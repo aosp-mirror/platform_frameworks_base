@@ -17,8 +17,7 @@
 
 
 #define LOG_TAG "AudioFlinger"
-//
-#define LOG_NDEBUG 0
+//#define LOG_NDEBUG 0
 
 #include <math.h>
 #include <signal.h>
@@ -5085,15 +5084,53 @@ void AudioFlinger::EffectModule::disconnect(const wp<EffectHandle>& handle)
     }
 }
 
+void AudioFlinger::EffectModule::updateState() {
+    Mutex::Autolock _l(mLock);
+
+    switch (mState) {
+    case RESTART:
+        reset_l();
+        // FALL THROUGH
+
+    case STARTING:
+        // clear auxiliary effect input buffer for next accumulation
+        if ((mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
+            memset(mConfig.inputCfg.buffer.raw,
+                   0,
+                   mConfig.inputCfg.buffer.frameCount*sizeof(int32_t));
+        }
+        start_l();
+        mState = ACTIVE;
+        break;
+    case STOPPING:
+        stop_l();
+        mDisableWaitCnt = mMaxDisableWaitCnt;
+        mState = STOPPED;
+        break;
+    case STOPPED:
+        // mDisableWaitCnt is forced to 1 by process() when the engine indicates the end of the
+        // turn off sequence.
+        if (--mDisableWaitCnt == 0) {
+            reset_l();
+            mState = IDLE;
+        }
+        break;
+    default: //IDLE , ACTIVE
+        break;
+    }
+}
+
 void AudioFlinger::EffectModule::process()
 {
     Mutex::Autolock _l(mLock);
 
-    if (mEffectInterface == NULL || mConfig.inputCfg.buffer.raw == NULL || mConfig.outputCfg.buffer.raw == NULL) {
+    if (mEffectInterface == NULL ||
+            mConfig.inputCfg.buffer.raw == NULL ||
+            mConfig.outputCfg.buffer.raw == NULL) {
         return;
     }
 
-    if (mState != IDLE) {
+    if (mState == ACTIVE || mState == STOPPING || mState == STOPPED) {
         // do 32 bit to 16 bit conversion for auxiliary effect input buffer
         if ((mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
             AudioMixer::ditherAndClamp(mConfig.inputCfg.buffer.s32,
@@ -5101,33 +5138,15 @@ void AudioFlinger::EffectModule::process()
                                         mConfig.inputCfg.buffer.frameCount);
         }
 
-        // TODO: handle effects with buffer provider
-        if (mState != ACTIVE) {
-            switch (mState) {
-            case RESET:
-                reset_l();
-                mState = STARTING;
-                // clear auxiliary effect input buffer for next accumulation
-                if ((mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
-                    memset(mConfig.inputCfg.buffer.raw, 0, mConfig.inputCfg.buffer.frameCount*sizeof(int32_t));
-                }
-                return;
-            case STARTING:
-                start_l();
-                mState = ACTIVE;
-                break;
-            case STOPPING:
-                mState = STOPPED;
-                break;
-            case STOPPED:
-                stop_l();
-                mState = IDLE;
-                return;
-            }
-        }
-
         // do the actual processing in the effect engine
-        (*mEffectInterface)->process(mEffectInterface, &mConfig.inputCfg.buffer, &mConfig.outputCfg.buffer);
+        int ret = (*mEffectInterface)->process(mEffectInterface,
+                                               &mConfig.inputCfg.buffer,
+                                               &mConfig.outputCfg.buffer);
+
+        // force transition to IDLE state when engine is ready
+        if (mState == STOPPED && ret == -ENODATA) {
+            mDisableWaitCnt = 1;
+        }
 
         // clear auxiliary effect input buffer for next accumulation
         if ((mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
@@ -5216,6 +5235,10 @@ status_t AudioFlinger::EffectModule::configure()
     if (status == 0) {
         status = cmdStatus;
     }
+
+    mMaxDisableWaitCnt = (MAX_DISABLE_TIME_MS * mConfig.outputCfg.samplingRate) /
+            (1000 * mConfig.outputCfg.buffer.frameCount);
+
     return status;
 }
 
@@ -5292,21 +5315,19 @@ status_t AudioFlinger::EffectModule::setEnabled(bool enabled)
         switch (mState) {
         // going from disabled to enabled
         case IDLE:
-            mState = RESET;
+            mState = STARTING;
+            break;
+        case STOPPED:
+            mState = RESTART;
             break;
         case STOPPING:
             mState = ACTIVE;
             break;
-        case STOPPED:
-            mState = STARTING;
-            break;
 
         // going from enabled to disabled
-        case RESET:
-            mState = IDLE;
-            break;
+        case RESTART:
         case STARTING:
-            mState = STOPPED;
+            mState = IDLE;
             break;
         case ACTIVE:
             mState = STOPPING;
@@ -5325,7 +5346,7 @@ status_t AudioFlinger::EffectModule::setEnabled(bool enabled)
 bool AudioFlinger::EffectModule::isEnabled()
 {
     switch (mState) {
-    case RESET:
+    case RESTART:
     case STARTING:
     case ACTIVE:
         return true;
@@ -5771,6 +5792,9 @@ void AudioFlinger::EffectChain::process_l()
     size_t size = mEffects.size();
     for (size_t i = 0; i < size; i++) {
         mEffects[i]->process();
+    }
+    for (size_t i = 0; i < size; i++) {
+        mEffects[i]->updateState();
     }
     // if no track is active, input buffer must be cleared here as the mixer process
     // will not do it

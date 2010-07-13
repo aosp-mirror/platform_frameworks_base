@@ -905,7 +905,7 @@ private:
 
         enum effect_state {
             IDLE,
-            RESET,
+            RESTART,
             STARTING,
             ACTIVE,
             STOPPING,
@@ -914,6 +914,7 @@ private:
 
         int         id() { return mId; }
         void process();
+        void updateState();
         status_t command(int cmdCode, int cmdSize, void *pCmdData, int *replySize, void *pReplyData);
 
         void reset_l();
@@ -948,6 +949,9 @@ private:
 
     protected:
 
+        // Maximum time allocated to effect engines to complete the turn off sequence
+        static const uint32_t MAX_DISABLE_TIME_MS = 10000;
+
         EffectModule(const EffectModule&);
         EffectModule& operator = (const EffectModule&);
 
@@ -973,6 +977,9 @@ private:
         status_t mStatus;               // initialization status
         uint32_t mState;                // current activation state (effect_state)
         Vector< wp<EffectHandle> > mHandles;    // list of client handles
+        uint32_t mMaxDisableWaitCnt;    // maximum grace period before forcing an effect off after
+                                        // sending disable command.
+        uint32_t mDisableWaitCnt;       // current process() calls count during disable period.
     };
 
     // The EffectHandle class implements the IEffect interface. It provides resources

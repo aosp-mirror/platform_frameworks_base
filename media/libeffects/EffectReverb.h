@@ -114,6 +114,12 @@ int32_t nPanG1 = -1.0 for cos
 #define AP1_GAIN_RANGE (int)(22936-6553)
 
 
+enum reverb_state_e {
+    REVERB_STATE_UNINITIALIZED,
+    REVERB_STATE_INITIALIZED,
+    REVERB_STATE_ACTIVE,
+};
+
 /* parameters for each allpass */
 typedef struct
 {
@@ -279,6 +285,7 @@ typedef struct
     uint16_t            m_Aux;                // if TRUE, is connected as auxiliary effect
     uint16_t            m_Preset;             // if TRUE, expose preset revert interface
 
+    uint32_t            mState;
 } reverb_object_t;
 
 
