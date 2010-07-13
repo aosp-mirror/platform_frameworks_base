@@ -356,6 +356,11 @@ public final class ActivityThread {
         ParcelFileDescriptor fd;
     }
 
+    private static final class DumpHeapData {
+        String path;
+        ParcelFileDescriptor fd;
+    }
+
     private final class ApplicationThread extends ApplicationThreadNative {
         private static final String HEAP_COLUMN = "%17s %8s %8s %8s %8s";
         private static final String ONE_COUNT_COLUMN = "%17s %8d";
@@ -623,6 +628,13 @@ public final class ActivityThread {
             queueOrSendMessage(H.PROFILER_CONTROL, pcd, start ? 1 : 0);
         }
 
+        public void dumpHeap(boolean managed, String path, ParcelFileDescriptor fd) {
+            DumpHeapData dhd = new DumpHeapData();
+            dhd.path = path;
+            dhd.fd = fd;
+            queueOrSendMessage(H.DUMP_HEAP, dhd, managed ? 1 : 0);
+        }
+
         public void setSchedulingGroup(int group) {
             // Note: do this immediately, since going into the foreground
             // should happen regardless of what pending work we have to do
@@ -874,6 +886,7 @@ public final class ActivityThread {
         public static final int ENABLE_JIT              = 132;
         public static final int DISPATCH_PACKAGE_BROADCAST = 133;
         public static final int SCHEDULE_CRASH          = 134;
+        public static final int DUMP_HEAP               = 135;
         String codeToString(int code) {
             if (localLOGV) {
                 switch (code) {
@@ -912,6 +925,7 @@ public final class ActivityThread {
                     case ENABLE_JIT: return "ENABLE_JIT";
                     case DISPATCH_PACKAGE_BROADCAST: return "DISPATCH_PACKAGE_BROADCAST";
                     case SCHEDULE_CRASH: return "SCHEDULE_CRASH";
+                    case DUMP_HEAP: return "DUMP_HEAP";
                 }
             }
             return "(unknown)";
@@ -1037,6 +1051,9 @@ public final class ActivityThread {
                     break;
                 case SCHEDULE_CRASH:
                     throw new RemoteServiceException((String)msg.obj);
+                case DUMP_HEAP:
+                    handleDumpHeap(msg.arg1 != 0, (DumpHeapData)msg.obj);
+                    break;
             }
         }
 
@@ -3012,6 +3029,26 @@ public final class ActivityThread {
             }
         } else {
             Debug.stopMethodTracing();
+        }
+    }
+
+    final void handleDumpHeap(boolean managed, DumpHeapData dhd) {
+        if (managed) {
+            try {
+                Debug.dumpHprofData(dhd.path, dhd.fd.getFileDescriptor());
+            } catch (IOException e) {
+                Slog.w(TAG, "Managed heap dump failed on path " + dhd.path
+                        + " -- can the process access this path?");
+            } finally {
+                try {
+                    dhd.fd.close();
+                } catch (IOException e) {
+                    Slog.w(TAG, "Failure closing profile fd", e);
+                }
+            }
+        } else {
+            // TODO
+            Slog.w(TAG, "Native heap dump not yet implemented");
         }
     }
 
