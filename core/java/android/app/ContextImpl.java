@@ -62,6 +62,8 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.hardware.SensorManager;
+import android.location.CountryDetector;
+import android.location.ICountryDetector;
 import android.location.ILocationManager;
 import android.location.LocationManager;
 import android.media.AudioManager;
@@ -168,6 +170,7 @@ class ContextImpl extends Context {
     private static ThrottleManager sThrottleManager;
     private static WifiManager sWifiManager;
     private static LocationManager sLocationManager;
+    private static CountryDetector sCountryDetector;
     private static final HashMap<File, SharedPreferencesImpl> sSharedPrefs =
             new HashMap<File, SharedPreferencesImpl>();
 
@@ -954,6 +957,8 @@ class ContextImpl extends Context {
             return AccessibilityManager.getInstance(this);
         } else if (LOCATION_SERVICE.equals(name)) {
             return getLocationManager();
+        } else if (COUNTRY_DETECTOR.equals(name)) {
+            return getCountryDetector();
         } else if (SEARCH_SERVICE.equals(name)) {
             return getSearchManager();
         } else if (SENSOR_SERVICE.equals(name)) {
@@ -1118,6 +1123,17 @@ class ContextImpl extends Context {
             }
         }
         return sLocationManager;
+    }
+
+    private CountryDetector getCountryDetector() {
+        synchronized (sSync) {
+            if (sCountryDetector == null) {
+                IBinder b = ServiceManager.getService(COUNTRY_DETECTOR);
+                ICountryDetector service = ICountryDetector.Stub.asInterface(b);
+                sCountryDetector = new CountryDetector(service);
+            }
+        }
+        return sCountryDetector;
     }
 
     private SearchManager getSearchManager() {

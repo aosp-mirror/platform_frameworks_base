@@ -1380,7 +1380,16 @@ public abstract class Context {
      * @see android.location.LocationManager
      */
     public static final String LOCATION_SERVICE = "location";
-    
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.location.CountryDetector} for detecting the country that
+     * the user is in.
+     *
+     * @hide
+     */
+    public static final String COUNTRY_DETECTOR = "country_detector";
+
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
      * android.app.SearchManager} for handling searches.

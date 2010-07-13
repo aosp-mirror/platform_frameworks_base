@@ -163,6 +163,8 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/view/IInputMethodManager.aidl \
 	core/java/com/android/internal/view/IInputMethodSession.aidl \
 	core/java/com/android/internal/widget/IRemoteViewsFactory.aidl \
+	location/java/android/location/ICountryDetector.aidl \
+	location/java/android/location/ICountryListener.aidl \
 	location/java/android/location/IGeocodeProvider.aidl \
 	location/java/android/location/IGpsStatusListener.aidl \
 	location/java/android/location/IGpsStatusProvider.aidl \

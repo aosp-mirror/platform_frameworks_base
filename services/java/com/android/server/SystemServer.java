@@ -206,6 +206,7 @@ class ServerThread extends Thread {
         NotificationManagerService notification = null;
         WallpaperManagerService wallpaper = null;
         LocationManagerService location = null;
+        CountryDetectorService countryDetector = null;
 
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
             try {
@@ -313,6 +314,14 @@ class ServerThread extends Thread {
                 ServiceManager.addService(Context.LOCATION_SERVICE, location);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting Location Manager", e);
+            }
+
+            try {
+                Slog.i(TAG, "Country Detector");
+                countryDetector = new CountryDetectorService(context);
+                ServiceManager.addService(Context.COUNTRY_DETECTOR, countryDetector);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting Country Detector", e);
             }
 
             try {
@@ -479,6 +488,7 @@ class ServerThread extends Thread {
         final InputMethodManagerService immF = imm;
         final RecognitionManagerService recognitionF = recognition;
         final LocationManagerService locationF = location;
+        final CountryDetectorService countryDetectorF = countryDetector;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -506,6 +516,7 @@ class ServerThread extends Thread {
                 if (wallpaperF != null) wallpaperF.systemReady();
                 if (immF != null) immF.systemReady();
                 if (locationF != null) locationF.systemReady();
+                if (countryDetectorF != null) countryDetectorF.systemReady();
                 if (throttleF != null) throttleF.systemReady();
             }
         });
