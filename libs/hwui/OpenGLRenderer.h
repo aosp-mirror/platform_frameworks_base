@@ -179,7 +179,7 @@ private:
      * @param isPremultiplied Indicates whether the texture has premultiplied alpha
      */
     void drawTextureRect(float left, float top, float right, float bottom, GLuint texture,
-            float alpha, SkXfermode::Mode mode, bool blend, bool isPremultiplied = false);
+            float alpha, SkXfermode::Mode mode, bool blend, bool isPremultiplied = true);
 
     /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
@@ -194,7 +194,7 @@ private:
      * @param isPremultiplied Indicates whether the texture has premultiplied alpha
      */
     void drawTextureRect(float left, float top, float right, float bottom, const Texture* texture,
-            const SkPaint* paint, bool isPremultiplied = false);
+            const SkPaint* paint, bool isPremultiplied = true);
 
     /**
      * Draws a textured mesh with the specified texture. If the indices are omitted, the

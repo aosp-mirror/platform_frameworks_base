@@ -558,7 +558,7 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
     getAlphaAndMode(paint, &alpha, &mode);
 
     drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f, mode,
-            texture->blend, texture->blend, &mDrawTextureVertices[0].position[0],
+            texture->blend, isPremultiplied, &mDrawTextureVertices[0].position[0],
             &mDrawTextureVertices[0].texture[0], NULL);
 }
 
