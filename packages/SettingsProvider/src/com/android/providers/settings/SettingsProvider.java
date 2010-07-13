@@ -83,6 +83,9 @@ public class SettingsProvider extends ContentProvider {
         SqlArguments(Uri url, String where, String[] args) {
             if (url.getPathSegments().size() == 1) {
                 this.table = url.getPathSegments().get(0);
+                if (!DatabaseHelper.isValidTable(this.table)) {
+                    throw new IllegalArgumentException("Bad root path: " + this.table);
+                }
                 this.where = where;
                 this.args = args;
             } else if (url.getPathSegments().size() != 2) {
@@ -91,6 +94,9 @@ public class SettingsProvider extends ContentProvider {
                 throw new UnsupportedOperationException("WHERE clause not supported: " + url);
             } else {
                 this.table = url.getPathSegments().get(0);
+                if (!DatabaseHelper.isValidTable(this.table)) {
+                    throw new IllegalArgumentException("Bad root path: " + this.table);
+                }
                 if ("system".equals(this.table) || "secure".equals(this.table)) {
                     this.where = Settings.NameValueTable.NAME + "=?";
                     this.args = new String[] { url.getPathSegments().get(1) };
@@ -105,6 +111,9 @@ public class SettingsProvider extends ContentProvider {
         SqlArguments(Uri url) {
             if (url.getPathSegments().size() == 1) {
                 this.table = url.getPathSegments().get(0);
+                if (!DatabaseHelper.isValidTable(this.table)) {
+                    throw new IllegalArgumentException("Bad root path: " + this.table);
+                }
                 this.where = null;
                 this.args = null;
             } else {
