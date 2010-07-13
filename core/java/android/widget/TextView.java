@@ -7709,14 +7709,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 mOffsetX = (bounds.left + bounds.right) / 2.0f - x;
                                 mOffsetY = bounds.top - mCursorControllerVerticalOffset - y;
 
-                                mOnDownTimerStart = System.currentTimeMillis();
+                                mOnDownTimerStart = event.getEventTime();
                             }
                         }
                         break;
                     }
 
                     case MotionEvent.ACTION_UP : {
-                        int time = (int) (System.currentTimeMillis() - mOnDownTimerStart);
+                        int time = (int) (event.getEventTime() - mOnDownTimerStart);
 
                         if (time <= ViewConfiguration.getTapTimeout()) {
                             // A tap on the controller is not grabbed, move the cursor instead
