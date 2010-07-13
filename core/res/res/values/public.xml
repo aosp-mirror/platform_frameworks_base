@@ -1315,4 +1315,11 @@
   <public type="style" name="Widget.Spinner.DropDown" />
   <public type="style" name="Widget.ActionButton" />
 
+  <!-- Standard content view for a {@link android.app.ListFragment}.
+       If you are implementing a subclass of ListFragment with your
+       own customized content, you can include this layout in that
+       content to still retain all of the standard functionality of
+       the base class. -->
+  <public type="layout" name="list_content" />
+  
 </resources>
