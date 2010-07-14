@@ -421,7 +421,7 @@ public abstract class WallpaperService extends Service {
         }
 
         /**
-         * Convenience for {@link SurfaceHolder.Callback#surfaceRedrawNeeded
+         * Convenience for {@link SurfaceHolder.Callback2#surfaceRedrawNeeded
          * SurfaceHolder.Callback.surfaceRedrawNeeded()}.
          */
         public void onSurfaceRedrawNeeded(SurfaceHolder holder) {
