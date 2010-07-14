@@ -123,7 +123,7 @@ public class SurfaceView extends View {
                     handleGetNewSurface();
                 } break;
                 case UPDATE_WINDOW_MSG: {
-                    updateWindow(false);
+                    updateWindow(false, false);
                 } break;
             }
         }
@@ -132,7 +132,7 @@ public class SurfaceView extends View {
     final ViewTreeObserver.OnScrollChangedListener mScrollChangedListener
             = new ViewTreeObserver.OnScrollChangedListener() {
                     public void onScrollChanged() {
-                        updateWindow(false);
+                        updateWindow(false, false);
                     }
             };
             
@@ -210,7 +210,7 @@ public class SurfaceView extends View {
         super.onWindowVisibilityChanged(visibility);
         mWindowVisibility = visibility == VISIBLE;
         mRequestedVisible = mWindowVisibility && mViewVisibility;
-        updateWindow(false);
+        updateWindow(false, false);
     }
 
     @Override
@@ -218,7 +218,7 @@ public class SurfaceView extends View {
         super.setVisibility(visibility);
         mViewVisibility = visibility == VISIBLE;
         mRequestedVisible = mWindowVisibility && mViewVisibility;
-        updateWindow(false);
+        updateWindow(false, false);
     }
 
     /**
@@ -232,7 +232,7 @@ public class SurfaceView extends View {
      */
     protected void showSurface() {
         if (mSession != null) {
-            updateWindow(true);
+            updateWindow(true, false);
         }
     }
 
@@ -265,7 +265,7 @@ public class SurfaceView extends View {
     protected void onDetachedFromWindow() {
         getViewTreeObserver().removeOnScrollChangedListener(mScrollChangedListener);
         mRequestedVisible = false;
-        updateWindow(false);
+        updateWindow(false, false);
         mHaveFrame = false;
         if (mWindow != null) {
             try {
@@ -290,7 +290,7 @@ public class SurfaceView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        updateWindow(false);
+        updateWindow(false, false);
     }
 
     @Override
@@ -343,7 +343,7 @@ public class SurfaceView extends View {
         }
         // reposition ourselves where the surface is 
         mHaveFrame = true;
-        updateWindow(false);
+        updateWindow(false, false);
         super.dispatchDraw(canvas);
     }
 
@@ -397,7 +397,7 @@ public class SurfaceView extends View {
         mWindowType = type;
     }
 
-    private void updateWindow(boolean force) {
+    private void updateWindow(boolean force, boolean redrawNeeded) {
         if (!mHaveFrame) {
             return;
         }
@@ -425,7 +425,7 @@ public class SurfaceView extends View {
         final boolean typeChanged = mType != mRequestedType;
         if (force || creating || formatChanged || sizeChanged || visibleChanged
             || typeChanged || mLeft != mLocation[0] || mTop != mLocation[1]
-            || mUpdateWindowNeeded || mReportDrawNeeded) {
+            || mUpdateWindowNeeded || mReportDrawNeeded || redrawNeeded) {
 
             if (localLOGV) Log.i(TAG, "Changes: creating=" + creating
                     + " format=" + formatChanged + " size=" + sizeChanged
@@ -524,6 +524,8 @@ public class SurfaceView extends View {
                 }
 
                 try {
+                    redrawNeeded |= creating | reportDrawNeeded;
+
                     if (visible) {
                         mDestroyReportNeeded = true;
 
@@ -541,8 +543,13 @@ public class SurfaceView extends View {
                         }
                         if (creating || formatChanged || sizeChanged
                                 || visibleChanged || realSizeChanged) {
+                        }
+                        if (redrawNeeded) {
                             for (SurfaceHolder.Callback c : callbacks) {
-                                c.surfaceChanged(mSurfaceHolder, mFormat, myWidth, myHeight);
+                                if (c instanceof SurfaceHolder.Callback2) {
+                                    ((SurfaceHolder.Callback2)c).surfaceRedrawNeeded(
+                                            mSurfaceHolder);
+                                }
                             }
                         }
                     } else {
@@ -550,7 +557,7 @@ public class SurfaceView extends View {
                     }
                 } finally {
                     mIsCreating = false;
-                    if (creating || reportDrawNeeded) {
+                    if (redrawNeeded) {
                         mSession.finishDrawing(mWindow);
                     }
                 }
@@ -580,7 +587,7 @@ public class SurfaceView extends View {
 
     void handleGetNewSurface() {
         mNewSurfaceNeeded = true;
-        updateWindow(false);
+        updateWindow(false, false);
     }
 
     /**
@@ -696,7 +703,7 @@ public class SurfaceView extends View {
 
             mRequestedFormat = format;
             if (mWindow != null) {
-                updateWindow(false);
+                updateWindow(false, false);
             }
         }
 
@@ -713,7 +720,7 @@ public class SurfaceView extends View {
             case SURFACE_TYPE_PUSH_BUFFERS:
                 mRequestedType = type;
                 if (mWindow != null) {
-                    updateWindow(false);
+                    updateWindow(false, false);
                 }
                 break;
             }

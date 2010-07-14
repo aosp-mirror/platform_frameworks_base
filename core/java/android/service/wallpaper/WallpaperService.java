@@ -336,7 +336,7 @@ public abstract class WallpaperService extends Service {
                     ? (mWindowFlags&~WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
                     : (mWindowFlags|WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             if (mCreated) {
-                updateSurface(false, false);
+                updateSurface(false, false, false);
             }
         }
         
@@ -421,6 +421,13 @@ public abstract class WallpaperService extends Service {
         }
 
         /**
+         * Convenience for {@link SurfaceHolder.Callback#surfaceRedrawNeeded
+         * SurfaceHolder.Callback.surfaceRedrawNeeded()}.
+         */
+        public void onSurfaceRedrawNeeded(SurfaceHolder holder) {
+        }
+
+        /**
          * Convenience for {@link SurfaceHolder.Callback#surfaceCreated
          * SurfaceHolder.Callback.surfaceCreated()}.
          */
@@ -450,7 +457,7 @@ public abstract class WallpaperService extends Service {
             }
         }
 
-        void updateSurface(boolean forceRelayout, boolean forceReport) {
+        void updateSurface(boolean forceRelayout, boolean forceReport, boolean redrawNeeded) {
             if (mDestroyed) {
                 Log.w(TAG, "Ignoring updateSurface: destroyed");
             }
@@ -467,7 +474,7 @@ public abstract class WallpaperService extends Service {
             final boolean typeChanged = mType != mSurfaceHolder.getRequestedType();
             final boolean flagsChanged = mCurWindowFlags != mWindowFlags;
             if (forceRelayout || creating || surfaceCreating || formatChanged || sizeChanged
-                    || typeChanged || flagsChanged) {
+                    || typeChanged || flagsChanged || redrawNeeded) {
 
                 if (DEBUG) Log.v(TAG, "Changes: creating=" + creating
                         + " format=" + formatChanged + " size=" + sizeChanged);
@@ -555,6 +562,10 @@ public abstract class WallpaperService extends Service {
                                 }
                             }
                         }
+
+                        redrawNeeded |= creating
+                                || (relayoutResult&WindowManagerImpl.RELAYOUT_FIRST_TIME) != 0;
+
                         if (forceReport || creating || surfaceCreating
                                 || formatChanged || sizeChanged) {
                             if (DEBUG) {
@@ -578,10 +589,24 @@ public abstract class WallpaperService extends Service {
                                 }
                             }
                         }
+
+                        if (redrawNeeded) {
+                            onSurfaceRedrawNeeded(mSurfaceHolder);
+                            SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
+                            if (callbacks != null) {
+                                for (SurfaceHolder.Callback c : callbacks) {
+                                    if (c instanceof SurfaceHolder.Callback2) {
+                                        ((SurfaceHolder.Callback2)c).surfaceRedrawNeeded(
+                                                mSurfaceHolder);
+                                    }
+                                }
+                            }
+                        }
+
                     } finally {
                         mIsCreating = false;
                         mSurfaceCreated = true;
-                        if (creating || (relayoutResult&WindowManagerImpl.RELAYOUT_FIRST_TIME) != 0) {
+                        if (redrawNeeded) {
                             mSession.finishDrawing(mWindow);
                         }
                     }
@@ -618,7 +643,7 @@ public abstract class WallpaperService extends Service {
             onCreate(mSurfaceHolder);
             
             mInitializing = false;
-            updateSurface(false, false);
+            updateSurface(false, false, false);
         }
         
         void doDesiredSizeChanged(int desiredWidth, int desiredHeight) {
@@ -647,7 +672,7 @@ public abstract class WallpaperService extends Service {
                         // If becoming visible, in preview mode the surface
                         // may have been destroyed so now we need to make
                         // sure it is re-created.
-                        updateSurface(false, false);
+                        updateSurface(false, false, false);
                     }
                     onVisibilityChanged(visible);
                 }
@@ -852,7 +877,7 @@ public abstract class WallpaperService extends Service {
                     return;
                 }
                 case MSG_UPDATE_SURFACE:
-                    mEngine.updateSurface(true, false);
+                    mEngine.updateSurface(true, false, false);
                     break;
                 case MSG_VISIBILITY_CHANGED:
                     if (DEBUG) Log.v(TAG, "Visibility change in " + mEngine
@@ -868,14 +893,8 @@ public abstract class WallpaperService extends Service {
                 } break;
                 case MSG_WINDOW_RESIZED: {
                     final boolean reportDraw = message.arg1 != 0;
-                    mEngine.updateSurface(true, false);
+                    mEngine.updateSurface(true, false, reportDraw);
                     mEngine.doOffsetsChanged();
-                    if (reportDraw) {
-                        try {
-                            mEngine.mSession.finishDrawing(mEngine.mWindow);
-                        } catch (RemoteException e) {
-                        }
-                    }
                 } break;
                 case MSG_TOUCH_EVENT: {
                     MotionEvent ev = (MotionEvent)message.obj;

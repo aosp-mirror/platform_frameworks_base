@@ -43,7 +43,9 @@ enum {
 /*
  * Declare a concrete type for the NDK's input event forward declaration.
  */
-struct AInputEvent { };
+struct AInputEvent {
+    virtual ~AInputEvent() { }
+};
 
 namespace android {
 
