@@ -23,6 +23,7 @@ LOCAL_SRC_FILES:=                                       \
                   MtpDataPacket.cpp                     \
                   MtpDebug.cpp                          \
                   MtpDevice.cpp                         \
+                  MtpEventPacket.cpp                    \
                   MtpDeviceInfo.cpp                     \
                   MtpObjectInfo.cpp                     \
                   MtpPacket.cpp                         \

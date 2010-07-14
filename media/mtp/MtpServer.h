@@ -20,6 +20,7 @@
 #include "MtpRequestPacket.h"
 #include "MtpDataPacket.h"
 #include "MtpResponsePacket.h"
+#include "MtpEventPacket.h"
 #include "mtp.h"
 
 #include "MtpUtils.h"
@@ -52,6 +53,7 @@ private:
     MtpRequestPacket    mRequest;
     MtpDataPacket       mData;
     MtpResponsePacket   mResponse;
+    MtpEventPacket      mEvent;
 
     MtpStorageList      mStorages;
 
@@ -76,6 +78,9 @@ public:
 
     MtpProperty*        getObjectProperty(MtpPropertyCode propCode);
     MtpProperty*        getDeviceProperty(MtpPropertyCode propCode);
+
+    void                sendObjectAdded(MtpObjectHandle handle);
+    void                sendObjectRemoved(MtpObjectHandle handle);
 
 private:
     void                initObjectProperties();

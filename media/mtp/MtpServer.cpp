@@ -73,6 +73,11 @@ static const MtpOperationCode kSupportedOperationCodes[] = {
 //    MTP_OPERATION_SKIP,
 };
 
+static const MtpEventCode kSupportedEventCodes[] = {
+    MTP_EVENT_OBJECT_ADDED,
+    MTP_EVENT_OBJECT_REMOVED,
+};
+
 static const MtpObjectProperty kSupportedObjectProperties[] = {
     MTP_PROPERTY_STORAGE_ID,
     MTP_PROPERTY_OBJECT_FORMAT,
@@ -239,6 +244,24 @@ MtpProperty* MtpServer::getDeviceProperty(MtpPropertyCode propCode) {
     return NULL;
 }
 
+void MtpServer::sendObjectAdded(MtpObjectHandle handle) {
+    LOGD("sendObjectAdded %d\n", handle);
+    mEvent.setEventCode(MTP_EVENT_OBJECT_ADDED);
+    mEvent.setTransactionID(mRequest.getTransactionID());
+    mEvent.setParameter(1, handle);
+    int ret = mEvent.write(mFD);
+    LOGD("mEvent.write returned %d\n", ret);
+}
+
+void MtpServer::sendObjectRemoved(MtpObjectHandle handle) {
+    LOGD("sendObjectRemoved %d\n", handle);
+    mEvent.setEventCode(MTP_EVENT_OBJECT_REMOVED);
+    mEvent.setTransactionID(mRequest.getTransactionID());
+    mEvent.setParameter(1, handle);
+    int ret = mEvent.write(mFD);
+    LOGD("mEvent.write returned %d\n", ret);
+}
+
 void MtpServer::initObjectProperties() {
     mObjectProperties.push(new MtpProperty(MTP_PROPERTY_STORAGE_ID, MTP_TYPE_UINT16));
     mObjectProperties.push(new MtpProperty(MTP_PROPERTY_OBJECT_FORMAT, MTP_TYPE_UINT16));
@@ -326,7 +349,8 @@ MtpResponseCode MtpServer::doGetDeviceInfo() {
     mData.putUInt16(0); //Functional Mode
     mData.putAUInt16(kSupportedOperationCodes,
             sizeof(kSupportedOperationCodes) / sizeof(uint16_t)); // Operations Supported
-    mData.putEmptyArray(); // Events Supported
+    mData.putAUInt16(kSupportedEventCodes,
+            sizeof(kSupportedEventCodes) / sizeof(uint16_t)); // Events Supported
     mData.putEmptyArray(); // Device Properties Supported
     mData.putEmptyArray(); // Capture Formats
     mData.putAUInt16(kSupportedPlaybackFormats,
