@@ -119,6 +119,23 @@ public interface SurfaceHolder {
     }
 
     /**
+     * Additional callbacks that can be received for {@link Callback}.
+     */
+    public interface Callback2 extends Callback {
+        /**
+         * Called when the application needs to redraw the content of its
+         * surface, after it is resized or for some other reason.  By not
+         * returning here until the redraw is complete, you can ensure that
+         * the user will not see your surface in a bad state (at its new
+         * size before it has been correctly drawn that way).  This will
+         * typically be preceeded by a call to {@link #surfaceChanged}.
+         *
+         * @param holder The SurfaceHolder whose surface has changed.
+         */
+        public void surfaceRedrawNeeded(SurfaceHolder holder);
+    }
+
+    /**
      * Add a Callback interface for this holder.  There can several Callback
      * interfaces associated to a holder.
      * 

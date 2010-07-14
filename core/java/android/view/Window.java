@@ -478,7 +478,7 @@ public abstract class Window {
      * to operate (such as for receiving input events).  The given SurfaceHolder
      * callback will be used to tell you about state changes to the surface.
      */
-    public abstract void takeSurface(SurfaceHolder.Callback callback);
+    public abstract void takeSurface(SurfaceHolder.Callback2 callback);
     
     /**
      * Take ownership of this window's InputQueue.  The window will no

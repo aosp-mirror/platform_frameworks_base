@@ -104,7 +104,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     // mDecor itself, or a child of mDecor where the contents go.
     private ViewGroup mContentParent;
 
-    SurfaceHolder.Callback mTakeSurfaceCallback;
+    SurfaceHolder.Callback2 mTakeSurfaceCallback;
     BaseSurfaceHolder mSurfaceHolder;
     
     InputQueue.Callback mTakeInputQueueCallback;
@@ -248,7 +248,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
-    public void takeSurface(SurfaceHolder.Callback callback) {
+    public void takeSurface(SurfaceHolder.Callback2 callback) {
         mTakeSurfaceCallback = callback;
     }
     
@@ -2038,7 +2038,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
         }
 
-        public android.view.SurfaceHolder.Callback willYouTakeTheSurface() {
+        public android.view.SurfaceHolder.Callback2 willYouTakeTheSurface() {
             return mFeatureId < 0 ? mTakeSurfaceCallback : null;
         }
         

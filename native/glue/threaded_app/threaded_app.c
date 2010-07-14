@@ -18,6 +18,7 @@
 #include <jni.h>
 
 #include <errno.h>
+#include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/resource.h>
@@ -74,6 +75,19 @@ int32_t android_app_exec_cmd(struct android_app* android_app, int8_t cmd) {
             android_app->activityState = cmd;
             pthread_cond_broadcast(&android_app->cond);
             pthread_mutex_unlock(&android_app->mutex);
+            break;
+
+        case APP_CMD_WINDOW_REDRAW_NEEDED:
+            LOGI("APP_CMD_WINDOW_REDRAW_NEEDED\n");
+            pthread_mutex_lock(&android_app->mutex);
+            android_app->redrawNeeded = 0;
+            pthread_cond_broadcast(&android_app->cond);
+            pthread_mutex_unlock(&android_app->mutex);
+            break;
+
+        case APP_CMD_CONTENT_RECT_CHANGED:
+            LOGI("APP_CMD_CONTENT_RECT_CHANGED\n");
+            android_app->contentRect = android_app->pendingContentRect;
             break;
             
         case APP_CMD_DESTROY:
@@ -133,6 +147,12 @@ static struct android_app* android_app_create(ANativeActivity* activity) {
     }
     android_app->msgread = msgpipe[0];
     android_app->msgwrite = msgpipe[1];
+    int result = fcntl(android_app->msgread, F_SETFL, O_NONBLOCK);
+    if (result != 0) LOGW("Could not make message read pipe "
+            "non-blocking: %s", strerror(errno));
+    result = fcntl(android_app->msgwrite, F_SETFL, O_NONBLOCK);
+    if (result != 0) LOGW("Could not make message write pipe "
+            "non-blocking: %s", strerror(errno));
     
     pthread_attr_t attr; 
     pthread_attr_init(&attr);
@@ -184,6 +204,23 @@ static void android_app_set_activity_state(struct android_app* android_app, int8
     pthread_mutex_unlock(&android_app->mutex);
 }
 
+static void android_app_wait_redraw(struct android_app* android_app) {
+    pthread_mutex_lock(&android_app->mutex);
+    android_app->redrawNeeded = 1;
+    android_app_write_cmd(android_app, APP_CMD_WINDOW_REDRAW_NEEDED);
+    while (android_app->redrawNeeded) {
+        pthread_cond_wait(&android_app->cond, &android_app->mutex);
+    }
+    pthread_mutex_unlock(&android_app->mutex);
+}
+
+static void android_app_set_content_rect(struct android_app* android_app, const ARect* rect) {
+    pthread_mutex_lock(&android_app->mutex);
+    android_app->pendingContentRect = *rect;
+    android_app_write_cmd(android_app, APP_CMD_CONTENT_RECT_CHANGED);
+    pthread_mutex_unlock(&android_app->mutex);
+}
+
 static void android_app_free(struct android_app* android_app) {
     pthread_mutex_lock(&android_app->mutex);
     android_app_write_cmd(android_app, APP_CMD_DESTROY);
@@ -231,6 +268,8 @@ static void onStop(ANativeActivity* activity) {
 
 static void onLowMemory(ANativeActivity* activity) {
     LOGI("LowMemory: %p\n", activity);
+    android_app_write_cmd((struct android_app*)activity->instance,
+            APP_CMD_LOW_MEMORY);
 }
 
 static void onWindowFocusChanged(ANativeActivity* activity, int focused) {
@@ -242,6 +281,23 @@ static void onWindowFocusChanged(ANativeActivity* activity, int focused) {
 static void onNativeWindowCreated(ANativeActivity* activity, ANativeWindow* window) {
     LOGI("NativeWindowCreated: %p -- %p\n", activity, window);
     android_app_set_window((struct android_app*)activity->instance, window);
+}
+
+static void onNativeWindowResized(ANativeActivity* activity, ANativeWindow* window) {
+    LOGI("NativeWindowResized: %p -- %p\n", activity, window);
+    android_app_write_cmd((struct android_app*)activity->instance,
+            APP_CMD_WINDOW_RESIZED);
+}
+
+static void onNativeWindowRedrawNeeded(ANativeActivity* activity, ANativeWindow* window) {
+    LOGI("NativeWindowRedrawNeeded: %p -- %p\n", activity, window);
+    android_app_wait_redraw((struct android_app*)activity->instance);
+}
+
+static void onContentRectChanged(ANativeActivity* activity, const ARect* rect) {
+    LOGI("ContentRectChanged: %p -- (%d,%d)-(%d,%d)\n", activity, rect->left,
+            rect->top, rect->right, rect->bottom);
+    android_app_set_content_rect((struct android_app*)activity->instance, rect);
 }
 
 static void onNativeWindowDestroyed(ANativeActivity* activity, ANativeWindow* window) {
@@ -268,12 +324,15 @@ void ANativeActivity_onCreate(ANativeActivity* activity,
     activity->callbacks->onSaveInstanceState = onSaveInstanceState;
     activity->callbacks->onPause = onPause;
     activity->callbacks->onStop = onStop;
-    activity->callbacks->onLowMemory = onLowMemory;
     activity->callbacks->onWindowFocusChanged = onWindowFocusChanged;
     activity->callbacks->onNativeWindowCreated = onNativeWindowCreated;
+    activity->callbacks->onNativeWindowResized = onNativeWindowResized;
+    activity->callbacks->onNativeWindowRedrawNeeded = onNativeWindowRedrawNeeded;
     activity->callbacks->onNativeWindowDestroyed = onNativeWindowDestroyed;
     activity->callbacks->onInputQueueCreated = onInputQueueCreated;
     activity->callbacks->onInputQueueDestroyed = onInputQueueDestroyed;
+    activity->callbacks->onContentRectChanged = onContentRectChanged;
+    activity->callbacks->onLowMemory = onLowMemory;
     
     activity->instance = android_app_create(activity);
 }

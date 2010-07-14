@@ -22,6 +22,8 @@
 #include <ui/InputTransport.h>
 #include <utils/PollLoop.h>
 
+#include <android_runtime/android_app_NativeActivity.h>
+
 #include <poll.h>
 
 using android::InputEvent;
@@ -187,65 +189,21 @@ float AMotionEvent_getHistoricalSize(AInputEvent* motion_event, size_t pointer_i
 
 void AInputQueue_attachLooper(AInputQueue* queue, ALooper* looper,
         ALooper_callbackFunc* callback, void* data) {
-    queue->setPollLoop(static_cast<android::PollLoop*>(looper));
-    ALooper_addFd(looper, queue->getConsumer().getChannel()->getReceivePipeFd(),
-            POLLIN, callback, data);
+    queue->attachLooper(looper, callback, data);
 }
 
 void AInputQueue_detachLooper(AInputQueue* queue) {
-    queue->getPollLoop()->removeCallback(
-            queue->getConsumer().getChannel()->getReceivePipeFd());
+    queue->detachLooper();
 }
 
 int AInputQueue_hasEvents(AInputQueue* queue) {
-    struct pollfd pfd;
-    
-    pfd.fd = queue->getConsumer().getChannel()->getReceivePipeFd();
-    pfd.events = POLLIN;
-    pfd.revents = 0;
-    
-    int nfd = poll(&pfd, 1, 0);
-    if (nfd <= 0) return nfd;
-    return pfd.revents == POLLIN ? 1 : -1;
+    return queue->hasEvents();
 }
 
 int32_t AInputQueue_getEvent(AInputQueue* queue, AInputEvent** outEvent) {
-    *outEvent = NULL;
-    
-    int32_t res = queue->getConsumer().receiveDispatchSignal();
-    if (res != android::OK) {
-        LOGE("channel '%s' ~ Failed to receive dispatch signal.  status=%d",
-                queue->getConsumer().getChannel()->getName().string(), res);
-        return -1;
-    }
-    
-    InputEvent* myEvent = NULL;
-    res = queue->consume(&myEvent);
-    if (res != android::OK) {
-        LOGW("channel '%s' ~ Failed to consume input event.  status=%d",
-                queue->getConsumer().getChannel()->getName().string(), res);
-        queue->getConsumer().sendFinishedSignal();
-        return -1;
-    }
-    
-    *outEvent = myEvent;
-    return 0;
+    return queue->getEvent(outEvent);
 }
 
-void AInputQueue_finishEvent(AInputQueue* queue, AInputEvent* event,
-        int handled) {
-    if (!handled && ((InputEvent*)event)->getType() == INPUT_EVENT_TYPE_KEY
-            && ((KeyEvent*)event)->hasDefaultAction()) {
-        // The app didn't handle this, but it may have a default action
-        // associated with it.  We need to hand this back to Java to be
-        // executed.
-        queue->doDefaultKey((KeyEvent*)event);
-        return;
-    }
-    
-    int32_t res = queue->getConsumer().sendFinishedSignal();
-    if (res != android::OK) {
-        LOGW("Failed to send finished signal on channel '%s'.  status=%d",
-                queue->getConsumer().getChannel()->getName().string(), res);
-    }
+void AInputQueue_finishEvent(AInputQueue* queue, AInputEvent* event, int handled) {
+    queue->finishEvent(event, handled != 0);
 }

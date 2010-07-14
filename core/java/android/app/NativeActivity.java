@@ -2,6 +2,7 @@ package android.app;
 
 import dalvik.system.PathClassLoader;
 
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -11,12 +12,16 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Looper;
 import android.os.MessageQueue;
+import android.util.AttributeSet;
 import android.view.InputChannel;
 import android.view.InputQueue;
 import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.inputmethod.InputMethodManager;
 
 import java.io.File;
 
@@ -24,15 +29,26 @@ import java.io.File;
  * Convenience for implementing an activity that will be implemented
  * purely in native code.  That is, a game (or game-like thing).
  */
-public class NativeActivity extends Activity implements SurfaceHolder.Callback,
-        InputQueue.Callback {
+public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
+        InputQueue.Callback, OnGlobalLayoutListener {
     public static final String META_DATA_LIB_NAME = "android.app.lib_name";
     
+    private NativeContentView mNativeContentView;
+    private InputMethodManager mIMM;
+
     private int mNativeHandle;
     
     private InputQueue mCurInputQueue;
     private SurfaceHolder mCurSurfaceHolder;
     
+    final int[] mLocation = new int[2];
+    int mLastContentX;
+    int mLastContentY;
+    int mLastContentWidth;
+    int mLastContentHeight;
+
+    private boolean mDispatchingUnhandledKey;
+
     private boolean mDestroyed;
     
     private native int loadNativeCode(String path, MessageQueue queue,
@@ -49,18 +65,44 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback,
     private native void onSurfaceCreatedNative(int handle, Surface surface);
     private native void onSurfaceChangedNative(int handle, Surface surface,
             int format, int width, int height);
+    private native void onSurfaceRedrawNeededNative(int handle, Surface surface);
     private native void onSurfaceDestroyedNative(int handle);
     private native void onInputChannelCreatedNative(int handle, InputChannel channel);
     private native void onInputChannelDestroyedNative(int handle, InputChannel channel);
+    private native void onContentRectChangedNative(int handle, int x, int y, int w, int h);
+    private native void dispatchKeyEventNative(int handle, KeyEvent event);
+
+    static class NativeContentView extends View {
+        NativeActivity mActivity;
+
+        public NativeContentView(Context context) {
+            super(context);
+        }
+
+        public NativeContentView(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+    }
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         String libname = "main";
         ActivityInfo ai;
         
+        mIMM = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+
         getWindow().takeSurface(this);
         getWindow().takeInputQueue(this);
         getWindow().setFormat(PixelFormat.RGB_565);
+        getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED
+                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
+        mNativeContentView = new NativeContentView(this);
+        mNativeContentView.mActivity = this;
+        setContentView(mNativeContentView);
+        mNativeContentView.requestFocus();
+        mNativeContentView.getViewTreeObserver().addOnGlobalLayoutListener(this);
         
         try {
             ai = getPackageManager().getActivityInfo(
@@ -165,6 +207,18 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback,
         }
     }
     
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (mDispatchingUnhandledKey) {
+            return super.dispatchKeyEvent(event);
+        } else {
+            // Key events from the IME do not go through the input channel;
+            // we need to intercept them here to hand to the application.
+            dispatchKeyEventNative(mNativeHandle, event);
+            return true;
+        }
+    }
+
     public void surfaceCreated(SurfaceHolder holder) {
         if (!mDestroyed) {
             mCurSurfaceHolder = holder;
@@ -179,6 +233,13 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback,
         }
     }
     
+    public void surfaceRedrawNeeded(SurfaceHolder holder) {
+        if (!mDestroyed) {
+            mCurSurfaceHolder = holder;
+            onSurfaceRedrawNeededNative(mNativeHandle, holder.getSurface());
+        }
+    }
+
     public void surfaceDestroyed(SurfaceHolder holder) {
         mCurSurfaceHolder = null;
         if (!mDestroyed) {
@@ -200,10 +261,32 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback,
         }
     }
     
+    public void onGlobalLayout() {
+        mNativeContentView.getLocationInWindow(mLocation);
+        int w = mNativeContentView.getWidth();
+        int h = mNativeContentView.getHeight();
+        if (mLocation[0] != mLastContentX || mLocation[1] != mLastContentY
+                || w != mLastContentWidth || h != mLastContentHeight) {
+            mLastContentX = mLocation[0];
+            mLastContentY = mLocation[1];
+            mLastContentWidth = w;
+            mLastContentHeight = h;
+            if (!mDestroyed) {
+                onContentRectChangedNative(mNativeHandle, mLastContentX,
+                        mLastContentY, mLastContentWidth, mLastContentHeight);
+            }
+        }
+    }
+
     void dispatchUnhandledKeyEvent(KeyEvent event) {
-        View decor = getWindow().getDecorView();
-        if (decor != null) {
-            decor.dispatchKeyEvent(event);
+        try {
+            mDispatchingUnhandledKey = true;
+            View decor = getWindow().getDecorView();
+            if (decor != null) {
+                decor.dispatchKeyEvent(event);
+            }
+        } finally {
+            mDispatchingUnhandledKey = false;
         }
     }
     
@@ -213,5 +296,13 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback,
     
     void setWindowFormat(int format) {
         getWindow().setFormat(format);
+    }
+
+    void showIme(int mode) {
+        mIMM.showSoftInput(mNativeContentView, mode);
+    }
+
+    void hideIme(int mode) {
+        mIMM.hideSoftInputFromWindow(mNativeContentView.getWindowToken(), mode);
     }
 }

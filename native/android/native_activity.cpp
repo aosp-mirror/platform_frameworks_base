@@ -29,3 +29,11 @@ void ANativeActivity_setWindowFlags(ANativeActivity* activity,
 		uint32_t addFlags, uint32_t removeFlags) {
 	android_NativeActivity_setWindowFlags(activity, addFlags, addFlags|removeFlags);
 }
+
+void ANativeActivity_showSoftInput(ANativeActivity* activity, uint32_t flags) {
+	android_NativeActivity_showSoftInput(activity, flags);
+}
+
+void ANativeActivity_hideSoftInput(ANativeActivity* activity, uint32_t flags) {
+	android_NativeActivity_hideSoftInput(activity, flags);
+}
