@@ -4287,7 +4287,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     final ArrayList<View> scrap = mScrapViews[i];
                     final int scrapCount = scrap.size();
                     for (int j = 0; j < scrapCount; j++) {
-                        scrap.get(i).setDrawingCacheBackgroundColor(color);
+                        scrap.get(j).setDrawingCacheBackgroundColor(color);
                     }
                 }
             }
