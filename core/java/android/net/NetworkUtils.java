@@ -32,13 +32,37 @@ public class NetworkUtils {
     public native static int disableInterface(String interfaceName);
 
     /** Add a route to the specified host via the named interface. */
-    public native static int addHostRoute(String interfaceName, int hostaddr);
+    public static int addHostRoute(String interfaceName, InetAddress hostaddr) {
+        int v4Int = v4StringToInt(hostaddr.getHostAddress());
+        if (v4Int != 0) {
+            return addHostRouteNative(interfaceName, v4Int);
+        } else {
+            return -1;
+        }
+    }
+    private native static int addHostRouteNative(String interfaceName, int hostaddr);
 
     /** Add a default route for the named interface. */
-    public native static int setDefaultRoute(String interfaceName, int gwayAddr);
+    public static int setDefaultRoute(String interfaceName, InetAddress gwayAddr) {
+        int v4Int = v4StringToInt(gwayAddr.getHostAddress());
+        if (v4Int != 0) {
+            return setDefaultRouteNative(interfaceName, v4Int);
+        } else {
+            return -1;
+        }
+    }
+    private native static int setDefaultRouteNative(String interfaceName, int hostaddr);
 
     /** Return the gateway address for the default route for the named interface. */
-    public native static int getDefaultRoute(String interfaceName);
+    public static InetAddress getDefaultRoute(String interfaceName) {
+        int addr = getDefaultRouteNative(interfaceName);
+        try {
+            return InetAddress.getByAddress(v4IntToArray(addr));
+        } catch (UnknownHostException e) {
+            return null;
+        }
+    }
+    private native static int getDefaultRouteNative(String interfaceName);
 
     /** Remove host routes that uses the named interface. */
     public native static int removeHostRoutes(String interfaceName);
@@ -105,27 +129,30 @@ public class NetworkUtils {
     private native static boolean configureNative(
         String interfaceName, int ipAddress, int netmask, int gateway, int dns1, int dns2);
 
-    /**
-     * Look up a host name and return the result as an int. Works if the argument
-     * is an IP address in dot notation. Obviously, this can only be used for IPv4
-     * addresses.
-     * @param hostname the name of the host (or the IP address)
-     * @return the IP address as an {@code int} in network byte order
-     */
-    public static int lookupHost(String hostname) {
-        InetAddress inetAddress;
+    // The following two functions are glue to tie the old int-based address scheme
+    // to the new InetAddress scheme.  They should go away when we go fully to InetAddress
+    // TODO - remove when we switch fully to InetAddress
+    public static byte[] v4IntToArray(int addr) {
+        byte[] addrBytes = new byte[4];
+        addrBytes[0] = (byte)(addr & 0xff);
+        addrBytes[1] = (byte)((addr >> 8) & 0xff);
+        addrBytes[2] = (byte)((addr >> 16) & 0xff);
+        addrBytes[3] = (byte)((addr >> 24) & 0xff);
+        return addrBytes;
+    }
+
+    public static int v4StringToInt(String str) {
+        int result = 0;
+        String[] array = str.split("\\.");
+        if (array.length != 4) return 0;
         try {
-            inetAddress = InetAddress.getByName(hostname);
-        } catch (UnknownHostException e) {
-            return -1;
+            result = Integer.parseInt(array[3]);
+            result = (result << 8) + Integer.parseInt(array[2]);
+            result = (result << 8) + Integer.parseInt(array[1]);
+            result = (result << 8) + Integer.parseInt(array[0]);
+        } catch (NumberFormatException e) {
+            return 0;
         }
-        byte[] addrBytes;
-        int addr;
-        addrBytes = inetAddress.getAddress();
-        addr = ((addrBytes[3] & 0xff) << 24)
-                | ((addrBytes[2] & 0xff) << 16)
-                | ((addrBytes[1] & 0xff) << 8)
-                |  (addrBytes[0] & 0xff);
-        return addr;
+        return result;
     }
 }

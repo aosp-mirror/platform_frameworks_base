@@ -30,6 +30,7 @@ import android.net.NetworkUtils;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkInfo.State;
+import android.net.NetworkProperties;
 import android.os.Message;
 import android.os.Parcelable;
 import android.os.Handler;
@@ -54,6 +55,9 @@ import android.content.Context;
 import android.database.ContentObserver;
 import com.android.internal.app.IBatteryStats;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -211,6 +215,7 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
     private boolean mDisconnectExpected;
     private DhcpHandler mDhcpTarget;
     private DhcpInfo mDhcpInfo;
+    private NetworkProperties mNetworkProperties;
     private int mLastSignalLevel = -1;
     private String mLastBssid;
     private String mLastSsid;
@@ -315,7 +320,6 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
     private String mInterfaceName;
     private static String LS = System.getProperty("line.separator");
 
-    private static String[] sDnsPropNames;
     private Handler mTarget;
     private Context mContext;
     private boolean mPrivateDnsRouteSet = false;
@@ -379,10 +383,7 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
         mSettingsObserver = new SettingsObserver(new Handler());
 
         mInterfaceName = SystemProperties.get("wifi.interface", "tiwlan0");
-        sDnsPropNames = new String[] {
-            "dhcp." + mInterfaceName + ".dns1",
-            "dhcp." + mInterfaceName + ".dns2"
-        };
+        mNetworkProperties = new NetworkProperties();
         mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService("batteryinfo"));
 
     }
@@ -474,15 +475,6 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
     private void setTornDownByConnMgr(boolean flag) {
         mTornDownByConnMgr = flag;
         updateNetworkInfo();
-    }
-
-    /**
-     * Return the IP addresses of the DNS servers available for the WLAN
-     * network interface.
-     * @return a list of DNS addresses, with no holes.
-     */
-    public String[] getDnsPropNames() {
-        return sDnsPropNames;
     }
 
     /**
@@ -901,6 +893,7 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
                 }
                 setDetailedState(DetailedState.DISCONNECTED);
                 setSupplicantState(SupplicantState.UNINITIALIZED);
+                mNetworkProperties.clear();
                 mHaveIpAddress = false;
                 mObtainingIpAddress = false;
                 if (died) {
@@ -1008,6 +1001,7 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
                             reconnectCommand();
                         }
                     } else if (newState == SupplicantState.DISCONNECTED) {
+                        mNetworkProperties.clear();
                         mHaveIpAddress = false;
                         if (isDriverStopped() || mDisconnectExpected) {
                             handleDisconnectedState(DetailedState.DISCONNECTED, true);
@@ -1192,6 +1186,7 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
                 }
                 mReconnectCount = 0;
                 mHaveIpAddress = true;
+                configureNetworkProperties();
                 mObtainingIpAddress = false;
                 mWifiInfo.setIpAddress(mDhcpInfo.ipAddress);
                 mLastSignalLevel = -1; // force update of signal strength
@@ -1217,6 +1212,7 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
                     // [31- 1] Reserved for future use
                     // [ 0- 0] Interface configuration succeeded (1) or failed (0)
                     EventLog.writeEvent(EVENTLOG_INTERFACE_CONFIGURATION_STATE_CHANGED, 0);
+                    mNetworkProperties.clear();
                     mHaveIpAddress = false;
                     mWifiInfo.setIpAddress(0);
                     mObtainingIpAddress = false;
@@ -1289,6 +1285,49 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
         return disabledNetwork;
     }
 
+
+    private void configureNetworkProperties() {
+        try {
+            mNetworkProperties.setInterface(NetworkInterface.getByName(mInterfaceName));
+        } catch (SocketException e) {
+            Log.e(TAG, "SocketException creating NetworkInterface from " + mInterfaceName +
+                    ". e=" + e);
+            return;
+        } catch (NullPointerException e) {
+            Log.e(TAG, "NPE creating NetworkInterface. e=" + e);
+            return;
+        }
+        // TODO - fix this for v6
+        try {
+            mNetworkProperties.addAddress(InetAddress.getByAddress(
+                    NetworkUtils.v4IntToArray(mDhcpInfo.ipAddress)));
+        } catch (UnknownHostException e) {
+            Log.e(TAG, "Exception setting IpAddress using " + mDhcpInfo + ", e=" + e);
+        }
+
+        try {
+            mNetworkProperties.setGateway(InetAddress.getByAddress(NetworkUtils.v4IntToArray(
+                    mDhcpInfo.gateway)));
+        } catch (UnknownHostException e) {
+            Log.e(TAG, "Exception setting Gateway using " + mDhcpInfo + ", e=" + e);
+        }
+
+        try {
+            mNetworkProperties.addDns(InetAddress.getByAddress(
+                    NetworkUtils.v4IntToArray(mDhcpInfo.dns1)));
+        } catch (UnknownHostException e) {
+            Log.e(TAG, "Exception setting Dns1 using " + mDhcpInfo + ", e=" + e);
+        }
+        try {
+            mNetworkProperties.addDns(InetAddress.getByAddress(
+                    NetworkUtils.v4IntToArray(mDhcpInfo.dns2)));
+
+        } catch (UnknownHostException e) {
+            Log.e(TAG, "Exception setting Dns2 using " + mDhcpInfo + ", e=" + e);
+        }
+        // TODO - add proxy info
+    }
+
     private void configureInterface() {
         checkPollTimer();
         mLastSignalLevel = -1;
@@ -1300,11 +1339,9 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
         } else {
             int event;
             if (NetworkUtils.configureInterface(mInterfaceName, mDhcpInfo)) {
-                mHaveIpAddress = true;
                 event = EVENT_INTERFACE_CONFIGURATION_SUCCEEDED;
                 if (LOCAL_LOGD) Log.v(TAG, "Static IP configuration succeeded");
             } else {
-                mHaveIpAddress = false;
                 event = EVENT_INTERFACE_CONFIGURATION_FAILED;
                 if (LOCAL_LOGD) Log.v(TAG, "Static IP configuration failed");
             }
@@ -1339,6 +1376,7 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
      */
     public void resetConnections(boolean disableInterface) {
         if (LOCAL_LOGD) Log.d(TAG, "Reset connections and stopping DHCP");
+        mNetworkProperties.clear();
         mHaveIpAddress = false;
         mObtainingIpAddress = false;
         mWifiInfo.setIpAddress(0);
@@ -2282,11 +2320,12 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
         mNotificationRepeatTime = 0;
         mNumScansSinceNetworkStateChange = 0;
     }
-    
+
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append("interface ").append(mInterfaceName);
+
+        sb.append(mNetworkProperties.toString());
         sb.append(" runState=");
         if (mRunState >= 1 && mRunState <= mRunStateNames.length) {
             sb.append(mRunStateNames[mRunState-1]);
@@ -2366,7 +2405,7 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
                         setBluetoothCoexistenceMode(
                                 WifiNative.BLUETOOTH_COEXISTENCE_MODE_DISABLED);
                     }
-                    
+
                     powerMode = getPowerMode();
                     if (powerMode < 0) {
                       // Handle the case where supplicant driver does not support
@@ -2587,5 +2626,9 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
             return Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 1) == 1;
         }
+    }
+
+    public NetworkProperties getNetworkProperties() {
+        return mNetworkProperties;
     }
 }

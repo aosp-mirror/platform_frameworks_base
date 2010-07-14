@@ -53,6 +53,7 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.RetryManager;
 import com.android.internal.telephony.ServiceStateTracker;
 
+import java.net.NetworkInterface;
 import java.util.ArrayList;
 
 /**
@@ -736,6 +737,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         }
 
         if (ar.exception == null) {
+            mNetworkProperties = makeNetworkProperties(mActiveDataConnection);
+
             // everything is setup
             notifyDefaultData(reason);
         } else {

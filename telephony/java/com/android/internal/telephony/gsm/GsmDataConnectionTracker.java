@@ -30,6 +30,8 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.NetworkProperties;
+import android.net.ProxyProperties;
 import android.net.TrafficStats;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
@@ -58,6 +60,9 @@ import com.android.internal.telephony.EventLogTags;
 import com.android.internal.telephony.DataConnection.FailCause;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 /**
@@ -1133,6 +1138,25 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
 
         if (ar.exception == null) {
+            mNetworkProperties = makeNetworkProperties(mActivePdp);
+
+            ApnSetting apn = mActivePdp.getApn();
+            if (apn.proxy != null && apn.proxy.length() != 0) {
+                try {
+                    ProxyProperties proxy = new ProxyProperties();
+                    proxy.setAddress(InetAddress.getByName(apn.proxy));
+                    proxy.setPort(Integer.parseInt(apn.port));
+                    mNetworkProperties.setHttpProxy(proxy);
+                } catch (UnknownHostException e) {
+                    Log.e(LOG_TAG, "UnknownHostException making ProxyProperties: " + e);
+                } catch (SecurityException e) {
+                    Log.e(LOG_TAG, "SecurityException making ProxyProperties: " + e);
+                } catch (NumberFormatException e) {
+                    Log.e(LOG_TAG, "NumberFormatException making ProxyProperties (" + apn.port +
+                            "): " + e);
+                }
+            }
+
             // everything is setup
             if (isApnTypeActive(Phone.APN_TYPE_DEFAULT)) {
                 SystemProperties.set("gsm.defaultpdpcontext.active", "true");
