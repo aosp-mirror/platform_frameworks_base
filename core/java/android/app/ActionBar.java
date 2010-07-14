@@ -368,6 +368,24 @@ public abstract class ActionBar {
          * @return The context mode's menu.
          */
         public abstract Menu getMenu();
+
+        /**
+         * Returns the current title of this context mode.
+         * @return Title text
+         */
+        public abstract CharSequence getTitle();
+
+        /**
+         * Returns the current subtitle of this context mode.
+         * @return Subtitle text
+         */
+        public abstract CharSequence getSubtitle();
+
+        /**
+         * Returns the current custom view for this context mode.
+         * @return The current custom view
+         */
+        public abstract View getCustomView();
     }
     
     /**

@@ -34,6 +34,7 @@ import android.widget.LinearLayout;
 import android.widget.SpinnerAdapter;
 import android.widget.ViewAnimator;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -338,6 +339,7 @@ public class ActionBarImpl extends ActionBar {
     public class ContextMode extends ActionBar.ContextMode {
         private ContextModeCallback mCallback;
         private ActionMenu mMenu;
+        private WeakReference<View> mCustomView;
         
         public ContextMode(ContextModeCallback callback) {
             mCallback = callback;
@@ -375,6 +377,7 @@ public class ActionBarImpl extends ActionBar {
         @Override
         public void setCustomView(View view) {
             mUpperContextView.setCustomView(view);
+            mCustomView = new WeakReference<View>(view);
         }
 
         @Override
@@ -386,7 +389,22 @@ public class ActionBarImpl extends ActionBar {
         public void setTitle(CharSequence title) {
             mUpperContextView.setTitle(title);
         }
+
+        @Override
+        public CharSequence getTitle() {
+            return mUpperContextView.getTitle();
+        }
+
+        @Override
+        public CharSequence getSubtitle() {
+            return mUpperContextView.getSubtitle();
+        }
         
+        @Override
+        public View getCustomView() {
+            return mCustomView != null ? mCustomView.get() : null;
+        }
+
         public void dispatchOnContextItemClicked(MenuItem item) {
             ActionMenuItem actionItem = (ActionMenuItem) item;
             if (!actionItem.invoke()) {

@@ -105,6 +105,14 @@ public class ActionBarContextView extends ViewGroup {
         initTitle();
     }
 
+    public CharSequence getTitle() {
+        return mTitle;
+    }
+
+    public CharSequence getSubtitle() {
+        return mSubtitle;
+    }
+
     private void initTitle() {
         if (mTitleLayout == null) {
             LayoutInflater inflater = LayoutInflater.from(getContext());
