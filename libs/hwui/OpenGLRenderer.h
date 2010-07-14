@@ -160,9 +160,10 @@ private:
      * @param bottom The bottom coordinate of the rectangle
      * @param color The rectangle's ARGB color, defined as a packed 32 bits word
      * @param mode The Skia xfermode to use
+     * @param ignoreTransform True if the current transform should be ignored
      */
     void drawColorRect(float left, float top, float right, float bottom,
-    		int color, SkXfermode::Mode mode);
+    		int color, SkXfermode::Mode mode, bool ignoreTransform = false);
 
     /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
