@@ -1567,6 +1567,12 @@ public class Activity extends ContextThemeWrapper
         return new BackStackEntry(mFragments);
     }
     
+    void invalidateFragmentIndex(int index) {
+        if (mAllLoaderManagers != null) {
+            mAllLoaderManagers.remove(index);
+        }
+    }
+    
     /**
      * Called when a Fragment is being attached to this activity, immediately
      * after the call to its {@link Fragment#onAttach Fragment.onAttach()}
