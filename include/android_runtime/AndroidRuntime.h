@@ -100,6 +100,7 @@ public:
 
 private:
     static int startReg(JNIEnv* env);
+    void parseExtraOpts(char* extraOptsBuf);
     int startVm(JavaVM** pJavaVM, JNIEnv** pEnv);
 
     Vector<JavaVMOption> mOptions;
