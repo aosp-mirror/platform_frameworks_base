@@ -19,13 +19,12 @@
 
 #include <media/EffectApi.h>
 
+// for the definition of SL_IID_EQUALIZER
+#include "OpenSLES.h"
+
 #if __cplusplus
 extern "C" {
 #endif
-
-//TODO replace by openSL ES include when available
-static const effect_uuid_t SL_IID_EQUALIZER_ = { 0x0bed4300, 0xddd6, 0x11db, 0x8f34, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } };
-const effect_uuid_t * const SL_IID_EQUALIZER = &SL_IID_EQUALIZER_;
 
 /* enumerated parameters for Equalizer effect */
 typedef enum
