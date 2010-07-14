@@ -222,6 +222,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         // underlying surface is created and destroyed
         SurfaceHolder holder = getHolder();
         holder.addCallback(this);
+        // setFormat is done by SurfaceView in SDK 2.3 and newer. Uncomment
+        // this statement if back-porting to 2.2 or older:
+        // holder.setFormat(PixelFormat.RGB_565);
+        //
         // setType is not needed for SDK 2.0 or newer. Uncomment this
         // statement if back-porting this code to older SDKs.
         // holder.setType(SurfaceHolder.SURFACE_TYPE_GPU);
@@ -1103,7 +1107,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             mRenderer = renderer;
         }
 
-
         @Override
         public void run() {
             setName("GLThread " + getId());
@@ -1154,6 +1157,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 boolean sizeChanged = false;
                 boolean wantRenderNotification = false;
                 boolean doRenderNotification = false;
+                boolean askedToReleaseEglContext = false;
                 int w = 0;
                 int h = 0;
                 Runnable event = null;
@@ -1177,6 +1181,17 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                                 if (LOG_PAUSE_RESUME) {
                                     Log.i("GLThread", "mPaused is now " + mPaused + " tid=" + getId());
                                 }
+                            }
+
+                            // Do we need to give up the EGL context?
+                            if (mShouldReleaseEglContext) {
+                                if (LOG_SURFACE) {
+                                    Log.i("GLThread", "releasing EGL context because asked to tid=" + getId());
+                                }
+                                stopEglSurfaceLocked();
+                                stopEglContextLocked();
+                                mShouldReleaseEglContext = false;
+                                askedToReleaseEglContext = true;
                             }
 
                             // Have we lost the EGL context?
@@ -1228,6 +1243,9 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                             }
 
                             if (doRenderNotification) {
+                                if (LOG_SURFACE) {
+                                    Log.i("GLThread", "sending render notification tid=" + getId());
+                                }
                                 wantRenderNotification = false;
                                 doRenderNotification = false;
                                 mRenderComplete = true;
@@ -1235,22 +1253,24 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                             }
 
                             // Ready to draw?
-                            if ((!mPaused) && mHasSurface
-                                && (mWidth > 0) && (mHeight > 0)
-                                && (mRequestRender || (mRenderMode == RENDERMODE_CONTINUOUSLY))) {
+                            if (readyToDraw()) {
 
                                 // If we don't have an EGL context, try to acquire one.
-                                if ((! mHaveEglContext) && sGLThreadManager.tryAcquireEglContextLocked(this)) {
-                                    try {
-                                        mEglHelper.start();
-                                    } catch (RuntimeException t) {
-                                        sGLThreadManager.releaseEglContextLocked(this);
-                                        throw t;
-                                    }
-                                    mHaveEglContext = true;
-                                    createEglContext = true;
+                                if (! mHaveEglContext) {
+                                    if (askedToReleaseEglContext) {
+                                        askedToReleaseEglContext = false;
+                                    } else if (sGLThreadManager.tryAcquireEglContextLocked(this)) {
+                                        try {
+                                            mEglHelper.start();
+                                        } catch (RuntimeException t) {
+                                            sGLThreadManager.releaseEglContextLocked(this);
+                                            throw t;
+                                        }
+                                        mHaveEglContext = true;
+                                        createEglContext = true;
 
-                                    sGLThreadManager.notifyAll();
+                                        sGLThreadManager.notifyAll();
+                                    }
                                 }
 
                                 if (mHaveEglContext && !mHaveEglSurface) {
@@ -1265,6 +1285,9 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                                         w = mWidth;
                                         h = mHeight;
                                         wantRenderNotification = true;
+                                        if (LOG_SURFACE) {
+                                            Log.i("GLThread", "noticing that we want render notification tid=" + getId());
+                                        }
 
                                         if (DRAW_TWICE_AFTER_SIZE_CHANGED) {
                                             // We keep mRequestRender true so that we draw twice after the size changes.
@@ -1284,7 +1307,16 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
                             // By design, this is the only place in a GLThread thread where we wait().
                             if (LOG_THREADS) {
-                                Log.i("GLThread", "waiting tid=" + getId());
+                                Log.i("GLThread", "waiting tid=" + getId()
+                                    + " mHaveEglContext: " + mHaveEglContext
+                                    + " mHaveEglSurface: " + mHaveEglSurface
+                                    + " mPaused: " + mPaused
+                                    + " mHasSurface: " + mHasSurface
+                                    + " mWaitingForSurface: " + mWaitingForSurface
+                                    + " mWidth: " + mWidth
+                                    + " mHeight: " + mHeight
+                                    + " mRequestRender: " + mRequestRender
+                                    + " mRenderMode: " + mRenderMode);
                             }
                             sGLThreadManager.wait();
                         }
@@ -1326,7 +1358,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                     }
 
                     if (LOG_RENDERER_DRAW_FRAME) {
-                        Log.w("GLThread", "onDrawFrame");
+                        Log.w("GLThread", "onDrawFrame tid=" + getId());
                     }
                     mRenderer.onDrawFrame(gl);
                     if (!mEglHelper.swap()) {
@@ -1350,6 +1382,16 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                     stopEglContextLocked();
                 }
             }
+        }
+
+        public boolean ableToDraw() {
+            return mHaveEglContext && mHaveEglSurface && readyToDraw();
+        }
+
+        private boolean readyToDraw() {
+            return (!mPaused) && mHasSurface
+                && (mWidth > 0) && (mHeight > 0)
+                && (mRequestRender || (mRenderMode == RENDERMODE_CONTINUOUSLY));
         }
 
         public void setRenderMode(int renderMode) {
@@ -1461,9 +1503,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 sGLThreadManager.notifyAll();
 
                 // Wait for thread to react to resize and render a frame
-                while (! mExited && !mPaused && !mRenderComplete ) {
+                while (! mExited && !mPaused && !mRenderComplete
+                        && (mGLThread != null && mGLThread.ableToDraw())) {
                     if (LOG_SURFACE) {
-                        Log.i("Main thread", "onWindowResize waiting for render complete.");
+                        Log.i("Main thread", "onWindowResize waiting for render complete from tid=" + mGLThread.getId());
                     }
                     try {
                         sGLThreadManager.wait();
@@ -1490,6 +1533,11 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             }
         }
 
+        public void requestReleaseEglContextLocked() {
+            mShouldReleaseEglContext = true;
+            sGLThreadManager.notifyAll();
+        }
+
         /**
          * Queue an "event" to be run on the GL rendering thread.
          * @param r the runnable to be run on the GL rendering thread.
@@ -1514,6 +1562,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         private boolean mWaitingForSurface;
         private boolean mHaveEglContext;
         private boolean mHaveEglSurface;
+        private boolean mShouldReleaseEglContext;
         private int mWidth;
         private int mHeight;
         private int mRenderMode;
@@ -1597,6 +1646,13 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             checkGLESVersion();
             if (mMultipleGLESContextsAllowed) {
                 return true;
+            }
+            // Notify the owning thread that it should release the context.
+            // TODO: implement a fairness policy. Currently
+            // if the owning thread is drawing continuously it will just
+            // reacquire the EGL context.
+            if (mEglOwner != null) {
+                mEglOwner.requestReleaseEglContextLocked();
             }
             return false;
         }
