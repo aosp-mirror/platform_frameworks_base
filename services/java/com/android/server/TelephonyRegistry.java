@@ -376,8 +376,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     mDataConnectionState = state;
                     modified = true;
                 } else {
-                    // we're still connected, so send that out if we send anything.
-                    state = mDataConnectionState;
+                    // leave mDataConnectionState as is and
+                    // send out the new status for the APN in question.
                 }
             }
             mDataConnectionPossible = isDataConnectivityPossible;
@@ -444,7 +444,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     /**
      * Copy the service state object so they can't mess it up in the local calls
      */
-    public void sendServiceState(Record r, ServiceState state) {
+    private void sendServiceState(Record r, ServiceState state) {
         try {
             r.callback.onServiceStateChanged(new ServiceState(state));
         } catch (RemoteException ex) {
