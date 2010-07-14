@@ -36,6 +36,9 @@ public class MtpDatabase {
     private final String mVolumeName;
     private final Uri mObjectsUri;
 
+    // FIXME - this should be passed in via the constructor
+    private final int mStorageID = 0x00010001;
+
     private static final String[] ID_PROJECTION = new String[] {
             MtpObjects.ObjectColumns._ID, // 0
     };
@@ -59,6 +62,20 @@ public class MtpDatabase {
                                             + MtpObjects.ObjectColumns.FORMAT + "=?";
 
     private final MediaScanner mMediaScanner;
+
+    // MTP property codes
+    private static final int MTP_PROPERTY_STORAGE_ID = 0xDC01;
+    private static final int MTP_PROPERTY_OBJECT_FORMAT = 0xDC02;
+    private static final int MTP_PROPERTY_OBJECT_SIZE = 0xDC04;
+    private static final int MTP_PROPERTY_OBJECT_FILE_NAME = 0xDC07;
+    private static final int MTP_PROPERTY_DATE_MODIFIED = 0xDC09;
+    private static final int MTP_PROPERTY_PARENT_OBJECT = 0xDC0B;
+
+    // MTP response codes
+    private static final int MTP_RESPONSE_OK = 0x2001;
+    private static final int MTP_RESPONSE_GENERAL_ERROR = 0x2002;
+    private static final int MTP_RESPONSE_INVALID_OBJECT_HANDLE = 0x2009;
+    private static final int MTP_RESPONSE_OBJECT_PROP_NOT_SUPPORTED = 0xA80A;
 
     static {
         System.loadLibrary("media_jni");
@@ -150,7 +167,71 @@ public class MtpDatabase {
     private int getObjectProperty(int handle, int property,
                             long[] outIntValue, char[] outStringValue) {
         Log.d(TAG, "getObjectProperty: " + property);
-        return 0;
+        String column = null;
+        boolean isString = false;
+
+        switch (property) {
+            case MTP_PROPERTY_STORAGE_ID:
+                outIntValue[0] = mStorageID;
+                return MTP_RESPONSE_OK;
+            case MTP_PROPERTY_OBJECT_FORMAT:
+                column = MtpObjects.ObjectColumns.FORMAT;
+                break;
+            case MTP_PROPERTY_OBJECT_SIZE:
+                column = MtpObjects.ObjectColumns.SIZE;
+                break;
+            case MTP_PROPERTY_OBJECT_FILE_NAME:
+                column = MtpObjects.ObjectColumns.DATA;
+                isString = true;
+                break;
+            case MTP_PROPERTY_DATE_MODIFIED:
+                column = MtpObjects.ObjectColumns.DATE_MODIFIED;
+                break;
+            case MTP_PROPERTY_PARENT_OBJECT:
+                column = MtpObjects.ObjectColumns.PARENT;
+                break;
+            default:
+                return MTP_RESPONSE_OBJECT_PROP_NOT_SUPPORTED;
+        }
+
+        Cursor c = null;
+        try {
+            // for now we are only reading properties from the "objects" table
+            c = mMediaProvider.query(mObjectsUri,
+                            new String [] { MtpObjects.ObjectColumns._ID, column },
+                            ID_WHERE, new String[] { Integer.toString(handle) }, null);
+            if (c != null && c.moveToNext()) {
+                if (isString) {
+                    String value = c.getString(1);
+                    int start = 0;
+
+                    if (property == MTP_PROPERTY_OBJECT_FILE_NAME) {
+                        // extract name from full path
+                        int lastSlash = value.lastIndexOf('/');
+                        if (lastSlash >= 0) {
+                            start = lastSlash + 1;
+                        }
+                    }
+                    int end = value.length();
+                    if (end - start > 255) {
+                        end = start + 255;
+                    }
+                    value.getChars(start, end, outStringValue, 0);
+                    outStringValue[end - start] = 0;
+                } else {
+                    outIntValue[0] = c.getLong(1);
+                }
+                return MTP_RESPONSE_OK;
+            }
+        } catch (Exception e) {
+            return MTP_RESPONSE_GENERAL_ERROR;
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+        }
+        // query failed if we get here
+        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
     }
 
     private boolean getObjectInfo(int handle, int[] outStorageFormatParent,
@@ -161,7 +242,7 @@ public class MtpDatabase {
             c = mMediaProvider.query(mObjectsUri, OBJECT_INFO_PROJECTION,
                             ID_WHERE, new String[] {  Integer.toString(handle) }, null);
             if (c != null && c.moveToNext()) {
-                outStorageFormatParent[0] = 0x00010001;
+                outStorageFormatParent[0] = mStorageID;
                 outStorageFormatParent[1] = c.getInt(2);
                 outStorageFormatParent[2] = c.getInt(3);
 
