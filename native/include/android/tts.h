@@ -87,6 +87,11 @@ typedef struct {
  */
 extern android_tts_engine_t *android_getTtsEngine();
 
+/* Including the old version for legacy support (Froyo compatibility).
+ * This should return the same thing as android_getTtsEngine.
+ */
+extern "C" android_tts_engine_t *getTtsEngine();
+
 // A callback type used to notify the framework of new synthetized
 // audio samples, status will be SYNTH_DONE for the last sample of
 // the last request, of SYNTH_PENDING otherwise.
