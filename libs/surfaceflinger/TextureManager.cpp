@@ -107,7 +107,6 @@ bool TextureManager::isSupportedYuvFormat(int format)
 {
     switch (format) {
     case HAL_PIXEL_FORMAT_YV12:
-    case HAL_PIXEL_FORMAT_YV16:
         return true;
     }
     return false;
@@ -118,7 +117,6 @@ bool TextureManager::isYuvFormat(int format)
     switch (format) {
     // supported YUV formats
     case HAL_PIXEL_FORMAT_YV12:
-    case HAL_PIXEL_FORMAT_YV16:
     // Legacy/deprecated YUV formats
     case HAL_PIXEL_FORMAT_YCbCr_422_SP:
     case HAL_PIXEL_FORMAT_YCrCb_420_SP:
