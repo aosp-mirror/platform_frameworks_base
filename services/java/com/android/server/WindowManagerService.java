@@ -495,6 +495,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public interface WindowChangeListener {
         public void windowsChanged();
+        public void focusChanged();
     }
 
     final Configuration mTempConfiguration = new Configuration();
@@ -4831,6 +4832,21 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    private void notifyFocusChanged() {
+        WindowChangeListener[] windowChangeListeners;
+        synchronized(mWindowMap) {
+            if(mWindowChangeListeners.isEmpty()) {
+                return;
+            }
+            windowChangeListeners = new WindowChangeListener[mWindowChangeListeners.size()];
+            windowChangeListeners = mWindowChangeListeners.toArray(windowChangeListeners);
+        }
+        int N = windowChangeListeners.length;
+        for(int i = 0; i < N; i++) {
+            windowChangeListeners[i].focusChanged();
+        }
+    }
+
     private WindowState findWindow(int hashCode) {
         if (hashCode == -1) {
             return getFocusedWindow();
@@ -7720,7 +7736,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int ENABLE_SCREEN = 16;
         public static final int APP_FREEZE_TIMEOUT = 17;
         public static final int SEND_NEW_CONFIGURATION = 18;
-        public static final int WINDOWS_CHANGED = 19;
+        public static final int REPORT_WINDOWS_CHANGE = 19;
 
         private Session mLastReportedHold;
 
@@ -7772,6 +7788,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 // Ignore if process has died.
                             }
                         }
+                        notifyFocusChanged();
                     }
                 } break;
 
@@ -8052,7 +8069,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     break;
                 }
 
-                case WINDOWS_CHANGED: {
+                case REPORT_WINDOWS_CHANGE: {
                     if (mWindowsChanged) {
                         synchronized (mWindowMap) {
                             mWindowsChanged = false;
@@ -8283,8 +8300,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             if (mWindowsChanged && !mWindowChangeListeners.isEmpty()) {
-                mH.removeMessages(H.WINDOWS_CHANGED);
-                mH.sendMessage(mH.obtainMessage(H.WINDOWS_CHANGED));
+                mH.removeMessages(H.REPORT_WINDOWS_CHANGE);
+                mH.sendMessage(mH.obtainMessage(H.REPORT_WINDOWS_CHANGE));
             }
         } catch (RuntimeException e) {
             mInLayout = false;
