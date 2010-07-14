@@ -932,6 +932,8 @@ public class SmsMessage extends SmsMessageBase {
         // TP-Message-Type-Indicator
         // 9.2.3
         case 0:
+        case 3: //GSM 03.40 9.2.3.1: MTI == 3 is Reserved.
+                //This should be processed in the same way as MTI == 0 (Deliver)
             parseSmsDeliver(p, firstByte);
             break;
         case 2:
