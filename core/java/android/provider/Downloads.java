@@ -899,6 +899,12 @@ public final class Downloads {
         public static final int DESTINATION_CACHE_PARTITION_NOROAMING = 3;
 
         /**
+         * This download will be saved to the location given by the file URI in
+         * {@link #COLUMN_FILE_NAME_HINT}.
+         */
+        public static final int DESTINATION_FILE_URI = 4;
+
+        /**
          * This download is allowed to run.
          */
         public static final int CONTROL_RUN = 0;
