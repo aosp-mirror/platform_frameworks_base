@@ -184,7 +184,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libssl \
 	libicuuc \
 	libicui18n \
-	libicudata \
 	libmedia \
 	libwpa_client \
 	libjpeg
