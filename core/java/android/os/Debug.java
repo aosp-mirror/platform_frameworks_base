@@ -767,6 +767,13 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
 
     /**
+     * Writes native heap data to the specified file descriptor.
+     *
+     * @hide
+     */
+    public static native void dumpNativeHeap(FileDescriptor fd);
+
+    /**
      * Returns the number of sent transactions from this process.
      * @return The number of sent transactions or -1 if it could not read t.
      */

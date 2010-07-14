@@ -3047,8 +3047,7 @@ public final class ActivityThread {
                 }
             }
         } else {
-            // TODO
-            Slog.w(TAG, "Native heap dump not yet implemented");
+            Debug.dumpNativeHeap(dhd.fd.getFileDescriptor());
         }
     }
 
