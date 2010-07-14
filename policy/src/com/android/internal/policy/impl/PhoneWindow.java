@@ -284,7 +284,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mTitleView != null) {
             mTitleView.setText(title);
         } else if (mActionBar != null) {
-            mActionBar.setTitle(title);
+            mActionBar.setWindowTitle(title);
         }
         mTitle = title;
     }
@@ -2334,7 +2334,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             } else {
                 mActionBar = (ActionBarView) findViewById(com.android.internal.R.id.action_bar);
                 if (mActionBar != null && mActionBar.getTitle() == null) {
-                    mActionBar.setTitle(mTitle);
+                    mActionBar.setWindowTitle(mTitle);
                 }
             }
         }

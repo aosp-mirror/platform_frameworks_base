@@ -91,6 +91,7 @@ public class ActionBarView extends ViewGroup {
     private View mCustomNavView;
     
     private boolean mShowMenu;
+    private boolean mUserTitle;
 
     private MenuBuilder mOptionsMenu;
     private ActionMenuView mMenuView;
@@ -212,7 +213,30 @@ public class ActionBarView extends ViewGroup {
         return mTitle;
     }
 
+    /**
+     * Set the action bar title. This will always replace or override window titles.
+     * @param title Title to set
+     *
+     * @see #setWindowTitle(CharSequence)
+     */
     public void setTitle(CharSequence title) {
+        mUserTitle = true;
+        setTitleImpl(title);
+    }
+
+    /**
+     * Set the window title. A window title will always be replaced or overridden by a user title.
+     * @param title Title to set
+     *
+     * @see #setTitle(CharSequence)
+     */
+    public void setWindowTitle(CharSequence title) {
+        if (!mUserTitle) {
+            setTitleImpl(title);
+        }
+    }
+
+    private void setTitleImpl(CharSequence title) {
         mTitle = title;
         if (mTitleView != null) {
             mTitleView.setText(title);
