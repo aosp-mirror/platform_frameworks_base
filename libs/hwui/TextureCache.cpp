@@ -133,7 +133,7 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
                 GL_RGB, GL_UNSIGNED_SHORT_5_6_5, bitmap->getPixels());
         break;
     case SkBitmap::kARGB_8888_Config:
-        texture->blend = true;
+        texture->blend = !bitmap->isOpaque();
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap->rowBytesAsPixels(), texture->height, 0,
                 GL_RGBA, GL_UNSIGNED_BYTE, bitmap->getPixels());
         break;

@@ -69,8 +69,11 @@ public class BitmapFactory {
          * the decoder will try to pick the best matching config based on the
          * system's screen depth, and characteristics of the original image such
          * as if it has per-pixel alpha (requiring a config that also does).
+         * 
+         * The configuration is set to {@link android.graphics.Bitmap.Config#ARGB_8888}
+         * by default.
          */
-        public Bitmap.Config inPreferredConfig;
+        public Bitmap.Config inPreferredConfig = Bitmap.Config.ARGB_8888;
 
         /**
          * If dither is true, the decoder will attempt to dither the decoded
