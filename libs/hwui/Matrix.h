@@ -88,6 +88,9 @@ public:
     void copyTo(float* v) const;
     void copyTo(SkMatrix& v) const;
 
+    /**
+     * Does not apply rotations!
+     */
     void mapRect(Rect& r) const;
 
     float getTranslateX();

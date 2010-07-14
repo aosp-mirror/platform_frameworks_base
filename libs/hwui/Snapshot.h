@@ -56,6 +56,8 @@ public:
             previous(s),
             layer(NULL),
             fbo(s->fbo) {
+        mappedClip.set(s->clipRect);
+        transform.mapRect(mappedClip);
     }
 
     /**
@@ -87,12 +89,20 @@ public:
      * Returns the current clip region mapped by the current transform.
      */
     const Rect& getMappedClip() {
+        return mappedClip;
+    }
+
+    /**
+     * Intersects the current clip with the new clip rectangle.
+     */
+    bool clip(float left, float top, float right, float bottom) {
+        bool clipped = clipRect.intersect(left, top, right, bottom);
         if (flags & kFlagDirtyTransform) {
             flags &= ~kFlagDirtyTransform;
             mappedClip.set(clipRect);
             transform.mapRect(mappedClip);
         }
-        return mappedClip;
+        return clipped;
     }
 
     /**

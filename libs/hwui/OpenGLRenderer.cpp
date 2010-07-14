@@ -406,7 +406,7 @@ bool OpenGLRenderer::quickReject(float left, float top, float right, float botto
 }
 
 bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom) {
-    bool clipped = mSnapshot->clipRect.intersect(left, top, right, bottom);
+    bool clipped = mSnapshot->clip(left, top, right, bottom);
     if (clipped) {
         mSnapshot->flags |= Snapshot::kFlagClipSet;
         setScissorFromClip();
@@ -492,8 +492,8 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
 }
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
-    const Rect& clip = mSnapshot->clipRect;
-    drawColorRect(clip.left, clip.top, clip.right, clip.bottom, color, mode);
+    const Rect& clip = mSnapshot->getMappedClip();
+    drawColorRect(clip.left, clip.top, clip.right, clip.bottom, color, mode, true);
 }
 
 void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, const SkPaint* p) {
@@ -524,7 +524,7 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom,
-        int color, SkXfermode::Mode mode) {
+        int color, SkXfermode::Mode mode, bool ignoreTransform) {
     const int alpha = (color >> 24) & 0xFF;
     const GLfloat a = alpha                  / 255.0f;
     const GLfloat r = ((color >> 16) & 0xFF) / 255.0f;
@@ -538,7 +538,12 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     mModelView.scale(right - left, bottom - top, 1.0f);
 
     const bool inUse = useShader(mDrawColorShader);
-    mDrawColorShader->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+    if (!ignoreTransform) {
+        mDrawColorShader->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+    } else {
+        mat4 identity;
+        mDrawColorShader->set(mOrthoMatrix, mModelView, identity);
+    }
 
     if (!inUse) {
         const GLvoid* p = &gDrawColorVertices[0].position[0];
