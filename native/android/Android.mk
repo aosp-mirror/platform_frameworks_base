@@ -9,13 +9,15 @@ LOCAL_SRC_FILES:= \
     input.cpp \
     looper.cpp \
     native_activity.cpp \
-    native_window.cpp
+    native_window.cpp \
+    sensor.cpp
 
 LOCAL_SHARED_LIBRARIES := \
     libcutils \
     libutils \
     libbinder \
     libui \
+    libgui \
     libsurfaceflinger_client \
     libandroid_runtime
 
