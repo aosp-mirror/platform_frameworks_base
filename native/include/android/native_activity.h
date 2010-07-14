@@ -147,6 +147,21 @@ typedef struct ANativeActivityCallbacks {
     void (*onNativeWindowCreated)(ANativeActivity* activity, ANativeWindow* window);
 
     /**
+     * The drawing window for this native activity has been resized.  You should
+     * retrieve the new size from the window and ensure that your rendering in
+     * it now matches.
+     */
+    void (*onNativeWindowResized)(ANativeActivity* activity, ANativeWindow* window);
+
+    /**
+     * The drawing window for this native activity needs to be redrawn.  To avoid
+     * transient artifacts during screen changes (such resizing after rotation),
+     * applications should not return from this function until they have finished
+     * drawing their window in its current state.
+     */
+    void (*onNativeWindowRedrawNeeded)(ANativeActivity* activity, ANativeWindow* window);
+
+    /**
      * The drawing window for this native activity is going to be destroyed.
      * You MUST ensure that you do not touch the window object after returning
      * from this function: in the common case of drawing to the window from
@@ -168,6 +183,11 @@ typedef struct ANativeActivityCallbacks {
      * function.
      */
     void (*onInputQueueDestroyed)(ANativeActivity* activity, AInputQueue* queue);
+
+    /**
+     * The rectangle in the window in which content should be placed has changed.
+     */
+    void (*onContentRectChanged)(ANativeActivity* activity, const ARect* rect);
 
     /**
      * The system is running low on memory.  Use this callback to release
@@ -196,6 +216,28 @@ void ANativeActivity_setWindowFormat(ANativeActivity* activity, int32_t format);
 
 void ANativeActivity_setWindowFlags(ANativeActivity* activity,
         uint32_t addFlags, uint32_t removeFlags);
+
+/**
+ * Flags for ANativeActivity_showSoftInput; see the Java InputMethodManager
+ * API for documentation.
+ */
+enum {
+    ANATIVEACTIVITY_SHOW_SOFT_INPUT_IMPLICIT = 0x0001,
+    ANATIVEACTIVITY_SHOW_SOFT_INPUT_FORCED = 0x0002,
+};
+
+void ANativeActivity_showSoftInput(ANativeActivity* activity, uint32_t flags);
+
+/**
+ * Flags for ANativeActivity_hideSoftInput; see the Java InputMethodManager
+ * API for documentation.
+ */
+enum {
+    ANATIVEACTIVITY_HIDE_SOFT_INPUT_IMPLICIT_ONLY = 0x0001,
+    ANATIVEACTIVITY_HIDE_SOFT_INPUT_NOT_ALWAYS = 0x0002,
+};
+
+void ANativeActivity_hideSoftInput(ANativeActivity* activity, uint32_t flags);
 
 #ifdef __cplusplus
 };

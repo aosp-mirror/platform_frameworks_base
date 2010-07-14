@@ -48,6 +48,10 @@ struct android_app {
     // When non-NULL, this is the window surface that the app can draw in.
     ANativeWindow* window;
 
+    // Current content rectangle of the window; this is the area where the
+    // window's content should be placed to be seen by the user.
+    ARect contentRect;
+
     // Current state of the app's activity.  May be either APP_CMD_START,
     // APP_CMD_RESUME, APP_CMD_PAUSE, or APP_CMD_STOP; see below.
     int activityState;
@@ -69,8 +73,10 @@ struct android_app {
 
     int running;
     int destroyed;
+    int redrawNeeded;
     AInputQueue* pendingInputQueue;
     ANativeWindow* pendingWindow;
+    ARect pendingContentRect;
 };
 
 enum {
@@ -105,6 +111,26 @@ enum {
     APP_CMD_WINDOW_CHANGED,
 
     /**
+     * Command from main thread: the current ANativeWindow has been resized.
+     * Please redraw with its new size.
+     */
+    APP_CMD_WINDOW_RESIZED,
+
+    /**
+     * Command from main thread: the system needs that the current ANativeWindow
+     * be redrawn.  You should redraw the window before handing this to
+     * android_app_exec_cmd() in order to avoid transient drawing glitches.
+     */
+    APP_CMD_WINDOW_REDRAW_NEEDED,
+
+    /**
+     * Command from main thread: the content area of the window has changed,
+     * such as from the soft input window being shown or hidden.  You can
+     * find the new content rect in android_app::contentRect.
+     */
+    APP_CMD_CONTENT_RECT_CHANGED,
+
+    /**
      * Command from main thread: the app's activity window has gained
      * input focus.
      */
@@ -115,6 +141,12 @@ enum {
      * input focus.
      */
     APP_CMD_LOST_FOCUS,
+
+    /**
+     * Command from main thread: the system is running low on memory.
+     * Try to reduce your memory use.
+     */
+    APP_CMD_LOW_MEMORY,
 
     /**
      * Command from main thread: the app's activity has been started.

@@ -137,7 +137,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     int mViewVisibility;
     boolean mAppVisible = true;
 
-    SurfaceHolder.Callback mSurfaceHolderCallback;
+    SurfaceHolder.Callback2 mSurfaceHolderCallback;
     BaseSurfaceHolder mSurfaceHolder;
     boolean mIsCreating;
     boolean mDrawingAllowed;
@@ -1263,6 +1263,18 @@ public final class ViewRoot extends Handler implements ViewParent,
                     Log.v("ViewRoot", "FINISHED DRAWING: " + mWindowAttributes.getTitle());
                 }
                 mReportNextDraw = false;
+                if (mSurfaceHolder != null && mSurface.isValid()) {
+                    mSurfaceHolderCallback.surfaceRedrawNeeded(mSurfaceHolder);
+                    SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
+                    if (callbacks != null) {
+                        for (SurfaceHolder.Callback c : callbacks) {
+                            if (c instanceof SurfaceHolder.Callback2) {
+                                ((SurfaceHolder.Callback2)c).surfaceRedrawNeeded(
+                                        mSurfaceHolder);
+                            }
+                        }
+                    }
+                }
                 try {
                     sWindowSession.finishDrawing(mWindow);
                 } catch (RemoteException e) {

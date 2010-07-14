@@ -331,30 +331,4 @@ private:
 
 } // namespace android
 
-/*
- * NDK input queue API.
- */
-struct AInputQueue {
-public:
-    /* Creates a consumer associated with an input channel. */
-    explicit AInputQueue(const android::sp<android::InputChannel>& channel);
-
-    /* Destroys the consumer and releases its input channel. */
-    virtual ~AInputQueue();
-
-    inline android::InputConsumer& getConsumer() { return mConsumer; }
-    
-    android::status_t consume(android::InputEvent** event);
-    
-    void setPollLoop(const android::sp<android::PollLoop>& pollLoop) { mPollLoop = pollLoop; }
-    const android::sp<android::PollLoop> getPollLoop() const { return mPollLoop; }
-    
-    virtual void doDefaultKey(android::KeyEvent* keyEvent) = 0;
-    
-private:
-    android::InputConsumer mConsumer;
-    android::PreallocatedInputEventFactory mInputEventFactory;
-    android::sp<android::PollLoop> mPollLoop;
-};
-
 #endif // _UI_INPUT_TRANSPORT_H
