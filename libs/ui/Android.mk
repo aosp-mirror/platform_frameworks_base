@@ -12,6 +12,7 @@ LOCAL_SRC_FILES:= \
 	KeyLayoutMap.cpp \
 	KeyCharacterMap.cpp \
 	Input.cpp \
+	InputDevice.cpp \
 	InputDispatcher.cpp \
 	InputManager.cpp \
 	InputReader.cpp \
@@ -38,3 +39,13 @@ ifeq ($(TARGET_SIMULATOR),true)
 endif
 
 include $(BUILD_SHARED_LIBRARY)
+
+
+# Include subdirectory makefiles
+# ============================================================
+
+# If we're building with ONE_SHOT_MAKEFILE (mm, mmm), then what the framework
+# team really wants is to build the stuff defined by this makefile.
+ifeq (,$(ONE_SHOT_MAKEFILE))
+include $(call first-makefiles-under,$(LOCAL_PATH))
+endif

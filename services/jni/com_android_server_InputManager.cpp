@@ -405,28 +405,28 @@ NativeInputManager::~NativeInputManager() {
 }
 
 bool NativeInputManager::isAppSwitchKey(int32_t keyCode) {
-    return keyCode == KEYCODE_HOME || keyCode == KEYCODE_ENDCALL;
+    return keyCode == AKEYCODE_HOME || keyCode == AKEYCODE_ENDCALL;
 }
 
 bool NativeInputManager::isPolicyKey(int32_t keyCode, bool isScreenOn) {
     // Special keys that the WindowManagerPolicy might care about.
     switch (keyCode) {
-    case KEYCODE_VOLUME_UP:
-    case KEYCODE_VOLUME_DOWN:
-    case KEYCODE_ENDCALL:
-    case KEYCODE_POWER:
-    case KEYCODE_CALL:
-    case KEYCODE_HOME:
-    case KEYCODE_MENU:
-    case KEYCODE_SEARCH:
+    case AKEYCODE_VOLUME_UP:
+    case AKEYCODE_VOLUME_DOWN:
+    case AKEYCODE_ENDCALL:
+    case AKEYCODE_POWER:
+    case AKEYCODE_CALL:
+    case AKEYCODE_HOME:
+    case AKEYCODE_MENU:
+    case AKEYCODE_SEARCH:
         // media keys
-    case KEYCODE_HEADSETHOOK:
-    case KEYCODE_MEDIA_PLAY_PAUSE:
-    case KEYCODE_MEDIA_STOP:
-    case KEYCODE_MEDIA_NEXT:
-    case KEYCODE_MEDIA_PREVIOUS:
-    case KEYCODE_MEDIA_REWIND:
-    case KEYCODE_MEDIA_FAST_FORWARD:
+    case AKEYCODE_HEADSETHOOK:
+    case AKEYCODE_MEDIA_PLAY_PAUSE:
+    case AKEYCODE_MEDIA_STOP:
+    case AKEYCODE_MEDIA_NEXT:
+    case AKEYCODE_MEDIA_PREVIOUS:
+    case AKEYCODE_MEDIA_REWIND:
+    case AKEYCODE_MEDIA_FAST_FORWARD:
         return true;
     default:
         // We need to pass all keys to the policy in the following cases:

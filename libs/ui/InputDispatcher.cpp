@@ -40,10 +40,10 @@ namespace android {
 
 // TODO, this needs to be somewhere else, perhaps in the policy
 static inline bool isMovementKey(int32_t keyCode) {
-    return keyCode == KEYCODE_DPAD_UP
-            || keyCode == KEYCODE_DPAD_DOWN
-            || keyCode == KEYCODE_DPAD_LEFT
-            || keyCode == KEYCODE_DPAD_RIGHT;
+    return keyCode == AKEYCODE_DPAD_UP
+            || keyCode == AKEYCODE_DPAD_DOWN
+            || keyCode == AKEYCODE_DPAD_LEFT
+            || keyCode == AKEYCODE_DPAD_RIGHT;
 }
 
 static inline nsecs_t now() {

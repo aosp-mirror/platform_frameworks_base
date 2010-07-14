@@ -68,7 +68,10 @@ enum {
     INPUT_DEVICE_CLASS_TOUCHSCREEN_MT= 0x00000010,
 
     /* The input device is a directional pad. */
-    INPUT_DEVICE_CLASS_DPAD          = 0x00000020
+    INPUT_DEVICE_CLASS_DPAD          = 0x00000020,
+
+    /* The input device is a gamepad (implies keyboard). */
+    INPUT_DEVICE_CLASS_GAMEPAD       = 0x00000040
 };
 
 /*

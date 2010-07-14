@@ -54,6 +54,9 @@
  */
 #define test_bit(bit, array)    (array[bit/8] & (1<<(bit%8)))
 
+/* this macro computes the number of bytes needed to represent a bit array of the specified size */
+#define sizeof_bit_array(bits)  ((bits + 7) / 8)
+
 #define ID_MASK  0x0000ffff
 #define SEQ_MASK 0x7fff0000
 #define SEQ_SHIFT 16
@@ -182,7 +185,7 @@ int32_t EventHub::getScanCodeState(int32_t deviceId, int32_t deviceClasses,
 }
 
 int32_t EventHub::getScanCodeStateLocked(device_t* device, int32_t scanCode) const {
-    uint8_t key_bitmask[(KEY_MAX + 7) / 8];
+    uint8_t key_bitmask[sizeof_bit_array(KEY_MAX + 1)];
     memset(key_bitmask, 0, sizeof(key_bitmask));
     if (ioctl(mFDs[id_to_index(device->id)].fd,
                EVIOCGKEY(sizeof(key_bitmask)), key_bitmask) >= 0) {
@@ -218,7 +221,7 @@ int32_t EventHub::getKeyCodeStateLocked(device_t* device, int32_t keyCode) const
     Vector<int32_t> scanCodes;
     device->layoutMap->findScancodes(keyCode, &scanCodes);
 
-    uint8_t key_bitmask[(KEY_MAX + 7) / 8];
+    uint8_t key_bitmask[sizeof_bit_array(KEY_MAX + 1)];
     memset(key_bitmask, 0, sizeof(key_bitmask));
     if (ioctl(mFDs[id_to_index(device->id)].fd,
                EVIOCGKEY(sizeof(key_bitmask)), key_bitmask) >= 0) {
@@ -264,7 +267,7 @@ int32_t EventHub::getSwitchState(int32_t deviceId, int32_t deviceClasses, int32_
 }
 
 int32_t EventHub::getSwitchStateLocked(device_t* device, int32_t sw) const {
-    uint8_t sw_bitmask[(SW_MAX + 7) / 8];
+    uint8_t sw_bitmask[sizeof_bit_array(SW_MAX + 1)];
     memset(sw_bitmask, 0, sizeof(sw_bitmask));
     if (ioctl(mFDs[id_to_index(device->id)].fd,
                EVIOCGSW(sizeof(sw_bitmask)), sw_bitmask) >= 0) {
@@ -409,7 +412,7 @@ bool EventHub::getEvent(int32_t* outDeviceId, int32_t* outType,
                             LOGV("iev.code=%d outKeycode=%d outFlags=0x%08x err=%d\n",
                                 iev.code, *outKeycode, *outFlags, err);
                             if (err != 0) {
-                                *outKeycode = 0;
+                                *outKeycode = AKEYCODE_UNKNOWN;
                                 *outFlags = 0;
                             }
                         } else {
@@ -508,6 +511,26 @@ bool EventHub::hasKeys(size_t numCodes, const int32_t* keyCodes, uint8_t* outFla
 }
 
 // ----------------------------------------------------------------------------
+
+static bool containsNonZeroByte(const uint8_t* array, uint32_t startIndex, uint32_t endIndex) {
+    const uint8_t* end = array + endIndex;
+    array += startIndex;
+    while (array != end) {
+        if (*(array++) != 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static const int32_t GAMEPAD_KEYCODES[] = {
+        AKEYCODE_BUTTON_A, AKEYCODE_BUTTON_B, AKEYCODE_BUTTON_C,
+        AKEYCODE_BUTTON_X, AKEYCODE_BUTTON_Y, AKEYCODE_BUTTON_Z,
+        AKEYCODE_BUTTON_L1, AKEYCODE_BUTTON_R1,
+        AKEYCODE_BUTTON_L2, AKEYCODE_BUTTON_R2,
+        AKEYCODE_BUTTON_THUMBL, AKEYCODE_BUTTON_THUMBR,
+        AKEYCODE_BUTTON_START, AKEYCODE_BUTTON_SELECT, AKEYCODE_BUTTON_MODE
+};
 
 int EventHub::open_device(const char *deviceName)
 {
@@ -626,27 +649,27 @@ int EventHub::open_device(const char *deviceName)
     mFDs[mFDCount].fd = fd;
     mFDs[mFDCount].events = POLLIN;
 
-    // figure out the kinds of events the device reports
+    // Figure out the kinds of events the device reports.
     
-    // See if this is a keyboard, and classify it.  Note that we only
-    // consider up through the function keys; we don't want to include
-    // ones after that (play cd etc) so we don't mistakenly consider a
-    // controller to be a keyboard.
-    uint8_t key_bitmask[(KEY_MAX+7)/8];
+    uint8_t key_bitmask[sizeof_bit_array(KEY_MAX + 1)];
     memset(key_bitmask, 0, sizeof(key_bitmask));
+
     LOGV("Getting keys...");
     if (ioctl(fd, EVIOCGBIT(EV_KEY, sizeof(key_bitmask)), key_bitmask) >= 0) {
         //LOGI("MAP\n");
-        //for (int i=0; i<((KEY_MAX+7)/8); i++) {
+        //for (int i = 0; i < sizeof(key_bitmask); i++) {
         //    LOGI("%d: 0x%02x\n", i, key_bitmask[i]);
         //}
-        for (int i=0; i<((BTN_MISC+7)/8); i++) {
-            if (key_bitmask[i] != 0) {
-                device->classes |= INPUT_DEVICE_CLASS_KEYBOARD;
-                break;
-            }
-        }
-        if ((device->classes & INPUT_DEVICE_CLASS_KEYBOARD) != 0) {
+
+        // See if this is a keyboard.  Ignore everything in the button range except for
+        // gamepads which are also considered keyboards.
+        if (containsNonZeroByte(key_bitmask, 0, sizeof_bit_array(BTN_MISC))
+                || containsNonZeroByte(key_bitmask, sizeof_bit_array(BTN_GAMEPAD),
+                        sizeof_bit_array(BTN_DIGI))
+                || containsNonZeroByte(key_bitmask, sizeof_bit_array(KEY_OK),
+                        sizeof_bit_array(KEY_MAX + 1))) {
+            device->classes |= INPUT_DEVICE_CLASS_KEYBOARD;
+
             device->keyBitmask = new uint8_t[sizeof(key_bitmask)];
             if (device->keyBitmask != NULL) {
                 memcpy(device->keyBitmask, key_bitmask, sizeof(key_bitmask));
@@ -658,39 +681,39 @@ int EventHub::open_device(const char *deviceName)
         }
     }
     
-    // See if this is a trackball.
+    // See if this is a trackball (or mouse).
     if (test_bit(BTN_MOUSE, key_bitmask)) {
-        uint8_t rel_bitmask[(REL_MAX+7)/8];
+        uint8_t rel_bitmask[sizeof_bit_array(REL_MAX + 1)];
         memset(rel_bitmask, 0, sizeof(rel_bitmask));
         LOGV("Getting relative controllers...");
-        if (ioctl(fd, EVIOCGBIT(EV_REL, sizeof(rel_bitmask)), rel_bitmask) >= 0)
-        {
+        if (ioctl(fd, EVIOCGBIT(EV_REL, sizeof(rel_bitmask)), rel_bitmask) >= 0) {
             if (test_bit(REL_X, rel_bitmask) && test_bit(REL_Y, rel_bitmask)) {
                 device->classes |= INPUT_DEVICE_CLASS_TRACKBALL;
             }
         }
     }
-    
-    uint8_t abs_bitmask[(ABS_MAX+7)/8];
+
+    // See if this is a touch pad.
+    uint8_t abs_bitmask[sizeof_bit_array(ABS_MAX + 1)];
     memset(abs_bitmask, 0, sizeof(abs_bitmask));
     LOGV("Getting absolute controllers...");
-    ioctl(fd, EVIOCGBIT(EV_ABS, sizeof(abs_bitmask)), abs_bitmask);
-    
-    // Is this a new modern multi-touch driver?
-    if (test_bit(ABS_MT_TOUCH_MAJOR, abs_bitmask)
-            && test_bit(ABS_MT_POSITION_X, abs_bitmask)
-            && test_bit(ABS_MT_POSITION_Y, abs_bitmask)) {
-        device->classes |= INPUT_DEVICE_CLASS_TOUCHSCREEN | INPUT_DEVICE_CLASS_TOUCHSCREEN_MT;
-        
-    // Is this an old style single-touch driver?
-    } else if (test_bit(BTN_TOUCH, key_bitmask)
-            && test_bit(ABS_X, abs_bitmask) && test_bit(ABS_Y, abs_bitmask)) {
-        device->classes |= INPUT_DEVICE_CLASS_TOUCHSCREEN;
+    if (ioctl(fd, EVIOCGBIT(EV_ABS, sizeof(abs_bitmask)), abs_bitmask) >= 0) {
+        // Is this a new modern multi-touch driver?
+        if (test_bit(ABS_MT_TOUCH_MAJOR, abs_bitmask)
+                && test_bit(ABS_MT_POSITION_X, abs_bitmask)
+                && test_bit(ABS_MT_POSITION_Y, abs_bitmask)) {
+            device->classes |= INPUT_DEVICE_CLASS_TOUCHSCREEN | INPUT_DEVICE_CLASS_TOUCHSCREEN_MT;
+
+        // Is this an old style single-touch driver?
+        } else if (test_bit(BTN_TOUCH, key_bitmask)
+                && test_bit(ABS_X, abs_bitmask) && test_bit(ABS_Y, abs_bitmask)) {
+            device->classes |= INPUT_DEVICE_CLASS_TOUCHSCREEN;
+        }
     }
 
 #ifdef EV_SW
     // figure out the switches this device reports
-    uint8_t sw_bitmask[(SW_MAX+7)/8];
+    uint8_t sw_bitmask[sizeof_bit_array(SW_MAX + 1)];
     memset(sw_bitmask, 0, sizeof(sw_bitmask));
     if (ioctl(fd, EVIOCGBIT(EV_SW, sizeof(sw_bitmask)), sw_bitmask) >= 0) {
         for (int i=0; i<EV_SW; i++) {
@@ -726,7 +749,10 @@ int EventHub::open_device(const char *deviceName)
                      "%s/usr/keylayout/%s", root, "qwerty.kl");
             defaultKeymap = true;
         }
-        device->layoutMap->load(keylayoutFilename);
+        status_t status = device->layoutMap->load(keylayoutFilename);
+        if (status) {
+            LOGE("Error %d loading key layout.", status);
+        }
 
         // tell the world about the devname (the descriptive name)
         if (!mHaveFirstKeyboard && !defaultKeymap && strstr(name, "-keypad")) {
@@ -746,19 +772,27 @@ int EventHub::open_device(const char *deviceName)
         property_set(propName, name);
 
         // 'Q' key support = cheap test of whether this is an alpha-capable kbd
-        if (hasKeycode(device, kKeyCodeQ)) {
+        if (hasKeycode(device, AKEYCODE_Q)) {
             device->classes |= INPUT_DEVICE_CLASS_ALPHAKEY;
         }
         
-        // See if this has a DPAD.
-        if (hasKeycode(device, kKeyCodeDpadUp) &&
-                hasKeycode(device, kKeyCodeDpadDown) &&
-                hasKeycode(device, kKeyCodeDpadLeft) &&
-                hasKeycode(device, kKeyCodeDpadRight) &&
-                hasKeycode(device, kKeyCodeDpadCenter)) {
+        // See if this device has a DPAD.
+        if (hasKeycode(device, AKEYCODE_DPAD_UP) &&
+                hasKeycode(device, AKEYCODE_DPAD_DOWN) &&
+                hasKeycode(device, AKEYCODE_DPAD_LEFT) &&
+                hasKeycode(device, AKEYCODE_DPAD_RIGHT) &&
+                hasKeycode(device, AKEYCODE_DPAD_CENTER)) {
             device->classes |= INPUT_DEVICE_CLASS_DPAD;
         }
         
+        // See if this device has a gamepad.
+        for (size_t i = 0; i < sizeof(GAMEPAD_KEYCODES); i++) {
+            if (hasKeycode(device, GAMEPAD_KEYCODES[i])) {
+                device->classes |= INPUT_DEVICE_CLASS_GAMEPAD;
+                break;
+            }
+        }
+
         LOGI("New keyboard: device->id=0x%x devname='%s' propName='%s' keylayout='%s'\n",
                 device->id, name, propName, keylayoutFilename);
     }

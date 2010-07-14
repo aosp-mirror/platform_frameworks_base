@@ -124,11 +124,27 @@ public class KeyEvent implements Parcelable {
     public static final int KEYCODE_PAGE_DOWN       = 93;
     public static final int KEYCODE_PICTSYMBOLS     = 94;   // switch symbol-sets (Emoji,Kao-moji)
     public static final int KEYCODE_SWITCH_CHARSET  = 95;   // switch char-sets (Kanji,Katakana)
+    public static final int KEYCODE_BUTTON_A        = 96;
+    public static final int KEYCODE_BUTTON_B        = 97;
+    public static final int KEYCODE_BUTTON_C        = 98;
+    public static final int KEYCODE_BUTTON_X        = 99;
+    public static final int KEYCODE_BUTTON_Y        = 100;
+    public static final int KEYCODE_BUTTON_Z        = 101;
+    public static final int KEYCODE_BUTTON_L1       = 102;
+    public static final int KEYCODE_BUTTON_R1       = 103;
+    public static final int KEYCODE_BUTTON_L2       = 104;
+    public static final int KEYCODE_BUTTON_R2       = 105;
+    public static final int KEYCODE_BUTTON_THUMBL   = 106;
+    public static final int KEYCODE_BUTTON_THUMBR   = 107;
+    public static final int KEYCODE_BUTTON_START    = 108;
+    public static final int KEYCODE_BUTTON_SELECT   = 109;
+    public static final int KEYCODE_BUTTON_MODE     = 110;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
     //  native/include/android/keycodes.h
     //  frameworks/base/include/ui/KeycodeLabels.h
+    //  external/webkit/WebKit/android/plugins/ANPKeyCodes.h
     //  tools/puppet_master/PuppetMaster/nav_keys.py
     //  frameworks/base/core/res/res/values/attrs.xml
     //  commands/monkey/Monkey.java
