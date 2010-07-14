@@ -316,7 +316,6 @@ public class FragmentManager {
                             throw new SuperNotCalledException("Fragment " + f
                                     + " did not call through to super.onDetach()");
                         }
-                        f.mActivity.mAllLoaderManagers.remove(f.mIndex);
                         f.mActivity = null;
                     }
             }
@@ -377,6 +376,7 @@ public class FragmentManager {
             mAvailIndices = new ArrayList<Integer>();
         }
         mAvailIndices.add(f.mIndex);
+        mActivity.invalidateFragmentIndex(f.mIndex);
         f.clearIndex();
     }
     
