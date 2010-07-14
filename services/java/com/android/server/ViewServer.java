@@ -216,8 +216,11 @@ class ViewServer implements Runnable {
     class ViewServerWorker implements Runnable, WindowManagerService.WindowChangeListener {
         private Socket mClient;
         private boolean mNeedWindowListUpdate;
+        private boolean mNeedFocusedWindowUpdate;
         public ViewServerWorker(Socket client) {
             mClient = client;
+            mNeedWindowListUpdate = false;
+            mNeedFocusedWindowUpdate = false;
         }
 
         public void run() {
@@ -285,20 +288,42 @@ class ViewServer implements Runnable {
             }
         }
 
+        public void focusChanged() {
+            synchronized(this) {
+                mNeedFocusedWindowUpdate = true;
+                notifyAll();
+            }
+        }
+
         private boolean windowManagerAutolistLoop() {
             mWindowManager.addWindowChangeListener(this);
             BufferedWriter out = null;
             try {
                 out = new BufferedWriter(new OutputStreamWriter(mClient.getOutputStream()));
                 while (!Thread.interrupted()) {
+                    boolean needWindowListUpdate = false;
+                    boolean needFocusedWindowUpdate = false;
                     synchronized (this) {
-                        while (!mNeedWindowListUpdate) {
+                        while (!mNeedWindowListUpdate && !mNeedFocusedWindowUpdate) {
                             wait();
                         }
-                        mNeedWindowListUpdate = false;
+                        if (mNeedWindowListUpdate) {
+                            mNeedWindowListUpdate = false;
+                            needWindowListUpdate = true;
+                        }
+                        if (mNeedFocusedWindowUpdate) {
+                            mNeedFocusedWindowUpdate = false;
+                            needFocusedWindowUpdate = true;
+                        }
                     }
-                    out.write("UPDATE\n");
-                    out.flush();
+                    if(needWindowListUpdate) {
+                        out.write("LIST UPDATE\n");
+                        out.flush();
+                    }
+                    if(needFocusedWindowUpdate) {
+                        out.write("FOCUS UPDATE\n");
+                        out.flush();
+                    }
                 }
             } catch (Exception e) {
                 Slog.w(LOG_TAG, "Connection error: ", e);
