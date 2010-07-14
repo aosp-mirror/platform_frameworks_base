@@ -3005,6 +3005,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Determine if this view has the FITS_SYSTEM_WINDOWS flag set.
+     * @return True if window has FITS_SYSTEM_WINDOWS set
+     *
+     * @hide
+     */
+    public boolean isFitsSystemWindowsFlagSet() {
+        return (mViewFlags & FITS_SYSTEM_WINDOWS) == FITS_SYSTEM_WINDOWS;
+    }
+
+    /**
      * Returns the visibility status for this view.
      *
      * @return One of {@link #VISIBLE}, {@link #INVISIBLE}, or {@link #GONE}.
