@@ -70,6 +70,8 @@ public class ActionBarImpl extends ActionBar {
     
     private int mContextDisplayMode;
 
+    private boolean mClosingContext;
+
     final Handler mHandler = new Handler();
     final Runnable mCloseContext = new Runnable() {
         public void run() {
@@ -77,6 +79,7 @@ public class ActionBarImpl extends ActionBar {
             if (mLowerContextView != null) {
                 mLowerContextView.removeAllViews();
             }
+            mClosingContext = false;
         }
     };
 
@@ -195,6 +198,14 @@ public class ActionBarImpl extends ActionBar {
         if (mContextMode != null) {
             mContextMode.finish();
         }
+
+        // Don't wait for the close context mode animation to finish.
+        if (mClosingContext) {
+            mAnimatorView.clearAnimation();
+            mHandler.removeCallbacks(mCloseContext);
+            mCloseContext.run();
+        }
+
         mContextMode = new ContextMode(callback);
         if (callback.onCreateContextMode(mContextMode, mContextMode.getMenu())) {
             mContextMode.invalidate();
@@ -344,6 +355,7 @@ public class ActionBarImpl extends ActionBar {
             mAnimatorView.setDisplayedChild(NORMAL_VIEW);
 
             // Clear out the context mode views after the animation finishes
+            mClosingContext = true;
             mHandler.postDelayed(mCloseContext, mAnimatorView.getOutAnimation().getDuration());
 
             if (mLowerContextView != null && mLowerContextView.getVisibility() != View.GONE) {
