@@ -17,6 +17,8 @@
 #ifndef _UI_KEYCODE_LABELS_H
 #define _UI_KEYCODE_LABELS_H
 
+#include <android/keycodes.h>
+
 struct KeycodeLabel {
     const char *literal;
     int value;
@@ -118,116 +120,27 @@ static const KeycodeLabel KEYCODES[] = {
     { "PAGE_DOWN", 93 },
     { "PICTSYMBOLS", 94 },
     { "SWITCH_CHARSET", 95 },
+    { "BUTTON_A", 96 },
+    { "BUTTON_B", 97 },
+    { "BUTTON_C", 98 },
+    { "BUTTON_X", 99 },
+    { "BUTTON_Y", 100 },
+    { "BUTTON_Z", 101 },
+    { "BUTTON_L1", 102 },
+    { "BUTTON_R1", 103 },
+    { "BUTTON_L2", 104 },
+    { "BUTTON_R2", 105 },
+    { "BUTTON_THUMBL", 106 },
+    { "BUTTON_THUMBR", 107 },
+    { "BUTTON_START", 108 },
+    { "BUTTON_SELECT", 109 },
+    { "BUTTON_MODE", 110 },
 
-    // NOTE: If you add a new keycode here you must also add it to:
-    //   (enum KeyCode, in this file)
-    //   frameworks/base/core/java/android/view/KeyEvent.java
-    //   tools/puppet_master/PuppetMaster.nav_keys.py
-    //   frameworks/base/core/res/res/values/attrs.xml
+    // NOTE: If you add a new keycode here you must also add it to several other files.
+    //       Refer to frameworks/base/core/java/android/view/KeyEvent.java for the full list.
 
     { NULL, 0 }
 };
-
-// These constants need to match the above mappings.
-typedef enum KeyCode {
-    kKeyCodeUnknown = 0,
-
-    kKeyCodeSoftLeft = 1,
-    kKeyCodeSoftRight = 2,
-    kKeyCodeHome = 3,
-    kKeyCodeBack = 4,
-    kKeyCodeCall = 5,
-    kKeyCodeEndCall = 6,
-    kKeyCode0 = 7,
-    kKeyCode1 = 8,
-    kKeyCode2 = 9,
-    kKeyCode3 = 10,
-    kKeyCode4 = 11,
-    kKeyCode5 = 12,
-    kKeyCode6 = 13,
-    kKeyCode7 = 14,
-    kKeyCode8 = 15,
-    kKeyCode9 = 16,
-    kKeyCodeStar = 17,
-    kKeyCodePound = 18,
-    kKeyCodeDpadUp = 19,
-    kKeyCodeDpadDown = 20,
-    kKeyCodeDpadLeft = 21,
-    kKeyCodeDpadRight = 22,
-    kKeyCodeDpadCenter = 23,
-    kKeyCodeVolumeUp = 24,
-    kKeyCodeVolumeDown = 25,
-    kKeyCodePower = 26,
-    kKeyCodeCamera = 27,
-    kKeyCodeClear = 28,
-    kKeyCodeA = 29,
-    kKeyCodeB = 30,
-    kKeyCodeC = 31,
-    kKeyCodeD = 32,
-    kKeyCodeE = 33,
-    kKeyCodeF = 34,
-    kKeyCodeG = 35,
-    kKeyCodeH = 36,
-    kKeyCodeI = 37,
-    kKeyCodeJ = 38,
-    kKeyCodeK = 39,
-    kKeyCodeL = 40,
-    kKeyCodeM = 41,
-    kKeyCodeN = 42,
-    kKeyCodeO = 43,
-    kKeyCodeP = 44,
-    kKeyCodeQ = 45,
-    kKeyCodeR = 46,
-    kKeyCodeS = 47,
-    kKeyCodeT = 48,
-    kKeyCodeU = 49,
-    kKeyCodeV = 50,
-    kKeyCodeW = 51,
-    kKeyCodeX = 52,
-    kKeyCodeY = 53,
-    kKeyCodeZ = 54,
-    kKeyCodeComma = 55,
-    kKeyCodePeriod = 56,
-    kKeyCodeAltLeft = 57,
-    kKeyCodeAltRight = 58,
-    kKeyCodeShiftLeft = 59,
-    kKeyCodeShiftRight = 60,
-    kKeyCodeTab = 61,
-    kKeyCodeSpace = 62,
-    kKeyCodeSym = 63,
-    kKeyCodeExplorer = 64,
-    kKeyCodeEnvelope = 65,
-    kKeyCodeNewline = 66,
-    kKeyCodeDel = 67,
-    kKeyCodeGrave = 68,
-    kKeyCodeMinus = 69,
-    kKeyCodeEquals = 70,
-    kKeyCodeLeftBracket = 71,
-    kKeyCodeRightBracket = 72,
-    kKeyCodeBackslash = 73,
-    kKeyCodeSemicolon = 74,
-    kKeyCodeApostrophe = 75,
-    kKeyCodeSlash = 76,
-    kKeyCodeAt = 77,
-    kKeyCodeNum = 78,
-    kKeyCodeHeadSetHook = 79,
-    kKeyCodeFocus = 80,
-    kKeyCodePlus = 81,
-    kKeyCodeMenu = 82,
-    kKeyCodeNotification = 83,
-    kKeyCodeSearch = 84,
-    kKeyCodePlayPause = 85,
-    kKeyCodeStop = 86,
-    kKeyCodeNextSong = 87,
-    kKeyCodePreviousSong = 88,
-    kKeyCodeRewind = 89,
-    kKeyCodeForward = 90,
-    kKeyCodeMute = 91,
-    kKeyCodePageUp = 92,
-    kKeyCodePageDown = 93,
-    kKeyCodePictSymbols = 94,
-    kKeyCodeSwitchCharset = 95
-} KeyCode;
 
 static const KeycodeLabel FLAGS[] = {
     { "WAKE", 0x00000001 },

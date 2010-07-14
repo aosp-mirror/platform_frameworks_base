@@ -920,6 +920,21 @@
         <enum name="KEYCODE_PAGE_DOWN" value="93" />
         <enum name="KEYCODE_PICTSYMBOLS" value="94" />
         <enum name="KEYCODE_SWITCH_CHARSET" value="95" />
+        <enum name="KEYCODE_BUTTON_A" value="96" />
+        <enum name="KEYCODE_BUTTON_B" value="97" />
+        <enum name="KEYCODE_BUTTON_C" value="98" />
+        <enum name="KEYCODE_BUTTON_X" value="99" />
+        <enum name="KEYCODE_BUTTON_Y" value="100" />
+        <enum name="KEYCODE_BUTTON_Z" value="101" />
+        <enum name="KEYCODE_BUTTON_L1" value="102" />
+        <enum name="KEYCODE_BUTTON_R1" value="103" />
+        <enum name="KEYCODE_BUTTON_L2" value="104" />
+        <enum name="KEYCODE_BUTTON_R2" value="105" />
+        <enum name="KEYCODE_BUTTON_THUMBL" value="106" />
+        <enum name="KEYCODE_BUTTON_THUMBR" value="107" />
+        <enum name="KEYCODE_BUTTON_START" value="108" />
+        <enum name="KEYCODE_BUTTON_SELECT" value="109" />
+        <enum name="KEYCODE_BUTTON_MODE" value="110" />
     </attr>
 
     <!-- ***************************************************************** -->
