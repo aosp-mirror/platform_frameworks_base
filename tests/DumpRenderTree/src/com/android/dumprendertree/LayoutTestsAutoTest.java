@@ -336,6 +336,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         intent.putExtra(TestShellActivity.TIMEOUT_IN_MILLIS, timeout);
         intent.putExtra(TestShellActivity.TOTAL_TEST_COUNT, mTestCount);
         intent.putExtra(TestShellActivity.CURRENT_TEST_NUMBER, testNumber);
+        intent.putExtra(TestShellActivity.STOP_ON_REF_ERROR, true);
         activity.startActivity(intent);
 
         // Wait until done.
