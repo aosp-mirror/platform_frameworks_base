@@ -192,11 +192,6 @@ sp<CameraService::Client> CameraService::getClientById(int cameraId) {
     return mClient[cameraId].promote();
 }
 
-void CameraService::instantiate() {
-    defaultServiceManager()->addService(String16("media.camera"),
-        new CameraService());
-}
-
 status_t CameraService::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags) {
     // Permission checks

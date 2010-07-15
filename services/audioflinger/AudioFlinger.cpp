@@ -6068,11 +6068,4 @@ status_t AudioFlinger::onTransact(
     return BnAudioFlinger::onTransact(code, data, reply, flags);
 }
 
-// ----------------------------------------------------------------------------
-
-void AudioFlinger::instantiate() {
-    defaultServiceManager()->addService(
-            String16("media.audio_flinger"), new AudioFlinger());
-}
-
 }; // namespace android
