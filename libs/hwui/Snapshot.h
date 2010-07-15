@@ -106,6 +106,18 @@ public:
     }
 
     /**
+     * Sets the current clip.
+     */
+    void setClip(float left, float top, float right, float bottom) {
+        clipRect.set(left, top, right, bottom);
+        if (flags & kFlagDirtyTransform) {
+            flags &= ~kFlagDirtyTransform;
+            mappedClip.set(clipRect);
+            transform.mapRect(mappedClip);
+        }
+    }
+
+    /**
      * Height of the framebuffer the snapshot is rendering into.
      */
     int height;

@@ -1,5 +1,7 @@
 SHADER_SOURCE(gDrawColorFragmentShader,
 
+precision mediump float;
+
 uniform vec4 color;
 
 void main(void) {

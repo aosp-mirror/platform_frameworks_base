@@ -90,6 +90,12 @@ static const Blender gBlends[] = {
         { SkXfermode::kXor_Mode,     GL_ONE_MINUS_DST_ALPHA,  GL_ONE_MINUS_SRC_ALPHA }
 };
 
+static const GLint gTileModes[] = {
+        GL_CLAMP_TO_EDGE,   // == SkShader::kClamp_TileMode
+        GL_REPEAT,          // == SkShader::kRepeat_Mode
+        GL_MIRRORED_REPEAT  // == SkShader::kMirror_TileMode
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
@@ -116,9 +122,15 @@ OpenGLRenderer::OpenGLRenderer():
         LOGD("  Using default layer cache size of %dMB", DEFAULT_LAYER_CACHE_SIZE);
     }
 
-    mDrawColorShader = new DrawColorProgram;
-    mDrawTextureShader = new DrawTextureProgram;
-    mCurrentShader = mDrawTextureShader;
+    mDrawColorProgram = new DrawColorProgram;
+    mDrawTextureProgram = new DrawTextureProgram;
+    mCurrentProgram = mDrawTextureProgram;
+
+    mShader = kShaderNone;
+    mShaderTileX = SkShader::kClamp_TileMode;
+    mShaderTileY = SkShader::kClamp_TileMode;
+    mShaderMatrix = NULL;
+    mShaderBitmap = NULL;
 
     memcpy(mDrawTextureVertices, gDrawTextureVertices, sizeof(gDrawTextureVertices));
 }
@@ -295,7 +307,7 @@ int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bot
 bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         float right, float bottom, int alpha, SkXfermode::Mode mode,int flags) {
 
-    LAYER_LOGD("Requesting layer %dx%d", size.width, size.height);
+    LAYER_LOGD("Requesting layer %fx%f", right - left, bottom - top);
     LAYER_LOGD("Layer cache size = %d", mLayerCache.getSize());
 
     GLuint previousFbo = snapshot->previous.get() ? snapshot->previous->fbo : 0;
@@ -327,7 +339,7 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     saveSnapshot();
     // TODO: This doesn't preserve other transformations (check Skia first)
     mSnapshot->transform.loadTranslate(-left, -top, 0.0f);
-    mSnapshot->clipRect.set(left, top, right, bottom);
+    mSnapshot->setClip(left, top, right, bottom);
     mSnapshot->height = bottom - top;
     setScissorFromClip();
 
@@ -512,11 +524,32 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
     // Skia draws using the color's alpha channel if < 255
     // Otherwise, it uses the paint's alpha
     int color = p->getColor();
-    if (((color >> 24) & 0xFF) == 255) {
+    if (((color >> 24) & 0xff) == 255) {
         color |= p->getAlpha() << 24;
     }
 
     drawColorRect(left, top, right, bottom, color, mode);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Shaders
+///////////////////////////////////////////////////////////////////////////////
+
+void OpenGLRenderer::resetShader() {
+    mShader = OpenGLRenderer::kShaderNone;
+    mShaderBlend = false;
+    mShaderTileX = SkShader::kClamp_TileMode;
+    mShaderTileY = SkShader::kClamp_TileMode;
+}
+
+void OpenGLRenderer::setupBitmapShader(SkBitmap* bitmap, SkShader::TileMode tileX,
+        SkShader::TileMode tileY, SkMatrix* matrix, bool hasAlpha) {
+    mShader = kShaderBitmap;
+    mShaderBlend = hasAlpha;
+    mShaderBitmap = bitmap;
+    mShaderTileX = tileX;
+    mShaderTileY = tileY;
+    mShaderMatrix = matrix;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -525,35 +558,89 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
 
 void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom,
         int color, SkXfermode::Mode mode, bool ignoreTransform) {
+    // If a shader is set, preserve only the alpha
+    if (mShader != kShaderNone) {
+        color |= 0x00ffffff;
+    }
+
+    // Render using pre-multiplied alpha
     const int alpha = (color >> 24) & 0xFF;
-    const GLfloat a = alpha                  / 255.0f;
-    const GLfloat r = ((color >> 16) & 0xFF) / 255.0f;
-    const GLfloat g = ((color >>  8) & 0xFF) / 255.0f;
-    const GLfloat b = ((color      ) & 0xFF) / 255.0f;
+    const GLfloat a = alpha / 255.0f;
+    const GLfloat r = a * ((color >> 16) & 0xFF) / 255.0f;
+    const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
+    const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
+
+    switch (mShader) {
+        case kShaderBitmap:
+            drawBitmapShader(left, top, right, bottom, a, mode);
+            return;
+        default:
+            break;
+    }
 
     // Pre-multiplication happens when setting the shader color
-    chooseBlending(alpha < 255, mode);
+    chooseBlending(alpha < 255 || mShaderBlend, mode);
 
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
 
-    const bool inUse = useShader(mDrawColorShader);
-    if (!ignoreTransform) {
-        mDrawColorShader->set(mOrthoMatrix, mModelView, mSnapshot->transform);
-    } else {
-        mat4 identity;
-        mDrawColorShader->set(mOrthoMatrix, mModelView, identity);
-    }
-
-    if (!inUse) {
+    // TODO: Pick the program matching the current shader
+    sp<DrawColorProgram> program = mDrawColorProgram;
+    if (!useProgram(program)) {
         const GLvoid* p = &gDrawColorVertices[0].position[0];
-        glVertexAttribPointer(mDrawColorShader->position, 2, GL_FLOAT, GL_FALSE,
+        glVertexAttribPointer(program->position, 2, GL_FLOAT, GL_FALSE,
                 gDrawColorVertexStride, p);
     }
-    // Render using pre-multiplied alpha
-    glUniform4f(mDrawColorShader->color, r * a, g * a, b * a, a);
+
+    if (!ignoreTransform) {
+        program->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+    } else {
+        mat4 identity;
+        program->set(mOrthoMatrix, mModelView, identity);
+    }
+
+    glUniform4f(program->color, r, g, b, a);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gDrawColorVertexCount);
+}
+
+void OpenGLRenderer::drawBitmapShader(float left, float top, float right, float bottom,
+        float alpha, SkXfermode::Mode mode) {
+    const Texture* texture = mTextureCache.get(mShaderBitmap);
+
+    const float width = texture->width;
+    const float height = texture->height;
+
+    // This could be done in the vertex shader but we have only 4 vertices
+    float u1 = 0.0f;
+    float v1 = 0.0f;
+    float u2 = right - left;
+    float v2 = bottom - top;
+
+    if (mShaderMatrix) {
+        SkMatrix inverse;
+        mShaderMatrix->invert(&inverse);
+        mat4 m(inverse);
+        Rect r(u1, v1, u2, v2);
+        m.mapRect(r);
+
+        u1 = r.left;
+        u2 = r.right;
+        v1 = r.top;
+        v2 = r.bottom;
+    }
+
+    u1 /= width;
+    u2 /= width;
+    v1 /= height;
+    v2 /= height;
+
+    resetDrawTextureTexCoords(u1, v1, u2, v2);
+
+    drawTextureMesh(left, top, right, bottom, texture->id, alpha, mode, texture->blend,
+            &mDrawTextureVertices[0].position[0], &mDrawTextureVertices[0].texture[0], NULL);
+
+    resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
 }
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
@@ -578,21 +665,22 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
 
-    useShader(mDrawTextureShader);
-    mDrawTextureShader->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+    useProgram(mDrawTextureProgram);
+    mDrawTextureProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
 
     chooseBlending(blend || alpha < 1.0f, mode);
 
+    // TODO: Only bind/set parameters when needed
     glBindTexture(GL_TEXTURE_2D, texture);
-
-    // TODO handle tiling and filtering here
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gTileModes[mShaderTileX]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gTileModes[mShaderTileY]);
 
     // Always premultiplied
-    glUniform4f(mDrawTextureShader->color, alpha, alpha, alpha, alpha);
+    glUniform4f(mDrawTextureProgram->color, alpha, alpha, alpha, alpha);
 
-    glVertexAttribPointer(mDrawTextureShader->position, 2, GL_FLOAT, GL_FALSE,
+    glVertexAttribPointer(mDrawTextureProgram->position, 2, GL_FLOAT, GL_FALSE,
             gDrawTextureVertexStride, vertices);
-    glVertexAttribPointer(mDrawTextureShader->texCoords, 2, GL_FLOAT, GL_FALSE,
+    glVertexAttribPointer(mDrawTextureProgram->texCoords, 2, GL_FLOAT, GL_FALSE,
             gDrawTextureVertexStride, texCoords);
 
     if (!indices) {
@@ -630,11 +718,11 @@ void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode, bool isPr
     mBlend = blend;
 }
 
-bool OpenGLRenderer::useShader(const sp<Program>& shader) {
-    if (!shader->isInUse()) {
-        mCurrentShader->remove();
-        shader->use();
-        mCurrentShader = shader;
+bool OpenGLRenderer::useProgram(const sp<Program>& program) {
+    if (!program->isInUse()) {
+        mCurrentProgram->remove();
+        program->use();
+        mCurrentProgram = program;
         return false;
     }
     return true;

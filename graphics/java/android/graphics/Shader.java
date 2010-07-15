@@ -23,9 +23,19 @@ package android.graphics;
  * drawn with that paint will get its color(s) from the shader.
  */
 public class Shader {
+    /**
+     * Local matrix native instance.
+     * 
+     * @hide
+     */
+    public int mLocalMatrix;
 
-    // this is set by subclasses, but don't make it public
-    /* package */ int native_instance;
+    /**
+     * This is set by subclasses, but don't make it public.
+     * 
+     * @hide 
+     */
+    public int native_instance;
 
     public enum TileMode {
         /**
@@ -64,11 +74,12 @@ public class Shader {
      * @param localM The shader's new local matrix, or null to specify identity
      */
     public void setLocalMatrix(Matrix localM) {
-        nativeSetLocalMatrix(native_instance,
-                             localM != null ? localM.native_instance : 0);
+        mLocalMatrix = localM != null ? localM.native_instance : 0;
+        nativeSetLocalMatrix(native_instance, mLocalMatrix);
     }
 
     protected void finalize() throws Throwable {
+        super.finalize();
         nativeDestructor(native_instance);
     }
 

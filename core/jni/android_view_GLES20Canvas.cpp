@@ -221,6 +221,22 @@ static void android_view_GLES20Canvas_drawRect(JNIEnv* env, jobject canvas,
 }
 
 // ----------------------------------------------------------------------------
+// Shaders
+// ----------------------------------------------------------------------------
+
+static void android_view_GLES20Canvas_resetShader(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer) {
+    renderer->resetShader();
+}
+
+static void android_view_GLES20Canvas_setupBitmapShader(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, SkShader* shader, SkBitmap* bitmap,
+        SkShader::TileMode tileX, SkShader::TileMode tileY, SkMatrix* matrix) {
+    renderer->setupBitmapShader(bitmap, tileX, tileY, matrix,
+            (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+}
+
+// ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
 
@@ -258,6 +274,9 @@ static JNINativeMethod gMethods[] = {
     {   "nDrawPatch",         "(II[BFFFFI)V",    (void*) android_view_GLES20Canvas_drawPatch },
     {   "nDrawColor",         "(III)V",          (void*) android_view_GLES20Canvas_drawColor },
     {   "nDrawRect",          "(IFFFFI)V",       (void*) android_view_GLES20Canvas_drawRect },
+
+    {   "nResetShader",       "(I)V",            (void*) android_view_GLES20Canvas_resetShader },
+    {   "nSetupBitmapShader", "(IIIIII)V",       (void*) android_view_GLES20Canvas_setupBitmapShader },
 
     {   "nGetClipBounds",     "(ILandroid/graphics/Rect;)Z",
             (void*) android_view_GLES20Canvas_getClipBounds },

@@ -25,9 +25,11 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
+import android.widget.FrameLayout;
 
 @SuppressWarnings({"UnusedDeclaration"})
 public class BitmapsActivity extends Activity {
@@ -35,7 +37,9 @@ public class BitmapsActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final BitmapsView view = new BitmapsView(this);
-        setContentView(view);
+        final FrameLayout layout = new FrameLayout(this);
+        layout.addView(view, new FrameLayout.LayoutParams(480, 800, Gravity.CENTER));
+        setContentView(layout);
         
         ScaleAnimation a = new ScaleAnimation(1.0f, 2.0f, 1.0f, 2.0f,
                 ScaleAnimation.RELATIVE_TO_SELF, 0.5f,
@@ -50,6 +54,7 @@ public class BitmapsActivity extends Activity {
         private Paint mBitmapPaint;
         private final Bitmap mBitmap1;
         private final Bitmap mBitmap2;
+        private final PorterDuffXfermode mDstIn;
 
         BitmapsView(Context c) {
             super(c);
@@ -58,6 +63,7 @@ public class BitmapsActivity extends Activity {
             mBitmap2 = BitmapFactory.decodeResource(c.getResources(), R.drawable.sunset2);
 
             mBitmapPaint = new Paint();
+            mDstIn = new PorterDuffXfermode(PorterDuff.Mode.DST_IN);
         }
 
         @Override
@@ -81,10 +87,10 @@ public class BitmapsActivity extends Activity {
             canvas.translate(0.0f, 25.0f);
             mBitmapPaint.setColor(0xffff0000);
             canvas.drawRect(0.0f, 0.0f, mBitmap2.getWidth(), mBitmap2.getHeight(), mBitmapPaint);
-            mBitmapPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
+            mBitmapPaint.setXfermode(mDstIn);
             canvas.drawBitmap(mBitmap2, 0.0f, 0.0f, mBitmapPaint);
 
-            mBitmapPaint = new Paint();
+            mBitmapPaint.reset();
         }
     }
 }
