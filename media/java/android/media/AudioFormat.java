@@ -31,9 +31,9 @@ public class AudioFormat {
     public static final int ENCODING_INVALID = 0;
     /** Default audio data format */
     public static final int ENCODING_DEFAULT = 1;
-    /** Audio data format: PCM 16 bit per sample */
+    /** Audio data format: PCM 16 bit per sample. Guaranteed to be supported by devices. */
     public static final int ENCODING_PCM_16BIT = 2; // accessed by native code
-    /** Audio data format: PCM 8 bit per sample */
+    /** Audio data format: PCM 8 bit per sample. Not guaranteed to be supported by devices. */
     public static final int ENCODING_PCM_8BIT = 3;  // accessed by native code
 
     /** Invalid audio channel configuration */
