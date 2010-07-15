@@ -64,6 +64,8 @@ import android.util.AttributeSet;
  * // Start the animation (looped playback by default).
  * frameAnimation.start()
  * </pre>
+ * <p>For more information, see the guide to <a
+ * href="{@docRoot}guide/topics/resources/animation-resource.html">Animation Resources</a>.</p>
  *
  * @attr ref android.R.styleable#AnimationDrawable_visible
  * @attr ref android.R.styleable#AnimationDrawable_variablePadding

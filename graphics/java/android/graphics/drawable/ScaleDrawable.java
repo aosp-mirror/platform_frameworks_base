@@ -34,7 +34,9 @@ import java.io.IOException;
  * placed in its overall container.  Most often used to implement things like
  * progress bars.
  *
- * <p>It can be defined in an XML file with the <code>&lt;scale></code> element.</p>
+ * <p>It can be defined in an XML file with the <code>&lt;scale></code> element. For more
+ * information, see the guide to <a
+ * href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.</p>
  *
  * @attr ref android.R.styleable#ScaleDrawable_scaleWidth
  * @attr ref android.R.styleable#ScaleDrawable_scaleHeight

@@ -31,7 +31,9 @@ import android.util.StateSet;
  * ID value.
  * <p/>
  * <p>It can be defined in an XML file with the <code>&lt;selector></code> element.
- * Each state Drawable is defined in a nested <code>&lt;item></code> element.</p>
+ * Each state Drawable is defined in a nested <code>&lt;item></code> element. For more
+ * information, see the guide to <a
+ * href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.</p>
  *
  * @attr ref android.R.styleable#StateListDrawable_visible
  * @attr ref android.R.styleable#StateListDrawable_variablePadding
