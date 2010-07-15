@@ -754,7 +754,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
 
     private static class NewWindowWebView extends WebView {
         public NewWindowWebView(Context context, Map<String, Object> jsIfaces) {
-            super(context, null, 0, jsIfaces);
+            super(context, null, 0, jsIfaces, false);
         }
     }
 

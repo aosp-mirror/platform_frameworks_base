@@ -86,6 +86,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -825,7 +827,18 @@ public class WebView extends AbsoluteLayout
      * @param defStyle The default style resource ID.
      */
     public WebView(Context context, AttributeSet attrs, int defStyle) {
-        this(context, attrs, defStyle, null);
+        this(context, attrs, defStyle, false);
+    }
+
+    /**
+     * Construct a new WebView with layout parameters and a default style.
+     * @param context A Context object used to access application assets.
+     * @param attrs An AttributeSet passed to our parent.
+     * @param defStyle The default style resource ID.
+     */
+    public WebView(Context context, AttributeSet attrs, int defStyle,
+            boolean privateBrowsing) {
+        this(context, attrs, defStyle, null, privateBrowsing);
     }
 
     /**
@@ -841,7 +854,7 @@ public class WebView extends AbsoluteLayout
      * @hide pending API council approval.
      */
     protected WebView(Context context, AttributeSet attrs, int defStyle,
-            Map<String, Object> javascriptInterfaces) {
+            Map<String, Object> javascriptInterfaces, boolean privateBrowsing) {
         super(context, attrs, defStyle);
 
         if (AccessibilityManager.getInstance(context).isEnabled()) {
@@ -863,6 +876,10 @@ public class WebView extends AbsoluteLayout
          */
         init();
         updateMultiTouchSupport(context);
+
+        if (privateBrowsing) {
+            startPrivateBrowsing();
+        }
     }
 
     void updateMultiTouchSupport(Context context) {
@@ -1665,6 +1682,34 @@ public class WebView extends AbsoluteLayout
             clearTextEntry(false);
             mWebViewCore.sendMessage(EventHub.GO_BACK_FORWARD, steps,
                     ignoreSnapshot ? 1 : 0);
+        }
+    }
+
+    /**
+     * Returns true if private browsing is enabled in this WebView.
+     */
+    public boolean isPrivateBrowsingEnabled () {
+        return getSettings().isPrivateBrowsingEnabled();
+    }
+
+    private void startPrivateBrowsing () {
+        boolean wasPrivateBrowsingEnabled = isPrivateBrowsingEnabled();
+
+        getSettings().setPrivateBrowsingEnabled(true);
+
+        if (!wasPrivateBrowsingEnabled) {
+            StringBuilder data = new StringBuilder(1024);
+            try {
+                InputStreamReader file = new InputStreamReader(mContext.getResources().openRawResource(com.android.internal.R.raw.incognito_mode_start_page));
+                int size;
+                char[] buffer = new char[1024];
+                while ((size = file.read(buffer)) != -1) {
+                    data.append(buffer, 0, size);
+                }
+            } catch (IOException e) {
+                // This should never happen since this is a static resource.
+            }
+            loadDataWithBaseURL(null, data.toString(), "text/html", "utf-8", null);
         }
     }
 

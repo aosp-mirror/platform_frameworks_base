@@ -179,6 +179,7 @@ public class WebSettings {
     private boolean         mSupportMultipleWindows = false;
     private boolean         mShrinksStandaloneImagesToFit = false;
     private long            mMaximumDecodedImageSize = 0; // 0 means default
+    private boolean         mPrivateBrowsingEnabled = false;
     // HTML5 API flags
     private boolean         mAppCacheEnabled = false;
     private boolean         mDatabaseEnabled = false;
@@ -1464,6 +1465,24 @@ public class WebSettings {
     public void setMaximumDecodedImageSize(long size) {
         if (mMaximumDecodedImageSize != size) {
             mMaximumDecodedImageSize = size;
+            postSync();
+        }
+    }
+
+    /**
+     * Returns whether private browsing is enabled.
+     */
+    /* package */ boolean isPrivateBrowsingEnabled() {
+        return mPrivateBrowsingEnabled;
+    }
+
+    /**
+     * Sets whether private browsing is enabled.
+     * @param flag Whether private browsing should be enabled.
+     */
+    /* package */ synchronized void setPrivateBrowsingEnabled(boolean flag) {
+        if (mPrivateBrowsingEnabled != flag) {
+            mPrivateBrowsingEnabled = flag;
             postSync();
         }
     }
