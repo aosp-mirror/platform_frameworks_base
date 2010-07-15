@@ -1340,9 +1340,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
     }
 
-    /*package*/ void handleInputDevicePropertyChange(String path, boolean connected) {
-        String address = getAddressFromObjectPath(path);
-        if (address == null) return;
+    /*package*/ void handleInputDevicePropertyChange(String address, boolean connected) {
         int state = connected ? BluetoothInputDevice.STATE_CONNECTED :
             BluetoothInputDevice.STATE_DISCONNECTED;
         BluetoothDevice device = mAdapter.getRemoteDevice(address);
