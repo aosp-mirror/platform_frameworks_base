@@ -285,24 +285,54 @@ public class ActivityManager {
      * @param maxNum The maximum number of entries to return in the list.  The
      * actual number returned may be smaller, depending on how many tasks the
      * user has started.
-     * 
+     *
+     * @param flags Optional flags
+     * @param receiver Optional receiver for delayed thumbnails
+     *
      * @return Returns a list of RunningTaskInfo records describing each of
      * the running tasks.
      * 
+     * Some thumbnails may not be available at the time of this call. The optional
+     * receiver may be used to receive those thumbnails.
+     *
      * @throws SecurityException Throws SecurityException if the caller does
      * not hold the {@link android.Manifest.permission#GET_TASKS} permission.
+     *
+     * @hide
      */
-    public List<RunningTaskInfo> getRunningTasks(int maxNum)
+    public List<RunningTaskInfo> getRunningTasks(int maxNum, int flags, IThumbnailReceiver receiver)
             throws SecurityException {
         try {
-            return (List<RunningTaskInfo>)ActivityManagerNative.getDefault()
-                    .getTasks(maxNum, 0, null);
+            return ActivityManagerNative.getDefault().getTasks(maxNum, flags, receiver);
         } catch (RemoteException e) {
             // System dead, we will be dead too soon!
             return null;
         }
     }
-    
+
+    /**
+     * Return a list of the tasks that are currently running, with
+     * the most recent being first and older ones after in order.  Note that
+     * "running" does not mean any of the task's code is currently loaded or
+     * activity -- the task may have been frozen by the system, so that it
+     * can be restarted in its previous state when next brought to the
+     * foreground.
+     *
+     * @param maxNum The maximum number of entries to return in the list.  The
+     * actual number returned may be smaller, depending on how many tasks the
+     * user has started.
+     *
+     * @return Returns a list of RunningTaskInfo records describing each of
+     * the running tasks.
+     *
+     * @throws SecurityException Throws SecurityException if the caller does
+     * not hold the {@link android.Manifest.permission#GET_TASKS} permission.
+     */
+    public List<RunningTaskInfo> getRunningTasks(int maxNum)
+            throws SecurityException {
+        return getRunningTasks(maxNum, 0, null);
+    }
+
     /**
      * Information you can retrieve about a particular Service that is
      * currently running in the system.

@@ -71,6 +71,7 @@ import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.android.internal.app.ActionBarImpl;
@@ -1270,19 +1271,37 @@ public class Activity extends ContextThemeWrapper
      * @see #onPause
      */
     public boolean onCreateThumbnail(Bitmap outBitmap, Canvas canvas) {
-        final View view = mDecor;
-        if (view == null) {
+        if (mDecor == null) {
             return false;
         }
 
-        final int vw = view.getWidth();
-        final int vh = view.getHeight();
-        final int dw = outBitmap.getWidth();
-        final int dh = outBitmap.getHeight();
+        int paddingLeft = 0;
+        int paddingRight = 0;
+        int paddingTop = 0;
+        int paddingBottom = 0;
+
+        // Find System window and use padding so we ignore space reserved for decorations
+        // like the status bar and such.
+        final FrameLayout top = (FrameLayout) mDecor;
+        for (int i = 0; i < top.getChildCount(); i++) {
+            View child = top.getChildAt(i);
+            if (child.isFitsSystemWindowsFlagSet()) {
+                paddingLeft = child.getPaddingLeft();
+                paddingRight = child.getPaddingRight();
+                paddingTop = child.getPaddingTop();
+                paddingBottom = child.getPaddingBottom();
+                break;
+            }
+        }
+        
+        final int visibleWidth = mDecor.getWidth() - paddingLeft - paddingRight;
+        final int visibleHeight = mDecor.getHeight() - paddingTop - paddingBottom;
 
         canvas.save();
-        canvas.scale(((float)dw)/vw, ((float)dh)/vh);
-        view.draw(canvas);
+        canvas.scale( (float) outBitmap.getWidth() / visibleWidth,
+                (float) outBitmap.getHeight() / visibleHeight);
+        canvas.translate(-paddingLeft, -paddingTop);
+        mDecor.draw(canvas);
         canvas.restore();
 
         return true;
