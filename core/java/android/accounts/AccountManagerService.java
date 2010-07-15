@@ -399,19 +399,19 @@ public class AccountManagerService
 
     private boolean insertAccountIntoDatabase(Account account, String password, Bundle extras) {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        if (account == null) {
+            return false;
+        }
+        final boolean noBroadcast = account.type.equals(GOOGLE_ACCOUNT_TYPE)
+                && extras != null && extras.getBoolean(NO_BROADCAST_FLAG, false);
+        // Remove the 'nobroadcast' flag since we don't want it to persist in the db. It is instead
+        // used as a control signal to indicate whether or not this insertion should result in
+        // an accounts changed broadcast being sent.
+        if (extras != null) {
+            extras.remove(NO_BROADCAST_FLAG);
+        }
         db.beginTransaction();
         try {
-            if (account == null) {
-                return false;
-            }
-            boolean noBroadcast = false;
-            if (account.type.equals(GOOGLE_ACCOUNT_TYPE)) {
-                // Look for the 'nobroadcast' flag and remove it since we don't want it to persist
-                // in the db.
-                noBroadcast = extras.getBoolean(NO_BROADCAST_FLAG, false);
-                extras.remove(NO_BROADCAST_FLAG);
-            }
-
             long numMatches = DatabaseUtils.longForQuery(db,
                     "select count(*) from " + TABLE_ACCOUNTS
                             + " WHERE " + ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
@@ -436,13 +436,13 @@ public class AccountManagerService
                 }
             }
             db.setTransactionSuccessful();
-            if (!noBroadcast) {
-                sendAccountsChangedBroadcast();
-            }
-            return true;
         } finally {
             db.endTransaction();
         }
+        if (!noBroadcast) {
+            sendAccountsChangedBroadcast();
+        }
+        return true;
     }
 
     private long insertExtra(SQLiteDatabase db, long accountId, String key, String value) {
@@ -1681,11 +1681,11 @@ public class AccountManagerService
                 try {
                     db.execSQL("DELETE from " + TABLE_AUTHTOKENS);
                     db.execSQL("UPDATE " + TABLE_ACCOUNTS + " SET " + ACCOUNTS_PASSWORD + " = ''");
-                    sendAccountsChangedBroadcast();
                     db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();
                 }
+                sendAccountsChangedBroadcast();
             }
             setMetaValue("imsi", imsi);
         }
