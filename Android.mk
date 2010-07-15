@@ -24,7 +24,7 @@ LOCAL_PATH := $(call my-dir)
 # Instead, it depends on the R.stamp file, which lists the corresponding
 # R.java file as a prerequisite.
 # TODO: find a more appropriate way to do this.
-framework-res-source-path := APPS/framework-res_intermediates/src
+framework_res_source_path := APPS/framework-res_intermediates/src
 
 # the library
 # ============================================================
@@ -189,9 +189,9 @@ LOCAL_SRC_FILES += \
 LOCAL_AIDL_INCLUDES += $(FRAMEWORKS_BASE_JAVA_SRC_DIRS)
 
 LOCAL_INTERMEDIATE_SOURCES := \
-			$(framework-res-source-path)/android/R.java \
-			$(framework-res-source-path)/android/Manifest.java \
-			$(framework-res-source-path)/com/android/internal/R.java
+			$(framework_res_source_path)/android/R.java \
+			$(framework_res_source_path)/android/Manifest.java \
+			$(framework_res_source_path)/com/android/internal/R.java
 
 LOCAL_NO_STANDARD_LIBRARIES := true
 LOCAL_JAVA_LIBRARIES := bouncycastle core core-junit ext
@@ -337,9 +337,9 @@ framework_docs_LOCAL_DROIDDOC_SOURCE_PATH := \
 	$(FRAMEWORKS_BASE_JAVA_SRC_DIRS)
 
 framework_docs_LOCAL_INTERMEDIATE_SOURCES := \
-			$(framework-res-source-path)/android/R.java \
-			$(framework-res-source-path)/android/Manifest.java \
-			$(framework-res-source-path)/com/android/internal/R.java
+			$(framework_res_source_path)/android/R.java \
+			$(framework_res_source_path)/android/Manifest.java \
+			$(framework_res_source_path)/com/android/internal/R.java
 
 framework_docs_LOCAL_JAVA_LIBRARIES := \
 			bouncycastle \
