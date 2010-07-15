@@ -16,7 +16,9 @@
 
 package android.renderscript;
 
+
 import java.lang.reflect.Field;
+import android.util.Log;
 
 /**
  * @hide
@@ -106,6 +108,27 @@ public class Type extends BaseObj {
             mNativeCache = 0;
         }
         super.finalize();
+    }
+
+    @Override
+    void updateFromNative() {
+        // We have 6 integer to obtain mDimX; mDimY; mDimZ;
+        // mDimLOD; mDimFaces; mElement;
+        int[] dataBuffer = new int[6];
+        mRS.nTypeGetNativeData(mID, dataBuffer);
+
+        mDimX = dataBuffer[0];
+        mDimY = dataBuffer[1];
+        mDimZ = dataBuffer[2];
+        mDimLOD = dataBuffer[3] == 1 ? true : false;
+        mDimFaces = dataBuffer[4] == 1 ? true : false;
+
+        int elementID = dataBuffer[5];
+        if(elementID != 0) {
+            mElement = new Element(mRS, elementID);
+            mElement.updateFromNative();
+        }
+        calcElementCount();
     }
 
     public static Type createFromClass(RenderScript rs, Class c, int size, String scriptName) {

@@ -91,7 +91,7 @@ void Type::compute()
     if (mLODCount != oldLODCount) {
         if(mLODs){
             delete [] mLODs;
-        }        
+        }
         mLODs = new LOD[mLODCount];
     }
 
@@ -338,6 +338,22 @@ RsType rsi_TypeCreate(Context *rsc)
     stc->mElement.clear();
     stc->mTypes.push(st);
     return st;
+}
+
+void rsi_TypeGetNativeData(Context *rsc, RsType type, uint32_t *typeData, uint32_t typeDataSize)
+{
+    rsAssert(typeDataSize == 6);
+    // Pack the data in the follofing way mDimX; mDimY; mDimZ;
+    // mDimLOD; mDimFaces; mElement; into typeData
+    Type *t = static_cast<Type *>(type);
+
+    (*typeData++) = t->getDimX();
+    (*typeData++) = t->getDimY();
+    (*typeData++) = t->getDimZ();
+    (*typeData++) = t->getDimLOD();
+    (*typeData++) = t->getDimFaces() ? 1 : 0;
+    (*typeData++) = (uint32_t)t->getElement();
+
 }
 
 

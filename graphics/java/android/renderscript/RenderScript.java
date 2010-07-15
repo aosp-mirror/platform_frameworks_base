@@ -90,12 +90,15 @@ public class RenderScript {
 
     native int  nElementCreate(int type, int kind, boolean norm, int vecSize);
     native int  nElementCreate2(int[] elements, String[] names);
+    native void nElementGetNativeData(int id, int[] elementData);
+    native void nElementGetSubElements(int id, int[] IDs, String[] names);
 
     native void nTypeBegin(int elementID);
     native void nTypeAdd(int dim, int val);
     native int  nTypeCreate();
     native void nTypeFinalDestroy(Type t);
     native void nTypeSetupFields(Type t, int[] types, int[] bits, Field[] IDs);
+    native void nTypeGetNativeData(int id, int[] typeData);
 
     native int  nAllocationCreateTyped(int type);
     native int  nAllocationCreateFromBitmap(int dstFmt, boolean genMips, Bitmap bmp);
@@ -117,6 +120,7 @@ public class RenderScript {
     native void nAllocationRead(int id, float[] d);
     native void nAllocationSubDataFromObject(int id, Type t, int offset, Object o);
     native void nAllocationSubReadFromObject(int id, Type t, int offset, Object o);
+    native int  nAllocationGetType(int id);
 
     native int  nFileA3DCreateFromAssetStream(int assetStream);
     native int  nFileA3DGetNumIndexEntries(int fileA3D);

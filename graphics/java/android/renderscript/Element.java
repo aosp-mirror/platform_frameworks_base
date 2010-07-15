@@ -17,6 +17,7 @@
 package android.renderscript;
 
 import java.lang.reflect.Field;
+import android.util.Log;
 
 /**
  * @hide
@@ -306,6 +307,45 @@ public class Element extends BaseObj {
         mNormalized = norm;
         mVectorSize = size;
         mID = rs.nElementCreate(dt.mID, dk.mID, norm, size);
+    }
+
+    Element(RenderScript rs, int id) {
+        super(rs);
+        mID = id;
+    }
+
+    @Override
+    void updateFromNative() {
+
+        // we will pack mType; mKind; mNormalized; mVectorSize; NumSubElements
+        int[] dataBuffer = new int[5];
+        mRS.nElementGetNativeData(mID, dataBuffer);
+        for (DataType dt: DataType.values()) {
+            if(dt.mID == dataBuffer[0]){
+                mType = dt;
+            }
+        }
+        for (DataKind dk: DataKind.values()) {
+            if(dk.mID == dataBuffer[1]){
+                mKind = dk;
+            }
+        }
+
+        mNormalized = dataBuffer[2] == 1 ? true : false;
+        mVectorSize = dataBuffer[3];
+        int numSubElements = dataBuffer[4];
+        if(numSubElements > 0) {
+            mElements = new Element[numSubElements];
+            mElementNames = new String[numSubElements];
+
+            int[] subElementIds = new int[numSubElements];
+            mRS.nElementGetSubElements(mID, subElementIds, mElementNames);
+            for(int i = 0; i < numSubElements; i ++) {
+                mElements[i] = new Element(mRS, subElementIds[i]);
+                mElements[i].updateFromNative();
+            }
+        }
+
     }
 
     public void destroy() throws IllegalStateException {

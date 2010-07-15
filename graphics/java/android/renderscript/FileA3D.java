@@ -56,7 +56,7 @@ public class FileA3D extends BaseObj {
     }
 
     // Read only class with index entries
-    public class IndexEntry {
+    public static class IndexEntry {
         RenderScript mRS;
         int mIndex;
         int mID;
@@ -73,34 +73,40 @@ public class FileA3D extends BaseObj {
         }
 
         public BaseObj getObject() {
-            if(mLoadedObj != null) {
-                return mLoadedObj;
+            mRS.validate();
+            BaseObj obj = internalCreate(mRS, this);
+            return obj;
+        }
+
+        static synchronized BaseObj internalCreate(RenderScript rs, IndexEntry entry) {
+            if(entry.mLoadedObj != null) {
+                return entry.mLoadedObj;
             }
 
-            if(mClassID == ClassID.UNKNOWN) {
+            if(entry.mClassID == ClassID.UNKNOWN) {
                 return null;
             }
 
-            int objectID = mRS.nFileA3DGetEntryByIndex(mID, mIndex);
+            int objectID = rs.nFileA3DGetEntryByIndex(entry.mID, entry.mIndex);
             if(objectID == 0) {
                 return null;
             }
 
-            switch (mClassID) {
+            switch (entry.mClassID) {
             case MESH:
-                mLoadedObj = new Mesh(objectID, mRS);
+                entry.mLoadedObj = new Mesh(objectID, rs);
                 break;
             case TYPE:
-                mLoadedObj = new Type(objectID, mRS);
+                entry.mLoadedObj = new Type(objectID, rs);
                 break;
             case ELEMENT:
-                mLoadedObj = null;
+                entry.mLoadedObj = null;
                 break;
             case ALLOCATION:
-                mLoadedObj = null;
+                entry.mLoadedObj = null;
                 break;
             case PROGRAM_VERTEX:
-                mLoadedObj = new ProgramVertex(objectID, mRS);
+                entry.mLoadedObj = new ProgramVertex(objectID, rs);
                 break;
             case PROGRAM_RASTER:
                 break;
@@ -122,7 +128,9 @@ public class FileA3D extends BaseObj {
                 break;
             }
 
-            return mLoadedObj;
+            entry.mLoadedObj.updateFromNative();
+
+            return entry.mLoadedObj;
         }
 
         IndexEntry(RenderScript rs, int index, int id, String name, ClassID classID) {
