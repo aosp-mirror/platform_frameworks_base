@@ -42,6 +42,8 @@ extern MtpDatabase* getMtpDatabase(JNIEnv *env, jobject database);
 
 // ----------------------------------------------------------------------------
 
+#ifdef HAVE_ANDROID_OS
+
 static bool ExceptionCheck(void* env)
 {
     return ((JNIEnv *)env)->ExceptionCheck();
@@ -111,9 +113,12 @@ public:
     }
 };
 
+#endif // HAVE_ANDROID_OS
+
 static void
 android_media_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase, jstring storagePath)
 {
+#ifdef HAVE_ANDROID_OS
     LOGD("setup\n");
 
     MtpDatabase* database = getMtpDatabase(env, javaDatabase);
@@ -123,6 +128,7 @@ android_media_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase, j
     env->SetIntField(thiz, field_context, (int)thread);
 
     env->ReleaseStringUTFChars(storagePath, storagePathStr);
+#endif
 }
 
 static void
@@ -135,42 +141,50 @@ android_media_MtpServer_finalize(JNIEnv *env, jobject thiz)
 static void
 android_media_MtpServer_start(JNIEnv *env, jobject thiz)
 {
+#ifdef HAVE_ANDROID_OS
     LOGD("start\n");
     MtpThread *thread = (MtpThread *)env->GetIntField(thiz, field_context);
     thread->run("MtpThread");
+#endif // HAVE_ANDROID_OS
 }
 
 static void
 android_media_MtpServer_stop(JNIEnv *env, jobject thiz)
 {
+#ifdef HAVE_ANDROID_OS
     LOGD("stop\n");
     MtpThread *thread = (MtpThread *)env->GetIntField(thiz, field_context);
     if (thread) {
         thread->setDone();
         env->SetIntField(thiz, field_context, 0);
     }
+#endif
 }
 
 static void
 android_media_MtpServer_send_object_added(JNIEnv *env, jobject thiz, jint handle)
 {
+#ifdef HAVE_ANDROID_OS
     LOGD("send_object_added %d\n", handle);
     MtpThread *thread = (MtpThread *)env->GetIntField(thiz, field_context);
     if (thread)
         thread->sendObjectAdded(handle);
     else
         LOGE("sendObjectAdded called while disconnected\n");
+#endif
 }
 
 static void
 android_media_MtpServer_send_object_removed(JNIEnv *env, jobject thiz, jint handle)
 {
+#ifdef HAVE_ANDROID_OS
     LOGD("send_object_removed %d\n", handle);
     MtpThread *thread = (MtpThread *)env->GetIntField(thiz, field_context);
     if (thread)
         thread->sendObjectRemoved(handle);
     else
         LOGE("sendObjectRemoved called while disconnected\n");
+#endif
 }
 
 // ----------------------------------------------------------------------------

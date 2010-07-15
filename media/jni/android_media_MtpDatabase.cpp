@@ -49,6 +49,7 @@ MtpDatabase* getMtpDatabase(JNIEnv *env, jobject database) {
     return (MtpDatabase *)env->GetIntField(database, field_context);
 }
 
+#ifdef HAVE_ANDROID_OS
 // ----------------------------------------------------------------------------
 
 class MyMtpDatabase : public MtpDatabase {
@@ -368,26 +369,32 @@ static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodNa
     }
 }
 
+#endif // HAVE_ANDROID_OS
+
 // ----------------------------------------------------------------------------
 
 static void
 android_media_MtpDatabase_setup(JNIEnv *env, jobject thiz)
 {
+#ifdef HAVE_ANDROID_OS
     LOGD("setup\n");
     MyMtpDatabase* database = new MyMtpDatabase(env, thiz);
     env->SetIntField(thiz, field_context, (int)database);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
+#endif
 }
 
 static void
 android_media_MtpDatabase_finalize(JNIEnv *env, jobject thiz)
 {
+#ifdef HAVE_ANDROID_OS
     LOGD("finalize\n");
     MyMtpDatabase* database = (MyMtpDatabase *)env->GetIntField(thiz, field_context);
     database->cleanup(env);
     delete database;
     env->SetIntField(thiz, field_context, 0);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
+#endif
 }
 
 // ----------------------------------------------------------------------------

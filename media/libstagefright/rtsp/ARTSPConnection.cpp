@@ -116,7 +116,7 @@ bool ARTSPConnection::ParseURL(
         path->setTo(slashPos);
     }
 
-    char *colonPos = strchr(host->c_str(), ':');
+    const char *colonPos = strchr(host->c_str(), ':');
 
     if (colonPos != NULL) {
         unsigned long x;

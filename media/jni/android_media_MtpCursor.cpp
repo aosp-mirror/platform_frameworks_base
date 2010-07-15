@@ -51,6 +51,7 @@ static void
 android_media_MtpCursor_setup(JNIEnv *env, jobject thiz, jobject javaClient,
         jint queryType, jint deviceID, jint storageID, jint objectID, jintArray javaColumns)
 {
+#ifdef HAVE_ANDROID_OS
     LOGD("android_media_MtpCursor_setup queryType: %d deviceID: %d storageID: %d objectID: %d\n",
                 queryType, deviceID, storageID, objectID);
 
@@ -68,19 +69,23 @@ android_media_MtpCursor_setup(JNIEnv *env, jobject thiz, jobject javaClient,
     if (columns)
         env->ReleaseIntArrayElements(javaColumns, columns, 0);
     env->SetIntField(thiz, field_context, (int)cursor);
+#endif
 }
 
 static void
 android_media_MtpCursor_finalize(JNIEnv *env, jobject thiz)
 {
+#ifdef HAVE_ANDROID_OS
     LOGD("finalize\n");
     MtpCursor *cursor = (MtpCursor *)env->GetIntField(thiz, field_context);
     delete cursor;
+#endif
 }
 
 static jint
 android_media_MtpCursor_fill_window(JNIEnv *env, jobject thiz, jobject javaWindow, jint startPos)
 {
+#ifdef HAVE_ANDROID_OS
     CursorWindow* window = get_window_from_object(env, javaWindow);
     if (!window) {
         LOGE("Invalid CursorWindow");
@@ -91,6 +96,9 @@ android_media_MtpCursor_fill_window(JNIEnv *env, jobject thiz, jobject javaWindo
     MtpCursor *cursor = (MtpCursor *)env->GetIntField(thiz, field_context);
 
     return cursor->fillWindow(window, startPos);
+#else
+    return 0;
+#endif
 }
 
 // ----------------------------------------------------------------------------

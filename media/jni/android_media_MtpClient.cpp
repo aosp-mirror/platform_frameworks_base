@@ -38,6 +38,8 @@ static jmethodID method_deviceAdded;
 static jmethodID method_deviceRemoved;
 static jfieldID field_context;
 
+#ifdef HAVE_ANDROID_OS
+
 static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
     if (env->ExceptionCheck()) {
         LOGE("An exception was thrown by callback '%s'.", methodName);
@@ -94,52 +96,66 @@ void MyClient::deviceRemoved(MtpDevice *device) {
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
+#endif // HAVE_ANDROID_OS
+
 // ----------------------------------------------------------------------------
 
 static void
 android_media_MtpClient_setup(JNIEnv *env, jobject thiz)
 {
+#ifdef HAVE_ANDROID_OS
     LOGD("setup\n");
     MyClient* client = new MyClient(env, thiz);
     client->start();
     env->SetIntField(thiz, field_context, (int)client);
+#endif
 }
 
 static void
 android_media_MtpClient_finalize(JNIEnv *env, jobject thiz)
 {
+#ifdef HAVE_ANDROID_OS
     LOGD("finalize\n");
     MyClient *client = (MyClient *)env->GetIntField(thiz, field_context);
     client->cleanup(env);
     delete client;
     env->SetIntField(thiz, field_context, 0);
+#endif
 }
 
 static jboolean
 android_media_MtpClient_start(JNIEnv *env, jobject thiz)
 {
+#ifdef HAVE_ANDROID_OS
     LOGD("start\n");
     MyClient *client = (MyClient *)env->GetIntField(thiz, field_context);
     return client->start();
+#else
+    return false;
+#endif
 }
 
 static void
 android_media_MtpClient_stop(JNIEnv *env, jobject thiz)
 {
+#ifdef HAVE_ANDROID_OS
     LOGD("stop\n");
     MyClient *client = (MyClient *)env->GetIntField(thiz, field_context);
     client->stop();
+#endif
 }
 
 static jboolean
 android_media_MtpClient_delete_object(JNIEnv *env, jobject thiz,
         jint device_id, jint object_id)
 {
+#ifdef HAVE_ANDROID_OS
     MyClient *client = (MyClient *)env->GetIntField(thiz, field_context);
     MtpDevice* device = client->getDevice(device_id);
     if (device)
         return device->deleteObject(object_id);
     else
+ #endif
         return NULL;
 }
 
@@ -147,11 +163,13 @@ static jint
 android_media_MtpClient_get_parent(JNIEnv *env, jobject thiz,
         jint device_id, jint object_id)
 {
+#ifdef HAVE_ANDROID_OS
     MyClient *client = (MyClient *)env->GetIntField(thiz, field_context);
     MtpDevice* device = client->getDevice(device_id);
     if (device)
         return device->getParent(object_id);
     else
+#endif
         return -1;
 }
 
@@ -159,11 +177,13 @@ static jint
 android_media_MtpClient_get_storage_id(JNIEnv *env, jobject thiz,
         jint device_id, jint object_id)
 {
+ #ifdef HAVE_ANDROID_OS
     MyClient *client = (MyClient *)env->GetIntField(thiz, field_context);
     MtpDevice* device = client->getDevice(device_id);
     if (device)
         return device->getStorageID(object_id);
     else
+#endif
         return -1;
 }
 
