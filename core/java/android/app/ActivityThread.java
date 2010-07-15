@@ -3102,7 +3102,9 @@ public final class ActivityThread {
          * For system applications on userdebug/eng builds, log stack
          * traces of disk and network access to dropbox for analysis.
          */
-        if ((data.appInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0 &&
+        if ((data.appInfo.flags &
+             (ApplicationInfo.FLAG_SYSTEM |
+              ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0 &&
             !"user".equals(Build.TYPE)) {
             StrictMode.setThreadBlockingPolicy(
                 StrictMode.DISALLOW_DISK_WRITE |

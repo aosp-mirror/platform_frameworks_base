@@ -542,6 +542,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     private static final int MAX_DUP_SUPPRESSED_STACKS = 5000;
 
     /**
+     * Strict Mode background batched logging state.
+     *
+     * The string buffer is guarded by itself, and its lock is also
+     * used to determine if another batched write is already
+     * in-flight.
+     */
+    private final StringBuilder mStrictModeBuffer = new StringBuilder();
+
+    /**
      * Intent broadcast that we have tried to start, but are
      * waiting for its application's process to be created.  We only
      * need one (instead of a list) because we always process broadcasts
@@ -6115,7 +6124,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
             if (logIt) {
-                addErrorToDropBox("strictmode", r, null, null, null, null, null, crashInfo);
+                logStrictModeViolationToDropBox(r, crashInfo);
             }
         }
 
@@ -6139,6 +6148,89 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             int res = result.get();
             Log.w(TAG, "handleApplicationStrictModeViolation; res=" + res);
         }
+    }
+
+    // Depending on the policy in effect, there could be a bunch of
+    // these in quick succession so we try to batch these together to
+    // minimize disk writes, number of dropbox entries, and maximize
+    // compression, by having more fewer, larger records.
+    private void logStrictModeViolationToDropBox(ProcessRecord process,
+                                                 ApplicationErrorReport.CrashInfo crashInfo) {
+        if (crashInfo == null) {
+            return;
+        }
+        final boolean isSystemApp = process == null ||
+                (process.info.flags & (ApplicationInfo.FLAG_SYSTEM |
+                                       ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0;
+        final String dropboxTag = isSystemApp ? "system_app_strictmode" : "data_app_strictmode";
+        final DropBoxManager dbox = (DropBoxManager)
+                mContext.getSystemService(Context.DROPBOX_SERVICE);
+
+        // Exit early if the dropbox isn't configured to accept this report type.
+        if (dbox == null || !dbox.isTagEnabled(dropboxTag)) return;
+
+        boolean bufferWasEmpty;
+
+        final StringBuilder sb = isSystemApp ? mStrictModeBuffer : new StringBuilder(1024);
+        synchronized (sb) {
+            bufferWasEmpty = sb.length() == 0;
+            appendDropBoxProcessHeaders(process, sb);
+            sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
+            sb.append("System-App: ").append(isSystemApp).append("\n");
+            if (crashInfo != null && crashInfo.durationMillis != -1) {
+                sb.append("Duration-Millis: ").append(crashInfo.durationMillis).append("\n");
+            }
+            sb.append("\n");
+            if (crashInfo != null && crashInfo.stackTrace != null) {
+                sb.append(crashInfo.stackTrace);
+            }
+            sb.append("\n");
+        }
+
+        // Non-system apps are isolated with a different tag & policy.
+        // They're also not batched.  Batching is useful during system
+        // boot with strict system-wide logging policies and lots of
+        // things firing, but not common with regular apps, which
+        // won't ship with StrictMode dropboxing enabled.
+        if (!isSystemApp) {
+            new Thread("Error dump: " + dropboxTag) {
+                @Override
+                public void run() {
+                    dbox.addText(dropboxTag, sb.toString());
+                }
+            }.start();
+            return;
+        }
+
+        // System app batching:
+        if (!bufferWasEmpty) {
+            // An existing dropbox-writing thread is outstanding and
+            // will handle it.
+            return;
+        }
+
+        // Worker thread to both batch writes and to avoid blocking the caller on I/O.
+        // (After this point, we shouldn't access AMS internal data structures.)
+        new Thread("Error dump: " + dropboxTag) {
+            @Override
+            public void run() {
+                // 5 second sleep to let stacks arrive and be batched together
+                try {
+                    Thread.sleep(5000);  // 5 seconds
+                } catch (InterruptedException e) {}
+
+                String errorReport;
+                synchronized (mStrictModeBuffer) {
+                    errorReport = mStrictModeBuffer.toString();
+                    if (errorReport.length() == 0) {
+                        return;
+                    }
+                    mStrictModeBuffer.delete(0, mStrictModeBuffer.length());
+                    mStrictModeBuffer.trimToSize();
+                }
+                dbox.addText(dropboxTag, errorReport);
+            }
+        }.start();
     }
 
     /**
@@ -6194,40 +6286,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     /**
-     * Write a description of an error (crash, WTF, ANR) to the drop box.
-     * @param eventType to include in the drop box tag ("crash", "wtf", etc.)
-     * @param process which caused the error, null means the system server
-     * @param activity which triggered the error, null if unknown
-     * @param parent activity related to the error, null if unknown
-     * @param subject line related to the error, null if absent
-     * @param report in long form describing the error, null if absent
-     * @param logFile to include in the report, null if none
-     * @param crashInfo giving an application stack trace, null if absent
+     * Utility function for addErrorToDropBox and handleStrictModeViolation's logging
+     * to append various headers to the dropbox log text.
      */
-    public void addErrorToDropBox(String eventType,
-            ProcessRecord process, ActivityRecord activity, ActivityRecord parent, String subject,
-            final String report, final File logFile,
-            final ApplicationErrorReport.CrashInfo crashInfo) {
-        // NOTE -- this must never acquire the ActivityManagerService lock,
-        // otherwise the watchdog may be prevented from resetting the system.
-
-        String prefix;
-        if (process == null || process.pid == MY_PID) {
-            prefix = "system_server_";
-        } else if ((process.info.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-            prefix = "system_app_";
-        } else {
-            prefix = "data_app_";
-        }
-
-        final String dropboxTag = prefix + eventType;
-        final DropBoxManager dbox = (DropBoxManager)
-                mContext.getSystemService(Context.DROPBOX_SERVICE);
-
-        // Exit early if the dropbox isn't configured to accept this report type.
-        if (dbox == null || !dbox.isTagEnabled(dropboxTag)) return;
-
-        final StringBuilder sb = new StringBuilder(1024);
+    private static void appendDropBoxProcessHeaders(ProcessRecord process, StringBuilder sb) {
         if (process == null || process.pid == MY_PID) {
             sb.append("Process: system_server\n");
         } else {
@@ -6253,6 +6315,45 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 sb.append("\n");
             }
         }
+    }
+
+    private static String processClass(ProcessRecord process) {
+        if (process == null || process.pid == MY_PID) {
+            return "system_server";
+        } else if ((process.info.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+            return "system_app";
+        } else {
+            return "data_app";
+        }
+    }
+
+    /**
+     * Write a description of an error (crash, WTF, ANR) to the drop box.
+     * @param eventType to include in the drop box tag ("crash", "wtf", etc.)
+     * @param process which caused the error, null means the system server
+     * @param activity which triggered the error, null if unknown
+     * @param parent activity related to the error, null if unknown
+     * @param subject line related to the error, null if absent
+     * @param report in long form describing the error, null if absent
+     * @param logFile to include in the report, null if none
+     * @param crashInfo giving an application stack trace, null if absent
+     */
+    public void addErrorToDropBox(String eventType,
+            ProcessRecord process, ActivityRecord activity, ActivityRecord parent, String subject,
+            final String report, final File logFile,
+            final ApplicationErrorReport.CrashInfo crashInfo) {
+        // NOTE -- this must never acquire the ActivityManagerService lock,
+        // otherwise the watchdog may be prevented from resetting the system.
+
+        final String dropboxTag = processClass(process) + "_" + eventType;
+        final DropBoxManager dbox = (DropBoxManager)
+                mContext.getSystemService(Context.DROPBOX_SERVICE);
+
+        // Exit early if the dropbox isn't configured to accept this report type.
+        if (dbox == null || !dbox.isTagEnabled(dropboxTag)) return;
+
+        final StringBuilder sb = new StringBuilder(1024);
+        appendDropBoxProcessHeaders(process, sb);
         if (activity != null) {
             sb.append("Activity: ").append(activity.shortComponentName).append("\n");
         }
@@ -6266,9 +6367,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             sb.append("Subject: ").append(subject).append("\n");
         }
         sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
-        if (crashInfo != null && crashInfo.durationMillis != -1) {
-            sb.append("Duration-Millis: ").append(crashInfo.durationMillis).append("\n");
-        }
         sb.append("\n");
 
         // Do the rest in a worker thread to avoid blocking the caller on I/O
