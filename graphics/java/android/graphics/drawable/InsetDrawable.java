@@ -32,7 +32,9 @@ import java.io.IOException;
  * This is used when a View needs a background that is smaller than
  * the View's actual bounds.
  *
- * <p>It can be defined in an XML file with the <code>&lt;inset></code> element.</p>
+ * <p>It can be defined in an XML file with the <code>&lt;inset></code> element. For more
+ * information, see the guide to <a
+ * href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.</p>
  *
  * @attr ref android.R.styleable#InsetDrawable_visible
  * @attr ref android.R.styleable#InsetDrawable_drawable

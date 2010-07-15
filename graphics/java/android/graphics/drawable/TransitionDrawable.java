@@ -26,8 +26,10 @@ import android.os.SystemClock;
  * display just the first layer, call {@link #resetTransition()}.
  * <p>
  * It can be defined in an XML file with the <code>&lt;transition></code> element.
- * Each Drawable in the transition is defined in a nested <code>&lt;item></code>.
- * </p>
+ * Each Drawable in the transition is defined in a nested <code>&lt;item></code>. For more
+ * information, see the guide to <a
+ * href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.</p>
+ *
  * @attr ref android.R.styleable#LayerDrawableItem_left
  * @attr ref android.R.styleable#LayerDrawableItem_top
  * @attr ref android.R.styleable#LayerDrawableItem_right
@@ -212,7 +214,7 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
      * Enables or disables the cross fade of the drawables. When cross fade
      * is disabled, the first drawable is always drawn opaque. With cross
      * fade enabled, the first drawable is drawn with the opposite alpha of
-     * the second drawable.
+     * the second drawable. Cross fade is disabled by default.
      *
      * @param enabled True to enable cross fading, false otherwise.
      */

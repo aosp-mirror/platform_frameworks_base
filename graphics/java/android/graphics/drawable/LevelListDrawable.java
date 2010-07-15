@@ -47,7 +47,10 @@ import android.util.AttributeSet;
  * <p>With this XML saved into the res/drawable/ folder of the project, it can be referenced as
  * the drawable for an {@link android.widget.ImageView}. The default image is the first in the list.
  * It can then be changed to one of the other levels with
- * {@link android.widget.ImageView#setImageLevel(int)}.</p>
+ * {@link android.widget.ImageView#setImageLevel(int)}. For more
+ * information, see the guide to <a
+ * href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.</p>
+ *
  * @attr ref android.R.styleable#LevelListDrawableItem_minLevel
  * @attr ref android.R.styleable#LevelListDrawableItem_maxLevel
  * @attr ref android.R.styleable#LevelListDrawableItem_drawable

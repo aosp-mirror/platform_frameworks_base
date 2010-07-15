@@ -18,23 +18,6 @@ of application resource that you can provide in your resources directory ({@code
 
 <p>Here's a brief summary of each resource type:</p>
 
-<div class="sidebox-wrapper">
-<div class="sidebox">
-<h2>{@code R.id} Is Not a Resource</h2>
-
-<p>You will often use an {@code R.id} integer to handle {@link android.view.View} objects in
-your UI. Although the {@code id} is a subclass of the {@code R} class, it is not considered a
-"resource" because it is not a reference to an externalized application resource. The {@code id}
-is simply a unique identifier that allows you to handle elements in your UI by instantiating
-objects with {@link android.app.Activity#findViewById(int) findViewById()}.</p>
-
-<p>For information about using {@code R.id} with your UI, see <a
-href="{@docRoot}guide/topics/ui/declaring-layout.html#attributes">Declaring Layout</a>.</p>
-
-</div>
-</div>
-
-
 <dl>
   <dt><a href="{@docRoot}guide/topics/resources/animation-resource.html">Animation Resources</a></dt>
     <dd>Define pre-determined animations.<br/>

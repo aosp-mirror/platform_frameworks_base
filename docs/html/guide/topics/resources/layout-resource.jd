@@ -35,12 +35,12 @@ In XML: <code>@[<em>package</em>:]layout/<em>filename</em></code>
 <pre class="stx">
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;<a href="#viewgroup-element"><em>ViewGroup</em></a> xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/<em>name</em>"
+    android:id="@[+][<em>package</em>:]id/<em>resource_name</em>"
     android:layout_height=["<em>dimension</em>" | "fill_parent" | "wrap_content"]
     android:layout_width=["<em>dimension</em>" | "fill_parent" | "wrap_content"]
     [<em>ViewGroup-specific attributes</em>] &gt;
     &lt;<a href="#view-element"><em>View</em></a>
-        android:id="@+id/<em>name</em>"
+        android:id="@[+][<em>package</em>:]id/<em>resource_name</em>"
         android:layout_height=["<em>dimension</em>" | "fill_parent" | "wrap_content"]
         android:layout_width=["<em>dimension</em>" | "fill_parent" | "wrap_content"]
         [<em>View-specific attributes</em>] &gt;
@@ -49,10 +49,12 @@ In XML: <code>@[<em>package</em>:]layout/<em>filename</em></code>
     &lt;<a href="#viewgroup-element"><em>ViewGroup</em></a> &gt;
         &lt;<a href="#view-element"><em>View</em></a> /&gt;
     &lt;/<em>ViewGroup</em>&gt;
+    &lt;<a href="#include-element">include</a> layout="@layout/<i>layout_resource</i>"/&gt;
 &lt;/<em>ViewGroup</em>&gt;
 </pre>
 <p class="note"><strong>Note:</strong> The root element can be either a
-{@link android.view.ViewGroup} or a {@link android.view.View}, but there must be only
+{@link android.view.ViewGroup}, a {@link android.view.View}, or a <a
+href="#merge-element">{@code &lt;merge&gt;}</a> element, but there must be only
 one root element and it must contain the {@code xmlns:android} attribute with the {@code android}
 namespace as shown.</p>
 </dd>
@@ -74,10 +76,9 @@ namespace as shown.</p>
       <p class="caps">attributes:</p>
       <dl class="atn-list">
         <dt><code>android:id</code></dt>
-        <dd><em>Resource name</em>. A unique resource name for the element, which you can
-use to obtain a reference to the {@link android.view.ViewGroup} from your application.
-          The value takes the form: <code>"@+id/<em>name</em>"</code>. See more about the
-          <a href="#idvalue">value for {@code android:id}</a> below.
+        <dd><em>Resource ID</em>. A unique resource name for the element, which you can
+use to obtain a reference to the {@link android.view.ViewGroup} from your application. See more
+about the <a href="#idvalue">value for {@code android:id}</a> below.
         </dd>
         <dt><code>android:layout_height</code></dt>
         <dd><em>Dimension or keyword</em>. <strong>Required</strong>. The height for the group, as a
@@ -107,10 +108,9 @@ attributes</a>).</p>
       <p class="caps">attributes:</p>
       <dl class="atn-list">
         <dt><code>android:id</code></dt>
-        <dd><em>Resource name</em>. A unique resource name for the element, which you can use to
-          obtain a reference to the {@link android.view.View} from your application.
-          The value takes the form: <code>"@+id/<em>name</em>"</code>. See more about the
-          <a href="#idvalue">value for {@code android:id}</a> below.
+        <dd><em>Resource ID</em>. A unique resource name for the element, which you can use to
+          obtain a reference to the {@link android.view.View} from your application. See more about
+the <a href="#idvalue">value for {@code android:id}</a> below.
         </dd>
         <dt><code>android:layout_height</code></dt>
         <dd><em>Dimension or keyword</em>. <strong>Required</strong>. The height for the element, as
@@ -137,20 +137,71 @@ or {@code "wrap_content"}). See the <a href="#layoutvalues">valid values</a> bel
     which gives it's parent initial focus on the screen. You can have only one of these
     elements per file.</dd>
 
+  <dt id="include-element"><code>&lt;include&gt;</code></dt>
+    <dd>Includes a layout file into this layout.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>layout</code></dt>
+        <dd><em>Layout resource</em>. <strong>Required</strong>. Reference to a layout
+resource.</dd>
+        <dt><code>android:id</code></dt>
+        <dd><em>Resource ID</em>. Overrides the ID given to the root view in the included layout.
+        </dd>
+        <dt><code>android:layout_height</code></dt>
+        <dd><em>Dimension or keyword</em>. Overrides the height given to the root view in the
+included layout.
+        </dd>
+        <dt><code>android:layout_width</code></dt>
+        <dd><em>Dimension or keyword</em>. Overrides the width given to the root view in the
+included layout.
+        </dd>
+      </dl>
+      <p>You can include any other layout attributes in the <code>&lt;include&gt;</code> that are
+supported by the root element in the included layout and they will override those defined in the
+root element.</p>
+
+    <p>Another way to include a layout is to use {@link android.view.ViewStub}. It is a lightweight
+View that consumes no layout space until you explicitly inflate it, at which point, it includes a
+layout file defined by its {@code android:layout} attribute. For more information about using {@link
+android.view.ViewStub}, read <a href="{@docRoot}resources/articles/layout-tricks-stubs.html">Layout
+Tricks: ViewStubs</a>.</p>
+    </dd>
+
+  <dt id="merge-element"><code>&lt;merge&gt;</code></dt>
+    <dd>An alternative root element that is not drawn in the layout hierarchy. Using this as the
+root element is useful when you know that this layout will be placed into a layout
+that already contains the appropriate parent View to contain the children of the
+<code>&lt;merge&gt;</code> element. This is particularly useful when you plan to include this layout
+in another layout file using <a href="#include-element"><code>&lt;include&gt;</code></a> and
+this layout doesn't require a different {@link android.view.ViewGroup} container. For more
+information about merging layouts, read <a
+href="{@docRoot}resources/articles/layout-tricks-merging.html">Layout
+Tricks: Merging</a>.</dd>
+
   </dl>
+
+
 
 <h4 id="idvalue">Value for <code>android:id</code></h4>
 
-<p>For the ID value, you should use this syntax form: <code>"@+id/<em>name</em>"</code>. The plus symbol,
-{@code +}, indicates that this is a new resource ID and the aapt tool will create
-a new resource number to the {@code R.java} class, if it doesn't already exist. For example:</p>
+<p>For the ID value, you should usually use this syntax form: <code>"@+id/<em>name</em>"</code>. The
+plus symbol, {@code +}, indicates that this is a new resource ID and the <code>aapt</code> tool will
+create a new resource integer in the {@code R.java} class, if it doesn't already exist. For
+example:</p>
 <pre>
 &lt;TextView android:id="@+id/nameTextbox"/>
 </pre>
-<p>You can then refer to it this way in Java:</p>
+<p>The <code>nameTextbox</code> name is now a resource ID attached to this element. You can then
+refer to the {@link android.widget.TextView} to which the ID is associated in Java:</p>
 <pre>
 findViewById(R.id.nameTextbox);
 </pre>
+<p>This code returns the {@link android.widget.TextView} object.</p>
+
+<p>However, if you have already defined an <a
+href="{@docRoot}guide/topics/resources/drawable-resource.html#Id">ID resource</a> (and it is not
+already used), then you can apply that ID to a {@link android.view.View} element by excluding the
+plus symbol in the <code>android:id</code> value.</p>
 
 <h4 id="layoutvalues">Value for <code>android:layout_height</code> and
 <code>android:layout_width</code>:</h4>
