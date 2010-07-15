@@ -247,13 +247,16 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     /**
      * {@inheritDoc}
      *
-     * <p>This method verifies the peer's certificate hostname after connecting.
+     * <p>This method verifies the peer's certificate hostname after connecting
+     * (unless created with {@link #getInsecure(int, SSLSessionCache)}).
      */
     @Override
     public Socket createSocket(Socket k, String host, int port, boolean close) throws IOException {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(k, host, port, close);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
-        verifyHostname(s, host);
+        if (mSecure) {
+            verifyHostname(s, host);
+        }
         return s;
     }
 
@@ -305,7 +308,8 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     /**
      * {@inheritDoc}
      *
-     * <p>This method verifies the peer's certificate hostname after connecting.
+     * <p>This method verifies the peer's certificate hostname after connecting
+     * (unless created with {@link #getInsecure(int, SSLSessionCache)}).
      */
     @Override
     public Socket createSocket(String host, int port, InetAddress localAddr, int localPort)
@@ -313,20 +317,25 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(
                 host, port, localAddr, localPort);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
-        verifyHostname(s, host);
+        if (mSecure) {
+            verifyHostname(s, host);
+        }
         return s;
     }
 
     /**
      * {@inheritDoc}
      *
-     * <p>This method verifies the peer's certificate hostname after connecting.
+     * <p>This method verifies the peer's certificate hostname after connecting
+     * (unless created with {@link #getInsecure(int, SSLSessionCache)}).
      */
     @Override
     public Socket createSocket(String host, int port) throws IOException {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(host, port);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
-        verifyHostname(s, host);
+        if (mSecure) {
+            verifyHostname(s, host);
+        }
         return s;
     }
 
