@@ -350,8 +350,7 @@ public class DownloadManager {
             }
 
             if (!mRequestHeaders.isEmpty()) {
-                // TODO request headers support
-                throw new UnsupportedOperationException();
+                encodeHttpHeaders(values);
             }
 
             putIfNonNull(values, Downloads.COLUMN_TITLE, mTitle);
@@ -365,6 +364,15 @@ public class DownloadManager {
             values.put(Downloads.COLUMN_VISIBILITY, visibility);
 
             return values;
+        }
+
+        private void encodeHttpHeaders(ContentValues values) {
+            int index = 0;
+            for (Map.Entry<String, String> entry : mRequestHeaders.entrySet()) {
+                String headerString = entry.getKey() + ": " + entry.getValue();
+                values.put(Downloads.Impl.RequestHeaders.INSERT_KEY_PREFIX + index, headerString);
+                index++;
+            }
         }
 
         private void putIfNonNull(ContentValues contentValues, String key, String value) {
