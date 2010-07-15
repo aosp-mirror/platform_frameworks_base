@@ -23,6 +23,7 @@
 #include <SkBitmap.h>
 #include <SkMatrix.h>
 #include <SkPaint.h>
+#include <SkShader.h>
 #include <SkXfermode.h>
 
 #include <utils/RefBase.h>
@@ -98,7 +99,22 @@ public:
     void drawColor(int color, SkXfermode::Mode mode);
     void drawRect(float left, float top, float right, float bottom, const SkPaint* paint);
 
+    void resetShader();
+    void setupBitmapShader(SkBitmap* bitmap, SkShader::TileMode tileX, SkShader::TileMode tileY,
+            SkMatrix* matrix, bool hasAlpha);
+
 private:
+    /**
+     * Type of Skia shader in use.
+     */
+    enum ShaderType {
+        kShaderNone,
+        kShaderBitmap,
+        kShaderLinearGradient,
+        kShaderCircularGradient,
+        kShaderSweepGradient
+    };
+
     /**
      * Saves the current state of the renderer as a new snapshot.
      * The new snapshot is saved in mSnapshot and the previous snapshot
@@ -217,6 +233,19 @@ private:
             GLvoid* vertices, GLvoid* texCoords, GLvoid* indices, GLsizei elementsCount = 0);
 
     /**
+     * Fills the specified rectangle with the currently set bitmap shader.
+     *
+     * @param left The left coordinate of the rectangle
+     * @param top The top coordinate of the rectangle
+     * @param right The right coordinate of the rectangle
+     * @param bottom The bottom coordinate of the rectangle
+     * @param alpha An additional translucency parameter, between 0.0f and 1.0f
+     * @param mode The blending mode
+     */
+    void drawBitmapShader(float left, float top, float right, float bottom, float alpha,
+            SkXfermode::Mode mode);
+
+    /**
      * Resets the texture coordinates stored in mDrawTextureVertices. Setting the values
      * back to default is achieved by calling:
      *
@@ -246,14 +275,16 @@ private:
     inline void chooseBlending(bool blend, SkXfermode::Mode mode, bool isPremultiplied = true);
 
     /**
-     * Use the specified shader with the current GL context. If the shader is already
-     * in use, it will not be bound again. If it is not in use, the current shader is
-     * marked unused and the specified shader becomes used and becomes the new
-     * current shader.
+     * Use the specified program with the current GL context. If the program is already
+     * in use, it will not be bound again. If it is not in use, the current program is
+     * marked unused and the specified program becomes used and becomes the new
+     * current program.
      *
-     * @return true If the specified shader was already in use, false otherwise.
+     * @param program The program to use
+     *
+     * @return true If the specified program was already in use, false otherwise.
      */
-    inline bool useShader(const sp<Program>& shader);
+    inline bool useProgram(const sp<Program>& program);
 
     // Dimensions of the drawing surface
     int mWidth, mHeight;
@@ -272,9 +303,9 @@ private:
     sp<Snapshot> mSnapshot;
 
     // Shaders
-    sp<Program> mCurrentShader;
-    sp<DrawColorProgram> mDrawColorShader;
-    sp<DrawTextureProgram> mDrawTextureShader;
+    sp<Program> mCurrentProgram;
+    sp<DrawColorProgram> mDrawColorProgram;
+    sp<DrawTextureProgram> mDrawTextureProgram;
 
     // Used to draw textured quads
     TextureVertex mDrawTextureVertices[4];
@@ -283,6 +314,14 @@ private:
     bool mBlend;
     GLenum mLastSrcMode;
     GLenum mLastDstMode;
+
+    // Skia shader
+    ShaderType mShader;
+    bool mShaderBlend;
+    SkBitmap* mShaderBitmap;
+    SkShader::TileMode mShaderTileX;
+    SkShader::TileMode mShaderTileY;
+    SkMatrix* mShaderMatrix;
 
     // Various caches
     TextureCache mTextureCache;

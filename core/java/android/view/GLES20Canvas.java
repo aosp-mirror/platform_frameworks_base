@@ -17,16 +17,21 @@
 package android.view;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.DrawFilter;
+import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Picture;
 import android.graphics.PorterDuff;
+import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.graphics.Shader;
+import android.graphics.SweepGradient;
 
 import javax.microedition.khronos.opengles.GL;
 
@@ -369,6 +374,7 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawPatch(Bitmap bitmap, byte[] chunks, RectF dst, Paint paint) {
+        // Shaders are ignored when drawing patches
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
         nDrawPatch(mRenderer, bitmap.mNativeBitmap, chunks, dst.left, dst.top,
                 dst.right, dst.bottom, nativePaint);
@@ -379,6 +385,7 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
+        // Shaders are ignored when drawing bitmaps
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
         nDrawBitmap(mRenderer, bitmap.mNativeBitmap, left, top, nativePaint);
     }
@@ -387,6 +394,7 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawBitmap(Bitmap bitmap, Matrix matrix, Paint paint) {
+        // Shaders are ignored when drawing bitmaps
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
         nDrawBitmap(mRenderer, bitmap.mNativeBitmap, matrix.native_instance, nativePaint);
     }
@@ -395,6 +403,7 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, Rect dst, Paint paint) {
+        // Shaders are ignored when drawing bitmaps
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
         nDrawBitmap(mRenderer, bitmap.mNativeBitmap, src.left, src.top, src.right, src.bottom,
                 dst.left, dst.top, dst.right, dst.bottom, nativePaint
@@ -403,6 +412,7 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, RectF dst, Paint paint) {
+        // Shaders are ignored when drawing bitmaps
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
         nDrawBitmap(mRenderer, bitmap.mNativeBitmap, src.left, src.top, src.right, src.bottom,
                 dst.left, dst.top, dst.right, dst.bottom, nativePaint
@@ -416,6 +426,7 @@ class GLES20Canvas extends Canvas {
     @Override
     public void drawBitmap(int[] colors, int offset, int stride, float x, float y,
             int width, int height, boolean hasAlpha, Paint paint) {
+        // Shaders are ignored when drawing bitmaps
         final Bitmap.Config config = hasAlpha ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
         final Bitmap b = Bitmap.createBitmap(colors, offset, stride, width, height, config);
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
@@ -426,6 +437,7 @@ class GLES20Canvas extends Canvas {
     @Override
     public void drawBitmap(int[] colors, int offset, int stride, int x, int y,
             int width, int height, boolean hasAlpha, Paint paint) {
+        // Shaders are ignored when drawing bitmaps
         drawBitmap(colors, offset, stride, (float) x, (float) y, width, height, hasAlpha, paint);
     }
 
@@ -532,7 +544,9 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawRect(float left, float top, float right, float bottom, Paint paint) {
+        boolean hasShader = setupShader(paint);
         nDrawRect(mRenderer, left, top, right, bottom, paint.mNativePaint);
+        if (hasShader) nResetShader(mRenderer);
     }
 
     private native void nDrawRect(int renderer, float left, float top, float right, float bottom,
@@ -555,7 +569,7 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawRoundRect(RectF rect, float rx, float ry, Paint paint) {
-        throw new UnsupportedOperationException();
+        // TODO: Implement
     }
 
     @Override
@@ -607,4 +621,27 @@ class GLES20Canvas extends Canvas {
             int indexOffset, int indexCount, Paint paint) {
         // TODO: Implement
     }
+
+    private boolean setupShader(Paint paint) {
+        final Shader shader = paint.getShader();
+        if (shader != null) {
+            if (shader instanceof BitmapShader) {
+                final BitmapShader bs = (BitmapShader) shader;
+                nSetupBitmapShader(mRenderer, bs.native_instance, bs.mBitmap.mNativeBitmap,
+                        bs.mTileX, bs.mTileY, bs.mLocalMatrix);
+                return true;
+            } else if (shader instanceof LinearGradient) {
+                // TODO: Implement
+            } else if (shader instanceof RadialGradient) {
+                // TODO: Implement
+            } else if (shader instanceof SweepGradient) {
+                // TODO: Implement
+            }
+        }
+        return false;
+    }
+    
+    private native void nSetupBitmapShader(int renderer, int shader, int bitmap,
+            int tileX, int tileY, int matrix);
+    private native void nResetShader(int renderer);  
 }

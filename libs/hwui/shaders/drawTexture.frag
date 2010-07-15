@@ -1,6 +1,8 @@
 SHADER_SOURCE(gDrawTextureFragmentShader,
 
-varying mediump vec2 outTexCoords;
+precision mediump float;
+
+varying vec2 outTexCoords;
 
 uniform vec4 color;
 uniform sampler2D sampler;
