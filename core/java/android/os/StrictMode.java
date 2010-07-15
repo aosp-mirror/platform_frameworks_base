@@ -80,6 +80,8 @@ public final class StrictMode {
      * our offending stack traces to the caller to ultimately handle
      * in the originating process.
      *
+     * This must be kept in sync with the constant in libs/binder/Parcel.cpp
+     *
      * @hide
      */
     public static final int PENALTY_GATHER = 0x100;
@@ -98,7 +100,10 @@ public final class StrictMode {
     private static ThreadLocal<ArrayList<ApplicationErrorReport.CrashInfo>> gatheredViolations =
             new ThreadLocal<ArrayList<ApplicationErrorReport.CrashInfo>>() {
         @Override protected ArrayList<ApplicationErrorReport.CrashInfo> initialValue() {
-            return new ArrayList<ApplicationErrorReport.CrashInfo>(1);
+            // Starts null to avoid unnecessary allocations when
+            // checking whether there are any violations or not in
+            // hasGatheredViolations() below.
+            return null;
         }
     };
 
@@ -308,7 +313,10 @@ public final class StrictMode {
 
             if ((policy & PENALTY_GATHER) != 0) {
                 ArrayList<ApplicationErrorReport.CrashInfo> violations = gatheredViolations.get();
-                if (violations.size() >= 5) {
+                if (violations == null) {
+                    violations = new ArrayList<ApplicationErrorReport.CrashInfo>(1);
+                    gatheredViolations.set(violations);
+                } else if (violations.size() >= 5) {
                     // Too many.  In a loop or something?  Don't gather them all.
                     return;
                 }
@@ -393,7 +401,16 @@ public final class StrictMode {
      * Called from Parcel.writeNoException()
      */
     /* package */ static boolean hasGatheredViolations() {
-        return !gatheredViolations.get().isEmpty();
+        return gatheredViolations.get() != null;
+    }
+
+    /**
+     * Called from Parcel.writeException(), so we drop this memory and
+     * don't incorrectly attribute it to the wrong caller on the next
+     * Binder call on this thread.
+     */
+    /* package */ static void clearGatheredViolations() {
+        gatheredViolations.set(null);
     }
 
     /**
@@ -401,13 +418,17 @@ public final class StrictMode {
      */
     /* package */ static void writeGatheredViolationsToParcel(Parcel p) {
         ArrayList<ApplicationErrorReport.CrashInfo> violations = gatheredViolations.get();
-        p.writeInt(violations.size());
-        for (int i = 0; i < violations.size(); ++i) {
-            violations.get(i).writeToParcel(p, 0 /* unused flags? */);
+        if (violations == null) {
+            p.writeInt(0);
+        } else {
+            p.writeInt(violations.size());
+            for (int i = 0; i < violations.size(); ++i) {
+                violations.get(i).writeToParcel(p, 0 /* unused flags? */);
+            }
+            if (LOG_V) Log.d(TAG, "wrote violations to response parcel; num=" + violations.size());
+            violations.clear(); // somewhat redundant, as we're about to null the threadlocal
         }
-
-        if (LOG_V) Log.d(TAG, "wrote violations to response parcel; num=" + violations.size());
-        violations.clear();
+        gatheredViolations.set(null);
     }
 
     private static class LogStackTrace extends Exception {}
