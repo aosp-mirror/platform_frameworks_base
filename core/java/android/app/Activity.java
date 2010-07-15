@@ -651,7 +651,7 @@ public class Activity extends ContextThemeWrapper
         Object activity;
         HashMap<String, Object> children;
         ArrayList<Fragment> fragments;
-        SparseArray<LoaderManager> loaders;
+        SparseArray<LoaderManagerImpl> loaders;
     }
     /* package */ NonConfigurationInstances mLastNonConfigurationInstances;
     
@@ -669,8 +669,8 @@ public class Activity extends ContextThemeWrapper
 
     final FragmentManager mFragments = new FragmentManager();
     
-    SparseArray<LoaderManager> mAllLoaderManagers;
-    LoaderManager mLoaderManager;
+    SparseArray<LoaderManagerImpl> mAllLoaderManagers;
+    LoaderManagerImpl mLoaderManager;
     
     private static final class ManagedCursor {
         ManagedCursor(Cursor cursor) {
@@ -779,13 +779,13 @@ public class Activity extends ContextThemeWrapper
         return mLoaderManager;
     }
     
-    LoaderManager getLoaderManager(int index, boolean started) {
+    LoaderManagerImpl getLoaderManager(int index, boolean started) {
         if (mAllLoaderManagers == null) {
-            mAllLoaderManagers = new SparseArray<LoaderManager>();
+            mAllLoaderManagers = new SparseArray<LoaderManagerImpl>();
         }
-        LoaderManager lm = mAllLoaderManagers.get(index);
+        LoaderManagerImpl lm = mAllLoaderManagers.get(index);
         if (lm == null) {
-            lm = new LoaderManager(started);
+            lm = new LoaderManagerImpl(started);
             mAllLoaderManagers.put(index, lm);
         }
         return lm;
@@ -1554,7 +1554,7 @@ public class Activity extends ContextThemeWrapper
             // prune out any loader managers that were already stopped, so
             // have nothing useful to retain.
             for (int i=mAllLoaderManagers.size()-1; i>=0; i--) {
-                LoaderManager lm = mAllLoaderManagers.valueAt(i);
+                LoaderManagerImpl lm = mAllLoaderManagers.valueAt(i);
                 if (lm.mRetaining) {
                     retainLoaders = true;
                 } else {

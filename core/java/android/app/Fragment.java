@@ -213,7 +213,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     // The View generated for this fragment.
     View mView;
     
-    LoaderManager mLoaderManager;
+    LoaderManagerImpl mLoaderManager;
     boolean mStarted;
     
     /**
