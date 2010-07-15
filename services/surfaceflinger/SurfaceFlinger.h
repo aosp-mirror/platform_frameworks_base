@@ -29,6 +29,7 @@
 
 #include <binder/IMemory.h>
 #include <binder/Permission.h>
+#include <binder/BinderService.h>
 
 #include <ui/PixelFormat.h>
 #include <surfaceflinger/ISurfaceComposer.h>
@@ -167,11 +168,13 @@ enum {
     eTraversalNeeded        = 0x02
 };
 
-class SurfaceFlinger : public BnSurfaceComposer, protected Thread
+class SurfaceFlinger :
+        public BinderService<SurfaceFlinger>,
+        public BnSurfaceComposer,
+        protected Thread
 {
 public:
-    static void instantiate();
-    static void shutdown();
+    static char const* getServiceName() { return "SurfaceFlinger"; }
 
                     SurfaceFlinger();
     virtual         ~SurfaceFlinger();

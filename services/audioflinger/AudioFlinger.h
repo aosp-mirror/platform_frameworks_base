@@ -31,9 +31,11 @@
 #include <utils/Atomic.h>
 #include <utils/Errors.h>
 #include <utils/threads.h>
-#include <binder/MemoryDealer.h>
 #include <utils/SortedVector.h>
 #include <utils/Vector.h>
+
+#include <binder/BinderService.h>
+#include <binder/MemoryDealer.h>
 
 #include <hardware_legacy/AudioHardwareInterface.h>
 
@@ -58,10 +60,13 @@ class AudioResampler;
 
 static const nsecs_t kStandbyTimeInNsecs = seconds(3);
 
-class AudioFlinger : public BnAudioFlinger
+class AudioFlinger :
+    public BinderService<AudioFlinger>,
+    public BnAudioFlinger
 {
+    friend class BinderService<AudioFlinger>;
 public:
-    static void instantiate();
+    static char const* getServiceName() { return "media.audio_flinger"; }
 
     virtual     status_t    dump(int fd, const Vector<String16>& args);
 
