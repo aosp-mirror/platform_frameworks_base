@@ -45,6 +45,16 @@ public class Allocation extends BaseObj {
         mID = id;
     }
 
+    @Override
+    void updateFromNative() {
+        mRS.validate();
+        int typeID = mRS.nAllocationGetType(mID);
+        if(typeID != 0) {
+            mType = new Type(typeID, mRS);
+            mType.updateFromNative();
+        }
+    }
+
     public Type getType() {
         return mType;
     }

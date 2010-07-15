@@ -293,6 +293,32 @@ RsElement rsi_ElementCreate2(Context *rsc,
     return (RsElement)e;
 }
 
+void rsi_ElementGetNativeData(Context *rsc, RsElement elem, uint32_t *elemData, uint32_t elemDataSize)
+{
+    rsAssert(elemDataSize == 5);
+    // we will pack mType; mKind; mNormalized; mVectorSize; NumSubElements
+    Element *e = static_cast<Element *>(elem);
+
+    (*elemData++) = (uint32_t)e->getType();
+    (*elemData++) = (uint32_t)e->getKind();
+    (*elemData++) = e->getComponent().getIsNormalized() ? 1 : 0;
+    (*elemData++) = e->getComponent().getVectorSize();
+    (*elemData++) = e->getFieldCount();
+
+}
+
+void rsi_ElementGetSubElements(Context *rsc, RsElement elem, uint32_t *ids, const char **names, uint32_t dataSize)
+{
+    Element *e = static_cast<Element *>(elem);
+    rsAssert(e->getFieldCount() == dataSize);
+
+    for(uint32_t i = 0; i < dataSize; i ++) {
+        ids[i] = (uint32_t)e->getField(i);
+        names[i] = e->getFieldName(i);
+    }
+
+}
+
 
 }
 }

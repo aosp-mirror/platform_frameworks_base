@@ -297,6 +297,46 @@ nElementCreate2(JNIEnv *_env, jobject _this, jintArray _ids, jobjectArray _names
     return (jint)id;
 }
 
+static void
+nElementGetNativeData(JNIEnv *_env, jobject _this, jint id, jintArray _elementData)
+{
+    int dataSize = _env->GetArrayLength(_elementData);
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nElementGetNativeData, con(%p)", con);
+
+    // we will pack mType; mKind; mNormalized; mVectorSize; NumSubElements
+    assert(dataSize == 5);
+
+    uint32_t elementData[5];
+    rsElementGetNativeData(con, (RsElement)id, elementData, dataSize);
+
+    for(jint i = 0; i < dataSize; i ++) {
+        _env->SetIntArrayRegion(_elementData, i, 1, (const jint*)&elementData[i]);
+    }
+}
+
+
+static void
+nElementGetSubElements(JNIEnv *_env, jobject _this, jint id, jintArray _IDs, jobjectArray _names)
+{
+    int dataSize = _env->GetArrayLength(_IDs);
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nElementGetSubElements, con(%p)", con);
+
+    uint32_t *ids = (uint32_t *)malloc((uint32_t)dataSize * sizeof(uint32_t));
+    const char **names = (const char **)malloc((uint32_t)dataSize * sizeof(const char *));
+
+    rsElementGetSubElements(con, (RsElement)id, ids, names, (uint32_t)dataSize);
+
+    for(jint i = 0; i < dataSize; i ++) {
+        _env->SetObjectArrayElement(_names, i, _env->NewStringUTF(names[i]));
+        _env->SetIntArrayRegion(_IDs, i, 1, (const jint*)&ids[i]);
+    }
+
+    free(ids);
+    free(names);
+}
+
 // -----------------------------------
 
 static void
@@ -321,6 +361,26 @@ nTypeCreate(JNIEnv *_env, jobject _this)
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nTypeCreate, con(%p)", con);
     return (jint)rsTypeCreate(con);
+}
+
+static void
+nTypeGetNativeData(JNIEnv *_env, jobject _this, jint id, jintArray _typeData)
+{
+    // We are packing 6 items: mDimX; mDimY; mDimZ;
+    // mDimLOD; mDimFaces; mElement; into typeData
+    int elementCount = _env->GetArrayLength(_typeData);
+
+    assert(elementCount == 6);
+
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nTypeCreate, con(%p)", con);
+
+    uint32_t typeData[6];
+    rsTypeGetNativeData(con, (RsType)id, typeData, 6);
+
+    for(jint i = 0; i < elementCount; i ++) {
+        _env->SetIntArrayRegion(_typeData, i, 1, (const jint*)&typeData[i]);
+    }
 }
 
 static void * SF_LoadInt(JNIEnv *_env, jobject _obj, jfieldID _field, void *buffer)
@@ -706,6 +766,14 @@ nAllocationSubReadFromObject(JNIEnv *_env, jobject _this, jint alloc, jobject _t
         buf = tfc->readPtr(_env, _o, tfc->field, buf);
     }
     free(bufAlloc);
+}
+
+static jint
+nAllocationGetType(JNIEnv *_env, jobject _this, jint a)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nAllocationGetType, con(%p), a(%p)", con, (RsAllocation)a);
+    return (jint) rsAllocationGetType(con, (RsAllocation)a);
 }
 
 // -----------------------------------
@@ -1466,12 +1534,15 @@ static JNINativeMethod methods[] = {
 
 {"nElementCreate",                 "(IIZI)I",                              (void*)nElementCreate },
 {"nElementCreate2",                "([I[Ljava/lang/String;)I",             (void*)nElementCreate2 },
+{"nElementGetNativeData",         "(I[I)V",                               (void*)nElementGetNativeData },
+{"nElementGetSubElements",        "(I[I[Ljava/lang/String;)V",           (void*)nElementGetSubElements },
 
 {"nTypeBegin",                     "(I)V",                                 (void*)nTypeBegin },
 {"nTypeAdd",                       "(II)V",                                (void*)nTypeAdd },
 {"nTypeCreate",                    "()I",                                  (void*)nTypeCreate },
 {"nTypeFinalDestroy",              "(Landroid/renderscript/Type;)V",       (void*)nTypeFinalDestroy },
 {"nTypeSetupFields",               "(Landroid/renderscript/Type;[I[I[Ljava/lang/reflect/Field;)V", (void*)nTypeSetupFields },
+{"nTypeGetNativeData",             "(I[I)V",                                (void*)nTypeGetNativeData },
 
 {"nAllocationCreateTyped",         "(I)I",                                 (void*)nAllocationCreateTyped },
 {"nAllocationCreateFromBitmap",    "(IZLandroid/graphics/Bitmap;)I",       (void*)nAllocationCreateFromBitmap },
@@ -1490,6 +1561,7 @@ static JNINativeMethod methods[] = {
 {"nAllocationRead",                "(I[F)V",                               (void*)nAllocationRead_f },
 {"nAllocationSubDataFromObject",   "(ILandroid/renderscript/Type;ILjava/lang/Object;)V",   (void*)nAllocationSubDataFromObject },
 {"nAllocationSubReadFromObject",   "(ILandroid/renderscript/Type;ILjava/lang/Object;)V",   (void*)nAllocationSubReadFromObject },
+{"nAllocationGetType",              "(I)I",                                 (void*)nAllocationGetType},
 
 {"nAdapter1DBindAllocation",       "(II)V",                                (void*)nAdapter1DBindAllocation },
 {"nAdapter1DSetConstraint",        "(III)V",                               (void*)nAdapter1DSetConstraint },

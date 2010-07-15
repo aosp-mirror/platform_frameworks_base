@@ -74,14 +74,6 @@ public class ProgramRaster extends BaseObj {
         boolean mPointSmooth;
         boolean mLineSmooth;
 
-        // Legacy to not break app in other projects, will be removed in cleanup pass
-        public Builder(RenderScript rs, Element in, Element out) {
-            mRS = rs;
-            mPointSmooth = false;
-            mLineSmooth = false;
-            mPointSprite = false;
-        }
-
         public Builder(RenderScript rs) {
             mRS = rs;
             mPointSmooth = false;

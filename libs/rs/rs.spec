@@ -78,6 +78,19 @@ ElementCreate2 {
 	ret RsElement
 	}
 
+ElementGetNativeData {
+	param RsElement elem
+	param uint32_t *elemData
+	param uint32_t elemDataSize
+	}
+
+ElementGetSubElements {
+	param RsElement elem
+	param uint32_t *ids
+	param const char **names
+	param uint32_t dataSize
+	}
+
 TypeBegin {
 	param RsElement type
 	}
@@ -89,6 +102,12 @@ TypeAdd {
 
 TypeCreate {
 	ret RsType
+	}
+
+TypeGetNativeData {
+	param RsType type
+	param uint32_t * typeData
+	param uint32_t typeDataSize
 	}
 
 AllocationCreateTyped {
@@ -229,6 +248,11 @@ Adapter2DSubData {
 	param uint32_t w
 	param uint32_t h
 	param const void *data
+	}
+
+AllocationGetType {
+	param RsAllocation va
+	ret const void*
 	}
 
 SamplerBegin {
