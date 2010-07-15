@@ -40,7 +40,9 @@ else
     LOCAL_CFLAGS += -DNO_OPENCORE
 endif
 
+ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_STATIC_LIBRARIES := libmtp libusbhost
+endif
 
 LOCAL_C_INCLUDES += \
     external/tremor/Tremor \

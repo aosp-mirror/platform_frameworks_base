@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+ifneq ($(TARGET_SIMULATOR),true)
+
 LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
@@ -41,3 +44,5 @@ LOCAL_MODULE:= libmtp
 LOCAL_CFLAGS := -DMTP_DEVICE -DMTP_HOST
 
 include $(BUILD_STATIC_LIBRARY)
+
+endif
