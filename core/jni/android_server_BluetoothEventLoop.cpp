@@ -231,6 +231,20 @@ static jboolean setUpEventLoop(native_data_t *nat) {
             return JNI_FALSE;
         }
         dbus_bus_add_match(nat->conn,
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".Input'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+            return JNI_FALSE;
+        }
+        dbus_bus_add_match(nat->conn,
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".Network'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+            return JNI_FALSE;
+        }
+        dbus_bus_add_match(nat->conn,
                 "type='signal',interface='org.bluez.AudioSink'",
                 &err);
         if (dbus_error_is_set(&err)) {
