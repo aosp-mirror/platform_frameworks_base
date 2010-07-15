@@ -115,6 +115,7 @@ final class RemoteServiceException extends AndroidRuntimeException {
  */
 public final class ActivityThread {
     static final String TAG = "ActivityThread";
+    private static final android.graphics.Bitmap.Config THUMBNAIL_FORMAT = Bitmap.Config.RGB_565;
     private static final boolean DEBUG = false;
     static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
     static final boolean DEBUG_BROADCAST = false;
@@ -2210,13 +2211,24 @@ public final class ActivityThread {
                 h = mThumbnailHeight;
             }
 
-            // XXX Only set hasAlpha if needed?
-            thumbnail = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
-            thumbnail.eraseColor(0);
-            Canvas cv = new Canvas(thumbnail);
-            if (!r.activity.onCreateThumbnail(thumbnail, cv)) {
-                thumbnail = null;
+            // On platforms where we don't want thumbnails, set dims to (0,0)
+            if ((w > 0) && (h > 0)) {
+                View topView = r.activity.getWindow().getDecorView();
+
+                // Maximize bitmap by capturing in native aspect.
+                if (topView.getWidth() >= topView.getHeight()) {
+                    thumbnail = Bitmap.createBitmap(w, h, THUMBNAIL_FORMAT);
+                } else {
+                    thumbnail = Bitmap.createBitmap(h, w, THUMBNAIL_FORMAT);
+                }
+
+                thumbnail.eraseColor(0);
+                Canvas cv = new Canvas(thumbnail);
+                if (!r.activity.onCreateThumbnail(thumbnail, cv)) {
+                    thumbnail = null;
+                }
             }
+
         } catch (Exception e) {
             if (!mInstrumentation.onException(r.activity, e)) {
                 throw new RuntimeException(
@@ -2347,7 +2359,7 @@ public final class ActivityThread {
             if (info != null) {
                 try {
                     // First create a thumbnail for the activity...
-                    //info.thumbnail = createThumbnailBitmap(r);
+                    info.thumbnail = createThumbnailBitmap(r);
                     info.description = r.activity.onCreateDescription();
                 } catch (Exception e) {
                     if (!mInstrumentation.onException(r.activity, e)) {
