@@ -10,7 +10,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils
 
 LOCAL_C_INCLUDES := \
-	$(LOCAL_PATH)/../../libs/surfaceflinger
+	$(LOCAL_PATH)/../../services/surfaceflinger
 
 LOCAL_MODULE:= surfaceflinger
 

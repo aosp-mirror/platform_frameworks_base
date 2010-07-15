@@ -14,8 +14,8 @@ LOCAL_SHARED_LIBRARIES := \
 base := $(LOCAL_PATH)/../..
 
 LOCAL_C_INCLUDES := \
-    $(base)/libs/audioflinger \
-    $(base)/camera/libcameraservice \
+    $(base)/services/audioflinger \
+    $(base)/services/camera/libcameraservice \
     $(base)/media/libmediaplayerservice
 
 LOCAL_MODULE:= mediaserver
