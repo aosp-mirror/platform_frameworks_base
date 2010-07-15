@@ -24,6 +24,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_app_NativeActivity.h>
+#include <android_runtime/android_util_AssetManager.h>
 #include <surfaceflinger/Surface.h>
 #include <ui/egl/android_natives.h>
 #include <ui/InputTransport.h>
@@ -451,7 +452,8 @@ static bool mainWorkCallback(int fd, int events, void* data) {
 
 static jint
 loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jobject messageQueue,
-        jstring internalDataDir, jstring externalDataDir, int sdkVersion)
+        jstring internalDataDir, jstring externalDataDir, int sdkVersion,
+        jobject jAssetMgr)
 {
     LOG_TRACE("loadNativeCode_native");
 
@@ -502,7 +504,7 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jobject messageQ
         }
         code->env = env;
         code->clazz = env->NewGlobalRef(clazz);
-        
+
         const char* dirStr = env->GetStringUTFChars(internalDataDir, NULL);
         code->internalDataPath = dirStr;
         code->internalDataPath = code->internalDataPath.string();
@@ -512,9 +514,11 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jobject messageQ
         code->externalDataPath = dirStr;
         code->externalDataPath = code->externalDataPath.string();
         env->ReleaseStringUTFChars(path, dirStr);
-    
+
         code->sdkVersion = sdkVersion;
         
+        code->assetManager = assetManagerForJavaObject(env, jAssetMgr);
+
         code->createActivityFunc(code, NULL, 0);
     }
     
@@ -770,7 +774,7 @@ dispatchKeyEvent_native(JNIEnv* env, jobject clazz, jint handle, jobject eventOb
 }
 
 static const JNINativeMethod g_methods[] = {
-    { "loadNativeCode", "(Ljava/lang/String;Landroid/os/MessageQueue;Ljava/lang/String;Ljava/lang/String;I)I",
+    { "loadNativeCode", "(Ljava/lang/String;Landroid/os/MessageQueue;Ljava/lang/String;Ljava/lang/String;I;Landroid/content/res/AssetManager)I",
             (void*)loadNativeCode_native },
     { "unloadNativeCode", "(I)V", (void*)unloadNativeCode_native },
     { "onStartNative", "(I)V", (void*)onStart_native },
