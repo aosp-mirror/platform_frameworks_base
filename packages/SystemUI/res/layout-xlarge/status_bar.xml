@@ -19,7 +19,7 @@
 -->
 
 <!--    android:background="@drawable/status_bar_closed_default_background" -->
-<com.android.systemui.statusbar.StatusBarView
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:background="@drawable/status_bar_background"
@@ -28,20 +28,12 @@
     android:descendantFocusability="afterDescendants"
     >
 
-    <LinearLayout android:id="@+id/icons"
+    <RelativeLayout android:id="@+id/icons"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal">
             
-        <com.android.systemui.statusbar.IconMerger android:id="@+id/notificationIcons"
-            android:layout_width="0dip"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:layout_alignParentLeft="true"
-            android:paddingLeft="6dip"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"/>  
-            
+<!--
         <LinearLayout android:id="@+id/statusIcons"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -49,18 +41,63 @@
             android:paddingRight="6dip"
             android:gravity="center_vertical"
             android:orientation="horizontal"/>    
+-->
 
-        <com.android.systemui.statusbar.Clock
-            android:textAppearance="@*android:style/TextAppearance.StatusBar.Icon"
+        <com.android.systemui.statusbar.tablet.NotificationIconArea
+            android:id="@+id/notificationIcons"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:singleLine="true"
-            android:paddingRight="6dip"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:gravity="center_vertical|left"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="10dp"
+            android:paddingLeft="6dip"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            />  
+            
+        <RelativeLayout android:id="@+id/icons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            >
+
+            <com.android.systemui.statusbar.Clock
+                android:textAppearance="@*android:style/TextAppearance.StatusBar.Icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:singleLine="true"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                />
+        </RelativeLayout>
+
+        <com.android.systemui.statusbar.KeyButtonView android:id="@+id/back"
+            android:layout_width="wrap_content"
+            android:layout_height="@*android:dimen/status_bar_height"
+            android:layout_toLeftOf="@+id/menu"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/status_bar_back"
+            systemui:keyCode="4"
             />
-    </LinearLayout>
+        <com.android.systemui.statusbar.KeyButtonView android:id="@+id/menu"
+            android:layout_width="wrap_content"
+            android:layout_height="@*android:dimen/status_bar_height"
+            android:layout_toLeftOf="@+id/home"
+            android:src="@drawable/status_bar_menu"
+            android:layout_marginRight="10dp"
+            systemui:keyCode="82"
+            />
+        <com.android.systemui.statusbar.KeyButtonView android:id="@+id/home"
+            android:layout_width="wrap_content"
+            android:layout_height="@*android:dimen/status_bar_height"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/status_bar_home"
+            systemui:keyCode="3"
+            />
+            
+    </RelativeLayout>
+<!--
         
     <LinearLayout android:id="@+id/ticker"
         android:layout_width="match_parent"
@@ -113,4 +150,6 @@
         android:paddingRight="6px"
         android:background="@drawable/status_bar_background"
         />
-</com.android.systemui.statusbar.StatusBarView>
+-->
+</FrameLayout>
+
