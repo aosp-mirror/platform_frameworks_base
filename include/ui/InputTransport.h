@@ -119,7 +119,7 @@ struct InputMessage {
     };
 
     int32_t deviceId;
-    int32_t nature;
+    int32_t source;
 
     union {
         struct {
@@ -198,7 +198,7 @@ public:
      */
     status_t publishKeyEvent(
             int32_t deviceId,
-            int32_t nature,
+            int32_t source,
             int32_t action,
             int32_t flags,
             int32_t keyCode,
@@ -216,7 +216,7 @@ public:
      */
     status_t publishMotionEvent(
             int32_t deviceId,
-            int32_t nature,
+            int32_t source,
             int32_t action,
             int32_t edgeFlags,
             int32_t metaState,
@@ -233,7 +233,7 @@ public:
     /* Appends a motion sample to a motion event unless already consumed.
      *
      * Returns OK on success.
-     * Returns INVALID_OPERATION if the current event is not a MOTION_EVENT_ACTION_MOVE event.
+     * Returns INVALID_OPERATION if the current event is not a AMOTION_EVENT_ACTION_MOVE event.
      * Returns FAILED_TRANSACTION if the current event has already been consumed.
      * Returns NO_MEMORY if the buffer is full and no additional samples can be added.
      */
@@ -272,7 +272,7 @@ private:
     status_t publishInputEvent(
             int32_t type,
             int32_t deviceId,
-            int32_t nature);
+            int32_t source);
 };
 
 /*

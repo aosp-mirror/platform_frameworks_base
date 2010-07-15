@@ -77,9 +77,9 @@ public class InputManager {
     private static native boolean nativeHasKeys(int[] keyCodes, boolean[] keyExists);
     private static native void nativeRegisterInputChannel(InputChannel inputChannel);
     private static native void nativeUnregisterInputChannel(InputChannel inputChannel);
-    private static native int nativeInjectKeyEvent(KeyEvent event, int nature,
+    private static native int nativeInjectKeyEvent(KeyEvent event,
             int injectorPid, int injectorUid, boolean sync, int timeoutMillis);
-    private static native int nativeInjectMotionEvent(MotionEvent event, int nature,
+    private static native int nativeInjectMotionEvent(MotionEvent event,
             int injectorPid, int injectorUid, boolean sync, int timeoutMillis);
     private static native void nativeSetInputWindows(InputWindow[] windows);
     private static native void nativeSetInputDispatchMode(boolean enabled, boolean frozen);
@@ -229,14 +229,13 @@ public class InputManager {
      * to be dispatched before it can determine whether input event injection will be
      * permitted based on the current input focus.
      * @param event The event to inject.
-     * @param nature The nature of the event.
      * @param injectorPid The pid of the injecting application.
      * @param injectorUid The uid of the injecting application.
      * @param sync If true, waits for the event to be completed before returning.
      * @param timeoutMillis The injection timeout in milliseconds.
      * @return One of the INPUT_EVENT_INJECTION_XXX constants.
      */
-    public int injectKeyEvent(KeyEvent event, int nature, int injectorPid, int injectorUid,
+    public int injectKeyEvent(KeyEvent event, int injectorPid, int injectorUid,
             boolean sync, int timeoutMillis) {
         if (event == null) {
             throw new IllegalArgumentException("event must not be null");
@@ -248,7 +247,7 @@ public class InputManager {
             throw new IllegalArgumentException("timeoutMillis must be positive");
         }
         
-        return nativeInjectKeyEvent(event, nature, injectorPid, injectorUid,
+        return nativeInjectKeyEvent(event, injectorPid, injectorUid,
                 sync, timeoutMillis);
     }
     
@@ -258,7 +257,6 @@ public class InputManager {
      * to be dispatched before it can determine whether input event injection will be
      * permitted based on the current input focus.
      * @param event The event to inject.
-     * @param nature The nature of the event.
      * @param sync If true, waits for the event to be completed before returning.
      * @param injectorPid The pid of the injecting application.
      * @param injectorUid The uid of the injecting application.
@@ -266,7 +264,7 @@ public class InputManager {
      * @param timeoutMillis The injection timeout in milliseconds.
      * @return One of the INPUT_EVENT_INJECTION_XXX constants.
      */
-    public int injectMotionEvent(MotionEvent event, int nature, int injectorPid, int injectorUid,
+    public int injectMotionEvent(MotionEvent event, int injectorPid, int injectorUid,
             boolean sync, int timeoutMillis) {
         if (event == null) {
             throw new IllegalArgumentException("event must not be null");
@@ -278,7 +276,7 @@ public class InputManager {
             throw new IllegalArgumentException("timeoutMillis must be positive");
         }
         
-        return nativeInjectMotionEvent(event, nature, injectorPid, injectorUid,
+        return nativeInjectMotionEvent(event, injectorPid, injectorUid,
                 sync, timeoutMillis);
     }
     

@@ -29,11 +29,7 @@ public abstract class BaseInputHandler implements InputHandler {
         finishedCallback.run();
     }
     
-    public void handleTouch(MotionEvent event, Runnable finishedCallback) {
-        finishedCallback.run();
-    }
-    
-    public void handleTrackball(MotionEvent event, Runnable finishedCallback) {
+    public void handleMotion(MotionEvent event, Runnable finishedCallback) {
         finishedCallback.run();
     }
 }

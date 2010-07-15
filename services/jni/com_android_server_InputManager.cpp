@@ -354,7 +354,7 @@ private:
 
     void releaseTouchedWindowLd();
 
-    int32_t waitForTrackballEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
+    int32_t waitForNonTouchEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
             int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets);
     int32_t waitForTouchEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
             int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets);
@@ -1222,13 +1222,16 @@ int32_t NativeInputManager::waitForFocusedWindowLd(uint32_t policyFlags,
     return injectionResult;
 }
 
+enum InjectionPermission {
+    INJECTION_PERMISSION_UNKNOWN,
+    INJECTION_PERMISSION_GRANTED,
+    INJECTION_PERMISSION_DENIED
+};
+
 int32_t NativeInputManager::waitForTouchedWindowLd(MotionEvent* motionEvent, uint32_t policyFlags,
         int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets,
         InputWindow*& outTouchedWindow) {
     nsecs_t startTime = now();
-
-    int32_t injectionResult = INPUT_EVENT_INJECTION_SUCCEEDED;
-    int32_t action = motionEvent->getAction();
 
     // For security reasons, we defer updating the touch state until we are sure that
     // event injection will be allowed.
@@ -1255,8 +1258,13 @@ int32_t NativeInputManager::waitForTouchedWindowLd(MotionEvent* motionEvent, uin
     //       instead of POLICY_FLAG_WOKE_HERE...
     //
     bool screenWasOff = false; // original policy: policyFlags & POLICY_FLAG_BRIGHT_HERE;
+
+    int32_t action = motionEvent->getAction();
+
     bool firstIteration = true;
     ANRTimer anrTimer;
+    int32_t injectionResult;
+    InjectionPermission injectionPermission;
     for (;;) {
         if (firstIteration) {
             firstIteration = false;
@@ -1265,7 +1273,8 @@ int32_t NativeInputManager::waitForTouchedWindowLd(MotionEvent* motionEvent, uin
                 LOGW("Dropping event because the dispatcher timed out waiting to identify "
                         "the window that should receive it.");
                 injectionResult = INPUT_EVENT_INJECTION_TIMED_OUT;
-                break;
+                injectionPermission = INJECTION_PERMISSION_UNKNOWN;
+                break; // timed out, exit wait loop
             }
         }
 
@@ -1273,6 +1282,7 @@ int32_t NativeInputManager::waitForTouchedWindowLd(MotionEvent* motionEvent, uin
         if (! mDispatchEnabled) {
             LOGI("Dropping event because input dispatch is disabled.");
             injectionResult = INPUT_EVENT_INJECTION_FAILED;
+            injectionPermission = INJECTION_PERMISSION_UNKNOWN;
             break; // failed, exit wait loop
         }
 
@@ -1286,7 +1296,9 @@ int32_t NativeInputManager::waitForTouchedWindowLd(MotionEvent* motionEvent, uin
         }
 
         // Update the touch state as needed based on the properties of the touch event.
-        if (action == MOTION_EVENT_ACTION_DOWN) {
+        if (action == AMOTION_EVENT_ACTION_DOWN) {
+            /* Case 1: ACTION_DOWN */
+
             InputWindow* newTouchedWindow = NULL;
             mTempTouchedOutsideWindows.clear();
 
@@ -1348,12 +1360,14 @@ int32_t NativeInputManager::waitForTouchedWindowLd(MotionEvent* motionEvent, uin
 
                 LOGI("Dropping event because there is no touched window or focused application.");
                 injectionResult = INPUT_EVENT_INJECTION_FAILED;
+                injectionPermission = INJECTION_PERMISSION_UNKNOWN;
                 break; // failed, exit wait loop
             }
 
             // Check permissions.
             if (! checkInjectionPermission(newTouchedWindow, injectorPid, injectorUid)) {
                 injectionResult = INPUT_EVENT_INJECTION_PERMISSION_DENIED;
+                injectionPermission = INJECTION_PERMISSION_DENIED;
                 break; // failed, exit wait loop
             }
 
@@ -1374,18 +1388,33 @@ int32_t NativeInputManager::waitForTouchedWindowLd(MotionEvent* motionEvent, uin
             if (newTouchedWindow->hasWallpaper) {
                 mTouchedWallpaperWindows.appendVector(mWallpaperWindows);
             }
+
+            injectionResult = INPUT_EVENT_INJECTION_SUCCEEDED;
+            injectionPermission = INJECTION_PERMISSION_GRANTED;
             break; // done
         } else {
+            /* Case 2: Everything but ACTION_DOWN */
+
             // Check permissions.
             if (! checkInjectionPermission(mTouchedWindow, injectorPid, injectorUid)) {
                 injectionResult = INPUT_EVENT_INJECTION_PERMISSION_DENIED;
+                injectionPermission = INJECTION_PERMISSION_DENIED;
+                break; // failed, exit wait loop
+            }
+
+            // If the pointer is not currently down, then ignore the event.
+            if (! mTouchDown) {
+                LOGI("Dropping event because the pointer is not down.");
+                injectionResult = INPUT_EVENT_INJECTION_FAILED;
+                injectionPermission = INJECTION_PERMISSION_GRANTED;
                 break; // failed, exit wait loop
             }
 
             // If there is no currently touched window then fail.
-            if (! mTouchedWindow || ! mTouchDown) {
-                LOGI("Dropping event because touched window is no longer valid.");
+            if (! mTouchedWindow) {
+                LOGW("Dropping event because there is no touched window to receive it.");
                 injectionResult = INPUT_EVENT_INJECTION_FAILED;
+                injectionPermission = INJECTION_PERMISSION_GRANTED;
                 break; // failed, exit wait loop
             }
 
@@ -1399,16 +1428,14 @@ int32_t NativeInputManager::waitForTouchedWindowLd(MotionEvent* motionEvent, uin
             }
 
             // Success!
+            injectionResult = INPUT_EVENT_INJECTION_SUCCEEDED;
+            injectionPermission = INJECTION_PERMISSION_GRANTED;
             break; // done
         }
     }
 
     // Output targets.
-    bool havePermission;
     if (injectionResult == INPUT_EVENT_INJECTION_SUCCEEDED) {
-        // Injection succeeded so the injector must have permission.
-        havePermission = true;
-
         size_t numWallpaperWindows = mTouchedWallpaperWindows.size();
         for (size_t i = 0; i < numWallpaperWindows; i++) {
             addTarget(mTouchedWallpaperWindows[i], 0, 0, outTargets);
@@ -1423,25 +1450,23 @@ int32_t NativeInputManager::waitForTouchedWindowLd(MotionEvent* motionEvent, uin
                 anrTimer.getTimeSpentWaitingForApplication(), outTargets);
         outTouchedWindow = mTouchedWindow;
     } else {
-        if (injectionResult != INPUT_EVENT_INJECTION_PERMISSION_DENIED
-                && checkInjectionPermission(NULL, injectorPid, injectorUid)) {
-            // Injection failed but the injector does have permission to inject events.
-            // While we might not have found a valid target for the injected event, we
-            // still want to update the dispatch state to take it into account.
-            havePermission = true;
-        } else {
-            // Injector does not have permission to inject events.
-            // We make sure to leave the dispatch state unchanged.
-            havePermission = false;
-        }
         outTouchedWindow = NULL;
     }
     mTempTouchedOutsideWindows.clear();
 
-    // Update final pieces of touch state now that we know for sure whether the injector
-    // had permission to perform the injection.
-    if (havePermission) {
-        if (action == MOTION_EVENT_ACTION_DOWN) {
+    // Check injection permission once and for all.
+    if (injectionPermission == INJECTION_PERMISSION_UNKNOWN) {
+        if (checkInjectionPermission(action == AMOTION_EVENT_ACTION_DOWN ? NULL : mTouchedWindow,
+                injectorPid, injectorUid)) {
+            injectionPermission = INJECTION_PERMISSION_GRANTED;
+        } else {
+            injectionPermission = INJECTION_PERMISSION_DENIED;
+        }
+    }
+
+    // Update final pieces of touch state if the injector had permission.
+    if (injectionPermission == INJECTION_PERMISSION_GRANTED) {
+        if (action == AMOTION_EVENT_ACTION_DOWN) {
             if (mTouchDown) {
                 // This is weird.  We got a down but we thought it was already down!
                 LOGW("Pointer down received while already down.");
@@ -1454,10 +1479,12 @@ int32_t NativeInputManager::waitForTouchedWindowLd(MotionEvent* motionEvent, uin
                 // be holding on to an earlier target from a previous touch down.  Release it.
                 releaseTouchedWindowLd();
             }
-        } else if (action == MOTION_EVENT_ACTION_UP) {
+        } else if (action == AMOTION_EVENT_ACTION_UP) {
             mTouchDown = false;
             releaseTouchedWindowLd();
         }
+    } else {
+        LOGW("Not updating touch focus because injection was denied.");
     }
 
 #if DEBUG_FOCUS
@@ -1557,26 +1584,21 @@ int32_t NativeInputManager::waitForMotionEventTargets(MotionEvent* motionEvent,
             policyFlags, injectorPid, injectorUid);
 #endif
 
-    switch (motionEvent->getNature()) {
-    case INPUT_EVENT_NATURE_TRACKBALL:
-        return waitForTrackballEventTargets(motionEvent, policyFlags, injectorPid, injectorUid,
-                outTargets);
-
-    case INPUT_EVENT_NATURE_TOUCH:
+    int32_t source = motionEvent->getSource();
+    if (source & AINPUT_SOURCE_CLASS_POINTER) {
         return waitForTouchEventTargets(motionEvent, policyFlags, injectorPid, injectorUid,
                 outTargets);
-
-    default:
-        assert(false);
-        return INPUT_EVENT_INJECTION_FAILED;
+    } else {
+        return waitForNonTouchEventTargets(motionEvent, policyFlags, injectorPid, injectorUid,
+                outTargets);
     }
 }
 
-int32_t NativeInputManager::waitForTrackballEventTargets(MotionEvent* motionEvent,
+int32_t NativeInputManager::waitForNonTouchEventTargets(MotionEvent* motionEvent,
         uint32_t policyFlags, int32_t injectorPid, int32_t injectorUid,
         Vector<InputTarget>& outTargets) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
-    LOGD("waitForTrackballEventTargets - policyFlags=%d, injectorPid=%d, injectorUid=%d",
+    LOGD("waitForNonTouchEventTargets - policyFlags=%d, injectorPid=%d, injectorUid=%d",
             policyFlags, injectorPid, injectorUid);
 #endif
 
@@ -1622,10 +1644,10 @@ int32_t NativeInputManager::waitForTouchEventTargets(MotionEvent* motionEvent,
 
     int32_t eventType;
     switch (motionEvent->getAction()) {
-    case MOTION_EVENT_ACTION_DOWN:
+    case AMOTION_EVENT_ACTION_DOWN:
         eventType = POWER_MANAGER_TOUCH_EVENT;
         break;
-    case MOTION_EVENT_ACTION_UP:
+    case AMOTION_EVENT_ACTION_UP:
         eventType = POWER_MANAGER_TOUCH_UP_EVENT;
         break;
     default:
@@ -1852,7 +1874,7 @@ static void android_server_InputManager_nativeSetDisplayOrientation(JNIEnv* env,
 static jint android_server_InputManager_nativeGetScanCodeState(JNIEnv* env, jclass clazz,
         jint deviceId, jint deviceClasses, jint scanCode) {
     if (checkInputManagerUnitialized(env)) {
-        return KEY_STATE_UNKNOWN;
+        return AKEY_STATE_UNKNOWN;
     }
 
     return gNativeInputManager->getInputManager()->getScanCodeState(
@@ -1862,7 +1884,7 @@ static jint android_server_InputManager_nativeGetScanCodeState(JNIEnv* env, jcla
 static jint android_server_InputManager_nativeGetKeyCodeState(JNIEnv* env, jclass clazz,
         jint deviceId, jint deviceClasses, jint keyCode) {
     if (checkInputManagerUnitialized(env)) {
-        return KEY_STATE_UNKNOWN;
+        return AKEY_STATE_UNKNOWN;
     }
 
     return gNativeInputManager->getInputManager()->getKeyCodeState(
@@ -1872,7 +1894,7 @@ static jint android_server_InputManager_nativeGetKeyCodeState(JNIEnv* env, jclas
 static jint android_server_InputManager_nativeGetSwitchState(JNIEnv* env, jclass clazz,
         jint deviceId, jint deviceClasses, jint sw) {
     if (checkInputManagerUnitialized(env)) {
-        return KEY_STATE_UNKNOWN;
+        return AKEY_STATE_UNKNOWN;
     }
 
     return gNativeInputManager->getInputManager()->getSwitchState(deviceId, deviceClasses, sw);
@@ -1963,28 +1985,28 @@ static void android_server_InputManager_nativeUnregisterInputChannel(JNIEnv* env
 }
 
 static jint android_server_InputManager_nativeInjectKeyEvent(JNIEnv* env, jclass clazz,
-        jobject keyEventObj, jint nature, jint injectorPid, jint injectorUid,
+        jobject keyEventObj, jint injectorPid, jint injectorUid,
         jboolean sync, jint timeoutMillis) {
     if (checkInputManagerUnitialized(env)) {
         return INPUT_EVENT_INJECTION_FAILED;
     }
 
     KeyEvent keyEvent;
-    android_view_KeyEvent_toNative(env, keyEventObj, nature, & keyEvent);
+    android_view_KeyEvent_toNative(env, keyEventObj, & keyEvent);
 
     return gNativeInputManager->getInputManager()->injectInputEvent(& keyEvent,
             injectorPid, injectorUid, sync, timeoutMillis);
 }
 
 static jint android_server_InputManager_nativeInjectMotionEvent(JNIEnv* env, jclass clazz,
-        jobject motionEventObj, jint nature, jint injectorPid, jint injectorUid,
+        jobject motionEventObj, jint injectorPid, jint injectorUid,
         jboolean sync, jint timeoutMillis) {
     if (checkInputManagerUnitialized(env)) {
         return INPUT_EVENT_INJECTION_FAILED;
     }
 
     MotionEvent motionEvent;
-    android_view_MotionEvent_toNative(env, motionEventObj, nature, & motionEvent);
+    android_view_MotionEvent_toNative(env, motionEventObj, & motionEvent);
 
     return gNativeInputManager->getInputManager()->injectInputEvent(& motionEvent,
             injectorPid, injectorUid, sync, timeoutMillis);
@@ -2050,9 +2072,9 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) android_server_InputManager_nativeRegisterInputChannel },
     { "nativeUnregisterInputChannel", "(Landroid/view/InputChannel;)V",
             (void*) android_server_InputManager_nativeUnregisterInputChannel },
-    { "nativeInjectKeyEvent", "(Landroid/view/KeyEvent;IIIZI)I",
+    { "nativeInjectKeyEvent", "(Landroid/view/KeyEvent;IIZI)I",
             (void*) android_server_InputManager_nativeInjectKeyEvent },
-    { "nativeInjectMotionEvent", "(Landroid/view/MotionEvent;IIIZI)I",
+    { "nativeInjectMotionEvent", "(Landroid/view/MotionEvent;IIZI)I",
             (void*) android_server_InputManager_nativeInjectMotionEvent },
     { "nativeSetInputWindows", "([Lcom/android/server/InputWindow;)V",
             (void*) android_server_InputManager_nativeSetInputWindows },

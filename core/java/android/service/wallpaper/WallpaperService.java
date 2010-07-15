@@ -41,6 +41,7 @@ import android.util.LogPrinter;
 import android.view.Gravity;
 import android.view.IWindowSession;
 import android.view.InputChannel;
+import android.view.InputDevice;
 import android.view.InputHandler;
 import android.view.InputQueue;
 import android.view.KeyEvent;
@@ -214,9 +215,12 @@ public abstract class WallpaperService extends Service {
         
         final InputHandler mInputHandler = new BaseInputHandler() {
             @Override
-            public void handleTouch(MotionEvent event, Runnable finishedCallback) {
+            public void handleMotion(MotionEvent event, Runnable finishedCallback) {
                 try {
-                    dispatchPointer(event);
+                    int source = event.getSource();
+                    if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+                        dispatchPointer(event);
+                    }
                 } finally {
                     finishedCallback.run();
                 }

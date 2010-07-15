@@ -32,22 +32,12 @@ public interface InputHandler {
     public void handleKey(KeyEvent event, Runnable finishedCallback);
     
     /**
-     * Handle a touch event.
+     * Handle a motion event.
      * It is the responsibility of the callee to ensure that the finished callback is
      * eventually invoked when the event processing is finished and the input system
      * can send the next event.
      * @param event The motion event data.
      * @param finishedCallback The callback to invoke when event processing is finished.
      */
-    public void handleTouch(MotionEvent event, Runnable finishedCallback);
-    
-    /**
-     * Handle a trackball event.
-     * It is the responsibility of the callee to ensure that the finished callback is
-     * eventually invoked when the event processing is finished and the input system
-     * can send the next event.
-     * @param event The motion event data.
-     * @param finishedCallback The callback to invoke when event processing is finished.
-     */
-    public void handleTrackball(MotionEvent event, Runnable finishedCallback);
+    public void handleMotion(MotionEvent event, Runnable finishedCallback);
 }

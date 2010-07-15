@@ -245,14 +245,14 @@ void InputDispatcher::processConfigurationChangedLockedInterruptible(
 void InputDispatcher::processKeyLockedInterruptible(
         nsecs_t currentTime, KeyEntry* entry, nsecs_t keyRepeatTimeout) {
 #if DEBUG_OUTBOUND_EVENT_DETAILS
-    LOGD("processKey - eventTime=%lld, deviceId=0x%x, nature=0x%x, policyFlags=0x%x, action=0x%x, "
+    LOGD("processKey - eventTime=%lld, deviceId=0x%x, source=0x%x, policyFlags=0x%x, action=0x%x, "
             "flags=0x%x, keyCode=0x%x, scanCode=0x%x, metaState=0x%x, downTime=%lld",
-            entry->eventTime, entry->deviceId, entry->nature, entry->policyFlags, entry->action,
+            entry->eventTime, entry->deviceId, entry->source, entry->policyFlags, entry->action,
             entry->flags, entry->keyCode, entry->scanCode, entry->metaState,
             entry->downTime);
 #endif
 
-    if (entry->action == KEY_EVENT_ACTION_DOWN && ! entry->isInjected()) {
+    if (entry->action == AKEY_EVENT_ACTION_DOWN && ! entry->isInjected()) {
         if (mKeyRepeatState.lastKeyEntry
                 && mKeyRepeatState.lastKeyEntry->keyCode == entry->keyCode) {
             // We have seen two identical key downs in a row which indicates that the device
@@ -287,7 +287,7 @@ void InputDispatcher::processKeyRepeatLockedInterruptible(
         if (queuedEntry->type == EventEntry::TYPE_KEY) {
             KeyEntry* queuedKeyEntry = static_cast<KeyEntry*>(queuedEntry);
             if (queuedKeyEntry->deviceId == entry->deviceId
-                    && entry->action == KEY_EVENT_ACTION_UP) {
+                    && entry->action == AKEY_EVENT_ACTION_UP) {
                 resetKeyRepeatLocked();
                 return;
             }
@@ -303,7 +303,7 @@ void InputDispatcher::processKeyRepeatLockedInterruptible(
         entry->repeatCount += 1;
     } else {
         KeyEntry* newEntry = mAllocator.obtainKeyEntry(currentTime,
-                entry->deviceId, entry->nature, policyFlags,
+                entry->deviceId, entry->source, policyFlags,
                 entry->action, entry->flags, entry->keyCode, entry->scanCode,
                 entry->metaState, entry->repeatCount + 1, entry->downTime);
 
@@ -314,16 +314,16 @@ void InputDispatcher::processKeyRepeatLockedInterruptible(
     }
 
     if (entry->repeatCount == 1) {
-        entry->flags |= KEY_EVENT_FLAG_LONG_PRESS;
+        entry->flags |= AKEY_EVENT_FLAG_LONG_PRESS;
     }
 
     mKeyRepeatState.nextRepeatTime = currentTime + keyRepeatTimeout;
 
 #if DEBUG_OUTBOUND_EVENT_DETAILS
-    LOGD("processKeyRepeat - eventTime=%lld, deviceId=0x%x, nature=0x%x, policyFlags=0x%x, "
+    LOGD("processKeyRepeat - eventTime=%lld, deviceId=0x%x, source=0x%x, policyFlags=0x%x, "
             "action=0x%x, flags=0x%x, keyCode=0x%x, scanCode=0x%x, metaState=0x%x, "
             "repeatCount=%d, downTime=%lld",
-            entry->eventTime, entry->deviceId, entry->nature, entry->policyFlags,
+            entry->eventTime, entry->deviceId, entry->source, entry->policyFlags,
             entry->action, entry->flags, entry->keyCode, entry->scanCode, entry->metaState,
             entry->repeatCount, entry->downTime);
 #endif
@@ -334,9 +334,9 @@ void InputDispatcher::processKeyRepeatLockedInterruptible(
 void InputDispatcher::processMotionLockedInterruptible(
         nsecs_t currentTime, MotionEntry* entry) {
 #if DEBUG_OUTBOUND_EVENT_DETAILS
-    LOGD("processMotion - eventTime=%lld, deviceId=0x%x, nature=0x%x, policyFlags=0x%x, action=0x%x, "
+    LOGD("processMotion - eventTime=%lld, deviceId=0x%x, source=0x%x, policyFlags=0x%x, action=0x%x, "
             "metaState=0x%x, edgeFlags=0x%x, xPrecision=%f, yPrecision=%f, downTime=%lld",
-            entry->eventTime, entry->deviceId, entry->nature, entry->policyFlags, entry->action,
+            entry->eventTime, entry->deviceId, entry->source, entry->policyFlags, entry->action,
             entry->metaState, entry->edgeFlags, entry->xPrecision, entry->yPrecision,
             entry->downTime);
 
@@ -357,7 +357,7 @@ void InputDispatcher::processMotionLockedInterruptible(
 
     // Keep in mind that due to batching, it is possible for the number of samples actually
     // dispatched to change before the application finally consumed them.
-    if (entry->action == MOTION_EVENT_ACTION_MOVE) {
+    if (entry->action == AMOTION_EVENT_ACTION_MOVE) {
         LOGD("  ... Total movement samples currently batched %d ...", sampleCount);
     }
 #endif
@@ -375,7 +375,7 @@ void InputDispatcher::identifyInputTargetsAndDispatchKeyLockedInterruptible(
     mCurrentInputTargetsValid = false;
     mLock.unlock();
 
-    mReusableKeyEvent.initialize(entry->deviceId, entry->nature, entry->action, entry->flags,
+    mReusableKeyEvent.initialize(entry->deviceId, entry->source, entry->action, entry->flags,
             entry->keyCode, entry->scanCode, entry->metaState, entry->repeatCount,
             entry->downTime, entry->eventTime);
 
@@ -404,7 +404,7 @@ void InputDispatcher::identifyInputTargetsAndDispatchMotionLockedInterruptible(
     mCurrentInputTargetsValid = false;
     mLock.unlock();
 
-    mReusableMotionEvent.initialize(entry->deviceId, entry->nature, entry->action,
+    mReusableMotionEvent.initialize(entry->deviceId, entry->source, entry->action,
             entry->edgeFlags, entry->metaState,
             0, 0, entry->xPrecision, entry->yPrecision,
             entry->downTime, entry->eventTime, entry->pointerCount, entry->pointerIds,
@@ -611,11 +611,11 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
         int32_t action = keyEntry->action;
         int32_t flags = keyEntry->flags;
         if (dispatchEntry->targetFlags & InputTarget::FLAG_CANCEL) {
-            flags |= KEY_EVENT_FLAG_CANCELED;
+            flags |= AKEY_EVENT_FLAG_CANCELED;
         }
 
         // Publish the key event.
-        status = connection->inputPublisher.publishKeyEvent(keyEntry->deviceId, keyEntry->nature,
+        status = connection->inputPublisher.publishKeyEvent(keyEntry->deviceId, keyEntry->source,
                 action, flags, keyEntry->keyCode, keyEntry->scanCode,
                 keyEntry->metaState, keyEntry->repeatCount, keyEntry->downTime,
                 keyEntry->eventTime);
@@ -635,10 +635,10 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
         // Apply target flags.
         int32_t action = motionEntry->action;
         if (dispatchEntry->targetFlags & InputTarget::FLAG_OUTSIDE) {
-            action = MOTION_EVENT_ACTION_OUTSIDE;
+            action = AMOTION_EVENT_ACTION_OUTSIDE;
         }
         if (dispatchEntry->targetFlags & InputTarget::FLAG_CANCEL) {
-            action = MOTION_EVENT_ACTION_CANCEL;
+            action = AMOTION_EVENT_ACTION_CANCEL;
         }
 
         // If headMotionSample is non-NULL, then it points to the first new sample that we
@@ -652,7 +652,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
 
         // Publish the motion event and the first motion sample.
         status = connection->inputPublisher.publishMotionEvent(motionEntry->deviceId,
-                motionEntry->nature, action, motionEntry->edgeFlags, motionEntry->metaState,
+                motionEntry->source, action, motionEntry->edgeFlags, motionEntry->metaState,
                 dispatchEntry->xOffset, dispatchEntry->yOffset,
                 motionEntry->xPrecision, motionEntry->yPrecision,
                 motionEntry->downTime, firstMotionSample->eventTime,
@@ -964,13 +964,13 @@ void InputDispatcher::notifyAppSwitchComing(nsecs_t eventTime) {
     } // release lock
 }
 
-void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t nature,
+void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t source,
         uint32_t policyFlags, int32_t action, int32_t flags,
         int32_t keyCode, int32_t scanCode, int32_t metaState, nsecs_t downTime) {
 #if DEBUG_INBOUND_EVENT_DETAILS
-    LOGD("notifyKey - eventTime=%lld, deviceId=0x%x, nature=0x%x, policyFlags=0x%x, action=0x%x, "
+    LOGD("notifyKey - eventTime=%lld, deviceId=0x%x, source=0x%x, policyFlags=0x%x, action=0x%x, "
             "flags=0x%x, keyCode=0x%x, scanCode=0x%x, metaState=0x%x, downTime=%lld",
-            eventTime, deviceId, nature, policyFlags, action, flags,
+            eventTime, deviceId, source, policyFlags, action, flags,
             keyCode, scanCode, metaState, downTime);
 #endif
 
@@ -980,7 +980,7 @@ void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t nat
 
         int32_t repeatCount = 0;
         KeyEntry* newEntry = mAllocator.obtainKeyEntry(eventTime,
-                deviceId, nature, policyFlags, action, flags, keyCode, scanCode,
+                deviceId, source, policyFlags, action, flags, keyCode, scanCode,
                 metaState, repeatCount, downTime);
 
         wasEmpty = mInboundQueue.isEmpty();
@@ -992,15 +992,15 @@ void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t nat
     }
 }
 
-void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t nature,
+void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t source,
         uint32_t policyFlags, int32_t action, int32_t metaState, int32_t edgeFlags,
         uint32_t pointerCount, const int32_t* pointerIds, const PointerCoords* pointerCoords,
         float xPrecision, float yPrecision, nsecs_t downTime) {
 #if DEBUG_INBOUND_EVENT_DETAILS
-    LOGD("notifyMotion - eventTime=%lld, deviceId=0x%x, nature=0x%x, policyFlags=0x%x, "
+    LOGD("notifyMotion - eventTime=%lld, deviceId=0x%x, source=0x%x, policyFlags=0x%x, "
             "action=0x%x, metaState=0x%x, edgeFlags=0x%x, xPrecision=%f, yPrecision=%f, "
             "downTime=%lld",
-            eventTime, deviceId, nature, policyFlags, action, metaState, edgeFlags,
+            eventTime, deviceId, source, policyFlags, action, metaState, edgeFlags,
             xPrecision, yPrecision, downTime);
     for (uint32_t i = 0; i < pointerCount; i++) {
         LOGD("  Pointer %d: id=%d, x=%f, y=%f, pressure=%f, size=%f",
@@ -1014,7 +1014,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t 
         AutoMutex _l(mLock);
 
         // Attempt batching and streaming of move events.
-        if (action == MOTION_EVENT_ACTION_MOVE) {
+        if (action == AMOTION_EVENT_ACTION_MOVE) {
             // BATCHING CASE
             //
             // Try to append a move sample to the tail of the inbound queue for this device.
@@ -1033,7 +1033,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t 
                     continue;
                 }
 
-                if (motionEntry->action != MOTION_EVENT_ACTION_MOVE
+                if (motionEntry->action != AMOTION_EVENT_ACTION_MOVE
                         || motionEntry->pointerCount != pointerCount
                         || motionEntry->isInjected()) {
                     // Last motion event in the queue for this device is not compatible for
@@ -1094,7 +1094,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t 
 
                             MotionEntry* syncedMotionEntry = static_cast<MotionEntry*>(
                                     dispatchEntry->eventEntry);
-                            if (syncedMotionEntry->action != MOTION_EVENT_ACTION_MOVE
+                            if (syncedMotionEntry->action != AMOTION_EVENT_ACTION_MOVE
                                     || syncedMotionEntry->deviceId != deviceId
                                     || syncedMotionEntry->pointerCount != pointerCount
                                     || syncedMotionEntry->isInjected()) {
@@ -1124,7 +1124,7 @@ NoBatchingOrStreaming:;
 
         // Just enqueue a new motion event.
         MotionEntry* newEntry = mAllocator.obtainMotionEntry(eventTime,
-                deviceId, nature, policyFlags, action, metaState, edgeFlags,
+                deviceId, source, policyFlags, action, metaState, edgeFlags,
                 xPrecision, yPrecision, downTime,
                 pointerCount, pointerIds, pointerCoords);
 
@@ -1224,19 +1224,19 @@ bool InputDispatcher::isFullySynchronizedLocked() {
 InputDispatcher::EventEntry* InputDispatcher::createEntryFromInputEventLocked(
         const InputEvent* event) {
     switch (event->getType()) {
-    case INPUT_EVENT_TYPE_KEY: {
+    case AINPUT_EVENT_TYPE_KEY: {
         const KeyEvent* keyEvent = static_cast<const KeyEvent*>(event);
         uint32_t policyFlags = 0; // XXX consider adding a policy flag to track injected events
 
         KeyEntry* keyEntry = mAllocator.obtainKeyEntry(keyEvent->getEventTime(),
-                keyEvent->getDeviceId(), keyEvent->getNature(), policyFlags,
+                keyEvent->getDeviceId(), keyEvent->getSource(), policyFlags,
                 keyEvent->getAction(), keyEvent->getFlags(),
                 keyEvent->getKeyCode(), keyEvent->getScanCode(), keyEvent->getMetaState(),
                 keyEvent->getRepeatCount(), keyEvent->getDownTime());
         return keyEntry;
     }
 
-    case INPUT_EVENT_TYPE_MOTION: {
+    case AINPUT_EVENT_TYPE_MOTION: {
         const MotionEvent* motionEvent = static_cast<const MotionEvent*>(event);
         uint32_t policyFlags = 0; // XXX consider adding a policy flag to track injected events
 
@@ -1245,7 +1245,7 @@ InputDispatcher::EventEntry* InputDispatcher::createEntryFromInputEventLocked(
         size_t pointerCount = motionEvent->getPointerCount();
 
         MotionEntry* motionEntry = mAllocator.obtainMotionEntry(*sampleEventTimes,
-                motionEvent->getDeviceId(), motionEvent->getNature(), policyFlags,
+                motionEvent->getDeviceId(), motionEvent->getSource(), policyFlags,
                 motionEvent->getAction(), motionEvent->getMetaState(), motionEvent->getEdgeFlags(),
                 motionEvent->getXPrecision(), motionEvent->getYPrecision(),
                 motionEvent->getDownTime(), uint32_t(pointerCount),
@@ -1500,14 +1500,14 @@ InputDispatcher::Allocator::obtainConfigurationChangedEntry(nsecs_t eventTime) {
 }
 
 InputDispatcher::KeyEntry* InputDispatcher::Allocator::obtainKeyEntry(nsecs_t eventTime,
-        int32_t deviceId, int32_t nature, uint32_t policyFlags, int32_t action,
+        int32_t deviceId, int32_t source, uint32_t policyFlags, int32_t action,
         int32_t flags, int32_t keyCode, int32_t scanCode, int32_t metaState,
         int32_t repeatCount, nsecs_t downTime) {
     KeyEntry* entry = mKeyEntryPool.alloc();
     initializeEventEntry(entry, EventEntry::TYPE_KEY, eventTime);
 
     entry->deviceId = deviceId;
-    entry->nature = nature;
+    entry->source = source;
     entry->policyFlags = policyFlags;
     entry->action = action;
     entry->flags = flags;
@@ -1520,7 +1520,7 @@ InputDispatcher::KeyEntry* InputDispatcher::Allocator::obtainKeyEntry(nsecs_t ev
 }
 
 InputDispatcher::MotionEntry* InputDispatcher::Allocator::obtainMotionEntry(nsecs_t eventTime,
-        int32_t deviceId, int32_t nature, uint32_t policyFlags, int32_t action,
+        int32_t deviceId, int32_t source, uint32_t policyFlags, int32_t action,
         int32_t metaState, int32_t edgeFlags, float xPrecision, float yPrecision,
         nsecs_t downTime, uint32_t pointerCount,
         const int32_t* pointerIds, const PointerCoords* pointerCoords) {
@@ -1529,7 +1529,7 @@ InputDispatcher::MotionEntry* InputDispatcher::Allocator::obtainMotionEntry(nsec
 
     entry->eventTime = eventTime;
     entry->deviceId = deviceId;
-    entry->nature = nature;
+    entry->source = source;
     entry->policyFlags = policyFlags;
     entry->action = action;
     entry->metaState = metaState;

@@ -27,7 +27,7 @@ class KeyEvent;
 extern jobject android_view_KeyEvent_fromNative(JNIEnv* env, const KeyEvent* event);
 
 /* Copies the contents of a DVM KeyEvent object to a native KeyEvent instance. */
-extern void android_view_KeyEvent_toNative(JNIEnv* env, jobject eventObj, int32_t nature,
+extern void android_view_KeyEvent_toNative(JNIEnv* env, jobject eventObj,
         KeyEvent* event);
 
 } // namespace android

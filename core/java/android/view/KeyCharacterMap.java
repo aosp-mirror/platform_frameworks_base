@@ -26,6 +26,9 @@ import android.util.SparseArray;
 import java.lang.Character;
 import java.lang.ref.WeakReference;
 
+/**
+ * Describes the keys provided by a device and their associated labels.
+ */
 public class KeyCharacterMap
 {
     /**
@@ -59,6 +62,11 @@ public class KeyCharacterMap
     private static SparseArray<WeakReference<KeyCharacterMap>> sInstances 
         = new SparseArray<WeakReference<KeyCharacterMap>>();
 
+    /**
+     * Loads the key character maps for the keyboard with the specified device id.
+     * @param keyboard The device id of the keyboard.
+     * @return The associated key character map.
+     */
     public static KeyCharacterMap load(int keyboard)
     {
         synchronized (sLock) {

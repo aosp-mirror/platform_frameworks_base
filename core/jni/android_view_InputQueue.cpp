@@ -326,12 +326,11 @@ bool NativeInputQueue::handleReceiveCallback(int receiveFd, int events, void* da
     //       the input handler object itself for the same reason.
 
     int32_t inputEventType = inputEvent->getType();
-    int32_t inputEventNature = inputEvent->getNature();
 
     jobject inputEventObj;
     jmethodID dispatchMethodId;
     switch (inputEventType) {
-    case INPUT_EVENT_TYPE_KEY:
+    case AINPUT_EVENT_TYPE_KEY:
 #if DEBUG_DISPATCH_CYCLE
         LOGD("channel '%s' ~ Received key event.", connection->getInputChannelName());
 #endif
@@ -340,7 +339,7 @@ bool NativeInputQueue::handleReceiveCallback(int receiveFd, int events, void* da
         dispatchMethodId = gInputQueueClassInfo.dispatchKeyEvent;
         break;
 
-    case INPUT_EVENT_TYPE_MOTION:
+    case AINPUT_EVENT_TYPE_MOTION:
 #if DEBUG_DISPATCH_CYCLE
         LOGD("channel '%s' ~ Received motion event.", connection->getInputChannelName());
 #endif
@@ -367,7 +366,7 @@ bool NativeInputQueue::handleReceiveCallback(int receiveFd, int events, void* da
 #endif
     env->CallStaticVoidMethod(gInputQueueClassInfo.clazz,
             dispatchMethodId, inputHandlerObjLocal, inputEventObj,
-            jint(inputEventNature), jlong(finishedToken));
+            jlong(finishedToken));
 #if DEBUG_DISPATCH_CYCLE
     LOGD("Returned from input handler.");
 #endif
@@ -471,11 +470,11 @@ int register_android_view_InputQueue(JNIEnv* env) {
 
     GET_STATIC_METHOD_ID(gInputQueueClassInfo.dispatchKeyEvent, gInputQueueClassInfo.clazz,
             "dispatchKeyEvent",
-            "(Landroid/view/InputHandler;Landroid/view/KeyEvent;IJ)V");
+            "(Landroid/view/InputHandler;Landroid/view/KeyEvent;J)V");
 
     GET_STATIC_METHOD_ID(gInputQueueClassInfo.dispatchMotionEvent, gInputQueueClassInfo.clazz,
             "dispatchMotionEvent",
-            "(Landroid/view/InputHandler;Landroid/view/MotionEvent;IJ)V");
+            "(Landroid/view/InputHandler;Landroid/view/MotionEvent;J)V");
     return 0;
 }
 

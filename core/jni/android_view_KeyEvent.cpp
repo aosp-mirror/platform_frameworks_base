@@ -32,12 +32,13 @@ static struct {
 
     jmethodID ctor;
 
+    jfieldID mDeviceId;
+    jfieldID mSource;
     jfieldID mMetaState;
     jfieldID mAction;
     jfieldID mKeyCode;
     jfieldID mScanCode;
     jfieldID mRepeatCount;
-    jfieldID mDeviceId;
     jfieldID mFlags;
     jfieldID mDownTime;
     jfieldID mEventTime;
@@ -56,22 +57,24 @@ jobject android_view_KeyEvent_fromNative(JNIEnv* env, const KeyEvent* event) {
             event->getMetaState(),
             event->getDeviceId(),
             event->getScanCode(),
-            event->getFlags());
+            event->getFlags(),
+            event->getSource());
 }
 
-void android_view_KeyEvent_toNative(JNIEnv* env, jobject eventObj, int32_t nature,
+void android_view_KeyEvent_toNative(JNIEnv* env, jobject eventObj,
         KeyEvent* event) {
+    jint deviceId = env->GetIntField(eventObj, gKeyEventClassInfo.mDeviceId);
+    jint source = env->GetIntField(eventObj, gKeyEventClassInfo.mSource);
     jint metaState = env->GetIntField(eventObj, gKeyEventClassInfo.mMetaState);
     jint action = env->GetIntField(eventObj, gKeyEventClassInfo.mAction);
     jint keyCode = env->GetIntField(eventObj, gKeyEventClassInfo.mKeyCode);
     jint scanCode = env->GetIntField(eventObj, gKeyEventClassInfo.mScanCode);
     jint repeatCount = env->GetIntField(eventObj, gKeyEventClassInfo.mRepeatCount);
-    jint deviceId = env->GetIntField(eventObj, gKeyEventClassInfo.mDeviceId);
     jint flags = env->GetIntField(eventObj, gKeyEventClassInfo.mFlags);
     jlong downTime = env->GetLongField(eventObj, gKeyEventClassInfo.mDownTime);
     jlong eventTime = env->GetLongField(eventObj, gKeyEventClassInfo.mEventTime);
 
-    event->initialize(deviceId, nature, action, flags, keyCode, scanCode, metaState, repeatCount,
+    event->initialize(deviceId, source, action, flags, keyCode, scanCode, metaState, repeatCount,
             milliseconds_to_nanoseconds(downTime),
             milliseconds_to_nanoseconds(eventTime));
 }
@@ -91,8 +94,6 @@ static const JNINativeMethod g_methods[] = {
     { "native_hasDefaultAction", "(I)Z", (void*)native_hasDefaultAction },
 };
 
-static const char* const kKeyEventPathName = "android/view/KeyEvent";
-
 #define FIND_CLASS(var, className) \
         var = env->FindClass(className); \
         LOG_FATAL_IF(! var, "Unable to find class " className); \
@@ -107,11 +108,15 @@ static const char* const kKeyEventPathName = "android/view/KeyEvent";
         LOG_FATAL_IF(! var, "Unable to find field " fieldName);
 
 int register_android_view_KeyEvent(JNIEnv* env) {
-    FIND_CLASS(gKeyEventClassInfo.clazz, kKeyEventPathName);
+    FIND_CLASS(gKeyEventClassInfo.clazz, "android/view/KeyEvent");
         
     GET_METHOD_ID(gKeyEventClassInfo.ctor, gKeyEventClassInfo.clazz,
-            "<init>", "(JJIIIIIII)V");
+            "<init>", "(JJIIIIIIII)V");
 
+    GET_FIELD_ID(gKeyEventClassInfo.mDeviceId, gKeyEventClassInfo.clazz,
+            "mDeviceId", "I");
+    GET_FIELD_ID(gKeyEventClassInfo.mSource, gKeyEventClassInfo.clazz,
+            "mSource", "I");
     GET_FIELD_ID(gKeyEventClassInfo.mMetaState, gKeyEventClassInfo.clazz,
             "mMetaState", "I");
     GET_FIELD_ID(gKeyEventClassInfo.mAction, gKeyEventClassInfo.clazz,
@@ -122,8 +127,6 @@ int register_android_view_KeyEvent(JNIEnv* env) {
             "mScanCode", "I");
     GET_FIELD_ID(gKeyEventClassInfo.mRepeatCount, gKeyEventClassInfo.clazz,
             "mRepeatCount", "I");
-    GET_FIELD_ID(gKeyEventClassInfo.mDeviceId, gKeyEventClassInfo.clazz,
-            "mDeviceId", "I");
     GET_FIELD_ID(gKeyEventClassInfo.mFlags, gKeyEventClassInfo.clazz,
             "mFlags", "I");
     GET_FIELD_ID(gKeyEventClassInfo.mDownTime, gKeyEventClassInfo.clazz,
@@ -134,8 +137,7 @@ int register_android_view_KeyEvent(JNIEnv* env) {
             "mCharacters", "Ljava/lang/String;");
 
     return AndroidRuntime::registerNativeMethods(
-        env, kKeyEventPathName,
-        g_methods, NELEM(g_methods));
+        env, "android/view/KeyEvent", g_methods, NELEM(g_methods));
 }
 
 } // namespace android

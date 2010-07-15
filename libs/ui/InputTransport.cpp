@@ -270,7 +270,7 @@ status_t InputPublisher::reset() {
 status_t InputPublisher::publishInputEvent(
         int32_t type,
         int32_t deviceId,
-        int32_t nature) {
+        int32_t source) {
     if (mPinned) {
         LOGE("channel '%s' publisher ~ Attempted to publish a new event but publisher has "
                 "not yet been reset.", mChannel->getName().string());
@@ -302,13 +302,13 @@ status_t InputPublisher::publishInputEvent(
     mSharedMessage->consumed = false;
     mSharedMessage->type = type;
     mSharedMessage->deviceId = deviceId;
-    mSharedMessage->nature = nature;
+    mSharedMessage->source = source;
     return OK;
 }
 
 status_t InputPublisher::publishKeyEvent(
         int32_t deviceId,
-        int32_t nature,
+        int32_t source,
         int32_t action,
         int32_t flags,
         int32_t keyCode,
@@ -318,15 +318,15 @@ status_t InputPublisher::publishKeyEvent(
         nsecs_t downTime,
         nsecs_t eventTime) {
 #if DEBUG_TRANSPORT_ACTIONS
-    LOGD("channel '%s' publisher ~ publishKeyEvent: deviceId=%d, nature=%d, "
+    LOGD("channel '%s' publisher ~ publishKeyEvent: deviceId=%d, source=%d, "
             "action=%d, flags=%d, keyCode=%d, scanCode=%d, metaState=%d, repeatCount=%d,"
             "downTime=%lld, eventTime=%lld",
             mChannel->getName().string(),
-            deviceId, nature, action, flags, keyCode, scanCode, metaState, repeatCount,
+            deviceId, source, action, flags, keyCode, scanCode, metaState, repeatCount,
             downTime, eventTime);
 #endif
 
-    status_t result = publishInputEvent(INPUT_EVENT_TYPE_KEY, deviceId, nature);
+    status_t result = publishInputEvent(AINPUT_EVENT_TYPE_KEY, deviceId, source);
     if (result < 0) {
         return result;
     }
@@ -344,7 +344,7 @@ status_t InputPublisher::publishKeyEvent(
 
 status_t InputPublisher::publishMotionEvent(
         int32_t deviceId,
-        int32_t nature,
+        int32_t source,
         int32_t action,
         int32_t edgeFlags,
         int32_t metaState,
@@ -358,12 +358,12 @@ status_t InputPublisher::publishMotionEvent(
         const int32_t* pointerIds,
         const PointerCoords* pointerCoords) {
 #if DEBUG_TRANSPORT_ACTIONS
-    LOGD("channel '%s' publisher ~ publishMotionEvent: deviceId=%d, nature=%d, "
+    LOGD("channel '%s' publisher ~ publishMotionEvent: deviceId=%d, source=%d, "
             "action=%d, edgeFlags=%d, metaState=%d, xOffset=%f, yOffset=%f, "
             "xPrecision=%f, yPrecision=%f, downTime=%lld, eventTime=%lld, "
             "pointerCount=%d",
             mChannel->getName().string(),
-            deviceId, nature, action, edgeFlags, metaState, xOffset, yOffset,
+            deviceId, source, action, edgeFlags, metaState, xOffset, yOffset,
             xPrecision, yPrecision, downTime, eventTime, pointerCount);
 #endif
 
@@ -373,7 +373,7 @@ status_t InputPublisher::publishMotionEvent(
         return BAD_VALUE;
     }
 
-    status_t result = publishInputEvent(INPUT_EVENT_TYPE_MOTION, deviceId, nature);
+    status_t result = publishInputEvent(AINPUT_EVENT_TYPE_MOTION, deviceId, source);
     if (result < 0) {
         return result;
     }
@@ -399,7 +399,7 @@ status_t InputPublisher::publishMotionEvent(
     // Cache essential information about the motion event to ensure that a malicious consumer
     // cannot confuse the publisher by modifying the contents of the shared memory buffer while
     // it is being updated.
-    if (action == MOTION_EVENT_ACTION_MOVE) {
+    if (action == AMOTION_EVENT_ACTION_MOVE) {
         mMotionEventPointerCount = pointerCount;
         mMotionEventSampleDataStride = InputMessage::sampleDataStride(pointerCount);
         mMotionEventSampleDataTail = InputMessage::sampleDataPtrIncrement(
@@ -420,7 +420,7 @@ status_t InputPublisher::appendMotionSample(
 
     if (! mPinned || ! mMotionEventSampleDataTail) {
         LOGE("channel '%s' publisher ~ Cannot append motion sample because there is no current "
-                "MOTION_EVENT_ACTION_MOVE event.", mChannel->getName().string());
+                "AMOTION_EVENT_ACTION_MOVE event.", mChannel->getName().string());
         return INVALID_OPERATION;
     }
 
@@ -588,7 +588,7 @@ status_t InputConsumer::consume(InputEventFactoryInterface* factory, InputEvent*
     mSharedMessage->consumed = true;
 
     switch (mSharedMessage->type) {
-    case INPUT_EVENT_TYPE_KEY: {
+    case AINPUT_EVENT_TYPE_KEY: {
         KeyEvent* keyEvent = factory->createKeyEvent();
         if (! keyEvent) return NO_MEMORY;
 
@@ -598,7 +598,7 @@ status_t InputConsumer::consume(InputEventFactoryInterface* factory, InputEvent*
         break;
     }
 
-    case INPUT_EVENT_TYPE_MOTION: {
+    case AINPUT_EVENT_TYPE_MOTION: {
         MotionEvent* motionEvent = factory->createMotionEvent();
         if (! motionEvent) return NO_MEMORY;
 
@@ -648,7 +648,7 @@ status_t InputConsumer::receiveDispatchSignal() {
 void InputConsumer::populateKeyEvent(KeyEvent* keyEvent) const {
     keyEvent->initialize(
             mSharedMessage->deviceId,
-            mSharedMessage->nature,
+            mSharedMessage->source,
             mSharedMessage->key.action,
             mSharedMessage->key.flags,
             mSharedMessage->key.keyCode,
@@ -662,7 +662,7 @@ void InputConsumer::populateKeyEvent(KeyEvent* keyEvent) const {
 void InputConsumer::populateMotionEvent(MotionEvent* motionEvent) const {
     motionEvent->initialize(
             mSharedMessage->deviceId,
-            mSharedMessage->nature,
+            mSharedMessage->source,
             mSharedMessage->motion.action,
             mSharedMessage->motion.edgeFlags,
             mSharedMessage->motion.metaState,

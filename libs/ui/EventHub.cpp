@@ -168,12 +168,12 @@ int32_t EventHub::getScanCodeState(int32_t deviceId, int32_t deviceClasses,
                 device_t* device = mDevicesById[i].device;
                 if (device != NULL && (device->classes & deviceClasses) != 0) {
                     int32_t result = getScanCodeStateLocked(device, scanCode);
-                    if (result >= KEY_STATE_DOWN) {
+                    if (result >= AKEY_STATE_DOWN) {
                         return result;
                     }
                 }
             }
-            return KEY_STATE_UP;
+            return AKEY_STATE_UP;
         } else {
             device_t* device = getDevice(deviceId);
             if (device != NULL) {
@@ -181,7 +181,7 @@ int32_t EventHub::getScanCodeState(int32_t deviceId, int32_t deviceClasses,
             }
         }
     }
-    return KEY_STATE_UNKNOWN;
+    return AKEY_STATE_UNKNOWN;
 }
 
 int32_t EventHub::getScanCodeStateLocked(device_t* device, int32_t scanCode) const {
@@ -189,9 +189,9 @@ int32_t EventHub::getScanCodeStateLocked(device_t* device, int32_t scanCode) con
     memset(key_bitmask, 0, sizeof(key_bitmask));
     if (ioctl(mFDs[id_to_index(device->id)].fd,
                EVIOCGKEY(sizeof(key_bitmask)), key_bitmask) >= 0) {
-        return test_bit(scanCode, key_bitmask) ? KEY_STATE_DOWN : KEY_STATE_UP;
+        return test_bit(scanCode, key_bitmask) ? AKEY_STATE_DOWN : AKEY_STATE_UP;
     }
-    return KEY_STATE_UNKNOWN;
+    return AKEY_STATE_UNKNOWN;
 }
 
 int32_t EventHub::getKeyCodeState(int32_t deviceId, int32_t deviceClasses,
@@ -202,19 +202,19 @@ int32_t EventHub::getKeyCodeState(int32_t deviceId, int32_t deviceClasses,
             device_t* device = mDevicesById[i].device;
             if (device != NULL && (device->classes & deviceClasses) != 0) {
                 int32_t result = getKeyCodeStateLocked(device, keyCode);
-                if (result >= KEY_STATE_DOWN) {
+                if (result >= AKEY_STATE_DOWN) {
                     return result;
                 }
             }
         }
-        return KEY_STATE_UP;
+        return AKEY_STATE_UP;
     } else {
         device_t* device = getDevice(deviceId);
         if (device != NULL) {
             return getKeyCodeStateLocked(device, keyCode);
         }
     }
-    return KEY_STATE_UNKNOWN;
+    return AKEY_STATE_UNKNOWN;
 }
 
 int32_t EventHub::getKeyCodeStateLocked(device_t* device, int32_t keyCode) const {
@@ -235,12 +235,12 @@ int32_t EventHub::getKeyCodeStateLocked(device_t* device, int32_t keyCode) const
             int32_t sc = scanCodes.itemAt(i);
             //LOGI("Code %d: down=%d", sc, test_bit(sc, key_bitmask));
             if (sc >= 0 && sc <= KEY_MAX && test_bit(sc, key_bitmask)) {
-                return KEY_STATE_DOWN;
+                return AKEY_STATE_DOWN;
             }
         }
-        return KEY_STATE_UP;
+        return AKEY_STATE_UP;
     }
-    return KEY_STATE_UNKNOWN;
+    return AKEY_STATE_UNKNOWN;
 }
 
 int32_t EventHub::getSwitchState(int32_t deviceId, int32_t deviceClasses, int32_t sw) const {
@@ -251,19 +251,19 @@ int32_t EventHub::getSwitchState(int32_t deviceId, int32_t deviceClasses, int32_
         if (deviceId == -1) {
             deviceId = mSwitches[sw];
             if (deviceId == 0) {
-                return KEY_STATE_UNKNOWN;
+                return AKEY_STATE_UNKNOWN;
             }
         }
 
         device_t* device = getDevice(deviceId);
         if (device == NULL) {
-            return KEY_STATE_UNKNOWN;
+            return AKEY_STATE_UNKNOWN;
         }
 
         return getSwitchStateLocked(device, sw);
     }
 #endif
-    return KEY_STATE_UNKNOWN;
+    return AKEY_STATE_UNKNOWN;
 }
 
 int32_t EventHub::getSwitchStateLocked(device_t* device, int32_t sw) const {
@@ -271,9 +271,9 @@ int32_t EventHub::getSwitchStateLocked(device_t* device, int32_t sw) const {
     memset(sw_bitmask, 0, sizeof(sw_bitmask));
     if (ioctl(mFDs[id_to_index(device->id)].fd,
                EVIOCGSW(sizeof(sw_bitmask)), sw_bitmask) >= 0) {
-        return test_bit(sw, sw_bitmask) ? KEY_STATE_DOWN : KEY_STATE_UP;
+        return test_bit(sw, sw_bitmask) ? AKEY_STATE_DOWN : AKEY_STATE_UP;
     }
-    return KEY_STATE_UNKNOWN;
+    return AKEY_STATE_UNKNOWN;
 }
 
 status_t EventHub::scancodeToKeycode(int32_t deviceId, int scancode,
