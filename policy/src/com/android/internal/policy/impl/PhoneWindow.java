@@ -1381,8 +1381,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             case KeyEvent.KEYCODE_MENU: {
-                onKeyUpPanel(featureId < 0 ? FEATURE_OPTIONS_PANEL : featureId,
-                        event);
+                if (mActionBar != null && mActionBar.isOverflowReserved()) {
+                    mActionBar.showOverflowMenu();
+                } else {
+                    onKeyUpPanel(featureId < 0 ? FEATURE_OPTIONS_PANEL : featureId,
+                            event);
+                }
                 return true;
             }
 

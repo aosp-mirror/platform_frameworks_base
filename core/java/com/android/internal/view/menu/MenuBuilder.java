@@ -165,6 +165,12 @@ public class MenuBuilder implements Menu {
     private boolean mIsActionItemsStale;
 
     /**
+     * Whether the process of granting space as action items should reserve a space for
+     * an overflow option in the action list.
+     */
+    private boolean mReserveActionOverflow;
+
+    /**
      * Current use case is Context Menus: As Views populate the context menu, each one has
      * extra information that should be passed along.  This is the current menu info that
      * should be set on all items added to this menu.
@@ -670,6 +676,11 @@ public class MenuBuilder implements Menu {
         return mItems.get(index);
     }
 
+    public MenuItem getOverflowItem(int index) {
+        flagActionItems(true);
+        return mNonActionItems.get(index);
+    }
+
     public boolean isShortcutKey(int keyCode, KeyEvent event) {
         return findItemWithShortcutForKey(keyCode, event) != null;
     }
@@ -986,22 +997,41 @@ public class MenuBuilder implements Menu {
         return mVisibleItems;
     }
     
-    private void flagActionItems() {
+    private void flagActionItems(boolean reserveActionOverflow) {
+        if (reserveActionOverflow != mReserveActionOverflow) {
+            mReserveActionOverflow = reserveActionOverflow;
+            mIsActionItemsStale = true;
+        }
+
         if (!mIsActionItemsStale) {
             return;
         }
-        
+
         final ArrayList<MenuItemImpl> visibleItems = getVisibleItems();
         final int itemsSize = visibleItems.size();
         int maxActions = mMaxActionItems;
-        
+
+        int requiredItems = 0;
+        int requestedItems = 0;
+        boolean hasOverflow = false;
         for (int i = 0; i < itemsSize; i++) {
             MenuItemImpl item = visibleItems.get(i);
             if (item.requiresActionButton()) {
-                maxActions--;
+                requiredItems++;
+            } else if (item.requestsActionButton()) {
+                requestedItems++;
+            } else {
+                hasOverflow = true;
             }
         }
-        
+
+        // Reserve a spot for the overflow item if needed.
+        if (reserveActionOverflow &&
+                (hasOverflow || requiredItems + requestedItems > maxActions)) {
+            maxActions--;
+        }
+        maxActions -= requiredItems;
+
         // Flag as many more requested items as will fit.
         for (int i = 0; i < itemsSize; i++) {
             MenuItemImpl item = visibleItems.get(i);
@@ -1010,7 +1040,7 @@ public class MenuBuilder implements Menu {
                 maxActions--;
             }
         }
-        
+
         mActionItems.clear();
         mNonActionItems.clear();
         for (int i = 0; i < itemsSize; i++) {
@@ -1021,17 +1051,17 @@ public class MenuBuilder implements Menu {
                 mNonActionItems.add(item);
             }
         }
-        
+
         mIsActionItemsStale = false;
     }
     
-    ArrayList<MenuItemImpl> getActionItems() {
-        flagActionItems();
+    ArrayList<MenuItemImpl> getActionItems(boolean reserveActionOverflow) {
+        flagActionItems(reserveActionOverflow);
         return mActionItems;
     }
     
-    ArrayList<MenuItemImpl> getNonActionItems() {
-        flagActionItems();
+    ArrayList<MenuItemImpl> getNonActionItems(boolean reserveActionOverflow) {
+        flagActionItems(reserveActionOverflow);
         return mNonActionItems;
     }
     
@@ -1180,6 +1210,16 @@ public class MenuBuilder implements Menu {
         return new MenuAdapter(menuType);
     }
 
+    /**
+     * Gets an adapter for providing overflow (non-action) items and their views.
+     *
+     * @param menuType The type of menu to get an adapter for.
+     * @return A {@link MenuAdapter} for this menu with the given menu type.
+     */
+    public MenuAdapter getOverflowMenuAdapter(int menuType) {
+        return new OverflowMenuAdapter(menuType);
+    }
+
     void setOptionalIconsVisible(boolean visible) {
         mOptionalIconsVisible = visible;
     }
@@ -1271,6 +1311,28 @@ public class MenuBuilder implements Menu {
                 return item.getItemView(mMenuType, parent);
             }
         }
+    }
 
+    /**
+     * An adapter that allows an {@link AdapterView} to use this {@link MenuBuilder} as a data
+     * source for overflow menu items that do not fit in the list of action items.
+     */
+    private class OverflowMenuAdapter extends MenuAdapter {
+        private ArrayList<MenuItemImpl> mOverflowItems;
+
+        public OverflowMenuAdapter(int menuType) {
+            super(menuType);
+            mOverflowItems = getNonActionItems(true);
+        }
+
+        @Override
+        public MenuItemImpl getItem(int position) {
+            return mOverflowItems.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return mOverflowItems.size();
+        }
     }
 }

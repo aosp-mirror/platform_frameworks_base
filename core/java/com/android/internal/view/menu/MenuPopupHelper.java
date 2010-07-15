@@ -20,28 +20,48 @@ import com.android.internal.view.menu.MenuBuilder.MenuAdapter;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
+import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.widget.AdapterView;
 import android.widget.ListPopupWindow;
 
+import java.lang.ref.WeakReference;
+
 /**
  * @hide
  */
-public class MenuPopupHelper implements AdapterView.OnItemClickListener {
+public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.OnKeyListener {
     private static final String TAG = "MenuPopupHelper";
 
     private Context mContext;
     private ListPopupWindow mPopup;
-    private SubMenuBuilder mSubMenu;
+    private MenuBuilder mMenu;
     private int mPopupMaxWidth;
+    private WeakReference<View> mAnchorView;
+    private boolean mOverflowOnly;
 
-    public MenuPopupHelper(Context context, SubMenuBuilder subMenu) {
+    public MenuPopupHelper(Context context, MenuBuilder menu) {
+        this(context, menu, null, false);
+    }
+
+    public MenuPopupHelper(Context context, MenuBuilder menu, View anchorView) {
+        this(context, menu, anchorView, false);
+    }
+
+    public MenuPopupHelper(Context context, MenuBuilder menu,
+            View anchorView, boolean overflowOnly) {
         mContext = context;
-        mSubMenu = subMenu;
+        mMenu = menu;
+        mOverflowOnly = overflowOnly;
 
         final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         mPopupMaxWidth = metrics.widthPixels / 2;
+
+        if (anchorView != null) {
+            mAnchorView = new WeakReference<View>(anchorView);
+        }
     }
 
     public void show() {
@@ -50,16 +70,23 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener {
                 com.android.internal.R.style.Widget_Spinner);
         mPopup.setOnItemClickListener(this);
 
-        final MenuAdapter adapter = mSubMenu.getMenuAdapter(MenuBuilder.TYPE_POPUP);
+        final MenuAdapter adapter = mOverflowOnly ?
+                mMenu.getOverflowMenuAdapter(MenuBuilder.TYPE_POPUP) :
+                mMenu.getMenuAdapter(MenuBuilder.TYPE_POPUP);
         mPopup.setAdapter(adapter);
         mPopup.setModal(true);
 
-        final MenuItemImpl itemImpl = (MenuItemImpl) mSubMenu.getItem();
-        final View anchorView = itemImpl.getItemView(MenuBuilder.TYPE_ACTION_BUTTON, null);
-        mPopup.setAnchorView(anchorView);
+        if (mMenu instanceof SubMenuBuilder) {
+            SubMenuBuilder subMenu = (SubMenuBuilder) mMenu;
+            final MenuItemImpl itemImpl = (MenuItemImpl) subMenu.getItem();
+            mPopup.setAnchorView(itemImpl.getItemView(MenuBuilder.TYPE_ACTION_BUTTON, null));
+        } else if (mAnchorView != null) {
+            mPopup.setAnchorView(mAnchorView.get());
+        }
 
         mPopup.setContentWidth(Math.min(measureContentWidth(adapter), mPopupMaxWidth));
         mPopup.show();
+        mPopup.getListView().setOnKeyListener(this);
     }
 
     public void dismiss() {
@@ -67,9 +94,27 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener {
         mPopup = null;
     }
 
+    public boolean isShowing() {
+        return mPopup != null && mPopup.isShowing();
+    }
+
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        mSubMenu.performItemAction(mSubMenu.getItem(position), 0);
+        MenuItem item = null;
+        if (mOverflowOnly) {
+            item = mMenu.getOverflowItem(position);
+        } else {
+            item = mMenu.getItem(position);
+        }
+        mMenu.performItemAction(item, 0);
         mPopup.dismiss();
+    }
+
+    public boolean onKey(View v, int keyCode, KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_MENU) {
+            dismiss();
+            return true;
+        }
+        return false;
     }
 
     private int measureContentWidth(MenuAdapter adapter) {

@@ -16,10 +16,12 @@
 package com.android.internal.view.menu;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import java.util.ArrayList;
@@ -35,6 +37,8 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     private int mItemPadding;
     private int mItemMargin;
     private int mMaxItems;
+    private boolean mReserveOverflow;
+    private OverflowMenuButton mOverflowButton;
     
     public ActionMenuView(Context context) {
         this(context, null);
@@ -56,6 +60,15 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         final int itemSpace = size + mItemPadding;
         
         mMaxItems = spaceAvailable / (itemSpace > 0 ? itemSpace : 1);
+
+        // TODO There has to be a better way to indicate that we don't have a hard menu key.
+        final int screen = res.getConfiguration().screenLayout;
+        mReserveOverflow = (screen & Configuration.SCREENLAYOUT_SIZE_MASK) ==
+                Configuration.SCREENLAYOUT_SIZE_XLARGE;
+    }
+
+    public boolean isOverflowReserved() {
+        return mReserveOverflow;
     }
     
     @Override
@@ -101,9 +114,10 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     }
 
     public void updateChildren(boolean cleared) {
+        final boolean reserveOverflow = mReserveOverflow;
         removeAllViews();
         
-        final ArrayList<MenuItemImpl> itemsToShow = mMenu.getActionItems();
+        final ArrayList<MenuItemImpl> itemsToShow = mMenu.getActionItems(reserveOverflow);
         final int itemCount = itemsToShow.size();
         
         for (int i = 0; i < itemCount; i++) {
@@ -111,10 +125,53 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             addItemView((ActionMenuItemView) itemData.getItemView(MenuBuilder.TYPE_ACTION_BUTTON,
                     this));
         }
+
+        if (reserveOverflow) {
+            if (mMenu.getNonActionItems(true).size() > 0) {
+                OverflowMenuButton button = new OverflowMenuButton(mContext);
+                addView(button);
+                mOverflowButton = button;
+            } else {
+                mOverflowButton = null;
+            }
+        }
+    }
+
+    public boolean showOverflowMenu() {
+        if (mOverflowButton != null) {
+            MenuPopupHelper popup = new MenuPopupHelper(getContext(), mMenu, mOverflowButton, true);
+            popup.show();
+            return true;
+        }
+        return false;
     }
 
     private void addItemView(ActionMenuItemView view) {
         view.setItemInvoker(this);
         addView(view);
+    }
+
+    private class OverflowMenuButton extends ImageButton {
+        public OverflowMenuButton(Context context) {
+            super(context, null, com.android.internal.R.attr.actionButtonStyle);
+
+            final Resources res = context.getResources();
+            setClickable(true);
+            setFocusable(true);
+            // TODO setTitle() to a localized string for accessibility
+            setImageDrawable(res.getDrawable(com.android.internal.R.drawable.ic_menu_more));
+            setVisibility(VISIBLE);
+            setEnabled(true);
+        }
+
+        @Override
+        public boolean performClick() {
+            if (super.performClick()) {
+                return true;
+            }
+
+            showOverflowMenu();
+            return true;
+        }
     }
 }

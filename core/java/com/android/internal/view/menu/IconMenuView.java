@@ -337,7 +337,9 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
         // This method does a clear refresh of children
         removeAllViews();
         
-        final ArrayList<MenuItemImpl> itemsToShow = mMenu.getNonActionItems();
+        // IconMenuView never wants content sorted for an overflow action button, since
+        // it is never used in the presence of an overflow button.
+        final ArrayList<MenuItemImpl> itemsToShow = mMenu.getNonActionItems(false);
         final int numItems = itemsToShow.size();
         final int numItemsThatCanFit = mMaxItems;
         // Minimum of the num that can fit and the num that we have
