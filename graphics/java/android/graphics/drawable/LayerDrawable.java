@@ -32,8 +32,9 @@ import java.io.IOException;
  * order, so the element with the largest index will be drawn on top.
  * <p>
  * It can be defined in an XML file with the <code>&lt;layer-list></code> element.
- * Each Drawable in the layer is defined in a nested <code>&lt;item></code>.
- * </p>
+ * Each Drawable in the layer is defined in a nested <code>&lt;item></code>. For more
+ * information, see the guide to <a
+ * href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.</p>
  *
  * @attr ref android.R.styleable#LayerDrawableItem_left
  * @attr ref android.R.styleable#LayerDrawableItem_top

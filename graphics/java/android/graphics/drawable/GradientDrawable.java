@@ -42,7 +42,9 @@ import java.io.IOException;
 /**
  * A Drawable with a color gradient for buttons, backgrounds, etc. 
  *
- * <p>It can be defined in an XML file with the <code>&lt;shape></code> element.</p>
+ * <p>It can be defined in an XML file with the <code>&lt;shape></code> element. For more
+ * information, see the guide to <a
+ * href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.</p>
  *
  * @attr ref android.R.styleable#GradientDrawable_visible
  * @attr ref android.R.styleable#GradientDrawable_shape

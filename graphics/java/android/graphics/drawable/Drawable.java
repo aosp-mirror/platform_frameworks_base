@@ -102,8 +102,8 @@ import java.util.Arrays;
  *     whose overall size is modified based on the current level.
  * </ul>
  * <p>For information and examples of creating drawable resources (XML or bitmap files that
- * can be loaded in code), see <a href="{@docRoot}guide/topics/resources/resources-i18n.html">Resources
- * and Internationalization</a>.
+ * can be loaded in code), see <a
+ * href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.
  */
 public abstract class Drawable {
     private static final Rect ZERO_BOUNDS_RECT = new Rect();
@@ -720,8 +720,7 @@ public abstract class Drawable {
     /**
      * Create a drawable from an XML document. For more information on how to
      * create resources in XML, see
-     * <a href="{@docRoot}guide/topics/resources/resources-i18n.html">Resources and
-     * Internationalization</a>.
+     * <a href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.
      */
     public static Drawable createFromXml(Resources r, XmlPullParser parser)
             throws XmlPullParserException, IOException {
