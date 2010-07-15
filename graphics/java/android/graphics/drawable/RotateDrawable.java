@@ -35,7 +35,9 @@ import java.io.IOException;
  * value. The start and end angles of rotation can be controlled to map any
  * circular arc to the level values range.</p>
  *
- * <p>It can be defined in an XML file with the <code>&lt;rotate></code> element.</p>
+ * <p>It can be defined in an XML file with the <code>&lt;rotate></code> element. For more
+ * information, see the guide to <a
+ * href="{@docRoot}guide/topics/resources/animation-resource.html">Animation Resources</a>.</p>
  *
  * @attr ref android.R.styleable#RotateDrawable_visible
  * @attr ref android.R.styleable#RotateDrawable_fromDegrees

@@ -34,6 +34,10 @@ import java.io.IOException;
  * the ShapeDrawable will default to a 
  * {@link android.graphics.drawable.shapes.RectShape}.
  *
+ * <p>It can be defined in an XML file with the <code>&lt;shape></code> element. For more
+ * information, see the guide to <a
+ * href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.</p>
+ *
  * @attr ref android.R.styleable#ShapeDrawablePadding_left
  * @attr ref android.R.styleable#ShapeDrawablePadding_top
  * @attr ref android.R.styleable#ShapeDrawablePadding_right

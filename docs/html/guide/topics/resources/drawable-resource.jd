@@ -18,31 +18,49 @@ and draw on the screen. There are several different types of drawables:</p>
 <dl>
   <dt><a href="#Bitmap">Bitmap File</a><dt>
     <dd>A bitmap graphic file ({@code .png}, {@code .jpg}, or {@code .gif}).
-      A {@link android.graphics.drawable.BitmapDrawable}.</dd>
+      Creates a {@link android.graphics.drawable.BitmapDrawable}.</dd>
   <dt><a href="#NinePatch">Nine-Patch File</a></dt>
     <dd>A PNG file with stretchable regions to allow image resizing based on content ({@code
-.9.png}). A {@link android.graphics.drawable.NinePatchDrawable}.</dd>
-<!--  <dt><a href="#BitmapAlias">Bitmap Alias</a><dt>
-    <dd>An alias for a drawable.</dd>  -->
+.9.png}). Creates a {@link android.graphics.drawable.NinePatchDrawable}.</dd>
+  <dt><a href="#LayerList">Layer List</a></dt>
+    <dd>A Drawable that manages an array of other Drawables. These are drawn in array order, so the
+element with the largest index is be drawn on top. Creates a {@link
+android.graphics.drawable.LayerDrawable}.</dd>
   <dt><a href="#StateList">State List</a></dt>
     <dd>An XML file that references different bitmap graphics
     for different states (for example, to use a different image when a button is pressed).
-    A {@link android.graphics.drawable.StateListDrawable}.</dd>
-  <dt><a href="#Color">Color</a></dt>
-    <dd>A resource defined in XML that specifies a rectangle of color, with
-    optionally rounded corners. A {@link android.graphics.drawable.PaintDrawable}.</dd>
-  <dt><a href="#Shape">Shape</a></dt>
+    Creates a {@link android.graphics.drawable.StateListDrawable}.</dd>
+  <dt><a href="#LevelList">Level List</a></dt>
+    <dd>An XML file that defines a Drawable that manages a number of alternate Drawables, each
+assigned a maximum numerical value. Creates a {@link
+android.graphics.drawable.LevelListDrawable}.</dd>
+  <dt><a href="#Transition">Transition Drawable</a></dt>
+    <dd>An XML file that defines a Drawable that can cross-fade between two drawable resources.
+Creates a {@link android.graphics.drawable.TransitionDrawable}.</dd>
+  <dt><a href="#Clip">Clip Drawable</a></dt>
+    <dd>An XML file that defines a drawable that clips another Drawable based on this Drawable's
+current level value. Creates a {@link android.graphics.drawable.ClipDrawable}.</dd>
+  <dt><a href="#Scale">Scale Drawable</a></dt>
+    <dd>An XML file that defines a drawable that changes the size of another Drawable based on its
+current level value.  Creates a {@link android.graphics.drawable.ScaleDrawable}</dd>
+  <dt><a href="#Shape">Shape Drawable</a></dt>
     <dd>An XML file that defines a geometric shape, including colors and gradients.
-    A {@link android.graphics.drawable.ShapeDrawable}.</dd>
+    Creates a {@link android.graphics.drawable.ShapeDrawable}.</dd>
 </dl>
 
-<p>Documentation for the {@link android.graphics.drawable.AnimationDrawable} resource
-is in the <a href="animation-resource.html">Animation Resource</a> document.</p>
+<p>Also see the <a href="animation-resource.html">Animation Resource</a> document for how to
+create an {@link android.graphics.drawable.AnimationDrawable}.</p>
 
-<h2 id="Bitmap">Bitmap File</h2>
 
-<p>A basic bitmap image. Android supports basic bitmap files in a few different formats:
+
+
+<h2 id="Bitmap">Bitmap</h2>
+
+<p>A bitmap image. Android supports bitmap files in a three formats:
 {@code .png} (preferred), {@code .jpg} (acceptable), {@code .gif} (discouraged).</p>
+
+<p>You can reference a bitmap file directly, using the filename as the resource ID, or create an
+alias resource ID in XML.</p>
 
 <p class="note"><strong>Note:</strong> Bitmap files may be automatically optimized with lossless
 image compression by the <a href="{@docRoot}guide/developing/tools/aapt.html">aapt</a> tool. For
@@ -52,11 +70,18 @@ memory. So be aware that the image binaries placed in this directory can change 
 you plan on reading an image as a bit stream in order to convert it to a bitmap, put your images in
 the <code>res/raw/</code> folder instead, where they will not be optimized.</p>
 
+
+<h3 id="BitmapFile">Bitmap File</h3>
+
+<p>A bitmap file is a {@code .png}, {@code .jpg}, or {@code .gif} file. Android creates a {@link
+android.graphics.drawable.Drawable}
+resource for any of these files when you save them in the {@code res/drawable/} directory.</p>
+
 <dl class="xml">
 
 <dt>file location:</dt>
 <dd><code>res/drawable/<em>filename</em>.png</code> ({@code .png}, {@code .jpg}, or {@code .gif})<br/>
-The filename will be used as the resource ID.</dd>
+The filename is used as the resource ID.</dd>
 
 <dt>compiled resource datatype:</dt>
 <dd>Resource pointer to a {@link android.graphics.drawable.BitmapDrawable}.</dd>
@@ -68,15 +93,16 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
 </dd>
 
 <dt>example:</dt>
-<dd>With an image saved at <code>res/drawable/myimage.png</code>, this layout XML will apply
+
+<dd>With an image saved at <code>res/drawable/myimage.png</code>, this layout XML applies
 the image to a View:
 <pre>
 &lt;ImageView
     android:layout_height="wrap_content"
     android:layout_width="wrap_content"
-    <strong>android:src="@drawable/myimage"</strong> />
+    android:src="@drawable/myimage" />
 </pre>
-<p>This application code will retrieve the image as a {@link
+<p>The following application code retrieves the image as a {@link
 android.graphics.drawable.Drawable}:</p>
 <pre>
 Resources res = {@link android.content.Context#getResources()};
@@ -97,54 +123,454 @@ Drawable drawable = res.{@link android.content.res.Resources#getDrawable(int) ge
 
 
 
+<h3 id="XmlBitmap">XML Bitmap</h3>
+
+<p>An XML bitmap is a resource defined in XML that points to a bitmap file. The effect is an alias for a
+raw bitmap file. The XML can specify additional properties for the bitmap such as dithering and tiling.</p>
+
+<p class="note"><strong>Note:</strong> You can use a {@code &lt;bitmap&gt;} element as a child of
+an {@code &lt;item&gt;} element. For
+example, when creating a <a href="#StateList">state list</a> or <a href="#LayerList">layer list</a>,
+you can exclude the {@code android:drawable}
+attribute from an {@code &lt;item&gt;} element and nest a {@code &lt;bitmap&gt;} inside it
+that defines the drawable item.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/drawable/<em>filename</em>.xml</code><br/>
+The filename is used as the resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to a {@link android.graphics.drawable.BitmapDrawable}.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.drawable.<em>filename</em></code></li><br/>
+In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;<a href="#bitmap-element">bitmap</a>
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@[package:]drawable/<em>drawable_resource</em>"
+    android:antialias=["true" | "false"]
+    android:dither=["true" | "false"]
+    android:filter=["true" | "false"]
+    android:gravity=["top" | "bottom" | "left" | "right" | "center_vertical" |
+                      "fill_vertical" | "center_horizontal" | "fill_horizontal" |
+                      "center" | "fill" | "clip_vertical" | "clip_horizontal"]
+    android:tileMode=["disabled" | "clamp" | "repeat" | "mirror"] /&gt;
+</pre>
+</dd>
+
+
+<dt>elements:</dt>
+<dd>
+<dl class="tag-list">
+
+  <dt id="bitmap-element"><code>&lt;bitmap&gt;</code></dt>
+    <dd>Defines the bitmap source and its properties.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>xmlns:android</code></dt>
+          <dd><em>String</em>. Defines the XML namespace, which must be
+          <code>"http://schemas.android.com/apk/res/android"</code>. This is required only if the
+<code>&lt;bitmap&gt;</code> is the root element&mdash;it is not needed when the
+<code>&lt;bitmap&gt;</code> is nested inside an <code>&lt;item&gt;</code>.</dd>
+        <dt><code>android:src</code></dt>
+          <dd><em>Drawable resource</em>. <strong>Required</strong>. Reference to a drawable
+resource.</dd>
+        <dt><code>android:antialias</code></dt>
+          <dd><em>Boolean</em>. Enables or disables antialiasing.</dd>
+        <dt><code>android:dither</code></dt>
+          <dd><em>Boolean</em>. Enables or disables dithering of the bitmap if the bitmap does not
+have the same pixel configuration as the screen (for instance: a ARGB 8888 bitmap with an RGB 565
+screen).</dd>
+        <dt><code>android:filter</code></dt>
+          <dd><em>Boolean</em>. Enables or disables bitmap filtering. Filtering is used when the
+bitmap is shrunk or stretched to smooth its apperance.</dd>
+        <dt><code>android:gravity</code></dt>
+          <dd><em>Keyword</em>. Defines the gravity for the bitmap. The gravity indicates where to
+position the drawable in its container if the bitmap is smaller than the container.
+            <p>Must be one or more (separated by '|') of the following constant values:</p>
+<table>
+<tr><th>Value</th><th>Description</th></tr>
+<tr><td><code>top</code></td>
+<td>Put the object at the top of its container, not changing its size.</td></tr>
+<tr><td><code>bottom</code></td>
+<td>Put the object at the bottom of its container, not changing its size. </td></tr>
+<tr><td><code>left</code></td>
+<td>Put the object at the left edge of its container, not changing its size. </td></tr>
+<tr><td><code>right</code></td>
+<td>Put the object at the right edge of its container, not changing its size. </td></tr>
+<tr><td><code>center_vertical</code></td>
+<td>Place object in the vertical center of its container, not changing its size. </td></tr>
+<tr><td><code>fill_vertical</code></td>
+<td>Grow the vertical size of the object if needed so it completely fills its container. </td></tr>
+<tr><td><code>center_horizontal</code></td>
+<td>Place object in the horizontal center of its container, not changing its size. </td></tr>
+<tr><td><code>fill_horizontal</code></td>
+<td>Grow the horizontal size of the object if needed so it completely fills its container.
+</td></tr>
+<tr><td><code>center</code></td>
+<td>Place the object in the center of its container in both the vertical and horizontal axis, not
+changing its size. </td></tr>
+<tr><td><code>fill</code></td>
+<td>Grow the horizontal and vertical size of the object if needed so it completely fills its
+container. This is the default.</td></tr>
+<tr><td><code>clip_vertical</code></td>
+<td>Additional option that can be set to have the top and/or bottom edges of the child clipped to
+its container's bounds. The clip is based on the vertical gravity: a top gravity clips the
+bottom edge, a bottom gravity clips the top edge, and neither clips both edges.
+</td></tr>
+<tr><td><code>clip_horizontal</code></td>
+<td>Additional option that can be set to have the left and/or right edges of the child clipped to
+its container's bounds. The clip is based on the horizontal gravity: a left gravity clips
+the right edge, a right gravity clips the left edge, and neither clips both edges.
+</td></tr>
+</table>
+          </dd>
+        <dt><code>android:tileMode</code></dt>
+          <dd><em>Keyword</em>. Defines the tile mode. When the tile mode is enabled, the bitmap is
+repeated. Gravity is ignored when the tile mode is enabled.
+            <p>Must be one of the following constant values:</p>
+<table>
+<tr><th>Value</th><th>Description</th></tr>
+<tr><td><code>disabled</code></td>
+<td>Do not tile the bitmap. This is the default value.</td></tr>
+<tr><td><code>clamp</code></td>
+<td>Replicates the edge color if the shader draws outside of its original bounds</td></tr>
+<tr><td><code>repeat</code></td>
+<td>Repeats the shader's image horizontally and vertically.</td></tr>
+<tr><td><code>mirror</code></td>
+<td>Repeats the shader's image horizontally and vertically, alternating mirror images so that
+adjacent images always seam.</td></tr>
+</table>
+
+          </dd>
+      </dl>
+    </dd>
+
+</dl>
+</dd> <!-- end  elements and attributes -->
+
+<dt>example:</dt>
+<dd>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/icon"
+    android:tileMode="repeat" /&gt;
+</pre>
+
+</dd>
+
+<dt>see also:</dt>
+<dd>
+<ul>
+  <li>{@link android.graphics.drawable.BitmapDrawable}</li>
+  <li><a href="{@docRoot}guide/topics/resources/providing-resources.html#AliasResources">Creating
+alias resources</a>
+</ul>
+</dd>
+
+</dl>
 
 
 
-<h2 id="NinePatch">Nine-Patch File</h2>
+
+
+
+<h2 id="NinePatch">Nine-Patch</h2>
 
 <p>A {@link android.graphics.NinePatch} is a PNG image in which you can define stretchable regions
-that Android will scale when content within the View exceeds the normal image bounds. You will
+that Android scales when content within the View exceeds the normal image bounds. You
 typically assign this type of image as the background of a View that has at least one dimension set
 to {@code "wrap_content"}, and when the View grows to accomodate the content, the Nine-Patch image
-will also be scaled to match the size of the View. An example use of a Nine-Patch image is the
+is also scaled to match the size of the View. An example use of a Nine-Patch image is the
 background used by Android's standard {@link android.widget.Button} widget, which must stretch to
 accommodate the text (or image) inside the button.</p>
 
-<p>For a complete discussion about how to define a Nine-Patch file with stretchable regions,
+<p>Same as with a normal <a href="#Bitmap">bitmap</a>, you can reference a Nine-Patch file directly
+or from a resource defined by XML.</p>
+
+<p>For a complete discussion about how to create a Nine-Patch file with stretchable regions,
 see the <a href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">2D Graphics</a>
 document.</p>
+
+
+<h3 id="NinePatchFile">Nine-Patch File</h3>
 
 <dl class="xml">
 
 <dt>file location:</dt>
 <dd><code>res/drawable/<em>filename</em>.9.png</code><br/>
-The filename will be used as the resource ID.</dd>
+The filename is used as the resource ID.</dd>
 
 <dt>compiled resource datatype:</dt>
 <dd>Resource pointer to a {@link android.graphics.drawable.NinePatchDrawable}.</dd>
 
 <dt>resource reference:</dt>
+
 <dd>
 In Java: <code>R.drawable.<em>filename</em></code><br/>
 In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
 </dd>
 
 <dt>example:</dt>
-<dd>With an image saved at <code>res/drawable/myninepatch.9.png</code>, this layout XML will
-apply the Nine-Patch to a View:
+
+<dd>With an image saved at <code>res/drawable/myninepatch.9.png</code>, this layout XML
+applies the Nine-Patch to a View:
 <pre>
 &lt;Button
     android:layout_height="wrap_content"
     android:layout_width="wrap_content"
-    <strong>android:background="@drawable/myninepatch"</strong> />
+    android:background="@drawable/myninepatch" />
 </pre>
 </dd>
 
 <dt>see also:</dt>
+
 <dd>
 <ul>
   <li><a href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">2D Graphics</a></li>
   <li>{@link android.graphics.drawable.NinePatchDrawable}</li>
+</ul>
+</dd>
+
+</dl>
+
+
+
+
+<h3 id="NinePatchXml">XML Nine-Patch</h3>
+
+<p>An XML Nine-Patch is a resource defined in XML that points to a Nine-Patch file. The XML can
+specify dithering for the image.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/drawable/<em>filename</em>.xml</code><br/>
+The filename is used as the resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to a {@link android.graphics.drawable.NinePatchDrawable}.</dd>
+
+<dt>resource reference:</dt>
+
+<dd>
+In Java: <code>R.drawable.<em>filename</em></code><br/>
+In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
+</dd>
+
+
+<dt>syntax:</dt>
+
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;<a href="#bitmap-element">nine-patch</a>
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@[package:]drawable/<em>drawable_resource</em>"
+    android:dither=["true" | "false"] /&gt;
+</pre>
+</dd>
+
+
+<dt>elements:</dt>
+
+<dd>
+<dl class="tag-list">
+
+  <dt id="layerlist-element"><code>&lt;bitmap&gt;</code></dt>
+    <dd>Defines the bitmap source and its properties.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>xmlns:android</code></dt>
+          <dd><em>String</em>. <strong>Required.</strong> Defines the XML namespace, which must be
+          <code>"http://schemas.android.com/apk/res/android"</code>.
+        <dt><code>android:src</code></dt>
+          <dd><em>Drawable resource</em>. <strong>Required</strong>. Reference to a Nine-Patch
+file.</dd>
+        <dt><code>android:dither</code></dt>
+          <dd><em>Boolean</em>. Enables or disables dithering of the bitmap if the bitmap does not
+have the same pixel configuration as the screen (for instance: a ARGB 8888 bitmap with an RGB 565
+screen).</dd>
+      </dl>
+    </dd>
+</dl>
+</dd>
+
+
+<dt>example:</dt>
+
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;nine-patch xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/myninepatch"
+    android:dither="false" /&gt;
+</pre>
+</dd>
+</dl>
+
+
+
+
+
+
+<h2 id="LayerList">Layer List</h2>
+
+<p>A {@link android.graphics.drawable.LayerDrawable} is a drawable object
+that manages an array of other drawables. Each drawable in the list is drawn in the order of the 
+list&mdash;the last drawable in the list is drawn on top.</p>
+
+<p>Each drawable is represented by an {@code &lt;item&gt;} element inside a single {@code
+&lt;layer-list&gt;} element.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/drawable/<em>filename</em>.xml</code><br/>
+The filename is used as the resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to a {@link android.graphics.drawable.LayerDrawable}.</dd>
+
+<dt>resource reference:</dt>
+
+<dd>
+In Java: <code>R.drawable.<em>filename</em></code><br/>
+In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
+</dd>
+
+<dt>syntax:</dt>
+
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#layerlist-element">layer-list</a>
+    xmlns:android="http://schemas.android.com/apk/res/android" &gt;
+    &lt;<a href="#layerlist-item-element">item</a>
+        android:drawable="@[package:]drawable/<em>drawable_resource</em>"
+        android:id="@[+][<em>package</em>:]id/<i>resource_name</i>"
+        android:top="<em>dimension</em>"
+        android:right="<em>dimension</em>"
+        android:bottom="<em>dimension</em>"
+        android:left="<em>dimension</em>" /&gt;
+&lt;/selector>
+</pre>
+</dd>
+
+<dt>elements:</dt>
+
+<dd>
+<dl class="tag-list">
+
+  <dt id="layerlist-element"><code>&lt;layer-list&gt;</code></dt>
+    <dd><strong>Required.</strong> This must be the root element. Contains one or more {@code
+&lt;item>} elements.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>xmlns:android</code></dt>
+          <dd><em>String</em>. <strong>Required.</strong> Defines the XML namespace, which must be
+          <code>"http://schemas.android.com/apk/res/android"</code>.
+      </dl>
+    </dd>
+  <dt id="layerlist-item-element"><code>&lt;item&gt;</code></dt>
+    <dd>Defines a drawable to place in the layer drawable, in a position defined by its attributes.
+Must be a child of a <code>&lt;selector&gt;</code> element. Accepts child {@code &lt;bitmap&gt;}
+elements.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:drawable</code></dt>
+          <dd><em>Drawable resource</em>. <strong>Required</strong>. Reference to a drawable
+resource.</dd>
+        <dt><code>android:id</code></dt>
+          <dd><em>Resource ID</em>. A unique resource ID for this drawable. To create a new resource
+ID for this item, use the form:
+<code>"@+id/<em>name</em>"</code>. The plus symbol indicates that this should be created as a new
+ID. You can use this identifier to
+retrieve and modify the drawable with {@link android.view.View#findViewById(int)
+View.findViewById()} or {@link android.app.Activity#findViewById(int) Activity.findViewById()}.</dd>
+        <dt><code>android:top</code></dt>
+          <dd><em>Integer</em>. The top offset in pixels.</dd>
+        <dt><code>android:right</code></dt>
+          <dd><em>Integer</em>. The right offset in pixels.</dd>
+        <dt><code>android:bottom</code></dt>
+          <dd><em>Integer</em>. The bottom offset in pixels.</dd>
+        <dt><code>android:left</code></dt>
+          <dd><em>Integer</em>. The left offset in pixels.</dd>
+      </dl>
+      <p>All drawable items are scaled to fit the size of the containing View, by default. Thus,
+placing your images in a layer list at different positions might increase the size of the View and
+some images scale as appropriate. To avoid
+scaling items in the list, use a {@code &lt;bitmap&gt;} element inside the {@code
+&lt;item&gt;} element to specify the drawable and define the gravity to something that does not
+scale, such as {@code "center"}. For example, the following {@code &lt;item&gt;} defines an item
+that scales to fit its container View:</p>
+<pre>
+&lt;item android:drawable="@drawable/image" /&gt;
+</pre>
+
+<p>To avoid scaling, the following example uses a {@code &lt;bitmap&gt;} element with centered
+gravity:</p>
+<pre>
+&lt;item&gt;
+  &lt;bitmap android:src="<b>@drawable/image</b>"
+          android:gravity="center" /&gt;
+&lt;/item&gt;
+</pre>
+    </dd>
+
+</dl>
+</dd> <!-- end  elements and attributes -->
+
+<dt>example:</dt>
+
+<dd>XML file saved at <code>res/drawable/layers.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;layer-list xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item&gt;
+      &lt;bitmap android:src="@drawable/android_red"
+        android:gravity="center" /&gt;
+    &lt;/item&gt;
+    &lt;item android:top="10dp" android:left="10dp"&gt;
+      &lt;bitmap android:src="@drawable/android_green"
+        android:gravity="center" /&gt;
+    &lt;/item&gt;
+    &lt;item android:top="20dp" android:left="20dp"&gt;
+      &lt;bitmap android:src="@drawable/android_blue"
+        android:gravity="center" /&gt;
+    &lt;/item&gt;
+&lt;/layer-list&gt;
+</pre>
+<p>Notice that this example uses a nested {@code &lt;bitmap&gt;} element to define the drawable
+resource for each item with a "center" gravity. This ensures that none of the images are scaled to
+fit the size of the container, due to resizing caused by the offset images.</p>
+
+<p>This layout XML applies the drawable to a View:</p>
+<pre>
+&lt;ImageView
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    android:src="@drawable/layers" /&gt;
+</pre>
+
+<p>The result is a stack of increasingly offset images:</p>
+<img src="{@docRoot}images/resources/layers.png" alt="" />
+</dd> <!-- end example -->
+
+<dt>see also:</dt>
+<dd>
+<ul>
+  <li>{@link android.graphics.drawable.LayerDrawable}</li>
 </ul>
 </dd>
 
@@ -163,33 +589,36 @@ apply the Nine-Patch to a View:
 that uses a several different images to represent the same graphic, depending on the state of
 the object. For example, a {@link
 android.widget.Button} widget can exist in one of several different states (pressed, focused,
-or niether) and, using a state list drawable, you can provide a different button image for each
+or niether) and, using a state list drawable, you can provide a different background image for each
 state.</p>
 
 <p>You can describe the state list in an XML file. Each graphic is represented by an {@code
 &lt;item>} element inside a single {@code &lt;selector>} element. Each {@code &lt;item>}
 uses various attributes to describe the state in which it should be used as the graphic for the
 drawable.</p>
+
 <p>During each state change, the state list is traversed top to bottom and the first item that
-matches the current state will be used&mdash;the selection is <em>not</em> based on the "best
+matches the current state is used&mdash;the selection is <em>not</em> based on the "best
 match," but simply the first item that meets the minimum criteria of the state.</p>
 
 <dl class="xml">
 
 <dt>file location:</dt>
 <dd><code>res/drawable/<em>filename</em>.xml</code><br/>
-The filename will be used as the resource ID.</dd>
+The filename is used as the resource ID.</dd>
 
 <dt>compiled resource datatype:</dt>
 <dd>Resource pointer to a {@link android.graphics.drawable.StateListDrawable}.</dd>
 
 <dt>resource reference:</dt>
+
 <dd>
 In Java: <code>R.drawable.<em>filename</em></code><br/>
 In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
 </dd>
 
 <dt>syntax:</dt>
+
 <dd>
 <pre class="stx">
 &lt;?xml version="1.0" encoding="utf-8"?>
@@ -212,6 +641,7 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
 </dd>
 
 <dt>elements:</dt>
+
 <dd>
 <dl class="tag-list">
 
@@ -224,8 +654,8 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
           <dd><em>String</em>. <strong>Required.</strong> Defines the XML namespace, which must be
           <code>"http://schemas.android.com/apk/res/android"</code>.
         <dt><code>android:constantSize</code></dt>
-          <dd><em>Boolean</em>. "true" if the drawable's reported internal size will remain constant as the state
-changes (the size will be the maximum of all of the states); "false" if the size will vary based on
+          <dd><em>Boolean</em>. "true" if the drawable's reported internal size remains constant as the state
+changes (the size is the maximum of all of the states); "false" if the size varies based on
 the current state. Default is false.</dd>
         <dt><code>android:dither</code></dt>
           <dd><em>Boolean</em>. "true" to enable dithering of the bitmap if the bitmap does not have the same pixel
@@ -270,9 +700,9 @@ receiving touch/click events); "false" if it should be used when the object is d
 application is in the foreground), "false" if this item should be used when the application
 window does not have focus (for example, if the notification shade is pulled down or a dialog appears).</dd>
       </dl>
-      <p class="note"><strong>Note:</strong>Remember that the first item in the state list that
-matches the current state of the object will be applied. So if the first item in the list contains
-none of the state attributes above, then it will be applied every time, which is why your
+      <p class="note"><strong>Note:</strong> Remember that Android applies the first item in the state list that
+matches the current state of the object. So, if the first item in the list contains
+none of the state attributes above, then it is applied every time, which is why your
 default value should always be last (as demonstrated in the following example).</p>
     </dd>
 
@@ -280,6 +710,7 @@ default value should always be last (as demonstrated in the following example).<
 </dd> <!-- end  elements and attributes -->
 
 <dt>example:</dt>
+
 <dd>XML file saved at <code>res/drawable/button.xml</code>:
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
@@ -292,12 +723,12 @@ default value should always be last (as demonstrated in the following example).<
 &lt;/selector>
 </pre>
 
-<p>This layout XML will apply the drawable to a View:</p>
+<p>This layout XML applies the drawable to a View:</p>
 <pre>
 &lt;ImageView
     android:layout_height="wrap_content"
     android:layout_width="wrap_content"
-    <strong>android:src="@drawable/button"</strong> />
+    android:src="@drawable/button" />
 </pre>
 </dd> <!-- end example -->
 
@@ -317,106 +748,513 @@ default value should always be last (as demonstrated in the following example).<
 
 
 
+<h2 id="LevelList">Level List</h2>
 
-
-
-
-
-
-<h2 id="Color">Color</h2>
-
-<p>This is a color defined in XML that's used as a drawable to fill a rectangular space,
-with optionally rounded corners. This kind of drawable behaves like a color fill.</p>
-
-<p class="note"><strong>Note:</strong> A color drawable is a simple resource that is referenced
-using the value provided in the {@code name} attribute (not the name of the XML file). As
-such, you can combine a color drawable resources with other simple resources in the one XML file,
-under one {@code &lt;resources>} element.</p>
-
+<p>A Drawable that manages a number of alternate Drawables, each assigned a maximum numerical
+value. Setting the level value of the drawable with {@link
+android.graphics.drawable.Drawable#setLevel(int) setLevel()} loads the drawable resource in the
+level list that has a {@code android:maxLevel} value greater than or equal to the value
+passed to the method.</p>
 
 <dl class="xml">
 
 <dt>file location:</dt>
-<dd><code>res/drawable/<em>filename</em>.png</code><br/>
-The filename is arbitrary. The element's {@code name} will be used as the resource ID.</dd>
+<dd><code>res/drawable/<em>filename</em>.xml</code><br/>
+The filename is used as the resource ID.</dd>
 
 <dt>compiled resource datatype:</dt>
-<dd>Resource pointer to a {@link android.graphics.drawable.PaintDrawable}.</dd>
+<dd>Resource pointer to a {@link android.graphics.drawable.LevelListDrawable}.</dd>
 
 <dt>resource reference:</dt>
+
 <dd>
-In Java: <code>R.drawable.<em>color_name</em></code><br/>
-In XML: <code>@[<em>package</em>:]drawable/<em>color_name</em></code>
+In Java: <code>R.drawable.<em>filename</em></code><br/>
+In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
 </dd>
 
 <dt>syntax:</dt>
+
 <dd>
 <pre class="stx">
-&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;<a href="#color-resources-element">resources</a>>
-    &lt;<a href="#drawable-element">drawable</a>
-        name="<em>color_name</em>"
-        &gt;<em>color</em>&lt;/drawable&gt;
-&lt;/resources&gt;
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#levellist-element">level-list</a>
+    xmlns:android="http://schemas.android.com/apk/res/android" &gt;
+    &lt;<a href="#levellist-item-element">item</a>
+        android:drawable="@drawable/<i>drawable_resource</i>"
+        android:maxLevel="<i>integer</i>"
+        android:minLevel="<i>integer</i>" /&gt;
+&lt;/level-list&gt;
 </pre>
 </dd>
 
 <dt>elements:</dt>
+
 <dd>
 <dl class="tag-list">
 
-  <dt id="color-resources-element"><code>&lt;resources&gt;</code></dt>
-    <dd><strong>Required.</strong> This must be the root node.
-      <p>No attributes.</p>
-    </dd>
-  <dt id="drawable-element"><code>&lt;drawable&gt;</code></dt>
-    <dd>A color to use as a drawable rectangle. The value can be
-    any valid hexadecimal color value or a <a href="more-resources.html#Color">color
-    resource</a>. A color value always begins with a pound (#) character, followed
-    by the Alpha-Red-Green-Blue information in one of the following formats:
-    #<em>RGB</em>, #<em>RRGGBB</em>, #<em>ARGB</em>, or #<em>AARRGGBB</em>.
+  <dt id="levellist-element"><code>&lt;level-list&gt;</code></dt>
+  <dd>This must be the root element. Contains one or more {@code &lt;item&gt;} elements.
+    <p class="caps">attributes:</p>
+    <dl class="atn-list">
+      <dt><code>xmlns:android</code></dt>
+        <dd><em>String</em>. <strong>Required.</strong> Defines the XML namespace, which must be
+        <code>"http://schemas.android.com/apk/res/android"</code>.
+    </dl>
+  </dd>
+
+  <dt id="levellist-item-element"><code>&lt;item&gt;</code></dt>
+  <dd>Defines a drawable to use at a certain level.
+    <p class="caps">attributes:</p>
+    <dl class="atn-list">
+      <dt><code>android:drawable</code></dt>
+        <dd><em>Drawable resource</em>. <strong>Required</strong>. Reference to a drawable
+resource to be inset.</dd>
+      <dt><code>android:maxLevel</code></dt>
+        <dd><em>Integer</em>. The maximum level allowed for this item.</dd>
+      <dt><code>android:minLevel</code></dt>
+        <dd><em>Integer</em>. The minimum level allowed for this item.</dd>
+    </dl>
+  </dd>
+</dl>
+
+</dd>
+
+<dt>example:</dt>
+
+<dd>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;level-list xmlns:android="http://schemas.android.com/apk/res/android" &gt;
+    &lt;item
+        android:drawable="@drawable/status_off"
+        android:maxLevel="0" /&gt;
+    &lt;item
+        android:drawable="@drawable/status_on"
+        android:maxLevel="1" /&gt;
+&lt;/level-list&gt;
+</pre>
+<p>Once this is applied to a {@link android.view.View}, the level can be changed with {@link
+android.graphics.drawable.Drawable#setLevel(int) setLevel()} or {@link
+android.widget.ImageView#setImageLevel(int) setImageLevel()}.</p>
+
+</dd>
+
+<dt>see also:</dt>
+
+<dd>
+<ul>
+  <li>{@link android.graphics.drawable.LevelListDrawable}</li>
+</ul>
+</dd>
+
+</dl>
+
+
+
+
+
+
+<h2 id="Transition">Transition Drawable</h2>
+
+<p>A {@link android.graphics.drawable.TransitionDrawable} is a drawable object
+that can cross-fade between the two drawable resources.</p>
+
+<p>Each drawable is represented by an {@code &lt;item&gt;} element inside a single {@code
+&lt;transition&gt;} element. No more than two items are supported. To transition forward, call
+{@link android.graphics.drawable.TransitionDrawable#startTransition(int) startTransition()}. To
+transition backward, call {@link android.graphics.drawable.TransitionDrawable#reverseTransition(int)
+reverseTransition()}.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/drawable/<em>filename</em>.xml</code><br/>
+The filename is used as the resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to a {@link android.graphics.drawable.TransitionDrawable}.</dd>
+
+<dt>resource reference:</dt>
+
+<dd>
+In Java: <code>R.drawable.<em>filename</em></code><br/>
+In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
+</dd>
+
+<dt>syntax:</dt>
+
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#transition-element">layer-list</a>
+xmlns:android="http://schemas.android.com/apk/res/android" &gt;
+    &lt;<a href="#transition-item-element">item</a>
+        android:drawable="@[package:]drawable/<em>drawable_resource</em>"
+        android:id="@[+][<em>package</em>:]id/<i>resource_name</i>"
+        android:top="<em>dimension</em>"
+        android:right="<em>dimension</em>"
+        android:bottom="<em>dimension</em>"
+        android:left="<em>dimension</em>" /&gt;
+&lt;/selector>
+</pre>
+</dd>
+
+<dt>elements:</dt>
+
+<dd>
+<dl class="tag-list">
+
+  <dt id="transition-element"><code>&lt;transition&gt;</code></dt>
+    <dd><strong>Required.</strong> This must be the root element. Contains one or more {@code
+&lt;item>} elements.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
-        <dt><code>name</code></dt>
-        <dd><em>String</em>. <strong>Required</strong>.
-        A name for the color. This name will be used as the resource ID.</dd>
+        <dt><code>xmlns:android</code></dt>
+          <dd><em>String</em>. <strong>Required.</strong> Defines the XML namespace, which must be
+          <code>"http://schemas.android.com/apk/res/android"</code>.
       </dl>
-
+    </dd>
+  <dt id="transition-item-element"><code>&lt;item&gt;</code></dt>
+    <dd>Defines a drawable to place in the layer drawable, in a position defined by its attributes.
+Must be a child of a <code>&lt;selector&gt;</code> element. Accepts child {@code &lt;bitmap&gt;}
+elements.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:drawable</code></dt>
+          <dd><em>Drawable resource</em>. <strong>Required</strong>. Reference to a drawable
+resource.</dd>
+        <dt><code>android:id</code></dt>
+          <dd><em>Resource ID</em>. A unique resource ID for this drawable. To create a new resource
+ID for this item, use the form:
+<code>"@+id/<em>name</em>"</code>. The plus symbol indicates that this should be created as a new
+ID. You can use this identifier to
+retrieve and modify the drawable with {@link android.view.View#findViewById(int)
+View.findViewById()} or {@link android.app.Activity#findViewById(int) Activity.findViewById()}.</dd>
+        <dt><code>android:top</code></dt>
+          <dd><em>Integer</em>. The top offset in pixels.</dd>
+        <dt><code>android:right</code></dt>
+          <dd><em>Integer</em>. The right offset in pixels.</dd>
+        <dt><code>android:bottom</code></dt>
+          <dd><em>Integer</em>. The bottom offset in pixels.</dd>
+        <dt><code>android:left</code></dt>
+          <dd><em>Integer</em>. The left offset in pixels.</dd>
+      </dl>
     </dd>
 
 </dl>
 </dd> <!-- end  elements and attributes -->
 
 <dt>example:</dt>
-<dd>XML file saved at <code>res/drawable/colors.xml</code>:
-<pre>
-&lt;?xml version="1.0" encoding="utf-8"?>
-&lt;resources>
-    &lt;drawable name="solid_red">#f00&lt;/drawable>
-    &lt;drawable name="solid_blue">#0000ff&lt;/drawable>
-&lt;/resources>
-</pre>
-    <p>This layout XML will apply a color drawable to a View:</p>
-<pre>
-&lt;TextView
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    <strong>android:background="@drawable/solid_blue"</strong> />
-</pre>
-    <p>This application code will get a color drawable and apply it to a View:</p>
-<pre>
-Resources res =  {@link android.content.Context#getResources()};
-Drawable redDrawable = res.{@link android.content.res.Resources#getDrawable(int) getDrawable}(R.drawable.solid_red);
 
-TextView tv = (TextView) findViewByID(R.id.text);
-tv.setBackground(redDrawable);
+<dd>XML file saved at <code>res/drawable/transition.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;transition xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:drawable="@drawable/on" /&gt;
+    &lt;item android:drawable="@drawable/off" /&gt;
+&lt;/layer-list&gt;
 </pre>
+
+<p>This layout XML applies the drawable to a View:</p>
+<pre>
+&lt;ImageButton
+    android:id="@+id/button"
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    android:src="@drawable/transition" /&gt;
+</pre>
+
+<p>And the following code performs a 500ms transition from the first item to the second:</p>
+<pre>
+ImageButton button = (ImageButton) findViewById(R.id.button);
+TransitionDrawable drawable = (TransitionDrawable) button.getDrawable();
+drawable.startTransition(500);
+</pre>
+
 </dd> <!-- end example -->
 
 <dt>see also:</dt>
+
 <dd>
 <ul>
-  <li>{@link android.graphics.drawable.PaintDrawable}</li>
+  <li>{@link android.graphics.drawable.TransitionDrawable}</li>
+</ul>
+</dd>
+
+</dl>
+
+
+
+
+
+
+
+
+<h2 id="Inset">Inset Drawable</h2>
+
+<p>A drawable defined in XML that insets another drawable by a specified distance. This is used when
+a View needs a background that is smaller than the View's actual bounds.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/drawable/<em>filename</em>.xml</code><br/>
+The filename is used as the resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to a {@link android.graphics.drawable.InsetDrawable}.</dd>
+
+<dt>resource reference:</dt>
+
+<dd>
+In Java: <code>R.drawable.<em>filename</em></code><br/>
+In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
+</dd>
+
+<dt>syntax:</dt>
+
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#inset-element">inset</a>
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/<i>drawable_resource</i>"
+    android:insetTop="<i>dimension</i>"
+    android:insetRight="<i>dimension</i>"
+    android:insetBottom="<i>dimension</i>"
+    android:insetLeft="<i>dimension</i>" /&gt;
+</pre>
+</dd>
+
+<dt>elements:</dt>
+
+<dd>
+<dl class="tag-list">
+
+  <dt id="inset-element"><code>&lt;inset&gt;</code></dt>
+  <dd>Defines the inset drawable. This must be the root element.
+    <p class="caps">attributes:</p>
+    <dl class="atn-list">
+      <dt><code>xmlns:android</code></dt>
+        <dd><em>String</em>. <strong>Required.</strong> Defines the XML namespace, which must be
+        <code>"http://schemas.android.com/apk/res/android"</code>.
+      <dt><code>android:drawable</code></dt>
+        <dd><em>Drawable resource</em>. <strong>Required</strong>. Reference to a drawable
+resource to be inset.</dd>
+      <dt><code>android:insetTop</code></dt>
+        <dd><em>Dimension</em>. The top inset, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a></dd>
+      <dt><code>android:insetRight</code></dt>
+        <dd><em>Dimension</em>. The right inset, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a></dd>
+      <dt><code>android:insetBottom</code></dt>
+        <dd><em>Dimension</em>. The bottom inset, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a></dd>
+      <dt><code>android:insetLeft</code></dt>
+        <dd><em>Dimension</em>. The left inset, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a></dd>
+    </dl>
+  </dd>
+</dl>
+
+</dd>
+
+<dt>example:</dt>
+
+<dd>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/background"
+    android:insetTop="10dp"
+    android:insetLeft="10dp" /&gt;
+</pre>
+</dd>
+
+<dt>see also:</dt>
+
+<dd>
+<ul>
+  <li>{@link android.graphics.drawable.InsetDrawable}</li>
+</ul>
+</dd>
+
+</dl>
+
+
+
+
+
+
+
+
+<h2 id="Clip">Clip Drawable</h2>
+
+<p>A drawable defined in XML that clips another drawable based on this Drawable's current level. You
+can control how much the child drawable gets clipped in width and height based on the level, as well
+as a gravity to control where it is placed in its overall container. Most often used to implement
+things like progress bars.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/drawable/<em>filename</em>.xml</code><br/>
+The filename is used as the resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to a {@link android.graphics.drawable.ClipDrawable}.</dd>
+
+<dt>resource reference:</dt>
+
+<dd>
+In Java: <code>R.drawable.<em>filename</em></code><br/>
+In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
+</dd>
+
+<dt>syntax:</dt>
+
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#clip-element">clip</a>
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/<i>drawable_resource</i>"
+    android:clipOrientation=["horizontal" | "vertical"]
+    android:gravity=["top" | "bottom" | "left" | "right" | "center_vertical" |
+                     "fill_vertical" | "center_horizontal" | "fill_horizontal" |
+                     "center" | "fill" | "clip_vertical" | "clip_horizontal"] /&gt;
+</pre>
+</dd>
+
+<dt>elements:</dt>
+
+<dd>
+<dl class="tag-list">
+
+  <dt id="clip-element"><code>&lt;clip&gt;</code></dt>
+  <dd>Defines the clip drawable. This must be the root element.
+    <p class="caps">attributes:</p>
+    <dl class="atn-list">
+      <dt><code>xmlns:android</code></dt>
+        <dd><em>String</em>. <strong>Required.</strong> Defines the XML namespace, which must be
+        <code>"http://schemas.android.com/apk/res/android"</code>.
+      <dt><code>android:drawable</code></dt>
+        <dd><em>Drawable resource</em>. <strong>Required</strong>. Reference to a drawable
+resource to be clipped.</dd>
+      <dt><code>android:clipOrientation</code></dt>
+        <dd><em>Keyword</em>. The orientation for the clip.
+          <p>Must be one of the following constant values:</p>
+<table>
+<tr><th>Value</th><th>Description</th></tr>
+<tr><td><code>horizontal</code></td>
+<td>Clip the drawable horizontally.</td></tr>
+<tr><td><code>vertical</code></td>
+<td>Clip the drawable vertically.</td></tr>
+</table>
+        </dd>
+      <dt><code>android:gravity</code></dt>
+        <dd><em>Keyword</em>. Specifies where to clip within the drawable.
+          <p>Must be one or more (separated by '|') of the following constant values:</p>
+<table>
+<tr><th>Value</th><th>Description</th></tr>
+<tr><td><code>top</code></td>
+<td>Put the object at the top of its container, not changing its size. When {@code
+clipOrientation} is {@code "vertical"}, clipping occurs at the bottom of the drawable.</td></tr>
+<tr><td><code>bottom</code></td>
+<td>Put the object at the bottom of its container, not changing its size. When {@code
+clipOrientation} is {@code "vertical"}, clipping occurs at the top of the drawable.</td></tr>
+<tr><td><code>left</code></td>
+<td>Put the object at the left edge of its container, not changing its size. This is the
+default. When {@code clipOrientation} is {@code "horizontal"}, clipping occurs at the right side of
+the drawable. This is the default.</td></tr>
+<tr><td><code>right</code></td>
+<td>Put the object at the right edge of its container, not changing its size. When {@code
+clipOrientation} is {@code "horizontal"}, clipping occurs at the left side of
+the drawable.</td></tr>
+<tr><td><code>center_vertical</code></td>
+<td>Place object in the vertical center of its container, not changing its size. Clipping behaves
+the same as when gravity is {@code "center"}.</td></tr>
+<tr><td><code>fill_vertical</code></td>
+<td>Grow the vertical size of the object if needed so it completely fills its container. When {@code
+clipOrientation} is {@code "vertical"}, no clipping occurs because the drawable fills the
+vertical space (unless the drawable level is 0, in which case it's not visible).</td></tr>
+<tr><td><code>center_horizontal</code></td>
+<td>Place object in the horizontal center of its container, not changing its size.
+Clipping behaves the same as when gravity is {@code "center"}.</td></tr>
+<tr><td><code>fill_horizontal</code></td>
+<td>Grow the horizontal size of the object if needed so it completely fills its container. When
+{@code clipOrientation} is {@code "horizontal"}, no clipping occurs because the drawable fills the
+horizontal space (unless the drawable level is 0, in which case it's not visible).
+</td></tr>
+<tr><td><code>center</code></td>
+<td>Place the object in the center of its container in both the vertical and horizontal axis, not
+changing its size. When {@code
+clipOrientation} is {@code "horizontal"}, clipping occurs on the left and right. When {@code
+clipOrientation} is {@code "vertical"}, clipping occurs on the top and bottom.</td></tr>
+<tr><td><code>fill</code></td>
+<td>Grow the horizontal and vertical size of the object if needed so it completely fills its
+container. No clipping occurs because the drawable fills the
+horizontal and vertical space (unless the drawable level is 0, in which case it's not
+visible).</td></tr>
+<tr><td><code>clip_vertical</code></td>
+<td>Additional option that can be set to have the top and/or bottom edges of the child clipped to
+its container's bounds. The clip is based on the vertical gravity: a top gravity clips the
+bottom edge, a bottom gravity clips the top edge, and neither clips both edges.
+</td></tr>
+<tr><td><code>clip_horizontal</code></td>
+<td>Additional option that can be set to have the left and/or right edges of the child clipped to
+its container's bounds. The clip is based on the horizontal gravity: a left gravity clips
+the right edge, a right gravity clips the left edge, and neither clips both edges.
+</td></tr>
+</table></dd>
+    </dl>
+  </dd>
+</dl>
+
+</dd> <!-- end  elements and attributes -->
+
+<dt>example:</dt>
+
+<dd>XML file saved at <code>res/drawable/clip.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/android"
+    android:clipOrientation="horizontal"
+    android:gravity="left" /&gt;
+&lt;/shape>
+</pre>
+    <p>The following layout XML applies the clip drawable to a View:</p>
+<pre>
+&lt;ImageView
+    android:id="@+id/image"
+    android:background="@drawable/clip"
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content" />
+</pre>
+
+    <p>The following code gets the drawable and increases the amount of clipping in order to
+progressively reveal the image:</p>
+<pre>
+ImageView imageview = (ImageView) findViewById(R.id.image);
+ClipDrawable drawable = (ClipDrawable) imageview.getDrawable();
+drawable.setLevel(drawable.getLevel() + 1000);
+</pre>
+
+<p>Increasing the level reduces the amount of clipping and slowly reveals the image. Here it is
+at a level of 7000:</p>
+<img src="{@docRoot}images/resources/clip.png" alt="" />
+
+<p class="note"><strong>Note:</strong> The default level is 0, which is fully clipped so the image
+is not visible. When the level is 10,000, the image is not clipped and completely visible.</p>
+</dd> <!-- end example -->
+
+<dt>see also:</dt>
+
+<dd>
+<ul>
+  <li>{@link android.graphics.drawable.ClipDrawable}</li>
 </ul>
 </dd>
 
@@ -430,10 +1268,139 @@ tv.setBackground(redDrawable);
 
 
 
+<h2 id="Scale">Scale Drawable</h2>
+
+<p>A drawable defined in XML that changes the size of another drawable based on its current
+level.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/drawable/<em>filename</em>.xml</code><br/>
+The filename is used as the resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to a {@link android.graphics.drawable.ScaleDrawable}.</dd>
+
+<dt>resource reference:</dt>
+
+<dd>
+In Java: <code>R.drawable.<em>filename</em></code><br/>
+In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
+</dd>
+
+<dt>syntax:</dt>
+
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#scale-element">scale</a>
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/<i>drawable_resource</i>"
+    android:scaleGravity=["top" | "bottom" | "left" | "right" | "center_vertical" |
+                          "fill_vertical" | "center_horizontal" | "fill_horizontal" |
+                          "center" | "fill" | "clip_vertical" | "clip_horizontal"]
+    android:scaleHeight="<i>percentage</i>"
+    android:scaleWidth="<i>percentage</i>" /&gt;
+</pre>
+</dd>
+
+<dt>elements:</dt>
+
+<dd>
+<dl class="tag-list">
+
+  <dt id="scale-element"><code>&lt;scale&gt;</code></dt>
+  <dd>Defines the scale drawable. This must be the root element.
+    <p class="caps">attributes:</p>
+    <dl class="atn-list">
+      <dt><code>xmlns:android</code></dt>
+        <dd><em>String</em>. <strong>Required.</strong> Defines the XML namespace, which must be
+        <code>"http://schemas.android.com/apk/res/android"</code>.
+      <dt><code>android:drawable</code></dt>
+        <dd><em>Drawable resource</em>. <strong>Required</strong>. Reference to a drawable
+resource.</dd>
+      <dt><code>android:scaleGravity</code></dt>
+        <dd><em>Keyword</em>. Specifies the gravity position after scaling.
+          <p>Must be one or more (separated by '|') of the following constant values:</p>
+<table>
+<tr><th>Value</th><th>Description</th></tr>
+<tr><td><code>top</code></td>
+<td>Put the object at the top of its container, not changing its size.</td></tr>
+<tr><td><code>bottom</code></td>
+<td>Put the object at the bottom of its container, not changing its size. </td></tr>
+<tr><td><code>left</code></td>
+<td>Put the object at the left edge of its container, not changing its size. This is the
+default.</td></tr>
+<tr><td><code>right</code></td>
+<td>Put the object at the right edge of its container, not changing its size. </td></tr>
+<tr><td><code>center_vertical</code></td>
+<td>Place object in the vertical center of its container, not changing its size. </td></tr>
+<tr><td><code>fill_vertical</code></td>
+<td>Grow the vertical size of the object if needed so it completely fills its container. </td></tr>
+<tr><td><code>center_horizontal</code></td>
+<td>Place object in the horizontal center of its container, not changing its size. </td></tr>
+<tr><td><code>fill_horizontal</code></td>
+<td>Grow the horizontal size of the object if needed so it completely fills its container.
+</td></tr>
+<tr><td><code>center</code></td>
+<td>Place the object in the center of its container in both the vertical and horizontal axis, not
+changing its size. </td></tr>
+<tr><td><code>fill</code></td>
+<td>Grow the horizontal and vertical size of the object if needed so it completely fills its
+container. </td></tr>
+<tr><td><code>clip_vertical</code></td>
+<td>Additional option that can be set to have the top and/or bottom edges of the child clipped to
+its container's bounds. The clip is based on the vertical gravity: a top gravity clips the
+bottom edge, a bottom gravity clips the top edge, and neither clips both edges.
+</td></tr>
+<tr><td><code>clip_horizontal</code></td>
+<td>Additional option that can be set to have the left and/or right edges of the child clipped to
+its container's bounds. The clip is based on the horizontal gravity: a left gravity clips
+the right edge, a right gravity clips the left edge, and neither clips both edges.
+</td></tr>
+</table></dd>
+      <dt><code>android:scaleHeight</code></dt>
+        <dd><em>Percentage</em>. The scale height, expressed as a percentage of the drawable's
+bound. The value's format is XX%. For instance: 100%, 12.5%, etc.</dd>
+      <dt><code>android:scaleWidth</code></dt>
+        <dd><em>Percentage</em>. The scale width, expressed as a percentage of the drawable's
+bound. The value's format is XX%. For instance: 100%, 12.5%, etc.</dd>
+    </dl>
+  </dd>
+</dl>
+
+</dd>
+
+<dt>example:</dt>
+
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;scale xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/logo"
+    android:scaleGravity="center_vertical|center_horizontal"
+    android:scaleHeight="80%"
+    android:scaleWidth="80%" /&gt;
+</pre>
+</dd>
+
+<dt>see also:</dt>
+<dd>
+<ul>
+  <li>{@link android.graphics.drawable.ScaleDrawable}</li>
+</ul>
+</dd>
+
+</dl>
 
 
 
-<h2 id="Shape">Shape</h2>
+
+
+
+
+<h2 id="Shape">Shape Drawable</h2>
 
 <p>This is a generic shape defined in XML.</p>
 
@@ -441,23 +1408,32 @@ tv.setBackground(redDrawable);
 
 <dt>file location:</dt>
 <dd><code>res/drawable/<em>filename</em>.xml</code><br/>
-The filename will be used as the resource ID.</dd>
+The filename is used as the resource ID.</dd>
 
 <dt>compiled resource datatype:</dt>
 <dd>Resource pointer to a {@link android.graphics.drawable.ShapeDrawable}.</dd>
 
 <dt>resource reference:</dt>
+
 <dd>
 In Java: <code>R.drawable.<em>filename</em></code><br/>
 In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
 </dd>
 
 <dt>syntax:</dt>
+
 <dd>
 <pre class="stx">
 &lt;?xml version="1.0" encoding="utf-8"?>
-&lt;<a href="#shape-element">shape</a> xmlns:android="http://schemas.android.com/apk/res/android"
+&lt;<a href="#shape-element">shape</a>
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape=["rectangle" | "oval" | "line" | "ring"] >
+    &lt;<a href="#corners-element">corners</a>
+        android:radius="<em>integer</em>"
+        android:topLeftRadius="<em>integer</em>"
+        android:topRightRadius="<em>integer</em>"
+        android:bottomLeftRadius="<em>integer</em>"
+        android:bottomRightRadius="<em>integer</em>" /&gt;
     &lt;<a href="#gradient-element">gradient</a>
         android:angle="<em>integer</em>"
         android:centerX="<em>integer</em>"
@@ -467,37 +1443,40 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
         android:gradientRadius="<em>integer</em>"
         android:startColor="<em>color</em>"
         android:type=["linear" | "radial" | "sweep"]
-        android:usesLevel=["true" | "false"] />
-    &lt;<a href="#solid-element">solid</a>
-        android:color="<em>color</em>" />
-    &lt;<a href="#stroke-element">stroke</a>
-        android:width="<em>integer</em>"
-        android:color="<em>color</em>"
-        android:dashWidth="<em>integer</em>"
-        android:dashGap="<em>integer</em>" />
+        android:usesLevel=["true" | "false"] /&gt;
     &lt;<a href="#padding-element">padding</a>
         android:left="<em>integer</em>"
         android:top="<em>integer</em>"
         android:right="<em>integer</em>"
-        android:bottom="<em>integer</em>" />
-    &lt;<a href="#corners-element">corners</a>
-        android:radius="<em>integer</em>"
-        android:topLeftRadius="<em>integer</em>"
-        android:topRightRadius="<em>integer</em>"
-        android:bottomLeftRadius="<em>integer</em>"
-        android:bottomRightRadius="<em>integer</em>" />
+        android:bottom="<em>integer</em>" /&gt;
+    &lt;<a href="#size-element">size</a>
+        android:width="<em>integer</em>"
+        android:color="<em>color</em>"
+        android:dashWidth="<em>integer</em>"
+        android:dashGap="<em>integer</em>" /&gt;
+    &lt;<a href="#solid-element">solid</a>
+        android:color="<em>color</em>" /&gt;
+    &lt;<a href="#stroke-element">stroke</a>
+        android:width="<em>integer</em>"
+        android:color="<em>color</em>"
+        android:dashWidth="<em>integer</em>"
+        android:dashGap="<em>integer</em>" /&gt;
 &lt;/shape>
 </pre>
 </dd>
 
 <dt>elements:</dt>
+
 <dd>
 <dl class="tag-list">
 
   <dt id="shape-element"><code>&lt;shape&gt;</code></dt>
-    <dd><strong>Required.</strong> This must be the root element.
+    <dd>The shape drawable. This must be the root element.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
+        <dt><code>xmlns:android</code></dt>
+          <dd><em>String</em>. <strong>Required.</strong> Defines the XML namespace, which must be
+          <code>"http://schemas.android.com/apk/res/android"</code>.
         <dt><code>android:shape</code></dt>
         <dd><em>Keyword</em>. Defines the type of shape. Valid values are:
           <table>
@@ -525,7 +1504,7 @@ href="more-resources.html#Dimension">dimension resource</a>.</dd>
         <dd><em>Float</em>. The radius for the inner
 part of the ring, expressed as a ratio of the ring's width. For instance, if {@code
 android:innerRadiusRatio="5"}, then the inner radius equals the ring's width divided by 5. This
-value will be overridden by {@code android:innerRadius}. Default value is 9.</dd>
+value is overridden by {@code android:innerRadius}. Default value is 9.</dd>
         <dt><code>android:thickness</code></dt>
         <dd><em>Dimension</em>. The thickness of the
 ring, as a dimension value or <a
@@ -533,13 +1512,40 @@ href="more-resources.html#Dimension">dimension resource</a>.</dd>
         <dt><code>android:thicknessRatio</code></dt>
         <dd><em>Float</em>. The thickness of the ring,
 expressed as a ratio of the ring's width. For instance, if {@code android:thicknessRatio="2"}, then
-the thickness equals the ring's width divided by 2. This value will be overridden by {@code
+the thickness equals the ring's width divided by 2. This value is overridden by {@code
 android:innerRadius}. Default value is 3.</dd>
         <dt><code>android:useLevel</code></dt>
         <dd><em>Boolean</em>. "true" if this is used as
 a {@link android.graphics.drawable.LevelListDrawable}. This should normally be "false"
           or your shape may not appear.</dd>
       </dl>
+  <dt id="corners-element"><code>&lt;corners&gt;</code></dt>
+    <dd>Creates rounded corners for the shape. Applies only when the shape is a rectangle.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:radius</code></dt>
+        <dd><em>Dimension</em>. The radius for all corners, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>. This is overridden for each
+corner by the following attributes.</dd>
+        <dt><code>android:topLeftRadius</code></dt>
+        <dd><em>Dimension</em>. The radius for the top-left corner, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+        <dt><code>android:topRightRadius</code></dt>
+        <dd><em>Dimension</em>. The radius for the top-right corner, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+        <dt><code>android:bottomLeftRadius</code></dt>
+        <dd><em>Dimension</em>. The radius for the bottom-left corner, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+        <dt><code>android:bottomRightRadius</code></dt>
+        <dd><em>Dimension</em>. The radius for the bottom-right corner, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+      </dl>
+      <p class="note"><strong>Note:</strong> Every corner must (initially) be provided a corner
+radius greater than 1, or else no corners are rounded. If you want specific corners
+to <em>not</em> be rounded, a work-around is to use {@code android:radius} to set a default corner
+radius greater than 1, but then override each and every corner with the values you really
+want, providing zero ("0dp") where you don't want rounded corners.</p>
+    </dd>
   <dt id="gradient-element"><code>&lt;gradient&gt;</code></dt>
     <dd>Specifies a gradient color for the shape.
       <p class="caps">attributes:</p>
@@ -582,6 +1588,42 @@ value or <a href="more-resources.html#Color">color resource</a>.</dd>
 android.graphics.drawable.LevelListDrawable}.</dd>
       </dl>
     </dd>
+  <dt id="padding-element"><code>&lt;padding&gt;</code></dt>
+    <dd>Padding to apply to the containing View element (this pads the position of the View
+content, not the shape).
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:left</code></dt>
+        <dd><em>Dimension</em>. Left padding, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+        <dt><code>android:top</code></dt>
+        <dd><em>Dimension</em>. Top padding, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+        <dt><code>android:right</code></dt>
+        <dd><em>Dimension</em>. Right padding, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+        <dt><code>android:bottom</code></dt>
+        <dd><em>Dimension</em>. Bottom padding, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+      </dl>
+    </dd>
+  <dt id="solid-element"><code>&lt;size&gt;</code></dt>
+    <dd>The size of the shape.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:height</code></dt>
+        <dd><em>Dimension</em>. The height of the shape, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+        <dt><code>android:width</code></dt>
+        <dd><em>Dimension</em>. The width of the shape, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+      </dl>
+      <p class="note"><strong>Note:</strong> The shape scales to the size of the container
+View proportionate to the dimensions defined here, by default. When you use the shape in an {@link
+android.widget.ImageView}, you can restrict scaling by setting the <a
+href="{@docRoot}reference/android/widget/ImageView.html#attr_android:scaleType">{@code
+android:scaleType}</a> to {@code "center"}.</p>
+    </dd>
   <dt id="solid-element"><code>&lt;solid&gt;</code></dt>
     <dd>A solid color to fill the shape.
       <p class="caps">attributes:</p>
@@ -611,57 +1653,12 @@ href="more-resources.html#Dimension">dimension resource</a>. Only valid if {@cod
 android:dashGap} is set.</dd>
       </dl>
     </dd>
-  <dt id="padding-element"><code>&lt;padding&gt;</code></dt>
-    <dd>Padding to apply to the containing View element (this pads the position of the View
-content, not the shape).
-      <p class="caps">attributes:</p>
-      <dl class="atn-list">
-        <dt><code>android:left</code></dt>
-        <dd><em>Dimension</em>. Left padding, as a dimension value or <a
-href="more-resources.html#Dimension">dimension resource</a>.</dd>
-        <dt><code>android:top</code></dt>
-        <dd><em>Dimension</em>. Top padding, as a dimension value or <a
-href="more-resources.html#Dimension">dimension resource</a>.</dd>
-        <dt><code>android:right</code></dt>
-        <dd><em>Dimension</em>. Right padding, as a dimension value or <a
-href="more-resources.html#Dimension">dimension resource</a>.</dd>
-        <dt><code>android:bottom</code></dt>
-        <dd><em>Dimension</em>. Bottom padding, as a dimension value or <a
-href="more-resources.html#Dimension">dimension resource</a>.</dd>
-      </dl>
-    </dd>
-  <dt id="corners-element"><code>&lt;corners&gt;</code></dt>
-    <dd>Creates rounded corners for the shape. Applies only when the shape is a rectangle.
-      <p class="caps">attributes:</p>
-      <dl class="atn-list">
-        <dt><code>android:radius</code></dt>
-        <dd><em>Dimension</em>. The radius for all corners, as a dimension value or <a
-href="more-resources.html#Dimension">dimension resource</a>. This will be overridden for each
-corner by the following attributes.</dd>
-        <dt><code>android:topLeftRadius</code></dt>
-        <dd><em>Dimension</em>. The radius for the top-left corner, as a dimension value or <a
-href="more-resources.html#Dimension">dimension resource</a>.</dd>
-        <dt><code>android:topRightRadius</code></dt>
-        <dd><em>Dimension</em>. The radius for the top-right corner, as a dimension value or <a
-href="more-resources.html#Dimension">dimension resource</a>.</dd>
-        <dt><code>android:bottomLeftRadius</code></dt>
-        <dd><em>Dimension</em>. The radius for the bottom-left corner, as a dimension value or <a
-href="more-resources.html#Dimension">dimension resource</a>.</dd>
-        <dt><code>android:bottomRightRadius</code></dt>
-        <dd><em>Dimension</em>. The radius for the bottom-right corner, as a dimension value or <a
-href="more-resources.html#Dimension">dimension resource</a>.</dd>
-      </dl>
-      <p class="note"><strong>Note:</strong> Every corner must (initially) be provided a corner
-radius greater than zero, or else no corners will be rounded. If you want specific corners
-to <em>not</em> be rounded, a work-around is to use {@code android:radius} to set a default corner
-radius greater than zero, but then override each and every corner with the values you really
-want, providing zero ("0dp") where you don't want rounded corners.</p>
-    </dd>
 
 </dl>
 </dd> <!-- end  elements and attributes -->
 
 <dt>example:</dt>
+
 <dd>XML file saved at <code>res/drawable/gradient_box.xml</code>:
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
@@ -678,14 +1675,16 @@ want, providing zero ("0dp") where you don't want rounded corners.</p>
     &lt;corners android:radius="8dp" />
 &lt;/shape>
 </pre>
-    <p>This layout XML will apply the shape drawable to a View:</p>
+
+    <p>This layout XML applies the shape drawable to a View:</p>
 <pre>
 &lt;TextView
     android:background="@drawable/gradient_box"
     android:layout_height="wrap_content"
     android:layout_width="wrap_content" />
 </pre>
-    <p>This application code will get the shape drawable and apply it to a View:</p>
+
+    <p>This application code gets the shape drawable and applies it to a View:</p>
 <pre>
 Resources res = {@link android.content.Context#getResources()};
 Drawable shape = res. {@link android.content.res.Resources#getDrawable(int) getDrawable}(R.drawable.gradient_box);
@@ -694,6 +1693,14 @@ TextView tv = (TextView)findViewByID(R.id.textview);
 tv.setBackground(shape);
 </pre>
 </dd> <!-- end example -->
+
+<dt>see also:</dt>
+
+<dd>
+<ul>
+  <li>{@link android.graphics.drawable.ShapeDrawable}</li>
+</ul>
+</dd>
 
 </dl>
 

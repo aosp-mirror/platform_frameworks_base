@@ -40,7 +40,9 @@ import java.io.IOException;
  * A Drawable that wraps a bitmap and can be tiled, stretched, or aligned. You can create a
  * BitmapDrawable from a file path, an input stream, through XML inflation, or from
  * a {@link android.graphics.Bitmap} object.
- * <p>It can be defined in an XML file with the <code>&lt;bitmap></code> element.</p>
+ * <p>It can be defined in an XML file with the <code>&lt;bitmap></code> element.  For more
+ * information, see the guide to <a
+ * href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.</p>
  * <p>
  * Also see the {@link android.graphics.Bitmap} class, which handles the management and 
  * transformation of raw bitmap graphics, and should be used when drawing to a 
