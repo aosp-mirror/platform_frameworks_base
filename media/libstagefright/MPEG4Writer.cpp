@@ -41,6 +41,7 @@ namespace android {
 class MPEG4Writer::Track {
 public:
     Track(MPEG4Writer *owner, const sp<MediaSource> &source);
+
     ~Track();
 
     status_t start(MetaData *params);
@@ -61,12 +62,13 @@ private:
     volatile bool mResumed;
     int64_t mMaxTimeStampUs;
     int64_t mEstimatedTrackSizeBytes;
+    int32_t mTimeScale;
 
     pthread_t mThread;
 
     struct SampleInfo {
         size_t size;
-        int64_t timestamp;
+        int64_t timestampUs;
     };
     List<SampleInfo>    mSampleInfos;
     bool                mSamplesHaveSameSize;
@@ -92,11 +94,11 @@ private:
 
     struct SttsTableEntry {
 
-        SttsTableEntry(uint32_t count, uint32_t duration)
-            : sampleCount(count), sampleDuration(duration) {}
+        SttsTableEntry(uint32_t count, uint32_t durationUs)
+            : sampleCount(count), sampleDurationUs(durationUs) {}
 
         uint32_t sampleCount;
-        uint32_t sampleDuration;
+        uint32_t sampleDurationUs;
     };
     List<SttsTableEntry> mSttsTableEntries;
 
@@ -270,6 +272,13 @@ status_t MPEG4Writer::start(MetaData *param) {
         return OK;
     }
 
+    if (!param ||
+        !param->findInt32(kKeyTimeScale, &mTimeScale)) {
+        mTimeScale = 1000;
+    }
+    CHECK(mTimeScale > 0);
+    LOGV("movie time scale: %d", mTimeScale);
+
     mStreamableFile = true;
     mWriteMoovBoxToMemory = false;
     mMoovBoxBuffer = NULL;
@@ -336,14 +345,14 @@ void MPEG4Writer::stop() {
         return;
     }
 
-    int64_t max_duration = 0;
+    int64_t maxDurationUs = 0;
     for (List<Track *>::iterator it = mTracks.begin();
          it != mTracks.end(); ++it) {
         (*it)->stop();
 
-        int64_t duration = (*it)->getDurationUs();
-        if (duration > max_duration) {
-            max_duration = duration;
+        int64_t durationUs = (*it)->getDurationUs();
+        if (durationUs > maxDurationUs) {
+            maxDurationUs = durationUs;
         }
     }
 
@@ -367,8 +376,7 @@ void MPEG4Writer::stop() {
     mMoovBoxBuffer = (uint8_t *) malloc(mEstimatedMoovBoxSize);
     mMoovBoxBufferOffset = 0;
     CHECK(mMoovBoxBuffer != NULL);
-    int32_t timeScale = 1000;
-    int32_t duration = max_duration / timeScale;
+    int32_t duration = (maxDurationUs * mTimeScale) / 1E6;
 
     beginBox("moov");
 
@@ -376,7 +384,7 @@ void MPEG4Writer::stop() {
         writeInt32(0);             // version=0, flags=0
         writeInt32(now);           // creation time
         writeInt32(now);           // modification time
-        writeInt32(timeScale);          // timescale
+        writeInt32(mTimeScale);    // mvhd timescale
         writeInt32(duration);
         writeInt32(0x10000);       // rate: 1.0
         writeInt16(0x100);         // volume
@@ -655,7 +663,6 @@ void MPEG4Writer::setStartTimestampUs(int64_t timeUs) {
 }
 
 int64_t MPEG4Writer::getStartTimestampUs() {
-    LOGI("getStartTimestampUs: %lld", mStartTimestampUs);
     Mutex::Autolock autoLock(mLock);
     return mStartTimestampUs;
 }
@@ -683,6 +690,11 @@ MPEG4Writer::Track::Track(
       mGotAllCodecSpecificData(false),
       mReachedEOS(false) {
     getCodecSpecificDataFromInputFormatIfPossible();
+
+    if (!mMeta->findInt32(kKeyTimeScale, &mTimeScale)) {
+        mTimeScale = 1000;
+    }
+    CHECK(mTimeScale > 0);
 }
 
 void MPEG4Writer::Track::getCodecSpecificDataFromInputFormatIfPossible() {
@@ -927,9 +939,9 @@ void MPEG4Writer::Track::threadEntry() {
     int64_t chunkTimestampUs = 0;
     int32_t nChunks = 0;
     int32_t nZeroLengthFrames = 0;
-    int64_t lastTimestamp = 0;  // Timestamp of the previous sample
-    int64_t lastDuration = 0;   // Time spacing between the previous two samples
-    int32_t sampleCount = 1;    // Sample count in the current stts table entry
+    int64_t lastTimestampUs = 0;  // Previous sample time stamp in ms
+    int64_t lastDurationUs = 0;   // Between the previous two samples in ms
+    int32_t sampleCount = 1;      // Sample count in the current stts table entry
     uint32_t previousSampleSize = 0;  // Size of the previous sample
     int64_t previousPausedDurationUs = 0;
     sp<MetaData> meta_data;
@@ -1113,7 +1125,7 @@ void MPEG4Writer::Track::threadEntry() {
         }
 
         if (mResumed) {
-            previousPausedDurationUs += (timestampUs - mMaxTimeStampUs - 1000 * lastDuration);
+            previousPausedDurationUs += (timestampUs - mMaxTimeStampUs - lastDurationUs);
             mResumed = false;
         }
 
@@ -1124,12 +1136,11 @@ void MPEG4Writer::Track::threadEntry() {
             mMaxTimeStampUs = timestampUs;
         }
 
-        // Our timestamp is in ms.
-        info.timestamp = (timestampUs + 500) / 1000;
+        info.timestampUs = timestampUs;
         mSampleInfos.push_back(info);
         if (mSampleInfos.size() > 2) {
-            if (lastDuration != info.timestamp - lastTimestamp) {
-                SttsTableEntry sttsEntry(sampleCount, lastDuration);
+            if (lastDurationUs != info.timestampUs - lastTimestampUs) {
+                SttsTableEntry sttsEntry(sampleCount, lastDurationUs);
                 mSttsTableEntries.push_back(sttsEntry);
                 sampleCount = 1;
             } else {
@@ -1142,8 +1153,8 @@ void MPEG4Writer::Track::threadEntry() {
             }
             previousSampleSize = info.size;
         }
-        lastDuration = info.timestamp - lastTimestamp;
-        lastTimestamp = info.timestamp;
+        lastDurationUs = info.timestampUs - lastTimestampUs;
+        lastTimestampUs = info.timestampUs;
 
         if (isSync != 0) {
             mStssTableEntries.push_back(mSampleInfos.size());
@@ -1213,11 +1224,11 @@ void MPEG4Writer::Track::threadEntry() {
     // there is no frame time after it, just repeat the previous
     // frame's duration.
     if (mSampleInfos.size() == 1) {
-        lastDuration = 0;  // A single sample's duration
+        lastDurationUs = 0;  // A single sample's duration
     } else {
         ++sampleCount;  // Count for the last sample
     }
-    SttsTableEntry sttsEntry(sampleCount, lastDuration);
+    SttsTableEntry sttsEntry(sampleCount, lastDurationUs);
     mSttsTableEntries.push_back(sttsEntry);
     mReachedEOS = true;
     LOGI("Received total/0-length (%d/%d) buffers and encoded %d frames - %s",
@@ -1249,12 +1260,13 @@ void MPEG4Writer::Track::trackProgressStatus(int32_t nFrames, int64_t timeUs) {
 void MPEG4Writer::Track::findMinAvgMaxSampleDurationMs(
         int32_t *min, int32_t *avg, int32_t *max) {
     CHECK(!mSampleInfos.empty());
-    int32_t avgSampleDurationMs = mMaxTimeStampUs / 1000/ mSampleInfos.size();
+    int32_t avgSampleDurationMs = mMaxTimeStampUs / 1000 / mSampleInfos.size();
     int32_t minSampleDurationMs = 0x7FFFFFFF;
     int32_t maxSampleDurationMs = 0;
     for (List<SttsTableEntry>::iterator it = mSttsTableEntries.begin();
         it != mSttsTableEntries.end(); ++it) {
-        int32_t sampleDurationMs = static_cast<int32_t>(it->sampleDuration);
+        int32_t sampleDurationMs =
+            (static_cast<int32_t>(it->sampleDurationUs) + 500) / 1000;
         if (sampleDurationMs > maxSampleDurationMs) {
             maxSampleDurationMs = sampleDurationMs;
         } else if (sampleDurationMs < minSampleDurationMs) {
@@ -1370,10 +1382,13 @@ void MPEG4Writer::Track::writeTrackHeader(
     CHECK(success);
 
     bool is_audio = !strncasecmp(mime, "audio/", 6);
-    int32_t timeScale = 1000;
-    int32_t duration = getDurationUs() / timeScale;
+    LOGV("%s track time scale: %d",
+        is_audio? "Audio": "Video", mTimeScale);
+
 
     time_t now = time(NULL);
+    int32_t mvhdTimeScale = mOwner->getTimeScale();
+    int64_t trakDurationUs = getDurationUs();
 
     mOwner->beginBox("trak");
 
@@ -1385,7 +1400,9 @@ void MPEG4Writer::Track::writeTrackHeader(
         mOwner->writeInt32(now);           // modification time
         mOwner->writeInt32(trackID);
         mOwner->writeInt32(0);             // reserved
-        mOwner->writeInt32(duration);
+        int32_t tkhdDuration =
+            (trakDurationUs * mvhdTimeScale + 5E5) / 1E6;
+        mOwner->writeInt32(tkhdDuration);  // in mvhd timescale
         mOwner->writeInt32(0);             // reserved
         mOwner->writeInt32(0);             // reserved
         mOwner->writeInt16(0);             // layer
@@ -1423,12 +1440,17 @@ void MPEG4Writer::Track::writeTrackHeader(
           mOwner->beginBox("elst");
             mOwner->writeInt32(0);           // version=0, flags=0: 32-bit time
             mOwner->writeInt32(2);           // never ends with an empty list
-            int64_t durationMs =
-                (mStartTimestampUs - moovStartTimeUs) / 1000;
-            mOwner->writeInt32(durationMs);  // edit duration
-            mOwner->writeInt32(-1);          // empty edit box to signal starting time offset
-            mOwner->writeInt32(1 << 16);     // x1 rate
-            mOwner->writeInt32(duration);
+
+            // First elst entry: specify the starting time offset
+            int64_t offsetUs = mStartTimestampUs - moovStartTimeUs;
+            int32_t seg = (offsetUs * mvhdTimeScale + 5E5) / 1E6;
+            mOwner->writeInt32(seg);         // in mvhd timecale
+            mOwner->writeInt32(-1);          // starting time offset
+            mOwner->writeInt32(1 << 16);     // rate = 1.0
+
+            // Second elst entry: specify the track duration
+            seg = (trakDurationUs * mvhdTimeScale + 5E5) / 1E6;
+            mOwner->writeInt32(seg);         // in mvhd timescale
             mOwner->writeInt32(0);
             mOwner->writeInt32(1 << 16);
           mOwner->endBox();
@@ -1441,8 +1463,9 @@ void MPEG4Writer::Track::writeTrackHeader(
           mOwner->writeInt32(0);             // version=0, flags=0
           mOwner->writeInt32(now);           // creation time
           mOwner->writeInt32(now);           // modification time
-          mOwner->writeInt32(timeScale);     // timescale
-          mOwner->writeInt32(duration);      // duration
+          mOwner->writeInt32(mTimeScale);    // media timescale
+          int32_t mdhdDuration = (trakDurationUs * mTimeScale + 5E5) / 1E6;
+          mOwner->writeInt32(mdhdDuration);  // use media timescale
           // Language follows the three letter standard ISO-639-2/T
           // 'e', 'n', 'g' for "English", for instance.
           // Each character is packed as the difference between its ASCII value and 0x60.
@@ -1664,7 +1687,8 @@ void MPEG4Writer::Track::writeTrackHeader(
             for (List<SttsTableEntry>::iterator it = mSttsTableEntries.begin();
                  it != mSttsTableEntries.end(); ++it) {
                 mOwner->writeInt32(it->sampleCount);
-                mOwner->writeInt32(it->sampleDuration);
+                int32_t dur = (it->sampleDurationUs * mTimeScale + 5E5) / 1E6;
+                mOwner->writeInt32(dur);
             }
           mOwner->endBox();  // stts
 
@@ -1717,7 +1741,7 @@ void MPEG4Writer::Track::writeTrackHeader(
                     mOwner->writeInt64((*it));
                 }
             }
-          mOwner->endBox();  // co64
+          mOwner->endBox();  // stco or co64
 
         mOwner->endBox();  // stbl
        mOwner->endBox();  // minf

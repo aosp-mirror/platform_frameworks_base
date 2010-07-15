@@ -3212,6 +3212,12 @@ void OMXCodec::dumpPortStatus(OMX_U32 portIndex) {
 void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
     mOutputFormat = new MetaData;
     mOutputFormat->setCString(kKeyDecoderComponent, mComponentName);
+    if (mIsEncoder) {
+        int32_t timeScale;
+        if (inputFormat->findInt32(kKeyTimeScale, &timeScale)) {
+            mOutputFormat->setInt32(kKeyTimeScale, timeScale);
+        }
+    }
 
     OMX_PARAM_PORTDEFINITIONTYPE def;
     InitOMXParams(&def);
