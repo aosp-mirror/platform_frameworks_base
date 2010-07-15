@@ -1402,7 +1402,7 @@ void AudioFlinger::PlaybackThread::setMode(uint32_t mode)
     Mutex::Autolock _l(mLock);
     size_t size = mEffectChains.size();
     for (size_t i = 0; i < size; i++) {
-        mEffectChains[i]->setMode(mode);
+        mEffectChains[i]->setMode_l(mode);
     }
 }
 
@@ -1503,8 +1503,8 @@ bool AudioFlinger::MixerThread::threadLoop()
             // prevent any changes in effect chain list and in each effect chain
             // during mixing and effect process as the audio buffers could be deleted
             // or modified if an effect is created or deleted
-            effectChains = mEffectChains;
             lockEffectChains_l();
+            effectChains = mEffectChains;
        }
 
         if (LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
@@ -1628,7 +1628,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
     sp<EffectChain> chain = getEffectChain_l(0);
     if (chain != 0) {
         uint32_t v = (uint32_t)(masterVolume * (1 << 24));
-        chain->setVolume(&v, &v);
+        chain->setVolume_l(&v, &v);
         masterVolume = (float)((v + (1 << 23)) >> 24);
         chain.clear();
     }
@@ -1706,7 +1706,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
                 uint32_t vr = (uint32_t)(v * cblk->volume[1]) << 12;
 
                 // Delegate volume control to effect in track effect chain if needed
-                if (chain != 0 && chain->setVolume(&vl, &vr)) {
+                if (chain != 0 && chain->setVolume_l(&vl, &vr)) {
                     // Do not ramp volume is volume is controlled by effect
                     param = AudioMixer::VOLUME;
                 }
@@ -1885,7 +1885,7 @@ bool AudioFlinger::MixerThread::checkForNewParameters_l()
             // aware of attached audio device.
             mDevice = (uint32_t)value;
             for (size_t i = 0; i < mEffectChains.size(); i++) {
-                mEffectChains[i]->setDevice(mDevice);
+                mEffectChains[i]->setDevice_l(mDevice);
             }
         }
 
@@ -2198,7 +2198,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                         // there is one, the track is connected to it
                         if (!effectChains.isEmpty()) {
                             // Do not ramp volume is volume is controlled by effect
-                            if(effectChains[0]->setVolume(&vl, &vr)) {
+                            if(effectChains[0]->setVolume_l(&vl, &vr)) {
                                 rampVolume = false;
                             }
                         }
@@ -2505,8 +2505,8 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
             // prevent any changes in effect chain list and in each effect chain
             // during mixing and effect process as the audio buffers could be deleted
             // or modified if an effect is created or deleted
-            effectChains = mEffectChains;
             lockEffectChains_l();
+            effectChains = mEffectChains;
         }
 
         if (LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
@@ -4744,7 +4744,7 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::PlaybackThread::createEffect_l(
             chain = new EffectChain(this, sessionId);
             addEffectChain_l(chain);
         } else {
-            effect = chain->getEffectFromDesc(desc);
+            effect = chain->getEffectFromDesc_l(desc);
         }
 
         LOGV("createEffect_l() got effect %p on chain %p", effect == 0 ? 0 : effect.get(), chain.get());
@@ -4762,7 +4762,7 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::PlaybackThread::createEffect_l(
             if (lStatus != NO_ERROR) {
                 goto Exit;
             }
-            lStatus = chain->addEffect(effect);
+            lStatus = chain->addEffect_l(effect);
             if (lStatus != NO_ERROR) {
                 goto Exit;
             }
@@ -4782,7 +4782,8 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::PlaybackThread::createEffect_l(
 Exit:
     if (lStatus != NO_ERROR && lStatus != ALREADY_EXISTS) {
         if (effectCreated) {
-            if (chain->removeEffect(effect) == 0) {
+            Mutex::Autolock _l(mLock);
+            if (chain->removeEffect_l(effect) == 0) {
                 removeEffectChain_l(chain);
             }
         }
@@ -4810,7 +4811,7 @@ void AudioFlinger::PlaybackThread::disconnectEffect(const sp< EffectModule>& eff
         sp<EffectChain> chain = effect->chain().promote();
         if (chain != 0) {
             // remove effect chain if remove last effect
-            if (chain->removeEffect(effect) == 0) {
+            if (chain->removeEffect_l(effect) == 0) {
                 removeEffectChain_l(chain);
             }
         }
@@ -4920,7 +4921,7 @@ sp<AudioFlinger::EffectModule> AudioFlinger::PlaybackThread::getEffect_l(int ses
 
     sp<EffectChain> chain = getEffectChain_l(sessionId);
     if (chain != 0) {
-        effect = chain->getEffectFromId(effectId);
+        effect = chain->getEffectFromId_l(effectId);
     }
     return effect;
 }
@@ -5365,7 +5366,9 @@ status_t AudioFlinger::EffectModule::setVolume(uint32_t *left, uint32_t *right, 
 
     // Send volume indication if EFFECT_FLAG_VOLUME_IND is set and read back altered volume
     // if controller flag is set (Note that controller == TRUE => EFFECT_FLAG_VOLUME_CTRL set)
-    if ((mDescriptor.flags & EFFECT_FLAG_VOLUME_MASK) & (EFFECT_FLAG_VOLUME_CTRL|EFFECT_FLAG_VOLUME_IND)) {
+    if (isEnabled() &&
+            (mDescriptor.flags & EFFECT_FLAG_VOLUME_MASK) == EFFECT_FLAG_VOLUME_CTRL ||
+            (mDescriptor.flags & EFFECT_FLAG_VOLUME_MASK) == EFFECT_FLAG_VOLUME_IND) {
         status_t cmdStatus;
         uint32_t volume[2];
         uint32_t *pVolume = NULL;
@@ -5745,7 +5748,8 @@ void AudioFlinger::EffectHandle::dump(char* buffer, size_t size)
 
 AudioFlinger::EffectChain::EffectChain(const wp<ThreadBase>& wThread,
                                         int sessionId)
-    : mThread(wThread), mSessionId(sessionId), mVolumeCtrlIdx(-1), mActiveTrackCnt(0), mOwnInBuffer(false)
+    : mThread(wThread), mSessionId(sessionId), mActiveTrackCnt(0), mOwnInBuffer(false),
+            mVolumeCtrlIdx(-1), mLeftVolume(0), mRightVolume(0)
 {
 
 }
@@ -5758,7 +5762,8 @@ AudioFlinger::EffectChain::~EffectChain()
 
 }
 
-sp<AudioFlinger::EffectModule> AudioFlinger::EffectChain::getEffectFromDesc(effect_descriptor_t *descriptor)
+// getEffectFromDesc_l() must be called with PlaybackThread::mLock held
+sp<AudioFlinger::EffectModule> AudioFlinger::EffectChain::getEffectFromDesc_l(effect_descriptor_t *descriptor)
 {
     sp<EffectModule> effect;
     size_t size = mEffects.size();
@@ -5772,7 +5777,8 @@ sp<AudioFlinger::EffectModule> AudioFlinger::EffectChain::getEffectFromDesc(effe
     return effect;
 }
 
-sp<AudioFlinger::EffectModule> AudioFlinger::EffectChain::getEffectFromId(int id)
+// getEffectFromId_l() must be called with PlaybackThread::mLock held
+sp<AudioFlinger::EffectModule> AudioFlinger::EffectChain::getEffectFromId_l(int id)
 {
     sp<EffectModule> effect;
     size_t size = mEffects.size();
@@ -5807,7 +5813,8 @@ void AudioFlinger::EffectChain::process_l()
     }
 }
 
-status_t AudioFlinger::EffectChain::addEffect(sp<EffectModule>& effect)
+// addEffect_l() must be called with PlaybackThread::mLock held
+status_t AudioFlinger::EffectChain::addEffect_l(sp<EffectModule>& effect)
 {
     effect_descriptor_t desc = effect->desc();
     uint32_t insertPref = desc.flags & EFFECT_FLAG_INSERT_MASK;
@@ -5860,7 +5867,7 @@ status_t AudioFlinger::EffectChain::addEffect(sp<EffectModule>& effect)
                 // check invalid effect chaining combinations
                 if (insertPref == EFFECT_FLAG_INSERT_EXCLUSIVE ||
                     iPref == EFFECT_FLAG_INSERT_EXCLUSIVE) {
-                    LOGW("addEffect() could not insert effect %s: exclusive conflict with %s", desc.name, d.name);
+                    LOGW("addEffect_l() could not insert effect %s: exclusive conflict with %s", desc.name, d.name);
                     return INVALID_OPERATION;
                 }
                 // remember position of first insert effect and by default
@@ -5910,22 +5917,17 @@ status_t AudioFlinger::EffectChain::addEffect(sp<EffectModule>& effect)
             effect->setOutBuffer(mInBuffer);
         }
         mEffects.insertAt(effect, idx_insert);
-        // Always give volume control to last effect in chain with volume control capability
-        if (((desc.flags & EFFECT_FLAG_VOLUME_MASK) & EFFECT_FLAG_VOLUME_CTRL) &&
-                mVolumeCtrlIdx < idx_insert) {
-            mVolumeCtrlIdx = idx_insert;
-        }
 
-        LOGV("addEffect() effect %p, added in chain %p at rank %d", effect.get(), this, idx_insert);
+        LOGV("addEffect_l() effect %p, added in chain %p at rank %d", effect.get(), this, idx_insert);
     }
     effect->configure();
     return NO_ERROR;
 }
 
-size_t AudioFlinger::EffectChain::removeEffect(const sp<EffectModule>& effect)
+// removeEffect_l() must be called with PlaybackThread::mLock held
+size_t AudioFlinger::EffectChain::removeEffect_l(const sp<EffectModule>& effect)
 {
     Mutex::Autolock _l(mLock);
-
     int size = (int)mEffects.size();
     int i;
     uint32_t type = effect->desc().flags & EFFECT_FLAG_TYPE_MASK;
@@ -5941,26 +5943,16 @@ size_t AudioFlinger::EffectChain::removeEffect(const sp<EffectModule>& effect)
                 }
             }
             mEffects.removeAt(i);
-            LOGV("removeEffect() effect %p, removed from chain %p at rank %d", effect.get(), this, i);
+            LOGV("removeEffect_l() effect %p, removed from chain %p at rank %d", effect.get(), this, i);
             break;
         }
-    }
-    // Return volume control to last effect in chain with volume control capability
-    if (mVolumeCtrlIdx == i) {
-        size = (int)mEffects.size();
-        for (i = size; i > 0; i--) {
-            if ((mEffects[i - 1]->desc().flags & EFFECT_FLAG_VOLUME_MASK) & EFFECT_FLAG_VOLUME_CTRL) {
-                break;
-            }
-        }
-        // mVolumeCtrlIdx reset to -1 if no effect found with volume control flag set
-        mVolumeCtrlIdx = i - 1;
     }
 
     return mEffects.size();
 }
 
-void AudioFlinger::EffectChain::setDevice(uint32_t device)
+// setDevice_l() must be called with PlaybackThread::mLock held
+void AudioFlinger::EffectChain::setDevice_l(uint32_t device)
 {
     size_t size = mEffects.size();
     for (size_t i = 0; i < size; i++) {
@@ -5968,7 +5960,8 @@ void AudioFlinger::EffectChain::setDevice(uint32_t device)
     }
 }
 
-void AudioFlinger::EffectChain::setMode(uint32_t mode)
+// setMode_l() must be called with PlaybackThread::mLock held
+void AudioFlinger::EffectChain::setMode_l(uint32_t mode)
 {
     size_t size = mEffects.size();
     for (size_t i = 0; i < size; i++) {
@@ -5976,15 +5969,35 @@ void AudioFlinger::EffectChain::setMode(uint32_t mode)
     }
 }
 
-bool AudioFlinger::EffectChain::setVolume(uint32_t *left, uint32_t *right)
+// setVolume_l() must be called with PlaybackThread::mLock held
+bool AudioFlinger::EffectChain::setVolume_l(uint32_t *left, uint32_t *right)
 {
     uint32_t newLeft = *left;
     uint32_t newRight = *right;
     bool hasControl = false;
+    int ctrlIdx = -1;
+    size_t size = mEffects.size();
 
-    // first get volume update from volume controller
-    if (mVolumeCtrlIdx >= 0) {
-        mEffects[mVolumeCtrlIdx]->setVolume(&newLeft, &newRight, true);
+    // first update volume controller
+    for (size_t i = size; i > 0; i--) {
+        if (mEffects[i - 1]->isEnabled() &&
+            (mEffects[i - 1]->desc().flags & EFFECT_FLAG_VOLUME_MASK) == EFFECT_FLAG_VOLUME_CTRL) {
+            ctrlIdx = i - 1;
+            break;
+        }
+    }
+
+    if (ctrlIdx == mVolumeCtrlIdx && *left == mLeftVolume && *right == mRightVolume) {
+        return false;
+    }
+
+    mVolumeCtrlIdx = ctrlIdx;
+    mLeftVolume = *left;
+    mRightVolume = *right;
+
+    // second get volume update from volume controller
+    if (ctrlIdx >= 0) {
+        mEffects[ctrlIdx]->setVolume(&newLeft, &newRight, true);
         hasControl = true;
     }
     // then indicate volume to all other effects in chain.
@@ -5992,11 +6005,11 @@ bool AudioFlinger::EffectChain::setVolume(uint32_t *left, uint32_t *right)
     // and requested volume to effects after controller
     uint32_t lVol = newLeft;
     uint32_t rVol = newRight;
-    size_t size = mEffects.size();
+
     for (size_t i = 0; i < size; i++) {
-        if ((int)i == mVolumeCtrlIdx) continue;
-        // this also works for mVolumeCtrlIdx == -1 when there is no volume controller
-        if ((int)i > mVolumeCtrlIdx) {
+        if ((int)i == ctrlIdx) continue;
+        // this also works for ctrlIdx == -1 when there is no volume controller
+        if ((int)i > ctrlIdx) {
             lVol = *left;
             rVol = *right;
         }
@@ -6007,16 +6020,6 @@ bool AudioFlinger::EffectChain::setVolume(uint32_t *left, uint32_t *right)
 
     return hasControl;
 }
-
-sp<AudioFlinger::EffectModule> AudioFlinger::EffectChain::getVolumeController()
-{
-    sp<EffectModule> effect;
-    if (mVolumeCtrlIdx >= 0) {
-        effect = mEffects[mVolumeCtrlIdx];
-    }
-    return effect;
-}
-
 
 status_t AudioFlinger::EffectChain::dump(int fd, const Vector<String16>& args)
 {
@@ -6033,12 +6036,11 @@ status_t AudioFlinger::EffectChain::dump(int fd, const Vector<String16>& args)
         result.append("\tCould not lock mutex:\n");
     }
 
-    result.append("\tNum fx In buffer   Out buffer   Vol ctrl Active tracks:\n");
-    snprintf(buffer, SIZE, "\t%02d     0x%08x  0x%08x   %02d       %d\n",
+    result.append("\tNum fx In buffer   Out buffer   Active tracks:\n");
+    snprintf(buffer, SIZE, "\t%02d     0x%08x  0x%08x   %d\n",
             mEffects.size(),
             (uint32_t)mInBuffer,
             (uint32_t)mOutBuffer,
-            (mVolumeCtrlIdx == -1) ? 0 : mEffects[mVolumeCtrlIdx]->id(),
             mActiveTrackCnt);
     result.append(buffer);
     write(fd, result.string(), result.size());
