@@ -372,8 +372,8 @@ void IPCThreadState::setStrictModePolicy(int32_t policy)
     mStrictModePolicy = policy;
 }
 
-
-int32_t IPCThreadState::getStrictModePolicy() const {
+int32_t IPCThreadState::getStrictModePolicy() const
+{
     return mStrictModePolicy;
 }
 
