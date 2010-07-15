@@ -179,6 +179,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mTimeoutInMillis = intent.getIntExtra(TIMEOUT_IN_MILLIS, 0);
         mGetDrawtime = intent.getBooleanExtra(GET_DRAW_TIME, false);
         mSaveImagePath = intent.getStringExtra(SAVE_IMAGE);
+        mStopOnRefError = intent.getBooleanExtra(STOP_ON_REF_ERROR, false);
         setTitle("Test " + mCurrentTestNumber + " of " + mTotalTestCount);
         float ratio = (float)mCurrentTestNumber / mTotalTestCount;
         int progress = (int)(ratio * Window.PROGRESS_END);
@@ -699,8 +700,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             // waiting for "notifyDone" signal to finish, then there's no point in waiting
             // anymore because the JS execution is already terminated at this point and a
             // "notifyDone" will never come out so it's just wasting time till timeout kicks in
-            if (msg.contains("Uncaught ReferenceError:") || msg.contains("Uncaught TypeError:")
-                    && mWaitUntilDone) {
+            if ((msg.contains("Uncaught ReferenceError:") || msg.contains("Uncaught TypeError:"))
+                    && mWaitUntilDone && mStopOnRefError) {
                 Log.w(LOGTAG, "Terminating test case on uncaught ReferenceError or TypeError.");
                 mHandler.postDelayed(new Runnable() {
                     public void run() {
@@ -857,6 +858,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     private boolean mGetDrawtime;
     private int mTotalTestCount;
     private int mCurrentTestNumber;
+    private boolean mStopOnRefError;
 
     // States
     private boolean mTimedOut;
@@ -897,6 +899,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     static final String SAVE_IMAGE = "SaveImage";
     static final String TOTAL_TEST_COUNT = "TestCount";
     static final String CURRENT_TEST_NUMBER = "TestNumber";
+    static final String STOP_ON_REF_ERROR = "StopOnReferenceError";
 
     static final int DRAW_RUNS = 5;
     static final String DRAW_TIME_LOG = "/sdcard/android/page_draw_time.txt";
