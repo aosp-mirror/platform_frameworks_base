@@ -2,6 +2,9 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
+ifneq ($(TARGET_SIMULATOR),true)
+
+# Build the unit tests.
 test_src_files := \
     InputChannel_test.cpp \
     InputDispatcher_test.cpp \
@@ -43,3 +46,5 @@ $(foreach file,$(test_src_files), \
 
 # Build the manual test programs.
 include $(call all-subdir-makefiles)
+
+endif
