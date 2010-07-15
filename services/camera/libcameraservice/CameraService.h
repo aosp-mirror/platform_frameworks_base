@@ -19,6 +19,8 @@
 #ifndef ANDROID_SERVERS_CAMERA_CAMERASERVICE_H
 #define ANDROID_SERVERS_CAMERA_CAMERASERVICE_H
 
+#include <binder/BinderService.h>
+
 #include <camera/ICameraService.h>
 #include <camera/CameraHardwareInterface.h>
 
@@ -30,11 +32,14 @@ namespace android {
 class MemoryHeapBase;
 class MediaPlayer;
 
-class CameraService: public BnCameraService
+class CameraService :
+    public BinderService<CameraService>,
+    public BnCameraService
 {
     class Client;
+    friend class BinderService<CameraService>;
 public:
-    static void         instantiate();
+    static char const* getServiceName() { return "media.camera"; }
 
                         CameraService();
     virtual             ~CameraService();

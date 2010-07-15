@@ -63,20 +63,6 @@
 #define DISPLAY_COUNT       1
 
 namespace android {
-
-// ---------------------------------------------------------------------------
-
-void SurfaceFlinger::instantiate() {
-    defaultServiceManager()->addService(
-            String16("SurfaceFlinger"), new SurfaceFlinger());
-}
-
-void SurfaceFlinger::shutdown() {
-    // we should unregister here, but not really because
-    // when (if) the service manager goes away, all the services
-    // it has a reference to will leave too.
-}
-
 // ---------------------------------------------------------------------------
 
 SurfaceFlinger::LayerVector::LayerVector(const SurfaceFlinger::LayerVector& rhs)
