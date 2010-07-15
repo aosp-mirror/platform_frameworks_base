@@ -31,7 +31,7 @@
 #include "MtpStorage.h"
 #include "MtpStringBuffer.h"
 
-#include "f_mtp.h"
+#include <linux/usb/f_mtp.h>
 
 namespace android {
 
