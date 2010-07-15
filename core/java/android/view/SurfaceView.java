@@ -543,6 +543,9 @@ public class SurfaceView extends View {
                         }
                         if (creating || formatChanged || sizeChanged
                                 || visibleChanged || realSizeChanged) {
+                            for (SurfaceHolder.Callback c : callbacks) {
+                                c.surfaceChanged(mSurfaceHolder, mFormat, myWidth, myHeight);
+                            }
                         }
                         if (redrawNeeded) {
                             for (SurfaceHolder.Callback c : callbacks) {
