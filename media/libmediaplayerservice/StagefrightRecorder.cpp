@@ -381,12 +381,12 @@ status_t StagefrightRecorder::setParamInterleaveDuration(int32_t durationUs) {
     return OK;
 }
 
-// If interval <  0, only the first frame is I frame, and rest are all P frames
-// If interval == 0, all frames are encoded as I frames. No P frames
-// If interval >  0, it is the time spacing (seconds) between 2 neighboring I frames
-status_t StagefrightRecorder::setParamVideoIFramesInterval(int32_t interval) {
-    LOGV("setParamVideoIFramesInterval: %d seconds", interval);
-    mIFramesInterval = interval;
+// If seconds <  0, only the first frame is I frame, and rest are all P frames
+// If seconds == 0, all frames are encoded as I frames. No P frames
+// If seconds >  0, it is the time spacing (seconds) between 2 neighboring I frames
+status_t StagefrightRecorder::setParamVideoIFramesInterval(int32_t seconds) {
+    LOGV("setParamVideoIFramesInterval: %d seconds", seconds);
+    mIFramesIntervalSec = seconds;
     return OK;
 }
 
@@ -444,6 +444,44 @@ status_t StagefrightRecorder::setParamVideoEncoderLevel(int32_t level) {
     return OK;
 }
 
+status_t StagefrightRecorder::setParamMovieTimeScale(int32_t timeScale) {
+    LOGV("setParamMovieTimeScale: %d", timeScale);
+
+    // The range is set to be the same as the audio's time scale range
+    // since audio's time scale has a wider range.
+    if (timeScale < 600 || timeScale > 96000) {
+        LOGE("Time scale (%d) for movie is out of range [600, 96000]", timeScale);
+        return BAD_VALUE;
+    }
+    mMovieTimeScale = timeScale;
+    return OK;
+}
+
+status_t StagefrightRecorder::setParamVideoTimeScale(int32_t timeScale) {
+    LOGV("setParamVideoTimeScale: %d", timeScale);
+
+    // 60000 is chosen to make sure that each video frame from a 60-fps
+    // video has 1000 ticks.
+    if (timeScale < 600 || timeScale > 60000) {
+        LOGE("Time scale (%d) for video is out of range [600, 60000]", timeScale);
+        return BAD_VALUE;
+    }
+    mVideoTimeScale = timeScale;
+    return OK;
+}
+
+status_t StagefrightRecorder::setParamAudioTimeScale(int32_t timeScale) {
+    LOGV("setParamAudioTimeScale: %d", timeScale);
+
+    // 96000 Hz is the highest sampling rate support in AAC.
+    if (timeScale < 600 || timeScale > 96000) {
+        LOGE("Time scale (%d) for audio is out of range [600, 96000]", timeScale);
+        return BAD_VALUE;
+    }
+    mAudioTimeScale = timeScale;
+    return OK;
+}
+
 status_t StagefrightRecorder::setParameter(
         const String8 &key, const String8 &value) {
     LOGV("setParameter: key (%s) => value (%s)", key.string(), value.string());
@@ -461,6 +499,11 @@ status_t StagefrightRecorder::setParameter(
         int32_t durationUs;
         if (safe_strtoi32(value.string(), &durationUs)) {
             return setParamInterleaveDuration(durationUs);
+        }
+    } else if (key == "param-movie-time-scale") {
+        int32_t timeScale;
+        if (safe_strtoi32(value.string(), &timeScale)) {
+            return setParamMovieTimeScale(timeScale);
         }
     } else if (key == "param-use-64bit-offset") {
         int32_t use64BitOffset;
@@ -492,15 +535,20 @@ status_t StagefrightRecorder::setParameter(
         if (safe_strtoi32(value.string(), &audio_bitrate)) {
             return setParamAudioEncodingBitRate(audio_bitrate);
         }
+    } else if (key == "audio-param-time-scale") {
+        int32_t timeScale;
+        if (safe_strtoi32(value.string(), &timeScale)) {
+            return setParamAudioTimeScale(timeScale);
+        }
     } else if (key == "video-param-encoding-bitrate") {
         int32_t video_bitrate;
         if (safe_strtoi32(value.string(), &video_bitrate)) {
             return setParamVideoEncodingBitRate(video_bitrate);
         }
     } else if (key == "video-param-i-frames-interval") {
-        int32_t interval;
-        if (safe_strtoi32(value.string(), &interval)) {
-            return setParamVideoIFramesInterval(interval);
+        int32_t seconds;
+        if (safe_strtoi32(value.string(), &seconds)) {
+            return setParamVideoIFramesInterval(seconds);
         }
     } else if (key == "video-param-encoder-profile") {
         int32_t profile;
@@ -516,6 +564,11 @@ status_t StagefrightRecorder::setParameter(
         int32_t cameraId;
         if (safe_strtoi32(value.string(), &cameraId)) {
             return setParamVideoCameraId(cameraId);
+        }
+    } else if (key == "video-param-time-scale") {
+        int32_t timeScale;
+        if (safe_strtoi32(value.string(), &timeScale)) {
+            return setParamVideoTimeScale(timeScale);
         }
     } else {
         LOGE("setParameter: failed to find key %s", key.string());
@@ -637,6 +690,7 @@ sp<MediaSource> StagefrightRecorder::createAudioSource() {
     encMeta->setInt32(kKeyChannelCount, mAudioChannels);
     encMeta->setInt32(kKeySampleRate, mSampleRate);
     encMeta->setInt32(kKeyBitRate, mAudioBitRate);
+    encMeta->setInt32(kKeyTimeScale, mAudioTimeScale);
 
     OMXClient client;
     CHECK_EQ(client.connect(), OK);
@@ -880,10 +934,11 @@ status_t StagefrightRecorder::setupVideoEncoder(const sp<MediaWriter>& writer) {
 
     enc_meta->setInt32(kKeyWidth, width);
     enc_meta->setInt32(kKeyHeight, height);
-    enc_meta->setInt32(kKeyIFramesInterval, mIFramesInterval);
+    enc_meta->setInt32(kKeyIFramesInterval, mIFramesIntervalSec);
     enc_meta->setInt32(kKeyStride, stride);
     enc_meta->setInt32(kKeySliceHeight, sliceHeight);
     enc_meta->setInt32(kKeyColorFormat, colorFormat);
+    enc_meta->setInt32(kKeyTimeScale, mVideoTimeScale);
     if (mVideoEncoderProfile != -1) {
         enc_meta->setInt32(kKeyVideoProfile, mVideoEncoderProfile);
     }
@@ -921,6 +976,7 @@ status_t StagefrightRecorder::setupAudioEncoder(const sp<MediaWriter>& writer) {
     if (audioEncoder == NULL) {
         return UNKNOWN_ERROR;
     }
+
     writer->addSource(audioEncoder);
     return OK;
 }
@@ -957,6 +1013,7 @@ status_t StagefrightRecorder::startMPEG4Recording() {
     meta->setInt32(kKeyFileType, mOutputFormat);
     meta->setInt32(kKeyBitRate, totalBitRate);
     meta->setInt32(kKey64BitFileOffset, mUse64BitFileOffset);
+    meta->setInt32(kKeyTimeScale, mMovieTimeScale);
     if (mTrackEveryNumberOfFrames > 0) {
         meta->setInt32(kKeyTrackFrameStatus, mTrackEveryNumberOfFrames);
     }
@@ -1027,9 +1084,12 @@ status_t StagefrightRecorder::reset() {
     mAudioChannels = 1;
     mAudioBitRate  = 12200;
     mInterleaveDurationUs = 0;
-    mIFramesInterval = 1;
+    mIFramesIntervalSec = 1;
     mAudioSourceNode = 0;
     mUse64BitFileOffset = false;
+    mMovieTimeScale  = 1000;
+    mAudioTimeScale  = 1000;
+    mVideoTimeScale  = 1000;
     mCameraId        = 0;
     mVideoEncoderProfile = -1;
     mVideoEncoderLevel   = -1;
@@ -1112,7 +1172,7 @@ status_t StagefrightRecorder::dump(int fd, const Vector<String16>& args) const {
     result.append(buffer);
     snprintf(buffer, SIZE, "     Encoder level: %d\n", mVideoEncoderLevel);
     result.append(buffer);
-    snprintf(buffer, SIZE, "     I frames interval (s): %d\n", mIFramesInterval);
+    snprintf(buffer, SIZE, "     I frames interval (s): %d\n", mIFramesIntervalSec);
     result.append(buffer);
     snprintf(buffer, SIZE, "     Frame size (pixels): %dx%d\n", mVideoWidth, mVideoHeight);
     result.append(buffer);
