@@ -52,13 +52,15 @@ include $(BUILD_SYSTEM)/base_rules.mk
 $(LOCAL_BUILT_MODULE): $(built_core_dep) \
                        $(built_framework_dep) \
                        $(built_layoutlib_create_jar)
-	@echo "host layoutlib_create: $@"
-	@mkdir -p $(dir $@)
-	@rm -f $@
+	$(hide) echo "host layoutlib_create: $@"
+	$(hide) mkdir -p $(dir $@)
+	$(hide) rm -f $@
+	$(hide) ls -l $(built_framework_classes)
 	$(hide) java -jar $(built_layoutlib_create_jar) \
 	             $@ \
 	             $(built_core_classes) \
 	             $(built_framework_classes)
+	$(hide) ls -l $(built_framework_classes)
 
 
 #
