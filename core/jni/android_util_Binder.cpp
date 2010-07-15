@@ -134,6 +134,12 @@ static struct parcel_file_descriptor_offsets_t
     jmethodID mConstructor;
 } gParcelFileDescriptorOffsets;
 
+static struct strict_mode_callback_offsets_t
+{
+    jclass mClass;
+    jmethodID mCallback;
+} gStrictModeCallbackOffsets;
+
 // ****************************************************************************
 // ****************************************************************************
 // ****************************************************************************
@@ -214,6 +220,15 @@ bail:
     env->DeleteLocalRef(msgstr);
 }
 
+static void set_dalvik_blockguard_policy(JNIEnv* env, jint strict_policy)
+{
+    // Call back into android.os.StrictMode#onBinderStrictModePolicyChange
+    // to sync our state back to it.  See the comments in StrictMode.java.
+    env->CallStaticVoidMethod(gStrictModeCallbackOffsets.mClass,
+                              gStrictModeCallbackOffsets.mCallback,
+                              strict_policy);
+}
+
 class JavaBBinderHolder;
 
 class JavaBBinder : public BBinder
@@ -253,12 +268,28 @@ protected:
 
         LOGV("onTransact() on %p calling object %p in env %p vm %p\n", this, mObject, env, mVM);
 
+        IPCThreadState* thread_state = IPCThreadState::self();
+        const int strict_policy_before = thread_state->getStrictModePolicy();
+
         //printf("Transact from %p to Java code sending: ", this);
         //data.print();
         //printf("\n");
         jboolean res = env->CallBooleanMethod(mObject, gBinderOffsets.mExecTransact,
             code, (int32_t)&data, (int32_t)reply, flags);
         jthrowable excep = env->ExceptionOccurred();
+
+        // Restore the Java binder thread's state if it changed while
+        // processing a call (as it would if the Parcel's header had a
+        // new policy mask and Parcel.enforceInterface() changed
+        // it...)
+        const int strict_policy_after = thread_state->getStrictModePolicy();
+        if (strict_policy_after != strict_policy_before) {
+            // Our thread-local...
+            thread_state->setStrictModePolicy(strict_policy_before);
+            // And the Java-level thread-local...
+            set_dalvik_blockguard_policy(env, strict_policy_before);
+        }
+
         if (excep) {
             report_exception(env, excep,
                 "*** Uncaught remote exception!  "
@@ -574,6 +605,16 @@ static void android_os_Binder_restoreCallingIdentity(JNIEnv* env, jobject clazz,
     IPCThreadState::self()->restoreCallingIdentity(token);
 }
 
+static void android_os_Binder_setThreadStrictModePolicy(JNIEnv* env, jobject clazz, jint policyMask)
+{
+    IPCThreadState::self()->setStrictModePolicy(policyMask);
+}
+
+static jint android_os_Binder_getThreadStrictModePolicy(JNIEnv* env, jobject clazz)
+{
+    return IPCThreadState::self()->getStrictModePolicy();
+}
+
 static void android_os_Binder_flushPendingCommands(JNIEnv* env, jobject clazz)
 {
     IPCThreadState::self()->flushCommands();
@@ -618,6 +659,8 @@ static const JNINativeMethod gBinderMethods[] = {
     { "getCallingUid", "()I", (void*)android_os_Binder_getCallingUid },
     { "clearCallingIdentity", "()J", (void*)android_os_Binder_clearCallingIdentity },
     { "restoreCallingIdentity", "(J)V", (void*)android_os_Binder_restoreCallingIdentity },
+    { "setThreadStrictModePolicy", "(I)V", (void*)android_os_Binder_setThreadStrictModePolicy },
+    { "getThreadStrictModePolicy", "()I", (void*)android_os_Binder_getThreadStrictModePolicy },
     { "flushPendingCommands", "()V", (void*)android_os_Binder_flushPendingCommands },
     { "init", "()V", (void*)android_os_Binder_init },
     { "destroy", "()V", (void*)android_os_Binder_destroy }
@@ -1523,9 +1566,24 @@ static void android_os_Parcel_enforceInterface(JNIEnv* env, jobject clazz, jstri
     if (parcel != NULL) {
         const jchar* str = env->GetStringCritical(name, 0);
         if (str) {
-            bool isValid = parcel->enforceInterface(String16(str, env->GetStringLength(name)));
+            const int32_t old_strict_policy =
+                IPCThreadState::self()->getStrictModePolicy();
+            int32_t strict_policy;
+            bool isValid = parcel->enforceInterface(
+                String16(str, env->GetStringLength(name)),
+                &strict_policy);
             env->ReleaseStringCritical(name, str);
             if (isValid) {
+                if (old_strict_policy != strict_policy) {
+                    // Need to keep the Java-level thread-local strict
+                    // mode policy in sync for the libcore
+                    // enforcements, which involves an upcall back
+                    // into Java.  (We can't modify the
+                    // Parcel.enforceInterface signature, as it's
+                    // pseudo-public, and used via AIDL
+                    // auto-generation...)
+                    set_dalvik_blockguard_policy(env, strict_policy);
+                }
                 return;     // everything was correct -> return silently
             }
         }
@@ -1610,6 +1668,14 @@ static int int_register_android_os_Parcel(JNIEnv* env)
         = env->GetFieldID(clazz, "mObject", "I");
     gParcelOffsets.mOwnObject
         = env->GetFieldID(clazz, "mOwnObject", "I");
+
+    clazz = env->FindClass("android/os/StrictMode");
+    LOG_FATAL_IF(clazz == NULL, "Unable to find class android.os.StrictMode");
+    gStrictModeCallbackOffsets.mClass = (jclass) env->NewGlobalRef(clazz);
+    gStrictModeCallbackOffsets.mCallback = env->GetStaticMethodID(
+        clazz, "onBinderStrictModePolicyChange", "(I)V");
+    LOG_FATAL_IF(gStrictModeCallbackOffsets.mCallback == NULL,
+                 "Unable to find strict mode callback.");
 
     return AndroidRuntime::registerNativeMethods(
         env, kParcelPathName,
