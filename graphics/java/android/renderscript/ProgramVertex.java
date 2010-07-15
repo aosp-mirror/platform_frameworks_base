@@ -47,8 +47,9 @@ public class ProgramVertex extends Program {
             mRS = rs;
         }
 
-        public void setTextureMatrixEnable(boolean enable) {
+        public Builder setTextureMatrixEnable(boolean enable) {
             mTextureMatrixEnable = enable;
+            return this;
         }
 
         public ProgramVertex create() {

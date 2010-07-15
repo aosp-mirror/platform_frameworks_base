@@ -114,28 +114,33 @@ public class ProgramStore extends BaseObj {
 
         }
 
-        public void setDepthFunc(DepthFunc func) {
+        public Builder setDepthFunc(DepthFunc func) {
             mDepthFunc = func;
+            return this;
         }
 
-        public void setDepthMask(boolean enable) {
+        public Builder setDepthMask(boolean enable) {
             mDepthMask = enable;
+            return this;
         }
 
-        public void setColorMask(boolean r, boolean g, boolean b, boolean a) {
+        public Builder setColorMask(boolean r, boolean g, boolean b, boolean a) {
             mColorMaskR = r;
             mColorMaskG = g;
             mColorMaskB = b;
             mColorMaskA = a;
+            return this;
         }
 
-        public void setBlendFunc(BlendSrcFunc src, BlendDstFunc dst) {
+        public Builder setBlendFunc(BlendSrcFunc src, BlendDstFunc dst) {
             mBlendSrc = src;
             mBlendDst = dst;
+            return this;
         }
 
-        public void setDitherEnable(boolean enable) {
+        public Builder setDitherEnable(boolean enable) {
             mDither = enable;
+            return this;
         }
 
         static synchronized ProgramStore internalCreate(RenderScript rs, Builder b) {
