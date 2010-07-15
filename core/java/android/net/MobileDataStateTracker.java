@@ -205,8 +205,8 @@ public class MobileDataStateTracker implements NetworkStateTracker {
 
                                 setDetailedState(DetailedState.DISCONNECTED, reason, apnName);
                                 if (mNetworkProperties != null) {
-                                    NetworkUtils.resetConnections(mNetworkProperties.getInterface().
-                                            getName());
+                                    String iface = mNetworkProperties.getInterfaceName();
+                                    if (iface != null) NetworkUtils.resetConnections(iface);
                                 }
                                 // TODO - check this
                                 // can't do this here - ConnectivityService needs it to clear stuff
