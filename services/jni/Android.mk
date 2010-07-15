@@ -7,7 +7,6 @@ LOCAL_SRC_FILES:= \
     com_android_server_InputManager.cpp \
     com_android_server_LightsService.cpp \
     com_android_server_PowerManagerService.cpp \
-    com_android_server_SensorService.cpp \
     com_android_server_SystemServer.cpp \
     com_android_server_VibratorService.cpp \
 	com_android_server_location_GpsLocationProvider.cpp \

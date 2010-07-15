@@ -47,13 +47,13 @@ public:
     SensorManager();
     ~SensorManager();
 
-    ssize_t getSensorList(Sensor**) const;
-    Sensor* getDefaultSensor(int type);
+    ssize_t getSensorList(Sensor const* const** list) const;
+    Sensor const* getDefaultSensor(int type);
     sp<SensorEventQueue> createEventQueue();
 
 private:
     sp<ISensorServer> mSensorServer;
-    Sensor* mSensorList;
+    Sensor const** mSensorList;
     Vector<Sensor> mSensors;
 };
 

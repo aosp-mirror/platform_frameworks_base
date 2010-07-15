@@ -51,7 +51,8 @@ public:
         TYPE_PROXIMITY      = ASENSOR_TYPE_PROXIMITY
     };
 
-    Sensor();
+            Sensor();
+            Sensor(struct sensor_t const* hwSensor);
     virtual ~Sensor();
 
     const String8& getName() const;

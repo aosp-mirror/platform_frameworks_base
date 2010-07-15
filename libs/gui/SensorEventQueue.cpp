@@ -13,11 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#define LOG_TAG "Sensors"
+
 #include <stdint.h>
 #include <sys/types.h>
 
 #include <utils/Errors.h>
 #include <utils/RefBase.h>
+#include <utils/PollLoop.h>
 
 #include <gui/Sensor.h>
 #include <gui/SensorChannel.h>
@@ -68,7 +72,7 @@ ssize_t SensorEventQueue::read(ASensorEvent* events, size_t numEvents)
     ssize_t size = mSensorChannel->read(events, numEvents*sizeof(events[0]));
     if (size >= 0) {
         if (size % sizeof(events[0])) {
-            // partial write!!! should never happen.
+            // partial read!!! should never happen.
             return -EINVAL;
         }
         // returns number of events read
@@ -77,18 +81,48 @@ ssize_t SensorEventQueue::read(ASensorEvent* events, size_t numEvents)
     return size;
 }
 
-status_t SensorEventQueue::enableSensor(Sensor const* sensor) const
+sp<PollLoop> SensorEventQueue::getPollLoop() const
 {
+    Mutex::Autolock _l(mLock);
+    if (mPollLoop == 0) {
+        mPollLoop = new PollLoop(true);
+        mPollLoop->setCallback(getFd(), POLLIN, NULL, NULL);
+    }
+    return mPollLoop;
+}
+
+status_t SensorEventQueue::waitForEvent() const
+{
+    const int fd = getFd();
+    sp<PollLoop> pollLoop(getPollLoop());
+    int32_t result = pollLoop->pollOnce(-1, NULL, NULL);
+    return (result == fd) ? NO_ERROR : -1;
+}
+
+status_t SensorEventQueue::wake() const
+{
+    sp<PollLoop> pollLoop(getPollLoop());
+    pollLoop->wake();
+    return NO_ERROR;
+}
+
+status_t SensorEventQueue::enableSensor(Sensor const* sensor) const {
     return mSensorEventConnection->enableDisable(sensor->getHandle(), true);
 }
 
-status_t SensorEventQueue::disableSensor(Sensor const* sensor) const
-{
+status_t SensorEventQueue::disableSensor(Sensor const* sensor) const {
     return mSensorEventConnection->enableDisable(sensor->getHandle(), false);
 }
 
-status_t SensorEventQueue::setEventRate(Sensor const* sensor, nsecs_t ns) const
-{
+status_t SensorEventQueue::enableSensor(int32_t handle) const {
+    return mSensorEventConnection->enableDisable(handle, true);
+}
+
+status_t SensorEventQueue::disableSensor(int32_t handle) const {
+    return mSensorEventConnection->enableDisable(handle, false);
+}
+
+status_t SensorEventQueue::setEventRate(Sensor const* sensor, nsecs_t ns) const {
     return mSensorEventConnection->setEventRate(sensor->getHandle(), ns);
 }
 

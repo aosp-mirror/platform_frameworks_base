@@ -16,12 +16,7 @@
 
 package android.hardware;
 
-import android.content.Context;
-import android.os.Binder;
-import android.os.Bundle;
 import android.os.Looper;
-import android.os.Parcelable;
-import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.Handler;
@@ -33,8 +28,6 @@ import android.view.IRotationWatcher;
 import android.view.IWindowManager;
 import android.view.Surface;
 
-import java.io.FileDescriptor;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -339,7 +332,6 @@ public class SensorManager
 
     /*-----------------------------------------------------------------------*/
 
-    private ISensorService mSensorService;
     Looper mMainLooper;
     @SuppressWarnings("deprecation")
     private HashMap<SensorListener, LegacyListener> mLegacyListenersMap =
@@ -356,6 +348,7 @@ public class SensorManager
     /* The thread and the sensor list are global to the process
      * but the actual thread is spawned on demand */
     private static SensorThread sSensorThread;
+    private static int sQueue;
 
     // Used within this module from outside SensorManager, don't make private
     static SparseArray<Sensor> sHandleToSensor = new SparseArray<Sensor>();
@@ -370,80 +363,41 @@ public class SensorManager
         boolean mSensorsReady;
 
         SensorThread() {
-            // this gets to the sensor module. We can have only one per process.
-            sensors_data_init();
         }
 
         @Override
         protected void finalize() {
-            sensors_data_uninit();
         }
 
         // must be called with sListeners lock
-        boolean startLocked(ISensorService service) {
+        boolean startLocked() {
             try {
                 if (mThread == null) {
-                    Bundle dataChannel = service.getDataChannel();
-                    if (dataChannel != null) {
-                        mSensorsReady = false;
-                        SensorThreadRunnable runnable = new SensorThreadRunnable(dataChannel);
-                        Thread thread = new Thread(runnable, SensorThread.class.getName());
-                        thread.start();
-                        synchronized (runnable) {
-                            while (mSensorsReady == false) {
-                                runnable.wait();
-                            }
+                    mSensorsReady = false;
+                    SensorThreadRunnable runnable = new SensorThreadRunnable();
+                    Thread thread = new Thread(runnable, SensorThread.class.getName());
+                    thread.start();
+                    synchronized (runnable) {
+                        while (mSensorsReady == false) {
+                            runnable.wait();
                         }
-                        mThread = thread;
                     }
+                    mThread = thread;
                 }
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException in startLocked: ", e);
             } catch (InterruptedException e) {
             }
             return mThread == null ? false : true;
         }
 
         private class SensorThreadRunnable implements Runnable {
-            private Bundle mDataChannel;
-            SensorThreadRunnable(Bundle dataChannel) {
-                mDataChannel = dataChannel;
+            SensorThreadRunnable() {
             }
 
             private boolean open() {
                 // NOTE: this cannot synchronize on sListeners, since
                 // it's held in the main thread at least until we
                 // return from here.
-
-                // this thread is guaranteed to be unique
-                Parcelable[] pfds = mDataChannel.getParcelableArray("fds");
-                FileDescriptor[] fds;
-                if (pfds != null) {
-                    int length = pfds.length;
-                    fds = new FileDescriptor[length];
-                    for (int i = 0; i < length; i++) {
-                        ParcelFileDescriptor pfd = (ParcelFileDescriptor)pfds[i];
-                        fds[i] = pfd.getFileDescriptor();
-                    }
-                } else {
-                    fds = null;
-                }
-                int[] ints = mDataChannel.getIntArray("ints");
-                sensors_data_open(fds, ints);
-                if (pfds != null) {
-                    try {
-                        // close our copies of the file descriptors,
-                        // since we are just passing these to the JNI code and not using them here.
-                        for (int i = pfds.length - 1; i >= 0; i--) {
-                            ParcelFileDescriptor pfd = (ParcelFileDescriptor)pfds[i];
-                            pfd.close();
-                        }
-                    } catch (IOException e) {
-                        // *shrug*
-                        Log.e(TAG, "IOException: ", e);
-                    }
-                }
-                mDataChannel = null;
+                sQueue = sensors_create_queue();
                 return true;
             }
 
@@ -466,7 +420,7 @@ public class SensorManager
 
                 while (true) {
                     // wait for an event
-                    final int sensor = sensors_data_poll(values, status, timestamp);
+                    final int sensor = sensors_data_poll(sQueue, values, status, timestamp);
 
                     int accuracy = status[0];
                     synchronized (sListeners) {
@@ -478,7 +432,8 @@ public class SensorManager
                             }
 
                             // we have no more listeners or polling failed, terminate the thread
-                            sensors_data_close();
+                            sensors_destroy_queue(sQueue);
+                            sQueue = 0;
                             mThread = null;
                             break;
                         }
@@ -506,7 +461,7 @@ public class SensorManager
 
     /*-----------------------------------------------------------------------*/
 
-    private class ListenerDelegate extends Binder {
+    private class ListenerDelegate {
         final SensorEventListener mSensorEventListener;
         private final ArrayList<Sensor> mSensorList = new ArrayList<Sensor>();
         private final Handler mHandler;
@@ -602,8 +557,6 @@ public class SensorManager
      * {@hide}
      */
     public SensorManager(Looper mainLooper) {
-        mSensorService = ISensorService.Stub.asInterface(
-                ServiceManager.getService(Context.SENSOR_SERVICE));
         mMainLooper = mainLooper;
 
 
@@ -1051,42 +1004,37 @@ public class SensorManager
                 return false;
         }
 
-        try {
-            synchronized (sListeners) {
-                ListenerDelegate l = null;
-                for (ListenerDelegate i : sListeners) {
-                    if (i.getListener() == listener) {
-                        l = i;
-                        break;
-                    }
-                }
-
-                String name = sensor.getName();
-                int handle = sensor.getHandle();
-                if (l == null) {
-                    result = false;
-                    l = new ListenerDelegate(listener, sensor, handler);
-                    sListeners.add(l);
-                    if (!sListeners.isEmpty()) {
-                        result = sSensorThread.startLocked(mSensorService);
-                        if (result) {
-                            result = mSensorService.enableSensor(l, name, handle, delay);
-                            if (!result) {
-                                // there was an error, remove the listeners
-                                sListeners.remove(l);
-                            }
-                        }
-                    }
-                } else {
-                    result = mSensorService.enableSensor(l, name, handle, delay);
-                    if (result) {
-                        l.addSensor(sensor);
-                    }
+        synchronized (sListeners) {
+            ListenerDelegate l = null;
+            for (ListenerDelegate i : sListeners) {
+                if (i.getListener() == listener) {
+                    l = i;
+                    break;
                 }
             }
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in registerListener: ", e);
-            result = false;
+
+            String name = sensor.getName();
+            int handle = sensor.getHandle();
+            if (l == null) {
+                result = false;
+                l = new ListenerDelegate(listener, sensor, handler);
+                sListeners.add(l);
+                if (!sListeners.isEmpty()) {
+                    result = sSensorThread.startLocked();
+                    if (result) {
+                        result = sensors_enable_sensor(sQueue, name, handle, delay);
+                        if (!result) {
+                            // there was an error, remove the listeners
+                            sListeners.remove(l);
+                        }
+                    }
+                }
+            } else {
+                result = sensors_enable_sensor(sQueue, name, handle, delay);
+                if (result) {
+                    l.addSensor(sensor);
+                }
+            }
         }
         return result;
     }
@@ -1095,27 +1043,23 @@ public class SensorManager
         if (listener == null || sensor == null) {
             return;
         }
-        try {
-            synchronized (sListeners) {
-                final int size = sListeners.size();
-                for (int i=0 ; i<size ; i++) {
-                    ListenerDelegate l = sListeners.get(i);
-                    if (l.getListener() == listener) {
-                        // disable these sensors
-                        String name = sensor.getName();
-                        int handle = sensor.getHandle();
-                        mSensorService.enableSensor(l, name, handle, SENSOR_DISABLE);
-                        // if we have no more sensors enabled on this listener,
-                        // take it off the list.
-                        if (l.removeSensor(sensor) == 0) {
-                            sListeners.remove(i);
-                        }
-                        break;
+        synchronized (sListeners) {
+            final int size = sListeners.size();
+            for (int i=0 ; i<size ; i++) {
+                ListenerDelegate l = sListeners.get(i);
+                if (l.getListener() == listener) {
+                    // disable these sensors
+                    String name = sensor.getName();
+                    int handle = sensor.getHandle();
+                    sensors_enable_sensor(sQueue, name, handle, SENSOR_DISABLE);
+                    // if we have no more sensors enabled on this listener,
+                    // take it off the list.
+                    if (l.removeSensor(sensor) == 0) {
+                        sListeners.remove(i);
                     }
+                    break;
                 }
             }
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in unregisterListener: ", e);
         }
     }
 
@@ -1123,25 +1067,21 @@ public class SensorManager
         if (listener == null) {
             return;
         }
-        try {
-            synchronized (sListeners) {
-                final int size = sListeners.size();
-                for (int i=0 ; i<size ; i++) {
-                    ListenerDelegate l = sListeners.get(i);
-                    if (l.getListener() == listener) {
-                        // disable all sensors for this listener
-                        for (Sensor sensor : l.getSensors()) {
-                            String name = sensor.getName();
-                            int handle = sensor.getHandle();
-                            mSensorService.enableSensor(l, name, handle, SENSOR_DISABLE);
-                        }
-                        sListeners.remove(i);
-                        break;
+        synchronized (sListeners) {
+            final int size = sListeners.size();
+            for (int i=0 ; i<size ; i++) {
+                ListenerDelegate l = sListeners.get(i);
+                if (l.getListener() == listener) {
+                    // disable all sensors for this listener
+                    for (Sensor sensor : l.getSensors()) {
+                        String name = sensor.getName();
+                        int handle = sensor.getHandle();
+                        sensors_enable_sensor(sQueue, name, handle, SENSOR_DISABLE);
                     }
+                    sListeners.remove(i);
+                    break;
                 }
             }
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in unregisterListener: ", e);
         }
     }
 
@@ -1794,9 +1734,8 @@ public class SensorManager
     private static native int sensors_module_get_next_sensor(Sensor sensor, int next);
 
     // Used within this module from outside SensorManager, don't make private
-    static native int sensors_data_init();
-    static native int sensors_data_uninit();
-    static native int sensors_data_open(FileDescriptor[] fds, int[] ints);
-    static native int sensors_data_close();
-    static native int sensors_data_poll(float[] values, int[] status, long[] timestamp);
+    static native int sensors_create_queue();
+    static native void sensors_destroy_queue(int queue);
+    static native boolean sensors_enable_sensor(int queue, String name, int sensor, int enable);
+    static native int sensors_data_poll(int queue, float[] values, int[] status, long[] timestamp);
 }
