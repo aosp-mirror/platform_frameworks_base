@@ -23,11 +23,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.ObbInfo;
+import android.content.res.ObbScanner;
 import android.net.Uri;
 import android.os.storage.IMountService;
 import android.os.storage.IMountServiceListener;
 import android.os.storage.IMountShutdownObserver;
 import android.os.storage.StorageResultCode;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -53,7 +56,8 @@ class MountService extends IMountService.Stub
     private static final boolean LOCAL_LOGD = false;
     private static final boolean DEBUG_UNMOUNT = false;
     private static final boolean DEBUG_EVENTS = false;
-    
+    private static final boolean DEBUG_OBB = true;
+
     private static final String TAG = "MountService";
 
     /*
@@ -130,6 +134,12 @@ class MountService extends IMountService.Stub
      */
     final private HashSet<String> mAsecMountSet = new HashSet<String>();
 
+    /**
+     * Private hash of currently mounted filesystem images.
+     */
+    final private HashSet<String> mObbMountSet = new HashSet<String>();
+
+    // Handler messages
     private static final int H_UNMOUNT_PM_UPDATE = 1;
     private static final int H_UNMOUNT_PM_DONE = 2;
     private static final int H_UNMOUNT_MS = 3;
@@ -287,7 +297,7 @@ class MountService extends IMountService.Stub
             Slog.w(TAG, "Waiting too long for mReady!");
         }
     }
-  
+
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -344,7 +354,7 @@ class MountService extends IMountService.Stub
 
         MountServiceBinderListener(IMountServiceListener listener) {
             mListener = listener;
- 
+
         }
 
         public void binderDied() {
@@ -1326,6 +1336,146 @@ class MountService extends IMountService.Stub
 
     public void finishMediaUpdate() {
         mHandler.sendEmptyMessage(H_UNMOUNT_PM_DONE);
+    }
+
+    private boolean isCallerOwnerOfPackage(String packageName) {
+        final int callerUid = Binder.getCallingUid();
+        return isUidOwnerOfPackage(packageName, callerUid);
+    }
+
+    private boolean isUidOwnerOfPackage(String packageName, int callerUid) {
+        if (packageName == null) {
+            return false;
+        }
+
+        final int packageUid = mPms.getPackageUid(packageName);
+
+        if (DEBUG_OBB) {
+            Slog.d(TAG, "packageName = " + packageName + ", packageUid = " +
+                    packageUid + ", callerUid = " + callerUid);
+        }
+
+        return callerUid == packageUid;
+    }
+
+    public String getMountedObbPath(String filename) {
+        waitForReady();
+        warnOnNotMounted();
+
+        // XXX replace with call to IMediaContainerService
+        ObbInfo obbInfo = ObbScanner.getObbInfo(filename);
+        if (!isCallerOwnerOfPackage(obbInfo.packageName)) {
+            throw new IllegalArgumentException("Caller package does not match OBB file");
+        }
+
+        try {
+            ArrayList<String> rsp = mConnector.doCommand(String.format("obb path %s", filename));
+            String []tok = rsp.get(0).split(" ");
+            int code = Integer.parseInt(tok[0]);
+            if (code != VoldResponseCode.AsecPathResult) {
+                throw new IllegalStateException(String.format("Unexpected response code %d", code));
+            }
+            return tok[1];
+        } catch (NativeDaemonConnectorException e) {
+            int code = e.getCode();
+            if (code == VoldResponseCode.OpFailedStorageNotFound) {
+                throw new IllegalArgumentException(String.format("OBB '%s' not found", filename));
+            } else {
+                throw new IllegalStateException(String.format("Unexpected response code %d", code));
+            }
+        }
+    }
+
+    public boolean isObbMounted(String filename) {
+        waitForReady();
+        warnOnNotMounted();
+
+        // XXX replace with call to IMediaContainerService
+        ObbInfo obbInfo = ObbScanner.getObbInfo(filename);
+        if (!isCallerOwnerOfPackage(obbInfo.packageName)) {
+            throw new IllegalArgumentException("Caller package does not match OBB file");
+        }
+
+        synchronized (mObbMountSet) {
+            return mObbMountSet.contains(filename);
+        }
+    }
+
+    public int mountObb(String filename, String key) {
+        waitForReady();
+        warnOnNotMounted();
+
+        synchronized (mObbMountSet) {
+            if (mObbMountSet.contains(filename)) {
+                return StorageResultCode.OperationFailedStorageMounted;
+            }
+        }
+
+        final int callerUid = Binder.getCallingUid();
+
+        // XXX replace with call to IMediaContainerService
+        ObbInfo obbInfo = ObbScanner.getObbInfo(filename);
+        if (!isUidOwnerOfPackage(obbInfo.packageName, callerUid)) {
+            throw new IllegalArgumentException("Caller package does not match OBB file");
+        }
+
+        if (key == null) {
+            key = "none";
+        }
+
+        int rc = StorageResultCode.OperationSucceeded;
+        String cmd = String.format("obb mount %s %s %d", filename, key, callerUid);
+        try {
+            mConnector.doCommand(cmd);
+        } catch (NativeDaemonConnectorException e) {
+            int code = e.getCode();
+            if (code != VoldResponseCode.OpFailedStorageBusy) {
+                rc = StorageResultCode.OperationFailedInternalError;
+            }
+        }
+
+        if (rc == StorageResultCode.OperationSucceeded) {
+            synchronized (mObbMountSet) {
+                mObbMountSet.add(filename);
+            }
+        }
+        return rc;
+    }
+
+    public int unmountObb(String filename, boolean force) {
+        waitForReady();
+        warnOnNotMounted();
+
+        ObbInfo obbInfo = ObbScanner.getObbInfo(filename);
+        if (!isCallerOwnerOfPackage(obbInfo.packageName)) {
+            throw new IllegalArgumentException("Caller package does not match OBB file");
+        }
+
+        synchronized (mObbMountSet) {
+            if (!mObbMountSet.contains(filename)) {
+                return StorageResultCode.OperationFailedStorageNotMounted;
+            }
+         }
+
+        int rc = StorageResultCode.OperationSucceeded;
+        String cmd = String.format("obb unmount %s%s", filename, (force ? " force" : ""));
+        try {
+            mConnector.doCommand(cmd);
+        } catch (NativeDaemonConnectorException e) {
+            int code = e.getCode();
+            if (code == VoldResponseCode.OpFailedStorageBusy) {
+                rc = StorageResultCode.OperationFailedStorageBusy;
+            } else {
+                rc = StorageResultCode.OperationFailedInternalError;
+            }
+        }
+
+        if (rc == StorageResultCode.OperationSucceeded) {
+            synchronized (mObbMountSet) {
+                mObbMountSet.remove(filename);
+            }
+        }
+        return rc;
     }
 }
 

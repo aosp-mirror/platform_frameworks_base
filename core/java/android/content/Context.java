@@ -1400,7 +1400,7 @@ public abstract class Context {
     
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
-     * android.os.storage.StorageManager} for accesssing system storage
+     * android.os.storage.StorageManager} for accessing system storage
      * functions.
      *
      * @see #getSystemService

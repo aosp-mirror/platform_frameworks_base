@@ -152,4 +152,26 @@ interface IMountService
      * processing the media status update request.
      */
     void finishMediaUpdate();
+
+    /**
+     * Mounts an Opaque Binary Blob (OBB) with the specified decryption key and only
+     * allows the calling process's UID access to the contents.
+     */
+    int mountObb(String filename, String key);
+
+    /**
+     * Unmounts an Opaque Binary Blob (OBB). When the force flag is specified, any
+     * program using it will be forcibly killed to unmount the image.
+     */
+    int unmountObb(String filename, boolean force);
+
+    /**
+     * Checks whether the specified Opaque Binary Blob (OBB) is mounted somewhere.
+     */
+    boolean isObbMounted(String filename);
+
+    /**
+     * Gets the path to the mounted Opaque Binary Blob (OBB).
+     */
+    String getMountedObbPath(String filename);
 }
