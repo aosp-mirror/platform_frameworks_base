@@ -24,6 +24,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.KeyEvent;
 import java.util.List;
 import android.widget.LinearLayout;
 import android.net.ConnectivityManager;
@@ -64,6 +65,8 @@ public class ConnectivityManagerTestActivity extends Activity {
     public int mWifiState;
     public NetworkInfo mWifiNetworkInfo;
     public String mBssid;
+    public String mPowerSsid = "GoogleGuest"; //Default power SSID
+    private Context mContext;
 
     /*
      * Control Wifi States
@@ -403,5 +406,45 @@ public class ConnectivityManagerTestActivity extends Activity {
             unregisterReceiver(mWifiReceiver);
         }
         Log.v(LOG_TAG, "onDestroy, inst=" + Integer.toHexString(hashCode()));
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mContext = this;
+        Bundle bundle = this.getIntent().getExtras();
+        if (bundle != null){
+            mPowerSsid = bundle.getString("power_ssid");
+        }
+    }
+    //A thread to set the device into airplane mode then turn on wifi.
+    Thread setDeviceWifiAndAirplaneThread = new Thread(new Runnable() {
+        public void run() {
+            setAirplaneMode(mContext, true);
+            connectToWifi(mPowerSsid);
+        }
+    });
+
+    //A thread to set the device into wifi
+    Thread setDeviceInWifiOnlyThread = new Thread(new Runnable() {
+        public void run() {
+            connectToWifi(mPowerSsid);
+        }
+    });
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            //This is a tricky way for the scripted monkey to
+            //set the device in wifi and wifi in airplane mode.
+            case KeyEvent.KEYCODE_1:
+                setDeviceWifiAndAirplaneThread.start();
+                break;
+
+            case KeyEvent.KEYCODE_2:
+                setDeviceInWifiOnlyThread.start();
+                break;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }
