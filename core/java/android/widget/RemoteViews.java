@@ -285,6 +285,7 @@ public class RemoteViews implements Parcelable, Filter {
         static final int URI = 11;
         static final int BITMAP = 12;
         static final int BUNDLE = 13;
+        static final int INTENT = 14;
 
         int viewId;
         String methodName;
@@ -347,6 +348,9 @@ public class RemoteViews implements Parcelable, Filter {
                 case BUNDLE:
                     this.value = in.readBundle();
                     break;
+                case INTENT:
+                    this.value = Intent.CREATOR.createFromParcel(in);
+                    break;
                 default:
                     break;
             }
@@ -402,6 +406,9 @@ public class RemoteViews implements Parcelable, Filter {
                 case BUNDLE:
                     out.writeBundle((Bundle) this.value);
                     break;
+                case INTENT:
+                    ((Intent)this.value).writeToParcel(out, flags);
+                    break;
                 default:
                     break;
             }
@@ -435,6 +442,8 @@ public class RemoteViews implements Parcelable, Filter {
                     return Bitmap.class;
                 case BUNDLE:
                     return Bundle.class;
+                case INTENT:
+                    return Intent.class;
                 default:
                     return null;
             }
@@ -770,6 +779,37 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Equivalent to calling {@link android.widget.AbsListView#setRemoteViewsAdapter(Intent)}.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param intent The intent of the service which will be
+     *            providing data to the RemoteViewsAdapter
+     */
+    public void setRemoteAdapter(int viewId, Intent intent) {
+        setIntent(viewId, "setRemoteViewsAdapter", intent);
+    }
+
+    /**
+     * Equivalent to calling {@link android.widget.AbsListView#smoothScrollToPosition(int, int)}.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param position Scroll to this adapter position
+     */
+    public void setScrollPosition(int viewId, int position) {
+        setInt(viewId, "smoothScrollToPosition", position);
+    }
+
+    /**
+     * Equivalent to calling {@link android.widget.AbsListView#smoothScrollToPosition(int, int)}.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param position Scroll by this adapter position offset
+     */
+    public void setRelativeScrollPosition(int viewId, int offset) {
+        setInt(viewId, "smoothScrollByOffset", offset);
+    }
+
+    /**
      * Call a method taking one boolean on a view in the layout for this RemoteViews.
      *
      * @param viewId The id of the view whose text should change
@@ -913,6 +953,16 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setBundle(int viewId, String methodName, Bundle value) {
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.BUNDLE, value));
+    }
+
+    /**
+     *
+     * @param viewId
+     * @param methodName
+     * @param value
+     */
+    public void setIntent(int viewId, String methodName, Intent value) {
+        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.INTENT, value));
     }
 
     /**

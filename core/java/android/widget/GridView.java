@@ -17,22 +17,25 @@
 package android.widget;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
-import android.view.SoundEffectConstants;
 import android.view.animation.GridLayoutAnimationController;
+import android.widget.RemoteViews.RemoteView;
 
 
 /**
  * A view that shows items in two-dimensional scrolling grid. The items in the
  * grid come from the {@link ListAdapter} associated with this view.
  */
+@RemoteView
 public class GridView extends AbsListView {
     public static final int NO_STRETCH = 0;
     public static final int STRETCH_SPACING = 1;
@@ -104,6 +107,16 @@ public class GridView extends AbsListView {
     @Override
     public ListAdapter getAdapter() {
         return mAdapter;
+    }
+
+    /**
+     * Sets up this AbsListView to use a remote views adapter which connects to a RemoteViewsService
+     * through the specified intent.
+     * @param intent the intent used to identify the RemoteViewsService for the adapter to connect to.
+     */
+    @android.view.RemotableViewMethod
+    public void setRemoteViewsAdapter(Intent intent) {
+        super.setRemoteViewsAdapter(intent);
     }
 
     /**
@@ -737,6 +750,26 @@ public class GridView extends AbsListView {
             // Now offset the selected item to get it into view
             offsetChildrenTopAndBottom(offset);
         }
+    }
+
+    /**
+     * Smoothly scroll to the specified adapter position. The view will
+     * scroll such that the indicated position is displayed.
+     * @param position Scroll to this adapter position.
+     */
+    @android.view.RemotableViewMethod
+    public void smoothScrollToPosition(int position) {
+        super.smoothScrollToPosition(position);
+    }
+
+    /**
+     * Smoothly scroll to the specified adapter position offset. The view will
+     * scroll such that the indicated position is displayed.
+     * @param offset The amount to offset from the adapter position to scroll to.
+     */
+    @android.view.RemotableViewMethod
+    public void smoothScrollByOffset(int offset) {
+        super.smoothScrollByOffset(offset);
     }
 
     /**

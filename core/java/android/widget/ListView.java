@@ -20,6 +20,7 @@ import com.android.internal.R;
 import com.google.android.collect.Lists;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -41,6 +42,7 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
+import android.widget.RemoteViews.RemoteView;
 
 import java.util.ArrayList;
 
@@ -65,6 +67,7 @@ import java.util.ArrayList;
  * @attr ref android.R.styleable#ListView_headerDividersEnabled
  * @attr ref android.R.styleable#ListView_footerDividersEnabled
  */
+@RemoteView
 public class ListView extends AbsListView {
     /**
      * Used to indicate a no preference for a position type.
@@ -398,6 +401,16 @@ public class ListView extends AbsListView {
     @Override
     public ListAdapter getAdapter() {
         return mAdapter;
+    }
+
+    /**
+     * Sets up this AbsListView to use a remote views adapter which connects to a RemoteViewsService
+     * through the specified intent.
+     * @param intent the intent used to identify the RemoteViewsService for the adapter to connect to.
+     */
+    @android.view.RemotableViewMethod
+    public void setRemoteViewsAdapter(Intent intent) {
+        super.setRemoteViewsAdapter(intent);
     }
 
     /**
@@ -863,6 +876,25 @@ public class ListView extends AbsListView {
         return topSelectionPixel;
     }
 
+    /**
+     * Smoothly scroll to the specified adapter position. The view will
+     * scroll such that the indicated position is displayed.
+     * @param position Scroll to this adapter position.
+     */
+    @android.view.RemotableViewMethod
+    public void smoothScrollToPosition(int position) {
+        super.smoothScrollToPosition(position);
+    }
+
+    /**
+     * Smoothly scroll to the specified adapter position offset. The view will
+     * scroll such that the indicated position is displayed.
+     * @param offset The amount to offset from the adapter position to scroll to.
+     */
+    @android.view.RemotableViewMethod
+    public void smoothScrollByOffset(int offset) {
+        super.smoothScrollByOffset(offset);
+    }
 
     /**
      * Fills the list based on positioning the new selection relative to the old

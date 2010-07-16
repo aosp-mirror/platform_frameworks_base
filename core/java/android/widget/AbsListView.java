@@ -19,6 +19,7 @@ package android.widget;
 import com.android.internal.R;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -71,7 +72,8 @@ import java.util.List;
  */
 public abstract class AbsListView extends AdapterView<ListAdapter> implements TextWatcher,
         ViewTreeObserver.OnGlobalLayoutListener, Filter.FilterListener,
-        ViewTreeObserver.OnTouchModeChangeListener {
+        ViewTreeObserver.OnTouchModeChangeListener,
+        RemoteViewsAdapter.RemoteAdapterConnectionCallback {
 
     /**
      * Disables the transcript mode.
@@ -178,6 +180,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * The adapter containing the data to be displayed by this view
      */
     ListAdapter mAdapter;
+
+    /**
+     * The remote adapter containing the data to be displayed by this view to be set
+     */
+    private RemoteViewsAdapter mRemoteAdapter;
 
     /**
      * Indicates whether the list selector should be drawn on top of the children or behind
@@ -2893,6 +2900,42 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mFlingRunnable.startScroll(distance, duration);
     }
 
+    /**
+     * Allows RemoteViews to scroll relatively to a position.
+     */
+    void smoothScrollByOffset(int position) {
+        int index = -1;
+        if (position < 0) {
+            index = getFirstVisiblePosition();
+        } else if (position > 0) {
+            index = getLastVisiblePosition();
+        }
+
+        if (index > -1) {
+            View child = getChildAt(index - getFirstVisiblePosition());
+            if (child != null) {
+                Rect visibleRect = new Rect();
+                if (child.getGlobalVisibleRect(visibleRect)) {
+                    // the child is partially visible
+                    int childRectArea = child.getWidth() * child.getHeight();
+                    int visibleRectArea = visibleRect.width() * visibleRect.height();
+                    float visibleArea = (visibleRectArea / (float) childRectArea);
+                    final float visibleThreshold = 0.75f;
+                    if ((position < 0) && (visibleArea < visibleThreshold)) {
+                        // the top index is not perceivably visible so offset
+                        // to account for showing that top index as well
+                        ++index;
+                    } else if ((position > 0) && (visibleArea < visibleThreshold)) {
+                        // the bottom index is not perceivably visible so offset
+                        // to account for showing that bottom index as well
+                        --index;
+                    }
+                }
+                smoothScrollToPosition(Math.max(0, Math.min(getCount(), index + position)));
+            }
+        }
+    }
+
     private void createScrollingCache() {
         if (mScrollingCacheEnabled && !mCachingStarted) {
             setChildrenDrawnWithCacheEnabled(true);
@@ -3902,6 +3945,34 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         return result;
+    }
+
+    /**
+     * Sets up this AbsListView to use a remote views adapter which connects to a RemoteViewsService
+     * through the specified intent.
+     * @param intent the intent used to identify the RemoteViewsService for the adapter to connect to.
+     */
+    public void setRemoteViewsAdapter(Intent intent) {
+        mRemoteAdapter = new RemoteViewsAdapter(getContext(), intent, this);
+    }
+
+    /**
+     * Called back when the adapter connects to the RemoteViewsService.
+     */
+    public void onRemoteAdapterConnected() {
+        if (mRemoteAdapter != mAdapter) {
+            setAdapter(mRemoteAdapter);
+        }
+    }
+
+    /**
+     * Called back when the adapter disconnects from the RemoteViewsService.
+     */
+    public void onRemoteAdapterDisconnected() {
+        if (mRemoteAdapter == mAdapter) {
+            mRemoteAdapter = null;
+            setAdapter(null);
+        }
     }
 
     /**
