@@ -101,7 +101,30 @@ public class Binder implements IBinder {
      * @see #clearCallingIdentity
      */
     public static final native void restoreCallingIdentity(long token);
-    
+
+    /**
+     * Sets the native thread-local StrictMode policy mask.
+     *
+     * <p>The StrictMode settings are kept in two places: a Java-level
+     * threadlocal for libcore/Dalvik, and a native threadlocal (set
+     * here) for propagation via Binder calls.  This is a little
+     * unfortunate, but necessary to break otherwise more unfortunate
+     * dependencies either of Dalvik on Android, or Android
+     * native-only code on Dalvik.
+     *
+     * @see StrictMode
+     * @hide
+     */
+    public static final native void setThreadStrictModePolicy(int policyMask);
+
+    /**
+     * Gets the current native thread-local StrictMode policy mask.
+     *
+     * @see #setThreadStrictModePolicy
+     * @hide
+     */
+    public static final native int getThreadStrictModePolicy();
+
     /**
      * Flush any Binder commands pending in the current thread to the kernel
      * driver.  This can be
