@@ -52,7 +52,7 @@ public:
                 return 0;
             }
             
-            if (n <= 0) {
+            if (n < 0) { // n == 0 should not be possible, see InputStream read() specifications.
                 break;  // eof
             }
             
@@ -76,17 +76,19 @@ public:
     
     size_t doSkip(size_t size) {
         JNIEnv* env = fEnv;
+
         jlong skipped = env->CallLongMethod(fJavaInputStream,
                                             gInputStream_skipMethodID, (jlong)size);
         if (env->ExceptionCheck()) {
             env->ExceptionDescribe();
             env->ExceptionClear();
-            SkDebugf("------- available threw an exception\n");
+            SkDebugf("------- skip threw an exception\n");
             return 0;
         }
         if (skipped < 0) {
             skipped = 0;
         }
+
         return (size_t)skipped;
     }
     
@@ -115,7 +117,7 @@ public:
                  */
                 size_t amountSkipped = 0;
                 do {
-                    size_t amount = this->doSkip(size);
+                    size_t amount = this->doSkip(size - amountSkipped);
                     if (0 == amount) {
                         char tmp;
                         amount = this->doRead(&tmp, 1);
