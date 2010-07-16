@@ -16,7 +16,8 @@
 package com.android.internal.widget;
 
 import com.android.internal.R;
-import com.android.internal.app.ActionBarImpl;
+import com.android.internal.view.menu.ActionMenuView;
+import com.android.internal.view.menu.MenuBuilder;
 
 import android.app.ActionBar;
 import android.content.Context;
@@ -25,11 +26,8 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.MeasureSpec;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -43,6 +41,7 @@ public class ActionBarContextView extends ViewGroup {
     
     private int mItemPadding;
     private int mItemMargin;
+    private int mActionSpacing;
     private int mContentHeight;
     
     private CharSequence mTitle;
@@ -54,6 +53,7 @@ public class ActionBarContextView extends ViewGroup {
     private TextView mTitleView;
     private TextView mSubtitleView;
     private Drawable mCloseDrawable;
+    private View mMenuView;
     
     public ActionBarContextView(Context context) {
         this(context, null, 0);
@@ -137,8 +137,6 @@ public class ActionBarContextView extends ViewGroup {
     }
 
     public void initForMode(final ActionBar.ContextMode mode) {
-        final ActionBarImpl.ContextMode implMode = (ActionBarImpl.ContextMode) mode;
-        
         if (mCloseButton == null) {
             mCloseButton = new ImageButton(getContext());
             mCloseButton.setImageDrawable(mCloseDrawable);
@@ -151,34 +149,15 @@ public class ActionBarContextView extends ViewGroup {
         }
         addView(mCloseButton);
 
-        final Context context = getContext();
-        final Menu menu = mode.getMenu();
-        final int itemCount = menu.size();
-        for (int i = 0; i < itemCount; i++) {
-            final MenuItem item = menu.getItem(i);
-            final ImageButton button = new ImageButton(context, null,
-                    com.android.internal.R.attr.actionButtonStyle);
-            button.setClickable(true);
-            button.setFocusable(true);
-            button.setImageDrawable(item.getIcon());
-            button.setId(item.getItemId());
-            button.setVisibility(item.isVisible() ? VISIBLE : GONE);
-            button.setEnabled(item.isEnabled());
-            
-            button.setOnClickListener(new OnClickListener() {
-                public void onClick(View v) {
-                    implMode.dispatchOnContextItemClicked(item);
-                }
-            });
-
-            addView(button);
-        }
-        requestLayout();
+        final MenuBuilder menu = (MenuBuilder) mode.getMenu();
+        mMenuView = menu.getMenuView(MenuBuilder.TYPE_ACTION_BUTTON, this);
+        addView(mMenuView);
     }
 
     public void closeMode() {
         removeAllViews();
         mCustomView = null;
+        mMenuView = null;
     }
 
     @Override
@@ -266,15 +245,10 @@ public class ActionBarContextView extends ViewGroup {
         }
         
         x = r - l - getPaddingRight();
-        
-        final int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            final View child = getChildAt(i);
-            if (child == mCloseButton || child == mTitleLayout || child == mCustomView) {
-                continue;
-            }
 
-            x -= positionChildInverse(child, x, y, contentHeight) + itemMargin;
+        if (mMenuView != null) {
+            x -= positionChildInverse(mMenuView, x + mActionSpacing, y, contentHeight)
+                    - mActionSpacing;
         }
     }
 
