@@ -129,6 +129,25 @@ struct Rect {
         return intersect(r.left, r.top, r.right, r.bottom);
     }
 
+    bool unionWith(const Rect& r) {
+        if (r.left < r.right && r.top < r.bottom) {
+            if (left < right && top < bottom) {
+                if (left > r.left) left = r.left;
+                if (top > r.top) top = r.top;
+                if (right < r.right) right = r.right;
+                if (bottom < r.bottom) bottom = r.bottom;
+                return true;
+            } else {
+                left = r.left;
+                top = r.top;
+                right = r.right;
+                bottom = r.bottom;
+                return true;
+            }
+        }
+        return false;
+    }
+
     void dump() const {
         LOGD("Rect[l=%f t=%f r=%f b=%f]", left, top, right, bottom);
     }

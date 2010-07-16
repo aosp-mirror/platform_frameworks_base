@@ -22,6 +22,8 @@
 
 #include <utils/RefBase.h>
 
+#include <SkRegion.h>
+
 #include "Layer.h"
 #include "Matrix.h"
 #include "Rect.h"
@@ -40,7 +42,7 @@ namespace uirenderer {
  */
 class Snapshot: public LightRefBase<Snapshot> {
 public:
-    Snapshot(): layer(NULL), fbo(0) { }
+    Snapshot(): flags(0x0), previous(NULL), layer(NULL), fbo(0) { }
 
     /**
      * Copies the specified snapshot. Only the transform and clip rectangle
@@ -52,12 +54,10 @@ public:
             height(s->height),
             transform(s->transform),
             clipRect(s->clipRect),
-            flags(kFlagDirtyTransform),
+            flags(0x0),
             previous(s),
             layer(NULL),
             fbo(s->fbo) {
-        mappedClip.set(s->clipRect);
-        transform.mapRect(mappedClip);
     }
 
     /**
@@ -70,38 +70,48 @@ public:
          */
         kFlagClipSet = 0x1,
         /**
-         * Indicates that the snapshot holds new transform
-         * information.
-         */
-        kFlagDirtyTransform = 0x2,
-        /**
          * Indicates that this snapshot was created when saving
          * a new layer.
          */
-        kFlagIsLayer = 0x4,
+        kFlagIsLayer = 0x2,
         /**
          * Indicates that this snapshot has changed the ortho matrix.
          */
-        kFlagDirtyOrtho = 0x8,
+        kFlagDirtyOrtho = 0x4,
     };
-
-    /**
-     * Returns the current clip region mapped by the current transform.
-     */
-    const Rect& getMappedClip() {
-        return mappedClip;
-    }
 
     /**
      * Intersects the current clip with the new clip rectangle.
      */
-    bool clip(float left, float top, float right, float bottom) {
-        bool clipped = clipRect.intersect(left, top, right, bottom);
-        if (flags & kFlagDirtyTransform) {
-            flags &= ~kFlagDirtyTransform;
-            mappedClip.set(clipRect);
-            transform.mapRect(mappedClip);
+    bool clip(float left, float top, float right, float bottom, SkRegion::Op op) {
+        bool clipped = false;
+
+        Rect r(left, top, right, bottom);
+        transform.mapRect(r);
+
+        switch (op) {
+        case SkRegion::kDifference_Op:
+            break;
+        case SkRegion::kIntersect_Op:
+            clipped = clipRect.intersect(r);
+            break;
+        case SkRegion::kUnion_Op:
+            clipped = clipRect.unionWith(r);
+            break;
+        case SkRegion::kXOR_Op:
+            break;
+        case SkRegion::kReverseDifference_Op:
+            break;
+        case SkRegion::kReplace_Op:
+            clipRect.set(r);
+            clipped = true;
+            break;
         }
+
+        if (clipped) {
+            flags |= Snapshot::kFlagClipSet;
+        }
+
         return clipped;
     }
 
@@ -110,11 +120,15 @@ public:
      */
     void setClip(float left, float top, float right, float bottom) {
         clipRect.set(left, top, right, bottom);
-        if (flags & kFlagDirtyTransform) {
-            flags &= ~kFlagDirtyTransform;
-            mappedClip.set(clipRect);
-            transform.mapRect(mappedClip);
-        }
+        flags |= Snapshot::kFlagClipSet;
+    }
+
+    const Rect& getLocalClip() {
+        mat4 inverse;
+        inverse.loadInverse(transform);
+        localClip.set(clipRect);
+        inverse.mapRect(localClip);
+        return localClip;
     }
 
     /**
@@ -129,7 +143,8 @@ public:
     mat4 transform;
 
     /**
-     * Current clip region.
+     * Current clip region. The clip is stored in canvas-space coordinates,
+     * (screen-space coordinates in the regular case.)
      */
     Rect clipRect;
 
@@ -155,8 +170,8 @@ public:
     mat4 orthoMatrix;
 
 private:
-    // Clipping rectangle mapped with the transform
-    Rect mappedClip;
+    Rect localClip;
+
 }; // class Snapshot
 
 }; // namespace uirenderer

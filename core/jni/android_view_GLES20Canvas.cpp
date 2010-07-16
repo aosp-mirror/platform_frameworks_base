@@ -23,6 +23,7 @@
 #include <SkCanvas.h>
 #include <SkMatrix.h>
 #include <SkPaint.h>
+#include <SkRegion.h>
 #include <SkXfermode.h>
 
 #include <OpenGLRenderer.h>
@@ -120,13 +121,15 @@ static bool android_view_GLES20Canvas_quickReject(JNIEnv* env, jobject canvas,
 }
 
 static bool android_view_GLES20Canvas_clipRectF(JNIEnv* env, jobject canvas,
-        OpenGLRenderer* renderer, jfloat left, jfloat top, jfloat right, jfloat bottom) {
-    return renderer->clipRect(left, top, right, bottom);
+        OpenGLRenderer* renderer, jfloat left, jfloat top, jfloat right, jfloat bottom,
+        SkRegion::Op op) {
+    return renderer->clipRect(left, top, right, bottom, op);
 }
 
 static bool android_view_GLES20Canvas_clipRect(JNIEnv* env, jobject canvas,
-        OpenGLRenderer* renderer, jint left, jint top, jint right, jint bottom) {
-    return renderer->clipRect(float(left), float(top), float(right), float(bottom));
+        OpenGLRenderer* renderer, jint left, jint top, jint right, jint bottom,
+        SkRegion::Op op) {
+    return renderer->clipRect(float(left), float(top), float(right), float(bottom), op);
 }
 
 static bool android_view_GLES20Canvas_getClipBounds(JNIEnv* env, jobject canvas,
@@ -257,8 +260,8 @@ static JNINativeMethod gMethods[] = {
     {   "nSaveLayerAlpha",    "(IFFFFII)I",      (void*) android_view_GLES20Canvas_saveLayerAlpha },
 
     {   "nQuickReject",       "(IFFFFI)Z",       (void*) android_view_GLES20Canvas_quickReject },
-    {   "nClipRect",          "(IFFFF)Z",        (void*) android_view_GLES20Canvas_clipRectF },
-    {   "nClipRect",          "(IIIII)Z",        (void*) android_view_GLES20Canvas_clipRect },
+    {   "nClipRect",          "(IFFFFI)Z",       (void*) android_view_GLES20Canvas_clipRectF },
+    {   "nClipRect",          "(IIIIII)Z",       (void*) android_view_GLES20Canvas_clipRect },
 
     {   "nTranslate",         "(IFF)V",          (void*) android_view_GLES20Canvas_translate },
     {   "nRotate",            "(IF)V",           (void*) android_view_GLES20Canvas_rotate },

@@ -23,6 +23,7 @@
 #include <SkBitmap.h>
 #include <SkMatrix.h>
 #include <SkPaint.h>
+#include <SkRegion.h>
 #include <SkShader.h>
 #include <SkXfermode.h>
 
@@ -88,7 +89,7 @@ public:
 
     const Rect& getClipBounds();
     bool quickReject(float left, float top, float right, float bottom);
-    bool clipRect(float left, float top, float right, float bottom);
+    bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
 
     void drawBitmap(SkBitmap* bitmap, float left, float top, const SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix, const SkPaint* paint);

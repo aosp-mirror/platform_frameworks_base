@@ -54,6 +54,8 @@ public:
     void load(const Matrix4& v);
     void load(const SkMatrix& v);
 
+    void loadInverse(const Matrix4& v);
+
     void loadTranslate(float x, float y, float z);
     void loadScale(float sx, float sy, float sz);
     void loadRotate(float angle, float x, float y, float z);

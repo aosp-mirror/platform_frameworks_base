@@ -33,7 +33,11 @@ public class Region implements Parcelable {
         Op(int nativeInt) {
             this.nativeInt = nativeInt;
         }
-        final int nativeInt;
+
+        /**
+         * @hide
+         */
+        public final int nativeInt;
     }
 
     /** Create an empty region
