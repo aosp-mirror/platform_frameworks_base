@@ -374,15 +374,36 @@ status_t Surface::writeToParcel(
 
 }
 
-sp<Surface> Surface::readFromParcel(
-        const Parcel& data, const sp<Surface>& other)
-{
-    sp<Surface> result(other);
+
+Mutex Surface::sCachedSurfacesLock;
+DefaultKeyedVector<wp<IBinder>, wp<Surface> > Surface::sCachedSurfaces(wp<Surface>(0));
+
+sp<Surface> Surface::readFromParcel(const Parcel& data) {
+    Mutex::Autolock _l(sCachedSurfacesLock);
     sp<IBinder> binder(data.readStrongBinder());
-    if (other==0 || binder != other->mSurface->asBinder()) {
-        result = new Surface(data, binder);
+    sp<Surface> surface = sCachedSurfaces.valueFor(binder).promote();
+    if (surface == 0) {
+       surface = new Surface(data, binder);
+       sCachedSurfaces.add(binder, surface);
+    } else {
+        LOGW("Reusing surface!");
     }
-    return result;
+    if (surface->mSurface == 0) {
+      surface = 0;
+    }
+    cleanCachedSurfaces();
+    return surface;
+}
+
+// Remove the stale entries from the surface cache.  This should only be called
+// with sCachedSurfacesLock held.
+void Surface::cleanCachedSurfaces() {
+    for (int i = sCachedSurfaces.size()-1; i >= 0; --i) {
+        wp<Surface> s(sCachedSurfaces.valueAt(i));
+        if (s == 0 || s.promote() == 0) {
+            sCachedSurfaces.removeItemsAt(i);
+        }
+    }
 }
 
 void Surface::init()
