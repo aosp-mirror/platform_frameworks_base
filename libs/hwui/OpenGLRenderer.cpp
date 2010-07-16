@@ -132,6 +132,8 @@ OpenGLRenderer::OpenGLRenderer():
     mShaderMatrix = NULL;
     mShaderBitmap = NULL;
 
+    mLastTexture = 0;
+
     memcpy(mDrawTextureVertices, gDrawTextureVertices, sizeof(gDrawTextureVertices));
 }
 
@@ -650,8 +652,11 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
 
     chooseBlending(blend || alpha < 1.0f, mode);
 
-    // TODO: Only bind/set parameters when needed
-    glBindTexture(GL_TEXTURE_2D, texture);
+    if (texture != mLastTexture) {
+        glBindTexture(GL_TEXTURE_2D, texture);
+        mLastTexture = texture;
+    }
+    // TODO: Don't set the texture parameters every time
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gTileModes[mShaderTileX]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gTileModes[mShaderTileY]);
 
@@ -668,8 +673,6 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     } else {
         glDrawElements(GL_TRIANGLES, elementsCount, GL_UNSIGNED_SHORT, indices);
     }
-
-    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode, bool isPremultiplied) {

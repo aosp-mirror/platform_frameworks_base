@@ -311,6 +311,9 @@ private:
     // Used to draw textured quads
     TextureVertex mDrawTextureVertices[4];
 
+    // Current texture state
+    GLuint mLastTexture;
+
     // Last known blend state
     bool mBlend;
     GLenum mLastSrcMode;
