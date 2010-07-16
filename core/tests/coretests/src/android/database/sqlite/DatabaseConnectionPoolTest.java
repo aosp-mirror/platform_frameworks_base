@@ -17,6 +17,7 @@
 package android.database.sqlite;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabaseTest.ClassToTestSqlCompilationAndCaching;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
@@ -73,6 +74,7 @@ public class DatabaseConnectionPoolTest extends AndroidTestCase {
         SQLiteDatabase db = mTestPool.get(TEST_SQL);
         // pool size should be one - since only one should be allocated for the above get()
         assertEquals(1, mTestPool.getSize());
+        assertEquals(mDatabase, db.mParentConnObj);
         // no free connections should be available
         assertEquals(0, mTestPool.getFreePoolSize());
         assertFalse(mTestPool.isDatabaseObjFree(db));
@@ -104,6 +106,7 @@ public class DatabaseConnectionPoolTest extends AndroidTestCase {
             SQLiteDatabase db = mTestPool.get(TEST_SQL);
             assertFalse(dbObjs.contains(db));
             dbObjs.add(db);
+            assertEquals(mDatabase, db.mParentConnObj);
         }
         assertEquals(0, mTestPool.getFreePoolSize());
         assertEquals(MAX_CONN, mTestPool.getSize());
@@ -197,11 +200,12 @@ public class DatabaseConnectionPoolTest extends AndroidTestCase {
     }
 
     private void executeSqlOnDatabaseConn(SQLiteDatabase db, String sql) {
-        // execute the given SQL on the given database connection so that the prepared
-        // statement for SQL is cached by the given database connection
+        // get the given sql be compiled on the given database connection.
         // this will help DatabaseConenctionPool figure out if a given SQL statement
         // is already cached by a database connection.
-        db.execSQL(sql, new String[]{1+""});
+        ClassToTestSqlCompilationAndCaching c =
+                ClassToTestSqlCompilationAndCaching.create(db, sql);
+        c.close();
     }
 
     /**

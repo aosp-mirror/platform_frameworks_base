@@ -17,6 +17,7 @@
 package android.database.sqlite;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
@@ -75,6 +76,55 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         // make the same call again and make sure the pool already setup is not re-created
         mDatabase.enableWriteAheadLogging();
         assertEquals(pool, mDatabase.mConnectionPool);
+    }
+
+    @SmallTest
+    public void testDisableWriteAheadLogging() {
+        mDatabase.execSQL("create table test (i int);");
+        mDatabase.enableWriteAheadLogging();
+        assertNotNull(mDatabase.mConnectionPool);
+        // get a pooled database connection
+        SQLiteDatabase db = mDatabase.getDbConnection("select * from test");
+        assertNotNull(db);
+        assertFalse(mDatabase.equals(db));
+        assertTrue(db.isOpen());
+        // disable WAL - which should close connection pool and all pooled connections
+        mDatabase.disableWriteAheadLogging();
+        assertNull(mDatabase.mConnectionPool);
+        assertFalse(db.isOpen());
+    }
+
+    @SmallTest
+    public void testCursorsWithClosedDbConnAfterDisableWriteAheadLogging() {
+        mDatabase.disableWriteAheadLogging();
+        mDatabase.beginTransactionNonExclusive();
+        mDatabase.execSQL("create table test (i int);");
+        mDatabase.execSQL("insert into test values(1);");
+        mDatabase.setTransactionSuccessful();
+        mDatabase.endTransaction();
+        mDatabase.enableWriteAheadLogging();
+        assertNotNull(mDatabase.mConnectionPool);
+        assertEquals(0, mDatabase.mConnectionPool.getSize());
+        assertEquals(0, mDatabase.mConnectionPool.getFreePoolSize());
+        // get a cursor which should use pooled database connection
+        Cursor c = mDatabase.rawQuery("select * from test", null);
+        assertEquals(1, c.getCount());
+        assertEquals(1, mDatabase.mConnectionPool.getSize());
+        assertEquals(1, mDatabase.mConnectionPool.getFreePoolSize());
+        SQLiteDatabase db = mDatabase.mConnectionPool.getConnectionList().get(0);
+        assertTrue(mDatabase.mConnectionPool.isDatabaseObjFree(db));
+        // disable WAL - which should close connection pool and all pooled connections
+        mDatabase.disableWriteAheadLogging();
+        assertNull(mDatabase.mConnectionPool);
+        assertFalse(db.isOpen());
+        // cursor data should still be accessible because it is fetching data from CursorWindow
+        c.moveToNext();
+        assertEquals(1, c.getInt(0));
+        c.requery();
+        assertEquals(1, c.getCount());
+        c.moveToNext();
+        assertEquals(1, c.getInt(0));
+        c.close();
     }
 
     @SmallTest
@@ -279,11 +329,11 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         }
     }
 
-    private static class ClassToTestSqlCompilationAndCaching extends SQLiteProgram {
+    public static class ClassToTestSqlCompilationAndCaching extends SQLiteProgram {
         private ClassToTestSqlCompilationAndCaching(SQLiteDatabase db, String sql) {
             super(db, sql);
         }
-        private static ClassToTestSqlCompilationAndCaching create(SQLiteDatabase db, String sql) {
+        public static ClassToTestSqlCompilationAndCaching create(SQLiteDatabase db, String sql) {
             db.lock();
             try {
                 return new ClassToTestSqlCompilationAndCaching(db, sql);

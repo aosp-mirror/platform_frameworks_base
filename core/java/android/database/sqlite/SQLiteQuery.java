@@ -53,6 +53,18 @@ public class SQLiteQuery extends SQLiteProgram {
     }
 
     /**
+     * Constructor used to create new instance to replace a given instance of this class.
+     * This constructor is used when the current Query object is now associated with a different
+     * {@link SQLiteDatabase} object.
+     *
+     * @param db The database that this query object is associated with
+     * @param query the instance of {@link SQLiteQuery} to be replaced
+     */
+    /* package */ SQLiteQuery(SQLiteDatabase db, SQLiteQuery query) {
+        this(db, query.mSql, 0, query.mBindArgs);
+    }
+
+    /**
      * Reads rows into a buffer. This method acquires the database lock.
      *
      * @param window The window to fill into
