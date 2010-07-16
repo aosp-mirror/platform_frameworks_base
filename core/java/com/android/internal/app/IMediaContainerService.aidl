@@ -19,7 +19,6 @@ package com.android.internal.app;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.content.pm.PackageInfoLite;
-import android.content.res.ObbInfo;
 
 interface IMediaContainerService {
     String copyResourceToContainer(in Uri packageURI,
@@ -29,5 +28,4 @@ interface IMediaContainerService {
                 in ParcelFileDescriptor outStream);
     PackageInfoLite getMinimalPackageInfo(in Uri fileUri, int flags);
     boolean checkFreeStorage(boolean external, in Uri fileUri);
-    ObbInfo getObbInfo(in Uri fileUri);
 }
