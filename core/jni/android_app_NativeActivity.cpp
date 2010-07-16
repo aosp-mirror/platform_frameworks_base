@@ -774,7 +774,7 @@ dispatchKeyEvent_native(JNIEnv* env, jobject clazz, jint handle, jobject eventOb
 }
 
 static const JNINativeMethod g_methods[] = {
-    { "loadNativeCode", "(Ljava/lang/String;Landroid/os/MessageQueue;Ljava/lang/String;Ljava/lang/String;I;Landroid/content/res/AssetManager)I",
+    { "loadNativeCode", "(Ljava/lang/String;Landroid/os/MessageQueue;Ljava/lang/String;Ljava/lang/String;ILandroid/content/res/AssetManager;)I",
             (void*)loadNativeCode_native },
     { "unloadNativeCode", "(I)V", (void*)unloadNativeCode_native },
     { "onStartNative", "(I)V", (void*)onStart_native },
