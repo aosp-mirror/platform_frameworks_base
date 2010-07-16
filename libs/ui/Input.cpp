@@ -18,6 +18,11 @@ void InputEvent::initialize(int32_t deviceId, int32_t source) {
     mSource = source;
 }
 
+void InputEvent::initialize(const InputEvent& from) {
+    mDeviceId = from.mDeviceId;
+    mSource = from.mSource;
+}
+
 // class KeyEvent
 
 bool KeyEvent::hasDefaultAction(int32_t keyCode) {
@@ -104,6 +109,18 @@ void KeyEvent::initialize(
     mRepeatCount = repeatCount;
     mDownTime = downTime;
     mEventTime = eventTime;
+}
+
+void KeyEvent::initialize(const KeyEvent& from) {
+    InputEvent::initialize(from);
+    mAction = from.mAction;
+    mFlags = from.mFlags;
+    mKeyCode = from.mKeyCode;
+    mScanCode = from.mScanCode;
+    mMetaState = from.mMetaState;
+    mRepeatCount = from.mRepeatCount;
+    mDownTime = from.mDownTime;
+    mEventTime = from.mEventTime;
 }
 
 // class MotionEvent

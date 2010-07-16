@@ -42,8 +42,26 @@ extern void android_NativeActivity_hideSoftInput(
 
 /*
  * NDK input queue API.
+ *
+ * Here is the event flow:
+ * 1. Event arrives in input consumer, and is returned by getEvent().
+ * 2. Application calls preDispatchEvent():
+ *    a. Event is assigned a sequence ID and enqueued in mPreDispatchingKeys.
+ *    b. Main thread picks up event, hands to input method.
+ *    c. Input method eventually returns sequence # and whether it was handled.
+ *    d. finishPreDispatch() is called to enqueue the information.
+ *    e. next getEvent() call will:
+ *       - finish any pre-dispatch events that the input method handled
+ *       - return the next pre-dispatched event that the input method didn't handle.
+ *    f. (A preDispatchEvent() call on this event will now return false).
+ * 3. Application calls finishEvent() with whether it was handled.
+ *    - If handled is true, the event is finished.
+ *    - If handled is false, the event is put on mUnhandledKeys, and:
+ *      a. Main thread receives event from consumeUnhandledEvent().
+ *      b. Java sends event through default key handler.
+ *      c. event is finished.
  */
-struct AInputQueue {
+struct AInputQueue : public android::InputEventFactoryInterface {
 public:
     /* Creates a consumer associated with an input channel. */
     explicit AInputQueue(const android::sp<android::InputChannel>& channel, int workWrite);
@@ -59,8 +77,9 @@ public:
 
     int32_t getEvent(AInputEvent** outEvent);
 
-    void finishEvent(AInputEvent* event, bool handled);
+    bool preDispatchEvent(AInputEvent* event);
 
+    void finishEvent(AInputEvent* event, bool handled);
 
     // ----------------------------------------------------------
 
@@ -68,28 +87,63 @@ public:
 
     void dispatchEvent(android::KeyEvent* event);
 
+    void finishPreDispatch(int seq, bool handled);
+
     android::KeyEvent* consumeUnhandledEvent();
+    android::KeyEvent* consumePreDispatchingEvent(int* outSeq);
+
+    virtual android::KeyEvent* createKeyEvent();
+    virtual android::MotionEvent* createMotionEvent();
 
     int mWorkWrite;
 
 private:
-    void doDefaultKey(android::KeyEvent* keyEvent);
+    void doUnhandledKey(android::KeyEvent* keyEvent);
+    bool preDispatchKey(android::KeyEvent* keyEvent);
+    void wakeupDispatch();
 
     android::InputConsumer mConsumer;
-    android::PreallocatedInputEventFactory mInputEventFactory;
     android::sp<android::PollLoop> mPollLoop;
 
     int mDispatchKeyRead;
     int mDispatchKeyWrite;
 
-    // This is only touched by the event reader thread.  It is the current
-    // key events that came out of the mDispatchingKeys list and are now
-    //Êdelivered to the app.
-    android::Vector<android::KeyEvent*> mDeliveringKeys;
+    struct in_flight_event {
+        android::InputEvent* event;
+        int seq;
+        bool doFinish;
+    };
+
+    struct finish_pre_dispatch {
+        int seq;
+        bool handled;
+    };
 
     android::Mutex mLock;
-    android::Vector<android::KeyEvent*> mPendingKeys;
+
+    int mSeq;
+
+    // Cache of previously allocated key events.
+    android::Vector<android::KeyEvent*> mAvailKeyEvents;
+    // Cache of previously allocated motion events.
+    android::Vector<android::MotionEvent*> mAvailMotionEvents;
+
+    // All input events that are actively being processed.
+    android::Vector<in_flight_event> mInFlightEvents;
+
+    // Key events that the app didn't handle, and are pending for
+    // delivery to the activity's default key handling.
+    android::Vector<android::KeyEvent*> mUnhandledKeys;
+
+    // Keys that arrived in the Java framework and need to be
+    // dispatched to the app.
     android::Vector<android::KeyEvent*> mDispatchingKeys;
+
+    // Key events that are pending to be pre-dispatched to the IME.
+    android::Vector<in_flight_event> mPreDispatchingKeys;
+
+    // Event sequence numbers that we have finished pre-dispatching.
+    android::Vector<finish_pre_dispatch> mFinishPreDispatches;
 };
 
 #endif // _ANDROID_APP_NATIVEACTIVITY_H

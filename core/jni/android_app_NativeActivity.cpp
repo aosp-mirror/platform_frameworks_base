@@ -45,6 +45,7 @@ static struct {
     jclass clazz;
 
     jmethodID dispatchUnhandledKeyEvent;
+    jmethodID preDispatchKeyEvent;
     jmethodID setWindowFlags;
     jmethodID setWindowFormat;
     jmethodID showIme;
@@ -104,7 +105,7 @@ static bool read_work(int fd, ActivityWork* outWork) {
 using namespace android;
 
 AInputQueue::AInputQueue(const sp<InputChannel>& channel, int workWrite) :
-        mWorkWrite(workWrite), mConsumer(channel) {
+        mWorkWrite(workWrite), mConsumer(channel), mSeq(0) {
     int msgpipe[2];
     if (pipe(msgpipe)) {
         LOGW("could not create pipe: %s", strerror(errno));
@@ -157,6 +158,8 @@ int32_t AInputQueue::hasEvents() {
 int32_t AInputQueue::getEvent(AInputEvent** outEvent) {
     *outEvent = NULL;
 
+    bool finishNow = false;
+
     char byteread;
     ssize_t nRead = read(mDispatchKeyRead, &byteread, 1);
     if (nRead == 1) {
@@ -165,10 +168,34 @@ int32_t AInputQueue::getEvent(AInputEvent** outEvent) {
             KeyEvent* kevent = mDispatchingKeys[0];
             *outEvent = kevent;
             mDispatchingKeys.removeAt(0);
-            mDeliveringKeys.add(kevent);
+            in_flight_event inflight;
+            inflight.event = kevent;
+            inflight.seq = -1;
+            inflight.doFinish = false;
+            mInFlightEvents.push(inflight);
+        }
+        if (mFinishPreDispatches.size() > 0) {
+            finish_pre_dispatch finish(mFinishPreDispatches[0]);
+            mFinishPreDispatches.removeAt(0);
+            const size_t N = mInFlightEvents.size();
+            for (size_t i=0; i<N; i++) {
+                const in_flight_event& inflight(mInFlightEvents[i]);
+                if (inflight.seq == finish.seq) {
+                    *outEvent = inflight.event;
+                    finishNow = finish.handled;
+                }
+            }
+            if (*outEvent == NULL) {
+                LOGW("getEvent couldn't find inflight for seq %d", finish.seq);
+            }
         }
         mLock.unlock();
-        if (*outEvent != NULL) {
+
+        if (finishNow) {
+            finishEvent(*outEvent, true);
+            *outEvent = NULL;
+            return -1;
+        } else if (*outEvent != NULL) {
             return 0;
         }
     }
@@ -181,7 +208,7 @@ int32_t AInputQueue::getEvent(AInputEvent** outEvent) {
     }
 
     InputEvent* myEvent = NULL;
-    res = mConsumer.consume(&mInputEventFactory, &myEvent);
+    res = mConsumer.consume(this, &myEvent);
     if (res != android::OK) {
         LOGW("channel '%s' ~ Failed to consume input event.  status=%d",
                 mConsumer.getChannel()->getName().string(), res);
@@ -189,39 +216,69 @@ int32_t AInputQueue::getEvent(AInputEvent** outEvent) {
         return -1;
     }
 
+    in_flight_event inflight;
+    inflight.event = myEvent;
+    inflight.seq = -1;
+    inflight.doFinish = true;
+    mInFlightEvents.push(inflight);
+
     *outEvent = myEvent;
     return 0;
 }
 
+bool AInputQueue::preDispatchEvent(AInputEvent* event) {
+    if (((InputEvent*)event)->getType() != AINPUT_EVENT_TYPE_KEY) {
+        // The IME only cares about key events.
+        return false;
+    }
+
+    // For now we only send system keys to the IME...  this avoids having
+    // critical keys like DPAD go through this path.  We really need to have
+    // the IME report which keys it wants.
+    if (!((KeyEvent*)event)->isSystemKey()) {
+        return false;
+    }
+
+    return preDispatchKey((KeyEvent*)event);
+}
+
 void AInputQueue::finishEvent(AInputEvent* event, bool handled) {
-    bool needFinished = true;
+    LOG_TRACE("finishEvent: %p handled=%d", event, handled ? 1 : 0);
 
     if (!handled && ((InputEvent*)event)->getType() == AINPUT_EVENT_TYPE_KEY
             && ((KeyEvent*)event)->hasDefaultAction()) {
         // The app didn't handle this, but it may have a default action
         // associated with it.  We need to hand this back to Java to be
         // executed.
-        doDefaultKey((KeyEvent*)event);
-        needFinished = false;
+        doUnhandledKey((KeyEvent*)event);
+        return;
     }
 
-    const size_t N = mDeliveringKeys.size();
+    mLock.lock();
+    const size_t N = mInFlightEvents.size();
     for (size_t i=0; i<N; i++) {
-        if (mDeliveringKeys[i] == event) {
-            delete event;
-            mDeliveringKeys.removeAt(i);
-            needFinished = false;
-            break;
+        const in_flight_event& inflight(mInFlightEvents[i]);
+        if (inflight.event == event) {
+            if (inflight.doFinish) {
+                int32_t res = mConsumer.sendFinishedSignal();
+                if (res != android::OK) {
+                    LOGW("Failed to send finished signal on channel '%s'.  status=%d",
+                            mConsumer.getChannel()->getName().string(), res);
+                }
+            }
+            if (static_cast<InputEvent*>(event)->getType() == AINPUT_EVENT_TYPE_KEY) {
+                mAvailKeyEvents.push(static_cast<KeyEvent*>(event));
+            } else {
+                mAvailMotionEvents.push(static_cast<MotionEvent*>(event));
+            }
+            mInFlightEvents.removeAt(i);
+            mLock.unlock();
+            return;
         }
     }
+    mLock.unlock();
     
-    if (needFinished) {
-        int32_t res = mConsumer.sendFinishedSignal();
-        if (res != android::OK) {
-            LOGW("Failed to send finished signal on channel '%s'.  status=%d",
-                    mConsumer.getChannel()->getName().string(), res);
-        }
-    }
+    LOGW("finishEvent called for unknown event: %p", event);
 }
 
 void AInputQueue::dispatchEvent(android::KeyEvent* event) {
@@ -229,8 +286,120 @@ void AInputQueue::dispatchEvent(android::KeyEvent* event) {
     LOG_TRACE("dispatchEvent: dispatching=%d write=%d\n", mDispatchingKeys.size(),
             mDispatchKeyWrite);
     mDispatchingKeys.add(event);
+    wakeupDispatch();
     mLock.unlock();
-    
+}
+
+void AInputQueue::finishPreDispatch(int seq, bool handled) {
+    mLock.lock();
+    LOG_TRACE("finishPreDispatch: seq=%d handled=%d\n", seq, handled ? 1 : 0);
+    finish_pre_dispatch finish;
+    finish.seq = seq;
+    finish.handled = handled;
+    mFinishPreDispatches.add(finish);
+    wakeupDispatch();
+    mLock.unlock();
+}
+
+KeyEvent* AInputQueue::consumeUnhandledEvent() {
+    KeyEvent* event = NULL;
+
+    mLock.lock();
+    if (mUnhandledKeys.size() > 0) {
+        event = mUnhandledKeys[0];
+        mUnhandledKeys.removeAt(0);
+    }
+    mLock.unlock();
+
+    LOG_TRACE("consumeUnhandledEvent: KeyEvent=%p", event);
+
+    return event;
+}
+
+KeyEvent* AInputQueue::consumePreDispatchingEvent(int* outSeq) {
+    KeyEvent* event = NULL;
+
+    mLock.lock();
+    if (mPreDispatchingKeys.size() > 0) {
+        const in_flight_event& inflight(mPreDispatchingKeys[0]);
+        event = static_cast<KeyEvent*>(inflight.event);
+        *outSeq = inflight.seq;
+        mPreDispatchingKeys.removeAt(0);
+    }
+    mLock.unlock();
+
+    LOG_TRACE("consumePreDispatchingEvent: KeyEvent=%p", event);
+
+    return event;
+}
+
+KeyEvent* AInputQueue::createKeyEvent() {
+    mLock.lock();
+    KeyEvent* event;
+    if (mAvailKeyEvents.size() <= 0) {
+        event = new KeyEvent();
+    } else {
+        event = mAvailKeyEvents.top();
+        mAvailKeyEvents.pop();
+    }
+    mLock.unlock();
+    return event;
+}
+
+MotionEvent* AInputQueue::createMotionEvent() {
+    mLock.lock();
+    MotionEvent* event;
+    if (mAvailMotionEvents.size() <= 0) {
+        event = new MotionEvent();
+    } else {
+        event = mAvailMotionEvents.top();
+        mAvailMotionEvents.pop();
+    }
+    mLock.unlock();
+    return event;
+}
+
+void AInputQueue::doUnhandledKey(KeyEvent* keyEvent) {
+    mLock.lock();
+    LOG_TRACE("Unhandled key: pending=%d write=%d\n", mUnhandledKeys.size(), mWorkWrite);
+    if (mUnhandledKeys.size() <= 0 && mWorkWrite >= 0) {
+        write_work(mWorkWrite, CMD_DEF_KEY);
+    }
+    mUnhandledKeys.add(keyEvent);
+    mLock.unlock();
+}
+
+bool AInputQueue::preDispatchKey(KeyEvent* keyEvent) {
+    mLock.lock();
+    LOG_TRACE("preDispatch key: pending=%d write=%d\n", mPreDispatchingKeys.size(), mWorkWrite);
+    const size_t N = mInFlightEvents.size();
+    for (size_t i=0; i<N; i++) {
+        in_flight_event& inflight(mInFlightEvents.editItemAt(i));
+        if (inflight.event == keyEvent) {
+            if (inflight.seq >= 0) {
+                // This event has already been pre-dispatched!
+                LOG_TRACE("Event already pre-dispatched!");
+                mLock.unlock();
+                return false;
+            }
+            mSeq++;
+            if (mSeq < 0) mSeq = 1;
+            inflight.seq = mSeq;
+
+            if (mPreDispatchingKeys.size() <= 0 && mWorkWrite >= 0) {
+                write_work(mWorkWrite, CMD_DEF_KEY);
+            }
+            mPreDispatchingKeys.add(inflight);
+            mLock.unlock();
+            return true;
+        }
+    }
+
+    LOGW("preDispatchKey called for unknown event: %p", keyEvent);
+    return false;
+}
+
+void AInputQueue::wakeupDispatch() {
 restart:
     char dummy = 0;
     int res = write(mDispatchKeyWrite, &dummy, sizeof(dummy));
@@ -242,31 +411,6 @@ restart:
 
     if (res < 0) LOGW("Failed writing to dispatch fd: %s", strerror(errno));
     else LOGW("Truncated writing to dispatch fd: %d", res);
-}
-
-KeyEvent* AInputQueue::consumeUnhandledEvent() {
-    KeyEvent* event = NULL;
-
-    mLock.lock();
-    if (mPendingKeys.size() > 0) {
-        event = mPendingKeys[0];
-        mPendingKeys.removeAt(0);
-    }
-    mLock.unlock();
-
-    LOG_TRACE("consumeUnhandledEvent: KeyEvent=%p", event);
-
-    return event;
-}
-
-void AInputQueue::doDefaultKey(KeyEvent* keyEvent) {
-    mLock.lock();
-    LOG_TRACE("Default key: pending=%d write=%d\n", mPendingKeys.size(), mWorkWrite);
-    if (mPendingKeys.size() <= 0 && mWorkWrite >= 0) {
-        write_work(mWorkWrite, CMD_DEF_KEY);
-    }
-    mPendingKeys.add(keyEvent);
-    mLock.unlock();
 }
 
 namespace android {
@@ -417,11 +561,14 @@ static bool mainWorkCallback(int fd, int events, void* data) {
                         code->env, keyEvent);
                 code->env->CallVoidMethod(code->clazz,
                         gNativeActivityClassInfo.dispatchUnhandledKeyEvent, inputEventObj);
-                int32_t res = code->nativeInputQueue->getConsumer().sendFinishedSignal();
-                if (res != OK) {
-                    LOGW("Failed to send finished signal on channel '%s'.  status=%d",
-                            code->nativeInputQueue->getConsumer().getChannel()->getName().string(), res);
-                }
+                code->nativeInputQueue->finishEvent(keyEvent, true);
+            }
+            int seq;
+            while ((keyEvent=code->nativeInputQueue->consumePreDispatchingEvent(&seq)) != NULL) {
+                jobject inputEventObj = android_view_KeyEvent_fromNative(
+                        code->env, keyEvent);
+                code->env->CallVoidMethod(code->clazz,
+                        gNativeActivityClassInfo.preDispatchKeyEvent, inputEventObj, seq);
             }
         } break;
         case CMD_SET_WINDOW_FORMAT: {
@@ -766,9 +913,22 @@ dispatchKeyEvent_native(JNIEnv* env, jobject clazz, jint handle, jobject eventOb
     if (handle != 0) {
         NativeCode* code = (NativeCode*)handle;
         if (code->nativeInputQueue != NULL) {
-            KeyEvent* event = new KeyEvent();
+            KeyEvent* event = code->nativeInputQueue->createKeyEvent();
             android_view_KeyEvent_toNative(env, eventObj, event);
             code->nativeInputQueue->dispatchEvent(event);
+        }
+    }
+}
+
+static void
+finishPreDispatchKeyEvent_native(JNIEnv* env, jobject clazz, jint handle,
+        jint seq, jboolean handled)
+{
+    LOG_TRACE("finishPreDispatchKeyEvent_native");
+    if (handle != 0) {
+        NativeCode* code = (NativeCode*)handle;
+        if (code->nativeInputQueue != NULL) {
+            code->nativeInputQueue->finishPreDispatch(seq, handled ? true : false);
         }
     }
 }
@@ -792,6 +952,7 @@ static const JNINativeMethod g_methods[] = {
     { "onInputChannelDestroyedNative", "(ILandroid/view/InputChannel;)V", (void*)onInputChannelDestroyed_native },
     { "onContentRectChangedNative", "(IIIII)V", (void*)onContentRectChanged_native },
     { "dispatchKeyEventNative", "(ILandroid/view/KeyEvent;)V", (void*)dispatchKeyEvent_native },
+    { "finishPreDispatchKeyEventNative", "(IIZ)V", (void*)finishPreDispatchKeyEvent_native },
 };
 
 static const char* const kNativeActivityPathName = "android/app/NativeActivity";
@@ -814,6 +975,9 @@ int register_android_app_NativeActivity(JNIEnv* env)
     GET_METHOD_ID(gNativeActivityClassInfo.dispatchUnhandledKeyEvent,
             gNativeActivityClassInfo.clazz,
             "dispatchUnhandledKeyEvent", "(Landroid/view/KeyEvent;)V");
+    GET_METHOD_ID(gNativeActivityClassInfo.preDispatchKeyEvent,
+            gNativeActivityClassInfo.clazz,
+            "preDispatchKeyEvent", "(Landroid/view/KeyEvent;I)V");
 
     GET_METHOD_ID(gNativeActivityClassInfo.setWindowFlags,
             gNativeActivityClassInfo.clazz,

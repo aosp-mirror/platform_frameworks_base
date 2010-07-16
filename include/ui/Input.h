@@ -152,6 +152,7 @@ public:
     
 protected:
     void initialize(int32_t deviceId, int32_t source);
+    void initialize(const InputEvent& from);
 
 private:
     int32_t mDeviceId;
@@ -202,6 +203,7 @@ public:
             int32_t repeatCount,
             nsecs_t downTime,
             nsecs_t eventTime);
+    void initialize(const KeyEvent& from);
 
 private:
     int32_t mAction;
