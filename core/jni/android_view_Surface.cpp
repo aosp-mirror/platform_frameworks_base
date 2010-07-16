@@ -237,7 +237,7 @@ static void Surface_initParcel(JNIEnv* env, jobject clazz, jobject argParcel)
         return;
     }
 
-    sp<Surface> sur(Surface::readFromParcel(*parcel, 0));
+    sp<Surface> sur(Surface::readFromParcel(*parcel));
     setSurface(env, clazz, sur);
 }
 
@@ -616,8 +616,7 @@ static void Surface_readFromParcel(
         return;
     }
 
-    const sp<Surface>& curr(getSurface(env, clazz));
-    sp<Surface> sur(Surface::readFromParcel(*parcel, curr));
+    sp<Surface> sur(Surface::readFromParcel(*parcel));
     setSurface(env, clazz, sur);
 }
 
@@ -729,4 +728,3 @@ int register_android_view_Surface(JNIEnv* env)
 }
 
 };
-
