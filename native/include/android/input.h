@@ -607,13 +607,23 @@ void AInputQueue_detachLooper(AInputQueue* queue);
  * input queue.  Returns 1 if the queue has events; 0 if
  * it does not have events; and a negative value if there is an error.
  */
-int AInputQueue_hasEvents(AInputQueue* queue);
+int32_t AInputQueue_hasEvents(AInputQueue* queue);
 
 /*
  * Returns the next available event from the queue.  Returns a negative
  * value if no events are available or an error has occurred.
  */
 int32_t AInputQueue_getEvent(AInputQueue* queue, AInputEvent** outEvent);
+
+/*
+ * Sends the key for standard pre-dispatching -- that is, possibly deliver
+ * it to the current IME to be consumed before the app.  Returns 0 if it
+ * was not pre-dispatched, meaning you can process it right now.  If non-zero
+ * is returned, you must abandon the current event processing and allow the
+ * event to appear again in the event queue (if it does not get consumed during
+ * pre-dispatching).
+ */
+int32_t AInputQueue_preDispatchEvent(AInputQueue* queue, AInputEvent* event);
 
 /*
  * Report that dispatching has finished with the given event.
