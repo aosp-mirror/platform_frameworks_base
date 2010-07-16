@@ -38,8 +38,8 @@ int32_t AInputEvent_getDeviceId(const AInputEvent* event) {
     return static_cast<const InputEvent*>(event)->getDeviceId();
 }
 
-int32_t AInputEvent_getNature(const AInputEvent* event) {
-    return static_cast<const InputEvent*>(event)->getNature();
+int32_t AInputEvent_getSource(const AInputEvent* event) {
+    return static_cast<const InputEvent*>(event)->getSource();
 }
 
 int32_t AKeyEvent_getAction(const AInputEvent* key_event) {
@@ -68,6 +68,7 @@ int32_t AKeyEvent_getRepeatCount(const AInputEvent* key_event) {
 int64_t AKeyEvent_getDownTime(const AInputEvent* key_event) {
     return static_cast<const KeyEvent*>(key_event)->getDownTime();
 }
+
 
 int64_t AKeyEvent_getEventTime(const AInputEvent* key_event) {
     return static_cast<const KeyEvent*>(key_event)->getEventTime();
@@ -141,6 +142,26 @@ float AMotionEvent_getSize(const AInputEvent* motion_event, size_t pointer_index
     return static_cast<const MotionEvent*>(motion_event)->getSize(pointer_index);
 }
 
+float AMotionEvent_getTouchMajor(const AInputEvent* motion_event, size_t pointer_index) {
+    return static_cast<const MotionEvent*>(motion_event)->getTouchMajor(pointer_index);
+}
+
+float AMotionEvent_getTouchMinor(const AInputEvent* motion_event, size_t pointer_index) {
+    return static_cast<const MotionEvent*>(motion_event)->getTouchMinor(pointer_index);
+}
+
+float AMotionEvent_getToolMajor(const AInputEvent* motion_event, size_t pointer_index) {
+    return static_cast<const MotionEvent*>(motion_event)->getToolMajor(pointer_index);
+}
+
+float AMotionEvent_getToolMinor(const AInputEvent* motion_event, size_t pointer_index) {
+    return static_cast<const MotionEvent*>(motion_event)->getToolMinor(pointer_index);
+}
+
+float AMotionEvent_getOrientation(const AInputEvent* motion_event, size_t pointer_index) {
+    return static_cast<const MotionEvent*>(motion_event)->getOrientation(pointer_index);
+}
+
 size_t AMotionEvent_getHistorySize(const AInputEvent* motion_event) {
     return static_cast<const MotionEvent*>(motion_event)->getHistorySize();
 }
@@ -186,6 +207,37 @@ float AMotionEvent_getHistoricalSize(AInputEvent* motion_event, size_t pointer_i
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalSize(
             pointer_index, history_index);
 }
+
+float AMotionEvent_getHistoricalTouchMajor(AInputEvent* motion_event, size_t pointer_index,
+        size_t history_index) {
+    return static_cast<const MotionEvent*>(motion_event)->getHistoricalTouchMajor(
+            pointer_index, history_index);
+}
+
+float AMotionEvent_getHistoricalTouchMinor(AInputEvent* motion_event, size_t pointer_index,
+        size_t history_index) {
+    return static_cast<const MotionEvent*>(motion_event)->getHistoricalTouchMinor(
+            pointer_index, history_index);
+}
+
+float AMotionEvent_getHistoricalToolMajor(AInputEvent* motion_event, size_t pointer_index,
+        size_t history_index) {
+    return static_cast<const MotionEvent*>(motion_event)->getHistoricalToolMajor(
+            pointer_index, history_index);
+}
+
+float AMotionEvent_getHistoricalToolMinor(AInputEvent* motion_event, size_t pointer_index,
+        size_t history_index) {
+    return static_cast<const MotionEvent*>(motion_event)->getHistoricalToolMinor(
+            pointer_index, history_index);
+}
+
+float AMotionEvent_getHistoricalOrientation(AInputEvent* motion_event, size_t pointer_index,
+        size_t history_index) {
+    return static_cast<const MotionEvent*>(motion_event)->getHistoricalOrientation(
+            pointer_index, history_index);
+}
+
 
 void AInputQueue_attachLooper(AInputQueue* queue, ALooper* looper,
         ALooper_callbackFunc* callback, void* data) {

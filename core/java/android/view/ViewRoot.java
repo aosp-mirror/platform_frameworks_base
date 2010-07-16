@@ -400,7 +400,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 }
                 mPendingContentInsets.set(mAttachInfo.mContentInsets);
                 mPendingVisibleInsets.set(0, 0, 0, 0);
-                if (Config.LOGV) Log.v("ViewRoot", "Added window " + mWindow);
+                if (Config.LOGV) Log.v(TAG, "Added window " + mWindow);
                 if (res < WindowManagerImpl.ADD_OKAY) {
                     mView = null;
                     mAttachInfo.mRootView = null;
@@ -665,7 +665,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             desiredWindowWidth = frame.width();
             desiredWindowHeight = frame.height();
             if (desiredWindowWidth != mWidth || desiredWindowHeight != mHeight) {
-                if (DEBUG_ORIENTATION) Log.v("ViewRoot",
+                if (DEBUG_ORIENTATION) Log.v(TAG,
                         "View " + host + " resized to: " + frame);
                 fullRedrawNeeded = true;
                 mLayoutRequested = true;
@@ -729,7 +729,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
 
             // Ask host how big it wants to be
-            if (DEBUG_ORIENTATION || DEBUG_LAYOUT) Log.v("ViewRoot",
+            if (DEBUG_ORIENTATION || DEBUG_LAYOUT) Log.v(TAG,
                     "Measuring " + host + " in display " + desiredWindowWidth
                     + "x" + desiredWindowHeight + "...");
             host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
@@ -900,7 +900,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             }
             
             if (DEBUG_ORIENTATION) Log.v(
-                    "ViewRoot", "Relayout returned: frame=" + frame + ", surface=" + mSurface);
+                    TAG, "Relayout returned: frame=" + frame + ", surface=" + mSurface);
 
             attachInfo.mWindowLeft = frame.left;
             attachInfo.mWindowTop = frame.top;
@@ -1020,7 +1020,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             mLayoutRequested = false;
             mScrollMayChange = true;
             if (DEBUG_ORIENTATION || DEBUG_LAYOUT) Log.v(
-                "ViewRoot", "Laying out " + host + " to (" +
+                TAG, "Laying out " + host + " to (" +
                 host.mMeasuredWidth + ", " + host.mMeasuredHeight + ")");
             long startTime = 0L;
             if (Config.DEBUG && ViewDebug.profileLayout) {
@@ -1149,7 +1149,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             if ((relayoutResult&WindowManagerImpl.RELAYOUT_FIRST_TIME) != 0
                     || mReportNextDraw) {
                 if (LOCAL_LOGV) {
-                    Log.v("ViewRoot", "FINISHED DRAWING: " + mWindowAttributes.getTitle());
+                    Log.v(TAG, "FINISHED DRAWING: " + mWindowAttributes.getTitle());
                 }
                 mReportNextDraw = false;
                 if (mSurfaceHolder != null && mSurface.isValid()) {
@@ -1290,7 +1290,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         }
 
         if (DEBUG_ORIENTATION || DEBUG_DRAW) {
-            Log.v("ViewRoot", "Draw " + mView + "/"
+            Log.v(TAG, "Draw " + mView + "/"
                     + mWindowAttributes.getTitle()
                     + ": dirty={" + dirty.left + "," + dirty.top
                     + "," + dirty.right + "," + dirty.bottom + "} surface="
@@ -1315,12 +1315,12 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 // TODO: Do this in native
                 canvas.setDensity(mDensity);
             } catch (Surface.OutOfResourcesException e) {
-                Log.e("ViewRoot", "OutOfResourcesException locking surface", e);
+                Log.e(TAG, "OutOfResourcesException locking surface", e);
                 // TODO: we should ask the window manager to do something!
                 // for now we just do nothing
                 return;
             } catch (IllegalArgumentException e) {
-                Log.e("ViewRoot", "IllegalArgumentException locking surface", e);
+                Log.e(TAG, "IllegalArgumentException locking surface", e);
                 // TODO: we should ask the window manager to do something!
                 // for now we just do nothing
                 return;
@@ -1331,7 +1331,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                     long startTime = 0L;
 
                     if (DEBUG_ORIENTATION || DEBUG_DRAW) {
-                        Log.v("ViewRoot", "Surface " + surface + " drawing to bitmap w="
+                        Log.v(TAG, "Surface " + surface + " drawing to bitmap w="
                                 + canvas.getWidth() + ", h=" + canvas.getHeight());
                         //canvas.drawARGB(255, 255, 0, 0);
                     }
@@ -1400,7 +1400,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         }
 
         if (LOCAL_LOGV) {
-            Log.v("ViewRoot", "Surface " + surface + " unlockCanvasAndPost");
+            Log.v(TAG, "Surface " + surface + " unlockCanvasAndPost");
         }
 
         if (scrolling) {
@@ -1718,7 +1718,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             break;
         case DISPATCH_KEY:
             if (LOCAL_LOGV) Log.v(
-                "ViewRoot", "Dispatching key "
+                TAG, "Dispatching key "
                 + msg.obj + " to " + mView);
             deliverKeyEvent((KeyEvent)msg.obj, true);
             break;
@@ -1830,7 +1830,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             break;
         case DISPATCH_KEY_FROM_IME: {
             if (LOCAL_LOGV) Log.v(
-                "ViewRoot", "Dispatching key "
+                TAG, "Dispatching key "
                 + msg.obj + " from IME to " + mView);
             KeyEvent event = (KeyEvent)msg.obj;
             if ((event.getFlags()&KeyEvent.FLAG_FROM_SYSTEM) != 0) {
@@ -2323,7 +2323,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         if (handled) {
             if (sendDone) {
                 if (LOCAL_LOGV) Log.v(
-                    "ViewRoot", "Telling window manager key is finished");
+                    TAG, "Telling window manager key is finished");
                 finishKeyEvent(event);
             }
             return;
@@ -2355,10 +2355,10 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 deliverKeyEventToViewHierarchy(event, sendDone);
             } else if (sendDone) {
                 if (LOCAL_LOGV) Log.v(
-                        "ViewRoot", "Telling window manager key is finished");
+                        TAG, "Telling window manager key is finished");
                 finishKeyEvent(event);
             } else {
-                Log.w("ViewRoot", "handleFinishedEvent(seq=" + seq
+                Log.w(TAG, "handleFinishedEvent(seq=" + seq
                         + " handled=" + handled + " ev=" + event
                         + ") neither delivering nor finishing key");
             }
@@ -2430,7 +2430,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         } finally {
             if (sendDone) {
                 if (LOCAL_LOGV) Log.v(
-                    "ViewRoot", "Telling window manager key is finished");
+                    TAG, "Telling window manager key is finished");
                 finishKeyEvent(event);
             }
             // Let the exception fall through -- the looper will catch
@@ -2553,7 +2553,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
 
     void doDie() {
         checkThread();
-        if (LOCAL_LOGV) Log.v("ViewRoot", "DIE in " + this + " of " + mSurface);
+        if (LOCAL_LOGV) Log.v(TAG, "DIE in " + this + " of " + mSurface);
         synchronized (this) {
             if (mAdded && !mFirst) {
                 int viewVisibility = mView.getVisibility();
@@ -2619,16 +2619,10 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             dispatchKey(event);
         }
 
-        public void handleTouch(MotionEvent event, Runnable finishedCallback) {
+        public void handleMotion(MotionEvent event, Runnable finishedCallback) {
             finishedCallback.run();
             
-            dispatchPointer(event);
-        }
-
-        public void handleTrackball(MotionEvent event, Runnable finishedCallback) {
-            finishedCallback.run();
-            
-            dispatchTrackball(event);
+            dispatchMotion(event);
         }
     };
 
@@ -2649,9 +2643,21 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         msg.obj = event;
 
         if (LOCAL_LOGV) Log.v(
-            "ViewRoot", "sending key " + event + " to " + mView);
+            TAG, "sending key " + event + " to " + mView);
 
         sendMessageAtTime(msg, event.getEventTime());
+    }
+    
+    public void dispatchMotion(MotionEvent event) {
+        int source = event.getSource();
+        if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+            dispatchPointer(event);
+        } else if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
+            dispatchTrackball(event);
+        } else {
+            // TODO
+            Log.v(TAG, "Dropping unsupported motion event (unimplemented): " + event);
+        }
     }
 
     public void dispatchPointer(MotionEvent event) {

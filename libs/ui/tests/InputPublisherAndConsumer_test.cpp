@@ -73,17 +73,17 @@ void InputPublisherAndConsumerTest::PublishAndConsumeKeyEvent() {
     status_t status;
 
     const int32_t deviceId = 1;
-    const int32_t nature = INPUT_EVENT_NATURE_KEY;
-    const int32_t action = KEY_EVENT_ACTION_DOWN;
-    const int32_t flags = KEY_EVENT_FLAG_FROM_SYSTEM;
+    const int32_t source = AINPUT_SOURCE_KEYBOARD;
+    const int32_t action = AKEY_EVENT_ACTION_DOWN;
+    const int32_t flags = AKEY_EVENT_FLAG_FROM_SYSTEM;
     const int32_t keyCode = AKEYCODE_ENTER;
     const int32_t scanCode = 13;
-    const int32_t metaState = META_ALT_LEFT_ON | META_ALT_ON;
+    const int32_t metaState = AMETA_ALT_LEFT_ON | AMETA_ALT_ON;
     const int32_t repeatCount = 1;
     const nsecs_t downTime = 3;
     const nsecs_t eventTime = 4;
 
-    status = mPublisher->publishKeyEvent(deviceId, nature, action, flags,
+    status = mPublisher->publishKeyEvent(deviceId, source, action, flags,
             keyCode, scanCode, metaState, repeatCount, downTime, eventTime);
     ASSERT_EQ(OK, status)
             << "publisher publishKeyEvent should return OK";
@@ -103,12 +103,12 @@ void InputPublisherAndConsumerTest::PublishAndConsumeKeyEvent() {
 
     ASSERT_TRUE(event != NULL)
             << "consumer should have returned non-NULL event";
-    ASSERT_EQ(INPUT_EVENT_TYPE_KEY, event->getType())
+    ASSERT_EQ(AINPUT_EVENT_TYPE_KEY, event->getType())
             << "consumer should have returned a key event";
 
     KeyEvent* keyEvent = static_cast<KeyEvent*>(event);
     EXPECT_EQ(deviceId, keyEvent->getDeviceId());
-    EXPECT_EQ(nature, keyEvent->getNature());
+    EXPECT_EQ(source, keyEvent->getSource());
     EXPECT_EQ(action, keyEvent->getAction());
     EXPECT_EQ(flags, keyEvent->getFlags());
     EXPECT_EQ(keyCode, keyEvent->getKeyCode());
@@ -136,10 +136,10 @@ void InputPublisherAndConsumerTest::PublishAndConsumeMotionEvent(
     status_t status;
 
     const int32_t deviceId = 1;
-    const int32_t nature = INPUT_EVENT_NATURE_TOUCH;
-    const int32_t action = MOTION_EVENT_ACTION_MOVE;
-    const int32_t edgeFlags = MOTION_EVENT_EDGE_FLAG_TOP;
-    const int32_t metaState = META_ALT_LEFT_ON | META_ALT_ON;
+    const int32_t source = AINPUT_SOURCE_TOUCHSCREEN;
+    const int32_t action = AMOTION_EVENT_ACTION_MOVE;
+    const int32_t edgeFlags = AMOTION_EVENT_EDGE_FLAG_TOP;
+    const int32_t metaState = AMETA_ALT_LEFT_ON | AMETA_ALT_ON;
     const float xOffset = -10;
     const float yOffset = -20;
     const float xPrecision = 0.25;
@@ -159,10 +159,15 @@ void InputPublisherAndConsumerTest::PublishAndConsumeMotionEvent(
             samplePointerCoords.editTop().y = 200 * i + j;
             samplePointerCoords.editTop().pressure = 0.5 * i + j;
             samplePointerCoords.editTop().size = 0.7 * i + j;
+            samplePointerCoords.editTop().touchMajor = 1.5 * i + j;
+            samplePointerCoords.editTop().touchMinor = 1.7 * i + j;
+            samplePointerCoords.editTop().toolMajor = 2.5 * i + j;
+            samplePointerCoords.editTop().toolMinor = 2.7 * i + j;
+            samplePointerCoords.editTop().orientation = 3.5 * i + j;
         }
     }
 
-    status = mPublisher->publishMotionEvent(deviceId, nature, action, edgeFlags,
+    status = mPublisher->publishMotionEvent(deviceId, source, action, edgeFlags,
             metaState, xOffset, yOffset, xPrecision, yPrecision,
             downTime, sampleEventTimes[0], pointerCount, pointerIds, samplePointerCoords.array());
     ASSERT_EQ(OK, status)
@@ -199,14 +204,14 @@ void InputPublisherAndConsumerTest::PublishAndConsumeMotionEvent(
 
     ASSERT_TRUE(event != NULL)
             << "consumer should have returned non-NULL event";
-    ASSERT_EQ(INPUT_EVENT_TYPE_MOTION, event->getType())
+    ASSERT_EQ(AINPUT_EVENT_TYPE_MOTION, event->getType())
             << "consumer should have returned a motion event";
 
     size_t lastSampleIndex = samplesToAppendBeforeDispatch + samplesToAppendAfterDispatch;
 
     MotionEvent* motionEvent = static_cast<MotionEvent*>(event);
     EXPECT_EQ(deviceId, motionEvent->getDeviceId());
-    EXPECT_EQ(nature, motionEvent->getNature());
+    EXPECT_EQ(source, motionEvent->getSource());
     EXPECT_EQ(action, motionEvent->getAction());
     EXPECT_EQ(edgeFlags, motionEvent->getEdgeFlags());
     EXPECT_EQ(metaState, motionEvent->getMetaState());
@@ -241,6 +246,16 @@ void InputPublisherAndConsumerTest::PublishAndConsumeMotionEvent(
                     motionEvent->getHistoricalPressure(i, sampleIndex));
             EXPECT_EQ(samplePointerCoords[offset].size,
                     motionEvent->getHistoricalSize(i, sampleIndex));
+            EXPECT_EQ(samplePointerCoords[offset].touchMajor,
+                    motionEvent->getHistoricalTouchMajor(i, sampleIndex));
+            EXPECT_EQ(samplePointerCoords[offset].touchMinor,
+                    motionEvent->getHistoricalTouchMinor(i, sampleIndex));
+            EXPECT_EQ(samplePointerCoords[offset].toolMajor,
+                    motionEvent->getHistoricalToolMajor(i, sampleIndex));
+            EXPECT_EQ(samplePointerCoords[offset].toolMinor,
+                    motionEvent->getHistoricalToolMinor(i, sampleIndex));
+            EXPECT_EQ(samplePointerCoords[offset].orientation,
+                    motionEvent->getHistoricalOrientation(i, sampleIndex));
         }
     }
 
@@ -255,6 +270,11 @@ void InputPublisherAndConsumerTest::PublishAndConsumeMotionEvent(
         EXPECT_EQ(samplePointerCoords[offset].y + yOffset, motionEvent->getY(i));
         EXPECT_EQ(samplePointerCoords[offset].pressure, motionEvent->getPressure(i));
         EXPECT_EQ(samplePointerCoords[offset].size, motionEvent->getSize(i));
+        EXPECT_EQ(samplePointerCoords[offset].touchMajor, motionEvent->getTouchMajor(i));
+        EXPECT_EQ(samplePointerCoords[offset].touchMinor, motionEvent->getTouchMinor(i));
+        EXPECT_EQ(samplePointerCoords[offset].toolMajor, motionEvent->getToolMajor(i));
+        EXPECT_EQ(samplePointerCoords[offset].toolMinor, motionEvent->getToolMinor(i));
+        EXPECT_EQ(samplePointerCoords[offset].orientation, motionEvent->getOrientation(i));
     }
 
     status = mConsumer->sendFinishedSignal();
@@ -300,7 +320,7 @@ TEST_F(InputPublisherAndConsumerTest, PublishMotionEvent_WhenNotReset_ReturnsErr
 
     const size_t pointerCount = 1;
     int32_t pointerIds[pointerCount] = { 0 };
-    PointerCoords pointerCoords[pointerCount] = { { 0, 0, 0, 0 } };
+    PointerCoords pointerCoords[pointerCount] = { { 0, 0, 0, 0, 0, 0, 0, 0, 0 } };
 
     status = mPublisher->publishMotionEvent(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             pointerCount, pointerIds, pointerCoords);
@@ -381,7 +401,7 @@ TEST_F(InputPublisherAndConsumerTest, AppendMotionSample_WhenPublishedMotionEven
     int32_t pointerIds[pointerCount];
     PointerCoords pointerCoords[pointerCount];
 
-    status = mPublisher->publishMotionEvent(0, 0, MOTION_EVENT_ACTION_DOWN,
+    status = mPublisher->publishMotionEvent(0, 0, AMOTION_EVENT_ACTION_DOWN,
             0, 0, 0, 0, 0, 0, 0, 0, pointerCount, pointerIds, pointerCoords);
     ASSERT_EQ(OK, status);
 
@@ -398,7 +418,7 @@ TEST_F(InputPublisherAndConsumerTest, AppendMotionSample_WhenAlreadyConsumed_Ret
     int32_t pointerIds[pointerCount];
     PointerCoords pointerCoords[pointerCount];
 
-    status = mPublisher->publishMotionEvent(0, 0, MOTION_EVENT_ACTION_MOVE,
+    status = mPublisher->publishMotionEvent(0, 0, AMOTION_EVENT_ACTION_MOVE,
             0, 0, 0, 0, 0, 0, 0, 0, pointerCount, pointerIds, pointerCoords);
     ASSERT_EQ(OK, status);
 
@@ -425,7 +445,7 @@ TEST_F(InputPublisherAndConsumerTest, AppendMotionSample_WhenBufferFull_ReturnsE
     int32_t pointerIds[pointerCount];
     PointerCoords pointerCoords[pointerCount];
 
-    status = mPublisher->publishMotionEvent(0, 0, MOTION_EVENT_ACTION_MOVE,
+    status = mPublisher->publishMotionEvent(0, 0, AMOTION_EVENT_ACTION_MOVE,
             0, 0, 0, 0, 0, 0, 0, 0, pointerCount, pointerIds, pointerCoords);
     ASSERT_EQ(OK, status);
 

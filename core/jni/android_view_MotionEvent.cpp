@@ -24,7 +24,7 @@
 #include "android_view_MotionEvent.h"
 
 // Number of float items per entry in a DVM sample data array
-#define NUM_SAMPLE_DATA 4
+#define NUM_SAMPLE_DATA 9
 
 namespace android {
 
@@ -36,13 +36,14 @@ static struct {
     jmethodID obtain;
     jmethodID recycle;
 
+    jfieldID mDeviceId;
+    jfieldID mSource;
     jfieldID mDownTimeNano;
     jfieldID mAction;
     jfieldID mXOffset;
     jfieldID mYOffset;
     jfieldID mXPrecision;
     jfieldID mYPrecision;
-    jfieldID mDeviceId;
     jfieldID mEdgeFlags;
     jfieldID mMetaState;
     jfieldID mNumPointers;
@@ -70,6 +71,10 @@ jobject android_view_MotionEvent_fromNative(JNIEnv* env, const MotionEvent* even
         return NULL;
     }
 
+    env->SetIntField(eventObj, gMotionEventClassInfo.mDeviceId,
+            event->getDeviceId());
+    env->SetIntField(eventObj, gMotionEventClassInfo.mSource,
+            event->getSource());
     env->SetLongField(eventObj, gMotionEventClassInfo.mDownTimeNano,
             event->getDownTime());
     env->SetIntField(eventObj, gMotionEventClassInfo.mAction,
@@ -82,8 +87,6 @@ jobject android_view_MotionEvent_fromNative(JNIEnv* env, const MotionEvent* even
             event->getXPrecision());
     env->SetFloatField(eventObj, gMotionEventClassInfo.mYPrecision,
             event->getYPrecision());
-    env->SetIntField(eventObj, gMotionEventClassInfo.mDeviceId,
-            event->getDeviceId());
     env->SetIntField(eventObj, gMotionEventClassInfo.mEdgeFlags,
             event->getEdgeFlags());
     env->SetIntField(eventObj, gMotionEventClassInfo.mMetaState,
@@ -129,6 +132,11 @@ jobject android_view_MotionEvent_fromNative(JNIEnv* env, const MotionEvent* even
         *(destDataSamples++) = srcSamplePointerCoords->y;
         *(destDataSamples++) = srcSamplePointerCoords->pressure;
         *(destDataSamples++) = srcSamplePointerCoords->size;
+        *(destDataSamples++) = srcSamplePointerCoords->touchMajor;
+        *(destDataSamples++) = srcSamplePointerCoords->touchMinor;
+        *(destDataSamples++) = srcSamplePointerCoords->toolMajor;
+        *(destDataSamples++) = srcSamplePointerCoords->toolMinor;
+        *(destDataSamples++) = srcSamplePointerCoords->orientation;
         srcSamplePointerCoords += 1;
     }
 
@@ -142,15 +150,16 @@ jobject android_view_MotionEvent_fromNative(JNIEnv* env, const MotionEvent* even
     return eventObj;
 }
 
-void android_view_MotionEvent_toNative(JNIEnv* env, jobject eventObj, int32_t nature,
+void android_view_MotionEvent_toNative(JNIEnv* env, jobject eventObj,
         MotionEvent* event) {
+    jint deviceId = env->GetIntField(eventObj, gMotionEventClassInfo.mDeviceId);
+    jint source = env->GetIntField(eventObj, gMotionEventClassInfo.mSource);
     jlong downTimeNano = env->GetLongField(eventObj, gMotionEventClassInfo.mDownTimeNano);
     jint action = env->GetIntField(eventObj, gMotionEventClassInfo.mAction);
     jfloat xOffset = env->GetFloatField(eventObj, gMotionEventClassInfo.mXOffset);
     jfloat yOffset = env->GetFloatField(eventObj, gMotionEventClassInfo.mYOffset);
     jfloat xPrecision = env->GetFloatField(eventObj, gMotionEventClassInfo.mXPrecision);
     jfloat yPrecision = env->GetFloatField(eventObj, gMotionEventClassInfo.mYPrecision);
-    jint deviceId = env->GetIntField(eventObj, gMotionEventClassInfo.mDeviceId);
     jint edgeFlags = env->GetIntField(eventObj, gMotionEventClassInfo.mEdgeFlags);
     jint metaState = env->GetIntField(eventObj, gMotionEventClassInfo.mMetaState);
     jint numPointers = env->GetIntField(eventObj, gMotionEventClassInfo.mNumPointers);
@@ -180,9 +189,14 @@ void android_view_MotionEvent_toNative(JNIEnv* env, jobject eventObj, int32_t na
         samplePointerCoords[j].y = *(srcDataSamples++);
         samplePointerCoords[j].pressure = *(srcDataSamples++);
         samplePointerCoords[j].size = *(srcDataSamples++);
+        samplePointerCoords[j].touchMajor = *(srcDataSamples++);
+        samplePointerCoords[j].touchMinor = *(srcDataSamples++);
+        samplePointerCoords[j].toolMajor = *(srcDataSamples++);
+        samplePointerCoords[j].toolMinor = *(srcDataSamples++);
+        samplePointerCoords[j].orientation = *(srcDataSamples++);
     }
 
-    event->initialize(deviceId, nature, action, edgeFlags, metaState,
+    event->initialize(deviceId, source, action, edgeFlags, metaState,
             xOffset, yOffset, xPrecision, yPrecision, downTimeNano, sampleEventTime,
             numPointers, pointerIdentifiers, samplePointerCoords);
 
@@ -193,6 +207,11 @@ void android_view_MotionEvent_toNative(JNIEnv* env, jobject eventObj, int32_t na
             samplePointerCoords[j].y = *(srcDataSamples++);
             samplePointerCoords[j].pressure = *(srcDataSamples++);
             samplePointerCoords[j].size = *(srcDataSamples++);
+            samplePointerCoords[j].touchMajor = *(srcDataSamples++);
+            samplePointerCoords[j].touchMinor = *(srcDataSamples++);
+            samplePointerCoords[j].toolMajor = *(srcDataSamples++);
+            samplePointerCoords[j].toolMinor = *(srcDataSamples++);
+            samplePointerCoords[j].orientation = *(srcDataSamples++);
         }
         event->addSample(sampleEventTime, samplePointerCoords);
     }
@@ -242,6 +261,10 @@ int register_android_view_MotionEvent(JNIEnv* env) {
     GET_METHOD_ID(gMotionEventClassInfo.recycle, gMotionEventClassInfo.clazz,
             "recycle", "()V");
 
+    GET_FIELD_ID(gMotionEventClassInfo.mDeviceId, gMotionEventClassInfo.clazz,
+            "mDeviceId", "I");
+    GET_FIELD_ID(gMotionEventClassInfo.mSource, gMotionEventClassInfo.clazz,
+            "mSource", "I");
     GET_FIELD_ID(gMotionEventClassInfo.mDownTimeNano, gMotionEventClassInfo.clazz,
             "mDownTimeNano", "J");
     GET_FIELD_ID(gMotionEventClassInfo.mAction, gMotionEventClassInfo.clazz,
@@ -254,8 +277,6 @@ int register_android_view_MotionEvent(JNIEnv* env) {
             "mXPrecision", "F");
     GET_FIELD_ID(gMotionEventClassInfo.mYPrecision, gMotionEventClassInfo.clazz,
             "mYPrecision", "F");
-    GET_FIELD_ID(gMotionEventClassInfo.mDeviceId, gMotionEventClassInfo.clazz,
-            "mDeviceId", "I");
     GET_FIELD_ID(gMotionEventClassInfo.mEdgeFlags, gMotionEventClassInfo.clazz,
             "mEdgeFlags", "I");
     GET_FIELD_ID(gMotionEventClassInfo.mMetaState, gMotionEventClassInfo.clazz,

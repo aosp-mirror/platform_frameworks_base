@@ -30,6 +30,8 @@ import android.util.Slog;
 public final class InputChannel implements Parcelable {
     private static final String TAG = "InputChannel";
     
+    private static final boolean DEBUG = false;
+    
     public static final Parcelable.Creator<InputChannel> CREATOR
             = new Parcelable.Creator<InputChannel>() {
         public InputChannel createFromParcel(Parcel source) {
@@ -84,8 +86,10 @@ public final class InputChannel implements Parcelable {
         if (name == null) {
             throw new IllegalArgumentException("name must not be null");
         }
-        
-        Slog.d(TAG, "Opening input channel pair '" + name + "'");
+
+        if (DEBUG) {
+            Slog.d(TAG, "Opening input channel pair '" + name + "'");
+        }
         return nativeOpenInputChannelPair(name);
     }
     

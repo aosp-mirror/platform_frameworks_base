@@ -42,6 +42,7 @@ namespace android {
 extern int32_t updateMetaState(int32_t keyCode, bool down, int32_t oldMetaState);
 extern int32_t rotateKeyCode(int32_t keyCode, int32_t orientation);
 
+
 /*
  * An input device structure tracks the state of a single input device.
  *
@@ -168,8 +169,11 @@ struct InputDevice {
                 FIELD_ABS_MT_POSITION_X = 1,
                 FIELD_ABS_MT_POSITION_Y = 2,
                 FIELD_ABS_MT_TOUCH_MAJOR = 4,
-                FIELD_ABS_MT_WIDTH_MAJOR = 8,
-                FIELD_ABS_MT_TRACKING_ID = 16
+                FIELD_ABS_MT_TOUCH_MINOR = 8,
+                FIELD_ABS_MT_WIDTH_MAJOR = 16,
+                FIELD_ABS_MT_WIDTH_MINOR = 32,
+                FIELD_ABS_MT_ORIENTATION = 64,
+                FIELD_ABS_MT_TRACKING_ID = 128
             };
 
             uint32_t pointerCount;
@@ -179,7 +183,10 @@ struct InputDevice {
                 int32_t absMTPositionX;
                 int32_t absMTPositionY;
                 int32_t absMTTouchMajor;
+                int32_t absMTTouchMinor;
                 int32_t absMTWidthMajor;
+                int32_t absMTWidthMinor;
+                int32_t absMTOrientation;
                 int32_t absMTTrackingId;
 
                 inline void clear() {
@@ -206,6 +213,11 @@ struct InputDevice {
         int32_t y;
         int32_t pressure;
         int32_t size;
+        int32_t touchMajor;
+        int32_t touchMinor;
+        int32_t toolMajor;
+        int32_t toolMinor;
+        int32_t orientation;
     };
 
     struct TouchData {
@@ -236,6 +248,7 @@ struct InputDevice {
             AbsoluteAxisInfo yAxis;
             AbsoluteAxisInfo pressureAxis;
             AbsoluteAxisInfo sizeAxis;
+            AbsoluteAxisInfo orientationAxis;
         } parameters;
 
         // The touch data of the current sample being processed.
@@ -290,6 +303,8 @@ struct InputDevice {
 
             int32_t sizeOrigin;
             float sizeScale;
+
+            float orientationScale;
         } precalculated;
 
         void reset();

@@ -27,7 +27,7 @@ class MotionEvent;
 extern jobject android_view_MotionEvent_fromNative(JNIEnv* env, const MotionEvent* event);
 
 /* Copies the contents of a DVM MotionEvent object to a native MotionEvent instance. */
-extern void android_view_MotionEvent_toNative(JNIEnv* env, jobject eventObj, int32_t nature,
+extern void android_view_MotionEvent_toNative(JNIEnv* env, jobject eventObj,
         MotionEvent* event);
 
 /* Recycles a DVM MotionEvent object. */

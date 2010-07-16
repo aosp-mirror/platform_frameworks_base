@@ -32,7 +32,7 @@ enum {
     /*
      * Private control to determine when an app is tracking a key sequence.
      */
-    KEY_EVENT_FLAG_START_TRACKING = 0x40000000
+    AKEY_EVENT_FLAG_START_TRACKING = 0x40000000
 };
 
 /*
@@ -130,6 +130,11 @@ struct PointerCoords {
     float y;
     float pressure;
     float size;
+    float touchMajor;
+    float touchMinor;
+    float toolMajor;
+    float toolMinor;
+    float orientation;
 };
 
 /*
@@ -143,14 +148,14 @@ public:
 
     inline int32_t getDeviceId() const { return mDeviceId; }
 
-    inline int32_t getNature() const { return mNature; }
+    inline int32_t getSource() const { return mSource; }
     
 protected:
-    void initialize(int32_t deviceId, int32_t nature);
+    void initialize(int32_t deviceId, int32_t source);
 
 private:
     int32_t mDeviceId;
-    int32_t mNature;
+    int32_t mSource;
 };
 
 /*
@@ -160,7 +165,7 @@ class KeyEvent : public InputEvent {
 public:
     virtual ~KeyEvent() { }
 
-    virtual int32_t getType() const { return INPUT_EVENT_TYPE_KEY; }
+    virtual int32_t getType() const { return AINPUT_EVENT_TYPE_KEY; }
 
     inline int32_t getAction() const { return mAction; }
 
@@ -188,7 +193,7 @@ public:
     
     void initialize(
             int32_t deviceId,
-            int32_t nature,
+            int32_t source,
             int32_t action,
             int32_t flags,
             int32_t keyCode,
@@ -216,7 +221,7 @@ class MotionEvent : public InputEvent {
 public:
     virtual ~MotionEvent() { }
 
-    virtual int32_t getType() const { return INPUT_EVENT_TYPE_MOTION; }
+    virtual int32_t getType() const { return AINPUT_EVENT_TYPE_MOTION; }
 
     inline int32_t getAction() const { return mAction; }
 
@@ -264,6 +269,26 @@ public:
         return getCurrentPointerCoords(pointerIndex).size;
     }
 
+    inline float getTouchMajor(size_t pointerIndex) const {
+        return getCurrentPointerCoords(pointerIndex).touchMajor;
+    }
+
+    inline float getTouchMinor(size_t pointerIndex) const {
+        return getCurrentPointerCoords(pointerIndex).touchMinor;
+    }
+
+    inline float getToolMajor(size_t pointerIndex) const {
+        return getCurrentPointerCoords(pointerIndex).toolMajor;
+    }
+
+    inline float getToolMinor(size_t pointerIndex) const {
+        return getCurrentPointerCoords(pointerIndex).toolMinor;
+    }
+
+    inline float getOrientation(size_t pointerIndex) const {
+        return getCurrentPointerCoords(pointerIndex).orientation;
+    }
+
     inline size_t getHistorySize() const { return mSampleEventTimes.size() - 1; }
 
     inline nsecs_t getHistoricalEventTime(size_t historicalIndex) const {
@@ -294,9 +319,29 @@ public:
         return getHistoricalPointerCoords(pointerIndex, historicalIndex).size;
     }
 
+    inline float getHistoricalTouchMajor(size_t pointerIndex, size_t historicalIndex) const {
+        return getHistoricalPointerCoords(pointerIndex, historicalIndex).touchMajor;
+    }
+
+    inline float getHistoricalTouchMinor(size_t pointerIndex, size_t historicalIndex) const {
+        return getHistoricalPointerCoords(pointerIndex, historicalIndex).touchMinor;
+    }
+
+    inline float getHistoricalToolMajor(size_t pointerIndex, size_t historicalIndex) const {
+        return getHistoricalPointerCoords(pointerIndex, historicalIndex).toolMajor;
+    }
+
+    inline float getHistoricalToolMinor(size_t pointerIndex, size_t historicalIndex) const {
+        return getHistoricalPointerCoords(pointerIndex, historicalIndex).toolMinor;
+    }
+
+    inline float getHistoricalOrientation(size_t pointerIndex, size_t historicalIndex) const {
+        return getHistoricalPointerCoords(pointerIndex, historicalIndex).orientation;
+    }
+
     void initialize(
             int32_t deviceId,
-            int32_t nature,
+            int32_t source,
             int32_t action,
             int32_t edgeFlags,
             int32_t metaState,

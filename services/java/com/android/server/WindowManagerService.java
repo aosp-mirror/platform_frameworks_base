@@ -102,6 +102,7 @@ import android.view.IWindow;
 import android.view.IWindowManager;
 import android.view.IWindowSession;
 import android.view.InputChannel;
+import android.view.InputDevice;
 import android.view.InputQueue;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -2016,6 +2017,8 @@ public class WindowManagerService extends IWindowManager.Stub
             + ", surface=" + win.mSurface);
 
         final long origId = Binder.clearCallingIdentity();
+        
+        win.disposeInputChannel();
 
         if (DEBUG_APP_TRANSITIONS) Slog.v(
                 TAG, "Remove " + win + ": mSurface=" + win.mSurface
@@ -2076,8 +2079,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void removeWindowInnerLocked(Session session, WindowState win) {
-        mInputMonitor.windowIsBeingRemovedLw(win);
-
         win.mRemoved = true;
 
         if (mInputMethodTarget == win) {
@@ -2156,6 +2157,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mAppToken.updateReportedVisibilityLocked();
             }
         }
+        
+        mInputMonitor.updateInputWindowsLw();
     }
 
     private static void logSurface(WindowState w, String msg, RuntimeException where) {
@@ -2906,7 +2909,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (win.isVisibleNow()) {
                             applyAnimationLocked(win,
                                     WindowManagerPolicy.TRANSIT_EXIT, false);
-                            mInputMonitor.windowIsBeingRemovedLw(win);
                             changed = true;
                         }
                     }
@@ -2924,6 +2926,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
 
+                mInputMonitor.updateInputWindowsLw();
             } else {
                 Slog.w(TAG, "Attempted to remove non-existing token: " + token);
             }
@@ -5109,7 +5112,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final int N = windows.size();
             for (int i = N - 1; i >= 0; i--) {
                 final WindowState child = (WindowState) windows.get(i);
-                if (child.mInputChannel == null) {
+                if (child.mInputChannel == null || child.mRemoved) {
                     // Skip this window because it cannot possibly receive input.
                     continue;
                 }
@@ -5286,11 +5289,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         
-        public void windowIsBeingRemovedLw(WindowState window) {
-            // Window is being removed.
-            updateInputWindowsLw();
-        }
-        
         public void pauseDispatchingLw(WindowToken window) {
             if (! window.paused) {
                 if (DEBUG_INPUT) {
@@ -5408,19 +5406,24 @@ public class WindowManagerService extends IWindowManager.Stub
         int metaState = ev.getMetaState();
         int deviceId = ev.getDeviceId();
         int scancode = ev.getScanCode();
+        int source = ev.getSource();
+        
+        if (source == InputDevice.SOURCE_UNKNOWN) {
+            source = InputDevice.SOURCE_KEYBOARD;
+        }
 
         if (eventTime == 0) eventTime = SystemClock.uptimeMillis();
         if (downTime == 0) downTime = eventTime;
 
         KeyEvent newEvent = new KeyEvent(downTime, eventTime, action, code, repeatCount, metaState,
-                deviceId, scancode, KeyEvent.FLAG_FROM_SYSTEM);
+                deviceId, scancode, KeyEvent.FLAG_FROM_SYSTEM, source);
 
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         
         final int result = mInputManager.injectKeyEvent(newEvent,
-                InputQueue.INPUT_EVENT_NATURE_KEY, pid, uid, sync, INJECTION_TIMEOUT_MILLIS);
+                pid, uid, sync, INJECTION_TIMEOUT_MILLIS);
         
         Binder.restoreCallingIdentity(ident);
         return reportInjectionResult(result);
@@ -5440,8 +5443,13 @@ public class WindowManagerService extends IWindowManager.Stub
         final int uid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         
-        final int result = mInputManager.injectMotionEvent(ev,
-                InputQueue.INPUT_EVENT_NATURE_TOUCH, pid, uid, sync, INJECTION_TIMEOUT_MILLIS);
+        MotionEvent newEvent = MotionEvent.obtain(ev);
+        if ((newEvent.getSource() & InputDevice.SOURCE_CLASS_POINTER) == 0) {
+            newEvent.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        }
+        
+        final int result = mInputManager.injectMotionEvent(newEvent,
+                pid, uid, sync, INJECTION_TIMEOUT_MILLIS);
         
         Binder.restoreCallingIdentity(ident);
         return reportInjectionResult(result);
@@ -5461,8 +5469,13 @@ public class WindowManagerService extends IWindowManager.Stub
         final int uid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         
-        final int result = mInputManager.injectMotionEvent(ev,
-                InputQueue.INPUT_EVENT_NATURE_TRACKBALL, pid, uid, sync, INJECTION_TIMEOUT_MILLIS);
+        MotionEvent newEvent = MotionEvent.obtain(ev);
+        if ((newEvent.getSource() & InputDevice.SOURCE_CLASS_TRACKBALL) == 0) {
+            newEvent.setSource(InputDevice.SOURCE_TRACKBALL);
+        }
+        
+        final int result = mInputManager.injectMotionEvent(newEvent,
+                pid, uid, sync, INJECTION_TIMEOUT_MILLIS);
         
         Binder.restoreCallingIdentity(ident);
         return reportInjectionResult(result);
@@ -6956,6 +6969,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         void removeLocked() {
+            disposeInputChannel();
+            
             if (mAttachedWindow != null) {
                 mAttachedWindow.mChildWindows.remove(this);
             }
@@ -6967,7 +6982,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 // Ignore if it has already been removed (usually because
                 // we are doing this as part of processing a death note.)
             }
-            
+        }
+        
+        void disposeInputChannel() {
             if (mInputChannel != null) {
                 mInputManager.unregisterInputChannel(mInputChannel);
                 

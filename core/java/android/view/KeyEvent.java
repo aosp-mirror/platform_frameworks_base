@@ -26,7 +26,7 @@ import android.view.KeyCharacterMap.KeyData;
 /**
  * Contains constants for key events.
  */
-public class KeyEvent implements Parcelable {
+public class KeyEvent extends InputEvent implements Parcelable {
     // key codes
     public static final int KEYCODE_UNKNOWN         = 0;
     public static final int KEYCODE_SOFT_LEFT       = 1;
@@ -349,7 +349,6 @@ public class KeyEvent implements Parcelable {
     private int mKeyCode;
     private int mScanCode;
     private int mRepeatCount;
-    private int mDeviceId;
     private int mFlags;
     private long mDownTime;
     private long mEventTime;
@@ -484,19 +483,19 @@ public class KeyEvent implements Parcelable {
      * @param repeat A repeat count for down events (> 0 if this is after the
      * initial down) or event count for multiple events.
      * @param metaState Flags indicating which meta keys are currently pressed.
-     * @param device The device ID that generated the key event.
+     * @param deviceId The device ID that generated the key event.
      * @param scancode Raw device scan code of the event.
      */
     public KeyEvent(long downTime, long eventTime, int action,
                     int code, int repeat, int metaState,
-                    int device, int scancode) {
+                    int deviceId, int scancode) {
         mDownTime = downTime;
         mEventTime = eventTime;
         mAction = action;
         mKeyCode = code;
         mRepeatCount = repeat;
         mMetaState = metaState;
-        mDeviceId = device;
+        mDeviceId = deviceId;
         mScanCode = scancode;
     }
 
@@ -513,44 +512,79 @@ public class KeyEvent implements Parcelable {
      * @param repeat A repeat count for down events (> 0 if this is after the
      * initial down) or event count for multiple events.
      * @param metaState Flags indicating which meta keys are currently pressed.
-     * @param device The device ID that generated the key event.
+     * @param deviceId The device ID that generated the key event.
      * @param scancode Raw device scan code of the event.
      * @param flags The flags for this key event
      */
     public KeyEvent(long downTime, long eventTime, int action,
                     int code, int repeat, int metaState,
-                    int device, int scancode, int flags) {
+                    int deviceId, int scancode, int flags) {
         mDownTime = downTime;
         mEventTime = eventTime;
         mAction = action;
         mKeyCode = code;
         mRepeatCount = repeat;
         mMetaState = metaState;
-        mDeviceId = device;
+        mDeviceId = deviceId;
         mScanCode = scancode;
         mFlags = flags;
     }
 
     /**
+     * Create a new key event.
+     * 
+     * @param downTime The time (in {@link android.os.SystemClock#uptimeMillis})
+     * at which this key code originally went down.
+     * @param eventTime The time (in {@link android.os.SystemClock#uptimeMillis})
+     * at which this event happened.
+     * @param action Action code: either {@link #ACTION_DOWN},
+     * {@link #ACTION_UP}, or {@link #ACTION_MULTIPLE}.
+     * @param code The key code.
+     * @param repeat A repeat count for down events (> 0 if this is after the
+     * initial down) or event count for multiple events.
+     * @param metaState Flags indicating which meta keys are currently pressed.
+     * @param deviceId The device ID that generated the key event.
+     * @param scancode Raw device scan code of the event.
+     * @param flags The flags for this key event
+     * @param source The input source such as {@link InputDevice#SOURCE_KEYBOARD}.
+     */
+    public KeyEvent(long downTime, long eventTime, int action,
+                    int code, int repeat, int metaState,
+                    int deviceId, int scancode, int flags, int source) {
+        mDownTime = downTime;
+        mEventTime = eventTime;
+        mAction = action;
+        mKeyCode = code;
+        mRepeatCount = repeat;
+        mMetaState = metaState;
+        mDeviceId = deviceId;
+        mScanCode = scancode;
+        mFlags = flags;
+        mSource = source;
+    }
+
+    /**
      * Create a new key event for a string of characters.  The key code,
-     * action, and repeat could will automatically be set to
-     * {@link #KEYCODE_UNKNOWN}, {@link #ACTION_MULTIPLE}, and 0 for you.
+     * action, repeat count and source will automatically be set to
+     * {@link #KEYCODE_UNKNOWN}, {@link #ACTION_MULTIPLE}, 0, and
+     * {@link InputDevice#SOURCE_KEYBOARD} for you.
      * 
      * @param time The time (in {@link android.os.SystemClock#uptimeMillis})
      * at which this event occured.
      * @param characters The string of characters.
-     * @param device The device ID that generated the key event.
+     * @param deviceId The device ID that generated the key event.
      * @param flags The flags for this key event
      */
-    public KeyEvent(long time, String characters, int device, int flags) {
+    public KeyEvent(long time, String characters, int deviceId, int flags) {
         mDownTime = time;
         mEventTime = time;
         mCharacters = characters;
         mAction = ACTION_MULTIPLE;
         mKeyCode = KEYCODE_UNKNOWN;
         mRepeatCount = 0;
-        mDeviceId = device;
+        mDeviceId = deviceId;
         mFlags = flags;
+        mSource = InputDevice.SOURCE_KEYBOARD;
     }
 
     /**
@@ -564,6 +598,7 @@ public class KeyEvent implements Parcelable {
         mRepeatCount = origEvent.mRepeatCount;
         mMetaState = origEvent.mMetaState;
         mDeviceId = origEvent.mDeviceId;
+        mSource = origEvent.mSource;
         mScanCode = origEvent.mScanCode;
         mFlags = origEvent.mFlags;
         mCharacters = origEvent.mCharacters;
@@ -589,6 +624,7 @@ public class KeyEvent implements Parcelable {
         mRepeatCount = newRepeat;
         mMetaState = origEvent.mMetaState;
         mDeviceId = origEvent.mDeviceId;
+        mSource = origEvent.mSource;
         mScanCode = origEvent.mScanCode;
         mFlags = origEvent.mFlags;
         mCharacters = origEvent.mCharacters;
@@ -642,6 +678,7 @@ public class KeyEvent implements Parcelable {
         mRepeatCount = origEvent.mRepeatCount;
         mMetaState = origEvent.mMetaState;
         mDeviceId = origEvent.mDeviceId;
+        mSource = origEvent.mSource;
         mScanCode = origEvent.mScanCode;
         mFlags = origEvent.mFlags;
         // Don't copy mCharacters, since one way or the other we'll lose it
@@ -894,18 +931,6 @@ public class KeyEvent implements Parcelable {
      */
     public final long getEventTime() {
         return mEventTime;
-    }
-
-    /**
-     * Return the id for the keyboard that this event came from.  A device
-     * id of 0 indicates the event didn't come from a physical device and
-     * maps to the default keymap.  The other numbers are arbitrary and
-     * you shouldn't depend on the values.
-     * 
-     * @see KeyCharacterMap#load
-     */
-    public final int getDeviceId() {
-        return mDeviceId;
     }
 
     /**
@@ -1204,6 +1229,7 @@ public class KeyEvent implements Parcelable {
         out.writeInt(mRepeatCount);
         out.writeInt(mMetaState);
         out.writeInt(mDeviceId);
+        out.writeInt(mSource);
         out.writeInt(mScanCode);
         out.writeInt(mFlags);
         out.writeLong(mDownTime);
@@ -1216,6 +1242,7 @@ public class KeyEvent implements Parcelable {
         mRepeatCount = in.readInt();
         mMetaState = in.readInt();
         mDeviceId = in.readInt();
+        mSource = in.readInt();
         mScanCode = in.readInt();
         mFlags = in.readInt();
         mDownTime = in.readLong();

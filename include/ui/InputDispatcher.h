@@ -167,10 +167,10 @@ public:
      */
     virtual void notifyConfigurationChanged(nsecs_t eventTime) = 0;
     virtual void notifyAppSwitchComing(nsecs_t eventTime) = 0;
-    virtual void notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t nature,
+    virtual void notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t source,
             uint32_t policyFlags, int32_t action, int32_t flags, int32_t keyCode,
             int32_t scanCode, int32_t metaState, nsecs_t downTime) = 0;
-    virtual void notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t nature,
+    virtual void notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t source,
             uint32_t policyFlags, int32_t action, int32_t metaState, int32_t edgeFlags,
             uint32_t pointerCount, const int32_t* pointerIds, const PointerCoords* pointerCoords,
             float xPrecision, float yPrecision, nsecs_t downTime) = 0;
@@ -232,10 +232,10 @@ public:
 
     virtual void notifyConfigurationChanged(nsecs_t eventTime);
     virtual void notifyAppSwitchComing(nsecs_t eventTime);
-    virtual void notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t nature,
+    virtual void notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t source,
             uint32_t policyFlags, int32_t action, int32_t flags, int32_t keyCode,
             int32_t scanCode, int32_t metaState, nsecs_t downTime);
-    virtual void notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t nature,
+    virtual void notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t source,
             uint32_t policyFlags, int32_t action, int32_t metaState, int32_t edgeFlags,
             uint32_t pointerCount, const int32_t* pointerIds, const PointerCoords* pointerCoords,
             float xPrecision, float yPrecision, nsecs_t downTime);
@@ -281,7 +281,7 @@ private:
 
     struct KeyEntry : EventEntry {
         int32_t deviceId;
-        int32_t nature;
+        int32_t source;
         uint32_t policyFlags;
         int32_t action;
         int32_t flags;
@@ -301,7 +301,7 @@ private:
 
     struct MotionEntry : EventEntry {
         int32_t deviceId;
-        int32_t nature;
+        int32_t source;
         uint32_t policyFlags;
         int32_t action;
         int32_t metaState;
@@ -424,11 +424,11 @@ private:
 
         ConfigurationChangedEntry* obtainConfigurationChangedEntry(nsecs_t eventTime);
         KeyEntry* obtainKeyEntry(nsecs_t eventTime,
-                int32_t deviceId, int32_t nature, uint32_t policyFlags, int32_t action,
+                int32_t deviceId, int32_t source, uint32_t policyFlags, int32_t action,
                 int32_t flags, int32_t keyCode, int32_t scanCode, int32_t metaState,
                 int32_t repeatCount, nsecs_t downTime);
         MotionEntry* obtainMotionEntry(nsecs_t eventTime,
-                int32_t deviceId, int32_t nature, uint32_t policyFlags, int32_t action,
+                int32_t deviceId, int32_t source, uint32_t policyFlags, int32_t action,
                 int32_t metaState, int32_t edgeFlags, float xPrecision, float yPrecision,
                 nsecs_t downTime, uint32_t pointerCount,
                 const int32_t* pointerIds, const PointerCoords* pointerCoords);
