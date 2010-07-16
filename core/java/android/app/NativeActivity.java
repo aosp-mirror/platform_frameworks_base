@@ -1,5 +1,8 @@
 package android.app;
 
+import com.android.internal.view.IInputMethodCallback;
+import com.android.internal.view.IInputMethodSession;
+
 import dalvik.system.PathClassLoader;
 
 import android.content.Context;
@@ -25,6 +28,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.inputmethod.InputMethodManager;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 
 /**
  * Convenience for implementing an activity that will be implemented
@@ -36,6 +40,7 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
     
     private NativeContentView mNativeContentView;
     private InputMethodManager mIMM;
+    private InputMethodCallback mInputMethodCallback;
 
     private int mNativeHandle;
     
@@ -73,6 +78,7 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
     private native void onInputChannelDestroyedNative(int handle, InputChannel channel);
     private native void onContentRectChangedNative(int handle, int x, int y, int w, int h);
     private native void dispatchKeyEventNative(int handle, KeyEvent event);
+    private native void finishPreDispatchKeyEventNative(int handle, int seq, boolean handled);
 
     static class NativeContentView extends View {
         NativeActivity mActivity;
@@ -86,12 +92,34 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
         }
     }
     
+    static class InputMethodCallback extends IInputMethodCallback.Stub {
+        WeakReference<NativeActivity> mNa;
+
+        InputMethodCallback(NativeActivity na) {
+            mNa = new WeakReference<NativeActivity>(na);
+        }
+
+        @Override
+        public void finishedEvent(int seq, boolean handled) {
+            NativeActivity na = mNa.get();
+            if (na != null) {
+                na.finishPreDispatchKeyEventNative(na.mNativeHandle, seq, handled);
+            }
+        }
+
+        @Override
+        public void sessionCreated(IInputMethodSession session) {
+            // Stub -- not for use in the client.
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         String libname = "main";
         ActivityInfo ai;
         
         mIMM = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        mInputMethodCallback = new InputMethodCallback(this);
 
         getWindow().takeSurface(this);
         getWindow().takeInputQueue(this);
@@ -292,6 +320,11 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
         }
     }
     
+    void preDispatchKeyEvent(KeyEvent event, int seq) {
+        mIMM.dispatchKeyEvent(this, seq, event,
+                mInputMethodCallback);
+    }
+
     void setWindowFlags(int flags, int mask) {
         getWindow().setFlags(flags, mask);
     }
