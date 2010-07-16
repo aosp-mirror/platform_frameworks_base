@@ -70,6 +70,7 @@ public final class AssetManager {
     
     // For communication with native code.
     private int mObject;
+    private int mNObject;  // used by the NDK
 
     private StringBlock mStringBlocks[] = null;
     
