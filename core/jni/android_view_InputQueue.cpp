@@ -413,6 +413,7 @@ static void android_view_InputQueue_nativeRegisterInputChannel(JNIEnv* env, jcla
         jobject inputChannelObj, jobject inputHandlerObj, jobject messageQueueObj) {
     status_t status = gNativeInputQueue.registerInputChannel(
             env, inputChannelObj, inputHandlerObj, messageQueueObj);
+
     if (status) {
         jniThrowRuntimeException(env, "Failed to register input channel.  "
                 "Check logs for details.");
@@ -422,6 +423,7 @@ static void android_view_InputQueue_nativeRegisterInputChannel(JNIEnv* env, jcla
 static void android_view_InputQueue_nativeUnregisterInputChannel(JNIEnv* env, jclass clazz,
         jobject inputChannelObj) {
     status_t status = gNativeInputQueue.unregisterInputChannel(env, inputChannelObj);
+
     if (status) {
         jniThrowRuntimeException(env, "Failed to unregister input channel.  "
                 "Check logs for details.");
@@ -432,7 +434,11 @@ static void android_view_InputQueue_nativeFinished(JNIEnv* env, jclass clazz,
         jlong finishedToken) {
     status_t status = gNativeInputQueue.finished(
             env, finishedToken, false /*ignoreSpuriousFinish*/);
-    if (status) {
+
+    // We ignore the case where an event could not be finished because the input channel
+    // was no longer registered (DEAD_OBJECT) since it is a common race that can occur
+    // during application shutdown.  The input dispatcher recovers gracefully anyways.
+    if (status != OK && status != DEAD_OBJECT) {
         jniThrowRuntimeException(env, "Failed to finish input event.  "
                 "Check logs for details.");
     }
