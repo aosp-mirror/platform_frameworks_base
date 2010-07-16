@@ -283,6 +283,8 @@ public class Paint extends _Original_Paint {
             mStyle = src.mStyle;
             mFlags = src.mFlags;
 
+            updateFontObject();
+
             super.set(src);
         }
     }
