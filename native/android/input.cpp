@@ -248,12 +248,16 @@ void AInputQueue_detachLooper(AInputQueue* queue) {
     queue->detachLooper();
 }
 
-int AInputQueue_hasEvents(AInputQueue* queue) {
+int32_t AInputQueue_hasEvents(AInputQueue* queue) {
     return queue->hasEvents();
 }
 
 int32_t AInputQueue_getEvent(AInputQueue* queue, AInputEvent** outEvent) {
     return queue->getEvent(outEvent);
+}
+
+int32_t AInputQueue_preDispatchEvent(AInputQueue* queue, AInputEvent* event) {
+    return queue->preDispatchEvent(event) ? 1 : 0;
 }
 
 void AInputQueue_finishEvent(AInputQueue* queue, AInputEvent* event, int handled) {
