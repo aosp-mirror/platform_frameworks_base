@@ -1061,18 +1061,17 @@ private:
             mLock.unlock();
         }
 
-        status_t addEffect(sp<EffectModule>& handle);
-        size_t removeEffect(const sp<EffectModule>& handle);
+        status_t addEffect_l(sp<EffectModule>& handle);
+        size_t removeEffect_l(const sp<EffectModule>& handle);
 
         int sessionId() {
             return mSessionId;
         }
-        sp<EffectModule> getEffectFromDesc(effect_descriptor_t *descriptor);
-        sp<EffectModule> getEffectFromId(int id);
-        sp<EffectModule> getVolumeController();
-        bool setVolume(uint32_t *left, uint32_t *right);
-        void setDevice(uint32_t device);
-        void setMode(uint32_t mode);
+        sp<EffectModule> getEffectFromDesc_l(effect_descriptor_t *descriptor);
+        sp<EffectModule> getEffectFromId_l(int id);
+        bool setVolume_l(uint32_t *left, uint32_t *right);
+        void setDevice_l(uint32_t device);
+        void setMode_l(uint32_t mode);
 
 
         void setInBuffer(int16_t *buffer, bool ownsBuffer = false) {
@@ -1106,9 +1105,11 @@ private:
         int mSessionId;             // audio session ID
         int16_t *mInBuffer;         // chain input buffer
         int16_t *mOutBuffer;        // chain output buffer
-        int mVolumeCtrlIdx;         // index of insert effect having control over volume
         int mActiveTrackCnt;        // number of active tracks connected
         bool mOwnInBuffer;          // true if the chain owns its input buffer
+        int mVolumeCtrlIdx;         // index of insert effect having control over volume
+        uint32_t mLeftVolume;       // previous volume on left channel
+        uint32_t mRightVolume;      // previous volume on right channel
     };
 
     friend class RecordThread;
