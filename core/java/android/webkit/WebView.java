@@ -401,6 +401,10 @@ public class WebView extends AbsoluteLayout
     private float mLastVelX;
     private float mLastVelY;
 
+    // A pointer to the native scrollable layer when dragging layers.  Only
+    // valid when mTouchMode is TOUCH_DRAG_LAYER_MODE.
+    private int mScrollingLayer;
+
     // only trigger accelerated fling if the new velocity is at least
     // MINIMUM_VELOCITY_RATIO_FOR_ACCELERATION times of the previous velocity
     private static final float MINIMUM_VELOCITY_RATIO_FOR_ACCELERATION = 0.2f;
@@ -417,6 +421,7 @@ public class WebView extends AbsoluteLayout
     private static final int TOUCH_DOUBLE_TAP_MODE = 6;
     private static final int TOUCH_DONE_MODE = 7;
     private static final int TOUCH_PINCH_DRAG = 8;
+    private static final int TOUCH_DRAG_LAYER_MODE = 9;
 
     // Whether to forward the touch events to WebCore
     private boolean mForwardTouchEvents = false;
@@ -883,6 +888,9 @@ public class WebView extends AbsoluteLayout
         mNavSlop = (int) (16 * density);
         mZoomManager.init(density);
         mMaximumFling = configuration.getScaledMaximumFlingVelocity();
+
+        // Compute the inverse of the density squared.
+        DRAG_LAYER_INVERSE_DENSITY_SQUARED = 1 / (density * density);
     }
 
     /**
@@ -4540,6 +4548,25 @@ public class WebView extends AbsoluteLayout
         startTouch(detector.getFocusX(), detector.getFocusY(), mLastTouchTime);
     }
 
+    private void startScrollingLayer(float gestureX, float gestureY) {
+        if (mTouchMode != TOUCH_DRAG_LAYER_MODE) {
+            int contentX = viewToContentX((int) gestureX + mScrollX);
+            int contentY = viewToContentY((int) gestureY + mScrollY);
+            mScrollingLayer = nativeScrollableLayer(contentX, contentY);
+            if (mScrollingLayer != 0) {
+                mTouchMode = TOUCH_DRAG_LAYER_MODE;
+            }
+        }
+    }
+
+    // 1/(density * density) used to compute the distance between points.
+    // Computed in init().
+    private float DRAG_LAYER_INVERSE_DENSITY_SQUARED;
+
+    // The distance between two points reported in onTouchEvent scaled by the
+    // density of the screen.
+    private static final int DRAG_LAYER_FINGER_DISTANCE = 20000;
+
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         if (mNativeClass == 0 || !isClickable() || !isLongClickable()) {
@@ -4551,20 +4578,73 @@ public class WebView extends AbsoluteLayout
                     + mTouchMode);
         }
 
-        int action;
-        float x, y;
+        int action = ev.getAction();
+        float x = ev.getX();
+        float y = ev.getY();
         long eventTime = ev.getEventTime();
+
+        final ScaleGestureDetector detector =
+                mZoomManager.getMultiTouchGestureDetector();
+        boolean skipScaleGesture = false;
+        // Set to the mid-point of a two-finger gesture used to detect if the
+        // user has touched a layer.
+        float gestureX = x;
+        float gestureY = y;
+        if (!detector.isInProgress()) {
+            // The gesture for scrolling a layer is two fingers close together.
+            // FIXME: we may consider giving WebKit an option to handle
+            // multi-touch events later.
+            if (ev.getPointerCount() > 1) {
+                float dx = ev.getX(1) - ev.getX(0);
+                float dy = ev.getY(1) - ev.getY(0);
+                float dist = (dx * dx + dy * dy) *
+                        DRAG_LAYER_INVERSE_DENSITY_SQUARED;
+                // Use the approximate center to determine if the gesture is in
+                // a layer.
+                gestureX = ev.getX(0) + (dx * .5f);
+                gestureY = ev.getY(0) + (dy * .5f);
+                // Now use a consistent point for tracking movement.
+                if (ev.getX(0) < ev.getX(1)) {
+                    x = ev.getX(0);
+                    y = ev.getY(0);
+                } else {
+                    x = ev.getX(1);
+                    y = ev.getY(1);
+                }
+                action = ev.getActionMasked();
+                if (dist < DRAG_LAYER_FINGER_DISTANCE) {
+                    skipScaleGesture = true;
+                } else if (mTouchMode == TOUCH_DRAG_LAYER_MODE) {
+                    // Fingers moved too far apart while dragging, the user
+                    // might be trying to zoom.
+                    mTouchMode = TOUCH_INIT_MODE;
+                }
+            }
+        }
 
         // FIXME: we may consider to give WebKit an option to handle multi-touch
         // events later.
-        if (mZoomManager.supportsMultiTouchZoom() && ev.getPointerCount() > 1) {
+        if (mZoomManager.supportsMultiTouchZoom() && ev.getPointerCount() > 1 &&
+                mTouchMode != TOUCH_DRAG_LAYER_MODE && !skipScaleGesture) {
 
-            // if the page disallows zoom, then skip multi-pointer action
+            // if the page disallows zoom, skip multi-pointer action
             if (mZoomManager.isZoomScaleFixed()) {
                 return true;
             }
 
-            ScaleGestureDetector detector = mZoomManager.getMultiTouchGestureDetector();
+            if (!detector.isInProgress() &&
+                    ev.getActionMasked() != MotionEvent.ACTION_POINTER_DOWN) {
+                // Insert a fake pointer down event in order to start
+                // the zoom scale detector.
+                MotionEvent temp = MotionEvent.obtain(ev);
+                // Clear the original event and set it to
+                // ACTION_POINTER_DOWN.
+                temp.setAction(temp.getAction() &
+                        ~MotionEvent.ACTION_MASK |
+                        MotionEvent.ACTION_POINTER_DOWN);
+                detector.onTouchEvent(temp);
+            }
+
             detector.onTouchEvent(ev);
 
             if (detector.isInProgress()) {
@@ -4588,22 +4668,14 @@ public class WebView extends AbsoluteLayout
                     return true;
                 }
             }
-        } else {
-            action = ev.getAction();
-            x = ev.getX();
-            y = ev.getY();
         }
 
         // Due to the touch screen edge effect, a touch closer to the edge
         // always snapped to the edge. As getViewWidth() can be different from
         // getWidth() due to the scrollbar, adjusting the point to match
         // getViewWidth(). Same applied to the height.
-        if (x > getViewWidth() - 1) {
-            x = getViewWidth() - 1;
-        }
-        if (y > getViewHeightWithTitle() - 1) {
-            y = getViewHeightWithTitle() - 1;
-        }
+        x = Math.min(x, getViewWidth() - 1);
+        y = Math.min(y, getViewHeightWithTitle() - 1);
 
         float fDeltaX = mLastTouchX - x;
         float fDeltaY = mLastTouchY - y;
@@ -4776,7 +4848,9 @@ public class WebView extends AbsoluteLayout
                     invalidate();
                     break;
                 }
-                if (mTouchMode != TOUCH_DRAG_MODE) {
+
+                if (mTouchMode != TOUCH_DRAG_MODE &&
+                        mTouchMode != TOUCH_DRAG_LAYER_MODE) {
 
                     if (!mConfirmMove) {
                         break;
@@ -4808,6 +4882,9 @@ public class WebView extends AbsoluteLayout
                     deltaX = 0;
                     deltaY = 0;
 
+                    if (skipScaleGesture) {
+                        startScrollingLayer(gestureX, gestureY);
+                    }
                     startDrag();
                 }
 
@@ -4816,17 +4893,19 @@ public class WebView extends AbsoluteLayout
                 }
 
                 // do pan
-                int newScrollX = pinLocX(mScrollX + deltaX);
-                int newDeltaX = newScrollX - mScrollX;
-                if (deltaX != newDeltaX) {
-                    deltaX = newDeltaX;
-                    fDeltaX = (float) newDeltaX;
-                }
-                int newScrollY = pinLocY(mScrollY + deltaY);
-                int newDeltaY = newScrollY - mScrollY;
-                if (deltaY != newDeltaY) {
-                    deltaY = newDeltaY;
-                    fDeltaY = (float) newDeltaY;
+                if (mTouchMode != TOUCH_DRAG_LAYER_MODE) {
+                    int newScrollX = pinLocX(mScrollX + deltaX);
+                    int newDeltaX = newScrollX - mScrollX;
+                    if (deltaX != newDeltaX) {
+                        deltaX = newDeltaX;
+                        fDeltaX = (float) newDeltaX;
+                    }
+                    int newScrollY = pinLocY(mScrollY + deltaY);
+                    int newDeltaY = newScrollY - mScrollY;
+                    if (deltaY != newDeltaY) {
+                        deltaY = newDeltaY;
+                        fDeltaY = (float) newDeltaY;
+                    }
                 }
                 boolean done = false;
                 boolean keepScrollBarsVisible = false;
@@ -4894,7 +4973,9 @@ public class WebView extends AbsoluteLayout
 
                 doDrag(deltaX, deltaY);
 
-                if (keepScrollBarsVisible) {
+                // Turn off scrollbars when dragging a layer.
+                if (keepScrollBarsVisible &&
+                        mTouchMode != TOUCH_DRAG_LAYER_MODE) {
                     if (mHeldMotionless != MOTIONLESS_TRUE) {
                         mHeldMotionless = MOTIONLESS_TRUE;
                         invalidate();
@@ -5021,6 +5102,7 @@ public class WebView extends AbsoluteLayout
                         invalidate();
                         // fall through
                     case TOUCH_DRAG_START_MODE:
+                    case TOUCH_DRAG_LAYER_MODE:
                         // TOUCH_DRAG_START_MODE should not happen for the real
                         // device as we almost certain will get a MOVE. But this
                         // is possible on emulator.
@@ -5086,6 +5168,14 @@ public class WebView extends AbsoluteLayout
 
     private void doDrag(int deltaX, int deltaY) {
         if ((deltaX | deltaY) != 0) {
+            if (mTouchMode == TOUCH_DRAG_LAYER_MODE) {
+                deltaX = viewToContentDimension(deltaX);
+                deltaY = viewToContentDimension(deltaY);
+                if (nativeScrollLayer(mScrollingLayer, deltaX, deltaY)) {
+                    invalidate();
+                }
+                return;
+            }
             scrollBy(deltaX, deltaY);
         }
         mZoomManager.keepZoomPickerVisible();
@@ -5115,7 +5205,8 @@ public class WebView extends AbsoluteLayout
             mVelocityTracker.recycle();
             mVelocityTracker = null;
         }
-        if (mTouchMode == TOUCH_DRAG_MODE) {
+        if (mTouchMode == TOUCH_DRAG_MODE ||
+                mTouchMode == TOUCH_DRAG_LAYER_MODE) {
             WebViewCore.resumePriority();
             WebViewCore.resumeUpdatePicture(mWebViewCore);
         }
@@ -7117,4 +7208,8 @@ public class WebView extends AbsoluteLayout
     // return NO_LEFTEDGE means failure.
     static final int NO_LEFTEDGE = -1;
     native int nativeGetBlockLeftEdge(int x, int y, float scale);
+
+    // Returns a pointer to the scrollable LayerAndroid at the given point.
+    private native int      nativeScrollableLayer(int x, int y);
+    private native boolean  nativeScrollLayer(int layer, int dx, int dy);
 }
