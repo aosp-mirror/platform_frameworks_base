@@ -171,6 +171,8 @@ public:
             status_t            append(const char* other);
             status_t            append(const char* other, size_t numChars);
 
+            status_t            appendFormat(const char* fmt, ...);
+
             // Note that this function takes O(N) time to calculate the value.
             // No cache value is stored.
             size_t              getUtf32Length() const;

@@ -199,6 +199,8 @@ public:
 
     inline sp<InputManager> getInputManager() const { return mInputManager; }
 
+    String8 dump();
+
     void setDisplaySize(int32_t displayId, int32_t width, int32_t height);
     void setDisplayOrientation(int32_t displayId, int32_t orientation);
 
@@ -341,7 +343,8 @@ private:
     InputApplication* mFocusedApplication;
     InputApplication mFocusedApplicationStorage; // preallocated storage for mFocusedApplication
 
-    void dumpDispatchStateLd();
+    void dumpDispatchStateLd(String8& dump);
+    void logDispatchStateLd();
 
     bool notifyANR(jobject tokenObj, nsecs_t& outNewTimeout);
     void releaseFocusedApplicationLd(JNIEnv* env);
@@ -402,6 +405,13 @@ NativeInputManager::~NativeInputManager() {
     env->DeleteGlobalRef(mCallbacksObj);
 
     releaseFocusedApplicationLd(env);
+}
+
+String8 NativeInputManager::dump() {
+    String8 dump;
+    dump.append("Native Input Dispatcher State:\n");
+    dumpDispatchStateLd(dump);
+    return dump;
 }
 
 bool NativeInputManager::isAppSwitchKey(int32_t keyCode) {
@@ -921,6 +931,8 @@ void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowObjArra
             mTouchedWallpaperWindows.clear();
         }
 
+        bool hadFocusedWindow = mFocusedWindow != NULL;
+
         mWindows.clear();
         mFocusedWindow = NULL;
         mWallpaperWindows.clear();
@@ -972,10 +984,15 @@ void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowObjArra
 
         mTempTouchedWallpaperChannels.clear();
 
+        if (hadFocusedWindow && ! mFocusedWindow
+                || mFocusedWindow && ! mFocusedWindow->visible) {
+            preemptInputDispatch();
+        }
+
         mDispatchStateChanged.broadcast();
 
 #if DEBUG_FOCUS
-        dumpDispatchStateLd();
+        logDispatchStateLd();
 #endif
     } // release lock
 }
@@ -1092,7 +1109,7 @@ void NativeInputManager::setFocusedApplication(JNIEnv* env, jobject applicationO
         mDispatchStateChanged.broadcast();
 
 #if DEBUG_FOCUS
-        dumpDispatchStateLd();
+        logDispatchStateLd();
 #endif
     } // release lock
 }
@@ -1120,7 +1137,7 @@ void NativeInputManager::setInputDispatchMode(bool enabled, bool frozen) {
         }
 
 #if DEBUG_FOCUS
-        dumpDispatchStateLd();
+        logDispatchStateLd();
 #endif
     } // release lock
 }
@@ -1217,7 +1234,7 @@ int32_t NativeInputManager::waitForFocusedWindowLd(uint32_t policyFlags,
 #if DEBUG_FOCUS
     LOGD("waitForFocusedWindow finished: injectionResult=%d",
             injectionResult);
-    dumpDispatchStateLd();
+    logDispatchStateLd();
 #endif
     return injectionResult;
 }
@@ -1490,7 +1507,7 @@ int32_t NativeInputManager::waitForTouchedWindowLd(MotionEvent* motionEvent, uin
 #if DEBUG_FOCUS
     LOGD("waitForTouchedWindow finished: injectionResult=%d",
             injectionResult);
-    dumpDispatchStateLd();
+    logDispatchStateLd();
 #endif
     return injectionResult;
 }
@@ -1697,31 +1714,38 @@ void NativeInputManager::pokeUserActivity(nsecs_t eventTime, int32_t eventType) 
     android_server_PowerManagerService_userActivity(eventTime, eventType);
 }
 
-void NativeInputManager::dumpDispatchStateLd() {
-#if DEBUG_FOCUS
-    LOGD("  dispatcherState: dispatchEnabled=%d, dispatchFrozen=%d, windowsReady=%d",
-            mDispatchEnabled, mDispatchFrozen, mWindowsReady);
+void NativeInputManager::logDispatchStateLd() {
+    String8 dump;
+    dumpDispatchStateLd(dump);
+    LOGD("%s", dump.string());
+}
+
+void NativeInputManager::dumpDispatchStateLd(String8& dump) {
+    dump.appendFormat("  dispatchEnabled: %d\n", mDispatchEnabled);
+    dump.appendFormat("  dispatchFrozen: %d\n", mDispatchFrozen);
+    dump.appendFormat("  windowsReady: %d\n", mWindowsReady);
+
     if (mFocusedApplication) {
-        LOGD("  focusedApplication: name='%s', dispatchingTimeout=%0.3fms",
+        dump.appendFormat("  focusedApplication: name='%s', dispatchingTimeout=%0.3fms\n",
                 mFocusedApplication->name.string(),
                 mFocusedApplication->dispatchingTimeout / 1000000.0);
     } else {
-        LOGD("  focusedApplication: <null>");
+        dump.append("  focusedApplication: <null>\n");
     }
-    LOGD("  focusedWindow: '%s'",
+    dump.appendFormat("  focusedWindow: '%s'\n",
             mFocusedWindow != NULL ? mFocusedWindow->inputChannel->getName().string() : "<null>");
-    LOGD("  touchedWindow: '%s', touchDown=%d",
+    dump.appendFormat("  touchedWindow: '%s', touchDown=%d\n",
             mTouchedWindow != NULL ? mTouchedWindow->inputChannel->getName().string() : "<null>",
             mTouchDown);
     for (size_t i = 0; i < mTouchedWallpaperWindows.size(); i++) {
-        LOGD("  touchedWallpaperWindows[%d]: '%s'",
+        dump.appendFormat("  touchedWallpaperWindows[%d]: '%s'\n",
                 i, mTouchedWallpaperWindows[i]->inputChannel->getName().string());
     }
     for (size_t i = 0; i < mWindows.size(); i++) {
-        LOGD("  windows[%d]: '%s', paused=%d, hasFocus=%d, hasWallpaper=%d, visible=%d, "
-                "flags=0x%08x, type=0x%08x, "
+        dump.appendFormat("  windows[%d]: '%s', paused=%d, hasFocus=%d, hasWallpaper=%d, "
+                "visible=%d, flags=0x%08x, type=0x%08x, "
                 "frame=[%d,%d], touchableArea=[%d,%d][%d,%d], "
-                "ownerPid=%d, ownerUid=%d, dispatchingTimeout=%0.3fms",
+                "ownerPid=%d, ownerUid=%d, dispatchingTimeout=%0.3fms\n",
                 i, mWindows[i].inputChannel->getName().string(),
                 mWindows[i].paused, mWindows[i].hasFocus, mWindows[i].hasWallpaper,
                 mWindows[i].visible, mWindows[i].layoutParamsFlags, mWindows[i].layoutParamsType,
@@ -1731,7 +1755,6 @@ void NativeInputManager::dumpDispatchStateLd() {
                 mWindows[i].ownerPid, mWindows[i].ownerUid,
                 mWindows[i].dispatchingTimeout / 1000000.0);
     }
-#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -2048,6 +2071,15 @@ static void android_server_InputManager_nativePreemptInputDispatch(JNIEnv* env,
     gNativeInputManager->preemptInputDispatch();
 }
 
+static jstring android_server_InputManager_nativeDump(JNIEnv* env, jclass clazz) {
+    if (checkInputManagerUnitialized(env)) {
+        return NULL;
+    }
+
+    String8 dump(gNativeInputManager->dump());
+    return env->NewStringUTF(dump.string());
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gInputManagerMethods[] = {
@@ -2083,7 +2115,9 @@ static JNINativeMethod gInputManagerMethods[] = {
     { "nativeSetInputDispatchMode", "(ZZ)V",
             (void*) android_server_InputManager_nativeSetInputDispatchMode },
     { "nativePreemptInputDispatch", "()V",
-            (void*) android_server_InputManager_nativePreemptInputDispatch }
+            (void*) android_server_InputManager_nativePreemptInputDispatch },
+    { "nativeDump", "()Ljava/lang/String;",
+            (void*) android_server_InputManager_nativeDump },
 };
 
 #define FIND_CLASS(var, className) \
