@@ -44,9 +44,6 @@ import java.util.List;
  * Get an instance of this class by calling
  * {@link android.content.Context#getSystemService(java.lang.String)} with an argument
  * of {@link android.content.Context#STORAGE_SERVICE}.
- *
- * @hide
- *
  */
 
 public class StorageManager
@@ -209,6 +206,7 @@ public class StorageManager
      *
      * @param listener A {@link android.os.storage.StorageEventListener StorageEventListener} object.
      *
+     * @hide
      */
     public void registerListener(StorageEventListener listener) {
         if (listener == null) {
@@ -225,6 +223,7 @@ public class StorageManager
      *
      * @param listener A {@link android.os.storage.StorageEventListener StorageEventListener} object.
      *
+     * @hide
      */
     public void unregisterListener(StorageEventListener listener) {
         if (listener == null) {
@@ -245,6 +244,8 @@ public class StorageManager
 
     /**
      * Enables USB Mass Storage (UMS) on the device.
+     *
+     * @hide
      */
     public void enableUsbMassStorage() {
         try {
@@ -256,6 +257,8 @@ public class StorageManager
 
     /**
      * Disables USB Mass Storage (UMS) on the device.
+     *
+     * @hide
      */
     public void disableUsbMassStorage() {
         try {
@@ -268,6 +271,8 @@ public class StorageManager
     /**
      * Query if a USB Mass Storage (UMS) host is connected.
      * @return true if UMS host is connected.
+     *
+     * @hide
      */
     public boolean isUsbMassStorageConnected() {
         try {
@@ -281,6 +286,8 @@ public class StorageManager
     /**
      * Query if a USB Mass Storage (UMS) is enabled on the device.
      * @return true if UMS host is enabled.
+     *
+     * @hide
      */
     public boolean isUsbMassStorageEnabled() {
         try {
@@ -289,5 +296,56 @@ public class StorageManager
             Log.e(TAG, "Failed to get UMS enable state", rex);
         }
         return false;
+    }
+
+    /**
+     * Mount an OBB file.
+     */
+    public boolean mountObb(String filename, String key) {
+        try {
+            return mMountService.mountObb(filename, key)
+                    == StorageResultCode.OperationSucceeded;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to mount OBB", e);
+        }
+
+        return false;
+    }
+
+    /**
+     * Mount an OBB file.
+     */
+    public boolean unmountObb(String filename, boolean force) {
+        try {
+            return mMountService.unmountObb(filename, force)
+                    == StorageResultCode.OperationSucceeded;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to mount OBB", e);
+        }
+
+        return false;
+    }
+
+    public boolean isObbMounted(String filename) {
+        try {
+            return mMountService.isObbMounted(filename);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to check if OBB is mounted", e);
+        }
+
+        return false;
+    }
+
+    /**
+     * Check the mounted path of an OBB file.
+     */
+    public String getMountedObbPath(String filename) {
+        try {
+            return mMountService.getMountedObbPath(filename);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to find mounted path for OBB", e);
+        }
+
+        return null;
     }
 }
