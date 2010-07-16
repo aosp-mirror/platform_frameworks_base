@@ -52,7 +52,7 @@ Android Market within a 14-day period ending on the data collection date noted b
 <div class="dashboard-panel">
 
 <img alt="" height="250" width="460"
-src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:0.3,21.3,23.5,53.1,1.8&chl=Other*|
+src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:0.3,18.9,22.1,55.5,3.3&chl=Other*|
 Android%201.5|Android%201.6|Android%202.1|Android%202.2&chco=c4df9b,6fad0c" />
 
 <table>
@@ -61,13 +61,13 @@ Android%201.5|Android%201.6|Android%202.1|Android%202.2&chco=c4df9b,6fad0c" />
   <th>API Level</th>
   <th>Distribution</th>
 </tr>
-<tr><td>Android 1.5</td><td>3</td><td>21.3%</td></tr>
-<tr><td>Android 1.6</td><td>4</td><td>23.5%</td></tr>
-<tr><td>Android 2.1</td><td>7</td><td>53.1%</td></tr>
-<tr><td>Android 2.2</td><td>8</td><td>1.8%</td></tr>
+<tr><td>Android 1.5</td><td>3</td><td>18.9%</td></tr>
+<tr><td>Android 1.6</td><td>4</td><td>22.1%</td></tr>
+<tr><td>Android 2.1</td><td>7</td><td>55.5%</td></tr>
+<tr><td>Android 2.2</td><td>8</td><td>3.3%</td></tr>
 </table>
 
-<p><em>Data collected during two weeks ending on July 1, 2010</em></p>
+<p><em>Data collected during two weeks ending on July 15, 2010</em></p>
 <p style="font-size:.9em">* <em>Other: 0.3% of devices running obsolete versions</em></p>
 
 </div><!-- end dashboard-panel -->
