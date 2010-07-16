@@ -16,11 +16,19 @@
 
 package android.net;
 
+import org.apache.harmony.luni.platform.INetworkSystem;
+import org.apache.harmony.luni.platform.Platform;
+import org.apache.http.HttpHost;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Log;
+
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.UnknownHostException;
 
 import junit.framework.Assert;
 
@@ -35,6 +43,8 @@ final public class Proxy {
 
     static final public String PROXY_CHANGE_ACTION =
         "android.intent.action.PROXY_CHANGE";
+
+    static final private INetworkSystem NETIMPL = Platform.getNetworkSystem();
 
     /**
      * Return the proxy host set by the user.
@@ -120,4 +130,74 @@ final public class Proxy {
         }
     }
 
+    /**
+     * Returns the preferred proxy to be used by clients. This is a wrapper
+     * around {@link android.net.Proxy#getHost()}. Currently no proxy will
+     * be returned for localhost or if the active network is Wi-Fi.
+     *
+     * @param context the context which will be passed to
+     * {@link android.net.Proxy#getHost()}
+     * @param url the target URL for the request
+     * @note Calling this method requires permission
+     * android.permission.ACCESS_NETWORK_STATE
+     * @return The preferred proxy to be used by clients, or null if there
+     * is no proxy.
+     *
+     * {@hide}
+     */
+    static final public HttpHost getPreferredHttpHost(Context context,
+            String url) {
+        if (!isLocalHost(url) && !isNetworkWifi(context)) {
+            final String proxyHost = Proxy.getHost(context);
+            if (proxyHost != null) {
+                return new HttpHost(proxyHost, Proxy.getPort(context), "http");
+            }
+        }
+
+        return null;
+    }
+
+    static final private boolean isLocalHost(String url) {
+        if (url == null) {
+            return false;
+        }
+
+        try {
+            final URI uri = URI.create(url);
+            final String host = uri.getHost();
+            if (host != null) {
+                if (host.equalsIgnoreCase("localhost")) {
+                    return true;
+                }
+                if (InetAddress.getByAddress(NETIMPL.ipStringToByteArray(host))
+                        .isLoopbackAddress()) {
+                    return true;
+                }
+            }
+        } catch (UnknownHostException uex) {
+            // Ignore (INetworkSystem.ipStringToByteArray)
+        } catch (IllegalArgumentException iex) {
+            // Ignore (URI.create)
+        }
+
+        return false;
+    }
+
+    static final private boolean isNetworkWifi(Context context) {
+        if (context == null) {
+            return false;
+        }
+
+        final ConnectivityManager connectivity = (ConnectivityManager)
+            context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivity != null) {
+            final NetworkInfo info = connectivity.getActiveNetworkInfo();
+            if (info != null &&
+                    info.getType() == ConnectivityManager.TYPE_WIFI) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 };
