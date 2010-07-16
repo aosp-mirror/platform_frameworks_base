@@ -1403,7 +1403,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * current location, position and size is updated to the new values.
      * The current values in the event are added to a list of historical values.
      * 
-     * Only applies to {@link ACTION_MOVE} events.
+     * Only applies to {@link #ACTION_MOVE} events.
      *
      * @param eventTime The time stamp (in ms) for this data.
      * @param x The new X position.
@@ -1427,7 +1427,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * current location, position and size is updated to the new values.
      * The current values in the event are added to a list of historical values.
      * 
-     * Only applies to {@link ACTION_MOVE} events.
+     * Only applies to {@link #ACTION_MOVE} events.
      *
      * @param eventTime The time stamp (in ms) for this data.
      * @param pointerCoords The new pointer coordinates.

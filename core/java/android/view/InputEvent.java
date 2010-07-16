@@ -42,9 +42,18 @@ public abstract class InputEvent implements Parcelable {
     }
     
     /**
+     * Gets the device that this event came from.
+     * 
+     * @return The device, or null if unknown.
+     */
+    public final InputDevice getDevice() {
+        return InputDevice.getDevice(mDeviceId);
+    }
+    
+    /**
      * Gets the source of the event.
      * 
-     * @return The event source or {@link InputDevice.SOURCE_UNKNOWN} if unknown.
+     * @return The event source or {@link InputDevice#SOURCE_UNKNOWN} if unknown.
      * @see InputDevice#getSourceInfo
      */
     public final int getSource() {
