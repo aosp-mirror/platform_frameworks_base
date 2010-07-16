@@ -49,7 +49,7 @@ ending on the data collection date noted below.</p>
 <div class="dashboard-panel">
 
 <img alt="" width="460" height="250"
-src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:1.4,54.5,44.1&chl=Small%20/%20ldpi|
+src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:1.8,51.5,46.6&chl=Small%20/%20ldpi|
 Normal%20/%20mdpi|Normal%20/%20hdpi&chco=c4df9b,6fad0c" />
 
 <table>
@@ -60,22 +60,22 @@ Normal%20/%20mdpi|Normal%20/%20hdpi&chco=c4df9b,6fad0c" />
 <th scope="col">High Density</th>
 </tr>
 <tr><th scope="row">Small</th> 
-<td class='cent hi'>1.4%</td> 
+<td class='cent hi'>1.8%</td> 
 <td></td> 
 <td></td> 
 </tr> 
 <tr><th scope="row">Normal</th> 
 <td></td> 
-<td class='cent hi'>54.5%</td> 
-<td class='cent hi'>44.1%</td> 
+<td class='cent hi'>51.5%</td> 
+<td class='cent hi'>46.6%</td> 
 </tr> 
 <tr><th scope="row">Large</th> 
 <td></td> 
 <td></td> 
 <td></td> 
-</tr> 
+</tr>
 </table>
 
-<p><em>Data collected during two weeks ending on July 1, 2010</em></p>
+<p><em>Data collected during two weeks ending on July 15, 2010</em></p>
 </div>
 
