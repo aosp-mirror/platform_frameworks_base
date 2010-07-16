@@ -48,11 +48,7 @@ extern int64_t rsElapsedTimeMillis();
 extern int rsSendToClient(void *data, int cmdID, int len, int waitForSpace);
 
 // Script to Script
-typedef struct rs_script_call_rec {
-    rs_script script;
-    rs_allocation input;
-    rs_allocation output;
-
+typedef struct rs_script_call {
     uint32_t xStart;
     uint32_t xEnd;
     uint32_t yStart;
@@ -62,14 +58,17 @@ typedef struct rs_script_call_rec {
     uint32_t arrayStart;
     uint32_t arrayEnd;
 
-    const void * usrData;
-} rs_script_call;
+} rs_script_call_t;
 
-extern void __attribute__((overloadable))rsForEach(rs_script, rs_allocation input);
-extern void __attribute__((overloadable))rsForEach(rs_script, rs_allocation input, rs_allocation output);
-extern void __attribute__((overloadable))rsForEach(rs_script, rs_allocation input, int xStart, int xEnd);
-extern void __attribute__((overloadable))rsForEach(rs_script, rs_allocation input, rs_allocation output, int xStart, int xEnd);
-extern void __attribute__((overloadable))rsForEach(rs_script, rs_allocation input, int xStart, int yStart, int xEnd, int yEnd);
-extern void __attribute__((overloadable))rsForEach(rs_script, rs_allocation input, rs_allocation output, int xStart, int yStart, int xEnd, int yEnd);
+extern void __attribute__((overloadable))rsForEach(rs_script script,
+                                                   rs_allocation input,
+                                                   rs_allocation output,
+                                                   const void * usrData);
+
+extern void __attribute__((overloadable))rsForEach(rs_script script,
+                                                   rs_allocation input,
+                                                   rs_allocation output,
+                                                   const void * usrData,
+                                                   const rs_script_call_t *);
 
 #endif
