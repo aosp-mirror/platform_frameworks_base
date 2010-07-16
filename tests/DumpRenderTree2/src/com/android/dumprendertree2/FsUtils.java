@@ -19,6 +19,7 @@ package com.android.dumprendertree2;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -47,5 +48,31 @@ public class FsUtils {
         } catch (IOException e) {
             Log.e(LOG_TAG + "::writeDataToStorage", e.getMessage());
         }
+    }
+
+    public static byte[] readDataFromStorage(File file) {
+        if (!file.exists()) {
+            Log.d(LOG_TAG + "::readDataFromStorage", "File does not exist: "
+                    + file.getAbsolutePath());
+            return null;
+        }
+
+        byte[] bytes = null;
+        try {
+            FileInputStream fis = null;
+            try {
+                fis = new FileInputStream(file);
+                bytes = new byte[(int) file.length()];
+                fis.read(bytes);
+            } finally {
+                if (fis != null) {
+                    fis.close();
+                }
+            }
+        } catch (IOException e) {
+            Log.e(LOG_TAG + "::readDataFromStorage", e.getMessage());
+        }
+
+        return bytes;
     }
 }

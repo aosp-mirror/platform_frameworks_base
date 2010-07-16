@@ -54,6 +54,15 @@ public class LayoutTestsRunnerThread extends Thread {
             File.separator + "android" +
             File.separator + "LayoutTests-results";
 
+    /** TODO: Make it a setting */
+    private static final String EXPECTED_RESULT_SECONDARY_LOCATION_RELATIVE_DIR_PREFIX =
+            "platform" + File.separator +
+            "android-v8" + File.separator;
+
+    /** TODO: Make these settings */
+    private static final String TEXT_RESULT_EXTENSION = "txt";
+    private static final String IMAGE_RESULT_EXTENSION = "png";
+
     /** A list containing relative paths of tests to run */
     private LinkedList<String> mTestsList = new LinkedList<String>();
 
@@ -72,8 +81,7 @@ public class LayoutTestsRunnerThread extends Thread {
      */
     private String mRelativePath;
 
-    /** A handler obtained from UI thread to handle messages concerning updating the display */
-    private Handler mUiDisplayHandler;
+    private LayoutTestsRunner mActivity;
 
     private LayoutTest mCurrentTest;
     private String mCurrentTestPath;
@@ -87,10 +95,11 @@ public class LayoutTestsRunnerThread extends Thread {
      * @param path
      * @param uiDisplayHandler
      */
-    public LayoutTestsRunnerThread(String path, Handler uiDisplayHandler) {
+    public LayoutTestsRunnerThread(String path, LayoutTestsRunner activity) {
         mFileFilter = new FileFilter(TESTS_ROOT_DIR_PATH);
         mRelativePath = path;
-        mUiDisplayHandler = uiDisplayHandler;
+        mUiDisplayHandler = activity.getHandler();
+        mActivity = activity;
 
         /** This creates a handler that runs on the thread that _created_ this thread */
         mHandlerOnUiThread = new Handler() {
@@ -111,6 +120,9 @@ public class LayoutTestsRunnerThread extends Thread {
 
         mSummarizer = new Summarizer(mFileFilter, RESULTS_ROOT_DIR_PATH);
 
+        /** A handler obtained from UI thread to handle messages concerning updating the display */
+        final Handler uiDisplayHandler = mActivity.getHandler();
+
         /** Creates a new handler in _this_ thread */
         mHandler = new Handler() {
             @Override
@@ -118,7 +130,7 @@ public class LayoutTestsRunnerThread extends Thread {
                 switch (msg.what) {
                     case MSG_TEST_FINISHED:
                         onTestFinished(mCurrentTest);
-                        mUiDisplayHandler.obtainMessage(LayoutTestsRunner.MSG_UPDATE_PROGRESS,
+                        uiDisplayHandler.obtainMessage(LayoutTestsRunner.MSG_UPDATE_PROGRESS,
                                 mCurrentTestCount, mTotalTestCount).sendToTarget();
                         runNextTest();
                         break;
@@ -135,9 +147,9 @@ public class LayoutTestsRunnerThread extends Thread {
 
         /** Populate the tests' list accordingly */
         if (file.isDirectory()) {
-            mUiDisplayHandler.sendEmptyMessage(LayoutTestsRunner.MSG_SHOW_PROGRESS_DIALOG);
+            uiDisplayHandler.sendEmptyMessage(LayoutTestsRunner.MSG_SHOW_PROGRESS_DIALOG);
             preloadTests(mRelativePath);
-            mUiDisplayHandler.sendEmptyMessage(LayoutTestsRunner.MSG_DISMISS_PROGRESS_DIALOG);
+            uiDisplayHandler.sendEmptyMessage(LayoutTestsRunner.MSG_DISMISS_PROGRESS_DIALOG);
         } else {
             mTestsList.addLast(mRelativePath);
             mTotalTestCount = 1;
@@ -194,7 +206,8 @@ public class LayoutTestsRunnerThread extends Thread {
 
         mCurrentTestCount++;
         mCurrentTestPath = mTestsList.removeFirst();
-        mCurrentTest = new LayoutTest(mCurrentTestPath, mHandler);
+        mCurrentTest = new LayoutTest(mCurrentTestPath, TESTS_ROOT_DIR_PATH,
+                mHandler.obtainMessage(MSG_TEST_FINISHED), mActivity);
 
         /**
          * This will run the test on UI thread. The reason why we need to run the test
@@ -221,22 +234,30 @@ public class LayoutTestsRunnerThread extends Thread {
     }
 
     private void dumpResultData(AbstractResult result, String testPath) {
-        String resultPath = null;
+        dumpActualTextResult(result, testPath);
+        dumpActualImageResult(result, testPath);
+    }
 
-        switch (result.getType()) {
-            case TEXT:
-                resultPath = FileFilter.setPathEnding(testPath, "-actual.txt");
-                break;
-
-            case PIXEL:
-                /** TODO: Check if it is for sure *.bmp */
-                resultPath = FileFilter.setPathEnding(testPath, "-actual.bmp");
-                break;
+    private void dumpActualTextResult(AbstractResult result, String testPath) {
+        String actualTextResult = result.getActualTextResult();
+        if (actualTextResult == null) {
+            return;
         }
 
-        /** Dump the result */
+        String resultPath = FileFilter.setPathEnding(testPath, "-actual." + TEXT_RESULT_EXTENSION);
         FsUtils.writeDataToStorage(new File(RESULTS_ROOT_DIR_PATH, resultPath),
-                result.getData(), false);
+                actualTextResult.getBytes(), false);
+    }
+
+    private void dumpActualImageResult(AbstractResult result, String testPath) {
+        byte[] actualImageResult = result.getActualImageResult();
+        if (actualImageResult == null) {
+            return;
+        }
+
+        String resultPath = FileFilter.setPathEnding(testPath, "-actual." + IMAGE_RESULT_EXTENSION);
+        FsUtils.writeDataToStorage(new File(RESULTS_ROOT_DIR_PATH, resultPath),
+                actualImageResult, false);
     }
 
     private void onFinishedTests() {
@@ -248,5 +269,25 @@ public class LayoutTestsRunnerThread extends Thread {
          * - go to html view of results
          * - zip results
          * - run more tests before zipping */
+    }
+
+    public static String getExpectedTextResult(String relativePath) {
+        return new String(getExpectedResult(relativePath, TEXT_RESULT_EXTENSION));
+    }
+
+    public static byte[] getExpectedImageResult(String relativePath) {
+        return getExpectedResult(relativePath, IMAGE_RESULT_EXTENSION);
+    }
+
+    private static byte[] getExpectedResult(String relativePath, String extension) {
+        relativePath = FileFilter.setPathEnding(relativePath, "-expected." + extension);
+
+        byte[] bytes = FsUtils.readDataFromStorage(new File(TESTS_ROOT_DIR_PATH, relativePath));
+        if (bytes == null) {
+            relativePath = EXPECTED_RESULT_SECONDARY_LOCATION_RELATIVE_DIR_PREFIX + relativePath;
+            bytes = FsUtils.readDataFromStorage(new File(TESTS_ROOT_DIR_PATH, relativePath));
+        }
+
+        return bytes;
     }
 }
