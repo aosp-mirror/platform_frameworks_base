@@ -98,7 +98,6 @@ public class LayoutTestsRunnerThread extends Thread {
     public LayoutTestsRunnerThread(String path, LayoutTestsRunner activity) {
         mFileFilter = new FileFilter(TESTS_ROOT_DIR_PATH);
         mRelativePath = path;
-        mUiDisplayHandler = activity.getHandler();
         mActivity = activity;
 
         /** This creates a handler that runs on the thread that _created_ this thread */
