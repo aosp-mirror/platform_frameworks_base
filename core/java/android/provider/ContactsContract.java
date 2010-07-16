@@ -1508,6 +1508,7 @@ public final class ContactsContract {
          * The "read-only" flag: "0" by default, "1" if the row cannot be modified or
          * deleted except by a sync adapter.  See {@link ContactsContract#CALLER_IS_SYNCADAPTER}.
          * <P>Type: INTEGER</P>
+         * @hide
          */
         public static final String IS_READ_ONLY = "is_read_only";
     }
@@ -2269,6 +2270,7 @@ public final class ContactsContract {
          * The "read-only" flag: "0" by default, "1" if the row cannot be modified or
          * deleted except by a sync adapter.  See {@link ContactsContract#CALLER_IS_SYNCADAPTER}.
          * <P>Type: INTEGER</P>
+         * @hide
          */
         public static final String IS_READ_ONLY = "is_read_only";
 
