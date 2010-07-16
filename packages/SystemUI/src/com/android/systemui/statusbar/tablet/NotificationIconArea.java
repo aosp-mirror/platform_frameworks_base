@@ -38,36 +38,26 @@ public class NotificationIconArea extends LinearLayout {
     public NotificationIconArea(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        mMoreView = new MoreView(context);
-        addView(mMoreView, new LinearLayout.LayoutParams(
-                    LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-
-        mIconLayout = new IconLayout(context);
-        addView(mIconLayout, new LinearLayout.LayoutParams(
-                    LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-
-        mDraggerView = new DraggerView(context);
-        addView(mDraggerView, new LinearLayout.LayoutParams(
-                    LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+        mMoreView = (MoreView) findViewById(R.id.more);
+        mIconLayout = (IconLayout)findViewById(R.id.icons);
+        mDraggerView = (DraggerView) findViewById(R.id.handle);
     }
 
-    class MoreView extends ImageView {
-        public MoreView(Context context) {
-            super(context);
-            setImageResource(R.drawable.stat_notify_more);
+    static class MoreView extends ImageView {
+        public MoreView(Context context, AttributeSet attrs) {
+            super(context, attrs);
         }
     }
 
-    class IconLayout extends LinearLayout {
-        public IconLayout(Context context) {
-            super(context);
+    static class IconLayout extends LinearLayout {
+        public IconLayout(Context context, AttributeSet attrs) {
+            super(context, attrs);
         }
     }
 
-    class DraggerView extends ImageView {
-        public DraggerView(Context context) {
-            super(context);
-            setImageResource(R.drawable.notification_dragger);
+    static class DraggerView extends ImageView {
+        public DraggerView(Context context, AttributeSet attrs) {
+            super(context, attrs);
         }
     }
 }

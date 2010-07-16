@@ -28,7 +28,7 @@
     android:descendantFocusability="afterDescendants"
     >
 
-    <RelativeLayout android:id="@+id/icons"
+    <RelativeLayout android:id="@+id/notifications"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal">
@@ -52,9 +52,31 @@
             android:paddingLeft="6dip"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            />  
+            >
+            <view
+                class="com.android.systemui.statusbar.tablet.NotificationIconArea$MoreView"
+                android:id="@+id/more"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/stat_notify_more"
+                />
+            <view
+                class="com.android.systemui.statusbar.tablet.NotificationIconArea$IconLayout"
+                android:id="@+id/icons"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                />
+            <view
+                class="com.android.systemui.statusbar.tablet.NotificationIconArea$DraggerView"
+                android:id="@+id/handle"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/notification_dragger"
+                />
             
-        <RelativeLayout android:id="@+id/icons"
+        </com.android.systemui.statusbar.tablet.NotificationIconArea>
+            
+        <RelativeLayout android:id="@+id/systemInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
