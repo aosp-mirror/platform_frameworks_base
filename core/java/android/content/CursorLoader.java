@@ -50,7 +50,9 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     public void deliverResult(Cursor cursor) {
         if (mStopped) {
             // An async query came in while the loader is stopped
-            cursor.close();
+            if (cursor != null) {
+                cursor.close();
+            }
             return;
         }
         mCursor = cursor;
