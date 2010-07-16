@@ -5,74 +5,88 @@ parent.link=index.html
 
 <div id="qv-wrapper">
 <div id="qv">
-<h2>Key classes</h2>
-<ol>
-<li>{@link android.app.SearchManager}</li>
-<li>{@link android.content.SearchRecentSuggestionsProvider}</li>
-<li>{@link android.content.ContentProvider}</li>
-</ol>
 <h2>In this document</h2>
 <ol>
 <li><a href="#TheBasics">The Basics</a></li>
-<li><a href="#CustomSearchableConfiguration">Modifying the searchable configuration</a></li>
+<li><a href="#CustomSearchableConfiguration">Modifying the Searchable Configuration</a></li>
 <li><a href="#CustomContentProvider">Creating a Content Provider</a>
   <ol>
     <li><a href="#HandlingSuggestionQuery">Handling a suggestion query</a></li>
     <li><a href="#SuggestionTable">Building a suggestion table</a></li>
   </ol>
 </li>
-<li><a href="#IntentForSuggestions">Declaring an Intent for suggestions</a>
+<li><a href="#IntentForSuggestions">Declaring an Intent for Suggestions</a>
   <ol>
     <li><a href="#IntentAction">Declaring the Intent action</a></li>
     <li><a href="#IntentData">Declaring the Intent data</a></li>
   </ol>
 </li>
 <li><a href="#HandlingIntent">Handling the Intent</a></li>
-<li><a href="#RewritingQueryText">Rewriting the query text</a></li>
-<li><a href="#QSB">Exposing search suggestions to Quick Search Box</a></li>
+<li><a href="#RewritingQueryText">Rewriting the Query Text</a></li>
+<li><a href="#QSB">Exposing Search Suggestions to Quick Search Box</a></li>
 </ol>
+
+<h2>Key classes</h2>
+<ol>
+<li>{@link android.app.SearchManager}</li>
+<li>{@link android.content.SearchRecentSuggestionsProvider}</li>
+<li>{@link android.content.ContentProvider}</li>
+</ol>
+
+<h2>Related Samples</h2>
+<ol>
+<li><a href="{@docRoot}resources/samples/SearchableDictionary/index.html">Searchable
+Dictionary</a></li>
+</ol>
+
 <h2>See also</h2>
 <ol>
 <li><a href="searchable-config.html">Searchable Configuration</a></li>
 <li><a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a></li>
-<li><a href="{@docRoot}resources/samples/SearchableDictionary/index.html">Searchable
-Dictionary sample app</a></li>
 </ol>
 </div>
 </div>
 
-<p>The Android search framework provides the ability for your application to
-provide suggestions while the user types into the Android search dialog. In this guide, you'll learn
-how to create custom suggestions. These are suggestions based on custom data provided by your
-application. For example, if your application is a word dictionary, you can suggest words from the
-dictionary that match the text entered so far. These are the most valuable suggestions because you
-can effectively predict what the user wants and provide instant access to it. Once you provide
-custom suggestions, you then make them available to the system-wide Quick Search Box, providing
-access to your content from outside your application.</p>
+<p>When using the Android search dialog, you can provide custom search suggestions that are
+created from data in your application. For example, if your application is a word
+dictionary, you can suggest words from the
+dictionary that match the text entered so far. These are the most valuable suggestions, because you
+can effectively predict what the user wants and provide instant access to it. Figure 1 shows
+an example of a search dialog with custom suggestions.</p>
 
-<p>Before you begin, you need to have implemented the Android search dialog for searches in your
-application. If you haven't done this, see <a href="search-dialog.html">Using the Android Search
+<p>Once you provide custom suggestions, you can also make them available to the system-wide Quick
+Search Box, providing access to your content from outside your application.</p>
+
+<p>Before you begin with this guide to add custom suggestions, you need to have implemented the
+Android search dialog for searches in your
+application. If you haven't, see <a href="search-dialog.html">Using the Android Search
 Dialog</a>.</p>
 
 
 <h2 id="TheBasics">The Basics</h2>
 
-<img src="{@docRoot}images/search/search-suggest-custom.png" alt="" height="417"
-style="float:right;clear:right;" />
+<div class="figure" style="width:250px">
+<img src="{@docRoot}images/search/search-suggest-custom.png" alt="" height="417" />
+<p class="img-caption"><strong>Figure 1.</strong> Screenshot of a search dialog with custom
+search suggestions.</p>
+</div>
 
-<p>When the user selects a custom suggestions, the Search Manager will send a customized Intent to
-your searchable Activity. Whereas a normal search query will send an Intent with the {@link
+<p>When the user selects a custom suggestion, the Search Manager sends an {@link
+android.content.Intent} to
+your searchable Activity. Whereas a normal search query sends an Intent with the {@link
 android.content.Intent#ACTION_SEARCH} action, you can instead define your custom suggestions to use
-{@link android.content.Intent#ACTION_VIEW} (or any other action), and also include additional data
+{@link android.content.Intent#ACTION_VIEW} (or any other Intent action), and also include data
 that's relevant to the selected suggestion. Continuing
 the dictionary example, when the user selects a suggestion, your application can immediately
 open the definition for that word, instead of searching the dictionary for matches.</p>
 
-<p>To provide custom suggestions, you need to do the following:</p>
+<p>To provide custom suggestions, do the following:</p>
 
 <ul>
   <li>Implement a basic searchable Activity, as described in <a
 href="search-dialog.html">Using the Android Search Dialog</a>.</li>
+  <li>Modify the searchable configuration with information about the content provider that
+provides custom suggestions.</li>
   <li>Build a table (such as in an {@link android.database.sqlite.SQLiteDatabase}) for your
 suggestions and format the table with required columns.</li>
   <li>Create a <a href="{@docRoot}guide/topics/providers/content-providers.html">Content
@@ -80,36 +94,32 @@ Provider</a> that has access to your suggestions table and declare the provider
 in your manifest.</li>
   <li>Declare the type of {@link android.content.Intent} to be sent when the user selects a
 suggestion (including a custom action and custom data). </li>
-  <li>Modify the searchable configuration with information about the content provider.</li>
 </ul>
 
-<p>Just like the Search Manager handles the rendering of the search dialog, it will also do the work
-to display all search suggestions below the search dialog. All you need to do is provide a source
-from which the suggestions can be retrieved.</p>
-
-<p class="note"><strong>Note:</strong> If you're not familiar with creating Content
-Providers, please read the <a href="{@docRoot}guide/topics/providers/content-providers.html">Content
+<p>Just like the Search Manager displays the search dialog, it also displays your search
+suggestions. All you need is a content provider from which the Search Manager can retrieve your
+suggestions. If you're not familiar with creating content
+providers, read the <a href="{@docRoot}guide/topics/providers/content-providers.html">Content
 Providers</a> developer guide before you continue.</p>
 
-<p>When the Search Manager identifies that your Activity is searchable and also provides search
-suggestions, the following procedure will take place as soon as the user types into the Android
-search box:</p>
+<p>When the Search Manager identifies that your Activity is searchable and provides search
+suggestions, the following procedure takes place as soon as the user enters text into the
+search dialog:</p>
 
-<ul>
-  <li>The Search Manager takes the search query text (whatever has been typed so far) and performs a
-query to the content provider that manages your suggestions.</li>
-  <li>Your content provider then returns a {@link android.database.Cursor} that points to all
+<ol>
+  <li>Search Manager takes the search query text (whatever has been typed so far) and performs a
+query to your content provider that manages your suggestions.</li>
+  <li>Your content provider returns a {@link android.database.Cursor} that points to all
 suggestions that are relevant to the search query text.</li>
-  <li>The Search Manager then displays the list of suggestions provided by the Cursor (as
-demonstrated in the screenshot to the right).</li>
-</ul>
+  <li>Search Manager displays the list of suggestions provided by the Cursor.</li>
+</ol>
 
-<p>At this point, the following may happen:</p>
+<p>Once the custom suggestions are displayed, the following might happen:</p>
 
 <ul>
   <li>If the user types another key, or changes the query in any way, the above steps are repeated
 and the suggestion list is updated as appropriate. </li>
-  <li>If the user executes the search, the suggestions are ignored and the search is delivered 
+  <li>If the user executes the search, the suggestions are ignored and the search is delivered
 to your searchable Activity using the normal {@link android.content.Intent#ACTION_SEARCH}
 Intent.</li>
   <li>If the user selects a suggestion, an Intent is sent to your searchable Activity, carrying a
@@ -124,56 +134,64 @@ custom action and custom data so that your application can open the suggested co
 to the {@code &lt;searchable&gt;} element in your searchable configuration file. For example:</p>
 
 <pre>
-&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;searchable xmlns:android="http://schemas.android.com/apk/res/android"
     android:label="@string/app_label"
     android:hint="@string/search_hint"
-    android:searchSuggestAuthority="my.package.MyCustomSuggestionProvider" >
-&lt;/searchable>
+    <b>android:searchSuggestAuthority="com.example.MyCustomSuggestionProvider"</b>&gt;
+&lt;/searchable&gt;
 </pre>
 
-<p>You may require some additional attributes, depending on the type of Intent you attach
+<p>You might need some additional attributes, depending on the type of Intent you attach
 to each suggestion and how you want to format queries to your content provider. The other optional
-attributes are discussed in the relevant sections below.</p>
+attributes are discussed in the following sections.</p>
+
 
 
 <h2 id="CustomContentProvider">Creating a Content Provider</h2>
 
-<p>Creating a content provider for custom suggestions requires previous knowledge about Content
-Providers that's covered in the <a
+<p>Creating a content provider for custom suggestions requires previous knowledge about content
+providers that's covered in the <a
 href="{@docRoot}guide/topics/providers/content-providers.html">Content Provider</a> developer
 guide. For the most part, a content provider for custom suggestions is the
 same as any other content provider. However, for each suggestion you provide, the respective row in
 the {@link android.database.Cursor} must include specific columns that the Search Manager
-understands.</p>
+understands and uses to format the suggestions.</p>
 
-<p>When the user starts typing into the search dialog, the Search Manager will query your Content
-Provider for suggestions by calling {@link
+<p>When the user starts typing into the search dialog, the Search Manager queries your content
+provider for suggestions by calling {@link
 android.content.ContentProvider#query(Uri,String[],String,String[],String) query()} each time
 a letter is typed. In your implementation of {@link
 android.content.ContentProvider#query(Uri,String[],String,String[],String) query()}, your
 content provider must search your suggestion data and return a {@link
-android.database.Cursor} that points to the rows you determine to be good suggestions.</p>
+android.database.Cursor} that points to the rows you have determined to be good suggestions.</p>
 
-<p>The following two sections describe how the Search Manager will send requests to your Content
-Provider and how you can handle them, and define the columns that the Search Manager understands and
-expects to be provided in the {@link android.database.Cursor} returned with each query.</p>
+<p>Details about creating a content provider for custom suggestions are discussed in the following
+two sections:</p>
+<dl>
+  <dt><a href="#HandlingSuggestionQuery">Handling the suggestion query</a></dt>
+  <dd>How the Search Manager sends requests to your content provider and how to handle them</dd>
+  <dt><a href="#SuggestionTable">Building a suggestion table</a></dt>
+  <dd>How to define the columns that the Search Manager expects in the {@link
+android.database.Cursor} returned with each query</dd>
+</dl>
 
 
 <h3 id="HandlingSuggestionQuery">Handling the suggestion query</h3>
 
-<p>When the Search Manager makes a request for suggestions from your content provider, it will call
-{@link android.content.ContentProvider#query(Uri,String[],String,String[],String)}. You must
-implement this method in your content provider so that it will search your suggestions and return a
-Cursor that contains the suggestions you deem relevant.</p>
+<p>When the Search Manager requests suggestions from your content provider, it calls your content
+provider's {@link android.content.ContentProvider#query(Uri,String[],String,String[],String)
+query()} method. You must
+implement this method to search your suggestion data and return a
+{@link android.database.Cursor} pointing to the suggestions you deem relevant.</p>
 
-<p>Here's a summary of the parameters that the Search Manager will pass to your {@link
+<p>Here's a summary of the parameters that the Search Manager passes to your {@link
 android.content.ContentProvider#query(Uri,String[],String,String[],String) query()} method
 (listed in order):</p>
 
 <dl>
   <dt><code>uri</code></dt>
-  <dd>This will always be a content {@link android.net.Uri}, formatted as:
+  <dd>Always a content {@link android.net.Uri}, formatted as:
 <pre class="no-pretty-print">
 content://<em>your.authority</em>/<em>optional.suggest.path</em>/<em>{@link
 android.app.SearchManager#SUGGEST_URI_PATH_QUERY}</em>
@@ -184,46 +202,48 @@ For example:</p>
 content://<em>your.authority</em>/<em>optional.suggest.path</em>/<em>{@link
 android.app.SearchManager#SUGGEST_URI_PATH_QUERY}</em>/puppies
 </pre>
-<p>The query text on the end will be encoded using URI encoding rules, so you may need to decode
-it.</p>
+<p>The query text on the end is encoded using URI encoding rules, so you might need to decode
+it before performing a search.</p>
 <p>The <em>{@code optional.suggest.path}</em> portion is only included in the URI if you have set
 such a path in your searchable configuration file with the {@code android:searchSuggestPath}
 attribute. This is only needed if you use the same content provider for multiple searchable
-activities, in which case you need to disambiguate the source of the suggestion query.</p>
-<p>Note that {@link android.app.SearchManager#SUGGEST_URI_PATH_QUERY} is not the literal
+activities, in which case, you need to disambiguate the source of the suggestion query.</p>
+<p class="note"><strong>Note:</strong> {@link
+android.app.SearchManager#SUGGEST_URI_PATH_QUERY} is not the literal
 string provided in the URI, but a constant that you should use if you need to refer to this
 path.</p>
   </dd>
 
   <dt><code>projection</code></dt>
-  <dd>This is always null</dd>
+  <dd>Always null</dd>
 
   <dt><code>selection</code></dt>
-  <dd>This is the value provided in the {@code android:searchSuggestSelection} attribute of
+  <dd>The value provided in the {@code android:searchSuggestSelection} attribute of
 your searchable configuration file, or null if you have not declared the {@code
-android:searchSuggestSelection} attribute. More about this below.</dd>
+android:searchSuggestSelection} attribute. More about using this to <a href="#GetTheQuery">get the
+query</a> below.</dd>
 
   <dt><code>selectionArgs</code></dt>
-  <dd>This contains the search query as the first (and only) element of the array if you have
+  <dd>Contains the search query as the first (and only) element of the array if you have
 declared the {@code android:searchSuggestSelection} attribute in your searchable configuration. If
 you have not declared {@code android:searchSuggestSelection}, then this parameter is null. More
-about this below.</dd>
+about using this to <a href="#GetTheQuery">get the query</a> below.</dd>
 
   <dt><code>sortOrder</code></dt>
-  <dd>This is always null</dd>
+  <dd>Always null</dd>
 </dl>
 
-<p>As you may have realized, there are two ways by which the Search Manager can send you the search
-query text. The default manner is for the query text to be included as the last path of the content
-URI that is passed in the {@code uri} parameter. However, if you include a selection value in your 
+<p>The Search Manager can send you the search query text in two ways. The
+default manner is for the query text to be included as the last path of the content
+URI passed in the {@code uri} parameter. However, if you include a selection value in your
 searchable configuration's {@code
-android:searchSuggestSelection} attribute, then the query text will instead be passed as the first
-element of the {@code selectionArgs} string array. Both options are summarized below.</p>
+android:searchSuggestSelection} attribute, then the query text is instead passed as the first
+element of the {@code selectionArgs} string array. Both options are summarized next.</p>
 
 
-<h4>Get the query in the Uri</h4>
+<h4 id="GetTheQueryUri">Get the query in the Uri</h4>
 
-<p>By default, the query will be appended as the last segment of the {@code uri}
+<p>By default, the query is appended as the last segment of the {@code uri}
 parameter (a {@link android.net.Uri} object). To retrieve the query text in this case, simply use
 {@link android.net.Uri#getLastPathSegment()}. For example:</p>
 
@@ -231,52 +251,59 @@ parameter (a {@link android.net.Uri} object). To retrieve the query text in this
 String query = uri.getLastPathSegment().toLowerCase();
 </pre>
 
-<p>This will return the last segment of the Uri, which is the query text entered in the search
-dialog.</p>
+<p>This returns the last segment of the {@link android.net.Uri}, which is the query text entered in
+the search dialog.</p>
 
 
 
-<h4>Get the query in the selection arguments</h4>
+<h4 id="GetTheQuery">Get the query in the selection arguments</h4>
 
-<p>Instead of using the URI, you may decide it makes more sense for your {@link
+<p>Instead of using the URI, you might decide it makes more sense for your {@link
 android.content.ContentProvider#query(Uri,String[],String,String[],String) query()} method to
 receive everything it needs to perform the look-up and you want the
-{@code selection} and {@code selectionArgs} parameters to carry values. In this case, you can
-add the {@code android:searchSuggestSelection} attribute to your searchable configuration with your
-SQLite selection string. In this selection string, you can include a question mark ("?") as
-a placeholder for the actual search query. This selection string will be delivered as the
-{@code selection} string parameter, and the query entered into the search dialog will be delivered
-as the first element in the {@code selectionArgs} string array parameter.</p>
+{@code selection} and {@code selectionArgs} parameters to carry the appropriate values. In such a
+case, add the {@code android:searchSuggestSelection} attribute to your searchable configuration with
+your SQLite selection string. In the selection string, include a question mark ("?") as
+a placeholder for the actual search query. The Search Manager calls {@link
+android.content.ContentProvider#query(Uri,String[],String,String[],String) query()} with the
+selection string as the {@code selection} parameter and the search query as the first
+element in the {@code selectionArgs} array.</p>
 
 <p>For example, here's how you might form the {@code android:searchSuggestSelection} attribute to
 create a full-text search statement:</p>
 
 <pre>
-&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;searchable xmlns:android="http://schemas.android.com/apk/res/android"
     android:label="@string/app_label"
     android:hint="@string/search_hint"
-    android:searchSuggestAuthority="my.package.MyCustomSuggestionProvider"
+    android:searchSuggestAuthority="com.example.MyCustomSuggestionProvider"
     android:searchSuggestIntentAction="android.Intent.action.VIEW"
-    android:searchSuggestSelection="word MATCH ?">
-&lt;/searchable>
+    <b>android:searchSuggestSelection="word MATCH ?"</b>&gt;
+&lt;/searchable&gt;
 </pre>
 
-<p>When you then receive the {@code selection} and {@code selectionArgs} parameters in your {@link
-android.content.ContentProvider#query(Uri,String[],String,String[],String) ContentProvider.query()}
-method, they will carry the selection ("word MATCH ?") and the query text, respectively. When
-these are passed to an SQLite {@link
-android.database.sqlite.SQLiteDatabase#query(String,String[],String,String[],String,String,
-String) query} method, they will be synthesized together (replacing the question mark with the query
-text, wrapped in single-quotes). Note that if you chose this method and need to add any wildcards to
-your query text, you must do so by appending (and/or prefixing) them to the {@code selectionArgs}
-parameter, because this is the value that will be wrapped in quotes and inserted in place of the
+<p>With this configuration, your {@link
+android.content.ContentProvider#query(Uri,String[],String,String[],String) query()} method
+delivers the {@code selection} parameter as "word MATCH ?" and the {@code selectionArgs}
+parameter as whatever the user entered in the search dialog. When you pass these to an SQLite
+{@link android.database.sqlite.SQLiteDatabase#query(String,String[],String,String[],String,String,
+String) query()} method, as their respective arguments, they are synthesized together (the
+question mark is replaced with the query
+text). If you chose to receive suggestion queries this way and need to add wildcards to
+the query text, append (and/or prefix) them to the {@code selectionArgs}
+parameter, because this value is wrapped in quotes and inserted in place of the
 question mark.</p>
+
+<p>Another new attribute in the example above is {@code android:searchSuggestIntentAction}, which
+defines the Intent action sent with each Intent when the user selects a suggestion. It is
+discussed further in the section about <a href="#IntentForSuggestions">Declaring an Intent for
+suggestions</a>.</p>
 
 <p class="note"><strong>Tip:</strong> If you don't want to define a selection clause in
 the {@code android:searchSuggestSelection} attribute, but would still like to receive the query
 text in the {@code selectionArgs} parameter, simply provide a non-null value for the {@code
-android:searchSuggestSelection} attribute. This will trigger the query to be passed in {@code
+android:searchSuggestSelection} attribute. This triggers the query to be passed in {@code
 selectionArgs} and you can ignore the {@code selection} parameter. In this way, you can instead
 define the actual selection clause at a lower level so that your content provider doesn't have to
 handle it.</p>
@@ -287,11 +314,12 @@ handle it.</p>
 
 <div class="sidebox-wrapper">
 <div class="sidebox">
-<h2>Creating a Cursor on the fly</h2>
-<p>If your search suggestions are not stored in a table format using the columns required by the
+<h2>Creating a Cursor without a table</h2>
+<p>If your search suggestions are not stored in a table format (such as an SQLite table) using the
+columns required by the
 Search Manager, then you can search your suggestion data for matches and then format them
-into the necessary table on the fly. To do so, create a {@link android.database.MatrixCursor} using
-the required column names and then add a row for each suggestion using {@link
+into the necessary table on each request. To do so, create a {@link android.database.MatrixCursor}
+using the required column names and then add a row for each suggestion using {@link
 android.database.MatrixCursor#addRow(Object[])}. Return the final product from your Content
 Provider's {@link
 android.content.ContentProvider#query(Uri,String[],String,String[],String) query()} method.</p>
@@ -299,97 +327,94 @@ android.content.ContentProvider#query(Uri,String[],String,String[],String) query
 </div>
 
 <p>When you return suggestions to the Search Manager with a {@link android.database.Cursor}, the
-Search Manager expects there to be specific columns in each row. So, regardless of whether you
+Search Manager expects specific columns in each row. So, regardless of whether you
 decide to store
 your suggestion data in an SQLite database on the device, a database on a web server, or another
 format on the device or web, you must format the suggestions as rows in a table and
-present them with a {@link android.database.Cursor}. There are several columns that the Search
-Manager will understand, but only two are required:</p>
+present them with a {@link android.database.Cursor}. The Search
+Manager understands several columns, but only two are required:</p>
 
 <dl>
   <dt>{@link android.provider.BaseColumns#_ID}</dt>
-  <dd>This is the unique row ID for each suggestion. The search dialog requires this in order
-to present the suggestions in a ListView.</dd>
+  <dd>A unique integer row ID for each suggestion. The search dialog requires this in order
+to present suggestions in a ListView.</dd>
   <dt>{@link android.app.SearchManager#SUGGEST_COLUMN_TEXT_1}</dt>
-  <dd>This is the line of text that will be presented to the user as a suggestion.</dd>
+  <dd>The string that is presented as a suggestion.</dd>
 </dl>
 
-<p>The following columns are all optional (and most will be discussed further in the following
-sections, so you may want to skip this list for now):</p>
+<p>The following columns are all optional (and most are discussed further in the following
+sections):</p>
 
 <dl>
   <dt>{@link android.app.SearchManager#SUGGEST_COLUMN_TEXT_2}</dt>
-  <dd>If your Cursor  includes this column, then all suggestions will be provided in a two-line
-format. The data in this column will be displayed as a second, smaller line of text below the
+  <dd>A string. If your Cursor includes this column, then all suggestions are provided in a
+two-line format. The string in this column is displayed as a second, smaller line of text below the
 primary suggestion text. It can be null or empty to indicate no secondary text.</dd>
   <dt>{@link android.app.SearchManager#SUGGEST_COLUMN_ICON_1}</dt>
-  <dd>If your Cursor  includes this column, then all suggestions will be provided in an
-icon-plus-text format with the icon on the left side. This value should be a reference to the
-icon. It can be null or zero to indicate no icon in this row.</dd>
+  <dd>A drawable resource, content, or file URI string. If your Cursor includes this column, then
+all suggestions are provided in an icon-plus-text format with the drawable icon on the left side.
+This can be null or zero to indicate no icon in this row.</dd>
   <dt>{@link android.app.SearchManager#SUGGEST_COLUMN_ICON_2}</dt>
-  <dd>If your Cursor  includes this column, then all suggestions will be provided in an
-icon-plus-text format with the icon on the right side. This value should be a reference to the
-icon. It can be null or zero to indicate no icon in this row.</dd>
+  <dd>A drawable resource, content, or file URI string. If your Cursor  includes this column, then
+all suggestions are provided in an icon-plus-text format with the icon on the right side. This can
+be null or zero to indicate no icon in this row.</dd>
   <dt>{@link android.app.SearchManager#SUGGEST_COLUMN_INTENT_ACTION}</dt>
-  <dd>If this column exists and this element exists at the given row, this is the action that will
-be used when forming the suggestion's Intent . If the element is not provided, the action will be
-taken from the {@code android:searchSuggestIntentAction} field in your searchable configuration. At
-least one of these
-must be present for the suggestion to generate an Intent. Note: If your action is the same for all
+  <dd>An Intent action string. If this column exists and contains a value at the given row, the
+action defined here is used when forming the suggestion's Intent. If the element is not
+provided, the action is taken from the {@code android:searchSuggestIntentAction} field in your
+searchable configuration. If your action is the same for all
 suggestions, it is more efficient to specify the action using {@code
-android:searchSuggestIntentAction} and omit this column from the Cursor .</dd>
+android:searchSuggestIntentAction} and omit this column.</dd>
   <dt>{@link android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA}</dt>
-  <dd>If this column exists and this element exists at the given row, this is the data that will be
-used when forming the suggestion's Intent. If the element is not provided, the data will be taken
-from the {@code android:searchSuggestIntentData} field in your searchable configuration. If neither
-source is provided,
-the Intent's data field will be null. Note: If your data is the same for all suggestions, or can be
+  <dd>A data URI string. If this column exists and contains a value at the given row, this is the
+data that is used when forming the suggestion's Intent. If the element is not provided, the data is
+taken from the {@code android:searchSuggestIntentData} field in your searchable configuration. If
+neither source is provided,
+the Intent's data field is null. If your data is the same for all suggestions, or can be
 described using a constant part and a specific ID, it is more efficient to specify it using {@code
-android:searchSuggestIntentData} and omit this column from the Cursor .
+android:searchSuggestIntentData} and omit this column.
 </dd>
   <dt>{@link android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA_ID}</dt>
-  <dd>If this column exists and this element exists at the given row, then "/" and this value will
-be appended to the data field in the Intent. This should only be used if the data field specified
+  <dd>A URI path string. If this column exists and contains a value at the given row, then "/" and
+this value is appended to the data field in the Intent. This should only be used if the data field
+specified
 by the {@code android:searchSuggestIntentData} attribute in the searchable configuration has already
 been set to an appropriate base string.</dd>
   <dt>{@link android.app.SearchManager#SUGGEST_COLUMN_INTENT_EXTRA_DATA}</dt>
-  <dd>If this column exists and this element exists at a given row, this is the <em>extra</em> data
-that will be used when forming the suggestion's Intent. If not provided, the Intent's extra data
-field will be
-null. This column allows suggestions to provide additional arbitrary data which will be
+  <dd>Arbitrary data. If this column exists and contains a value at a given row, this is the
+<em>extra</em> data used when forming the suggestion's Intent. If not provided, the
+Intent's extra data field is null. This column allows suggestions to provide additional data that is
 included as an extra in the Intent's {@link android.app.SearchManager#EXTRA_DATA_KEY} key.</dd>
   <dt>{@link android.app.SearchManager#SUGGEST_COLUMN_QUERY}</dt>
-  <dd>If this column exists and this element exists at the given row, this is the data that will be
+  <dd>If this column exists and this element exists at the given row, this is the data that is
 used when forming the suggestion's query, included as an extra in the Intent's {@link
 android.app.SearchManager#QUERY} key. Required if suggestion's action is {@link
 android.content.Intent#ACTION_SEARCH}, optional otherwise.</dd>
   <dt>{@link android.app.SearchManager#SUGGEST_COLUMN_SHORTCUT_ID}</dt>
-  <dd>Only used when providing suggestions for Quick Search Box. This column is used to indicate
+  <dd>Only used when providing suggestions for Quick Search Box. This column indicates
 whether a search suggestion should be stored as a
-shortcut, and whether it should be validated. Shortcuts are usually formed when the user clicks a
-suggestion from Quick Search Box. If missing, the result will be stored as a shortcut and never
-refreshed. If set to {@link android.app.SearchManager#SUGGEST_NEVER_MAKE_SHORTCUT}, the result will
-not be stored as a shortcut.
-Otherwise, the shortcut id will be used to check back for for an up to date suggestion using
+shortcut and whether it should be validated. Shortcuts are usually formed when the user clicks a
+suggestion from Quick Search Box. If missing, the result is stored as a shortcut and never
+refreshed. If set to {@link android.app.SearchManager#SUGGEST_NEVER_MAKE_SHORTCUT}, the result is
+not stored as a shortcut.
+Otherwise, the shortcut ID is used to check back for an up to date suggestion using
 {@link android.app.SearchManager#SUGGEST_URI_PATH_SHORTCUT}.</dd>
   <dt>{@link android.app.SearchManager#SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING}</dt>
-  <dd>Only used when providing suggestions for Quick Search Box. This column is used to specify that
+  <dd>Only used when providing suggestions for Quick Search Box. This column specifies that
 a spinner should be shown instead of an icon from {@link
 android.app.SearchManager#SUGGEST_COLUMN_ICON_2}
 while the shortcut of this suggestion is being refreshed in Quick Search Box.</dd>
 </dl>
 
-<p>Again, most of these columns will be discussed in the relevant sections below, so don't worry if
-they don't make sense to you now.</p>
+<p>Some of these columns are discussed more in the following sections.</p>
 
 
 
 <h2 id="IntentForSuggestions">Declaring an Intent for suggestions</h2>
 
-<p>When the user selects a suggestion from the list that appears below the search
-dialog (instead of performing a search), the Search Manager will send
-a custom {@link android.content.Intent} to your searchable Activity. You must define both the
-<em>action</em> and <em>data</em> for the Intent.</p>
+<p>When the user selects a suggestion from the list that appears below the search dialog, the Search
+Manager sends a custom {@link android.content.Intent} to your searchable Activity. You must define
+the action and data for the Intent.</p>
 
 
 <h3 id="IntentAction">Declaring the Intent action</h3>
@@ -397,34 +422,42 @@ a custom {@link android.content.Intent} to your searchable Activity. You must de
 <p>The most common Intent action for a custom suggestion is {@link
 android.content.Intent#ACTION_VIEW}, which is appropriate when
 you want to open something, like the definition for a word, a person's contact information, or a web
-page. However, the Intent action can be whatever you want and can even be different for each
+page. However, the Intent action can be any other action and can even be different for each
 suggestion.</p>
 
-<p>To declare an Intent action that will be the same for all suggestions, define the action in
-the {@code android:searchSuggestIntentAction} attribute of your searchable configuration file. For
-example:</p>
+<p>Depending on whether you want all suggestions to use the same Intent action, you
+can define the action in two ways:</p>
+
+<ol type="a">
+  <li>Use the {@code android:searchSuggestIntentAction} attribute of your searchable configuration
+file to define the action for all suggestions. <p>For example:</p>
 
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;searchable xmlns:android="http://schemas.android.com/apk/res/android"
     android:label="@string/app_label"
     android:hint="@string/search_hint"
-    android:searchSuggestAuthority="my.package.MySuggestionProvider"
-    android:searchSuggestIntentAction="android.Intent.action.VIEW" >
+    android:searchSuggestAuthority="com.example.MyCustomSuggestionProvider"
+    <b>android:searchSuggestIntentAction="android.Intent.action.VIEW"</b> >
 &lt;/searchable>
 </pre>
 
-<p>If you want to declare an Intent action that's unique for each suggestion, add the {@link
-android.app.SearchManager#SUGGEST_COLUMN_INTENT_ACTION} column to
+  </li>
+  <li>Use the {@link android.app.SearchManager#SUGGEST_COLUMN_INTENT_ACTION} column to define the
+action for individual suggestions.
+  <p>Add the {@link android.app.SearchManager#SUGGEST_COLUMN_INTENT_ACTION} column to
 your suggestions table and, for each suggestion, place in it the action to use (such as
-{@code "android.Intent.action.VIEW"}). </p>
+{@code "android.Intent.action.VIEW"}).</p>
+
+  </li>
+</ol>
 
 <p>You can also combine these two techniques. For instance, you can include the {@code
 android:searchSuggestIntentAction} attribute with an action to be used with all suggestions by
 default, then override this action for some suggestions by declaring a different action in the
 {@link android.app.SearchManager#SUGGEST_COLUMN_INTENT_ACTION} column. If you do not include
 a value in the {@link android.app.SearchManager#SUGGEST_COLUMN_INTENT_ACTION} column, then the
-Intent provided in the {@code android:searchSuggestIntentAction} attribute will be used.</p>
+Intent provided in the {@code android:searchSuggestIntentAction} attribute is used.</p>
 
 <p class="note"><strong>Note</strong>: If you do not include the
 {@code android:searchSuggestIntentAction} attribute in your searchable configuration, then you
@@ -432,45 +465,45 @@ Intent provided in the {@code android:searchSuggestIntentAction} attribute will 
 column for every suggestion, or the Intent will fail.</p>
 
 
+
 <h3 id="IntentData">Declaring Intent data</h3>
 
-<p>When the user selects a suggestion, your searchable Activity will receive the Intent with the
+<p>When the user selects a suggestion, your searchable Activity receives the Intent with the
 action you've defined (as discussed in the previous section), but the Intent must also carry
-data in order for your Activity to identify which suggestions was selected. Specifically,
+data in order for your Activity to identify which suggestion was selected. Specifically,
 the data should be something unique for each suggestion, such as the row ID for the suggestion in
-your suggestions table. When the Intent is received,
+your SQLite table. When the Intent is received,
 you can retrieve the attached data with {@link android.content.Intent#getData()} or {@link
 android.content.Intent#getDataString()}.</p>
 
-<p>There are two ways to define the data that is included with the Intent:</p>
+<p>You can define the data included with the Intent in two ways:</p>
 
 <ol type="a">
   <li>Define the data for each suggestion inside the {@link
-android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA} column of your suggestions table.</li>
+android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA} column of your suggestions table.
+
+<p>Provide all necessary data information for each Intent in the suggestions table by including the
+{@link android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA} column and then populating it with
+unique data for each row. The data from this column is attached to the Intent exactly as you
+define it in this column. You can then retrieve it with with {@link
+android.content.Intent#getData()} or {@link android.content.Intent#getDataString()}.</p>
+
+<p class="note"><strong>Tip</strong>: It's usually easiest to use the table's row ID as the
+Intent data, because it's always unique. And the easiest way to do that is by using the
+{@link android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA} column name as an alias for the row ID
+column. See the <a
+href="{@docRoot}resources/samples/SearchableDictionary/index.html">Searchable Dictionary sample
+app</a> for an example in which {@link android.database.sqlite.SQLiteQueryBuilder} creates a
+projection map of column names to aliases.</p>
+  </li>
+
   <li>Fragment a data URI into two pieces: the portion common to all suggestions and the portion
 unique to each suggestion. Place these parts into the {@code android:searchSuggestIntentData}
 attribute of the searchable configuration and the {@link
 android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA_ID} column of your
-suggestions table, respectively.</li>
-</ol>
+suggestions table, respectively.
 
-<p>The first option is straight-forward. Simply provide all necessary data information for each
-Intent in the suggestions table by including the {@link
-android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA} column and then populating it with unique
-data for each row. The data from this column will be attached to the Intent exactly as it
-is found in this column. You can then retrieve it with with {@link android.content.Intent#getData()}
-or {@link android.content.Intent#getDataString()}.</p>
-
-<p class="note"><strong>Tip</strong>: It's usually easiest to use the table's row ID as the
-Intent data because it's always unique. And the easiest way to do that is by using the
-{@link android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA} column name as an alias for the row ID
-column. See the <a
-href="{@docRoot}resources/samples/SearchableDictionary/index.html">Searchable Dictionary sample
-app</a> for an example in which {@link android.database.sqlite.SQLiteQueryBuilder} is used to
-create a projection map of column names to aliases.</p>
-
-<p>The second option is to fragment your data URI into the common piece and the unique piece.
-Declare the piece of the URI that is common to all suggestions in the {@code
+<p>Declare the piece of the URI that is common to all suggestions in the {@code
 android:searchSuggestIntentData} attribute of your searchable configuration. For example:</p>
 
 <pre>
@@ -478,35 +511,40 @@ android:searchSuggestIntentData} attribute of your searchable configuration. For
 &lt;searchable xmlns:android="http://schemas.android.com/apk/res/android"
     android:label="@string/app_label"
     android:hint="@string/search_hint"
-    android:searchSuggestAuthority="my.package.MySuggestionProvider"
+    android:searchSuggestAuthority="com.example.MyCustomSuggestionProvider"
     android:searchSuggestIntentAction="android.Intent.action.VIEW"
-    android:searchSuggestIntentData="content://my.package/datatable" >
+    <b>android:searchSuggestIntentData="content://com.example/datatable"</b> >
 &lt;/searchable>
 </pre>
 
-<p>Now include the final path for each suggestion (the unique part) in the {@link
+<p>Then include the final path for each suggestion (the unique part) in the {@link
 android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA_ID}
-column of your suggestions table. When the user selects a suggestion, the Search Manager will take
-the string from {@code android:searchSuggestIntentData}, append a slash ("/") and then add the
+column of your suggestions table. When the user selects a suggestion, the Search Manager takes
+the string from {@code android:searchSuggestIntentData}, appends a slash ("/") and then adds the
 respective value from the {@link android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA_ID} column to
 form a complete content URI. You can then retrieve the {@link android.net.Uri} with with {@link
 android.content.Intent#getData()}.</p>
+
+  </li>
+</ol>
 
 <h4>Add more data</h4>
 
 <p>If you need to express even more information with your Intent, you can add another table column,
 {@link android.app.SearchManager#SUGGEST_COLUMN_INTENT_EXTRA_DATA}, which can store additional
-information about the suggestion. The data saved in this column will be placed in {@link
+information about the suggestion. The data saved in this column is placed in {@link
 android.app.SearchManager#EXTRA_DATA_KEY} of the Intent's extra Bundle.</p>
+
 
 
 <h2 id="HandlingIntent">Handling the Intent</h2>
 
-<p>Now that your search dialog provides custom search suggestions with custom formatted Intents, you
-need your searchable Activity to handle these Intents as they are delivered once the user selects a
-suggestion. (This is, of course, in addition to handling the {@link
-android.content.Intent#ACTION_SEARCH} Intent, which your searchable Activity already does.)
-Accepting the new Intent is rather self-explanatory, so we'll skip straight to an example:</p>
+<p>Now that your search dialog provides custom search suggestions with custom Intents, you
+need your searchable Activity to handle these Intents when the user selects a
+suggestion. This is in addition to handling the {@link
+android.content.Intent#ACTION_SEARCH} Intent, which your searchable Activity already does.
+Here's an example of how you can handle the Intents during your Activity {@link
+android.app.Activity#onCreate(Bundle) onCreate()} callback:</p>
 
 <pre>
 Intent intent = getIntent();
@@ -515,26 +553,32 @@ if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
     String query = intent.getStringExtra(SearchManager.QUERY);
     doSearch(query);
 } else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-    // Handle a suggestions click (because my suggestions all use ACTION_VIEW)
-    Uri data = intent.getData());
-    showResult(rowId);
+    // Handle a suggestions click (because the suggestions all use ACTION_VIEW)
+    Uri data = intent.getData();
+    showResult(data);
 }
 </pre>
 
 <p>In this example, the Intent action is {@link
 android.content.Intent#ACTION_VIEW} and the data carries a complete URI pointing to the suggested
 item, as synthesized by the {@code android:searchSuggestIntentData} string and {@link
-android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA_ID} column. The URI is then passed to a local
-method that will query the content provider for the item specified by the URI and show it.</p>
+android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA_ID} column. The URI is then passed to the local
+{@code showResult()} method that queries the content provider for the item specified by the URI.</p>
 
+<p class="note"><strong>Note:</strong> You do <em>not</em> need to add an Intent filter to your
+Android manifest file for the Intent action you defined with the {@code
+android:searchSuggestIntentAction} attribute or {@link
+android.app.SearchManager#SUGGEST_COLUMN_INTENT_ACTION} column. The Search Manager opens your
+searchable Activity by name to deliver the suggestion's Intent, so the Activity does not need to
+declare the accepted action.</p>
 
 
 <h2 id="RewritingQueryText">Rewriting the query text</h2>
 
-<p>If the user navigates through the suggestions list using the device directional controls, the
-text in the search dialog won't change, by default. However, you can temporarily rewrite the
-user's query text as it appears in the text box with
-a query that matches the currently selected suggestion. This enables the user to see what query is
+<p>If the user navigates through the suggestions list using the directional controls (trackball or
+d-pad), the text in the search dialog won't change, by default. However, you can temporarily rewrite
+the user's query text as it appears in the text box with
+a query that matches the suggestion currently in focus. This enables the user to see what query is
 being suggested (if appropriate) and then select the search box and edit the query before
 dispatching it as a search.</p>
 
@@ -544,39 +588,40 @@ dispatching it as a search.</p>
   <li>Add the {@code android:searchMode} attribute to your searchable configuration with the
 "queryRewriteFromText" value. In this case, the content from the suggestion's {@link
 android.app.SearchManager#SUGGEST_COLUMN_TEXT_1}
-column will be used to rewrite the query text.</li>
+column is used to rewrite the query text.</li>
   <li>Add the {@code android:searchMode} attribute to your searchable configuration with the
 "queryRewriteFromData" value. In this case, the content from the suggestion's
-{@link android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA} column will be used to rewrite the
-query text. Note that this should only
-be used with Uri's or other data formats that are intended to be user-visible, such as HTTP URLs.
-Internal Uri schemes should not be used to rewrite the query in this way.</li>
+{@link android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA} column is used to rewrite the
+query text. This should only
+be used with URI's or other data formats that are intended to be user-visible, such as HTTP URLs.
+Internal URI schemes should not be used to rewrite the query in this way.</li>
   <li>Provide a unique query text string in the {@link
 android.app.SearchManager#SUGGEST_COLUMN_QUERY} column of your suggestions table. If this column is
-present and contains a value for the current suggestion, it will be used to rewrite the query text
+present and contains a value for the current suggestion, it is used to rewrite the query text
 (and override either of the previous implementations).</li>
 </ol>
 
 
+
 <h2 id="QSB">Exposing search suggestions to Quick Search Box</h2>
 
-<p>Once your application is configured to provide custom search suggestions, making them available
-to the globally-accessible Quick Search Box is as easy as modifying your searchable configuration to
+<p>Once you configure your application to provide custom search suggestions, making them available
+to the globally accessible Quick Search Box is as easy as modifying your searchable configuration to
 include {@code android:includeInGlobalSearch} as "true".</p>
 
-<p>The only scenario in which additional work will be required is if your content provider  for
-custom suggestions requires a permission for read access. In which case, you need to add a special
-{@code &lt;path-permission>} element for the provider to grant Quick Search Box read access to your
-content provider. For example:</p>
+<p>The only scenario in which additional work is necessary is when your content provider demands a
+read permission. In which case, you need to add a special
+{@code &lt;path-permission&gt;} element for the provider to grant Quick Search Box read access to
+your content provider. For example:</p>
 
 <pre>
 &lt;provider android:name="MySuggestionProvider"
-          android:authorities="my.package.authority"
+          android:authorities="com.example.MyCustomSuggestionProvider"
           android:readPermission="com.example.provider.READ_MY_DATA"
-          android:writePermission="com.example.provider.WRITE_MY_DATA">
+          android:writePermission="com.example.provider.WRITE_MY_DATA"&gt;
   &lt;path-permission android:pathPrefix="/search_suggest_query"
-                   android:readPermission="android.permission.GLOBAL_SEARCH" />
-&lt;/provider>
+                   android:readPermission="android.permission.GLOBAL_SEARCH" /&gt;
+&lt;/provider&gt;
 </pre>
 
 <p>In this example, the provider restricts read and write access to the content. The
@@ -585,8 +630,8 @@ inside the {@code "/search_suggest_query"} path prefix when the {@code
 "android.permission.GLOBAL_SEARCH"} permission exists. This grants access to Quick Search Box
 so that it may query your content provider for suggestions.</p>
 
-<p>Content providers that enforce no permissions are already available to the search
-infrastructure.</p>
+<p>If your content provider does not enforce read permissions, then Quick Search Box can read
+it by default.</p>
 
 
 <h3 id="EnablingSuggestions">Enabling suggestions on a device</h3>
@@ -608,89 +653,93 @@ android:searchSettingsDescription} attribute to your searchable configuration. F
 &lt;searchable xmlns:android="http://schemas.android.com/apk/res/android"
     android:label="@string/app_label"
     android:hint="@string/search_hint"
-    android:searchSuggestAuthority="my.package.MySuggestionProvider"
+    android:searchSuggestAuthority="com.example.MyCustomSuggestionProvider"
     android:searchSuggestIntentAction="android.Intent.action.VIEW"
     android:includeInGlobalSearch="true"
-    android:searchSettingsDescription="@string/search_description" >
+    <b>android:searchSettingsDescription="@string/search_description"</b> >
 &lt;/searchable>
 </pre>
 
 <p>The string for {@code android:searchSettingsDescription} should be as concise as possible and
 state the content that is searchable. For example, "Artists, albums, and tracks" for a music
 application, or "Saved notes" for a notepad application. Providing this description is important so
-the user knows what kind of suggestions will be provided. This attribute should always be included
+the user knows what kind of suggestions are provided. You should always include this attribute
 when {@code android:includeInGlobalSearch} is "true".</p>
 
-<p>Remember that the user must visit this settings menu to enable search suggestions for your
-application before your search suggestions will appear in Quick Search Box. As such, if search is an
-important aspect of your application, then you may want to consider a way to message this to your
-users &mdash; perhaps with a note the first time they launch the app about how to enable search
-suggestions for Quick Search Box.</p>
+<p>Remember that the user must visit the settings menu to enable search suggestions for your
+application before your search suggestions appear in Quick Search Box. As such, if search is an
+important aspect of your application, then you might want to consider a way to convey that to
+your users &mdash; you might provide a note the first time they launch the app that instructs
+them how to enable search suggestions for Quick Search Box.</p>
 
 
 <h3 id="ManagingShortcuts">Managing Quick Search Box suggestion shortcuts</h3>
 
-<p>Suggestions that the user selects from Quick Search Box may be automatically made into shortcuts.
+<p>Suggestions that the user selects from Quick Search Box can be automatically made into shortcuts.
 These are suggestions that the Search Manager has copied from your content provider  so it can
 quickly access the suggestion without the need to re-query your content provider. </p>
 
 <p>By default, this is enabled for all suggestions retrieved by Quick Search Box, but if your
-suggestion data may change over time, then you can request that the shortcuts be refreshed. For
+suggestion data changes over time, then you can request that the shortcuts be refreshed. For
 instance, if your suggestions refer to dynamic data, such as a contact's presence status, then you
 should request that the suggestion shortcuts be refreshed when shown to the user. To do so,
 include the {@link android.app.SearchManager#SUGGEST_COLUMN_SHORTCUT_ID} in your suggestions table.
 Using this column, you can
-configure the shortcut behavior for each suggestion in the following ways:</p>
+configure the shortcut behavior for each suggestion in one of the following ways:</p>
 
 <ol type="a">
-  <li>Have Quick Search Box re-query your content provider for a fresh version of the shortcutted
-suggestion.
+  <li>Have Quick Search Box re-query your content provider for a fresh version of the suggestion
+shortcut.
     <p>Provide a value in the {@link android.app.SearchManager#SUGGEST_COLUMN_SHORTCUT_ID} column
-and the suggestion will be
-re-queried for a fresh version of the suggestion each time the shortcut is displayed. The shortcut
-will be quickly displayed with whatever data was most recently available until the refresh query
-returns, after which the suggestion will be dynamically refreshed with the new information. The
-refresh query will be sent to your content provider with a URI path of {@link
+and the suggestion is
+re-queried for a fresh version each time the shortcut is displayed. The shortcut
+is quickly displayed with whatever data was most recently available until the refresh query
+returns, at which point the suggestion is refreshed with the new information. The
+refresh query is sent to your content provider with a URI path of {@link
 android.app.SearchManager#SUGGEST_URI_PATH_SHORTCUT}
-(instead of {@link android.app.SearchManager#SUGGEST_URI_PATH_QUERY}). The Cursor you return should
-contain one suggestion using the
+(instead of {@link android.app.SearchManager#SUGGEST_URI_PATH_QUERY}).</p>
+    <p>The {@link android.database.Cursor} you return should contain one suggestion using the
 same columns as the original suggestion, or be empty, indicating that the shortcut is no
-longer valid (in which case, the suggestion will disappear and the shortcut will be removed).</p>
-    <p>If a suggestion refers to data that could take longer to refresh, such as a network based
-refresh, you may also add the {@link
+longer valid (in which case, the suggestion disappears and the shortcut is removed).</p>
+    <p>If a suggestion refers to data that could take longer to refresh, such as a network-based
+refresh, you can also add the {@link
 android.app.SearchManager#SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING} column to your suggestions
 table with a value
 of "true" in order to show a progress spinner for the right hand icon until the refresh is complete.
-(Any value other than "true" will not show the progress spinner.)</p></li>
+Any value other than "true" does not show the progress spinner.</p>
+  </li>
+
   <li>Prevent the suggestion from being copied into a shortcut at all.
     <p>Provide a value of {@link android.app.SearchManager#SUGGEST_NEVER_MAKE_SHORTCUT} in the
 {@link android.app.SearchManager#SUGGEST_COLUMN_SHORTCUT_ID} column. In
-this case, the suggestion will never be copied into a shortcut. This should only be necessary if you
-absolutely do not want the previously copied suggestion to appear at all. (Recall that if you
-provide a normal value for the column then the suggestion shortcut will appear only until the
+this case, the suggestion is never copied into a shortcut. This should only be necessary if you
+absolutely do not want the previously copied suggestion to appear. (Recall that if you
+provide a normal value for the column, then the suggestion shortcut appears only until the
 refresh query returns.)</p></li>
   <li>Allow the default shortcut behavior to apply.
-    <p>Simply leave the {@link android.app.SearchManager#SUGGEST_COLUMN_SHORTCUT_ID} empty for each
+    <p>Leave the {@link android.app.SearchManager#SUGGEST_COLUMN_SHORTCUT_ID} empty for each
 suggestion that will not change and can be saved as a shortcut.</p></li>
 </ol>
 
-<p>Of course, if none of your suggestions will ever change, then you do not need the
+<p>If none of your suggestions ever change, then you do not need the
 {@link android.app.SearchManager#SUGGEST_COLUMN_SHORTCUT_ID} column at all.</p>
 
-<p class="note"><strong>Note</strong>: Quick Search Box will ultimately decide whether to shortcut
-your app's suggestions, considering these values as a strong request from your application.</p>
+<p class="note"><strong>Note</strong>: Quick Search Box ultimately decides whether or not to create
+a shortcut for a suggestion, considering these values as a strong request from your
+application&mdash;there is no guarantee that the behavior you have requested for your suggestion
+shortcuts will be honored.</p>
 
 
 <h3 id="AboutRanking">About Quick Search Box suggestion ranking</h3>
 
-<p>Once your application's search results are made available to Quick Search Box, how they surface
-to the user for a particular query will be determined as appropriate by Quick Search Box ranking.
-This may depend on how many other apps have results for that query, and how often the user has
-selected on your results compared to those of the other apps. There is no guarantee about how
-ranking will occur, or whether your app's suggestions will show at all for a given query. In
-general, you can expect that providing quality results will increase the likelihood that your app's
-suggestions are provided in a prominent position, and apps that provide lower quality suggestions
-will be more likely to be ranked lower and/or not displayed.</p>
+<p>Once you make your application's search suggestions available to Quick Search Box, the Quick
+Search Box ranking determines how the suggestions are surfaced to the user for a particular query.
+This might depend on how many other apps have results for that query, and how often the user has
+selected your results compared to those from other apps. There is no guarantee about how your
+suggestions are ranked, or whether your app's suggestions show at all for a given query. In
+general, you can expect that providing quality results increases the likelihood that your app's
+suggestions are provided in a prominent position and apps that provide low quality suggestions
+are more likely to be ranked lower or not displayed.</p>
 
 <div class="special">
 <p>See the <a href="{@docRoot}resources/samples/SearchableDictionary/index.html">Searchable
