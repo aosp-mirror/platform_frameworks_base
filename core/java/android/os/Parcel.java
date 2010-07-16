@@ -1202,6 +1202,7 @@ public final class Parcel {
             code = EX_ILLEGAL_STATE;
         }
         writeInt(code);
+        StrictMode.clearGatheredViolations();
         if (code == 0) {
             if (e instanceof RuntimeException) {
                 throw (RuntimeException) e;
