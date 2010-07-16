@@ -303,6 +303,20 @@ public final class ContactsContract {
                 "vnd.android.cursor.item/contact_directory";
 
         /**
+         * _ID of the default directory, which represents locally stored contacts.
+         *
+         * @hide
+         */
+        public static final long DEFAULT = 0;
+
+        /**
+         * _ID of the directory that represents locally stored invisible contacts.
+         *
+         * @hide
+         */
+        public static final long LOCAL_INVISIBLE = 1;
+
+        /**
          * The name of the package that owns this directory. This field is
          * required in an insert request and must match the name of the package
          * making the request. If the package is later uninstalled, the
@@ -398,18 +412,38 @@ public final class ContactsContract {
         public static final int EXPORT_SUPPORT_ANY_ACCOUNT = 2;
 
         /**
-         * _ID of the default directory, which represents locally stored contacts.
+         * One of {@link #SHORTCUT_SUPPORT_NONE}, {@link #SHORTCUT_SUPPORT_DATA_ITEMS_ONLY},
+         * {@link #SHORTCUT_SUPPORT_FULL}, This is the expectation the directory
+         * has for shortcuts created for its elements. Clients must obey this setting.
          *
          * @hide
          */
-        public static final long DEFAULT = 0;
+        public static final String SHORTCUT_SUPPORT = "shortcutSupport";
 
         /**
-         * _ID of the directory that represents locally stored invisible contacts.
+         * An {@link #SHORTCUT_SUPPORT} setting that indicates that the directory
+         * does not allow any shortcuts created for its contacts.
          *
          * @hide
          */
-        public static final long LOCAL_INVISIBLE = 1;
+        public static final int SHORTCUT_SUPPORT_NONE = 0;
+
+        /**
+         * An {@link #SHORTCUT_SUPPORT} setting that indicates that the directory
+         * allow creation of shortcuts for data items like email, phone or postal address,
+         * but not the entire contact.
+         *
+         * @hide
+         */
+        public static final int SHORTCUT_SUPPORT_DATA_ITEMS_ONLY = 1;
+
+        /**
+         * An {@link #SHORTCUT_SUPPORT} setting that indicates that the directory
+         * allow creation of shortcuts for contact as well as their constituent elements.
+         *
+         * @hide
+         */
+        public static final int SHORTCUT_SUPPORT_FULL = 2;
     }
 
     /**
@@ -1469,6 +1503,13 @@ public final class ContactsContract {
          * @hide
          */
         public static final String NAME_VERIFIED = "name_verified";
+
+        /**
+         * The "read-only" flag: "0" by default, "1" if the row cannot be modified or
+         * deleted except by a sync adapter.  See {@link ContactsContract#CALLER_IS_SYNCADAPTER}.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String IS_READ_ONLY = "is_read_only";
     }
 
     /**
@@ -2223,6 +2264,13 @@ public final class ContactsContract {
          * <P>Type: INTEGER (if set, non-0 means true)</P>
          */
         public static final String IS_SUPER_PRIMARY = "is_super_primary";
+
+        /**
+         * The "read-only" flag: "0" by default, "1" if the row cannot be modified or
+         * deleted except by a sync adapter.  See {@link ContactsContract#CALLER_IS_SYNCADAPTER}.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String IS_READ_ONLY = "is_read_only";
 
         /**
          * The version of this data record. This is a read-only value. The data column is
