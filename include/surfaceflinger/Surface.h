@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include <utils/KeyedVector.h>
 #include <utils/RefBase.h>
 #include <utils/threads.h>
 
@@ -147,8 +148,7 @@ public:
     static status_t writeToParcel(
             const sp<Surface>& control, Parcel* parcel);
 
-    static sp<Surface> readFromParcel(
-            const Parcel& data, const sp<Surface>& other);
+    static sp<Surface> readFromParcel(const Parcel& data);
 
     static bool isValid(const sp<Surface>& surface) {
         return (surface != 0) && surface->isValid();
@@ -244,6 +244,8 @@ private:
             uint32_t *pWidth, uint32_t *pHeight,
             uint32_t *pFormat, uint32_t *pUsage) const;
 
+    static void cleanCachedSurfaces();
+
     class BufferInfo {
         uint32_t mWidth;
         uint32_t mHeight;
@@ -298,6 +300,10 @@ private:
     // Inherently thread-safe
     mutable Mutex               mSurfaceLock;
     mutable Mutex               mApiLock;
+
+    // A cache of Surface objects that have been deserialized into this process.
+    static Mutex sCachedSurfacesLock;
+    static DefaultKeyedVector<wp<IBinder>, wp<Surface> > sCachedSurfaces;
 };
 
 }; // namespace android
