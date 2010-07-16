@@ -766,7 +766,7 @@ void InputReader::dispatchTouches(nsecs_t when,
         // The dispatcher takes care of batching moves so we don't have to deal with that here.
         int32_t motionEventAction = AMOTION_EVENT_ACTION_MOVE;
         dispatchTouch(when, device, policyFlags, & device->touchScreen.currentTouch,
-                currentIdBits, motionEventAction);
+                currentIdBits, -1, motionEventAction);
     } else {
         // There may be pointers going up and pointers going down at the same time when pointer
         // ids are reported by the device driver.
@@ -784,12 +784,11 @@ void InputReader::dispatchTouches(nsecs_t when,
             if (activeIdBits.isEmpty()) {
                 motionEventAction = AMOTION_EVENT_ACTION_UP;
             } else {
-                motionEventAction = AMOTION_EVENT_ACTION_POINTER_UP
-                        | (upId << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT);
+                motionEventAction = AMOTION_EVENT_ACTION_POINTER_UP;
             }
 
             dispatchTouch(when, device, policyFlags, & device->touchScreen.lastTouch,
-                    oldActiveIdBits, motionEventAction);
+                    oldActiveIdBits, upId, motionEventAction);
         }
 
         while (! downIdBits.isEmpty()) {
@@ -803,18 +802,17 @@ void InputReader::dispatchTouches(nsecs_t when,
                 motionEventAction = AMOTION_EVENT_ACTION_DOWN;
                 device->touchScreen.downTime = when;
             } else {
-                motionEventAction = AMOTION_EVENT_ACTION_POINTER_DOWN
-                        | (downId << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT);
+                motionEventAction = AMOTION_EVENT_ACTION_POINTER_DOWN;
             }
 
             dispatchTouch(when, device, policyFlags, & device->touchScreen.currentTouch,
-                    activeIdBits, motionEventAction);
+                    activeIdBits, downId, motionEventAction);
         }
     }
 }
 
 void InputReader::dispatchTouch(nsecs_t when, InputDevice* device, uint32_t policyFlags,
-        InputDevice::TouchData* touch, BitSet32 idBits,
+        InputDevice::TouchData* touch, BitSet32 idBits, uint32_t changedId,
         int32_t motionEventAction) {
     int32_t orientedWidth, orientedHeight;
     switch (mDisplayOrientation) {
@@ -904,12 +902,15 @@ void InputReader::dispatchTouch(nsecs_t when, InputDevice* device, uint32_t poli
         pointerCoords[pointerCount].toolMinor = toolMinor;
         pointerCoords[pointerCount].orientation = orientation;
 
+        if (id == changedId) {
+            motionEventAction |= pointerCount << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+        }
+
         pointerCount += 1;
     }
 
     // Check edge flags by looking only at the first pointer since the flags are
     // global to the event.
-    // XXX Maybe we should revise the edge flags API to work on a per-pointer basis.
     int32_t motionEventEdgeFlags = 0;
     if (motionEventAction == AMOTION_EVENT_ACTION_DOWN) {
         if (pointerCoords[0].x <= 0) {
