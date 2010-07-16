@@ -196,7 +196,7 @@ int32_t AInputQueue::getEvent(AInputEvent** outEvent) {
 void AInputQueue::finishEvent(AInputEvent* event, bool handled) {
     bool needFinished = true;
 
-    if (!handled && ((InputEvent*)event)->getType() == INPUT_EVENT_TYPE_KEY
+    if (!handled && ((InputEvent*)event)->getType() == AINPUT_EVENT_TYPE_KEY
             && ((KeyEvent*)event)->hasDefaultAction()) {
         // The app didn't handle this, but it may have a default action
         // associated with it.  We need to hand this back to Java to be
@@ -767,7 +767,7 @@ dispatchKeyEvent_native(JNIEnv* env, jobject clazz, jint handle, jobject eventOb
         NativeCode* code = (NativeCode*)handle;
         if (code->nativeInputQueue != NULL) {
             KeyEvent* event = new KeyEvent();
-            android_view_KeyEvent_toNative(env, eventObj, INPUT_EVENT_NATURE_KEY, event);
+            android_view_KeyEvent_toNative(env, eventObj, event);
             code->nativeInputQueue->dispatchEvent(event);
         }
     }

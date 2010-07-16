@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <limits.h>
+#include <math.h>
 
 /** Amount that trackball needs to move in order to generate a key event. */
 #define TRACKBALL_MOVEMENT_THRESHOLD 6
@@ -60,33 +61,33 @@ int32_t updateMetaState(int32_t keyCode, bool down, int32_t oldMetaState) {
     int32_t mask;
     switch (keyCode) {
     case AKEYCODE_ALT_LEFT:
-        mask = META_ALT_LEFT_ON;
+        mask = AMETA_ALT_LEFT_ON;
         break;
     case AKEYCODE_ALT_RIGHT:
-        mask = META_ALT_RIGHT_ON;
+        mask = AMETA_ALT_RIGHT_ON;
         break;
     case AKEYCODE_SHIFT_LEFT:
-        mask = META_SHIFT_LEFT_ON;
+        mask = AMETA_SHIFT_LEFT_ON;
         break;
     case AKEYCODE_SHIFT_RIGHT:
-        mask = META_SHIFT_RIGHT_ON;
+        mask = AMETA_SHIFT_RIGHT_ON;
         break;
     case AKEYCODE_SYM:
-        mask = META_SYM_ON;
+        mask = AMETA_SYM_ON;
         break;
     default:
         return oldMetaState;
     }
 
     int32_t newMetaState = down ? oldMetaState | mask : oldMetaState & ~ mask
-            & ~ (META_ALT_ON | META_SHIFT_ON);
+            & ~ (AMETA_ALT_ON | AMETA_SHIFT_ON);
 
-    if (newMetaState & (META_ALT_LEFT_ON | META_ALT_RIGHT_ON)) {
-        newMetaState |= META_ALT_ON;
+    if (newMetaState & (AMETA_ALT_LEFT_ON | AMETA_ALT_RIGHT_ON)) {
+        newMetaState |= AMETA_ALT_ON;
     }
 
-    if (newMetaState & (META_SHIFT_LEFT_ON | META_SHIFT_RIGHT_ON)) {
-        newMetaState |= META_SHIFT_ON;
+    if (newMetaState & (AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_RIGHT_ON)) {
+        newMetaState |= AMETA_SHIFT_ON;
     }
 
     return newMetaState;
@@ -324,10 +325,25 @@ void InputReader::handleAbsoluteMotion(const RawEvent* rawEvent) {
                     InputDevice::MultiTouchScreenState::Accumulator::FIELD_ABS_MT_TOUCH_MAJOR;
             pointer->absMTTouchMajor = rawEvent->value;
             break;
+        case ABS_MT_TOUCH_MINOR:
+            pointer->fields |=
+                    InputDevice::MultiTouchScreenState::Accumulator::FIELD_ABS_MT_TOUCH_MINOR;
+            pointer->absMTTouchMinor = rawEvent->value;
+            break;
         case ABS_MT_WIDTH_MAJOR:
             pointer->fields |=
                     InputDevice::MultiTouchScreenState::Accumulator::FIELD_ABS_MT_WIDTH_MAJOR;
             pointer->absMTWidthMajor = rawEvent->value;
+            break;
+        case ABS_MT_WIDTH_MINOR:
+            pointer->fields |=
+                    InputDevice::MultiTouchScreenState::Accumulator::FIELD_ABS_MT_WIDTH_MINOR;
+            pointer->absMTWidthMinor = rawEvent->value;
+            break;
+        case ABS_MT_ORIENTATION:
+            pointer->fields |=
+                    InputDevice::MultiTouchScreenState::Accumulator::FIELD_ABS_MT_ORIENTATION;
+            pointer->absMTOrientation = rawEvent->value;
             break;
         case ABS_MT_TRACKING_ID:
             pointer->fields |=
@@ -408,17 +424,17 @@ void InputReader::onKey(nsecs_t when, InputDevice* device,
     int32_t keyEventAction;
     if (down) {
         device->keyboard.current.downTime = when;
-        keyEventAction = KEY_EVENT_ACTION_DOWN;
+        keyEventAction = AKEY_EVENT_ACTION_DOWN;
     } else {
-        keyEventAction = KEY_EVENT_ACTION_UP;
+        keyEventAction = AKEY_EVENT_ACTION_UP;
     }
 
-    int32_t keyEventFlags = KEY_EVENT_FLAG_FROM_SYSTEM;
+    int32_t keyEventFlags = AKEY_EVENT_FLAG_FROM_SYSTEM;
     if (policyActions & InputReaderPolicyInterface::ACTION_WOKE_HERE) {
-        keyEventFlags = keyEventFlags | KEY_EVENT_FLAG_WOKE_HERE;
+        keyEventFlags = keyEventFlags | AKEY_EVENT_FLAG_WOKE_HERE;
     }
 
-    mDispatcher->notifyKey(when, device->id, INPUT_EVENT_NATURE_KEY, policyFlags,
+    mDispatcher->notifyKey(when, device->id, AINPUT_SOURCE_KEYBOARD, policyFlags,
             keyEventAction, keyEventFlags, keyCode, scanCode,
             device->keyboard.current.metaState,
             device->keyboard.current.downTime);
@@ -473,11 +489,29 @@ void InputReader::onMultiTouchScreenStateChanged(nsecs_t when,
             continue;
         }
 
+        out->pointers[outCount].x = in->accumulator.pointers[inIndex].absMTPositionX;
+        out->pointers[outCount].y = in->accumulator.pointers[inIndex].absMTPositionY;
+
+        out->pointers[outCount].touchMajor = in->accumulator.pointers[inIndex].absMTTouchMajor;
+        out->pointers[outCount].touchMinor = (fields
+                & InputDevice::MultiTouchScreenState::Accumulator::FIELD_ABS_MT_TOUCH_MINOR) != 0
+                ? in->accumulator.pointers[inIndex].absMTTouchMinor
+                        : in->accumulator.pointers[inIndex].absMTTouchMajor;
+
+        out->pointers[outCount].toolMajor = in->accumulator.pointers[inIndex].absMTWidthMajor;
+        out->pointers[outCount].toolMinor = (fields
+                & InputDevice::MultiTouchScreenState::Accumulator::FIELD_ABS_MT_WIDTH_MINOR) != 0
+                ? in->accumulator.pointers[inIndex].absMTWidthMinor
+                        : in->accumulator.pointers[inIndex].absMTWidthMajor;
+
+        out->pointers[outCount].orientation = (fields
+                & InputDevice::MultiTouchScreenState::Accumulator::FIELD_ABS_MT_ORIENTATION) != 0
+                ? in->accumulator.pointers[inIndex].absMTOrientation : 0;
+
+        // Derive an approximation of pressure and size.
         // FIXME assignment of pressure may be incorrect, probably better to let
         // pressure = touch / width.  Later on we pass width to MotionEvent as a size, which
         // isn't quite right either.  Should be using touch for that.
-        out->pointers[outCount].x = in->accumulator.pointers[inIndex].absMTPositionX;
-        out->pointers[outCount].y = in->accumulator.pointers[inIndex].absMTPositionY;
         out->pointers[outCount].pressure = in->accumulator.pointers[inIndex].absMTTouchMajor;
         out->pointers[outCount].size = in->accumulator.pointers[inIndex].absMTWidthMajor;
 
@@ -556,6 +590,11 @@ void InputReader::onSingleTouchScreenStateChanged(nsecs_t when,
         out->pointers[0].y = in->current.y;
         out->pointers[0].pressure = in->current.pressure;
         out->pointers[0].size = in->current.size;
+        out->pointers[0].touchMajor = in->current.pressure;
+        out->pointers[0].touchMinor = in->current.pressure;
+        out->pointers[0].toolMajor = in->current.size;
+        out->pointers[0].toolMinor = in->current.size;
+        out->pointers[0].orientation = 0;
         out->idToIndex[0] = 0;
         out->idBits.markBit(0);
     }
@@ -635,8 +674,8 @@ bool InputReader::consumeVirtualKeyTouches(nsecs_t when,
                     device->touchScreen.currentVirtualKey.keyCode,
                     device->touchScreen.currentVirtualKey.scanCode);
 #endif
-            dispatchVirtualKey(when, device, policyFlags, KEY_EVENT_ACTION_UP,
-                    KEY_EVENT_FLAG_FROM_SYSTEM | KEY_EVENT_FLAG_VIRTUAL_HARD_KEY);
+            dispatchVirtualKey(when, device, policyFlags, AKEY_EVENT_ACTION_UP,
+                    AKEY_EVENT_FLAG_FROM_SYSTEM | AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY);
             return true; // consumed
         }
 
@@ -658,9 +697,9 @@ bool InputReader::consumeVirtualKeyTouches(nsecs_t when,
                 device->touchScreen.currentVirtualKey.keyCode,
                 device->touchScreen.currentVirtualKey.scanCode);
 #endif
-        dispatchVirtualKey(when, device, policyFlags, KEY_EVENT_ACTION_UP,
-                KEY_EVENT_FLAG_FROM_SYSTEM | KEY_EVENT_FLAG_VIRTUAL_HARD_KEY
-                        | KEY_EVENT_FLAG_CANCELED);
+        dispatchVirtualKey(when, device, policyFlags, AKEY_EVENT_ACTION_UP,
+                AKEY_EVENT_FLAG_FROM_SYSTEM | AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY
+                        | AKEY_EVENT_FLAG_CANCELED);
         return true; // consumed
 
     default:
@@ -679,8 +718,8 @@ bool InputReader::consumeVirtualKeyTouches(nsecs_t when,
                         device->touchScreen.currentVirtualKey.keyCode,
                         device->touchScreen.currentVirtualKey.scanCode);
 #endif
-                dispatchVirtualKey(when, device, policyFlags, KEY_EVENT_ACTION_DOWN,
-                        KEY_EVENT_FLAG_FROM_SYSTEM | KEY_EVENT_FLAG_VIRTUAL_HARD_KEY);
+                dispatchVirtualKey(when, device, policyFlags, AKEY_EVENT_ACTION_DOWN,
+                        AKEY_EVENT_FLAG_FROM_SYSTEM | AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY);
                 return true; // consumed
             }
         }
@@ -698,15 +737,15 @@ void InputReader::dispatchVirtualKey(nsecs_t when,
     nsecs_t downTime = device->touchScreen.currentVirtualKey.downTime;
     int32_t metaState = globalMetaState();
 
-    if (keyEventAction == KEY_EVENT_ACTION_DOWN) {
+    if (keyEventAction == AKEY_EVENT_ACTION_DOWN) {
         mPolicy->virtualKeyDownFeedback();
     }
 
     int32_t policyActions = mPolicy->interceptKey(when, device->id,
-            keyEventAction == KEY_EVENT_ACTION_DOWN, keyCode, scanCode, policyFlags);
+            keyEventAction == AKEY_EVENT_ACTION_DOWN, keyCode, scanCode, policyFlags);
 
     if (applyStandardInputDispatchPolicyActions(when, policyActions, & policyFlags)) {
-        mDispatcher->notifyKey(when, device->id, INPUT_EVENT_NATURE_KEY, policyFlags,
+        mDispatcher->notifyKey(when, device->id, AINPUT_SOURCE_KEYBOARD, policyFlags,
                 keyEventAction, keyEventFlags, keyCode, scanCode, metaState, downTime);
     }
 }
@@ -725,7 +764,7 @@ void InputReader::dispatchTouches(nsecs_t when,
     if (currentIdBits == lastIdBits) {
         // No pointer id changes so this is a move event.
         // The dispatcher takes care of batching moves so we don't have to deal with that here.
-        int32_t motionEventAction = MOTION_EVENT_ACTION_MOVE;
+        int32_t motionEventAction = AMOTION_EVENT_ACTION_MOVE;
         dispatchTouch(when, device, policyFlags, & device->touchScreen.currentTouch,
                 currentIdBits, motionEventAction);
     } else {
@@ -743,10 +782,10 @@ void InputReader::dispatchTouches(nsecs_t when,
 
             int32_t motionEventAction;
             if (activeIdBits.isEmpty()) {
-                motionEventAction = MOTION_EVENT_ACTION_UP;
+                motionEventAction = AMOTION_EVENT_ACTION_UP;
             } else {
-                motionEventAction = MOTION_EVENT_ACTION_POINTER_UP
-                        | (upId << MOTION_EVENT_ACTION_POINTER_INDEX_SHIFT);
+                motionEventAction = AMOTION_EVENT_ACTION_POINTER_UP
+                        | (upId << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT);
             }
 
             dispatchTouch(when, device, policyFlags, & device->touchScreen.lastTouch,
@@ -761,11 +800,11 @@ void InputReader::dispatchTouches(nsecs_t when,
 
             int32_t motionEventAction;
             if (oldActiveIdBits.isEmpty()) {
-                motionEventAction = MOTION_EVENT_ACTION_DOWN;
+                motionEventAction = AMOTION_EVENT_ACTION_DOWN;
                 device->touchScreen.downTime = when;
             } else {
-                motionEventAction = MOTION_EVENT_ACTION_POINTER_DOWN
-                        | (downId << MOTION_EVENT_ACTION_POINTER_INDEX_SHIFT);
+                motionEventAction = AMOTION_EVENT_ACTION_POINTER_DOWN
+                        | (downId << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT);
             }
 
             dispatchTouch(when, device, policyFlags, & device->touchScreen.currentTouch,
@@ -813,11 +852,17 @@ void InputReader::dispatchTouch(nsecs_t when, InputDevice* device, uint32_t poli
         float size = float(touch->pointers[index].size
                 - precalculated.sizeOrigin) * precalculated.sizeScale;
 
+        float orientation = float(touch->pointers[index].orientation)
+                * precalculated.orientationScale;
+
+        bool vertical = abs(orientation) <= M_PI / 8;
+
         switch (mDisplayOrientation) {
         case InputReaderPolicyInterface::ROTATION_90: {
             float xTemp = x;
             x = y;
             y = mDisplayWidth - xTemp;
+            vertical = ! vertical;
             break;
         }
         case InputReaderPolicyInterface::ROTATION_180: {
@@ -829,8 +874,22 @@ void InputReader::dispatchTouch(nsecs_t when, InputDevice* device, uint32_t poli
             float xTemp = x;
             x = mDisplayHeight - y;
             y = xTemp;
+            vertical = ! vertical;
             break;
         }
+        }
+
+        float touchMajor, touchMinor, toolMajor, toolMinor;
+        if (vertical) {
+            touchMajor = float(touch->pointers[index].touchMajor) * precalculated.yScale;
+            touchMinor = float(touch->pointers[index].touchMinor) * precalculated.xScale;
+            toolMajor = float(touch->pointers[index].toolMajor) * precalculated.yScale;
+            toolMinor = float(touch->pointers[index].toolMinor) * precalculated.xScale;
+        } else {
+            touchMajor = float(touch->pointers[index].touchMajor) * precalculated.xScale;
+            touchMinor = float(touch->pointers[index].touchMinor) * precalculated.yScale;
+            toolMajor = float(touch->pointers[index].toolMajor) * precalculated.xScale;
+            toolMinor = float(touch->pointers[index].toolMinor) * precalculated.yScale;
         }
 
         pointerIds[pointerCount] = int32_t(id);
@@ -839,6 +898,11 @@ void InputReader::dispatchTouch(nsecs_t when, InputDevice* device, uint32_t poli
         pointerCoords[pointerCount].y = y;
         pointerCoords[pointerCount].pressure = pressure;
         pointerCoords[pointerCount].size = size;
+        pointerCoords[pointerCount].touchMajor = touchMajor;
+        pointerCoords[pointerCount].touchMinor = touchMinor;
+        pointerCoords[pointerCount].toolMajor = toolMajor;
+        pointerCoords[pointerCount].toolMinor = toolMinor;
+        pointerCoords[pointerCount].orientation = orientation;
 
         pointerCount += 1;
     }
@@ -847,21 +911,21 @@ void InputReader::dispatchTouch(nsecs_t when, InputDevice* device, uint32_t poli
     // global to the event.
     // XXX Maybe we should revise the edge flags API to work on a per-pointer basis.
     int32_t motionEventEdgeFlags = 0;
-    if (motionEventAction == MOTION_EVENT_ACTION_DOWN) {
+    if (motionEventAction == AMOTION_EVENT_ACTION_DOWN) {
         if (pointerCoords[0].x <= 0) {
-            motionEventEdgeFlags |= MOTION_EVENT_EDGE_FLAG_LEFT;
+            motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_LEFT;
         } else if (pointerCoords[0].x >= orientedWidth) {
-            motionEventEdgeFlags |= MOTION_EVENT_EDGE_FLAG_RIGHT;
+            motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_RIGHT;
         }
         if (pointerCoords[0].y <= 0) {
-            motionEventEdgeFlags |= MOTION_EVENT_EDGE_FLAG_TOP;
+            motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_TOP;
         } else if (pointerCoords[0].y >= orientedHeight) {
-            motionEventEdgeFlags |= MOTION_EVENT_EDGE_FLAG_BOTTOM;
+            motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_BOTTOM;
         }
     }
 
     nsecs_t downTime = device->touchScreen.downTime;
-    mDispatcher->notifyMotion(when, device->id, INPUT_EVENT_NATURE_TOUCH, policyFlags,
+    mDispatcher->notifyMotion(when, device->id, AINPUT_SOURCE_TOUCHSCREEN, policyFlags,
             motionEventAction, globalMetaState(), motionEventEdgeFlags,
             pointerCount, pointerIds, pointerCoords,
             0, 0, downTime);
@@ -912,9 +976,9 @@ void InputReader::onTrackballStateChanged(nsecs_t when,
 
     int32_t motionEventAction;
     if (downChanged) {
-        motionEventAction = down ? MOTION_EVENT_ACTION_DOWN : MOTION_EVENT_ACTION_UP;
+        motionEventAction = down ? AMOTION_EVENT_ACTION_DOWN : AMOTION_EVENT_ACTION_UP;
     } else {
-        motionEventAction = MOTION_EVENT_ACTION_MOVE;
+        motionEventAction = AMOTION_EVENT_ACTION_MOVE;
     }
 
     int32_t pointerId = 0;
@@ -925,6 +989,11 @@ void InputReader::onTrackballStateChanged(nsecs_t when,
             ? device->trackball.accumulator.relY * device->trackball.precalculated.yScale : 0;
     pointerCoords.pressure = 1.0f; // XXX Consider making this 1.0f if down, 0 otherwise.
     pointerCoords.size = 0;
+    pointerCoords.touchMajor = 0;
+    pointerCoords.touchMinor = 0;
+    pointerCoords.toolMajor = 0;
+    pointerCoords.toolMinor = 0;
+    pointerCoords.orientation = 0;
 
     float temp;
     switch (mDisplayOrientation) {
@@ -946,8 +1015,8 @@ void InputReader::onTrackballStateChanged(nsecs_t when,
         break;
     }
 
-    mDispatcher->notifyMotion(when, device->id, INPUT_EVENT_NATURE_TRACKBALL, policyFlags,
-            motionEventAction, globalMetaState(), MOTION_EVENT_EDGE_FLAG_NONE,
+    mDispatcher->notifyMotion(when, device->id, AINPUT_SOURCE_TRACKBALL, policyFlags,
+            motionEventAction, globalMetaState(), AMOTION_EVENT_EDGE_FLAG_NONE,
             1, & pointerId, & pointerCoords,
             device->trackball.precalculated.xPrecision,
             device->trackball.precalculated.yPrecision,
@@ -1079,6 +1148,8 @@ void InputReader::configureDevice(InputDevice* device) {
                 & device->touchScreen.parameters.pressureAxis);
         configureAbsoluteAxisInfo(device, ABS_MT_WIDTH_MAJOR, "Size",
                 & device->touchScreen.parameters.sizeAxis);
+        configureAbsoluteAxisInfo(device, ABS_MT_ORIENTATION, "Orientation",
+                & device->touchScreen.parameters.orientationAxis);
     } else if (device->isSingleTouchScreen()) {
         configureAbsoluteAxisInfo(device, ABS_X, "X",
                 & device->touchScreen.parameters.xAxis);
@@ -1088,6 +1159,7 @@ void InputReader::configureDevice(InputDevice* device) {
                 & device->touchScreen.parameters.pressureAxis);
         configureAbsoluteAxisInfo(device, ABS_TOOL_WIDTH, "Size",
                 & device->touchScreen.parameters.sizeAxis);
+        device->touchScreen.parameters.orientationAxis.valid = false;
     }
 
     if (device->isTouchScreen()) {
@@ -1116,6 +1188,14 @@ void InputReader::configureDevice(InputDevice* device) {
         } else {
             device->touchScreen.precalculated.sizeOrigin = 0;
             device->touchScreen.precalculated.sizeScale = 1.0f;
+        }
+
+        if (device->touchScreen.parameters.orientationAxis.valid
+                && device->touchScreen.parameters.orientationAxis.maxValue > 0) {
+            device->touchScreen.precalculated.orientationScale =
+                    M_PI_4 / device->touchScreen.parameters.orientationAxis.maxValue;
+        } else {
+            device->touchScreen.precalculated.orientationScale = 0.0f;
         }
     }
 
@@ -1347,7 +1427,7 @@ int32_t InputReader::getCurrentScanCodeState(int32_t deviceId, int32_t deviceCla
         AutoMutex _l(mExportedStateLock);
 
         if (mExportedVirtualScanCode == scanCode) {
-            return KEY_STATE_VIRTUAL;
+            return AKEY_STATE_VIRTUAL;
         }
     } // release exported state lock
 
@@ -1360,7 +1440,7 @@ int32_t InputReader::getCurrentKeyCodeState(int32_t deviceId, int32_t deviceClas
         AutoMutex _l(mExportedStateLock);
 
         if (mExportedVirtualKeyCode == keyCode) {
-            return KEY_STATE_VIRTUAL;
+            return AKEY_STATE_VIRTUAL;
         }
     } // release exported state lock
 

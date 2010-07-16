@@ -26,21 +26,14 @@ import android.util.Slog;
 public final class InputQueue {
     private static final String TAG = "InputQueue";
     
+    private static final boolean DEBUG = false;
+    
     public static interface Callback {
         void onInputQueueCreated(InputQueue queue);
         void onInputQueueDestroyed(InputQueue queue);
     }
 
     final InputChannel mChannel;
-    
-    // Describes the interpretation of an event.
-    // XXX This concept is tentative.  See comments in android/input.h.
-    /** @hide */
-    public static final int INPUT_EVENT_NATURE_KEY = 1;
-    /** @hide */
-    public static final int INPUT_EVENT_NATURE_TOUCH = 2;
-    /** @hide */
-    public static final int INPUT_EVENT_NATURE_TRACKBALL = 3;
     
     private static Object sLock = new Object();
     
@@ -79,7 +72,10 @@ public final class InputQueue {
         }
         
         synchronized (sLock) {
-            Slog.d(TAG, "Registering input channel '" + inputChannel + "'");
+            if (DEBUG) {
+                Slog.d(TAG, "Registering input channel '" + inputChannel + "'");
+            }
+            
             nativeRegisterInputChannel(inputChannel, inputHandler, messageQueue);
         }
     }
@@ -96,35 +92,26 @@ public final class InputQueue {
         }
 
         synchronized (sLock) {
-            Slog.d(TAG, "Unregistering input channel '" + inputChannel + "'");
+            if (DEBUG) {
+                Slog.d(TAG, "Unregistering input channel '" + inputChannel + "'");
+            }
+            
             nativeUnregisterInputChannel(inputChannel);
         }
     }
     
     @SuppressWarnings("unused")
     private static void dispatchKeyEvent(InputHandler inputHandler,
-            KeyEvent event, int nature, long finishedToken) {
+            KeyEvent event, long finishedToken) {
         Runnable finishedCallback = new FinishedCallback(finishedToken);
-        
-        if (nature == INPUT_EVENT_NATURE_KEY) {
-            inputHandler.handleKey(event, finishedCallback);
-        } else {
-            Slog.d(TAG, "Unsupported nature for key event: " + nature);
-        }
+        inputHandler.handleKey(event, finishedCallback);
     }
 
     @SuppressWarnings("unused")
     private static void dispatchMotionEvent(InputHandler inputHandler,
-            MotionEvent event, int nature, long finishedToken) {
+            MotionEvent event, long finishedToken) {
         Runnable finishedCallback = new FinishedCallback(finishedToken);
-        
-        if (nature == INPUT_EVENT_NATURE_TOUCH) {
-            inputHandler.handleTouch(event, finishedCallback);
-        } else if (nature == INPUT_EVENT_NATURE_TRACKBALL) {
-            inputHandler.handleTrackball(event, finishedCallback);
-        } else {
-            Slog.d(TAG, "Unsupported nature for motion event: " + nature);
-        }
+        inputHandler.handleMotion(event, finishedCallback);
     }
     
     // TODO consider recycling finished callbacks when done

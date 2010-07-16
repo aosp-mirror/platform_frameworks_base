@@ -60,6 +60,32 @@ namespace android {
 class KeyLayoutMap;
 
 /*
+ * Input device classes.
+ */
+enum {
+    /* The input device is a keyboard. */
+    INPUT_DEVICE_CLASS_KEYBOARD      = 0x00000001,
+
+    /* The input device is an alpha-numeric keyboard (not just a dial pad). */
+    INPUT_DEVICE_CLASS_ALPHAKEY      = 0x00000002,
+
+    /* The input device is a touchscreen (either single-touch or multi-touch). */
+    INPUT_DEVICE_CLASS_TOUCHSCREEN   = 0x00000004,
+
+    /* The input device is a trackball. */
+    INPUT_DEVICE_CLASS_TRACKBALL     = 0x00000008,
+
+    /* The input device is a multi-touch touchscreen. */
+    INPUT_DEVICE_CLASS_TOUCHSCREEN_MT= 0x00000010,
+
+    /* The input device is a directional pad. */
+    INPUT_DEVICE_CLASS_DPAD          = 0x00000020,
+
+    /* The input device is a gamepad (implies keyboard). */
+    INPUT_DEVICE_CLASS_GAMEPAD       = 0x00000040
+};
+
+/*
  * Grand Central Station for events.
  *
  * The event hub aggregates input events received across all known input

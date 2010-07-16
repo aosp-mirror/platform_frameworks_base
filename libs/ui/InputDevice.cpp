@@ -108,7 +108,7 @@ void InputDevice::TouchData::copyFrom(const TouchData& other) {
 // --- InputDevice::KeyboardState ---
 
 void InputDevice::KeyboardState::reset() {
-    current.metaState = META_NONE;
+    current.metaState = AMETA_NONE;
     current.downTime = 0;
 }
 

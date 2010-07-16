@@ -13,9 +13,9 @@ namespace android {
 
 // class InputEvent
 
-void InputEvent::initialize(int32_t deviceId, int32_t nature) {
+void InputEvent::initialize(int32_t deviceId, int32_t source) {
     mDeviceId = deviceId;
-    mNature = nature;
+    mSource = source;
 }
 
 // class KeyEvent
@@ -86,7 +86,7 @@ bool KeyEvent::isSystemKey() const {
 
 void KeyEvent::initialize(
         int32_t deviceId,
-        int32_t nature,
+        int32_t source,
         int32_t action,
         int32_t flags,
         int32_t keyCode,
@@ -95,7 +95,7 @@ void KeyEvent::initialize(
         int32_t repeatCount,
         nsecs_t downTime,
         nsecs_t eventTime) {
-    InputEvent::initialize(deviceId, nature);
+    InputEvent::initialize(deviceId, source);
     mAction = action;
     mFlags = flags;
     mKeyCode = keyCode;
@@ -110,7 +110,7 @@ void KeyEvent::initialize(
 
 void MotionEvent::initialize(
         int32_t deviceId,
-        int32_t nature,
+        int32_t source,
         int32_t action,
         int32_t edgeFlags,
         int32_t metaState,
@@ -123,7 +123,7 @@ void MotionEvent::initialize(
         size_t pointerCount,
         const int32_t* pointerIds,
         const PointerCoords* pointerCoords) {
-    InputEvent::initialize(deviceId, nature);
+    InputEvent::initialize(deviceId, source);
     mAction = action;
     mEdgeFlags = edgeFlags;
     mMetaState = metaState;
