@@ -108,7 +108,7 @@ public class DatabaseUtils {
      * @see Parcel#readException
      */
     public static final void readExceptionFromParcel(Parcel reply) {
-        int code = reply.readInt();
+        int code = reply.readExceptionCode();
         if (code == 0) return;
         String msg = reply.readString();
         DatabaseUtils.readExceptionFromParcel(reply, msg, code);
@@ -116,7 +116,7 @@ public class DatabaseUtils {
 
     public static void readExceptionWithFileNotFoundExceptionFromParcel(
             Parcel reply) throws FileNotFoundException {
-        int code = reply.readInt();
+        int code = reply.readExceptionCode();
         if (code == 0) return;
         String msg = reply.readString();
         if (code == 1) {
@@ -128,7 +128,7 @@ public class DatabaseUtils {
 
     public static void readExceptionWithOperationApplicationExceptionFromParcel(
             Parcel reply) throws OperationApplicationException {
-        int code = reply.readInt();
+        int code = reply.readExceptionCode();
         if (code == 0) return;
         String msg = reply.readString();
         if (code == 10) {
