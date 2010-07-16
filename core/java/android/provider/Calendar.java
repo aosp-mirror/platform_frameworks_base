@@ -92,6 +92,8 @@ public final class Calendar {
         public static final String SYNC3 = "sync3";
         /** Generic column for use by sync adapters. */
         public static final String SYNC4 = "sync4";
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC5 = "sync5";
     }
 
     /**
@@ -290,11 +292,11 @@ public final class Calendar {
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC2);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC3);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC4);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC5);
 
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.NAME);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
                         Calendars.DISPLAY_NAME);
-                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, Calendars.HIDDEN);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, Calendars.COLOR);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, ACCESS_LEVEL);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, SELECTED);
@@ -413,12 +415,6 @@ public final class Calendar {
          * <P>Type: TEXT</P>
          */
         public static final String LOCATION = "location";
-
-        /**
-         * Should the calendar be hidden in the calendar selection panel?
-         * <P>Type: INTEGER (boolean)</P>
-         */
-        public static final String HIDDEN = "hidden";
 
         /**
          * The owner account for this calendar, based on the calendar feed.
