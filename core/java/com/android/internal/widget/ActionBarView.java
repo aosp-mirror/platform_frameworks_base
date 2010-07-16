@@ -202,6 +202,17 @@ public class ActionBarView extends ViewGroup {
         mMenuView = menuView;
     }
 
+    public boolean showOverflowMenu() {
+        if (mMenuView != null) {
+            return mMenuView.showOverflowMenu();
+        }
+        return false;
+    }
+
+    public boolean isOverflowReserved() {
+        return mMenuView != null && mMenuView.isOverflowReserved();
+    }
+
     public void setCustomNavigationView(View view) {
         mCustomNavView = view;
         if (view != null) {
