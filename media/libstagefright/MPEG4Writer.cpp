@@ -111,7 +111,6 @@ private:
     int64_t mStartTimestampUs;
     int64_t mPreviousTrackTimeUs;
     int64_t mTrackEveryTimeDurationUs;
-    int32_t mTrackEveryNumberOfFrames;
 
     static void *ThreadWrapper(void *me);
     void threadEntry();
@@ -121,7 +120,7 @@ private:
     void writeOneChunk(bool isAvc);
 
     // Track authoring progress status
-    void trackProgressStatus(int32_t nFrames, int64_t timeUs);
+    void trackProgressStatus(int64_t timeUs, status_t err = OK);
     void initTrackingProgressStatus(MetaData *params);
 
     // Utilities for collecting statistical data
@@ -742,20 +741,11 @@ void MPEG4Writer::Track::initTrackingProgressStatus(MetaData *params) {
     mPreviousTrackTimeUs = -1;
     mTrackingProgressStatus = false;
     mTrackEveryTimeDurationUs = 0;
-    mTrackEveryNumberOfFrames = 0;
     {
         int64_t timeUs;
         if (params && params->findInt64(kKeyTrackTimeStatus, &timeUs)) {
             LOGV("Receive request to track progress status for every %lld us", timeUs);
             mTrackEveryTimeDurationUs = timeUs;
-            mTrackingProgressStatus = true;
-        }
-    }
-    {
-        int32_t nFrames;
-        if (params && params->findInt32(kKeyTrackFrameStatus, &nFrames)) {
-            LOGV("Receive request to track progress status for every %d frames", nFrames);
-            mTrackEveryNumberOfFrames = nFrames;
             mTrackingProgressStatus = true;
         }
     }
@@ -1164,7 +1154,7 @@ void MPEG4Writer::Track::threadEntry() {
             if (mPreviousTrackTimeUs <= 0) {
                 mPreviousTrackTimeUs = mStartTimestampUs;
             }
-            trackProgressStatus(mSampleInfos.size(), timestampUs);
+            trackProgressStatus(timestampUs);
         }
         if (mOwner->numTracks() == 1) {
             off_t offset = is_avc? mOwner->addLengthPrefixedSample_l(copy)
@@ -1207,7 +1197,7 @@ void MPEG4Writer::Track::threadEntry() {
     if (mSampleInfos.empty()) {
         err = UNKNOWN_ERROR;
     }
-    mOwner->notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_COMPLETION_STATUS, err);
+    mOwner->trackProgressStatus(this, -1, err);
 
     // Last chunk
     if (mOwner->numTracks() == 1) {
@@ -1237,23 +1227,58 @@ void MPEG4Writer::Track::threadEntry() {
     logStatisticalData(is_audio);
 }
 
-void MPEG4Writer::Track::trackProgressStatus(int32_t nFrames, int64_t timeUs) {
-    LOGV("trackProgressStatus: %d frames and %lld us", nFrames, timeUs);
-    if (mTrackEveryNumberOfFrames > 0 &&
-        nFrames % mTrackEveryNumberOfFrames == 0) {
-        LOGV("Fire frame tracking progress status at frame %d", nFrames);
-        mOwner->notify(MEDIA_RECORDER_EVENT_INFO,
-                       MEDIA_RECORDER_INFO_PROGRESS_FRAME_STATUS,
-                       nFrames);
-    }
-
+void MPEG4Writer::Track::trackProgressStatus(int64_t timeUs, status_t err) {
+    LOGV("trackProgressStatus: %lld us", timeUs);
     if (mTrackEveryTimeDurationUs > 0 &&
         timeUs - mPreviousTrackTimeUs >= mTrackEveryTimeDurationUs) {
         LOGV("Fire time tracking progress status at %lld us", timeUs);
-        mOwner->notify(MEDIA_RECORDER_EVENT_INFO,
-                       MEDIA_RECORDER_INFO_PROGRESS_TIME_STATUS,
-                       timeUs / 1000);
+        mOwner->trackProgressStatus(this, timeUs - mPreviousTrackTimeUs, err);
         mPreviousTrackTimeUs = timeUs;
+    }
+}
+
+void MPEG4Writer::trackProgressStatus(
+        const MPEG4Writer::Track* track, int64_t timeUs, status_t err) {
+    Mutex::Autolock lock(mLock);
+    int32_t nTracks = mTracks.size();
+    CHECK(nTracks >= 1);
+    CHECK(nTracks < 64);  // Arbitrary number
+
+    int32_t trackNum = 0;
+#if 0
+    // In the worst case, we can put the trackNum
+    // along with MEDIA_RECORDER_INFO_COMPLETION_STATUS
+    // to report the progress.
+    for (List<Track *>::iterator it = mTracks.begin();
+         it != mTracks.end(); ++it, ++trackNum) {
+        if (track == (*it)) {
+            break;
+        }
+    }
+#endif
+    CHECK(trackNum < nTracks);
+    trackNum <<= 16;
+
+    // Error notification
+    // Do not consider ERROR_END_OF_STREAM an error
+    if (err != OK && err != ERROR_END_OF_STREAM) {
+        notify(MEDIA_RECORDER_EVENT_ERROR,
+               trackNum | MEDIA_RECORDER_ERROR_UNKNOWN,
+               err);
+        return;
+    }
+
+    if (timeUs == -1) {
+        // Send completion notification
+        notify(MEDIA_RECORDER_EVENT_INFO,
+               trackNum | MEDIA_RECORDER_INFO_COMPLETION_STATUS,
+               err);
+        return;
+    } else {
+        // Send progress status
+        notify(MEDIA_RECORDER_EVENT_INFO,
+               trackNum | MEDIA_RECORDER_INFO_PROGRESS_TIME_STATUS,
+               timeUs / 1000);
     }
 }
 
