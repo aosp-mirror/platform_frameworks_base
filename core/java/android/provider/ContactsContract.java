@@ -1510,7 +1510,7 @@ public final class ContactsContract {
          * <P>Type: INTEGER</P>
          * @hide
          */
-        public static final String IS_READ_ONLY = "is_read_only";
+        public static final String RAW_CONTACT_IS_READ_ONLY = "raw_contact_is_read_only";
     }
 
     /**
