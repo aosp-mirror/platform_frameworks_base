@@ -261,8 +261,8 @@ public:
     /* set the send level for this track. An auxiliary effect should be attached
      * to the track with attachEffect(). Level must be <= 1.0.
      */
-            status_t    setSendLevel(float level);
-            void        getSendLevel(float* level);
+            status_t    setAuxEffectSendLevel(float level);
+            void        getAuxEffectSendLevel(float* level);
 
     /* set sample rate for this track, mostly used for games' sound effects
      */
@@ -479,6 +479,7 @@ private:
     uint32_t                mUpdatePeriod;
     uint32_t                mFlags;
     int                     mSessionId;
+    int                     mAuxEffectId;
 };
 
 

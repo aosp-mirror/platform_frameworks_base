@@ -45,6 +45,8 @@ enum {
     GET_METADATA,
     SUSPEND,
     RESUME,
+    SET_AUX_EFFECT_SEND_LEVEL,
+    ATTACH_AUX_EFFECT
 };
 
 class BpMediaPlayer: public BpInterface<IMediaPlayer>
@@ -221,6 +223,24 @@ public:
 
         return reply.readInt32();
     }
+
+    status_t setAuxEffectSendLevel(float level)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+        data.writeFloat(level);
+        remote()->transact(SET_AUX_EFFECT_SEND_LEVEL, data, &reply);
+        return reply.readInt32();
+    }
+
+    status_t attachAuxEffect(int effectId)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+        data.writeInt32(effectId);
+        remote()->transact(ATTACH_AUX_EFFECT, data, &reply);
+        return reply.readInt32();
+    }
 };
 
 IMPLEMENT_META_INTERFACE(MediaPlayer, "android.media.IMediaPlayer");
@@ -337,6 +357,16 @@ status_t BnMediaPlayer::onTransact(
             reply->setDataPosition(0);
             reply->writeInt32(retcode);
             reply->setDataPosition(0);
+            return NO_ERROR;
+        } break;
+        case SET_AUX_EFFECT_SEND_LEVEL: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            reply->writeInt32(setAuxEffectSendLevel(data.readFloat()));
+            return NO_ERROR;
+        } break;
+        case ATTACH_AUX_EFFECT: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            reply->writeInt32(attachAuxEffect(data.readInt32()));
             return NO_ERROR;
         } break;
         default:

@@ -423,7 +423,7 @@ import java.lang.ref.WeakReference;
  *     <td>Successful invoke of this method in a valid state transfers the
  *         object to the <em>Stopped</em> state. Calling this method in an
  *         invalid state transfers the object to the <em>Error</em> state.</p></td></tr>
-  * <tr><td>setAudioSessionId </p></td>
+ * <tr><td>setAudioSessionId </p></td>
  *     <td>{Idle} </p></td>
  *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted,
  *          Error} </p></td>
@@ -434,6 +434,15 @@ import java.lang.ref.WeakReference;
  *     <td>{} </p></td>
  *     <td>This method can be called in any state and calling it does not change
  *         the object state. </p></td></tr>
+ * <tr><td>attachAuxEffect </p></td>
+ *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted} </p></td>
+ *     <td>{Idle, Error} </p></td>
+ *     <td>This method must be called after setDataSource.
+ *     Calling it does not change the object state. </p></td></tr>
+ * <tr><td>setAuxEffectSendLevel </p></td>
+ *     <td>any</p></td>
+ *     <td>{} </p></td>
+ *     <td>Calling this method does not change the object state. </p></td></tr>
  *
  * </table>
  *
@@ -1187,7 +1196,7 @@ public class MediaPlayer
      * @throws IllegalStateException if it is called in an invalid state
      *
      // FIXME: unhide.
-     // FIXME: link to AudioEffect class when public.
+     // TODO when AudioEffect is unhidden
      * @hide
      */
     public native void setAudioSessionId(int sessionId)  throws IllegalArgumentException, IllegalStateException;
@@ -1201,6 +1210,41 @@ public class MediaPlayer
      * @hide
      */
     public native int getAudioSessionId();
+
+    /**
+     * Attaches an auxiliary effect to the player. A typical auxiliary effect is a reverberation
+     * effect which can be applied on any sound source that directs a certain amount of its
+     * energy to this effect. This amount is defined by setAuxEffectSendLevel().
+     * {@see #setAuxEffectSendLevel(float)}.
+     // TODO when AudioEffect is unhidden
+     * <p>After creating an auxiliary effect (e.g. {_at_link android.media.EnvironmentalReverb}),
+     * retrieve its ID with {_at_link android.media.AudioEffect#getId()} and use it when calling
+     * this method to attach the player to the effect.
+     * <p>To detach the effect from the player, call this method with a null effect id.
+     * <p>This method must be called after one of the overloaded <code> setDataSource </code>
+     * methods.
+     *
+     * @param effectId system wide unique id of the effect to attach
+     // FIXME: unhide.
+     * @hide
+     */
+    public native void attachAuxEffect(int effectId);
+
+    /**
+     * Sets the send level of the player to the attached auxiliary effect
+     * {@see #attachAuxEffect(int)}. The level value range is 0 to 1.0.
+     * <p>By default the send level is 0, so even if an effect is attached to the player
+     * this method must be called for the effect to be applied.
+     * <p>Note that the passed level value is a raw scalar. UI controls should be scaled
+     * logarithmically: the gain applied by audio framework ranges from -72dB to 0dB,
+     * so an appropriate conversion from linear UI input x to level is:
+     * x == 0 -> level = 0
+     * 0 < x <= R -> level = 10^(72*(x-R)/20/R)
+     * @param level send level scalar
+     // FIXME: unhide.
+     * @hide
+     */
+    public native void setAuxEffectSendLevel(float level);
 
     /**
      * @param request Parcel destinated to the media player. The

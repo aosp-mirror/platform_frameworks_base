@@ -329,6 +329,10 @@ status_t MediaPlayerService::AudioOutput::dump(int fd, const Vector<String16>& a
     snprintf(buffer, 255, "  msec per frame(%f), latency (%d)\n",
             mMsecsPerFrame, mLatency);
     result.append(buffer);
+    snprintf(buffer, 255, "  aux effect id(%d), send level (%f)\n",
+            mAuxEffectId, mSendLevel);
+    result.append(buffer);
+
     ::write(fd, result.string(), result.size());
     if (mTrack != 0) {
         mTrack->dump(fd, args);
@@ -1093,6 +1097,21 @@ status_t MediaPlayerService::Client::setVolume(float leftVolume, float rightVolu
     return NO_ERROR;
 }
 
+status_t MediaPlayerService::Client::setAuxEffectSendLevel(float level)
+{
+    LOGV("[%d] setAuxEffectSendLevel(%f)", mConnId, level);
+    Mutex::Autolock l(mLock);
+    if (mAudioOutput != 0) return mAudioOutput->setAuxEffectSendLevel(level);
+    return NO_ERROR;
+}
+
+status_t MediaPlayerService::Client::attachAuxEffect(int effectId)
+{
+    LOGV("[%d] attachAuxEffect(%d)", mConnId, effectId);
+    Mutex::Autolock l(mLock);
+    if (mAudioOutput != 0) return mAudioOutput->attachAuxEffect(effectId);
+    return NO_ERROR;
+}
 
 void MediaPlayerService::Client::notify(void* cookie, int msg, int ext1, int ext2)
 {
@@ -1285,6 +1304,8 @@ MediaPlayerService::AudioOutput::AudioOutput(int sessionId)
     mRightVolume = 1.0;
     mLatency = 0;
     mMsecsPerFrame = 0;
+    mAuxEffectId = 0;
+    mSendLevel = 0.0;
     setMinBufferCount();
 }
 
@@ -1417,10 +1438,13 @@ status_t MediaPlayerService::AudioOutput::open(
 
     LOGV("setVolume");
     t->setVolume(mLeftVolume, mRightVolume);
+
     mMsecsPerFrame = 1.e3 / (float) sampleRate;
     mLatency = t->latency();
     mTrack = t;
-    return NO_ERROR;
+
+    t->setAuxEffectSendLevel(mSendLevel);
+    return t->attachAuxEffect(mAuxEffectId);;
 }
 
 void MediaPlayerService::AudioOutput::start()
@@ -1428,6 +1452,7 @@ void MediaPlayerService::AudioOutput::start()
     LOGV("start");
     if (mTrack) {
         mTrack->setVolume(mLeftVolume, mRightVolume);
+        mTrack->setAuxEffectSendLevel(mSendLevel);
         mTrack->start();
     }
 }
@@ -1479,6 +1504,26 @@ void MediaPlayerService::AudioOutput::setVolume(float left, float right)
     if (mTrack) {
         mTrack->setVolume(left, right);
     }
+}
+
+status_t MediaPlayerService::AudioOutput::setAuxEffectSendLevel(float level)
+{
+    LOGV("setAuxEffectSendLevel(%f)", level);
+    mSendLevel = level;
+    if (mTrack) {
+        return mTrack->setAuxEffectSendLevel(level);
+    }
+    return NO_ERROR;
+}
+
+status_t MediaPlayerService::AudioOutput::attachAuxEffect(int effectId)
+{
+    LOGV("attachAuxEffect(%d)", effectId);
+    mAuxEffectId = effectId;
+    if (mTrack) {
+        return mTrack->attachAuxEffect(effectId);
+    }
+    return NO_ERROR;
 }
 
 // static
