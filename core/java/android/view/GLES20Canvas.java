@@ -149,43 +149,44 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public boolean clipRect(float left, float top, float right, float bottom) {
-        return nClipRect(mRenderer, left, top, right, bottom);
+        return nClipRect(mRenderer, left, top, right, bottom, Region.Op.INTERSECT.nativeInt);
     }
     
-    private native boolean nClipRect(int renderer, float left, float top, float right, float bottom);
+    private native boolean nClipRect(int renderer, float left, float top,
+            float right, float bottom, int op);
 
     @Override
     public boolean clipRect(float left, float top, float right, float bottom, Region.Op op) {
-        throw new UnsupportedOperationException();
+        return nClipRect(mRenderer, left, top, right, bottom, op.nativeInt);
     }
 
     @Override
     public boolean clipRect(int left, int top, int right, int bottom) {
-        return nClipRect(mRenderer, left, top, right, bottom);        
+        return nClipRect(mRenderer, left, top, right, bottom, Region.Op.INTERSECT.nativeInt);        
     }
     
-    private native boolean nClipRect(int renderer, int left, int top, int right, int bottom);
+    private native boolean nClipRect(int renderer, int left, int top, int right, int bottom, int op);
 
     @Override
     public boolean clipRect(Rect rect) {
-        return clipRect(rect.left, rect.top, rect.right, rect.bottom);        
+        return nClipRect(mRenderer, rect.left, rect.top, rect.right, rect.bottom,
+                Region.Op.INTERSECT.nativeInt);        
     }
 
     @Override
     public boolean clipRect(Rect rect, Region.Op op) {
-        // TODO: Implement
-        throw new UnsupportedOperationException();
+        return nClipRect(mRenderer, rect.left, rect.top, rect.right, rect.bottom, op.nativeInt);
     }
 
     @Override
     public boolean clipRect(RectF rect) {
-        return clipRect(rect.left, rect.top, rect.right, rect.bottom);
+        return nClipRect(mRenderer, rect.left, rect.top, rect.right, rect.bottom,
+                Region.Op.INTERSECT.nativeInt);
     }
 
     @Override
     public boolean clipRect(RectF rect, Region.Op op) {
-        // TODO: Implement
-        throw new UnsupportedOperationException();
+        return nClipRect(mRenderer, rect.left, rect.top, rect.right, rect.bottom, op.nativeInt);
     }
 
     @Override
@@ -347,7 +348,6 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void setDrawFilter(DrawFilter filter) {
-        // Don't crash, but ignore the draw filter
         // TODO: Implement PaintDrawFilter
         mFilter = filter;
     }

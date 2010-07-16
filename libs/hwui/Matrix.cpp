@@ -93,6 +93,25 @@ void Matrix4::copyTo(SkMatrix& v) const {
     v.set(SkMatrix::kMPersp2, data[15]);
 }
 
+void Matrix4::loadInverse(const Matrix4& v) {
+    double scale = 1.0 /
+            (v.data[0]  * ((double) v.data[5]  * v.data[15] - (double) v.data[13] * v.data[7]) +
+             v.data[4]  * ((double) v.data[13] * v.data[3]  - (double) v.data[1]  * v.data[15]) +
+             v.data[12] * ((double) v.data[1]  * v.data[7]  - (double) v.data[5]  * v.data[3]));
+
+    data[0]  = (v.data[5] * v.data[15] - v.data[13] * v.data[7])  * scale;
+    data[4]  = (v.data[12] * v.data[7] - v.data[4]  * v.data[15]) * scale;
+    data[12] = (v.data[4] * v.data[13] - v.data[12] * v.data[5])  * scale;
+
+    data[1]  = (v.data[13] * v.data[3] - v.data[1]  * v.data[15]) * scale;
+    data[5]  = (v.data[0] * v.data[15] - v.data[12] * v.data[3])  * scale;
+    data[13] = (v.data[12] * v.data[1] - v.data[0]  * v.data[13]) * scale;
+
+    data[3]  = (v.data[1] * v.data[7] - v.data[5] * v.data[3]) * scale;
+    data[7]  = (v.data[4] * v.data[3] - v.data[0] * v.data[7]) * scale;
+    data[15] = (v.data[0] * v.data[5] - v.data[4] * v.data[1]) * scale;
+}
+
 void Matrix4::copyTo(float* v) const {
     memcpy(v, data, sizeof(data));
 }

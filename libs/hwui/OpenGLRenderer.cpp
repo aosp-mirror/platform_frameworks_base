@@ -244,7 +244,7 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     glBindFramebuffer(GL_FRAMEBUFFER, previous->fbo);
 
     // Restore the clip from the previous snapshot
-    const Rect& clip = previous->getMappedClip();
+    const Rect& clip = previous->clipRect;
     glScissor(clip.left, mHeight - clip.bottom, clip.getWidth(), clip.getHeight());
 
     Layer* layer = current->layer;
@@ -339,12 +339,11 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     saveSnapshot();
     // TODO: This doesn't preserve other transformations (check Skia first)
     mSnapshot->transform.loadTranslate(-left, -top, 0.0f);
-    mSnapshot->setClip(left, top, right, bottom);
+    mSnapshot->setClip(0.0f, 0.0f, right - left, bottom - top);
     mSnapshot->height = bottom - top;
     setScissorFromClip();
 
-    mSnapshot->flags = Snapshot::kFlagDirtyTransform | Snapshot::kFlagDirtyOrtho |
-            Snapshot::kFlagClipSet;
+    mSnapshot->flags = Snapshot::kFlagDirtyOrtho | Snapshot::kFlagClipSet;
     mSnapshot->orthoMatrix.load(mOrthoMatrix);
 
     // Change the ortho projection
@@ -359,22 +358,18 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
 void OpenGLRenderer::translate(float dx, float dy) {
     mSnapshot->transform.translate(dx, dy, 0.0f);
-    mSnapshot->flags |= Snapshot::kFlagDirtyTransform;
 }
 
 void OpenGLRenderer::rotate(float degrees) {
     mSnapshot->transform.rotate(degrees, 0.0f, 0.0f, 1.0f);
-    mSnapshot->flags |= Snapshot::kFlagDirtyTransform;
 }
 
 void OpenGLRenderer::scale(float sx, float sy) {
     mSnapshot->transform.scale(sx, sy, 1.0f);
-    mSnapshot->flags |= Snapshot::kFlagDirtyTransform;
 }
 
 void OpenGLRenderer::setMatrix(SkMatrix* matrix) {
     mSnapshot->transform.load(*matrix);
-    mSnapshot->flags |= Snapshot::kFlagDirtyTransform;
 }
 
 void OpenGLRenderer::getMatrix(SkMatrix* matrix) {
@@ -384,7 +379,6 @@ void OpenGLRenderer::getMatrix(SkMatrix* matrix) {
 void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
     mat4 m(*matrix);
     mSnapshot->transform.multiply(m);
-    mSnapshot->flags |= Snapshot::kFlagDirtyTransform;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -392,38 +386,26 @@ void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::setScissorFromClip() {
-    const Rect& clip = mSnapshot->getMappedClip();
+    const Rect& clip = mSnapshot->clipRect;
     glScissor(clip.left, mSnapshot->height - clip.bottom, clip.getWidth(), clip.getHeight());
 }
 
 const Rect& OpenGLRenderer::getClipBounds() {
-    return mSnapshot->clipRect;
+    return mSnapshot->getLocalClip();
 }
 
 bool OpenGLRenderer::quickReject(float left, float top, float right, float bottom) {
-    /*
-     * The documentation of quickReject() indicates that the specified rect
-     * is transformed before being compared to the clip rect. However, the
-     * clip rect is not stored transformed in the snapshot and can thus be
-     * compared directly
-     *
-     * The following code can be used instead to performed a mapped comparison:
-     *
-     *     mSnapshot->transform.mapRect(r);
-     *     const Rect& clip = mSnapshot->getMappedClip();
-     *     return !clip.intersects(r);
-     */
     Rect r(left, top, right, bottom);
+    mSnapshot->transform.mapRect(r);
     return !mSnapshot->clipRect.intersects(r);
 }
 
-bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom) {
-    bool clipped = mSnapshot->clip(left, top, right, bottom);
+bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {
+    bool clipped = mSnapshot->clip(left, top, right, bottom, op);
     if (clipped) {
-        mSnapshot->flags |= Snapshot::kFlagClipSet;
         setScissorFromClip();
     }
-    return clipped;
+    return !mSnapshot->clipRect.isEmpty();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -504,7 +486,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
 }
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
-    const Rect& clip = mSnapshot->getMappedClip();
+    const Rect& clip = mSnapshot->clipRect;
     drawColorRect(clip.left, clip.top, clip.right, clip.bottom, color, mode, true);
 }
 
@@ -584,22 +566,20 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
 
-    // TODO: Pick the program matching the current shader
-    sp<DrawColorProgram> program = mDrawColorProgram;
-    if (!useProgram(program)) {
+    if (!useProgram(mDrawColorProgram)) {
         const GLvoid* p = &gDrawColorVertices[0].position[0];
-        glVertexAttribPointer(program->position, 2, GL_FLOAT, GL_FALSE,
+        glVertexAttribPointer(mDrawColorProgram->position, 2, GL_FLOAT, GL_FALSE,
                 gDrawColorVertexStride, p);
     }
 
     if (!ignoreTransform) {
-        program->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+        mDrawColorProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
     } else {
         mat4 identity;
-        program->set(mOrthoMatrix, mModelView, identity);
+        mDrawColorProgram->set(mOrthoMatrix, mModelView, identity);
     }
 
-    glUniform4f(program->color, r, g, b, a);
+    glUniform4f(mDrawColorProgram->color, r, g, b, a);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gDrawColorVertexCount);
 }
