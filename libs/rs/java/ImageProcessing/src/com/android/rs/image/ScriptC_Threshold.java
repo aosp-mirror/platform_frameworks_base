@@ -161,6 +161,28 @@ public class ScriptC_Threshold extends ScriptC {
         return mExportVar_saturation;
     }
 
+    private final static int mExportVarIdx_vBlurScript = 12;
+    private Script mExportVar_vBlurScript;
+    public void set_vBlurScript(Script v) {
+        mExportVar_vBlurScript = v;
+        setVar(mExportVarIdx_vBlurScript, (v == null) ? 0 : v.getID());
+    }
+
+    public Script get_vBlurScript() {
+        return mExportVar_vBlurScript;
+    }
+
+    private final static int mExportVarIdx_hBlurScript = 13;
+    private Script mExportVar_hBlurScript;
+    public void set_hBlurScript(Script v) {
+        mExportVar_hBlurScript = v;
+        setVar(mExportVarIdx_hBlurScript, (v == null) ? 0 : v.getID());
+    }
+
+    public Script get_hBlurScript() {
+        return mExportVar_hBlurScript;
+    }
+
     private final static int mExportFuncIdx_filter = 0;
     public void invoke_filter() {
         invoke(mExportFuncIdx_filter);

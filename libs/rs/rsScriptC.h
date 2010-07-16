@@ -57,9 +57,11 @@ public:
 
     virtual uint32_t run(Context *);
 
-    virtual void runForEach(Context *rsc, const Allocation *ain, Allocation *aout);
-    virtual void runForEach(Context *rsc, const Allocation *ain, Allocation *aout, uint32_t xStart, uint32_t xEnd);
-    virtual void runForEach(Context *rsc, const Allocation *ain, Allocation *aout, uint32_t xStart, uint32_t yStart, uint32_t xEnd, uint32_t yEnd);
+    virtual void runForEach(Context *rsc,
+                            const Allocation * ain,
+                            Allocation * aout,
+                            const void * usr,
+                            const RsScriptCall *sc = NULL);
 
     virtual void serialize(OStream *stream) const {    }
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_SCRIPT_C; }

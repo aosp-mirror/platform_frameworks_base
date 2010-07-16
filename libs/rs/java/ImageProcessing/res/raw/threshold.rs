@@ -2,12 +2,8 @@
 
 #include "../../../../scriptc/rs_types.rsh"
 #include "../../../../scriptc/rs_math.rsh"
-#include "../../../../scriptc/rs_graphics.rsh"
 
-#pragma rs java_package_name(com.android.rs.image)
-
-
-#define MAX_RADIUS 25
+#include "ip.rsh"
 
 int height;
 int width;
@@ -28,10 +24,14 @@ float saturation;
 static float inWMinInB;
 static float outWMinOutB;
 static float overInWMinInB;
-//static float3 gammaV;
+static FilterStruct filterStruct;
 
-#pragma rs export_var(height, width, radius, InPixel, OutPixel, ScratchPixel, inBlack, outBlack, inWhite, outWhite, gamma, saturation, InPixel, OutPixel, ScratchPixel)
+#pragma rs export_var(height, width, radius, InPixel, OutPixel, ScratchPixel, inBlack, outBlack, inWhite, outWhite, gamma, saturation, InPixel, OutPixel, ScratchPixel, vBlurScript, hBlurScript)
 #pragma rs export_func(filter, filterBenchmark);
+
+rs_script vBlurScript;
+rs_script hBlurScript;
+
 
 // Store our coefficients here
 static float gaussian[MAX_RADIUS * 2 + 1];
@@ -145,48 +145,6 @@ static void processNoBlur() {
     rsSendToClient(&count, 1, 4, 0);
 }
 
-static void horizontalBlur() {
-    float4 blurredPixel = 0;
-    float4 currentPixel = 0;
-    // Horizontal blur
-    int w, h, r;
-    for(h = 0; h < height; h ++) {
-        uchar4 *input = InPixel + h*width;
-        uchar4 *output = ScratchPixel + h*width;
-
-        for(w = 0; w < width; w ++) {
-            blurredPixel = 0;
-
-            for(r = -radius; r <= radius; r ++) {
-                // Stepping left and right away from the pixel
-                int validW = w + r;
-                // Clamp to zero and width max() isn't exposed for ints yet
-                if(validW < 0) {
-                    validW = 0;
-                }
-                if(validW > width - 1) {
-                    validW = width - 1;
-                }
-                //int validW = rsClamp(w + r, 0, width - 1);
-
-                float weight = gaussian[r + radius];
-                currentPixel.x = (float)(input[validW].x);
-                currentPixel.y = (float)(input[validW].y);
-                currentPixel.z = (float)(input[validW].z);
-                //currentPixel.w = (float)(input->a);
-
-                blurredPixel += currentPixel*weight;
-            }
-
-            output->x = (uint8_t)blurredPixel.x;
-            output->y = (uint8_t)blurredPixel.y;
-            output->z = (uint8_t)blurredPixel.z;
-            //output->a = (uint8_t)blurredPixel.w;
-            output++;
-        }
-    }
-}
-
 static void horizontalBlurLevels() {
     float4 blurredPixel = 0;
     float4 currentPixel = 0;
@@ -232,58 +190,19 @@ static void horizontalBlurLevels() {
     }
 }
 
-static void verticalBlur() {
-    float4 blurredPixel = 0;
-    float4 currentPixel = 0;
-    // Vertical blur
-    int w, h, r;
-    for(h = 0; h < height; h ++) {
-        uchar4 *output = OutPixel + h*width;
-
-        for(w = 0; w < width; w ++) {
-
-            blurredPixel = 0;
-            for(r = -radius; r <= radius; r ++) {
-#if 1
-                int validH = h + r;
-                // Clamp to zero and width
-                if(validH < 0) {
-                    validH = 0;
-                }
-                if(validH > height - 1) {
-                    validH = height - 1;
-                }
-
-                uchar4 *input = ScratchPixel + validH*width + w;
-
-                float weight = gaussian[r + radius];
-
-                currentPixel.x = (float)(input->x);
-                currentPixel.y = (float)(input->y);
-                currentPixel.z = (float)(input->z);
-
-                blurredPixel.xyz += currentPixel.xyz * weight;
-#else
-                int validH = rsClamp(h + r, 0, height - 1);
-                uchar4 *input = ScratchPixel + validH*width + w;
-                blurredPixel.xyz += convert_float3(input->xyz) * gaussian[r + radius];
-#endif
-            }
-
-            //output->xyz = convert_uchar3(blurredPixel.xyz);
-            output->x = (uint8_t)blurredPixel.x;
-            output->y = (uint8_t)blurredPixel.y;
-            output->z = (uint8_t)blurredPixel.z;
-            //output->a = (uint8_t)blurredPixel.w;
-            output++;
-        }
-    }
+static void initStructs() {
+    filterStruct.gaussian = gaussian;
+    filterStruct.width = width;
+    filterStruct.height = height;
+    filterStruct.radius = radius;
 }
 
 void filter() {
     RS_DEBUG(height);
     RS_DEBUG(width);
     RS_DEBUG(radius);
+
+    initStructs();
 
     computeColorMatrix();
 
@@ -295,18 +214,30 @@ void filter() {
     computeGaussianWeights();
 
     horizontalBlurLevels();
-    verticalBlur();
+
+    rsForEach(vBlurScript,
+              rsGetAllocation(InPixel),
+              rsGetAllocation(OutPixel),
+              &filterStruct);
 
     int count = 0;
     rsSendToClient(&count, 1, 4, 0);
 }
 
 void filterBenchmark() {
+    initStructs();
 
     computeGaussianWeights();
 
-    horizontalBlur();
-    verticalBlur();
+    rsForEach(hBlurScript,
+              rsGetAllocation(InPixel),
+              rsGetAllocation(OutPixel),
+              &filterStruct);
+
+    rsForEach(vBlurScript,
+              rsGetAllocation(InPixel),
+              rsGetAllocation(OutPixel),
+              &filterStruct);
 
     int count = 0;
     rsSendToClient(&count, 1, 4, 0);

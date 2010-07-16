@@ -376,57 +376,30 @@ int SC_getAllocation(const void *ptr)
 }
 
 
-void SC_ForEachii(RsScript vs, RsAllocation vin)
+void SC_ForEach(RsScript vs,
+                RsAllocation vin,
+                RsAllocation vout,
+                const void *usr)
 {
     GET_TLS();
-    Script *s = static_cast<Script *>(vs);
-    Allocation *ain = static_cast<Allocation *>(vin);
-    s->runForEach(rsc, ain, NULL);
-}
-
-void SC_ForEachiii(RsScript vs, RsAllocation vin, RsAllocation vout)
-{
-    GET_TLS();
-    Script *s = static_cast<Script *>(vs);
-    Allocation *ain = static_cast<Allocation *>(vin);
+    const Allocation *ain = static_cast<const Allocation *>(vin);
     Allocation *aout = static_cast<Allocation *>(vout);
-    s->runForEach(rsc, ain, aout);
+    Script *s = static_cast<Script *>(vs);
+    s->runForEach(rsc, ain, aout, usr);
 }
 
-void SC_ForEachiiii(RsScript vs, RsAllocation vin, int xStart, int xEnd)
+void SC_ForEach2(RsScript vs,
+                RsAllocation vin,
+                RsAllocation vout,
+                const void *usr,
+                const RsScriptCall *call)
 {
     GET_TLS();
-    Script *s = static_cast<Script *>(vs);
-    Allocation *ain = static_cast<Allocation *>(vin);
-    s->runForEach(rsc, ain, NULL, xStart, xEnd);
-}
-
-void SC_ForEachiiiii(RsScript vs, RsAllocation vin, RsAllocation vout, int xStart, int xEnd)
-{
-    GET_TLS();
-    Script *s = static_cast<Script *>(vs);
-    Allocation *ain = static_cast<Allocation *>(vin);
+    const Allocation *ain = static_cast<const Allocation *>(vin);
     Allocation *aout = static_cast<Allocation *>(vout);
-    s->runForEach(rsc, ain, aout, xStart, xEnd);
-}
-
-void SC_ForEachiiiiii(RsScript vs, RsAllocation vin, int xStart, int yStart, int xEnd, int yEnd)
-{
-    GET_TLS();
     Script *s = static_cast<Script *>(vs);
-    Allocation *ain = static_cast<Allocation *>(vin);
-    s->runForEach(rsc, ain, NULL, xStart, yStart, xEnd, yEnd);
+    s->runForEach(rsc, ain, aout, usr, call);
 }
-
-void SC_ForEachiiiiiii(RsScript vs, RsAllocation vin, RsAllocation vout, int xStart, int yStart, int xEnd, int yEnd)
-{
-    GET_TLS();
-    Script *s = static_cast<Script *>(vs);
-    Allocation *ain = static_cast<Allocation *>(vin);
-    Allocation *aout = static_cast<Allocation *>(vout);
-    s->runForEach(rsc, ain, aout, xStart, yStart, xEnd, yEnd);
-}
-
 
 //////////////////////////////////////////////////////////////////////////////
 // Class implementation
@@ -502,12 +475,8 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "rsMatrixScale", (void *)&SC_matrixScale },
     { "rsMatrixTranslate", (void *)&SC_matrixTranslate },
 
-    { "_Z9rsForEachii", (void *)&SC_ForEachii },
-    { "_Z9rsForEachiii", (void *)&SC_ForEachiii },
-    { "_Z9rsForEachiiii", (void *)&SC_ForEachiiii },
-    { "_Z9rsForEachiiiii", (void *)&SC_ForEachiiiii },
-    { "_Z9rsForEachiiiiii", (void *)&SC_ForEachiiiiii },
-    { "_Z9rsForEachiiiiiii", (void *)&SC_ForEachiiiiiii },
+    { "_Z9rsForEach9rs_script13rs_allocationS0_PKv", (void *)&SC_ForEach },
+    //{ "_Z9rsForEach9rs_script13rs_allocationS0_PKv", (void *)&SC_ForEach2 },
 
 ////////////////////////////////////////////////////////////////////
 

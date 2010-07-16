@@ -255,6 +255,19 @@ typedef struct {
     const char* objectName;
 } RsFileIndexEntry;
 
+// Script to Script
+typedef struct {
+    uint32_t xStart;
+    uint32_t xEnd;
+    uint32_t yStart;
+    uint32_t yEnd;
+    uint32_t zStart;
+    uint32_t zEnd;
+    uint32_t arrayStart;
+    uint32_t arrayEnd;
+
+} RsScriptCall;
+
 #ifndef NO_RS_FUNCS
 #include "rsgApiFuncDecl.h"
 #endif

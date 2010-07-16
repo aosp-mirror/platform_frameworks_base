@@ -64,9 +64,11 @@ public:
 
     void setVar(uint32_t slot, const void *val, uint32_t len);
 
-    virtual void runForEach(Context *rsc, const Allocation *ain, Allocation *aout) = 0;
-    virtual void runForEach(Context *rsc, const Allocation *ain, Allocation *aout, uint32_t xStart, uint32_t xEnd) = 0;
-    virtual void runForEach(Context *rsc, const Allocation *ain, Allocation *aout, uint32_t xStart, uint32_t yStart, uint32_t xEnd, uint32_t yEnd) = 0;
+    virtual void runForEach(Context *rsc,
+                            const Allocation * ain,
+                            Allocation * aout,
+                            const void * usr,
+                            const RsScriptCall *sc = NULL) = 0;
 
     virtual void Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len) = 0;
     virtual void setupScript(Context *rsc) = 0;

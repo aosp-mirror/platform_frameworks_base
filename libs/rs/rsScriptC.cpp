@@ -136,54 +136,94 @@ uint32_t ScriptC::run(Context *rsc)
     return ret;
 }
 
-void ScriptC::runForEach(Context *rsc, const Allocation *ain, Allocation *aout,
-                         uint32_t xStart, uint32_t yStart, uint32_t xEnd, uint32_t yEnd)
-{
-    LOGE("ScriptC::runForEach not implemented");
-}
 
-void ScriptC::runForEach(Context *rsc, const Allocation *ain, Allocation *aout, uint32_t xStart, uint32_t xEnd)
+void ScriptC::runForEach(Context *rsc,
+                         const Allocation * ain,
+                         Allocation * aout,
+                         const void * usr,
+                         const RsScriptCall *sc)
 {
     uint32_t dimX = ain->getType()->getDimX();
-    rsAssert(xStart < dimX);
-    rsAssert(xEnd <= dimX);
-    rsAssert(ain->getType()->getDimY() == 0);
-    rsAssert(ain->getType()->getDimZ() == 0);
+    uint32_t dimY = ain->getType()->getDimY();
+    uint32_t dimZ = ain->getType()->getDimZ();
+    uint32_t dimA = 0;//ain->getType()->getDimArray();
 
-    if (xStart >= dimX) xStart = dimX - 1;
-    if (xEnd >= dimX) xEnd = dimX - 1;
-    if (xStart > xEnd) return;
+    uint32_t xStart = 0;
+    uint32_t xEnd = 0;
+    uint32_t yStart = 0;
+    uint32_t yEnd = 0;
+    uint32_t zStart = 0;
+    uint32_t zEnd = 0;
+    uint32_t arrayStart = 0;
+    uint32_t arrayEnd = 0;
+
+    if (!sc || (sc->xEnd == 0)) {
+        xStart = 0;
+        xEnd = ain->getType()->getDimX();
+    } else {
+        rsAssert(xStart < dimX);
+        rsAssert(xEnd <= dimX);
+        rsAssert(sc->xStart < sc->xEnd);
+        xStart = rsMin(dimX, sc->xStart);
+        xEnd = rsMin(dimX, sc->xEnd);
+        if (xStart >= xEnd) return;
+    }
+
+    if (!sc || (sc->yEnd == 0)) {
+        yStart = 0;
+        yEnd = ain->getType()->getDimY();
+    } else {
+        rsAssert(yStart < dimY);
+        rsAssert(yEnd <= dimY);
+        rsAssert(sc->yStart < sc->yEnd);
+        yStart = rsMin(dimY, sc->yStart);
+        yEnd = rsMin(dimY, sc->yEnd);
+        if (yStart >= yEnd) return;
+    }
+
+    xEnd = rsMax((uint32_t)1, xEnd);
+    yEnd = rsMax((uint32_t)1, yEnd);
+    zEnd = rsMax((uint32_t)1, zEnd);
+    arrayEnd = rsMax((uint32_t)1, arrayEnd);
+
+    rsAssert(ain->getType()->getDimZ() == 0);
 
     setupScript(rsc);
     Script * oldTLS = setTLS(this);
 
-    typedef int (*rs_t)(const void *, void *, uint32_t);
+    typedef int (*rs_t)(const void *, void *, const void *, uint32_t, uint32_t, uint32_t, uint32_t);
+
     const uint8_t *ptrIn = (const uint8_t *)ain->getPtr();
-    uint32_t strideIn = ain->getType()->getElementSizeBytes();
+    uint32_t eStrideIn = ain->getType()->getElementSizeBytes();
 
     uint8_t *ptrOut = NULL;
-    uint32_t strideOut = 0;
+    uint32_t eStrideOut = 0;
     if (aout) {
         ptrOut = (uint8_t *)aout->getPtr();
-        strideOut = aout->getType()->getElementSizeBytes();
+        eStrideOut = aout->getType()->getElementSizeBytes();
     }
 
-    for (uint32_t ct=xStart; ct < xEnd; ct++) {
-        ((rs_t)mProgram.mRoot) (ptrIn + (strideIn * ct), ptrOut + (strideOut * ct), ct);
+    for (uint32_t ar = arrayStart; ar < arrayEnd; ar++) {
+        for (uint32_t z = zStart; z < zEnd; z++) {
+            for (uint32_t y = yStart; y < yEnd; y++) {
+                uint32_t offset = dimX * dimY * dimZ * ar +
+                                  dimX * dimY * z +
+                                  dimX * y;
+                uint8_t *xPtrOut = ptrOut + (eStrideOut * offset);
+                const uint8_t *xPtrIn = ptrIn + (eStrideIn * offset);
+
+                for (uint32_t x = xStart; x < xEnd; x++) {
+                    ((rs_t)mProgram.mRoot) (xPtrIn, xPtrOut, usr, x, y, z, ar);
+                    xPtrIn += eStrideIn;
+                    xPtrOut += eStrideOut;
+                }
+            }
+        }
+
     }
 
     setTLS(oldTLS);
 }
-
-void ScriptC::runForEach(Context *rsc, const Allocation *ain, Allocation *aout)
-{
-    if (ain->getType()->getDimY()) {
-        runForEach(rsc, ain, aout, 0, 0, 0xffffffff, 0xffffffff);
-    } else {
-        runForEach(rsc, ain, aout, 0, 0xffffffff);
-    }
-}
-
 
 void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len)
 {
@@ -246,7 +286,7 @@ static BCCvoid* symbolLookup(BCCvoid* pContext, const BCCchar* name)
 
 void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
 {
-    LOGE("ScriptCState::runCompiler ");
+    LOGV("ScriptCState::runCompiler ");
 
     s->mBccScript = bccCreateScript();
     bccScriptBitcode(s->mBccScript, s->mEnviroment.mScriptText, s->mEnviroment.mScriptTextLength);
@@ -254,7 +294,7 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
     bccCompileScript(s->mBccScript);
     bccGetScriptLabel(s->mBccScript, "root", (BCCvoid**) &s->mProgram.mRoot);
     bccGetScriptLabel(s->mBccScript, "init", (BCCvoid**) &s->mProgram.mInit);
-    LOGE("root %p,  init %p", s->mProgram.mRoot, s->mProgram.mInit);
+    LOGV("root %p,  init %p", s->mProgram.mRoot, s->mProgram.mInit);
 
     if (s->mProgram.mInit) {
         s->mProgram.mInit();
@@ -268,24 +308,9 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
         bccGetExportFuncs(s->mBccScript, NULL, s->mEnviroment.mInvokeFunctionCount, (BCCvoid **) s->mEnviroment.mInvokeFunctions);
     }
 
-//    s->mEnviroment.mInvokeFunctions = (Script::InvokeFunc_t *)calloc(100, sizeof(void *));
-//    BCCchar **labels = new char*[100];
-//    bccGetFunctions(s->mBccScript, (BCCsizei *)&s->mEnviroment.mInvokeFunctionCount,
-//                    100, (BCCchar **)labels);
-    //LOGE("func count %i", s->mEnviroment.mInvokeFunctionCount);
-//    for (uint32_t i=0; i < s->mEnviroment.mInvokeFunctionCount; i++) {
-//        BCCsizei length;
-//        bccGetFunctionBinary(s->mBccScript, labels[i], (BCCvoid **)&(s->mEnviroment.mInvokeFunctions[i]), &length);
-        //LOGE("func %i %p", i, s->mEnviroment.mInvokeFunctions[i]);
-  //  }
-
     s->mEnviroment.mFieldAddress = (void **)calloc(100, sizeof(void *));
     bccGetExportVars(s->mBccScript, (BCCsizei *)&s->mEnviroment.mFieldCount,
                      100, s->mEnviroment.mFieldAddress);
-    //LOGE("var count %i", s->mEnviroment.mFieldCount);
-    for (uint32_t i=0; i < s->mEnviroment.mFieldCount; i++) {
-        //LOGE("var %i %p", i, s->mEnviroment.mFieldAddress[i]);
-    }
 
     s->mEnviroment.mFragment.set(rsc->getDefaultProgramFragment());
     s->mEnviroment.mVertex.set(rsc->getDefaultProgramVertex());
