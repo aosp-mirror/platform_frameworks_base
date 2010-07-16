@@ -393,7 +393,11 @@ case ACTIVITY_EDIT:
       <pre>setContentView(R.layout.note_edit);</pre>
     </li>
     <li>
-      Find the edit and button components we need:
+      Change the Activity title to the "Edit Note" string:
+      <pre>setTitle(R.string.edit_note);</pre>
+    </li>
+    <li>
+      Find the {@link android.widget.EditText} and {@link android.widget.Button} components we need:
       <p>These are found by the
       IDs associated to them in the R class, and need to be cast to the right
       type of <code>View</code> (<code>EditText</code> for the two text views,
