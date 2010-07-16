@@ -3238,7 +3238,7 @@ public class WebView extends AbsoluteLayout
         setUpSelect();
         if (mNativeClass != 0 && nativeWordSelection(x, y)) {
             nativeSetExtendSelection();
-            getWebChromeClient().onSelectionStart();
+            getWebChromeClient().onSelectionStart(this);
             return true;
         }
         notifySelectDialogDismissed();
@@ -4025,7 +4025,7 @@ public class WebView extends AbsoluteLayout
      */
     public void selectionDone() {
         if (mSelectingText) {
-            getWebChromeClient().onSelectionDone();
+            getWebChromeClient().onSelectionDone(this);
             invalidate(); // redraw without selection
             notifySelectDialogDismissed();
         }
