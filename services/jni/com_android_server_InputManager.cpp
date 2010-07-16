@@ -410,7 +410,11 @@ NativeInputManager::~NativeInputManager() {
 String8 NativeInputManager::dump() {
     String8 dump;
     dump.append("Native Input Dispatcher State:\n");
-    dumpDispatchStateLd(dump);
+
+    { // acquire lock
+        AutoMutex _l(mDisplayLock);
+        dumpDispatchStateLd(dump);
+    } // release lock
     return dump;
 }
 
@@ -984,8 +988,8 @@ void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowObjArra
 
         mTempTouchedWallpaperChannels.clear();
 
-        if (hadFocusedWindow && ! mFocusedWindow
-                || mFocusedWindow && ! mFocusedWindow->visible) {
+        if ((hadFocusedWindow && ! mFocusedWindow)
+                || (mFocusedWindow && ! mFocusedWindow->visible)) {
             preemptInputDispatch();
         }
 

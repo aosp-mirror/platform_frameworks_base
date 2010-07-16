@@ -286,7 +286,8 @@ private:
             int32_t keyEventAction, int32_t keyEventFlags);
     void dispatchTouches(nsecs_t when, InputDevice* device, uint32_t policyFlags);
     void dispatchTouch(nsecs_t when, InputDevice* device, uint32_t policyFlags,
-            InputDevice::TouchData* touch, BitSet32 idBits, int32_t motionEventAction);
+            InputDevice::TouchData* touch, BitSet32 idBits, uint32_t changedId,
+            int32_t motionEventAction);
 
     // display
     void resetDisplayProperties();
