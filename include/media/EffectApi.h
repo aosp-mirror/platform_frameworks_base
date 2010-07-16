@@ -455,7 +455,7 @@ enum effect_command_e {
 //--------------------------------------------------------------------------------------------------
 // description:
 //  Set and get volume. Used by audio framework to delegate volume control to effect engine.
-//  The effect implementation must set EFFECT_FLAG_VOLUME_IND and/or EFFECT_FLAG_VOLUME_CTRL flag in
+//  The effect implementation must set EFFECT_FLAG_VOLUME_IND or EFFECT_FLAG_VOLUME_CTRL flag in
 //  its descriptor to receive this command before every call to process() function
 //  If EFFECT_FLAG_VOLUME_CTRL flag is set in the effect descriptor, the effect engine must return
 //  the volume that should be applied before the effect is processed. The overall volume (the volume
