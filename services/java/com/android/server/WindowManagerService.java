@@ -332,7 +332,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Z-ordered (bottom-most first) list of all Window objects.
      */
-    final ArrayList mWindows = new ArrayList();
+    final ArrayList<WindowState> mWindows = new ArrayList<WindowState>();
 
     /**
      * Windows that are being resized.  Used so we can tell the client about
@@ -630,7 +630,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "KEEP_SCREEN_ON_FLAG");
         mHoldingScreenWakeLock.setReferenceCounted(false);
 
-        mInputManager = new InputManager(context, this, pmc, mPowerManager);
+        mInputManager = new InputManager(context, this);
 
         PolicyThread thr = new PolicyThread(mPolicy, this, context, pm);
         thr.start();
@@ -665,7 +665,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void placeWindowAfter(Object pos, WindowState window) {
+    private void placeWindowAfter(WindowState pos, WindowState window) {
         final int i = mWindows.indexOf(pos);
         if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT) Slog.v(
             TAG, "Adding window " + window + " at "
@@ -674,7 +674,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mWindowsChanged = true;
     }
 
-    private void placeWindowBefore(Object pos, WindowState window) {
+    private void placeWindowBefore(WindowState pos, WindowState window) {
         final int i = mWindows.indexOf(pos);
         if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT) Slog.v(
             TAG, "Adding window " + window + " at "
@@ -687,13 +687,13 @@ public class WindowManagerService extends IWindowManager.Stub
     //win. used for z ordering the windows in mWindows
     private int findIdxBasedOnAppTokens(WindowState win) {
         //use a local variable to cache mWindows
-        ArrayList localmWindows = mWindows;
+        ArrayList<WindowState> localmWindows = mWindows;
         int jmax = localmWindows.size();
         if(jmax == 0) {
             return -1;
         }
         for(int j = (jmax-1); j >= 0; j--) {
-            WindowState wentry = (WindowState)localmWindows.get(j);
+            WindowState wentry = localmWindows.get(j);
             if(wentry.mAppToken == win.mAppToken) {
                 return j;
             }
@@ -704,7 +704,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private void addWindowToListInOrderLocked(WindowState win, boolean addToToken) {
         final IWindow client = win.mClient;
         final WindowToken token = win.mToken;
-        final ArrayList localmWindows = mWindows;
+        final ArrayList<WindowState> localmWindows = mWindows;
 
         final int N = localmWindows.size();
         final WindowState attached = win.mAttachedWindow;
@@ -749,7 +749,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // Figure out where the window should go, based on the
                     // order of applications.
                     final int NA = mAppTokens.size();
-                    Object pos = null;
+                    WindowState pos = null;
                     for (i=NA-1; i>=0; i--) {
                         AppWindowToken t = mAppTokens.get(i);
                         if (t == token) {
@@ -769,8 +769,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // we need to look some more.
                     if (pos != null) {
                         // Move behind any windows attached to this one.
-                        WindowToken atoken =
-                            mTokenMap.get(((WindowState)pos).mClient.asBinder());
+                        WindowToken atoken = mTokenMap.get(pos.mClient.asBinder());
                         if (atoken != null) {
                             final int NC = atoken.windows.size();
                             if (NC > 0) {
@@ -796,8 +795,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (pos != null) {
                             // Move in front of any windows attached to this
                             // one.
-                            WindowToken atoken =
-                                mTokenMap.get(((WindowState)pos).mClient.asBinder());
+                            WindowToken atoken = mTokenMap.get(pos.mClient.asBinder());
                             if (atoken != null) {
                                 final int NC = atoken.windows.size();
                                 if (NC > 0) {
@@ -812,7 +810,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             // Just search for the start of this layer.
                             final int myLayer = win.mBaseLayer;
                             for (i=0; i<N; i++) {
-                                WindowState w = (WindowState)localmWindows.get(i);
+                                WindowState w = localmWindows.get(i);
                                 if (w.mBaseLayer > myLayer) {
                                     break;
                                 }
@@ -829,7 +827,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // Figure out where window should go, based on layer.
                 final int myLayer = win.mBaseLayer;
                 for (i=N-1; i>=0; i--) {
-                    if (((WindowState)localmWindows.get(i)).mBaseLayer <= myLayer) {
+                    if (localmWindows.get(i).mBaseLayer <= myLayer) {
                         i++;
                         break;
                     }
@@ -912,13 +910,13 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     int findDesiredInputMethodWindowIndexLocked(boolean willMove) {
-        final ArrayList localmWindows = mWindows;
+        final ArrayList<WindowState> localmWindows = mWindows;
         final int N = localmWindows.size();
         WindowState w = null;
         int i = N;
         while (i > 0) {
             i--;
-            w = (WindowState)localmWindows.get(i);
+            w = localmWindows.get(i);
 
             //Slog.i(TAG, "Checking window @" + i + " " + w + " fl=0x"
             //        + Integer.toHexString(w.mAttrs.flags));
@@ -933,7 +931,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (!willMove
                         && w.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING
                         && i > 0) {
-                    WindowState wb = (WindowState)localmWindows.get(i-1);
+                    WindowState wb = localmWindows.get(i-1);
                     if (wb.mAppToken == w.mAppToken && canBeImeTarget(wb)) {
                         i--;
                         w = wb;
@@ -963,7 +961,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     int pos = 0;
                     pos = localmWindows.indexOf(curTarget);
                     while (pos >= 0) {
-                        WindowState win = (WindowState)localmWindows.get(pos);
+                        WindowState win = localmWindows.get(pos);
                         if (win.mAppToken != token) {
                             break;
                         }
@@ -1068,7 +1066,7 @@ public class WindowManagerService extends IWindowManager.Stub
             int wi = imw.mChildWindows.size();
             while (wi > 0) {
                 wi--;
-                WindowState cw = (WindowState)imw.mChildWindows.get(wi);
+                WindowState cw = imw.mChildWindows.get(wi);
                 cw.mAnimLayer = cw.mLayer + adj;
                 if (DEBUG_LAYERS) Slog.v(TAG, "IM win " + cw
                         + " anim layer: " + cw.mAnimLayer);
@@ -1094,7 +1092,7 @@ public class WindowManagerService extends IWindowManager.Stub
             int NC = win.mChildWindows.size();
             while (NC > 0) {
                 NC--;
-                WindowState cw = (WindowState)win.mChildWindows.get(NC);
+                WindowState cw = win.mChildWindows.get(NC);
                 int cpos = mWindows.indexOf(cw);
                 if (cpos >= 0) {
                     if (cpos < interestingPos) interestingPos--;
@@ -1146,7 +1144,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (pos >= 0) {
             final AppWindowToken targetAppToken = mInputMethodTarget.mAppToken;
             if (pos < mWindows.size()) {
-                WindowState wp = (WindowState)mWindows.get(pos);
+                WindowState wp = mWindows.get(pos);
                 if (wp == mInputMethodWindow) {
                     pos++;
                 }
@@ -1190,14 +1188,14 @@ public class WindowManagerService extends IWindowManager.Stub
             // located here, and contiguous.
             final int N = mWindows.size();
             WindowState firstImWin = imPos < N
-                    ? (WindowState)mWindows.get(imPos) : null;
+                    ? mWindows.get(imPos) : null;
 
             // Figure out the actual input method window that should be
             // at the bottom of their stack.
             WindowState baseImWin = imWin != null
                     ? imWin : mInputMethodDialogs.get(0);
             if (baseImWin.mChildWindows.size() > 0) {
-                WindowState cw = (WindowState)baseImWin.mChildWindows.get(0);
+                WindowState cw = baseImWin.mChildWindows.get(0);
                 if (cw.mSubLayer < 0) baseImWin = cw;
             }
 
@@ -1206,7 +1204,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // First find the top IM window.
                 int pos = imPos+1;
                 while (pos < N) {
-                    if (!((WindowState)mWindows.get(pos)).mIsImWindow) {
+                    if (!(mWindows.get(pos)).mIsImWindow) {
                         break;
                     }
                     pos++;
@@ -1214,7 +1212,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pos++;
                 // Now there should be no more input method windows above.
                 while (pos < N) {
-                    if (((WindowState)mWindows.get(pos)).mIsImWindow) {
+                    if ((mWindows.get(pos)).mIsImWindow) {
                         break;
                     }
                     pos++;
@@ -1302,7 +1300,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // First find top-most window that has asked to be on top of the
         // wallpaper; all wallpapers go behind it.
-        final ArrayList localmWindows = mWindows;
+        final ArrayList<WindowState> localmWindows = mWindows;
         int N = localmWindows.size();
         WindowState w = null;
         WindowState foundW = null;
@@ -1312,7 +1310,7 @@ public class WindowManagerService extends IWindowManager.Stub
         int i = N;
         while (i > 0) {
             i--;
-            w = (WindowState)localmWindows.get(i);
+            w = localmWindows.get(i);
             if ((w.mAttrs.type == WindowManager.LayoutParams.TYPE_WALLPAPER)) {
                 if (topCurW == null) {
                     topCurW = w;
@@ -1483,7 +1481,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // AND any starting window associated with it, AND below the
             // maximum layer the policy allows for wallpapers.
             while (foundI > 0) {
-                WindowState wb = (WindowState)localmWindows.get(foundI-1);
+                WindowState wb = localmWindows.get(foundI-1);
                 if (wb.mBaseLayer < maxLayer &&
                         wb.mAttachedWindow != foundW &&
                         (wb.mAttrs.type != TYPE_APPLICATION_STARTING ||
@@ -1507,7 +1505,7 @@ public class WindowManagerService extends IWindowManager.Stub
         } else {
             // Okay i is the position immediately above the wallpaper.  Look at
             // what is below it for later.
-            foundW = foundI > 0 ? (WindowState)localmWindows.get(foundI-1) : null;
+            foundW = foundI > 0 ? localmWindows.get(foundI-1) : null;
         }
 
         if (visible) {
@@ -1566,7 +1564,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (wallpaper == foundW) {
                     foundI--;
                     foundW = foundI > 0
-                            ? (WindowState)localmWindows.get(foundI-1) : null;
+                            ? localmWindows.get(foundI-1) : null;
                     continue;
                 }
 
@@ -2403,6 +2401,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         outSurface.release();
                     }
                 } catch (Exception e) {
+                    mInputMonitor.updateInputWindowsLw();
+                    
                     Slog.w(TAG, "Exception thrown when creating surface for client "
                              + client + " (" + win.mAttrs.getTitle() + ")",
                              e);
@@ -2449,7 +2449,6 @@ public class WindowManagerService extends IWindowManager.Stub
                               applyAnimationLocked(win, transit, false)) {
                             focusMayChange = true;
                             win.mExiting = true;
-                            mInputMonitor.windowIsBecomingInvisibleLw(win);
                         } else if (win.isAnimating()) {
                             // Currently in a hide animation... turn this into
                             // an exit.
@@ -2544,6 +2543,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 TAG, "Relayout of " + win + ": focusMayChange=" + focusMayChange);
 
             inTouchMode = mInTouchMode;
+            
+            mInputMonitor.updateInputWindowsLw();
         }
 
         if (configChanged) {
@@ -2999,7 +3000,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public int getOrientationFromWindowsLocked() {
         int pos = mWindows.size() - 1;
         while (pos >= 0) {
-            WindowState wtoken = (WindowState) mWindows.get(pos);
+            WindowState wtoken = mWindows.get(pos);
             pos--;
             if (wtoken.mAppToken != null) {
                 // We hit an application window. so the orientation will be determined by the
@@ -3553,7 +3554,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         applyAnimationLocked(win,
                                 WindowManagerPolicy.TRANSIT_EXIT, false);
                     }
-                    mInputMonitor.windowIsBecomingInvisibleLw(win);
                     changed = true;
                 }
             }
@@ -3581,6 +3581,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (performLayout) {
                     updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES);
                     performLayoutAndPlaceSurfacesLocked();
+                } else {
+                    mInputMonitor.updateInputWindowsLw();
                 }
             }
         }
@@ -3868,7 +3870,7 @@ public class WindowManagerService extends IWindowManager.Stub
             int j = win.mChildWindows.size();
             while (j > 0) {
                 j--;
-                WindowState cwin = (WindowState)win.mChildWindows.get(j);
+                WindowState cwin = win.mChildWindows.get(j);
                 if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG,
                         "Tmp removing child window " + cwin);
                 mWindows.remove(cwin);
@@ -3896,7 +3898,7 @@ public class WindowManagerService extends IWindowManager.Stub
             int i = NW;
             while (i > 0) {
                 i--;
-                WindowState win = (WindowState)mWindows.get(i);
+                WindowState win = mWindows.get(i);
                 if (win.getAppToken() != null) {
                     return i+1;
                 }
@@ -3922,7 +3924,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 int j = win.mChildWindows.size();
                 while (j > 0) {
                     j--;
-                    WindowState cwin = (WindowState)win.mChildWindows.get(j);
+                    WindowState cwin = win.mChildWindows.get(j);
                     if (cwin.mSubLayer >= 0) {
                         for (int pos=NW-1; pos>=0; pos--) {
                             if (mWindows.get(pos) == cwin) {
@@ -3950,7 +3952,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final int NCW = win.mChildWindows.size();
         boolean added = false;
         for (int j=0; j<NCW; j++) {
-            WindowState cwin = (WindowState)win.mChildWindows.get(j);
+            WindowState cwin = win.mChildWindows.get(j);
             if (!added && cwin.mSubLayer >= 0) {
                 if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG, "Re-adding child window at "
                         + index + ": " + cwin);
@@ -4234,7 +4236,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public void closeSystemDialogs(String reason) {
         synchronized(mWindowMap) {
             for (int i=mWindows.size()-1; i>=0; i--) {
-                WindowState w = (WindowState)mWindows.get(i);
+                WindowState w = mWindows.get(i);
                 if (w.mSurface != null) {
                     try {
                         w.mClient.closeSystemDialogs(reason);
@@ -4418,7 +4420,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // have been drawn.
             final int N = mWindows.size();
             for (int i=0; i<N; i++) {
-                WindowState w = (WindowState)mWindows.get(i);
+                WindowState w = mWindows.get(i);
                 if (w.isVisibleLw() && !w.mObscured
                         && (w.mOrientationChanging || !w.isDrawnLw())) {
                     return;
@@ -4531,7 +4533,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Surface.setOrientation(0, rotation, animFlags);
             }
             for (int i=mWindows.size()-1; i>=0; i--) {
-                WindowState w = (WindowState)mWindows.get(i);
+                WindowState w = mWindows.get(i);
                 if (w.mSurface != null) {
                     w.mOrientationChanging = true;
                 }
@@ -4687,11 +4689,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         boolean result = true;
 
-        Object[] windows;
+        WindowState[] windows;
         synchronized (mWindowMap) {
-            windows = new Object[mWindows.size()];
             //noinspection unchecked
-            windows = mWindows.toArray(windows);
+            windows = mWindows.toArray(new WindowState[mWindows.size()]);
         }
 
         BufferedWriter out = null;
@@ -4703,7 +4704,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             final int count = windows.length;
             for (int i = 0; i < count; i++) {
-                final WindowState w = (WindowState) windows[i];
+                final WindowState w = windows[i];
                 out.write(Integer.toHexString(System.identityHashCode(w)));
                 out.write(' ');
                 out.append(w.mAttrs.getTitle());
@@ -4856,11 +4857,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized (mWindowMap) {
-            final ArrayList windows = mWindows;
+            final ArrayList<WindowState> windows = mWindows;
             final int count = windows.size();
 
             for (int i = 0; i < count; i++) {
-                WindowState w = (WindowState) windows.get(i);
+                WindowState w = windows.get(i);
                 if (System.identityHashCode(w) == hashCode) {
                     return w;
                 }
@@ -5094,7 +5095,7 @@ public class WindowManagerService extends IWindowManager.Stub
         private WindowState getWindowStateForInputChannelLocked(InputChannel inputChannel) {
             int windowCount = mWindows.size();
             for (int i = 0; i < windowCount; i++) {
-                WindowState windowState = (WindowState) mWindows.get(i);
+                WindowState windowState = mWindows.get(i);
                 if (windowState.mInputChannel == inputChannel) {
                     return windowState;
                 }
@@ -5110,10 +5111,10 @@ public class WindowManagerService extends IWindowManager.Stub
             // As an optimization, we could try to prune the list of windows but this turns
             // out to be difficult because only the native code knows for sure which window
             // currently has touch focus.
-            final ArrayList windows = mWindows;
+            final ArrayList<WindowState> windows = mWindows;
             final int N = windows.size();
             for (int i = N - 1; i >= 0; i--) {
-                final WindowState child = (WindowState) windows.get(i);
+                final WindowState child = windows.get(i);
                 if (child.mInputChannel == null || child.mRemoved) {
                     // Skip this window because it cannot possibly receive input.
                     continue;
@@ -5256,17 +5257,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 mInputFocus = newWindow;
                 updateInputWindowsLw();
             }
-        }
-        
-        public void windowIsBecomingInvisibleLw(WindowState window) {
-            // The window is becoming invisible.  Preempt input dispatch in progress
-            // so that the next window below can receive focus.
-            if (window == mInputFocus) {
-                mInputFocus = null;
-                preemptInputDispatchLw();
-            }
-            
-            updateInputWindowsLw();
         }
         
         /* Tells the dispatcher to stop waiting for its current synchronous event targets.
@@ -5779,7 +5769,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final WindowManager.LayoutParams mAttrs = new WindowManager.LayoutParams();
         final DeathRecipient mDeathRecipient;
         final WindowState mAttachedWindow;
-        final ArrayList mChildWindows = new ArrayList();
+        final ArrayList<WindowState> mChildWindows = new ArrayList<WindowState>();
         final int mBaseLayer;
         final int mSubLayer;
         final boolean mLayoutAttached;
@@ -6335,10 +6325,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 int i = mChildWindows.size();
                 while (i > 0) {
                     i--;
-                    WindowState c = (WindowState)mChildWindows.get(i);
+                    WindowState c = mChildWindows.get(i);
                     c.mAttachedHidden = true;
-                    
-                    mInputMonitor.windowIsBecomingInvisibleLw(c);
                 }
 
                 if (mReportDestroySurface) {
@@ -6448,7 +6436,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 int i = mChildWindows.size();
                 while (i > 0) {
                     i--;
-                    WindowState c = (WindowState)mChildWindows.get(i);
+                    WindowState c = mChildWindows.get(i);
                     if (c.mAttachedHidden) {
                         c.mAttachedHidden = false;
                         if (c.mSurface != null) {
@@ -6621,7 +6609,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             final int N = mChildWindows.size();
             for (int i=0; i<N; i++) {
-                ((WindowState)mChildWindows.get(i)).finishExit();
+                mChildWindows.get(i).finishExit();
             }
 
             if (!mExiting) {
@@ -6646,10 +6634,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.w(TAG, "Error hiding surface in " + this, e);
                 }
                 mLastHidden = true;
-                
-                for (int i=0; i<N; i++) {
-                    mInputMonitor.windowIsBecomingInvisibleLw((WindowState)mChildWindows.get(i));
-                }
             }
             mExiting = false;
             if (mRemoveOnExit) {
@@ -7554,7 +7538,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             final int N = windows.size();
             for (int i=0; i<N; i++) {
-                ((WindowState)windows.get(i)).finishExit();
+                windows.get(i).finishExit();
             }
             updateReportedVisibilityLocked();
 
@@ -7980,7 +7964,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         int i = mWindows.size();
                         while (i > 0) {
                             i--;
-                            WindowState w = (WindowState)mWindows.get(i);
+                            WindowState w = mWindows.get(i);
                             if (w.mOrientationChanging) {
                                 w.mOrientationChanging = false;
                                 Slog.w(TAG, "Force clearing orientation change: " + w);
@@ -8119,7 +8103,7 @@ public class WindowManagerService extends IWindowManager.Stub
             int idx = findDesiredInputMethodWindowIndexLocked(false);
             WindowState imFocus;
             if (idx > 0) {
-                imFocus = (WindowState)mWindows.get(idx-1);
+                imFocus = mWindows.get(idx-1);
                 if (imFocus != null) {
                     if (imFocus.mSession.mClient != null &&
                             imFocus.mSession.mClient.asBinder() == client.asBinder()) {
@@ -8177,9 +8161,9 @@ public class WindowManagerService extends IWindowManager.Stub
         // First remove all existing app windows.
         i=0;
         while (i < NW) {
-            WindowState w = (WindowState)mWindows.get(i);
+            WindowState w = mWindows.get(i);
             if (w.mAppToken != null) {
-                WindowState win = (WindowState)mWindows.remove(i);
+                WindowState win = mWindows.remove(i);
                 mWindowsChanged = true;
                 if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG,
                         "Rebuild removing window: " + win);
@@ -8227,7 +8211,7 @@ public class WindowManagerService extends IWindowManager.Stub
         int i;
 
         for (i=0; i<N; i++) {
-            WindowState w = (WindowState)mWindows.get(i);
+            WindowState w = mWindows.get(i);
             if (w.mBaseLayer == curBaseLayer || w.mIsImWindow
                     || (i > 0 && w.mIsWallpaper)) {
                 curLayer += WINDOW_LAYER_MULTIPLIER;
@@ -8352,7 +8336,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // to another window).
         int topAttached = -1;
         for (i = N-1; i >= 0; i--) {
-            WindowState win = (WindowState) mWindows.get(i);
+            WindowState win = mWindows.get(i);
 
             // Don't do layout of a window if it is not visible, or
             // soon won't be visible, to avoid wasting time and funky
@@ -8401,7 +8385,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // XXX does not deal with windows that are attached to windows
         // that are themselves attached.
         for (i = topAttached; i >= 0; i--) {
-            WindowState win = (WindowState) mWindows.get(i);
+            WindowState win = mWindows.get(i);
 
             // If this view is GONE, then skip it -- keep the current
             // frame, and let the caller know so they can ignore it
@@ -8548,7 +8532,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int N = mWindows.size();
 
                 for (i=N-1; i>=0; i--) {
-                    WindowState w = (WindowState)mWindows.get(i);
+                    WindowState w = mWindows.get(i);
 
                     final WindowManager.LayoutParams attrs = w.mAttrs;
 
@@ -8981,7 +8965,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         // Clear them out.
                         forceHiding = false;
                         for (i=N-1; i>=0; i--) {
-                            WindowState w = (WindowState)mWindows.get(i);
+                            WindowState w = mWindows.get(i);
                             if (w.mSurface != null) {
                                 final WindowManager.LayoutParams attrs = w.mAttrs;
                                 if (mPolicy.doesForceHide(w, attrs) && w.isVisibleLw()) {
@@ -9031,6 +9015,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "*** ANIM STEP: changes=0x"
                         + Integer.toHexString(changes));
                 
+                mInputMonitor.updateInputWindowsLw();
             } while (changes != 0);
 
             // THIRD LOOP: Update the surfaces of all windows.
@@ -9047,7 +9032,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final int N = mWindows.size();
 
             for (i=N-1; i>=0; i--) {
-                WindowState w = (WindowState)mWindows.get(i);
+                WindowState w = mWindows.get(i);
 
                 boolean displayed = false;
                 final WindowManager.LayoutParams attrs = w.mAttrs;
@@ -9227,7 +9212,6 @@ public class WindowManagerService extends IWindowManager.Stub
                                     Slog.w(TAG, "Exception hiding surface in " + w);
                                 }
                             }
-                            mInputMonitor.windowIsBecomingInvisibleLw(w);
                         }
                         // If we are waiting for this window to handle an
                         // orientation change, well, it is hidden, so
@@ -9487,6 +9471,8 @@ public class WindowManagerService extends IWindowManager.Stub
             Slog.e(TAG, "Unhandled exception in Window Manager", e);
         }
 
+        mInputMonitor.updateInputWindowsLw();
+        
         Surface.closeTransaction();
 
         if (DEBUG_ORIENTATION && mDisplayFrozen) Slog.v(TAG,
@@ -9612,6 +9598,8 @@ public class WindowManagerService extends IWindowManager.Stub
             requestAnimationLocked(currentTime+(1000/60)-SystemClock.uptimeMillis());
         }
         
+        mInputMonitor.updateInputWindowsLw();
+        
         if (DEBUG_FREEZE) Slog.v(TAG, "Layout: mDisplayFrozen=" + mDisplayFrozen
                 + " holdScreen=" + holdScreen);
         if (!mDisplayFrozen) {
@@ -9718,7 +9706,7 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean leakedSurface = false;
             Slog.i(TAG, "Out of memory for surface!  Looking for leaks...");
             for (int i=0; i<N; i++) {
-                WindowState ws = (WindowState)mWindows.get(i);
+                WindowState ws = mWindows.get(i);
                 if (ws.mSurface != null) {
                     if (!mSessions.contains(ws.mSession)) {
                         Slog.w(TAG, "LEAKED SURFACE (session doesn't exist): "
@@ -9750,7 +9738,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.w(TAG, "No leaked surfaces; killing applicatons!");
                 SparseIntArray pidCandidates = new SparseIntArray();
                 for (int i=0; i<N; i++) {
-                    WindowState ws = (WindowState)mWindows.get(i);
+                    WindowState ws = mWindows.get(i);
                     if (ws.mSurface != null) {
                         pidCandidates.append(ws.mSession.mPid, ws.mSession.mPid);
                     }
@@ -9842,7 +9830,7 @@ public class WindowManagerService extends IWindowManager.Stub
             ? mAppTokens.get(nextAppIndex) : null;
 
         while (i >= 0) {
-            win = (WindowState)mWindows.get(i);
+            win = mWindows.get(i);
 
             if (localLOGV || DEBUG_FOCUS) Slog.v(
                 TAG, "Looking for focus: " + i
@@ -9990,14 +9978,13 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        pw.println("Input Dispatcher State:");
         mInputManager.dump(pw);
         pw.println(" ");
         
         synchronized(mWindowMap) {
             pw.println("Current Window Manager state:");
             for (int i=mWindows.size()-1; i>=0; i--) {
-                WindowState w = (WindowState)mWindows.get(i);
+                WindowState w = mWindows.get(i);
                 pw.print("  Window #"); pw.print(i); pw.print(' ');
                         pw.print(w); pw.println(":");
                 w.dump(pw, "    ");

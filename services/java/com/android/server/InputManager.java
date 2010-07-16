@@ -56,8 +56,6 @@ public class InputManager {
     private final Callbacks mCallbacks;
     private final Context mContext;
     private final WindowManagerService mWindowManagerService;
-    private final PowerManager mPowerManager;
-    private final PowerManagerService mPowerManagerService;
     
     private int mTouchScreenConfig;
     private int mKeyboardConfig;
@@ -85,6 +83,7 @@ public class InputManager {
     private static native void nativeSetInputDispatchMode(boolean enabled, boolean frozen);
     private static native void nativeSetFocusedApplication(InputApplication application);
     private static native void nativePreemptInputDispatch();
+    private static native String nativeDump();
     
     // Device class as defined by EventHub.
     private static final int CLASS_KEYBOARD = 0x00000001;
@@ -100,14 +99,9 @@ public class InputManager {
     static final int INPUT_EVENT_INJECTION_FAILED = 2;
     static final int INPUT_EVENT_INJECTION_TIMED_OUT = 3;
     
-    public InputManager(Context context,
-            WindowManagerService windowManagerService,
-            PowerManager powerManager,
-            PowerManagerService powerManagerService) {
+    public InputManager(Context context, WindowManagerService windowManagerService) {
         this.mContext = context;
         this.mWindowManagerService = windowManagerService;
-        this.mPowerManager = powerManager;
-        this.mPowerManagerService = powerManagerService;
         
         this.mCallbacks = new Callbacks();
         
@@ -297,7 +291,10 @@ public class InputManager {
     }
     
     public void dump(PrintWriter pw) {
-        // TODO
+        String dumpStr = nativeDump();
+        if (dumpStr != null) {
+            pw.println(dumpStr);
+        }
     }
     
     private static final class VirtualKeyDefinition {

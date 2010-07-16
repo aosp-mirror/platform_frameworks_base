@@ -50,7 +50,7 @@ public final class InputDevice {
      * 
      * A {@link KeyEvent} should be interpreted as a button or key press.
      * 
-     * Use {@link #hasKeyCode} to query whether the device supports a particular button or key.
+     * Use {@link #hasKey} to query whether the device supports a particular button or key.
      */
     public static final int SOURCE_CLASS_BUTTON = 0x00000001;
     
@@ -154,7 +154,7 @@ public final class InputDevice {
     
     /**
      * The input source is a touch pad or digitizer tablet that is not
-     * associated with a display (unlike {@link SOURCE_TOUCHSCREEN}).
+     * associated with a display (unlike {@link #SOURCE_TOUCHSCREEN}).
      * 
      * @see #SOURCE_CLASS_POSITION
      */
@@ -174,20 +174,79 @@ public final class InputDevice {
      */
     public static final int SOURCE_JOYSTICK_RIGHT = 0x02000000 | SOURCE_CLASS_JOYSTICK;
 
-    /*
+    /**
+     * Constant for retrieving the range of values for {@link MotionEvent.PointerCoords#x}.
+     * 
+     * @see #getMotionRange
+     */
     public static final int MOTION_RANGE_X = 0;
-    public static final int MOTION_RANGE_Y = 1;
-    public static final int MOTION_RANGE_PRESSURE = 2;
-    public static final int MOTION_RANGE_SIZE = 3;
-    public static final int MOTION_RANGE_TOUCH_MAJOR = 4;
-    public static final int MOTION_RANGE_TOUCH_MINOR = 5;
-    public static final int MOTION_RANGE_TOOL_MAJOR = 6;
-    public static final int MOTION_RANGE_TOOL_MINOR = 7;
-    public static final int MOTION_RANGE_ORIENTATION = 8;
     
+    /**
+     * Constant for retrieving the range of values for {@link MotionEvent.PointerCoords#y}.
+     * 
+     * @see #getMotionRange
+     */
+    public static final int MOTION_RANGE_Y = 1;
+    
+    /**
+     * Constant for retrieving the range of values for {@link MotionEvent.PointerCoords#pressure}.
+     * 
+     * @see #getMotionRange
+     */
+    public static final int MOTION_RANGE_PRESSURE = 2;
+    
+    /**
+     * Constant for retrieving the range of values for {@link MotionEvent.PointerCoords#size}.
+     * 
+     * @see #getMotionRange
+     */
+    public static final int MOTION_RANGE_SIZE = 3;
+    
+    /**
+     * Constant for retrieving the range of values for {@link MotionEvent.PointerCoords#touchMajor}.
+     * 
+     * @see #getMotionRange
+     */
+    public static final int MOTION_RANGE_TOUCH_MAJOR = 4;
+    
+    /**
+     * Constant for retrieving the range of values for {@link MotionEvent.PointerCoords#touchMinor}.
+     * 
+     * @see #getMotionRange
+     */
+    public static final int MOTION_RANGE_TOUCH_MINOR = 5;
+    
+    /**
+     * Constant for retrieving the range of values for {@link MotionEvent.PointerCoords#toolMajor}.
+     * 
+     * @see #getMotionRange
+     */
+    public static final int MOTION_RANGE_TOOL_MAJOR = 6;
+    
+    /**
+     * Constant for retrieving the range of values for {@link MotionEvent.PointerCoords#toolMinor}.
+     * 
+     * @see #getMotionRange
+     */
+    public static final int MOTION_RANGE_TOOL_MINOR = 7;
+    
+    /**
+     * Constant for retrieving the range of values for
+     * {@link MotionEvent.PointerCoords#orientation}.
+     * 
+     * @see #getMotionRange
+     */
+    public static final int MOTION_RANGE_ORIENTATION = 8;
+
+    /**
+     * Gets information about the input device with the specified id.
+     * @param id The device id.
+     * @return The input device or null if not found.
+     */
     public static InputDevice getDevice(int id) {
+        // TODO
+        return null;
     }
-    */
     
     /**
      * Gets the name of this input device.
@@ -213,19 +272,80 @@ public final class InputDevice {
         return KeyCharacterMap.load(mId);
     }
     
-    /*
-    
+    /**
+     * Gets information about the range of values for a particular {@link MotionEvent}
+     * coordinate.
+     * @param range The motion range constant.
+     * @return The range of values, or null if the requested coordinate is not
+     * supported by the device.
+     */
     public MotionRange getMotionRange(int range) {
+        // TODO
+        return null;
     }
     
-    public boolean hasKeyCode(int keyCode) {
+    /**
+     * Returns true if the device supports a particular button or key.
+     * @param keyCode The key code.
+     * @return True if the device supports the key.
+     */
+    public boolean hasKey(int keyCode) {
+        // TODO
+        return false;
     }
     
+    /**
+     * Provides information about the range of values for a particular {@link MotionEvent}
+     * coordinate.
+     */
     public static final class MotionRange {
-        public float min;
-        public float max;
-        public float range;
-        public float flat;
-        public float fuzz;
-    }*/
+        /**
+         * Gets the minimum value for the coordinate.
+         * @return The minimum value.
+         */
+        public float getMin() {
+            // TODO
+            return 0;
+        }
+        
+        /**
+         * Gets the maximum value for the coordinate.
+         * @return The minimum value.
+         */
+        public float getMax() {
+            // TODO
+            return 0;
+        }
+        
+        /**
+         * Gets the range of the coordinate (difference between maximum and minimum).
+         * @return The range of values.
+         */
+        public float getRange() {
+            // TODO
+            return 0;
+        }
+        
+        /**
+         * Gets the extent of the center flat position with respect to this coordinate.
+         * For example, a flat value of 8 means that the center position is between -8 and +8.
+         * This value is mainly useful for calibrating joysticks.
+         * @return The extent of the center flat position.
+         */
+        public float getFlat() {
+            // TODO
+            return 0;
+        }
+        
+        /**
+         * Gets the error tolerance for input device measurements with respect to this coordinate.
+         * For example, a value of 2 indicates that the measured value may be up to +/- 2 units
+         * away from the actual value due to noise and device sensitivity limitations.
+         * @return The error tolerance.
+         */
+        public float getFuzz() {
+            // TODO
+            return 0;
+        }
+    }
 }
