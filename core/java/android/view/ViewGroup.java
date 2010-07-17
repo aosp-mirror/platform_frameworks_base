@@ -106,7 +106,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     // Target of Motion events
     private View mMotionTarget;
-    private final Rect mTempRect = new Rect();
 
     // Layout animation
     private LayoutAnimationController mLayoutAnimationController;
@@ -925,7 +924,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // dispatch the event.
         float xc;
         float yc;
-        if (mMatrixIsIdentity || mAttachInfo == null) {
+        if (hasIdentityMatrix() || mAttachInfo == null) {
             xc = scrolledXFloat - (float) target.mLeft;
             yc = scrolledYFloat - (float) target.mTop;
         } else {
@@ -1513,7 +1512,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         if (a != null) {
-
             final boolean initialized = a.isInitialized();
             if (!initialized) {
                 a.initialize(cr - cl, cb - ct, getWidth(), getHeight());
@@ -1609,13 +1607,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         float alpha = child.getAlpha();
 
-        if (transformToApply != null || alpha < 1.0f || !child.mMatrixIsIdentity) {
+        if (transformToApply != null || alpha < 1.0f || !child.hasIdentityMatrix()) {
             int transX = 0;
             int transY = 0;
+
             if (hasNoCache) {
                 transX = -sx;
                 transY = -sy;
             }
+
             if (transformToApply != null) {
                 if (concatMatrix) {
                     // Undo the scroll translation, apply the transformation matrix,
@@ -1625,28 +1625,31 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     canvas.translate(transX, transY);
                     mGroupFlags |= FLAG_CLEAR_TRANSFORMATION;
                 }
+
                 float transformAlpha = transformToApply.getAlpha();
                 if (transformAlpha < 1.0f) {
                     alpha *= transformToApply.getAlpha();
                     mGroupFlags |= FLAG_CLEAR_TRANSFORMATION;
                 }
             }
-            if (!child.mMatrixIsIdentity) {
+
+            if (!child.hasIdentityMatrix()) {
                 canvas.translate(-transX, -transY);
                 canvas.concat(child.getMatrix());
                 canvas.translate(transX, transY);
             }
+
             if (alpha < 1.0f) {
                 mGroupFlags |= FLAG_CLEAR_TRANSFORMATION;
-            }
-
-            if (alpha < 1.0f && hasNoCache) {
-                final int multipliedAlpha = (int) (255 * alpha);
-                if (!child.onSetAlpha(multipliedAlpha)) {
-                    canvas.saveLayerAlpha(sx, sy, sx + cr - cl, sy + cb - ct, multipliedAlpha,
-                            Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
-                } else {
-                    child.mPrivateFlags |= ALPHA_SET;
+            
+                if (hasNoCache) {
+                    final int multipliedAlpha = (int) (255 * alpha);
+                    if (!child.onSetAlpha(multipliedAlpha)) {
+                        canvas.saveLayerAlpha(sx, sy, sx + cr - cl, sy + cb - ct, multipliedAlpha,
+                                Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
+                    } else {
+                        child.mPrivateFlags |= ALPHA_SET;
+                    }
                 }
             }
         } else if ((child.mPrivateFlags & ALPHA_SET) == ALPHA_SET) {

@@ -1623,7 +1623,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * have changed since the matrix was last calculated. This variable
      * is only valid after a call to getMatrix().
      */
-    boolean mMatrixIsIdentity = true;
+    private boolean mMatrixIsIdentity = true;
 
     /**
      * The degrees rotation around the pivot point.
@@ -4855,6 +4855,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return The current transform matrix for the view
      */
     public Matrix getMatrix() {
+        hasIdentityMatrix();
+        return mMatrix;
+    }
+
+    /**
+     * Recomputes the transform matrix if necessary.
+     * 
+     * @return True if the transform matrix is the identity matrix, false otherwise.
+     */
+    boolean hasIdentityMatrix() {
         if (mMatrixDirty) {
             // transform-related properties have changed since the last time someone
             // asked for the matrix; recalculate it with the current values
@@ -4865,7 +4875,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mMatrixIsIdentity = mMatrix.isIdentity();
             mInverseMatrixDirty = true;
         }
-        return mMatrix;
+        return mMatrixIsIdentity;
     }
 
     /**
@@ -5088,7 +5098,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public final void setTop(int top) {
         if (top != mTop) {
-            if (mMatrixIsIdentity) {
+            if (hasIdentityMatrix()) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
                     final int[] location = mAttachInfo.mInvalidateChildLocation;
@@ -5103,7 +5113,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 // Double-invalidation is necessary to capture view's old and new areas
                 invalidate();
             }
+
             mTop = top;
+
             if (!mMatrixIsIdentity) {
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate();
@@ -5128,7 +5140,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public final void setBottom(int bottom) {
         if (bottom != mBottom) {
-            if (mMatrixIsIdentity) {
+            if (hasIdentityMatrix()) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
                     final int[] location = mAttachInfo.mInvalidateChildLocation;
@@ -5143,7 +5155,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 // Double-invalidation is necessary to capture view's old and new areas
                 invalidate();
             }
+
             mBottom = bottom;
+
             if (!mMatrixIsIdentity) {
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate();
@@ -5168,7 +5182,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public final void setLeft(int left) {
         if (left != mLeft) {
-            if (mMatrixIsIdentity) {
+            if (hasIdentityMatrix()) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
                     final int[] location = mAttachInfo.mInvalidateChildLocation;
@@ -5183,7 +5197,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 // Double-invalidation is necessary to capture view's old and new areas
                 invalidate();
             }
+
             mLeft = left;
+
             if (!mMatrixIsIdentity) {
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate();
@@ -5208,7 +5224,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public final void setRight(int right) {
         if (right != mRight) {
-            if (mMatrixIsIdentity) {
+            if (hasIdentityMatrix()) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
                     final int[] location = mAttachInfo.mInvalidateChildLocation;
@@ -5223,7 +5239,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 // Double-invalidation is necessary to capture view's old and new areas
                 invalidate();
             }
+
             mRight = right;
+
             if (!mMatrixIsIdentity) {
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate();
@@ -5279,16 +5297,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param outRect The hit rectangle of the view.
      */
     public void getHitRect(Rect outRect) {
-        if (mMatrixIsIdentity || mAttachInfo == null) {
+        if (hasIdentityMatrix() || mAttachInfo == null) {
             outRect.set(mLeft, mTop, mRight, mBottom);
         } else {
             Matrix m = getMatrix();
             final RectF tmpRect = mAttachInfo.mTmpTransformRect;
-            tmpRect.set(-mPivotX, -mPivotY,
-                    getWidth() - mPivotX, getHeight() - mPivotY);
+            tmpRect.set(-mPivotX, -mPivotY, getWidth() - mPivotX, getHeight() - mPivotY);
             m.mapRect(tmpRect);
-            outRect.set((int)tmpRect.left + mLeft, (int)tmpRect.top + mTop,
-                    (int)tmpRect.right + mLeft, (int)tmpRect.bottom + mTop);
+            outRect.set((int) tmpRect.left + mLeft, (int) tmpRect.top + mTop,
+                    (int) tmpRect.right + mLeft, (int) tmpRect.bottom + mTop);
         }
     }
 
@@ -5304,7 +5321,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     boolean dispatchTouchEvent(MotionEvent ev, float parentX, float parentY) {
         float localX = parentX - mLeft;
         float localY = parentY - mTop;
-        if (!mMatrixIsIdentity && mAttachInfo != null) {
+        if (!hasIdentityMatrix() && mAttachInfo != null) {
             // non-identity matrix: transform the point into the view's coordinates
             final float[] localXY = mAttachInfo.mTmpTransformLocation;
             localXY[0] = localX;
@@ -5313,8 +5330,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             localX = localXY[0];
             localY = localXY[1];
         }
-        if (localX >= 0 && localY >= 0 &&
-                localX < (mRight - mLeft) && localY < (mBottom - mTop)) {
+        if (localX >= 0 && localY >= 0 && localX < (mRight - mLeft) && localY < (mBottom - mTop)) {
             // It would be safer to clone the event here but we don't for performance.
             // There are many subtle interactions in touch event dispatch; change at your own risk.
             mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
@@ -5331,7 +5347,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * is still within the view.
      */
     private boolean pointInView(float localX, float localY, float slop) {
-        if (!mMatrixIsIdentity && mAttachInfo != null) {
+        if (!hasIdentityMatrix() && mAttachInfo != null) {
             // non-identity matrix: transform the point into the view's coordinates
             final float[] localXY = mAttachInfo.mTmpTransformLocation;
             localXY[0] = localX;
@@ -5340,11 +5356,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             localX = localXY[0];
             localY = localXY[1];
         }
-        if (localX > -slop && localY > -slop &&
-                localX < ((mRight - mLeft) + slop) && localY < ((mBottom - mTop) + slop)) {
-            return true;
-        }
-        return false;
+        return localX > -slop && localY > -slop && localX < ((mRight - mLeft) + slop) &&
+                localY < ((mBottom - mTop) + slop);
     }
 
     /**
@@ -5408,7 +5421,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void offsetTopAndBottom(int offset) {
         if (offset != 0) {
-            if (mMatrixIsIdentity) {
+            if (hasIdentityMatrix()) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
                     final int[] location = mAttachInfo.mInvalidateChildLocation;
@@ -5423,8 +5436,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             } else {
                 invalidate();
             }
+
             mTop += offset;
             mBottom += offset;
+
             if (!mMatrixIsIdentity) {
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate();
@@ -5439,7 +5454,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void offsetLeftAndRight(int offset) {
         if (offset != 0) {
-            if (mMatrixIsIdentity) {
+            if (hasIdentityMatrix()) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
                     final int[] location = mAttachInfo.mInvalidateChildLocation;
@@ -5454,8 +5469,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             } else {
                 invalidate();
             }
+
             mLeft += offset;
             mRight += offset;
+
             if (!mMatrixIsIdentity) {
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate();
@@ -9297,7 +9314,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         LayoutInflater factory = LayoutInflater.from(context);
         return factory.inflate(resource, root);
     }
-    
+
     /**
      * A MeasureSpec encapsulates the layout requirements passed from parent to child.
      * Each MeasureSpec represents a requirement for either the width or the height.
