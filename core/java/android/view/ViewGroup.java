@@ -2514,38 +2514,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             location[CHILD_TOP_INDEX] = child.mTop;
             Matrix childMatrix = child.getMatrix();
             if (!childMatrix.isIdentity()) {
-                float[] boundingRectPoints = attachInfo.mTmpTransformBounds;
-                boundingRectPoints[0] = dirty.left; // upper left
-                boundingRectPoints[1] = dirty.top;
-                boundingRectPoints[2] = dirty.right; // upper right
-                boundingRectPoints[3] = dirty.top;
-                boundingRectPoints[4] = dirty.right; // lower right
-                boundingRectPoints[5] = dirty.bottom;
-                boundingRectPoints[6] = dirty.left; // lower left
-                boundingRectPoints[7] = dirty.bottom;
-                childMatrix.mapPoints(boundingRectPoints);
-                // find the mind/max points to get the bounding rect
-                float left = Float.MAX_VALUE;
-                float top = Float.MAX_VALUE;
-                float right = -Float.MAX_VALUE;
-                float bottom = -Float.MAX_VALUE;
-                for (int i = 0; i < 8; i += 2) {
-                    float x = boundingRectPoints[i];
-                    float y = boundingRectPoints[i+1];
-                    if (x < left) {
-                        left = x;
-                    }
-                    if (x > right) {
-                        right = x;
-                    }
-                    if (y < top) {
-                        top = y;
-                    }
-                    if (y > bottom) {
-                        bottom = y;
-                    }
-                }
-                dirty.set((int)left, (int)top, (int)(right + .5f), (int)(bottom + .5f));
+                RectF boundingRect = attachInfo.mTmpTransformRect;
+                boundingRect.set(dirty);
+                childMatrix.mapRect(boundingRect);
+                dirty.set((int) boundingRect.left, (int) boundingRect.top,
+                        (int) (boundingRect.right + 0.5f),
+                        (int) (boundingRect.bottom + 0.5f));
             }
 
             // If the child is drawing an animation, we want to copy this flag onto
@@ -2581,38 +2555,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 }
 
                 parent = parent.invalidateChildInParent(location, dirty);
-                Matrix m = getMatrix();
-                if (!m.isIdentity()) {
-                    float[] boundingRectPoints = {
-                            dirty.left - mLeft, dirty.top - mTop, // upper left 
-                            dirty.right - mLeft, dirty.top - mTop, // upper right
-                            dirty.right - mLeft, dirty.bottom - mTop, // lower right
-                            dirty.left - mLeft, dirty.bottom - mTop // lower left
-                    };
-                    m.mapPoints(boundingRectPoints);
-                    // find the mind/max points to get the bounding rect
-                    float left = Float.MAX_VALUE;
-                    float top = Float.MAX_VALUE;
-                    float right = Float.MIN_VALUE;
-                    float bottom = Float.MIN_VALUE;
-                    for (int i = 0; i < 8; i += 2) {
-                        float x = boundingRectPoints[i];
-                        float y = boundingRectPoints[i+1];
-                        if (x < left) {
-                            left = x;
-                        }
-                        if (x > right) {
-                            right = x;
-                        }
-                        if (y < top) {
-                            top = y;
-                        }
-                        if (y > bottom) {
-                            bottom = y;
-                        }
+                if (view != null) {
+                    // Account for transform on current parent
+                    Matrix m = view.getMatrix();
+                    if (!m.isIdentity()) {
+                        RectF boundingRect = attachInfo.mTmpTransformRect;
+                        boundingRect.set(dirty);
+                        m.mapRect(boundingRect);
+                        dirty.set((int) boundingRect.left, (int) boundingRect.top,
+                                (int) (boundingRect.right + 0.5f),
+                                (int) (boundingRect.bottom + 0.5f));
                     }
-                    dirty.set((int)left + mLeft, (int)top + mTop, (int)(right + .5f) + mLeft,
-                            (int)(bottom + .5f) + mTop);
                 }
             } while (parent != null);
         }
