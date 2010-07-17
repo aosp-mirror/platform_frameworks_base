@@ -33,6 +33,9 @@ namespace uirenderer {
 #include "shaders/drawTexture.vert"
 #include "shaders/drawTexture.frag"
 
+#include "shaders/drawLinearGradient.vert"
+#include "shaders/drawLinearGradient.frag"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Base program
 ///////////////////////////////////////////////////////////////////////////////
@@ -176,6 +179,27 @@ void DrawTextureProgram::use() {
 void DrawTextureProgram::remove() {
     DrawColorProgram::remove();
     glDisableVertexAttribArray(texCoords);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Draw linear gradient
+///////////////////////////////////////////////////////////////////////////////
+
+DrawLinearGradientProgram::DrawLinearGradientProgram():
+        DrawColorProgram(gDrawLinearGradientVertexShader, gDrawLinearGradientFragmentShader) {
+    gradient = addUniform("gradient");
+    gradientLength = addUniform("gradientLength");
+    sampler = addUniform("sampler");
+}
+
+void DrawLinearGradientProgram::use() {
+    DrawColorProgram::use();
+    glActiveTexture(GL_TEXTURE0);
+    glUniform1i(sampler, 0);
+}
+
+void DrawLinearGradientProgram::remove() {
+    DrawColorProgram::remove();
 }
 
 }; // namespace uirenderer

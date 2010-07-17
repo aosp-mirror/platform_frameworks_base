@@ -80,8 +80,11 @@ public class LinearGradient extends Shader {
     }
     
     protected void finalize() throws Throwable {
-        super.finalize();
-        nativeDestructor(native_instance);
+        try {
+            super.finalize();
+        } finally {
+            nativeDestructor(native_instance);
+        }
     }
 
     private native void nativeDestructor(int native_shader);

@@ -103,8 +103,8 @@ public:
     void resetShader();
     void setupBitmapShader(SkBitmap* bitmap, SkShader::TileMode tileX, SkShader::TileMode tileY,
             SkMatrix* matrix, bool hasAlpha);
-    void setupLinearGradientShader(float* bounds, uint32_t* colors, float* positions,
-            SkShader::TileMode tileMode, SkMatrix* matrix, bool hasAlpha);
+    void setupLinearGradientShader(SkShader* shader, float* bounds, uint32_t* colors,
+            float* positions, SkShader::TileMode tileMode, SkMatrix* matrix, bool hasAlpha);
 
 private:
     /**
@@ -309,6 +309,7 @@ private:
     sp<Program> mCurrentProgram;
     sp<DrawColorProgram> mDrawColorProgram;
     sp<DrawTextureProgram> mDrawTextureProgram;
+    sp<DrawLinearGradientProgram> mDrawLinearGradientProgram;
 
     // Used to draw textured quads
     TextureVertex mDrawTextureVertices[4];
@@ -323,6 +324,7 @@ private:
 
     // Skia shaders
     ShaderType mShader;
+    SkShader* mShaderKey;
     bool mShaderBlend;
     SkShader::TileMode mShaderTileX;
     SkShader::TileMode mShaderTileY;
