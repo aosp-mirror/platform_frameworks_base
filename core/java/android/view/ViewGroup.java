@@ -841,7 +841,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final float yf = ev.getY();
         final float scrolledXFloat = xf + mScrollX;
         final float scrolledYFloat = yf + mScrollY;
-        final Rect frame = mTempRect;
 
         boolean disallowIntercept = (mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0;
 
@@ -860,8 +859,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 ev.setAction(MotionEvent.ACTION_DOWN);
                 // We know we want to dispatch the event down, find a child
                 // who can handle it, start with the front-most child.
-                final int scrolledXInt = (int) scrolledXFloat;
-                final int scrolledYInt = (int) scrolledYFloat;
                 final View[] children = mChildren;
                 final int count = mChildrenCount;
                 for (int i = count - 1; i >= 0; i--) {
@@ -869,7 +866,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE
                             || child.getAnimation() != null) {
                         if (child.dispatchTouchEvent(ev, scrolledXFloat, scrolledYFloat)) {
-                            child.mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
                             mMotionTarget = child;
                             return true;
                         }
@@ -929,7 +925,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // dispatch the event.
         float xc;
         float yc;
-        Matrix m = getMatrix();
         if (mMatrixIsIdentity || mAttachInfo == null) {
             xc = scrolledXFloat - (float) target.mLeft;
             yc = scrolledYFloat - (float) target.mTop;
@@ -1613,7 +1608,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         float alpha = child.getAlpha();
-        Matrix childMatrix = child.getMatrix();
 
         if (transformToApply != null || alpha < 1.0f || !child.mMatrixIsIdentity) {
             int transX = 0;

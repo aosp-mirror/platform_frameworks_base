@@ -5088,7 +5088,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public final void setTop(int top) {
         if (top != mTop) {
-            Matrix m = getMatrix();
             if (mMatrixIsIdentity) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
@@ -5129,7 +5128,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public final void setBottom(int bottom) {
         if (bottom != mBottom) {
-            Matrix m = getMatrix();
             if (mMatrixIsIdentity) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
@@ -5170,7 +5168,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public final void setLeft(int left) {
         if (left != mLeft) {
-            Matrix m = getMatrix();
             if (mMatrixIsIdentity) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
@@ -5211,7 +5208,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public final void setRight(int right) {
         if (right != mRight) {
-            Matrix m = getMatrix();
             if (mMatrixIsIdentity) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
@@ -5283,10 +5279,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param outRect The hit rectangle of the view.
      */
     public void getHitRect(Rect outRect) {
-        Matrix m = getMatrix();
         if (mMatrixIsIdentity || mAttachInfo == null) {
             outRect.set(mLeft, mTop, mRight, mBottom);
         } else {
+            Matrix m = getMatrix();
             final RectF tmpRect = mAttachInfo.mTmpTransformRect;
             tmpRect.set(-mPivotX, -mPivotY,
                     getWidth() - mPivotX, getHeight() - mPivotY);
@@ -5308,7 +5304,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     boolean dispatchTouchEvent(MotionEvent ev, float parentX, float parentY) {
         float localX = parentX - mLeft;
         float localY = parentY - mTop;
-        Matrix m = getMatrix();
         if (!mMatrixIsIdentity && mAttachInfo != null) {
             // non-identity matrix: transform the point into the view's coordinates
             final float[] localXY = mAttachInfo.mTmpTransformLocation;
@@ -5320,6 +5315,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
         if (localX >= 0 && localY >= 0 &&
                 localX < (mRight - mLeft) && localY < (mBottom - mTop)) {
+            // It would be safer to clone the event here but we don't for performance.
+            // There are many subtle interactions in touch event dispatch; change at your own risk.
+            mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
             ev.setLocation(localX, localY);
             return dispatchTouchEvent(ev);
         }
@@ -5333,7 +5331,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * is still within the view.
      */
     private boolean pointInView(float localX, float localY, float slop) {
-        Matrix m = getMatrix();
         if (!mMatrixIsIdentity && mAttachInfo != null) {
             // non-identity matrix: transform the point into the view's coordinates
             final float[] localXY = mAttachInfo.mTmpTransformLocation;
@@ -5411,7 +5408,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void offsetTopAndBottom(int offset) {
         if (offset != 0) {
-            Matrix m = getMatrix();
             if (mMatrixIsIdentity) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
@@ -5443,7 +5439,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void offsetLeftAndRight(int offset) {
         if (offset != 0) {
-            Matrix m = getMatrix();
             if (mMatrixIsIdentity) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
