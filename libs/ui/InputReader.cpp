@@ -270,6 +270,10 @@ void InputReader::handleKey(const RawEvent* rawEvent) {
             device->trackball.accumulator.fields |=
                     InputDevice::TrackballState::Accumulator::FIELD_BTN_MOUSE;
             device->trackball.accumulator.btnMouse = down;
+
+            // Process the trackball change now since we may not receive a sync immediately.
+            onTrackballStateChanged(rawEvent->when, device);
+            device->trackball.accumulator.clear();
             return;
         }
     }

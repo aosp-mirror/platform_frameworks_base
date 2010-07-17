@@ -650,10 +650,20 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
             firstMotionSample = & motionEntry->firstSample;
         }
 
+        // Set the X and Y offset depending on the input source.
+        float xOffset, yOffset;
+        if (motionEntry->source & AINPUT_SOURCE_CLASS_POINTER) {
+            xOffset = dispatchEntry->xOffset;
+            yOffset = dispatchEntry->yOffset;
+        } else {
+            xOffset = 0.0f;
+            yOffset = 0.0f;
+        }
+
         // Publish the motion event and the first motion sample.
         status = connection->inputPublisher.publishMotionEvent(motionEntry->deviceId,
                 motionEntry->source, action, motionEntry->edgeFlags, motionEntry->metaState,
-                dispatchEntry->xOffset, dispatchEntry->yOffset,
+                xOffset, yOffset,
                 motionEntry->xPrecision, motionEntry->yPrecision,
                 motionEntry->downTime, firstMotionSample->eventTime,
                 motionEntry->pointerCount, motionEntry->pointerIds,
