@@ -148,6 +148,7 @@ public:
      * Name of the color uniform.
      */
     int color;
+
     /**
      * Name of the transform uniform.
      */
@@ -187,6 +188,44 @@ public:
      * Name of the texture coordinates attribute.
      */
     int texCoords;
+};
+
+/**
+ * Program used to draw linear gradients. In addition to everything that the
+ * DrawColorProgram supports, the following two attributes must be specified:
+ *      vec2 gradient, the vector describing the linear gradient
+ *      float gradientLength, the invert of the magnitude of the gradient vector
+ *      sampler2D sampler, the texture sampler
+ */
+class DrawLinearGradientProgram: public DrawColorProgram {
+public:
+    DrawLinearGradientProgram();
+
+    /**
+     * Binds this program to the GL context.
+     */
+    virtual void use();
+
+    /**
+     * Marks this program as unused. This will not unbind
+     * the program from the GL context.
+     */
+    virtual void remove();
+
+    /**
+     * Name of the linear gradient vector.
+     */
+    int gradient;
+
+    /**
+     * Name of the inverse of linear gradient vector's magnitude.
+     */
+    int gradientLength;
+
+    /**
+     * Name of the texture sampler uniform.
+     */
+    int sampler;
 };
 
 }; // namespace uirenderer

@@ -124,6 +124,7 @@ OpenGLRenderer::OpenGLRenderer():
 
     mDrawColorProgram = new DrawColorProgram;
     mDrawTextureProgram = new DrawTextureProgram;
+    mDrawLinearGradientProgram = new DrawLinearGradientProgram;
     mCurrentProgram = mDrawTextureProgram;
 
     mShader = kShaderNone;
@@ -521,6 +522,7 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
 
 void OpenGLRenderer::resetShader() {
     mShader = OpenGLRenderer::kShaderNone;
+    mShaderKey = NULL;
     mShaderBlend = false;
     mShaderTileX = SkShader::kClamp_TileMode;
     mShaderTileY = SkShader::kClamp_TileMode;
@@ -536,9 +538,11 @@ void OpenGLRenderer::setupBitmapShader(SkBitmap* bitmap, SkShader::TileMode tile
     mShaderMatrix = matrix;
 }
 
-void OpenGLRenderer::setupLinearGradientShader(float* bounds, uint32_t* colors,
+void OpenGLRenderer::setupLinearGradientShader(SkShader* shader, float* bounds,uint32_t* colors,
         float* positions, SkShader::TileMode tileMode, SkMatrix* matrix, bool hasAlpha) {
+    // TODO: We should use a struct to describe each shader
     mShader = OpenGLRenderer::kShaderLinearGradient;
+    mShaderKey = shader;
     mShaderBlend = hasAlpha;
     mShaderTileX = tileMode;
     mShaderTileY = tileMode;
