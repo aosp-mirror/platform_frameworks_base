@@ -239,15 +239,22 @@ public final class MediaStore {
         public static final String MIME_TYPE = "mime_type";
 
         /**
-         * The MTP object handle of a newly transfered file.
-         * Used internally by the MediaScanner
+         * The row ID in the MTP object table corresponding to this media file.
          * <P>Type: INTEGER</P>
          * @hide
          */
-        public static final String MTP_OBJECT_HANDLE = "mtp_object_handle";
+        public static final String MTP_OBJECT_ID = "object_id";
+
+        /**
+         * The MTP object handle of a newly transfered file.
+         * Used to pass the new file's object handle through the media scanner
+         * from MTP to the media provider
+         * For internal use only by MTP, media scanner and media provider.
+         * <P>Type: INTEGER</P>
+         * @hide
+         */
+        public static final String MEDIA_SCANNER_NEW_OBJECT_ID = "media_scanner_new_object_id";
      }
-
-
 
     /**
      * Media provider interface used by MTP implementation.
