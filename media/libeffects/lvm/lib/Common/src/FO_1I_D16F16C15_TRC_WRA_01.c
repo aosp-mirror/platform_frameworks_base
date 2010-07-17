@@ -1,0 +1,83 @@
+/*
+ * Copyright (C) 2004-2010 NXP Software
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/************************************************************************/
+/*                                                                      */
+/*     Project::                                                        */
+/*     $Author: beq07716 $*/
+/*     $Revision: 1000 $*/
+/*     $Date: 2010-06-28 13:08:20 +0200 (Mon, 28 Jun 2010) $*/
+/*                                                                      */
+/************************************************************************/
+
+#include "BIQUAD.h"
+#include "FO_1I_D16F16Css_TRC_WRA_01_Private.h"
+#include "LVM_Macros.h"
+
+/**************************************************************************
+ ASSUMPTIONS:
+ COEFS-
+ pBiquadState->coefs[0] is A1,
+ pBiquadState->coefs[1] is A0,
+ pBiquadState->coefs[2] is -B1, these are in Q15 format
+
+ DELAYS-
+ pBiquadState->pDelays[0] is x(n-1)L in Q0 format
+ pBiquadState->pDelays[1] is y(n-1)L in Q0 format
+***************************************************************************/
+
+void FO_1I_D16F16C15_TRC_WRA_01( Biquad_Instance_t       *pInstance,
+                                 LVM_INT16               *pDataIn,
+                                 LVM_INT16               *pDataOut,
+                                 LVM_INT16               NrSamples)
+    {
+        LVM_INT32  ynL;
+        LVM_INT16 ii;
+        PFilter_State pBiquadState = (PFilter_State) pInstance;
+
+         for (ii = NrSamples; ii != 0; ii--)
+         {
+
+            /**************************************************************************
+                            PROCESSING OF THE LEFT CHANNEL
+            ***************************************************************************/
+            // ynL=A1 (Q15) * x(n-1)L (Q0) in Q15
+            ynL=(LVM_INT32)pBiquadState->coefs[0]* pBiquadState->pDelays[0];
+
+            // ynL+=A0 (Q15) * x(n)L (Q0) in Q15
+            ynL+=(LVM_INT32)pBiquadState->coefs[1]* (*pDataIn);
+
+            // ynL+=  (-B1 (Q15) * y(n-1)L (Q0) ) in Q15
+            ynL+=(LVM_INT32)pBiquadState->coefs[2]*pBiquadState->pDelays[1];
+
+
+            ynL=(LVM_INT16)(ynL>>15); // ynL in Q0 format
+            /**************************************************************************
+                            UPDATING THE DELAYS
+            ***************************************************************************/
+            pBiquadState->pDelays[1]=ynL; // Update y(n-1)L in Q0
+            pBiquadState->pDelays[0]=(*pDataIn++); // Update x(n-1)L in Q0
+
+            /**************************************************************************
+                            WRITING THE OUTPUT
+            ***************************************************************************/
+            *pDataOut++=(LVM_INT16)ynL; // Write Left output in Q0
+
+        }
+
+    }
+
