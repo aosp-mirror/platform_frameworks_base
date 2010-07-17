@@ -8,6 +8,13 @@
 #include "SkTemplates.h"
 #include "SkXfermode.h"
 
+static struct {
+    jclass clazz;
+    jfieldID bounds;
+    jfieldID colors;
+    jfieldID positions;
+} gLinearGradientClassInfo;
+
 static void ThrowIAE_IfNull(JNIEnv* env, void* ptr) {
     if (NULL == ptr) {
         doThrowIAE(env);
@@ -77,7 +84,14 @@ static SkShader* BitmapShader_constructor(JNIEnv* env, jobject, const SkBitmap* 
     
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-static SkShader* LinearGradient_create1(JNIEnv* env, jobject,
+static void LinearGradient_destructor(JNIEnv* env, jobject o, SkShader* shader)
+{
+    delete reinterpret_cast<jfloat*>(env->GetIntField(o, gLinearGradientClassInfo.bounds));
+    delete reinterpret_cast<jint*>(env->GetIntField(o, gLinearGradientClassInfo.colors));
+    delete reinterpret_cast<jfloat*>(env->GetIntField(o, gLinearGradientClassInfo.positions));
+}
+
+static SkShader* LinearGradient_create1(JNIEnv* env, jobject o,
                                         float x0, float y0, float x1, float y1,
                                         jintArray colorArray, jfloatArray posArray, int tileMode)
 {
@@ -90,15 +104,31 @@ static SkShader* LinearGradient_create1(JNIEnv* env, jobject,
 
     SkAutoSTMalloc<8, SkScalar> storage(posArray ? count : 0);
     SkScalar*                   pos = NULL;
-    
+
+    jfloat* storedBounds = new jfloat[4];
+    storedBounds[0] = x0; storedBounds[1] = y0;
+    storedBounds[2] = x1; storedBounds[3] = y1;
+    jfloat* storedPositions = new jfloat[count];
+    jint* storedColors = new jint[count];
+    memcpy(storedColors, colorValues, count);
+
     if (posArray) {
         AutoJavaFloatArray autoPos(env, posArray, count);
         const float* posValues = autoPos.ptr();
         pos = (SkScalar*)storage.get();
-        for (size_t i = 0; i < count; i++)
+        for (size_t i = 0; i < count; i++) {
             pos[i] = SkFloatToScalar(posValues[i]);
+            storedPositions[i] = posValues[i];
+        }
+    } else {
+        storedPositions[0] = 0.0f;
+        storedPositions[1] = 1.0f;
     }
-
+    
+    env->SetIntField(o, gLinearGradientClassInfo.bounds, reinterpret_cast<jint>(storedBounds));
+    env->SetIntField(o, gLinearGradientClassInfo.colors, reinterpret_cast<jint>(storedColors));
+    env->SetIntField(o, gLinearGradientClassInfo.positions, reinterpret_cast<jint>(storedPositions));
+    
     SkShader* shader = SkGradientShader::CreateLinear(pts,
                                 reinterpret_cast<const SkColor*>(colorValues),
                                 pos, count,
@@ -109,7 +139,7 @@ static SkShader* LinearGradient_create1(JNIEnv* env, jobject,
     return shader;
 }
 
-static SkShader* LinearGradient_create2(JNIEnv* env, jobject,
+static SkShader* LinearGradient_create2(JNIEnv* env, jobject o,
                                         float x0, float y0, float x1, float y1,
                                         int color0, int color1, int tileMode)
 {
@@ -120,6 +150,22 @@ static SkShader* LinearGradient_create2(JNIEnv* env, jobject,
     SkColor colors[2];
     colors[0] = color0;
     colors[1] = color1;
+    
+    float* storedBounds = new float[4];
+    storedBounds[0] = x0; storedBounds[1] = y0;
+    storedBounds[2] = x1; storedBounds[3] = y1;
+    
+    float* storedPositions = new float[2];
+    storedPositions[0] = 0.0f;
+    storedPositions[1] = 1.0f;
+    
+    uint32_t* storedColors = new uint32_t[2];
+    storedColors[0] = color0;
+    storedColors[1] = color1;
+    
+    env->SetIntField(o, gLinearGradientClassInfo.bounds, reinterpret_cast<jint>(storedBounds));
+    env->SetIntField(o, gLinearGradientClassInfo.colors, reinterpret_cast<jint>(storedColors));
+    env->SetIntField(o, gLinearGradientClassInfo.positions, reinterpret_cast<jint>(storedPositions));
 
     SkShader* s = SkGradientShader::CreateLinear(pts, colors, NULL, 2, (SkShader::TileMode)tileMode);
     ThrowIAE_IfNull(env, s);
@@ -254,8 +300,9 @@ static JNINativeMethod gBitmapShaderMethods[] = {
 };
 
 static JNINativeMethod gLinearGradientMethods[] = {
-    { "nativeCreate1",  "(FFFF[I[FI)I", (void*)LinearGradient_create1   },
-    { "nativeCreate2",  "(FFFFIII)I",   (void*)LinearGradient_create2   }
+    { "nativeDestructor", "(I)V",         (void*)LinearGradient_destructor },
+    { "nativeCreate1",    "(FFFF[I[FI)I", (void*)LinearGradient_create1    },
+    { "nativeCreate2",    "(FFFFIII)I",   (void*)LinearGradient_create2    }
 };
 
 static JNINativeMethod gRadialGradientMethods[] = {
@@ -278,6 +325,15 @@ static JNINativeMethod gComposeShaderMethods[] = {
 #define REG(env, name, array)                                                                       \
     result = android::AndroidRuntime::registerNativeMethods(env, name, array, SK_ARRAY_COUNT(array));  \
     if (result < 0) return result
+    
+#define FIND_CLASS(var, className) \
+        var = env->FindClass(className); \
+        LOG_FATAL_IF(! var, "Unable to find class " className); \
+        var = jclass(env->NewGlobalRef(var));
+
+#define GET_FIELD_ID(var, clazz, fieldName, fieldType) \
+        var = env->GetFieldID(clazz, fieldName, fieldType); \
+        LOG_FATAL_IF(! var, "Unable to find field " fieldName);
 
 int register_android_graphics_Shader(JNIEnv* env);
 int register_android_graphics_Shader(JNIEnv* env)
@@ -291,6 +347,11 @@ int register_android_graphics_Shader(JNIEnv* env)
     REG(env, "android/graphics/RadialGradient", gRadialGradientMethods);
     REG(env, "android/graphics/SweepGradient", gSweepGradientMethods);
     REG(env, "android/graphics/ComposeShader", gComposeShaderMethods);
+    
+    FIND_CLASS(gLinearGradientClassInfo.clazz, "android/graphics/LinearGradient");
+    GET_FIELD_ID(gLinearGradientClassInfo.bounds, gLinearGradientClassInfo.clazz, "bounds", "I");
+    GET_FIELD_ID(gLinearGradientClassInfo.colors, gLinearGradientClassInfo.clazz, "colors", "I");
+    GET_FIELD_ID(gLinearGradientClassInfo.positions, gLinearGradientClassInfo.clazz, "positions", "I");
     
     return result;
 }

@@ -17,6 +17,27 @@
 package android.graphics;
 
 public class LinearGradient extends Shader {
+    /**
+     * These fields are manipulated by the JNI layer, don't touch!
+     * @hide
+     */
+    public int bounds;
+    /**
+     * @hide
+     */
+    public int colors;
+    /**
+     * @hide
+     */
+    public int positions;
+    /**
+     * @hide
+     */
+    public int count;
+    /**
+     * @hide
+     */
+    public int tileMode;
 
 	/**	Create a shader that draws a linear gradient along a line.
         @param x0           The x-coordinate for the start of the gradient line
@@ -38,6 +59,8 @@ public class LinearGradient extends Shader {
             throw new IllegalArgumentException("color and position arrays must be of equal length");
         }
         native_instance = nativeCreate1(x0, y0, x1, y1, colors, positions, tile.nativeInt);
+        count = colors.length;
+        tileMode = tile.nativeInt;
     }
 
 	/**	Create a shader that draws a linear gradient along a line.
@@ -52,12 +75,18 @@ public class LinearGradient extends Shader {
 	public LinearGradient(float x0, float y0, float x1, float y1,
                           int color0, int color1, TileMode tile) {
         native_instance = nativeCreate2(x0, y0, x1, y1, color0, color1, tile.nativeInt);
+        count = 2;
+        tileMode = tile.nativeInt;
+    }
+    
+    protected void finalize() throws Throwable {
+        super.finalize();
+        nativeDestructor(native_instance);
     }
 
-
-	private static native int nativeCreate1(float x0, float y0, float x1, float y1,
-                                            int colors[], float positions[], int tileMode);
-	private static native int nativeCreate2(float x0, float y0, float x1, float y1,
-                                            int color0, int color1, int tileMode);
+    private native void nativeDestructor(int native_shader);
+	private native int nativeCreate1(float x0, float y0, float x1, float y1,
+            int colors[], float positions[], int tileMode);
+	private native int nativeCreate2(float x0, float y0, float x1, float y1,
+            int color0, int color1, int tileMode);
 }
-
