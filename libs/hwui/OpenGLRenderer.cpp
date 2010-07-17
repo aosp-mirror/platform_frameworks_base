@@ -528,12 +528,24 @@ void OpenGLRenderer::resetShader() {
 
 void OpenGLRenderer::setupBitmapShader(SkBitmap* bitmap, SkShader::TileMode tileX,
         SkShader::TileMode tileY, SkMatrix* matrix, bool hasAlpha) {
-    mShader = kShaderBitmap;
+    mShader = OpenGLRenderer::kShaderBitmap;
     mShaderBlend = hasAlpha;
     mShaderBitmap = bitmap;
     mShaderTileX = tileX;
     mShaderTileY = tileY;
     mShaderMatrix = matrix;
+}
+
+void OpenGLRenderer::setupLinearGradientShader(float* bounds, uint32_t* colors,
+        float* positions, SkShader::TileMode tileMode, SkMatrix* matrix, bool hasAlpha) {
+    mShader = OpenGLRenderer::kShaderLinearGradient;
+    mShaderBlend = hasAlpha;
+    mShaderTileX = tileMode;
+    mShaderTileY = tileMode;
+    mShaderMatrix = matrix;
+    mShaderBounds = bounds;
+    mShaderColors = colors;
+    mShaderPositions = positions;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -555,9 +567,12 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
 
     switch (mShader) {
-        case kShaderBitmap:
+        case OpenGLRenderer::kShaderBitmap:
             drawBitmapShader(left, top, right, bottom, a, mode);
             return;
+        case OpenGLRenderer::kShaderLinearGradient:
+            // TODO: Generate gradient texture, set appropriate shader
+            break;
         default:
             break;
     }

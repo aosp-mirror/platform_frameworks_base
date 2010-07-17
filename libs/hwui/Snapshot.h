@@ -90,22 +90,22 @@ public:
         transform.mapRect(r);
 
         switch (op) {
-        case SkRegion::kDifference_Op:
-            break;
-        case SkRegion::kIntersect_Op:
-            clipped = clipRect.intersect(r);
-            break;
-        case SkRegion::kUnion_Op:
-            clipped = clipRect.unionWith(r);
-            break;
-        case SkRegion::kXOR_Op:
-            break;
-        case SkRegion::kReverseDifference_Op:
-            break;
-        case SkRegion::kReplace_Op:
-            clipRect.set(r);
-            clipped = true;
-            break;
+            case SkRegion::kDifference_Op:
+                break;
+            case SkRegion::kIntersect_Op:
+                clipped = clipRect.intersect(r);
+                break;
+            case SkRegion::kUnion_Op:
+                clipped = clipRect.unionWith(r);
+                break;
+            case SkRegion::kXOR_Op:
+                break;
+            case SkRegion::kReverseDifference_Op:
+                break;
+            case SkRegion::kReplace_Op:
+                clipRect.set(r);
+                clipped = true;
+                break;
         }
 
         if (clipped) {

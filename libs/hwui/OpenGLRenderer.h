@@ -103,6 +103,8 @@ public:
     void resetShader();
     void setupBitmapShader(SkBitmap* bitmap, SkShader::TileMode tileX, SkShader::TileMode tileY,
             SkMatrix* matrix, bool hasAlpha);
+    void setupLinearGradientShader(float* bounds, uint32_t* colors, float* positions,
+            SkShader::TileMode tileMode, SkMatrix* matrix, bool hasAlpha);
 
 private:
     /**
@@ -319,13 +321,18 @@ private:
     GLenum mLastSrcMode;
     GLenum mLastDstMode;
 
-    // Skia shader
+    // Skia shaders
     ShaderType mShader;
     bool mShaderBlend;
-    SkBitmap* mShaderBitmap;
     SkShader::TileMode mShaderTileX;
     SkShader::TileMode mShaderTileY;
     SkMatrix* mShaderMatrix;
+    // Bitmaps
+    SkBitmap* mShaderBitmap;
+    // Gradients
+    float* mShaderBounds;
+    uint32_t* mShaderColors;
+    float* mShaderPositions;
 
     // Various caches
     TextureCache mTextureCache;

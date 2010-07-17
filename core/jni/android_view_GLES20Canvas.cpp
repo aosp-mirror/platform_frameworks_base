@@ -201,7 +201,6 @@ static void android_view_GLES20Canvas_drawBitmapMatrix(JNIEnv* env, jobject canv
 static void android_view_GLES20Canvas_drawPatch(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, SkBitmap* bitmap, jbyteArray chunks,
         float left, float top, float right, float bottom, SkPaint* paint) {
-
     jbyte* storage = env->GetByteArrayElements(chunks, NULL);
     Res_png_9patch* patch = reinterpret_cast<Res_png_9patch*>(storage);
     Res_png_9patch::deserialize(patch);
@@ -236,6 +235,13 @@ static void android_view_GLES20Canvas_setupBitmapShader(JNIEnv* env, jobject can
         OpenGLRenderer* renderer, SkShader* shader, SkBitmap* bitmap,
         SkShader::TileMode tileX, SkShader::TileMode tileY, SkMatrix* matrix) {
     renderer->setupBitmapShader(bitmap, tileX, tileY, matrix,
+            (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+}
+
+static void android_view_GLES20Canvas_setupLinearShader(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, SkShader* shader, float* bounds, uint32_t* colors,
+        float* positions, SkShader::TileMode tileMode, SkMatrix* matrix) {
+    renderer->setupLinearGradientShader(bounds, colors, positions, tileMode, matrix,
             (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
 }
 
@@ -280,6 +286,7 @@ static JNINativeMethod gMethods[] = {
 
     {   "nResetShader",       "(I)V",            (void*) android_view_GLES20Canvas_resetShader },
     {   "nSetupBitmapShader", "(IIIIII)V",       (void*) android_view_GLES20Canvas_setupBitmapShader },
+    {   "nSetupLinearShader", "(IIIIIII)V",      (void*) android_view_GLES20Canvas_setupLinearShader },
 
     {   "nGetClipBounds",     "(ILandroid/graphics/Rect;)Z",
             (void*) android_view_GLES20Canvas_getClipBounds },
