@@ -92,9 +92,15 @@ void *CameraSourceTimeLapse::ThreadTimeLapseWrapper(void *me) {
 
 void CameraSourceTimeLapse::threadTimeLapseEntry() {
     while(mStarted) {
-        LOGV("threadTimeLapseEntry loop");
-        sleep(mTimeBetweenTimeLapseFrameCaptureUs/1E6);
-        CHECK_EQ(OK, mCamera->takePicture());
+        if(mCameraIdle) {
+            LOGV("threadTimeLapseEntry: taking picture");
+            CHECK_EQ(OK, mCamera->takePicture());
+            mCameraIdle = false;
+            sleep(mTimeBetweenTimeLapseFrameCaptureUs/1E6);
+        } else {
+            LOGV("threadTimeLapseEntry: camera busy with old takePicture. Sleeping a little.");
+            sleep(.01);
+        }
     }
 }
 
@@ -112,11 +118,9 @@ void CameraSourceTimeLapse::startCameraRecording() {
         IPCThreadState::self()->restoreCallingIdentity(token);
 
         CameraParameters params(s);
-
         params.setPictureSize(width, height);
         mCamera->setParameters(params.flatten());
-
-        CHECK_EQ(OK, mCamera->takePicture());
+        mCameraIdle = true;
 
         // create a thread which takes pictures in a loop
         pthread_attr_t attr;
@@ -156,7 +160,35 @@ sp<IMemory> CameraSourceTimeLapse::createIMemoryCopy(const sp<IMemory> &source_d
     return newMemory;
 }
 
+// static
+void *CameraSourceTimeLapse::ThreadStartPreviewWrapper(void *me) {
+    CameraSourceTimeLapse *source = static_cast<CameraSourceTimeLapse *>(me);
+    source->threadStartPreview();
+    return NULL;
+}
+
+void CameraSourceTimeLapse::threadStartPreview() {
+    CHECK_EQ(OK, mCamera->startPreview());
+    mCameraIdle = true;
+}
+
+void CameraSourceTimeLapse::restartPreview() {
+    // Start this in a different thread, so that the dataCallback can return
+    LOGV("restartPreview");
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+
+    pthread_t threadPreview;
+    pthread_create(&threadPreview, &attr, ThreadStartPreviewWrapper, this);
+    pthread_attr_destroy(&attr);
+}
+
 void CameraSourceTimeLapse::dataCallback(int32_t msgType, const sp<IMemory> &data) {
+    if(msgType == CAMERA_MSG_COMPRESSED_IMAGE) {
+        // takePicture will complete after this callback, so restart preview.
+        restartPreview();
+    }
     if(msgType != CAMERA_MSG_RAW_IMAGE) {
         return;
     }
