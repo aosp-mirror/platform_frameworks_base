@@ -18,6 +18,7 @@
 #ifndef _PVDECDEF_H_
 #define _PVDECDEF_H_
 
+#include <stdint.h> // for uint8_t, etc
 #include <stdlib.h>
 #include <string.h>
 
