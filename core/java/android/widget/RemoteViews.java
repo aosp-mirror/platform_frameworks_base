@@ -803,7 +803,7 @@ public class RemoteViews implements Parcelable, Filter {
      * Equivalent to calling {@link android.widget.AbsListView#smoothScrollToPosition(int, int)}.
      *
      * @param viewId The id of the view whose text should change
-     * @param position Scroll by this adapter position offset
+     * @param offset Scroll by this adapter position offset
      */
     public void setRelativeScrollPosition(int viewId, int offset) {
         setInt(viewId, "smoothScrollByOffset", offset);
