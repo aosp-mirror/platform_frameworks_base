@@ -1287,6 +1287,11 @@ status_t MPEG4Extractor::updateAudioTrackInfoFromESDS_MPEG4Audio(
     uint32_t freqIndex = (csd[0] & 7) << 1 | (csd[1] >> 7);
     int32_t sampleRate = 0;
     int32_t numChannels = 0;
+    uint8_t offset = 0;
+    static uint32_t kSamplingRate[] = {
+        96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050,
+        16000, 12000, 11025, 8000, 7350
+    };
     if (freqIndex == 15) {
         if (csd_size < 5) {
             return ERROR_MALFORMED;
@@ -1298,11 +1303,8 @@ status_t MPEG4Extractor::updateAudioTrackInfoFromESDS_MPEG4Audio(
                         | (csd[4] >> 7);
 
         numChannels = (csd[4] >> 3) & 15;
+        offset = 4;
     } else {
-        static uint32_t kSamplingRate[] = {
-            96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050,
-            16000, 12000, 11025, 8000, 7350
-        };
 
         if (freqIndex == 13 || freqIndex == 14) {
             return ERROR_MALFORMED;
@@ -1310,6 +1312,66 @@ status_t MPEG4Extractor::updateAudioTrackInfoFromESDS_MPEG4Audio(
 
         sampleRate = kSamplingRate[freqIndex];
         numChannels = (csd[1] >> 3) & 15;
+        offset = 1;
+    }
+
+    uint8_t sbrPresentFlag = -1;
+    uint8_t extensionAudioObjectType = 0;
+    if (objectType == 5) {
+        extensionAudioObjectType = objectType;
+        sbrPresentFlag = 1;
+        freqIndex = ((csd[offset] & 7) << 1) | (csd[offset + 1] >> 7);
+        offset += 1;
+        if (freqIndex == 15) {
+            sampleRate = (((csd[offset] & 0x7f) << 17)
+                            | (csd[offset + 1] << 9)
+                            | (csd[offset + 2] << 1)
+                            | (csd[offset + 3] >> 7));
+            offset += 3;
+        }
+        objectType = csd[offset] >> 3;
+    }
+
+    if (((objectType >= 1 && objectType <= 4) ||
+         (objectType >= 6 && objectType <= 7) ||
+         (objectType == 17) ||
+         (objectType >= 19 || objectType <= 23)) &&
+        (0x00 == (csd[offset] & 7)) &&
+        numChannels != 0) {
+
+        // XXX: We are not handling coreCoderDelay,
+        //      program_config_element(),
+        //      extensionFlag, scalable profile, etc.
+        if (objectType != 6 && objectType != 20) {
+            if (objectType != 5 && csd_size - offset >= 2) {
+                uint32_t syncExtensionType =
+                    (csd[offset + 1] << 3) | (csd[offset + 2] >> 5);
+                if (syncExtensionType == 0x2b7) {
+                    extensionAudioObjectType =
+                            csd[offset + 2] & 0x1F;
+                    if (extensionAudioObjectType == 0x05) {
+                        if (csd_size - offset < 3) {
+                            return ERROR_MALFORMED;
+                        }
+                        uint8_t sbrPresentFlag = csd[offset + 3] & 0x80;
+                        if (sbrPresentFlag) {
+                            freqIndex = (csd[offset + 3] & 0x78) >> 3;
+                            if (freqIndex == 15) {
+                                if (csd_size - offset < 6) {
+                                    return ERROR_MALFORMED;
+                                }
+                                sampleRate = (csd[offset + 3] & 0x07) << 21
+                                        | csd[offset + 4] << 13
+                                        | csd[offset + 5] << 5
+                                        | csd[offset + 6] >> 3;
+                            } else {
+                                sampleRate = kSamplingRate[freqIndex];
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     if (numChannels == 0) {
