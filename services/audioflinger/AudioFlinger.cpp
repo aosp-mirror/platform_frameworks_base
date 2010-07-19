@@ -2948,7 +2948,8 @@ bool AudioFlinger::PlaybackThread::Track::isReady() const {
 status_t AudioFlinger::PlaybackThread::Track::start()
 {
     status_t status = NO_ERROR;
-    LOGV("start(%d), calling thread %d", mName, IPCThreadState::self()->getCallingPid());
+    LOGV("start(%d), calling thread %d session %d",
+            mName, IPCThreadState::self()->getCallingPid(), mSessionId);
     sp<ThreadBase> thread = mThread.promote();
     if (thread != 0) {
         Mutex::Autolock _l(thread->mLock);
@@ -5366,9 +5367,9 @@ status_t AudioFlinger::EffectModule::setVolume(uint32_t *left, uint32_t *right, 
 
     // Send volume indication if EFFECT_FLAG_VOLUME_IND is set and read back altered volume
     // if controller flag is set (Note that controller == TRUE => EFFECT_FLAG_VOLUME_CTRL set)
-    if (isEnabled() &&
-            (mDescriptor.flags & EFFECT_FLAG_VOLUME_MASK) == EFFECT_FLAG_VOLUME_CTRL ||
-            (mDescriptor.flags & EFFECT_FLAG_VOLUME_MASK) == EFFECT_FLAG_VOLUME_IND) {
+    if ((mState >= ACTIVE) &&
+            ((mDescriptor.flags & EFFECT_FLAG_VOLUME_MASK) == EFFECT_FLAG_VOLUME_CTRL ||
+            (mDescriptor.flags & EFFECT_FLAG_VOLUME_MASK) == EFFECT_FLAG_VOLUME_IND)) {
         status_t cmdStatus;
         uint32_t volume[2];
         uint32_t *pVolume = NULL;
@@ -5749,7 +5750,8 @@ void AudioFlinger::EffectHandle::dump(char* buffer, size_t size)
 AudioFlinger::EffectChain::EffectChain(const wp<ThreadBase>& wThread,
                                         int sessionId)
     : mThread(wThread), mSessionId(sessionId), mActiveTrackCnt(0), mOwnInBuffer(false),
-            mVolumeCtrlIdx(-1), mLeftVolume(0), mRightVolume(0)
+            mVolumeCtrlIdx(-1), mLeftVolume(0), mRightVolume(0),
+            mNewLeftVolume(0), mNewRightVolume(0)
 {
 
 }
@@ -5980,25 +5982,34 @@ bool AudioFlinger::EffectChain::setVolume_l(uint32_t *left, uint32_t *right)
 
     // first update volume controller
     for (size_t i = size; i > 0; i--) {
-        if (mEffects[i - 1]->isEnabled() &&
+        if ((mEffects[i - 1]->state() >= EffectModule::ACTIVE) &&
             (mEffects[i - 1]->desc().flags & EFFECT_FLAG_VOLUME_MASK) == EFFECT_FLAG_VOLUME_CTRL) {
             ctrlIdx = i - 1;
+            hasControl = true;
             break;
         }
     }
 
     if (ctrlIdx == mVolumeCtrlIdx && *left == mLeftVolume && *right == mRightVolume) {
-        return false;
+        if (hasControl) {
+            *left = mNewLeftVolume;
+            *right = mNewRightVolume;
+        }
+        return hasControl;
     }
 
+    if (mVolumeCtrlIdx != -1) {
+        hasControl = true;
+    }
     mVolumeCtrlIdx = ctrlIdx;
-    mLeftVolume = *left;
-    mRightVolume = *right;
+    mLeftVolume = newLeft;
+    mRightVolume = newRight;
 
     // second get volume update from volume controller
     if (ctrlIdx >= 0) {
         mEffects[ctrlIdx]->setVolume(&newLeft, &newRight, true);
-        hasControl = true;
+        mNewLeftVolume = newLeft;
+        mNewRightVolume = newRight;
     }
     // then indicate volume to all other effects in chain.
     // Pass altered volume to effects before volume controller

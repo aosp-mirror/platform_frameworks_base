@@ -230,9 +230,6 @@ extern "C" int Visualizer_process(
     if (pContext == NULL) {
         return -EINVAL;
     }
-    if (pContext->mState != VISUALIZER_STATE_ACTIVE) {
-        return -ENODATA;
-    }
 
     if (inBuffer == NULL || inBuffer->raw == NULL ||
         outBuffer == NULL || outBuffer->raw == NULL ||
@@ -268,6 +265,9 @@ extern "C" int Visualizer_process(
         } else {
             memcpy(outBuffer->raw, inBuffer->raw, outBuffer->frameCount * 2 * sizeof(int16_t));
         }
+    }
+    if (pContext->mState != VISUALIZER_STATE_ACTIVE) {
+        return -ENODATA;
     }
     return 0;
 }   // end Visualizer_process
