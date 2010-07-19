@@ -46,3 +46,33 @@ LOCAL_CFLAGS := -DMTP_DEVICE -DMTP_HOST
 include $(BUILD_STATIC_LIBRARY)
 
 endif
+
+ifeq ($(HOST_OS),linux)
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=                                       \
+                  MtpClient.cpp                         \
+                  MtpCursor.cpp                         \
+                  MtpDataPacket.cpp                     \
+                  MtpDebug.cpp                          \
+                  MtpDevice.cpp                         \
+                  MtpEventPacket.cpp                    \
+                  MtpDeviceInfo.cpp                     \
+                  MtpObjectInfo.cpp                     \
+                  MtpPacket.cpp                         \
+                  MtpProperty.cpp                       \
+                  MtpRequestPacket.cpp                  \
+                  MtpResponsePacket.cpp                 \
+                  MtpStorageInfo.cpp                    \
+                  MtpStringBuffer.cpp                   \
+                  MtpStorage.cpp                        \
+                  MtpUtils.cpp                          \
+
+LOCAL_MODULE:= libmtp
+
+LOCAL_CFLAGS := -DMTP_HOST
+
+include $(BUILD_HOST_STATIC_LIBRARY)
+
+endif

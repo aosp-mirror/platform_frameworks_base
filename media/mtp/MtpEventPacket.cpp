@@ -21,7 +21,9 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
+#ifdef MTP_DEVICE
 #include <linux/usb/f_mtp.h>
+#endif
 
 #include "MtpEventPacket.h"
 
