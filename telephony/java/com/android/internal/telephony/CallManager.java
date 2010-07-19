@@ -67,6 +67,12 @@ public final class CallManager {
     // list of supported foreground calls
     private final ArrayList<Call> mForegroundCalls;
 
+    // empty connection list
+    private final ArrayList<Connection> emptyConnections = new ArrayList<Connection>();
+
+    // default phone as the first phone registered
+    private Phone mDefaultPhone;
+
     // state registrants
     protected final RegistrantList mPreciseCallStateRegistrants
     = new RegistrantList();
@@ -100,6 +106,7 @@ public final class CallManager {
         mRingingCalls = new ArrayList<Call>();
         mBackgroundCalls = new ArrayList<Call>();
         mForegroundCalls = new ArrayList<Call>();
+        mDefaultPhone = null;
     }
 
     /**
@@ -117,6 +124,9 @@ public final class CallManager {
      */
     public boolean registerPhone(Phone phone) {
         if (phone != null && !mPhones.contains(phone)) {
+            if (mPhones.isEmpty()) {
+                mDefaultPhone = phone;
+            }
             mPhones.add(phone);
             mRingingCalls.add(phone.getRingingCall());
             mBackgroundCalls.add(phone.getBackgroundCall());
@@ -138,6 +148,13 @@ public final class CallManager {
             mBackgroundCalls.remove(phone.getBackgroundCall());
             mForegroundCalls.remove(phone.getForegroundCall());
             unregisterForPhoneStates(phone);
+            if (phone == mDefaultPhone) {
+                if (mPhones.isEmpty()) {
+                    mDefaultPhone = null;
+                } else {
+                    mDefaultPhone = mPhones.get(0);
+                }
+            }
         }
     }
 
@@ -338,67 +355,6 @@ public final class CallManager {
         if (canTransfer(heldCall)) {
             heldCall.getPhone().explicitCallTransfer();
         }
-    }
-
-
-    /**
-     * @return list of ringing calls
-     */
-    public ArrayList<Call> getRingingCalls() {
-        return mBackgroundCalls;
-    }
-
-    /**
-     * @return list of background calls
-     */
-    public ArrayList<Call> getBackgroundCalls() {
-        return mBackgroundCalls;
-    }
-
-    /**
-     * Return the non idle foreground call,
-     * note: there is difference between isAlive and non idle
-     */
-    public Call getActiveFgCall() {
-        for (Call call : mForegroundCalls) {
-            if (call.getState() != Call.State.IDLE) {
-                return call;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * return the first active call from a call list
-     */
-    private  Call getFirstActiveCall(ArrayList<Call> calls) {
-        for (Call call : calls) {
-            if (!call.isIdle()) {
-                return call;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Return true if there is at least one active foreground call
-     */
-    public boolean hasActiveFgCall() {
-        return (getFirstActiveCall(mForegroundCalls) != null);
-    }
-
-    /**
-     * Return true if there is at least one active background call
-     */
-    public boolean hasActiveBgCall() {
-        return (getFirstActiveCall(mBackgroundCalls) != null);
-    }
-
-    /**
-     * Return true if there is at least one active ringing call
-     */
-    public boolean hasActiveRingingCall() {
-        return (getFirstActiveCall(mRingingCalls) != null);
     }
 
     /**
@@ -804,6 +760,211 @@ public final class CallManager {
      * @param h Handler to be removed from the registrant list.
      */
     public void unregisterForSubscriptionInfoReady(Handler h){}
+
+    /* APIs to access foregroudCalls, backgroudCalls, and ringingCalls
+     * 1. APIs to access list of calls
+     * 2. APIs to check if any active call, which has connection other than
+     * disconnected ones, pleaser refer to Call.isIdle()
+     * 3. APIs to return first active call
+     * 4. APIs to return the connections of first active call
+     * 5. APIs to return other property of first active call
+     */
+
+    /**
+     * @return list of ringing calls
+     */
+    public ArrayList<Call> getRingingCalls() {
+        return mBackgroundCalls;
+    }
+
+    /**
+     * @return list of background calls
+     */
+    public ArrayList<Call> getBackgroundCalls() {
+        return mBackgroundCalls;
+    }
+
+    /**
+     * Return true if there is at least one active foreground call
+     */
+    public boolean hasActiveFgCall() {
+        return (getFirstActiveCall(mForegroundCalls) != null);
+    }
+
+    /**
+     * Return true if there is at least one active background call
+     */
+    public boolean hasActiveBgCall() {
+        // TODO since hasActiveBgCall may get called often
+        // better to cache it to improve performance
+        return (getFirstActiveCall(mBackgroundCalls) != null);
+    }
+
+    /**
+     * Return true if there is at least one active ringing call
+     *
+     */
+    public boolean hasActiveRingingCall() {
+        return (getFirstActiveCall(mRingingCalls) != null);
+    }
+
+    /**
+     * return the active foreground call from foreground calls
+     *
+     * Active call means the call is NOT in Call.State.IDLE
+     *
+     * 1. If there is active foreground call, return it
+     * 2. If there is no active foreground call, return the
+     *    foreground call associated with default phone, which state is IDLE.
+     * 3. If there is no phone registered at all, return null.
+     *
+     */
+    public Call getActiveFgCall() {
+        for (Call call : mForegroundCalls) {
+            if (call.getState() != Call.State.IDLE) {
+                return call;
+            }
+        }
+        return (mDefaultPhone == null) ?
+                null : mDefaultPhone.getForegroundCall();
+    }
+
+    /**
+     * return one active background call from background calls
+     *
+     * Active call means the call is NOT idle defined by Call.isIdle()
+     *
+     * 1. If there is only one active background call, return it
+     * 2. If there is more than one active background call, return the first one
+     * 3. If there is no active background call, return the background call
+     *    associated with default phone, which state is IDLE.
+     * 4. If there is no background call at all, return null.
+     *
+     * Complete background calls list can be get by getBackgroundCalls()
+     */
+    public Call getFirstActiveBgCall() {
+        for (Call call : mBackgroundCalls) {
+            if (!call.isIdle()) {
+                return call;
+            }
+        }
+        return (mDefaultPhone == null) ?
+                null : mDefaultPhone.getBackgroundCall();
+    }
+
+    /**
+     * return one active ringing call from ringing calls
+     *
+     * Active call means the call is NOT idle defined by Call.isIdle()
+     *
+     * 1. If there is only one active ringing call, return it
+     * 2. If there is more than one active ringing call, return the first one
+     * 3. If there is no active ringing call, return the ringing call
+     *    associated with default phone, which state is IDLE.
+     * 4. If there is no ringing call at all, return null.
+     *
+     * Complete ringing calls list can be get by getRingingCalls()
+     */
+    public Call getFirstActiveRingingCall() {
+        for (Call call : mRingingCalls) {
+            if (!call.isIdle()) {
+                return call;
+            }
+        }
+        return (mDefaultPhone == null) ?
+                null : mDefaultPhone.getRingingCall();
+    }
+
+    /**
+     * @return the state of active foreground call
+     * return IDLE if there is no active foreground call
+     */
+    public Call.State getActiveFgCallState() {
+        Call fgCall = getActiveFgCall();
+
+        if (fgCall != null) {
+            return fgCall.getState();
+        }
+
+        return Call.State.IDLE;
+    }
+
+    /**
+     * @return the connections of active foreground call
+     * return null if there is no active foreground call
+     */
+    public List<Connection> getFgCallConnections() {
+        Call fgCall = getActiveFgCall();
+        if ( fgCall != null) {
+            return fgCall.getConnections();
+        }
+        return emptyConnections;
+    }
+
+    /**
+     * @return the connections of active background call
+     * return empty list if there is no active background call
+     */
+    public List<Connection> getBgCallConnections() {
+        Call bgCall = getActiveFgCall();
+        if ( bgCall != null) {
+            return bgCall.getConnections();
+        }
+        return emptyConnections;
+    }
+
+    /**
+     * @return the latest connection of active foreground call
+     * return null if there is no active foreground call
+     */
+    public Connection getFgCallLatestConnection() {
+        Call fgCall = getActiveFgCall();
+        if ( fgCall != null) {
+            return fgCall.getLatestConnection();
+        }
+        return null;
+    }
+
+    /**
+     * @return true if there is at least one Foreground call in disconnected state
+     */
+    public boolean hasDisconnectedFgCall() {
+        return (getFirstCallOfState(mForegroundCalls, Call.State.DISCONNECTED) != null);
+    }
+
+    /**
+     * @return true if there is at least one background call in disconnected state
+     */
+    public boolean hasDisconnectedBgCall() {
+        return (getFirstCallOfState(mBackgroundCalls, Call.State.DISCONNECTED) != null);
+    }
+
+    /**
+     * @return the first active call from a call list
+     */
+    private  Call getFirstActiveCall(ArrayList<Call> calls) {
+        for (Call call : calls) {
+            if (!call.isIdle()) {
+                return call;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @return the first call in a the Call.state from a call list
+     */
+    private Call getFirstCallOfState(ArrayList<Call> calls, Call.State state) {
+        for (Call call : calls) {
+            if (call.getState() == state) {
+                return call;
+            }
+        }
+        return null;
+    }
+
+
+
 
     private Handler mHandler = new Handler() {
 
