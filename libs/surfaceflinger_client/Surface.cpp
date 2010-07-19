@@ -385,8 +385,6 @@ sp<Surface> Surface::readFromParcel(const Parcel& data) {
     if (surface == 0) {
        surface = new Surface(data, binder);
        sCachedSurfaces.add(binder, surface);
-    } else {
-        LOGW("Reusing surface!");
     }
     if (surface->mSurface == 0) {
       surface = 0;
@@ -1024,4 +1022,3 @@ bool Surface::BufferInfo::validateBuffer(const sp<GraphicBuffer>& buffer) const 
 
 // ----------------------------------------------------------------------------
 }; // namespace android
-
