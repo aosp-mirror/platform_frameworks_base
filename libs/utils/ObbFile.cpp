@@ -156,9 +156,9 @@ bool ObbFile::parseObbFile(int fd)
             return false;
         }
 
-        if (footerSize < kFooterMinSize) {
-            LOGW("claimed footer size is too small (%08zx; minimum size is 0x%x)\n",
-                    footerSize, kFooterMinSize);
+        if (footerSize < (kFooterMinSize - kFooterTagSize)) {
+            LOGW("claimed footer size is too small (0x%zx; minimum size is 0x%x)\n",
+                    footerSize, kFooterMinSize - kFooterTagSize);
             return false;
         }
     }
@@ -168,6 +168,8 @@ bool ObbFile::parseObbFile(int fd)
         LOGW("seek %lld failed: %s\n", fileOffset, strerror(errno));
         return false;
     }
+
+    mFooterStart = fileOffset;
 
     char* scanBuf = (char*)malloc(footerSize);
     if (scanBuf == NULL) {
@@ -289,6 +291,40 @@ bool ObbFile::writeTo(int fd)
         LOGW("couldn't write footer magic signature: %s", strerror(errno));
         return false;
     }
+
+    return true;
+}
+
+bool ObbFile::removeFrom(const char* filename)
+{
+    int fd;
+    bool success = false;
+
+    fd = ::open(filename, O_RDWR);
+    if (fd < 0) {
+        goto out;
+    }
+    success = removeFrom(fd);
+    close(fd);
+
+out:
+    if (!success) {
+        LOGW("failed to remove signature from %s: %s\n", filename, strerror(errno));
+    }
+    return success;
+}
+
+bool ObbFile::removeFrom(int fd)
+{
+    if (fd < 0) {
+        return false;
+    }
+
+    if (!readFrom(fd)) {
+        return false;
+    }
+
+    ftruncate(fd, mFooterStart);
 
     return true;
 }
