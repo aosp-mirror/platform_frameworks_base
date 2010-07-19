@@ -18,8 +18,13 @@ LOCAL_PRELINK_MODULE := false
 LOCAL_STATIC_LIBRARIES += libmusicbundle
 
 LOCAL_SHARED_LIBRARIES := \
-     libcutils \
-     libdl
+     libcutils
+
+ifeq ($(TARGET_SIMULATOR),true)
+LOCAL_LDLIBS += -ldl
+else
+LOCAL_SHARED_LIBRARIES += libdl
+endif
 
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/Bundle \

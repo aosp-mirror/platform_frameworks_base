@@ -15,7 +15,7 @@ LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/soundfx
 LOCAL_MODULE:= libvisualizer
 
 ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
-LOCAL_LDLIBS += -ldlS
+LOCAL_LDLIBS += -ldl
 endif
 
 ifneq ($(TARGET_SIMULATOR),true)
