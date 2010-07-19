@@ -424,8 +424,7 @@ public class LocationManager {
      * {@link LocationListener#onLocationChanged} method will be called for
      * each location update
      *
-     * @throws IllegalArgumentException if provider is null or doesn't exist
-     * @throws IllegalArgumentException if listener is null
+     * @throws IllegalArgumentException if provider or listener is null
      * @throws RuntimeException if the calling thread has no Looper
      * @throws SecurityException if no suitable permission is present for the provider.
      */
@@ -977,7 +976,7 @@ public class LocationManager {
      * @return true if the provider is enabled
      *
      * @throws SecurityException if no suitable permission is present for the provider.
-     * @throws IllegalArgumentException if provider is null or doesn't exist
+     * @throws IllegalArgumentException if provider is null
      */
     public boolean isProviderEnabled(String provider) {
         if (provider == null) {
