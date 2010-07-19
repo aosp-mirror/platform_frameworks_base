@@ -127,6 +127,8 @@ class MountService extends IMountService.Stub
     private boolean                               mBooted = false;
     private boolean                               mReady = false;
     private boolean                               mSendUmsConnectedOnBoot = false;
+    // true if we should fake MEDIA_MOUNTED state for external storage
+    private boolean                               mEmulateExternalStorage = false;
 
     /**
      * Private hash of currently mounted secure containers.
@@ -319,7 +321,9 @@ class MountService extends IMountService.Stub
                             String path = Environment.getExternalStorageDirectory().getPath();
                             String state = getVolumeState(path);
 
-                            if (state.equals(Environment.MEDIA_UNMOUNTED)) {
+                            if (mEmulateExternalStorage) {
+                                notifyVolumeStateChange(null, path, VolumeState.NoMedia, VolumeState.Mounted);
+                            } else if (state.equals(Environment.MEDIA_UNMOUNTED)) {
                                 int rc = doMountVolume(path);
                                 if (rc != StorageResultCode.OperationSucceeded) {
                                     Slog.e(TAG, String.format("Boot-time mount failed (%d)", rc));
@@ -390,11 +394,13 @@ class MountService extends IMountService.Stub
             Slog.w(TAG, String.format("Duplicate state transition (%s -> %s)", mLegacyState, state));
             return;
         }
-        // Update state on PackageManager
-        if (Environment.MEDIA_UNMOUNTED.equals(state)) {
-            mPms.updateExternalMediaStatus(false, false);
-        } else if (Environment.MEDIA_MOUNTED.equals(state)) {
-            mPms.updateExternalMediaStatus(true, false);
+        // Update state on PackageManager, but only of real events
+        if (!mEmulateExternalStorage) {
+            if (Environment.MEDIA_UNMOUNTED.equals(state)) {
+                mPms.updateExternalMediaStatus(false, false);
+            } else if (Environment.MEDIA_MOUNTED.equals(state)) {
+                mPms.updateExternalMediaStatus(true, false);
+            }
         }
         String oldState = mLegacyState;
         mLegacyState = state;
@@ -893,6 +899,13 @@ class MountService extends IMountService.Stub
      */
     public MountService(Context context) {
         mContext = context;
+
+        mEmulateExternalStorage = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_emulateExternalStorage);
+        if (mEmulateExternalStorage) {
+            Slog.d(TAG, "using emulated external storage");
+            mLegacyState = Environment.MEDIA_MOUNTED;
+        }
 
         // XXX: This will go away soon in favor of IMountServiceObserver
         mPms = (PackageManagerService) ServiceManager.getService("package");

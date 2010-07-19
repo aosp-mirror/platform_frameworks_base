@@ -72,6 +72,13 @@
          when there's no network connection. If the scan doesn't timeout, use zero -->
     <integer name="config_radioScanningTimeout">0</integer>
 
+    <!-- Set to true if the location returned Environment.getExternalStorageDirectory()
+         is actually a subdirectory of the internal storage.
+         If this is set then Environment.getExternalStorageState() will always return
+         MEDIA_MOUNTED and Intent.ACTION_MEDIA_MOUNTED will be broadcast at boot time
+         for backward compatibility with apps that require external storage. -->
+    <bool name="config_emulateExternalStorage">false</bool>
+
     <!-- XXXXX NOTE THE FOLLOWING RESOURCES USE THE WRONG NAMING CONVENTION.
          Please don't copy them, copy anything else. -->
 
