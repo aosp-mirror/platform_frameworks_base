@@ -5,17 +5,14 @@
 
 #include "ip.rsh"
 
-uchar4 * ScratchPixel;
-
-#pragma rs export_var(ScratchPixel)
-
 void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32_t y) {
     uchar4 *output = (uchar4 *)v_out;
-    const uchar4 *input = (uchar4 *)v_in;
     const FilterStruct *fs = (const FilterStruct *)usrData;
+    const uchar4 *input = (const uchar4 *)rsGetElementAt(fs->ain, 0, y);
 
     float4 blurredPixel = 0;
     float4 currentPixel = 0;
+
     for(int r = -fs->radius; r <= fs->radius; r ++) {
         // Stepping left and right away from the pixel
         int validW = x + r;

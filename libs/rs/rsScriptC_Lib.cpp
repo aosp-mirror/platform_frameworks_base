@@ -329,6 +329,29 @@ static uint32_t SC_allocGetDimFaces(RsAllocation va)
     return a->getType()->getDimFaces();
 }
 
+const void * SC_getElementAtX(RsAllocation va, uint32_t x)
+{
+    const Allocation *a = static_cast<const Allocation *>(va);
+    const Type *t = a->getType();
+    const uint8_t *p = (const uint8_t *)a->getPtr();
+    return &p[t->getElementSizeBytes() * x];
+}
+
+const void * SC_getElementAtXY(RsAllocation va, uint32_t x, uint32_t y)
+{
+    const Allocation *a = static_cast<const Allocation *>(va);
+    const Type *t = a->getType();
+    const uint8_t *p = (const uint8_t *)a->getPtr();
+    return &p[t->getElementSizeBytes() * (x + y*t->getDimX())];
+}
+
+const void * SC_getElementAtXYZ(RsAllocation va, uint32_t x, uint32_t y, uint32_t z)
+{
+    const Allocation *a = static_cast<const Allocation *>(va);
+    const Type *t = a->getType();
+    const uint8_t *p = (const uint8_t *)a->getPtr();
+    return &p[t->getElementSizeBytes() * (x + y*t->getDimX())];
+}
 
 
 static void SC_debugF(const char *s, float f) {
@@ -348,6 +371,10 @@ static void SC_debugFv4(const char *s, rsvF_4 fv) {
 }
 static void SC_debugI32(const char *s, int32_t i) {
     LOGE("%s %i  0x%x", s, i, i);
+}
+
+static void SC_debugP(const char *s, const void *p) {
+    LOGE("%s %p", s, p);
 }
 
 static uint32_t SC_toClient(void *data, int cmdID, int len, int waitForSpace)
@@ -433,12 +460,18 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "rsAllocationGetDimFaces", (void *)&SC_allocGetDimFaces },
     { "rsGetAllocation", (void *)&SC_getAllocation },
 
+    { "_Z14rsGetElementAt13rs_allocationj", (void *)&SC_getElementAtX },
+    { "_Z14rsGetElementAt13rs_allocationjj", (void *)&SC_getElementAtXY },
+    { "_Z14rsGetElementAt13rs_allocationjjj", (void *)&SC_getElementAtXYZ },
+
+
     // Debug
     { "_Z7rsDebugPKcf", (void *)&SC_debugF },
     { "_Z7rsDebugPKcDv2_f", (void *)&SC_debugFv2 },
     { "_Z7rsDebugPKcDv3_f", (void *)&SC_debugFv3 },
     { "_Z7rsDebugPKcDv4_f", (void *)&SC_debugFv4 },
     { "_Z7rsDebugPKci", (void *)&SC_debugI32 },
+    { "_Z7rsDebugPKcPKv", (void *)&SC_debugP },
     //extern void __attribute__((overloadable))rsDebug(const char *, const void *);
 
 

@@ -14,6 +14,12 @@ extern uint32_t rsAllocationGetDimZ(rs_allocation);
 extern uint32_t rsAllocationGetDimLOD(rs_allocation);
 extern uint32_t rsAllocationGetDimFaces(rs_allocation);
 
+extern const void * __attribute__((overloadable))
+    rsGetElementAt(rs_allocation, uint32_t x);
+extern const void * __attribute__((overloadable))
+    rsGetElementAt(rs_allocation, uint32_t x, uint32_t y);
+extern const void * __attribute__((overloadable))
+    rsGetElementAt(rs_allocation, uint32_t x, uint32_t y, uint32_t z);
 
 
 // Debugging

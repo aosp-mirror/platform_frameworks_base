@@ -5,14 +5,10 @@
 
 #include "ip.rsh"
 
-uchar4 * ScratchPixel;
-
-#pragma rs export_var(ScratchPixel)
-
 void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32_t y) {
     uchar4 *output = (uchar4 *)v_out;
-    const uchar4 *input = (uchar4 *)v_in;
     const FilterStruct *fs = (const FilterStruct *)usrData;
+    const uchar4 *input = (const uchar4 *)rsGetElementAt(fs->ain, x, 0);
 
     float4 blurredPixel = 0;
     float4 currentPixel = 0;
@@ -27,19 +23,21 @@ void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32
             validH = fs->height - 1;
         }
 
-        uchar4 *input = ScratchPixel + validH * fs->width + x;
+        const uchar4 *i = input + validH * fs->width;
+        //const uchar4 *i = (const uchar4 *)rsGetElementAt(fs->ain, x, validH);
 
         float weight = fs->gaussian[r + fs->radius];
 
-        currentPixel.x = (float)(input->x);
-        currentPixel.y = (float)(input->y);
-        currentPixel.z = (float)(input->z);
+        currentPixel.x = (float)(i->x);
+        currentPixel.y = (float)(i->y);
+        currentPixel.z = (float)(i->z);
 
         blurredPixel.xyz += currentPixel.xyz * weight;
 #else
         int validH = rsClamp(y + r, 0, height - 1);
-        uchar4 *input = ScratchPixel + validH * width + x;
-        blurredPixel.xyz += convert_float3(input->xyz) * gaussian[r + fs->radius];
+        validH -= y;
+        uchar4 *i = input + validH * width + x;
+        blurredPixel.xyz += convert_float3(i->xyz) * gaussian[r + fs->radius];
 #endif
     }
 

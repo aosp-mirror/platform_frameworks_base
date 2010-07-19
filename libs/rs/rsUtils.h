@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <time.h>
+#include <cutils/atomic.h>
 
 #ifndef ANDROID_RS_BUILD_FOR_HOST
 #include <EGL/egl.h>

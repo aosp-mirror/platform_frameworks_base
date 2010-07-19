@@ -65,6 +65,7 @@ public:
         Script * mScript;
     };
 
+    typedef void (*WorkerCallback_t)(void *usr, uint32_t idx);
 
     //StructuredAllocationContext mStateAllocation;
     ElementState mStateElement;
@@ -172,6 +173,8 @@ public:
 
     bool ext_OES_texture_npot() const {return mGL.OES_texture_npot;}
 
+    void launchThreads(WorkerCallback_t cbk, void *data);
+
 protected:
     Device *mDev;
 
@@ -222,6 +225,20 @@ protected:
     pthread_t mThreadId;
     pid_t mNativeThreadId;
 
+    struct Workers {
+        volatile int mRunningCount;
+        volatile int mLaunchCount;
+        uint32_t mCount;
+        pthread_t *mThreadId;
+        pid_t *mNativeThreadId;
+        Signal mCompleteSignal;
+
+        Signal *mLaunchSignals;
+        WorkerCallback_t mLaunchCallback;
+        void *mLaunchData;
+    };
+    Workers mWorkers;
+
     ObjectBaseRef<Script> mRootScript;
     ObjectBaseRef<ProgramFragment> mFragment;
     ObjectBaseRef<ProgramVertex> mVertex;
@@ -248,6 +265,7 @@ private:
     uint32_t runRootScript();
 
     static void * threadProc(void *);
+    static void * helperThreadProc(void *);
 
     ANativeWindow *mWndSurface;
 
