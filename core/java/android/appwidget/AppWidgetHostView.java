@@ -32,6 +32,9 @@ import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Adapter;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
@@ -253,6 +256,22 @@ public class AppWidgetHostView extends FrameLayout {
                 // and that looks okay.
                 mFadeStartTime = SystemClock.uptimeMillis();
                 invalidate();
+            }
+        }
+    }
+
+    /**
+     * Process data-changed notifications for the specified view in the specified
+     * set of {@link RemoteViews} views.
+     */
+    void viewDataChanged(RemoteViews remoteViews, int viewId) {
+        View v = findViewById(viewId);
+        if ((v != null) && (v instanceof AdapterView<?>)) {
+            AdapterView<?> adapterView = (AdapterView<?>) v;
+            Adapter adapter = adapterView.getAdapter();
+            if (adapter instanceof BaseAdapter) {
+                BaseAdapter baseAdapter = (BaseAdapter) adapter;
+                baseAdapter.notifyDataSetChanged();
             }
         }
     }

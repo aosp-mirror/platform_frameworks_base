@@ -288,6 +288,35 @@ public class AppWidgetManager {
     }
 
     /**
+     * Notifies the specified collection view in all the specified AppWidget instances
+     * to invalidate their currently data.
+     *
+     * @param appWidgetIds  The AppWidget instances for which to notify of view data changes.
+     * @param views         The RemoteViews which contains the view referenced at viewId.
+     * @param viewId        The collection view id.
+     */
+    public void notifyAppWidgetViewDataChanged(int[] appWidgetIds, RemoteViews views, int viewId) {
+        try {
+            sService.notifyAppWidgetViewDataChanged(appWidgetIds, views, viewId);
+        }
+        catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+    }
+
+    /**
+     * Notifies the specified collection view in all the specified AppWidget instance
+     * to invalidate it's currently data.
+     *
+     * @param appWidgetId  The AppWidget instance for which to notify of view data changes.
+     * @param views         The RemoteViews which contains the view referenced at viewId.
+     * @param viewId        The collection view id.
+     */
+    public void notifyAppWidgetViewDataChanged(int appWidgetId, RemoteViews views, int viewId) {
+        notifyAppWidgetViewDataChanged(new int[] { appWidgetId }, views, viewId);
+    }
+
+    /**
      * Return a list of the AppWidget providers that are currently installed.
      */
     public List<AppWidgetProviderInfo> getInstalledProviders() {

@@ -425,6 +425,23 @@ class AppWidgetService extends IAppWidgetService.Stub
         }
     }
 
+    public void notifyAppWidgetViewDataChanged(int[] appWidgetIds, RemoteViews views, int viewId) {
+        if (appWidgetIds == null) {
+            return;
+        }
+        if (appWidgetIds.length == 0) {
+            return;
+        }
+        final int N = appWidgetIds.length;
+
+        synchronized (mAppWidgetIds) {
+            for (int i=0; i<N; i++) {
+                AppWidgetId id = lookupAppWidgetIdLocked(appWidgetIds[i]);
+                notifyAppWidgetViewDataChangedInstanceLocked(id, views, viewId);
+            }
+        }
+    }
+
     public void updateAppWidgetProvider(ComponentName provider, RemoteViews views) {
         synchronized (mAppWidgetIds) {
             Provider p = lookupProviderLocked(provider);
@@ -453,6 +470,27 @@ class AppWidgetService extends IAppWidgetService.Stub
                 try {
                     // the lock is held, but this is a oneway call
                     id.host.callbacks.updateAppWidget(id.appWidgetId, views);
+                } catch (RemoteException e) {
+                    // It failed; remove the callback. No need to prune because
+                    // we know that this host is still referenced by this instance.
+                    id.host.callbacks = null;
+                }
+            }
+        }
+    }
+
+    void notifyAppWidgetViewDataChangedInstanceLocked(AppWidgetId id, RemoteViews views, int viewId) {
+        // allow for stale appWidgetIds and other badness
+        // lookup also checks that the calling process can access the appWidgetId
+        // drop unbound appWidgetIds (shouldn't be possible under normal circumstances)
+        if (id != null && id.provider != null && !id.provider.zombie && !id.host.zombie) {
+            id.views = views;
+
+            // is anyone listening?
+            if (id.host.callbacks != null) {
+                try {
+                    // the lock is held, but this is a oneway call
+                    id.host.callbacks.viewDataChanged(id.appWidgetId, views, viewId);
                 } catch (RemoteException e) {
                     // It failed; remove the callback. No need to prune because
                     // we know that this host is still referenced by this instance.
