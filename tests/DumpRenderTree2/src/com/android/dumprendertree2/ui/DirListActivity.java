@@ -17,6 +17,7 @@
 package com.android.dumprendertree2.ui;
 
 import com.android.dumprendertree2.FileFilter;
+import com.android.dumprendertree2.LayoutTestsRunner;
 import com.android.dumprendertree2.R;
 
 import android.app.Activity;
@@ -25,6 +26,7 @@ import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Environment;
@@ -79,6 +81,8 @@ public class DirListActivity extends ListActivity {
      * TODO: This should not be a constant, but rather be configurable from somewhere.
      */
     private String mRootDirPath = ROOT_DIR_PATH;
+
+    private FileFilter mFileFilter;
 
     /**
      * A thread responsible for loading the contents of the directory from sd card
@@ -186,6 +190,7 @@ public class DirListActivity extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mFileFilter = new FileFilter(ROOT_DIR_PATH);
         mListView = getListView();
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -196,7 +201,12 @@ public class DirListActivity extends ListActivity {
                 if (item.isDirectory()) {
                     showDir(item.getRelativePath());
                 } else {
-                    /** TODO: run the test */
+                    /** Run the test */
+                    Intent intent = new Intent();
+                    intent.setClass(DirListActivity.this, LayoutTestsRunner.class);
+                    intent.setAction(Intent.ACTION_RUN);
+                    intent.putExtra(LayoutTestsRunner.EXTRA_TEST_PATH, item.getRelativePath());
+                    startActivity(intent);
                 }
             }
         });
@@ -249,7 +259,7 @@ public class DirListActivity extends ListActivity {
     }
 
     @Override
-    protected Dialog onCreateDialog(int id, Bundle args) {
+    protected Dialog onCreateDialog(int id, final Bundle args) {
         Dialog dialog = null;
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -264,8 +274,14 @@ public class DirListActivity extends ListActivity {
                         new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        /** TODO: Run tests from the dir */
                         removeDialog(DIALOG_RUN_ABORT_DIR);
+                        /** Run the tests */
+                        Intent intent = new Intent();
+                        intent.setClass(DirListActivity.this, LayoutTestsRunner.class);
+                        intent.setAction(Intent.ACTION_RUN);
+                        intent.putExtra(LayoutTestsRunner.EXTRA_TEST_PATH,
+                                args.getString("relativePath"));
+                        startActivity(intent);
                     }
                 });
 
@@ -367,9 +383,9 @@ public class DirListActivity extends ListActivity {
 
         for (File item : dir.listFiles()) {
             if (item.isDirectory() && FileFilter.isTestDir(item.getName())) {
-                subDirs.add(new ListItem(getRelativePath(item), true));
+                subDirs.add(new ListItem(mFileFilter.getRelativePath(item), true));
             } else if (FileFilter.isTestFile(item.getName())) {
-                subFiles.add(new ListItem(getRelativePath(item), false));
+                subFiles.add(new ListItem(mFileFilter.getRelativePath(item), false));
             }
         }
 
@@ -380,10 +396,5 @@ public class DirListActivity extends ListActivity {
         subDirs.addAll(subFiles);
 
         return subDirs.toArray(new ListItem[subDirs.size()]);
-    }
-
-    private String getRelativePath(File file) {
-        File rootDir = new File(mRootDirPath);
-        return file.getAbsolutePath().replaceFirst(rootDir.getPath() + File.separator, "");
     }
 }

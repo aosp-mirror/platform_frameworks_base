@@ -23,4 +23,6 @@ limitations under the License.
 
     <string name="dialog_progress_title">Loading items.</string>
     <string name="dialog_progress_msg">Please wait...</string>
+
+    <string name="runner_preloading_title">Preloading tests...</string>
 </resources>
