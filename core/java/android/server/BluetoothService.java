@@ -676,6 +676,10 @@ public class BluetoothService extends IBluetooth.Stub {
                 removeProfileState(address);
             }
 
+            // HID is handled by BluetoothService, other profiles
+            // will be handled by their respective services.
+            setInitialInputDevicePriority(mAdapter.getRemoteDevice(address), state);
+
             if (DBG) log(address + " bond state " + oldState + " -> " + state + " (" +
                          reason + ")");
             Intent intent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
@@ -1345,6 +1349,19 @@ public class BluetoothService extends IBluetooth.Stub {
             BluetoothInputDevice.STATE_DISCONNECTED;
         BluetoothDevice device = mAdapter.getRemoteDevice(address);
         handleInputDeviceStateChange(device, state);
+    }
+
+    private void setInitialInputDevicePriority(BluetoothDevice device, int state) {
+        switch (state) {
+            case BluetoothDevice.BOND_BONDED:
+                if (getInputDevicePriority(device) == BluetoothInputDevice.PRIORITY_UNDEFINED) {
+                    setInputDevicePriority(device, BluetoothInputDevice.PRIORITY_ON);
+                }
+                break;
+            case BluetoothDevice.BOND_NONE:
+                setInputDevicePriority(device, BluetoothInputDevice.PRIORITY_UNDEFINED);
+                break;
+        }
     }
 
     /*package*/ boolean isRemoteDeviceInCache(String address) {
