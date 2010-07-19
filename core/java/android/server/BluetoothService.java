@@ -919,7 +919,7 @@ public class BluetoothService extends IBluetooth.Stub {
                 Log.e(TAG, "Error:Adapter Property at index" + i + "is null");
                 continue;
             }
-            if (name.equals("Devices")) {
+            if (name.equals("Devices") || name.equals("UUIDs")) {
                 StringBuilder str = new StringBuilder();
                 len = Integer.valueOf(properties[++i]);
                 for (int j = 0; j < len; j++) {
