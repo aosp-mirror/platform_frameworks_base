@@ -401,6 +401,8 @@ public interface MenuItem {
      * Sets how this item should display in the presence of an Action Bar.
      *
      * @param actionEnum How the item should display. One of
+     * {@link #SHOW_AS_ACTION_ALWAYS}, {@link #SHOW_AS_ACTION_IF_ROOM}, or
+     * {@link #SHOW_AS_ACTION_NEVER}. SHOW_AS_ACTION_NEVER is the default.
      * 
      * @see android.app.ActionBar
      */
