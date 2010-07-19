@@ -58,19 +58,24 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
     private static final String TAG = "BluetoothDeviceProfileState";
     private static final boolean DBG = true; //STOPSHIP - Change to false
 
+    // TODO(): Restructure the state machine to make it scalable with regard to profiles.
     public static final int CONNECT_HFP_OUTGOING = 1;
     public static final int CONNECT_HFP_INCOMING = 2;
     public static final int CONNECT_A2DP_OUTGOING = 3;
     public static final int CONNECT_A2DP_INCOMING = 4;
+    public static final int CONNECT_HID_OUTGOING = 5;
+    public static final int CONNECT_HID_INCOMING = 6;
 
-    public static final int DISCONNECT_HFP_OUTGOING = 5;
-    private static final int DISCONNECT_HFP_INCOMING = 6;
-    public static final int DISCONNECT_A2DP_OUTGOING = 7;
-    public static final int DISCONNECT_A2DP_INCOMING = 8;
+    public static final int DISCONNECT_HFP_OUTGOING = 50;
+    private static final int DISCONNECT_HFP_INCOMING = 51;
+    public static final int DISCONNECT_A2DP_OUTGOING = 52;
+    public static final int DISCONNECT_A2DP_INCOMING = 53;
+    public static final int DISCONNECT_HID_OUTGOING = 54;
+    public static final int DISCONNECT_HID_INCOMING = 55;
 
-    public static final int UNPAIR = 9;
-    public static final int AUTO_CONNECT_PROFILES = 10;
-    public static final int TRANSITION_TO_STABLE = 11;
+    public static final int UNPAIR = 100;
+    public static final int AUTO_CONNECT_PROFILES = 101;
+    public static final int TRANSITION_TO_STABLE = 102;
 
     private static final int AUTO_CONNECT_DELAY = 6000; // 6 secs
 
@@ -79,6 +84,8 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
     private IncomingHandsfree mIncomingHandsfree = new IncomingHandsfree();
     private IncomingA2dp mIncomingA2dp = new IncomingA2dp();
     private OutgoingA2dp mOutgoingA2dp = new OutgoingA2dp();
+    private OutgoingHid mOutgoingHid = new OutgoingHid();
+    private IncomingHid mIncomingHid = new IncomingHid();
 
     private Context mContext;
     private BluetoothService mService;
@@ -89,6 +96,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
     private BluetoothDevice mDevice;
     private int mHeadsetState;
     private int mA2dpState;
+    private int mHidState;
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -123,6 +131,19 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                 }
                 if (newState == BluetoothA2dp.STATE_CONNECTED ||
                     newState == BluetoothA2dp.STATE_DISCONNECTED) {
+                    sendMessage(TRANSITION_TO_STABLE);
+                }
+            } else if (action.equals(BluetoothInputDevice.ACTION_INPUT_DEVICE_STATE_CHANGED)) {
+                int newState = intent.getIntExtra(BluetoothInputDevice.EXTRA_INPUT_DEVICE_STATE, 0);
+                int oldState =
+                    intent.getIntExtra(BluetoothInputDevice.EXTRA_PREVIOUS_INPUT_DEVICE_STATE, 0);
+                mHidState = newState;
+                if (oldState == BluetoothInputDevice.STATE_CONNECTED &&
+                    newState == BluetoothInputDevice.STATE_DISCONNECTED) {
+                    sendMessage(DISCONNECT_HID_INCOMING);
+                }
+                if (newState == BluetoothInputDevice.STATE_CONNECTED ||
+                    newState == BluetoothInputDevice.STATE_DISCONNECTED) {
                     sendMessage(TRANSITION_TO_STABLE);
                 }
             } else if (action.equals(BluetoothDevice.ACTION_ACL_CONNECTED)) {
@@ -165,6 +186,8 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         addState(mIncomingHandsfree);
         addState(mIncomingA2dp);
         addState(mOutgoingA2dp);
+        addState(mOutgoingHid);
+        addState(mIncomingHid);
         setInitialState(mBondedDevice);
 
         IntentFilter filter = new IntentFilter();
@@ -172,6 +195,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         filter.addAction(BluetoothA2dp.ACTION_SINK_STATE_CHANGED);
         filter.addAction(BluetoothHeadset.ACTION_STATE_CHANGED);
         filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        filter.addAction(BluetoothInputDevice.ACTION_INPUT_DEVICE_STATE_CHANGED);
 
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
@@ -224,6 +248,14 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                 case DISCONNECT_A2DP_INCOMING:
                     transitionTo(mIncomingA2dp);
                     break;
+                case CONNECT_HID_OUTGOING:
+                case DISCONNECT_HID_OUTGOING:
+                    transitionTo(mOutgoingHid);
+                    break;
+                case CONNECT_HID_INCOMING:
+                case DISCONNECT_HID_INCOMING:
+                    transitionTo(mIncomingHid);
+                    break;
                 case UNPAIR:
                     if (mHeadsetState != BluetoothHeadset.STATE_DISCONNECTED) {
                         sendMessage(DISCONNECT_HFP_OUTGOING);
@@ -231,6 +263,10 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                         break;
                     } else if (mA2dpState != BluetoothA2dp.STATE_DISCONNECTED) {
                         sendMessage(DISCONNECT_A2DP_OUTGOING);
+                        deferMessage(message);
+                        break;
+                    } else if (mHidState != BluetoothInputDevice.STATE_DISCONNECTED) {
+                        sendMessage(DISCONNECT_HID_OUTGOING);
                         deferMessage(message);
                         break;
                     }
@@ -253,6 +289,10 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                               BluetoothA2dp.PRIORITY_AUTO_CONNECT &&
                               mA2dpService.getConnectedSinks().length == 0) {
                             mA2dpService.connectSink(mDevice);
+                        }
+                        if (mService.getInputDevicePriority(mDevice) ==
+                              BluetoothInputDevice.PRIORITY_AUTO_CONNECT) {
+                            mService.connectInputDevice(mDevice);
                         }
                     }
                     break;
@@ -342,6 +382,23 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                        deferMessage(deferMsg);
                     }
                     break;
+                case CONNECT_HID_OUTGOING:
+                case DISCONNECT_HID_OUTGOING:
+                    deferMessage(message);
+                    break;
+                case CONNECT_HID_INCOMING:
+                    transitionTo(mIncomingHid);
+                    if (mStatus) {
+                        deferMsg.what = mCommand;
+                        deferMessage(deferMsg);
+                    }
+                    break;
+                case DISCONNECT_HID_INCOMING:
+                    if (mStatus) {
+                        deferMsg.what = mCommand;
+                        deferMessage(deferMsg);
+                    }
+                    break; // ignore
                 case UNPAIR:
                 case AUTO_CONNECT_PROFILES:
                     deferMessage(message);
@@ -409,6 +466,13 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                     // If this causes incoming HFP to fail, it is more of a headset problem
                     // since both connections are incoming ones.
                     break;
+                case CONNECT_HID_OUTGOING:
+                case DISCONNECT_HID_OUTGOING:
+                    deferMessage(message);
+                    break;
+                case CONNECT_HID_INCOMING:
+                case DISCONNECT_HID_INCOMING:
+                     break; // ignore
                 case UNPAIR:
                 case AUTO_CONNECT_PROFILES:
                     deferMessage(message);
@@ -496,6 +560,23 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                 case DISCONNECT_A2DP_INCOMING:
                     // Ignore, will be handled by Bluez
                     break;
+                case CONNECT_HID_OUTGOING:
+                case DISCONNECT_HID_OUTGOING:
+                    deferMessage(message);
+                    break;
+                case CONNECT_HID_INCOMING:
+                    transitionTo(mIncomingHid);
+                    if (mStatus) {
+                        deferMsg.what = mCommand;
+                        deferMessage(deferMsg);
+                    }
+                    break;
+                case DISCONNECT_HID_INCOMING:
+                    if (mStatus) {
+                        deferMsg.what = mCommand;
+                        deferMessage(deferMsg);
+                    }
+                    break; // ignore
                 case UNPAIR:
                 case AUTO_CONNECT_PROFILES:
                     deferMessage(message);
@@ -561,6 +642,13 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                 case DISCONNECT_A2DP_INCOMING:
                     // Ignore, will be handled by Bluez
                     break;
+                case CONNECT_HID_OUTGOING:
+                case DISCONNECT_HID_OUTGOING:
+                    deferMessage(message);
+                    break;
+                case CONNECT_HID_INCOMING:
+                case DISCONNECT_HID_INCOMING:
+                     break; // ignore
                 case UNPAIR:
                 case AUTO_CONNECT_PROFILES:
                     deferMessage(message);
@@ -575,6 +663,143 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         }
     }
 
+
+    private class OutgoingHid extends HierarchicalState {
+        private boolean mStatus = false;
+        private int mCommand;
+
+        @Override
+        protected void enter() {
+            log("Entering OutgoingHid state with: " + getCurrentMessage().what);
+            mCommand = getCurrentMessage().what;
+            if (mCommand != CONNECT_HID_OUTGOING &&
+                mCommand != DISCONNECT_HID_OUTGOING) {
+                Log.e(TAG, "Error: OutgoingHid state with command:" + mCommand);
+            }
+            mStatus = processCommand(mCommand);
+            if (!mStatus) sendMessage(TRANSITION_TO_STABLE);
+        }
+
+        @Override
+        protected boolean processMessage(Message message) {
+            log("OutgoingHid State->Processing Message: " + message.what);
+            Message deferMsg = new Message();
+            switch(message.what) {
+                // defer all outgoing messages
+                case CONNECT_HFP_OUTGOING:
+                case CONNECT_A2DP_OUTGOING:
+                case CONNECT_HID_OUTGOING:
+                case DISCONNECT_HFP_OUTGOING:
+                case DISCONNECT_A2DP_OUTGOING:
+                case DISCONNECT_HID_OUTGOING:
+                    deferMessage(message);
+                    break;
+
+                case CONNECT_HFP_INCOMING:
+                    transitionTo(mIncomingHandsfree);
+                case CONNECT_A2DP_INCOMING:
+                    transitionTo(mIncomingA2dp);
+
+                    // Don't cancel HID outgoing as there is no guarantee it
+                    // will get canceled.
+                    // It might already be connected but we might not have got the
+                    // INPUT_DEVICE_STATE_CHANGE. Hence, no point disconnecting here.
+                    // The worst case, the connection will fail, retry.
+                    if (mStatus) {
+                        deferMsg.what = mCommand;
+                        deferMessage(deferMsg);
+                    }
+                    break;
+                case CONNECT_HID_INCOMING:
+                  // Bluez will take care of the conflicts
+                    transitionTo(mIncomingHid);
+                    break;
+
+                case DISCONNECT_HFP_INCOMING:
+                case DISCONNECT_A2DP_INCOMING:
+                    // At this point, we are already disconnected
+                    // with HFP. Sometimes HID connection can
+                    // fail due to the disconnection of HFP. So add a retry
+                    // for the HID.
+                    if (mStatus) {
+                        deferMsg.what = mCommand;
+                        deferMessage(deferMsg);
+                    }
+                    break;
+                case DISCONNECT_HID_INCOMING:
+                    // Ignore, will be handled by Bluez
+                    break;
+
+                case UNPAIR:
+                case AUTO_CONNECT_PROFILES:
+                    deferMessage(message);
+                    break;
+                case TRANSITION_TO_STABLE:
+                    transitionTo(mBondedDevice);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            return HANDLED;
+        }
+    }
+
+  private class IncomingHid extends HierarchicalState {
+      private boolean mStatus = false;
+      private int mCommand;
+
+      @Override
+      protected void enter() {
+          log("Entering IncomingHid state with: " + getCurrentMessage().what);
+          mCommand = getCurrentMessage().what;
+          if (mCommand != CONNECT_HID_INCOMING &&
+              mCommand != DISCONNECT_HID_INCOMING) {
+              Log.e(TAG, "Error: IncomingHid state with command:" + mCommand);
+          }
+          mStatus = processCommand(mCommand);
+          if (!mStatus) sendMessage(TRANSITION_TO_STABLE);
+      }
+
+      @Override
+      protected boolean processMessage(Message message) {
+          log("IncomingHid State->Processing Message: " + message.what);
+          Message deferMsg = new Message();
+          switch(message.what) {
+              case CONNECT_HFP_OUTGOING:
+              case CONNECT_HFP_INCOMING:
+              case DISCONNECT_HFP_OUTGOING:
+              case CONNECT_A2DP_INCOMING:
+              case CONNECT_A2DP_OUTGOING:
+              case DISCONNECT_A2DP_OUTGOING:
+              case CONNECT_HID_OUTGOING:
+              case CONNECT_HID_INCOMING:
+              case DISCONNECT_HID_OUTGOING:
+                  deferMessage(message);
+                  break;
+              case DISCONNECT_HFP_INCOMING:
+                  // Shouldn't happen but if does, we can handle it.
+                  // Depends if the headset can handle it.
+                  // Incoming HID will be handled by Bluez, Disconnect HFP
+                  // the socket would have already been closed.
+                  // ignore
+                  break;
+              case DISCONNECT_HID_INCOMING:
+              case DISCONNECT_A2DP_INCOMING:
+                  // Ignore, will be handled by Bluez
+                  break;
+              case UNPAIR:
+              case AUTO_CONNECT_PROFILES:
+                  deferMessage(message);
+                  break;
+              case TRANSITION_TO_STABLE:
+                  transitionTo(mBondedDevice);
+                  break;
+              default:
+                  return NOT_HANDLED;
+          }
+          return HANDLED;
+      }
+  }
 
 
     synchronized void cancelCommand(int command) {
@@ -619,6 +844,10 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
             case CONNECT_A2DP_INCOMING:
                 // ignore, Bluez takes care
                 return true;
+            case CONNECT_HID_OUTGOING:
+                return mService.connectInputDeviceInternal(mDevice);
+            case CONNECT_HID_INCOMING:
+                return true;
             case DISCONNECT_HFP_OUTGOING:
                 if (!mHeadsetServiceConnected) {
                     deferHeadsetMessage(command);
@@ -645,6 +874,15 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                     return mA2dpService.disconnectSinkInternal(mDevice);
                 }
                 break;
+            case DISCONNECT_HID_INCOMING:
+                // ignore
+                return true;
+            case DISCONNECT_HID_OUTGOING:
+                if (mService.getInputDevicePriority(mDevice) ==
+                    BluetoothInputDevice.PRIORITY_AUTO_CONNECT) {
+                    mService.setInputDevicePriority(mDevice, BluetoothInputDevice.PRIORITY_ON);
+                }
+                return mService.disconnectInputDeviceInternal(mDevice);
             case UNPAIR:
                 return mService.removeBondInternal(mDevice.getAddress());
             default:
@@ -652,6 +890,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         }
         return false;
     }
+
 
     /*package*/ BluetoothDevice getDevice() {
         return mDevice;

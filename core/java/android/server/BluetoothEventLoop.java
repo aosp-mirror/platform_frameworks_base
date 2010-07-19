@@ -693,6 +693,26 @@ class BluetoothEventLoop {
         }
     }
 
+    private void onInputDeviceConnectionResult(String path, boolean result) {
+        // Success case gets handled by Property Change signal
+        if (!result) {
+            String address = mBluetoothService.getAddressFromObjectPath(path);
+            if (address == null) return;
+
+            boolean connected = false;
+            BluetoothDevice device = mAdapter.getRemoteDevice(address);
+            int state = mBluetoothService.getInputDeviceState(device);
+            if (state == BluetoothInputDevice.STATE_CONNECTING) {
+                connected = false;
+            } else if (state == BluetoothInputDevice.STATE_DISCONNECTING) {
+                connected = true;
+            } else {
+                Log.e(TAG, "Error onInputDeviceConnectionResult. State is:" + state);
+            }
+            mBluetoothService.handleInputDevicePropertyChange(address, connected);
+        }
+    }
+
     private void onRestartRequired() {
         if (mBluetoothService.isEnabled()) {
             Log.e(TAG, "*** A serious error occured (did bluetoothd crash?) - " +
