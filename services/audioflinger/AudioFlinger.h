@@ -1110,6 +1110,9 @@ private:
         int mVolumeCtrlIdx;         // index of insert effect having control over volume
         uint32_t mLeftVolume;       // previous volume on left channel
         uint32_t mRightVolume;      // previous volume on right channel
+        uint32_t mNewLeftVolume;       // new volume on left channel
+        uint32_t mNewRightVolume;      // new volume on right channel
+
     };
 
     friend class RecordThread;
