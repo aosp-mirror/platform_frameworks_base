@@ -75,8 +75,9 @@ public class ActionBarContextView extends ViewGroup {
         mCloseDrawable = a.getDrawable(
                 com.android.internal.R.styleable.Theme_actionBarCloseContextDrawable);
         mItemMargin = mItemPadding / 2;
-        
-        mContentHeight = CONTENT_HEIGHT_DIP;
+
+        mContentHeight =
+                (int) (CONTENT_HEIGHT_DIP * getResources().getDisplayMetrics().density + 0.5f);
         a.recycle();
     }
     
