@@ -675,7 +675,7 @@ public final class ContactsContract {
         public static final String CONTACT_PRESENCE = "contact_presence";
 
         /**
-         * Contact Chat Capabilities. See {@link StatusColumns#CHAT_CAPABILITY} for individual
+         * Contact Chat Capabilities. See {@link StatusUpdates} for individual
          * definitions.
          * <p>Type: NUMBER</p>
          */
