@@ -1017,6 +1017,15 @@ public final class Calendar {
         }
 
         public static final Cursor query(ContentResolver cr, String[] projection,
+                                         long begin, long end, String searchQuery) {
+            Uri.Builder builder = CONTENT_SEARCH_URI.buildUpon();
+            ContentUris.appendId(builder, begin);
+            ContentUris.appendId(builder, end);
+            return cr.query(builder.build(), projection, WHERE_CALENDARS_SELECTED,
+                         new String[] { searchQuery }, DEFAULT_SORT_ORDER);
+        }
+
+        public static final Cursor query(ContentResolver cr, String[] projection,
                                          long begin, long end, String where, String orderBy) {
             Uri.Builder builder = CONTENT_URI.buildUpon();
             ContentUris.appendId(builder, begin);
@@ -1030,6 +1039,21 @@ public final class Calendar {
                          null, orderBy == null ? DEFAULT_SORT_ORDER : orderBy);
         }
 
+        public static final Cursor query(ContentResolver cr, String[] projection, long begin,
+                long end, String searchQuery, String where, String orderBy) {
+            Uri.Builder builder = CONTENT_SEARCH_URI.buildUpon();
+            ContentUris.appendId(builder, begin);
+            ContentUris.appendId(builder, end);
+            builder = builder.appendPath(searchQuery);
+            if (TextUtils.isEmpty(where)) {
+                where = WHERE_CALENDARS_SELECTED;
+            } else {
+                where = "(" + where + ") AND " + WHERE_CALENDARS_SELECTED;
+            }
+            return cr.query(builder.build(), projection, where, null,
+                    orderBy == null ? DEFAULT_SORT_ORDER : orderBy);
+        }
+
         /**
          * The content:// style URL for this table
          */
@@ -1037,6 +1061,10 @@ public final class Calendar {
                 "/instances/when");
         public static final Uri CONTENT_BY_DAY_URI =
             Uri.parse("content://" + AUTHORITY + "/instances/whenbyday");
+        public static final Uri CONTENT_SEARCH_URI = Uri.parse("content://" + AUTHORITY +
+                "/instances/search");
+        public static final Uri CONTENT_SEARCH_BY_DAY_URI =
+            Uri.parse("content://" + AUTHORITY + "/instances/searchbyday");
 
         /**
          * The default sort order for this table.
@@ -1053,7 +1081,6 @@ public final class Calendar {
          * required for correctness, it just adds a nice touch.
          */
         public static final String SORT_CALENDAR_VIEW = "begin ASC, end DESC, title ASC";
-
         /**
          * The beginning time of the instance, in UTC milliseconds
          * <P>Type: INTEGER (long; millis since epoch)</P>
