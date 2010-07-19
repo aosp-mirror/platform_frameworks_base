@@ -245,21 +245,25 @@ MtpProperty* MtpServer::getDeviceProperty(MtpPropertyCode propCode) {
 }
 
 void MtpServer::sendObjectAdded(MtpObjectHandle handle) {
-    LOGD("sendObjectAdded %d\n", handle);
-    mEvent.setEventCode(MTP_EVENT_OBJECT_ADDED);
-    mEvent.setTransactionID(mRequest.getTransactionID());
-    mEvent.setParameter(1, handle);
-    int ret = mEvent.write(mFD);
-    LOGD("mEvent.write returned %d\n", ret);
+    if (mSessionOpen) {
+        LOGD("sendObjectAdded %d\n", handle);
+        mEvent.setEventCode(MTP_EVENT_OBJECT_ADDED);
+        mEvent.setTransactionID(mRequest.getTransactionID());
+        mEvent.setParameter(1, handle);
+        int ret = mEvent.write(mFD);
+        LOGD("mEvent.write returned %d\n", ret);
+    }
 }
 
 void MtpServer::sendObjectRemoved(MtpObjectHandle handle) {
-    LOGD("sendObjectRemoved %d\n", handle);
-    mEvent.setEventCode(MTP_EVENT_OBJECT_REMOVED);
-    mEvent.setTransactionID(mRequest.getTransactionID());
-    mEvent.setParameter(1, handle);
-    int ret = mEvent.write(mFD);
-    LOGD("mEvent.write returned %d\n", ret);
+    if (mSessionOpen) {
+        LOGD("sendObjectRemoved %d\n", handle);
+        mEvent.setEventCode(MTP_EVENT_OBJECT_REMOVED);
+        mEvent.setTransactionID(mRequest.getTransactionID());
+        mEvent.setParameter(1, handle);
+        int ret = mEvent.write(mFD);
+        LOGD("mEvent.write returned %d\n", ret);
+    }
 }
 
 void MtpServer::initObjectProperties() {
