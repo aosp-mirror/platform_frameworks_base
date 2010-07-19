@@ -627,7 +627,7 @@ public class MediaScanner
             map.put(MediaStore.MediaColumns.SIZE, mFileSize);
             map.put(MediaStore.MediaColumns.MIME_TYPE, mMimeType);
             if (mMtpObjectHandle != 0) {
-                map.put(MediaStore.MediaColumns.MTP_OBJECT_HANDLE, mMtpObjectHandle);
+                map.put(MediaStore.MediaColumns.MEDIA_SCANNER_NEW_OBJECT_ID, mMtpObjectHandle);
             }
 
             if (MediaFile.isVideoFileType(mFileType)) {
