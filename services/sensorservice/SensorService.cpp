@@ -133,8 +133,10 @@ status_t SensorService::dump(int fd, const Vector<String16>& args)
         snprintf(buffer, SIZE, "Active sensors:\n");
         result.append(buffer);
         for (size_t i=0 ; i<mActiveSensors.size() ; i++) {
-            snprintf(buffer, SIZE, "handle=%d, connections=%d\n",
-                    mActiveSensors.keyAt(i),
+            int handle = mActiveSensors.keyAt(i);
+            snprintf(buffer, SIZE, "%s (handle=%d, connections=%d)\n",
+                    getSensorName(handle).string(),
+                    handle,
                     mActiveSensors.valueAt(i)->getNumConnections());
             result.append(buffer);
         }
@@ -182,6 +184,18 @@ SensorService::getActiveConnections() const
 {
     Mutex::Autolock _l(mLock);
     return mActiveConnections;
+}
+
+String8 SensorService::getSensorName(int handle) const {
+    size_t count = mSensorList.size();
+    for (size_t i=0 ; i<count ; i++) {
+        const Sensor& sensor(mSensorList[i]);
+        if (sensor.getHandle() == handle) {
+            return sensor.getName();
+        }
+    }
+    String8 result("unknown");
+    return result;
 }
 
 Vector<Sensor> SensorService::getSensorList()
