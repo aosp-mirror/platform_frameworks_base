@@ -30,6 +30,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
 import android.net.http.SslError;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -862,7 +863,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     static final String SAVE_IMAGE = "SaveImage";
 
     static final int DRAW_RUNS = 5;
-    static final String DRAW_TIME_LOG = "/sdcard/android/page_draw_time.txt";
+    static final String DRAW_TIME_LOG = Environment.getExternalStorageDirectory() +
+        "/android/page_draw_time.txt";
 
     private boolean mGeolocationPermissionSet;
     private boolean mGeolocationPermission;
