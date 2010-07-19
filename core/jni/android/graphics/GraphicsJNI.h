@@ -4,6 +4,8 @@
 #include "SkPoint.h"
 #include "SkRect.h"
 #include "SkBitmap.h"
+#include "../images/SkLargeBitmap.h"
+#include "../images/SkImageDecoder.h"
 #include <jni.h>
 
 class SkCanvas;
@@ -54,6 +56,8 @@ public:
     
     static jobject createRegion(JNIEnv* env, SkRegion* region);
 
+    static jobject createLargeBitmap(JNIEnv* env, SkLargeBitmap* bitmap);
+
     /** Set a pixelref for the bitmap (needs setConfig to already be called)
         Returns true on success. If it returns false, then it failed, and the
         appropriate exception will have been raised.
@@ -78,6 +82,18 @@ public:
 private:
     JNIEnv* fEnv;
     bool fReportSizeToVM;
+};
+
+class JavaMemoryUsageReporter : public SkVMMemoryReporter {
+public:
+    JavaMemoryUsageReporter(JNIEnv* env);
+    virtual ~JavaMemoryUsageReporter();
+    // overrides
+    virtual bool reportMemory(size_t memorySize);
+
+private:
+    JNIEnv* fEnv;
+    size_t fTotalSize;
 };
 
 enum JNIAccess {
@@ -156,6 +172,7 @@ void doThrowIAE(JNIEnv* env, const char* msg = NULL);   // Illegal Argument
 void doThrowRE(JNIEnv* env, const char* msg = NULL);   // Runtime
 void doThrowISE(JNIEnv* env, const char* msg = NULL);   // Illegal State
 void doThrowOOME(JNIEnv* env, const char* msg = NULL);   // Out of memory
+void doThrowIOE(JNIEnv* env, const char* msg = NULL);   // IO Exception
 
 #define NPE_CHECK_RETURN_ZERO(env, object)    \
     do { if (NULL == (object)) { doThrowNPE(env); return 0; } } while (0)
