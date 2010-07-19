@@ -21,7 +21,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.text.TextUtils.TruncateAt;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.DatePicker;
@@ -36,13 +35,13 @@ import java.util.Calendar;
 /**
  * A simple dialog containing an {@link android.widget.DatePicker}.
  */
-public class DatePickerDialog extends AlertDialog implements OnClickListener, 
+public class DatePickerDialog extends AlertDialog implements OnClickListener,
         OnDateChangedListener {
 
     private static final String YEAR = "year";
     private static final String MONTH = "month";
     private static final String DAY = "day";
-    
+
     private final DatePicker mDatePicker;
     private final OnDateSetListener mCallBack;
     private final Calendar mCalendar;
@@ -80,7 +79,7 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
             int year,
             int monthOfYear,
             int dayOfMonth) {
-        this(context, com.android.internal.R.style.Theme_Dialog_Alert, 
+        this(context, com.android.internal.R.style.Theme_Dialog_Alert,
                 callBack, year, monthOfYear, dayOfMonth);
     }
 
@@ -106,17 +105,17 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
         mInitialDay = dayOfMonth;
         DateFormatSymbols symbols = new DateFormatSymbols();
         mWeekDays = symbols.getShortWeekdays();
-        
+
         mTitleDateFormat = java.text.DateFormat.
                                 getDateInstance(java.text.DateFormat.FULL);
         mCalendar = Calendar.getInstance();
         updateTitle(mInitialYear, mInitialMonth, mInitialDay);
-        
-        setButton(context.getText(R.string.date_time_set), this);
-        setButton2(context.getText(R.string.cancel), (OnClickListener) null);
+
+        setButton(BUTTON_POSITIVE, context.getText(R.string.date_time_set), this);
+        setButton(BUTTON_NEGATIVE, context.getText(R.string.cancel), (OnClickListener) null);
         setIcon(R.drawable.ic_dialog_time);
-        
-        LayoutInflater inflater = 
+
+        LayoutInflater inflater =
                 (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.date_picker_dialog, null);
         setView(view);
@@ -136,20 +135,20 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
         title.setSingleLine();
         title.setEllipsize(TruncateAt.END);
     }
-    
+
     public void onClick(DialogInterface dialog, int which) {
         if (mCallBack != null) {
             mDatePicker.clearFocus();
-            mCallBack.onDateSet(mDatePicker, mDatePicker.getYear(), 
+            mCallBack.onDateSet(mDatePicker, mDatePicker.getYear(),
                     mDatePicker.getMonth(), mDatePicker.getDayOfMonth());
         }
     }
-    
+
     public void onDateChanged(DatePicker view, int year,
             int month, int day) {
         updateTitle(year, month, day);
     }
-    
+
     public void updateDate(int year, int monthOfYear, int dayOfMonth) {
         mInitialYear = year;
         mInitialMonth = monthOfYear;
@@ -163,7 +162,7 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
         mCalendar.set(Calendar.DAY_OF_MONTH, day);
         setTitle(mTitleDateFormat.format(mCalendar.getTime()));
     }
-    
+
     @Override
     public Bundle onSaveInstanceState() {
         Bundle state = super.onSaveInstanceState();
@@ -172,7 +171,7 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
         state.putInt(DAY, mDatePicker.getDayOfMonth());
         return state;
     }
-    
+
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
