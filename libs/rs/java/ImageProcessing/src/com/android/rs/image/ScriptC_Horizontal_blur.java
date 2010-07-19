@@ -26,17 +26,5 @@ public class ScriptC_Horizontal_blur extends ScriptC {
         super(rs, resources, id, isRoot);
     }
 
-    private final static int mExportVarIdx_ScratchPixel = 0;
-    private Allocation mExportVar_ScratchPixel;
-    public void bind_ScratchPixel(Allocation v) {
-        mExportVar_ScratchPixel = v;
-        if(v == null) bindAllocation(null, mExportVarIdx_ScratchPixel);
-        else bindAllocation(v, mExportVarIdx_ScratchPixel);
-    }
-
-    public Allocation get_ScratchPixel() {
-        return mExportVar_ScratchPixel;
-    }
-
 }
 

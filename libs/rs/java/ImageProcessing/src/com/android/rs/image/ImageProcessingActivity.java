@@ -376,10 +376,7 @@ public class ImageProcessingActivity extends Activity
         mScratchPixelsAllocation = Allocation.createBitmapRef(mRS, mBitmapScratch);
 
         mScriptVBlur = new ScriptC_Vertical_blur(mRS, getResources(), R.raw.vertical_blur_bc, false);
-        mScriptVBlur.bind_ScratchPixel(mScratchPixelsAllocation);
-
         mScriptHBlur = new ScriptC_Horizontal_blur(mRS, getResources(), R.raw.horizontal_blur_bc, false);
-        mScriptHBlur.bind_ScratchPixel(mScratchPixelsAllocation);
 
         mScript = new ScriptC_Threshold(mRS, getResources(), R.raw.threshold_bc, false);
         mScript.set_width(mBitmapIn.getWidth());
@@ -431,8 +428,8 @@ public class ImageProcessingActivity extends Activity
         android.util.Log.v("Img", "Renderscript frame time core ms " + t);
 
         long javaTime = javaFilter();
-
         mBenchmarkResult.setText("RS: " + t + " ms  Java: " + javaTime + " ms");
+        //mBenchmarkResult.setText("RS: " + t + " ms");
 
         mRadius = oldRadius;
         mScript.set_radius(mRadius);

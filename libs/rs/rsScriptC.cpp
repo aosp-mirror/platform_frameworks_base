@@ -137,72 +137,155 @@ uint32_t ScriptC::run(Context *rsc)
 }
 
 
+typedef struct {
+    Context *rsc;
+    ScriptC *script;
+    const Allocation * ain;
+    Allocation * aout;
+    const void * usr;
+
+    uint32_t mSliceSize;
+    volatile int mSliceNum;
+
+    const uint8_t *ptrIn;
+    uint32_t eStrideIn;
+    uint8_t *ptrOut;
+    uint32_t eStrideOut;
+
+    uint32_t xStart;
+    uint32_t xEnd;
+    uint32_t yStart;
+    uint32_t yEnd;
+    uint32_t zStart;
+    uint32_t zEnd;
+    uint32_t arrayStart;
+    uint32_t arrayEnd;
+
+    uint32_t dimX;
+    uint32_t dimY;
+    uint32_t dimZ;
+    uint32_t dimArray;
+} MTLaunchStruct;
+typedef int (*rs_t)(const void *, void *, const void *, uint32_t, uint32_t, uint32_t, uint32_t);
+
+static void wc_xy(void *usr, uint32_t idx)
+{
+    MTLaunchStruct *mtls = (MTLaunchStruct *)usr;
+    LOGE("usr %p, idx %i", usr, idx);
+
+    while (1) {
+        uint32_t slice = (uint32_t)android_atomic_inc(&mtls->mSliceNum);
+        uint32_t yStart = mtls->yStart + slice * mtls->mSliceSize;
+        uint32_t yEnd = yStart + mtls->mSliceSize;
+        yEnd = rsMin(yEnd, mtls->yEnd);
+        if (yEnd <= yStart) {
+            return;
+        }
+
+        //LOGE("usr idx %i, x %i,%i  y %i,%i", idx, mtls->xStart, mtls->xEnd, yStart, yEnd);
+
+        for (uint32_t y = yStart; y < yEnd; y++) {
+            uint32_t offset = mtls->dimX * y;
+            uint8_t *xPtrOut = mtls->ptrOut + (mtls->eStrideOut * offset);
+            const uint8_t *xPtrIn = mtls->ptrIn + (mtls->eStrideIn * offset);
+
+            for (uint32_t x = mtls->xStart; x < mtls->xEnd; x++) {
+                ((rs_t)mtls->script->mProgram.mRoot) (xPtrIn, xPtrOut, mtls->usr, x, y, 0, 0);
+                xPtrIn += mtls->eStrideIn;
+                xPtrOut += mtls->eStrideOut;
+            }
+        }
+    }
+
+}
+
 void ScriptC::runForEach(Context *rsc,
                          const Allocation * ain,
                          Allocation * aout,
                          const void * usr,
                          const RsScriptCall *sc)
 {
-    uint32_t dimX = ain->getType()->getDimX();
-    uint32_t dimY = ain->getType()->getDimY();
-    uint32_t dimZ = ain->getType()->getDimZ();
-    uint32_t dimA = 0;//ain->getType()->getDimArray();
+    MTLaunchStruct mtls;
+    memset(&mtls, 0, sizeof(mtls));
 
-    uint32_t xStart = 0;
-    uint32_t xEnd = 0;
-    uint32_t yStart = 0;
-    uint32_t yEnd = 0;
-    uint32_t zStart = 0;
-    uint32_t zEnd = 0;
-    uint32_t arrayStart = 0;
-    uint32_t arrayEnd = 0;
+    if (ain) {
+        mtls.dimX = ain->getType()->getDimX();
+        mtls.dimY = ain->getType()->getDimY();
+        mtls.dimZ = ain->getType()->getDimZ();
+        //mtls.dimArray = ain->getType()->getDimArray();
+    } else if (aout) {
+        mtls.dimX = aout->getType()->getDimX();
+        mtls.dimY = aout->getType()->getDimY();
+        mtls.dimZ = aout->getType()->getDimZ();
+        //mtls.dimArray = aout->getType()->getDimArray();
+    } else {
+        rsc->setError(RS_ERROR_BAD_SCRIPT, "rsForEach called with null allocations");
+        return;
+    }
 
     if (!sc || (sc->xEnd == 0)) {
-        xStart = 0;
-        xEnd = ain->getType()->getDimX();
+        mtls.xEnd = mtls.dimX;
     } else {
-        rsAssert(xStart < dimX);
-        rsAssert(xEnd <= dimX);
+        rsAssert(sc->xStart < mtls.dimX);
+        rsAssert(sc->xEnd <= mtls.dimX);
         rsAssert(sc->xStart < sc->xEnd);
-        xStart = rsMin(dimX, sc->xStart);
-        xEnd = rsMin(dimX, sc->xEnd);
-        if (xStart >= xEnd) return;
+        mtls.xStart = rsMin(mtls.dimX, sc->xStart);
+        mtls.xEnd = rsMin(mtls.dimX, sc->xEnd);
+        if (mtls.xStart >= mtls.xEnd) return;
     }
 
     if (!sc || (sc->yEnd == 0)) {
-        yStart = 0;
-        yEnd = ain->getType()->getDimY();
+        mtls.yEnd = mtls.dimY;
     } else {
-        rsAssert(yStart < dimY);
-        rsAssert(yEnd <= dimY);
+        rsAssert(sc->yStart < mtls.dimY);
+        rsAssert(sc->yEnd <= mtls.dimY);
         rsAssert(sc->yStart < sc->yEnd);
-        yStart = rsMin(dimY, sc->yStart);
-        yEnd = rsMin(dimY, sc->yEnd);
-        if (yStart >= yEnd) return;
+        mtls.yStart = rsMin(mtls.dimY, sc->yStart);
+        mtls.yEnd = rsMin(mtls.dimY, sc->yEnd);
+        if (mtls.yStart >= mtls.yEnd) return;
     }
 
-    xEnd = rsMax((uint32_t)1, xEnd);
-    yEnd = rsMax((uint32_t)1, yEnd);
-    zEnd = rsMax((uint32_t)1, zEnd);
-    arrayEnd = rsMax((uint32_t)1, arrayEnd);
+    mtls.xEnd = rsMax((uint32_t)1, mtls.xEnd);
+    mtls.yEnd = rsMax((uint32_t)1, mtls.yEnd);
+    mtls.zEnd = rsMax((uint32_t)1, mtls.zEnd);
+    mtls.arrayEnd = rsMax((uint32_t)1, mtls.arrayEnd);
 
     rsAssert(ain->getType()->getDimZ() == 0);
 
     setupScript(rsc);
     Script * oldTLS = setTLS(this);
 
-    typedef int (*rs_t)(const void *, void *, const void *, uint32_t, uint32_t, uint32_t, uint32_t);
 
-    const uint8_t *ptrIn = (const uint8_t *)ain->getPtr();
-    uint32_t eStrideIn = ain->getType()->getElementSizeBytes();
+    mtls.rsc = rsc;
+    mtls.ain = ain;
+    mtls.aout = aout;
+    mtls.script = this;
+    mtls.usr = usr;
+    mtls.mSliceSize = 10;
+    mtls.mSliceNum = 0;
 
-    uint8_t *ptrOut = NULL;
-    uint32_t eStrideOut = 0;
-    if (aout) {
-        ptrOut = (uint8_t *)aout->getPtr();
-        eStrideOut = aout->getType()->getElementSizeBytes();
+    mtls.ptrIn = NULL;
+    mtls.eStrideIn = 0;
+    if (ain) {
+        mtls.ptrIn = (const uint8_t *)ain->getPtr();
+        mtls.eStrideIn = ain->getType()->getElementSizeBytes();
     }
 
+    mtls.ptrOut = NULL;
+    mtls.eStrideOut = 0;
+    if (aout) {
+        mtls.ptrOut = (uint8_t *)aout->getPtr();
+        mtls.eStrideOut = aout->getType()->getElementSizeBytes();
+    }
+
+
+    {
+        LOGE("launch 1");
+        rsc->launchThreads(wc_xy, &mtls);
+        LOGE("launch 2");
+    }
+
+/*
     for (uint32_t ar = arrayStart; ar < arrayEnd; ar++) {
         for (uint32_t z = zStart; z < zEnd; z++) {
             for (uint32_t y = yStart; y < yEnd; y++) {
@@ -221,7 +304,7 @@ void ScriptC::runForEach(Context *rsc,
         }
 
     }
-
+*/
     setTLS(oldTLS);
 }
 

@@ -3,6 +3,8 @@
 #define MAX_RADIUS 25
 
 typedef struct {
+    rs_allocation ain;
+
     float *gaussian; //[MAX_RADIUS * 2 + 1];
     rs_matrix3x3 colorMat;
 
