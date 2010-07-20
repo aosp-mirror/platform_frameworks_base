@@ -16,9 +16,9 @@
 
 #pragma rs java_package_name(com.android.modelviewer)
 
-#include "../../../../scriptc/rs_types.rsh"
-#include "../../../../scriptc/rs_math.rsh"
-#include "../../../../scriptc/rs_graphics.rsh"
+#include "rs_types.rsh"
+#include "rs_math.rsh"
+#include "rs_graphics.rsh"
 
 rs_program_vertex gPVBackground;
 rs_program_fragment gPFBackground;
