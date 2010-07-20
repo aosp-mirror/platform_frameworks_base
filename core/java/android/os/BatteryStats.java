@@ -1237,10 +1237,9 @@ public abstract class BatteryStats implements Parcelable {
                             linePrefix);
                     if (!linePrefix.equals(": ")) {
                         sb.append(" realtime");
-                    } else {
-                        sb.append(": (nothing executed)");
+                        // Only print out wake locks that were held
+                        pw.println(sb.toString());
                     }
-                    pw.println(sb.toString());
                 }
             }
         }
@@ -1453,11 +1452,10 @@ public abstract class BatteryStats implements Parcelable {
                             "window", which, linePrefix);
                     if (!linePrefix.equals(": ")) {
                         sb.append(" realtime");
-                    } else {
-                        sb.append(": (nothing executed)");
+                        // Only print out wake locks that were held
+                        pw.println(sb.toString());
+                        uidActivity = true;
                     }
-                    pw.println(sb.toString());
-                    uidActivity = true;
                 }
             }
 
