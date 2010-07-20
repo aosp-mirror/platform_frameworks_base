@@ -30,6 +30,7 @@ public class GLPerfActivity extends Activity {
 
     @Override protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+	getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         mView = new GLPerfView(getApplication());
 	setContentView(mView);
     }
