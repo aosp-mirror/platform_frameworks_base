@@ -190,6 +190,11 @@ public class Animator extends Animatable {
     private Object mAnimatedValue = null;
 
     /**
+     * The set of keyframes (time/value pairs) that define this animation.
+     */
+    private KeyframeSet mKeyframeSet = null;
+
+    /**
      * The type of the values, as determined by the valueFrom/valueTo properties.
      */
     Class mValueType;
@@ -219,6 +224,20 @@ public class Animator extends Animatable {
         mValueFrom = valueFrom;
         mValueTo= valueTo;
         this.mValueType = valueType;
+    }
+
+    /**
+     * This constructor takes a set of {@link Keyframe} objects that define the values
+     * for the animation, along with the times at which those values will hold true during
+     * the animation.
+     *
+     * @param duration The length of the animation, in milliseconds.
+     * @param keyframes The set of keyframes that define the time/value pairs for the animation.
+     */
+    public Animator(long duration, Keyframe...keyframes) {
+        mDuration = duration;
+        mKeyframeSet = new KeyframeSet(keyframes);
+        mValueType = keyframes[0].getType();
     }
 
     /**
@@ -418,6 +437,15 @@ public class Animator extends Animatable {
      */
     public static long getFrameDelay() {
         return sFrameDelay;
+    }
+
+    /**
+     * Gets the set of keyframes that define this animation.
+     *
+     * @return KeyframeSet The set of keyframes for this animation.
+     */
+    KeyframeSet getKeyframes() {
+        return mKeyframeSet;
     }
 
     /**
@@ -751,7 +779,11 @@ public class Animator extends Animatable {
      */
     void animateValue(float fraction) {
         fraction = mInterpolator.getInterpolation(fraction);
-        mAnimatedValue = mEvaluator.evaluate(fraction, mValueFrom, mValueTo);
+        if (mKeyframeSet != null) {
+            mAnimatedValue = mKeyframeSet.getValue(fraction, mEvaluator);
+        } else {
+            mAnimatedValue = mEvaluator.evaluate(fraction, mValueFrom, mValueTo);
+        }
         if (mUpdateListeners != null) {
             int numListeners = mUpdateListeners.size();
             for (int i = 0; i < numListeners; ++i) {
