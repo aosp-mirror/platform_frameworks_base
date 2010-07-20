@@ -19,8 +19,10 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.glperf">
+    package="com.android.glperf"
+    android:versionName="1.0.0" android:versionCode="10000" >
     <uses-sdk android:targetSdkVersion="7" android:minSdkVersion="7" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <application
             android:label="@string/glperf_activity">
         <activity android:name="GLPerfActivity"
