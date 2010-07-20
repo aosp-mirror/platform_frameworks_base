@@ -3,9 +3,9 @@
 
 #pragma rs java_package_name(com.android.fountain)
 
-#include "rs_types.rsh"
-#include "rs_math.rsh"
-#include "rs_graphics.rsh"
+#include "../../../../../../scriptc/rs_types.rsh"
+#include "../../../../../../scriptc/rs_math.rsh"
+#include "../../../../../../scriptc/rs_graphics.rsh"
 
 static int newPart = 0;
 rs_mesh partMesh;
