@@ -124,7 +124,10 @@ void endTimer(const char *str, int w, int h, double dc, int count) {
     double dc60 = pixels / delta / (w * h) / 60;
 
     LOGI("%s, %f, %f\n", str, mpps, dc60);
-    if (out) fprintf(out, "%s, %f, %f\r\n", str, mpps, dc60);
+    if (out) {
+        fprintf(out, "%s, %f, %f\r\n", str, mpps, dc60);
+        fflush(out);
+    }
 }
 
 static const char gVertexShader[] =
@@ -397,7 +400,6 @@ void doTest(uint32_t w, uint32_t h) {
            out = NULL;
        }
        done = true;
-       exit(0);
        return;
     }
 
@@ -440,21 +442,28 @@ extern "C" {
 
 JNIEXPORT void JNICALL Java_com_android_glperf_GLPerfLib_init(JNIEnv * env, jobject obj,  jint width, jint height)
 {
-    w = width;
-    h = height;
-    stateClock = 0;
-    done = false;
-    setupVA();
-    genTextures();
-    const char* fileName = "/sdcard/glperf.csv";
-    LOGI("Writing to: %s\n",fileName);
-    out = fopen(fileName, "w");
-    if (out == NULL) {
-        LOGE("Could not open: %s\n", fileName);
-    }
+    if (!done) {
+	    w = width;
+	    h = height;
+	    stateClock = 0;
+	    done = false;
+	    setupVA();
+	    genTextures();
+	    const char* fileName = "/sdcard/glperf.csv";
+            if (out != NULL) {
+                 LOGI("Closing partially written output.n");
+                 fclose(out);
+                 out = NULL;
+            }
+	    LOGI("Writing to: %s\n",fileName);
+	    out = fopen(fileName, "w");
+	    if (out == NULL) {
+		LOGE("Could not open: %s\n", fileName);
+	    }
 
-    LOGI("\nvarColor, texCount, modulate, extraMath, texSize, blend, Mpps, DC60\n");
-    if (out) fprintf(out,"\nvarColor, texCount, modulate, extraMath, texSize, blend, Mpps, DC60\r\n");
+	    LOGI("\nvarColor, texCount, modulate, extraMath, texSize, blend, Mpps, DC60\n");
+	    if (out) fprintf(out,"varColor, texCount, modulate, extraMath, texSize, blend, Mpps, DC60\r\n");
+    }
 }
 
 JNIEXPORT void JNICALL Java_com_android_glperf_GLPerfLib_step(JNIEnv * env, jobject obj)
