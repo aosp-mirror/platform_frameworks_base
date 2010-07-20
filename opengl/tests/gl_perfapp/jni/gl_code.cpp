@@ -261,11 +261,10 @@ bool done;
 
 char saveBuf[1024];
 
-void kickTimer() {
-    endTimer(saveBuf, w, h, 1, 100);
-}
 static void doLoop(uint32_t w, uint32_t h, const char *str) {
-    switch(stateClock % doLoopStates) {
+    int doLoopState = stateClock % doLoopStates;
+    // LOGI("doLoop %d\n", doLoopState);
+    switch(doLoopState) {
     case 0:
 	    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -287,7 +286,9 @@ static void doSingleTest(uint32_t w, uint32_t h,
                          bool modulateFirstTex,
                          int extraMath,
                          int tex0, int tex1) {
-    switch ((stateClock / doLoopStates) % doSingleTestStates) {
+    int doSingleTestState = (stateClock / doLoopStates) % doSingleTestStates;
+    // LOGI("doSingleTest %d\n", doSingleTestState);
+    switch (doSingleTestState) {
 	case 0: {
 	    char *pgmTxt = genShader(useVarColor, texCount, modulateFirstTex, extraMath);
 	    int pgm = createProgram(gVertexShader, pgmTxt);
@@ -385,10 +386,13 @@ void doTest(uint32_t w, uint32_t h) {
        testSubState = testState % 8;
     }
     if (texCount >= 3) {
-       LOGI("done\n");
+       // LOGI("done\n");
        done = true;
        return;
     }
+
+
+    // LOGI("doTest %d %d %d\n", texCount, extraMath, testSubState);
 
     switch(testSubState) {
 	case 0:
@@ -439,10 +443,12 @@ JNIEXPORT void JNICALL Java_com_android_glperf_GLPerfLib_init(JNIEnv * env, jobj
 JNIEXPORT void JNICALL Java_com_android_glperf_GLPerfLib_step(JNIEnv * env, jobject obj)
 {
     if (! done) {
-        if (stateClock > 0) {
-            kickTimer();
+        if (stateClock > 0 && ((stateClock & 1) == 0)) {
+	    endTimer(saveBuf, w, h, 1, 100);
         }
         doTest(w, h);
         stateClock++;
+    } else {
+	    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     }
 }
