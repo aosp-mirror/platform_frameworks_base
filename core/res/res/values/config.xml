@@ -201,6 +201,9 @@
     <!-- Indicate whether the SD card is accessible without removing the battery. -->
     <bool name="config_batterySdCardAccessibility">false</bool>
 
+    <!-- Indicate whether the device has USB host support. -->
+    <bool name="config_hasUsbHostSupport">false</bool>
+
     <!-- Vibrator pattern for feedback about a long screen/key press -->
     <integer-array name="config_longPressVibePattern">
         <item>0</item>
