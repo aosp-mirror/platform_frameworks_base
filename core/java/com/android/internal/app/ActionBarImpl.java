@@ -16,8 +16,10 @@
 
 package com.android.internal.app;
 
-import com.android.internal.view.menu.ActionMenu;
-import com.android.internal.view.menu.ActionMenuItem;
+import com.android.internal.view.menu.MenuBuilder;
+import com.android.internal.view.menu.MenuItemImpl;
+import com.android.internal.view.menu.MenuPopupHelper;
+import com.android.internal.view.menu.SubMenuBuilder;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.ActionBarView;
 
@@ -196,9 +198,7 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void startContextMode(ContextModeCallback callback) {
-        if (mContextMode != null) {
-            mContextMode.finish();
-        }
+        finishContextMode();
 
         // Don't wait for the close context mode animation to finish.
         if (mClosingContext) {
@@ -207,15 +207,16 @@ public class ActionBarImpl extends ActionBar {
             mCloseContext.run();
         }
 
-        mContextMode = new ContextMode(callback);
-        if (callback.onCreateContextMode(mContextMode, mContextMode.getMenu())) {
-            mContextMode.invalidate();
-            mUpperContextView.initForMode(mContextMode);
+        ContextMode mode = new ContextMode(callback);
+        if (callback.onCreateContextMode(mode, mode.getMenu())) {
+            mode.invalidate();
+            mUpperContextView.initForMode(mode);
             mAnimatorView.setDisplayedChild(CONTEXT_VIEW);
             if (mLowerContextView != null) {
                 // TODO animate this
                 mLowerContextView.setVisibility(View.VISIBLE);
             }
+            mContextMode = mode;
         }
     }
 
@@ -336,14 +337,15 @@ public class ActionBarImpl extends ActionBar {
     /**
      * @hide 
      */
-    public class ContextMode extends ActionBar.ContextMode {
+    public class ContextMode extends ActionBar.ContextMode implements MenuBuilder.Callback {
         private ContextModeCallback mCallback;
-        private ActionMenu mMenu;
+        private MenuBuilder mMenu;
         private WeakReference<View> mCustomView;
         
         public ContextMode(ContextModeCallback callback) {
             mCallback = callback;
-            mMenu = new ActionMenu(mActionView.getContext());
+            mMenu = new MenuBuilder(mActionView.getContext());
+            mMenu.setCallback(this);
         }
         
         @Override
@@ -405,12 +407,27 @@ public class ActionBarImpl extends ActionBar {
             return mCustomView != null ? mCustomView.get() : null;
         }
 
-        public void dispatchOnContextItemClicked(MenuItem item) {
-            ActionMenuItem actionItem = (ActionMenuItem) item;
-            if (!actionItem.invoke()) {
-                mCallback.onContextItemClicked(this, item);
+        public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
+            return mCallback.onContextItemClicked(this, item);
+        }
+
+        public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
+        }
+
+        public boolean onSubMenuSelected(SubMenuBuilder subMenu) {
+            if (!subMenu.hasVisibleItems()) {
+                return true;
             }
-       }
+
+            new MenuPopupHelper(mActivity, subMenu).show();
+            return true;
+        }
+
+        public void onCloseSubMenu(SubMenuBuilder menu) {
+        }
+
+        public void onMenuModeChange(MenuBuilder menu) {
+        }
     }
 
     /**
