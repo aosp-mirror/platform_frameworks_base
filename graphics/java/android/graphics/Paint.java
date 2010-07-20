@@ -43,7 +43,10 @@ public class Paint {
     private boolean     mHasCompatScaling;
     private float       mCompatScaling;
     private float       mInvCompatScaling;
-    /* package */ int   mBidiFlags = BIDI_DEFAULT_LTR;
+    /**
+     * @hide
+     */
+    public  int         mBidiFlags = BIDI_DEFAULT_LTR;
     
     private static final Style[] sStyleArray = {
         Style.FILL, Style.STROKE, Style.FILL_AND_STROKE

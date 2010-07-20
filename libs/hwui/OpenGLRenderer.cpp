@@ -138,8 +138,8 @@ OpenGLRenderer::OpenGLRenderer():
     mCurrentProgram = mDrawTextureProgram;
 
     mShader = kShaderNone;
-    mShaderTileX = SkShader::kClamp_TileMode;
-    mShaderTileY = SkShader::kClamp_TileMode;
+    mShaderTileX = GL_CLAMP_TO_EDGE;
+    mShaderTileY = GL_CLAMP_TO_EDGE;
     mShaderMatrix = NULL;
     mShaderBitmap = NULL;
 
@@ -535,8 +535,8 @@ void OpenGLRenderer::resetShader() {
     mShader = OpenGLRenderer::kShaderNone;
     mShaderKey = NULL;
     mShaderBlend = false;
-    mShaderTileX = SkShader::kClamp_TileMode;
-    mShaderTileY = SkShader::kClamp_TileMode;
+    mShaderTileX = GL_CLAMP_TO_EDGE;
+    mShaderTileY = GL_CLAMP_TO_EDGE;
 }
 
 void OpenGLRenderer::setupBitmapShader(SkBitmap* bitmap, SkShader::TileMode tileX,
@@ -544,8 +544,8 @@ void OpenGLRenderer::setupBitmapShader(SkBitmap* bitmap, SkShader::TileMode tile
     mShader = OpenGLRenderer::kShaderBitmap;
     mShaderBlend = hasAlpha;
     mShaderBitmap = bitmap;
-    mShaderTileX = tileX;
-    mShaderTileY = tileY;
+    mShaderTileX = gTileModes[tileX];
+    mShaderTileY = gTileModes[tileY];
     mShaderMatrix = matrix;
 }
 
@@ -556,8 +556,8 @@ void OpenGLRenderer::setupLinearGradientShader(SkShader* shader, float* bounds, 
     mShader = OpenGLRenderer::kShaderLinearGradient;
     mShaderKey = shader;
     mShaderBlend = hasAlpha;
-    mShaderTileX = tileMode;
-    mShaderTileY = tileMode;
+    mShaderTileX = gTileModes[tileMode];
+    mShaderTileY = gTileModes[tileMode];
     mShaderMatrix = matrix;
     mShaderBounds = bounds;
     mShaderColors = colors;
@@ -623,8 +623,18 @@ void OpenGLRenderer::drawLinearGradientShader(float left, float top, float right
         float alpha, SkXfermode::Mode mode) {
     Texture* texture = mGradientCache.get(mShaderKey);
     if (!texture) {
+        SkShader::TileMode tileMode = SkShader::kClamp_TileMode;
+        switch (mShaderTileX) {
+            case GL_REPEAT:
+                tileMode = SkShader::kRepeat_TileMode;
+                break;
+            case GL_MIRRORED_REPEAT:
+                tileMode = SkShader::kMirror_TileMode;
+                break;
+        }
+
         texture = mGradientCache.addLinearGradient(mShaderKey, mShaderBounds, mShaderColors,
-                mShaderPositions, mShaderCount, mShaderTileX);
+                mShaderPositions, mShaderCount, tileMode);
     }
 
     mModelView.loadTranslate(left, top, 0.0f);
@@ -634,14 +644,7 @@ void OpenGLRenderer::drawLinearGradientShader(float left, float top, float right
     mDrawLinearGradientProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
 
     chooseBlending(mShaderBlend || alpha < 1.0f, mode);
-
-    if (texture->id != mLastTexture) {
-        glBindTexture(GL_TEXTURE_2D, texture->id);
-        mLastTexture = texture->id;
-    }
-    // TODO: Don't set the texture parameters every time
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gTileModes[mShaderTileX]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gTileModes[mShaderTileX]);
+    bindTexture(texture->id, mShaderTileX, mShaderTileY);
 
     Rect start(mShaderBounds[0], mShaderBounds[1], mShaderBounds[2], mShaderBounds[3]);
     if (mShaderMatrix) {
@@ -736,14 +739,7 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     mDrawTextureProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
 
     chooseBlending(blend || alpha < 1.0f, mode);
-
-    if (texture != mLastTexture) {
-        glBindTexture(GL_TEXTURE_2D, texture);
-        mLastTexture = texture;
-    }
-    // TODO: Don't set the texture parameters every time
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gTileModes[mShaderTileX]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gTileModes[mShaderTileY]);
+    bindTexture(texture, mShaderTileX, mShaderTileY);
 
     // Always premultiplied
     //glUniform4f(mDrawTextureProgram->color, alpha, alpha, alpha, alpha);
@@ -824,6 +820,16 @@ void OpenGLRenderer::getAlphaAndMode(const SkPaint* paint, int* alpha, SkXfermod
         *mode = SkXfermode::kSrcOver_Mode;
         *alpha = 255;
     }
+}
+
+void OpenGLRenderer::bindTexture(GLuint texture, GLenum wrapS, GLenum wrapT) {
+    if (texture != mLastTexture) {
+        glBindTexture(GL_TEXTURE_2D, texture);
+        mLastTexture = texture;
+    }
+    // TODO: Don't set the texture parameters every time
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
 }
 
 }; // namespace uirenderer

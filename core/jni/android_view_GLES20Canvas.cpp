@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "OpenGLRenderer"
+
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
@@ -24,6 +26,7 @@
 #include <SkMatrix.h>
 #include <SkPaint.h>
 #include <SkRegion.h>
+#include <SkScalerContext.h>
 #include <SkXfermode.h>
 
 #include <OpenGLRenderer.h>
@@ -207,7 +210,6 @@ static void android_view_GLES20Canvas_drawPatch(JNIEnv* env, jobject canvas,
 
     renderer->drawPatch(bitmap, patch, left, top, right, bottom, paint);
 
-    // TODO: make sure that 0 is correct for the flags
     env->ReleaseByteArrayElements(chunks, storage, 0);
 }
 
@@ -243,6 +245,26 @@ static void android_view_GLES20Canvas_setupLinearShader(JNIEnv* env, jobject can
         float* positions, int count, SkShader::TileMode tileMode, SkMatrix* matrix) {
     renderer->setupLinearGradientShader(shader, bounds, colors, positions, count,
             tileMode, matrix, (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+}
+
+// ----------------------------------------------------------------------------
+// Text
+// ----------------------------------------------------------------------------
+
+static void android_view_GLES20Canvas_drawTextArray(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, jcharArray text, int index, int count,
+        jfloat x, jfloat y, int flags, SkPaint* paint) {
+    jchar* textArray = env->GetCharArrayElements(text, NULL);
+    // TODO: draw from textArray + index
+    env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
+}
+
+static void android_view_GLES20Canvas_drawText(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, jstring text, int start, int end,
+        jfloat x, jfloat y, int flags, SkPaint* paint) {
+    const jchar* textArray = env->GetStringChars(text, NULL);
+    // TODO: draw from textArray + start
+    env->ReleaseStringChars(text, textArray);
 }
 
 // ----------------------------------------------------------------------------
@@ -287,6 +309,10 @@ static JNINativeMethod gMethods[] = {
     {   "nResetShader",       "(I)V",            (void*) android_view_GLES20Canvas_resetShader },
     {   "nSetupBitmapShader", "(IIIIII)V",       (void*) android_view_GLES20Canvas_setupBitmapShader },
     {   "nSetupLinearShader", "(IIIIIIII)V",     (void*) android_view_GLES20Canvas_setupLinearShader },
+
+    {   "nDrawText",          "(I[CIIFFII)V",    (void*) android_view_GLES20Canvas_drawTextArray },
+    {   "nDrawText",          "(ILjava/lang/String;IIFFII)V",
+            (void*) android_view_GLES20Canvas_drawText },
 
     {   "nGetClipBounds",     "(ILandroid/graphics/Rect;)Z",
             (void*) android_view_GLES20Canvas_getClipBounds },
