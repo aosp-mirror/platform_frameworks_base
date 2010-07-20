@@ -390,9 +390,13 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
         bccGetExportFuncs(s->mBccScript, NULL, s->mEnviroment.mInvokeFunctionCount, (BCCvoid **) s->mEnviroment.mInvokeFunctions);
     }
 
-    s->mEnviroment.mFieldAddress = (void **)calloc(100, sizeof(void *));
-    bccGetExportVars(s->mBccScript, (BCCsizei *)&s->mEnviroment.mFieldCount,
-                     100, s->mEnviroment.mFieldAddress);
+    bccGetExportVars(s->mBccScript, (BCCsizei*) &s->mEnviroment.mFieldCount, 0, NULL);
+    if(s->mEnviroment.mFieldCount <= 0)
+        s->mEnviroment.mFieldAddress = NULL;
+    else {
+        s->mEnviroment.mFieldAddress = (void **) calloc(s->mEnviroment.mFieldCount, sizeof(void *));
+        bccGetExportVars(s->mBccScript, NULL, s->mEnviroment.mFieldCount, (BCCvoid **) s->mEnviroment.mFieldAddress);
+    }
     //for (int ct2=0; ct2 < s->mEnviroment.mFieldCount; ct2++ ) {
         //LOGE("Script field %i = %p", ct2, s->mEnviroment.mFieldAddress[ct2]);
     //}
