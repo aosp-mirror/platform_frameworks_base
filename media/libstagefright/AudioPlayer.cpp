@@ -23,6 +23,7 @@
 #include <media/stagefright/AudioPlayer.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
+#include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
 
@@ -41,6 +42,9 @@ AudioPlayer::AudioPlayer(const sp<MediaPlayerBase::AudioSink> &audioSink)
       mReachedEOS(false),
       mFinalStatus(OK),
       mStarted(false),
+      mIsFirstBuffer(false),
+      mFirstBufferResult(OK),
+      mFirstBuffer(NULL),
       mAudioSink(audioSink) {
 }
 
@@ -68,6 +72,24 @@ status_t AudioPlayer::start(bool sourceAlreadyStarted) {
         }
     }
 
+    // We allow an optional INFO_FORMAT_CHANGED at the very beginning
+    // of playback, if there is one, getFormat below will retrieve the
+    // updated format, if there isn't, we'll stash away the valid buffer
+    // of data to be used on the first audio callback.
+
+    CHECK(mFirstBuffer == NULL);
+
+    mFirstBufferResult = mSource->read(&mFirstBuffer);
+    if (mFirstBufferResult == INFO_FORMAT_CHANGED) {
+        LOGV("INFO_FORMAT_CHANGED!!!");
+
+        CHECK(mFirstBuffer == NULL);
+        mFirstBufferResult = OK;
+        mIsFirstBuffer = false;
+    } else {
+        mIsFirstBuffer = true;
+    }
+
     sp<MetaData> format = mSource->getFormat();
     const char *mime;
     bool success = format->findCString(kKeyMIMEType, &mime);
@@ -87,7 +109,14 @@ status_t AudioPlayer::start(bool sourceAlreadyStarted) {
                 DEFAULT_AUDIOSINK_BUFFERCOUNT,
                 &AudioPlayer::AudioSinkCallback, this);
         if (err != OK) {
-            mSource->stop();
+            if (mFirstBuffer != NULL) {
+                mFirstBuffer->release();
+                mFirstBuffer = NULL;
+            }
+
+            if (!sourceAlreadyStarted) {
+                mSource->stop();
+            }
 
             return err;
         }
@@ -108,7 +137,14 @@ status_t AudioPlayer::start(bool sourceAlreadyStarted) {
             delete mAudioTrack;
             mAudioTrack = NULL;
 
-            mSource->stop();
+            if (mFirstBuffer != NULL) {
+                mFirstBuffer->release();
+                mFirstBuffer = NULL;
+            }
+
+            if (!sourceAlreadyStarted) {
+                mSource->stop();
+            }
 
             return err;
         }
@@ -159,6 +195,12 @@ void AudioPlayer::stop() {
 
     // Make sure to release any buffer we hold onto so that the
     // source is able to stop().
+
+    if (mFirstBuffer != NULL) {
+        mFirstBuffer->release();
+        mFirstBuffer = NULL;
+    }
+
     if (mInputBuffer != NULL) {
         LOGV("AudioPlayer releasing input buffer.");
 
@@ -243,6 +285,14 @@ size_t AudioPlayer::fillBuffer(void *data, size_t size) {
             Mutex::Autolock autoLock(mLock);
 
             if (mSeeking) {
+                if (mIsFirstBuffer) {
+                    if (mFirstBuffer != NULL) {
+                        mFirstBuffer->release();
+                        mFirstBuffer = NULL;
+                    }
+                    mIsFirstBuffer = false;
+                }
+
                 options.setSeekTo(mSeekTimeUs);
 
                 if (mInputBuffer != NULL) {
@@ -255,7 +305,17 @@ size_t AudioPlayer::fillBuffer(void *data, size_t size) {
         }
 
         if (mInputBuffer == NULL) {
-            status_t err = mSource->read(&mInputBuffer, &options);
+            status_t err;
+
+            if (mIsFirstBuffer) {
+                mInputBuffer = mFirstBuffer;
+                mFirstBuffer = NULL;
+                err = mFirstBufferResult;
+
+                mIsFirstBuffer = false;
+            } else {
+                err = mSource->read(&mInputBuffer, &options);
+            }
 
             CHECK((err == OK && mInputBuffer != NULL)
                    || (err != OK && mInputBuffer == NULL));

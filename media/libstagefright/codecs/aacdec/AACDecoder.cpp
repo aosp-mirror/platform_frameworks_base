@@ -15,6 +15,7 @@
  */
 
 #include "AACDecoder.h"
+#define LOG_TAG "AACDecoder"
 
 #include "../../include/ESDS.h"
 
@@ -36,26 +37,33 @@ AACDecoder::AACDecoder(const sp<MediaSource> &source)
       mAnchorTimeUs(0),
       mNumSamplesOutput(0),
       mInputBuffer(NULL) {
-}
 
-AACDecoder::~AACDecoder() {
-    if (mStarted) {
-        stop();
+    sp<MetaData> srcFormat = mSource->getFormat();
+
+    int32_t sampleRate;
+    CHECK(srcFormat->findInt32(kKeySampleRate, &sampleRate));
+
+    mMeta = new MetaData;
+    mMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
+
+    // We'll always output stereo, regardless of how many channels are
+    // present in the input due to decoder limitations.
+    mMeta->setInt32(kKeyChannelCount, 2);
+    mMeta->setInt32(kKeySampleRate, sampleRate);
+
+    int64_t durationUs;
+    if (srcFormat->findInt64(kKeyDuration, &durationUs)) {
+        mMeta->setInt64(kKeyDuration, durationUs);
     }
+    mMeta->setCString(kKeyDecoderComponent, "AACDecoder");
 
-    delete mConfig;
-    mConfig = NULL;
+    mInitCheck = initCheck();
 }
 
-status_t AACDecoder::start(MetaData *params) {
-    CHECK(!mStarted);
-
-    mBufferGroup = new MediaBufferGroup;
-    mBufferGroup->add_buffer(new MediaBuffer(2048 * 2));
-
+status_t AACDecoder::initCheck() {
+    memset(mConfig, 0, sizeof(tPVMP4AudioDecoderExternal));
     mConfig->outputFormat = OUTPUTFORMAT_16PCM_INTERLEAVED;
-    mConfig->aacPlusUpsamplingFactor = 0;
-    mConfig->aacPlusEnabled = false;
+    mConfig->aacPlusEnabled = 1;
 
     // The software decoder doesn't properly support mono output on
     // AACplus files. Always output stereo.
@@ -64,8 +72,11 @@ status_t AACDecoder::start(MetaData *params) {
     UInt32 memRequirements = PVMP4AudioDecoderGetMemRequirements();
     mDecoderBuf = malloc(memRequirements);
 
-    CHECK_EQ(PVMP4AudioDecoderInitLibrary(mConfig, mDecoderBuf),
-             MP4AUDEC_SUCCESS);
+    status_t err = PVMP4AudioDecoderInitLibrary(mConfig, mDecoderBuf);
+    if (err != MP4AUDEC_SUCCESS) {
+        LOGE("Failed to initialize MP4 audio decoder");
+        return UNKNOWN_ERROR;
+    }
 
     uint32_t type;
     const void *data;
@@ -83,18 +94,29 @@ status_t AACDecoder::start(MetaData *params) {
         mConfig->pInputBuffer = (UChar *)codec_specific_data;
         mConfig->inputBufferCurrentLength = codec_specific_data_size;
         mConfig->inputBufferMaxLength = 0;
-        mConfig->inputBufferUsedLength = 0;
-        mConfig->remainderBits = 0;
-
-        mConfig->pOutputBuffer = NULL;
-        mConfig->pOutputBuffer_plus = NULL;
-        mConfig->repositionFlag = false;
 
         if (PVMP4AudioDecoderConfig(mConfig, mDecoderBuf)
                 != MP4AUDEC_SUCCESS) {
             return ERROR_UNSUPPORTED;
         }
     }
+    return OK;
+}
+
+AACDecoder::~AACDecoder() {
+    if (mStarted) {
+        stop();
+    }
+
+    delete mConfig;
+    mConfig = NULL;
+}
+
+status_t AACDecoder::start(MetaData *params) {
+    CHECK(!mStarted);
+
+    mBufferGroup = new MediaBufferGroup;
+    mBufferGroup->add_buffer(new MediaBuffer(4096 * 2));
 
     mSource->start();
 
@@ -127,28 +149,7 @@ status_t AACDecoder::stop() {
 }
 
 sp<MetaData> AACDecoder::getFormat() {
-    sp<MetaData> srcFormat = mSource->getFormat();
-
-    int32_t sampleRate;
-    CHECK(srcFormat->findInt32(kKeySampleRate, &sampleRate));
-
-    sp<MetaData> meta = new MetaData;
-    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
-
-    // We'll always output stereo, regardless of how many channels are
-    // present in the input due to decoder limitations.
-    meta->setInt32(kKeyChannelCount, 2);
-
-    meta->setInt32(kKeySampleRate, sampleRate);
-
-    int64_t durationUs;
-    if (srcFormat->findInt64(kKeyDuration, &durationUs)) {
-        meta->setInt64(kKeyDuration, durationUs);
-    }
-
-    meta->setCString(kKeyDecoderComponent, "AACDecoder");
-
-    return meta;
+    return mMeta;
 }
 
 status_t AACDecoder::read(
@@ -200,13 +201,32 @@ status_t AACDecoder::read(
     mConfig->remainderBits = 0;
 
     mConfig->pOutputBuffer = static_cast<Int16 *>(buffer->data());
-    mConfig->pOutputBuffer_plus = NULL;
+    mConfig->pOutputBuffer_plus = &mConfig->pOutputBuffer[2048];
     mConfig->repositionFlag = false;
 
     Int decoderErr = PVMP4AudioDecodeFrame(mConfig, mDecoderBuf);
 
+    // Check on the sampling rate to see whether it is changed.
+    int32_t sampleRate;
+    CHECK(mMeta->findInt32(kKeySampleRate, &sampleRate));
+    if (mConfig->samplingRate != sampleRate) {
+        mMeta->setInt32(kKeySampleRate, mConfig->samplingRate);
+        LOGW("Sample rate was %d, but now is %d",
+                sampleRate, mConfig->samplingRate);
+        buffer->release();
+        mInputBuffer->release();
+        mInputBuffer = NULL;
+        return INFO_FORMAT_CHANGED;
+    }
+
     size_t numOutBytes =
         mConfig->frameLength * sizeof(int16_t) * mConfig->desiredChannels;
+    if (mConfig->aacPlusUpsamplingFactor == 2) {
+        if (mConfig->desiredChannels == 1) {
+            memcpy(&mConfig->pOutputBuffer[1024], &mConfig->pOutputBuffer[2048], numOutBytes * 2);
+        }
+        numOutBytes *= 2;
+    }
 
     if (decoderErr != MP4AUDEC_SUCCESS) {
         LOGW("AAC decoder returned error %d, substituting silence", decoderErr);
