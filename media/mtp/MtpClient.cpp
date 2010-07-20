@@ -27,7 +27,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <utils/threads.h>
 
 #include <usbhost/usbhost.h>
 #include <linux/version.h>
@@ -67,6 +66,8 @@ MtpClient::~MtpClient() {
 }
 
 bool MtpClient::start() {
+    Mutex::Autolock autoLock(mMutex);
+
     if (mThread)
         return true;
 
@@ -76,12 +77,23 @@ bool MtpClient::start() {
 
     mThread = new MtpClientThread(this);
     mThread->run("MtpClientThread");
+    // wait for the thread to do initial device discovery before returning
+    mThreadStartCondition.wait(mMutex);
 
     return true;
 }
 
 void MtpClient::stop() {
     mDone = true;
+}
+
+MtpDevice* MtpClient::getDevice(int id) {
+    for (int i = 0; i < mDeviceList.size(); i++) {
+        MtpDevice* device = mDeviceList[i];
+        if (device->getID() == id)
+            return device;
+    }
+    return NULL;
 }
 
 bool MtpClient::usbDeviceAdded(const char *devname) {
@@ -159,15 +171,6 @@ bool MtpClient::usbDeviceAdded(const char *devname) {
     return mDone;
 }
 
-MtpDevice* MtpClient::getDevice(int id) {
-    for (int i = 0; i < mDeviceList.size(); i++) {
-        MtpDevice* device = mDeviceList[i];
-        if (device->getID() == id)
-            return device;
-    }
-    return NULL;
-}
-
 bool MtpClient::usbDeviceRemoved(const char *devname) {
     for (int i = 0; i < mDeviceList.size(); i++) {
         MtpDevice* device = mDeviceList[i];
@@ -182,8 +185,14 @@ bool MtpClient::usbDeviceRemoved(const char *devname) {
     return mDone;
 }
 
+bool MtpClient::usbDiscoveryDone() {
+    Mutex::Autolock autoLock(mMutex);
+    mThreadStartCondition.signal();
+    return mDone;
+}
+
 bool MtpClient::threadLoop() {
-    usb_host_run(mUsbHostContext, usb_device_added, usb_device_removed, this);
+    usb_host_run(mUsbHostContext, usb_device_added, usb_device_removed, usb_discovery_done, this);
     return false;
 }
 
@@ -195,6 +204,11 @@ int MtpClient::usb_device_added(const char *devname, void* client_data) {
 int MtpClient::usb_device_removed(const char *devname, void* client_data) {
     LOGD("usb_device_removed %s\n", devname);
     return ((MtpClient *)client_data)->usbDeviceRemoved(devname);
+}
+
+int MtpClient::usb_discovery_done(void* client_data) {
+    LOGD("usb_discovery_done\n");
+    return ((MtpClient *)client_data)->usbDiscoveryDone();
 }
 
 }  // namespace android

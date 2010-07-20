@@ -19,6 +19,8 @@
 
 #include "MtpTypes.h"
 
+#include <utils/threads.h>
+
 struct usb_host_context;
 
 namespace android {
@@ -29,6 +31,8 @@ class MtpClient {
 private:
     MtpDeviceList               mDeviceList;
     MtpClientThread*            mThread;
+    Condition                   mThreadStartCondition;
+    Mutex                       mMutex;
     struct usb_host_context*    mUsbHostContext;
     bool                        mDone;
 
@@ -50,11 +54,13 @@ private:
     // these return true if we should stop monitoring USB and clean up
     bool                    usbDeviceAdded(const char *devname);
     bool                    usbDeviceRemoved(const char *devname);
+    bool                    usbDiscoveryDone();
 
     friend class MtpClientThread;
     bool                    threadLoop();
     static int              usb_device_added(const char *devname, void* client_data);
     static int              usb_device_removed(const char *devname, void* client_data);
+    static int              usb_discovery_done(void* client_data);
 };
 
 }; // namespace android
