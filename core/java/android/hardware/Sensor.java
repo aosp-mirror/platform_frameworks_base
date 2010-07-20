@@ -69,7 +69,27 @@ public class Sensor {
      */
     public static final int TYPE_PROXIMITY      = 8;
 
-    
+    /**
+     * A constant describing a gravity sensor type.
+     * See {@link android.hardware.SensorEvent SensorEvent}
+     * for more details.
+     */
+    public static final int TYPE_GRAVITY = 9;
+
+    /**
+     * A constant describing a linear acceleration sensor type.
+     * See {@link android.hardware.SensorEvent SensorEvent}
+     * for more details.
+     */
+    public static final int TYPE_LINEAR_ACCELERATION = 10;
+
+    /**
+     * A constant describing a rotation vector sensor type.
+     * See {@link android.hardware.SensorEvent SensorEvent}
+     * for more details.
+     */
+    public static final int TYPE_ROTATION_VECTOR = 11;
+
     /** 
      * A constant describing all sensor types.
      */
