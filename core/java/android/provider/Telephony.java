@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SqliteWrapper;
 import android.net.Uri;
+import android.os.Environment;
 import android.telephony.SmsMessage;
 import android.text.TextUtils;
 import android.util.Config;
@@ -1526,7 +1527,8 @@ public final class Telephony {
              * which streams the captured image to the uri. Internally we write the media content
              * to this file. It's named '.temp.jpg' so Gallery won't pick it up.
              */
-            public static final String SCRAP_FILE_PATH = "/sdcard/mms/scrapSpace/.temp.jpg";
+            public static final String SCRAP_FILE_PATH =
+                Environment.getExternalStorageDirectory().getPath() + "/mms/scrapSpace/.temp.jpg";
         }
 
         public static final class Intents {
