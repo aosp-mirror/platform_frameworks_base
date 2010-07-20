@@ -98,6 +98,7 @@ class SensorService :
     struct sensors_poll_device_t* mSensorDevice;
     struct sensors_module_t* mSensorModule;
     Permission mDump;
+    status_t mInitCheck;
 
     // protected by mLock
     mutable Mutex mLock;
