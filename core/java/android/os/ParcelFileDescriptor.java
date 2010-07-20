@@ -250,6 +250,11 @@ public class ParcelFileDescriptor implements Parcelable {
         return Parcelable.CONTENTS_FILE_DESCRIPTOR;
     }
 
+    /**
+     * {@inheritDoc}
+     * If {@link Parcelable#PARCELABLE_WRITE_RETURN_VALUE} is set in flags,
+     * the file descriptor will be closed after a copy is written to the Parcel.
+     */
     public void writeToParcel(Parcel out, int flags) {
         out.writeFileDescriptor(mFileDescriptor);
         if ((flags&PARCELABLE_WRITE_RETURN_VALUE) != 0 && !mClosed) {
