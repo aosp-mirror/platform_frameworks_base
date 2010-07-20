@@ -114,8 +114,9 @@ boolean screenIsSmall = res.{@link android.content.res.Resources#getBoolean(int)
 <h2 id="Color">Color</h2>
 
 <p>A color value defined in XML.
-The color is specified with an RGB value and alpha channel. You can use color resource
-any place that accepts a hexadecimal color value.</p>
+The color is specified with an RGB value and alpha channel. You can use a color resource
+any place that accepts a hexadecimal color value. You can also use a color resource when a
+drawable resource is expected in XML (for example, {@code android:drawable="@color/green"}).</p>
 
 <p>The value always begins with a pound (#) character and then followed by the
 Alpha-Red-Green-Blue information in one of the following formats:</p>

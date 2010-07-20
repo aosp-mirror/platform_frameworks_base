@@ -12,9 +12,10 @@ parent.link=available-resources.html
   </div>
 </div>
 
-<p>A drawable resource is a general concept for a graphic that you
-can retrieve with {@link android.content.res.Resources#getDrawable(int)}
-and draw on the screen. There are several different types of drawables:</p>
+<p>A drawable resource is a general concept for a graphic that can be drawn to the screen and which
+you can retrieve with APIs such as {@link android.content.res.Resources#getDrawable(int)} or apply
+to another XML resource with attributes such as {@code android:drawable} and {@code android:icon}.
+There are several different types of drawables:</p>
 <dl>
   <dt><a href="#Bitmap">Bitmap File</a><dt>
     <dd>A bitmap graphic file ({@code .png}, {@code .jpg}, or {@code .gif}).
@@ -50,6 +51,12 @@ current level value.  Creates a {@link android.graphics.drawable.ScaleDrawable}<
 
 <p>Also see the <a href="animation-resource.html">Animation Resource</a> document for how to
 create an {@link android.graphics.drawable.AnimationDrawable}.</p>
+
+<p class="note"><strong>Note:</strong> A <a
+href="{@docRoot}guide/topics/resources/more-resources.html#Color">color resource</a> can also be
+used as a drawable in XML. For example, when creating a <a href="#StateList">state list
+drawable</a>, you can reference a color resource for the {@code android:drawable} attribute ({@code
+android:drawable="@color/green"}).</p>
 
 
 
