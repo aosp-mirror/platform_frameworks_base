@@ -168,8 +168,7 @@ public:
                         int *id,
                         int *enabled);
 
-            status_t registerEffectResource_l(effect_descriptor_t *desc);
-            void     unregisterEffectResource_l(effect_descriptor_t *desc);
+    virtual status_t moveEffects(int session, int srcOutput, int dstOutput);
 
     enum hardware_call_state {
         AUDIO_HW_IDLE = 0,
@@ -619,14 +618,21 @@ private:
                     sp<EffectChain> getEffectChain_l(int sessionId);
                     status_t addEffectChain_l(const sp<EffectChain>& chain);
                     size_t removeEffectChain_l(const sp<EffectChain>& chain);
-                    void lockEffectChains_l();
-                    void unlockEffectChains();
+                    void lockEffectChains_l(Vector<sp <EffectChain> >& effectChains);
+                    void unlockEffectChains(Vector<sp <EffectChain> >& effectChains);
 
                     sp<AudioFlinger::EffectModule> getEffect_l(int sessionId, int effectId);
                     void detachAuxEffect_l(int effectId);
-                    status_t attachAuxEffect(const sp<AudioFlinger::PlaybackThread::Track> track, int EffectId);
-                    status_t attachAuxEffect_l(const sp<AudioFlinger::PlaybackThread::Track> track, int EffectId);
+                    status_t attachAuxEffect(const sp<AudioFlinger::PlaybackThread::Track> track,
+                            int EffectId);
+                    status_t attachAuxEffect_l(const sp<AudioFlinger::PlaybackThread::Track> track,
+                            int EffectId);
                     void setMode(uint32_t mode);
+
+                    status_t addEffect_l(const sp< EffectModule>& effect);
+                    void removeEffect_l(const sp< EffectModule>& effect);
+
+                    uint32_t getStrategyForSession_l(int sessionId);
 
         struct  stream_type_t {
             stream_type_t()
@@ -690,7 +696,10 @@ private:
 
     class MixerThread : public PlaybackThread {
     public:
-        MixerThread (const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id, uint32_t device);
+        MixerThread (const sp<AudioFlinger>& audioFlinger,
+                     AudioStreamOut* output,
+                     int id,
+                     uint32_t device);
         virtual             ~MixerThread();
 
         // Thread virtuals
@@ -701,7 +710,8 @@ private:
         virtual     status_t    dumpInternals(int fd, const Vector<String16>& args);
 
     protected:
-                    uint32_t    prepareTracks_l(const SortedVector< wp<Track> >& activeTracks, Vector< sp<Track> > *tracksToRemove);
+                    uint32_t    prepareTracks_l(const SortedVector< wp<Track> >& activeTracks,
+                                                Vector< sp<Track> > *tracksToRemove);
         virtual     int         getTrackName_l();
         virtual     void        deleteTrackName_l(int name);
         virtual     uint32_t    activeSleepTimeUs();
@@ -764,6 +774,9 @@ private:
               void audioConfigChanged_l(int event, int ioHandle, void *param2);
 
               int  nextUniqueId();
+              status_t moveEffectChain_l(int session,
+                                     AudioFlinger::PlaybackThread *srcThread,
+                                     AudioFlinger::PlaybackThread *dstThread);
 
     friend class AudioBuffer;
 
@@ -931,6 +944,9 @@ private:
         uint32_t status() {
             return mStatus;
         }
+        int sessionId() {
+            return mSessionId;
+        }
         status_t    setEnabled(bool enabled);
         bool isEnabled();
 
@@ -938,6 +954,8 @@ private:
         int16_t     *inBuffer() { return mConfig.inputCfg.buffer.s16; }
         void        setOutBuffer(int16_t *buffer) { mConfig.outputCfg.buffer.s16 = buffer; }
         int16_t     *outBuffer() { return mConfig.outputCfg.buffer.s16; }
+        void        setChain(const wp<EffectChain>& chain) { mChain = chain; }
+        void        setThread(const wp<ThreadBase>& thread) { mThread = thread; }
 
         status_t addHandle(sp<EffectHandle>& handle);
         void disconnect(const wp<EffectHandle>& handle);
@@ -1061,18 +1079,18 @@ private:
             mLock.unlock();
         }
 
-        status_t addEffect_l(sp<EffectModule>& handle);
+        status_t addEffect_l(const sp<EffectModule>& handle);
         size_t removeEffect_l(const sp<EffectModule>& handle);
 
         int sessionId() {
             return mSessionId;
         }
+
         sp<EffectModule> getEffectFromDesc_l(effect_descriptor_t *descriptor);
         sp<EffectModule> getEffectFromId_l(int id);
         bool setVolume_l(uint32_t *left, uint32_t *right);
         void setDevice_l(uint32_t device);
         void setMode_l(uint32_t mode);
-
 
         void setInBuffer(int16_t *buffer, bool ownsBuffer = false) {
             mInBuffer = buffer;
@@ -1091,6 +1109,10 @@ private:
         void startTrack() {mActiveTrackCnt++;}
         void stopTrack() {mActiveTrackCnt--;}
         int activeTracks() { return mActiveTrackCnt;}
+
+        uint32_t strategy() { return mStrategy; }
+        void setStrategy(uint32_t strategy)
+                 { mStrategy = strategy; }
 
         status_t dump(int fd, const Vector<String16>& args);
 
@@ -1112,7 +1134,7 @@ private:
         uint32_t mRightVolume;      // previous volume on right channel
         uint32_t mNewLeftVolume;       // new volume on left channel
         uint32_t mNewRightVolume;      // new volume on right channel
-
+        uint32_t mStrategy; // strategy for this effect chain
     };
 
     friend class RecordThread;
@@ -1142,12 +1164,6 @@ private:
 #endif
                 uint32_t mMode;
 
-                // Maximum CPU load allocated to audio effects in 0.1 MIPS (ARMv5TE, 0 WS memory) units
-                static const uint32_t MAX_EFFECTS_CPU_LOAD = 1000;
-                // Maximum memory allocated to audio effects in KB
-                static const uint32_t MAX_EFFECTS_MEMORY = 512;
-                uint32_t mTotalEffectsCpuLoad; // current CPU load used by effects
-                uint32_t mTotalEffectsMemory;  // current memory used by effects
 };
 
 // ----------------------------------------------------------------------------

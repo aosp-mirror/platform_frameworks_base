@@ -538,9 +538,11 @@ audio_io_handle_t AudioPolicyManagerBase::getOutput(AudioSystem::stream_type str
     return output;
 }
 
-status_t AudioPolicyManagerBase::startOutput(audio_io_handle_t output, AudioSystem::stream_type stream)
+status_t AudioPolicyManagerBase::startOutput(audio_io_handle_t output,
+                                             AudioSystem::stream_type stream,
+                                             int session)
 {
-    LOGV("startOutput() output %d, stream %d", output, stream);
+    LOGV("startOutput() output %d, stream %d, session %d", output, stream, session);
     ssize_t index = mOutputs.indexOfKey(output);
     if (index < 0) {
         LOGW("startOutput() unknow output %d", output);
@@ -574,9 +576,11 @@ status_t AudioPolicyManagerBase::startOutput(audio_io_handle_t output, AudioSyst
     return NO_ERROR;
 }
 
-status_t AudioPolicyManagerBase::stopOutput(audio_io_handle_t output, AudioSystem::stream_type stream)
+status_t AudioPolicyManagerBase::stopOutput(audio_io_handle_t output,
+                                            AudioSystem::stream_type stream,
+                                            int session)
 {
-    LOGV("stopOutput() output %d, stream %d", output, stream);
+    LOGV("stopOutput() output %d, stream %d, session %d", output, stream, session);
     ssize_t index = mOutputs.indexOfKey(output);
     if (index < 0) {
         LOGW("stopOutput() unknow output %d", output);
@@ -602,8 +606,12 @@ status_t AudioPolicyManagerBase::stopOutput(audio_io_handle_t output, AudioSyste
         setOutputDevice(output, getNewDevice(output));
 
 #ifdef WITH_A2DP
-        if (mA2dpOutput != 0 && !a2dpUsedForSonification() && strategy == STRATEGY_SONIFICATION) {
-            setStrategyMute(STRATEGY_MEDIA, false, mA2dpOutput, mOutputs.valueFor(mHardwareOutput)->mLatency*2);
+        if (mA2dpOutput != 0 && !a2dpUsedForSonification() &&
+                strategy == STRATEGY_SONIFICATION) {
+            setStrategyMute(STRATEGY_MEDIA,
+                            false,
+                            mA2dpOutput,
+                            mOutputs.valueFor(mHardwareOutput)->mLatency*2);
         }
 #endif
         if (output != mHardwareOutput) {
@@ -826,6 +834,85 @@ status_t AudioPolicyManagerBase::getStreamVolumeIndex(AudioSystem::stream_type s
     return NO_ERROR;
 }
 
+audio_io_handle_t AudioPolicyManagerBase::getOutputForEffect(effect_descriptor_t *desc)
+{
+    LOGV("getOutputForEffect()");
+    // apply simple rule where global effects are attached to the same output as MUSIC streams
+    return getOutput(AudioSystem::MUSIC);
+}
+
+status_t AudioPolicyManagerBase::registerEffect(effect_descriptor_t *desc,
+                                audio_io_handle_t output,
+                                uint32_t strategy,
+                                int session,
+                                int id)
+{
+    ssize_t index = mOutputs.indexOfKey(output);
+    if (index < 0) {
+        LOGW("registerEffect() unknown output %d", output);
+        return INVALID_OPERATION;
+    }
+
+    if (mTotalEffectsCpuLoad + desc->cpuLoad > getMaxEffectsCpuLoad()) {
+        LOGW("registerEffect() CPU Load limit exceeded for Fx %s, CPU %f MIPS",
+                desc->name, (float)desc->cpuLoad/10);
+        return INVALID_OPERATION;
+    }
+    if (mTotalEffectsMemory + desc->memoryUsage > getMaxEffectsMemory()) {
+        LOGW("registerEffect() memory limit exceeded for Fx %s, Memory %d KB",
+                desc->name, desc->memoryUsage);
+        return INVALID_OPERATION;
+    }
+    mTotalEffectsCpuLoad += desc->cpuLoad;
+    mTotalEffectsMemory += desc->memoryUsage;
+    LOGV("registerEffect() effect %s, output %d, strategy %d session %d id %d",
+            desc->name, output, strategy, session, id);
+
+    LOGV("registerEffect() CPU %d, memory %d", desc->cpuLoad, desc->memoryUsage);
+    LOGV("  total CPU %d, total memory %d", mTotalEffectsCpuLoad, mTotalEffectsMemory);
+
+    EffectDescriptor *pDesc = new EffectDescriptor();
+    memcpy (&pDesc->mDesc, desc, sizeof(effect_descriptor_t));
+    pDesc->mOutput = output;
+    pDesc->mStrategy = (routing_strategy)strategy;
+    pDesc->mSession = session;
+    mEffects.add(id, pDesc);
+
+    return NO_ERROR;
+}
+
+status_t AudioPolicyManagerBase::unregisterEffect(int id)
+{
+    ssize_t index = mEffects.indexOfKey(id);
+    if (index < 0) {
+        LOGW("unregisterEffect() unknown effect ID %d", id);
+        return INVALID_OPERATION;
+    }
+
+    EffectDescriptor *pDesc = mEffects.valueAt(index);
+
+    if (mTotalEffectsCpuLoad < pDesc->mDesc.cpuLoad) {
+        LOGW("unregisterEffect() CPU load %d too high for total %d",
+                pDesc->mDesc.cpuLoad, mTotalEffectsCpuLoad);
+        pDesc->mDesc.cpuLoad = mTotalEffectsCpuLoad;
+    }
+    mTotalEffectsCpuLoad -= pDesc->mDesc.cpuLoad;
+    if (mTotalEffectsMemory < pDesc->mDesc.memoryUsage) {
+        LOGW("unregisterEffect() memory %d too big for total %d",
+                pDesc->mDesc.memoryUsage, mTotalEffectsMemory);
+        pDesc->mDesc.memoryUsage = mTotalEffectsMemory;
+    }
+    mTotalEffectsMemory -= pDesc->mDesc.memoryUsage;
+    LOGV("unregisterEffect() effect %s, ID %d, CPU %d, memory %d",
+            pDesc->mDesc.name, id, pDesc->mDesc.cpuLoad, pDesc->mDesc.memoryUsage);
+    LOGV("  total CPU %d, total memory %d", mTotalEffectsCpuLoad, mTotalEffectsMemory);
+
+    mEffects.removeItem(id);
+    delete pDesc;
+
+    return NO_ERROR;
+}
+
 status_t AudioPolicyManagerBase::dump(int fd)
 {
     const size_t SIZE = 256;
@@ -890,6 +977,19 @@ status_t AudioPolicyManagerBase::dump(int fd)
         write(fd, buffer, strlen(buffer));
     }
 
+    snprintf(buffer, SIZE, "\nTotal Effects CPU: %f MIPS, Total Effects memory: %d KB\n",
+            (float)mTotalEffectsCpuLoad/10, mTotalEffectsMemory);
+    write(fd, buffer, strlen(buffer));
+
+    snprintf(buffer, SIZE, "Registered effects:\n");
+    write(fd, buffer, strlen(buffer));
+    for (size_t i = 0; i < mEffects.size(); i++) {
+        snprintf(buffer, SIZE, "- Effect %d dump:\n", mEffects.keyAt(i));
+        write(fd, buffer, strlen(buffer));
+        mEffects.valueAt(i)->dump(fd);
+    }
+
+
     return NO_ERROR;
 }
 
@@ -902,7 +1002,8 @@ AudioPolicyManagerBase::AudioPolicyManagerBase(AudioPolicyClientInterface *clien
 #ifdef AUDIO_POLICY_TEST
     Thread(false),
 #endif //AUDIO_POLICY_TEST
-    mPhoneState(AudioSystem::MODE_NORMAL), mRingerMode(0), mMusicStopTime(0), mLimitRingtoneVolume(false)
+    mPhoneState(AudioSystem::MODE_NORMAL), mRingerMode(0), mMusicStopTime(0),
+    mLimitRingtoneVolume(false), mTotalEffectsCpuLoad(0), mTotalEffectsMemory(0)
 {
     mpClientInterface = clientInterface;
 
@@ -938,6 +1039,7 @@ AudioPolicyManagerBase::AudioPolicyManagerBase(AudioPolicyClientInterface *clien
     } else {
         addOutput(mHardwareOutput, outputDesc);
         setOutputDevice(mHardwareOutput, (uint32_t)AudioSystem::DEVICE_OUT_SPEAKER, true);
+        //TODO: configure audio effect output stage here
     }
 
     updateDeviceForStrategy();
@@ -1152,6 +1254,9 @@ status_t AudioPolicyManagerBase::handleA2dpConnection(AudioSystem::audio_devices
     if (mA2dpOutput) {
         // add A2DP output descriptor
         addOutput(mA2dpOutput, outputDesc);
+
+        //TODO: configure audio effect output stage here
+
         // set initial stream volume for A2DP device
         applyStreamVolumes(mA2dpOutput, device);
         if (a2dpUsedForSonification()) {
@@ -1269,6 +1374,7 @@ void AudioPolicyManagerBase::closeA2dpOutputs()
         AudioParameter param;
         param.add(String8("closing"), String8("true"));
         mpClientInterface->setParameters(mA2dpOutput, param.toString());
+
         mpClientInterface->closeOutput(mA2dpOutput);
         delete mOutputs.valueFor(mA2dpOutput);
         mOutputs.removeItem(mA2dpOutput);
@@ -1282,48 +1388,54 @@ void AudioPolicyManagerBase::checkOutputForStrategy(routing_strategy strategy, u
     uint32_t curDevice = getDeviceForStrategy(strategy, false);
     bool a2dpWasUsed = AudioSystem::isA2dpDevice((AudioSystem::audio_devices)(prevDevice & ~AudioSystem::DEVICE_OUT_SPEAKER));
     bool a2dpIsUsed = AudioSystem::isA2dpDevice((AudioSystem::audio_devices)(curDevice & ~AudioSystem::DEVICE_OUT_SPEAKER));
-    AudioOutputDescriptor *hwOutputDesc = mOutputs.valueFor(mHardwareOutput);
-    AudioOutputDescriptor *a2dpOutputDesc;
+    audio_io_handle_t srcOutput = 0;
+    audio_io_handle_t dstOutput = 0;
 
     if (a2dpWasUsed && !a2dpIsUsed) {
         bool dupUsed = a2dpUsedForSonification() && a2dpWasUsed && (AudioSystem::popCount(prevDevice) == 2);
-
+        dstOutput = mHardwareOutput;
         if (dupUsed) {
-            LOGV("checkOutputForStrategy() moving strategy %d to duplicated", strategy);
-            a2dpOutputDesc = mOutputs.valueFor(mDuplicatedOutput);
+            LOGV("checkOutputForStrategy() moving strategy %d from duplicated", strategy);
+            srcOutput = mDuplicatedOutput;
         } else {
-            LOGV("checkOutputForStrategy() moving strategy %d to a2dp", strategy);
-            a2dpOutputDesc = mOutputs.valueFor(mA2dpOutput);
+            LOGV("checkOutputForStrategy() moving strategy %d from a2dp", strategy);
+            srcOutput = mA2dpOutput;
         }
 
-        for (int i = 0; i < (int)AudioSystem::NUM_STREAM_TYPES; i++) {
-            if (getStrategy((AudioSystem::stream_type)i) == strategy) {
-                mpClientInterface->setStreamOutput((AudioSystem::stream_type)i, mHardwareOutput);
-            }
-        }
         // do not change newDevice if it was already set before this call by a previous call to
         // getNewDevice() or checkOutputForStrategy() for a strategy with higher priority
-        if (newDevice == 0 && hwOutputDesc->isUsedByStrategy(strategy)) {
+        if (newDevice == 0 && mOutputs.valueFor(mHardwareOutput)->isUsedByStrategy(strategy)) {
             newDevice = getDeviceForStrategy(strategy, false);
         }
     }
     if (a2dpIsUsed && !a2dpWasUsed) {
         bool dupUsed = a2dpUsedForSonification() && a2dpIsUsed && (AudioSystem::popCount(curDevice) == 2);
-        audio_io_handle_t a2dpOutput;
-
+        srcOutput = mHardwareOutput;
         if (dupUsed) {
-            LOGV("checkOutputForStrategy() moving strategy %d from duplicated", strategy);
-            a2dpOutputDesc = mOutputs.valueFor(mDuplicatedOutput);
-            a2dpOutput = mDuplicatedOutput;
+            LOGV("checkOutputForStrategy() moving strategy %d to duplicated", strategy);
+            dstOutput = mDuplicatedOutput;
         } else {
-            LOGV("checkOutputForStrategy() moving strategy %d from a2dp", strategy);
-            a2dpOutputDesc = mOutputs.valueFor(mA2dpOutput);
-            a2dpOutput = mA2dpOutput;
+            LOGV("checkOutputForStrategy() moving strategy %d to a2dp", strategy);
+            dstOutput = mA2dpOutput;
         }
+    }
 
+    if (srcOutput != 0 && dstOutput != 0) {
+        // Move effects associated to this strategy from previous output to new output
+        for (size_t i = 0; i < mEffects.size(); i++) {
+            EffectDescriptor *desc = mEffects.valueAt(i);
+            if (desc->mSession != AudioSystem::SESSION_OUTPUT_STAGE &&
+                    desc->mStrategy == strategy &&
+                    desc->mOutput == srcOutput) {
+                LOGV("checkOutputForStrategy() moving effect %d to output %d", mEffects.keyAt(i), dstOutput);
+                mpClientInterface->moveEffects(desc->mSession, srcOutput, dstOutput);
+                desc->mOutput = dstOutput;
+            }
+        }
+        // Move tracks associated to this strategy from previous output to new output
         for (int i = 0; i < (int)AudioSystem::NUM_STREAM_TYPES; i++) {
             if (getStrategy((AudioSystem::stream_type)i) == strategy) {
-                mpClientInterface->setStreamOutput((AudioSystem::stream_type)i, a2dpOutput);
+                mpClientInterface->setStreamOutput((AudioSystem::stream_type)i, dstOutput);
             }
         }
     }
@@ -1371,8 +1483,12 @@ uint32_t AudioPolicyManagerBase::getNewDevice(audio_io_handle_t output, bool fro
     return device;
 }
 
-AudioPolicyManagerBase::routing_strategy AudioPolicyManagerBase::getStrategy(AudioSystem::stream_type stream)
-{
+uint32_t AudioPolicyManagerBase::getStrategyForStream(AudioSystem::stream_type stream) {
+    return (uint32_t)getStrategy(stream);
+}
+
+AudioPolicyManagerBase::routing_strategy AudioPolicyManagerBase::getStrategy(
+        AudioSystem::stream_type stream) {
     // stream to strategy mapping
     switch (stream) {
     case AudioSystem::VOICE_CALL:
@@ -1836,6 +1952,16 @@ bool AudioPolicyManagerBase::needsDirectOuput(AudioSystem::stream_type stream,
           (format !=0 && !AudioSystem::isLinearPCM(format)));
 }
 
+uint32_t AudioPolicyManagerBase::getMaxEffectsCpuLoad()
+{
+    return MAX_EFFECTS_CPU_LOAD;
+}
+
+uint32_t AudioPolicyManagerBase::getMaxEffectsMemory()
+{
+    return MAX_EFFECTS_MEMORY;
+}
+
 // --- AudioOutputDescriptor class implementation
 
 AudioPolicyManagerBase::AudioOutputDescriptor::AudioOutputDescriptor()
@@ -1968,6 +2094,28 @@ void AudioPolicyManagerBase::StreamDescriptor::dump(char* buffer, size_t size)
             mIndexCur,
             mCanBeMuted);
 }
+
+// --- EffectDescriptor class implementation
+
+status_t AudioPolicyManagerBase::EffectDescriptor::dump(int fd)
+{
+    const size_t SIZE = 256;
+    char buffer[SIZE];
+    String8 result;
+
+    snprintf(buffer, SIZE, " Output: %d\n", mOutput);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Strategy: %d\n", mStrategy);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Session: %d\n", mSession);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Name: %s\n",  mDesc.name);
+    result.append(buffer);
+    write(fd, result.string(), result.size());
+
+    return NO_ERROR;
+}
+
 
 
 }; // namespace android

@@ -69,7 +69,8 @@ enum {
     QUERY_NUM_EFFECTS,
     QUERY_EFFECT,
     GET_EFFECT_DESCRIPTOR,
-    CREATE_EFFECT
+    CREATE_EFFECT,
+    MOVE_EFFECTS
 };
 
 class BpAudioFlinger : public BpInterface<IAudioFlinger>
@@ -676,6 +677,17 @@ public:
 
         return effect;
     }
+
+    virtual status_t moveEffects(int session, int srcOutput, int dstOutput)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.writeInt32(session);
+        data.writeInt32(srcOutput);
+        data.writeInt32(dstOutput);
+        remote()->transact(MOVE_EFFECTS, data, &reply);
+        return reply.readInt32();
+    }
 };
 
 IMPLEMENT_META_INTERFACE(AudioFlinger, "android.media.IAudioFlinger");
@@ -1022,6 +1034,14 @@ status_t BnAudioFlinger::onTransact(
             reply->writeInt32(enabled);
             reply->writeStrongBinder(effect->asBinder());
             reply->write(&desc, sizeof(effect_descriptor_t));
+            return NO_ERROR;
+        } break;
+        case MOVE_EFFECTS: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            int session = data.readInt32();
+            int srcOutput = data.readInt32();
+            int dstOutput = data.readInt32();
+            reply->writeInt32(moveEffects(session, srcOutput, dstOutput));
             return NO_ERROR;
         } break;
         default:
