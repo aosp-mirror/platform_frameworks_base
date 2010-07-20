@@ -140,12 +140,12 @@ public class ActionBarContextView extends ViewGroup {
             mCloseButton = new ImageButton(getContext());
             mCloseButton.setImageDrawable(mCloseDrawable);
             mCloseButton.setBackgroundDrawable(null);
-            mCloseButton.setOnClickListener(new OnClickListener() {
-                public void onClick(View v) {
-                    mode.finish();
-                }
-            });
         }
+        mCloseButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                mode.finish();
+            }
+        });
         addView(mCloseButton);
 
         final MenuBuilder menu = (MenuBuilder) mode.getMenu();
