@@ -22,7 +22,6 @@
 #include <media/stagefright/MediaSource.h>
 #include <utils/List.h>
 #include <utils/RefBase.h>
-#include <utils/threads.h>
 
 namespace android {
 
@@ -34,10 +33,6 @@ class CameraSource : public MediaSource, public MediaBufferObserver {
 public:
     static CameraSource *Create();
     static CameraSource *CreateFromCamera(const sp<Camera> &camera);
-
-    void enableTimeLapseMode(
-            int64_t timeBetweenTimeLapseFrameCaptureUs, int32_t videoFrameRate);
-    void disableTimeLapseMode();
 
     virtual ~CameraSource();
 
@@ -51,11 +46,33 @@ public:
 
     virtual void signalBufferReturned(MediaBuffer* buffer);
 
-private:
-    friend class CameraSourceListener;
-
+protected:
     sp<Camera> mCamera;
     sp<MetaData> mMeta;
+
+    int64_t mStartTimeUs;
+    int32_t mNumFramesReceived;
+    int64_t mLastFrameTimestampUs;
+    bool mStarted;
+
+    CameraSource(const sp<Camera> &camera);
+
+    virtual void startCameraRecording();
+    virtual void stopCameraRecording();
+    virtual void releaseRecordingFrame(const sp<IMemory>& frame);
+
+    // Returns true if need to skip the current frame.
+    // Called from dataCallbackTimestamp.
+    virtual bool skipCurrentFrame(int64_t timestampUs) {return false;}
+
+    // Callback called when still camera raw data is available.
+    virtual void dataCallback(int32_t msgType, const sp<IMemory> &data) {}
+
+    virtual void dataCallbackTimestamp(int64_t timestampUs, int32_t msgType,
+            const sp<IMemory> &data);
+
+private:
+    friend class CameraSourceListener;
 
     Mutex mLock;
     Condition mFrameAvailableCondition;
@@ -64,29 +81,12 @@ private:
     List<sp<IMemory> > mFramesBeingEncoded;
     List<int64_t> mFrameTimes;
 
-    int64_t mStartTimeUs;
     int64_t mFirstFrameTimeUs;
-    int64_t mLastFrameTimestampUs;
-    int32_t mNumFramesReceived;
     int32_t mNumFramesEncoded;
     int32_t mNumFramesDropped;
     int32_t mNumGlitches;
     int64_t mGlitchDurationThresholdUs;
     bool mCollectStats;
-    bool mStarted;
-
-    // Time between capture of two frames during time lapse recording
-    // Negative value indicates that timelapse is disabled.
-    int64_t mTimeBetweenTimeLapseFrameCaptureUs;
-    // Time between two frames in final video (1/frameRate)
-    int64_t mTimeBetweenTimeLapseVideoFramesUs;
-    // Real timestamp of the last encoded time lapse frame
-    int64_t mLastTimeLapseFrameRealTimestampUs;
-
-    CameraSource(const sp<Camera> &camera);
-
-    void dataCallbackTimestamp(
-            int64_t timestampUs, int32_t msgType, const sp<IMemory> &data);
 
     void releaseQueuedFrames();
     void releaseOneRecordingFrame(const sp<IMemory>& frame);

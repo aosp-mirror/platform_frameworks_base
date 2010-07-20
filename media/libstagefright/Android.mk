@@ -10,6 +10,7 @@ LOCAL_SRC_FILES:=                         \
         AudioSource.cpp                   \
         AwesomePlayer.cpp                 \
         CameraSource.cpp                  \
+        CameraSourceTimeLapse.cpp                  \
         DataSource.cpp                    \
         ESDS.cpp                          \
         FileSource.cpp                    \
