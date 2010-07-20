@@ -37,10 +37,12 @@ namespace uirenderer {
 // These properties are defined in mega-bytes
 #define PROPERTY_TEXTURE_CACHE_SIZE "ro.hwui.texture_cache_size"
 #define PROPERTY_LAYER_CACHE_SIZE "ro.hwui.layer_cache_size"
+#define PROPERTY_GRADIENT_CACHE_SIZE "ro.hwui.gradient_cache_size"
 
-#define DEFAULT_TEXTURE_CACHE_SIZE 20
-#define DEFAULT_LAYER_CACHE_SIZE 10
+#define DEFAULT_TEXTURE_CACHE_SIZE 20.0f
+#define DEFAULT_LAYER_CACHE_SIZE 10.0f
 #define DEFAULT_PATCH_CACHE_SIZE 100
+#define DEFAULT_GRADIENT_CACHE_SIZE 0.5f
 
 // Converts a number of mega-bytes into bytes
 #define MB(s) s * 1024 * 1024
@@ -104,22 +106,30 @@ OpenGLRenderer::OpenGLRenderer():
         mBlend(false), mLastSrcMode(GL_ZERO), mLastDstMode(GL_ZERO),
         mTextureCache(MB(DEFAULT_TEXTURE_CACHE_SIZE)),
         mLayerCache(MB(DEFAULT_LAYER_CACHE_SIZE)),
+        mGradientCache(MB(DEFAULT_GRADIENT_CACHE_SIZE)),
         mPatchCache(DEFAULT_PATCH_CACHE_SIZE) {
     LOGD("Create OpenGLRenderer");
 
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_TEXTURE_CACHE_SIZE, property, NULL) > 0) {
         LOGD("  Setting texture cache size to %sMB", property);
-        mTextureCache.setMaxSize(MB(atoi(property)));
+        mTextureCache.setMaxSize(MB(atof(property)));
     } else {
-        LOGD("  Using default texture cache size of %dMB", DEFAULT_TEXTURE_CACHE_SIZE);
+        LOGD("  Using default texture cache size of %.2fMB", DEFAULT_TEXTURE_CACHE_SIZE);
     }
 
     if (property_get(PROPERTY_LAYER_CACHE_SIZE, property, NULL) > 0) {
         LOGD("  Setting layer cache size to %sMB", property);
-        mLayerCache.setMaxSize(MB(atoi(property)));
+        mLayerCache.setMaxSize(MB(atof(property)));
     } else {
-        LOGD("  Using default layer cache size of %dMB", DEFAULT_LAYER_CACHE_SIZE);
+        LOGD("  Using default layer cache size of %.2fMB", DEFAULT_LAYER_CACHE_SIZE);
+    }
+
+    if (property_get(PROPERTY_GRADIENT_CACHE_SIZE, property, NULL) > 0) {
+        LOGD("  Setting gradient cache size to %sMB", property);
+        mLayerCache.setMaxSize(MB(atof(property)));
+    } else {
+        LOGD("  Using default gradient cache size of %.2fMB", DEFAULT_GRADIENT_CACHE_SIZE);
     }
 
     mDrawColorProgram = new DrawColorProgram;
@@ -143,6 +153,7 @@ OpenGLRenderer::~OpenGLRenderer() {
 
     mTextureCache.clear();
     mLayerCache.clear();
+    mGradientCache.clear();
     mPatchCache.clear();
 }
 
@@ -538,8 +549,9 @@ void OpenGLRenderer::setupBitmapShader(SkBitmap* bitmap, SkShader::TileMode tile
     mShaderMatrix = matrix;
 }
 
-void OpenGLRenderer::setupLinearGradientShader(SkShader* shader, float* bounds,uint32_t* colors,
-        float* positions, SkShader::TileMode tileMode, SkMatrix* matrix, bool hasAlpha) {
+void OpenGLRenderer::setupLinearGradientShader(SkShader* shader, float* bounds, uint32_t* colors,
+        float* positions, int count, SkShader::TileMode tileMode, SkMatrix* matrix,
+        bool hasAlpha) {
     // TODO: We should use a struct to describe each shader
     mShader = OpenGLRenderer::kShaderLinearGradient;
     mShaderKey = shader;
@@ -550,6 +562,7 @@ void OpenGLRenderer::setupLinearGradientShader(SkShader* shader, float* bounds,u
     mShaderBounds = bounds;
     mShaderColors = colors;
     mShaderPositions = positions;
+    mShaderCount = count;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -566,20 +579,21 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     // Render using pre-multiplied alpha
     const int alpha = (color >> 24) & 0xFF;
     const GLfloat a = alpha / 255.0f;
-    const GLfloat r = a * ((color >> 16) & 0xFF) / 255.0f;
-    const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
-    const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
 
     switch (mShader) {
         case OpenGLRenderer::kShaderBitmap:
             drawBitmapShader(left, top, right, bottom, a, mode);
             return;
         case OpenGLRenderer::kShaderLinearGradient:
-            // TODO: Generate gradient texture, set appropriate shader
-            break;
+            drawLinearGradientShader(left, top, right, bottom, a, mode);
+            return;
         default:
             break;
     }
+
+    const GLfloat r = a * ((color >> 16) & 0xFF) / 255.0f;
+    const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
+    const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
 
     // Pre-multiplication happens when setting the shader color
     chooseBlending(alpha < 255 || mShaderBlend, mode);
@@ -603,6 +617,58 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     glUniform4f(mDrawColorProgram->color, r, g, b, a);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gDrawColorVertexCount);
+}
+
+void OpenGLRenderer::drawLinearGradientShader(float left, float top, float right, float bottom,
+        float alpha, SkXfermode::Mode mode) {
+    Texture* texture = mGradientCache.get(mShaderKey);
+    if (!texture) {
+        texture = mGradientCache.addLinearGradient(mShaderKey, mShaderBounds, mShaderColors,
+                mShaderPositions, mShaderCount, mShaderTileX);
+    }
+
+    mModelView.loadTranslate(left, top, 0.0f);
+    mModelView.scale(right - left, bottom - top, 1.0f);
+
+    useProgram(mDrawLinearGradientProgram);
+    mDrawLinearGradientProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+
+    chooseBlending(mShaderBlend || alpha < 1.0f, mode);
+
+    if (texture->id != mLastTexture) {
+        glBindTexture(GL_TEXTURE_2D, texture->id);
+        mLastTexture = texture->id;
+    }
+    // TODO: Don't set the texture parameters every time
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gTileModes[mShaderTileX]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gTileModes[mShaderTileX]);
+
+    Rect start(mShaderBounds[0], mShaderBounds[1], mShaderBounds[2], mShaderBounds[3]);
+    if (mShaderMatrix) {
+        mat4 shaderMatrix(*mShaderMatrix);
+        shaderMatrix.mapRect(start);
+    }
+    mSnapshot->transform.mapRect(start);
+
+    const float gradientX = start.right - start.left;
+    const float gradientY = start.bottom - start.top;
+
+    mat4 screenSpace(mSnapshot->transform);
+    screenSpace.multiply(mModelView);
+
+    // Always premultiplied
+    glUniform4f(mDrawLinearGradientProgram->color, alpha, alpha, alpha, alpha);
+    glUniform2f(mDrawLinearGradientProgram->start, start.left, start.top);
+    glUniform2f(mDrawLinearGradientProgram->gradient, gradientX, gradientY);
+    glUniform1f(mDrawLinearGradientProgram->gradientLength,
+            1.0f / (gradientX * gradientX + gradientY * gradientY));
+    glUniformMatrix4fv(mDrawLinearGradientProgram->screenSpace, 1, GL_FALSE,
+            &screenSpace.data[0]);
+
+    glVertexAttribPointer(mDrawLinearGradientProgram->position, 2, GL_FLOAT, GL_FALSE,
+            gDrawTextureVertexStride, &mDrawTextureVertices[0].position[0]);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, gDrawTextureVertexCount);
 }
 
 void OpenGLRenderer::drawBitmapShader(float left, float top, float right, float bottom,
@@ -680,6 +746,7 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gTileModes[mShaderTileY]);
 
     // Always premultiplied
+    //glUniform4f(mDrawTextureProgram->color, alpha, alpha, alpha, alpha);
     glUniform4f(mDrawTextureProgram->color, alpha, alpha, alpha, alpha);
 
     glVertexAttribPointer(mDrawTextureProgram->position, 2, GL_FLOAT, GL_FALSE,

@@ -18,7 +18,10 @@
 
 #include <GLES2/gl2.h>
 
-#include "TextureCache.h"
+#include <SkCanvas.h>
+#include <SkGradientShader.h>
+
+#include "GradientCache.h"
 
 namespace android {
 namespace uirenderer {
@@ -27,13 +30,13 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-TextureCache::TextureCache(uint32_t maxByteSize):
-        mCache(GenerationCache<SkBitmap*, Texture*>::kUnlimitedCapacity),
+GradientCache::GradientCache(uint32_t maxByteSize):
+        mCache(GenerationCache<SkShader*, Texture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(maxByteSize) {
     mCache.setOnEntryRemovedListener(this);
 }
 
-TextureCache::~TextureCache() {
+GradientCache::~GradientCache() {
     mCache.clear();
 }
 
@@ -41,15 +44,15 @@ TextureCache::~TextureCache() {
 // Size management
 ///////////////////////////////////////////////////////////////////////////////
 
-uint32_t TextureCache::getSize() {
+uint32_t GradientCache::getSize() {
     return mSize;
 }
 
-uint32_t TextureCache::getMaxSize() {
+uint32_t GradientCache::getMaxSize() {
     return mMaxSize;
 }
 
-void TextureCache::setMaxSize(uint32_t maxSize) {
+void GradientCache::setMaxSize(uint32_t maxSize) {
     mMaxSize = maxSize;
     while (mSize > mMaxSize) {
         mCache.removeOldest();
@@ -60,9 +63,9 @@ void TextureCache::setMaxSize(uint32_t maxSize) {
 // Callbacks
 ///////////////////////////////////////////////////////////////////////////////
 
-void TextureCache::operator()(SkBitmap*& bitmap, Texture*& texture) {
-    if (bitmap) {
-        const uint32_t size = bitmap->rowBytes() * bitmap->height();
+void GradientCache::operator()(SkShader*& shader, Texture*& texture) {
+    if (shader) {
+        const uint32_t size = texture->width * texture->height * 4;
         mSize -= size;
     }
 
@@ -76,71 +79,75 @@ void TextureCache::operator()(SkBitmap*& bitmap, Texture*& texture) {
 // Caching
 ///////////////////////////////////////////////////////////////////////////////
 
-Texture* TextureCache::get(SkBitmap* bitmap) {
-    Texture* texture = mCache.get(bitmap);
-    if (!texture) {
-        const uint32_t size = bitmap->rowBytes() * bitmap->height();
-        // Don't even try to cache a bitmap that's bigger than the cache
-        if (size < mMaxSize) {
-            while (mSize + size > mMaxSize) {
-                mCache.removeOldest();
-            }
-        }
-
-        texture = new Texture;
-        generateTexture(bitmap, texture, false);
-
-        if (size < mMaxSize) {
-            mSize += size;
-            mCache.put(bitmap, texture);
-        }
-    } else if (bitmap->getGenerationID() != texture->generation) {
-        generateTexture(bitmap, texture, true);
-    }
-    // TODO: Do something to destroy the texture object if it's too big for the cache
+Texture* GradientCache::get(SkShader* shader) {
+    Texture* texture = mCache.get(shader);
     return texture;
 }
 
-void TextureCache::remove(SkBitmap* bitmap) {
-    mCache.remove(bitmap);
+void GradientCache::remove(SkShader* shader) {
+    mCache.remove(shader);
 }
 
-void TextureCache::clear() {
+void GradientCache::clear() {
     mCache.clear();
 }
 
-void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool regenerate) {
-    SkAutoLockPixels alp(*bitmap);
+Texture* GradientCache::addLinearGradient(SkShader* shader, float* bounds, uint32_t* colors,
+        float* positions, int count, SkShader::TileMode tileMode) {
+    SkBitmap bitmap;
+    bitmap.setConfig(SkBitmap::kARGB_8888_Config, 1024, 1);
+    bitmap.allocPixels();
+    bitmap.eraseColor(0);
+
+    SkCanvas canvas(bitmap);
+
+    SkPoint points[2];
+    points[0].set(0.0f, 0.0f);
+    points[1].set(bitmap.width(), 0.0f);
+
+    SkShader* localShader = SkGradientShader::CreateLinear(points,
+            reinterpret_cast<const SkColor*>(colors), positions, count, tileMode);
+
+    SkPaint p;
+    p.setStyle(SkPaint::kStrokeAndFill_Style);
+    p.setShader(localShader)->unref();
+
+    canvas.drawRectCoords(0.0f, 0.0f, bitmap.width(), 1.0f, p);
+
+    // Asume the cache is always big enough
+    const uint32_t size = bitmap.rowBytes() * bitmap.height();
+    while (mSize + size > mMaxSize) {
+        mCache.removeOldest();
+    }
+
+    Texture* texture = new Texture;
+    generateTexture(&bitmap, texture);
+
+    mSize += size;
+    mCache.put(shader, texture);
+
+    return texture;
+}
+
+void GradientCache::generateTexture(SkBitmap* bitmap, Texture* texture) {
+    SkAutoLockPixels autoLock(*bitmap);
     if (!bitmap->readyToDraw()) {
-        LOGE("Cannot generate texture from bitmap");
+        LOGE("Cannot generate texture from shader");
         return;
     }
 
-    if (!regenerate) {
-        texture->generation = bitmap->getGenerationID();
-        texture->width = bitmap->width();
-        texture->height = bitmap->height();
+    texture->generation = bitmap->getGenerationID();
+    texture->width = bitmap->width();
+    texture->height = bitmap->height();
 
-        glGenTextures(1, &texture->id);
-    }
+    glGenTextures(1, &texture->id);
 
     glBindTexture(GL_TEXTURE_2D, texture->id);
     glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap->bytesPerPixel());
 
-    switch (bitmap->getConfig()) {
-    case SkBitmap::kRGB_565_Config:
-        texture->blend = false;
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, bitmap->rowBytesAsPixels(), texture->height, 0,
-                GL_RGB, GL_UNSIGNED_SHORT_5_6_5, bitmap->getPixels());
-        break;
-    case SkBitmap::kARGB_8888_Config:
-        texture->blend = !bitmap->isOpaque();
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap->rowBytesAsPixels(), texture->height, 0,
-                GL_RGBA, GL_UNSIGNED_BYTE, bitmap->getPixels());
-        break;
-    default:
-        break;
-    }
+    texture->blend = !bitmap->isOpaque();
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap->rowBytesAsPixels(), texture->height, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, bitmap->getPixels());
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

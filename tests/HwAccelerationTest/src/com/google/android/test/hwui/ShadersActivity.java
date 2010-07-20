@@ -91,7 +91,7 @@ public class ShadersActivity extends Activity {
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-            canvas.drawRGB(255, 255, 255);
+            //canvas.drawRGB(255, 255, 255);
 
             // Bitmap shaders
             canvas.save();

@@ -240,9 +240,9 @@ static void android_view_GLES20Canvas_setupBitmapShader(JNIEnv* env, jobject can
 
 static void android_view_GLES20Canvas_setupLinearShader(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, SkShader* shader, float* bounds, uint32_t* colors,
-        float* positions, SkShader::TileMode tileMode, SkMatrix* matrix) {
-    renderer->setupLinearGradientShader(shader, bounds, colors, positions, tileMode,
-            matrix, (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+        float* positions, int count, SkShader::TileMode tileMode, SkMatrix* matrix) {
+    renderer->setupLinearGradientShader(shader, bounds, colors, positions, count,
+            tileMode, matrix, (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
 }
 
 // ----------------------------------------------------------------------------
@@ -286,7 +286,7 @@ static JNINativeMethod gMethods[] = {
 
     {   "nResetShader",       "(I)V",            (void*) android_view_GLES20Canvas_resetShader },
     {   "nSetupBitmapShader", "(IIIIII)V",       (void*) android_view_GLES20Canvas_setupBitmapShader },
-    {   "nSetupLinearShader", "(IIIIIII)V",      (void*) android_view_GLES20Canvas_setupLinearShader },
+    {   "nSetupLinearShader", "(IIIIIIII)V",     (void*) android_view_GLES20Canvas_setupLinearShader },
 
     {   "nGetClipBounds",     "(ILandroid/graphics/Rect;)Z",
             (void*) android_view_GLES20Canvas_getClipBounds },

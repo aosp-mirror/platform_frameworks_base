@@ -190,6 +190,8 @@ DrawLinearGradientProgram::DrawLinearGradientProgram():
     gradient = addUniform("gradient");
     gradientLength = addUniform("gradientLength");
     sampler = addUniform("sampler");
+    start = addUniform("start");
+    screenSpace = addUniform("screenSpace");
 }
 
 void DrawLinearGradientProgram::use() {

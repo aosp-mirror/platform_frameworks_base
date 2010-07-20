@@ -633,7 +633,7 @@ class GLES20Canvas extends Canvas {
             } else if (shader instanceof LinearGradient) {
                 final LinearGradient ls = (LinearGradient) shader;
                 nSetupLinearShader(mRenderer, ls.native_instance, ls.bounds, ls.colors,
-                        ls.positions, ls.tileMode, ls.mLocalMatrix);
+                        ls.positions, ls.count, ls.tileMode, ls.mLocalMatrix);
                 return true;
             } else if (shader instanceof RadialGradient) {
                 // TODO: Implement
@@ -645,7 +645,7 @@ class GLES20Canvas extends Canvas {
     }
 
     private native void nSetupLinearShader(int renderer, int shader, int bounds,
-            int colors, int positions, int tileMode, int localMatrix);
+            int colors, int positions, int count, int tileMode, int localMatrix);
     private native void nSetupBitmapShader(int renderer, int shader, int bitmap,
             int tileX, int tileY, int matrix);
     private native void nResetShader(int renderer);

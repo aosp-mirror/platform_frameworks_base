@@ -213,6 +213,17 @@ public:
     virtual void remove();
 
     /**
+     * Name of the matrix used to compute the screen space coordinates
+     * of the vertices.
+     */
+    int screenSpace;
+
+    /**
+     * Name of the linear gradient start point.
+     */
+    int start;
+
+    /**
      * Name of the linear gradient vector.
      */
     int gradient;

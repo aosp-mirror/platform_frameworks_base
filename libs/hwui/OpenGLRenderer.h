@@ -36,6 +36,7 @@
 #include "Snapshot.h"
 #include "TextureCache.h"
 #include "LayerCache.h"
+#include "GradientCache.h"
 #include "PatchCache.h"
 #include "Vertex.h"
 
@@ -104,7 +105,8 @@ public:
     void setupBitmapShader(SkBitmap* bitmap, SkShader::TileMode tileX, SkShader::TileMode tileY,
             SkMatrix* matrix, bool hasAlpha);
     void setupLinearGradientShader(SkShader* shader, float* bounds, uint32_t* colors,
-            float* positions, SkShader::TileMode tileMode, SkMatrix* matrix, bool hasAlpha);
+            float* positions, int count, SkShader::TileMode tileMode,
+            SkMatrix* matrix, bool hasAlpha);
 
 private:
     /**
@@ -249,6 +251,19 @@ private:
             SkXfermode::Mode mode);
 
     /**
+     * Fills the specified rectangle with the currently set linear gradient shader.
+     *
+     * @param left The left coordinate of the rectangle
+     * @param top The top coordinate of the rectangle
+     * @param right The right coordinate of the rectangle
+     * @param bottom The bottom coordinate of the rectangle
+     * @param alpha An additional translucency parameter, between 0.0f and 1.0f
+     * @param mode The blending mode
+     */
+    void drawLinearGradientShader(float left, float top, float right, float bottom, float alpha,
+            SkXfermode::Mode mode);
+
+    /**
      * Resets the texture coordinates stored in mDrawTextureVertices. Setting the values
      * back to default is achieved by calling:
      *
@@ -335,10 +350,12 @@ private:
     float* mShaderBounds;
     uint32_t* mShaderColors;
     float* mShaderPositions;
+    int mShaderCount;
 
     // Various caches
     TextureCache mTextureCache;
     LayerCache mLayerCache;
+    GradientCache mGradientCache;
     PatchCache mPatchCache;
 }; // class OpenGLRenderer
 
