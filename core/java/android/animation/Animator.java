@@ -28,8 +28,13 @@ import java.util.ArrayList;
  * This class provides a simple timing engine for running animations
  * which calculate animated values and set them on target objects.
  *
- * There is a single timing pulse that all animations use. It runs in a
- * custom handler to ensure that property changes happen on the UI thread.
+ * <p>There is a single timing pulse that all animations use. It runs in a
+ * custom handler to ensure that property changes happen on the UI thread.</p>
+ *
+ * <p>By default, Animator uses non-linear time interpolation, via the
+ * {@link AccelerateDecelerateInterpolator} class, which accelerates into and decelerates
+ * out of an animation. This behavior can be changed by calling
+ * {@link Animator#setInterpolator(Interpolator)}.</p>
  */
 public class Animator extends Animatable {
 
