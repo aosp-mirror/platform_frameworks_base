@@ -161,6 +161,8 @@ public:
                                     status_t *status,
                                     int *id,
                                     int *enabled) = 0;
+
+    virtual status_t moveEffects(int session, int srcOutput, int dstOutput) = 0;
 };
 
 

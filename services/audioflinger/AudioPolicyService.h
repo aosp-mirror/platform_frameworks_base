@@ -28,7 +28,8 @@ class String8;
 
 // ----------------------------------------------------------------------------
 
-class AudioPolicyService: public BnAudioPolicyService, public AudioPolicyClientInterface, public IBinder::DeathRecipient
+class AudioPolicyService: public BnAudioPolicyService, public AudioPolicyClientInterface,
+    public IBinder::DeathRecipient
 {
 
 public:
@@ -43,8 +44,9 @@ public:
     virtual status_t setDeviceConnectionState(AudioSystem::audio_devices device,
                                               AudioSystem::device_connection_state state,
                                               const char *device_address);
-    virtual AudioSystem::device_connection_state getDeviceConnectionState(AudioSystem::audio_devices device,
-                                                                          const char *device_address);
+    virtual AudioSystem::device_connection_state getDeviceConnectionState(
+                                                                AudioSystem::audio_devices device,
+                                                                const char *device_address);
     virtual status_t setPhoneState(int state);
     virtual status_t setRingerMode(uint32_t mode, uint32_t mask);
     virtual status_t setForceUse(AudioSystem::force_use usage, AudioSystem::forced_config config);
@@ -53,15 +55,21 @@ public:
                                         uint32_t samplingRate = 0,
                                         uint32_t format = AudioSystem::FORMAT_DEFAULT,
                                         uint32_t channels = 0,
-                                        AudioSystem::output_flags flags = AudioSystem::OUTPUT_FLAG_INDIRECT);
-    virtual status_t startOutput(audio_io_handle_t output, AudioSystem::stream_type stream);
-    virtual status_t stopOutput(audio_io_handle_t output, AudioSystem::stream_type stream);
+                                        AudioSystem::output_flags flags =
+                                                AudioSystem::OUTPUT_FLAG_INDIRECT);
+    virtual status_t startOutput(audio_io_handle_t output,
+                                 AudioSystem::stream_type stream,
+                                 int session = 0);
+    virtual status_t stopOutput(audio_io_handle_t output,
+                                AudioSystem::stream_type stream,
+                                int session = 0);
     virtual void releaseOutput(audio_io_handle_t output);
     virtual audio_io_handle_t getInput(int inputSource,
                                     uint32_t samplingRate = 0,
                                     uint32_t format = AudioSystem::FORMAT_DEFAULT,
                                     uint32_t channels = 0,
-                                    AudioSystem::audio_in_acoustics acoustics = (AudioSystem::audio_in_acoustics)0);
+                                    AudioSystem::audio_in_acoustics acoustics =
+                                            (AudioSystem::audio_in_acoustics)0);
     virtual status_t startInput(audio_io_handle_t input);
     virtual status_t stopInput(audio_io_handle_t input);
     virtual void releaseInput(audio_io_handle_t input);
@@ -70,6 +78,16 @@ public:
                                       int indexMax);
     virtual status_t setStreamVolumeIndex(AudioSystem::stream_type stream, int index);
     virtual status_t getStreamVolumeIndex(AudioSystem::stream_type stream, int *index);
+
+    virtual uint32_t getStrategyForStream(AudioSystem::stream_type stream);
+
+    virtual audio_io_handle_t getOutputForEffect(effect_descriptor_t *desc);
+    virtual status_t registerEffect(effect_descriptor_t *desc,
+                                    audio_io_handle_t output,
+                                    uint32_t strategy,
+                                    int session,
+                                    int id);
+    virtual status_t unregisterEffect(int id);
 
     virtual     status_t    onTransact(
                                 uint32_t code,
@@ -89,7 +107,8 @@ public:
                                     uint32_t *pChannels,
                                     uint32_t *pLatencyMs,
                                     AudioSystem::output_flags flags);
-    virtual audio_io_handle_t openDuplicateOutput(audio_io_handle_t output1, audio_io_handle_t output2);
+    virtual audio_io_handle_t openDuplicateOutput(audio_io_handle_t output1,
+                                                  audio_io_handle_t output2);
     virtual status_t closeOutput(audio_io_handle_t output);
     virtual status_t suspendOutput(audio_io_handle_t output);
     virtual status_t restoreOutput(audio_io_handle_t output);
@@ -99,13 +118,21 @@ public:
                                     uint32_t *pChannels,
                                     uint32_t acoustics);
     virtual status_t closeInput(audio_io_handle_t input);
-    virtual status_t setStreamVolume(AudioSystem::stream_type stream, float volume, audio_io_handle_t output, int delayMs = 0);
+    virtual status_t setStreamVolume(AudioSystem::stream_type stream,
+                                     float volume,
+                                     audio_io_handle_t output,
+                                     int delayMs = 0);
     virtual status_t setStreamOutput(AudioSystem::stream_type stream, audio_io_handle_t output);
-    virtual void setParameters(audio_io_handle_t ioHandle, const String8& keyValuePairs, int delayMs = 0);
+    virtual void setParameters(audio_io_handle_t ioHandle,
+                               const String8& keyValuePairs,
+                               int delayMs = 0);
     virtual String8 getParameters(audio_io_handle_t ioHandle, const String8& keys);
     virtual status_t startTone(ToneGenerator::tone_type tone, AudioSystem::stream_type stream);
     virtual status_t stopTone();
     virtual status_t setVoiceVolume(float volume, int delayMs = 0);
+    virtual status_t moveEffects(int session,
+                                     audio_io_handle_t srcOutput,
+                                     audio_io_handle_t dstOutput);
 
 private:
                         AudioPolicyService();

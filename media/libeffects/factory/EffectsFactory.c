@@ -31,7 +31,7 @@ static list_elem_t *gCurLib;    // current library in enumeration process
 static list_elem_t *gCurEffect; // current effect in enumeration process
 static uint32_t gCurEffectIdx;       // current effect index in enumeration process
 
-static const char * const gEffectLibPath = "/system/lib/soundfx"; // path to built-in effect libraries
+const char * const gEffectLibPath = "/system/lib/soundfx"; // path to built-in effect libraries
 static int gInitDone; // true is global initialization has been preformed
 static int gNextLibId; // used by loadLibrary() to allocate unique library handles
 static int gCanQueryEffect; // indicates that call to EffectQueryEffect() is valid, i.e. that the list of effects
