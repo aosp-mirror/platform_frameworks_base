@@ -949,9 +949,11 @@ status_t StagefrightRecorder::setupVideoEncoder(const sp<MediaWriter>& writer) {
     OMXClient client;
     CHECK_EQ(client.connect(), OK);
 
+    uint32_t encoder_flags = (mCaptureTimeLapse) ? OMXCodec::kPreferSoftwareCodecs : 0;
     sp<MediaSource> encoder = OMXCodec::Create(
             client.interface(), enc_meta,
-            true /* createEncoder */, cameraSource);
+            true /* createEncoder */, cameraSource,
+            NULL, encoder_flags);
     if (encoder == NULL) {
         return UNKNOWN_ERROR;
     }
