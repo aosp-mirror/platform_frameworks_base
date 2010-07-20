@@ -2113,28 +2113,21 @@ public final class ContactsContract {
                             Data.DATA_VERSION);
                     for (String key : DATA_KEYS) {
                         final int columnIndex = cursor.getColumnIndexOrThrow(key);
-                        if (cursor.isNull(columnIndex)) {
-                            // don't put anything
-                        } else {
-                            try {
+                        switch (cursor.getType(columnIndex)) {
+                            case Cursor.FIELD_TYPE_NULL:
+                                // don't put anything
+                                break;
+                            case Cursor.FIELD_TYPE_INTEGER:
+                            case Cursor.FIELD_TYPE_FLOAT:
+                            case Cursor.FIELD_TYPE_STRING:
                                 cv.put(key, cursor.getString(columnIndex));
-                            } catch (SQLiteException e) {
+                                break;
+                            case Cursor.FIELD_TYPE_BLOB:
                                 cv.put(key, cursor.getBlob(columnIndex));
-                            }
+                                break;
+                            default:
+                                throw new IllegalStateException("Invalid or unhandled data type");
                         }
-                        // TODO: go back to this version of the code when bug
-                        // http://b/issue?id=2306370 is fixed.
-//                        if (cursor.isNull(columnIndex)) {
-//                            // don't put anything
-//                        } else if (cursor.isLong(columnIndex)) {
-//                            values.put(key, cursor.getLong(columnIndex));
-//                        } else if (cursor.isFloat(columnIndex)) {
-//                            values.put(key, cursor.getFloat(columnIndex));
-//                        } else if (cursor.isString(columnIndex)) {
-//                            values.put(key, cursor.getString(columnIndex));
-//                        } else if (cursor.isBlob(columnIndex)) {
-//                            values.put(key, cursor.getBlob(columnIndex));
-//                        }
                     }
                     contact.addSubValue(ContactsContract.Data.CONTENT_URI, cv);
                 } while (cursor.moveToNext());
