@@ -400,6 +400,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @see #unlock()
      */
     /* package */ void lock() {
+        verifyDbIsOpen();
         if (!mLockingEnabled) return;
         mLock.lock();
         if (SQLiteDebug.DEBUG_LOCK_TIME_TRACKING) {
@@ -420,6 +421,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @see #unlockForced()
      */
     private void lockForced() {
+        verifyDbIsOpen();
         mLock.lock();
         if (SQLiteDebug.DEBUG_LOCK_TIME_TRACKING) {
             if (mLock.getHoldCount() == 1) {
@@ -952,7 +954,10 @@ public class SQLiteDatabase extends SQLiteClosable {
         //STOPSHIP - uncomment the following line
         //sqliteDatabase.setJournalMode(path, "TRUNCATE");
         // STOPSHIP remove the following lines
-        sqliteDatabase.enableWriteAheadLogging();
+        if (!path.equalsIgnoreCase(MEMORY_DB_PATH)) {
+            sqliteDatabase.enableWriteAheadLogging();
+        }
+        // END STOPSHIP
 
         // add this database to the list of databases opened in this process
         ActiveDatabases.addActiveDatabase(sqliteDatabase);
@@ -2406,14 +2411,18 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * package visibility only for testing purposes
+     * This method disables the features enabled by {@link #enableWriteAheadLogging()}.
+     * @hide
      */
-    /* package */ synchronized void disableWriteAheadLogging() {
-        if (mConnectionPool == null) {
-            return;
+    public void disableWriteAheadLogging() {
+        synchronized (this) {
+            if (mConnectionPool == null) {
+                return;
+            }
+            mConnectionPool.close();
+            mConnectionPool = null;
+            setJournalMode(mPath, "TRUNCATE");
         }
-        mConnectionPool.close();
-        mConnectionPool = null;
     }
 
     /**
