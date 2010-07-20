@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+FILE * out;
+
 static void printGLString(const char *name, GLenum s) {
     const char *v = (const char *) glGetString(s);
     LOGI("GL %s = %s\n", name, v);
@@ -122,6 +124,7 @@ void endTimer(const char *str, int w, int h, double dc, int count) {
     double dc60 = pixels / delta / (w * h) / 60;
 
     LOGI("%s, %f, %f\n", str, mpps, dc60);
+    if (out) fprintf(out, "%s, %f, %f\r\n", str, mpps, dc60);
 }
 
 static const char gVertexShader[] =
@@ -247,7 +250,7 @@ static void setupVA() {
 
 //////////////////////////
 
-// Tells us what to draw next
+// Width and height of the screen
 
 uint32_t w;
 uint32_t h;
@@ -258,6 +261,8 @@ int stateClock;
 const int doLoopStates = 2;
 const int doSingleTestStates = 2;
 bool done;
+
+// Saves the parameters of the test (so we can print them out when we finish the timing.)
 
 char saveBuf[1024];
 
@@ -386,8 +391,13 @@ void doTest(uint32_t w, uint32_t h) {
        testSubState = testState % 8;
     }
     if (texCount >= 3) {
-       // LOGI("done\n");
+       LOGI("done\n");
+       if (out) {
+           fclose(out);
+           out = NULL;
+       }
        done = true;
+       exit(0);
        return;
     }
 
@@ -436,8 +446,15 @@ JNIEXPORT void JNICALL Java_com_android_glperf_GLPerfLib_init(JNIEnv * env, jobj
     done = false;
     setupVA();
     genTextures();
+    const char* fileName = "/sdcard/glperf.csv";
+    LOGI("Writing to: %s\n",fileName);
+    out = fopen(fileName, "w");
+    if (out == NULL) {
+        LOGE("Could not open: %s\n", fileName);
+    }
 
     LOGI("\nvarColor, texCount, modulate, extraMath, texSize, blend, Mpps, DC60\n");
+    if (out) fprintf(out,"\nvarColor, texCount, modulate, extraMath, texSize, blend, Mpps, DC60\r\n");
 }
 
 JNIEXPORT void JNICALL Java_com_android_glperf_GLPerfLib_step(JNIEnv * env, jobject obj)
