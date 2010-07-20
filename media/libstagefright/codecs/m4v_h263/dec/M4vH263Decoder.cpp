@@ -37,7 +37,8 @@ M4vH263Decoder::M4vH263Decoder(const sp<MediaSource> &source)
       mStarted(false),
       mHandle(new tagvideoDecControls),
       mInputBuffer(NULL),
-      mNumSamplesOutput(0) {
+      mNumSamplesOutput(0),
+      mTargetTimeUs(-1) {
 
     LOGV("M4vH263Decoder");
     memset(mHandle, 0, sizeof(tagvideoDecControls));
@@ -146,6 +147,7 @@ status_t M4vH263Decoder::start(MetaData *) {
     mSource->start();
 
     mNumSamplesOutput = 0;
+    mTargetTimeUs = -1;
     mStarted = true;
 
     return OK;
@@ -175,8 +177,11 @@ status_t M4vH263Decoder::read(
         MediaBuffer **out, const ReadOptions *options) {
     *out = NULL;
 
+    bool seeking = false;
     int64_t seekTimeUs;
-    if (options && options->getSeekTo(&seekTimeUs)) {
+    ReadOptions::SeekMode mode;
+    if (options && options->getSeekTo(&seekTimeUs, &mode)) {
+        seeking = true;
         CHECK_EQ(PVResetVideoDecoder(mHandle), PV_TRUE);
     }
 
@@ -184,6 +189,16 @@ status_t M4vH263Decoder::read(
     status_t err = mSource->read(&inputBuffer, options);
     if (err != OK) {
         return err;
+    }
+
+    if (seeking) {
+        int64_t targetTimeUs;
+        if (inputBuffer->meta_data()->findInt64(kKeyTargetTime, &targetTimeUs)
+                && targetTimeUs >= 0) {
+            mTargetTimeUs = targetTimeUs;
+        } else {
+            mTargetTimeUs = -1;
+        }
     }
 
     uint8_t *bitstream =
@@ -221,16 +236,39 @@ status_t M4vH263Decoder::read(
         return INFO_FORMAT_CHANGED;
     }
 
-    *out = mFrames[mNumSamplesOutput & 0x01];
-    (*out)->add_ref();
-
     int64_t timeUs;
     CHECK(inputBuffer->meta_data()->findInt64(kKeyTime, &timeUs));
-    (*out)->meta_data()->setInt64(kKeyTime, timeUs);
 
-    ++mNumSamplesOutput;
     inputBuffer->release();
     inputBuffer = NULL;
+
+    bool skipFrame = false;
+
+    if (mTargetTimeUs >= 0) {
+        CHECK(timeUs <= mTargetTimeUs);
+
+        if (timeUs < mTargetTimeUs) {
+            // We're still waiting for the frame with the matching
+            // timestamp and we won't return the current one.
+            skipFrame = true;
+
+            LOGV("skipping frame at %lld us", timeUs);
+        } else {
+            LOGV("found target frame at %lld us", timeUs);
+
+            mTargetTimeUs = -1;
+        }
+    }
+
+    if (skipFrame) {
+        *out = new MediaBuffer(0);
+    } else {
+        *out = mFrames[mNumSamplesOutput & 0x01];
+        (*out)->add_ref();
+        (*out)->meta_data()->setInt64(kKeyTime, timeUs);
+    }
+
+    ++mNumSamplesOutput;
 
     return OK;
 }

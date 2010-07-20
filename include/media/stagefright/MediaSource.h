@@ -62,14 +62,21 @@ struct MediaSource : public RefBase {
     // a) not request a seek
     // b) not be late, i.e. lateness_us = 0
     struct ReadOptions {
+        enum SeekMode {
+            SEEK_PREVIOUS_SYNC,
+            SEEK_NEXT_SYNC,
+            SEEK_CLOSEST_SYNC,
+            SEEK_CLOSEST,
+        };
+
         ReadOptions();
 
         // Reset everything back to defaults.
         void reset();
 
-        void setSeekTo(int64_t time_us);
+        void setSeekTo(int64_t time_us, SeekMode mode = SEEK_CLOSEST_SYNC);
         void clearSeekTo();
-        bool getSeekTo(int64_t *time_us) const;
+        bool getSeekTo(int64_t *time_us, SeekMode *mode) const;
 
         void setLateBy(int64_t lateness_us);
         int64_t getLateBy() const;
@@ -81,6 +88,7 @@ struct MediaSource : public RefBase {
 
         uint32_t mOptions;
         int64_t mSeekTimeUs;
+        SeekMode mSeekMode;
         int64_t mLatenessUs;
     };
 

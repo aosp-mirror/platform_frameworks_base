@@ -586,7 +586,8 @@ status_t MP3Source::read(
     *out = NULL;
 
     int64_t seekTimeUs;
-    if (options != NULL && options->getSeekTo(&seekTimeUs)) {
+    ReadOptions::SeekMode mode;
+    if (options != NULL && options->getSeekTo(&seekTimeUs, &mode)) {
         int32_t bitrate;
         if (!mMeta->findInt32(kKeyBitRate, &bitrate)) {
             // bitrate is in bits/sec.

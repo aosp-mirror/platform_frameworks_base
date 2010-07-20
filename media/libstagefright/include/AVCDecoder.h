@@ -58,6 +58,9 @@ private:
     int64_t mAnchorTimeUs;
     int64_t mNumSamplesOutput;
     int64_t mPendingSeekTimeUs;
+    MediaSource::ReadOptions::SeekMode mPendingSeekMode;
+
+    int64_t mTargetTimeUs;
 
     void addCodecSpecificData(const uint8_t *data, size_t size);
 

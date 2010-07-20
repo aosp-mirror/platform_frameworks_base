@@ -122,7 +122,8 @@ status_t MP3Decoder::read(
     *out = NULL;
 
     int64_t seekTimeUs;
-    if (options && options->getSeekTo(&seekTimeUs)) {
+    ReadOptions::SeekMode mode;
+    if (options && options->getSeekTo(&seekTimeUs, &mode)) {
         CHECK(seekTimeUs >= 0);
 
         mNumFramesOutput = 0;

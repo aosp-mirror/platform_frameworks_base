@@ -63,10 +63,16 @@ public:
             uint32_t *decodingTime);
 
     enum {
-        kSyncSample_Flag = 1
+        kFlagBefore,
+        kFlagAfter,
+        kFlagClosest
     };
-    status_t findClosestSample(
+    status_t findSampleAtTime(
             uint32_t req_time, uint32_t *sample_index, uint32_t flags);
+
+    status_t findSyncSampleNear(
+            uint32_t start_sample_index, uint32_t *sample_index,
+            uint32_t flags);
 
     status_t findThumbnailSample(uint32_t *sample_index);
 
@@ -110,9 +116,6 @@ private:
     SampleToChunkEntry *mSampleToChunkEntries;
 
     friend struct SampleIterator;
-
-    status_t findClosestSyncSample_l(
-            uint32_t start_sample_index, uint32_t *sample_index);
 
     status_t getSampleSize_l(uint32_t sample_index, size_t *sample_size);
 

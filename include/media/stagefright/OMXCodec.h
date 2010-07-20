@@ -141,6 +141,8 @@ private:
     bool mNoMoreOutputData;
     bool mOutputPortSettingsHaveChanged;
     int64_t mSeekTimeUs;
+    ReadOptions::SeekMode mSeekMode;
+    int64_t mTargetTimeUs;
 
     MediaBuffer *mLeftOverBuffer;
 
