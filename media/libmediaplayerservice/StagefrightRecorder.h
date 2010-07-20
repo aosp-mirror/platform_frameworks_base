@@ -90,7 +90,6 @@ private:
     int32_t mAudioTimeScale;
     int64_t mMaxFileSizeBytes;
     int64_t mMaxFileDurationUs;
-    int32_t mTrackEveryNumberOfFrames;
     int64_t mTrackEveryTimeDurationUs;
 
     bool mCaptureTimeLapse;
@@ -122,7 +121,6 @@ private:
     status_t setParamVideoCameraId(int32_t cameraId);
     status_t setParamVideoTimeScale(int32_t timeScale);
     status_t setParamTrackTimeStatus(int64_t timeDurationUs);
-    status_t setParamTrackFrameStatus(int32_t nFrames);
     status_t setParamInterleaveDuration(int32_t durationUs);
     status_t setParam64BitFileOffset(bool use64BitFileOffset);
     status_t setParamMaxFileDurationUs(int64_t timeUs);
