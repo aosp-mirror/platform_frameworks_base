@@ -133,6 +133,16 @@ public class SensorEvent {
      * All values are in micro-Tesla (uT) and measure the ambient magnetic field
      * in the X, Y and Z axis.
      * 
+     * <h4>{@link android.hardware.Sensor#TYPE_GYROSCOPE Sensor.TYPE_GYROSCOPE}:</h4>
+     *  All values are in radians/second and measure the rate of rotation
+     *  around the X, Y and Z axis. The coordinate system is the same as is
+     *  used for the acceleration sensor.  Rotation is positive in the counter-clockwise
+     *  direction.  That is, an observer looking from some positive location on the x, y.
+     *  or z axis at a device positioned on the origin would report positive rotation
+     *  if the device appeared to be rotating counter clockwise.  Note that this is the
+     *  standard mathematical definition of positive rotation and does not agree with the
+     *  definition of roll given earlier.
+     *
      * <h4>{@link android.hardware.Sensor#TYPE_LIGHT Sensor.TYPE_LIGHT}:</h4>
      * 
      * <ul>
@@ -155,6 +165,27 @@ public class SensorEvent {
      * the <i>far</i> state and a lesser value in the <i>near</i> state.
      * </p>
      * 
+     *  <h4>{@link android.hardware.Sensor#TYPE_GRAVITY Sensor.TYPE_GRAVITY}:</h4>
+     *  A three dimensional vector indicating the direction and magnitude of gravity.  Units
+     *  are m/s^2.  The coordinate system is the same as is used by the acceleration sensor.
+     *
+     *  <h4>{@link android.hardware.Sensor#TYPE_LINEAR_ACCELERATION Sensor.TYPE_LINEAR_ACCELERATION}:</h4>
+     *  A three dimensional vector indicating acceleration along each device axis, not including
+     *  gravity.  All values have units of m/s^2.  The coordinate system is the same as is used by the
+     * acceleration sensor.
+     *
+     *  <h4>{@link android.hardware.Sensor#TYPE_ROTATION_VECTOR Sensor.TYPE_ROTATION_VECTOR}:</h4>
+     *  The rotation vector represents the orientation of the device as a combination of an angle
+     *  and an axis, in which the device has rotated through an angle theta around an axis
+     *  <x, y, z>. The three elements of the rotation vector are
+     *  <x*sin(theta/2), y*sin(theta/2), z*sin(theta/2)>, such that the magnitude of the rotation
+     *  vector is equal to sin(theta/2), and the direction of the rotation vector is equal to the
+     *  direction of the axis of rotation. The three elements of the rotation vector are equal to
+     *  the last three components of a unit quaternion
+     *  <cos(theta/2), x*sin(theta/2), y*sin(theta/2), z*sin(theta/2)>.  Elements of the rotation
+     *  vector are unitless.  The x,y, and z axis are defined in the same way as the acceleration
+     *  sensor.
+     *
      * <h4>{@link android.hardware.Sensor#TYPE_ORIENTATION
      * Sensor.TYPE_ORIENTATION}:</h4> All values are angles in degrees.
      * 
@@ -201,6 +232,7 @@ public class SensorEvent {
      * @see SensorEvent
      * @see GeomagneticField
      */
+
     public final float[] values;
 
     /**
