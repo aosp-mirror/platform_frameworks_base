@@ -63,6 +63,8 @@
 
 // ----------------------------------------------------------------------------
 
+extern const char * const gEffectLibPath;
+
 namespace android {
 
 static const char* kDeadlockedString = "AudioFlinger may be deadlocked\n";
@@ -127,8 +129,7 @@ static bool settingsAllowed() {
 
 AudioFlinger::AudioFlinger()
     : BnAudioFlinger(),
-        mAudioHardware(0), mMasterVolume(1.0f), mMasterMute(false), mNextUniqueId(1),
-        mTotalEffectsCpuLoad(0), mTotalEffectsMemory(0)
+        mAudioHardware(0), mMasterVolume(1.0f), mMasterMute(false), mNextUniqueId(1)
 {
     mHardwareStatus = AUDIO_HW_IDLE;
 
@@ -321,13 +322,19 @@ sp<IAudioTrack> AudioFlinger::createTrack(
             mClients.add(pid, client);
         }
 
-        // If no audio session id is provided, create one here
-        // TODO: enforce same stream type for all tracks in same audio session?
-        // TODO: prevent same audio session on different output threads
         LOGV("createTrack() sessionId: %d", (sessionId == NULL) ? -2 : *sessionId);
-        if (sessionId != NULL && *sessionId != 0) {
+        if (sessionId != NULL && *sessionId != AudioSystem::SESSION_OUTPUT_MIX) {
+            // prevent same audio session on different output threads
+            for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
+                if (mPlaybackThreads.keyAt(i) != output &&
+                        mPlaybackThreads.valueAt(i)->hasAudioSession(*sessionId)) {
+                    lStatus = BAD_VALUE;
+                    goto Exit;
+                }
+            }
             lSessionId = *sessionId;
         } else {
+            // if no audio session id is provided, create one here
             lSessionId = nextUniqueId();
             if (sessionId != NULL) {
                 *sessionId = lSessionId;
@@ -1141,6 +1148,23 @@ sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTra
 
     { // scope for mLock
         Mutex::Autolock _l(mLock);
+
+        // all tracks in same audio session must share the same routing strategy otherwise
+        // conflicts will happen when tracks are moved from one output to another by audio policy
+        // manager
+        uint32_t strategy =
+                AudioSystem::getStrategyForStream((AudioSystem::stream_type)streamType);
+        for (size_t i = 0; i < mTracks.size(); ++i) {
+            sp<Track> t = mTracks[i];
+            if (t != 0) {
+                if (sessionId == t->sessionId() &&
+                        strategy != AudioSystem::getStrategyForStream((AudioSystem::stream_type)t->type())) {
+                    lStatus = BAD_VALUE;
+                    goto Exit;
+                }
+            }
+        }
+
         track = new Track(this, client, streamType, sampleRate, format,
                 channelCount, frameCount, sharedBuffer, sessionId);
         if (track->getCblk() == NULL || track->name() < 0) {
@@ -1153,6 +1177,7 @@ sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTra
         if (chain != 0) {
             LOGV("createTrack_l() setting main buffer %p", chain->inBuffer());
             track->setMainBuffer(chain->inBuffer());
+            chain->setStrategy(AudioSystem::getStrategyForStream((AudioSystem::stream_type)track->type()));
         }
     }
     lStatus = NO_ERROR;
@@ -1344,7 +1369,16 @@ void AudioFlinger::PlaybackThread::readOutputParameters()
     mMixBuffer = new int16_t[mFrameCount * 2];
     memset(mMixBuffer, 0, mFrameCount * 2 * sizeof(int16_t));
 
-    //TODO handle effects reconfig
+    // force reconfiguration of effect chains and engines to take new buffer size and audio
+    // parameters into account
+    // Note that mLock is not held when readOutputParameters() is called from the constructor
+    // but in this case nothing is done below as no audio sessions have effect yet so it doesn't
+    // matter.
+    // create a copy of mEffectChains as calling moveEffectChain_l() can reorder some effect chains
+    Vector< sp<EffectChain> > effectChains = mEffectChains;
+    for (size_t i = 0; i < effectChains.size(); i ++) {
+        mAudioFlinger->moveEffectChain_l(effectChains[i]->sessionId(), this, this);
+    }
 }
 
 status_t AudioFlinger::PlaybackThread::getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames)
@@ -1369,12 +1403,30 @@ bool AudioFlinger::PlaybackThread::hasAudioSession(int sessionId)
 
     for (size_t i = 0; i < mTracks.size(); ++i) {
         sp<Track> track = mTracks[i];
-        if (sessionId == track->sessionId()) {
+        if (sessionId == track->sessionId() &&
+                !(track->mCblk->flags & CBLK_INVALID_MSK)) {
             return true;
         }
     }
 
     return false;
+}
+
+uint32_t AudioFlinger::PlaybackThread::getStrategyForSession_l(int sessionId)
+{
+    // session AudioSystem::SESSION_OUTPUT_MIX is placed in same strategy as MUSIC stream so that
+    // it is moved to correct output by audio policy manager when A2DP is connected or disconnected
+    if (sessionId == AudioSystem::SESSION_OUTPUT_MIX) {
+        return AudioSystem::getStrategyForStream(AudioSystem::MUSIC);
+    }
+    for (size_t i = 0; i < mTracks.size(); i++) {
+        sp<Track> track = mTracks[i];
+        if (sessionId == track->sessionId() &&
+                !(track->mCblk->flags & CBLK_INVALID_MSK)) {
+            return AudioSystem::getStrategyForStream((AudioSystem::stream_type) track->type());
+        }
+    }
+    return AudioSystem::getStrategyForStream(AudioSystem::MUSIC);
 }
 
 sp<AudioFlinger::EffectChain> AudioFlinger::PlaybackThread::getEffectChain(int sessionId)
@@ -1503,8 +1555,7 @@ bool AudioFlinger::MixerThread::threadLoop()
             // prevent any changes in effect chain list and in each effect chain
             // during mixing and effect process as the audio buffers could be deleted
             // or modified if an effect is created or deleted
-            lockEffectChains_l();
-            effectChains = mEffectChains;
+            lockEffectChains_l(effectChains);
        }
 
         if (LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
@@ -1540,7 +1591,7 @@ bool AudioFlinger::MixerThread::threadLoop()
                  effectChains[i]->process_l();
              }
              // enable changes in effect chain
-             unlockEffectChains();
+             unlockEffectChains(effectChains);
 #ifdef LVMX
             int audioOutputType = LifeVibes::getMixerType(mId, mType);
             if (LifeVibes::audioOutputTypeIsLifeVibes(audioOutputType)) {
@@ -1571,7 +1622,7 @@ bool AudioFlinger::MixerThread::threadLoop()
             mStandby = false;
         } else {
             // enable changes in effect chain
-            unlockEffectChains();
+            unlockEffectChains(effectChains);
             usleep(sleepTime);
         }
 
@@ -1625,7 +1676,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
     }
 #endif
     // Delegate master volume control to effect in output mix effect chain if needed
-    sp<EffectChain> chain = getEffectChain_l(0);
+    sp<EffectChain> chain = getEffectChain_l(AudioSystem::SESSION_OUTPUT_MIX);
     if (chain != 0) {
         uint32_t v = (uint32_t)(masterVolume * (1 << 24));
         chain->setVolume_l(&v, &v);
@@ -1814,8 +1865,10 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
 
 void AudioFlinger::MixerThread::invalidateTracks(int streamType)
 {
-    LOGV ("MixerThread::invalidateTracks() mixer %p, streamType %d, mTracks.size %d", this,  streamType, mTracks.size());
+    LOGV ("MixerThread::invalidateTracks() mixer %p, streamType %d, mTracks.size %d",
+            this,  streamType, mTracks.size());
     Mutex::Autolock _l(mLock);
+
     size_t size = mTracks.size();
     for (size_t i = 0; i < size; i++) {
         sp<Track> t = mTracks[i];
@@ -2070,7 +2123,6 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
     // hardware resources as soon as possible
     nsecs_t standbyDelay = microseconds(activeSleepTime*2);
 
-
     while (!exitPending())
     {
         bool rampVolume;
@@ -2246,7 +2298,8 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             if (UNLIKELY(trackToRemove != 0)) {
                 mActiveTracks.remove(trackToRemove);
                 if (!effectChains.isEmpty()) {
-                    LOGV("stopping track on chain %p for session Id: %d", effectChains[0].get(), trackToRemove->sessionId());
+                    LOGV("stopping track on chain %p for session Id: %d", effectChains[0].get(),
+                            trackToRemove->sessionId());
                     effectChains[0]->stopTrack();
                 }
                 if (trackToRemove->isTerminated()) {
@@ -2255,7 +2308,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                 }
             }
 
-            lockEffectChains_l();
+            lockEffectChains_l(effectChains);
        }
 
         if (LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
@@ -2301,7 +2354,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             for (size_t i = 0; i < effectChains.size(); i ++) {
                 effectChains[i]->process_l();
             }
-            unlockEffectChains();
+            unlockEffectChains(effectChains);
 
             mLastWriteTime = systemTime();
             mInWrite = true;
@@ -2312,7 +2365,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             mInWrite = false;
             mStandby = false;
         } else {
-            unlockEffectChains();
+            unlockEffectChains(effectChains);
             usleep(sleepTime);
         }
 
@@ -2505,8 +2558,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
             // prevent any changes in effect chain list and in each effect chain
             // during mixing and effect process as the audio buffers could be deleted
             // or modified if an effect is created or deleted
-            lockEffectChains_l();
-            effectChains = mEffectChains;
+            lockEffectChains_l(effectChains);
         }
 
         if (LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
@@ -2547,7 +2599,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
                 effectChains[i]->process_l();
             }
             // enable changes in effect chain
-            unlockEffectChains();
+            unlockEffectChains(effectChains);
 
             standbyTime = systemTime() + kStandbyTimeInNsecs;
             for (size_t i = 0; i < outputTracks.size(); i++) {
@@ -2557,7 +2609,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
             mBytesWritten += mixBufferSize;
         } else {
             // enable changes in effect chain
-            unlockEffectChains();
+            unlockEffectChains(effectChains);
             usleep(sleepTime);
         }
 
@@ -2859,7 +2911,9 @@ void AudioFlinger::PlaybackThread::Track::destroy()
         if (thread != 0) {
             if (!isOutputTrack()) {
                 if (mState == ACTIVE || mState == RESUMING) {
-                    AudioSystem::stopOutput(thread->id(), (AudioSystem::stream_type)mStreamType);
+                    AudioSystem::stopOutput(thread->id(),
+                                            (AudioSystem::stream_type)mStreamType,
+                                            mSessionId);
                 }
                 AudioSystem::releaseOutput(thread->id());
             }
@@ -2966,7 +3020,9 @@ status_t AudioFlinger::PlaybackThread::Track::start()
 
         if (!isOutputTrack() && state != ACTIVE && state != RESUMING) {
             thread->mLock.unlock();
-            status = AudioSystem::startOutput(thread->id(), (AudioSystem::stream_type)mStreamType);
+            status = AudioSystem::startOutput(thread->id(),
+                                              (AudioSystem::stream_type)mStreamType,
+                                              mSessionId);
             thread->mLock.lock();
         }
         if (status == NO_ERROR) {
@@ -2999,7 +3055,9 @@ void AudioFlinger::PlaybackThread::Track::stop()
         }
         if (!isOutputTrack() && (state == ACTIVE || state == RESUMING)) {
             thread->mLock.unlock();
-            AudioSystem::stopOutput(thread->id(), (AudioSystem::stream_type)mStreamType);
+            AudioSystem::stopOutput(thread->id(),
+                                    (AudioSystem::stream_type)mStreamType,
+                                    mSessionId);
             thread->mLock.lock();
         }
     }
@@ -3016,7 +3074,9 @@ void AudioFlinger::PlaybackThread::Track::pause()
             LOGV("ACTIVE/RESUMING => PAUSING (%d) on thread %p", mName, thread.get());
             if (!isOutputTrack()) {
                 thread->mLock.unlock();
-                AudioSystem::stopOutput(thread->id(), (AudioSystem::stream_type)mStreamType);
+                AudioSystem::stopOutput(thread->id(),
+                                        (AudioSystem::stream_type)mStreamType,
+                                        mSessionId);
                 thread->mLock.lock();
             }
         }
@@ -3585,7 +3645,7 @@ sp<IAudioRecord> AudioFlinger::openRecord(
         }
 
         // If no audio session id is provided, create one here
-        if (sessionId != NULL && *sessionId != 0) {
+        if (sessionId != NULL && *sessionId != AudioSystem::SESSION_OUTPUT_MIX) {
             lSessionId = *sessionId;
         } else {
             lSessionId = nextUniqueId();
@@ -4416,8 +4476,8 @@ status_t AudioFlinger::setStreamOutput(uint32_t stream, int output)
             thread->type() != PlaybackThread::DIRECT) {
             MixerThread *srcThread = (MixerThread *)thread;
             srcThread->invalidateTracks(stream);
-            }
         }
+    }
 
     return NO_ERROR;
 }
@@ -4472,12 +4532,26 @@ int AudioFlinger::nextUniqueId()
 
 status_t AudioFlinger::loadEffectLibrary(const char *libPath, int *handle)
 {
+    // check calling permissions
+    if (!settingsAllowed()) {
+        return PERMISSION_DENIED;
+    }
+    // only allow libraries loaded from /system/lib/soundfx for now
+    if (strncmp(gEffectLibPath, libPath, strlen(gEffectLibPath)) != 0) {
+        return PERMISSION_DENIED;
+    }
+
     Mutex::Autolock _l(mLock);
     return EffectLoadLibrary(libPath, handle);
 }
 
 status_t AudioFlinger::unloadEffectLibrary(int handle)
 {
+    // check calling permissions
+    if (!settingsAllowed()) {
+        return PERMISSION_DENIED;
+    }
+
     Mutex::Autolock _l(mLock);
     return EffectUnloadLibrary(handle);
 }
@@ -4522,7 +4596,8 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
     sp<Client> client;
     wp<Client> wclient;
 
-    LOGV("createEffect pid %d, client %p, priority %d, sessionId %d, output %d", pid, effectClient.get(), priority, sessionId, output);
+    LOGV("createEffect pid %d, client %p, priority %d, sessionId %d, output %d",
+            pid, effectClient.get(), priority, sessionId, output);
 
     if (pDesc == NULL) {
         lStatus = BAD_VALUE;
@@ -4577,7 +4652,7 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
                     // an auxiliary version of this effect type is available
                     found = true;
                     memcpy(&d, &desc, sizeof(effect_descriptor_t));
-                    if (sessionId != 0 ||
+                    if (sessionId != AudioSystem::SESSION_OUTPUT_MIX ||
                             (desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
                         break;
                     }
@@ -4590,22 +4665,23 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
             }
             // For same effect type, chose auxiliary version over insert version if
             // connect to output mix (Compliance to OpenSL ES)
-            if (sessionId == 0 &&
+            if (sessionId == AudioSystem::SESSION_OUTPUT_MIX &&
                     (d.flags & EFFECT_FLAG_TYPE_MASK) != EFFECT_FLAG_TYPE_AUXILIARY) {
                 memcpy(&desc, &d, sizeof(effect_descriptor_t));
             }
         }
 
         // Do not allow auxiliary effects on a session different from 0 (output mix)
-        if (sessionId != 0 &&
+        if (sessionId != AudioSystem::SESSION_OUTPUT_MIX &&
              (desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
             lStatus = INVALID_OPERATION;
             goto Exit;
         }
 
-        // Session -1 is reserved for output stage effects that can only be created
-        // by audio policy manager (running in same process)
-        if (sessionId == -1 && getpid() != IPCThreadState::self()->getCallingPid()) {
+        // Session AudioSystem::SESSION_OUTPUT_STAGE is reserved for output stage effects
+        // that can only be created by audio policy manager (running in same process)
+        if (sessionId == AudioSystem::SESSION_OUTPUT_STAGE &&
+                getpid() != IPCThreadState::self()->getCallingPid()) {
             lStatus = INVALID_OPERATION;
             goto Exit;
         }
@@ -4617,13 +4693,14 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
         // output threads.
         // TODO: allow attachment of effect to inputs
         if (output == 0) {
-            if (sessionId <= 0) {
-                // default to first output
-                // TODO: define criteria to choose output when not specified. Or
-                // receive output from audio policy manager
-                if (mPlaybackThreads.size() != 0) {
-                    output = mPlaybackThreads.keyAt(0);
-                }
+            if (sessionId == AudioSystem::SESSION_OUTPUT_STAGE) {
+                // output must be specified by AudioPolicyManager when using session
+                // AudioSystem::SESSION_OUTPUT_STAGE
+                lStatus = BAD_VALUE;
+                goto Exit;
+            } else if (sessionId == AudioSystem::SESSION_OUTPUT_MIX) {
+                output = AudioSystem::getOutputForEffect(&desc);
+                LOGV("createEffect() got output %d for effect %s", output, desc.name);
             } else {
                  // look for the thread where the specified audio session is present
                 for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
@@ -4636,7 +4713,7 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
         }
         PlaybackThread *thread = checkPlaybackThread_l(output);
         if (thread == NULL) {
-            LOGE("unknown output thread");
+            LOGE("createEffect() unknown output thread");
             lStatus = BAD_VALUE;
             goto Exit;
         }
@@ -4651,7 +4728,8 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
         }
 
         // create effect on selected output trhead
-        handle = thread->createEffect_l(client, effectClient, priority, sessionId, &desc, enabled, &lStatus);
+        handle = thread->createEffect_l(client, effectClient, priority, sessionId,
+                &desc, enabled, &lStatus);
         if (handle != 0 && id != NULL) {
             *id = handle->id();
         }
@@ -4664,31 +4742,64 @@ Exit:
     return handle;
 }
 
-status_t AudioFlinger::registerEffectResource_l(effect_descriptor_t *desc) {
-    if (mTotalEffectsCpuLoad + desc->cpuLoad > MAX_EFFECTS_CPU_LOAD) {
-        LOGW("registerEffectResource() CPU Load limit exceeded for Fx %s, CPU %f MIPS",
-                desc->name, (float)desc->cpuLoad/10);
-        return INVALID_OPERATION;
+status_t AudioFlinger::moveEffects(int session, int srcOutput, int dstOutput)
+{
+    LOGV("moveEffects() session %d, srcOutput %d, dstOutput %d",
+            session, srcOutput, dstOutput);
+    Mutex::Autolock _l(mLock);
+    if (srcOutput == dstOutput) {
+        LOGW("moveEffects() same dst and src outputs %d", dstOutput);
+        return NO_ERROR;
     }
-    if (mTotalEffectsMemory + desc->memoryUsage > MAX_EFFECTS_MEMORY) {
-        LOGW("registerEffectResource() memory limit exceeded for Fx %s, Memory %d KB",
-                desc->name, desc->memoryUsage);
-        return INVALID_OPERATION;
+    PlaybackThread *srcThread = checkPlaybackThread_l(srcOutput);
+    if (srcThread == NULL) {
+        LOGW("moveEffects() bad srcOutput %d", srcOutput);
+        return BAD_VALUE;
     }
-    mTotalEffectsCpuLoad += desc->cpuLoad;
-    mTotalEffectsMemory += desc->memoryUsage;
-    LOGV("registerEffectResource_l() effect %s, CPU %d, memory %d",
-            desc->name, desc->cpuLoad, desc->memoryUsage);
-    LOGV("  total CPU %d, total memory %d", mTotalEffectsCpuLoad, mTotalEffectsMemory);
+    PlaybackThread *dstThread = checkPlaybackThread_l(dstOutput);
+    if (dstThread == NULL) {
+        LOGW("moveEffects() bad dstOutput %d", dstOutput);
+        return BAD_VALUE;
+    }
+
+    Mutex::Autolock _dl(dstThread->mLock);
+    Mutex::Autolock _sl(srcThread->mLock);
+    moveEffectChain_l(session, srcThread, dstThread);
+
     return NO_ERROR;
 }
 
-void AudioFlinger::unregisterEffectResource_l(effect_descriptor_t *desc) {
-    mTotalEffectsCpuLoad -= desc->cpuLoad;
-    mTotalEffectsMemory -= desc->memoryUsage;
-    LOGV("unregisterEffectResource_l() effect %s, CPU %d, memory %d",
-            desc->name, desc->cpuLoad, desc->memoryUsage);
-    LOGV("  total CPU %d, total memory %d", mTotalEffectsCpuLoad, mTotalEffectsMemory);
+// moveEffectChain_l mustbe called with both srcThread and dstThread mLocks held
+status_t AudioFlinger::moveEffectChain_l(int session,
+                                   AudioFlinger::PlaybackThread *srcThread,
+                                   AudioFlinger::PlaybackThread *dstThread)
+{
+    LOGV("moveEffectChain_l() session %d from thread %p to thread %p",
+            session, srcThread, dstThread);
+
+    sp<EffectChain> chain = srcThread->getEffectChain_l(session);
+    if (chain == 0) {
+        LOGW("moveEffectChain_l() effect chain for session %d not on source thread %p",
+                session, srcThread);
+        return INVALID_OPERATION;
+    }
+
+    // remove chain first. This is usefull only if reconfiguring effect chain on same output thread,
+    // so that a new chain is created with correct parameters when first effect is added. This is
+    // otherwise unecessary as removeEffect_l() will remove the chain when last effect is
+    // removed.
+    srcThread->removeEffectChain_l(chain);
+
+    // transfer all effects one by one so that new effect chain is created on new thread with
+    // correct buffer sizes and audio parameters and effect engines reconfigured accordingly
+    sp<EffectModule> effect = chain->getEffectFromId_l(0);
+    while (effect != 0) {
+        srcThread->removeEffect_l(effect);
+        dstThread->addEffect_l(effect);
+        effect = chain->getEffectFromId_l(0);
+    }
+
+    return NO_ERROR;
 }
 
 // PlaybackThread::createEffect_l() must be called with AudioFlinger::mLock held
@@ -4707,6 +4818,7 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::PlaybackThread::createEffect_l(
     status_t lStatus;
     sp<Track> track;
     sp<EffectChain> chain;
+    bool chainCreated = false;
     bool effectCreated = false;
     bool effectRegistered = false;
 
@@ -4718,16 +4830,18 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::PlaybackThread::createEffect_l(
 
     // Do not allow auxiliary effect on session other than 0
     if ((desc->flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY &&
-        sessionId != 0) {
-        LOGW("createEffect_l() Cannot add auxiliary effect %s to session %d", desc->name, sessionId);
+        sessionId != AudioSystem::SESSION_OUTPUT_MIX) {
+        LOGW("createEffect_l() Cannot add auxiliary effect %s to session %d",
+                desc->name, sessionId);
         lStatus = BAD_VALUE;
         goto Exit;
     }
 
     // Do not allow effects with session ID 0 on direct output or duplicating threads
     // TODO: add rule for hw accelerated effects on direct outputs with non PCM format
-    if (sessionId == 0 && mType != MIXER) {
-        LOGW("createEffect_l() Cannot add auxiliary effect %s to session %d", desc->name, sessionId);
+    if (sessionId == AudioSystem::SESSION_OUTPUT_MIX && mType != MIXER) {
+        LOGW("createEffect_l() Cannot add auxiliary effect %s to session %d",
+                desc->name, sessionId);
         lStatus = BAD_VALUE;
         goto Exit;
     }
@@ -4744,6 +4858,8 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::PlaybackThread::createEffect_l(
             LOGV("createEffect_l() new effect chain for session %d", sessionId);
             chain = new EffectChain(this, sessionId);
             addEffectChain_l(chain);
+            chain->setStrategy(getStrategyForSession_l(sessionId));
+            chainCreated = true;
         } else {
             effect = chain->getEffectFromDesc_l(desc);
         }
@@ -4751,14 +4867,15 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::PlaybackThread::createEffect_l(
         LOGV("createEffect_l() got effect %p on chain %p", effect == 0 ? 0 : effect.get(), chain.get());
 
         if (effect == 0) {
+            int id = mAudioFlinger->nextUniqueId();
             // Check CPU and memory usage
-            lStatus = mAudioFlinger->registerEffectResource_l(desc);
+            lStatus = AudioSystem::registerEffect(desc, mId, chain->strategy(), sessionId, id);
             if (lStatus != NO_ERROR) {
                 goto Exit;
             }
             effectRegistered = true;
             // create a new effect module if none present in the chain
-            effect = new EffectModule(this, chain, desc, mAudioFlinger->nextUniqueId(), sessionId);
+            effect = new EffectModule(this, chain, desc, id, sessionId);
             lStatus = effect->status();
             if (lStatus != NO_ERROR) {
                 goto Exit;
@@ -4782,14 +4899,15 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::PlaybackThread::createEffect_l(
 
 Exit:
     if (lStatus != NO_ERROR && lStatus != ALREADY_EXISTS) {
+        Mutex::Autolock _l(mLock);
         if (effectCreated) {
-            Mutex::Autolock _l(mLock);
-            if (chain->removeEffect_l(effect) == 0) {
-                removeEffectChain_l(chain);
-            }
+            chain->removeEffect_l(effect);
         }
         if (effectRegistered) {
-            mAudioFlinger->unregisterEffectResource_l(desc);
+            AudioSystem::unregisterEffect(effect->id());
+        }
+        if (chainCreated) {
+            removeEffectChain_l(chain);
         }
         handle.clear();
     }
@@ -4800,26 +4918,71 @@ Exit:
     return handle;
 }
 
-void AudioFlinger::PlaybackThread::disconnectEffect(const sp< EffectModule>& effect,
-                                                    const wp<EffectHandle>& handle) {
+// PlaybackThread::addEffect_l() must be called with AudioFlinger::mLock and
+// PlaybackThread::mLock held
+status_t AudioFlinger::PlaybackThread::addEffect_l(const sp<EffectModule>& effect)
+{
+    // check for existing effect chain with the requested audio session
+    int sessionId = effect->sessionId();
+    sp<EffectChain> chain = getEffectChain_l(sessionId);
+    bool chainCreated = false;
+
+    if (chain == 0) {
+        // create a new chain for this session
+        LOGV("addEffect_l() new effect chain for session %d", sessionId);
+        chain = new EffectChain(this, sessionId);
+        addEffectChain_l(chain);
+        chain->setStrategy(getStrategyForSession_l(sessionId));
+        chainCreated = true;
+    }
+    LOGV("addEffect_l() %p chain %p effect %p", this, chain.get(), effect.get());
+
+    if (chain->getEffectFromId_l(effect->id()) != 0) {
+        LOGW("addEffect_l() %p effect %s already present in chain %p",
+                this, effect->desc().name, chain.get());
+        return BAD_VALUE;
+    }
+
+    status_t status = chain->addEffect_l(effect);
+    if (status != NO_ERROR) {
+        if (chainCreated) {
+            removeEffectChain_l(chain);
+        }
+        return status;
+    }
+
+    effect->setDevice(mDevice);
+    effect->setMode(mAudioFlinger->getMode());
+    return NO_ERROR;
+}
+
+void AudioFlinger::PlaybackThread::removeEffect_l(const sp<EffectModule>& effect) {
+
+    LOGV("removeEffect_l() %p effect %p", this, effect.get());
     effect_descriptor_t desc = effect->desc();
+    if ((desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
+        detachAuxEffect_l(effect->id());
+    }
+
+    sp<EffectChain> chain = effect->chain().promote();
+    if (chain != 0) {
+        // remove effect chain if removing last effect
+        if (chain->removeEffect_l(effect) == 0) {
+            removeEffectChain_l(chain);
+        }
+    } else {
+        LOGW("removeEffect_l() %p cannot promote chain for effect %p", this, effect.get());
+    }
+}
+
+void AudioFlinger::PlaybackThread::disconnectEffect(const sp<EffectModule>& effect,
+                                                    const wp<EffectHandle>& handle) {
     Mutex::Autolock _l(mLock);
+    LOGV("disconnectEffect() %p effect %p", this, effect.get());
     // delete the effect module if removing last handle on it
     if (effect->removeHandle(handle) == 0) {
-        if ((desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
-            detachAuxEffect_l(effect->id());
-        }
-        sp<EffectChain> chain = effect->chain().promote();
-        if (chain != 0) {
-            // remove effect chain if remove last effect
-            if (chain->removeEffect_l(effect) == 0) {
-                removeEffectChain_l(chain);
-            }
-        }
-        mLock.unlock();
-        mAudioFlinger->mLock.lock();
-        mAudioFlinger->unregisterEffectResource_l(&desc);
-        mAudioFlinger->mLock.unlock();
+        removeEffect_l(effect);
+        AudioSystem::unregisterEffect(effect->id());
     }
 }
 
@@ -4863,13 +5026,16 @@ status_t AudioFlinger::PlaybackThread::addEffectChain_l(const sp<EffectChain>& c
 
     chain->setInBuffer(buffer, ownsBuffer);
     chain->setOutBuffer(mMixBuffer);
-    // Effect chain for session -1 is inserted at end of effect chains list
-    // in order to be processed last as it contains output stage effects
-    // Effect chain for session 0 is inserted before session -1 to be processed
+    // Effect chain for session AudioSystem::SESSION_OUTPUT_STAGE is inserted at end of effect
+    // chains list in order to be processed last as it contains output stage effects
+    // Effect chain for session AudioSystem::SESSION_OUTPUT_MIX is inserted before
+    // session AudioSystem::SESSION_OUTPUT_STAGE to be processed
     // after track specific effects and before output stage
-    // Effect chain for session other than 0 is inserted at beginning of effect
-    // chains list to be processed before output mix effects. Relative order between
-    // sessions other than 0 is not important
+    // It is therefore mandatory that AudioSystem::SESSION_OUTPUT_MIX == 0 and
+    // that AudioSystem::SESSION_OUTPUT_STAGE < AudioSystem::SESSION_OUTPUT_MIX
+    // Effect chain for other sessions are inserted at beginning of effect
+    // chains list to be processed before output mix effects. Relative order between other
+    // sessions is not important
     size_t size = mEffectChains.size();
     size_t i = 0;
     for (i = 0; i < size; i++) {
@@ -4896,25 +5062,29 @@ size_t AudioFlinger::PlaybackThread::removeEffectChain_l(const sp<EffectChain>& 
                     track->setMainBuffer(mMixBuffer);
                 }
             }
+            break;
         }
     }
     return mEffectChains.size();
 }
 
-void AudioFlinger::PlaybackThread::lockEffectChains_l()
+void AudioFlinger::PlaybackThread::lockEffectChains_l(
+        Vector<sp <AudioFlinger::EffectChain> >& effectChains)
 {
+    effectChains = mEffectChains;
     for (size_t i = 0; i < mEffectChains.size(); i++) {
         mEffectChains[i]->lock();
     }
 }
 
-void AudioFlinger::PlaybackThread::unlockEffectChains()
+void AudioFlinger::PlaybackThread::unlockEffectChains(
+        Vector<sp <AudioFlinger::EffectChain> >& effectChains)
 {
-    Mutex::Autolock _l(mLock);
-    for (size_t i = 0; i < mEffectChains.size(); i++) {
-        mEffectChains[i]->unlock();
+    for (size_t i = 0; i < effectChains.size(); i++) {
+        effectChains[i]->unlock();
     }
 }
+
 
 sp<AudioFlinger::EffectModule> AudioFlinger::PlaybackThread::getEffect_l(int sessionId, int effectId)
 {
@@ -4927,21 +5097,23 @@ sp<AudioFlinger::EffectModule> AudioFlinger::PlaybackThread::getEffect_l(int ses
     return effect;
 }
 
-status_t AudioFlinger::PlaybackThread::attachAuxEffect(const sp<AudioFlinger::PlaybackThread::Track> track, int EffectId)
+status_t AudioFlinger::PlaybackThread::attachAuxEffect(
+        const sp<AudioFlinger::PlaybackThread::Track> track, int EffectId)
 {
     Mutex::Autolock _l(mLock);
     return attachAuxEffect_l(track, EffectId);
 }
 
-status_t AudioFlinger::PlaybackThread::attachAuxEffect_l(const sp<AudioFlinger::PlaybackThread::Track> track, int EffectId)
+status_t AudioFlinger::PlaybackThread::attachAuxEffect_l(
+        const sp<AudioFlinger::PlaybackThread::Track> track, int EffectId)
 {
     status_t status = NO_ERROR;
 
     if (EffectId == 0) {
         track->setAuxBuffer(0, NULL);
     } else {
-        // Auxiliary effects are always in audio session 0
-        sp<EffectModule> effect = getEffect_l(0, EffectId);
+        // Auxiliary effects are always in audio session AudioSystem::SESSION_OUTPUT_MIX
+        sp<EffectModule> effect = getEffect_l(AudioSystem::SESSION_OUTPUT_MIX, EffectId);
         if (effect != 0) {
             if ((effect->desc().flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
                 track->setAuxBuffer(EffectId, (int32_t *)effect->inBuffer());
@@ -5137,7 +5309,7 @@ void AudioFlinger::EffectModule::process()
         if ((mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
             AudioMixer::ditherAndClamp(mConfig.inputCfg.buffer.s32,
                                         mConfig.inputCfg.buffer.s32,
-                                        mConfig.inputCfg.buffer.frameCount);
+                                        mConfig.inputCfg.buffer.frameCount/2);
         }
 
         // do the actual processing in the effect engine
@@ -5214,7 +5386,8 @@ status_t AudioFlinger::EffectModule::configure()
     mConfig.outputCfg.bufferProvider.releaseBuffer = NULL;
     mConfig.inputCfg.accessMode = EFFECT_BUFFER_ACCESS_READ;
     // Insert effect:
-    // - in session 0 or -1, always overwrites output buffer: input buffer == output buffer
+    // - in session AudioSystem::SESSION_OUTPUT_MIX or AudioSystem::SESSION_OUTPUT_STAGE,
+    // always overwrites output buffer: input buffer == output buffer
     // - in other sessions:
     //      last effect in the chain accumulates in output buffer: input buffer != output buffer
     //      other effect: overwrites output buffer: input buffer == output buffer
@@ -5230,6 +5403,9 @@ status_t AudioFlinger::EffectModule::configure()
     mConfig.outputCfg.mask = EFFECT_CONFIG_ALL;
     mConfig.inputCfg.buffer.frameCount = thread->frameCount();
     mConfig.outputCfg.buffer.frameCount = mConfig.inputCfg.buffer.frameCount;
+
+    LOGV("configure() %p thread %p buffer %p framecount %d",
+            this, thread.get(), mConfig.inputCfg.buffer.raw, mConfig.inputCfg.buffer.frameCount);
 
     status_t cmdStatus;
     int size = sizeof(int);
@@ -5753,7 +5929,7 @@ AudioFlinger::EffectChain::EffectChain(const wp<ThreadBase>& wThread,
             mVolumeCtrlIdx(-1), mLeftVolume(0), mRightVolume(0),
             mNewLeftVolume(0), mNewRightVolume(0)
 {
-
+    mStrategy = AudioSystem::getStrategyForStream(AudioSystem::MUSIC);
 }
 
 AudioFlinger::EffectChain::~EffectChain()
@@ -5786,7 +5962,8 @@ sp<AudioFlinger::EffectModule> AudioFlinger::EffectChain::getEffectFromId_l(int 
     size_t size = mEffects.size();
 
     for (size_t i = 0; i < size; i++) {
-        if (mEffects[i]->id() == id) {
+        // by convention, return first effect if id provided is 0 (0 is never a valid id)
+        if (id == 0 || mEffects[i]->id() == id) {
             effect = mEffects[i];
             break;
         }
@@ -5816,21 +5993,24 @@ void AudioFlinger::EffectChain::process_l()
 }
 
 // addEffect_l() must be called with PlaybackThread::mLock held
-status_t AudioFlinger::EffectChain::addEffect_l(sp<EffectModule>& effect)
+status_t AudioFlinger::EffectChain::addEffect_l(const sp<EffectModule>& effect)
 {
     effect_descriptor_t desc = effect->desc();
     uint32_t insertPref = desc.flags & EFFECT_FLAG_INSERT_MASK;
 
     Mutex::Autolock _l(mLock);
+    effect->setChain(this);
+    sp<ThreadBase> thread = mThread.promote();
+    if (thread == 0) {
+        return NO_INIT;
+    }
+    effect->setThread(thread);
 
     if ((desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
         // Auxiliary effects are inserted at the beginning of mEffects vector as
         // they are processed first and accumulated in chain input buffer
         mEffects.insertAt(effect, 0);
-        sp<ThreadBase> thread = mThread.promote();
-        if (thread == 0) {
-            return NO_INIT;
-        }
+
         // the input buffer for auxiliary effect contains mono samples in
         // 32 bit format. This is to avoid saturation in AudoMixer
         // accumulation stage. Saturation is done in EffectModule::process() before

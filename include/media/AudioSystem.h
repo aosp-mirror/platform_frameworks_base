@@ -168,6 +168,15 @@ public:
         TX_DISABLE    = 0
     };
 
+    // special audio session values
+    enum audio_sessions {
+        SESSION_OUTPUT_STAGE = -1, // session for effects attached to a particular output stream
+                                   // (value must be less than 0)
+        SESSION_OUTPUT_MIX = 0,    // session for effects applied to output mix. These effects can
+                                   // be moved by audio policy manager to another output stream
+                                   // (value must be 0)
+    };
+
     /* These are static methods to control the system-wide AudioFlinger
      * only privileged processes can have access to them
      */
@@ -353,8 +362,12 @@ public:
                                         uint32_t format = FORMAT_DEFAULT,
                                         uint32_t channels = CHANNEL_OUT_STEREO,
                                         output_flags flags = OUTPUT_FLAG_INDIRECT);
-    static status_t startOutput(audio_io_handle_t output, AudioSystem::stream_type stream);
-    static status_t stopOutput(audio_io_handle_t output, AudioSystem::stream_type stream);
+    static status_t startOutput(audio_io_handle_t output,
+                                AudioSystem::stream_type stream,
+                                int session = 0);
+    static status_t stopOutput(audio_io_handle_t output,
+                               AudioSystem::stream_type stream,
+                               int session = 0);
     static void releaseOutput(audio_io_handle_t output);
     static audio_io_handle_t getInput(int inputSource,
                                     uint32_t samplingRate = 0,
@@ -369,6 +382,16 @@ public:
                                       int indexMax);
     static status_t setStreamVolumeIndex(stream_type stream, int index);
     static status_t getStreamVolumeIndex(stream_type stream, int *index);
+
+    static uint32_t getStrategyForStream(stream_type stream);
+
+    static audio_io_handle_t getOutputForEffect(effect_descriptor_t *desc);
+    static status_t registerEffect(effect_descriptor_t *desc,
+                                    audio_io_handle_t output,
+                                    uint32_t strategy,
+                                    int session,
+                                    int id);
+    static status_t unregisterEffect(int id);
 
     static const sp<IAudioPolicyService>& get_audio_policy_service();
 

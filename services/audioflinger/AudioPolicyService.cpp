@@ -119,7 +119,8 @@ status_t AudioPolicyService::setDeviceConnectionState(AudioSystem::audio_devices
     if (!AudioSystem::isOutputDevice(device) && !AudioSystem::isInputDevice(device)) {
         return BAD_VALUE;
     }
-    if (state != AudioSystem::DEVICE_STATE_AVAILABLE && state != AudioSystem::DEVICE_STATE_UNAVAILABLE) {
+    if (state != AudioSystem::DEVICE_STATE_AVAILABLE &&
+            state != AudioSystem::DEVICE_STATE_UNAVAILABLE) {
         return BAD_VALUE;
     }
 
@@ -128,8 +129,9 @@ status_t AudioPolicyService::setDeviceConnectionState(AudioSystem::audio_devices
     return mpPolicyManager->setDeviceConnectionState(device, state, device_address);
 }
 
-AudioSystem::device_connection_state AudioPolicyService::getDeviceConnectionState(AudioSystem::audio_devices device,
-                                                  const char *device_address)
+AudioSystem::device_connection_state AudioPolicyService::getDeviceConnectionState(
+                                                              AudioSystem::audio_devices device,
+                                                              const char *device_address)
 {
     if (mpPolicyManager == NULL) {
         return AudioSystem::DEVICE_STATE_UNAVAILABLE;
@@ -175,7 +177,8 @@ status_t AudioPolicyService::setRingerMode(uint32_t mode, uint32_t mask)
     return NO_ERROR;
 }
 
-status_t AudioPolicyService::setForceUse(AudioSystem::force_use usage, AudioSystem::forced_config config)
+status_t AudioPolicyService::setForceUse(AudioSystem::force_use usage,
+                                         AudioSystem::forced_config config)
 {
     if (mpPolicyManager == NULL) {
         return NO_INIT;
@@ -223,24 +226,28 @@ audio_io_handle_t AudioPolicyService::getOutput(AudioSystem::stream_type stream,
     return mpPolicyManager->getOutput(stream, samplingRate, format, channels, flags);
 }
 
-status_t AudioPolicyService::startOutput(audio_io_handle_t output, AudioSystem::stream_type stream)
+status_t AudioPolicyService::startOutput(audio_io_handle_t output,
+                                         AudioSystem::stream_type stream,
+                                         int session)
 {
     if (mpPolicyManager == NULL) {
         return NO_INIT;
     }
     LOGV("startOutput() tid %d", gettid());
     Mutex::Autolock _l(mLock);
-    return mpPolicyManager->startOutput(output, stream);
+    return mpPolicyManager->startOutput(output, stream, session);
 }
 
-status_t AudioPolicyService::stopOutput(audio_io_handle_t output, AudioSystem::stream_type stream)
+status_t AudioPolicyService::stopOutput(audio_io_handle_t output,
+                                        AudioSystem::stream_type stream,
+                                        int session)
 {
     if (mpPolicyManager == NULL) {
         return NO_INIT;
     }
     LOGV("stopOutput() tid %d", gettid());
     Mutex::Autolock _l(mLock);
-    return mpPolicyManager->stopOutput(output, stream);
+    return mpPolicyManager->stopOutput(output, stream, session);
 }
 
 void AudioPolicyService::releaseOutput(audio_io_handle_t output)
@@ -339,8 +346,46 @@ status_t AudioPolicyService::getStreamVolumeIndex(AudioSystem::stream_type strea
     return mpPolicyManager->getStreamVolumeIndex(stream, index);
 }
 
+uint32_t AudioPolicyService::getStrategyForStream(AudioSystem::stream_type stream)
+{
+    if (mpPolicyManager == NULL) {
+        return 0;
+    }
+    return mpPolicyManager->getStrategyForStream(stream);
+}
+
+audio_io_handle_t AudioPolicyService::getOutputForEffect(effect_descriptor_t *desc)
+{
+    if (mpPolicyManager == NULL) {
+        return NO_INIT;
+    }
+    Mutex::Autolock _l(mLock);
+    return mpPolicyManager->getOutputForEffect(desc);
+}
+
+status_t AudioPolicyService::registerEffect(effect_descriptor_t *desc,
+                                audio_io_handle_t output,
+                                uint32_t strategy,
+                                int session,
+                                int id)
+{
+    if (mpPolicyManager == NULL) {
+        return NO_INIT;
+    }
+    return mpPolicyManager->registerEffect(desc, output, strategy, session, id);
+}
+
+status_t AudioPolicyService::unregisterEffect(int id)
+{
+    if (mpPolicyManager == NULL) {
+        return NO_INIT;
+    }
+    return mpPolicyManager->unregisterEffect(id);
+}
+
 void AudioPolicyService::binderDied(const wp<IBinder>& who) {
-    LOGW("binderDied() %p, tid %d, calling tid %d", who.unsafe_get(), gettid(), IPCThreadState::self()->getCallingPid());
+    LOGW("binderDied() %p, tid %d, calling tid %d", who.unsafe_get(), gettid(),
+            IPCThreadState::self()->getCallingPid());
 }
 
 static bool tryLock(Mutex& mutex)
@@ -447,10 +492,16 @@ audio_io_handle_t AudioPolicyService::openOutput(uint32_t *pDevices,
         return 0;
     }
 
-    return af->openOutput(pDevices, pSamplingRate, (uint32_t *)pFormat, pChannels, pLatencyMs, flags);
+    return af->openOutput(pDevices,
+                          pSamplingRate,
+                          (uint32_t *)pFormat,
+                          pChannels,
+                          pLatencyMs,
+                          flags);
 }
 
-audio_io_handle_t AudioPolicyService::openDuplicateOutput(audio_io_handle_t output1, audio_io_handle_t output2)
+audio_io_handle_t AudioPolicyService::openDuplicateOutput(audio_io_handle_t output1,
+                                                          audio_io_handle_t output2)
 {
     sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
     if (af == 0) {
@@ -514,12 +565,16 @@ status_t AudioPolicyService::closeInput(audio_io_handle_t input)
     return af->closeInput(input);
 }
 
-status_t AudioPolicyService::setStreamVolume(AudioSystem::stream_type stream, float volume, audio_io_handle_t output, int delayMs)
+status_t AudioPolicyService::setStreamVolume(AudioSystem::stream_type stream,
+                                             float volume,
+                                             audio_io_handle_t output,
+                                             int delayMs)
 {
     return mAudioCommandThread->volumeCommand((int)stream, volume, (int)output, delayMs);
 }
 
-status_t AudioPolicyService::setStreamOutput(AudioSystem::stream_type stream, audio_io_handle_t output)
+status_t AudioPolicyService::setStreamOutput(AudioSystem::stream_type stream,
+                                             audio_io_handle_t output)
 {
     sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
     if (af == 0) return PERMISSION_DENIED;
@@ -527,8 +582,18 @@ status_t AudioPolicyService::setStreamOutput(AudioSystem::stream_type stream, au
     return af->setStreamOutput(stream, output);
 }
 
+status_t AudioPolicyService::moveEffects(int session, audio_io_handle_t srcOutput,
+                                               audio_io_handle_t dstOutput)
+{
+    sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
+    if (af == 0) return PERMISSION_DENIED;
 
-void AudioPolicyService::setParameters(audio_io_handle_t ioHandle, const String8& keyValuePairs, int delayMs)
+    return af->moveEffects(session, (int)srcOutput, (int)dstOutput);
+}
+
+void AudioPolicyService::setParameters(audio_io_handle_t ioHandle,
+                                       const String8& keyValuePairs,
+                                       int delayMs)
 {
     mAudioCommandThread->parametersCommand((int)ioHandle, keyValuePairs, delayMs);
 }
@@ -539,7 +604,8 @@ String8 AudioPolicyService::getParameters(audio_io_handle_t ioHandle, const Stri
     return result;
 }
 
-status_t AudioPolicyService::startTone(ToneGenerator::tone_type tone, AudioSystem::stream_type stream)
+status_t AudioPolicyService::startTone(ToneGenerator::tone_type tone,
+                                       AudioSystem::stream_type stream)
 {
     mTonePlaybackThread->startToneCommand(tone, stream);
     return NO_ERROR;
@@ -623,8 +689,11 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
                     }break;
                 case SET_VOLUME: {
                     VolumeData *data = (VolumeData *)command->mParam;
-                    LOGV("AudioCommandThread() processing set volume stream %d, volume %f, output %d", data->mStream, data->mVolume, data->mIO);
-                    command->mStatus = AudioSystem::setStreamVolume(data->mStream, data->mVolume, data->mIO);
+                    LOGV("AudioCommandThread() processing set volume stream %d, \
+                            volume %f, output %d", data->mStream, data->mVolume, data->mIO);
+                    command->mStatus = AudioSystem::setStreamVolume(data->mStream,
+                                                                    data->mVolume,
+                                                                    data->mIO);
                     if (command->mWaitStatus) {
                         command->mCond.signal();
                         mWaitWorkCV.wait(mLock);
@@ -633,7 +702,8 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
                     }break;
                 case SET_PARAMETERS: {
                      ParametersData *data = (ParametersData *)command->mParam;
-                     LOGV("AudioCommandThread() processing set parameters string %s, io %d", data->mKeyValuePairs.string(), data->mIO);
+                     LOGV("AudioCommandThread() processing set parameters string %s, io %d",
+                             data->mKeyValuePairs.string(), data->mIO);
                      command->mStatus = AudioSystem::setParameters(data->mIO, data->mKeyValuePairs);
                      if (command->mWaitStatus) {
                          command->mCond.signal();
@@ -643,7 +713,8 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
                      }break;
                 case SET_VOICE_VOLUME: {
                     VoiceVolumeData *data = (VoiceVolumeData *)command->mParam;
-                    LOGV("AudioCommandThread() processing set voice volume volume %f", data->mVolume);
+                    LOGV("AudioCommandThread() processing set voice volume volume %f",
+                            data->mVolume);
                     command->mStatus = AudioSystem::setVoiceVolume(data->mVolume);
                     if (command->mWaitStatus) {
                         command->mCond.signal();
@@ -734,7 +805,10 @@ void AudioPolicyService::AudioCommandThread::stopToneCommand()
     mWaitWorkCV.signal();
 }
 
-status_t AudioPolicyService::AudioCommandThread::volumeCommand(int stream, float volume, int output, int delayMs)
+status_t AudioPolicyService::AudioCommandThread::volumeCommand(int stream,
+                                                               float volume,
+                                                               int output,
+                                                               int delayMs)
 {
     status_t status = NO_ERROR;
 
@@ -752,7 +826,8 @@ status_t AudioPolicyService::AudioCommandThread::volumeCommand(int stream, float
     }
     Mutex::Autolock _l(mLock);
     insertCommand_l(command, delayMs);
-    LOGV("AudioCommandThread() adding set volume stream %d, volume %f, output %d", stream, volume, output);
+    LOGV("AudioCommandThread() adding set volume stream %d, volume %f, output %d",
+            stream, volume, output);
     mWaitWorkCV.signal();
     if (command->mWaitStatus) {
         command->mCond.wait(mLock);
@@ -762,7 +837,9 @@ status_t AudioPolicyService::AudioCommandThread::volumeCommand(int stream, float
     return status;
 }
 
-status_t AudioPolicyService::AudioCommandThread::parametersCommand(int ioHandle, const String8& keyValuePairs, int delayMs)
+status_t AudioPolicyService::AudioCommandThread::parametersCommand(int ioHandle,
+                                                                   const String8& keyValuePairs,
+                                                                   int delayMs)
 {
     status_t status = NO_ERROR;
 
@@ -779,7 +856,8 @@ status_t AudioPolicyService::AudioCommandThread::parametersCommand(int ioHandle,
     }
     Mutex::Autolock _l(mLock);
     insertCommand_l(command, delayMs);
-    LOGV("AudioCommandThread() adding set parameter string %s, io %d ,delay %d", keyValuePairs.string(), ioHandle, delayMs);
+    LOGV("AudioCommandThread() adding set parameter string %s, io %d ,delay %d",
+            keyValuePairs.string(), ioHandle, delayMs);
     mWaitWorkCV.signal();
     if (command->mWaitStatus) {
         command->mCond.wait(mLock);
@@ -840,7 +918,8 @@ void AudioPolicyService::AudioCommandThread::insertCommand_l(AudioCommand *comma
             ParametersData *data = (ParametersData *)command->mParam;
             ParametersData *data2 = (ParametersData *)command2->mParam;
             if (data->mIO != data2->mIO) break;
-            LOGV("Comparing parameter command %s to new command %s", data2->mKeyValuePairs.string(), data->mKeyValuePairs.string());
+            LOGV("Comparing parameter command %s to new command %s",
+                    data2->mKeyValuePairs.string(), data->mKeyValuePairs.string());
             AudioParameter param = AudioParameter(data->mKeyValuePairs);
             AudioParameter param2 = AudioParameter(data2->mKeyValuePairs);
             for (size_t j = 0; j < param.size(); j++) {
@@ -872,7 +951,8 @@ void AudioPolicyService::AudioCommandThread::insertCommand_l(AudioCommand *comma
             VolumeData *data2 = (VolumeData *)command2->mParam;
             if (data->mIO != data2->mIO) break;
             if (data->mStream != data2->mStream) break;
-            LOGV("Filtering out volume command on output %d for stream %d", data->mIO, data->mStream);
+            LOGV("Filtering out volume command on output %d for stream %d",
+                    data->mIO, data->mStream);
             removedCommands.add(command2);
         } break;
         case START_TONE:
@@ -896,7 +976,8 @@ void AudioPolicyService::AudioCommandThread::insertCommand_l(AudioCommand *comma
     removedCommands.clear();
 
     // insert command at the right place according to its time stamp
-    LOGV("inserting command: %d at index %d, num commands %d", command->mCommand, (int)i+1, mAudioCommands.size());
+    LOGV("inserting command: %d at index %d, num commands %d",
+            command->mCommand, (int)i+1, mAudioCommands.size());
     mAudioCommands.insertAt(command, i + 1);
 }
 

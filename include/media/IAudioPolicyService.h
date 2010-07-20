@@ -53,8 +53,12 @@ public:
                                         uint32_t format = AudioSystem::FORMAT_DEFAULT,
                                         uint32_t channels = 0,
                                         AudioSystem::output_flags flags = AudioSystem::OUTPUT_FLAG_INDIRECT) = 0;
-    virtual status_t startOutput(audio_io_handle_t output, AudioSystem::stream_type stream) = 0;
-    virtual status_t stopOutput(audio_io_handle_t output, AudioSystem::stream_type stream) = 0;
+    virtual status_t startOutput(audio_io_handle_t output,
+                                 AudioSystem::stream_type stream,
+                                 int session = 0) = 0;
+    virtual status_t stopOutput(audio_io_handle_t output,
+                                AudioSystem::stream_type stream,
+                                int session = 0) = 0;
     virtual void releaseOutput(audio_io_handle_t output) = 0;
     virtual audio_io_handle_t getInput(int inputSource,
                                     uint32_t samplingRate = 0,
@@ -69,6 +73,14 @@ public:
                                       int indexMax) = 0;
     virtual status_t setStreamVolumeIndex(AudioSystem::stream_type stream, int index) = 0;
     virtual status_t getStreamVolumeIndex(AudioSystem::stream_type stream, int *index) = 0;
+    virtual uint32_t getStrategyForStream(AudioSystem::stream_type stream) = 0;
+    virtual audio_io_handle_t getOutputForEffect(effect_descriptor_t *desc) = 0;
+    virtual status_t registerEffect(effect_descriptor_t *desc,
+                                    audio_io_handle_t output,
+                                    uint32_t strategy,
+                                    int session,
+                                    int id) = 0;
+    virtual status_t unregisterEffect(int id) = 0;
 };
 
 

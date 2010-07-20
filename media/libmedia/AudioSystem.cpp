@@ -590,18 +590,22 @@ audio_io_handle_t AudioSystem::getOutput(stream_type stream,
     return output;
 }
 
-status_t AudioSystem::startOutput(audio_io_handle_t output, AudioSystem::stream_type stream)
+status_t AudioSystem::startOutput(audio_io_handle_t output,
+                                  AudioSystem::stream_type stream,
+                                  int session)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
     if (aps == 0) return PERMISSION_DENIED;
-    return aps->startOutput(output, stream);
+    return aps->startOutput(output, stream, session);
 }
 
-status_t AudioSystem::stopOutput(audio_io_handle_t output, AudioSystem::stream_type stream)
+status_t AudioSystem::stopOutput(audio_io_handle_t output,
+                                 AudioSystem::stream_type stream,
+                                 int session)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
     if (aps == 0) return PERMISSION_DENIED;
-    return aps->stopOutput(output, stream);
+    return aps->stopOutput(output, stream, session);
 }
 
 void AudioSystem::releaseOutput(audio_io_handle_t output)
@@ -664,6 +668,38 @@ status_t AudioSystem::getStreamVolumeIndex(stream_type stream, int *index)
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
     if (aps == 0) return PERMISSION_DENIED;
     return aps->getStreamVolumeIndex(stream, index);
+}
+
+uint32_t AudioSystem::getStrategyForStream(AudioSystem::stream_type stream)
+{
+    const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
+    if (aps == 0) return 0;
+    return aps->getStrategyForStream(stream);
+}
+
+audio_io_handle_t AudioSystem::getOutputForEffect(effect_descriptor_t *desc)
+{
+    const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
+    if (aps == 0) return PERMISSION_DENIED;
+    return aps->getOutputForEffect(desc);
+}
+
+status_t AudioSystem::registerEffect(effect_descriptor_t *desc,
+                                audio_io_handle_t output,
+                                uint32_t strategy,
+                                int session,
+                                int id)
+{
+    const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
+    if (aps == 0) return PERMISSION_DENIED;
+    return aps->registerEffect(desc, output, strategy, session, id);
+}
+
+status_t AudioSystem::unregisterEffect(int id)
+{
+    const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
+    if (aps == 0) return PERMISSION_DENIED;
+    return aps->unregisterEffect(id);
 }
 
 // ---------------------------------------------------------------------------
