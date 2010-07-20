@@ -406,16 +406,6 @@ status_t StagefrightRecorder::setParamVideoCameraId(int32_t cameraId) {
     return OK;
 }
 
-status_t StagefrightRecorder::setParamTrackFrameStatus(int32_t nFrames) {
-    LOGV("setParamTrackFrameStatus: %d", nFrames);
-    if (nFrames <= 0) {
-        LOGE("Invalid number of frames to track: %d", nFrames);
-        return BAD_VALUE;
-    }
-    mTrackEveryNumberOfFrames = nFrames;
-    return OK;
-}
-
 status_t StagefrightRecorder::setParamTrackTimeStatus(int64_t timeDurationUs) {
     LOGV("setParamTrackTimeStatus: %lld", timeDurationUs);
     if (timeDurationUs < 20000) {  // Infeasible if shorter than 20 ms?
@@ -509,11 +499,6 @@ status_t StagefrightRecorder::setParameter(
         int32_t use64BitOffset;
         if (safe_strtoi32(value.string(), &use64BitOffset)) {
             return setParam64BitFileOffset(use64BitOffset != 0);
-        }
-    } else if (key == "param-track-frame-status") {
-        int32_t nFrames;
-        if (safe_strtoi32(value.string(), &nFrames)) {
-            return setParamTrackFrameStatus(nFrames);
         }
     } else if (key == "param-track-time-status") {
         int64_t timeDurationUs;
@@ -1011,9 +996,6 @@ status_t StagefrightRecorder::startMPEG4Recording() {
     meta->setInt32(kKeyBitRate, totalBitRate);
     meta->setInt32(kKey64BitFileOffset, mUse64BitFileOffset);
     meta->setInt32(kKeyTimeScale, mMovieTimeScale);
-    if (mTrackEveryNumberOfFrames > 0) {
-        meta->setInt32(kKeyTrackFrameStatus, mTrackEveryNumberOfFrames);
-    }
     if (mTrackEveryTimeDurationUs > 0) {
         meta->setInt64(kKeyTrackTimeStatus, mTrackEveryTimeDurationUs);
     }
@@ -1092,7 +1074,6 @@ status_t StagefrightRecorder::reset() {
     mVideoEncoderLevel   = -1;
     mMaxFileDurationUs = 0;
     mMaxFileSizeBytes = 0;
-    mTrackEveryNumberOfFrames = 0;
     mTrackEveryTimeDurationUs = 0;
     mEncoderProfiles = MediaProfiles::getInstance();
 
@@ -1135,8 +1116,6 @@ status_t StagefrightRecorder::dump(int fd, const Vector<String16>& args) const {
     snprintf(buffer, SIZE, "     File offset length (bits): %d\n", mUse64BitFileOffset? 64: 32);
     result.append(buffer);
     snprintf(buffer, SIZE, "     Interleave duration (us): %d\n", mInterleaveDurationUs);
-    result.append(buffer);
-    snprintf(buffer, SIZE, "     Progress notification: %d frames\n", mTrackEveryNumberOfFrames);
     result.append(buffer);
     snprintf(buffer, SIZE, "     Progress notification: %lld us\n", mTrackEveryTimeDurationUs);
     result.append(buffer);

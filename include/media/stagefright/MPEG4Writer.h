@@ -97,6 +97,7 @@ private:
     inline size_t write(const void *ptr, size_t size, size_t nmemb, FILE* stream);
     bool exceedsFileSizeLimit();
     bool exceedsFileDurationLimit();
+    void trackProgressStatus(const Track* track, int64_t timeUs, status_t err = OK);
 
     MPEG4Writer(const MPEG4Writer &);
     MPEG4Writer &operator=(const MPEG4Writer &);

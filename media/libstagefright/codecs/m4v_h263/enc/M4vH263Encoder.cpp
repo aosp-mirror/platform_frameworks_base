@@ -267,7 +267,6 @@ sp<MetaData> M4vH263Encoder::getFormat() {
 status_t M4vH263Encoder::read(
         MediaBuffer **out, const ReadOptions *options) {
 
-    CHECK(!options);
     *out = NULL;
 
     MediaBuffer *outputBuffer;
