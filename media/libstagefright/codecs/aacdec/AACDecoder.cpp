@@ -99,15 +99,6 @@ status_t AACDecoder::initCheck() {
                 != MP4AUDEC_SUCCESS) {
             return ERROR_UNSUPPORTED;
         }
-
-        // Check on the sampling rate to see whether it is changed.
-        int32_t sampleRate;
-        CHECK(mMeta->findInt32(kKeySampleRate, &sampleRate));
-        if (mConfig->samplingRate != sampleRate) {
-            mMeta->setInt32(kKeySampleRate, mConfig->samplingRate);
-            LOGW("Sample rate was %d, but now is %d",
-                    sampleRate, mConfig->samplingRate);
-        }
     }
     return OK;
 }
@@ -214,6 +205,19 @@ status_t AACDecoder::read(
     mConfig->repositionFlag = false;
 
     Int decoderErr = PVMP4AudioDecodeFrame(mConfig, mDecoderBuf);
+
+    // Check on the sampling rate to see whether it is changed.
+    int32_t sampleRate;
+    CHECK(mMeta->findInt32(kKeySampleRate, &sampleRate));
+    if (mConfig->samplingRate != sampleRate) {
+        mMeta->setInt32(kKeySampleRate, mConfig->samplingRate);
+        LOGW("Sample rate was %d, but now is %d",
+                sampleRate, mConfig->samplingRate);
+        buffer->release();
+        mInputBuffer->release();
+        mInputBuffer = NULL;
+        return INFO_FORMAT_CHANGED;
+    }
 
     size_t numOutBytes =
         mConfig->frameLength * sizeof(int16_t) * mConfig->desiredChannels;
