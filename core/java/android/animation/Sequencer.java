@@ -27,7 +27,7 @@ import java.util.HashMap;
  * either the {@link Sequencer#playTogether(Animatable...) playTogether()} or
  * {@link Sequencer#playSequentially(Animatable...) playSequentially()} methods can be called to add
  * a set of animations all at once, or the {@link Sequencer#play(Animatable)} can be
- * used in conjunction with methods in the {@link android.animation.Sequencer.Builder Builder}
+ * used in conjunction with methods in the {@link myandroid.animation.Sequencer.Builder Builder}
  * class to add animations
  * one by one.</p>
  *
@@ -81,6 +81,13 @@ public final class Sequencer extends Animatable {
     private boolean mNeedsSort = true;
 
     private SequencerAnimatableListener mSequenceListener = null;
+
+    /**
+     * Flag indicating that the Sequencer has been canceled (by calling cancel() or end()).
+     * This flag is used to avoid starting other animations when currently-playing
+     * child animations of this Sequencer end.
+     */
+    boolean mCanceled = false;
 
     /**
      * Sets up this Sequencer to play all of the supplied animations at the same time.
@@ -161,6 +168,7 @@ public final class Sequencer extends Animatable {
     @SuppressWarnings("unchecked")
     @Override
     public void cancel() {
+        mCanceled = true;
         if (mListeners != null) {
             ArrayList<AnimatableListener> tmpListeners =
                     (ArrayList<AnimatableListener>) mListeners.clone();
@@ -168,11 +176,10 @@ public final class Sequencer extends Animatable {
                 listener.onAnimationCancel(this);
             }
         }
-        if (mPlayingSet.size() > 0) {
-            for (Animatable item : mPlayingSet) {
-                item.cancel();
+        if (mSortedNodes.size() > 0) {
+            for (Node node : mSortedNodes) {
+                node.animation.cancel();
             }
-            mPlayingSet.clear();
         }
     }
 
@@ -184,11 +191,11 @@ public final class Sequencer extends Animatable {
      */
     @Override
     public void end() {
-        if (mPlayingSet.size() > 0) {
-            for (Animatable item : mPlayingSet) {
-                item.end();
+        mCanceled = true;
+        if (mSortedNodes.size() > 0) {
+            for (Node node : mSortedNodes) {
+                node.animation.end();
             }
-            mPlayingSet.clear();
         }
     }
 
@@ -202,6 +209,8 @@ public final class Sequencer extends Animatable {
     @SuppressWarnings("unchecked")
     @Override
     public void start() {
+        mCanceled = false;
+
         // First, sort the nodes (if necessary). This will ensure that sortedNodes
         // contains the animation nodes in the correct order.
         sortNodes();
@@ -221,7 +230,7 @@ public final class Sequencer extends Animatable {
             } else {
                 for (Dependency dependency : node.dependencies) {
                     dependency.node.animation.addListener(
-                            new DependencyListener(node, dependency.rule));
+                            new DependencyListener(this, node, dependency.rule));
                 }
                 node.tmpDependencies = (ArrayList<Dependency>) node.dependencies.clone();
             }
@@ -247,6 +256,8 @@ public final class Sequencer extends Animatable {
      */
     private static class DependencyListener implements AnimatableListener {
 
+        private Sequencer mSequencer;
+
         // The node upon which the dependency is based.
         private Node mNode;
 
@@ -254,27 +265,18 @@ public final class Sequencer extends Animatable {
         // the node
         private int mRule;
 
-        public DependencyListener(Node node, int rule) {
+        public DependencyListener(Sequencer sequencer, Node node, int rule) {
+            this.mSequencer = sequencer;
             this.mNode = node;
             this.mRule = rule;
         }
 
         /**
-         * If an animation that is being listened for is canceled, then this removes
-         * the listener on that animation, to avoid triggering further animations down
-         * the line when the animation ends.
+         * Ignore cancel events for now. We may want to handle this eventually,
+         * to prevent follow-on animations from running when some dependency
+         * animation is canceled.
          */
         public void onAnimationCancel(Animatable animation) {
-            Dependency dependencyToRemove = null;
-            for (Dependency dependency : mNode.tmpDependencies) {
-                if (dependency.node.animation == animation) {
-                    // animation canceled - remove the dependency and listener
-                    dependencyToRemove = dependency;
-                    animation.removeListener(this);
-                    break;
-                }
-            }
-            mNode.tmpDependencies.remove(dependencyToRemove);
         }
 
         /**
@@ -308,6 +310,10 @@ public final class Sequencer extends Animatable {
          * @param dependencyAnimation the animation that sent the event.
          */
         private void startIfReady(Animatable dependencyAnimation) {
+            if (mSequencer.mCanceled) {
+                // if the parent Sequencer was canceled, then don't start any dependent anims
+                return;
+            }
             Dependency dependencyToRemove = null;
             for (Dependency dependency : mNode.tmpDependencies) {
                 if (dependency.rule == mRule &&
@@ -405,6 +411,7 @@ public final class Sequencer extends Animatable {
                         }
                     }
                 }
+                roots.clear();
                 roots.addAll(tmpRoots);
                 tmpRoots.clear();
             }
