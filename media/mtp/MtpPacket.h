@@ -23,8 +23,6 @@ struct usb_endpoint;
 
 namespace android {
 
-class MtpStringBuffer;
-
 class MtpPacket {
 
 protected:

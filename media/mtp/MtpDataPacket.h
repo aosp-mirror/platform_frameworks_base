@@ -22,6 +22,8 @@
 
 namespace android {
 
+class MtpStringBuffer;
+
 class MtpDataPacket : public MtpPacket {
 private:
     // current offset for get/put methods

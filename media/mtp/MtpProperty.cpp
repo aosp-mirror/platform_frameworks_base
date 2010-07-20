@@ -88,7 +88,7 @@ MtpProperty::MtpProperty(MtpPropertyCode propCode,
                 mDefaultValue.u64 = defaultValue;
                 break;
             default:
-                LOGE("unknown type %d in MtpProperty::MtpProperty", type);
+                LOGE("unknown type %04X in MtpProperty::MtpProperty", type);
         }
     }
 }
@@ -119,7 +119,6 @@ MtpProperty::~MtpProperty() {
 }
 
 void MtpProperty::read(MtpDataPacket& packet, bool deviceProp) {
-    MtpStringBuffer string;
 
     mCode = packet.getUInt16();
     mType = packet.getUInt16();
@@ -198,76 +197,110 @@ void MtpProperty::print() {
 }
 
 void MtpProperty::readValue(MtpDataPacket& packet, MtpPropertyValue& value) {
+    MtpStringBuffer stringBuffer;
+
     switch (mType) {
         case MTP_TYPE_INT8:
+        case MTP_TYPE_AINT8:
             value.i8 = packet.getInt8();
             break;
         case MTP_TYPE_UINT8:
+        case MTP_TYPE_AUINT8:
             value.u8 = packet.getUInt8();
             break;
         case MTP_TYPE_INT16:
+        case MTP_TYPE_AINT16:
             value.i16 = packet.getInt16();
             break;
         case MTP_TYPE_UINT16:
+        case MTP_TYPE_AUINT16:
             value.u16 = packet.getUInt16();
             break;
         case MTP_TYPE_INT32:
+        case MTP_TYPE_AINT32:
             value.i32 = packet.getInt32();
             break;
         case MTP_TYPE_UINT32:
+        case MTP_TYPE_AUINT32:
             value.u32 = packet.getUInt32();
             break;
         case MTP_TYPE_INT64:
+        case MTP_TYPE_AINT64:
             value.i64 = packet.getInt64();
             break;
         case MTP_TYPE_UINT64:
+        case MTP_TYPE_AUINT64:
             value.u64 = packet.getUInt64();
             break;
         case MTP_TYPE_INT128:
+        case MTP_TYPE_AINT128:
             packet.getInt128(value.i128);
             break;
         case MTP_TYPE_UINT128:
+        case MTP_TYPE_AUINT128:
             packet.getUInt128(value.u128);
             break;
+        case MTP_TYPE_STR:
+            packet.getString(stringBuffer);
+            value.str = strdup(stringBuffer);
+            break;
         default:
-            LOGE("unknown type %d in MtpProperty::readValue", mType);
+            LOGE("unknown type %04X in MtpProperty::readValue", mType);
     }
 }
 
 void MtpProperty::writeValue(MtpDataPacket& packet, MtpPropertyValue& value) {
+    MtpStringBuffer stringBuffer;
+
     switch (mType) {
         case MTP_TYPE_INT8:
+        case MTP_TYPE_AINT8:
             packet.putInt8(value.i8);
             break;
         case MTP_TYPE_UINT8:
+        case MTP_TYPE_AUINT8:
             packet.putUInt8(value.u8);
             break;
         case MTP_TYPE_INT16:
+        case MTP_TYPE_AINT16:
             packet.putInt16(value.i16);
             break;
         case MTP_TYPE_UINT16:
+        case MTP_TYPE_AUINT16:
             packet.putUInt16(value.u16);
             break;
         case MTP_TYPE_INT32:
+        case MTP_TYPE_AINT32:
             packet.putInt32(value.i32);
             break;
         case MTP_TYPE_UINT32:
+        case MTP_TYPE_AUINT32:
             packet.putUInt32(value.u32);
             break;
         case MTP_TYPE_INT64:
+        case MTP_TYPE_AINT64:
             packet.putInt64(value.i64);
             break;
         case MTP_TYPE_UINT64:
+        case MTP_TYPE_AUINT64:
             packet.putUInt64(value.u64);
             break;
         case MTP_TYPE_INT128:
+        case MTP_TYPE_AINT128:
             packet.putInt128(value.i128);
             break;
         case MTP_TYPE_UINT128:
+        case MTP_TYPE_AUINT128:
             packet.putUInt128(value.u128);
             break;
+        case MTP_TYPE_STR:
+            if (value.str)
+                packet.putString(value.str);
+            else
+                packet.putEmptyString();
+            break;
         default:
-            LOGE("unknown type %d in MtpProperty::readValue", mType);
+            LOGE("unknown type %04X in MtpProperty::writeValue", mType);
     }
 }
 
