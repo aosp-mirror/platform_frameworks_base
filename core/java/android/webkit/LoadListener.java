@@ -110,6 +110,7 @@ class LoadListener extends Handler implements EventHandler {
     private RequestHandle mRequestHandle;
     private RequestHandle mSslErrorRequestHandle;
     private long     mPostIdentifier;
+    private boolean  mSetNativeResponse;
 
     // Request data. It is only valid when we are doing a load from the
     // cache. It is needed if the cache returns a redirect
@@ -181,6 +182,7 @@ class LoadListener extends Handler implements EventHandler {
     private void clearNativeLoader() {
         sNativeLoaderCount -= 1;
         mNativeLoader = 0;
+        mSetNativeResponse = false;
     }
 
     /*
@@ -1086,13 +1088,18 @@ class LoadListener extends Handler implements EventHandler {
         // request with some credentials then don't commit the headers
         // of this response; wait for the response to the request with the
         // credentials.
-        if (mAuthHeader != null)
+        if (mAuthHeader != null) {
             return;
+        }
 
-        // Commit the headers to WebCore
+        setNativeResponse();
+    }
+
+    private void setNativeResponse() {
         int nativeResponse = createNativeResponse();
         // The native code deletes the native response object.
         nativeReceivedResponse(nativeResponse);
+        mSetNativeResponse = true;
     }
 
     /**
@@ -1127,6 +1134,9 @@ class LoadListener extends Handler implements EventHandler {
      */
     private void commitLoad() {
         if (mCancelled) return;
+        if (!mSetNativeResponse) {
+            setNativeResponse();
+        }
 
         if (mIsMainPageLoader) {
             String type = sCertificateTypeMap.get(mMimeType);
@@ -1197,6 +1207,10 @@ class LoadListener extends Handler implements EventHandler {
         }
         if (mNativeLoader != 0) {
             PerfChecker checker = new PerfChecker();
+            if (!mSetNativeResponse) {
+                setNativeResponse();
+            }
+
             nativeFinished();
             checker.responseAlert("res nativeFinished");
             clearNativeLoader();
@@ -1312,6 +1326,9 @@ class LoadListener extends Handler implements EventHandler {
                 final String text = mContext
                         .getString(R.string.open_permission_deny)
                         + "\n" + redirectTo;
+                if (!mSetNativeResponse) {
+                    setNativeResponse();
+                }
                 nativeAddData(text.getBytes(), text.length());
                 nativeFinished();
                 clearNativeLoader();
