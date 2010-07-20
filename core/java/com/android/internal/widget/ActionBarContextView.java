@@ -25,7 +25,6 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -53,7 +52,7 @@ public class ActionBarContextView extends ViewGroup {
     private TextView mTitleView;
     private TextView mSubtitleView;
     private Drawable mCloseDrawable;
-    private View mMenuView;
+    private ActionMenuView mMenuView;
     
     public ActionBarContextView(Context context) {
         this(context, null, 0);
@@ -150,7 +149,9 @@ public class ActionBarContextView extends ViewGroup {
         addView(mCloseButton);
 
         final MenuBuilder menu = (MenuBuilder) mode.getMenu();
-        mMenuView = menu.getMenuView(MenuBuilder.TYPE_ACTION_BUTTON, this);
+        mMenuView = (ActionMenuView) menu.getMenuView(MenuBuilder.TYPE_ACTION_BUTTON, this);
+        mMenuView.setOverflowReserved(true);
+        mMenuView.updateChildren(false);
         addView(mMenuView);
     }
 
