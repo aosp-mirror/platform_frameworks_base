@@ -467,6 +467,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
                         flipper.invalidate();
                     } else {
                         // hide the loading view and show the item view
+                        flipper.setVisibility(View.VISIBLE);
                         for (int i = 0; i < flipper.getChildCount() - 1; ++i) {
                             flipper.getChildAt(i).setVisibility(View.GONE);
                         }

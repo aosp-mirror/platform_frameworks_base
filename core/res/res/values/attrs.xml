@@ -2229,6 +2229,20 @@
         <!-- When true, automatically start animating -->
         <attr name="autoStart" format="boolean" />
     </declare-styleable>
+    <declare-styleable name="AdapterViewAnimator">
+        <!-- Identifier for the animation to use when a view is shown. -->
+        <attr name="inAnimation" />
+        <!-- Identifier for the animation to use when a view is hidden. -->
+        <attr name="outAnimation" />
+        <!-- Defines whether to animate the current View when the ViewAnimation
+             is first displayed. -->
+        <attr name="animateFirstView" />
+    </declare-styleable>
+    <declare-styleable name="AdapterViewFlipper">
+        <attr name="flipInterval" />
+        <!-- When true, automatically start animating -->
+        <attr name="autoStart" />
+    </declare-styleable>
     <declare-styleable name="ViewSwitcher">
     </declare-styleable>
     <declare-styleable name="ScrollView">
