@@ -14,9 +14,9 @@
 # limitations under the License.
 #
 
-ifneq ($(TARGET_SIMULATOR),true)
-
 LOCAL_PATH:= $(call my-dir)
+
+ifneq ($(TARGET_SIMULATOR),true)
 
 include $(CLEAR_VARS)
 
