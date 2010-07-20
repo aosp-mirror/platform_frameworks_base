@@ -145,6 +145,10 @@ uint32_t Type::getLODOffset(uint32_t lod, uint32_t x, uint32_t y, uint32_t z) co
 
 void Type::makeGLComponents()
 {
+    if(getElement()->getFieldCount() >= RS_MAX_ATTRIBS) {
+        return;
+    }
+
     uint32_t userNum = 0;
 
     for (uint32_t ct=0; ct < getElement()->getFieldCount(); ct++) {
