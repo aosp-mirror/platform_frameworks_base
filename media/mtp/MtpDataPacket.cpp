@@ -372,7 +372,7 @@ int MtpDataPacket::writeDataHeader(int fd, uint32_t length) {
 int MtpDataPacket::read(struct usb_endpoint *ep) {
     // first read the header
     int length = transfer(ep, mBuffer, mBufferSize);
-    if (length > MTP_CONTAINER_HEADER_SIZE) {
+    if (length >= MTP_CONTAINER_HEADER_SIZE) {
         // look at the length field to see if the data spans multiple packets
         uint32_t totalLength = MtpPacket::getUInt32(MTP_CONTAINER_LENGTH_OFFSET);
         while (totalLength > length) {
