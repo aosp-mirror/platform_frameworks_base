@@ -287,6 +287,11 @@ private:
     inline void getAlphaAndMode(const SkPaint* paint, int* alpha, SkXfermode::Mode* mode);
 
     /**
+     * Binds the specified texture with the specified wrap modes.
+     */
+    inline void bindTexture(GLuint texture, GLenum wrapS, GLenum wrapT);
+
+    /**
      * Enable or disable blending as necessary. This function sets the appropriate
      * blend function based on the specified xfermode.
      */
@@ -341,8 +346,8 @@ private:
     ShaderType mShader;
     SkShader* mShaderKey;
     bool mShaderBlend;
-    SkShader::TileMode mShaderTileX;
-    SkShader::TileMode mShaderTileY;
+    GLenum mShaderTileX;
+    GLenum mShaderTileY;
     SkMatrix* mShaderMatrix;
     // Bitmaps
     SkBitmap* mShaderBitmap;

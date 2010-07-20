@@ -34,13 +34,11 @@ static void android_view_HardwareRenderer_abandonGlCaches(JNIEnv* env, jobject) 
 const char* const kClassPathName = "android/view/HardwareRenderer";
 
 static JNINativeMethod gMethods[] = {
-    {   "nativeAbandonGlCaches", "()V", 
-                                (void*)android_view_HardwareRenderer_abandonGlCaches },
+    {   "nativeAbandonGlCaches", "()V", (void*)android_view_HardwareRenderer_abandonGlCaches },
 };
 
 int register_android_view_HardwareRenderer(JNIEnv* env) {
-    return AndroidRuntime::registerNativeMethods(env,
-            kClassPathName, gMethods, NELEM(gMethods));
+    return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 
 };

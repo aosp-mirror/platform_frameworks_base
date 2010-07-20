@@ -32,6 +32,11 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
+import android.graphics.TemporaryBuffer;
+import android.text.GraphicsOperations;
+import android.text.SpannableString;
+import android.text.SpannedString;
+import android.text.TextUtils;
 
 import javax.microedition.khronos.opengles.GL;
 
@@ -574,22 +579,46 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawText(char[] text, int index, int count, float x, float y, Paint paint) {
-        // TODO: Implement
+        if ((index | count | (index + count) | (text.length - index - count)) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        nDrawText(mRenderer, text, index, count, x, y, paint.mBidiFlags, paint.mNativePaint);
     }
+    
+    private native void nDrawText(int renderer, char[] text, int index, int count, float x, float y,
+            int bidiFlags, int paint);
 
     @Override
     public void drawText(CharSequence text, int start, int end, float x, float y, Paint paint) {
-        // TODO: Implement
+        if (text instanceof String || text instanceof SpannedString ||
+                text instanceof SpannableString) {
+            nDrawText(mRenderer, text.toString(), start, end, x, y, paint.mBidiFlags,
+                    paint.mNativePaint);
+        } else if (text instanceof GraphicsOperations) {
+            ((GraphicsOperations) text).drawText(this, start, end, x, y,
+                                                     paint);
+        } else {
+            char[] buf = TemporaryBuffer.obtain(end - start);
+            TextUtils.getChars(text, start, end, buf, 0);
+            nDrawText(mRenderer, buf, 0, end - start, x, y, paint.mBidiFlags, paint.mNativePaint);
+            TemporaryBuffer.recycle(buf);
+        }
     }
 
     @Override
     public void drawText(String text, int start, int end, float x, float y, Paint paint) {
-        // TODO: Implement
+        if ((start | end | (end - start) | (text.length() - end)) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        nDrawText(mRenderer, text, start, end, x, y, paint.mBidiFlags, paint.mNativePaint);
     }
+
+    private native void nDrawText(int renderer, String text, int start, int end, float x, float y,
+            int bidiFlags, int paint);
 
     @Override
     public void drawText(String text, float x, float y, Paint paint) {
-        drawText(text, 0, text.length(), x, y, paint);
+        nDrawText(mRenderer, text, 0, text.length(), x, y, paint.mBidiFlags, paint.mNativePaint);
     }
 
     @Override
