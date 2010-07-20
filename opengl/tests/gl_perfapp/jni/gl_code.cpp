@@ -384,14 +384,18 @@ void doTest(uint32_t w, uint32_t h) {
     int texCount;
     int extraMath;
     int testSubState;
-    if ( testState < 5 * 2) {
-       texCount = 0; // Only 10 tests for texCout 0
-       extraMath = testState / 2;
-       testSubState = testState % 2;
+    const int extraMathCount = 5;
+    const int texCount0SubTestCount = 2;
+    const int texCountNSubTestCount = 8;
+
+    if ( testState < extraMathCount * texCount0SubTestCount) {
+       texCount = 0; // Only 10 tests for texCount 0
+       extraMath = (testState / texCount0SubTestCount) % extraMathCount;
+       testSubState = testState % texCount0SubTestCount;
     } else {
-       texCount = 1 + (testState - 10) / (5 * 8);
-       extraMath = testState / 8;
-       testSubState = testState % 8;
+       texCount = 1 + (testState - extraMathCount * texCount0SubTestCount) / (extraMathCount * texCountNSubTestCount);
+       extraMath = (testState / texCountNSubTestCount) % extraMathCount;
+       testSubState = testState % texCountNSubTestCount;
     }
     if (texCount >= 3) {
        LOGI("done\n");
