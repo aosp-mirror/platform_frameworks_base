@@ -139,7 +139,7 @@ public class ModelViewerRS {
 
     private void initRS() {
 
-        mScript = new ScriptC_Modelviewer(mRS, mRes, R.raw.modelviewer_bc, true);
+        mScript = new ScriptC_Modelviewer(mRS, mRes, R.raw.modelviewer, true);
 
         initPFS();
         initPF();
