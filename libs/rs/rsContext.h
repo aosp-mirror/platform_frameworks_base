@@ -174,6 +174,7 @@ public:
     bool ext_OES_texture_npot() const {return mGL.OES_texture_npot;}
 
     void launchThreads(WorkerCallback_t cbk, void *data);
+    uint32_t getWorkerPoolSize() const {return (uint32_t)mWorkers.mRunningCount;}
 
 protected:
     Device *mDev;

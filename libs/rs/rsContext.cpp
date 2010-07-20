@@ -361,7 +361,7 @@ void * Context::helperThreadProc(void *vrsc)
      Context *rsc = static_cast<Context *>(vrsc);
      uint32_t idx = (uint32_t)android_atomic_inc(&rsc->mWorkers.mLaunchCount);
 
-     LOGE("helperThreadProc 1 %p idx=%i", rsc, idx);
+     LOGV("RS helperThread starting %p idx=%i", rsc, idx);
 
      rsc->mWorkers.mLaunchSignals[idx].init();
      rsc->mWorkers.mNativeThreadId[idx] = gettid();
@@ -376,13 +376,13 @@ void * Context::helperThreadProc(void *vrsc)
      while(rsc->mRunning) {
          rsc->mWorkers.mLaunchSignals[idx].wait();
          if (rsc->mWorkers.mLaunchCallback) {
-    LOGE("helperThreadProc 4");
             rsc->mWorkers.mLaunchCallback(rsc->mWorkers.mLaunchData, idx);
          }
-    LOGE("helperThreadProc 5");
          android_atomic_dec(&rsc->mWorkers.mRunningCount);
          rsc->mWorkers.mCompleteSignal.set();
      }
+
+     LOGV("RS helperThread exiting %p idx=%i", rsc, idx);
      return NULL;
 }
 
@@ -479,6 +479,10 @@ Context::Context(Device *dev, bool isGraphics, bool useDepth)
         LOGE("Failed to start rs context thread.");
         return;
     }
+    while(!mRunning) {
+        usleep(100);
+    }
+
     mWorkers.mRunningCount = 0;
     mWorkers.mLaunchCount = 0;
     for (uint32_t ct=0; ct < mWorkers.mCount; ct++) {
@@ -490,9 +494,6 @@ Context::Context(Device *dev, bool isGraphics, bool useDepth)
         }
     }
 
-    while(!mRunning) {
-        usleep(100);
-    }
 
     pthread_attr_destroy(&threadAttr);
 }

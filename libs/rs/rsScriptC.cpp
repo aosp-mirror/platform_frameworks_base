@@ -171,7 +171,6 @@ typedef int (*rs_t)(const void *, void *, const void *, uint32_t, uint32_t, uint
 static void wc_xy(void *usr, uint32_t idx)
 {
     MTLaunchStruct *mtls = (MTLaunchStruct *)usr;
-    LOGE("usr %p, idx %i", usr, idx);
 
     while (1) {
         uint32_t slice = (uint32_t)android_atomic_inc(&mtls->mSliceNum);
@@ -279,32 +278,32 @@ void ScriptC::runForEach(Context *rsc,
     }
 
 
-    {
-        LOGE("launch 1");
+    if ((rsc->getWorkerPoolSize() > 1) &&
+        ((mtls.dimY * mtls.dimZ * mtls.dimArray) > 1)) {
+
+        //LOGE("launch 1");
         rsc->launchThreads(wc_xy, &mtls);
-        LOGE("launch 2");
-    }
+        //LOGE("launch 2");
+    } else {
+        for (uint32_t ar = mtls.arrayStart; ar < mtls.arrayEnd; ar++) {
+            for (uint32_t z = mtls.zStart; z < mtls.zEnd; z++) {
+                for (uint32_t y = mtls.yStart; y < mtls.yEnd; y++) {
+                    uint32_t offset = mtls.dimX * mtls.dimY * mtls.dimZ * ar +
+                                      mtls.dimX * mtls.dimY * z +
+                                      mtls.dimX * y;
+                    uint8_t *xPtrOut = mtls.ptrOut + (mtls.eStrideOut * offset);
+                    const uint8_t *xPtrIn = mtls.ptrIn + (mtls.eStrideIn * offset);
 
-/*
-    for (uint32_t ar = arrayStart; ar < arrayEnd; ar++) {
-        for (uint32_t z = zStart; z < zEnd; z++) {
-            for (uint32_t y = yStart; y < yEnd; y++) {
-                uint32_t offset = dimX * dimY * dimZ * ar +
-                                  dimX * dimY * z +
-                                  dimX * y;
-                uint8_t *xPtrOut = ptrOut + (eStrideOut * offset);
-                const uint8_t *xPtrIn = ptrIn + (eStrideIn * offset);
-
-                for (uint32_t x = xStart; x < xEnd; x++) {
-                    ((rs_t)mProgram.mRoot) (xPtrIn, xPtrOut, usr, x, y, z, ar);
-                    xPtrIn += eStrideIn;
-                    xPtrOut += eStrideOut;
+                    for (uint32_t x = mtls.xStart; x < mtls.xEnd; x++) {
+                        ((rs_t)mProgram.mRoot) (xPtrIn, xPtrOut, usr, x, y, z, ar);
+                        xPtrIn += mtls.eStrideIn;
+                        xPtrOut += mtls.eStrideOut;
+                    }
                 }
             }
         }
-
     }
-*/
+
     setTLS(oldTLS);
 }
 
@@ -394,6 +393,9 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
     s->mEnviroment.mFieldAddress = (void **)calloc(100, sizeof(void *));
     bccGetExportVars(s->mBccScript, (BCCsizei *)&s->mEnviroment.mFieldCount,
                      100, s->mEnviroment.mFieldAddress);
+    //for (int ct2=0; ct2 < s->mEnviroment.mFieldCount; ct2++ ) {
+        //LOGE("Script field %i = %p", ct2, s->mEnviroment.mFieldAddress[ct2]);
+    //}
 
     s->mEnviroment.mFragment.set(rsc->getDefaultProgramFragment());
     s->mEnviroment.mVertex.set(rsc->getDefaultProgramVertex());
