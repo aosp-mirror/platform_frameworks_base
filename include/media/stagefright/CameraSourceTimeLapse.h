@@ -27,7 +27,6 @@ namespace android {
 
 class ICamera;
 class IMemory;
-class ISurface;
 class Camera;
 
 class CameraSourceTimeLapse : public CameraSource {
@@ -64,6 +63,9 @@ private:
     // Variable set in dataCallbackTimestamp() to help skipCurrentFrame()
     // to know if current frame needs to be skipped.
     bool mSkipCurrentFrame;
+
+    // True if camera is in preview mode and ready for takePicture().
+    bool mCameraIdle;
 
     CameraSourceTimeLapse(const sp<Camera> &camera,
         bool useStillCameraForTimeLapse,
@@ -116,6 +118,17 @@ private:
     // and then calls mCamera->takePicture() to take the still picture.
     // Used only in the case mUseStillCameraForTimeLapse = true.
     void threadTimeLapseEntry();
+
+    // Wrapper to enter threadStartPreview()
+    static void *ThreadStartPreviewWrapper(void *me);
+
+    // Starts the camera's preview.
+    void threadStartPreview();
+
+    // Starts thread ThreadStartPreviewWrapper() for restarting preview.
+    // Needs to be done in a thread so that dataCallback() which calls this function
+    // can return, and the camera can know that takePicture() is done.
+    void restartPreview();
 
     // Creates a copy of source_data into a new memory of final type MemoryBase.
     sp<IMemory> createIMemoryCopy(const sp<IMemory> &source_data);
