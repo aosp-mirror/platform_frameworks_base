@@ -19,7 +19,7 @@ import com.android.internal.R;
 import com.android.internal.view.menu.ActionMenuView;
 import com.android.internal.view.menu.MenuBuilder;
 
-import android.app.ActionBar;
+import android.app.ContextualMode;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -135,7 +135,7 @@ public class ActionBarContextView extends ViewGroup {
         }
     }
 
-    public void initForMode(final ActionBar.ContextMode mode) {
+    public void initForMode(final ContextualMode mode) {
         if (mCloseButton == null) {
             mCloseButton = new ImageButton(getContext());
             mCloseButton.setImageDrawable(mCloseDrawable);

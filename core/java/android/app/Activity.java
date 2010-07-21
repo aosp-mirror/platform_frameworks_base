@@ -662,7 +662,7 @@ public class Activity extends ContextThemeWrapper
     /*package*/ boolean mWindowAdded = false;
     /*package*/ boolean mVisibleFromServer = false;
     /*package*/ boolean mVisibleFromClient = true;
-    /*package*/ ActionBar mActionBar = null;
+    /*package*/ ActionBarImpl mActionBar = null;
 
     private CharSequence mTitle;
     private int mTitleColor = 0;
@@ -4251,6 +4251,21 @@ public class Activity extends ContextThemeWrapper
             if (frag != null) {
                 frag.onActivityResult(requestCode, resultCode, data);
             }
+        }
+    }
+
+    @Override
+    public ContextualMode startContextualMode(ContextualMode.Callback callback) {
+        if (mActionBar == null) {
+            return null;
+        }
+        return mActionBar.startContextualMode(callback);
+    }
+
+    @Override
+    public void finishContextualMode() {
+        if (mActionBar != null) {
+            mActionBar.finishContextualMode();
         }
     }
 }
