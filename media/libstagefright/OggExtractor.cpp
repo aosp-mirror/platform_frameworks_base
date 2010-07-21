@@ -155,7 +155,8 @@ status_t OggSource::read(
     *out = NULL;
 
     int64_t seekTimeUs;
-    if (options && options->getSeekTo(&seekTimeUs)) {
+    ReadOptions::SeekMode mode;
+    if (options && options->getSeekTo(&seekTimeUs, &mode)) {
         off_t pos = seekTimeUs * mExtractor->mImpl->approxBitrate() / 8000000ll;
         LOGI("seeking to offset %ld", pos);
 

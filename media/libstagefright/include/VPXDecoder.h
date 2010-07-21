@@ -48,6 +48,8 @@ private:
     void *mCtx;
     MediaBufferGroup *mBufferGroup;
 
+    int64_t mTargetTimeUs;
+
     sp<MetaData> mFormat;
 
     VPXDecoder(const VPXDecoder &);

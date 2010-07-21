@@ -1272,6 +1272,8 @@ OMXCodec::OMXCodec(
       mNoMoreOutputData(false),
       mOutputPortSettingsHaveChanged(false),
       mSeekTimeUs(-1),
+      mSeekMode(ReadOptions::SEEK_CLOSEST_SYNC),
+      mTargetTimeUs(-1),
       mLeftOverBuffer(NULL),
       mPaused(false) {
     mPortStatus[kPortIndexInput] = ENABLED;
@@ -1640,13 +1642,33 @@ void OMXCodec::on_message(const omx_message &msg) {
                         kKeyBufferID,
                         msg.u.extended_buffer_data.buffer);
 
-                mFilledBuffers.push_back(i);
-                mBufferFilled.signal();
-
                 if (msg.u.extended_buffer_data.flags & OMX_BUFFERFLAG_EOS) {
                     CODEC_LOGV("No more output data.");
                     mNoMoreOutputData = true;
                 }
+
+                if (mTargetTimeUs >= 0) {
+                    CHECK(msg.u.extended_buffer_data.timestamp <= mTargetTimeUs);
+
+                    if (msg.u.extended_buffer_data.timestamp < mTargetTimeUs) {
+                        CODEC_LOGV(
+                                "skipping output buffer at timestamp %lld us",
+                                msg.u.extended_buffer_data.timestamp);
+
+                        fillOutputBuffer(info);
+                        break;
+                    }
+
+                    CODEC_LOGV(
+                            "returning output buffer at target timestamp "
+                            "%lld us",
+                            msg.u.extended_buffer_data.timestamp);
+
+                    mTargetTimeUs = -1;
+                }
+
+                mFilledBuffers.push_back(i);
+                mBufferFilled.signal();
             }
 
             break;
@@ -2185,12 +2207,24 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
             }
 
             MediaSource::ReadOptions options;
-            options.setSeekTo(mSeekTimeUs);
+            options.setSeekTo(mSeekTimeUs, mSeekMode);
 
             mSeekTimeUs = -1;
+            mSeekMode = ReadOptions::SEEK_CLOSEST_SYNC;
             mBufferFilled.signal();
 
             err = mSource->read(&srcBuffer, &options);
+
+            if (err == OK) {
+                int64_t targetTimeUs;
+                if (srcBuffer->meta_data()->findInt64(
+                            kKeyTargetTime, &targetTimeUs)
+                        && targetTimeUs >= 0) {
+                    mTargetTimeUs = targetTimeUs;
+                } else {
+                    mTargetTimeUs = -1;
+                }
+            }
         } else if (mLeftOverBuffer) {
             srcBuffer = mLeftOverBuffer;
             mLeftOverBuffer = NULL;
@@ -2239,7 +2273,7 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
 
         int64_t lastBufferTimeUs;
         CHECK(srcBuffer->meta_data()->findInt64(kKeyTime, &lastBufferTimeUs));
-        CHECK(timestampUs >= 0);
+        CHECK(lastBufferTimeUs >= 0);
 
         if (offset == 0) {
             timestampUs = lastBufferTimeUs;
@@ -2696,6 +2730,8 @@ status_t OMXCodec::start(MetaData *meta) {
     mNoMoreOutputData = false;
     mOutputPortSettingsHaveChanged = false;
     mSeekTimeUs = -1;
+    mSeekMode = ReadOptions::SEEK_CLOSEST_SYNC;
+    mTargetTimeUs = -1;
     mFilledBuffers.clear();
     mPaused = false;
 
@@ -2790,7 +2826,8 @@ status_t OMXCodec::read(
 
     bool seeking = false;
     int64_t seekTimeUs;
-    if (options && options->getSeekTo(&seekTimeUs)) {
+    ReadOptions::SeekMode seekMode;
+    if (options && options->getSeekTo(&seekTimeUs, &seekMode)) {
         seeking = true;
     }
 
@@ -2800,6 +2837,7 @@ status_t OMXCodec::read(
         if (seeking) {
             CHECK(seekTimeUs >= 0);
             mSeekTimeUs = seekTimeUs;
+            mSeekMode = seekMode;
 
             // There's no reason to trigger the code below, there's
             // nothing to flush yet.
@@ -2823,6 +2861,7 @@ status_t OMXCodec::read(
 
         CHECK(seekTimeUs >= 0);
         mSeekTimeUs = seekTimeUs;
+        mSeekMode = seekMode;
 
         mFilledBuffers.clear();
 

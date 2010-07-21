@@ -202,7 +202,8 @@ status_t AACEncoder::read(
     *out = NULL;
 
     int64_t seekTimeUs;
-    CHECK(options == NULL || !options->getSeekTo(&seekTimeUs));
+    ReadOptions::SeekMode mode;
+    CHECK(options == NULL || !options->getSeekTo(&seekTimeUs, &mode));
 
     MediaBuffer *buffer;
     CHECK_EQ(mBufferGroup->acquire_buffer(&buffer), OK);

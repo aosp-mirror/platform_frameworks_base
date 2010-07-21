@@ -196,7 +196,8 @@ status_t AMRWBEncoder::read(
     *out = NULL;
 
     int64_t seekTimeUs;
-    CHECK(options == NULL || !options->getSeekTo(&seekTimeUs));
+    ReadOptions::SeekMode mode;
+    CHECK(options == NULL || !options->getSeekTo(&seekTimeUs, &mode));
 
     while (mNumInputSamples < kNumSamplesPerFrame) {
         if (mInputBuffer == NULL) {
