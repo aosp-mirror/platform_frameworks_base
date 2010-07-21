@@ -278,6 +278,62 @@ static void writeSourceToMP4(const sp<MediaSource> &source) {
     writer->stop();
 }
 
+static void performSeekTest(const sp<MediaSource> &source) {
+    CHECK_EQ(OK, source->start());
+
+    int64_t durationUs;
+    CHECK(source->getFormat()->findInt64(kKeyDuration, &durationUs));
+
+    for (int64_t seekTimeUs = 0; seekTimeUs <= durationUs;
+            seekTimeUs += 60000ll) {
+        MediaSource::ReadOptions options;
+        options.setSeekTo(
+                seekTimeUs, MediaSource::ReadOptions::SEEK_PREVIOUS_SYNC);
+
+        MediaBuffer *buffer;
+        status_t err;
+        for (;;) {
+            err = source->read(&buffer, &options);
+
+            options.clearSeekTo();
+
+            if (err == INFO_FORMAT_CHANGED) {
+                CHECK(buffer == NULL);
+                continue;
+            }
+
+            if (err != OK) {
+                CHECK(buffer == NULL);
+                break;
+            }
+
+            if (buffer->range_length() > 0) {
+                break;
+            }
+
+            CHECK(buffer != NULL);
+
+            buffer->release();
+            buffer = NULL;
+        }
+
+        if (err == OK) {
+            int64_t timeUs;
+            CHECK(buffer->meta_data()->findInt64(kKeyTime, &timeUs));
+
+            printf("%lld\t%lld\t%lld\n", seekTimeUs, timeUs, seekTimeUs - timeUs);
+
+            buffer->release();
+            buffer = NULL;
+        } else {
+            printf("ERROR\n");
+            break;
+        }
+    }
+
+    CHECK_EQ(OK, source->stop());
+}
+
 static void usage(const char *me) {
     fprintf(stderr, "usage: %s\n", me);
     fprintf(stderr, "       -h(elp)\n");
@@ -291,6 +347,7 @@ static void usage(const char *me) {
     fprintf(stderr, "       -s(oftware) prefer software codec\n");
     fprintf(stderr, "       -o playback audio\n");
     fprintf(stderr, "       -w(rite) filename (write to .mp4 file)\n");
+    fprintf(stderr, "       -k seek test\n");
 }
 
 int main(int argc, char **argv) {
@@ -300,6 +357,7 @@ int main(int argc, char **argv) {
     bool listComponents = false;
     bool dumpProfiles = false;
     bool extractThumbnail = false;
+    bool seekTest = false;
     gNumRepetitions = 1;
     gMaxNumFrames = 0;
     gReproduceBug = -1;
@@ -308,7 +366,7 @@ int main(int argc, char **argv) {
     gWriteMP4 = false;
 
     int res;
-    while ((res = getopt(argc, argv, "han:lm:b:ptsow:")) >= 0) {
+    while ((res = getopt(argc, argv, "han:lm:b:ptsow:k")) >= 0) {
         switch (res) {
             case 'a':
             {
@@ -372,6 +430,12 @@ int main(int argc, char **argv) {
             case 'o':
             {
                 gPlaybackAudio = true;
+                break;
+            }
+
+            case 'k':
+            {
+                seekTest = true;
                 break;
             }
 
@@ -585,6 +649,8 @@ int main(int argc, char **argv) {
 
         if (gWriteMP4) {
             writeSourceToMP4(mediaSource);
+        } else if (seekTest) {
+            performSeekTest(mediaSource);
         } else {
             playSource(&client, mediaSource);
         }
