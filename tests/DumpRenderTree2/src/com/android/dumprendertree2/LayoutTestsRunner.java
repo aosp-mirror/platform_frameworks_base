@@ -85,6 +85,10 @@ public class LayoutTestsRunner extends Activity {
         }
         String path = intent.getStringExtra(EXTRA_TEST_PATH);
 
-        new LayoutTestsRunnerThread(path, mHandler).start();
+        new LayoutTestsRunnerThread(path, this).start();
+    }
+
+    public Handler getHandler() {
+        return mHandler;
     }
 }
