@@ -1,8 +1,5 @@
 #pragma version(1)
 
-#include "rs_types.rsh"
-#include "rs_math.rsh"
-
 #include "ip.rsh"
 
 int height;

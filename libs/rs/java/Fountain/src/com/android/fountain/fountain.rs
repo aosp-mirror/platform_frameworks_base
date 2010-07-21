@@ -3,8 +3,6 @@
 
 #pragma rs java_package_name(com.android.fountain)
 
-#include "rs_types.rsh"
-#include "rs_math.rsh"
 #include "rs_graphics.rsh"
 
 static int newPart = 0;
