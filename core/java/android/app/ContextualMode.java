@@ -61,7 +61,7 @@ public abstract class ContextualMode {
     /**
      * Invalidate the contextual mode and refresh menu content. The contextual mode's
      * {@link ContextualMode.Callback} will have its
-     * {@link Callback#onPrepareContextMode(ContextualMode, Menu)} method called.
+     * {@link Callback#onPrepareContextualMode(ContextualMode, Menu)} method called.
      * If it returns true the menu will be scanned for updated content and any relevant changes
      * will be reflected to the user.
      */
@@ -69,7 +69,7 @@ public abstract class ContextualMode {
 
     /**
      * Finish and close this context mode. The context mode's {@link ContextualMode.Callback} will
-     * have its {@link Callback#onDestroyContextMode(ContextualMode)} method called.
+     * have its {@link Callback#onDestroyContextualMode(ContextualMode)} method called.
      */
     public abstract void finish();
 
@@ -104,52 +104,52 @@ public abstract class ContextualMode {
      *
      * <p>A context mode's lifecycle is as follows:
      * <ul>
-     * <li>{@link Callback#onCreateContextMode(ContextualMode, Menu)} once on initial
+     * <li>{@link Callback#onCreateContextualMode(ContextualMode, Menu)} once on initial
      * creation</li>
-     * <li>{@link Callback#onPrepareContextMode(ContextualMode, Menu)} after creation
+     * <li>{@link Callback#onPrepareContextualMode(ContextualMode, Menu)} after creation
      * and any time the {@link ContextualMode} is invalidated</li>
-     * <li>{@link Callback#onContextItemClicked(ContextualMode, MenuItem)} any time a
+     * <li>{@link Callback#onContextualItemClicked(ContextualMode, MenuItem)} any time a
      * contextual action button is clicked</li>
-     * <li>{@link Callback#onDestroyContextMode(ContextualMode)} when the context mode
+     * <li>{@link Callback#onDestroyContextualMode(ContextualMode)} when the context mode
      * is closed</li>
      * </ul>
      */
     public interface Callback {
         /**
-         * Called when a context mode is first created. The menu supplied will be used to generate
-         * action buttons for the context mode.
+         * Called when a contextual mode is first created. The menu supplied will be used to
+         * generate action buttons for the contextual mode.
          *
-         * @param mode ContextMode being created
+         * @param mode ContextualMode being created
          * @param menu Menu used to populate contextual action buttons
-         * @return true if the context mode should be created, false if entering this context mode
-         *          should be aborted.
+         * @return true if the contextual mode should be created, false if entering this
+         *              mode should be aborted.
          */
-        public boolean onCreateContextMode(ContextualMode mode, Menu menu);
+        public boolean onCreateContextualMode(ContextualMode mode, Menu menu);
 
         /**
-         * Called to refresh a context mode's action menu whenever it is invalidated.
+         * Called to refresh a contextual mode's action menu whenever it is invalidated.
          *
-         * @param mode ContextMode being prepared
+         * @param mode ContextualMode being prepared
          * @param menu Menu used to populate contextual action buttons
-         * @return true if the menu or context mode was updated, false otherwise.
+         * @return true if the menu or contextual mode was updated, false otherwise.
          */
-        public boolean onPrepareContextMode(ContextualMode mode, Menu menu);
+        public boolean onPrepareContextualMode(ContextualMode mode, Menu menu);
 
         /**
          * Called to report a user click on a contextual action button.
          *
-         * @param mode The current ContextMode
+         * @param mode The current ContextualMode
          * @param item The item that was clicked
          * @return true if this callback handled the event, false if the standard MenuItem
          *          invocation should continue.
          */
-        public boolean onContextItemClicked(ContextualMode mode, MenuItem item);
+        public boolean onContextualItemClicked(ContextualMode mode, MenuItem item);
 
         /**
-         * Called when a context mode is about to be exited and destroyed.
+         * Called when a contextual mode is about to be exited and destroyed.
          *
-         * @param mode The current ContextMode being destroyed
+         * @param mode The current ContextualMode being destroyed
          */
-        public void onDestroyContextMode(ContextualMode mode);
+        public void onDestroyContextualMode(ContextualMode mode);
     }
 }

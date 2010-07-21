@@ -240,7 +240,7 @@ public class ActionBarImpl extends ActionBar {
         }
 
         ContextMode mode = new ContextMode(callback);
-        if (callback.onCreateContextMode(mode, mode.getMenu())) {
+        if (callback.onCreateContextualMode(mode, mode.getMenu())) {
             mode.invalidate();
             mUpperContextView.initForMode(mode);
             mAnimatorView.setDisplayedChild(CONTEXT_VIEW);
@@ -383,7 +383,7 @@ public class ActionBarImpl extends ActionBar {
 
         @Override
         public void finish() {
-            mCallback.onDestroyContextMode(this);
+            mCallback.onDestroyContextualMode(this);
             mAnimatorView.setDisplayedChild(NORMAL_VIEW);
 
             // Clear out the context mode views after the animation finishes
@@ -399,7 +399,7 @@ public class ActionBarImpl extends ActionBar {
 
         @Override
         public void invalidate() {
-            if (mCallback.onPrepareContextMode(this, mMenu)) {
+            if (mCallback.onPrepareContextualMode(this, mMenu)) {
                 // Refresh content in both context views
             }
         }
@@ -436,7 +436,7 @@ public class ActionBarImpl extends ActionBar {
         }
 
         public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
-            return mCallback.onContextItemClicked(this, item);
+            return mCallback.onContextualItemClicked(this, item);
         }
 
         public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
