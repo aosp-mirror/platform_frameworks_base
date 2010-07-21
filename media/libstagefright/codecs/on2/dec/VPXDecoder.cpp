@@ -39,7 +39,8 @@ VPXDecoder::VPXDecoder(const sp<MediaSource> &source)
       mStarted(false),
       mBufferSize(0),
       mCtx(NULL),
-      mBufferGroup(NULL) {
+      mBufferGroup(NULL),
+      mTargetTimeUs(-1) {
     sp<MetaData> inputFormat = source->getFormat();
     const char *mime;
     CHECK(inputFormat->findCString(kKeyMIMEType, &mime));
@@ -94,6 +95,8 @@ status_t VPXDecoder::start(MetaData *) {
     mBufferGroup->add_buffer(new MediaBuffer(mBufferSize));
     mBufferGroup->add_buffer(new MediaBuffer(mBufferSize));
 
+    mTargetTimeUs = -1;
+
     mStarted = true;
 
     return OK;
@@ -126,6 +129,13 @@ status_t VPXDecoder::read(
         MediaBuffer **out, const ReadOptions *options) {
     *out = NULL;
 
+    bool seeking = false;
+    int64_t seekTimeUs;
+    ReadOptions::SeekMode seekMode;
+    if (options && options->getSeekTo(&seekTimeUs, &seekMode)) {
+        seeking = true;
+    }
+
     MediaBuffer *input;
     status_t err = mSource->read(&input, options);
 
@@ -134,6 +144,16 @@ status_t VPXDecoder::read(
     }
 
     LOGV("read %d bytes from source\n", input->range_length());
+
+    if (seeking) {
+        int64_t targetTimeUs;
+        if (input->meta_data()->findInt64(kKeyTargetTime, &targetTimeUs)
+                && targetTimeUs >= 0) {
+            mTargetTimeUs = targetTimeUs;
+        } else {
+            mTargetTimeUs = -1;
+        }
+    }
 
     if (vpx_codec_decode(
                 (vpx_codec_ctx_t *)mCtx,
@@ -155,6 +175,29 @@ status_t VPXDecoder::read(
 
     input->release();
     input = NULL;
+
+    bool skipFrame = false;
+
+    if (mTargetTimeUs >= 0) {
+        CHECK(timeUs <= mTargetTimeUs);
+
+        if (timeUs < mTargetTimeUs) {
+            // We're still waiting for the frame with the matching
+            // timestamp and we won't return the current one.
+            skipFrame = true;
+
+            LOGV("skipping frame at %lld us", timeUs);
+        } else {
+            LOGV("found target frame at %lld us", timeUs);
+
+            mTargetTimeUs = -1;
+        }
+    }
+
+    if (skipFrame) {
+        *out = new MediaBuffer(0);
+        return OK;
+    }
 
     vpx_codec_iter_t iter = NULL;
     vpx_image_t *img = vpx_codec_get_frame((vpx_codec_ctx_t *)mCtx, &iter);

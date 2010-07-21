@@ -54,6 +54,7 @@ private:
     MediaBuffer *mInputBuffer;
 
     int64_t mNumSamplesOutput;
+    int64_t mTargetTimeUs;
 
     void allocateFrames(int32_t width, int32_t height);
     void releaseFrames();

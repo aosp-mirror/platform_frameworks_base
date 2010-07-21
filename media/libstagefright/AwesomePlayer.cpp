@@ -914,7 +914,8 @@ void AwesomePlayer::onVideoEvent() {
         if (mSeeking) {
             LOGV("seeking to %lld us (%.2f secs)", mSeekTimeUs, mSeekTimeUs / 1E6);
 
-            options.setSeekTo(mSeekTimeUs);
+            options.setSeekTo(
+                    mSeekTimeUs, MediaSource::ReadOptions::SEEK_CLOSEST_SYNC);
         }
         for (;;) {
             status_t err = mVideoSource->read(&mVideoBuffer, &options);

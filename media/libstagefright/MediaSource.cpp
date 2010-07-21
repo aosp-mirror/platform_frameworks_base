@@ -34,18 +34,22 @@ void MediaSource::ReadOptions::reset() {
     mLatenessUs = 0;
 }
 
-void MediaSource::ReadOptions::setSeekTo(int64_t time_us) {
+void MediaSource::ReadOptions::setSeekTo(int64_t time_us, SeekMode mode) {
     mOptions |= kSeekTo_Option;
     mSeekTimeUs = time_us;
+    mSeekMode = mode;
 }
 
 void MediaSource::ReadOptions::clearSeekTo() {
     mOptions &= ~kSeekTo_Option;
     mSeekTimeUs = 0;
+    mSeekMode = SEEK_CLOSEST_SYNC;
 }
 
-bool MediaSource::ReadOptions::getSeekTo(int64_t *time_us) const {
+bool MediaSource::ReadOptions::getSeekTo(
+        int64_t *time_us, SeekMode *mode) const {
     *time_us = mSeekTimeUs;
+    *mode = mSeekMode;
     return (mOptions & kSeekTo_Option) != 0;
 }
 

@@ -159,7 +159,8 @@ status_t AACDecoder::read(
     *out = NULL;
 
     int64_t seekTimeUs;
-    if (options && options->getSeekTo(&seekTimeUs)) {
+    ReadOptions::SeekMode mode;
+    if (options && options->getSeekTo(&seekTimeUs, &mode)) {
         CHECK(seekTimeUs >= 0);
 
         mNumSamplesOutput = 0;

@@ -135,7 +135,8 @@ status_t AMRWBDecoder::read(
     *out = NULL;
 
     int64_t seekTimeUs;
-    if (options && options->getSeekTo(&seekTimeUs)) {
+    ReadOptions::SeekMode seekMode;
+    if (options && options->getSeekTo(&seekTimeUs, &seekMode)) {
         CHECK(seekTimeUs >= 0);
 
         mNumSamplesOutput = 0;
