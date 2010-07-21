@@ -279,6 +279,23 @@ public class MediaRecorder
     }
 
     /**
+     * Enables/Disables time lapse capture and sets its parameters. This method should
+     * be called after setProfile().
+     *
+     * @param enableTimeLapse Pass true to enable time lapse capture, false to disable it.
+     * @param timeBetweenTimeLapseFrameCaptureMs time between two captures of time lapse frames.
+     * @param encoderLevel the video encoder level.
+     */
+    public void setTimeLapseParameters(boolean enableTimeLapse,
+            int timeBetweenTimeLapseFrameCaptureMs, int encoderLevel) {
+        setParameter(String.format("time-lapse-enable=%d",
+                    (enableTimeLapse) ? 1 : 0));
+        setParameter(String.format("time-between-time-lapse-frame-capture=%d",
+                    timeBetweenTimeLapseFrameCaptureMs));
+        setVideoEncoderLevel(encoderLevel);
+    }
+
+    /**
      * Sets the format of the output file produced during recording. Call this
      * after setAudioSource()/setVideoSource() but before prepare().
      *
@@ -442,6 +459,15 @@ public class MediaRecorder
             throw new IllegalArgumentException("Video encoding bit rate is not positive");
         }
         setParameter(String.format("video-param-encoding-bitrate=%d", bitRate));
+    }
+
+    /**
+     * Sets the level of the encoder. Call this before prepare().
+     *
+     * @param encoderLevel the video encoder level.
+     */
+    public void setVideoEncoderLevel(int encoderLevel) {
+        setParameter(String.format("video-param-encoder-level=%d", encoderLevel));
     }
 
     /**

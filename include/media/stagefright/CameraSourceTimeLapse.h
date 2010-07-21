@@ -33,11 +33,13 @@ class CameraSourceTimeLapse : public CameraSource {
 public:
     static CameraSourceTimeLapse *Create(bool useStillCameraForTimeLapse,
         int64_t timeBetweenTimeLapseFrameCaptureUs,
+        int32_t width, int32_t height,
         int32_t videoFrameRate);
 
     static CameraSourceTimeLapse *CreateFromCamera(const sp<Camera> &camera,
         bool useStillCameraForTimeLapse,
         int64_t timeBetweenTimeLapseFrameCaptureUs,
+        int32_t width, int32_t height,
         int32_t videoFrameRate);
 
     virtual ~CameraSourceTimeLapse();
@@ -70,6 +72,7 @@ private:
     CameraSourceTimeLapse(const sp<Camera> &camera,
         bool useStillCameraForTimeLapse,
         int64_t timeBetweenTimeLapseFrameCaptureUs,
+        int32_t width, int32_t height,
         int32_t videoFrameRate);
 
     // For still camera case starts a thread which calls camera's takePicture()

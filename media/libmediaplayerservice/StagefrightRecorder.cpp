@@ -473,6 +473,32 @@ status_t StagefrightRecorder::setParamAudioTimeScale(int32_t timeScale) {
     return OK;
 }
 
+status_t StagefrightRecorder::setParamTimeLapseEnable(int32_t timeLapseEnable) {
+    LOGV("setParamTimeLapseEnable: %d", timeLapseEnable);
+
+    if(timeLapseEnable == 0) {
+        mCaptureTimeLapse = false;
+    } else if (timeLapseEnable == 1) {
+        mCaptureTimeLapse = true;
+    } else {
+        return BAD_VALUE;
+    }
+    return OK;
+}
+
+status_t StagefrightRecorder::setParamTimeBetweenTimeLapseFrameCapture(int64_t timeUs) {
+    LOGV("setParamTimeBetweenTimeLapseFrameCapture: %lld us", timeUs);
+
+    // Not allowing time more than a day
+    if (timeUs <= 0 || timeUs > 86400*1E6) {
+        LOGE("Time between time lapse frame capture (%lld) is out of range [0, 1 Day]", timeUs);
+        return BAD_VALUE;
+    }
+
+    mTimeBetweenTimeLapseFrameCaptureUs = timeUs;
+    return OK;
+}
+
 status_t StagefrightRecorder::setParameter(
         const String8 &key, const String8 &value) {
     LOGV("setParameter: key (%s) => value (%s)", key.string(), value.string());
@@ -555,6 +581,17 @@ status_t StagefrightRecorder::setParameter(
         int32_t timeScale;
         if (safe_strtoi32(value.string(), &timeScale)) {
             return setParamVideoTimeScale(timeScale);
+        }
+    } else if (key == "time-lapse-enable") {
+        int32_t timeLapseEnable;
+        if (safe_strtoi32(value.string(), &timeLapseEnable)) {
+            return setParamTimeLapseEnable(timeLapseEnable);
+        }
+    } else if (key == "time-between-time-lapse-frame-capture") {
+        int64_t timeBetweenTimeLapseFrameCaptureMs;
+        if (safe_strtoi64(value.string(), &timeBetweenTimeLapseFrameCaptureMs)) {
+            return setParamTimeBetweenTimeLapseFrameCapture(
+                    1000LL * timeBetweenTimeLapseFrameCaptureMs);
         }
     } else {
         LOGE("setParameter: failed to find key %s", key.string());
@@ -813,10 +850,14 @@ void StagefrightRecorder::clipVideoFrameWidth() {
 }
 
 status_t StagefrightRecorder::setupCameraSource() {
-    clipVideoBitRate();
-    clipVideoFrameRate();
-    clipVideoFrameWidth();
-    clipVideoFrameHeight();
+    if(!mCaptureTimeLapse) {
+        // Dont clip for time lapse capture as encoder will have enough
+        // time to encode because of slow capture rate of time lapse.
+        clipVideoBitRate();
+        clipVideoFrameRate();
+        clipVideoFrameWidth();
+        clipVideoFrameHeight();
+    }
 
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
     if (mCamera == 0) {
@@ -831,7 +872,13 @@ status_t StagefrightRecorder::setupCameraSource() {
 
     // Set the actual video recording frame size
     CameraParameters params(mCamera->getParameters());
-    params.setPreviewSize(mVideoWidth, mVideoHeight);
+
+    // dont change the preview size for time lapse as mVideoWidth, mVideoHeight
+    // may correspond to HD resolution not supported by video camera.
+    if (!mCaptureTimeLapse) {
+        params.setPreviewSize(mVideoWidth, mVideoHeight);
+    }
+
     params.setPreviewFrameRate(mFrameRate);
     String8 s = params.flatten();
     CHECK_EQ(OK, mCamera->setParameters(s));
@@ -840,8 +887,9 @@ status_t StagefrightRecorder::setupCameraSource() {
     // Check on video frame size
     int frameWidth = 0, frameHeight = 0;
     newCameraParams.getPreviewSize(&frameWidth, &frameHeight);
-    if (frameWidth  < 0 || frameWidth  != mVideoWidth ||
-        frameHeight < 0 || frameHeight != mVideoHeight) {
+    if (!mCaptureTimeLapse &&
+        (frameWidth  < 0 || frameWidth  != mVideoWidth ||
+        frameHeight < 0 || frameHeight != mVideoHeight)) {
         LOGE("Failed to set the video frame size to %dx%d",
                 mVideoWidth, mVideoHeight);
         IPCThreadState::self()->restoreCallingIdentity(token);
@@ -882,7 +930,8 @@ status_t StagefrightRecorder::setupVideoEncoder(const sp<MediaWriter>& writer) {
     if (err != OK) return err;
 
     sp<CameraSource> cameraSource = (mCaptureTimeLapse) ?
-        CameraSourceTimeLapse::CreateFromCamera(mCamera, true, 3E6, mFrameRate):
+        CameraSourceTimeLapse::CreateFromCamera(mCamera, true,
+                mTimeBetweenTimeLapseFrameCaptureUs, mVideoWidth, mVideoHeight, mFrameRate):
         CameraSource::CreateFromCamera(mCamera);
     CHECK(cameraSource != NULL);
 
@@ -934,6 +983,7 @@ status_t StagefrightRecorder::setupVideoEncoder(const sp<MediaWriter>& writer) {
     OMXClient client;
     CHECK_EQ(client.connect(), OK);
 
+    // Use software codec for time lapse
     uint32_t encoder_flags = (mCaptureTimeLapse) ? OMXCodec::kPreferSoftwareCodecs : 0;
     sp<MediaSource> encoder = OMXCodec::Create(
             client.interface(), enc_meta,
@@ -1081,6 +1131,7 @@ status_t StagefrightRecorder::reset() {
     mMaxFileSizeBytes = 0;
     mTrackEveryTimeDurationUs = 0;
     mCaptureTimeLapse = false;
+    mTimeBetweenTimeLapseFrameCaptureUs = -1;
     mEncoderProfiles = MediaProfiles::getInstance();
 
     mOutputFd = -1;

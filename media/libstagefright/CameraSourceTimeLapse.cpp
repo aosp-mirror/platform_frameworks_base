@@ -33,6 +33,7 @@ namespace android {
 // static
 CameraSourceTimeLapse *CameraSourceTimeLapse::Create(bool useStillCameraForTimeLapse,
         int64_t timeBetweenTimeLapseFrameCaptureUs,
+        int32_t width, int32_t height,
         int32_t videoFrameRate) {
     sp<Camera> camera = Camera::connect(0);
 
@@ -41,25 +42,27 @@ CameraSourceTimeLapse *CameraSourceTimeLapse::Create(bool useStillCameraForTimeL
     }
 
     return new CameraSourceTimeLapse(camera, useStillCameraForTimeLapse,
-            timeBetweenTimeLapseFrameCaptureUs, videoFrameRate);
+            timeBetweenTimeLapseFrameCaptureUs, width, height, videoFrameRate);
 }
 
 // static
 CameraSourceTimeLapse *CameraSourceTimeLapse::CreateFromCamera(const sp<Camera> &camera,
         bool useStillCameraForTimeLapse,
         int64_t timeBetweenTimeLapseFrameCaptureUs,
+        int32_t width, int32_t height,
         int32_t videoFrameRate) {
     if (camera.get() == NULL) {
         return NULL;
     }
 
     return new CameraSourceTimeLapse(camera, useStillCameraForTimeLapse,
-            timeBetweenTimeLapseFrameCaptureUs, videoFrameRate);
+            timeBetweenTimeLapseFrameCaptureUs, width, height, videoFrameRate);
 }
 
 CameraSourceTimeLapse::CameraSourceTimeLapse(const sp<Camera> &camera,
         bool useStillCameraForTimeLapse,
         int64_t timeBetweenTimeLapseFrameCaptureUs,
+        int32_t width, int32_t height,
         int32_t videoFrameRate)
     : CameraSource(camera),
       mUseStillCameraForTimeLapse(useStillCameraForTimeLapse),
@@ -70,11 +73,6 @@ CameraSourceTimeLapse::CameraSourceTimeLapse(const sp<Camera> &camera,
 
     LOGV("starting time lapse mode");
     if(mUseStillCameraForTimeLapse) {
-        // Currently hardcoded the picture size. Will need to choose
-        // automatically or pass in from the app.
-        int32_t width, height;
-        width = 1024;
-        height = 768;
         mMeta->setInt32(kKeyWidth, width);
         mMeta->setInt32(kKeyHeight, height);
     }
