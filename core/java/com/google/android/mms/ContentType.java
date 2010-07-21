@@ -26,6 +26,7 @@ public class ContentType {
     public static final String MMS_GENERIC       = "application/vnd.wap.mms-generic";
     public static final String MULTIPART_MIXED   = "application/vnd.wap.multipart.mixed";
     public static final String MULTIPART_RELATED = "application/vnd.wap.multipart.related";
+    public static final String MULTIPART_ALTERNATIVE = "application/vnd.wap.multipart.alternative";
 
     public static final String TEXT_PLAIN        = "text/plain";
     public static final String TEXT_HTML         = "text/html";
