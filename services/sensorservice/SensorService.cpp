@@ -23,8 +23,10 @@
 #include <utils/Atomic.h>
 #include <utils/Errors.h>
 #include <utils/RefBase.h>
+#include <utils/Singleton.h>
 
 #include <binder/BinderService.h>
+#include <binder/IServiceManager.h>
 
 #include <gui/ISensorServer.h>
 #include <gui/ISensorEventConnection.h>
@@ -44,7 +46,36 @@ namespace android {
  *   send something to application when they enable a sensor that is already
  *   active (the issue here is that it can take time before a value is
  *   produced by the h/w if the rate is low or if it's a one-shot sensor).
+ * - send sensor info to battery service
  */
+
+// ---------------------------------------------------------------------------
+
+class BatteryService : public Singleton<BatteryService> {
+    friend class Singleton<BatteryService>;
+    sp<IBinder> mBatteryStatService;
+    BatteryService() {
+        const String16 name("batteryinfo");
+        //getService(name, &mBatteryStatService);
+    }
+public:
+    void enableSensor(int handle) {
+        if (mBatteryStatService != 0) {
+            int uid = IPCThreadState::self()->getCallingUid();
+            //mBatteryStatService->noteStartSensor(uid, handle);
+        }
+    }
+    void disableSensor(int handle) {
+        if (mBatteryStatService != 0) {
+            int uid = IPCThreadState::self()->getCallingUid();
+            //mBatteryStatService->noteStopSensor(uid, handle);
+        }
+    }
+};
+
+ANDROID_SINGLETON_STATIC_INSTANCE(BatteryService)
+
+// ---------------------------------------------------------------------------
 
 SensorService::SensorService()
     : Thread(false),
@@ -201,6 +232,9 @@ status_t SensorService::enable(const sp<SensorEventConnection>& connection,
         mActiveSensors.add(handle, rec);
         err = mSensorDevice->activate(mSensorDevice, handle, 1);
         LOGE_IF(err, "Error activating sensor %d (%s)", handle, strerror(-err));
+        if (err == 0) {
+            BatteryService::getInstance().enableSensor(handle);
+        }
     } else {
         err = rec->addConnection(connection);
     }
@@ -232,6 +266,9 @@ status_t SensorService::disable(const sp<SensorEventConnection>& connection,
             mActiveSensors.removeItem(handle);
             delete rec;
             err = mSensorDevice->activate(mSensorDevice, handle, 0);
+            if (err == 0) {
+                BatteryService::getInstance().disableSensor(handle);
+            }
         }
     }
     return err;
