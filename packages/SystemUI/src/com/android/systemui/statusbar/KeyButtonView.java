@@ -72,6 +72,7 @@ public class KeyButtonView extends ImageView {
                 mRepeat = 0;
                 mSending = true;
                 sendEvent(KeyEvent.ACTION_DOWN, mDownTime);
+                setPressed(true);
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (mSending) {
@@ -80,14 +81,16 @@ public class KeyButtonView extends ImageView {
                     if (x < 0 || x >= getWidth() || y < 0 || y >= getHeight()) {
                         mSending = false;
                         sendEvent(KeyEvent.ACTION_UP);
+                        setPressed(false);
                     }
                 }
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 if (mSending) {
-                    sendEvent(KeyEvent.ACTION_UP);
                     mSending = false;
+                    sendEvent(KeyEvent.ACTION_UP);
+                    setPressed(false);
                 }
                 break;
         }
