@@ -10,11 +10,13 @@ LOCAL_C_INCLUDES := \
 	$(base)/services/camera/libcameraservice \
 	$(base)/services/audioflinger \
 	$(base)/services/surfaceflinger \
+	$(base)/services/sensorservice \
 	$(base)/media/libmediaplayerservice \
 	$(JNI_H_INCLUDE)
 
 LOCAL_SHARED_LIBRARIES := \
 	libandroid_runtime \
+	libsensorservice \
 	libsurfaceflinger \
 	libaudioflinger \
     libcameraservice \

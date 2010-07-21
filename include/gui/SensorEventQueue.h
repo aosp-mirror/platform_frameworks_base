@@ -42,6 +42,7 @@ namespace android {
 
 class ISensorEventConnection;
 class Sensor;
+class PollLoop;
 
 // ----------------------------------------------------------------------------
 
@@ -56,13 +57,21 @@ public:
     ssize_t write(ASensorEvent const* events, size_t numEvents);
     ssize_t read(ASensorEvent* events, size_t numEvents);
 
+    status_t waitForEvent() const;
+    status_t wake() const;
+
     status_t enableSensor(Sensor const* sensor) const;
     status_t disableSensor(Sensor const* sensor) const;
+    status_t enableSensor(int32_t handle) const;
+    status_t disableSensor(int32_t handle) const;
     status_t setEventRate(Sensor const* sensor, nsecs_t ns) const;
 
 private:
+    sp<PollLoop> getPollLoop() const;
     sp<ISensorEventConnection> mSensorEventConnection;
     sp<SensorChannel> mSensorChannel;
+    mutable Mutex mLock;
+    mutable sp<PollLoop> mPollLoop;
 };
 
 // ----------------------------------------------------------------------------

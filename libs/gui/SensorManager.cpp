@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "Sensors"
+
 #include <stdint.h>
 #include <sys/types.h>
 
 #include <utils/Errors.h>
 #include <utils/RefBase.h>
 #include <utils/Singleton.h>
+
+#include <binder/IServiceManager.h>
 
 #include <gui/ISensorServer.h>
 #include <gui/ISensorEventConnection.h>
@@ -36,25 +40,40 @@ ANDROID_SINGLETON_STATIC_INSTANCE(SensorManager)
 SensorManager::SensorManager()
     : mSensorList(0)
 {
+    const String16 name("sensorservice");
+    while (getService(name, &mSensorServer) != NO_ERROR) {
+        usleep(250000);
+    }
+
     mSensors = mSensorServer->getSensorList();
-    // TODO: needs implementation
+    size_t count = mSensors.size();
+    mSensorList = (Sensor const**)malloc(count * sizeof(Sensor*));
+    for (size_t i=0 ; i<count ; i++) {
+        mSensorList[i] = mSensors.array() + i;
+    }
 }
 
 SensorManager::~SensorManager()
 {
-    // TODO: needs implementation
+    free(mSensorList);
 }
 
-ssize_t SensorManager::getSensorList(Sensor** list) const
+ssize_t SensorManager::getSensorList(Sensor const* const** list) const
 {
     *list = mSensorList;
     return mSensors.size();
 }
 
-Sensor* SensorManager::getDefaultSensor(int type)
+Sensor const* SensorManager::getDefaultSensor(int type)
 {
-    // TODO: needs implementation
-    return mSensorList;
+    // For now we just return the first sensor of that type we find.
+    // in the future it will make sense to let the SensorService make
+    // that decision.
+    for (size_t i=0 ; i<mSensors.size() ; i++) {
+        if (mSensorList[i]->getType() == type)
+            return mSensorList[i];
+    }
+    return NULL;
 }
 
 sp<SensorEventQueue> SensorManager::createEventQueue()
