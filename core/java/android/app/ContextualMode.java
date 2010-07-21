@@ -99,18 +99,18 @@ public abstract class ContextualMode {
 
     /**
      * Callback interface for contextual modes. Supplied to
-     * {@link Context#startContextMode(Callback)}, a ContextModeCallback
+     * {@link Context#startContextualMode(Callback)}, a Callback
      * configures and handles events raised by a user's interaction with a context mode.
      *
      * <p>A context mode's lifecycle is as follows:
      * <ul>
-     * <li>{@link Callback#onCreateContextMode(ActionBar.ContextualMode, Menu)} once on initial
+     * <li>{@link Callback#onCreateContextMode(ContextualMode, Menu)} once on initial
      * creation</li>
-     * <li>{@link Callback#onPrepareContextMode(ActionBar.ContextualMode, Menu)} after creation
+     * <li>{@link Callback#onPrepareContextMode(ContextualMode, Menu)} after creation
      * and any time the {@link ContextualMode} is invalidated</li>
-     * <li>{@link Callback#onContextItemClicked(ActionBar.ContextualMode, MenuItem)} any time a
+     * <li>{@link Callback#onContextItemClicked(ContextualMode, MenuItem)} any time a
      * contextual action button is clicked</li>
-     * <li>{@link Callback#onDestroyContextMode(ActionBar.ContextualMode)} when the context mode
+     * <li>{@link Callback#onDestroyContextMode(ContextualMode)} when the context mode
      * is closed</li>
      * </ul>
      */
