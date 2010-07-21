@@ -343,7 +343,15 @@ public class ActionBarView extends ViewGroup {
     public void setDropdownAdapter(SpinnerAdapter adapter) {
         mSpinner.setAdapter(adapter);
     }
-    
+
+    public void setDropdownSelectedPosition(int position) {
+        mSpinner.setSelection(position);
+    }
+
+    public int getDropdownSelectedPosition() {
+        return mSpinner.getSelectedItemPosition();
+    }
+
     public View getCustomNavigationView() {
         return mCustomNavView;
     }
