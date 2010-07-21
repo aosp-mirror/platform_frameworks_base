@@ -25,6 +25,7 @@ import com.android.internal.widget.ActionBarView;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.ContextualMode;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.graphics.drawable.Drawable;
@@ -196,9 +197,8 @@ public class ActionBarImpl extends ActionBar {
         return mActionView.getDisplayOptions();
     }
 
-    @Override
-    public void startContextMode(ContextModeCallback callback) {
-        finishContextMode();
+    public ContextualMode startContextualMode(ContextualMode.Callback callback) {
+        finishContextualMode();
 
         // Don't wait for the close context mode animation to finish.
         if (mClosingContext) {
@@ -217,11 +217,12 @@ public class ActionBarImpl extends ActionBar {
                 mLowerContextView.setVisibility(View.VISIBLE);
             }
             mContextMode = mode;
+            return mode;
         }
+        return null;
     }
 
-    @Override
-    public void finishContextMode() {
+    public void finishContextualMode() {
         if (mContextMode != null) {
             mContextMode.finish();
         }
@@ -337,12 +338,12 @@ public class ActionBarImpl extends ActionBar {
     /**
      * @hide 
      */
-    public class ContextMode extends ActionBar.ContextMode implements MenuBuilder.Callback {
-        private ContextModeCallback mCallback;
+    public class ContextMode extends ContextualMode implements MenuBuilder.Callback {
+        private ContextualMode.Callback mCallback;
         private MenuBuilder mMenu;
         private WeakReference<View> mCustomView;
         
-        public ContextMode(ContextModeCallback callback) {
+        public ContextMode(ContextualMode.Callback callback) {
             mCallback = callback;
             mMenu = new MenuBuilder(mActionView.getContext());
             mMenu.setCallback(this);
