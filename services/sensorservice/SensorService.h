@@ -91,6 +91,7 @@ class SensorService :
     };
 
     SortedVector< wp<SensorEventConnection> > getActiveConnections() const;
+    String8 getSensorName(int handle) const;
 
     // constants
     Vector<Sensor> mSensorList;
