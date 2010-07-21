@@ -896,11 +896,25 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return super.dispatchTouchEvent(ev);
         }
 
+        // Calculate the offset point into the target's local coordinates
+        float xc;
+        float yc;
+        if (target.hasIdentityMatrix() || mAttachInfo == null) {
+            xc = scrolledXFloat - (float) target.mLeft;
+            yc = scrolledYFloat - (float) target.mTop;
+        } else {
+            // non-identity matrix: transform the point into the view's coordinates
+            final float[] localXY = mAttachInfo.mTmpTransformLocation;
+            localXY[0] = scrolledXFloat;
+            localXY[1] = scrolledYFloat;
+            target.getInverseMatrix().mapPoints(localXY);
+            xc = localXY[0] - (float) target.mLeft;
+            yc = localXY[1] - (float) target.mTop;
+        }
+
         // if have a target, see if we're allowed to and want to intercept its
         // events
         if (!disallowIntercept && onInterceptTouchEvent(ev)) {
-            final float xc = scrolledXFloat - (float) target.mLeft;
-            final float yc = scrolledYFloat - (float) target.mTop;
             mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
             ev.setAction(MotionEvent.ACTION_CANCEL);
             ev.setLocation(xc, yc);
@@ -922,20 +936,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         // finally offset the event to the target's coordinate system and
         // dispatch the event.
-        float xc;
-        float yc;
-        if (hasIdentityMatrix() || mAttachInfo == null) {
-            xc = scrolledXFloat - (float) target.mLeft;
-            yc = scrolledYFloat - (float) target.mTop;
-        } else {
-            // non-identity matrix: transform the point into the view's coordinates
-            final float[] localXY = mAttachInfo.mTmpTransformLocation;
-            localXY[0] = scrolledXFloat;
-            localXY[1] = scrolledYFloat;
-            getInverseMatrix().mapPoints(localXY);
-            xc = localXY[0] - (float) target.mLeft;
-            yc = localXY[1] - (float) target.mTop;
-        }
         ev.setLocation(xc, yc);
 
         if ((target.mPrivateFlags & CANCEL_NEXT_UP_EVENT) != 0) {
