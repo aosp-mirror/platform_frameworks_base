@@ -157,9 +157,11 @@ public class PduParser {
                 }
                 String ctTypeStr = new String(contentType);
                 if (ctTypeStr.equals(ContentType.MULTIPART_MIXED)
-                        || ctTypeStr.equals(ContentType.MULTIPART_RELATED)) {
+                        || ctTypeStr.equals(ContentType.MULTIPART_RELATED)
+                        || ctTypeStr.equals(ContentType.MULTIPART_ALTERNATIVE)) {
                     // The MMS content type must be "application/vnd.wap.multipart.mixed"
                     // or "application/vnd.wap.multipart.related"
+                    // or "application/vnd.wap.multipart.alternative"
                     return retrieveConf;
                 } else if (ctTypeStr.equals(ContentType.MULTIPART_ALTERNATIVE)) {
                     // "application/vnd.wap.multipart.alternative"
