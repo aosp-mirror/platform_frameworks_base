@@ -371,6 +371,9 @@
             <span class="zh-CN" style="display:none">应用程序版本控制</span>
             <span class="zh-TW" style="display:none">應用程式版本設定</span>
           </a></li>
+      <li><a href="<?cs var:toroot ?>guide/publishing/licensing.html">
+            <span class="en">Licensing Your Applications</span>
+          </a> <span class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>guide/publishing/preparing.html">
             <span class="en">Preparing to Publish</span>
             <span class="de" style="display:none">Vorbereitung auf die Veröffentlichung</span>
