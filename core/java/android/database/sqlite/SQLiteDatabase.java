@@ -844,54 +844,12 @@ public class SQLiteDatabase extends SQLiteClosable {
         return true;
     }
 
-    /** Maps table names to info about what to which _sync_time column to set
-     * to NULL on an update. This is used to support syncing. */
-    private final Map<String, SyncUpdateInfo> mSyncUpdateInfo =
-            new HashMap<String, SyncUpdateInfo>();
-
-    public Map<String, String> getSyncedTables() {
-        synchronized(mSyncUpdateInfo) {
-            HashMap<String, String> tables = new HashMap<String, String>();
-            for (String table : mSyncUpdateInfo.keySet()) {
-                SyncUpdateInfo info = mSyncUpdateInfo.get(table);
-                if (info.deletedTable != null) {
-                    tables.put(table, info.deletedTable);
-                }
-            }
-            return tables;
-        }
-    }
-
     /**
-     * Internal class used to keep track what needs to be marked as changed
-     * when an update occurs. This is used for syncing, so the sync engine
-     * knows what data has been updated locally.
+     * @deprecated This method no longer serves any useful purpose and has been deprecated.
      */
-    static private class SyncUpdateInfo {
-        /**
-         * Creates the SyncUpdateInfo class.
-         *
-         * @param masterTable The table to set _sync_time to NULL in
-         * @param deletedTable The deleted table that corresponds to the
-         *          master table
-         * @param foreignKey The key that refers to the primary key in table
-         */
-        SyncUpdateInfo(String masterTable, String deletedTable,
-                String foreignKey) {
-            this.masterTable = masterTable;
-            this.deletedTable = deletedTable;
-            this.foreignKey = foreignKey;
-        }
-
-        /** The table containing the _sync_time column */
-        String masterTable;
-
-        /** The deleted table that corresponds to the master table */
-        String deletedTable;
-
-        /** The key in the local table the row in table. It may be _id, if table
-         * is the local table. */
-        String foreignKey;
+    @Deprecated
+    public Map<String, String> getSyncedTables() {
+        return new HashMap<String, String>(0);
     }
 
     /**
@@ -1216,9 +1174,10 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @param table the table to mark as syncable
      * @param deletedTable The deleted table that corresponds to the
      *          syncable table
+     * @deprecated This method no longer serves any useful purpose and has been deprecated.
      */
+    @Deprecated
     public void markTableSyncable(String table, String deletedTable) {
-        markTableSyncable(table, "_id", table, deletedTable);
     }
 
     /**
@@ -1231,60 +1190,10 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @param foreignKey this is the column in table whose value is an _id in
      *          updateTable
      * @param updateTable this is the table that will have its _sync_dirty
+     * @deprecated This method no longer serves any useful purpose and has been deprecated.
      */
-    public void markTableSyncable(String table, String foreignKey,
-            String updateTable) {
-        markTableSyncable(table, foreignKey, updateTable, null);
-    }
-
-    /**
-     * Mark this table as syncable, with the _sync_dirty residing in another
-     * table. When an update occurs in this table the _sync_dirty field of the
-     * row in updateTable with the _id in foreignKey will be set to
-     * ensure proper syncing operation.
-     *
-     * @param table an update on this table will trigger a sync time removal
-     * @param foreignKey this is the column in table whose value is an _id in
-     *          updateTable
-     * @param updateTable this is the table that will have its _sync_dirty
-     * @param deletedTable The deleted table that corresponds to the
-     *          updateTable
-     */
-    private void markTableSyncable(String table, String foreignKey,
-            String updateTable, String deletedTable) {
-        lock();
-        try {
-            native_execSQL("SELECT _sync_dirty FROM " + updateTable
-                    + " LIMIT 0");
-            native_execSQL("SELECT " + foreignKey + " FROM " + table
-                    + " LIMIT 0");
-        } finally {
-            unlock();
-        }
-
-        SyncUpdateInfo info = new SyncUpdateInfo(updateTable, deletedTable,
-                foreignKey);
-        synchronized (mSyncUpdateInfo) {
-            mSyncUpdateInfo.put(table, info);
-        }
-    }
-
-    /**
-     * Call for each row that is updated in a cursor.
-     *
-     * @param table the table the row is in
-     * @param rowId the row ID of the updated row
-     */
-    /* package */ void rowUpdated(String table, long rowId) {
-        SyncUpdateInfo info;
-        synchronized (mSyncUpdateInfo) {
-            info = mSyncUpdateInfo.get(table);
-        }
-        if (info != null) {
-            execSQL("UPDATE " + info.masterTable
-                    + " SET _sync_dirty=1 WHERE _id=(SELECT " + info.foreignKey
-                    + " FROM " + table + " WHERE _id=?)", new String[] {String.valueOf(rowId)});
-        }
+    @Deprecated
+    public void markTableSyncable(String table, String foreignKey, String updateTable) {
     }
 
     /**
