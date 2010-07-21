@@ -100,13 +100,13 @@ sensors_destroy_queue(JNIEnv *env, jclass clazz, jint nativeQueue)
 
 static jboolean
 sensors_enable_sensor(JNIEnv *env, jclass clazz,
-        jint nativeQueue, jstring name, jint sensor, jint enable)
+        jint nativeQueue, jstring name, jint sensor, jint delay)
 {
     sp<SensorEventQueue> queue(reinterpret_cast<SensorEventQueue *>(nativeQueue));
     if (queue == 0) return JNI_FALSE;
     status_t res;
-    if (enable) {
-        res = queue->enableSensor(sensor);
+    if (delay >= 0) {
+        res = queue->enableSensor(sensor, delay);
     } else {
         res = queue->disableSensor(sensor);
     }

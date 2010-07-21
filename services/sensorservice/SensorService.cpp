@@ -77,6 +77,9 @@ ANDROID_SINGLETON_STATIC_INSTANCE(BatteryService)
 
 // ---------------------------------------------------------------------------
 
+// 100 events/s max
+static const nsecs_t MINIMUM_EVENT_PERIOD = ms2ns(10);
+
 SensorService::SensorService()
     : Thread(false),
       mSensorDevice(0),
@@ -284,7 +287,6 @@ status_t SensorService::disable(const sp<SensorEventConnection>& connection,
     status_t err = NO_ERROR;
     Mutex::Autolock _l(mLock);
     SensorRecord* rec = mActiveSensors.valueFor(handle);
-    LOGW("sensor (handle=%d) is not enabled", handle);
     if (rec) {
         // see if this connection becomes inactive
         connection->removeSensor(handle);
@@ -309,6 +311,12 @@ status_t SensorService::setRate(const sp<SensorEventConnection>& connection,
 {
     if (mInitCheck != NO_ERROR)
         return mInitCheck;
+
+    if (ns < 0)
+        return BAD_VALUE;
+
+    if (ns < MINIMUM_EVENT_PERIOD)
+        ns = MINIMUM_EVENT_PERIOD;
 
     status_t err = NO_ERROR;
     Mutex::Autolock _l(mLock);
