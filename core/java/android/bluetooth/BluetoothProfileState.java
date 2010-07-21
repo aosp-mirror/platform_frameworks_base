@@ -43,8 +43,9 @@ public class BluetoothProfileState extends HierarchicalStateMachine {
     private static final boolean DBG = true; // STOPSHIP - change to false.
     private static final String TAG = "BluetoothProfileState";
 
-    public static int HFP = 0;
-    public static int A2DP = 1;
+    public static final int HFP = 0;
+    public static final int A2DP = 1;
+    public static final int HID = 2;
 
     private static int TRANSITION_TO_STABLE = 100;
 
@@ -70,6 +71,12 @@ public class BluetoothProfileState extends HierarchicalStateMachine {
                     newState == BluetoothA2dp.STATE_DISCONNECTED)) {
                     sendMessage(TRANSITION_TO_STABLE);
                 }
+            } else if (action.equals(BluetoothInputDevice.ACTION_INPUT_DEVICE_STATE_CHANGED)) {
+                int newState = intent.getIntExtra(BluetoothInputDevice.EXTRA_INPUT_DEVICE_STATE, 0);
+                if (mProfile == HID && (newState == BluetoothInputDevice.STATE_CONNECTED ||
+                    newState == BluetoothInputDevice.STATE_DISCONNECTED)) {
+                    sendMessage(TRANSITION_TO_STABLE);
+                }
             }
         }
     };
@@ -84,6 +91,7 @@ public class BluetoothProfileState extends HierarchicalStateMachine {
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothA2dp.ACTION_SINK_STATE_CHANGED);
         filter.addAction(BluetoothHeadset.ACTION_STATE_CHANGED);
+        filter.addAction(BluetoothInputDevice.ACTION_INPUT_DEVICE_STATE_CHANGED);
         context.registerReceiver(mBroadcastReceiver, filter);
     }
 

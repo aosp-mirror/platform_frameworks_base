@@ -132,6 +132,7 @@ public class BluetoothService extends IBluetooth.Stub {
     private final HashMap<String, BluetoothDeviceProfileState> mDeviceProfileState;
     private final BluetoothProfileState mA2dpProfileState;
     private final BluetoothProfileState mHfpProfileState;
+    private final BluetoothProfileState mHidProfileState;
 
     private BluetoothA2dpService mA2dpService;
     private final HashMap<BluetoothDevice, Integer> mInputDevices;
@@ -196,9 +197,11 @@ public class BluetoothService extends IBluetooth.Stub {
         mDeviceProfileState = new HashMap<String, BluetoothDeviceProfileState>();
         mA2dpProfileState = new BluetoothProfileState(mContext, BluetoothProfileState.A2DP);
         mHfpProfileState = new BluetoothProfileState(mContext, BluetoothProfileState.HFP);
+        mHidProfileState = new BluetoothProfileState(mContext, BluetoothProfileState.HID);
 
         mHfpProfileState.start();
         mA2dpProfileState.start();
+        mHidProfileState.start();
 
         IntentFilter filter = new IntentFilter();
         registerForAirplaneMode(filter);
@@ -1241,11 +1244,25 @@ public class BluetoothService extends IBluetooth.Stub {
             getInputDevicePriority(device) == BluetoothInputDevice.PRIORITY_OFF) {
             return false;
         }
-        if(connectInputDeviceNative(objectPath)) {
-            handleInputDeviceStateChange(device, BluetoothInputDevice.STATE_CONNECTING);
+        BluetoothDeviceProfileState state = mDeviceProfileState.get(device.getAddress());
+        if (state != null) {
+            Message msg = new Message();
+            msg.arg1 = BluetoothDeviceProfileState.CONNECT_HID_OUTGOING;
+            msg.obj = state;
+            mHidProfileState.sendMessage(msg);
             return true;
         }
         return false;
+    }
+
+    public synchronized boolean connectInputDeviceInternal(BluetoothDevice device) {
+        String objectPath = getObjectPathFromAddress(device.getAddress());
+        handleInputDeviceStateChange(device, BluetoothInputDevice.STATE_CONNECTING);
+        if (!connectInputDeviceNative(objectPath)) {
+            handleInputDeviceStateChange(device, BluetoothInputDevice.STATE_DISCONNECTED);
+            return false;
+        }
+        return true;
     }
 
     public synchronized boolean disconnectInputDevice(BluetoothDevice device) {
@@ -1256,11 +1273,25 @@ public class BluetoothService extends IBluetooth.Stub {
         if (objectPath == null || getConnectedInputDevices().length == 0) {
             return false;
         }
-        if(disconnectInputDeviceNative(objectPath)) {
-            handleInputDeviceStateChange(device, BluetoothInputDevice.STATE_DISCONNECTING);
+        BluetoothDeviceProfileState state = mDeviceProfileState.get(device.getAddress());
+        if (state != null) {
+            Message msg = new Message();
+            msg.arg1 = BluetoothDeviceProfileState.DISCONNECT_HID_OUTGOING;
+            msg.obj = state;
+            mHidProfileState.sendMessage(msg);
             return true;
         }
         return false;
+    }
+
+    public synchronized boolean disconnectInputDeviceInternal(BluetoothDevice device) {
+        String objectPath = getObjectPathFromAddress(device.getAddress());
+        handleInputDeviceStateChange(device, BluetoothInputDevice.STATE_DISCONNECTING);
+        if (!disconnectInputDeviceNative(objectPath)) {
+            handleInputDeviceStateChange(device, BluetoothInputDevice.STATE_CONNECTED);
+            return false;
+        }
+        return true;
     }
 
     public synchronized int getInputDeviceState(BluetoothDevice device) {

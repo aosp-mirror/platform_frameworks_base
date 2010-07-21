@@ -70,6 +70,7 @@ extern DBusHandlerResult agent_event_filter(DBusConnection *conn,
 void onCreatePairedDeviceResult(DBusMessage *msg, void *user, void *nat);
 void onDiscoverServicesResult(DBusMessage *msg, void *user, void *nat);
 void onCreateDeviceResult(DBusMessage *msg, void *user, void *nat);
+void onInputDeviceConnectionResult(DBusMessage *msg, void *user, void *nat);
 
 
 /** Get native data stored in the opaque (Java code maintained) pointer mNativeData
@@ -887,12 +888,21 @@ static jboolean connectInputDeviceNative(JNIEnv *env, jobject object, jstring pa
     LOGV(__FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat = get_native_data(env, object);
-    if (nat) {
+    jobject eventLoop = env->GetObjectField(object, field_mEventLoop);
+    struct event_loop_native_data_t *eventLoopNat =
+            get_EventLoop_native_data(env, eventLoop);
+
+    if (nat && eventLoopNat) {
         const char *c_path = env->GetStringUTFChars(path, NULL);
 
-        bool ret = dbus_func_args_async(env, nat->conn, -1, NULL, NULL, nat,
-                                    c_path, DBUS_INPUT_IFACE, "Connect",
-                                    DBUS_TYPE_INVALID);
+        int len = env->GetStringLength(path) + 1;
+        char *context_path = (char *)calloc(len, sizeof(char));
+        strlcpy(context_path, c_path, len);  // for callback
+
+        bool ret = dbus_func_args_async(env, nat->conn, -1, onInputDeviceConnectionResult,
+                                        context_path, eventLoopNat, c_path, DBUS_INPUT_IFACE,
+                                        "Connect",
+                                        DBUS_TYPE_INVALID);
 
         env->ReleaseStringUTFChars(path, c_path);
         return ret ? JNI_TRUE : JNI_FALSE;
@@ -906,12 +916,21 @@ static jboolean disconnectInputDeviceNative(JNIEnv *env, jobject object,
     LOGV(__FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat = get_native_data(env, object);
-    if (nat) {
+    jobject eventLoop = env->GetObjectField(object, field_mEventLoop);
+    struct event_loop_native_data_t *eventLoopNat =
+            get_EventLoop_native_data(env, eventLoop);
+
+    if (nat && eventLoopNat) {
         const char *c_path = env->GetStringUTFChars(path, NULL);
 
-        bool ret = dbus_func_args_async(env, nat->conn, -1, NULL, NULL, nat,
-                                    c_path, DBUS_INPUT_IFACE, "Disconnect",
-                                    DBUS_TYPE_INVALID);
+        int len = env->GetStringLength(path) + 1;
+        char *context_path = (char *)calloc(len, sizeof(char));
+        strlcpy(context_path, c_path, len);  // for callback
+
+        bool ret = dbus_func_args_async(env, nat->conn, -1, onInputDeviceConnectionResult,
+                                        context_path, eventLoopNat, c_path, DBUS_INPUT_IFACE,
+                                        "Disconnect",
+                                        DBUS_TYPE_INVALID);
 
         env->ReleaseStringUTFChars(path, c_path);
         return ret ? JNI_TRUE : JNI_FALSE;
