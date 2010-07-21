@@ -172,6 +172,7 @@ class LoaderManagerImpl implements LoaderManager {
                 // Let the loader know we're done with it
                 mListenerRegistered = false;
                 mLoader.unregisterListener(this);
+                mLoader.stopLoading();
             }
         }
         
