@@ -91,6 +91,8 @@ class MediaPlayerService : public BnMediaPlayerService
         virtual void            close();
                 void            setAudioStreamType(int streamType) { mStreamType = streamType; }
                 void            setVolume(float left, float right);
+                status_t        setAuxEffectSendLevel(float level);
+                status_t        attachAuxEffect(int effectId);
         virtual status_t        dump(int fd, const Vector<String16>& args) const;
 
         static bool             isOnEmulator();
@@ -109,7 +111,8 @@ class MediaPlayerService : public BnMediaPlayerService
         float                   mMsecsPerFrame;
         uint32_t                mLatency;
         int                     mSessionId;
-
+        float                   mSendLevel;
+        int                     mAuxEffectId;
         static bool             mIsOnEmulator;
         static int              mMinBufferCount;  // 12 for emulator; otherwise 4
 
@@ -221,6 +224,8 @@ private:
                                             Parcel *reply);
         virtual status_t        suspend();
         virtual status_t        resume();
+        virtual status_t        setAuxEffectSendLevel(float level);
+        virtual status_t        attachAuxEffect(int effectId);
 
         sp<MediaPlayerBase>     createPlayer(player_type playerType);
 

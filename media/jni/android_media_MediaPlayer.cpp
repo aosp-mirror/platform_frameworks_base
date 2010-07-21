@@ -714,6 +714,28 @@ static jint android_media_MediaPlayer_get_audio_session_id(JNIEnv *env,  jobject
     return mp->getAudioSessionId();
 }
 
+static void
+android_media_MediaPlayer_setAuxEffectSendLevel(JNIEnv *env, jobject thiz, jfloat level)
+{
+    LOGV("setAuxEffectSendLevel: level %f", level);
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+    process_media_player_call( env, thiz, mp->setAuxEffectSendLevel(level), NULL, NULL );
+}
+
+static void android_media_MediaPlayer_attachAuxEffect(JNIEnv *env,  jobject thiz, jint effectId) {
+    LOGV("attachAuxEffect(): %d", sessionId);
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+    process_media_player_call( env, thiz, mp->attachAuxEffect(effectId), NULL, NULL );
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -748,6 +770,8 @@ static JNINativeMethod gMethods[] = {
     {"native_suspend_resume", "(Z)I",                           (void *)android_media_MediaPlayer_native_suspend_resume},
     {"getAudioSessionId",   "()I",                              (void *)android_media_MediaPlayer_get_audio_session_id},
     {"setAudioSessionId",   "(I)V",                             (void *)android_media_MediaPlayer_set_audio_session_id},
+    {"setAuxEffectSendLevel", "(F)V",                           (void *)android_media_MediaPlayer_setAuxEffectSendLevel},
+    {"attachAuxEffect",     "(I)V",                             (void *)android_media_MediaPlayer_attachAuxEffect},
 };
 
 static const char* const kClassPathName = "android/media/MediaPlayer";

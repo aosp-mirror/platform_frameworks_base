@@ -360,6 +360,7 @@ android_media_AudioTrack_start(JNIEnv *env, jobject thiz)
     if (lpTrack == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for start()");
+        return;
     }
 
     lpTrack->start();
@@ -375,6 +376,7 @@ android_media_AudioTrack_stop(JNIEnv *env, jobject thiz)
     if (lpTrack == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for stop()");
+        return;
     }
 
     lpTrack->stop();
@@ -390,6 +392,7 @@ android_media_AudioTrack_pause(JNIEnv *env, jobject thiz)
     if (lpTrack == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for pause()");
+        return;
     }
 
     lpTrack->pause();
@@ -405,6 +408,7 @@ android_media_AudioTrack_flush(JNIEnv *env, jobject thiz)
     if (lpTrack == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for flush()");
+        return;
     }
 
     lpTrack->flush();
@@ -419,6 +423,7 @@ android_media_AudioTrack_set_volume(JNIEnv *env, jobject thiz, jfloat leftVol, j
     if (lpTrack == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for setVolume()");
+        return;
     }
 
     lpTrack->setVolume(leftVol, rightVol);
@@ -515,6 +520,7 @@ static jint android_media_AudioTrack_native_write(JNIEnv *env,  jobject thiz,
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for write()");
+        return 0;
     }
 
     // get the pointer for the audio data from the java array
@@ -801,6 +807,36 @@ static jint android_media_AudioTrack_get_min_buff_size(JNIEnv *env,  jobject thi
     return minBuffSize;
 }
 
+// ----------------------------------------------------------------------------
+static void
+android_media_AudioTrack_setAuxEffectSendLevel(JNIEnv *env, jobject thiz, jfloat level )
+{
+    AudioTrack *lpTrack = (AudioTrack *)env->GetIntField(
+        thiz, javaAudioTrackFields.nativeTrackInJavaObj);
+    if (lpTrack == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+            "Unable to retrieve AudioTrack pointer for setAuxEffectSendLevel()");
+        return;
+    }
+
+    lpTrack->setAuxEffectSendLevel(level);
+}
+
+// ----------------------------------------------------------------------------
+static jint android_media_AudioTrack_attachAuxEffect(JNIEnv *env,  jobject thiz,
+        jint effectId) {
+
+    AudioTrack *lpTrack = (AudioTrack *)env->GetIntField(
+                thiz, javaAudioTrackFields.nativeTrackInJavaObj);
+
+    if (lpTrack) {
+        return android_media_translateErrorCode( lpTrack->attachAuxEffect(effectId) );
+    } else {
+        jniThrowException(env, "java/lang/IllegalStateException",
+            "Unable to retrieve AudioTrack pointer for attachAuxEffect()");
+        return AUDIOTRACK_ERROR;
+    }
+}
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -837,6 +873,10 @@ static JNINativeMethod gMethods[] = {
                              "(I)I",      (void *)android_media_AudioTrack_get_output_sample_rate},
     {"native_get_min_buff_size",
                              "(III)I",   (void *)android_media_AudioTrack_get_min_buff_size},
+    {"native_setAuxEffectSendLevel",
+                             "(F)V",     (void *)android_media_AudioTrack_setAuxEffectSendLevel},
+    {"native_attachAuxEffect",
+                             "(I)I",     (void *)android_media_AudioTrack_attachAuxEffect},
 };
 
 

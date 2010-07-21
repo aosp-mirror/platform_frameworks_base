@@ -209,6 +209,7 @@ status_t AudioTrack::set(
     mFrameCount = frameCount;
     mNotificationFramesReq = notificationFrames;
     mSessionId = sessionId;
+    mAuxEffectId = 0;
 
     // create the IAudioTrack
     status_t status = createTrack(streamType, sampleRate, format, channelCount,
@@ -458,8 +459,9 @@ void AudioTrack::getVolume(float* left, float* right)
     }
 }
 
-status_t AudioTrack::setSendLevel(float level)
+status_t AudioTrack::setAuxEffectSendLevel(float level)
 {
+    LOGV("setAuxEffectSendLevel(%f)", level);
     if (level > 1.0f) {
         return BAD_VALUE;
     }
@@ -471,7 +473,7 @@ status_t AudioTrack::setSendLevel(float level)
     return NO_ERROR;
 }
 
-void AudioTrack::getSendLevel(float* level)
+void AudioTrack::getAuxEffectSendLevel(float* level)
 {
     if (level != NULL) {
         *level  = mSendLevel;
@@ -637,7 +639,12 @@ int AudioTrack::getSessionId()
 
 status_t AudioTrack::attachAuxEffect(int effectId)
 {
-    return mAudioTrack->attachAuxEffect(effectId);
+    LOGV("attachAuxEffect(%d)", effectId);
+    status_t status = mAudioTrack->attachAuxEffect(effectId);
+    if (status == NO_ERROR) {
+        mAuxEffectId = effectId;
+    }
+    return status;
 }
 
 // -------------------------------------------------------------------------
@@ -752,6 +759,7 @@ status_t AudioTrack::createTrack(
 
     mCblk->volumeLR = (uint32_t(uint16_t(mVolume[RIGHT] * 0x1000)) << 16) | uint16_t(mVolume[LEFT] * 0x1000);
     mCblk->sendLevel = uint16_t(mSendLevel * 0x1000);
+    mAudioTrack->attachAuxEffect(mAuxEffectId);
     mCblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
     mCblk->waitTimeMs = 0;
     mRemainingFrames = mNotificationFramesAct;
