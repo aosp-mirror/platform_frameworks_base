@@ -20,6 +20,10 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.DropBoxManager;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.ServiceManager;
 import android.os.StatFs;
 import android.provider.Settings;
@@ -27,10 +31,13 @@ import android.test.AndroidTestCase;
 
 import com.android.server.DropBoxManagerService;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Random;
 import java.util.zip.GZIPOutputStream;
 
@@ -531,6 +538,203 @@ public class DropBoxTest extends AndroidTestCase {
         service.stop();
     }
 
+    public void testDropBoxEntrySerialization() throws Exception {
+        // Make sure DropBoxManager.Entry can be serialized to a Parcel and back
+        // under a variety of conditions.
+
+        Parcel parcel = Parcel.obtain();
+        File dir = getEmptyDir("testDropBoxEntrySerialization");
+
+        new DropBoxManager.Entry("empty", 1000000).writeToParcel(parcel, 0);
+        new DropBoxManager.Entry("string", 2000000, "String Value").writeToParcel(parcel, 0);
+        new DropBoxManager.Entry("bytes", 3000000, "Bytes Value".getBytes(),
+                DropBoxManager.IS_TEXT).writeToParcel(parcel, 0);
+        new DropBoxManager.Entry("zerobytes", 4000000, new byte[0], 0).writeToParcel(parcel, 0);
+        new DropBoxManager.Entry("emptybytes", 5000000, (byte[]) null,
+                DropBoxManager.IS_EMPTY).writeToParcel(parcel, 0);
+
+        try {
+            new DropBoxManager.Entry("badbytes", 99999,
+                    "Bad Bytes Value".getBytes(),
+                    DropBoxManager.IS_EMPTY).writeToParcel(parcel, 0);
+            fail("IllegalArgumentException expected for non-null byte[] and IS_EMPTY flags");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        try {
+            new DropBoxManager.Entry("badbytes", 99999, (byte[]) null, 0).writeToParcel(parcel, 0);
+            fail("IllegalArgumentException expected for null byte[] and non-IS_EMPTY flags");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        File f = new File(dir, "file.dat");
+        FileOutputStream os = new FileOutputStream(f);
+        os.write("File Value".getBytes());
+        os.close();
+
+        new DropBoxManager.Entry("file", 6000000, f, DropBoxManager.IS_TEXT).writeToParcel(
+                parcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        new DropBoxManager.Entry("binfile", 7000000, f, 0).writeToParcel(
+                parcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        new DropBoxManager.Entry("emptyfile", 8000000, (ParcelFileDescriptor) null,
+                DropBoxManager.IS_EMPTY).writeToParcel(parcel, 0);
+
+        try {
+            new DropBoxManager.Entry("badfile", 99999, new File(dir, "nonexist.dat"), 0);
+            fail("IOException expected for nonexistent file");
+        } catch (IOException e) {
+            // expected
+        }
+
+        try {
+            new DropBoxManager.Entry("badfile", 99999, f, DropBoxManager.IS_EMPTY).writeToParcel(
+                    parcel, 0);
+            fail("IllegalArgumentException expected for non-null file and IS_EMPTY flags");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        try {
+            new DropBoxManager.Entry("badfile", 99999, (ParcelFileDescriptor) null, 0);
+            fail("IllegalArgumentException expected for null PFD and non-IS_EMPTY flags");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        File gz = new File(dir, "file.gz");
+        GZIPOutputStream gzout = new GZIPOutputStream(new FileOutputStream(gz));
+        gzout.write("Gzip File Value".getBytes());
+        gzout.close();
+
+        new DropBoxManager.Entry("gzipfile", 9000000, gz,
+                DropBoxManager.IS_TEXT | DropBoxManager.IS_GZIPPED).writeToParcel(
+                    parcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        new DropBoxManager.Entry("gzipbinfile", 10000000, gz,
+                DropBoxManager.IS_GZIPPED).writeToParcel(
+                    parcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+
+        //
+        // Switch from writing to reading
+        //
+
+        parcel.setDataPosition(0);
+        DropBoxManager.Entry e;
+
+        e = DropBoxManager.Entry.CREATOR.createFromParcel(parcel);
+        assertEquals("empty", e.getTag());
+        assertEquals(1000000, e.getTimeMillis());
+        assertEquals(DropBoxManager.IS_EMPTY, e.getFlags());
+        assertEquals(null, e.getText(100));
+        assertEquals(null, e.getInputStream());
+        e.close();
+
+        e = DropBoxManager.Entry.CREATOR.createFromParcel(parcel);
+        assertEquals("string", e.getTag());
+        assertEquals(2000000, e.getTimeMillis());
+        assertEquals(DropBoxManager.IS_TEXT, e.getFlags());
+        assertEquals("String Value", e.getText(100));
+        assertEquals("String Value",
+                new BufferedReader(new InputStreamReader(e.getInputStream())).readLine());
+        e.close();
+
+        e = DropBoxManager.Entry.CREATOR.createFromParcel(parcel);
+        assertEquals("bytes", e.getTag());
+        assertEquals(3000000, e.getTimeMillis());
+        assertEquals(DropBoxManager.IS_TEXT, e.getFlags());
+        assertEquals("Bytes Value", e.getText(100));
+        e.close();
+
+        e = DropBoxManager.Entry.CREATOR.createFromParcel(parcel);
+        assertEquals("zerobytes", e.getTag());
+        assertEquals(4000000, e.getTimeMillis());
+        assertEquals(0, e.getFlags());
+        assertEquals(null, e.getText(100));
+        assertEquals(null,
+                new BufferedReader(new InputStreamReader(e.getInputStream())).readLine());
+        e.close();
+
+        e = DropBoxManager.Entry.CREATOR.createFromParcel(parcel);
+        assertEquals("emptybytes", e.getTag());
+        assertEquals(5000000, e.getTimeMillis());
+        assertEquals(DropBoxManager.IS_EMPTY, e.getFlags());
+        assertEquals(null, e.getText(100));
+        assertEquals(null, e.getInputStream());
+        e.close();
+
+        e = DropBoxManager.Entry.CREATOR.createFromParcel(parcel);
+        assertEquals("file", e.getTag());
+        assertEquals(6000000, e.getTimeMillis());
+        assertEquals(DropBoxManager.IS_TEXT, e.getFlags());
+        assertEquals("File Value", e.getText(100));
+        e.close();
+
+        e = DropBoxManager.Entry.CREATOR.createFromParcel(parcel);
+        assertEquals("binfile", e.getTag());
+        assertEquals(7000000, e.getTimeMillis());
+        assertEquals(0, e.getFlags());
+        assertEquals(null, e.getText(100));
+        assertEquals("File Value",
+                new BufferedReader(new InputStreamReader(e.getInputStream())).readLine());
+        e.close();
+
+        e = DropBoxManager.Entry.CREATOR.createFromParcel(parcel);
+        assertEquals("emptyfile", e.getTag());
+        assertEquals(8000000, e.getTimeMillis());
+        assertEquals(DropBoxManager.IS_EMPTY, e.getFlags());
+        assertEquals(null, e.getText(100));
+        assertEquals(null, e.getInputStream());
+        e.close();
+
+        e = DropBoxManager.Entry.CREATOR.createFromParcel(parcel);
+        assertEquals("gzipfile", e.getTag());
+        assertEquals(9000000, e.getTimeMillis());
+        assertEquals(DropBoxManager.IS_TEXT, e.getFlags());
+        assertEquals("Gzip File Value", e.getText(100));
+        e.close();
+
+        e = DropBoxManager.Entry.CREATOR.createFromParcel(parcel);
+        assertEquals("gzipbinfile", e.getTag());
+        assertEquals(10000000, e.getTimeMillis());
+        assertEquals(0, e.getFlags());
+        assertEquals(null, e.getText(100));
+        assertEquals("Gzip File Value",
+                new BufferedReader(new InputStreamReader(e.getInputStream())).readLine());
+        e.close();
+
+        assertEquals(0, parcel.dataAvail());
+        parcel.recycle();
+    }
+
+    public void testDropBoxEntrySerializationDoesntLeakFileDescriptors() throws Exception {
+        File dir = getEmptyDir("testDropBoxEntrySerialization");
+        File f = new File(dir, "file.dat");
+        FileOutputStream os = new FileOutputStream(f);
+        os.write("File Value".getBytes());
+        os.close();
+
+        int before = countOpenFiles();
+        assertTrue(before > 0);
+
+        for (int i = 0; i < 1000; i++) {
+            Parcel parcel = Parcel.obtain();
+            new DropBoxManager.Entry("file", 1000000, f, 0).writeToParcel(
+                    parcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+
+            parcel.setDataPosition(0);
+            DropBoxManager.Entry e = DropBoxManager.Entry.CREATOR.createFromParcel(parcel);
+            assertEquals("file", e.getTag());
+            e.close();
+
+            parcel.recycle();
+        }
+
+        int after = countOpenFiles();
+        assertTrue(after > 0);
+        assertTrue(after < before + 20);
+    }
+
     private void addRandomEntry(DropBoxManager dropbox, String tag, int size) throws Exception {
         byte[] bytes = new byte[size];
         new Random(System.currentTimeMillis()).nextBytes(bytes);
@@ -563,5 +767,9 @@ public class DropBoxTest extends AndroidTestCase {
         for (File f : dir.listFiles()) recursiveDelete(f);
         assertTrue(dir.listFiles().length == 0);
         return dir;
+    }
+
+    private int countOpenFiles() {
+        return new File("/proc/" + Process.myPid() + "/fd").listFiles().length;
     }
 }
