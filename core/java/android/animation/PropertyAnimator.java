@@ -55,6 +55,9 @@ public final class PropertyAnimator extends Animator {
     // at a time.
     private ReentrantReadWriteLock propertyMapLock = new ReentrantReadWriteLock();
 
+    // Used to pass single value to varargs parameter in setter invocation
+    private Object[] mTmpValueArray = new Object[1];
+
 
     /**
      * Sets the name of the property that will be animated. This name is used to derive
@@ -272,6 +275,33 @@ public final class PropertyAnimator extends Animator {
     }
 
     /**
+     * A constructor that takes <code>Keyframe</code>s. When this constructor
+     * is called, the system expects to find a setter for <code>propertyName</code> on
+     * the target object that takes a value of the same type as that returned from
+     * {@link Keyframe#getType()}.
+     * .
+     *
+     * @param duration The length of the animation, in milliseconds.
+     * @param target The object whose property is to be animated. This object should
+     * have a public function on it called <code>setName()</code>, where <code>name</code> is
+     * the name of the property passed in as the <code>propertyName</code> parameter.
+     * @param propertyName The name of the property on the <code>target</code> object
+     * that will be animated. Given this name, the constructor will search for a
+     * setter on the target object with the name <code>setPropertyName</code>. For example,
+     * if the constructor is called with <code>propertyName = "foo"</code>, then the
+     * target object should have a setter function with the name <code>setFoo()</code>.
+     * @param keyframes The set of keyframes that define the times and values for the animation.
+     * These keyframes should be ordered in increasing time value, should have a starting
+     * keyframe with a fraction of 0 and and ending keyframe with a fraction of 1.
+     */
+    public PropertyAnimator(int duration, Object target, String propertyName,
+            Keyframe...keyframes) {
+        super(duration, keyframes);
+        mTarget = target;
+        mPropertyName = propertyName;
+    }
+
+    /**
      * This function is called immediately before processing the first animation
      * frame of an animation. If there is a nonzero <code>startDelay</code>, the
      * function is called after that delay ends.
@@ -309,7 +339,7 @@ public final class PropertyAnimator extends Animator {
                 propertyMapLock.writeLock().unlock();
             }
         }
-        if (getValueFrom() == null || getValueTo() == null) {
+        if (getKeyframes() == null && (getValueFrom() == null || getValueTo() == null)) {
             // Need to set up the getter if not set by the user, then call it
             // to get the initial values
             if (mGetter == null) {
@@ -376,7 +406,8 @@ public final class PropertyAnimator extends Animator {
         super.animateValue(fraction);
         if (mSetter != null) {
             try {
-                mSetter.invoke(mTarget, getAnimatedValue());
+                mTmpValueArray[0] = getAnimatedValue();
+                mSetter.invoke(mTarget, mTmpValueArray);
             } catch (InvocationTargetException e) {
                 Log.e("PropertyAnimator", e.toString());
             } catch (IllegalAccessException e) {
