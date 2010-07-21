@@ -40,7 +40,6 @@ namespace android {
 
 /*
  * TODO:
- * - handle per-connection event rate
  * - filter events per connection
  * - make sure to keep the last value of each event type so we can quickly
  *   send something to application when they enable a sensor that is already
@@ -140,8 +139,8 @@ status_t SensorService::dump(int fd, const Vector<String16>& args)
         result.append(buffer);
     } else {
         Mutex::Autolock _l(mLock);
-        snprintf(buffer, SIZE, "%d connections / %d active\n",
-                mConnections.size(), mActiveConnections.size());
+        snprintf(buffer, SIZE, "%d active connections\n",
+                mActiveConnections.size());
         result.append(buffer);
         snprintf(buffer, SIZE, "Active sensors:\n");
         result.append(buffer);
@@ -219,33 +218,25 @@ Vector<Sensor> SensorService::getSensorList()
 sp<ISensorEventConnection> SensorService::createSensorEventConnection()
 {
     sp<SensorEventConnection> result(new SensorEventConnection(this));
-    Mutex::Autolock _l(mLock);
-    mConnections.add(result);
     return result;
 }
 
 void SensorService::cleanupConnection(const wp<SensorEventConnection>& connection)
 {
     Mutex::Autolock _l(mLock);
-    ssize_t index = mConnections.indexOf(connection);
-    if (index >= 0) {
-
-        size_t size = mActiveSensors.size();
-        for (size_t i=0 ; i<size ; ) {
-            SensorRecord* rec = mActiveSensors.valueAt(i);
-            if (rec && rec->removeConnection(connection)) {
-                mSensorDevice->activate(mSensorDevice, mActiveSensors.keyAt(i), 0);
-                mActiveSensors.removeItemsAt(i, 1);
-                delete rec;
-                size--;
-            } else {
-                i++;
-            }
+    size_t size = mActiveSensors.size();
+    for (size_t i=0 ; i<size ; ) {
+        SensorRecord* rec = mActiveSensors.valueAt(i);
+        if (rec && rec->removeConnection(connection)) {
+            mSensorDevice->activate(mSensorDevice, mActiveSensors.keyAt(i), 0);
+            mActiveSensors.removeItemsAt(i, 1);
+            delete rec;
+            size--;
+        } else {
+            i++;
         }
-
-        mActiveConnections.remove(connection);
-        mConnections.removeItemsAt(index, 1);
     }
+    mActiveConnections.remove(connection);
 }
 
 status_t SensorService::enable(const sp<SensorEventConnection>& connection,
@@ -266,13 +257,18 @@ status_t SensorService::enable(const sp<SensorEventConnection>& connection,
             BatteryService::getInstance().enableSensor(handle);
         }
     } else {
-        err = rec->addConnection(connection);
+        rec->addConnection(connection);
     }
     if (err == NO_ERROR) {
         // connection now active
-        connection->addSensor(handle);
-        if (mActiveConnections.indexOf(connection) < 0) {
-            mActiveConnections.add(connection);
+        if (connection->addSensor(handle)) {
+            // the sensor was added (which means it wasn't already there)
+            // so, see if this connection becomes active
+            if (mActiveConnections.indexOf(connection) < 0) {
+                mActiveConnections.add(connection);
+            }
+            // this could change the sensor event delivery speed
+            recomputeEventsPeriodLocked(handle);
         }
     }
     return err;
@@ -303,10 +299,13 @@ status_t SensorService::disable(const sp<SensorEventConnection>& connection,
             }
         }
     }
+    if (err == NO_ERROR) {
+        recomputeEventsPeriodLocked(handle);
+    }
     return err;
 }
 
-status_t SensorService::setRate(const sp<SensorEventConnection>& connection,
+status_t SensorService::setEventRate(const sp<SensorEventConnection>& connection,
         int handle, nsecs_t ns)
 {
     if (mInitCheck != NO_ERROR)
@@ -315,15 +314,32 @@ status_t SensorService::setRate(const sp<SensorEventConnection>& connection,
     if (ns < 0)
         return BAD_VALUE;
 
-    if (ns < MINIMUM_EVENT_PERIOD)
-        ns = MINIMUM_EVENT_PERIOD;
+    if (ns < MINIMUM_EVENTS_PERIOD)
+        ns = MINIMUM_EVENTS_PERIOD;
 
-    status_t err = NO_ERROR;
     Mutex::Autolock _l(mLock);
+    status_t err = connection->setEventRateLocked(handle, ns);
+    if (err == NO_ERROR) {
+        recomputeEventsPeriodLocked(handle);
+    }
+    return err;
+}
 
-    err = mSensorDevice->setDelay(mSensorDevice, handle, ns);
-
-    // TODO: handle rate per connection
+status_t SensorService::recomputeEventsPeriodLocked(int32_t handle)
+{
+    status_t err = NO_ERROR;
+    nsecs_t wanted = ms2ns(1000);
+    size_t count = mActiveConnections.size();
+    for (size_t i=0 ; i<count ; i++) {
+        sp<SensorEventConnection> connection(mActiveConnections[i].promote());
+        if (connection != NULL) {
+            nsecs_t ns = connection->getEventRateForSensor(handle);
+            if (ns) {
+                wanted = wanted < ns ? wanted : ns;
+            }
+        }
+    }
+    err = mSensorDevice->setDelay(mSensorDevice, handle, wanted);
     return err;
 }
 
@@ -335,13 +351,14 @@ SensorService::SensorRecord::SensorRecord(
     mConnections.add(connection);
 }
 
-status_t SensorService::SensorRecord::addConnection(
+bool SensorService::SensorRecord::addConnection(
         const sp<SensorEventConnection>& connection)
 {
     if (mConnections.indexOf(connection) < 0) {
         mConnections.add(connection);
+        return true;
     }
-    return NO_ERROR;
+    return false;
 }
 
 bool SensorService::SensorRecord::removeConnection(
@@ -371,22 +388,40 @@ void SensorService::SensorEventConnection::onFirstRef()
 {
 }
 
-void SensorService::SensorEventConnection::addSensor(int32_t handle) {
-    if (mSensorList.indexOf(handle) <= 0) {
-        mSensorList.add(handle);
+bool SensorService::SensorEventConnection::addSensor(int32_t handle) {
+    if (mSensorInfo.indexOfKey(handle) <= 0) {
+        SensorInfo info;
+        mSensorInfo.add(handle, info);
+        return true;
     }
+    return false;
 }
 
-void SensorService::SensorEventConnection::removeSensor(int32_t handle) {
-    mSensorList.remove(handle);
+bool SensorService::SensorEventConnection::removeSensor(int32_t handle) {
+    if (mSensorInfo.removeItem(handle) >= 0) {
+        return true;
+    }
+    return false;
 }
 
 bool SensorService::SensorEventConnection::hasSensor(int32_t handle) const {
-    return mSensorList.indexOf(handle) >= 0;
+    return mSensorInfo.indexOfKey(handle) >= 0;
 }
 
 bool SensorService::SensorEventConnection::hasAnySensor() const {
-    return mSensorList.size() ? true : false;
+    return mSensorInfo.size() ? true : false;
+}
+
+status_t SensorService::SensorEventConnection::setEventRateLocked(
+        int handle, nsecs_t ns)
+{
+    ssize_t index = mSensorInfo.indexOfKey(handle);
+    if (index >= 0) {
+        SensorInfo& info = mSensorInfo.editValueFor(handle);
+        info.ns = ns;
+        return NO_ERROR;
+    }
+    return status_t(index);
 }
 
 status_t SensorService::SensorEventConnection::sendEvents(
@@ -429,7 +464,7 @@ status_t SensorService::SensorEventConnection::enableDisable(
 status_t SensorService::SensorEventConnection::setEventRate(
         int handle, nsecs_t ns)
 {
-    return mService->setRate(this, handle, ns);
+    return mService->setEventRate(this, handle, ns);
 }
 
 // ---------------------------------------------------------------------------

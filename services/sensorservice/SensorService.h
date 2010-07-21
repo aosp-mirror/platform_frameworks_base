@@ -49,6 +49,9 @@ class SensorService :
 {
    friend class BinderService<SensorService>;
 
+   static const nsecs_t MINIMUM_EVENTS_PERIOD = 10000000; // 10ms
+   static const nsecs_t DEFAULT_EVENTS_PERIOD = 200000000; // 200 ms
+
             SensorService();
     virtual ~SensorService();
 
@@ -64,34 +67,50 @@ class SensorService :
 
 
     class SensorEventConnection : public BnSensorEventConnection {
+        virtual ~SensorEventConnection();
+        virtual void onFirstRef();
         virtual sp<SensorChannel> getSensorChannel() const;
         virtual status_t enableDisable(int handle, bool enabled);
         virtual status_t setEventRate(int handle, nsecs_t ns);
+
         sp<SensorService> const mService;
         sp<SensorChannel> const mChannel;
-        SortedVector<int32_t> mSensorList;
+
+        // protected by SensorService::mLock
+        //SortedVector<int32_t> mSensorList;
+
+        struct SensorInfo {
+            SensorInfo() : ns(DEFAULT_EVENTS_PERIOD) { }
+            nsecs_t ns;
+        };
+        DefaultKeyedVector<int32_t, SensorInfo> mSensorInfo;
+
     public:
         SensorEventConnection(const sp<SensorService>& service);
-        virtual ~SensorEventConnection();
-        virtual void onFirstRef();
+
         status_t sendEvents(sensors_event_t const* buffer, size_t count);
         bool hasSensor(int32_t handle) const;
         bool hasAnySensor() const;
-        void addSensor(int32_t handle);
-        void removeSensor(int32_t handle);
+        bool addSensor(int32_t handle);
+        bool removeSensor(int32_t handle);
+        status_t setEventRateLocked(int handle, nsecs_t ns);
+        nsecs_t getEventRateForSensor(int32_t handle) const {
+            return mSensorInfo.valueFor(handle).ns;
+        }
     };
 
     class SensorRecord {
         SortedVector< wp<SensorEventConnection> > mConnections;
     public:
         SensorRecord(const sp<SensorEventConnection>& connection);
-        status_t addConnection(const sp<SensorEventConnection>& connection);
+        bool addConnection(const sp<SensorEventConnection>& connection);
         bool removeConnection(const wp<SensorEventConnection>& connection);
         size_t getNumConnections() const { return mConnections.size(); }
     };
 
     SortedVector< wp<SensorEventConnection> > getActiveConnections() const;
     String8 getSensorName(int handle) const;
+    status_t recomputeEventsPeriodLocked(int32_t handle);
 
     // constants
     Vector<Sensor> mSensorList;
@@ -102,7 +121,6 @@ class SensorService :
 
     // protected by mLock
     mutable Mutex mLock;
-    SortedVector< wp<SensorEventConnection> > mConnections;
     DefaultKeyedVector<int, SensorRecord*> mActiveSensors;
     SortedVector< wp<SensorEventConnection> > mActiveConnections;
 
@@ -112,7 +130,7 @@ public:
     void cleanupConnection(const wp<SensorEventConnection>& connection);
     status_t enable(const sp<SensorEventConnection>& connection, int handle);
     status_t disable(const sp<SensorEventConnection>& connection, int handle);
-    status_t setRate(const sp<SensorEventConnection>& connection, int handle, nsecs_t ns);
+    status_t setEventRate(const sp<SensorEventConnection>& connection, int handle, nsecs_t ns);
 };
 
 // ---------------------------------------------------------------------------
