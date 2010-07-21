@@ -1,8 +1,5 @@
 #pragma version(1)
 
-#include "rs_types.rsh"
-#include "rs_math.rsh"
-
 #include "ip.rsh"
 
 void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32_t y) {
