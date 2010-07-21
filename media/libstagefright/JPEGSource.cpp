@@ -112,7 +112,8 @@ status_t JPEGSource::read(
     *out = NULL;
 
     int64_t seekTimeUs;
-    if (options != NULL && options->getSeekTo(&seekTimeUs)) {
+    ReadOptions::SeekMode mode;
+    if (options != NULL && options->getSeekTo(&seekTimeUs, &mode)) {
         return UNKNOWN_ERROR;
     }
 

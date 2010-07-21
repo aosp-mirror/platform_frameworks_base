@@ -1468,12 +1468,45 @@ status_t MPEG4Source::read(
 
     *out = NULL;
 
+    int64_t targetSampleTimeUs = -1;
+
     int64_t seekTimeUs;
-    if (options && options->getSeekTo(&seekTimeUs)) {
+    ReadOptions::SeekMode mode;
+    if (options && options->getSeekTo(&seekTimeUs, &mode)) {
+        uint32_t findFlags = 0;
+        switch (mode) {
+            case ReadOptions::SEEK_PREVIOUS_SYNC:
+                findFlags = SampleTable::kFlagBefore;
+                break;
+            case ReadOptions::SEEK_NEXT_SYNC:
+                findFlags = SampleTable::kFlagAfter;
+                break;
+            case ReadOptions::SEEK_CLOSEST_SYNC:
+            case ReadOptions::SEEK_CLOSEST:
+                findFlags = SampleTable::kFlagClosest;
+                break;
+            default:
+                CHECK(!"Should not be here.");
+                break;
+        }
+
         uint32_t sampleIndex;
-        status_t err = mSampleTable->findClosestSample(
+        status_t err = mSampleTable->findSampleAtTime(
                 seekTimeUs * mTimescale / 1000000,
-                &sampleIndex, SampleTable::kSyncSample_Flag);
+                &sampleIndex, findFlags);
+
+        if (mode == ReadOptions::SEEK_CLOSEST) {
+            // We found the closest sample already, now we want the sync
+            // sample preceding it (or the sample itself of course), even
+            // if the subsequent sync sample is closer.
+            findFlags = SampleTable::kFlagBefore;
+        }
+
+        uint32_t syncSampleIndex;
+        if (err == OK) {
+            err = mSampleTable->findSyncSampleNear(
+                    sampleIndex, &syncSampleIndex, findFlags);
+        }
 
         if (err != OK) {
             if (err == ERROR_OUT_OF_RANGE) {
@@ -1487,7 +1520,27 @@ status_t MPEG4Source::read(
             return err;
         }
 
-        mCurrentSampleIndex = sampleIndex;
+        uint32_t sampleTime;
+        CHECK_EQ(OK, mSampleTable->getMetaDataForSample(
+                    sampleIndex, NULL, NULL, &sampleTime));
+
+        if (mode == ReadOptions::SEEK_CLOSEST) {
+            targetSampleTimeUs = (sampleTime * 1000000ll) / mTimescale;
+        }
+
+#if 0
+        uint32_t syncSampleTime;
+        CHECK_EQ(OK, mSampleTable->getMetaDataForSample(
+                    syncSampleIndex, NULL, NULL, &syncSampleTime));
+
+        LOGI("seek to time %lld us => sample at time %lld us, "
+             "sync sample at time %lld us",
+             seekTimeUs,
+             sampleTime * 1000000ll / mTimescale,
+             syncSampleTime * 1000000ll / mTimescale);
+#endif
+
+        mCurrentSampleIndex = syncSampleIndex;
         if (mBuffer != NULL) {
             mBuffer->release();
             mBuffer = NULL;
@@ -1536,6 +1589,12 @@ status_t MPEG4Source::read(
             mBuffer->meta_data()->clear();
             mBuffer->meta_data()->setInt64(
                     kKeyTime, ((int64_t)dts * 1000000) / mTimescale);
+
+            if (targetSampleTimeUs >= 0) {
+                mBuffer->meta_data()->setInt64(
+                        kKeyTargetTime, targetSampleTimeUs);
+            }
+
             ++mCurrentSampleIndex;
         }
 
@@ -1632,6 +1691,12 @@ status_t MPEG4Source::read(
         mBuffer->meta_data()->clear();
         mBuffer->meta_data()->setInt64(
                 kKeyTime, ((int64_t)dts * 1000000) / mTimescale);
+
+        if (targetSampleTimeUs >= 0) {
+            mBuffer->meta_data()->setInt64(
+                    kKeyTargetTime, targetSampleTimeUs);
+        }
+
         ++mCurrentSampleIndex;
 
         *out = mBuffer;

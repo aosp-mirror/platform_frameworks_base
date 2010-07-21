@@ -314,8 +314,10 @@ uint32_t abs_difference(uint32_t time1, uint32_t time2) {
     return time1 > time2 ? time1 - time2 : time2 - time1;
 }
 
-status_t SampleTable::findClosestSample(
+status_t SampleTable::findSampleAtTime(
         uint32_t req_time, uint32_t *sample_index, uint32_t flags) {
+    *sample_index = 0;
+
     Mutex::Autolock autoLock(mLock);
 
     uint32_t cur_sample = 0;
@@ -330,16 +332,37 @@ status_t SampleTable::findClosestSample(
             uint32_t time1 = time + j * delta;
             uint32_t time2 = time1 + delta;
 
+            uint32_t sampleTime;
             if (i+1 == mTimeToSampleCount
                     || (abs_difference(req_time, time1)
                         < abs_difference(req_time, time2))) {
                 *sample_index = cur_sample + j;
+                sampleTime = time1;
             } else {
                 *sample_index = cur_sample + j + 1;
+                sampleTime = time2;
             }
 
-            if (flags & kSyncSample_Flag) {
-                return findClosestSyncSample_l(*sample_index, sample_index);
+            switch (flags) {
+                case kFlagBefore:
+                {
+                    if (sampleTime > req_time && *sample_index > 0) {
+                        --*sample_index;
+                    }
+                    break;
+                }
+
+                case kFlagAfter:
+                {
+                    if (sampleTime < req_time
+                            && *sample_index + 1 < mNumSampleSizes) {
+                        ++*sample_index;
+                    }
+                    break;
+                }
+
+                default:
+                    break;
             }
 
             return OK;
@@ -352,8 +375,10 @@ status_t SampleTable::findClosestSample(
     return ERROR_OUT_OF_RANGE;
 }
 
-status_t SampleTable::findClosestSyncSample_l(
-        uint32_t start_sample_index, uint32_t *sample_index) {
+status_t SampleTable::findSyncSampleNear(
+        uint32_t start_sample_index, uint32_t *sample_index, uint32_t flags) {
+    Mutex::Autolock autoLock(mLock);
+
     *sample_index = 0;
 
     if (mSyncSampleOffset < 0) {
@@ -362,29 +387,124 @@ status_t SampleTable::findClosestSyncSample_l(
         return OK;
     }
 
-    uint32_t x;
-    uint32_t left = 0;
-    uint32_t right = mNumSyncSamples;
-    while (left < right) {
-        uint32_t mid = (left + right) / 2;
+    if (mNumSyncSamples == 0) {
+        *sample_index = 0;
+        return OK;
+    }
 
+    uint32_t left = 0;
+    while (left < mNumSyncSamples) {
+        uint32_t x;
         if (mDataSource->readAt(
-                    mSyncSampleOffset + 8 + mid * 4, &x, 4) != 4) {
+                    mSyncSampleOffset + 8 + left * 4, &x, 4) != 4) {
             return ERROR_IO;
         }
 
         x = ntohl(x);
+        --x;
 
-        if (x < (start_sample_index + 1)) {
-            left = mid + 1;
-        } else if (x > (start_sample_index + 1)) {
-            right = mid;
-        } else {
+        if (x >= start_sample_index) {
             break;
+        }
+
+        ++left;
+    }
+
+    --left;
+    uint32_t x;
+    if (mDataSource->readAt(
+                mSyncSampleOffset + 8 + left * 4, &x, 4) != 4) {
+        return ERROR_IO;
+    }
+
+    x = ntohl(x);
+    --x;
+
+    if (left + 1 < mNumSyncSamples) {
+        uint32_t y;
+        if (mDataSource->readAt(
+                    mSyncSampleOffset + 8 + (left + 1) * 4, &y, 4) != 4) {
+            return ERROR_IO;
+        }
+
+        y = ntohl(y);
+        --y;
+
+        // our sample lies between sync samples x and y.
+
+        status_t err = mSampleIterator->seekTo(start_sample_index);
+        if (err != OK) {
+            return err;
+        }
+
+        uint32_t sample_time = mSampleIterator->getSampleTime();
+
+        err = mSampleIterator->seekTo(x);
+        if (err != OK) {
+            return err;
+        }
+        uint32_t x_time = mSampleIterator->getSampleTime();
+
+        err = mSampleIterator->seekTo(y);
+        if (err != OK) {
+            return err;
+        }
+
+        uint32_t y_time = mSampleIterator->getSampleTime();
+
+        if (abs_difference(x_time, sample_time)
+                > abs_difference(y_time, sample_time)) {
+            // Pick the sync sample closest (timewise) to the start-sample.
+            x = y;
+            ++left;
         }
     }
 
-    *sample_index = x - 1;
+    switch (flags) {
+        case kFlagBefore:
+        {
+            if (x > start_sample_index) {
+                CHECK(left > 0);
+
+                if (mDataSource->readAt(
+                            mSyncSampleOffset + 8 + (left - 1) * 4, &x, 4) != 4) {
+                    return ERROR_IO;
+                }
+
+                x = ntohl(x);
+                --x;
+
+                CHECK(x <= start_sample_index);
+            }
+            break;
+        }
+
+        case kFlagAfter:
+        {
+            if (x < start_sample_index) {
+                if (left + 1 >= mNumSyncSamples) {
+                    return ERROR_OUT_OF_RANGE;
+                }
+
+                if (mDataSource->readAt(
+                            mSyncSampleOffset + 8 + (left + 1) * 4, &x, 4) != 4) {
+                    return ERROR_IO;
+                }
+
+                x = ntohl(x);
+                --x;
+
+                CHECK(x >= start_sample_index);
+            }
+
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    *sample_index = x;
 
     return OK;
 }

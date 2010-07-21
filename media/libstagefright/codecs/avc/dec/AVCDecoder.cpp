@@ -51,7 +51,9 @@ AVCDecoder::AVCDecoder(const sp<MediaSource> &source)
       mInputBuffer(NULL),
       mAnchorTimeUs(0),
       mNumSamplesOutput(0),
-      mPendingSeekTimeUs(-1) {
+      mPendingSeekTimeUs(-1),
+      mPendingSeekMode(MediaSource::ReadOptions::SEEK_CLOSEST_SYNC),
+      mTargetTimeUs(-1) {
     memset(mHandle, 0, sizeof(tagAVCHandle));
     mHandle->AVCObject = NULL;
     mHandle->userData = this;
@@ -161,6 +163,8 @@ status_t AVCDecoder::start(MetaData *) {
     mAnchorTimeUs = 0;
     mNumSamplesOutput = 0;
     mPendingSeekTimeUs = -1;
+    mPendingSeekMode = ReadOptions::SEEK_CLOSEST_SYNC;
+    mTargetTimeUs = -1;
     mStarted = true;
 
     return OK;
@@ -229,11 +233,13 @@ status_t AVCDecoder::read(
     *out = NULL;
 
     int64_t seekTimeUs;
-    if (options && options->getSeekTo(&seekTimeUs)) {
+    ReadOptions::SeekMode mode;
+    if (options && options->getSeekTo(&seekTimeUs, &mode)) {
         LOGV("seek requested to %lld us (%.2f secs)", seekTimeUs, seekTimeUs / 1E6);
 
         CHECK(seekTimeUs >= 0);
         mPendingSeekTimeUs = seekTimeUs;
+        mPendingSeekMode = mode;
 
         if (mInputBuffer) {
             mInputBuffer->release();
@@ -245,6 +251,8 @@ status_t AVCDecoder::read(
 
     if (mInputBuffer == NULL) {
         LOGV("fetching new input buffer.");
+
+        bool seeking = false;
 
         if (!mCodecSpecificData.isEmpty()) {
             mInputBuffer = mCodecSpecificData.editItemAt(0);
@@ -258,7 +266,9 @@ status_t AVCDecoder::read(
 
                 ReadOptions seekOptions;
                 if (mPendingSeekTimeUs >= 0) {
-                    seekOptions.setSeekTo(mPendingSeekTimeUs);
+                    seeking = true;
+
+                    seekOptions.setSeekTo(mPendingSeekTimeUs, mPendingSeekMode);
                     mPendingSeekTimeUs = -1;
                 }
                 status_t err = mSource->read(&mInputBuffer, &seekOptions);
@@ -274,6 +284,16 @@ status_t AVCDecoder::read(
 
                 mInputBuffer->release();
                 mInputBuffer = NULL;
+            }
+        }
+
+        if (seeking) {
+            int64_t targetTimeUs;
+            if (mInputBuffer->meta_data()->findInt64(kKeyTargetTime, &targetTimeUs)
+                    && targetTimeUs >= 0) {
+                mTargetTimeUs = targetTimeUs;
+            } else {
+                mTargetTimeUs = -1;
             }
         }
     }
@@ -394,9 +414,35 @@ status_t AVCDecoder::read(
                 CHECK(index >= 0);
                 CHECK(index < (int32_t)mFrames.size());
 
-                *out = mFrames.editItemAt(index);
-                (*out)->set_range(0, (*out)->size());
-                (*out)->add_ref();
+                MediaBuffer *mbuf = mFrames.editItemAt(index);
+
+                bool skipFrame = false;
+
+                if (mTargetTimeUs >= 0) {
+                    int64_t timeUs;
+                    CHECK(mbuf->meta_data()->findInt64(kKeyTime, &timeUs));
+                    CHECK(timeUs <= mTargetTimeUs);
+
+                    if (timeUs < mTargetTimeUs) {
+                        // We're still waiting for the frame with the matching
+                        // timestamp and we won't return the current one.
+                        skipFrame = true;
+
+                        LOGV("skipping frame at %lld us", timeUs);
+                    } else {
+                        LOGV("found target frame at %lld us", timeUs);
+
+                        mTargetTimeUs = -1;
+                    }
+                }
+
+                if (!skipFrame) {
+                    *out = mbuf;
+                    (*out)->set_range(0, (*out)->size());
+                    (*out)->add_ref();
+                } else {
+                    *out = new MediaBuffer(0);
+                }
 
                 // Do _not_ release input buffer yet.
 

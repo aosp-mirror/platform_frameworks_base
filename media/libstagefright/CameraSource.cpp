@@ -267,7 +267,8 @@ status_t CameraSource::read(
     *buffer = NULL;
 
     int64_t seekTimeUs;
-    if (options && options->getSeekTo(&seekTimeUs)) {
+    ReadOptions::SeekMode mode;
+    if (options && options->getSeekTo(&seekTimeUs, &mode)) {
         return ERROR_UNSUPPORTED;
     }
 
