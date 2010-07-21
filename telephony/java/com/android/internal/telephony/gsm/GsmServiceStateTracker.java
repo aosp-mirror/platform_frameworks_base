@@ -650,6 +650,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     int lac = -1;
                     int cid = -1;
                     int regState = -1;
+                    int psc = -1;
                     if (states.length > 0) {
                         try {
                             regState = Integer.parseInt(states[0]);
@@ -659,6 +660,11 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                                 }
                                 if (states[2] != null && states[2].length() > 0) {
                                     cid = Integer.parseInt(states[2], 16);
+                                }
+                            }
+                            if (states.length > 14) {
+                                if (states[14] != null && states[14].length() > 0) {
+                                    psc = Integer.parseInt(states[14], 16);
                                 }
                             }
                         } catch (NumberFormatException ex) {
@@ -677,6 +683,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
                     // LAC and CID are -1 if not avail
                     newCellLoc.setLacAndCid(lac, cid);
+                    newCellLoc.setPsc(psc);
                 break;
 
                 case EVENT_POLL_STATE_GPRS:
