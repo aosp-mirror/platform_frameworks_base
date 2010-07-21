@@ -18,8 +18,9 @@
 
 #include "utils/Log.h"
 
-#include <hardware/sensors.h>
-#include <cutils/native_handle.h>
+#include <gui/Sensor.h>
+#include <gui/SensorManager.h>
+#include <gui/SensorEventQueue.h>
 
 #include "jni.h"
 #include "JNIHelp.h"
@@ -43,44 +44,36 @@ struct SensorOffsets
  * The method below are not thread-safe and not intended to be
  */
 
-static sensors_module_t* sSensorModule = 0;
-static sensors_data_device_t* sSensorDevice = 0;
 
 static jint
 sensors_module_init(JNIEnv *env, jclass clazz)
 {
-    int err = 0;
-    sensors_module_t const* module;
-    err = hw_get_module(SENSORS_HARDWARE_MODULE_ID, (const hw_module_t **)&module);
-    if (err == 0)
-        sSensorModule = (sensors_module_t*)module;
-    return err;
+    SensorManager::getInstance();
+    return 0;
 }
 
 static jint
 sensors_module_get_next_sensor(JNIEnv *env, jobject clazz, jobject sensor, jint next)
 {
-    if (sSensorModule == NULL)
-        return 0;
+    SensorManager& mgr(SensorManager::getInstance());
 
-    SensorOffsets& sensorOffsets = gSensorOffsets;
-    const struct sensor_t* list;
-    int count = sSensorModule->get_sensors_list(sSensorModule, &list);
+    Sensor const* const* sensorList;
+    size_t count = mgr.getSensorList(&sensorList);
     if (next >= count)
         return -1;
     
-    list += next;
-
-    jstring name = env->NewStringUTF(list->name);
-    jstring vendor = env->NewStringUTF(list->vendor);
+    Sensor const* const list = sensorList[next];
+    const SensorOffsets& sensorOffsets(gSensorOffsets);
+    jstring name = env->NewStringUTF(list->getName().string());
+    jstring vendor = env->NewStringUTF(list->getVendor().string());
     env->SetObjectField(sensor, sensorOffsets.name,      name);
     env->SetObjectField(sensor, sensorOffsets.vendor,    vendor);
-    env->SetIntField(sensor, sensorOffsets.version,      list->version);
-    env->SetIntField(sensor, sensorOffsets.handle,       list->handle);
-    env->SetIntField(sensor, sensorOffsets.type,         list->type);
-    env->SetFloatField(sensor, sensorOffsets.range,      list->maxRange);
-    env->SetFloatField(sensor, sensorOffsets.resolution, list->resolution);
-    env->SetFloatField(sensor, sensorOffsets.power,      list->power);
+    env->SetIntField(sensor, sensorOffsets.version,      1);
+    env->SetIntField(sensor, sensorOffsets.handle,       list->getHandle());
+    env->SetIntField(sensor, sensorOffsets.type,         list->getType());
+    env->SetFloatField(sensor, sensorOffsets.range,      list->getMaxValue());
+    env->SetFloatField(sensor, sensorOffsets.resolution, list->getResolution());
+    env->SetFloatField(sensor, sensorOffsets.power,      list->getPowerUsage());
     
     next++;
     return next<count ? next : 0;
@@ -88,75 +81,64 @@ sensors_module_get_next_sensor(JNIEnv *env, jobject clazz, jobject sensor, jint 
 
 //----------------------------------------------------------------------------
 static jint
-sensors_data_init(JNIEnv *env, jclass clazz)
+sensors_create_queue(JNIEnv *env, jclass clazz)
 {
-    if (sSensorModule == NULL)
-        return -1;
-    int err = sensors_data_open(&sSensorModule->common, &sSensorDevice);
-    return err;
+    SensorManager& mgr(SensorManager::getInstance());
+    sp<SensorEventQueue> queue(mgr.createEventQueue());
+    queue->incStrong(clazz);
+    return reinterpret_cast<int>(queue.get());
 }
 
-static jint
-sensors_data_uninit(JNIEnv *env, jclass clazz)
+static void
+sensors_destroy_queue(JNIEnv *env, jclass clazz, jint nativeQueue)
 {
-    int err = 0;
-    if (sSensorDevice) {
-        err = sensors_data_close(sSensorDevice);
-        if (err == 0)
-            sSensorDevice = 0;
+    sp<SensorEventQueue> queue(reinterpret_cast<SensorEventQueue *>(nativeQueue));
+    if (queue != 0) {
+        queue->decStrong(clazz);
     }
-    return err;
 }
 
-static jint
-sensors_data_open(JNIEnv *env, jclass clazz, jobjectArray fdArray, jintArray intArray)
+static jboolean
+sensors_enable_sensor(JNIEnv *env, jclass clazz,
+        jint nativeQueue, jstring name, jint sensor, jint enable)
 {
-    jclass FileDescriptor = env->FindClass("java/io/FileDescriptor");
-    jfieldID fieldOffset = env->GetFieldID(FileDescriptor, "descriptor", "I");
-    int numFds = (fdArray ? env->GetArrayLength(fdArray) : 0);
-    int numInts = (intArray ? env->GetArrayLength(intArray) : 0);
-    native_handle_t* handle = native_handle_create(numFds, numInts);
-    int offset = 0;
-
-    for (int i = 0; i < numFds; i++) {
-        jobject fdo = env->GetObjectArrayElement(fdArray, i);
-        if (fdo) {
-            handle->data[offset++] = env->GetIntField(fdo, fieldOffset);
-        } else {
-            handle->data[offset++] = -1;
-        }
+    sp<SensorEventQueue> queue(reinterpret_cast<SensorEventQueue *>(nativeQueue));
+    if (queue == 0) return JNI_FALSE;
+    status_t res;
+    if (enable) {
+        res = queue->enableSensor(sensor);
+    } else {
+        res = queue->disableSensor(sensor);
     }
-    if (numInts > 0) {
-        jint* ints = env->GetIntArrayElements(intArray, 0);
-        for (int i = 0; i < numInts; i++) {
-            handle->data[offset++] = ints[i];
-        }
-        env->ReleaseIntArrayElements(intArray, ints, 0);
-    }
-
-    // doesn't take ownership of the native handle
-    return sSensorDevice->data_open(sSensorDevice, handle);
+    return res == NO_ERROR ? true : false;
 }
 
 static jint
-sensors_data_close(JNIEnv *env, jclass clazz)
-{
-    return sSensorDevice->data_close(sSensorDevice);
-}
-
-static jint
-sensors_data_poll(JNIEnv *env, jclass clazz, 
+sensors_data_poll(JNIEnv *env, jclass clazz, jint nativeQueue,
         jfloatArray values, jintArray status, jlongArray timestamp)
 {
-    sensors_data_t data;
-    int res = sSensorDevice->poll(sSensorDevice, &data);
-    if (res >= 0) {
-        jint accuracy = data.vector.status;
-        env->SetFloatArrayRegion(values, 0, 3, data.vector.v);
-        env->SetIntArrayRegion(status, 0, 1, &accuracy);
-        env->SetLongArrayRegion(timestamp, 0, 1, &data.time);
+    sp<SensorEventQueue> queue(reinterpret_cast<SensorEventQueue *>(nativeQueue));
+    if (queue == 0) return -1;
+
+    status_t res;
+    ASensorEvent event;
+
+    res = queue->read(&event, 1);
+    if (res == -EAGAIN) {
+        res = queue->waitForEvent();
+        if (res != NO_ERROR)
+            return -1;
+        res = queue->read(&event, 1);
     }
-    return res;
+    if (res < 0)
+        return -1;
+
+    jint accuracy = event.vector.status;
+    env->SetFloatArrayRegion(values, 0, 3, event.vector.v);
+    env->SetIntArrayRegion(status, 0, 1, &accuracy);
+    env->SetLongArrayRegion(timestamp, 0, 1, &event.timestamp);
+
+    return event.sensor;
 }
 
 static void
@@ -179,11 +161,13 @@ static JNINativeMethod gMethods[] = {
     {"sensors_module_init","()I",           (void*)sensors_module_init },
     {"sensors_module_get_next_sensor","(Landroid/hardware/Sensor;I)I",
                                             (void*)sensors_module_get_next_sensor },
-    {"sensors_data_init", "()I",            (void*)sensors_data_init },
-    {"sensors_data_uninit", "()I",          (void*)sensors_data_uninit },
-    {"sensors_data_open",  "([Ljava/io/FileDescriptor;[I)I",  (void*)sensors_data_open },
-    {"sensors_data_close", "()I",           (void*)sensors_data_close },
-    {"sensors_data_poll",  "([F[I[J)I",     (void*)sensors_data_poll },
+
+    {"sensors_create_queue",  "()I",        (void*)sensors_create_queue },
+    {"sensors_destroy_queue", "(I)V",       (void*)sensors_destroy_queue },
+    {"sensors_enable_sensor", "(ILjava/lang/String;II)Z",
+                                            (void*)sensors_enable_sensor },
+
+    {"sensors_data_poll",  "(I[F[I[J)I",     (void*)sensors_data_poll },
 };
 
 }; // namespace android

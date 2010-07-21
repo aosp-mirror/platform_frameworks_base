@@ -36,6 +36,18 @@ Sensor::Sensor()
 {
 }
 
+Sensor::Sensor(struct sensor_t const* hwSensor)
+{
+    mName = hwSensor->name;
+    mVendor = hwSensor->vendor;
+    mHandle = hwSensor->handle;
+    mType = hwSensor->type;
+    mMinValue = 0;                      // FIXME: minValue
+    mMaxValue = hwSensor->maxRange;     // FIXME: maxValue
+    mResolution = hwSensor->resolution;
+    mPower = hwSensor->power;
+}
+
 Sensor::~Sensor()
 {
 }

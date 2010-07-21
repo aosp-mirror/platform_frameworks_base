@@ -87,6 +87,7 @@ enum {
  * A sensor event.
  */
 
+/* NOTE: Must match hardware/sensors.h */
 typedef struct ASensorVector {
     union {
         float v[3];
@@ -95,23 +96,32 @@ typedef struct ASensorVector {
             float y;
             float z;
         };
+        struct {
+            float azimuth;
+            float pitch;
+            float roll;
+        };
     };
     int8_t status;
     uint8_t reserved[3];
 } ASensorVector;
 
+/* NOTE: Must match hardware/sensors.h */
 typedef struct ASensorEvent {
-    int sensor;
+    int32_t version; /* sizeof(struct ASensorEvent) */
+    int32_t sensor;
+    int32_t type;
     int32_t reserved0;
+    int64_t timestamp;
     union {
         float           data[16];
+        ASensorVector   vector;
         ASensorVector   acceleration;
         ASensorVector   magnetic;
         float           temperature;
         float           distance;
         float           light;
     };
-    int64_t timestamp;
     int32_t reserved1[4];
 } ASensorEvent;
 
@@ -124,6 +134,8 @@ typedef struct ASensorEventQueue ASensorEventQueue;
 
 struct ASensor;
 typedef struct ASensor ASensor;
+typedef ASensor const* ASensorRef;
+typedef ASensorRef const* ASensorList;
 
 /*****************************************************************************/
 
@@ -141,13 +153,13 @@ ASensorManager* ASensorManager_getInstance();
 /*
  * Returns the list of available sensors.
  */
-int ASensorManager_getSensorList(ASensorManager* manager, ASensor** list);
+int ASensorManager_getSensorList(ASensorManager* manager, ASensorList* list);
 
 /*
  * Returns the default sensor for the given type, or NULL if no sensor
  * of that type exist.
  */
-ASensor* ASensorManager_getDefaultSensor(ASensorManager* manager, int type);
+ASensor const* ASensorManager_getDefaultSensor(ASensorManager* manager, int type);
 
 /*
  * Creates a new sensor event queue and associate it with a looper.
@@ -166,12 +178,12 @@ int ASensorManager_destroyEventQueue(ASensorManager* manager, ASensorEventQueue*
 /*
  * Enable the selected sensor. Returns a negative error code on failure.
  */
-int ASensorEventQueue_enableSensor(ASensorEventQueue* queue, ASensor* sensor);
+int ASensorEventQueue_enableSensor(ASensorEventQueue* queue, ASensor const* sensor);
 
 /*
  * Disable the selected sensor. Returns a negative error code on failure.
  */
-int ASensorEventQueue_disableSensor(ASensorEventQueue* queue, ASensor* sensor);
+int ASensorEventQueue_disableSensor(ASensorEventQueue* queue, ASensor const* sensor);
 
 /*
  * Sets the delivery rate of events in microseconds for the given sensor.
@@ -179,7 +191,7 @@ int ASensorEventQueue_disableSensor(ASensorEventQueue* queue, ASensor* sensor);
  * rate.
  * Returns a negative error code on failure.
  */
-int ASensorEventQueue_setEventRate(ASensorEventQueue* queue, ASensor* sensor, int32_t usec);
+int ASensorEventQueue_setEventRate(ASensorEventQueue* queue, ASensor const* sensor, int32_t usec);
 
 /*
  * Returns true if there are one or more events available in the
@@ -210,22 +222,22 @@ ssize_t ASensorEventQueue_getEvents(ASensorEventQueue* queue,
 /*
  * Returns this sensor's name (non localized)
  */
-const char* ASensor_getName(ASensor* sensor);
+const char* ASensor_getName(ASensor const* sensor);
 
 /*
  * Returns this sensor's vendor's name (non localized)
  */
-const char* ASensor_getVendor(ASensor* sensor);
+const char* ASensor_getVendor(ASensor const* sensor);
 
 /*
  * Return this sensor's type
  */
-int ASensor_getType(ASensor* sensor);
+int ASensor_getType(ASensor const* sensor);
 
 /*
  * Returns this sensors's resolution
  */
-float ASensor_getResolution(ASensor* sensor);
+float ASensor_getResolution(ASensor const* sensor);
 
 
 #ifdef __cplusplus
