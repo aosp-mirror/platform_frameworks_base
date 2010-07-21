@@ -277,23 +277,44 @@ status_t CameraSource::read(
 
     {
         Mutex::Autolock autoLock(mLock);
-        while (mStarted && mFramesReceived.empty()) {
-            mFrameAvailableCondition.wait(mLock);
-        }
-        if (!mStarted) {
-            return OK;
-        }
-        frame = *mFramesReceived.begin();
-        mFramesReceived.erase(mFramesReceived.begin());
+        while (mStarted) {
+            while(mFramesReceived.empty()) {
+                mFrameAvailableCondition.wait(mLock);
+            }
 
-        frameTime = *mFrameTimes.begin();
-        mFrameTimes.erase(mFrameTimes.begin());
+            if (!mStarted) {
+                return OK;
+            }
 
-        mFramesBeingEncoded.push_back(frame);
-        *buffer = new MediaBuffer(frame->pointer(), frame->size());
-        (*buffer)->setObserver(this);
-        (*buffer)->add_ref();
-        (*buffer)->meta_data()->setInt64(kKeyTime, frameTime);
+            frame = *mFramesReceived.begin();
+            mFramesReceived.erase(mFramesReceived.begin());
+
+            frameTime = *mFrameTimes.begin();
+            mFrameTimes.erase(mFrameTimes.begin());
+            int64_t skipTimeUs;
+            if (!options || !options->getSkipFrame(&skipTimeUs)) {
+                skipTimeUs = frameTime;
+            }
+            if (skipTimeUs > frameTime) {
+                LOGV("skipTimeUs: %lld us > frameTime: %lld us",
+                    skipTimeUs, frameTime);
+                releaseOneRecordingFrame(frame);
+                ++mNumFramesDropped;
+                // Safeguard against the abuse of the kSkipFrame_Option.
+                if (skipTimeUs - frameTime >= 1E6) {
+                    LOGE("Frame skipping requested is way too long: %lld us",
+                        skipTimeUs - frameTime);
+                    return UNKNOWN_ERROR;
+                }
+            } else {
+                mFramesBeingEncoded.push_back(frame);
+                *buffer = new MediaBuffer(frame->pointer(), frame->size());
+                (*buffer)->setObserver(this);
+                (*buffer)->add_ref();
+                (*buffer)->meta_data()->setInt64(kKeyTime, frameTime);
+                return OK;
+            }
+        }
     }
     return OK;
 }

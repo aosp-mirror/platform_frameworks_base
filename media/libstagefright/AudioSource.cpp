@@ -137,52 +137,75 @@ status_t AudioSource::read(
     MediaBuffer *buffer;
     CHECK_EQ(mGroup->acquire_buffer(&buffer), OK);
 
-    uint32_t numFramesRecorded;
-    mRecord->getPosition(&numFramesRecorded);
-    int64_t latency = mRecord->latency() * 1000;
+    while (mStarted) {
+        uint32_t numFramesRecorded;
+        mRecord->getPosition(&numFramesRecorded);
+        int64_t latency = mRecord->latency() * 1000;
 
-    int64_t readTime = systemTime() / 1000;
-    if (numFramesRecorded == 0) {
-        // Initial delay
-        if (mStartTimeUs > 0) {
-            mStartTimeUs = readTime - mStartTimeUs;
+        int64_t readTime = systemTime() / 1000;
+
+        if (numFramesRecorded == 0) {
+            // Initial delay
+            if (mStartTimeUs > 0) {
+                mStartTimeUs = readTime - mStartTimeUs;
+            } else {
+                mStartTimeUs += latency;
+            }
+        }
+
+        ssize_t n = 0;
+        if (mCollectStats) {
+            n = mRecord->read(buffer->data(), buffer->size());
+            int64_t endTime = systemTime() / 1000;
+            mTotalReadTimeUs += (endTime - readTime);
+            if (n >= 0) {
+                mTotalReadBytes += n;
+            }
         } else {
-            mStartTimeUs += latency;
+            n = mRecord->read(buffer->data(), buffer->size());
         }
-    }
 
-    ssize_t n = 0;
-    if (mCollectStats) {
-        n = mRecord->read(buffer->data(), buffer->size());
-        int64_t endTime = systemTime() / 1000;
-        mTotalReadTimeUs += (endTime - readTime);
-        if (n >= 0) {
-            mTotalReadBytes += n;
+        if (n < 0) {
+            buffer->release();
+            buffer = NULL;
+
+            return (status_t)n;
         }
-    } else {
-        n = mRecord->read(buffer->data(), buffer->size());
+
+        uint32_t sampleRate = mRecord->getSampleRate();
+        int64_t timestampUs = (1000000LL * numFramesRecorded) / sampleRate +
+                                 mStartTimeUs;
+        int64_t skipFrameUs;
+        if (!options || !options->getSkipFrame(&skipFrameUs)) {
+            skipFrameUs = timestampUs;  // Don't skip frame
+        }
+
+        if (skipFrameUs > timestampUs) {
+            // Safe guard against the abuse of the kSkipFrame_Option.
+            if (skipFrameUs - timestampUs >= 1E6) {
+                LOGE("Frame skipping requested is way too long: %lld us",
+                    skipFrameUs - timestampUs);
+                buffer->release();
+                return UNKNOWN_ERROR;
+            }
+            LOGV("skipFrame: %lld us > timestamp: %lld us, samples %d",
+                skipFrameUs, timestampUs, numFramesRecorded);
+            continue;
+        }
+
+        if (mTrackMaxAmplitude) {
+            trackMaxAmplitude((int16_t *) buffer->data(), n >> 1);
+        }
+
+        buffer->meta_data()->setInt64(kKeyTime, timestampUs);
+        LOGV("initial delay: %lld, sample rate: %d, timestamp: %lld",
+                mStartTimeUs, sampleRate, timestampUs);
+
+        buffer->set_range(0, n);
+
+        *out = buffer;
+        return OK;
     }
-
-    if (n < 0) {
-        buffer->release();
-        buffer = NULL;
-
-        return (status_t)n;
-    }
-
-    if (mTrackMaxAmplitude) {
-        trackMaxAmplitude((int16_t *) buffer->data(), n >> 1);
-    }
-
-    uint32_t sampleRate = mRecord->getSampleRate();
-    int64_t timestampUs = (1000000LL * numFramesRecorded) / sampleRate + mStartTimeUs;
-    buffer->meta_data()->setInt64(kKeyTime, timestampUs);
-    LOGV("initial delay: %lld, sample rate: %d, timestamp: %lld",
-            mStartTimeUs, sampleRate, timestampUs);
-
-    buffer->set_range(0, n);
-
-    *out = buffer;
 
     return OK;
 }
