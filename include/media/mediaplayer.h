@@ -173,6 +173,8 @@ public:
             status_t        resume();
             status_t        setAudioSessionId(int sessionId);
             int             getAudioSessionId();
+            status_t        setAuxEffectSendLevel(float level);
+            status_t        attachAuxEffect(int effectId);
 private:
             void            clear_l();
             status_t        seekTo_l(int msec);
@@ -200,6 +202,7 @@ private:
     int                         mVideoWidth;
     int                         mVideoHeight;
     int                         mAudioSessionId;
+    float                       mSendLevel;
 };
 
 }; // namespace android

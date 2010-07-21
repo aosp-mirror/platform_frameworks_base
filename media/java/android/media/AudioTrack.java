@@ -963,6 +963,65 @@ public class AudioTrack
         return native_reload_static();
     }
 
+    //--------------------------------------------------------------------------
+    // Audio effects management
+    //--------------------
+
+    /**
+     * Attaches an auxiliary effect to the audio track. A typical auxiliary effect is a
+     * reverberation effect which can be applied on any sound source that directs a certain
+     * amount of its energy to this effect. This amount is defined by setAuxEffectSendLevel().
+     * {@see #setAuxEffectSendLevel(float)}.
+     // TODO when AudioEffect are unhidden
+     * <p>After creating an auxiliary effect (e.g. {_at_link android.media.EnvironmentalReverb}),
+     * retrieve its ID with {_at_link android.media.AudioEffect#getId()} and use it when calling
+     * this method to attach the audio track to the effect.
+     * <p>To detach the effect from the audio track, call this method with a null effect id.
+     *
+     * @param effectId system wide unique id of the effect to attach
+     * @return error code or success, see {@link #SUCCESS},
+     *    {@link #ERROR_INVALID_OPERATION}, {@link #ERROR_BAD_VALUE}
+     // FIXME: unhide.
+     * @hide
+     */
+    public int attachAuxEffect(int effectId) {
+        if (mState != STATE_INITIALIZED) {
+            return ERROR_INVALID_OPERATION;
+        }
+        return native_attachAuxEffect(effectId);
+    }
+
+    /**
+     * Sets the send level of the audio track to the attached auxiliary effect
+     * {@see #attachAuxEffect(int)}. The level value range is 0 to 1.0.
+     * <p>By default the send level is 0, so even if an effect is attached to the player
+     * this method must be called for the effect to be applied.
+     * <p>Note that the passed level value is a raw scalar. UI controls should be scaled
+     * logarithmically: the gain applied by audio framework ranges from -72dB to 0dB,
+     * so an appropriate conversion from linear UI input x to level is:
+     * x == 0 -> level = 0
+     * 0 < x <= R -> level = 10^(72*(x-R)/20/R)
+     *
+     * @param level send level scalar
+     * @return error code or success, see {@link #SUCCESS},
+     *    {@link #ERROR_INVALID_OPERATION}
+     // FIXME: unhide.
+     * @hide
+     */
+    public int setAuxEffectSendLevel(float level) {
+        if (mState != STATE_INITIALIZED) {
+            return ERROR_INVALID_OPERATION;
+        }
+        // clamp the level
+        if (level < getMinVolume()) {
+            level = getMinVolume();
+        }
+        if (level > getMaxVolume()) {
+            level = getMaxVolume();
+        }
+        native_setAuxEffectSendLevel(level);
+        return SUCCESS;
+    }
 
     //---------------------------------------------------------
     // Interface definitions
@@ -1122,6 +1181,9 @@ public class AudioTrack
             int sampleRateInHz, int channelConfig, int audioFormat);
 
     private native final int native_get_session_id();
+
+    private native final int native_attachAuxEffect(int effectId);
+    private native final void native_setAuxEffectSendLevel(float level);
 
     //---------------------------------------------------------
     // Utility methods

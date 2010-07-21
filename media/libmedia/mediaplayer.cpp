@@ -270,6 +270,7 @@ status_t MediaPlayer::start()
                     MEDIA_PLAYER_PLAYBACK_COMPLETE | MEDIA_PLAYER_PAUSED ) ) ) {
         mPlayer->setLooping(mLoop);
         mPlayer->setVolume(mLeftVolume, mRightVolume);
+        mPlayer->setAuxEffectSendLevel(mSendLevel);
         mCurrentState = MEDIA_PLAYER_STARTED;
         status_t ret = mPlayer->start();
         if (ret != NO_ERROR) {
@@ -521,6 +522,31 @@ int MediaPlayer::getAudioSessionId()
 {
     Mutex::Autolock _l(mLock);
     return mAudioSessionId;
+}
+
+status_t MediaPlayer::setAuxEffectSendLevel(float level)
+{
+    LOGV("MediaPlayer::setAuxEffectSendLevel(%f)", level);
+    Mutex::Autolock _l(mLock);
+    mSendLevel = level;
+    if (mPlayer != 0) {
+        return mPlayer->setAuxEffectSendLevel(level);
+    }
+    return OK;
+}
+
+status_t MediaPlayer::attachAuxEffect(int effectId)
+{
+    LOGV("MediaPlayer::attachAuxEffect(%d)", effectId);
+    Mutex::Autolock _l(mLock);
+    if (mPlayer == 0 ||
+        (mCurrentState & MEDIA_PLAYER_IDLE) ||
+        (mCurrentState == MEDIA_PLAYER_STATE_ERROR )) {
+        LOGE("attachAuxEffect called in state %d", mCurrentState);
+        return INVALID_OPERATION;
+    }
+
+    return mPlayer->attachAuxEffect(effectId);
 }
 
 void MediaPlayer::notify(int msg, int ext1, int ext2)
