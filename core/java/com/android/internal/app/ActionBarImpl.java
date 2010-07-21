@@ -17,7 +17,6 @@
 package com.android.internal.app;
 
 import com.android.internal.view.menu.MenuBuilder;
-import com.android.internal.view.menu.MenuItemImpl;
 import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.SubMenuBuilder;
 import com.android.internal.widget.ActionBarContextView;
@@ -114,10 +113,18 @@ public class ActionBarImpl extends ActionBar {
     }
 
     public void setDropdownNavigationMode(SpinnerAdapter adapter, NavigationCallback callback) {
+        setDropdownNavigationMode(adapter, callback, -1);
+    }
+
+    public void setDropdownNavigationMode(SpinnerAdapter adapter, NavigationCallback callback,
+            int defaultSelectedPosition) {
         cleanupTabs();
-        mActionView.setCallback(callback);
         mActionView.setNavigationMode(NAVIGATION_MODE_DROPDOWN_LIST);
         mActionView.setDropdownAdapter(adapter);
+        if (defaultSelectedPosition >= 0) {
+            mActionView.setDropdownSelectedPosition(defaultSelectedPosition);
+        }
+        mActionView.setCallback(callback);
     }
 
     public void setStandardNavigationMode() {
@@ -137,6 +144,31 @@ public class ActionBarImpl extends ActionBar {
         mActionView.setTitle(title);
         mActionView.setSubtitle(subtitle);
         mActionView.setCallback(null);
+    }
+
+    public void setSelectedNavigationItem(int position) {
+        switch (mActionView.getNavigationMode()) {
+        case NAVIGATION_MODE_TABS:
+            selectTab(mTabs.get(position));
+            break;
+        case NAVIGATION_MODE_DROPDOWN_LIST:
+            mActionView.setDropdownSelectedPosition(position);
+            break;
+        default:
+            throw new IllegalStateException(
+                    "setSelectedNavigationItem not valid for current navigation mode");
+        }
+    }
+
+    public int getSelectedNavigationItem() {
+        switch (mActionView.getNavigationMode()) {
+        case NAVIGATION_MODE_TABS:
+            return mSelectedTab.getPosition();
+        case NAVIGATION_MODE_DROPDOWN_LIST:
+            return mActionView.getDropdownSelectedPosition();
+        default:
+            return -1;
+        }
     }
 
     private void cleanupTabs() {
@@ -328,11 +360,6 @@ public class ActionBarImpl extends ActionBar {
         }
         mSelectedTab = (TabImpl) tab;
         trans.commit();
-    }
-
-    @Override
-    public void selectTabAt(int position) {
-        selectTab(mTabs.get(position));
     }
 
     /**

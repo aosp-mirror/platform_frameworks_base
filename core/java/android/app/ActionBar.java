@@ -93,6 +93,35 @@ public abstract class ActionBar {
             NavigationCallback callback);
 
     /**
+     * Set the action bar into dropdown navigation mode and supply an adapter that will
+     * provide views for navigation choices.
+     *
+     * @param adapter An adapter that will provide views both to display the current
+     *                navigation selection and populate views within the dropdown
+     *                navigation menu.
+     * @param callback A NavigationCallback that will receive events when the user
+     *                 selects a navigation item.
+     * @param defaultSelectedPosition Position within the provided adapter that should be
+     *                                selected from the outset.
+     */
+    public abstract void setDropdownNavigationMode(SpinnerAdapter adapter,
+            NavigationCallback callback, int defaultSelectedPosition);
+
+    /**
+     * Set the selected navigation item in dropdown or tabbed navigation modes.
+     *
+     * @param position Position of the item to select.
+     */
+    public abstract void setSelectedNavigationItem(int position);
+
+    /**
+     * Get the position of the selected navigation item in dropdown or tabbed navigation modes.
+     *
+     * @return Position of the selected item.
+     */
+    public abstract int getSelectedNavigationItem();
+
+    /**
      * Set the action bar into standard navigation mode, supplying a title and subtitle.
      * 
      * Standard navigation mode is default. The title is automatically set to the
@@ -287,13 +316,6 @@ public abstract class ActionBar {
      * @param tab Tab to select
      */
     public abstract void selectTab(Tab tab);
-
-    /**
-     * Select the tab at <code>position</code>
-     *
-     * @param position Position of the tab to select
-     */
-    public abstract void selectTabAt(int position);
 
     /**
      * Callback interface for ActionBar navigation events. 
