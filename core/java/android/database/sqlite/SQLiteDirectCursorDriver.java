@@ -53,7 +53,7 @@ public class SQLiteDirectCursorDriver implements SQLiteCursorDriver {
 
             // Create the cursor
             if (factory == null) {
-                mCursor = new SQLiteCursor(mDatabase, this, mEditTable, query);
+                mCursor = new SQLiteCursor(this, mEditTable, query);
             } else {
                 mCursor = factory.newCursor(mDatabase, this, mEditTable, query);
             }

@@ -44,19 +44,16 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     static final int NO_COUNT = -1;
 
     /** The name of the table to edit */
-    private String mEditTable;
+    private final String mEditTable;
 
     /** The names of the columns in the rows */
-    private String[] mColumns;
+    private final String[] mColumns;
 
     /** The query object for the cursor */
     private SQLiteQuery mQuery;
 
-    /** The database the cursor was created from */
-    private SQLiteDatabase mDatabase;
-
     /** The compiled query this cursor came from */
-    private SQLiteCursorDriver mDriver;
+    private final SQLiteCursorDriver mDriver;
 
     /** The number of rows in the cursor */
     private int mCount = NO_COUNT;
@@ -65,7 +62,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     private Map<String, Integer> mColumnNameMap;
 
     /** Used to find out where a cursor was allocated in case it never got released. */
-    private Throwable mStackTrace;
+    private final Throwable mStackTrace;
     
     /** 
      *  mMaxRead is the max items that each cursor window reads 
@@ -140,7 +137,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
                     break;
                 }
                 try {
-                    int count = mQuery.fillWindow(cw, mMaxRead, mCount);
+                    int count = getQuery().fillWindow(cw, mMaxRead, mCount);
                     // return -1 means not finished
                     if (count != 0) {
                         if (count == NO_COUNT){
@@ -205,24 +202,46 @@ public class SQLiteCursor extends AbstractWindowedCursor {
      * has package scope.
      *
      * @param db a reference to a Database object that is already constructed
-     *     and opened
+     *     and opened. This param is not used any longer
      * @param editTable the name of the table used for this query
      * @param query the rest of the query terms
      *     cursor is finalized
+     * @deprecated use {@link #SQLiteCursor(SQLiteCursorDriver, String, SQLiteQuery)} instead
      */
+    @Deprecated
     public SQLiteCursor(SQLiteDatabase db, SQLiteCursorDriver driver,
             String editTable, SQLiteQuery query) {
+        this(driver, editTable, query);
+    }
+
+    /**
+     * Execute a query and provide access to its result set through a Cursor
+     * interface. For a query such as: {@code SELECT name, birth, phone FROM
+     * myTable WHERE ... LIMIT 1,20 ORDER BY...} the column names (name, birth,
+     * phone) would be in the projection argument and everything from
+     * {@code FROM} onward would be in the params argument. This constructor
+     * has package scope.
+     *
+     * @param editTable the name of the table used for this query
+     * @param query the {@link SQLiteQuery} object associated with this cursor object.
+     */
+    public SQLiteCursor(SQLiteCursorDriver driver, String editTable, SQLiteQuery query) {
         // The AbstractCursor constructor needs to do some setup.
         super();
+        if (query == null) {
+            throw new IllegalArgumentException("query object cannot be null");
+        }
+        if (query.mDatabase == null) {
+            throw new IllegalArgumentException("query.mDatabase cannot be null");
+        }
         mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
-        mDatabase = db;
         mDriver = driver;
         mEditTable = editTable;
         mColumnNameMap = null;
         mQuery = query;
 
         try {
-            db.lock();
+            query.mDatabase.lock();
 
             // Setup the list of columns
             int columnCount = mQuery.columnCountLocked();
@@ -243,7 +262,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
                 }
             }
         } finally {
-            db.unlock();
+            query.mDatabase.unlock();
         }
     }
 
@@ -251,7 +270,9 @@ public class SQLiteCursor extends AbstractWindowedCursor {
      * @return the SQLiteDatabase that this cursor is associated with.
      */
     public SQLiteDatabase getDatabase() {
-        return mDatabase;
+        synchronized (this) {
+            return mQuery.mDatabase;
+        }
     }
 
     @Override
@@ -287,13 +308,17 @@ public class SQLiteCursor extends AbstractWindowedCursor {
                 }
         }
         mWindow.setStartPosition(startPos);
-        mCount = mQuery.fillWindow(mWindow, mInitialRead, 0);
+        mCount = getQuery().fillWindow(mWindow, mInitialRead, 0);
         // return -1 means not finished
         if (mCount == NO_COUNT){
             mCount = startPos + mInitialRead;
             Thread t = new Thread(new QueryThread(mCursorState), "query thread");
             t.start();
         } 
+    }
+
+    private synchronized SQLiteQuery getQuery() {
+        return mQuery;
     }
 
     @Override
@@ -350,9 +375,11 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     @Override
     public void close() {
         super.close();
-        deactivateCommon();
-        mQuery.close();
-        mDriver.cursorClosed();
+        synchronized (this) {
+            deactivateCommon();
+            mQuery.close();
+            mDriver.cursorClosed();
+        }
     }
 
     /**
@@ -361,7 +388,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
      */
     private void warnIfUiThread() {
         if (Looper.getMainLooper() == Looper.myLooper()) {
-            String databasePath = mDatabase.getPath();
+            String databasePath = getQuery().mDatabase.getPath();
             // We show the warning once per database in order not to spam logcat.
             if (!sAlreadyWarned.containsKey(databasePath)) {
                 sAlreadyWarned.put(databasePath, true);
@@ -383,16 +410,25 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         if (Config.LOGV) {
             timeStart = System.currentTimeMillis();
         }
-        /*
-         * Synchronize on the database lock to ensure that mCount matches the
-         * results of mQuery.requery().
-         */
-        mDatabase.lock();
-        try {
+
+        synchronized (this) {
             if (mWindow != null) {
                 mWindow.clear();
             }
             mPos = -1;
+            SQLiteDatabase db = mQuery.mDatabase.getDatabaseHandle(mQuery.mSql);
+            if (!db.equals(mQuery.mDatabase)) {
+                // since we need to use a different database connection handle,
+                // re-compile the query
+                db.lock();
+                try {
+                    // close the old mQuery object and open a new one
+                    mQuery.close();
+                    mQuery = new SQLiteQuery(db, mQuery);
+                } finally {
+                    db.unlock();
+                }
+            }
             // This one will recreate the temp table, and get its count
             mDriver.cursorRequeried(this);
             mCount = NO_COUNT;
@@ -403,8 +439,6 @@ public class SQLiteCursor extends AbstractWindowedCursor {
             } finally {
                 queryThreadUnlock();
             }
-        } finally {
-            mDatabase.unlock();
         }
 
         if (Config.LOGV) {
@@ -452,14 +486,14 @@ public class SQLiteCursor extends AbstractWindowedCursor {
             if (mWindow != null) {
                 int len = mQuery.mSql.length();
                 Log.e(TAG, "Finalizing a Cursor that has not been deactivated or closed. " +
-                        "database = " + mDatabase.getPath() + ", table = " + mEditTable +
+                        "database = " + mQuery.mDatabase.getPath() + ", table = " + mEditTable +
                         ", query = " + mQuery.mSql.substring(0, (len > 100) ? 100 : len),
                         mStackTrace);
                 close();
                 SQLiteDebug.notifyActiveCursorFinalized();
             } else {
                 if (Config.LOGV) {
-                    Log.v(TAG, "Finalizing cursor on database = " + mDatabase.getPath() +
+                    Log.v(TAG, "Finalizing cursor on database = " + mQuery.mDatabase.getPath() +
                             ", table = " + mEditTable + ", query = " + mQuery.mSql);
                 }
             }

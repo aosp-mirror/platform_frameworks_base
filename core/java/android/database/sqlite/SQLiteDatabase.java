@@ -341,6 +341,12 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     /* package */ final short mConnectionNum;
 
+    /** on pooled database connections, this member points to the parent ( = main)
+     * database connection handle.
+     * package visibility only for testing purposes
+     */
+    /* package */ SQLiteDatabase mParentConnObj = null;
+
     private static final String MEMORY_DB_PATH = ":memory:";
 
     synchronized void addSQLiteClosable(SQLiteClosable closable) {
@@ -2425,6 +2431,27 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
     }
 
+    /* package */ SQLiteDatabase getDatabaseHandle(String sql) {
+        if (isPooledConnection()) {
+            // this is a pooled database connection
+            if (isOpen()) {
+                // TODO: use another connection from the pool
+                // if this connection is currently in use by some other thread
+                // AND if there are free connections in the pool
+                return this;
+            } else {
+                // the pooled connection is not open! could have been closed either due
+                // to corruption on this or some other connection to the database
+                // OR, maybe the connection pool is disabled after this connection has been
+                // allocated to me. try to get some other pooled or main database connection
+                return getParentDbConnObj().getDbConnection(sql);
+            }
+        } else {
+            // this is NOT a pooled connection. can we get one?
+            return getDbConnection(sql);
+        }
+    }
+
     /**
      * Sets the database connection handle pool size to the given value.
      * Database connection handle pool is enabled when the app calls
@@ -2450,7 +2477,13 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /* package */ SQLiteDatabase createPoolConnection(short connectionNum) {
-        return openDatabase(mPath, mFactory, mFlags, mErrorHandler, connectionNum);
+        SQLiteDatabase db = openDatabase(mPath, mFactory, mFlags, mErrorHandler, connectionNum);
+        db.mParentConnObj = this;
+        return db;
+    }
+
+    private synchronized SQLiteDatabase getParentDbConnObj() {
+        return mParentConnObj;
     }
 
     private boolean isPooledConnection() {
@@ -2459,29 +2492,30 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     /* package */ SQLiteDatabase getDbConnection(String sql) {
         verifyDbIsOpen();
+        // this method should always be called with main database connection handle
+        // NEVER with pooled database connection handle
+        if (isPooledConnection()) {
+            throw new IllegalStateException("incorrect database connection handle");
+        }
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            // this method shoudl never be called with anything other than SELECT
+            if (sql.substring(0, 6).equalsIgnoreCase("SELECT")) {
+                throw new IllegalStateException("unexpected SQL statement: " + sql);
+            }
+        }
 
         // use the current connection handle if
-        // 1. this is a pooled connection handle
-        // 2. OR, if this thread is in a transaction
-        // 3. OR, if there is NO connection handle pool setup
-        SQLiteDatabase db = null;
-        if (isPooledConnection() ||
-                (inTransaction() && mLock.isHeldByCurrentThread()) ||
-                (this.mConnectionPool == null)) {
-            db = this;
+        // 1. if this thread is in a transaction
+        // 2. OR, if there is NO connection handle pool setup
+        if ((inTransaction() && mLock.isHeldByCurrentThread()) || mConnectionPool == null) {
+            return this;
         } else {
             // get a connection handle from the pool
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 assert mConnectionPool != null;
             }
-            db = mConnectionPool.get(sql);
+            return mConnectionPool.get(sql);
         }
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "getDbConnection threadid = " + Thread.currentThread().getId() +
-                    ", request on # " + mConnectionNum +
-                    ", assigned # " + db.mConnectionNum + ", " + getPath());
-        }
-        return db;
     }
 
     private void releaseDbConnection(SQLiteDatabase db) {
