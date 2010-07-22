@@ -79,35 +79,45 @@ ANDROID_SINGLETON_STATIC_INSTANCE(BatteryService)
 
 SensorService::SensorService()
     : Thread(false),
-      mDump("android.permission.DUMP")
+      mSensorDevice(0),
+      mSensorModule(0),
+      mDump("android.permission.DUMP"),
+      mInitCheck(NO_INIT)
 {
 }
 
 void SensorService::onFirstRef()
 {
+    LOGD("nuSensorService starting...");
+
     status_t err = hw_get_module(SENSORS_HARDWARE_MODULE_ID,
             (hw_module_t const**)&mSensorModule);
 
     LOGE_IF(err, "couldn't load %s module (%s)",
             SENSORS_HARDWARE_MODULE_ID, strerror(-err));
 
-    err = sensors_open(&mSensorModule->common, &mSensorDevice);
+    if (mSensorModule) {
+        err = sensors_open(&mSensorModule->common, &mSensorDevice);
 
-    LOGE_IF(err, "couldn't open device for module %s (%s)",
-            SENSORS_HARDWARE_MODULE_ID, strerror(-err));
+        LOGE_IF(err, "couldn't open device for module %s (%s)",
+                SENSORS_HARDWARE_MODULE_ID, strerror(-err));
 
-    LOGD("nuSensorService starting...");
+        struct sensor_t const* list;
+        int count = mSensorModule->get_sensors_list(mSensorModule, &list);
+        for (int i=0 ; i<count ; i++) {
+            Sensor sensor(list + i);
+            LOGI("%s", sensor.getName().string());
+            mSensorList.add(sensor);
+            if (mSensorDevice) {
+                mSensorDevice->activate(mSensorDevice, sensor.getHandle(), 0);
+            }
+        }
 
-    struct sensor_t const* list;
-    int count = mSensorModule->get_sensors_list(mSensorModule, &list);
-    for (int i=0 ; i<count ; i++) {
-        Sensor sensor(list + i);
-        LOGI("%s", sensor.getName().string());
-        mSensorList.add(sensor);
-        mSensorDevice->activate(mSensorDevice, sensor.getHandle(), 0);
+        if (mSensorDevice) {
+            run("SensorService", PRIORITY_URGENT_DISPLAY);
+            mInitCheck = NO_ERROR;
+        }
     }
-
-    run("SensorService", PRIORITY_URGENT_DISPLAY);
 }
 
 SensorService::~SensorService()
@@ -238,6 +248,9 @@ void SensorService::cleanupConnection(const wp<SensorEventConnection>& connectio
 status_t SensorService::enable(const sp<SensorEventConnection>& connection,
         int handle)
 {
+    if (mInitCheck != NO_ERROR)
+        return mInitCheck;
+
     status_t err = NO_ERROR;
     Mutex::Autolock _l(mLock);
     SensorRecord* rec = mActiveSensors.valueFor(handle);
@@ -265,6 +278,9 @@ status_t SensorService::enable(const sp<SensorEventConnection>& connection,
 status_t SensorService::disable(const sp<SensorEventConnection>& connection,
         int handle)
 {
+    if (mInitCheck != NO_ERROR)
+        return mInitCheck;
+
     status_t err = NO_ERROR;
     Mutex::Autolock _l(mLock);
     SensorRecord* rec = mActiveSensors.valueFor(handle);
@@ -291,6 +307,9 @@ status_t SensorService::disable(const sp<SensorEventConnection>& connection,
 status_t SensorService::setRate(const sp<SensorEventConnection>& connection,
         int handle, nsecs_t ns)
 {
+    if (mInitCheck != NO_ERROR)
+        return mInitCheck;
+
     status_t err = NO_ERROR;
     Mutex::Autolock _l(mLock);
 
