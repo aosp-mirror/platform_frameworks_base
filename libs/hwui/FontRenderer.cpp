@@ -65,8 +65,8 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y) {
             0, glyph->mBitmapMinU, glyph->mBitmapMinV);
 }
 
-void Font::renderUTF(SkPaint* paint, const char *text, uint32_t len, uint32_t start, int numGlyphs,
-        int x, int y) {
+void Font::renderUTF(SkPaint* paint, const char *text, uint32_t len, uint32_t start,
+        int numGlyphs, int x, int y) {
     if (numGlyphs == 0 || text == NULL || len == 0) {
         return;
     }
@@ -110,8 +110,7 @@ void Font::renderUTF(SkPaint* paint, const char *text, uint32_t len, uint32_t st
             drawCachedGlyph(cachedGlyph, penX, penY);
         }
 
-        // TODO: Check how to do this conversion
-        penX += SkFixedRound(cachedGlyph->mAdvanceX);
+        penX += SkFixedFloor(cachedGlyph->mAdvanceX);
 
         // If we were given a specific number of glyphs, decrement
         if (numGlyphs > 0) {
@@ -391,17 +390,13 @@ void FontRenderer::issueDrawCommand() {
 void FontRenderer::appendMeshQuad(float x1, float y1, float z1, float u1, float v1, float x2,
         float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3,
         float x4, float y4, float z4, float u4, float v4) {
+    if (x1 > mClip->right || y1 < mClip->top || x2 < mClip->left || y4 > mClip->bottom) {
+        return;
+    }
+
     const uint32_t vertsPerQuad = 4;
     const uint32_t floatsPerVert = 5;
     float *currentPos = mTextMeshPtr + mCurrentQuadIndex * vertsPerQuad * floatsPerVert;
-
-    // TODO: Cull things that are off the screen
-    //    float width = (float)mRSC->getWidth();
-    //    float height = (float)mRSC->getHeight();
-    //
-    //    if(x1 > width || y1 < 0.0f || x2 < 0 || y4 > height) {
-    //        return;
-    //    }
 
     (*currentPos++) = x1;
     (*currentPos++) = y1;
@@ -439,28 +434,22 @@ void FontRenderer::setFont(uint32_t fontId, float fontSize) {
     mCurrentFont = Font::create(this, fontId, fontSize);
 }
 
-void FontRenderer::renderText(SkPaint* paint, const char *text, uint32_t len, uint32_t startIndex,
-        int numGlyphs, int x, int y) {
+void FontRenderer::renderText(SkPaint* paint, const Rect* clip, const char *text, uint32_t len,
+        uint32_t startIndex, int numGlyphs, int x, int y) {
     checkInit();
 
-    // Render code here
-    Font *currentFont = mCurrentFont;
-    if (!currentFont) {
-        LOGE("Unable to initialize any fonts");
+    if (!mCurrentFont) {
+        LOGE("No font set");
         return;
     }
 
-    currentFont->renderUTF(paint, text, len, startIndex, numGlyphs, x, y);
+    mClip = clip;
+    mCurrentFont->renderUTF(paint, text, len, startIndex, numGlyphs, x, y);
 
     if (mCurrentQuadIndex != 0) {
         issueDrawCommand();
         mCurrentQuadIndex = 0;
     }
-}
-
-void FontRenderer::renderText(SkPaint* paint, const char *text, int x, int y) {
-    size_t textLen = strlen(text);
-    renderText(paint, text, textLen, 0, -1, x, y);
 }
 
 }; // namespace uirenderer

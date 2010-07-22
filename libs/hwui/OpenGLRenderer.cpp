@@ -530,11 +530,6 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
 }
 
 void OpenGLRenderer::drawText(const char* text, int count, float x, float y, SkPaint* paint) {
-    // TODO: Support paint's text alignments, proper clipping
-    if (quickReject(x, y, x + 1, y +1)) {
-        return;
-    }
-
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
@@ -556,8 +551,11 @@ void OpenGLRenderer::drawText(const char* text, int count, float x, float y, SkP
     // Always premultiplied
     glUniform4f(mDrawTextProgram->color, r, g, b, a);
 
+    // TODO: Implement scale properly
+    const Rect& clip = mSnapshot->getLocalClip();
+
     mFontRenderer.setFont(SkTypeface::UniqueID(paint->getTypeface()), paint->getTextSize());
-    mFontRenderer.renderText(paint, text, count, 0, count, x, y);
+    mFontRenderer.renderText(paint, &clip, text, count, 0, count, x, y);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }

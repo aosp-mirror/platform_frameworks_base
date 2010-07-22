@@ -26,6 +26,8 @@
 
 #include <GLES2/gl2.h>
 
+#include "Rect.h"
+
 namespace android {
 namespace uirenderer {
 
@@ -35,9 +37,6 @@ class Font {
 public:
     ~Font();
 
-    // Pointer to the utf data, length of data, where to start, number of glyphs ot read
-    // (each glyph may be longer than a char because we are dealing with utf data)
-    // Last two variables are the initial pen position
     void renderUTF(SkPaint* paint, const char *text, uint32_t len, uint32_t start,
             int numGlyphs, int x, int y);
 
@@ -91,9 +90,8 @@ public:
     void deinit();
 
     void setFont(uint32_t fontId, float fontSize);
-    void renderText(SkPaint* paint, const char *text, uint32_t len, uint32_t startIndex,
-            int numGlyphs, int x, int y);
-    void renderText(SkPaint* paint, const char *text, int x, int y);
+    void renderText(SkPaint* paint, const Rect* clip, const char *text, uint32_t len,
+            uint32_t startIndex, int numGlyphs, int x, int y);
 
     GLuint getTexture() {
         checkInit();
@@ -140,7 +138,6 @@ protected:
     }
 
     void initTextTexture();
-
     bool cacheBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_t *retOriginY);
 
     void flushAllAndInvalidate();
@@ -149,7 +146,6 @@ protected:
     void checkInit();
 
     void issueDrawCommand();
-
     void appendMeshQuad(float x1, float y1, float z1, float u1, float v1, float x2, float y2,
             float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3,
             float x4, float y4, float z4, float u4, float v4);
@@ -157,10 +153,9 @@ protected:
     uint32_t mCacheWidth;
     uint32_t mCacheHeight;
 
-    Font* mCurrentFont;
-
     Vector<CacheTextureLine*> mCacheLines;
 
+    Font* mCurrentFont;
     Vector<Font*> mActiveFonts;
 
     // Texture to cache glyph bitmaps
@@ -174,6 +169,8 @@ protected:
     uint32_t mMaxNumberOfQuads;
 
     uint32_t mIndexBufferID;
+
+    const Rect* mClip;
 
     bool mInitialized;
 };
