@@ -624,14 +624,6 @@ public final class Downloads {
                 "android.permission.SEND_DOWNLOAD_COMPLETED_INTENTS";
 
         /**
-         * The permission to access downloads to {@link DESTINATION_EXTERNAL}
-         * which were downloaded by other applications.
-         * @hide
-         */
-        public static final String PERMISSION_SEE_ALL_EXTERNAL =
-                "android.permission.SEE_ALL_EXTERNAL";
-
-        /**
          * The content:// URI for the data table in the provider
          */
         public static final Uri CONTENT_URI =
