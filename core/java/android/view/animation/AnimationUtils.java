@@ -16,6 +16,12 @@
 
 package android.view.animation;
 
+import android.animation.Animatable;
+import android.animation.Animator;
+import android.animation.PropertyAnimator;
+import android.animation.Sequencer;
+import android.content.res.TypedArray;
+import android.util.TypedValue;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -27,12 +33,21 @@ import android.util.Xml;
 import android.os.SystemClock;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Defines common utilities for working with animations.
  *
  */
 public class AnimationUtils {
+
+    /**
+     * These flags are used when parsing Sequencer objects
+     */
+    private static final int TOGETHER = 0;
+    private static final int SEQUENTIALLY = 1;
+
+
     /**
      * Returns the current animation time in milliseconds. This time should be used when invoking
      * {@link Animation#setStartTime(long)}. Refer to {@link android.os.SystemClock} for more
@@ -49,7 +64,7 @@ public class AnimationUtils {
 
     /**
      * Loads an {@link Animation} object from a resource
-     * 
+     *
      * @param context Application context used to access resources
      * @param id The resource id of the animation to load
      * @return The animation object reference by the specified id
@@ -77,17 +92,54 @@ public class AnimationUtils {
         }
     }
 
+    /**
+     * Loads an {@link Animation} object from a resource
+     *
+     * @param context Application context used to access resources
+     * @param id The resource id of the animation to load
+     * @return The animation object reference by the specified id
+     * @throws NotFoundException when the animation cannot be loaded
+     * @hide
+     */
+    public static Animatable loadAnimator(Context context, int id)
+            throws NotFoundException {
+
+        XmlResourceParser parser = null;
+        try {
+            parser = context.getResources().getAnimation(id);
+            return createAnimatableFromXml(context, parser);
+        } catch (XmlPullParserException ex) {
+            NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" +
+                    Integer.toHexString(id));
+            rnf.initCause(ex);
+            throw rnf;
+        } catch (IOException ex) {
+            NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" +
+                    Integer.toHexString(id));
+            rnf.initCause(ex);
+            throw rnf;
+        } finally {
+            if (parser != null) parser.close();
+        }
+    }
+
+    private static Animatable createAnimatableFromXml(Context c, XmlPullParser parser)
+            throws XmlPullParserException, IOException {
+
+        return createAnimatableFromXml(c, parser, Xml.asAttributeSet(parser), null, 0);
+    }
+
     private static Animation createAnimationFromXml(Context c, XmlPullParser parser)
             throws XmlPullParserException, IOException {
 
         return createAnimationFromXml(c, parser, null, Xml.asAttributeSet(parser));
     }
-    
+
     private static Animation createAnimationFromXml(Context c, XmlPullParser parser,
             AnimationSet parent, AttributeSet attrs) throws XmlPullParserException, IOException {
-        
+
         Animation anim = null;
- 
+
         // Make sure we are on a start tag.
         int type;
         int depth = parser.getDepth();
@@ -100,7 +152,7 @@ public class AnimationUtils {
             }
 
             String  name = parser.getName();
-    
+
             if (name.equals("set")) {
                 anim = new AnimationSet(c, attrs);
                 createAnimationFromXml(c, parser, (AnimationSet)anim, attrs);
@@ -120,7 +172,67 @@ public class AnimationUtils {
                 parent.addAnimation(anim);
             }
         }
-    
+
+        return anim;
+
+    }
+
+    private static Animatable createAnimatableFromXml(Context c, XmlPullParser parser,
+            AttributeSet attrs, Sequencer parent, int sequenceOrdering)
+            throws XmlPullParserException, IOException {
+
+        Animatable anim = null;
+        ArrayList<Animatable> childAnims = null;
+
+        // Make sure we are on a start tag.
+        int type;
+        int depth = parser.getDepth();
+
+        while (((type=parser.next()) != XmlPullParser.END_TAG || parser.getDepth() > depth)
+               && type != XmlPullParser.END_DOCUMENT) {
+
+            if (type != XmlPullParser.START_TAG) {
+                continue;
+            }
+
+            String  name = parser.getName();
+
+            if (name.equals("property")) {
+                anim = new PropertyAnimator(c, attrs);
+            } else if (name.equals("animator")) {
+                anim = new Animator(c, attrs);
+            } else if (name.equals("sequencer")) {
+                anim = new Sequencer();
+                TypedArray a = c.obtainStyledAttributes(attrs,
+                        com.android.internal.R.styleable.Sequencer);
+                int ordering = a.getInt(com.android.internal.R.styleable.Sequencer_ordering,
+                        TOGETHER);
+                createAnimatableFromXml(c, parser, attrs, (Sequencer) anim,  ordering);
+                a.recycle();
+            } else {
+                throw new RuntimeException("Unknown animator name: " + parser.getName());
+            }
+
+            if (parent != null) {
+                if (childAnims == null) {
+                    childAnims = new ArrayList<Animatable>();
+                }
+                childAnims.add(anim);
+            }
+        }
+        if (parent != null && childAnims != null) {
+            Animatable[] animsArray = new Animatable[childAnims.size()];
+            int index = 0;
+            for (Animatable a : childAnims) {
+                animsArray[index++] = a;
+            }
+            if (sequenceOrdering == TOGETHER) {
+                parent.playTogether(animsArray);
+            } else {
+                parent.playSequentially(animsArray);
+            }
+        }
+
         return anim;
 
     }

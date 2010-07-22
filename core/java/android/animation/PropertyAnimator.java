@@ -16,6 +16,9 @@
 
 package android.animation;
 
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.util.AttributeSet;
 import android.util.Log;
 
 import java.lang.reflect.InvocationTargetException;
@@ -151,6 +154,24 @@ public final class PropertyAnimator extends Animator {
         return mGetter;
     }
 
+    /**
+     * Creates a new animation whose parameters come from the specified context and
+     * attributes set.
+     *
+     * @param context the application environment
+     * @param attrs the set of attributes holding the animation parameters
+     */
+    public PropertyAnimator(Context context, AttributeSet attrs) {
+        super(context, attrs);
+
+        TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.PropertyAnimator);
+
+        mPropertyName = a.getString(com.android.internal.R.styleable.PropertyAnimator_propertyName);
+
+
+        a.recycle();
+    }
     /**
      * Determine the setter or getter function using the JavaBeans convention of setFoo or
      * getFoo for a property named 'foo'. This function figures out what the name of the
@@ -488,6 +509,15 @@ public final class PropertyAnimator extends Animator {
      */
     public Object getTarget() {
         return mTarget;
+    }
+
+    /**
+     * Sets the target object whose property will be animated by this animation
+     *
+     * @param target The object being animated
+     */
+    public void setTarget(Object target) {
+        mTarget = target;
     }
 
     /**

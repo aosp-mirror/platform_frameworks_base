@@ -16,6 +16,11 @@
 
 package android.animation;
 
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.util.AttributeSet;
+import android.view.animation.AnimationUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -116,6 +121,22 @@ public final class Sequencer extends Animatable {
                 }
             }
         }
+    }
+
+    /**
+     * Returns the current list of child Animatable objects controlled by this
+     * Sequencer. This is a copy of the internal list; modifications to the returned list
+     * will not affect the Sequencer, although changes to the underlying Animatable objects
+     * will affect those objects being managed by the Sequencer.
+     *
+     * @return ArrayList<Animatable> The list of child animations of this Sequencer.
+     */
+    public ArrayList<Animatable> getChildAnimations() {
+        ArrayList<Animatable> childList = new ArrayList<Animatable>();
+        for (Node node : mNodes) {
+            childList.add(node.animation);
+        }
+        return childList;
     }
 
     /**

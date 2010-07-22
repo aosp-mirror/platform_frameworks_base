@@ -16,8 +16,11 @@
 
 package android.animation;
 
+import android.content.Context;
+import android.content.res.TypedArray;
 import android.os.Handler;
 import android.os.Message;
+import android.util.AttributeSet;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
@@ -62,6 +65,15 @@ public class Animator extends Animatable {
     private static final int RUNNING    = 1; // Playing normally
     private static final int CANCELED   = 2; // cancel() called - need to end it
     private static final int ENDED      = 3; // end() called - need to end it
+
+    /**
+     * Enum values used in XML attributes to indicate the value for mValueType
+     */
+    private static final int VALUE_TYPE_FLOAT       = 0;
+    private static final int VALUE_TYPE_INT         = 1;
+    private static final int VALUE_TYPE_DOUBLE      = 2;
+    private static final int VALUE_TYPE_COLOR       = 3;
+    private static final int VALUE_TYPE_CUSTOM      = 4;
 
     /**
      * Internal variables
@@ -218,6 +230,67 @@ public class Animator extends Animatable {
      * the animation indefinitely.
      */
     public static final int INFINITE = -1;
+
+    /**
+     * Creates a new animation whose parameters come from the specified context and
+     * attributes set.
+     *
+     * @param context the application environment
+     * @param attrs the set of attributes holding the animation parameters
+     */
+    public Animator(Context context, AttributeSet attrs) {
+        TypedArray a =
+                context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.Animator);
+
+        mDuration = (long) a.getInt(com.android.internal.R.styleable.Animator_duration, 0);
+
+        mStartDelay = (long) a.getInt(com.android.internal.R.styleable.Animator_startOffset, 0);
+
+        final int resID =
+                a.getResourceId(com.android.internal.R.styleable.Animator_interpolator, 0);
+        if (resID > 0) {
+            setInterpolator(AnimationUtils.loadInterpolator(context, resID));
+        }
+        int valueType = a.getInt(com.android.internal.R.styleable.Animator_valueType,
+                VALUE_TYPE_FLOAT);
+
+        switch (valueType) {
+            case VALUE_TYPE_FLOAT:
+                mValueFrom = a.getFloat(com.android.internal.R.styleable.Animator_valueFrom, 0f);
+                mValueTo = a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
+                mValueType = float.class;
+                break;
+            case VALUE_TYPE_INT:
+                mValueFrom = a.getInt(com.android.internal.R.styleable.Animator_valueFrom, 0);
+                mValueTo = a.getInt(com.android.internal.R.styleable.Animator_valueTo, 0);
+                mValueType = int.class;
+                break;
+            case VALUE_TYPE_DOUBLE:
+                mValueFrom = (double)
+                        a.getFloat(com.android.internal.R.styleable.Animator_valueFrom, 0f);
+                mValueTo = (double)
+                        a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
+                mValueType = double.class;
+                break;
+            case VALUE_TYPE_COLOR:
+                mValueFrom = a.getInt(com.android.internal.R.styleable.Animator_valueFrom, 0);
+                mValueTo = a.getInt(com.android.internal.R.styleable.Animator_valueTo, 0);
+                mEvaluator = new RGBEvaluator();
+                mValueType = int.class;
+                break;
+            case VALUE_TYPE_CUSTOM:
+                // TODO: How to get an 'Object' value?
+                mValueFrom = a.getFloat(com.android.internal.R.styleable.Animator_valueFrom, 0f);
+                mValueTo = a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
+                mValueType = Object.class;
+                break;
+        }
+
+        mRepeatCount = a.getInt(com.android.internal.R.styleable.Animator_repeatCount, mRepeatCount);
+        mRepeatMode = a.getInt(com.android.internal.R.styleable.Animator_repeatMode, RESTART);
+
+        a.recycle();
+    }
 
     private Animator(long duration, Object valueFrom, Object valueTo, Class valueType) {
         mDuration = duration;
