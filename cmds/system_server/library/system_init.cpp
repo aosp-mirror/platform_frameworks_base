@@ -19,6 +19,7 @@
 #include <CameraService.h>
 #include <AudioPolicyService.h>
 #include <MediaPlayerService.h>
+#include <SensorService.h>
 
 #include <android_runtime/AndroidRuntime.h>
 
@@ -68,6 +69,9 @@ extern "C" status_t system_init()
         // Start the SurfaceFlinger
         SurfaceFlinger::instantiate();
     }
+
+    // Start the sensor service
+    SensorService::instantiate();
 
     // On the simulator, audioflinger et al don't get started the
     // same way as on the device, and we need to start them here

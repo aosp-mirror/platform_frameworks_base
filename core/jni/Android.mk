@@ -171,6 +171,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libnetutils \
 	libui \
 	libhwui \
+	libgui \
 	libsurfaceflinger_client \
 	libcamera_client \
 	libskiagl \

@@ -36,7 +36,7 @@ class ISensorServer : public IInterface
 public:
     DECLARE_META_INTERFACE(SensorServer);
 
-    virtual Vector<Sensor> getSensorList()= 0;
+    virtual Vector<Sensor> getSensorList() = 0;
     virtual sp<ISensorEventConnection> createSensorEventConnection() = 0;
 };
 

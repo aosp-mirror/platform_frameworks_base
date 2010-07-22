@@ -162,10 +162,6 @@ class ServerThread extends Thread {
             Watchdog.getInstance().init(context, battery, power, alarm,
                     ActivityManagerService.self());
 
-            // Sensor Service is needed by Window Manager, so this goes first
-            Slog.i(TAG, "Sensor Service");
-            ServiceManager.addService(Context.SENSOR_SERVICE, new SensorService(context));
-
             Slog.i(TAG, "Window Manager");
             wm = WindowManagerService.main(context, power,
                     factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL);
