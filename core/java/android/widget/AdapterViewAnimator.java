@@ -16,14 +16,22 @@
 
 package android.widget;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+
+import android.animation.PropertyAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
@@ -35,23 +43,100 @@ import android.view.animation.AnimationUtils;
  * @attr ref android.R.styleable#AdapterViewAnimator_outAnimation
  * @attr ref android.R.styleable#AdapterViewAnimator_animateFirstView
  */
-public class AdapterViewAnimator extends AdapterView<Adapter> implements RemoteViewsAdapter.RemoteAdapterConnectionCallback{
+public abstract class AdapterViewAnimator extends AdapterView<Adapter>
+        implements RemoteViewsAdapter.RemoteAdapterConnectionCallback{
     private static final String TAG = "RemoteViewAnimator";
 
+    /**
+     * The index of the current child, which appears anywhere from the beginning
+     * to the end of the current set of children, as specified by {@link #mActiveOffset}
+     */
     int mWhichChild = 0;
-    boolean mFirstTime = true;
+
+    /**
+     * Whether or not the first view(s) should be animated in
+     */
     boolean mAnimateFirstTime = true;
 
+    /**
+     *  Represents where the in the current window of
+     *  views the current <code>mDisplayedChild</code> sits
+     */
+    int mActiveOffset = 0;
+
+    /**
+     * The number of views that the {@link AdapterViewAnimator} keeps as children at any
+     * given time (not counting views that are pending removal, see {@link #mPreviousViews}).
+     */
+    int mNumActiveViews = 1;
+
+    /**
+     * Array of the children of the {@link AdapterViewAnimator}. This array
+     * is accessed in a circular fashion
+     */
+    View[] mActiveViews;
+
+    /**
+     * List of views pending removal from the {@link AdapterViewAnimator}
+     */
+    ArrayList<View> mPreviousViews;
+
+    /**
+     * The index, relative to the adapter, of the beginning of the window of views
+     */
+    int mCurrentWindowStart = 0;
+
+    /**
+     * The index, relative to the adapter, of the end of the window of views
+     */
+    int mCurrentWindowEnd = -1;
+
+    /**
+     * The same as {@link #mCurrentWindowStart}, except when the we have bounded
+     * {@link #mCurrentWindowStart} to be non-negative
+     */
+    int mCurrentWindowStartUnbounded = 0;
+
+    /**
+     * Indicates whether to treat the adapter to be a circular structure, ie.
+     * the view before 0 is considered to be <code>mAdapter.getCount() - 1</code>
+     *
+     * TODO: this doesn't do anything yet
+     *
+     */
+    boolean mCycleViews = false;
+
+    /**
+     * Handler to post events to the main thread
+     */
+    Handler mMainQueue;
+
+    /**
+     * Listens for data changes from the adapter
+     */
     AdapterDataSetObserver mDataSetObserver;
 
-    View mPreviousView;
-    View mCurrentView;
+    /**
+     * The {@link Adapter} for this {@link AdapterViewAnimator}
+     */
+    Adapter mAdapter;
 
+    /**
+     * The {@link RemoteViewsAdapter} for this {@link AdapterViewAnimator}
+     */
+    RemoteViewsAdapter mRemoteViewsAdapter;
+
+    /**
+     * Specifies whether this is the first time the animator is showing views
+     */
+    boolean mFirstTime = true;
+
+    /**
+     * TODO: Animation stuff is still in flux, waiting on the new framework to settle a bit.
+     */
     Animation mInAnimation;
     Animation mOutAnimation;
-    Adapter mAdapter;
-    RemoteViewsAdapter mRemoteViewsAdapter;
-    private Handler mMainQueue;
+    private  ArrayList<View> mViewsToBringToFront;
 
     public AdapterViewAnimator(Context context) {
         super(context);
@@ -61,8 +146,10 @@ public class AdapterViewAnimator extends AdapterView<Adapter> implements RemoteV
     public AdapterViewAnimator(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        TypedArray a = context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.ViewAnimator);
-        int resource = a.getResourceId(com.android.internal.R.styleable.ViewAnimator_inAnimation, 0);
+        TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.ViewAnimator);
+        int resource = a.getResourceId(
+                com.android.internal.R.styleable.ViewAnimator_inAnimation, 0);
         if (resource > 0) {
             setInAnimation(context, resource);
         }
@@ -72,7 +159,8 @@ public class AdapterViewAnimator extends AdapterView<Adapter> implements RemoteV
             setOutAnimation(context, resource);
         }
 
-        boolean flag = a.getBoolean(com.android.internal.R.styleable.ViewAnimator_animateFirstView, true);
+        boolean flag = a.getBoolean(
+                com.android.internal.R.styleable.ViewAnimator_animateFirstView, true);
         setAnimateFirstView(flag);
 
         a.recycle();
@@ -85,6 +173,54 @@ public class AdapterViewAnimator extends AdapterView<Adapter> implements RemoteV
      */
     private void initViewAnimator(Context context, AttributeSet attrs) {
         mMainQueue = new Handler(Looper.myLooper());
+        mActiveViews = new View[mNumActiveViews];
+        mPreviousViews = new ArrayList<View>();
+        mViewsToBringToFront = new ArrayList<View>();
+    }
+
+    /**
+     * This method is used by subclasses to configure the animator to display the
+     * desired number of views, and specify the offset
+     *
+     * @param numVisibleViews The number of views the animator keeps in the {@link ViewGroup}
+     * @param activeOffset This parameter specifies where the current index ({@link mWhichChild})
+     *        sits within the window. For example if activeOffset is 1, and numVisibleViews is 3,
+     *        and {@link setDisplayedChild} is called with 10, then the effective window will be
+     *        the indexes 9, 10, and 11. In the same example, if activeOffset were 0, then the
+     *        window would instead contain indexes 10, 11 and 12.
+     */
+     void configureViewAnimator(int numVisibleViews, int activeOffset) {
+        if (activeOffset > numVisibleViews - 1) {
+            // Throw an exception here.
+        }
+        mNumActiveViews = numVisibleViews;
+        mActiveOffset = activeOffset;
+        mActiveViews = new View[mNumActiveViews];
+        mPreviousViews.clear();
+        removeAllViewsInLayout();
+        mCurrentWindowStart = 0;
+        mCurrentWindowEnd = -1;
+    }
+
+    /**
+     * This class should be overridden by subclasses to customize view transitions within
+     * the set of visible views
+     *
+     * @param fromIndex The relative index within the window that the view was in, -1 if it wasn't
+     *        in the window
+     * @param toIndex The relative index within the window that the view is going to, -1 if it is
+     *        being removed
+     * @param view The view that is being animated
+     */
+    void animateViewForTransition(int fromIndex, int toIndex, View view) {
+        PropertyAnimator pa;
+        if (fromIndex == -1) {
+            pa = new PropertyAnimator(400, view, "alpha", 0.0f, 1.0f);
+            pa.start();
+        } else if (toIndex == -1) {
+            pa = new PropertyAnimator(400, view, "alpha", 1.0f, 0.0f);
+            pa.start();
+        }
     }
 
     /**
@@ -114,15 +250,25 @@ public class AdapterViewAnimator extends AdapterView<Adapter> implements RemoteV
     /**
      * Return default inAnimation. To be overriden by subclasses.
      */
-    public Animation getDefaultInAnimation() {
+    Animation getDefaultInAnimation() {
         return null;
     }
 
     /**
-     * Return default outAnimation. To be overriden by subclasses.
+     * Return default outAnimation. To be overridden by subclasses.
      */
-    public Animation getDefaultOutAnimation() {
+    Animation getDefaultOutAnimation() {
         return null;
+    }
+
+    /**
+     * To be overridden by subclasses. This method applies a view / index specific
+     * transform to the child view.
+     *
+     * @param child
+     * @param relativeIndex
+     */
+    void applyTransformForChildAtIndex(View child, int relativeIndex) {
     }
 
     /**
@@ -160,70 +306,137 @@ public class AdapterViewAnimator extends AdapterView<Adapter> implements RemoteV
         showOnly(childIndex, animate, false);
     }
 
-    private LayoutParams makeLayoutParams() {
-        int width = mMeasuredWidth - mPaddingLeft - mPaddingRight;
-        int height = mMeasuredHeight - mPaddingTop - mPaddingBottom;
-        return new LayoutParams(width, height);
+    private int modulo(int pos, int size) {
+        return (size + (pos % size)) % size;
     }
 
-    protected void showOnly(int childIndex, boolean animate, boolean onLayout) {
-        if (mAdapter != null) {
-            // The previous view should be removed from the ViewGroup
-            if (mPreviousView != null) {
-                mPreviousView.clearAnimation();
+    /**
+     * Get the view at this index relative to the current window's start
+     *
+     * @param relativeIndex Position relative to the current window's start
+     * @return View at this index, null if the index is outside the bounds
+     */
+    View getViewAtRelativeIndex(int relativeIndex) {
+        if (relativeIndex >= 0 && relativeIndex <= mNumActiveViews - 1) {
+            int index = mCurrentWindowStartUnbounded + relativeIndex;
+            return mActiveViews[modulo(index, mNumActiveViews)];
+        }
+        return null;
+    }
 
-                // TODO: this is where we would store the the view for
-                // recycling
-                removeViewInLayout(mPreviousView);
-            }
+    private LayoutParams createOrReuseLayoutParams(View v) {
+        final LayoutParams currentLp = (LayoutParams) v.getLayoutParams();
+        if (currentLp instanceof LayoutParams) {
+            return currentLp;
+        }
+        return new LayoutParams(v);
+    }
 
-            // If the current view is still being animated, we should
-            // force the animation to end
-            if (mCurrentView != null) {
-                mCurrentView.clearAnimation();
-            }
+    void showOnly(int childIndex, boolean animate, boolean onLayout) {
+        if (mAdapter == null) return;
 
-            // load the new mCurrentView from our adapter
-            mPreviousView = mCurrentView;
-            mCurrentView = mAdapter.getView(childIndex, null, this);
-            if (mPreviousView != mCurrentView) {
-                addViewInLayout(mCurrentView, 0, makeLayoutParams(), true);
-                mCurrentView.bringToFront();
-            }
+        for (int i = 0; i < mPreviousViews.size(); i++) {
+            View viewToRemove = mPreviousViews.get(i);
+            viewToRemove.clearAnimation();
+            // applyTransformForChildAtIndex here just allows for any cleanup
+            // associated with this view that may need to be done by a subclass
+            applyTransformForChildAtIndex(viewToRemove, -1);
+            removeViewInLayout(viewToRemove);
+        }
+        mPreviousViews.clear();
+        int newWindowStartUnbounded = childIndex - mActiveOffset;
+        int newWindowEndUnbounded = newWindowStartUnbounded + mNumActiveViews - 1;
+        int newWindowStart = Math.max(0, newWindowStartUnbounded);
+        int newWindowEnd = Math.min(mAdapter.getCount(), newWindowEndUnbounded);
 
-
-
-            // Animate as necessary
-            if (mPreviousView != null && mPreviousView != mCurrentView) {
-                if (animate && mOutAnimation != null) {
-                    mPreviousView.startAnimation(mOutAnimation);
+        // This section clears out any items that are in our mActiveViews list
+        // but are outside the effective bounds of our window (this is becomes an issue
+        // at the extremities of the list, eg. where newWindowStartUnbounded < 0 or
+        // newWindowEndUnbounded > mAdapter.getCount() - 1
+        for (int i = newWindowStartUnbounded; i < newWindowEndUnbounded; i++) {
+            if (i < newWindowStart || i > newWindowEnd) {
+                int index = modulo(i, mNumActiveViews);
+                if (mActiveViews[index] != null) {
+                    View previousView = mActiveViews[index];
+                    mPreviousViews.add(previousView);
+                    int previousViewRelativeIndex = modulo(index - mCurrentWindowStart,
+                            mNumActiveViews);
+                    animateViewForTransition(previousViewRelativeIndex, -1, previousView);
                 }
-                // This line results in the view becoming invisible *after*
-                // the above animation is complete, or, if there is no animation
-                // then it becomes invisble immediately
-                mPreviousView.setVisibility(View.GONE);
             }
+        }
 
-            if (mCurrentView != null && animate && mInAnimation != null) {
-                mCurrentView.startAnimation(mInAnimation);
-            }
+        // If the window has changed
+        if (! (newWindowStart == mCurrentWindowStart && newWindowEnd == mCurrentWindowEnd)) {
+            // Run through the indices in the new range
+            for (int i = newWindowStart; i <= newWindowEnd; i++) {
 
-            mFirstTime = false;
-            if (!onLayout) {
-                requestLayout();
-                invalidate();
-            } else {
-                // If the Adapter tries to layout the current view when we get it using getView above
-                // the layout will end up being ignored since we are currently laying out, so
-                // we post a delayed requestLayout and invalidate
-                mMainQueue.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mCurrentView.requestLayout();
-                        mCurrentView.invalidate();
+                int oldRelativeIndex = i - mCurrentWindowStartUnbounded;
+                int newRelativeIndex = i - newWindowStartUnbounded;
+                int index = modulo(i, mNumActiveViews);
+
+                // If this item is in the current window, great, we just need to apply
+                // the transform for it's new relative position in the window, and animate
+                // between it's current and new relative positions
+                if (i >= mCurrentWindowStart && i <= mCurrentWindowEnd) {
+                    View view = mActiveViews[index];
+                    applyTransformForChildAtIndex(view, newRelativeIndex);
+                    animateViewForTransition(oldRelativeIndex, newRelativeIndex, view);
+
+                // Otherwise this view is new, so first we have to displace the view that's
+                // taking the new view's place within our cache (a circular array)
+                } else {
+                    if (mActiveViews[index] != null) {
+                        View previousView = mActiveViews[index];
+                        mPreviousViews.add(previousView);
+                        int previousViewRelativeIndex = modulo(index - mCurrentWindowStart,
+                                mNumActiveViews);
+                        animateViewForTransition(previousViewRelativeIndex, -1, previousView);
+
+                        if (mCurrentWindowStart > newWindowStart) {
+                            mViewsToBringToFront.add(previousView);
+                        }
                     }
-                });
+
+                    // We've cleared a spot for the new view. Get it from the adapter, add it
+                    // and apply any transform / animation
+                    View newView = mAdapter.getView(i, null, this);
+                    if (newView != null) {
+                        mActiveViews[index] = newView;
+                        addViewInLayout(newView, -1, createOrReuseLayoutParams(newView));
+                        applyTransformForChildAtIndex(newView, newRelativeIndex);
+                        animateViewForTransition(-1, newRelativeIndex, newView);
+                    }
+                }
+                mActiveViews[index].bringToFront();
             }
+
+            for (int i = 0; i < mViewsToBringToFront.size(); i++) {
+                View v = mViewsToBringToFront.get(i);
+                v.bringToFront();
+            }
+            mViewsToBringToFront.clear();
+
+            mCurrentWindowStart = newWindowStart;
+            mCurrentWindowEnd = newWindowEnd;
+            mCurrentWindowStartUnbounded = newWindowStartUnbounded;
+        }
+
+        mFirstTime = false;
+        if (!onLayout) {
+            requestLayout();
+            invalidate();
+        } else {
+            // If the Adapter tries to layout the current view when we get it using getView
+            // above the layout will end up being ignored since we are currently laying out, so
+            // we post a delayed requestLayout and invalidate
+            mMainQueue.post(new Runnable() {
+                @Override
+                public void run() {
+                    requestLayout();
+                    invalidate();
+                }
+            });
         }
     }
 
@@ -247,10 +460,11 @@ public class AdapterViewAnimator extends AdapterView<Adapter> implements RemoteV
 
             int childRight = mPaddingLeft + child.getMeasuredWidth();
             int childBottom = mPaddingTop + child.getMeasuredHeight();
+            LayoutParams lp = (LayoutParams) child.getLayoutParams();
 
-            child.layout(mPaddingLeft, mPaddingTop, childRight, childBottom);
+            child.layout(mPaddingLeft + lp.horizontalOffset, mPaddingTop + lp.verticalOffset,
+                    childRight + lp.horizontalOffset, childBottom + lp.verticalOffset);
         }
-
         mDataChanged = false;
     }
 
@@ -260,8 +474,6 @@ public class AdapterViewAnimator extends AdapterView<Adapter> implements RemoteV
 
         int widthSpecSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightSpecSize = MeasureSpec.getSize(heightMeasureSpec);
-
-        Log.v(TAG, "onMeasure");
 
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
@@ -278,7 +490,6 @@ public class AdapterViewAnimator extends AdapterView<Adapter> implements RemoteV
 
             child.measure(childWidthMeasureSpec, childheightMeasureSpec);
         }
-
         setMeasuredDimension(widthSpecSize, heightSpecSize);
     }
 
@@ -302,7 +513,7 @@ public class AdapterViewAnimator extends AdapterView<Adapter> implements RemoteV
      * @see #getDisplayedChild()
      */
     public View getCurrentView() {
-        return mCurrentView;
+        return getViewAtRelativeIndex(mActiveOffset);
     }
 
     /**
@@ -412,12 +623,15 @@ public class AdapterViewAnimator extends AdapterView<Adapter> implements RemoteV
             mDataSetObserver = new AdapterDataSetObserver();
             mAdapter.registerDataSetObserver(mDataSetObserver);
         }
+        setFocusable(true);
     }
 
     /**
-     * Sets up this AdapterViewAnimator to use a remote views adapter which connects to a RemoteViewsService
-     * through the specified intent.
-     * @param intent the intent used to identify the RemoteViewsService for the adapter to connect to.
+     * Sets up this AdapterViewAnimator to use a remote views adapter which connects to a
+     * RemoteViewsService through the specified intent.
+     *
+     * @param intent the intent used to identify the RemoteViewsService for the adapter to
+     *        connect to.
      */
     @android.view.RemotableViewMethod
     public void setRemoteViewsAdapter(Intent intent) {
@@ -431,7 +645,7 @@ public class AdapterViewAnimator extends AdapterView<Adapter> implements RemoteV
 
     @Override
     public View getSelectedView() {
-        return mCurrentView;
+        return getViewAtRelativeIndex(mActiveOffset);
     }
 
     /**
@@ -450,6 +664,63 @@ public class AdapterViewAnimator extends AdapterView<Adapter> implements RemoteV
         if (mRemoteViewsAdapter != mAdapter) {
             mRemoteViewsAdapter = null;
             setAdapter(mRemoteViewsAdapter);
+        }
+    }
+
+    static class LayoutParams extends ViewGroup.LayoutParams {
+        int horizontalOffset;
+        int verticalOffset;
+        View mView;
+
+        LayoutParams(View view) {
+            super(0, 0);
+            horizontalOffset = 0;
+            verticalOffset = 0;
+            mView = view;
+        }
+
+        LayoutParams(Context c, AttributeSet attrs) {
+            super(c, attrs);
+            horizontalOffset = 0;
+            verticalOffset = 0;
+        }
+
+        void setHorizontalOffset(int newHorizontalOffset) {
+            horizontalOffset = newHorizontalOffset;
+            if (mView != null) {
+                mView.requestLayout();
+                mView.invalidate();
+            }
+        }
+
+        private Rect parentRect = new Rect();
+        void invalidateGlobalRegion(View v, Rect r) {
+            View p = v;
+            boolean firstPass = true;
+            parentRect.set(0, 0, 0, 0);
+            while (p.getParent() != null && p.getParent() instanceof View
+                    && !parentRect.contains(r)) {
+                if (!firstPass) r.offset(p.getLeft() - p.getScrollX(), p.getTop() - p.getScrollY());
+                firstPass = false;
+                p = (View) p.getParent();
+                parentRect.set(p.getLeft() - p.getScrollX(), p.getTop() - p.getScrollY(),
+                        p.getRight() - p.getScrollX(), p.getBottom() - p.getScrollY());
+            }
+            p.invalidate(r.left, r.top, r.right, r.bottom);
+        }
+
+        private Rect invalidateRect = new Rect();
+        // This is public so that PropertyAnimator can access it
+        public void setVerticalOffset(int newVerticalOffset) {
+            int offsetDelta = newVerticalOffset - verticalOffset;
+            verticalOffset = newVerticalOffset;
+            if (mView != null) {
+                mView.requestLayout();
+                int top = Math.min(mView.getTop() + offsetDelta, mView.getTop());
+                int bottom = Math.max(mView.getBottom() + offsetDelta, mView.getBottom());
+                invalidateRect.set(mView.getLeft(), top, mView.getRight(), bottom);
+                invalidateGlobalRegion(mView, invalidateRect);
+            }
         }
     }
 }
