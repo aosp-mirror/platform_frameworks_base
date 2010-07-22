@@ -78,18 +78,31 @@ struct MediaSource : public RefBase {
         void clearSeekTo();
         bool getSeekTo(int64_t *time_us, SeekMode *mode) const;
 
+        // Option allows encoder to skip some frames until the specified
+        // time stamp.
+        // To prevent from being abused, when the skipFrame timestamp is
+        // found to be more than 1 second later than the current timestamp,
+        // an error will be returned from read().
+        void clearSkipFrame();
+        bool getSkipFrame(int64_t *timeUs) const;
+        void setSkipFrame(int64_t timeUs);
+
         void setLateBy(int64_t lateness_us);
         int64_t getLateBy() const;
 
     private:
         enum Options {
+            // Bit map
             kSeekTo_Option      = 1,
+            kSkipFrame_Option   = 2,
         };
 
         uint32_t mOptions;
         int64_t mSeekTimeUs;
         SeekMode mSeekMode;
         int64_t mLatenessUs;
+
+        int64_t mSkipFrameUntilTimeUs;
     };
 
     // Causes this source to suspend pulling data from its upstream source

@@ -1274,6 +1274,7 @@ OMXCodec::OMXCodec(
       mSeekTimeUs(-1),
       mSeekMode(ReadOptions::SEEK_CLOSEST_SYNC),
       mTargetTimeUs(-1),
+      mSkipTimeUs(-1),
       mLeftOverBuffer(NULL),
       mPaused(false) {
     mPortStatus[kPortIndexInput] = ENABLED;
@@ -2200,13 +2201,15 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
     int32_t n = 0;
     for (;;) {
         MediaBuffer *srcBuffer;
+        MediaSource::ReadOptions options;
+        if (mSkipTimeUs >= 0) {
+            options.setSkipFrame(mSkipTimeUs);
+        }
         if (mSeekTimeUs >= 0) {
             if (mLeftOverBuffer) {
                 mLeftOverBuffer->release();
                 mLeftOverBuffer = NULL;
             }
-
-            MediaSource::ReadOptions options;
             options.setSeekTo(mSeekTimeUs, mSeekMode);
 
             mSeekTimeUs = -1;
@@ -2231,7 +2234,7 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
 
             err = OK;
         } else {
-            err = mSource->read(&srcBuffer);
+            err = mSource->read(&srcBuffer, &options);
         }
 
         if (err != OK) {
@@ -2829,6 +2832,12 @@ status_t OMXCodec::read(
     ReadOptions::SeekMode seekMode;
     if (options && options->getSeekTo(&seekTimeUs, &seekMode)) {
         seeking = true;
+    }
+    int64_t skipTimeUs;
+    if (options && options->getSkipFrame(&skipTimeUs)) {
+        mSkipTimeUs = skipTimeUs;
+    } else {
+        mSkipTimeUs = -1;
     }
 
     if (mInitialBufferSubmit) {
