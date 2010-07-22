@@ -4590,7 +4590,7 @@ public class WebView extends AbsoluteLayout
         // user has touched a layer.
         float gestureX = x;
         float gestureY = y;
-        if (!detector.isInProgress()) {
+        if (detector == null || !detector.isInProgress()) {
             // The gesture for scrolling a layer is two fingers close together.
             // FIXME: we may consider giving WebKit an option to handle
             // multi-touch events later.
