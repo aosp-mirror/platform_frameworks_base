@@ -16,8 +16,8 @@
 
 package android.widget;
 
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import android.content.ComponentName;
@@ -85,6 +85,10 @@ public class RemoteViewsAdapter extends BaseAdapter {
         public void onServiceConnected(ComponentName name, IBinder service) {
             mRemoteViewsFactory = IRemoteViewsFactory.Stub.asInterface(service);
             mConnected = true;
+
+            // start the background loader
+            mViewCache.startBackgroundLoader();
+
             // notifyDataSetChanged should be called first, to ensure that the
             // views are not updated twice
             notifyDataSetChanged();
@@ -112,12 +116,15 @@ public class RemoteViewsAdapter extends BaseAdapter {
         public void onServiceDisconnected(ComponentName name) {
             mRemoteViewsFactory = null;
             mConnected = false;
-            if (mCallback != null)
-                mCallback.onRemoteAdapterDisconnected();
 
             // clear the main/worker queues
             mMainQueue.removeMessages(0);
-            mWorkerQueue.removeMessages(0);
+            
+            // stop the background loader
+            mViewCache.stopBackgroundLoader();
+
+            if (mCallback != null)
+                mCallback.onRemoteAdapterDisconnected();
         }
 
         public IRemoteViewsFactory getRemoteViewsFactory() {
@@ -135,6 +142,9 @@ public class RemoteViewsAdapter extends BaseAdapter {
     private class RemoteViewsCache {
         private RemoteViewsInfo mViewCacheInfo;
         private RemoteViewsIndexInfo[] mViewCache;
+        private int[] mTmpViewCacheLoadIndices;
+        private LinkedList<Integer> mViewCacheLoadIndices;
+        private boolean mBackgroundLoaderEnabled;
 
         // if a user loading view is not provided, then we create a temporary one
         // for the user using the height of the first view
@@ -149,16 +159,6 @@ public class RemoteViewsAdapter extends BaseAdapter {
         private int mHalfCacheSize;
         private int mCacheSlack;
         private final float mCacheSlackPercentage = 0.75f;
-
-        // determines whether to reorder the posted items on the worker thread
-        // so that the items in the current window can be loaded first
-        private int mPriorityLoadingWindowSize;
-        private int mPriorityLoadingWindowStart;
-        private int mPriorityLoadingWindowEnd;
-
-        // determines which way to load items in the current window based on how
-        // the window shifted last
-        private boolean mLoadUpwards;
 
         /**
          * The data structure stored at each index of the cache. Any member 
@@ -218,22 +218,21 @@ public class RemoteViewsAdapter extends BaseAdapter {
             mCacheSlack = Math.round(mCacheSlackPercentage * mHalfCacheSize);
             mViewCacheStartPosition = 0;
             mViewCacheEndPosition = -1;
-            mPriorityLoadingWindowSize = 4;
-            mPriorityLoadingWindowStart = 0;
-            mPriorityLoadingWindowEnd = 0;
-            mLoadUpwards = false;
+            mBackgroundLoaderEnabled = false;
 
             // initialize the cache
+            int cacheSize = 2 * mHalfCacheSize + 1;
             mViewCacheInfo = new RemoteViewsInfo();
-            mViewCache = new RemoteViewsIndexInfo[2 * mHalfCacheSize + 1];
+            mViewCache = new RemoteViewsIndexInfo[cacheSize];
             for (int i = 0; i < mViewCache.length; ++i) {
                 mViewCache[i] = new RemoteViewsIndexInfo();
             }
+            mTmpViewCacheLoadIndices = new int[cacheSize];
+            mViewCacheLoadIndices = new LinkedList<Integer>();
         }
 
         private final boolean contains(int position) {
-            // take the modulo of the position
-            return (mViewCacheStartPosition <= position) && (position < mViewCacheEndPosition);
+            return (mViewCacheStartPosition <= position) && (position <= mViewCacheEndPosition);
         }
 
         private final boolean containsAndIsValid(int position) {
@@ -247,6 +246,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
         }
 
         private final int getCacheIndex(int position) {
+            // take the modulo of the position
             return (mViewCache.length + (position % mViewCache.length)) % mViewCache.length;
         }
 
@@ -298,7 +298,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
 
                 synchronized (mViewCache) {
                     // skip if the window has moved
-                    if (position < mViewCacheStartPosition || position >= mViewCacheEndPosition)
+                    if (position < mViewCacheStartPosition || position > mViewCacheEndPosition)
                         return;
 
                     final int positionIndex = position;
@@ -316,16 +316,28 @@ public class RemoteViewsAdapter extends BaseAdapter {
                                     RemoteViewsIndexInfo indexInfo = mViewCache[cacheIndex];
                                     FrameLayout flipper = indexInfo.flipper;
 
-                                    // recompose the flipper
-                                    View loadingView = flipper.getChildAt(0);
-                                    loadingView.setVisibility(View.GONE);
-                                    flipper.removeAllViews();
-                                    flipper.addView(loadingView);
-                                    flipper.addView(indexInfo.view.apply(mContext, flipper));
-
-                                    // hide the loader view and bring the new view to the front
-                                    flipper.requestLayout();
-                                    flipper.invalidate();
+                                    // update the flipper
+                                    flipper.getChildAt(0).setVisibility(View.GONE);
+                                    boolean addNewView = true;
+                                    if (flipper.getChildCount() > 1) {
+                                        View v = flipper.getChildAt(1);
+                                        int typeId = ((Integer) v.getTag()).intValue();
+                                        if (typeId == indexInfo.typeId) {
+                                            // we can reapply since it is the same type
+                                            indexInfo.view.reapply(mContext, v);
+                                            v.setVisibility(View.VISIBLE);
+                                            if (v.getAnimation() != null) 
+                                                v.buildDrawingCache();
+                                            addNewView = false;
+                                        } else {
+                                            flipper.removeViewAt(1);
+                                        }
+                                    }
+                                    if (addNewView) {
+                                        View v = indexInfo.view.apply(mContext, flipper);
+                                        v.setTag(new Integer(indexInfo.typeId));
+                                        flipper.addView(v);
+                                    }
                                 }
                             }
                         }
@@ -336,88 +348,52 @@ public class RemoteViewsAdapter extends BaseAdapter {
 
         private RemoteViewsIndexInfo requestCachedIndexInfo(final int position) {
             int indicesToLoadCount = 0;
-            int[] indicesToLoad = null;
 
             synchronized (mViewCache) {
-                indicesToLoad = new int[mViewCache.length];
-                Arrays.fill(indicesToLoad, 0);
-
                 if (containsAndIsValid(position)) {
                     // return the info if it exists in the window and is loaded
                     return mViewCache[getCacheIndex(position)];
-                } 
+                }
 
                 // if necessary update the window and load the new information
                 int centerPosition = (mViewCacheEndPosition + mViewCacheStartPosition) / 2;
                 if ((mViewCacheEndPosition <= mViewCacheStartPosition) || (Math.abs(position - centerPosition) > mCacheSlack)) {
                     int newStartPosition = position - mHalfCacheSize;
                     int newEndPosition = position + mHalfCacheSize;
+                    int frameSize = mHalfCacheSize / 4;
+                    int frameCount = (int) Math.ceil(mViewCache.length / (float) frameSize);
 
                     // prune/add before the current start position
                     int effectiveStart = Math.max(newStartPosition, 0);
-                    int effectiveEnd = Math.min(newEndPosition, getCount());
-
-                    mWorkerQueue.removeMessages(0);
+                    int effectiveEnd = Math.min(newEndPosition, getCount() - 1);
 
                     // invalidate items in the queue
-                    boolean loadFromBeginning = effectiveStart < mViewCacheStartPosition;
-                    int numLoadFromBeginning = mViewCacheStartPosition - effectiveStart;
-                    boolean loadFromEnd = effectiveEnd > mViewCacheEndPosition;
                     int overlapStart = Math.max(mViewCacheStartPosition, effectiveStart);
                     int overlapEnd = Math.min(Math.max(mViewCacheStartPosition, mViewCacheEndPosition), effectiveEnd);
-                    for (int i = newStartPosition; i < newEndPosition; ++i) {
-                        if (loadFromBeginning && (effectiveStart <= i) && (i < overlapStart)) {
-                            // load new items at the beginning in reverse order
-                            mViewCache[getCacheIndex(i)].invalidate();
-                            indicesToLoad[indicesToLoadCount++] = effectiveStart
-                                    + (numLoadFromBeginning - (i - effectiveStart) - 1);
-                        } else if (loadFromEnd && (overlapEnd <= i) && (i < effectiveEnd)) {
-                            mViewCache[getCacheIndex(i)].invalidate();
-                            indicesToLoad[indicesToLoadCount++] = i;
-                        } else if ((overlapStart <= i) && (i < overlapEnd)) {
-                            // load the stuff in the middle that has not already
-                            // been loaded
-                            if (!mViewCache[getCacheIndex(i)].isValid()) {
-                                indicesToLoad[indicesToLoadCount++] = i;
+                    for (int i = 0; i < (frameSize * frameCount); ++i) {
+                        int index = newStartPosition + ((i % frameSize) * frameCount + (i / frameSize));
+                        
+                        if (index <= newEndPosition) {
+                            if ((overlapStart <= index) && (index <= overlapEnd)) {
+                                // load the stuff in the middle that has not already
+                                // been loaded
+                                if (!mViewCache[getCacheIndex(index)].isValid()) {
+                                    mTmpViewCacheLoadIndices[indicesToLoadCount++] = index;
+                                }
+                            } else if ((effectiveStart <= index) && (index <= effectiveEnd)) {
+                                // invalidate and load all new effective items
+                                mViewCache[getCacheIndex(index)].invalidate();
+                                mTmpViewCacheLoadIndices[indicesToLoadCount++] = index;
+                            } else {
+                                // invalidate all other cache indices (outside the effective start/end)
+                                // but don't load
+                                mViewCache[getCacheIndex(index)].invalidate();
                             }
-                        } else {
-                            // invalidate all other cache indices (outside the effective start/end)
-                            mViewCache[getCacheIndex(i)].invalidate();
                         }
                     }
 
                     mViewCacheStartPosition = newStartPosition;
                     mViewCacheEndPosition = newEndPosition;
-                    mPriorityLoadingWindowStart = position;
-                    mPriorityLoadingWindowEnd = position + mPriorityLoadingWindowSize;
-                    mLoadUpwards = loadFromBeginning && !loadFromEnd;
-                } else if (contains(position)) {
-                    // prioritize items around this position so that they load first
-                    if (position < mPriorityLoadingWindowStart || position > mPriorityLoadingWindowEnd) {
-                        mWorkerQueue.removeMessages(0);
-
-                        int index;
-                        int effectiveStart = Math.max(position - mPriorityLoadingWindowSize, 0);
-                        int effectiveEnd = 0;
-                        synchronized (mViewCacheInfo) {
-                            effectiveEnd = Math.min(position + mPriorityLoadingWindowSize - 1,
-                                    mViewCacheInfo.count - 1);
-                        }
-
-                        for (int i = 0; i < mViewCache.length; ++i) {
-                            if (mLoadUpwards) {
-                                index = effectiveEnd - i;
-                            } else {
-                                index = effectiveStart + i;
-                            }
-                            if (!mViewCache[getCacheIndex(index)].isValid()) {
-                                indicesToLoad[indicesToLoadCount++] = index;
-                            }
-                        }
-
-                        mPriorityLoadingWindowStart = effectiveStart;
-                        mPriorityLoadingWindowEnd = position + mPriorityLoadingWindowSize;
-                    }
                 }
             }
 
@@ -426,15 +402,15 @@ public class RemoteViewsAdapter extends BaseAdapter {
             synchronized (mViewCacheInfo) {
                 length = mViewCacheInfo.count;
             }
-            for (int i = 0; i < indicesToLoadCount; ++i) {
-                final int index = indicesToLoad[i];
-                if (0 <= index && index < length) {
-                    mWorkerQueue.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            updateRemoteViewsInfo(index);
+            if (indicesToLoadCount > 0) {
+                synchronized (mViewCacheLoadIndices) {
+                    mViewCacheLoadIndices.clear();
+                    for (int i = 0; i < indicesToLoadCount; ++i) {
+                        final int index = mTmpViewCacheLoadIndices[i];
+                        if (0 <= index && index < length) {
+                            mViewCacheLoadIndices.addLast(index);
                         }
-                    });
+                    }
                 }
             }
 
@@ -446,7 +422,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
             if (mServiceConnection.isConnected()) {
                 // create the flipper views if necessary (we have to do this now
                 // for all the flippers while we have the reference to the parent)
-                createInitialLoadingFlipperViews(parent);
+                initializeLoadingViews(parent);
 
                 // request the item from the cache (queueing it to load if not
                 // in the cache already)
@@ -456,6 +432,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
                 synchronized (mViewCache) {
                     int cacheIndex = getCacheIndex(position);
                     FrameLayout flipper = mViewCache[cacheIndex].flipper;
+                    flipper.setVisibility(View.VISIBLE);
 
                     if (indexInfo == null) {
                         // hide the item view and show the loading view
@@ -463,17 +440,12 @@ public class RemoteViewsAdapter extends BaseAdapter {
                         for (int i = 1; i < flipper.getChildCount(); ++i) {
                             flipper.getChildAt(i).setVisibility(View.GONE);
                         }
-                        flipper.requestLayout();
-                        flipper.invalidate();
                     } else {
                         // hide the loading view and show the item view
-                        flipper.setVisibility(View.VISIBLE);
                         for (int i = 0; i < flipper.getChildCount() - 1; ++i) {
                             flipper.getChildAt(i).setVisibility(View.GONE);
                         }
                         flipper.getChildAt(flipper.getChildCount() - 1).setVisibility(View.VISIBLE);
-                        flipper.requestLayout();
-                        flipper.invalidate();
                     }
                     return flipper;
                 }
@@ -481,7 +453,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
             return new View(mContext);
         }
 
-        private void createInitialLoadingFlipperViews(ViewGroup parent) {
+        private void initializeLoadingViews(ViewGroup parent) {
             // ensure that the cache has the appropriate initial flipper
             synchronized (mViewCache) {
                 if (mViewCache[0].flipper == null) {
@@ -516,6 +488,50 @@ public class RemoteViewsAdapter extends BaseAdapter {
                         mViewCache[i].flipper = flipper;
                     }
                 }
+            }
+        }
+
+        public void startBackgroundLoader() {
+            // initialize the worker runnable
+            mBackgroundLoaderEnabled = true;
+            mWorkerQueue.post(new Runnable() {
+                @Override
+                public void run() {
+                    while (mBackgroundLoaderEnabled) {
+                        int index = -1;
+                        synchronized (mViewCacheLoadIndices) {
+                            if (!mViewCacheLoadIndices.isEmpty()) {
+                                index = mViewCacheLoadIndices.removeFirst();
+                            }
+                        }
+                        if (index < 0) {
+                            // there were no items to load, so sleep for a bit
+                            try {
+                                Thread.sleep(10);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            // otherwise, try and load the item
+                            updateRemoteViewsInfo(index);
+
+                            // sleep for a bit to allow things to catch up after the load
+                            try {
+                                Thread.sleep(50);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        public void stopBackgroundLoader() {
+            // clear the items to be loaded
+            mBackgroundLoaderEnabled = false;
+            synchronized (mViewCacheLoadIndices) {
+                mViewCacheLoadIndices.clear();
             }
         }
 
@@ -567,9 +583,13 @@ public class RemoteViewsAdapter extends BaseAdapter {
         }
 
         public void flushCache() {
+            // clear the items to be loaded
+            synchronized (mViewCacheLoadIndices) {
+                mViewCacheLoadIndices.clear();
+            }
+
             synchronized (mViewCache) {
                 // flush the internal cache and invalidate the adapter for future loads
-                mWorkerQueue.removeMessages(0);
                 mMainQueue.removeMessages(0);
 
                 for (int i = 0; i < mViewCache.length; ++i) {
