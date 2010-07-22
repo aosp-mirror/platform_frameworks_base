@@ -64,17 +64,18 @@ void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32
     const uchar4 *input = v_in;
     uchar4 *output = v_out;
 
-    float4 currentPixel = 0;
+    float3 currentPixel = 0;
 
     //currentPixel.xyz = convert_float3(input.xyz);
     currentPixel.x = (float)(input->x);
     currentPixel.y = (float)(input->y);
     currentPixel.z = (float)(input->z);
 
-    float3 temp = rsMatrixMultiply(&colorMat, currentPixel.xyz);
+    float3 temp = rsMatrixMultiply(&colorMat, currentPixel);
     temp = (clamp(temp, 0.f, 255.f) - inBlack) * overInWMinInB;
-    temp = pow(temp, (float3)gamma);
-    currentPixel.xyz = clamp(temp * outWMinOutB + outBlack, 0.f, 255.f);
+    if (gamma.x != 1.0f)
+        temp = pow(temp, (float3)gamma);
+    currentPixel = clamp(temp * outWMinOutB + outBlack, 0.f, 255.f);
 
     //output.xyz = convert_uchar3(currentPixel.xyz);
     output->x = (uint8_t)currentPixel.x;
