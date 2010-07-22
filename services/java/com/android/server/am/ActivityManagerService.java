@@ -5880,10 +5880,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 String[] pkgs = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
                 if (pkgs != null) {
                     for (String pkg : pkgs) {
-                        if (forceStopPackageLocked(pkg, -1, false, false, false)) {
-                            setResultCode(Activity.RESULT_OK);
-                            return;
-                        }
+                        synchronized (ActivityManagerService.this) {
+                          if (forceStopPackageLocked(pkg, -1, false, false, false)) {
+                              setResultCode(Activity.RESULT_OK);
+                              return;
+                          }
+                       }
                     }
                 }
             }
