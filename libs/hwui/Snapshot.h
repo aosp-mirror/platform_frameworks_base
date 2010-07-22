@@ -42,7 +42,7 @@ namespace uirenderer {
  */
 class Snapshot: public LightRefBase<Snapshot> {
 public:
-    Snapshot(): flags(0x0), previous(NULL), layer(NULL), fbo(0) { }
+    Snapshot(): flags(0), previous(NULL), layer(NULL), fbo(0) { }
 
     /**
      * Copies the specified snapshot. Only the transform and clip rectangle
@@ -54,10 +54,11 @@ public:
             height(s->height),
             transform(s->transform),
             clipRect(s->clipRect),
-            flags(0x0),
+            flags(0),
             previous(s),
             layer(NULL),
-            fbo(s->fbo) {
+            fbo(s->fbo),
+            localClip(s->localClip) {
     }
 
     /**
@@ -78,6 +79,10 @@ public:
          * Indicates that this snapshot has changed the ortho matrix.
          */
         kFlagDirtyOrtho = 0x4,
+        /**
+         * Indicates that the local clip should be recomputed.
+         */
+        kFlagDirtyLocalClip = 0x8,
     };
 
     /**
@@ -109,7 +114,7 @@ public:
         }
 
         if (clipped) {
-            flags |= Snapshot::kFlagClipSet;
+            flags |= Snapshot::kFlagClipSet | Snapshot::kFlagDirtyLocalClip;
         }
 
         return clipped;
@@ -120,14 +125,17 @@ public:
      */
     void setClip(float left, float top, float right, float bottom) {
         clipRect.set(left, top, right, bottom);
-        flags |= Snapshot::kFlagClipSet;
+        flags |= Snapshot::kFlagClipSet | Snapshot::kFlagDirtyLocalClip;
     }
 
     const Rect& getLocalClip() {
-        mat4 inverse;
-        inverse.loadInverse(transform);
-        localClip.set(clipRect);
-        inverse.mapRect(localClip);
+        if (flags & Snapshot::kFlagDirtyLocalClip) {
+            mat4 inverse;
+            inverse.loadInverse(transform);
+            localClip.set(clipRect);
+            inverse.mapRect(localClip);
+            flags &= ~Snapshot::kFlagDirtyLocalClip;
+        }
         return localClip;
     }
 

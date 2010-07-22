@@ -54,6 +54,11 @@ public class TextActivity extends Activity {
             
             canvas.drawText("Hello OpenGL renderer!", 100, 100, mMediumPaint);
             canvas.drawText("Hello OpenGL renderer!", 100, 200, mLargePaint);
+            
+            canvas.save();
+            canvas.clipRect(150.0f, 220.0f, 450.0f, 320.0f);
+            canvas.drawText("Hello OpenGL renderer!", 100, 300, mLargePaint);
+            canvas.restore();
         }
     }
 }
