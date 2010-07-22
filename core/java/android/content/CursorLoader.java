@@ -55,8 +55,13 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
             }
             return;
         }
+        Cursor oldCursor = mCursor;
         mCursor = cursor;
         super.deliverResult(cursor);
+
+        if (oldCursor != null && !oldCursor.isClosed()) {
+            oldCursor.close();
+        }
     }
 
     public CursorLoader(Context context, Uri uri, String[] projection, String selection,
