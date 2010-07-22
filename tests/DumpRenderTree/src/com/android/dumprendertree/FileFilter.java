@@ -110,6 +110,23 @@ public class FileFilter {
         ignoreResultList.add("storage/private-browsing-readonly.html"); // private browsing not supported
         ignoreResultList.add("websocket/tests/workers"); // workers not supported
 
+        // Expected failures due to missing expected results
+        ignoreResultList.add("dom/xhtml/level3/core/canonicalform08.xhtml");
+        ignoreResultList.add("dom/xhtml/level3/core/canonicalform09.xhtml");
+        ignoreResultList.add("dom/xhtml/level3/core/documentgetinputencoding03.xhtml");
+        ignoreResultList.add("dom/xhtml/level3/core/entitygetinputencoding02.xhtml");
+        ignoreResultList.add("dom/xhtml/level3/core/entitygetxmlversion02.xhtml");
+        ignoreResultList.add("dom/xhtml/level3/core/nodegetbaseuri05.xhtml");
+        ignoreResultList.add("dom/xhtml/level3/core/nodegetbaseuri07.xhtml");
+        ignoreResultList.add("dom/xhtml/level3/core/nodegetbaseuri09.xhtml");
+        ignoreResultList.add("dom/xhtml/level3/core/nodegetbaseuri10.xhtml");
+        ignoreResultList.add("dom/xhtml/level3/core/nodegetbaseuri11.xhtml");
+        ignoreResultList.add("dom/xhtml/level3/core/nodegetbaseuri15.xhtml");
+        ignoreResultList.add("dom/xhtml/level3/core/nodegetbaseuri17.xhtml");
+        ignoreResultList.add("dom/xhtml/level3/core/nodegetbaseuri18.xhtml");
+        ignoreResultList.add("dom/xhtml/level3/core/nodelookupnamespaceuri01.xhtml");
+        ignoreResultList.add("dom/xhtml/level3/core/nodelookupprefix19.xhtml");
+
         // TODO: These need to be triaged
         ignoreResultList.add("fast/css/case-transform.html"); // will not fix #619707
         ignoreResultList.add("fast/dom/Element/offsetLeft-offsetTop-body-quirk.html"); // different screen size result in extra spaces in Apple compared to us
