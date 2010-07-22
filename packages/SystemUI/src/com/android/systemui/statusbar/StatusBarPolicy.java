@@ -1033,6 +1033,7 @@ public class StatusBarPolicy {
                     iconId = sWifiSignalImages[mLastWifiSignalLevel];
                 }
 
+                mService.setIcon("wifi", iconId, 0);
                 // Show the icon since wi-fi is connected
                 mService.setIconVisibility("wifi", true);
 
@@ -1041,11 +1042,11 @@ public class StatusBarPolicy {
                 mIsWifiConnected = false;
                 iconId = sWifiSignalImages[0];
 
+                mService.setIcon("wifi", iconId, 0);
                 // Hide the icon since we're not connected
                 mService.setIconVisibility("wifi", false);
             }
 
-            mService.setIcon("wifi", iconId, 0);
         } else if (action.equals(WifiManager.RSSI_CHANGED_ACTION)) {
             int iconId;
             final int newRssi = intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200);
