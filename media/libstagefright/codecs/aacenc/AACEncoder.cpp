@@ -224,6 +224,7 @@ status_t AACEncoder::read(
         if (mInputBuffer == NULL) {
             if (mSource->read(&mInputBuffer, options) != OK) {
                 if (mNumInputSamples == 0) {
+                    buffer->release();
                     return ERROR_END_OF_STREAM;
                 }
                 memset(&mInputFrame[mNumInputSamples],

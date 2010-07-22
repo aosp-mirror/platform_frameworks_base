@@ -32,6 +32,7 @@ void MediaSource::ReadOptions::reset() {
     mOptions = 0;
     mSeekTimeUs = 0;
     mLatenessUs = 0;
+    mSkipFrameUntilTimeUs = 0;
 }
 
 void MediaSource::ReadOptions::setSeekTo(int64_t time_us, SeekMode mode) {
@@ -51,6 +52,21 @@ bool MediaSource::ReadOptions::getSeekTo(
     *time_us = mSeekTimeUs;
     *mode = mSeekMode;
     return (mOptions & kSeekTo_Option) != 0;
+}
+
+void MediaSource::ReadOptions::clearSkipFrame() {
+    mOptions &= ~kSkipFrame_Option;
+    mSkipFrameUntilTimeUs = 0;
+}
+
+void MediaSource::ReadOptions::setSkipFrame(int64_t timeUs) {
+    mOptions |= kSkipFrame_Option;
+    mSkipFrameUntilTimeUs = timeUs;
+}
+
+bool MediaSource::ReadOptions::getSkipFrame(int64_t *timeUs) const {
+    *timeUs = mSkipFrameUntilTimeUs;
+    return (mOptions & kSkipFrame_Option) != 0;
 }
 
 void MediaSource::ReadOptions::setLateBy(int64_t lateness_us) {

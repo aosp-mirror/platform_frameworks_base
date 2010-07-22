@@ -143,6 +143,7 @@ private:
     int64_t mSeekTimeUs;
     ReadOptions::SeekMode mSeekMode;
     int64_t mTargetTimeUs;
+    int64_t mSkipTimeUs;
 
     MediaBuffer *mLeftOverBuffer;
 
