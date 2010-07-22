@@ -1206,7 +1206,7 @@ class ContextImpl extends Context {
     private DownloadManager getDownloadManager() {
         synchronized (mSync) {
             if (mDownloadManager == null) {
-                mDownloadManager = new DownloadManager(getContentResolver());
+                mDownloadManager = new DownloadManager(getContentResolver(), getPackageName());
             }
         }
         return mDownloadManager;

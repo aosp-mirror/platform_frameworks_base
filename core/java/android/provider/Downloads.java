@@ -17,11 +17,6 @@
 package android.provider;
 
 import android.net.Uri;
-import android.content.ContentUris;
-import android.content.ContentValues;
-import android.content.Context;
-
-import java.io.File;
 
 /**
  * The Download Manager
@@ -855,6 +850,30 @@ public final class Downloads {
          * <P>Owner can Init/Read/Write</P>
          */
         public static final String COLUMN_DESCRIPTION = "description";
+
+        /**
+         * The name of the column indicating whether the download was requesting through the public
+         * API.  This controls some differences in behavior.
+         * <P>Type: BOOLEAN</P>
+         * <P>Owner can Init/Read</P>
+         */
+        public static final String COLUMN_IS_PUBLIC_API = "is_public_api";
+
+        /**
+         * The name of the column indicating whether roaming connections can be used.  This is only
+         * used for public API downloads.
+         * <P>Type: BOOLEAN</P>
+         * <P>Owner can Init/Read</P>
+         */
+        public static final String COLUMN_ALLOW_ROAMING = "allow_roaming";
+
+        /**
+         * The name of the column holding a bitmask of allowed network types.  This is only used for
+         * public API downloads.
+         * <P>Type: INTEGER</P>
+         * <P>Owner can Init/Read</P>
+         */
+        public static final String COLUMN_ALLOWED_NETWORK_TYPES = "allowed_network_types";
 
         /*
          * Lists the destinations that an application can specify for a download.

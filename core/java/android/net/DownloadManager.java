@@ -22,7 +22,6 @@ import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.os.ParcelFileDescriptor;
 import android.provider.Downloads;
-import android.util.Log;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -187,6 +186,23 @@ public class DownloadManager {
      */
     public final static int ERROR_DEVICE_NOT_FOUND = 1007;
 
+    /**
+     * Broadcast intent action sent by the download manager when a download completes.
+     */
+    public final static String ACTION_DOWNLOAD_COMPLETE = "android.intent.action.DOWNLOAD_COMPLETE";
+
+    /**
+     * Broadcast intent action sent by the download manager when a running download notification is
+     * clicked.
+     */
+    public final static String ACTION_NOTIFICATION_CLICKED =
+            "android.intent.action.DOWNLOAD_NOTIFICATION_CLICKED";
+
+    /**
+     * Intent extra included with {@link #ACTION_DOWNLOAD_COMPLETE} intents, indicating the ID (as a
+     * long) of the download that just completed.
+     */
+    public static final String EXTRA_DOWNLOAD_ID = "extra_download_id";
 
     // this array must contain all public columns
     private static final String[] COLUMNS = new String[] {
@@ -227,19 +243,38 @@ public class DownloadManager {
      */
     public static class Request {
         /**
-         * Bit flag for setShowNotification indicated a notification should be created while the
-         * download is running.
+         * Bit flag for {@link #setShowNotification} indicating a notification should be created
+         * while the download is running.
          */
-        private static final int NOTIFICATION_WHEN_RUNNING = 1;
+        public static final int NOTIFICATION_WHEN_RUNNING = 1;
 
-        Uri mUri;
-        Uri mDestinationUri;
-        Map<String, String> mRequestHeaders = new HashMap<String, String>();
-        String mTitle;
-        String mDescription;
-        int mNotificationFlags;
+        /**
+         * Bit flag for {@link #setAllowedNetworkTypes} corresponding to
+         * {@link ConnectivityManager#TYPE_MOBILE}.
+         */
+        public static final int NETWORK_MOBILE = 1 << 0;
 
+        /**
+         * Bit flag for {@link #setAllowedNetworkTypes} corresponding to
+         * {@link ConnectivityManager#TYPE_WIFI}.
+         */
+        public static final int NETWORK_WIFI = 1 << 1;
+
+        /**
+         * Bit flag for {@link #setAllowedNetworkTypes} corresponding to
+         * {@link ConnectivityManager#TYPE_WIMAX}.
+         */
+        public static final int NETWORK_WIMAX = 1 << 2;
+
+        private Uri mUri;
+        private Uri mDestinationUri;
+        private Map<String, String> mRequestHeaders = new HashMap<String, String>();
+        private String mTitle;
+        private String mDescription;
+        private int mNotificationFlags = 0;
         private String mMediaType;
+        private boolean mRoamingAllowed = true;
+        private int mAllowedNetworkTypes = ~0; // default to all network types allowed
 
         /**
          * @param uri the HTTP URI to download.
@@ -313,7 +348,7 @@ public class DownloadManager {
         /**
          * Control system notifications posted by the download manager for this download.  If
          * enabled, the download manager posts notifications about downloads through the system
-         * {@link android.app.NotificationManager}.
+         * {@link android.app.NotificationManager}. By default, no notification is shown.
          *
          * @param flags any combination of the NOTIFICATION_* bit flags
          * @return this object
@@ -323,23 +358,37 @@ public class DownloadManager {
             return this;
         }
 
+        /**
+         * Restrict the types of networks over which this download may proceed.  By default, all
+         * network types are allowed.
+         * @param flags any combination of the NETWORK_* bit flags.
+         * @return this object
+         */
         public Request setAllowedNetworkTypes(int flags) {
-            // TODO allowed networks support
-            throw new UnsupportedOperationException();
+            mAllowedNetworkTypes = flags;
+            return this;
         }
 
+        /**
+         * Set whether this download may proceed over a roaming connection.  By default, roaming is
+         * allowed.
+         * @param allowed whether to allow a roaming connection to be used
+         * @return this object
+         */
         public Request setAllowedOverRoaming(boolean allowed) {
-            // TODO roaming support
-            throw new UnsupportedOperationException();
+            mRoamingAllowed = allowed;
+            return this;
         }
 
         /**
          * @return ContentValues to be passed to DownloadProvider.insert()
          */
-        ContentValues toContentValues() {
+        ContentValues toContentValues(String packageName) {
             ContentValues values = new ContentValues();
             assert mUri != null;
             values.put(Downloads.COLUMN_URI, mUri.toString());
+            values.put(Downloads.Impl.COLUMN_IS_PUBLIC_API, true);
+            values.put(Downloads.COLUMN_NOTIFICATION_PACKAGE, packageName);
 
             if (mDestinationUri != null) {
                 values.put(Downloads.COLUMN_DESTINATION, Downloads.Impl.DESTINATION_FILE_URI);
@@ -362,6 +411,9 @@ public class DownloadManager {
                 visibility = Downloads.VISIBILITY_VISIBLE;
             }
             values.put(Downloads.COLUMN_VISIBILITY, visibility);
+
+            values.put(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES, mAllowedNetworkTypes);
+            values.put(Downloads.Impl.COLUMN_ALLOW_ROAMING, mRoamingAllowed);
 
             return values;
         }
@@ -441,7 +493,6 @@ public class DownloadManager {
                               + " AND " + statusClause("<", 600) + ")");
                 }
                 selection = joinStrings(" OR ", parts);
-                Log.w("DownloadManagerPublic", selection);
             }
             String orderBy = Downloads.COLUMN_LAST_MODIFICATION + " DESC";
             return resolver.query(uri, projection, selection, null, orderBy);
@@ -466,12 +517,14 @@ public class DownloadManager {
     }
 
     private ContentResolver mResolver;
+    private String mPackageName;
 
     /**
      * @hide
      */
-    public DownloadManager(ContentResolver resolver) {
+    public DownloadManager(ContentResolver resolver, String packageName) {
         mResolver = resolver;
+        mPackageName = packageName;
     }
 
     /**
@@ -483,7 +536,7 @@ public class DownloadManager {
      * calls related to this download.
      */
     public long enqueue(Request request) {
-        ContentValues values = request.toContentValues();
+        ContentValues values = request.toContentValues(mPackageName);
         Uri downloadUri = mResolver.insert(Downloads.CONTENT_URI, values);
         long id = Long.parseLong(downloadUri.getLastPathSegment());
         return id;
