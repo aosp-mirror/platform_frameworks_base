@@ -59,6 +59,7 @@
   <item type="id" name="copy" />
   <item type="id" name="paste" />
   <item type="id" name="copyUrl" />
+  <item type="id" name="selectTextMode" />
   <item type="id" name="switchInputMethod" />
   <item type="id" name="keyboardView" />
   <item type="id" name="closeButton" />
