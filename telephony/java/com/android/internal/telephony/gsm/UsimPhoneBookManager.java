@@ -27,8 +27,6 @@ import com.android.internal.telephony.IccConstants;
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.PhoneBase;
 
-import org.apache.harmony.luni.lang.reflect.ListOfTypes;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
