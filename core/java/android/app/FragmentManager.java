@@ -86,6 +86,10 @@ public class FragmentManager {
     ArrayList<Integer> mAvailIndices;
     ArrayList<BackStackEntry> mBackStack;
     
+    // Must be accessed while locked.
+    ArrayList<BackStackEntry> mBackStackIndices;
+    ArrayList<Integer> mAvailBackStackIndices;
+
     int mCurState = Fragment.INITIALIZING;
     Activity mActivity;
     
@@ -514,6 +518,62 @@ public class FragmentManager {
         }
     }
     
+    public int allocBackStackIndex(BackStackEntry bse) {
+        synchronized (this) {
+            if (mAvailBackStackIndices == null || mAvailBackStackIndices.size() <= 0) {
+                if (mBackStackIndices == null) {
+                    mBackStackIndices = new ArrayList<BackStackEntry>();
+                }
+                int index = mBackStackIndices.size();
+                if (DEBUG) Log.v(TAG, "Setting back stack index " + index + " to " + bse);
+                mBackStackIndices.add(bse);
+                return index;
+
+            } else {
+                int index = mAvailBackStackIndices.remove(mAvailBackStackIndices.size()-1);
+                if (DEBUG) Log.v(TAG, "Adding back stack index " + index + " with " + bse);
+                mBackStackIndices.set(index, bse);
+                return index;
+            }
+        }
+    }
+
+    public void setBackStackIndex(int index, BackStackEntry bse) {
+        synchronized (this) {
+            if (mBackStackIndices == null) {
+                mBackStackIndices = new ArrayList<BackStackEntry>();
+            }
+            int N = mBackStackIndices.size();
+            if (index < N) {
+                if (DEBUG) Log.v(TAG, "Setting back stack index " + index + " to " + bse);
+                mBackStackIndices.set(index, bse);
+            } else {
+                while (N < index) {
+                    mBackStackIndices.add(null);
+                    if (mAvailBackStackIndices == null) {
+                        mAvailBackStackIndices = new ArrayList<Integer>();
+                    }
+                    if (DEBUG) Log.v(TAG, "Adding available back stack index " + N);
+                    mAvailBackStackIndices.add(N);
+                    N++;
+                }
+                if (DEBUG) Log.v(TAG, "Adding back stack index " + index + " with " + bse);
+                mBackStackIndices.add(bse);
+            }
+        }
+    }
+
+    public void freeBackStackIndex(int index) {
+        synchronized (this) {
+            mBackStackIndices.set(index, null);
+            if (mAvailBackStackIndices == null) {
+                mAvailBackStackIndices = new ArrayList<Integer>();
+            }
+            if (DEBUG) Log.v(TAG, "Freeing back stack index " + index);
+            mAvailBackStackIndices.add(index);
+        }
+    }
+
     /**
      * Only call from main thread!
      */
@@ -554,11 +614,22 @@ public class FragmentManager {
         mBackStack.add(state);
     }
     
-    public boolean popBackStackState(Handler handler, String name) {
+    public boolean popBackStackState(Handler handler, String name, int flags) {
+        return popBackStackState(handler, name, -1, flags);
+    }
+
+    public boolean popBackStackState(Handler handler, int id, int flags) {
+        if (id < 0) {
+            return false;
+        }
+        return popBackStackState(handler, null, id, flags);
+    }
+
+    boolean popBackStackState(Handler handler, String name, int id, int flags) {
         if (mBackStack == null) {
             return false;
         }
-        if (name == null) {
+        if (name == null && id < 0) {
             int last = mBackStack.size()-1;
             if (last < 0) {
                 return false;
@@ -576,11 +647,21 @@ public class FragmentManager {
             int index = mBackStack.size()-1;
             while (index >= 0) {
                 BackStackEntry bss = mBackStack.get(index);
-                if (name.equals(bss.getName())) {
+                if (name != null && name.equals(bss.getName())) {
                     break;
                 }
+                if (id >= 0 && id == bss.mIndex) {
+                    break;
+                }
+                index--;
             }
-            if (index < 0 || index == mBackStack.size()-1) {
+            if (index < 0) {
+                return false;
+            }
+            if ((flags&Activity.POP_BACK_STACK_INCLUSIVE) != 0) {
+                index--;
+            }
+            if (index == mBackStack.size()-1) {
                 return false;
             }
             final ArrayList<BackStackEntry> states
@@ -772,6 +853,9 @@ public class FragmentManager {
             for (int i=0; i<fms.mBackStack.length; i++) {
                 BackStackEntry bse = fms.mBackStack[i].instantiate(this);
                 mBackStack.add(bse);
+                if (bse.mIndex >= 0) {
+                    setBackStackIndex(bse.mIndex, bse);
+                }
             }
         } else {
             mBackStack = null;

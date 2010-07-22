@@ -1314,6 +1314,7 @@
   <public type="style" name="Theme.WithActionBar" />
   <public type="style" name="Widget.Spinner.DropDown" />
   <public type="style" name="Widget.ActionButton" />
+  <public type="style" name="Theme.Dialog.NoFrame" />
 
   <!-- Standard content view for a {@link android.app.ListFragment}.
        If you are implementing a subclass of ListFragment with your

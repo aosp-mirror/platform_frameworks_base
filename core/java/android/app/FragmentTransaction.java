@@ -147,5 +147,15 @@ public interface FragmentTransaction {
     public FragmentTransaction setTransitionStyle(int styleRes);
     
     public FragmentTransaction addToBackStack(String name);
-    public void commit();
+
+    /**
+     * Schedules a commit of this transaction.  Note that the commit does
+     * not happen immediately; it will be scheduled as work on the main thread
+     * to be done the next time that thread is ready.
+     *
+     * @return Returns the identifier of this transaction's back stack entry,
+     * if {@link #addToBackStack(String)} had been called.  Otherwise, returns
+     * a negative number.
+     */
+    public int commit();
 }
