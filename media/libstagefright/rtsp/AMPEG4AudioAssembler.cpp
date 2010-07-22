@@ -144,6 +144,11 @@ void AMPEG4AudioAssembler::submitAccessUnit() {
 
     accessUnit->meta()->setInt64("ntp-time", ntpTime);
 
+#if 0
+    printf(mAccessUnitDamaged ? "X" : ".");
+    fflush(stdout);
+#endif
+
     if (mAccessUnitDamaged) {
         accessUnit->meta()->setInt32("damaged", true);
     }

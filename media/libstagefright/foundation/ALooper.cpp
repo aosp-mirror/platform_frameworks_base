@@ -73,7 +73,8 @@ void ALooper::unregisterHandler(handler_id handlerID) {
     gLooperRoster.unregisterHandler(handlerID);
 }
 
-status_t ALooper::start(bool runOnCallingThread, bool canCallJava) {
+status_t ALooper::start(
+        bool runOnCallingThread, bool canCallJava, int32_t priority) {
     if (runOnCallingThread) {
         {
             Mutex::Autolock autoLock(mLock);
@@ -99,7 +100,7 @@ status_t ALooper::start(bool runOnCallingThread, bool canCallJava) {
 
     mThread = new LooperThread(this, canCallJava);
 
-    status_t err = mThread->run("ALooper");
+    status_t err = mThread->run("ALooper", priority);
     if (err != OK) {
         mThread.clear();
     }
