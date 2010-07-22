@@ -114,8 +114,12 @@ status_t SensorEventQueue::disableSensor(Sensor const* sensor) const {
     return mSensorEventConnection->enableDisable(sensor->getHandle(), false);
 }
 
-status_t SensorEventQueue::enableSensor(int32_t handle) const {
-    return mSensorEventConnection->enableDisable(handle, true);
+status_t SensorEventQueue::enableSensor(int32_t handle, int32_t ms) const {
+    status_t err = mSensorEventConnection->enableDisable(handle, true);
+    if (err == NO_ERROR) {
+        mSensorEventConnection->setEventRate(handle, ms2ns(ms));
+    }
+    return err;
 }
 
 status_t SensorEventQueue::disableSensor(int32_t handle) const {
