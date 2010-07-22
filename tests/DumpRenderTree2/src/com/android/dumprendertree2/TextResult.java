@@ -16,6 +16,7 @@
 
 package com.android.dumprendertree2;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.webkit.WebView;
@@ -48,6 +49,19 @@ public class TextResult extends AbstractResult {
 
     public TextResult(String relativePath) {
         mRelativePath = relativePath;
+    }
+
+    /**
+     * Used to recreate the Result when received by the service.
+     *
+     * @param bundle
+     *      bundle with data used to recreate the result
+     */
+    public TextResult(Bundle bundle) {
+        mExpectedResult = bundle.getString("expectedTextualResult");
+        mActualResult = bundle.getString("actualTextualResult");
+        mRelativePath = bundle.getString("relativePath");
+        mResultCode = ResultCode.valueOf(bundle.getString("resultCode"));
     }
 
     @Override
@@ -141,7 +155,7 @@ public class TextResult extends AbstractResult {
     }
 
     @Override
-    public void obtainActualResult(WebView webview, Message resultObtainedMsg) {
+    public void obtainActualResults(WebView webview, Message resultObtainedMsg) {
         mResultObtainedMsg = resultObtainedMsg;
         Message msg = mHandler.obtainMessage(MSG_DOCUMENT_AS_TEXT);
 
@@ -149,5 +163,18 @@ public class TextResult extends AbstractResult {
         msg.arg1 = 1;
         msg.arg2 = 0;
         webview.documentAsText(msg);
+    }
+
+    @Override
+    public Bundle getBundle() {
+        Bundle bundle = new Bundle();
+        bundle.putString("expectedTextualResult", mExpectedResult);
+        bundle.putString("actualTextualResult", mActualResult);
+        bundle.putString("relativePath", mRelativePath);
+        if (mResultCode != null) {
+            bundle.putString("resultCode", mResultCode.name());
+        }
+        bundle.putString("type", getType().name());
+        return bundle;
     }
 }

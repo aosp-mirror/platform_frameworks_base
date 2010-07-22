@@ -16,6 +16,7 @@
 
 package com.android.dumprendertree2;
 
+import android.content.Intent;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -23,6 +24,7 @@ import android.os.Message;
 import android.util.Log;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
@@ -154,7 +156,17 @@ public class LayoutTestsRunnerThread extends Thread {
             mTotalTestCount = 1;
         }
 
-        runNextTest();
+        /**
+         * Instead of running next test here, we send a tests' list to Executer activity.
+         * Rest of the code is never executed and will be gradually moved to the service.
+         */
+        Intent intent = new Intent();
+        intent.setClass(mActivity, LayoutTestsExecuter.class);
+        intent.setAction(Intent.ACTION_RUN);
+        intent.putStringArrayListExtra(LayoutTestsExecuter.EXTRA_TESTS_LIST,
+                new ArrayList<String>(mTestsList));
+        mActivity.startActivity(intent);
+
         Looper.loop();
     }
 
