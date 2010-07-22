@@ -2,6 +2,7 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
+	FontRenderer.cpp \
 	GradientCache.cpp \
 	LayerCache.cpp \
 	Matrix.cpp \

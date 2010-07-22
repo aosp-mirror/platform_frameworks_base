@@ -410,9 +410,21 @@ class GLES20Canvas extends Canvas {
     public void drawBitmap(Bitmap bitmap, Rect src, Rect dst, Paint paint) {
         // Shaders are ignored when drawing bitmaps
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
-        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, src.left, src.top, src.right, src.bottom,
-                dst.left, dst.top, dst.right, dst.bottom, nativePaint
-        );
+
+        int left, top, right, bottom;
+        if (src == null) {
+            left = top = 0;
+            right = bitmap.getWidth();
+            bottom = bitmap.getHeight();
+        } else {
+            left = src.left;
+            right = src.right;
+            top = src.top;
+            bottom = src.bottom;
+        }
+
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, left, top, right, bottom,
+                dst.left, dst.top, dst.right, dst.bottom, nativePaint);
     }
 
     @Override
@@ -420,8 +432,7 @@ class GLES20Canvas extends Canvas {
         // Shaders are ignored when drawing bitmaps
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
         nDrawBitmap(mRenderer, bitmap.mNativeBitmap, src.left, src.top, src.right, src.bottom,
-                dst.left, dst.top, dst.right, dst.bottom, nativePaint
-        );
+                dst.left, dst.top, dst.right, dst.bottom, nativePaint);
     }
 
     private native void nDrawBitmap(int renderer, int bitmap,

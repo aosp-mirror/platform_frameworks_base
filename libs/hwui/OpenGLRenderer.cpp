@@ -21,6 +21,7 @@
 #include <sys/types.h>
 
 #include <SkCanvas.h>
+#include <SkTypeface.h>
 
 #include <cutils/properties.h>
 #include <utils/Log.h>
@@ -134,6 +135,7 @@ OpenGLRenderer::OpenGLRenderer():
 
     mDrawColorProgram = new DrawColorProgram;
     mDrawTextureProgram = new DrawTextureProgram;
+    mDrawTextProgram = new DrawTextProgram;
     mDrawLinearGradientProgram = new DrawLinearGradientProgram;
     mCurrentProgram = mDrawTextureProgram;
 
@@ -527,6 +529,39 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
     drawColorRect(left, top, right, bottom, color, mode);
 }
 
+void OpenGLRenderer::drawText(const char* text, int count, float x, float y, SkPaint* paint) {
+    // TODO: Support paint's text alignments, proper clipping
+    if (quickReject(x, y, x + 1, y +1)) {
+        return;
+    }
+
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
+
+    uint32_t color = paint->getColor();
+    const GLfloat a = alpha / 255.0f;
+    const GLfloat r = a * ((color >> 16) & 0xFF) / 255.0f;
+    const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
+    const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
+
+    mModelView.loadIdentity();
+
+    useProgram(mDrawTextProgram);
+    mDrawTextProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+
+    chooseBlending(true, mode);
+    bindTexture(mFontRenderer.getTexture(), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+    // Always premultiplied
+    glUniform4f(mDrawTextProgram->color, r, g, b, a);
+
+    mFontRenderer.setFont(SkTypeface::UniqueID(paint->getTypeface()), paint->getTextSize());
+    mFontRenderer.renderText(paint, text, count, 0, count, x, y);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Shaders
 ///////////////////////////////////////////////////////////////////////////////
@@ -687,6 +722,7 @@ void OpenGLRenderer::drawBitmapShader(float left, float top, float right, float 
     float u2 = right - left;
     float v2 = bottom - top;
 
+    // TODO: If the texture is not pow, use a shader to support repeat/mirror
     if (mShaderMatrix) {
         SkMatrix inverse;
         mShaderMatrix->invert(&inverse);
@@ -742,7 +778,6 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     bindTexture(texture, mShaderTileX, mShaderTileY);
 
     // Always premultiplied
-    //glUniform4f(mDrawTextureProgram->color, alpha, alpha, alpha, alpha);
     glUniform4f(mDrawTextureProgram->color, alpha, alpha, alpha, alpha);
 
     glVertexAttribPointer(mDrawTextureProgram->position, 2, GL_FLOAT, GL_FALSE,
