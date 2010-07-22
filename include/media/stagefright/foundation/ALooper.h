@@ -41,7 +41,9 @@ struct ALooper : public RefBase {
 
     status_t start(
             bool runOnCallingThread = false,
-            bool canCallJava = false);
+            bool canCallJava = false,
+            int32_t priority = PRIORITY_DEFAULT
+            );
 
     status_t stop();
 
