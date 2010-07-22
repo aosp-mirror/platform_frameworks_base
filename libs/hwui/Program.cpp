@@ -33,6 +33,8 @@ namespace uirenderer {
 #include "shaders/drawTexture.vert"
 #include "shaders/drawTexture.frag"
 
+#include "shaders/drawText.frag"
+
 #include "shaders/drawLinearGradient.vert"
 #include "shaders/drawLinearGradient.frag"
 
@@ -169,6 +171,12 @@ DrawTextureProgram::DrawTextureProgram():
     sampler = addUniform("sampler");
 }
 
+DrawTextureProgram::DrawTextureProgram(const char* vertex, const char* fragment):
+        DrawColorProgram(vertex, fragment) {
+    texCoords = addAttrib("texCoords");
+    sampler = addUniform("sampler");
+}
+
 void DrawTextureProgram::use() {
     DrawColorProgram::use();
     glActiveTexture(GL_TEXTURE0);
@@ -179,6 +187,14 @@ void DrawTextureProgram::use() {
 void DrawTextureProgram::remove() {
     DrawColorProgram::remove();
     glDisableVertexAttribArray(texCoords);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Draw text
+///////////////////////////////////////////////////////////////////////////////
+
+DrawTextProgram::DrawTextProgram():
+        DrawTextureProgram(gDrawTextureVertexShader, gDrawTextFragmentShader) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////

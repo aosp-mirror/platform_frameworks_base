@@ -931,15 +931,14 @@ public class Paint {
     }
     
     /**
-     * Temporary API to expose layer drawing. This draws a shadow layer below
-     * the main layer, with the specified offset and color, and blur radius.
-     * If radius is 0, then the shadow layer is removed.
+     * This draws a shadow layer below the main layer, with the specified
+     * offset and color, and blur radius. If radius is 0, then the shadow
+     * layer is removed.
      */
-    public native void setShadowLayer(float radius, float dx, float dy,
-                                      int color);
+    public native void setShadowLayer(float radius, float dx, float dy, int color);
 
     /**
-     * Temporary API to clear the shadow layer.
+     * Clear the shadow layer.
      */
     public void clearShadowLayer() {
         setShadowLayer(0, 0, 0, 0);

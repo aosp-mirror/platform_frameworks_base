@@ -255,7 +255,8 @@ static void android_view_GLES20Canvas_drawTextArray(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, jcharArray text, int index, int count,
         jfloat x, jfloat y, int flags, SkPaint* paint) {
     jchar* textArray = env->GetCharArrayElements(text, NULL);
-    // TODO: draw from textArray + index
+    // TODO: Prepare the text for RTL
+    renderer->drawText((const char*) (textArray + index), count, x, y, paint);
     env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
 }
 
@@ -263,7 +264,8 @@ static void android_view_GLES20Canvas_drawText(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, jstring text, int start, int end,
         jfloat x, jfloat y, int flags, SkPaint* paint) {
     const jchar* textArray = env->GetStringChars(text, NULL);
-    // TODO: draw from textArray + start
+    // TODO: Prepare the text for RTL
+    renderer->drawText((const char*) (textArray + start), end - start, x, y, paint);
     env->ReleaseStringChars(text, textArray);
 }
 

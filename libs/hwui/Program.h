@@ -167,6 +167,7 @@ protected:
 class DrawTextureProgram: public DrawColorProgram {
 public:
     DrawTextureProgram();
+    DrawTextureProgram(const char* vertex, const char* fragment);
 
     /**
      * Binds this program to the GL context.
@@ -188,6 +189,11 @@ public:
      * Name of the texture coordinates attribute.
      */
     int texCoords;
+};
+
+class DrawTextProgram: public DrawTextureProgram {
+public:
+    DrawTextProgram();
 };
 
 /**

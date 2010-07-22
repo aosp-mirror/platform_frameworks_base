@@ -39,6 +39,7 @@
 #include "GradientCache.h"
 #include "PatchCache.h"
 #include "Vertex.h"
+#include "FontRenderer.h"
 
 namespace android {
 namespace uirenderer {
@@ -107,6 +108,8 @@ public:
     void setupLinearGradientShader(SkShader* shader, float* bounds, uint32_t* colors,
             float* positions, int count, SkShader::TileMode tileMode,
             SkMatrix* matrix, bool hasAlpha);
+
+    void drawText(const char* text, int count, float x, float y, SkPaint* paint);
 
 private:
     /**
@@ -329,6 +332,7 @@ private:
     sp<Program> mCurrentProgram;
     sp<DrawColorProgram> mDrawColorProgram;
     sp<DrawTextureProgram> mDrawTextureProgram;
+    sp<DrawTextProgram> mDrawTextProgram;
     sp<DrawLinearGradientProgram> mDrawLinearGradientProgram;
 
     // Used to draw textured quads
@@ -356,6 +360,9 @@ private:
     uint32_t* mShaderColors;
     float* mShaderPositions;
     int mShaderCount;
+
+    // Font renderer
+    FontRenderer mFontRenderer;
 
     // Various caches
     TextureCache mTextureCache;
