@@ -383,6 +383,11 @@ public class ActionBarImpl extends ActionBar {
 
         @Override
         public void finish() {
+            if (mContextMode != this) {
+                // Not the active context mode - no-op
+                return;
+            }
+
             mCallback.onDestroyContextualMode(this);
             mAnimatorView.setDisplayedChild(NORMAL_VIEW);
 
