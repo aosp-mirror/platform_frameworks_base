@@ -34,17 +34,31 @@ namespace android {
 struct MyHandler : public AHandler {
     MyHandler(const char *url, const sp<ALooper> &looper)
         : mLooper(looper),
+          mNetLooper(new ALooper),
           mConn(new ARTSPConnection),
           mRTPConn(new ARTPConnection),
           mSessionURL(url),
           mSetupTracksSuccessful(false),
           mFirstAccessUnit(true),
           mFirstAccessUnitNTP(-1) {
+
+        mNetLooper->start(false /* runOnCallingThread */,
+                          false /* canCallJava */,
+                          PRIORITY_HIGHEST);
+    }
+
+    void connect() {
         mLooper->registerHandler(this);
         mLooper->registerHandler(mConn);
-        mLooper->registerHandler(mRTPConn);
+        (1 ? mNetLooper : mLooper)->registerHandler(mRTPConn);
         sp<AMessage> reply = new AMessage('conn', id());
+
         mConn->connect(mSessionURL.c_str(), reply);
+    }
+
+    void disconnect() {
+        sp<AMessage> reply = new AMessage('disc', id());
+        mConn->disconnect(reply);
     }
 
     virtual void onMessageReceived(const sp<AMessage> &msg) {
@@ -290,7 +304,6 @@ struct MyHandler : public AHandler {
 
             case 'quit':
             {
-                mLooper->stop();
                 break;
             }
 
@@ -320,8 +333,17 @@ struct MyHandler : public AHandler {
 
                 accessUnit->meta()->setInt64("ntp-time", ntpTime);
 
-                TrackInfo *track = &mTracks.editItemAt(trackIndex);
-                track->mPacketSource->queueAccessUnit(accessUnit);
+#if 0
+                int32_t damaged;
+                if (accessUnit->meta()->findInt32("damaged", &damaged)
+                        && damaged != 0) {
+                    LOG(INFO) << "ignoring damaged AU";
+                } else
+#endif
+                {
+                    TrackInfo *track = &mTracks.editItemAt(trackIndex);
+                    track->mPacketSource->queueAccessUnit(accessUnit);
+                }
                 break;
             }
 
@@ -344,6 +366,7 @@ struct MyHandler : public AHandler {
 
 private:
     sp<ALooper> mLooper;
+    sp<ALooper> mNetLooper;
     sp<ARTSPConnection> mConn;
     sp<ARTPConnection> mRTPConn;
     sp<ASessionDescription> mSessionDesc;

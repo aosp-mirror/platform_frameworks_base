@@ -38,6 +38,8 @@ status_t ARTSPController::connect(const char *url) {
     }
 
     mHandler = new MyHandler(url, mLooper);
+    mHandler->connect();
+
     sleep(10);
 
     return OK;
@@ -48,6 +50,7 @@ void ARTSPController::disconnect() {
         return;
     }
 
+    mHandler->disconnect();
     mHandler.clear();
 }
 
