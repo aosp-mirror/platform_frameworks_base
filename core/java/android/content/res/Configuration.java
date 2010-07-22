@@ -266,11 +266,18 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         sb.append("/");
         sb.append(navigationHidden);
         sb.append(" orien=");
-        sb.append(orientation);
-        sb.append(" layout=");
-        sb.append(screenLayout);
-        sb.append(" uiMode=");
-        sb.append(uiMode);
+        switch(orientation) {
+            case ORIENTATION_LANDSCAPE:
+                sb.append("L"); break;
+            case ORIENTATION_PORTRAIT:
+                sb.append("P"); break;
+            default:
+                sb.append(orientation);
+        }
+        sb.append(" layout=0x");
+        sb.append(java.lang.Integer.toHexString(screenLayout));
+        sb.append(" uiMode=0x");
+        sb.append(java.lang.Integer.toHexString(uiMode));
         if (seq != 0) {
             sb.append(" seq=");
             sb.append(seq);
