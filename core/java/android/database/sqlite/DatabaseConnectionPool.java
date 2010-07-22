@@ -63,6 +63,9 @@ import java.util.Random;
      */
     /* package */ void close() {
         synchronized(mParentDbObj) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Closing the connection pool on " + mParentDbObj.getPath() + toString());
+            }
             for (int i = mPool.size() - 1; i >= 0; i--) {
                 mPool.get(i).mDb.close();
             }

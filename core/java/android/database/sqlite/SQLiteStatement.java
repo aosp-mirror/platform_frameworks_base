@@ -16,6 +16,7 @@
 
 package android.database.sqlite;
 
+import android.database.DatabaseUtils;
 import android.os.SystemClock;
 
 import dalvik.system.BlockGuard;
@@ -36,6 +37,11 @@ public class SQLiteStatement extends SQLiteProgram
     private static final boolean WRITE = false;
 
     private SQLiteDatabase mOrigDb;
+    private int state;
+    /** possible value for {@link #state}. indicates that a transaction is started.} */
+    private static final int TRANS_STARTED = 1;
+    /** possible value for {@link #state}. indicates that a lock is acquired.} */
+    private static final int LOCK_ACQUIRED = 2;
 
     /**
      * Don't use SQLiteStatement constructor directly, please use
@@ -150,18 +156,20 @@ public class SQLiteStatement extends SQLiteProgram
      *   <li>make sure the database is open</li>
      *   <li>get a database connection from the connection pool,if possible</li>
      *   <li>notifies {@link BlockGuard} of read/write</li>
-     *   <li>get lock on the database</li>
+     *   <li>if the SQL statement is an update, start transaction if not already in one.
+     *   otherwise, get lock on the database</li>
      *   <li>acquire reference on this object</li>
      *   <li>and then return the current time _before_ the database lock was acquired</li>
      * </ul>
      * <p>
-     * This method removes the duplcate code from the other public
+     * This method removes the duplicate code from the other public
      * methods in this class.
      */
     private long acquireAndLock(boolean rwFlag) {
+        state = 0;
         // use pooled database connection handles for SELECT SQL statements
         mDatabase.verifyDbIsOpen();
-        SQLiteDatabase db = (getSqlStatementType(mSql) != SELECT_STMT) ? mDatabase
+        SQLiteDatabase db = (mStatementType != DatabaseUtils.STATEMENT_SELECT) ? mDatabase
                 : mDatabase.getDbConnection(mSql);
         // use the database connection obtained above
         mOrigDb = mDatabase;
@@ -172,20 +180,57 @@ public class SQLiteStatement extends SQLiteProgram
         } else {
             BlockGuard.getThreadPolicy().onReadFromDisk();
         }
-        long startTime = SystemClock.uptimeMillis();
-        mDatabase.lock();
+
+        /*
+         * Special case handling of SQLiteDatabase.execSQL("BEGIN transaction").
+         * we know it is execSQL("BEGIN transaction") from the caller IF there is no lock held.
+         * beginTransaction() methods in SQLiteDatabase call lockForced() before
+         * calling execSQL("BEGIN transaction").
+         */
+        if (mStatementType == DatabaseUtils.STATEMENT_BEGIN) {
+            if (!mDatabase.isDbLockedByCurrentThread()) {
+                // transaction is  NOT started by calling beginTransaction() methods in
+                // SQLiteDatabase
+                mDatabase.setTransactionUsingExecSqlFlag();
+            }
+        } else if (mStatementType == DatabaseUtils.STATEMENT_UPDATE) {
+            // got update SQL statement. if there is NO pending transaction, start one
+            if (!mDatabase.inTransaction()) {
+                mDatabase.beginTransactionNonExclusive();
+                state = TRANS_STARTED;
+            }
+        }
+        // do I have database lock? if not, grab it.
+        if (!mDatabase.isDbLockedByCurrentThread()) {
+            mDatabase.lock();
+            state = LOCK_ACQUIRED;
+        }
+
         acquireReference();
+        long startTime = SystemClock.uptimeMillis();
         mDatabase.closePendingStatements();
         compileAndbindAllArgs();
         return startTime;
     }
 
     /**
-     * this method releases locks and references acquired in {@link #acquireAndLock(boolean)}.
+     * this method releases locks and references acquired in {@link #acquireAndLock(boolean)}
      */
     private void releaseAndUnlock() {
         releaseReference();
-        mDatabase.unlock();
+        if (state == TRANS_STARTED) {
+            try {
+                mDatabase.setTransactionSuccessful();
+            } finally {
+                mDatabase.endTransaction();
+            }
+        } else if (state == LOCK_ACQUIRED) {
+            mDatabase.unlock();
+        }
+        if (mStatementType == DatabaseUtils.STATEMENT_COMMIT ||
+                mStatementType == DatabaseUtils.STATEMENT_ABORT) {
+            mDatabase.resetTransactionUsingExecSqlFlag();
+        }
         clearBindings();
         // release the compiled sql statement so that the caller's SQLiteStatement no longer
         // has a hard reference to a database object that may get deallocated at any point.
