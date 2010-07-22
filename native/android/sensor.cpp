@@ -43,17 +43,18 @@ ASensorManager* ASensorManager_getInstance()
     return &SensorManager::getInstance();
 }
 
-int ASensorManager_getSensorList(ASensorManager* manager, ASensor** list)
+int ASensorManager_getSensorList(ASensorManager* manager,
+        ASensorList* list)
 {
-    Sensor* l;
+    Sensor const* const* l;
     int c = static_cast<SensorManager*>(manager)->getSensorList(&l);
     if (list) {
-        *list = l;
+        *list = reinterpret_cast<ASensorList>(l);
     }
     return c;
 }
 
-ASensor* ASensorManager_getDefaultSensor(ASensorManager* manager, int type)
+ASensor const* ASensorManager_getDefaultSensor(ASensorManager* manager, int type)
 {
     return static_cast<SensorManager*>(manager)->getDefaultSensor(type);
 }
@@ -82,23 +83,23 @@ int ASensorManager_destroyEventQueue(ASensorManager* manager,
 
 /*****************************************************************************/
 
-int ASensorEventQueue_enableSensor(ASensorEventQueue* queue, ASensor* sensor)
+int ASensorEventQueue_enableSensor(ASensorEventQueue* queue, ASensor const* sensor)
 {
     return static_cast<SensorEventQueue*>(queue)->enableSensor(
-            static_cast<Sensor*>(sensor));
+            static_cast<Sensor const*>(sensor));
 }
 
-int ASensorEventQueue_disableSensor(ASensorEventQueue* queue, ASensor* sensor)
+int ASensorEventQueue_disableSensor(ASensorEventQueue* queue, ASensor const* sensor)
 {
     return static_cast<SensorEventQueue*>(queue)->disableSensor(
-            static_cast<Sensor*>(sensor));
+            static_cast<Sensor const*>(sensor));
 }
 
-int ASensorEventQueue_setEventRate(ASensorEventQueue* queue, ASensor* sensor,
+int ASensorEventQueue_setEventRate(ASensorEventQueue* queue, ASensor const* sensor,
         int32_t usec)
 {
     return static_cast<SensorEventQueue*>(queue)->setEventRate(
-            static_cast<Sensor*>(sensor), us2ns(usec));
+            static_cast<Sensor const*>(sensor), us2ns(usec));
 }
 
 int ASensorEventQueue_hasEvents(ASensorEventQueue* queue)
@@ -128,23 +129,23 @@ ssize_t ASensorEventQueue_getEvents(ASensorEventQueue* queue,
 
 /*****************************************************************************/
 
-const char* ASensor_getName(ASensor* sensor)
+const char* ASensor_getName(ASensor const* sensor)
 {
-    return static_cast<Sensor*>(sensor)->getName().string();
+    return static_cast<Sensor const*>(sensor)->getName().string();
 }
 
-const char* ASensor_getVendor(ASensor* sensor)
+const char* ASensor_getVendor(ASensor const* sensor)
 {
-    return static_cast<Sensor*>(sensor)->getVendor().string();
+    return static_cast<Sensor const*>(sensor)->getVendor().string();
 }
 
-int ASensor_getType(ASensor* sensor)
+int ASensor_getType(ASensor const* sensor)
 {
-    return static_cast<Sensor*>(sensor)->getType();
+    return static_cast<Sensor const*>(sensor)->getType();
 }
 
-float ASensor_getResolution(ASensor* sensor)
+float ASensor_getResolution(ASensor const* sensor)
 {
-    return static_cast<Sensor*>(sensor)->getResolution();
+    return static_cast<Sensor const*>(sensor)->getResolution();
 }
 

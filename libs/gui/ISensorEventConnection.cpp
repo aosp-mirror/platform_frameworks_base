@@ -47,6 +47,7 @@ public:
     virtual sp<SensorChannel> getSensorChannel() const
     {
         Parcel data, reply;
+        data.writeInterfaceToken(ISensorEventConnection::getInterfaceDescriptor());
         remote()->transact(GET_SENSOR_CHANNEL, data, &reply);
         return new SensorChannel(reply);
     }
@@ -54,6 +55,7 @@ public:
     virtual status_t enableDisable(int handle, bool enabled)
     {
         Parcel data, reply;
+        data.writeInterfaceToken(ISensorEventConnection::getInterfaceDescriptor());
         data.writeInt32(handle);
         data.writeInt32(enabled);
         remote()->transact(ENABLE_DISABLE, data, &reply);
@@ -63,6 +65,7 @@ public:
     virtual status_t setEventRate(int handle, nsecs_t ns)
     {
         Parcel data, reply;
+        data.writeInterfaceToken(ISensorEventConnection::getInterfaceDescriptor());
         data.writeInt32(handle);
         data.writeInt64(ns);
         remote()->transact(SET_EVENT_RATE, data, &reply);

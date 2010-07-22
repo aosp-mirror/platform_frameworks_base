@@ -48,6 +48,7 @@ public:
     virtual Vector<Sensor> getSensorList()
     {
         Parcel data, reply;
+        data.writeInterfaceToken(ISensorServer::getInterfaceDescriptor());
         remote()->transact(GET_SENSOR_LIST, data, &reply);
         Sensor s;
         Vector<Sensor> v;
@@ -63,6 +64,7 @@ public:
     virtual sp<ISensorEventConnection> createSensorEventConnection()
     {
         Parcel data, reply;
+        data.writeInterfaceToken(ISensorServer::getInterfaceDescriptor());
         remote()->transact(CREATE_SENSOR_EVENT_CONNECTION, data, &reply);
         return interface_cast<ISensorEventConnection>(reply.readStrongBinder());
     }
