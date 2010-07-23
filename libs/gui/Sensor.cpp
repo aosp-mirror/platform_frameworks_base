@@ -89,7 +89,7 @@ size_t Sensor::getFlattenedSize() const
     return  sizeof(int32_t) + ((mName.length() + 3) & ~3) +
             sizeof(int32_t) + ((mVendor.length() + 3) & ~3) +
             sizeof(int32_t) * 2 +
-            sizeof(float) * 3;
+            sizeof(float) * 4;
 }
 
 size_t Sensor::getFdCount() const
