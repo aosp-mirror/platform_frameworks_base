@@ -69,11 +69,6 @@ public final class Sequencer extends Animatable {
     private final ArrayList<Node> mSortedNodes = new ArrayList<Node>();
 
     /**
-     * The set of listeners to be sent events through the life of an animation.
-     */
-    private ArrayList<AnimatableListener> mListeners = null;
-
-    /**
      * Flag indicating whether the nodes should be sorted prior to playing. This
      * flag allows us to cache the previous sorted nodes so that if the sequence
      * is replayed with no changes, it does not have to re-sort the nodes again.
@@ -224,7 +219,6 @@ public final class Sequencer extends Animatable {
             if (mSequenceListener == null) {
                 mSequenceListener = new SequencerAnimatableListener(this);
             }
-            node.animation.addListener(mSequenceListener);
             if (node.dependencies == null || node.dependencies.size() == 0) {
                 nodesToStart.add(node);
             } else {
@@ -234,6 +228,7 @@ public final class Sequencer extends Animatable {
                 }
                 node.tmpDependencies = (ArrayList<Dependency>) node.dependencies.clone();
             }
+            node.animation.addListener(mSequenceListener);
         }
         // Now that all dependencies are set up, start the animations that should be started.
         for (Node node : nodesToStart) {
@@ -329,6 +324,7 @@ public final class Sequencer extends Animatable {
             if (mNode.tmpDependencies.size() == 0) {
                 // all dependencies satisfied: start the animation
                 mNode.animation.start();
+                mSequencer.mPlayingSet.add(mNode.animation);
             }
         }
 
@@ -356,9 +352,21 @@ public final class Sequencer extends Animatable {
         public void onAnimationEnd(Animatable animation) {
             animation.removeListener(this);
             mPlayingSet.remove(animation);
-            if (mPlayingSet.size() == 0) {
+            Node animNode = mSequencer.mNodeMap.get(animation);
+            animNode.done = true;
+            ArrayList<Node> sortedNodes = mSequencer.mSortedNodes;
+            int numNodes = sortedNodes.size();
+            int nodeIndex = sortedNodes.indexOf(animNode);
+            boolean allDone = true;
+            for (int i = nodeIndex + 1; i < numNodes; ++i) {
+                if (!sortedNodes.get(i).done) {
+                    allDone = false;
+                    break;
+                }
+            }
+            if (allDone) {
                 // If this was the last child animation to end, then notify listeners that this
-                // sequence ended
+                // sequencer has ended
                 if (mListeners != null) {
                     ArrayList<AnimatableListener> tmpListeners =
                             (ArrayList<AnimatableListener>) mListeners.clone();
@@ -435,6 +443,7 @@ public final class Sequencer extends Animatable {
                         }
                     }
                 }
+                node.done = false; // also reset done flag
             }
         }
     }
@@ -500,6 +509,13 @@ public final class Sequencer extends Animatable {
          * dependency when it is a root node.
          */
         public ArrayList<Node> nodeDependents = null;
+
+        /**
+         * Flag indicating whether the animation in this node is finished. This flag
+         * is used by Sequencer to check, as each animation ends, whether all child animations
+         * are done and it's time to send out an end event for the entire Sequencer.
+         */
+        public boolean done = false;
 
         /**
          * Constructs the Node with the animation that it encapsulates. A Node has no
