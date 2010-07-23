@@ -40,6 +40,7 @@
 #include "PatchCache.h"
 #include "Vertex.h"
 #include "FontRenderer.h"
+#include "Extensions.h"
 
 namespace android {
 namespace uirenderer {
@@ -369,6 +370,8 @@ private:
     LayerCache mLayerCache;
     GradientCache mGradientCache;
     PatchCache mPatchCache;
+
+    Extensions mExtensions;
 }; // class OpenGLRenderer
 
 }; // namespace uirenderer

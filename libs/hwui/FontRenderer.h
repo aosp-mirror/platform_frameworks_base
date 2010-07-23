@@ -43,10 +43,8 @@ public:
     static Font* create(FontRenderer* state, uint32_t fontId, float fontSize);
 
 protected:
-
     friend class FontRenderer;
 
-    void invalidateTextureCache();
     struct CachedGlyphInfo {
         // Has the cache been invalidated?
         bool mIsValid;
@@ -68,17 +66,19 @@ protected:
         uint32_t mBitmapTop;
     };
 
-    FontRenderer* mState;
-    uint32_t mFontId;
-    float mFontSize;
-
     Font(FontRenderer* state, uint32_t fontId, float fontSize);
 
     DefaultKeyedVector<int32_t, CachedGlyphInfo*> mCachedGlyphs;
 
+    void invalidateTextureCache();
+
     CachedGlyphInfo *cacheGlyph(SkPaint* paint, int32_t glyph);
     void updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyphInfo *glyph);
     void drawCachedGlyph(CachedGlyphInfo *glyph, int x, int y);
+
+    FontRenderer* mState;
+    uint32_t mFontId;
+    float mFontSize;
 };
 
 class FontRenderer {

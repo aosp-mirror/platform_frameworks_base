@@ -128,6 +128,11 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
     glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap->bytesPerPixel());
 
     switch (bitmap->getConfig()) {
+    case SkBitmap::kA8_Config:
+        texture->blend = true;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, bitmap->rowBytesAsPixels(), texture->height, 0,
+                GL_ALPHA, GL_UNSIGNED_BYTE, bitmap->getPixels());
+        break;
     case SkBitmap::kRGB_565_Config:
         texture->blend = false;
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, bitmap->rowBytesAsPixels(), texture->height, 0,
