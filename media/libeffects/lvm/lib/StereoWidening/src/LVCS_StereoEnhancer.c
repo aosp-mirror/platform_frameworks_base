@@ -17,9 +17,9 @@
 
 /************************************************************************************
 
-     $Author: beq07716 $
-     $Revision: 1001 $
-     $Date: 2010-06-28 13:23:02 +0200 (Mon, 28 Jun 2010) $
+     $Author: nxp007753 $
+     $Revision: 1315 $
+     $Date: 2010-07-23 11:52:08 +0200 (Fri, 23 Jul 2010) $
 
 *************************************************************************************/
 
@@ -90,7 +90,8 @@ LVCS_ReturnStatus_en LVCS_SEnhancerInit(LVCS_Handle_t       hInstance,
 
         /* Clear the taps */
         LoadConst_16(0,                                                                 /* Value */
-                     (LVM_INT16 *)&pData->SEBiquadTapsMid,                              /* Destination */
+                     (void *)&pData->SEBiquadTapsMid,              /* Destination Cast to void:\
+                                                                      no dereferencing in function*/
                      (LVM_UINT16)(sizeof(pData->SEBiquadTapsMid)/sizeof(LVM_UINT16)));  /* Number of words */
 
         FO_1I_D16F16Css_TRC_WRA_01_Init(&pCoefficient->SEBiquadInstanceMid,
@@ -116,7 +117,8 @@ LVCS_ReturnStatus_en LVCS_SEnhancerInit(LVCS_Handle_t       hInstance,
 
         /* Clear the taps */
         LoadConst_16(0,                                                                 /* Value */
-                     (LVM_INT16 *)&pData->SEBiquadTapsSide,                             /* Destination */
+                     (void *)&pData->SEBiquadTapsSide,             /* Destination Cast to void:\
+                                                                      no dereferencing in function*/
                      (LVM_UINT16)(sizeof(pData->SEBiquadTapsSide)/sizeof(LVM_UINT16))); /* Number of words */
 
 

@@ -17,9 +17,9 @@
 
 /************************************************************************************
 
-     $Author: nxp007753 $
-     $Revision: 1246 $
-     $Date: 2010-07-16 11:07:10 +0200 (Fri, 16 Jul 2010) $
+     $Author: beq06068 $
+     $Revision: 1307 $
+     $Date: 2010-07-22 17:41:25 +0200 (Thu, 22 Jul 2010) $
 
 *************************************************************************************/
 
@@ -90,7 +90,7 @@ LVCS_ReturnStatus_en LVCS_BypassMixInit(LVCS_Handle_t       hInstance,
      */
     if ((pParams->OperatingMode == LVCS_ON) &&
         (pInstance->bTimerDone == LVM_TRUE)
-        && (LVC_Mixer_GetTarget(&pInstance->MSBypassMixer.MixerStream[1]) != 0x7FFF) /* this indicates an off->on transtion */
+        && (pInstance->MSTarget1 != 0x7FFF) /* this indicates an off->on transtion */
         )
     {
         pInstance->TransitionGain = pParams->EffectLevel;
@@ -260,17 +260,15 @@ LVM_INT32 LVCS_MixerCallback(LVCS_Handle_t      hInstance,
                             LVM_INT16           CallbackParam)
 {
     LVCS_Instance_t     *pInstance = (LVCS_Instance_t  *)hInstance;
-    LVM_INT32           Target1;
 
-    Target1 = LVC_Mixer_GetTarget(&pInstance->MSBypassMixer.MixerStream[0]);
-    (void)pGeneralPurpose;
+   (void)pGeneralPurpose;
 
     /*
      * Off transition has completed in Headphone mode
      */
     if ((pInstance->OutputDevice == LVCS_HEADPHONE) &&
         (pInstance->bInOperatingModeTransition)     &&
-        (Target1 == 0x0000)&&  /* this indicates an on->off transition */
+        (pInstance->MSTarget0 == 0x0000)&&  /* this indicates an on->off transition */
         (CallbackParam == 0))
     {
         /* Set operating mode to OFF */
@@ -289,7 +287,7 @@ LVM_INT32 LVCS_MixerCallback(LVCS_Handle_t      hInstance,
 
 
     if ((pInstance->OutputDevice == LVCS_HEADPHONE)  &&
-        (Target1 == 1) &&
+        (pInstance->MSTarget0 == 1) &&
         (pInstance->bTimerDone == LVM_TRUE)){
 
         /* Exit transition state */
