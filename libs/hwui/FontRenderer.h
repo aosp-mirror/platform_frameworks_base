@@ -27,19 +27,29 @@
 #include <GLES2/gl2.h>
 
 #include "Rect.h"
+#include "Properties.h"
 
 namespace android {
 namespace uirenderer {
 
 class FontRenderer;
 
+/**
+ * Represents a font, defined by a Skia font id and a font size. A font is used
+ * to generate glyphs and cache them in the FontState.
+ */
 class Font {
 public:
     ~Font();
 
-    void renderUTF(SkPaint* paint, const char *text, uint32_t len, uint32_t start,
+    /**
+     * Renders the specified string of text.
+     */
+    void renderUTF(SkPaint* paint, const char *text, uint32_t start, uint32_t len,
             int numGlyphs, int x, int y);
-
+    /**
+     * Creates a new font associated with the specified font state.
+     */
     static Font* create(FontRenderer* state, uint32_t fontId, float fontSize);
 
 protected:
@@ -90,8 +100,8 @@ public:
     void deinit();
 
     void setFont(uint32_t fontId, float fontSize);
-    void renderText(SkPaint* paint, const Rect* clip, const char *text, uint32_t len,
-            uint32_t startIndex, int numGlyphs, int x, int y);
+    void renderText(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
+            uint32_t len, int numGlyphs, int x, int y);
 
     GLuint getTexture() {
         checkInit();
@@ -107,10 +117,12 @@ protected:
         uint32_t mCurrentRow;
         uint32_t mCurrentCol;
 
-        CacheTextureLine(uint16_t maxHeight, uint16_t maxWidth, uint32_t currentRow,
+        CacheTextureLine(uint16_t maxWidth, uint16_t maxHeight, uint32_t currentRow,
                 uint32_t currentCol):
-            mMaxHeight(maxHeight), mMaxWidth(maxWidth), mCurrentRow(currentRow),
-            mCurrentCol(currentCol) {
+                    mMaxHeight(maxHeight),
+                    mMaxWidth(maxWidth),
+                    mCurrentRow(currentRow),
+                    mCurrentCol(currentCol) {
         }
 
         bool fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_t *retOriginY) {

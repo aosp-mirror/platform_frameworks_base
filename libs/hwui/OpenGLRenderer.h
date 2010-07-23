@@ -30,6 +30,7 @@
 #include <utils/RefBase.h>
 #include <utils/ResourceTypes.h>
 
+#include "Extensions.h"
 #include "Matrix.h"
 #include "Program.h"
 #include "Rect.h"
@@ -40,7 +41,6 @@
 #include "PatchCache.h"
 #include "Vertex.h"
 #include "FontRenderer.h"
-#include "Extensions.h"
 
 namespace android {
 namespace uirenderer {
@@ -362,6 +362,9 @@ private:
     float* mShaderPositions;
     int mShaderCount;
 
+    // GL extensions
+    Extensions mExtensions;
+
     // Font renderer
     FontRenderer mFontRenderer;
 
@@ -370,8 +373,6 @@ private:
     LayerCache mLayerCache;
     GradientCache mGradientCache;
     PatchCache mPatchCache;
-
-    Extensions mExtensions;
 }; // class OpenGLRenderer
 
 }; // namespace uirenderer
