@@ -78,9 +78,12 @@ import android.view.inputmethod.EditorInfo;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * This class provides a system service that manages input methods.
@@ -1513,21 +1516,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             hideInputMethodMenuLocked();
 
             int N = immis.size();
-    
-            mItems = new CharSequence[N];
-            mIms = new InputMethodInfo[N];
-    
-            int j = 0;
+
+            final Map<CharSequence, InputMethodInfo> imMap =
+                new TreeMap<CharSequence, InputMethodInfo>(Collator.getInstance());
+
             for (int i = 0; i < N; ++i) {
                 InputMethodInfo property = immis.get(i);
                 if (property == null) {
                     continue;
                 }
-                mItems[j] = property.loadLabel(pm);
-                mIms[j] = property;
-                j++;
+                imMap.put(property.loadLabel(pm), property);
             }
-    
+
+            N = imMap.size();
+            mItems = imMap.keySet().toArray(new CharSequence[N]);
+            mIms = imMap.values().toArray(new InputMethodInfo[N]);
+
             int checkedItem = 0;
             for (int i = 0; i < N; ++i) {
                 if (mIms[i].getId().equals(lastInputMethodId)) {
