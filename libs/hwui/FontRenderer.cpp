@@ -199,11 +199,12 @@ FontRenderer::FontRenderer() {
     mInitialized = false;
     mMaxNumberOfQuads = 1024;
     mCurrentQuadIndex = 0;
+    mTextureId = 0;
 
     mIndexBufferID = 0;
 
     mCacheWidth = DEFAULT_TEXT_CACHE_WIDTH;
-    mCacheHeight = DEFAULT_TEXT_CACHE_WIDTH;
+    mCacheHeight = DEFAULT_TEXT_CACHE_HEIGHT;
 
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_TEXT_CACHE_WIDTH, property, NULL) > 0) {
@@ -227,7 +228,12 @@ FontRenderer::~FontRenderer() {
     }
     mCacheLines.clear();
 
+    delete mTextMeshPtr;
+
     delete mTextTexture;
+    if(mTextureId) {
+        glDeleteTextures(1, &mTextureId);
+    }
 
     Vector<Font*> fontsToDereference = mActiveFonts;
     for (uint32_t i = 0; i < fontsToDereference.size(); i++) {
@@ -318,6 +324,9 @@ void FontRenderer::initTextTexture() {
     glGenTextures(1, &mTextureId);
     glBindTexture(GL_TEXTURE_2D, mTextureId);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    // Initialize texture dimentions
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, mCacheWidth, mCacheHeight, 0,
+                  GL_ALPHA, GL_UNSIGNED_BYTE, 0);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -370,9 +379,8 @@ void FontRenderer::initVertexArrayBuffers() {
     uint32_t coordSize = 3;
     uint32_t uvSize = 2;
     uint32_t vertsPerQuad = 4;
-    uint32_t vertexBufferSizeBytes = mMaxNumberOfQuads * vertsPerQuad * coordSize *
-            uvSize * sizeof(float);
-    mTextMeshPtr = (float*) malloc(vertexBufferSizeBytes);
+    uint32_t vertexBufferSize = mMaxNumberOfQuads * vertsPerQuad * coordSize * uvSize;
+    mTextMeshPtr = new float[vertexBufferSize];
 }
 
 // We don't want to allocate anything unless we actually draw text
@@ -387,13 +395,36 @@ void FontRenderer::checkInit() {
     mInitialized = true;
 }
 
-void FontRenderer::issueDrawCommand() {
-    if (mUploadTexture) {
-        glBindTexture(GL_TEXTURE_2D, mTextureId);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, mCacheWidth, mCacheHeight, 0, GL_ALPHA,
-                GL_UNSIGNED_BYTE, mTextTexture);
-        mUploadTexture = false;
+void FontRenderer::checkTextureUpdate() {
+    if (!mUploadTexture) {
+        return;
     }
+
+    glBindTexture(GL_TEXTURE_2D, mTextureId);
+
+    // Iterate over all the cache lines and see which ones need to be updated
+    for (uint32_t i = 0; i < mCacheLines.size(); i++) {
+        CacheTextureLine* cl = mCacheLines[i];
+        if(cl->mDirty) {
+            uint32_t xOffset = 0;
+            uint32_t yOffset = cl->mCurrentRow;
+            uint32_t width   = mCacheWidth;
+            uint32_t height  = cl->mMaxHeight;
+            void*    textureData = mTextTexture + yOffset*width;
+
+            glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height,
+                             GL_ALPHA, GL_UNSIGNED_BYTE, textureData);
+
+            cl->mDirty = false;
+        }
+    }
+
+    mUploadTexture = false;
+}
+
+void FontRenderer::issueDrawCommand() {
+
+    checkTextureUpdate();
 
     float* vtx = mTextMeshPtr;
     float* tex = vtx + 3;

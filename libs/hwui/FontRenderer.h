@@ -116,13 +116,15 @@ protected:
         uint16_t mMaxWidth;
         uint32_t mCurrentRow;
         uint32_t mCurrentCol;
+        bool     mDirty;
 
         CacheTextureLine(uint16_t maxWidth, uint16_t maxHeight, uint32_t currentRow,
                 uint32_t currentCol):
                     mMaxHeight(maxHeight),
                     mMaxWidth(maxWidth),
                     mCurrentRow(currentRow),
-                    mCurrentCol(currentCol) {
+                    mCurrentCol(currentCol),
+                    mDirty(false) {
         }
 
         bool fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_t *retOriginY) {
@@ -134,6 +136,7 @@ protected:
                 *retOriginX = mCurrentCol;
                 *retOriginY = mCurrentRow;
                 mCurrentCol += glyph.fWidth;
+                mDirty = true;
                 return true;
             }
 
@@ -173,6 +176,7 @@ protected:
     // Texture to cache glyph bitmaps
     unsigned char* mTextTexture;
     GLuint mTextureId;
+    void checkTextureUpdate();
     bool mUploadTexture;
 
     // Pointer to vertex data to speed up frame to frame work
