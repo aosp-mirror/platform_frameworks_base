@@ -27,6 +27,7 @@
 #include <utils/Log.h>
 
 #include "OpenGLRenderer.h"
+#include "Properties.h"
 
 namespace android {
 namespace uirenderer {
@@ -34,11 +35,6 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
-
-// These properties are defined in mega-bytes
-#define PROPERTY_TEXTURE_CACHE_SIZE "ro.hwui.texture_cache_size"
-#define PROPERTY_LAYER_CACHE_SIZE "ro.hwui.layer_cache_size"
-#define PROPERTY_GRADIENT_CACHE_SIZE "ro.hwui.gradient_cache_size"
 
 #define DEFAULT_TEXTURE_CACHE_SIZE 20.0f
 #define DEFAULT_LAYER_CACHE_SIZE 10.0f
@@ -555,7 +551,7 @@ void OpenGLRenderer::drawText(const char* text, int count, float x, float y, SkP
     const Rect& clip = mSnapshot->getLocalClip();
 
     mFontRenderer.setFont(SkTypeface::UniqueID(paint->getTypeface()), paint->getTextSize());
-    mFontRenderer.renderText(paint, &clip, text, count, 0, count, x, y);
+    mFontRenderer.renderText(paint, &clip, text, 0, count, count, x, y);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
