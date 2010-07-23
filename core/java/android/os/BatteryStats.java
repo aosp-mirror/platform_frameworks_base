@@ -106,7 +106,7 @@ public abstract class BatteryStats implements Parcelable {
 
     // NOTE: Update this list if you add/change any stats above.
     // These characters are supposed to represent "total", "last", "current", 
-    // and "unplugged". They were shortened for effeciency sake.
+    // and "unplugged". They were shortened for efficiency sake.
     private static final String[] STAT_NAMES = { "t", "l", "c", "u" };
     
     /**
@@ -395,19 +395,23 @@ public abstract class BatteryStats implements Parcelable {
         public char batteryTemperature;
         public char batteryVoltage;
         
+        // Constants from SCREEN_BRIGHTNESS_*
         public static final int STATE_BRIGHTNESS_MASK = 0x000000f;
         public static final int STATE_BRIGHTNESS_SHIFT = 0;
+        // Constants from SIGNAL_STRENGTH_*
         public static final int STATE_SIGNAL_STRENGTH_MASK = 0x00000f0;
         public static final int STATE_SIGNAL_STRENGTH_SHIFT = 4;
+        // Constants from ServiceState.STATE_*
         public static final int STATE_PHONE_STATE_MASK = 0x0000f00;
         public static final int STATE_PHONE_STATE_SHIFT = 8;
+        // Constants from DATA_CONNECTION_*
         public static final int STATE_DATA_CONNECTION_MASK = 0x000f000;
         public static final int STATE_DATA_CONNECTION_SHIFT = 12;
         
         public static final int STATE_BATTERY_PLUGGED_FLAG = 1<<30;
         public static final int STATE_SCREEN_ON_FLAG = 1<<29;
         public static final int STATE_GPS_ON_FLAG = 1<<28;
-        public static final int STATE_PHONE_ON_FLAG = 1<<27;
+        public static final int STATE_PHONE_IN_CALL_FLAG = 1<<27;
         public static final int STATE_PHONE_SCANNING_FLAG = 1<<26;
         public static final int STATE_WIFI_ON_FLAG = 1<<25;
         public static final int STATE_WIFI_RUNNING_FLAG = 1<<24;
@@ -619,7 +623,7 @@ public abstract class BatteryStats implements Parcelable {
         new BitDescription(HistoryItem.STATE_BATTERY_PLUGGED_FLAG, "plugged"),
         new BitDescription(HistoryItem.STATE_SCREEN_ON_FLAG, "screen"),
         new BitDescription(HistoryItem.STATE_GPS_ON_FLAG, "gps"),
-        new BitDescription(HistoryItem.STATE_PHONE_ON_FLAG, "phone"),
+        new BitDescription(HistoryItem.STATE_PHONE_IN_CALL_FLAG, "phone_in_call"),
         new BitDescription(HistoryItem.STATE_PHONE_SCANNING_FLAG, "phone_scanning"),
         new BitDescription(HistoryItem.STATE_WIFI_ON_FLAG, "wifi"),
         new BitDescription(HistoryItem.STATE_WIFI_RUNNING_FLAG, "wifi_running"),
@@ -715,6 +719,18 @@ public abstract class BatteryStats implements Parcelable {
      * returns the level at the last plug event.
      */
     public abstract int getDischargeCurrentLevel();
+
+    /**
+     * Get the amount the battery has discharged since the stats were
+     * last reset after charging, as a lower-end approximation.
+     */
+    public abstract int getLowDischargeAmountSinceCharge();
+
+    /**
+     * Get the amount the battery has discharged since the stats were
+     * last reset after charging, as an upper-end approximation.
+     */
+    public abstract int getHighDischargeAmountSinceCharge();
 
     /**
      * Returns the total, last, or current battery uptime in microseconds.
