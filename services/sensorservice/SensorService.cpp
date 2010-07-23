@@ -24,6 +24,7 @@
 #include <utils/Errors.h>
 #include <utils/RefBase.h>
 #include <utils/Singleton.h>
+#include <utils/String16.h>
 
 #include <binder/BinderService.h>
 #include <binder/IServiceManager.h>
@@ -38,45 +39,64 @@
 namespace android {
 // ---------------------------------------------------------------------------
 
-/*
- * TODO:
- * - send sensor info to battery service
- *
-
-static final int TRANSACTION_noteStartSensor = (android.os.IBinder.FIRST_CALL_TRANSACTION + 3);
-static final int TRANSACTION_noteStopSensor = (android.os.IBinder.FIRST_CALL_TRANSACTION + 4);
-
-    _data.writeInterfaceToken(DESCRIPTOR);
-    _data.writeInt(uid);
-    _data.writeInt(sensor);
-    mRemote.transact(Stub.TRANSACTION_noteStartSensor, _data, _reply, 0);
-    _reply.readException();
- *
- */
-
-// ---------------------------------------------------------------------------
-
 class BatteryService : public Singleton<BatteryService> {
+    static const int TRANSACTION_noteStartSensor = IBinder::FIRST_CALL_TRANSACTION + 3;
+    static const int TRANSACTION_noteStopSensor = IBinder::FIRST_CALL_TRANSACTION + 4;
+    static const String16 DESCRIPTOR;
+
     friend class Singleton<BatteryService>;
     sp<IBinder> mBatteryStatService;
+
     BatteryService() {
-        const String16 name("batteryinfo");
-        //getService(name, &mBatteryStatService);
+        const sp<IServiceManager> sm(defaultServiceManager());
+        if (sm != NULL) {
+            const String16 name("batteryinfo");
+            mBatteryStatService = sm->getService(name);
+        }
     }
+
+    status_t noteStartSensor(int uid, int handle) {
+        Parcel data, reply;
+        data.writeInterfaceToken(DESCRIPTOR);
+        data.writeInt32(uid);
+        data.writeInt32(handle);
+        status_t err = mBatteryStatService->transact(
+                TRANSACTION_noteStartSensor, data, &reply, 0);
+        err = reply.readExceptionCode();
+        return err;
+    }
+
+    status_t noteStopSensor(int uid, int handle) {
+        Parcel data, reply;
+        data.writeInterfaceToken(DESCRIPTOR);
+        data.writeInt32(uid);
+        data.writeInt32(handle);
+        status_t err = mBatteryStatService->transact(
+                TRANSACTION_noteStopSensor, data, &reply, 0);
+        err = reply.readExceptionCode();
+        return err;
+    }
+
 public:
     void enableSensor(int handle) {
         if (mBatteryStatService != 0) {
             int uid = IPCThreadState::self()->getCallingUid();
-            //mBatteryStatService->noteStartSensor(uid, handle);
+            int64_t identity = IPCThreadState::self()->clearCallingIdentity();
+            noteStartSensor(uid, handle);
+            IPCThreadState::self()->restoreCallingIdentity(identity);
         }
     }
     void disableSensor(int handle) {
         if (mBatteryStatService != 0) {
             int uid = IPCThreadState::self()->getCallingUid();
-            //mBatteryStatService->noteStopSensor(uid, handle);
+            int64_t identity = IPCThreadState::self()->clearCallingIdentity();
+            noteStopSensor(uid, handle);
+            IPCThreadState::self()->restoreCallingIdentity(identity);
         }
     }
 };
+
+const String16 BatteryService::DESCRIPTOR("com.android.internal.app.IBatteryStats");
 
 ANDROID_SINGLETON_STATIC_INSTANCE(BatteryService)
 
