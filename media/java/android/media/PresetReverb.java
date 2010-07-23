@@ -19,12 +19,14 @@ package android.media;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioEffect;
 import android.os.Bundle;
 import android.util.Log;
+
 import java.nio.ByteOrder;
 import java.nio.ByteBuffer;
+import java.util.StringTokenizer;
 
-import android.media.AudioEffect;
 
 /**
  * A sound generated within a room travels in many directions. The listener first hears the
@@ -116,7 +118,6 @@ public class PresetReverb extends AudioEffect {
     public PresetReverb(int priority, int audioSession)
     throws IllegalArgumentException, UnsupportedOperationException, RuntimeException {
         super(EFFECT_TYPE_PRESET_REVERB, EFFECT_TYPE_NULL, priority, audioSession);
-        Log.e(TAG, "contructor");
     }
 
     /**
@@ -144,10 +145,8 @@ public class PresetReverb extends AudioEffect {
      */
     public short getPreset()
     throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
-        int[] param = new int[1];
-        param[0] = PARAM_PRESET;
         short[] value = new short[1];
-        checkStatus(getParameter(param, value));
+        checkStatus(getParameter(PARAM_PRESET, value));
         return value[0];
     }
 
@@ -215,5 +214,83 @@ public class PresetReverb extends AudioEffect {
                 super.setParameterListener(mBaseParamListener);
             }
         }
+    }
+
+    /**
+     * The Settings class regroups all preset reverb parameters. It is used in
+     * conjuntion with getProperties() and setProperties() methods to backup and restore
+     * all parameters in a single call.
+     */
+    public static class Settings {
+        public short preset;
+
+        public Settings() {
+        }
+
+        /**
+         * Settings class constructor from a key=value; pairs formatted string. The string is
+         * typically returned by Settings.toString() method.
+         * @throws IllegalArgumentException if the string is not correctly formatted.
+         */
+        public Settings(String settings) {
+            StringTokenizer st = new StringTokenizer(settings, "=;");
+            int tokens = st.countTokens();
+            if (st.countTokens() != 3) {
+                throw new IllegalArgumentException("settings: " + settings);
+            }
+            String key = st.nextToken();
+            if (!key.equals("PresetReverb")) {
+                throw new IllegalArgumentException(
+                        "invalid settings for PresetReverb: " + key);
+            }
+            try {
+                key = st.nextToken();
+                if (!key.equals("preset")) {
+                    throw new IllegalArgumentException("invalid key name: " + key);
+                }
+                preset = Short.parseShort(st.nextToken());
+             } catch (NumberFormatException nfe) {
+                throw new IllegalArgumentException("invalid value for key: " + key);
+            }
+        }
+
+        @Override
+        public String toString() {
+            String str = new String (
+                    "PresetReverb"+
+                    ";preset="+Short.toString(preset)
+                    );
+            return str;
+        }
+    };
+
+
+    /**
+     * Gets the preset reverb properties. This method is useful when a snapshot of current
+     * preset reverb settings must be saved by the application.
+     * @return a PresetReverb.Settings object containing all current parameters values
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
+    public PresetReverb.Settings getProperties()
+    throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
+        Settings settings = new Settings();
+        short[] value = new short[1];
+        checkStatus(getParameter(PARAM_PRESET, value));
+        settings.preset = value[0];
+        return settings;
+    }
+
+    /**
+     * Sets the preset reverb properties. This method is useful when preset reverb settings have to
+     * be applied from a previous backup.
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
+    public void setProperties(PresetReverb.Settings settings)
+    throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
+        checkStatus(setParameter(PARAM_PRESET, settings.preset));
     }
 }

@@ -23,10 +23,10 @@
 extern "C" {
 #endif
 
-// TODO: include OpenSLES_IID.h instead
-
+#ifndef OPENSL_ES_H_
 static const effect_uuid_t SL_IID_PRESETREVERB_ = { 0x47382d60, 0xddd8, 0x11db, 0xbf3a, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } };
 const effect_uuid_t * const SL_IID_PRESETREVERB = &SL_IID_PRESETREVERB_;
+#endif //OPENSL_ES_H_
 
 /* enumerated parameter settings for preset reverb effect */
 typedef enum

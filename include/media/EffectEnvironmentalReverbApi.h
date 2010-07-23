@@ -23,9 +23,10 @@
 extern "C" {
 #endif
 
-// TODO: include OpenSLES_IID.h instead
+#ifndef OPENSL_ES_H_
 static const effect_uuid_t SL_IID_ENVIRONMENTALREVERB_ = { 0xc2e5d5f0, 0x94bd, 0x4763, 0x9cac, { 0x4e, 0x23, 0x4d, 0x6, 0x83, 0x9e } };
 const effect_uuid_t * const SL_IID_ENVIRONMENTALREVERB = &SL_IID_ENVIRONMENTALREVERB_;
+#endif //OPENSL_ES_H_
 
 /* enumerated parameter settings for environmental reverb effect */
 typedef enum
@@ -45,20 +46,19 @@ typedef enum
     REVERB_PARAM_BYPASS
 } t_env_reverb_params;
 
-//t_reverb_properties is equal to SLEnvironmentalReverbSettings defined in OpenSL ES specification.
-typedef struct s_reverb_properties {
+//t_reverb_settings is equal to SLEnvironmentalReverbSettings defined in OpenSL ES specification.
+typedef struct s_reverb_settings {
     int16_t roomLevel;
     int16_t roomHFLevel;
     int32_t decayTime;
     int16_t decayHFRatio;
     int16_t reflectionsLevel;
     int32_t reflectionsDelay;
-    int32_t reverbDelay;
     int16_t reverbLevel;
+    int32_t reverbDelay;
     int16_t diffusion;
     int16_t density;
-    int16_t padding;
-} t_reverb_properties;
+} __attribute__((packed)) t_reverb_settings;
 
 
 #if __cplusplus

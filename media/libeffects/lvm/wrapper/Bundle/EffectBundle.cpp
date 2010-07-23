@@ -1625,7 +1625,7 @@ int BassBoost_getParameter(EffectContext     *pContext,
     //LOGV("\tBassBoost_getParameter start");
 
     switch (param){
-        case BASSBOOST_PARAM_STRENGTH_SUP:
+        case BASSBOOST_PARAM_STRENGTH_SUPPORTED:
         case BASSBOOST_PARAM_STRENGTH:
             if (*pValueSize != sizeof(int16_t)){
                 LOGV("\tLVM_ERROR : BassBoost_getParameter() invalid pValueSize2 %d", *pValueSize);
@@ -1640,10 +1640,10 @@ int BassBoost_getParameter(EffectContext     *pContext,
     }
 
     switch (param){
-        case BASSBOOST_PARAM_STRENGTH_SUP:
+        case BASSBOOST_PARAM_STRENGTH_SUPPORTED:
             *(uint32_t *)pValue = 1;
 
-            //LOGV("\tBassBoost_getParameter() BASSBOOST_PARAM_STRENGTH_SUP Value is %d",
+            //LOGV("\tBassBoost_getParameter() BASSBOOST_PARAM_STRENGTH_SUPPORTED Value is %d",
             //        *(uint32_t *)pValue);
             break;
 
@@ -1735,7 +1735,7 @@ int Virtualizer_getParameter(EffectContext        *pContext,
     //LOGV("\tVirtualizer_getParameter start");
 
     switch (param){
-        case VIRTUALIZER_PARAM_STRENGTH_SUP:
+        case VIRTUALIZER_PARAM_STRENGTH_SUPPORTED:
         case VIRTUALIZER_PARAM_STRENGTH:
             if (*pValueSize != sizeof(int16_t)){
                 LOGV("\tLVM_ERROR : Virtualizer_getParameter() invalid pValueSize2 %d",*pValueSize);
@@ -1750,10 +1750,10 @@ int Virtualizer_getParameter(EffectContext        *pContext,
     }
 
     switch (param){
-        case VIRTUALIZER_PARAM_STRENGTH_SUP:
+        case VIRTUALIZER_PARAM_STRENGTH_SUPPORTED:
             *(uint32_t *)pValue = 1;
 
-            //LOGV("\tVirtualizer_getParameter() VIRTUALIZER_PARAM_STRENGTH_SUP Value is %d",
+            //LOGV("\tVirtualizer_getParameter() VIRTUALIZER_PARAM_STRENGTH_SUPPORTED Value is %d",
             //        *(uint32_t *)pValue);
             break;
 
@@ -1876,6 +1876,14 @@ int Equalizer_getParameter(EffectContext     *pContext,
     case EQ_PARAM_GET_PRESET_NAME:
         break;
 
+    case EQ_PARAM_PROPERTIES:
+        if (*pValueSize < (2 + FIVEBAND_NUMBANDS) * sizeof(uint16_t)) {
+            LOGV("\tLVM_ERROR : Equalizer_getParameter() invalid pValueSize 1  %d", *pValueSize);
+            return -EINVAL;
+        }
+        *pValueSize = (2 + FIVEBAND_NUMBANDS) * sizeof(uint16_t);
+        break;
+
     default:
         LOGV("\tLVM_ERROR : Equalizer_getParameter unknown param %d", param);
         return -EINVAL;
@@ -1958,6 +1966,16 @@ int Equalizer_getParameter(EffectContext     *pContext,
         //LOGV("\tEqualizer_getParameter() EQ_PARAM_GET_PRESET_NAME preset %d, name %s len %d",
         //      param2, gEqualizerPresets[param2].name, *pValueSize);
         break;
+
+    case EQ_PARAM_PROPERTIES: {
+        uint16_t *p = (uint16_t *)pValue;
+        LOGV("\tEqualizer_getParameter() EQ_PARAM_PROPERTIES");
+        p[0] = EqualizerGetPreset(pContext);
+        p[1] = FIVEBAND_NUMBANDS;
+        for (int i = 0; i < FIVEBAND_NUMBANDS; i++) {
+            p[2 + i] = EqualizerGetBandLevel(pContext, i);
+        }
+    } break;
 
     default:
         LOGV("\tLVM_ERROR : Equalizer_getParameter() invalid param %d", param);

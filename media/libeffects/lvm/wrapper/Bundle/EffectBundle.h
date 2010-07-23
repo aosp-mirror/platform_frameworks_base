@@ -17,7 +17,9 @@
 #ifndef ANDROID_EFFECTBUNDLE_H_
 #define ANDROID_EFFECTBUNDLE_H_
 
-#include <media/EffectApi.h>
+#include <media/EffectEqualizerApi.h>
+#include <media/EffectBassBoostApi.h>
+#include <media/EffectVirtualizerApi.h>
 #include <LVM.h>
 
 #if __cplusplus
@@ -29,22 +31,11 @@ extern "C" {
 #define MAX_CALL_SIZE           256
 //#define LVM_PCM
 
-//TODO: this should be included from each effect API include
-static const effect_uuid_t SL_IID_BASSBOOST_ = { 0x0634f220, 0xddd4, 0x11db, 0xa0fc,
-                                               { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } };
-const effect_uuid_t * const SL_IID_BASSBOOST = &SL_IID_BASSBOOST_;
-
-static const effect_uuid_t SL_IID_EQUALIZER_ = { 0x0bed4300, 0xddd6, 0x11db, 0x8f34,
-                                               { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } };
-const effect_uuid_t * const SL_IID_EQUALIZER = &SL_IID_EQUALIZER_;
-
-static const effect_uuid_t SL_IID_VIRTUALIZER_ = { 0x37cc2c00, 0xdddd, 0x11db, 0x8577,
-                                                 { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } };
-const effect_uuid_t * const SL_IID_VIRTUALIZER = &SL_IID_VIRTUALIZER_;
-
+#ifndef OPENSL_ES_H_
 static const effect_uuid_t SL_IID_VOLUME_ = { 0x09e8ede0, 0xddde, 0x11db, 0xb4f6,
                                             { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } };
 const effect_uuid_t * const SL_IID_VOLUME = &SL_IID_VOLUME_;
+#endif //OPENSL_ES_H_
 
 typedef enum
 {
@@ -112,34 +103,6 @@ struct EffectContext{
     BundledEffectContext            *pBundledContext;
 };
 
-//TODO: this should be included from each effect API include
-/* enumerated parameter settings for BassBoost effect */
-typedef enum
-{
-    BASSBOOST_PARAM_STRENGTH_SUP,        // type SLboolean  = typedef SLuint32
-    BASSBOOST_PARAM_STRENGTH             // type SLpermille = typedef SLuint16
-} t_bassboost_params;
-
-/* enumerated parameter settings for Virtualizer effect */
-typedef enum
-{
-    VIRTUALIZER_PARAM_STRENGTH_SUP,        // type SLboolean  = typedef SLuint32
-    VIRTUALIZER_PARAM_STRENGTH             // type SLpermille = typedef SLuint16
-} t_virtualizer_params;
-
-/* enumerated parameter settings for Equalizer effect */
-typedef enum
-{
-    EQ_PARAM_NUM_BANDS,           // Gets the number of frequency bands that the equalizer supports.
-    EQ_PARAM_LEVEL_RANGE,         // Returns the minimum and maximum band levels supported.
-    EQ_PARAM_BAND_LEVEL,          // Gets/Sets the gain set for the given equalizer band.
-    EQ_PARAM_CENTER_FREQ,         // Gets the center frequency of the given band.
-    EQ_PARAM_BAND_FREQ_RANGE,     // Gets the frequency range of the given frequency band.
-    EQ_PARAM_GET_BAND,            // Gets the band that has the most effect on the given frequency.
-    EQ_PARAM_CUR_PRESET,          // Gets/Sets the current preset.
-    EQ_PARAM_GET_NUM_OF_PRESETS,  // Gets the total number of presets the equalizer supports.
-    EQ_PARAM_GET_PRESET_NAME      // Gets the preset name based on the index.
-} t_equalizer_params;
 
 /* enumerated parameter settings for Volume effect */
 typedef enum
