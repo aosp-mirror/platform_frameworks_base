@@ -18,16 +18,18 @@ package android.app;
 
 import com.android.internal.policy.PolicyManager;
 
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.ActionMode;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -36,13 +38,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.view.View.OnCreateContextMenuListener;
-import android.view.ViewGroup.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 
 import java.lang.ref.WeakReference;
@@ -830,6 +831,11 @@ public class Dialog implements DialogInterface, Window.Callback,
         } else {
             return false;
         }
+    }
+
+    public ActionMode onStartActionMode(ActionMode.Callback callback) {
+        // TODO Support context modes in dialogs
+        return null;
     }
 
     /**

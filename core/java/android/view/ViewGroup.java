@@ -16,7 +16,6 @@
 
 package android.view;
 
-import android.graphics.Matrix;
 import com.android.internal.R;
 
 import android.content.Context;
@@ -24,6 +23,7 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -35,6 +35,7 @@ import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.ViewGroup.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -471,6 +472,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     public boolean showContextMenuForChild(View originalView) {
         return mParent != null && mParent.showContextMenuForChild(originalView);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ActionMode startActionModeForChild(View originalView, ActionMode.Callback callback) {
+        return mParent != null ? mParent.startActionModeForChild(originalView, callback) : null;
     }
 
     /**

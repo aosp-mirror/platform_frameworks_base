@@ -24,11 +24,11 @@ import com.android.internal.widget.ActionBarView;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.ContextualMode;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -66,7 +66,7 @@ public class ActionBarImpl extends ActionBar {
     private TabImpl mSelectedTab;
     private int mTabSwitchMode = TAB_SWITCH_ADD_REMOVE;
     
-    private ContextMode mContextMode;
+    private ActionMode mContextMode;
     
     private static final int CONTEXT_DISPLAY_NORMAL = 0;
     private static final int CONTEXT_DISPLAY_SPLIT = 1;
@@ -229,8 +229,10 @@ public class ActionBarImpl extends ActionBar {
         return mActionView.getDisplayOptions();
     }
 
-    public ContextualMode startContextualMode(ContextualMode.Callback callback) {
-        finishContextualMode();
+    public ActionMode startContextMode(ActionMode.Callback callback) {
+        if (mContextMode != null) {
+            mContextMode.finish();
+        }
 
         // Don't wait for the close context mode animation to finish.
         if (mClosingContext) {
@@ -239,8 +241,8 @@ public class ActionBarImpl extends ActionBar {
             mCloseContext.run();
         }
 
-        ContextMode mode = new ContextMode(callback);
-        if (callback.onCreateContextualMode(mode, mode.getMenu())) {
+        ActionMode mode = new ContextModeImpl(callback);
+        if (callback.onCreateActionMode(mode, mode.getMenu())) {
             mode.invalidate();
             mUpperContextView.initForMode(mode);
             mAnimatorView.setDisplayedChild(CONTEXT_VIEW);
@@ -252,12 +254,6 @@ public class ActionBarImpl extends ActionBar {
             return mode;
         }
         return null;
-    }
-
-    public void finishContextualMode() {
-        if (mContextMode != null) {
-            mContextMode.finish();
-        }
     }
 
     private void configureTab(Tab tab, int position) {
@@ -365,12 +361,12 @@ public class ActionBarImpl extends ActionBar {
     /**
      * @hide 
      */
-    public class ContextMode extends ContextualMode implements MenuBuilder.Callback {
-        private ContextualMode.Callback mCallback;
+    public class ContextModeImpl extends ActionMode implements MenuBuilder.Callback {
+        private ActionMode.Callback mCallback;
         private MenuBuilder mMenu;
         private WeakReference<View> mCustomView;
         
-        public ContextMode(ContextualMode.Callback callback) {
+        public ContextModeImpl(ActionMode.Callback callback) {
             mCallback = callback;
             mMenu = new MenuBuilder(mActionView.getContext());
             mMenu.setCallback(this);
@@ -388,7 +384,7 @@ public class ActionBarImpl extends ActionBar {
                 return;
             }
 
-            mCallback.onDestroyContextualMode(this);
+            mCallback.onDestroyActionMode(this);
             mAnimatorView.setDisplayedChild(NORMAL_VIEW);
 
             // Clear out the context mode views after the animation finishes
@@ -404,7 +400,7 @@ public class ActionBarImpl extends ActionBar {
 
         @Override
         public void invalidate() {
-            if (mCallback.onPrepareContextualMode(this, mMenu)) {
+            if (mCallback.onPrepareActionMode(this, mMenu)) {
                 // Refresh content in both context views
             }
         }
@@ -441,7 +437,7 @@ public class ActionBarImpl extends ActionBar {
         }
 
         public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
-            return mCallback.onContextualItemClicked(this, item);
+            return mCallback.onActionItemClicked(this, item);
         }
 
         public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {

@@ -55,6 +55,7 @@ import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.InputQueue;
@@ -78,11 +79,8 @@ import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ListPopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import java.lang.ref.WeakReference;
 
 /**
  * Android-specific Window.
@@ -1928,6 +1926,19 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             mContextMenuHelper = mContextMenu.show(originalView, originalView.getWindowToken());
             return mContextMenuHelper != null;
+        }
+
+        @Override
+        public ActionMode startActionModeForChild(View originalView,
+                ActionMode.Callback callback) {
+            // originalView can be used here to be sure that we don't obscure
+            // relevant content with the context mode UI.
+            return startActionMode(callback);
+        }
+
+        @Override
+        public ActionMode startActionMode(ActionMode.Callback callback) {
+            return getCallback().onStartActionMode(callback);
         }
 
         public void startChanging() {

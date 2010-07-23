@@ -2717,6 +2717,10 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         return false;
     }
 
+    public ActionMode startActionModeForChild(View originalView, ActionMode.Callback callback) {
+        return null;
+    }
+
     public void createContextMenu(ContextMenu menu) {
     }
 
