@@ -163,12 +163,11 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
       'img':"devphone-large.png",
       'title':"Android Dev Phones",
       'desc': "<p>Run and debug your Android applications directly on one of these "
- + "device. Modify and rebuild the Android operating system, and flash it onto "
- + "the phone. The Android Dev Phones are carrier independent, and available for "
- + "purchase by any developer registered with <a "
- + "href='http://market.android.com/publish'>Android Market</a>.</p><p><a "
- + "href='/guide/developing/device.html#dev-phone-1'>Learn more about the "
- + "Android Dev Phones &raquo;</a></p>"
+ + "devices. Modify and rebuild the Android operating system, and flash it onto "
+ + "the phone. The Android Dev Phones are carrier-independent, and available for "
+ + "purchase by developers through their Android Market publisher accounts.</p><p> "
+ + "<a href='http://market.android.com/publish'>Visit Android Market "
+ + "to learn more &raquo;</a></p>"
     },
 
     'mapskey': {
