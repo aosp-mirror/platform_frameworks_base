@@ -77,8 +77,6 @@ class SensorService :
         sp<SensorChannel> const mChannel;
 
         // protected by SensorService::mLock
-        //SortedVector<int32_t> mSensorList;
-
         struct SensorInfo {
             SensorInfo() : ns(DEFAULT_EVENTS_PERIOD) { }
             nsecs_t ns;
@@ -88,7 +86,8 @@ class SensorService :
     public:
         SensorEventConnection(const sp<SensorService>& service);
 
-        status_t sendEvents(sensors_event_t const* buffer, size_t count);
+        status_t sendEvents(sensors_event_t const* buffer, size_t count,
+                sensors_event_t* scratch);
         bool hasSensor(int32_t handle) const;
         bool hasAnySensor() const;
         bool addSensor(int32_t handle);
