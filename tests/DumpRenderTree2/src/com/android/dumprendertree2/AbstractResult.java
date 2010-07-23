@@ -27,8 +27,21 @@ import android.webkit.WebView;
 public abstract class AbstractResult {
 
     public enum TestType {
-        TEXT,
-        PIXEL
+        TEXT {
+            @Override
+            public AbstractResult createResult(Bundle bundle) {
+                return new TextResult(bundle);
+            }
+        },
+        RENDER_TREE {
+            @Override
+            public AbstractResult createResult(Bundle bundle) {
+                /** TODO: RenderTree tests are not yet supported */
+                return null;
+            }
+        };
+
+        public abstract AbstractResult createResult(Bundle bundle);
     }
 
     public enum ResultCode {
@@ -100,6 +113,8 @@ public abstract class AbstractResult {
      *      the type of the result data.
      */
     public abstract TestType getType();
+
+    public abstract String getRelativePath();
 
     /**
      * Returns a piece of HTML code that presents a visual diff between a result and

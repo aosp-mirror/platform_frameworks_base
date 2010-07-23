@@ -25,13 +25,13 @@ limitations under the License.
             </intent-filter>
         </activity>
 
-        <activity android:name=".LayoutTestsRunner"
-                  android:label="Layout tests' runner">
+        <activity android:name=".TestsListActivity"
+                  android:label="Tests' list activity">
         </activity>
 
-        <activity android:name=".LayoutTestsExecuter"
-                  android:label="Layout tests' executer"
-                  android:process=":executer">
+        <activity android:name=".LayoutTestsExecutor"
+                  android:label="Layout tests' executor"
+                  android:process=":executor">
         </activity>
 
         <service android:name="ManagerService">

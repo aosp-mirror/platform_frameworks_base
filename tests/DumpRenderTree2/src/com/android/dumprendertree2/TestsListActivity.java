@@ -24,18 +24,16 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.Window;
 
-/**
- * An Activity that is responsible only for updating the UI features, like titles, progress bars,
- * etc.
- *
- * <p>Also, the webview form the test must be running in this activity's thread if we want
- * to be able to display it on the screen.
- */
-public class LayoutTestsRunner extends Activity {
+import java.util.ArrayList;
 
-    public static final int MSG_UPDATE_PROGRESS = 1;
-    public static final int MSG_SHOW_PROGRESS_DIALOG = 2;
-    public static final int MSG_DISMISS_PROGRESS_DIALOG = 3;
+/**
+ * An Activity that generates a list of tests and sends the intent to
+ * LayoutTestsExecuter to run them. It also restarts the LayoutTestsExecuter
+ * after it crashes (TODO).
+ */
+public class TestsListActivity extends Activity {
+
+    private static final int MSG_TEST_LIST_PRELOADER_DONE = 0;
 
     /** Constants for adding extras to an intent */
     public static final String EXTRA_TEST_PATH = "TestPath";
@@ -46,31 +44,25 @@ public class LayoutTestsRunner extends Activity {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_UPDATE_PROGRESS:
-                    int i = msg.arg1;
-                    int size = msg.arg2;
-                    getWindow().setFeatureInt(Window.FEATURE_PROGRESS,
-                            i * Window.PROGRESS_END / size);
-                    setTitle(i * 100 / size + "% (" + i + "/" + size + ")");
-                    break;
-
-                case MSG_SHOW_PROGRESS_DIALOG:
-                    sProgressDialog.show();
-                    break;
-
-                case MSG_DISMISS_PROGRESS_DIALOG:
+                case MSG_TEST_LIST_PRELOADER_DONE:
                     sProgressDialog.dismiss();
+                    mTestsList = (ArrayList<String>)msg.obj;
+                    mTotalTestCount = mTestsList.size();
+                    restartExecutor(0);
                     break;
             }
         }
     };
+
+    private ArrayList<String> mTestsList;
+    private int mTotalTestCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         /** Prepare the progress dialog */
-        sProgressDialog = new ProgressDialog(LayoutTestsRunner.this);
+        sProgressDialog = new ProgressDialog(TestsListActivity.this);
         sProgressDialog.setCancelable(false);
         sProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         sProgressDialog.setTitle(R.string.dialog_progress_title);
@@ -78,17 +70,32 @@ public class LayoutTestsRunner extends Activity {
 
         requestWindowFeature(Window.FEATURE_PROGRESS);
 
-        /** Execute the intent */
         Intent intent = getIntent();
         if (!intent.getAction().equals(Intent.ACTION_RUN)) {
             return;
         }
         String path = intent.getStringExtra(EXTRA_TEST_PATH);
 
-        new LayoutTestsRunnerThread(path, this).start();
+        sProgressDialog.show();
+        Message doneMsg = Message.obtain(mHandler, MSG_TEST_LIST_PRELOADER_DONE);
+
+        new TestsListPreloaderThread(path, doneMsg).start();
     }
 
-    public Handler getHandler() {
-        return mHandler;
+    /**
+     * (Re)starts the executer activity from the given test number (inclusive, 0-based).
+     * This number is an index in mTestsList, not the sublist passed in the intent.
+     *
+     * @param startFrom
+     *      test index in mTestsList to start the tests from (inclusive, 0-based)
+     */
+    private void restartExecutor(int startFrom) {
+        Intent intent = new Intent();
+        intent.setClass(this, LayoutTestsExecutor.class);
+        intent.setAction(Intent.ACTION_RUN);
+        intent.putStringArrayListExtra(LayoutTestsExecutor.EXTRA_TESTS_LIST,
+                new ArrayList<String>(mTestsList.subList(startFrom, mTotalTestCount)));
+        intent.putExtra(LayoutTestsExecutor.EXTRA_TEST_INDEX, startFrom);
+        startActivity(intent);
     }
 }

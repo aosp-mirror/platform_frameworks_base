@@ -17,7 +17,7 @@
 package com.android.dumprendertree2.ui;
 
 import com.android.dumprendertree2.FileFilter;
-import com.android.dumprendertree2.LayoutTestsRunner;
+import com.android.dumprendertree2.TestsListActivity;
 import com.android.dumprendertree2.R;
 
 import android.app.Activity;
@@ -203,9 +203,9 @@ public class DirListActivity extends ListActivity {
                 } else {
                     /** Run the test */
                     Intent intent = new Intent();
-                    intent.setClass(DirListActivity.this, LayoutTestsRunner.class);
+                    intent.setClass(DirListActivity.this, TestsListActivity.class);
                     intent.setAction(Intent.ACTION_RUN);
-                    intent.putExtra(LayoutTestsRunner.EXTRA_TEST_PATH, item.getRelativePath());
+                    intent.putExtra(TestsListActivity.EXTRA_TEST_PATH, item.getRelativePath());
                     startActivity(intent);
                 }
             }
@@ -277,9 +277,9 @@ public class DirListActivity extends ListActivity {
                         removeDialog(DIALOG_RUN_ABORT_DIR);
                         /** Run the tests */
                         Intent intent = new Intent();
-                        intent.setClass(DirListActivity.this, LayoutTestsRunner.class);
+                        intent.setClass(DirListActivity.this, TestsListActivity.class);
                         intent.setAction(Intent.ACTION_RUN);
-                        intent.putExtra(LayoutTestsRunner.EXTRA_TEST_PATH,
+                        intent.putExtra(TestsListActivity.EXTRA_TEST_PATH,
                                 args.getString("relativePath"));
                         startActivity(intent);
                     }

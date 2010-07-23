@@ -61,7 +61,10 @@ public class TextResult extends AbstractResult {
         mExpectedResult = bundle.getString("expectedTextualResult");
         mActualResult = bundle.getString("actualTextualResult");
         mRelativePath = bundle.getString("relativePath");
-        mResultCode = ResultCode.valueOf(bundle.getString("resultCode"));
+        String resultCode = bundle.getString("resultCode");
+        if (resultCode != null) {
+            mResultCode = ResultCode.valueOf(resultCode);
+        }
     }
 
     @Override
@@ -176,5 +179,10 @@ public class TextResult extends AbstractResult {
         }
         bundle.putString("type", getType().name());
         return bundle;
+    }
+
+    @Override
+    public String getRelativePath() {
+        return mRelativePath;
     }
 }
