@@ -87,7 +87,7 @@ class SensorService :
         SensorEventConnection(const sp<SensorService>& service);
 
         status_t sendEvents(sensors_event_t const* buffer, size_t count,
-                sensors_event_t* scratch);
+                sensors_event_t* scratch = NULL);
         bool hasSensor(int32_t handle) const;
         bool hasAnySensor() const;
         bool addSensor(int32_t handle);
@@ -122,6 +122,9 @@ class SensorService :
     mutable Mutex mLock;
     DefaultKeyedVector<int, SensorRecord*> mActiveSensors;
     SortedVector< wp<SensorEventConnection> > mActiveConnections;
+
+    // The size of this vector is constant, only the items are mutable
+    KeyedVector<int32_t, sensors_event_t> mLastEventSeen;
 
 public:
     static char const* getServiceName() { return "sensorservice"; }
