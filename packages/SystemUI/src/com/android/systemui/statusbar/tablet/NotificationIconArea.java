@@ -55,7 +55,7 @@ public class NotificationIconArea extends LinearLayout {
         }
     }
 
-    static class DraggerView extends ImageView {
+    static class DraggerView extends View {
         public DraggerView(Context context, AttributeSet attrs) {
             super(context, attrs);
         }
