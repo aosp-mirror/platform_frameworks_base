@@ -40,7 +40,6 @@ namespace android {
 
 /*
  * TODO:
- * - filter events per connection
  * - make sure to keep the last value of each event type so we can quickly
  *   send something to application when they enable a sensor that is already
  *   active (the issue here is that it can take time before a value is
@@ -162,6 +161,7 @@ bool SensorService::threadLoop()
     LOGD("nuSensorService thread starting...");
 
     sensors_event_t buffer[16];
+    sensors_event_t scratch[16];
     struct sensors_poll_device_t* device = mSensorDevice;
     ssize_t count;
 
@@ -177,10 +177,11 @@ bool SensorService::threadLoop()
 
         size_t numConnections = activeConnections.size();
         if (numConnections) {
+            Mutex::Autolock _l(mLock);
             for (size_t i=0 ; i<numConnections ; i++) {
                 sp<SensorEventConnection> connection(activeConnections[i].promote());
                 if (connection != 0) {
-                    connection->sendEvents(buffer, count);
+                    connection->sendEvents(buffer, count, scratch);
                 }
             }
         }
@@ -425,12 +426,23 @@ status_t SensorService::SensorEventConnection::setEventRateLocked(
 }
 
 status_t SensorService::SensorEventConnection::sendEvents(
-        sensors_event_t const* buffer, size_t count)
+        sensors_event_t const* buffer, size_t numEvents,
+        sensors_event_t* scratch)
 {
-    // TODO: we should only send the events for the sensors this connection
-    // is registered for.
+    // filter out events not for this connection
+    size_t count=0, i=0;
+    while (i<numEvents) {
+        const int32_t curr = buffer[i].sensor;
+        if (mSensorInfo.indexOfKey(curr) >= 0) {
+            do {
+                scratch[count++] = buffer[i++];
+            } while ((i<numEvents) && (buffer[i].sensor == curr));
+        } else {
+            i++;
+        }
+    }
 
-    ssize_t size = mChannel->write(buffer, count*sizeof(sensors_event_t));
+    ssize_t size = mChannel->write(scratch, count*sizeof(sensors_event_t));
     if (size == -EAGAIN) {
         // the destination doesn't accept events anymore, it's probably
         // full. For now, we just drop the events on the floor.
