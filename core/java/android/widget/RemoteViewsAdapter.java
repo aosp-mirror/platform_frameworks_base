@@ -86,9 +86,6 @@ public class RemoteViewsAdapter extends BaseAdapter {
             mRemoteViewsFactory = IRemoteViewsFactory.Stub.asInterface(service);
             mConnected = true;
 
-            // start the background loader
-            mViewCache.startBackgroundLoader();
-
             // notifyDataSetChanged should be called first, to ensure that the
             // views are not updated twice
             notifyDataSetChanged();
@@ -111,6 +108,9 @@ public class RemoteViewsAdapter extends BaseAdapter {
                     });
                 }
             });
+
+            // start the background loader
+            mViewCache.startBackgroundLoader();
         }
 
         public void onServiceDisconnected(ComponentName name) {
