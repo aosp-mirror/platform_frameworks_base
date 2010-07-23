@@ -285,6 +285,7 @@ public class MediaRecorder
      * @param enableTimeLapse Pass true to enable time lapse capture, false to disable it.
      * @param timeBetweenTimeLapseFrameCaptureMs time between two captures of time lapse frames.
      * @param encoderLevel the video encoder level.
+     * @hide
      */
     public void setTimeLapseParameters(boolean enableTimeLapse,
             int timeBetweenTimeLapseFrameCaptureMs, int encoderLevel) {
@@ -465,6 +466,7 @@ public class MediaRecorder
      * Sets the level of the encoder. Call this before prepare().
      *
      * @param encoderLevel the video encoder level.
+     * @hide
      */
     public void setVideoEncoderLevel(int encoderLevel) {
         setParameter(String.format("video-param-encoder-level=%d", encoderLevel));
