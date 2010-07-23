@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.Runtime;
 import java.lang.Process;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -472,7 +473,7 @@ public class PackageManagerHostTestUtils extends Assert {
             mAllTestsPassed = false;
         }
 
-        public void testRunEnded(long elapsedTime) {
+        public void testRunEnded(long elapsedTime, Map<String, String> resultBundle) {
             // ignore
         }
 
