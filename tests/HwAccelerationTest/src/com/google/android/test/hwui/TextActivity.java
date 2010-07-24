@@ -51,7 +51,13 @@ public class TextActivity extends Activity {
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
             canvas.drawRGB(255, 255, 255);
-            
+
+            canvas.drawText("Hello OpenGL renderer!", 100, 20, mMediumPaint);
+            mMediumPaint.setTextAlign(Paint.Align.CENTER);
+            canvas.drawText("Hello OpenGL renderer!", 100, 40, mMediumPaint);
+            mMediumPaint.setTextAlign(Paint.Align.RIGHT);
+            canvas.drawText("Hello OpenGL renderer!", 100, 60, mMediumPaint);
+            mMediumPaint.setTextAlign(Paint.Align.LEFT);
             canvas.drawText("Hello OpenGL renderer!", 100, 100, mMediumPaint);
             canvas.drawText("Hello OpenGL renderer!", 100, 200, mLargePaint);
             

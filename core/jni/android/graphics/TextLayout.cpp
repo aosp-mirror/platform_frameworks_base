@@ -150,26 +150,22 @@ jint TextLayout::layoutLine(const jchar* text, jint len, jint flags, int &dir, j
     return result;
 }
 
-// Draws or gets the path of a paragraph of text on a single line, running bidi and shaping.
-// This will draw if canvas is not null, otherwise path must be non-null and it will create
-// a path representing the text that would have been drawn.
-void TextLayout::handleText(SkPaint *paint, const jchar* text, jsize len,
-                            jint bidiFlags, jfloat x, jfloat y,SkCanvas *canvas, SkPath *path) {
-
+bool TextLayout::prepareText(SkPaint *paint, const jchar* text, jsize len, jint bidiFlags,
+        const jchar** outText, int32_t* outBytes) {
     const jchar *workText = text;
     jchar *buffer = NULL;
     int dir = kDirection_LTR;
     if (needsLayout(text, len, bidiFlags)) {
         buffer =(jchar *) malloc(len * sizeof(jchar));
         if (!buffer) {
-            return;
+            return false;
         }
         UErrorCode status = U_ZERO_ERROR;
         len = layoutLine(text, len, bidiFlags, dir, buffer, status); // might change len, dir
         if (!U_SUCCESS(status)) {
             LOG(LOG_WARN, "LAYOUT", "drawText error %d\n", status);
             free(buffer);
-            return; // can't render
+            return false; // can't render
         }
 
         workText = buffer; // use the shaped text
@@ -180,10 +176,10 @@ void TextLayout::handleText(SkPaint *paint, const jchar* text, jsize len,
 
     SkPaint::Align horiz = paint->getTextAlign();
     switch (horiz) {
-    case SkPaint::kLeft_Align: trimLeft = dir & kDirection_Mask; break;
-    case SkPaint::kCenter_Align: trimLeft = trimRight = true; break;
-    case SkPaint::kRight_Align: trimRight = !(dir & kDirection_Mask);
-    default: break;
+        case SkPaint::kLeft_Align: trimLeft = dir & kDirection_Mask; break;
+        case SkPaint::kCenter_Align: trimLeft = trimRight = true; break;
+        case SkPaint::kRight_Align: trimRight = !(dir & kDirection_Mask);
+        default: break;
     }
     const jchar* workLimit = workText + len;
 
@@ -198,16 +194,29 @@ void TextLayout::handleText(SkPaint *paint, const jchar* text, jsize len,
         }
     }
 
-    int32_t workBytes = (workLimit - workText) << 1;
-    SkScalar x_ = SkFloatToScalar(x);
-    SkScalar y_ = SkFloatToScalar(y);
-    if (canvas) {
-        canvas->drawText(workText, workBytes, x_, y_, *paint);
-    } else {
-        paint->getTextPath(workText, workBytes, x_, y_, path);
-    }
-
+    *outBytes = (workLimit - workText) << 1;
+    *outText = workText;
+    
     free(buffer);
+    return true;
+}
+
+// Draws or gets the path of a paragraph of text on a single line, running bidi and shaping.
+// This will draw if canvas is not null, otherwise path must be non-null and it will create
+// a path representing the text that would have been drawn.
+void TextLayout::handleText(SkPaint *paint, const jchar* text, jsize len,
+                            jint bidiFlags, jfloat x, jfloat y,SkCanvas *canvas, SkPath *path) {
+    const jchar *workText;
+    int32_t workBytes;
+    if (prepareText(paint, text, len, bidiFlags, &workText, &workBytes)) {
+        SkScalar x_ = SkFloatToScalar(x);
+        SkScalar y_ = SkFloatToScalar(y);
+        if (canvas) {
+            canvas->drawText(workText, workBytes, x_, y_, *paint);
+        } else {
+            paint->getTextPath(workText, workBytes, x_, y_, path);
+        }
+    }
 }
 
 void TextLayout::drawTextRun(SkPaint* paint, const jchar* chars,
