@@ -89,26 +89,35 @@ void InputManager::preemptInputDispatch() {
     mDispatcher->preemptInputDispatch();
 }
 
-void InputManager::getInputConfiguration(InputConfiguration* outConfiguration) const {
-    mReader->getCurrentInputConfiguration(outConfiguration);
+void InputManager::getInputConfiguration(InputConfiguration* outConfiguration) {
+    mReader->getInputConfiguration(outConfiguration);
 }
 
-int32_t InputManager::getScanCodeState(int32_t deviceId, int32_t deviceClasses,
-        int32_t scanCode) const {
-    return mReader->getCurrentScanCodeState(deviceId, deviceClasses, scanCode);
+status_t InputManager::getInputDeviceInfo(int32_t deviceId, InputDeviceInfo* outDeviceInfo) {
+    return mReader->getInputDeviceInfo(deviceId, outDeviceInfo);
 }
 
-int32_t InputManager::getKeyCodeState(int32_t deviceId, int32_t deviceClasses,
-        int32_t keyCode) const {
-    return mReader->getCurrentKeyCodeState(deviceId, deviceClasses, keyCode);
+void InputManager::getInputDeviceIds(Vector<int32_t>& outDeviceIds) {
+    mReader->getInputDeviceIds(outDeviceIds);
 }
 
-int32_t InputManager::getSwitchState(int32_t deviceId, int32_t deviceClasses, int32_t sw) const {
-    return mReader->getCurrentSwitchState(deviceId, deviceClasses, sw);
+int32_t InputManager::getScanCodeState(int32_t deviceId, uint32_t sourceMask,
+        int32_t scanCode) {
+    return mReader->getScanCodeState(deviceId, sourceMask, scanCode);
 }
 
-bool InputManager::hasKeys(size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags) const {
-    return mReader->hasKeys(numCodes, keyCodes, outFlags);
+int32_t InputManager::getKeyCodeState(int32_t deviceId, uint32_t sourceMask,
+        int32_t keyCode) {
+    return mReader->getKeyCodeState(deviceId, sourceMask, keyCode);
+}
+
+int32_t InputManager::getSwitchState(int32_t deviceId, uint32_t sourceMask, int32_t sw) {
+    return mReader->getSwitchState(deviceId, sourceMask, sw);
+}
+
+bool InputManager::hasKeys(int32_t deviceId, uint32_t sourceMask,
+        size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags) {
+    return mReader->hasKeys(deviceId, sourceMask, numCodes, keyCodes, outFlags);
 }
 
 } // namespace android

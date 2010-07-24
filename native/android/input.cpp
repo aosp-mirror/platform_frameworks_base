@@ -21,14 +21,21 @@
 #include <ui/Input.h>
 #include <ui/InputTransport.h>
 #include <utils/PollLoop.h>
+#include <utils/RefBase.h>
+#include <utils/Vector.h>
 
 #include <android_runtime/android_app_NativeActivity.h>
 
 #include <poll.h>
+#include <errno.h>
 
 using android::InputEvent;
 using android::KeyEvent;
 using android::MotionEvent;
+using android::InputDeviceInfo;
+using android::InputDeviceProxy;
+using android::sp;
+using android::Vector;
 
 int32_t AInputEvent_getType(const AInputEvent* event) {
     return static_cast<const InputEvent*>(event)->getType();
@@ -262,4 +269,75 @@ int32_t AInputQueue_preDispatchEvent(AInputQueue* queue, AInputEvent* event) {
 
 void AInputQueue_finishEvent(AInputQueue* queue, AInputEvent* event, int handled) {
     queue->finishEvent(event, handled != 0);
+}
+
+
+int32_t AInputDevice_getDeviceIds(int32_t* idBuf, size_t nMax, size_t* nActual) {
+    Vector<int32_t> ids;
+    InputDeviceProxy::getDeviceIds(ids);
+
+    if (nActual) {
+        *nActual = ids.size();
+    }
+
+    if (idBuf && ids.size() < nMax) {
+        memcpy(idBuf, ids.array(), ids.size() * sizeof(int32_t));
+        return 0;
+    }
+
+    return -ENOMEM;
+}
+
+AInputDevice* AInputDevice_acquire(int32_t deviceId) {
+    sp<InputDeviceProxy> proxy(InputDeviceProxy::getDevice(deviceId));
+    if (proxy == NULL) {
+        return NULL;
+    }
+    proxy->incStrong((void*)AInputDevice_acquire);
+    return static_cast<AInputDevice*>(proxy.get());
+}
+
+void AInputDevice_release(AInputDevice* device) {
+    if (device) {
+        InputDeviceProxy* proxy = static_cast<InputDeviceProxy*>(device);
+        proxy->decStrong((void*)AInputDevice_acquire);
+    }
+}
+
+const char* AInputDevice_getName(AInputDevice* device) {
+    InputDeviceProxy* proxy = static_cast<InputDeviceProxy*>(device);
+    return proxy->getInfo()->getName().string();
+}
+
+uint32_t AInputDevice_getSources(AInputDevice* device) {
+    InputDeviceProxy* proxy = static_cast<InputDeviceProxy*>(device);
+    return proxy->getInfo()->getSources();
+}
+
+int32_t AInputDevice_getKeyboardType(AInputDevice* device) {
+    InputDeviceProxy* proxy = static_cast<InputDeviceProxy*>(device);
+    return proxy->getInfo()->getKeyboardType();
+}
+
+int32_t AInputDevice_getMotionRange(AInputDevice* device, int32_t rangeType,
+        float* outMin, float* outMax, float* outFlat, float* outFuzz) {
+    InputDeviceProxy* proxy = static_cast<InputDeviceProxy*>(device);
+    const InputDeviceInfo::MotionRange* range = proxy->getInfo()->getMotionRange(rangeType);
+    if (range) {
+        if (outMin) {
+            *outMin = range->min;
+        }
+        if (outMax) {
+            *outMax = range->max;
+        }
+        if (outFlat) {
+            *outFlat = range->flat;
+        }
+        if (outFuzz) {
+            *outFuzz = range->fuzz;
+        }
+        return 0;
+    } else {
+        return -ENOTSUP;
+    }
 }

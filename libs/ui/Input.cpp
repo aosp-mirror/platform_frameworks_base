@@ -168,4 +168,63 @@ void MotionEvent::offsetLocation(float xOffset, float yOffset) {
     mYOffset += yOffset;
 }
 
+// class InputDeviceInfo
+
+InputDeviceInfo::InputDeviceInfo() {
+    initialize(-1, String8("uninitialized device info"));
+}
+
+InputDeviceInfo::InputDeviceInfo(const InputDeviceInfo& other) :
+        mId(other.mId), mName(other.mName), mSources(other.mSources),
+        mKeyboardType(other.mKeyboardType),
+        mMotionRanges(other.mMotionRanges) {
+}
+
+InputDeviceInfo::~InputDeviceInfo() {
+}
+
+void InputDeviceInfo::initialize(int32_t id, const String8& name) {
+    mId = id;
+    mName = name;
+    mSources = 0;
+    mKeyboardType = AINPUT_KEYBOARD_TYPE_NONE;
+    mMotionRanges.clear();
+}
+
+const InputDeviceInfo::MotionRange* InputDeviceInfo::getMotionRange(int32_t rangeType) const {
+    ssize_t index = mMotionRanges.indexOfKey(rangeType);
+    return index >= 0 ? & mMotionRanges.valueAt(index) : NULL;
+}
+
+void InputDeviceInfo::addSource(uint32_t source) {
+    mSources |= source;
+}
+
+void InputDeviceInfo::addMotionRange(int32_t rangeType, float min, float max,
+        float flat, float fuzz) {
+    MotionRange range = { min, max, flat, fuzz };
+    addMotionRange(rangeType, range);
+}
+
+void InputDeviceInfo::addMotionRange(int32_t rangeType, const MotionRange& range) {
+    mMotionRanges.add(rangeType, range);
+}
+
+// class InputDeviceProxy
+
+InputDeviceProxy::InputDeviceProxy() {
+}
+
+InputDeviceProxy::~InputDeviceProxy() {
+}
+
+void InputDeviceProxy::getDeviceIds(Vector<int32_t>& outIds) {
+    // TODO use Binder
+}
+
+sp<InputDeviceProxy> InputDeviceProxy::getDevice(int32_t id) {
+    // TODO use Binder
+    return NULL;
+}
+
 } // namespace android

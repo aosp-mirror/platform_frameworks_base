@@ -181,61 +181,61 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * Offset for the sample's X coordinate.
      * @hide
      */
-    static public final int SAMPLE_X = 0;
+    static private final int SAMPLE_X = 0;
     
     /**
      * Offset for the sample's Y coordinate.
      * @hide
      */
-    static public final int SAMPLE_Y = 1;
+    static private final int SAMPLE_Y = 1;
     
     /**
      * Offset for the sample's pressure.
      * @hide
      */
-    static public final int SAMPLE_PRESSURE = 2;
+    static private final int SAMPLE_PRESSURE = 2;
     
     /**
      * Offset for the sample's size
      * @hide
      */
-    static public final int SAMPLE_SIZE = 3;
+    static private final int SAMPLE_SIZE = 3;
     
     /**
      * Offset for the sample's touch major axis length.
      * @hide
      */
-    static public final int SAMPLE_TOUCH_MAJOR = 4;
+    static private final int SAMPLE_TOUCH_MAJOR = 4;
 
     /**
      * Offset for the sample's touch minor axis length.
      * @hide
      */
-    static public final int SAMPLE_TOUCH_MINOR = 5;
+    static private final int SAMPLE_TOUCH_MINOR = 5;
     
     /**
      * Offset for the sample's tool major axis length.
      * @hide
      */
-    static public final int SAMPLE_TOOL_MAJOR = 6;
+    static private final int SAMPLE_TOOL_MAJOR = 6;
 
     /**
      * Offset for the sample's tool minor axis length.
      * @hide
      */
-    static public final int SAMPLE_TOOL_MINOR = 7;
+    static private final int SAMPLE_TOOL_MINOR = 7;
     
     /**
      * Offset for the sample's orientation.
      * @hide
      */
-    static public final int SAMPLE_ORIENTATION = 8;
+    static private final int SAMPLE_ORIENTATION = 8;
 
     /**
      * Number of data items for each sample.
      * @hide
      */
-    static public final int NUM_SAMPLE_DATA = 9;
+    static private final int NUM_SAMPLE_DATA = 9;
     
     /**
      * Number of possible pointers.
@@ -918,7 +918,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * upwards, is perfectly circular or is of unknown orientation.  A positive angle
      * indicates that the major axis of contact is oriented to the right.  A negative angle
      * indicates that the major axis of contact is oriented to the left.
-     * The full range is from -PI/4 radians (finger pointing fully left) to PI/4 radians
+     * The full range is from -PI/2 radians (finger pointing fully left) to PI/2 radians
      * (finger pointing fully right).
      * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
      * (the first pointer that is down) to {@link #getPointerCount()}-1.
@@ -1614,28 +1614,28 @@ public final class MotionEvent extends InputEvent implements Parcelable {
          * upwards, is perfectly circular or is of unknown orientation.  A positive angle
          * indicates that the major axis of contact is oriented to the right.  A negative angle
          * indicates that the major axis of contact is oriented to the left.
-         * The full range is from -PI/4 radians (finger pointing fully left) to PI/4 radians
+         * The full range is from -PI/2 radians (finger pointing fully left) to PI/2 radians
          * (finger pointing fully right).
          */
         public float orientation;
         
         /*
-        private static final float PI_8 = (float) (Math.PI / 8);
+        private static final float PI_4 = (float) (Math.PI / 4);
         
         public float getTouchWidth() {
-            return Math.abs(orientation) > PI_8 ? touchMajor : touchMinor;
+            return Math.abs(orientation) > PI_4 ? touchMajor : touchMinor;
         }
         
         public float getTouchHeight() {
-            return Math.abs(orientation) > PI_8 ? touchMinor : touchMajor;
+            return Math.abs(orientation) > PI_4 ? touchMinor : touchMajor;
         }
         
         public float getToolWidth() {
-            return Math.abs(orientation) > PI_8 ? toolMajor : toolMinor;
+            return Math.abs(orientation) > PI_4 ? toolMajor : toolMinor;
         }
         
         public float getToolHeight() {
-            return Math.abs(orientation) > PI_8 ? toolMinor : toolMajor;
+            return Math.abs(orientation) > PI_4 ? toolMinor : toolMajor;
         }
         */
     }

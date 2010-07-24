@@ -60,6 +60,31 @@ namespace android {
 class KeyLayoutMap;
 
 /*
+ * A raw event as retrieved from the EventHub.
+ */
+struct RawEvent {
+    nsecs_t when;
+    int32_t deviceId;
+    int32_t type;
+    int32_t scanCode;
+    int32_t keyCode;
+    int32_t value;
+    uint32_t flags;
+};
+
+/* Describes an absolute axis. */
+struct RawAbsoluteAxisInfo {
+    bool valid; // true if the information is valid, false otherwise
+
+    int32_t minValue;  // minimum value
+    int32_t maxValue;  // maximum value
+    int32_t flat;      // center flat position, eg. flat == 8 means center is between -8 and 8
+    int32_t fuzz;      // error tolerance, eg. fuzz == 4 means value is +/- 4 due to noise
+
+    inline int32_t getRange() { return maxValue - minValue; }
+};
+
+/*
  * Input device classes.
  */
 enum {
@@ -82,7 +107,10 @@ enum {
     INPUT_DEVICE_CLASS_DPAD          = 0x00000020,
 
     /* The input device is a gamepad (implies keyboard). */
-    INPUT_DEVICE_CLASS_GAMEPAD       = 0x00000040
+    INPUT_DEVICE_CLASS_GAMEPAD       = 0x00000040,
+
+    /* The input device has switches. */
+    INPUT_DEVICE_CLASS_SWITCH        = 0x00000080,
 };
 
 /*
@@ -114,8 +142,8 @@ public:
 
     virtual String8 getDeviceName(int32_t deviceId) const = 0;
 
-    virtual int getAbsoluteInfo(int32_t deviceId, int axis, int *outMinValue,
-            int* outMaxValue, int* outFlat, int* outFuzz) const = 0;
+    virtual status_t getAbsoluteAxisInfo(int32_t deviceId, int axis,
+            RawAbsoluteAxisInfo* outAxisInfo) const = 0;
 
     virtual status_t scancodeToKeycode(int32_t deviceId, int scancode,
             int32_t* outKeycode, uint32_t* outFlags) const = 0;
@@ -131,26 +159,19 @@ public:
      * If the device needs to remain awake longer than that, then the caller is responsible
      * for taking care of it (say, by poking the power manager user activity timer).
      */
-    virtual bool getEvent(int32_t* outDeviceId, int32_t* outType,
-            int32_t* outScancode, int32_t* outKeycode, uint32_t *outFlags,
-            int32_t* outValue, nsecs_t* outWhen) = 0;
+    virtual bool getEvent(RawEvent* outEvent) = 0;
 
     /*
      * Query current input state.
-     *   deviceId may be -1 to search for the device automatically, filtered by class.
-     *   deviceClasses may be -1 to ignore device class while searching.
      */
-    virtual int32_t getScanCodeState(int32_t deviceId, int32_t deviceClasses,
-            int32_t scanCode) const = 0;
-    virtual int32_t getKeyCodeState(int32_t deviceId, int32_t deviceClasses,
-            int32_t keyCode) const = 0;
-    virtual int32_t getSwitchState(int32_t deviceId, int32_t deviceClasses,
-            int32_t sw) const = 0;
+    virtual int32_t getScanCodeState(int32_t deviceId, int32_t scanCode) const = 0;
+    virtual int32_t getKeyCodeState(int32_t deviceId, int32_t keyCode) const = 0;
+    virtual int32_t getSwitchState(int32_t deviceId, int32_t sw) const = 0;
 
     /*
      * Examine key input devices for specific framework keycode support
      */
-    virtual bool hasKeys(size_t numCodes, const int32_t* keyCodes,
+    virtual bool markSupportedKeyCodes(int32_t deviceId, size_t numCodes, const int32_t* keyCodes,
             uint8_t* outFlags) const = 0;
 };
 
@@ -165,33 +186,28 @@ public:
     
     virtual String8 getDeviceName(int32_t deviceId) const;
     
-    virtual int getAbsoluteInfo(int32_t deviceId, int axis, int *outMinValue,
-            int* outMaxValue, int* outFlat, int* outFuzz) const;
-        
+    virtual status_t getAbsoluteAxisInfo(int32_t deviceId, int axis,
+            RawAbsoluteAxisInfo* outAxisInfo) const;
+
     virtual status_t scancodeToKeycode(int32_t deviceId, int scancode,
             int32_t* outKeycode, uint32_t* outFlags) const;
 
     virtual void addExcludedDevice(const char* deviceName);
 
-    virtual int32_t getScanCodeState(int32_t deviceId, int32_t deviceClasses,
-            int32_t scanCode) const;
-    virtual int32_t getKeyCodeState(int32_t deviceId, int32_t deviceClasses,
-            int32_t keyCode) const;
-    virtual int32_t getSwitchState(int32_t deviceId, int32_t deviceClasses,
-            int32_t sw) const;
+    virtual int32_t getScanCodeState(int32_t deviceId, int32_t scanCode) const;
+    virtual int32_t getKeyCodeState(int32_t deviceId, int32_t keyCode) const;
+    virtual int32_t getSwitchState(int32_t deviceId, int32_t sw) const;
 
-    virtual bool hasKeys(size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags) const;
+    virtual bool markSupportedKeyCodes(int32_t deviceId, size_t numCodes,
+            const int32_t* keyCodes, uint8_t* outFlags) const;
 
-    virtual bool getEvent(int32_t* outDeviceId, int32_t* outType,
-            int32_t* outScancode, int32_t* outKeycode, uint32_t *outFlags,
-            int32_t* outValue, nsecs_t* outWhen);
+    virtual bool getEvent(RawEvent* outEvent);
 
 protected:
     virtual ~EventHub();
     
 private:
     bool openPlatformInput(void);
-    int32_t convertDeviceKey_TI_P2(int code);
 
     int open_device(const char *device);
     int close_device(const char *device);
@@ -220,6 +236,8 @@ private:
     int32_t getScanCodeStateLocked(device_t* device, int32_t scanCode) const;
     int32_t getKeyCodeStateLocked(device_t* device, int32_t keyCode) const;
     int32_t getSwitchStateLocked(device_t* device, int32_t sw) const;
+    bool markSupportedKeyCodesLocked(device_t* device, size_t numCodes,
+            const int32_t* keyCodes, uint8_t* outFlags) const;
 
     // Protect all internal state.
     mutable Mutex   mLock;

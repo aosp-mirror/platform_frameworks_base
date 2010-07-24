@@ -12,7 +12,6 @@ LOCAL_SRC_FILES:= \
 	KeyLayoutMap.cpp \
 	KeyCharacterMap.cpp \
 	Input.cpp \
-	InputDevice.cpp \
 	InputDispatcher.cpp \
 	InputManager.cpp \
 	InputReader.cpp \

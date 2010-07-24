@@ -268,7 +268,6 @@ enum {
 /*
  * Input sources.
  *
- * The appropriate interpretation for an input event depends on its source.
  * Refer to the documentation on android.view.InputDevice for more details about input sources
  * and their correct interpretation.
  */
@@ -295,6 +294,37 @@ enum {
     AINPUT_SOURCE_JOYSTICK_LEFT = 0x01000000 | AINPUT_SOURCE_CLASS_JOYSTICK,
     AINPUT_SOURCE_JOYSTICK_RIGHT = 0x02000000 | AINPUT_SOURCE_CLASS_JOYSTICK,
 };
+
+/*
+ * Keyboard types.
+ *
+ * Refer to the documentation on android.view.InputDevice for more details.
+ */
+enum {
+    AINPUT_KEYBOARD_TYPE_NONE = 0,
+    AINPUT_KEYBOARD_TYPE_NON_ALPHABETIC = 1,
+    AINPUT_KEYBOARD_TYPE_ALPHABETIC = 2,
+};
+
+/*
+ * Constants used to retrieve information about the range of motion for a particular
+ * coordinate of a motion event.
+ *
+ * Refer to the documentation on android.view.InputDevice for more details about input sources
+ * and their correct interpretation.
+ */
+enum {
+    AINPUT_MOTION_RANGE_X = 0,
+    AINPUT_MOTION_RANGE_Y = 1,
+    AINPUT_MOTION_RANGE_PRESSURE = 2,
+    AINPUT_MOTION_RANGE_SIZE = 3,
+    AINPUT_MOTION_RANGE_TOUCH_MAJOR = 4,
+    AINPUT_MOTION_RANGE_TOUCH_MINOR = 5,
+    AINPUT_MOTION_RANGE_TOOL_MAJOR = 6,
+    AINPUT_MOTION_RANGE_TOOL_MINOR = 7,
+    AINPUT_MOTION_RANGE_ORIENTATION = 8,
+};
+
 
 /*
  * Input event accessors.
@@ -475,7 +505,7 @@ float AMotionEvent_getToolMinor(const AInputEvent* motion_event, size_t pointer_
  * upwards, is perfectly circular or is of unknown orientation.  A positive angle
  * indicates that the major axis of contact is oriented to the right.  A negative angle
  * indicates that the major axis of contact is oriented to the left.
- * The full range is from -PI/4 radians (finger pointing fully left) to PI/4 radians
+ * The full range is from -PI/2 radians (finger pointing fully left) to PI/2 radians
  * (finger pointing fully right). */
 float AMotionEvent_getOrientation(const AInputEvent* motion_event, size_t pointer_index);
 
@@ -575,7 +605,7 @@ float AMotionEvent_getHistoricalToolMinor(const AInputEvent* motion_event, size_
  * upwards, is perfectly circular or is of unknown orientation.  A positive angle
  * indicates that the major axis of contact is oriented to the right.  A negative angle
  * indicates that the major axis of contact is oriented to the left.
- * The full range is from -PI/4 radians (finger pointing fully left) to PI/4 radians
+ * The full range is from -PI/2 radians (finger pointing fully left) to PI/2 radians
  * (finger pointing fully right). */
 float AMotionEvent_getHistoricalOrientation(const AInputEvent* motion_event, size_t pointer_index,
         size_t history_index);
@@ -630,6 +660,64 @@ int32_t AInputQueue_preDispatchEvent(AInputQueue* queue, AInputEvent* event);
  * This must be called after receiving an event with AInputQueue_get_event().
  */
 void AInputQueue_finishEvent(AInputQueue* queue, AInputEvent* event, int handled);
+
+/*
+ * Input devices.
+ *
+ * These functions provide a mechanism for querying the set of available input devices
+ * and their characteristics and capabilities.
+ */
+struct AInputDevice;
+typedef struct AInputDevice AInputDevice;
+
+/*
+ * Populates the supplied array with the ids of all input devices in the system.
+ * Sets nActual to the actual number of devices.
+ * Returns zero if enumeration was successful.
+ * Returns non-zero if the actual number of devices is greater than nMax, in which case the
+ * client should call the method again with a larger id buffer.
+ */
+int32_t AInputDevice_getDeviceIds(int32_t* idBuf, size_t nMax, size_t* nActual);
+
+/*
+ * Acquires a device by id.
+ * Returns NULL if the device was not found.
+ *
+ * Note: The returned object must be freed using AInputDevice_release when no longer needed.
+ */
+AInputDevice* AInputDevice_acquire(int32_t deviceId);
+
+/*
+ * Releases a device previously acquired by AInputDevice_acquire.
+ * If device is NULL, this function does nothing.
+ */
+void AInputDevice_release(AInputDevice* device);
+
+/*
+ * Gets the name of an input device.
+ *
+ * Note: The caller should copy the name into a private buffer since the returned pointer
+ * will become invalid when the device object is released.
+ */
+const char* AInputDevice_getName(AInputDevice* device);
+
+/*
+ * Gets the combination of input sources provided by the input device.
+ */
+uint32_t AInputDevice_getSources(AInputDevice* device);
+
+/*
+ * Gets the keyboard type.
+ */
+int32_t AInputDevice_getKeyboardType(AInputDevice* device);
+
+/* Gets the minimum value, maximum value, flat position and error tolerance for a
+ * particular motion coodinate.
+ * Returns zero if the device supports the specified motion range. */
+int32_t AInputDevice_getMotionRange(AInputDevice* device, int32_t rangeType,
+        float* outMin, float* outMax, float* outFlat, float* outFuzz);
+
+//TODO hasKey, keymap stuff, etc...
 
 #ifdef __cplusplus
 }
