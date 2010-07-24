@@ -110,7 +110,7 @@ public:
             float* positions, int count, SkShader::TileMode tileMode,
             SkMatrix* matrix, bool hasAlpha);
 
-    void drawText(const char* text, int count, float x, float y, SkPaint* paint);
+    void drawText(const char* text, int bytesCount, int count, float x, float y, SkPaint* paint);
 
 private:
     /**

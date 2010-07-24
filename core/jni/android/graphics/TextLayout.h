@@ -63,6 +63,9 @@ public:
     static void drawTextOnPath(SkPaint* paint, const jchar* text, jsize len,
                                int bidiFlags, jfloat hOffset, jfloat vOffset,
                                SkPath* path, SkCanvas* canvas);
+                               
+   static bool prepareText(SkPaint *paint, const jchar* text, jsize len, jint bidiFlags,
+        const jchar** outText, int32_t* outBytes);
 
 private:
     static bool needsLayout(const jchar* text, jint len, jint bidiFlags);

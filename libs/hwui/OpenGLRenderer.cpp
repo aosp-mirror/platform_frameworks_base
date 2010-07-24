@@ -525,7 +525,26 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
     drawColorRect(left, top, right, bottom, color, mode);
 }
 
-void OpenGLRenderer::drawText(const char* text, int count, float x, float y, SkPaint* paint) {
+void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
+        float x, float y, SkPaint* paint) {
+    if (text == NULL || count == 0 || (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
+        return;
+    }
+
+    float length;
+    switch (paint->getTextAlign()) {
+        case SkPaint::kCenter_Align:
+            length = paint->measureText(text, bytesCount);
+            x -= length / 2.0f;
+            break;
+        case SkPaint::kRight_Align:
+            length = paint->measureText(text, bytesCount);
+            x -= length;
+            break;
+        default:
+            break;
+    }
+
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
@@ -551,7 +570,7 @@ void OpenGLRenderer::drawText(const char* text, int count, float x, float y, SkP
     const Rect& clip = mSnapshot->getLocalClip();
 
     mFontRenderer.setFont(SkTypeface::UniqueID(paint->getTypeface()), paint->getTextSize());
-    mFontRenderer.renderText(paint, &clip, text, 0, count, count, x, y);
+    mFontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }

@@ -33,6 +33,8 @@
 #include <Rect.h>
 #include <ui/Rect.h>
 
+#include "TextLayout.h"
+
 namespace android {
 
 using namespace uirenderer;
@@ -251,12 +253,20 @@ static void android_view_GLES20Canvas_setupLinearShader(JNIEnv* env, jobject can
 // Text
 // ----------------------------------------------------------------------------
 
+static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
+        jfloat x, jfloat y, int flags, SkPaint* paint) {
+    const jchar *workText;
+    int32_t workBytes;
+    if (TextLayout::prepareText(paint, text, count, flags, &workText, &workBytes)) {
+        renderer->drawText((const char*) workText, workBytes, count, x, y, paint);
+    }
+}
+
 static void android_view_GLES20Canvas_drawTextArray(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, jcharArray text, int index, int count,
         jfloat x, jfloat y, int flags, SkPaint* paint) {
     jchar* textArray = env->GetCharArrayElements(text, NULL);
-    // TODO: Prepare the text for RTL
-    renderer->drawText((const char*) (textArray + index), count, x, y, paint);
+    renderText(renderer, textArray + index, count, x, y, flags, paint);
     env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
 }
 
@@ -264,8 +274,7 @@ static void android_view_GLES20Canvas_drawText(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, jstring text, int start, int end,
         jfloat x, jfloat y, int flags, SkPaint* paint) {
     const jchar* textArray = env->GetStringChars(text, NULL);
-    // TODO: Prepare the text for RTL
-    renderer->drawText((const char*) (textArray + start), end - start, x, y, paint);
+    renderText(renderer, textArray + start, end - start, x, y, flags, paint);
     env->ReleaseStringChars(text, textArray);
 }
 
