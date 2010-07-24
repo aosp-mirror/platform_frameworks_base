@@ -426,13 +426,25 @@
         <item name="textAppearanceSmallInverse">@android:style/TextAppearance.Small.Inverse</item>
     </style>
 
+    <!-- Variation of Theme.Dialog that does not include a frame (or background).
+         The view hierarchy of the dialog is responsible for drawing all of
+         its pixels. -->
+    <style name="Theme.Dialog.NoFrame">
+        <item name="windowBackground">@android:color/transparent</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
     <!-- Default theme for alert dialog windows, which is used by the
          {@link android.app.AlertDialog} class.  This is basically a dialog
          but sets the background to empty so it can do two-tone backgrounds. -->
     <style name="Theme.Dialog.Alert">
         <item name="windowBackground">@android:color/transparent</item>
         <item name="windowTitleStyle">@android:style/DialogWindowTitle</item>
-        <item name="windowIsFloating">true</item>
         <item name="windowContentOverlay">@null</item>
     </style>
     

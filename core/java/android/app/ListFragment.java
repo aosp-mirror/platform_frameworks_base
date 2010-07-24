@@ -28,10 +28,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 /**
- * An fragment that displays a list of items by binding to a data source such as
+ * A fragment that displays a list of items by binding to a data source such as
  * an array or Cursor, and exposes event handlers when the user selects an item.
  * <p>
- * ListActivity hosts a {@link android.widget.ListView ListView} object that can
+ * ListFragment hosts a {@link android.widget.ListView ListView} object that can
  * be bound to different data sources, typically either an array or a Cursor
  * holding query results. Binding, screen layout, and row layout are discussed
  * in the following sections.
@@ -39,10 +39,10 @@ import android.widget.TextView;
  * <strong>Screen Layout</strong>
  * </p>
  * <p>
- * ListActivity has a default layout that consists of a single list view.
+ * ListFragment has a default layout that consists of a single list view.
  * However, if you desire, you can customize the fragment layout by returning
  * your own view hierarchy from {@link #onCreateView}.
- * To do this, your view hierarchy MUST contain a ListView object with the
+ * To do this, your view hierarchy <em>must</em> contain a ListView object with the
  * id "@android:id/list" (or {@link android.R.id#list} if it's in code)
  * <p>
  * Optionally, your view hierarchy can contain another view object of any type to
@@ -50,7 +50,7 @@ import android.widget.TextView;
  * id "android:empty". Note that when an empty view is present, the list view
  * will be hidden when there is no data to display.
  * <p>
- * The following code demonstrates an (ugly) custom lisy layout. It has a list
+ * The following code demonstrates an (ugly) custom list layout. It has a list
  * with a green background, and an alternate red "no data" message.
  * </p>
  *
@@ -134,6 +134,13 @@ import android.widget.TextView;
  * and {@link android.widget.SimpleCursorAdapter SimpleCursorAdapter} for Cursor
  * query results.
  * </p>
+ * <p>
+ * You <b>must</b> use
+ * {@link #setListAdapter(ListAdapter) ListFragment.setListAdapter()} to
+ * associate the list with an adapter.  Do not directly call
+ * {@link ListView#setAdapter(ListAdapter) ListView.setAdapter()} or else
+ * important initialization will be skipped.
+ * </p>
  *
  * @see #setListAdapter
  * @see android.widget.ListView
@@ -160,6 +167,7 @@ public class ListFragment extends Fragment {
     TextView mStandardEmptyView;
     View mProgressContainer;
     View mListContainer;
+    boolean mSetEmptyText;
     boolean mListShown;
 
     public ListFragment() {
@@ -280,7 +288,11 @@ public class ListFragment extends Fragment {
         if (mStandardEmptyView == null) {
             throw new IllegalStateException("Can't be used with a custom content view");
         }
-        mList.setEmptyView(mStandardEmptyView);
+        mStandardEmptyView.setText(text);
+        if (!mSetEmptyText) {
+            mList.setEmptyView(mStandardEmptyView);
+            mSetEmptyText = true;
+        }
     }
     
     /**

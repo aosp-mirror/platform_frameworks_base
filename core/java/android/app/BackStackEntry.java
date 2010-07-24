@@ -27,6 +27,7 @@ final class BackStackState implements Parcelable {
     final int mTransition;
     final int mTransitionStyle;
     final String mName;
+    final int mIndex;
     
     public BackStackState(FragmentManager fm, BackStackEntry bse) {
         int numRemoved = 0;
@@ -58,6 +59,7 @@ final class BackStackState implements Parcelable {
         mTransition = bse.mTransition;
         mTransitionStyle = bse.mTransitionStyle;
         mName = bse.mName;
+        mIndex = bse.mIndex;
     }
     
     public BackStackState(Parcel in) {
@@ -65,6 +67,7 @@ final class BackStackState implements Parcelable {
         mTransition = in.readInt();
         mTransitionStyle = in.readInt();
         mName = in.readString();
+        mIndex = in.readInt();
     }
     
     public BackStackEntry instantiate(FragmentManager fm) {
@@ -90,6 +93,7 @@ final class BackStackState implements Parcelable {
         bse.mTransition = mTransition;
         bse.mTransitionStyle = mTransitionStyle;
         bse.mName = mName;
+        bse.mIndex = mIndex;
         return bse;
     }
     
@@ -102,6 +106,7 @@ final class BackStackState implements Parcelable {
         dest.writeInt(mTransition);
         dest.writeInt(mTransitionStyle);
         dest.writeString(mName);
+        dest.writeInt(mIndex);
     }
     
     public static final Parcelable.Creator<BackStackState> CREATOR
@@ -151,6 +156,7 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
     boolean mAddToBackStack;
     String mName;
     boolean mCommitted;
+    int mIndex;
     
     public BackStackEntry(FragmentManager manager) {
         mManager = manager;
@@ -289,16 +295,28 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
         return this;
     }
 
-    public void commit() {
+    public int commit() {
         if (mCommitted) throw new IllegalStateException("commit already called");
         if (FragmentManager.DEBUG) Log.v(TAG, "Commit: " + this);
         mCommitted = true;
+        if (mAddToBackStack) {
+            mIndex = mManager.allocBackStackIndex(this);
+        } else {
+            mIndex = -1;
+        }
         mManager.enqueueAction(this);
+        return mIndex;
     }
     
     public void run() {
         if (FragmentManager.DEBUG) Log.v(TAG, "Run: " + this);
         
+        if (mAddToBackStack) {
+            if (mIndex < 0) {
+                throw new IllegalStateException("addToBackStack() called after commit()");
+            }
+        }
+
         Op op = mHead;
         while (op != null) {
             switch (op.cmd) {
@@ -449,6 +467,11 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
         if (mManager.mNeedMenuInvalidate && mManager.mActivity != null) {
             mManager.mActivity.invalidateOptionsMenu();
             mManager.mNeedMenuInvalidate = false;
+        }
+
+        if (mIndex >= 0) {
+            mManager.freeBackStackIndex(mIndex);
+            mIndex = -1;
         }
     }
     

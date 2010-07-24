@@ -2054,14 +2054,47 @@ public class Activity extends ContextThemeWrapper
     }
     
     /**
+     * Flag for {@link #popBackStack(String, int)}
+     * and {@link #popBackStack(int, int)}: If set, and the name or ID of
+     * a back stack entry has been supplied, then that entry will also be
+     * removed.  Otherwise, all entries up to but not including that entry
+     * will be removed
+     */
+    static final int POP_BACK_STACK_INCLUSIVE = 1<<0;
+
+    /**
+     * Pop the top state off the back stack.  Returns true if there was one
+     * to pop, else false.
+     */
+    public boolean popBackStack() {
+        return popBackStack(null, 0);
+    }
+
+    /**
      * Pop the last fragment transition from the local activity's fragment
      * back stack.  If there is nothing to pop, false is returned.
      * @param name If non-null, this is the name of a previous back state
-     * to look for; if found, all states up to (but not including) that
-     * state will be popped.  If null, only the top state is popped.
+     * to look for; if found, all states up to that state will be popped.  The
+     * {@link #POP_BACK_STACK_INCLUSIVE} flag can be used to control whether
+     * the named state itself is popped. If null, only the top state is popped.
+     * @param flags Either 0 or {@link #POP_BACK_STACK_INCLUSIVE}.
      */
-    public boolean popBackStack(String name) {
-        return mFragments.popBackStackState(mHandler, name);
+    public boolean popBackStack(String name, int flags) {
+        return mFragments.popBackStackState(mHandler, name, flags);
+    }
+
+    /**
+     * Pop all back stack states up to the one with the given identifier.
+     * @param id Identifier of the stated to be popped. If no identifier exists,
+     * false is returned.
+     * The identifier is the number returned by
+     * {@link FragmentTransaction#commit() FragmentTransaction.commit()}.  The
+     * {@link #POP_BACK_STACK_INCLUSIVE} flag can be used to control whether
+     * the named state itself is popped.
+     * @param flags Either 0 or {@link #POP_BACK_STACK_INCLUSIVE}.
+     */
+    public boolean popBackStack(int id, int flags) {
+        return mFragments.popBackStackState(mHandler, id, flags);
     }
     
     /**
@@ -2070,7 +2103,7 @@ public class Activity extends ContextThemeWrapper
      * but you can override this to do whatever you want.
      */
     public void onBackPressed() {
-        if (!popBackStack(null)) {
+        if (!popBackStack()) {
             finish();
         }
     }
