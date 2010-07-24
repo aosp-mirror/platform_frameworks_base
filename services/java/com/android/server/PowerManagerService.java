@@ -1022,36 +1022,67 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    private void setTimeoutLocked(long now, int nextState)
-    {
+    private void setTimeoutLocked(long now, int nextState) {
+        setTimeoutLocked(now, -1, nextState);
+    }
+
+    // If they gave a timeoutOverride it is the number of seconds
+    // to screen-off.  Figure out where in the countdown cycle we
+    // should jump to.
+    private void setTimeoutLocked(long now, long timeoutOverride, int nextState) {
         if (mBootCompleted) {
-            mHandler.removeCallbacks(mTimeoutTask);
-            mTimeoutTask.nextState = nextState;
-            long when = now;
-            switch (nextState)
-            {
-                case SCREEN_BRIGHT:
-                    when += mKeylightDelay;
-                    break;
-                case SCREEN_DIM:
-                    if (mDimDelay >= 0) {
-                        when += mDimDelay;
-                        break;
-                    } else {
-                        Slog.w(TAG, "mDimDelay=" + mDimDelay + " while trying to dim");
+            synchronized (mLocks) {
+                mHandler.removeCallbacks(mTimeoutTask);
+                mTimeoutTask.nextState = nextState;
+                long when = 0;
+                if (timeoutOverride <= 0) {
+                    switch (nextState)
+                    {
+                        case SCREEN_BRIGHT:
+                            when = now + mKeylightDelay;
+                            break;
+                        case SCREEN_DIM:
+                            if (mDimDelay >= 0) {
+                                when = now + mDimDelay;
+                            } else {
+                                Slog.w(TAG, "mDimDelay=" + mDimDelay + " while trying to dim");
+                            }
+                       case SCREEN_OFF:
+                            synchronized (mLocks) {
+                                when = now + mScreenOffDelay;
+                            }
+                            break;
                     }
-                case SCREEN_OFF:
-                    synchronized (mLocks) {
-                        when += mScreenOffDelay;
+                } else {
+                    override: {
+                        if (timeoutOverride <= mScreenOffDelay) {
+                            when = now + timeoutOverride;
+                            nextState = SCREEN_OFF;
+                            break override;
+                        }
+                        timeoutOverride -= mScreenOffDelay;
+
+                        if (mDimDelay >= 0) {
+                             if (timeoutOverride <= mDimDelay) {
+                                when = now + timeoutOverride;
+                                nextState = SCREEN_DIM;
+                                break override;
+                            }
+                            timeoutOverride -= mDimDelay;
+                        }
+
+                        when = now + timeoutOverride;
+                        nextState = SCREEN_BRIGHT;
                     }
-                    break;
+                }
+                if (mSpew) {
+                    Slog.d(TAG, "setTimeoutLocked now=" + now
+                            + " timeoutOverride=" + timeoutOverride
+                            + " nextState=" + nextState + " when=" + when);
+                }
+                mHandler.postAtTime(mTimeoutTask, when);
+                mNextTimeout = when; // for debugging
             }
-            if (mSpew) {
-                Slog.d(TAG, "setTimeoutLocked now=" + now + " nextState=" + nextState
-                        + " when=" + when);
-            }
-            mHandler.postAtTime(mTimeoutTask, when);
-            mNextTimeout = when; // for debugging
         }
     }
 
@@ -1958,18 +1989,33 @@ class PowerManagerService extends IPowerManager.Stub
 
     public void userActivityWithForce(long time, boolean noChangeLights, boolean force) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
-        userActivity(time, noChangeLights, OTHER_EVENT, force);
+        userActivity(time, -1, noChangeLights, OTHER_EVENT, force);
     }
 
     public void userActivity(long time, boolean noChangeLights) {
-        userActivity(time, noChangeLights, OTHER_EVENT, false);
+        userActivity(time, -1, noChangeLights, OTHER_EVENT, false);
     }
 
     public void userActivity(long time, boolean noChangeLights, int eventType) {
-        userActivity(time, noChangeLights, eventType, false);
+        userActivity(time, -1, noChangeLights, eventType, false);
     }
 
     public void userActivity(long time, boolean noChangeLights, int eventType, boolean force) {
+        userActivity(time, -1, noChangeLights, eventType, force);
+    }
+
+    /*
+     * Reset the user activity timeout to now + timeout.  This overrides whatever else is going
+     * on with user activity.  Don't use this function.
+     */
+    public void clearUserActivityTimeout(long now, long timeout) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+        Slog.i(TAG, "clearUserActivity for " + timeout + "ms from now");
+        userActivity(now, timeout, false, OTHER_EVENT, false);
+    }
+
+    private void userActivity(long time, long timeoutOverride, boolean noChangeLights,
+            int eventType, boolean force) {
         //mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
 
         if (((mPokey & POKE_LOCK_IGNORE_CHEEK_EVENTS) != 0)
@@ -2041,7 +2087,7 @@ class PowerManagerService extends IPowerManager.Stub
                     mWakeLockState = mLocks.reactivateScreenLocksLocked();
                     setPowerState(mUserState | mWakeLockState, noChangeLights,
                             WindowManagerPolicy.OFF_BECAUSE_OF_USER);
-                    setTimeoutLocked(time, SCREEN_BRIGHT);
+                    setTimeoutLocked(time, timeoutOverride, SCREEN_BRIGHT);
                 }
             }
         }
