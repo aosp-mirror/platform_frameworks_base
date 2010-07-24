@@ -144,6 +144,9 @@ public abstract class IccPhoneBookInterfaceManager extends IIccPhoneBook.Stub {
         if (DBG) logd("updateAdnRecordsInEfBySearch: efid=" + efid +
                 " ("+ oldTag + "," + oldPhoneNumber + ")"+ "==>" +
                 " ("+ newTag + "," + newPhoneNumber + ")"+ " pin2=" + pin2);
+
+        efid = updateEfForIccType(efid);
+
         synchronized(mLock) {
             checkThread();
             success = false;
