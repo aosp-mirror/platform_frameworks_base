@@ -19,5 +19,5 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- service name  -->
-    <string name="service_name">Media Container Service</string>
+    <string name="service_name">Package Access Helper</string>
 </resources>
