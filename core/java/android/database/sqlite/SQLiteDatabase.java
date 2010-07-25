@@ -67,7 +67,7 @@ import java.util.regex.Pattern;
  * is the Unicode Collation Algorithm and not tailored to the current locale.
  */
 public class SQLiteDatabase extends SQLiteClosable {
-    private static final String TAG = "Database";
+    private static final String TAG = "SQLiteDatabase";
     private static final int EVENT_DB_OPERATION = 52000;
     private static final int EVENT_DB_CORRUPT = 75004;
 
@@ -1641,18 +1641,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             }
 
             // Run the program and then cleanup
-            statement.execute();
-
-            long insertedRowId = lastInsertRow();
-            if (insertedRowId == -1) {
-                Log.e(TAG, "Error inserting " + initialValues + " using " + sql);
-            } else {
-                if (Config.LOGD && Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "Inserting row " + insertedRowId + " from "
-                            + initialValues + " using " + sql);
-                }
-            }
-            return insertedRowId;
+            return statement.executeInsert();
         } catch (SQLiteDatabaseCorruptException e) {
             onCorruption();
             throw e;
@@ -1689,8 +1678,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                     DatabaseUtils.bindObjectToProgram(statement, i + 1, whereArgs[i]);
                 }
             }
-            statement.execute();
-            return lastChangeCount();
+            return statement.executeUpdateDelete();
         } catch (SQLiteDatabaseCorruptException e) {
             onCorruption();
             throw e;
@@ -1782,12 +1770,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             }
 
             // Run the program and then cleanup
-            statement.execute();
-            int numChangedRows = lastChangeCount();
-            if (Config.LOGD && Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "Updated " + numChangedRows + " using " + values + " and " + sql);
-            }
-            return numChangedRows;
+            return statement.executeUpdateDelete();
         } catch (SQLiteDatabaseCorruptException e) {
             onCorruption();
             throw e;
@@ -1834,13 +1817,18 @@ public class SQLiteDatabase extends SQLiteClosable {
         long timeStart = SystemClock.uptimeMillis();
         lock();
         logTimeStat(mLastSqlStatement, timeStart, GET_LOCK_LOG_PREFIX);
+        SQLiteStatement stmt = null;
         try {
             closePendingStatements();
-            native_execSQL(sql);
+            stmt = compileStatement(sql);
+            stmt.execute();
         } catch (SQLiteDatabaseCorruptException e) {
             onCorruption();
             throw e;
         } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
             unlock();
         }
 
@@ -1914,7 +1902,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                     DatabaseUtils.bindObjectToProgram(statement, i + 1, bindArgs[i]);
                 }
             }
-            statement.execute();
+            statement.executeUpdateDelete();
         } catch (SQLiteDatabaseCorruptException e) {
             onCorruption();
             throw e;
@@ -2025,7 +2013,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
         if (durationMillis >= sQueryLogTimeInMillis) {
             samplePercent = 100;
-        } else {;
+        } else {
             samplePercent = (int) (100 * durationMillis / sQueryLogTimeInMillis) + 1;
             if (mRandom.nextInt(100) >= samplePercent) return;
         }
@@ -2628,34 +2616,11 @@ public class SQLiteDatabase extends SQLiteClosable {
     private native void enableSqlProfiling(String path, short connectionNum);
 
     /**
-     * Native call to execute a raw SQL statement. {@link #lock} must be held
-     * when calling this method.
-     *
-     * @param sql The raw SQL string
-     * @throws SQLException
-     */
-    /* package */ native void native_execSQL(String sql) throws SQLException;
-
-    /**
      * Native call to set the locale.  {@link #lock} must be held when calling
      * this method.
      * @throws SQLException
      */
     /* package */ native void native_setLocale(String loc, int flags);
-
-    /**
-     * Returns the row ID of the last row inserted into the database.
-     *
-     * @return the row ID of the last row inserted into the database.
-     */
-    /* package */ native long lastInsertRow();
-
-    /**
-     * Returns the number of changes made in the last statement executed.
-     *
-     * @return the number of changes made in the last statement executed.
-     */
-    /* package */ native int lastChangeCount();
 
     /**
      * return the SQLITE_DBSTATUS_LOOKASIDE_USED documented here

@@ -48,18 +48,31 @@ public class SQLiteStatement extends SQLiteProgram
     }
 
     /**
-     * Execute this SQL statement, if it is not a query. For example,
-     * CREATE TABLE, DELTE, INSERT, etc.
+     * Execute this SQL statement, if it is not a SELECT / INSERT / DELETE / UPDATE, for example
+     * CREATE / DROP table, view, trigger, index etc.
      *
      * @throws android.database.SQLException If the SQL string is invalid for
      *         some reason
      */
     public void execute() {
+        executeUpdateDelete();
+    }
+
+    /**
+     * Execute this SQL statement, if the the number of rows affected by exection of this SQL
+     * statement is of any importance to the caller - for example, UPDATE / DELETE SQL statements.
+     *
+     * @return the number of rows affected by this SQL statement execution.
+     * @throws android.database.SQLException If the SQL string is invalid for
+     *         some reason
+     */
+    public int executeUpdateDelete() {
         synchronized(this) {
             long timeStart = acquireAndLock(WRITE);
             try {
-                native_execute();
+                int numChanges = native_execute();
                 mDatabase.logTimeStat(mSql, timeStart);
+                return numChanges;
             } finally {
                 releaseAndUnlock();
             }
@@ -79,9 +92,9 @@ public class SQLiteStatement extends SQLiteProgram
         synchronized(this) {
             long timeStart = acquireAndLock(WRITE);
             try {
-                native_execute();
+                long lastInsertedRowId = native_executeInsert();
                 mDatabase.logTimeStat(mSql, timeStart);
-                return (mDatabase.lastChangeCount() > 0) ? mDatabase.lastInsertRow() : -1;
+                return lastInsertedRowId;
             } finally {
                 releaseAndUnlock();
             }
@@ -182,7 +195,8 @@ public class SQLiteStatement extends SQLiteProgram
         nHandle = mDatabase.mNativeHandle;
     }
 
-    private final native void native_execute();
+    private final native int native_execute();
+    private final native long native_executeInsert();
     private final native long native_1x1_long();
     private final native String native_1x1_string();
 }

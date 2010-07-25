@@ -16,7 +16,7 @@
 */
 
 #undef LOG_TAG
-#define LOG_TAG "Cursor"
+#define LOG_TAG "SQLiteStatementCpp"
 
 #include <jni.h>
 #include <JNIHelp.h>
@@ -48,24 +48,40 @@ static jfieldID gStatementField;
         (sqlite3 *)env->GetIntField(object, gHandleField)
 
 
-static void native_execute(JNIEnv* env, jobject object)
+static jint native_execute(JNIEnv* env, jobject object)
 {
     int err;
     sqlite3 * handle = GET_HANDLE(env, object);
     sqlite3_stmt * statement = GET_STATEMENT(env, object);
+    int numChanges = -1;
 
     // Execute the statement
     err = sqlite3_step(statement);
 
-    // Throw an exception if an error occured
+    // Throw an exception if an error occurred
     if (err == SQLITE_ROW) {
-        LOGV("Queries cannot be performed using execute(). use SQLiteDatabase.query() instead.");
+        throw_sqlite3_exception(env,
+                "Queries can be performed using SQLiteDatabase query or rawQuery methods only.");
     } else if (err != SQLITE_DONE) {
         throw_sqlite3_exception_errcode(env, err, sqlite3_errmsg(handle));
+    } else {
+        numChanges = sqlite3_changes(handle);
     }
 
-    // Reset the statment so it's ready to use again
+    // Reset the statement so it's ready to use again
     sqlite3_reset(statement);
+    return numChanges;
+}
+
+static jlong native_executeInsert(JNIEnv* env, jobject object)
+{
+    sqlite3 * handle = GET_HANDLE(env, object);
+    jint numChanges = native_execute(env, object);
+    if (numChanges > 0) {
+        return sqlite3_last_insert_rowid(handle);
+    } else {
+        return -1;
+    }
 }
 
 static jlong native_1x1_long(JNIEnv* env, jobject object)
@@ -117,11 +133,11 @@ static jstring native_1x1_string(JNIEnv* env, jobject object)
     return value;
 }
 
-
 static JNINativeMethod sMethods[] =
 {
      /* name, signature, funcPtr */
-    {"native_execute", "()V", (void *)native_execute},
+    {"native_execute", "()I", (void *)native_execute},
+    {"native_executeInsert", "()J", (void *)native_executeInsert},
     {"native_1x1_long", "()J", (void *)native_1x1_long},
     {"native_1x1_string", "()Ljava/lang/String;", (void *)native_1x1_string},
 };

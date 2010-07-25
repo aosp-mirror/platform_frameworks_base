@@ -21,6 +21,7 @@ import static android.database.DatabaseUtils.InsertHelper.TABLE_INFO_PRAGMA_DEFA
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.os.Handler;
 import android.os.Parcel;
 import android.test.AndroidTestCase;
@@ -384,54 +385,28 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
 
     @MediumTest
     public void testSchemaChange2() throws Exception {
-        SQLiteDatabase db1 = mDatabase;
-        SQLiteDatabase db2 = SQLiteDatabase.openOrCreateDatabase(mDatabaseFile, null);
-        Cursor cursor;
-
-        db1.execSQL("CREATE TABLE db1 (_id INTEGER PRIMARY KEY, data TEXT);");
-
-        cursor = db1.query("db1", null, null, null, null, null, null);
-        assertNotNull("Cursor is null", cursor);
+        mDatabase.execSQL("CREATE TABLE db1 (_id INTEGER PRIMARY KEY, data TEXT);");
+        Cursor cursor = mDatabase.query("db1", null, null, null, null, null, null);
+        assertNotNull(cursor);
         assertEquals(0, cursor.getCount());
-        cursor.deactivate();
-        // this cause exception because we're still using sqlite_prepate16 and not
-        // sqlite_prepare16_v2. The v2 variant added the ability to check the
-        // schema version and handle the case when the schema has changed
-        // Marco Nelissen claim it was 2x slower to compile SQL statements so
-        // I reverted back to the v1 variant.
-        /* db2.execSQL("CREATE TABLE db2 (_id INTEGER PRIMARY KEY, data TEXT);");
-
-        cursor = db1.query("db1", null, null, null, null, null, null);
-        assertNotNull("Cursor is null", cursor);
-        assertEquals(0, cursor.count());
-        cursor.deactivate();
-        */
+        cursor.close();
     }
 
     @MediumTest
     public void testSchemaChange3() throws Exception {
-        SQLiteDatabase db1 = mDatabase;
-        SQLiteDatabase db2 = SQLiteDatabase.openOrCreateDatabase(mDatabaseFile, null);
-        Cursor cursor;
-
-
-        db1.execSQL("CREATE TABLE db1 (_id INTEGER PRIMARY KEY, data TEXT);");
-        db1.execSQL("INSERT INTO db1 (data) VALUES ('test');");
-
-        cursor = db1.query("db1", null, null, null, null, null, null);
-        // this cause exception because we're still using sqlite_prepate16 and not
-        // sqlite_prepare16_v2. The v2 variant added the ability to check the
-        // schema version and handle the case when the schema has changed
-        // Marco Nelissen claim it was 2x slower to compile SQL statements so
-        // I reverted back to the v1 variant.
-        /* db2.execSQL("CREATE TABLE db2 (_id INTEGER PRIMARY KEY, data TEXT);");
-
-        assertNotNull("Cursor is null", cursor);
-        assertEquals(1, cursor.count());
-        assertTrue(cursor.first());
-        assertEquals("test", cursor.getString(cursor.getColumnIndexOrThrow("data")));
-        cursor.deactivate();
-        */
+        mDatabase.execSQL("CREATE TABLE db1 (_id INTEGER PRIMARY KEY, data TEXT);");
+        mDatabase.execSQL("INSERT INTO db1 (data) VALUES ('test');");
+        mDatabase.execSQL("ALTER TABLE db1 ADD COLUMN blah int;");
+        Cursor c = null;
+        try {
+            c = mDatabase.rawQuery("select blah from db1", null);
+        } catch (SQLiteException e) {
+            fail("unexpected exception: " + e.getMessage());
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+        }
     }
 
     private class ChangeObserver extends ContentObserver {

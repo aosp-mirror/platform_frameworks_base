@@ -15,7 +15,7 @@
  */
 
 #undef LOG_TAG
-#define LOG_TAG "Database"
+#define LOG_TAG "SqliteDatabaseCpp"
 
 #include <utils/Log.h>
 #include <utils/String8.h>
@@ -245,77 +245,6 @@ static void dbclose(JNIEnv* env, jobject object)
     }
 }
 
-/* public native void native_execSQL(String sql); */
-static void native_execSQL(JNIEnv* env, jobject object, jstring sqlString)
-{
-    int err;
-    int stepErr;
-    sqlite3_stmt * statement = NULL;
-    sqlite3 * handle = (sqlite3 *)env->GetIntField(object, offset_db_handle);
-    jchar const * sql = env->GetStringChars(sqlString, NULL);
-    jsize sqlLen = env->GetStringLength(sqlString);
-
-    if (sql == NULL || sqlLen == 0) {
-        jniThrowException(env, "java/lang/IllegalArgumentException",
-                "You must supply an SQL string");
-        return;
-    }
-
-    err = sqlite3_prepare16_v2(handle, sql, sqlLen * 2, &statement, NULL);
-
-    env->ReleaseStringChars(sqlString, sql);
-
-    if (err != SQLITE_OK) {
-        char const * sql8 = env->GetStringUTFChars(sqlString, NULL);
-        LOGE("Failure %d (%s) on %p when preparing '%s'.\n", err, sqlite3_errmsg(handle),
-                handle, sql8);
-        throw_sqlite3_exception(env, handle, sql8);
-        env->ReleaseStringUTFChars(sqlString, sql8);
-        return;
-    }
-
-    stepErr = sqlite3_step(statement);
-    err = sqlite3_finalize(statement);
-
-    if (stepErr != SQLITE_DONE) {
-        if (stepErr == SQLITE_ROW) {
-            throw_sqlite3_exception(env,
-                    "Queries cannot be performed using execSQL(), use query() instead.");
-        } else {
-            char const * sql8 = env->GetStringUTFChars(sqlString, NULL);
-            LOGE("Failure %d (%s) on %p when executing '%s'\n", err, sqlite3_errmsg(handle),
-                    handle, sql8);
-            throw_sqlite3_exception(env, handle, sql8);
-            env->ReleaseStringUTFChars(sqlString, sql8);
-
-        }
-    } else
-#ifndef DB_LOG_STATEMENTS
-    IF_LOGV()
-#endif
-    {
-        char const * sql8 = env->GetStringUTFChars(sqlString, NULL);
-        LOGV("Success on %p when executing '%s'\n", handle, sql8);
-        env->ReleaseStringUTFChars(sqlString, sql8);
-    }
-}
-
-/* native long lastInsertRow(); */
-static jlong lastInsertRow(JNIEnv* env, jobject object)
-{
-    sqlite3 * handle = (sqlite3 *)env->GetIntField(object, offset_db_handle);
-
-    return sqlite3_last_insert_rowid(handle);
-}
-
-/* native int lastChangeCount(); */
-static jint lastChangeCount(JNIEnv* env, jobject object)
-{
-    sqlite3 * handle = (sqlite3 *)env->GetIntField(object, offset_db_handle);
-
-    return sqlite3_changes(handle);
-}
-
 /* native int native_getDbLookaside(); */
 static jint native_getDbLookaside(JNIEnv* env, jobject object)
 {
@@ -522,9 +451,6 @@ static JNINativeMethod sMethods[] =
     {"dbclose", "()V", (void *)dbclose},
     {"enableSqlTracing", "(Ljava/lang/String;S)V", (void *)enableSqlTracing},
     {"enableSqlProfiling", "(Ljava/lang/String;S)V", (void *)enableSqlProfiling},
-    {"native_execSQL", "(Ljava/lang/String;)V", (void *)native_execSQL},
-    {"lastInsertRow", "()J", (void *)lastInsertRow},
-    {"lastChangeCount", "()I", (void *)lastChangeCount},
     {"native_setLocale", "(Ljava/lang/String;I)V", (void *)native_setLocale},
     {"native_getDbLookaside", "()I", (void *)native_getDbLookaside},
     {"releaseMemory", "()I", (void *)native_releaseMemory},
