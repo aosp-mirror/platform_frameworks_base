@@ -79,6 +79,11 @@ public class ApplicationErrorReport implements Parcelable {
     public static final int TYPE_STRICT_MODE_VIOLATION = 4;
 
     /**
+     * An error report about a StrictMode violation.
+     */
+    public static final int TYPE_RUNNING_SERVICE = 5;
+
+    /**
      * Type of this report. Can be one of {@link #TYPE_NONE},
      * {@link #TYPE_CRASH}, {@link #TYPE_ANR}, or {@link #TYPE_BATTERY}.
      */
@@ -129,6 +134,12 @@ public class ApplicationErrorReport implements Parcelable {
      */
     public BatteryInfo batteryInfo;
     
+    /**
+     * If this report is of type {@link #TYPE_RUNNING_SERVICE}, contains an instance
+     * of RunningServiceInfo; otherwise null.
+     */
+    public RunningServiceInfo runningServiceInfo;
+
     /**
      * Create an uninitialized instance of {@link ApplicationErrorReport}.
      */
@@ -223,6 +234,9 @@ public class ApplicationErrorReport implements Parcelable {
             case TYPE_BATTERY:
                 batteryInfo.writeToParcel(dest, flags);
                 break;
+            case TYPE_RUNNING_SERVICE:
+                runningServiceInfo.writeToParcel(dest, flags);
+                break;
         }
     }
 
@@ -239,16 +253,25 @@ public class ApplicationErrorReport implements Parcelable {
                 crashInfo = new CrashInfo(in);
                 anrInfo = null;
                 batteryInfo = null;
+                runningServiceInfo = null;
                 break;
             case TYPE_ANR:
                 anrInfo = new AnrInfo(in);
                 crashInfo = null;
                 batteryInfo = null;
+                runningServiceInfo = null;
                 break;
             case TYPE_BATTERY:
                 batteryInfo = new BatteryInfo(in);
                 anrInfo = null;
                 crashInfo = null;
+                runningServiceInfo = null;
+                break;
+            case TYPE_RUNNING_SERVICE:
+                batteryInfo = null;
+                anrInfo = null;
+                crashInfo = null;
+                runningServiceInfo = new RunningServiceInfo(in);
                 break;
         }
     }
@@ -491,6 +514,51 @@ public class ApplicationErrorReport implements Parcelable {
             pw.println(prefix + "durationMicros: " + durationMicros);
             pw.println(prefix + "usageDetails: " + usageDetails);
             pw.println(prefix + "checkinDetails: " + checkinDetails);
+        }
+    }
+
+    /**
+     * Describes a running service report.
+     */
+    public static class RunningServiceInfo {
+        /**
+         * Duration in milliseconds that the service has been running.
+         */
+        public long durationMillis;
+
+        /**
+         * Dump of debug information about the service.
+         */
+        public String serviceDetails;
+
+        /**
+         * Create an uninitialized instance of RunningServiceInfo.
+         */
+        public RunningServiceInfo() {
+        }
+
+        /**
+         * Create an instance of RunningServiceInfo initialized from a Parcel.
+         */
+        public RunningServiceInfo(Parcel in) {
+            durationMillis = in.readLong();
+            serviceDetails = in.readString();
+        }
+
+        /**
+         * Save a RunningServiceInfo instance to a parcel.
+         */
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeLong(durationMillis);
+            dest.writeString(serviceDetails);
+        }
+
+        /**
+         * Dump a BatteryInfo instance to a Printer.
+         */
+        public void dump(Printer pw, String prefix) {
+            pw.println(prefix + "durationMillis: " + durationMillis);
+            pw.println(prefix + "serviceDetails: " + serviceDetails);
         }
     }
 
