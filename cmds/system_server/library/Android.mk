@@ -7,9 +7,9 @@ LOCAL_SRC_FILES:= \
 base = $(LOCAL_PATH)/../../..
 
 LOCAL_C_INCLUDES := \
-	$(base)/camera/libcameraservice \
-	$(base)/libs/audioflinger \
-	$(base)/libs/surfaceflinger \
+	$(base)/services/camera/libcameraservice \
+	$(base)/services/audioflinger \
+	$(base)/services/surfaceflinger \
 	$(base)/media/libmediaplayerservice \
 	$(JNI_H_INCLUDE)
 
