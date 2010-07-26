@@ -775,7 +775,7 @@ public class Activity extends ContextThemeWrapper
         if (mLoaderManager != null) {
             return mLoaderManager;
         }
-        mLoaderManager = getLoaderManager(-1, false);
+        mLoaderManager = getLoaderManager(-1, mStarted);
         return mLoaderManager;
     }
     
