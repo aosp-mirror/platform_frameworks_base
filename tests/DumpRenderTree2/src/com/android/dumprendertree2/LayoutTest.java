@@ -54,8 +54,10 @@ public class LayoutTest {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == MSG_ACTUAL_RESULT_OBTAINED) {
-                mResult.setExpectedTextResult(LayoutTestsRunnerThread.getExpectedTextResult(mRelativePath));
-                mResult.setExpectedImageResult(LayoutTestsRunnerThread.getExpectedImageResult(mRelativePath));
+                mResult.setExpectedTextResult(LayoutTestsRunnerThread
+                        .getExpectedTextResult(mRelativePath));
+                mResult.setExpectedImageResult(LayoutTestsRunnerThread
+                        .getExpectedImageResult(mRelativePath));
                 mTestFinishedMsg.sendToTarget();
             }
         }
@@ -114,6 +116,11 @@ public class LayoutTest {
         mActivity = activity;
     }
 
+    public LayoutTest(AbstractResult result, String relativePath) {
+        mResult = result;
+        mRelativePath = relativePath;
+    }
+
     public void run() {
         mWebView = new WebView(mActivity);
         mActivity.setContentView(mWebView);
@@ -143,7 +150,7 @@ public class LayoutTest {
 
         /** TODO: Implement waitUntilDone */
 
-        mResult.obtainActualResult(mWebView,
+        mResult.obtainActualResults(mWebView,
                 mResultHandler.obtainMessage(MSG_ACTUAL_RESULT_OBTAINED));
     }
 

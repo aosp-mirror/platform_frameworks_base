@@ -28,6 +28,14 @@ limitations under the License.
         <activity android:name=".LayoutTestsRunner"
                   android:label="Layout tests' runner">
         </activity>
+
+        <activity android:name=".LayoutTestsExecuter"
+                  android:label="Layout tests' executer"
+                  android:process=":executer">
+        </activity>
+
+        <service android:name="ManagerService">
+        </service>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

@@ -16,6 +16,7 @@
 
 package com.android.dumprendertree2;
 
+import android.os.Bundle;
 import android.os.Message;
 import android.webkit.WebView;
 
@@ -50,15 +51,15 @@ public abstract class AbstractResult {
     }
 
     /**
-     * Makes the result object obtain the result of the test from the webview
-     * and store it in the format that suits itself bests. This method is asynchronous.
+     * Makes the result object obtain the results of the test from the webview
+     * and store them in the format that suits itself bests. This method is asynchronous.
      * The message passed as a parameter is a message that should be sent to its target
      * when the result finishes obtaining the result.
      *
      * @param webview
      * @param resultObtainedMsg
      */
-    public abstract void obtainActualResult(WebView webview, Message resultObtainedMsg);
+    public abstract void obtainActualResults(WebView webview, Message resultObtainedMsg);
 
     public abstract void setExpectedImageResult(byte[] expectedResult);
 
@@ -108,4 +109,6 @@ public abstract class AbstractResult {
      *      a piece of HTML code with a visual diff between the result and the expected result
      */
     public abstract String getDiffAsHtml();
+
+    public abstract Bundle getBundle();
 }
