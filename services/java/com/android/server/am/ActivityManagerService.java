@@ -6755,7 +6755,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
                 return;
             } else if ("service".equals(cmd)) {
-                dumpService(fd, pw, args, opti, true);
+                dumpService(fd, pw, args, opti, dumpAll);
                 return;
             } else if ("services".equals(cmd) || "s".equals(cmd)) {
                 synchronized (this) {
@@ -7061,19 +7061,27 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             componentNameString = args[opti];
             opti++;
             ComponentName componentName = ComponentName.unflattenFromString(componentNameString);
-            r = componentName != null ? mServices.get(componentName) : null;
+            synchronized (this) {
+                r = componentName != null ? mServices.get(componentName) : null;
+            }
             newArgs = new String[args.length - opti];
             if (args.length > 2) System.arraycopy(args, opti, newArgs, 0, args.length - opti);
         }
 
         if (r != null) {
-            dumpService(fd, pw, r, newArgs);
+            dumpService(fd, pw, r, newArgs, dumpAll);
         } else {
-            for (ServiceRecord r1 : mServices.values()) {
-                if (componentNameString == null
-                        || r1.name.flattenToString().contains(componentNameString)) {
-                    dumpService(fd, pw, r1, newArgs);
+            ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
+            synchronized (this) {
+                for (ServiceRecord r1 : mServices.values()) {
+                    if (componentNameString == null
+                            || r1.name.flattenToString().contains(componentNameString)) {
+                        services.add(r1);
+                    }
                 }
+            }
+            for (int i=0; i<services.size(); i++) {
+                dumpService(fd, pw, services.get(i), newArgs, dumpAll);
             }
         }
     }
@@ -7082,8 +7090,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * Invokes IApplicationThread.dumpService() on the thread of the specified service if
      * there is a thread associated with the service.
      */
-    private void dumpService(FileDescriptor fd, PrintWriter pw, ServiceRecord r, String[] args) {
+    private void dumpService(FileDescriptor fd, PrintWriter pw, ServiceRecord r, String[] args,
+            boolean dumpAll) {
         pw.println("  Service " + r.name.flattenToString());
+        if (dumpAll) {
+            synchronized (this) {
+                pw.print("  * "); pw.println(r);
+                r.dump(pw, "    ");
+            }
+            pw.println("");
+        }
         if (r.app != null && r.app.thread != null) {
             try {
                 // flush anything that is already in the PrintWriter since the thread is going
@@ -7091,6 +7107,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 pw.flush();
                 r.app.thread.dumpService(fd, r, args);
                 pw.print("\n");
+                pw.flush();
             } catch (RemoteException e) {
                 pw.println("got a RemoteException while dumping the service");
             }
