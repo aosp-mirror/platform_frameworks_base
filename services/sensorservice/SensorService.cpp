@@ -40,11 +40,18 @@ namespace android {
 
 /*
  * TODO:
- * - make sure to keep the last value of each event type so we can quickly
- *   send something to application when they enable a sensor that is already
- *   active (the issue here is that it can take time before a value is
- *   produced by the h/w if the rate is low or if it's a one-shot sensor).
  * - send sensor info to battery service
+ *
+
+static final int TRANSACTION_noteStartSensor = (android.os.IBinder.FIRST_CALL_TRANSACTION + 3);
+static final int TRANSACTION_noteStopSensor = (android.os.IBinder.FIRST_CALL_TRANSACTION + 4);
+
+    _data.writeInterfaceToken(DESCRIPTOR);
+    _data.writeInt(uid);
+    _data.writeInt(sensor);
+    mRemote.transact(Stub.TRANSACTION_noteStartSensor, _data, _reply, 0);
+    _reply.readException();
+ *
  */
 
 // ---------------------------------------------------------------------------
@@ -103,8 +110,12 @@ void SensorService::onFirstRef()
         LOGE_IF(err, "couldn't open device for module %s (%s)",
                 SENSORS_HARDWARE_MODULE_ID, strerror(-err));
 
+        sensors_event_t event;
+        memset(&event, 0, sizeof(event));
+
         struct sensor_t const* list;
         int count = mSensorModule->get_sensors_list(mSensorModule, &list);
+        mLastEventSeen.setCapacity(count);
         for (int i=0 ; i<count ; i++) {
             Sensor sensor(list + i);
             LOGI("%s", sensor.getName().string());
@@ -112,6 +123,7 @@ void SensorService::onFirstRef()
             if (mSensorDevice) {
                 mSensorDevice->activate(mSensorDevice, sensor.getHandle(), 0);
             }
+            mLastEventSeen.add(sensor.getHandle(), event);
         }
 
         if (mSensorDevice) {
@@ -138,6 +150,19 @@ status_t SensorService::dump(int fd, const Vector<String16>& args)
         result.append(buffer);
     } else {
         Mutex::Autolock _l(mLock);
+        snprintf(buffer, SIZE, "Sensor List:\n");
+        result.append(buffer);
+        for (size_t i=0 ; i<mSensorList.size() ; i++) {
+            const Sensor& s(mSensorList[i]);
+            const sensors_event_t& e(mLastEventSeen.valueFor(s.getHandle()));
+            snprintf(buffer, SIZE, "%s (vendor=%s, handle=%d, last=<%5.1f,%5.1f,%5.1f>)\n",
+                    s.getName().string(),
+                    s.getVendor().string(),
+                    s.getHandle(),
+                    e.data[0], e.data[1], e.data[2]);
+            result.append(buffer);
+        }
+
         snprintf(buffer, SIZE, "%d active connections\n",
                 mActiveConnections.size());
         result.append(buffer);
@@ -178,6 +203,19 @@ bool SensorService::threadLoop()
         size_t numConnections = activeConnections.size();
         if (numConnections) {
             Mutex::Autolock _l(mLock);
+
+            // record the last event for each sensor
+            int32_t prev = buffer[0].sensor;
+            for (ssize_t i=1 ; i<count ; i++) {
+                // record the last event of each sensor type in this buffer
+                int32_t curr = buffer[i].sensor;
+                if (curr != prev) {
+                    mLastEventSeen.editValueFor(prev) = buffer[i-1];
+                    prev = curr;
+                }
+            }
+            mLastEventSeen.editValueFor(prev) = buffer[count-1];
+
             for (size_t i=0 ; i<numConnections ; i++) {
                 sp<SensorEventConnection> connection(activeConnections[i].promote());
                 if (connection != 0) {
@@ -258,7 +296,16 @@ status_t SensorService::enable(const sp<SensorEventConnection>& connection,
             BatteryService::getInstance().enableSensor(handle);
         }
     } else {
-        rec->addConnection(connection);
+        if (rec->addConnection(connection)) {
+            // this sensor is already activated, but we are adding a
+            // connection that uses it. Immediately send down the last
+            // known value of the requested sensor.
+            sensors_event_t scratch;
+            sensors_event_t& event(mLastEventSeen.editValueFor(handle));
+            if (event.version == sizeof(sensors_event_t)) {
+                connection->sendEvents(&event, 1);
+            }
+        }
     }
     if (err == NO_ERROR) {
         // connection now active
@@ -430,17 +477,26 @@ status_t SensorService::SensorEventConnection::sendEvents(
         sensors_event_t* scratch)
 {
     // filter out events not for this connection
-    size_t count=0, i=0;
-    while (i<numEvents) {
-        const int32_t curr = buffer[i].sensor;
-        if (mSensorInfo.indexOfKey(curr) >= 0) {
-            do {
-                scratch[count++] = buffer[i++];
-            } while ((i<numEvents) && (buffer[i].sensor == curr));
-        } else {
-            i++;
+    size_t count = 0;
+    if (scratch) {
+        size_t i=0;
+        while (i<numEvents) {
+            const int32_t curr = buffer[i].sensor;
+            if (mSensorInfo.indexOfKey(curr) >= 0) {
+                do {
+                    scratch[count++] = buffer[i++];
+                } while ((i<numEvents) && (buffer[i].sensor == curr));
+            } else {
+                i++;
+            }
         }
+    } else {
+        scratch = const_cast<sensors_event_t *>(buffer);
+        count = numEvents;
     }
+
+    if (count == 0)
+        return 0;
 
     ssize_t size = mChannel->write(scratch, count*sizeof(sensors_event_t));
     if (size == -EAGAIN) {
