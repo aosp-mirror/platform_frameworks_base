@@ -84,7 +84,7 @@ public final class ShutdownThread extends Thread {
     public static void shutdown(final Context context, boolean confirm) {
         // ensure that only one thread is trying to power down.
         // any additional calls are just returned
-        synchronized (sIsStartedGuard){
+        synchronized (sIsStartedGuard) {
             if (sIsStarted) {
                 Log.d(TAG, "Request to shutdown already running, returning.");
                 return;
@@ -133,6 +133,10 @@ public final class ShutdownThread extends Thread {
 
     private static void beginShutdownSequence(Context context) {
         synchronized (sIsStartedGuard) {
+            if (sIsStarted) {
+                Log.d(TAG, "Request to shutdown already running, returning.");
+                return;
+            }
             sIsStarted = true;
         }
 
