@@ -18,6 +18,7 @@
 #define ANDROID_UI_FONT_RENDERER_H
 
 #include <utils/String8.h>
+#include <utils/String16.h>
 #include <utils/Vector.h>
 #include <utils/KeyedVector.h>
 
@@ -82,9 +83,11 @@ protected:
 
     void invalidateTextureCache();
 
-    CachedGlyphInfo *cacheGlyph(SkPaint* paint, int32_t glyph);
+    CachedGlyphInfo* cacheGlyph(SkPaint* paint, int32_t glyph);
     void updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyphInfo *glyph);
     void drawCachedGlyph(CachedGlyphInfo *glyph, int x, int y);
+
+    CachedGlyphInfo* getCachedUTFChar(SkPaint* paint, int32_t utfChar);
 
     FontRenderer* mState;
     uint32_t mFontId;
@@ -99,7 +102,7 @@ public:
     void init();
     void deinit();
 
-    void setFont(uint32_t fontId, float fontSize);
+    void setFont(SkPaint* paint, uint32_t fontId, float fontSize);
     void renderText(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
             uint32_t len, int numGlyphs, int x, int y);
 
@@ -160,6 +163,9 @@ protected:
 
     void checkInit();
 
+    String16 mLatinPrecache;
+    void precacheLatin(SkPaint* paint);
+
     void issueDrawCommand();
     void appendMeshQuad(float x1, float y1, float z1, float u1, float v1, float x2, float y2,
             float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3,
@@ -169,6 +175,7 @@ protected:
     uint32_t mCacheHeight;
 
     Vector<CacheTextureLine*> mCacheLines;
+    uint32_t getRemainingCacheCapacity();
 
     Font* mCurrentFont;
     Vector<Font*> mActiveFonts;
