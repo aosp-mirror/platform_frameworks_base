@@ -16,8 +16,11 @@
 
 package android.content.pm;
 
-import com.android.ddmlib.IDevice;
+import com.android.ddmlib.AdbCommandRejectedException;
+import com.android.ddmlib.InstallException;
 import com.android.ddmlib.Log;
+import com.android.ddmlib.ShellCommandUnresponsiveException;
+import com.android.ddmlib.TimeoutException;
 import com.android.hosttest.DeviceTestCase;
 import com.android.hosttest.DeviceTestSuite;
 
@@ -138,7 +141,9 @@ public class PackageManagerStressHostTests extends DeviceTestCase {
      * <p/>
      * Assumes adb is running as root in device under test.
      */
-    public void testUpdateAppManyTimesOnSD() throws IOException, InterruptedException {
+    public void testUpdateAppManyTimesOnSD() throws IOException, InterruptedException,
+            InstallException, TimeoutException, AdbCommandRejectedException,
+            ShellCommandUnresponsiveException {
         Log.i(LOG_TAG, "Test updating an app on SD numerous times");
 
         // cleanup test app just in case it already exists
@@ -173,7 +178,9 @@ public class PackageManagerStressHostTests extends DeviceTestCase {
      * <p/>
      * Assumes adb is running as root in device under test.
      */
-    public void testUninstallReinstallAppOnSDManyTimes() throws IOException, InterruptedException {
+    public void testUninstallReinstallAppOnSDManyTimes() throws IOException, InterruptedException,
+            InstallException, TimeoutException, AdbCommandRejectedException,
+            ShellCommandUnresponsiveException {
         Log.i(LOG_TAG, "Test updating an app on the SD card stays on the SD card");
 
         // cleanup test app just in case it was already exists
@@ -207,7 +214,9 @@ public class PackageManagerStressHostTests extends DeviceTestCase {
      * <p/>
      * Assumes adb is running as root in device under test.
      */
-    public void testInstallManyLargeAppsOnSD() throws IOException, InterruptedException {
+    public void testInstallManyLargeAppsOnSD() throws IOException, InterruptedException,
+            InstallException, TimeoutException, AdbCommandRejectedException,
+            ShellCommandUnresponsiveException {
         Log.i(LOG_TAG, "Test installing 20 large apps onto the sd card");
 
         try {
@@ -251,7 +260,9 @@ public class PackageManagerStressHostTests extends DeviceTestCase {
      * <p/>
      * Assumes adb is running as root in device under test.
      */
-    public void testInstallManyAppsOnSD() throws IOException, InterruptedException {
+    public void testInstallManyAppsOnSD() throws IOException, InterruptedException,
+            InstallException, TimeoutException, AdbCommandRejectedException,
+            ShellCommandUnresponsiveException {
         Log.i(LOG_TAG, "Test installing 500 small apps onto SD");
 
         try {
