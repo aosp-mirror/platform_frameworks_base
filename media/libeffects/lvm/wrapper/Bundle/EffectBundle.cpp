@@ -2337,7 +2337,6 @@ extern "C" int Effect_command(effect_interface_t  self,
                               void                *pReplyData){
     EffectContext * pContext = (EffectContext *) self;
     int retsize;
-    int status = 0;
 
     //LOGV("\t\nEffect_command start");
 
@@ -2371,54 +2370,29 @@ extern "C" int Effect_command(effect_interface_t  self,
 
     switch (cmdCode){
         case EFFECT_CMD_INIT:
+            if (pReplyData == NULL || *replySize != sizeof(int)){
+                LOGV("\tLVM_ERROR, EFFECT_CMD_INIT: ERROR for effect type %d",
+                        pContext->EffectType);
+                return -EINVAL;
+            }
+            *(int *) pReplyData = 0;
             //LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_INIT start");
             if(pContext->EffectType == LVM_BASS_BOOST){
                 //LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_INIT for LVM_BASS_BOOST");
-
-                if (pReplyData == NULL || *replySize != sizeof(int)){
-                    LOGV("\tLVM_ERROR : BassBoost_command cmdCode Case: "
-                            "EFFECT_CMD_INIT: ERROR");
-                    return -EINVAL;
-                }
-
                 android::BassSetStrength(pContext, 0);
             }
             if(pContext->EffectType == LVM_VIRTUALIZER){
                 //LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_INIT for LVM_VIRTUALIZER");
-
-                if (pReplyData == NULL || *replySize != sizeof(int)){
-                    LOGV("\tLVM_ERROR : Virtualizer_command cmdCode Case: "
-                            "EFFECT_CMD_INIT: ERROR");
-                    return -EINVAL;
-                }
-
                 android::VirtualizerSetStrength(pContext, 0);
             }
             if(pContext->EffectType == LVM_EQUALIZER){
                 //LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_INIT for LVM_EQUALIZER");
-
-                if (pReplyData == NULL || *replySize != sizeof(int)){
-                    LOGV("\tLVM_ERROR : Equalizer_command cmdCode Case: "
-                            "EFFECT_CMD_INIT: ERROR");
-                    return -EINVAL;
-                }
-
                 android::EqualizerSetPreset(pContext, 0);
             }
             if(pContext->EffectType == LVM_VOLUME){
                 //LOGV("\tEffect_command cmdCode Case: "
                 //        "EFFECT_CMD_INIT start");
-
-                if (pReplyData == NULL || *replySize != sizeof(int)){
-                    LOGV("\tLVM_ERROR : Volume_command cmdCode Case: "
-                            "EFFECT_CMD_INIT: ERROR");
-                    return -EINVAL;
-                }
-
-                status = android::VolumeSetVolumeLevel(pContext, 0);
-                if(status == -EINVAL){
-                    return -EINVAL;
-                }
+                *(int *) pReplyData = android::VolumeSetVolumeLevel(pContext, 0);
             }
             break;
 
