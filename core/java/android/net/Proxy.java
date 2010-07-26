@@ -16,8 +16,6 @@
 
 package android.net;
 
-import org.apache.harmony.luni.platform.INetworkSystem;
-import org.apache.harmony.luni.platform.Platform;
 import org.apache.http.HttpHost;
 
 import android.content.ContentResolver;
@@ -43,8 +41,6 @@ final public class Proxy {
 
     static final public String PROXY_CHANGE_ACTION =
         "android.intent.action.PROXY_CHANGE";
-
-    static final private INetworkSystem NETIMPL = Platform.getNetworkSystem();
 
     /**
      * Return the proxy host set by the user.
@@ -169,8 +165,7 @@ final public class Proxy {
                 if (host.equalsIgnoreCase("localhost")) {
                     return true;
                 }
-                if (InetAddress.getByAddress(NETIMPL.ipStringToByteArray(host))
-                        .isLoopbackAddress()) {
+                if (InetAddress.getByName(host).isLoopbackAddress()) {
                     return true;
                 }
             }
