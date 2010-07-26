@@ -199,6 +199,7 @@ static const CodecInfo kEncoderInfo[] = {
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.7x30.video.encoder.avc" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.video.encoder.avc" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.Video.encoder" },
+    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.Nvidia.h264.encoder" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "AVCEncoder" },
 //    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.PV.avcenc" },
 };
@@ -854,6 +855,10 @@ void OMXCodec::setVideoInputFormat(
     OMX_COLOR_FORMATTYPE colorFormat;
     CHECK_EQ(OK, findTargetColorFormat(meta, &colorFormat));
 
+    if (!strcasecmp("OMX.Nvidia.h264.encoder", mComponentName)) {
+        colorFormat = OMX_COLOR_FormatYUV420Planar;
+    }
+
     status_t err;
     OMX_PARAM_PORTDEFINITIONTYPE def;
     OMX_VIDEO_PORTDEFINITIONTYPE *video_def = &def.format.video;
@@ -1192,6 +1197,10 @@ status_t OMXCodec::setupAVCEncoderParameters(const sp<MetaData>& meta) {
     h264type.bFrameMBsOnly = OMX_TRUE;
     h264type.bMBAFF = OMX_FALSE;
     h264type.eLoopFilterMode = OMX_VIDEO_AVCLoopFilterEnable;
+
+    if (!strcasecmp("OMX.Nvidia.h264.encoder", mComponentName)) {
+        h264type.eLevel = OMX_VIDEO_AVCLevelMax;
+    }
 
     err = mOMX->setParameter(
             mNode, OMX_IndexParamVideoAvc, &h264type, sizeof(h264type));
