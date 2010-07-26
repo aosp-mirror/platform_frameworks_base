@@ -17,9 +17,9 @@
 
 /************************************************************************************
 
-     $Author: beq07716 $
-     $Revision: 1001 $
-     $Date: 2010-06-28 13:23:02 +0200 (Mon, 28 Jun 2010) $
+     $Author: nxp007753 $
+     $Revision: 1315 $
+     $Date: 2010-07-23 11:52:08 +0200 (Fri, 23 Jul 2010) $
 
 *************************************************************************************/
 
@@ -113,7 +113,7 @@ LVCS_ReturnStatus_en LVCS_ReverbGeneratorInit(LVCS_Handle_t     hInstance,
         Coeffs.B2 = (LVM_INT16)-pReverbCoefTable[Offset].B2;
 
         LoadConst_16(0,                                                                 /* Value */
-                     (LVM_INT16 *)&pData->ReverbBiquadTaps,                             /* Destination */
+                     (void *)&pData->ReverbBiquadTaps,                             /* Destination Cast to void: no dereferencing in function*/
                      (LVM_UINT16)(sizeof(pData->ReverbBiquadTaps)/sizeof(LVM_INT16)));  /* Number of words */
 
         BQ_2I_D16F16Css_TRC_WRA_01_Init(&pCoefficients->ReverbBiquadInstance,

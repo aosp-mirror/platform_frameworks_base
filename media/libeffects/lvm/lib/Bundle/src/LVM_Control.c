@@ -18,8 +18,8 @@
 /****************************************************************************************
 
      $Author: nxp007753 $
-     $Revision: 1255 $
-     $Date: 2010-07-16 17:07:29 +0200 (Fri, 16 Jul 2010) $
+     $Revision: 1316 $
+     $Date: 2010-07-23 11:53:24 +0200 (Fri, 23 Jul 2010) $
 
 *****************************************************************************************/
 
@@ -314,8 +314,9 @@ void LVM_SetTrebleBoost(LVM_Instance_t         *pInstance,
             /*
              * Clear the taps
              */
-            LoadConst_16((LVM_INT16)0,                                                                   /* Value */
-                         (LVM_INT16 *)&pInstance->pTE_Taps->TrebleBoost_Taps,                            /* Destination */
+            LoadConst_16((LVM_INT16)0,                                     /* Value */
+                         (void *)&pInstance->pTE_Taps->TrebleBoost_Taps,  /* Destination.\
+                                                     Cast to void: no dereferencing in function */
                          (LVM_UINT16)(sizeof(pInstance->pTE_Taps->TrebleBoost_Taps)/sizeof(LVM_INT16))); /* Number of words */
         }
     }
