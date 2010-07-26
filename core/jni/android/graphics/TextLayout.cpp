@@ -151,7 +151,7 @@ jint TextLayout::layoutLine(const jchar* text, jint len, jint flags, int &dir, j
 }
 
 bool TextLayout::prepareText(SkPaint *paint, const jchar* text, jsize len, jint bidiFlags,
-        const jchar** outText, int32_t* outBytes) {
+        const jchar** outText, int32_t* outBytes, jchar** outBuffer) {
     const jchar *workText = text;
     jchar *buffer = NULL;
     int dir = kDirection_LTR;
@@ -196,8 +196,8 @@ bool TextLayout::prepareText(SkPaint *paint, const jchar* text, jsize len, jint 
 
     *outBytes = (workLimit - workText) << 1;
     *outText = workText;
-    
-    free(buffer);
+    *outBuffer = buffer;
+
     return true;
 }
 
@@ -207,8 +207,9 @@ bool TextLayout::prepareText(SkPaint *paint, const jchar* text, jsize len, jint 
 void TextLayout::handleText(SkPaint *paint, const jchar* text, jsize len,
                             jint bidiFlags, jfloat x, jfloat y,SkCanvas *canvas, SkPath *path) {
     const jchar *workText;
+    jchar *buffer = NULL;
     int32_t workBytes;
-    if (prepareText(paint, text, len, bidiFlags, &workText, &workBytes)) {
+    if (prepareText(paint, text, len, bidiFlags, &workText, &workBytes, &buffer)) {
         SkScalar x_ = SkFloatToScalar(x);
         SkScalar y_ = SkFloatToScalar(y);
         if (canvas) {
@@ -216,6 +217,7 @@ void TextLayout::handleText(SkPaint *paint, const jchar* text, jsize len,
         } else {
             paint->getTextPath(workText, workBytes, x_, y_, path);
         }
+        free(buffer);
     }
 }
 

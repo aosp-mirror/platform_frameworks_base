@@ -65,7 +65,7 @@ public:
                                SkPath* path, SkCanvas* canvas);
                                
    static bool prepareText(SkPaint *paint, const jchar* text, jsize len, jint bidiFlags,
-        const jchar** outText, int32_t* outBytes);
+        const jchar** outText, int32_t* outBytes, jchar** outBuffer);
 
 private:
     static bool needsLayout(const jchar* text, jint len, jint bidiFlags);
