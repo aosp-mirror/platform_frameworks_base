@@ -1495,6 +1495,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 ps.pkg.applicationInfo.publicSourceDir = ps.resourcePathString;
                 ps.pkg.applicationInfo.sourceDir = ps.codePathString;
                 ps.pkg.applicationInfo.dataDir = getDataPathForPackage(ps.pkg).getPath();
+                ps.pkg.mSetEnabled = ps.enabled;
             }
             return generatePackageInfo(ps.pkg, flags);
         }
@@ -6875,6 +6876,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     return;
                 }
                 pkgSetting.enabled = newState;
+                pkgSetting.pkg.mSetEnabled = newState;
             } else {
                 // We're dealing with a component level state change
                 switch (newState) {
@@ -8261,6 +8263,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
         private void insertPackageSettingLP(PackageSetting p, PackageParser.Package pkg) {
             p.pkg = pkg;
+            pkg.mSetEnabled = p.enabled;
             String codePath = pkg.applicationInfo.sourceDir;
             String resourcePath = pkg.applicationInfo.publicSourceDir;
             // Update code path if needed
@@ -9486,6 +9489,9 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         boolean isEnabledLP(ComponentInfo componentInfo, int flags) {
+            if ((flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
+                return true;
+            }
             final PackageSetting packageSettings = mPackages.get(componentInfo.packageName);
             if (Config.LOGV) {
                 Log.v(TAG, "isEnabledLock - packageName = " + componentInfo.packageName
@@ -9501,14 +9507,20 @@ class PackageManagerService extends IPackageManager.Stub {
                     Debug.waitForDebugger();
                     Log.i(TAG, "We will crash!");
                 }
+                return false;
             }
-            return ((flags&PackageManager.GET_DISABLED_COMPONENTS) != 0)
-                   || ((componentInfo.enabled
-                        && ((packageSettings.enabled == COMPONENT_ENABLED_STATE_ENABLED)
-                            || (componentInfo.applicationInfo.enabled
-                                && packageSettings.enabled != COMPONENT_ENABLED_STATE_DISABLED))
-                        && !packageSettings.disabledComponents.contains(componentInfo.name))
-                       || packageSettings.enabledComponents.contains(componentInfo.name));
+            if (packageSettings.enabled == COMPONENT_ENABLED_STATE_DISABLED
+                    || (packageSettings.pkg != null && !packageSettings.pkg.applicationInfo.enabled
+                            && packageSettings.enabled == COMPONENT_ENABLED_STATE_DEFAULT)) {
+                return false;
+            }
+            if (packageSettings.enabledComponents.contains(componentInfo.name)) {
+                return true;
+            }
+            if (packageSettings.disabledComponents.contains(componentInfo.name)) {
+                return false;
+            }
+            return componentInfo.enabled;
         }
     }
 

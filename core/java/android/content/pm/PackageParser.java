@@ -2792,6 +2792,9 @@ public class PackageParser {
         // For use by package manager to keep track of where it has done dexopt.
         public boolean mDidDexOpt;
         
+        // User set enabled state.
+        public int mSetEnabled = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
+
         // Additional data supplied by callers.
         public Object mExtras;
         
@@ -3018,6 +3021,12 @@ public class PackageParser {
     }
 
     private static boolean copyNeeded(int flags, Package p, Bundle metaData) {
+        if (p.mSetEnabled != PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
+            boolean enabled = p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+            if (p.applicationInfo.enabled != enabled) {
+                return true;
+            }
+        }
         if ((flags & PackageManager.GET_META_DATA) != 0
                 && (metaData != null || p.mAppMetaData != null)) {
             return true;
@@ -3051,6 +3060,7 @@ public class PackageParser {
         if (!sCompatibilityModeEnabled) {
             ai.disableCompatibilityMode();
         }
+        ai.enabled = p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
         return ai;
     }
 
