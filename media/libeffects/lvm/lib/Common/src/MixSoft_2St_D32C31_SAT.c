@@ -18,9 +18,9 @@
 /************************************************************************/
 /*                                                                      */
 /*     Project::                                                        */
-/*     $Author: beq07716 $*/
-/*     $Revision: 1000 $*/
-/*     $Date: 2010-06-28 13:08:20 +0200 (Mon, 28 Jun 2010) $*/
+/*     $Author: nxp007753 $*/
+/*     $Revision: 1316 $*/
+/*     $Date: 2010-07-23 11:53:24 +0200 (Fri, 23 Jul 2010) $*/
 /*                                                                      */
 /************************************************************************/
 
@@ -51,7 +51,8 @@ void MixSoft_2St_D32C31_SAT(    Mix_2St_Cll_t       *pInstance,
     if ((pInstance->Current1 != pInstance->Target1) || (pInstance->Current2 != pInstance->Target2))
     {
         MixSoft_1St_D32C31_WRA( (Mix_1St_Cll_t*) pInstance, src1, dst, n);
-        MixInSoft_D32C31_SAT( (Mix_1St_Cll_t*) &pInstance->Alpha2, src2, dst, n);
+        MixInSoft_D32C31_SAT( (void *) &pInstance->Alpha2,     /* Cast to void: no dereferencing in function*/
+            src2, dst, n);
     }
 
     /******************************************************************************
@@ -61,7 +62,8 @@ void MixSoft_2St_D32C31_SAT(    Mix_2St_Cll_t       *pInstance,
     else
     {
         if (pInstance->Current1 == 0)
-            MixSoft_1St_D32C31_WRA( (Mix_1St_Cll_t*) &pInstance->Alpha2, src2, dst, n);
+            MixSoft_1St_D32C31_WRA( (void *) &pInstance->Alpha2, /* Cast to void: no dereferencing in function*/
+            src2, dst, n);
         else if (pInstance->Current2 == 0)
             MixSoft_1St_D32C31_WRA( (Mix_1St_Cll_t*) pInstance, src1, dst, n);
         else
