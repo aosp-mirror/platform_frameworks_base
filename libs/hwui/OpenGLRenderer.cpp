@@ -569,7 +569,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     // TODO: Implement scale properly
     const Rect& clip = mSnapshot->getLocalClip();
 
-    mFontRenderer.setFont(SkTypeface::UniqueID(paint->getTypeface()), paint->getTextSize());
+    mFontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()), paint->getTextSize());
     mFontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
