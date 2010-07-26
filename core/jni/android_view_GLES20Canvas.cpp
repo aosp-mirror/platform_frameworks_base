@@ -256,9 +256,11 @@ static void android_view_GLES20Canvas_setupLinearShader(JNIEnv* env, jobject can
 static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
         jfloat x, jfloat y, int flags, SkPaint* paint) {
     const jchar *workText;
+    jchar* buffer = NULL;
     int32_t workBytes;
-    if (TextLayout::prepareText(paint, text, count, flags, &workText, &workBytes)) {
+    if (TextLayout::prepareText(paint, text, count, flags, &workText, &workBytes, &buffer)) {
         renderer->drawText((const char*) workText, workBytes, count, x, y, paint);
+        free(buffer);
     }
 }
 
