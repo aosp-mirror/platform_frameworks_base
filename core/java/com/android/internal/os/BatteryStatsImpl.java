@@ -63,7 +63,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS' 
 
     // Current on-disk Parcel version
-    private static final int VERSION = 48;
+    private static final int VERSION = 49;
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 1000;
@@ -184,6 +184,8 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mDischargeStartLevel;
     int mDischargeUnplugLevel;
     int mDischargeCurrentLevel;
+    int mLowDischargeAmountSinceCharge;
+    int mHighDischargeAmountSinceCharge;
 
     long mLastWriteTime = 0; // Milliseconds
 
@@ -260,7 +262,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mPluggedCount = in.readInt();
             mCount.set(mPluggedCount);
             mLoadedCount = in.readInt();
-            mLastCount = in.readInt();
+            mLastCount = 0;
             mUnpluggedCount = in.readInt();
             unpluggables.add(this);
         }
@@ -273,7 +275,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         public void writeToParcel(Parcel out) {
             out.writeInt(mCount.get());
             out.writeInt(mLoadedCount);
-            out.writeInt(mLastCount);
             out.writeInt(mUnpluggedCount);
         }
 
@@ -348,13 +349,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         void writeSummaryFromParcelLocked(Parcel out) {
             int count = mCount.get();
             out.writeInt(count);
-            out.writeInt(count - mLoadedCount);
         }
 
         void readSummaryFromParcelLocked(Parcel in) {
             mLoadedCount = in.readInt();
             mCount.set(mLoadedCount);
-            mLastCount = in.readInt();
+            mLastCount = 0;
             mUnpluggedCount = mPluggedCount = mLoadedCount;
         }
     }
@@ -428,11 +428,11 @@ public final class BatteryStatsImpl extends BatteryStats {
             
             mCount = in.readInt();
             mLoadedCount = in.readInt();
-            mLastCount = in.readInt();
+            mLastCount = 0;
             mUnpluggedCount = in.readInt();
             mTotalTime = in.readLong();
             mLoadedTime = in.readLong();
-            mLastTime = in.readLong();
+            mLastTime = 0;
             mUnpluggedTime = in.readLong();
             unpluggables.add(this);
         }
@@ -467,11 +467,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         public void writeToParcel(Parcel out, long batteryRealtime) {
             out.writeInt(mCount);
             out.writeInt(mLoadedCount);
-            out.writeInt(mLastCount);
             out.writeInt(mUnpluggedCount);
             out.writeLong(computeRunTimeLocked(batteryRealtime));
             out.writeLong(mLoadedTime);
-            out.writeLong(mLastTime);
             out.writeLong(mUnpluggedTime);
         }
 
@@ -569,18 +567,16 @@ public final class BatteryStatsImpl extends BatteryStats {
             long runTime = computeRunTimeLocked(batteryRealtime);
             // Divide by 1000 for backwards compatibility
             out.writeLong((runTime + 500) / 1000);
-            out.writeLong(((runTime - mLoadedTime) + 500) / 1000);
             out.writeInt(mCount);
-            out.writeInt(mCount - mLoadedCount);
         }
 
         void readSummaryFromParcelLocked(Parcel in) {
             // Multiply by 1000 for backwards compatibility
             mTotalTime = mLoadedTime = in.readLong() * 1000;
-            mLastTime = in.readLong() * 1000;
+            mLastTime = 0;
             mUnpluggedTime = mTotalTime;
             mCount = mLoadedCount = in.readInt();
-            mLastCount = in.readInt();
+            mLastCount = 0;
             mUnpluggedCount = mCount;
         }
     }
@@ -1243,7 +1239,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "Screen on to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(SystemClock.elapsedRealtime());
-            mGpsNesting++;
             mScreenOn = true;
             mScreenOnTimer.startRunningLocked(this);
             if (mScreenBrightnessBin >= 0) {
@@ -1297,7 +1292,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     
     public void notePhoneOnLocked() {
         if (!mPhoneOn) {
-            mHistoryCur.states |= HistoryItem.STATE_PHONE_ON_FLAG;
+            mHistoryCur.states |= HistoryItem.STATE_PHONE_IN_CALL_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Phone on to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(SystemClock.elapsedRealtime());
@@ -1308,7 +1303,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     
     public void notePhoneOffLocked() {
         if (mPhoneOn) {
-            mHistoryCur.states &= ~HistoryItem.STATE_PHONE_ON_FLAG;
+            mHistoryCur.states &= ~HistoryItem.STATE_PHONE_IN_CALL_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Phone off to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(SystemClock.elapsedRealtime());
@@ -1317,38 +1312,43 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    void stopAllSignalStrengthTimersLocked(int except) {
+        for (int i = 0; i < NUM_SIGNAL_STRENGTH_BINS; i++) {
+            if (i == except) {
+                continue;
+            }
+            while (mPhoneSignalStrengthsTimer[i].isRunningLocked()) {
+                mPhoneSignalStrengthsTimer[i].stopRunningLocked(this);
+            }
+        }
+    }
+
     /**
      * Telephony stack updates the phone state.
      * @param state phone state from ServiceState.getState()
      */
     public void notePhoneStateLocked(int state) {
+        boolean scanning = false;
+
         int bin = mPhoneSignalStrengthBin;
-        boolean isAirplaneMode = state == ServiceState.STATE_POWER_OFF;
-        // Stop all timers
-        if (isAirplaneMode || state == ServiceState.STATE_OUT_OF_SERVICE) {
-            for (int i = 0; i < NUM_SIGNAL_STRENGTH_BINS; i++) {
-                while (mPhoneSignalStrengthsTimer[i].isRunningLocked()) {
-                    mPhoneSignalStrengthsTimer[i].stopRunningLocked(this);
-                }
-            }
-        }
-        // Stop Signal Scanning timer, in case we're going into service
-        if (mPhoneSignalScanningTimer.isRunningLocked()) {
-            mHistoryCur.states &= ~HistoryItem.STATE_PHONE_SCANNING_FLAG;
-            if (DEBUG_HISTORY) Slog.v(TAG, "Phone stopped scanning to: "
-                    + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(SystemClock.elapsedRealtime());
-            mPhoneSignalScanningTimer.stopRunningLocked(this);
-        }
+
+        // If the phone is powered off, stop all timers.
+        if (state == ServiceState.STATE_POWER_OFF) {
+            stopAllSignalStrengthTimersLocked(-1);
 
         // If we're back in service or continuing in service, restart the old timer.
-        if (state == ServiceState.STATE_IN_SERVICE) {
+        } if (state == ServiceState.STATE_IN_SERVICE) {
             if (bin == -1) bin = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
             if (!mPhoneSignalStrengthsTimer[bin].isRunningLocked()) {
                 mPhoneSignalStrengthsTimer[bin].startRunningLocked(this);
             }
+
+        // If we're out of service, we are in the lowest signal strength
+        // bin and have the scanning bit set.
         } else if (state == ServiceState.STATE_OUT_OF_SERVICE) {
+            scanning = true;
             mPhoneSignalStrengthBin = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+            stopAllSignalStrengthTimersLocked(mPhoneSignalStrengthBin);
             if (!mPhoneSignalStrengthsTimer[mPhoneSignalStrengthBin].isRunningLocked()) {
                 mPhoneSignalStrengthsTimer[mPhoneSignalStrengthBin].startRunningLocked(this);
             }
@@ -1361,6 +1361,17 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
         
+        if (!scanning) {
+            // If we are no longer scanning, then stop the scanning timer.
+            if (mPhoneSignalScanningTimer.isRunningLocked()) {
+                mHistoryCur.states &= ~HistoryItem.STATE_PHONE_SCANNING_FLAG;
+                if (DEBUG_HISTORY) Slog.v(TAG, "Phone stopped scanning to: "
+                        + Integer.toHexString(mHistoryCur.states));
+                addHistoryRecordLocked(SystemClock.elapsedRealtime());
+                mPhoneSignalScanningTimer.stopRunningLocked(this);
+            }
+        }
+
         if (mPhoneServiceState != state) {
             mHistoryCur.states = (mHistoryCur.states&~HistoryItem.STATE_PHONE_STATE_MASK)
                     | (state << HistoryItem.STATE_PHONE_STATE_SHIFT);
@@ -2622,10 +2633,6 @@ public final class BatteryStatsImpl extends BatteryStats {
                 out.writeLong(mLoadedSystemTime);
                 out.writeLong(mLoadedForegroundTime);
                 out.writeInt(mLoadedStarts);
-                out.writeLong(mLastUserTime);
-                out.writeLong(mLastSystemTime);
-                out.writeLong(mLastForegroundTime);
-                out.writeInt(mLastStarts);
                 out.writeLong(mUnpluggedUserTime);
                 out.writeLong(mUnpluggedSystemTime);
                 out.writeLong(mUnpluggedForegroundTime);
@@ -2652,10 +2659,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mLoadedSystemTime = in.readLong();
                 mLoadedForegroundTime = in.readLong();
                 mLoadedStarts = in.readInt();
-                mLastUserTime = in.readLong();
-                mLastSystemTime = in.readLong();
-                mLastForegroundTime = in.readLong();
-                mLastStarts = in.readInt();
+                mLastUserTime = 0;
+                mLastSystemTime = 0;
+                mLastForegroundTime = 0;
+                mLastStarts = 0;
                 mUnpluggedUserTime = in.readLong();
                 mUnpluggedSystemTime = in.readLong();
                 mUnpluggedForegroundTime = in.readLong();
@@ -2828,7 +2835,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             void readFromParcelLocked(Parcel in) {
                 mWakeups = in.readInt();
                 mLoadedWakeups = in.readInt();
-                mLastWakeups = in.readInt();
+                mLastWakeups = 0;
                 mUnpluggedWakeups = in.readInt();
 
                 int numServs = in.readInt();
@@ -2845,7 +2852,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             void writeToParcelLocked(Parcel out) {
                 out.writeInt(mWakeups);
                 out.writeInt(mLoadedWakeups);
-                out.writeInt(mLastWakeups);
                 out.writeInt(mUnpluggedWakeups);
 
                 out.writeInt(mServiceStats.size());
@@ -3002,9 +3008,9 @@ public final class BatteryStatsImpl extends BatteryStats {
                     mLoadedStartTime = in.readLong();
                     mLoadedStarts = in.readInt();
                     mLoadedLaunches = in.readInt();
-                    mLastStartTime = in.readLong();
-                    mLastStarts = in.readInt();
-                    mLastLaunches = in.readInt();
+                    mLastStartTime = 0;
+                    mLastStarts = 0;
+                    mLastLaunches = 0;
                     mUnpluggedStartTime = in.readLong();
                     mUnpluggedStarts = in.readInt();
                     mUnpluggedLaunches = in.readInt();
@@ -3022,9 +3028,6 @@ public final class BatteryStatsImpl extends BatteryStats {
                     out.writeLong(mLoadedStartTime);
                     out.writeInt(mLoadedStarts);
                     out.writeInt(mLoadedLaunches);
-                    out.writeLong(mLastStartTime);
-                    out.writeInt(mLastStarts);
-                    out.writeInt(mLastLaunches);
                     out.writeLong(mUnpluggedStartTime);
                     out.writeInt(mUnpluggedStarts);
                     out.writeInt(mUnpluggedLaunches);
@@ -3336,6 +3339,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mDischargeStartLevel = 0;
         mDischargeUnplugLevel = 0;
         mDischargeCurrentLevel = 0;
+        mLowDischargeAmountSinceCharge = 0;
+        mHighDischargeAmountSinceCharge = 0;
     }
 
     public BatteryStatsImpl(Parcel p) {
@@ -3434,6 +3439,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                     doWrite = true;
                     resetAllStatsLocked();
                     mDischargeStartLevel = level;
+                    mLowDischargeAmountSinceCharge = 0;
+                    mHighDischargeAmountSinceCharge = 0;
                 }
                 updateKernelWakelocksLocked();
                 mHistoryCur.batteryLevel = (byte)level;
@@ -3457,6 +3464,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mTrackBatteryPastUptime += uptime - mTrackBatteryUptimeStart;
                 mTrackBatteryPastRealtime += realtime - mTrackBatteryRealtimeStart;
                 mDischargeCurrentLevel = level;
+                if (level < mDischargeUnplugLevel) {
+                    mLowDischargeAmountSinceCharge = mDischargeUnplugLevel-level-1;
+                    mHighDischargeAmountSinceCharge = mDischargeUnplugLevel-level;
+                }
                 doPlugLocked(getBatteryUptimeLocked(uptime), getBatteryRealtimeLocked(realtime));
             }
             if (doWrite || (mLastWriteTime + (60 * 1000)) < mSecRealtime) {
@@ -3723,6 +3734,20 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override
+    public int getLowDischargeAmountSinceCharge() {
+        synchronized(this) {
+            return mLowDischargeAmountSinceCharge;
+        }
+    }
+
+    @Override
+    public int getHighDischargeAmountSinceCharge() {
+        synchronized(this) {
+            return mHighDischargeAmountSinceCharge;
+        }
+    }
+
+    @Override
     public int getCpuSpeedSteps() {
         return sNumSpeedSteps;
     }
@@ -3926,15 +3951,13 @@ public final class BatteryStatsImpl extends BatteryStats {
         
         mStartCount = in.readInt();
         mBatteryUptime = in.readLong();
-        mBatteryLastUptime = in.readLong();
         mBatteryRealtime = in.readLong();
-        mBatteryLastRealtime = in.readLong();
         mUptime = in.readLong();
-        mLastUptime = in.readLong();
         mRealtime = in.readLong();
-        mLastRealtime = in.readLong();
         mDischargeUnplugLevel = in.readInt();
         mDischargeCurrentLevel = in.readInt();
+        mLowDischargeAmountSinceCharge = in.readInt();
+        mHighDischargeAmountSinceCharge = in.readInt();
         
         mStartCount++;
         
@@ -4058,11 +4081,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                 String procName = in.readString();
                 Uid.Proc p = u.getProcessStatsLocked(procName);
                 p.mUserTime = p.mLoadedUserTime = in.readLong();
-                p.mLastUserTime = in.readLong();
                 p.mSystemTime = p.mLoadedSystemTime = in.readLong();
-                p.mLastSystemTime = in.readLong();
                 p.mStarts = p.mLoadedStarts = in.readInt();
-                p.mLastStarts = in.readInt();
             }
 
             NP = in.readInt();
@@ -4074,17 +4094,13 @@ public final class BatteryStatsImpl extends BatteryStats {
                 String pkgName = in.readString();
                 Uid.Pkg p = u.getPackageStatsLocked(pkgName);
                 p.mWakeups = p.mLoadedWakeups = in.readInt();
-                p.mLastWakeups = in.readInt();
                 final int NS = in.readInt();
                 for (int is = 0; is < NS; is++) {
                     String servName = in.readString();
                     Uid.Pkg.Serv s = u.getServiceStatsLocked(pkgName, servName);
                     s.mStartTime = s.mLoadedStartTime = in.readLong();
-                    s.mLastStartTime = in.readLong();
                     s.mStarts = s.mLoadedStarts = in.readInt();
-                    s.mLastStarts = in.readInt();
                     s.mLaunches = s.mLoadedLaunches = in.readInt();
-                    s.mLastLaunches = in.readInt();
                 }
             }
 
@@ -4111,16 +4127,13 @@ public final class BatteryStatsImpl extends BatteryStats {
         
         out.writeInt(mStartCount);
         out.writeLong(computeBatteryUptime(NOW_SYS, STATS_SINCE_CHARGED));
-        out.writeLong(computeBatteryUptime(NOW_SYS, STATS_CURRENT));
         out.writeLong(computeBatteryRealtime(NOWREAL_SYS, STATS_SINCE_CHARGED));
-        out.writeLong(computeBatteryRealtime(NOWREAL_SYS, STATS_CURRENT));
         out.writeLong(computeUptime(NOW_SYS, STATS_SINCE_CHARGED));
-        out.writeLong(computeUptime(NOW_SYS, STATS_CURRENT));
         out.writeLong(computeRealtime(NOWREAL_SYS, STATS_SINCE_CHARGED));
-        out.writeLong(computeRealtime(NOWREAL_SYS, STATS_CURRENT));
         out.writeInt(mDischargeUnplugLevel);
         out.writeInt(mDischargeCurrentLevel);
-        
+        out.writeInt(mLowDischargeAmountSinceCharge);
+        out.writeInt(mHighDischargeAmountSinceCharge);
         
         mScreenOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
@@ -4256,11 +4269,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                     out.writeString(ent.getKey());
                     Uid.Proc ps = ent.getValue();
                     out.writeLong(ps.mUserTime);
-                    out.writeLong(ps.mUserTime - ps.mLoadedUserTime);
                     out.writeLong(ps.mSystemTime);
-                    out.writeLong(ps.mSystemTime - ps.mLoadedSystemTime);
                     out.writeInt(ps.mStarts);
-                    out.writeInt(ps.mStarts - ps.mLoadedStarts);
                 }
             }
 
@@ -4272,7 +4282,6 @@ public final class BatteryStatsImpl extends BatteryStats {
                     out.writeString(ent.getKey());
                     Uid.Pkg ps = ent.getValue();
                     out.writeInt(ps.mWakeups);
-                    out.writeInt(ps.mWakeups - ps.mLoadedWakeups);
                     final int NS = ps.mServiceStats.size();
                     out.writeInt(NS);
                     if (NS > 0) {
@@ -4282,11 +4291,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                             BatteryStatsImpl.Uid.Pkg.Serv ss = sent.getValue();
                             long time = ss.getStartTimeToNowLocked(NOW);
                             out.writeLong(time);
-                            out.writeLong(time - ss.mLoadedStartTime);
                             out.writeInt(ss.mStarts);
-                            out.writeInt(ss.mStarts - ss.mLoadedStarts);
                             out.writeInt(ss.mLaunches);
-                            out.writeInt(ss.mLaunches - ss.mLoadedLaunches);
                         }
                     }
                 }
@@ -4311,9 +4317,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         
         mStartCount = in.readInt();
         mBatteryUptime = in.readLong();
-        mBatteryLastUptime = in.readLong();
+        mBatteryLastUptime = 0;
         mBatteryRealtime = in.readLong();
-        mBatteryLastRealtime = in.readLong();
+        mBatteryLastRealtime = 0;
         mScreenOn = false;
         mScreenOnTimer = new StopwatchTimer(-1, null, mUnpluggables, in);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
@@ -4337,10 +4343,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         mBluetoothOnTimer = new StopwatchTimer(-2, null, mUnpluggables, in);
         mUptime = in.readLong();
         mUptimeStart = in.readLong();
-        mLastUptime = in.readLong();
+        mLastUptime = 0;
         mRealtime = in.readLong();
         mRealtimeStart = in.readLong();
-        mLastRealtime = in.readLong();
+        mLastRealtime = 0;
         mOnBattery = in.readInt() != 0;
         mOnBatteryInternal = false; // we are no longer really running.
         mTrackBatteryPastUptime = in.readLong();
@@ -4351,6 +4357,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mUnpluggedBatteryRealtime = in.readLong();
         mDischargeUnplugLevel = in.readInt();
         mDischargeCurrentLevel = in.readInt();
+        mLowDischargeAmountSinceCharge = in.readInt();
+        mHighDischargeAmountSinceCharge = in.readInt();
         mLastWriteTime = in.readLong();
 
         mMobileDataRx[STATS_LAST] = in.readLong();
@@ -4396,11 +4404,15 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void writeToParcel(Parcel out, int flags) {
-        writeToParcelLocked(out, flags);
+        writeToParcelLocked(out, true, flags);
+    }
+
+    public void writeToParcelWithoutUids(Parcel out, int flags) {
+        writeToParcelLocked(out, false, flags);
     }
     
     @SuppressWarnings("unused") 
-    void writeToParcelLocked(Parcel out, int flags) {
+    void writeToParcelLocked(Parcel out, boolean inclUids, int flags) {
         final long uSecUptime = SystemClock.uptimeMillis() * 1000;
         final long uSecRealtime = SystemClock.elapsedRealtime() * 1000;
         final long batteryUptime = getBatteryUptimeLocked(uSecUptime);
@@ -4412,9 +4424,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         
         out.writeInt(mStartCount);
         out.writeLong(mBatteryUptime);
-        out.writeLong(mBatteryLastUptime);
         out.writeLong(mBatteryRealtime);
-        out.writeLong(mBatteryLastRealtime);
         mScreenOnTimer.writeToParcel(out, batteryRealtime);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i].writeToParcel(out, batteryRealtime);
@@ -4433,10 +4443,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mBluetoothOnTimer.writeToParcel(out, batteryRealtime);
         out.writeLong(mUptime);
         out.writeLong(mUptimeStart);
-        out.writeLong(mLastUptime);
         out.writeLong(mRealtime);
         out.writeLong(mRealtimeStart);
-        out.writeLong(mLastRealtime);
         out.writeInt(mOnBattery ? 1 : 0);
         out.writeLong(batteryUptime);
         out.writeLong(mTrackBatteryUptimeStart);
@@ -4446,6 +4454,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeLong(mUnpluggedBatteryRealtime);
         out.writeInt(mDischargeUnplugLevel);
         out.writeInt(mDischargeCurrentLevel);
+        out.writeInt(mLowDischargeAmountSinceCharge);
+        out.writeInt(mHighDischargeAmountSinceCharge);
         out.writeLong(mLastWriteTime);
 
         out.writeLong(getMobileTcpBytesReceived(STATS_SINCE_UNPLUGGED));
@@ -4458,27 +4468,35 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         out.writeInt(getBluetoothPingCount());
 
-        out.writeInt(mKernelWakelockStats.size());
-        for (Map.Entry<String, SamplingTimer> ent : mKernelWakelockStats.entrySet()) {
-            SamplingTimer kwlt = ent.getValue();
-            if (kwlt != null) {
-                out.writeInt(1);
-                out.writeString(ent.getKey());
-                Timer.writeTimerToParcel(out, kwlt, batteryRealtime);
-            } else {
-                out.writeInt(0);
+        if (inclUids) {
+            out.writeInt(mKernelWakelockStats.size());
+            for (Map.Entry<String, SamplingTimer> ent : mKernelWakelockStats.entrySet()) {
+                SamplingTimer kwlt = ent.getValue();
+                if (kwlt != null) {
+                    out.writeInt(1);
+                    out.writeString(ent.getKey());
+                    Timer.writeTimerToParcel(out, kwlt, batteryRealtime);
+                } else {
+                    out.writeInt(0);
+                }
             }
+        } else {
+            out.writeInt(0);
         }
 
         out.writeInt(sNumSpeedSteps);
 
-        int size = mUidStats.size();
-        out.writeInt(size);
-        for (int i = 0; i < size; i++) {
-            out.writeInt(mUidStats.keyAt(i));
-            Uid uid = mUidStats.valueAt(i);
+        if (inclUids) {
+            int size = mUidStats.size();
+            out.writeInt(size);
+            for (int i = 0; i < size; i++) {
+                out.writeInt(mUidStats.keyAt(i));
+                Uid uid = mUidStats.valueAt(i);
 
-            uid.writeToParcelLocked(out, batteryRealtime);
+                uid.writeToParcelLocked(out, batteryRealtime);
+            }
+        } else {
+            out.writeInt(0);
         }
     }
 
