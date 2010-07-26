@@ -624,6 +624,13 @@ public final class Downloads {
                 "android.permission.SEND_DOWNLOAD_COMPLETED_INTENTS";
 
         /**
+         * The permission to downloads files to the cache partition that won't be automatically
+         * purged when space is needed.
+         */
+        public static final String PERMISSION_CACHE_NON_PURGEABLE =
+                "android.permission.DOWNLOAD_CACHE_NON_PURGEABLE";
+
+        /**
          * The content:// URI for the data table in the provider
          */
         public static final Uri CONTENT_URI =
