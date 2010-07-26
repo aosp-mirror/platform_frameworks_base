@@ -18,8 +18,8 @@
 /****************************************************************************************
 
      $Author: nxp007753 $
-     $Revision: 1223 $
-     $Date: 2010-07-15 14:27:01 +0200 (Thu, 15 Jul 2010) $
+     $Revision: 1315 $
+     $Date: 2010-07-23 11:52:08 +0200 (Fri, 23 Jul 2010) $
 
 *****************************************************************************************/
 
@@ -124,10 +124,11 @@ void    LVDBE_SetFilters(LVDBE_Instance_t     *pInstance,
     /*
      * Setup the high pass filter
      */
-    LoadConst_16(0,                                                         /* Clear the history, value 0 */
-                 (LVM_INT16 *)&pInstance->pData->HPFTaps,                   /* Destination */
-                 sizeof(pInstance->pData->HPFTaps)/sizeof(LVM_INT16));      /* Number of words */
-    BQ_2I_D32F32Cll_TRC_WRA_01_Init(&pInstance->pCoef->HPFInstance,         /* Initialise the filter */
+    LoadConst_16(0,                                                 /* Clear the history, value 0 */
+                 (void *)&pInstance->pData->HPFTaps,                /* Destination Cast to void: \
+                                                                     no dereferencing in function*/
+                 sizeof(pInstance->pData->HPFTaps)/sizeof(LVM_INT16));   /* Number of words */
+    BQ_2I_D32F32Cll_TRC_WRA_01_Init(&pInstance->pCoef->HPFInstance,      /* Initialise the filter */
                                     &pInstance->pData->HPFTaps,
                                     (BQ_C32_Coefs_t *)&LVDBE_HPF_Table[Offset]);
 
@@ -135,10 +136,11 @@ void    LVDBE_SetFilters(LVDBE_Instance_t     *pInstance,
     /*
      * Setup the band pass filter
      */
-    LoadConst_16(0,                                                         /* Clear the history, value 0 */
-                 (LVM_INT16 *)&pInstance->pData->BPFTaps,                   /* Destination */
-                 sizeof(pInstance->pData->BPFTaps)/sizeof(LVM_INT16));      /* Number of words */
-    BP_1I_D32F32Cll_TRC_WRA_02_Init(&pInstance->pCoef->BPFInstance,         /* Initialise the filter */
+    LoadConst_16(0,                                                 /* Clear the history, value 0 */
+                 (void *)&pInstance->pData->BPFTaps,                /* Destination Cast to void:\
+                                                                     no dereferencing in function*/
+                 sizeof(pInstance->pData->BPFTaps)/sizeof(LVM_INT16));   /* Number of words */
+    BP_1I_D32F32Cll_TRC_WRA_02_Init(&pInstance->pCoef->BPFInstance,      /* Initialise the filter */
                                     &pInstance->pData->BPFTaps,
                                     (BP_C32_Coefs_t *)&LVDBE_BPF_Table[Offset]);
 

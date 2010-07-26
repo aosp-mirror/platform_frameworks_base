@@ -17,9 +17,9 @@
 
 /************************************************************************************
 
-     $Author: beq07716 $
-     $Revision: 1001 $
-     $Date: 2010-06-28 13:23:02 +0200 (Mon, 28 Jun 2010) $
+     $Author: nxp007753 $
+     $Revision: 1315 $
+     $Date: 2010-07-23 11:52:08 +0200 (Fri, 23 Jul 2010) $
 
 *************************************************************************************/
 
@@ -94,8 +94,9 @@ LVCS_ReturnStatus_en LVCS_EqualiserInit(LVCS_Handle_t       hInstance,
         Coeffs.B1 = (LVM_INT16)-pEqualiserCoefTable[Offset].B1;
         Coeffs.B2 = (LVM_INT16)-pEqualiserCoefTable[Offset].B2;
 
-        LoadConst_16((LVM_INT16)0,                                                           /* Value */
-                     (LVM_INT16 *)&pData->EqualiserBiquadTaps,                               /* Destination */
+        LoadConst_16((LVM_INT16)0,                                                       /* Value */
+                     (void *)&pData->EqualiserBiquadTaps,   /* Destination Cast to void:\
+                                                               no dereferencing in function*/
                      (LVM_UINT16)(sizeof(pData->EqualiserBiquadTaps)/sizeof(LVM_INT16)));    /* Number of words */
 
         BQ_2I_D16F32Css_TRC_WRA_01_Init(&pCoefficients->EqualiserBiquadInstance,

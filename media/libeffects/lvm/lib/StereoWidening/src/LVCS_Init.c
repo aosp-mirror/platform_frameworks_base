@@ -17,9 +17,9 @@
 
 /************************************************************************************
 
-     $Author: beq07716 $
-     $Revision: 1001 $
-     $Date: 2010-06-28 13:23:02 +0200 (Mon, 28 Jun 2010) $
+     $Author: beq06068 $
+     $Revision: 1307 $
+     $Date: 2010-07-22 17:41:25 +0200 (Thu, 22 Jul 2010) $
 
 *************************************************************************************/
 
@@ -159,7 +159,6 @@ LVCS_ReturnStatus_en LVCS_Init(LVCS_Handle_t         *phInstance,
                                LVCS_Capabilities_t   *pCapabilities)
 {
 
-    LVM_INT16                       Offset;
     LVCS_Instance_t                 *pInstance;
     LVCS_VolCorrect_t               *pLVCS_VolCorrectTable;
 
@@ -197,30 +196,18 @@ LVCS_ReturnStatus_en LVCS_Init(LVCS_Handle_t         *phInstance,
     pInstance->Params.EffectLevel    = 0;
     pInstance->Params.ReverbLevel    = (LVM_UINT16)0x8000;
     pLVCS_VolCorrectTable            = (LVCS_VolCorrect_t*)&LVCS_VolCorrectTable[0];
-    Offset                           = (LVM_INT16)(pInstance->Params.SpeakerType + (pInstance->Params.SourceFormat*(1+LVCS_EX_HEADPHONES)));
-    pInstance->VolCorrect            = pLVCS_VolCorrectTable[Offset];
+    pInstance->VolCorrect            = pLVCS_VolCorrectTable[0];
     pInstance->TransitionGain        = 0;
+    /* These current and target values are intialized again in LVCS_Control.c */
     LVC_Mixer_Init(&pInstance->BypassMix.Mixer_Instance.MixerStream[0],0,0);
+    /* These current and target values are intialized again in LVCS_Control.c */
     LVC_Mixer_Init(&pInstance->BypassMix.Mixer_Instance.MixerStream[1],0,0);
 
     /*
      * Initialise the bypass variables
      */
-    pInstance->MSBypassMixer.MixerStream[0].CallbackParam      = 0;
-    pInstance->MSBypassMixer.MixerStream[0].pCallbackHandle    = LVM_NULL;
-    pInstance->MSBypassMixer.MixerStream[0].pCallBack          = LVM_NULL;
-    pInstance->MSBypassMixer.MixerStream[0].CallbackSet        = 0;
-    LVC_Mixer_Init(&pInstance->MSBypassMixer.MixerStream[0],0,0);
-    LVC_Mixer_SetTimeConstant(&pInstance->MSBypassMixer.MixerStream[0],0,LVM_FS_44100,2);
-
-
-    pInstance->MSBypassMixer.MixerStream[1].CallbackParam      = 0;
-    pInstance->MSBypassMixer.MixerStream[1].pCallbackHandle    = LVM_NULL;
-    pInstance->MSBypassMixer.MixerStream[1].pCallBack          = LVM_NULL;
-    pInstance->MSBypassMixer.MixerStream[1].CallbackSet        = 0;
-    LVC_Mixer_Init(&pInstance->MSBypassMixer.MixerStream[1],0,0);
-    LVC_Mixer_SetTimeConstant(&pInstance->MSBypassMixer.MixerStream[1],0,LVM_FS_44100,2);
-
+    pInstance->MSTarget0=0;
+    pInstance->MSTarget1=0;
     pInstance->bInOperatingModeTransition          = LVM_FALSE;
     pInstance->bTimerDone                        = LVM_FALSE;
     pInstance->TimerParams.CallBackParam         = 0;

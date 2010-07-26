@@ -17,9 +17,9 @@
 
 /************************************************************************************
 
-     $Author: beq07716 $
-     $Revision: 1001 $
-     $Date: 2010-06-28 13:23:02 +0200 (Mon, 28 Jun 2010) $
+     $Author: beq06068 $
+     $Revision: 1307 $
+     $Date: 2010-07-22 17:41:25 +0200 (Thu, 22 Jul 2010) $
 
 *************************************************************************************/
 
@@ -128,7 +128,8 @@ typedef struct
     LVCS_BypassMix_t        BypassMix;          /* Bypass mixer configuration */
 
     /* Bypass variable */
-    LVMixer3_2St_st         MSBypassMixer;                      /* Bypass mixer used in transitions in MS mode */
+    LVM_INT16               MSTarget0;                          /* Mixer state control variable for smooth transtion */
+    LVM_INT16               MSTarget1;                          /* Mixer state control variable for smooth transtion */
     LVM_INT16               bInOperatingModeTransition;         /* Operating mode transition flag */
     LVM_INT16               bTimerDone;                         /* Timer completion flag */
     LVM_Timer_Params_t      TimerParams;                        /* Timer parameters */

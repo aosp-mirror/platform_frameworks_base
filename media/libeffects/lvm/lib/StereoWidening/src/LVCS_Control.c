@@ -17,9 +17,9 @@
 
 /************************************************************************************
 
-     $Author: nxp007753 $
-     $Revision: 1246 $
-     $Date: 2010-07-16 11:07:10 +0200 (Fri, 16 Jul 2010) $
+     $Author: beq06068 $
+     $Revision: 1307 $
+     $Date: 2010-07-22 17:41:25 +0200 (Thu, 22 Jul 2010) $
 
 *************************************************************************************/
 
@@ -94,9 +94,6 @@ LVCS_ReturnStatus_en LVCS_Control(LVCS_Handle_t      hInstance,
 
     if (pParams->SampleRate != pInstance->Params.SampleRate)
     {
-        LVC_Mixer_VarSlope_SetTimeConstant(&pInstance->MSBypassMixer.MixerStream[0],LVCS_BYPASS_MIXER_TC,pParams->SampleRate,2);
-
-        LVC_Mixer_VarSlope_SetTimeConstant(&pInstance->MSBypassMixer.MixerStream[1],LVCS_BYPASS_MIXER_TC,pParams->SampleRate,2);
         pInstance->TimerParams.SamplingRate = LVCS_SampleRateTable[pParams->SampleRate];
     }
 
@@ -129,6 +126,29 @@ LVCS_ReturnStatus_en LVCS_Control(LVCS_Handle_t      hInstance,
         Offset = (LVM_INT16)(pParams->SpeakerType + pParams->SourceFormat*(1+LVCS_EX_HEADPHONES));
 
         pInstance->VolCorrect = pLVCS_VolCorrectTable[Offset];
+
+        LVC_Mixer_Init(&pInstance->BypassMix.Mixer_Instance.MixerStream[0],0,0);
+
+
+        {
+            LVM_UINT32          Gain;
+            const Gain_t        *pOutputGainTable = (Gain_t*)&LVCS_OutputGainTable[0];
+            Gain = (LVM_UINT32)(pOutputGainTable[Offset].Loss * LVM_MAXINT_16);
+            Gain = (LVM_UINT32)pOutputGainTable[Offset].UnprocLoss * (Gain >> 15);
+            Gain=Gain>>15;
+            /*
+             * Apply the gain correction and shift, note the result is in Q3.13 format
+             */
+            Gain = (Gain * pInstance->VolCorrect.GainMin) >>12;
+
+            LVC_Mixer_Init(&pInstance->BypassMix.Mixer_Instance.MixerStream[1],0,Gain);
+            LVC_Mixer_VarSlope_SetTimeConstant(&pInstance->BypassMix.Mixer_Instance.MixerStream[0],
+                    LVCS_BYPASS_MIXER_TC,pParams->SampleRate,2);
+            LVC_Mixer_VarSlope_SetTimeConstant(&pInstance->BypassMix.Mixer_Instance.MixerStream[1],
+                    LVCS_BYPASS_MIXER_TC,pParams->SampleRate,2);
+
+        }
+
 
         err=LVCS_SEnhancerInit(hInstance,
                            pParams);
@@ -199,44 +219,15 @@ LVCS_ReturnStatus_en LVCS_Control(LVCS_Handle_t      hInstance,
 
         /* Change transition bypass mixer settings if needed depending on transition type */
         if(pParams->OperatingMode != LVCS_OFF){
-            LVM_INT32 Current1;
-            LVM_INT32 Current2;
-
-            Current1 = LVC_Mixer_GetCurrent(&pInstance->MSBypassMixer.MixerStream[0]);
-            Current2 = LVC_Mixer_GetCurrent(&pInstance->MSBypassMixer.MixerStream[1]);
-
-            if(pInstance->bInOperatingModeTransition != LVM_TRUE)
-            {
-                Current1 = 0x00000000;
-                Current2 = LVM_MAXINT_16;
-            }
-            pInstance->MSBypassMixer.MixerStream[0].CallbackSet = 1;
-            pInstance->MSBypassMixer.MixerStream[1].CallbackSet = 1;
-
-            LVC_Mixer_Init(&pInstance->MSBypassMixer.MixerStream[0],LVM_MAXINT_16,Current1);
-            LVC_Mixer_Init(&pInstance->MSBypassMixer.MixerStream[1],0,Current2);
+            pInstance->MSTarget0=LVM_MAXINT_16;
+            pInstance->MSTarget1=0;
         }
         else
         {
-            LVM_INT32 Current1;
-            LVM_INT32 Current2;
-
-            Current1 = LVC_Mixer_GetCurrent(&pInstance->MSBypassMixer.MixerStream[0]);
-            Current2 = LVC_Mixer_GetCurrent(&pInstance->MSBypassMixer.MixerStream[1]);
-
-            if(pInstance->bInOperatingModeTransition != LVM_TRUE)
-            {
-                Current1 = LVM_MAXINT_16;
-                Current2 = 0x00000000;
-            }
-            pInstance->MSBypassMixer.MixerStream[0].CallbackSet = 1;
-            pInstance->MSBypassMixer.MixerStream[1].CallbackSet = 1;
             pInstance->Params.OperatingMode = OperatingModeSave;
-            LVC_Mixer_Init(&pInstance->MSBypassMixer.MixerStream[0],0x00000000,Current1);
-            LVC_Mixer_Init(&pInstance->MSBypassMixer.MixerStream[1],LVM_MAXINT_16,Current2);
+            pInstance->MSTarget1=LVM_MAXINT_16;
+            pInstance->MSTarget0=0;
         }
-        LVC_Mixer_SetTimeConstant(&pInstance->MSBypassMixer.MixerStream[0],LVCS_BYPASS_MIXER_TC,pParams->SampleRate,2);
-        LVC_Mixer_SetTimeConstant(&pInstance->MSBypassMixer.MixerStream[1],LVCS_BYPASS_MIXER_TC,pParams->SampleRate,2);
 
 
         /* Set transition flag */
