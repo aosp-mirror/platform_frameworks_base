@@ -1065,6 +1065,9 @@ public class TextToSpeech {
             if (!mStarted) {
                 return result;
             }
+            if (loc == null) {
+                return result;
+            }
             try {
                 String language = loc.getISO3Language();
                 String country = loc.getISO3Country();
