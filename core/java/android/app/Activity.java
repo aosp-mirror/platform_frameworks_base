@@ -16,8 +16,8 @@
 
 package android.app;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.android.internal.app.ActionBarImpl;
+import com.android.internal.policy.PolicyManager;
 
 import android.content.ComponentCallbacks;
 import android.content.ComponentName;
@@ -52,7 +52,9 @@ import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.ActionMode;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.ContextThemeWrapper;
 import android.view.InflateException;
 import android.view.KeyEvent;
@@ -62,21 +64,18 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.ViewManager;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.view.View.OnCreateContextMenuListener;
-import android.view.ViewGroup.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
-import com.android.internal.app.ActionBarImpl;
-import com.android.internal.policy.PolicyManager;
-import com.android.internal.widget.ActionBarView;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * An activity is a single, focused thing that the user can do.  Almost all
@@ -4073,6 +4072,25 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
+    /**
+     * Start a context mode.
+     *
+     * @param callback Callback that will manage lifecycle events for this context mode
+     * @return The ContextMode that was started, or null if it was canceled
+     *
+     * @see ActionMode
+     */
+    public ActionMode startContextMode(ActionMode.Callback callback) {
+        return mWindow.getDecorView().startActionMode(callback);
+    }
+
+    public ActionMode onStartActionMode(ActionMode.Callback callback) {
+        if (mActionBar != null) {
+            return mActionBar.startContextMode(callback);
+        }
+        return null;
+    }
+
     // ------------------ Internal API ------------------
     
     final void setParent(Activity parent) {
@@ -4284,21 +4302,6 @@ public class Activity extends ContextThemeWrapper
             if (frag != null) {
                 frag.onActivityResult(requestCode, resultCode, data);
             }
-        }
-    }
-
-    @Override
-    public ContextualMode startContextualMode(ContextualMode.Callback callback) {
-        if (mActionBar == null) {
-            return null;
-        }
-        return mActionBar.startContextualMode(callback);
-    }
-
-    @Override
-    public void finishContextualMode() {
-        if (mActionBar != null) {
-            mActionBar.finishContextualMode();
         }
     }
 }

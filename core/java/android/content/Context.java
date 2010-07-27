@@ -16,7 +16,6 @@
 
 package android.content;
 
-import android.app.ContextualMode;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -1982,26 +1981,5 @@ public abstract class Context {
      */
     public boolean isRestricted() {
         return false;
-    }
-
-    /**
-     * Start a contextual mode controlled by <code>callback</code>.
-     * The {@link ContextualMode.Callback} will receive lifecycle events for the duration
-     * of the contextual mode. There can only be one contextual mode active at a time.
-     * Starting a new contextual mode while one is already active will finish the old
-     * contextual mode.
-     *
-     * @param callback Callback handler that will manage this context mode.
-     * @return The new contextual mode started by this call, or <code>null</code>
-     *         if the mode was not started.
-     */
-    public ContextualMode startContextualMode(ContextualMode.Callback callback) {
-        return null;
-    }
-
-    /**
-     * Finish the current contextual mode if present.
-     */
-    public void finishContextualMode() {
     }
 }

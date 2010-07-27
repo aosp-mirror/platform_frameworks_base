@@ -16,7 +16,6 @@
 
 package android.view;
 
-import android.graphics.RectF;
 import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
 
@@ -35,6 +34,7 @@ import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
@@ -57,6 +57,7 @@ import android.util.PoolableManager;
 import android.util.Pools;
 import android.util.SparseArray;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
@@ -2538,6 +2539,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public boolean showContextMenu() {
         return getParent().showContextMenuForChild(this);
+    }
+
+    /**
+     * Start an action mode.
+     *
+     * @param callback Callback that will control the lifecycle of the action mode
+     * @return The new action mode if it is started, null otherwise
+     *
+     * @see ActionMode
+     */
+    public ActionMode startActionMode(ActionMode.Callback callback) {
+        return getParent().startActionModeForChild(this, callback);
     }
 
     /**

@@ -299,6 +299,14 @@ public abstract class Window {
          * @see android.app.Activity#onSearchRequested() 
          */
         public boolean onSearchRequested();
+
+        /**
+         * Called when an action mode is being started.
+         *
+         * @param callback Callback to control the lifecycle of this action mode
+         * @return The ActionMode that was started, or null if it was canceled
+         */
+        public ActionMode onStartActionMode(ActionMode.Callback callback);
     }
 
     public Window(Context context) {
