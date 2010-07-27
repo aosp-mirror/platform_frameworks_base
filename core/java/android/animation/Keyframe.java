@@ -142,6 +142,15 @@ public class Keyframe {
     }
 
     /**
+     * Sets the value for this Keyframe.
+     *
+     * @param The value for this Keyframe.
+     */
+    public void setValue(Object value) {
+        mValue = value;
+    }
+
+    /**
      * Gets the time for this keyframe, as a fraction of the overall animation duration.
      *
      * @return The time associated with this keyframe, as a fraction of the overall animation
@@ -149,6 +158,16 @@ public class Keyframe {
      */
     public float getFraction() {
         return mFraction;
+    }
+
+    /**
+     * Sets the time for this keyframe, as a fraction of the overall animation duration.
+     *
+     * @param The time associated with this keyframe, as a fraction of the overall animation
+     * duration. This should be a value between 0 and 1.
+     */
+    public void setFraction(float fraction) {
+        mFraction = fraction;
     }
 
     /**

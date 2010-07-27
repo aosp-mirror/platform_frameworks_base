@@ -241,25 +241,6 @@ public class Animator extends Animatable {
     }
 
     /**
-     * This function is called immediately before processing the first animation
-     * frame of an animation. If there is a nonzero <code>startDelay</code>, the
-     * function is called after that delay ends.
-     * It takes care of the final initialization steps for the
-     * animation.
-     *
-     *  <p>Overrides of this method should call the superclass method to ensure
-     *  that internal mechanisms for the animation are set up correctly.</p>
-     */
-    void initAnimation() {
-        if (mEvaluator == null) {
-            mEvaluator = (mValueType == int.class) ? sIntEvaluator :
-                (mValueType == double.class) ? sDoubleEvaluator : sFloatEvaluator;
-        }
-        mPlayingBackwards = false;
-        mCurrentIteration = 0;
-    }
-
-    /**
      * A constructor that takes <code>float</code> values.
      *
      * @param duration The length of the animation, in milliseconds.
@@ -302,6 +283,61 @@ public class Animator extends Animatable {
     public Animator(long duration, Object valueFrom, Object valueTo) {
         this(duration, valueFrom, valueTo,
                 (valueFrom != null) ? valueFrom.getClass() : valueTo.getClass());
+    }
+
+    /**
+     * Internal constructor that takes a single <code>float</code> value.
+     * This constructor is called by PropertyAnimator.
+     *
+     * @param duration The length of the animation, in milliseconds.
+     * @param valueFrom The initial value of the property when the animation begins.
+     * @param valueTo The value to which the property will animate.
+     */
+    Animator(long duration, float valueTo) {
+        this(duration, null, valueTo, float.class);
+    }
+
+    /**
+     * Internal constructor that takes a single <code>int</code> value.
+     * This constructor is called by PropertyAnimator.
+     *
+     * @param duration The length of the animation, in milliseconds.
+     * @param valueFrom The initial value of the property when the animation begins.
+     * @param valueTo The value to which the property will animate.
+     */
+    Animator(long duration, int valueTo) {
+        this(duration, null, valueTo, int.class);
+    }
+
+    /**
+     * Internal constructor that takes a single <code>double</code> value.
+     * This constructor is called by PropertyAnimator.
+     *
+     * @param duration The length of the animation, in milliseconds.
+     * @param valueFrom The initial value of the property when the animation begins.
+     * @param valueTo The value to which the property will animate.
+     */
+    Animator(long duration, double valueTo) {
+        this(duration, null, valueTo, double.class);
+    }
+
+    /**
+     * This function is called immediately before processing the first animation
+     * frame of an animation. If there is a nonzero <code>startDelay</code>, the
+     * function is called after that delay ends.
+     * It takes care of the final initialization steps for the
+     * animation.
+     *
+     *  <p>Overrides of this method should call the superclass method to ensure
+     *  that internal mechanisms for the animation are set up correctly.</p>
+     */
+    void initAnimation() {
+        if (mEvaluator == null) {
+            mEvaluator = (mValueType == int.class) ? sIntEvaluator :
+                (mValueType == double.class) ? sDoubleEvaluator : sFloatEvaluator;
+        }
+        mPlayingBackwards = false;
+        mCurrentIteration = 0;
     }
 
     /**
@@ -454,6 +490,9 @@ public class Animator extends Animatable {
      * @return Object The starting value for the animation.
      */
     public Object getValueFrom() {
+        if (mKeyframeSet != null) {
+            return mKeyframeSet.mKeyframes.get(0).getValue();
+        }
         return mValueFrom;
     }
 
@@ -461,7 +500,12 @@ public class Animator extends Animatable {
      * Sets the value that this animation will start from.
      */
     public void setValueFrom(Object valueFrom) {
-        mValueFrom = valueFrom;
+        if (mKeyframeSet != null) {
+            Keyframe kf = mKeyframeSet.mKeyframes.get(0);
+            kf.setValue(valueFrom);
+        } else {
+            mValueFrom = valueFrom;
+        }
     }
 
     /**
@@ -470,6 +514,10 @@ public class Animator extends Animatable {
      * @return Object The ending value for the animation.
      */
     public Object getValueTo() {
+        if (mKeyframeSet != null) {
+            int numKeyframes = mKeyframeSet.mKeyframes.size();
+            return mKeyframeSet.mKeyframes.get(numKeyframes - 1).getValue();
+        }
         return mValueTo;
     }
 
@@ -479,7 +527,13 @@ public class Animator extends Animatable {
      * @return Object The ending value for the animation.
      */
     public void setValueTo(Object valueTo) {
-        mValueTo = valueTo;
+        if (mKeyframeSet != null) {
+            int numKeyframes = mKeyframeSet.mKeyframes.size();
+            Keyframe kf = mKeyframeSet.mKeyframes.get(numKeyframes - 1);
+            kf.setValue(valueTo);
+        } else {
+            mValueTo = valueTo;
+        }
     }
 
     /**

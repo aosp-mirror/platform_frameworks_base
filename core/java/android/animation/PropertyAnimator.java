@@ -160,20 +160,23 @@ public final class PropertyAnimator extends Animator {
      * @param prefix "set" or "get", depending on whether we need a setter or getter.
      * @return Method the method associated with mPropertyName.
      */
-    private Method getPropertyFunction(String prefix) {
+    private Method getPropertyFunction(String prefix, Class valueType) {
         // TODO: faster implementation...
         Method returnVal = null;
         String firstLetter = mPropertyName.substring(0, 1);
         String theRest = mPropertyName.substring(1);
         firstLetter = firstLetter.toUpperCase();
         String setterName = prefix + firstLetter + theRest;
-        Class args[] = new Class[1];
-        args[0] = mValueType;
+        Class args[] = null;
+        if (valueType != null) {
+            args = new Class[1];
+            args[0] = valueType;
+        }
         try {
             returnVal = mTarget.getClass().getMethod(setterName, args);
         } catch (NoSuchMethodException e) {
             Log.e("PropertyAnimator",
-                    "Couldn't find setter for property " + mPropertyName + ": " + e);
+                    "Couldn't find setter/getter for property " + mPropertyName + ": " + e);
         }
         return returnVal;
     }
@@ -203,6 +206,31 @@ public final class PropertyAnimator extends Animator {
     }
 
     /**
+     * A constructor that takes a single <code>float</code> value, which is the value that the
+     * target object will animate to. When this constructor
+     * is called, the system expects to find a setter for <code>propertyName</code> on
+     * the target object that takes a value of the same type as the <code>Object</code>s. The
+     * system also expects to find a similar getter function with which to derive the starting
+     * value for the animation.
+     *
+     * @param duration The length of the animation, in milliseconds.
+     * @param target The object whose property is to be animated. This object should
+     * have a public function on it called <code>setName()</code>, where <code>name</code> is
+     * the name of the property passed in as the <code>propertyName</code> parameter.
+     * @param propertyName The name of the property on the <code>target</code> object
+     * that will be animated. Given this name, the constructor will search for a
+     * setter on the target object with the name <code>setPropertyName</code>. For example,
+     * if the constructor is called with <code>propertyName = "foo"</code>, then the
+     * target object should have a setter function with the name <code>setFoo()</code>.
+     * @param valueTo The value to which the property will animate.
+     */
+    public PropertyAnimator(int duration, Object target, String propertyName, float valueTo) {
+        super(duration, valueTo);
+        mTarget = target;
+        mPropertyName = propertyName;
+    }
+
+    /**
      * A constructor that takes <code>int</code> values. When this constructor
      * is called, the system expects to find a setter for <code>propertyName</code> on
      * the target object that takes a <code>int</code> value.
@@ -222,6 +250,31 @@ public final class PropertyAnimator extends Animator {
     public PropertyAnimator(int duration, Object target, String propertyName,
             int valueFrom, int valueTo) {
         super(duration, valueFrom, valueTo);
+        mTarget = target;
+        mPropertyName = propertyName;
+    }
+
+    /**
+     * A constructor that takes a single <code>int</code> value, which is the value that the
+     * target object will animate to. When this constructor
+     * is called, the system expects to find a setter for <code>propertyName</code> on
+     * the target object that takes a value of the same type as the <code>Object</code>s. The
+     * system also expects to find a similar getter function with which to derive the starting
+     * value for the animation.
+     *
+     * @param duration The length of the animation, in milliseconds.
+     * @param target The object whose property is to be animated. This object should
+     * have a public function on it called <code>setName()</code>, where <code>name</code> is
+     * the name of the property passed in as the <code>propertyName</code> parameter.
+     * @param propertyName The name of the property on the <code>target</code> object
+     * that will be animated. Given this name, the constructor will search for a
+     * setter on the target object with the name <code>setPropertyName</code>. For example,
+     * if the constructor is called with <code>propertyName = "foo"</code>, then the
+     * target object should have a setter function with the name <code>setFoo()</code>.
+     * @param valueTo The value to which the property will animate.
+     */
+    public PropertyAnimator(int duration, Object target, String propertyName, int valueTo) {
+        super(duration, valueTo);
         mTarget = target;
         mPropertyName = propertyName;
     }
@@ -251,6 +304,31 @@ public final class PropertyAnimator extends Animator {
     }
 
     /**
+     * A constructor that takes a single <code>double</code> value, which is the value that the
+     * target object will animate to. When this constructor
+     * is called, the system expects to find a setter for <code>propertyName</code> on
+     * the target object that takes a value of the same type as the <code>Object</code>s. The
+     * system also expects to find a similar getter function with which to derive the starting
+     * value for the animation.
+     *
+     * @param duration The length of the animation, in milliseconds.
+     * @param target The object whose property is to be animated. This object should
+     * have a public function on it called <code>setName()</code>, where <code>name</code> is
+     * the name of the property passed in as the <code>propertyName</code> parameter.
+     * @param propertyName The name of the property on the <code>target</code> object
+     * that will be animated. Given this name, the constructor will search for a
+     * setter on the target object with the name <code>setPropertyName</code>. For example,
+     * if the constructor is called with <code>propertyName = "foo"</code>, then the
+     * target object should have a setter function with the name <code>setFoo()</code>.
+     * @param valueTo The value to which the property will animate.
+     */
+    public PropertyAnimator(int duration, Object target, String propertyName, double valueTo) {
+        super(duration, valueTo);
+        mTarget = target;
+        mPropertyName = propertyName;
+    }
+
+    /**
      * A constructor that takes <code>Object</code> values. When this constructor
      * is called, the system expects to find a setter for <code>propertyName</code> on
      * the target object that takes a value of the same type as the <code>Object</code>s.
@@ -272,6 +350,29 @@ public final class PropertyAnimator extends Animator {
         super(duration, valueFrom, valueTo);
         mTarget = target;
         mPropertyName = propertyName;
+    }
+
+    /**
+     * A constructor that takes a single <code>Object</code> value, which is the value that the
+     * target object will animate to. When this constructor
+     * is called, the system expects to find a setter for <code>propertyName</code> on
+     * the target object that takes a value of the same type as the <code>Object</code>s. The
+     * system also expects to find a similar getter function with which to derive the starting
+     * value for the animation.
+     *
+     * @param duration The length of the animation, in milliseconds.
+     * @param target The object whose property is to be animated. This object should
+     * have a public function on it called <code>setName()</code>, where <code>name</code> is
+     * the name of the property passed in as the <code>propertyName</code> parameter.
+     * @param propertyName The name of the property on the <code>target</code> object
+     * that will be animated. Given this name, the constructor will search for a
+     * setter on the target object with the name <code>setPropertyName</code>. For example,
+     * if the constructor is called with <code>propertyName = "foo"</code>, then the
+     * target object should have a setter function with the name <code>setFoo()</code>.
+     * @param valueTo The value to which the property will animate.
+     */
+    public PropertyAnimator(int duration, Object target, String propertyName, Object valueTo) {
+        this(duration, target, propertyName, null, valueTo);
     }
 
     /**
@@ -329,7 +430,7 @@ public final class PropertyAnimator extends Animator {
                         return;
                     }
                 }
-                mSetter = getPropertyFunction("set");
+                mSetter = getPropertyFunction("set", mValueType);
                 if (propertyMap == null) {
                     propertyMap = new HashMap<String, Method>();
                     sSetterPropertyMap.put(mTarget, propertyMap);
@@ -352,7 +453,7 @@ public final class PropertyAnimator extends Animator {
                             return;
                         }
                     }
-                    mGetter = getPropertyFunction("get");
+                    mGetter = getPropertyFunction("get", null);
                     if (propertyMap == null) {
                         propertyMap = new HashMap<String, Method>();
                         sGetterPropertyMap.put(mTarget, propertyMap);
