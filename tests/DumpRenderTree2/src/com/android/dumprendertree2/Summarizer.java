@@ -16,8 +16,6 @@
 
 package com.android.dumprendertree2;
 
-import android.util.Log;
-
 import java.io.File;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -155,15 +153,8 @@ public class Summarizer {
         mSkippedTestsList.addLast(relativePath);
     }
 
-    public void appendTest(LayoutTest test) {
-        String testPath = test.getRelativePath();
-
-        /** Obtain the result */
-        AbstractResult result = test.getResult();
-        if (result == null) {
-            Log.e(LOG_TAG + "::appendTest", testPath + ": result NULL!!");
-            return;
-        }
+    public void appendTest(AbstractResult result) {
+        String testPath = result.getRelativePath();
 
         AbstractResult.ResultCode resultCode = result.getResultCode();
 

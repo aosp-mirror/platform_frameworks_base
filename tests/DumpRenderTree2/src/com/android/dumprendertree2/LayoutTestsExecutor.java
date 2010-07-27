@@ -30,6 +30,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.Window;
 import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
@@ -47,7 +48,7 @@ import java.util.List;
  * to ManagerService. The reason why is to handle crashing (test that crashes brings down
  * whole process with it).
  */
-public class LayoutTestsExecuter extends Activity {
+public class LayoutTestsExecutor extends Activity {
 
     /** TODO: make it a setting */
     static final String TESTS_ROOT_DIR_PATH =
@@ -55,14 +56,23 @@ public class LayoutTestsExecuter extends Activity {
             File.separator + "android" +
             File.separator + "LayoutTests";
 
-    private static final String LOG_TAG = "LayoutTestExecuter";
+    private static final String LOG_TAG = "LayoutTestExecutor";
 
     public static final String EXTRA_TESTS_LIST = "TestsList";
+    public static final String EXTRA_TEST_INDEX = "TestIndex";
 
     private static final int MSG_ACTUAL_RESULT_OBTAINED = 0;
 
     private List<String> mTestsList;
-    private int mCurrentTestCount = 0;
+
+    /**
+     * This is a number of currently running test. It is 0-based and doesn't reset after
+     * the crash. Initial index is passed to LayoutTestsExecuter in the intent that starts
+     * it.
+     */
+    private int mCurrentTestIndex;
+
+    private int mTotalTestCount;
 
     private WebView mCurrentWebView;
     private String mCurrentTestRelativePath;
@@ -94,6 +104,8 @@ public class LayoutTestsExecuter extends Activity {
         public void handleMessage(Message msg) {
             if (msg.what == MSG_ACTUAL_RESULT_OBTAINED) {
                 reportResultToService();
+                mCurrentTestIndex++;
+                updateProgressBar();
                 runNextTest();
             }
         }
@@ -153,8 +165,12 @@ public class LayoutTestsExecuter extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        requestWindowFeature(Window.FEATURE_PROGRESS);
+
         Intent intent = getIntent();
         mTestsList = intent.getStringArrayListExtra(EXTRA_TESTS_LIST);
+        mCurrentTestIndex = intent.getIntExtra(EXTRA_TEST_INDEX, -1);
+        mTotalTestCount = mCurrentTestIndex + mTestsList.size();
 
         bindService(new Intent(this, ManagerService.class), mServiceConnection,
                 Context.BIND_AUTO_CREATE);
@@ -191,7 +207,6 @@ public class LayoutTestsExecuter extends Activity {
             return;
         }
 
-        mCurrentTestCount++;
         mCurrentTestRelativePath = mTestsList.remove(0);
         mCurrentTestUri =
                 Uri.fromFile(new File(TESTS_ROOT_DIR_PATH, mCurrentTestRelativePath)).toString();
@@ -226,6 +241,7 @@ public class LayoutTestsExecuter extends Activity {
             Message serviceMsg =
                     Message.obtain(null, ManagerService.MSG_PROCESS_ACTUAL_RESULTS);
             Bundle bundle = mCurrentResult.getBundle();
+            bundle.putInt("testIndex", mCurrentTestIndex);
             /** TODO: Add timeout info to bundle */
             serviceMsg.setData(bundle);
             mManagerServiceMessenger.send(serviceMsg);
@@ -234,7 +250,20 @@ public class LayoutTestsExecuter extends Activity {
         }
     }
 
+    private void updateProgressBar() {
+        getWindow().setFeatureInt(Window.FEATURE_PROGRESS,
+                mCurrentTestIndex * Window.PROGRESS_END / mTotalTestCount);
+        setTitle(mCurrentTestIndex * 100 / mTotalTestCount + "% " +
+                "(" + mCurrentTestIndex + "/" + mTotalTestCount + ")");
+    }
+
     private void onAllTestsFinished() {
-        Log.d(LOG_TAG + "::onAllTestsFisnihed", "Begin.");
+        try {
+            Message serviceMsg =
+                    Message.obtain(null, ManagerService.MSG_ALL_TESTS_FINISHED);
+            mManagerServiceMessenger.send(serviceMsg);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG + "::onAllTestsFinished", e.getMessage());
+        }
     }
 }
