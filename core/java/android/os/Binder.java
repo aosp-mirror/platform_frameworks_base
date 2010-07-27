@@ -226,8 +226,15 @@ public class Binder implements IBinder {
                     try {
                         fd.close();
                     } catch (IOException e) {
+                        // swallowed, not propagated back to the caller
                     }
                 }
+            }
+            // Write the StrictMode header.
+            if (reply != null) {
+                reply.writeNoException();
+            } else {
+                StrictMode.clearGatheredViolations();
             }
             return true;
         }
@@ -341,12 +348,15 @@ final class BinderProxy implements IBinder {
 
     public void dump(FileDescriptor fd, String[] args) throws RemoteException {
         Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
         data.writeFileDescriptor(fd);
         data.writeStringArray(args);
         try {
-            transact(DUMP_TRANSACTION, data, null, 0);
+            transact(DUMP_TRANSACTION, data, reply, 0);
+            reply.readException();
         } finally {
             data.recycle();
+            reply.recycle();
         }
     }
     
