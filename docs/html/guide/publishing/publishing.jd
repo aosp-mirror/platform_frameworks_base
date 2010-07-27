@@ -18,7 +18,8 @@ page.title=Publishing Your Applications
 <ol>
 <li><a href="#overview">Publishing on Android Market</a>
     <ol>
-    <li><a href="#marketupgrade">Publishing Updates on Android Market</a>
+    <li><a href="#marketupgrade">Publishing Updates on Android Market</a></li>
+    <li><a href="#marketLicensing">Using Android Market Licensing Service</a></li>
     <li><a href="#marketintent">Using Intents to Launch the Market Application</a></li>
     </ol></li>
 <!--
@@ -30,6 +31,7 @@ page.title=Publishing Your Applications
 <h2>See also</h2>
 
 <ol>
+<li><a href="{@docRoot}guide/publishing/licensing.html">Licensing Your Applications</a></li>
 <li><a href="{@docRoot}guide/publishing/preparing.html">Preparing to Publish</a></li>
 </ol>
 
@@ -59,7 +61,7 @@ the .apk. Your application is now ready for publishing. </p>
 <p>The sections below provide information about publishing your Android
 application to mobile device users.</p>
 
-<h2 id="market">Publishing on Android Market</h2>
+<h2 id="overview">Publishing on Android Market</h2>
 
 <p>Android Market is a hosted service that makes it easy for users to find and
 download Android applications to their Android-powered devices, and makes it 
@@ -121,7 +123,26 @@ certificate do <em>not</em> match those of the existing version, Market will
 consider it a new application and will not offer it to users as an update.</p>
 
 
+<h3 id="marketLicensing">Using Android Market Licensing Service</h3>
 
+<p>Android Market offers a licensing service that lets you enforce licensing
+policies for paid applications that you publish through Android Market. With
+Android Market Licensing, your applications can query Android Market at run time
+to obtain their licensing status for the current user, then allow or disallow
+further use as appropriate. Using the service, you can apply a flexible
+licensing policy on an application-by-application basis &mdash; each 
+application can enforce its licensing status in the way most appropriate
+for it. </p>
+
+<p>Any application that you publish through Android Market can use the Android
+Market Licensing Service. The service uses no dedicated framework APIs, you can
+add licensing to any legacy application that uses a minimum API level of 3 or
+higher.</p>
+
+<p>For complete information about Android Market Licensing Service and how to
+use it in your application, see <a
+href="{@docRoot}guide/publishing/licensing.html">Licensing Your
+Applications</a>.</p>
 
 
 <h3 id="marketintent">Using Intents to Launch the Market Application on 
