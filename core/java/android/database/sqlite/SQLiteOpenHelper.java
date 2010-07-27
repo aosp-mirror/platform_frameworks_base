@@ -22,10 +22,16 @@ import android.util.Log;
 
 /**
  * A helper class to manage database creation and version management.
- * You create a subclass implementing {@link #onCreate}, {@link #onUpgrade} and
+ *
+ * <p>You create a subclass implementing {@link #onCreate}, {@link #onUpgrade} and
  * optionally {@link #onOpen}, and this class takes care of opening the database
  * if it exists, creating it if it does not, and upgrading it as necessary.
  * Transactions are used to make sure the database is always in a sensible state.
+ *
+ * <p>This class makes it easy for {@link android.content.ContentProvider}
+ * implementations to defer opening and upgrading the database until first use,
+ * to avoid blocking application startup with long-running database upgrades.
+ *
  * <p>For an example, see the NotePadProvider class in the NotePad sample application,
  * in the <em>samples/</em> directory of the SDK.</p>
  */
@@ -42,8 +48,9 @@ public abstract class SQLiteOpenHelper {
 
     /**
      * Create a helper object to create, open, and/or manage a database.
-     * The database is not actually created or opened until one of
-     * {@link #getWritableDatabase} or {@link #getReadableDatabase} is called.
+     * This method always returns very quickly.  The database is not actually
+     * created or opened until one of {@link #getWritableDatabase} or
+     * {@link #getReadableDatabase} is called.
      *
      * @param context to use to open or create the database
      * @param name of the database file, or null for an in-memory database
@@ -62,12 +69,19 @@ public abstract class SQLiteOpenHelper {
 
     /**
      * Create and/or open a database that will be used for reading and writing.
-     * Once opened successfully, the database is cached, so you can call this
-     * method every time you need to write to the database.  Make sure to call
-     * {@link #close} when you no longer need it.
+     * The first time this is called, the database will be opened and
+     * {@link #onCreate}, {@link #onUpgrade} and/or {@link #onOpen} will be
+     * called.
      *
-     * <p>Errors such as bad permissions or a full disk may cause this operation
+     * <p>Once opened successfully, the database is cached, so you can
+     * call this method every time you need to write to the database.
+     * (Make sure to call {@link #close} when you no longer need the database.)
+     * Errors such as bad permissions or a full disk may cause this method
      * to fail, but future attempts may succeed if the problem is fixed.</p>
+     *
+     * <p class="caution">Database upgrade may take a long time, you
+     * should not call this method from the application main thread, including
+     * from {@link android.content.ContentProvider#onCreate ContentProvider.onCreate()}.
      *
      * @throws SQLiteException if the database cannot be opened for writing
      * @return a read/write database object valid until {@link #close} is called
@@ -140,6 +154,11 @@ public abstract class SQLiteOpenHelper {
      * to {@link #getWritableDatabase} may succeed, in which case the read-only
      * database object will be closed and the read/write object will be returned
      * in the future.
+     *
+     * <p class="caution">Like {@link #getWritableDatabase}, this method may
+     * take a long time to return, so you should not call it from the
+     * application main thread, including from
+     * {@link android.content.ContentProvider#onCreate ContentProvider.onCreate()}.
      *
      * @throws SQLiteException if the database cannot be opened
      * @return a database object valid until {@link #getWritableDatabase}
@@ -219,9 +238,9 @@ public abstract class SQLiteOpenHelper {
     public abstract void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion);
 
     /**
-     * Called when the database has been opened.
-     * Override method should check {@link SQLiteDatabase#isReadOnly} before
-     * updating the database.
+     * Called when the database has been opened.  The implementation
+     * should check {@link SQLiteDatabase#isReadOnly} before updating the
+     * database.
      *
      * @param db The database.
      */
