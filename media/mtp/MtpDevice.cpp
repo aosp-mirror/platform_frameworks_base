@@ -23,6 +23,7 @@
 #include "MtpProperty.h"
 #include "MtpStorageInfo.h"
 #include "MtpStringBuffer.h"
+#include "MtpUtils.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,6 +32,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <endian.h>
 
 #include <usbhost/usbhost.h>
 
@@ -93,6 +95,8 @@ const char* MtpDevice::getDeviceName() {
 }
 
 bool MtpDevice::openSession() {
+    Mutex::Autolock autoLock(mMutex);
+
     mSessionID = 0;
     mTransactionID = 0;
     MtpSessionID newSession = 1;
@@ -117,6 +121,8 @@ bool MtpDevice::closeSession() {
 }
 
 MtpDeviceInfo* MtpDevice::getDeviceInfo() {
+    Mutex::Autolock autoLock(mMutex);
+
     mRequest.reset();
     if (!sendRequest(MTP_OPERATION_GET_DEVICE_INFO))
         return NULL;
@@ -132,6 +138,8 @@ MtpDeviceInfo* MtpDevice::getDeviceInfo() {
 }
 
 MtpStorageIDList* MtpDevice::getStorageIDs() {
+    Mutex::Autolock autoLock(mMutex);
+
     mRequest.reset();
     if (!sendRequest(MTP_OPERATION_GET_STORAGE_IDS))
         return NULL;
@@ -145,6 +153,8 @@ MtpStorageIDList* MtpDevice::getStorageIDs() {
 }
 
 MtpStorageInfo* MtpDevice::getStorageInfo(MtpStorageID storageID) {
+    Mutex::Autolock autoLock(mMutex);
+
     mRequest.reset();
     mRequest.setParameter(1, storageID);
     if (!sendRequest(MTP_OPERATION_GET_STORAGE_INFO))
@@ -162,6 +172,8 @@ MtpStorageInfo* MtpDevice::getStorageInfo(MtpStorageID storageID) {
 
 MtpObjectHandleList* MtpDevice::getObjectHandles(MtpStorageID storageID,
             MtpObjectFormat format, MtpObjectHandle parent) {
+    Mutex::Autolock autoLock(mMutex);
+
     mRequest.reset();
     mRequest.setParameter(1, storageID);
     mRequest.setParameter(2, format);
@@ -178,6 +190,8 @@ MtpObjectHandleList* MtpDevice::getObjectHandles(MtpStorageID storageID,
 }
 
 MtpObjectInfo* MtpDevice::getObjectInfo(MtpObjectHandle handle) {
+    Mutex::Autolock autoLock(mMutex);
+
     // FIXME - we might want to add some caching here
 
     mRequest.reset();
@@ -196,6 +210,8 @@ MtpObjectInfo* MtpDevice::getObjectInfo(MtpObjectHandle handle) {
 }
 
 void* MtpDevice::getThumbnail(MtpObjectHandle handle, int& outLength) {
+    Mutex::Autolock autoLock(mMutex);
+
     mRequest.reset();
     mRequest.setParameter(1, handle);
     if (sendRequest(MTP_OPERATION_GET_THUMB) && readData()) {
@@ -208,7 +224,90 @@ void* MtpDevice::getThumbnail(MtpObjectHandle handle, int& outLength) {
     return NULL;
 }
 
+MtpObjectHandle MtpDevice::sendObjectInfo(MtpObjectInfo* info) {
+    Mutex::Autolock autoLock(mMutex);
+
+    mRequest.reset();
+    MtpObjectHandle parent = info->mParent;
+    if (parent == 0)
+        parent = MTP_PARENT_ROOT;
+
+    mRequest.setParameter(1, info->mStorageID);
+    mRequest.setParameter(2, info->mParent);
+
+    mData.putUInt32(info->mStorageID);
+    mData.putUInt16(info->mFormat);
+    mData.putUInt16(info->mProtectionStatus);
+    mData.putUInt32(info->mCompressedSize);
+    mData.putUInt16(info->mThumbFormat);
+    mData.putUInt32(info->mThumbCompressedSize);
+    mData.putUInt32(info->mThumbPixWidth);
+    mData.putUInt32(info->mThumbPixHeight);
+    mData.putUInt32(info->mImagePixWidth);
+    mData.putUInt32(info->mImagePixHeight);
+    mData.putUInt32(info->mImagePixDepth);
+    mData.putUInt32(info->mParent);
+    mData.putUInt16(info->mAssociationType);
+    mData.putUInt32(info->mAssociationDesc);
+    mData.putUInt32(info->mSequenceNumber);
+    mData.putString(info->mName);
+
+    char created[100], modified[100];
+    formatDateTime(info->mDateCreated, created, sizeof(created));
+    formatDateTime(info->mDateModified, modified, sizeof(modified));
+
+    mData.putString(created);
+    mData.putString(modified);
+    if (info->mKeywords)
+        mData.putString(info->mKeywords);
+    else
+        mData.putEmptyString();
+
+   if (sendRequest(MTP_OPERATION_SEND_OBJECT_INFO) && sendData()) {
+        printf("MTP_OPERATION_SEND_OBJECT_INFO sent\n");
+        MtpResponseCode ret = readResponse();
+        printf("sendObjectInfo response: %04X\n", ret);
+        if (ret == MTP_RESPONSE_OK) {
+            info->mStorageID = mResponse.getParameter(1);
+            info->mParent = mResponse.getParameter(2);
+            info->mHandle = mResponse.getParameter(3);
+            return info->mHandle;
+        }
+    }
+    return (MtpObjectHandle)-1;
+}
+
+bool MtpDevice::sendObject(MtpObjectInfo* info, int srcFD) {
+    Mutex::Autolock autoLock(mMutex);
+
+    int remaining = info->mCompressedSize;
+    mRequest.reset();
+    mRequest.setParameter(1, info->mHandle);
+    if (sendRequest(MTP_OPERATION_SEND_OBJECT)) {
+        printf("MTP_OPERATION_SEND_OBJECT sent\n");
+        // send data header
+        writeDataHeader(MTP_OPERATION_SEND_OBJECT, remaining);
+
+        char buffer[65536];
+        while (remaining > 0) {
+            int count = read(srcFD, buffer, sizeof(buffer));
+            if (count > 0) {
+                int written = mData.write(mEndpointOut, buffer, count);
+                printf("wrote %d\n", written);
+                // FIXME check error
+                remaining -= count;
+            } else {
+                break;
+            }
+        }
+    }
+    MtpResponseCode ret = readResponse();
+    return (remaining == 0 && ret == MTP_RESPONSE_OK);
+}
+
 bool MtpDevice::deleteObject(MtpObjectHandle handle) {
+    Mutex::Autolock autoLock(mMutex);
+
     mRequest.reset();
     mRequest.setParameter(1, handle);
     if (sendRequest(MTP_OPERATION_DELETE_OBJECT)) {
@@ -236,6 +335,8 @@ MtpObjectHandle MtpDevice::getStorageID(MtpObjectHandle handle) {
 }
 
 MtpProperty* MtpDevice::getDevicePropDesc(MtpDeviceProperty code) {
+    Mutex::Autolock autoLock(mMutex);
+
     mRequest.reset();
     mRequest.setParameter(1, code);
     if (!sendRequest(MTP_OPERATION_GET_DEVICE_PROP_DESC))
@@ -251,6 +352,98 @@ MtpProperty* MtpDevice::getDevicePropDesc(MtpDeviceProperty code) {
     return NULL;
 }
 
+class ReadObjectThread : public Thread {
+private:
+    MtpDevice*          mDevice;
+    MtpObjectHandle     mHandle;
+    int                 mObjectSize;
+    void*               mInitialData;
+    int                 mInitialDataLength;
+    int                 mFD;
+
+public:
+    ReadObjectThread(MtpDevice* device, MtpObjectHandle handle, int objectSize)
+        : mDevice(device),
+          mHandle(handle),
+          mObjectSize(objectSize),
+          mInitialData(NULL),
+          mInitialDataLength(0)
+    {
+    }
+
+    virtual ~ReadObjectThread() {
+        if (mFD >= 0)
+            close(mFD);
+        free(mInitialData);
+    }
+
+    // returns file descriptor
+    int init() {
+        mDevice->mRequest.reset();
+        mDevice->mRequest.setParameter(1, mHandle);
+        if (mDevice->sendRequest(MTP_OPERATION_GET_OBJECT)
+                && mDevice->mData.readDataHeader(mDevice->mEndpointIn)) {
+
+            // mData will contain header and possibly the beginning of the object data
+            mInitialData = mDevice->mData.getData(mInitialDataLength);
+
+            // create a pipe for the client to read from
+            int pipefd[2];
+            if (pipe(pipefd) < 0) {
+                LOGE("pipe failed (%s)", strerror(errno));
+                return -1;
+            }
+
+            mFD = pipefd[1];
+            return pipefd[0];
+        } else {
+           return -1;
+        }
+    }
+
+    virtual bool threadLoop() {
+        int remaining = mObjectSize;
+        if (mInitialData) {
+            write(mFD, mInitialData, mInitialDataLength);
+            remaining -= mInitialDataLength;
+            free(mInitialData);
+            mInitialData = NULL;
+        }
+
+        char buffer[65536];
+        while (remaining > 0) {
+            int readSize = (remaining > sizeof(buffer) ? sizeof(buffer) : remaining);
+            int count = mDevice->mData.readData(mDevice->mEndpointIn, buffer, readSize);
+            int written;
+            if (count >= 0) {
+                int written = write(mFD, buffer, count);
+                // FIXME check error
+                remaining -= count;
+            } else {
+                break;
+            }
+        }
+
+        MtpResponseCode ret = mDevice->readResponse();
+        mDevice->mMutex.unlock();
+        return false;
+    }
+};
+
+    // returns the file descriptor for a pipe to read the object's data
+int MtpDevice::readObject(MtpObjectHandle handle, int objectSize) {
+    mMutex.lock();
+
+    ReadObjectThread* thread = new ReadObjectThread(this, handle, objectSize);
+    int fd = thread->init();
+    if (fd < 0) {
+        delete thread;
+        mMutex.unlock();
+    } else {
+        thread->run("ReadObjectThread");
+    }
+    return fd;
+}
 
 bool MtpDevice::sendRequest(MtpOperationCode operation) {
     LOGD("sendRequest: %s\n", MtpDebug::getOperationCodeName(operation));
@@ -262,7 +455,7 @@ bool MtpDevice::sendRequest(MtpOperationCode operation) {
     return (ret > 0);
 }
 
-bool MtpDevice::sendData(MtpOperationCode operation) {
+bool MtpDevice::sendData() {
     LOGD("sendData\n");
     mData.setOperationCode(mRequest.getOperationCode());
     mData.setTransactionID(mRequest.getTransactionID());
@@ -283,6 +476,12 @@ bool MtpDevice::readData() {
         LOGD("readResponse failed\n");
         return false;
     }
+}
+
+bool MtpDevice::writeDataHeader(MtpOperationCode operation, int dataLength) {
+    mData.setOperationCode(operation);
+    mData.setTransactionID(mRequest.getTransactionID());
+    return (!mData.writeDataHeader(mEndpointOut, dataLength));
 }
 
 MtpResponseCode MtpDevice::readResponse() {

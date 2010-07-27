@@ -98,7 +98,12 @@ public:
 
 #ifdef MTP_HOST
     int                 read(struct usb_endpoint *ep);
+    int                 readData(struct usb_endpoint *ep, void* buffer, int length);
+    int                 readDataHeader(struct usb_endpoint *ep);
+
+    int                 writeDataHeader(struct usb_endpoint *ep, uint32_t length);
     int                 write(struct usb_endpoint *ep);
+    int                 write(struct usb_endpoint *ep, void* buffer, uint32_t length);
 #endif
 
     inline bool         hasData() const { return mPacketSize > MTP_CONTAINER_HEADER_SIZE; }

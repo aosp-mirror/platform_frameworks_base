@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 /**
@@ -64,6 +65,11 @@ public class MtpClient {
         return native_get_storage_id(deviceID, objectID);
     }
 
+    // create a file descriptor for reading the contents of an object over MTP
+    public ParcelFileDescriptor openFile(int deviceID, int objectID) {
+        return native_open_file(deviceID, objectID);
+    }
+
     public interface Listener {
         // called when a new MTP device has been discovered
         void deviceAdded(int id);
@@ -94,4 +100,5 @@ public class MtpClient {
     private native boolean native_delete_object(int deviceID, int objectID);
     private native int native_get_parent(int deviceID, int objectID);
     private native int native_get_storage_id(int deviceID, int objectID);
+    private native ParcelFileDescriptor native_open_file(int deviceID, int objectID);
 }

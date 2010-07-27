@@ -20,6 +20,8 @@
 #include <sys/types.h>
 #include <fcntl.h>
 
+#include <usbhost/usbhost.h>
+
 #include "MtpDataPacket.h"
 #include "MtpStringBuffer.h"
 
@@ -391,6 +393,35 @@ int MtpDataPacket::read(struct usb_endpoint *ep) {
     return length;
 }
 
+int MtpDataPacket::readData(struct usb_endpoint *ep, void* buffer, int length) {
+    int packetSize = usb_endpoint_max_packet(ep);
+    int read = 0;
+    while (read < length) {
+        int ret = transfer(ep, (char *)buffer + read, packetSize);
+        if (ret < 0) {
+printf("MtpDataPacket::readData returning %d\n", ret);
+            return ret;
+        }
+        read += ret;
+    }
+printf("MtpDataPacket::readData returning %d\n", read);
+    return read;
+}
+
+int MtpDataPacket::readDataHeader(struct usb_endpoint *ep) {
+    int length = transfer(ep, mBuffer, usb_endpoint_max_packet(ep));
+    if (length >= 0)
+        mPacketSize = length;
+    return length;
+}
+
+int MtpDataPacket::writeDataHeader(struct usb_endpoint *ep, uint32_t length) {
+    MtpPacket::putUInt32(MTP_CONTAINER_LENGTH_OFFSET, length);
+    MtpPacket::putUInt16(MTP_CONTAINER_TYPE_OFFSET, MTP_CONTAINER_TYPE_DATA);
+    int ret = transfer(ep, mBuffer, MTP_CONTAINER_HEADER_SIZE);
+    return (ret < 0 ? ret : 0);
+}
+
 int MtpDataPacket::write(struct usb_endpoint *ep) {
     MtpPacket::putUInt32(MTP_CONTAINER_LENGTH_OFFSET, mPacketSize);
     MtpPacket::putUInt16(MTP_CONTAINER_TYPE_OFFSET, MTP_CONTAINER_TYPE_DATA);
@@ -400,6 +431,19 @@ int MtpDataPacket::write(struct usb_endpoint *ep) {
     if (ret == MTP_CONTAINER_HEADER_SIZE)
         ret = transfer(ep, mBuffer + MTP_CONTAINER_HEADER_SIZE,
                         mPacketSize - MTP_CONTAINER_HEADER_SIZE);
+    return (ret < 0 ? ret : 0);
+}
+
+int MtpDataPacket::write(struct usb_endpoint *ep, void* buffer, uint32_t length) {
+    int ret = 0;
+    int packetSize = usb_endpoint_max_packet(ep);
+    while (length > 0) {
+        int write = (length > packetSize ? packetSize : length);
+        int ret = transfer(ep, buffer, write);
+        if (ret < 0)
+            break;
+        length -= ret;
+    }
     return (ret < 0 ? ret : 0);
 }
 
