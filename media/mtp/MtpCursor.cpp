@@ -437,7 +437,7 @@ bool MtpCursor::putThumbnail(CursorWindow* window, int objectID, int format, int
     } else {
         thumbnail = device->getThumbnail(objectID, size);
 
-        LOGD("putThumbnail: %p, size: %d\n", thumbnail, size);
+        LOGV("putThumbnail: %p, size: %d\n", thumbnail, size);
         offset = window->alloc(size);
         if (!offset) {
             window->freeLastRow();

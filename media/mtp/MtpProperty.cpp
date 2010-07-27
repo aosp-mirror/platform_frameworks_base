@@ -191,9 +191,9 @@ void MtpProperty::write(MtpDataPacket& packet) {
 }
 
 void MtpProperty::print() {
-    LOGD("MtpProperty %04X\n", mCode);
-    LOGD("    type %04X\n", mType);
-    LOGD("    writeable %s\n", (mWriteable ? "true" : "false"));
+    LOGV("MtpProperty %04X\n", mCode);
+    LOGV("    type %04X\n", mType);
+    LOGV("    writeable %s\n", (mWriteable ? "true" : "false"));
 }
 
 void MtpProperty::readValue(MtpDataPacket& packet, MtpPropertyValue& value) {

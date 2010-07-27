@@ -264,9 +264,7 @@ MtpObjectHandle MtpDevice::sendObjectInfo(MtpObjectInfo* info) {
         mData.putEmptyString();
 
    if (sendRequest(MTP_OPERATION_SEND_OBJECT_INFO) && sendData()) {
-        printf("MTP_OPERATION_SEND_OBJECT_INFO sent\n");
         MtpResponseCode ret = readResponse();
-        printf("sendObjectInfo response: %04X\n", ret);
         if (ret == MTP_RESPONSE_OK) {
             info->mStorageID = mResponse.getParameter(1);
             info->mParent = mResponse.getParameter(2);
@@ -284,7 +282,6 @@ bool MtpDevice::sendObject(MtpObjectInfo* info, int srcFD) {
     mRequest.reset();
     mRequest.setParameter(1, info->mHandle);
     if (sendRequest(MTP_OPERATION_SEND_OBJECT)) {
-        printf("MTP_OPERATION_SEND_OBJECT sent\n");
         // send data header
         writeDataHeader(MTP_OPERATION_SEND_OBJECT, remaining);
 
@@ -293,7 +290,6 @@ bool MtpDevice::sendObject(MtpObjectInfo* info, int srcFD) {
             int count = read(srcFD, buffer, sizeof(buffer));
             if (count > 0) {
                 int written = mData.write(mEndpointOut, buffer, count);
-                printf("wrote %d\n", written);
                 // FIXME check error
                 remaining -= count;
             } else {
@@ -446,7 +442,7 @@ int MtpDevice::readObject(MtpObjectHandle handle, int objectSize) {
 }
 
 bool MtpDevice::sendRequest(MtpOperationCode operation) {
-    LOGD("sendRequest: %s\n", MtpDebug::getOperationCodeName(operation));
+    LOGV("sendRequest: %s\n", MtpDebug::getOperationCodeName(operation));
     mRequest.setOperationCode(operation);
     if (mTransactionID > 0)
         mRequest.setTransactionID(mTransactionID++);
@@ -456,7 +452,7 @@ bool MtpDevice::sendRequest(MtpOperationCode operation) {
 }
 
 bool MtpDevice::sendData() {
-    LOGD("sendData\n");
+    LOGV("sendData\n");
     mData.setOperationCode(mRequest.getOperationCode());
     mData.setTransactionID(mRequest.getTransactionID());
     int ret = mData.write(mEndpointOut);
@@ -467,13 +463,13 @@ bool MtpDevice::sendData() {
 bool MtpDevice::readData() {
     mData.reset();
     int ret = mData.read(mEndpointIn);
-    LOGD("readData returned %d\n", ret);
+    LOGV("readData returned %d\n", ret);
     if (ret >= MTP_CONTAINER_HEADER_SIZE) {
         mData.dump();
         return true;
     }
     else {
-        LOGD("readResponse failed\n");
+        LOGV("readResponse failed\n");
         return false;
     }
 }
@@ -485,7 +481,7 @@ bool MtpDevice::writeDataHeader(MtpOperationCode operation, int dataLength) {
 }
 
 MtpResponseCode MtpDevice::readResponse() {
-    LOGD("readResponse\n");
+    LOGV("readResponse\n");
     int ret = mResponse.read(mEndpointIn);
     if (ret >= MTP_CONTAINER_HEADER_SIZE) {
         mResponse.dump();

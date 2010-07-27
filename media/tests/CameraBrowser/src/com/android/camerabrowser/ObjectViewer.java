@@ -193,7 +193,6 @@ public class ObjectViewer extends Activity {
                 byte[] buffer = new byte[65536];
                 int bytesRead;
                 while ((bytesRead = fis.read(buffer)) >= 0) {
-                    Log.d(TAG, "copying the bytes numbering " + bytesRead);
                     fos.write(buffer, 0, bytesRead);
                 }
 
