@@ -26,6 +26,7 @@ interface IPowerManager
     void releaseWakeLock(IBinder lock, int flags);
     void userActivity(long when, boolean noChangeLights);
     void userActivityWithForce(long when, boolean noChangeLights, boolean force);
+    void clearUserActivityTimeout(long now, long timeout);
     void setPokeLock(int pokey, IBinder lock, String tag);
     int getSupportedWakeLockFlags();
     void setStayOnSetting(int val);
