@@ -39,13 +39,14 @@ Applications</a> document. </p>
 <ol>
 <li>Test your application extensively on an actual device </li>
 <li>Consider adding an End User License Agreement in your application</li>
+<li>Consider adding licensing support</li>
 <li>Specify an icon and label in the application's manifest</li>
 <li>Turn off logging and debugging and clean up data/files</li>
 </ol>
 
 <p>Before you do the final compile of your application:</p>
 
-<ol start="5">
+<ol start="6">
 <li>Version your application</li>
 <li>Obtain a suitable cryptographic key</li>
 <li>Register for a Maps API Key, if your application is using MapView elements</li>
@@ -53,7 +54,7 @@ Applications</a> document. </p>
 
 <p><em>Compile your application...</em></p>
 <p>After compiling your application:</p>
-<ol start="8">
+<ol start="9">
 <li>Sign your application</li>
 <li>Test your compiled application</li>
 </ol>
@@ -101,7 +102,19 @@ application</h3>
 <p>To protect your person, organization, and intellectual property, you may want
 to provide an End User License Agreement (EULA) with your application. 
 
-<h3 id="iconlabel">3. Specify an icon and label in the application's manifest</h3>
+<h3 id="eula">3. Consider adding support for Android Market Licensing</h3>
+
+<p>If you are publishing a paid application through Android Market, consider
+adding support for Android Market Licensing. Licensing lets you control access
+to your application based on whether the current user has purchased it.
+Using Android Market Licensing is optional. 
+
+<p>For complete information about Android Market Licensing Service and how to
+use it in your application, see <a
+href="{@docRoot}guide/publishing/licensing.html">Licensing Your
+Applications</a>.</p>
+
+<h3 id="iconlabel">4. Specify an icon and label in the application's manifest</h3>
 
 <p>The icon and label that you specify in an application's manifest are
 important because they are displayed to users as your application's icon and
@@ -116,7 +129,7 @@ display the icon and label to users. </p>
 <p>As regards the design of your icon, you should try to make it match as much
 as possible the style used by the built-in Android applications.</p>
 
-<h3 id="logging">4. Turn off logging and debugging and clean up data/files</h3>
+<h3 id="logging">5. Turn off logging and debugging and clean up data/files</h3>
 
 <p>For release, you should make sure that debug facilities are turned off and
 that debug and other unnecessary data/files are removed from your application
@@ -133,7 +146,7 @@ code.</li>
 
 <h2 id="finalcompile">Before you do the final compile of your application</h2>
 
-<h3 id="versionapp">5. Version your application</h3>
+<h3 id="versionapp">6. Version your application</h3>
 
 <p>Before you compile your application, you must make sure that you have defined
 a version number for your application, specifying an appropriate value for both
@@ -152,7 +165,7 @@ element in the application's manifest file, using appropriate values. </p>
 application, see <a href="{@docRoot}guide/publishing/versioning.html">Versioning 
 Your Applications</a>.</p>
 
-<h3 id="cryptokey">6. Obtain a suitable cryptographic key</h3>
+<h3 id="cryptokey">7. Obtain a suitable cryptographic key</h3>
 
 <p>If you have read and followed all of the preparation steps up to this point,
 your application is compiled and ready for signing. Inside the .apk, the
@@ -173,7 +186,7 @@ elements.</li>
 <li>Sign your application for release, later in the preparation process</li>
 </ul>
 
-<h3 id="mapsApiKey">7. Register for a Maps API Key, if your application is using
+<h3 id="mapsApiKey">8. Register for a Maps API Key, if your application is using
 MapView elements</h3>
 
 <div class="sidebox-wrapper">
@@ -231,7 +244,7 @@ you can compile your application for release.</p>
 
 <h2 id="post-compile">After compiling your application</h2>
 
-<h3 id="signapp">8. Sign your application</h3>
+<h3 id="signapp">9. Sign your application</h3>
 
 <p>Sign your application using your private key and then
 align it with the {@code zipalign} tool. Signing your application
@@ -239,7 +252,7 @@ correctly is critically important. Please see
 <a href="{@docRoot}guide/publishing/app-signing.html">Signing Your 
 Applications</a> for complete information. </p>
 
-<h3 id="testapp">9. Test your compiled and signed application</h3>
+<h3 id="testapp">10. Test your compiled and signed application</h3>
 
 <p>Before you release your compiled application, you should thoroughly test it
 on the target mobile device (and target network, if possible). In particular,
