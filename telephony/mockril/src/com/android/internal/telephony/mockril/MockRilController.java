@@ -1,0 +1,107 @@
+/*
+ * Copyright (C) 2010, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.internal.telephony.mockril;
+
+import android.os.Bundle;
+import android.util.Log;
+
+import com.android.internal.communication.MsgHeader;
+import com.android.internal.communication.Msg;
+import com.android.internal.telephony.RilChannel;
+import com.android.internal.telephony.ril_proto.RilCtrlCmds;
+import com.android.internal.telephony.ril_proto.RilCmds;
+import com.google.protobuf.micro.MessageMicro;
+
+import java.io.IOException;
+
+/**
+ * Contain a list of commands to control Mock RIL. Before using these commands the devices
+ * needs to be set with Mock RIL. Refer to hardware/ril/mockril/README.txt for details.
+ *
+ */
+public class MockRilController {
+    private static final String TAG = "MockRILController";
+    private RilChannel mRilChannel = null;
+    private Msg mMessage = null;
+
+    public MockRilController() throws IOException {
+        mRilChannel = RilChannel.makeRilChannel();
+    }
+
+    /**
+     * Close the channel after the communication is done.
+     * This method has to be called after the test is finished.
+     */
+    public void closeChannel() {
+        mRilChannel.close();
+    }
+
+    /**
+     * Send commands and return true on success
+     * @param cmd for MsgHeader
+     * @param token for MsgHeader
+     * @param status for MsgHeader
+     * @param pbData for Msg data
+     * @return true if command is sent successfully, false if it fails
+     */
+    private boolean sendCtrlCommand(int cmd, long token, int status, MessageMicro pbData) {
+        try {
+            Msg.send(mRilChannel, cmd, token, status, pbData);
+        } catch (IOException e) {
+            Log.v(TAG, "send command : %d failed: " + e.getStackTrace());
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Get control response
+     * @return Msg if response is received, else return null.
+     */
+    private Msg getCtrlResponse() {
+        Msg response = null;
+        try {
+            response = Msg.recv(mRilChannel);
+        } catch (IOException e) {
+            Log.v(TAG, "receive response for getRadioState() error: " + e.getStackTrace());
+            return null;
+        }
+        return response;
+    }
+
+    /**
+     * @return the radio state if it is valid, otherwise return -1
+     */
+    public int getRadioState() {
+        if (!sendCtrlCommand(RilCtrlCmds.CTRL_CMD_GET_RADIO_STATE, 0, 0, null)) {
+            return -1;
+        }
+        Msg response = getCtrlResponse();
+        if (response == null) {
+            Log.v(TAG, "failed to get response");
+            return -1;
+        }
+        response.printHeader(TAG);
+        RilCtrlCmds.CtrlRspRadioState resp =
+            response.getDataAs(RilCtrlCmds.CtrlRspRadioState.class);
+        int state = resp.getState();
+        if ((state >= RilCmds.RADIO_STATE_OFF) && (state <= RilCmds.RADIO_STATE_NV_READY))
+            return state;
+        else
+            return -1;
+    }
+}
