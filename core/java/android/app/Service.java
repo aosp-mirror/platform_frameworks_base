@@ -400,7 +400,15 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * 
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/ForegroundService.java
      *   start_compatibility}
-     * 
+     *
+     * <p class="caution">Note that the system calls this on your
+     * service's main thread.  A service's main thread is the same
+     * thread where UI operations place for Activities running in the
+     * same process.  You should always avoid stalling the main
+     * thread's event loop.  When doing long-running operations,
+     * network calls, or heavy disk I/O, you should kick off a new
+     * thread, or use {@link android.os.AsyncTask}.</p>
+     *
      * @param intent The Intent supplied to {@link android.content.Context#startService}, 
      * as given.  This may be null if the service is being restarted after
      * its process has gone away, and it had previously returned anything
