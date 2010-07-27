@@ -1566,15 +1566,15 @@ static void android_os_Parcel_enforceInterface(JNIEnv* env, jobject clazz, jstri
     if (parcel != NULL) {
         const jchar* str = env->GetStringCritical(name, 0);
         if (str) {
-            const int32_t old_strict_policy =
-                IPCThreadState::self()->getStrictModePolicy();
-            int32_t strict_policy;
-            bool isValid = parcel->enforceInterface(
+            IPCThreadState* threadState = IPCThreadState::self();
+            const int32_t oldPolicy = threadState->getStrictModePolicy();
+            const bool isValid = parcel->enforceInterface(
                 String16(str, env->GetStringLength(name)),
-                &strict_policy);
+                threadState);
             env->ReleaseStringCritical(name, str);
             if (isValid) {
-                if (old_strict_policy != strict_policy) {
+                const int32_t newPolicy = threadState->getStrictModePolicy();
+                if (oldPolicy != newPolicy) {
                     // Need to keep the Java-level thread-local strict
                     // mode policy in sync for the libcore
                     // enforcements, which involves an upcall back
@@ -1582,7 +1582,7 @@ static void android_os_Parcel_enforceInterface(JNIEnv* env, jobject clazz, jstri
                     // Parcel.enforceInterface signature, as it's
                     // pseudo-public, and used via AIDL
                     // auto-generation...)
-                    set_dalvik_blockguard_policy(env, strict_policy);
+                    set_dalvik_blockguard_policy(env, newPolicy);
                 }
                 return;     // everything was correct -> return silently
             }
