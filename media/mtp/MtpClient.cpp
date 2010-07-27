@@ -38,6 +38,16 @@
 
 namespace android {
 
+static bool isMtpDevice(uint16_t vendor, uint16_t product) {
+    // Sandisk Sansa Fuze
+    if (vendor == 0x0781 && product == 0x74c2)
+        return true;
+    // Samsung YP-Z5
+    if (vendor == 0x04e8 && product == 0x503c)
+        return true;
+    return false;
+}
+
 class MtpClientThread : public Thread {
 private:
     MtpClient*   mClient;
@@ -128,8 +138,32 @@ bool MtpClient::usbDeviceAdded(const char *devname) {
                 LOGD("Found MTP device: \"%s\" \"%s\"\n", usb_device_get_manufacturer_name(device),
                         usb_device_get_product_name(device));
             } else {
-                // not an MTP or PTP device
-                continue;
+                // look for special cased devices based on vendor/product ID
+                // we are doing this mainly for testing purposes
+                uint16_t vendor = usb_device_get_vendor_id(device);
+                uint16_t product = usb_device_get_product_id(device);
+                if (!isMtpDevice(vendor, product)) {
+                    // not an MTP or PTP device
+                    continue;
+                }
+                // request MTP OS string and descriptor
+                // some music players need to see this before entering MTP mode.
+                char buffer[256];
+                memset(buffer, 0, sizeof(buffer));
+                int ret = usb_device_send_control(device,
+                        USB_DIR_IN|USB_RECIP_DEVICE|USB_TYPE_STANDARD,
+                        USB_REQ_GET_DESCRIPTOR, (USB_DT_STRING << 8) | 0xEE,
+                        0, sizeof(buffer), buffer);
+                printf("usb_device_send_control returned %d errno: %d\n", ret, errno);
+                if (ret > 0) {
+                    printf("got MTP string %s\n", buffer);
+                    ret = usb_device_send_control(device,
+                            USB_DIR_IN|USB_RECIP_DEVICE|USB_TYPE_VENDOR, 1,
+                            0, 4, sizeof(buffer), buffer);
+                    printf("OS descriptor got %d\n", ret);
+                } else {
+                    printf("no MTP string\n");
+                }
             }
 
             // if we got here, then we have a likely MTP or PTP device
@@ -165,7 +199,7 @@ bool MtpClient::usbDeviceAdded(const char *devname) {
             struct usb_endpoint *ep_intr = usb_endpoint_open(device, ep_intr_desc);
 
             if (usb_device_claim_interface(device, interface->bInterfaceNumber)) {
-                LOGE("usb_device_claim_interface failed\n");
+                LOGE("usb_device_claim_interface failed errno: %d\n", errno);
                 usb_endpoint_close(ep_in);
                 usb_endpoint_close(ep_out);
                 usb_endpoint_close(ep_intr);
