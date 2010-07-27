@@ -458,13 +458,13 @@ bool Parcel::checkInterface(IBinder* binder) const
 }
 
 bool Parcel::enforceInterface(const String16& interface,
-                              int32_t* strict_policy_out) const
+                              IPCThreadState* threadState) const
 {
-    int32_t strict_policy = readInt32();
-    IPCThreadState::self()->setStrictModePolicy(strict_policy);
-    if (strict_policy_out != NULL) {
-      *strict_policy_out = strict_policy;
+    int32_t strictPolicy = readInt32();
+    if (threadState == NULL) {
+        threadState = IPCThreadState::self();
     }
+    threadState->setStrictModePolicy(strictPolicy);
     const String16 str(readString16());
     if (str == interface) {
         return true;
