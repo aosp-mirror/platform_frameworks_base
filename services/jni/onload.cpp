@@ -9,6 +9,7 @@ int register_android_server_BatteryService(JNIEnv* env);
 int register_android_server_InputManager(JNIEnv* env);
 int register_android_server_LightsService(JNIEnv* env);
 int register_android_server_PowerManagerService(JNIEnv* env);
+int register_android_server_UsbService(JNIEnv* env);
 int register_android_server_VibratorService(JNIEnv* env);
 int register_android_server_SystemServer(JNIEnv* env);
 int register_android_server_location_GpsLocationProvider(JNIEnv* env);
@@ -32,6 +33,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
     register_android_server_LightsService(env);
     register_android_server_AlarmManagerService(env);
     register_android_server_BatteryService(env);
+    register_android_server_UsbService(env);
     register_android_server_VibratorService(env);
     register_android_server_SystemServer(env);
     register_android_server_location_GpsLocationProvider(env);
