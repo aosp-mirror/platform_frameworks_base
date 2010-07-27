@@ -26,11 +26,12 @@
 // ---------------------------------------------------------------------------
 namespace android {
 
+class Flattenable;
 class IBinder;
+class IPCThreadState;
 class ProcessState;
 class String8;
 class TextOutput;
-class Flattenable;
 
 struct flat_binder_object;  // defined in support_p/binder_module.h
 
@@ -61,10 +62,13 @@ public:
 
     // Parses the RPC header, returning true if the interface name
     // in the header matches the expected interface from the caller.
-    // If strict_policy_out is non-NULL, the RPC header's StrictMode policy
-    // mask is returned.
+    //
+    // Additionally, enforceInterface does part of the work of
+    // propagating the StrictMode policy mask, populating the current
+    // IPCThreadState, which as an optimization may optionally be
+    // passed in.
     bool                enforceInterface(const String16& interface,
-                                         int32_t* strict_policy_out = NULL) const;
+                                         IPCThreadState* threadState = NULL) const;
     bool                checkInterface(IBinder*) const;
 
     void                freeData();

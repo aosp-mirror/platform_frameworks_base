@@ -97,7 +97,7 @@ public final class StrictMode {
      * via Parcel.writeNoException() (amusingly) where the caller can
      * choose how to react.
      */
-    private static ThreadLocal<ArrayList<ApplicationErrorReport.CrashInfo>> gatheredViolations =
+    private static final ThreadLocal<ArrayList<ApplicationErrorReport.CrashInfo>> gatheredViolations =
             new ThreadLocal<ArrayList<ApplicationErrorReport.CrashInfo>>() {
         @Override protected ArrayList<ApplicationErrorReport.CrashInfo> initialValue() {
             // Starts null to avoid unnecessary allocations when
