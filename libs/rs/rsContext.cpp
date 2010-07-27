@@ -468,8 +468,11 @@ Context::Context(Device *dev, bool isGraphics, bool useDepth)
     timerInit();
     timerSet(RS_TIMER_INTERNAL);
 
-    LOGV("RS Launching thread(s)");
-    mWorkers.mCount = 2;
+    int cpu = sysconf(_SC_NPROCESSORS_ONLN);
+    LOGV("RS Launching thread(s), reported CPU count %i", cpu);
+    if (cpu < 2) cpu = 0;
+
+    mWorkers.mCount = (uint32_t)cpu;
     mWorkers.mThreadId = (pthread_t *) calloc(mWorkers.mCount, sizeof(pthread_t));
     mWorkers.mNativeThreadId = (pid_t *) calloc(mWorkers.mCount, sizeof(pid_t));
     mWorkers.mLaunchSignals = new Signal[mWorkers.mCount];
