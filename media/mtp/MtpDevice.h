@@ -22,6 +22,8 @@
 #include "MtpResponsePacket.h"
 #include "MtpTypes.h"
 
+#include <utils/threads.h>
+
 struct usb_device;
 
 namespace android {
@@ -52,6 +54,9 @@ private:
     MtpDataPacket           mData;
     MtpResponsePacket       mResponse;
 
+    // to ensure only one MTP transaction at a time
+    Mutex                   mMutex;
+
 public:
                             MtpDevice(struct usb_device* device, int interface,
                                     struct usb_endpoint *ep_in, struct usb_endpoint *ep_out,
@@ -73,16 +78,24 @@ public:
     MtpObjectHandleList*    getObjectHandles(MtpStorageID storageID, MtpObjectFormat format, MtpObjectHandle parent);
     MtpObjectInfo*          getObjectInfo(MtpObjectHandle handle);
     void*                   getThumbnail(MtpObjectHandle handle, int& outLength);
+    MtpObjectHandle         sendObjectInfo(MtpObjectInfo* info);
+    bool                    sendObject(MtpObjectInfo* info, int srcFD);
     bool                    deleteObject(MtpObjectHandle handle);
     MtpObjectHandle         getParent(MtpObjectHandle handle);
     MtpObjectHandle         getStorageID(MtpObjectHandle handle);
 
     MtpProperty*            getDevicePropDesc(MtpDeviceProperty code);
 
+    // returns the file descriptor for a pipe to read the object's data
+    int                     readObject(MtpObjectHandle handle, int objectSize);
+
 private:
+    friend class ReadObjectThread;
+
     bool                    sendRequest(MtpOperationCode operation);
-    bool                    sendData(MtpOperationCode operation);
+    bool                    sendData();
     bool                    readData();
+    bool                    writeDataHeader(MtpOperationCode operation, int dataLength);
     MtpResponseCode         readResponse();
 
 };
