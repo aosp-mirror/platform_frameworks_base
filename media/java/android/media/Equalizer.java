@@ -19,13 +19,15 @@ package android.media;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioEffect;
 import android.os.Bundle;
 import android.util.Log;
+
 import java.nio.ByteOrder;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.util.StringTokenizer;
 
-import android.media.AudioEffect;
 
 /**
  * An Equalizer is used to alter the frequency response of a particular music source or of the main
@@ -87,10 +89,17 @@ public class Equalizer extends AudioEffect {
      * Request preset name. Parameter ID for OnParameterChangeListener
      */
     public static final int PARAM_GET_PRESET_NAME = 8;
+    // used by setProperties()/getProperties
+    private static final int PARAM_PROPERTIES = 9;
     /**
      * maximum size for perset name
      */
     public static final int PARAM_STRING_SIZE_MAX = 32;
+
+    /**
+     * Number of bands implemented by Equalizer engine
+     */
+    private short mNumBands = 0;
 
     /**
      * Number of presets implemented by Equalizer engine
@@ -136,6 +145,8 @@ public class Equalizer extends AudioEffect {
            UnsupportedOperationException, RuntimeException {
         super(EFFECT_TYPE_EQUALIZER, EFFECT_TYPE_NULL, priority, audioSession);
 
+        getNumberOfBands();
+
         mNumPresets = (int)getNumberOfPresets();
 
         if (mNumPresets != 0) {
@@ -150,7 +161,6 @@ public class Equalizer extends AudioEffect {
                 while (value[length] != 0) length++;
                 try {
                     mPresetNames[i] = new String(value, 0, length, "ISO-8859-1");
-                    Log.e(TAG, "preset #: "+i+" name: "+mPresetNames[i]+" length: "+length);
                 } catch (java.io.UnsupportedEncodingException e) {
                     Log.e(TAG, "preset name decode error");
                 }
@@ -167,11 +177,15 @@ public class Equalizer extends AudioEffect {
      */
     public short getNumberOfBands()
     throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
+        if (mNumBands != 0) {
+            return mNumBands;
+        }
         int[] param = new int[1];
         param[0] = PARAM_NUM_BANDS;
         short[] value = new short[1];
         checkStatus(getParameter(param, value));
-        return value[0];
+        mNumBands = value[0];
+        return mNumBands;
     }
 
     /**
@@ -440,4 +454,120 @@ public class Equalizer extends AudioEffect {
         }
     }
 
+    /**
+     * The Settings class regroups all equalizer parameters. It is used in
+     * conjuntion with getProperties() and setProperties() methods to backup and restore
+     * all parameters in a single call.
+     */
+    public static class Settings {
+        public short curPreset;
+        public short numBands = 0;
+        public short[] bandLevels = null;
+
+        public Settings() {
+        }
+
+        /**
+         * Settings class constructor from a key=value; pairs formatted string. The string is
+         * typically returned by Settings.toString() method.
+         * @throws IllegalArgumentException if the string is not correctly formatted.
+         */
+        public Settings(String settings) {
+            StringTokenizer st = new StringTokenizer(settings, "=;");
+            int tokens = st.countTokens();
+            if (st.countTokens() < 5) {
+                throw new IllegalArgumentException("settings: " + settings);
+            }
+            String key = st.nextToken();
+            if (!key.equals("Equalizer")) {
+                throw new IllegalArgumentException(
+                        "invalid settings for Equalizer: " + key);
+            }
+            try {
+                key = st.nextToken();
+                if (!key.equals("curPreset")) {
+                    throw new IllegalArgumentException("invalid key name: " + key);
+                }
+                curPreset = Short.parseShort(st.nextToken());
+                key = st.nextToken();
+                if (!key.equals("numBands")) {
+                    throw new IllegalArgumentException("invalid key name: " + key);
+                }
+                numBands = Short.parseShort(st.nextToken());
+                if (st.countTokens() != numBands*2) {
+                    throw new IllegalArgumentException("settings: " + settings);
+                }
+                bandLevels = new short[numBands];
+                for (int i = 0; i < numBands; i++) {
+                    key = st.nextToken();
+                    if (!key.equals("band"+(i+1)+"Level")) {
+                        throw new IllegalArgumentException("invalid key name: " + key);
+                    }
+                    bandLevels[i] = Short.parseShort(st.nextToken());
+                }
+             } catch (NumberFormatException nfe) {
+                throw new IllegalArgumentException("invalid value for key: " + key);
+            }
+        }
+
+        @Override
+        public String toString() {
+
+            String str = new String (
+                    "Equalizer"+
+                    ";curPreset="+Short.toString(curPreset)+
+                    ";numBands="+Short.toString(numBands)
+                    );
+            for (int i = 0; i < numBands; i++) {
+                str = str.concat(";band"+(i+1)+"Level="+Short.toString(bandLevels[i]));
+            }
+            return str;
+        }
+    };
+
+
+    /**
+     * Gets the equalizer properties. This method is useful when a snapshot of current
+     * equalizer settings must be saved by the application.
+     * @return an Equalizer.Settings object containing all current parameters values
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
+    public Equalizer.Settings getProperties()
+    throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
+        byte[] param = new byte[4 + mNumBands * 2];
+        checkStatus(getParameter(PARAM_PROPERTIES, param));
+        Settings settings = new Settings();
+        settings.curPreset = byteArrayToShort(param, 0);
+        settings.numBands = byteArrayToShort(param, 2);
+        settings.bandLevels = new short[mNumBands];
+        for (int i = 0; i < mNumBands; i++) {
+            settings.bandLevels[i] = byteArrayToShort(param, 4 + 2*i);
+        }
+        return settings;
+    }
+
+    /**
+     * Sets the equalizer properties. This method is useful when equalizer settings have to
+     * be applied from a previous backup.
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
+    public void setProperties(Equalizer.Settings settings)
+    throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
+        if (settings.numBands != settings.bandLevels.length ||
+            settings.numBands != mNumBands) {
+            throw new IllegalArgumentException("settings invalid band count: " +settings.numBands);
+        }
+
+        byte[] param = concatArrays(shortToByteArray(settings.curPreset),
+                                    shortToByteArray(mNumBands));
+        for (int i = 0; i < mNumBands; i++) {
+            param = concatArrays(param,
+                                 shortToByteArray(settings.bandLevels[i]));
+        }
+        checkStatus(setParameter(PARAM_PROPERTIES, param));
+    }
 }

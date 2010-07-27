@@ -549,7 +549,7 @@ static jint android_media_AudioEffect_native_setParameter(JNIEnv *env,
     p = (effect_param_t *) malloc(sizeof(effect_param_t) + voffset + vsize);
     memcpy(p->data, lpParam, psize);
     p->psize = psize;
-    memcpy(p->data + voffset, lpValue, psize);
+    memcpy(p->data + voffset, lpValue, vsize);
     p->vsize = vsize;
 
     lStatus = lpAudioEffect->setParameter(p);

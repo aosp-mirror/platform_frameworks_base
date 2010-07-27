@@ -19,17 +19,19 @@ package android.media;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioEffect;
 import android.os.Bundle;
 import android.util.Log;
+
 import java.nio.ByteOrder;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.util.StringTokenizer;
 
-import android.media.AudioEffect;
 
 /**
  * Bass boost is an audio effect to boost or amplify low frequencies of the sound. It is comparable
- * to an simple equalizer but limited to one band amplification in the low frequency range.
+ * to a simple equalizer but limited to one band amplification in the low frequency range.
  * <p>An application creates a BassBoost object to instantiate and control a bass boost engine
  * in the audio framework.
  * <p>The methods, parameter types and units exposed by the BassBoost implementation are directly
@@ -209,5 +211,83 @@ public class BassBoost extends AudioEffect {
                 super.setParameterListener(mBaseParamListener);
             }
         }
+    }
+
+    /**
+     * The Settings class regroups all bass boost parameters. It is used in
+     * conjuntion with getProperties() and setProperties() methods to backup and restore
+     * all parameters in a single call.
+     */
+    public static class Settings {
+        public short strength;
+
+        public Settings() {
+        }
+
+        /**
+         * Settings class constructor from a key=value; pairs formatted string. The string is
+         * typically returned by Settings.toString() method.
+         * @throws IllegalArgumentException if the string is not correctly formatted.
+         */
+        public Settings(String settings) {
+            StringTokenizer st = new StringTokenizer(settings, "=;");
+            int tokens = st.countTokens();
+            if (st.countTokens() != 3) {
+                throw new IllegalArgumentException("settings: " + settings);
+            }
+            String key = st.nextToken();
+            if (!key.equals("BassBoost")) {
+                throw new IllegalArgumentException(
+                        "invalid settings for BassBoost: " + key);
+            }
+            try {
+                key = st.nextToken();
+                if (!key.equals("strength")) {
+                    throw new IllegalArgumentException("invalid key name: " + key);
+                }
+                strength = Short.parseShort(st.nextToken());
+             } catch (NumberFormatException nfe) {
+                throw new IllegalArgumentException("invalid value for key: " + key);
+            }
+        }
+
+        @Override
+        public String toString() {
+            String str = new String (
+                    "BassBoost"+
+                    ";strength="+Short.toString(strength)
+                    );
+            return str;
+        }
+    };
+
+
+    /**
+     * Gets the bass boost properties. This method is useful when a snapshot of current
+     * bass boost settings must be saved by the application.
+     * @return a BassBoost.Settings object containing all current parameters values
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
+    public BassBoost.Settings getProperties()
+    throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
+        Settings settings = new Settings();
+        short[] value = new short[1];
+        checkStatus(getParameter(PARAM_STRENGTH, value));
+        settings.strength = value[0];
+        return settings;
+    }
+
+    /**
+     * Sets the bass boost properties. This method is useful when bass boost settings have to
+     * be applied from a previous backup.
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
+    public void setProperties(BassBoost.Settings settings)
+    throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
+        checkStatus(setParameter(PARAM_STRENGTH, settings.strength));
     }
 }

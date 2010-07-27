@@ -54,7 +54,19 @@ $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/FrameworkTest_in
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/android.policy*)
 $(call add-clean-step, rm -rf $(TARGET_OUT_JAVA_LIBRARIES)/android.policy.jar)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates)
-
+$(call add-clean-step, rm -f $(PRODUCT_OUT)/obj/lib/libequalizer.so)
+$(call add-clean-step, rm -f $(PRODUCT_OUT)/obj/lib/libequalizertest.so)
+$(call add-clean-step, rm -f $(PRODUCT_OUT)/obj/lib/libreverb.so)
+$(call add-clean-step, rm -f $(PRODUCT_OUT)/obj/lib/libreverbtest.so)
+$(call add-clean-step, rm -f $(PRODUCT_OUT)/symbols/system/lib/libequalizer.so)
+$(call add-clean-step, rm -f $(PRODUCT_OUT)/symbols/system/lib/libequalizertest.so)
+$(call add-clean-step, rm -f $(PRODUCT_OUT)/symbols/system/lib/libreverb.so)
+$(call add-clean-step, rm -f $(PRODUCT_OUT)/symbols/system/lib/libreverbtest.so)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/SHARED_LIBRARIES/libequalizer_intermediates)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/SHARED_LIBRARIES/libequalizertest_intermediates)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/SHARED_LIBRARIES/libreverb_intermediates)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/SHARED_LIBRARIES/libreverbtest_intermediates)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/lib/soundfx/)
 
 # ************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST

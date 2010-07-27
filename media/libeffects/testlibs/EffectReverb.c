@@ -688,7 +688,7 @@ int Reverb_getParameter(reverb_object_t *pReverb, int32_t param, size_t *pSize,
         void *pValue) {
     int32_t *pValue32;
     int16_t *pValue16;
-    t_reverb_properties *pProperties;
+    t_reverb_settings *pProperties;
     int32_t i;
     int32_t temp;
     int32_t temp2;
@@ -727,7 +727,7 @@ int Reverb_getParameter(reverb_object_t *pReverb, int32_t param, size_t *pSize,
             break;
 
         case REVERB_PARAM_PROPERTIES:
-            size = sizeof(t_reverb_properties);
+            size = sizeof(t_reverb_settings);
             break;
 
         default:
@@ -740,7 +740,7 @@ int Reverb_getParameter(reverb_object_t *pReverb, int32_t param, size_t *pSize,
 
         pValue32 = (int32_t *) pValue;
         pValue16 = (int16_t *) pValue;
-        pProperties = (t_reverb_properties *) pValue;
+        pProperties = (t_reverb_settings *) pValue;
 
         switch (param) {
         case REVERB_PARAM_BYPASS:
@@ -971,7 +971,7 @@ int Reverb_setParameter(reverb_object_t *pReverb, int32_t param, size_t size,
         void *pValue) {
     int32_t value32;
     int16_t value16;
-    t_reverb_properties *pProperties;
+    t_reverb_settings *pProperties;
     int32_t i;
     int32_t temp;
     int32_t temp2;
@@ -1019,7 +1019,7 @@ int Reverb_setParameter(reverb_object_t *pReverb, int32_t param, size_t size,
             break;
 
         case REVERB_PARAM_PROPERTIES:
-            paramSize = sizeof(t_reverb_properties);
+            paramSize = sizeof(t_reverb_settings);
             break;
 
         default:
@@ -1035,7 +1035,7 @@ int Reverb_setParameter(reverb_object_t *pReverb, int32_t param, size_t size,
         } else if (paramSize == sizeof(int32_t)) {
             value32 = *(int32_t *) pValue;
         } else {
-            pProperties = (t_reverb_properties *) pValue;
+            pProperties = (t_reverb_settings *) pValue;
         }
 
         pPreset = &pReverb->m_sPreset.m_sPreset[pReverb->m_nNextRoom];
