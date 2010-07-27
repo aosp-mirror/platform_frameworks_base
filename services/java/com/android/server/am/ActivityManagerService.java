@@ -6170,7 +6170,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (dbox == null || !dbox.isTagEnabled(dropboxTag)) return;
 
         boolean bufferWasEmpty;
-
+        boolean needsFlush;
         final StringBuilder sb = isSystemApp ? mStrictModeBuffer : new StringBuilder(1024);
         synchronized (sb) {
             bufferWasEmpty = sb.length() == 0;
@@ -6185,18 +6185,32 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 sb.append(crashInfo.stackTrace);
             }
             sb.append("\n");
+
+            // Only buffer up to ~64k.  Various logging bits truncate
+            // things at 128k.
+            needsFlush = (sb.length() > 64 * 1024);
         }
 
-        // Non-system apps are isolated with a different tag & policy.
-        // They're also not batched.  Batching is useful during system
-        // boot with strict system-wide logging policies and lots of
-        // things firing, but not common with regular apps, which
-        // won't ship with StrictMode dropboxing enabled.
-        if (!isSystemApp) {
+        // Flush immediately if the buffer's grown too large, or this
+        // is a non-system app.  Non-system apps are isolated with a
+        // different tag & policy and not batched.
+        //
+        // Batching is useful during internal testing with
+        // StrictMode settings turned up high.  Without batching,
+        // thousands of separate files could be created on boot.
+        if (!isSystemApp || needsFlush) {
             new Thread("Error dump: " + dropboxTag) {
                 @Override
                 public void run() {
-                    dbox.addText(dropboxTag, sb.toString());
+                    String report;
+                    synchronized (sb) {
+                        report = sb.toString();
+                        sb.delete(0, sb.length());
+                        sb.trimToSize();
+                    }
+                    if (report.length() != 0) {
+                        dbox.addText(dropboxTag, report);
+                    }
                 }
             }.start();
             return;
@@ -6204,8 +6218,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         // System app batching:
         if (!bufferWasEmpty) {
-            // An existing dropbox-writing thread is outstanding and
-            // will handle it.
+            // An existing dropbox-writing thread is outstanding, so
+            // we don't need to start it up.  The existing thread will
+            // catch the buffer appends we just did.
             return;
         }
 
