@@ -32,9 +32,12 @@
     <string name="keywords_label">Keywords: </string>
 
     <!-- menu items -->
+    <string name="save_item">Save</string>
     <string name="delete_item">Delete</string>
 
     <!-- toasts -->
+    <string name="object_saved_message">Object saved</string>
+    <string name="save_failed_message">Could not save object</string>
     <string name="object_deleted_message">Object deleted</string>
     <string name="delete_failed_message">Could not delete object</string>
 

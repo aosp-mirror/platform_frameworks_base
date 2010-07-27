@@ -22,12 +22,25 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.FileUtils;
+import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.provider.Mtp;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -106,18 +119,135 @@ public class ObjectViewer extends Activity {
             view.setText(c.getString(12));
             byte[] thumbnail = c.getBlob(13);
             if (thumbnail != null) {
-                Log.d(TAG, "got thumbnail, length: " + thumbnail.length);
-                for (int i = 0; i < 50; i++) {
-                    Log.d(TAG, "    " + Integer.toHexString(thumbnail[i]));
-                }
-
                 ImageView thumbView = (ImageView)findViewById(R.id.thumbnail);
                 Bitmap bitmap = BitmapFactory.decodeByteArray(thumbnail, 0, thumbnail.length);
-                Log.d(TAG, "bitmap: " + bitmap);
                 if (bitmap != null) {
                     thumbView.setImageBitmap(bitmap);
                 }
             }
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.object_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.save);
+        item.setEnabled(true);
+        item = menu.findItem(R.id.delete);
+        item.setEnabled(true);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.save:
+                save();
+                return true;
+            case R.id.delete:
+                delete();
+                return true;
+        }
+        return false;
+    }
+
+    private static String getTimestamp() {
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(System.currentTimeMillis());
+        return String.format("%tY-%tm-%td-%tH-%tM-%tS", c, c, c, c, c, c);
+    }
+
+    private void save() {
+        boolean success = false;
+        Uri uri = Mtp.Object.getContentUri(mDeviceID, mObjectID);
+        File destFile = null;
+        ParcelFileDescriptor pfd = null;
+        FileInputStream fis = null;
+        FileOutputStream fos = null;
+
+        try {
+            pfd = getContentResolver().openFileDescriptor(uri, "r");
+            Log.d(TAG, "save got pfd " + pfd);
+            if (pfd != null) {
+                fis = new FileInputStream(pfd.getFileDescriptor());
+                Log.d(TAG, "save got fis " + fis);
+                File destDir = Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_DCIM);
+                destDir.mkdirs();
+                destFile = new File(destDir, "CameraBrowser-" + getTimestamp() + ".jpeg");
+
+
+                Log.d(TAG, "save got destFile " + destFile);
+
+                if (destFile.exists()) {
+                    destFile.delete();
+                }
+                fos = new FileOutputStream(destFile);
+
+                byte[] buffer = new byte[65536];
+                int bytesRead;
+                while ((bytesRead = fis.read(buffer)) >= 0) {
+                    Log.d(TAG, "copying the bytes numbering " + bytesRead);
+                    fos.write(buffer, 0, bytesRead);
+                }
+
+                // temporary workaround until we straighten out permissions in /data/media
+                // 1015 is AID_SDCARD_RW
+                FileUtils.setPermissions(destDir.getPath(), 0775, Process.myUid(), 1015);
+                FileUtils.setPermissions(destFile.getPath(), 0664, Process.myUid(), 1015);
+
+                success = true;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Exception in ObjectView.save", e);
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (Exception e) {
+                }
+            }
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (Exception e) {
+                }
+            }
+            if (pfd != null) {
+                try {
+                    pfd.close();
+                } catch (Exception e) {
+                }
+            }
+        }
+
+        if (success) {
+            Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            intent.setData(Uri.fromFile(destFile));
+            sendBroadcast(intent);
+            Toast.makeText(this, R.string.object_saved_message, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, R.string.save_failed_message, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void delete() {
+        Uri uri = Mtp.Object.getContentUri(mDeviceID, mObjectID);
+
+        Log.d(TAG, "deleting " + uri);
+
+        int result = getContentResolver().delete(uri, null, null);
+        if (result > 0) {
+            Toast.makeText(this, R.string.object_deleted_message, Toast.LENGTH_SHORT).show();
+            finish();
+        } else {
+            Toast.makeText(this, R.string.delete_failed_message, Toast.LENGTH_SHORT).show();
         }
     }
 }
