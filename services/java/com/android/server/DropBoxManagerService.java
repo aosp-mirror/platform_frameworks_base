@@ -690,8 +690,6 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
         // was lost.  Tombstones are expunged by age (see above).
 
         if (mAllFiles.blocks > mCachedQuotaBlocks) {
-            Slog.i(TAG, "Usage (" + mAllFiles.blocks + ") > Quota (" + mCachedQuotaBlocks + ")");
-
             // Find a fair share amount of space to limit each tag
             int unsqueezed = mAllFiles.blocks, squeezed = 0;
             TreeSet<FileList> tags = new TreeSet<FileList>(mFilesByTag.values());
