@@ -177,7 +177,7 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
             break;
 
         case LAYOUT_DUMP_TEXT:
-            mLayoutTestController.dumpAsText();
+            mLayoutTestController.dumpAsText(msg.arg1 == 1);
             break;
 
         case LAYOUT_DUMP_CHILD_FRAMES_TEXT:
@@ -387,7 +387,11 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
     }
 
     public void dumpAsText() {
-        obtainMessage(LAYOUT_DUMP_TEXT).sendToTarget();
+        obtainMessage(LAYOUT_DUMP_TEXT, 0).sendToTarget();
+    }
+
+    public void dumpAsText(boolean enablePixelTests) {
+        obtainMessage(LAYOUT_DUMP_TEXT, enablePixelTests ? 1 : 0).sendToTarget();
     }
 
     public void dumpChildFramesAsText() {

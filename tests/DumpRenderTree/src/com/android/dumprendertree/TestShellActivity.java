@@ -342,7 +342,12 @@ public class TestShellActivity extends Activity implements LayoutTestController 
 
     // .......................................
     // LayoutTestController Functions
-    public void dumpAsText() {
+    public void dumpAsText(boolean enablePixelTests) {
+        // Added after webkit update to r63859. See trac.webkit.org/changeset/63730.
+        if (enablePixelTests) {
+            Log.v(LOGTAG, "dumpAsText(enablePixelTests == true) not implemented on Android!");
+        }
+
         mDumpDataType = DumpDataType.DUMP_AS_TEXT;
         mDumpTopFrameAsText = true;
         if (mWebView != null) {
