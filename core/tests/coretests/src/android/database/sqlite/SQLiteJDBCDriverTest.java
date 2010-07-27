@@ -16,13 +16,14 @@
 
 package android.database.sqlite;
 
+import android.test.suitebuilder.annotation.LargeTest;
+
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import android.test.suitebuilder.annotation.MediumTest;
 
 /**
  * Minimal test for JDBC driver
@@ -62,7 +63,7 @@ public class SQLiteJDBCDriverTest extends AbstractJDBCDriverTest {
     
     // Regression test for (Noser) #255: PreparedStatement.executeUpdate results
     // in VM crashing with SIGABRT.
-    @MediumTest
+    @LargeTest
     public void test_connection3() throws Exception {
         PreparedStatement prst = null;
         Statement st = null;

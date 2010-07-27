@@ -17,9 +17,8 @@
 package android.os;
 
 import android.content.Context;
-import android.os.PowerManager;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 
 public class PowerManagerTest extends AndroidTestCase {
     
@@ -39,7 +38,7 @@ public class PowerManagerTest extends AndroidTestCase {
      * 
      * @throws Exception
      */
-    @MediumTest
+    @SmallTest
     public void testPreconditions() throws Exception {
         assertNotNull(mPm);
     }
@@ -49,7 +48,7 @@ public class PowerManagerTest extends AndroidTestCase {
      * 
      * @throws Exception
      */
-    @MediumTest
+    @SmallTest
     public void testNewWakeLock() throws Exception {
         PowerManager.WakeLock wl = mPm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "FULL_WAKE_LOCK");
         doTestWakeLock(wl);
@@ -74,7 +73,7 @@ public class PowerManagerTest extends AndroidTestCase {
      * 
      * @throws Exception
      */
-    @MediumTest
+    @SmallTest
     public void testBadNewWakeLock() throws Exception {
         
         final int badFlags = PowerManager.SCREEN_BRIGHT_WAKE_LOCK 

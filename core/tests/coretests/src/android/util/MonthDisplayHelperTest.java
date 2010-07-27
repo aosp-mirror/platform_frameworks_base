@@ -16,13 +16,11 @@
 
 package android.util;
 
-import junit.framework.TestCase;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import java.util.Calendar;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.MediumTest;
+
+import junit.framework.TestCase;
 
 /**
  * Unit tests for {@link MonthDisplayHelper}.
@@ -42,7 +40,7 @@ public class MonthDisplayHelperTest extends TestCase {
                 new MonthDisplayHelper(2007, Calendar.SEPTEMBER).getFirstDayOfMonth());
     }
 
-    @MediumTest
+    @SmallTest
     public void testNumberOfDaysInCurrentMonth() {
         assertEquals(30,
                 new MonthDisplayHelper(2007, Calendar.SEPTEMBER).getNumberOfDaysInMonth());

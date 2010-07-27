@@ -17,10 +17,8 @@
 package android.text.util;
 
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.method.LinkMovementMethod;
-import android.text.util.Linkify;
 import android.widget.TextView;
 
 /**
@@ -39,7 +37,7 @@ public class LinkifyTest extends AndroidTestCase {
         assertTrue(tv.getUrls().length == 0);
     }
 
-    @MediumTest
+    @SmallTest
     public void testNormal() throws Exception {
         TextView tv;
 

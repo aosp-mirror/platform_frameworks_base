@@ -19,7 +19,6 @@ package android.text;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Typeface;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.QuoteSpan;
@@ -36,7 +35,7 @@ import junit.framework.TestCase;
 
 public class HtmlTest extends TestCase {
 
-    @MediumTest
+    @SmallTest
     public void testSingleTagOnWhileString() {
         Spanned spanned = Html.fromHtml("<b>hello</b>");
         Object[] spans = spanned.getSpans(-1, 100, Object.class);
@@ -46,7 +45,7 @@ public class HtmlTest extends TestCase {
         assertEquals(5, spanned.getSpanEnd(span));
     }
 
-    @MediumTest
+    @SmallTest
     public void testEmptyFontTag() {
         Spanned spanned = Html.fromHtml("Hello <font color=\"#ff00ff00\"></font>");
         Object[] spans = spanned.getSpans(0, 100, Object.class);
@@ -54,7 +53,7 @@ public class HtmlTest extends TestCase {
     }
 
     /** Tests that the parser can handle mal-formed HTML. */
-    @MediumTest
+    @SmallTest
     public void testBadHtml() {
         Spanned spanned = Html.fromHtml("Hello <b>b<i>bi</b>i</i>");
         Object[] spans = spanned.getSpans(0, 100, Object.class);
@@ -69,13 +68,13 @@ public class HtmlTest extends TestCase {
         assertEquals(10, spanned.getSpanEnd(spans[2]));
     }
 
-    @MediumTest
+    @SmallTest
     public void testSymbols() {
         String spanned = Html.fromHtml("&copy; &gt; &lt").toString();
         assertEquals("\u00a9 > <", spanned);
     }
     
-    @MediumTest
+    @SmallTest
     public void testColor() throws Exception {
         Spanned s;
         ForegroundColorSpan[] colors;
@@ -95,7 +94,7 @@ public class HtmlTest extends TestCase {
         assertEquals(0, colors.length);
     }
 
-    @MediumTest
+    @SmallTest
     public void testResourceColor() throws Exception {
         ColorStateList c =
                 Resources.getSystem().getColorStateList(android.R.color.primary_text_dark);

@@ -16,16 +16,15 @@
 
 package android.widget.listview.arrowscroll;
 
-import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
+import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.MediumTest;
-import android.widget.ListView;
-import android.view.View;
 import android.view.KeyEvent;
+import android.view.View;
+import android.widget.ListView;
 import android.widget.listview.ListOfItemsTallerThanScreen;
 
 public class ListOfItemsTallerThanScreenTest
-        extends ActivityInstrumentationTestCase<ListOfItemsTallerThanScreen> {
+        extends ActivityInstrumentationTestCase2<ListOfItemsTallerThanScreen> {
 
     private ListView mListView;
     private ListOfItemsTallerThanScreen mActivity;
@@ -38,7 +37,7 @@ public class ListOfItemsTallerThanScreenTest
     }
 
     public ListOfItemsTallerThanScreenTest() {
-        super("com.android.frameworks.coretests", ListOfItemsTallerThanScreen.class);
+        super(ListOfItemsTallerThanScreen.class);
     }
 
     @MediumTest
@@ -126,7 +125,7 @@ public class ListOfItemsTallerThanScreenTest
                 1, mListView.getChildCount());
     }
 
-    @LargeTest
+    @MediumTest
     public void testScrollDownToLastItem() {
         final int numItems = mListView.getAdapter().getCount();
 
