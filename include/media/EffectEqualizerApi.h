@@ -19,8 +19,10 @@
 
 #include <media/EffectApi.h>
 
-// for the definition of SL_IID_EQUALIZER
-#include "OpenSLES.h"
+#ifndef OPENSL_ES_H_
+static const effect_uuid_t SL_IID_EQUALIZER_ = { 0x0bed4300, 0xddd6, 0x11db, 0x8f34, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } };
+const effect_uuid_t * const SL_IID_EQUALIZER = &SL_IID_EQUALIZER_;
+#endif //OPENSL_ES_H_
 
 #if __cplusplus
 extern "C" {
@@ -37,9 +39,16 @@ typedef enum
     EQ_PARAM_GET_BAND,              // Gets the band that has the most effect on the given frequency.
     EQ_PARAM_CUR_PRESET,            // Gets/Sets the current preset.
     EQ_PARAM_GET_NUM_OF_PRESETS,    // Gets the total number of presets the equalizer supports.
-    EQ_PARAM_GET_PRESET_NAME        // Gets the preset name based on the index.
+    EQ_PARAM_GET_PRESET_NAME,       // Gets the preset name based on the index.
+    EQ_PARAM_PROPERTIES             // Gets/Sets all parameters at a time.
 } t_equalizer_params;
 
+//t_equalizer_settings groups all current equalizer setting for backup and restore.
+typedef struct s_equalizer_settings {
+    uint16_t curPreset;
+    uint16_t numBands;
+    uint16_t bandLevels[];
+} t_equalizer_settings;
 
 #if __cplusplus
 }  // extern "C"
