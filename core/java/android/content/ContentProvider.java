@@ -57,6 +57,7 @@ import java.util.ArrayList;
  *
  * <p>The primary methods that need to be implemented are:
  * <ul>
+ *   <li>{@link #onCreate} which is called to initialize the provider</li>
  *   <li>{@link #query} which returns data to the caller</li>
  *   <li>{@link #insert} which inserts new data into the content provider</li>
  *   <li>{@link #update} which updates existing data in the content provider</li>
@@ -64,8 +65,15 @@ import java.util.ArrayList;
  *   <li>{@link #getType} which returns the MIME type of data in the content provider</li>
  * </ul></p>
  *
- * <p>This class takes care of cross process calls so subclasses don't have to worry about which
- * process a request is coming from.</p>
+ * <p class="caution">Data access methods (such as {@link #insert} and
+ * {@link #update}) may be called from many threads at once, and must be thread-safe.
+ * Other methods (such as {@link #onCreate}) are only called from the application
+ * main thread, and must avoid performing lengthy operations.  See the method
+ * descriptions for their expected thread behavior.</p>
+ *
+ * <p>Requests to {@link ContentResolver} are automatically forwarded to the appropriate
+ * ContentProvider instance, so subclasses don't have to worry about the details of
+ * cross-process calls.</p>
  */
 public abstract class ContentProvider implements ComponentCallbacks {
     /*
@@ -81,6 +89,21 @@ public abstract class ContentProvider implements ComponentCallbacks {
 
     private Transport mTransport = new Transport();
 
+    /**
+     * Construct a ContentProvider instance.  Content providers must be
+     * <a href="{@docRoot}guide/topics/manifest/provider-element.html">declared
+     * in the manifest</a>, accessed with {@link ContentResolver}, and created
+     * automatically by the system, so applications usually do not create
+     * ContentProvider instances directly.
+     *
+     * <p>At construction time, the object is uninitialized, and most fields and
+     * methods are unavailable.  Subclasses should initialize themselves in
+     * {@link #onCreate}, not the constructor.
+     *
+     * <p>Content providers are created on the application main thread at
+     * application launch time.  The constructor must not perform lengthy
+     * operations, or application startup will be delayed.
+     */
     public ContentProvider() {
     }
 
@@ -328,8 +351,8 @@ public abstract class ContentProvider implements ComponentCallbacks {
 
 
     /**
-     * Retrieve the Context this provider is running in.  Only available once
-     * onCreate(Map icicle) has been called -- this will be null in the
+     * Retrieves the Context this provider is running in.  Only available once
+     * {@link #onCreate} has been called -- this will return null in the
      * constructor.
      */
     public final Context getContext() {
@@ -403,23 +426,59 @@ public abstract class ContentProvider implements ComponentCallbacks {
     }
 
     /**
-     * Called when the provider is being started.
+     * Implement this to initialize your content provider on startup.
+     * This method is called for all registered content providers on the
+     * application main thread at application launch time.  It must not perform
+     * lengthy operations, or application startup will be delayed.
+     *
+     * <p>You should defer nontrivial initialization (such as opening,
+     * upgrading, and scanning databases) until the content provider is used
+     * (via {@link #query}, {@link #insert}, etc).  Deferred initialization
+     * keeps application startup fast, avoids unnecessary work if the provider
+     * turns out not to be needed, and stops database errors (such as a full
+     * disk) from halting application launch.
+     *
+     * <p>For SQL databases, {@link android.database.sqlite.SQLiteOpenHelper}
+     * is a helpful utility class that makes it easy to manage databases,
+     * and will automatically defer opening until first use.  If you do use
+     * SQLiteOpenHelper, make sure to avoid calling
+     * {@link android.database.sqlite.SQLiteOpenHelper#getReadableDatabase} or
+     * {@link android.database.sqlite.SQLiteOpenHelper#getWritableDatabase}
+     * from this method.  (Instead, override
+     * {@link android.database.sqlite.SQLiteOpenHelper#onOpen} to initialize the
+     * database when it is first opened.)
      *
      * @return true if the provider was successfully loaded, false otherwise
      */
     public abstract boolean onCreate();
 
+    /**
+     * {@inheritDoc}
+     * This method is always called on the application main thread, and must
+     * not perform lengthy operations.
+     *
+     * <p>The default content provider implementation does nothing.
+     * Override this method to take appropriate action.
+     * (Content providers do not usually care about things like screen
+     * orientation, but may want to know about locale changes.)
+     */
     public void onConfigurationChanged(Configuration newConfig) {
     }
-    
+
+    /**
+     * {@inheritDoc}
+     * This method is always called on the application main thread, and must
+     * not perform lengthy operations.
+     *
+     * <p>The default content provider implementation does nothing.
+     * Subclasses may override this method to take appropriate action.
+     */
     public void onLowMemory() {
     }
 
     /**
-     * Receives a query request from a client in a local process, and
-     * returns a Cursor. This is called internally by the {@link ContentResolver}.
-     * This method can be called from multiple
-     * threads, as described in
+     * Implement this to handle query requests from clients.
+     * This method can be called from multiple threads, as described in
      * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
      * Processes and Threads</a>.
      * <p>
@@ -476,11 +535,11 @@ public abstract class ContentProvider implements ComponentCallbacks {
             String selection, String[] selectionArgs, String sortOrder);
 
     /**
-     * Return the MIME type of the data at the given URI. This should start with
+     * Implement this to handle requests for the MIME type of the data at the
+     * given URI.  The returned MIME type should start with
      * <code>vnd.android.cursor.item</code> for a single record,
      * or <code>vnd.android.cursor.dir/</code> for multiple items.
-     * This method can be called from multiple
-     * threads, as described in
+     * This method can be called from multiple threads, as described in
      * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
      * Processes and Threads</a>.
      *
@@ -490,11 +549,10 @@ public abstract class ContentProvider implements ComponentCallbacks {
     public abstract String getType(Uri uri);
 
     /**
-     * Implement this to insert a new row.
+     * Implement this to handle requests to insert a new row.
      * As a courtesy, call {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver) notifyChange()}
      * after inserting.
-     * This method can be called from multiple
-     * threads, as described in
+     * This method can be called from multiple threads, as described in
      * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
      * Processes and Threads</a>.
      * @param uri The content:// URI of the insertion request.
@@ -504,12 +562,12 @@ public abstract class ContentProvider implements ComponentCallbacks {
     public abstract Uri insert(Uri uri, ContentValues values);
 
     /**
-     * Implement this to insert a set of new rows, or the default implementation will
-     * iterate over the values and call {@link #insert} on each of them.
+     * Override this to handle requests to insert a set of new rows, or the
+     * default implementation will iterate over the values and call
+     * {@link #insert} on each of them.
      * As a courtesy, call {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver) notifyChange()}
      * after inserting.
-     * This method can be called from multiple
-     * threads, as described in
+     * This method can be called from multiple threads, as described in
      * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
      * Processes and Threads</a>.
      *
@@ -526,13 +584,12 @@ public abstract class ContentProvider implements ComponentCallbacks {
     }
 
     /**
-     * A request to delete one or more rows. The selection clause is applied when performing
-     * the deletion, allowing the operation to affect multiple rows in a
-     * directory.
+     * Implement this to handle requests to delete one or more rows.
+     * The implementation should apply the selection clause when performing
+     * deletion, allowing the operation to affect multiple rows in a directory.
      * As a courtesy, call {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver) notifyDelete()}
      * after deleting.
-     * This method can be called from multiple
-     * threads, as described in
+     * This method can be called from multiple threads, as described in
      * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
      * Processes and Threads</a>.
      *
@@ -549,13 +606,12 @@ public abstract class ContentProvider implements ComponentCallbacks {
     public abstract int delete(Uri uri, String selection, String[] selectionArgs);
 
     /**
-     * Update a content URI. All rows matching the optionally provided selection
-     * will have their columns listed as the keys in the values map with the
-     * values of those keys.
+     * Implement this to update one or more rows.
+     * The implementation should update all rows matching the selection
+     * to set the columns according to the provided values map.
      * As a courtesy, call {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver) notifyChange()}
      * after updating.
-     * This method can be called from multiple
-     * threads, as described in
+     * This method can be called from multiple threads, as described in
      * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
      * Processes and Threads</a>.
      *
@@ -570,18 +626,15 @@ public abstract class ContentProvider implements ComponentCallbacks {
             String[] selectionArgs);
 
     /**
-     * Open a file blob associated with a content URI.
-     * This method can be called from multiple
-     * threads, as described in
+     * Override this to open a file blob associated with a content URI.
+     * The default implementation always throws {@link FileNotFoundException}.
+     * This method can be called from multiple threads, as described in
      * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
      * Processes and Threads</a>.
-     * 
-     * <p>Returns a
-     * ParcelFileDescriptor, from which you can obtain a
-     * {@link java.io.FileDescriptor} for use with
-     * {@link java.io.FileInputStream}, {@link java.io.FileOutputStream}, etc.
-     * This can be used to store large data (such as an image) associated with
-     * a particular piece of content.
+     *
+     * <p>Returns a ParcelFileDescriptor, which is returned directly to the
+     * caller.  This way large data (such as images and documents) can be
+     * returned without copying the content.
      *
      * <p>The returned ParcelFileDescriptor is owned by the caller, so it is
      * their responsibility to close it when done.  That is, the implementation
@@ -599,31 +652,35 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * no file associated with the given URI or the mode is invalid.
      * @throws SecurityException Throws SecurityException if the caller does
      * not have permission to access the file.
-     * 
+     *
      * @see #openAssetFile(Uri, String)
      * @see #openFileHelper(Uri, String)
-     */    
+     */
     public ParcelFileDescriptor openFile(Uri uri, String mode)
             throws FileNotFoundException {
         throw new FileNotFoundException("No files supported by provider at "
                 + uri);
     }
-    
+
     /**
      * This is like {@link #openFile}, but can be implemented by providers
      * that need to be able to return sub-sections of files, often assets
-     * inside of their .apk.  Note that when implementing this your clients
-     * must be able to deal with such files, either directly with
-     * {@link ContentResolver#openAssetFileDescriptor
-     * ContentResolver.openAssetFileDescriptor}, or by using the higher-level
+     * inside of their .apk.
+     * This method can be called from multiple threads, as described in
+     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
+     * Processes and Threads</a>.
+     *
+     * <p>If you implement this, your clients must be able to deal with such
+     * files, either directly with
+     * {@link ContentResolver#openAssetFileDescriptor}, or by using the higher-level
      * {@link ContentResolver#openInputStream ContentResolver.openInputStream}
      * or {@link ContentResolver#openOutputStream ContentResolver.openOutputStream}
      * methods.
-     * 
-     * <p><em>Note: if you are implementing this to return a full file, you
+     *
+     * <p class="note">If you are implementing this to return a full file, you
      * should create the AssetFileDescriptor with
      * {@link AssetFileDescriptor#UNKNOWN_LENGTH} to be compatible with
-     * applications that can not handle sub-sections of files.</em></p>
+     * applications that can not handle sub-sections of files.</p>
      *
      * @param uri The URI whose file is to be opened.
      * @param mode Access mode for the file.  May be "r" for read-only access,
@@ -735,17 +792,20 @@ public abstract class ContentProvider implements ComponentCallbacks {
     }
 
     /**
-     * Applies each of the {@link ContentProviderOperation} objects and returns an array
-     * of their results. Passes through OperationApplicationException, which may be thrown
-     * by the call to {@link ContentProviderOperation#apply}.
-     * If all the applications succeed then a {@link ContentProviderResult} array with the
-     * same number of elements as the operations will be returned. It is implementation-specific
-     * how many, if any, operations will have been successfully applied if a call to
-     * apply results in a {@link OperationApplicationException}.
+     * Override this to perform a batch of operations, or the default
+     * implementation will {@link ContentProviderOperation#apply} each of the
+     * {@link ContentProviderOperation} objects.  If the apply calls all succeed
+     * then a {@link ContentProviderResult} array with the same number of
+     * elements as the operations will be returned.  If any of the apply calls
+     * fail, it is up to the implementation how many of the others take effect.
+     * This method can be called from multiple threads, as described in
+     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
+     * Processes and Threads</a>.
+     *
      * @param operations the operations to apply
      * @return the results of the applications
-     * @throws OperationApplicationException thrown if an application fails.
-     * See {@link ContentProviderOperation#apply} for more information.
+     * @throws OperationApplicationException thrown if any operation fails.
+     * @see ContentProviderOperation#apply
      */
     public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
             throws OperationApplicationException {
