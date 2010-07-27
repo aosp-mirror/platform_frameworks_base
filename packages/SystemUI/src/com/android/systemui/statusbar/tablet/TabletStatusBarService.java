@@ -16,22 +16,30 @@
 
 package com.android.systemui.statusbar.tablet;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.os.Handler;
-import android.os.Message;
 import android.os.IBinder;
+import android.os.Message;
+import android.util.Slog;
 import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.widget.RemoteViews;
+import android.app.ActivityManagerNative;
+import android.app.PendingIntent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.graphics.Rect;
+import android.os.RemoteException;
 import android.view.WindowManagerImpl;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.util.Slog;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
@@ -41,7 +49,7 @@ import com.android.systemui.statusbar.*;
 import com.android.systemui.R;
 
 public class TabletStatusBarService extends StatusBarService {
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
     public static final String TAG = "TabletStatusBar";
 
     View mStatusBarView;
@@ -53,6 +61,10 @@ public class TabletStatusBarService extends StatusBarService {
 
     private View mNotificationPanel;
     private View mSystemPanel;
+
+    private NotificationIconArea.IconLayout mIconLayout;
+
+    private NotificationData mHaps = new NotificationData();
     
     protected void addPanelWindows() {
         if (mNotificationPanel == null) {
@@ -124,6 +136,9 @@ public class TabletStatusBarService extends StatusBarService {
         // the more notifications icon
         mNotificationIconArea = (NotificationIconArea)sb.findViewById(R.id.notificationIcons);
 
+        // where the icons go
+        mIconLayout = (NotificationIconArea.IconLayout) sb.findViewById(R.id.icons);
+
         return sb;
     }
 
@@ -172,15 +187,86 @@ public class TabletStatusBarService extends StatusBarService {
     }
 
     public void addNotification(IBinder key, StatusBarNotification notification) {
-        // TODO
+        if (DEBUG) Slog.d(TAG, "addNotification(" + key + " -> " + notification + ")");
+        addNotificationViews(key, notification);
+
+        // TODO: kicker; immersive mode
     }
 
     public void updateNotification(IBinder key, StatusBarNotification notification) {
-        // TODO
+        if (DEBUG) Slog.d(TAG, "updateNotification(" + key + " -> " + notification + ") // TODO");
+        NotificationData oldList = mHaps;
+
+        int oldIndex = oldList.findEntry(key);
+        if (oldIndex < 0) {
+            Slog.w(TAG, "updateNotification for unknown key: " + key);
+            return;
+        }
+
+        final NotificationData.Entry oldEntry = oldList.getEntryAt(oldIndex);
+        final StatusBarNotification oldNotification = oldEntry.notification;
+        final RemoteViews oldContentView = oldNotification.notification.contentView;
+
+        final RemoteViews contentView = notification.notification.contentView;
+
+        if (false) {
+            Slog.d(TAG, "old notification: when=" + oldNotification.notification.when
+                    + " ongoing=" + oldNotification.isOngoing()
+                    + " expanded=" + oldEntry.expanded
+                    + " contentView=" + oldContentView);
+            Slog.d(TAG, "new notification: when=" + notification.notification.when
+                    + " ongoing=" + oldNotification.isOngoing()
+                    + " contentView=" + contentView);
+        }
+
+        // Can we just reapply the RemoteViews in place?  If when didn't change, the order
+        // didn't change.
+        if (notification.notification.when == oldNotification.notification.when
+                && notification.isOngoing() == oldNotification.isOngoing()
+                && oldEntry.expanded != null
+                && contentView != null
+                && oldContentView != null
+                && contentView.getPackage() != null
+                && oldContentView.getPackage() != null
+                && oldContentView.getPackage().equals(contentView.getPackage())
+                && oldContentView.getLayoutId() == contentView.getLayoutId()) {
+            if (DEBUG) Slog.d(TAG, "reusing notification for key: " + key);
+            oldEntry.notification = notification;
+            try {
+                // Reapply the RemoteViews
+                contentView.reapply(this, oldEntry.content);
+                // update the contentIntent
+                final PendingIntent contentIntent = notification.notification.contentIntent;
+                if (contentIntent != null) {
+                    oldEntry.content.setOnClickListener(new NotificationClicker(contentIntent,
+                                notification.pkg, notification.tag, notification.id));
+                }
+                // Update the icon.
+                final StatusBarIcon ic = new StatusBarIcon(notification.pkg,
+                        notification.notification.icon, notification.notification.iconLevel,
+                        notification.notification.number);
+                if (!oldEntry.icon.set(ic)) {
+                    handleNotificationError(key, notification, "Couldn't update icon: " + ic);
+                    return;
+                }
+            }
+            catch (RuntimeException e) {
+                // It failed to add cleanly.  Log, and remove the view from the panel.
+                Slog.w(TAG, "Couldn't reapply views for package " + contentView.getPackage(), e);
+                removeNotificationViews(key);
+                addNotificationViews(key, notification);
+            }
+        } else {
+            if (DEBUG) Slog.d(TAG, "not reusing notification for key: " + key);
+            removeNotificationViews(key);
+            addNotificationViews(key, notification);
+        }
+        // TODO: kicker; immersive mode
     }
 
     public void removeNotification(IBinder key) {
-        // TODO
+        if (DEBUG) Slog.d(TAG, "removeNotification(" + key + ") // TODO");
+        removeNotificationViews(key);
     }
 
     public void disable(int state) {
@@ -215,5 +301,169 @@ public class TabletStatusBarService extends StatusBarService {
             : H.MSG_CLOSE_SYSTEM_PANEL;
         mHandler.removeMessages(msg);
         mHandler.sendEmptyMessage(msg);
+    }
+
+    /**
+     * Cancel this notification and tell the status bar service about the failure. Hold no locks.
+     */
+    void handleNotificationError(IBinder key, StatusBarNotification n, String message) {
+        removeNotification(key);
+        try {
+            mBarService.onNotificationError(n.pkg, n.tag, n.id, n.uid, n.initialPid, message);
+        } catch (RemoteException ex) {
+            // The end is nigh.
+        }
+    }
+
+    private class NotificationClicker implements View.OnClickListener {
+        private PendingIntent mIntent;
+        private String mPkg;
+        private String mTag;
+        private int mId;
+
+        NotificationClicker(PendingIntent intent, String pkg, String tag, int id) {
+            mIntent = intent;
+            mPkg = pkg;
+            mTag = tag;
+            mId = id;
+        }
+
+        public void onClick(View v) {
+            try {
+                // The intent we are sending is for the application, which
+                // won't have permission to immediately start an activity after
+                // the user switches to home.  We know it is safe to do at this
+                // point, so make sure new activity switches are now allowed.
+                ActivityManagerNative.getDefault().resumeAppSwitches();
+            } catch (RemoteException e) {
+            }
+
+            if (mIntent != null) {
+                int[] pos = new int[2];
+                v.getLocationOnScreen(pos);
+                Intent overlay = new Intent();
+                overlay.setSourceBounds(
+                        new Rect(pos[0], pos[1], pos[0]+v.getWidth(), pos[1]+v.getHeight()));
+                try {
+                    mIntent.send(TabletStatusBarService.this, 0, overlay);
+                } catch (PendingIntent.CanceledException e) {
+                    // the stack trace isn't very helpful here.  Just log the exception message.
+                    Slog.w(TAG, "Sending contentIntent failed: " + e);
+                }
+            }
+
+            try {
+                mBarService.onNotificationClick(mPkg, mTag, mId);
+            } catch (RemoteException ex) {
+                // system process is dead if we're here.
+            }
+
+            // close the shade if it was open
+            animateCollapse();
+
+            // If this click was on the intruder alert, hide that instead
+//            mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
+        }
+    }
+
+    StatusBarNotification removeNotificationViews(IBinder key) {
+        NotificationData.Entry entry = mHaps.remove(key);
+        if (entry == null) {
+            Slog.w(TAG, "removeNotification for unknown key: " + key);
+            return null;
+        }
+        // Remove the expanded view.
+        ViewGroup rowParent = (ViewGroup)entry.row.getParent();
+        if (rowParent != null) rowParent.removeView(entry.row);
+        // Remove the icon.
+        ViewGroup iconParent = (ViewGroup)entry.icon.getParent();
+        if (iconParent != null) iconParent.removeView(entry.icon);
+
+        return entry.notification;
+    }
+
+    StatusBarIconView addNotificationViews(IBinder key, StatusBarNotification notification) {
+        NotificationData list = mHaps;
+        ViewGroup parent = null;
+        final boolean isOngoing = notification.isOngoing();
+        if (isOngoing) {
+//            parent = mOngoingItems;
+        } else {
+//            parent = mIconLayout;
+        }
+        // Construct the icon.
+        final StatusBarIconView iconView = new StatusBarIconView(this,
+                notification.pkg + "/0x" + Integer.toHexString(notification.id));
+        iconView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+
+        final StatusBarIcon ic = new StatusBarIcon(notification.pkg,
+                    notification.notification.icon,
+                    notification.notification.iconLevel,
+                    notification.notification.number);
+        if (!iconView.set(ic)) {
+            handleNotificationError(key, notification, "Couldn't attach StatusBarIcon: " + ic);
+            return null;
+        }
+        // Construct the expanded view.
+        NotificationData.Entry entry = new NotificationData.Entry(key, notification, iconView);
+        if (!inflateViews(entry, parent)) {
+            handleNotificationError(key, notification, "Couldn't expand RemoteViews for: "
+                    + notification);
+            return null;
+        }
+        // Add the expanded view.
+        final int viewIndex = list.add(entry);
+        if (parent != null) parent.addView(entry.row, viewIndex);
+        // Add the icon.
+        final int iconIndex = 0; // XXX: sort into ongoing and regular buckets
+        mIconLayout.addView(iconView, iconIndex,
+                new LinearLayout.LayoutParams(mIconSize, mIconSize));
+        return iconView;
+    }
+
+    private boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
+        StatusBarNotification sbn = entry.notification;
+        RemoteViews remoteViews = sbn.notification.contentView;
+        if (remoteViews == null) {
+            return false;
+        }
+
+        // create the row view
+        LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View row = inflater.inflate(R.layout.status_bar_latest_event, parent, false);
+
+        // bind the click event to the content area
+        ViewGroup content = (ViewGroup)row.findViewById(R.id.content);
+        // XXX: update to allow controls within notification views
+        content.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+//        content.setOnFocusChangeListener(mFocusChangeListener);
+        PendingIntent contentIntent = sbn.notification.contentIntent;
+        if (contentIntent != null) {
+            content.setOnClickListener(new NotificationClicker(contentIntent,
+                        sbn.pkg, sbn.tag, sbn.id));
+        }
+
+        View expanded = null;
+        Exception exception = null;
+        try {
+            expanded = remoteViews.apply(this, content);
+        }
+        catch (RuntimeException e) {
+            exception = e;
+        }
+        if (expanded == null) {
+            String ident = sbn.pkg + "/0x" + Integer.toHexString(sbn.id);
+            Slog.e(TAG, "couldn't inflate view for notification " + ident, exception);
+            return false;
+        } else {
+            content.addView(expanded);
+            row.setDrawingCacheEnabled(true);
+        }
+
+        entry.row = row;
+        entry.content = content;
+        entry.expanded = expanded;
+
+        return true;
     }
 }

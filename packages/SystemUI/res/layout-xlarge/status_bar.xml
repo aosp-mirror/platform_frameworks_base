@@ -27,16 +27,6 @@
     android:descendantFocusability="afterDescendants"
     >
 
-<!--
-        <LinearLayout android:id="@+id/statusIcons"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:paddingRight="6dip"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"/>    
--->
-
         <com.android.systemui.statusbar.tablet.NotificationIconArea
             android:id="@+id/notificationIcons"
             android:layout_width="wrap_content"
@@ -61,7 +51,7 @@
                 class="com.android.systemui.statusbar.tablet.NotificationIconArea$IconLayout"
                 android:id="@+id/icons"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="@*android:dimen/status_bar_icon_size"
                 android:layout_marginLeft="8dip"
                 />
             <view
