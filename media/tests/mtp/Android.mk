@@ -1,5 +1,7 @@
 LOCAL_PATH:= $(call my-dir)
 
+ifneq ($(TARGET_SIMULATOR),true)
+
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
@@ -16,6 +18,8 @@ LOCAL_MODULE := mtp
 LOCAL_STATIC_LIBRARIES := libmtp libusbhost libutils libcutils
 
 include $(BUILD_EXECUTABLE)
+
+endif
 
 ifeq ($(HOST_OS),linux)
 
