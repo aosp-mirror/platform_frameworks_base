@@ -66,7 +66,7 @@ public class ActionBarImpl extends ActionBar {
     private TabImpl mSelectedTab;
     private int mTabSwitchMode = TAB_SWITCH_ADD_REMOVE;
     
-    private ActionMode mContextMode;
+    private ActionMode mActionMode;
     
     private static final int CONTEXT_DISPLAY_NORMAL = 0;
     private static final int CONTEXT_DISPLAY_SPLIT = 1;
@@ -229,9 +229,9 @@ public class ActionBarImpl extends ActionBar {
         return mActionView.getDisplayOptions();
     }
 
-    public ActionMode startContextMode(ActionMode.Callback callback) {
-        if (mContextMode != null) {
-            mContextMode.finish();
+    public ActionMode startActionMode(ActionMode.Callback callback) {
+        if (mActionMode != null) {
+            mActionMode.finish();
         }
 
         // Don't wait for the close context mode animation to finish.
@@ -241,7 +241,7 @@ public class ActionBarImpl extends ActionBar {
             mCloseContext.run();
         }
 
-        ActionMode mode = new ContextModeImpl(callback);
+        ActionMode mode = new ActionModeImpl(callback);
         if (callback.onCreateActionMode(mode, mode.getMenu())) {
             mode.invalidate();
             mUpperContextView.initForMode(mode);
@@ -250,7 +250,7 @@ public class ActionBarImpl extends ActionBar {
                 // TODO animate this
                 mLowerContextView.setVisibility(View.VISIBLE);
             }
-            mContextMode = mode;
+            mActionMode = mode;
             return mode;
         }
         return null;
@@ -361,12 +361,12 @@ public class ActionBarImpl extends ActionBar {
     /**
      * @hide 
      */
-    public class ContextModeImpl extends ActionMode implements MenuBuilder.Callback {
+    public class ActionModeImpl extends ActionMode implements MenuBuilder.Callback {
         private ActionMode.Callback mCallback;
         private MenuBuilder mMenu;
         private WeakReference<View> mCustomView;
         
-        public ContextModeImpl(ActionMode.Callback callback) {
+        public ActionModeImpl(ActionMode.Callback callback) {
             mCallback = callback;
             mMenu = new MenuBuilder(mActionView.getContext());
             mMenu.setCallback(this);
@@ -379,8 +379,8 @@ public class ActionBarImpl extends ActionBar {
 
         @Override
         public void finish() {
-            if (mContextMode != this) {
-                // Not the active context mode - no-op
+            if (mActionMode != this) {
+                // Not the active action mode - no-op
                 return;
             }
 
@@ -395,7 +395,7 @@ public class ActionBarImpl extends ActionBar {
                 // TODO Animate this
                 mLowerContextView.setVisibility(View.GONE);
             }
-            mContextMode = null;
+            mActionMode = null;
         }
 
         @Override

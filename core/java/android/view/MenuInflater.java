@@ -350,6 +350,10 @@ public class MenuInflater {
                 .setShowAsAction(itemShowAsAction);
             
             if (itemListenerMethodName != null) {
+                if (mContext.isRestricted()) {
+                    throw new IllegalStateException("The android:onClick attribute cannot "
+                            + "be used within a restricted context");
+                }
                 item.setOnMenuItemClickListener(
                         new InflatedOnMenuItemClickListener(mContext, itemListenerMethodName));
             }

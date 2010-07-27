@@ -4080,13 +4080,13 @@ public class Activity extends ContextThemeWrapper
      *
      * @see ActionMode
      */
-    public ActionMode startContextMode(ActionMode.Callback callback) {
+    public ActionMode startActionMode(ActionMode.Callback callback) {
         return mWindow.getDecorView().startActionMode(callback);
     }
 
     public ActionMode onStartActionMode(ActionMode.Callback callback) {
         if (mActionBar != null) {
-            return mActionBar.startContextMode(callback);
+            return mActionBar.startActionMode(callback);
         }
         return null;
     }

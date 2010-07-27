@@ -62,7 +62,12 @@ public abstract class Window {
      * replaces the title bar and provides an alternate location
      * for an on-screen menu button on some devices.
      */
-    public static final int FEATURE_ACTION_BAR = 9;
+    public static final int FEATURE_ACTION_BAR = 8;
+    /**
+     * Flag for specifying the behavior of action modes when an Action Bar is not present.
+     * If overlay is enabled, the action mode UI will be allowed to cover existing window content.
+     */
+    public static final int FEATURE_ACTION_MODE_OVERLAY = 9;
     /** Flag for setting the progress bar's visibility to VISIBLE */
     public static final int PROGRESS_VISIBILITY_ON = -1;
     /** Flag for setting the progress bar's visibility to GONE */

@@ -21,6 +21,13 @@ This is an custom layout for a screen.
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:fitsSystemWindows="true">
+    <!-- Popout bar for action modes -->
+    <com.android.internal.widget.ActionBarContextView
+         android:id="@+id/action_mode_bar"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:visibility="gone" />
+
     <FrameLayout android:id="@android:id/title_container" 
         android:layout_width="match_parent" 
         android:layout_height="?android:attr/windowTitleSize"

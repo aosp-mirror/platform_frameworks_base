@@ -24,12 +24,14 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
+import com.android.internal.view.StandaloneActionMode;
 import com.android.internal.view.menu.ContextMenuBuilder;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuDialogHelper;
 import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.MenuView;
 import com.android.internal.view.menu.SubMenuBuilder;
+import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.ActionBarView;
 
 import android.app.KeyguardManager;
@@ -1638,6 +1640,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         private boolean mWatchingForMenu;
         private int mDownY;
 
+        private ActionMode mActionMode;
+        private ActionBarContextView mActionModeView;
+
         public DecorView(Context context, int featureId) {
             super(context);
             mFeatureId = featureId;
@@ -1935,7 +1940,33 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         @Override
         public ActionMode startActionMode(ActionMode.Callback callback) {
-            return getCallback().onStartActionMode(callback);
+            if (mActionMode != null) {
+                mActionMode.finish();
+            }
+
+            ActionMode mode = getCallback().onStartActionMode(callback);
+            if (mode != null) {
+                mActionMode = mode;
+            } else {
+                if (mActionModeView == null) {
+                    mActionModeView = (ActionBarContextView) findViewById(
+                            com.android.internal.R.id.action_mode_bar);
+                }
+
+                if (mActionModeView != null) {
+                    mode = new StandaloneActionMode(getContext(), mActionModeView,
+                            new ActionModeCallbackWrapper(callback));
+                    if (callback.onCreateActionMode(mode, mode.getMenu())) {
+                        mode.invalidate();
+                        mActionModeView.initForMode(mode);
+                        mActionModeView.setVisibility(View.VISIBLE);
+                        mActionMode = mode;
+                    } else {
+                        mActionMode = null;
+                    }
+                }
+            }
+            return mActionMode;
         }
 
         public void startChanging() {
@@ -2117,6 +2148,35 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (keepOn) PhoneWindow.this.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             else PhoneWindow.this.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
+
+        /**
+         * Clears out internal reference when the action mode is destroyed.
+         */
+        private class ActionModeCallbackWrapper implements ActionMode.Callback {
+            private ActionMode.Callback mWrapped;
+
+            public ActionModeCallbackWrapper(ActionMode.Callback wrapped) {
+                mWrapped = wrapped;
+            }
+
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                return mWrapped.onCreateActionMode(mode, menu);
+            }
+
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return mWrapped.onPrepareActionMode(mode, menu);
+            }
+
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                return mWrapped.onActionItemClicked(mode, item);
+            }
+
+            public void onDestroyActionMode(ActionMode mode) {
+                mWrapped.onDestroyActionMode(mode);
+                mActionModeView.removeAllViews();
+                mActionMode = null;
+            }
+        }
     }
 
     protected DecorView generateDecor() {
@@ -2168,6 +2228,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         } else if (a.getBoolean(com.android.internal.R.styleable.Window_windowActionBar, false)) {
             // Don't allow an action bar if there is no title.
             requestFeature(FEATURE_ACTION_BAR);
+        }
+
+        if (a.getBoolean(com.android.internal.R.styleable.Window_windowActionModeOverlay, false)) {
+            requestFeature(FEATURE_ACTION_MODE_OVERLAY);
         }
 
         if (a.getBoolean(com.android.internal.R.styleable.Window_windowFullscreen, false)) {
@@ -2252,13 +2316,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (mIsFloating) {
                 layoutResource = com.android.internal.R.layout.dialog_title;
             } else if ((features & (1 << FEATURE_ACTION_BAR)) != 0) {
-                Configuration config = getContext().getResources().getConfiguration();
-                if ((config.screenLayout & Configuration.SCREENLAYOUT_SIZE_XLARGE) ==
-                    Configuration.SCREENLAYOUT_SIZE_XLARGE) {
-                    layoutResource = com.android.internal.R.layout.screen_xlarge_action_bar;
-                } else {
-                    layoutResource = com.android.internal.R.layout.screen_action_bar;
-                }
+                layoutResource = com.android.internal.R.layout.screen_action_bar;
             } else {
                 layoutResource = com.android.internal.R.layout.screen_title;
             }

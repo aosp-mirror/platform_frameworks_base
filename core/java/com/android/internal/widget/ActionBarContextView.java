@@ -70,9 +70,9 @@ public class ActionBarContextView extends ViewGroup {
         mItemPadding = a.getDimensionPixelOffset(
                 com.android.internal.R.styleable.Theme_actionButtonPadding, 0);
         setBackgroundDrawable(a.getDrawable(
-                com.android.internal.R.styleable.Theme_actionBarContextBackground));
+                com.android.internal.R.styleable.Theme_actionModeBackground));
         mCloseDrawable = a.getDrawable(
-                com.android.internal.R.styleable.Theme_actionBarCloseContextDrawable);
+                com.android.internal.R.styleable.Theme_actionModeCloseDrawable);
         mItemMargin = mItemPadding / 2;
 
         mContentHeight =

@@ -251,6 +251,10 @@
         <!-- Reference to a style for the Action Bar -->
         <attr name="windowActionBarStyle" format="reference" />
 
+        <!-- Flag indicating whether action modes should overlay window content
+             when there is not reserved space for their UI (such as an Action Bar). -->
+        <attr name="windowActionModeOverlay" format="boolean" />
+
         <!-- Defines the default soft input state that this window would
              like when it is displayed. -->
         <attr name="windowSoftInputMode">
@@ -444,8 +448,15 @@
         <eat-comment />
         <!-- Default amount of padding to use between action buttons. -->
         <attr name="actionButtonPadding" format="dimension" />
-        <attr name="actionBarContextBackground" format="reference" />
-        <attr name="actionBarCloseContextDrawable" format="reference" />
+
+        <!-- =================== -->
+        <!-- Action mode styles  -->
+        <!-- =================== -->
+        <eat-comment />
+        <!-- Background drawable to use for action mode UI -->
+        <attr name="actionModeBackground" format="reference" />
+        <!-- Drawable to use for the close action mode button -->
+        <attr name="actionModeCloseDrawable" format="reference" />
 
         <!-- =================== -->
         <!-- Preference styles   -->
@@ -987,6 +998,7 @@
         <attr name="backgroundDimAmount" />
         <attr name="windowActionBar" />
         <attr name="windowActionBarStyle" />
+        <attr name="windowActionModeOverlay" />
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->

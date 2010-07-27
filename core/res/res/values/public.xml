@@ -1306,8 +1306,9 @@
   <public type="attr" name="showAsAction" />
   <public type="attr" name="actionButtonPadding" />
   <public type="attr" name="previewImage" />
-  <public type="attr" name="actionBarContextBackground" />
-  <public type="attr" name="actionBarCloseContextDrawable" />
+  <public type="attr" name="actionModeBackground" />
+  <public type="attr" name="actionModeCloseDrawable" />
+  <public type="attr" name="windowActionModeOverlay" />
 
   <public type="id" name="home" />
 
