@@ -26,16 +26,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Mtp;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
  /**
  * A list view displaying all objects within a container (folder or storage unit).
@@ -116,47 +112,6 @@ public class ObjectBrowser extends ListActivity {
             intent.putExtra("storage", mStorageID);
             intent.putExtra("object", rowID);
             startActivity(intent);
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.object_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        int position = mList.getSelectedItemPosition();
-        MenuItem item = menu.findItem(R.id.delete);
-        item.setEnabled(position != AdapterView.INVALID_POSITION);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.delete:
-                deleteSelected();
-                return true;
-        }
-        return false;
-    }
-
-    private void deleteSelected() {
-        int position = mList.getSelectedItemPosition();
-        int rowID = (int)mAdapter.getItemId(position);
-        Uri uri = Mtp.Object.getContentUri(mDeviceID, rowID);
-
-        Log.d(TAG, "deleting " + uri);
-
-        int result = getContentResolver().delete(uri, null, null);
-        if (result > 0) {
-            Toast.makeText(this, R.string.object_deleted_message, Toast.LENGTH_SHORT).show();
-            mCursor.requery();
-        } else {
-            Toast.makeText(this, R.string.delete_failed_message, Toast.LENGTH_SHORT).show();
         }
     }
 
