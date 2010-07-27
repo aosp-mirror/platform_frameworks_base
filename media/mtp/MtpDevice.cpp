@@ -406,7 +406,7 @@ public:
             mInitialData = NULL;
         }
 
-        char buffer[65536];
+        char buffer[16384];
         while (remaining > 0) {
             int readSize = (remaining > sizeof(buffer) ? sizeof(buffer) : remaining);
             int count = mDevice->mData.readData(mDevice->mEndpointIn, buffer, readSize);
