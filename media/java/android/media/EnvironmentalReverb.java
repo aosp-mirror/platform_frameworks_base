@@ -19,12 +19,13 @@ package android.media;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioEffect;
 import android.os.Bundle;
 import android.util.Log;
+
 import java.nio.ByteOrder;
 import java.nio.ByteBuffer;
-
-import android.media.AudioEffect;
+import java.util.StringTokenizer;
 
 /**
  * A sound generated within a room travels in many directions. The listener first hears the
@@ -107,6 +108,9 @@ public class EnvironmentalReverb extends AudioEffect {
      */
     public static final int PARAM_DENSITY = 9;
 
+    // used by setProperties()/getProperties
+    private static final int PARAM_PROPERTIES = 10;
+
     /**
      * Registered listener for parameter changes
      */
@@ -142,7 +146,6 @@ public class EnvironmentalReverb extends AudioEffect {
     public EnvironmentalReverb(int priority, int audioSession)
     throws IllegalArgumentException, UnsupportedOperationException, RuntimeException {
         super(EFFECT_TYPE_ENV_REVERB, EFFECT_TYPE_NULL, priority, audioSession);
-        Log.e(TAG, "contructor");
     }
 
     /**
@@ -500,5 +503,170 @@ public class EnvironmentalReverb extends AudioEffect {
                 super.setParameterListener(mBaseParamListener);
             }
         }
+    }
+
+    /**
+     * The Settings class regroups all environmental reverb parameters. It is used in
+     * conjuntion with getProperties() and setProperties() methods to backup and restore
+     * all parameters in a single call.
+     */
+    public static class Settings {
+        public short roomLevel;
+        public short roomHFLevel;
+        public int decayTime;
+        public short decayHFRatio;
+        public short reflectionsLevel;
+        public int reflectionsDelay;
+        public short reverbLevel;
+        public int reverbDelay;
+        public short diffusion;
+        public short density;
+
+        public Settings() {
+        }
+
+        /**
+         * Settings class constructor from a key=value; pairs formatted string. The string is
+         * typically returned by Settings.toString() method.
+         * @throws IllegalArgumentException if the string is not correctly formatted.
+         */
+        public Settings(String settings) {
+            StringTokenizer st = new StringTokenizer(settings, "=;");
+            int tokens = st.countTokens();
+            if (st.countTokens() != 21) {
+                throw new IllegalArgumentException("settings: " + settings);
+            }
+            String key = st.nextToken();
+            if (!key.equals("EnvironmentalReverb")) {
+                throw new IllegalArgumentException(
+                        "invalid settings for EnvironmentalReverb: " + key);
+            }
+
+            try {
+                key = st.nextToken();
+                if (!key.equals("roomLevel")) {
+                    throw new IllegalArgumentException("invalid key name: " + key);
+                }
+                roomLevel = Short.parseShort(st.nextToken());
+                key = st.nextToken();
+                if (!key.equals("roomHFLevel")) {
+                    throw new IllegalArgumentException("invalid key name: " + key);
+                }
+                roomHFLevel = Short.parseShort(st.nextToken());
+                key = st.nextToken();
+                if (!key.equals("decayTime")) {
+                    throw new IllegalArgumentException("invalid key name: " + key);
+                }
+                decayTime = Integer.parseInt(st.nextToken());
+                key = st.nextToken();
+                if (!key.equals("decayHFRatio")) {
+                    throw new IllegalArgumentException("invalid key name: " + key);
+                }
+                decayHFRatio = Short.parseShort(st.nextToken());
+                key = st.nextToken();
+                if (!key.equals("reflectionsLevel")) {
+                    throw new IllegalArgumentException("invalid key name: " + key);
+                }
+                reflectionsLevel = Short.parseShort(st.nextToken());
+                key = st.nextToken();
+                if (!key.equals("reflectionsDelay")) {
+                    throw new IllegalArgumentException("invalid key name: " + key);
+                }
+                reflectionsDelay = Integer.parseInt(st.nextToken());
+                key = st.nextToken();
+                if (!key.equals("reverbLevel")) {
+                    throw new IllegalArgumentException("invalid key name: " + key);
+                }
+                reverbLevel = Short.parseShort(st.nextToken());
+                key = st.nextToken();
+                if (!key.equals("reverbDelay")) {
+                    throw new IllegalArgumentException("invalid key name: " + key);
+                }
+                reverbDelay = Integer.parseInt(st.nextToken());
+                key = st.nextToken();
+                if (!key.equals("diffusion")) {
+                    throw new IllegalArgumentException("invalid key name: " + key);
+                }
+                diffusion = Short.parseShort(st.nextToken());
+                key = st.nextToken();
+                if (!key.equals("density")) {
+                    throw new IllegalArgumentException("invalid key name: " + key);
+                }
+                density = Short.parseShort(st.nextToken());
+             } catch (NumberFormatException nfe) {
+                throw new IllegalArgumentException("invalid value for key: " + key);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return new String (
+                    "EnvironmentalReverb"+
+                    ";roomLevel="+Short.toString(roomLevel)+
+                    ";roomHFLevel="+Short.toString(roomHFLevel)+
+                    ";decayTime="+Integer.toString(decayTime)+
+                    ";decayHFRatio="+Short.toString(decayHFRatio)+
+                    ";reflectionsLevel="+Short.toString(reflectionsLevel)+
+                    ";reflectionsDelay="+Integer.toString(reflectionsDelay)+
+                    ";reverbLevel="+Short.toString(reverbLevel)+
+                    ";reverbDelay="+Integer.toString(reverbDelay)+
+                    ";diffusion="+Short.toString(diffusion)+
+                    ";density="+Short.toString(density)
+                    );
+        }
+    };
+
+    // Keep this in sync with sizeof(s_reverb_settings) defined in
+    // frameworks/base/include/media/EffectEnvironmentalReverbApi.h
+    static private int PROPERTY_SIZE = 26;
+
+    /**
+     * Gets the environmental reverb properties. This method is useful when a snapshot of current
+     * reverb settings must be saved by the application.
+     * @return an EnvironmentalReverb.Settings object containing all current parameters values
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
+    public EnvironmentalReverb.Settings getProperties()
+    throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
+        byte[] param = new byte[PROPERTY_SIZE];
+        checkStatus(getParameter(PARAM_PROPERTIES, param));
+        Settings settings = new Settings();
+        settings.roomLevel = byteArrayToShort(param, 0);
+        settings.roomHFLevel = byteArrayToShort(param, 2);
+        settings.decayTime = byteArrayToInt(param, 4);
+        settings.decayHFRatio = byteArrayToShort(param, 8);
+        settings.reflectionsLevel = byteArrayToShort(param, 10);
+        settings.reflectionsDelay = byteArrayToInt(param, 12);
+        settings.reverbLevel = byteArrayToShort(param, 16);
+        settings.reverbDelay = byteArrayToInt(param, 18);
+        settings.diffusion = byteArrayToShort(param, 22);
+        settings.density = byteArrayToShort(param, 24);
+        return settings;
+    }
+
+    /**
+     * Sets the environmental reverb properties. This method is useful when reverb settings have to
+     * be applied from a previous backup.
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
+    public void setProperties(EnvironmentalReverb.Settings settings)
+    throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
+
+        byte[] param = concatArrays(shortToByteArray(settings.roomLevel),
+                                    shortToByteArray(settings.roomHFLevel),
+                                    intToByteArray(settings.decayTime),
+                                    shortToByteArray(settings.decayHFRatio),
+                                    shortToByteArray(settings.reflectionsLevel),
+                                    intToByteArray(settings.reflectionsDelay),
+                                    shortToByteArray(settings.reverbLevel),
+                                    intToByteArray(settings.reverbDelay),
+                                    shortToByteArray(settings.diffusion),
+                                    shortToByteArray(settings.density));
+
+        checkStatus(setParameter(PARAM_PROPERTIES, param));
     }
 }

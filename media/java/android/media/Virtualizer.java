@@ -19,13 +19,15 @@ package android.media;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioEffect;
 import android.os.Bundle;
 import android.util.Log;
+
 import java.nio.ByteOrder;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.util.StringTokenizer;
 
-import android.media.AudioEffect;
 
 /**
  * An audio virtualizer is a general name for an effect to spatialize audio channels. The exact
@@ -210,5 +212,83 @@ public class Virtualizer extends AudioEffect {
                 super.setParameterListener(mBaseParamListener);
             }
         }
+    }
+
+    /**
+     * The Settings class regroups all virtualizer parameters. It is used in
+     * conjuntion with getProperties() and setProperties() methods to backup and restore
+     * all parameters in a single call.
+     */
+    public static class Settings {
+        public short strength;
+
+        public Settings() {
+        }
+
+        /**
+         * Settings class constructor from a key=value; pairs formatted string. The string is
+         * typically returned by Settings.toString() method.
+         * @throws IllegalArgumentException if the string is not correctly formatted.
+         */
+        public Settings(String settings) {
+            StringTokenizer st = new StringTokenizer(settings, "=;");
+            int tokens = st.countTokens();
+            if (st.countTokens() != 3) {
+                throw new IllegalArgumentException("settings: " + settings);
+            }
+            String key = st.nextToken();
+            if (!key.equals("Virtualizer")) {
+                throw new IllegalArgumentException(
+                        "invalid settings for Virtualizer: " + key);
+            }
+            try {
+                key = st.nextToken();
+                if (!key.equals("strength")) {
+                    throw new IllegalArgumentException("invalid key name: " + key);
+                }
+                strength = Short.parseShort(st.nextToken());
+             } catch (NumberFormatException nfe) {
+                throw new IllegalArgumentException("invalid value for key: " + key);
+            }
+        }
+
+        @Override
+        public String toString() {
+            String str = new String (
+                    "Virtualizer"+
+                    ";strength="+Short.toString(strength)
+                    );
+            return str;
+        }
+    };
+
+
+    /**
+     * Gets the virtualizer properties. This method is useful when a snapshot of current
+     * virtualizer settings must be saved by the application.
+     * @return a Virtualizer.Settings object containing all current parameters values
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
+    public Virtualizer.Settings getProperties()
+    throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
+        Settings settings = new Settings();
+        short[] value = new short[1];
+        checkStatus(getParameter(PARAM_STRENGTH, value));
+        settings.strength = value[0];
+        return settings;
+    }
+
+    /**
+     * Sets the virtualizer properties. This method is useful when virtualizer settings have to
+     * be applied from a previous backup.
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
+    public void setProperties(Virtualizer.Settings settings)
+    throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
+        checkStatus(setParameter(PARAM_STRENGTH, settings.strength));
     }
 }
