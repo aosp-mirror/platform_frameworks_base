@@ -14,6 +14,14 @@
         <activity android:name="StorageBrowser" />
         <activity android:name="ObjectBrowser" />
         <activity android:name="ObjectViewer" />
+
+        <receiver android:name="UsbReceiver">
+            <intent-filter>
+                <action android:name="android.hardware.action.USB_CAMERA_ATTACHED" />
+                <data android:scheme="content"/>
+            </intent-filter>
+        </receiver>
+
     </application>
 
 
