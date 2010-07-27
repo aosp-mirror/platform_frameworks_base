@@ -2059,7 +2059,7 @@ public class Activity extends ContextThemeWrapper
      * removed.  Otherwise, all entries up to but not including that entry
      * will be removed
      */
-    static final int POP_BACK_STACK_INCLUSIVE = 1<<0;
+    public static final int POP_BACK_STACK_INCLUSIVE = 1<<0;
 
     /**
      * Pop the top state off the back stack.  Returns true if there was one
