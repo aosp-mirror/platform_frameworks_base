@@ -42,8 +42,6 @@ import java.util.Set;
  * Instances of this class should be obtained through
  * {@link android.content.Context#getSystemService(String)} by passing
  * {@link android.content.Context#DOWNLOAD_SERVICE}.
- *
- * @hide
  */
 public class DownloadManager {
     /**

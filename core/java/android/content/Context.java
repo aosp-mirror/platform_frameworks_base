@@ -1566,7 +1566,6 @@ public abstract class Context {
      * {@link android.net.DownloadManager} for requesting HTTP downloads.
      *
      * @see #getSystemService
-     * @hide (TODO) for now
      */
     public static final String DOWNLOAD_SERVICE = "download";
 
