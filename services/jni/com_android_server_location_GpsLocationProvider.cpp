@@ -40,12 +40,15 @@ static jmethodID method_reportNmea;
 static jmethodID method_setEngineCapabilities;
 static jmethodID method_xtraDownloadRequest;
 static jmethodID method_reportNiNotification;
+static jmethodID method_requestRefLocation;
+static jmethodID method_requestSetID;
 
 static const GpsInterface* sGpsInterface = NULL;
 static const GpsXtraInterface* sGpsXtraInterface = NULL;
 static const AGpsInterface* sAGpsInterface = NULL;
 static const GpsNiInterface* sGpsNiInterface = NULL;
 static const GpsDebugInterface* sGpsDebugInterface = NULL;
+static const AGpsRilInterface* sAGpsRilInterface = NULL;
 
 // temporary storage for GPS callbacks
 static GpsSvStatus  sGpsSvStatus;
@@ -193,6 +196,30 @@ GpsNiCallbacks sGpsNiCallbacks = {
     create_thread_callback,
 };
 
+static void agps_request_set_id(uint32_t flags)
+{
+    LOGD("agps_request_set_id: flags (%d)", flags);
+
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    env->CallVoidMethod(mCallbacksObj, method_requestSetID, flags);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+}
+
+static void agps_request_ref_location(uint32_t flags)
+{
+    LOGD("agps_ref_location: flags (%d)", flags);
+
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    env->CallVoidMethod(mCallbacksObj, method_requestRefLocation, flags);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+}
+
+AGpsRilCallbacks sAGpsRilCallbacks = {
+    agps_request_set_id,
+    agps_request_ref_location,
+    create_thread_callback,
+};
+
 static void android_location_GpsLocationProvider_class_init_native(JNIEnv* env, jclass clazz) {
     method_reportLocation = env->GetMethodID(clazz, "reportLocation", "(IDDDFFFJ)V");
     method_reportStatus = env->GetMethodID(clazz, "reportStatus", "(I)V");
@@ -202,6 +229,8 @@ static void android_location_GpsLocationProvider_class_init_native(JNIEnv* env, 
     method_setEngineCapabilities = env->GetMethodID(clazz, "setEngineCapabilities", "(I)V");
     method_xtraDownloadRequest = env->GetMethodID(clazz, "xtraDownloadRequest", "()V");
     method_reportNiNotification = env->GetMethodID(clazz, "reportNiNotification", "(IIIIILjava/lang/String;Ljava/lang/String;IILjava/lang/String;)V");
+    method_requestRefLocation = env->GetMethodID(clazz,"requestRefLocation","(I)V");
+    method_requestSetID = env->GetMethodID(clazz,"requestSetID","(I)V");
 }
 
 static const GpsInterface* get_gps_interface() {
@@ -251,6 +280,11 @@ static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject o
 
     if (!sGpsDebugInterface)
        sGpsDebugInterface = (const GpsDebugInterface*)sGpsInterface->get_extension(GPS_DEBUG_INTERFACE);
+
+    if (!sAGpsRilInterface)
+       sAGpsRilInterface = (const AGpsRilInterface*)sGpsInterface->get_extension(AGPS_RIL_INTERFACE);
+    if (sAGpsRilInterface)
+        sAGpsRilInterface->init(&sAGpsRilCallbacks);
 
     return true;
 }
@@ -311,6 +345,61 @@ static jint android_location_GpsLocationProvider_read_sv_status(JNIEnv* env, job
     env->ReleaseFloatArrayElements(azumArray, azim, 0);
     env->ReleaseIntArrayElements(maskArray, mask, 0);
     return num_svs;
+}
+
+static void android_location_GpsLocationProvider_agps_set_reference_location_cellid(JNIEnv* env,
+        jobject obj, jint type, jint mcc, jint mnc, jint lac, jint cid)
+{
+    AGpsRefLocation location;
+    if (!sAGpsRilInterface)
+        sAGpsRilInterface = (const AGpsRilInterface *)sGpsInterface->get_extension(AGPS_RIL_INTERFACE);
+    if (!sAGpsRilInterface)
+        return;
+    switch(type) {
+        case AGPS_REF_LOCATION_TYPE_GSM_CELLID:
+        case AGPS_REF_LOCATION_TYPE_UMTS_CELLID:
+            location.type = type;
+            location.u.cellID.mcc = mcc;
+            location.u.cellID.mnc = mnc;
+            location.u.cellID.lac = lac;
+            location.u.cellID.cid = cid;
+            break;
+        default:
+            LOGE("Neither a GSM nor a UMTS cellid (%s:%d).",__FUNCTION__,__LINE__);
+            return;
+            break;
+    }
+    sAGpsRilInterface->set_ref_location(&location, sizeof(location));
+}
+
+static void android_location_GpsLocationProvider_agps_send_ni_message(JNIEnv* env,
+        jobject obj, jbyteArray ni_msg, jint size)
+{
+    size_t sz;
+    if (!sAGpsRilInterface)
+        sAGpsRilInterface =(const AGpsRilInterface *)sGpsInterface->get_extension(AGPS_RIL_INTERFACE);
+    if (!sAGpsRilInterface)
+        return;
+    if (size < 0)
+        return;
+    sz = (size_t)size;
+    jbyte* b = env->GetByteArrayElements(ni_msg, 0);
+    sAGpsRilInterface->ni_message((uint8_t *)b,sz);
+    env->ReleaseByteArrayElements(ni_msg,b,0);
+}
+
+static void android_location_GpsLocationProvider_agps_set_id(JNIEnv *env,
+        jobject obj, jint type, jstring  setid_string)
+{
+    if (!sAGpsRilInterface) {
+        sAGpsRilInterface =(const AGpsRilInterface *)sGpsInterface->get_extension(AGPS_RIL_INTERFACE);
+    }
+    if (!sAGpsRilInterface)
+        return;
+
+    const char *setid = env->GetStringUTFChars(setid_string, NULL);
+    sAGpsRilInterface->set_set_id(type, setid);
+    env->ReleaseStringUTFChars(setid_string, setid);
 }
 
 static jint android_location_GpsLocationProvider_read_nmea(JNIEnv* env, jobject obj,
@@ -454,8 +543,11 @@ static JNINativeMethod sMethods[] = {
     {"native_agps_data_conn_open", "(Ljava/lang/String;)V", (void*)android_location_GpsLocationProvider_agps_data_conn_open},
     {"native_agps_data_conn_closed", "()V", (void*)android_location_GpsLocationProvider_agps_data_conn_closed},
     {"native_agps_data_conn_failed", "()V", (void*)android_location_GpsLocationProvider_agps_data_conn_failed},
+    {"native_agps_set_id","(ILjava/lang/String;)V",(void*)android_location_GpsLocationProvider_agps_set_id},
+    {"native_agps_set_ref_location_cellid","(IIIII)V",(void*)android_location_GpsLocationProvider_agps_set_reference_location_cellid},
     {"native_set_agps_server", "(ILjava/lang/String;I)V", (void*)android_location_GpsLocationProvider_set_agps_server},
     {"native_send_ni_response", "(II)V", (void*)android_location_GpsLocationProvider_send_ni_response},
+    {"native_agps_ni_message", "([BI)V", (void *)android_location_GpsLocationProvider_agps_send_ni_message},
     {"native_get_internal_state", "()Ljava/lang/String;", (void*)android_location_GpsLocationProvider_get_internal_state},
 };
 
