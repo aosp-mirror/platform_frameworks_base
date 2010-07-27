@@ -17,11 +17,11 @@
 package com.android.dumprendertree2;
 
 import java.io.File;
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 /**
  * A class that collects information about tests that ran and can create HTML
@@ -32,6 +32,7 @@ public class Summarizer {
     private static final String LOG_TAG = "Summarizer";
 
     private static final String CSS =
+            "<style type=\"text/css\">" +
             "* {" +
             "       font-family: Verdana;" +
             "       border: 0;" +
@@ -39,23 +40,35 @@ public class Summarizer {
             "       padding: 0;}" +
             "body {" +
             "       margin: 10px;}" +
-            "a {" +
-            "       font-size: 12px;" +
-            "       color: black;}" +
             "h1 {" +
-            "       font-size: 33px;" +
+            "       font-size: 24px;" +
             "       margin: 4px 0 4px 0;}" +
             "h2 {" +
-            "       font-size:22px;" +
+            "       font-size:18px;" +
+            "       text-transform: uppercase;" +
             "       margin: 20px 0 3px 0;}" +
-            "h3 {" +
-            "       font-size: 20px;" +
-            "       margin-bottom: 6px;}" +
+            "h3, h3 a {" +
+            "       font-size: 14px;" +
+            "       color: black;" +
+            "       text-decoration: none;" +
+            "       margin-bottom: 4px;}" +
+            "h3 a span.path {" +
+            "       text-decoration: underline;}" +
+            "h3 span.tri {" +
+            "       text-decoration: none;}" +
+            "h3 img {" +
+            "       width: 8px;" +
+            "       margin-right: 4px;}" +
+            "div.diff {" +
+            "       margin-bottom: 25px;}" +
+            "div.diff a {" +
+            "       font-size: 12px;" +
+            "       color: #888;}" +
             "table.visual_diff {" +
             "       border-bottom: 0px solid;" +
             "       border-collapse: collapse;" +
             "       width: 100%;" +
-            "       margin-bottom: 3px;}" +
+            "       margin-bottom: 2px;}" +
             "table.visual_diff tr.headers td {" +
             "       border-bottom: 1px solid;" +
             "       border-top: 0;" +
@@ -83,7 +96,7 @@ public class Summarizer {
             "       border: 0;" +
             "       width: 0.4%}" +
             "div.space {" +
-            "       margin-top:30px;}" +
+            "       margin-top:4px;}" +
             "span.eql {" +
             "       background-color: #f3f3f3;}" +
             "span.del {" +
@@ -95,28 +108,57 @@ public class Summarizer {
             "span.pass {" +
             "       color: green;}" +
             "span.time_out {" +
-            "       color: orange;}";
-    private static final String HTML_DIFF_BEGINNING = "<html><head><style type=\"text/css\">" +
-            CSS + "</style></head><body>";
-    private static final String HTML_DIFF_ENDING = "</body></html>";
+            "       color: orange;}" +
+            "table.summary {" +
+            "       border: 1px solid black;" +
+            "       margin-top: 20px;}" +
+            "table.summary td {" +
+            "       padding: 3px;}" +
+            "span.listItem {" +
+            "       font-size: 11px;" +
+            "       font-weight: normal;" +
+            "       text-transform: uppercase;" +
+            "       padding: 3px;" +
+            "       -webkit-border-radius: 4px;}" +
+            "span." + AbstractResult.ResultCode.PASS.name() + "{" +
+            "       background-color: #8ee100;" +
+            "       color: black;}" +
+            "span." + AbstractResult.ResultCode.FAIL_RESULT_DIFFERS.name() + "{" +
+            "       background-color: #ccc;" +
+            "       color: black;}" +
+            "span." + AbstractResult.ResultCode.FAIL_NO_EXPECTED_RESULT.name() + "{" +
+            "       background-color: #a700e4;" +
+            "       color: #fff;}" +
+            "span." + AbstractResult.ResultCode.FAIL_TIMED_OUT.name() + "{" +
+            "       background-color: #f3cb00;" +
+            "       color: black;}" +
+            "span." + AbstractResult.ResultCode.FAIL_CRASHED.name() + "{" +
+            "       background-color: #c30000;" +
+            "       color: #fff;}" +
+            "</style>";
+
+    private static final String SCRIPT =
+            "<script type=\"text/javascript\">" +
+            "    function toggleDisplay(id) {" +
+            "        element = document.getElementById(id);" +
+            "        triangle = document.getElementById('tri.' + id);" +
+            "        if (element.style.display == 'none') {" +
+            "            element.style.display = 'inline';" +
+            "            triangle.innerHTML = '&#x25bc; ';" +
+            "        } else {" +
+            "            element.style.display = 'none';" +
+            "            triangle.innerHTML = '&#x25b6; ';" +
+            "        }" +
+            "    }" +
+            "</script>";
 
     /** TODO: Make it a setting */
-    private static final String HTML_DIFF_RELATIVE_PATH = "_diff.html";
-    private static final String HTML_DIFF_INDEX_RELATIVE_PATH = "_diff-index.html";
+    private static final String HTML_SUMMARY_RELATIVE_PATH = "summary.html";
 
-    /** A list containing relatives paths of tests that were skipped */
-    private LinkedList<String> mSkippedTestsList = new LinkedList<String>();
-
-    /** Collection of tests grouped according to result. Sets are initialized lazily. */
-    private Map<AbstractResult.ResultCode, Set<String>> mResults =
-            new EnumMap<AbstractResult.ResultCode, Set<String>>(AbstractResult.ResultCode.class);
-
-    /**
-     * Collection of tests for which results are ignored grouped according to result. Sets are
-     * initialized lazily.
-     */
-    private Map<AbstractResult.ResultCode, Set<String>> mResultsIgnored =
-            new EnumMap<AbstractResult.ResultCode, Set<String>>(AbstractResult.ResultCode.class);
+    private int mCrashedTestsCount = 0;
+    private List<AbstractResult> mFailedNotIgnoredTests = new ArrayList<AbstractResult>();
+    private List<AbstractResult> mIgnoredTests = new ArrayList<AbstractResult>();
+    private List<String> mPassedNotIgnoredTests = new ArrayList<String>();
 
     private FileFilter mFileFilter;
     private String mResultsRootDirPath;
@@ -124,99 +166,124 @@ public class Summarizer {
     public Summarizer(FileFilter fileFilter, String resultsRootDirPath) {
         mFileFilter = fileFilter;
         mResultsRootDirPath = resultsRootDirPath;
-        createHtmlDiff();
-    }
-
-    private void createHtmlDiff() {
-        FsUtils.writeDataToStorage(new File(mResultsRootDirPath, HTML_DIFF_RELATIVE_PATH),
-                HTML_DIFF_BEGINNING.getBytes(), false);
-    }
-
-    private void appendHtmlDiff(String relativePath, String diff) {
-        StringBuilder html = new StringBuilder();
-        html.append("<label id=\"" + relativePath + "\" />");
-        html.append(diff);
-        html.append("<a href=\"" + HTML_DIFF_INDEX_RELATIVE_PATH + "\">Back to index</a>");
-        html.append("<div class=\"space\"></div>");
-        FsUtils.writeDataToStorage(new File(mResultsRootDirPath, HTML_DIFF_RELATIVE_PATH),
-                html.toString().getBytes(), true);
-    }
-
-    private void finalizeHtmlDiff() {
-        FsUtils.writeDataToStorage(new File(mResultsRootDirPath, HTML_DIFF_RELATIVE_PATH),
-                HTML_DIFF_ENDING.getBytes(), true);
-    }
-
-    /** TODO: Add settings method, like setIndexSkippedTests(), setIndexTimedOutTests(), etc */
-
-    public void addSkippedTest(String relativePath) {
-        mSkippedTestsList.addLast(relativePath);
     }
 
     public void appendTest(AbstractResult result) {
-        String testPath = result.getRelativePath();
+        String relativePath = result.getRelativePath();
 
-        AbstractResult.ResultCode resultCode = result.getResultCode();
-
-        /** Add the test to correct collection according to its result code */
-        if (mFileFilter.isIgnoreRes(testPath)) {
-            /** Lazy initialization */
-            if (mResultsIgnored.get(resultCode) == null) {
-                mResultsIgnored.put(resultCode, new HashSet<String>());
-            }
-
-            mResultsIgnored.get(resultCode).add(testPath);
-        } else {
-            /** Lazy initialization */
-            if (mResults.get(resultCode) == null) {
-                mResults.put(resultCode, new HashSet<String>());
-            }
-
-            mResults.get(resultCode).add(testPath);
+        if (result.getResultCode() == AbstractResult.ResultCode.FAIL_CRASHED) {
+            mCrashedTestsCount++;
         }
 
-        if (resultCode != AbstractResult.ResultCode.PASS) {
-            appendHtmlDiff(testPath, result.getDiffAsHtml());
+        if (mFileFilter.isIgnoreRes(relativePath)) {
+            mIgnoredTests.add(result);
+        } else if (result.getResultCode() == AbstractResult.ResultCode.PASS) {
+            mPassedNotIgnoredTests.add(relativePath);
+        } else {
+            mFailedNotIgnoredTests.add(result);
         }
     }
 
     public void summarize() {
-        finalizeHtmlDiff();
-        createHtmlDiffIndex();
-    }
-
-    private void createHtmlDiffIndex() {
         StringBuilder html = new StringBuilder();
-        html.append(HTML_DIFF_BEGINNING);
-        Set<String> results;
-        html.append("<h1>NOT ignored</h1>");
-        appendResultsMap(mResults, html);
-        html.append("<h1>Ignored</h1>");
-        appendResultsMap(mResultsIgnored, html);
-        html.append(HTML_DIFF_ENDING);
-        FsUtils.writeDataToStorage(new File(mResultsRootDirPath, HTML_DIFF_INDEX_RELATIVE_PATH),
+
+        html.append("<html><head>");
+        html.append(CSS);
+        html.append(SCRIPT);
+        html.append("</head><body>");
+
+        createTopSummaryTable(html);
+
+        createResultsListWithDiff(html, "Failed", mFailedNotIgnoredTests);
+
+        createResultsListWithDiff(html, "Ignored", mIgnoredTests);
+
+        createResultsListNoDiff(html, "Passed", mPassedNotIgnoredTests);
+
+        html.append("</body></html>");
+
+        FsUtils.writeDataToStorage(new File(mResultsRootDirPath, HTML_SUMMARY_RELATIVE_PATH),
                 html.toString().getBytes(), false);
     }
 
-    private void appendResultsMap(Map<AbstractResult.ResultCode, Set<String>> resultsMap,
-            StringBuilder html) {
-        Set<String> results;
-        for (AbstractResult.ResultCode resultCode : AbstractResult.ResultCode.values()) {
-            results = resultsMap.get(resultCode);
-            if (results != null) {
-                html.append("<h2>");
-                html.append(resultCode.toString());
-                html.append("</h2");
-                for (String relativePath : results) {
-                    html.append("<a href=\"");
-                    html.append(HTML_DIFF_RELATIVE_PATH);
-                    html.append("#");
-                    html.append(relativePath);
-                    html.append("\">");
-                    html.append(relativePath);
-                    html.append("</a><br />");
-                }
+    private void createTopSummaryTable(StringBuilder html) {
+        int total = mFailedNotIgnoredTests.size() +
+                mPassedNotIgnoredTests.size() +
+                mIgnoredTests.size();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        html.append("<h1> - total of " + total + " tests - ");
+        html.append(dateFormat.format(new Date()) + "</h1>");
+
+        html.append("<table class=\"summary\">");
+        createSummaryTableRow(html, "CRASHED", mCrashedTestsCount);
+        createSummaryTableRow(html, "FAILED", mFailedNotIgnoredTests.size());
+        createSummaryTableRow(html, "IGNORED", mIgnoredTests.size());
+        createSummaryTableRow(html, "PASSED", mPassedNotIgnoredTests.size());
+        html.append("</table>");
+    }
+
+    private void createSummaryTableRow(StringBuilder html, String caption, int size) {
+        html.append("<tr>");
+        html.append("    <td>" + caption + "</td>");
+        html.append("    <td>" + size + "</td>");
+        html.append("</tr>");
+    }
+
+    private void createResultsListWithDiff(StringBuilder html, String title,
+            List<AbstractResult> resultsList) {
+        String relativePath;
+        String id = "";
+        AbstractResult.ResultCode resultCode;
+
+        Collections.sort(resultsList);
+        html.append("<h2>" + title + " [" + resultsList.size() + "]</h2>");
+        for (AbstractResult result : resultsList) {
+            relativePath = result.getRelativePath();
+            resultCode = result.getResultCode();
+
+            html.append("<h3>");
+
+            if (resultCode == AbstractResult.ResultCode.PASS) {
+                html.append(relativePath);
+            } else {
+                /**
+                 * Technically, two different paths could end up being the same, because
+                 * ':' is a valid  character in a path. However, it is probably not going
+                 * to cause any problems in this case
+                 */
+                id = relativePath.replace(File.separator, ":");
+                html.append("<a href=\"#\" onClick=\"toggleDisplay('" + id + "');");
+                html.append("return false;\">");
+                html.append("<span class=\"tri\" id=\"tri." + id + "\">&#x25b6; </span>");
+                html.append("<span class=\"path\">" + relativePath + "</span>");
+                html.append("</a>");
             }
+
+            html.append(" <span class=\"listItem " + resultCode.name() + "\">");
+            html.append(resultCode.toString());
+            html.append("</span>");
+
+            html.append("</h3>");
+
+            if (resultCode != AbstractResult.ResultCode.PASS) {
+                html.append("<div class=\"diff\" style=\"display: none;\" id=\"" + id + "\">");
+                html.append(result.getDiffAsHtml());
+                html.append("<a href=\"#\" onClick=\"toggleDisplay('" + id + "');");
+                html.append("return false;\">Hide</a>");
+                html.append("</div>");
+            }
+
+            html.append("<div class=\"space\"></div>");
+        }
+    }
+
+    private void createResultsListNoDiff(StringBuilder html, String title,
+            List<String> resultsList) {
+        Collections.sort(resultsList);
+        html.append("<h2>Passed [" + resultsList.size() + "]</h2>");
+        for (String result : resultsList) {
+            html.append("<h3>" + result + "</h3>");
+            html.append("<div class=\"space\"></div>");
         }
     }
 }

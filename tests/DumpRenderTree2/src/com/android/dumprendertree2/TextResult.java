@@ -21,6 +21,10 @@ import android.os.Handler;
 import android.os.Message;
 import android.webkit.WebView;
 
+import name.fraser.neil.plaintext.diff_match_patch;
+
+import java.util.LinkedList;
+
 /**
  * A result object for which the expected output is text. It does not have an image
  * expected result.
@@ -106,50 +110,71 @@ public class TextResult extends AbstractResult {
 
     @Override
     public String getDiffAsHtml() {
-        /** TODO: just a stub
-         * Probably needs rethinking anyway - just one table would be much better
-         * This will require some changes in Summarizer in CSS as well */
         StringBuilder html = new StringBuilder();
-        html.append("<h3>");
-        html.append(mRelativePath);
-        html.append("</h3>");
         html.append("<table class=\"visual_diff\">");
+        html.append("    <tr class=\"headers\">");
+        html.append("        <td colspan=\"2\">Expected result:</td>");
+        html.append("        <td class=\"space\"></td>");
+        html.append("        <td colspan=\"2\">Actual result:</td>");
+        html.append("    </tr>");
 
-        html.append("<tr class=\"headers\">");
-        html.append("<td colspan=\"2\">Expected result:</td>");
-        html.append("<td class=\"space\"></td>");
-        html.append("<td colspan=\"2\">Actual result:</td>");
-        html.append("</tr>");
-
-        html.append("<tr class=\"results\">");
-        html.append("<td class=\"line_count\">1:</td>");
-        html.append("<td class=\"line\">");
-        if (mExpectedResult == null) {
-            html.append("NULL");
+        if (mExpectedResult == null || mActualResult == null) {
+            appendNullsHtml(html);
         } else {
-            html.append(mExpectedResult.replace("\n", "<br />"));
+            appendDiffHtml(html);
         }
-        html.append("</td>");
-        html.append("<td class=\"space\"></td>");
-        html.append("<td class=\"line_count\">1:</td>");
-        html.append("<td class=\"line\">");
-        if (mActualResult == null) {
-            html.append("NULL");
-        } else {
-            html.append(mActualResult.replace("\n", "<br />"));
-        }
-        html.append("</td>");
-        html.append("</tr>");
 
-        html.append("<tr class=\"footers\">");
-        html.append("<td colspan=\"2\"></td>");
-        html.append("<td class=\"space\"></td>");
-        html.append("<td colspan=\"2\"></td>");
-        html.append("</tr>");
-
+        html.append("    <tr class=\"footers\">");
+        html.append("        <td colspan=\"2\"></td>");
+        html.append("        <td class=\"space\"></td>");
+        html.append("        <td colspan=\"2\"></td>");
+        html.append("    </tr>");
         html.append("</table>");
 
         return html.toString();
+    }
+
+    private void appendDiffHtml(StringBuilder html) {
+        LinkedList<diff_match_patch.Diff> diffs =
+                new diff_match_patch().diff_main(mExpectedResult, mActualResult);
+
+        diffs = VisualDiffUtils.splitDiffsOnNewline(diffs);
+
+        LinkedList<String> expectedLines = new LinkedList<String>();
+        LinkedList<Integer> expectedLineNums = new LinkedList<Integer>();
+        LinkedList<String> actualLines = new LinkedList<String>();
+        LinkedList<Integer> actualLineNums = new LinkedList<Integer>();
+
+        VisualDiffUtils.generateExpectedResultLines(diffs, expectedLineNums, expectedLines);
+        VisualDiffUtils.generateActualResultLines(diffs, actualLineNums, actualLines);
+
+        html.append(VisualDiffUtils.getHtml(expectedLineNums, expectedLines,
+                actualLineNums, actualLines));
+    }
+
+    private void appendNullsHtml(StringBuilder html) {
+        /** TODO: Create a separate row for each line of not null result */
+        html.append("    <tr class=\"results\">");
+        html.append("    <td class=\"line_count\">");
+        html.append("    </td>");
+        html.append("    <td class=\"line\">");
+        if (mExpectedResult == null) {
+            html.append("Expected result was NULL");
+        } else {
+            html.append(mExpectedResult.replace("\n", "<br />"));
+        }
+        html.append("        </td>");
+        html.append("        <td class=\"space\"></td>");
+        html.append("    <td class=\"line_count\">");
+        html.append("    </td>");
+        html.append("    <td class=\"line\">");
+        if (mActualResult == null) {
+            html.append("Actual result was NULL");
+        } else {
+            html.append(mActualResult.replace("\n", "<br />"));
+        }
+        html.append("        </td>");
+        html.append("    </tr>");
     }
 
     @Override
