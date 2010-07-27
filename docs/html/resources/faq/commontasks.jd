@@ -158,7 +158,7 @@ It is not necessary to put external JARs in the assets folder.
 <ul>
     <li>Create an {@link android.app.Dialog app.Dialog} class </li>
     <li>Create an {@link android.app.AlertDialog app.AlertDialog} class </li>
-    <li>Set the {@link android.R.style#Theme_Dialog} <em>theme</em> attribute to <code>&#064;android:style/Theme.Dialog</code>
+    <li>Set the {@link android.R.style#Theme_Dialog} <em>theme</em> attribute to <code>&#64;android:style/Theme.Dialog</code>
         in your AndroidManifest.xml file. For example:    
     <pre>&lt;activity class=&quot;AddRssItem&quot; android:label=&quot;Add an item&quot; android:theme=&quot;&#064;android:style/Theme.Dialog&quot;/&gt;</pre></li>
 </ul>
