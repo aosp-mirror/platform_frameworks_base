@@ -367,7 +367,7 @@ bool MtpCursor::fillObject(CursorWindow* window, MtpDevice* device,
                     goto fail;
                  break;
             case OBJECT_THUMB:
-                if (!putThumbnail(window, objectID, row, i))
+                if (!putThumbnail(window, objectID, objectInfo->mFormat, row, i))
                     goto fail;
                 break;
             default:
@@ -427,19 +427,25 @@ bool MtpCursor::putString(CursorWindow* window, const char* text, int row, int c
     return true;
 }
 
-bool MtpCursor::putThumbnail(CursorWindow* window, int objectID, int row, int column) {
+bool MtpCursor::putThumbnail(CursorWindow* window, int objectID, int format, int row, int column) {
     MtpDevice* device = mClient->getDevice(mDeviceID);
-    int size;
-    void* thumbnail = device->getThumbnail(objectID, size);
+    void* thumbnail;
+    int size, offset;
+    if (format == MTP_FORMAT_ASSOCIATION) {
+        thumbnail = NULL;
+        size = offset = 0;
+    } else {
+        thumbnail = device->getThumbnail(objectID, size);
 
-    LOGD("putThumbnail: %p, size: %d\n", thumbnail, size);
-    int offset = window->alloc(size);
-    if (!offset) {
-        window->freeLastRow();
-        LOGE("Failed allocating %u bytes for thumbnail", size);
-        return false;
+        LOGD("putThumbnail: %p, size: %d\n", thumbnail, size);
+        offset = window->alloc(size);
+        if (!offset) {
+            window->freeLastRow();
+            LOGE("Failed allocating %u bytes for thumbnail", size);
+            return false;
+        }
     }
-    if (size > 0)
+    if (thumbnail)
         window->copyIn(offset, (const uint8_t*)thumbnail, size);
 
     // This must be updated after the call to alloc(), since that
