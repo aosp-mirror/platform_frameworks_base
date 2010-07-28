@@ -438,7 +438,7 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * turns out not to be needed, and stops database errors (such as a full
      * disk) from halting application launch.
      *
-     * <p>For SQL databases, {@link android.database.sqlite.SQLiteOpenHelper}
+     * <p>If you use SQLite, {@link android.database.sqlite.SQLiteOpenHelper}
      * is a helpful utility class that makes it easy to manage databases,
      * and will automatically defer opening until first use.  If you do use
      * SQLiteOpenHelper, make sure to avoid calling
@@ -606,7 +606,7 @@ public abstract class ContentProvider implements ComponentCallbacks {
     public abstract int delete(Uri uri, String selection, String[] selectionArgs);
 
     /**
-     * Implement this to update one or more rows.
+     * Implement this to handle requests to update one or more rows.
      * The implementation should update all rows matching the selection
      * to set the columns according to the provided values map.
      * As a courtesy, call {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver) notifyChange()}
@@ -626,14 +626,14 @@ public abstract class ContentProvider implements ComponentCallbacks {
             String[] selectionArgs);
 
     /**
-     * Override this to open a file blob associated with a content URI.
+     * Override this to handle requests to open a file blob.
      * The default implementation always throws {@link FileNotFoundException}.
      * This method can be called from multiple threads, as described in
      * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
      * Processes and Threads</a>.
      *
-     * <p>Returns a ParcelFileDescriptor, which is returned directly to the
-     * caller.  This way large data (such as images and documents) can be
+     * <p>This method returns a ParcelFileDescriptor, which is returned directly
+     * to the caller.  This way large data (such as images and documents) can be
      * returned without copying the content.
      *
      * <p>The returned ParcelFileDescriptor is owned by the caller, so it is
@@ -671,7 +671,7 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * Processes and Threads</a>.
      *
      * <p>If you implement this, your clients must be able to deal with such
-     * files, either directly with
+     * file slices, either directly with
      * {@link ContentResolver#openAssetFileDescriptor}, or by using the higher-level
      * {@link ContentResolver#openInputStream ContentResolver.openInputStream}
      * or {@link ContentResolver#openOutputStream ContentResolver.openOutputStream}
@@ -792,11 +792,12 @@ public abstract class ContentProvider implements ComponentCallbacks {
     }
 
     /**
-     * Override this to perform a batch of operations, or the default
-     * implementation will {@link ContentProviderOperation#apply} each of the
-     * {@link ContentProviderOperation} objects.  If the apply calls all succeed
-     * then a {@link ContentProviderResult} array with the same number of
-     * elements as the operations will be returned.  If any of the apply calls
+     * Override this to handle requests to perform a batch of operations, or the
+     * default implementation will iterate over the operations and call
+     * {@link ContentProviderOperation#apply} on each of them.
+     * If all calls to {@link ContentProviderOperation#apply} succeed
+     * then a {@link ContentProviderResult} array with as many
+     * elements as there were operations will be returned.  If any of the calls
      * fail, it is up to the implementation how many of the others take effect.
      * This method can be called from multiple threads, as described in
      * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
