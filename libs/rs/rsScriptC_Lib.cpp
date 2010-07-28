@@ -179,112 +179,30 @@ static int32_t SC_year()
     return timeinfo->tm_year;
 }
 
-static int64_t SC_uptimeMillis2()
+static int64_t SC_uptimeMillis()
 {
     return nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC));
 }
 
-static int64_t SC_startTimeMillis2()
+static int64_t SC_startTimeMillis()
 {
     GET_TLS();
     return sc->mEnviroment.mStartTimeMillis;
 }
 
-static int64_t SC_elapsedTimeMillis2()
+static int64_t SC_elapsedTimeMillis()
 {
     GET_TLS();
     return nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC))
             - sc->mEnviroment.mStartTimeMillis;
 }
 
-static int32_t SC_uptimeMillis()
-{
-    return nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC));
-}
-
-static int32_t SC_startTimeMillis()
+static float SC_getDt()
 {
     GET_TLS();
-    return sc->mEnviroment.mStartTimeMillis;
-}
-
-static int32_t SC_elapsedTimeMillis()
-{
-    GET_TLS();
-    return nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC))
-            - sc->mEnviroment.mStartTimeMillis;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// Matrix routines
-//////////////////////////////////////////////////////////////////////////////
-
-
-static void SC_matrixLoadIdentity(rsc_Matrix *mat)
-{
-    Matrix *m = reinterpret_cast<Matrix *>(mat);
-    m->loadIdentity();
-}
-
-static void SC_matrixLoadFloat(rsc_Matrix *mat, const float *f)
-{
-    Matrix *m = reinterpret_cast<Matrix *>(mat);
-    m->load(f);
-}
-
-static void SC_matrixLoadMat(rsc_Matrix *mat, const rsc_Matrix *newmat)
-{
-    Matrix *m = reinterpret_cast<Matrix *>(mat);
-    m->load(reinterpret_cast<const Matrix *>(newmat));
-}
-
-static void SC_matrixLoadRotate(rsc_Matrix *mat, float rot, float x, float y, float z)
-{
-    Matrix *m = reinterpret_cast<Matrix *>(mat);
-    m->loadRotate(rot, x, y, z);
-}
-
-static void SC_matrixLoadScale(rsc_Matrix *mat, float x, float y, float z)
-{
-    Matrix *m = reinterpret_cast<Matrix *>(mat);
-    m->loadScale(x, y, z);
-}
-
-static void SC_matrixLoadTranslate(rsc_Matrix *mat, float x, float y, float z)
-{
-    Matrix *m = reinterpret_cast<Matrix *>(mat);
-    m->loadTranslate(x, y, z);
-}
-
-static void SC_matrixLoadMultiply(rsc_Matrix *mat, const rsc_Matrix *lhs, const rsc_Matrix *rhs)
-{
-    Matrix *m = reinterpret_cast<Matrix *>(mat);
-    m->loadMultiply(reinterpret_cast<const Matrix *>(lhs),
-                    reinterpret_cast<const Matrix *>(rhs));
-}
-
-static void SC_matrixMultiply(rsc_Matrix *mat, const rsc_Matrix *rhs)
-{
-    Matrix *m = reinterpret_cast<Matrix *>(mat);
-    m->multiply(reinterpret_cast<const Matrix *>(rhs));
-}
-
-static void SC_matrixRotate(rsc_Matrix *mat, float rot, float x, float y, float z)
-{
-    Matrix *m = reinterpret_cast<Matrix *>(mat);
-    m->rotate(rot, x, y, z);
-}
-
-static void SC_matrixScale(rsc_Matrix *mat, float x, float y, float z)
-{
-    Matrix *m = reinterpret_cast<Matrix *>(mat);
-    m->scale(x, y, z);
-}
-
-static void SC_matrixTranslate(rsc_Matrix *mat, float x, float y, float z)
-{
-    Matrix *m = reinterpret_cast<Matrix *>(mat);
-    m->translate(x, y, z);
+    int64_t l = sc->mEnviroment.mLastDtTime;
+    sc->mEnviroment.mLastDtTime = systemTime(SYSTEM_TIME_MONOTONIC);
+    return ((float)(sc->mEnviroment.mLastDtTime - l)) / 1.0e9;
 }
 
 
@@ -372,22 +290,40 @@ static void SC_debugFv4(const char *s, rsvF_4 fv) {
 static void SC_debugI32(const char *s, int32_t i) {
     LOGE("%s %i  0x%x", s, i, i);
 }
+static void SC_debugU32(const char *s, uint32_t i) {
+    LOGE("%s %i  0x%x", s, i, i);
+}
 
 static void SC_debugP(const char *s, const void *p) {
     LOGE("%s %p", s, p);
 }
 
-static uint32_t SC_toClient(void *data, int cmdID, int len, int waitForSpace)
+static uint32_t SC_toClient2(int cmdID, void *data, int len)
 {
     GET_TLS();
-    //LOGE("SC_toClient %i %i %i", cmdID, len, waitForSpace);
-    return rsc->sendMessageToClient(data, cmdID, len, waitForSpace != 0);
+    //LOGE("SC_toClient %i %i %i", cmdID, len);
+    return rsc->sendMessageToClient(data, cmdID, len, false);
 }
 
-static void SC_scriptCall(int scriptID)
+static uint32_t SC_toClient(int cmdID)
 {
     GET_TLS();
-    rsc->runScript((Script *)scriptID);
+    //LOGE("SC_toClient %i", cmdID);
+    return rsc->sendMessageToClient(NULL, cmdID, 0, false);
+}
+
+static uint32_t SC_toClientBlocking2(int cmdID, void *data, int len)
+{
+    GET_TLS();
+    //LOGE("SC_toClientBlocking %i %i", cmdID, len);
+    return rsc->sendMessageToClient(data, cmdID, len, true);
+}
+
+static uint32_t SC_toClientBlocking(int cmdID)
+{
+    GET_TLS();
+    //LOGE("SC_toClientBlocking %i", cmdID);
+    return rsc->sendMessageToClient(NULL, cmdID, 0, true);
 }
 
 int SC_divsi3(int a, int b)
@@ -453,12 +389,12 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "__divsi3", (void *)&SC_divsi3 },
 
     // allocation
-    { "rsAllocationGetDimX", (void *)&SC_allocGetDimX },
-    { "rsAllocationGetDimY", (void *)&SC_allocGetDimY },
-    { "rsAllocationGetDimZ", (void *)&SC_allocGetDimZ },
-    { "rsAllocationGetDimLOD", (void *)&SC_allocGetDimLOD },
-    { "rsAllocationGetDimFaces", (void *)&SC_allocGetDimFaces },
-    { "rsGetAllocation", (void *)&SC_getAllocation },
+    { "_Z19rsAllocationGetDimX13rs_allocation", (void *)&SC_allocGetDimX },
+    { "_Z19rsAllocationGetDimY13rs_allocation", (void *)&SC_allocGetDimY },
+    { "_Z19rsAllocationGetDimZ13rs_allocation", (void *)&SC_allocGetDimZ },
+    { "_Z21rsAllocationGetDimLOD13rs_allocation", (void *)&SC_allocGetDimLOD },
+    { "_Z23rsAllocationGetDimFaces13rs_allocation", (void *)&SC_allocGetDimFaces },
+    { "_Z15rsGetAllocationPKv", (void *)&SC_getAllocation },
 
     { "_Z14rsGetElementAt13rs_allocationj", (void *)&SC_getElementAtX },
     { "_Z14rsGetElementAt13rs_allocationjj", (void *)&SC_getElementAtXY },
@@ -471,6 +407,7 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z7rsDebugPKcDv3_f", (void *)&SC_debugFv3 },
     { "_Z7rsDebugPKcDv4_f", (void *)&SC_debugFv4 },
     { "_Z7rsDebugPKci", (void *)&SC_debugI32 },
+    { "_Z7rsDebugPKcj", (void *)&SC_debugU32 },
     { "_Z7rsDebugPKcPKv", (void *)&SC_debugP },
     //extern void __attribute__((overloadable))rsDebug(const char *, const void *);
 
@@ -483,30 +420,32 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z6rsFracf", (void *)&SC_frac },
 
     // time
+    { "_Z8rsSecond", (void *)&SC_second },
+    { "_Z8rsMinute", (void *)&SC_minute },
+    { "_Z6rsHour", (void *)&SC_hour },
+    { "_Z5rsDay", (void *)&SC_day },
+    { "_Z7rsMonth", (void *)&SC_month },
+    { "_Z6rsYear", (void *)&SC_year },
+    { "_Z14rsUptimeMillis", (void*)&SC_uptimeMillis },
+    { "_Z17rsStartTimeMillis", (void*)&SC_startTimeMillis },
+    { "_Z19rsElapsedTimeMillis", (void*)&SC_elapsedTimeMillis },
+    { "_Z7rsGetDt", (void*)&SC_getDt },
+
     { "rsSecond", (void *)&SC_second },
     { "rsMinute", (void *)&SC_minute },
     { "rsHour", (void *)&SC_hour },
     { "rsDay", (void *)&SC_day },
     { "rsMonth", (void *)&SC_month },
     { "rsYear", (void *)&SC_year },
-    { "rsUptimeMillis", (void*)&SC_uptimeMillis2 },
-    { "rsStartTimeMillis", (void*)&SC_startTimeMillis2 },
-    { "rsElapsedTimeMillis", (void*)&SC_elapsedTimeMillis2 },
+    { "rsUptimeMillis", (void*)&SC_uptimeMillis },
+    { "rsStartTimeMillis", (void*)&SC_startTimeMillis },
+    { "rsElapsedTimeMillis", (void*)&SC_elapsedTimeMillis },
+    { "rsGetDt", (void*)&SC_getDt },
 
-    { "rsSendToClient", (void *)&SC_toClient },
-
-    // matrix
-    { "rsMatrixLoadIdentity", (void *)&SC_matrixLoadIdentity },
-    { "rsMatrixLoadFloat", (void *)&SC_matrixLoadFloat },
-    { "rsMatrixLoadMat", (void *)&SC_matrixLoadMat },
-    { "rsMatrixLoadRotate", (void *)&SC_matrixLoadRotate },
-    { "rsMatrixLoadScale", (void *)&SC_matrixLoadScale },
-    { "rsMatrixLoadTranslate", (void *)&SC_matrixLoadTranslate },
-    { "rsMatrixLoadMultiply", (void *)&SC_matrixLoadMultiply },
-    { "rsMatrixMultiply", (void *)&SC_matrixMultiply },
-    { "rsMatrixRotate", (void *)&SC_matrixRotate },
-    { "rsMatrixScale", (void *)&SC_matrixScale },
-    { "rsMatrixTranslate", (void *)&SC_matrixTranslate },
+    { "_Z14rsSendToClienti", (void *)&SC_toClient },
+    { "_Z14rsSendToClientiPKvj", (void *)&SC_toClient2 },
+    { "_Z22rsSendToClientBlockingi", (void *)&SC_toClientBlocking },
+    { "_Z22rsSendToClientBlockingiPKvj", (void *)&SC_toClientBlocking2 },
 
     { "_Z9rsForEach9rs_script13rs_allocationS0_PKv", (void *)&SC_ForEach },
     //{ "_Z9rsForEach9rs_script13rs_allocationS0_PKv", (void *)&SC_ForEach2 },
@@ -515,9 +454,6 @@ static ScriptCState::SymbolTable_t gSyms[] = {
 
     //{ "sinf_fast", (void *)&SC_sinf_fast },
     //{ "cosf_fast", (void *)&SC_cosf_fast },
-
-    { "scriptCall", (void *)&SC_scriptCall },
-
 
     { NULL, NULL }
 };

@@ -40,7 +40,8 @@ public:
     virtual ~Script();
 
     struct Enviroment_t {
-        uint32_t mStartTimeMillis;
+        int64_t mStartTimeMillis;
+        int64_t mLastDtTime;
         const char* mTimeZone;
 
         ObjectBaseRef<ProgramVertex> mVertex;

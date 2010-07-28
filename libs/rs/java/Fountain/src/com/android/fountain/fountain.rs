@@ -19,13 +19,14 @@ Point_t *point;
 #pragma rs export_func(addParticles)
 
 int root() {
+    float dt = min(rsGetDt(), 0.1f);
     rsgClearColor(0.f, 0.f, 0.f, 1.f);
     const float height = rsgGetHeight();
     const int size = rsAllocationGetDimX(rsGetAllocation(point));
-
+    float dy2 = dt * (10.f);
     Point_t * p = point;
     for (int ct=0; ct < size; ct++) {
-        p->delta.y += 0.15f;
+        p->delta.y += dy2;
         p->position += p->delta;
         if ((p->position.y > height) && (p->delta.y > 0)) {
             p->delta.y *= -0.3f;
