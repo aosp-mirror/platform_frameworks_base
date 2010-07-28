@@ -26,13 +26,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.hardware.Usb;
 import android.net.ConnectivityManager;
 import android.net.InterfaceConfiguration;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.NetworkInfo;
 import android.net.NetworkUtils;
-import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.HandlerThread;
@@ -136,7 +136,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
         mStateReceiver = new StateReceiver();
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        filter.addAction(Usb.ACTION_USB_STATE);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(Intent.ACTION_BOOT_COMPLETED);
         mContext.registerReceiver(mStateReceiver, filter);
@@ -429,10 +429,9 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private class StateReceiver extends BroadcastReceiver {
         public void onReceive(Context content, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
-                mUsbConnected = (intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
-                        == BatteryManager.BATTERY_PLUGGED_USB);
-                Tethering.this.updateUsbStatus();
+            if (action.equals(Usb.ACTION_USB_STATE)) {
+                mUsbConnected = intent.getExtras().getBoolean(Usb.USB_CONNECTED);
+                updateUsbStatus();
             } else if (action.equals(Intent.ACTION_MEDIA_SHARED)) {
                 mUsbMassStorageOff = false;
                 updateUsbStatus();
