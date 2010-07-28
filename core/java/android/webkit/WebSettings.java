@@ -19,12 +19,11 @@ package android.webkit;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.util.EventLog;
-import java.lang.SecurityException;
+
 import java.util.Locale;
 
 /**
@@ -433,9 +432,8 @@ public class WebSettings {
             buffer.append(" Build/");
             buffer.append(id);
         }
-        String mobile = ((mContext.getResources().getConfiguration().screenLayout
-                & Configuration.SCREENLAYOUT_SIZE_MASK)
-                == Configuration.SCREENLAYOUT_SIZE_XLARGE) ? "" : "Mobile ";
+        String mobile = mContext.getResources().getText(
+            com.android.internal.R.string.web_user_agent_target_content).toString();
         final String base = mContext.getResources().getText(
                 com.android.internal.R.string.web_user_agent).toString();
         return String.format(base, buffer, mobile);
