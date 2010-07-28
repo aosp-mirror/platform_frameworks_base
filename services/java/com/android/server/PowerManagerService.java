@@ -1052,6 +1052,7 @@ class PowerManagerService extends IPowerManager.Stub
                         case SCREEN_DIM:
                             if (mDimDelay >= 0) {
                                 when = now + mDimDelay;
+                                break;
                             } else {
                                 Slog.w(TAG, "mDimDelay=" + mDimDelay + " while trying to dim");
                             }
@@ -1059,6 +1060,9 @@ class PowerManagerService extends IPowerManager.Stub
                             synchronized (mLocks) {
                                 when = now + mScreenOffDelay;
                             }
+                            break;
+                        default:
+                            when = now;
                             break;
                     }
                 } else {
