@@ -91,6 +91,12 @@ static void SC_bindProgramRaster(RsProgramRaster pv)
 // VP
 //////////////////////////////////////////////////////////////////////////////
 
+static void SC_vpLoadProjectionMatrix(const rsc_Matrix *m)
+{
+    GET_TLS();
+    rsc->getVertex()->setProjectionMatrix(m);
+}
+
 static void SC_vpLoadModelMatrix(const rsc_Matrix *m)
 {
     GET_TLS();
@@ -355,6 +361,7 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "rsgBindSampler", (void *)&SC_bindSampler },
     { "rsgBindTexture", (void *)&SC_bindTexture },
 
+    { "rsgProgramVertexLoadProjectionMatrix", (void *)&SC_vpLoadProjectionMatrix },
     { "rsgProgramVertexLoadModelMatrix", (void *)&SC_vpLoadModelMatrix },
     { "rsgProgramVertexLoadTextureMatrix", (void *)&SC_vpLoadTextureMatrix },
 

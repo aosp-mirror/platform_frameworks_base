@@ -13,6 +13,7 @@ extern void rsgBindProgramRaster(rs_program_raster);
 extern void rsgBindSampler(rs_program_fragment, int slot, rs_sampler);
 extern void rsgBindTexture(rs_program_fragment, int slot, rs_allocation);
 
+extern void rsgProgramVertexLoadProjectionMatrix(const rs_matrix4x4 *);
 extern void rsgProgramVertexLoadModelMatrix(const rs_matrix4x4 *);
 extern void rsgProgramVertexLoadTextureMatrix(const rs_matrix4x4 *);
 
