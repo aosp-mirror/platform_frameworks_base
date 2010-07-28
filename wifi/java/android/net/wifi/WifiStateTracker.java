@@ -2960,6 +2960,15 @@ public class WifiStateTracker extends HierarchicalStateMachine implements Networ
                 transitionTo(mScanModeState);
             } else {
                 WifiNative.setScanResultHandlingCommand(CONNECT_MODE);
+                /* If supplicant has already connected, before we could finish establishing
+                 * the control channel connection, we miss all the supplicant events.
+                 * Disconnect and reconnect when driver has started to ensure we receive
+                 * all supplicant events.
+                 *
+                 * TODO: This is a bit unclean, ideally the supplicant should never
+                 * connect until told to do so by the framework
+                 */
+                WifiNative.disconnectCommand();
                 WifiNative.reconnectCommand();
                 transitionTo(mConnectModeState);
             }
