@@ -106,6 +106,27 @@ public class ActionBarImpl extends ActionBar {
                 CONTEXT_DISPLAY_NORMAL : CONTEXT_DISPLAY_SPLIT;
     }
 
+    @Override
+    public void setStandardNavigationMode(int titleResId, int subtitleResId) {
+        setStandardNavigationMode(mActivity.getString(titleResId),
+                mActivity.getString(subtitleResId));
+    }
+
+    @Override
+    public void setStandardNavigationMode(int titleResId) {
+        setStandardNavigationMode(mActivity.getString(titleResId));
+    }
+
+    @Override
+    public void setTitle(int resId) {
+        setTitle(mActivity.getString(resId));
+    }
+
+    @Override
+    public void setSubtitle(int resId) {
+        setSubtitle(mActivity.getString(resId));
+    }
+
     public void setCustomNavigationMode(View view) {
         cleanupTabs();
         mActionView.setCustomNavigationView(view);
