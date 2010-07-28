@@ -66,11 +66,7 @@ private:
 
     pthread_t mThread;
 
-    struct SampleInfo {
-        size_t size;
-        int64_t timestampUs;
-    };
-    List<SampleInfo>    mSampleInfos;
+    List<size_t>        mSampleSizes;
     bool                mSamplesHaveSameSize;
 
     List<MediaBuffer *> mChunkSamples;
@@ -916,6 +912,15 @@ status_t MPEG4Writer::Track::makeAVCCodecSpecificData(
     return OK;
 }
 
+static bool collectStatisticalData() {
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.stagefright.record-stats", value, NULL)
+        && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
+        return true;
+    }
+    return false;
+}
+
 void MPEG4Writer::Track::threadEntry() {
     sp<MetaData> meta = mSource->getFormat();
     const char *mime;
@@ -935,6 +940,7 @@ void MPEG4Writer::Track::threadEntry() {
     uint32_t previousSampleSize = 0;  // Size of the previous sample
     int64_t previousPausedDurationUs = 0;
     sp<MetaData> meta_data;
+    bool collectStats = collectStatisticalData();
 
     status_t err = OK;
     MediaBuffer *buffer;
@@ -1081,8 +1087,8 @@ void MPEG4Writer::Track::threadEntry() {
 
         if (is_avc) StripStartcode(copy);
 
-        SampleInfo info;
-        info.size = is_avc
+        size_t sampleSize;
+        sampleSize = is_avc
 #if USE_NALLEN_FOUR
                 ? copy->range_length() + 4
 #else
@@ -1091,7 +1097,7 @@ void MPEG4Writer::Track::threadEntry() {
                 : copy->range_length();
 
         // Max file size or duration handling
-        mEstimatedTrackSizeBytes += info.size;
+        mEstimatedTrackSizeBytes += sampleSize;
         if (mOwner->exceedsFileSizeLimit()) {
             mOwner->notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED, 0);
             break;
@@ -1109,7 +1115,7 @@ void MPEG4Writer::Track::threadEntry() {
         CHECK(meta_data->findInt64(kKeyTime, &timestampUs));
 
 ////////////////////////////////////////////////////////////////////////////////
-        if (mSampleInfos.empty()) {
+        if (mSampleSizes.empty()) {
             mStartTimestampUs = timestampUs;
             mOwner->setStartTimestampUs(mStartTimestampUs);
         }
@@ -1126,10 +1132,9 @@ void MPEG4Writer::Track::threadEntry() {
             mMaxTimeStampUs = timestampUs;
         }
 
-        info.timestampUs = timestampUs;
-        mSampleInfos.push_back(info);
-        if (mSampleInfos.size() > 2) {
-            if (lastDurationUs != info.timestampUs - lastTimestampUs) {
+        mSampleSizes.push_back(sampleSize);
+        if (mSampleSizes.size() > 2) {
+            if (lastDurationUs != timestampUs - lastTimestampUs) {
                 SttsTableEntry sttsEntry(sampleCount, lastDurationUs);
                 mSttsTableEntries.push_back(sttsEntry);
                 sampleCount = 1;
@@ -1138,16 +1143,16 @@ void MPEG4Writer::Track::threadEntry() {
             }
         }
         if (mSamplesHaveSameSize) {
-            if (mSampleInfos.size() >= 2 && previousSampleSize != info.size) {
+            if (mSampleSizes.size() >= 2 && previousSampleSize != sampleSize) {
                 mSamplesHaveSameSize = false;
             }
-            previousSampleSize = info.size;
+            previousSampleSize = sampleSize;
         }
-        lastDurationUs = info.timestampUs - lastTimestampUs;
-        lastTimestampUs = info.timestampUs;
+        lastDurationUs = timestampUs - lastTimestampUs;
+        lastTimestampUs = timestampUs;
 
         if (isSync != 0) {
-            mStssTableEntries.push_back(mSampleInfos.size());
+            mStssTableEntries.push_back(mSampleSizes.size());
         }
 
         if (mTrackingProgressStatus) {
@@ -1178,7 +1183,9 @@ void MPEG4Writer::Track::threadEntry() {
             } else {
                 if (timestampUs - chunkTimestampUs > interleaveDurationUs) {
                     ++nChunks;
-                    mChunkDurations.push_back(timestampUs - chunkTimestampUs);
+                    if (collectStats) {
+                        mChunkDurations.push_back(timestampUs - chunkTimestampUs);
+                    }
                     if (nChunks == 1 ||  // First chunk
                         (--(mStscTableEntries.end()))->samplesPerChunk !=
                          mChunkSamples.size()) {
@@ -1194,14 +1201,14 @@ void MPEG4Writer::Track::threadEntry() {
 
     }
 
-    if (mSampleInfos.empty()) {
+    if (mSampleSizes.empty()) {
         err = UNKNOWN_ERROR;
     }
     mOwner->trackProgressStatus(this, -1, err);
 
     // Last chunk
     if (mOwner->numTracks() == 1) {
-        StscTableEntry stscEntry(1, mSampleInfos.size(), 1);
+        StscTableEntry stscEntry(1, mSampleSizes.size(), 1);
         mStscTableEntries.push_back(stscEntry);
     } else if (!mChunkSamples.empty()) {
         ++nChunks;
@@ -1213,7 +1220,7 @@ void MPEG4Writer::Track::threadEntry() {
     // We don't really know how long the last frame lasts, since
     // there is no frame time after it, just repeat the previous
     // frame's duration.
-    if (mSampleInfos.size() == 1) {
+    if (mSampleSizes.size() == 1) {
         lastDurationUs = 0;  // A single sample's duration
     } else {
         ++sampleCount;  // Count for the last sample
@@ -1222,7 +1229,7 @@ void MPEG4Writer::Track::threadEntry() {
     mSttsTableEntries.push_back(sttsEntry);
     mReachedEOS = true;
     LOGI("Received total/0-length (%d/%d) buffers and encoded %d frames - %s",
-            count, nZeroLengthFrames, mSampleInfos.size(), is_audio? "audio": "video");
+            count, nZeroLengthFrames, mSampleSizes.size(), is_audio? "audio": "video");
 
     logStatisticalData(is_audio);
 }
@@ -1284,8 +1291,8 @@ void MPEG4Writer::trackProgressStatus(
 
 void MPEG4Writer::Track::findMinAvgMaxSampleDurationMs(
         int32_t *min, int32_t *avg, int32_t *max) {
-    CHECK(!mSampleInfos.empty());
-    int32_t avgSampleDurationMs = mMaxTimeStampUs / 1000 / mSampleInfos.size();
+    CHECK(!mSampleSizes.empty());
+    int32_t avgSampleDurationMs = mMaxTimeStampUs / 1000 / mSampleSizes.size();
     int32_t minSampleDurationMs = 0x7FFFFFFF;
     int32_t maxSampleDurationMs = 0;
     for (List<SttsTableEntry>::iterator it = mSttsTableEntries.begin();
@@ -1327,22 +1334,17 @@ void MPEG4Writer::Track::findMinMaxChunkDurations(int64_t *min, int64_t *max) {
 }
 
 void MPEG4Writer::Track::logStatisticalData(bool isAudio) {
-    if (mMaxTimeStampUs <= 0 || mSampleInfos.empty()) {
+    if (mMaxTimeStampUs <= 0 || mSampleSizes.empty()) {
         LOGI("nothing is recorded");
         return;
     }
 
-    bool collectStats = false;
-    char value[PROPERTY_VALUE_MAX];
-    if (property_get("media.stagefright.record-stats", value, NULL)
-        && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
-        collectStats = true;
-    }
+    bool collectStats = collectStatisticalData();
 
     if (collectStats) {
         LOGI("%s track - duration %lld us, total %d frames",
                 isAudio? "audio": "video", mMaxTimeStampUs,
-                mSampleInfos.size());
+                mSampleSizes.size());
         int32_t min, avg, max;
         findMinAvgMaxSampleDurationMs(&min, &avg, &max);
         LOGI("min/avg/max sample duration (ms): %d/%d/%d", min, avg, max);
@@ -1355,9 +1357,9 @@ void MPEG4Writer::Track::logStatisticalData(bool isAudio) {
         }
 
         int64_t totalBytes = 0;
-        for (List<SampleInfo>::iterator it = mSampleInfos.begin();
-            it != mSampleInfos.end(); ++it) {
-            totalBytes += it->size;
+        for (List<size_t>::iterator it = mSampleSizes.begin();
+            it != mSampleSizes.end(); ++it) {
+            totalBytes += (*it);
         }
         float bitRate = (totalBytes * 8000000.0) / mMaxTimeStampUs;
         LOGI("avg bit rate (bps): %.2f", bitRate);
@@ -1731,16 +1733,16 @@ void MPEG4Writer::Track::writeTrackHeader(
           mOwner->beginBox("stsz");
             mOwner->writeInt32(0);  // version=0, flags=0
             if (mSamplesHaveSameSize) {
-                List<SampleInfo>::iterator it = mSampleInfos.begin();
-                mOwner->writeInt32(it->size);  // default sample size
+                List<size_t>::iterator it = mSampleSizes.begin();
+                mOwner->writeInt32(*it);  // default sample size
             } else {
                 mOwner->writeInt32(0);
             }
-            mOwner->writeInt32(mSampleInfos.size());
+            mOwner->writeInt32(mSampleSizes.size());
             if (!mSamplesHaveSameSize) {
-                for (List<SampleInfo>::iterator it = mSampleInfos.begin();
-                     it != mSampleInfos.end(); ++it) {
-                    mOwner->writeInt32((*it).size);
+                for (List<size_t>::iterator it = mSampleSizes.begin();
+                     it != mSampleSizes.end(); ++it) {
+                    mOwner->writeInt32(*it);
                 }
             }
           mOwner->endBox();  // stsz
