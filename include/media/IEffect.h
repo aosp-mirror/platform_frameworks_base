@@ -33,7 +33,11 @@ public:
 
     virtual status_t disable() = 0;
 
-    virtual status_t command(int cmdCode, int cmdSize, void *pCmdData, int *pReplySize, void *pReplyData) = 0;
+    virtual status_t command(uint32_t cmdCode,
+                             uint32_t cmdSize,
+                             void *pCmdData,
+                             uint32_t *pReplySize,
+                             void *pReplyData) = 0;
 
     virtual void disconnect() = 0;
 

@@ -301,12 +301,23 @@ typedef struct reverb_module_s {
  *------------------------------------
 */
 int EffectQueryNumberEffects(uint32_t *pNumEffects);
-int EffectQueryEffect(uint32_t index, effect_descriptor_t *pDescriptor);
-int EffectCreate(effect_uuid_t *effectUID, int32_t sessionId, int32_t ioId, effect_interface_t *pInterface);
+int EffectQueryEffect(uint32_t index,
+                      effect_descriptor_t *pDescriptor);
+int EffectCreate(effect_uuid_t *effectUID,
+                 int32_t sessionId,
+                 int32_t ioId,
+                 effect_interface_t *pInterface);
 int EffectRelease(effect_interface_t interface);
 
-static int Reverb_Process(effect_interface_t self, audio_buffer_t *inBuffer, audio_buffer_t *outBuffer);
-static int Reverb_Command(effect_interface_t self, int cmdCode, int cmdSize, void *pCmdData, int *replySize, void *pReplyData);
+static int Reverb_Process(effect_interface_t self,
+                          audio_buffer_t *inBuffer,
+                          audio_buffer_t *outBuffer);
+static int Reverb_Command(effect_interface_t self,
+                          uint32_t cmdCode,
+                          uint32_t cmdSize,
+                          void *pCmdData,
+                          uint32_t *replySize,
+                          void *pReplyData);
 
 
 /*------------------------------------

@@ -284,10 +284,10 @@ typedef int32_t (*effect_process_t)(effect_interface_t self,
 //
 ////////////////////////////////////////////////////////////////////////////////
 typedef int32_t (*effect_command_t)(effect_interface_t self,
-                                    int32_t cmdCode,
-                                    int32_t cmdSize,
+                                    uint32_t cmdCode,
+                                    uint32_t cmdSize,
                                     void *pCmdData,
-                                    int32_t *replySize,
+                                    uint32_t *replySize,
                                     void *pReplyData);
 
 

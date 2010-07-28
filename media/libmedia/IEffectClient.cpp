@@ -56,7 +56,11 @@ public:
         remote()->transact(ENABLE_STATUS_CHANGED, data, &reply, IBinder::FLAG_ONEWAY);
     }
 
-    void commandExecuted(int cmdCode, int cmdSize, void *pCmdData, int replySize, void *pReplyData)
+    void commandExecuted(uint32_t cmdCode,
+                         uint32_t cmdSize,
+                         void *pCmdData,
+                         uint32_t replySize,
+                         void *pReplyData)
     {
         LOGV("commandExecuted");
         Parcel data, reply;
@@ -108,14 +112,14 @@ status_t BnEffectClient::onTransact(
         case COMMAND_EXECUTED: {
             LOGV("COMMAND_EXECUTED");
             CHECK_INTERFACE(IEffectClient, data, reply);
-            int cmdCode = data.readInt32();
-            int cmdSize = data.readInt32();
+            uint32_t cmdCode = data.readInt32();
+            uint32_t cmdSize = data.readInt32();
             char *cmd = NULL;
             if (cmdSize) {
                 cmd = (char *)malloc(cmdSize);
                 data.read(cmd, cmdSize);
             }
-            int replySize = data.readInt32();
+            uint32_t replySize = data.readInt32();
             char *resp = NULL;
             if (replySize) {
                 resp = (char *)malloc(replySize);
