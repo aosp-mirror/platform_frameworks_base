@@ -256,8 +256,8 @@ page.title=Activity and Task Design Guidelines
   to be able go to a subsequent screen B and then use the BACK key to go
   back to screen A, then the screen A needs to be implemented as an
   activity. The one exception to this rule is if your application 
-  <a href=#taking_over_back_key title="takes control of the BACK key"
-  takes control of the BACK key</a> and manages the navigation itself.
+  <a href="#taking_over_back_key">takes control of the BACK key</a> and manages the navigation
+itself.
 </p>
 
 
