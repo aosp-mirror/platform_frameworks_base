@@ -3373,6 +3373,14 @@ public final class Settings {
         public static final String THROTTLE_MAX_NTP_CACHE_AGE_SEC =
                 "throttle_max_ntp_cache_age_sec";
 
+        /**
+         * The maximum size, in bytes, of a download that the download manager will transfer over
+         * a non-wifi connection.
+         * @hide
+         */
+        public static final String DOWNLOAD_MAX_BYTES_OVER_MOBILE =
+                "download_manager_max_bytes_over_mobile";
+
 
         /**
          * @hide
