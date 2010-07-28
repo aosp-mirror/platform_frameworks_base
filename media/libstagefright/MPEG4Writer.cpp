@@ -145,7 +145,7 @@ MPEG4Writer::MPEG4Writer(const char *filename)
       mOffset(0),
       mMdatOffset(0),
       mEstimatedMoovBoxSize(0),
-      mInterleaveDurationUs(500000) {
+      mInterleaveDurationUs(1000000) {
     CHECK(mFile != NULL);
 }
 
@@ -157,7 +157,7 @@ MPEG4Writer::MPEG4Writer(int fd)
       mOffset(0),
       mMdatOffset(0),
       mEstimatedMoovBoxSize(0),
-      mInterleaveDurationUs(500000) {
+      mInterleaveDurationUs(1000000) {
     CHECK(mFile != NULL);
 }
 
