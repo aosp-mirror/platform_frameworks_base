@@ -23,12 +23,13 @@ import android.view.ViewGroup;
  * Additional methods that when implemented make an
  * {@link ExpandableListAdapter} take advantage of the {@link Adapter} view type
  * mechanism.
- * 
- * An {@link ExpandableListAdapter} declares one view type for its group items
+ * <p>
+ * An {@link ExpandableListAdapter} declares it has one view type for its group items
  * and one view type for its child items. Although adapted for most {@link ExpandableListView}s,
- * these values should be tuned heterogeneous {@link ExpandableListView}s. Lists that contain
- * different types of group and/or child item views, should use an adapter that implements this
- * interface. This way, the recycled views that will be provided to
+ * these values should be tuned for heterogeneous {@link ExpandableListView}s.
+ * </p>
+ * Lists that contain different types of group and/or child item views, should use an adapter that
+ * implements this interface. This way, the recycled views that will be provided to
  * {@link android.widget.ExpandableListAdapter#getGroupView(int, boolean, View, ViewGroup)}
  * and
  * {@link android.widget.ExpandableListAdapter#getChildView(int, int, boolean, View, ViewGroup)}
@@ -48,7 +49,7 @@ public interface HeterogeneousExpandableList {
      *         . Note: Integers must be in the range 0 to {@link #getGroupTypeCount} - 1.
      *         {@link android.widget.Adapter#IGNORE_ITEM_VIEW_TYPE} can also be returned.
      * @see android.widget.Adapter#IGNORE_ITEM_VIEW_TYPE
-     * @see getGroupTypeCount()
+     * @see #getGroupTypeCount()
      */
     int getGroupType(int groupPosition);
 
@@ -65,7 +66,7 @@ public interface HeterogeneousExpandableList {
      *         Note: Integers must be in the range 0 to {@link #getChildTypeCount} - 1.
      *         {@link android.widget.Adapter#IGNORE_ITEM_VIEW_TYPE} can also be returned.
      * @see android.widget.Adapter#IGNORE_ITEM_VIEW_TYPE
-     * @see getChildTypeCount()
+     * @see #getChildTypeCount()
      */
     int getChildType(int groupPosition, int childPosition);
 
@@ -78,13 +79,11 @@ public interface HeterogeneousExpandableList {
      * . If the adapter always returns the same type of View for all group items, this method should
      * return 1.
      * </p>
-     * <p>
      * This method will only be called when the adapter is set on the {@link AdapterView}.
-     * </p>
      * 
      * @return The number of types of group Views that will be created by this adapter.
-     * @see getChildTypeCount()
-     * @see getGroupType()
+     * @see #getChildTypeCount()
+     * @see #getGroupType(int)
      */
     int getGroupTypeCount();
 
@@ -97,13 +96,11 @@ public interface HeterogeneousExpandableList {
      * , for any group. If the adapter always returns the same type of View for
      * all child items, this method should return 1.
      * </p>
-     * <p>
      * This method will only be called when the adapter is set on the {@link AdapterView}.
-     * </p>
      * 
      * @return The total number of types of child Views that will be created by this adapter.
-     * @see getGroupTypeCount()
-     * @see getChildType()
+     * @see #getGroupTypeCount()
+     * @see #getChildType(int, int)
      */
     int getChildTypeCount();
 }
