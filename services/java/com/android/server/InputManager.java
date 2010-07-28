@@ -66,13 +66,14 @@ public class InputManager {
     private static native void nativeSetDisplaySize(int displayId, int width, int height);
     private static native void nativeSetDisplayOrientation(int displayId, int rotation);
     
-    private static native int nativeGetScanCodeState(int deviceId, int deviceClasses,
+    private static native int nativeGetScanCodeState(int deviceId, int sourceMask,
             int scanCode);
-    private static native int nativeGetKeyCodeState(int deviceId, int deviceClasses,
+    private static native int nativeGetKeyCodeState(int deviceId, int sourceMask,
             int keyCode);
-    private static native int nativeGetSwitchState(int deviceId, int deviceClasses,
+    private static native int nativeGetSwitchState(int deviceId, int sourceMask,
             int sw);
-    private static native boolean nativeHasKeys(int[] keyCodes, boolean[] keyExists);
+    private static native boolean nativeHasKeys(int deviceId, int sourceMask,
+            int[] keyCodes, boolean[] keyExists);
     private static native void nativeRegisterInputChannel(InputChannel inputChannel);
     private static native void nativeUnregisterInputChannel(InputChannel inputChannel);
     private static native int nativeInjectKeyEvent(KeyEvent event,
@@ -85,20 +86,28 @@ public class InputManager {
     private static native void nativePreemptInputDispatch();
     private static native String nativeDump();
     
-    // Device class as defined by EventHub.
-    private static final int CLASS_KEYBOARD = 0x00000001;
-    private static final int CLASS_ALPHAKEY = 0x00000002;
-    private static final int CLASS_TOUCHSCREEN = 0x00000004;
-    private static final int CLASS_TRACKBALL = 0x00000008;
-    private static final int CLASS_TOUCHSCREEN_MT = 0x00000010;
-    private static final int CLASS_DPAD = 0x00000020;
-    
     // Input event injection constants defined in InputDispatcher.h.
     static final int INPUT_EVENT_INJECTION_SUCCEEDED = 0;
     static final int INPUT_EVENT_INJECTION_PERMISSION_DENIED = 1;
     static final int INPUT_EVENT_INJECTION_FAILED = 2;
     static final int INPUT_EVENT_INJECTION_TIMED_OUT = 3;
     
+    // Key states (may be returned by queries about the current state of a
+    // particular key code, scan code or switch).
+    
+    /** The key state is unknown or the requested key itself is not supported. */
+    public static final int KEY_STATE_UNKNOWN = -1;
+
+    /** The key is up. /*/
+    public static final int KEY_STATE_UP = 0;
+
+    /** The key is down. */
+    public static final int KEY_STATE_DOWN = 1;
+
+    /** The key is down but is a virtual key press that is being emulated by the system. */
+    public static final int KEY_STATE_VIRTUAL = 2;
+
+
     public InputManager(Context context, WindowManagerService windowManagerService) {
         this.mContext = context;
         this.mWindowManagerService = windowManagerService;
@@ -150,55 +159,67 @@ public class InputManager {
         config.navigation = mNavigationConfig;
     }
     
-    public int getScancodeState(int code) {
-        return nativeGetScanCodeState(0, -1, code);
+    /**
+     * Gets the current state of a key or button by key code.
+     * @param deviceId The input device id, or -1 to consult all devices.
+     * @param sourceMask The input sources to consult, or {@link InputDevice#SOURCE_ANY} to
+     * consider all input sources.  An input device is consulted if at least one of its
+     * non-class input source bits matches the specified source mask.
+     * @param keyCode The key code to check.
+     * @return The key state.
+     */
+    public int getKeyCodeState(int deviceId, int sourceMask, int keyCode) {
+        return nativeGetKeyCodeState(deviceId, sourceMask, keyCode);
     }
     
-    public int getScancodeState(int deviceId, int code) {
-        return nativeGetScanCodeState(deviceId, -1, code);
+    /**
+     * Gets the current state of a key or button by scan code.
+     * @param deviceId The input device id, or -1 to consult all devices.
+     * @param sourceMask The input sources to consult, or {@link InputDevice#SOURCE_ANY} to
+     * consider all input sources.  An input device is consulted if at least one of its
+     * non-class input source bits matches the specified source mask.
+     * @param scanCode The scan code to check.
+     * @return The key state.
+     */
+    public int getScanCodeState(int deviceId, int sourceMask, int scanCode) {
+        return nativeGetScanCodeState(deviceId, sourceMask, scanCode);
     }
     
-    public int getTrackballScancodeState(int code) {
-        return nativeGetScanCodeState(-1, CLASS_TRACKBALL, code);
-    }
-    
-    public int getDPadScancodeState(int code) {
-        return nativeGetScanCodeState(-1, CLASS_DPAD, code);
-    }
-    
-    public int getKeycodeState(int code) {
-        return nativeGetKeyCodeState(0, -1, code);
-    }
-    
-    public int getKeycodeState(int deviceId, int code) {
-        return nativeGetKeyCodeState(deviceId, -1, code);
-    }
-    
-    public int getTrackballKeycodeState(int code) {
-        return nativeGetKeyCodeState(-1, CLASS_TRACKBALL, code);
-    }
-    
-    public int getDPadKeycodeState(int code) {
-        return nativeGetKeyCodeState(-1, CLASS_DPAD, code);
+    /**
+     * Gets the current state of a switch by switch code.
+     * @param deviceId The input device id, or -1 to consult all devices.
+     * @param sourceMask The input sources to consult, or {@link InputDevice#SOURCE_ANY} to
+     * consider all input sources.  An input device is consulted if at least one of its
+     * non-class input source bits matches the specified source mask.
+     * @param switchCode The switch code to check.
+     * @return The switch state.
+     */
+    public int getSwitchState(int deviceId, int sourceMask, int switchCode) {
+        return nativeGetSwitchState(deviceId, sourceMask, switchCode);
     }
 
-    public int getSwitchState(int sw) {
-        return nativeGetSwitchState(-1, -1, sw);
-    }
-    
-    public int getSwitchState(int deviceId, int sw) {
-        return nativeGetSwitchState(deviceId, -1, sw);
-    }
-
-    public boolean hasKeys(int[] keyCodes, boolean[] keyExists) {
+    /**
+     * Determines whether the specified key codes are supported by a particular device.
+     * @param deviceId The input device id, or -1 to consult all devices.
+     * @param sourceMask The input sources to consult, or {@link InputDevice#SOURCE_ANY} to
+     * consider all input sources.  An input device is consulted if at least one of its
+     * non-class input source bits matches the specified source mask.
+     * @param keyCodes The array of key codes to check.
+     * @param keyExists An array at least as large as keyCodes whose entries will be set
+     * to true or false based on the presence or absence of support for the corresponding
+     * key codes.
+     * @return True if the lookup was successful, false otherwise.
+     */
+    public boolean hasKeys(int deviceId, int sourceMask, int[] keyCodes, boolean[] keyExists) {
         if (keyCodes == null) {
             throw new IllegalArgumentException("keyCodes must not be null.");
         }
-        if (keyExists == null) {
-            throw new IllegalArgumentException("keyExists must not be null.");
+        if (keyExists == null || keyExists.length < keyCodes.length) {
+            throw new IllegalArgumentException("keyExists must not be null and must be at "
+                    + "least as large as keyCodes.");
         }
         
-        return nativeHasKeys(keyCodes, keyExists);
+        return nativeHasKeys(deviceId, sourceMask, keyCodes, keyExists);
     }
     
     public void registerInputChannel(InputChannel inputChannel) {

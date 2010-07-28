@@ -4306,7 +4306,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getSwitchState()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        return mInputManager.getSwitchState(sw);
+        return mInputManager.getSwitchState(-1, InputDevice.SOURCE_ANY, sw);
     }
 
     public int getSwitchStateForDevice(int devid, int sw) {
@@ -4314,7 +4314,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getSwitchStateForDevice()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        return mInputManager.getSwitchState(devid, sw);
+        return mInputManager.getSwitchState(devid, InputDevice.SOURCE_ANY, sw);
     }
 
     public int getScancodeState(int sw) {
@@ -4322,7 +4322,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getScancodeState()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        return mInputManager.getScancodeState(sw);
+        return mInputManager.getScanCodeState(-1, InputDevice.SOURCE_ANY, sw);
     }
 
     public int getScancodeStateForDevice(int devid, int sw) {
@@ -4330,7 +4330,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getScancodeStateForDevice()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        return mInputManager.getScancodeState(devid, sw);
+        return mInputManager.getScanCodeState(devid, InputDevice.SOURCE_ANY, sw);
     }
 
     public int getTrackballScancodeState(int sw) {
@@ -4338,7 +4338,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getTrackballScancodeState()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        return mInputManager.getTrackballScancodeState(sw);
+        return mInputManager.getScanCodeState(-1, InputDevice.SOURCE_TRACKBALL, sw);
     }
 
     public int getDPadScancodeState(int sw) {
@@ -4346,7 +4346,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getDPadScancodeState()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        return mInputManager.getDPadScancodeState(sw);
+        return mInputManager.getScanCodeState(-1, InputDevice.SOURCE_DPAD, sw);
     }
 
     public int getKeycodeState(int sw) {
@@ -4354,7 +4354,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getKeycodeState()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        return mInputManager.getKeycodeState(sw);
+        return mInputManager.getKeyCodeState(-1, InputDevice.SOURCE_ANY, sw);
     }
 
     public int getKeycodeStateForDevice(int devid, int sw) {
@@ -4362,7 +4362,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getKeycodeStateForDevice()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        return mInputManager.getKeycodeState(devid, sw);
+        return mInputManager.getKeyCodeState(devid, InputDevice.SOURCE_ANY, sw);
     }
 
     public int getTrackballKeycodeState(int sw) {
@@ -4370,7 +4370,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getTrackballKeycodeState()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        return mInputManager.getTrackballKeycodeState(sw);
+        return mInputManager.getKeyCodeState(-1, InputDevice.SOURCE_TRACKBALL, sw);
     }
 
     public int getDPadKeycodeState(int sw) {
@@ -4378,11 +4378,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getDPadKeycodeState()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        return mInputManager.getDPadKeycodeState(sw);
+        return mInputManager.getKeyCodeState(-1, InputDevice.SOURCE_DPAD, sw);
     }
 
     public boolean hasKeys(int[] keycodes, boolean[] keyExists) {
-        return mInputManager.hasKeys(keycodes, keyExists);
+        return mInputManager.hasKeys(-1, InputDevice.SOURCE_ANY, keycodes, keyExists);
     }
 
     public void enableScreenAfterBoot() {

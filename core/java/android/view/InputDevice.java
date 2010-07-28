@@ -30,11 +30,13 @@ package android.view;
  * As a further wrinkle, different kinds of input sources uses different coordinate systems
  * to describe motion events.  Refer to the comments on the input source constants for
  * the appropriate interpretation.
+ * </p>
  */
 public final class InputDevice {
     private int mId;
     private String mName;
     private int mSources;
+    private int mKeyboardType;
     
     /**
      * A mask for input source classes.
@@ -173,6 +175,12 @@ public final class InputDevice {
      * @see #SOURCE_CLASS_JOYSTICK
      */
     public static final int SOURCE_JOYSTICK_RIGHT = 0x02000000 | SOURCE_CLASS_JOYSTICK;
+    
+    /**
+     * A special input source constant that is used when filtering input devices
+     * to match devices that provide any type of input source.
+     */
+    public static final int SOURCE_ANY = 0xffffff00;
 
     /**
      * Constant for retrieving the range of values for {@link MotionEvent.PointerCoords#x}.
@@ -237,6 +245,22 @@ public final class InputDevice {
      * @see #getMotionRange
      */
     public static final int MOTION_RANGE_ORIENTATION = 8;
+    
+    /**
+     * There is no keyboard.
+     */
+    public static final int KEYBOARD_TYPE_NONE = 0;
+    
+    /**
+     * The keyboard is not fully alphabetic.  It may be a numeric keypad or an assortment
+     * of buttons that are not mapped as alphabetic keys suitable for text input.
+     */
+    public static final int KEYBOARD_TYPE_NON_ALPHABETIC = 1;
+    
+    /**
+     * The keyboard supports a complement of alphabetic keys.
+     */
+    public static final int KEYBOARD_TYPE_ALPHABETIC = 2;
 
     /**
      * Gets information about the input device with the specified id.
@@ -262,6 +286,14 @@ public final class InputDevice {
      */
     public int getSources() {
         return mSources;
+    }
+    
+    /**
+     * Gets the keyboard type.
+     * @return The keyboard type.
+     */
+    public int getKeyboardType() {
+        return mKeyboardType;
     }
     
     /**

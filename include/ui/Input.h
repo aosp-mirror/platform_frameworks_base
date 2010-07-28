@@ -23,7 +23,10 @@
 
 #include <android/input.h>
 #include <utils/Vector.h>
+#include <utils/KeyedVector.h>
 #include <utils/Timers.h>
+#include <utils/RefBase.h>
+#include <utils/String8.h>
 
 /*
  * Additional private constants not defined in ndk/ui/input.h.
@@ -47,20 +50,15 @@ struct AInputEvent {
     virtual ~AInputEvent() { }
 };
 
-namespace android {
-
 /*
- * A raw event as retrieved from the EventHub.
+ * Declare a concrete type for the NDK's input device forward declaration.
  */
-struct RawEvent {
-    nsecs_t when;
-    int32_t deviceId;
-    int32_t type;
-    int32_t scanCode;
-    int32_t keyCode;
-    int32_t value;
-    uint32_t flags;
+struct AInputDevice {
+    virtual ~AInputDevice() { }
 };
+
+
+namespace android {
 
 /*
  * Flags that flow alongside events in the input dispatch system to help with certain
@@ -422,6 +420,69 @@ public:
 private:
     KeyEvent mKeyEvent;
     MotionEvent mMotionEvent;
+};
+
+/*
+ * Describes the characteristics and capabilities of an input device.
+ */
+class InputDeviceInfo {
+public:
+    InputDeviceInfo();
+    InputDeviceInfo(const InputDeviceInfo& other);
+    ~InputDeviceInfo();
+
+    struct MotionRange {
+        float min;
+        float max;
+        float flat;
+        float fuzz;
+    };
+
+    void initialize(int32_t id, const String8& name);
+
+    inline int32_t getId() const { return mId; }
+    inline const String8 getName() const { return mName; }
+    inline uint32_t getSources() const { return mSources; }
+
+    const MotionRange* getMotionRange(int32_t rangeType) const;
+
+    void addSource(uint32_t source);
+    void addMotionRange(int32_t rangeType, float min, float max, float flat, float fuzz);
+    void addMotionRange(int32_t rangeType, const MotionRange& range);
+
+    inline void setKeyboardType(int32_t keyboardType) { mKeyboardType = keyboardType; }
+    inline int32_t getKeyboardType() const { return mKeyboardType; }
+
+private:
+    int32_t mId;
+    String8 mName;
+    uint32_t mSources;
+    int32_t mKeyboardType;
+
+    KeyedVector<int32_t, MotionRange> mMotionRanges;
+};
+
+/*
+ * Provides remote access to information about an input device.
+ *
+ * Note: This is essentially a wrapper for Binder calls into the Window Manager Service.
+ */
+class InputDeviceProxy : public RefBase, public AInputDevice {
+protected:
+    InputDeviceProxy();
+    virtual ~InputDeviceProxy();
+
+public:
+    static void getDeviceIds(Vector<int32_t>& outIds);
+
+    static sp<InputDeviceProxy> getDevice(int32_t id);
+
+    inline const InputDeviceInfo* getInfo() { return & mInfo; }
+
+    // TODO add hasKeys, keymap, etc...
+
+private:
+    InputDeviceInfo mInfo;
 };
 
 
