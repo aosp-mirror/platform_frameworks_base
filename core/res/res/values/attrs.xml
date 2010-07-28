@@ -1790,6 +1790,8 @@
             <enum name="singleChoice" value="1" />
             <!-- The list allows multiple choices. -->
             <enum name="multipleChoice" value="2" />
+            <!-- The list allows multiple choices in a custom selection mode. -->
+            <enum name="multipleChoiceModal" value="3" />
         </attr>
         <!-- When set to false, the ListView will not draw the divider after each header view.
              The default value is true. -->
