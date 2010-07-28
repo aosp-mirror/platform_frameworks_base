@@ -42,188 +42,39 @@ outside the scope of this document.</p>
 
 <h2 id="optimize_judiciously">Optimize Judiciously</h2>
 
-<p>As you get started thinking about how to design your application, and as
-you write it, consider
-the cautionary points about optimization that Josh Bloch makes in his book
-<em>Effective Java</em>. Here's "Item 47: Optimize Judiciously", excerpted from
-the latest edition of the book with permission. Although Josh didn't have
-Android application development in mind when writing this section &mdash; for
-example, the <code style="color:black">java.awt.Component</code> class
-referenced is not available in Android, and Android uses the
-Dalvik VM, rather than a standard JVM &mdash; his points are still valid. </p>
+<p>This document is about Android-specific micro-optimization, so it assumes
+that you've already used profiling to work out exactly what code needs to be
+optimized, and that you already have a way to measure the effect (good or bad)
+of any changes you make. You only have so much engineering time to invest, so
+it's important to know you're spending it wisely.
 
-<blockquote>
+<p>(See <a href="#closing_notes">Closing Notes</a> for more on profiling and
+writing effective benchmarks.)
 
-<p>There are three aphorisms concerning optimization that everyone should know.
-They are perhaps beginning to suffer from overexposure, but in case you aren't
-yet familiar with them, here they are:</p>
+<p>This document also assumes that you made the best decisions about data
+structures and algorithms, and that you've also considered the future
+performance consequences of your API decisions. Using the right data
+structures and algorithms will make more difference than any of the advice
+here, and considering the performance consequences of your API decisions will
+make it easier to switch to better implementations later (this is more
+important for library code than for application code).
 
-<div style="padding-left:3em;padding-right:4em;">
+<p>(If you need that kind of advice, see Josh Bloch's <em>Effective Java</em>,
+item 47.)</p>
 
-<p style="margin-bottom:.5em;">More computing sins are committed in the name of
-efficiency (without necessarily achieving it) than for any other single
-reason&mdash;including blind stupidity.</p>
-<p>&mdash;William A. Wulf <span style="font-size:80%;"><sup>1</sup></span></p>
+<p>One of the trickiest problems you'll face when micro-optimizing an Android
+app is that your app is pretty much guaranteed to be running on multiple
+hardware platforms. Different versions of the VM running on different
+processors running at different speeds. It's not even generally the case
+that you can simply say "device X is a factor F faster/slower than device Y",
+and scale your results from one device to others. In particular, measurement
+on the emulator tells you very little about performance on any device. There
+are also huge differences between devices with and without a JIT: the "best"
+code for a device with a JIT is not always the best code for a device
+without.</p>
 
-<p style="margin-bottom:.5em;">We should forget about small efficiencies, say
-about 97% of the time: premature optimization is the root of all evil. </p>
-<p>&mdash;Donald E. Knuth <span style="font-size:80%;"><sup>2</sup></span></p>
-
-
-<p style="margin-bottom:.5em;">We follow two rules in the matter of optimization:</p>
-<ul style="margin-bottom:0">
-<li>Rule 1. Don't do it.</li>
-<li>Rule 2 (for experts only). Don't do it yet &mdash; that is, not until you have a
-perfectly clear and unoptimized solution. </li>
-</ul>
-<p>&mdash;M. A. Jackson <span style="font-size:80%;"><sup>3</sup></span></p>
-</div>
-
-<p>All of these aphorisms predate the Java programming language by two decades.
-They tell a deep truth about optimization: it is easy to do more harm than good,
-especially if you optimize prematurely. In the process, you may produce software
-that is neither fast nor correct and cannot easily be fixed.</p>
-
-<p>Don't sacrifice sound architectural principles for performance.
-<strong>Strive to write good programs rather than fast ones.</strong> If a good
-program is not fast enough, its architecture will allow it to be optimized. Good
-programs embody the principle of <em>information hiding</em>: where possible,
-they localize design decisions within individual modules, so individual
-decisions can be changed without affecting the remainder of the system (Item
-13).</p>
-
-<p>This does <em>not</em> mean that you can ignore performance concerns until
-your program is complete. Implementation problems can be fixed by later
-optimization, but pervasive architectural flaws that limit performance can be
-impossible to fix without rewriting the system. Changing a fundamental facet of
-your design after the fact can result in an ill-structured system that is
-difficult to maintain and evolve. Therefore you must think about performance
-during the design process.</p>
-
-<p><strong>Strive to avoid design decisions that limit performance.</strong> The
-components of a design that are most difficult to change after the fact are
-those specifying interactions between modules and with the outside world. Chief
-among these design components are APIs, wire-level protocols, and persistent
-data formats. Not only are these design components difficult or impossible to
-change after the fact, but all of them can place significant limitations on the
-performance that a system can ever achieve.</p>
-
-<p><strong>Consider the performance consequences of your API design
-decisions.</strong> Making a public type mutable may require a lot of needless
-defensive copying (Item 39). Similarly, using inheritance in a public class
-where composition would have been appropriate ties the class forever to its
-superclass, which can place artificial limits on the performance of the subclass
-(Item 16). As a final example, using an implementation type rather than an
-interface in an API ties you to a specific implementation, even though faster
-implementations may be written in the future (Item 52).</p>
-
-<p>The effects of API design on performance are very real. Consider the <code
-style="color:black">getSize</code> method in the <code
-style="color:black">java.awt.Component</code> class. The decision that this
-performance-critical method was to return a <code
-style="color:black">Dimension</code> instance, coupled with the decision that
-<code style="color:black">Dimension</code> instances are mutable, forces any
-implementation of this method to allocate a new <code
-style="color:black">Dimension</code> instance on every invocation. Even though
-allocating small objects is inexpensive on a modern VM, allocating millions of
-objects needlessly can do real harm to performance.</p>
-
-<p>In this case, several alternatives existed. Ideally, <code
-style="color:black">Dimension</code> should have been immutable (Item 15);
-alternatively, the <code style="color:black">getSize</code> method could have
-been replaced by two methods returning the individual primitive components of a
-<code style="color:black">Dimension</code> object. In fact, two such methods
-were added to the Component API in the 1.2 release for performance reasons.
-Preexisting client code, however, still uses the <code
-style="color:black">getSize</code> method and still suffers the performance
-consequences of the original API design decisions.</p>
-
-<p>Luckily, it is generally the case that good API design is consistent with
-good performance. <strong>It is a very bad idea to warp an API to achieve good
-performance.</strong> The performance issue that caused you to warp the API may
-go away in a future release of the platform or other underlying software, but
-the warped API and the support headaches that come with it will be with you for
-life.</p>
-
-<p>Once you've carefully designed your program and produced a clear, concise,
-and well-structured implementation, <em>then</em> it may be time to consider
-optimization, assuming you're not already satisfied with the performance of the
-program.</p>
-
-<p>Recall that Jackson's two rules of optimization were "Don't do it," and "(for
-experts only). Don't do it yet." He could have added one more: <strong>measure
-performance before and after each attempted optimization.</strong> You may be
-surprised by what you find. Often, attempted optimizations have no measurable
-effect on performance; sometimes, they make it worse. The main reason is that
-it's difficult to guess where your program is spending its time. The part of the
-program that you think is slow may not be at fault, in which case you'd be
-wasting your time trying to optimize it. Common wisdom says that programs spend
-80 percent of their time in 20 percent of their code.</p>
-
-<p>Profiling tools can help you decide where to focus your optimization efforts.
-Such tools give you runtime information, such as roughly how much time each
-method is consuming and how many times it is invoked. In addition to focusing
-your tuning efforts, this can alert you to the need for algorithmic changes. If
-a quadratic (or worse) algorithm lurks inside your program, no amount of tuning
-will fix the problem. You must replace the algorithm with one that is more
-efficient. The more code in the system, the more important it is to use a
-profiler. It's like looking for a needle in a haystack: the bigger the haystack,
-the more useful it is to have a metal detector. The JDK comes with a simple
-profiler and modern IDEs provide more sophisticated profiling tools.</p>
-
-<p>The need to measure the effects of attempted optimization is even greater on
-the Java platform than on more traditional platforms, because the Java
-programming language does not have a strong <em>performance model</em>. The
-relative costs of the various primitive operations are not well defined. The
-"semantic gap" between what the programmer writes and what the CPU executes is
-far greater than in traditional statically compiled languages, which makes it
-very difficult to reliably predict the performance consequences of any
-optimization. There are plenty of performance myths floating around that turn
-out to be half-truths or outright lies.</p>
-
-<p>Not only is Java's performance model ill-defined, but it varies from JVM
-implementation to JVM implementation, from release to release, and from
-processor to processor. If you will be running your program on multiple JVM
-implementations or multiple hardware platforms, it is important that you measure
-the effects of your optimization on each. Occasionally you may be forced to make
-trade-offs between performance on different JVM implementations or hardware
-platforms.</p>
-
-<p>To summarize, do not strive to write fast programs &mdash; strive to write
-good ones; speed will follow. Do think about performance issues while you're
-designing systems and especially while you're designing APIs, wire-level
-protocols, and persistent data formats. When you've finished building the
-system, measure its performance. If it's fast enough, you're done. If not,
-locate the source of the problems with the aid of a profiler, and go to work
-optimizing the relevant parts of the system. The first step is to examine your
-choice of algorithms: no amount of low-level optimization can make up for a poor
-choice of algorithm. Repeat this process as necessary, measuring the performance
-after every change, until you're satisfied.</p>
-
-<p>&mdash;Excerpted from Josh Bloch's <em>Effective Java</em>, Second Ed.
-(Addison-Wesley, 2008).</em></p>
-
-<p style="font-size:80%;margin-bottom:0;"><sup>1</sup> Wulf, W. A Case Against
-the GOTO. <em>Proceedings of the 25th ACM National
-Conference</em> 2 (1972): 791–797.</p>
-<p style="font-size:80%;margin-bottom:0;"><sup>2</sup> Knuth, Donald. Structured
-Programming with go to Statements. <em>Computing
-Surveys 6</em> (1974): 261–301.</p>
-<p style="font-size:80%"><sup>3</sup> Jackson, M. A. <em>Principles of Program
-Design</em>, Academic Press, London, 1975.
-ISBN: 0123790506.</p>
-
-</blockquote>
-
-<p>One of the trickiest problems you'll face when micro-optimizing Android
-apps is that the "if you will be running your program on ... multiple hardware
-platforms" clause above is always true. And it's not even generally the case
-that you can say "device X is a factor F faster/slower than device Y".
-This is especially true if one of the devices is the emulator, or one of the
-devices has a JIT. If you want to know how your app performs on a given device,
-you need to test it on that device. Drawing conclusions from the emulator is
-particularly dangerous, as is attempting to compare JIT versus non-JIT
-performance: the performance <em>profiles</em> can differ wildly.</p>
+<p>If you want to know how your app performs on a given device, you need to
+test on that device.</p>
 
 <a name="object_creation"></a>
 <h2>Avoid Creating Objects</h2>
@@ -566,3 +417,11 @@ of its way to do the hard work for you, and even detect some cases where you're
 not measuring what you think you're measuring (because, say, the VM has
 managed to optimize all your code away). We highly recommend you use Caliper
 to run your own microbenchmarks.</p>
+
+<p>You may also find
+<a href="{@docRoot}guide/developing/tools/traceview.html">Traceview</a> useful
+for profiling, but it's important to realize that it currently disables the JIT,
+which may cause it to misattribute time to code that the JIT may be able to win
+back. It's especially important after making changes suggested by Traceview
+data to ensure that the resulting code actually runs faster when run without
+Traceview.
