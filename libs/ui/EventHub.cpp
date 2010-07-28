@@ -137,9 +137,14 @@ uint32_t EventHub::getDeviceClasses(int32_t deviceId) const
     return device->classes;
 }
 
-int EventHub::getAbsoluteInfo(int32_t deviceId, int axis, int *outMinValue,
-        int* outMaxValue, int* outFlat, int* outFuzz) const
-{
+status_t EventHub::getAbsoluteAxisInfo(int32_t deviceId, int axis,
+        RawAbsoluteAxisInfo* outAxisInfo) const {
+    outAxisInfo->valid = false;
+    outAxisInfo->minValue = 0;
+    outAxisInfo->maxValue = 0;
+    outAxisInfo->flat = 0;
+    outAxisInfo->fuzz = 0;
+
     AutoMutex _l(mLock);
     device_t* device = getDevice(deviceId);
     if (device == NULL) return -1;
@@ -147,38 +152,28 @@ int EventHub::getAbsoluteInfo(int32_t deviceId, int axis, int *outMinValue,
     struct input_absinfo info;
 
     if(ioctl(mFDs[id_to_index(device->id)].fd, EVIOCGABS(axis), &info)) {
-        LOGE("Error reading absolute controller %d for device %s fd %d\n",
+        LOGW("Error reading absolute controller %d for device %s fd %d\n",
              axis, device->name.string(), mFDs[id_to_index(device->id)].fd);
-        return -1;
+        return -errno;
     }
-    *outMinValue = info.minimum;
-    *outMaxValue = info.maximum;
-    *outFlat = info.flat;
-    *outFuzz = info.fuzz;
-    return 0;
+
+    if (info.minimum != info.maximum) {
+        outAxisInfo->valid = true;
+        outAxisInfo->minValue = info.minimum;
+        outAxisInfo->maxValue = info.maximum;
+        outAxisInfo->flat = info.flat;
+        outAxisInfo->fuzz = info.fuzz;
+    }
+    return OK;
 }
 
-int32_t EventHub::getScanCodeState(int32_t deviceId, int32_t deviceClasses,
-        int32_t scanCode) const {
+int32_t EventHub::getScanCodeState(int32_t deviceId, int32_t scanCode) const {
     if (scanCode >= 0 && scanCode <= KEY_MAX) {
         AutoMutex _l(mLock);
 
-        if (deviceId == -1) {
-            for (int i = 0; i < mNumDevicesById; i++) {
-                device_t* device = mDevicesById[i].device;
-                if (device != NULL && (device->classes & deviceClasses) != 0) {
-                    int32_t result = getScanCodeStateLocked(device, scanCode);
-                    if (result >= AKEY_STATE_DOWN) {
-                        return result;
-                    }
-                }
-            }
-            return AKEY_STATE_UP;
-        } else {
-            device_t* device = getDevice(deviceId);
-            if (device != NULL) {
-                return getScanCodeStateLocked(device, scanCode);
-            }
+        device_t* device = getDevice(deviceId);
+        if (device != NULL) {
+            return getScanCodeStateLocked(device, scanCode);
         }
     }
     return AKEY_STATE_UNKNOWN;
@@ -194,25 +189,12 @@ int32_t EventHub::getScanCodeStateLocked(device_t* device, int32_t scanCode) con
     return AKEY_STATE_UNKNOWN;
 }
 
-int32_t EventHub::getKeyCodeState(int32_t deviceId, int32_t deviceClasses,
-        int32_t keyCode) const {
+int32_t EventHub::getKeyCodeState(int32_t deviceId, int32_t keyCode) const {
+    AutoMutex _l(mLock);
 
-    if (deviceId == -1) {
-        for (int i = 0; i < mNumDevicesById; i++) {
-            device_t* device = mDevicesById[i].device;
-            if (device != NULL && (device->classes & deviceClasses) != 0) {
-                int32_t result = getKeyCodeStateLocked(device, keyCode);
-                if (result >= AKEY_STATE_DOWN) {
-                    return result;
-                }
-            }
-        }
-        return AKEY_STATE_UP;
-    } else {
-        device_t* device = getDevice(deviceId);
-        if (device != NULL) {
-            return getKeyCodeStateLocked(device, keyCode);
-        }
+    device_t* device = getDevice(deviceId);
+    if (device != NULL) {
+        return getKeyCodeStateLocked(device, keyCode);
     }
     return AKEY_STATE_UNKNOWN;
 }
@@ -243,24 +225,15 @@ int32_t EventHub::getKeyCodeStateLocked(device_t* device, int32_t keyCode) const
     return AKEY_STATE_UNKNOWN;
 }
 
-int32_t EventHub::getSwitchState(int32_t deviceId, int32_t deviceClasses, int32_t sw) const {
+int32_t EventHub::getSwitchState(int32_t deviceId, int32_t sw) const {
 #ifdef EV_SW
     if (sw >= 0 && sw <= SW_MAX) {
         AutoMutex _l(mLock);
 
-        if (deviceId == -1) {
-            deviceId = mSwitches[sw];
-            if (deviceId == 0) {
-                return AKEY_STATE_UNKNOWN;
-            }
-        }
-
         device_t* device = getDevice(deviceId);
-        if (device == NULL) {
-            return AKEY_STATE_UNKNOWN;
+        if (device != NULL) {
+            return getSwitchStateLocked(device, sw);
         }
-
-        return getSwitchStateLocked(device, sw);
     }
 #endif
     return AKEY_STATE_UNKNOWN;
@@ -274,6 +247,42 @@ int32_t EventHub::getSwitchStateLocked(device_t* device, int32_t sw) const {
         return test_bit(sw, sw_bitmask) ? AKEY_STATE_DOWN : AKEY_STATE_UP;
     }
     return AKEY_STATE_UNKNOWN;
+}
+
+bool EventHub::markSupportedKeyCodes(int32_t deviceId, size_t numCodes,
+        const int32_t* keyCodes, uint8_t* outFlags) const {
+    AutoMutex _l(mLock);
+
+    device_t* device = getDevice(deviceId);
+    if (device != NULL) {
+        return markSupportedKeyCodesLocked(device, numCodes, keyCodes, outFlags);
+    }
+    return false;
+}
+
+bool EventHub::markSupportedKeyCodesLocked(device_t* device, size_t numCodes,
+        const int32_t* keyCodes, uint8_t* outFlags) const {
+    if (device->layoutMap == NULL || device->keyBitmask == NULL) {
+        return false;
+    }
+
+    Vector<int32_t> scanCodes;
+    for (size_t codeIndex = 0; codeIndex < numCodes; codeIndex++) {
+        scanCodes.clear();
+
+        status_t err = device->layoutMap->findScancodes(keyCodes[codeIndex], &scanCodes);
+        if (! err) {
+            // check the possible scan codes identified by the layout map against the
+            // map of codes actually emitted by the driver
+            for (size_t sc = 0; sc < scanCodes.size(); sc++) {
+                if (test_bit(scanCodes[sc], device->keyBitmask)) {
+                    outFlags[codeIndex] = 1;
+                    break;
+                }
+            }
+        }
+    }
+    return true;
 }
 
 status_t EventHub::scancodeToKeycode(int32_t deviceId, int scancode,
@@ -324,17 +333,15 @@ EventHub::device_t* EventHub::getDevice(int32_t deviceId) const
     return NULL;
 }
 
-bool EventHub::getEvent(int32_t* outDeviceId, int32_t* outType,
-        int32_t* outScancode, int32_t* outKeycode, uint32_t *outFlags,
-        int32_t* outValue, nsecs_t* outWhen)
+bool EventHub::getEvent(RawEvent* outEvent)
 {
-    *outDeviceId = 0;
-    *outType = 0;
-    *outScancode = 0;
-    *outKeycode = 0;
-    *outFlags = 0;
-    *outValue = 0;
-    *outWhen = 0;
+    outEvent->deviceId = 0;
+    outEvent->type = 0;
+    outEvent->scanCode = 0;
+    outEvent->keyCode = 0;
+    outEvent->flags = 0;
+    outEvent->value = 0;
+    outEvent->when = 0;
 
     status_t err;
 
@@ -359,20 +366,27 @@ bool EventHub::getEvent(int32_t* outDeviceId, int32_t* outType,
             LOGV("Reporting device closed: id=0x%x, name=%s\n",
                  device->id, device->path.string());
             mClosingDevices = device->next;
-            *outDeviceId = device->id;
-            if (*outDeviceId == mFirstKeyboardId) *outDeviceId = 0;
-            *outType = DEVICE_REMOVED;
+            if (device->id == mFirstKeyboardId) {
+                outEvent->deviceId = 0;
+            } else {
+                outEvent->deviceId = device->id;
+            }
+            outEvent->type = DEVICE_REMOVED;
             delete device;
             return true;
         }
+
         if (mOpeningDevices != NULL) {
             device_t* device = mOpeningDevices;
             LOGV("Reporting device opened: id=0x%x, name=%s\n",
                  device->id, device->path.string());
             mOpeningDevices = device->next;
-            *outDeviceId = device->id;
-            if (*outDeviceId == mFirstKeyboardId) *outDeviceId = 0;
-            *outType = DEVICE_ADDED;
+            if (device->id == mFirstKeyboardId) {
+                outEvent->deviceId = 0;
+            } else {
+                outEvent->deviceId = device->id;
+            }
+            outEvent->type = DEVICE_ADDED;
             return true;
         }
 
@@ -399,27 +413,36 @@ bool EventHub::getEvent(int32_t* outDeviceId, int32_t* outType,
                 if(mFDs[i].revents & POLLIN) {
                     res = read(mFDs[i].fd, &iev, sizeof(iev));
                     if (res == sizeof(iev)) {
+                        device_t* device = mDevices[i];
                         LOGV("%s got: t0=%d, t1=%d, type=%d, code=%d, v=%d",
-                             mDevices[i]->path.string(),
+                             device->path.string(),
                              (int) iev.time.tv_sec, (int) iev.time.tv_usec,
                              iev.type, iev.code, iev.value);
-                        *outDeviceId = mDevices[i]->id;
-                        if (*outDeviceId == mFirstKeyboardId) *outDeviceId = 0;
-                        *outType = iev.type;
-                        *outScancode = iev.code;
+                        if (device->id == mFirstKeyboardId) {
+                            outEvent->deviceId = 0;
+                        } else {
+                            outEvent->deviceId = device->id;
+                        }
+                        outEvent->type = iev.type;
+                        outEvent->scanCode = iev.code;
                         if (iev.type == EV_KEY) {
-                            err = mDevices[i]->layoutMap->map(iev.code, outKeycode, outFlags);
-                            LOGV("iev.code=%d outKeycode=%d outFlags=0x%08x err=%d\n",
-                                iev.code, *outKeycode, *outFlags, err);
+                            err = device->layoutMap->map(iev.code,
+                                    & outEvent->keyCode, & outEvent->flags);
+                            LOGV("iev.code=%d keyCode=%d flags=0x%08x err=%d\n",
+                                iev.code, outEvent->keyCode, outEvent->flags, err);
                             if (err != 0) {
-                                *outKeycode = AKEYCODE_UNKNOWN;
-                                *outFlags = 0;
+                                outEvent->keyCode = AKEYCODE_UNKNOWN;
+                                outEvent->flags = 0;
                             }
                         } else {
-                            *outKeycode = iev.code;
+                            outEvent->keyCode = iev.code;
                         }
-                        *outValue = iev.value;
-                        *outWhen = s2ns(iev.time.tv_sec) + us2ns(iev.time.tv_usec);
+                        outEvent->value = iev.value;
+
+                        // Use an event timestamp in the same timebase as
+                        // java.lang.System.nanoTime() and android.os.SystemClock.uptimeMillis()
+                        // as expected by the rest of the system.
+                        outEvent->when = systemTime(SYSTEM_TIME_MONOTONIC);
                         return true;
                     } else {
                         if (res<0) {
@@ -474,37 +497,6 @@ bool EventHub::openPlatformInput(void)
     if(res < 0) {
         LOGE("scan dir failed for %s\n", device_path);
         //open_device("/dev/input/event0");
-    }
-
-    return true;
-}
-
-/*
- * Inspect the known devices to determine whether physical keys exist for the given
- * framework-domain key codes.
- */
-bool EventHub::hasKeys(size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags) const {
-    for (size_t codeIndex = 0; codeIndex < numCodes; codeIndex++) {
-        outFlags[codeIndex] = 0;
-
-        // check each available hardware device for support for this keycode
-        Vector<int32_t> scanCodes;
-        for (int n = 0; (n < mFDCount) && (outFlags[codeIndex] == 0); n++) {
-            if (mDevices[n]) {
-                status_t err = mDevices[n]->layoutMap->findScancodes(
-                        keyCodes[codeIndex], &scanCodes);
-                if (!err) {
-                    // check the possible scan codes identified by the layout map against the
-                    // map of codes actually emitted by the driver
-                    for (size_t sc = 0; sc < scanCodes.size(); sc++) {
-                        if (test_bit(scanCodes[sc], mDevices[n]->keyBitmask)) {
-                            outFlags[codeIndex] = 1;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
     }
 
     return true;
@@ -715,15 +707,20 @@ int EventHub::open_device(const char *deviceName)
     // figure out the switches this device reports
     uint8_t sw_bitmask[sizeof_bit_array(SW_MAX + 1)];
     memset(sw_bitmask, 0, sizeof(sw_bitmask));
+    bool hasSwitches = false;
     if (ioctl(fd, EVIOCGBIT(EV_SW, sizeof(sw_bitmask)), sw_bitmask) >= 0) {
         for (int i=0; i<EV_SW; i++) {
             //LOGI("Device 0x%x sw %d: has=%d", device->id, i, test_bit(i, sw_bitmask));
             if (test_bit(i, sw_bitmask)) {
+                hasSwitches = true;
                 if (mSwitches[i] == 0) {
                     mSwitches[i] = device->id;
                 }
             }
         }
+    }
+    if (hasSwitches) {
+        device->classes |= INPUT_DEVICE_CLASS_SWITCH;
     }
 #endif
 

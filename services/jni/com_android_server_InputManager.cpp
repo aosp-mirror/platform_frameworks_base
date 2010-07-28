@@ -219,11 +219,10 @@ public:
             int32_t* width, int32_t* height, int32_t* orientation);
     virtual void virtualKeyDownFeedback();
     virtual int32_t interceptKey(nsecs_t when, int32_t deviceId,
-            bool down, int32_t keyCode, int32_t scanCode, uint32_t policyFlags);
-    virtual int32_t interceptTrackball(nsecs_t when, bool buttonChanged, bool buttonDown,
-            bool rolled);
-    virtual int32_t interceptTouch(nsecs_t when);
-    virtual int32_t interceptSwitch(nsecs_t when, int32_t switchCode, int32_t switchValue);
+            bool down, int32_t keyCode, int32_t scanCode, uint32_t& policyFlags);
+    virtual int32_t interceptSwitch(nsecs_t when, int32_t switchCode, int32_t switchValue,
+            uint32_t& policyFlags);
+    virtual int32_t interceptGeneric(nsecs_t when, uint32_t& policyFlags);
     virtual bool filterTouchEvents();
     virtual bool filterJumpyTouchEvents();
     virtual void getVirtualKeyDefinitions(const String8& deviceName,
@@ -343,6 +342,7 @@ private:
     InputApplication* mFocusedApplication;
     InputApplication mFocusedApplicationStorage; // preallocated storage for mFocusedApplication
 
+    void dumpDeviceInfo(String8& dump);
     void dumpDispatchStateLd(String8& dump);
     void logDispatchStateLd();
 
@@ -409,12 +409,16 @@ NativeInputManager::~NativeInputManager() {
 
 String8 NativeInputManager::dump() {
     String8 dump;
-    dump.append("Native Input Dispatcher State:\n");
-
     { // acquire lock
         AutoMutex _l(mDisplayLock);
+        dump.append("Native Input Dispatcher State:\n");
         dumpDispatchStateLd(dump);
+        dump.append("\n");
     } // release lock
+
+    dump.append("Input Devices:\n");
+    dumpDeviceInfo(dump);
+
     return dump;
 }
 
@@ -566,9 +570,15 @@ bool NativeInputManager::getDisplayInfo(int32_t displayId,
         AutoMutex _l(mDisplayLock);
 
         if (mDisplayWidth > 0) {
-            *width = mDisplayWidth;
-            *height = mDisplayHeight;
-            *orientation = mDisplayOrientation;
+            if (width) {
+                *width = mDisplayWidth;
+            }
+            if (height) {
+                *height = mDisplayHeight;
+            }
+            if (orientation) {
+                *orientation = mDisplayOrientation;
+            }
             result = true;
         }
     }
@@ -595,7 +605,7 @@ void NativeInputManager::virtualKeyDownFeedback() {
 }
 
 int32_t NativeInputManager::interceptKey(nsecs_t when,
-        int32_t deviceId, bool down, int32_t keyCode, int32_t scanCode, uint32_t policyFlags) {
+        int32_t deviceId, bool down, int32_t keyCode, int32_t scanCode, uint32_t& policyFlags) {
 #if DEBUG_INPUT_READER_POLICY
     LOGD("interceptKey - when=%lld, deviceId=%d, down=%d, keyCode=%d, scanCode=%d, "
             "policyFlags=0x%x",
@@ -626,12 +636,12 @@ int32_t NativeInputManager::interceptKey(nsecs_t when,
     int32_t actions = InputReaderPolicyInterface::ACTION_NONE;
     if (! isScreenOn) {
         // Key presses and releases wake the device.
-        actions |= InputReaderPolicyInterface::ACTION_WOKE_HERE;
+        policyFlags |= POLICY_FLAG_WOKE_HERE;
     }
 
     if (! isScreenBright) {
         // Key presses and releases brighten the screen if dimmed.
-        actions |= InputReaderPolicyInterface::ACTION_BRIGHT_HERE;
+        policyFlags |= POLICY_FLAG_BRIGHT_HERE;
     }
 
     if (wmActions & WM_ACTION_GO_TO_SLEEP) {
@@ -658,42 +668,20 @@ int32_t NativeInputManager::interceptKey(nsecs_t when,
     return actions;
 }
 
-int32_t NativeInputManager::interceptTouch(nsecs_t when) {
+int32_t NativeInputManager::interceptGeneric(nsecs_t when, uint32_t& policyFlags) {
 #if DEBUG_INPUT_READER_POLICY
-    LOGD("interceptTouch - when=%lld", when);
+    LOGD("interceptGeneric - when=%lld, policyFlags=0x%x", when, policyFlags);
 #endif
 
     int32_t actions = InputReaderPolicyInterface::ACTION_NONE;
     if (isScreenOn()) {
-        // Only dispatch touch events when the device is awake.
+        // Only dispatch events when the device is awake.
         // Do not wake the device.
         actions |= InputReaderPolicyInterface::ACTION_DISPATCH;
 
         if (! isScreenBright()) {
             // Brighten the screen if dimmed.
-            actions |= InputReaderPolicyInterface::ACTION_BRIGHT_HERE;
-        }
-    }
-
-    return actions;
-}
-
-int32_t NativeInputManager::interceptTrackball(nsecs_t when,
-        bool buttonChanged, bool buttonDown, bool rolled) {
-#if DEBUG_INPUT_READER_POLICY
-    LOGD("interceptTrackball - when=%lld, buttonChanged=%d, buttonDown=%d, rolled=%d",
-            when, buttonChanged, buttonDown, rolled);
-#endif
-
-    int32_t actions = InputReaderPolicyInterface::ACTION_NONE;
-    if (isScreenOn()) {
-        // Only dispatch trackball events when the device is awake.
-        // Do not wake the device.
-        actions |= InputReaderPolicyInterface::ACTION_DISPATCH;
-
-        if (! isScreenBright()) {
-            // Brighten the screen if dimmed.
-            actions |= InputReaderPolicyInterface::ACTION_BRIGHT_HERE;
+            policyFlags |= POLICY_FLAG_BRIGHT_HERE;
         }
     }
 
@@ -701,10 +689,10 @@ int32_t NativeInputManager::interceptTrackball(nsecs_t when,
 }
 
 int32_t NativeInputManager::interceptSwitch(nsecs_t when, int32_t switchCode,
-        int32_t switchValue) {
+        int32_t switchValue, uint32_t& policyFlags) {
 #if DEBUG_INPUT_READER_POLICY
-    LOGD("interceptSwitch - when=%lld, switchCode=%d, switchValue=%d",
-            when, switchCode, switchValue);
+    LOGD("interceptSwitch - when=%lld, switchCode=%d, switchValue=%d, policyFlags=0x%x",
+            when, switchCode, switchValue, policyFlags);
 #endif
 
     JNIEnv* env = jniEnv();
@@ -1718,6 +1706,56 @@ void NativeInputManager::pokeUserActivity(nsecs_t eventTime, int32_t eventType) 
     android_server_PowerManagerService_userActivity(eventTime, eventType);
 }
 
+static void dumpMotionRange(String8& dump,
+        const char* name, const InputDeviceInfo::MotionRange* range) {
+    if (range) {
+        dump.appendFormat("      %s = { min: %0.3f, max: %0.3f, flat: %0.3f, fuzz: %0.3f }\n",
+                name, range->min, range->max, range->flat, range->fuzz);
+    }
+}
+
+#define DUMP_MOTION_RANGE(range) \
+    dumpMotionRange(dump, #range, deviceInfo.getMotionRange(AINPUT_MOTION_RANGE_##range));
+
+void NativeInputManager::dumpDeviceInfo(String8& dump) {
+    Vector<int32_t> deviceIds;
+    mInputManager->getInputDeviceIds(deviceIds);
+
+    InputDeviceInfo deviceInfo;
+    for (size_t i = 0; i < deviceIds.size(); i++) {
+        int32_t deviceId = deviceIds[i];
+
+        status_t result = mInputManager->getInputDeviceInfo(deviceId, & deviceInfo);
+        if (result == NAME_NOT_FOUND) {
+            continue;
+        } else if (result != OK) {
+            dump.appendFormat("  ** Unexpected error %d getting information about input devices.\n",
+                    result);
+            continue;
+        }
+
+        dump.appendFormat("  Device %d: '%s'\n",
+                deviceInfo.getId(), deviceInfo.getName().string());
+        dump.appendFormat("    sources = 0x%08x\n",
+                deviceInfo.getSources());
+        dump.appendFormat("    keyboardType = %d\n",
+                deviceInfo.getKeyboardType());
+
+        dump.append("    motion ranges:\n");
+        DUMP_MOTION_RANGE(X);
+        DUMP_MOTION_RANGE(Y);
+        DUMP_MOTION_RANGE(PRESSURE);
+        DUMP_MOTION_RANGE(SIZE);
+        DUMP_MOTION_RANGE(TOUCH_MAJOR);
+        DUMP_MOTION_RANGE(TOUCH_MINOR);
+        DUMP_MOTION_RANGE(TOOL_MAJOR);
+        DUMP_MOTION_RANGE(TOOL_MINOR);
+        DUMP_MOTION_RANGE(ORIENTATION);
+    }
+}
+
+#undef DUMP_MOTION_RANGE
+
 void NativeInputManager::logDispatchStateLd() {
     String8 dump;
     dumpDispatchStateLd(dump);
@@ -1899,36 +1937,37 @@ static void android_server_InputManager_nativeSetDisplayOrientation(JNIEnv* env,
 }
 
 static jint android_server_InputManager_nativeGetScanCodeState(JNIEnv* env, jclass clazz,
-        jint deviceId, jint deviceClasses, jint scanCode) {
+        jint deviceId, jint sourceMask, jint scanCode) {
     if (checkInputManagerUnitialized(env)) {
         return AKEY_STATE_UNKNOWN;
     }
 
     return gNativeInputManager->getInputManager()->getScanCodeState(
-            deviceId, deviceClasses, scanCode);
+            deviceId, uint32_t(sourceMask), scanCode);
 }
 
 static jint android_server_InputManager_nativeGetKeyCodeState(JNIEnv* env, jclass clazz,
-        jint deviceId, jint deviceClasses, jint keyCode) {
+        jint deviceId, jint sourceMask, jint keyCode) {
     if (checkInputManagerUnitialized(env)) {
         return AKEY_STATE_UNKNOWN;
     }
 
     return gNativeInputManager->getInputManager()->getKeyCodeState(
-            deviceId, deviceClasses, keyCode);
+            deviceId, uint32_t(sourceMask), keyCode);
 }
 
 static jint android_server_InputManager_nativeGetSwitchState(JNIEnv* env, jclass clazz,
-        jint deviceId, jint deviceClasses, jint sw) {
+        jint deviceId, jint sourceMask, jint sw) {
     if (checkInputManagerUnitialized(env)) {
         return AKEY_STATE_UNKNOWN;
     }
 
-    return gNativeInputManager->getInputManager()->getSwitchState(deviceId, deviceClasses, sw);
+    return gNativeInputManager->getInputManager()->getSwitchState(
+            deviceId, uint32_t(sourceMask), sw);
 }
 
 static jboolean android_server_InputManager_nativeHasKeys(JNIEnv* env, jclass clazz,
-        jintArray keyCodes, jbooleanArray outFlags) {
+        jint deviceId, jint sourceMask, jintArray keyCodes, jbooleanArray outFlags) {
     if (checkInputManagerUnitialized(env)) {
         return JNI_FALSE;
     }
@@ -1937,8 +1976,9 @@ static jboolean android_server_InputManager_nativeHasKeys(JNIEnv* env, jclass cl
     uint8_t* flags = env->GetBooleanArrayElements(outFlags, NULL);
     jsize numCodes = env->GetArrayLength(keyCodes);
     jboolean result;
-    if (numCodes == env->GetArrayLength(outFlags)) {
-        result = gNativeInputManager->getInputManager()->hasKeys(numCodes, codes, flags);
+    if (numCodes == env->GetArrayLength(keyCodes)) {
+        result = gNativeInputManager->getInputManager()->hasKeys(
+                deviceId, uint32_t(sourceMask), numCodes, codes, flags);
     } else {
         result = JNI_FALSE;
     }
@@ -2102,7 +2142,7 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) android_server_InputManager_nativeGetKeyCodeState },
     { "nativeGetSwitchState", "(III)I",
             (void*) android_server_InputManager_nativeGetSwitchState },
-    { "nativeHasKeys", "([I[Z)Z",
+    { "nativeHasKeys", "(II[I[Z)Z",
             (void*) android_server_InputManager_nativeHasKeys },
     { "nativeRegisterInputChannel", "(Landroid/view/InputChannel;)V",
             (void*) android_server_InputManager_nativeRegisterInputChannel },

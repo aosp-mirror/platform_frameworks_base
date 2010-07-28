@@ -96,22 +96,28 @@ public:
     virtual void preemptInputDispatch() = 0;
 
     /* Gets input device configuration. */
-    virtual void getInputConfiguration(InputConfiguration* outConfiguration) const = 0;
+    virtual void getInputConfiguration(InputConfiguration* outConfiguration) = 0;
 
-    /*
-     * Queries current input state.
-     *   deviceId may be -1 to search for the device automatically, filtered by class.
-     *   deviceClasses may be -1 to ignore device class while searching.
+    /* Gets information about the specified input device.
+     * Returns OK if the device information was obtained or NAME_NOT_FOUND if there
+     * was no such device.
      */
-    virtual int32_t getScanCodeState(int32_t deviceId, int32_t deviceClasses,
-            int32_t scanCode) const = 0;
-    virtual int32_t getKeyCodeState(int32_t deviceId, int32_t deviceClasses,
-            int32_t keyCode) const = 0;
-    virtual int32_t getSwitchState(int32_t deviceId, int32_t deviceClasses,
-            int32_t sw) const = 0;
+    virtual status_t getInputDeviceInfo(int32_t deviceId, InputDeviceInfo* outDeviceInfo) = 0;
+
+    /* Gets the list of all registered device ids. */
+    virtual void getInputDeviceIds(Vector<int32_t>& outDeviceIds) = 0;
+
+    /* Queries current input state. */
+    virtual int32_t getScanCodeState(int32_t deviceId, uint32_t sourceMask,
+            int32_t scanCode) = 0;
+    virtual int32_t getKeyCodeState(int32_t deviceId, uint32_t sourceMask,
+            int32_t keyCode) = 0;
+    virtual int32_t getSwitchState(int32_t deviceId, uint32_t sourceMask,
+            int32_t sw) = 0;
 
     /* Determines whether physical keys exist for the given framework-domain key codes. */
-    virtual bool hasKeys(size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags) const = 0;
+    virtual bool hasKeys(int32_t deviceId, uint32_t sourceMask,
+            size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags) = 0;
 };
 
 class InputManager : public InputManagerInterface {
@@ -140,14 +146,17 @@ public:
 
     virtual void preemptInputDispatch();
 
-    virtual void getInputConfiguration(InputConfiguration* outConfiguration) const;
-    virtual int32_t getScanCodeState(int32_t deviceId, int32_t deviceClasses,
-            int32_t scanCode) const;
-    virtual int32_t getKeyCodeState(int32_t deviceId, int32_t deviceClasses,
-            int32_t keyCode) const;
-    virtual int32_t getSwitchState(int32_t deviceId, int32_t deviceClasses,
-            int32_t sw) const;
-    virtual bool hasKeys(size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags) const;
+    virtual void getInputConfiguration(InputConfiguration* outConfiguration);
+    virtual status_t getInputDeviceInfo(int32_t deviceId, InputDeviceInfo* outDeviceInfo);
+    virtual void getInputDeviceIds(Vector<int32_t>& outDeviceIds);
+    virtual int32_t getScanCodeState(int32_t deviceId, uint32_t sourceMask,
+            int32_t scanCode);
+    virtual int32_t getKeyCodeState(int32_t deviceId, uint32_t sourceMask,
+            int32_t keyCode);
+    virtual int32_t getSwitchState(int32_t deviceId, uint32_t sourceMask,
+            int32_t sw);
+    virtual bool hasKeys(int32_t deviceId, uint32_t sourceMask,
+            size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags);
 
 private:
     sp<InputReaderInterface> mReader;
