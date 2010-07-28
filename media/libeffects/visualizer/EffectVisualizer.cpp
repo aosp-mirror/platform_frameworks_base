@@ -272,8 +272,8 @@ extern "C" int Visualizer_process(
     return 0;
 }   // end Visualizer_process
 
-extern "C" int Visualizer_command(effect_interface_t self, int cmdCode, int cmdSize,
-        void *pCmdData, int *replySize, void *pReplyData) {
+extern "C" int Visualizer_command(effect_interface_t self, uint32_t cmdCode, uint32_t cmdSize,
+        void *pCmdData, uint32_t *replySize, void *pReplyData) {
 
     android::VisualizerContext * pContext = (android::VisualizerContext *)self;
     int retsize;

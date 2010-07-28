@@ -382,10 +382,10 @@ public:
       *     See EffectApi.h for details on effect command() function, valid command codes
       *     and formats.
       */
-     virtual status_t command(int32_t cmdCode,
-                              int32_t cmdSize,
+     virtual status_t command(uint32_t cmdCode,
+                              uint32_t cmdSize,
                               void *cmdData,
-                              int32_t *replySize,
+                              uint32_t *replySize,
                               void *replyData);
 
 
@@ -429,10 +429,10 @@ private:
         virtual void enableStatusChanged(bool enabled) {
             mEffect->enableStatusChanged(enabled);
         }
-        virtual void commandExecuted(int cmdCode,
-                                     int cmdSize,
+        virtual void commandExecuted(uint32_t cmdCode,
+                                     uint32_t cmdSize,
                                      void *pCmdData,
-                                     int replySize,
+                                     uint32_t replySize,
                                      void *pReplyData) {
             mEffect->commandExecuted(cmdCode, cmdSize, pCmdData, replySize, pReplyData);
         }
@@ -450,7 +450,11 @@ private:
     // IEffectClient
     void controlStatusChanged(bool controlGranted);
     void enableStatusChanged(bool enabled);
-    void commandExecuted(int cmdCode, int cmdSize, void *pCmdData, int replySize, void *pReplyData);
+    void commandExecuted(uint32_t cmdCode,
+                         uint32_t cmdSize,
+                         void *pCmdData,
+                         uint32_t replySize,
+                         void *pReplyData);
     void binderDied();
 
 

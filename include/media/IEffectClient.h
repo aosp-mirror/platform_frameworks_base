@@ -31,7 +31,11 @@ public:
 
     virtual void controlStatusChanged(bool controlGranted) = 0;
     virtual void enableStatusChanged(bool enabled) = 0;
-    virtual void commandExecuted(int cmdCode, int cmdSize, void *pCmdData, int replySize, void *pReplyData) = 0;
+    virtual void commandExecuted(uint32_t cmdCode,
+                                 uint32_t cmdSize,
+                                 void *pCmdData,
+                                 uint32_t replySize,
+                                 void *pReplyData) = 0;
 };
 
 // ----------------------------------------------------------------------------

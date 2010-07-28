@@ -933,7 +933,11 @@ private:
         int         id() { return mId; }
         void process();
         void updateState();
-        status_t command(int cmdCode, int cmdSize, void *pCmdData, int *replySize, void *pReplyData);
+        status_t command(uint32_t cmdCode,
+                         uint32_t cmdSize,
+                         void *pCmdData,
+                         uint32_t *replySize,
+                         void *pReplyData);
 
         void reset_l();
         status_t configure();
@@ -1023,7 +1027,11 @@ private:
         // IEffect
         virtual status_t enable();
         virtual status_t disable();
-        virtual status_t command(int cmdCode, int cmdSize, void *pCmdData, int *replySize, void *pReplyData);
+        virtual status_t command(uint32_t cmdCode,
+                                 uint32_t cmdSize,
+                                 void *pCmdData,
+                                 uint32_t *replySize,
+                                 void *pReplyData);
         virtual void disconnect();
         virtual sp<IMemory> getCblk() const;
         virtual status_t onTransact(uint32_t code, const Parcel& data,
@@ -1032,7 +1040,11 @@ private:
 
         // Give or take control of effect module
         void setControl(bool hasControl, bool signal);
-        void commandExecuted(int cmdCode, int cmdSize, void *pCmdData, int replySize, void *pReplyData);
+        void commandExecuted(uint32_t cmdCode,
+                             uint32_t cmdSize,
+                             void *pCmdData,
+                             uint32_t replySize,
+                             void *pReplyData);
         void setEnabled(bool enabled);
 
         // Getters

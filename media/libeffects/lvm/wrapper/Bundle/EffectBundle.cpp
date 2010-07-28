@@ -2348,10 +2348,10 @@ extern "C" int Effect_process(effect_interface_t     self,
 
 /* Effect Control Interface Implementation: Command */
 extern "C" int Effect_command(effect_interface_t  self,
-                              int                 cmdCode,
-                              int                 cmdSize,
+                              uint32_t            cmdCode,
+                              uint32_t            cmdSize,
                               void                *pCmdData,
-                              int                 *replySize,
+                              uint32_t            *replySize,
                               void                *pReplyData){
     EffectContext * pContext = (EffectContext *) self;
     int retsize;
