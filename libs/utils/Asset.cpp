@@ -24,6 +24,7 @@
 #include <utils/Asset.h>
 #include <utils/Atomic.h>
 #include <utils/FileMap.h>
+#include <utils/StreamingZipInflater.h>
 #include <utils/ZipUtils.h>
 #include <utils/ZipFileRO.h>
 #include <utils/Log.h>
@@ -659,7 +660,7 @@ const void* _FileAsset::ensureAlignment(FileMap* map)
  */
 _CompressedAsset::_CompressedAsset(void)
     : mStart(0), mCompressedLen(0), mUncompressedLen(0), mOffset(0),
-      mMap(NULL), mFd(-1), mBuf(NULL)
+      mMap(NULL), mFd(-1), mZipInflater(NULL), mBuf(NULL)
 {
 }
 
@@ -698,6 +699,10 @@ status_t _CompressedAsset::openChunk(int fd, off_t offset,
     mFd = fd;
     assert(mBuf == NULL);
 
+    if (uncompressedLen > StreamingZipInflater::OUTPUT_CHUNK_SIZE) {
+        mZipInflater = new StreamingZipInflater(mFd, offset, uncompressedLen, compressedLen);
+    }
+
     return NO_ERROR;
 }
 
@@ -724,6 +729,9 @@ status_t _CompressedAsset::openChunk(FileMap* dataMap, int compressionMethod,
     mUncompressedLen = uncompressedLen;
     assert(mOffset == 0);
 
+    if (uncompressedLen > StreamingZipInflater::OUTPUT_CHUNK_SIZE) {
+        mZipInflater = new StreamingZipInflater(dataMap, uncompressedLen);
+    }
     return NO_ERROR;
 }
 
@@ -739,26 +747,29 @@ ssize_t _CompressedAsset::read(void* buf, size_t count)
 
     assert(mOffset >= 0 && mOffset <= mUncompressedLen);
 
-    // TODO: if mAccessMode == ACCESS_STREAMING, use zlib more cleverly
+    /* If we're relying on a streaming inflater, go through that */
+    if (mZipInflater) {
+        actual = mZipInflater->read(buf, count);
+    } else {
+        if (mBuf == NULL) {
+            if (getBuffer(false) == NULL)
+                return -1;
+        }
+        assert(mBuf != NULL);
 
-    if (mBuf == NULL) {
-        if (getBuffer(false) == NULL)
-            return -1;
+        /* adjust count if we're near EOF */
+        maxLen = mUncompressedLen - mOffset;
+        if (count > maxLen)
+            count = maxLen;
+
+        if (!count)
+            return 0;
+
+        /* copy from buffer */
+        //printf("comp buf read\n");
+        memcpy(buf, (char*)mBuf + mOffset, count);
+        actual = count;
     }
-    assert(mBuf != NULL);
-
-    /* adjust count if we're near EOF */
-    maxLen = mUncompressedLen - mOffset;
-    if (count > maxLen)
-        count = maxLen;
-
-    if (!count)
-        return 0;
-
-    /* copy from buffer */
-    //printf("comp buf read\n");
-    memcpy(buf, (char*)mBuf + mOffset, count);
-    actual = count;
 
     mOffset += actual;
     return actual;
@@ -780,6 +791,9 @@ off_t _CompressedAsset::seek(off_t offset, int whence)
     if (newPosn == (off_t) -1)
         return newPosn;
 
+    if (mZipInflater) {
+        mZipInflater->seekAbsolute(newPosn);
+    }
     mOffset = newPosn;
     return mOffset;
 }
@@ -793,10 +807,12 @@ void _CompressedAsset::close(void)
         mMap->release();
         mMap = NULL;
     }
-    if (mBuf != NULL) {
-        delete[] mBuf;
-        mBuf = NULL;
-    }
+
+    delete[] mBuf;
+    mBuf = NULL;
+
+    delete mZipInflater;
+    mZipInflater = NULL;
 
     if (mFd > 0) {
         ::close(mFd);
@@ -816,12 +832,6 @@ const void* _CompressedAsset::getBuffer(bool wordAligned)
 
     if (mBuf != NULL)
         return mBuf;
-
-    if (mUncompressedLen > UNCOMPRESS_DATA_MAX) {
-        LOGD("Data exceeds UNCOMPRESS_DATA_MAX (%ld vs %d)\n",
-            (long) mUncompressedLen, UNCOMPRESS_DATA_MAX);
-        goto bail;
-    }
 
     /*
      * Allocate a buffer and read the file into it.
@@ -853,7 +863,13 @@ const void* _CompressedAsset::getBuffer(bool wordAligned)
             goto bail;
     }
 
-    /* success! */
+    /*
+     * Success - now that we have the full asset in RAM we
+     * no longer need the streaming inflater
+     */
+    delete mZipInflater;
+    mZipInflater = NULL;
+
     mBuf = buf;
     buf = NULL;
 
