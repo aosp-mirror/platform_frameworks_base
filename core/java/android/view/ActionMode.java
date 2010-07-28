@@ -29,9 +29,21 @@ public abstract class ActionMode {
      *
      * @param title Title string to set
      *
+     * @see #setTitle(int)
      * @see #setCustomView(View)
      */
     public abstract void setTitle(CharSequence title);
+
+    /**
+     * Set the title of the action mode. This method will have no visible effect if
+     * a custom view has been set.
+     *
+     * @param resId Resource ID of a string to set as the title
+     *
+     * @see #setTitle(CharSequence)
+     * @see #setCustomView(View)
+     */
+    public abstract void setTitle(int resId);
 
     /**
      * Set the subtitle of the action mode. This method will have no visible effect if
@@ -39,9 +51,21 @@ public abstract class ActionMode {
      *
      * @param subtitle Subtitle string to set
      *
+     * @see #setSubtitle(int)
      * @see #setCustomView(View)
      */
     public abstract void setSubtitle(CharSequence subtitle);
+
+    /**
+     * Set the subtitle of the action mode. This method will have no visible effect if
+     * a custom view has been set.
+     *
+     * @param resId Resource ID of a string to set as the subtitle
+     *
+     * @see #setSubtitle(CharSequence)
+     * @see #setCustomView(View)
+     */
+    public abstract void setSubtitle(int resId);
 
     /**
      * Set a custom view for this action mode. The custom view will take the place of
