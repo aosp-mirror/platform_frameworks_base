@@ -1311,6 +1311,9 @@
   <public type="attr" name="windowActionModeOverlay" />
 
   <public type="id" name="home" />
+  <!-- Context menu ID for the "Select text..." menu item to switch to text
+       selection context mode in text views. -->
+  <public type="id" name="selectTextMode" />
 
   <public type="style" name="Theme.WithActionBar" />
   <public type="style" name="Widget.Spinner.DropDown" />
@@ -1323,5 +1326,6 @@
        content to still retain all of the standard functionality of
        the base class. -->
   <public type="layout" name="list_content" />
-  
+
+  <public type="string" name="selectTextMode" id="0x01040030" />
 </resources>

@@ -1870,23 +1870,11 @@
     <!-- Item on EditText context menu. This action is used to select all text in the edit field. -->
     <string name="selectAll">Select all</string>
 
-    <!-- Item on EditText context menu. This action is used to start selecting text in the edit field. -->
-    <string name="selectText">Select text</string>
-
-    <!-- Item on EditText context menu. This action is used to start selecting text in the edit field. -->
-    <string name="stopSelectingText">Stop selecting text</string>
-
     <!-- Item on EditText context menu.  This action is used to cut selected the text into the clipboard.  -->
     <string name="cut">Cut</string>
 
-    <!-- Item on EditText context menu. This action is used to cut all the text into the clipboard. -->
-    <string name="cutAll">Cut all</string>
-
     <!-- Item on EditText context menu. This action is used to cut selected the text into the clipboard. -->
     <string name="copy">Copy</string>
-
-    <!-- Item on EditText context menu. This action is used to copy all the text into the clipboard. -->
-    <string name="copyAll">Copy all</string>
 
     <!-- Item on EditText context menu. This action is used t o paste from the clipboard into the eidt field -->
     <string name="paste">Paste</string>
@@ -1894,15 +1882,17 @@
     <!-- Item on EditText context menu. This action is used to copy a URL from the edit field into the clipboard. -->
     <string name="copyUrl">Copy URL</string>
 
+    <!-- Item on EditText context menu. Added only when the context menu is not empty, it enable selection context mode. -->
+    <string name="selectTextMode">Select text...</string>
+
+    <!-- Text selection contextual mode title, displayed in the CAB.. -->
+    <string name="textSelectionCABTitle">Text selection</string>
+
     <!-- EditText context menu -->
     <string name="inputMethod">Input method</string>
 
-    <!-- Item on EditText context menu, used to add a word to the
-         input method dictionary. -->
-    <string name="addToDictionary">"Add \"<xliff:g id="word" example="rickroll">%s</xliff:g>\" to dictionary</string>
-
     <!-- Title for EditText context menu -->
-    <string name="editTextMenuTitle">Edit text</string>
+    <string name="editTextMenuTitle">Text actions</string>
 
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the title of that notification. -->
     <string name="low_internal_storage_view_title">Low on space</string>
