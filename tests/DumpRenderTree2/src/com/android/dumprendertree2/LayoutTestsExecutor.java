@@ -50,6 +50,18 @@ import java.util.List;
  */
 public class LayoutTestsExecutor extends Activity {
 
+    private enum CurrentState {
+        IDLE,
+        RENDERING_PAGE,
+        WAITING_FOR_ASYNCHRONOUS_TEST,
+        OBTAINING_RESULT;
+
+        public boolean isRunningState() {
+            return this == CurrentState.RENDERING_PAGE ||
+                    this == CurrentState.WAITING_FOR_ASYNCHRONOUS_TEST;
+        }
+    }
+
     /** TODO: make it a setting */
     static final String TESTS_ROOT_DIR_PATH =
             Environment.getExternalStorageDirectory() +
@@ -62,6 +74,9 @@ public class LayoutTestsExecutor extends Activity {
     public static final String EXTRA_TEST_INDEX = "TestIndex";
 
     private static final int MSG_ACTUAL_RESULT_OBTAINED = 0;
+    private static final int MSG_TEST_TIMED_OUT = 1;
+
+    private static final int DEFAULT_TIME_OUT_MS = 15 * 1000;
 
     private List<String> mTestsList;
 
@@ -77,8 +92,9 @@ public class LayoutTestsExecutor extends Activity {
     private WebView mCurrentWebView;
     private String mCurrentTestRelativePath;
     private String mCurrentTestUri;
+    private CurrentState mCurrentState = CurrentState.IDLE;
 
-    private boolean mOnTestFinishedCalled;
+    private boolean mCurrentTestTimedOut;
     private AbstractResult mCurrentResult;
 
     /** COMMUNICATION WITH ManagerService */
@@ -102,11 +118,17 @@ public class LayoutTestsExecutor extends Activity {
     private final Handler mResultHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what == MSG_ACTUAL_RESULT_OBTAINED) {
-                reportResultToService();
-                mCurrentTestIndex++;
-                updateProgressBar();
-                runNextTest();
+            switch (msg.what) {
+                case MSG_ACTUAL_RESULT_OBTAINED:
+                    onActualResultsObtained();
+                    break;
+
+                case MSG_TEST_TIMED_OUT:
+                    onTestTimedOut();
+                    break;
+
+                default:
+                    break;
             }
         }
     };
@@ -177,7 +199,9 @@ public class LayoutTestsExecutor extends Activity {
     }
 
     private void reset() {
-        mOnTestFinishedCalled = false;
+        WebView previousWebView = mCurrentWebView;
+
+        mCurrentTestTimedOut = false;
         mCurrentResult = null;
 
         mCurrentWebView = new WebView(this);
@@ -199,9 +223,14 @@ public class LayoutTestsExecutor extends Activity {
         webViewSettings.setXSSAuditorEnabled(false);
 
         setContentView(mCurrentWebView);
+        if (previousWebView != null) {
+            previousWebView.destroy();
+        }
     }
 
     private void runNextTest() {
+        assert mCurrentState == CurrentState.IDLE : "mCurrentState = " + mCurrentState.name();
+
         if (mTestsList.isEmpty()) {
             onAllTestsFinished();
             return;
@@ -212,17 +241,34 @@ public class LayoutTestsExecutor extends Activity {
                 Uri.fromFile(new File(TESTS_ROOT_DIR_PATH, mCurrentTestRelativePath)).toString();
 
         reset();
-        /** TODO: Implement timeout */
+
+        /** Start time-out countdown and the test */
+        mCurrentState = CurrentState.RENDERING_PAGE;
+        mResultHandler.sendEmptyMessageDelayed(MSG_TEST_TIMED_OUT, DEFAULT_TIME_OUT_MS);
         mCurrentWebView.loadUrl(mCurrentTestUri);
     }
 
+    private void onTestTimedOut() {
+        assert mCurrentState.isRunningState() : "mCurrentState = " + mCurrentState.name();
+
+        mCurrentTestTimedOut = true;
+
+        /**
+         * While it is theoretically possible that the test times out because
+         * of webview becoming unresponsive, it is very unlikely. Therefore it's
+         * assumed that obtaining results (that calls various webview methods)
+         * will not itself hang.
+         */
+        obtainActualResultsFromWebView();
+    }
+
     private void onTestFinished() {
-        if (mOnTestFinishedCalled) {
-            return;
-        }
+        assert mCurrentState.isRunningState() : "mCurrentState = " + mCurrentState.name();
 
-        mOnTestFinishedCalled = true;
+        obtainActualResultsFromWebView();
+    }
 
+    private void obtainActualResultsFromWebView() {
         /**
          * If the result has not been set by the time the test finishes we create
          * a default type of result.
@@ -232,17 +278,35 @@ public class LayoutTestsExecutor extends Activity {
             mCurrentResult = new TextResult(mCurrentTestRelativePath);
         }
 
+        mCurrentState = CurrentState.OBTAINING_RESULT;
         mCurrentResult.obtainActualResults(mCurrentWebView,
                 mResultHandler.obtainMessage(MSG_ACTUAL_RESULT_OBTAINED));
+    }
+
+    private void onActualResultsObtained() {
+        assert mCurrentState == CurrentState.OBTAINING_RESULT
+                : "mCurrentState = " + mCurrentState.name();
+
+        mCurrentState = CurrentState.IDLE;
+
+        mResultHandler.removeMessages(MSG_TEST_TIMED_OUT);
+        reportResultToService();
+        mCurrentTestIndex++;
+        updateProgressBar();
+        runNextTest();
     }
 
     private void reportResultToService() {
         try {
             Message serviceMsg =
                     Message.obtain(null, ManagerService.MSG_PROCESS_ACTUAL_RESULTS);
+
             Bundle bundle = mCurrentResult.getBundle();
             bundle.putInt("testIndex", mCurrentTestIndex);
-            /** TODO: Add timeout info to bundle */
+            if (mCurrentTestTimedOut) {
+                bundle.putString("resultCode", AbstractResult.ResultCode.FAIL_TIMED_OUT.name());
+            }
+
             serviceMsg.setData(bundle);
             mManagerServiceMessenger.send(serviceMsg);
         } catch (RemoteException e) {
