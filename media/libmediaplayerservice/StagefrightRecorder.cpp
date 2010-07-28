@@ -1036,8 +1036,10 @@ status_t StagefrightRecorder::startMPEG4Recording() {
         totalBitRate += mVideoBitRate;
     }
 
-    reinterpret_cast<MPEG4Writer *>(writer.get())->
-        setInterleaveDuration(mInterleaveDurationUs);
+    if (mInterleaveDurationUs > 0) {
+        reinterpret_cast<MPEG4Writer *>(writer.get())->
+            setInterleaveDuration(mInterleaveDurationUs);
+    }
 
     if (mMaxFileDurationUs != 0) {
         writer->setMaxFileDuration(mMaxFileDurationUs);
