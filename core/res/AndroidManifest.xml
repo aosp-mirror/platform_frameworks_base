@@ -83,6 +83,8 @@
     <protected-broadcast android:name="android.hardware.action.USB_CONNECTED" />
     <protected-broadcast android:name="android.hardware.action.USB_DISCONNECTED" />
     <protected-broadcast android:name="android.hardware.action.USB_STATE" />
+    <protected-broadcast android:name="android.hardware.action.USB_CAMERA_ATTACHED" />
+    <protected-broadcast android:name="android.hardware.action.USB_CAMERA_DETACHED" />
 
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
