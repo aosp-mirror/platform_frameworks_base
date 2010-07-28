@@ -79,13 +79,12 @@ public:
     virtual status_t unregisterInputChannel(const sp<InputChannel>& inputChannel) = 0;
 
     /* Injects an input event and optionally waits for sync.
-     * This method may block even if sync is false because it must wait for previous events
-     * to be dispatched before it can determine whether input event injection will be
-     * permitted based on the current input focus.
+     * The synchronization mode determines whether the method blocks while waiting for
+     * input injection to proceed.
      * Returns one of the INPUT_EVENT_INJECTION_XXX constants.
      */
     virtual int32_t injectInputEvent(const InputEvent* event,
-            int32_t injectorPid, int32_t injectorUid, bool sync, int32_t timeoutMillis) = 0;
+            int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis) = 0;
 
     /* Preempts input dispatch in progress by making pending synchronous
      * dispatches asynchronous instead.  This method is generally called during a focus
@@ -142,7 +141,7 @@ public:
     virtual status_t unregisterInputChannel(const sp<InputChannel>& inputChannel);
 
     virtual int32_t injectInputEvent(const InputEvent* event,
-            int32_t injectorPid, int32_t injectorUid, bool sync, int32_t timeoutMillis);
+            int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis);
 
     virtual void preemptInputDispatch();
 

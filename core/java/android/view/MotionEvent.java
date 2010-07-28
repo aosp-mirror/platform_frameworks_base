@@ -1453,43 +1453,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static final Parcelable.Creator<MotionEvent> CREATOR
             = new Parcelable.Creator<MotionEvent>() {
         public MotionEvent createFromParcel(Parcel in) {
-            final int NP = in.readInt();
-            final int NS = in.readInt();
-            final int NI = NP * NS * NUM_SAMPLE_DATA;
-            
-            MotionEvent ev = obtain(NP, NS);
-            ev.mNumPointers = NP;
-            ev.mNumSamples = NS;
-            
-            ev.mDownTimeNano = in.readLong();
-            ev.mAction = in.readInt();
-            ev.mXOffset = in.readFloat();
-            ev.mYOffset = in.readFloat();
-            ev.mXPrecision = in.readFloat();
-            ev.mYPrecision = in.readFloat();
-            ev.mDeviceId = in.readInt();
-            ev.mSource = in.readInt();
-            ev.mEdgeFlags = in.readInt();
-            ev.mMetaState = in.readInt();
-            
-            final int[] pointerIdentifiers = ev.mPointerIdentifiers;
-            for (int i = 0; i < NP; i++) {
-                pointerIdentifiers[i] = in.readInt();
-            }
-            
-            final long[] eventTimeNanoSamples = ev.mEventTimeNanoSamples;
-            for (int i = 0; i < NS; i++) {
-                eventTimeNanoSamples[i] = in.readLong();
-            }
-
-            final float[] dataSamples = ev.mDataSamples;
-            for (int i = 0; i < NI; i++) {
-                dataSamples[i] = in.readFloat();
-            }
-            
-            ev.mLastEventTimeNanoSampleIndex = NS - 1;
-            ev.mLastDataSampleIndex = (NS - 1) * NP * NUM_SAMPLE_DATA;
-            return ev;
+            in.readInt(); // skip token, we already know this is a MotionEvent
+            return MotionEvent.createFromParcelBody(in);
         }
 
         public MotionEvent[] newArray(int size) {
@@ -1497,11 +1462,50 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         }
     };
 
-    public int describeContents() {
-        return 0;
-    }
+    /** @hide */
+    public static MotionEvent createFromParcelBody(Parcel in) {
+        final int NP = in.readInt();
+        final int NS = in.readInt();
+        final int NI = NP * NS * NUM_SAMPLE_DATA;
+        
+        MotionEvent ev = obtain(NP, NS);
+        ev.mNumPointers = NP;
+        ev.mNumSamples = NS;
+        
+        ev.readBaseFromParcel(in);
+        
+        ev.mDownTimeNano = in.readLong();
+        ev.mAction = in.readInt();
+        ev.mXOffset = in.readFloat();
+        ev.mYOffset = in.readFloat();
+        ev.mXPrecision = in.readFloat();
+        ev.mYPrecision = in.readFloat();
+        ev.mEdgeFlags = in.readInt();
+        ev.mMetaState = in.readInt();
+        
+        final int[] pointerIdentifiers = ev.mPointerIdentifiers;
+        for (int i = 0; i < NP; i++) {
+            pointerIdentifiers[i] = in.readInt();
+        }
+        
+        final long[] eventTimeNanoSamples = ev.mEventTimeNanoSamples;
+        for (int i = 0; i < NS; i++) {
+            eventTimeNanoSamples[i] = in.readLong();
+        }
 
+        final float[] dataSamples = ev.mDataSamples;
+        for (int i = 0; i < NI; i++) {
+            dataSamples[i] = in.readFloat();
+        }
+        
+        ev.mLastEventTimeNanoSampleIndex = NS - 1;
+        ev.mLastDataSampleIndex = (NS - 1) * NP * NUM_SAMPLE_DATA;
+        return ev;
+    }
+    
     public void writeToParcel(Parcel out, int flags) {
+        out.writeInt(PARCEL_TOKEN_MOTION_EVENT);
+        
         final int NP = mNumPointers;
         final int NS = mNumSamples;
         final int NI = NP * NS * NUM_SAMPLE_DATA;
@@ -1509,14 +1513,14 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         out.writeInt(NP);
         out.writeInt(NS);
         
+        writeBaseToParcel(out);
+        
         out.writeLong(mDownTimeNano);
         out.writeInt(mAction);
         out.writeFloat(mXOffset);
         out.writeFloat(mYOffset);
         out.writeFloat(mXPrecision);
         out.writeFloat(mYPrecision);
-        out.writeInt(mDeviceId);
-        out.writeInt(mSource);
         out.writeInt(mEdgeFlags);
         out.writeInt(mMetaState);
         

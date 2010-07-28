@@ -184,11 +184,6 @@ void InputDispatcher::dispatchOnce() {
 
         // Run any deferred commands.
         skipPoll |= runCommandsLockedInterruptible();
-
-        // Wake up synchronization waiters, if needed.
-        if (isFullySynchronizedLocked()) {
-            mFullySynchronizedCondition.broadcast();
-        }
     } // release lock
 
     // If we dispatched anything, don't poll just now.  Wait for the next iteration.
@@ -560,6 +555,10 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
     dispatchEntry->headMotionSample = NULL;
     dispatchEntry->tailMotionSample = NULL;
 
+    if (dispatchEntry->isSyncTarget()) {
+        eventEntry->pendingSyncDispatches += 1;
+    }
+
     // Handle the case where we could not stream a new motion sample because the consumer has
     // already consumed the motion event (otherwise the corresponding dispatch entry would
     // still be in the outbound queue for this connection).  We set the head motion sample
@@ -789,6 +788,9 @@ void InputDispatcher::finishDispatchCycleLocked(nsecs_t currentTime,
             }
             // Finished.
             connection->outboundQueue.dequeueAtHead();
+            if (dispatchEntry->isSyncTarget()) {
+                decrementPendingSyncDispatchesLocked(dispatchEntry->eventEntry);
+            }
             mAllocator.releaseDispatchEntry(dispatchEntry);
         } else {
             // If the head is not in progress, then we must have already dequeued the in
@@ -854,6 +856,9 @@ void InputDispatcher::abortDispatchCycleLocked(nsecs_t currentTime,
     if (! connection->outboundQueue.isEmpty()) {
         do {
             DispatchEntry* dispatchEntry = connection->outboundQueue.dequeueAtHead();
+            if (dispatchEntry->isSyncTarget()) {
+                decrementPendingSyncDispatchesLocked(dispatchEntry->eventEntry);
+            }
             mAllocator.releaseDispatchEntry(dispatchEntry);
         } while (! connection->outboundQueue.isEmpty());
 
@@ -1097,7 +1102,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t 
                     Connection* connection = mActiveConnections.itemAt(i);
                     if (! connection->outboundQueue.isEmpty()) {
                         DispatchEntry* dispatchEntry = connection->outboundQueue.tail.prev;
-                        if (dispatchEntry->targetFlags & InputTarget::FLAG_SYNC) {
+                        if (dispatchEntry->isSyncTarget()) {
                             if (dispatchEntry->eventEntry->type != EventEntry::TYPE_MOTION) {
                                 goto NoBatchingOrStreaming;
                             }
@@ -1148,11 +1153,11 @@ NoBatchingOrStreaming:;
 }
 
 int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
-        int32_t injectorPid, int32_t injectorUid, bool sync, int32_t timeoutMillis) {
+        int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis) {
 #if DEBUG_INBOUND_EVENT_DETAILS
     LOGD("injectInputEvent - eventType=%d, injectorPid=%d, injectorUid=%d, "
-            "sync=%d, timeoutMillis=%d",
-            event->getType(), injectorPid, injectorUid, sync, timeoutMillis);
+            "syncMode=%d, timeoutMillis=%d",
+            event->getType(), injectorPid, injectorUid, syncMode, timeoutMillis);
 #endif
 
     nsecs_t endTime = now() + milliseconds_to_nanoseconds(timeoutMillis);
@@ -1167,6 +1172,10 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
         injectedEntry->injectorPid = injectorPid;
         injectedEntry->injectorUid = injectorUid;
 
+        if (syncMode == INPUT_EVENT_INJECTION_SYNC_NONE) {
+            injectedEntry->injectionIsAsync = true;
+        }
+
         wasEmpty = mInboundQueue.isEmpty();
         mInboundQueue.enqueueAtTail(injectedEntry);
 
@@ -1180,36 +1189,58 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
     { // acquire lock
         AutoMutex _l(mLock);
 
-        for (;;) {
-            injectionResult = injectedEntry->injectionResult;
-            if (injectionResult != INPUT_EVENT_INJECTION_PENDING) {
-                break;
-            }
+        if (syncMode == INPUT_EVENT_INJECTION_SYNC_NONE) {
+            injectionResult = INPUT_EVENT_INJECTION_SUCCEEDED;
+        } else {
+            for (;;) {
+                injectionResult = injectedEntry->injectionResult;
+                if (injectionResult != INPUT_EVENT_INJECTION_PENDING) {
+                    break;
+                }
 
-            nsecs_t remainingTimeout = endTime - now();
-            if (remainingTimeout <= 0) {
-                injectionResult = INPUT_EVENT_INJECTION_TIMED_OUT;
-                sync = false;
-                break;
-            }
-
-            mInjectionResultAvailableCondition.waitRelative(mLock, remainingTimeout);
-        }
-
-        if (sync) {
-            while (! isFullySynchronizedLocked()) {
                 nsecs_t remainingTimeout = endTime - now();
                 if (remainingTimeout <= 0) {
+#if DEBUG_INJECTION
+                    LOGD("injectInputEvent - Timed out waiting for injection result "
+                            "to become available.");
+#endif
                     injectionResult = INPUT_EVENT_INJECTION_TIMED_OUT;
                     break;
                 }
 
-                mFullySynchronizedCondition.waitRelative(mLock, remainingTimeout);
+                mInjectionResultAvailableCondition.waitRelative(mLock, remainingTimeout);
+            }
+
+            if (injectionResult == INPUT_EVENT_INJECTION_SUCCEEDED
+                    && syncMode == INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISHED) {
+                while (injectedEntry->pendingSyncDispatches != 0) {
+#if DEBUG_INJECTION
+                    LOGD("injectInputEvent - Waiting for %d pending synchronous dispatches.",
+                            injectedEntry->pendingSyncDispatches);
+#endif
+                    nsecs_t remainingTimeout = endTime - now();
+                    if (remainingTimeout <= 0) {
+#if DEBUG_INJECTION
+                    LOGD("injectInputEvent - Timed out waiting for pending synchronous "
+                            "dispatches to finish.");
+#endif
+                        injectionResult = INPUT_EVENT_INJECTION_TIMED_OUT;
+                        break;
+                    }
+
+                    mInjectionSyncFinishedCondition.waitRelative(mLock, remainingTimeout);
+                }
             }
         }
 
         mAllocator.releaseEventEntry(injectedEntry);
     } // release lock
+
+#if DEBUG_INJECTION
+    LOGD("injectInputEvent - Finished with result %d.  "
+            "injectorPid=%d, injectorUid=%d",
+            injectionResult, injectorPid, injectorUid);
+#endif
 
     return injectionResult;
 }
@@ -1222,13 +1253,35 @@ void InputDispatcher::setInjectionResultLocked(EventEntry* entry, int32_t inject
                  injectionResult, entry->injectorPid, entry->injectorUid);
 #endif
 
+        if (entry->injectionIsAsync) {
+            // Log the outcome since the injector did not wait for the injection result.
+            switch (injectionResult) {
+            case INPUT_EVENT_INJECTION_SUCCEEDED:
+                LOGV("Asynchronous input event injection succeeded.");
+                break;
+            case INPUT_EVENT_INJECTION_FAILED:
+                LOGW("Asynchronous input event injection failed.");
+                break;
+            case INPUT_EVENT_INJECTION_PERMISSION_DENIED:
+                LOGW("Asynchronous input event injection permission denied.");
+                break;
+            case INPUT_EVENT_INJECTION_TIMED_OUT:
+                LOGW("Asynchronous input event injection timed out.");
+                break;
+            }
+        }
+
         entry->injectionResult = injectionResult;
         mInjectionResultAvailableCondition.broadcast();
     }
 }
 
-bool InputDispatcher::isFullySynchronizedLocked() {
-    return mInboundQueue.isEmpty() && mActiveConnections.isEmpty();
+void InputDispatcher::decrementPendingSyncDispatchesLocked(EventEntry* entry) {
+    entry->pendingSyncDispatches -= 1;
+
+    if (entry->isInjected() && entry->pendingSyncDispatches == 0) {
+        mInjectionSyncFinishedCondition.broadcast();
+    }
 }
 
 InputDispatcher::EventEntry* InputDispatcher::createEntryFromInputEventLocked(
@@ -1498,8 +1551,10 @@ void InputDispatcher::Allocator::initializeEventEntry(EventEntry* entry, int32_t
     entry->dispatchInProgress = false;
     entry->eventTime = eventTime;
     entry->injectionResult = INPUT_EVENT_INJECTION_PENDING;
+    entry->injectionIsAsync = false;
     entry->injectorPid = -1;
     entry->injectorUid = -1;
+    entry->pendingSyncDispatches = 0;
 }
 
 InputDispatcher::ConfigurationChangedEntry*

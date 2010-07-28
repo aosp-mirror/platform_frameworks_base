@@ -26,6 +26,7 @@ import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
 import android.view.IWindowSession;
 import android.view.KeyEvent;
+import android.view.InputEvent;
 import android.view.MotionEvent;
 
 /**
@@ -50,10 +51,13 @@ interface IWindowManager
     boolean inputMethodClientHasFocus(IInputMethodClient client);
     
     // These can only be called when injecting events to your own window,
-    // or by holding the INJECT_EVENTS permission.
+    // or by holding the INJECT_EVENTS permission.  These methods may block
+    // until pending input events are finished being dispatched even when 'sync' is false.
+    // Avoid calling these methods on your UI thread or use the 'NoWait' version instead.
     boolean injectKeyEvent(in KeyEvent ev, boolean sync);
     boolean injectPointerEvent(in MotionEvent ev, boolean sync);
     boolean injectTrackballEvent(in MotionEvent ev, boolean sync);
+    boolean injectInputEventNoWait(in InputEvent ev);
     
     // These can only be called when holding the MANAGE_APP_TOKENS permission.
     void pauseKeyDispatching(IBinder token);

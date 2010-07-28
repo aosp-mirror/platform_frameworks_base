@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
@@ -24,6 +25,11 @@ import android.os.Parcelable;
 public abstract class InputEvent implements Parcelable {
     protected int mDeviceId;
     protected int mSource;
+    
+    /** @hide */
+    protected static final int PARCEL_TOKEN_MOTION_EVENT = 1;
+    /** @hide */
+    protected static final int PARCEL_TOKEN_KEY_EVENT = 2;
     
     /*package*/ InputEvent() {
     }
@@ -69,4 +75,38 @@ public abstract class InputEvent implements Parcelable {
     public final void setSource(int source) {
         mSource = source;
     }
+    
+    public final int describeContents() {
+        return 0;
+    }
+    
+    /** @hide */
+    protected final void readBaseFromParcel(Parcel in) {
+        mDeviceId = in.readInt();
+        mSource = in.readInt();
+    }
+    
+    /** @hide */
+    protected final void writeBaseToParcel(Parcel out) {
+        out.writeInt(mDeviceId);
+        out.writeInt(mSource);
+    }
+    
+    public static final Parcelable.Creator<InputEvent> CREATOR
+            = new Parcelable.Creator<InputEvent>() {
+        public InputEvent createFromParcel(Parcel in) {
+            int token = in.readInt();
+            if (token == PARCEL_TOKEN_KEY_EVENT) {
+                return KeyEvent.createFromParcelBody(in);
+            } else if (token == PARCEL_TOKEN_MOTION_EVENT) {
+                return MotionEvent.createFromParcelBody(in);
+            } else {
+                throw new IllegalStateException("Unexpected input event type token in parcel.");
+            }
+        }
+        
+        public InputEvent[] newArray(int size) {
+            return new InputEvent[size];
+        }
+    };
 }

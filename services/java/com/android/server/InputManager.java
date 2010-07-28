@@ -29,6 +29,7 @@ import android.os.PowerManager;
 import android.util.Slog;
 import android.util.Xml;
 import android.view.InputChannel;
+import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -76,10 +77,8 @@ public class InputManager {
             int[] keyCodes, boolean[] keyExists);
     private static native void nativeRegisterInputChannel(InputChannel inputChannel);
     private static native void nativeUnregisterInputChannel(InputChannel inputChannel);
-    private static native int nativeInjectKeyEvent(KeyEvent event,
-            int injectorPid, int injectorUid, boolean sync, int timeoutMillis);
-    private static native int nativeInjectMotionEvent(MotionEvent event,
-            int injectorPid, int injectorUid, boolean sync, int timeoutMillis);
+    private static native int nativeInjectInputEvent(InputEvent event,
+            int injectorPid, int injectorUid, int syncMode, int timeoutMillis);
     private static native void nativeSetInputWindows(InputWindow[] windows);
     private static native void nativeSetInputDispatchMode(boolean enabled, boolean frozen);
     private static native void nativeSetFocusedApplication(InputApplication application);
@@ -91,6 +90,11 @@ public class InputManager {
     static final int INPUT_EVENT_INJECTION_PERMISSION_DENIED = 1;
     static final int INPUT_EVENT_INJECTION_FAILED = 2;
     static final int INPUT_EVENT_INJECTION_TIMED_OUT = 3;
+    
+    // Input event injection synchronization modes defined in InputDispatcher.h
+    static final int INPUT_EVENT_INJECTION_SYNC_NONE = 0;
+    static final int INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_RESULT = 1;
+    static final int INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISH = 2;
     
     // Key states (may be returned by queries about the current state of a
     // particular key code, scan code or switch).
@@ -106,7 +110,6 @@ public class InputManager {
 
     /** The key is down but is a virtual key press that is being emulated by the system. */
     public static final int KEY_STATE_VIRTUAL = 2;
-
 
     public InputManager(Context context, WindowManagerService windowManagerService) {
         this.mContext = context;
@@ -239,19 +242,30 @@ public class InputManager {
     }
     
     /**
-     * Injects a key event into the event system on behalf of an application.
-     * This method may block even if sync is false because it must wait for previous events
-     * to be dispatched before it can determine whether input event injection will be
-     * permitted based on the current input focus.
+     * Injects an input event into the event system on behalf of an application.
+     * The synchronization mode determines whether the method blocks while waiting for
+     * input injection to proceed.
+     * 
+     * {@link #INPUT_EVENT_INJECTION_SYNC_NONE} never blocks.  Injection is asynchronous and
+     * is assumed always to be successful.
+     * 
+     * {@link #INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_RESULT} waits for previous events to be
+     * dispatched so that the input dispatcher can determine whether input event injection will
+     * be permitted based on the current input focus.  Does not wait for the input event to
+     * finish processing.
+     * 
+     * {@link #INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISH} waits for the input event to
+     * be completely processed.
+     * 
      * @param event The event to inject.
      * @param injectorPid The pid of the injecting application.
      * @param injectorUid The uid of the injecting application.
-     * @param sync If true, waits for the event to be completed before returning.
+     * @param syncMode The synchronization mode.
      * @param timeoutMillis The injection timeout in milliseconds.
      * @return One of the INPUT_EVENT_INJECTION_XXX constants.
      */
-    public int injectKeyEvent(KeyEvent event, int injectorPid, int injectorUid,
-            boolean sync, int timeoutMillis) {
+    public int injectInputEvent(InputEvent event, int injectorPid, int injectorUid,
+            int syncMode, int timeoutMillis) {
         if (event == null) {
             throw new IllegalArgumentException("event must not be null");
         }
@@ -261,38 +275,8 @@ public class InputManager {
         if (timeoutMillis <= 0) {
             throw new IllegalArgumentException("timeoutMillis must be positive");
         }
-        
-        return nativeInjectKeyEvent(event, injectorPid, injectorUid,
-                sync, timeoutMillis);
-    }
-    
-    /**
-     * Injects a motion event into the event system on behalf of an application.
-     * This method may block even if sync is false because it must wait for previous events
-     * to be dispatched before it can determine whether input event injection will be
-     * permitted based on the current input focus.
-     * @param event The event to inject.
-     * @param sync If true, waits for the event to be completed before returning.
-     * @param injectorPid The pid of the injecting application.
-     * @param injectorUid The uid of the injecting application.
-     * @param sync If true, waits for the event to be completed before returning.
-     * @param timeoutMillis The injection timeout in milliseconds.
-     * @return One of the INPUT_EVENT_INJECTION_XXX constants.
-     */
-    public int injectMotionEvent(MotionEvent event, int injectorPid, int injectorUid,
-            boolean sync, int timeoutMillis) {
-        if (event == null) {
-            throw new IllegalArgumentException("event must not be null");
-        }
-        if (injectorPid < 0 || injectorUid < 0) {
-            throw new IllegalArgumentException("injectorPid and injectorUid must not be negative.");
-        }
-        if (timeoutMillis <= 0) {
-            throw new IllegalArgumentException("timeoutMillis must be positive");
-        }
-        
-        return nativeInjectMotionEvent(event, injectorPid, injectorUid,
-                sync, timeoutMillis);
+
+        return nativeInjectInputEvent(event, injectorPid, injectorUid, syncMode, timeoutMillis);
     }
     
     public void setInputWindows(InputWindow[] windows) {
