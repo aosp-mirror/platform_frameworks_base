@@ -698,8 +698,11 @@ static jint android_media_AudioEffect_native_command(JNIEnv *env, jobject thiz,
         }
     }
 
-    lStatus = translateError(lpAudioEffect->command(cmdCode, cmdSize, pCmdData,
-            pReplySize, pReplyData));
+    lStatus = translateError(lpAudioEffect->command((uint32_t)cmdCode,
+                                                    (uint32_t)cmdSize,
+                                                    pCmdData,
+                                                    (uint32_t *)pReplySize,
+                                                    pReplyData));
 
 command_Exit:
 

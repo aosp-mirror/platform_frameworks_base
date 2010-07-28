@@ -5408,8 +5408,13 @@ status_t AudioFlinger::EffectModule::configure()
             this, thread.get(), mConfig.inputCfg.buffer.raw, mConfig.inputCfg.buffer.frameCount);
 
     status_t cmdStatus;
-    int size = sizeof(int);
-    status_t status = (*mEffectInterface)->command(mEffectInterface, EFFECT_CMD_CONFIGURE, sizeof(effect_config_t), &mConfig, &size, &cmdStatus);
+    uint32_t size = sizeof(int);
+    status_t status = (*mEffectInterface)->command(mEffectInterface,
+                                                   EFFECT_CMD_CONFIGURE,
+                                                   sizeof(effect_config_t),
+                                                   &mConfig,
+                                                   &size,
+                                                   &cmdStatus);
     if (status == 0) {
         status = cmdStatus;
     }
@@ -5427,8 +5432,13 @@ status_t AudioFlinger::EffectModule::init()
         return NO_INIT;
     }
     status_t cmdStatus;
-    int size = sizeof(status_t);
-    status_t status = (*mEffectInterface)->command(mEffectInterface, EFFECT_CMD_INIT, 0, NULL, &size, &cmdStatus);
+    uint32_t size = sizeof(status_t);
+    status_t status = (*mEffectInterface)->command(mEffectInterface,
+                                                   EFFECT_CMD_INIT,
+                                                   0,
+                                                   NULL,
+                                                   &size,
+                                                   &cmdStatus);
     if (status == 0) {
         status = cmdStatus;
     }
@@ -5441,8 +5451,13 @@ status_t AudioFlinger::EffectModule::start_l()
         return NO_INIT;
     }
     status_t cmdStatus;
-    int size = sizeof(status_t);
-    status_t status = (*mEffectInterface)->command(mEffectInterface, EFFECT_CMD_ENABLE, 0, NULL, &size, &cmdStatus);
+    uint32_t size = sizeof(status_t);
+    status_t status = (*mEffectInterface)->command(mEffectInterface,
+                                                   EFFECT_CMD_ENABLE,
+                                                   0,
+                                                   NULL,
+                                                   &size,
+                                                   &cmdStatus);
     if (status == 0) {
         status = cmdStatus;
     }
@@ -5455,15 +5470,24 @@ status_t AudioFlinger::EffectModule::stop_l()
         return NO_INIT;
     }
     status_t cmdStatus;
-    int size = sizeof(status_t);
-    status_t status = (*mEffectInterface)->command(mEffectInterface, EFFECT_CMD_DISABLE, 0, NULL, &size, &cmdStatus);
+    uint32_t size = sizeof(status_t);
+    status_t status = (*mEffectInterface)->command(mEffectInterface,
+                                                   EFFECT_CMD_DISABLE,
+                                                   0,
+                                                   NULL,
+                                                   &size,
+                                                   &cmdStatus);
     if (status == 0) {
         status = cmdStatus;
     }
     return status;
 }
 
-status_t AudioFlinger::EffectModule::command(int cmdCode, int cmdSize, void *pCmdData, int *replySize, void *pReplyData)
+status_t AudioFlinger::EffectModule::command(uint32_t cmdCode,
+                                             uint32_t cmdSize,
+                                             void *pCmdData,
+                                             uint32_t *replySize,
+                                             void *pReplyData)
 {
     Mutex::Autolock _l(mLock);
 //    LOGV("command(), cmdCode: %d, mEffectInterface: %p", cmdCode, mEffectInterface);
@@ -5471,9 +5495,14 @@ status_t AudioFlinger::EffectModule::command(int cmdCode, int cmdSize, void *pCm
     if (mEffectInterface == NULL) {
         return NO_INIT;
     }
-    status_t status = (*mEffectInterface)->command(mEffectInterface, cmdCode, cmdSize, pCmdData, replySize, pReplyData);
+    status_t status = (*mEffectInterface)->command(mEffectInterface,
+                                                   cmdCode,
+                                                   cmdSize,
+                                                   pCmdData,
+                                                   replySize,
+                                                   pReplyData);
     if (cmdCode != EFFECT_CMD_GET_PARAM && status == NO_ERROR) {
-        int size = (replySize == NULL) ? 0 : *replySize;
+        uint32_t size = (replySize == NULL) ? 0 : *replySize;
         for (size_t i = 1; i < mHandles.size(); i++) {
             sp<EffectHandle> h = mHandles[i].promote();
             if (h != 0) {
@@ -5549,13 +5578,18 @@ status_t AudioFlinger::EffectModule::setVolume(uint32_t *left, uint32_t *right, 
         status_t cmdStatus;
         uint32_t volume[2];
         uint32_t *pVolume = NULL;
-        int size = sizeof(volume);
+        uint32_t size = sizeof(volume);
         volume[0] = *left;
         volume[1] = *right;
         if (controller) {
             pVolume = volume;
         }
-        status = (*mEffectInterface)->command(mEffectInterface, EFFECT_CMD_SET_VOLUME, size, volume, &size, pVolume);
+        status = (*mEffectInterface)->command(mEffectInterface,
+                                              EFFECT_CMD_SET_VOLUME,
+                                              size,
+                                              volume,
+                                              &size,
+                                              pVolume);
         if (controller && status == NO_ERROR && size == sizeof(volume)) {
             *left = volume[0];
             *right = volume[1];
@@ -5575,8 +5609,13 @@ status_t AudioFlinger::EffectModule::setDevice(uint32_t device)
             return BAD_VALUE;
         }
         status_t cmdStatus;
-        int size = sizeof(status_t);
-        status = (*mEffectInterface)->command(mEffectInterface, EFFECT_CMD_SET_DEVICE, sizeof(uint32_t), &device, &size, &cmdStatus);
+        uint32_t size = sizeof(status_t);
+        status = (*mEffectInterface)->command(mEffectInterface,
+                                              EFFECT_CMD_SET_DEVICE,
+                                              sizeof(uint32_t),
+                                              &device,
+                                              &size,
+                                              &cmdStatus);
         if (status == NO_ERROR) {
             status = cmdStatus;
         }
@@ -5595,8 +5634,13 @@ status_t AudioFlinger::EffectModule::setMode(uint32_t mode)
             return BAD_VALUE;
         }
         status_t cmdStatus;
-        int size = sizeof(status_t);
-        status = (*mEffectInterface)->command(mEffectInterface, EFFECT_CMD_SET_AUDIO_MODE, sizeof(int), &effectMode, &size, &cmdStatus);
+        uint32_t size = sizeof(status_t);
+        status = (*mEffectInterface)->command(mEffectInterface,
+                                              EFFECT_CMD_SET_AUDIO_MODE,
+                                              sizeof(int),
+                                              &effectMode,
+                                              &size,
+                                              &cmdStatus);
         if (status == NO_ERROR) {
             status = cmdStatus;
         }
@@ -5805,9 +5849,14 @@ void AudioFlinger::EffectHandle::disconnect()
     }
 }
 
-status_t AudioFlinger::EffectHandle::command(int cmdCode, int cmdSize, void *pCmdData, int *replySize, void *pReplyData)
+status_t AudioFlinger::EffectHandle::command(uint32_t cmdCode,
+                                             uint32_t cmdSize,
+                                             void *pCmdData,
+                                             uint32_t *replySize,
+                                             void *pReplyData)
 {
-//    LOGV("command(), cmdCode: %d, mHasControl: %d, mEffect: %p", cmdCode, mHasControl, (mEffect == 0) ? 0 : mEffect.get());
+//    LOGV("command(), cmdCode: %d, mHasControl: %d, mEffect: %p",
+//              cmdCode, mHasControl, (mEffect == 0) ? 0 : mEffect.get());
 
     // only get parameter command is permitted for applications not controlling the effect
     if (!mHasControl && cmdCode != EFFECT_CMD_GET_PARAM) {
@@ -5829,7 +5878,7 @@ status_t AudioFlinger::EffectHandle::command(int cmdCode, int cmdSize, void *pCm
         status_t status = NO_ERROR;
         while (mCblk->serverIndex < mCblk->clientIndex) {
             int reply;
-            int rsize = sizeof(int);
+            uint32_t rsize = sizeof(int);
             int *p = (int *)(mBuffer + mCblk->serverIndex);
             int size = *p++;
             if (((uint8_t *)p + size) > mBuffer + mCblk->clientIndex) {
@@ -5842,8 +5891,14 @@ status_t AudioFlinger::EffectHandle::command(int cmdCode, int cmdSize, void *pCm
                 mCblk->serverIndex += size;
                 continue;
             }
-            int psize = sizeof(effect_param_t) + ((param->psize - 1) / sizeof(int) + 1) * sizeof(int) + param->vsize;
-            status_t ret = mEffect->command(EFFECT_CMD_SET_PARAM, psize, p, &rsize, &reply);
+            uint32_t psize = sizeof(effect_param_t) +
+                             ((param->psize - 1) / sizeof(int) + 1) * sizeof(int) +
+                             param->vsize;
+            status_t ret = mEffect->command(EFFECT_CMD_SET_PARAM,
+                                            psize,
+                                            p,
+                                            &rsize,
+                                            &reply);
             if (ret == NO_ERROR) {
                 if (reply != NO_ERROR) {
                     status = reply;
@@ -5879,7 +5934,11 @@ void AudioFlinger::EffectHandle::setControl(bool hasControl, bool signal)
     }
 }
 
-void AudioFlinger::EffectHandle::commandExecuted(int cmdCode, int cmdSize, void *pCmdData, int replySize, void *pReplyData)
+void AudioFlinger::EffectHandle::commandExecuted(uint32_t cmdCode,
+                                                 uint32_t cmdSize,
+                                                 void *pCmdData,
+                                                 uint32_t replySize,
+                                                 void *pReplyData)
 {
     if (mEffectClient != 0) {
         mEffectClient->commandExecuted(cmdCode, cmdSize, pCmdData, replySize, pReplyData);

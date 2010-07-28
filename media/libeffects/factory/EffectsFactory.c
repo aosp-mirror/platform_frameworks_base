@@ -73,7 +73,12 @@ int Effect_Process(effect_interface_t self, audio_buffer_t *inBuffer, audio_buff
     return ret;
 }
 
-int Effect_Command(effect_interface_t self, int cmdCode, int cmdSize, void *pCmdData, int *replySize, void *pReplyData)
+int Effect_Command(effect_interface_t self,
+                   uint32_t cmdCode,
+                   uint32_t cmdSize,
+                   void *pCmdData,
+                   uint32_t *replySize,
+                   void *pReplyData)
 {
     int ret = init();
     if (ret < 0) {

@@ -551,8 +551,8 @@ extern "C" int Equalizer_process(effect_interface_t self, audio_buffer_t *inBuff
     return 0;
 }   // end Equalizer_process
 
-extern "C" int Equalizer_command(effect_interface_t self, int cmdCode, int cmdSize,
-        void *pCmdData, int *replySize, void *pReplyData) {
+extern "C" int Equalizer_command(effect_interface_t self, uint32_t cmdCode, uint32_t cmdSize,
+        void *pCmdData, uint32_t *replySize, void *pReplyData) {
 
     android::EqualizerContext * pContext = (android::EqualizerContext *) self;
     int retsize;
