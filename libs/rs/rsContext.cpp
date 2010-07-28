@@ -780,9 +780,13 @@ bool Context::sendMessageToClient(void *data, uint32_t cmdID, size_t len, bool w
         }
     }
     //LOGE("sendMessageToClient 2");
-    void *p = mIO.mToClient.reserve(len);
-    memcpy(p, data, len);
-    mIO.mToClient.commit(cmdID, len);
+    if (len > 0) {
+        void *p = mIO.mToClient.reserve(len);
+        memcpy(p, data, len);
+        mIO.mToClient.commit(cmdID, len);
+    } else {
+        mIO.mToClient.commit(cmdID, 0);
+    }
     //LOGE("sendMessageToClient 3");
     return true;
 }

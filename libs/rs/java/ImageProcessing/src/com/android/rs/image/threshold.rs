@@ -17,6 +17,7 @@ rs_script vBlurScript;
 rs_script hBlurScript;
 rs_script levelsScript;
 
+const int CMD_FINISHED = 1;
 
 // Store our coefficients here
 static float gaussian[MAX_RADIUS * 2 + 1];
@@ -89,14 +90,11 @@ void filter() {
         rsForEach(levelsScript, rsGetAllocation(InPixel), rsGetAllocation(OutPixel), 0);
     }
 
-    int count = 0;
-    rsSendToClient(&count, 1, 4, 0);
+    rsSendToClientBlocking(CMD_FINISHED);
 }
 
 void filterBenchmark() {
     blur();
-
-    int count = 0;
-    rsSendToClient(&count, 1, 4, 0);
+    rsSendToClientBlocking(CMD_FINISHED);
 }
 
