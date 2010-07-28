@@ -294,19 +294,9 @@ sp<GraphicBuffer> Layer::requestBuffer(int index,
      * This is called from the client's Surface::dequeue(). This can happen
      * at any time, especially while we're in the middle of using the
      * buffer 'index' as our front buffer.
-     *
-     * Make sure the buffer we're resizing is not the front buffer and has been
-     * dequeued. Once this condition is asserted, we are guaranteed that this
-     * buffer cannot become the front buffer under our feet, since we're called
-     * from Surface::dequeue()
      */
-    status_t err = lcblk->assertReallocate(index);
-    LOGE_IF(err, "assertReallocate(%d) failed (%s)", index, strerror(-err));
-    if (err != NO_ERROR) {
-        // the surface may have died
-        return buffer;
-    }
 
+    status_t err = NO_ERROR;
     uint32_t w, h, f;
     { // scope for the lock
         Mutex::Autolock _l(mLock);
@@ -319,23 +309,17 @@ sp<GraphicBuffer> Layer::requestBuffer(int index,
         w = reqWidth  ? reqWidth  : mWidth;
         h = reqHeight ? reqHeight : mHeight;
         f = reqFormat ? reqFormat : mFormat;
-        buffer = mBufferManager.detachBuffer(index);
         if (fixedSizeChanged || formatChanged) {
             lcblk->reallocateAllExcept(index);
         }
     }
 
+    // here we have to reallocate a new buffer because the buffer could be
+    // used as the front buffer, or by a client in our process
+    // (eg: status bar), and we can't release the handle under its feet.
     const uint32_t effectiveUsage = getEffectiveUsage(usage);
-    if (buffer!=0 && buffer->getStrongCount() == 1) {
-        err = buffer->reallocate(w, h, f, effectiveUsage);
-    } else {
-        // here we have to reallocate a new buffer because we could have a
-        // client in our process with a reference to it (eg: status bar),
-        // and we can't release the handle under its feet.
-        buffer.clear();
-        buffer = new GraphicBuffer(w, h, f, effectiveUsage);
-        err = buffer->initCheck();
-    }
+    buffer = new GraphicBuffer(w, h, f, effectiveUsage);
+    err = buffer->initCheck();
 
     if (err || buffer->handle == 0) {
         LOGE_IF(err || buffer->handle == 0,
