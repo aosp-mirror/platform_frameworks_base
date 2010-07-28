@@ -273,7 +273,6 @@ public:
     void setStatus(status_t status);
     status_t reallocateAll();
     status_t reallocateAllExcept(int buffer);
-    status_t assertReallocate(int buffer);
     int32_t getQueuedCount() const;
     Region getDirtyRegion(int buffer) const;
 
@@ -355,13 +354,6 @@ private:
         const status_t status;
         inline StatusUpdate(SharedBufferBase* sbb, status_t status);
         inline ssize_t operator()();
-    };
-
-    struct ReallocateCondition : public ConditionBase {
-        int buf;
-        inline ReallocateCondition(SharedBufferBase* sbb, int buf);
-        inline bool operator()() const;
-        inline const char* name() const { return "ReallocateCondition"; }
     };
 };
 
