@@ -243,21 +243,6 @@ bool SharedBufferClient::LockCondition::operator()() const {
             (stack.queued > 0 && stack.inUse != buf));
 }
 
-SharedBufferServer::ReallocateCondition::ReallocateCondition(
-        SharedBufferBase* sbb, int buf) : ConditionBase(sbb), buf(buf) { 
-}
-bool SharedBufferServer::ReallocateCondition::operator()() const {
-    int32_t head = stack.head;
-    if (uint32_t(head) >= SharedBufferStack::NUM_BUFFER_MAX) {
-        // if stack.head is messed up, we cannot allow the server to
-        // crash (since stack.head is mapped on the client side)
-        stack.status = BAD_VALUE;
-        return false;
-    }
-    // TODO: we should also check that buf has been dequeued
-    return (buf != stack.index[head]);
-}
-
 // ----------------------------------------------------------------------------
 
 SharedBufferClient::QueueUpdate::QueueUpdate(SharedBufferBase* sbb)
@@ -556,21 +541,6 @@ int32_t SharedBufferServer::getQueuedCount() const
 {
     SharedBufferStack& stack( *mSharedStack );
     return stack.queued;
-}
-
-status_t SharedBufferServer::assertReallocate(int buf)
-{
-    /*
-     * NOTE: it's safe to hold mLock for read while waiting for
-     * the ReallocateCondition because that condition is not updated
-     * by the thread that holds mLock for write.
-     */
-    RWLock::AutoRLock _l(mLock);
-
-    // TODO: need to validate "buf"
-    ReallocateCondition condition(this, buf);
-    status_t err = waitForCondition(condition);
-    return err;
 }
 
 Region SharedBufferServer::getDirtyRegion(int buf) const
