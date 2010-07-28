@@ -116,7 +116,7 @@ trigger filtering on Market.</p>
     <td valign="top">
 
 <p>An application indicates the screen sizes that it is capable of supporting by
-setting attributes of the <code>&lt;supports-screens&gt;</code> element. When
+setting attributes of the <code>&lt;supports-screens&gt;</code> element. When
 the application is published, Market uses those attributes to determine whether
 to show the application to users, based on the screen sizes of their
 devices. </p>
@@ -198,22 +198,34 @@ of corresponding screen size.</li>
 href="{@docRoot}guide/topics/manifest/uses-configuration-element.html"><code>&lt;uses-configuration&gt;</code></a>.</p></td>
   </tr>
   <tr>
-    <td rowspan="2" valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></code>
+    <td rowspan="2" valign="top" style="white-space:nowrap;"><code><a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a>
+</code>
       <!-- ##api level 4## --></td>
     <td valign="top">Device Features<br />
       (<code>name</code>)</td>
-    <td valign="top"><p>An
-      application can require certain device features to be present on the device. This functionality
-      was introduced in Android 2.0 (API Level 5).</p>
+    <td valign="top"><p>An application can require certain device features to be
+present on the device. This functionality was introduced in Android 2.0 (API
+Level 5).</p>
       <p><strong>Example 1<br />
-      </strong>The manifest includes <code>&lt;uses-feature android:name=&quot;android.hardware.sensor.light&quot; /&gt;</code>, and a user is searching for apps on a device that does not have a light sensor. <strong>Result</strong>: Android Market will not show the app to the user. </p>
+      </strong>The manifest includes <code>&lt;uses-feature
+android:name=&quot;android.hardware.sensor.light&quot; /&gt;</code>, and a user
+is searching for apps on a device that does not have a light sensor.
+<strong>Result</strong>: Android Market will not show the app to the user. </p>
       <p><strong>Example 2<br />
-      </strong>The manifest does not include a <code>&lt;uses-feature&gt;</code> element. <strong>Result</strong>: Android Market will show the app to all users, unless other filters apply.</p>
-      <p>For more details, see <code><a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></code>.</p>
-<p><em>A note about camera:</em> If an
-        application requests the CAMERA permission using the <a
-href="{@docRoot}guide/topics/manifest/uses-permission-element.html"> <code>&lt;uses-permission&gt;</code></a> element, Market assumes that the
-        application requires the camera and all camera features (such as autofocus). For applications that require the camera and are designed to run on Android 1.5 (API Level 3), declaring the CAMERA permission is an effective way of ensuring that Market filters your app properly, since <code>uses-feature</code> filtering is not available to applications compiled against the Android 1.5 platform. For more details about requiring or requesting a camera, see the <a href="{@docRoot}guide/topics/manifest/uses-library-element.html#required"> <code>required</code></a> attribute of <code>&lt;uses-feature&gt;</code>. </p></td>
+      </strong>The manifest does not include a <code>&lt;uses-feature&gt;</code>
+element. <strong>Result</strong>: Android Market will show the app to all users,
+unless other filters apply.</p>
+      <p>For complete information, see <code><a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a>
+</code>.</p>
+      <p><em>Filtering based on implied features:</em> In some cases, Android
+Market interprets permissions requested through
+<code>&lt;uses-permission&gt;</code> elements as feature requirements equivalent
+to those declared in <code>&lt;uses-feature&gt;</code> elements. See <a
+href="#uses-permission-filtering"><code>&lt;uses-permission&gt;</code></a>,
+below.</p>
+</td>
   </tr>
   <tr>
     <td valign="top">OpenGL-ES
@@ -253,10 +265,29 @@ href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-
 <p>For more details, see <a
 href="{@docRoot}guide/topics/manifest/uses-library-element.html"><code>&lt;uses-library&gt;</code></a>.</p></td>
   </tr>
-  <tr>
+  <tr id="uses-permission-filtering">
     <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code></td>
     <td valign="top">&nbsp;</td>
-    <td valign="top"><em>(See the note in the description of <code>&lt;uses-feature&gt;</code>, above.)</em></td>
+    <td valign="top">Strictly, Android Market does not filter based on
+<code>&lt;uses-permission&gt;</code> elements. However, it does read the
+elements to determine whether the application has hardware feature requirements
+that may not have been properly declared in <code>&lt;uses-feature&gt;</code>
+elements. For example, if an application requests the <code>CAMERA</code>
+permission but does not declare a <code>&lt;uses-feature&gt;</code> element for
+<code>android.hardware.camera</code>, Android Market considers that the
+application requires a camera and should not be shown to users whose devices do
+not offer a camera.</p>
+    <p>In general, if an application requests hardware-related permissions,
+Android Market assumes that the application requires the underlying hardware
+features, even though there might be no corresponding to
+<code>&lt;uses-feature&gt;</code> declarations. Android Market then sets up
+filtering based on the features implied by the <code>&lt;uses-feature&gt;</code>
+declarations.</p>
+    <p>For a list of permissions that imply hardware features, see
+the documentation for the <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions-features"><code>&lt;uses-feature&gt;</code></a>
+element.</p>
+</td>
   </tr>
   <tr>
     <td rowspan="2" valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></code></td>
