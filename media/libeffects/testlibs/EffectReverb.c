@@ -270,8 +270,8 @@ static int Reverb_Process(effect_interface_t self, audio_buffer_t *inBuffer, aud
 }
 
 
-static int Reverb_Command(effect_interface_t self, int cmdCode, int cmdSize,
-        void *pCmdData, int *replySize, void *pReplyData) {
+static int Reverb_Command(effect_interface_t self, uint32_t cmdCode, uint32_t cmdSize,
+        void *pCmdData, uint32_t *replySize, void *pReplyData) {
     reverb_module_t *pRvbModule = (reverb_module_t *) self;
     reverb_object_t *pReverb;
     int retsize;

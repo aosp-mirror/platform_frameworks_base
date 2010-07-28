@@ -59,7 +59,11 @@ public:
         return reply.readInt32();
     }
 
-    status_t command(int cmdCode, int cmdSize, void *pCmdData, int *pReplySize, void *pReplyData)
+    status_t command(uint32_t cmdCode,
+                     uint32_t cmdSize,
+                     void *pCmdData,
+                     uint32_t *pReplySize,
+                     void *pReplyData)
     {
         LOGV("command");
         Parcel data, reply;
@@ -136,15 +140,15 @@ status_t BnEffect::onTransact(
         case COMMAND: {
             LOGV("COMMAND");
             CHECK_INTERFACE(IEffect, data, reply);
-            int cmdCode = data.readInt32();
-            int cmdSize = data.readInt32();
+            uint32_t cmdCode = data.readInt32();
+            uint32_t cmdSize = data.readInt32();
             char *cmd = NULL;
             if (cmdSize) {
                 cmd = (char *)malloc(cmdSize);
                 data.read(cmd, cmdSize);
             }
-            int replySize = data.readInt32();
-            int replySz = replySize;
+            uint32_t replySize = data.readInt32();
+            uint32_t replySz = replySize;
             char *resp = NULL;
             if (replySize) {
                 resp = (char *)malloc(replySize);

@@ -221,7 +221,11 @@ status_t AudioEffect::setEnabled(bool enabled)
     return INVALID_OPERATION;
 }
 
-status_t AudioEffect::command(int32_t cmdCode, int32_t cmdSize, void *cmdData, int32_t *replySize, void *replyData)
+status_t AudioEffect::command(uint32_t cmdCode,
+                              uint32_t cmdSize,
+                              void *cmdData,
+                              uint32_t *replySize,
+                              void *replyData)
 {
     if (mStatus != NO_ERROR && mStatus != ALREADY_EXISTS) {
         return INVALID_OPERATION;
@@ -241,8 +245,8 @@ status_t AudioEffect::setParameter(effect_param_t *param)
         return BAD_VALUE;
     }
 
-    int size = sizeof(int);
-    int psize = ((param->psize - 1) / sizeof(int) + 1) * sizeof(int) + param->vsize;
+    uint32_t size = sizeof(int);
+    uint32_t psize = ((param->psize - 1) / sizeof(int) + 1) * sizeof(int) + param->vsize;
 
     LOGV("setParameter: param: %d, param2: %d", *(int *)param->data, (param->psize == 8) ? *((int *)param->data + 1): -1);
 
@@ -285,7 +289,7 @@ status_t AudioEffect::setParameterCommit()
     if (mCblk->clientIndex == 0) {
         return INVALID_OPERATION;
     }
-    int size = 0;
+    uint32_t size = 0;
     return mIEffect->command(EFFECT_CMD_SET_PARAM_COMMIT, 0, NULL, &size, NULL);
 }
 
@@ -301,7 +305,7 @@ status_t AudioEffect::getParameter(effect_param_t *param)
 
     LOGV("getParameter: param: %d, param2: %d", *(int *)param->data, (param->psize == 8) ? *((int *)param->data + 1): -1);
 
-    int psize = sizeof(effect_param_t) + ((param->psize - 1) / sizeof(int) + 1) * sizeof(int) + param->vsize;
+    uint32_t psize = sizeof(effect_param_t) + ((param->psize - 1) / sizeof(int) + 1) * sizeof(int) + param->vsize;
 
     return mIEffect->command(EFFECT_CMD_GET_PARAM, sizeof(effect_param_t) + param->psize, param, &psize, param);
 }
@@ -350,7 +354,11 @@ void AudioEffect::enableStatusChanged(bool enabled)
     }
 }
 
-void AudioEffect::commandExecuted(int cmdCode, int cmdSize, void *cmdData, int replySize, void *replyData)
+void AudioEffect::commandExecuted(uint32_t cmdCode,
+                                  uint32_t cmdSize,
+                                  void *cmdData,
+                                  uint32_t replySize,
+                                  void *replyData)
 {
     if (cmdData == NULL || replyData == NULL) {
         return;
