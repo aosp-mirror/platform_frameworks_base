@@ -1206,6 +1206,8 @@ public abstract class Context {
      * for management of input methods.
      * <dt> {@link #UI_MODE_SERVICE} ("uimode")
      * <dd> An {@link android.app.UiModeManager} for controlling UI modes.
+     * <dt> {@link #DOWNLOAD_SERVICE} ("download")
+     * <dd> A {@link android.net.DownloadManager} for requesting HTTP downloads
      * </dl>
      * 
      * <p>Note:  System services obtained via this API may be closely associated with
@@ -1253,6 +1255,8 @@ public abstract class Context {
      * @see android.view.inputmethod.InputMethodManager
      * @see #UI_MODE_SERVICE
      * @see android.app.UiModeManager
+     * @see #DOWNLOAD_SERVICE
+     * @see android.net.DownloadManager
      */
     public abstract Object getSystemService(String name);
 
