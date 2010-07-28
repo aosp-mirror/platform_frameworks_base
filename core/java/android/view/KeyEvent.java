@@ -1211,44 +1211,48 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final Parcelable.Creator<KeyEvent> CREATOR
             = new Parcelable.Creator<KeyEvent>() {
         public KeyEvent createFromParcel(Parcel in) {
-            return new KeyEvent(in);
+            in.readInt(); // skip token, we already know this is a KeyEvent
+            return KeyEvent.createFromParcelBody(in);
         }
 
         public KeyEvent[] newArray(int size) {
             return new KeyEvent[size];
         }
     };
-
-    public int describeContents() {
-        return 0;
+    
+    /** @hide */
+    public static KeyEvent createFromParcelBody(Parcel in) {
+        return new KeyEvent(in);
+    }
+    
+    private KeyEvent(Parcel in) {
+        readBaseFromParcel(in);
+        
+        mAction = in.readInt();
+        mKeyCode = in.readInt();
+        mRepeatCount = in.readInt();
+        mMetaState = in.readInt();
+        mScanCode = in.readInt();
+        mFlags = in.readInt();
+        mDownTime = in.readLong();
+        mEventTime = in.readLong();
     }
 
     public void writeToParcel(Parcel out, int flags) {
+        out.writeInt(PARCEL_TOKEN_KEY_EVENT);
+        
+        writeBaseToParcel(out);
+        
         out.writeInt(mAction);
         out.writeInt(mKeyCode);
         out.writeInt(mRepeatCount);
         out.writeInt(mMetaState);
-        out.writeInt(mDeviceId);
-        out.writeInt(mSource);
         out.writeInt(mScanCode);
         out.writeInt(mFlags);
         out.writeLong(mDownTime);
         out.writeLong(mEventTime);
     }
 
-    private KeyEvent(Parcel in) {
-        mAction = in.readInt();
-        mKeyCode = in.readInt();
-        mRepeatCount = in.readInt();
-        mMetaState = in.readInt();
-        mDeviceId = in.readInt();
-        mSource = in.readInt();
-        mScanCode = in.readInt();
-        mFlags = in.readInt();
-        mDownTime = in.readLong();
-        mEventTime = in.readLong();
-    }
-    
     private native boolean native_isSystemKey(int keyCode);
     private native boolean native_hasDefaultAction(int keyCode);
 }

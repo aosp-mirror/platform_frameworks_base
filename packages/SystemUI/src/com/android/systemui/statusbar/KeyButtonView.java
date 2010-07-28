@@ -26,6 +26,7 @@ import android.os.ServiceManager;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.IWindowManager;
+import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.widget.ImageView;
@@ -71,7 +72,8 @@ public class KeyButtonView extends ImageView {
                 mDownTime = SystemClock.uptimeMillis();
                 mRepeat = 0;
                 mSending = true;
-                sendEvent(KeyEvent.ACTION_DOWN, mDownTime);
+                sendEvent(KeyEvent.ACTION_DOWN,
+                        KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_SOFT_KEYBOARD, mDownTime);
                 setPressed(true);
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -80,7 +82,9 @@ public class KeyButtonView extends ImageView {
                     y = (int)ev.getY();
                     if (x < 0 || x >= getWidth() || y < 0 || y >= getHeight()) {
                         mSending = false;
-                        sendEvent(KeyEvent.ACTION_UP);
+                        sendEvent(KeyEvent.ACTION_UP,
+                                KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_SOFT_KEYBOARD
+                                        | KeyEvent.FLAG_CANCELED);
                         setPressed(false);
                     }
                 }
@@ -89,7 +93,8 @@ public class KeyButtonView extends ImageView {
             case MotionEvent.ACTION_CANCEL:
                 if (mSending) {
                     mSending = false;
-                    sendEvent(KeyEvent.ACTION_UP);
+                    sendEvent(KeyEvent.ACTION_UP,
+                            KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_SOFT_KEYBOARD);
                     setPressed(false);
                 }
                 break;
@@ -98,15 +103,16 @@ public class KeyButtonView extends ImageView {
         return true;
     }
 
-    void sendEvent(int action) {
-        sendEvent(action, SystemClock.uptimeMillis());
+    void sendEvent(int action, int flags) {
+        sendEvent(action, flags, SystemClock.uptimeMillis());
     }
 
-    void sendEvent(int action, long when) {
-        final KeyEvent ev = new KeyEvent(mDownTime, mDownTime, action, mCode, mRepeat);
+    void sendEvent(int action, int flags, long when) {
+        final KeyEvent ev = new KeyEvent(mDownTime, when, action, mCode, mRepeat,
+                0, 0, 0, flags, InputDevice.SOURCE_KEYBOARD);
         try {
             Slog.d(StatusBarService.TAG, "injecting event " + ev);
-            mWindowManager.injectKeyEvent(ev, false);
+            mWindowManager.injectInputEventNoWait(ev);
         } catch (RemoteException ex) {
             // System process is dead
         }

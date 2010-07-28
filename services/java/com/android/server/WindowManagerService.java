@@ -103,6 +103,7 @@ import android.view.IWindowManager;
 import android.view.IWindowSession;
 import android.view.InputChannel;
 import android.view.InputDevice;
+import android.view.InputEvent;
 import android.view.InputQueue;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -5380,6 +5381,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Injects a keystroke event into the UI.
+     * Even when sync is false, this method may block while waiting for current
+     * input events to be dispatched.
      *
      * @param ev A motion event describing the keystroke action.  (Be sure to use
      * {@link SystemClock#uptimeMillis()} as the timebase.)
@@ -5412,8 +5415,10 @@ public class WindowManagerService extends IWindowManager.Stub
         final int uid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         
-        final int result = mInputManager.injectKeyEvent(newEvent,
-                pid, uid, sync, INJECTION_TIMEOUT_MILLIS);
+        final int result = mInputManager.injectInputEvent(newEvent, pid, uid,
+                sync ? InputManager.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISH
+                        : InputManager.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_RESULT,
+                INJECTION_TIMEOUT_MILLIS);
         
         Binder.restoreCallingIdentity(ident);
         return reportInjectionResult(result);
@@ -5421,6 +5426,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Inject a pointer (touch) event into the UI.
+     * Even when sync is false, this method may block while waiting for current
+     * input events to be dispatched.
      *
      * @param ev A motion event describing the pointer (touch) action.  (As noted in
      * {@link MotionEvent#obtain(long, long, int, float, float, int)}, be sure to use
@@ -5438,8 +5445,10 @@ public class WindowManagerService extends IWindowManager.Stub
             newEvent.setSource(InputDevice.SOURCE_TOUCHSCREEN);
         }
         
-        final int result = mInputManager.injectMotionEvent(newEvent,
-                pid, uid, sync, INJECTION_TIMEOUT_MILLIS);
+        final int result = mInputManager.injectInputEvent(newEvent, pid, uid,
+                sync ? InputManager.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISH
+                        : InputManager.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_RESULT,
+                INJECTION_TIMEOUT_MILLIS);
         
         Binder.restoreCallingIdentity(ident);
         return reportInjectionResult(result);
@@ -5447,6 +5456,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Inject a trackball (navigation device) event into the UI.
+     * Even when sync is false, this method may block while waiting for current
+     * input events to be dispatched.
      *
      * @param ev A motion event describing the trackball action.  (As noted in
      * {@link MotionEvent#obtain(long, long, int, float, float, int)}, be sure to use
@@ -5464,8 +5475,31 @@ public class WindowManagerService extends IWindowManager.Stub
             newEvent.setSource(InputDevice.SOURCE_TRACKBALL);
         }
         
-        final int result = mInputManager.injectMotionEvent(newEvent,
-                pid, uid, sync, INJECTION_TIMEOUT_MILLIS);
+        final int result = mInputManager.injectInputEvent(newEvent, pid, uid,
+                sync ? InputManager.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISH
+                        : InputManager.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_RESULT,
+                INJECTION_TIMEOUT_MILLIS);
+        
+        Binder.restoreCallingIdentity(ident);
+        return reportInjectionResult(result);
+    }
+    
+    /**
+     * Inject an input event into the UI without waiting for dispatch to commence.
+     * This variant is useful for fire-and-forget input event injection.  It does not
+     * block any longer than it takes to enqueue the input event.
+     *
+     * @param ev An input event.  (Be sure to set the input source correctly.)
+     * @return Returns true if event was dispatched, false if it was dropped for any reason
+     */
+    public boolean injectInputEventNoWait(InputEvent ev) {
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
+        final long ident = Binder.clearCallingIdentity();
+        
+        final int result = mInputManager.injectInputEvent(ev, pid, uid,
+                InputManager.INPUT_EVENT_INJECTION_SYNC_NONE,
+                INJECTION_TIMEOUT_MILLIS);
         
         Binder.restoreCallingIdentity(ident);
         return reportInjectionResult(result);
