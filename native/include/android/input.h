@@ -40,6 +40,7 @@
  * NOTE: These functions MUST be implemented by /system/lib/libui.so
  */
 
+#include <stdint.h>
 #include <sys/types.h>
 #include <android/keycodes.h>
 #include <android/looper.h>
