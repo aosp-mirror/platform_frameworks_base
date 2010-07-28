@@ -33,6 +33,7 @@ commonSources:= \
 	SharedBuffer.cpp \
 	Static.cpp \
 	StopWatch.cpp \
+	StreamingZipInflater.cpp \
 	String8.cpp \
 	String16.cpp \
 	StringArray.cpp \
