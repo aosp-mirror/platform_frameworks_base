@@ -27,18 +27,17 @@ package android.net;
 public interface NetworkStateTracker {
 
     public static final int EVENT_STATE_CHANGED = 1;
-    public static final int EVENT_SCAN_RESULTS_AVAILABLE = 2;
     /**
      * arg1: 1 to show, 0 to hide
      * arg2: ID of the notification
      * obj: Notification (if showing)
      */
-    public static final int EVENT_NOTIFICATION_CHANGED = 3;
-    public static final int EVENT_CONFIGURATION_CHANGED = 4;
-    public static final int EVENT_ROAMING_CHANGED = 5;
-    public static final int EVENT_NETWORK_SUBTYPE_CHANGED = 6;
-    public static final int EVENT_RESTORE_DEFAULT_NETWORK = 7;
-    public static final int EVENT_CLEAR_NET_TRANSITION_WAKELOCK = 8;
+    public static final int EVENT_NOTIFICATION_CHANGED = 2;
+    public static final int EVENT_CONFIGURATION_CHANGED = 3;
+    public static final int EVENT_ROAMING_CHANGED = 4;
+    public static final int EVENT_NETWORK_SUBTYPE_CHANGED = 5;
+    public static final int EVENT_RESTORE_DEFAULT_NETWORK = 6;
+    public static final int EVENT_CLEAR_NET_TRANSITION_WAKELOCK = 7;
 
     /**
      * Fetch NetworkInfo for the network
@@ -146,11 +145,5 @@ public interface NetworkStateTracker {
      * always indicates failure.
      */
     public int stopUsingNetworkFeature(String feature, int callingPid, int callingUid);
-
-    /**
-     * Interprets scan results. This will be called at a safe time for
-     * processing, and from a safe thread.
-     */
-    public void interpretScanResultsAvailable();
 
 }

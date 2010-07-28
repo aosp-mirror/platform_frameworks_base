@@ -19,14 +19,13 @@ package android.net.wifi;
 import android.util.Log;
 import android.util.Config;
 import android.net.NetworkInfo;
-import android.net.NetworkStateTracker;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 /**
  * Listens for events from the wpa_supplicant server, and passes them on
- * to the {@link WifiStateTracker} for handling. Runs in its own thread.
+ * to the {@link WifiStateMachine} for handling. Runs in its own thread.
  *
  * @hide
  */
@@ -117,7 +116,7 @@ public class WifiMonitor {
     private static Pattern mConnectedEventPattern =
         Pattern.compile("((?:[0-9a-f]{2}:){5}[0-9a-f]{2}) .* \\[id=([0-9]+) ");
 
-    private final WifiStateTracker mWifiStateTracker;
+    private final WifiStateMachine mWifiStateMachine;
 
     /**
      * This indicates the supplicant connection for the monitor is closed
@@ -139,16 +138,12 @@ public class WifiMonitor {
      */
     private static final int MAX_RECV_ERRORS    = 10;
 
-    public WifiMonitor(WifiStateTracker tracker) {
-        mWifiStateTracker = tracker;
+    public WifiMonitor(WifiStateMachine wifiStateMachine) {
+        mWifiStateMachine = wifiStateMachine;
     }
 
     public void startMonitoring() {
         new MonitorThread().start();
-    }
-
-    public NetworkStateTracker getNetworkStateTracker() {
-        return mWifiStateTracker;
     }
 
     class MonitorThread extends Thread {
@@ -161,9 +156,9 @@ public class WifiMonitor {
             if (connectToSupplicant()) {
                 // Send a message indicating that it is now possible to send commands
                 // to the supplicant
-                mWifiStateTracker.notifySupplicantConnection();
+                mWifiStateMachine.notifySupplicantConnection();
             } else {
-                mWifiStateTracker.notifySupplicantLost();
+                mWifiStateMachine.notifySupplicantLost();
                 return;
             }
 
@@ -259,7 +254,7 @@ public class WifiMonitor {
                     }
 
                     // notify and exit
-                    mWifiStateTracker.notifySupplicantLost();
+                    mWifiStateMachine.notifySupplicantLost();
                     break;
                 } else {
                     handleEvent(event, eventData);
@@ -285,7 +280,7 @@ public class WifiMonitor {
         }
 
         private void handlePasswordKeyMayBeIncorrect() {
-            mWifiStateTracker.notifyPasswordKeyMayBeIncorrect();
+            mWifiStateMachine.notifyPasswordKeyMayBeIncorrect();
         }
 
         private void handleDriverEvent(String state) {
@@ -293,11 +288,11 @@ public class WifiMonitor {
                 return;
             }
             if (state.equals("STOPPED")) {
-                mWifiStateTracker.notifyDriverStopped();
+                mWifiStateMachine.notifyDriverStopped();
             } else if (state.equals("STARTED")) {
-                mWifiStateTracker.notifyDriverStarted();
+                mWifiStateMachine.notifyDriverStarted();
             } else if (state.equals("HANGED")) {
-                mWifiStateTracker.notifyDriverHung();
+                mWifiStateMachine.notifyDriverHung();
             }
         }
 
@@ -318,7 +313,7 @@ public class WifiMonitor {
                     break;
 
                 case SCAN_RESULTS:
-                    mWifiStateTracker.notifyScanResultsAvailable();
+                    mWifiStateMachine.notifyScanResultsAvailable();
                     break;
 
                 case UNKNOWN:
@@ -375,7 +370,7 @@ public class WifiMonitor {
             if (newSupplicantState == SupplicantState.INVALID) {
                 Log.w(TAG, "Invalid supplicant state: " + newState);
             }
-            mWifiStateTracker.notifySupplicantStateChange(networkId, BSSID, newSupplicantState);
+            mWifiStateMachine.notifySupplicantStateChange(networkId, BSSID, newSupplicantState);
         }
     }
 
@@ -395,7 +390,7 @@ public class WifiMonitor {
                 }
             }
         }
-        mWifiStateTracker.notifyNetworkStateChange(newState, BSSID, networkId);
+        mWifiStateMachine.notifyNetworkStateChange(newState, BSSID, networkId);
     }
 
     /**

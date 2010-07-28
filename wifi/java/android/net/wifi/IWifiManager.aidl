@@ -85,5 +85,13 @@ interface IWifiManager
     WifiConfiguration getWifiApConfiguration();
 
     void setWifiApConfiguration(in WifiConfiguration wifiConfig);
+
+    void startWifi();
+
+    void stopWifi();
+
+    void addToBlacklist(String bssid);
+
+    void clearBlacklist();
 }
 
