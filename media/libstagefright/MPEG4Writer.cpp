@@ -66,6 +66,10 @@ private:
 
     pthread_t mThread;
 
+    // mNumSamples is used to track how many samples in mSampleSizes List.
+    // This is to reduce the cost associated with mSampleSizes.size() call,
+    // since it is O(n). Ideally, the fix should be in List class.
+    size_t              mNumSamples;
     List<size_t>        mSampleSizes;
     bool                mSamplesHaveSameSize;
 
@@ -942,6 +946,7 @@ void MPEG4Writer::Track::threadEntry() {
     sp<MetaData> meta_data;
     bool collectStats = collectStatisticalData();
 
+    mNumSamples = 0;
     status_t err = OK;
     MediaBuffer *buffer;
     while (!mDone && (err = mSource->read(&buffer)) == OK) {
@@ -1133,7 +1138,8 @@ void MPEG4Writer::Track::threadEntry() {
         }
 
         mSampleSizes.push_back(sampleSize);
-        if (mSampleSizes.size() > 2) {
+        ++mNumSamples;
+        if (mNumSamples > 2) {
             if (lastDurationUs != timestampUs - lastTimestampUs) {
                 SttsTableEntry sttsEntry(sampleCount, lastDurationUs);
                 mSttsTableEntries.push_back(sttsEntry);
@@ -1143,7 +1149,7 @@ void MPEG4Writer::Track::threadEntry() {
             }
         }
         if (mSamplesHaveSameSize) {
-            if (mSampleSizes.size() >= 2 && previousSampleSize != sampleSize) {
+            if (mNumSamples >= 2 && previousSampleSize != sampleSize) {
                 mSamplesHaveSameSize = false;
             }
             previousSampleSize = sampleSize;
@@ -1152,7 +1158,7 @@ void MPEG4Writer::Track::threadEntry() {
         lastTimestampUs = timestampUs;
 
         if (isSync != 0) {
-            mStssTableEntries.push_back(mSampleSizes.size());
+            mStssTableEntries.push_back(mNumSamples);
         }
 
         if (mTrackingProgressStatus) {
@@ -1208,7 +1214,7 @@ void MPEG4Writer::Track::threadEntry() {
 
     // Last chunk
     if (mOwner->numTracks() == 1) {
-        StscTableEntry stscEntry(1, mSampleSizes.size(), 1);
+        StscTableEntry stscEntry(1, mNumSamples, 1);
         mStscTableEntries.push_back(stscEntry);
     } else if (!mChunkSamples.empty()) {
         ++nChunks;
@@ -1220,7 +1226,7 @@ void MPEG4Writer::Track::threadEntry() {
     // We don't really know how long the last frame lasts, since
     // there is no frame time after it, just repeat the previous
     // frame's duration.
-    if (mSampleSizes.size() == 1) {
+    if (mNumSamples == 1) {
         lastDurationUs = 0;  // A single sample's duration
     } else {
         ++sampleCount;  // Count for the last sample
@@ -1229,7 +1235,7 @@ void MPEG4Writer::Track::threadEntry() {
     mSttsTableEntries.push_back(sttsEntry);
     mReachedEOS = true;
     LOGI("Received total/0-length (%d/%d) buffers and encoded %d frames - %s",
-            count, nZeroLengthFrames, mSampleSizes.size(), is_audio? "audio": "video");
+            count, nZeroLengthFrames, mNumSamples, is_audio? "audio": "video");
 
     logStatisticalData(is_audio);
 }
@@ -1292,7 +1298,7 @@ void MPEG4Writer::trackProgressStatus(
 void MPEG4Writer::Track::findMinAvgMaxSampleDurationMs(
         int32_t *min, int32_t *avg, int32_t *max) {
     CHECK(!mSampleSizes.empty());
-    int32_t avgSampleDurationMs = mMaxTimeStampUs / 1000 / mSampleSizes.size();
+    int32_t avgSampleDurationMs = mMaxTimeStampUs / 1000 / mNumSamples;
     int32_t minSampleDurationMs = 0x7FFFFFFF;
     int32_t maxSampleDurationMs = 0;
     for (List<SttsTableEntry>::iterator it = mSttsTableEntries.begin();
@@ -1344,7 +1350,7 @@ void MPEG4Writer::Track::logStatisticalData(bool isAudio) {
     if (collectStats) {
         LOGI("%s track - duration %lld us, total %d frames",
                 isAudio? "audio": "video", mMaxTimeStampUs,
-                mSampleSizes.size());
+                mNumSamples);
         int32_t min, avg, max;
         findMinAvgMaxSampleDurationMs(&min, &avg, &max);
         LOGI("min/avg/max sample duration (ms): %d/%d/%d", min, avg, max);
@@ -1738,7 +1744,7 @@ void MPEG4Writer::Track::writeTrackHeader(
             } else {
                 mOwner->writeInt32(0);
             }
-            mOwner->writeInt32(mSampleSizes.size());
+            mOwner->writeInt32(mNumSamples);
             if (!mSamplesHaveSameSize) {
                 for (List<size_t>::iterator it = mSampleSizes.begin();
                      it != mSampleSizes.end(); ++it) {
