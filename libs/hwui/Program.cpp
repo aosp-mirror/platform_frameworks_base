@@ -27,7 +27,6 @@ namespace uirenderer {
 
 #define SHADER_SOURCE(name, source) const char* name = #source
 
-#include "shaders/drawColor.vert"
 #include "shaders/drawColor.frag"
 
 #include "shaders/drawTexture.vert"
@@ -127,7 +126,7 @@ GLuint Program::buildShader(const char* source, GLenum type) {
 ///////////////////////////////////////////////////////////////////////////////
 
 DrawColorProgram::DrawColorProgram():
-        Program(gDrawColorVertexShader, gDrawColorFragmentShader) {
+        Program(gDrawTextureVertexShader, gDrawColorFragmentShader) {
     getAttribsAndUniforms();
 }
 
@@ -138,6 +137,7 @@ DrawColorProgram::DrawColorProgram(const char* vertex, const char* fragment):
 
 void DrawColorProgram::getAttribsAndUniforms() {
     position = addAttrib("position");
+    texCoords = addAttrib("texCoords");
     color = addUniform("color");
     transform = addUniform("transform");
 }
@@ -154,11 +154,13 @@ void DrawColorProgram::set(const mat4& projectionMatrix, const mat4& modelViewMa
 void DrawColorProgram::use() {
     Program::use();
     glEnableVertexAttribArray(position);
+    glEnableVertexAttribArray(texCoords);
 }
 
 void DrawColorProgram::remove() {
     Program::remove();
     glDisableVertexAttribArray(position);
+    glDisableVertexAttribArray(texCoords);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -167,26 +169,21 @@ void DrawColorProgram::remove() {
 
 DrawTextureProgram::DrawTextureProgram():
         DrawColorProgram(gDrawTextureVertexShader, gDrawTextureFragmentShader) {
-    texCoords = addAttrib("texCoords");
     sampler = addUniform("sampler");
 }
 
 DrawTextureProgram::DrawTextureProgram(const char* vertex, const char* fragment):
         DrawColorProgram(vertex, fragment) {
-    texCoords = addAttrib("texCoords");
     sampler = addUniform("sampler");
 }
 
 void DrawTextureProgram::use() {
     DrawColorProgram::use();
-    glActiveTexture(GL_TEXTURE0);
     glUniform1i(sampler, 0);
-    glEnableVertexAttribArray(texCoords);
 }
 
 void DrawTextureProgram::remove() {
     DrawColorProgram::remove();
-    glDisableVertexAttribArray(texCoords);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

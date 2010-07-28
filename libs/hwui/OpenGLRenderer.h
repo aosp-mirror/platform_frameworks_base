@@ -41,6 +41,7 @@
 #include "PatchCache.h"
 #include "Vertex.h"
 #include "FontRenderer.h"
+#include "ProgramCache.h"
 
 namespace android {
 namespace uirenderer {
@@ -268,7 +269,7 @@ private:
             SkXfermode::Mode mode);
 
     /**
-     * Resets the texture coordinates stored in mDrawTextureVertices. Setting the values
+     * Resets the texture coordinates stored in mMeshVertices. Setting the values
      * back to default is achieved by calling:
      *
      * resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
@@ -337,7 +338,7 @@ private:
     sp<DrawLinearGradientProgram> mDrawLinearGradientProgram;
 
     // Used to draw textured quads
-    TextureVertex mDrawTextureVertices[4];
+    TextureVertex mMeshVertices[4];
 
     // Current texture state
     GLuint mLastTexture;
@@ -372,6 +373,7 @@ private:
     TextureCache mTextureCache;
     LayerCache mLayerCache;
     GradientCache mGradientCache;
+    ProgramCache mProgramCache;
     PatchCache mPatchCache;
 }; // class OpenGLRenderer
 

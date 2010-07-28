@@ -56,11 +56,6 @@ public abstract class Window {
     public static final int FEATURE_CONTEXT_MENU = 6;
     /** Flag for custom title. You cannot combine this feature with other title features. */
     public static final int FEATURE_CUSTOM_TITLE = 7;
-    /** Flag for asking for an OpenGL enabled window.
-        All 2D graphics will be handled by OpenGL ES.
-        @hide
-    */
-    public static final int FEATURE_OPENGL = 8;
     /**
      * Flag for enabling the Action Bar.
      * This is enabled by default for some devices. The Action Bar

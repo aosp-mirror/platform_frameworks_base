@@ -45,32 +45,22 @@ namespace uirenderer {
 #define MB(s) s * 1024 * 1024
 
 // Generates simple and textured vertices
-#define SV(x, y) { { x, y } }
 #define FV(x, y, u, v) { { x, y }, { u, v } }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Globals
 ///////////////////////////////////////////////////////////////////////////////
 
-static const SimpleVertex gDrawColorVertices[] = {
-        SV(0.0f, 0.0f),
-        SV(1.0f, 0.0f),
-        SV(0.0f, 1.0f),
-        SV(1.0f, 1.0f)
-};
-static const GLsizei gDrawColorVertexStride = sizeof(SimpleVertex);
-static const GLsizei gDrawColorVertexCount = 4;
-
 // This array is never used directly but used as a memcpy source in the
 // OpenGLRenderer constructor
-static const TextureVertex gDrawTextureVertices[] = {
+static const TextureVertex gMeshVertices[] = {
         FV(0.0f, 0.0f, 0.0f, 0.0f),
         FV(1.0f, 0.0f, 1.0f, 0.0f),
         FV(0.0f, 1.0f, 0.0f, 1.0f),
         FV(1.0f, 1.0f, 1.0f, 1.0f)
 };
-static const GLsizei gDrawTextureVertexStride = sizeof(TextureVertex);
-static const GLsizei gDrawTextureVertexCount = 4;
+static const GLsizei gMeshStride = sizeof(TextureVertex);
+static const GLsizei gMeshCount = 4;
 
 // In this array, the index of each Blender equals the value of the first
 // entry. For instance, gBlends[1] == gBlends[SkXfermode::kSrc_Mode]
@@ -143,7 +133,18 @@ OpenGLRenderer::OpenGLRenderer():
 
     mLastTexture = 0;
 
-    memcpy(mDrawTextureVertices, gDrawTextureVertices, sizeof(gDrawTextureVertices));
+    memcpy(mMeshVertices, gMeshVertices, sizeof(gMeshVertices));
+
+    ProgramDescription d;
+    mProgramCache.get(d);
+    d.hasTexture = true;
+    mProgramCache.get(d);
+    d.hasAlpha8Texture = true;
+    d.hasGradient = true;
+    d.hasBitmap = true;
+    d.shadersMode = SkXfermode::kDstOut_Mode;
+    d.colorOp = ProgramDescription::kColorMatrix;
+    mProgramCache.get(d);
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
@@ -650,9 +651,13 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     mModelView.scale(right - left, bottom - top, 1.0f);
 
     if (!useProgram(mDrawColorProgram)) {
-        const GLvoid* p = &gDrawColorVertices[0].position[0];
+        const GLvoid* vertices = &mMeshVertices[0].position[0];
+        const GLvoid* texCoords = &mMeshVertices[0].texture[0];
+
         glVertexAttribPointer(mDrawColorProgram->position, 2, GL_FLOAT, GL_FALSE,
-                gDrawColorVertexStride, p);
+                gMeshStride, vertices);
+        glVertexAttribPointer(mDrawColorProgram->texCoords, 2, GL_FLOAT, GL_FALSE,
+                gMeshStride, texCoords);
     }
 
     if (!ignoreTransform) {
@@ -664,7 +669,7 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
 
     glUniform4f(mDrawColorProgram->color, r, g, b, a);
 
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, gDrawColorVertexCount);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
 }
 
 void OpenGLRenderer::drawLinearGradientShader(float left, float top, float right, float bottom,
@@ -717,9 +722,9 @@ void OpenGLRenderer::drawLinearGradientShader(float left, float top, float right
             &screenSpace.data[0]);
 
     glVertexAttribPointer(mDrawLinearGradientProgram->position, 2, GL_FLOAT, GL_FALSE,
-            gDrawTextureVertexStride, &mDrawTextureVertices[0].position[0]);
+            gMeshStride, &mMeshVertices[0].position[0]);
 
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, gDrawTextureVertexCount);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
 }
 
 void OpenGLRenderer::drawBitmapShader(float left, float top, float right, float bottom,
@@ -757,7 +762,7 @@ void OpenGLRenderer::drawBitmapShader(float left, float top, float right, float 
     resetDrawTextureTexCoords(u1, v1, u2, v2);
 
     drawTextureMesh(left, top, right, bottom, texture->id, alpha, mode, texture->blend,
-            &mDrawTextureVertices[0].position[0], &mDrawTextureVertices[0].texture[0], NULL);
+            &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0], NULL);
 
     resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
 }
@@ -769,13 +774,13 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
     getAlphaAndMode(paint, &alpha, &mode);
 
     drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f, mode, texture->blend,
-            &mDrawTextureVertices[0].position[0], &mDrawTextureVertices[0].texture[0], NULL);
+            &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0], NULL);
 }
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
         GLuint texture, float alpha, SkXfermode::Mode mode, bool blend) {
     drawTextureMesh(left, top, right, bottom, texture, alpha, mode, blend,
-            &mDrawTextureVertices[0].position[0], &mDrawTextureVertices[0].texture[0], NULL);
+            &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0], NULL);
 }
 
 void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float bottom,
@@ -794,12 +799,12 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     glUniform4f(mDrawTextureProgram->color, alpha, alpha, alpha, alpha);
 
     glVertexAttribPointer(mDrawTextureProgram->position, 2, GL_FLOAT, GL_FALSE,
-            gDrawTextureVertexStride, vertices);
+            gMeshStride, vertices);
     glVertexAttribPointer(mDrawTextureProgram->texCoords, 2, GL_FLOAT, GL_FALSE,
-            gDrawTextureVertexStride, texCoords);
+            gMeshStride, texCoords);
 
     if (!indices) {
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, gDrawTextureVertexCount);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
     } else {
         glDrawElements(GL_TRIANGLES, elementsCount, GL_UNSIGNED_SHORT, indices);
     }
@@ -842,7 +847,7 @@ bool OpenGLRenderer::useProgram(const sp<Program>& program) {
 }
 
 void OpenGLRenderer::resetDrawTextureTexCoords(float u1, float v1, float u2, float v2) {
-    TextureVertex* v = &mDrawTextureVertices[0];
+    TextureVertex* v = &mMeshVertices[0];
     TextureVertex::setUV(v++, u1, v1);
     TextureVertex::setUV(v++, u2, v1);
     TextureVertex::setUV(v++, u1, v2);
