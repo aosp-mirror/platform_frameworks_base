@@ -10,6 +10,7 @@ LOCAL_SRC_FILES:= \
 	Patch.cpp \
 	PatchCache.cpp \
 	Program.cpp \
+	ProgramCache.cpp \
 	TextureCache.cpp
 
 LOCAL_C_INCLUDES += \

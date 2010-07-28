@@ -21,14 +21,6 @@ namespace android {
 namespace uirenderer {
 
 /**
- * Simple structure to describe a vertex with a position.
- * This is used to draw filled rectangles without a texture.
- */
-struct SimpleVertex {
-    float position[2];
-}; // struct SimpleVertex
-
-/**
  * Simple structure to describe a vertex with a position and a texture.
  */
 struct TextureVertex {

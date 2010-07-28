@@ -53,6 +53,16 @@ public:
     virtual void remove();
 
     /**
+     * Returns the OpenGL name of the specified attribute.
+     */
+    int getAttrib(const char* name);
+
+    /**
+     * Returns the OpenGL name of the specified uniform.
+     */
+    int getUniform(const char* name);
+
+    /**
      * Indicates whether this program is currently in use with
      * the GL context.
      */
@@ -67,10 +77,6 @@ protected:
      * @return The OpenGL name of the attribute.
      */
     int addAttrib(const char* name);
-    /**
-     * Returns the OpenGL name of the specified attribute.
-     */
-    int getAttrib(const char* name);
 
     /**
      * Adds a uniform with the specified name.
@@ -78,10 +84,6 @@ protected:
      * @return The OpenGL name of the uniform.
      */
     int addUniform(const char* name);
-    /**
-     * Returns the OpenGL name of the specified uniform.
-     */
-    int getUniform(const char* name);
 
 private:
     /**
@@ -145,6 +147,11 @@ public:
     int position;
 
     /**
+     * Name of the texture coordinates attribute.
+     */
+    int texCoords;
+
+    /**
      * Name of the color uniform.
      */
     int color;
@@ -184,11 +191,6 @@ public:
      * Name of the texture sampler uniform.
      */
     int sampler;
-
-    /**
-     * Name of the texture coordinates attribute.
-     */
-    int texCoords;
 };
 
 class DrawTextProgram: public DrawTextureProgram {
