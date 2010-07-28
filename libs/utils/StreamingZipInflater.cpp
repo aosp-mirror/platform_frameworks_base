@@ -20,6 +20,7 @@
 #include <utils/FileMap.h>
 #include <utils/StreamingZipInflater.h>
 #include <string.h>
+#include <unistd.h>
 #include <assert.h>
 
 static inline size_t min(size_t a, size_t b) { return (a < b) ? a : b; }
