@@ -450,8 +450,8 @@ application during runtime.</p>
 to match the device density.</li>
         </ul>
         <p><em>Added in API Level 4.</em></p>
-        <p>There is thus a 4:3 scaling factor between each density, so a 9x9 bitmap
-         in ldpi is 12x12 in mdpi and 16x16 in hdpi.</p>
+        <p>There is thus a 3:4:6 scaling ratio between the three densities, so a 9x9 bitmap
+         in ldpi is 12x12 in mdpi and 18x18 in hdpi.</p>
         <p>When Android selects which resource files to use,
          it handles screen density differently than the other qualifiers.
          In step 1 of <a href="#BestMatch">How Android finds the best
@@ -895,7 +895,7 @@ drawable-port-ldpi/
 drawable-port-notouch-12key/
 </pre>
 <p class="note"><strong>Exception:</strong> Screen pixel density is the one qualifier that is not
-eliminated due to a contradiction. Even though the screen density of the device is mdpi,
+eliminated due to a contradiction. Even though the screen density of the device is hdpi,
 <code>drawable-port-ldpi/</code> is not eliminated because every screen density is
 considered to be a match at this point. More information is available in the <a
 href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
@@ -922,9 +922,8 @@ drawable-en-notouch-12key/
 <strike>drawable-port-notouch-12key/</strike>
 </pre>
 <p class="note"><strong>Exception:</strong> If the qualifier in question is screen pixel density,
-Android
-selects the option that most closely matches the device, and the selection process is complete.
-In general, Android prefers scaling down a larger original image to scaling  up a smaller
+Android selects the option that most closely matches the device screen density.
+In general, Android prefers scaling down a larger original image to scaling up a smaller
 original image. See <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
 Screens</a>.</p>
   </li>
