@@ -29,7 +29,7 @@ class KeyframeSet {
 
     private int mNumKeyframes;
 
-    private ArrayList<Keyframe> mKeyframes;
+    ArrayList<Keyframe> mKeyframes;
 
     public KeyframeSet(Keyframe... keyframes) {
         mKeyframes = new ArrayList<Keyframe>();
