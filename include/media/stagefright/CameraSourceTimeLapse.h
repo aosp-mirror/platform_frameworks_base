@@ -49,6 +49,23 @@ private:
     // If false, will use the videocamera frames instead.
     bool mUseStillCameraForTimeLapse;
 
+    // Size of picture taken from still camera. This may be larger than the size
+    // of the video, as still camera may not support the exact video resolution
+    // demanded. See setPictureSizeToClosestSupported().
+    int32_t mPictureWidth;
+    int32_t mPictureHeight;
+
+    // size of the encoded video.
+    int32_t mVideoWidth;
+    int32_t mVideoHeight;
+
+    // True if we need to crop the still camera image to get the video frame.
+    bool mNeedCropping;
+
+    // Start location of the cropping rectangle.
+    int32_t mCropRectStartX;
+    int32_t mCropRectStartY;
+
     // Time between capture of two frames during time lapse recording
     // Negative value indicates that timelapse is disabled.
     int64_t mTimeBetweenTimeLapseFrameCaptureUs;
@@ -106,6 +123,22 @@ private:
     // Then it calls the base CameraSource::dataCallbackTimestamp()
     virtual void dataCallbackTimestamp(int64_t timestampUs, int32_t msgType,
             const sp<IMemory> &data);
+
+    // The still camera may not support the demanded video width and height.
+    // We look for the supported picture sizes from the still camera and
+    // choose the size with either dimensions higher than the corresponding video
+    // dimensions. The still picture will be cropped to get the video frame.
+    void setPictureSizeToClosestSupported(int32_t width, int32_t height);
+
+    // Computes the offset of the rectangle from where to start cropping the
+    // still image into the video frame. We choose the center of the image to be
+    // cropped. The offset is stored in (mCropRectStartX, mCropRectStartY).
+    bool computeCropRectangleOffset();
+
+    // Crops the source data into a smaller image starting at
+    // (mCropRectStartX, mCropRectStartY) and of the size of the video frame.
+    // The data is returned into a newly allocated IMemory.
+    sp<IMemory> cropYUVImage(const sp<IMemory> &source_data);
 
     // When video camera is used for time lapse capture, returns true
     // until enough time has passed for the next time lapse frame. When
