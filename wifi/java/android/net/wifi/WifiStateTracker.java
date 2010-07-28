@@ -1207,8 +1207,6 @@ public class WifiStateTracker extends HierarchicalStateMachine implements Networ
 
         if (DBG) Log.d(TAG, "setWifiState: " + getWifiStateByName());
 
-        if (!ActivityManagerNative.isSystemReady()) return;
-
         final Intent intent = new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         intent.putExtra(WifiManager.EXTRA_WIFI_STATE, wifiState);
@@ -1235,7 +1233,6 @@ public class WifiStateTracker extends HierarchicalStateMachine implements Networ
         if (DBG) Log.d(TAG, "setWifiApState: " + getWifiApStateByName());
 
         // Broadcast
-        if (!ActivityManagerNative.isSystemReady()) return;
         final Intent intent = new Intent(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         intent.putExtra(WifiManager.EXTRA_WIFI_AP_STATE, wifiApState);
@@ -1706,8 +1703,6 @@ public class WifiStateTracker extends HierarchicalStateMachine implements Networ
     }
 
     private void sendNetworkStateChangeBroadcast(String bssid) {
-        if (!ActivityManagerNative.isSystemReady()) return;
-
         Intent intent = new Intent(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
                 | Intent.FLAG_RECEIVER_REPLACE_PENDING);
@@ -1718,8 +1713,6 @@ public class WifiStateTracker extends HierarchicalStateMachine implements Networ
     }
 
     private void sendSupplicantStateChangedBroadcast(StateChangeResult sc, boolean failedAuth) {
-        if (!ActivityManagerNative.isSystemReady()) return;
-
         Intent intent = new Intent(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
                 | Intent.FLAG_RECEIVER_REPLACE_PENDING);
