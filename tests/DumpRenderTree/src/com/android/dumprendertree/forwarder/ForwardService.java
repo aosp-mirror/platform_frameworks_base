@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+import android.os.Environment;
 import android.util.Log;
 
 public class ForwardService {
@@ -33,7 +34,8 @@ public class ForwardService {
 
     private static final String DEFAULT_TEST_HOST = "android-browser-test.mtv.corp.google.com";
 
-    private static final String FORWARD_HOST_CONF = "/sdcard/drt_forward_host.txt";
+    private static final String FORWARD_HOST_CONF =
+        Environment.getExternalStorageDirectory() + "/drt_forward_host.txt";
 
     private ForwardService() {
         int addr = getForwardHostAddr();

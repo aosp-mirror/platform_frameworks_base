@@ -16,24 +16,19 @@
 
 package com.android.statusbartest;
 
-import android.app.ListActivity;
 import android.app.PendingIntent;
-import android.widget.ArrayAdapter;
-import android.view.View;
-import android.widget.ListView;
 import android.content.Context;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.os.Environment;
 import android.os.Vibrator;
-import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.net.Uri;
 import android.os.SystemClock;
 import android.widget.RemoteViews;
-import android.widget.TextView;
 import android.os.PowerManager;
 
 public class NotificationTestList extends TestActivity
@@ -70,7 +65,8 @@ public class NotificationTestList extends TestActivity
                 pm.goToSleep(SystemClock.uptimeMillis());
 
                 Notification n = new Notification();
-                n.sound = Uri.parse("file:///sdcard/virtual-void.mp3");
+                n.sound = Uri.parse("file://" + Environment.getExternalStorageDirectory() +
+                        "/virtual-void.mp3");
                 Log.d(TAG, "n.sound=" + n.sound);
 
                 mNM.notify(1, n);
