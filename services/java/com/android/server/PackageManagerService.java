@@ -6222,11 +6222,10 @@ class PackageManagerService extends IPackageManager.Stub {
                 File dataDir = new File(pkg.applicationInfo.dataDir);
                 dataDir.delete();
             }
+            schedulePackageCleaning(packageName);
         }
         synchronized (mPackages) {
             if (deletedPs != null) {
-                schedulePackageCleaning(packageName);
-                
                 if ((flags&PackageManager.DONT_DELETE_DATA) == 0) {
                     if (outInfo != null) {
                         outInfo.removedUid = mSettings.removePackageLP(packageName);
