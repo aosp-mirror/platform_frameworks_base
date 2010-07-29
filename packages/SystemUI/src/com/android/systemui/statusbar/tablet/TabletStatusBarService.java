@@ -49,7 +49,7 @@ import com.android.systemui.statusbar.*;
 import com.android.systemui.R;
 
 public class TabletStatusBarService extends StatusBarService {
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     public static final String TAG = "TabletStatusBar";
 
     View mStatusBarView;
@@ -195,15 +195,13 @@ public class TabletStatusBarService extends StatusBarService {
 
     public void updateNotification(IBinder key, StatusBarNotification notification) {
         if (DEBUG) Slog.d(TAG, "updateNotification(" + key + " -> " + notification + ") // TODO");
-        NotificationData oldList = mHaps;
-
-        int oldIndex = oldList.findEntry(key);
-        if (oldIndex < 0) {
+        
+        final NotificationData.Entry oldEntry = mHaps.findByKey(key);
+        if (oldEntry == null) {
             Slog.w(TAG, "updateNotification for unknown key: " + key);
             return;
         }
 
-        final NotificationData.Entry oldEntry = oldList.getEntryAt(oldIndex);
         final StatusBarNotification oldNotification = oldEntry.notification;
         final RemoteViews oldContentView = oldNotification.notification.contentView;
 

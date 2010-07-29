@@ -353,7 +353,7 @@ public class PhoneStatusBarService extends StatusBarService {
         if (immersive) {
             if ((notification.notification.flags & Notification.FLAG_HIGH_PRIORITY) != 0) {
                 Slog.d(TAG, "Presenting high-priority notification in immersive activity");
-                // @@@ special new transient ticker mode
+                // special new transient ticker mode
                 // 1. Populate mIntruderAlertView
 
                 ImageView alertIcon = (ImageView) mIntruderAlertView.findViewById(R.id.alertIcon);
@@ -399,18 +399,17 @@ public class PhoneStatusBarService extends StatusBarService {
         Slog.d(TAG, "updateNotification key=" + key + " notification=" + notification);
 
         NotificationData oldList;
-        int oldIndex = mOngoing.findEntry(key);
-        if (oldIndex >= 0) {
+        NotificationData.Entry oldEntry = mOngoing.findByKey(key);
+        if (oldEntry != null) {
             oldList = mOngoing;
         } else {
-            oldIndex = mLatest.findEntry(key);
-            if (oldIndex < 0) {
+            oldEntry = mLatest.findByKey(key);
+            if (oldEntry == null) {
                 Slog.w(TAG, "updateNotification for unknown key: " + key);
                 return;
             }
             oldList = mLatest;
         }
-        final NotificationData.Entry oldEntry = oldList.getEntryAt(oldIndex);
         final StatusBarNotification oldNotification = oldEntry.notification;
         final RemoteViews oldContentView = oldNotification.notification.contentView;
 
