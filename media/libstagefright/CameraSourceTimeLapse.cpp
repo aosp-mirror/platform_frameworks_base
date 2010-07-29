@@ -24,9 +24,13 @@
 #include <media/stagefright/CameraSourceTimeLapse.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MetaData.h>
+#include <media/stagefright/YUVImage.h>
+#include <media/stagefright/YUVCanvas.h>
 #include <camera/Camera.h>
 #include <camera/CameraParameters.h>
+#include <ui/Rect.h>
 #include <utils/String8.h>
+#include "OMX_Video.h"
 
 namespace android {
 
@@ -72,13 +76,42 @@ CameraSourceTimeLapse::CameraSourceTimeLapse(const sp<Camera> &camera,
       mSkipCurrentFrame(false) {
 
     LOGV("starting time lapse mode");
-    if(mUseStillCameraForTimeLapse) {
+    mVideoWidth = width;
+    mVideoHeight = height;
+    if (mUseStillCameraForTimeLapse) {
+        setPictureSizeToClosestSupported(width, height);
+        mNeedCropping = computeCropRectangleOffset();
         mMeta->setInt32(kKeyWidth, width);
         mMeta->setInt32(kKeyHeight, height);
     }
 }
 
 CameraSourceTimeLapse::~CameraSourceTimeLapse() {
+}
+
+void CameraSourceTimeLapse::setPictureSizeToClosestSupported(int32_t width, int32_t height) {
+    // TODO: Currently fixed to the highest resolution.
+    // Need to poll the camera and set accordingly.
+    mPictureWidth = 2048;
+    mPictureHeight = 1536;
+}
+
+bool CameraSourceTimeLapse::computeCropRectangleOffset() {
+    if ((mPictureWidth == mVideoWidth) && (mPictureHeight == mVideoHeight)) {
+        return false;
+    }
+
+    CHECK((mPictureWidth > mVideoWidth) && (mPictureHeight > mVideoHeight));
+
+    int32_t widthDifference = mPictureWidth - mVideoWidth;
+    int32_t heightDifference = mPictureHeight - mVideoHeight;
+
+    mCropRectStartX = widthDifference/2;
+    mCropRectStartY = heightDifference/2;
+
+    LOGV("setting crop rectangle offset to (%d, %d)", mCropRectStartX, mCropRectStartY);
+
+    return true;
 }
 
 // static
@@ -90,7 +123,7 @@ void *CameraSourceTimeLapse::ThreadTimeLapseWrapper(void *me) {
 
 void CameraSourceTimeLapse::threadTimeLapseEntry() {
     while(mStarted) {
-        if(mCameraIdle) {
+        if (mCameraIdle) {
             LOGV("threadTimeLapseEntry: taking picture");
             CHECK_EQ(OK, mCamera->takePicture());
             mCameraIdle = false;
@@ -103,20 +136,15 @@ void CameraSourceTimeLapse::threadTimeLapseEntry() {
 }
 
 void CameraSourceTimeLapse::startCameraRecording() {
-    if(mUseStillCameraForTimeLapse) {
+    if (mUseStillCameraForTimeLapse) {
         LOGV("start time lapse recording using still camera");
-
-        int32_t width;
-        int32_t height;
-        mMeta->findInt32(kKeyWidth, &width);
-        mMeta->findInt32(kKeyHeight, &height);
 
         int64_t token = IPCThreadState::self()->clearCallingIdentity();
         String8 s = mCamera->getParameters();
         IPCThreadState::self()->restoreCallingIdentity(token);
 
         CameraParameters params(s);
-        params.setPictureSize(width, height);
+        params.setPictureSize(mPictureWidth, mPictureHeight);
         mCamera->setParameters(params.flatten());
         mCameraIdle = true;
 
@@ -134,7 +162,7 @@ void CameraSourceTimeLapse::startCameraRecording() {
 }
 
 void CameraSourceTimeLapse::stopCameraRecording() {
-    if(mUseStillCameraForTimeLapse) {
+    if (mUseStillCameraForTimeLapse) {
         void *dummy;
         pthread_join(mThreadTimeLapse, &dummy);
     } else {
@@ -143,7 +171,7 @@ void CameraSourceTimeLapse::stopCameraRecording() {
 }
 
 void CameraSourceTimeLapse::releaseRecordingFrame(const sp<IMemory>& frame) {
-    if(!mUseStillCameraForTimeLapse) {
+    if (!mUseStillCameraForTimeLapse) {
         mCamera->releaseRecordingFrame(frame);
     }
 }
@@ -155,6 +183,13 @@ sp<IMemory> CameraSourceTimeLapse::createIMemoryCopy(const sp<IMemory> &source_d
     sp<MemoryHeapBase> newMemoryHeap = new MemoryHeapBase(source_size);
     sp<MemoryBase> newMemory = new MemoryBase(newMemoryHeap, 0, source_size);
     memcpy(newMemory->pointer(), source_pointer, source_size);
+    return newMemory;
+}
+
+// Allocates IMemory of final type MemoryBase with the given size.
+sp<IMemory> allocateIMemory(size_t size) {
+    sp<MemoryHeapBase> newMemoryHeap = new MemoryHeapBase(size);
+    sp<MemoryBase> newMemory = new MemoryBase(newMemoryHeap, 0, size);
     return newMemory;
 }
 
@@ -182,12 +217,45 @@ void CameraSourceTimeLapse::restartPreview() {
     pthread_attr_destroy(&attr);
 }
 
+sp<IMemory> CameraSourceTimeLapse::cropYUVImage(const sp<IMemory> &source_data) {
+    // find the YUV format
+    int32_t srcFormat;
+    CHECK(mMeta->findInt32(kKeyColorFormat, &srcFormat));
+    YUVImage::YUVFormat yuvFormat;
+    if (srcFormat == OMX_COLOR_FormatYUV420SemiPlanar) {
+        yuvFormat = YUVImage::YUV420SemiPlanar;
+    } else if (srcFormat == OMX_COLOR_FormatYUV420Planar) {
+        yuvFormat = YUVImage::YUV420Planar;
+    }
+
+    // allocate memory for cropped image and setup a canvas using it.
+    sp<IMemory> croppedImageMemory = allocateIMemory(
+            YUVImage::bufferSize(yuvFormat, mVideoWidth, mVideoHeight));
+    YUVImage yuvImageCropped(yuvFormat,
+            mVideoWidth, mVideoHeight,
+            (uint8_t *)croppedImageMemory->pointer());
+    YUVCanvas yuvCanvasCrop(yuvImageCropped);
+
+    YUVImage yuvImageSource(yuvFormat,
+            mPictureWidth, mPictureHeight,
+            (uint8_t *)source_data->pointer());
+    yuvCanvasCrop.CopyImageRect(
+            Rect(mCropRectStartX, mCropRectStartY,
+                mCropRectStartX + mVideoWidth,
+                mCropRectStartY + mVideoHeight),
+            0, 0,
+            yuvImageSource);
+
+    return croppedImageMemory;
+}
+
 void CameraSourceTimeLapse::dataCallback(int32_t msgType, const sp<IMemory> &data) {
-    if(msgType == CAMERA_MSG_COMPRESSED_IMAGE) {
+    if (msgType == CAMERA_MSG_COMPRESSED_IMAGE) {
         // takePicture will complete after this callback, so restart preview.
         restartPreview();
+        return;
     }
-    if(msgType != CAMERA_MSG_RAW_IMAGE) {
+    if (msgType != CAMERA_MSG_RAW_IMAGE) {
         return;
     }
 
@@ -200,12 +268,18 @@ void CameraSourceTimeLapse::dataCallback(int32_t msgType, const sp<IMemory> &dat
     } else {
         timestampUs = mLastFrameTimestampUs + mTimeBetweenTimeLapseVideoFramesUs;
     }
-    sp<IMemory> dataCopy = createIMemoryCopy(data);
-    dataCallbackTimestamp(timestampUs, msgType, dataCopy);
+
+    if (mNeedCropping) {
+        sp<IMemory> croppedImageData = cropYUVImage(data);
+        dataCallbackTimestamp(timestampUs, msgType, croppedImageData);
+    } else {
+        sp<IMemory> dataCopy = createIMemoryCopy(data);
+        dataCallbackTimestamp(timestampUs, msgType, dataCopy);
+    }
 }
 
 bool CameraSourceTimeLapse::skipCurrentFrame(int64_t timestampUs) {
-    if(mSkipCurrentFrame) {
+    if (mSkipCurrentFrame) {
         mSkipCurrentFrame = false;
         return true;
     } else {
@@ -214,8 +288,8 @@ bool CameraSourceTimeLapse::skipCurrentFrame(int64_t timestampUs) {
 }
 
 bool CameraSourceTimeLapse::skipFrameAndModifyTimeStamp(int64_t *timestampUs) {
-    if(!mUseStillCameraForTimeLapse) {
-        if(mLastTimeLapseFrameRealTimestampUs == 0) {
+    if (!mUseStillCameraForTimeLapse) {
+        if (mLastTimeLapseFrameRealTimestampUs == 0) {
             // First time lapse frame. Initialize mLastTimeLapseFrameRealTimestampUs
             // to current time (timestampUs) and save frame data.
             LOGV("dataCallbackTimestamp timelapse: initial frame");
@@ -244,7 +318,7 @@ bool CameraSourceTimeLapse::skipFrameAndModifyTimeStamp(int64_t *timestampUs) {
 
 void CameraSourceTimeLapse::dataCallbackTimestamp(int64_t timestampUs, int32_t msgType,
             const sp<IMemory> &data) {
-    if(!mUseStillCameraForTimeLapse) {
+    if (!mUseStillCameraForTimeLapse) {
         mSkipCurrentFrame = skipFrameAndModifyTimeStamp(&timestampUs);
     }
     CameraSource::dataCallbackTimestamp(timestampUs, msgType, data);
