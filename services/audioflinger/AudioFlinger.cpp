@@ -2015,7 +2015,7 @@ uint32_t AudioFlinger::MixerThread::activeSleepTimeUs()
 
 uint32_t AudioFlinger::MixerThread::idleSleepTimeUs()
 {
-    return (uint32_t)((mFrameCount * 1000) / mSampleRate) * 1000;
+    return (uint32_t)(((mFrameCount * 1000) / mSampleRate) * 1000) / 2;
 }
 
 // ----------------------------------------------------------------------------
@@ -2476,7 +2476,7 @@ uint32_t AudioFlinger::DirectOutputThread::idleSleepTimeUs()
 {
     uint32_t time;
     if (AudioSystem::isLinearPCM(mFormat)) {
-        time = (uint32_t)((mFrameCount * 1000) / mSampleRate) * 1000;
+        time = (uint32_t)(((mFrameCount * 1000) / mSampleRate) * 1000) / 2;
     } else {
         time = 10000;
     }
