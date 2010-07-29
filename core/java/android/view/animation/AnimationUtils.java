@@ -99,7 +99,6 @@ public class AnimationUtils {
      * @param id The resource id of the animation to load
      * @return The animation object reference by the specified id
      * @throws NotFoundException when the animation cannot be loaded
-     * @hide
      */
     public static Animatable loadAnimator(Context context, int id)
             throws NotFoundException {

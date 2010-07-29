@@ -29,10 +29,10 @@ import java.util.HashMap;
  * can be set up to play together, in sequence, or after a specified delay.
  *
  * <p>There are two different approaches to adding animations to a <code>Sequencer</code>:
- * either the {@link Sequencer#playTogether(Animatable...) playTogether()} or
- * {@link Sequencer#playSequentially(Animatable...) playSequentially()} methods can be called to add
+ * either the {@link Sequencer#playTogether(Animatable[]) playTogether()} or
+ * {@link Sequencer#playSequentially(Animatable[]) playSequentially()} methods can be called to add
  * a set of animations all at once, or the {@link Sequencer#play(Animatable)} can be
- * used in conjunction with methods in the {@link myandroid.animation.Sequencer.Builder Builder}
+ * used in conjunction with methods in the {@link android.animation.Sequencer.Builder Builder}
  * class to add animations
  * one by one.</p>
  *
@@ -46,7 +46,7 @@ import java.util.HashMap;
 public final class Sequencer extends Animatable {
 
     /**
-     * Tracks aniamtions currently being played, so that we know what to
+     * Tracks animations currently being played, so that we know what to
      * cancel or end when cancel() or end() is called on this Sequencer
      */
     private final ArrayList<Animatable> mPlayingSet = new ArrayList<Animatable>();
@@ -577,8 +577,8 @@ public final class Sequencer extends Animatable {
      * intention of the <code>Builder</code> methods, along with the {@link
      * Sequencer#play(Animatable) play()} method of <code>Sequencer</code> is to make it possible to
      * express the dependency relationships of animations in a natural way. Developers can also use
-     * the {@link Sequencer#playTogether(Animatable...) playTogether()} and {@link
-     * Sequencer#playSequentially(Animatable...) playSequentially()} methods if these suit the need,
+     * the {@link Sequencer#playTogether(Animatable[]) playTogether()} and {@link
+     * Sequencer#playSequentially(Animatable[]) playSequentially()} methods if these suit the need,
      * but it might be easier in some situations to express the sequence of animations in pairs.
      * <p/>
      * <p>The <code>Builder</code> object cannot be constructed directly, but is rather constructed
