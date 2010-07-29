@@ -19,7 +19,7 @@ package android.animation;
 import android.view.animation.Interpolator;
 
 /**
- * This class represents timea time/value pair for an animation. The Keyframe class is used
+ * This class holds a time/value pair for an animation. The Keyframe class is used
  * by {@link Animator} to define the values that the animation target will have over the course
  * of the animation. As the time proceeds from one keyframe to the other, the value of the
  * target object will animate between the value at the previous keyframe and the value at the
@@ -144,7 +144,7 @@ public class Keyframe {
     /**
      * Sets the value for this Keyframe.
      *
-     * @param The value for this Keyframe.
+     * @param value value for this Keyframe.
      */
     public void setValue(Object value) {
         mValue = value;
@@ -163,7 +163,7 @@ public class Keyframe {
     /**
      * Sets the time for this keyframe, as a fraction of the overall animation duration.
      *
-     * @param The time associated with this keyframe, as a fraction of the overall animation
+     * @param fraction time associated with this keyframe, as a fraction of the overall animation
      * duration. This should be a value between 0 and 1.
      */
     public void setFraction(float fraction) {
@@ -192,9 +192,8 @@ public class Keyframe {
 
     /**
      * Gets the type of keyframe. This information is used by Animator to determine the type of
-     * {@linke TypeEvaluator} to use when calculating values between keyframes. The type is based
-     * on the type of Keyframe created. For example, {@link IntKeyframe} returns a value of
-     * <code>int.class</code>. This superclass returns a value of <code>Object.class</code>.
+     * {@link TypeEvaluator} to use when calculating values between keyframes. The type is based
+     * on the type of Keyframe created.
      *
      * @return The type of the value stored in the Keyframe.
      */
