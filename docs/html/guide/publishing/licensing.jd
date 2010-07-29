@@ -154,7 +154,7 @@ published on that account. </p>
 <p>When the application receives a signed response, it uses the embedded public
 key to verify the data. The use of public key cryptography in the licensing
 service makes it possible for the application to detect responses that have been
-tampered with or are spoofed.</p>
+tampered with or that are spoofed.</p>
 
 <h4>Use of licensing in your application</h4>
 
@@ -184,7 +184,7 @@ The LVL greatly simplifies the process of adding licensing to your application
 and helps ensure a more secure, robust implementation for your application. The
 LVL provides internal classes that handle most of the standard operations of a
 license query, such as contacting Android Market to initiate a license request
-and decrypting and validating the responses. It also exposes key interfaces that
+and verifying and validating the responses. It also exposes key interfaces that
 let you easily plug in your custom code for defining licensing policy and
 managing access as needed by your application. The key LVL interfaces are: </p>
 
@@ -211,7 +211,7 @@ needs:</p>
 <li><a href="#ServerManagedPolicy">ServerManagedPolicy</a> is a flexible Policy
 that uses settings provided by the licensing server to manage response caching
 and access to the application while the device is offline (such as when the
-user is on on an airplane). For most applications, the use of
+user is on an airplane). For most applications, the use of
 ServerManagedPolicy is highly recommended. </li>
 <li><a href="#StrictPolicy">StrictPolicy</a> is a restrictive Policy that
 does not cache any response data and allows the application access <em>only</em>
@@ -233,10 +233,10 @@ physical device.</p>
 <h4>Requirements and limitations</h4>
 
 <p>Android Market Licensing is designed to let you apply license controls to
-applications that you publish through Android Market and that users download
-from Market. The service is not designed to let you control access to
-applications that are not published through Android Market or that are run
-on devices that do not offer the Android Market client. </p>
+applications that you publish through Android Market. The service is not
+designed to let you control access to applications that are not published
+through Android Market or that are run on devices that do not offer the Android
+Market client. </p>
 
 <p>Here are some points to keep in mind as you implement licensing in your
 application: </p>
@@ -267,14 +267,15 @@ you won't be able to upload a new version that uses licensing.</li>
 
 <p>Android Market Licensing is a flexible, secure mechanism for controlling
 access to your applications. It effectively replaces the copy-protection
-mechanism and gives you wider distribution potential for your applications. </p>
+mechanism offered on Android Market and gives you wider distribution
+potential for your applications. </p>
 
 <ul>
-<li>A limitation of copy protection is that applications using it can be
-installed only on compatible devices that provide a secure internal storage
-environment. For example, a copy-protected application cannot be downloaded
-from Market to a device that provides root access, and the application
-cannot be installed to a device's SD card. </li>
+<li>A limitation of the legacy copy-protection mechanism on Android Market is
+that applications using it can be installed only on compatible devices that
+provide a secure internal storage environment. For example, a copy-protected
+application cannot be downloaded from Market to a device that provides root
+access, and the application cannot be installed to a device's SD card. </li>
 <li>With Android Market licensing, you can move to a license-based model in
 which access is not bound to the characteristics of the host device, but to your
 publisher account on Android Market and the licensing policy that you define.
@@ -338,7 +339,7 @@ let you: </p>
 <ul>
 <li>Set up multiple "test accounts", identified by email address. The licensing
 server allows users signed into test accounts on a device or emulator to send
-license checks and receive static test reponses.</li>
+license checks and receive static test responses.</li>
 <li>Obtain the account's public key for licensing. When you are implementing
 licensing in an application, you must copy the public key string into the
 application.</li>
@@ -402,7 +403,7 @@ href="#download-lvl">Downloading the LVL</a>.</p>
 <p>If you haven't done so, you need to download the Android SDK before you can
 develop Android applications. The SDK provides the tools that you need to build
 and debug Android applications, including applications that use Android Market
-licensing. For complete information, including installation intructions, see
+licensing. For complete information, including installation instructions, see
 the <a href="{@docRoot}sdk/index.html">Android SDK</a>. </p>
 
 <p>If you have already installed the SDK, make sure to update the
@@ -472,7 +473,7 @@ However, it does provide: </p>
 
 <ul>
 <li>An Android Market background service that implements the
-<code>ILicensingService</code> remote interface, so that your application can
+ILicensingService remote interface, so that your application can
 send license checks over the network to the licensing server. </li>
 <li>A set of underlying account services that let you add an a Google account on
 the AVD and sign in using your publisher account or test account credentials.
@@ -492,7 +493,7 @@ developing licensing on an emulator.</p>
 <img src="{@docRoot}images/licensing_gapis_8.png" style="text-align:left;margin-bottom:0;" />
 <div style="margin:0 2em;padding:0"><strong>Figure 3.</strong> Google APIs
 Add-On, API 8 (release 2) or higher lets you debug and test your licensing
-implemention in an emulator.</div>
+implementation in an emulator.</div>
 </div>
 
 <p>To set up an emulator for adding licensing to an application, follow
@@ -581,9 +582,9 @@ Licensing package contains the LVL and the LVL sample application. </div>
 <p>When the download is complete, the Android SDK and AVD Manager installs both
 the LVL library project and the example application into these directories: </p>
 
-<p style="margin-left:2em"><code>&lt;<em>sdk</em>&gt;/marketlicensing/library/</code>
+<p style="margin-left:2em"><code>&lt;<em>sdk</em>&gt;/market_licensing/library/</code>
 &nbsp;&nbsp;(the LVL library project)<br />
-<code>&lt;<em>sdk</em>&gt;/marketlicensing/sample/</code>&nbsp;&nbsp;(the example
+<code>&lt;<em>sdk</em>&gt;/market_licensing/sample/</code>&nbsp;&nbsp;(the example
 application)</p>
 
 <p>If you aren't familiar with how to download components into your SDK, see the
@@ -601,20 +602,21 @@ since it lets you reuse your licensing code across multiple applications and
 maintain it more easily over time. Note that the LVL is not designed to be
 compiled separately and added to an application as a static .jar file. </p>
 
-<h4>Moving the library sources out  location</h4>
+<h4>Moving the library sources to a new location</h4>
 
 <p>Because you will be customizing the LVL sources to some extent, you should
 make sure to <em>move or copy</em> the library sources (the entire
-directory at <code>&lt;<em>sdk</em>&gt;/marketlicensing/library/</code>)
-to a working directory outside of the SDK. You can then add the sources
-in the working location to your source-code management system, rather
-than those in the SDK.</p>
+directory at <code>&lt;<em>sdk</em>&gt;/market_licensing/library/</code>)
+to a working directory outside of the SDK. You should then use the relocated
+sources as your working set. If you are using a source-code management
+system, add and track the sources that are in the working location rather
+than those in default location in the SDK. </p>
 
 <p>Moving the library sources is important is because, when you later update the
 Market licensing package, the SDK installs the new files to the same location as
 the older files. Moving your working library files to a safe location ensures
-that they won't be inadvertently overwritten when you download a new version of
-the LVL.</p>
+that your work won't be inadvertently overwritten should you download a new
+version of the LVL.</p>
 
 <h4>Creating the LVL as a library project</h4>
 
@@ -639,11 +641,11 @@ Other IDEs</a>, as appropriate for your environment.</p>
 <em>library project</em>. A library project is a type of development project
 that holds shared Android source code and resources. Other Android application
 projects can reference the library project and, at build time, include its
-compiled sources in their <code>.apk</code> files. In the context of licensing, this means
-that you can do most of your licensing development once, in a library project,
-then include the library sources in your various application projects. In this
-way, you can easily maintain a uniform implementation of licensing across all of
-your projects and maintain it centrally. </p>
+compiled sources in their <code>.apk</code> files. In the context of licensing,
+this means that you can do most of your licensing development once, in a library
+project, then include the library sources in your various application projects.
+In this way, you can easily maintain a uniform implementation of licensing
+across all of your projects and maintain it centrally. </p>
 
 <p>The LVL is provided as a configured library project &mdash; once you have
 downloaded it, you can start using it right away. </p>
@@ -675,9 +677,8 @@ in Eclipse with ADT</a>.</p>
 
 <p>As an alternative to adding the LVL as a library project, you can copy the
 library sources directly into your application. To do so, copy (or import) the
-directory
-<code>&lt;<em>sdk</em>&gt;/extras/marketlicensing/library/src/com</code> into
-your application's <code>src/</code> directory.</p>
+LVL's <code>library/src/com</code> directory into your application's
+<code>src/</code> directory.</p>
 
 <p>If you add the LVL sources directly to your application, you can skip the
 next section and start working with the library, as described in <a
@@ -688,10 +689,10 @@ href="#app-integration"></a>.</p>
 application</h3>
 
 <p>If you want to use the LVL sources as a library project, you need to add a
-reference to the LVL library project in your project properties. This tells
+reference to the LVL library project in your application project properties. This tells
 build tools to include the LVL library project sources in your application at
-compile time. The process for adding a reference to a library project varies,
-based on your development environment, as described below.</p>
+compile time. The process for adding a reference to a library project depends
+on your development environment, as described below.</p>
 
 <p> If you are developing in Eclipse with ADT, you should already have added the
 library project to your workspace, as described in the previous section. If you
@@ -793,10 +794,10 @@ android:name="com.android.vending.CHECK_LICENSE"&gt;</code></p>
 </pre>
 
 <p class="note"><strong>Note:</strong> Currently, you cannot declare the
-<code>CHECK_LICENSE</code> permission in the LVL's manifest, because the SDK
-Tools will not merge it into the manifests of dependent applications. Instead,
-you must declare the permission in the manifest of each dependent application.
-</p>
+<code>CHECK_LICENSE</code> permission in the LVL library project's manifest,
+because the SDK Tools will not merge it into the manifests of dependent
+applications. Instead, you must declare the permission in each dependent
+application's manifest. </p>
 
 
 <h3 id="impl-Policy">Implementing a Policy</h3>
@@ -856,7 +857,7 @@ licensing server or from cache) or other application-specific information.  For
 example, your implementation of <code>allowAccess()</code> could take into
 account additional criteria, such as usage or other data retrieved from a
 backend server. In all cases, an implementation of <code>allowAccess()</code>
-should only return <code>true</code> if there user is licensed to use the
+should only return <code>true</code> if the user is licensed to use the
 application, as determined by the licensing server, or if there is a transient
 network or system problem that prevents the license check from completing. In
 such cases, your implementation can maintain a count of retry responses and
@@ -866,7 +867,8 @@ provisionally allow access until the next license check is complete.</li>
 
 <p>To simplify the process of adding licensing to your application and to
 provide an illustration of how a Policy should be designed, the LVL includes
-two full Policy implementations that you can use without modification:</p>
+two full Policy implementations that you can use without modification or
+adapt to your needs:</p>
 
 <ul>
 <li><a href="#ServerManagedPolicy">ServerManagedPolicy</a>, a flexible Policy
@@ -886,7 +888,7 @@ the LVL sample application.</p>
 
 <p>In your licensing implementation, you can use one of the complete policies
 provided in the LVL (ServerManagedPolicy or StrictPolicy) or you can create a
-custom Policy. For any type of custom policy, there are several important design
+custom policy. For any type of custom policy, there are several important design
 points to understand and account for in your implementation.</p>
 
 <p>The licensing server applies general request limits to guard against overuse
@@ -896,7 +898,7 @@ passed through to your application as a general server error. This means that no
 license response will be available to the user until the limit is reset, which
 can affect the user for an indefinite period.</p>
 
-<p>If you are designing a custom Policy, we recommend that the Policy:
+<p>If you are designing a custom policy, we recommend that the Policy:
 <ol>
 <!-- <li>Limits the number of points at which your app calls for a license check
 to the minimum. </li> -->
@@ -904,12 +906,12 @@ to the minimum. </li> -->
 in local persistent storage.</li>
 <li>Returns the cached response for all license checks, for as long as the
 cached response is valid, rather than making a request to the licensing server.
-Setting the response validity accrording to the server-provided <code>VT</code>
+Setting the response validity according to the server-provided <code>VT</code>
 extra is highly recommended. See <a href="#extras">Server Response Extras</a>
 for more information.</li>
-<li>Uses an exponential backoff period if retrying any requests the result in
-errors. However, because the Android Market client automatically retries failed
-requests, the Policy does not need to do so, in most cases.</li>
+<li>Uses an exponential backoff period, if retrying any requests the result in
+errors. Note that the Android Market client automatically retries failed
+requests, so in most cases there is no need for your Policy to retry them.</li>
 <li>Provides for a "grace period" that allows the user to access your
 application for a limited time or number of uses, while a license check is being
 retried. The grace period benefits the user by allowing access until the next
@@ -942,7 +944,7 @@ settings to the responses, to help the application manage licensing effectively.
 
 <p style="margin-top:.5em;">See <a href="#extras">Server Response Extras</a> for
 a list of settings and <code>ServerManagedPolicy.java</code> for information
-about how a Policy can usethe extras.</p>
+about how a Policy can use the extras.</p>
 
 </div>
 </div>
@@ -965,8 +967,8 @@ responses.</p>
 server-provided settings as the basis for managing licensing across an
 application's refund period and through varying network and error conditions.
 When an application contacts the Android Market server for a license check, the
-server appends several settings as key-value pairs in the license response
-extras field. For example, the server provides recommended values for the
+server appends several settings as key-value pairs in the extras field of certain
+license response types. For example, the server provides recommended values for the
 application's license validity period, retry grace period, and maximum allowable
 retry count, among others. ServerManagedPolicy extracts the values from the
 license response in its <code>processServerResponse()</code> method and checks
@@ -1019,8 +1021,7 @@ with the cached data and obtain access to the application.</p>
 means that they won't be able to access the application when there is no network
 (cell or wi-fi) connection available. Another side-effect is that your
 application will send more license check requests to the server, since using a
-cached response is not possible. Depending on network conditions, this might
-prove challenging for users also.</p>
+cached response is not possible.</p>
 
 <p>Overall, this policy represents a tradeoff of some degree of user convenience
 for absolute security and control over access. Consider the tradeoff carefully
@@ -1058,7 +1059,7 @@ data is persistent. </p>
 
 <p>Because the Policy will use stored license response data to determine whether
 to allow or disallow access to the application, it <em>must</em> ensure that any
-stored data is secure and can not be reused or manipulated by a root user on a
+stored data is secure and cannot be reused or manipulated by a root user on a
 device. Specifically, the Policy must always obfuscate the data before storing
 it, using a key that is unique for the application and device. Obfuscating using
 a key that is both application-specific and device-specific is critical, because
@@ -1066,20 +1067,18 @@ it prevents the obfuscated data from being shared among applications and
 devices.</p>
 
 <p>The LVL assists the application with storing its license response data in a
-secure, persistent manner. First, it provides an <code>Obfuscator</code>
+secure, persistent manner. First, it provides an Obfuscator
 interface that lets your application supply the obfuscation algorithm of its
 choice for stored data. Building on that, the LVL provides the helper class
-<code>PreferenceObfuscator</code>, which handles most of the work of calling the
+PreferenceObfuscator, which handles most of the work of calling the
 application's Obfuscator class and reading and writing the obfuscated data in a
 SharedPreferences instance. </p>
 
 <p>The LVL provides a full Obfuscator implementation called
-<code>AESObfuscator</code> that uses AES encryption to obfuscate data. You can
-use <code>AESObfuscator</code> in your application without modification or you
+AESObfuscator that uses AES encryption to obfuscate data. You can
+use AESObfuscator in your application without modification or you
 can adapt it to your needs. For more information, see the next section.</p>
 
-<p>Alternatively, you can write a custom Obfuscator based on your own code
-or use an obfuscator program such as ProGuard for additional security.</p>
 
 <h4 id="AESObfuscator">AESObfuscator</h4>
 
@@ -1118,14 +1117,16 @@ queries the system settings for the
 <code>android.Settings.Secure.ANDROID_ID</code>, which is unique to each device.
 </p>
 
-<p>Note that, depending on the APIs you use to derive device-specific
-information, your application might need to request additional permissions in
-order to secure device-specific information. For example, if you query the
-TelephonyManager to obtain the device IMEI or related data, your application
-will also need to request the <code>android.permission.READ_PHONE_STATE</code>
-permission in its manifest. Before requesting permissions in this way, consider
-how doing so might affect your application or its filtering of your application
-on Android Market (since some permissions can cause the SDK build tools to add
+<p>Note that, depending on the APIs you use, your application might need to
+request additional permissions in order to acquire device-specific information.
+For example, to query the {@link android.telephony.TelephonyManager} to obtain
+the device IMEI or related data, the application will also need to request the
+<code>android.permission.READ_PHONE_STATE</code> permission in its manifest.</p>
+
+<p>Before requesting new permissions for the <em>sole purpose</em> of acquiring
+device-specific information for use in your Obfuscator, consider
+how doing so might affect your application or its filtering on Android Market
+(since some permissions can cause the SDK build tools to add
 the associated <code>&lt;uses-feature&gt;</code>).</p>
 
 <p>Finally, construct an instance of AESObfuscator, passing the salt,
@@ -1441,7 +1442,7 @@ licensing. </li>
 </ul>
 
 <p>If you are using ServerManagedPolicy, you won't need to access the class
-directly, so you can instantiate it directly in the LicenseChecker constructor,
+directly, so you can instantiate it in the LicenseChecker constructor,
 as shown in the example below. Note that you need to pass a reference to a new
 Obfuscator instance when you construct ServerManagedPolicy.</p>
 
@@ -1510,7 +1511,7 @@ sample application calls <code>checkAccess()</code> from a
 <h4 id="account-key">Embed your public key for licensing</h4>
 
 <p>For each publisher account, the Android Market service automatically
-generates a  2048-bit RSA public/private key pair that is used exlusively for
+generates a  2048-bit RSA public/private key pair that is used exclusively for
 licensing. The key pair is uniquely associated with the publisher account and is
 shared across all applications that are published through the account. Although
 associated with a publisher account, the key pair is <em>not</em> the same as
@@ -1562,14 +1563,14 @@ LicenseChecker to properly close any open IPC connection to the Android Market
 application's ILicensingService and removes any local references to the service
 and handler.</p>
 
-<p>Failing to add the call the LicenseChecker's <code>onDestroy()</code> method
+<p>Failing to call the LicenseChecker's <code>onDestroy()</code> method
 can lead to problems over the lifecycle of your application. For example, if the
 user changes screen orientation while a license check is active, the application
 {@link android.content.Context} is destroyed. If your application does not
 properly close the LicenseChecker's IPC connection, your application will crash
 when the response is received. Similarly, if the user exits your application
 while a license check is in progress,  your application will crash when the
-response is received, unless your application has properly called the
+response is received, unless it has properly called the
 LicenseChecker's <code>onDestroy()</code> method to disconnect from the service.
 </p>
 
@@ -1608,7 +1609,7 @@ user ID string extracted from the response.</p>
 required</strong> &mdash; the LicenseChecker class automatically uses a default
 implementation called NullDeviceLimiter. As the name suggests, NullDeviceLimiter
 is a "no-op" class whose <code>allowDeviceAccess()</code> method simply returns
-a LICENSED response for all users and devices. </p>
+a <code>LICENSED</code> response for all users and devices. </p>
 
 <div style="border-left:4px solid #FFCF00;margin:1em;padding: 0 0 0 .5em">
 <p><strong>Caution:</strong> Per-device licensing is <em>not recommended for
@@ -1634,15 +1635,15 @@ error conditions.</p>
 
 <ul>
 <li>A "Test response" configuration in your publisher account that lets you
-control the licensing response returned, when the server processes a license
-check for an uploaded application from the publisher account or a test
-account.</li>
-<li>An optional set of test accounts that will receive the configured test
-response when checking the license of an application that you have uploaded
+set the static licensing response returned, when the server processes a
+license check for an application uploaded to the publisher account, from a user
+signed in to the publisher account or a test account.</li>
+<li>An optional set of test accounts that will receive the static test
+response when they check the license of an application that you have uploaded
 (regardless whether the application is published or not).</li>
 <li>A runtime environment for the application that includes the Android Market
 application or Google APIs Add-On, on which the user is signed in to the
-publisher account or one of the test accounts.
+publisher account or one of the test accounts.</li>
 </ul>
 
 <p>Setting up the test environment properly involves:</p>
@@ -1659,11 +1660,12 @@ publisher account or one of the test accounts.
 <h3 id="test-response">Setting test responses for license checks</h3>
 
 <p>Android Market provides a configuration setting in your publisher account
-that lets you override the normal processing of a license check for an
-application you have uploaded and return a specified response code. The setting
-is for testing only and applies <em>only</em> to license checks for applications
-that you have uploaded. For other users (users not signed in to test accounts),
-the server always processes license checks according to normal rules.  </p>
+that lets you override the normal processing of a license check and return a
+specified static response code. The setting is for testing only and applies
+<em>only</em> to license checks for applications that you have uploaded, made by
+any user signed in to an emulator or device using the credentials of the
+publisher account or a registered test account. For other users, the server
+always processes license checks according to normal rules.  </p>
 
 <p>To set a test response for your account, sign in to your publisher account
 and click "Edit Profile". In the Edit Profile page, locate the Test Response
@@ -1672,9 +1674,9 @@ valid server response codes to control the response or condition you want to
 test in your application.</p>
 
 <p>In general, you should make sure to test your application's licensing
-implementation with every response code available in the Test Response" menu.
+implementation with every response code available in the Test Response menu.
 For a description of the codes, see <a href="#server-response-codes">Server
-Response Codes</a>, below.</p>
+Response Codes</a> in the Appendix of this document.</p>
 
 <div style="margin-bottom:2em;" id="licensing_test_response">
 
@@ -1688,10 +1690,11 @@ Test Response menu.</div>
 that is, it applies not to a single application, but to <em>all</em>
 applications associated with the publisher account. If you are testing multiple
 applications at once, changing the test response will affect all of those
-applications on their next license check.</p>
+applications on their next license check (if the user is signed into
+the emulator or device using the publisher account or a test account).</p>
 
-<p>Finally, before you can successfully send these test responses to your
-application, you must sign in to the device or emulator on which the application
+<p>Before you can successfully receive a test response for a license check,
+you must sign in to the device or emulator on which the application
 is installed, and from which it is querying the server. Specifically, you must
 sign using either your publisher account or one of the test accounts that you
 have set up. For more information about test accounts, see the next section.</p>
@@ -1799,7 +1802,7 @@ upload a new version if the local application increments the
 <p>The licensing server handles static test responses in the normal way,
 including signing the license response data, adding extras parameters, and so
 on. To support developers who are implementing licensing using test accounts,
-rather than having access to the publisher account, you will need to distribute
+rather than the publisher account, you will need to distribute
 your public key to them. Developers without access to the publisher site do not
 have access to your public key, and without the key they won't be able to
 verify license responses. </p>
@@ -2176,7 +2179,7 @@ that is not installed on the device. </td>
 <td>No </td>
 <td></td>
 <td><em>Do not retry the license check.</em>
-<p style="margin-top:.5em;">Typically caused by a developement error.</p>
+<p style="margin-top:.5em;">Typically caused by a development error.</p>
 </td>
 </tr>
 <tr>
@@ -2187,7 +2190,7 @@ application. </td>
 <td>No </td>
 <td></td>
 <td><em>Do not retry the license check.</em>
-<p style="margin-top:.5em;">Typically caused by a developement error.</p>
+<p style="margin-top:.5em;">Typically caused by a development error.</p>
 </td>
 </tr>
 <tr>
@@ -2295,7 +2298,7 @@ the server sets a validity period as follows:</p>
 
 <ul>
 <li>For a paid application, the server sets the initial license validity period
-so that the license reponse remains valid for as long as the application is
+so that the license response remains valid for as long as the application is
 refundable. A licensing Policy in the application may cache the
 result of the initial license check and does not need to recheck the license
 until the validity period has expired.</li>
