@@ -1600,7 +1600,7 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
         case InputReaderPolicyInterface::ROTATION_90: {
             float xTemp = x;
             x = y;
-            y = mOrientedSurfaceWidth - xTemp;
+            y = mSurfaceWidth - xTemp;
             orientation -= M_PI_2;
             if (orientation < - M_PI_2) {
                 orientation += M_PI;
@@ -1608,14 +1608,14 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
             break;
         }
         case InputReaderPolicyInterface::ROTATION_180: {
-            x = mOrientedSurfaceWidth - x;
-            y = mOrientedSurfaceHeight - y;
+            x = mSurfaceWidth - x;
+            y = mSurfaceHeight - y;
             orientation = - orientation;
             break;
         }
         case InputReaderPolicyInterface::ROTATION_270: {
             float xTemp = x;
-            x = mOrientedSurfaceHeight - y;
+            x = mSurfaceHeight - y;
             y = xTemp;
             orientation += M_PI_2;
             if (orientation > M_PI_2) {
