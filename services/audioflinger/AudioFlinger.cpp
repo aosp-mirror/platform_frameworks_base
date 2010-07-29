@@ -307,6 +307,7 @@ sp<IAudioTrack> AudioFlinger::createTrack(
     {
         Mutex::Autolock _l(mLock);
         PlaybackThread *thread = checkPlaybackThread_l(output);
+        PlaybackThread *effectThread = NULL;
         if (thread == NULL) {
             LOGE("unknown output thread");
             lStatus = BAD_VALUE;
@@ -324,12 +325,19 @@ sp<IAudioTrack> AudioFlinger::createTrack(
 
         LOGV("createTrack() sessionId: %d", (sessionId == NULL) ? -2 : *sessionId);
         if (sessionId != NULL && *sessionId != AudioSystem::SESSION_OUTPUT_MIX) {
-            // prevent same audio session on different output threads
             for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
-                if (mPlaybackThreads.keyAt(i) != output &&
-                        mPlaybackThreads.valueAt(i)->hasAudioSession(*sessionId)) {
-                    lStatus = BAD_VALUE;
-                    goto Exit;
+                sp<PlaybackThread> t = mPlaybackThreads.valueAt(i);
+                if (mPlaybackThreads.keyAt(i) != output) {
+                    // prevent same audio session on different output threads
+                    uint32_t sessions = t->hasAudioSession(*sessionId);
+                    if (sessions & PlaybackThread::TRACK_SESSION) {
+                        lStatus = BAD_VALUE;
+                        goto Exit;
+                    }
+                    // check if an effect with same session ID is waiting for a track to be created
+                    if (sessions & PlaybackThread::EFFECT_SESSION) {
+                        effectThread = t.get();
+                    }
                 }
             }
             lSessionId = *sessionId;
@@ -344,6 +352,14 @@ sp<IAudioTrack> AudioFlinger::createTrack(
 
         track = thread->createTrack_l(client, streamType, sampleRate, format,
                 channelCount, frameCount, sharedBuffer, lSessionId, &lStatus);
+
+        // move effect chain to this output thread if an effect on same session was waiting
+        // for a track to be created
+        if (lStatus == NO_ERROR && effectThread != NULL) {
+            Mutex::Autolock _dl(thread->mLock);
+            Mutex::Autolock _sl(effectThread->mLock);
+            moveEffectChain_l(lSessionId, effectThread, thread, true);
+        }
     }
     if (lStatus == NO_ERROR) {
         trackHandle = new TrackHandle(track);
@@ -1377,7 +1393,7 @@ void AudioFlinger::PlaybackThread::readOutputParameters()
     // create a copy of mEffectChains as calling moveEffectChain_l() can reorder some effect chains
     Vector< sp<EffectChain> > effectChains = mEffectChains;
     for (size_t i = 0; i < effectChains.size(); i ++) {
-        mAudioFlinger->moveEffectChain_l(effectChains[i]->sessionId(), this, this);
+        mAudioFlinger->moveEffectChain_l(effectChains[i]->sessionId(), this, this, false);
     }
 }
 
@@ -1394,22 +1410,24 @@ status_t AudioFlinger::PlaybackThread::getRenderPosition(uint32_t *halFrames, ui
     return mOutput->getRenderPosition(dspFrames);
 }
 
-bool AudioFlinger::PlaybackThread::hasAudioSession(int sessionId)
+uint32_t AudioFlinger::PlaybackThread::hasAudioSession(int sessionId)
 {
     Mutex::Autolock _l(mLock);
+    uint32_t result = 0;
     if (getEffectChain_l(sessionId) != 0) {
-        return true;
+        result = EFFECT_SESSION;
     }
 
     for (size_t i = 0; i < mTracks.size(); ++i) {
         sp<Track> track = mTracks[i];
         if (sessionId == track->sessionId() &&
                 !(track->mCblk->flags & CBLK_INVALID_MSK)) {
-            return true;
+            result |= TRACK_SESSION;
+            break;
         }
     }
 
-    return false;
+    return result;
 }
 
 uint32_t AudioFlinger::PlaybackThread::getStrategyForSession_l(int sessionId)
@@ -4704,10 +4722,16 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
             } else {
                  // look for the thread where the specified audio session is present
                 for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
-                    if (mPlaybackThreads.valueAt(i)->hasAudioSession(sessionId)) {
+                    if (mPlaybackThreads.valueAt(i)->hasAudioSession(sessionId) != 0) {
                         output = mPlaybackThreads.keyAt(i);
                         break;
                     }
+                }
+                // If no output thread contains the requested session ID, default to
+                // first output. The effect chain will be moved to the correct output
+                // thread when a track with the same session ID is created
+                if (output == 0 && mPlaybackThreads.size()) {
+                    output = mPlaybackThreads.keyAt(0);
                 }
             }
         }
@@ -4764,7 +4788,7 @@ status_t AudioFlinger::moveEffects(int session, int srcOutput, int dstOutput)
 
     Mutex::Autolock _dl(dstThread->mLock);
     Mutex::Autolock _sl(srcThread->mLock);
-    moveEffectChain_l(session, srcThread, dstThread);
+    moveEffectChain_l(session, srcThread, dstThread, false);
 
     return NO_ERROR;
 }
@@ -4772,7 +4796,8 @@ status_t AudioFlinger::moveEffects(int session, int srcOutput, int dstOutput)
 // moveEffectChain_l mustbe called with both srcThread and dstThread mLocks held
 status_t AudioFlinger::moveEffectChain_l(int session,
                                    AudioFlinger::PlaybackThread *srcThread,
-                                   AudioFlinger::PlaybackThread *dstThread)
+                                   AudioFlinger::PlaybackThread *dstThread,
+                                   bool reRegister)
 {
     LOGV("moveEffectChain_l() session %d from thread %p to thread %p",
             session, srcThread, dstThread);
@@ -4784,7 +4809,7 @@ status_t AudioFlinger::moveEffectChain_l(int session,
         return INVALID_OPERATION;
     }
 
-    // remove chain first. This is usefull only if reconfiguring effect chain on same output thread,
+    // remove chain first. This is useful only if reconfiguring effect chain on same output thread,
     // so that a new chain is created with correct parameters when first effect is added. This is
     // otherwise unecessary as removeEffect_l() will remove the chain when last effect is
     // removed.
@@ -4792,10 +4817,32 @@ status_t AudioFlinger::moveEffectChain_l(int session,
 
     // transfer all effects one by one so that new effect chain is created on new thread with
     // correct buffer sizes and audio parameters and effect engines reconfigured accordingly
+    int dstOutput = dstThread->id();
+    sp<EffectChain> dstChain;
+    uint32_t strategy;
     sp<EffectModule> effect = chain->getEffectFromId_l(0);
     while (effect != 0) {
         srcThread->removeEffect_l(effect);
         dstThread->addEffect_l(effect);
+        // if the move request is not received from audio policy manager, the effect must be
+        // re-registered with the new strategy and output
+        if (dstChain == 0) {
+            dstChain = effect->chain().promote();
+            if (dstChain == 0) {
+                LOGW("moveEffectChain_l() cannot get chain from effect %p", effect.get());
+                srcThread->addEffect_l(effect);
+                return NO_INIT;
+            }
+            strategy = dstChain->strategy();
+        }
+        if (reRegister) {
+            AudioSystem::unregisterEffect(effect->id());
+            AudioSystem::registerEffect(&effect->desc(),
+                                        dstOutput,
+                                        strategy,
+                                        session,
+                                        effect->id());
+        }
         effect = chain->getEffectFromId_l(0);
     }
 

@@ -613,7 +613,15 @@ private:
                     void disconnectEffect(const sp< EffectModule>& effect,
                                           const wp<EffectHandle>& handle);
 
-                    bool hasAudioSession(int sessionId);
+                    // return values for hasAudioSession (bit field)
+                    enum effect_state {
+                        EFFECT_SESSION = 0x1,   // the audio session corresponds to at least one
+                                                // effect
+                        TRACK_SESSION = 0x2     // the audio session corresponds to at least one
+                                                // track
+                    };
+
+                    uint32_t hasAudioSession(int sessionId);
                     sp<EffectChain> getEffectChain(int sessionId);
                     sp<EffectChain> getEffectChain_l(int sessionId);
                     status_t addEffectChain_l(const sp<EffectChain>& chain);
@@ -776,7 +784,8 @@ private:
               int  nextUniqueId();
               status_t moveEffectChain_l(int session,
                                      AudioFlinger::PlaybackThread *srcThread,
-                                     AudioFlinger::PlaybackThread *dstThread);
+                                     AudioFlinger::PlaybackThread *dstThread,
+                                     bool reRegister);
 
     friend class AudioBuffer;
 
