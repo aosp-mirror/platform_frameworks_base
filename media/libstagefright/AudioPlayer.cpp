@@ -23,6 +23,7 @@
 #include <media/stagefright/AudioPlayer.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
+#include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
 
