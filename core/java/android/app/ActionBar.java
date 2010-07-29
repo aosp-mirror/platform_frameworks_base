@@ -131,8 +131,31 @@ public abstract class ActionBar {
      *
      * @param title The action bar's title. null is treated as an empty string.
      * @param subtitle The action bar's subtitle. null will remove the subtitle entirely.
+     *
+     * @see #setStandardNavigationMode()
+     * @see #setStandardNavigationMode(CharSequence)
+     * @see #setStandardNavigationMode(int)
+     * @see #setStandardNavigationMode(int, int)
      */
     public abstract void setStandardNavigationMode(CharSequence title, CharSequence subtitle);
+
+    /**
+     * Set the action bar into standard navigation mode, supplying a title and subtitle.
+     * 
+     * Standard navigation mode is default. The title is automatically set to the
+     * name of your Activity. Subtitles are displayed underneath the title, usually
+     * in a smaller font or otherwise less prominently than the title. Subtitles are
+     * good for extended descriptions of activity state.
+     *
+     * @param titleResId Resource ID of a title string
+     * @param subtitleResId Resource ID of a subtitle string
+     *
+     * @see #setStandardNavigationMode()
+     * @see #setStandardNavigationMode(CharSequence)
+     * @see #setStandardNavigationMode(CharSequence, CharSequence)
+     * @see #setStandardNavigationMode(int)
+     */
+    public abstract void setStandardNavigationMode(int titleResId, int subtitleResId);
 
     /**
      * Set the action bar into standard navigation mode, supplying a title and subtitle.
@@ -141,8 +164,28 @@ public abstract class ActionBar {
      * name of your Activity on startup if an action bar is present.
      *
      * @param title The action bar's title. null is treated as an empty string.
+     *
+     * @see #setStandardNavigationMode()
+     * @see #setStandardNavigationMode(CharSequence, CharSequence)
+     * @see #setStandardNavigationMode(int)
+     * @see #setStandardNavigationMode(int, int)
      */
     public abstract void setStandardNavigationMode(CharSequence title);
+
+    /**
+     * Set the action bar into standard navigation mode, supplying a title and subtitle.
+     * 
+     * Standard navigation mode is default. The title is automatically set to the
+     * name of your Activity on startup if an action bar is present.
+     *
+     * @param titleResId Resource ID of a title string
+     *
+     * @see #setStandardNavigationMode()
+     * @see #setStandardNavigationMode(CharSequence)
+     * @see #setStandardNavigationMode(CharSequence, CharSequence)
+     * @see #setStandardNavigationMode(int, int)
+     */
+    public abstract void setStandardNavigationMode(int titleResId);
 
     /**
      * Set the action bar into standard navigation mode, using the currently set title
@@ -157,16 +200,38 @@ public abstract class ActionBar {
      * Set the action bar's title. This will only be displayed in standard navigation mode.
      *
      * @param title Title to set
+     *
+     * @see #setTitle(int)
      */
     public abstract void setTitle(CharSequence title);
+
+    /**
+     * Set the action bar's title. This will only be displayed in standard navigation mode.
+     *
+     * @param resId Resource ID of title string to set
+     *
+     * @see #setTitle(CharSequence)
+     */
+    public abstract void setTitle(int resId);
 
     /**
      * Set the action bar's subtitle. This will only be displayed in standard navigation mode.
      * Set to null to disable the subtitle entirely.
      *
      * @param subtitle Subtitle to set
+     *
+     * @see #setSubtitle(int)
      */
     public abstract void setSubtitle(CharSequence subtitle);
+
+    /**
+     * Set the action bar's subtitle. This will only be displayed in standard navigation mode.
+     *
+     * @param resId Resource ID of subtitle string to set
+     *
+     * @see #setSubtitle(CharSequence)
+     */
+    public abstract void setSubtitle(int resId);
 
     /**
      * Set display options. This changes all display option bits at once. To change
