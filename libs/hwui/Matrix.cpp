@@ -152,6 +152,11 @@ void Matrix4::loadRotate(float angle, float x, float y, float z) {
     float s = sinf(angle);
 
     const float length = sqrtf(x * x + y * y + z * z);
+    float recipLen = 1.0f / length;
+    x *= recipLen;
+    y *= recipLen;
+    z *= recipLen;
+
     const float nc = 1.0f - c;
     const float xy = x * y;
     const float yz = y * z;

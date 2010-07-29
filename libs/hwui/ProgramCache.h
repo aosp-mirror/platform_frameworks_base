@@ -20,6 +20,8 @@
 #include <utils/KeyedVector.h>
 #include <utils/Log.h>
 
+#include <GLES2/gl2.h>
+
 #include <SkXfermode.h>
 
 #include "Program.h"
@@ -32,7 +34,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Debug
-#define DEBUG_PROGRAM_CACHE 0
+#define DEBUG_PROGRAM_CACHE 1
 
 // Debug
 #if DEBUG_PROGRAM_CACHE
@@ -49,11 +51,18 @@ namespace uirenderer {
 #define PROGRAM_KEY_COLOR_MATRIX 0x20
 #define PROGRAM_KEY_COLOR_LIGHTING 0x40
 #define PROGRAM_KEY_COLOR_BLEND 0x80
+#define PROGRAM_KEY_BITMAP_NPOT 0x100
+
+#define PROGRAM_KEY_BITMAP_WRAPS_MASK 0x600
+#define PROGRAM_KEY_BITMAP_WRAPT_MASK 0x1800
 
 // Support only the 12 Porter-Duff modes for now
 #define PROGRAM_MAX_XFERMODE 0xC
 #define PROGRAM_XFERMODE_SHADER_SHIFT 24
 #define PROGRAM_XFERMODE_COLOR_OP_SHIFT 20
+
+#define PROGRAM_BITMAP_WRAPS_SHIFT 9
+#define PROGRAM_BITMAP_WRAPT_SHIFT 11
 
 ///////////////////////////////////////////////////////////////////////////////
 // Types
@@ -80,7 +89,9 @@ struct ProgramDescription {
 
     ProgramDescription():
         hasTexture(false), hasAlpha8Texture(false),
-        hasBitmap(false), hasGradient(false), shadersMode(SkXfermode::kClear_Mode),
+        hasBitmap(false), isBitmapNpot(false), hasGradient(false),
+        shadersMode(SkXfermode::kClear_Mode), isBitmapFirst(false),
+        bitmapWrapS(GL_CLAMP_TO_EDGE), bitmapWrapT(GL_CLAMP_TO_EDGE),
         colorOp(kColorNone), colorMode(SkXfermode::kClear_Mode) {
     }
 
@@ -90,19 +101,41 @@ struct ProgramDescription {
 
     // Shaders
     bool hasBitmap;
+    bool isBitmapNpot;
     bool hasGradient;
     SkXfermode::Mode shadersMode;
     bool isBitmapFirst;
+    GLenum bitmapWrapS;
+    GLenum bitmapWrapT;
 
     // Color operations
     int colorOp;
     SkXfermode::Mode colorMode;
 
+    inline uint32_t getEnumForWrap(GLenum wrap) const {
+        switch (wrap) {
+            case GL_CLAMP_TO_EDGE:
+                return 0;
+            case GL_REPEAT:
+                return 1;
+            case GL_MIRRORED_REPEAT:
+                return 2;
+        }
+        return 0;
+    }
+
     programid key() const {
         programid key = 0;
         if (hasTexture) key |= PROGRAM_KEY_TEXTURE;
         if (hasAlpha8Texture) key |= PROGRAM_KEY_A8_TEXTURE;
-        if (hasBitmap) key |= PROGRAM_KEY_BITMAP;
+        if (hasBitmap) {
+            key |= PROGRAM_KEY_BITMAP;
+            if (isBitmapNpot) {
+                key |= PROGRAM_KEY_BITMAP_NPOT;
+                key |= getEnumForWrap(bitmapWrapS) << PROGRAM_BITMAP_WRAPS_SHIFT;
+                key |= getEnumForWrap(bitmapWrapT) << PROGRAM_BITMAP_WRAPT_SHIFT;
+            }
+        }
         if (hasGradient) key |= PROGRAM_KEY_GRADIENT;
         if (isBitmapFirst) key  |= PROGRAM_KEY_BITMAP_FIRST;
         if (hasBitmap && hasGradient) {
@@ -144,6 +177,7 @@ private:
     String8 generateVertexShader(const ProgramDescription& description);
     String8 generateFragmentShader(const ProgramDescription& description);
     void generatePorterDuffBlend(String8& shader, const char* name, SkXfermode::Mode mode);
+    void generateTextureWrap(String8& shader, GLenum wrapS, GLenum wrapT);
 
     KeyedVector<programid, Program*> mCache;
 

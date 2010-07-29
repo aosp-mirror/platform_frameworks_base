@@ -40,6 +40,9 @@ const char* gVS_Header_Uniforms_HasGradient =
         "uniform vec2 gradient;\n"
         "uniform vec2 gradientStart;\n"
         "uniform mat4 screenSpace;\n";
+const char* gVS_Header_Uniforms_HasBitmap =
+        "uniform mat4 textureTransform;\n"
+        "uniform vec2 textureDimension;\n";
 const char* gVS_Header_Varyings_HasTexture =
         "varying vec2 outTexCoords;\n";
 const char* gVS_Header_Varyings_HasBitmap =
@@ -53,6 +56,9 @@ const char* gVS_Main_OutTexCoords =
 const char* gVS_Main_OutGradientIndex =
         "    vec4 location = screenSpace * position;\n"
         "    index = dot(location.xy - gradientStart, gradient) * gradientLength;\n";
+const char* gVS_Main_OutBitmapTexCoords =
+        "    vec4 bitmapCoords = textureTransform * position;\n"
+        "    outBitmapTexCoords = bitmapCoords.xy * textureDimension;\n";
 const char* gVS_Main_Position =
         "    gl_Position = transform * position;\n";
 const char* gVS_Footer =
@@ -97,12 +103,18 @@ const char* gFS_Main_FetchGradient =
         "    vec4 gradientColor = texture2D(gradientSampler, vec2(index, 0.5));\n";
 const char* gFS_Main_FetchBitmap =
         "    vec4 bitmapColor = texture2D(bitmapSampler, outBitmapTexCoords);\n";
+const char* gFS_Main_FetchBitmapNpot =
+        "    vec4 bitmapColor = texture2D(bitmapSampler, wrap(outBitmapTexCoords));\n";
 const char* gFS_Main_BlendShadersBG =
         "    fragColor = blendShaders(bitmapColor, gradientColor)";
 const char* gFS_Main_BlendShadersGB =
         "    fragColor = blendShaders(gradientColor, bitmapColor)";
 const char* gFS_Main_BlendShaders_Modulate =
         " * fragColor.a;\n";
+const char* gFS_Main_GradientShader_Modulate =
+        "    fragColor = gradientColor * fragColor.a;\n";
+const char* gFS_Main_BitmapShader_Modulate =
+        "    fragColor = bitmapColor * fragColor.a;\n";
 const char* gFS_Main_FragColor =
         "    gl_FragColor = fragColor;\n";
 const char* gFS_Main_ApplyColorOp[4] = {
@@ -204,13 +216,16 @@ Program* ProgramCache::generateProgram(const ProgramDescription& description, pr
 String8 ProgramCache::generateVertexShader(const ProgramDescription& description) {
     // Add attributes
     String8 shader(gVS_Header_Attributes);
-    if (description.hasTexture || description.hasBitmap) {
+    if (description.hasTexture) {
         shader.append(gVS_Header_Attributes_TexCoords);
     }
     // Uniforms
     shader.append(gVS_Header_Uniforms);
     if (description.hasGradient) {
         shader.append(gVS_Header_Uniforms_HasGradient);
+    }
+    if (description.hasBitmap) {
+        shader.append(gVS_Header_Uniforms_HasBitmap);
     }
     // Varyings
     if (description.hasTexture) {
@@ -230,6 +245,9 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
         }
         if (description.hasGradient) {
             shader.append(gVS_Main_OutGradientIndex);
+        }
+        if (description.hasBitmap) {
+            shader.append(gVS_Main_OutBitmapTexCoords);
         }
         // Output transformed position
         shader.append(gVS_Main_Position);
@@ -278,6 +296,9 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     if (description.colorOp == ProgramDescription::kColorBlend) {
         generatePorterDuffBlend(shader, "blendColors", description.colorMode);
     }
+    if (description.isBitmapNpot) {
+        generateTextureWrap(shader, description.bitmapWrapS, description.bitmapWrapT);
+    }
 
     // Begin the shader
     shader.append(gFS_Main); {
@@ -295,7 +316,11 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
             shader.append(gFS_Main_FetchGradient);
         }
         if (description.hasBitmap) {
-            shader.append(gFS_Main_FetchBitmap);
+            if (!description.isBitmapNpot) {
+                shader.append(gFS_Main_FetchBitmap);
+            } else {
+                shader.append(gFS_Main_FetchBitmapNpot);
+            }
         }
         // Case when we have two shaders set
         if (description.hasGradient && description.hasBitmap) {
@@ -305,6 +330,12 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
                 shader.append(gFS_Main_BlendShadersGB);
             }
             shader.append(gFS_Main_BlendShaders_Modulate);
+        } else {
+            if (description.hasGradient) {
+                shader.append(gFS_Main_GradientShader_Modulate);
+            } else if (description.hasBitmap) {
+                shader.append(gFS_Main_BitmapShader_Modulate);
+            }
         }
         // Apply the color op if needed
         shader.append(gFS_Main_ApplyColorOp[description.colorOp]);
@@ -325,6 +356,38 @@ void ProgramCache::generatePorterDuffBlend(String8& shader, const char* name,
     shader.append("(vec4 src, vec4 dst) {\n");
     shader.append("    ");
     shader.append(gPorterDuff[mode]);
+    shader.append("}\n");
+}
+
+void ProgramCache::generateTextureWrap(String8& shader, GLenum wrapS, GLenum wrapT) {
+    shader.append("\nvec2 wrap(vec2 texCoords) {\n");
+    if (wrapS == GL_MIRRORED_REPEAT) {
+        shader.append("    float xMod2 = mod(texCoords.x, 2.0);\n");
+        shader.append("    if (xMod2 > 1.0) xMod2 = 2.0 - xMod2;\n");
+    }
+    if (wrapT == GL_MIRRORED_REPEAT) {
+        shader.append("    float yMod2 = mod(texCoords.y, 2.0);\n");
+        shader.append("    if (yMod2 > 1.0) yMod2 = 2.0 - yMod2;\n");
+    }
+    shader.append("    return vec2(");
+    switch (wrapS) {
+        case GL_REPEAT:
+            shader.append("mod(texCoords.x, 1.0)");
+            break;
+        case GL_MIRRORED_REPEAT:
+            shader.append("xMod2");
+            break;
+    }
+    shader.append(", ");
+    switch (wrapT) {
+        case GL_REPEAT:
+            shader.append("mod(texCoords.y, 1.0)");
+            break;
+        case GL_MIRRORED_REPEAT:
+            shader.append("yMod2");
+            break;
+    }
+    shader.append(");\n");
     shader.append("}\n");
 }
 

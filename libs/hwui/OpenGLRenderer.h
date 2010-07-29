@@ -47,21 +47,10 @@ namespace android {
 namespace uirenderer {
 
 ///////////////////////////////////////////////////////////////////////////////
-// Support
-///////////////////////////////////////////////////////////////////////////////
-
-/**
- * Structure mapping Skia xfermodes to OpenGL blending factors.
- */
-struct Blender {
-    SkXfermode::Mode mode;
-    GLenum src;
-    GLenum dst;
-}; // struct Blender
-
-///////////////////////////////////////////////////////////////////////////////
 // Renderer
 ///////////////////////////////////////////////////////////////////////////////
+
+#define REQUIRED_TEXTURE_UNITS_COUNT 3
 
 /**
  * OpenGL renderer used to draw accelerated 2D graphics. The API is a
@@ -294,7 +283,7 @@ private:
     /**
      * Binds the specified texture with the specified wrap modes.
      */
-    inline void bindTexture(GLuint texture, GLenum wrapS, GLenum wrapT);
+    inline void bindTexture(GLuint texture, GLenum wrapS, GLenum wrapT, GLuint textureUnit = 0);
 
     /**
      * Enable or disable blending as necessary. This function sets the appropriate
@@ -312,7 +301,7 @@ private:
      *
      * @return true If the specified program was already in use, false otherwise.
      */
-    inline bool useProgram(const sp<Program>& program);
+    inline bool useProgram(Program* program);
 
     // Dimensions of the drawing surface
     int mWidth, mHeight;
@@ -331,17 +320,14 @@ private:
     sp<Snapshot> mSnapshot;
 
     // Shaders
-    sp<Program> mCurrentProgram;
-    sp<DrawColorProgram> mDrawColorProgram;
-    sp<DrawTextureProgram> mDrawTextureProgram;
-    sp<DrawTextProgram> mDrawTextProgram;
-    sp<DrawLinearGradientProgram> mDrawLinearGradientProgram;
+    Program* mCurrentProgram;
 
     // Used to draw textured quads
     TextureVertex mMeshVertices[4];
 
     // Current texture state
-    GLuint mLastTexture;
+    GLuint mLastTexture[REQUIRED_TEXTURE_UNITS_COUNT];
+    GLint mMaxTextureUnits;
 
     // Last known blend state
     bool mBlend;
