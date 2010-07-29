@@ -35,6 +35,12 @@ public class NotificationData {
         public View row; // the outer expanded view
         public View content; // takes the click events and sends the PendingIntent
         public View expanded; // the inflated RemoteViews
+        public Entry() {}
+        public Entry(IBinder key, StatusBarNotification n, StatusBarIconView ic) {
+            this.key = key;
+            this.notification = n;
+            this.icon = ic;
+        }
     }
     private final ArrayList<Entry> mEntries = new ArrayList<Entry>();
 
@@ -57,6 +63,12 @@ public class NotificationData {
         return -1;
     }
 
+    public int add(Entry entry) {
+        final int index = chooseIndex(entry.notification.notification.when);
+        mEntries.add(index, entry);
+        return index;
+    }
+
     public int add(IBinder key, StatusBarNotification notification, View row, View content,
             View expanded, StatusBarIconView icon) {
         Entry entry = new Entry();
@@ -66,9 +78,7 @@ public class NotificationData {
         entry.content = content;
         entry.expanded = expanded;
         entry.icon = icon;
-        final int index = chooseIndex(notification.notification.when);
-        mEntries.add(index, entry);
-        return index;
+        return add(entry);
     }
 
     public Entry remove(IBinder key) {
