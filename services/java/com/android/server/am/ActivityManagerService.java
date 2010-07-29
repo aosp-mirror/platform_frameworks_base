@@ -6101,17 +6101,19 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     public void handleApplicationStrictModeViolation(
-        IBinder app, int violationMask, ApplicationErrorReport.CrashInfo crashInfo) {
+            IBinder app,
+            int violationMask,
+            StrictMode.ViolationInfo info) {
         ProcessRecord r = findAppProcess(app);
 
         if ((violationMask & StrictMode.PENALTY_DROPBOX) != 0) {
-            Integer stackFingerprint = crashInfo.stackTrace.hashCode();
+            Integer stackFingerprint = info.crashInfo.stackTrace.hashCode();
             boolean logIt = true;
             synchronized (mAlreadyLoggedViolatedStacks) {
                 if (mAlreadyLoggedViolatedStacks.contains(stackFingerprint)) {
                     logIt = false;
                     // TODO: sub-sample into EventLog for these, with
-                    // the crashInfo.durationMillis?  Then we'd get
+                    // the info.durationMillis?  Then we'd get
                     // the relative pain numbers, without logging all
                     // the stack traces repeatedly.  We'd want to do
                     // likewise in the client code, which also does
@@ -6124,7 +6126,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
             if (logIt) {
-                logStrictModeViolationToDropBox(r, crashInfo);
+                logStrictModeViolationToDropBox(r, info);
             }
         }
 
@@ -6139,7 +6141,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 data.put("result", result);
                 data.put("app", r);
                 data.put("violationMask", violationMask);
-                data.put("crashInfo", crashInfo);
+                data.put("info", info);
                 msg.obj = data;
                 mHandler.sendMessage(msg);
 
@@ -6154,9 +6156,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     // these in quick succession so we try to batch these together to
     // minimize disk writes, number of dropbox entries, and maximize
     // compression, by having more fewer, larger records.
-    private void logStrictModeViolationToDropBox(ProcessRecord process,
-                                                 ApplicationErrorReport.CrashInfo crashInfo) {
-        if (crashInfo == null) {
+    private void logStrictModeViolationToDropBox(
+            ProcessRecord process,
+            StrictMode.ViolationInfo info) {
+        if (info == null) {
             return;
         }
         final boolean isSystemApp = process == null ||
@@ -6177,12 +6180,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             appendDropBoxProcessHeaders(process, sb);
             sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
             sb.append("System-App: ").append(isSystemApp).append("\n");
-            if (crashInfo != null && crashInfo.durationMillis != -1) {
-                sb.append("Duration-Millis: ").append(crashInfo.durationMillis).append("\n");
+            sb.append("Uptime-Millis: ").append(info.violationUptimeMillis).append("\n");
+            if (info.violationNumThisLoop != 0) {
+                sb.append("Loop-Violation-Number: ").append(info.violationNumThisLoop).append("\n");
+            }
+            if (info != null && info.durationMillis != -1) {
+                sb.append("Duration-Millis: ").append(info.durationMillis).append("\n");
             }
             sb.append("\n");
-            if (crashInfo != null && crashInfo.stackTrace != null) {
-                sb.append(crashInfo.stackTrace);
+            if (info.crashInfo != null && info.crashInfo.stackTrace != null) {
+                sb.append(info.crashInfo.stackTrace);
             }
             sb.append("\n");
 
