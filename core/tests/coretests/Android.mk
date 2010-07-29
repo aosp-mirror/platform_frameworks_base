@@ -13,7 +13,9 @@ LOCAL_SRC_FILES := \
 
 LOCAL_STATIC_JAVA_LIBRARIES += android-common
 
-LOCAL_JAVA_LIBRARIES := android.test.runner
+LOCAL_DX_FLAGS := --core-library
+LOCAL_STATIC_JAVA_LIBRARIES := core-tests-supportlib
+LOCAL_JAVA_LIBRARIES := android.test.runner android-common
 LOCAL_PACKAGE_NAME := FrameworksCoreTests
 
 LOCAL_CERTIFICATE := platform
