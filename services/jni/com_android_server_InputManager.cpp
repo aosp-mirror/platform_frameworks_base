@@ -180,6 +180,14 @@ static struct {
     jfieldID token;
 } gInputApplicationClassInfo;
 
+static struct {
+    jclass clazz;
+} gKeyEventClassInfo;
+
+static struct {
+    jclass clazz;
+} gMotionEventClassInfo;
+
 // ----------------------------------------------------------------------------
 
 static inline nsecs_t now() {
@@ -2051,32 +2059,29 @@ static void android_server_InputManager_nativeUnregisterInputChannel(JNIEnv* env
     }
 }
 
-static jint android_server_InputManager_nativeInjectKeyEvent(JNIEnv* env, jclass clazz,
-        jobject keyEventObj, jint injectorPid, jint injectorUid,
-        jboolean sync, jint timeoutMillis) {
+static jint android_server_InputManager_nativeInjectInputEvent(JNIEnv* env, jclass clazz,
+        jobject inputEventObj, jint injectorPid, jint injectorUid,
+        jint syncMode, jint timeoutMillis) {
     if (checkInputManagerUnitialized(env)) {
         return INPUT_EVENT_INJECTION_FAILED;
     }
 
-    KeyEvent keyEvent;
-    android_view_KeyEvent_toNative(env, keyEventObj, & keyEvent);
+    if (env->IsInstanceOf(inputEventObj, gKeyEventClassInfo.clazz)) {
+        KeyEvent keyEvent;
+        android_view_KeyEvent_toNative(env, inputEventObj, & keyEvent);
 
-    return gNativeInputManager->getInputManager()->injectInputEvent(& keyEvent,
-            injectorPid, injectorUid, sync, timeoutMillis);
-}
+        return gNativeInputManager->getInputManager()->injectInputEvent(& keyEvent,
+                injectorPid, injectorUid, syncMode, timeoutMillis);
+    } else if (env->IsInstanceOf(inputEventObj, gMotionEventClassInfo.clazz)) {
+        MotionEvent motionEvent;
+        android_view_MotionEvent_toNative(env, inputEventObj, & motionEvent);
 
-static jint android_server_InputManager_nativeInjectMotionEvent(JNIEnv* env, jclass clazz,
-        jobject motionEventObj, jint injectorPid, jint injectorUid,
-        jboolean sync, jint timeoutMillis) {
-    if (checkInputManagerUnitialized(env)) {
+        return gNativeInputManager->getInputManager()->injectInputEvent(& motionEvent,
+                injectorPid, injectorUid, syncMode, timeoutMillis);
+    } else {
+        jniThrowRuntimeException(env, "Invalid input event type.");
         return INPUT_EVENT_INJECTION_FAILED;
     }
-
-    MotionEvent motionEvent;
-    android_view_MotionEvent_toNative(env, motionEventObj, & motionEvent);
-
-    return gNativeInputManager->getInputManager()->injectInputEvent(& motionEvent,
-            injectorPid, injectorUid, sync, timeoutMillis);
 }
 
 static void android_server_InputManager_nativeSetInputWindows(JNIEnv* env, jclass clazz,
@@ -2148,10 +2153,8 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) android_server_InputManager_nativeRegisterInputChannel },
     { "nativeUnregisterInputChannel", "(Landroid/view/InputChannel;)V",
             (void*) android_server_InputManager_nativeUnregisterInputChannel },
-    { "nativeInjectKeyEvent", "(Landroid/view/KeyEvent;IIZI)I",
-            (void*) android_server_InputManager_nativeInjectKeyEvent },
-    { "nativeInjectMotionEvent", "(Landroid/view/MotionEvent;IIZI)I",
-            (void*) android_server_InputManager_nativeInjectMotionEvent },
+    { "nativeInjectInputEvent", "(Landroid/view/InputEvent;IIII)I",
+            (void*) android_server_InputManager_nativeInjectInputEvent },
     { "nativeSetInputWindows", "([Lcom/android/server/InputWindow;)V",
             (void*) android_server_InputManager_nativeSetInputWindows },
     { "nativeSetFocusedApplication", "(Lcom/android/server/InputApplication;)V",
@@ -2317,6 +2320,14 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_FIELD_ID(gInputApplicationClassInfo.token, gInputApplicationClassInfo.clazz,
             "token", "Ljava/lang/Object;");
+
+    // KeyEvent
+
+    FIND_CLASS(gKeyEventClassInfo.clazz, "android/view/KeyEvent");
+
+    // MotionEVent
+
+    FIND_CLASS(gMotionEventClassInfo.clazz, "android/view/MotionEvent");
 
     return 0;
 }

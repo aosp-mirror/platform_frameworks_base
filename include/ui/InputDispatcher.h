@@ -55,6 +55,22 @@ enum {
     INPUT_EVENT_INJECTION_TIMED_OUT = 3
 };
 
+/*
+ * Constants used to determine the input event injection synchronization mode.
+ */
+enum {
+    /* Injection is asynchronous and is assumed always to be successful. */
+    INPUT_EVENT_INJECTION_SYNC_NONE = 0,
+
+    /* Waits for previous events to be dispatched so that the input dispatcher can determine
+     * whether input event injection willbe permitted based on the current input focus.
+     * Does not wait for the input event to finish processing. */
+    INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_RESULT = 1,
+
+    /* Waits for the input event to be completely processed. */
+    INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISHED = 2,
+};
+
 
 /*
  * An input target specifies how an input event is to be dispatched to a particular window
@@ -176,15 +192,14 @@ public:
             float xPrecision, float yPrecision, nsecs_t downTime) = 0;
 
     /* Injects an input event and optionally waits for sync.
-     * This method may block even if sync is false because it must wait for previous events
-     * to be dispatched before it can determine whether input event injection will be
-     * permitted based on the current input focus.
+     * The synchronization mode determines whether the method blocks while waiting for
+     * input injection to proceed.
      * Returns one of the INPUT_EVENT_INJECTION_XXX constants.
      *
      * This method may be called on any thread (usually by the input manager).
      */
     virtual int32_t injectInputEvent(const InputEvent* event,
-            int32_t injectorPid, int32_t injectorUid, bool sync, int32_t timeoutMillis) = 0;
+            int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis) = 0;
 
     /* Preempts input dispatch in progress by making pending synchronous
      * dispatches asynchronous instead.  This method is generally called during a focus
@@ -241,7 +256,7 @@ public:
             float xPrecision, float yPrecision, nsecs_t downTime);
 
     virtual int32_t injectInputEvent(const InputEvent* event,
-            int32_t injectorPid, int32_t injectorUid, bool sync, int32_t timeoutMillis);
+            int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis);
 
     virtual void preemptInputDispatch();
 
@@ -267,11 +282,13 @@ private:
         int32_t type;
         nsecs_t eventTime;
 
-        int32_t injectionResult; // initially INPUT_EVENT_INJECTION_PENDING
-        int32_t injectorPid;     // -1 if not injected
-        int32_t injectorUid;     // -1 if not injected
+        int32_t injectionResult;  // initially INPUT_EVENT_INJECTION_PENDING
+        bool    injectionIsAsync; // set to true if injection is not waiting for the result
+        int32_t injectorPid;      // -1 if not injected
+        int32_t injectorUid;      // -1 if not injected
 
         bool dispatchInProgress; // initially false, set to true while dispatching
+        int32_t pendingSyncDispatches; // the number of synchronous dispatches in progress
 
         inline bool isInjected() { return injectorPid >= 0; }
     };
@@ -340,6 +357,10 @@ private:
         //   headMotionSample will be initialized to tailMotionSample and tailMotionSample
         //   will be set to NULL.
         MotionSample* tailMotionSample;
+
+        inline bool isSyncTarget() {
+            return targetFlags & InputTarget::FLAG_SYNC;
+        }
     };
 
     // A command entry captures state and behavior for an action to be performed in the
@@ -497,8 +518,7 @@ private:
         // Since there can only ever be at most one such target at a time, if there is one,
         // it must be at the tail because nothing else can be enqueued after it.
         inline bool hasPendingSyncTarget() {
-            return ! outboundQueue.isEmpty()
-                    && (outboundQueue.tail.prev->targetFlags & InputTarget::FLAG_SYNC);
+            return ! outboundQueue.isEmpty() && outboundQueue.tail.prev->isSyncTarget();
         }
 
         // Gets the time since the current event was originally obtained from the input driver.
@@ -559,10 +579,11 @@ private:
 
     // Event injection and synchronization.
     Condition mInjectionResultAvailableCondition;
-    Condition mFullySynchronizedCondition;
-    bool isFullySynchronizedLocked();
     EventEntry* createEntryFromInputEventLocked(const InputEvent* event);
     void setInjectionResultLocked(EventEntry* entry, int32_t injectionResult);
+
+    Condition mInjectionSyncFinishedCondition;
+    void decrementPendingSyncDispatchesLocked(EventEntry* entry);
 
     // Key repeat tracking.
     // XXX Move this up to the input reader instead.
