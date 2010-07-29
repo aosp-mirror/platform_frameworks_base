@@ -16,6 +16,11 @@
 
 package android.telephony;
 
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
+
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -1317,6 +1322,88 @@ public class PhoneNumberUtils
                 p++;
            }
         }
+    }
+
+    /**
+     * Format the given phoneNumber to the E.164 representation.
+     * <p>
+     * The given phone number must have an area code and could have a country
+     * code.
+     * <p>
+     * The defaultCountryIso is used to validate the given number and generate
+     * the E.164 phone number if the given number doesn't have a country code.
+     *
+     * @param phoneNumber
+     *            the phone number to format
+     * @param defaultCountryIso
+     *            the ISO 3166-1 two letters country code
+     * @return the E.164 representation, or null if the given phone number is
+     *         not valid.
+     *
+     * @hide
+     */
+    public static String formatNumberToE164(String phoneNumber, String defaultCountryIso) {
+        PhoneNumberUtil util = PhoneNumberUtil.getInstance();
+        String result = null;
+        try {
+            PhoneNumber pn = util.parse(phoneNumber, defaultCountryIso);
+            if (util.isValidNumber(pn)) {
+                result = util.format(pn, PhoneNumberFormat.E164);
+            }
+        } catch (NumberParseException e) {
+        }
+        return result;
+    }
+
+    /**
+     * Format a phone number.
+     * <p>
+     * If the given number doesn't have the country code, the phone will be
+     * formatted to the default country's convention.
+     *
+     * @param phoneNumber
+     *            the number to be formatted.
+     * @param defaultCountryIso
+     *            the ISO 3166-1 two letters country code whose convention will
+     *            be used if the given number doesn't have the country code.
+     * @return the formatted number, or null if the given number is not valid.
+     *
+     * @hide
+     */
+    public static String formatNumber(String phoneNumber, String defaultCountryIso) {
+        PhoneNumberUtil util = PhoneNumberUtil.getInstance();
+        String result = null;
+        try {
+            PhoneNumber pn = util.parse(phoneNumber, defaultCountryIso);
+            result = util.formatInOriginalFormat(pn, defaultCountryIso);
+        } catch (NumberParseException e) {
+        }
+        return result;
+    }
+
+    /**
+     * Normalize a phone number by removing the characters other than digits. If
+     * the given number has keypad letters, the letters will be converted to
+     * digits first.
+     * 
+     * @param phoneNumber
+     *            the number to be normalized.
+     * @return the normalized number.
+     *
+     * @hide
+     */
+    public static String normalizeNumber(String phoneNumber) {
+        StringBuilder sb = new StringBuilder();
+        int len = phoneNumber.length();
+        for (int i = 0; i < len; i++) {
+            char c = phoneNumber.charAt(i);
+            if (PhoneNumberUtils.isISODigit(c)) {
+                sb.append(c);
+            } else if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
+                return normalizeNumber(PhoneNumberUtils.convertKeypadLettersToDigits(phoneNumber));
+            }
+        }
+        return sb.toString();
     }
 
     // Three and four digit phone numbers for either special services,

@@ -503,4 +503,27 @@ public class PhoneNumberUtilsTest extends AndroidTestCase {
         assertTrue(PhoneNumberUtils.isVoiceMailNumber(mVoiceMailNumber));
         */
     }
+
+    @SmallTest
+    public void testFormatNumberToE164() {
+        assertEquals("+16502910000", PhoneNumberUtils.formatNumberToE164("650 2910000", "us"));
+        assertNull(PhoneNumberUtils.formatNumberToE164("1234567", "us"));
+        assertEquals("+18004664114", PhoneNumberUtils.formatNumberToE164("800-GOOG-114", "us"));
+    }
+
+    @SmallTest
+    public void testFormatNumber() {
+        assertEquals("(650) 291-0000", PhoneNumberUtils.formatNumber("650 2910000", "us"));
+        assertEquals("123-4567", PhoneNumberUtils.formatNumber("1234567", "us"));
+        assertEquals("(800) 466-4114", PhoneNumberUtils.formatNumber("800-GOOG-114", "us"));
+
+    }
+
+    @SmallTest
+    public void testNormalizeNumber() {
+        assertEquals("6502910000", PhoneNumberUtils.normalizeNumber("650 2910000"));
+        assertEquals("1234567", PhoneNumberUtils.normalizeNumber("12,3#4*567"));
+        assertEquals("8004664114", PhoneNumberUtils.normalizeNumber("800-GOOG-114"));
+    }
+
 }
