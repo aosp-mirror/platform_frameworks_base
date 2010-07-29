@@ -19,9 +19,9 @@ package android.core;
 import junit.framework.TestCase;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.harmony.xnet.provider.jsse.SSLContextImpl;
-import org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache;
 import org.apache.harmony.xnet.provider.jsse.FileClientSessionCache;
+import org.apache.harmony.xnet.provider.jsse.OpenSSLContextImpl;
+import org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -907,7 +907,7 @@ public class SSLSocketTest extends TestCase {
      */
     public void testClientSessionCaching() throws IOException,
             KeyManagementException {
-        SSLContextImpl context = new SSLContextImpl();
+        OpenSSLContextImpl context = new OpenSSLContextImpl();
 
         // Cache size = 2.
         FakeClientSessionCache fakeCache = new FakeClientSessionCache();
@@ -997,7 +997,7 @@ public class SSLSocketTest extends TestCase {
 
     public void testFileBasedClientSessionCache() throws IOException,
             KeyManagementException {
-        SSLContextImpl context = new SSLContextImpl();
+        OpenSSLContextImpl context = new OpenSSLContextImpl();
         String tmpDir = System.getProperty("java.io.tmpdir");
         if (tmpDir == null) {
             fail("Please set 'java.io.tmpdir' system property.");
