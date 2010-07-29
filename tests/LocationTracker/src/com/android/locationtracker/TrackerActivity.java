@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -210,12 +211,11 @@ public class TrackerActivity extends ListActivity {
     }
 
     private String getUniqueFileName(String ext) {
-        File dir = new File("/sdcard/locationtracker");
+        File dir = new File(Environment.getExternalStorageDirectory() + "/locationtracker");
         if (!dir.exists()) {
             dir.mkdir();
         }
-        return "/sdcard/locationtracker/tracking-" +
-            DateUtils.getCurrentTimestamp() + "." + ext;
+        return dir + "/tracking-" + DateUtils.getCurrentTimestamp() + "." + ext;
     }
 
     private void launchSettings() {

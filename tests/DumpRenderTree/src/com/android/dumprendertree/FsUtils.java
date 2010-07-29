@@ -18,6 +18,7 @@ package com.android.dumprendertree;
 
 import com.android.dumprendertree.forwarder.ForwardService;
 
+import android.os.Environment;
 import android.util.Log;
 
 import java.io.BufferedOutputStream;
@@ -32,11 +33,17 @@ import java.util.regex.Pattern;
 public class FsUtils {
 
     private static final String LOGTAG = "FsUtils";
-    static final String HTTP_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/";
-    static final String HTTPS_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/ssl/";
-    static final String HTTP_LOCAL_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/local/";
-    static final String HTTP_MEDIA_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/media/";
-    static final String HTTP_WML_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/wml/";
+    static final String EXTERNAL_DIR = Environment.getExternalStorageDirectory().toString();
+    static final String HTTP_TESTS_PREFIX =
+        EXTERNAL_DIR + "/android/layout_tests/http/tests/";
+    static final String HTTPS_TESTS_PREFIX =
+        EXTERNAL_DIR + "/android/layout_tests/http/tests/ssl/";
+    static final String HTTP_LOCAL_TESTS_PREFIX =
+        EXTERNAL_DIR + "/android/layout_tests/http/tests/local/";
+    static final String HTTP_MEDIA_TESTS_PREFIX =
+        EXTERNAL_DIR + "/android/layout_tests/http/tests/media/";
+    static final String HTTP_WML_TESTS_PREFIX =
+        EXTERNAL_DIR + "/android/layout_tests/http/tests/wml/";
 
     private FsUtils() {
         //no creation of instances
