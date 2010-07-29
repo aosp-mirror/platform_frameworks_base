@@ -327,6 +327,7 @@ void FontRenderer::initTextTexture() {
     mTextTexture = new unsigned char[mCacheWidth * mCacheHeight];
     mUploadTexture = false;
 
+    glActiveTexture(GL_TEXTURE0);
     glGenTextures(1, &mTextureId);
     glBindTexture(GL_TEXTURE_2D, mTextureId);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

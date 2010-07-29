@@ -68,6 +68,7 @@ public class ShadersActivity extends Activity {
                     Shader.TileMode.REPEAT);
             Matrix m1 = new Matrix();
             m1.setTranslate(mTexWidth / 2.0f, mTexHeight / 2.0f);
+            m1.postRotate(45, 0, 0);
             mTranslatedShader.setLocalMatrix(m1);
             
             mScaledShader = new BitmapShader(texture, Shader.TileMode.MIRROR,

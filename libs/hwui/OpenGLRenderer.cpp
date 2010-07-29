@@ -62,6 +62,15 @@ static const TextureVertex gMeshVertices[] = {
 static const GLsizei gMeshStride = sizeof(TextureVertex);
 static const GLsizei gMeshCount = 4;
 
+/**
+ * Structure mapping Skia xfermodes to OpenGL blending factors.
+ */
+struct Blender {
+    SkXfermode::Mode mode;
+    GLenum src;
+    GLenum dst;
+}; // struct Blender
+
 // In this array, the index of each Blender equals the value of the first
 // entry. For instance, gBlends[1] == gBlends[SkXfermode::kSrc_Mode]
 static const Blender gBlends[] = {
@@ -80,9 +89,15 @@ static const Blender gBlends[] = {
 };
 
 static const GLint gTileModes[] = {
-        GL_CLAMP_TO_EDGE,   // == SkShader::kClamp_TileMode
-        GL_REPEAT,          // == SkShader::kRepeat_Mode
-        GL_MIRRORED_REPEAT  // == SkShader::kMirror_TileMode
+        GL_CLAMP_TO_EDGE,   // SkShader::kClamp_TileMode
+        GL_REPEAT,          // SkShader::kRepeat_Mode
+        GL_MIRRORED_REPEAT  // SkShader::kMirror_TileMode
+};
+
+static const GLenum gTextureUnits[] = {
+        GL_TEXTURE0,        // Bitmap or text
+        GL_TEXTURE1,        // Gradient
+        GL_TEXTURE2         // Bitmap shader
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -119,11 +134,7 @@ OpenGLRenderer::OpenGLRenderer():
         LOGD("  Using default gradient cache size of %.2fMB", DEFAULT_GRADIENT_CACHE_SIZE);
     }
 
-    mDrawColorProgram = new DrawColorProgram;
-    mDrawTextureProgram = new DrawTextureProgram;
-    mDrawTextProgram = new DrawTextProgram;
-    mDrawLinearGradientProgram = new DrawLinearGradientProgram;
-    mCurrentProgram = mDrawTextureProgram;
+    mCurrentProgram = NULL;
 
     mShader = kShaderNone;
     mShaderTileX = GL_CLAMP_TO_EDGE;
@@ -131,20 +142,13 @@ OpenGLRenderer::OpenGLRenderer():
     mShaderMatrix = NULL;
     mShaderBitmap = NULL;
 
-    mLastTexture = 0;
-
     memcpy(mMeshVertices, gMeshVertices, sizeof(gMeshVertices));
 
-    ProgramDescription d;
-    mProgramCache.get(d);
-    d.hasTexture = true;
-    mProgramCache.get(d);
-    d.hasAlpha8Texture = true;
-    d.hasGradient = true;
-    d.hasBitmap = true;
-    d.shadersMode = SkXfermode::kDstOut_Mode;
-    d.colorOp = ProgramDescription::kColorMatrix;
-    mProgramCache.get(d);
+    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &mMaxTextureUnits);
+    if (mMaxTextureUnits < REQUIRED_TEXTURE_UNITS_COUNT) {
+        LOGW("At least %d texture units are required!", REQUIRED_TEXTURE_UNITS_COUNT);
+    }
+    mLastTexture[0] = mLastTexture[1] = mLastTexture[2] = 0;
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
@@ -468,6 +472,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     const float u2 = srcRight / width;
     const float v2 = srcBottom / height;
 
+    // TODO: Do this in the shader
     resetDrawTextureTexCoords(u1, v1, u2, v2);
 
     drawTextureRect(dstLeft, dstTop, dstRight, dstBottom, texture, paint);
@@ -532,6 +537,8 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         return;
     }
 
+    glActiveTexture(GL_TEXTURE0);
+
     float length;
     switch (paint->getTextAlign()) {
         case SkPaint::kCenter_Align:
@@ -558,22 +565,29 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     mModelView.loadIdentity();
 
-    useProgram(mDrawTextProgram);
-    mDrawTextProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+    ProgramDescription description;
+    description.hasTexture = true;
+    description.hasAlpha8Texture = true;
+
+    useProgram(mProgramCache.get(description));
+    mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
 
     chooseBlending(true, mode);
-    bindTexture(mFontRenderer.getTexture(), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+    bindTexture(mFontRenderer.getTexture(), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, 0);
+
+    int texCoordsSlot = mCurrentProgram->getAttrib("texCoords");
+    glEnableVertexAttribArray(texCoordsSlot);
 
     // Always premultiplied
-    glUniform4f(mDrawTextProgram->color, r, g, b, a);
+    glUniform4f(mCurrentProgram->color, r, g, b, a);
 
     // TODO: Implement scale properly
     const Rect& clip = mSnapshot->getLocalClip();
-
     mFontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()), paint->getTextSize());
     mFontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glDisableVertexAttribArray(texCoordsSlot);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -599,8 +613,7 @@ void OpenGLRenderer::setupBitmapShader(SkBitmap* bitmap, SkShader::TileMode tile
 }
 
 void OpenGLRenderer::setupLinearGradientShader(SkShader* shader, float* bounds, uint32_t* colors,
-        float* positions, int count, SkShader::TileMode tileMode, SkMatrix* matrix,
-        bool hasAlpha) {
+        float* positions, int count, SkShader::TileMode tileMode, SkMatrix* matrix, bool hasAlpha) {
     // TODO: We should use a struct to describe each shader
     mShader = OpenGLRenderer::kShaderLinearGradient;
     mShaderKey = shader;
@@ -650,30 +663,31 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
 
-    if (!useProgram(mDrawColorProgram)) {
+    ProgramDescription description;
+    Program* program = mProgramCache.get(description);
+    if (!useProgram(program)) {
         const GLvoid* vertices = &mMeshVertices[0].position[0];
         const GLvoid* texCoords = &mMeshVertices[0].texture[0];
 
-        glVertexAttribPointer(mDrawColorProgram->position, 2, GL_FLOAT, GL_FALSE,
+        glVertexAttribPointer(mCurrentProgram->position, 2, GL_FLOAT, GL_FALSE,
                 gMeshStride, vertices);
-        glVertexAttribPointer(mDrawColorProgram->texCoords, 2, GL_FLOAT, GL_FALSE,
-                gMeshStride, texCoords);
     }
 
     if (!ignoreTransform) {
-        mDrawColorProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+        mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
     } else {
         mat4 identity;
-        mDrawColorProgram->set(mOrthoMatrix, mModelView, identity);
+        mCurrentProgram->set(mOrthoMatrix, mModelView, identity);
     }
 
-    glUniform4f(mDrawColorProgram->color, r, g, b, a);
+    glUniform4f(mCurrentProgram->color, r, g, b, a);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
 }
 
 void OpenGLRenderer::drawLinearGradientShader(float left, float top, float right, float bottom,
         float alpha, SkXfermode::Mode mode) {
+    glActiveTexture(GL_TEXTURE1);
     Texture* texture = mGradientCache.get(mShaderKey);
     if (!texture) {
         SkShader::TileMode tileMode = SkShader::kClamp_TileMode;
@@ -690,14 +704,18 @@ void OpenGLRenderer::drawLinearGradientShader(float left, float top, float right
                 mShaderPositions, mShaderCount, tileMode);
     }
 
+    ProgramDescription description;
+    description.hasGradient = true;
+
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
 
-    useProgram(mDrawLinearGradientProgram);
-    mDrawLinearGradientProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+    useProgram(mProgramCache.get(description));
+    mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
 
     chooseBlending(mShaderBlend || alpha < 1.0f, mode);
-    bindTexture(texture->id, mShaderTileX, mShaderTileY);
+    bindTexture(texture->id, mShaderTileX, mShaderTileY, 1);
+    glUniform1i(mCurrentProgram->getUniform("gradientSampler"), 1);
 
     Rect start(mShaderBounds[0], mShaderBounds[1], mShaderBounds[2], mShaderBounds[3]);
     if (mShaderMatrix) {
@@ -713,15 +731,15 @@ void OpenGLRenderer::drawLinearGradientShader(float left, float top, float right
     screenSpace.multiply(mModelView);
 
     // Always premultiplied
-    glUniform4f(mDrawLinearGradientProgram->color, alpha, alpha, alpha, alpha);
-    glUniform2f(mDrawLinearGradientProgram->start, start.left, start.top);
-    glUniform2f(mDrawLinearGradientProgram->gradient, gradientX, gradientY);
-    glUniform1f(mDrawLinearGradientProgram->gradientLength,
+    glUniform4f(mCurrentProgram->color, alpha, alpha, alpha, alpha);
+    glUniform2f(mCurrentProgram->getUniform("gradientStart"), start.left, start.top);
+    glUniform2f(mCurrentProgram->getUniform("gradient"), gradientX, gradientY);
+    glUniform1f(mCurrentProgram->getUniform("gradientLength"),
             1.0f / (gradientX * gradientX + gradientY * gradientY));
-    glUniformMatrix4fv(mDrawLinearGradientProgram->screenSpace, 1, GL_FALSE,
+    glUniformMatrix4fv(mCurrentProgram->getUniform("screenSpace"), 1, GL_FALSE,
             &screenSpace.data[0]);
 
-    glVertexAttribPointer(mDrawLinearGradientProgram->position, 2, GL_FLOAT, GL_FALSE,
+    glVertexAttribPointer(mCurrentProgram->position, 2, GL_FLOAT, GL_FALSE,
             gMeshStride, &mMeshVertices[0].position[0]);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
@@ -729,42 +747,55 @@ void OpenGLRenderer::drawLinearGradientShader(float left, float top, float right
 
 void OpenGLRenderer::drawBitmapShader(float left, float top, float right, float bottom,
         float alpha, SkXfermode::Mode mode) {
+    glActiveTexture(GL_TEXTURE2);
     const Texture* texture = mTextureCache.get(mShaderBitmap);
 
     const float width = texture->width;
     const float height = texture->height;
 
-    // This could be done in the vertex shader but we have only 4 vertices
-    float u1 = 0.0f;
-    float v1 = 0.0f;
-    float u2 = right - left;
-    float v2 = bottom - top;
+    mModelView.loadTranslate(left, top, 0.0f);
+    mModelView.scale(right - left, bottom - top, 1.0f);
 
-    // TODO: If the texture is not pow, use a shader to support repeat/mirror
+    mat4 textureTransform;
     if (mShaderMatrix) {
         SkMatrix inverse;
         mShaderMatrix->invert(&inverse);
-        mat4 m(inverse);
-        Rect r(u1, v1, u2, v2);
-        m.mapRect(r);
-
-        u1 = r.left;
-        u2 = r.right;
-        v1 = r.top;
-        v2 = r.bottom;
+        textureTransform.load(inverse);
+        textureTransform.multiply(mModelView);
+    } else {
+        textureTransform.load(mModelView);
     }
 
-    u1 /= width;
-    u2 /= width;
-    v1 /= height;
-    v2 /= height;
+    ProgramDescription description;
+    description.hasBitmap = true;
+    // The driver does not support non-power of two mirrored/repeated
+    // textures, so do it ourselves
+    if (!mExtensions.hasNPot()) {
+        description.isBitmapNpot = true;
+        description.bitmapWrapS = mShaderTileX;
+        description.bitmapWrapT = mShaderTileY;
+    }
 
-    resetDrawTextureTexCoords(u1, v1, u2, v2);
+    useProgram(mProgramCache.get(description));
+    mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
 
-    drawTextureMesh(left, top, right, bottom, texture->id, alpha, mode, texture->blend,
-            &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0], NULL);
+    chooseBlending(texture->blend || alpha < 1.0f, mode);
 
-    resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
+    // Texture
+    bindTexture(texture->id, mShaderTileX, mShaderTileY, 2);
+    glUniform1i(mCurrentProgram->getUniform("bitmapSampler"), 2);
+    glUniformMatrix4fv(mCurrentProgram->getUniform("textureTransform"), 1,
+            GL_FALSE, &textureTransform.data[0]);
+    glUniform2f(mCurrentProgram->getUniform("textureDimension"), 1.0f / width, 1.0f / height);
+
+    // Always premultiplied
+    glUniform4f(mCurrentProgram->color, alpha, alpha, alpha, alpha);
+
+    // Mesh
+    glVertexAttribPointer(mCurrentProgram->position, 2, GL_FLOAT, GL_FALSE,
+            gMeshStride, &mMeshVertices[0].position[0]);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
 }
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
@@ -786,28 +817,37 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
 void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float bottom,
         GLuint texture, float alpha, SkXfermode::Mode mode, bool blend,
         GLvoid* vertices, GLvoid* texCoords, GLvoid* indices, GLsizei elementsCount) {
+    ProgramDescription description;
+    description.hasTexture = true;
+
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
 
-    useProgram(mDrawTextureProgram);
-    mDrawTextureProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+    useProgram(mProgramCache.get(description));
+    mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
 
     chooseBlending(blend || alpha < 1.0f, mode);
-    bindTexture(texture, mShaderTileX, mShaderTileY);
+
+    // Texture
+    bindTexture(texture, mShaderTileX, mShaderTileY, 0);
+    glUniform1i(mCurrentProgram->getUniform("sampler"), 0);
 
     // Always premultiplied
-    glUniform4f(mDrawTextureProgram->color, alpha, alpha, alpha, alpha);
+    glUniform4f(mCurrentProgram->color, alpha, alpha, alpha, alpha);
 
-    glVertexAttribPointer(mDrawTextureProgram->position, 2, GL_FLOAT, GL_FALSE,
+    // Mesh
+    int texCoordsSlot = mCurrentProgram->getAttrib("texCoords");
+    glEnableVertexAttribArray(texCoordsSlot);
+    glVertexAttribPointer(mCurrentProgram->position, 2, GL_FLOAT, GL_FALSE,
             gMeshStride, vertices);
-    glVertexAttribPointer(mDrawTextureProgram->texCoords, 2, GL_FLOAT, GL_FALSE,
-            gMeshStride, texCoords);
+    glVertexAttribPointer(texCoordsSlot, 2, GL_FLOAT, GL_FALSE, gMeshStride, texCoords);
 
     if (!indices) {
         glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
     } else {
         glDrawElements(GL_TRIANGLES, elementsCount, GL_UNSIGNED_SHORT, indices);
     }
+    glDisableVertexAttribArray(texCoordsSlot);
 }
 
 void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode, bool isPremultiplied) {
@@ -836,9 +876,9 @@ void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode, bool isPr
     mBlend = blend;
 }
 
-bool OpenGLRenderer::useProgram(const sp<Program>& program) {
+bool OpenGLRenderer::useProgram(Program* program) {
     if (!program->isInUse()) {
-        mCurrentProgram->remove();
+        if (mCurrentProgram != NULL) mCurrentProgram->remove();
         program->use();
         mCurrentProgram = program;
         return false;
@@ -875,12 +915,12 @@ void OpenGLRenderer::getAlphaAndMode(const SkPaint* paint, int* alpha, SkXfermod
     }
 }
 
-void OpenGLRenderer::bindTexture(GLuint texture, GLenum wrapS, GLenum wrapT) {
-    if (texture != mLastTexture) {
+void OpenGLRenderer::bindTexture(GLuint texture, GLenum wrapS, GLenum wrapT, GLuint textureUnit) {
+    glActiveTexture(gTextureUnits[textureUnit]);
+    if (texture != mLastTexture[textureUnit]) {
         glBindTexture(GL_TEXTURE_2D, texture);
-        mLastTexture = texture;
+        mLastTexture[textureUnit] = texture;
     }
-    // TODO: Don't set the texture parameters every time
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
 }
