@@ -475,6 +475,8 @@ class ServerThread extends Thread {
         } catch (RemoteException e) {
         }
 
+        wm.initDisplay();
+
         // These are needed to propagate to the runnable below.
         final StatusBarManagerService statusBarF = statusBar;
         final BatteryService batteryF = battery;

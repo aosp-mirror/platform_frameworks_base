@@ -1790,18 +1790,11 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean reportNewConfig = false;
         WindowState attachedWindow = null;
         WindowState win = null;
+        long origId;
 
         synchronized(mWindowMap) {
-            // Instantiating a Display requires talking with the simulator,
-            // so don't do it until we know the system is mostly up and
-            // running.
             if (mDisplay == null) {
-                WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
-                mDisplay = wm.getDefaultDisplay();
-                mInitialDisplayWidth = mDisplay.getWidth();
-                mInitialDisplayHeight = mDisplay.getHeight();
-                mInputManager.setDisplaySize(0, mInitialDisplayWidth, mInitialDisplayHeight);
-                reportNewConfig = true;
+                throw new IllegalStateException("Display has not been initialialized");
             }
 
             if (mWindowMap.containsKey(client.asBinder())) {
@@ -1907,7 +1900,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             res = WindowManagerImpl.ADD_OKAY;
 
-            final long origId = Binder.clearCallingIdentity();
+            origId = Binder.clearCallingIdentity();
 
             if (addToken) {
                 mTokenMap.put(attrs.token, token);
@@ -1984,14 +1977,10 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        // sendNewConfiguration() checks caller permissions so we must call it with
-        // privilege.  updateOrientationFromAppTokens() clears and resets the caller
-        // identity anyway, so it's safe to just clear & restore around this whole
-        // block.
-        final long origId = Binder.clearCallingIdentity();
         if (reportNewConfig) {
             sendNewConfiguration();
         }
+
         Binder.restoreCallingIdentity(origId);
 
         return res;
@@ -5541,6 +5530,24 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void systemReady() {
         mPolicy.systemReady();
+    }
+
+    public void initDisplay() {
+        synchronized(mWindowMap) {
+            if (mDisplay != null) {
+                throw new IllegalStateException("Display already initialized");
+            }
+            WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
+            mDisplay = wm.getDefaultDisplay();
+            mInitialDisplayWidth = mDisplay.getWidth();
+            mInitialDisplayHeight = mDisplay.getHeight();
+            mInputManager.setDisplaySize(0, mInitialDisplayWidth, mInitialDisplayHeight);
+        }
+
+        try {
+            mActivityManager.updateConfiguration(null);
+        } catch (RemoteException e) {
+        }
     }
 
     // -------------------------------------------------------------
