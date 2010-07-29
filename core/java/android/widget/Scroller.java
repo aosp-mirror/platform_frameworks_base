@@ -218,7 +218,11 @@ public class Scroller  {
                 // Pin to mMinY <= mCurrY <= mMaxY
                 mCurrY = Math.min(mCurrY, mMaxY);
                 mCurrY = Math.max(mCurrY, mMinY);
-                
+
+                if (mCurrX == mFinalX && mCurrY == mFinalY) {
+                    mFinished = true;
+                }
+
                 break;
             }
         }
