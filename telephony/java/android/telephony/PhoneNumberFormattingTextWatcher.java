@@ -81,7 +81,7 @@ public class PhoneNumberFormattingTextWatcher implements TextWatcher {
      * may not take effect on this instance.
      */
     public PhoneNumberFormattingTextWatcher() {
-        this (Locale.getDefault() != null ? Locale.getDefault().getCountry() : "US");
+        this(Locale.getDefault().getCountry());
     }
 
     /**
@@ -93,6 +93,7 @@ public class PhoneNumberFormattingTextWatcher implements TextWatcher {
      * @hide
      */
     public PhoneNumberFormattingTextWatcher(String countryCode) {
+        if (countryCode == null) throw new IllegalArgumentException();
         mFormatter = PhoneNumberUtil.getInstance().getAsYouTypeFormatter(countryCode);
     }
 
@@ -131,7 +132,7 @@ public class PhoneNumberFormattingTextWatcher implements TextWatcher {
             stopFormatting();
         } else if (mState == STATE_OTHER) {
             // User must insert or remove the non-dialable characters in the begin or middle of
-            // number, stop formatting. 
+            // number, stop formatting.
             stopFormatting();
         }
     }
