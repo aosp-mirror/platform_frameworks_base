@@ -22,17 +22,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.util.Log;
 import android.webkit.WebIconDatabase;
 
-import java.util.Date;
-
 public class Browser {
     private static final String LOGTAG = "browser";
-    public static final Uri BOOKMARKS_URI =
-        Uri.parse("content://browser/bookmarks");
+
+    /**
+     * A table containing both bookmarks and history items. The columns of the table are defined in
+     * {@link BookmarkColumns}. Reading this table requires the
+     * {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS} permission and writing to it
+     * requires the {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS} permission.
+     */
+    public static final Uri BOOKMARKS_URI = Uri.parse("content://browser/bookmarks");
 
     /**
      * The name of extra data when starting Browser with ACTION_VIEW or
@@ -49,12 +53,11 @@ public class Browser {
      * application.
      * <p>
      * The value is a unique identification string that will be used to
-     * indentify the calling application. The Browser will attempt to reuse the
+     * identify the calling application. The Browser will attempt to reuse the
      * same window each time the application launches the Browser with the same
      * identifier.
      */
-    public static final String EXTRA_APPLICATION_ID =
-        "com.android.browser.application_id";
+    public static final String EXTRA_APPLICATION_ID = "com.android.browser.application_id";
 
     /**
      * The name of the extra data in the VIEW intent. The data are key/value
@@ -68,10 +71,17 @@ public class Browser {
     /* if you change column order you must also change indices
        below */
     public static final String[] HISTORY_PROJECTION = new String[] {
-        BookmarkColumns._ID, BookmarkColumns.URL, BookmarkColumns.VISITS,
-        BookmarkColumns.DATE, BookmarkColumns.BOOKMARK, BookmarkColumns.TITLE,
-        BookmarkColumns.FAVICON, BookmarkColumns.THUMBNAIL,
-        BookmarkColumns.TOUCH_ICON, BookmarkColumns.USER_ENTERED };
+            BookmarkColumns._ID, // 0
+            BookmarkColumns.URL, // 1
+            BookmarkColumns.VISITS, // 2
+            BookmarkColumns.DATE, // 3
+            BookmarkColumns.BOOKMARK, // 4
+            BookmarkColumns.TITLE, // 5
+            BookmarkColumns.FAVICON, // 6
+            BookmarkColumns.THUMBNAIL, // 7
+            BookmarkColumns.TOUCH_ICON, // 8
+            BookmarkColumns.USER_ENTERED, // 9
+    };
 
     /* these indices dependent on HISTORY_PROJECTION */
     public static final int HISTORY_PROJECTION_ID_INDEX = 0;
@@ -92,19 +102,33 @@ public class Browser {
 
     /* columns needed to determine whether to truncate history */
     public static final String[] TRUNCATE_HISTORY_PROJECTION = new String[] {
-        BookmarkColumns._ID, BookmarkColumns.DATE, };
+            BookmarkColumns._ID,
+            BookmarkColumns.DATE,
+    };
+
     public static final int TRUNCATE_HISTORY_PROJECTION_ID_INDEX = 0;
 
     /* truncate this many history items at a time */
     public static final int TRUNCATE_N_OLDEST = 5;
 
-    public static final Uri SEARCHES_URI =
-        Uri.parse("content://browser/searches");
+    /**
+     * A table containing a log of browser searches. The columns of the table are defined in
+     * {@link SearchColumns}. Reading this table requires the
+     * {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS} permission and writing to it
+     * requires the {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS} permission.
+     */
+    public static final Uri SEARCHES_URI = Uri.parse("content://browser/searches");
 
-    /* if you change column order you must also change indices
-       below */
+    /**
+     * A projection of {@link #SEARCHES_URI} that contains {@link SearchColumns#_ID},
+     * {@link SearchColumns#SEARCH}, and {@link SearchColumns#DATE}.
+     */
     public static final String[] SEARCHES_PROJECTION = new String[] {
-        SearchColumns._ID, SearchColumns.SEARCH, SearchColumns.DATE };
+            // if you change column order you must also change indices below
+            SearchColumns._ID, // 0
+            SearchColumns.SEARCH, // 1
+            SearchColumns.DATE, // 2
+    };
 
     /* these indices dependent on SEARCHES_PROJECTION */
     public static final int SEARCHES_PROJECTION_SEARCH_INDEX = 1;
@@ -121,9 +145,10 @@ public class Browser {
     private static final int MAX_HISTORY_COUNT = 250;
 
     /**
-     *  Open the AddBookmark activity to save a bookmark.  Launch with
-     *  and/or url, which can be edited by the user before saving.
-     *  @param c        Context used to launch the AddBookmark activity.
+     *  Open an activity to save a bookmark. Launch with a title
+     *  and/or a url, both of which can be edited by the user before saving.
+     *
+     *  @param c        Context used to launch the activity to add a bookmark.
      *  @param title    Title for the bookmark. Can be null or empty string.
      *  @param url      Url for the bookmark. Can be null or empty string.
      */
@@ -152,8 +177,15 @@ public class Browser {
      */
     public final static String EXTRA_SHARE_FAVICON = "share_favicon";
 
-    public static final void sendString(Context c, String s) {
-        sendString(c, s, c.getString(com.android.internal.R.string.sendText));
+    /**
+     * Sends the given string using an Intent with {@link Intent#ACTION_SEND} and a mime type
+     * of text/plain. The string is put into {@link Intent#EXTRA_TEXT}.
+     *
+     * @param context the context used to start the activity
+     * @param string the string to send
+     */
+    public static final void sendString(Context context, String string) {
+        sendString(context, string, context.getString(com.android.internal.R.string.sendText));
     }
 
     /**
@@ -181,20 +213,26 @@ public class Browser {
     }
 
     /**
-     *  Return a cursor pointing to a list of all the bookmarks.
+     *  Return a cursor pointing to a list of all the bookmarks. The cursor will have a single
+     *  column, {@link BookmarkColumns#URL}.
+     *  <p>
      *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
+     *
      *  @param cr   The ContentResolver used to access the database.
      */
     public static final Cursor getAllBookmarks(ContentResolver cr) throws 
             IllegalStateException {
         return cr.query(BOOKMARKS_URI,
                 new String[] { BookmarkColumns.URL }, 
-                "bookmark = 1", null, null);
+                BookmarkColumns.BOOKMARK + " = 1", null, null);
     }
 
     /**
-     *  Return a cursor pointing to a list of all visited site urls.
+     *  Return a cursor pointing to a list of all visited site urls. The cursor will
+     *  have a single column, {@link BookmarkColumns#URL}.
+     *  <p>
      *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
+     *
      *  @param cr   The ContentResolver used to access the database.
      */
     public static final Cursor getAllVisitedUrls(ContentResolver cr) throws
@@ -266,7 +304,7 @@ public class Browser {
      */
     public static final void updateVisitedHistory(ContentResolver cr,
                                                   String url, boolean real) {
-        long now = new Date().getTime();
+        long now = System.currentTimeMillis();
         Cursor c = null;
         try {
             c = getVisitedLike(cr, url);
@@ -534,7 +572,7 @@ public class Browser {
      * @param search    The string to add to the searches database.
      */
     public static final void addSearchUrl(ContentResolver cr, String search) {
-        long now = new Date().getTime();
+        long now = System.currentTimeMillis();
         Cursor c = null;
         try {
             c = cr.query(
@@ -558,6 +596,7 @@ public class Browser {
             if (c != null) c.close();
         }
     }
+
     /**
      * Remove all searches from the search database.
      *  Requires {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS}
@@ -590,31 +629,90 @@ public class Browser {
                 .bulkRequestIconForPageUrl(cr, where, listener);
     }
 
+    /**
+     * Column definitions for the mixed bookmark and history items available
+     * at {@link #BOOKMARKS_URI}.
+     */
     public static class BookmarkColumns implements BaseColumns {
+        /**
+         * The URL of the bookmark or history item.
+         * <p>Type: TEXT (URL)</p>
+         */
         public static final String URL = "url";
+
+        /**
+         * The number of time the item has been visited.
+         * <p>Type: NUMBER</p>
+         */
         public static final String VISITS = "visits";
+
+        /**
+         * The date the item was last visited, in milliseconds since the epoch.
+         * <p>Type: NUMBER (date in milliseconds since January 1, 1970)</p>
+         */
         public static final String DATE = "date";
+
+        /**
+         * Flag indicating that an item is a bookmark. A value of 1 indicates a bookmark, a value
+         * of 0 indicates a history item.
+         * <p>Type: INTEGER (boolean)</p>
+         */
         public static final String BOOKMARK = "bookmark";
+
+        /**
+         * The user visible title of the bookmark or history item.
+         * <p>Type: TEXT</p>
+         */
         public static final String TITLE = "title";
+
+        /**
+         * The date the item created, in milliseconds since the epoch.
+         * <p>Type: NUMBER (date in milliseconds since January 1, 1970)</p>
+         */
         public static final String CREATED = "created";
+
+        /**
+         * The favicon of the bookmark. Must decode via {@link BitmapFactory#decodeByteArray}.
+         * <p>Type: BLOB (image)</p>
+         */
         public static final String FAVICON = "favicon";
+
         /**
          * @hide
          */
         public static final String THUMBNAIL = "thumbnail";
+
         /**
          * @hide
          */
         public static final String TOUCH_ICON = "touch_icon";
+
         /**
          * @hide
          */
         public static final String USER_ENTERED = "user_entered";
     }
 
+    /**
+     * Column definitions for the search history table, available at {@link #SEARCHES_URI}.
+     */
     public static class SearchColumns implements BaseColumns {
+        /**
+         * Not used.
+         * @deprecated
+         */
+        @Deprecated
         public static final String URL = "url";
+
+        /**
+         * The user entered search term.
+         */
         public static final String SEARCH = "search";
+
+        /**
+         * The date the search was performed, in milliseconds since the epoch.
+         * <p>Type: NUMBER (date in milliseconds since January 1, 1970)</p>
+         */
         public static final String DATE = "date";
     }
 }
