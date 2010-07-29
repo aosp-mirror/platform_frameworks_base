@@ -422,6 +422,16 @@ public class ActionBarImpl extends ActionBar {
         }
 
         @Override
+        public void setTitle(int resId) {
+            setTitle(mActivity.getString(resId));
+        }
+
+        @Override
+        public void setSubtitle(int resId) {
+            setSubtitle(mActivity.getString(resId));
+        }
+
+        @Override
         public CharSequence getTitle() {
             return mUpperContextView.getTitle();
         }

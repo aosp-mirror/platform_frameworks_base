@@ -58,6 +58,16 @@ public class StandaloneActionMode extends ActionMode implements MenuBuilder.Call
     }
 
     @Override
+    public void setTitle(int resId) {
+        setTitle(mContext.getString(resId));
+    }
+
+    @Override
+    public void setSubtitle(int resId) {
+        setSubtitle(mContext.getString(resId));
+    }
+
+    @Override
     public void setCustomView(View view) {
         mContextView.setCustomView(view);
         mCustomView = view != null ? new WeakReference<View>(view) : null;
