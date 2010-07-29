@@ -935,7 +935,8 @@ public class SensorManager
      *        received faster or slower than the specified rate. Usually events
      *        are received faster. The value must be one of
      *        {@link #SENSOR_DELAY_NORMAL}, {@link #SENSOR_DELAY_UI},
-     *        {@link #SENSOR_DELAY_GAME}, or {@link #SENSOR_DELAY_FASTEST}.
+     *        {@link #SENSOR_DELAY_GAME}, or {@link #SENSOR_DELAY_FASTEST}
+     *        or, the desired delay between events in microsecond.
      *
      * @return <code>true</code> if the sensor is supported and successfully
      *         enabled.
@@ -967,6 +968,7 @@ public class SensorManager
      *        are received faster. The value must be one of
      *        {@link #SENSOR_DELAY_NORMAL}, {@link #SENSOR_DELAY_UI},
      *        {@link #SENSOR_DELAY_GAME}, or {@link #SENSOR_DELAY_FASTEST}.
+     *        or, the desired delay between events in microsecond.
      *
      * @param handler
      *        The {@link android.os.Handler Handler} the
@@ -992,16 +994,17 @@ public class SensorManager
                 delay = 0;
                 break;
             case SENSOR_DELAY_GAME:
-                delay = 20;
+                delay = 20000;
                 break;
             case SENSOR_DELAY_UI:
-                delay = 60;
+                delay = 60000;
                 break;
             case SENSOR_DELAY_NORMAL:
-                delay = 200;
+                delay = 200000;
                 break;
             default:
-                return false;
+                delay = rate;
+                break;
         }
 
         synchronized (sListeners) {
