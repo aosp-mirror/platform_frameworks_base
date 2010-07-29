@@ -23,7 +23,7 @@
 #include <stddef.h>
 #include <assert.h>
 
-static inline size_t min(size_t a, size_t b) { return (a < b) ? a : b; }
+static inline size_t min_of(size_t a, size_t b) { return (a < b) ? a : b; }
 
 using namespace android;
 
@@ -116,10 +116,10 @@ void StreamingZipInflater::initInflateState() {
 ssize_t StreamingZipInflater::read(void* outBuf, size_t count) {
     uint8_t* dest = (uint8_t*) outBuf;
     size_t bytesRead = 0;
-    size_t toRead = min(count, size_t(mOutTotalSize - mOutCurPosition));
+    size_t toRead = min_of(count, size_t(mOutTotalSize - mOutCurPosition));
     while (toRead > 0) {
         // First, write from whatever we already have decoded and ready to go
-        size_t deliverable = min(toRead, mOutLastDecoded - mOutDeliverable);
+        size_t deliverable = min_of(toRead, mOutLastDecoded - mOutDeliverable);
         if (deliverable > 0) {
             if (outBuf != NULL) memcpy(dest, mOutBuf + mOutDeliverable, deliverable);
             mOutDeliverable += deliverable;
@@ -188,7 +188,7 @@ int StreamingZipInflater::readNextChunk() {
     assert(mDataMap == NULL);
 
     if (mInNextChunkOffset < mInTotalSize) {
-        size_t toRead = min(mInBufSize, mInTotalSize - mInNextChunkOffset);
+        size_t toRead = min_of(mInBufSize, mInTotalSize - mInNextChunkOffset);
         if (toRead > 0) {
             ssize_t didRead = ::read(mFd, mInBuf, toRead);
             //LOGD("Reading input chunk, size %08x didread %08x", toRead, didRead);
