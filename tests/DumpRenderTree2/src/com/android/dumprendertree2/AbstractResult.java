@@ -24,7 +24,7 @@ import android.webkit.WebView;
  * A class that represent a result of the test. It is responsible for returning the result's
  * raw data and generating its own diff in HTML format.
  */
-public abstract class AbstractResult {
+public abstract class AbstractResult implements Comparable<AbstractResult> {
 
     public enum TestType {
         TEXT {
@@ -46,10 +46,10 @@ public abstract class AbstractResult {
 
     public enum ResultCode {
         PASS("Passed"),
-        FAIL_RESULT_DIFFERS("Failed: different results"),
-        FAIL_NO_EXPECTED_RESULT("Failed: no expected result"),
-        FAIL_TIMED_OUT("Failed: timed out"),
-        FAIL_CRASHED("Failed: crashed");
+        FAIL_RESULT_DIFFERS("Result differs"),
+        FAIL_NO_EXPECTED_RESULT("No expected result"),
+        FAIL_TIMED_OUT("Timed out"),
+        FAIL_CRASHED("Crashed");
 
         private String mTitle;
 
@@ -61,6 +61,10 @@ public abstract class AbstractResult {
         public String toString() {
             return mTitle;
         }
+    }
+
+    public int compareTo(AbstractResult another) {
+        return getRelativePath().compareTo(another.getRelativePath());
     }
 
     /**
