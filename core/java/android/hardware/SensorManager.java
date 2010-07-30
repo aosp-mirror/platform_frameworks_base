@@ -268,6 +268,10 @@ public class SensorManager
     public static final float MAGNETIC_FIELD_EARTH_MIN = 30.0f;
 
 
+    /** Standard atmosphere, or average sea-level pressure in hPa (millibar) */
+    public static final float PRESSURE_STANDARD_ATMOSPHERE = 1013.25f;
+
+
     /** Maximum luminance of sunlight in lux */
     public static final float LIGHT_SUNLIGHT_MAX = 120000.0f;
     /** luminance of sunlight in lux */
@@ -573,11 +577,11 @@ public class SensorManager
                     // which won't get the rotated values
                     try {
                         sRotation = sWindowManager.watchRotation(
-                            new IRotationWatcher.Stub() {
-                                public void onRotationChanged(int rotation) {
-                                    SensorManager.this.onRotationChanged(rotation);
+                                new IRotationWatcher.Stub() {
+                                    public void onRotationChanged(int rotation) {
+                                        SensorManager.this.onRotationChanged(rotation);
+                                    }
                                 }
-                            }
                         );
                     } catch (RemoteException e) {
                     }
@@ -638,7 +642,7 @@ public class SensorManager
                     break;
                 case Sensor.TYPE_ORIENTATION:
                     result |= SensorManager.SENSOR_ORIENTATION |
-                                    SensorManager.SENSOR_ORIENTATION_RAW;
+                    SensorManager.SENSOR_ORIENTATION_RAW;
                     break;
             }
         }
@@ -1488,7 +1492,7 @@ public class SensorManager
      * @see #getRotationMatrix(float[], float[], float[], float[])
      * @see GeomagneticField
      */
-   public static float[] getOrientation(float[] R, float values[]) {
+    public static float[] getOrientation(float[] R, float values[]) {
         /*
          * 4x4 (length=16) case:
          *   /  R[ 0]   R[ 1]   R[ 2]   0  \
@@ -1514,8 +1518,27 @@ public class SensorManager
         return values;
     }
 
-
     /**
+     * Computes the Altitude in meters from the atmospheric pressure and the
+     * pressure at sea level.
+     * <p>
+     * Typically the atmospheric pressure is read from a
+     * {@link Sensor#TYPE_PRESSURE} sensor. The pressure at sea level must be
+     * known, usually it can be retrieved from airport databases in the
+     * vicinity.
+     * </p>
+     *
+     * @param p0 pressure at sea level
+     * @param p atmospheric pressure
+     * @return Altitude in meters
+     */
+   public static float getAltitude(float p0, float p) {
+        final float coef = 1.0f / 5.255f;
+        return 44330.0f * (1.0f - (float)Math.pow(p/p0, coef));
+    }
+
+
+   /**
      * {@hide}
      */
     public void onRotationChanged(int rotation) {
