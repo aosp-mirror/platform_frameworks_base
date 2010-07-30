@@ -1615,6 +1615,16 @@ void MPEG4Writer::Track::writeTrackHeader(
                         mOwner->write(kData2, sizeof(kData2));
 
                     mOwner->endBox();  // esds
+                  } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_NB, mime) ||
+                             !strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_WB, mime)) {
+                    // 3gpp2 Spec AMRSampleEntry fields
+                    mOwner->beginBox("damr");
+                      mOwner->writeCString("   ");  // vendor: 4 bytes
+                      mOwner->writeInt8(0);         // decoder version
+                      mOwner->writeInt16(0x83FF);   // mode set: all enabled
+                      mOwner->writeInt8(0);         // mode change period
+                      mOwner->writeInt8(1);         // frames per sample
+                    mOwner->endBox();
                   }
                 mOwner->endBox();
             } else {
