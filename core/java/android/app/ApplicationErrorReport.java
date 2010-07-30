@@ -24,6 +24,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Printer;
@@ -74,18 +75,15 @@ public class ApplicationErrorReport implements Parcelable {
     public static final int TYPE_BATTERY = 3;
 
     /**
-     * An error report about a StrictMode violation.
-     */
-    public static final int TYPE_STRICT_MODE_VIOLATION = 4;
-
-    /**
-     * An error report about a StrictMode violation.
+     * A report from a user to a developer about a running service that the
+     * user doesn't think should be running.
      */
     public static final int TYPE_RUNNING_SERVICE = 5;
 
     /**
      * Type of this report. Can be one of {@link #TYPE_NONE},
-     * {@link #TYPE_CRASH}, {@link #TYPE_ANR}, or {@link #TYPE_BATTERY}.
+     * {@link #TYPE_CRASH}, {@link #TYPE_ANR}, {@link #TYPE_BATTERY},
+     * or {@link #TYPE_RUNNING_SERVICE}.
      */
     public int type;
 
@@ -133,7 +131,7 @@ public class ApplicationErrorReport implements Parcelable {
      * of BatteryInfo; otherwise null.
      */
     public BatteryInfo batteryInfo;
-    
+
     /**
      * If this report is of type {@link #TYPE_RUNNING_SERVICE}, contains an instance
      * of RunningServiceInfo; otherwise null.
@@ -278,10 +276,6 @@ public class ApplicationErrorReport implements Parcelable {
 
     /**
      * Describes an application crash.
-     *
-     * <p>This is also used to marshal around stack traces of ANRs and
-     * StrictMode violations which aren't necessarily crashes, but have
-     * a lot in common.
      */
     public static class CrashInfo {
         /**
@@ -318,12 +312,6 @@ public class ApplicationErrorReport implements Parcelable {
          * Stack trace.
          */
         public String stackTrace;
-
-        /**
-         * For StrictMode violations, the wall time duration of the
-         * violation, when known.
-         */
-        public long durationMillis = -1;
 
         /**
          * Create an uninitialized instance of CrashInfo.
@@ -368,7 +356,6 @@ public class ApplicationErrorReport implements Parcelable {
             throwMethodName = in.readString();
             throwLineNumber = in.readInt();
             stackTrace = in.readString();
-            durationMillis = in.readLong();
         }
 
         /**
@@ -382,7 +369,6 @@ public class ApplicationErrorReport implements Parcelable {
             dest.writeString(throwMethodName);
             dest.writeInt(throwLineNumber);
             dest.writeString(stackTrace);
-            dest.writeLong(durationMillis);
         }
 
         /**
@@ -396,9 +382,6 @@ public class ApplicationErrorReport implements Parcelable {
             pw.println(prefix + "throwMethodName: " + throwMethodName);
             pw.println(prefix + "throwLineNumber: " + throwLineNumber);
             pw.println(prefix + "stackTrace: " + stackTrace);
-            if (durationMillis != -1) {
-                pw.println(prefix + "durationMillis: " + durationMillis);
-            }
         }
     }
 
