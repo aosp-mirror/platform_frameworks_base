@@ -292,12 +292,11 @@ public class ImageProcessingActivity extends Activity
                 mRS.finish();
             } else {
                 javaFilter();
+                mDisplayView.invalidate();
             }
 
             t = java.lang.System.currentTimeMillis() - t;
             android.util.Log.v("Img", "Renderscript frame time core ms " + t);
-
-            mDisplayView.invalidate();
         }
     }
 
