@@ -713,15 +713,15 @@ KeyboardInputMapper::KeyboardInputMapper(InputDevice* device, int32_t associated
         uint32_t sources, int32_t keyboardType) :
         InputMapper(device), mAssociatedDisplayId(associatedDisplayId), mSources(sources),
         mKeyboardType(keyboardType) {
-    initialize();
+    initializeLocked();
 }
 
 KeyboardInputMapper::~KeyboardInputMapper() {
 }
 
-void KeyboardInputMapper::initialize() {
-    mMetaState = AMETA_NONE;
-    mDownTime = 0;
+void KeyboardInputMapper::initializeLocked() {
+    mLocked.metaState = AMETA_NONE;
+    mLocked.downTime = 0;
 }
 
 uint32_t KeyboardInputMapper::getSources() {
@@ -735,17 +735,27 @@ void KeyboardInputMapper::populateDeviceInfo(InputDeviceInfo* info) {
 }
 
 void KeyboardInputMapper::reset() {
-    // Synthesize key up event on reset if keys are currently down.
-    while (! mKeyDowns.isEmpty()) {
-        const KeyDown& keyDown = mKeyDowns.top();
+    for (;;) {
+        int32_t keyCode, scanCode;
+        { // acquire lock
+            AutoMutex _l(mLock);
+
+            // Synthesize key up event on reset if keys are currently down.
+            if (mLocked.keyDowns.isEmpty()) {
+                initializeLocked();
+                break; // done
+            }
+
+            const KeyDown& keyDown = mLocked.keyDowns.top();
+            keyCode = keyDown.keyCode;
+            scanCode = keyDown.scanCode;
+        } // release lock
+
         nsecs_t when = systemTime(SYSTEM_TIME_MONOTONIC);
-        processKey(when, false, keyDown.keyCode, keyDown.scanCode, 0);
+        processKey(when, false, keyCode, scanCode, 0);
     }
 
     InputMapper::reset();
-
-    // Reinitialize.
-    initialize();
     getContext()->updateGlobalMetaState();
 }
 
@@ -768,56 +778,76 @@ bool KeyboardInputMapper::isKeyboardOrGamepadKey(int32_t scanCode) {
         || (scanCode >= BTN_GAMEPAD && scanCode < BTN_DIGI);
 }
 
-void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode, int32_t scanCode,
-        uint32_t policyFlags) {
-    if (down) {
-        // Rotate key codes according to orientation.
-        if (mAssociatedDisplayId >= 0) {
-            int32_t orientation;
-            if (! getPolicy()->getDisplayInfo(mAssociatedDisplayId, NULL, NULL, & orientation)) {
-                return;
+void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
+        int32_t scanCode, uint32_t policyFlags) {
+    int32_t newMetaState;
+    nsecs_t downTime;
+    bool metaStateChanged = false;
+
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        if (down) {
+            // Rotate key codes according to orientation if needed.
+            // Note: getDisplayInfo is non-reentrant so we can continue holding the lock.
+            if (mAssociatedDisplayId >= 0) {
+                int32_t orientation;
+                if (! getPolicy()->getDisplayInfo(mAssociatedDisplayId, NULL, NULL, & orientation)) {
+                    return;
+                }
+
+                keyCode = rotateKeyCode(keyCode, orientation);
             }
 
-            keyCode = rotateKeyCode(keyCode, orientation);
+            // Add key down.
+            ssize_t keyDownIndex = findKeyDownLocked(scanCode);
+            if (keyDownIndex >= 0) {
+                // key repeat, be sure to use same keycode as before in case of rotation
+                keyCode = mLocked.keyDowns.top().keyCode;
+            } else {
+                // key down
+                mLocked.keyDowns.push();
+                KeyDown& keyDown = mLocked.keyDowns.editTop();
+                keyDown.keyCode = keyCode;
+                keyDown.scanCode = scanCode;
+            }
+
+            mLocked.downTime = when;
+        } else {
+            // Remove key down.
+            ssize_t keyDownIndex = findKeyDownLocked(scanCode);
+            if (keyDownIndex >= 0) {
+                // key up, be sure to use same keycode as before in case of rotation
+                keyCode = mLocked.keyDowns.top().keyCode;
+                mLocked.keyDowns.removeAt(size_t(keyDownIndex));
+            } else {
+                // key was not actually down
+                LOGI("Dropping key up from device %s because the key was not down.  "
+                        "keyCode=%d, scanCode=%d",
+                        getDeviceName().string(), keyCode, scanCode);
+                return;
+            }
         }
 
-        // Add key down.
-        ssize_t keyDownIndex = findKeyDown(scanCode);
-        if (keyDownIndex >= 0) {
-            // key repeat, be sure to use same keycode as before in case of rotation
-            keyCode = mKeyDowns.top().keyCode;
-        } else {
-            // key down
-            mKeyDowns.push();
-            KeyDown& keyDown = mKeyDowns.editTop();
-            keyDown.keyCode = keyCode;
-            keyDown.scanCode = scanCode;
+        int32_t oldMetaState = mLocked.metaState;
+        newMetaState = updateMetaState(keyCode, down, oldMetaState);
+        if (oldMetaState != newMetaState) {
+            mLocked.metaState = newMetaState;
+            metaStateChanged = true;
         }
-    } else {
-        // Remove key down.
-        ssize_t keyDownIndex = findKeyDown(scanCode);
-        if (keyDownIndex >= 0) {
-            // key up, be sure to use same keycode as before in case of rotation
-            keyCode = mKeyDowns.top().keyCode;
-            mKeyDowns.removeAt(size_t(keyDownIndex));
-        } else {
-            // key was not actually down
-            LOGI("Dropping key up from device %s because the key was not down.  "
-                    "keyCode=%d, scanCode=%d",
-                    getDeviceName().string(), keyCode, scanCode);
-            return;
-        }
-    }
 
-    int32_t oldMetaState = mMetaState;
-    int32_t newMetaState = updateMetaState(keyCode, down, oldMetaState);
-    if (oldMetaState != newMetaState) {
-        mMetaState = newMetaState;
+        downTime = mLocked.downTime;
+    } // release lock
+
+    if (metaStateChanged) {
         getContext()->updateGlobalMetaState();
     }
 
-    /* Apply policy. */
+    applyPolicyAndDispatch(when, policyFlags, down, keyCode, scanCode, newMetaState, downTime);
+}
 
+void KeyboardInputMapper::applyPolicyAndDispatch(nsecs_t when, uint32_t policyFlags, bool down,
+        int32_t keyCode, int32_t scanCode, int32_t metaState, nsecs_t downTime) {
     int32_t policyActions = getPolicy()->interceptKey(when,
             getDeviceId(), down, keyCode, scanCode, policyFlags);
 
@@ -825,30 +855,20 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode, i
         return; // event dropped
     }
 
-    /* Enqueue key event for dispatch. */
-
-    int32_t keyEventAction;
-    if (down) {
-        mDownTime = when;
-        keyEventAction = AKEY_EVENT_ACTION_DOWN;
-    } else {
-        keyEventAction = AKEY_EVENT_ACTION_UP;
-    }
-
+    int32_t keyEventAction = down ? AKEY_EVENT_ACTION_DOWN : AKEY_EVENT_ACTION_UP;
     int32_t keyEventFlags = AKEY_EVENT_FLAG_FROM_SYSTEM;
     if (policyFlags & POLICY_FLAG_WOKE_HERE) {
         keyEventFlags = keyEventFlags | AKEY_EVENT_FLAG_WOKE_HERE;
     }
 
     getDispatcher()->notifyKey(when, getDeviceId(), AINPUT_SOURCE_KEYBOARD, policyFlags,
-            keyEventAction, keyEventFlags, keyCode, scanCode,
-            mMetaState, mDownTime);
+            keyEventAction, keyEventFlags, keyCode, scanCode, metaState, downTime);
 }
 
-ssize_t KeyboardInputMapper::findKeyDown(int32_t scanCode) {
-    size_t n = mKeyDowns.size();
+ssize_t KeyboardInputMapper::findKeyDownLocked(int32_t scanCode) {
+    size_t n = mLocked.keyDowns.size();
     for (size_t i = 0; i < n; i++) {
-        if (mKeyDowns[i].scanCode == scanCode) {
+        if (mLocked.keyDowns[i].scanCode == scanCode) {
             return i;
         }
     }
@@ -869,7 +889,10 @@ bool KeyboardInputMapper::markSupportedKeyCodes(uint32_t sourceMask, size_t numC
 }
 
 int32_t KeyboardInputMapper::getMetaState() {
-    return mMetaState;
+    { // acquire lock
+        AutoMutex _l(mLock);
+        return mLocked.metaState;
+    } // release lock
 }
 
 
@@ -882,7 +905,7 @@ TrackballInputMapper::TrackballInputMapper(InputDevice* device, int32_t associat
     mXScale = 1.0f / TRACKBALL_MOVEMENT_THRESHOLD;
     mYScale = 1.0f / TRACKBALL_MOVEMENT_THRESHOLD;
 
-    initialize();
+    initializeLocked();
 }
 
 TrackballInputMapper::~TrackballInputMapper() {
@@ -899,26 +922,33 @@ void TrackballInputMapper::populateDeviceInfo(InputDeviceInfo* info) {
     info->addMotionRange(AINPUT_MOTION_RANGE_Y, -1.0f, 1.0f, 0.0f, mYScale);
 }
 
-void TrackballInputMapper::initialize() {
+void TrackballInputMapper::initializeLocked() {
     mAccumulator.clear();
 
-    mDown = false;
-    mDownTime = 0;
+    mLocked.down = false;
+    mLocked.downTime = 0;
 }
 
 void TrackballInputMapper::reset() {
-    // Synthesize trackball button up event on reset if trackball button is currently down.
-    if (mDown) {
+    for (;;) {
+        { // acquire lock
+            AutoMutex _l(mLock);
+
+            if (! mLocked.down) {
+                initializeLocked();
+                break; // done
+            }
+        } // release lock
+
+        // Synthesize trackball button up event on reset.
         nsecs_t when = systemTime(SYSTEM_TIME_MONOTONIC);
-        mAccumulator.fields |= Accumulator::FIELD_BTN_MOUSE;
+        mAccumulator.fields = Accumulator::FIELD_BTN_MOUSE;
         mAccumulator.btnMouse = false;
         sync(when);
+        mAccumulator.clear();
     }
 
     InputMapper::reset();
-
-    // Reinitialize.
-    initialize();
 }
 
 void TrackballInputMapper::process(const RawEvent* rawEvent) {
@@ -962,33 +992,79 @@ void TrackballInputMapper::process(const RawEvent* rawEvent) {
 }
 
 void TrackballInputMapper::sync(nsecs_t when) {
-    /* Get display properties so for rotation based on display orientation. */
+    int motionEventAction;
+    PointerCoords pointerCoords;
+    nsecs_t downTime;
+    { // acquire lock
+        AutoMutex _l(mLock);
 
-    int32_t orientation;
-    if (mAssociatedDisplayId >= 0) {
-        if (! getPolicy()->getDisplayInfo(mAssociatedDisplayId, NULL, NULL, & orientation)) {
-            return;
+        uint32_t fields = mAccumulator.fields;
+        bool downChanged = fields & Accumulator::FIELD_BTN_MOUSE;
+
+        if (downChanged) {
+            if (mAccumulator.btnMouse) {
+                mLocked.down = true;
+                mLocked.downTime = when;
+            } else {
+                mLocked.down = false;
+            }
         }
-    } else {
-        orientation = InputReaderPolicyInterface::ROTATION_0;
-    }
 
-    /* Update saved trackball state */
+        downTime = mLocked.downTime;
+        float x = fields & Accumulator::FIELD_REL_X ? mAccumulator.relX * mXScale : 0.0f;
+        float y = fields & Accumulator::FIELD_REL_Y ? mAccumulator.relY * mYScale : 0.0f;
 
-    uint32_t fields = mAccumulator.fields;
-    bool downChanged = fields & Accumulator::FIELD_BTN_MOUSE;
-
-    if (downChanged) {
-        if (mAccumulator.btnMouse) {
-            mDown = true;
-            mDownTime = when;
+        if (downChanged) {
+            motionEventAction = mLocked.down ? AMOTION_EVENT_ACTION_DOWN : AMOTION_EVENT_ACTION_UP;
         } else {
-            mDown = false;
+            motionEventAction = AMOTION_EVENT_ACTION_MOVE;
         }
-    }
 
-    /* Apply policy */
+        pointerCoords.x = x;
+        pointerCoords.y = y;
+        pointerCoords.pressure = mLocked.down ? 1.0f : 0.0f;
+        pointerCoords.size = 0;
+        pointerCoords.touchMajor = 0;
+        pointerCoords.touchMinor = 0;
+        pointerCoords.toolMajor = 0;
+        pointerCoords.toolMinor = 0;
+        pointerCoords.orientation = 0;
 
+        if (mAssociatedDisplayId >= 0 && (x != 0.0f || y != 0.0f)) {
+            // Rotate motion based on display orientation if needed.
+            // Note: getDisplayInfo is non-reentrant so we can continue holding the lock.
+            int32_t orientation;
+            if (! getPolicy()->getDisplayInfo(mAssociatedDisplayId, NULL, NULL, & orientation)) {
+                return;
+            }
+
+            float temp;
+            switch (orientation) {
+            case InputReaderPolicyInterface::ROTATION_90:
+                temp = pointerCoords.x;
+                pointerCoords.x = pointerCoords.y;
+                pointerCoords.y = - temp;
+                break;
+
+            case InputReaderPolicyInterface::ROTATION_180:
+                pointerCoords.x = - pointerCoords.x;
+                pointerCoords.y = - pointerCoords.y;
+                break;
+
+            case InputReaderPolicyInterface::ROTATION_270:
+                temp = pointerCoords.x;
+                pointerCoords.x = - pointerCoords.y;
+                pointerCoords.y = temp;
+                break;
+            }
+        }
+    } // release lock
+
+    applyPolicyAndDispatch(when, motionEventAction, & pointerCoords, downTime);
+}
+
+void TrackballInputMapper::applyPolicyAndDispatch(nsecs_t when, int32_t motionEventAction,
+        PointerCoords* pointerCoords, nsecs_t downTime) {
     uint32_t policyFlags = 0;
     int32_t policyActions = getPolicy()->interceptGeneric(when, policyFlags);
 
@@ -996,62 +1072,24 @@ void TrackballInputMapper::sync(nsecs_t when) {
         return; // event dropped
     }
 
-    /* Enqueue motion event for dispatch. */
-
-    int32_t motionEventAction;
-    if (downChanged) {
-        motionEventAction = mDown ? AMOTION_EVENT_ACTION_DOWN : AMOTION_EVENT_ACTION_UP;
-    } else {
-        motionEventAction = AMOTION_EVENT_ACTION_MOVE;
-    }
-
-    int32_t pointerId = 0;
-    PointerCoords pointerCoords;
-    pointerCoords.x = fields & Accumulator::FIELD_REL_X
-            ? mAccumulator.relX * mXScale : 0;
-    pointerCoords.y = fields & Accumulator::FIELD_REL_Y
-            ? mAccumulator.relY * mYScale : 0;
-    pointerCoords.pressure = 1.0f; // XXX Consider making this 1.0f if down, 0 otherwise.
-    pointerCoords.size = 0;
-    pointerCoords.touchMajor = 0;
-    pointerCoords.touchMinor = 0;
-    pointerCoords.toolMajor = 0;
-    pointerCoords.toolMinor = 0;
-    pointerCoords.orientation = 0;
-
-    float temp;
-    switch (orientation) {
-    case InputReaderPolicyInterface::ROTATION_90:
-        temp = pointerCoords.x;
-        pointerCoords.x = pointerCoords.y;
-        pointerCoords.y = - temp;
-        break;
-
-    case InputReaderPolicyInterface::ROTATION_180:
-        pointerCoords.x = - pointerCoords.x;
-        pointerCoords.y = - pointerCoords.y;
-        break;
-
-    case InputReaderPolicyInterface::ROTATION_270:
-        temp = pointerCoords.x;
-        pointerCoords.x = - pointerCoords.y;
-        pointerCoords.y = temp;
-        break;
-    }
-
     int32_t metaState = mContext->getGlobalMetaState();
+    int32_t pointerId = 0;
+
     getDispatcher()->notifyMotion(when, getDeviceId(), AINPUT_SOURCE_TRACKBALL, policyFlags,
             motionEventAction, metaState, AMOTION_EVENT_EDGE_FLAG_NONE,
-            1, & pointerId, & pointerCoords, mXPrecision, mYPrecision, mDownTime);
+            1, & pointerId, pointerCoords, mXPrecision, mYPrecision, downTime);
 }
 
 
 // --- TouchInputMapper ---
 
 TouchInputMapper::TouchInputMapper(InputDevice* device, int32_t associatedDisplayId) :
-        InputMapper(device), mAssociatedDisplayId(associatedDisplayId),
-        mSurfaceOrientation(-1), mSurfaceWidth(-1), mSurfaceHeight(-1) {
-    initialize();
+        InputMapper(device), mAssociatedDisplayId(associatedDisplayId) {
+    mLocked.surfaceOrientation = -1;
+    mLocked.surfaceWidth = -1;
+    mLocked.surfaceHeight = -1;
+
+    initializeLocked();
 }
 
 TouchInputMapper::~TouchInputMapper() {
@@ -1064,26 +1102,29 @@ uint32_t TouchInputMapper::getSources() {
 void TouchInputMapper::populateDeviceInfo(InputDeviceInfo* info) {
     InputMapper::populateDeviceInfo(info);
 
-    // FIXME: Should ensure the surface information is up to date so that orientation changes
-    // are noticed immediately.  Unfortunately we will need to add some extra locks here
-    // to prevent race conditions.
-    // configureSurface();
+    { // acquire lock
+        AutoMutex _l(mLock);
 
-    info->addMotionRange(AINPUT_MOTION_RANGE_X, mOrientedRanges.x);
-    info->addMotionRange(AINPUT_MOTION_RANGE_Y, mOrientedRanges.y);
-    info->addMotionRange(AINPUT_MOTION_RANGE_PRESSURE, mOrientedRanges.pressure);
-    info->addMotionRange(AINPUT_MOTION_RANGE_SIZE, mOrientedRanges.size);
-    info->addMotionRange(AINPUT_MOTION_RANGE_TOUCH_MAJOR, mOrientedRanges.touchMajor);
-    info->addMotionRange(AINPUT_MOTION_RANGE_TOUCH_MINOR, mOrientedRanges.touchMinor);
-    info->addMotionRange(AINPUT_MOTION_RANGE_TOOL_MAJOR, mOrientedRanges.toolMajor);
-    info->addMotionRange(AINPUT_MOTION_RANGE_TOOL_MINOR, mOrientedRanges.toolMinor);
-    info->addMotionRange(AINPUT_MOTION_RANGE_ORIENTATION, mOrientedRanges.orientation);
+        // Ensure surface information is up to date so that orientation changes are
+        // noticed immediately.
+        configureSurfaceLocked();
+
+        info->addMotionRange(AINPUT_MOTION_RANGE_X, mLocked.orientedRanges.x);
+        info->addMotionRange(AINPUT_MOTION_RANGE_Y, mLocked.orientedRanges.y);
+        info->addMotionRange(AINPUT_MOTION_RANGE_PRESSURE, mLocked.orientedRanges.pressure);
+        info->addMotionRange(AINPUT_MOTION_RANGE_SIZE, mLocked.orientedRanges.size);
+        info->addMotionRange(AINPUT_MOTION_RANGE_TOUCH_MAJOR, mLocked.orientedRanges.touchMajor);
+        info->addMotionRange(AINPUT_MOTION_RANGE_TOUCH_MINOR, mLocked.orientedRanges.touchMinor);
+        info->addMotionRange(AINPUT_MOTION_RANGE_TOOL_MAJOR, mLocked.orientedRanges.toolMajor);
+        info->addMotionRange(AINPUT_MOTION_RANGE_TOOL_MINOR, mLocked.orientedRanges.toolMinor);
+        info->addMotionRange(AINPUT_MOTION_RANGE_ORIENTATION, mLocked.orientedRanges.orientation);
+    } // release lock
 }
 
-void TouchInputMapper::initialize() {
+void TouchInputMapper::initializeLocked() {
+    mCurrentTouch.clear();
     mLastTouch.clear();
     mDownTime = 0;
-    mCurrentVirtualKey.down = false;
 
     for (uint32_t i = 0; i < MAX_POINTERS; i++) {
         mAveragingTouchFilter.historyStart[i] = 0;
@@ -1091,6 +1132,8 @@ void TouchInputMapper::initialize() {
     }
 
     mJumpyTouchFilter.jumpyPointsDropped = 0;
+
+    mLocked.currentVirtualKey.down = false;
 }
 
 void TouchInputMapper::configure() {
@@ -1104,48 +1147,52 @@ void TouchInputMapper::configure() {
     // Configure absolute axis information.
     configureAxes();
 
-    // Configure pressure factors.
-    if (mAxes.pressure.valid) {
-        mPressureOrigin = mAxes.pressure.minValue;
-        mPressureScale = 1.0f / mAxes.pressure.getRange();
-    } else {
-        mPressureOrigin = 0;
-        mPressureScale = 1.0f;
-    }
+    { // acquire lock
+        AutoMutex _l(mLock);
 
-    mOrientedRanges.pressure.min = 0.0f;
-    mOrientedRanges.pressure.max = 1.0f;
-    mOrientedRanges.pressure.flat = 0.0f;
-    mOrientedRanges.pressure.fuzz = mPressureScale;
+        // Configure pressure factors.
+        if (mAxes.pressure.valid) {
+            mLocked.pressureOrigin = mAxes.pressure.minValue;
+            mLocked.pressureScale = 1.0f / mAxes.pressure.getRange();
+        } else {
+            mLocked.pressureOrigin = 0;
+            mLocked.pressureScale = 1.0f;
+        }
 
-    // Configure size factors.
-    if (mAxes.size.valid) {
-        mSizeOrigin = mAxes.size.minValue;
-        mSizeScale = 1.0f / mAxes.size.getRange();
-    } else {
-        mSizeOrigin = 0;
-        mSizeScale = 1.0f;
-    }
+        mLocked.orientedRanges.pressure.min = 0.0f;
+        mLocked.orientedRanges.pressure.max = 1.0f;
+        mLocked.orientedRanges.pressure.flat = 0.0f;
+        mLocked.orientedRanges.pressure.fuzz = mLocked.pressureScale;
 
-    mOrientedRanges.size.min = 0.0f;
-    mOrientedRanges.size.max = 1.0f;
-    mOrientedRanges.size.flat = 0.0f;
-    mOrientedRanges.size.fuzz = mSizeScale;
+        // Configure size factors.
+        if (mAxes.size.valid) {
+            mLocked.sizeOrigin = mAxes.size.minValue;
+            mLocked.sizeScale = 1.0f / mAxes.size.getRange();
+        } else {
+            mLocked.sizeOrigin = 0;
+            mLocked.sizeScale = 1.0f;
+        }
 
-    // Configure orientation factors.
-    if (mAxes.orientation.valid && mAxes.orientation.maxValue > 0) {
-        mOrientationScale = float(M_PI_2) / mAxes.orientation.maxValue;
-    } else {
-        mOrientationScale = 0.0f;
-    }
+        mLocked.orientedRanges.size.min = 0.0f;
+        mLocked.orientedRanges.size.max = 1.0f;
+        mLocked.orientedRanges.size.flat = 0.0f;
+        mLocked.orientedRanges.size.fuzz = mLocked.sizeScale;
 
-    mOrientedRanges.orientation.min = - M_PI_2;
-    mOrientedRanges.orientation.max = M_PI_2;
-    mOrientedRanges.orientation.flat = 0;
-    mOrientedRanges.orientation.fuzz = mOrientationScale;
+        // Configure orientation factors.
+        if (mAxes.orientation.valid && mAxes.orientation.maxValue > 0) {
+            mLocked.orientationScale = float(M_PI_2) / mAxes.orientation.maxValue;
+        } else {
+            mLocked.orientationScale = 0.0f;
+        }
 
-    // Configure surface dimensions and orientation.
-    configureSurface();
+        mLocked.orientedRanges.orientation.min = - M_PI_2;
+        mLocked.orientedRanges.orientation.max = M_PI_2;
+        mLocked.orientedRanges.orientation.flat = 0;
+        mLocked.orientedRanges.orientation.fuzz = mLocked.orientationScale;
+
+        // Configure surface dimensions and orientation.
+        configureSurfaceLocked();
+    } // release lock
 }
 
 void TouchInputMapper::configureAxes() {
@@ -1160,11 +1207,12 @@ void TouchInputMapper::configureAxes() {
     mAxes.orientation.valid = false;
 }
 
-bool TouchInputMapper::configureSurface() {
+bool TouchInputMapper::configureSurfaceLocked() {
     // Update orientation and dimensions if needed.
     int32_t orientation;
     int32_t width, height;
     if (mAssociatedDisplayId >= 0) {
+        // Note: getDisplayInfo is non-reentrant so we can continue holding the lock.
         if (! getPolicy()->getDisplayInfo(mAssociatedDisplayId, & width, & height, & orientation)) {
             return false;
         }
@@ -1174,150 +1222,152 @@ bool TouchInputMapper::configureSurface() {
         height = mAxes.y.getRange();
     }
 
-    bool orientationChanged = mSurfaceOrientation != orientation;
+    bool orientationChanged = mLocked.surfaceOrientation != orientation;
     if (orientationChanged) {
-        mSurfaceOrientation = orientation;
+        mLocked.surfaceOrientation = orientation;
     }
 
-    bool sizeChanged = mSurfaceWidth != width || mSurfaceHeight != height;
+    bool sizeChanged = mLocked.surfaceWidth != width || mLocked.surfaceHeight != height;
     if (sizeChanged) {
-        mSurfaceWidth = width;
-        mSurfaceHeight = height;
+        mLocked.surfaceWidth = width;
+        mLocked.surfaceHeight = height;
 
         // Compute size-dependent translation and scaling factors and place virtual keys.
         if (mAxes.x.valid && mAxes.y.valid) {
-            mXOrigin = mAxes.x.minValue;
-            mYOrigin = mAxes.y.minValue;
+            mLocked.xOrigin = mAxes.x.minValue;
+            mLocked.yOrigin = mAxes.y.minValue;
 
             LOGI("Device configured: id=0x%x, name=%s (display size was changed)",
                     getDeviceId(), getDeviceName().string());
 
-            mXScale = float(width) / mAxes.x.getRange();
-            mYScale = float(height) / mAxes.y.getRange();
-            mXPrecision = 1.0f / mXScale;
-            mYPrecision = 1.0f / mYScale;
+            mLocked.xScale = float(width) / mAxes.x.getRange();
+            mLocked.yScale = float(height) / mAxes.y.getRange();
+            mLocked.xPrecision = 1.0f / mLocked.xScale;
+            mLocked.yPrecision = 1.0f / mLocked.yScale;
 
-            configureVirtualKeys();
+            configureVirtualKeysLocked();
         } else {
-            mXOrigin = 0;
-            mYOrigin = 0;
-            mXScale = 1.0f;
-            mYScale = 1.0f;
-            mXPrecision = 1.0f;
-            mYPrecision = 1.0f;
+            mLocked.xOrigin = 0;
+            mLocked.yOrigin = 0;
+            mLocked.xScale = 1.0f;
+            mLocked.yScale = 1.0f;
+            mLocked.xPrecision = 1.0f;
+            mLocked.yPrecision = 1.0f;
         }
 
         // Configure touch and tool area ranges.
         float diagonal = sqrt(float(width * width + height * height));
-        float diagonalFuzz = sqrt(mXScale * mXScale + mYScale * mYScale);
+        float diagonalFuzz = sqrt(mLocked.xScale * mLocked.xScale
+                + mLocked.yScale * mLocked.yScale);
 
-        mOrientedRanges.touchMajor.min = 0.0f;
-        mOrientedRanges.touchMajor.max = diagonal;
-        mOrientedRanges.touchMajor.flat = 0.0f;
-        mOrientedRanges.touchMajor.fuzz = diagonalFuzz;
-        mOrientedRanges.touchMinor = mOrientedRanges.touchMajor;
+        InputDeviceInfo::MotionRange area;
+        area.min = 0.0f;
+        area.max = diagonal;
+        area.flat = 0.0f;
+        area.fuzz = diagonalFuzz;
 
-        mOrientedRanges.toolMinor = mOrientedRanges.toolMajor = mOrientedRanges.touchMajor;
+        mLocked.orientedRanges.touchMajor = area;
+        mLocked.orientedRanges.touchMinor = area;
+
+        mLocked.orientedRanges.toolMajor = area;
+        mLocked.orientedRanges.toolMinor = area;
     }
 
     if (orientationChanged || sizeChanged) {
         // Compute oriented surface dimensions, precision, and scales.
         float orientedXScale, orientedYScale;
-        switch (mSurfaceOrientation) {
+        switch (mLocked.surfaceOrientation) {
         case InputReaderPolicyInterface::ROTATION_90:
         case InputReaderPolicyInterface::ROTATION_270:
-            mOrientedSurfaceWidth = mSurfaceHeight;
-            mOrientedSurfaceHeight = mSurfaceWidth;
-            mOrientedXPrecision = mYPrecision;
-            mOrientedYPrecision = mXPrecision;
-            orientedXScale = mYScale;
-            orientedYScale = mXScale;
+            mLocked.orientedSurfaceWidth = mLocked.surfaceHeight;
+            mLocked.orientedSurfaceHeight = mLocked.surfaceWidth;
+            mLocked.orientedXPrecision = mLocked.yPrecision;
+            mLocked.orientedYPrecision = mLocked.xPrecision;
+            orientedXScale = mLocked.yScale;
+            orientedYScale = mLocked.xScale;
             break;
         default:
-            mOrientedSurfaceWidth = mSurfaceWidth;
-            mOrientedSurfaceHeight = mSurfaceHeight;
-            mOrientedXPrecision = mXPrecision;
-            mOrientedYPrecision = mYPrecision;
-            orientedXScale = mXScale;
-            orientedYScale = mYScale;
+            mLocked.orientedSurfaceWidth = mLocked.surfaceWidth;
+            mLocked.orientedSurfaceHeight = mLocked.surfaceHeight;
+            mLocked.orientedXPrecision = mLocked.xPrecision;
+            mLocked.orientedYPrecision = mLocked.yPrecision;
+            orientedXScale = mLocked.xScale;
+            orientedYScale = mLocked.yScale;
             break;
         }
 
         // Configure position ranges.
-        mOrientedRanges.x.min = 0;
-        mOrientedRanges.x.max = mOrientedSurfaceWidth;
-        mOrientedRanges.x.flat = 0;
-        mOrientedRanges.x.fuzz = orientedXScale;
+        mLocked.orientedRanges.x.min = 0;
+        mLocked.orientedRanges.x.max = mLocked.orientedSurfaceWidth;
+        mLocked.orientedRanges.x.flat = 0;
+        mLocked.orientedRanges.x.fuzz = orientedXScale;
 
-        mOrientedRanges.y.min = 0;
-        mOrientedRanges.y.max = mOrientedSurfaceHeight;
-        mOrientedRanges.y.flat = 0;
-        mOrientedRanges.y.fuzz = orientedYScale;
+        mLocked.orientedRanges.y.min = 0;
+        mLocked.orientedRanges.y.max = mLocked.orientedSurfaceHeight;
+        mLocked.orientedRanges.y.flat = 0;
+        mLocked.orientedRanges.y.fuzz = orientedYScale;
     }
 
     return true;
 }
 
-void TouchInputMapper::configureVirtualKeys() {
+void TouchInputMapper::configureVirtualKeysLocked() {
     assert(mAxes.x.valid && mAxes.y.valid);
 
+    // Note: getVirtualKeyDefinitions is non-reentrant so we can continue holding the lock.
     Vector<InputReaderPolicyInterface::VirtualKeyDefinition> virtualKeyDefinitions;
     getPolicy()->getVirtualKeyDefinitions(getDeviceName(), virtualKeyDefinitions);
 
-    { // acquire virtual key lock
-        AutoMutex _l(mVirtualKeyLock);
+    mLocked.virtualKeys.clear();
 
-        mVirtualKeys.clear();
+    if (virtualKeyDefinitions.size() == 0) {
+        return;
+    }
 
-        if (virtualKeyDefinitions.size() == 0) {
-            return;
+    mLocked.virtualKeys.setCapacity(virtualKeyDefinitions.size());
+
+    int32_t touchScreenLeft = mAxes.x.minValue;
+    int32_t touchScreenTop = mAxes.y.minValue;
+    int32_t touchScreenWidth = mAxes.x.getRange();
+    int32_t touchScreenHeight = mAxes.y.getRange();
+
+    for (size_t i = 0; i < virtualKeyDefinitions.size(); i++) {
+        const InputReaderPolicyInterface::VirtualKeyDefinition& virtualKeyDefinition =
+                virtualKeyDefinitions[i];
+
+        mLocked.virtualKeys.add();
+        VirtualKey& virtualKey = mLocked.virtualKeys.editTop();
+
+        virtualKey.scanCode = virtualKeyDefinition.scanCode;
+        int32_t keyCode;
+        uint32_t flags;
+        if (getEventHub()->scancodeToKeycode(getDeviceId(), virtualKey.scanCode,
+                & keyCode, & flags)) {
+            LOGW("  VirtualKey %d: could not obtain key code, ignoring", virtualKey.scanCode);
+            mLocked.virtualKeys.pop(); // drop the key
+            continue;
         }
 
-        mVirtualKeys.setCapacity(virtualKeyDefinitions.size());
+        virtualKey.keyCode = keyCode;
+        virtualKey.flags = flags;
 
-        int32_t touchScreenLeft = mAxes.x.minValue;
-        int32_t touchScreenTop = mAxes.y.minValue;
-        int32_t touchScreenWidth = mAxes.x.getRange();
-        int32_t touchScreenHeight = mAxes.y.getRange();
+        // convert the key definition's display coordinates into touch coordinates for a hit box
+        int32_t halfWidth = virtualKeyDefinition.width / 2;
+        int32_t halfHeight = virtualKeyDefinition.height / 2;
 
-        for (size_t i = 0; i < virtualKeyDefinitions.size(); i++) {
-            const InputReaderPolicyInterface::VirtualKeyDefinition& virtualKeyDefinition =
-                    virtualKeyDefinitions[i];
+        virtualKey.hitLeft = (virtualKeyDefinition.centerX - halfWidth)
+                * touchScreenWidth / mLocked.surfaceWidth + touchScreenLeft;
+        virtualKey.hitRight= (virtualKeyDefinition.centerX + halfWidth)
+                * touchScreenWidth / mLocked.surfaceWidth + touchScreenLeft;
+        virtualKey.hitTop = (virtualKeyDefinition.centerY - halfHeight)
+                * touchScreenHeight / mLocked.surfaceHeight + touchScreenTop;
+        virtualKey.hitBottom = (virtualKeyDefinition.centerY + halfHeight)
+                * touchScreenHeight / mLocked.surfaceHeight + touchScreenTop;
 
-            mVirtualKeys.add();
-            VirtualKey& virtualKey = mVirtualKeys.editTop();
-
-            virtualKey.scanCode = virtualKeyDefinition.scanCode;
-            int32_t keyCode;
-            uint32_t flags;
-            if (getEventHub()->scancodeToKeycode(getDeviceId(), virtualKey.scanCode,
-                    & keyCode, & flags)) {
-                LOGW("  VirtualKey %d: could not obtain key code, ignoring", virtualKey.scanCode);
-                mVirtualKeys.pop(); // drop the key
-                continue;
-            }
-
-            virtualKey.keyCode = keyCode;
-            virtualKey.flags = flags;
-
-            // convert the key definition's display coordinates into touch coordinates for a hit box
-            int32_t halfWidth = virtualKeyDefinition.width / 2;
-            int32_t halfHeight = virtualKeyDefinition.height / 2;
-
-            virtualKey.hitLeft = (virtualKeyDefinition.centerX - halfWidth)
-                    * touchScreenWidth / mSurfaceWidth + touchScreenLeft;
-            virtualKey.hitRight= (virtualKeyDefinition.centerX + halfWidth)
-                    * touchScreenWidth / mSurfaceWidth + touchScreenLeft;
-            virtualKey.hitTop = (virtualKeyDefinition.centerY - halfHeight)
-                    * touchScreenHeight / mSurfaceHeight + touchScreenTop;
-            virtualKey.hitBottom = (virtualKeyDefinition.centerY + halfHeight)
-                    * touchScreenHeight / mSurfaceHeight + touchScreenTop;
-
-            LOGI("  VirtualKey %d: keyCode=%d hitLeft=%d hitRight=%d hitTop=%d hitBottom=%d",
-                    virtualKey.scanCode, virtualKey.keyCode,
-                    virtualKey.hitLeft, virtualKey.hitRight, virtualKey.hitTop, virtualKey.hitBottom);
-        }
-    } // release virtual key lock
+        LOGI("  VirtualKey %d: keyCode=%d hitLeft=%d hitRight=%d hitTop=%d hitBottom=%d",
+                virtualKey.scanCode, virtualKey.keyCode,
+                virtualKey.hitLeft, virtualKey.hitRight, virtualKey.hitTop, virtualKey.hitBottom);
+    }
 }
 
 void TouchInputMapper::reset() {
@@ -1329,20 +1379,16 @@ void TouchInputMapper::reset() {
         syncTouch(when, true);
     }
 
-    InputMapper::reset();
+    { // acquire lock
+        AutoMutex _l(mLock);
+        initializeLocked();
+    } // release lock
 
-    // Reinitialize.
-    initialize();
+    InputMapper::reset();
 }
 
 void TouchInputMapper::syncTouch(nsecs_t when, bool havePointerIds) {
-    /* Refresh associated display information and update our size configuration if needed. */
-
-    if (! configureSurface()) {
-        return;
-    }
-
-    /* Apply policy */
+    // Apply generic policy actions.
 
     uint32_t policyFlags = 0;
     int32_t policyActions = getPolicy()->interceptGeneric(when, policyFlags);
@@ -1352,7 +1398,7 @@ void TouchInputMapper::syncTouch(nsecs_t when, bool havePointerIds) {
         return; // event dropped
     }
 
-    /* Preprocess pointer data */
+    // Preprocess pointer data.
 
     if (mParameters.useBadTouchFilter) {
         if (applyBadTouchFilter()) {
@@ -1381,14 +1427,14 @@ void TouchInputMapper::syncTouch(nsecs_t when, bool havePointerIds) {
         savedTouch = & mCurrentTouch;
     }
 
-    /* Process touches and virtual keys */
+    // Process touches and virtual keys.
 
     TouchResult touchResult = consumeOffScreenTouches(when, policyFlags);
     if (touchResult == DISPATCH_TOUCH) {
         dispatchTouches(when, policyFlags);
     }
 
-    /* Copy current touch to last touch in preparation for the next cycle. */
+    // Copy current touch to last touch in preparation for the next cycle.
 
     if (touchResult == DROP_STROKE) {
         mLastTouch.clear();
@@ -1403,13 +1449,19 @@ TouchInputMapper::TouchResult TouchInputMapper::consumeOffScreenTouches(
     int32_t keyCode, scanCode, downTime;
     TouchResult touchResult;
 
-    { // acquire virtual key lock
-        AutoMutex _l(mVirtualKeyLock);
+    { // acquire lock
+        AutoMutex _l(mLock);
 
-        if (mCurrentVirtualKey.down) {
+        // Update surface size and orientation, including virtual key positions.
+        if (! configureSurfaceLocked()) {
+            return DROP_STROKE;
+        }
+
+        // Check for virtual key press.
+        if (mLocked.currentVirtualKey.down) {
             if (mCurrentTouch.pointerCount == 0) {
                 // Pointer went up while virtual key was down.
-                mCurrentVirtualKey.down = false;
+                mLocked.currentVirtualKey.down = false;
 #if DEBUG_VIRTUAL_KEYS
                 LOGD("VirtualKeys: Generating key up: keyCode=%d, scanCode=%d",
                         mCurrentVirtualKey.keyCode, mCurrentVirtualKey.scanCode);
@@ -1423,8 +1475,8 @@ TouchInputMapper::TouchResult TouchInputMapper::consumeOffScreenTouches(
             if (mCurrentTouch.pointerCount == 1) {
                 int32_t x = mCurrentTouch.pointers[0].x;
                 int32_t y = mCurrentTouch.pointers[0].y;
-                const VirtualKey* virtualKey = findVirtualKeyHitLvk(x, y);
-                if (virtualKey && virtualKey->keyCode == mCurrentVirtualKey.keyCode) {
+                const VirtualKey* virtualKey = findVirtualKeyHitLocked(x, y);
+                if (virtualKey && virtualKey->keyCode == mLocked.currentVirtualKey.keyCode) {
                     // Pointer is still within the space of the virtual key.
                     return SKIP_TOUCH;
                 }
@@ -1434,7 +1486,7 @@ TouchInputMapper::TouchResult TouchInputMapper::consumeOffScreenTouches(
             // Send key cancellation and drop the stroke so subsequent motions will be
             // considered fresh downs.  This is useful when the user swipes away from the
             // virtual key area into the main display surface.
-            mCurrentVirtualKey.down = false;
+            mLocked.currentVirtualKey.down = false;
 #if DEBUG_VIRTUAL_KEYS
             LOGD("VirtualKeys: Canceling key: keyCode=%d, scanCode=%d",
                     mCurrentVirtualKey.keyCode, mCurrentVirtualKey.scanCode);
@@ -1449,16 +1501,16 @@ TouchInputMapper::TouchResult TouchInputMapper::consumeOffScreenTouches(
                 // Pointer just went down.  Handle off-screen touches, if needed.
                 int32_t x = mCurrentTouch.pointers[0].x;
                 int32_t y = mCurrentTouch.pointers[0].y;
-                if (! isPointInsideSurface(x, y)) {
+                if (! isPointInsideSurfaceLocked(x, y)) {
                     // If exactly one pointer went down, check for virtual key hit.
                     // Otherwise we will drop the entire stroke.
                     if (mCurrentTouch.pointerCount == 1) {
-                        const VirtualKey* virtualKey = findVirtualKeyHitLvk(x, y);
+                        const VirtualKey* virtualKey = findVirtualKeyHitLocked(x, y);
                         if (virtualKey) {
-                            mCurrentVirtualKey.down = true;
-                            mCurrentVirtualKey.downTime = when;
-                            mCurrentVirtualKey.keyCode = virtualKey->keyCode;
-                            mCurrentVirtualKey.scanCode = virtualKey->scanCode;
+                            mLocked.currentVirtualKey.down = true;
+                            mLocked.currentVirtualKey.downTime = when;
+                            mLocked.currentVirtualKey.keyCode = virtualKey->keyCode;
+                            mLocked.currentVirtualKey.scanCode = virtualKey->scanCode;
 #if DEBUG_VIRTUAL_KEYS
                             LOGD("VirtualKeys: Generating key down: keyCode=%d, scanCode=%d",
                                     mCurrentVirtualKey.keyCode, mCurrentVirtualKey.scanCode);
@@ -1478,12 +1530,20 @@ TouchInputMapper::TouchResult TouchInputMapper::consumeOffScreenTouches(
 
     DispatchVirtualKey:
         // Collect remaining state needed to dispatch virtual key.
-        keyCode = mCurrentVirtualKey.keyCode;
-        scanCode = mCurrentVirtualKey.scanCode;
-        downTime = mCurrentVirtualKey.downTime;
-    } // release virtual key lock
+        keyCode = mLocked.currentVirtualKey.keyCode;
+        scanCode = mLocked.currentVirtualKey.scanCode;
+        downTime = mLocked.currentVirtualKey.downTime;
+    } // release lock
 
     // Dispatch virtual key.
+    applyPolicyAndDispatchVirtualKey(when, policyFlags, keyEventAction, keyEventFlags,
+            keyCode, scanCode, downTime);
+    return touchResult;
+}
+
+void TouchInputMapper::applyPolicyAndDispatchVirtualKey(nsecs_t when, uint32_t policyFlags,
+        int32_t keyEventAction, int32_t keyEventFlags,
+        int32_t keyCode, int32_t scanCode, nsecs_t downTime) {
     int32_t metaState = mContext->getGlobalMetaState();
 
     if (keyEventAction == AKEY_EVENT_ACTION_DOWN) {
@@ -1497,7 +1557,6 @@ TouchInputMapper::TouchResult TouchInputMapper::consumeOffScreenTouches(
         getDispatcher()->notifyKey(when, getDeviceId(), AINPUT_SOURCE_KEYBOARD, policyFlags,
                 keyEventAction, keyEventFlags, keyCode, scanCode, metaState, downTime);
     }
-    return touchResult;
 }
 
 void TouchInputMapper::dispatchTouches(nsecs_t when, uint32_t policyFlags) {
@@ -1566,107 +1625,118 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
     uint32_t pointerCount = 0;
     int32_t pointerIds[MAX_POINTERS];
     PointerCoords pointerCoords[MAX_POINTERS];
-
-    // Walk through the the active pointers and map touch screen coordinates (TouchData) into
-    // display coordinates (PointerCoords) and adjust for display orientation.
-    while (! idBits.isEmpty()) {
-        uint32_t id = idBits.firstMarkedBit();
-        idBits.clearBit(id);
-        uint32_t index = touch->idToIndex[id];
-
-        float x = float(touch->pointers[index].x - mXOrigin) * mXScale;
-        float y = float(touch->pointers[index].y - mYOrigin) * mYScale;
-        float pressure = float(touch->pointers[index].pressure - mPressureOrigin) * mPressureScale;
-        float size = float(touch->pointers[index].size - mSizeOrigin) * mSizeScale;
-
-        float orientation = float(touch->pointers[index].orientation) * mOrientationScale;
-
-        float touchMajor, touchMinor, toolMajor, toolMinor;
-        if (abs(orientation) <= M_PI_4) {
-            // Nominally vertical orientation: scale major axis by Y, and scale minor axis by X.
-            touchMajor = float(touch->pointers[index].touchMajor) * mYScale;
-            touchMinor = float(touch->pointers[index].touchMinor) * mXScale;
-            toolMajor = float(touch->pointers[index].toolMajor) * mYScale;
-            toolMinor = float(touch->pointers[index].toolMinor) * mXScale;
-        } else {
-            // Nominally horizontal orientation: scale major axis by X, and scale minor axis by Y.
-            touchMajor = float(touch->pointers[index].touchMajor) * mXScale;
-            touchMinor = float(touch->pointers[index].touchMinor) * mYScale;
-            toolMajor = float(touch->pointers[index].toolMajor) * mXScale;
-            toolMinor = float(touch->pointers[index].toolMinor) * mYScale;
-        }
-
-        switch (mSurfaceOrientation) {
-        case InputReaderPolicyInterface::ROTATION_90: {
-            float xTemp = x;
-            x = y;
-            y = mSurfaceWidth - xTemp;
-            orientation -= M_PI_2;
-            if (orientation < - M_PI_2) {
-                orientation += M_PI;
-            }
-            break;
-        }
-        case InputReaderPolicyInterface::ROTATION_180: {
-            x = mSurfaceWidth - x;
-            y = mSurfaceHeight - y;
-            orientation = - orientation;
-            break;
-        }
-        case InputReaderPolicyInterface::ROTATION_270: {
-            float xTemp = x;
-            x = mSurfaceHeight - y;
-            y = xTemp;
-            orientation += M_PI_2;
-            if (orientation > M_PI_2) {
-                orientation -= M_PI;
-            }
-            break;
-        }
-        }
-
-        pointerIds[pointerCount] = int32_t(id);
-
-        pointerCoords[pointerCount].x = x;
-        pointerCoords[pointerCount].y = y;
-        pointerCoords[pointerCount].pressure = pressure;
-        pointerCoords[pointerCount].size = size;
-        pointerCoords[pointerCount].touchMajor = touchMajor;
-        pointerCoords[pointerCount].touchMinor = touchMinor;
-        pointerCoords[pointerCount].toolMajor = toolMajor;
-        pointerCoords[pointerCount].toolMinor = toolMinor;
-        pointerCoords[pointerCount].orientation = orientation;
-
-        if (id == changedId) {
-            motionEventAction |= pointerCount << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
-        }
-
-        pointerCount += 1;
-    }
-
-    // Check edge flags by looking only at the first pointer since the flags are
-    // global to the event.
     int32_t motionEventEdgeFlags = 0;
-    if (motionEventAction == AMOTION_EVENT_ACTION_DOWN) {
-        if (pointerCoords[0].x <= 0) {
-            motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_LEFT;
-        } else if (pointerCoords[0].x >= mOrientedSurfaceWidth) {
-            motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_RIGHT;
+    float xPrecision, yPrecision;
+
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        // Walk through the the active pointers and map touch screen coordinates (TouchData) into
+        // display coordinates (PointerCoords) and adjust for display orientation.
+        while (! idBits.isEmpty()) {
+            uint32_t id = idBits.firstMarkedBit();
+            idBits.clearBit(id);
+            uint32_t index = touch->idToIndex[id];
+
+            float x = float(touch->pointers[index].x - mLocked.xOrigin) * mLocked.xScale;
+            float y = float(touch->pointers[index].y - mLocked.yOrigin) * mLocked.yScale;
+            float pressure = float(touch->pointers[index].pressure - mLocked.pressureOrigin)
+                    * mLocked.pressureScale;
+            float size = float(touch->pointers[index].size - mLocked.sizeOrigin)
+                    * mLocked.sizeScale;
+
+            float orientation = float(touch->pointers[index].orientation)
+                    * mLocked.orientationScale;
+
+            float touchMajor, touchMinor, toolMajor, toolMinor;
+            if (abs(orientation) <= M_PI_4) {
+                // Nominally vertical orientation: scale major axis by Y, and scale minor axis by X.
+                touchMajor = float(touch->pointers[index].touchMajor) * mLocked.yScale;
+                touchMinor = float(touch->pointers[index].touchMinor) * mLocked.xScale;
+                toolMajor = float(touch->pointers[index].toolMajor) * mLocked.yScale;
+                toolMinor = float(touch->pointers[index].toolMinor) * mLocked.xScale;
+            } else {
+                // Nominally horizontal orientation: scale major axis by X, and scale minor axis by Y.
+                touchMajor = float(touch->pointers[index].touchMajor) * mLocked.xScale;
+                touchMinor = float(touch->pointers[index].touchMinor) * mLocked.yScale;
+                toolMajor = float(touch->pointers[index].toolMajor) * mLocked.xScale;
+                toolMinor = float(touch->pointers[index].toolMinor) * mLocked.yScale;
+            }
+
+            switch (mLocked.surfaceOrientation) {
+            case InputReaderPolicyInterface::ROTATION_90: {
+                float xTemp = x;
+                x = y;
+                y = mLocked.surfaceWidth - xTemp;
+                orientation -= M_PI_2;
+                if (orientation < - M_PI_2) {
+                    orientation += M_PI;
+                }
+                break;
+            }
+            case InputReaderPolicyInterface::ROTATION_180: {
+                x = mLocked.surfaceWidth - x;
+                y = mLocked.surfaceHeight - y;
+                orientation = - orientation;
+                break;
+            }
+            case InputReaderPolicyInterface::ROTATION_270: {
+                float xTemp = x;
+                x = mLocked.surfaceHeight - y;
+                y = xTemp;
+                orientation += M_PI_2;
+                if (orientation > M_PI_2) {
+                    orientation -= M_PI;
+                }
+                break;
+            }
+            }
+
+            pointerIds[pointerCount] = int32_t(id);
+
+            pointerCoords[pointerCount].x = x;
+            pointerCoords[pointerCount].y = y;
+            pointerCoords[pointerCount].pressure = pressure;
+            pointerCoords[pointerCount].size = size;
+            pointerCoords[pointerCount].touchMajor = touchMajor;
+            pointerCoords[pointerCount].touchMinor = touchMinor;
+            pointerCoords[pointerCount].toolMajor = toolMajor;
+            pointerCoords[pointerCount].toolMinor = toolMinor;
+            pointerCoords[pointerCount].orientation = orientation;
+
+            if (id == changedId) {
+                motionEventAction |= pointerCount << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+            }
+
+            pointerCount += 1;
         }
-        if (pointerCoords[0].y <= 0) {
-            motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_TOP;
-        } else if (pointerCoords[0].y >= mOrientedSurfaceHeight) {
-            motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_BOTTOM;
+
+        // Check edge flags by looking only at the first pointer since the flags are
+        // global to the event.
+        if (motionEventAction == AMOTION_EVENT_ACTION_DOWN) {
+            if (pointerCoords[0].x <= 0) {
+                motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_LEFT;
+            } else if (pointerCoords[0].x >= mLocked.orientedSurfaceWidth) {
+                motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_RIGHT;
+            }
+            if (pointerCoords[0].y <= 0) {
+                motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_TOP;
+            } else if (pointerCoords[0].y >= mLocked.orientedSurfaceHeight) {
+                motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_BOTTOM;
+            }
         }
-    }
+
+        xPrecision = mLocked.orientedXPrecision;
+        yPrecision = mLocked.orientedYPrecision;
+    } // release lock
 
     getDispatcher()->notifyMotion(when, getDeviceId(), AINPUT_SOURCE_TOUCHSCREEN, policyFlags,
             motionEventAction, getContext()->getGlobalMetaState(), motionEventEdgeFlags,
             pointerCount, pointerIds, pointerCoords,
-            mOrientedXPrecision, mOrientedYPrecision, mDownTime);
+            xPrecision, yPrecision, mDownTime);
 }
 
-bool TouchInputMapper::isPointInsideSurface(int32_t x, int32_t y) {
+bool TouchInputMapper::isPointInsideSurfaceLocked(int32_t x, int32_t y) {
     if (mAxes.x.valid && mAxes.y.valid) {
         return x >= mAxes.x.minValue && x <= mAxes.x.maxValue
                 && y >= mAxes.y.minValue && y <= mAxes.y.maxValue;
@@ -1674,9 +1744,11 @@ bool TouchInputMapper::isPointInsideSurface(int32_t x, int32_t y) {
     return true;
 }
 
-const TouchInputMapper::VirtualKey* TouchInputMapper::findVirtualKeyHitLvk(int32_t x, int32_t y) {
-    for (size_t i = 0; i < mVirtualKeys.size(); i++) {
-        const VirtualKey& virtualKey = mVirtualKeys[i];
+const TouchInputMapper::VirtualKey* TouchInputMapper::findVirtualKeyHitLocked(
+        int32_t x, int32_t y) {
+    size_t numVirtualKeys = mLocked.virtualKeys.size();
+    for (size_t i = 0; i < numVirtualKeys; i++) {
+        const VirtualKey& virtualKey = mLocked.virtualKeys[i];
 
 #if DEBUG_VIRTUAL_KEYS
         LOGD("VirtualKeys: Hit test (%d, %d): keyCode=%d, scanCode=%d, "
@@ -2224,50 +2296,53 @@ void TouchInputMapper::applyAveragingTouchFilter() {
 }
 
 int32_t TouchInputMapper::getKeyCodeState(uint32_t sourceMask, int32_t keyCode) {
-    { // acquire virtual key lock
-        AutoMutex _l(mVirtualKeyLock);
+    { // acquire lock
+        AutoMutex _l(mLock);
 
-        if (mCurrentVirtualKey.down && mCurrentVirtualKey.keyCode == keyCode) {
+        if (mLocked.currentVirtualKey.down && mLocked.currentVirtualKey.keyCode == keyCode) {
             return AKEY_STATE_VIRTUAL;
         }
 
-        for (size_t i = 0; i < mVirtualKeys.size(); i++) {
-            const VirtualKey& virtualKey = mVirtualKeys[i];
+        size_t numVirtualKeys = mLocked.virtualKeys.size();
+        for (size_t i = 0; i < numVirtualKeys; i++) {
+            const VirtualKey& virtualKey = mLocked.virtualKeys[i];
             if (virtualKey.keyCode == keyCode) {
                 return AKEY_STATE_UP;
             }
         }
-    } // release virtual key lock
+    } // release lock
 
     return AKEY_STATE_UNKNOWN;
 }
 
 int32_t TouchInputMapper::getScanCodeState(uint32_t sourceMask, int32_t scanCode) {
-    { // acquire virtual key lock
-        AutoMutex _l(mVirtualKeyLock);
+    { // acquire lock
+        AutoMutex _l(mLock);
 
-        if (mCurrentVirtualKey.down && mCurrentVirtualKey.scanCode == scanCode) {
+        if (mLocked.currentVirtualKey.down && mLocked.currentVirtualKey.scanCode == scanCode) {
             return AKEY_STATE_VIRTUAL;
         }
 
-        for (size_t i = 0; i < mVirtualKeys.size(); i++) {
-            const VirtualKey& virtualKey = mVirtualKeys[i];
+        size_t numVirtualKeys = mLocked.virtualKeys.size();
+        for (size_t i = 0; i < numVirtualKeys; i++) {
+            const VirtualKey& virtualKey = mLocked.virtualKeys[i];
             if (virtualKey.scanCode == scanCode) {
                 return AKEY_STATE_UP;
             }
         }
-    } // release virtual key lock
+    } // release lock
 
     return AKEY_STATE_UNKNOWN;
 }
 
 bool TouchInputMapper::markSupportedKeyCodes(uint32_t sourceMask, size_t numCodes,
         const int32_t* keyCodes, uint8_t* outFlags) {
-    { // acquire virtual key lock
-        AutoMutex _l(mVirtualKeyLock);
+    { // acquire lock
+        AutoMutex _l(mLock);
 
-        for (size_t i = 0; i < mVirtualKeys.size(); i++) {
-            const VirtualKey& virtualKey = mVirtualKeys[i];
+        size_t numVirtualKeys = mLocked.virtualKeys.size();
+        for (size_t i = 0; i < numVirtualKeys; i++) {
+            const VirtualKey& virtualKey = mLocked.virtualKeys[i];
 
             for (size_t i = 0; i < numCodes; i++) {
                 if (virtualKey.keyCode == keyCodes[i]) {
@@ -2275,7 +2350,7 @@ bool TouchInputMapper::markSupportedKeyCodes(uint32_t sourceMask, size_t numCode
                 }
             }
         }
-    } // release virtual key lock
+    } // release lock
 
     return true;
 }
@@ -2304,7 +2379,6 @@ void SingleTouchInputMapper::initialize() {
 void SingleTouchInputMapper::reset() {
     TouchInputMapper::reset();
 
-    // Reinitialize.
     initialize();
  }
 
@@ -2436,7 +2510,6 @@ void MultiTouchInputMapper::initialize() {
 void MultiTouchInputMapper::reset() {
     TouchInputMapper::reset();
 
-    // Reinitialize.
     initialize();
 }
 
