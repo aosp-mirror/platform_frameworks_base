@@ -5529,10 +5529,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void systemReady() {
-        mPolicy.systemReady();
-    }
-
-    public void initDisplay() {
         synchronized(mWindowMap) {
             if (mDisplay != null) {
                 throw new IllegalStateException("Display already initialized");
@@ -5548,6 +5544,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mActivityManager.updateConfiguration(null);
         } catch (RemoteException e) {
         }
+        
+        mPolicy.systemReady();
     }
 
     // -------------------------------------------------------------
