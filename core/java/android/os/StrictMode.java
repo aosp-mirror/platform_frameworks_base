@@ -18,6 +18,7 @@ package android.os;
 import android.app.ActivityManagerNative;
 import android.app.ApplicationErrorReport;
 import android.util.Log;
+import android.util.Printer;
 
 import com.android.internal.os.RuntimeInit;
 
@@ -97,9 +98,9 @@ public final class StrictMode {
      * via Parcel.writeNoException() (amusingly) where the caller can
      * choose how to react.
      */
-    private static final ThreadLocal<ArrayList<ApplicationErrorReport.CrashInfo>> gatheredViolations =
-            new ThreadLocal<ArrayList<ApplicationErrorReport.CrashInfo>>() {
-        @Override protected ArrayList<ApplicationErrorReport.CrashInfo> initialValue() {
+    private static final ThreadLocal<ArrayList<ViolationInfo>> gatheredViolations =
+            new ThreadLocal<ArrayList<ViolationInfo>>() {
+        @Override protected ArrayList<ViolationInfo> initialValue() {
             // Starts null to avoid unnecessary allocations when
             // checking whether there are any violations or not in
             // hasGatheredViolations() below.
@@ -240,7 +241,9 @@ public final class StrictMode {
             if ((mPolicyMask & DISALLOW_DISK_WRITE) == 0) {
                 return;
             }
-            startHandlingViolationException(new StrictModeDiskWriteViolation(mPolicyMask));
+            BlockGuard.BlockGuardPolicyException e = new StrictModeDiskWriteViolation(mPolicyMask);
+            e.fillInStackTrace();
+            startHandlingViolationException(e);
         }
 
         // Part of BlockGuard.Policy interface:
@@ -248,7 +251,9 @@ public final class StrictMode {
             if ((mPolicyMask & DISALLOW_DISK_READ) == 0) {
                 return;
             }
-            startHandlingViolationException(new StrictModeDiskReadViolation(mPolicyMask));
+            BlockGuard.BlockGuardPolicyException e = new StrictModeDiskReadViolation(mPolicyMask);
+            e.fillInStackTrace();
+            startHandlingViolationException(e);
         }
 
         // Part of BlockGuard.Policy interface:
@@ -256,7 +261,9 @@ public final class StrictMode {
             if ((mPolicyMask & DISALLOW_NETWORK) == 0) {
                 return;
             }
-            startHandlingViolationException(new StrictModeNetworkViolation(mPolicyMask));
+            BlockGuard.BlockGuardPolicyException e = new StrictModeNetworkViolation(mPolicyMask);
+            e.fillInStackTrace();
+            startHandlingViolationException(e);
         }
 
         public void setPolicyMask(int policyMask) {
@@ -269,31 +276,70 @@ public final class StrictMode {
         // thread and, if so, uses it to roughly measure how long the
         // violation took.
         void startHandlingViolationException(BlockGuard.BlockGuardPolicyException e) {
-            e.fillInStackTrace();
-            final ApplicationErrorReport.CrashInfo crashInfo = new ApplicationErrorReport.CrashInfo(e);
-            crashInfo.durationMillis = -1;  // unknown
-            final int savedPolicy = mPolicyMask;
+            final ViolationInfo info = new ViolationInfo(e, e.getPolicy());
+            info.violationUptimeMillis = SystemClock.uptimeMillis();
+            handleViolationWithTimingAttempt(info);
+        }
 
+        private static final ThreadLocal<ArrayList<ViolationInfo>> violationsBeingTimed =
+                new ThreadLocal<ArrayList<ViolationInfo>>() {
+            @Override protected ArrayList<ViolationInfo> initialValue() {
+                return new ArrayList<ViolationInfo>();
+            }
+        };
+
+        // Attempts to fill in the provided ViolationInfo's
+        // durationMillis field if this thread has a Looper we can use
+        // to measure with.  We measure from the time of violation
+        // until the time the looper is idle again (right before
+        // the next epoll_wait)
+        void handleViolationWithTimingAttempt(final ViolationInfo info) {
             Looper looper = Looper.myLooper();
+
+            // Without a Looper, we're unable to time how long the
+            // violation takes place.  This case should be rare, as
+            // most users will care about timing violations that
+            // happen on their main UI thread.  Note that this case is
+            // also hit when a violation takes place in a Binder
+            // thread, in "gather" mode.  In this case, the duration
+            // of the violation is computed by the ultimate caller and
+            // its Looper, if any.
+            // TODO: if in gather mode, ignore Looper.myLooper() and always
+            //       go into this immediate mode?
             if (looper == null) {
-                // Without a Looper, we're unable to time how long the
-                // violation takes place.  This case should be rare,
-                // as most users will care about timing violations
-                // that happen on their main UI thread.
-                handleViolation(crashInfo, savedPolicy);
-            } else {
-                MessageQueue queue = Looper.myQueue();
-                final long violationTime = SystemClock.uptimeMillis();
-                queue.addIdleHandler(new MessageQueue.IdleHandler() {
-                        public boolean queueIdle() {
-                            long afterViolationTime = SystemClock.uptimeMillis();
-                            crashInfo.durationMillis = afterViolationTime - violationTime;
-                            handleViolation(crashInfo, savedPolicy);
-                            return false;  // remove this idle handler from the array
-                        }
-                    });
+                info.durationMillis = -1;  // unknown (redundant, already set)
+                handleViolation(info);
+                return;
             }
 
+            MessageQueue queue = Looper.myQueue();
+            final ArrayList<ViolationInfo> records = violationsBeingTimed.get();
+            if (records.size() >= 10) {
+                // Not worth measuring.  Too many offenses in one loop.
+                return;
+            }
+            records.add(info);
+            if (records.size() > 1) {
+                // There's already been a violation this loop, so we've already
+                // registered an idle handler to process the list of violations
+                // at the end of this Looper's loop.
+                return;
+            }
+
+            queue.addIdleHandler(new MessageQueue.IdleHandler() {
+                    public boolean queueIdle() {
+                        long loopFinishTime = SystemClock.uptimeMillis();
+                        for (int n = 0; n < records.size(); ++n) {
+                            ViolationInfo v = records.get(n);
+                            v.violationNumThisLoop = n + 1;
+                            v.durationMillis =
+                                    (int) (loopFinishTime - v.violationUptimeMillis);
+                            handleViolation(v);
+                        }
+                        records.clear();
+                        return false;  // remove this idle handler from the array
+                    }
+                });
         }
 
         // Note: It's possible (even quite likely) that the
@@ -301,37 +347,35 @@ public final class StrictMode {
         // violation fired and now (after the violating code ran) due
         // to people who push/pop temporary policy in regions of code,
         // hence the policy being passed around.
-        void handleViolation(
-            final ApplicationErrorReport.CrashInfo crashInfo,
-            int policy) {
-            if (crashInfo.stackTrace == null) {
-                Log.d(TAG, "unexpected null stacktrace");
+        void handleViolation(final ViolationInfo info) {
+            if (info == null || info.crashInfo == null || info.crashInfo.stackTrace == null) {
+                Log.wtf(TAG, "unexpected null stacktrace");
                 return;
             }
 
-            if (LOG_V) Log.d(TAG, "handleViolation; policy=" + policy);
+            if (LOG_V) Log.d(TAG, "handleViolation; policy=" + info.policy);
 
-            if ((policy & PENALTY_GATHER) != 0) {
-                ArrayList<ApplicationErrorReport.CrashInfo> violations = gatheredViolations.get();
+            if ((info.policy & PENALTY_GATHER) != 0) {
+                ArrayList<ViolationInfo> violations = gatheredViolations.get();
                 if (violations == null) {
-                    violations = new ArrayList<ApplicationErrorReport.CrashInfo>(1);
+                    violations = new ArrayList<ViolationInfo>(1);
                     gatheredViolations.set(violations);
                 } else if (violations.size() >= 5) {
                     // Too many.  In a loop or something?  Don't gather them all.
                     return;
                 }
-                for (ApplicationErrorReport.CrashInfo previous : violations) {
-                    if (crashInfo.stackTrace.equals(previous.stackTrace)) {
+                for (ViolationInfo previous : violations) {
+                    if (info.crashInfo.stackTrace.equals(previous.crashInfo.stackTrace)) {
                         // Duplicate. Don't log.
                         return;
                     }
                 }
-                violations.add(crashInfo);
+                violations.add(info);
                 return;
             }
 
             // Not perfect, but fast and good enough for dup suppression.
-            Integer crashFingerprint = crashInfo.stackTrace.hashCode();
+            Integer crashFingerprint = info.crashInfo.stackTrace.hashCode();
             long lastViolationTime = 0;
             if (mLastViolationTime.containsKey(crashFingerprint)) {
                 lastViolationTime = mLastViolationTime.get(crashFingerprint);
@@ -341,13 +385,13 @@ public final class StrictMode {
             long timeSinceLastViolationMillis = lastViolationTime == 0 ?
                     Long.MAX_VALUE : (now - lastViolationTime);
 
-            if ((policy & PENALTY_LOG) != 0 &&
+            if ((info.policy & PENALTY_LOG) != 0 &&
                 timeSinceLastViolationMillis > MIN_LOG_INTERVAL_MS) {
-                if (crashInfo.durationMillis != -1) {
+                if (info.durationMillis != -1) {
                     Log.d(TAG, "StrictMode policy violation; ~duration=" +
-                          crashInfo.durationMillis + " ms: " + crashInfo.stackTrace);
+                          info.durationMillis + " ms: " + info.crashInfo.stackTrace);
                 } else {
-                    Log.d(TAG, "StrictMode policy violation: " + crashInfo.stackTrace);
+                    Log.d(TAG, "StrictMode policy violation: " + info.crashInfo.stackTrace);
                 }
             }
 
@@ -355,20 +399,20 @@ public final class StrictMode {
             // subset of the original StrictMode policy bitmask, with
             // only the bit violated and penalty bits to be executed
             // by the ActivityManagerService remaining set.
-            int violationMask = 0;
+            int violationMaskSubset = 0;
 
-            if ((policy & PENALTY_DIALOG) != 0 &&
+            if ((info.policy & PENALTY_DIALOG) != 0 &&
                 timeSinceLastViolationMillis > MIN_DIALOG_INTERVAL_MS) {
-                violationMask |= PENALTY_DIALOG;
+                violationMaskSubset |= PENALTY_DIALOG;
             }
 
-            if ((policy & PENALTY_DROPBOX) != 0 && lastViolationTime == 0) {
-                violationMask |= PENALTY_DROPBOX;
+            if ((info.policy & PENALTY_DROPBOX) != 0 && lastViolationTime == 0) {
+                violationMaskSubset |= PENALTY_DROPBOX;
             }
 
-            if (violationMask != 0) {
-                int violationBit = parseViolationFromMessage(crashInfo.exceptionMessage);
-                violationMask |= violationBit;
+            if (violationMaskSubset != 0) {
+                int violationBit = parseViolationFromMessage(info.crashInfo.exceptionMessage);
+                violationMaskSubset |= violationBit;
                 final int savedPolicy = getThreadBlockingPolicy();
                 try {
                     // First, remove any policy before we call into the Activity Manager,
@@ -379,8 +423,8 @@ public final class StrictMode {
 
                     ActivityManagerNative.getDefault().handleApplicationStrictModeViolation(
                         RuntimeInit.getApplicationObject(),
-                        violationMask,
-                        crashInfo);
+                        violationMaskSubset,
+                        info);
                 } catch (RemoteException e) {
                     Log.e(TAG, "RemoteException trying to handle StrictMode violation", e);
                 } finally {
@@ -389,7 +433,7 @@ public final class StrictMode {
                 }
             }
 
-            if ((policy & PENALTY_DEATH) != 0) {
+            if ((info.policy & PENALTY_DEATH) != 0) {
                 System.err.println("StrictMode policy violation with POLICY_DEATH; shutting down.");
                 Process.killProcess(Process.myPid());
                 System.exit(10);
@@ -417,7 +461,7 @@ public final class StrictMode {
      * Called from Parcel.writeNoException()
      */
     /* package */ static void writeGatheredViolationsToParcel(Parcel p) {
-        ArrayList<ApplicationErrorReport.CrashInfo> violations = gatheredViolations.get();
+        ArrayList<ViolationInfo> violations = gatheredViolations.get();
         if (violations == null) {
             p.writeInt(0);
         } else {
@@ -439,35 +483,21 @@ public final class StrictMode {
      */
     /* package */ static void readAndHandleBinderCallViolations(Parcel p) {
         // Our own stack trace to append
-        Exception e = new LogStackTrace();
         StringWriter sw = new StringWriter();
-        e.printStackTrace(new PrintWriter(sw));
+        new LogStackTrace().printStackTrace(new PrintWriter(sw));
         String ourStack = sw.toString();
 
         int policyMask = getThreadBlockingPolicy();
+        boolean currentlyGathering = (policyMask & PENALTY_GATHER) != 0;
 
         int numViolations = p.readInt();
         for (int i = 0; i < numViolations; ++i) {
             if (LOG_V) Log.d(TAG, "strict mode violation stacks read from binder call.  i=" + i);
-            ApplicationErrorReport.CrashInfo crashInfo = new ApplicationErrorReport.CrashInfo(p);
-            crashInfo.stackTrace += "# via Binder call with stack:\n" + ourStack;
-
-            // Unlike the in-process violations in which case we
-            // trigger an error _before_ the thing occurs, in this
-            // case the violating thing has already occurred, so we
-            // can't use our heuristic of waiting for the next event
-            // loop idle cycle to measure the approximate violation
-            // duration.  Instead, just skip that step and use -1
-            // (unknown duration) for now.
-            // TODO: keep a thread-local on remote process of first
-            // violation time's uptimeMillis, and when writing that
-            // back out in Parcel reply, include in the header the
-            // violation time and use it here.
-            crashInfo.durationMillis = -1;
-
+            ViolationInfo info = new ViolationInfo(p, !currentlyGathering);
+            info.crashInfo.stackTrace += "# via Binder call with stack:\n" + ourStack;
             BlockGuard.Policy policy = BlockGuard.getThreadPolicy();
             if (policy instanceof AndroidBlockGuardPolicy) {
-                ((AndroidBlockGuardPolicy) policy).handleViolation(crashInfo, policyMask);
+                ((AndroidBlockGuardPolicy) policy).handleViolationWithTimingAttempt(info);
             }
         }
     }
@@ -482,5 +512,114 @@ public final class StrictMode {
      */
     private static void onBinderStrictModePolicyChange(int newPolicy) {
         setBlockGuardPolicy(newPolicy);
+    }
+
+    /**
+     * Parcelable that gets sent in Binder call headers back to callers
+     * to report violations that happened during a cross-process call.
+     *
+     * @hide
+     */
+    public static class ViolationInfo {
+        /**
+         * Stack and other stuff info.
+         */
+        public final ApplicationErrorReport.CrashInfo crashInfo;
+
+        /**
+         * The strict mode policy mask at the time of violation.
+         */
+        public final int policy;
+
+        /**
+         * The wall time duration of the violation, when known.  -1 when
+         * not known.
+         */
+        public int durationMillis = -1;
+
+        /**
+         * Which violation number this was (1-based) since the last Looper loop,
+         * from the perspective of the root caller (if it crossed any processes
+         * via Binder calls).  The value is 0 if the root caller wasn't on a Looper
+         * thread.
+         */
+        public int violationNumThisLoop;
+
+        /**
+         * The time (in terms of SystemClock.uptimeMillis()) that the
+         * violation occurred.
+         */
+        public long violationUptimeMillis;
+
+        /**
+         * Create an uninitialized instance of ViolationInfo
+         */
+        public ViolationInfo() {
+            crashInfo = null;
+            policy = 0;
+        }
+
+        /**
+         * Create an instance of ViolationInfo initialized from an exception.
+         */
+        public ViolationInfo(Throwable tr, int policy) {
+            crashInfo = new ApplicationErrorReport.CrashInfo(tr);
+            violationUptimeMillis = SystemClock.uptimeMillis();
+            this.policy = policy;
+        }
+
+        /**
+         * Create an instance of ViolationInfo initialized from a Parcel.
+         */
+        public ViolationInfo(Parcel in) {
+            this(in, false);
+        }
+
+        /**
+         * Create an instance of ViolationInfo initialized from a Parcel.
+         *
+         * @param unsetGatheringBit if true, the caller is the root caller
+         *   and the gathering penalty should be removed.
+         */
+        public ViolationInfo(Parcel in, boolean unsetGatheringBit) {
+            crashInfo = new ApplicationErrorReport.CrashInfo(in);
+            int rawPolicy = in.readInt();
+            if (unsetGatheringBit) {
+                policy = rawPolicy & ~PENALTY_GATHER;
+            } else {
+                policy = rawPolicy;
+            }
+            durationMillis = in.readInt();
+            violationNumThisLoop = in.readInt();
+            violationUptimeMillis = in.readLong();
+        }
+
+        /**
+         * Save a ViolationInfo instance to a parcel.
+         */
+        public void writeToParcel(Parcel dest, int flags) {
+            crashInfo.writeToParcel(dest, flags);
+            dest.writeInt(policy);
+            dest.writeInt(durationMillis);
+            dest.writeInt(violationNumThisLoop);
+            dest.writeLong(violationUptimeMillis);
+        }
+
+
+        /**
+         * Dump a ViolationInfo instance to a Printer.
+         */
+        public void dump(Printer pw, String prefix) {
+            crashInfo.dump(pw, prefix);
+            pw.println(prefix + "policy: " + policy);
+            if (durationMillis != -1) {
+                pw.println(prefix + "durationMillis: " + durationMillis);
+            }
+            if (violationNumThisLoop != 0) {
+                pw.println(prefix + "violationNumThisLoop: " + violationNumThisLoop);
+            }
+            pw.println(prefix + "violationUptimeMillis: " + violationUptimeMillis);
+        }
+
     }
 }

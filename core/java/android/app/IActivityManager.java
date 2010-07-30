@@ -19,10 +19,10 @@ package android.app;
 import android.content.ComponentName;
 import android.content.ContentProviderNative;
 import android.content.IContentProvider;
+import android.content.IIntentReceiver;
+import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IIntentSender;
-import android.content.IIntentReceiver;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
@@ -31,14 +31,15 @@ import android.content.pm.ProviderInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Debug;
-import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.ParcelFileDescriptor;
-import android.os.Bundle;
+import android.os.Parcelable;
+import android.os.RemoteException;
+import android.os.StrictMode;
 
 import java.util.List;
 
@@ -260,7 +261,7 @@ public interface IActivityManager extends IInterface {
     // bit violated and penalty bits to be executed by the
     // ActivityManagerService remaining set.
     public void handleApplicationStrictModeViolation(IBinder app, int violationMask,
-            ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException;
+            StrictMode.ViolationInfo crashInfo) throws RemoteException;
 
     /*
      * This will deliver the specified signal to all the persistent processes. Currently only 
