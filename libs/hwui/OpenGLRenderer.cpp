@@ -177,7 +177,7 @@ void OpenGLRenderer::setViewport(int width, int height) {
 }
 
 void OpenGLRenderer::prepare() {
-    mSnapshot = mFirstSnapshot;
+    mSnapshot = new Snapshot(mFirstSnapshot);
     mSaveCount = 0;
 
     glDisable(GL_SCISSOR_TEST);
@@ -188,7 +188,7 @@ void OpenGLRenderer::prepare() {
     glEnable(GL_SCISSOR_TEST);
     glScissor(0, 0, mWidth, mHeight);
 
-    mSnapshot->clipRect.set(0.0f, 0.0f, mWidth, mHeight);
+    mSnapshot->setClip(0.0f, 0.0f, mWidth, mHeight);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -569,6 +569,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     chooseBlending(true, mode);
     bindTexture(mFontRenderer.getTexture(), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, 0);
+    glUniform1i(mCurrentProgram->getUniform("sampler"), 0);
 
     int texCoordsSlot = mCurrentProgram->getAttrib("texCoords");
     glEnableVertexAttribArray(texCoordsSlot);
