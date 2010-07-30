@@ -519,6 +519,40 @@ static void readLocale(char* language, char* region)
 }
 
 /*
+ * Parse a property containing space-separated options that should be
+ * passed directly to the VM, e.g. "-Xmx32m -verbose:gc -Xregenmap".
+ *
+ * This will cut up "extraOptsBuf" as we chop it into individual options.
+ *
+ * Adds the strings, if any, to mOptions.
+ */
+void AndroidRuntime::parseExtraOpts(char* extraOptsBuf)
+{
+    JavaVMOption opt;
+    char* start;
+    char* end;
+
+    memset(&opt, 0, sizeof(opt));
+    start = extraOptsBuf;
+    while (*start != '\0') {
+        while (*start == ' ')                   /* skip leading whitespace */
+            start++;
+        if (*start == '\0')                     /* was trailing ws, bail */
+            break;
+
+        end = start+1;
+        while (*end != ' ' && *end != '\0')     /* find end of token */
+            end++;
+        if (*end == ' ')
+            *end++ = '\0';          /* mark end, advance to indicate more */
+
+        opt.optionString = start;
+        mOptions.add(opt);
+        start = end;
+    }
+}
+
+/*
  * Start the Dalvik Virtual Machine.
  *
  * Various arguments, most determined by system properties, are passed in.
@@ -537,6 +571,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char enableAssertBuf[sizeof("-ea:")-1 + PROPERTY_VALUE_MAX];
     char jniOptsBuf[sizeof("-Xjniopts:")-1 + PROPERTY_VALUE_MAX];
     char heapsizeOptsBuf[sizeof("-Xmx")-1 + PROPERTY_VALUE_MAX];
+    char extraOptsBuf[PROPERTY_VALUE_MAX];
     char* stackTraceFile = NULL;
     bool checkJni = false;
     bool checkDexSum = false;
@@ -845,7 +880,11 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         opt.optionString = stackTraceFile;
         mOptions.add(opt);
     }
-    
+
+    /* extra options; parse this late so it overrides others */
+    property_get("dalvik.vm.extra-opts", extraOptsBuf, "");
+    parseExtraOpts(extraOptsBuf);
+
     /* Set the properties for locale */
     {
         char langOption[sizeof("-Duser.language=") + 3];
