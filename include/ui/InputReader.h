@@ -210,7 +210,7 @@ public:
  * IMPORTANT INVARIANT:
  *     Because the policy and dispatcher can potentially block or cause re-entrance into
  *     the input reader, the input reader never calls into other components while holding
- *     an exclusive internal lock.
+ *     an exclusive internal lock whenever re-entrance can happen.
  */
 class InputReader : public InputReaderInterface, private InputReaderContext {
 public:
@@ -414,6 +414,8 @@ public:
     virtual int32_t getMetaState();
 
 private:
+    Mutex mLock;
+
     struct KeyDown {
         int32_t keyCode;
         int32_t scanCode;
@@ -423,17 +425,22 @@ private:
     uint32_t mSources;
     int32_t mKeyboardType;
 
-    Vector<KeyDown> mKeyDowns; // keys that are down
-    int32_t mMetaState;
-    nsecs_t mDownTime; // time of most recent key down
+    struct LockedState {
+        Vector<KeyDown> keyDowns; // keys that are down
+        int32_t metaState;
+        nsecs_t downTime; // time of most recent key down
+    } mLocked;
 
-    void initialize();
+    void initializeLocked();
 
     bool isKeyboardOrGamepadKey(int32_t scanCode);
+
     void processKey(nsecs_t when, bool down, int32_t keyCode, int32_t scanCode,
             uint32_t policyFlags);
+    void applyPolicyAndDispatch(nsecs_t when, uint32_t policyFlags,
+            bool down, int32_t keyCode, int32_t scanCode, int32_t metaState, nsecs_t downTime);
 
-    ssize_t findKeyDown(int32_t scanCode);
+    ssize_t findKeyDownLocked(int32_t scanCode);
 };
 
 
@@ -450,6 +457,8 @@ public:
 private:
     // Amount that trackball needs to move in order to generate a key event.
     static const int32_t TRACKBALL_MOVEMENT_THRESHOLD = 6;
+
+    Mutex mLock;
 
     int32_t mAssociatedDisplayId;
 
@@ -475,17 +484,21 @@ private:
         }
     } mAccumulator;
 
-    bool mDown;
-    nsecs_t mDownTime;
-
     float mXScale;
     float mYScale;
     float mXPrecision;
     float mYPrecision;
 
-    void initialize();
+    struct LockedState {
+        bool down;
+        nsecs_t downTime;
+    } mLocked;
+
+    void initializeLocked();
 
     void sync(nsecs_t when);
+    void applyPolicyAndDispatch(nsecs_t when, int32_t motionEventAction,
+            PointerCoords* pointerCoords, nsecs_t downTime);
 };
 
 
@@ -508,6 +521,8 @@ protected:
     /* Maximum pointer id value supported.
      * (This is limited by our use of BitSet32 to track pointer assignments.) */
     static const uint32_t MAX_POINTER_ID = 31;
+
+    Mutex mLock;
 
     struct VirtualKey {
         int32_t keyCode;
@@ -561,7 +576,6 @@ protected:
     };
 
     int32_t mAssociatedDisplayId;
-    Vector<VirtualKey> mVirtualKeys;
 
     // Immutable configuration parameters.
     struct Parameters {
@@ -583,67 +597,65 @@ protected:
         RawAbsoluteAxisInfo orientation;
     } mAxes;
 
-    // The surface orientation and width and height set by configureSurface().
-    int32_t mSurfaceOrientation;
-    int32_t mSurfaceWidth, mSurfaceHeight;
-
-    // Translation and scaling factors, orientation-independent.
-    int32_t mXOrigin;
-    float mXScale;
-    float mXPrecision;
-
-    int32_t mYOrigin;
-    float mYScale;
-    float mYPrecision;
-
-    int32_t mPressureOrigin;
-    float mPressureScale;
-
-    int32_t mSizeOrigin;
-    float mSizeScale;
-
-    float mOrientationScale;
-
-    // Oriented motion ranges for input device info.
-    struct OrientedRanges {
-        InputDeviceInfo::MotionRange x;
-        InputDeviceInfo::MotionRange y;
-        InputDeviceInfo::MotionRange pressure;
-        InputDeviceInfo::MotionRange size;
-        InputDeviceInfo::MotionRange touchMajor;
-        InputDeviceInfo::MotionRange touchMinor;
-        InputDeviceInfo::MotionRange toolMajor;
-        InputDeviceInfo::MotionRange toolMinor;
-        InputDeviceInfo::MotionRange orientation;
-    } mOrientedRanges;
-
-    // Oriented dimensions and precision.
-    float mOrientedSurfaceWidth, mOrientedSurfaceHeight;
-    float mOrientedXPrecision, mOrientedYPrecision;
-
-    // The touch data of the current sample being processed.
+    // Current and previous touch sample data.
     TouchData mCurrentTouch;
-
-    // The touch data of the previous sample that was processed.  This is updated
-    // incrementally while the current sample is being processed.
     TouchData mLastTouch;
 
     // The time the primary pointer last went down.
     nsecs_t mDownTime;
 
-    struct CurrentVirtualKeyState {
-        bool down;
-        nsecs_t downTime;
-        int32_t keyCode;
-        int32_t scanCode;
-    } mCurrentVirtualKey;
+    struct LockedState {
+        Vector<VirtualKey> virtualKeys;
 
-    // Lock for virtual key state.
-    Mutex mVirtualKeyLock; // methods use "Lvk" suffix
+        // The surface orientation and width and height set by configureSurfaceLocked().
+        int32_t surfaceOrientation;
+        int32_t surfaceWidth, surfaceHeight;
+
+        // Translation and scaling factors, orientation-independent.
+        int32_t xOrigin;
+        float xScale;
+        float xPrecision;
+
+        int32_t yOrigin;
+        float yScale;
+        float yPrecision;
+
+        int32_t pressureOrigin;
+        float pressureScale;
+
+        int32_t sizeOrigin;
+        float sizeScale;
+
+        float orientationScale;
+
+        // Oriented motion ranges for input device info.
+        struct OrientedRanges {
+            InputDeviceInfo::MotionRange x;
+            InputDeviceInfo::MotionRange y;
+            InputDeviceInfo::MotionRange pressure;
+            InputDeviceInfo::MotionRange size;
+            InputDeviceInfo::MotionRange touchMajor;
+            InputDeviceInfo::MotionRange touchMinor;
+            InputDeviceInfo::MotionRange toolMajor;
+            InputDeviceInfo::MotionRange toolMinor;
+            InputDeviceInfo::MotionRange orientation;
+        } orientedRanges;
+
+        // Oriented dimensions and precision.
+        float orientedSurfaceWidth, orientedSurfaceHeight;
+        float orientedXPrecision, orientedYPrecision;
+
+        struct CurrentVirtualKeyState {
+            bool down;
+            nsecs_t downTime;
+            int32_t keyCode;
+            int32_t scanCode;
+        } currentVirtualKey;
+    } mLocked;
 
     virtual void configureAxes();
-    virtual bool configureSurface();
-    virtual void configureVirtualKeys();
+    virtual bool configureSurfaceLocked();
+    virtual void configureVirtualKeysLocked();
 
     enum TouchResult {
         // Dispatch the touch normally.
@@ -696,15 +708,19 @@ private:
         uint64_t distance : 48; // squared distance
     };
 
-    void initialize();
+    void initializeLocked();
 
     TouchResult consumeOffScreenTouches(nsecs_t when, uint32_t policyFlags);
     void dispatchTouches(nsecs_t when, uint32_t policyFlags);
     void dispatchTouch(nsecs_t when, uint32_t policyFlags, TouchData* touch,
             BitSet32 idBits, uint32_t changedId, int32_t motionEventAction);
 
-    bool isPointInsideSurface(int32_t x, int32_t y);
-    const VirtualKey* findVirtualKeyHitLvk(int32_t x, int32_t y);
+    void applyPolicyAndDispatchVirtualKey(nsecs_t when, uint32_t policyFlags,
+            int32_t keyEventAction, int32_t keyEventFlags,
+            int32_t keyCode, int32_t scanCode, nsecs_t downTime);
+
+    bool isPointInsideSurfaceLocked(int32_t x, int32_t y);
+    const VirtualKey* findVirtualKeyHitLocked(int32_t x, int32_t y);
 
     bool applyBadTouchFilter();
     bool applyJumpyTouchFilter();
