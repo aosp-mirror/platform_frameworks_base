@@ -21,7 +21,7 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.android.internal.telephony.GsmAlphabet;
-import com.android.internal.telephony.gsm.SIMFileHandler;
+import com.android.internal.telephony.IccFileHandler;
 
 import java.util.Iterator;
 import java.util.List;
@@ -53,7 +53,7 @@ class CommandParamsFactory extends Handler {
     static final int REFRESH_UICC_RESET                     = 0x04;
 
     static synchronized CommandParamsFactory getInstance(RilMessageDecoder caller,
-            SIMFileHandler fh) {
+            IccFileHandler fh) {
         if (sInstance != null) {
             return sInstance;
         }
@@ -63,7 +63,7 @@ class CommandParamsFactory extends Handler {
         return null;
     }
 
-    private CommandParamsFactory(RilMessageDecoder caller, SIMFileHandler fh) {
+    private CommandParamsFactory(RilMessageDecoder caller, IccFileHandler fh) {
         mCaller = caller;
         mIconLoader = IconLoader.getInstance(this, fh);
     }
