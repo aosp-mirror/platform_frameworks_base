@@ -1848,6 +1848,8 @@ int Equalizer_getParameter(EffectContext     *pContext,
     case EQ_PARAM_NUM_BANDS:
     case EQ_PARAM_CUR_PRESET:
     case EQ_PARAM_GET_NUM_OF_PRESETS:
+    case EQ_PARAM_BAND_LEVEL:
+    case EQ_PARAM_GET_BAND:
         if (*pValueSize < sizeof(int16_t)) {
             LOGV("\tLVM_ERROR : Equalizer_getParameter() invalid pValueSize 1  %d", *pValueSize);
             return -EINVAL;
@@ -1856,6 +1858,13 @@ int Equalizer_getParameter(EffectContext     *pContext,
         break;
 
     case EQ_PARAM_LEVEL_RANGE:
+        if (*pValueSize < 2 * sizeof(int16_t)) {
+            LOGV("\tLVM_ERROR : Equalizer_getParameter() invalid pValueSize 2  %d", *pValueSize);
+            return -EINVAL;
+        }
+        *pValueSize = 2 * sizeof(int16_t);
+        break;
+
     case EQ_PARAM_BAND_FREQ_RANGE:
         if (*pValueSize < 2 * sizeof(int32_t)) {
             LOGV("\tLVM_ERROR : Equalizer_getParameter() invalid pValueSize 2  %d", *pValueSize);
@@ -1863,8 +1872,7 @@ int Equalizer_getParameter(EffectContext     *pContext,
         }
         *pValueSize = 2 * sizeof(int32_t);
         break;
-    case EQ_PARAM_BAND_LEVEL:
-    case EQ_PARAM_GET_BAND:
+
     case EQ_PARAM_CENTER_FREQ:
         if (*pValueSize < sizeof(int32_t)) {
             LOGV("\tLVM_ERROR : Equalizer_getParameter() invalid pValueSize 1  %d", *pValueSize);
@@ -1891,13 +1899,13 @@ int Equalizer_getParameter(EffectContext     *pContext,
 
     switch (param) {
     case EQ_PARAM_NUM_BANDS:
-        *(int16_t *)pValue = FIVEBAND_NUMBANDS;
+        *(uint16_t *)pValue = (uint16_t)FIVEBAND_NUMBANDS;
         //LOGV("\tEqualizer_getParameter() EQ_PARAM_NUM_BANDS %d", *(int16_t *)pValue);
         break;
 
     case EQ_PARAM_LEVEL_RANGE:
-        *(int32_t *)pValue = -1500;
-        *((int32_t *)pValue + 1) = 1500;
+        *(int16_t *)pValue = -1500;
+        *((int16_t *)pValue + 1) = 1500;
         //LOGV("\tEqualizer_getParameter() EQ_PARAM_LEVEL_RANGE min %d, max %d",
         //      *(int32_t *)pValue, *((int32_t *)pValue + 1));
         break;
@@ -1908,7 +1916,7 @@ int Equalizer_getParameter(EffectContext     *pContext,
             status = -EINVAL;
             break;
         }
-        *(int32_t *)pValue = EqualizerGetBandLevel(pContext, param2);
+        *(int16_t *)pValue = (int16_t)EqualizerGetBandLevel(pContext, param2);
         //LOGV("\tEqualizer_getParameter() EQ_PARAM_BAND_LEVEL band %d, level %d",
         //      param2, *(int32_t *)pValue);
         break;
@@ -1937,18 +1945,18 @@ int Equalizer_getParameter(EffectContext     *pContext,
 
     case EQ_PARAM_GET_BAND:
         param2 = *pParam;
-        *(int32_t *)pValue = EqualizerGetBand(pContext, param2);
+        *(uint16_t *)pValue = (uint16_t)EqualizerGetBand(pContext, param2);
         //LOGV("\tEqualizer_getParameter() EQ_PARAM_GET_BAND frequency %d, band %d",
         //      param2, *(int32_t *)pValue);
         break;
 
     case EQ_PARAM_CUR_PRESET:
-        *(int16_t *)pValue = EqualizerGetPreset(pContext);
+        *(uint16_t *)pValue = (uint16_t)EqualizerGetPreset(pContext);
         //LOGV("\tEqualizer_getParameter() EQ_PARAM_CUR_PRESET %d", *(int32_t *)pValue);
         break;
 
     case EQ_PARAM_GET_NUM_OF_PRESETS:
-        *(int16_t *)pValue = EqualizerGetNumPresets();
+        *(uint16_t *)pValue = (uint16_t)EqualizerGetNumPresets();
         //LOGV("\tEqualizer_getParameter() EQ_PARAM_GET_NUM_OF_PRESETS %d", *(int16_t *)pValue);
         break;
 
@@ -1968,12 +1976,12 @@ int Equalizer_getParameter(EffectContext     *pContext,
         break;
 
     case EQ_PARAM_PROPERTIES: {
-        uint16_t *p = (uint16_t *)pValue;
+        int16_t *p = (int16_t *)pValue;
         LOGV("\tEqualizer_getParameter() EQ_PARAM_PROPERTIES");
-        p[0] = EqualizerGetPreset(pContext);
-        p[1] = FIVEBAND_NUMBANDS;
+        p[0] = (int16_t)EqualizerGetPreset(pContext);
+        p[1] = (int16_t)FIVEBAND_NUMBANDS;
         for (int i = 0; i < FIVEBAND_NUMBANDS; i++) {
-            p[2 + i] = EqualizerGetBandLevel(pContext, i);
+            p[2 + i] = (int16_t)EqualizerGetBandLevel(pContext, i);
         }
     } break;
 
@@ -2011,7 +2019,7 @@ int Equalizer_setParameter (EffectContext *pContext, int32_t *pParam, void *pVal
     //LOGV("\tEqualizer_setParameter start");
     switch (param) {
     case EQ_PARAM_CUR_PRESET:
-        preset = *(int16_t *)pValue;
+        preset = (int32_t)(*(uint16_t *)pValue);
 
         //LOGV("\tEqualizer_setParameter() EQ_PARAM_CUR_PRESET %d", preset);
         if ((preset >= EqualizerGetNumPresets())||(preset < 0)) {
@@ -2022,7 +2030,7 @@ int Equalizer_setParameter (EffectContext *pContext, int32_t *pParam, void *pVal
         break;
     case EQ_PARAM_BAND_LEVEL:
         band =  *pParam;
-        level = *(int32_t *)pValue;
+        level = (int32_t)(*(int16_t *)pValue);
         //LOGV("\tEqualizer_setParameter() EQ_PARAM_BAND_LEVEL band %d, level %d", band, level);
         if (band >= FIVEBAND_NUMBANDS) {
             status = -EINVAL;
@@ -2030,8 +2038,28 @@ int Equalizer_setParameter (EffectContext *pContext, int32_t *pParam, void *pVal
         }
         EqualizerSetBandLevel(pContext, band, level);
         break;
+    case EQ_PARAM_PROPERTIES: {
+        //LOGV("\tEqualizer_setParameter() EQ_PARAM_PROPERTIES");
+        int16_t *p = (int16_t *)pValue;
+        if ((int)p[0] >= EqualizerGetNumPresets()) {
+            status = -EINVAL;
+            break;
+        }
+        if (p[0] >= 0) {
+            EqualizerSetPreset(pContext, (int)p[0]);
+        } else {
+            if ((int)p[1] != FIVEBAND_NUMBANDS) {
+                status = -EINVAL;
+                break;
+            }
+            for (int i = 0; i < FIVEBAND_NUMBANDS; i++) {
+                EqualizerSetBandLevel(pContext, i, (int)p[2 + i]);
+            }
+        }
+    } break;
     default:
         LOGV("\tLVM_ERROR : setParameter() invalid param %d", param);
+        status = -EINVAL;
         break;
     }
 
