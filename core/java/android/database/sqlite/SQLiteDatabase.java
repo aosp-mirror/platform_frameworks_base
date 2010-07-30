@@ -39,14 +39,13 @@ import dalvik.system.BlockGuard;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
@@ -350,6 +349,10 @@ public class SQLiteDatabase extends SQLiteClosable {
     /* package */ SQLiteDatabase mParentConnObj = null;
 
     private static final String MEMORY_DB_PATH = ":memory:";
+
+    /** stores reference to all databases opened in the current process. */
+    private static ArrayList<WeakReference<SQLiteDatabase>> mActiveDatabases =
+            new ArrayList<WeakReference<SQLiteDatabase>>();
 
     synchronized void addSQLiteClosable(SQLiteClosable closable) {
         // mPrograms is per instance of SQLiteDatabase and it doesn't actually touch the database
@@ -966,7 +969,9 @@ public class SQLiteDatabase extends SQLiteClosable {
         // END STOPSHIP
 
         // add this database to the list of databases opened in this process
-        ActiveDatabases.addActiveDatabase(sqliteDatabase);
+        synchronized(mActiveDatabases) {
+            mActiveDatabases.add(new WeakReference<SQLiteDatabase>(sqliteDatabase));
+        }
         return sqliteDatabase;
     }
 
@@ -1284,7 +1289,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public SQLiteStatement compileStatement(String sql) throws SQLException {
         verifyDbIsOpen();
-        return new SQLiteStatement(this, sql);
+        return new SQLiteStatement(this, sql, null);
     }
 
     /**
@@ -1634,68 +1639,41 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public long insertWithOnConflict(String table, String nullColumnHack,
             ContentValues initialValues, int conflictAlgorithm) {
-        verifyDbIsOpen();
-
-        // Measurements show most sql lengths <= 152
-        StringBuilder sql = new StringBuilder(152);
+        StringBuilder sql = new StringBuilder();
         sql.append("INSERT");
         sql.append(CONFLICT_VALUES[conflictAlgorithm]);
         sql.append(" INTO ");
         sql.append(table);
-        // Measurements show most values lengths < 40
-        StringBuilder values = new StringBuilder(40);
+        sql.append('(');
 
-        Set<Map.Entry<String, Object>> entrySet = null;
-        if (initialValues != null && initialValues.size() > 0) {
-            entrySet = initialValues.valueSet();
-            Iterator<Map.Entry<String, Object>> entriesIter = entrySet.iterator();
-            sql.append('(');
-
-            boolean needSeparator = false;
-            while (entriesIter.hasNext()) {
-                if (needSeparator) {
-                    sql.append(", ");
-                    values.append(", ");
-                }
-                needSeparator = true;
-                Map.Entry<String, Object> entry = entriesIter.next();
-                sql.append(entry.getKey());
-                values.append('?');
+        Object[] bindArgs = null;
+        int size = (initialValues != null && initialValues.size() > 0) ? initialValues.size() : 0;
+        if (size > 0) {
+            bindArgs = new Object[size];
+            int i = 0;
+            for (String colName : initialValues.keySet()) {
+                sql.append((i > 0) ? "," : "");
+                sql.append(colName);
+                bindArgs[i++] = initialValues.get(colName);
             }
-
             sql.append(')');
-        } else {
-            sql.append("(" + nullColumnHack + ") ");
-            values.append("NULL");
-        }
-
-        sql.append(" VALUES(");
-        sql.append(values);
-        sql.append(");");
-
-        SQLiteStatement statement = null;
-        try {
-            statement = compileStatement(sql.toString());
-
-            // Bind the values
-            if (entrySet != null) {
-                int size = entrySet.size();
-                Iterator<Map.Entry<String, Object>> entriesIter = entrySet.iterator();
-                for (int i = 0; i < size; i++) {
-                    Map.Entry<String, Object> entry = entriesIter.next();
-                    DatabaseUtils.bindObjectToProgram(statement, i + 1, entry.getValue());
-                }
+            sql.append(" VALUES (");
+            for (i = 0; i < size; i++) {
+                sql.append((i > 0) ? ",?" : "?");
             }
+        } else {
+            sql.append(nullColumnHack + ") VALUES (NULL");
+        }
+        sql.append(')');
 
-            // Run the program and then cleanup
+        SQLiteStatement statement = new SQLiteStatement(this, sql.toString(), bindArgs);
+        try {
             return statement.executeInsert();
         } catch (SQLiteDatabaseCorruptException e) {
             onCorruption();
             throw e;
         } finally {
-            if (statement != null) {
-                statement.close();
-            }
+            statement.close();
         }
     }
 
@@ -1710,26 +1688,15 @@ public class SQLiteDatabase extends SQLiteClosable {
      *         whereClause.
      */
     public int delete(String table, String whereClause, String[] whereArgs) {
-        verifyDbIsOpen();
-        SQLiteStatement statement = null;
+        SQLiteStatement statement =  new SQLiteStatement(this, "DELETE FROM " + table +
+                (!TextUtils.isEmpty(whereClause) ? " WHERE " + whereClause : ""), whereArgs);
         try {
-            statement = compileStatement("DELETE FROM " + table
-                    + (!TextUtils.isEmpty(whereClause)
-                    ? " WHERE " + whereClause : ""));
-            if (whereArgs != null) {
-                int numArgs = whereArgs.length;
-                for (int i = 0; i < numArgs; i++) {
-                    DatabaseUtils.bindObjectToProgram(statement, i + 1, whereArgs[i]);
-                }
-            }
             return statement.executeUpdateDelete();
         } catch (SQLiteDatabaseCorruptException e) {
             onCorruption();
             throw e;
         } finally {
-            if (statement != null) {
-                statement.close();
-            }
+            statement.close();
         }
     }
 
@@ -1760,7 +1727,8 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public int updateWithOnConflict(String table, ContentValues values,
             String whereClause, String[] whereArgs, int conflictAlgorithm) {
-        if (values == null || values.size() == 0) {
+        int setValuesSize = values.size();
+        if (values == null || setValuesSize == 0) {
             throw new IllegalArgumentException("Empty values");
         }
 
@@ -1770,58 +1738,34 @@ public class SQLiteDatabase extends SQLiteClosable {
         sql.append(table);
         sql.append(" SET ");
 
-        Set<Map.Entry<String, Object>> entrySet = values.valueSet();
-        Iterator<Map.Entry<String, Object>> entriesIter = entrySet.iterator();
-
-        while (entriesIter.hasNext()) {
-            Map.Entry<String, Object> entry = entriesIter.next();
-            sql.append(entry.getKey());
+        // move all bind args to one array
+        int bindArgsSize = (whereArgs == null) ? setValuesSize : (setValuesSize + whereArgs.length);
+        Object[] bindArgs = new Object[bindArgsSize];
+        int i = 0;
+        for (String colName : values.keySet()) {
+            sql.append((i > 0) ? "," : "");
+            sql.append(colName);
+            bindArgs[i++] = values.get(colName);
             sql.append("=?");
-            if (entriesIter.hasNext()) {
-                sql.append(", ");
+        }
+        if (whereArgs != null) {
+            for (i = setValuesSize; i < bindArgsSize; i++) {
+                bindArgs[i] = whereArgs[i - setValuesSize];
             }
         }
-
         if (!TextUtils.isEmpty(whereClause)) {
             sql.append(" WHERE ");
             sql.append(whereClause);
         }
 
-        verifyDbIsOpen();
-        SQLiteStatement statement = null;
+        SQLiteStatement statement = new SQLiteStatement(this, sql.toString(), bindArgs);
         try {
-            statement = compileStatement(sql.toString());
-
-            // Bind the values
-            int size = entrySet.size();
-            entriesIter = entrySet.iterator();
-            int bindArg = 1;
-            for (int i = 0; i < size; i++) {
-                Map.Entry<String, Object> entry = entriesIter.next();
-                DatabaseUtils.bindObjectToProgram(statement, bindArg, entry.getValue());
-                bindArg++;
-            }
-
-            if (whereArgs != null) {
-                size = whereArgs.length;
-                for (int i = 0; i < size; i++) {
-                    statement.bindString(bindArg, whereArgs[i]);
-                    bindArg++;
-                }
-            }
-
-            // Run the program and then cleanup
             return statement.executeUpdateDelete();
         } catch (SQLiteDatabaseCorruptException e) {
             onCorruption();
             throw e;
-        } catch (SQLException e) {
-            Log.e(TAG, "Error updating " + values + " using " + sql);
-            throw e;
         } finally {
-            if (statement != null) {
-                statement.close();
-            }
+            statement.close();
         }
     }
 
@@ -1913,25 +1857,15 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     private void executeSql(String sql, Object[] bindArgs) throws SQLException {
-        verifyDbIsOpen();
         long timeStart = SystemClock.uptimeMillis();
-        SQLiteStatement statement = null;
+        SQLiteStatement statement = new SQLiteStatement(this, sql, bindArgs);
         try {
-            statement = compileStatement(sql);
-            if (bindArgs != null) {
-                int numArgs = bindArgs.length;
-                for (int i = 0; i < numArgs; i++) {
-                    DatabaseUtils.bindObjectToProgram(statement, i + 1, bindArgs[i]);
-                }
-            }
-            statement.execute();
+            statement.executeUpdateDelete();
         } catch (SQLiteDatabaseCorruptException e) {
             onCorruption();
             throw e;
         } finally {
-            if (statement != null) {
-                statement.close();
-            }
+            statement.close();
         }
         logTimeStat(sql, timeStart);
     }
@@ -2450,82 +2384,78 @@ public class SQLiteDatabase extends SQLiteClosable {
         mConnectionPool.release(db);
     }
 
-    static class ActiveDatabases {
-        private static final ActiveDatabases activeDatabases = new ActiveDatabases();
-        private HashSet<WeakReference<SQLiteDatabase>> mActiveDatabases =
-                new HashSet<WeakReference<SQLiteDatabase>>();
-        private ActiveDatabases() {} // disable instantiation of this class
-        static ActiveDatabases getInstance() {
-            return activeDatabases;
-        }
-        private static void addActiveDatabase(SQLiteDatabase sqliteDatabase) {
-            activeDatabases.mActiveDatabases.add(new WeakReference<SQLiteDatabase>(sqliteDatabase));
-        }
-    }
-
     /**
      * this method is used to collect data about ALL open databases in the current process.
-     * bugreport is a user of this data. 
+     * bugreport is a user of this data.
      */
     /* package */ static ArrayList<DbStats> getDbStats() {
         ArrayList<DbStats> dbStatsList = new ArrayList<DbStats>();
-        for (WeakReference<SQLiteDatabase> w : ActiveDatabases.getInstance().mActiveDatabases) {
+        // make a local copy of mActiveDatabases - so that this method is not competing
+        // for synchronization lock on mActiveDatabases
+        ArrayList<WeakReference<SQLiteDatabase>> tempList =
+                new ArrayList<WeakReference<SQLiteDatabase>>();
+        synchronized(mActiveDatabases) {
+            Collections.copy(tempList, mActiveDatabases);
+        }
+        for (WeakReference<SQLiteDatabase> w : tempList) {
             SQLiteDatabase db = w.get();
             if (db == null || !db.isOpen()) {
                 continue;
             }
 
-            try {
-                // get SQLITE_DBSTATUS_LOOKASIDE_USED for the db
-                int lookasideUsed = db.native_getDbLookaside();
+            synchronized (db) {
+                try {
+                    // get SQLITE_DBSTATUS_LOOKASIDE_USED for the db
+                    int lookasideUsed = db.native_getDbLookaside();
 
-                // get the lastnode of the dbname
-                String path = db.getPath();
-                int indx = path.lastIndexOf("/");
-                String lastnode = path.substring((indx != -1) ? ++indx : 0);
+                    // get the lastnode of the dbname
+                    String path = db.getPath();
+                    int indx = path.lastIndexOf("/");
+                    String lastnode = path.substring((indx != -1) ? ++indx : 0);
 
-                // get list of attached dbs and for each db, get its size and pagesize
-                ArrayList<Pair<String, String>> attachedDbs = db.getAttachedDbs();
-                if (attachedDbs == null) {
-                    continue;
-                }
-                for (int i = 0; i < attachedDbs.size(); i++) {
-                    Pair<String, String> p = attachedDbs.get(i);
-                    long pageCount = DatabaseUtils.longForQuery(db, "PRAGMA " + p.first
-                            + ".page_count;", null);
+                    // get list of attached dbs and for each db, get its size and pagesize
+                    ArrayList<Pair<String, String>> attachedDbs = db.getAttachedDbs();
+                    if (attachedDbs == null) {
+                        continue;
+                    }
+                    for (int i = 0; i < attachedDbs.size(); i++) {
+                        Pair<String, String> p = attachedDbs.get(i);
+                        long pageCount = DatabaseUtils.longForQuery(db, "PRAGMA " + p.first
+                                + ".page_count;", null);
 
-                    // first entry in the attached db list is always the main database
-                    // don't worry about prefixing the dbname with "main"
-                    String dbName;
-                    if (i == 0) {
-                        dbName = lastnode;
-                    } else {
-                        // lookaside is only relevant for the main db
-                        lookasideUsed = 0;
-                        dbName = "  (attached) " + p.first;
-                        // if the attached db has a path, attach the lastnode from the path to above
-                        if (p.second.trim().length() > 0) {
-                            int idx = p.second.lastIndexOf("/");
-                            dbName += " : " + p.second.substring((idx != -1) ? ++idx : 0);
+                        // first entry in the attached db list is always the main database
+                        // don't worry about prefixing the dbname with "main"
+                        String dbName;
+                        if (i == 0) {
+                            dbName = lastnode;
+                        } else {
+                            // lookaside is only relevant for the main db
+                            lookasideUsed = 0;
+                            dbName = "  (attached) " + p.first;
+                            // if the attached db has a path, attach the lastnode from the path to above
+                            if (p.second.trim().length() > 0) {
+                                int idx = p.second.lastIndexOf("/");
+                                dbName += " : " + p.second.substring((idx != -1) ? ++idx : 0);
+                            }
+                        }
+                        if (pageCount > 0) {
+                            dbStatsList.add(new DbStats(dbName, pageCount, db.getPageSize(),
+                                    lookasideUsed, db.mNumCacheHits, db.mNumCacheMisses,
+                                    db.mCompiledQueries.size()));
                         }
                     }
-                    if (pageCount > 0) {
-                        dbStatsList.add(new DbStats(dbName, pageCount, db.getPageSize(),
-                                lookasideUsed, db.mNumCacheHits, db.mNumCacheMisses,
-                                db.mCompiledQueries.size()));
+                    // if there are pooled connections, return the cache stats for them also.
+                    if (db.mConnectionPool != null) {
+                        for (SQLiteDatabase pDb : db.mConnectionPool.getConnectionList()) {
+                            dbStatsList.add(new DbStats("(pooled # " + pDb.mConnectionNum + ") "
+                                    + lastnode, 0, 0, 0, pDb.mNumCacheHits, pDb.mNumCacheMisses,
+                                    pDb.mCompiledQueries.size()));
+                        }
                     }
+                } catch (SQLiteException e) {
+                    // ignore. we don't care about exceptions when we are taking adb
+                    // bugreport!
                 }
-                // if there are pooled connections, return the cache stats for them also.
-                if (db.mConnectionPool != null) {
-                    for (SQLiteDatabase pDb : db.mConnectionPool.getConnectionList()) {
-                        dbStatsList.add(new DbStats("(pooled # " + pDb.mConnectionNum + ") "
-                                + lastnode, 0, 0, 0, pDb.mNumCacheHits, pDb.mNumCacheMisses,
-                                pDb.mCompiledQueries.size()));
-                    }
-                }
-            } catch (SQLiteException e) {
-                // ignore. we don't care about exceptions when we are taking adb
-                // bugreport!
             }
         }
         return dbStatsList;
@@ -2636,7 +2566,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * this method.
      * @throws SQLException
      */
-    /* package */ native void native_setLocale(String loc, int flags);
+    private native void native_setLocale(String loc, int flags);
 
     /**
      * return the SQLITE_DBSTATUS_LOOKASIDE_USED documented here

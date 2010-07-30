@@ -45,11 +45,6 @@ public class SQLiteDirectCursorDriver implements SQLiteCursorDriver {
             mDatabase.lock();
             mDatabase.closePendingStatements();
             query = new SQLiteQuery(mDatabase, mSql, 0, selectionArgs);
-            // Arg binding
-            int numArgs = selectionArgs == null ? 0 : selectionArgs.length;
-            for (int i = 0; i < numArgs; i++) {
-                query.bindString(i + 1, selectionArgs[i]);
-            }
 
             // Create the cursor
             if (factory == null) {
@@ -73,10 +68,7 @@ public class SQLiteDirectCursorDriver implements SQLiteCursorDriver {
     }
 
     public void setBindArguments(String[] bindArgs) {
-        final int numArgs = bindArgs.length;
-        for (int i = 0; i < numArgs; i++) {
-            mQuery.bindString(i + 1, bindArgs[i]);
-        }
+        mQuery.bindAllArgsAsStrings(bindArgs);
     }
 
     public void cursorDeactivated() {

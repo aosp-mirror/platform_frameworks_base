@@ -40,8 +40,6 @@ public interface SQLiteCursorDriver {
 
     /**
      * Called by a SQLiteCursor when it is requeryed.
-     * 
-     * @return The new count value.
      */
     void cursorRequeried(Cursor cursor);
 
