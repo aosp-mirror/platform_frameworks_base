@@ -1322,6 +1322,59 @@ public final class ContactsContract {
 
         /**
          * <p>
+         * A sub-directory of a contact that contains all of its
+         * {@link ContactsContract.RawContacts} as well as
+         * {@link ContactsContract.Data} rows. To access this directory append
+         * {@link #CONTENT_DIRECTORY} to the contact URI.
+         * </p>
+         * <p>
+         * Entity has three ID fields: {@link #CONTACT_ID} for the contact,
+         * {@link #RAW_CONTACT_ID} for the raw contact and {@link #DATA_ID} for
+         * the data rows. Entity always contains at least one row per
+         * constituent raw contact, even if there are no actual data rows. In
+         * this case the {@link #DATA_ID} field will be null.
+         * </p>
+         * <p>
+         * Entity reads all data for the entire contact in one transaction, to
+         * guarantee consistency.  There is significant data duplication
+         * in the Entity (each row repeats all Contact columns and all RawContact
+         * columns), so the benefits of transactional consistency should be weighed
+         * against the cost of transferring large amounts of denormalized data
+         * from the Provider.
+         * </p>
+         *
+         * @hide
+         */
+        public static final class Entity implements BaseColumns, ContactsColumns,
+                ContactNameColumns, RawContactsColumns, BaseSyncColumns, SyncColumns, DataColumns,
+                StatusColumns, ContactOptionsColumns, ContactStatusColumns {
+            /**
+             * no public constructor since this is a utility class
+             */
+            private Entity() {
+            }
+
+            /**
+             * The directory twig for this sub-table
+             */
+            public static final String CONTENT_DIRECTORY = "entities";
+
+            /**
+             * The ID of the raw contact row.
+             * <P>Type: INTEGER</P>
+             */
+            public static final String RAW_CONTACT_ID = "raw_contact_id";
+
+            /**
+             * The ID of the data row. The value will be null if this raw contact has no
+             * data rows.
+             * <P>Type: INTEGER</P>
+             */
+            public static final String DATA_ID = "data_id";
+        }
+
+        /**
+         * <p>
          * A <i>read-only</i> sub-directory of a single contact aggregate that
          * contains all aggregation suggestions (other contacts). The
          * aggregation suggestions are computed based on approximate data
@@ -2025,7 +2078,7 @@ public final class ContactsContract {
             public static final String CONTENT_DIRECTORY = "entity";
 
             /**
-             * The ID of the data column. The value will be null if this raw contact has no
+             * The ID of the data row. The value will be null if this raw contact has no
              * data rows.
              * <P>Type: INTEGER</P>
              */
