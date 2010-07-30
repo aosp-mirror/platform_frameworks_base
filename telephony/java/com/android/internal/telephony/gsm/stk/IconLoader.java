@@ -16,7 +16,7 @@
 
 package com.android.internal.telephony.gsm.stk;
 
-import com.android.internal.telephony.gsm.SIMFileHandler;
+import com.android.internal.telephony.IccFileHandler;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -40,7 +40,7 @@ class IconLoader extends Handler {
     private ImageDescriptor mId = null;
     private Bitmap mCurrentIcon = null;
     private int mRecordNumber;
-    private SIMFileHandler mSimFH = null;
+    private IccFileHandler mSimFH = null;
     private Message mEndMsg = null;
     private byte[] mIconData = null;
     // multi icons state members
@@ -68,14 +68,14 @@ class IconLoader extends Handler {
     private static final int CLUT_ENTRY_SIZE = 3;
 
 
-    private IconLoader(Looper looper , SIMFileHandler fh) {
+    private IconLoader(Looper looper , IccFileHandler fh) {
         super(looper);
         mSimFH = fh;
 
         mIconsCache = new HashMap<Integer, Bitmap>(50);
     }
 
-    static IconLoader getInstance(Handler caller, SIMFileHandler fh) {
+    static IconLoader getInstance(Handler caller, IccFileHandler fh) {
         if (sLoader != null) {
             return sLoader;
         }
