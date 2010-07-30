@@ -447,16 +447,15 @@ public final class PropertyAnimator extends Animator {
                 HashMap<String, Method> propertyMap = sSetterPropertyMap.get(mTarget);
                 if (propertyMap != null) {
                     mSetter = propertyMap.get(mPropertyName);
-                    if (mSetter != null) {
-                        return;
+                }
+                if (mSetter == null) {
+                    mSetter = getPropertyFunction("set", mValueType);
+                    if (propertyMap == null) {
+                        propertyMap = new HashMap<String, Method>();
+                        sSetterPropertyMap.put(mTarget, propertyMap);
                     }
+                    propertyMap.put(mPropertyName, mSetter);
                 }
-                mSetter = getPropertyFunction("set", mValueType);
-                if (propertyMap == null) {
-                    propertyMap = new HashMap<String, Method>();
-                    sSetterPropertyMap.put(mTarget, propertyMap);
-                }
-                propertyMap.put(mPropertyName, mSetter);
             } finally {
                 propertyMapLock.writeLock().unlock();
             }
@@ -470,16 +469,15 @@ public final class PropertyAnimator extends Animator {
                     HashMap<String, Method> propertyMap = sGetterPropertyMap.get(mTarget);
                     if (propertyMap != null) {
                         mGetter = propertyMap.get(mPropertyName);
-                        if (mGetter != null) {
-                            return;
+                    }
+                    if (mGetter == null) {
+                        mGetter = getPropertyFunction("get", null);
+                        if (propertyMap == null) {
+                            propertyMap = new HashMap<String, Method>();
+                            sGetterPropertyMap.put(mTarget, propertyMap);
                         }
+                        propertyMap.put(mPropertyName, mGetter);
                     }
-                    mGetter = getPropertyFunction("get", null);
-                    if (propertyMap == null) {
-                        propertyMap = new HashMap<String, Method>();
-                        sGetterPropertyMap.put(mTarget, propertyMap);
-                    }
-                    propertyMap.put(mPropertyName, mGetter);
                 } finally {
                     propertyMapLock.writeLock().unlock();
                 }
