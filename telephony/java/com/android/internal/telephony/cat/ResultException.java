@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm.stk;
+package com.android.internal.telephony.cat;
 
 
 /**
@@ -22,7 +22,7 @@ package com.android.internal.telephony.gsm.stk;
  *
  * {@hide}
  */
-public class ResultException extends StkException {
+public class ResultException extends CatException {
     private ResultCode mResult;
     private int mAdditionalInfo;
 

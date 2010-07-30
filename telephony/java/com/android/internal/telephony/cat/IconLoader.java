@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm.stk;
+package com.android.internal.telephony.cat;
 
 import com.android.internal.telephony.IccFileHandler;
 
@@ -80,7 +80,7 @@ class IconLoader extends Handler {
             return sLoader;
         }
         if (fh != null) {
-            HandlerThread thread = new HandlerThread("Stk Icon Loader");
+            HandlerThread thread = new HandlerThread("Cat Icon Loader");
             thread.start();
             return new IconLoader(thread.getLooper(), fh);
         }
@@ -163,7 +163,7 @@ class IconLoader extends Handler {
                 break;
             }
         } catch (Exception e) {
-            StkLog.d(this, "Icon load failed");
+            CatLog.d(this, "Icon load failed");
             // post null icon back to the caller.
             postIcon();
         }
@@ -254,7 +254,7 @@ class IconLoader extends Handler {
         }
 
         if (pixelIndex != numOfPixels) {
-            StkLog.d("IconLoader", "parseToBnW; size error");
+            CatLog.d("IconLoader", "parseToBnW; size error");
         }
         return Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
     }

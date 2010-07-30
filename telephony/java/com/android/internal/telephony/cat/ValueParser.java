@@ -14,11 +14,11 @@
  * the License.
  */
 
-package com.android.internal.telephony.gsm.stk;
+package com.android.internal.telephony.cat;
 
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.IccUtils;
-import com.android.internal.telephony.gsm.stk.Duration.TimeUnit;
+import com.android.internal.telephony.cat.Duration.TimeUnit;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -182,7 +182,7 @@ abstract class ValueParser {
      */
     static ItemsIconId retrieveItemsIconId(ComprehensionTlv ctlv)
             throws ResultException {
-        StkLog.d("ValueParser", "retrieveItemsIconId:");
+        CatLog.d("ValueParser", "retrieveItemsIconId:");
         ItemsIconId id = new ItemsIconId();
 
         byte[] rawValue = ctlv.getRawValue();

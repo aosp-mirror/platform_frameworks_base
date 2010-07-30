@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm.stk;
+package com.android.internal.telephony.cat;
 
 /**
  * {@hide}
@@ -69,7 +69,7 @@ public class ImageDescriptor {
 
             d.length = ((rawData[valueIndex++] & 0xff) << 8 | (rawData[valueIndex++] & 0xff));
         } catch (IndexOutOfBoundsException e) {
-            StkLog.d("ImageDescripter", "parse; failed parsing image descriptor");
+            CatLog.d("ImageDescripter", "parse; failed parsing image descriptor");
             d = null;
         }
         return d;

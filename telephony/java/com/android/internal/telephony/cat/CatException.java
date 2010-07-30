@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm.stk;
+package com.android.internal.telephony.cat;
 
 import android.util.AndroidException;
 
 
 /**
- * Base class for all the exceptions in STK service.
+ * Base class for all the exceptions in CAT service.
  *
  * {@hide}
  */
-class StkException extends AndroidException {
-    public StkException() {
+class CatException extends AndroidException {
+    public CatException() {
         super();
     }
 }

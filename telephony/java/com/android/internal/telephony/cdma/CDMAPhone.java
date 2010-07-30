@@ -42,6 +42,7 @@ import android.telephony.SignalStrength;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.telephony.cat.CatService;
 import com.android.internal.telephony.Call;
 import com.android.internal.telephony.CallStateException;
 import com.android.internal.telephony.CommandException;
@@ -49,7 +50,6 @@ import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.Connection;
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.MccTable;
-import com.android.internal.telephony.gsm.stk.StkService;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.IccException;
 import com.android.internal.telephony.IccFileHandler;
@@ -110,7 +110,7 @@ public class CDMAPhone extends PhoneBase {
     PhoneSubInfo mSubInfo;
     EriManager mEriManager;
     WakeLock mWakeLock;
-    StkService mStkService;
+    CatService mCcatService;
 
     // mNvLoadedRegistrants are informed after the EVENT_NV_READY
     private RegistrantList mNvLoadedRegistrants = new RegistrantList();
@@ -162,7 +162,7 @@ public class CDMAPhone extends PhoneBase {
         mRuimSmsInterfaceManager = new RuimSmsInterfaceManager(this);
         mSubInfo = new PhoneSubInfo(this);
         mEriManager = new EriManager(this, context, EriManager.ERI_FROM_XML);
-        mStkService = StkService.getInstance(mCM, mRuimRecords, mContext,
+        mCcatService = CatService.getInstance(mCM, mRuimRecords, mContext,
                 mIccFileHandler, mRuimCard);
 
         mCM.registerForAvailable(this, EVENT_RADIO_AVAILABLE, null);
@@ -239,7 +239,7 @@ public class CDMAPhone extends PhoneBase {
             mRuimSmsInterfaceManager.dispose();
             mSubInfo.dispose();
             mEriManager.dispose();
-            mStkService.dispose();
+            mCcatService.dispose();
         }
     }
 
@@ -255,7 +255,7 @@ public class CDMAPhone extends PhoneBase {
             this.mCT = null;
             this.mSST = null;
             this.mEriManager = null;
-            this.mStkService = null;
+            this.mCcatService = null;
     }
 
     protected void finalize() {
