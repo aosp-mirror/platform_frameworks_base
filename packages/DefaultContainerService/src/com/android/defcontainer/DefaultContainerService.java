@@ -125,8 +125,6 @@ public class DefaultContainerService extends IntentService {
             metrics.setToDefaults();
             PackageParser.PackageLite pkg = packageParser.parsePackageLite(
                     archiveFilePath, 0);
-            ret.packageName = pkg.packageName;
-            ret.installLocation = pkg.installLocation;
             // Nuke the parser reference right away and force a gc
             packageParser = null;
             Runtime.getRuntime().gc();
@@ -136,6 +134,7 @@ public class DefaultContainerService extends IntentService {
                 return ret;
             }
             ret.packageName = pkg.packageName;
+            ret.installLocation = pkg.installLocation;
             ret.recommendedInstallLocation = recommendAppInstallLocation(pkg.installLocation, archiveFilePath, flags);
             return ret;
         }
