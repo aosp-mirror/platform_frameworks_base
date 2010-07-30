@@ -43,14 +43,14 @@ public abstract class BaseExpandableListAdapter implements ExpandableListAdapter
     }
     
     /**
-     * {@see DataSetObservable#notifyInvalidated()}
+     * @see DataSetObservable#notifyInvalidated()
      */
     public void notifyDataSetInvalidated() {
         mDataSetObservable.notifyInvalidated();
     }
     
     /**
-     * {@see DataSetObservable#notifyChanged()}
+     * @see DataSetObservable#notifyChanged()
      */
     public void notifyDataSetChanged() {
         mDataSetObservable.notifyChanged();
