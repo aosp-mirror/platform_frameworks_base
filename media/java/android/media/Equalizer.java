@@ -182,9 +182,9 @@ public class Equalizer extends AudioEffect {
         }
         int[] param = new int[1];
         param[0] = PARAM_NUM_BANDS;
-        short[] value = new short[1];
-        checkStatus(getParameter(param, value));
-        mNumBands = value[0];
+        short[] result = new short[1];
+        checkStatus(getParameter(param, result));
+        mNumBands = result[0];
         return mNumBands;
     }
 
@@ -199,16 +199,8 @@ public class Equalizer extends AudioEffect {
      */
     public short[] getBandLevelRange()
     throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
-        int[] param = new int[1];
-        int[] value = new int[2];
-        param[0] = PARAM_LEVEL_RANGE;
-        checkStatus(getParameter(param, value));
-
         short[] result = new short[2];
-
-        result[0] = (short)value[0];
-        result[1] = (short)value[1];
-
+        checkStatus(getParameter(PARAM_LEVEL_RANGE, result));
         return result;
     }
 
@@ -222,14 +214,14 @@ public class Equalizer extends AudioEffect {
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
      */
-    public void setBandLevel(int band, short level)
+    public void setBandLevel(short band, short level)
     throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
         int[] param = new int[2];
-        int[] value = new int[1];
+        short[] value = new short[1];
 
         param[0] = PARAM_BAND_LEVEL;
-        param[1] = band;
-        value[0] = (int)level;
+        param[1] = (int)band;
+        value[0] = level;
         checkStatus(setParameter(param, value));
     }
 
@@ -242,16 +234,16 @@ public class Equalizer extends AudioEffect {
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
      */
-    public short getBandLevel(int band)
+    public short getBandLevel(short band)
     throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
         int[] param = new int[2];
-        int[] result = new int[1];
+        short[] result = new short[1];
 
         param[0] = PARAM_BAND_LEVEL;
-        param[1] = band;
+        param[1] = (int)band;
         checkStatus(getParameter(param, result));
 
-        return (short)result[0];
+        return result[0];
     }
 
 
@@ -264,13 +256,13 @@ public class Equalizer extends AudioEffect {
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
      */
-    public int getCenterFreq(int band)
+    public int getCenterFreq(short band)
     throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
         int[] param = new int[2];
         int[] result = new int[1];
 
         param[0] = PARAM_CENTER_FREQ;
-        param[1] = band;
+        param[1] = (int)band;
         checkStatus(getParameter(param, result));
 
         return result[0];
@@ -286,12 +278,12 @@ public class Equalizer extends AudioEffect {
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
      */
-    public int[] getBandFreqRange(int band)
+    public int[] getBandFreqRange(short band)
     throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
         int[] param = new int[2];
         int[] result = new int[2];
         param[0] = PARAM_BAND_FREQ_RANGE;
-        param[1] = band;
+        param[1] = (int)band;
         checkStatus(getParameter(param, result));
 
         return result;
@@ -305,10 +297,10 @@ public class Equalizer extends AudioEffect {
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
      */
-    public int getBand(int frequency)
+    public short getBand(int frequency)
     throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
         int[] param = new int[2];
-        int[] result = new int[1];
+        short[] result = new short[1];
 
         param[0] = PARAM_GET_BAND;
         param[1] = frequency;
@@ -326,11 +318,9 @@ public class Equalizer extends AudioEffect {
      */
     public short getCurrentPreset()
     throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
-        int[] param = new int[1];
-        param[0] = PARAM_CURRENT_PRESET;
-        short[] value = new short[1];
-        checkStatus(getParameter(param, value));
-        return value[0];
+        short[] result = new short[1];
+        checkStatus(getParameter(PARAM_CURRENT_PRESET, result));
+        return result[0];
     }
 
     /**
@@ -356,11 +346,9 @@ public class Equalizer extends AudioEffect {
      */
     public short getNumberOfPresets()
     throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
-        int[] param = new int[1];
-        param[0] = PARAM_GET_NUM_OF_PRESETS;
-        short[] value = new short[1];
-        checkStatus(getParameter(param, value));
-        return value[0];
+        short[] result = new short[1];
+        checkStatus(getParameter(PARAM_GET_NUM_OF_PRESETS, result));
+        return result[0];
     }
 
     /**
