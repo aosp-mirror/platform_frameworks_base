@@ -37,6 +37,7 @@ import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ServiceManager;
+import android.os.StrictMode;
 import android.text.TextUtils;
 import android.util.Config;
 import android.util.Log;
@@ -1056,8 +1057,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             IBinder app = data.readStrongBinder();
             int violationMask = data.readInt();
-            ApplicationErrorReport.CrashInfo ci = new ApplicationErrorReport.CrashInfo(data);
-            handleApplicationStrictModeViolation(app, violationMask, ci);
+            StrictMode.ViolationInfo info = new StrictMode.ViolationInfo(data);
+            handleApplicationStrictModeViolation(app, violationMask, info);
             reply.writeNoException();
             return true;
         }
@@ -2584,14 +2585,14 @@ class ActivityManagerProxy implements IActivityManager
 
     public void handleApplicationStrictModeViolation(IBinder app,
             int violationMask,
-            ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException
+            StrictMode.ViolationInfo info) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(app);
         data.writeInt(violationMask);
-        crashInfo.writeToParcel(data, 0);
+        info.writeToParcel(data, 0);
         mRemote.transact(HANDLE_APPLICATION_STRICT_MODE_VIOLATION_TRANSACTION, data, reply, 0);
         reply.readException();
         reply.recycle();
