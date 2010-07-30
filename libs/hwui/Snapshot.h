@@ -57,8 +57,13 @@ public:
             flags(0),
             previous(s),
             layer(NULL),
-            fbo(s->fbo),
-            localClip(s->localClip) {
+            fbo(s->fbo) {
+        if ((s->flags & Snapshot::kFlagClipSet) &&
+                !(s->flags & Snapshot::kFlagDirtyLocalClip)) {
+            localClip.set(s->localClip);
+        } else {
+            flags |= Snapshot::kFlagDirtyLocalClip;
+        }
     }
 
     /**
