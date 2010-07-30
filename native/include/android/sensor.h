@@ -121,6 +121,7 @@ typedef struct ASensorEvent {
         float           temperature;
         float           distance;
         float           light;
+        float           pressure;
     };
     int32_t reserved1[4];
 } ASensorEvent;
@@ -188,7 +189,8 @@ int ASensorEventQueue_disableSensor(ASensorEventQueue* queue, ASensor const* sen
 /*
  * Sets the delivery rate of events in microseconds for the given sensor.
  * Note that this is a hint only, generally event will arrive at a higher
- * rate.
+ * rate. It is an error to set a rate inferior to the value returned by
+ * ASensor_getMinDelay().
  * Returns a negative error code on failure.
  */
 int ASensorEventQueue_setEventRate(ASensorEventQueue* queue, ASensor const* sensor, int32_t usec);
@@ -238,6 +240,13 @@ int ASensor_getType(ASensor const* sensor);
  * Returns this sensors's resolution
  */
 float ASensor_getResolution(ASensor const* sensor);
+
+/*
+ * Returns the minimum delay allowed between events in microseconds.
+ * A value of zero means that this sensor doesn't report events at a
+ * constant rate, but rather only when a new data is available.
+ */
+int ASensor_getMinDelay(ASensor const* sensor);
 
 
 #ifdef __cplusplus

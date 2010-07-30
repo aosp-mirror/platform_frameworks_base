@@ -32,7 +32,7 @@ namespace android {
 Sensor::Sensor()
     : mHandle(0), mType(0),
       mMinValue(0), mMaxValue(0), mResolution(0),
-      mPower(0)
+      mPower(0), mMinDelay(0)
 {
 }
 
@@ -46,6 +46,7 @@ Sensor::Sensor(struct sensor_t const* hwSensor)
     mMaxValue = hwSensor->maxRange;     // FIXME: maxValue
     mResolution = hwSensor->resolution;
     mPower = hwSensor->power;
+    mMinDelay = hwSensor->minDelay;
 }
 
 Sensor::~Sensor()
@@ -84,12 +85,17 @@ float Sensor::getPowerUsage() const {
     return mPower;
 }
 
+int32_t Sensor::getMinDelay() const {
+    return mMinDelay;
+}
+
 size_t Sensor::getFlattenedSize() const
 {
     return  sizeof(int32_t) + ((mName.length() + 3) & ~3) +
             sizeof(int32_t) + ((mVendor.length() + 3) & ~3) +
             sizeof(int32_t) * 2 +
-            sizeof(float) * 4;
+            sizeof(float) * 4 +
+            sizeof(int32_t);
 }
 
 size_t Sensor::getFdCount() const
@@ -132,6 +138,7 @@ status_t Sensor::flatten(void* buffer, size_t size,
     offset += write(buffer, offset, mMaxValue);
     offset += write(buffer, offset, mResolution);
     offset += write(buffer, offset, mPower);
+    offset += write(buffer, offset, mMinDelay);
 
     return NO_ERROR;
 }
@@ -169,6 +176,7 @@ status_t Sensor::unflatten(void const* buffer, size_t size,
     offset += read(buffer, offset, &mMaxValue);
     offset += read(buffer, offset, &mResolution);
     offset += read(buffer, offset, &mPower);
+    offset += read(buffer, offset, &mMinDelay);
 
     return NO_ERROR;
 }
