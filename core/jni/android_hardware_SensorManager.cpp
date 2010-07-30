@@ -38,6 +38,7 @@ struct SensorOffsets
     jfieldID    range;
     jfieldID    resolution;
     jfieldID    power;
+    jfieldID    minDelay;
 } gSensorOffsets;
 
 /*
@@ -74,6 +75,7 @@ sensors_module_get_next_sensor(JNIEnv *env, jobject clazz, jobject sensor, jint 
     env->SetFloatField(sensor, sensorOffsets.range,      list->getMaxValue());
     env->SetFloatField(sensor, sensorOffsets.resolution, list->getResolution());
     env->SetFloatField(sensor, sensorOffsets.power,      list->getPowerUsage());
+    env->SetIntField(sensor, sensorOffsets.minDelay,     list->getMinDelay());
     
     next++;
     return next<count ? next : 0;
@@ -154,6 +156,7 @@ nativeClassInit (JNIEnv *_env, jclass _this)
     sensorOffsets.range       = _env->GetFieldID(sensorClass, "mMaxRange",  "F");
     sensorOffsets.resolution  = _env->GetFieldID(sensorClass, "mResolution","F");
     sensorOffsets.power       = _env->GetFieldID(sensorClass, "mPower",     "F");
+    sensorOffsets.minDelay    = _env->GetFieldID(sensorClass, "mMinDelay",  "I");
 }
 
 static JNINativeMethod gMethods[] = {

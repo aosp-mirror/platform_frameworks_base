@@ -63,6 +63,7 @@ public:
     float getMaxValue() const;
     float getResolution() const;
     float getPowerUsage() const;
+    int32_t getMinDelay() const;
 
     // Flattenable interface
     virtual size_t getFlattenedSize() const;
@@ -81,6 +82,7 @@ private:
     float   mMaxValue;
     float   mResolution;
     float   mPower;
+    int32_t mMinDelay;
 };
 
 // ----------------------------------------------------------------------------

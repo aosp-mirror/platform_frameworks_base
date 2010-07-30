@@ -92,6 +92,7 @@ public class Sensor {
     private float   mMaxRange;
     private float   mResolution;
     private float   mPower;
+    private int     mMinDelay;
     private int     mLegacyType;
 
 
@@ -145,6 +146,15 @@ public class Sensor {
      */
     public float getPower() {
         return mPower;
+    }
+
+    /**
+     * @return the minimum delay allowed between two events in microsecond
+     * or zero if this sensor only returns a value when the data it's measuring
+     * changes.
+     */
+    public int getMinDelay() {
+        return mMinDelay;
     }
 
     int getHandle() {
