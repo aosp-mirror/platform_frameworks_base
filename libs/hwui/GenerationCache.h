@@ -34,13 +34,12 @@ template<typename EntryKey, typename EntryValue>
 struct Entry: public LightRefBase<Entry<EntryKey, EntryValue> > {
     Entry() { }
     Entry(const Entry<EntryKey, EntryValue>& e):
-            key(e.key), value(e.value), index(e.index), parent(e.parent), child(e.child) { }
+            key(e.key), value(e.value), parent(e.parent), child(e.child) { }
     Entry(sp<Entry<EntryKey, EntryValue> > e):
-            key(e->key), value(e->value), index(e->index), parent(e->parent), child(e->child) { }
+            key(e->key), value(e->value), parent(e->parent), child(e->child) { }
 
     EntryKey key;
     EntryValue value;
-    ssize_t index;
 
     sp<Entry<EntryKey, EntryValue> > parent;
     sp<Entry<EntryKey, EntryValue> > child;
@@ -156,7 +155,7 @@ template<typename K, typename V>
 void GenerationCache<K, V>::addToCache(sp<Entry<K, V> > entry, K key, V value) {
     entry->key = key;
     entry->value = value;
-    entry->index = mCache.add(key, entry);
+    mCache.add(key, entry);
     attachToCache(entry);
 }
 
@@ -185,7 +184,10 @@ V GenerationCache<K, V>::removeAt(ssize_t index) {
 template<typename K, typename V>
 V GenerationCache<K, V>::removeOldest() {
     if (mOldest.get()) {
-        return removeAt(mOldest->index);
+        ssize_t index = mCache.indexOfKey(mOldest->key);
+        if (index >= 0) {
+            return removeAt(index);
+        }
     }
 
     return NULL;

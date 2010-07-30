@@ -78,7 +78,7 @@ public class ShadersActivity extends Activity {
             mScaledShader.setLocalMatrix(m2);
 
             mHorGradient = new LinearGradient(0.0f, 0.0f, mDrawWidth, 0.0f,
-                    Color.RED, Color.GREEN, Shader.TileMode.REPEAT);
+                    Color.RED, Color.GREEN, Shader.TileMode.CLAMP);
             
             mDiagGradient = new LinearGradient(0.0f, 0.0f, mDrawWidth / 1.5f, mDrawHeight,
                     Color.BLUE, Color.MAGENTA, Shader.TileMode.CLAMP);
