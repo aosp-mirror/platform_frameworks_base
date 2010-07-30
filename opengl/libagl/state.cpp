@@ -28,10 +28,6 @@
 #include "BufferObjectManager.h"
 #include "TextureObjectManager.h"
 
-#ifdef LIBAGL_USE_GRALLOC_COPYBITS
-#include <hardware/copybit.h>
-#endif // LIBAGL_USE_GRALLOC_COPYBITS
-
 namespace android {
 
 // ----------------------------------------------------------------------------
@@ -101,35 +97,6 @@ ogles_context_t *ogles_init(size_t extra)
     // OpenGL enables dithering by default
     c->rasterizer.procs.enable(c, GL_DITHER);
 
-    c->copybits.blitEngine = NULL;
-    c->copybits.minScale = 0;
-    c->copybits.maxScale = 0;
-    c->copybits.drawSurfaceBuffer = 0;
-
-#ifdef LIBAGL_USE_GRALLOC_COPYBITS
-    hw_module_t const* module;
-    if (hw_get_module(COPYBIT_HARDWARE_MODULE_ID, &module) == 0) {
-        struct copybit_device_t* copyBits;
-        if (copybit_open(module, &copyBits) == 0) {
-            c->copybits.blitEngine = copyBits;
-            {
-                int minLim = copyBits->get(copyBits,
-                        COPYBIT_MINIFICATION_LIMIT);
-                if (minLim != -EINVAL && minLim > 0) {
-                    c->copybits.minScale = (1 << 16) / minLim;
-                }
-            }
-            {
-                int magLim = copyBits->get(copyBits,
-                        COPYBIT_MAGNIFICATION_LIMIT);
-                if (magLim != -EINVAL && magLim > 0) {
-                    c->copybits.maxScale = min(32*1024-1, magLim) << 16;
-                }
-            }
-        }
-    }
-#endif // LIBAGL_USE_GRALLOC_COPYBITS
-
     return c;
 }
 
@@ -144,11 +111,6 @@ void ogles_uninit(ogles_context_t* c)
     c->bufferObjectManager->decStrong(c);
     ggl_uninit_context(&(c->rasterizer));
     free(c->rasterizer.base);
-#ifdef LIBAGL_USE_GRALLOC_COPYBITS
-    if (c->copybits.blitEngine != NULL) {
-        copybit_close((struct copybit_device_t*) c->copybits.blitEngine);
-    }
-#endif // LIBAGL_USE_GRALLOC_COPYBITS
 }
 
 void _ogles_error(ogles_context_t* c, GLenum error)
