@@ -6044,7 +6044,28 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 sr.crashCount++;
             }
         }
-        
+
+        // If the crashing process is what we consider to be the "home process" and it has been
+        // replaced by a third-party app, clear the package preferred activities from packages
+        // with a home activity running in the process to prevent a repeatedly crashing app
+        // from blocking the user to manually clear the list.
+        if (app == mHomeProcess && mHomeProcess.activities.size() > 0
+                    && (mHomeProcess.info.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+            Iterator it = mHomeProcess.activities.iterator();
+            while (it.hasNext()) {
+                HistoryRecord r = (HistoryRecord)it.next();
+                if (r.isHomeActivity) {
+                    Log.i(TAG, "Clearing package preferred activities from " + r.packageName);
+                    try {
+                        ActivityThread.getPackageManager()
+                                .clearPackagePreferredActivities(r.packageName);
+                    } catch (RemoteException c) {
+                        // pm is in same process, this will never happen.
+                    }
+                }
+            }
+        }
+
         mProcessCrashTimes.put(app.info.processName, app.info.uid, now);
         return true;
     }
