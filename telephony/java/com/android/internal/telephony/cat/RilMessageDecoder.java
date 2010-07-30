@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm.stk;
+package com.android.internal.telephony.cat;
 
 import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccUtils;
@@ -26,7 +26,7 @@ import android.os.Message;
 
 /**
  * Class used for queuing raw ril messages, decoding them into CommanParams
- * objects and sending the result back to the STK Service.
+ * objects and sending the result back to the CAT Service.
  */
 class RilMessageDecoder extends HierarchicalStateMachine {
 
@@ -85,7 +85,7 @@ class RilMessageDecoder extends HierarchicalStateMachine {
     }
 
     private void sendCmdForExecution(RilMessage rilMsg) {
-        Message msg = mCaller.obtainMessage(StkService.MSG_ID_RIL_MSG_DECODED,
+        Message msg = mCaller.obtainMessage(CatService.MSG_ID_RIL_MSG_DECODED,
                 new RilMessage(rilMsg));
         msg.sendToTarget();
     }
@@ -108,7 +108,7 @@ class RilMessageDecoder extends HierarchicalStateMachine {
                     transitionTo(mStateCmdParamsReady);
                 }
             } else {
-                StkLog.d(this, "StateStart unexpected expecting START=" +
+                CatLog.d(this, "StateStart unexpected expecting START=" +
                          CMD_START + " got " + msg.what);
             }
             return true;
@@ -123,7 +123,7 @@ class RilMessageDecoder extends HierarchicalStateMachine {
                 sendCmdForExecution(mCurrentRilMessage);
                 transitionTo(mStateStart);
             } else {
-                StkLog.d(this, "StateCmdParamsReady expecting CMD_PARAMS_READY="
+                CatLog.d(this, "StateCmdParamsReady expecting CMD_PARAMS_READY="
                          + CMD_PARAMS_READY + " got " + msg.what);
                 deferMessage(msg);
             }
@@ -136,21 +136,21 @@ class RilMessageDecoder extends HierarchicalStateMachine {
 
         mCurrentRilMessage = rilMsg;
         switch(rilMsg.mId) {
-        case StkService.MSG_ID_SESSION_END:
-        case StkService.MSG_ID_CALL_SETUP:
+        case CatService.MSG_ID_SESSION_END:
+        case CatService.MSG_ID_CALL_SETUP:
             mCurrentRilMessage.mResCode = ResultCode.OK;
             sendCmdForExecution(mCurrentRilMessage);
             decodingStarted = false;
             break;
-        case StkService.MSG_ID_PROACTIVE_COMMAND:
-        case StkService.MSG_ID_EVENT_NOTIFY:
-        case StkService.MSG_ID_REFRESH:
+        case CatService.MSG_ID_PROACTIVE_COMMAND:
+        case CatService.MSG_ID_EVENT_NOTIFY:
+        case CatService.MSG_ID_REFRESH:
             byte[] rawData = null;
             try {
                 rawData = IccUtils.hexStringToBytes((String) rilMsg.mData);
             } catch (Exception e) {
                 // zombie messages are dropped
-                StkLog.d(this, "decodeMessageParams dropping zombie messages");
+                CatLog.d(this, "decodeMessageParams dropping zombie messages");
                 decodingStarted = false;
                 break;
             }

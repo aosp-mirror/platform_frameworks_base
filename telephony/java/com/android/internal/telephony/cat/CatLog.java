@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm.stk;
+package com.android.internal.telephony.cat;
 
 import android.util.Log;
 
-public abstract class StkLog {
+public abstract class CatLog {
     static final boolean DEBUG = true;
 
     public static void d(Object caller, String msg) {
@@ -27,7 +27,7 @@ public abstract class StkLog {
         }
 
         String className = caller.getClass().getName();
-        Log.d("STK", className.substring(className.lastIndexOf('.') + 1) + ": "
+        Log.d("CAT", className.substring(className.lastIndexOf('.') + 1) + ": "
                 + msg);
     }
 
@@ -36,6 +36,6 @@ public abstract class StkLog {
             return;
         }
 
-        Log.d("STK", caller + ": " + msg);
+        Log.d("CAT", caller + ": " + msg);
     }
 }

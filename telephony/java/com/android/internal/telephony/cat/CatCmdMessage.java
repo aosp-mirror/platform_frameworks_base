@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm.stk;
+package com.android.internal.telephony.cat;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Class used to pass STK messages from telephony to application. Application
+ * Class used to pass CAT messages from telephony to application. Application
  * should call getXXX() to get commands's specific values.
  *
  */
-public class StkCmdMessage implements Parcelable {
+public class CatCmdMessage implements Parcelable {
     // members
     CommandDetails mCmdDet;
     private TextMessage mTextMsg;
@@ -50,7 +50,7 @@ public class StkCmdMessage implements Parcelable {
         public TextMessage callMsg;
     }
 
-    StkCmdMessage(CommandParams cmdParams) {
+    CatCmdMessage(CommandParams cmdParams) {
         mCmdDet = cmdParams.cmdDet;
         switch(getCmdType()) {
         case SET_UP_MENU:
@@ -88,7 +88,7 @@ public class StkCmdMessage implements Parcelable {
         }
     }
 
-    public StkCmdMessage(Parcel in) {
+    public CatCmdMessage(Parcel in) {
         mCmdDet = in.readParcelable(null);
         mTextMsg = in.readParcelable(null);
         mMenu = in.readParcelable(null);
@@ -130,13 +130,13 @@ public class StkCmdMessage implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<StkCmdMessage> CREATOR = new Parcelable.Creator<StkCmdMessage>() {
-        public StkCmdMessage createFromParcel(Parcel in) {
-            return new StkCmdMessage(in);
+    public static final Parcelable.Creator<CatCmdMessage> CREATOR = new Parcelable.Creator<CatCmdMessage>() {
+        public CatCmdMessage createFromParcel(Parcel in) {
+            return new CatCmdMessage(in);
         }
 
-        public StkCmdMessage[] newArray(int size) {
-            return new StkCmdMessage[size];
+        public CatCmdMessage[] newArray(int size) {
+            return new CatCmdMessage[size];
         }
     };
 

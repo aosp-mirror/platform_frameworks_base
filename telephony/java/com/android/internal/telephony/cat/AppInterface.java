@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm.stk;
+package com.android.internal.telephony.cat;
 
 /**
- * Interface for communication between STK App and STK Telephony
+ * Interface for communication between STK App and CAT Telephony
  *
  * {@hide}
  */
 public interface AppInterface {
 
     /*
-     * Intent's actions which are broadcasted by the Telephony once a new STK
+     * Intent's actions which are broadcasted by the Telephony once a new CAT
      * proactive command, session end arrive.
      */
-    public static final String STK_CMD_ACTION =
+    public static final String CAT_CMD_ACTION =
                                     "android.intent.action.stk.command";
-    public static final String STK_SESSION_END_ACTION =
+    public static final String CAT_SESSION_END_ACTION =
                                     "android.intent.action.stk.session_end";
 
     /*
      * Callback function from app to telephony to pass a result code and user's
-     * input back to the SIM.
+     * input back to the ICC.
      */
-    void onCmdResponse(StkResponseMessage resMsg);
+    void onCmdResponse(CatResponseMessage resMsg);
 
     /*
      * Enumeration for representing "Type of Command" of proactive commands.

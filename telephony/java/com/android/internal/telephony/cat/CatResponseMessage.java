@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm.stk;
+package com.android.internal.telephony.cat;
 
-public class StkResponseMessage {
+public class CatResponseMessage {
         CommandDetails cmdDet = null;
         ResultCode resCode  = ResultCode.OK;
         int usersMenuSelection = 0;
@@ -24,7 +24,7 @@ public class StkResponseMessage {
         boolean usersYesNoSelection = false;
         boolean usersConfirm = false;
 
-        public StkResponseMessage(StkCmdMessage cmdMsg) {
+        public CatResponseMessage(CatCmdMessage cmdMsg) {
             this.cmdDet = cmdMsg.mCmdDet;
         }
 
