@@ -31,6 +31,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Window;
+import android.webkit.ConsoleMessage;
 import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
@@ -96,6 +97,11 @@ public class LayoutTestsExecutor extends Activity {
 
     private boolean mCurrentTestTimedOut;
     private AbstractResult mCurrentResult;
+    private AdditionalTextOutput mCurrentAdditionalTextOutput;
+
+    private LayoutTestController mLayoutTestController = new LayoutTestController(this);
+    private boolean mCanOpenWindows;
+    private boolean mDumpDatabaseCallbacks;
 
     /** COMMUNICATION WITH ManagerService */
 
@@ -143,8 +149,9 @@ public class LayoutTestsExecutor extends Activity {
                 return;
             }
 
-            /** TODO: Implement waitUntilDone */
-            onTestFinished();
+            if (mCurrentState == CurrentState.RENDERING_PAGE) {
+                onTestFinished();
+            }
         }
     };
 
@@ -154,6 +161,14 @@ public class LayoutTestsExecutor extends Activity {
                 long currentQuota, long estimatedSize, long totalUsedQuota,
                 QuotaUpdater quotaUpdater) {
             /** TODO: This should be recorded as part of the text result */
+            /** TODO: The quota should also probably be reset somehow for every test? */
+            if (mDumpDatabaseCallbacks) {
+                if (mCurrentAdditionalTextOutput == null) {
+                    mCurrentAdditionalTextOutput = new AdditionalTextOutput();
+                }
+
+                mCurrentAdditionalTextOutput.appendExceededDbQuotaMessage(url, databaseIdentifier);
+            }
             quotaUpdater.updateQuota(currentQuota + 5 * 1024 * 1024);
         }
 
@@ -179,6 +194,36 @@ public class LayoutTestsExecutor extends Activity {
             return true;
         }
 
+        @Override
+        public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+            if (mCurrentAdditionalTextOutput == null) {
+                mCurrentAdditionalTextOutput = new AdditionalTextOutput();
+            }
+
+            mCurrentAdditionalTextOutput.appendConsoleMessage(consoleMessage);
+            return true;
+        }
+
+        @Override
+        public boolean onCreateWindow(WebView view, boolean dialog, boolean userGesture,
+                Message resultMsg) {
+            WebView.WebViewTransport transport = (WebView.WebViewTransport)resultMsg.obj;
+            /** By default windows cannot be opened, so just send null back. */
+            WebView newWindowWebView = null;
+
+            if (mCanOpenWindows) {
+                /**
+                 * We never display the new window, just create the view and allow it's content to
+                 * execute and be recorded by the executor.
+                 */
+                newWindowWebView = new WebView(LayoutTestsExecutor.this);
+                setupWebView(newWindowWebView);
+            }
+
+            transport.setWebView(newWindowWebView);
+            resultMsg.sendToTarget();
+            return true;
+        }
     };
 
     /** IMPLEMENTATION */
@@ -201,14 +246,37 @@ public class LayoutTestsExecutor extends Activity {
     private void reset() {
         WebView previousWebView = mCurrentWebView;
 
+        resetLayoutTestController();
+
         mCurrentTestTimedOut = false;
         mCurrentResult = null;
+        mCurrentAdditionalTextOutput = null;
 
         mCurrentWebView = new WebView(this);
-        mCurrentWebView.setWebViewClient(mWebViewClient);
-        mCurrentWebView.setWebChromeClient(mWebChromeClient);
+        setupWebView(mCurrentWebView);
 
-        WebSettings webViewSettings = mCurrentWebView.getSettings();
+        setContentView(mCurrentWebView);
+        if (previousWebView != null) {
+            Log.d(LOG_TAG + "::reset", "previousWebView != null");
+            previousWebView.destroy();
+        }
+    }
+
+    private void setupWebView(WebView webView) {
+        webView.setWebViewClient(mWebViewClient);
+        webView.setWebChromeClient(mWebChromeClient);
+        webView.addJavascriptInterface(mLayoutTestController, "layoutTestController");
+
+        /**
+         * Setting a touch interval of -1 effectively disables the optimisation in WebView
+         * that stops repeated touch events flooding WebCore. The Event Sender only sends a
+         * single event rather than a stream of events (like what would generally happen in
+         * a real use of touch events in a WebView)  and so if the WebView drops the event,
+         * the test will fail as the test expects one callback for every touch it synthesizes.
+         */
+        webView.setTouchInterval(-1);
+
+        WebSettings webViewSettings = webView.getSettings();
         webViewSettings.setAppCacheEnabled(true);
         webViewSettings.setAppCachePath(getApplicationContext().getCacheDir().getPath());
         webViewSettings.setAppCacheMaxSize(Long.MAX_VALUE);
@@ -221,11 +289,6 @@ public class LayoutTestsExecutor extends Activity {
         webViewSettings.setDomStorageEnabled(true);
         webViewSettings.setWorkersEnabled(false);
         webViewSettings.setXSSAuditorEnabled(false);
-
-        setContentView(mCurrentWebView);
-        if (previousWebView != null) {
-            previousWebView.destroy();
-        }
     }
 
     private void runNextTest() {
@@ -279,6 +342,7 @@ public class LayoutTestsExecutor extends Activity {
         }
 
         mCurrentState = CurrentState.OBTAINING_RESULT;
+
         mCurrentResult.obtainActualResults(mCurrentWebView,
                 mResultHandler.obtainMessage(MSG_ACTUAL_RESULT_OBTAINED));
     }
@@ -297,6 +361,10 @@ public class LayoutTestsExecutor extends Activity {
     }
 
     private void reportResultToService() {
+        if (mCurrentAdditionalTextOutput != null) {
+            mCurrentResult.setAdditionalTextOutputString(mCurrentAdditionalTextOutput.toString());
+        }
+
         try {
             Message serviceMsg =
                     Message.obtain(null, ManagerService.MSG_PROCESS_ACTUAL_RESULTS);
@@ -329,5 +397,109 @@ public class LayoutTestsExecutor extends Activity {
         } catch (RemoteException e) {
             Log.e(LOG_TAG + "::onAllTestsFinished", e.getMessage());
         }
+
+        unbindService(mServiceConnection);
+    }
+
+    /** LAYOUT TEST CONTROLLER */
+
+    private static final int MSG_WAIT_UNTIL_DONE = 0;
+    private static final int MSG_NOTIFY_DONE = 1;
+    private static final int MSG_DUMP_AS_TEXT = 2;
+    private static final int MSG_DUMP_CHILD_FRAMES_AS_TEXT = 3;
+    private static final int MSG_SET_CAN_OPEN_WINDOWS = 4;
+    private static final int MSG_DUMP_DATABASE_CALLBACKS = 5;
+
+    Handler mLayoutTestControllerHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            assert mCurrentState.isRunningState()
+                    : "mCurrentState = " + mCurrentState.name();
+
+            switch (msg.what) {
+                case MSG_WAIT_UNTIL_DONE:
+                    mCurrentState = CurrentState.WAITING_FOR_ASYNCHRONOUS_TEST;
+                    break;
+
+                case MSG_NOTIFY_DONE:
+                    if (mCurrentState == CurrentState.WAITING_FOR_ASYNCHRONOUS_TEST) {
+                        onTestFinished();
+                    }
+                    break;
+
+                case MSG_DUMP_AS_TEXT:
+                    if (mCurrentResult == null) {
+                        mCurrentResult = new TextResult(mCurrentTestRelativePath);
+                    }
+
+                    assert mCurrentResult instanceof TextResult
+                            : "mCurrentResult instanceof" + mCurrentResult.getClass().getName();
+
+                    break;
+
+                case MSG_DUMP_CHILD_FRAMES_AS_TEXT:
+                    /** If dumpAsText was not called we assume that the result should be text */
+                    if (mCurrentResult == null) {
+                        mCurrentResult = new TextResult(mCurrentTestRelativePath);
+                    }
+
+                    assert mCurrentResult instanceof TextResult
+                            : "mCurrentResult instanceof" + mCurrentResult.getClass().getName();
+
+                    ((TextResult)mCurrentResult).setDumpChildFramesAsText(true);
+                    break;
+
+                case MSG_SET_CAN_OPEN_WINDOWS:
+                    mCanOpenWindows = true;
+                    break;
+
+                case MSG_DUMP_DATABASE_CALLBACKS:
+                    mDumpDatabaseCallbacks = true;
+                    break;
+
+                default:
+                    Log.w(LOG_TAG + "::handleMessage", "Message code does not exist: " + msg.what);
+                    break;
+            }
+        }
+    };
+
+    private void resetLayoutTestController() {
+        mCanOpenWindows = false;
+        mDumpDatabaseCallbacks = false;
+    }
+
+    public void waitUntilDone() {
+        Log.w(LOG_TAG + "::waitUntilDone", "called");
+        mLayoutTestControllerHandler.sendEmptyMessage(MSG_WAIT_UNTIL_DONE);
+    }
+
+    public void notifyDone() {
+        Log.w(LOG_TAG + "::notifyDone", "called");
+        mLayoutTestControllerHandler.sendEmptyMessage(MSG_NOTIFY_DONE);
+    }
+
+    public void dumpAsText(boolean enablePixelTest) {
+        Log.w(LOG_TAG + "::dumpAsText(" + enablePixelTest + ")", "called");
+        /** TODO: Implement */
+        if (enablePixelTest) {
+            Log.w(LOG_TAG + "::dumpAsText", "enablePixelTest not implemented, switching to false");
+        }
+        mLayoutTestControllerHandler.sendEmptyMessage(MSG_DUMP_AS_TEXT);
+    }
+
+    public void dumpChildFramesAsText() {
+        Log.w(LOG_TAG + "::dumpChildFramesAsText", "called");
+        mLayoutTestControllerHandler.sendEmptyMessage(MSG_DUMP_CHILD_FRAMES_AS_TEXT);
+    }
+
+    public void setCanOpenWindows() {
+        Log.w(LOG_TAG + "::setCanOpenWindows", "called");
+        mLayoutTestControllerHandler.sendEmptyMessage(MSG_SET_CAN_OPEN_WINDOWS);
+    }
+
+    public void dumpDatabaseCallbacks() {
+        Log.w(LOG_TAG + "::dumpDatabaseCallbacks:", "called");
+        mLayoutTestControllerHandler.sendEmptyMessage(MSG_DUMP_DATABASE_CALLBACKS);
     }
 }
