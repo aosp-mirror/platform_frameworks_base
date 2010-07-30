@@ -409,6 +409,7 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
                     if (mAddToBackStack) {
                         f.mBackStackNesting--;
                     }
+                    f.mImmediateActivity = null;
                     mManager.removeFragment(f,
                             FragmentManager.reverseTransit(mTransition),
                             mTransitionStyle);
@@ -418,6 +419,7 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
                     if (mAddToBackStack) {
                         f.mBackStackNesting--;
                     }
+                    f.mImmediateActivity = null;
                     mManager.removeFragment(f,
                             FragmentManager.reverseTransit(mTransition),
                             mTransitionStyle);
@@ -427,6 +429,7 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
                             if (mAddToBackStack) {
                                 old.mBackStackNesting--;
                             }
+                            f.mImmediateActivity = mManager.mActivity;
                             mManager.addFragment(old, false);
                         }
                     }
@@ -436,6 +439,7 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
                     if (mAddToBackStack) {
                         f.mBackStackNesting--;
                     }
+                    f.mImmediateActivity = mManager.mActivity;
                     mManager.addFragment(f, false);
                 } break;
                 case OP_HIDE: {
