@@ -21,9 +21,19 @@ This is an optimized layout for a screen, with the minimum set of features
 enabled.
 -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@android:id/content"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:fitsSystemWindows="true"
-    android:foregroundInsidePadding="false"
-    android:foregroundGravity="fill_horizontal|top"
-    android:foreground="?android:attr/windowContentOverlay" />
+    android:orientation="vertical">
+    <com.android.internal.widget.ActionBarContextView
+         android:id="@+id/action_mode_bar"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:visibility="gone" />
+    <FrameLayout
+         android:id="@android:id/content"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+         android:foregroundInsidePadding="false"
+         android:foregroundGravity="fill_horizontal|top"
+         android:foreground="?android:attr/windowContentOverlay" />
+</LinearLayout>
