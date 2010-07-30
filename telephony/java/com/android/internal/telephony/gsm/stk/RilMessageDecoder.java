@@ -16,7 +16,7 @@
 
 package com.android.internal.telephony.gsm.stk;
 
-import com.android.internal.telephony.gsm.SIMFileHandler;
+import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccUtils;
 
 import android.os.Handler;
@@ -51,7 +51,7 @@ class RilMessageDecoder extends HierarchicalStateMachine {
      * @param fh
      * @return RilMesssageDecoder
      */
-    public static synchronized RilMessageDecoder getInstance(Handler caller, SIMFileHandler fh) {
+    public static synchronized RilMessageDecoder getInstance(Handler caller, IccFileHandler fh) {
         if (sInstance == null) {
             sInstance = new RilMessageDecoder(caller, fh);
             sInstance.start();
@@ -90,7 +90,7 @@ class RilMessageDecoder extends HierarchicalStateMachine {
         msg.sendToTarget();
     }
 
-    private RilMessageDecoder(Handler caller, SIMFileHandler fh) {
+    private RilMessageDecoder(Handler caller, IccFileHandler fh) {
         super("RilMessageDecoder");
 
         addState(mStateStart);

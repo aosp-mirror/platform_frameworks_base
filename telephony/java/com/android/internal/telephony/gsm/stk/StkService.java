@@ -25,9 +25,9 @@ import android.os.Message;
 
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.CommandsInterface;
-import com.android.internal.telephony.gsm.SimCard;
-import com.android.internal.telephony.gsm.SIMFileHandler;
-import com.android.internal.telephony.gsm.SIMRecords;
+import com.android.internal.telephony.IccCard;
+import com.android.internal.telephony.IccFileHandler;
+import com.android.internal.telephony.IccRecords;
 
 import android.util.Config;
 
@@ -114,7 +114,7 @@ class RilMessage {
 public class StkService extends Handler implements AppInterface {
 
     // Class members
-    private static SIMRecords mSimRecords;
+    private static IccRecords mIccRecords;
 
     // Service members.
     private static StkService sInstance;
@@ -136,7 +136,7 @@ public class StkService extends Handler implements AppInterface {
     static final int MSG_ID_RIL_MSG_DECODED          = 10;
 
     // Events to signal SIM presence or absent in the device.
-    private static final int MSG_ID_SIM_LOADED       = 20;
+    private static final int MSG_ID_ICC_RECORDS_LOADED       = 20;
 
     private static final int DEV_ID_KEYPAD      = 0x01;
     private static final int DEV_ID_DISPLAY     = 0x02;
@@ -146,10 +146,10 @@ public class StkService extends Handler implements AppInterface {
     private static final int DEV_ID_NETWORK     = 0x83;
 
     /* Intentionally private for singleton */
-    private StkService(CommandsInterface ci, SIMRecords sr, Context context,
-            SIMFileHandler fh, SimCard sc) {
-        if (ci == null || sr == null || context == null || fh == null
-                || sc == null) {
+    private StkService(CommandsInterface ci, IccRecords ir, Context context,
+            IccFileHandler fh, IccCard ic) {
+        if (ci == null || ir == null || context == null || fh == null
+                || ic == null) {
             throw new NullPointerException(
                     "Service: Input parameters must not be null");
         }
@@ -166,17 +166,17 @@ public class StkService extends Handler implements AppInterface {
         mCmdIf.setOnStkCallSetUp(this, MSG_ID_CALL_SETUP, null);
         //mCmdIf.setOnSimRefresh(this, MSG_ID_REFRESH, null);
 
-        mSimRecords = sr;
+        mIccRecords = ir;
 
         // Register for SIM ready event.
-        mSimRecords.registerForRecordsLoaded(this, MSG_ID_SIM_LOADED, null);
+        mIccRecords.registerForRecordsLoaded(this, MSG_ID_ICC_RECORDS_LOADED, null);
 
         mCmdIf.reportStkServiceIsRunning(null);
         StkLog.d(this, "StkService: is running");
     }
 
     public void dispose() {
-        mSimRecords.unregisterForRecordsLoaded(this);
+        mIccRecords.unregisterForRecordsLoaded(this);
         mCmdIf.unSetOnStkSessionEnd(this);
         mCmdIf.unSetOnStkProactiveCmd(this);
         mCmdIf.unSetOnStkEvent(this);
@@ -446,32 +446,32 @@ public class StkService extends Handler implements AppInterface {
     }
 
     /**
-     * Used for instantiating/updating the Service from the GsmPhone constructor.
+     * Used for instantiating/updating the Service from the GsmPhone or CdmaPhone constructor.
      *
      * @param ci CommandsInterface object
-     * @param sr SIMRecords object
+     * @param ir IccRecords object
      * @param context phone app context
-     * @param fh SIM file handler
-     * @param sc GSM SIM card
+     * @param fh Icc file handler
+     * @param ic Icc card
      * @return The only Service object in the system
      */
-    public static StkService getInstance(CommandsInterface ci, SIMRecords sr,
-            Context context, SIMFileHandler fh, SimCard sc) {
+    public static StkService getInstance(CommandsInterface ci, IccRecords ir,
+            Context context, IccFileHandler fh, IccCard ic) {
         if (sInstance == null) {
-            if (ci == null || sr == null || context == null || fh == null
-                    || sc == null) {
+            if (ci == null || ir == null || context == null || fh == null
+                    || ic == null) {
                 return null;
             }
             HandlerThread thread = new HandlerThread("Stk Telephony service");
             thread.start();
-            sInstance = new StkService(ci, sr, context, fh, sc);
+            sInstance = new StkService(ci, ir, context, fh, ic);
             StkLog.d(sInstance, "NEW sInstance");
-        } else if ((sr != null) && (mSimRecords != sr)) {
+        } else if ((ir != null) && (mIccRecords != ir)) {
             StkLog.d(sInstance, "Reinitialize the Service with SIMRecords");
-            mSimRecords = sr;
+            mIccRecords = ir;
 
             // re-Register for SIM ready event.
-            mSimRecords.registerForRecordsLoaded(sInstance, MSG_ID_SIM_LOADED, null);
+            mIccRecords.registerForRecordsLoaded(sInstance, MSG_ID_ICC_RECORDS_LOADED, null);
             StkLog.d(sInstance, "sr changed reinitialize and return current sInstance");
         } else {
             StkLog.d(sInstance, "Return current sInstance");
@@ -513,7 +513,7 @@ public class StkService extends Handler implements AppInterface {
         case MSG_ID_CALL_SETUP:
             mMsgDecoder.sendStartDecodingMessageParams(new RilMessage(msg.what, null));
             break;
-        case MSG_ID_SIM_LOADED:
+        case MSG_ID_ICC_RECORDS_LOADED:
             break;
         case MSG_ID_RIL_MSG_DECODED:
             handleRilMsg((RilMessage) msg.obj);
