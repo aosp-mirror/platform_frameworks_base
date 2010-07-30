@@ -1696,7 +1696,10 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
     // Delegate master volume control to effect in output mix effect chain if needed
     sp<EffectChain> chain = getEffectChain_l(AudioSystem::SESSION_OUTPUT_MIX);
     if (chain != 0) {
-        uint32_t v = (uint32_t)(masterVolume * (1 << 24));
+        uint32_t v = 0;
+        if (!masterMute) {
+            v = (uint32_t)(masterVolume * (1 << 24));
+        }
         chain->setVolume_l(&v, &v);
         masterVolume = (float)((v + (1 << 23)) >> 24);
         chain.clear();
@@ -1750,7 +1753,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
 
             // compute volume for this track
             int16_t left, right, aux;
-            if (track->isMuted() || masterMute || track->isPausing() ||
+            if (track->isMuted() || track->isPausing() ||
                 mStreamTypes[track->type()].mute) {
                 left = right = aux = 0;
                 if (track->isPausing()) {
@@ -5351,7 +5354,7 @@ void AudioFlinger::EffectModule::process()
         return;
     }
 
-    if (mState == ACTIVE || mState == STOPPING || mState == STOPPED) {
+    if (mState == ACTIVE || mState == STOPPING || mState == STOPPED || mState == RESTART) {
         // do 32 bit to 16 bit conversion for auxiliary effect input buffer
         if ((mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
             AudioMixer::ditherAndClamp(mConfig.inputCfg.buffer.s32,
@@ -6032,8 +6035,8 @@ void AudioFlinger::EffectHandle::dump(char* buffer, size_t size)
 AudioFlinger::EffectChain::EffectChain(const wp<ThreadBase>& wThread,
                                         int sessionId)
     : mThread(wThread), mSessionId(sessionId), mActiveTrackCnt(0), mOwnInBuffer(false),
-            mVolumeCtrlIdx(-1), mLeftVolume(0), mRightVolume(0),
-            mNewLeftVolume(0), mNewRightVolume(0)
+            mVolumeCtrlIdx(-1), mLeftVolume(UINT_MAX), mRightVolume(UINT_MAX),
+            mNewLeftVolume(UINT_MAX), mNewRightVolume(UINT_MAX)
 {
     mStrategy = AudioSystem::getStrategyForStream(AudioSystem::MUSIC);
 }

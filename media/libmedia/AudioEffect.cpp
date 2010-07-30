@@ -218,7 +218,7 @@ status_t AudioEffect::setEnabled(bool enabled)
            return mIEffect->disable();
         }
     }
-    return INVALID_OPERATION;
+    return NO_ERROR;
 }
 
 status_t AudioEffect::command(uint32_t cmdCode,
@@ -231,7 +231,22 @@ status_t AudioEffect::command(uint32_t cmdCode,
         return INVALID_OPERATION;
     }
 
-    return mIEffect->command(cmdCode, cmdSize, cmdData, replySize, replyData);
+    status_t status = mIEffect->command(cmdCode, cmdSize, cmdData, replySize, replyData);
+    if (status != NO_ERROR) {
+        return status;
+    }
+    status = *(status_t *)replyData;
+    if (status != NO_ERROR) {
+        return status;
+    }
+
+    if (cmdCode == EFFECT_CMD_ENABLE) {
+        android_atomic_or(1, &mEnabled);
+    }
+    if (cmdCode == EFFECT_CMD_DISABLE) {
+        android_atomic_and(~1, &mEnabled);
+    }
+    return status;
 }
 
 
@@ -347,7 +362,11 @@ void AudioEffect::enableStatusChanged(bool enabled)
 {
     LOGV("enableStatusChanged %p enabled %d mCbf %p", this, enabled, mCbf);
     if (mStatus == ALREADY_EXISTS) {
-        mEnabled = enabled;
+        if (enabled) {
+            android_atomic_or(1, &mEnabled);
+        } else {
+            android_atomic_and(~1, &mEnabled);
+        }
         if (mCbf) {
             mCbf(EVENT_ENABLE_STATUS_CHANGED, mUserData, &enabled);
         }
