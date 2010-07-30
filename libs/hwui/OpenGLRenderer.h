@@ -315,7 +315,7 @@ private:
     // Number of saved states
     int mSaveCount;
     // Base state
-    Snapshot mFirstSnapshot;
+    sp<Snapshot> mFirstSnapshot;
     // Current state
     sp<Snapshot> mSnapshot;
 
@@ -324,10 +324,6 @@ private:
 
     // Used to draw textured quads
     TextureVertex mMeshVertices[4];
-
-    // Current texture state
-    GLuint mLastTexture[REQUIRED_TEXTURE_UNITS_COUNT];
-    GLint mMaxTextureUnits;
 
     // Last known blend state
     bool mBlend;

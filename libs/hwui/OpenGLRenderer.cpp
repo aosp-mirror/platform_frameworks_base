@@ -144,11 +144,13 @@ OpenGLRenderer::OpenGLRenderer():
 
     memcpy(mMeshVertices, gMeshVertices, sizeof(gMeshVertices));
 
-    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &mMaxTextureUnits);
-    if (mMaxTextureUnits < REQUIRED_TEXTURE_UNITS_COUNT) {
+    mFirstSnapshot = new Snapshot;
+
+    GLint maxTextureUnits;
+    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
+    if (maxTextureUnits < REQUIRED_TEXTURE_UNITS_COUNT) {
         LOGW("At least %d texture units are required!", REQUIRED_TEXTURE_UNITS_COUNT);
     }
-    mLastTexture[0] = mLastTexture[1] = mLastTexture[2] = 0;
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
@@ -171,11 +173,11 @@ void OpenGLRenderer::setViewport(int width, int height) {
 
     mWidth = width;
     mHeight = height;
-    mFirstSnapshot.height = height;
+    mFirstSnapshot->height = height;
 }
 
 void OpenGLRenderer::prepare() {
-    mSnapshot = &mFirstSnapshot;
+    mSnapshot = mFirstSnapshot;
     mSaveCount = 0;
 
     glDisable(GL_SCISSOR_TEST);
@@ -265,10 +267,6 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     glScissor(clip.left, mHeight - clip.bottom, clip.getWidth(), clip.getHeight());
 
     Layer* layer = current->layer;
-
-    // Compute the correct texture coordinates for the FBO texture
-    // The texture is currently as big as the window but drawn with
-    // a quad of the appropriate size
     const Rect& rect = layer->layer;
 
     drawTextureRect(rect.left, rect.top, rect.right, rect.bottom,
@@ -323,7 +321,6 @@ int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bot
 
 bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         float right, float bottom, int alpha, SkXfermode::Mode mode,int flags) {
-
     LAYER_LOGD("Requesting layer %fx%f", right - left, bottom - top);
     LAYER_LOGD("Layer cache size = %d", mLayerCache.getSize());
 
@@ -537,8 +534,6 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         return;
     }
 
-    glActiveTexture(GL_TEXTURE0);
-
     float length;
     switch (paint->getTextAlign()) {
         case SkPaint::kCenter_Align:
@@ -687,7 +682,6 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
 
 void OpenGLRenderer::drawLinearGradientShader(float left, float top, float right, float bottom,
         float alpha, SkXfermode::Mode mode) {
-    glActiveTexture(GL_TEXTURE1);
     Texture* texture = mGradientCache.get(mShaderKey);
     if (!texture) {
         SkShader::TileMode tileMode = SkShader::kClamp_TileMode;
@@ -714,8 +708,8 @@ void OpenGLRenderer::drawLinearGradientShader(float left, float top, float right
     mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
 
     chooseBlending(mShaderBlend || alpha < 1.0f, mode);
-    bindTexture(texture->id, mShaderTileX, mShaderTileY, 1);
-    glUniform1i(mCurrentProgram->getUniform("gradientSampler"), 1);
+    bindTexture(texture->id, mShaderTileX, mShaderTileY, 0);
+    glUniform1i(mCurrentProgram->getUniform("gradientSampler"), 0);
 
     Rect start(mShaderBounds[0], mShaderBounds[1], mShaderBounds[2], mShaderBounds[3]);
     if (mShaderMatrix) {
@@ -747,7 +741,6 @@ void OpenGLRenderer::drawLinearGradientShader(float left, float top, float right
 
 void OpenGLRenderer::drawBitmapShader(float left, float top, float right, float bottom,
         float alpha, SkXfermode::Mode mode) {
-    glActiveTexture(GL_TEXTURE2);
     const Texture* texture = mTextureCache.get(mShaderBitmap);
 
     const float width = texture->width;
@@ -782,8 +775,8 @@ void OpenGLRenderer::drawBitmapShader(float left, float top, float right, float 
     chooseBlending(texture->blend || alpha < 1.0f, mode);
 
     // Texture
-    bindTexture(texture->id, mShaderTileX, mShaderTileY, 2);
-    glUniform1i(mCurrentProgram->getUniform("bitmapSampler"), 2);
+    bindTexture(texture->id, mShaderTileX, mShaderTileY, 0);
+    glUniform1i(mCurrentProgram->getUniform("bitmapSampler"), 0);
     glUniformMatrix4fv(mCurrentProgram->getUniform("textureTransform"), 1,
             GL_FALSE, &textureTransform.data[0]);
     glUniform2f(mCurrentProgram->getUniform("textureDimension"), 1.0f / width, 1.0f / height);
@@ -917,10 +910,7 @@ void OpenGLRenderer::getAlphaAndMode(const SkPaint* paint, int* alpha, SkXfermod
 
 void OpenGLRenderer::bindTexture(GLuint texture, GLenum wrapS, GLenum wrapT, GLuint textureUnit) {
     glActiveTexture(gTextureUnits[textureUnit]);
-    if (texture != mLastTexture[textureUnit]) {
-        glBindTexture(GL_TEXTURE_2D, texture);
-        mLastTexture[textureUnit] = texture;
-    }
+    glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
 }

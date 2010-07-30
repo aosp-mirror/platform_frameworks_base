@@ -50,7 +50,7 @@ public:
      * assumed to be dirty. The specified snapshot is stored as the previous
      * snapshot.
      */
-    Snapshot(const sp<Snapshot> s):
+    Snapshot(const sp<Snapshot>& s):
             height(s->height),
             transform(s->transform),
             clipRect(s->clipRect),
