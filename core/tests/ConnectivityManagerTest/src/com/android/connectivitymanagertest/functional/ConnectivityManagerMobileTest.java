@@ -91,30 +91,30 @@ public class ConnectivityManagerMobileTest
     //                                      DISCONNECTING, DISCONNECTED, UNKNOWN
     private void waitForNetworkState(int networkType, State expectedState, long timeout) {
         long startTime = System.currentTimeMillis();
-        // In case the broadcast is already sent out, no need to wait
-        if (cmActivity.mCM.getNetworkInfo(networkType).getState() == expectedState) {
-            return;
-        } else {
-            while (true) {
-                if ((System.currentTimeMillis() - startTime) > timeout) {
+        while (true) {
+            if ((System.currentTimeMillis() - startTime) > timeout) {
+                if (cmActivity.mCM.getNetworkInfo(networkType).getState() != expectedState) {
                     assertFalse("Wait for network state timeout", true);
+                } else {
+                    // the broadcast has been sent out. the state has been changed.
+                    return;
                 }
-                Log.v(LOG_TAG, "Wait for the connectivity state for network: " + networkType +
-                        " to be " + expectedState.toString());
-                synchronized (cmActivity.connectivityObject) {
-                    try {
-                        cmActivity.connectivityObject.wait(STATE_TRANSITION_SHORT_TIMEOUT);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    if ((cmActivity.mNetworkInfo.getType() != networkType) ||
-                        (cmActivity.mNetworkInfo.getState() != expectedState)) {
-                        Log.v(LOG_TAG, "network state for " + cmActivity.mNetworkInfo.getType() +
-                                "is: " + cmActivity.mNetworkInfo.getState());
-                        continue;
-                    }
-                    break;
+            }
+            Log.v(LOG_TAG, "Wait for the connectivity state for network: " + networkType +
+                    " to be " + expectedState.toString());
+            synchronized (cmActivity.connectivityObject) {
+                try {
+                    cmActivity.connectivityObject.wait(STATE_TRANSITION_SHORT_TIMEOUT);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
+                if ((cmActivity.mNetworkInfo.getType() != networkType) ||
+                    (cmActivity.mNetworkInfo.getState() != expectedState)) {
+                    Log.v(LOG_TAG, "network state for " + cmActivity.mNetworkInfo.getType() +
+                            "is: " + cmActivity.mNetworkInfo.getState());
+                    continue;
+                }
+                break;
             }
         }
     }
@@ -123,26 +123,26 @@ public class ConnectivityManagerMobileTest
     //                      WIFI_STATE_ENALBING, WIFI_STATE_UNKNOWN
     private void waitForWifiState(int expectedState, long timeout) {
         long startTime = System.currentTimeMillis();
-        if (cmActivity.mWifiState == expectedState) {
-            return;
-        } else {
-            while (true) {
-                if ((System.currentTimeMillis() - startTime) > timeout) {
+        while (true) {
+            if ((System.currentTimeMillis() - startTime) > timeout) {
+                if (cmActivity.mWifiState != expectedState) {
                     assertFalse("Wait for Wifi state timeout", true);
+                } else {
+                    return;
                 }
-                Log.v(LOG_TAG, "Wait for wifi state to be: " + expectedState);
-                synchronized (cmActivity.wifiObject) {
-                    try {
-                        cmActivity.wifiObject.wait(5*1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    if (cmActivity.mWifiState != expectedState) {
-                        Log.v(LOG_TAG, "Wifi state is: " + cmActivity.mWifiNetworkInfo.getState());
-                        continue;
-                    }
-                    break;
+            }
+            Log.v(LOG_TAG, "Wait for wifi state to be: " + expectedState);
+            synchronized (cmActivity.wifiObject) {
+                try {
+                    cmActivity.wifiObject.wait(5*1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
+                if (cmActivity.mWifiState != expectedState) {
+                    Log.v(LOG_TAG, "Wifi state is: " + cmActivity.mWifiNetworkInfo.getState());
+                    continue;
+                }
+                break;
             }
         }
     }
