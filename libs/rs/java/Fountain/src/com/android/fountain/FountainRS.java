@@ -22,7 +22,7 @@ import android.util.Log;
 
 
 public class FountainRS {
-    public static final int PART_COUNT = 20000;
+    public static final int PART_COUNT = 50000;
 
     public FountainRS() {
     }

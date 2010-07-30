@@ -184,17 +184,9 @@ static int64_t SC_uptimeMillis()
     return nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC));
 }
 
-static int64_t SC_startTimeMillis()
+static int64_t SC_uptimeNanos()
 {
-    GET_TLS();
-    return sc->mEnviroment.mStartTimeMillis;
-}
-
-static int64_t SC_elapsedTimeMillis()
-{
-    GET_TLS();
-    return nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC))
-            - sc->mEnviroment.mStartTimeMillis;
+    return systemTime(SYSTEM_TIME_MONOTONIC);
 }
 
 static float SC_getDt()
@@ -400,7 +392,6 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z14rsGetElementAt13rs_allocationjj", (void *)&SC_getElementAtXY },
     { "_Z14rsGetElementAt13rs_allocationjjj", (void *)&SC_getElementAtXYZ },
 
-
     // Debug
     { "_Z7rsDebugPKcf", (void *)&SC_debugF },
     { "_Z7rsDebugPKcDv2_f", (void *)&SC_debugFv2 },
@@ -409,8 +400,6 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z7rsDebugPKci", (void *)&SC_debugI32 },
     { "_Z7rsDebugPKcj", (void *)&SC_debugU32 },
     { "_Z7rsDebugPKcPKv", (void *)&SC_debugP },
-    //extern void __attribute__((overloadable))rsDebug(const char *, const void *);
-
 
     // RS Math
     { "_Z6rsRandi", (void *)&SC_randi },
@@ -420,27 +409,15 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z6rsFracf", (void *)&SC_frac },
 
     // time
-    { "_Z8rsSecond", (void *)&SC_second },
-    { "_Z8rsMinute", (void *)&SC_minute },
-    { "_Z6rsHour", (void *)&SC_hour },
-    { "_Z5rsDay", (void *)&SC_day },
-    { "_Z7rsMonth", (void *)&SC_month },
-    { "_Z6rsYear", (void *)&SC_year },
-    { "_Z14rsUptimeMillis", (void*)&SC_uptimeMillis },
-    { "_Z17rsStartTimeMillis", (void*)&SC_startTimeMillis },
-    { "_Z19rsElapsedTimeMillis", (void*)&SC_elapsedTimeMillis },
-    { "_Z7rsGetDt", (void*)&SC_getDt },
-
-    { "rsSecond", (void *)&SC_second },
-    { "rsMinute", (void *)&SC_minute },
-    { "rsHour", (void *)&SC_hour },
-    { "rsDay", (void *)&SC_day },
-    { "rsMonth", (void *)&SC_month },
-    { "rsYear", (void *)&SC_year },
-    { "rsUptimeMillis", (void*)&SC_uptimeMillis },
-    { "rsStartTimeMillis", (void*)&SC_startTimeMillis },
-    { "rsElapsedTimeMillis", (void*)&SC_elapsedTimeMillis },
-    { "rsGetDt", (void*)&SC_getDt },
+    { "_Z8rsSecondv", (void *)&SC_second },
+    { "_Z8rsMinutev", (void *)&SC_minute },
+    { "_Z6rsHourv", (void *)&SC_hour },
+    { "_Z5rsDayv", (void *)&SC_day },
+    { "_Z7rsMonthv", (void *)&SC_month },
+    { "_Z6rsYearv", (void *)&SC_year },
+    { "_Z14rsUptimeMillisv", (void*)&SC_uptimeMillis },
+    { "_Z13rsUptimeNanosv", (void*)&SC_uptimeNanos },
+    { "_Z7rsGetDtv", (void*)&SC_getDt },
 
     { "_Z14rsSendToClienti", (void *)&SC_toClient },
     { "_Z14rsSendToClientiPKvj", (void *)&SC_toClient2 },
