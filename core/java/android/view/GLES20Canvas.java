@@ -17,21 +17,17 @@
 package android.view;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.DrawFilter;
-import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Picture;
 import android.graphics.PorterDuff;
-import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Shader;
-import android.graphics.SweepGradient;
 import android.graphics.TemporaryBuffer;
 import android.text.GraphicsOperations;
 import android.text.SpannableString;
@@ -593,7 +589,9 @@ class GLES20Canvas extends Canvas {
         if ((index | count | (index + count) | (text.length - index - count)) < 0) {
             throw new IndexOutOfBoundsException();
         }
+        boolean hasShader = setupShader(paint);
         nDrawText(mRenderer, text, index, count, x, y, paint.mBidiFlags, paint.mNativePaint);
+        if (hasShader) nResetShader(mRenderer);
     }
     
     private native void nDrawText(int renderer, char[] text, int index, int count, float x, float y,
@@ -601,6 +599,7 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawText(CharSequence text, int start, int end, float x, float y, Paint paint) {
+        boolean hasShader = setupShader(paint);
         if (text instanceof String || text instanceof SpannedString ||
                 text instanceof SpannableString) {
             nDrawText(mRenderer, text.toString(), start, end, x, y, paint.mBidiFlags,
@@ -614,6 +613,7 @@ class GLES20Canvas extends Canvas {
             nDrawText(mRenderer, buf, 0, end - start, x, y, paint.mBidiFlags, paint.mNativePaint);
             TemporaryBuffer.recycle(buf);
         }
+        if (hasShader) nResetShader(mRenderer);
     }
 
     @Override
@@ -621,7 +621,9 @@ class GLES20Canvas extends Canvas {
         if ((start | end | (end - start) | (text.length() - end)) < 0) {
             throw new IndexOutOfBoundsException();
         }
+        boolean hasShader = setupShader(paint);
         nDrawText(mRenderer, text, start, end, x, y, paint.mBidiFlags, paint.mNativePaint);
+        if (hasShader) nResetShader(mRenderer);
     }
 
     private native void nDrawText(int renderer, String text, int start, int end, float x, float y,
@@ -629,7 +631,9 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawText(String text, float x, float y, Paint paint) {
+        boolean hasShader = setupShader(paint);
         nDrawText(mRenderer, text, 0, text.length(), x, y, paint.mBidiFlags, paint.mNativePaint);
+        if (hasShader) nResetShader(mRenderer);
     }
 
     @Override
@@ -665,28 +669,12 @@ class GLES20Canvas extends Canvas {
     private boolean setupShader(Paint paint) {
         final Shader shader = paint.getShader();
         if (shader != null) {
-            if (shader instanceof BitmapShader) {
-                final BitmapShader bs = (BitmapShader) shader;
-                nSetupBitmapShader(mRenderer, bs.native_instance, bs.mBitmap.mNativeBitmap,
-                        bs.mTileX, bs.mTileY, bs.mLocalMatrix);
-                return true;
-            } else if (shader instanceof LinearGradient) {
-                final LinearGradient ls = (LinearGradient) shader;
-                nSetupLinearShader(mRenderer, ls.native_instance, ls.bounds, ls.colors,
-                        ls.positions, ls.count, ls.tileMode, ls.mLocalMatrix);
-                return true;
-            } else if (shader instanceof RadialGradient) {
-                // TODO: Implement
-            } else if (shader instanceof SweepGradient) {
-                // TODO: Implement
-            }
+            nSetupShader(mRenderer, shader.native_shader);
+            return true;
         }
         return false;
     }
 
-    private native void nSetupLinearShader(int renderer, int shader, int bounds,
-            int colors, int positions, int count, int tileMode, int localMatrix);
-    private native void nSetupBitmapShader(int renderer, int shader, int bitmap,
-            int tileX, int tileY, int matrix);
+    private native void nSetupShader(int renderer, int shader);
     private native void nResetShader(int renderer);
 }

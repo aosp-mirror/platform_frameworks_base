@@ -41,6 +41,8 @@ namespace uirenderer {
 #define DEFAULT_PATCH_CACHE_SIZE 100
 #define DEFAULT_GRADIENT_CACHE_SIZE 0.5f
 
+#define REQUIRED_TEXTURE_UNITS_COUNT 3
+
 // Converts a number of mega-bytes into bytes
 #define MB(s) s * 1024 * 1024
 
@@ -88,16 +90,10 @@ static const Blender gBlends[] = {
         { SkXfermode::kXor_Mode,     GL_ONE_MINUS_DST_ALPHA,  GL_ONE_MINUS_SRC_ALPHA }
 };
 
-static const GLint gTileModes[] = {
-        GL_CLAMP_TO_EDGE,   // SkShader::kClamp_TileMode
-        GL_REPEAT,          // SkShader::kRepeat_Mode
-        GL_MIRRORED_REPEAT  // SkShader::kMirror_TileMode
-};
-
 static const GLenum gTextureUnits[] = {
-        GL_TEXTURE0,        // Bitmap or text
-        GL_TEXTURE1,        // Gradient
-        GL_TEXTURE2         // Bitmap shader
+        GL_TEXTURE0,
+        GL_TEXTURE1,
+        GL_TEXTURE2
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -135,12 +131,7 @@ OpenGLRenderer::OpenGLRenderer():
     }
 
     mCurrentProgram = NULL;
-
-    mShader = kShaderNone;
-    mShaderTileX = GL_CLAMP_TO_EDGE;
-    mShaderTileY = GL_CLAMP_TO_EDGE;
-    mShaderMatrix = NULL;
-    mShaderBitmap = NULL;
+    mShader = NULL;
 
     memcpy(mMeshVertices, gMeshVertices, sizeof(gMeshVertices));
 
@@ -560,22 +551,33 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     mModelView.loadIdentity();
 
+    GLuint textureUnit = 0;
+
     ProgramDescription description;
     description.hasTexture = true;
     description.hasAlpha8Texture = true;
+    if (mShader) {
+        mShader->describe(description, mExtensions);
+    }
 
     useProgram(mProgramCache.get(description));
     mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
 
     chooseBlending(true, mode);
-    bindTexture(mFontRenderer.getTexture(), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, 0);
-    glUniform1i(mCurrentProgram->getUniform("sampler"), 0);
+    bindTexture(mFontRenderer.getTexture(), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, textureUnit);
+    glUniform1i(mCurrentProgram->getUniform("sampler"), textureUnit);
 
     int texCoordsSlot = mCurrentProgram->getAttrib("texCoords");
     glEnableVertexAttribArray(texCoordsSlot);
 
     // Always premultiplied
     glUniform4f(mCurrentProgram->color, r, g, b, a);
+
+    textureUnit++;
+    // Setup attributes and uniforms required by the shaders
+    if (mShader) {
+        mShader->setupProgram(mCurrentProgram, mModelView, *mSnapshot, &textureUnit);
+    }
 
     // TODO: Implement scale properly
     const Rect& clip = mSnapshot->getLocalClip();
@@ -591,36 +593,14 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::resetShader() {
-    mShader = OpenGLRenderer::kShaderNone;
-    mShaderKey = NULL;
-    mShaderBlend = false;
-    mShaderTileX = GL_CLAMP_TO_EDGE;
-    mShaderTileY = GL_CLAMP_TO_EDGE;
+    mShader = NULL;
 }
 
-void OpenGLRenderer::setupBitmapShader(SkBitmap* bitmap, SkShader::TileMode tileX,
-        SkShader::TileMode tileY, SkMatrix* matrix, bool hasAlpha) {
-    mShader = OpenGLRenderer::kShaderBitmap;
-    mShaderBlend = hasAlpha;
-    mShaderBitmap = bitmap;
-    mShaderTileX = gTileModes[tileX];
-    mShaderTileY = gTileModes[tileY];
-    mShaderMatrix = matrix;
-}
-
-void OpenGLRenderer::setupLinearGradientShader(SkShader* shader, float* bounds, uint32_t* colors,
-        float* positions, int count, SkShader::TileMode tileMode, SkMatrix* matrix, bool hasAlpha) {
-    // TODO: We should use a struct to describe each shader
-    mShader = OpenGLRenderer::kShaderLinearGradient;
-    mShaderKey = shader;
-    mShaderBlend = hasAlpha;
-    mShaderTileX = gTileModes[tileMode];
-    mShaderTileY = gTileModes[tileMode];
-    mShaderMatrix = matrix;
-    mShaderBounds = bounds;
-    mShaderColors = colors;
-    mShaderPositions = positions;
-    mShaderCount = count;
+void OpenGLRenderer::setupShader(SkiaShader* shader) {
+    mShader = shader;
+    if (mShader) {
+        mShader->set(&mTextureCache, &mGradientCache);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -630,165 +610,52 @@ void OpenGLRenderer::setupLinearGradientShader(SkShader* shader, float* bounds, 
 void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom,
         int color, SkXfermode::Mode mode, bool ignoreTransform) {
     // If a shader is set, preserve only the alpha
-    if (mShader != kShaderNone) {
+    if (mShader) {
         color |= 0x00ffffff;
     }
 
     // Render using pre-multiplied alpha
     const int alpha = (color >> 24) & 0xFF;
     const GLfloat a = alpha / 255.0f;
-
-    switch (mShader) {
-        case OpenGLRenderer::kShaderBitmap:
-            drawBitmapShader(left, top, right, bottom, a, mode);
-            return;
-        case OpenGLRenderer::kShaderLinearGradient:
-            drawLinearGradientShader(left, top, right, bottom, a, mode);
-            return;
-        default:
-            break;
-    }
-
     const GLfloat r = a * ((color >> 16) & 0xFF) / 255.0f;
     const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
     const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
 
-    // Pre-multiplication happens when setting the shader color
-    chooseBlending(alpha < 255 || mShaderBlend, mode);
+    GLuint textureUnit = 0;
 
-    mModelView.loadTranslate(left, top, 0.0f);
-    mModelView.scale(right - left, bottom - top, 1.0f);
+    // Setup the blending mode
+    chooseBlending(alpha < 255 || (mShader && mShader->blend()), mode);
 
+    // Describe the required shaders
     ProgramDescription description;
-    Program* program = mProgramCache.get(description);
-    if (!useProgram(program)) {
-        const GLvoid* vertices = &mMeshVertices[0].position[0];
-        const GLvoid* texCoords = &mMeshVertices[0].texture[0];
-
-        glVertexAttribPointer(mCurrentProgram->position, 2, GL_FLOAT, GL_FALSE,
-                gMeshStride, vertices);
+    if (mShader) {
+        mShader->describe(description, mExtensions);
     }
 
+    // Build and use the appropriate shader
+    useProgram(mProgramCache.get(description));
+
+    // Setup attributes
+    glVertexAttribPointer(mCurrentProgram->position, 2, GL_FLOAT, GL_FALSE,
+            gMeshStride, &mMeshVertices[0].position[0]);
+
+    // Setup uniforms
+    mModelView.loadTranslate(left, top, 0.0f);
+    mModelView.scale(right - left, bottom - top, 1.0f);
     if (!ignoreTransform) {
         mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
     } else {
         mat4 identity;
         mCurrentProgram->set(mOrthoMatrix, mModelView, identity);
     }
-
     glUniform4f(mCurrentProgram->color, r, g, b, a);
 
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
-}
-
-void OpenGLRenderer::drawLinearGradientShader(float left, float top, float right, float bottom,
-        float alpha, SkXfermode::Mode mode) {
-    Texture* texture = mGradientCache.get(mShaderKey);
-    if (!texture) {
-        SkShader::TileMode tileMode = SkShader::kClamp_TileMode;
-        switch (mShaderTileX) {
-            case GL_REPEAT:
-                tileMode = SkShader::kRepeat_TileMode;
-                break;
-            case GL_MIRRORED_REPEAT:
-                tileMode = SkShader::kMirror_TileMode;
-                break;
-        }
-
-        texture = mGradientCache.addLinearGradient(mShaderKey, mShaderBounds, mShaderColors,
-                mShaderPositions, mShaderCount, tileMode);
+    // Setup attributes and uniforms required by the shaders
+    if (mShader) {
+        mShader->setupProgram(mCurrentProgram, mModelView, *mSnapshot, &textureUnit);
     }
 
-    ProgramDescription description;
-    description.hasGradient = true;
-
-    mModelView.loadTranslate(left, top, 0.0f);
-    mModelView.scale(right - left, bottom - top, 1.0f);
-
-    useProgram(mProgramCache.get(description));
-    mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
-
-    chooseBlending(mShaderBlend || alpha < 1.0f, mode);
-    bindTexture(texture->id, mShaderTileX, mShaderTileY, 0);
-    glUniform1i(mCurrentProgram->getUniform("gradientSampler"), 0);
-
-    Rect start(mShaderBounds[0], mShaderBounds[1], mShaderBounds[2], mShaderBounds[3]);
-    if (mShaderMatrix) {
-        mat4 shaderMatrix(*mShaderMatrix);
-        shaderMatrix.mapRect(start);
-    }
-    mSnapshot->transform.mapRect(start);
-
-    const float gradientX = start.right - start.left;
-    const float gradientY = start.bottom - start.top;
-
-    mat4 screenSpace(mSnapshot->transform);
-    screenSpace.multiply(mModelView);
-
-    // Always premultiplied
-    glUniform4f(mCurrentProgram->color, alpha, alpha, alpha, alpha);
-    glUniform2f(mCurrentProgram->getUniform("gradientStart"), start.left, start.top);
-    glUniform2f(mCurrentProgram->getUniform("gradient"), gradientX, gradientY);
-    glUniform1f(mCurrentProgram->getUniform("gradientLength"),
-            1.0f / (gradientX * gradientX + gradientY * gradientY));
-    glUniformMatrix4fv(mCurrentProgram->getUniform("screenSpace"), 1, GL_FALSE,
-            &screenSpace.data[0]);
-
-    glVertexAttribPointer(mCurrentProgram->position, 2, GL_FLOAT, GL_FALSE,
-            gMeshStride, &mMeshVertices[0].position[0]);
-
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
-}
-
-void OpenGLRenderer::drawBitmapShader(float left, float top, float right, float bottom,
-        float alpha, SkXfermode::Mode mode) {
-    const Texture* texture = mTextureCache.get(mShaderBitmap);
-
-    const float width = texture->width;
-    const float height = texture->height;
-
-    mModelView.loadTranslate(left, top, 0.0f);
-    mModelView.scale(right - left, bottom - top, 1.0f);
-
-    mat4 textureTransform;
-    if (mShaderMatrix) {
-        SkMatrix inverse;
-        mShaderMatrix->invert(&inverse);
-        textureTransform.load(inverse);
-        textureTransform.multiply(mModelView);
-    } else {
-        textureTransform.load(mModelView);
-    }
-
-    ProgramDescription description;
-    description.hasBitmap = true;
-    // The driver does not support non-power of two mirrored/repeated
-    // textures, so do it ourselves
-    if (!mExtensions.hasNPot()) {
-        description.isBitmapNpot = true;
-        description.bitmapWrapS = mShaderTileX;
-        description.bitmapWrapT = mShaderTileY;
-    }
-
-    useProgram(mProgramCache.get(description));
-    mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
-
-    chooseBlending(texture->blend || alpha < 1.0f, mode);
-
-    // Texture
-    bindTexture(texture->id, mShaderTileX, mShaderTileY, 0);
-    glUniform1i(mCurrentProgram->getUniform("bitmapSampler"), 0);
-    glUniformMatrix4fv(mCurrentProgram->getUniform("textureTransform"), 1,
-            GL_FALSE, &textureTransform.data[0]);
-    glUniform2f(mCurrentProgram->getUniform("textureDimension"), 1.0f / width, 1.0f / height);
-
-    // Always premultiplied
-    glUniform4f(mCurrentProgram->color, alpha, alpha, alpha, alpha);
-
-    // Mesh
-    glVertexAttribPointer(mCurrentProgram->position, 2, GL_FLOAT, GL_FALSE,
-            gMeshStride, &mMeshVertices[0].position[0]);
-
+    // Draw the mesh
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
 }
 
@@ -823,7 +690,7 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     chooseBlending(blend || alpha < 1.0f, mode);
 
     // Texture
-    bindTexture(texture, mShaderTileX, mShaderTileY, 0);
+    bindTexture(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, 0);
     glUniform1i(mCurrentProgram->getUniform("sampler"), 0);
 
     // Always premultiplied

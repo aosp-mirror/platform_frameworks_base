@@ -19,6 +19,7 @@
 
 #include <utils/KeyedVector.h>
 #include <utils/Log.h>
+#include <utils/String8.h>
 
 #include <GLES2/gl2.h>
 

@@ -42,6 +42,7 @@
 #include "Vertex.h"
 #include "FontRenderer.h"
 #include "ProgramCache.h"
+#include "SkiaShader.h"
 
 namespace android {
 namespace uirenderer {
@@ -49,8 +50,6 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 // Renderer
 ///////////////////////////////////////////////////////////////////////////////
-
-#define REQUIRED_TEXTURE_UNITS_COUNT 3
 
 /**
  * OpenGL renderer used to draw accelerated 2D graphics. The API is a
@@ -94,26 +93,11 @@ public:
     void drawRect(float left, float top, float right, float bottom, const SkPaint* paint);
 
     void resetShader();
-    void setupBitmapShader(SkBitmap* bitmap, SkShader::TileMode tileX, SkShader::TileMode tileY,
-            SkMatrix* matrix, bool hasAlpha);
-    void setupLinearGradientShader(SkShader* shader, float* bounds, uint32_t* colors,
-            float* positions, int count, SkShader::TileMode tileMode,
-            SkMatrix* matrix, bool hasAlpha);
+    void setupShader(SkiaShader* shader);
 
     void drawText(const char* text, int bytesCount, int count, float x, float y, SkPaint* paint);
 
 private:
-    /**
-     * Type of Skia shader in use.
-     */
-    enum ShaderType {
-        kShaderNone,
-        kShaderBitmap,
-        kShaderLinearGradient,
-        kShaderCircularGradient,
-        kShaderSweepGradient
-    };
-
     /**
      * Saves the current state of the renderer as a new snapshot.
      * The new snapshot is saved in mSnapshot and the previous snapshot
@@ -232,32 +216,6 @@ private:
             GLvoid* vertices, GLvoid* texCoords, GLvoid* indices, GLsizei elementsCount = 0);
 
     /**
-     * Fills the specified rectangle with the currently set bitmap shader.
-     *
-     * @param left The left coordinate of the rectangle
-     * @param top The top coordinate of the rectangle
-     * @param right The right coordinate of the rectangle
-     * @param bottom The bottom coordinate of the rectangle
-     * @param alpha An additional translucency parameter, between 0.0f and 1.0f
-     * @param mode The blending mode
-     */
-    void drawBitmapShader(float left, float top, float right, float bottom, float alpha,
-            SkXfermode::Mode mode);
-
-    /**
-     * Fills the specified rectangle with the currently set linear gradient shader.
-     *
-     * @param left The left coordinate of the rectangle
-     * @param top The top coordinate of the rectangle
-     * @param right The right coordinate of the rectangle
-     * @param bottom The bottom coordinate of the rectangle
-     * @param alpha An additional translucency parameter, between 0.0f and 1.0f
-     * @param mode The blending mode
-     */
-    void drawLinearGradientShader(float left, float top, float right, float bottom, float alpha,
-            SkXfermode::Mode mode);
-
-    /**
      * Resets the texture coordinates stored in mMeshVertices. Setting the values
      * back to default is achieved by calling:
      *
@@ -321,6 +279,7 @@ private:
 
     // Shaders
     Program* mCurrentProgram;
+    SkiaShader* mShader;
 
     // Used to draw textured quads
     TextureVertex mMeshVertices[4];
@@ -329,21 +288,6 @@ private:
     bool mBlend;
     GLenum mLastSrcMode;
     GLenum mLastDstMode;
-
-    // Skia shaders
-    ShaderType mShader;
-    SkShader* mShaderKey;
-    bool mShaderBlend;
-    GLenum mShaderTileX;
-    GLenum mShaderTileY;
-    SkMatrix* mShaderMatrix;
-    // Bitmaps
-    SkBitmap* mShaderBitmap;
-    // Gradients
-    float* mShaderBounds;
-    uint32_t* mShaderColors;
-    float* mShaderPositions;
-    int mShaderCount;
 
     // GL extensions
     Extensions mExtensions;

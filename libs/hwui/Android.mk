@@ -11,6 +11,7 @@ LOCAL_SRC_FILES:= \
 	PatchCache.cpp \
 	Program.cpp \
 	ProgramCache.cpp \
+	SkiaShader.cpp \
 	TextureCache.cpp
 
 LOCAL_C_INCLUDES += \

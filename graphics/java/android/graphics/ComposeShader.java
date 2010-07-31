@@ -30,7 +30,9 @@ public class ComposeShader extends Shader {
     */
     public ComposeShader(Shader shaderA, Shader shaderB, Xfermode mode) {
         native_instance = nativeCreate1(shaderA.native_instance, shaderB.native_instance,
-                                        (mode != null) ? mode.native_instance : 0);
+                (mode != null) ? mode.native_instance : 0);
+        native_shader = nativePostCreate1(native_instance, shaderA.native_shader,
+                shaderB.native_shader, (mode != null) ? mode.native_instance : 0);
     }
 
     /** Create a new compose shader, given shaders A, B, and a combining PorterDuff mode.
@@ -42,10 +44,17 @@ public class ComposeShader extends Shader {
     */
     public ComposeShader(Shader shaderA, Shader shaderB, PorterDuff.Mode mode) {
         native_instance = nativeCreate2(shaderA.native_instance, shaderB.native_instance,
-                                        mode.nativeInt);
+                mode.nativeInt);
+        native_shader = nativePostCreate2(native_instance, shaderA.native_shader,
+                shaderB.native_shader, mode.nativeInt);
     }
 
-    private static native int nativeCreate1(int native_shaderA, int native_shaderB, int native_mode);
-    private static native int nativeCreate2(int native_shaderA, int native_shaderB, int porterDuffMode);
+    private static native int nativeCreate1(int native_shaderA, int native_shaderB,
+            int native_mode);
+    private static native int nativeCreate2(int native_shaderA, int native_shaderB,
+            int porterDuffMode);
+    private static native int nativePostCreate1(int native_shader, int native_skiaShaderA,
+            int native_skiaShaderB, int native_mode);
+    private static native int nativePostCreate2(int native_shader, int native_skiaShaderA,
+            int native_skiaShaderB, int porterDuffMode);
 }
-

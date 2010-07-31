@@ -24,18 +24,15 @@ package android.graphics;
  */
 public class Shader {
     /**
-     * Local matrix native instance.
-     * 
-     * @hide
-     */
-    public int mLocalMatrix;
-
-    /**
      * This is set by subclasses, but don't make it public.
      * 
      * @hide 
      */
     public int native_instance;
+    /**
+     * @hide
+     */
+    public int native_shader;
 
     public enum TileMode {
         /**
@@ -74,21 +71,20 @@ public class Shader {
      * @param localM The shader's new local matrix, or null to specify identity
      */
     public void setLocalMatrix(Matrix localM) {
-        mLocalMatrix = localM != null ? localM.native_instance : 0;
-        nativeSetLocalMatrix(native_instance, mLocalMatrix);
+        nativeSetLocalMatrix(native_instance, native_shader, localM.native_instance);
     }
 
     protected void finalize() throws Throwable {
         try {
             super.finalize();
         } finally {
-            nativeDestructor(native_instance);
+            nativeDestructor(native_instance, native_shader);
         }
     }
 
-    private static native void nativeDestructor(int native_shader);
+    private static native void nativeDestructor(int native_shader, int native_skiaShader);
     private static native boolean nativeGetLocalMatrix(int native_shader,
-                                                       int matrix_instance);
+            int matrix_instance); 
     private static native void nativeSetLocalMatrix(int native_shader,
-                                                    int matrix_instance);
+            int native_skiaShader, int matrix_instance);
 }
