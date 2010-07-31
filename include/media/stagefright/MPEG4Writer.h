@@ -75,6 +75,7 @@ private:
     uint32_t mInterleaveDurationUs;
     int32_t mTimeScale;
     int64_t mStartTimestampUs;
+
     Mutex mLock;
 
     List<Track *> mTracks;
@@ -86,6 +87,46 @@ private:
     status_t startTracks(MetaData *params);
     size_t numTracks();
     int64_t estimateMoovBoxSize(int32_t bitRate);
+
+    struct Chunk {
+        Track               *mTrack;        // Owner
+        int64_t             mTimeStampUs;   // Timestamp of the 1st sample
+        List<MediaBuffer *> mSamples;       // Sample data
+
+        // Convenient constructor
+        Chunk(Track *track, int64_t timeUs, List<MediaBuffer *> samples)
+            : mTrack(track), mTimeStampUs(timeUs), mSamples(samples) {
+        }
+
+    };
+    struct ChunkInfo {
+        Track               *mTrack;        // Owner
+        List<Chunk>         mChunks;        // Remaining chunks to be written
+    };
+
+    bool            mIsFirstChunk;
+    volatile bool   mDone;                  // Writer thread is done?
+    pthread_t       mThread;                // Thread id for the writer
+    List<ChunkInfo> mChunkInfos;            // Chunk infos
+    Condition       mChunkReadyCondition;   // Signal that chunks are available
+
+    // Writer thread handling
+    status_t startWriterThread();
+    void stopWriterThread();
+    static void *ThreadWrapper(void *me);
+    void threadFunc();
+
+    // Buffer a single chunk to be written out later.
+    void bufferChunk(const Chunk& chunk);
+
+    // Write all buffered chunks from all tracks
+    void writeChunks();
+
+    // Write a chunk if there is one
+    status_t writeOneChunk();
+
+    // Write the first chunk from the given ChunkInfo.
+    void writeFirstChunk(ChunkInfo* info);
 
     void lock();
     void unlock();
