@@ -5019,7 +5019,12 @@ class PackageManagerService extends IPackageManager.Stub {
 
         @Override
         void handleReturnCode() {
-            processPendingInstall(mArgs, mRet);
+            // If mArgs is null, then MCS couldn't be reached. When it
+            // reconnects, it will try again to install. At that point, this
+            // will succeed.
+            if (mArgs != null) {
+                processPendingInstall(mArgs, mRet);
+            }
         }
 
         @Override
