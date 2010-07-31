@@ -5117,13 +5117,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if (hasIdentityMatrix()) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
-                    final int[] location = mAttachInfo.mInvalidateChildLocation;
                     final Rect r = mAttachInfo.mTmpInvalRect;
-                    int minTop = Math.min(mTop, top);
-                    location[0] = mLeft;
-                    location[1] = minTop;
-                    r.set(0, 0, mRight - mLeft, mBottom - minTop);
-                    p.invalidateChildInParent(location, r);
+                    int minTop;
+                    int yLoc;
+                    if (top < mTop) {
+                        minTop = top;
+                        yLoc = top - mTop;
+                    } else {
+                        minTop = mTop;
+                        yLoc = 0;
+                    }
+                    r.set(0, yLoc, mRight - mLeft, mBottom - minTop);
+                    p.invalidateChild(this, r);
                 }
             } else {
                 // Double-invalidation is necessary to capture view's old and new areas
@@ -5159,13 +5164,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if (hasIdentityMatrix()) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
-                    final int[] location = mAttachInfo.mInvalidateChildLocation;
                     final Rect r = mAttachInfo.mTmpInvalRect;
-                    int maxBottom = Math.max(mBottom, bottom);
-                    location[0] = mLeft;
-                    location[1] = mTop;
+                    int maxBottom;
+                    if (bottom < mBottom) {
+                        maxBottom = mBottom;
+                    } else {
+                        maxBottom = bottom;
+                    }
                     r.set(0, 0, mRight - mLeft, maxBottom - mTop);
-                    p.invalidateChildInParent(location, r);
+                    p.invalidateChild(this, r);
                 }
             } else {
                 // Double-invalidation is necessary to capture view's old and new areas
@@ -5201,13 +5208,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if (hasIdentityMatrix()) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
-                    final int[] location = mAttachInfo.mInvalidateChildLocation;
                     final Rect r = mAttachInfo.mTmpInvalRect;
-                    int minLeft = Math.min(mLeft, left);
-                    location[0] = minLeft;
-                    location[1] = mTop;
-                    r.set(0, 0, mRight - minLeft, mBottom - mTop);
-                    p.invalidateChildInParent(location, r);
+                    int minLeft;
+                    int xLoc;
+                    if (left < mLeft) {
+                        minLeft = left;
+                        xLoc = left - mLeft;
+                    } else {
+                        minLeft = mLeft;
+                        xLoc = 0;
+                    }
+                    r.set(xLoc, 0, mRight - minLeft, mBottom - mTop);
+                    p.invalidateChild(this, r);
                 }
             } else {
                 // Double-invalidation is necessary to capture view's old and new areas
@@ -5243,13 +5255,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if (hasIdentityMatrix()) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
-                    final int[] location = mAttachInfo.mInvalidateChildLocation;
                     final Rect r = mAttachInfo.mTmpInvalRect;
-                    int maxRight = Math.max(mRight, right);
-                    location[0] = mLeft;
-                    location[1] = mTop;
+                    int maxRight;
+                    if (right < mRight) {
+                        maxRight = mRight;
+                    } else {
+                        maxRight = right;
+                    }
                     r.set(0, 0, maxRight - mLeft, mBottom - mTop);
-                    p.invalidateChildInParent(location, r);
+                    p.invalidateChild(this, r);
                 }
             } else {
                 // Double-invalidation is necessary to capture view's old and new areas
@@ -5440,14 +5454,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if (hasIdentityMatrix()) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
-                    final int[] location = mAttachInfo.mInvalidateChildLocation;
                     final Rect r = mAttachInfo.mTmpInvalRect;
-                    int minTop = offset < 0 ? mTop + offset : mTop;
-                    int maxBottom = offset < 0 ? mBottom : mBottom + offset;
-                    location[0] = mLeft;
-                    location[1] = minTop;
-                    r.set(0, 0, mRight - mLeft, maxBottom - minTop);
-                    p.invalidateChildInParent(location, r);
+                    int minTop;
+                    int maxBottom;
+                    int yLoc;
+                    if (offset < 0) {
+                        minTop = mTop + offset;
+                        maxBottom = mBottom;
+                        yLoc = offset;
+                    } else {
+                        minTop = mTop;
+                        maxBottom = mBottom + offset;
+                        yLoc = 0;
+                    }
+                    r.set(0, yLoc, mRight - mLeft, maxBottom - minTop);
+                    p.invalidateChild(this, r);
                 }
             } else {
                 invalidate();
@@ -5473,14 +5494,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if (hasIdentityMatrix()) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
-                    final int[] location = mAttachInfo.mInvalidateChildLocation;
                     final Rect r = mAttachInfo.mTmpInvalRect;
-                    int minLeft = offset < 0 ? mLeft + offset : mLeft;
-                    int maxRight = offset < 0 ? mRight : mRight + offset;
-                    location[0] = minLeft;
-                    location[1] = mTop;
+                    int minLeft;
+                    int maxRight;
+                    int xLoc;
+                    if (offset < 0) {
+                        minLeft = mLeft + offset;
+                        maxRight = mRight;
+                        xLoc = offset;
+                    } else {
+                        minLeft = mLeft;
+                        maxRight = mRight + offset;
+                        xLoc = 0;
+                    }
                     r.set(0, 0, maxRight - minLeft, mBottom - mTop);
-                    p.invalidateChildInParent(location, r);
+                    p.invalidateChild(this, r);
                 }
             } else {
                 invalidate();
