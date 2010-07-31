@@ -35,7 +35,7 @@ public final class InputQueue {
 
     final InputChannel mChannel;
     
-    private static Object sLock = new Object();
+    private static final Object sLock = new Object();
     
     private static native void nativeRegisterInputChannel(InputChannel inputChannel,
             InputHandler inputHandler, MessageQueue messageQueue);
@@ -103,28 +103,64 @@ public final class InputQueue {
     @SuppressWarnings("unused")
     private static void dispatchKeyEvent(InputHandler inputHandler,
             KeyEvent event, long finishedToken) {
-        Runnable finishedCallback = new FinishedCallback(finishedToken);
+        Runnable finishedCallback = FinishedCallback.obtain(finishedToken);
         inputHandler.handleKey(event, finishedCallback);
     }
 
     @SuppressWarnings("unused")
     private static void dispatchMotionEvent(InputHandler inputHandler,
             MotionEvent event, long finishedToken) {
-        Runnable finishedCallback = new FinishedCallback(finishedToken);
+        Runnable finishedCallback = FinishedCallback.obtain(finishedToken);
         inputHandler.handleMotion(event, finishedCallback);
     }
     
-    // TODO consider recycling finished callbacks when done
     private static class FinishedCallback implements Runnable {
+        private static final boolean DEBUG_RECYCLING = false;
+        
+        private static final int RECYCLE_MAX_COUNT = 4;
+        
+        private static FinishedCallback sRecycleHead;
+        private static int sRecycleCount;
+        
+        private FinishedCallback mRecycleNext;
         private long mFinishedToken;
         
-        public FinishedCallback(long finishedToken) {
-            mFinishedToken = finishedToken;
+        private FinishedCallback() {
+        }
+        
+        public static FinishedCallback obtain(long finishedToken) {
+            synchronized (sLock) {
+                FinishedCallback callback = sRecycleHead;
+                if (callback != null) {
+                    callback.mRecycleNext = null;
+                    sRecycleHead = callback.mRecycleNext;
+                    sRecycleCount -= 1;
+                } else {
+                    callback = new FinishedCallback();
+                }
+                callback.mFinishedToken = finishedToken;
+                return callback;
+            }
         }
         
         public void run() {
             synchronized (sLock) {
+                if (mFinishedToken == -1) {
+                    throw new IllegalStateException("Event finished callback already invoked.");
+                }
+                
                 nativeFinished(mFinishedToken);
+                mFinishedToken = -1;
+
+                if (sRecycleCount < RECYCLE_MAX_COUNT) {
+                    mRecycleNext = sRecycleHead;
+                    sRecycleHead = this;
+                    sRecycleCount += 1;
+                    
+                    if (DEBUG_RECYCLING) {
+                        Slog.d(TAG, "Recycled finished callbacks: " + sRecycleCount);
+                    }
+                }
             }
         }
     }
