@@ -1633,6 +1633,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     private float mRotation = 0f;
 
     /**
+     * The amount of translation of the object away from its left property (post-layout).
+     */
+    @ViewDebug.ExportedProperty
+    private float mTranslationX = 0f;
+
+    /**
+     * The amount of translation of the object away from its top property (post-layout).
+     */
+    @ViewDebug.ExportedProperty
+    private float mTranslationY = 0f;
+
+    /**
      * The amount of scale in the x direction around the pivot point. A
      * value of 1 means no scaling is applied.
      */
@@ -4885,7 +4897,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             // transform-related properties have changed since the last time someone
             // asked for the matrix; recalculate it with the current values
             mMatrix.reset();
-            mMatrix.setRotate(mRotation, mPivotX, mPivotY);
+            mMatrix.setTranslate(mTranslationX, mTranslationY);
+            mMatrix.preRotate(mRotation, mPivotX, mPivotY);
             mMatrix.preScale(mScaleX, mScaleY, mPivotX, mPivotY);
             mMatrixDirty = false;
             mMatrixIsIdentity = mMatrix.isIdentity();
@@ -5108,43 +5121,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Sets the top position of this view relative to its parent.
-     *
-     * @param top The top of this view, in pixels.
-     */
-    public final void setTop(int top) {
-        if (top != mTop) {
-            if (hasIdentityMatrix()) {
-                final ViewParent p = mParent;
-                if (p != null && mAttachInfo != null) {
-                    final Rect r = mAttachInfo.mTmpInvalRect;
-                    int minTop;
-                    int yLoc;
-                    if (top < mTop) {
-                        minTop = top;
-                        yLoc = top - mTop;
-                    } else {
-                        minTop = mTop;
-                        yLoc = 0;
-                    }
-                    r.set(0, yLoc, mRight - mLeft, mBottom - minTop);
-                    p.invalidateChild(this, r);
-                }
-            } else {
-                // Double-invalidation is necessary to capture view's old and new areas
-                invalidate();
-            }
-
-            mTop = top;
-
-            if (!mMatrixIsIdentity) {
-                mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-                invalidate();
-            }
-        }
-    }
-
-    /**
      * Bottom position of this view relative to its parent.
      *
      * @return The bottom of this view, in pixels.
@@ -5152,40 +5128,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     @ViewDebug.CapturedViewProperty
     public final int getBottom() {
         return mBottom;
-    }
-
-    /**
-     * Sets the bottom position of this view relative to its parent.
-     *
-     * @param bottom The bottom of this view, in pixels.
-     */
-    public final void setBottom(int bottom) {
-        if (bottom != mBottom) {
-            if (hasIdentityMatrix()) {
-                final ViewParent p = mParent;
-                if (p != null && mAttachInfo != null) {
-                    final Rect r = mAttachInfo.mTmpInvalRect;
-                    int maxBottom;
-                    if (bottom < mBottom) {
-                        maxBottom = mBottom;
-                    } else {
-                        maxBottom = bottom;
-                    }
-                    r.set(0, 0, mRight - mLeft, maxBottom - mTop);
-                    p.invalidateChild(this, r);
-                }
-            } else {
-                // Double-invalidation is necessary to capture view's old and new areas
-                invalidate();
-            }
-
-            mBottom = bottom;
-
-            if (!mMatrixIsIdentity) {
-                mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-                invalidate();
-            }
-        }
     }
 
     /**
@@ -5199,43 +5141,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Sets the left position of this view relative to its parent.
-     *
-     * @param left The bottom of this view, in pixels.
-     */
-    public final void setLeft(int left) {
-        if (left != mLeft) {
-            if (hasIdentityMatrix()) {
-                final ViewParent p = mParent;
-                if (p != null && mAttachInfo != null) {
-                    final Rect r = mAttachInfo.mTmpInvalRect;
-                    int minLeft;
-                    int xLoc;
-                    if (left < mLeft) {
-                        minLeft = left;
-                        xLoc = left - mLeft;
-                    } else {
-                        minLeft = mLeft;
-                        xLoc = 0;
-                    }
-                    r.set(xLoc, 0, mRight - minLeft, mBottom - mTop);
-                    p.invalidateChild(this, r);
-                }
-            } else {
-                // Double-invalidation is necessary to capture view's old and new areas
-                invalidate();
-            }
-
-            mLeft = left;
-
-            if (!mMatrixIsIdentity) {
-                mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-                invalidate();
-            }
-        }
-    }
-
-    /**
      * Right position of this view relative to its parent.
      *
      * @return The right edge of this view, in pixels.
@@ -5246,79 +5151,109 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Sets the right position of this view relative to its parent.
+     * The visual x position of this view, in pixels. This is equivalent to the
+     * {@link #setTranslationX(float) translationX} property plus the current
+     * {@link #getLeft() left} property. 
      *
-     * @param right The bottom of this view, in pixels.
+     * @return The visual x position of this view, in pixels.
      */
-    public final void setRight(int right) {
-        if (right != mRight) {
-            if (hasIdentityMatrix()) {
-                final ViewParent p = mParent;
-                if (p != null && mAttachInfo != null) {
-                    final Rect r = mAttachInfo.mTmpInvalRect;
-                    int maxRight;
-                    if (right < mRight) {
-                        maxRight = mRight;
-                    } else {
-                        maxRight = right;
-                    }
-                    r.set(0, 0, maxRight - mLeft, mBottom - mTop);
-                    p.invalidateChild(this, r);
-                }
-            } else {
-                // Double-invalidation is necessary to capture view's old and new areas
-                invalidate();
-            }
+    public float getX() {
+        return mLeft + mTranslationX;
+    }
 
-            mRight = right;
+    /**
+     * Sets the visual x position of this view, in pixels. This is equivalent to setting the
+     * {@link #setTranslationX(float) translationX} property to be the difference between
+     * the x value passed in and the current {@link #getLeft() left} property.
+     *
+     * @param x The visual x position of this view, in pixels.
+     */
+    public void setX(float x) {
+        setTranslationX(x - mLeft);
+    }
 
-            if (!mMatrixIsIdentity) {
-                mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-                invalidate();
-            }
+    /**
+     * The visual y position of this view, in pixels. This is equivalent to the
+     * {@link #setTranslationY(float) translationY} property plus the current
+     * {@link #getTop() top} property.
+     *
+     * @return The visual y position of this view, in pixels.
+     */
+    public float getY() {
+        return mTop + mTranslationY;
+    }
+
+    /**
+     * Sets the visual y position of this view, in pixels. This is equivalent to setting the
+     * {@link #setTranslationY(float) translationY} property to be the difference between
+     * the y value passed in and the current {@link #getTop() top} property.
+     *
+     * @param y The visual y position of this view, in pixels.
+     */
+    public void setY(float y) {
+        setTranslationY(y - mTop);
+    }
+
+
+    /**
+     * The horizontal location of this view relative to its {@link #getLeft() left} position.
+     * This position is post-layout, in addition to wherever the object's
+     * layout placed it.
+     *
+     * @return The horizontal position of this view relative to its left position, in pixels.
+     */
+    public float getTranslationX() {
+        return mTranslationX;
+    }
+
+    /**
+     * Sets the horizontal location of this view relative to its {@link #getLeft() left} position.
+     * This effectively positions the object post-layout, in addition to wherever the object's
+     * layout placed it.
+     *
+     * @param translationX The horizontal position of this view relative to its left position,
+     * in pixels.
+     */
+    public void setTranslationX(float translationX) {
+        if (mTranslationX != translationX) {
+            // Double-invalidation is necessary to capture view's old and new areas
+            invalidate();
+            mTranslationX = translationX;
+            mMatrixDirty = true;
+            mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+            invalidate();
         }
     }
 
     /**
-     * The horizontal location of this view relative to its parent. This value is equivalent to the
-     * {@link #getLeft() left} property.
+     * The horizontal location of this view relative to its {@link #getTop() top} position.
+     * This position is post-layout, in addition to wherever the object's
+     * layout placed it.
      *
-     * @return The horizontal position of this view, in pixels.
+     * @return The vertical position of this view relative to its top position,
+     * in pixels.
      */
-    public int getX() {
-        return mLeft;
+    public float getTranslationY() {
+        return mTranslationY;
     }
 
     /**
-     * Sets the horizontal location of this view relative to its parent. Setting this value will
-     * affect both the {@link #setLeft(int) left} and {@link #setRight(int) right} properties
-     * of this view.
+     * Sets the vertical location of this view relative to its {@link #getTop() top} position.
+     * This effectively positions the object post-layout, in addition to wherever the object's
+     * layout placed it.
      *
-     * @param x The horizontal position of this view, in pixels.
+     * @param translationY The vertical position of this view relative to its top position,
+     * in pixels.
      */
-    public void setX(int x) {
-        offsetLeftAndRight(x - mLeft);
-    }
-
-    /**
-     * The vertical location of this view relative to its parent. This value is equivalent to the
-     * {@link #getTop() left} property.
-     *
-     * @return The vertical position of this view, in pixels.
-     */
-    public int getY() {
-        return mTop;
-    }
-
-    /**
-     * Sets the vertical location of this view relative to its parent. Setting this value will
-     * affect both the {@link #setTop(int) left} and {@link #setBottom(int) right} properties
-     * of this view.
-     *
-     * @param y The vertical position of this view, in pixels.
-     */
-    public void setY(int y) {
-        offsetTopAndBottom(y - mTop);
+    public void setTranslationY(float translationY) {
+        if (mTranslationY != translationY) {
+            // Double-invalidation is necessary to capture view's old and new areas
+            invalidate();
+            mTranslationY = translationY;
+            mMatrixDirty = true;
+            mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+            invalidate();
+        }
     }
 
     /**

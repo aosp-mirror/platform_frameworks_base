@@ -1580,6 +1580,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
 
+        concatMatrix |= !child.hasIdentityMatrix();
+
         // Sets the flag as early as possible to allow draw() implementations
         // to call invalidate() successfully when doing animations
         child.mPrivateFlags |= DRAWN;
@@ -1744,6 +1746,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         final int count = mChildrenCount;
         for (int i = 0; i < count; i++) {
+            
             children[i].setSelected(selected);
         }
     }
