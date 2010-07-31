@@ -80,9 +80,6 @@ public:
     GLint               crop_rect[4];
     GLint               generate_mipmap;
     GLint               direct;
-#ifdef LIBAGL_USE_GRALLOC_COPYBITS
-    bool                try_copybit;
-#endif // LIBAGL_USE_GRALLOC_COPYBITS
     android_native_buffer_t* buffer;
 };
 

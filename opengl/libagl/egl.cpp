@@ -628,23 +628,6 @@ EGLClientBuffer egl_window_surface_v2_t::getRenderBuffer() const
     return buffer;
 }
 
-#ifdef LIBAGL_USE_GRALLOC_COPYBITS
-
-static bool supportedCopybitsDestinationFormat(int format) {
-    // Hardware supported
-    switch (format) {
-    case HAL_PIXEL_FORMAT_RGB_565:
-    case HAL_PIXEL_FORMAT_RGBA_8888:
-    case HAL_PIXEL_FORMAT_RGBX_8888:
-    case HAL_PIXEL_FORMAT_RGBA_4444:
-    case HAL_PIXEL_FORMAT_RGBA_5551:
-    case HAL_PIXEL_FORMAT_BGRA_8888:
-        return true;
-    }
-    return false;
-}
-#endif
-
 EGLBoolean egl_window_surface_v2_t::bindDrawSurface(ogles_context_t* gl)
 {
     GGLSurface buffer;
@@ -657,18 +640,6 @@ EGLBoolean egl_window_surface_v2_t::bindDrawSurface(ogles_context_t* gl)
     gl->rasterizer.procs.colorBuffer(gl, &buffer);
     if (depth.data != gl->rasterizer.state.buffers.depth.data)
         gl->rasterizer.procs.depthBuffer(gl, &depth);
-
-#ifdef LIBAGL_USE_GRALLOC_COPYBITS
-    gl->copybits.drawSurfaceBuffer = 0;
-    if (gl->copybits.blitEngine != NULL) {
-        if (supportedCopybitsDestinationFormat(buffer.format)) {
-            buffer_handle_t handle = this->buffer->handle;
-            if (handle != NULL) {
-                gl->copybits.drawSurfaceBuffer = this->buffer;
-            }
-        }
-    }
-#endif // LIBAGL_USE_GRALLOC_COPYBITS
 
     return EGL_TRUE;
 }
