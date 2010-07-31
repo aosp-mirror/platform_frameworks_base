@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
 
     <application
+        android:persistent="true"
         android:allowClearUserData="false"
         android:label="@string/app_label"
         android:icon="@drawable/ic_launcher_settings">
