@@ -112,11 +112,10 @@ public class MoreShadersActivity extends Activity {
 
             canvas.restore();
 
-            canvas.drawText("OpenGL rendering", 0.0f, 20.0f, mLargePaint);
             canvas.save();
             canvas.translate(40.0f + mDrawWidth + 40.0f, 40.0f);
 
-            //mLargePaint.setShader(mHorGradient);
+            mLargePaint.setShader(mHorGradient);
             canvas.drawText("OpenGL rendering", 0.0f, 20.0f, mLargePaint);
             
             mLargePaint.setShader(mScaled2Shader);

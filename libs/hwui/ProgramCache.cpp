@@ -106,9 +106,9 @@ const char* gFS_Main_FetchBitmap =
 const char* gFS_Main_FetchBitmapNpot =
         "    vec4 bitmapColor = texture2D(bitmapSampler, wrap(outBitmapTexCoords));\n";
 const char* gFS_Main_BlendShadersBG =
-        "    fragColor = blendShaders(bitmapColor, gradientColor)";
-const char* gFS_Main_BlendShadersGB =
         "    fragColor = blendShaders(gradientColor, bitmapColor)";
+const char* gFS_Main_BlendShadersGB =
+        "    fragColor = blendShaders(bitmapColor, gradientColor)";
 const char* gFS_Main_BlendShaders_Modulate =
         " * fragColor.a;\n";
 const char* gFS_Main_GradientShader_Modulate =
@@ -144,23 +144,23 @@ const char* gPorterDuff[12] = {
         // Dst
         "return dst;\n",
         // SrcOver
-        "return vec4(src.rgb + (1.0 - src.a) * dst.rgb, src.a + dst.a - src.a * dst.a);\n",
+        "return src + dst * (1.0 - src.a);\n",
         // DstOver
-        "return vec4(dst.rgb + (1.0 - dst.a) * src.rgb, src.a + dst.a - src.a * dst.a);\n",
+        "return dst + src * (1.0 - dst.a);\n",
         // SrcIn
-        "return vec4(src.rgb * dst.a, src.a * dst.a);\n",
+        "return src * dst.a;\n",
         // DstIn
-        "return vec4(dst.rgb * src.a, src.a * dst.a);\n",
+        "return dst * src.a;\n",
         // SrcOut
-        "return vec4(src.rgb * (1.0 - dst.a), src.a * (1.0 - dst.a));\n",
+        "return src * (1.0 - dst.a);\n",
         // DstOut
-        "return vec4(dst.rgb * (1.0 - src.a), dst.a * (1.0 - src.a));\n",
+        "return dst * (1.0 - src.a);\n",
         // SrcAtop
         "return vec4(src.rgb * dst.a + (1.0 - src.a) * dst.rgb, dst.a);\n",
         // DstAtop
         "return vec4(dst.rgb * src.a + (1.0 - dst.a) * src.rgb, src.a);\n",
         // Xor
-        "return vec4(src.rgb * (1.0 - dst.a) + (1.0 - src.a) * dst.rgb, "
+        "return vec4(src.rgb * (1.0 - dst.a) + (1.0 - src.a) * dst.rgb, 1.0, "
                 "src.a + dst.a - 2.0 * src.a * dst.a);\n",
 };
 

@@ -30,6 +30,7 @@
 #include <SkXfermode.h>
 
 #include <OpenGLRenderer.h>
+#include <SkiaShader.h>
 #include <Rect.h>
 #include <ui/Rect.h>
 
@@ -235,18 +236,9 @@ static void android_view_GLES20Canvas_resetShader(JNIEnv* env, jobject canvas,
     renderer->resetShader();
 }
 
-static void android_view_GLES20Canvas_setupBitmapShader(JNIEnv* env, jobject canvas,
-        OpenGLRenderer* renderer, SkShader* shader, SkBitmap* bitmap,
-        SkShader::TileMode tileX, SkShader::TileMode tileY, SkMatrix* matrix) {
-    renderer->setupBitmapShader(bitmap, tileX, tileY, matrix,
-            (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
-}
-
-static void android_view_GLES20Canvas_setupLinearShader(JNIEnv* env, jobject canvas,
-        OpenGLRenderer* renderer, SkShader* shader, float* bounds, uint32_t* colors,
-        float* positions, int count, SkShader::TileMode tileMode, SkMatrix* matrix) {
-    renderer->setupLinearGradientShader(shader, bounds, colors, positions, count,
-            tileMode, matrix, (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+static void android_view_GLES20Canvas_setupShader(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, SkiaShader* shader) {
+    renderer->setupShader(shader);
 }
 
 // ----------------------------------------------------------------------------
@@ -320,8 +312,7 @@ static JNINativeMethod gMethods[] = {
     {   "nDrawRect",          "(IFFFFI)V",       (void*) android_view_GLES20Canvas_drawRect },
 
     {   "nResetShader",       "(I)V",            (void*) android_view_GLES20Canvas_resetShader },
-    {   "nSetupBitmapShader", "(IIIIII)V",       (void*) android_view_GLES20Canvas_setupBitmapShader },
-    {   "nSetupLinearShader", "(IIIIIIII)V",     (void*) android_view_GLES20Canvas_setupLinearShader },
+    {   "nSetupShader",       "(II)V",           (void*) android_view_GLES20Canvas_setupShader },
 
     {   "nDrawText",          "(I[CIIFFII)V",    (void*) android_view_GLES20Canvas_drawTextArray },
     {   "nDrawText",          "(ILjava/lang/String;IIFFII)V",
