@@ -28,19 +28,19 @@ import android.widget.ImageButton;
  */
 public class ActionMenuItemView extends ImageButton implements MenuView.ItemView {
     private static final String TAG = "ActionMenuItemView";
-    
+
     private MenuItemImpl mItemData;
     private CharSequence mTitle;
     private MenuBuilder.ItemInvoker mItemInvoker;
-    
+
     public ActionMenuItemView(Context context) {
         this(context, null);
     }
-    
+
     public ActionMenuItemView(Context context, AttributeSet attrs) {
         this(context, attrs, com.android.internal.R.attr.actionButtonStyle);
     }
-    
+
     public ActionMenuItemView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
@@ -51,24 +51,24 @@ public class ActionMenuItemView extends ImageButton implements MenuView.ItemView
 
     public void initialize(MenuItemImpl itemData, int menuType) {
         mItemData = itemData;
-        
+
         setClickable(true);
         setFocusable(true);
         setTitle(itemData.getTitle());
         setIcon(itemData.getIcon());
         setId(itemData.getItemId());
-        
+
         setVisibility(itemData.isVisible() ? View.VISIBLE : View.GONE);
         setEnabled(itemData.isEnabled());
     }
-    
+
     @Override
     public boolean performClick() {
         // Let the view's listener have top priority
         if (super.performClick()) {
             return true;
         }
-        
+
         if (mItemInvoker != null && mItemInvoker.invokeItem(mItemData)) {
             playSoundEffect(SoundEffectConstants.CLICK);
             return true;
@@ -76,7 +76,7 @@ public class ActionMenuItemView extends ImageButton implements MenuView.ItemView
             return false;
         }
     }
-    
+
     public void setItemInvoker(MenuBuilder.ItemInvoker invoker) {
         mItemInvoker = invoker;
     }
@@ -103,6 +103,9 @@ public class ActionMenuItemView extends ImageButton implements MenuView.ItemView
 
     public void setTitle(CharSequence title) {
         mTitle = title;
+
+        // populate accessibility description with title
+        setContentDescription(title);
     }
 
     public boolean showsIcon() {
