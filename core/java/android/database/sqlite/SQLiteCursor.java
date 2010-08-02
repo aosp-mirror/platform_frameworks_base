@@ -393,9 +393,12 @@ public class SQLiteCursor extends AbstractWindowedCursor {
             if (!sAlreadyWarned.containsKey(databasePath)) {
                 sAlreadyWarned.put(databasePath, true);
                 String packageName = ActivityThread.currentPackageName();
+                Throwable t = null;
+                // BEGIN STOPSHIP remove the following line
+                t = new RequeryOnUiThreadException(packageName);
+                // END STOPSHIP
                 Log.w(TAG, "should not attempt requery on main (UI) thread: app = " +
-                        packageName == null ? "'unknown'" : packageName,
-                        new RequeryOnUiThreadException(packageName));
+                        packageName == null ? "'unknown'" : packageName, t);
             }
         }
     }
