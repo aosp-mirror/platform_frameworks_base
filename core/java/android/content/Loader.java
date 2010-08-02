@@ -22,7 +22,7 @@ import android.os.Handler;
 /**
  * An abstract class that performs asynchronous loading of data. While Loaders are active
  * they should monitor the source of their data and deliver new results when the contents
- * change. 
+ * change.
  *
  * @param <D> The result returned when the load is complete
  */
@@ -43,7 +43,7 @@ public abstract class Loader<D> {
 
         @Override
         public void onChange(boolean selfChange) {
-            forceLoad();
+            onContentChanged();
         }
     }
 
@@ -97,7 +97,7 @@ public abstract class Loader<D> {
     /**
      * Registers a class that will receive callbacks when a load is complete. The callbacks will
      * be called on the UI thread so it's safe to pass the results to widgets.
-     * 
+     *
      * Must be called from the UI thread
      */
     public void registerListener(int id, OnLoadCompleteListener<D> listener) {
@@ -126,7 +126,7 @@ public abstract class Loader<D> {
      * will be called on the UI thread. If a previous load has been completed and is still valid
      * the result may be passed to the callbacks immediately. The loader will monitor the source of
      * the data set and may deliver future callbacks if the source changes. Calling
-     * {@link #stopLoading} will stop the delivery of callbacks. 
+     * {@link #stopLoading} will stop the delivery of callbacks.
      *
      * Must be called from the UI thread
      */
@@ -151,4 +151,14 @@ public abstract class Loader<D> {
      * Must be called from the UI thread
      */
     public abstract void destroy();
+
+    /**
+     * Called when {@link ForceLoadContentObserver} detects a change.  Calls {@link #forceLoad()}
+     * by default.
+     *
+     * Must be called from the UI thread
+     */
+    public void onContentChanged() {
+        forceLoad();
+    }
 }
