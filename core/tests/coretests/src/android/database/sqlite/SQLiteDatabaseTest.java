@@ -16,6 +16,7 @@
 
 package android.database.sqlite;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -33,10 +34,13 @@ import java.util.ArrayList;
 
 public class SQLiteDatabaseTest extends AndroidTestCase {
     private static final String TAG = "DatabaseGeneralTest";
-
+    private static final String TEST_TABLE = "test";
     private static final int CURRENT_DATABASE_VERSION = 42;
     private SQLiteDatabase mDatabase;
     private File mDatabaseFile;
+    private static final int INSERT = 1;
+    private static final int UPDATE = 2;
+    private static final int DELETE = 3;
 
     @Override
     protected void setUp() throws Exception {
@@ -150,6 +154,100 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
     }
 
     /**
+     * a transaction should be started before a standalone-update/insert/delete statement
+     */
+    @SmallTest
+    public void testStartXactBeforeUpdateSql() throws InterruptedException {
+        runTestForStartXactBeforeUpdateSql(INSERT);
+        runTestForStartXactBeforeUpdateSql(UPDATE);
+        runTestForStartXactBeforeUpdateSql(DELETE);
+    }
+    private void runTestForStartXactBeforeUpdateSql(int stmtType) throws InterruptedException {
+        createTableAndClearCache();
+
+        ContentValues values = new ContentValues();
+        // make some changes to data in TEST_TABLE
+        for (int i = 0; i < 5; i++) {
+            values.put("i", i);
+            values.put("j", "i" + System.currentTimeMillis());
+            mDatabase.insert(TEST_TABLE, null, values);
+            switch (stmtType) {
+                case UPDATE:
+                    values.put("j", "u" + System.currentTimeMillis());
+                    mDatabase.update(TEST_TABLE, values, "i = " + i, null);
+                    break;
+                case DELETE:
+                    mDatabase.delete(TEST_TABLE, "i = 1", null);
+                    break;
+            }
+        }
+        // do a query. even though query uses a different database connection,
+        // it should still see the above changes to data because the above standalone
+        // insert/update/deletes are done in transactions automatically.
+        String sql = "select count(*) from " + TEST_TABLE;
+        SQLiteStatement stmt = mDatabase.compileStatement(sql);
+        final int expectedValue = (stmtType == DELETE) ? 4 : 5;
+        assertEquals(expectedValue, stmt.simpleQueryForLong());
+        stmt.close();
+        Cursor c = mDatabase.rawQuery(sql, null);
+        assertEquals(1, c.getCount());
+        c.moveToFirst();
+        assertEquals(expectedValue, c.getLong(0));
+        c.close();
+
+        // do 5 more changes in a transaction but do a query before and after the commit
+        mDatabase.beginTransaction();
+        for (int i = 10; i < 15; i++) {
+            values.put("i", i);
+            values.put("j", "i" + System.currentTimeMillis());
+            mDatabase.insert(TEST_TABLE, null, values);
+            switch (stmtType) {
+                case UPDATE:
+                    values.put("j", "u" + System.currentTimeMillis());
+                    mDatabase.update(TEST_TABLE, values, "i = " + i, null);
+                    break;
+                case DELETE:
+                    mDatabase.delete(TEST_TABLE, "i = 1", null);
+                    break;
+            }
+        }
+        mDatabase.setTransactionSuccessful();
+        // do a query before commit - should still have 5 rows
+        // this query should run in a different thread to force it to use a different database
+        // connection
+        Thread t = new Thread() {
+            @Override public void run() {
+                String sql = "select count(*) from " + TEST_TABLE;
+                SQLiteStatement stmt = getDb().compileStatement(sql);
+                assertEquals(expectedValue, stmt.simpleQueryForLong());
+                stmt.close();
+                Cursor c = getDb().rawQuery(sql, null);
+                assertEquals(1, c.getCount());
+                c.moveToFirst();
+                assertEquals(expectedValue, c.getLong(0));
+                c.close();
+            }
+        };
+        t.start();
+        // wait until the above thread is done
+        t.join();
+        // commit and then query. should see changes from the transaction
+        mDatabase.endTransaction();
+        stmt = mDatabase.compileStatement(sql);
+        final int expectedValue2 = (stmtType == DELETE) ? 9 : 10;
+        assertEquals(expectedValue2, stmt.simpleQueryForLong());
+        stmt.close();
+        c = mDatabase.rawQuery(sql, null);
+        assertEquals(1, c.getCount());
+        c.moveToFirst();
+        assertEquals(expectedValue2, c.getLong(0));
+        c.close();
+    }
+    private synchronized SQLiteDatabase getDb() {
+        return mDatabase;
+    }
+
+    /**
      * Test to ensure that readers are able to read the database data (old versions)
      * EVEN WHEN the writer is in a transaction on the same database.
      *<p>
@@ -198,6 +296,8 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
                 // set up connection pool
                 mDatabase.enableWriteAheadLogging();
                 mDatabase.setConnectionPoolSize(i + 1);
+            } else {
+                mDatabase.disableWriteAheadLogging();
             }
             mDatabase.execSQL("CREATE TABLE t1 (i int, j int);");
             mDatabase.execSQL("CREATE TABLE t2 (i int, j int);");
@@ -345,8 +445,7 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
 
     @SmallTest
     public void testLruCachingOfSqliteCompiledSqlObjs() {
-        mDatabase.disableWriteAheadLogging();
-        mDatabase.execSQL("CREATE TABLE test (i int, j int);");
+        createTableAndClearCache();
         // set cache size
         int N = SQLiteDatabase.MAX_SQL_CACHE_SIZE;
         mDatabase.setMaxSqlCacheSize(N);
@@ -393,14 +492,27 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
          */
     }
 
+    private void createTableAndClearCache() {
+        mDatabase.disableWriteAheadLogging();
+        mDatabase.execSQL("DROP TABLE IF EXISTS " + TEST_TABLE);
+        mDatabase.execSQL("CREATE TABLE " + TEST_TABLE + " (i int, j int);");
+        mDatabase.enableWriteAheadLogging();
+        mDatabase.lock();
+        // flush the above statement from cache and close all the pending statements to be released
+        mDatabase.deallocCachedSqlStatements();
+        mDatabase.closePendingStatements();
+        mDatabase.unlock();
+        assertEquals(0, mDatabase.getQueuedUpStmtList().size());
+    }
+
     /**
      * test to make sure the statement finalizations are not done right away but
      * piggy-backed onto the next sql statement execution on the same database.
      */
     @SmallTest
     public void testStatementClose() {
-        mDatabase.execSQL("CREATE TABLE test (i int, j int);");
-        // fill up statement cache in mDatabase\
+        createTableAndClearCache();
+        // fill up statement cache in mDatabase
         int N = SQLiteDatabase.MAX_SQL_CACHE_SIZE;
         mDatabase.setMaxSqlCacheSize(N);
         SQLiteStatement stmt;
@@ -429,7 +541,7 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         // execute something to see if this statement gets finalized
         mDatabase.execSQL("delete from test where i = 10;");
         statementIds = mDatabase.getQueuedUpStmtList();
-        assertEquals(0, statementIds.size());
+        assertFalse(statementIds.contains(stmt0Id));
     }
 
     /**
@@ -439,16 +551,16 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
      */
     @LargeTest
     public void testStatementCloseDiffThread() throws InterruptedException {
-        mDatabase.execSQL("CREATE TABLE test (i int, j int);");
+        createTableAndClearCache();
+        final int N = SQLiteDatabase.MAX_SQL_CACHE_SIZE;
+        mDatabase.setMaxSqlCacheSize(N);
         // fill up statement cache in mDatabase in a thread
         Thread t1 = new Thread() {
             @Override public void run() {
-                int N = SQLiteDatabase.MAX_SQL_CACHE_SIZE;
-                mDatabase.setMaxSqlCacheSize(N);
                 SQLiteStatement stmt;
-                for (int i = 0; i < N; i ++) {
+                for (int i = 0; i < N; i++) {
                     ClassToTestSqlCompilationAndCaching c =
-                        ClassToTestSqlCompilationAndCaching.create(mDatabase,
+                        ClassToTestSqlCompilationAndCaching.create(getDb(),
                                 "insert into test values(" + i + ", ?);");
                     // keep track of 0th entry
                     if (i == 0) {
@@ -461,45 +573,44 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         t1.start();
         // wait for the thread to finish
         t1.join();
+        // mDatabase shouldn't have any statements to be released
+        assertEquals(0, mDatabase.getQueuedUpStmtList().size());
 
         // add one more to the cache - and the above 'stmt0Id' should fall out of cache
         // just for the heck of it, do it in a separate thread
         Thread t2 = new Thread() {
             @Override public void run() {
                 ClassToTestSqlCompilationAndCaching stmt1 =
-                        ClassToTestSqlCompilationAndCaching.create(mDatabase,
-                                "insert into test values(100, ?);");
+                    ClassToTestSqlCompilationAndCaching.create(getDb(),
+                            "insert into test values(100, ?);");
+                stmt1.bindLong(1, 1);
                 stmt1.close();
             }
         };
         t2.start();
         t2.join();
 
-        // close() in the above thread should have queuedUp the statement for finalization
-        ArrayList<Integer> statementIds = mDatabase.getQueuedUpStmtList();
-        assertTrue(getStmt0Id() > 0);
-        assertTrue(statementIds.contains(stmt0Id));
+        // close() in the above thread should have queuedUp the stmt0Id for finalization
+        ArrayList<Integer> statementIds = getDb().getQueuedUpStmtList();
+        assertTrue(statementIds.contains(getStmt0Id()));
         assertEquals(1, statementIds.size());
 
         // execute something to see if this statement gets finalized
         // again do it in a separate thread
         Thread t3 = new Thread() {
             @Override public void run() {
-                mDatabase.execSQL("delete from test where i = 10;");
+                getDb().execSQL("delete from test where i = 10;");
             }
         };
         t3.start();
         t3.join();
 
         // is the statement finalized?
-        statementIds = mDatabase.getQueuedUpStmtList();
-        assertEquals(0, statementIds.size());
+        statementIds = getDb().getQueuedUpStmtList();
+        assertFalse(statementIds.contains(getStmt0Id()));
     }
 
     private volatile int stmt0Id = 0;
-    private synchronized void setStmt0Id(int stmt0Id) {
-        this.stmt0Id = stmt0Id;
-    }
     private synchronized int getStmt0Id() {
         return this.stmt0Id;
     }
@@ -510,16 +621,16 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
      */
     @LargeTest
     public void testStatementCloseByDbClose() throws InterruptedException {
-        mDatabase.execSQL("CREATE TABLE test (i int, j int);");
+        createTableAndClearCache();
         // fill up statement cache in mDatabase in a thread
         Thread t1 = new Thread() {
             @Override public void run() {
                 int N = SQLiteDatabase.MAX_SQL_CACHE_SIZE;
-                mDatabase.setMaxSqlCacheSize(N);
+                getDb().setMaxSqlCacheSize(N);
                 SQLiteStatement stmt;
                 for (int i = 0; i < N; i ++) {
                     ClassToTestSqlCompilationAndCaching c =
-                            ClassToTestSqlCompilationAndCaching.create(mDatabase,
+                            ClassToTestSqlCompilationAndCaching.create(getDb(),
                                     "insert into test values(" + i + ", ?);");
                     // keep track of 0th entry
                     if (i == 0) {
@@ -538,7 +649,7 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         Thread t2 = new Thread() {
             @Override public void run() {
                 ClassToTestSqlCompilationAndCaching stmt1 =
-                        ClassToTestSqlCompilationAndCaching.create(mDatabase,
+                        ClassToTestSqlCompilationAndCaching.create(getDb(),
                                 "insert into test values(100, ?);");
                 stmt1.bindLong(1, 1);
                 stmt1.close();
@@ -548,7 +659,7 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         t2.join();
 
         // close() in the above thread should have queuedUp the statement for finalization
-        ArrayList<Integer> statementIds = mDatabase.getQueuedUpStmtList();
+        ArrayList<Integer> statementIds = getDb().getQueuedUpStmtList();
         assertTrue(getStmt0Id() > 0);
         assertTrue(statementIds.contains(stmt0Id));
         assertEquals(1, statementIds.size());
@@ -558,14 +669,244 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         // again do it in a separate thread
         Thread t3 = new Thread() {
             @Override public void run() {
-                mDatabase.close();
+                getDb().close();
             }
         };
         t3.start();
         t3.join();
 
         // check mClosedStatementIds in mDatabase. it should be empty
-        statementIds = mDatabase.getQueuedUpStmtList();
+        statementIds = getDb().getQueuedUpStmtList();
         assertEquals(0, statementIds.size());
+    }
+
+    /**
+     * This test tests usage execSQL() to begin transaction works in the following way
+     *   Thread #1 does
+     *       execSQL("begin transaction");
+     *       insert()
+     *   Thread # 2
+     *       query()
+     *   Thread#1 ("end transaction")
+     * Thread # 2 query will execute - because java layer will not have locked the SQLiteDatabase
+     * object and sqlite will consider this query to be part of the transaction.
+     *
+     * but if thread # 1 uses beginTransaction() instead of execSQL() to start transaction,
+     * then Thread # 2's query will have been blocked by java layer
+     * until Thread#1 ends transaction.
+     *
+     * @throws InterruptedException
+     */
+    @SmallTest
+    public void testExecSqlToStartAndEndTransaction() throws InterruptedException {
+        runExecSqlToStartAndEndTransaction("END");
+        // same as above, instead now do "COMMIT" or "ROLLBACK" instead of "END" transaction
+        runExecSqlToStartAndEndTransaction("COMMIT");
+        runExecSqlToStartAndEndTransaction("ROLLBACK");
+    }
+    private void runExecSqlToStartAndEndTransaction(String str) throws InterruptedException {
+        createTableAndClearCache();
+        // disable WAL just so queries and updates use the same database connection
+        mDatabase.disableWriteAheadLogging();
+        mDatabase.execSQL("BEGIN transaction");
+        // even though mDatabase.beginTransaction() is not called to start transaction,
+        // mDatabase connection should now be in transaction as a result of
+        // mDatabase.execSQL("BEGIN transaction")
+        // but mDatabase.mLock should not be held by any thread
+        assertTrue(mDatabase.inTransaction());
+        assertFalse(mDatabase.isDbLockedByCurrentThread());
+        assertFalse(mDatabase.isDbLockedByOtherThreads());
+        assertTrue(mDatabase.amIInTransaction());
+        mDatabase.execSQL("INSERT into " + TEST_TABLE + " values(10, 999);");
+        assertTrue(mDatabase.inTransaction());
+        assertFalse(mDatabase.isDbLockedByCurrentThread());
+        assertFalse(mDatabase.isDbLockedByOtherThreads());
+        assertTrue(mDatabase.amIInTransaction());
+        Thread t = new Thread() {
+            @Override public void run() {
+                assertTrue(mDatabase.amIInTransaction());
+                assertEquals(999, DatabaseUtils.longForQuery(getDb(),
+                        "select j from " + TEST_TABLE + " WHERE i = 10", null));
+                assertTrue(getDb().inTransaction());
+                assertFalse(getDb().isDbLockedByCurrentThread());
+                assertFalse(getDb().isDbLockedByOtherThreads());
+                assertTrue(mDatabase.amIInTransaction());
+            }
+        };
+        t.start();
+        t.join();
+        assertTrue(mDatabase.amIInTransaction());
+        assertTrue(mDatabase.inTransaction());
+        assertFalse(mDatabase.isDbLockedByCurrentThread());
+        assertFalse(mDatabase.isDbLockedByOtherThreads());
+        mDatabase.execSQL(str);
+        assertFalse(mDatabase.amIInTransaction());
+        assertFalse(mDatabase.inTransaction());
+        assertFalse(mDatabase.isDbLockedByCurrentThread());
+        assertFalse(mDatabase.isDbLockedByOtherThreads());
+    }
+
+    /**
+     * test the following
+     * http://b/issue?id=2871037
+     *          Cursor cursor = db.query(...);
+     *          // with WAL enabled, the above uses a pooled database connection
+     *          db.beginTransaction()
+     *          try {
+     *            db.insert(......);
+     *            cursor.requery();
+     *            // since the cursor uses pooled database connection, the above requery
+     *            // will not return the results that were inserted above since the insert is
+     *            // done using main database connection AND the transaction is not committed yet.
+     *            // fix is to make the above cursor use the main database connection - and NOT
+     *            // the pooled database connection
+     *            db.setTransactionSuccessful()
+     *          } finally {
+     *            db.endTransaction()
+     *          }
+     *
+     * @throws InterruptedException
+     */
+    @SmallTest
+    public void testTransactionAndWalInterplay1() throws InterruptedException {
+        createTableAndClearCache();
+        mDatabase.execSQL("INSERT into " + TEST_TABLE + " values(10, 999);");
+        String sql = "select * from " + TEST_TABLE;
+        Cursor c = mDatabase.rawQuery(sql, null);
+        // should have 1 row in the table
+        assertEquals(1, c.getCount());
+        mDatabase.beginTransactionNonExclusive();
+        try {
+            mDatabase.execSQL("INSERT into " + TEST_TABLE + " values(100, 9909);");
+            assertEquals(2, DatabaseUtils.longForQuery(mDatabase,
+                    "select count(*) from " + TEST_TABLE, null));
+            // requery on the previously opened cursor
+            // cursor should now use the main database connection and see 2 rows
+            c.requery();
+            assertEquals(2, c.getCount());
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+        c.close();
+
+        // do the same test but now do the requery in a separate thread.
+        createTableAndClearCache();
+        mDatabase.execSQL("INSERT into " + TEST_TABLE + " values(10, 999);");
+        final Cursor c1 = mDatabase.rawQuery("select count(*) from " + TEST_TABLE, null);
+        // should have 1 row in the table
+        assertEquals(1, c1.getCount());
+        mDatabase.beginTransactionNonExclusive();
+        try {
+            mDatabase.execSQL("INSERT into " + TEST_TABLE + " values(100, 9909);");
+            assertEquals(2, DatabaseUtils.longForQuery(mDatabase,
+                    "select count(*) from " + TEST_TABLE, null));
+            // query in a different thread. that causes the cursor to use a pooled connection
+            // and since this thread hasn't committed its changes, the cursor should still see only
+            // 1 row
+            Thread t = new Thread() {
+                @Override public void run() {
+                    c1.requery();
+                    assertEquals(1, c1.getCount());
+                }
+            };
+            t.start();
+            t.join();
+            // should be 2 rows now - including the the row inserted above
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+        c1.close();
+    }
+
+    /**
+     * This test is same as {@link #testTransactionAndWalInterplay1()} except the following:
+     * instead of mDatabase.beginTransactionNonExclusive(), use execSQL("BEGIN transaction")
+     * and instead of mDatabase.endTransaction(), use execSQL("END");
+     */
+    @SmallTest
+    public void testTransactionAndWalInterplay2() throws InterruptedException {
+        createTableAndClearCache();
+        mDatabase.execSQL("INSERT into " + TEST_TABLE + " values(10, 999);");
+        String sql = "select * from " + TEST_TABLE;
+        Cursor c = mDatabase.rawQuery(sql, null);
+        // should have 1 row in the table
+        assertEquals(1, c.getCount());
+        mDatabase.execSQL("BEGIN transaction");
+        try {
+            mDatabase.execSQL("INSERT into " + TEST_TABLE + " values(100, 9909);");
+            assertEquals(2, DatabaseUtils.longForQuery(mDatabase,
+                    "select count(*) from " + TEST_TABLE, null));
+            // requery on the previously opened cursor
+            // cursor should now use the main database connection and see 2 rows
+            c.requery();
+            assertEquals(2, c.getCount());
+        } finally {
+            mDatabase.execSQL("commit;");
+        }
+        c.close();
+
+        // do the same test but now do the requery in a separate thread.
+        createTableAndClearCache();
+        mDatabase.execSQL("INSERT into " + TEST_TABLE + " values(10, 999);");
+        final Cursor c1 = mDatabase.rawQuery("select count(*) from " + TEST_TABLE, null);
+        // should have 1 row in the table
+        assertEquals(1, c1.getCount());
+        mDatabase.execSQL("BEGIN transaction");
+        try {
+            mDatabase.execSQL("INSERT into " + TEST_TABLE + " values(100, 9909);");
+            assertEquals(2, DatabaseUtils.longForQuery(mDatabase,
+                    "select count(*) from " + TEST_TABLE, null));
+            // query in a different thread. but since the transaction is started using
+            // execSQ() instead of beginTransaction(), cursor's query is considered part of
+            // the same ransaction - and hence it should see the above inserted row
+            Thread t = new Thread() {
+                @Override public void run() {
+                    c1.requery();
+                    assertEquals(1, c1.getCount());
+                }
+            };
+            t.start();
+            t.join();
+            // should be 2 rows now - including the the row inserted above
+        } finally {
+            mDatabase.execSQL("commit");
+        }
+        c1.close();
+    }
+
+    /**
+     * This test is same as {@link #testTransactionAndWalInterplay2()} except the following:
+     * instead of commiting the data, do rollback and make sure the data seen by the query
+     * within the transaction is now gone.
+     */
+    @SmallTest
+    public void testTransactionAndWalInterplay3() throws InterruptedException {
+        createTableAndClearCache();
+        mDatabase.execSQL("INSERT into " + TEST_TABLE + " values(10, 999);");
+        String sql = "select * from " + TEST_TABLE;
+        Cursor c = mDatabase.rawQuery(sql, null);
+        // should have 1 row in the table
+        assertEquals(1, c.getCount());
+        mDatabase.execSQL("BEGIN transaction");
+        try {
+            mDatabase.execSQL("INSERT into " + TEST_TABLE + " values(100, 9909);");
+            assertEquals(2, DatabaseUtils.longForQuery(mDatabase,
+                    "select count(*) from " + TEST_TABLE, null));
+            // requery on the previously opened cursor
+            // cursor should now use the main database connection and see 2 rows
+            c.requery();
+            assertEquals(2, c.getCount());
+        } finally {
+            // rollback the change
+            mDatabase.execSQL("rollback;");
+        }
+        // since the change is rolled back, do the same query again and should now find only 1 row
+        c.requery();
+        assertEquals(1, c.getCount());
+        assertEquals(1, DatabaseUtils.longForQuery(mDatabase,
+                "select count(*) from " + TEST_TABLE, null));
+        c.close();
     }
 }

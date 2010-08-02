@@ -192,6 +192,11 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     private SQLiteTransactionListener mTransactionListener;
 
+    /**
+     * this member is set if {@link #execSQL(String)} is used to begin and end transactions.
+     */
+    private boolean mTransactionUsingExecSql;
+
     /** Synchronize on this when accessing the database */
     private final ReentrantLock mLock = new ReentrantLock(true);
 
@@ -235,9 +240,6 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     /** Used by native code, do not rename. make it volatile, so it is thread-safe. */
     /* package */ volatile int mNativeHandle = 0;
-
-    /** Used to make temp table names unique */
-    /* package */ int mTempTableSequence = 0;
 
     /**
      * The size, in bytes, of a block on "/data". This corresponds to the Unix
@@ -621,9 +623,6 @@ public class SQLiteDatabase extends SQLiteClosable {
 
             // This thread didn't already have the lock, so begin a database
             // transaction now.
-            // STOPSHIP - uncomment the following 1 line
-            // if (exclusive) {
-            // STOPSHIP - remove the following 1 line
             if (exclusive && mConnectionPool == null) {
                 execSQL("BEGIN EXCLUSIVE;");
             } else {
@@ -740,7 +739,50 @@ public class SQLiteDatabase extends SQLiteClosable {
      * return true if there is a transaction pending
      */
     public boolean inTransaction() {
-        return mLock.getHoldCount() > 0;
+        return mLock.getHoldCount() > 0 || mTransactionUsingExecSql;
+    }
+
+    /* package */ synchronized void setTransactionUsingExecSqlFlag() {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.i(TAG, "found execSQL('begin transaction')");
+        }
+        mTransactionUsingExecSql = true;
+    }
+
+    /* package */ synchronized void resetTransactionUsingExecSqlFlag() {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            if (mTransactionUsingExecSql) {
+                Log.i(TAG, "found execSQL('commit or end or rollback')");
+            }
+        }
+        mTransactionUsingExecSql = false;
+    }
+
+    /**
+     * Returns true if the caller is considered part of the current transaction, if any.
+     * <p>
+     * Caller is part of the current transaction if either of the following is true
+     * <ol>
+     *   <li>If transaction is started by calling beginTransaction() methods AND if the caller is
+     *   in the same thread as the thread that started the transaction.
+     *   </li>
+     *   <li>If the transaction is started by calling {@link #execSQL(String)} like this:
+     *   execSQL("BEGIN transaction"). In this case, every thread in the process is considered
+     *   part of the current transaction.</li>
+     * </ol>
+     *
+     * @return true if the caller is considered part of the current transaction, if any.
+     */
+    /* package */ synchronized boolean amIInTransaction() {
+        // always do this test on the main database connection - NOT on pooled database connection
+        // since transactions always occur on the main database connections only.
+        SQLiteDatabase db = (isPooledConnection()) ? mParentConnObj : this;
+        boolean b = (!db.inTransaction()) ? false :
+                db.mTransactionUsingExecSql || db.mLock.isHeldByCurrentThread();
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.i(TAG, "amIinTransaction: " + b);
+        }
+        return b;
     }
 
     /**
@@ -932,6 +974,9 @@ public class SQLiteDatabase extends SQLiteClosable {
             DatabaseErrorHandler errorHandler, short connectionNum) {
         SQLiteDatabase db = new SQLiteDatabase(path, factory, flags, errorHandler, connectionNum);
         try {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.i(TAG, "opening the db : " + path);
+            }
             // Open the database.
             db.dbopen(path, flags);
             db.setLocale(Locale.getDefault());
@@ -1008,7 +1053,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         if (!isOpen()) {
             return; // already closed
         }
-        if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.i(TAG, "closing db: " + mPath + " (connection # " + mConnectionNum);
         }
         lock();
@@ -1020,6 +1065,10 @@ public class SQLiteDatabase extends SQLiteClosable {
             // close this database instance - regardless of its reference count value
             dbclose();
             if (mConnectionPool != null) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    assert mConnectionPool != null;
+                    Log.i(TAG, mConnectionPool.toString());
+                }
                 mConnectionPool.close();
             }
         } finally {
@@ -1586,7 +1635,6 @@ public class SQLiteDatabase extends SQLiteClosable {
     public long insertWithOnConflict(String table, String nullColumnHack,
             ContentValues initialValues, int conflictAlgorithm) {
         verifyDbIsOpen();
-        BlockGuard.getThreadPolicy().onWriteToDisk();
 
         // Measurements show most sql lengths <= 152
         StringBuilder sql = new StringBuilder(152);
@@ -1625,7 +1673,6 @@ public class SQLiteDatabase extends SQLiteClosable {
         sql.append(values);
         sql.append(");");
 
-        lock();
         SQLiteStatement statement = null;
         try {
             statement = compileStatement(sql.toString());
@@ -1649,7 +1696,6 @@ public class SQLiteDatabase extends SQLiteClosable {
             if (statement != null) {
                 statement.close();
             }
-            unlock();
         }
     }
 
@@ -1665,8 +1711,6 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public int delete(String table, String whereClause, String[] whereArgs) {
         verifyDbIsOpen();
-        BlockGuard.getThreadPolicy().onWriteToDisk();
-        lock();
         SQLiteStatement statement = null;
         try {
             statement = compileStatement("DELETE FROM " + table
@@ -1686,7 +1730,6 @@ public class SQLiteDatabase extends SQLiteClosable {
             if (statement != null) {
                 statement.close();
             }
-            unlock();
         }
     }
 
@@ -1717,7 +1760,6 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public int updateWithOnConflict(String table, ContentValues values,
             String whereClause, String[] whereArgs, int conflictAlgorithm) {
-        BlockGuard.getThreadPolicy().onWriteToDisk();
         if (values == null || values.size() == 0) {
             throw new IllegalArgumentException("Empty values");
         }
@@ -1746,7 +1788,6 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
 
         verifyDbIsOpen();
-        lock();
         SQLiteStatement statement = null;
         try {
             statement = compileStatement(sql.toString());
@@ -1781,7 +1822,6 @@ public class SQLiteDatabase extends SQLiteClosable {
             if (statement != null) {
                 statement.close();
             }
-            unlock();
         }
     }
 
@@ -1789,9 +1829,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * Execute a single SQL statement that is NOT a SELECT
      * or any other SQL statement that returns data.
      * <p>
-     * Use of this method is discouraged as it doesn't perform well when issuing the same SQL
-     * statement repeatedly (see {@link #compileStatement(String)} to prepare statements for
-     * repeated use), and it has no means to return any data (such as the number of affected rows).
+     * It has no means to return any data (such as the number of affected rows).
      * Instead, you're encouraged to use {@link #insert(String, String, ContentValues)},
      * {@link #update(String, ContentValues, String, String[])}, et al, when possible.
      * </p>
@@ -1807,35 +1845,17 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @throws SQLException If the SQL string is invalid for some reason
      */
     public void execSQL(String sql) throws SQLException {
-        sql = sql.trim();
-        String prefix = sql.substring(0, 6);
-        if (prefix.equalsIgnoreCase("ATTACH")) {
+        int stmtType = DatabaseUtils.getSqlStatementType(sql);
+        if (stmtType == DatabaseUtils.STATEMENT_ATTACH) {
             disableWriteAheadLogging();
         }
-        verifyDbIsOpen();
-        BlockGuard.getThreadPolicy().onWriteToDisk();
         long timeStart = SystemClock.uptimeMillis();
-        lock();
         logTimeStat(mLastSqlStatement, timeStart, GET_LOCK_LOG_PREFIX);
-        SQLiteStatement stmt = null;
-        try {
-            closePendingStatements();
-            stmt = compileStatement(sql);
-            stmt.execute();
-        } catch (SQLiteDatabaseCorruptException e) {
-            onCorruption();
-            throw e;
-        } finally {
-            if (stmt != null) {
-                stmt.close();
-            }
-            unlock();
-        }
+        executeSql(sql, null);
 
         // Log commit statements along with the most recently executed
-        // SQL statement for disambiguation.  Note that instance
-        // equality to COMMIT_SQL is safe here.
-        if (sql == COMMIT_SQL) {
+        // SQL statement for disambiguation.
+        if (stmtType == DatabaseUtils.STATEMENT_COMMIT) {
             logTimeStat(mLastSqlStatement, timeStart, COMMIT_SQL);
         } else {
             logTimeStat(sql, timeStart, null);
@@ -1886,13 +1906,15 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @throws SQLException If the SQL string is invalid for some reason
      */
     public void execSQL(String sql, Object[] bindArgs) throws SQLException {
-        BlockGuard.getThreadPolicy().onWriteToDisk();
         if (bindArgs == null) {
             throw new IllegalArgumentException("Empty bindArgs");
         }
+        executeSql(sql, bindArgs);
+    }
+
+    private void executeSql(String sql, Object[] bindArgs) throws SQLException {
         verifyDbIsOpen();
         long timeStart = SystemClock.uptimeMillis();
-        lock();
         SQLiteStatement statement = null;
         try {
             statement = compileStatement(sql);
@@ -1902,7 +1924,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                     DatabaseUtils.bindObjectToProgram(statement, i + 1, bindArgs[i]);
                 }
             }
-            statement.executeUpdateDelete();
+            statement.execute();
         } catch (SQLiteDatabaseCorruptException e) {
             onCorruption();
             throw e;
@@ -1910,7 +1932,6 @@ public class SQLiteDatabase extends SQLiteClosable {
             if (statement != null) {
                 statement.close();
             }
-            unlock();
         }
         logTimeStat(sql, timeStart);
     }
@@ -2142,7 +2163,8 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
     }
 
-    private void deallocCachedSqlStatements() {
+    /** package-level access for testing purposes */
+    /* package */ void deallocCachedSqlStatements() {
         synchronized (mCompiledQueries) {
             for (SQLiteCompiledSql compiledSql : mCompiledQueries.values()) {
                 compiledSql.releaseSqlStatement();
@@ -2220,11 +2242,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
     }
 
-    /**
-     * public visibility only for testing. otherwise, package visibility is sufficient
-     * @hide
-     */
-    public void closePendingStatements() {
+    /* package */ void closePendingStatements() {
         if (!isOpen()) {
             // since this database is already closed, no need to finalize anything.
             mClosedStatementIds.clear();
@@ -2246,9 +2264,8 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     /**
      * for testing only
-     * @hide
      */
-    public ArrayList<Integer> getQueuedUpStmtList() {
+    /* package */ ArrayList<Integer> getQueuedUpStmtList() {
         return mClosedStatementIds;
     }
 
@@ -2303,7 +2320,10 @@ public class SQLiteDatabase extends SQLiteClosable {
         // make sure this database has NO attached databases because sqlite's write-ahead-logging
         // doesn't work for databases with attached databases
         if (getAttachedDbs().size() > 1) {
-            Log.i(TAG, "this database: " + mPath + " has attached databases. can't  enable WAL.");
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG,
+                        "this database: " + mPath + " has attached databases. can't  enable WAL.");
+            }
             return false;
         }
         if (mConnectionPool == null) {
@@ -2331,7 +2351,8 @@ public class SQLiteDatabase extends SQLiteClosable {
     /* package */ SQLiteDatabase getDatabaseHandle(String sql) {
         if (isPooledConnection()) {
             // this is a pooled database connection
-            if (isOpen()) {
+            // use it if it is open AND if I am not currently part of a transaction
+            if (isOpen() && !amIInTransaction()) {
                 // TODO: use another connection from the pool
                 // if this connection is currently in use by some other thread
                 // AND if there are free connections in the pool
@@ -2394,22 +2415,17 @@ public class SQLiteDatabase extends SQLiteClosable {
         if (isPooledConnection()) {
             throw new IllegalStateException("incorrect database connection handle");
         }
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            // this method shoudl never be called with anything other than SELECT
-            if (sql.substring(0, 6).equalsIgnoreCase("SELECT")) {
-                throw new IllegalStateException("unexpected SQL statement: " + sql);
-            }
-        }
 
         // use the current connection handle if
-        // 1. if this thread is in a transaction
+        // 1. if the caller is part of the ongoing transaction, if any
         // 2. OR, if there is NO connection handle pool setup
-        if ((inTransaction() && mLock.isHeldByCurrentThread()) || mConnectionPool == null) {
+        if (amIInTransaction() || mConnectionPool == null) {
             return this;
         } else {
             // get a connection handle from the pool
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 assert mConnectionPool != null;
+                Log.i(TAG, mConnectionPool.toString());
             }
             return mConnectionPool.get(sql);
         }

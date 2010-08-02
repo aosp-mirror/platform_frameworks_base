@@ -16,6 +16,7 @@
 
 package android.database.sqlite;
 
+import android.database.DatabaseUtils;
 import android.util.Log;
 import android.util.Pair;
 
@@ -30,11 +31,6 @@ import java.util.ArrayList;
 public abstract class SQLiteProgram extends SQLiteClosable {
 
     private static final String TAG = "SQLiteProgram";
-
-    /** the type of sql statement being processed by this object */
-    /* package */ static final int SELECT_STMT = 1;
-    private static final int UPDATE_STMT = 2;
-    private static final int OTHER_STMT = 3;
 
     /** The database this program is compiled against.
      * @deprecated do not use this
@@ -88,7 +84,9 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * <p>
      * It is protected (in multi-threaded environment) by {@link SQLiteProgram}.this
      */
-    private ArrayList<Pair<Integer, Object>> bindArgs = null;
+    private ArrayList<Pair<Integer, Object>> mBindArgs = null;
+
+    /* package */ final int mStatementType;
 
     /* package */ SQLiteProgram(SQLiteDatabase db, String sql) {
         this(db, sql, true);
@@ -96,6 +94,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
 
     /* package */ SQLiteProgram(SQLiteDatabase db, String sql, boolean compileFlag) {
         mSql = sql.trim();
+        mStatementType = DatabaseUtils.getSqlStatementType(mSql);
         db.acquireReference();
         db.addSQLiteClosable(this);
         mDatabase = db;
@@ -107,7 +106,8 @@ public abstract class SQLiteProgram extends SQLiteClosable {
 
     private void compileSql() {
         // only cache CRUD statements
-        if (getSqlStatementType(mSql) == OTHER_STMT) {
+        if (mStatementType != DatabaseUtils.STATEMENT_SELECT &&
+                mStatementType != DatabaseUtils.STATEMENT_UPDATE) {
             mCompiledSql = new SQLiteCompiledSql(mDatabase, mSql);
             nStatement = mCompiledSql.nStatement;
             // since it is not in the cache, no need to acquire() it.
@@ -148,22 +148,6 @@ public abstract class SQLiteProgram extends SQLiteClosable {
             }
         }
         nStatement = mCompiledSql.nStatement;
-    }
-
-    /* package */ int getSqlStatementType(String sql) {
-        if (mSql.length() < 6) {
-            return OTHER_STMT;
-        }
-        String prefixSql = mSql.substring(0, 6);
-        if (prefixSql.equalsIgnoreCase("SELECT")) {
-            return SELECT_STMT;
-        } else if (prefixSql.equalsIgnoreCase("INSERT") ||
-                prefixSql.equalsIgnoreCase("UPDATE") ||
-                prefixSql.equalsIgnoreCase("REPLAC") ||
-                prefixSql.equalsIgnoreCase("DELETE")) {
-            return UPDATE_STMT;
-        }
-        return OTHER_STMT;
     }
 
     @Override
@@ -361,7 +345,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      */
     public void clearBindings() {
         synchronized (this) {
-            bindArgs = null;
+            mBindArgs = null;
             if (this.nStatement == 0) {
                 return;
             }
@@ -380,7 +364,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      */
     public void close() {
         synchronized (this) {
-            bindArgs = null;
+            mBindArgs = null;
             if (nHandle == 0 || !mDatabase.isOpen()) {
                 return;
             }
@@ -389,19 +373,19 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     }
 
     private synchronized void addToBindArgs(int index, Object value) {
-        if (bindArgs == null) {
-            bindArgs = new ArrayList<Pair<Integer, Object>>();
+        if (mBindArgs == null) {
+            mBindArgs = new ArrayList<Pair<Integer, Object>>();
         }
-        bindArgs.add(new Pair<Integer, Object>(index, value));
+        mBindArgs.add(new Pair<Integer, Object>(index, value));
     }
 
     /* package */ synchronized void compileAndbindAllArgs() {
         assert nStatement == 0;
         compileSql();
-        if (bindArgs == null) {
+        if (mBindArgs == null) {
             return;
         }
-        for (Pair<Integer, Object> p : bindArgs) {
+        for (Pair<Integer, Object> p : mBindArgs) {
             if (p.second == null) {
                 native_bind_null(p.first);
             } else if (p.second instanceof Long) {
