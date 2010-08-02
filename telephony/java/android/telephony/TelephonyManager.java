@@ -665,6 +665,25 @@ public class TelephonyManager {
     }
 
     /**
+     * Returns the complete voice mail number. Return null if it is unavailable.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#CALL_PRIVILEGED CALL_PRIVILEGED}
+     *
+     * @hide
+     */
+    public String getCompleteVoiceMailNumber() {
+        try {
+            return getSubscriberInfo().getCompleteVoiceMailNumber();
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return null;
+        }
+    }
+
+    /**
      * Returns the voice mail count. Return 0 if unavailable.
      * <p>
      * Requires Permission:

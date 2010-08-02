@@ -82,6 +82,13 @@ public class PhoneSubInfoProxy extends IPhoneSubInfo.Stub {
     }
 
     /**
+     * Retrieves the complete voice mail number.
+     */
+    public String getCompleteVoiceMailNumber() {
+        return mPhoneSubInfo.getCompleteVoiceMailNumber();
+    }
+
+    /**
      * Retrieves the alpha identifier associated with the voice mail number.
      */
     public String getVoiceMailAlphaTag() {

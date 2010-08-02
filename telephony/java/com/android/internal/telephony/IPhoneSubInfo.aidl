@@ -59,6 +59,11 @@ interface IPhoneSubInfo {
     String getVoiceMailNumber();
 
     /**
+     * Retrieves the complete voice mail number.
+     */
+    String getCompleteVoiceMailNumber();
+
+    /**
      * Retrieves the alpha identifier associated with the voice mail number.
      */
     String getVoiceMailAlphaTag();
