@@ -126,9 +126,11 @@ private:
 
     // The still camera may not support the demanded video width and height.
     // We look for the supported picture sizes from the still camera and
-    // choose the size with either dimensions higher than the corresponding video
-    // dimensions. The still picture will be cropped to get the video frame.
-    void setPictureSizeToClosestSupported(int32_t width, int32_t height);
+    // choose the smallest one with either dimensions higher than the corresponding
+    // video dimensions. The still picture will be cropped to get the video frame.
+    // The function returns true if the camera supports picture sizes greater than
+    // or equal to the passed in width and height, and false otherwise.
+    bool setPictureSizeToClosestSupported(int32_t width, int32_t height);
 
     // Computes the offset of the rectangle from where to start cropping the
     // still image into the video frame. We choose the center of the image to be

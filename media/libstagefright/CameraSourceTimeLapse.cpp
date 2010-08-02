@@ -30,6 +30,7 @@
 #include <camera/CameraParameters.h>
 #include <ui/Rect.h>
 #include <utils/String8.h>
+#include <utils/Vector.h>
 #include "OMX_Video.h"
 
 namespace android {
@@ -79,7 +80,7 @@ CameraSourceTimeLapse::CameraSourceTimeLapse(const sp<Camera> &camera,
     mVideoWidth = width;
     mVideoHeight = height;
     if (mUseStillCameraForTimeLapse) {
-        setPictureSizeToClosestSupported(width, height);
+        CHECK(setPictureSizeToClosestSupported(width, height));
         mNeedCropping = computeCropRectangleOffset();
         mMeta->setInt32(kKeyWidth, width);
         mMeta->setInt32(kKeyHeight, height);
@@ -89,11 +90,31 @@ CameraSourceTimeLapse::CameraSourceTimeLapse(const sp<Camera> &camera,
 CameraSourceTimeLapse::~CameraSourceTimeLapse() {
 }
 
-void CameraSourceTimeLapse::setPictureSizeToClosestSupported(int32_t width, int32_t height) {
-    // TODO: Currently fixed to the highest resolution.
-    // Need to poll the camera and set accordingly.
-    mPictureWidth = 2048;
-    mPictureHeight = 1536;
+bool CameraSourceTimeLapse::setPictureSizeToClosestSupported(int32_t width, int32_t height) {
+    int64_t token = IPCThreadState::self()->clearCallingIdentity();
+    String8 s = mCamera->getParameters();
+    IPCThreadState::self()->restoreCallingIdentity(token);
+
+    CameraParameters params(s);
+    Vector<Size> supportedSizes;
+    params.getSupportedPictureSizes(supportedSizes);
+
+    int32_t minPictureSize = INT_MAX;
+    for (uint32_t i = 0; i < supportedSizes.size(); ++i) {
+        int32_t pictureWidth = supportedSizes[i].width;
+        int32_t pictureHeight = supportedSizes[i].height;
+
+        if ((pictureWidth >= width) && (pictureHeight >= height)) {
+            int32_t pictureSize = pictureWidth*pictureHeight;
+            if (pictureSize < minPictureSize) {
+                minPictureSize = pictureSize;
+                mPictureWidth = pictureWidth;
+                mPictureHeight = pictureHeight;
+            }
+        }
+    }
+    LOGV("Picture size = (%d, %d)", mPictureWidth, mPictureHeight);
+    return (minPictureSize != INT_MAX);
 }
 
 bool CameraSourceTimeLapse::computeCropRectangleOffset() {
