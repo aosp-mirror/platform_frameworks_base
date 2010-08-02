@@ -30,6 +30,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.view.ActionMode;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -392,7 +393,12 @@ public class ActionBarImpl extends ActionBar {
             mMenu = new MenuBuilder(mActionView.getContext());
             mMenu.setCallback(this);
         }
-        
+
+        @Override
+        public MenuInflater getMenuInflater() {
+            return new MenuInflater(mActivity);
+        }
+
         @Override
         public Menu getMenu() {
             return mMenu;

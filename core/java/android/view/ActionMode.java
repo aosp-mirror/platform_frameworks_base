@@ -118,6 +118,11 @@ public abstract class ActionMode {
     public abstract View getCustomView();
 
     /**
+     * Returns a {@link MenuInflater} with the ActionMode's context.
+     */
+    public abstract MenuInflater getMenuInflater();
+
+    /**
      * Callback interface for action modes. Supplied to
      * {@link View#startActionMode(Callback)}, a Callback
      * configures and handles events raised by a user's interaction with an action mode.

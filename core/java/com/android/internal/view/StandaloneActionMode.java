@@ -23,6 +23,7 @@ import com.android.internal.widget.ActionBarContextView;
 import android.content.Context;
 import android.view.ActionMode;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -107,6 +108,11 @@ public class StandaloneActionMode extends ActionMode implements MenuBuilder.Call
     @Override
     public View getCustomView() {
         return mCustomView != null ? mCustomView.get() : null;
+    }
+
+    @Override
+    public MenuInflater getMenuInflater() {
+        return new MenuInflater(mContext);
     }
 
     public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
