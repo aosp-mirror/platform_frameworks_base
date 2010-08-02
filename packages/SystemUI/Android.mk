@@ -10,4 +10,6 @@ LOCAL_JAVA_LIBRARIES := services
 LOCAL_PACKAGE_NAME := SystemUI
 LOCAL_CERTIFICATE := platform
 
+LOCAL_PROGUARD_FLAGS := -include $(LOCAL_PATH)/proguard.flags
+
 include $(BUILD_PACKAGE)
