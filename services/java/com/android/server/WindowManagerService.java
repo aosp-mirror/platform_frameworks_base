@@ -5514,7 +5514,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 throw new SecurityException(
                         "Injecting to another application requires INJECT_EVENTS permission");
             case InputManager.INPUT_EVENT_INJECTION_SUCCEEDED:
-                Slog.v(TAG, "Input event injection succeeded.");
+                //Slog.v(TAG, "Input event injection succeeded.");
                 return true;
             case InputManager.INPUT_EVENT_INJECTION_TIMED_OUT:
                 Slog.w(TAG, "Input event injection timed out.");
