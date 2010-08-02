@@ -587,7 +587,7 @@ public class PackageParser {
      * location from the apk location at the given file path.
      * @param packageFilePath file location of the apk
      * @param flags Special parse flags
-     * @return PackageLite object with package information.
+     * @return PackageLite object with package information or null on failure.
      */
     public static PackageLite parsePackageLite(String packageFilePath, int flags) {
         XmlResourceParser parser = null;
