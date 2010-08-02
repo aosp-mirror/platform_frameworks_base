@@ -55,10 +55,10 @@ static const MtpOperationCode kSupportedOperationCodes[] = {
 //    MTP_OPERATION_SELF_TEST,
 //    MTP_OPERATION_SET_OBJECT_PROTECTION,
 //    MTP_OPERATION_POWER_DOWN,
-    MTP_OPERATION_GET_DEVICE_PROP_DESC,
-    MTP_OPERATION_GET_DEVICE_PROP_VALUE,
-    MTP_OPERATION_SET_DEVICE_PROP_VALUE,
-    MTP_OPERATION_RESET_DEVICE_PROP_VALUE,
+//    MTP_OPERATION_GET_DEVICE_PROP_DESC,
+//    MTP_OPERATION_GET_DEVICE_PROP_VALUE,
+//    MTP_OPERATION_SET_DEVICE_PROP_VALUE,
+//    MTP_OPERATION_RESET_DEVICE_PROP_VALUE,
 //    MTP_OPERATION_TERMINATE_OPEN_CAPTURE,
 //    MTP_OPERATION_MOVE_OBJECT,
 //    MTP_OPERATION_COPY_OBJECT,
@@ -67,7 +67,7 @@ static const MtpOperationCode kSupportedOperationCodes[] = {
     MTP_OPERATION_GET_OBJECT_PROPS_SUPPORTED,
 //    MTP_OPERATION_GET_OBJECT_PROP_DESC,
     MTP_OPERATION_GET_OBJECT_PROP_VALUE,
-    MTP_OPERATION_SET_OBJECT_PROP_VALUE,
+//    MTP_OPERATION_SET_OBJECT_PROP_VALUE,
 //    MTP_OPERATION_GET_OBJECT_REFERENCES,
 //    MTP_OPERATION_SET_OBJECT_REFERENCES,
 //    MTP_OPERATION_SKIP,
@@ -308,6 +308,9 @@ bool MtpServer::handleRequest() {
         case MTP_OPERATION_GET_OBJECT_HANDLES:
             response = doGetObjectHandles();
             break;
+        case MTP_OPERATION_GET_NUM_OBJECTS:
+            response = doGetNumObjects();
+            break;
         case MTP_OPERATION_GET_OBJECT_PROP_VALUE:
             response = doGetObjectPropValue();
             break;
@@ -452,6 +455,26 @@ MtpResponseCode MtpServer::doGetObjectHandles() {
     mData.putAUInt32(handles);
     delete handles;
     return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MtpServer::doGetNumObjects() {
+    if (!mSessionOpen)
+        return MTP_RESPONSE_SESSION_NOT_OPEN;
+    MtpStorageID storageID = mRequest.getParameter(1);      // 0xFFFFFFFF for all storage
+    MtpObjectFormat format = mRequest.getParameter(2);      // 0 for all formats
+    MtpObjectHandle parent = mRequest.getParameter(3);      // 0xFFFFFFFF for objects with no parent
+                                                            // 0x00000000 for all objects?
+    if (parent == 0xFFFFFFFF)
+        parent = 0;
+
+    int count = mDatabase->getNumObjects(storageID, format, parent);
+    if (count >= 0) {
+        mResponse.setParameter(1, count);
+        return MTP_RESPONSE_OK;
+    } else {
+        mResponse.setParameter(1, 0);
+        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
+    }
 }
 
 MtpResponseCode MtpServer::doGetObjectPropValue() {

@@ -47,6 +47,10 @@ public:
                                             MtpObjectFormat format,
                                             MtpObjectHandle parent) = 0;
 
+    virtual int                     getNumObjects(MtpStorageID storageID,
+                                            MtpObjectFormat format,
+                                            MtpObjectHandle parent) = 0;
+
     virtual MtpResponseCode         getObjectProperty(MtpObjectHandle handle,
                                             MtpObjectProperty property,
                                             MtpDataPacket& packet) = 0;

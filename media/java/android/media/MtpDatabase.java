@@ -164,6 +164,33 @@ public class MtpDatabase {
         return null;
     }
 
+    private int getNumObjects(int storageID, int format, int parent) {
+        // we can ignore storageID until we support multiple storages
+        Log.d(TAG, "getObjectList parent: " + parent);
+        Cursor c = null;
+        try {
+            if (format != 0) {
+                c = mMediaProvider.query(mObjectsUri, ID_PROJECTION,
+                            PARENT_FORMAT_WHERE,
+                            new String[] { Integer.toString(parent), Integer.toString(format) },
+                             null);
+            } else {
+                c = mMediaProvider.query(mObjectsUri, ID_PROJECTION,
+                            PARENT_WHERE, new String[] { Integer.toString(parent) }, null);
+            }
+            if (c != null) {
+                return c.getCount();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in getNumObjects", e);
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+        }
+        return -1;
+    }
+
     private int getObjectProperty(int handle, int property,
                             long[] outIntValue, char[] outStringValue) {
         Log.d(TAG, "getObjectProperty: " + property);

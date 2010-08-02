@@ -39,6 +39,7 @@ using namespace android;
 static jmethodID method_beginSendObject;
 static jmethodID method_endSendObject;
 static jmethodID method_getObjectList;
+static jmethodID method_getNumObjects;
 static jmethodID method_getObjectProperty;
 static jmethodID method_getObjectInfo;
 static jmethodID method_getObjectFilePath;
@@ -79,6 +80,10 @@ public:
     virtual MtpObjectHandleList*    getObjectList(MtpStorageID storageID,
                                     MtpObjectFormat format,
                                     MtpObjectHandle parent);
+
+    virtual int                     getNumObjects(MtpStorageID storageID,
+                                            MtpObjectFormat format,
+                                            MtpObjectHandle parent);
 
     virtual MtpResponseCode         getObjectProperty(MtpObjectHandle handle,
                                             MtpObjectProperty property,
@@ -164,13 +169,18 @@ MtpObjectHandleList* MyMtpDatabase::getObjectList(MtpStorageID storageID,
     MtpObjectHandleList* list = new MtpObjectHandleList();
     jint* handles = env->GetIntArrayElements(array, 0);
     jsize length = env->GetArrayLength(array);
-LOGD("getObjectList length: %d", length);
-    for (int i = 0; i < length; i++) {
-LOGD("push: %d", handles[i]);
+    for (int i = 0; i < length; i++)
         list->push(handles[i]);
-    }
    env->ReleaseIntArrayElements(array, handles, 0);
    return list;
+}
+
+int MyMtpDatabase::getNumObjects(MtpStorageID storageID,
+                                MtpObjectFormat format,
+                                MtpObjectHandle parent) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    return env->CallIntMethod(mDatabase, method_getNumObjects,
+                (jint)storageID, (jint)format, (jint)parent);
 }
 
 MtpResponseCode MyMtpDatabase::getObjectProperty(MtpObjectHandle handle,
@@ -405,6 +415,11 @@ int register_android_media_MtpDatabase(JNIEnv *env)
     method_getObjectList = env->GetMethodID(clazz, "getObjectList", "(III)[I");
     if (method_getObjectList == NULL) {
         LOGE("Can't find getObjectList");
+        return -1;
+    }
+    method_getNumObjects = env->GetMethodID(clazz, "getNumObjects", "(III)I");
+    if (method_getNumObjects == NULL) {
+        LOGE("Can't find getNumObjects");
         return -1;
     }
     method_getObjectProperty = env->GetMethodID(clazz, "getObjectProperty", "(II[J[C)I");
