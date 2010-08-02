@@ -446,6 +446,15 @@ public final class ContentValues implements Parcelable {
         return mValues.entrySet();
     }
 
+    /**
+     * Returns a set of all of the keys
+     *
+     * @return a set of all of the keys
+     */
+    public Set<String> keySet() {
+        return mValues.keySet();
+    }
+
     public static final Parcelable.Creator<ContentValues> CREATOR =
             new Parcelable.Creator<ContentValues>() {
         @SuppressWarnings({"deprecation", "unchecked"})
