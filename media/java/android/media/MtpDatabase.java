@@ -271,7 +271,7 @@ public class MtpDatabase {
         return false;
     }
 
-    private boolean getObjectFilePath(int handle, char[] outFilePath, long[] outFileLength) {
+    private int getObjectFilePath(int handle, char[] outFilePath, long[] outFileLength) {
         Log.d(TAG, "getObjectFilePath: " + handle);
         Cursor c = null;
         try {
@@ -282,26 +282,32 @@ public class MtpDatabase {
                 path.getChars(0, path.length(), outFilePath, 0);
                 outFilePath[path.length()] = 0;
                 outFileLength[0] = c.getLong(2);
-                return true;
+                return MTP_RESPONSE_OK;
+            } else {
+                return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in getObjectFilePath", e);
+            return MTP_RESPONSE_GENERAL_ERROR;
         } finally {
             if (c != null) {
                 c.close();
             }
         }
-        return false;
     }
 
-    private boolean deleteFile(int handle) {
+    private int deleteFile(int handle) {
         Log.d(TAG, "deleteFile: " + handle);
         Uri uri = MtpObjects.getContentUri(mVolumeName, handle);
         try {
-            return (mMediaProvider.delete(uri, null, null) == 1);
+            if (mMediaProvider.delete(uri, null, null) == 1) {
+                return MTP_RESPONSE_OK;
+            } else {
+                return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in deleteFile", e);
-            return false;
+            return MTP_RESPONSE_GENERAL_ERROR;
         }
     }
 

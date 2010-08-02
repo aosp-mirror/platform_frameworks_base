@@ -470,10 +470,11 @@ MtpResponseCode MtpServer::doGetObject() {
     MtpObjectHandle handle = mRequest.getParameter(1);
     MtpString pathBuf;
     int64_t fileLength;
-    if (!mDatabase->getObjectFilePath(handle, pathBuf, fileLength))
-        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
-    const char* filePath = (const char *)pathBuf;
+    int result = mDatabase->getObjectFilePath(handle, pathBuf, fileLength);
+    if (result != MTP_RESPONSE_OK)
+        return result;
 
+    const char* filePath = (const char *)pathBuf;
     mtp_file_range  mfr;
     mfr.fd = open(filePath, O_RDONLY);
     if (mfr.fd < 0) {
@@ -513,8 +514,9 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
         parent = 0;
     } else {
         int64_t dummy;
-        if (!mDatabase->getObjectFilePath(parent, path, dummy))
-            return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
+        int result = mDatabase->getObjectFilePath(parent, path, dummy);
+        if (result != MTP_RESPONSE_OK)
+            return result;
     }
 
     // read only the fields we need
@@ -547,14 +549,11 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
         path += "/";
     path += (const char *)name;
 
-    mDatabase->beginTransaction();
     MtpObjectHandle handle = mDatabase->beginSendObject((const char*)path,
             format, parent, storageID, mSendObjectFileSize, modifiedTime);
     if (handle == kInvalidObjectHandle) {
-        mDatabase->rollbackTransaction();
         return MTP_RESPONSE_GENERAL_ERROR;
     }
-    mDatabase->commitTransaction();
 
   if (format == MTP_FORMAT_ASSOCIATION) {
         mode_t mask = umask(0);
@@ -641,17 +640,16 @@ MtpResponseCode MtpServer::doDeleteObject() {
 
     MtpString filePath;
     int64_t fileLength;
-    if (!mDatabase->getObjectFilePath(handle, filePath, fileLength))
-        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
-
-    LOGV("deleting %s", (const char *)filePath);
-    // one of these should work
-    rmdir((const char *)filePath);
-    unlink((const char *)filePath);
-
-    mDatabase->deleteFile(handle);
-
-    return MTP_RESPONSE_OK;
+    int result = mDatabase->getObjectFilePath(handle, filePath, fileLength);
+    if (result == MTP_RESPONSE_OK) {
+        LOGV("deleting %s", (const char *)filePath);
+        // one of these should work
+        rmdir((const char *)filePath);
+        unlink((const char *)filePath);
+        return mDatabase->deleteFile(handle);
+    } else {
+        return result;
+    }
 }
 
 MtpResponseCode MtpServer::doGetObjectPropDesc() {
