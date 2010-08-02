@@ -124,11 +124,13 @@ public class ActionBarContextView extends ViewGroup {
             }
             if (mSubtitle != null) {
                 mSubtitleView.setText(mSubtitle);
+                mSubtitleView.setVisibility(VISIBLE);
             }
             addView(mTitleLayout);
         } else {
             mTitleView.setText(mTitle);
             mSubtitleView.setText(mSubtitle);
+            mSubtitleView.setVisibility(mSubtitle != null ? VISIBLE : GONE);
             if (mTitleLayout.getParent() == null) {
                 addView(mTitleLayout);
             }

@@ -33,8 +33,12 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.LongSparseArray;
 import android.util.SparseBooleanArray;
+import android.view.ActionMode;
 import android.view.FocusFinder;
+import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.View;
@@ -88,6 +92,11 @@ public class ListView extends AbsListView {
      * The list allows multiple choices
      */
     public static final int CHOICE_MODE_MULTIPLE = 2;
+
+    /**
+     * The list allows multiple choices in a modal selection mode
+     */
+    public static final int CHOICE_MODE_MULTIPLE_MODAL = 3;
 
     /**
      * When arrow scrolling, ListView will never scroll more than this factor
@@ -147,7 +156,12 @@ public class ListView extends AbsListView {
 
     // Keeps focused children visible through resizes
     private FocusSelector mFocusSelector;
-    
+
+    // Controls CHOICE_MODE_MULTIPLE_MODAL. null when inactive.
+    private ActionMode mChoiceActionMode;
+    private MultiChoiceModeWrapper mMultiChoiceModeCallback;
+    private int mCheckedItemCount;
+
     public ListView(Context context) {
         this(context, null);
     }
@@ -3365,6 +3379,10 @@ public class ListView extends AbsListView {
      */
     public void setChoiceMode(int choiceMode) {
         mChoiceMode = choiceMode;
+        if (mChoiceActionMode != null) {
+            mChoiceActionMode.finish();
+            mChoiceActionMode = null;
+        }
         if (mChoiceMode != CHOICE_MODE_NONE) {
             if (mCheckStates == null) {
                 mCheckStates = new SparseBooleanArray();
@@ -3372,7 +3390,45 @@ public class ListView extends AbsListView {
             if (mCheckedIdStates == null && mAdapter != null && mAdapter.hasStableIds()) {
                 mCheckedIdStates = new LongSparseArray<Boolean>();
             }
+            // Modal multi-choice mode only has choices when the mode is active. Clear them.
+            if (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {
+                clearChoices();
+                setLongClickable(true);
+            }
         }
+    }
+
+    /**
+     * Set a {@link MultiChoiceModeListener} that will manage the lifecycle of the
+     * selection {@link ActionMode}. Only used when the choice mode is set to
+     * {@link #CHOICE_MODE_MULTIPLE_MODAL}.
+     *
+     * @param listener Listener that will manage the selection mode
+     *
+     * @see #setChoiceMode(int)
+     */
+    public void setMultiChoiceModeListener(MultiChoiceModeListener listener) {
+        if (mMultiChoiceModeCallback == null) {
+            mMultiChoiceModeCallback = new MultiChoiceModeWrapper();
+        }
+        mMultiChoiceModeCallback.setWrapped(listener);
+    }
+
+    @Override
+    boolean performLongPress(final View child,
+            final int longPressPosition, final long longPressId) {
+        boolean handled = false;
+        if (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {
+            handled = true;
+            if (mChoiceActionMode == null) {
+                mChoiceActionMode = startActionMode(mMultiChoiceModeCallback);
+                setItemChecked(longPressPosition, true);
+            }
+            // TODO Should we select the long pressed item if we were already in
+            // selection mode? (i.e. treat it like an item click?)
+            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        }
+        return handled | super.performLongPress(child, longPressPosition, longPressId);
     }
 
     @Override
@@ -3382,7 +3438,8 @@ public class ListView extends AbsListView {
         if (mChoiceMode != CHOICE_MODE_NONE) {
             handled = true;
 
-            if (mChoiceMode == CHOICE_MODE_MULTIPLE) {
+            if (mChoiceMode == CHOICE_MODE_MULTIPLE ||
+                    (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL && mChoiceActionMode != null)) {
                 boolean newValue = !mCheckStates.get(position, false);
                 mCheckStates.put(position, newValue);
                 if (mCheckedIdStates != null && mAdapter.hasStableIds()) {
@@ -3392,7 +3449,16 @@ public class ListView extends AbsListView {
                         mCheckedIdStates.delete(mAdapter.getItemId(position));
                     }
                 }
-            } else {
+                if (newValue) {
+                    mCheckedItemCount++;
+                } else {
+                    mCheckedItemCount--;
+                }
+                if (mChoiceActionMode != null) {
+                    mMultiChoiceModeCallback.onItemCheckedStateChanged(mChoiceActionMode,
+                            position, id, newValue);
+                }
+            } else if (mChoiceMode == CHOICE_MODE_SINGLE) {
                 boolean newValue = !mCheckStates.get(position, false);
                 if (newValue) {
                     mCheckStates.clear();
@@ -3401,7 +3467,10 @@ public class ListView extends AbsListView {
                         mCheckedIdStates.clear();
                         mCheckedIdStates.put(mAdapter.getItemId(position), Boolean.TRUE);
                     }
-                } 
+                    mCheckedItemCount = 1;
+                } else if (mCheckStates.size() == 0 || !mCheckStates.valueAt(0)) {
+                    mCheckedItemCount = 0;
+                }
             }
 
             mDataChanged = true;
@@ -3427,7 +3496,13 @@ public class ListView extends AbsListView {
             return;
         }
 
-        if (mChoiceMode == CHOICE_MODE_MULTIPLE) {
+        // Start selection mode if needed. We don't need to if we're unchecking something.
+        if (value && mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL && mChoiceActionMode == null) {
+            mChoiceActionMode = startActionMode(mMultiChoiceModeCallback);
+        }
+
+        if (mChoiceMode == CHOICE_MODE_MULTIPLE || mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {
+            boolean oldValue = mCheckStates.get(position);
             mCheckStates.put(position, value);
             if (mCheckedIdStates != null && mAdapter.hasStableIds()) {
                 if (value) {
@@ -3435,6 +3510,18 @@ public class ListView extends AbsListView {
                 } else {
                     mCheckedIdStates.delete(mAdapter.getItemId(position));
                 }
+            }
+            if (oldValue != value) {
+                if (value) {
+                    mCheckedItemCount++;
+                } else {
+                    mCheckedItemCount--;
+                }
+            }
+            if (mChoiceActionMode != null) {
+                final long id = mAdapter.getItemId(position);
+                mMultiChoiceModeCallback.onItemCheckedStateChanged(mChoiceActionMode,
+                        position, id, value);
             }
         } else {
             boolean updateIds = mCheckedIdStates != null && mAdapter.hasStableIds();
@@ -3453,6 +3540,9 @@ public class ListView extends AbsListView {
                 if (updateIds) {
                     mCheckedIdStates.put(mAdapter.getItemId(position), Boolean.TRUE);
                 }
+                mCheckedItemCount = 1;
+            } else if (mCheckStates.size() == 0 || !mCheckStates.valueAt(0)) {
+                mCheckedItemCount = 0;
             }
         }
 
@@ -3462,6 +3552,23 @@ public class ListView extends AbsListView {
             rememberSyncState();
             requestLayout();
         }
+    }
+
+    /**
+     * Returns the number of items currently selected. This will only be valid
+     * if the choice mode is not {@link #CHOICE_MODE_NONE} (default).
+     * 
+     * <p>To determine the specific items that are currently selected, use one of
+     * the <code>getChecked*</code> methods.
+     *
+     * @return The number of items currently selected
+     *
+     * @see #getCheckedItemPosition()
+     * @see #getCheckedItemPositions()
+     * @see #getCheckedItemIds()
+     */
+    public int getCheckedItemCount() {
+        return mCheckedItemCount;
     }
 
     /**
@@ -3525,6 +3632,7 @@ public class ListView extends AbsListView {
      *         
      * @deprecated Use {@link #getCheckedItemIds()} instead.
      */
+    @Deprecated
     public long[] getCheckItemIds() {
         // Use new behavior that correctly handles stable ID mapping.
         if (mAdapter != null && mAdapter.hasStableIds()) {
@@ -3593,6 +3701,76 @@ public class ListView extends AbsListView {
         }
         if (mCheckedIdStates != null) {
             mCheckedIdStates.clear();
+        }
+        mCheckedItemCount = 0;
+    }
+
+    /**
+     * A MultiChoiceModeListener receives events for {@link ListView#CHOICE_MODE_MULTIPLE_MODAL}.
+     * It acts as the {@link ActionMode.Callback} for the selection mode and also receives
+     * {@link #onItemCheckedStateChanged(ActionMode, int, long, boolean)} events when the user
+     * selects and deselects list items.
+     */
+    public interface MultiChoiceModeListener extends ActionMode.Callback {
+        /**
+         * Called when an item is checked or unchecked during selection mode.
+         *
+         * @param mode The {@link ActionMode} providing the selection mode
+         * @param position Adapter position of the item that was checked or unchecked
+         * @param id Adapter ID of the item that was checked or unchecked
+         * @param checked <code>true</code> if the item is now checked, <code>false</code>
+         *                if the item is now unchecked.
+         */
+        public void onItemCheckedStateChanged(ActionMode mode,
+                int position, long id, boolean checked);
+    }
+
+    private class MultiChoiceModeWrapper implements MultiChoiceModeListener {
+        private MultiChoiceModeListener mWrapped;
+
+        public void setWrapped(MultiChoiceModeListener wrapped) {
+            mWrapped = wrapped;
+        }
+
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            if (mWrapped.onCreateActionMode(mode, menu)) {
+                // Initialize checked graphic state?
+                setLongClickable(false);
+                return true;
+            }
+            return false;
+        }
+
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return mWrapped.onPrepareActionMode(mode, menu);
+        }
+
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            return mWrapped.onActionItemClicked(mode, item);
+        }
+
+        public void onDestroyActionMode(ActionMode mode) {
+            mWrapped.onDestroyActionMode(mode);
+            mChoiceActionMode = null;
+
+            // Ending selection mode means deselecting everything.
+            clearChoices();
+
+            mDataChanged = true;
+            rememberSyncState();
+            requestLayout();
+
+            setLongClickable(true);
+        }
+
+        public void onItemCheckedStateChanged(ActionMode mode,
+                int position, long id, boolean checked) {
+            mWrapped.onItemCheckedStateChanged(mode, position, id, checked);
+
+            // If there are no items selected we no longer need the selection mode.
+            if (getCheckedItemCount() == 0) {
+                mode.finish();
+            }
         }
     }
 
