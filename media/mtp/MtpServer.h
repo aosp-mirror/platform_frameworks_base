@@ -94,6 +94,7 @@ private:
     MtpResponseCode     doGetStorageInfo();
     MtpResponseCode     doGetObjectPropsSupported();
     MtpResponseCode     doGetObjectHandles();
+    MtpResponseCode     doGetNumObjects();
     MtpResponseCode     doGetObjectPropValue();
     MtpResponseCode     doGetObjectInfo();
     MtpResponseCode     doGetObject();

@@ -39,6 +39,7 @@ using namespace android;
 static jmethodID method_beginSendObject;
 static jmethodID method_endSendObject;
 static jmethodID method_getObjectList;
+static jmethodID method_getNumObjects;
 static jmethodID method_getObjectProperty;
 static jmethodID method_getObjectInfo;
 static jmethodID method_getObjectFilePath;
@@ -80,6 +81,10 @@ public:
                                     MtpObjectFormat format,
                                     MtpObjectHandle parent);
 
+    virtual int                     getNumObjects(MtpStorageID storageID,
+                                            MtpObjectFormat format,
+                                            MtpObjectHandle parent);
+
     virtual MtpResponseCode         getObjectProperty(MtpObjectHandle handle,
                                             MtpObjectProperty property,
                                             MtpDataPacket& packet);
@@ -87,17 +92,10 @@ public:
     virtual MtpResponseCode         getObjectInfo(MtpObjectHandle handle,
                                             MtpDataPacket& packet);
 
-    virtual bool                    getObjectFilePath(MtpObjectHandle handle,
+    virtual MtpResponseCode         getObjectFilePath(MtpObjectHandle handle,
                                             MtpString& filePath,
                                             int64_t& fileLength);
-    virtual bool                    deleteFile(MtpObjectHandle handle);
-
-    // helper for media scanner
-    virtual MtpObjectHandle*        getFileList(int& outCount);
-
-    virtual void                    beginTransaction();
-    virtual void                    commitTransaction();
-    virtual void                    rollbackTransaction();
+    virtual MtpResponseCode         deleteFile(MtpObjectHandle handle);
 
     bool                            getPropertyInfo(MtpObjectProperty property, int& type);
 };
@@ -171,13 +169,18 @@ MtpObjectHandleList* MyMtpDatabase::getObjectList(MtpStorageID storageID,
     MtpObjectHandleList* list = new MtpObjectHandleList();
     jint* handles = env->GetIntArrayElements(array, 0);
     jsize length = env->GetArrayLength(array);
-LOGD("getObjectList length: %d", length);
-    for (int i = 0; i < length; i++) {
-LOGD("push: %d", handles[i]);
+    for (int i = 0; i < length; i++)
         list->push(handles[i]);
-    }
    env->ReleaseIntArrayElements(array, handles, 0);
    return list;
+}
+
+int MyMtpDatabase::getNumObjects(MtpStorageID storageID,
+                                MtpObjectFormat format,
+                                MtpObjectHandle parent) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    return env->CallIntMethod(mDatabase, method_getNumObjects,
+                (jint)storageID, (jint)format, (jint)parent);
 }
 
 MtpResponseCode MyMtpDatabase::getObjectProperty(MtpObjectHandle handle,
@@ -290,14 +293,14 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
     return MTP_RESPONSE_OK;
 }
 
-bool MyMtpDatabase::getObjectFilePath(MtpObjectHandle handle,
+MtpResponseCode MyMtpDatabase::getObjectFilePath(MtpObjectHandle handle,
                                             MtpString& filePath,
                                             int64_t& fileLength) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    jboolean result = env->CallBooleanMethod(mDatabase, method_getObjectFilePath,
+    jint result = env->CallIntMethod(mDatabase, method_getObjectFilePath,
                 (jint)handle, mStringBuffer, mLongBuffer);
-    if (!result)
-        return false;
+    if (result != MTP_RESPONSE_OK)
+        return result;
 
     jchar* str = env->GetCharArrayElements(mStringBuffer, 0);
     filePath.setTo(str, strlen16(str));
@@ -307,30 +310,12 @@ bool MyMtpDatabase::getObjectFilePath(MtpObjectHandle handle,
     fileLength = longValues[0];
     env->ReleaseLongArrayElements(mLongBuffer, longValues, 0);
     
-    return true;
+    return result;
 }
 
-bool MyMtpDatabase::deleteFile(MtpObjectHandle handle) {
+MtpResponseCode MyMtpDatabase::deleteFile(MtpObjectHandle handle) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    return env->CallBooleanMethod(mDatabase, method_deleteFile, (jint)handle); 
-}
-
-    // helper for media scanner
-MtpObjectHandle* MyMtpDatabase::getFileList(int& outCount) {
-    // REMOVE ME
-    return NULL;
-}
-
-void MyMtpDatabase::beginTransaction() {
-    // REMOVE ME
-}
-
-void MyMtpDatabase::commitTransaction() {
-    // REMOVE ME
-}
-
-void MyMtpDatabase::rollbackTransaction() {
-    // REMOVE ME
+    return env->CallIntMethod(mDatabase, method_deleteFile, (jint)handle);
 }
 
 struct PropertyTableEntry {
@@ -432,6 +417,11 @@ int register_android_media_MtpDatabase(JNIEnv *env)
         LOGE("Can't find getObjectList");
         return -1;
     }
+    method_getNumObjects = env->GetMethodID(clazz, "getNumObjects", "(III)I");
+    if (method_getNumObjects == NULL) {
+        LOGE("Can't find getNumObjects");
+        return -1;
+    }
     method_getObjectProperty = env->GetMethodID(clazz, "getObjectProperty", "(II[J[C)I");
     if (method_getObjectProperty == NULL) {
         LOGE("Can't find getObjectProperty");
@@ -442,12 +432,12 @@ int register_android_media_MtpDatabase(JNIEnv *env)
         LOGE("Can't find getObjectInfo");
         return -1;
     }
-    method_getObjectFilePath = env->GetMethodID(clazz, "getObjectFilePath", "(I[C[J)Z");
+    method_getObjectFilePath = env->GetMethodID(clazz, "getObjectFilePath", "(I[C[J)I");
     if (method_getObjectFilePath == NULL) {
         LOGE("Can't find getObjectFilePath");
         return -1;
     }
-    method_deleteFile = env->GetMethodID(clazz, "deleteFile", "(I)Z");
+    method_deleteFile = env->GetMethodID(clazz, "deleteFile", "(I)I");
     if (method_deleteFile == NULL) {
         LOGE("Can't find deleteFile");
         return -1;

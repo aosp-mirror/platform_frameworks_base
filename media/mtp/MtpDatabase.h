@@ -47,6 +47,10 @@ public:
                                             MtpObjectFormat format,
                                             MtpObjectHandle parent) = 0;
 
+    virtual int                     getNumObjects(MtpStorageID storageID,
+                                            MtpObjectFormat format,
+                                            MtpObjectHandle parent) = 0;
+
     virtual MtpResponseCode         getObjectProperty(MtpObjectHandle handle,
                                             MtpObjectProperty property,
                                             MtpDataPacket& packet) = 0;
@@ -54,14 +58,10 @@ public:
     virtual MtpResponseCode         getObjectInfo(MtpObjectHandle handle,
                                             MtpDataPacket& packet) = 0;
 
-    virtual bool                    getObjectFilePath(MtpObjectHandle handle,
+    virtual MtpResponseCode         getObjectFilePath(MtpObjectHandle handle,
                                             MtpString& filePath,
                                             int64_t& fileLength) = 0;
-    virtual bool                    deleteFile(MtpObjectHandle handle) = 0;
-
-    virtual void                    beginTransaction() = 0;
-    virtual void                    commitTransaction() = 0;
-    virtual void                    rollbackTransaction() = 0;
+    virtual MtpResponseCode         deleteFile(MtpObjectHandle handle) = 0;
 };
 
 }; // namespace android

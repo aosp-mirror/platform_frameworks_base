@@ -55,10 +55,10 @@ static const MtpOperationCode kSupportedOperationCodes[] = {
 //    MTP_OPERATION_SELF_TEST,
 //    MTP_OPERATION_SET_OBJECT_PROTECTION,
 //    MTP_OPERATION_POWER_DOWN,
-    MTP_OPERATION_GET_DEVICE_PROP_DESC,
-    MTP_OPERATION_GET_DEVICE_PROP_VALUE,
-    MTP_OPERATION_SET_DEVICE_PROP_VALUE,
-    MTP_OPERATION_RESET_DEVICE_PROP_VALUE,
+//    MTP_OPERATION_GET_DEVICE_PROP_DESC,
+//    MTP_OPERATION_GET_DEVICE_PROP_VALUE,
+//    MTP_OPERATION_SET_DEVICE_PROP_VALUE,
+//    MTP_OPERATION_RESET_DEVICE_PROP_VALUE,
 //    MTP_OPERATION_TERMINATE_OPEN_CAPTURE,
 //    MTP_OPERATION_MOVE_OBJECT,
 //    MTP_OPERATION_COPY_OBJECT,
@@ -67,7 +67,7 @@ static const MtpOperationCode kSupportedOperationCodes[] = {
     MTP_OPERATION_GET_OBJECT_PROPS_SUPPORTED,
 //    MTP_OPERATION_GET_OBJECT_PROP_DESC,
     MTP_OPERATION_GET_OBJECT_PROP_VALUE,
-    MTP_OPERATION_SET_OBJECT_PROP_VALUE,
+//    MTP_OPERATION_SET_OBJECT_PROP_VALUE,
 //    MTP_OPERATION_GET_OBJECT_REFERENCES,
 //    MTP_OPERATION_SET_OBJECT_REFERENCES,
 //    MTP_OPERATION_SKIP,
@@ -308,6 +308,9 @@ bool MtpServer::handleRequest() {
         case MTP_OPERATION_GET_OBJECT_HANDLES:
             response = doGetObjectHandles();
             break;
+        case MTP_OPERATION_GET_NUM_OBJECTS:
+            response = doGetNumObjects();
+            break;
         case MTP_OPERATION_GET_OBJECT_PROP_VALUE:
             response = doGetObjectPropValue();
             break;
@@ -454,6 +457,26 @@ MtpResponseCode MtpServer::doGetObjectHandles() {
     return MTP_RESPONSE_OK;
 }
 
+MtpResponseCode MtpServer::doGetNumObjects() {
+    if (!mSessionOpen)
+        return MTP_RESPONSE_SESSION_NOT_OPEN;
+    MtpStorageID storageID = mRequest.getParameter(1);      // 0xFFFFFFFF for all storage
+    MtpObjectFormat format = mRequest.getParameter(2);      // 0 for all formats
+    MtpObjectHandle parent = mRequest.getParameter(3);      // 0xFFFFFFFF for objects with no parent
+                                                            // 0x00000000 for all objects?
+    if (parent == 0xFFFFFFFF)
+        parent = 0;
+
+    int count = mDatabase->getNumObjects(storageID, format, parent);
+    if (count >= 0) {
+        mResponse.setParameter(1, count);
+        return MTP_RESPONSE_OK;
+    } else {
+        mResponse.setParameter(1, 0);
+        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
+    }
+}
+
 MtpResponseCode MtpServer::doGetObjectPropValue() {
     MtpObjectHandle handle = mRequest.getParameter(1);
     MtpObjectProperty property = mRequest.getParameter(2);
@@ -470,10 +493,11 @@ MtpResponseCode MtpServer::doGetObject() {
     MtpObjectHandle handle = mRequest.getParameter(1);
     MtpString pathBuf;
     int64_t fileLength;
-    if (!mDatabase->getObjectFilePath(handle, pathBuf, fileLength))
-        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
-    const char* filePath = (const char *)pathBuf;
+    int result = mDatabase->getObjectFilePath(handle, pathBuf, fileLength);
+    if (result != MTP_RESPONSE_OK)
+        return result;
 
+    const char* filePath = (const char *)pathBuf;
     mtp_file_range  mfr;
     mfr.fd = open(filePath, O_RDONLY);
     if (mfr.fd < 0) {
@@ -513,8 +537,9 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
         parent = 0;
     } else {
         int64_t dummy;
-        if (!mDatabase->getObjectFilePath(parent, path, dummy))
-            return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
+        int result = mDatabase->getObjectFilePath(parent, path, dummy);
+        if (result != MTP_RESPONSE_OK)
+            return result;
     }
 
     // read only the fields we need
@@ -547,14 +572,11 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
         path += "/";
     path += (const char *)name;
 
-    mDatabase->beginTransaction();
     MtpObjectHandle handle = mDatabase->beginSendObject((const char*)path,
             format, parent, storageID, mSendObjectFileSize, modifiedTime);
     if (handle == kInvalidObjectHandle) {
-        mDatabase->rollbackTransaction();
         return MTP_RESPONSE_GENERAL_ERROR;
     }
-    mDatabase->commitTransaction();
 
   if (format == MTP_FORMAT_ASSOCIATION) {
         mode_t mask = umask(0);
@@ -641,17 +663,16 @@ MtpResponseCode MtpServer::doDeleteObject() {
 
     MtpString filePath;
     int64_t fileLength;
-    if (!mDatabase->getObjectFilePath(handle, filePath, fileLength))
-        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
-
-    LOGV("deleting %s", (const char *)filePath);
-    // one of these should work
-    rmdir((const char *)filePath);
-    unlink((const char *)filePath);
-
-    mDatabase->deleteFile(handle);
-
-    return MTP_RESPONSE_OK;
+    int result = mDatabase->getObjectFilePath(handle, filePath, fileLength);
+    if (result == MTP_RESPONSE_OK) {
+        LOGV("deleting %s", (const char *)filePath);
+        // one of these should work
+        rmdir((const char *)filePath);
+        unlink((const char *)filePath);
+        return mDatabase->deleteFile(handle);
+    } else {
+        return result;
+    }
 }
 
 MtpResponseCode MtpServer::doGetObjectPropDesc() {
