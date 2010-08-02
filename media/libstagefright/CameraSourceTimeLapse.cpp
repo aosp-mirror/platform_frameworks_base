@@ -32,6 +32,7 @@
 #include <utils/String8.h>
 #include <utils/Vector.h>
 #include "OMX_Video.h"
+#include <limits.h>
 
 namespace android {
 
