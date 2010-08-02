@@ -135,9 +135,9 @@ public class PhoneNumberUtils
         }
 
         // TODO: We don't check for SecurityException here (requires
-        // READ_PHONE_STATE permission).
+        // CALL_PRIVILEGED permission).
         if (scheme.equals("voicemail")) {
-            return TelephonyManager.getDefault().getVoiceMailNumber();
+            return TelephonyManager.getDefault().getCompleteVoiceMailNumber();
         }
 
         if (context == null) {
