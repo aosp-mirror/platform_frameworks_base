@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.telephony.PhoneNumberUtils;
 import android.util.Log;
 
 public class PhoneSubInfo extends IPhoneSubInfo.Stub {
@@ -29,6 +30,9 @@ public class PhoneSubInfo extends IPhoneSubInfo.Stub {
     private Context mContext;
     private static final String READ_PHONE_STATE =
         android.Manifest.permission.READ_PHONE_STATE;
+    private static final String CALL_PRIVILEGED =
+        // TODO Add core/res/AndriodManifest.xml#READ_PRIVILEGED_PHONE_STATE
+        android.Manifest.permission.CALL_PRIVILEGED;
 
     public PhoneSubInfo(Phone phone) {
         mPhone = phone;
@@ -101,7 +105,22 @@ public class PhoneSubInfo extends IPhoneSubInfo.Stub {
      */
     public String getVoiceMailNumber() {
         mContext.enforceCallingOrSelfPermission(READ_PHONE_STATE, "Requires READ_PHONE_STATE");
-        return (String) mPhone.getVoiceMailNumber();
+        String number = PhoneNumberUtils.extractNetworkPortion(mPhone.getVoiceMailNumber());
+        Log.d(LOG_TAG, "VM: PhoneSubInfo.getVoiceMailNUmber: "); // + number);
+        return number;
+    }
+
+    /**
+     * Retrieves the compelete voice mail number.
+     *
+     * @hide
+     */
+    public String getCompleteVoiceMailNumber() {
+        mContext.enforceCallingOrSelfPermission(CALL_PRIVILEGED,
+                "Requires CALL_PRIVILEGED");
+        String number = mPhone.getVoiceMailNumber();
+        Log.d(LOG_TAG, "VM: PhoneSubInfo.getCompleteVoiceMailNUmber: "); // + number);
+        return number;
     }
 
     /**
