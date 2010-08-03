@@ -2321,9 +2321,24 @@ public final class Settings {
         public static final String DISABLED_SYSTEM_INPUT_METHODS = "disabled_system_input_methods";
 
         /**
-         * Host name and port for a user-selected proxy.
+         * Host name and port for global proxy.
          */
         public static final String HTTP_PROXY = "http_proxy";
+
+        /**
+         * Exclusion list for global proxy. This string contains a list of comma-separated
+         * domains where the global proxy does not apply. Domains should be listed in a comma-
+         * separated list. Example of acceptable formats: ".domain1.com,my.domain2.com"
+         * @hide
+         */
+        public static final String HTTP_PROXY_EXCLUSION_LIST = "http_proxy_exclusion_list";
+
+        /**
+         * Enables the UI setting to allow the user to specify the global HTTP proxy
+         * and associated exclusion list.
+         * @hide
+         */
+        public static final String SET_GLOBAL_HTTP_PROXY = "set_global_http_proxy";
 
         /**
          * Whether the package installer should allow installation of apps downloaded from
