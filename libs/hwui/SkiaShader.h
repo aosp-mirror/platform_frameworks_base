@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef SKIA_SHADER_H
-#define SKIA_SHADER_H
+#ifndef ANDROID_UI_SKIA_SHADER_H
+#define ANDROID_UI_SKIA_SHADER_H
 
 #include <SkShader.h>
 #include <SkXfermode.h>
@@ -160,4 +160,4 @@ private:
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // SKIA_SHADER_H
+#endif // ANDROID_UI_SKIA_SHADER_H

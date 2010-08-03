@@ -35,7 +35,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Debug
-#define DEBUG_PROGRAM_CACHE 1
+#define DEBUG_PROGRAM_CACHE 0
 
 // Debug
 #if DEBUG_PROGRAM_CACHE
@@ -179,6 +179,8 @@ private:
     String8 generateFragmentShader(const ProgramDescription& description);
     void generatePorterDuffBlend(String8& shader, const char* name, SkXfermode::Mode mode);
     void generateTextureWrap(String8& shader, GLenum wrapS, GLenum wrapT);
+
+    void printLongString(const String8& shader) const;
 
     KeyedVector<programid, Program*> mCache;
 

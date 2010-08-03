@@ -23,7 +23,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.graphics.ComposeShader;
+import android.graphics.LightingColorFilter;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -54,6 +56,7 @@ public class MoreShadersActivity extends Activity {
         private ComposeShader mCompose2Shader;
         private Paint mLargePaint;
         private BitmapShader mScaled2Shader;
+        private ColorFilter mColorFilter;
 
         ShadersView(Context c) {
             super(c);
@@ -87,6 +90,8 @@ public class MoreShadersActivity extends Activity {
             mCompose2Shader = new ComposeShader(mHorGradient, mScaledShader,
                     PorterDuff.Mode.SRC_OUT);
 
+            mColorFilter = new LightingColorFilter(0x0060ffff, 0x00101030);
+ 
             mLargePaint = new Paint();
             mLargePaint.setAntiAlias(true);
             mLargePaint.setTextSize(36.0f);
@@ -122,7 +127,9 @@ public class MoreShadersActivity extends Activity {
             canvas.drawText("OpenGL rendering", 0.0f, 60.0f, mLargePaint);
             
             mLargePaint.setShader(mCompose2Shader);
+            mLargePaint.setColorFilter(mColorFilter);
             canvas.drawText("OpenGL rendering", 0.0f, 100.0f, mLargePaint);
+            mLargePaint.setColorFilter(null);
             
             canvas.translate(0.0f, 40.0f + mDrawHeight);
             mLargePaint.setShader(mVertGradient);

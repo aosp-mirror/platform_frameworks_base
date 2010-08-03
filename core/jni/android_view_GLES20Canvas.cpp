@@ -31,6 +31,7 @@
 
 #include <OpenGLRenderer.h>
 #include <SkiaShader.h>
+#include <SkiaColorFilter.h>
 #include <Rect.h>
 #include <ui/Rect.h>
 
@@ -228,17 +229,23 @@ static void android_view_GLES20Canvas_drawRect(JNIEnv* env, jobject canvas,
 }
 
 // ----------------------------------------------------------------------------
-// Shaders
+// Shaders and color filters
 // ----------------------------------------------------------------------------
 
-static void android_view_GLES20Canvas_resetShader(JNIEnv* env, jobject canvas,
+static void android_view_GLES20Canvas_resetModifiers(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer) {
     renderer->resetShader();
+    renderer->resetColorFilter();
 }
 
 static void android_view_GLES20Canvas_setupShader(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, SkiaShader* shader) {
     renderer->setupShader(shader);
+}
+
+static void android_view_GLES20Canvas_setupColorFilter(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, SkiaColorFilter* filter) {
+    renderer->setupColorFilter(filter);
 }
 
 // ----------------------------------------------------------------------------
@@ -311,8 +318,9 @@ static JNINativeMethod gMethods[] = {
     {   "nDrawColor",         "(III)V",          (void*) android_view_GLES20Canvas_drawColor },
     {   "nDrawRect",          "(IFFFFI)V",       (void*) android_view_GLES20Canvas_drawRect },
 
-    {   "nResetShader",       "(I)V",            (void*) android_view_GLES20Canvas_resetShader },
+    {   "nResetModifiers",    "(I)V",            (void*) android_view_GLES20Canvas_resetModifiers },
     {   "nSetupShader",       "(II)V",           (void*) android_view_GLES20Canvas_setupShader },
+    {   "nSetupColorFilter",  "(II)V",           (void*) android_view_GLES20Canvas_setupColorFilter },
 
     {   "nDrawText",          "(I[CIIFFII)V",    (void*) android_view_GLES20Canvas_drawTextArray },
     {   "nDrawText",          "(ILjava/lang/String;IIFFII)V",

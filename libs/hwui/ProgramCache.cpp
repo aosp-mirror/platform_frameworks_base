@@ -27,8 +27,6 @@ namespace uirenderer {
 // Vertex shaders snippets
 ///////////////////////////////////////////////////////////////////////////////
 
-// TODO: Implement BitmapShader, implement repeat/mirror for npot
-
 const char* gVS_Header_Attributes =
         "attribute vec4 position;\n";
 const char* gVS_Header_Attributes_TexCoords =
@@ -85,10 +83,10 @@ const char* gFS_Uniforms_ColorOp[4] = {
         "uniform mat4 colorMatrix;\n"
         "uniform vec4 colorMatrixVector;\n",
         // Lighting
-        "uniform float lightingMul;\n"
-        "uniform float lightingAdd;\n",
+        "uniform vec4 lightingMul;\n"
+        "uniform vec4 lightingAdd;\n",
         // PorterDuff
-        "uniform vec4 colorBLend;\n"
+        "uniform vec4 colorBlend;\n"
 };
 const char* gFS_Main =
         "\nvoid main(void) {\n"
@@ -121,11 +119,14 @@ const char* gFS_Main_ApplyColorOp[4] = {
         // None
         "",
         // Matrix
+        // TODO: Fix premultiplied alpha computations for color matrix
         "    fragColor *= colorMatrix;\n"
-        "    fragColor += colorMatrixVector;\n",
+        "    fragColor += colorMatrixVector;\n"
+        "    fragColor.rgb *= fragColor.a;\n",
         // Lighting
-        "    fragColor *= lightingMul;\n"
-        "    fragColor += lightingAdd;\n",
+        "    float lightingAlpha = fragColor.a;\n"
+        "    fragColor = min(fragColor * lightingMul + (lightingAdd * lightingAlpha), lightingAlpha);\n"
+        "    fragColor.a = lightingAlpha;\n",
         // PorterDuff
         "    fragColor = blendColors(colorBlend, fragColor);\n"
 };
@@ -345,7 +346,11 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     // End the shader
     shader.append(gFS_Footer);
 
-    PROGRAM_LOGD("*** Generated fragment shader:\n\n%s", shader.string());
+    if (DEBUG_PROGRAM_CACHE) {
+        PROGRAM_LOGD("*** Generated fragment shader:\n\n");
+        printLongString(shader);
+    }
+
     return shader;
 }
 
@@ -389,6 +394,20 @@ void ProgramCache::generateTextureWrap(String8& shader, GLenum wrapS, GLenum wra
     }
     shader.append(");\n");
     shader.append("}\n");
+}
+
+void ProgramCache::printLongString(const String8& shader) const {
+    ssize_t index = 0;
+    ssize_t lastIndex = 0;
+    const char* str = shader.string();
+    while ((index = shader.find("\n", index)) > -1) {
+        String8 line(str, index - lastIndex);
+        if (line.length() == 0) line.append("\n");
+        PROGRAM_LOGD("%s", line.string());
+        index++;
+        str += (index - lastIndex);
+        lastIndex = index;
+    }
 }
 
 }; // namespace uirenderer

@@ -132,6 +132,7 @@ OpenGLRenderer::OpenGLRenderer():
 
     mCurrentProgram = NULL;
     mShader = NULL;
+    mColorFilter = NULL;
 
     memcpy(mMeshVertices, gMeshVertices, sizeof(gMeshVertices));
 
@@ -460,7 +461,6 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     const float u2 = srcRight / width;
     const float v2 = srcBottom / height;
 
-    // TODO: Do this in the shader
     resetDrawTextureTexCoords(u1, v1, u2, v2);
 
     drawTextureRect(dstLeft, dstTop, dstRight, dstBottom, texture, paint);
@@ -552,6 +552,8 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     mModelView.loadIdentity();
 
     GLuint textureUnit = 0;
+    // Needs to be set prior to calling FontRenderer::getTexture()
+    glActiveTexture(gTextureUnits[textureUnit]);
 
     ProgramDescription description;
     description.hasTexture = true;
@@ -559,10 +561,14 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     if (mShader) {
         mShader->describe(description, mExtensions);
     }
+    if (mColorFilter) {
+        mColorFilter->describe(description, mExtensions);
+    }
 
     useProgram(mProgramCache.get(description));
     mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
 
+    // Text is always blended, no need to check the shader
     chooseBlending(true, mode);
     bindTexture(mFontRenderer.getTexture(), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, textureUnit);
     glUniform1i(mCurrentProgram->getUniform("sampler"), textureUnit);
@@ -577,6 +583,9 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     // Setup attributes and uniforms required by the shaders
     if (mShader) {
         mShader->setupProgram(mCurrentProgram, mModelView, *mSnapshot, &textureUnit);
+    }
+    if (mColorFilter) {
+        mColorFilter->setupProgram(mCurrentProgram);
     }
 
     // TODO: Implement scale properly
@@ -601,6 +610,18 @@ void OpenGLRenderer::setupShader(SkiaShader* shader) {
     if (mShader) {
         mShader->set(&mTextureCache, &mGradientCache);
     }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Color filters
+///////////////////////////////////////////////////////////////////////////////
+
+void OpenGLRenderer::resetColorFilter() {
+    mColorFilter = NULL;
+}
+
+void OpenGLRenderer::setupColorFilter(SkiaColorFilter* filter) {
+    mColorFilter = filter;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -631,6 +652,9 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     if (mShader) {
         mShader->describe(description, mExtensions);
     }
+    if (mColorFilter) {
+        mColorFilter->describe(description, mExtensions);
+    }
 
     // Build and use the appropriate shader
     useProgram(mProgramCache.get(description));
@@ -653,6 +677,9 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     // Setup attributes and uniforms required by the shaders
     if (mShader) {
         mShader->setupProgram(mCurrentProgram, mModelView, *mSnapshot, &textureUnit);
+    }
+    if (mColorFilter) {
+        mColorFilter->setupProgram(mCurrentProgram);
     }
 
     // Draw the mesh
@@ -680,6 +707,9 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
         GLvoid* vertices, GLvoid* texCoords, GLvoid* indices, GLsizei elementsCount) {
     ProgramDescription description;
     description.hasTexture = true;
+    if (mColorFilter) {
+        mColorFilter->describe(description, mExtensions);
+    }
 
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
@@ -703,6 +733,11 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
             gMeshStride, vertices);
     glVertexAttribPointer(texCoordsSlot, 2, GL_FLOAT, GL_FALSE, gMeshStride, texCoords);
 
+    // Color filter
+    if (mColorFilter) {
+        mColorFilter->setupProgram(mCurrentProgram);
+    }
+
     if (!indices) {
         glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
     } else {
@@ -712,8 +747,6 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
 }
 
 void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode, bool isPremultiplied) {
-    // In theory we should not blend if the mode is Src, but it's rare enough
-    // that it's not worth it
     blend = blend || mode != SkXfermode::kSrcOver_Mode;
     if (blend) {
         if (!mBlend) {
