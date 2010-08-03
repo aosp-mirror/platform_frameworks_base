@@ -95,6 +95,8 @@ private:
     MtpResponseCode     doGetObjectPropsSupported();
     MtpResponseCode     doGetObjectHandles();
     MtpResponseCode     doGetNumObjects();
+    MtpResponseCode     doGetObjectReferences();
+    MtpResponseCode     doSetObjectReferences();
     MtpResponseCode     doGetObjectPropValue();
     MtpResponseCode     doGetObjectInfo();
     MtpResponseCode     doGetObject();

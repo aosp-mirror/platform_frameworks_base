@@ -44,6 +44,8 @@ static jmethodID method_getObjectProperty;
 static jmethodID method_getObjectInfo;
 static jmethodID method_getObjectFilePath;
 static jmethodID method_deleteFile;
+static jmethodID method_getObjectReferences;
+static jmethodID method_setObjectReferences;
 static jfieldID field_context;
 
 MtpDatabase* getMtpDatabase(JNIEnv *env, jobject database) {
@@ -98,6 +100,11 @@ public:
     virtual MtpResponseCode         deleteFile(MtpObjectHandle handle);
 
     bool                            getPropertyInfo(MtpObjectProperty property, int& type);
+
+    virtual MtpObjectHandleList*    getObjectReferences(MtpObjectHandle handle);
+
+    virtual MtpResponseCode         setObjectReferences(MtpObjectHandle handle,
+                                            MtpObjectHandleList* references);
 };
 
 MyMtpDatabase::MyMtpDatabase(JNIEnv *env, jobject client)
@@ -344,6 +351,37 @@ bool MyMtpDatabase::getPropertyInfo(MtpObjectProperty property, int& type) {
     return false;
 }
 
+MtpObjectHandleList* MyMtpDatabase::getObjectReferences(MtpObjectHandle handle) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    jintArray array = (jintArray)env->CallObjectMethod(mDatabase, method_getObjectReferences,
+                (jint)handle);
+    if (!array)
+        return NULL;
+    MtpObjectHandleList* list = new MtpObjectHandleList();
+    jint* handles = env->GetIntArrayElements(array, 0);
+    jsize length = env->GetArrayLength(array);
+    for (int i = 0; i < length; i++)
+        list->push(handles[i]);
+   env->ReleaseIntArrayElements(array, handles, 0);
+   return list;
+}
+
+MtpResponseCode MyMtpDatabase::setObjectReferences(MtpObjectHandle handle, MtpObjectHandleList* references) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    int count = references->size();
+    jintArray array = env->NewIntArray(count);
+    if (!array) {
+        LOGE("out of memory in setObjectReferences");
+        return false;
+    }
+    jint* handles = env->GetIntArrayElements(array, 0);
+     for (int i = 0; i < count; i++)
+        handles[i] = (*references)[i];
+    env->ReleaseIntArrayElements(array, handles, 0);
+    return env->CallIntMethod(mDatabase, method_setObjectReferences,
+                (jint)handle, array);
+}
+
 // ----------------------------------------------------------------------------
 
 static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
@@ -440,6 +478,16 @@ int register_android_media_MtpDatabase(JNIEnv *env)
     method_deleteFile = env->GetMethodID(clazz, "deleteFile", "(I)I");
     if (method_deleteFile == NULL) {
         LOGE("Can't find deleteFile");
+        return -1;
+    }
+    method_getObjectReferences = env->GetMethodID(clazz, "getObjectReferences", "(I)[I");
+    if (method_getObjectReferences == NULL) {
+        LOGE("Can't find getObjectReferences");
+        return -1;
+    }
+    method_setObjectReferences = env->GetMethodID(clazz, "setObjectReferences", "(I[I)I");
+    if (method_setObjectReferences == NULL) {
+        LOGE("Can't find setObjectReferences");
         return -1;
     }
     field_context = env->GetFieldID(clazz, "mNativeContext", "I");

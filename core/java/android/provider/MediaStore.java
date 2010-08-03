@@ -273,6 +273,13 @@ public final class MediaStore {
                     + "/object/" + objectId);
         }
 
+        // used for MTP GetObjectReferences and SetObjectReferences
+        public static final Uri getReferencesUri(String volumeName,
+                long objectId) {
+            return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
+                    + "/object/" + objectId + "/references");
+        }
+
         /**
          * Fields for master table for all media files.
          * Table also contains MediaColumns._ID, DATA, SIZE and DATE_MODIFIED.

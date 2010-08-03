@@ -22,7 +22,10 @@ import android.content.IContentProvider;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.RemoteException;
+import android.provider.MediaStore.Audio;
+import android.provider.MediaStore.MediaColumns;
 import android.provider.MediaStore.MtpObjects;
+import android.provider.Mtp;
 import android.util.Log;
 
 /**
@@ -120,7 +123,33 @@ public class MtpDatabase {
 
     private void endSendObject(String path, int handle, int format, boolean succeeded) {
         if (succeeded) {
-            Uri uri = mMediaScanner.scanMtpFile(path, mVolumeName, handle, format);
+            // handle abstract playlists separately
+            // they do not exist in the file system so don't use the media scanner here
+            if (format == Mtp.Object.FORMAT_ABSTRACT_AV_PLAYLIST) {
+                // Strip Windows Media Player file extension
+                if (path.endsWith(".pla")) {
+                    path = path.substring(0, path.length() - 4);
+                }
+
+                // extract name from path
+                String name = path;
+                int lastSlash = name.lastIndexOf('/');
+                if (lastSlash >= 0) {
+                    name = name.substring(lastSlash + 1);
+                }
+
+                ContentValues values = new ContentValues(1);
+                values.put(Audio.Playlists.DATA, path);
+                values.put(Audio.Playlists.NAME, name);
+                values.put(MediaColumns.MEDIA_SCANNER_NEW_OBJECT_ID, handle);
+                try {
+                    Uri uri = mMediaProvider.insert(Audio.Playlists.EXTERNAL_CONTENT_URI, values);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException in endSendObject", e);
+                }
+            } else {
+                Uri uri = mMediaScanner.scanMtpFile(path, mVolumeName, handle, format);
+            }
         } else {
             deleteFile(handle);
         }
@@ -336,6 +365,53 @@ public class MtpDatabase {
             Log.e(TAG, "RemoteException in deleteFile", e);
             return MTP_RESPONSE_GENERAL_ERROR;
         }
+    }
+
+    private int[] getObjectReferences(int handle) {
+        Log.d(TAG, "getObjectReferences for: " + handle);
+        Uri uri = MtpObjects.getReferencesUri(mVolumeName, handle);
+        Cursor c = null;
+        try {
+            c = mMediaProvider.query(uri, ID_PROJECTION, null, null, null);
+            if (c == null) {
+                return null;
+            }
+            int count = c.getCount();
+            if (count > 0) {
+                int[] result = new int[count];
+                for (int i = 0; i < count; i++) {
+                    c.moveToNext();
+                    result[i] = c.getInt(0);
+                }
+                return result;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in getObjectList", e);
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+        }
+        return null;
+    }
+
+    private int setObjectReferences(int handle, int[] references) {
+        Uri uri = MtpObjects.getReferencesUri(mVolumeName, handle);
+        int count = references.length;
+        ContentValues[] valuesList = new ContentValues[count];
+        for (int i = 0; i < count; i++) {
+            ContentValues values = new ContentValues();
+            values.put(MtpObjects.ObjectColumns._ID, references[i]);
+            valuesList[i] = values;
+        }
+        try {
+            if (count == mMediaProvider.bulkInsert(uri, valuesList)) {
+                return MTP_RESPONSE_OK;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in setObjectReferences", e);
+        }
+        return MTP_RESPONSE_GENERAL_ERROR;
     }
 
     // used by the JNI code

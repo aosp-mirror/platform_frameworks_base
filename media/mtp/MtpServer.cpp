@@ -68,8 +68,8 @@ static const MtpOperationCode kSupportedOperationCodes[] = {
 //    MTP_OPERATION_GET_OBJECT_PROP_DESC,
     MTP_OPERATION_GET_OBJECT_PROP_VALUE,
 //    MTP_OPERATION_SET_OBJECT_PROP_VALUE,
-//    MTP_OPERATION_GET_OBJECT_REFERENCES,
-//    MTP_OPERATION_SET_OBJECT_REFERENCES,
+    MTP_OPERATION_GET_OBJECT_REFERENCES,
+    MTP_OPERATION_SET_OBJECT_REFERENCES,
 //    MTP_OPERATION_SKIP,
 };
 
@@ -111,11 +111,11 @@ static const MtpObjectFormat kSupportedPlaybackFormats[] = {
     MTP_FORMAT_MP2,
     MTP_FORMAT_3GP_CONTAINER,
     // MTP_FORMAT_ABSTRACT_AUDIO_ALBUM,
-    // MTP_FORMAT_ABSTRACT_AV_PLAYLIST,
-    // MTP_FORMAT_WPL_PLAYLIST,
-    // MTP_FORMAT_M3U_PLAYLIST,
+    MTP_FORMAT_ABSTRACT_AV_PLAYLIST,
+    MTP_FORMAT_WPL_PLAYLIST,
+    MTP_FORMAT_M3U_PLAYLIST,
     // MTP_FORMAT_MPL_PLAYLIST,
-    // MTP_FORMAT_PLS_PLAYLIST,
+    MTP_FORMAT_PLS_PLAYLIST,
 };
 
 MtpServer::MtpServer(int fd, MtpDatabase* database,
@@ -175,7 +175,8 @@ void MtpServer::run() {
         mRequest.dump();
 
         // FIXME need to generalize this
-        bool dataIn = (operation == MTP_OPERATION_SEND_OBJECT_INFO);
+        bool dataIn = (operation == MTP_OPERATION_SEND_OBJECT_INFO
+                    || operation == MTP_OPERATION_SET_OBJECT_REFERENCES);
         if (dataIn) {
             int ret = mData.read(fd);
             if (ret < 0) {
@@ -310,6 +311,12 @@ bool MtpServer::handleRequest() {
             break;
         case MTP_OPERATION_GET_NUM_OBJECTS:
             response = doGetNumObjects();
+            break;
+        case MTP_OPERATION_GET_OBJECT_REFERENCES:
+            response = doGetObjectReferences();
+            break;
+        case MTP_OPERATION_SET_OBJECT_REFERENCES:
+            response = doSetObjectReferences();
             break;
         case MTP_OPERATION_GET_OBJECT_PROP_VALUE:
             response = doGetObjectPropValue();
@@ -475,6 +482,30 @@ MtpResponseCode MtpServer::doGetNumObjects() {
         mResponse.setParameter(1, 0);
         return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
     }
+}
+
+MtpResponseCode MtpServer::doGetObjectReferences() {
+    if (!mSessionOpen)
+        return MTP_RESPONSE_SESSION_NOT_OPEN;
+    MtpStorageID handle = mRequest.getParameter(1);
+    MtpObjectHandleList* handles = mDatabase->getObjectReferences(handle);
+    if (!handles) {
+        mData.putEmptyArray();
+        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
+    }
+    mData.putAUInt32(handles);
+    delete handles;
+    return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MtpServer::doSetObjectReferences() {
+    if (!mSessionOpen)
+        return MTP_RESPONSE_SESSION_NOT_OPEN;
+    MtpStorageID handle = mRequest.getParameter(1);
+    MtpObjectHandleList* references = mData.getAUInt32();
+    MtpResponseCode result = mDatabase->setObjectReferences(handle, references);
+    delete references;
+    return result;
 }
 
 MtpResponseCode MtpServer::doGetObjectPropValue() {
