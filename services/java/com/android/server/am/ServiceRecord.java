@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.server.NotificationManagerService;
 
 import android.app.INotificationManager;
 import android.app.Notification;
@@ -252,6 +253,8 @@ class ServiceRecord extends Binder {
     }
     
     public void postNotification() {
+        final int appUid = appInfo.uid;
+        final int appPid = app.pid;
         if (foregroundId != 0 && foregroundNoti != null) {
             // Do asynchronous communication with notification manager to
             // avoid deadlocks.
@@ -260,14 +263,15 @@ class ServiceRecord extends Binder {
             final Notification localForegroundNoti = foregroundNoti;
             ams.mHandler.post(new Runnable() {
                 public void run() {
-                    INotificationManager inm = NotificationManager.getService();
-                    if (inm == null) {
+                    NotificationManagerService nm =
+                            (NotificationManagerService) NotificationManager.getService();
+                    if (nm == null) {
                         return;
                     }
                     try {
                         int[] outId = new int[1];
-                        inm.enqueueNotification(localPackageName, localForegroundId,
-                                localForegroundNoti, outId);
+                        nm.enqueueNotificationInternal(localPackageName, appUid, appPid,
+                                null, localForegroundId, localForegroundNoti, outId);
                     } catch (RuntimeException e) {
                         Slog.w(ActivityManagerService.TAG,
                                 "Error showing notification for service", e);
@@ -275,7 +279,6 @@ class ServiceRecord extends Binder {
                         // get to be foreground.
                         ams.setServiceForeground(name, ServiceRecord.this,
                                 localForegroundId, null, true);
-                    } catch (RemoteException e) {
                     }
                 }
             });
