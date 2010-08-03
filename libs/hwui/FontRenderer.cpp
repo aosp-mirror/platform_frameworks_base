@@ -80,6 +80,37 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y) {
             nPenX, nPenY - height, 0, u1, v1);
 }
 
+void Font::drawCachedGlyph(CachedGlyphInfo *glyph, int x, int y,
+                             uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH) {
+    int nPenX = x + glyph->mBitmapLeft;
+    int nPenY = y + glyph->mBitmapTop;
+
+    uint32_t endX = glyph->mStartX + glyph->mBitmapWidth;
+    uint32_t endY = glyph->mStartY + glyph->mBitmapHeight;
+
+    if(nPenX < 0 || nPenY < 0) {
+        LOGE("Cannot render into a bitmap, some of the glyph is below zero");
+        return;
+    }
+
+    if(nPenX + glyph->mBitmapWidth >= bitmapW || nPenY + glyph->mBitmapHeight >= bitmapH) {
+        LOGE("Cannot render into a bitmap, dimentions too small");
+        return;
+    }
+
+    uint32_t cacheWidth = mState->getCacheWidth();
+    const uint8_t* cacheBuffer = mState->getTextTextureData();
+
+    uint32_t cacheX = 0, bX = 0, cacheY = 0, bY = 0;
+    for (cacheX = glyph->mStartX, bX = nPenX; cacheX < endX; cacheX++, bX++) {
+        for (cacheY = glyph->mStartY, bY = nPenY; cacheY < endY; cacheY++, bY++) {
+            uint8_t tempCol = cacheBuffer[cacheY * cacheWidth + cacheX];
+            bitmap[bY * bitmapW + bX] = tempCol;
+        }
+    }
+
+}
+
 Font::CachedGlyphInfo* Font::getCachedUTFChar(SkPaint* paint, int32_t utfChar) {
     CachedGlyphInfo* cachedGlyph = mCachedGlyphs.valueFor(utfChar);
     if (cachedGlyph == NULL) {
@@ -96,7 +127,7 @@ Font::CachedGlyphInfo* Font::getCachedUTFChar(SkPaint* paint, int32_t utfChar) {
 }
 
 void Font::renderUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
-        int numGlyphs, int x, int y) {
+        int numGlyphs, int x, int y, uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH) {
     if (numGlyphs == 0 || text == NULL || len == 0) {
         return;
     }
@@ -121,7 +152,12 @@ void Font::renderUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t 
 
         // If it's still not valid, we couldn't cache it, so we shouldn't draw garbage
         if (cachedGlyph->mIsValid) {
-            drawCachedGlyph(cachedGlyph, penX, penY);
+            if(bitmap != NULL) {
+                drawCachedGlyph(cachedGlyph, penX, penY, bitmap, bitmapW, bitmapH);
+            }
+            else {
+                drawCachedGlyph(cachedGlyph, penX, penY);
+            }
         }
 
         penX += SkFixedFloor(cachedGlyph->mAdvanceX);
@@ -153,6 +189,8 @@ void Font::updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyp
     uint32_t endX = startX + skiaGlyph.fWidth;
     uint32_t endY = startY + skiaGlyph.fHeight;
 
+    glyph->mStartX = startX;
+    glyph->mStartY = startY;
     glyph->mBitmapWidth = skiaGlyph.fWidth;
     glyph->mBitmapHeight = skiaGlyph.fHeight;
 
@@ -234,9 +272,9 @@ FontRenderer::~FontRenderer() {
     }
     mCacheLines.clear();
 
-    delete mTextMeshPtr;
+    delete[] mTextMeshPtr;
+    delete[] mTextTexture;
 
-    delete mTextTexture;
     if(mTextureId) {
         glDeleteTextures(1, &mTextureId);
     }
@@ -308,14 +346,14 @@ bool FontRenderer::cacheBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint3
 
     uint32_t cacheWidth = mCacheWidth;
 
-    unsigned char* cacheBuffer = mTextTexture;
-    unsigned char* bitmapBuffer = (unsigned char*) glyph.fImage;
+    uint8_t* cacheBuffer = mTextTexture;
+    uint8_t* bitmapBuffer = (uint8_t*) glyph.fImage;
     unsigned int stride = glyph.rowBytes();
 
     uint32_t cacheX = 0, bX = 0, cacheY = 0, bY = 0;
     for (cacheX = startX, bX = 0; cacheX < endX; cacheX++, bX++) {
         for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY++) {
-            unsigned char tempCol = bitmapBuffer[bY * stride + bX];
+            uint8_t tempCol = bitmapBuffer[bY * stride + bX];
             cacheBuffer[cacheY * cacheWidth + cacheX] = tempCol;
         }
     }
@@ -324,7 +362,7 @@ bool FontRenderer::cacheBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint3
 }
 
 void FontRenderer::initTextTexture() {
-    mTextTexture = new unsigned char[mCacheWidth * mCacheHeight];
+    mTextTexture = new uint8_t[mCacheWidth * mCacheHeight];
     mUploadTexture = false;
 
     glGenTextures(1, &mTextureId);
@@ -548,6 +586,145 @@ void FontRenderer::renderText(SkPaint* paint, const Rect* clip, const char *text
         issueDrawCommand();
         mCurrentQuadIndex = 0;
     }
+}
+
+void FontRenderer::computeGaussianWeights(float* weights, int32_t radius) {
+    // Compute gaussian weights for the blur
+    // e is the euler's number
+    float e = 2.718281828459045f;
+    float pi = 3.1415926535897932f;
+    // g(x) = ( 1 / sqrt( 2 * pi ) * sigma) * e ^ ( -x^2 / 2 * sigma^2 )
+    // x is of the form [-radius .. 0 .. radius]
+    // and sigma varies with radius.
+    // Based on some experimental radius values and sigma's
+    // we approximately fit sigma = f(radius) as
+    // sigma = radius * 0.4  + 0.6
+    // The larger the radius gets, the more our gaussian blur
+    // will resemble a box blur since with large sigma
+    // the gaussian curve begins to lose its shape
+    float sigma = 0.4f * (float)radius + 0.6f;
+
+    // Now compute the coefficints
+    // We will store some redundant values to save some math during
+    // the blur calculations
+    // precompute some values
+    float coeff1 = 1.0f / (sqrt( 2.0f * pi ) * sigma);
+    float coeff2 = - 1.0f / (2.0f * sigma * sigma);
+
+    float normalizeFactor = 0.0f;
+    for(int32_t r = -radius; r <= radius; r ++) {
+        float floatR = (float)r;
+        weights[r + radius] = coeff1 * pow(e, floatR * floatR * coeff2);
+        normalizeFactor += weights[r + radius];
+    }
+
+    //Now we need to normalize the weights because all our coefficients need to add up to one
+    normalizeFactor = 1.0f / normalizeFactor;
+    for(int32_t r = -radius; r <= radius; r ++) {
+        weights[r + radius] *= normalizeFactor;
+    }
+}
+
+void FontRenderer::horizontalBlur(float* weights, int32_t radius,
+                                    const uint8_t* source, uint8_t* dest,
+                                    int32_t width, int32_t height) {
+    float blurredPixel = 0.0f;
+    float currentPixel = 0.0f;
+
+    for(int32_t y = 0; y < height; y ++) {
+
+        const uint8_t* input = source + y * width;
+        uint8_t* output = dest + y * width;
+
+        for(int32_t x = 0; x < width; x ++) {
+            blurredPixel = 0.0f;
+            const float* gPtr = weights;
+            // Optimization for non-border pixels
+            if ((x > radius) && (x < (width - radius))) {
+                const uint8_t *i = input + (x - radius);
+                for(int r = -radius; r <= radius; r ++) {
+                    currentPixel = (float)(*i);
+                    blurredPixel += currentPixel * gPtr[0];
+                    gPtr++;
+                    i++;
+                }
+            } else {
+                for(int32_t r = -radius; r <= radius; r ++) {
+                    // Stepping left and right away from the pixel
+                    int validW = x + r;
+                    if(validW < 0) {
+                        validW = 0;
+                    }
+                    if(validW > width - 1) {
+                        validW = width - 1;
+                    }
+
+                    currentPixel = (float)(input[validW]);
+                    blurredPixel += currentPixel * gPtr[0];
+                    gPtr++;
+                }
+            }
+            *output = (uint8_t)blurredPixel;
+            output ++;
+        }
+    }
+}
+
+void FontRenderer::verticalBlur(float* weights, int32_t radius,
+                                  const uint8_t* source, uint8_t* dest,
+                                  int32_t width, int32_t height) {
+    float blurredPixel = 0.0f;
+    float currentPixel = 0.0f;
+
+    for(int32_t y = 0; y < height; y ++) {
+
+        uint8_t* output = dest + y * width;
+
+        for(int32_t x = 0; x < width; x ++) {
+            blurredPixel = 0.0f;
+            const float* gPtr = weights;
+            const uint8_t* input = source + x;
+            // Optimization for non-border pixels
+            if ((y > radius) && (y < (height - radius))) {
+                const uint8_t *i = input + ((y - radius) * width);
+                for(int32_t r = -radius; r <= radius; r ++) {
+                    currentPixel = (float)(*i);
+                    blurredPixel += currentPixel * gPtr[0];
+                    gPtr++;
+                    i += width;
+                }
+            } else {
+                for(int32_t r = -radius; r <= radius; r ++) {
+                    int validH = y + r;
+                    // Clamp to zero and width
+                    if(validH < 0) {
+                        validH = 0;
+                    }
+                    if(validH > height - 1) {
+                        validH = height - 1;
+                    }
+
+                    const uint8_t *i = input + validH * width;
+                    currentPixel = (float)(*i);
+                    blurredPixel += currentPixel * gPtr[0];
+                    gPtr++;
+                }
+            }
+            *output = (uint8_t)blurredPixel;
+            output ++;
+        }
+    }
+}
+
+
+void FontRenderer::blurImage(uint8_t *image, int32_t width, int32_t height, int32_t radius) {
+    float *gaussian = new float[2 * radius + 1];
+    computeGaussianWeights(gaussian, radius);
+    uint8_t* scratch = new uint8_t[width * height];
+    horizontalBlur(gaussian, radius, image, scratch, width, height);
+    verticalBlur(gaussian, radius, scratch, image, width, height);
+    delete[] gaussian;
+    delete[] scratch;
 }
 
 }; // namespace uirenderer
