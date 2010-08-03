@@ -14,8 +14,7 @@
 
 package android.view.accessibility;
 
-import android.test.suitebuilder.annotation.MediumTest;
-import android.view.accessibility.AccessibilityEvent;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import junit.framework.TestCase;
 
@@ -39,7 +38,7 @@ public class RecycleAccessibilityEventTest extends TestCase {
     /**
      * If an {@link AccessibilityEvent} is marshaled/unmarshaled correctly
      */
-    @MediumTest
+    @SmallTest
     public void testAccessibilityEventViewTextChangedType() {
         AccessibilityEvent first =
             AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);

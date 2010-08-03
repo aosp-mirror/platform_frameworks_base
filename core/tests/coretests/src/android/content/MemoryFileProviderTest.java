@@ -16,10 +16,11 @@
 
 package android.content;
 
-import android.content.ContentResolver;
 import android.net.Uri;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import java.io.InputStream;
 import java.util.Arrays;
@@ -46,7 +47,7 @@ public class MemoryFileProviderTest extends AndroidTestCase {
     }
 
     // tests that we don't leak file descriptors or virtual address space
-    @MediumTest
+    @LargeTest
     public void testClose() throws Exception {
         ContentResolver resolver = getContext().getContentResolver();
         // open enough file descriptors that we will crash something if we leak FDs
@@ -65,7 +66,7 @@ public class MemoryFileProviderTest extends AndroidTestCase {
     }
 
     // tests that we haven't broken AssestFileDescriptors for normal files.
-    @MediumTest
+    @SmallTest
     public void testFile() throws Exception {
         ContentResolver resolver = getContext().getContentResolver();
         Uri uri = Uri.parse("content://android.content.MemoryFileProvider/file");

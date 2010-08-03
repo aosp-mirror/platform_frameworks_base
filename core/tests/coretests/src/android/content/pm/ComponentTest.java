@@ -16,6 +16,11 @@
 
 package android.content.pm;
 
+import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
+import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+import static android.content.pm.PackageManager.GET_DISABLED_COMPONENTS;
+
 import com.android.frameworks.coretests.enabled_app.DisabledActivity;
 import com.android.frameworks.coretests.enabled_app.DisabledProvider;
 import com.android.frameworks.coretests.enabled_app.DisabledReceiver;
@@ -27,21 +32,9 @@ import com.android.frameworks.coretests.enabled_app.EnabledService;
 
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.ComponentInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.test.suitebuilder.annotation.LargeTest;
+import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
-import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
-import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
-import static android.content.pm.PackageManager.GET_DISABLED_COMPONENTS;
-import android.content.pm.ProviderInfo;
-import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
-import android.test.AndroidTestCase;
 
 import java.util.List;
 
@@ -134,7 +127,7 @@ public class ComponentTest extends AndroidTestCase {
         assertNotNull(mContext);
     }
 
-    @MediumTest
+    @SmallTest
     public void testResolveDisabledActivity() throws Exception {
         mPackageManager.setComponentEnabledSetting(DISABLED_ACTIVITY_COMPONENTNAME,
                                                    COMPONENT_ENABLED_STATE_DEFAULT,
@@ -150,7 +143,7 @@ public class ComponentTest extends AndroidTestCase {
         assertFalse(info2.activityInfo.enabled);
     }
 
-    @MediumTest
+    @SmallTest
     public void testResolveEnabledActivity() throws Exception {
         mPackageManager.setComponentEnabledSetting(ENABLED_ACTIVITY_COMPONENTNAME,
                                                    COMPONENT_ENABLED_STATE_DEFAULT,
@@ -183,7 +176,7 @@ public class ComponentTest extends AndroidTestCase {
         assertFalse(info.activityInfo.enabled);
     }
 
-    @MediumTest
+    @SmallTest
     public void testQueryEnabledActivity() throws Exception {
         mPackageManager.setComponentEnabledSetting(ENABLED_ACTIVITY_COMPONENTNAME,
                                                    COMPONENT_ENABLED_STATE_DEFAULT,
@@ -218,7 +211,7 @@ public class ComponentTest extends AndroidTestCase {
         assertFalse(activityInfo.enabled);
     }
 
-    @MediumTest
+    @SmallTest
     public void testGetEnabledActivityInfo() throws Exception {
         mPackageManager.setComponentEnabledSetting(ENABLED_ACTIVITY_COMPONENTNAME,
                                                    COMPONENT_ENABLED_STATE_DEFAULT,
@@ -253,7 +246,7 @@ public class ComponentTest extends AndroidTestCase {
         assertEquals(1, infoList.size());
     }
 
-    @LargeTest
+    @MediumTest
     public void testDisableActivity() throws Exception {
         mPackageManager.setComponentEnabledSetting(ENABLED_ACTIVITY_COMPONENTNAME,
                                                    COMPONENT_ENABLED_STATE_DEFAULT,
@@ -281,7 +274,7 @@ public class ComponentTest extends AndroidTestCase {
         assertEquals(0, infoList.size());
     }
 
-    @MediumTest
+    @SmallTest
     public void testResolveDisabledService() throws Exception {
         mPackageManager.setComponentEnabledSetting(DISABLED_SERVICE_COMPONENTNAME,
                                                    COMPONENT_ENABLED_STATE_DEFAULT,
@@ -297,7 +290,7 @@ public class ComponentTest extends AndroidTestCase {
         assertFalse(info2.serviceInfo.enabled);
     }
 
-    @MediumTest
+    @SmallTest
     public void testResolveEnabledService() throws Exception {
         mPackageManager.setComponentEnabledSetting(ENABLED_SERVICE_COMPONENTNAME,
                                                    COMPONENT_ENABLED_STATE_DEFAULT,
@@ -310,7 +303,7 @@ public class ComponentTest extends AndroidTestCase {
         assertTrue(info.serviceInfo.enabled);
     }
 
-    @MediumTest
+    @SmallTest
     public void testQueryDisabledService() throws Exception {
         mPackageManager.setComponentEnabledSetting(DISABLED_SERVICE_COMPONENTNAME,
                                                    COMPONENT_ENABLED_STATE_DEFAULT,
@@ -330,7 +323,7 @@ public class ComponentTest extends AndroidTestCase {
         assertFalse(info.serviceInfo.enabled);
     }
 
-    @MediumTest
+    @SmallTest
     public void testQueryEnabledService() throws Exception {
         mPackageManager.setComponentEnabledSetting(ENABLED_SERVICE_COMPONENTNAME,
                                                    COMPONENT_ENABLED_STATE_DEFAULT,
@@ -365,7 +358,7 @@ public class ComponentTest extends AndroidTestCase {
         assertFalse(serviceInfo.enabled);
     }
 
-    @MediumTest
+    @SmallTest
     public void testGetEnabledServiceInfo() throws Exception {
         mPackageManager.setComponentEnabledSetting(ENABLED_SERVICE_COMPONENTNAME,
                                                    COMPONENT_ENABLED_STATE_DEFAULT,
@@ -396,7 +389,7 @@ public class ComponentTest extends AndroidTestCase {
         assertFalse(info2.serviceInfo.enabled);
     }
 
-    @LargeTest
+    @MediumTest
     public void testDisableService() throws Exception {
         mPackageManager.setComponentEnabledSetting(ENABLED_SERVICE_COMPONENTNAME,
                                                    COMPONENT_ENABLED_STATE_DEFAULT,
@@ -420,7 +413,7 @@ public class ComponentTest extends AndroidTestCase {
         assertTrue(info3.serviceInfo.enabled);
     }
 
-    @MediumTest
+    @SmallTest
     public void testQueryDisabledReceiver() throws Exception {
         mPackageManager.setComponentEnabledSetting(DISABLED_RECEIVER_COMPONENTNAME,
                                                    COMPONENT_ENABLED_STATE_DEFAULT,
@@ -440,7 +433,7 @@ public class ComponentTest extends AndroidTestCase {
         assertFalse(info.activityInfo.enabled);
     }
 
-    @MediumTest
+    @SmallTest
     public void testQueryEnabledReceiver() throws Exception {
         mPackageManager.setComponentEnabledSetting(ENABLED_RECEIVER_COMPONENTNAME,
                                                    COMPONENT_ENABLED_STATE_DEFAULT,
@@ -475,7 +468,7 @@ public class ComponentTest extends AndroidTestCase {
         assertFalse(activityInfo.enabled);
     }
 
-    @MediumTest
+    @SmallTest
     public void testGetEnabledReceiverInfo() throws Exception {
         mPackageManager.setComponentEnabledSetting(ENABLED_RECEIVER_COMPONENTNAME,
                                                    COMPONENT_ENABLED_STATE_DEFAULT,
@@ -530,7 +523,7 @@ public class ComponentTest extends AndroidTestCase {
         }
     }
 
-    @MediumTest
+    @SmallTest
     public void testResolveEnabledProvider() throws Exception {
         mPackageManager.setComponentEnabledSetting(ENABLED_PROVIDER_COMPONENTNAME,
                                                    COMPONENT_ENABLED_STATE_DEFAULT,
@@ -542,7 +535,7 @@ public class ComponentTest extends AndroidTestCase {
         assertTrue(providerInfo.enabled);
     }
 
-    @MediumTest
+    @SmallTest
     public void testResolveDisabledProvider() throws Exception {
         mPackageManager.setComponentEnabledSetting(DISABLED_PROVIDER_COMPONENTNAME,
                                                    COMPONENT_ENABLED_STATE_DEFAULT,
@@ -594,7 +587,7 @@ public class ComponentTest extends AndroidTestCase {
         assertNull(providerInfo2);
     }
 
-    @MediumTest
+    @SmallTest
     public void testQueryEnabledProvider() throws Exception {
         mPackageManager.setComponentEnabledSetting(ENABLED_PROVIDER_COMPONENTNAME,
                                                    COMPONENT_ENABLED_STATE_DEFAULT,

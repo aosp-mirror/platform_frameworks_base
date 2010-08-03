@@ -16,13 +16,12 @@
 
 package android.content;
 
-import android.content.Intent;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 
 /** Test to make sure brick intents <b>don't</b> work without permission. */
 public class BrickDeniedTest extends AndroidTestCase {
-    @MediumTest
+    @SmallTest
     public void testBrick() {
         // Try both the old and new brick intent names.  Neither should work,
         // since this test application doesn't have the required permission.

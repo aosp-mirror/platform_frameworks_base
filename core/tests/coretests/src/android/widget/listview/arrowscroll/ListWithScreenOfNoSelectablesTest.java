@@ -16,21 +16,19 @@
 
 package android.widget.listview.arrowscroll;
 
-import android.widget.listview.ListWithScreenOfNoSelectables;
-
-import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
+import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.listview.ListWithScreenOfNoSelectables;
 
-public class ListWithScreenOfNoSelectablesTest extends ActivityInstrumentationTestCase<ListWithScreenOfNoSelectables> {
+public class ListWithScreenOfNoSelectablesTest extends ActivityInstrumentationTestCase2<ListWithScreenOfNoSelectables> {
 
     private ListView mListView;
 
     public ListWithScreenOfNoSelectablesTest() {
-        super("com.android.frameworks.coretests", ListWithScreenOfNoSelectables.class);
+        super(ListWithScreenOfNoSelectables.class);
     }
 
     @Override
@@ -56,7 +54,7 @@ public class ListWithScreenOfNoSelectablesTest extends ActivityInstrumentationTe
     @MediumTest
     public void testGoFromSelectedViewExistsToNoSelectedViewExists() {
 
-        // go down untile first (and only selectable) item is off screen
+        // go down until first (and only selectable) item is off screen
         View first = mListView.getChildAt(0);
         while (first.getParent() != null) {
             sendKeys(KeyEvent.KEYCODE_DPAD_DOWN);
@@ -67,7 +65,7 @@ public class ListWithScreenOfNoSelectablesTest extends ActivityInstrumentationTe
         assertNull("selected view", mListView.getSelectedView());
     }
 
-    @LargeTest
+    @MediumTest
     public void testPanDownAcrossUnselectableChildrenToBottom() {
         final int lastPosition = mListView.getCount() - 1;
         final int maxDowns = 20;
