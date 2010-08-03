@@ -42,8 +42,6 @@ import java.util.UUID;
  * <p>If the effect is to be applied to a specific AudioTrack or MediaPlayer instance,
  * the application must specify the audio session ID of that instance when calling the AudioEffect
  * constructor.
- *
- * { @hide Pending API council review }
  */
 public class AudioEffect {
     static {
@@ -107,15 +105,15 @@ public class AudioEffect {
     /**
      * Event id for engine state change notification.
      */
-    protected static final int NATIVE_EVENT_ENABLED_STATUS = 0;
+    public static final int NATIVE_EVENT_ENABLED_STATUS = 0;
     /**
      * Event id for engine control ownership change notification.
      */
-    protected static final int NATIVE_EVENT_CONTROL_STATUS = 1;
+    public static final int NATIVE_EVENT_CONTROL_STATUS = 1;
     /**
      * Event id for engine parameter change notification.
      */
-    protected static final int NATIVE_EVENT_PARAMETER_CHANGED = 2;
+    public static final int NATIVE_EVENT_PARAMETER_CHANGED = 2;
 
     /**
      * Successful operation.
@@ -203,15 +201,15 @@ public class AudioEffect {
     /**
      * Indicates the state of the AudioEffect instance
      */
-    protected int mState = STATE_UNINITIALIZED;
+    private int mState = STATE_UNINITIALIZED;
     /**
      * Lock to synchronize access to mState
      */
-    protected final Object mStateLock = new Object();
+    private final Object mStateLock = new Object();
     /**
      * System wide unique effect ID
      */
-    protected int mId;
+    private int mId;
 
     // accessed by native methods
     private int mNativeAudioEffect;
@@ -227,27 +225,27 @@ public class AudioEffect {
      *
      * @see #setEnableStatusListener(OnEnableStatusChangeListener)
      */
-    protected OnEnableStatusChangeListener mEnableStatusChangeListener = null;
+    private OnEnableStatusChangeListener mEnableStatusChangeListener = null;
     /**
      * Listener for effect engine control ownership change notifications.
      *
      * @see #setControlStatusListener(OnControlStatusChangeListener)
      */
-    protected OnControlStatusChangeListener mControlChangeStatusListener = null;
+    private OnControlStatusChangeListener mControlChangeStatusListener = null;
     /**
      * Listener for effect engine control ownership change notifications.
      *
      * @see #setParameterListener(OnParameterChangeListener)
      */
-    protected OnParameterChangeListener mParameterChangeListener = null;
+    private OnParameterChangeListener mParameterChangeListener = null;
     /**
      * Lock to protect listeners updates against event notifications
      */
-    protected final Object mListenerLock = new Object();
+    public final Object mListenerLock = new Object();
     /**
      * Handler for events coming from the native code
      */
-    protected NativeEventHandler mNativeEventHandler = null;
+    public NativeEventHandler mNativeEventHandler = null;
 
     // --------------------------------------------------------------------------
     // Constructor, Finalize
@@ -275,7 +273,7 @@ public class AudioEffect {
      *            how much the requesting application needs control of effect
      *            parameters. The normal priority is 0, above normal is a
      *            positive number, below normal a negative number.
-     * @param audioSession System wide unique audio session identifier. If audioSession
+     * @param audioSession system wide unique audio session identifier. If audioSession
      *            is not 0, the effect will be attached to the MediaPlayer or
      *            AudioTrack in the same audio session. Otherwise, the effect
      *            will apply to the output mix.
@@ -337,7 +335,7 @@ public class AudioEffect {
     /**
      * Get the effect descriptor.
      *
-     //TODO when AudioEffect class is unhidden @ see android.media.AudioEffect.Descriptor
+     * @see android.media.AudioEffect.Descriptor
      * @throws IllegalStateException
      */
     public Descriptor getDescriptor() throws IllegalStateException {
@@ -351,7 +349,7 @@ public class AudioEffect {
 
     /**
      * Query all effects available on the platform. Returns an array of
-     //TODO when AudioEffect class is unhidden: {@ link android.media.AudioEffect.Descriptor} objects
+     * {@link android.media.AudioEffect.Descriptor} objects
      *
      * @throws IllegalStateException
      */
@@ -967,7 +965,7 @@ public class AudioEffect {
     // Utility methods
     // ------------------
 
-    protected void checkState(String methodName) throws IllegalStateException {
+    public void checkState(String methodName) throws IllegalStateException {
         synchronized (mStateLock) {
             if (mState != STATE_INITIALIZED) {
                 throw (new IllegalStateException(methodName
@@ -976,7 +974,7 @@ public class AudioEffect {
         }
     }
 
-    protected void checkStatus(int status) {
+    public void checkStatus(int status) {
         switch (status) {
         case AudioEffect.SUCCESS:
             break;
@@ -991,37 +989,37 @@ public class AudioEffect {
         }
     }
 
-    protected int byteArrayToInt(byte[] valueBuf) {
+    public int byteArrayToInt(byte[] valueBuf) {
         return byteArrayToInt(valueBuf, 0);
 
     }
 
-    protected int byteArrayToInt(byte[] valueBuf, int offset) {
+    public int byteArrayToInt(byte[] valueBuf, int offset) {
         ByteBuffer converter = ByteBuffer.wrap(valueBuf);
         converter.order(ByteOrder.nativeOrder());
         return converter.getInt(offset);
 
     }
 
-    protected byte[] intToByteArray(int value) {
+    public byte[] intToByteArray(int value) {
         ByteBuffer converter = ByteBuffer.allocate(4);
         converter.order(ByteOrder.nativeOrder());
         converter.putInt(value);
         return converter.array();
     }
 
-    protected short byteArrayToShort(byte[] valueBuf) {
+    public short byteArrayToShort(byte[] valueBuf) {
         return byteArrayToShort(valueBuf, 0);
     }
 
-    protected short byteArrayToShort(byte[] valueBuf, int offset) {
+    public short byteArrayToShort(byte[] valueBuf, int offset) {
         ByteBuffer converter = ByteBuffer.wrap(valueBuf);
         converter.order(ByteOrder.nativeOrder());
         return converter.getShort(offset);
 
     }
 
-    protected byte[] shortToByteArray(short value) {
+    public byte[] shortToByteArray(short value) {
         ByteBuffer converter = ByteBuffer.allocate(2);
         converter.order(ByteOrder.nativeOrder());
         short sValue = (short) value;
@@ -1029,7 +1027,7 @@ public class AudioEffect {
         return converter.array();
     }
 
-    protected byte[] concatArrays(byte[]... arrays) {
+    public byte[] concatArrays(byte[]... arrays) {
         int len = 0;
         for (byte[] a : arrays) {
             len += a.length;
