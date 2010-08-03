@@ -486,6 +486,19 @@ status_t StagefrightRecorder::setParamTimeLapseEnable(int32_t timeLapseEnable) {
     return OK;
 }
 
+status_t StagefrightRecorder::setParamUseStillCameraForTimeLapse(int32_t useStillCamera) {
+    LOGV("setParamUseStillCameraForTimeLapse: %d", useStillCamera);
+
+    if(useStillCamera == 0) {
+        mUseStillCameraForTimeLapse= false;
+    } else if (useStillCamera == 1) {
+        mUseStillCameraForTimeLapse= true;
+    } else {
+        return BAD_VALUE;
+    }
+    return OK;
+}
+
 status_t StagefrightRecorder::setParamTimeBetweenTimeLapseFrameCapture(int64_t timeUs) {
     LOGV("setParamTimeBetweenTimeLapseFrameCapture: %lld us", timeUs);
 
@@ -586,6 +599,11 @@ status_t StagefrightRecorder::setParameter(
         int32_t timeLapseEnable;
         if (safe_strtoi32(value.string(), &timeLapseEnable)) {
             return setParamTimeLapseEnable(timeLapseEnable);
+        }
+    } else if (key == "use-still-camera-for-time-lapse") {
+        int32_t useStillCamera;
+        if (safe_strtoi32(value.string(), &useStillCamera)) {
+            return setParamUseStillCameraForTimeLapse(useStillCamera);
         }
     } else if (key == "time-between-time-lapse-frame-capture") {
         int64_t timeBetweenTimeLapseFrameCaptureMs;
@@ -930,7 +948,7 @@ status_t StagefrightRecorder::setupVideoEncoder(const sp<MediaWriter>& writer) {
     if (err != OK) return err;
 
     sp<CameraSource> cameraSource = (mCaptureTimeLapse) ?
-        CameraSourceTimeLapse::CreateFromCamera(mCamera, true,
+        CameraSourceTimeLapse::CreateFromCamera(mCamera, mUseStillCameraForTimeLapse,
                 mTimeBetweenTimeLapseFrameCaptureUs, mVideoWidth, mVideoHeight, mFrameRate):
         CameraSource::CreateFromCamera(mCamera);
     CHECK(cameraSource != NULL);
@@ -1133,6 +1151,7 @@ status_t StagefrightRecorder::reset() {
     mMaxFileSizeBytes = 0;
     mTrackEveryTimeDurationUs = 0;
     mCaptureTimeLapse = false;
+    mUseStillCameraForTimeLapse = true;
     mTimeBetweenTimeLapseFrameCaptureUs = -1;
     mEncoderProfiles = MediaProfiles::getInstance();
 

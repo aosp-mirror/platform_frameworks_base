@@ -288,9 +288,12 @@ public class MediaRecorder
      * @hide
      */
     public void setTimeLapseParameters(boolean enableTimeLapse,
+            boolean useStillCameraForTimeLapse,
             int timeBetweenTimeLapseFrameCaptureMs, int encoderLevel) {
         setParameter(String.format("time-lapse-enable=%d",
                     (enableTimeLapse) ? 1 : 0));
+        setParameter(String.format("use-still-camera-for-time-lapse=%d",
+                    (useStillCameraForTimeLapse) ? 1 : 0));
         setParameter(String.format("time-between-time-lapse-frame-capture=%d",
                     timeBetweenTimeLapseFrameCaptureMs));
         setVideoEncoderLevel(encoderLevel);

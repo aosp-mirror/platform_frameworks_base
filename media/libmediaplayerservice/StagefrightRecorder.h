@@ -93,6 +93,7 @@ private:
     int64_t mTrackEveryTimeDurationUs;
 
     bool mCaptureTimeLapse;
+    bool mUseStillCameraForTimeLapse;
     int64_t mTimeBetweenTimeLapseFrameCaptureUs;
 
     String8 mParams;
@@ -116,6 +117,7 @@ private:
     status_t setParamAudioSamplingRate(int32_t sampleRate);
     status_t setParamAudioTimeScale(int32_t timeScale);
     status_t setParamTimeLapseEnable(int32_t timeLapseEnable);
+    status_t setParamUseStillCameraForTimeLapse(int32_t useStillCamera);
     status_t setParamTimeBetweenTimeLapseFrameCapture(int64_t timeUs);
     status_t setParamVideoEncodingBitRate(int32_t bitRate);
     status_t setParamVideoIFramesInterval(int32_t seconds);
