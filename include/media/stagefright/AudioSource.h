@@ -57,11 +57,10 @@ private:
 
     bool mCollectStats;
     bool mTrackMaxAmplitude;
-    int64_t mTotalReadTimeUs;
-    int64_t mTotalReadBytes;
-    int64_t mTotalReads;
     int64_t mStartTimeUs;
     int16_t mMaxAmplitude;
+    int64_t mPrevSampleTimeUs;
+    int64_t mNumLostFrames;
 
     MediaBufferGroup *mGroup;
 
