@@ -26,8 +26,7 @@
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
 #include <cutils/properties.h>
-#include <sys/time.h>
-#include <time.h>
+#include <stdlib.h>
 
 namespace android {
 
@@ -35,9 +34,8 @@ AudioSource::AudioSource(
         int inputSource, uint32_t sampleRate, uint32_t channels)
     : mStarted(false),
       mCollectStats(false),
-      mTotalReadTimeUs(0),
-      mTotalReadBytes(0),
-      mTotalReads(0),
+      mPrevSampleTimeUs(0),
+      mNumLostFrames(0),
       mGroup(NULL) {
 
     LOGV("sampleRate: %d, channels: %d", sampleRate, channels);
@@ -110,10 +108,7 @@ status_t AudioSource::stop() {
     mStarted = false;
 
     if (mCollectStats) {
-        LOGI("%lld reads: %.2f bps in %lld us",
-                mTotalReads,
-                (mTotalReadBytes * 8000000.0) / mTotalReadTimeUs,
-                mTotalReadTimeUs);
+        LOGI("Total lost audio frames: %lld", mNumLostFrames);
     }
 
     return OK;
@@ -129,67 +124,113 @@ sp<MetaData> AudioSource::getFormat() {
     return meta;
 }
 
+/*
+ * Returns -1 if frame skipping request is too long.
+ * Returns  0 if there is no need to skip frames.
+ * Returns  1 if we need to skip frames.
+ */
+static int skipFrame(int64_t timestampUs,
+        const MediaSource::ReadOptions *options) {
+
+    int64_t skipFrameUs;
+    if (!options || !options->getSkipFrame(&skipFrameUs)) {
+        return 0;
+    }
+
+    if (skipFrameUs <= timestampUs) {
+        return 0;
+    }
+
+    // Safe guard against the abuse of the kSkipFrame_Option.
+    if (skipFrameUs - timestampUs >= 1E6) {
+        LOGE("Frame skipping requested is way too long: %lld us",
+            skipFrameUs - timestampUs);
+
+        return -1;
+    }
+
+    LOGV("skipFrame: %lld us > timestamp: %lld us",
+        skipFrameUs, timestampUs);
+
+    return 1;
+
+}
+
 status_t AudioSource::read(
         MediaBuffer **out, const ReadOptions *options) {
     *out = NULL;
-    ++mTotalReads;
 
     MediaBuffer *buffer;
     CHECK_EQ(mGroup->acquire_buffer(&buffer), OK);
 
+    int err = 0;
     while (mStarted) {
+
         uint32_t numFramesRecorded;
         mRecord->getPosition(&numFramesRecorded);
-        int64_t latency = mRecord->latency() * 1000;
 
-        int64_t readTime = systemTime() / 1000;
 
-        if (numFramesRecorded == 0) {
+        if (numFramesRecorded == 0 && mPrevSampleTimeUs == 0) {
             // Initial delay
             if (mStartTimeUs > 0) {
-                mStartTimeUs = readTime - mStartTimeUs;
+                mStartTimeUs = systemTime() / 1000 - mStartTimeUs;
             } else {
-                mStartTimeUs += latency;
+                // Assume latency is constant.
+                mStartTimeUs += mRecord->latency() * 1000;
             }
-        }
-
-        ssize_t n = 0;
-        if (mCollectStats) {
-            n = mRecord->read(buffer->data(), buffer->size());
-            int64_t endTime = systemTime() / 1000;
-            mTotalReadTimeUs += (endTime - readTime);
-            if (n >= 0) {
-                mTotalReadBytes += n;
-            }
-        } else {
-            n = mRecord->read(buffer->data(), buffer->size());
-        }
-
-        if (n < 0) {
-            buffer->release();
-            buffer = NULL;
-
-            return (status_t)n;
+            mPrevSampleTimeUs = mStartTimeUs;
         }
 
         uint32_t sampleRate = mRecord->getSampleRate();
-        int64_t timestampUs = (1000000LL * numFramesRecorded) / sampleRate +
-                                 mStartTimeUs;
-        int64_t skipFrameUs;
-        if (!options || !options->getSkipFrame(&skipFrameUs)) {
-            skipFrameUs = timestampUs;  // Don't skip frame
-        }
 
-        if (skipFrameUs > timestampUs) {
-            // Safe guard against the abuse of the kSkipFrame_Option.
-            if (skipFrameUs - timestampUs >= 1E6) {
-                LOGE("Frame skipping requested is way too long: %lld us",
-                    skipFrameUs - timestampUs);
+        // Insert null frames when lost frames are detected.
+        int64_t timestampUs = mPrevSampleTimeUs;
+        uint32_t numLostBytes = mRecord->getInputFramesLost() << 1;
+#if 0
+        // Simulate lost frames
+        numLostBytes = ((rand() * 1.0 / RAND_MAX)) * kMaxBufferSize;
+        numLostBytes &= 0xFFFFFFFE; // Alignment request
+
+        // Reduce the chance to lose
+        if (rand() * 1.0 / RAND_MAX >= 0.05) {
+            numLostBytes = 0;
+        }
+#endif
+        if (numLostBytes > 0) {
+            // Not expect too many lost frames!
+            CHECK(numLostBytes <= kMaxBufferSize);
+
+            timestampUs += (1000000LL * numLostBytes >> 1) / sampleRate;
+            CHECK(timestampUs > mPrevSampleTimeUs);
+            if (mCollectStats) {
+                mNumLostFrames += (numLostBytes >> 1);
+            }
+            if ((err = skipFrame(timestampUs, options)) == -1) {
                 buffer->release();
                 return UNKNOWN_ERROR;
+            } else if (err != 0) {
+                continue;
             }
-            LOGV("skipFrame: %lld us > timestamp: %lld us, samples %d",
-                skipFrameUs, timestampUs, numFramesRecorded);
+            memset(buffer->data(), 0, numLostBytes);
+            buffer->set_range(0, numLostBytes);
+            buffer->meta_data()->setInt64(kKeyTime, mPrevSampleTimeUs);
+            mPrevSampleTimeUs = timestampUs;
+            *out = buffer;
+            return OK;
+        }
+
+        ssize_t n = mRecord->read(buffer->data(), buffer->size());
+        if (n < 0) {
+            buffer->release();
+            return (status_t)n;
+        }
+
+        int64_t recordDurationUs = (1000000LL * n >> 1) / sampleRate;
+        timestampUs += recordDurationUs;
+        if ((err = skipFrame(timestampUs, options)) == -1) {
+            buffer->release();
+            return UNKNOWN_ERROR;
+        } else if (err != 0) {
             continue;
         }
 
@@ -197,7 +238,13 @@ status_t AudioSource::read(
             trackMaxAmplitude((int16_t *) buffer->data(), n >> 1);
         }
 
-        buffer->meta_data()->setInt64(kKeyTime, timestampUs);
+        buffer->meta_data()->setInt64(kKeyTime, mPrevSampleTimeUs);
+        CHECK(timestampUs > mPrevSampleTimeUs);
+        if (mNumLostFrames == 0) {
+            CHECK_EQ(mPrevSampleTimeUs,
+                mStartTimeUs + (1000000LL * numFramesRecorded) / sampleRate);
+        }
+        mPrevSampleTimeUs = timestampUs;
         LOGV("initial delay: %lld, sample rate: %d, timestamp: %lld",
                 mStartTimeUs, sampleRate, timestampUs);
 
