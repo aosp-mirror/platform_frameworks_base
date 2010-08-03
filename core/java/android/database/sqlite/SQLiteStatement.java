@@ -37,10 +37,10 @@ public class SQLiteStatement extends SQLiteProgram
     private static final boolean WRITE = false;
 
     private SQLiteDatabase mOrigDb;
-    private int state;
-    /** possible value for {@link #state}. indicates that a transaction is started.} */
+    private int mState;
+    /** possible value for {@link #mState}. indicates that a transaction is started.} */
     private static final int TRANS_STARTED = 1;
-    /** possible value for {@link #state}. indicates that a lock is acquired.} */
+    /** possible value for {@link #mState}. indicates that a lock is acquired.} */
     private static final int LOCK_ACQUIRED = 2;
 
     /**
@@ -49,8 +49,8 @@ public class SQLiteStatement extends SQLiteProgram
      * @param db
      * @param sql
      */
-    /* package */ SQLiteStatement(SQLiteDatabase db, String sql) {
-        super(db, sql, false /* don't compile sql statement */);
+    /* package */ SQLiteStatement(SQLiteDatabase db, String sql, Object[] bindArgs) {
+        super(db, sql, bindArgs, false /* don't compile sql statement */);
     }
 
     /**
@@ -166,7 +166,7 @@ public class SQLiteStatement extends SQLiteProgram
      * methods in this class.
      */
     private long acquireAndLock(boolean rwFlag) {
-        state = 0;
+        mState = 0;
         // use pooled database connection handles for SELECT SQL statements
         mDatabase.verifyDbIsOpen();
         SQLiteDatabase db = (mStatementType != DatabaseUtils.STATEMENT_SELECT) ? mDatabase
@@ -197,13 +197,13 @@ public class SQLiteStatement extends SQLiteProgram
             // got update SQL statement. if there is NO pending transaction, start one
             if (!mDatabase.inTransaction()) {
                 mDatabase.beginTransactionNonExclusive();
-                state = TRANS_STARTED;
+                mState = TRANS_STARTED;
             }
         }
         // do I have database lock? if not, grab it.
         if (!mDatabase.isDbLockedByCurrentThread()) {
             mDatabase.lock();
-            state = LOCK_ACQUIRED;
+            mState = LOCK_ACQUIRED;
         }
 
         acquireReference();
@@ -218,13 +218,13 @@ public class SQLiteStatement extends SQLiteProgram
      */
     private void releaseAndUnlock() {
         releaseReference();
-        if (state == TRANS_STARTED) {
+        if (mState == TRANS_STARTED) {
             try {
                 mDatabase.setTransactionSuccessful();
             } finally {
                 mDatabase.endTransaction();
             }
-        } else if (state == LOCK_ACQUIRED) {
+        } else if (mState == LOCK_ACQUIRED) {
             mDatabase.unlock();
         }
         if (mStatementType == DatabaseUtils.STATEMENT_COMMIT ||

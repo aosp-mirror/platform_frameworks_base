@@ -678,14 +678,8 @@ public class DatabaseUtils {
      * first column of the first row.
      */
     public static long longForQuery(SQLiteStatement prog, String[] selectionArgs) {
-        if (selectionArgs != null) {
-            int size = selectionArgs.length;
-            for (int i = 0; i < size; i++) {
-                bindObjectToProgram(prog, i + 1, selectionArgs[i]);
-            }
-        }
-        long value = prog.simpleQueryForLong();
-        return value;
+        prog.bindAllArgsAsStrings(selectionArgs);
+        return prog.simpleQueryForLong();
     }
 
     /**
@@ -706,14 +700,8 @@ public class DatabaseUtils {
      * first column of the first row.
      */
     public static String stringForQuery(SQLiteStatement prog, String[] selectionArgs) {
-        if (selectionArgs != null) {
-            int size = selectionArgs.length;
-            for (int i = 0; i < size; i++) {
-                bindObjectToProgram(prog, i + 1, selectionArgs[i]);
-            }
-        }
-        String value = prog.simpleQueryForString();
-        return value;
+        prog.bindAllArgsAsStrings(selectionArgs);
+        return prog.simpleQueryForString();
     }
 
     /**

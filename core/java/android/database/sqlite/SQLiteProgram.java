@@ -17,10 +17,10 @@
 package android.database.sqlite;
 
 import android.database.DatabaseUtils;
+import android.database.Cursor;
 import android.util.Log;
-import android.util.Pair;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * A base class for compiled SQLite programs.
@@ -47,7 +47,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @deprecated do not use this
      */
     @Deprecated
-    protected int nHandle = 0;
+    protected int nHandle;
 
     /**
      * the SQLiteCompiledSql object for the given sql statement.
@@ -60,7 +60,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @deprecated do not use this
      */
     @Deprecated
-    protected int nStatement = 0;
+    protected int nStatement;
 
     /**
      * In the case of {@link SQLiteStatement}, this member stores the bindargs passed
@@ -84,23 +84,29 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * <p>
      * It is protected (in multi-threaded environment) by {@link SQLiteProgram}.this
      */
-    private ArrayList<Pair<Integer, Object>> mBindArgs = null;
-
+    /* package */ HashMap<Integer, Object> mBindArgs = null;
     /* package */ final int mStatementType;
 
     /* package */ SQLiteProgram(SQLiteDatabase db, String sql) {
-        this(db, sql, true);
+        this(db, sql, null, true);
     }
 
-    /* package */ SQLiteProgram(SQLiteDatabase db, String sql, boolean compileFlag) {
+    /* package */ SQLiteProgram(SQLiteDatabase db, String sql, Object[] bindArgs,
+            boolean compileFlag) {
         mSql = sql.trim();
         mStatementType = DatabaseUtils.getSqlStatementType(mSql);
         db.acquireReference();
         db.addSQLiteClosable(this);
         mDatabase = db;
         nHandle = db.mNativeHandle;
+        if (bindArgs != null) {
+            int size = bindArgs.length;
+            for (int i = 0; i < size; i++) {
+                this.addToBindArgs(i + 1, bindArgs[i]);
+            }
+        }
         if (compileFlag) {
-            compileSql();
+            compileAndbindAllArgs();
         }
     }
 
@@ -218,6 +224,39 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         // TODO is there a need for this?
     }
 
+    private void bind(int type, int index, Object value) {
+        mDatabase.verifyDbIsOpen();
+        synchronized (this) {
+            addToBindArgs(index, (type == Cursor.FIELD_TYPE_NULL) ? null : value);
+            if (nStatement > 0) {
+                // bind only if the SQL statement is compiled
+                acquireReference();
+                try {
+                    switch (type) {
+                        case Cursor.FIELD_TYPE_NULL:
+                            native_bind_null(index);
+                            break;
+                        case Cursor.FIELD_TYPE_BLOB:
+                            native_bind_blob(index, (byte[]) value);
+                            break;
+                        case Cursor.FIELD_TYPE_FLOAT:
+                            native_bind_double(index, (Double) value);
+                            break;
+                        case Cursor.FIELD_TYPE_INTEGER:
+                            native_bind_long(index, (Long) value);
+                            break;
+                        case Cursor.FIELD_TYPE_STRING:
+                        default:
+                            native_bind_string(index, (String) value);
+                            break;
+                    }
+                } finally {
+                    releaseReference();
+                }
+            }
+        }
+    }
+
     /**
      * Bind a NULL value to this statement. The value remains bound until
      * {@link #clearBindings} is called.
@@ -225,44 +264,18 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @param index The 1-based index to the parameter to bind null to
      */
     public void bindNull(int index) {
-        mDatabase.verifyDbIsOpen();
-        synchronized (this) {
-            acquireReference();
-            try {
-                if (this.nStatement == 0) {
-                    // since the SQL statement is not compiled, don't do the binding yet.
-                    // can be done before executing the SQL statement
-                    addToBindArgs(index, null);
-                } else {
-                    native_bind_null(index);
-                }
-            } finally {
-                releaseReference();
-            }
-        }
+        bind(Cursor.FIELD_TYPE_NULL, index, null);
     }
 
     /**
      * Bind a long value to this statement. The value remains bound until
      * {@link #clearBindings} is called.
-     *
+     *addToBindArgs
      * @param index The 1-based index to the parameter to bind
      * @param value The value to bind
      */
     public void bindLong(int index, long value) {
-        mDatabase.verifyDbIsOpen();
-        synchronized (this) {
-            acquireReference();
-            try {
-                if (this.nStatement == 0) {
-                    addToBindArgs(index, value);
-                } else {
-                    native_bind_long(index, value);
-                }
-            } finally {
-                releaseReference();
-            }
-        }
+        bind(Cursor.FIELD_TYPE_INTEGER, index, value);
     }
 
     /**
@@ -273,19 +286,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @param value The value to bind
      */
     public void bindDouble(int index, double value) {
-        mDatabase.verifyDbIsOpen();
-        synchronized (this) {
-            acquireReference();
-            try {
-                if (this.nStatement == 0) {
-                    addToBindArgs(index, value);
-                } else {
-                    native_bind_double(index, value);
-                }
-            } finally {
-                releaseReference();
-            }
-        }
+        bind(Cursor.FIELD_TYPE_FLOAT, index, value);
     }
 
     /**
@@ -299,19 +300,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         if (value == null) {
             throw new IllegalArgumentException("the bind value at index " + index + " is null");
         }
-        mDatabase.verifyDbIsOpen();
-        synchronized (this) {
-            acquireReference();
-            try {
-                if (this.nStatement == 0) {
-                    addToBindArgs(index, value);
-                } else {
-                    native_bind_string(index, value);
-                }
-            } finally {
-                releaseReference();
-            }
-        }
+        bind(Cursor.FIELD_TYPE_STRING, index, value);
     }
 
     /**
@@ -325,19 +314,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         if (value == null) {
             throw new IllegalArgumentException("the bind value at index " + index + " is null");
         }
-        mDatabase.verifyDbIsOpen();
-        synchronized (this) {
-            acquireReference();
-            try {
-                if (this.nStatement == 0) {
-                    addToBindArgs(index, value);
-                } else {
-                    native_bind_blob(index, value);
-                }
-            } finally {
-                releaseReference();
-            }
-        }
+        bind(Cursor.FIELD_TYPE_BLOB, index, value);
     }
 
     /**
@@ -374,28 +351,56 @@ public abstract class SQLiteProgram extends SQLiteClosable {
 
     private synchronized void addToBindArgs(int index, Object value) {
         if (mBindArgs == null) {
-            mBindArgs = new ArrayList<Pair<Integer, Object>>();
+            mBindArgs = new HashMap<Integer, Object>();
         }
-        mBindArgs.add(new Pair<Integer, Object>(index, value));
+        mBindArgs.put(index, value);
     }
 
     /* package */ synchronized void compileAndbindAllArgs() {
-        assert nStatement == 0;
-        compileSql();
+        if (nStatement == 0) {
+            // SQL statement is not compiled yet. compile it now.
+            compileSql();
+        }
         if (mBindArgs == null) {
             return;
         }
-        for (Pair<Integer, Object> p : mBindArgs) {
-            if (p.second == null) {
-                native_bind_null(p.first);
-            } else if (p.second instanceof Long) {
-                native_bind_long(p.first, (Long)p.second);
-            } else if (p.second instanceof Double) {
-                native_bind_double(p.first, (Double)p.second);
-            } else if (p.second instanceof byte[]) {
-                native_bind_blob(p.first, (byte[])p.second);
-            }  else {
-                native_bind_string(p.first, (String)p.second);
+        for (int index : mBindArgs.keySet()) {
+            Object value = mBindArgs.get(index);
+            if (value == null) {
+                native_bind_null(index);
+            } else if (value instanceof Double || value instanceof Float) {
+                native_bind_double(index, ((Number) value).doubleValue());
+            } else if (value instanceof Number) {
+                native_bind_long(index, ((Number) value).longValue());
+            } else if (value instanceof Boolean) {
+                Boolean bool = (Boolean)value;
+                native_bind_long(index, (bool) ? 1 : 0);
+                if (bool) {
+                    native_bind_long(index, 1);
+                } else {
+                    native_bind_long(index, 0);
+                }
+            } else if (value instanceof byte[]){
+                native_bind_blob(index, (byte[]) value);
+            } else {
+                native_bind_string(index, value.toString());
+            }
+        }
+    }
+
+    /**
+     * Given an array of String bindArgs, this method binds all of them in one single call.
+     *
+     * @param bindArgs the String array of bind args.
+     */
+    public void bindAllArgsAsStrings(String[] bindArgs) {
+        if (bindArgs == null) {
+            return;
+        }
+        int size = bindArgs.length;
+        synchronized(this) {
+            for (int i = 0; i < size; i++) {
+                bindString(i + 1, bindArgs[i]);
             }
         }
     }
@@ -421,6 +426,6 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     protected final native void native_bind_double(int index, double value);
     protected final native void native_bind_string(int index, String value);
     protected final native void native_bind_blob(int index, byte[] value);
-    /* package */ final native void native_clear_bindings();
+    private final native void native_clear_bindings();
 }
 
