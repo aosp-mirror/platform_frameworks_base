@@ -27,6 +27,8 @@ import android.os.Messenger;
 import android.util.Log;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A service that handles managing the results of tests, informing of crashes, generating
@@ -49,9 +51,15 @@ public class ManagerService extends Service {
             File.separator + "LayoutTests-results";
 
     /** TODO: Make it a setting */
-    private static final String EXPECTED_RESULT_SECONDARY_LOCATION_RELATIVE_DIR_PREFIX =
-            "platform" + File.separator +
-            "android-v8" + File.separator;
+    private static final List<String> EXPECTED_RESULT_LOCATION_RELATIVE_DIR_PREFIXES =
+            new ArrayList<String>(3);
+    {
+        EXPECTED_RESULT_LOCATION_RELATIVE_DIR_PREFIXES.add("platform" + File.separator +
+                "android-v8" + File.separator);
+        EXPECTED_RESULT_LOCATION_RELATIVE_DIR_PREFIXES.add("platform" + File.separator +
+                "android" + File.separator);
+        EXPECTED_RESULT_LOCATION_RELATIVE_DIR_PREFIXES.add("");
+    }
 
     /** TODO: Make these settings */
     private static final String TEXT_RESULT_EXTENSION = "txt";
@@ -144,11 +152,15 @@ public class ManagerService extends Service {
     }
 
     private static byte[] getExpectedResult(String relativePath, String extension) {
-        relativePath = FileFilter.setPathEnding(relativePath, "-expected." + extension);
+        String originalRelativePath =
+                FileFilter.setPathEnding(relativePath, "-expected." + extension);
 
-        byte[] bytes = FsUtils.readDataFromStorage(new File(TESTS_ROOT_DIR_PATH, relativePath));
-        if (bytes == null) {
-            relativePath = EXPECTED_RESULT_SECONDARY_LOCATION_RELATIVE_DIR_PREFIX + relativePath;
+        byte[] bytes = null;
+        List<String> locations = EXPECTED_RESULT_LOCATION_RELATIVE_DIR_PREFIXES;
+
+        int size = EXPECTED_RESULT_LOCATION_RELATIVE_DIR_PREFIXES.size();
+        for (int i = 0; bytes == null && i < size; i++) {
+            relativePath = locations.get(i) + originalRelativePath;
             bytes = FsUtils.readDataFromStorage(new File(TESTS_ROOT_DIR_PATH, relativePath));
         }
 
