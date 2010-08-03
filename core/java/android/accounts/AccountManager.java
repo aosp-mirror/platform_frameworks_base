@@ -45,26 +45,26 @@ import com.google.android.collect.Maps;
 
 /**
  * This class provides access to a centralized registry of the user's
- * online accounts.  With this service, users only need to enter their
- * credentials (username and password) once for any account, granting
- * applications access to online resources with "one-click" approval.
+ * online accounts.  The user enters credentials (username and password) once
+ * per account, granting applications access to online resources with
+ * "one-click" approval.
  *
  * <p>Different online services have different ways of handling accounts and
  * authentication, so the account manager uses pluggable <em>authenticator</em>
- * modules for different <em>account types</em>.  The authenticators (which
- * may be written by third parties) handle the actual details of validating
- * account credentials and storing account information.  For example, Google,
- * Facebook, and Microsoft Exchange each have their own authenticator.
+ * modules for different <em>account types</em>.  Authenticators (which may be
+ * written by third parties) handle the actual details of validating account
+ * credentials and storing account information.  For example, Google, Facebook,
+ * and Microsoft Exchange each have their own authenticator.
  *
  * <p>Many servers support some notion of an <em>authentication token</em>,
  * which can be used to authenticate a request to the server without sending
  * the user's actual password.  (Auth tokens are normally created with a
  * separate request which does include the user's credentials.)  AccountManager
- * can generate these auth tokens for applications, so the application doesn't
- * need to handle passwords directly.  Auth tokens are normally reusable, and
- * cached by AccountManager, but must be refreshed periodically.  It's the
- * responsibility of applications to <em>invalidate</em> auth tokens when they
- * stop working so the AccountManager knows it needs to regenerate them.
+ * can generate auth tokens for applications, so the application doesn't need to
+ * handle passwords directly.  Auth tokens are normally reusable and cached by
+ * AccountManager, but must be refreshed periodically.  It's the responsibility
+ * of applications to <em>invalidate</em> auth tokens when they stop working so
+ * the AccountManager knows it needs to regenerate them.
  *
  * <p>Applications accessing a server normally go through these steps:
  *
@@ -84,14 +84,19 @@ import com.google.android.collect.Maps;
  * {@link #addAccount} may be called to prompt the user to create an
  * account of the appropriate type.
  *
+ * <li><b>Important:</b> If the application is using a previously remembered
+ * account selection, it must make sure the account is still in the list
+ * of accounts returned by {@link #getAccountsByType}.  Requesting an auth token
+ * for an account no longer on the device results in an undefined failure.
+ *
  * <li>Request an auth token for the selected account(s) using one of the
  * {@link #getAuthToken} methods or related helpers.  Refer to the description
  * of each method for exact usage and error handling details.
  *
  * <li>Make the request using the auth token.  The form of the auth token,
  * the format of the request, and the protocol used are all specific to the
- * service you are accessing.  The application makes the request itself, using
- * whatever network and protocol libraries are useful.
+ * service you are accessing.  The application may use whatever network and
+ * protocol libraries are useful.
  *
  * <li><b>Important:</b> If the request fails with an authentication error,
  * it could be that a cached auth token is stale and no longer honored by
@@ -103,7 +108,7 @@ import com.google.android.collect.Maps;
  * appropriate actions taken.
  * </ul>
  *
- * <p>Some AccountManager methods may require interaction with the user to
+ * <p>Some AccountManager methods may need to interact with the user to
  * prompt for credentials, present options, or ask the user to add an account.
  * The caller may choose whether to allow AccountManager to directly launch the
  * necessary user interface and wait for the user, or to return an Intent which
@@ -113,18 +118,17 @@ import com.google.android.collect.Maps;
  * the current foreground {@link Activity} context.
  *
  * <p>Many AccountManager methods take {@link AccountManagerCallback} and
- * {@link Handler} as parameters.  These methods return immediately but
+ * {@link Handler} as parameters.  These methods return immediately and
  * run asynchronously. If a callback is provided then
  * {@link AccountManagerCallback#run} will be invoked on the Handler's
  * thread when the request completes, successfully or not.
- * An {@link AccountManagerFuture} is returned by these requests and also
- * supplied to the callback (if any).  The result is retrieved by calling
- * {@link AccountManagerFuture#getResult()} which waits for the operation
- * to complete (if necessary) and either returns the result or throws an
- * exception if an error occurred during the operation.
- * To make the request synchronously, call
+ * The result is retrieved by calling {@link AccountManagerFuture#getResult()}
+ * on the {@link AccountManagerFuture} returned by the method (and also passed
+ * to the callback).  This method waits for the operation to complete (if
+ * necessary) and either returns the result or throws an exception if an error
+ * occurred during the operation.  To make the request synchronously, call
  * {@link AccountManagerFuture#getResult()} immediately on receiving the
- * future from the method.  No callback need be supplied.
+ * future from the method; no callback need be supplied.
  *
  * <p>Requests which may block, including
  * {@link AccountManagerFuture#getResult()}, must never be called on
@@ -143,32 +147,32 @@ public class AccountManager {
     public static final int ERROR_CODE_BAD_REQUEST = 8;
 
     /**
-     * The Bundle key used for the {@link String} account name in results
+     * Bundle key used for the {@link String} account name in results
      * from methods which return information about a particular account.
      */
     public static final String KEY_ACCOUNT_NAME = "authAccount";
 
     /**
-     * The Bundle key used for the {@link String} account type in results
+     * Bundle key used for the {@link String} account type in results
      * from methods which return information about a particular account.
      */
     public static final String KEY_ACCOUNT_TYPE = "accountType";
 
     /**
-     * The Bundle key used for the auth token value in results
+     * Bundle key used for the auth token value in results
      * from {@link #getAuthToken} and friends.
      */
     public static final String KEY_AUTHTOKEN = "authtoken";
 
     /**
-     * The Bundle key used for an {@link Intent} in results from methods that
+     * Bundle key used for an {@link Intent} in results from methods that
      * may require the caller to interact with the user.  The Intent can
      * be used to start the corresponding user interface activity.
      */
     public static final String KEY_INTENT = "intent";
 
     /**
-     * The Bundle key used to supply the password directly in options to
+     * Bundle key used to supply the password directly in options to
      * {@link #confirmCredentials}, rather than prompting the user with
      * the standard password prompt.
      */
@@ -476,7 +480,7 @@ public class AccountManager {
      * @param account The {@link Account} to add
      * @param password The password to associate with the account, null for none
      * @param userdata String values to use for the account's userdata, null for none
-     * @return Whether the account was successfully added.  False if the account
+     * @return True if the account was successfully added, false if the account
      *     already exists, the account is null, or another error occurs.
      */
     public boolean addAccountExplicitly(Account account, String password, Bundle userdata) {
@@ -733,15 +737,14 @@ public class AccountManager {
      * sense to ask the user directly for a password.
      *
      * <p>If a previously generated auth token is cached for this account and
-     * type, then it will be returned.  Otherwise, if we have a saved password
-     * the server accepts, it will be used to generate a new auth token.
-     * Otherwise, the user will be asked for a password, which will be sent to
-     * the server to generate a new auth token.
+     * type, then it is returned.  Otherwise, if a saved password is
+     * available, it is sent to the server to generate a new auth token.
+     * Otherwise, the user is prompted to enter a password.
      *
-     * <p>The value of the auth token type depends on the authenticator.
-     * Some services use different tokens to access different functionality --
-     * for example, Google uses different auth tokens to access Gmail and
-     * Google Calendar for the same account.
+     * <p>Some authenticators have auth token <em>types</em>, whose value
+     * is authenticator-dependent.  Some services use different token types to
+     * access different functionality -- for example, Google uses different auth
+     * tokens to access Gmail and Google Calendar for the same account.
      *
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
@@ -778,6 +781,9 @@ public class AccountManager {
      * <li> {@link IOException} if the authenticator experienced an I/O problem
      *      creating a new auth token, usually because of network trouble
      * </ul>
+     * If the account is no longer present on the device, the return value is
+     * authenticator-dependent.  The caller should verify the validity of the
+     * account before requesting an auth token.
      */
     public AccountManagerFuture<Bundle> getAuthToken(
             final Account account, final String authTokenType, final Bundle options,
@@ -800,29 +806,27 @@ public class AccountManager {
      * user should not be immediately interrupted with a password prompt.
      *
      * <p>If a previously generated auth token is cached for this account and
-     * type, then it will be returned.  Otherwise, if we have saved credentials
-     * the server accepts, it will be used to generate a new auth token.
-     * Otherwise, an Intent will be returned which, when started, will prompt
-     * the user for a password.  If the notifyAuthFailure parameter is set,
-     * the same Intent will be associated with a status bar notification,
+     * type, then it is returned.  Otherwise, if a saved password is
+     * available, it is sent to the server to generate a new auth token.
+     * Otherwise, an {@link Intent} is returned which, when started, will
+     * prompt the user for a password.  If the notifyAuthFailure parameter is
+     * set, a status bar notification is also created with the same Intent,
      * alerting the user that they need to enter a password at some point.
      *
-     * <p>If the intent is left in a notification, you will need to wait until
-     * the user gets around to entering a password before trying again,
-     * which could be hours or days or never.  When it does happen, the
-     * account manager will broadcast the {@link #LOGIN_ACCOUNTS_CHANGED_ACTION}
-     * {@link Intent}, which applications can use to trigger another attempt
-     * to fetch an auth token.
+     * <p>In that case, you may need to wait until the user responds, which
+     * could take hours or days or forever.  When the user does respond and
+     * supply a new password, the account manager will broadcast the
+     * {@link #LOGIN_ACCOUNTS_CHANGED_ACTION} Intent, which applications can
+     * use to try again.
      *
-     * <p>If notifications are not enabled, it is the application's
-     * responsibility to launch the returned intent at some point to let
-     * the user enter credentials.  In either case, the result from this
-     * call will not wait for user action.
+     * <p>If notifyAuthFailure is not set, it is the application's
+     * responsibility to launch the returned Intent at some point.
+     * Either way, the result from this call will not wait for user action.
      *
-     * <p>The value of the auth token type depends on the authenticator.
-     * Some services use different tokens to access different functionality --
-     * for example, Google uses different auth tokens to access Gmail and
-     * Google Calendar for the same account.
+     * <p>Some authenticators have auth token <em>types</em>, whose value
+     * is authenticator-dependent.  Some services use different token types to
+     * access different functionality -- for example, Google uses different auth
+     * tokens to access Gmail and Google Calendar for the same account.
      *
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
@@ -851,7 +855,7 @@ public class AccountManager {
      * must enter credentials, the returned Bundle contains only
      * {@link #KEY_INTENT} with the {@link Intent} needed to launch a prompt.
      *
-     * <p>If an error occurred, {@link AccountManagerFuture#getResult()} throws:
+     * If an error occurred, {@link AccountManagerFuture#getResult()} throws:
      * <ul>
      * <li> {@link AuthenticatorException} if the authenticator failed to respond
      * <li> {@link OperationCanceledException} if the operation is canceled for
@@ -859,6 +863,9 @@ public class AccountManager {
      * <li> {@link IOException} if the authenticator experienced an I/O problem
      *      creating a new auth token, usually because of network trouble
      * </ul>
+     * If the account is no longer present on the device, the return value is
+     * authenticator-dependent.  The caller should verify the validity of the
+     * account before requesting an auth token.
      */
     public AccountManagerFuture<Bundle> getAuthToken(
             final Account account, final String authTokenType, final boolean notifyAuthFailure,
@@ -910,9 +917,8 @@ public class AccountManager {
      *
      * If no activity was specified, the returned Bundle contains only
      * {@link #KEY_INTENT} with the {@link Intent} needed to launch the
-     * actual account creation process.
-     *
-     * <p>If an error occurred, {@link AccountManagerFuture#getResult()} throws:
+     * actual account creation process.  If an error occurred,
+     * {@link AccountManagerFuture#getResult()} throws:
      * <ul>
      * <li> {@link AuthenticatorException} if no authenticator was registered for
      *      this account type or the authenticator failed to respond
@@ -979,9 +985,8 @@ public class AccountManager {
      *
      * If no activity or password was specified, the returned Bundle contains
      * only {@link #KEY_INTENT} with the {@link Intent} needed to launch the
-     * password prompt.
-     *
-     * <p>If an error occurred, {@link AccountManagerFuture#getResult()} throws:
+     * password prompt.  If an error occurred,
+     * {@link AccountManagerFuture#getResult()} throws:
      * <ul>
      * <li> {@link AuthenticatorException} if the authenticator failed to respond
      * <li> {@link OperationCanceledException} if the operation was canceled for
@@ -1040,9 +1045,8 @@ public class AccountManager {
      *
      * If no activity was specified, the returned Bundle contains only
      * {@link #KEY_INTENT} with the {@link Intent} needed to launch the
-     * password prompt.
-     *
-     * <p>If an error occurred, {@link AccountManagerFuture#getResult()} throws:
+     * password prompt.  If an error occurred,
+     * {@link AccountManagerFuture#getResult()} throws:
      * <ul>
      * <li> {@link AuthenticatorException} if the authenticator failed to respond
      * <li> {@link OperationCanceledException} if the operation was canceled for
@@ -1091,8 +1095,8 @@ public class AccountManager {
      *     which is empty if properties were edited successfully, or
      *     if no activity was specified, contains only {@link #KEY_INTENT}
      *     needed to launch the authenticator's settings dialog.
-     *
-     * <p>If an error occurred, {@link AccountManagerFuture#getResult()} throws:
+     *     If an error occurred, {@link AccountManagerFuture#getResult()}
+     *     throws:
      * <ul>
      * <li> {@link AuthenticatorException} if no authenticator was registered for
      *      this account type or the authenticator failed to respond
@@ -1617,7 +1621,7 @@ public class AccountManager {
      * <li> {@link #KEY_AUTHTOKEN} - the auth token you wanted
      * </ul>
      *
-     * <p>If an error occurred, {@link AccountManagerFuture#getResult()} throws:
+     * If an error occurred, {@link AccountManagerFuture#getResult()} throws:
      * <ul>
      * <li> {@link AuthenticatorException} if no authenticator was registered for
      *      this account type or the authenticator failed to respond
