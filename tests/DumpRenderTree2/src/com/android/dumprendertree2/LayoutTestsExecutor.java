@@ -110,6 +110,8 @@ public class LayoutTestsExecutor extends Activity {
     private boolean mSetGeolocationPermissionCalled;
     private boolean mGeolocationPermission;
 
+    private EventSender mEventSender = new EventSender();
+
     private WakeLock mScreenDimLock;
 
     /** COMMUNICATION WITH ManagerService */
@@ -248,7 +250,7 @@ public class LayoutTestsExecutor extends Activity {
         mCurrentTestIndex = intent.getIntExtra(EXTRA_TEST_INDEX, -1);
         mTotalTestCount = mCurrentTestIndex + mTestsList.size();
 
-        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        PowerManager pm = (PowerManager)getSystemService(Context.POWER_SERVICE);
         mScreenDimLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK
                 | PowerManager.ON_AFTER_RELEASE, "WakeLock in LayoutTester");
         mScreenDimLock.acquire();
@@ -269,6 +271,8 @@ public class LayoutTestsExecutor extends Activity {
         mCurrentWebView = new WebView(this);
         setupWebView(mCurrentWebView);
 
+        mEventSender.reset(mCurrentWebView);
+
         setContentView(mCurrentWebView);
         if (previousWebView != null) {
             Log.d(LOG_TAG + "::reset", "previousWebView != null");
@@ -280,6 +284,7 @@ public class LayoutTestsExecutor extends Activity {
         webView.setWebViewClient(mWebViewClient);
         webView.setWebChromeClient(mWebChromeClient);
         webView.addJavascriptInterface(mLayoutTestController, "layoutTestController");
+        webView.addJavascriptInterface(mEventSender, "eventSender");
 
         /**
          * Setting a touch interval of -1 effectively disables the optimisation in WebView
@@ -462,8 +467,7 @@ public class LayoutTestsExecutor extends Activity {
     Handler mLayoutTestControllerHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            assert mCurrentState.isRunningState()
-                    : "mCurrentState = " + mCurrentState.name();
+            assert mCurrentState.isRunningState() : "mCurrentState = " + mCurrentState.name();
 
             switch (msg.what) {
                 case MSG_WAIT_UNTIL_DONE:
