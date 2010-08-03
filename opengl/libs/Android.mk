@@ -6,10 +6,11 @@ LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES:= 	\
-	EGL/egl.cpp 	\
-	EGL/hooks.cpp 	\
-	EGL/Loader.cpp 	\
+LOCAL_SRC_FILES:= 	       \
+	EGL/egl.cpp 	       \
+	EGL/getProcAddress.cpp.arm \
+	EGL/hooks.cpp 	       \
+	EGL/Loader.cpp 	       \
 #
 
 LOCAL_SHARED_LIBRARIES += libcutils libutils
