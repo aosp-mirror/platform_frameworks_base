@@ -16,22 +16,20 @@
 
 package android.widget.listview.arrowscroll;
 
-import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
+import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.MediumTest;
-import android.widget.ListView;
+import android.util.ListUtil;
 import android.view.KeyEvent;
 import android.view.View;
-
+import android.widget.ListView;
 import android.widget.listview.ListInterleaveFocusables;
-import android.util.ListUtil;
 
-public class ListInterleaveFocusablesTest extends ActivityInstrumentationTestCase<ListInterleaveFocusables> {
+public class ListInterleaveFocusablesTest extends ActivityInstrumentationTestCase2<ListInterleaveFocusables> {
     private ListView mListView;
     private ListUtil mListUtil;
 
     public ListInterleaveFocusablesTest() {
-        super("com.android.frameworks.coretests", ListInterleaveFocusables.class);
+        super(ListInterleaveFocusables.class);
     }
 
     @Override
@@ -42,7 +40,7 @@ public class ListInterleaveFocusablesTest extends ActivityInstrumentationTestCas
         mListUtil = new ListUtil(mListView, getInstrumentation());
     }
 
-    @LargeTest
+    @MediumTest
     public void testPreconditions() {
         assertEquals(7, mListView.getChildCount());
         assertTrue(mListView.getChildAt(1).isFocusable());

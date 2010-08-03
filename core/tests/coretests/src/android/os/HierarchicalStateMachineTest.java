@@ -16,23 +16,15 @@
 
 package android.os;
 
-import junit.framework.TestCase;
-
-import android.os.Debug;
-import android.os.HandlerThread;
-import android.os.Looper;
-import android.os.Message;
-import android.os.SystemClock;
-import android.test.suitebuilder.annotation.SmallTest;
-
-import android.util.Log;
-
-import com.android.internal.util.HierarchicalStateMachine;
 import com.android.internal.util.HierarchicalState;
+import com.android.internal.util.HierarchicalStateMachine;
 import com.android.internal.util.ProcessedMessages;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Log;
+
+import junit.framework.TestCase;
 
 /**
  * Test for HierarchicalStateMachine.
@@ -449,7 +441,7 @@ public class HierarchicalStateMachineTest extends TestCase {
         private int mExitCount;
     }
 
-    @SmallTest
+    @MediumTest
     public void testStateMachine1() throws Exception {
         StateMachine1 sm1 = new StateMachine1("sm1");
         sm1.start();
@@ -554,7 +546,7 @@ public class HierarchicalStateMachineTest extends TestCase {
         private boolean mDidExit = false;
     }
 
-    @SmallTest
+    @MediumTest
     public void testStateMachine2() throws Exception {
         StateMachine2 sm2 = new StateMachine2("sm2");
         sm2.start();
@@ -646,7 +638,7 @@ public class HierarchicalStateMachineTest extends TestCase {
         private ChildState mChildState = new ChildState();
     }
 
-    @SmallTest
+    @MediumTest
     public void testStateMachine3() throws Exception {
         StateMachine3 sm3 = new StateMachine3("sm3");
         sm3.start();
@@ -739,7 +731,7 @@ public class HierarchicalStateMachineTest extends TestCase {
         private ChildState2 mChildState2 = new ChildState2();
     }
 
-    @SmallTest
+    @MediumTest
     public void testStateMachine4() throws Exception {
         StateMachine4 sm4 = new StateMachine4("sm4");
         sm4.start();
@@ -1013,7 +1005,7 @@ public class HierarchicalStateMachineTest extends TestCase {
         private int mChildState5ExitCount = 0;
     }
 
-    @SmallTest
+    @MediumTest
     public void testStateMachine5() throws Exception {
         StateMachine5 sm5 = new StateMachine5("sm5");
         sm5.start();
@@ -1141,7 +1133,7 @@ public class HierarchicalStateMachineTest extends TestCase {
         private long mArrivalTimeMsg2;
     }
 
-    @SmallTest
+    @MediumTest
     public void testStateMachine6() throws Exception {
         long sentTimeMsg2;
         final int DELAY_TIME = 250;
@@ -1251,7 +1243,7 @@ public class HierarchicalStateMachineTest extends TestCase {
         private long mArrivalTimeMsg3;
     }
 
-    @SmallTest
+    @MediumTest
     public void testStateMachine7() throws Exception {
         long sentTimeMsg2;
         final int SM7_DELAY_FUDGE = 20;
@@ -1403,7 +1395,7 @@ public class HierarchicalStateMachineTest extends TestCase {
     private static int sharedCounter = 0;
     private static Object waitObject = new Object();
 
-    @SmallTest
+    @MediumTest
     public void testStateMachineSharedThread() throws Exception {
         if (DBG) Log.d(TAG, "testStateMachineSharedThread E");
 
@@ -1448,7 +1440,7 @@ public class HierarchicalStateMachineTest extends TestCase {
         if (DBG) Log.d(TAG, "testStateMachineSharedThread X");
     }
 
-    @SmallTest
+    @MediumTest
     public void testHsm1() throws Exception {
         if (DBG) Log.d(TAG, "testHsm1 E");
 

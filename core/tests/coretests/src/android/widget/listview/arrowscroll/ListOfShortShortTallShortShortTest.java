@@ -16,20 +16,19 @@
 
 package android.widget.listview.arrowscroll;
 
-import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
+import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.MediumTest;
+import android.util.ListUtil;
 import android.view.KeyEvent;
 import android.widget.ListView;
 import android.widget.listview.ListOfShortShortTallShortShort;
-import android.util.ListUtil;
 
-public class ListOfShortShortTallShortShortTest extends ActivityInstrumentationTestCase<ListOfShortShortTallShortShort> {
+public class ListOfShortShortTallShortShortTest extends ActivityInstrumentationTestCase2<ListOfShortShortTallShortShort> {
     private ListView mListView;
     private ListUtil mListUtil;
 
     public ListOfShortShortTallShortShortTest() {
-        super("com.android.frameworks.coretests", ListOfShortShortTallShortShort.class);
+        super(ListOfShortShortTallShortShort.class);
     }
 
     @Override
@@ -68,7 +67,7 @@ public class ListOfShortShortTallShortShortTest extends ActivityInstrumentationT
                 1, mListView.getChildCount());
     }
 
-    @LargeTest
+    @MediumTest
     public void testFadeInTwoBottomItems() {
         // put 2nd item selected
         sendKeys(KeyEvent.KEYCODE_DPAD_DOWN);
@@ -89,7 +88,7 @@ public class ListOfShortShortTallShortShortTest extends ActivityInstrumentationT
                 mListView.getChildAt(2).getBottom() >= mListUtil.getListBottom());
     }
 
-    @LargeTest
+    @MediumTest
     public void testFadeOutBottomTwoItems() throws Exception {
         mListUtil.arrowScrollToSelectedPosition(4);
 
@@ -110,7 +109,7 @@ public class ListOfShortShortTallShortShortTest extends ActivityInstrumentationT
                 1, mListView.getChildCount());        
     }
 
-    @LargeTest
+    @MediumTest
     public void testFadeInTopTwoItems() throws Exception {
         mListUtil.arrowScrollToSelectedPosition(4);
 

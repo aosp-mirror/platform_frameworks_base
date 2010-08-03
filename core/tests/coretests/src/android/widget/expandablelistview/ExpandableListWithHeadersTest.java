@@ -62,20 +62,20 @@ public class ExpandableListWithHeadersTest extends
         assertTrue(mExpandableListView.isGroupExpanded(0));
     }
 
-    @MediumTest
+    @LargeTest
     public void testContextMenus() {
         ExpandableListTester tester = new ExpandableListTester(mExpandableListView, this);
         tester.testContextMenus();
     }
 
-    @MediumTest
+    @LargeTest
     public void testConvertionBetweenFlatAndPacked() {
         ExpandableListTester tester = new ExpandableListTester(mExpandableListView, this);
         tester.testConvertionBetweenFlatAndPackedOnGroups();
         tester.testConvertionBetweenFlatAndPackedOnChildren();
     }
 
-    @MediumTest
+    @LargeTest
     public void testSelectedPosition() {
         ExpandableListTester tester = new ExpandableListTester(mExpandableListView, this);
         tester.testSelectedPositionOnGroups();

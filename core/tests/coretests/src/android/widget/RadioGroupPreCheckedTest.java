@@ -16,23 +16,22 @@
 
 package android.widget;
 
-import android.test.TouchUtils;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import com.android.frameworks.coretests.R;
 
 import android.test.ActivityInstrumentationTestCase2;
+import android.test.TouchUtils;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.MediumTest;
 
 /**
  * Exercises {@link android.widget.RadioGroup}'s check feature.
  */
 public class RadioGroupPreCheckedTest extends ActivityInstrumentationTestCase2<RadioGroupActivity> {
     public RadioGroupPreCheckedTest() {
-        super("com.android.frameworks.coretests", RadioGroupActivity.class);
+        super(RadioGroupActivity.class);
     }
 
-    @LargeTest
+    @MediumTest
     public void testRadioButtonPreChecked() throws Exception {
         final RadioGroupActivity activity = getActivity();
 
