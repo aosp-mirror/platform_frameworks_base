@@ -227,6 +227,21 @@
     <!-- Default LED off time for notification LED in milliseconds. -->
     <integer name="config_defaultNotificationLedOff">2000</integer>
 
+    <!-- Default value for led color when battery is low on charge -->
+    <integer name="config_notificationsBatteryLowARGB">0xFFFF0000</integer>
+
+    <!-- Default value for led color when battery is medium charged -->
+    <integer name="config_notificationsBatteryMediumARGB">0xFFFFFF00</integer>
+
+    <!-- Default value for led color when battery is fully charged -->
+    <integer name="config_notificationsBatteryFullARGB">0xFF00FF00</integer>
+
+    <!-- Default value for LED on time when the battery is low on charge in miliseconds -->
+    <integer name="config_notificationsBatteryLedOn">125</integer>
+
+    <!-- Default value for LED off time when the battery is low on charge in miliseconds -->
+    <integer name="config_notificationsBatteryLedOff">2875</integer>
+
     <!-- Allow the menu hard key to be disabled in LockScreen on some devices -->
     <bool name="config_disableMenuKeyInLockScreen">false</bool>
 
