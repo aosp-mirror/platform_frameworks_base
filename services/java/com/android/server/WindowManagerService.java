@@ -3093,8 +3093,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 
             } else if (currentConfig != null) {
                 // No obvious action we need to take, but if our current
-                // state mismatches the activity maanager's, update it
+                // state mismatches the activity manager's, update it,
+                // disregarding font scale, which should remain set to
+                // the value of the previous configuration.
                 mTempConfiguration.setToDefaults();
+                mTempConfiguration.fontScale = currentConfig.fontScale;
                 if (computeNewConfigurationLocked(mTempConfiguration)) {
                     if (currentConfig.diff(mTempConfiguration) != 0) {
                         mWaitingForConfig = true;
