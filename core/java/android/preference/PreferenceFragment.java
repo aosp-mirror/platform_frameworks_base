@@ -125,6 +125,21 @@ public abstract class PreferenceFragment extends Fragment implements
         }
     };
 
+    /**
+     * Interface that PreferenceFragment's containing activity should
+     * implement to be able to process preference items that wish to
+     * switch to a new fragment.
+     */
+    public interface OnPreferenceStartFragmentCallback {
+        /**
+         * Called when the user has clicked on a Preference that has
+         * a fragment class name associated with it.  The implementation
+         * to should instantiate and switch to an instance of the given
+         * fragment.
+         */
+        boolean onPreferenceStartFragment(PreferenceFragment caller, Preference pref);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -165,6 +180,13 @@ public abstract class PreferenceFragment extends Fragment implements
     public void onStop() {
         super.onStop();
         mPreferenceManager.dispatchActivityStop();
+    }
+
+    @Override
+    public void onDestroyView() {
+        mList = null;
+        mHandler.removeCallbacks(mRequestFocus);
+        super.onDestroyView();
     }
 
     @Override
@@ -251,7 +273,13 @@ public abstract class PreferenceFragment extends Fragment implements
     /**
      * {@inheritDoc}
      */
-    public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
+    public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen,
+            Preference preference) {
+        if (preference.getFragment() != null &&
+                getActivity() instanceof OnPreferenceStartFragmentCallback) {
+            return ((OnPreferenceStartFragmentCallback)getActivity()).onPreferenceStartFragment(
+                    this, preference);
+        }
         return false;
     }
 

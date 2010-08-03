@@ -56,6 +56,7 @@ import java.util.Set;
  * @attr ref android.R.styleable#Preference_title
  * @attr ref android.R.styleable#Preference_summary
  * @attr ref android.R.styleable#Preference_order
+ * @attr ref android.R.styleable#Preference_fragment
  * @attr ref android.R.styleable#Preference_layout
  * @attr ref android.R.styleable#Preference_widgetLayout
  * @attr ref android.R.styleable#Preference_enabled
@@ -88,6 +89,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
     private CharSequence mSummary;
     private String mKey;
     private Intent mIntent;
+    private String mFragment;
     private boolean mEnabled = true;
     private boolean mSelectable = true;
     private boolean mRequiresKey;
@@ -210,6 +212,10 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
                     mOrder = a.getInt(attr, mOrder);
                     break;
 
+                case com.android.internal.R.styleable.Preference_fragment:
+                    mFragment = a.getString(attr);
+                    break;
+
                 case com.android.internal.R.styleable.Preference_layout:
                     mLayoutResId = a.getResourceId(attr, mLayoutResId);
                     break;
@@ -312,6 +318,24 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      */
     public Intent getIntent() {
         return mIntent;
+    }
+
+    /**
+     * Sets the class name of a fragment to be shown when this Preference is clicked.
+     *
+     * @param fragment The class name of the fragment associated with this Preference.
+     */
+    public void setFragment(String fragment) {
+        mFragment = fragment;
+    }
+
+    /**
+     * Return the fragment class name associated with this Preference.
+     *
+     * @return The fragment class name last set via {@link #setFragment} or XML.
+     */
+    public String getFragment() {
+        return mFragment;
     }
 
     /**

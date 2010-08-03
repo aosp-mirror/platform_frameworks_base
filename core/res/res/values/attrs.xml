@@ -3457,6 +3457,9 @@
         <!-- The order for the Preference (lower values are to be ordered first). If this is not
              specified, the default orderin will be alphabetic. -->
         <attr name="order" format="integer" />
+        <!-- When used inside of a modern PreferenceActivity, this declares
+             a new PreferenceFragment to be shown when the user selects this item. -->
+        <attr name="fragment" />
         <!-- The layout for the Preference in a PreferenceActivity screen. This should
              rarely need to be changed, look at widgetLayout instead. -->
         <attr name="layout" />

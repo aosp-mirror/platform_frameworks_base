@@ -629,7 +629,7 @@ public class FragmentManager {
         if (mBackStack == null) {
             return false;
         }
-        if (name == null && id < 0) {
+        if (name == null && id < 0 && (flags&Activity.POP_BACK_STACK_INCLUSIVE) == 0) {
             int last = mBackStack.size()-1;
             if (last < 0) {
                 return false;
@@ -644,22 +644,37 @@ public class FragmentManager {
                 }
             });
         } else {
-            int index = mBackStack.size()-1;
-            while (index >= 0) {
-                BackStackEntry bss = mBackStack.get(index);
-                if (name != null && name.equals(bss.getName())) {
-                    break;
+            int index = -1;
+            if (name != null || id >= 0) {
+                // If a name or ID is specified, look for that place in
+                // the stack.
+                index = mBackStack.size()-1;
+                while (index >= 0) {
+                    BackStackEntry bss = mBackStack.get(index);
+                    if (name != null && name.equals(bss.getName())) {
+                        break;
+                    }
+                    if (id >= 0 && id == bss.mIndex) {
+                        break;
+                    }
+                    index--;
                 }
-                if (id >= 0 && id == bss.mIndex) {
-                    break;
+                if (index < 0) {
+                    return false;
                 }
-                index--;
-            }
-            if (index < 0) {
-                return false;
-            }
-            if ((flags&Activity.POP_BACK_STACK_INCLUSIVE) != 0) {
-                index--;
+                if ((flags&Activity.POP_BACK_STACK_INCLUSIVE) != 0) {
+                    index--;
+                    // Consume all following entries that match.
+                    while (index >= 0) {
+                        BackStackEntry bss = mBackStack.get(index);
+                        if ((name != null && name.equals(bss.getName()))
+                                || (id >= 0 && id == bss.mIndex)) {
+                            index--;
+                            continue;
+                        }
+                        break;
+                    }
+                }
             }
             if (index == mBackStack.size()-1) {
                 return false;

@@ -93,11 +93,22 @@ import java.util.List;
  *
  * {@sample development/samples/ApiDemos/res/xml/preference_headers.xml headers}
  *
- * See {@link PreferenceFragment} for information on implementing the
+ * <p>The first header is shown by Prefs1Fragment, which populates itself
+ * from the following XML resource:</p>
+ *
+ * {@sample development/samples/ApiDemos/res/xml/fragmented_preferences.xml preferences}
+ *
+ * <p>Note that this XML resource contains a preference screen holding another
+ * fragment, the Prefs1FragmentInner implemented here.  This allows the user
+ * to traverse down a hierarchy of preferences; pressing back will pop each
+ * fragment off the stack to return to the previous preferences.
+ *
+ * <p>See {@link PreferenceFragment} for information on implementing the
  * fragments themselves.
  */
 public abstract class PreferenceActivity extends ListActivity implements
-        PreferenceManager.OnPreferenceTreeClickListener {
+        PreferenceManager.OnPreferenceTreeClickListener,
+        PreferenceFragment.OnPreferenceStartFragmentCallback {
     private static final String TAG = "PreferenceActivity";
 
     private static final String PREFERENCES_TAG = "android:preferences";
@@ -105,6 +116,8 @@ public abstract class PreferenceActivity extends ListActivity implements
     private static final String EXTRA_PREFS_SHOW_FRAGMENT = ":android:show_fragment";
 
     private static final String EXTRA_PREFS_NO_HEADERS = ":android:no_headers";
+
+    private static final String BACK_STACK_PREFS = ":android:prefs";
 
     // extras that allow any preference activity to be launched as part of a wizard
 
@@ -206,16 +219,19 @@ public abstract class PreferenceActivity extends ListActivity implements
     public static class Header {
         /**
          * Title of the header that is shown to the user.
+         * @attr ref android.R.styleable#PreferenceHeader_title
          */
         CharSequence title;
 
         /**
          * Optional summary describing what this header controls.
+         * @attr ref android.R.styleable#PreferenceHeader_summary
          */
         CharSequence summary;
 
         /**
          * Optional icon resource to show for this header.
+         * @attr ref android.R.styleable#PreferenceHeader_icon
          */
         int iconRes;
 
@@ -228,6 +244,7 @@ public abstract class PreferenceActivity extends ListActivity implements
         /**
          * Full class name of the fragment to display when this header is
          * selected.
+         * @attr ref android.R.styleable#PreferenceHeader_fragment
          */
         String fragment;
     }
@@ -551,6 +568,8 @@ public abstract class PreferenceActivity extends ListActivity implements
      * @param fragmentName The name of the fragment to display.
      */
     public void switchToHeader(String fragmentName) {
+        popBackStack(BACK_STACK_PREFS, POP_BACK_STACK_INCLUSIVE);
+
         Fragment f;
         try {
             f = Fragment.instantiate(this, fragmentName);
@@ -559,6 +578,20 @@ public abstract class PreferenceActivity extends ListActivity implements
             return;
         }
         openFragmentTransaction().replace(com.android.internal.R.id.prefs, f).commit();
+    }
+
+    @Override
+    public boolean onPreferenceStartFragment(PreferenceFragment caller, Preference pref) {
+        Fragment f;
+        try {
+            f = Fragment.instantiate(this, pref.getFragment());
+        } catch (Exception e) {
+            Log.w(TAG, "Failure instantiating fragment " + pref.getFragment(), e);
+            return false;
+        }
+        openFragmentTransaction().replace(com.android.internal.R.id.prefs, f)
+                .addToBackStack(BACK_STACK_PREFS).commit();
+        return true;
     }
 
     /**

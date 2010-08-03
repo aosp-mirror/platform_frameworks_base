@@ -2055,9 +2055,10 @@ public class Activity extends ContextThemeWrapper
     /**
      * Flag for {@link #popBackStack(String, int)}
      * and {@link #popBackStack(int, int)}: If set, and the name or ID of
-     * a back stack entry has been supplied, then that entry will also be
-     * removed.  Otherwise, all entries up to but not including that entry
-     * will be removed
+     * a back stack entry has been supplied, then all matching entries will
+     * be consumed until one that doesn't match is found or the bottom of
+     * the stack is reached.  Otherwise, all entries up to but not including that entry
+     * will be removed.
      */
     public static final int POP_BACK_STACK_INCLUSIVE = 1<<0;
 
@@ -2066,7 +2067,7 @@ public class Activity extends ContextThemeWrapper
      * to pop, else false.
      */
     public boolean popBackStack() {
-        return popBackStack(null, 0);
+        return popBackStack(null, -1);
     }
 
     /**

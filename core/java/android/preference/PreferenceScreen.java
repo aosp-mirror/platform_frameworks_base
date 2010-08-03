@@ -136,7 +136,7 @@ public final class PreferenceScreen extends PreferenceGroup implements AdapterVi
     
     @Override
     protected void onClick() {
-        if (getIntent() != null || getPreferenceCount() == 0) {
+        if (getIntent() != null || getFragment() != null || getPreferenceCount() == 0) {
             return;
         }
         
