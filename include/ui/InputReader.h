@@ -565,7 +565,9 @@ protected:
 
             for (uint32_t i = 0; i < pointerCount; i++) {
                 pointers[i] = other.pointers[i];
-                idToIndex[i] = other.idToIndex[i];
+
+                int id = pointers[i].id;
+                idToIndex[id] = other.idToIndex[id];
             }
         }
 
