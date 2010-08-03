@@ -518,7 +518,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
     // Test case 6: Capture the memory usage after every 20 video and audio
     // recorded
     @LargeTest
-    public void testRecordVidedAudioMemoryUsage() throws Exception {
+    public void testRecordVideoAudioMemoryUsage() throws Exception {
         boolean memoryResult = false;
         mStartPid = getMediaserverPid();
 
