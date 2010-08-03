@@ -28,7 +28,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import android.view.Window;
 import android.webkit.ConsoleMessage;
@@ -102,6 +104,8 @@ public class LayoutTestsExecutor extends Activity {
     private LayoutTestController mLayoutTestController = new LayoutTestController(this);
     private boolean mCanOpenWindows;
     private boolean mDumpDatabaseCallbacks;
+
+    private WakeLock mScreenDimLock;
 
     /** COMMUNICATION WITH ManagerService */
 
@@ -238,6 +242,11 @@ public class LayoutTestsExecutor extends Activity {
         mTestsList = intent.getStringArrayListExtra(EXTRA_TESTS_LIST);
         mCurrentTestIndex = intent.getIntExtra(EXTRA_TEST_INDEX, -1);
         mTotalTestCount = mCurrentTestIndex + mTestsList.size();
+
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        mScreenDimLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK
+                | PowerManager.ON_AFTER_RELEASE, "WakeLock in LayoutTester");
+        mScreenDimLock.acquire();
 
         bindService(new Intent(this, ManagerService.class), mServiceConnection,
                 Context.BIND_AUTO_CREATE);
@@ -390,6 +399,8 @@ public class LayoutTestsExecutor extends Activity {
     }
 
     private void onAllTestsFinished() {
+        mScreenDimLock.release();
+
         try {
             Message serviceMsg =
                     Message.obtain(null, ManagerService.MSG_ALL_TESTS_FINISHED);
