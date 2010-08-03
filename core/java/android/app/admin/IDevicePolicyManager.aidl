@@ -66,6 +66,9 @@ interface IDevicePolicyManager {
     void lockNow();
     
     void wipeData(int flags);
+
+    ComponentName setGlobalProxy(in ComponentName admin, String proxySpec, String exclusionList);
+    ComponentName getGlobalProxyAdmin();
     
     void setActiveAdmin(in ComponentName policyReceiver);
     boolean isAdminActive(in ComponentName policyReceiver);

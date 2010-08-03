@@ -32,6 +32,8 @@ import android.os.ServiceManager;
 import android.util.Log;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.List;
 
 /**
@@ -915,6 +917,93 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by an application that is administering the device to set the
+     * global proxy and exclusion list.
+     * <p>
+     * The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_SETS_GLOBAL_PROXY} to be able to call
+     * this method; if it has not, a security exception will be thrown.
+     * Only the first device admin can set the proxy. If a second admin attempts
+     * to set the proxy, the {@link ComponentName} of the admin originally setting the
+     * proxy will be returned. If successful in setting the proxy, null will
+     * be returned.
+     * The method can be called repeatedly by the device admin alrady setting the
+     * proxy to update the proxy and exclusion list.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated
+     *            with.
+     * @param proxySpec the global proxy desired. Must be an HTTP Proxy.
+     *            Pass Proxy.NO_PROXY to reset the proxy.
+     * @param exclusionList a list of domains to be excluded from the global proxy.
+     * @param proxyAdmins an empty, mutable list that will contain any proxy admins
+     *            that define a global proxy.
+     * @return returns null if the proxy was successfully set, or a {@link ComponentName}
+     *            of the device admin that sets thew proxy otherwise.
+     */
+    public ComponentName setGlobalProxy(ComponentName admin, Proxy proxySpec,
+            List<String> exclusionList ) {
+        if (proxySpec == null) {
+            throw new NullPointerException();
+        }
+        if (mService != null) {
+            try {
+                String hostSpec;
+                String exclSpec;
+                if (proxySpec.equals(Proxy.NO_PROXY)) {
+                    hostSpec = null;
+                    exclSpec = null;
+                } else {
+                    if (!proxySpec.type().equals(Proxy.Type.HTTP)) {
+                        throw new IllegalArgumentException();
+                    }
+                    InetSocketAddress sa = (InetSocketAddress)proxySpec.address();
+                    String hostName = sa.getHostName();
+                    int port = sa.getPort();
+                    StringBuilder hostBuilder = new StringBuilder();
+                    hostSpec = hostBuilder.append(hostName)
+                        .append(":").append(Integer.toString(port)).toString();
+                    if (exclusionList == null) {
+                        exclSpec = "";
+                    } else {
+                        StringBuilder listBuilder = new StringBuilder();
+                        boolean firstDomain = true;
+                        for (String exclDomain : exclusionList) {
+                            if (!firstDomain) {
+                                listBuilder = listBuilder.append(",");
+                            } else {
+                                firstDomain = false;
+                            }
+                            listBuilder = listBuilder.append(exclDomain.trim());
+                        }
+                        exclSpec = listBuilder.toString();
+                    }
+                    android.net.Proxy.validate(hostName, Integer.toString(port), exclSpec);
+                }
+                return mService.setGlobalProxy(admin, hostSpec, exclSpec);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the component name setting the global proxy.
+     * @return ComponentName object of the device admin that set the global proxy, or
+     *            null if no admin has set the proxy.
+     */
+    public ComponentName getGlobalProxyAdmin() {
+        if (mService != null) {
+            try {
+                return mService.getGlobalProxyAdmin();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return null;
+    }
+
+    /**
      * @hide
      */
     public void setActiveAdmin(ComponentName policyReceiver) {
@@ -1007,4 +1096,5 @@ public class DevicePolicyManager {
             }
         }
     }
+
 }
