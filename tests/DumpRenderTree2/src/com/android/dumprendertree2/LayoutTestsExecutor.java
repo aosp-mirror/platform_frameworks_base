@@ -167,25 +167,22 @@ public class LayoutTestsExecutor extends Activity {
             /** TODO: This should be recorded as part of the text result */
             /** TODO: The quota should also probably be reset somehow for every test? */
             if (mDumpDatabaseCallbacks) {
-                if (mCurrentAdditionalTextOutput == null) {
-                    mCurrentAdditionalTextOutput = new AdditionalTextOutput();
-                }
-
-                mCurrentAdditionalTextOutput.appendExceededDbQuotaMessage(url, databaseIdentifier);
+                getCurrentAdditionalTextOutput().appendExceededDbQuotaMessage(url,
+                        databaseIdentifier);
             }
             quotaUpdater.updateQuota(currentQuota + 5 * 1024 * 1024);
         }
 
         @Override
         public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
-            /** TODO: Alerts should be recorded as part of text result */
+            getCurrentAdditionalTextOutput().appendJsAlert(message);
             result.confirm();
             return true;
         }
 
         @Override
         public boolean onJsConfirm(WebView view, String url, String message, JsResult result) {
-            /** TODO: Alerts should be recorded as part of text result */
+            getCurrentAdditionalTextOutput().appendJsConfirm(message);
             result.confirm();
             return true;
         }
@@ -193,18 +190,14 @@ public class LayoutTestsExecutor extends Activity {
         @Override
         public boolean onJsPrompt(WebView view, String url, String message, String defaultValue,
                 JsPromptResult result) {
-            /** TODO: Alerts should be recorded as part of text result */
+            getCurrentAdditionalTextOutput().appendJsPrompt(message, defaultValue);
             result.confirm();
             return true;
         }
 
         @Override
         public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-            if (mCurrentAdditionalTextOutput == null) {
-                mCurrentAdditionalTextOutput = new AdditionalTextOutput();
-            }
-
-            mCurrentAdditionalTextOutput.appendConsoleMessage(consoleMessage);
+            getCurrentAdditionalTextOutput().appendConsoleMessage(consoleMessage);
             return true;
         }
 
@@ -410,6 +403,13 @@ public class LayoutTestsExecutor extends Activity {
         }
 
         unbindService(mServiceConnection);
+    }
+
+    private AdditionalTextOutput getCurrentAdditionalTextOutput() {
+        if (mCurrentAdditionalTextOutput == null) {
+            mCurrentAdditionalTextOutput = new AdditionalTextOutput();
+        }
+        return mCurrentAdditionalTextOutput;
     }
 
     /** LAYOUT TEST CONTROLLER */

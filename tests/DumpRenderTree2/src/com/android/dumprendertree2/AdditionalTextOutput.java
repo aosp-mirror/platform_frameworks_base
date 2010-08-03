@@ -28,18 +28,28 @@ import java.net.URL;
 public class AdditionalTextOutput {
     private static final String LOG_TAG = "AdditionalTextOutput";
 
+    /**
+     * Ordering of enums is important as it determines ordering of the toString method!
+     * StringBuilders will be printed in the order the corresponding types appear here.
+     */
     private enum OutputType {
+        JS_DIALOG,
         EXCEEDED_DB_QUOTA_MESSAGE,
         CONSOLE_MESSAGE;
     }
 
     StringBuilder[] mOutputs = new StringBuilder[OutputType.values().length];
 
-    public void appendExceededDbQuotaMessage(String urlString, String databaseIdentifier) {
-        int index = OutputType.EXCEEDED_DB_QUOTA_MESSAGE.ordinal();
+    private StringBuilder getStringBuilderForType(OutputType outputType) {
+        int index = outputType.ordinal();
         if (mOutputs[index] == null) {
             mOutputs[index] = new StringBuilder();
         }
+        return mOutputs[index];
+    }
+
+    public void appendExceededDbQuotaMessage(String urlString, String databaseIdentifier) {
+        StringBuilder output = getStringBuilderForType(OutputType.EXCEEDED_DB_QUOTA_MESSAGE);
 
         String protocol = "";
         String host = "";
@@ -56,20 +66,43 @@ public class AdditionalTextOutput {
             Log.e(LOG_TAG + "::appendDatabaseCallback", e.getMessage());
         }
 
-        mOutputs[index].append("UI DELEGATE DATABASE CALLBACK: ");
-        mOutputs[index].append("exceededDatabaseQuotaForSecurityOrigin:{");
-        mOutputs[index].append(protocol + ", " + host + ", " + port + "} ");
-        mOutputs[index].append("database:" + databaseIdentifier + "\n");
+        output.append("UI DELEGATE DATABASE CALLBACK: ");
+        output.append("exceededDatabaseQuotaForSecurityOrigin:{");
+        output.append(protocol + ", " + host + ", " + port + "} ");
+        output.append("database:" + databaseIdentifier + "\n");
     }
 
     public void appendConsoleMessage(ConsoleMessage consoleMessage) {
-        int index = OutputType.CONSOLE_MESSAGE.ordinal();
-        if (mOutputs[index] == null) {
-            mOutputs[index] = new StringBuilder();
-        }
+        StringBuilder output = getStringBuilderForType(OutputType.CONSOLE_MESSAGE);
 
-        mOutputs[index].append("CONSOLE MESSAGE: line " + consoleMessage.lineNumber());
-        mOutputs[index].append(": " + consoleMessage.message() + "\n");
+        output.append("CONSOLE MESSAGE: line " + consoleMessage.lineNumber());
+        output.append(": " + consoleMessage.message() + "\n");
+    }
+
+    public void appendJsAlert(String message) {
+        StringBuilder output = getStringBuilderForType(OutputType.JS_DIALOG);
+
+        output.append("ALERT: ");
+        output.append(message);
+        output.append('\n');
+    }
+
+    public void appendJsConfirm(String message) {
+        StringBuilder output = getStringBuilderForType(OutputType.JS_DIALOG);
+
+        output.append("CONFIRM: ");
+        output.append(message);
+        output.append('\n');
+    }
+
+    public void appendJsPrompt(String message, String defaultValue) {
+        StringBuilder output = getStringBuilderForType(OutputType.JS_DIALOG);
+
+        output.append("PROMPT: ");
+        output.append(message);
+        output.append(", default text: ");
+        output.append(defaultValue);
+        output.append('\n');
     }
 
     @Override
