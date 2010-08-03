@@ -47,7 +47,8 @@ public:
      * Renders the specified string of text.
      */
     void renderUTF(SkPaint* paint, const char *text, uint32_t start, uint32_t len,
-            int numGlyphs, int x, int y);
+                     int numGlyphs, int x, int y,
+                     uint8_t *bitmap = NULL, uint32_t bitmapW = 0, uint32_t bitmapH = 0);
     /**
      * Creates a new font associated with the specified font state.
      */
@@ -60,7 +61,10 @@ protected:
         // Has the cache been invalidated?
         bool mIsValid;
         // Location of the cached glyph in the bitmap
-        // in case we need to resize the texture
+        // in case we need to resize the texture or
+        // render to bitmap
+        uint32_t mStartX;
+        uint32_t mStartY;
         uint32_t mBitmapWidth;
         uint32_t mBitmapHeight;
         // Also cache texture coords for the quad
@@ -73,8 +77,8 @@ protected:
         uint32_t mAdvanceX;
         uint32_t mAdvanceY;
         // Values below contain a glyph's origin in the bitmap
-        uint32_t mBitmapLeft;
-        uint32_t mBitmapTop;
+        int32_t mBitmapLeft;
+        int32_t mBitmapTop;
     };
 
     Font(FontRenderer* state, uint32_t fontId, float fontSize);
@@ -86,6 +90,8 @@ protected:
     CachedGlyphInfo* cacheGlyph(SkPaint* paint, int32_t glyph);
     void updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyphInfo *glyph);
     void drawCachedGlyph(CachedGlyphInfo *glyph, int x, int y);
+    void drawCachedGlyph(CachedGlyphInfo *glyph, int x, int y,
+                          uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH);
 
     CachedGlyphInfo* getCachedUTFChar(SkPaint* paint, int32_t utfChar);
 
@@ -181,7 +187,10 @@ protected:
     Vector<Font*> mActiveFonts;
 
     // Texture to cache glyph bitmaps
-    unsigned char* mTextTexture;
+    uint8_t* mTextTexture;
+    const uint8_t* getTextTextureData() const {
+        return mTextTexture;
+    }
     GLuint mTextureId;
     void checkTextureUpdate();
     bool mUploadTexture;
@@ -196,6 +205,13 @@ protected:
     const Rect* mClip;
 
     bool mInitialized;
+
+    void computeGaussianWeights(float* weights, int32_t radius);
+    void horizontalBlur(float* weights, int32_t radius, const uint8_t *source, uint8_t *dest,
+                         int32_t width, int32_t height);
+    void verticalBlur(float* weights, int32_t radius, const uint8_t *source, uint8_t *dest,
+                         int32_t width, int32_t height);
+    void blurImage(uint8_t* image, int32_t width, int32_t height, int32_t radius);
 };
 
 }; // namespace uirenderer
