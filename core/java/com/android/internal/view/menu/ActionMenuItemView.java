@@ -19,19 +19,24 @@ package com.android.internal.view.menu;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.view.SoundEffectConstants;
 import android.view.View;
+import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
 /**
  * @hide
  */
-public class ActionMenuItemView extends ImageButton implements MenuView.ItemView {
+public class ActionMenuItemView extends FrameLayout
+        implements MenuView.ItemView, View.OnClickListener {
     private static final String TAG = "ActionMenuItemView";
 
     private MenuItemImpl mItemData;
     private CharSequence mTitle;
     private MenuBuilder.ItemInvoker mItemInvoker;
+
+    private ImageButton mImageButton;
+    private Button mTextButton;
 
     public ActionMenuItemView(Context context) {
         this(context, null);
@@ -45,6 +50,14 @@ public class ActionMenuItemView extends ImageButton implements MenuView.ItemView
         super(context, attrs, defStyle);
     }
 
+    @Override
+    public void onFinishInflate() {
+        mImageButton = (ImageButton) findViewById(com.android.internal.R.id.imageButton);
+        mTextButton = (Button) findViewById(com.android.internal.R.id.textButton);
+        mImageButton.setOnClickListener(this);
+        mTextButton.setOnClickListener(this);
+    }
+
     public MenuItemImpl getItemData() {
         return mItemData;
     }
@@ -54,26 +67,17 @@ public class ActionMenuItemView extends ImageButton implements MenuView.ItemView
 
         setClickable(true);
         setFocusable(true);
-        setTitle(itemData.getTitle());
         setIcon(itemData.getIcon());
+        setTitle(itemData.getTitle()); // Title only takes effect if there is no icon
         setId(itemData.getItemId());
 
         setVisibility(itemData.isVisible() ? View.VISIBLE : View.GONE);
         setEnabled(itemData.isEnabled());
     }
 
-    @Override
-    public boolean performClick() {
-        // Let the view's listener have top priority
-        if (super.performClick()) {
-            return true;
-        }
-
-        if (mItemInvoker != null && mItemInvoker.invokeItem(mItemData)) {
-            playSoundEffect(SoundEffectConstants.CLICK);
-            return true;
-        } else {
-            return false;
+    public void onClick(View v) {
+        if (mItemInvoker != null) {
+            mItemInvoker.invokeItem(mItemData);
         }
     }
 
@@ -94,7 +98,13 @@ public class ActionMenuItemView extends ImageButton implements MenuView.ItemView
     }
 
     public void setIcon(Drawable icon) {
-        setImageDrawable(icon);
+        mImageButton.setImageDrawable(icon);
+        if (icon != null) {
+            mImageButton.setVisibility(VISIBLE);
+            mTextButton.setVisibility(GONE);
+        } else {
+            mImageButton.setVisibility(GONE);
+        }
     }
 
     public void setShortcut(boolean showShortcut, char shortcutKey) {
@@ -106,10 +116,14 @@ public class ActionMenuItemView extends ImageButton implements MenuView.ItemView
 
         // populate accessibility description with title
         setContentDescription(title);
+
+        if (mImageButton.getDrawable() == null) {
+            mTextButton.setText(mTitle);
+            mTextButton.setVisibility(VISIBLE);
+        }
     }
 
     public boolean showsIcon() {
         return true;
     }
-
 }

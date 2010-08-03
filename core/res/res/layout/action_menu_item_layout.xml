@@ -16,5 +16,14 @@
 
 <com.android.internal.view.menu.ActionMenuItemView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    />
+    android:layout_height="wrap_content" >
+    <ImageButton android:id="@+id/imageButton"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:visibility="gone"
+                 style="?attr/actionButtonStyle" />
+    <Button android:id="@+id/textButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+</com.android.internal.view.menu.ActionMenuItemView>
