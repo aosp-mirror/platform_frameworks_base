@@ -132,7 +132,11 @@ public class ManagerService extends Service {
     }
 
     public static String getExpectedTextResult(String relativePath) {
-        return new String(getExpectedResult(relativePath, TEXT_RESULT_EXTENSION));
+        byte[] result = getExpectedResult(relativePath, TEXT_RESULT_EXTENSION);
+        if (result != null) {
+            return new String(result);
+        }
+        return null;
     }
 
     public static byte[] getExpectedImageResult(String relativePath) {

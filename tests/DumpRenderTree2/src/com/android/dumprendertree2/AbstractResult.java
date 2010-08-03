@@ -26,6 +26,8 @@ import android.webkit.WebView;
  */
 public abstract class AbstractResult implements Comparable<AbstractResult> {
 
+    private static final String LOG_TAG = "AbstractResult";
+
     public enum TestType {
         TEXT {
             @Override
@@ -63,8 +65,18 @@ public abstract class AbstractResult implements Comparable<AbstractResult> {
         }
     }
 
+    String mAdditionalTextOutputString;
+
     public int compareTo(AbstractResult another) {
         return getRelativePath().compareTo(another.getRelativePath());
+    }
+
+    public void setAdditionalTextOutputString(String additionalTextOutputString) {
+        mAdditionalTextOutputString = additionalTextOutputString;
+    }
+
+    public String getAdditionalTextOutputString() {
+        return mAdditionalTextOutputString;
     }
 
     /**

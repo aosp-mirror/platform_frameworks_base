@@ -41,11 +41,13 @@ public class TextResult extends AbstractResult {
     private ResultCode mResultCode;
     private Message mResultObtainedMsg;
 
+    private boolean mDumpChildFramesAsText;
+
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == MSG_DOCUMENT_AS_TEXT) {
-                mActualResult = (String) msg.obj;
+                mActualResult = (String)msg.obj;
                 mResultObtainedMsg.sendToTarget();
             }
         }
@@ -53,6 +55,10 @@ public class TextResult extends AbstractResult {
 
     public TextResult(String relativePath) {
         mRelativePath = relativePath;
+    }
+
+    public void setDumpChildFramesAsText(boolean dumpChildFramesAsText) {
+        mDumpChildFramesAsText = dumpChildFramesAsText;
     }
 
     /**
@@ -64,6 +70,7 @@ public class TextResult extends AbstractResult {
     public TextResult(Bundle bundle) {
         mExpectedResult = bundle.getString("expectedTextualResult");
         mActualResult = bundle.getString("actualTextualResult");
+        setAdditionalTextOutputString(bundle.getString("additionalTextOutputString"));
         mRelativePath = bundle.getString("relativePath");
         String resultCode = bundle.getString("resultCode");
         if (resultCode != null) {
@@ -95,6 +102,11 @@ public class TextResult extends AbstractResult {
 
     @Override
     public String getActualTextResult() {
+        String additionalTextResultString = getAdditionalTextOutputString();
+        if (additionalTextResultString != null) {
+            return additionalTextResultString+ mActualResult;
+        }
+
         return mActualResult;
     }
 
@@ -187,9 +199,12 @@ public class TextResult extends AbstractResult {
         mResultObtainedMsg = resultObtainedMsg;
         Message msg = mHandler.obtainMessage(MSG_DOCUMENT_AS_TEXT);
 
-        /** TODO: mDumpTopFrameAsText and mDumpChildFramesAsText */
+        /**
+         * arg1 - should dump top frame as text
+         * arg2 - should dump child frames as text
+         */
         msg.arg1 = 1;
-        msg.arg2 = 0;
+        msg.arg2 = mDumpChildFramesAsText ? 1 : 0;
         webview.documentAsText(msg);
     }
 
@@ -197,7 +212,8 @@ public class TextResult extends AbstractResult {
     public Bundle getBundle() {
         Bundle bundle = new Bundle();
         bundle.putString("expectedTextualResult", mExpectedResult);
-        bundle.putString("actualTextualResult", mActualResult);
+        bundle.putString("actualTextualResult", getActualTextResult());
+        bundle.putString("additionalTextOutputString", getAdditionalTextOutputString());
         bundle.putString("relativePath", mRelativePath);
         if (mResultCode != null) {
             bundle.putString("resultCode", mResultCode.name());
