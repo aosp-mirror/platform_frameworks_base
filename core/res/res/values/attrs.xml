@@ -3428,6 +3428,19 @@
         <attr name="orderingFromXml" format="boolean" />
     </declare-styleable>
 
+    <!-- Attribute for a header describing the item shown in the top-level list
+         from which the selects the set of preference to dig in to. -->
+    <declare-styleable name="PreferenceHeader">
+        <!-- The title of the item that is shown to the user. -->
+        <attr name="title" />
+        <!-- The summary for the item. -->
+        <attr name="summary" format="string" />
+        <!-- An icon for the item. -->
+        <attr name="icon" />
+        <!-- The fragment that is displayed when the user selects this item. -->
+        <attr name="fragment" format="string" />
+    </declare-styleable>
+
     <!-- WARNING:  If adding attributes to Preference, make sure it does not conflict
                    with a View's attributes.  Some subclasses (e.g., EditTextPreference)
                    proxy all attributes to its EditText widget. -->
@@ -3440,7 +3453,7 @@
         <!-- The title for the Preference in a PreferenceActivity screen. -->
         <attr name="title" />
         <!-- The summary for the Preference in a PreferenceActivity screen. -->
-        <attr name="summary" format="string" />
+        <attr name="summary" />
         <!-- The order for the Preference (lower values are to be ordered first). If this is not
              specified, the default orderin will be alphabetic. -->
         <attr name="order" format="integer" />

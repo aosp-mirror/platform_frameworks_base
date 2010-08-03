@@ -37,6 +37,17 @@ import android.widget.ListView;
  * {@link PreferenceManager#getDefaultSharedPreferences(android.content.Context)}
  * with a context in the same package as this fragment.
  * <p>
+ * Furthermore, the preferences shown will follow the visual style of system
+ * preferences. It is easy to create a hierarchy of preferences (that can be
+ * shown on multiple screens) via XML. For these reasons, it is recommended to
+ * use this fragment (as a superclass) to deal with preferences in applications.
+ * <p>
+ * A {@link PreferenceScreen} object should be at the top of the preference
+ * hierarchy. Furthermore, subsequent {@link PreferenceScreen} in the hierarchy
+ * denote a screen break--that is the preferences contained within subsequent
+ * {@link PreferenceScreen} should be shown on another screen. The preference
+ * framework handles showing these other screens from the preference hierarchy.
+ * <p>
  * The preference hierarchy can be formed in multiple ways:
  * <li> From an XML file specifying the hierarchy
  * <li> From different {@link Activity Activities} that each specify its own
@@ -61,24 +72,21 @@ import android.widget.ListView;
  * As a convenience, this fragment implements a click listener for any
  * preference in the current hierarchy, see
  * {@link #onPreferenceTreeClick(PreferenceScreen, Preference)}.
- * <p>
- * See {@link PreferenceActivity} for more details.
  *
  * <a name="SampleCode"></a>
  * <h3>Sample Code</h3>
  *
- * <p>The following sample code shows the use if a PreferenceFragment to
- * embed preferences in a larger activity and switch between them.  The content
- * layout of the activity is:</p>
+ * <p>The following sample code shows a simple preference fragment that is
+ * populated from a resource.  The resource it loads is:</p>
  *
- * {@sample development/samples/ApiDemos/res/layout/fragment_preferences.xml layout}
+ * {@sample development/samples/ApiDemos/res/xml/preferences.xml preferences}
  *
- * <p>The code using this layout consists of an activity and three fragments.
- * One of the fragments is a list of categories the user can select; the other
- * two are the different preference options for the categories.</p>
+ * <p>The fragment implementation itself simply populates the preferences
+ * when created.  Note that the preferences framework takes care of loading
+ * the current values out of the app preferences and writing them when changed:</p>
  *
- * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentPreferences.java
- *      activity}
+ * {@sample development/samples/ApiDemos/src/com/example/android/apis/preference/FragmentPreferences.java
+ *      fragment}
  *
  * @see Preference
  * @see PreferenceScreen

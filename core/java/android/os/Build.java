@@ -196,6 +196,17 @@ public class Build {
          * </ul>
          */
         public static final int GINGERBREAD = CUR_DEVELOPMENT;
+
+        /**
+         * Next next version of Android.
+         *
+         * <p>Applications targeting this or a later release will get these
+         * new changes in behavior:</p>
+         * <ul>
+         * <li> Alerts UI change?
+         * </ul>
+         */
+        public static final int HONEYCOMB = CUR_DEVELOPMENT;
     }
     
     /** The type of build, like "user" or "eng". */

@@ -1314,6 +1314,7 @@
   <public type="attr" name="valueType" />
   <public type="attr" name="propertyName" />
   <public type="attr" name="ordering" />
+  <public type="attr" name="fragment" />
 
   <public type="id" name="home" />
   <!-- Context menu ID for the "Select text..." menu item to switch to text

@@ -23,17 +23,29 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent">
 
-    <ListView android:id="@android:id/list"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="1"
-        android:drawSelectorOnTop="false"
-        android:scrollbarAlwaysDrawVerticalTrack="true"
-    />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1">
+
+        <ListView android:id="@android:id/list"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:drawSelectorOnTop="false"
+            android:scrollbarAlwaysDrawVerticalTrack="true" />
+
+        <FrameLayout android:id="@+id/prefs"
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:visibility="gone" />
+    </LinearLayout>
 
     <RelativeLayout android:id="@+id/button_bar"
         android:layout_height="wrap_content"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_weight="0"
         android:background="@android:drawable/bottom_bar"
         android:visibility="gone">

@@ -17,6 +17,7 @@
 package android.app;
 
 import android.content.ComponentCallbacks;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -227,7 +228,25 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     public Fragment() {
     }
 
-    static Fragment instantiate(Activity activity, String fname)
+    /**
+     * Create a new instance of a Fragment with the given class name.  This is
+     * the same as calling its empty constructor.
+     *
+     * @param context The calling context being used to instantiate the fragment.
+     * This is currently just used to get its ClassLoader.
+     * @param fname The class name of the fragment to instantiate.
+     * @return Returns a new fragment instance.
+     * @throws NoSuchMethodException The fragment does not have an empty constructor.
+     * @throws ClassNotFoundException The fragment class does not exist.
+     * @throws IllegalArgumentException Bad arguments supplied to fragment class
+     * constructor (should not happen).
+     * @throws InstantiationException Caller does not have permission to instantiate
+     * the fragment (for example its constructor is not public).
+     * @throws IllegalAccessException Caller does not have permission to access
+     * the given fragment class.
+     * @throws InvocationTargetException Failure running the fragment's constructor.
+     */
+    public static Fragment instantiate(Context context, String fname)
             throws NoSuchMethodException, ClassNotFoundException,
             IllegalArgumentException, InstantiationException,
             IllegalAccessException, InvocationTargetException {
@@ -235,7 +254,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
 
         if (clazz == null) {
             // Class not found in the cache, see if it's real, and try to add it
-            clazz = activity.getClassLoader().loadClass(fname);
+            clazz = context.getClassLoader().loadClass(fname);
             sClassMap.put(fname, clazz);
         }
         return (Fragment)clazz.newInstance();
