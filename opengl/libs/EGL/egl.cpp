@@ -37,6 +37,8 @@
 #include <cutils/memory.h>
 
 #include <utils/SortedVector.h>
+#include <utils/KeyedVector.h>
+#include <utils/String8.h>
 
 #include "hooks.h"
 #include "egl_impl.h"
@@ -410,7 +412,11 @@ static const extention_map_t gExtentionMap[] = {
             (__eglMustCastToProperFunctionPointerType)&eglGetRenderBufferANDROID }, 
 };
 
-static extention_map_t gGLExtentionMap[MAX_NUMBER_OF_GL_EXTENSIONS];
+extern const __eglMustCastToProperFunctionPointerType gExtensionForwarders[MAX_NUMBER_OF_GL_EXTENSIONS];
+
+// accesses protected by gInitDriverMutex
+static DefaultKeyedVector<String8, __eglMustCastToProperFunctionPointerType> gGLExtentionMap;
+static int gGLExtentionSlot = 0;
 
 static void(*findProcAddress(const char* name,
         const extention_map_t* map, size_t n))() 
@@ -1369,55 +1375,54 @@ __eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
     addr = findProcAddress(procname, gExtentionMap, NELEM(gExtentionMap));
     if (addr) return addr;
 
-    return NULL; // TODO: finish implementation below
+    // this protects accesses to gGLExtentionMap and gGLExtentionSlot
+    pthread_mutex_lock(&gInitDriverMutex);
 
-    addr = findProcAddress(procname, gGLExtentionMap, NELEM(gGLExtentionMap));
-    if (addr) return addr;
-    
-    addr = 0;
-    int slot = -1;
-    for (int i=0 ; i<IMPL_NUM_IMPLEMENTATIONS ; i++) {
-        egl_connection_t* const cnx = &gEGLImpl[i];
-        if (cnx->dso) {
-            if (cnx->egl.eglGetProcAddress) {
-                addr = cnx->egl.eglGetProcAddress(procname);
-                if (addr) {
-                    if (slot == -1) {
-                        slot = 0; // XXX: find free slot
-                        if (slot == -1) {
-                            addr = 0;
-                            break;
-                        }
-                    }
-                    //cnx->hooks->ext.extensions[slot] = addr;
+        /*
+         * Since eglGetProcAddress() is not associated to anything, it needs
+         * to return a function pointer that "works" regardless of what
+         * the current context is.
+         *
+         * For this reason, we return a "forwarder", a small stub that takes
+         * care of calling the function associated with the context
+         * currently bound.
+         *
+         * We first look for extensions we've already resolved, if we're seeing
+         * this extension for the first time, we go through all our
+         * implementations and call eglGetProcAddress() and record the
+         * result in the appropriate implementation hooks and return the
+         * address of the forwarder corresponding to that hook set.
+         *
+         */
+
+        const String8 name(procname);
+        addr = gGLExtentionMap.valueFor(name);
+        const int slot = gGLExtentionSlot;
+
+        LOGE_IF(slot >= MAX_NUMBER_OF_GL_EXTENSIONS,
+                "no more slots for eglGetProcAddress(\"%s\")",
+                procname);
+
+        if (!addr && (slot < MAX_NUMBER_OF_GL_EXTENSIONS)) {
+            bool found = false;
+            for (int i=0 ; i<IMPL_NUM_IMPLEMENTATIONS ; i++) {
+                egl_connection_t* const cnx = &gEGLImpl[i];
+                if (cnx->dso && cnx->egl.eglGetProcAddress) {
+                    found = true;
+                    cnx->hooks[i]->ext.extensions[slot] =
+                            cnx->egl.eglGetProcAddress(procname);
                 }
             }
+            if (found) {
+                addr = gExtensionForwarders[slot];
+                gGLExtentionMap.add(name, addr);
+                gGLExtentionSlot++;
+            }
         }
-    }
-    
-    if (slot >= 0) {
-        addr = 0; // XXX: address of stub 'slot'
-        gGLExtentionMap[slot].name = strdup(procname);
-        gGLExtentionMap[slot].address = addr;
-    }
-    
-    return addr;
 
-    
-    /*
-     *  TODO: For OpenGL ES extensions, we must generate a stub
-     *  that looks like
-     *      mov     r12, #0xFFFF0FFF
-     *      ldr     r12, [r12, #-15]
-     *      ldr     r12, [r12, #TLS_SLOT_OPENGL_API*4]
-     *      mov     r12, [r12, #api_offset]
-     *      ldrne   pc, r12
-     *      mov     pc, #unsupported_extension
-     * 
-     *  and write the address of the extension in *all*
-     *  gl_hooks_t::gl_ext_t at offset "api_offset" from gl_hooks_t
-     * 
-     */
+    pthread_mutex_unlock(&gInitDriverMutex);
+
+    return addr;
 }
 
 EGLBoolean eglSwapBuffers(EGLDisplay dpy, EGLSurface draw)
