@@ -52,8 +52,9 @@ Android Market within a 14-day period ending on the data collection date noted b
 <div class="dashboard-panel">
 
 <img alt="" height="250" width="460"
-src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:0.3,18.9,22.1,55.5,3.3&chl=Other*|
-Android%201.5|Android%201.6|Android%202.1|Android%202.2&chco=c4df9b,6fad0c" />
+src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:15.3,20.3,0.2,59.7,4.5&chl=
+Android%201.5|Android%201.6|Other*|Android%202.1|Android%202.2&chco=c4df9b,
+6fad0c" />
 
 <table>
 <tr>
@@ -61,14 +62,14 @@ Android%201.5|Android%201.6|Android%202.1|Android%202.2&chco=c4df9b,6fad0c" />
   <th>API Level</th>
   <th>Distribution</th>
 </tr>
-<tr><td>Android 1.5</td><td>3</td><td>18.9%</td></tr>
-<tr><td>Android 1.6</td><td>4</td><td>22.1%</td></tr>
-<tr><td>Android 2.1</td><td>7</td><td>55.5%</td></tr>
-<tr><td>Android 2.2</td><td>8</td><td>3.3%</td></tr>
+<tr><td>Android 1.5</td><td>3</td><td>15.3%</td></tr>
+<tr><td>Android 1.6</td><td>4</td><td>20.3%</td></tr>
+<tr><td>Android 2.1</td><td>7</td><td>59.7%</td></tr>
+<tr><td>Android 2.2</td><td>8</td><td>4.5%</td></tr>
 </table>
 
-<p><em>Data collected during two weeks ending on July 15, 2010</em></p>
-<p style="font-size:.9em">* <em>Other: 0.3% of devices running obsolete versions</em></p>
+<p><em>Data collected during two weeks ending on August 2, 2010</em></p>
+<p style="font-size:.9em">* <em>Other: 0.2% of devices running obsolete versions</em></p>
 
 </div><!-- end dashboard-panel -->
 
@@ -94,21 +95,20 @@ Android Market within a 14-day period ending on the date indicated on the x-axis
 
 <div class="dashboard-panel">
 
-<img alt="" height="265" width="700" style="padding:5px;background:#fff"
-src="http://chart.apis.google.com/chart?&cht=lc&chs=700x265&chxt=x,y,r&chxr=0,0,10%7C1,0,100%7C2,0,
-100&chxl=0%3A%7C2010/02/01%7C02/15%7C03/01%7C03/15%7C04/01%7C04/15%7C05/01%7C05/15%7C06/01%7C06/15%
-7C2010/07/01%7C1%3A%7C0%25%7C25%25%7C50%25%7C75%25%7C100%25%7C2%3A%7C0%25%7C25%25%7C50%25%7C75%25%
-7C100%25&chxp=0,0,1,2,3,4,5,6,7,8,9,10&chxtc=0,5&chd=t:99.0,99.2,99.4,99.5,99.6,99.6,99.6,99.7,100.6
-,101.1,99.9%7C63.4,62.5,61.6,60.6,61.5,61.7,62.3,63.5,73.0,76.4,78.6%7C22.6,23.2,24.3,25.4,29.4,30.2
-,32.7,35.3,46.2,51.3,55.1%7C0.0,0.0,0.0,0.0,4.0,28.3,32.0,34.9,45.9,51.0,54.9%7C0.0,0.0,0.0,0.0,0.0,
-0.0,0.0,0.0,0.8,1.2,1.8&chm=tAndroid%201.5,7caa36,0,0,15,,t::-5%7Cb,c3df9b,0,1,0%7CtAndroid%201.6,
-638d23,1,0,15,,t::-5%7Cb,b0db6e,1,2,0%7CtAndroid%202.0.1,496c13,2,0,15,,t::-5%7Cb,9ddb3d,2,3,0%
-7CtAndroid%202.1,2f4708,3,5,15,,t::-5%7Cb,89cf19,3,4,0%7CB,6fad0c,4,5,0&chg=9,25&chdl=Android%201.5%
-20(API%20Level%203)%7CAndroid%201.6%20(API%20Level%204)%7CAndroid%202.0.1%20(API%20Level%206)%
-7CAndroid%202.1%20(API%20Level%207)%7CAndroid%202.2%20(API%20Level %208)&chco=add274,
-9ad145,84c323,6ba213,507d08" />
+<img alt="" height="250" width="660" style="padding:5px;background:#fff"
+src="http://chart.apis.google.com/chart?&cht=lc&chs=660x250&chxt=x,y,r&chxr=0,0,12|1,0,100|2,0,100&
+chxl=0%3A%7C2010/02/01%7C02/15%7C03/01%7C03/15%7C04/01%7C04/15%7C05/01%7C05/15%7C06/01%7C06/15%7C07/
+01%7C07/15%7C2010/08/01%7C1%3A%7C0%25%7C25%25%7C50%25%7C75%25%7C100%25%7C2%3A%7C0%25%7C25%25%7C50%25
+%7C75%25%7C100%25&chxp=0,0,1,2,3,4,5,6,7,8,9,10,11,12&chxtc=0,5&chd=t:99.0,99.2,99.4,99.5,99.6,99.6,
+99.6,99.7,100.6,101.1,99.9,100.0,100.0|63.4,62.5,61.6,60.6,61.5,61.7,62.3,63.5,73.0,76.4,78.6,81.1,
+84.5|22.6,23.2,24.3,25.4,29.4,30.2,32.7,35.3,46.2,51.3,55.1,59.0,64.1|0.0,0.0,0.0,0.0,4.0,28.3,32.0,
+34.9,45.9,51.0,54.9,58.8,64.0|0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.8,1.2,1.8,3.3,4.3&chm=tAndroid%201.5
+,7caa36,0,0,15,,t::-5|b,c3df9b,0,1,0|tAndroid%201.6,638d23,1,0,15,,t::-5|b,b0db6e,1,2,0|tAndroid%202
+.0.1,496c13,2,0,15,,t::-5|b,9ddb3d,2,3,0|tAndroid%202.1,2f4708,3,5,15,,t::-5|b,89cf19,3,4,0|B,6fad0c
+,4,5,0&chg=7,25&chdl=Android%201.5|Android%201.6|Android%202.0.1|Android%202.1|Android%202.2&chco=
+add274,9ad145,84c323,6ba213,507d08" />
 
-<p><em>Last historical dataset collected during two weeks ending on July 1, 2010</em></p>
+<p><em>Last historical dataset collected during two weeks ending on August 2, 2010</em></p>
 
 
 </div><!-- end dashboard-panel -->
