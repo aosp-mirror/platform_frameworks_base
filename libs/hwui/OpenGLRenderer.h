@@ -43,6 +43,7 @@
 #include "FontRenderer.h"
 #include "ProgramCache.h"
 #include "SkiaShader.h"
+#include "SkiaColorFilter.h"
 
 namespace android {
 namespace uirenderer {
@@ -94,6 +95,9 @@ public:
 
     void resetShader();
     void setupShader(SkiaShader* shader);
+
+    void resetColorFilter();
+    void setupColorFilter(SkiaColorFilter* filter);
 
     void drawText(const char* text, int bytesCount, int count, float x, float y, SkPaint* paint);
 
@@ -280,6 +284,9 @@ private:
     // Shaders
     Program* mCurrentProgram;
     SkiaShader* mShader;
+
+    // Color filters
+    SkiaColorFilter* mColorFilter;
 
     // Used to draw textured quads
     TextureVertex mMeshVertices[4];

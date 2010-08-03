@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #ifndef ANDROID_UI_EXTENSIONS_H
 #define ANDROID_UI_EXTENSIONS_H
 
