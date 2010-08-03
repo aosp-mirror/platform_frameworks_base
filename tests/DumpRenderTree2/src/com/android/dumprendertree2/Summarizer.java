@@ -21,7 +21,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A class that collects information about tests that ran and can create HTML
@@ -55,7 +57,14 @@ public class Summarizer {
             "h3 a span.path {" +
             "       text-decoration: underline;}" +
             "h3 span.tri {" +
-            "       text-decoration: none;}" +
+            "       text-decoration: none;" +
+            "       float: left;" +
+            "       width: 20px;}" +
+            "h3 span.sqr {" +
+            "       text-decoration: none;" +
+            "       color: #8ee100;" +
+            "       float: left;" +
+            "       width: 20px;}" +
             "h3 img {" +
             "       width: 8px;" +
             "       margin-right: 4px;}" +
@@ -135,6 +144,9 @@ public class Summarizer {
             "span." + AbstractResult.ResultCode.FAIL_CRASHED.name() + "{" +
             "       background-color: #c30000;" +
             "       color: #fff;}" +
+            "span.noLtc {" +
+            "       background-color: #944000;" +
+            "       color: #fff;" +
             "</style>";
 
     private static final String SCRIPT =
@@ -244,7 +256,8 @@ public class Summarizer {
             html.append("<h3>");
 
             if (resultCode == AbstractResult.ResultCode.PASS) {
-                html.append(relativePath);
+                html.append("<span class=\"sqr\">&#x25a0; </span>");
+                html.append("<span class=\"path\">" + relativePath + "</span>");
             } else {
                 /**
                  * Technically, two different paths could end up being the same, because
@@ -262,6 +275,15 @@ public class Summarizer {
             html.append(" <span class=\"listItem " + resultCode.name() + "\">");
             html.append(resultCode.toString());
             html.append("</span>");
+
+            /** Detect missing LTC function */
+            String additionalTextOutputString = result.getAdditionalTextOutputString();
+                if (additionalTextOutputString != null &&
+                        additionalTextOutputString.contains("com.android.dumprendertree") &&
+                        additionalTextOutputString.contains("LayoutTestController") &&
+                        additionalTextOutputString.contains("has no method")) {
+                    html.append(" <span class=\"listItem noLtc\">LTC function missing</span>");
+                }
 
             html.append("</h3>");
 
@@ -282,7 +304,10 @@ public class Summarizer {
         Collections.sort(resultsList);
         html.append("<h2>Passed [" + resultsList.size() + "]</h2>");
         for (String result : resultsList) {
-            html.append("<h3>" + result + "</h3>");
+            html.append("<h3>");
+            html.append("<span class=\"sqr\">&#x25a0; </span>");
+            html.append("<span class=\"path\">" + result + "</span>");
+            html.append("</h3>");
             html.append("<div class=\"space\"></div>");
         }
     }
