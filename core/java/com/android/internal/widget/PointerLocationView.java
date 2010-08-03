@@ -38,7 +38,8 @@ public class PointerLocationView extends View {
         private float mCurPressure;
         private float mCurSize;
         private int mCurWidth;
-        private VelocityTracker mVelocity;
+        private float mXVelocity;
+        private float mYVelocity;
     }
 
     private final ViewConfiguration mVC;
@@ -55,6 +56,8 @@ public class PointerLocationView extends View {
     private int mMaxNumPointers;
     private final ArrayList<PointerState> mPointers
              = new ArrayList<PointerState>();
+    
+    private final VelocityTracker mVelocity;
     
     private boolean mPrintCoords = true;
     
@@ -88,8 +91,9 @@ public class PointerLocationView extends View {
         mPaint.setStrokeWidth(1);
         
         PointerState ps = new PointerState();
-        ps.mVelocity = VelocityTracker.obtain();
         mPointers.add(ps);
+        
+        mVelocity = VelocityTracker.obtain();
     }
 
     public void setPrintCoords(boolean state) {
@@ -146,11 +150,11 @@ public class PointerLocationView extends View {
                 }
                 
                 canvas.drawRect(itemW * 3, 0, (itemW * 4) - 1, bottom, mTextBackgroundPaint);
-                int velocity = ps.mVelocity == null ? 0 : (int) (ps.mVelocity.getXVelocity() * 1000);
+                int velocity = (int) (ps.mXVelocity * 1000);
                 canvas.drawText("Xv: " + velocity, 1 + itemW * 3, base, mTextPaint);
                 
                 canvas.drawRect(itemW * 4, 0, (itemW * 5) - 1, bottom, mTextBackgroundPaint);
-                velocity = ps.mVelocity == null ? 0 : (int) (ps.mVelocity.getYVelocity() * 1000);
+                velocity = (int) (ps.mYVelocity * 1000);
                 canvas.drawText("Yv: " + velocity, 1 + itemW * 4, base, mTextPaint);
                 
                 canvas.drawRect(itemW * 5, 0, (itemW * 6) - 1, bottom, mTextBackgroundPaint);
@@ -205,14 +209,10 @@ public class PointerLocationView extends View {
                 }
                 
                 if (drawn) {
-                    if (ps.mVelocity != null) {
-                        mPaint.setARGB(255, 255, 64, 128);
-                        float xVel = ps.mVelocity.getXVelocity() * (1000/60);
-                        float yVel = ps.mVelocity.getYVelocity() * (1000/60);
-                        canvas.drawLine(lastX, lastY, lastX+xVel, lastY+yVel, mPaint);
-                    } else {
-                        canvas.drawPoint(lastX, lastY, mPaint);
-                    }
+                    mPaint.setARGB(255, 255, 64, 128);
+                    float xVel = ps.mXVelocity * (1000/60);
+                    float yVel = ps.mYVelocity * (1000/60);
+                    canvas.drawLine(lastX, lastY, lastX+xVel, lastY+yVel, mPaint);
                 }
             }
         }
@@ -236,11 +236,12 @@ public class PointerLocationView extends View {
             //    mRect.setEmpty();
             //}
             if (action == MotionEvent.ACTION_DOWN) {
+                mVelocity.clear();
+                
                 for (int p=0; p<NP; p++) {
                     final PointerState ps = mPointers.get(p);
                     ps.mXs.clear();
                     ps.mYs.clear();
-                    ps.mVelocity = VelocityTracker.obtain();
                     ps.mCurDown = false;
                 }
                 mPointers.get(0).mCurDown = true;
@@ -256,12 +257,10 @@ public class PointerLocationView extends View {
                 final int id = event.getPointerId(index);
                 while (NP <= id) {
                     PointerState ps = new PointerState();
-                    ps.mVelocity = VelocityTracker.obtain();
                     mPointers.add(ps);
                     NP++;
                 }
                 final PointerState ps = mPointers.get(id);
-                ps.mVelocity = VelocityTracker.obtain();
                 ps.mCurDown = true;
                 if (mPrintCoords) {
                     Log.i("Pointer", "Pointer " + (id+1) + ": DOWN");
@@ -276,12 +275,13 @@ public class PointerLocationView extends View {
             if (mMaxNumPointers < mCurNumPointers) {
                 mMaxNumPointers = mCurNumPointers;
             }
+
+            mVelocity.addMovement(event);
+            mVelocity.computeCurrentVelocity(1);
             
             for (int i=0; i<NI; i++) {
                 final int id = event.getPointerId(i);
                 final PointerState ps = mPointers.get(id);
-                ps.mVelocity.addMovement(event);
-                ps.mVelocity.computeCurrentVelocity(1);
                 final int N = event.getHistorySize();
                 for (int j=0; j<N; j++) {
                     if (mPrintCoords) {
@@ -309,6 +309,8 @@ public class PointerLocationView extends View {
                 ps.mCurPressure = event.getPressure(i);
                 ps.mCurSize = event.getSize(i);
                 ps.mCurWidth = (int)(ps.mCurSize*(getWidth()/3));
+                ps.mXVelocity = mVelocity.getXVelocity(id);
+                ps.mYVelocity = mVelocity.getYVelocity(id);
             }
             
             if ((action&MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_UP) {
