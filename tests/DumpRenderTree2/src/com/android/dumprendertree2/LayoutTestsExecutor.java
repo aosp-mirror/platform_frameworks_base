@@ -40,6 +40,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.GeolocationPermissions.Callback;
 import android.webkit.WebStorage.QuotaUpdater;
 
 import java.io.File;
@@ -104,6 +105,8 @@ public class LayoutTestsExecutor extends Activity {
     private LayoutTestController mLayoutTestController = new LayoutTestController(this);
     private boolean mCanOpenWindows;
     private boolean mDumpDatabaseCallbacks;
+    private boolean mSetGeolocationPermissionCalled;
+    private boolean mGeolocationPermission;
 
     private WakeLock mScreenDimLock;
 
@@ -220,6 +223,13 @@ public class LayoutTestsExecutor extends Activity {
             transport.setWebView(newWindowWebView);
             resultMsg.sendToTarget();
             return true;
+        }
+
+        @Override
+        public void onGeolocationPermissionsShowPrompt(String origin, Callback callback) {
+            if (mSetGeolocationPermissionCalled) {
+                callback.invoke(origin, mGeolocationPermission, false);
+            }
         }
     };
 
@@ -420,6 +430,7 @@ public class LayoutTestsExecutor extends Activity {
     private static final int MSG_DUMP_CHILD_FRAMES_AS_TEXT = 3;
     private static final int MSG_SET_CAN_OPEN_WINDOWS = 4;
     private static final int MSG_DUMP_DATABASE_CALLBACKS = 5;
+    private static final int MSG_SET_GEOLOCATION_PREMISSION = 6;
 
     Handler mLayoutTestControllerHandler = new Handler() {
         @Override
@@ -468,6 +479,11 @@ public class LayoutTestsExecutor extends Activity {
                     mDumpDatabaseCallbacks = true;
                     break;
 
+                case MSG_SET_GEOLOCATION_PREMISSION:
+                    mSetGeolocationPermissionCalled = true;
+                    mGeolocationPermission = msg.arg1 == 1;
+                    break;
+
                 default:
                     Log.w(LOG_TAG + "::handleMessage", "Message code does not exist: " + msg.what);
                     break;
@@ -478,6 +494,8 @@ public class LayoutTestsExecutor extends Activity {
     private void resetLayoutTestController() {
         mCanOpenWindows = false;
         mDumpDatabaseCallbacks = false;
+        mSetGeolocationPermissionCalled = false;
+        mGeolocationPermission = false;
     }
 
     public void waitUntilDone() {
@@ -512,5 +530,12 @@ public class LayoutTestsExecutor extends Activity {
     public void dumpDatabaseCallbacks() {
         Log.w(LOG_TAG + "::dumpDatabaseCallbacks:", "called");
         mLayoutTestControllerHandler.sendEmptyMessage(MSG_DUMP_DATABASE_CALLBACKS);
+    }
+
+    public void setGeolocationPermission(boolean allow) {
+        Log.w(LOG_TAG + "::setGeolocationPermission", "called");
+        Message msg = mLayoutTestControllerHandler.obtainMessage(MSG_SET_GEOLOCATION_PREMISSION);
+        msg.arg1 = allow ? 1 : 0;
+        msg.sendToTarget();
     }
 }

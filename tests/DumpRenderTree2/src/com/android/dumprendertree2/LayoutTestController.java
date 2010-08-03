@@ -18,6 +18,7 @@ package com.android.dumprendertree2;
 
 import android.net.Uri;
 import android.util.Log;
+import android.webkit.MockGeolocation;
 import android.webkit.WebStorage;
 
 import java.io.File;
@@ -72,5 +73,20 @@ public class LayoutTestController {
         Log.w(LOG_TAG + "::setDatabaseQuota", "called with: " + quota);
         WebStorage.getInstance().setQuotaForOrigin(Uri.fromFile(new File("")).toString(),
                 quota);
+    }
+
+    public void setGeolocationPermission(boolean allow) {
+        mLayoutTestsExecutor.setGeolocationPermission(allow);
+    }
+
+    public void setMockGeolocationPosition(double latitude, double longitude, double accuracy) {
+        Log.w(LOG_TAG + "::setMockGeolocationPosition", "latitude: " + latitude +
+                " longitude: " + longitude + " accuracy: " + accuracy);
+        MockGeolocation.getInstance().setPosition(latitude, longitude, accuracy);
+    }
+
+    public void setMockGeolocationError(int code, String message) {
+        Log.w(LOG_TAG + "::setMockGeolocationError", "code: " + code + " message: " + message);
+        MockGeolocation.getInstance().setError(code, message);
     }
 }
