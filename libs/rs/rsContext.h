@@ -162,6 +162,7 @@ public:
         bool mLogScripts;
         bool mLogObjects;
         bool mLogShaders;
+        bool mLogVisual;
     } props;
 
     void dumpDebug() const;
@@ -256,6 +257,8 @@ protected:
     bool objDestroyOOBInit();
     void objDestroyOOBRun();
     void objDestroyOOBDestroy();
+
+    void displayDebugStats();
 
 private:
     Context();
