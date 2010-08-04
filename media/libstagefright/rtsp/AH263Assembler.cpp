@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-#include "AMPEG4AudioAssembler.h"
+#include "AH263Assembler.h"
 
 #include "ARTPSource.h"
 
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
+#include <media/stagefright/foundation/hexdump.h>
+#include <media/stagefright/Utils.h>
 
 namespace android {
 
-AMPEG4AudioAssembler::AMPEG4AudioAssembler(const sp<AMessage> &notify)
+AH263Assembler::AH263Assembler(const sp<AMessage> &notify)
     : mNotifyMsg(notify),
       mAccessUnitRTPTime(0),
       mNextExpectedSeqNoValid(false),
@@ -32,10 +34,10 @@ AMPEG4AudioAssembler::AMPEG4AudioAssembler(const sp<AMessage> &notify)
       mAccessUnitDamaged(false) {
 }
 
-AMPEG4AudioAssembler::~AMPEG4AudioAssembler() {
+AH263Assembler::~AH263Assembler() {
 }
 
-ARTPAssembler::AssemblyStatus AMPEG4AudioAssembler::assembleMore(
+ARTPAssembler::AssemblyStatus AH263Assembler::assembleMore(
         const sp<ARTPSource> &source) {
     AssemblyStatus status = addPacket(source);
     if (status == MALFORMED_PACKET) {
@@ -44,7 +46,7 @@ ARTPAssembler::AssemblyStatus AMPEG4AudioAssembler::assembleMore(
     return status;
 }
 
-ARTPAssembler::AssemblyStatus AMPEG4AudioAssembler::addPacket(
+ARTPAssembler::AssemblyStatus AH263Assembler::addPacket(
         const sp<ARTPSource> &source) {
     List<sp<ABuffer> > *queue = source->queue();
 
@@ -88,6 +90,29 @@ ARTPAssembler::AssemblyStatus AMPEG4AudioAssembler::addPacket(
     }
     mAccessUnitRTPTime = rtpTime;
 
+    // hexdump(buffer->data(), buffer->size());
+
+    if (buffer->size() < 2) {
+        queue->erase(queue->begin());
+        ++mNextExpectedSeqNo;
+
+        return MALFORMED_PACKET;
+    }
+
+    unsigned payloadHeader = U16_AT(buffer->data());
+    CHECK_EQ(payloadHeader >> 11, 0u);  // RR=0
+    unsigned P = (payloadHeader >> 10) & 1;
+    CHECK_EQ((payloadHeader >> 9) & 1, 0u);  // V=0
+    CHECK_EQ((payloadHeader >> 3) & 0x3f, 0u);  // PLEN=0
+    CHECK_EQ(payloadHeader & 7, 0u);  // PEBIT=0
+
+    if (P) {
+        buffer->data()[0] = 0x00;
+        buffer->data()[1] = 0x00;
+    } else {
+        buffer->setRange(2, buffer->size() - 2);
+    }
+
     mPackets.push_back(buffer);
 
     queue->erase(queue->begin());
@@ -96,7 +121,7 @@ ARTPAssembler::AssemblyStatus AMPEG4AudioAssembler::addPacket(
     return OK;
 }
 
-void AMPEG4AudioAssembler::submitAccessUnit() {
+void AH263Assembler::submitAccessUnit() {
     CHECK(!mPackets.empty());
 
 #if VERBOSE
@@ -112,13 +137,7 @@ void AMPEG4AudioAssembler::submitAccessUnit() {
     while (it != mPackets.end()) {
         const sp<ABuffer> &unit = *it;
 
-        size_t n = 0;
-        while (unit->data()[n] == 0xff) {
-            ++n;
-        }
-        ++n;
-
-        totalSize += unit->size() - n;
+        totalSize += unit->size();
         ++it;
     }
 
@@ -128,16 +147,10 @@ void AMPEG4AudioAssembler::submitAccessUnit() {
     while (it != mPackets.end()) {
         const sp<ABuffer> &unit = *it;
 
-        size_t n = 0;
-        while (unit->data()[n] == 0xff) {
-            ++n;
-        }
-        ++n;
-
         memcpy((uint8_t *)accessUnit->data() + offset,
-               unit->data() + n, unit->size() - n);
+               unit->data(), unit->size());
 
-        offset += unit->size() - n;
+        offset += unit->size();
 
         ++it;
     }
@@ -161,17 +174,18 @@ void AMPEG4AudioAssembler::submitAccessUnit() {
     msg->post();
 }
 
-void AMPEG4AudioAssembler::packetLost() {
+void AH263Assembler::packetLost() {
     CHECK(mNextExpectedSeqNoValid);
     ++mNextExpectedSeqNo;
 
     mAccessUnitDamaged = true;
 }
 
-void AMPEG4AudioAssembler::onByeReceived() {
+void AH263Assembler::onByeReceived() {
     sp<AMessage> msg = mNotifyMsg->dup();
     msg->setInt32("eos", true);
     msg->post();
 }
 
 }  // namespace android
+

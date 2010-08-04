@@ -39,8 +39,12 @@ struct ARTPSource : public RefBase {
 
     void processRTPPacket(const sp<ABuffer> &buffer);
     void timeUpdate(uint32_t rtpTime, uint64_t ntpTime);
+    void byeReceived();
 
     List<sp<ABuffer> > *queue() { return &mQueue; }
+
+    void addReceiverReport(const sp<ABuffer> &buffer);
+    void addFIR(const sp<ABuffer> &buffer);
 
 private:
     uint32_t mID;
@@ -53,6 +57,13 @@ private:
     size_t mNumTimes;
     uint64_t mNTPTime[2];
     uint32_t mRTPTime[2];
+
+    uint64_t mLastNTPTime;
+    int64_t mLastNTPTimeUpdateUs;
+
+    bool mIssueFIRRequests;
+    int64_t mLastFIRRequestUs;
+    uint8_t mNextFIRSeqNo;
 
     uint64_t RTP2NTP(uint32_t rtpTime) const;
 

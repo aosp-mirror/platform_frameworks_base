@@ -23,17 +23,16 @@
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/foundation/AString.h>
+#include <media/stagefright/foundation/hexdump.h>
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-#define VERBOSE         0
-
-#if VERBOSE
-#include "hexdump.h"
-#endif
+#define IGNORE_RTCP_TIME        0
 
 namespace android {
+
+static const size_t kMaxUDPSize = 1500;
 
 static uint16_t u16at(const uint8_t *data) {
     return data[0] << 8 | data[1];
@@ -56,10 +55,15 @@ struct ARTPConnection::StreamInfo {
     sp<ASessionDescription> mSessionDesc;
     size_t mIndex;
     sp<AMessage> mNotifyMsg;
+    KeyedVector<uint32_t, sp<ARTPSource> > mSources;
+
+    int32_t mNumRTCPPacketsReceived;
+    struct sockaddr_in mRemoteRTCPAddr;
 };
 
 ARTPConnection::ARTPConnection()
-    : mPollEventPending(false) {
+    : mPollEventPending(false),
+      mLastReceiverReportTimeUs(-1) {
 }
 
 ARTPConnection::~ARTPConnection() {
@@ -176,6 +180,9 @@ void ARTPConnection::onAddStream(const sp<AMessage> &msg) {
     CHECK(msg->findSize("index", &info->mIndex));
     CHECK(msg->findMessage("notify", &info->mNotifyMsg));
 
+    info->mNumRTCPPacketsReceived = 0;
+    memset(&info->mRemoteRTCPAddr, 0, sizeof(info->mRemoteRTCPAddr));
+
     postPollEvent();
 }
 
@@ -252,21 +259,59 @@ void ARTPConnection::onPollStreams() {
     }
 
     postPollEvent();
+
+    int64_t nowUs = ALooper::GetNowUs();
+    if (mLastReceiverReportTimeUs <= 0
+            || mLastReceiverReportTimeUs + 5000000ll <= nowUs) {
+        sp<ABuffer> buffer = new ABuffer(kMaxUDPSize);
+        for (List<StreamInfo>::iterator it = mStreams.begin();
+             it != mStreams.end(); ++it) {
+            StreamInfo *s = &*it;
+
+            if (s->mNumRTCPPacketsReceived == 0) {
+                // We have never received any RTCP packets on this stream,
+                // we don't even know where to send a report.
+                continue;
+            }
+
+            buffer->setRange(0, 0);
+
+            for (size_t i = 0; i < s->mSources.size(); ++i) {
+                sp<ARTPSource> source = s->mSources.valueAt(i);
+
+                source->addReceiverReport(buffer);
+                source->addFIR(buffer);
+            }
+
+            if (buffer->size() > 0) {
+                LOG(VERBOSE) << "Sending RR...";
+
+                ssize_t n = sendto(
+                        s->mRTCPSocket, buffer->data(), buffer->size(), 0,
+                        (const struct sockaddr *)&s->mRemoteRTCPAddr,
+                        sizeof(s->mRemoteRTCPAddr));
+                CHECK_EQ(n, (ssize_t)buffer->size());
+
+                mLastReceiverReportTimeUs = nowUs;
+            }
+        }
+    }
 }
 
 status_t ARTPConnection::receive(StreamInfo *s, bool receiveRTP) {
     sp<ABuffer> buffer = new ABuffer(65536);
 
-    struct sockaddr_in from;
-    socklen_t fromSize = sizeof(from);
+    socklen_t remoteAddrLen =
+        (!receiveRTP && s->mNumRTCPPacketsReceived == 0)
+            ? sizeof(s->mRemoteRTCPAddr) : 0;
 
     ssize_t nbytes = recvfrom(
             receiveRTP ? s->mRTPSocket : s->mRTCPSocket,
             buffer->data(),
             buffer->capacity(),
             0,
-            (struct sockaddr *)&from,
-            &fromSize);
+            remoteAddrLen > 0 ? (struct sockaddr *)&s->mRemoteRTCPAddr : NULL,
+            remoteAddrLen > 0 ? &remoteAddrLen : NULL);
 
     if (nbytes < 0) {
         return -1;
@@ -278,6 +323,7 @@ status_t ARTPConnection::receive(StreamInfo *s, bool receiveRTP) {
     if (receiveRTP) {
         err = parseRTP(s, buffer);
     } else {
+        ++s->mNumRTCPPacketsReceived;
         err = parseRTCP(s, buffer);
     }
 
@@ -346,18 +392,7 @@ status_t ARTPConnection::parseRTP(StreamInfo *s, const sp<ABuffer> &buffer) {
 
     uint32_t srcId = u32at(&data[8]);
 
-    sp<ARTPSource> source;
-    ssize_t index = mSources.indexOfKey(srcId);
-    if (index < 0) {
-        index = mSources.size();
-
-        source = new ARTPSource(
-                srcId, s->mSessionDesc, s->mIndex, s->mNotifyMsg);
-
-        mSources.add(srcId, source);
-    } else {
-        source = mSources.valueAt(index);
-    }
+    sp<ARTPSource> source = findSource(s, srcId);
 
     uint32_t rtpTime = u32at(&data[4]);
 
@@ -368,24 +403,6 @@ status_t ARTPConnection::parseRTP(StreamInfo *s, const sp<ABuffer> &buffer) {
     meta->setInt32("M", data[1] >> 7);
 
     buffer->setInt32Data(u16at(&data[2]));
-
-#if VERBOSE
-    printf("RTP = {\n"
-           "  PT: %d\n"
-           "  sequence number: %d\n"
-           "  RTP-time: 0x%08x\n"
-           "  M: %d\n"
-           "  SSRC: 0x%08x\n"
-           "}\n",
-           data[1] & 0x7f,
-           u16at(&data[2]),
-           rtpTime,
-           data[1] >> 7,
-           srcId);
-
-    // hexdump(&data[payloadOffset], size - payloadOffset);
-#endif
-
     buffer->setRange(payloadOffset, size - payloadOffset);
 
     source->processRTPPacket(buffer);
@@ -436,14 +453,27 @@ status_t ARTPConnection::parseRTCP(StreamInfo *s, const sp<ABuffer> &buffer) {
                 break;
             }
 
+            case 201:  // RR
+            case 202:  // SDES
+            case 204:  // APP
+                break;
+
+            case 205:  // TSFB (transport layer specific feedback)
+            case 206:  // PSFB (payload specific feedback)
+                // hexdump(data, headerLength);
+                break;
+
+            case 203:
+            {
+                parseBYE(s, data, headerLength);
+                break;
+            }
+
             default:
             {
-#if VERBOSE
-                printf("Unknown RTCP packet type %d of size %ld\n",
-                       data[1], headerLength);
-
-                hexdump(data, headerLength);
-#endif
+                LOG(WARNING) << "Unknown RTCP packet type "
+                             << (unsigned)data[1]
+                             << " of size " << headerLength;
                 break;
             }
         }
@@ -451,6 +481,24 @@ status_t ARTPConnection::parseRTCP(StreamInfo *s, const sp<ABuffer> &buffer) {
         data += headerLength;
         size -= headerLength;
     }
+
+    return OK;
+}
+
+status_t ARTPConnection::parseBYE(
+        StreamInfo *s, const uint8_t *data, size_t size) {
+    size_t SC = data[0] & 0x3f;
+
+    if (SC == 0 || size < (4 + SC * 4)) {
+        // Packet too short for the minimal BYE header.
+        return -1;
+    }
+
+    uint32_t id = u32at(&data[4]);
+
+    sp<ARTPSource> source = findSource(s, id);
+
+    source->byeReceived();
 
     return OK;
 }
@@ -468,31 +516,43 @@ status_t ARTPConnection::parseSR(
     uint64_t ntpTime = u64at(&data[8]);
     uint32_t rtpTime = u32at(&data[16]);
 
-#if VERBOSE
-    printf("SR = {\n"
-           "  SSRC:      0x%08x\n"
-           "  NTP-time:  0x%016llx\n"
-           "  RTP-time:  0x%08x\n"
-           "}\n",
-           id, ntpTime, rtpTime);
+#if 0
+    LOG(INFO) << StringPrintf(
+            "XXX timeUpdate: ssrc=0x%08x, rtpTime %u == ntpTime %.3f",
+            id,
+            rtpTime, (ntpTime >> 32) + (double)(ntpTime & 0xffffffff) / (1ll << 32));
 #endif
 
-    sp<ARTPSource> source;
-    ssize_t index = mSources.indexOfKey(id);
-    if (index < 0) {
-        index = mSources.size();
+    sp<ARTPSource> source = findSource(s, id);
 
-        source = new ARTPSource(
-                id, s->mSessionDesc, s->mIndex, s->mNotifyMsg);
-
-        mSources.add(id, source);
-    } else {
-        source = mSources.valueAt(index);
-    }
-
+#if !IGNORE_RTCP_TIME
     source->timeUpdate(rtpTime, ntpTime);
+#endif
 
     return 0;
+}
+
+sp<ARTPSource> ARTPConnection::findSource(StreamInfo *info, uint32_t srcId) {
+    sp<ARTPSource> source;
+    ssize_t index = info->mSources.indexOfKey(srcId);
+    if (index < 0) {
+        index = info->mSources.size();
+
+        source = new ARTPSource(
+                srcId, info->mSessionDesc, info->mIndex, info->mNotifyMsg);
+
+#if IGNORE_RTCP_TIME
+        // For H.263 gtalk to work...
+        source->timeUpdate(0, 0);
+        source->timeUpdate(30, 0x100000000ll);
+#endif
+
+        info->mSources.add(srcId, source);
+    } else {
+        source = info->mSources.valueAt(index);
+    }
+
+    return source;
 }
 
 }  // namespace android

@@ -27,6 +27,11 @@
 #include "include/NuCachedSource2.h"
 #include "include/ThrottledSource.h"
 
+#include "ARTPSession.h"
+#include "APacketSource.h"
+#include "ASessionDescription.h"
+#include "UDPPusher.h"
+
 #include <binder/IPCThreadState.h>
 #include <media/stagefright/AudioPlayer.h>
 #include <media/stagefright/DataSource.h>
@@ -389,6 +394,9 @@ void AwesomePlayer::reset_l() {
     }
 
     mRTSPController.clear();
+    mRTPPusher.clear();
+    mRTCPPusher.clear();
+    mRTPSession.clear();
 
     if (mVideoSource != NULL) {
         mVideoSource->stop();
@@ -845,10 +853,24 @@ void AwesomePlayer::setVideoSource(sp<MediaSource> source) {
 }
 
 status_t AwesomePlayer::initVideoDecoder() {
+    uint32_t flags = 0;
+#if 1
+    if (mRTPSession != NULL) {
+        // XXX hack.
+
+        const char *mime;
+        CHECK(mVideoTrack->getFormat()->findCString(kKeyMIMEType, &mime));
+        if (!strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC)) {
+            flags |= OMXCodec::kPreferSoftwareCodecs;
+        }
+    }
+#endif
+
     mVideoSource = OMXCodec::Create(
             mClient.interface(), mVideoTrack->getFormat(),
             false, // createEncoder
-            mVideoTrack);
+            mVideoTrack,
+            NULL, flags);
 
     if (mVideoSource != NULL) {
         int64_t durationUs;
@@ -1200,6 +1222,158 @@ status_t AwesomePlayer::finishSetDataSource_l() {
             MediaExtractor::Create(dataSource, MEDIA_MIMETYPE_CONTAINER_MPEG2TS);
 
         return setDataSource_l(extractor);
+    } else if (!strcmp("rtsp://gtalk", mUri.string())) {
+        if (mLooper == NULL) {
+            mLooper = new ALooper;
+            mLooper->start();
+        }
+
+#if 0
+        mRTPPusher = new UDPPusher("/data/misc/rtpout.bin", 5434);
+        mLooper->registerHandler(mRTPPusher);
+
+        mRTCPPusher = new UDPPusher("/data/misc/rtcpout.bin", 5435);
+        mLooper->registerHandler(mRTCPPusher);
+#endif
+
+        mRTPSession = new ARTPSession;
+        mLooper->registerHandler(mRTPSession);
+
+#if 0
+        // My H264 SDP
+        static const char *raw =
+            "v=0\r\n"
+            "o=- 64 233572944 IN IP4 127.0.0.0\r\n"
+            "s=QuickTime\r\n"
+            "t=0 0\r\n"
+            "a=range:npt=0-315\r\n"
+            "a=isma-compliance:2,2.0,2\r\n"
+            "m=video 5434 RTP/AVP 97\r\n"
+            "c=IN IP4 127.0.0.1\r\n"
+            "b=AS:30\r\n"
+            "a=rtpmap:97 H264/90000\r\n"
+            "a=fmtp:97 packetization-mode=1;profile-level-id=42000C;"
+              "sprop-parameter-sets=Z0IADJZUCg+I,aM44gA==\r\n"
+            "a=mpeg4-esid:201\r\n"
+            "a=cliprect:0,0,240,320\r\n"
+            "a=framesize:97 320-240\r\n";
+#elif 0
+        // My H263 SDP
+        static const char *raw =
+            "v=0\r\n"
+            "o=- 64 233572944 IN IP4 127.0.0.0\r\n"
+            "s=QuickTime\r\n"
+            "t=0 0\r\n"
+            "a=range:npt=0-315\r\n"
+            "a=isma-compliance:2,2.0,2\r\n"
+            "m=video 5434 RTP/AVP 97\r\n"
+            "c=IN IP4 127.0.0.1\r\n"
+            "b=AS:30\r\n"
+            "a=rtpmap:97 H263-1998/90000\r\n"
+            "a=cliprect:0,0,240,320\r\n"
+            "a=framesize:97 320-240\r\n";
+#elif 0
+        // My AMR SDP
+        static const char *raw =
+            "v=0\r\n"
+            "o=- 64 233572944 IN IP4 127.0.0.0\r\n"
+            "s=QuickTime\r\n"
+            "t=0 0\r\n"
+            "a=range:npt=0-315\r\n"
+            "a=isma-compliance:2,2.0,2\r\n"
+            "m=audio 5434 RTP/AVP 97\r\n"
+            "c=IN IP4 127.0.0.1\r\n"
+            "b=AS:30\r\n"
+            "a=rtpmap:97 AMR/8000/1\r\n"
+            "a=fmtp:97 octet-align\r\n";
+#elif 1
+        // My GTalk H.264 SDP
+        static const char *raw =
+            "v=0\r\n"
+            "o=- 64 233572944 IN IP4 127.0.0.0\r\n"
+            "s=QuickTime\r\n"
+            "t=0 0\r\n"
+            "a=range:npt=0-315\r\n"
+            "a=isma-compliance:2,2.0,2\r\n"
+            "m=video 5434 RTP/AVP 97\r\n"
+            "c=IN IP4 127.0.0.1\r\n"
+            "b=AS:30\r\n"
+            "a=rtpmap:97 H264/90000\r\n"
+            "a=fmtp:97 packetization-mode=1;profile-level-id=42E00D;"
+              "sprop-parameter-sets=J0LgDZWgUG/lQA==,KM4DnoA=\r\n"
+            "a=mpeg4-esid:201\r\n"
+            "a=cliprect:0,0,200,320\r\n"
+            "a=framesize:97 320-200\r\n";
+#elif 0
+        // GTalk H263 SDP
+        static const char *raw =
+            "v=0\r\n"
+            "o=- 64 233572944 IN IP4 127.0.0.0\r\n"
+            "s=QuickTime\r\n"
+            "t=0 0\r\n"
+            "a=range:npt=0-315\r\n"
+            "a=isma-compliance:2,2.0,2\r\n"
+            "m=video 5434 RTP/AVP 98\r\n"
+            "c=IN IP4 127.0.0.1\r\n"
+            "b=AS:30\r\n"
+            "a=rtpmap:98 H263-1998/90000\r\n"
+            "a=cliprect:0,0,200,320\r\n"
+            "a=framesize:98 320-200\r\n";
+#else
+    // sholes H264 SDP
+    static const char *raw =
+        "v=0\r\n"
+        "o=- 64 233572944 IN IP4 127.0.0.0\r\n"
+        "s=QuickTime\r\n"
+        "t=0 0\r\n"
+        "a=range:npt=now-\r\n"
+        "m=video 5434 RTP/AVP 96\r\n"
+        "c=IN IP4 127.0.0.1\r\n"
+        "b=AS:320000\r\n"
+        "a=rtpmap:96 H264/90000\r\n"
+        "a=fmtp:96 packetization-mode=1;profile-level-id=42001E;"
+          "sprop-parameter-sets=Z0KACukCg+QgAAB9AAAOpgCA,aM48gA==\r\n"
+        "a=cliprect:0,0,240,320\r\n"
+        "a=framesize:96 320-240\r\n";
+#endif
+
+        sp<ASessionDescription> desc = new ASessionDescription;
+        CHECK(desc->setTo(raw, strlen(raw)));
+
+        CHECK_EQ(mRTPSession->setup(desc), (status_t)OK);
+
+        if (mRTPPusher != NULL) {
+            mRTPPusher->start();
+        }
+
+        if (mRTCPPusher != NULL) {
+            mRTCPPusher->start();
+        }
+
+        CHECK_EQ(mRTPSession->countTracks(), 1u);
+        sp<MediaSource> source = mRTPSession->trackAt(0);
+
+#if 0
+        bool eos;
+        while (((APacketSource *)source.get())
+                ->getQueuedDuration(&eos) < 5000000ll && !eos) {
+            usleep(100000ll);
+        }
+#endif
+
+        const char *mime;
+        CHECK(source->getFormat()->findCString(kKeyMIMEType, &mime));
+
+        if (!strncasecmp("video/", mime, 6)) {
+            setVideoSource(source);
+        } else {
+            CHECK(!strncasecmp("audio/", mime, 6));
+            setAudioSource(source);
+        }
+
+        mExtractorFlags = MediaExtractor::CAN_PAUSE;
+
+        return OK;
     } else if (!strncasecmp("rtsp://", mUri.string(), 7)) {
         if (mLooper == NULL) {
             mLooper = new ALooper;
