@@ -22,6 +22,7 @@ import android.view.View;
 
 import com.android.internal.statusbar.StatusBarNotification;
 
+import java.util.Comparator;
 import java.util.ArrayList;
 
 /**
@@ -43,30 +44,35 @@ public class NotificationData {
         }
     }
     private final ArrayList<Entry> mEntries = new ArrayList<Entry>();
+    private final Comparator<Entry> mEntryCmp = new Comparator<Entry>() {
+        public int compare(Entry a, Entry b) {
+            return (int)(a.notification.notification.when - b.notification.notification.when);
+        }
+    };
 
     public int size() {
         return mEntries.size();
     }
 
-    public Entry getEntryAt(int index) {
-        return mEntries.get(index);
-    }
-
-    public int findEntry(IBinder key) {
-        final int N = mEntries.size();
-        for (int i=0; i<N; i++) {
-            Entry entry = mEntries.get(i);
-            if (entry.key == key) {
-                return i;
+    public Entry findByKey(IBinder key) {
+        for (Entry e : mEntries) {
+            if (e.key == key) {
+                return e;
             }
         }
-        return -1;
+        return null;
     }
 
     public int add(Entry entry) {
-        final int index = chooseIndex(entry.notification.notification.when);
-        mEntries.add(index, entry);
-        return index;
+        int i;
+        int N = mEntries.size();
+        for (i=0; i<N; i++) {
+            if (mEntryCmp.compare(mEntries.get(i), entry) > 0) {
+                break;
+            }
+        }
+        mEntries.add(i, entry);
+        return i;
     }
 
     public int add(IBinder key, StatusBarNotification notification, View row, View content,
@@ -82,36 +88,19 @@ public class NotificationData {
     }
 
     public Entry remove(IBinder key) {
-        final int N = mEntries.size();
-        for (int i=0; i<N; i++) {
-            Entry entry = mEntries.get(i);
-            if (entry.key == key) {
-                mEntries.remove(i);
-                return entry;
-            }
+        Entry e = findByKey(key);
+        if (e != null) {
+            mEntries.remove(e);
         }
-        return null;
-    }
-
-    private int chooseIndex(final long when) {
-        final int N = mEntries.size();
-        for (int i=0; i<N; i++) {
-            Entry entry = mEntries.get(i);
-            if (entry.notification.notification.when > when) {
-                return i;
-            }
-        }
-        return N;
+        return e;
     }
 
     /**
      * Return whether there are any visible items (i.e. items without an error).
      */
     public boolean hasVisibleItems() {
-        final int N = mEntries.size();
-        for (int i=0; i<N; i++) {
-            Entry entry = mEntries.get(i);
-            if (entry.expanded != null) { // the view successfully inflated
+        for (Entry e : mEntries) {
+            if (e.expanded != null) { // the view successfully inflated
                 return true;
             }
         }
@@ -122,11 +111,9 @@ public class NotificationData {
      * Return whether there are any clearable items (that aren't errors).
      */
     public boolean hasClearableItems() {
-        final int N = mEntries.size();
-        for (int i=0; i<N; i++) {
-            Entry entry = mEntries.get(i);
-            if (entry.expanded != null) { // the view successfully inflated
-                if ((entry.notification.notification.flags & Notification.FLAG_NO_CLEAR) == 0) {
+        for (Entry e : mEntries) {
+            if (e.expanded != null) { // the view successfully inflated
+                if ((e.notification.notification.flags & Notification.FLAG_NO_CLEAR) == 0) {
                     return true;
                 }
             }
