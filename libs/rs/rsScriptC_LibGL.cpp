@@ -332,6 +332,12 @@ static void SC_BindFont(RsFont font)
     rsi_ContextBindFont(rsc, font);
 }
 
+static void SC_FontColor(float r, float g, float b, float a)
+{
+    GET_TLS();
+    rsc->mStateFont.setFontColor(r, g, b, a);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Class implementation
 //////////////////////////////////////////////////////////////////////////////
@@ -388,6 +394,7 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z11rsgDrawText13rs_allocationii", (void *)&SC_DrawTextAlloc },
 
     { "_Z11rsgBindFont7rs_font", (void *)&SC_BindFont },
+    { "_Z12rsgFontColorffff", (void *)&SC_FontColor },
 
     // misc
     { "_Z5colorffff", (void *)&SC_color },

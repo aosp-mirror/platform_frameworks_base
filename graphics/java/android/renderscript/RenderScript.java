@@ -83,6 +83,7 @@ public class RenderScript {
     native void nContextDeinitToClient();
 
     native void nAssignName(int obj, byte[] name);
+    native String nGetName(int obj);
     native void nObjDestroy(int id);
     native void nObjDestroyOOB(int id);
     native int  nFileOpen(byte[] name);

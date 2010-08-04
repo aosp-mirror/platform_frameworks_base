@@ -104,6 +104,17 @@ nAssignName(JNIEnv *_env, jobject _this, jint obj, jbyteArray str)
     _env->ReleasePrimitiveArrayCritical(str, cptr, JNI_ABORT);
 }
 
+static jstring
+nGetName(JNIEnv *_env, jobject _this, jint obj)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nGetName, con(%p), obj(%p)", con, (void *)obj);
+
+    const char *name = NULL;
+    rsGetName(con, (void *)obj, &name);
+    return _env->NewStringUTF(name);
+}
+
 static void
 nObjDestroy(JNIEnv *_env, jobject _this, jint obj)
 {
@@ -1518,6 +1529,7 @@ static JNINativeMethod methods[] = {
 {"nContextPause",                  "()V",                                  (void*)nContextPause },
 {"nContextResume",                 "()V",                                  (void*)nContextResume },
 {"nAssignName",                    "(I[B)V",                               (void*)nAssignName },
+{"nGetName",                       "(I)Ljava/lang/String;",               (void*)nGetName },
 {"nObjDestroy",                    "(I)V",                                 (void*)nObjDestroy },
 {"nObjDestroyOOB",                 "(I)V",                                 (void*)nObjDestroyOOB },
 {"nContextGetMessage",             "([IZ)I",                               (void*)nContextGetMessage },
