@@ -350,7 +350,6 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void setDrawFilter(DrawFilter filter) {
-        // TODO: Implement PaintDrawFilter
         mFilter = filter;
     }
 
@@ -522,8 +521,12 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawPath(Path path, Paint paint) {
-        throw new UnsupportedOperationException();
+        boolean hasModifier = setupModifiers(paint);
+        nDrawPath(mRenderer, path.mNativePath, paint.mNativePaint);
+        if (hasModifier) nResetModifiers(mRenderer);
     }
+
+    private native void nDrawPath(int renderer, int path, int paint);
 
     @Override
     public void drawPicture(Picture picture) {

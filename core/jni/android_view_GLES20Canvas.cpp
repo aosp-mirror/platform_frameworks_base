@@ -228,6 +228,11 @@ static void android_view_GLES20Canvas_drawRect(JNIEnv* env, jobject canvas,
     renderer->drawRect(left, top, right, bottom, paint);
 }
 
+static void android_view_GLES20Canvas_drawPath(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, SkPath* path, SkPaint* paint) {
+    renderer->drawPath(path, paint);
+}
+
 // ----------------------------------------------------------------------------
 // Shaders and color filters
 // ----------------------------------------------------------------------------
@@ -317,6 +322,7 @@ static JNINativeMethod gMethods[] = {
     {   "nDrawPatch",         "(II[BFFFFI)V",    (void*) android_view_GLES20Canvas_drawPatch },
     {   "nDrawColor",         "(III)V",          (void*) android_view_GLES20Canvas_drawColor },
     {   "nDrawRect",          "(IFFFFI)V",       (void*) android_view_GLES20Canvas_drawRect },
+    {   "nDrawPath",          "(III)V",          (void*) android_view_GLES20Canvas_drawPath },
 
     {   "nResetModifiers",    "(I)V",            (void*) android_view_GLES20Canvas_resetModifiers },
     {   "nSetupShader",       "(II)V",           (void*) android_view_GLES20Canvas_setupShader },

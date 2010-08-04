@@ -44,6 +44,7 @@
 #include "ProgramCache.h"
 #include "SkiaShader.h"
 #include "SkiaColorFilter.h"
+#include "PathCache.h"
 
 namespace android {
 namespace uirenderer {
@@ -92,6 +93,7 @@ public:
             float right, float bottom, const SkPaint* paint);
     void drawColor(int color, SkXfermode::Mode mode);
     void drawRect(float left, float top, float right, float bottom, const SkPaint* paint);
+    void drawPath(SkPath* path, SkPaint* paint);
 
     void resetShader();
     void setupShader(SkiaShader* shader);
@@ -307,6 +309,7 @@ private:
     LayerCache mLayerCache;
     GradientCache mGradientCache;
     ProgramCache mProgramCache;
+    PathCache mPathCache;
     PatchCache mPatchCache;
 }; // class OpenGLRenderer
 

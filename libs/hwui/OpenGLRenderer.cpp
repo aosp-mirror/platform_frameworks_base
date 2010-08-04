@@ -37,7 +37,8 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define DEFAULT_TEXTURE_CACHE_SIZE 20.0f
-#define DEFAULT_LAYER_CACHE_SIZE 10.0f
+#define DEFAULT_LAYER_CACHE_SIZE 6.0f
+#define DEFAULT_PATH_CACHE_SIZE 6.0f
 #define DEFAULT_PATCH_CACHE_SIZE 100
 #define DEFAULT_GRADIENT_CACHE_SIZE 0.5f
 
@@ -105,6 +106,7 @@ OpenGLRenderer::OpenGLRenderer():
         mTextureCache(MB(DEFAULT_TEXTURE_CACHE_SIZE)),
         mLayerCache(MB(DEFAULT_LAYER_CACHE_SIZE)),
         mGradientCache(MB(DEFAULT_GRADIENT_CACHE_SIZE)),
+        mPathCache(MB(DEFAULT_PATH_CACHE_SIZE)),
         mPatchCache(DEFAULT_PATCH_CACHE_SIZE) {
     LOGD("Create OpenGLRenderer");
 
@@ -125,9 +127,16 @@ OpenGLRenderer::OpenGLRenderer():
 
     if (property_get(PROPERTY_GRADIENT_CACHE_SIZE, property, NULL) > 0) {
         LOGD("  Setting gradient cache size to %sMB", property);
-        mLayerCache.setMaxSize(MB(atof(property)));
+        mGradientCache.setMaxSize(MB(atof(property)));
     } else {
         LOGD("  Using default gradient cache size of %.2fMB", DEFAULT_GRADIENT_CACHE_SIZE);
+    }
+
+    if (property_get(PROPERTY_PATH_CACHE_SIZE, property, NULL) > 0) {
+        LOGD("  Setting path cache size to %sMB", property);
+        mPathCache.setMaxSize(MB(atof(property)));
+    } else {
+        LOGD("  Using default path cache size of %.2fMB", DEFAULT_PATH_CACHE_SIZE);
     }
 
     mCurrentProgram = NULL;
@@ -594,6 +603,73 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     mFontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glDisableVertexAttribArray(texCoordsSlot);
+}
+
+void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
+    GLuint textureUnit = 0;
+    glActiveTexture(gTextureUnits[textureUnit]);
+
+    PathTexture* texture = mPathCache.get(path, paint);
+
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
+
+    uint32_t color = paint->getColor();
+    const GLfloat a = alpha / 255.0f;
+    const GLfloat r = a * ((color >> 16) & 0xFF) / 255.0f;
+    const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
+    const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
+
+    // Describe the required shaders
+    ProgramDescription description;
+    description.hasTexture = true;
+    description.hasAlpha8Texture = true;
+    if (mShader) {
+        mShader->describe(description, mExtensions);
+    }
+    if (mColorFilter) {
+        mColorFilter->describe(description, mExtensions);
+    }
+
+    // Build and use the appropriate shader
+    useProgram(mProgramCache.get(description));
+
+    // Setup the blending mode
+    chooseBlending(true, mode);
+    bindTexture(texture->id, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, textureUnit);
+    glUniform1i(mCurrentProgram->getUniform("sampler"), textureUnit);
+
+    int texCoordsSlot = mCurrentProgram->getAttrib("texCoords");
+    glEnableVertexAttribArray(texCoordsSlot);
+
+    // Setup attributes
+    glVertexAttribPointer(mCurrentProgram->position, 2, GL_FLOAT, GL_FALSE,
+            gMeshStride, &mMeshVertices[0].position[0]);
+    glVertexAttribPointer(texCoordsSlot, 2, GL_FLOAT, GL_FALSE,
+            gMeshStride, &mMeshVertices[0].texture[0]);
+
+    // Setup uniforms
+    mModelView.loadTranslate(texture->left - texture->offset,
+            texture->top - texture->offset, 0.0f);
+    mModelView.scale(texture->width, texture->height, 1.0f);
+    mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+
+    glUniform4f(mCurrentProgram->color, r, g, b, a);
+
+    textureUnit++;
+    // Setup attributes and uniforms required by the shaders
+    if (mShader) {
+        mShader->setupProgram(mCurrentProgram, mModelView, *mSnapshot, &textureUnit);
+    }
+    if (mColorFilter) {
+        mColorFilter->setupProgram(mCurrentProgram);
+    }
+
+    // Draw the mesh
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
+
     glDisableVertexAttribArray(texCoordsSlot);
 }
 
