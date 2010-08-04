@@ -58,6 +58,11 @@ AssignName {
 	param size_t len
 	}
 
+GetName {
+	param void *obj
+	param const char **name
+	}
+
 ObjDestroy {
 	param void *obj
 	}

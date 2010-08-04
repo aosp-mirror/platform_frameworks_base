@@ -61,6 +61,7 @@ public class Mesh extends BaseObj {
 
     @Override
     void updateFromNative() {
+        mName = mRS.nGetName(mID);
         int vtxCount = mRS.nMeshGetVertexBufferCount(mID);
         int idxCount = mRS.nMeshGetIndexCount(mID);
 

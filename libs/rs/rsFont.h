@@ -116,6 +116,8 @@ public:
     void renderText(Allocation *alloc, int x, int y);
     void renderText(Allocation *alloc, uint32_t start, int len, int x, int y);
 
+    void setFontColor(float r, float g, float b, float a);
+
 protected:
 
     friend class Font;
@@ -150,6 +152,9 @@ protected:
     Vector<CacheTextureLine*> mCacheLines;
 
     Context *mRSC;
+
+    float mFontColor[4];
+    bool mFontColorDirty;
 
     // Free type library, we only need one copy
     FT_Library mLibrary;

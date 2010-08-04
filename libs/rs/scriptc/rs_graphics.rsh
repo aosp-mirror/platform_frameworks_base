@@ -71,6 +71,8 @@ extern void __attribute__((overloadable))
     rsgDrawText(rs_allocation, int x, int y);
 extern void __attribute__((overloadable))
     rsgBindFont(rs_font);
+extern void __attribute__((overloadable))
+    rsgFontColor(float, float, float, float);
 
 ///////////////////////////////////////////////////////
 // misc

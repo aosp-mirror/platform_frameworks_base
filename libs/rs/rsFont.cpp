@@ -259,6 +259,7 @@ FontState::FontState()
     mCurrentQuadIndex = 0;
     mRSC = NULL;
     mLibrary = NULL;
+    setFontColor(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 FontState::~FontState()
@@ -658,6 +659,14 @@ void FontState::renderText(Allocation *alloc, uint32_t start, int len, int x, in
     const char *text = (const char *)alloc->getPtr();
     size_t allocSize = alloc->getType()->getSizeBytes();
     renderText(text, allocSize, start, len, x, y);
+}
+
+void FontState::setFontColor(float r, float g, float b, float a) {
+    mFontColor[0] = r;
+    mFontColor[1] = g;
+    mFontColor[2] = b;
+    mFontColor[3] = a;
+    mFontColorDirty = true;
 }
 
 void FontState::deinit(Context *rsc)

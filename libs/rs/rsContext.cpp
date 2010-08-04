@@ -944,11 +944,16 @@ void rsi_ContextBindFont(Context *rsc, RsFont vfont)
     rsc->setFont(font);
 }
 
-
 void rsi_AssignName(Context *rsc, void * obj, const char *name, uint32_t len)
 {
     ObjectBase *ob = static_cast<ObjectBase *>(obj);
     rsc->assignName(ob, name, len);
+}
+
+void rsi_GetName(Context *rsc, void * obj, const char **name)
+{
+    ObjectBase *ob = static_cast<ObjectBase *>(obj);
+    (*name) = ob->getName();
 }
 
 void rsi_ObjDestroy(Context *rsc, void *obj)
