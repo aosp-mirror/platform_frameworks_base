@@ -7826,8 +7826,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             } catch (RemoteException e) {
                                 // Ignore if process has died.
                             }
+                            notifyFocusChanged();
                         }
-                        notifyFocusChanged();
                     }
                 } break;
 
