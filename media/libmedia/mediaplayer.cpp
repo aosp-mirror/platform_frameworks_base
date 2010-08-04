@@ -568,7 +568,8 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
         locked = true;
     }
 
-    if (mPlayer == 0) {
+    // Allows calls from JNI in idle state to notify errors
+    if (!(msg == MEDIA_ERROR && mCurrentState == MEDIA_PLAYER_IDLE) && mPlayer == 0) {
         LOGV("notify(%d, %d, %d) callback on disconnected mediaplayer", msg, ext1, ext2);
         if (locked) mLock.unlock();   // release the lock when done.
         return;
