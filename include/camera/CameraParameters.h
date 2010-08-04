@@ -58,6 +58,7 @@ public:
 
     void setPreviewSize(int width, int height);
     void getPreviewSize(int *width, int *height) const;
+    void getSupportedPreviewSizes(Vector<Size> &sizes) const;
     void setPreviewFrameRate(int fps);
     int getPreviewFrameRate() const;
     void setPreviewFormat(const char *format);
