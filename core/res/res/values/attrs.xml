@@ -1550,6 +1550,28 @@
         <attr name="isDefault" format="boolean" />
     </declare-styleable>
 
+    <!-- This is the subtype of InputMethod. Subtype can describe locales (e.g. en_US, fr_FR...)
+         and modes (e.g. voice, keyboard...), and is used for IME switch. This subtype allows
+         the system to call the specified subtype of the IME directly. -->
+    <declare-styleable name="InputMethod_Subtype">
+        <!-- The name of the subtype. -->
+        <attr name="label" />
+        <!-- The icon of the subtype. -->
+        <attr name="icon" />
+        <!-- The locale of the subtype. This string should be a locale (e.g. en_US, fr_FR...)
+             and will be passed to the IME when the framework calls the IME
+             with the subtype. This is also used by the framework to know the supported locales
+             of the IME.  -->
+        <attr name="imeSubtypeLocale" format="string" />
+        <!-- The mode of the subtype. This string can be a mode (e.g. voice, keyboard...) and this
+             string will be passed to the IME when the framework calls the IME with the
+             subtype.  -->
+        <attr name="imeSubtypeMode" format="string" />
+        <!-- The extra value of the subtype. This string can be any string and will be passed to
+             the IME when the framework calls the IME with the subtype.  -->
+        <attr name="imeSubtypeExtraValue" format="string" />
+    </declare-styleable>
+
     <!-- =============================== -->
     <!-- Widget package class attributes -->
     <!-- =============================== -->
