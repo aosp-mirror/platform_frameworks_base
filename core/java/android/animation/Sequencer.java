@@ -713,11 +713,7 @@ public final class Sequencer extends Animatable {
          */
         public void after(long delay) {
             // setup dummy Animator just to run the clock
-            Animator anim = new Animator(delay, 0f, 1f);
-            Node node = new Node(anim);
-            mNodes.add(node);
-            Dependency dependency = new Dependency(node, Dependency.AFTER);
-            mCurrentNode.addDependency(dependency);
+            after(new Animator(delay, 0f, 1f));
         }
 
     }
