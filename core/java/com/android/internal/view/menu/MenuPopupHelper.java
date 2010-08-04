@@ -76,12 +76,14 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         mPopup.setAdapter(adapter);
         mPopup.setModal(true);
 
-        if (mMenu instanceof SubMenuBuilder) {
+        if (mAnchorView != null) {
+            mPopup.setAnchorView(mAnchorView.get());
+        } else if (mMenu instanceof SubMenuBuilder) {
             SubMenuBuilder subMenu = (SubMenuBuilder) mMenu;
             final MenuItemImpl itemImpl = (MenuItemImpl) subMenu.getItem();
             mPopup.setAnchorView(itemImpl.getItemView(MenuBuilder.TYPE_ACTION_BUTTON, null));
-        } else if (mAnchorView != null) {
-            mPopup.setAnchorView(mAnchorView.get());
+        } else {
+            throw new IllegalStateException("MenuPopupHelper cannot be used without an anchor");
         }
 
         mPopup.setContentWidth(Math.min(measureContentWidth(adapter), mPopupMaxWidth));
