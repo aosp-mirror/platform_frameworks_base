@@ -361,7 +361,7 @@ status_t MyVorbisExtractor::readNextPacket(MediaBuffer **out) {
                 memcpy(tmp->data(), buffer->data(), buffer->range_length());
                 tmp->set_range(0, buffer->range_length());
                 buffer->release();
-            } else {
+            } else if (mVi.rate) {
                 // XXX Not only is this not technically the correct time for
                 // this packet, we also stamp every packet in this page
                 // with the same time. This needs fixing later.
