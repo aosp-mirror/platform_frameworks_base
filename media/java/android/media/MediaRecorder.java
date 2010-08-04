@@ -283,9 +283,10 @@ public class MediaRecorder
      * be called after setProfile().
      *
      * @param enableTimeLapse Pass true to enable time lapse capture, false to disable it.
+     * @param useStillCameraForTimeLapse Pass true to use still camera for capturing time lapse
+     * frames, false to use the video camera.
      * @param timeBetweenTimeLapseFrameCaptureMs time between two captures of time lapse frames.
      * @param encoderLevel the video encoder level.
-     * @hide
      */
     public void setTimeLapseParameters(boolean enableTimeLapse,
             boolean useStillCameraForTimeLapse,
