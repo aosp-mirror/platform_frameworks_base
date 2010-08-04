@@ -7202,6 +7202,9 @@ class PackageManagerService extends IPackageManager.Stub {
                     pw.print("    pkgFlags=0x"); pw.print(Integer.toHexString(ps.pkgFlags));
                             pw.print(" installStatus="); pw.print(ps.installStatus);
                             pw.print(" enabled="); pw.println(ps.enabled);
+                    if (ps.pkg.mOperationPending) {
+                        pw.println("    mOperationPending=true");
+                    }
                     if (ps.disabledComponents.size() > 0) {
                         pw.println("    disabledComponents:");
                         for (String s : ps.disabledComponents) {
@@ -9889,6 +9892,9 @@ class PackageManagerService extends IPackageManager.Stub {
                        (pkg.applicationInfo.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0) {
                    Slog.w(TAG, "Cannot move forward locked app.");
                    returnCode = PackageManager.MOVE_FAILED_FORWARD_LOCKED;
+               } else if (pkg.mOperationPending) {
+                   Slog.w(TAG, "Attempt to move package which has pending operations");
+                   returnCode = PackageManager.MOVE_FAILED_OPERATION_PENDING;
                } else {
                    // Find install location first
                    if ((flags & PackageManager.MOVE_EXTERNAL_MEDIA) != 0 &&
@@ -9904,6 +9910,9 @@ class PackageManagerService extends IPackageManager.Stub {
                            Slog.w(TAG, "No move required. Trying to move to same location");
                            returnCode = PackageManager.MOVE_FAILED_INVALID_LOCATION;
                        }
+                   }
+                   if (returnCode == PackageManager.MOVE_SUCCEEDED) {
+                       pkg.mOperationPending = true;
                    }
                }
            }
@@ -10017,6 +10026,18 @@ class PackageManagerService extends IPackageManager.Stub {
                        mp.srcArgs.doPostDeleteLI(true);
                    }
                }
+
+               // Allow more operations on this file if we didn't fail because
+               // an operation was already pending for this package.
+               if (returnCode != PackageManager.MOVE_FAILED_OPERATION_PENDING) {
+                   synchronized (mPackages) {
+                       PackageParser.Package pkg = mPackages.get(mp.packageName);
+                       if (pkg != null) {
+                           pkg.mOperationPending = false;
+                       }
+                   }
+               }
+
                IPackageMoveObserver observer = mp.observer;
                if (observer != null) {
                    try {
