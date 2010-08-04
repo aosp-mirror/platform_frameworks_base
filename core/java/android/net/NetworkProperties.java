@@ -123,18 +123,17 @@ public class NetworkProperties implements Parcelable {
     public synchronized void writeToParcel(Parcel dest, int flags) {
         dest.writeString(getInterfaceName());
         dest.writeInt(mAddresses.size());
+        //TODO: explore an easy alternative to preserve hostname
+        // without doing a lookup
         for(InetAddress a : mAddresses) {
-            dest.writeString(a.getHostName());
             dest.writeByteArray(a.getAddress());
         }
         dest.writeInt(mDnses.size());
         for(InetAddress d : mDnses) {
-            dest.writeString(d.getHostName());
             dest.writeByteArray(d.getAddress());
         }
         if (mGateway != null) {
             dest.writeByte((byte)1);
-            dest.writeString(mGateway.getHostName());
             dest.writeByteArray(mGateway.getAddress());
         } else {
             dest.writeByte((byte)0);
@@ -166,21 +165,18 @@ public class NetworkProperties implements Parcelable {
                 int addressCount = in.readInt();
                 for (int i=0; i<addressCount; i++) {
                     try {
-                        netProp.addAddress(InetAddress.getByAddress(in.readString(),
-                                in.createByteArray()));
+                        netProp.addAddress(InetAddress.getByAddress(in.createByteArray()));
                     } catch (UnknownHostException e) { }
                 }
                 addressCount = in.readInt();
                 for (int i=0; i<addressCount; i++) {
                     try {
-                        netProp.addDns(InetAddress.getByAddress(in.readString(),
-                                in.createByteArray()));
+                        netProp.addDns(InetAddress.getByAddress(in.createByteArray()));
                     } catch (UnknownHostException e) { }
                 }
                 if (in.readByte() == 1) {
                     try {
-                        netProp.setGateway(InetAddress.getByAddress(in.readString(),
-                                in.createByteArray()));
+                        netProp.setGateway(InetAddress.getByAddress(in.createByteArray()));
                     } catch (UnknownHostException e) {}
                 }
                 if (in.readByte() == 1) {
