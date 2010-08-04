@@ -253,21 +253,21 @@ bool ZipFileRO::mapCentralDirectory(void)
 
     /*
      * Grab the CD offset and size, and the number of entries in the
-     * archive.  Verify that they look reasonable.
+     * archive. After that, we can release our EOCD hunt buffer.
      */
     unsigned int numEntries = get2LE(eocdPtr + kEOCDNumEntries);
     unsigned int dirSize = get4LE(eocdPtr + kEOCDSize);
     unsigned int dirOffset = get4LE(eocdPtr + kEOCDFileOffset);
+    free(scanBuf);
 
+    // Verify that they look reasonable.
     if ((long long) dirOffset + (long long) dirSize > (long long) eocdOffset) {
         LOGW("bad offsets (dir %ld, size %u, eocd %ld)\n",
             (long) dirOffset, dirSize, (long) eocdOffset);
-        free(scanBuf);
         return false;
     }
     if (numEntries == 0) {
         LOGW("empty archive?\n");
-        free(scanBuf);
         return false;
     }
 
@@ -277,14 +277,12 @@ bool ZipFileRO::mapCentralDirectory(void)
     mDirectoryMap = new FileMap();
     if (mDirectoryMap == NULL) {
         LOGW("Unable to create directory map: %s", strerror(errno));
-        free(scanBuf);
         return false;
     }
 
     if (!mDirectoryMap->create(mFileName, mFd, dirOffset, dirSize, true)) {
         LOGW("Unable to map '%s' (%zd to %zd): %s\n", mFileName,
                 dirOffset, dirOffset + dirSize, strerror(errno));
-        free(scanBuf);
         return false;
     }
 
@@ -683,7 +681,7 @@ bool ZipFileRO::uncompressEntry(ZipEntryRO entry, int fd) const
             goto bail;
         } else if ((size_t) actual != uncompLen) {
             LOGE("Partial write during uncompress (%zd of %zd)\n",
-                actual, uncompLen);
+                (size_t)actual, (size_t)uncompLen);
             goto bail;
         } else {
             LOGI("+++ successful write\n");
