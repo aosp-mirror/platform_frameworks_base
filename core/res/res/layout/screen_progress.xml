@@ -27,11 +27,11 @@ This is the basic layout for a screen, with all of its features enabled.
     android:layout_height="match_parent"
 >
     <!-- Popout bar for action modes -->
-    <com.android.internal.widget.ActionBarContextView
-         android:id="@+id/action_mode_bar"
-         android:layout_width="match_parent"
-         android:layout_height="wrap_content"
-         android:visibility="gone" />
+    <ViewStub android:id="@+id/action_mode_bar_stub"
+              android:inflatedId="@+id/action_mode_bar"
+              android:layout="@layout/action_mode_bar"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content" />
 
     <RelativeLayout android:id="@android:id/title_container" 
         style="?android:attr/windowTitleBackgroundStyle"

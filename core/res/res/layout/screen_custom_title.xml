@@ -22,11 +22,11 @@ This is an custom layout for a screen.
     android:orientation="vertical"
     android:fitsSystemWindows="true">
     <!-- Popout bar for action modes -->
-    <com.android.internal.widget.ActionBarContextView
-         android:id="@+id/action_mode_bar"
-         android:layout_width="match_parent"
-         android:layout_height="wrap_content"
-         android:visibility="gone" />
+    <ViewStub android:id="@+id/action_mode_bar_stub"
+              android:inflatedId="@+id/action_mode_bar"
+              android:layout="@layout/action_mode_bar"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content" />
 
     <FrameLayout android:id="@android:id/title_container" 
         android:layout_width="match_parent" 

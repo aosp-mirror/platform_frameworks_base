@@ -116,6 +116,7 @@
         <item name="android:windowAnimationStyle">@android:style/Animation.Activity</item>
         <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
         <item name="windowActionBar">false</item>
+        <item name="windowActionModeOverlay">false</item>
         <item name="windowActionBarStyle">@android:style/ActionBar</item>
 
         <!-- Dialog attributes -->
@@ -544,8 +545,14 @@
         <item name="android:textColor">@android:color/secondary_text_nofocus</item>
     </style>
 
+    <!-- Default theme with an Action Bar. -->
     <style name="Theme.WithActionBar">
         <item name="android:windowActionBar">true</item>
     </style>
-    
+
+    <!-- No title bar, but Action Mode bars will overlay application content
+         instead of pushing it down to make room. -->
+    <style name="Theme.NoTitleBar.OverlayActionModes">
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
 </resources>

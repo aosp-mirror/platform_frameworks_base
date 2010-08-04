@@ -71,6 +71,7 @@ import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewManager;
+import android.view.ViewStub;
 import android.view.VolumePanel;
 import android.view.Window;
 import android.view.WindowManager;
@@ -1949,8 +1950,16 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 mActionMode = mode;
             } else {
                 if (mActionModeView == null) {
-                    mActionModeView = (ActionBarContextView) findViewById(
-                            com.android.internal.R.id.action_mode_bar);
+                    if (hasFeature(FEATURE_ACTION_MODE_OVERLAY)) {
+                        mActionModeView = new ActionBarContextView(mContext);
+                        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                                MATCH_PARENT, WRAP_CONTENT);
+                        addView(mActionModeView, params);
+                    } else {
+                        ViewStub stub = (ViewStub) findViewById(
+                                com.android.internal.R.id.action_mode_bar_stub);
+                        mActionModeView = (ActionBarContextView) stub.inflate();
+                    }
                 }
 
                 if (mActionModeView != null) {
