@@ -99,7 +99,7 @@ public class MockRilController {
         RilCtrlCmds.CtrlRspRadioState resp =
             response.getDataAs(RilCtrlCmds.CtrlRspRadioState.class);
         int state = resp.getState();
-        if ((state >= RilCmds.RADIO_STATE_OFF) && (state <= RilCmds.RADIO_STATE_NV_READY))
+        if ((state >= RilCmds.RADIOSTATE_OFF) && (state <= RilCmds.RADIOSTATE_NV_READY))
             return state;
         else
             return -1;
