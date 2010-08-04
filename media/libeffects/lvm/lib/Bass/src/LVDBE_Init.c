@@ -17,9 +17,9 @@
 
 /****************************************************************************************
 
-     $Author: nxp007753 $
-     $Revision: 1081 $
-     $Date: 2010-07-05 11:48:44 +0200 (Mon, 05 Jul 2010) $
+     $Author: beq06068 $
+     $Revision: 1399 $
+     $Date: 2010-08-03 08:16:00 +0200 (Tue, 03 Aug 2010) $
 
 *****************************************************************************************/
 
@@ -160,6 +160,7 @@ LVDBE_ReturnStatus_en LVDBE_Init(LVDBE_Handle_t         *phInstance,
 
     LVDBE_Instance_t      *pInstance;
     LVMixer3_1St_st       *pMixer_Instance;
+    LVMixer3_2St_st       *pBypassMixer_Instance;
     LVM_INT16             i;
     LVM_INT32             MixGain;
 
@@ -227,7 +228,7 @@ LVDBE_ReturnStatus_en LVDBE_Init(LVDBE_Handle_t         *phInstance,
     /*
      * Initialise the filters
      */
-    LVDBE_SetFilters(pInstance,                                 /* Set the filter taps and coefficients */
+    LVDBE_SetFilters(pInstance,                 /* Set the filter taps and coefficients */
                      &pInstance->Params);
 
 
@@ -236,7 +237,8 @@ LVDBE_ReturnStatus_en LVDBE_Init(LVDBE_Handle_t         *phInstance,
      */
     LVDBE_SetAGC(pInstance,                                     /* Set the AGC gain */
                  &pInstance->Params);
-    pInstance->pData->AGCInstance.AGC_Gain = pInstance->pData->AGCInstance.AGC_MaxGain;   /* Default to the bass boost setting */
+    pInstance->pData->AGCInstance.AGC_Gain = pInstance->pData->AGCInstance.AGC_MaxGain;
+                                                /* Default to the bass boost setting */
 
 
     /*
@@ -245,7 +247,8 @@ LVDBE_ReturnStatus_en LVDBE_Init(LVDBE_Handle_t         *phInstance,
     LVDBE_SetVolume(pInstance,                                         /* Set the Volume */
                     &pInstance->Params);
 
-    pInstance->pData->AGCInstance.Volume = pInstance->pData->AGCInstance.Target;  /* Initialise as the target */
+    pInstance->pData->AGCInstance.Volume = pInstance->pData->AGCInstance.Target;
+                                                /* Initialise as the target */
 
     pMixer_Instance = &pInstance->pData->BypassVolume;
     MixGain = LVC_Mixer_GetTarget(&pMixer_Instance->MixerStream[0]);
@@ -258,9 +261,31 @@ LVDBE_ReturnStatus_en LVDBE_Init(LVDBE_Handle_t         *phInstance,
     pMixer_Instance->MixerStream[0].CallbackSet = 0;
 
     /*
-     * Initialise the clicks minimisation variable
+     * Initialise the clicks minimisation BypassMixer
      */
-    pInstance->bTransitionOnToOff   =   LVM_FALSE;
+
+    pBypassMixer_Instance = &pInstance->pData->BypassMixer;
+
+    /*
+     * Setup the mixer gain for the processed path
+     */
+    pBypassMixer_Instance->MixerStream[0].CallbackParam = 0;
+    pBypassMixer_Instance->MixerStream[0].pCallbackHandle = LVM_NULL;
+    pBypassMixer_Instance->MixerStream[0].pCallBack = LVM_NULL;
+    pBypassMixer_Instance->MixerStream[0].CallbackSet=0;
+    LVC_Mixer_Init(&pBypassMixer_Instance->MixerStream[0],0,0);
+    LVC_Mixer_SetTimeConstant(&pBypassMixer_Instance->MixerStream[0],
+        LVDBE_BYPASS_MIXER_TC,pInstance->Params.SampleRate,2);
+    /*
+     * Setup the mixer gain for the unprocessed path
+     */
+    pBypassMixer_Instance->MixerStream[1].CallbackParam = 0;
+    pBypassMixer_Instance->MixerStream[1].pCallbackHandle = LVM_NULL;
+    pBypassMixer_Instance->MixerStream[1].pCallBack = LVM_NULL;
+    pBypassMixer_Instance->MixerStream[1].CallbackSet=0;
+    LVC_Mixer_Init(&pBypassMixer_Instance->MixerStream[1],0x00007FFF,0x00007FFF);
+    LVC_Mixer_SetTimeConstant(&pBypassMixer_Instance->MixerStream[1],
+        LVDBE_BYPASS_MIXER_TC,pInstance->Params.SampleRate,2);
 
     return(LVDBE_SUCCESS);
 }
