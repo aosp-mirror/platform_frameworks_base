@@ -61,7 +61,14 @@ public:
     virtual MtpResponseCode         getObjectFilePath(MtpObjectHandle handle,
                                             MtpString& filePath,
                                             int64_t& fileLength) = 0;
+
     virtual MtpResponseCode         deleteFile(MtpObjectHandle handle) = 0;
+
+    virtual MtpObjectHandleList*    getObjectReferences(MtpObjectHandle handle) = 0;
+
+    virtual MtpResponseCode         setObjectReferences(MtpObjectHandle handle,
+                                            MtpObjectHandleList* references) = 0;
+
 };
 
 }; // namespace android
