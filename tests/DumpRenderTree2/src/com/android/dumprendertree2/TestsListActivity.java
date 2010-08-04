@@ -29,7 +29,7 @@ import java.util.ArrayList;
 /**
  * An Activity that generates a list of tests and sends the intent to
  * LayoutTestsExecuter to run them. It also restarts the LayoutTestsExecuter
- * after it crashes (TODO).
+ * after it crashes.
  */
 public class TestsListActivity extends Activity {
 
@@ -79,7 +79,47 @@ public class TestsListActivity extends Activity {
         sProgressDialog.show();
         Message doneMsg = Message.obtain(mHandler, MSG_TEST_LIST_PRELOADER_DONE);
 
+        Intent serviceIntent = new Intent(this, ManagerService.class);
+        startService(serviceIntent);
+
         new TestsListPreloaderThread(path, doneMsg).start();
+    }
+
+    /**
+     * This method handles an intent that comes from ManageService when crash is detected.
+     * The intent contains an index in mTestsList of the test that crashed. TestsListActivity
+     * restarts the LayoutTestsExecutor from the following test in mTestsList, by sending
+     * an intent to it. This new intent contains a list of remaining tests to run,
+     * total count of all tests, and the index of the first test to run after restarting.
+     * LayoutTestExecutor runs then as usual, sending reports to ManagerService. If it
+     * detects the crash it sends a new intent and the flow repeats.
+     */
+    @Override
+    protected void onNewIntent(Intent intent) {
+        if (!intent.getAction().equals(Intent.ACTION_REBOOT)) {
+            return;
+        }
+
+        int nextTestToRun = intent.getIntExtra("crashedTestIndex", -1) + 1;
+        if (nextTestToRun > 0 && nextTestToRun <= mTotalTestCount) {
+            restartExecutor(nextTestToRun);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putStringArrayList("testsList", mTestsList);
+        outState.putInt("totalCount", mTotalTestCount);
+
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        mTestsList = savedInstanceState.getStringArrayList("testsList");
+        mTotalTestCount = savedInstanceState.getInt("totalCount");
     }
 
     /**
@@ -93,9 +133,16 @@ public class TestsListActivity extends Activity {
         Intent intent = new Intent();
         intent.setClass(this, LayoutTestsExecutor.class);
         intent.setAction(Intent.ACTION_RUN);
-        intent.putStringArrayListExtra(LayoutTestsExecutor.EXTRA_TESTS_LIST,
-                new ArrayList<String>(mTestsList.subList(startFrom, mTotalTestCount)));
-        intent.putExtra(LayoutTestsExecutor.EXTRA_TEST_INDEX, startFrom);
+
+        if (startFrom < mTotalTestCount) {
+            intent.putStringArrayListExtra(LayoutTestsExecutor.EXTRA_TESTS_LIST,
+                    new ArrayList<String>(mTestsList.subList(startFrom, mTotalTestCount)));
+            intent.putExtra(LayoutTestsExecutor.EXTRA_TEST_INDEX, startFrom);
+        } else {
+            intent.putStringArrayListExtra(LayoutTestsExecutor.EXTRA_TESTS_LIST,
+                    new ArrayList<String>());
+        }
+
         startActivity(intent);
     }
 }
