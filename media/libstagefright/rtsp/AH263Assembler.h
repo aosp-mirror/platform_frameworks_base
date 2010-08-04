@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-#ifndef A_AVC_ASSEMBLER_H_
+#ifndef A_H263_ASSEMBLER_H_
 
-#define A_AVC_ASSEMBLER_H_
+#define A_H263_ASSEMBLER_H_
 
 #include "ARTPAssembler.h"
 
 #include <utils/List.h>
-#include <utils/RefBase.h>
+
+#include <stdint.h>
 
 namespace android {
 
-struct ABuffer;
 struct AMessage;
 
-struct AAVCAssembler : public ARTPAssembler {
-    AAVCAssembler(const sp<AMessage> &notify);
+struct AH263Assembler : public ARTPAssembler {
+    AH263Assembler(const sp<AMessage> &notify);
 
 protected:
-    virtual ~AAVCAssembler();
+    virtual ~AH263Assembler();
 
     virtual AssemblyStatus assembleMore(const sp<ARTPSource> &source);
     virtual void onByeReceived();
@@ -40,23 +40,18 @@ protected:
 
 private:
     sp<AMessage> mNotifyMsg;
-
     uint32_t mAccessUnitRTPTime;
     bool mNextExpectedSeqNoValid;
     uint32_t mNextExpectedSeqNo;
     bool mAccessUnitDamaged;
-    List<sp<ABuffer> > mNALUnits;
+    List<sp<ABuffer> > mPackets;
 
-    AssemblyStatus addNALUnit(const sp<ARTPSource> &source);
-    void addSingleNALUnit(const sp<ABuffer> &buffer);
-    AssemblyStatus addFragmentedNALUnit(List<sp<ABuffer> > *queue);
-    bool addSingleTimeAggregationPacket(const sp<ABuffer> &buffer);
-
+    AssemblyStatus addPacket(const sp<ARTPSource> &source);
     void submitAccessUnit();
 
-    DISALLOW_EVIL_CONSTRUCTORS(AAVCAssembler);
+    DISALLOW_EVIL_CONSTRUCTORS(AH263Assembler);
 };
 
 }  // namespace android
 
-#endif  // A_AVC_ASSEMBLER_H_
+#endif  // A_H263_ASSEMBLER_H_

@@ -377,9 +377,17 @@ ARTPAssembler::AssemblyStatus AAVCAssembler::assembleMore(
 
 void AAVCAssembler::packetLost() {
     CHECK(mNextExpectedSeqNoValid);
+    LOG(VERBOSE) << "packetLost (expected " << mNextExpectedSeqNo << ")";
+
     ++mNextExpectedSeqNo;
 
     mAccessUnitDamaged = true;
+}
+
+void AAVCAssembler::onByeReceived() {
+    sp<AMessage> msg = mNotifyMsg->dup();
+    msg->setInt32("eos", true);
+    msg->post();
 }
 
 }  // namespace android

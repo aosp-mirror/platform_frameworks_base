@@ -31,6 +31,8 @@ struct ASessionDescription;
 struct APacketSource : public MediaSource {
     APacketSource(const sp<ASessionDescription> &sessionDesc, size_t index);
 
+    status_t initCheck() const;
+
     virtual status_t start(MetaData *params = NULL);
     virtual status_t stop();
     virtual sp<MetaData> getFormat();
@@ -41,16 +43,23 @@ struct APacketSource : public MediaSource {
     void queueAccessUnit(const sp<ABuffer> &buffer);
     void signalEOS(status_t result);
 
+    int64_t getQueuedDuration(bool *eos);
+
 protected:
     virtual ~APacketSource();
 
 private:
+    status_t mInitCheck;
+
     Mutex mLock;
     Condition mCondition;
 
     sp<MetaData> mFormat;
     List<sp<ABuffer> > mBuffers;
     status_t mEOSResult;
+
+    bool mFirstAccessUnit;
+    uint64_t mFirstAccessUnitNTP;
 
     DISALLOW_EVIL_CONSTRUCTORS(APacketSource);
 };

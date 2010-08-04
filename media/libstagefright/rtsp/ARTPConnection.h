@@ -59,19 +59,22 @@ private:
     struct StreamInfo;
     List<StreamInfo> mStreams;
 
-    KeyedVector<uint32_t, sp<ARTPSource> > mSources;
-
     bool mPollEventPending;
+    int64_t mLastReceiverReportTimeUs;
 
     void onAddStream(const sp<AMessage> &msg);
     void onRemoveStream(const sp<AMessage> &msg);
     void onPollStreams();
+    void onSendReceiverReports();
 
     status_t receive(StreamInfo *info, bool receiveRTP);
 
     status_t parseRTP(StreamInfo *info, const sp<ABuffer> &buffer);
     status_t parseRTCP(StreamInfo *info, const sp<ABuffer> &buffer);
     status_t parseSR(StreamInfo *info, const uint8_t *data, size_t size);
+    status_t parseBYE(StreamInfo *info, const uint8_t *data, size_t size);
+
+    sp<ARTPSource> findSource(StreamInfo *info, uint32_t id);
 
     void postPollEvent();
 
