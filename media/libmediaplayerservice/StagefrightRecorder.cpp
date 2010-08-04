@@ -899,7 +899,11 @@ status_t StagefrightRecorder::setupCameraSource() {
 
     params.setPreviewFrameRate(mFrameRate);
     String8 s = params.flatten();
-    CHECK_EQ(OK, mCamera->setParameters(s));
+    if (OK != mCamera->setParameters(s)) {
+        LOGE("Could not change settings."
+             " Someone else is using camera %d?", mCameraId);
+        return -EBUSY;
+    }
     CameraParameters newCameraParams(mCamera->getParameters());
 
     // Check on video frame size
@@ -921,6 +925,8 @@ status_t StagefrightRecorder::setupCameraSource() {
              "frame rate is %d", mFrameRate, frameRate);
     }
 
+    // This CHECK is good, since we just passed the lock/unlock
+    // check earlier by calling mCamera->setParameters().
     CHECK_EQ(OK, mCamera->setPreviewDisplay(mPreviewSurface));
     IPCThreadState::self()->restoreCallingIdentity(token);
     return OK;
