@@ -34,6 +34,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Голосовая почта"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Неполадки подключения или неверный код MMI."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"Операция возможна только для разрешенных номеров."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Служба включена."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Служба подключена для:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Служба отключена."</string>
@@ -171,6 +172,8 @@
     <string name="permgroupdesc_storage" msgid="9203302214915355774">"Доступ к SD-карте."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"отключать или изменять строку состояния"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Позволяет приложению отключать строку состояния или добавлять/удалять системные значки."</string>
+    <string name="permlab_statusBarService" msgid="7247281911387931485">"строка состояния"</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Позволяет приложению быть строкой состояния."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"разворачивать/сворачивать строку состояния"</string>
     <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Позволяет приложению разворачивать или сворачивать строку состояния."</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"перехватывать исходящие вызовы"</string>
@@ -311,8 +314,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Позволяет приложению изменять глобальные аудионастройки, такие как громкость и маршрутизацию."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"записывать аудио"</string>
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"Позволяет приложению получать доступ к пути аудиозаписи."</string>
-    <string name="permlab_camera" msgid="8059288807274039014">"снимать фотографии"</string>
-    <string name="permdesc_camera" msgid="9013476258810982546">"Позволяет приложению делать снимки с помощью камеры. Это разрешение позволяет приложению в любое время собирать изображения, видимые через объектив камеры."</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"снимать фото и видео"</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"Позволяет приложению делать снимки и видео с помощью камеры. Это дает приложению возможность в любое время получать изображения с объектива камеры."</string>
     <string name="permlab_brick" msgid="8337817093326370537">"отключать телефон"</string>
     <string name="permdesc_brick" msgid="5569526552607599221">"Позволяет данному приложению отключить телефон навсегда. Это очень опасно."</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"принудительно перезагружать телефон"</string>
@@ -335,6 +338,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Позволяет приложению управлять виброзвонком."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"управлять вспышкой"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Позволяет приложению управлять вспышкой."</string>
+    <string name="permlab_accessUsb" msgid="7362327818655760496">"доступ к USB-устройствам"</string>
+    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Позволяет приложению получать доступ к USB-устройствам."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"проверять аппаратное обеспечение"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Позволяет приложению управлять различными периферийными устройствами для проверки аппаратного обеспечения."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"посылать прямые вызовы на номера телефонов"</string>
@@ -573,16 +578,6 @@
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Очистить"</string>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Нет уведомлений"</string>
-    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Текущие"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Уведомления"</string>
-    <string name="battery_status_text_percent_format" msgid="7660311274698797147">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="battery_status_charging" msgid="756617993998772213">"Идет зарядка..."</string>
-    <string name="battery_low_title" msgid="7923774589611311406">"Подключите зарядное устройство"</string>
-    <string name="battery_low_subtitle" msgid="7388781709819722764">"Батарея разряжена:"</string>
-    <string name="battery_low_percent_format" msgid="696154104579022959">"Осталось <xliff:g id="NUMBER">%d%%</xliff:g> или меньше."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Расход заряда батареи"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Не удалось провести стандартный тест"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Действие FACTORY_TEST поддерживается только для пакетов, установленных в /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Пакет, обеспечивающий действие FACTORY_TEST, не найден."</string>
@@ -728,8 +723,8 @@
     <string name="dialog_alert_title" msgid="2049658708609043103">"Внимание"</string>
     <string name="capital_on" msgid="1544682755514494298">"ВКЛ"</string>
     <string name="capital_off" msgid="6815870386972805832">"ВЫКЛ"</string>
-    <string name="whichApplication" msgid="4533185947064773386">"Завершить действие с помощью"</string>
-    <string name="alwaysUse" msgid="4583018368000610438">"Использовать по умолчанию для этого действия."</string>
+    <string name="whichApplication" msgid="4533185947064773386">"Что использовать?"</string>
+    <string name="alwaysUse" msgid="4583018368000610438">"По умолчанию для этого действия"</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Удалить настройки по умолчанию: главный экран &gt; \"Настройки\" &gt; \"Приложения\" &gt; \"Управление приложениями\"."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Выберите действие"</string>
     <string name="noApplications" msgid="1691104391758345586">"Это действие не может выполнять ни одно приложение."</string>
@@ -744,6 +739,16 @@
     <string name="force_close" msgid="3653416315450806396">"Закрыть"</string>
     <string name="report" msgid="4060218260984795706">"Отчет"</string>
     <string name="wait" msgid="7147118217226317732">"Подождать"</string>
+    <string name="smv_application" msgid="295583804361236288">"Приложение <xliff:g id="APPLICATION">%1$s</xliff:g> (процесс <xliff:g id="PROCESS">%2$s</xliff:g>) нарушило собственную политику StrictMode."</string>
+    <string name="smv_process" msgid="5120397012047462446">"Процесс <xliff:g id="PROCESS">%1$s</xliff:g> нарушил собственную политику StrictMode."</string>
+    <string name="heavy_weight_notification" msgid="9087063985776626166">"Приложение <xliff:g id="APP">%1$s</xliff:g> запущено"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Нажмите, чтобы переключиться в приложение"</string>
+    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Переключить приложения?"</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Выполняется другое приложение, которое должно быть остановлено прежде, чем запускать новое."</string>
+    <string name="old_app_action" msgid="493129172238566282">"Вернуться к приложению <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="old_app_description" msgid="942967900237208466">"Не запускать новое приложение."</string>
+    <string name="new_app_action" msgid="5472756926945440706">"Запустить приложение <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="6830398339826789493">"Остановить старое приложение без сохранения изменений."</string>
     <string name="sendText" msgid="5132506121645618310">"Выберите действие для текста"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Громкость звонка"</string>
     <string name="volume_music" msgid="5421651157138628171">"Громкость мультимедиа"</string>

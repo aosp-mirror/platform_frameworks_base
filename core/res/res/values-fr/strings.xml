@@ -34,6 +34,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Messagerie vocale"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problème de connexion ou code IHM non valide."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"Opération réservée aux numéros autorisés"</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Le service a été activé."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Ce service a été activé pour :"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Ce service a été désactivé."</string>
@@ -171,6 +172,8 @@
     <string name="permgroupdesc_storage" msgid="9203302214915355774">"Accès à la carte SD"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"Désactivation ou modification de la barre d\'état"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Permet à une application de désactiver la barre d\'état ou d\'ajouter/supprimer des icônes système."</string>
+    <string name="permlab_statusBarService" msgid="7247281911387931485">"barre d\'état"</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Permet à l\'application de faire office de barre d\'état."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"Agrandir/réduire la barre d\'état"</string>
     <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Permet à l\'application de réduire ou d\'agrandir la barre d\'état."</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"Interception d\'appels sortants"</string>
@@ -311,8 +314,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Permet à l\'application de modifier les paramètres audio généraux (p. ex. le volume et le routage)."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"Enregistrement de fichier audio"</string>
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"Permet à l\'application d\'accéder au chemin de l\'enregistrement audio."</string>
-    <string name="permlab_camera" msgid="8059288807274039014">"Prise de photos"</string>
-    <string name="permdesc_camera" msgid="9013476258810982546">"Permet à l\'application de prendre des clichés avec l\'appareil photo. Cette fonctionnalité permet à l\'application de récupérer à tout moment les images perçues par l\'appareil."</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"prendre des photos et enregistrer des vidéos"</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"Permet de prendre des photos et d\'enregistrer des vidéos avec l\'appareil photo. Cette fonctionnalité permet à l\'application de récupérer à tout moment les images perçues par l\'appareil."</string>
     <string name="permlab_brick" msgid="8337817093326370537">"Désactivation définitive du téléphone"</string>
     <string name="permdesc_brick" msgid="5569526552607599221">"Permet à l\'application de désactiver définitivement le téléphone. Cette fonctionnalité est très dangereuse."</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"Redémarrage forcé du téléphone"</string>
@@ -335,6 +338,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Permet à l\'application de contrôler le vibreur."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"Contrôle de la lampe de poche"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Permet à l\'application de contrôler la lampe de poche."</string>
+    <string name="permlab_accessUsb" msgid="7362327818655760496">"accéder aux périphériques USB"</string>
+    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Autorise l\'application à accéder aux périphériques USB"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"Tests du matériel"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Permet à l\'application de contrôler différents périphériques à des fins de test matériel."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"Appel direct des numéros de téléphone"</string>
@@ -573,16 +578,6 @@
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Effacer"</string>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Aucune notification"</string>
-    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"En cours"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notifications"</string>
-    <string name="battery_status_text_percent_format" msgid="7660311274698797147">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="battery_status_charging" msgid="756617993998772213">"Chargement..."</string>
-    <string name="battery_low_title" msgid="7923774589611311406">"Branchez le chargeur"</string>
-    <string name="battery_low_subtitle" msgid="7388781709819722764">"Le niveau de la batterie est bas :"</string>
-    <string name="battery_low_percent_format" msgid="696154104579022959">"Maximum <xliff:g id="NUMBER">%d%%</xliff:g> restants."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Utilisation de la batterie"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Échec du test usine"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"L\'action FACTORY_TEST est uniquement prise en charge pour les paquets de données installés dans in/system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Impossible de trouver un paquet proposant l\'action FACTORY_TEST."</string>
@@ -744,6 +739,16 @@
     <string name="force_close" msgid="3653416315450806396">"Forcer la fermeture"</string>
     <string name="report" msgid="4060218260984795706">"Rapport"</string>
     <string name="wait" msgid="7147118217226317732">"Attendre"</string>
+    <string name="smv_application" msgid="295583804361236288">"L\'application <xliff:g id="APPLICATION">%1$s</xliff:g> (processus <xliff:g id="PROCESS">%2$s</xliff:g>) a enfreint ses propres règles StrictMode."</string>
+    <string name="smv_process" msgid="5120397012047462446">"Le processus <xliff:g id="PROCESS">%1$s</xliff:g> a enfreint ses propres règles StrictMode."</string>
+    <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> en cours d\'exécution"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Sélectionner pour changer d\'application"</string>
+    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Passer d\'une application à l\'autre ?"</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Une autre application est déjà en cours d\'exécution. Veuillez l\'arrêter avant d\'en démarrer une nouvelle."</string>
+    <string name="old_app_action" msgid="493129172238566282">"Revenir à <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="old_app_description" msgid="942967900237208466">"Ne pas démarrer la nouvelle application"</string>
+    <string name="new_app_action" msgid="5472756926945440706">"Démarrer <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="6830398339826789493">"Arrêtez l\'ancienne application sans enregistrer."</string>
     <string name="sendText" msgid="5132506121645618310">"Sélectionner une action pour le texte"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volume de la sonnerie"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volume"</string>
