@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,10 +40,7 @@ import java.util.StringTokenizer;
  * <p>To attach the BassBoost to a particular AudioTrack or MediaPlayer, specify the audio session
  * ID of this AudioTrack or MediaPlayer when constructing the BassBoost. If the audio session ID 0
  * is specified, the BassBoost applies to the main audio output mix.
- // TODO when AudioEffect is unhidden
- // <p> See {_at_link android.media.AudioEffect} class for more details on controlling audio effects.
- *
- * {@hide Pending API council review}
+ * <p> See {@link android.media.AudioEffect} class for more details on controlling audio effects.
  */
 
 public class BassBoost extends AudioEffect {
@@ -88,7 +85,7 @@ public class BassBoost extends AudioEffect {
      * engine. As the same engine can be shared by several applications, this parameter indicates
      * how much the requesting application needs control of effect parameters. The normal priority
      * is 0, above normal is a positive number, below normal a negative number.
-     * @param audioSession  System wide unique audio session identifier. If audioSession
+     * @param audioSession system wide unique audio session identifier. If audioSession
      *  is not 0, the BassBoost will be attached to the MediaPlayer or AudioTrack in the
      *  same audio session. Otherwise, the BassBoost will apply to the output mix.
      *
@@ -121,7 +118,7 @@ public class BassBoost extends AudioEffect {
      * accuracy for setting the strength, it is allowed to round the given strength to the nearest
      * supported value. You can use the {@link #getRoundedStrength()} method to query the
      * (possibly rounded) value that was actually set.
-     * @param strength Strength of the effect. The valid range for strength strength is [0, 1000],
+     * @param strength strength of the effect. The valid range for strength strength is [0, 1000],
      * where 0 per mille designates the mildest effect and 1000 per mille designates the strongest.
      * @throws IllegalStateException
      * @throws IllegalArgumentException
@@ -134,7 +131,7 @@ public class BassBoost extends AudioEffect {
 
     /**
      * Gets the current strength of the effect.
-     * @return The strength of the effect. The valid range for strength is [0, 1000], where 0 per
+     * @return the strength of the effect. The valid range for strength is [0, 1000], where 0 per
      * mille designates the mildest effect and 1000 per mille the strongest
      * @throws IllegalStateException
      * @throws IllegalArgumentException
@@ -158,8 +155,7 @@ public class BassBoost extends AudioEffect {
          * BassBoost engine.
          * @param effect the BassBoost on which the interface is registered.
          * @param status status of the set parameter operation.
-         // TODO when AudioEffect is unhidden
-         // See {_at_link android.media.AudioEffect#setParameter(byte[], byte[])}.
+         * See {@link android.media.AudioEffect#setParameter(byte[], byte[])}.
          * @param param ID of the modified parameter. See {@link #PARAM_STRENGTH} ...
          * @param value the new parameter value.
          */
@@ -282,6 +278,7 @@ public class BassBoost extends AudioEffect {
     /**
      * Sets the bass boost properties. This method is useful when bass boost settings have to
      * be applied from a previous backup.
+     * @param settings a BassBoost.Settings object containing the properties to apply
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,7 @@ import java.util.StringTokenizer;
  * The EnvironmentalReverb class allows an application to control each reverb engine property in a
  * global reverb environment and is more suitable for games. For basic control, more suitable for
  * music applications, it is recommended to use the
- // TODO when PresetReverb is unhidden
- // {_at_link android.media.PresetReverb} class.
+ * {@link android.media.PresetReverb} class.
  * <p>An application creates a EnvironmentalReverb object to instantiate and control a reverb engine
  * in the audio framework.
  * <p>The methods, parameter types and units exposed by the EnvironmentalReverb implementation are
@@ -52,11 +51,8 @@ import java.util.StringTokenizer;
  * they must be explicitely attached to it and a send level must be specified. Use the effect ID
  * returned by getId() method to designate this particular effect when attaching it to the
  * MediaPlayer or AudioTrack.
- // TODO when AudioEffect is unhidden
- // <p> See {_at_link android.media.AudioEffect} class for more details on controlling
+ * <p> See {@link android.media.AudioEffect} class for more details on controlling
  * audio effects.
- *
- * {@hide Pending API council review}
  */
 
 public class EnvironmentalReverb extends AudioEffect {
@@ -67,8 +63,7 @@ public class EnvironmentalReverb extends AudioEffect {
     // frameworks/base/include/media/EffectEnvironmentalReverbApi.h
 
     /**
-     * Room level. Parameter ID for
-     * {@link android.media.EnvironmentalReverb.OnParameterChangeListener}
+     * Room level. Parameter ID for OnParameterChangeListener
      */
     public static final int PARAM_ROOM_LEVEL = 0;
     /**
@@ -80,7 +75,8 @@ public class EnvironmentalReverb extends AudioEffect {
      */
     public static final int PARAM_DECAY_TIME = 2;
     /**
-     * Decay HF ratio. Parameter ID for OnParameterChangeListener
+     * Decay HF ratio. Parameter ID for
+     * {@link android.media.EnvironmentalReverb.OnParameterChangeListener}
      */
     public static final int PARAM_DECAY_HF_RATIO = 3;
     /**
@@ -133,7 +129,7 @@ public class EnvironmentalReverb extends AudioEffect {
      * EnvironmentalReverb engine. As the same engine can be shared by several applications, this
      * parameter indicates how much the requesting application needs control of effect parameters.
      * The normal priority is 0, above normal is a positive number, below normal a negative number.
-     * @param audioSession  System wide unique audio session identifier. If audioSession
+     * @param audioSession  system wide unique audio session identifier. If audioSession
      *  is not 0, the EnvironmentalReverb will be attached to the MediaPlayer or AudioTrack in the
      *  same audio session. Otherwise, the EnvironmentalReverb will apply to the output mix.
      *  As the EnvironmentalReverb is an auxiliary effect it is recommended to instantiate it on
@@ -150,7 +146,7 @@ public class EnvironmentalReverb extends AudioEffect {
 
     /**
      * Sets the master volume level of the environmental reverb effect.
-     * @param room Room level in millibels. The valid range is [-9000, 0].
+     * @param room room level in millibels. The valid range is [-9000, 0].
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
@@ -179,7 +175,7 @@ public class EnvironmentalReverb extends AudioEffect {
      * Sets the volume level at 5 kHz relative to the volume level at low frequencies of the
      * overall reverb effect.
      * <p>This controls a low-pass filter that will reduce the level of the high-frequency.
-     * @param roomHF High frequency attenuation level in millibels. The valid range is [-9000, 0].
+     * @param roomHF high frequency attenuation level in millibels. The valid range is [-9000, 0].
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
@@ -206,7 +202,7 @@ public class EnvironmentalReverb extends AudioEffect {
 
     /**
      * Sets the time taken for the level of reverberation to decay by 60 dB.
-     * @param decayTime Decay time in milliseconds. The valid range is [100, 20000].
+     * @param decayTime decay time in milliseconds. The valid range is [100, 20000].
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
@@ -234,7 +230,7 @@ public class EnvironmentalReverb extends AudioEffect {
     /**
      * Sets the ratio of high frequency decay time (at 5 kHz) relative to the decay time at low
      * frequencies.
-     * @param decayHFRatio High frequency decay ratio using a permille scale. The valid range is
+     * @param decayHFRatio high frequency decay ratio using a permille scale. The valid range is
      * [100, 2000]. A ratio of 1000 indicates that all frequencies decay at the same rate.
      * @throws IllegalStateException
      * @throws IllegalArgumentException
@@ -264,7 +260,7 @@ public class EnvironmentalReverb extends AudioEffect {
      * Sets the volume level of the early reflections.
      * <p>This level is combined with the overall room level
      * (set using {@link #setRoomLevel(short)}).
-     * @param reflectionsLevel Reflection level in millibels. The valid range is [-9000, 1000].
+     * @param reflectionsLevel reflection level in millibels. The valid range is [-9000, 1000].
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
@@ -293,7 +289,7 @@ public class EnvironmentalReverb extends AudioEffect {
      * Sets the delay time for the early reflections.
      * <p>This method sets the time between when the direct path is heard and when the first
      * reflection is heard.
-     * @param reflectionsDelay Reflections delay in milliseconds. The valid range is [0, 300].
+     * @param reflectionsDelay reflections delay in milliseconds. The valid range is [0, 300].
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
@@ -321,7 +317,7 @@ public class EnvironmentalReverb extends AudioEffect {
     /**
      * Sets the volume level of the late reverberation.
      * <p>This level is combined with the overall room level (set using {@link #setRoomLevel(short)}).
-     * @param reverbLevel Reverb level in millibels. The valid range is [-9000, 2000].
+     * @param reverbLevel reverb level in millibels. The valid range is [-9000, 2000].
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
@@ -348,7 +344,7 @@ public class EnvironmentalReverb extends AudioEffect {
 
     /**
      * Sets the time between the first reflection and the reverberation.
-     * @param reverbDelay Reverb delay in milliseconds. The valid range is [0, 100].
+     * @param reverbDelay reverb delay in milliseconds. The valid range is [0, 100].
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
@@ -376,7 +372,7 @@ public class EnvironmentalReverb extends AudioEffect {
     /**
      * Sets the echo density in the late reverberation decay.
      * <p>The scale should approximately map linearly to the perceived change in reverberation.
-     * @param diffusion Diffusion specified using a permille scale. The diffusion valid range is
+     * @param diffusion diffusion specified using a permille scale. The diffusion valid range is
      * [0, 1000]. A value of 1000 o/oo indicates a smooth reverberation decay.
      * Values below this level give a more <i>grainy</i> character.
      * @throws IllegalStateException
@@ -409,7 +405,7 @@ public class EnvironmentalReverb extends AudioEffect {
      * <p> The scale should approximately map linearly to the perceived change in reverberation.
      * A lower density creates a hollow sound that is useful for simulating small reverberation
      * spaces such as bathrooms.
-     * @param density Density specified using a permille scale. The valid range is [0, 1000].
+     * @param density density specified using a permille scale. The valid range is [0, 1000].
      * A value of 1000 o/oo indicates a natural sounding reverberation. Values below this level
      * produce a more colored effect.
      * @throws IllegalStateException
@@ -448,8 +444,7 @@ public class EnvironmentalReverb extends AudioEffect {
          * EnvironmentalReverb engine.
          * @param effect the EnvironmentalReverb on which the interface is registered.
          * @param status status of the set parameter operation.
-         // TODO when AudioEffect is unhidden
-         // See {_at_link android.media.AudioEffect#setParameter(byte[], byte[])}.
+         * See {@link android.media.AudioEffect#setParameter(byte[], byte[])}.
          * @param param ID of the modified parameter. See {@link #PARAM_ROOM_LEVEL} ...
          * @param value the new parameter value.
          */
@@ -649,6 +644,7 @@ public class EnvironmentalReverb extends AudioEffect {
     /**
      * Sets the environmental reverb properties. This method is useful when reverb settings have to
      * be applied from a previous backup.
+     * @param settings a EnvironmentalReverb.Settings object containing the properties to apply
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException

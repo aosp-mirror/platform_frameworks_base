@@ -57,8 +57,6 @@ import android.os.Message;
  * When data capture is not needed any more, the Visualizer should be disabled.
  * <p>It is good practice to call the {@link #release()} method when the Visualizer is not used
  * anymore to free up native resources associated to the Visualizer instance.
- *
- * {@hide Pending API council review}
  */
 
 public class Visualizer {
@@ -84,8 +82,8 @@ public class Visualizer {
     public static final int STATE_ENABLED   = 2;
 
     // to keep in sync with frameworks/base/media/jni/audioeffect/android_media_Visualizer.cpp
-    protected static final int NATIVE_EVENT_PCM_CAPTURE = 0;
-    protected static final int NATIVE_EVENT_FFT_CAPTURE = 1;
+    private static final int NATIVE_EVENT_PCM_CAPTURE = 0;
+    private static final int NATIVE_EVENT_FFT_CAPTURE = 1;
 
     // Error codes:
     /**
@@ -127,28 +125,28 @@ public class Visualizer {
     /**
      * Indicates the state of the Visualizer instance
      */
-    protected int mState = STATE_UNINITIALIZED;
+    private int mState = STATE_UNINITIALIZED;
     /**
      * Lock to synchronize access to mState
      */
-    protected final Object mStateLock = new Object();
+    private final Object mStateLock = new Object();
     /**
      * System wide unique Identifier of the visualizer engine used by this Visualizer instance
      */
-    protected int mId;
+    private int mId;
 
     /**
      * Lock to protect listeners updates against event notifications
      */
-    protected final Object mListenerLock = new Object();
+    private final Object mListenerLock = new Object();
     /**
      * Handler for events coming from the native code
      */
-    protected NativeEventHandler mNativeEventHandler = null;
+    private NativeEventHandler mNativeEventHandler = null;
     /**
      *  PCM and FFT capture listener registered by client
      */
-    protected OnDataCaptureListener mCaptureListener = null;
+    private OnDataCaptureListener mCaptureListener = null;
 
     // accessed by native methods
     private int mNativeVisualizer;
@@ -159,7 +157,7 @@ public class Visualizer {
     //--------------------
     /**
      * Class constructor.
-     * @param audioSession  System wide unique audio session identifier. If audioSession
+     * @param audioSession system wide unique audio session identifier. If audioSession
      *  is not 0, the visualizer will be attached to the MediaPlayer or AudioTrack in the
      *  same audio session. Otherwise, the Visualizer will apply to the output mix.
      *

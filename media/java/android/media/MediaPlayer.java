@@ -273,6 +273,16 @@ import java.lang.ref.WeakReference;
  *     <td>Valid Sates </p></td>
  *     <td>Invalid States </p></td>
  *     <td>Comments </p></td></tr>
+ * <tr><td>attachAuxEffect </p></td>
+ *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted} </p></td>
+ *     <td>{Idle, Error} </p></td>
+ *     <td>This method must be called after setDataSource.
+ *     Calling it does not change the object state. </p></td></tr>
+ * <tr><td>getAudioSessionId </p></td>
+ *     <td>any </p></td>
+ *     <td>{} </p></td>
+ *     <td>This method can be called in any state and calling it does not change
+ *         the object state. </p></td></tr>
  * <tr><td>getCurrentPosition </p></td>
  *     <td>{Idle, Initialized, Prepared, Started, Paused, Stopped,
  *         PlaybackCompleted} </p></td>
@@ -340,6 +350,12 @@ import java.lang.ref.WeakReference;
  *     <td>Successful invoke of this method in a valid state does not change
  *         the state. Calling this method in an invalid state transfers the
  *         object to the <em>Error</em> state. </p></td></tr>
+ * <tr><td>setAudioSessionId </p></td>
+ *     <td>{Idle} </p></td>
+ *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted,
+ *          Error} </p></td>
+ *     <td>This method must be called in idle state as the audio session ID must be known before
+ *         calling setDataSource. Calling it does not change the object state. </p></td></tr>
  * <tr><td>setAudioStreamType </p></td>
  *     <td>{Idle, Initialized, Stopped, Prepared, Started, Paused,
  *          PlaybackCompleted}</p></td>
@@ -347,6 +363,10 @@ import java.lang.ref.WeakReference;
  *     <td>Successful invoke of this method does not change the state. In order for the
  *         target audio stream type to become effective, this method must be called before
  *         prepare() or prepareAsync().</p></td></tr>
+ * <tr><td>setAuxEffectSendLevel </p></td>
+ *     <td>any</p></td>
+ *     <td>{} </p></td>
+ *     <td>Calling this method does not change the object state. </p></td></tr>
  * <tr><td>setDataSource </p></td>
  *     <td>{Idle} </p></td>
  *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted,
@@ -423,26 +443,6 @@ import java.lang.ref.WeakReference;
  *     <td>Successful invoke of this method in a valid state transfers the
  *         object to the <em>Stopped</em> state. Calling this method in an
  *         invalid state transfers the object to the <em>Error</em> state.</p></td></tr>
- * <tr><td>setAudioSessionId </p></td>
- *     <td>{Idle} </p></td>
- *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted,
- *          Error} </p></td>
- *     <td>This method must be called in idle state as the audio session ID must be known before
- *         calling setDataSource. Calling it does not change the object state. </p></td></tr>
- * <tr><td>getAudioSessionId </p></td>
- *     <td>any </p></td>
- *     <td>{} </p></td>
- *     <td>This method can be called in any state and calling it does not change
- *         the object state. </p></td></tr>
- * <tr><td>attachAuxEffect </p></td>
- *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted} </p></td>
- *     <td>{Idle, Error} </p></td>
- *     <td>This method must be called after setDataSource.
- *     Calling it does not change the object state. </p></td></tr>
- * <tr><td>setAuxEffectSendLevel </p></td>
- *     <td>any</p></td>
- *     <td>{} </p></td>
- *     <td>Calling this method does not change the object state. </p></td></tr>
  *
  * </table>
  *
@@ -1182,7 +1182,7 @@ public class MediaPlayer
     /**
      * Sets the audio session ID.
      *
-     * @param sessionId: the audio session ID.
+     * @param sessionId the audio session ID.
      * The audio session ID is a system wide unique identifier for the audio stream played by
      * this MediaPlayer instance.
      * The primary use of the audio session ID  is to associate audio effects to a particular
@@ -1194,20 +1194,14 @@ public class MediaPlayer
      * by calling this method.
      * This method must be called before one of the overloaded <code> setDataSource </code> methods.
      * @throws IllegalStateException if it is called in an invalid state
-     *
-     // FIXME: unhide.
-     // TODO when AudioEffect is unhidden
-     * @hide
      */
     public native void setAudioSessionId(int sessionId)  throws IllegalArgumentException, IllegalStateException;
 
     /**
      * Returns the audio session ID.
      *
-     * @return the audio session ID. {@see #setAudioSessionId(int)}.
+     * @return the audio session ID. {@see #setAudioSessionId(int)}
      * Note that the audio session ID is 0 only if a problem occured when the MediaPlayer was contructed.
-     // FIXME: unhide.
-     * @hide
      */
     public native int getAudioSessionId();
 
@@ -1217,16 +1211,13 @@ public class MediaPlayer
      * energy to this effect. This amount is defined by setAuxEffectSendLevel().
      * {@see #setAuxEffectSendLevel(float)}.
      // TODO when AudioEffect is unhidden
-     * <p>After creating an auxiliary effect (e.g. {_at_link android.media.EnvironmentalReverb}),
-     * retrieve its ID with {_at_link android.media.AudioEffect#getId()} and use it when calling
+     * <p>After creating an auxiliary effect (e.g. {@link android.media.EnvironmentalReverb}),
+     * retrieve its ID with {@link android.media.AudioEffect#getId()} and use it when calling
      * this method to attach the player to the effect.
      * <p>To detach the effect from the player, call this method with a null effect id.
      * <p>This method must be called after one of the overloaded <code> setDataSource </code>
      * methods.
-     *
      * @param effectId system wide unique id of the effect to attach
-     // FIXME: unhide.
-     * @hide
      */
     public native void attachAuxEffect(int effectId);
 
@@ -1241,8 +1232,6 @@ public class MediaPlayer
      * x == 0 -> level = 0
      * 0 < x <= R -> level = 10^(72*(x-R)/20/R)
      * @param level send level scalar
-     // FIXME: unhide.
-     * @hide
      */
     public native void setAuxEffectSendLevel(float level);
 
@@ -1676,8 +1665,4 @@ public class MediaPlayer
 
     private OnInfoListener mOnInfoListener;
 
-    /**
-     * @hide
-     */
-    public native static int snoop(short [] outData, int kind);
 }
