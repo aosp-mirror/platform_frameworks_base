@@ -16,7 +16,9 @@
 
 #include "ARTPSource.h"
 
+#include "AAMRAssembler.h"
 #include "AAVCAssembler.h"
+#include "AH263Assembler.h"
 #include "AMPEG4AudioAssembler.h"
 #include "ASessionDescription.h"
 
@@ -24,9 +26,11 @@
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
 
-#define VERBOSE         0
+#define BE_VERBOSE      0
 
 namespace android {
+
+static const uint32_t kSourceID = 0xdeadbeef;
 
 ARTPSource::ARTPSource(
         uint32_t id,
@@ -35,7 +39,12 @@ ARTPSource::ARTPSource(
     : mID(id),
       mHighestSeqNumber(0),
       mNumBuffersReceived(0),
-      mNumTimes(0) {
+      mNumTimes(0),
+      mLastNTPTime(0),
+      mLastNTPTimeUpdateUs(0),
+      mIssueFIRRequests(false),
+      mLastFIRRequestUs(-1),
+      mNextFIRSeqNo((rand() * 256.0) / RAND_MAX) {
     unsigned long PT;
     AString desc;
     AString params;
@@ -43,8 +52,16 @@ ARTPSource::ARTPSource(
 
     if (!strncmp(desc.c_str(), "H264/", 5)) {
         mAssembler = new AAVCAssembler(notify);
-    } else if (!strncmp(desc.c_str(), "MP4A-LATM", 9)) {
+        mIssueFIRRequests = true;
+    } else if (!strncmp(desc.c_str(), "MP4A-LATM/", 10)) {
         mAssembler = new AMPEG4AudioAssembler(notify);
+    } else if (!strncmp(desc.c_str(), "H263-1998/", 10)
+            || !strncmp(desc.c_str(), "H263-2000/", 10)) {
+        mAssembler = new AH263Assembler(notify);
+    } else if (!strncmp(desc.c_str(), "AMR/", 4)) {
+        mAssembler = new AAMRAssembler(notify, false /* isWide */, params);
+    } else  if (!strncmp(desc.c_str(), "AMR-WB/", 7)) {
+        mAssembler = new AAMRAssembler(notify, true /* isWide */, params);
     } else {
         TRESPASS();
     }
@@ -55,7 +72,9 @@ static uint32_t AbsDiff(uint32_t seq1, uint32_t seq2) {
 }
 
 void ARTPSource::processRTPPacket(const sp<ABuffer> &buffer) {
-    if (queuePacket(buffer) && mNumTimes == 2 && mAssembler != NULL) {
+    if (queuePacket(buffer)
+            && mNumTimes == 2
+            && mAssembler != NULL) {
         mAssembler->onPacketReceived(this);
     }
 
@@ -63,9 +82,12 @@ void ARTPSource::processRTPPacket(const sp<ABuffer> &buffer) {
 }
 
 void ARTPSource::timeUpdate(uint32_t rtpTime, uint64_t ntpTime) {
-#if VERBOSE
+#if BE_VERBOSE
     LOG(VERBOSE) << "timeUpdate";
 #endif
+
+    mLastNTPTime = ntpTime;
+    mLastNTPTimeUpdateUs = ALooper::GetNowUs();
 
     if (mNumTimes == 2) {
         mNTPTime[0] = mNTPTime[1];
@@ -89,6 +111,13 @@ void ARTPSource::timeUpdate(uint32_t rtpTime, uint64_t ntpTime) {
 }
 
 bool ARTPSource::queuePacket(const sp<ABuffer> &buffer) {
+#if 1
+    if (mNumTimes != 2) {
+        // Drop incoming packets until we've established a time base.
+        return false;
+    }
+#endif
+
     uint32_t seqNum = (uint32_t)buffer->int32Data();
 
     if (mNumTimes == 2) {
@@ -194,7 +223,7 @@ void ARTPSource::dump() const {
 
 #if 0
     AString out;
-    
+
     out.append(tmp);
     out.append(" [");
 
@@ -243,6 +272,120 @@ uint64_t ARTPSource::RTP2NTP(uint32_t rtpTime) const {
     return mNTPTime[0] + (double)(mNTPTime[1] - mNTPTime[0])
             * ((double)rtpTime - (double)mRTPTime[0])
             / (double)(mRTPTime[1] - mRTPTime[0]);
+}
+
+void ARTPSource::byeReceived() {
+    mAssembler->onByeReceived();
+}
+
+void ARTPSource::addFIR(const sp<ABuffer> &buffer) {
+    if (!mIssueFIRRequests) {
+        return;
+    }
+
+    int64_t nowUs = ALooper::GetNowUs();
+    if (mLastFIRRequestUs >= 0 && mLastFIRRequestUs + 5000000ll > nowUs) {
+        // Send FIR requests at most every 5 secs.
+        return;
+    }
+
+    mLastFIRRequestUs = nowUs;
+
+    if (buffer->size() + 20 > buffer->capacity()) {
+        LOG(WARNING) << "RTCP buffer too small to accomodate FIR.";
+        return;
+    }
+
+    uint8_t *data = buffer->data() + buffer->size();
+
+    data[0] = 0x80 | 4;
+    data[1] = 206;  // PSFB
+    data[2] = 0;
+    data[3] = 4;
+    data[4] = kSourceID >> 24;
+    data[5] = (kSourceID >> 16) & 0xff;
+    data[6] = (kSourceID >> 8) & 0xff;
+    data[7] = kSourceID & 0xff;
+
+    data[8] = 0x00;  // SSRC of media source (unused)
+    data[9] = 0x00;
+    data[10] = 0x00;
+    data[11] = 0x00;
+
+    data[12] = mID >> 24;
+    data[13] = (mID >> 16) & 0xff;
+    data[14] = (mID >> 8) & 0xff;
+    data[15] = mID & 0xff;
+
+    data[16] = mNextFIRSeqNo++;  // Seq Nr.
+
+    data[17] = 0x00;  // Reserved
+    data[18] = 0x00;
+    data[19] = 0x00;
+
+    buffer->setRange(buffer->offset(), buffer->size() + 20);
+
+    LOG(VERBOSE) << "Added FIR request.";
+}
+
+void ARTPSource::addReceiverReport(const sp<ABuffer> &buffer) {
+    if (buffer->size() + 32 > buffer->capacity()) {
+        LOG(WARNING) << "RTCP buffer too small to accomodate RR.";
+        return;
+    }
+
+    uint8_t *data = buffer->data() + buffer->size();
+
+    data[0] = 0x80 | 1;
+    data[1] = 201;  // RR
+    data[2] = 0;
+    data[3] = 7;
+    data[4] = kSourceID >> 24;
+    data[5] = (kSourceID >> 16) & 0xff;
+    data[6] = (kSourceID >> 8) & 0xff;
+    data[7] = kSourceID & 0xff;
+
+    data[8] = mID >> 24;
+    data[9] = (mID >> 16) & 0xff;
+    data[10] = (mID >> 8) & 0xff;
+    data[11] = mID & 0xff;
+
+    data[12] = 0x00;  // fraction lost
+
+    data[13] = 0x00;  // cumulative lost
+    data[14] = 0x00;
+    data[15] = 0x00;
+
+    data[16] = mHighestSeqNumber >> 24;
+    data[17] = (mHighestSeqNumber >> 16) & 0xff;
+    data[18] = (mHighestSeqNumber >> 8) & 0xff;
+    data[19] = mHighestSeqNumber & 0xff;
+
+    data[20] = 0x00;  // Interarrival jitter
+    data[21] = 0x00;
+    data[22] = 0x00;
+    data[23] = 0x00;
+
+    uint32_t LSR = 0;
+    uint32_t DLSR = 0;
+    if (mLastNTPTime != 0) {
+        LSR = (mLastNTPTime >> 16) & 0xffffffff;
+
+        DLSR = (uint32_t)
+            ((ALooper::GetNowUs() - mLastNTPTimeUpdateUs) * 65536.0 / 1E6);
+    }
+
+    data[24] = LSR >> 24;
+    data[25] = (LSR >> 16) & 0xff;
+    data[26] = (LSR >> 8) & 0xff;
+    data[27] = LSR & 0xff;
+
+    data[28] = DLSR >> 24;
+    data[29] = (DLSR >> 16) & 0xff;
+    data[30] = (DLSR >> 8) & 0xff;
+    data[31] = DLSR & 0xff;
+
+    buffer->setRange(buffer->offset(), buffer->size() + 32);
 }
 
 }  // namespace android

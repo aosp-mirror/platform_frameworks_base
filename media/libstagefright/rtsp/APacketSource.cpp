@@ -226,8 +226,11 @@ sp<ABuffer> MakeAACCodecSpecificData(const char *params) {
 
 APacketSource::APacketSource(
         const sp<ASessionDescription> &sessionDesc, size_t index)
-    : mFormat(new MetaData),
-      mEOSResult(OK) {
+    : mInitCheck(NO_INIT),
+      mFormat(new MetaData),
+      mEOSResult(OK),
+      mFirstAccessUnit(true),
+      mFirstAccessUnitNTP(0) {
     unsigned long PT;
     AString desc;
     AString params;
@@ -240,6 +243,7 @@ APacketSource::APacketSource(
         mFormat->setInt64(kKeyDuration, 60 * 60 * 1000000ll);
     }
 
+    mInitCheck = OK;
     if (!strncmp(desc.c_str(), "H264/", 5)) {
         mFormat->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_AVC);
 
@@ -255,8 +259,16 @@ APacketSource::APacketSource(
         mFormat->setData(
                 kKeyAVCC, 0,
                 codecSpecificData->data(), codecSpecificData->size());
+    } else if (!strncmp(desc.c_str(), "H263-2000/", 10)
+            || !strncmp(desc.c_str(), "H263-1998/", 10)) {
+        mFormat->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_H263);
 
-    } else if (!strncmp(desc.c_str(), "MP4A-LATM", 9)) {
+        int32_t width, height;
+        sessionDesc->getDimensions(index, PT, &width, &height);
+
+        mFormat->setInt32(kKeyWidth, width);
+        mFormat->setInt32(kKeyHeight, height);
+    } else if (!strncmp(desc.c_str(), "MP4A-LATM/", 10)) {
         mFormat->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AAC);
 
         int32_t sampleRate, numChannels;
@@ -272,15 +284,48 @@ APacketSource::APacketSource(
         mFormat->setData(
                 kKeyESDS, 0,
                 codecSpecificData->data(), codecSpecificData->size());
+    } else if (!strncmp(desc.c_str(), "AMR/", 4)) {
+        mFormat->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AMR_NB);
+
+        int32_t sampleRate, numChannels;
+        ASessionDescription::ParseFormatDesc(
+                desc.c_str(), &sampleRate, &numChannels);
+
+        mFormat->setInt32(kKeySampleRate, sampleRate);
+        mFormat->setInt32(kKeyChannelCount, numChannels);
+
+        if (sampleRate != 8000 || numChannels != 1) {
+            mInitCheck = ERROR_UNSUPPORTED;
+        }
+    } else if (!strncmp(desc.c_str(), "AMR-WB/", 7)) {
+        mFormat->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AMR_WB);
+
+        int32_t sampleRate, numChannels;
+        ASessionDescription::ParseFormatDesc(
+                desc.c_str(), &sampleRate, &numChannels);
+
+        mFormat->setInt32(kKeySampleRate, sampleRate);
+        mFormat->setInt32(kKeyChannelCount, numChannels);
+
+        if (sampleRate != 16000 || numChannels != 1) {
+            mInitCheck = ERROR_UNSUPPORTED;
+        }
     } else {
-        TRESPASS();
+        mInitCheck = ERROR_UNSUPPORTED;
     }
 }
 
 APacketSource::~APacketSource() {
 }
 
+status_t APacketSource::initCheck() const {
+    return mInitCheck;
+}
+
 status_t APacketSource::start(MetaData *params) {
+    mFirstAccessUnit = true;
+    mFirstAccessUnitNTP = 0;
+
     return OK;
 }
 
@@ -308,10 +353,23 @@ status_t APacketSource::read(
         CHECK(buffer->meta()->findInt64(
                     "ntp-time", (int64_t *)&ntpTime));
 
+        MediaBuffer *mediaBuffer = new MediaBuffer(buffer->size());
+        mediaBuffer->meta_data()->setInt64(kKeyNTPTime, ntpTime);
+
+        if (mFirstAccessUnit) {
+            mFirstAccessUnit = false;
+            mFirstAccessUnitNTP = ntpTime;
+        }
+        if (ntpTime > mFirstAccessUnitNTP) {
+            ntpTime -= mFirstAccessUnitNTP;
+        } else {
+            ntpTime = 0;
+        }
+
         int64_t timeUs = (int64_t)(ntpTime * 1E6 / (1ll << 32));
 
-        MediaBuffer *mediaBuffer = new MediaBuffer(buffer->size());
         mediaBuffer->meta_data()->setInt64(kKeyTime, timeUs);
+
         memcpy(mediaBuffer->data(), buffer->data(), buffer->size());
         *out = mediaBuffer;
 
@@ -340,6 +398,33 @@ void APacketSource::signalEOS(status_t result) {
     Mutex::Autolock autoLock(mLock);
     mEOSResult = result;
     mCondition.signal();
+}
+
+int64_t APacketSource::getQueuedDuration(bool *eos) {
+    Mutex::Autolock autoLock(mLock);
+
+    *eos = (mEOSResult != OK);
+
+    if (mBuffers.empty()) {
+        return 0;
+    }
+
+    sp<ABuffer> buffer = *mBuffers.begin();
+
+    uint64_t ntpTime;
+    CHECK(buffer->meta()->findInt64(
+                "ntp-time", (int64_t *)&ntpTime));
+
+    int64_t firstTimeUs = (int64_t)(ntpTime * 1E6 / (1ll << 32));
+
+    buffer = *--mBuffers.end();
+
+    CHECK(buffer->meta()->findInt64(
+                "ntp-time", (int64_t *)&ntpTime));
+
+    int64_t lastTimeUs = (int64_t)(ntpTime * 1E6 / (1ll << 32));
+
+    return lastTimeUs - firstTimeUs;
 }
 
 }  // namespace android

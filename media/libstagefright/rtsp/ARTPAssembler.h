@@ -37,6 +37,7 @@ struct ARTPAssembler : public RefBase {
     ARTPAssembler();
 
     void onPacketReceived(const sp<ARTPSource> &source);
+    virtual void onByeReceived() = 0;
 
 protected:
     static void PropagateTimes(

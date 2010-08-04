@@ -40,6 +40,8 @@
 #include <unistd.h>
 #include <ctype.h>
 
+#include "ARTPWriter.h"
+
 namespace android {
 
 StagefrightRecorder::StagefrightRecorder()
@@ -628,6 +630,9 @@ status_t StagefrightRecorder::start() {
         case OUTPUT_FORMAT_AAC_ADTS:
             return startAACRecording();
 
+        case OUTPUT_FORMAT_RTP_AVP:
+            return startRTPRecording();
+
         default:
             LOGE("Unsupported output file format: %d", mOutputFormat);
             return UNKNOWN_ERROR;
@@ -760,6 +765,39 @@ status_t StagefrightRecorder::startAMRRecording() {
     return OK;
 }
 
+status_t StagefrightRecorder::startRTPRecording() {
+    CHECK_EQ(mOutputFormat, OUTPUT_FORMAT_RTP_AVP);
+
+    if ((mAudioSource != AUDIO_SOURCE_LIST_END
+                && mVideoSource != VIDEO_SOURCE_LIST_END)
+            || (mAudioSource == AUDIO_SOURCE_LIST_END
+                && mVideoSource == VIDEO_SOURCE_LIST_END)) {
+        // Must have exactly one source.
+        return BAD_VALUE;
+    }
+
+    if (mOutputFd < 0) {
+        return BAD_VALUE;
+    }
+
+    sp<MediaSource> source;
+
+    if (mAudioSource != AUDIO_SOURCE_LIST_END) {
+        source = createAudioSource();
+    } else {
+        status_t err = setupVideoEncoder(&source);
+        if (err != OK) {
+            return err;
+        }
+    }
+
+    mWriter = new ARTPWriter(dup(mOutputFd));
+    mWriter->addSource(source);
+    mWriter->setListener(mListener);
+
+    return mWriter->start();
+}
+
 void StagefrightRecorder::clipVideoFrameRate() {
     LOGV("clipVideoFrameRate: encoder %d", mVideoEncoder);
     int minFrameRate = mEncoderProfiles->getVideoEncoderParamByName(
@@ -882,7 +920,9 @@ void StagefrightRecorder::clipVideoFrameHeight() {
     }
 }
 
-status_t StagefrightRecorder::setupVideoEncoder(const sp<MediaWriter>& writer) {
+status_t StagefrightRecorder::setupVideoEncoder(sp<MediaSource> *source) {
+    source->clear();
+
     status_t err = setupCameraSource();
     if (err != OK) return err;
 
@@ -944,7 +984,8 @@ status_t StagefrightRecorder::setupVideoEncoder(const sp<MediaWriter>& writer) {
         return UNKNOWN_ERROR;
     }
 
-    writer->addSource(encoder);
+    *source = encoder;
+
     return OK;
 }
 
@@ -982,8 +1023,10 @@ status_t StagefrightRecorder::startMPEG4Recording() {
     }
     if (mVideoSource == VIDEO_SOURCE_DEFAULT
             || mVideoSource == VIDEO_SOURCE_CAMERA) {
-        err = setupVideoEncoder(writer);
+        sp<MediaSource> encoder;
+        err = setupVideoEncoder(&encoder);
         if (err != OK) return err;
+        writer->addSource(encoder);
         totalBitRate += mVideoBitRate;
     }
 
