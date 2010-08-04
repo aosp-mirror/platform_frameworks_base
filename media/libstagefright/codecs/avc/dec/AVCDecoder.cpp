@@ -53,7 +53,9 @@ AVCDecoder::AVCDecoder(const sp<MediaSource> &source)
       mNumSamplesOutput(0),
       mPendingSeekTimeUs(-1),
       mPendingSeekMode(MediaSource::ReadOptions::SEEK_CLOSEST_SYNC),
-      mTargetTimeUs(-1) {
+      mTargetTimeUs(-1),
+      mSPSSeen(false),
+      mPPSSeen(false) {
     memset(mHandle, 0, sizeof(tagAVCHandle));
     mHandle->AVCObject = NULL;
     mHandle->userData = this;
@@ -165,6 +167,8 @@ status_t AVCDecoder::start(MetaData *) {
     mPendingSeekTimeUs = -1;
     mPendingSeekMode = ReadOptions::SEEK_CLOSEST_SYNC;
     mTargetTimeUs = -1;
+    mSPSSeen = false;
+    mPPSSeen = false;
     mStarted = true;
 
     return OK;
@@ -314,184 +318,196 @@ status_t AVCDecoder::read(
 
     if (res != AVCDEC_SUCCESS) {
         LOGE("cannot determine nal type");
-    } else switch (nalType) {
-        case AVC_NALTYPE_SPS:
-        {
-            res = PVAVCDecSeqParamSet(
-                    mHandle, const_cast<uint8_t *>(fragPtr),
-                    fragSize);
-
-            if (res != AVCDEC_SUCCESS) {
-                break;
-            }
-
-            AVCDecObject *pDecVid = (AVCDecObject *)mHandle->AVCObject;
-
-            int32_t width =
-                (pDecVid->seqParams[0]->pic_width_in_mbs_minus1 + 1) * 16;
-
-            int32_t height =
-                (pDecVid->seqParams[0]->pic_height_in_map_units_minus1 + 1) * 16;
-
-            int32_t crop_left, crop_right, crop_top, crop_bottom;
-            if (pDecVid->seqParams[0]->frame_cropping_flag)
+    } else if (nalType == AVC_NALTYPE_SPS || nalType == AVC_NALTYPE_PPS
+                || (mSPSSeen && mPPSSeen)) {
+        switch (nalType) {
+            case AVC_NALTYPE_SPS:
             {
-                crop_left = 2 * pDecVid->seqParams[0]->frame_crop_left_offset;
-                crop_right =
-                    width - (2 * pDecVid->seqParams[0]->frame_crop_right_offset + 1);
+                mSPSSeen = true;
 
-                if (pDecVid->seqParams[0]->frame_mbs_only_flag)
-                {
-                    crop_top = 2 * pDecVid->seqParams[0]->frame_crop_top_offset;
-                    crop_bottom =
-                        height -
-                        (2 * pDecVid->seqParams[0]->frame_crop_bottom_offset + 1);
+                res = PVAVCDecSeqParamSet(
+                        mHandle, const_cast<uint8_t *>(fragPtr),
+                        fragSize);
+
+                if (res != AVCDEC_SUCCESS) {
+                    break;
                 }
-                else
+
+                AVCDecObject *pDecVid = (AVCDecObject *)mHandle->AVCObject;
+
+                int32_t width =
+                    (pDecVid->seqParams[0]->pic_width_in_mbs_minus1 + 1) * 16;
+
+                int32_t height =
+                    (pDecVid->seqParams[0]->pic_height_in_map_units_minus1 + 1) * 16;
+
+                int32_t crop_left, crop_right, crop_top, crop_bottom;
+                if (pDecVid->seqParams[0]->frame_cropping_flag)
                 {
-                    crop_top = 4 * pDecVid->seqParams[0]->frame_crop_top_offset;
-                    crop_bottom =
-                        height -
-                        (4 * pDecVid->seqParams[0]->frame_crop_bottom_offset + 1);
-                }
-            } else {
-                crop_bottom = height - 1;
-                crop_right = width - 1;
-                crop_top = crop_left = 0;
-            }
+                    crop_left = 2 * pDecVid->seqParams[0]->frame_crop_left_offset;
+                    crop_right =
+                        width - (2 * pDecVid->seqParams[0]->frame_crop_right_offset + 1);
 
-            int32_t aligned_width = (crop_right - crop_left + 1 + 15) & ~15;
-            int32_t aligned_height = (crop_bottom - crop_top + 1 + 15) & ~15;
-
-            int32_t oldWidth, oldHeight;
-            CHECK(mFormat->findInt32(kKeyWidth, &oldWidth));
-            CHECK(mFormat->findInt32(kKeyHeight, &oldHeight));
-
-            if (oldWidth != aligned_width || oldHeight != aligned_height) {
-                mFormat->setInt32(kKeyWidth, aligned_width);
-                mFormat->setInt32(kKeyHeight, aligned_height);
-
-                err = INFO_FORMAT_CHANGED;
-            } else {
-                *out = new MediaBuffer(0);
-                err = OK;
-            }
-            break;
-        }
-
-        case AVC_NALTYPE_PPS:
-        {
-            res = PVAVCDecPicParamSet(
-                    mHandle, const_cast<uint8_t *>(fragPtr),
-                    fragSize);
-
-            if (res != AVCDEC_SUCCESS) {
-                break;
-            }
-
-            *out = new MediaBuffer(0);
-
-            err = OK;
-            break;
-        }
-
-        case AVC_NALTYPE_SLICE:
-        case AVC_NALTYPE_IDR:
-        {
-            res = PVAVCDecodeSlice(
-                    mHandle, const_cast<uint8_t *>(fragPtr),
-                    fragSize);
-
-            if (res == AVCDEC_PICTURE_OUTPUT_READY) {
-                int32_t index;
-                int32_t Release;
-                AVCFrameIO Output;
-                Output.YCbCr[0] = Output.YCbCr[1] = Output.YCbCr[2] = NULL;
-
-                CHECK_EQ(PVAVCDecGetOutput(mHandle, &index, &Release, &Output),
-                         AVCDEC_SUCCESS);
-
-                CHECK(index >= 0);
-                CHECK(index < (int32_t)mFrames.size());
-
-                MediaBuffer *mbuf = mFrames.editItemAt(index);
-
-                bool skipFrame = false;
-
-                if (mTargetTimeUs >= 0) {
-                    int64_t timeUs;
-                    CHECK(mbuf->meta_data()->findInt64(kKeyTime, &timeUs));
-                    CHECK(timeUs <= mTargetTimeUs);
-
-                    if (timeUs < mTargetTimeUs) {
-                        // We're still waiting for the frame with the matching
-                        // timestamp and we won't return the current one.
-                        skipFrame = true;
-
-                        LOGV("skipping frame at %lld us", timeUs);
-                    } else {
-                        LOGV("found target frame at %lld us", timeUs);
-
-                        mTargetTimeUs = -1;
+                    if (pDecVid->seqParams[0]->frame_mbs_only_flag)
+                    {
+                        crop_top = 2 * pDecVid->seqParams[0]->frame_crop_top_offset;
+                        crop_bottom =
+                            height -
+                            (2 * pDecVid->seqParams[0]->frame_crop_bottom_offset + 1);
                     }
+                    else
+                    {
+                        crop_top = 4 * pDecVid->seqParams[0]->frame_crop_top_offset;
+                        crop_bottom =
+                            height -
+                            (4 * pDecVid->seqParams[0]->frame_crop_bottom_offset + 1);
+                    }
+                } else {
+                    crop_bottom = height - 1;
+                    crop_right = width - 1;
+                    crop_top = crop_left = 0;
                 }
 
-                if (!skipFrame) {
-                    *out = mbuf;
-                    (*out)->set_range(0, (*out)->size());
-                    (*out)->add_ref();
+                int32_t aligned_width = (crop_right - crop_left + 1 + 15) & ~15;
+                int32_t aligned_height = (crop_bottom - crop_top + 1 + 15) & ~15;
+
+                int32_t oldWidth, oldHeight;
+                CHECK(mFormat->findInt32(kKeyWidth, &oldWidth));
+                CHECK(mFormat->findInt32(kKeyHeight, &oldHeight));
+
+                if (oldWidth != aligned_width || oldHeight != aligned_height) {
+                    mFormat->setInt32(kKeyWidth, aligned_width);
+                    mFormat->setInt32(kKeyHeight, aligned_height);
+
+                    err = INFO_FORMAT_CHANGED;
                 } else {
                     *out = new MediaBuffer(0);
+                    err = OK;
                 }
-
-                // Do _not_ release input buffer yet.
-
-                releaseFragment = false;
-                err = OK;
                 break;
             }
 
-            if (res == AVCDEC_PICTURE_READY || res == AVCDEC_SUCCESS) {
+            case AVC_NALTYPE_PPS:
+            {
+                mPPSSeen = true;
+
+                res = PVAVCDecPicParamSet(
+                        mHandle, const_cast<uint8_t *>(fragPtr),
+                        fragSize);
+
+                if (res != AVCDEC_SUCCESS) {
+                    break;
+                }
+
                 *out = new MediaBuffer(0);
 
                 err = OK;
-            } else {
-                LOGV("failed to decode frame (res = %d)", res);
-            }
-            break;
-        }
-
-        case AVC_NALTYPE_SEI:
-        {
-            res = PVAVCDecSEI(
-                    mHandle, const_cast<uint8_t *>(fragPtr),
-                    fragSize);
-
-            if (res != AVCDEC_SUCCESS) {
                 break;
             }
 
-            *out = new MediaBuffer(0);
+            case AVC_NALTYPE_SLICE:
+            case AVC_NALTYPE_IDR:
+            {
+                res = PVAVCDecodeSlice(
+                        mHandle, const_cast<uint8_t *>(fragPtr),
+                        fragSize);
 
-            err = OK;
-            break;
+                if (res == AVCDEC_PICTURE_OUTPUT_READY) {
+                    int32_t index;
+                    int32_t Release;
+                    AVCFrameIO Output;
+                    Output.YCbCr[0] = Output.YCbCr[1] = Output.YCbCr[2] = NULL;
+
+                    CHECK_EQ(PVAVCDecGetOutput(mHandle, &index, &Release, &Output),
+                             AVCDEC_SUCCESS);
+
+                    CHECK(index >= 0);
+                    CHECK(index < (int32_t)mFrames.size());
+
+                    MediaBuffer *mbuf = mFrames.editItemAt(index);
+
+                    bool skipFrame = false;
+
+                    if (mTargetTimeUs >= 0) {
+                        int64_t timeUs;
+                        CHECK(mbuf->meta_data()->findInt64(kKeyTime, &timeUs));
+                        CHECK(timeUs <= mTargetTimeUs);
+
+                        if (timeUs < mTargetTimeUs) {
+                            // We're still waiting for the frame with the matching
+                            // timestamp and we won't return the current one.
+                            skipFrame = true;
+
+                            LOGV("skipping frame at %lld us", timeUs);
+                        } else {
+                            LOGV("found target frame at %lld us", timeUs);
+
+                            mTargetTimeUs = -1;
+                        }
+                    }
+
+                    if (!skipFrame) {
+                        *out = mbuf;
+                        (*out)->set_range(0, (*out)->size());
+                        (*out)->add_ref();
+                    } else {
+                        *out = new MediaBuffer(0);
+                    }
+
+                    // Do _not_ release input buffer yet.
+
+                    releaseFragment = false;
+                    err = OK;
+                    break;
+                }
+
+                if (res == AVCDEC_PICTURE_READY || res == AVCDEC_SUCCESS) {
+                    *out = new MediaBuffer(0);
+
+                    err = OK;
+                } else {
+                    LOGV("failed to decode frame (res = %d)", res);
+                }
+                break;
+            }
+
+            case AVC_NALTYPE_SEI:
+            {
+                res = PVAVCDecSEI(
+                        mHandle, const_cast<uint8_t *>(fragPtr),
+                        fragSize);
+
+                if (res != AVCDEC_SUCCESS) {
+                    break;
+                }
+
+                *out = new MediaBuffer(0);
+
+                err = OK;
+                break;
+            }
+
+            case AVC_NALTYPE_AUD:
+            case AVC_NALTYPE_FILL:
+            {
+                *out = new MediaBuffer(0);
+
+                err = OK;
+                break;
+            }
+
+            default:
+            {
+                LOGE("Should not be here, unknown nalType %d", nalType);
+                CHECK(!"Should not be here");
+                break;
+            }
         }
+    } else {
+        // We haven't seen SPS or PPS yet.
 
-        case AVC_NALTYPE_AUD:
-        case AVC_NALTYPE_FILL:
-        {
-            *out = new MediaBuffer(0);
-
-            err = OK;
-            break;
-        }
-
-        default:
-        {
-            LOGE("Should not be here, unknown nalType %d", nalType);
-            CHECK(!"Should not be here");
-            break;
-        }
+        *out = new MediaBuffer(0);
+        err = OK;
     }
 
     if (releaseFragment) {

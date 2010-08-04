@@ -62,6 +62,9 @@ private:
 
     int64_t mTargetTimeUs;
 
+    bool mSPSSeen;
+    bool mPPSSeen;
+
     void addCodecSpecificData(const uint8_t *data, size_t size);
 
     static int32_t ActivateSPSWrapper(
