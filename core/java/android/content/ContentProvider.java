@@ -32,6 +32,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -76,6 +77,8 @@ import java.util.ArrayList;
  * cross-process calls.</p>
  */
 public abstract class ContentProvider implements ComponentCallbacks {
+    private static final String TAG = "ContentProvider";
+
     /*
      * Note: if you add methods to ContentProvider, you must add similar methods to
      *       MockContentProvider.
@@ -830,5 +833,35 @@ public abstract class ContentProvider implements ComponentCallbacks {
      */
     public Bundle call(String method, String request, Bundle args) {
         return null;
+    }
+
+    /**
+     * Shuts down this instance of the ContentProvider. It is useful when writing tests that use
+     * the ContentProvider.
+     * <p>
+     * If a unittest starts the ContentProvider in its test(..() methods, it could run into sqlite
+     * errors "disk I/O error" or "corruption" in the following scenario:
+     * <ul>
+     *   <li>Say, there are 2 test methods in the unittest</li>
+     *   <li>test1() (or setUp()) causes ContentProvider object to be initialized and
+     *   assume it opens a database connection to "foo.db"</li>
+     *   <li>est1() completes and test2() starts</li>
+     *   <li>During the execution of test2() there will be 2 connections to "foo.db"</li>
+     *   <li>Different threads in the ContentProvider may have one of these two connection
+     *   handles. This is not a problem per se</li>
+     *   <li>But if the two threads with 2 database connections don't interact correctly,
+     *   there could be unexpected errors from sqlite</li>
+     *   <li>Some of those unexpected errros are "disk I/O error" or "corruption" error</li>
+     *   <li>Common practice in tearDown() is to delete test directory (and the database files)</li>
+     *   <li>If this is done while some threads are still holding unclosed database connections,
+     *   sqlite quite easily gets into corruption and disk I/O errors</li>
+     * </ul>
+     * <p>
+     * tearDown() in the unittests should call this method to have ContentProvider gracefully
+     * shutdown all database connections.
+     */
+    public void shutdown() {
+        Log.w(TAG, "implement ContentProvider shutdown() to make sure all database " +
+                "connections are gracefully shutdown");
     }
 }
