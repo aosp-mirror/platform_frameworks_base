@@ -66,10 +66,6 @@ public class ZygoteInit {
     /** when preloading, GC after allocating this many bytes */
     private static final int PRELOAD_GC_THRESHOLD = 50000;
 
-    /** throw on missing preload, only if this looks like a developer */
-    private static final boolean THROW_ON_MISSING_PRELOAD =
-            "1".equals(SystemProperties.get("persist.service.adb.enable"));
-
     public static final String USAGE_STRING =
             " <\"true\"|\"false\" for startSystemServer>";
 
@@ -287,7 +283,6 @@ public class ZygoteInit {
 
                 int count = 0;
                 String line;
-                String missingClasses = null;
                 while ((line = br.readLine()) != null) {
                     // Skip comments and blank lines.
                     line = line.trim();
@@ -311,12 +306,7 @@ public class ZygoteInit {
                         }
                         count++;
                     } catch (ClassNotFoundException e) {
-                        Log.e(TAG, "Class not found for preloading: " + line);
-                        if (missingClasses == null) {
-                            missingClasses = line;
-                        } else {
-                            missingClasses += " " + line;
-                        }
+                        Log.w(TAG, "Class not found for preloading: " + line);
                     } catch (Throwable t) {
                         Log.e(TAG, "Error preloading " + line + ".", t);
                         if (t instanceof Error) {
@@ -327,13 +317,6 @@ public class ZygoteInit {
                         }
                         throw new RuntimeException(t);
                     }
-                }
-
-                if (THROW_ON_MISSING_PRELOAD &&
-                    missingClasses != null) {
-                    throw new IllegalStateException(
-                            "Missing class(es) for preloading, update preloaded-classes ["
-                            + missingClasses + "]");
                 }
 
                 Log.i(TAG, "...preloaded " + count + " classes in "

@@ -697,19 +697,13 @@ com.google.android.gles_jni.GLImpl
 com.ibm.icu4jni.charset.CharsetDecoderICU
 com.ibm.icu4jni.charset.CharsetEncoderICU
 com.ibm.icu4jni.charset.CharsetICU
-com.ibm.icu4jni.charset.CharsetProviderICU
 com.ibm.icu4jni.charset.NativeConverter
 com.ibm.icu4jni.common.ErrorCode
-com.ibm.icu4jni.lang.UCharacter
-com.ibm.icu4jni.regex.NativeRegEx
 com.ibm.icu4jni.text.Collator
 com.ibm.icu4jni.text.NativeBreakIterator
 com.ibm.icu4jni.text.NativeCollation
 com.ibm.icu4jni.text.NativeDecimalFormat
 com.ibm.icu4jni.text.RuleBasedCollator
-com.ibm.icu4jni.text.RuleBasedNumberFormat
-com.ibm.icu4jni.util.Resources
-com.ibm.icu4jni.util.Resources$DefaultTimeZones
 dalvik.system.DalvikLogHandler
 dalvik.system.DalvikLogging
 dalvik.system.NativeStart
@@ -758,7 +752,6 @@ java.io.PrintStream
 java.io.PrintWriter
 java.io.PushbackReader
 java.io.RandomAccessFile
-java.io.RandomAccessFile$RepositionLock
 java.io.Reader
 java.io.Serializable
 java.io.StreamCorruptedException
@@ -853,6 +846,7 @@ java.math.BigDecimal
 java.math.BigInt
 java.math.BigInteger
 java.math.Multiplication
+java.math.NativeBN
 java.net.AddressCache
 java.net.AddressCache$1
 java.net.ConnectException
@@ -930,7 +924,6 @@ java.security.Security
 java.security.cert.X509Certificate
 java.text.AttributedCharacterIterator$Attribute
 java.text.Collator
-java.text.Collator$1
 java.text.DateFormat
 java.text.DateFormat$Field
 java.text.DecimalFormat
@@ -1126,7 +1119,6 @@ org.apache.harmony.luni.util.InputStreamHelper
 org.apache.harmony.luni.util.InputStreamHelper$1
 org.apache.harmony.luni.util.InputStreamHelper$ExposedByteArrayInputStream
 org.apache.harmony.luni.util.LocaleCache
-org.apache.harmony.luni.util.Msg
 org.apache.harmony.luni.util.NumberConverter
 org.apache.harmony.luni.util.PriviAction
 org.apache.harmony.luni.util.ThreadLocalCache
@@ -1178,7 +1170,6 @@ org.apache.harmony.security.x509.SubjectPublicKeyInfo
 org.apache.harmony.security.x509.TBSCertificate
 org.apache.harmony.security.x509.Time
 org.apache.harmony.security.x509.Validity
-org.apache.harmony.text.BidiWrapper
 org.apache.harmony.xml.ExpatAttributes
 org.apache.harmony.xml.ExpatParser
 org.apache.harmony.xml.ExpatPullParser
@@ -1260,7 +1251,6 @@ org.ccil.cowan.tagsoup.Parser
 org.json.JSONObject
 org.kxml2.io.KXmlParser
 org.kxml2.io.KXmlSerializer
-org.openssl.NativeBN
 org.xml.sax.Attributes
 org.xml.sax.InputSource
 org.xml.sax.helpers.AttributesImpl
