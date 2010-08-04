@@ -18,17 +18,19 @@ package android.content;
 
 import com.android.internal.os.AtomicFile;
 
-import android.test.AndroidTestCase;
-import android.test.RenamingDelegatingContext;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.test.mock.MockContext;
-import android.test.mock.MockContentResolver;
 import android.accounts.Account;
 import android.os.Bundle;
+import android.test.AndroidTestCase;
+import android.test.RenamingDelegatingContext;
+import android.test.mock.MockContentResolver;
+import android.test.mock.MockContext;
+import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 
-import java.util.List;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.List;
 
 public class SyncStorageEngineTest extends AndroidTestCase {
 
@@ -57,7 +59,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
     /**
      * Test that we can create, remove and retrieve periodic syncs
      */
-    @SmallTest
+    @MediumTest
     public void testPeriodics() throws Exception {
         final Account account1 = new Account("a@example.com", "example.type");
         final Account account2 = new Account("b@example.com", "example.type.2");
@@ -114,7 +116,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         }
     }
 
-    @SmallTest
+    @LargeTest
     public void testAuthorityPersistence() throws Exception {
         final Account account1 = new Account("a@example.com", "example.type");
         final Account account2 = new Account("b@example.com", "example.type.2");
@@ -197,7 +199,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         assertEquals(0, engine.getIsSyncable(account2, authority2));
     }
 
-    @SmallTest
+    @MediumTest
     public void testAuthorityParsing() throws Exception {
         final Account account = new Account("account1", "type1");
         final String authority1 = "auth1";
@@ -299,7 +301,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         assertEquals(sync3s, syncs.get(0));
     }
 
-    @SmallTest
+    @MediumTest
     public void testAuthorityRenaming() throws Exception {
         final Account account1 = new Account("acc1", "type1");
         final Account account2 = new Account("acc2", "type2");

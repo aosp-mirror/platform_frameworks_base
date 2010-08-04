@@ -67,7 +67,7 @@ public class GridTouchStackFromBottomManyTest extends ActivityInstrumentationTes
                 mGridView.getListPaddingTop(), firstChild.getTop());
     }
 
-    @MediumTest
+    @LargeTest
     public void testScrollToBottom() {
         TouchUtils.scrollToBottom(this, mGridView);
 

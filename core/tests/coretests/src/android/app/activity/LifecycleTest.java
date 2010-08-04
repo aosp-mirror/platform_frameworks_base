@@ -18,10 +18,7 @@ package android.app.activity;
 
 import android.content.ComponentName;
 import android.content.Intent;
-import android.test.FlakyTest;
-import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.test.suitebuilder.annotation.Suppress;
 
 public class LifecycleTest extends ActivityTestsBase {
@@ -37,7 +34,7 @@ public class LifecycleTest extends ActivityTestsBase {
                 LaunchpadActivity.class));
     }
 
-    @LargeTest
+    @MediumTest
     public void testBasic() throws Exception {
         mIntent = mTopIntent;
         runLaunchpad(LaunchpadActivity.LIFECYCLE_BASIC);
