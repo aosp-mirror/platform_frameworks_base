@@ -71,4 +71,8 @@ public interface LayoutTestController {
 
     // For XSSAuditor tests
     public void setXSSAuditorEnabled(boolean flag);
+
+    // For DeviceOrientation tests
+    public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,
+            boolean canProvideBeta, double beta, boolean canProvideGamma, double gamma);
 }

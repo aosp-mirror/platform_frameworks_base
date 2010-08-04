@@ -150,6 +150,9 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         if (intent != null) {
             executeIntent(intent);
         }
+
+        // This is asynchronous, but it gets processed by WebCore before it starts loading pages.
+        mWebView.useMockDeviceOrientation();
     }
 
     @Override
@@ -492,6 +495,12 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     public void setGeolocationPermission(boolean allow) {
         mGeolocationPermissionSet = true;
         mGeolocationPermission = allow;
+    }
+
+    public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,
+            boolean canProvideBeta, double beta, boolean canProvideGamma, double gamma) {
+        mWebView.setMockDeviceOrientation(canProvideAlpha, alpha, canProvideBeta, beta,
+                canProvideGamma, gamma);
     }
 
     public void overridePreference(String key, boolean value) {

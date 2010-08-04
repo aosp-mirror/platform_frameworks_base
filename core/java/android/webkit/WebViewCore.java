@@ -33,6 +33,7 @@ import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
 import android.view.SurfaceView;
 import android.view.View;
+import android.webkit.DeviceOrientationManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -878,6 +879,8 @@ final class WebViewCore {
         // accessibility support
         static final int MODIFY_SELECTION = 190;
 
+        static final int USE_MOCK_DEVICE_ORIENTATION = 191;
+
         // private message ids
         private static final int DESTROY =     200;
 
@@ -1408,6 +1411,10 @@ final class WebViewCore {
                             mWebView.mPrivateHandler.obtainMessage(
                                     WebView.SET_TOUCH_HIGHLIGHT_RECTS, null)
                                     .sendToTarget();
+                            break;
+
+                        case USE_MOCK_DEVICE_ORIENTATION:
+                            useMockDeviceOrientation();
                             break;
                     }
                 }
@@ -2479,6 +2486,10 @@ final class WebViewCore {
         }
         mWebView.mPrivateHandler.obtainMessage(WebView.SET_SCROLLBAR_MODES,
                 hMode, vMode).sendToTarget();
+    }
+
+    private void useMockDeviceOrientation() {
+        DeviceOrientationManager.useMock(this);
     }
 
     private native void nativePause();

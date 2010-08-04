@@ -510,6 +510,14 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
         obtainMessage(SET_GEOLOCATION_PERMISSION, allow ? 1 : 0, 0).sendToTarget();
     }
 
+    public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,
+            boolean canProvideBeta, double beta, boolean canProvideGamma, double gamma) {
+        // Configuration is in WebKit, so stay on WebCore thread, but go via the TestShellActivity
+        // as we need access to the Webview.
+        mLayoutTestController.setMockDeviceOrientation(canProvideAlpha, alpha, canProvideBeta, beta,
+                canProvideGamma, gamma);
+    }
+
     public void overridePreference(String key, boolean value) {
         Message message = obtainMessage(OVERRIDE_PREFERENCE);
         message.getData().putString("key", key);

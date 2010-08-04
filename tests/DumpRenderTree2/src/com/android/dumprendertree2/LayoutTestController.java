@@ -89,4 +89,12 @@ public class LayoutTestController {
         Log.w(LOG_TAG + "::setMockGeolocationError", "code: " + code + " message: " + message);
         MockGeolocation.getInstance().setError(code, message);
     }
+
+    public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,
+            boolean canProvideBeta, double beta, boolean canProvideGamma, double gamma) {
+        // Configuration is in WebKit, so stay on WebCore thread, but go via LayoutTestsExecutor
+        // as we need access to the Webview.
+        mLayoutTestsExecutor.setMockDeviceOrientation(
+                canProvideAlpha, alpha, canProvideBeta, beta, canProvideGamma, gamma);
+    }
 }

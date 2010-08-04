@@ -308,6 +308,9 @@ public class LayoutTestsExecutor extends Activity {
         webViewSettings.setDomStorageEnabled(true);
         webViewSettings.setWorkersEnabled(false);
         webViewSettings.setXSSAuditorEnabled(false);
+
+        // This is asynchronous, but it gets processed by WebCore before it starts loading pages.
+        mCurrentWebView.useMockDeviceOrientation();
     }
 
     private void startTests() {
@@ -568,5 +571,11 @@ public class LayoutTestsExecutor extends Activity {
         Message msg = mLayoutTestControllerHandler.obtainMessage(MSG_SET_GEOLOCATION_PREMISSION);
         msg.arg1 = allow ? 1 : 0;
         msg.sendToTarget();
+    }
+
+    public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,
+            boolean canProvideBeta, double beta, boolean canProvideGamma, double gamma) {
+        mCurrentWebView.setMockDeviceOrientation(canProvideAlpha, alpha, canProvideBeta, beta,
+                canProvideGamma, gamma);
     }
 }
