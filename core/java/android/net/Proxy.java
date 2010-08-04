@@ -138,6 +138,7 @@ public final class Proxy {
      */
     public static final java.net.Proxy getProxy(Context ctx, String url) {
         sProxyInfoLock.readLock().lock();
+        java.net.Proxy retval;
         try {
             if (sGlobalProxyChangedObserver == null) {
                 registerContentObserversReadLocked(ctx);
@@ -147,16 +148,19 @@ public final class Proxy {
                 // Proxy defined - Apply exclusion rules
                 if (isURLInExclusionListReadLocked(url, sGlobalProxySpec.exclusionList)) {
                     // Return no proxy
-                    return java.net.Proxy.NO_PROXY;
+                    retval = java.net.Proxy.NO_PROXY;
+                } else {
+                    java.net.Proxy retProxy =
+                        new java.net.Proxy(java.net.Proxy.Type.HTTP, sGlobalProxySpec.proxyAddress);
+                    sProxyInfoLock.readLock().unlock();
+                    if (isLocalHost(url)) {
+                        sProxyInfoLock.readLock().lock();
+                        retval = java.net.Proxy.NO_PROXY;
+                    } else {
+                        sProxyInfoLock.readLock().lock();
+                        retval = retProxy;
+                    }
                 }
-                java.net.Proxy retProxy =
-                    new java.net.Proxy(java.net.Proxy.Type.HTTP, sGlobalProxySpec.proxyAddress);
-                sProxyInfoLock.readLock().unlock();
-                if (isLocalHost(url)) {
-                    return java.net.Proxy.NO_PROXY;
-                }
-                sProxyInfoLock.readLock().lock();
-                return retProxy;
             } else {
                 // If network is WiFi, return no proxy.
                 // Otherwise, return the Mobile Operator proxy.
@@ -164,17 +168,20 @@ public final class Proxy {
                     java.net.Proxy retProxy = getDefaultProxy(url);
                     sProxyInfoLock.readLock().unlock();
                     if (isLocalHost(url)) {
-                        return java.net.Proxy.NO_PROXY;
+                        sProxyInfoLock.readLock().lock();
+                        retval = java.net.Proxy.NO_PROXY;
+                    } else {
+                        sProxyInfoLock.readLock().lock();
+                        retval = retProxy;
                     }
-                    sProxyInfoLock.readLock().lock();
-                    return retProxy;
                 } else {
-                    return java.net.Proxy.NO_PROXY;
+                    retval = java.net.Proxy.NO_PROXY;
                 }
             }
         } finally {
             sProxyInfoLock.readLock().unlock();
         }
+        return retval;
     }
 
     // TODO: deprecate this function
@@ -233,7 +240,7 @@ public final class Proxy {
      */
     public static final String getDefaultHost() {
         String host = SystemProperties.get("net.gprs.http-proxy");
-        if (host != null) {
+        if ((host != null) && (host.length() != 0)) {
             Uri u = Uri.parse(host);
             host = u.getHost();
             return host;
@@ -250,7 +257,7 @@ public final class Proxy {
      */
     public static final int getDefaultPort() {
         String host = SystemProperties.get("net.gprs.http-proxy");
-        if (host != null) {
+        if ((host != null) && (host.length() != 0)) {
             Uri u = Uri.parse(host);
             return u.getPort();
         } else {
@@ -262,7 +269,7 @@ public final class Proxy {
         // TODO: This will go away when information is collected from ConnectivityManager...
         // There are broadcast of network proxies, so they are parse manually.
         String host = SystemProperties.get("net.gprs.http-proxy");
-        if (host != null) {
+        if ((host != null) && (host.length() != 0)) {
             Uri u = Uri.parse(host);
             return new java.net.Proxy(java.net.Proxy.Type.HTTP,
                     new InetSocketAddress(u.getHost(), u.getPort()));
@@ -376,7 +383,13 @@ public final class Proxy {
         String proxyHost =  Settings.Secure.getString(
                 contentResolver,
                 Settings.Secure.HTTP_PROXY);
-        if (proxyHost == null) {
+        if ((proxyHost == null) || (proxyHost.length() == 0)) {
+            // Clear signal
+            sProxyInfoLock.readLock().unlock();
+            sProxyInfoLock.writeLock().lock();
+            sGlobalProxySpec = null;
+            sProxyInfoLock.readLock().lock();
+            sProxyInfoLock.writeLock().unlock();
             return;
         }
         String exclusionListSpec = Settings.Secure.getString(
@@ -387,7 +400,7 @@ public final class Proxy {
         if (proxyHost != null) {
             sGlobalProxySpec = new ProxySpec();
             sGlobalProxySpec.proxyAddress = new InetSocketAddress(host, port);
-            if (exclusionListSpec != null) {
+            if ((exclusionListSpec != null) && (exclusionListSpec.length() != 0)) {
                 String[] exclusionListEntries = exclusionListSpec.toLowerCase().split(",");
                 String[] processedEntries = new String[exclusionListEntries.length];
                 for (int i = 0; i < exclusionListEntries.length; i++) {
