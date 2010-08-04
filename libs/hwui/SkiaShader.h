@@ -102,7 +102,6 @@ protected:
 struct SkiaBitmapShader: public SkiaShader {
     SkiaBitmapShader(SkBitmap* bitmap, SkShader* key, SkShader::TileMode tileX,
             SkShader::TileMode tileY, SkMatrix* matrix, bool blend);
-    ~SkiaBitmapShader();
 
     void describe(ProgramDescription& description, const Extensions& extensions);
     void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
@@ -143,7 +142,6 @@ private:
  */
 struct SkiaComposeShader: public SkiaShader {
     SkiaComposeShader(SkiaShader* first, SkiaShader* second, SkXfermode::Mode mode, SkShader* key);
-    ~SkiaComposeShader();
 
     void set(TextureCache* textureCache, GradientCache* gradientCache);
 

@@ -78,9 +78,6 @@ SkiaBitmapShader::SkiaBitmapShader(SkBitmap* bitmap, SkShader* key, SkShader::Ti
         SkiaShader(kBitmap, key, tileX, tileY, matrix, blend), mBitmap(bitmap) {
 }
 
-SkiaBitmapShader::~SkiaBitmapShader() {
-}
-
 void SkiaBitmapShader::describe(ProgramDescription& description, const Extensions& extensions) {
     const Texture* texture = mTextureCache->get(mBitmap);
 
@@ -188,11 +185,6 @@ SkiaComposeShader::SkiaComposeShader(SkiaShader* first, SkiaShader* second,
         SkXfermode::Mode mode, SkShader* key):
         SkiaShader(kCompose, key, SkShader::kClamp_TileMode, SkShader::kClamp_TileMode,
         NULL, first->blend() || second->blend()), mFirst(first), mSecond(second), mMode(mode) {
-}
-
-SkiaComposeShader::~SkiaComposeShader() {
-    delete mFirst;
-    delete mSecond;
 }
 
 void SkiaComposeShader::set(TextureCache* textureCache, GradientCache* gradientCache) {
