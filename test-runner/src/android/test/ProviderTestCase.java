@@ -73,6 +73,18 @@ public abstract class ProviderTestCase<T extends ContentProvider>
         mResolver.addProvider(mProviderAuthority, getProvider());
     }
 
+    /**
+     * Tears down the environment for the test fixture.
+     * <p>
+     * Calls {@link android.content.ContentProvider#shutdown()} on the
+     * {@link android.content.ContentProvider} represented by {@link #mProvider}
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        mProvider.shutdown();
+        super.tearDown();
+    }
+
     public MockContentResolver getMockContentResolver() {
         return mResolver;
     }
