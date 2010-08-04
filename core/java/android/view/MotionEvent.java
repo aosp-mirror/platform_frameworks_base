@@ -177,72 +177,65 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      */
     public static final int EDGE_RIGHT = 0x00000008;
 
-    /**
+    /*
      * Offset for the sample's X coordinate.
-     * @hide
      */
     static private final int SAMPLE_X = 0;
     
-    /**
+    /*
      * Offset for the sample's Y coordinate.
-     * @hide
      */
     static private final int SAMPLE_Y = 1;
     
-    /**
+    /*
      * Offset for the sample's pressure.
-     * @hide
      */
     static private final int SAMPLE_PRESSURE = 2;
     
-    /**
+    /*
      * Offset for the sample's size
-     * @hide
      */
     static private final int SAMPLE_SIZE = 3;
     
-    /**
+    /*
      * Offset for the sample's touch major axis length.
-     * @hide
      */
     static private final int SAMPLE_TOUCH_MAJOR = 4;
 
-    /**
+    /*
      * Offset for the sample's touch minor axis length.
-     * @hide
      */
     static private final int SAMPLE_TOUCH_MINOR = 5;
     
-    /**
+    /*
      * Offset for the sample's tool major axis length.
-     * @hide
      */
     static private final int SAMPLE_TOOL_MAJOR = 6;
 
-    /**
+    /*
      * Offset for the sample's tool minor axis length.
-     * @hide
      */
     static private final int SAMPLE_TOOL_MINOR = 7;
     
-    /**
+    /*
      * Offset for the sample's orientation.
-     * @hide
      */
     static private final int SAMPLE_ORIENTATION = 8;
 
-    /**
+    /*
      * Number of data items for each sample.
-     * @hide
      */
     static private final int NUM_SAMPLE_DATA = 9;
     
-    /**
-     * Number of possible pointers.
-     * @hide
+    /*
+     * Minimum number of pointers for which to reserve space when allocating new
+     * motion events.  This is explicitly not a bound on the maximum number of pointers.
      */
-    static public final int BASE_AVAIL_POINTERS = 5;
+    static private final int BASE_AVAIL_POINTERS = 5;
     
+    /*
+     * Minimum number of samples for which to reserve space when allocating new motion events.
+     */
     static private final int BASE_AVAIL_SAMPLES = 8;
     
     static private final int MAX_RECYCLED = 10;
