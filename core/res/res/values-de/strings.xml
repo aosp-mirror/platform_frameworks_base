@@ -34,6 +34,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Mailbox"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Verbindungsproblem oder ungültiger MMI-Code."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"Der Vorgang ist nur für Ihre zugelassenen Rufnummern möglich."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Dienst wurde aktiviert."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Dienst wurde aktiviert für:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Dienst wurde deaktiviert."</string>
@@ -171,6 +172,8 @@
     <string name="permgroupdesc_storage" msgid="9203302214915355774">"Greift auf die SD-Karte zu."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"Statusleiste deaktivieren oder ändern"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Ermöglicht der Anwendung, die Statusanzeige zu deaktivieren oder Systemsymbole hinzuzufügen oder zu entfernen."</string>
+    <string name="permlab_statusBarService" msgid="7247281911387931485">"Statusleiste"</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Die Anwendung wird damit in der Statusleiste angezeigt."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"Statusleiste ein-/ausblenden"</string>
     <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Ermöglicht der Anwendung, die Statusleiste ein- oder auszublenden."</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"Abgehende Anrufe abfangen"</string>
@@ -239,7 +242,7 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Ermöglicht Anwendungen, die von Ihnen gedrückten Tasten zu überwachen (etwa die Eingabe eines Passworts). Dies gilt auch für die Interaktion mit anderen Anwendungen. Sollte für normale Anwendungen nicht benötigt werden."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"An eine Eingabemethode binden"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Ermöglicht dem Halter, sich an die Oberfläche einer Eingabemethode auf oberster Ebene zu binden. Sollte nie für normale Anwendungen benötigt werden."</string>
-    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"An ein Hintergrundbild binden"</string>
+    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"An einen Hintergrund binden"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Ermöglicht dem Halter, sich an die Oberfläche einer Eingabemethode auf oberster Ebene zu binden. Sollte nie für normale Anwendungen benötigt werden."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"Interaktion mit einem Geräteadministrator"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Ermöglicht dem Halter, Intents an einen Geräteadministrator zu senden. Sollte nie für normale Anwendungen benötigt werden."</string>
@@ -311,8 +314,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Ermöglicht der Anwendung, Änderungen an allgemeinen Audioeinstellungen wie Lautstärke und Weiterleitung vorzunehmen."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"Audio aufnehmen"</string>
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"Ermöglicht der Anwendung, auf den Pfad für Audioaufzeichnungen zuzugreifen."</string>
-    <string name="permlab_camera" msgid="8059288807274039014">"Fotos aufnehmen"</string>
-    <string name="permdesc_camera" msgid="9013476258810982546">"Ermöglicht der Anwendung, Fotos mit der Kamera aufzunehmen. So kann die Anwendung jederzeit Bilder zusammentragen, die von der Kamera erfasst werden."</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"Bilder und Videos aufnehmen"</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"Ermöglicht der Anwendung, Fotos und Videos mit der Kamera aufzunehmen. So kann die Anwendung jederzeit Bilder zusammentragen, die von der Kamera erfasst werden."</string>
     <string name="permlab_brick" msgid="8337817093326370537">"Telefon dauerhaft deaktivieren."</string>
     <string name="permdesc_brick" msgid="5569526552607599221">"Ermöglicht der Anwendung, das gesamte Telefon dauerhaft zu deaktivieren. Dies birgt hohe Risiken."</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"Neustart des Telefons erzwingen"</string>
@@ -335,6 +338,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Ermöglicht der Anwendung, den Vibrationsalarm zu steuern."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"Lichtanzeige steuern"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Ermöglicht der Anwendung, die Lichtanzeige zu steuern."</string>
+    <string name="permlab_accessUsb" msgid="7362327818655760496">"auf USB-Geräte zugreifen"</string>
+    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Die Anwendung erhält Zugriff auf USB-Geräte."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"Hardware testen"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Ermöglicht einer Anwendung, verschiedene Peripherie-Geräte zu Hardware-Testzwecken zu steuern."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"Telefonnummern direkt anrufen"</string>
@@ -359,10 +364,10 @@
     <string name="permdesc_devicePower" msgid="4577331933252444818">"Ermöglicht der Anwendung, das Telefon ein- oder auszuschalten."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"In Werkstestmodus ausführen"</string>
     <string name="permdesc_factoryTest" msgid="8136644990319244802">"Führt einen systemnahen Herstellertest durch, in dessen Rahmen auf die gesamte Telefonhardware zugegriffen werden kann. Nur verfügbar, wenn ein Telefon im Werkstestmodus ausgeführt wird."</string>
-    <string name="permlab_setWallpaper" msgid="6627192333373465143">"Hintergrundbild festlegen"</string>
-    <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Ermöglicht der Anwendung, das System-Hintergrundbild festzulegen."</string>
-    <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"Größenhinweise für Hintergrundbild festlegen"</string>
-    <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Ermöglicht der Anwendung, die Größenhinweise für das Hintergrundbild festzulegen."</string>
+    <string name="permlab_setWallpaper" msgid="6627192333373465143">"Hintergrund festlegen"</string>
+    <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Ermöglicht der Anwendung, den System-Hintergrund festzulegen."</string>
+    <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"Größenhinweise für Hintergrund festlegen"</string>
+    <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Ermöglicht der Anwendung, die Größenhinweise für den Hintergrund festzulegen."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"System auf Werkseinstellung zurücksetzen"</string>
     <string name="permdesc_masterClear" msgid="5033465107545174514">"Ermöglicht einer Anwendung, das System komplett auf Werkseinstellung zurückzusetzen. Hierbei werden alle Daten, Konfigurationen und installierten Anwendungen gelöscht."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"Zeit einstellen"</string>
@@ -573,16 +578,6 @@
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Löschen"</string>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Keine Benachrichtigungen"</string>
-    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Aktuell"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Benachrichtigungen"</string>
-    <string name="battery_status_text_percent_format" msgid="7660311274698797147">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="battery_status_charging" msgid="756617993998772213">"Wird aufgeladen..."</string>
-    <string name="battery_low_title" msgid="7923774589611311406">"Ladegerät anschließen"</string>
-    <string name="battery_low_subtitle" msgid="7388781709819722764">"Akku ist fast leer."</string>
-    <string name="battery_low_percent_format" msgid="696154104579022959">"<xliff:g id="NUMBER">%d%%</xliff:g> oder weniger verbleiben."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Akkuverbrauch"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Werkstest fehlgeschlagen"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Die Aktion FACTORY_TEST wird nur für unter \"/system/app\" gespeicherte Pakete unterstützt."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Es wurden kein Paket mit der Aktion FACTORY_TEST gefunden."</string>
@@ -744,6 +739,16 @@
     <string name="force_close" msgid="3653416315450806396">"Schließen erzwingen"</string>
     <string name="report" msgid="4060218260984795706">"Bericht"</string>
     <string name="wait" msgid="7147118217226317732">"Warten"</string>
+    <string name="smv_application" msgid="295583804361236288">"Die Anwendung <xliff:g id="APPLICATION">%1$s</xliff:g> (Prozess <xliff:g id="PROCESS">%2$s</xliff:g>) hat gegen ihre selbsterzwungene StrictMode-Richtlinie verstoßen."</string>
+    <string name="smv_process" msgid="5120397012047462446">"Der Prozess <xliff:g id="PROCESS">%1$s</xliff:g> hat gegen seine selbsterzwungene StrictMode-Richtlinie verstoßen."</string>
+    <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> läuft"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Auswahl zum Wechseln in die Anwendung"</string>
+    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Anwendung wechseln?"</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Eine andere Anwendung wird bereits ausgeführt und muss vor dem Start einer neuen Anwendung beendet werden."</string>
+    <string name="old_app_action" msgid="493129172238566282">"Zu <xliff:g id="OLD_APP">%1$s</xliff:g> zurückkehren"</string>
+    <string name="old_app_description" msgid="942967900237208466">"Starten Sie die neue Anwendung nicht."</string>
+    <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> starten"</string>
+    <string name="new_app_description" msgid="6830398339826789493">"Beenden Sie die Anwendung ohne zu speichern."</string>
     <string name="sendText" msgid="5132506121645618310">"Aktion für Text auswählen"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Klingeltonlautstärke"</string>
     <string name="volume_music" msgid="5421651157138628171">"Medienlautstärke"</string>
@@ -844,7 +849,7 @@
     <string name="sync_binding_label" msgid="3687969138375092423">"Synchronisieren"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Eingabehilfen"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Hintergrund"</string>
-    <string name="chooser_wallpaper" msgid="7873476199295190279">"Hintergrundbild ändern"</string>
+    <string name="chooser_wallpaper" msgid="7873476199295190279">"Hintergrund ändern"</string>
     <string name="pptp_vpn_description" msgid="2688045385181439401">"Point-to-Point-Tunneling-Protokoll"</string>
     <string name="l2tp_vpn_description" msgid="3750692169378923304">"Layer-2-Tunneling-Protokoll"</string>
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"L2TP/IPSec-VPN mit vorinstalliertem Schlüssel"</string>
