@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,7 @@ import java.util.StringTokenizer;
  * The PresetReverb class allows an application to configure the global reverb using a reverb preset.
  * This is primarily used for adding some reverb in a music playback context. Applications
  * requiring control over a more advanced environmental reverb are advised to use the
- // TODO when EnvironmentalReverb is unhidden
- // {_at_link android.media.EnvironmentalReverb} class.
+ * {@link android.media.EnvironmentalReverb} class.
  * <p>An application creates a PresetReverb object to instantiate and control a reverb engine in the
  * audio framework.
  * <p>The methods, parameter types and units exposed by the PresetReverb implementation are
@@ -53,10 +52,7 @@ import java.util.StringTokenizer;
  * they must be explicitely attached to it and a send level must be specified. Use the effect ID
  * returned by getId() method to designate this particular effect when attaching it to the
  * MediaPlayer or AudioTrack.
- // TODO when AudioEffect is unhidden
- // <p> See {_at_link android.media.AudioEffect} class for more details on controlling audio effects.
- *
- * {@hide Pending API council review}
+ * <p> See {@link android.media.AudioEffect} class for more details on controlling audio effects.
  */
 
 public class PresetReverb extends AudioEffect {
@@ -73,15 +69,32 @@ public class PresetReverb extends AudioEffect {
     public static final int PARAM_PRESET = 0;
 
     /**
-     * Room level. Parameter ID for
-     * {@link android.media.PresetReverb.OnParameterChangeListener}
+     * No reverb or reflections
      */
     public static final int PRESET_NONE        = 0;
+    /**
+     * Reverb preset representing a small room less than five meters in length
+     */
     public static final int PRESET_SMALLROOM   = 1;
+    /**
+     * Reverb preset representing a medium room with a length of ten meters or less
+     */
     public static final int PRESET_MEDIUMROOM  = 2;
+    /**
+     * Reverb preset representing a large-sized room suitable for live performances
+     */
     public static final int PRESET_LARGEROOM   = 3;
+    /**
+     * Reverb preset representing a medium-sized hall
+     */
     public static final int PRESET_MEDIUMHALL  = 4;
+    /**
+     * Reverb preset representing a large-sized hall suitable for a full orchestra
+     */
     public static final int PRESET_LARGEHALL   = 5;
+    /**
+     * Reverb preset representing a synthesis of the traditional plate reverb
+     */
     public static final int PRESET_PLATE       = 6;
 
     /**
@@ -105,7 +118,7 @@ public class PresetReverb extends AudioEffect {
      * PresetReverb engine. As the same engine can be shared by several applications, this
      * parameter indicates how much the requesting application needs control of effect parameters.
      * The normal priority is 0, above normal is a positive number, below normal a negative number.
-     * @param audioSession  System wide unique audio session identifier. If audioSession
+     * @param audioSession  system wide unique audio session identifier. If audioSession
      *  is not 0, the PresetReverb will be attached to the MediaPlayer or AudioTrack in the
      *  same audio session. Otherwise, the PresetReverb will apply to the output mix.
      *  As the PresetReverb is an auxiliary effect it is recommended to instantiate it on
@@ -125,7 +138,7 @@ public class PresetReverb extends AudioEffect {
      *  <p>The reverb PRESET_NONE disables any reverb from the current output but does not free the
      *  resources associated with the reverb. For an application to signal to the implementation
      *  to free the resources, it must call the release() method.
-     * @param preset This must be one of the the preset constants defined in this class.
+     * @param preset this must be one of the the preset constants defined in this class.
      * e.g. {@link #PRESET_SMALLROOM}
      * @throws IllegalStateException
      * @throws IllegalArgumentException
@@ -138,7 +151,7 @@ public class PresetReverb extends AudioEffect {
 
     /**
      * Gets current reverb preset.
-     * @return Preset that is set at the moment.
+     * @return the preset that is set at the moment.
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
@@ -161,8 +174,7 @@ public class PresetReverb extends AudioEffect {
          * PresetReverb engine.
          * @param effect the PresetReverb on which the interface is registered.
          * @param status status of the set parameter operation.
-         // TODO when AudioEffect is unhidden
-         // See {_at_link android.media.AudioEffect#setParameter(byte[], byte[])}.
+         * See {@link android.media.AudioEffect#setParameter(byte[], byte[])}.
          * @param param ID of the modified parameter. See {@link #PARAM_PRESET} ...
          * @param value the new parameter value.
          */
@@ -285,6 +297,7 @@ public class PresetReverb extends AudioEffect {
     /**
      * Sets the preset reverb properties. This method is useful when preset reverb settings have to
      * be applied from a previous backup.
+     * @param settings a PresetReverb.Settings object containing the properties to apply
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
