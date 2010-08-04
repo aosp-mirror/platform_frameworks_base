@@ -76,7 +76,13 @@ public class FileFilter {
         "fast/js/excessive-comma-usage.html", // Tests huge initializer list, causes OOM.
         "fast/js/regexp-charclass-crash.html", // RegExp is too large, causing OOM
         "fast/regex/test1.html", // Causes DumpRenderTree to hang with V8
-        "fast/regex/slow.html" // Causes DumpRenderTree to hang with V8
+        "fast/regex/slow.html", // Causes DumpRenderTree to hang with V8
+        "ietestcenter/Javascript/15.4.4.15-3-14.html", // hangs the layout tests
+        // http://b/issue?id=2889595
+        "ietestcenter/Javascript/15.4.4.15-3-29.html", // hangs the layout tests
+        // http://b/issue?id=2889596
+        "ietestcenter/Javascript/15.4.4.15-3-8.html" // hangs the layout tests
+        // http://b/issue?id=2889598
     };
 
     static void fillIgnoreResultList() {
