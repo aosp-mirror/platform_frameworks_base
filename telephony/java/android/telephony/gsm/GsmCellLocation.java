@@ -25,6 +25,7 @@ import android.telephony.CellLocation;
 public class GsmCellLocation extends CellLocation {
     private int mLac;
     private int mCid;
+    private int mPsc;
 
     /**
      * Empty constructor.  Initializes the LAC and CID to -1.
@@ -32,6 +33,7 @@ public class GsmCellLocation extends CellLocation {
     public GsmCellLocation() {
         mLac = -1;
         mCid = -1;
+        mPsc = -1;
     }
 
     /**
@@ -40,6 +42,7 @@ public class GsmCellLocation extends CellLocation {
     public GsmCellLocation(Bundle bundle) {
         mLac = bundle.getInt("lac", mLac);
         mCid = bundle.getInt("cid", mCid);
+        mPsc = bundle.getInt("psc", mPsc);
     }
 
     /**
@@ -57,11 +60,20 @@ public class GsmCellLocation extends CellLocation {
     }
 
     /**
+     * @return primary scrambling code for UMTS, -1 if unknown or GSM
+     * @hide
+     */
+    public int getPsc() {
+        return mPsc;
+    }
+
+    /**
      * Invalidate this object.  The location area code and the cell id are set to -1.
      */
     public void setStateInvalid() {
         mLac = -1;
         mCid = -1;
+        mPsc = -1;
     }
 
     /**
@@ -70,6 +82,14 @@ public class GsmCellLocation extends CellLocation {
     public void setLacAndCid(int lac, int cid) {
         mLac = lac;
         mCid = cid;
+    }
+
+    /**
+     * Set the primary scrambling code.
+     * @hide
+     */
+    public void setPsc(int psc) {
+        mPsc = psc;
     }
 
     @Override
@@ -91,12 +111,13 @@ public class GsmCellLocation extends CellLocation {
             return false;
         }
 
-        return equalsHandlesNulls(mLac, s.mLac) && equalsHandlesNulls(mCid, s.mCid);
+        return equalsHandlesNulls(mLac, s.mLac) && equalsHandlesNulls(mCid, s.mCid)
+            && equalsHandlesNulls(mPsc, s.mPsc);
     }
 
     @Override
     public String toString() {
-        return "["+ mLac + "," + mCid + "]";
+        return "["+ mLac + "," + mCid + "," + mPsc + "]";
     }
 
     /**
@@ -118,12 +139,13 @@ public class GsmCellLocation extends CellLocation {
     public void fillInNotifierBundle(Bundle m) {
         m.putInt("lac", mLac);
         m.putInt("cid", mCid);
+        m.putInt("psc", mPsc);
     }
 
     /**
      * @hide
      */
     public boolean isEmpty() {
-        return (mLac == -1 && mCid == -1);
+        return (mLac == -1 && mCid == -1 && mPsc == -1);
     }
 }
