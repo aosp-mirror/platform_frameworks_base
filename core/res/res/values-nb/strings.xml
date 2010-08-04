@@ -34,6 +34,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Telefonsvarer"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Tilkoblingsproblem eller ugyldig MMI-kode."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"Handlingen kan kun utføres på numre med anropsbegrensning."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Tjenesten ble aktivert."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Tjenesten ble aktivert for:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Tjenesten ble deaktivert."</string>
@@ -171,6 +172,8 @@
     <string name="permgroupdesc_storage" msgid="9203302214915355774">"Tilgang til minnekortet."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktivere eller endre statusfeltet"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Lar applikasjonen deaktivere statusfeltet, samt legge til og fjerne systemikoner."</string>
+    <string name="permlab_statusBarService" msgid="7247281911387931485">"statusrad"</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Tillater programmet å vises i statusfeltet."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"utvide/slå sammen statusfeltet"</string>
     <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Lar applikasjonen utvide eller slå sammen statusfeltet."</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"avskjære utgående anrop"</string>
@@ -311,8 +314,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Lar applikasjonen endre globale lydinnstillinger som volum og ruting."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ta opp lyd"</string>
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"Gir applikasjonen tilgang til opptaksstien for lyd."</string>
-    <string name="permlab_camera" msgid="8059288807274039014">"ta bilder"</string>
-    <string name="permdesc_camera" msgid="9013476258810982546">"Lar applikasjonen ta bilder med kameraet. Dette gir applikasjonen til når som helst å se og lagre det kameraet ser."</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"ta bilder og videoer"</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"Tillat programmet å ta bilder og videoer med kameraet. Programmet kan dermed til enhver tid samle inn bilder som kameraet fanger inn."</string>
     <string name="permlab_brick" msgid="8337817093326370537">"deaktivere telefonen permanent"</string>
     <string name="permdesc_brick" msgid="5569526552607599221">"Lar applikasjonen deaktivere hele telefonen permanent. Dette er svært farlig."</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"tvinge omstart av telefon"</string>
@@ -335,6 +338,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Lar applikasjonen kontrollere vibratoren."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"kontrollere lommelykten"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Lar applikasjonen kontrollere lommelykten."</string>
+    <string name="permlab_accessUsb" msgid="7362327818655760496">"tilgang til USB-enheter"</string>
+    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Tillater programmet å få tilgang til USB-enheter."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"teste maskinvare"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Lar applikasjonen styre diverse enheter med det formål å teste maskinvaren."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ringe telefonnummer direkte"</string>
@@ -573,16 +578,6 @@
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Fjern"</string>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ingen varslinger"</string>
-    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Aktiviteter"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Varslinger"</string>
-    <string name="battery_status_text_percent_format" msgid="7660311274698797147">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="battery_status_charging" msgid="756617993998772213">"Lader…"</string>
-    <string name="battery_low_title" msgid="7923774589611311406">"Koble til en lader"</string>
-    <string name="battery_low_subtitle" msgid="7388781709819722764">"Batteriet er nesten tomt:"</string>
-    <string name="battery_low_percent_format" msgid="696154104579022959">"mindre enn <xliff:g id="NUMBER">%d%%</xliff:g> igjen."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Batteribruk"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Fabrikktesten feilet"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"The FACTORY_TEST action is only supported for packages installed in /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"No package was found that provides the FACTORY_TEST action."</string>
@@ -744,6 +739,16 @@
     <string name="force_close" msgid="3653416315450806396">"Tving avslutning"</string>
     <string name="report" msgid="4060218260984795706">"Rapportér"</string>
     <string name="wait" msgid="7147118217226317732">"Vent"</string>
+    <string name="smv_application" msgid="295583804361236288">"Programmet <xliff:g id="APPLICATION">%1$s</xliff:g> (prosessen <xliff:g id="PROCESS">%2$s</xliff:g>) har brutt de selvpålagte StrictMode-retningslinjene."</string>
+    <string name="smv_process" msgid="5120397012047462446">"Prosessen<xliff:g id="PROCESS">%1$s</xliff:g> har brutt de selvpålagte StrictMode-retningslinjene."</string>
+    <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> kjører"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Velg for å bytte til programmet"</string>
+    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Bytt programmer?"</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Et annet program kjører og må stoppes før du kan starte et nytt program."</string>
+    <string name="old_app_action" msgid="493129172238566282">"Gå tilbake til <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="old_app_description" msgid="942967900237208466">"Ikke start det nye programmet."</string>
+    <string name="new_app_action" msgid="5472756926945440706">"Start <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="6830398339826789493">"Stopp det gamle programmet uten å lagre det."</string>
     <string name="sendText" msgid="5132506121645618310">"Velg mål for tekst"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Ringetonevolum"</string>
     <string name="volume_music" msgid="5421651157138628171">"Medievolum"</string>

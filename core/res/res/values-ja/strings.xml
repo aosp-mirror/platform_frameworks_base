@@ -34,6 +34,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"ボイスメール"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"接続に問題があるか、MMIコードが正しくありません。"</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"発信番号制限で指定された番号に対してのみ操作できます。"</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"サービスが有効になりました。"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"次のサービスが有効になりました:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"サービスが無効になりました。"</string>
@@ -171,6 +172,8 @@
     <string name="permgroupdesc_storage" msgid="9203302214915355774">"SDカードにアクセスします。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ステータスバーの無効化や変更"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"ステータスバーの無効化やシステムアイコンの追加や削除をアプリケーションに許可します。"</string>
+    <string name="permlab_statusBarService" msgid="7247281911387931485">"ステータスバーへの表示"</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"アプリケーションのステータスバーへの表示を許可します。"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"ステータスバーの拡大/縮小"</string>
     <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"ステータスバーの拡大や縮小をアプリケーションに許可します。"</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"発信の傍受"</string>
@@ -311,8 +314,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"音量や転送などの音声全般の設定の変更をアプリケーションに許可します。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"録音"</string>
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"オーディオ録音パスへのアクセスをアプリケーションに許可します。"</string>
-    <string name="permlab_camera" msgid="8059288807274039014">"写真の撮影"</string>
-    <string name="permdesc_camera" msgid="9013476258810982546">"カメラでの写真撮影をアプリケーションに許可します。アプリケーションはカメラから画像をいつでも収集できます。"</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"写真と動画の撮影"</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"カメラでの写真と動画の撮影をアプリケーションに許可します。許可すると、カメラがとらえている画像をアプリケーションがいつでも取得できるようになります。"</string>
     <string name="permlab_brick" msgid="8337817093326370537">"端末を永続的に無効にする"</string>
     <string name="permdesc_brick" msgid="5569526552607599221">"携帯電話全体を永続的に無効にすることをアプリケーションに許可します。この許可は非常に危険です。"</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"端末の再起動"</string>
@@ -335,6 +338,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"バイブレーションの制御をアプリケーションに許可します。"</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"ライトのコントロール"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"ライトの制御をアプリケーションに許可します。"</string>
+    <string name="permlab_accessUsb" msgid="7362327818655760496">"USBデバイスへのアクセス"</string>
+    <string name="permdesc_accessUsb" msgid="2414271762914049292">"USBデバイスへのアクセスをアプリケーションに許可します。"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"ハードウェアのテスト"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"ハードウェアのテストのためにさまざまな周辺機器を制御することをアプリケーションに許可します。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"電話番号発信"</string>
@@ -573,16 +578,6 @@
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"通知を消去"</string>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"通知なし"</string>
-    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"実行中"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"通知"</string>
-    <string name="battery_status_text_percent_format" msgid="7660311274698797147">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="battery_status_charging" msgid="756617993998772213">"充電中..."</string>
-    <string name="battery_low_title" msgid="7923774589611311406">"充電してください"</string>
-    <string name="battery_low_subtitle" msgid="7388781709819722764">"電池が残り少なくなっています:"</string>
-    <string name="battery_low_percent_format" msgid="696154104579022959">"残り<xliff:g id="NUMBER">%d%%</xliff:g>未満です。"</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"電池使用量"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"出荷時試験が失敗"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"FACTORY_TEST操作は、/system/appにインストールされたパッケージのみが対象です。"</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"FACTORY_TEST操作を行うパッケージは見つかりませんでした。"</string>
@@ -744,6 +739,16 @@
     <string name="force_close" msgid="3653416315450806396">"強制終了"</string>
     <string name="report" msgid="4060218260984795706">"レポート"</string>
     <string name="wait" msgid="7147118217226317732">"待機"</string>
+    <string name="smv_application" msgid="295583804361236288">"アプリケーション<xliff:g id="APPLICATION">%1$s</xliff:g>（プロセス<xliff:g id="PROCESS">%2$s</xliff:g>）でStrictModeポリシー違反がありました。"</string>
+    <string name="smv_process" msgid="5120397012047462446">"プロセス<xliff:g id="PROCESS">%1$s</xliff:g>でStrictModeポリシー違反がありました。"</string>
+    <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g>を実行中"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"アプリケーションを切り替える"</string>
+    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"アプリケーションを切り替えますか？"</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"別のアプリケーションが既に実行中です。新しいアプリケーションを起動する前に実行中のアプリケーションを停止してください。"</string>
+    <string name="old_app_action" msgid="493129172238566282">"<xliff:g id="OLD_APP">%1$s</xliff:g>に戻る"</string>
+    <string name="old_app_description" msgid="942967900237208466">"新しいアプリケーションを起動しません。"</string>
+    <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g>を起動"</string>
+    <string name="new_app_description" msgid="6830398339826789493">"実行中のアプリケーションを保存せずに停止します。"</string>
     <string name="sendText" msgid="5132506121645618310">"アプリケーションを選択"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"着信音量"</string>
     <string name="volume_music" msgid="5421651157138628171">"メディアの音量"</string>

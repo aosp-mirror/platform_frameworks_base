@@ -34,6 +34,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"음성메일"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"연결에 문제가 있거나 MMI 코드가 잘못되었습니다."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"발신 허용 번호에서만 수행할 수 있는 작업입니다."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"서비스를 사용하도록 설정했습니다."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"사용 설정된 서비스 목록:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"서비스가 사용 중지되었습니다."</string>
@@ -171,6 +172,8 @@
     <string name="permgroupdesc_storage" msgid="9203302214915355774">"SD 카드에 액세스합니다."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"상태 표시줄 사용 중지 또는 수정"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"애플리케이션이 상태 표시줄을 사용 중지하거나 시스템 아이콘을 추가 및 제거할 수 있도록 합니다."</string>
+    <string name="permlab_statusBarService" msgid="7247281911387931485">"상태 표시줄"</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"애플리케이션이 상태 표시줄이 되도록 허용합니다."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"상태 표시줄 확장/축소"</string>
     <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"애플리케이션이 상태 표시줄을 확장하거나 축소할 수 있도록 합니다."</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"발신전화 가로채기"</string>
@@ -195,8 +198,8 @@
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"애플리케이션이 다른 애플리케이션에 대해 디버깅을 사용할 수 있도록 합니다. 이 경우 악성 애플리케이션이 다른 애플리케이션을 중지시킬 수 있습니다."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"UI 설정 변경"</string>
     <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"애플리케이션이 로케일 또는 전체 글꼴 크기와 같은 현재 구성을 변경할 수 있도록 합니다."</string>
-    <string name="permlab_enableCarMode" msgid="5684504058192921098">"차량 모드 사용"</string>
-    <string name="permdesc_enableCarMode" msgid="5673461159384850628">"애플리케이션이 차량 모드를 사용할 수 있도록 합니다."</string>
+    <string name="permlab_enableCarMode" msgid="5684504058192921098">"운전모드 사용"</string>
+    <string name="permdesc_enableCarMode" msgid="5673461159384850628">"애플리케이션이 운전모드를 사용할 수 있도록 합니다."</string>
     <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"백그라운드 프로세스 종료"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"메모리가 부족하지 않은 경우에도 애플리케이션이 다른 애플리케이션의 백그라운드 프로세스를 중단할 수 있도록 합니다."</string>
     <string name="permlab_forceStopPackages" msgid="1447830113260156236">"다른 애플리케이션 강제 종료"</string>
@@ -311,8 +314,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"애플리케이션이 볼륨 및 경로 지정 같은 전체 오디오 설정을 수정할 수 있도록 합니다."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"오디오 녹음"</string>
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"애플리케이션이 오디오 레코드 경로에 액세스할 수 있도록 합니다."</string>
-    <string name="permlab_camera" msgid="8059288807274039014">"사진 촬영"</string>
-    <string name="permdesc_camera" msgid="9013476258810982546">"애플리케이션이 카메라로 사진을 찍을 수 있도록 합니다. 이 경우 애플리케이션이 카메라에 보여지는 화면을 언제든지 수집할 수 있습니다."</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"사진과 동영상 찍기"</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"애플리케이션이 카메라로 사진과 동영상을 찍을 수 있도록 합니다. 이 경우 애플리케이션이 카메라에 보여지는 화면을 언제든지 수집할 수 있습니다."</string>
     <string name="permlab_brick" msgid="8337817093326370537">"휴대전화를 영구적으로 사용 중지"</string>
     <string name="permdesc_brick" msgid="5569526552607599221">"애플리케이션이 휴대전화를 영구적으로 사용 중지할 수 있게 합니다. 이 기능은 매우 위험합니다."</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"휴대전화 강제로 다시 부팅"</string>
@@ -335,6 +338,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"애플리케이션이 진동을 제어할 수 있도록 합니다."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"카메라 플래시 제어"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"애플리케이션이 카메라 플래시를 제어할 수 있도록 합니다."</string>
+    <string name="permlab_accessUsb" msgid="7362327818655760496">"USB 장치 액세스"</string>
+    <string name="permdesc_accessUsb" msgid="2414271762914049292">"애플리케이션이 USB 장치에 액세스하도록 허용합니다."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"하드웨어 테스트"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"애플리케이션이 하드웨어를 테스트할 목적으로 다양한 주변장치를 제어할 수 있도록 합니다."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"전화번호 자동 연결"</string>
@@ -573,16 +578,6 @@
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="AMPM">%P</xliff:g> <xliff:g id="HOUR">%-l</xliff:g>:00"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="AMPM">%p</xliff:g> <xliff:g id="HOUR">%-l</xliff:g>:00"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"지우기"</string>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"알림 없음"</string>
-    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"진행 중"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"알림"</string>
-    <string name="battery_status_text_percent_format" msgid="7660311274698797147">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="battery_status_charging" msgid="756617993998772213">"충전 중..."</string>
-    <string name="battery_low_title" msgid="7923774589611311406">"충전기를 연결하세요."</string>
-    <string name="battery_low_subtitle" msgid="7388781709819722764">"배터리 전원이 부족합니다."</string>
-    <string name="battery_low_percent_format" msgid="696154104579022959">"잔여 배터리가 <xliff:g id="NUMBER">%d%%</xliff:g> 이하입니다."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"배터리 사용량"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"출고 테스트 불합격"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"FACTORY_TEST 작업은 /system/app 디렉토리에 설치된 패키지에 대해서만 지원됩니다."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"FACTORY_TEST 작업을 제공하는 패키지가 없습니다."</string>
@@ -744,6 +739,16 @@
     <string name="force_close" msgid="3653416315450806396">"닫기"</string>
     <string name="report" msgid="4060218260984795706">"신고"</string>
     <string name="wait" msgid="7147118217226317732">"대기"</string>
+    <string name="smv_application" msgid="295583804361236288">"애플리케이션 <xliff:g id="APPLICATION">%1$s</xliff:g>(프로세스 <xliff:g id="PROCESS">%2$s</xliff:g>)이(가) 자체 시행 StrictMode 정책을 위반했습니다."</string>
+    <string name="smv_process" msgid="5120397012047462446">"프로세스(<xliff:g id="PROCESS">%1$s</xliff:g>)가 자체 시행 StrictMode 정책을 위반했습니다."</string>
+    <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> 실행 중"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"애플리케이션으로 전환하려면 선택"</string>
+    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"애플리케이션을 전환하시겠습니까?"</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"다른 애플리케이션이 이미 실행 중입니다. 새 애플리케이션을 시작하려면 실행 중인 애플리케이션을 중단해야 합니다."</string>
+    <string name="old_app_action" msgid="493129172238566282">"<xliff:g id="OLD_APP">%1$s</xliff:g>(으)로 돌아가기"</string>
+    <string name="old_app_description" msgid="942967900237208466">"새 애플리케이션을 시작하지 마세요."</string>
+    <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> 시작"</string>
+    <string name="new_app_description" msgid="6830398339826789493">"저장하지 않고 이전 애플리케이션을 중단합니다."</string>
     <string name="sendText" msgid="5132506121645618310">"텍스트에 대한 작업 선택"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"벨소리 볼륨"</string>
     <string name="volume_music" msgid="5421651157138628171">"미디어 볼륨"</string>
@@ -853,8 +858,8 @@
     <string name="reset" msgid="2448168080964209908">"재설정"</string>
     <string name="submit" msgid="1602335572089911941">"제출"</string>
     <string name="description_star" msgid="2654319874908576133">"즐겨찾기"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"차량 모드 사용"</string>
-    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"차량 모드를 종료하려면 선택하세요."</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"운전모드 사용"</string>
+    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"운전모드를 종료하려면 선택하세요."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"테더링 또는 핫스팟 사용"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"구성하려면 터치하세요."</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"높은 모바일 데이터 사용량"</string>

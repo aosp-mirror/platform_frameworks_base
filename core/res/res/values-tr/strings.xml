@@ -34,6 +34,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Sesli Mesaj"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Bağlantı sorunu veya geçersiz MMI kodu."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"İşlem sadece sabit arama numaralarıyla sınırlandırılmıştır."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Hizmet etkindi."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Hizmet şunun için etkinleştirildi:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Hizmet devre dışı bırakıldı."</string>
@@ -171,6 +172,8 @@
     <string name="permgroupdesc_storage" msgid="9203302214915355774">"SD karta erişin."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"durum çubuğunu devre dışı bırak veya değiştir"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Uygulamanın durum çubuğunu devre dışı bırakmasına veya sistem simgeleri ekleyip kaldırmasına izin verir."</string>
+    <string name="permlab_statusBarService" msgid="7247281911387931485">"durum çubuğu"</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Uygulamanın durum çubuğu olmasına izin verir."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"durum çubuğunu genişlet/daralt"</string>
     <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Uygulamanın, durum çubuğunu genişletip daraltmasına izin verir."</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"giden aramalarda araya gir"</string>
@@ -311,8 +314,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Uygulamaların, ses düzeyi ve yönlendirme gibi genel ses ayarlarını değiştirmesine izin verir."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ses kaydet"</string>
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"Uygulamanın, ses kayıt yoluna erişmesine izin verir."</string>
-    <string name="permlab_camera" msgid="8059288807274039014">"resim çek"</string>
-    <string name="permdesc_camera" msgid="9013476258810982546">"Uygulamaların kamera ile resim çekmesine izin verir. Bu işlev herhangi bir zamanda kameranın görmekte olduğu görüntüyü uygulamaların toplamasına izin verir."</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"resim çekme ve görüntü kaydetme"</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"Uygulamanın kamera ile resim çekmesine ve görüntü almasına izin verir. Bu işlev herhangi bir zamanda uygulamanın kamera görüntülerini yakalamasına olanak tanır."</string>
     <string name="permlab_brick" msgid="8337817093326370537">"telefonu tamamen devre dışı bırak"</string>
     <string name="permdesc_brick" msgid="5569526552607599221">"Uygulamaların tüm telefonu kalıcı olarak devre dışı bırakmasına izin verir. Bu çok tehlikelidir."</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"telefonu yeniden başlamaya zorla"</string>
@@ -335,6 +338,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Uygulamanın titreşimi denetlemesine izin verir."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"flaşı denetle"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Uygulamaların flaş ışığını denetlemesine izin verir."</string>
+    <string name="permlab_accessUsb" msgid="7362327818655760496">"USB cihazlarına erişme"</string>
+    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Uygulamaların USB cihazlarına erişimine izin verir"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"donanımı test et"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Uygulamanın donanım testi için çeşitli çevre birimlerini denetlemesine izin verir."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefon numaralarına doğrudan çağrı yap"</string>
@@ -573,16 +578,6 @@
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%p</xliff:g>"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Temizle"</string>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Bildirim yok"</string>
-    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Sürüyor"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Bildirimler"</string>
-    <string name="battery_status_text_percent_format" msgid="7660311274698797147">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="battery_status_charging" msgid="756617993998772213">"Şarj oluyor…"</string>
-    <string name="battery_low_title" msgid="7923774589611311406">"Lütfen şarj cihazını takın"</string>
-    <string name="battery_low_subtitle" msgid="7388781709819722764">"Pil tükeniyor:"</string>
-    <string name="battery_low_percent_format" msgid="696154104579022959">"<xliff:g id="NUMBER">%d%%</xliff:g> veya daha az kaldı."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Pil kullanımı"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Fabrika testi yapılamadı"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"FACTORY_TEST işlemi yalnızca /system/app dizinine yüklenmiş paketler için desteklenir."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"FACTORY_TEST işlemini sağlayan hiçbir paket bulunamadı."</string>
@@ -744,6 +739,16 @@
     <string name="force_close" msgid="3653416315450806396">"Kapanmaya zorla"</string>
     <string name="report" msgid="4060218260984795706">"Rapor"</string>
     <string name="wait" msgid="7147118217226317732">"Bekle"</string>
+    <string name="smv_application" msgid="295583804361236288">"<xliff:g id="APPLICATION">%1$s</xliff:g> uygulaması (<xliff:g id="PROCESS">%2$s</xliff:g> işlemi) kendiliğinden zorunlu StrictMode politikasını ihlal etti."</string>
+    <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> işlemi kendiliğinden zorunlu StrictMode politikasını ihlal etti."</string>
+    <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> çalışıyor"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Uygulama değiştirmeyi seçin"</string>
+    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Uygulamaların arasında geçiş yapılsın mı?"</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Başka bir uygulama zaten çalışıyor. Yeni bir uygulama başlatmadan bu uygulama durdurulmalıdır."</string>
+    <string name="old_app_action" msgid="493129172238566282">"<xliff:g id="OLD_APP">%1$s</xliff:g> öğesine geri dön"</string>
+    <string name="old_app_description" msgid="942967900237208466">"Yeni uygulamayı başlatmayın."</string>
+    <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> uygulamasını başlat"</string>
+    <string name="new_app_description" msgid="6830398339826789493">"Eski uygulamayı kaydetmeden durdurun."</string>
     <string name="sendText" msgid="5132506121645618310">"Metin için bir işlem seçin"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Zil sesi düzeyi"</string>
     <string name="volume_music" msgid="5421651157138628171">"Medya ses düzeyi"</string>

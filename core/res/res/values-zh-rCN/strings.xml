@@ -34,6 +34,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"语音信箱"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"出现连接问题或 MMI 码无效。"</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"只能对固定拨号号码执行此类操作。"</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"已启用服务。"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"已针对以下内容启用了服务："</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"已停用服务。"</string>
@@ -171,6 +172,8 @@
     <string name="permgroupdesc_storage" msgid="9203302214915355774">"访问 SD 卡。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"停用或修改状态栏"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"允许应用程序停用状态栏或者增删系统图标。"</string>
+    <string name="permlab_statusBarService" msgid="7247281911387931485">"状态栏"</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"允许以状态栏形式显示应用程序。"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"展开/收拢状态栏"</string>
     <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"允许应用程序展开或收拢状态栏。"</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"拦截外拨电话"</string>
@@ -311,8 +314,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"允许应用程序修改整个系统的音频设置，如音量和路由。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"录音"</string>
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"允许应用程序访问录音路径。"</string>
-    <string name="permlab_camera" msgid="8059288807274039014">"拍照"</string>
-    <string name="permdesc_camera" msgid="9013476258810982546">"允许应用程序使用相机拍照，这样应用程序可随时收集进入相机镜头的图像。"</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"拍摄照片和视频"</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"允许应用程序使用相机拍摄照片和视频，这样应用程序可随时收集进入相机镜头中看到的图片。"</string>
     <string name="permlab_brick" msgid="8337817093326370537">"永久停用手机"</string>
     <string name="permdesc_brick" msgid="5569526552607599221">"允许应用程序永久停用整个手机，这非常危险。"</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"强行重新启动手机"</string>
@@ -335,6 +338,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"允许应用程序控制振动器。"</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"控制闪光灯"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"允许应用程序控制闪光灯。"</string>
+    <string name="permlab_accessUsb" msgid="7362327818655760496">"访问 USB 设备"</string>
+    <string name="permdesc_accessUsb" msgid="2414271762914049292">"允许应用程序访问 USB 设备。"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"测试硬件"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"允许应用程序控制各外围设备以进行硬件测试。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"直接拨打电话号码"</string>
@@ -573,16 +578,6 @@
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="AMPM">%P</xliff:g><xliff:g id="HOUR">%-l</xliff:g>点"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="AMPM">%p</xliff:g><xliff:g id="HOUR">%-l</xliff:g>点"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"清除"</string>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"无通知"</string>
-    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"正在进行的"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"通知"</string>
-    <string name="battery_status_text_percent_format" msgid="7660311274698797147">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="battery_status_charging" msgid="756617993998772213">"正在充电..."</string>
-    <string name="battery_low_title" msgid="7923774589611311406">"请连接充电器"</string>
-    <string name="battery_low_subtitle" msgid="7388781709819722764">"电量所剩不多："</string>
-    <string name="battery_low_percent_format" msgid="696154104579022959">"电量剩余 <xliff:g id="NUMBER">%d%%</xliff:g> 或更少。"</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"电量使用情况"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"出厂测试失败"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"只有在 /system/app 中安装的包支持 FACTORY_TEST 操作。"</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"未发现支持 FACTORY_TEST 操作的包。"</string>
@@ -744,6 +739,16 @@
     <string name="force_close" msgid="3653416315450806396">"强行关闭"</string>
     <string name="report" msgid="4060218260984795706">"报告"</string>
     <string name="wait" msgid="7147118217226317732">"等待"</string>
+    <string name="smv_application" msgid="295583804361236288">"应用程序<xliff:g id="APPLICATION">%1$s</xliff:g>（<xliff:g id="PROCESS">%2$s</xliff:g> 进程）违反了自我强制执行的严格模式 (StrictMode) 政策。"</string>
+    <string name="smv_process" msgid="5120397012047462446">"进程 <xliff:g id="PROCESS">%1$s</xliff:g> 违反了自我强制执行的严格模式 (StrictMode) 政策"</string>
+    <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g>正在运行"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"选择以切换到该应用程序"</string>
+    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"要切换应用程序吗？"</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"已有一个应用程序正在运行，要启动新的应用程序，您必须先停止该应用程序。"</string>
+    <string name="old_app_action" msgid="493129172238566282">"返回至<xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="old_app_description" msgid="942967900237208466">"不要启动新的应用程序。"</string>
+    <string name="new_app_action" msgid="5472756926945440706">"启动<xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="6830398339826789493">"停止旧的应用程序，但不保存。"</string>
     <string name="sendText" msgid="5132506121645618310">"选择要对文字执行的操作"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"铃声音量"</string>
     <string name="volume_music" msgid="5421651157138628171">"媒体音量"</string>
