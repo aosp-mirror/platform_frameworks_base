@@ -24,7 +24,6 @@ int install(const char *pkgname, int encrypted_fs_flag, uid_t uid, gid_t gid)
     if ((uid < AID_SYSTEM) || (gid < AID_SYSTEM)) {
         LOGE("invalid uid/gid: %d %d\n", uid, gid);
         return -1;
-        
     }
 
     if (encrypted_fs_flag == USE_UNENCRYPTED_FS) {
@@ -143,6 +142,7 @@ static int disk_free()
     if (statfs(PKG_DIR_PREFIX, &sfs) == 0) {
         return sfs.f_bavail * sfs.f_bsize;
     } else {
+        LOGE("Couldn't statfs " PKG_DIR_PREFIX ": %s\n", strerror(errno));
         return -1;
     }
 }
@@ -171,7 +171,7 @@ int free_cache(int free_size)
     /* First try encrypted dir */
     d = opendir(PKG_SEC_DIR_PREFIX);
     if (d == NULL) {
-        LOGE("cannot open %s\n", PKG_SEC_DIR_PREFIX);
+        LOGE("cannot open %s: %s\n", PKG_SEC_DIR_PREFIX, strerror(errno));
     } else {
         dfd = dirfd(d);
 
@@ -203,7 +203,7 @@ int free_cache(int free_size)
     /* Next try unencrypted dir... */
     d = opendir(PKG_DIR_PREFIX);
     if (d == NULL) {
-        LOGE("cannot open %s\n", PKG_DIR_PREFIX);
+        LOGE("cannot open %s: %s\n", PKG_DIR_PREFIX, strerror(errno));
         return -1;
     }
     dfd = dirfd(d);
@@ -279,6 +279,7 @@ int move_dex(const char *src, const char *dst)
 
     LOGI("move %s -> %s\n", src_dex, dst_dex);
     if (rename(src_dex, dst_dex) < 0) {
+        LOGE("Couldn't move %s: %s\n", src_dex, strerror(errno));
         return -1;
     } else {
         return 0;
@@ -294,6 +295,7 @@ int rm_dex(const char *path)
 
     LOGI("unlink %s\n", dex_path);
     if (unlink(dex_path) < 0) {
+        LOGE("Couldn't unlink %s: %s\n", dex_path, strerror(errno));
         return -1;
     } else {
         return 0;
