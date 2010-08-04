@@ -21,9 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * A class that collects information about tests that ran and can create HTML
@@ -146,7 +144,10 @@ public class Summarizer {
             "       color: #fff;}" +
             "span.noLtc {" +
             "       background-color: #944000;" +
-            "       color: #fff;" +
+            "       color: #fff;}" +
+            "span.noEventSender {" +
+            "       background-color: #815600;" +
+            "       color: #fff;}" +
             "</style>";
 
     private static final String SCRIPT =
@@ -278,12 +279,17 @@ public class Summarizer {
 
             /** Detect missing LTC function */
             String additionalTextOutputString = result.getAdditionalTextOutputString();
-                if (additionalTextOutputString != null &&
-                        additionalTextOutputString.contains("com.android.dumprendertree") &&
-                        additionalTextOutputString.contains("LayoutTestController") &&
-                        additionalTextOutputString.contains("has no method")) {
+            if (additionalTextOutputString != null &&
+                    additionalTextOutputString.contains("com.android.dumprendertree") &&
+                    additionalTextOutputString.contains("has no method")) {
+                if (additionalTextOutputString.contains("LayoutTestController")) {
                     html.append(" <span class=\"listItem noLtc\">LTC function missing</span>");
                 }
+                if (additionalTextOutputString.contains("EventSender")) {
+                    html.append(" <span class=\"listItem noEventSender\">");
+                    html.append("ES function missing</span>");
+                }
+            }
 
             html.append("</h3>");
 
