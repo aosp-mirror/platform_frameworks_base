@@ -166,6 +166,11 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int FLAG_IMMERSIVE = 0x0200;
     /**
+     * Value for {@link #flags}: true when the application's rendering should
+     * be hardware accelerated.
+     */
+    public static final int FLAG_HARDWARE_ACCELERATED = 0x0400;
+    /**
      * Options that have been set in the activity declaration in the
      * manifest.
      * These include:
@@ -175,7 +180,7 @@ public class ActivityInfo extends ComponentInfo
      * {@link #FLAG_STATE_NOT_NEEDED}, {@link #FLAG_EXCLUDE_FROM_RECENTS},
      * {@link #FLAG_ALLOW_TASK_REPARENTING}, {@link #FLAG_NO_HISTORY},
      * {@link #FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS},
-     * {@link #FLAG_IMMERSIVE}
+     * {@link #FLAG_IMMERSIVE}, {@link #FLAG_HARDWARE_ACCELERATED}
      */
     public int flags;
 

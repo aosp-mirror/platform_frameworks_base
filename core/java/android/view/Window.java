@@ -68,6 +68,10 @@ public abstract class Window {
      * If overlay is enabled, the action mode UI will be allowed to cover existing window content.
      */
     public static final int FEATURE_ACTION_MODE_OVERLAY = 9;
+    /**
+     * Flag for requesting this window to be hardware accelerated, if possible. 
+     */
+    public static final int FEATURE_HARDWARE_ACCELERATED = 10;
     /** Flag for setting the progress bar's visibility to VISIBLE */
     public static final int PROGRESS_VISIBILITY_ON = -1;
     /** Flag for setting the progress bar's visibility to GONE */
@@ -375,21 +379,35 @@ public abstract class Window {
      *
      * @param wm The ViewManager for adding new windows.
      */
-    public void setWindowManager(WindowManager wm,
-            IBinder appToken, String appName) {
+    public void setWindowManager(WindowManager wm, IBinder appToken, String appName) {
+        setWindowManager(wm, appToken, appName, false);
+    }
+
+    /**
+     * Set the window manager for use by this Window to, for example,
+     * display panels.  This is <em>not</em> used for displaying the
+     * Window itself -- that must be done by the client.
+     *
+     * @param wm The ViewManager for adding new windows.
+     */
+    public void setWindowManager(WindowManager wm, IBinder appToken, String appName,
+            boolean hardwareAccelerated) {
         mAppToken = appToken;
         mAppName = appName;
         if (wm == null) {
             wm = WindowManagerImpl.getDefault();
         }
-        mWindowManager = new LocalWindowManager(wm);
+        mWindowManager = new LocalWindowManager(wm, hardwareAccelerated);
     }
 
     private class LocalWindowManager implements WindowManager {
-        LocalWindowManager(WindowManager wm) {
+        private boolean mHardwareAccelerated;
+
+        LocalWindowManager(WindowManager wm, boolean hardwareAccelerated) {
             mWindowManager = wm;
             mDefaultDisplay = mContext.getResources().getDefaultDisplay(
                     mWindowManager.getDefaultDisplay());
+            mHardwareAccelerated = hardwareAccelerated;
         }
 
         public final void addView(View view, ViewGroup.LayoutParams params) {
@@ -435,6 +453,9 @@ public abstract class Window {
            }
             if (wp.packageName == null) {
                 wp.packageName = mContext.getPackageName();
+            }
+            if (mHardwareAccelerated) {
+                wp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
             }
             mWindowManager.addView(view, params);
         }

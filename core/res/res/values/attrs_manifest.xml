@@ -1210,6 +1210,7 @@
              any value in the theme. -->
         <attr name="windowSoftInputMode" />
         <attr name="immersive" />
+        <attr name="hardwareAccelerated" />
     </declare-styleable>
     
     <!-- The <code>activity-alias</code> tag declares a new

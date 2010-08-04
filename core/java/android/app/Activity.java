@@ -4123,7 +4123,7 @@ public class Activity extends ContextThemeWrapper
             mWindow.setSoftInputMode(info.softInputMode);
         }
         mUiThread = Thread.currentThread();
-
+        
         mMainThread = aThread;
         mInstrumentation = instr;
         mToken = token;
@@ -4137,7 +4137,8 @@ public class Activity extends ContextThemeWrapper
         mEmbeddedID = id;
         mLastNonConfigurationInstances = lastNonConfigurationInstances;
 
-        mWindow.setWindowManager(null, mToken, mComponent.flattenToString());
+        mWindow.setWindowManager(null, mToken, mComponent.flattenToString(),
+                (info.flags & ActivityInfo.FLAG_HARDWARE_ACCELERATED) != 0);
         if (mParent != null) {
             mWindow.setContainer(mParent.getWindow());
         }

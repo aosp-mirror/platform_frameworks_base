@@ -72,6 +72,7 @@ public interface WindowManager extends ViewManager {
          * When using {@link Gravity#LEFT} or {@link Gravity#RIGHT} it provides
          * an offset from the given edge.
          */
+        @ViewDebug.ExportedProperty
         public int x;
         
         /**
@@ -79,6 +80,7 @@ public interface WindowManager extends ViewManager {
          * When using {@link Gravity#TOP} or {@link Gravity#BOTTOM} it provides
          * an offset from the given edge.
          */
+        @ViewDebug.ExportedProperty
         public int y;
 
         /**
@@ -87,6 +89,7 @@ public interface WindowManager extends ViewManager {
          * should not be stretched. Otherwise the extra pixels will be pro-rated
          * among all views whose weight is greater than 0.
          */
+        @ViewDebug.ExportedProperty
         public float horizontalWeight;
 
         /**
@@ -95,8 +98,9 @@ public interface WindowManager extends ViewManager {
          * should not be stretched. Otherwise the extra pixels will be pro-rated
          * among all views whose weight is greater than 0.
          */
+        @ViewDebug.ExportedProperty
         public float verticalWeight;
-        
+
         /**
          * The general type of window.  There are three main classes of
          * window types:
@@ -389,6 +393,7 @@ public interface WindowManager extends ViewManager {
          * @see #FLAG_FULLSCREEN
          * @see #FLAG_FORCE_NOT_FULLSCREEN
          * @see #FLAG_IGNORE_CHEEK_PRESSES
+         * @see #FLAG_HARDWARE_ACCELERATED
          */
         @ViewDebug.ExportedProperty(flagMapping = {
             @ViewDebug.FlagToString(mask = FLAG_BLUR_BEHIND, equals = FLAG_BLUR_BEHIND,
@@ -420,7 +425,9 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.FlagToString(mask = FLAG_FORCE_NOT_FULLSCREEN,
                     equals = FLAG_FORCE_NOT_FULLSCREEN, name = "FLAG_FORCE_NOT_FULLSCREEN"),
             @ViewDebug.FlagToString(mask = FLAG_IGNORE_CHEEK_PRESSES,
-                    equals = FLAG_IGNORE_CHEEK_PRESSES, name = "FLAG_IGNORE_CHEEK_PRESSES")
+                    equals = FLAG_IGNORE_CHEEK_PRESSES, name = "FLAG_IGNORE_CHEEK_PRESSES"),
+            @ViewDebug.FlagToString(mask = FLAG_HARDWARE_ACCELERATED,
+                    equals = FLAG_HARDWARE_ACCELERATED, name = "FLAG_HARDWARE_ACCELERATED")
         })
         public int flags;
         
@@ -603,6 +610,12 @@ public interface WindowManager extends ViewManager {
          * it is created.
          * {@hide} */
         public static final int FLAG_SYSTEM_ERROR = 0x40000000;
+        
+        /**
+         * Indicates whether this window should be hardware accelerated.
+         * Requesting hardware acceleration does not guarantee it will happen.
+         */
+        public static final int FLAG_HARDWARE_ACCELERATED = 0x80000000;        
 
         /**
          * Given a particular set of window manager flags, determine whether
@@ -1075,6 +1088,7 @@ public interface WindowManager extends ViewManager {
                 screenOrientation = o.screenOrientation;
                 changes |= SCREEN_ORIENTATION_CHANGED;
             }
+
             return changes;
         }
     

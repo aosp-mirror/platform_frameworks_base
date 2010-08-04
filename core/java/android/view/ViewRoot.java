@@ -16,7 +16,6 @@
 
 package android.view;
 
-import android.content.pm.ApplicationInfo;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.IInputMethodCallback;
 import com.android.internal.view.IInputMethodSession;
@@ -329,7 +328,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 mWindowAttributes.copyFrom(attrs);
                 attrs = mWindowAttributes;
                 
-                enableHardwareAcceleration(view, attrs);
+                enableHardwareAcceleration(attrs);
 
                 if (view instanceof RootViewSurfaceTaker) {
                     mSurfaceHolderCallback =
@@ -460,14 +459,14 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         }
     }
 
-    private void enableHardwareAcceleration(View view, WindowManager.LayoutParams attrs) {
+    private void enableHardwareAcceleration(WindowManager.LayoutParams attrs) {
         // Only enable hardware acceleration if we are not in the system process
         // The window manager creates ViewRoots to display animated preview windows
         // of launching apps and we don't want those to be hardware accelerated
         if (Process.myUid() != Process.SYSTEM_UID) {
             // Try to enable hardware acceleration if requested
-            if ((view.getContext().getApplicationInfo().flags &
-                    ApplicationInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
+            if (attrs != null &&
+                    (attrs.flags & WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0) {
                 final boolean translucent = attrs.format != PixelFormat.OPAQUE;
                 mHwRenderer = HardwareRenderer.createGlRenderer(2, translucent);
             }
