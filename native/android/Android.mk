@@ -7,6 +7,7 @@ include $(CLEAR_VARS)
 #
 LOCAL_SRC_FILES:= \
     asset_manager.cpp \
+    configuration.cpp \
     input.cpp \
     looper.cpp \
     native_activity.cpp \
