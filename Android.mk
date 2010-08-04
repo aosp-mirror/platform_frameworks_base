@@ -362,6 +362,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since ./frameworks/base/api/6.xml 6 \
     -since ./frameworks/base/api/7.xml 7 \
     -since ./frameworks/base/api/8.xml 8 \
+    -since ./frameworks/base/api/current.xml HC \
 		-error 1 -error 2 -warning 3 -error 4 -error 6 -error 8 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
