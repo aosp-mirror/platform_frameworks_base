@@ -1252,6 +1252,11 @@
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_wipeData">Perform a factory reset, deleting
         all of your data without any confirmation.</string>
+    <string name="policylab_setGlobalProxy">Set the device global proxy</string>
+    <!-- Description of policy access to wipe the user's data -->
+    <string name="policydesc_setGlobalProxy">Set the device global proxy
+        to be used while policy is enabled. Only the first device admin
+        sets the effective global proxy.</string>
 
     <!-- The order of these is important, don't reorder without changing Contacts.java --> <skip />
     <!-- Phone number types from android.provider.Contacts. This could be used when adding a new phone number for a contact, for example. -->

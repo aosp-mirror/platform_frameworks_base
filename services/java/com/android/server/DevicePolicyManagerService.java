@@ -33,6 +33,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -46,6 +47,8 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.net.Proxy;
+import android.provider.Settings;
 import android.util.Slog;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
@@ -58,9 +61,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Implementation of the device policy APIs.
@@ -104,6 +109,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int minimumPasswordNonLetter = 0;
         long maximumTimeToUnlock = 0;
         int maximumFailedPasswordsForWipe = 0;
+
+        // TODO: review implementation decisions with frameworks team
+        boolean specifiesGlobalProxy = false;
+        String globalProxySpec = null;
+        String globalProxyExclusionList = null;
 
         ActiveAdmin(DeviceAdminInfo _info) {
             info = _info;
@@ -171,6 +181,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, "value", Integer.toString(maximumFailedPasswordsForWipe));
                 out.endTag(null, "max-failed-password-wipe");
             }
+            if (specifiesGlobalProxy) {
+                out.startTag(null, "specifies-global-proxy");
+                out.attribute(null, "value", Boolean.toString(specifiesGlobalProxy));
+                out.endTag(null, "specifies_global_proxy");
+                if (globalProxySpec != null) {
+                    out.startTag(null, "global-proxy-spec");
+                    out.attribute(null, "value", globalProxySpec);
+                    out.endTag(null, "global-proxy-spec");
+                }
+                if (globalProxyExclusionList != null) {
+                    out.startTag(null, "global-proxy-exclusion-list");
+                    out.attribute(null, "value", globalProxyExclusionList);
+                    out.endTag(null, "global-proxy-exclusion-list");
+                }
+            }
         }
 
         void readFromXml(XmlPullParser parser)
@@ -218,6 +243,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if ("max-failed-password-wipe".equals(tag)) {
                     maximumFailedPasswordsForWipe = Integer.parseInt(
                             parser.getAttributeValue(null, "value"));
+                } else if ("specifies-global-proxy".equals(tag)) {
+                    specifiesGlobalProxy = Boolean.getBoolean(
+                            parser.getAttributeValue(null, "value"));
+                } else if ("global-proxy-spec".equals(tag)) {
+                    globalProxySpec =
+                        parser.getAttributeValue(null, "value");
+                } else if ("global-proxy-exclusion-list".equals(tag)) {
+                    globalProxyExclusionList =
+                        parser.getAttributeValue(null, "value");
                 } else {
                     Slog.w(TAG, "Unknown admin tag: " + tag);
                 }
@@ -256,6 +290,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     pw.println(maximumTimeToUnlock);
             pw.print(prefix); pw.print("maximumFailedPasswordsForWipe=");
                     pw.println(maximumFailedPasswordsForWipe);
+            pw.print(prefix); pw.print("specifiesGlobalProxy=");
+                    pw.println(specifiesGlobalProxy);
+            if (globalProxySpec != null) {
+                pw.print(prefix); pw.print("globalProxySpec=");
+                        pw.println(globalProxySpec);
+            }
+            if (globalProxyExclusionList != null) {
+                pw.print(prefix); pw.print("globalProxyEclusionList=");
+                        pw.println(globalProxyExclusionList);
+            }
         }
     }
 
@@ -370,12 +414,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     void removeActiveAdminLocked(ComponentName adminReceiver) {
         ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver);
         if (admin != null) {
+            boolean doProxyCleanup =
+                admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_SETS_GLOBAL_PROXY);
             sendAdminCommandLocked(admin,
                     DeviceAdminReceiver.ACTION_DEVICE_ADMIN_DISABLED);
             // XXX need to wait for it to complete.
             mAdminList.remove(admin);
             mAdminMap.remove(adminReceiver);
             validatePasswordOwnerLocked();
+            if (doProxyCleanup) {
+                resetGlobalProxy();
+            }
         }
     }
 
@@ -1415,6 +1464,94 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
         }
+    }
+
+    public ComponentName setGlobalProxy(ComponentName who, String proxySpec,
+            String exclusionList) {
+        synchronized(this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_SETS_GLOBAL_PROXY);
+
+            // Scan through active admins and find if anyone has already
+            // set the global proxy.
+            final int N = mAdminList.size();
+            Set<ComponentName> compSet = mAdminMap.keySet();
+            for  (ComponentName component : compSet) {
+                ActiveAdmin ap = mAdminMap.get(component);
+                if ((ap.specifiesGlobalProxy) && (!component.equals(who))) {
+                    // Another admin already sets the global proxy
+                    // Return it to the caller.
+                    return component;
+                }
+            }
+            if (proxySpec == null) {
+                admin.specifiesGlobalProxy = false;
+                admin.globalProxySpec = null;
+                admin.globalProxyExclusionList = null;
+            } else {
+
+                admin.specifiesGlobalProxy = true;
+                admin.globalProxySpec = proxySpec;
+                admin.globalProxyExclusionList = exclusionList;
+            }
+
+            // Reset the global proxy accordingly
+            // Do this using system permissions, as apps cannot write to secure settings
+            long origId = Binder.clearCallingIdentity();
+            resetGlobalProxy();
+            Binder.restoreCallingIdentity(origId);
+            return null;
+        }
+    }
+
+    public ComponentName getGlobalProxyAdmin() {
+        synchronized(this) {
+            // Scan through active admins and find if anyone has already
+            // set the global proxy.
+            final int N = mAdminList.size();
+            for (int i = 0; i < N; i++) {
+                ActiveAdmin ap = mAdminList.get(i);
+                if (ap.specifiesGlobalProxy) {
+                    // Device admin sets the global proxy
+                    // Return it to the caller.
+                    return ap.info.getComponent();
+                }
+            }
+        }
+        // No device admin sets the global proxy.
+        return null;
+    }
+
+    private void resetGlobalProxy() {
+        final int N = mAdminList.size();
+        for (int i = 0; i < N; i++) {
+            ActiveAdmin ap = mAdminList.get(i);
+            if (ap.specifiesGlobalProxy) {
+                saveGlobalProxy(ap.globalProxySpec, ap.globalProxyExclusionList);
+                return;
+            }
+        }
+        // No device admins defining global proxies - reset global proxy settings to none
+        saveGlobalProxy(null, null);
+    }
+
+    private void saveGlobalProxy(String proxySpec, String exclusionList) {
+        if (exclusionList == null) {
+            exclusionList = "";
+        }
+        if (proxySpec == null) {
+            proxySpec = "";
+        }
+        // Remove white spaces
+        proxySpec = proxySpec.trim();
+        exclusionList = exclusionList.trim();
+        ContentResolver res = mContext.getContentResolver();
+        Settings.Secure.putString(res, Settings.Secure.HTTP_PROXY, proxySpec);
+        Settings.Secure.putString(res, Settings.Secure.HTTP_PROXY_EXCLUSION_LIST, exclusionList);
     }
 
     @Override
