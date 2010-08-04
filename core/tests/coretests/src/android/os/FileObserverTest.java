@@ -19,9 +19,8 @@ package android.os;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
-import android.os.FileObserver;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.MediumTest;
 import android.util.Log;
 
 import java.io.File;
@@ -69,7 +68,7 @@ public class FileObserverTest extends AndroidTestCase {
         }
     }
 
-    @LargeTest
+    @MediumTest
     public void testRun() throws Exception {
         // make file changes and wait for them
         assertTrue(mTestFile.exists());

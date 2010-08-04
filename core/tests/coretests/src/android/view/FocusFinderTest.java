@@ -18,7 +18,6 @@ package android.view;
 
 import android.graphics.Rect;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 
 public class FocusFinderTest extends AndroidTestCase {
@@ -239,7 +238,7 @@ public class FocusFinderTest extends AndroidTestCase {
      * A non-candidate (even a much closer one) is always a worse choice
      * than a real candidate.
      */
-    @MediumTest
+    @SmallTest
     public void testSomeCandidateBetterThanNonCandidate() {
         Rect src = new Rect(0, 0, 50, 50); // (left, top, right, bottom)
 

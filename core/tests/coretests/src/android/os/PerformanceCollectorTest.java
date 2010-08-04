@@ -16,11 +16,8 @@
 
 package android.os;
 
-import android.os.Bundle;
-import android.os.Parcelable;
-import android.os.PerformanceCollector;
-import android.os.Process;
 import android.os.PerformanceCollector.PerformanceResultsWriter;
+import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import java.lang.reflect.Field;
@@ -56,7 +53,7 @@ public class PerformanceCollectorTest extends TestCase {
         assertEquals(2, snapshot.size());
     }
 
-    @SmallTest
+    @MediumTest
     public void testEndSnapshotNoWriter() throws Exception {
         mPerfCollector.beginSnapshot("testEndSnapshotNoWriter");
         workForRandomLongPeriod();
@@ -116,7 +113,7 @@ public class PerformanceCollectorTest extends TestCase {
         assertEquals(2, snapshot.size());
     }
 
-    @SmallTest
+    @MediumTest
     public void testEndSnapshot() throws Exception {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
         mPerfCollector.setPerformanceResultsWriter(writer);
@@ -232,7 +229,7 @@ public class PerformanceCollectorTest extends TestCase {
         assertEquals("Hello World", results.getString("testAddMeasurementStringNonEmpty"));
     }
 
-    @SmallTest
+    @MediumTest
     public void testSimpleSequence() throws Exception {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
         mPerfCollector.setPerformanceResultsWriter(writer);
@@ -264,7 +261,7 @@ public class PerformanceCollectorTest extends TestCase {
         verifyTimingBundle(timing, labels);
     }
 
-    @SmallTest
+    @MediumTest
     public void testLongSequence() throws Exception {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
         mPerfCollector.setPerformanceResultsWriter(writer);
@@ -350,7 +347,7 @@ public class PerformanceCollectorTest extends TestCase {
      * Verify that snapshotting and timing do not interfere w/ each other,
      * by staggering calls to snapshot and timing functions.
      */
-    @SmallTest
+    @MediumTest
     public void testOutOfOrderSequence() {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
         mPerfCollector.setPerformanceResultsWriter(writer);

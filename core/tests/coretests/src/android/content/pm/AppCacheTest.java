@@ -16,32 +16,25 @@
 
 package android.content.pm;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageDataObserver;
-import android.content.pm.IPackageStatsObserver;
-import android.content.pm.PackageStats;
-import android.content.pm.IPackageManager;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.StatFs;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
-import android.os.Handler;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.StatFs;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class AppCacheTest extends AndroidTestCase {
     private static final boolean localLOGV = false;
@@ -627,7 +620,8 @@ public class AppCacheTest extends AndroidTestCase {
         }
     }
     
-    @SmallTest
+    // TODO: flaky test, omit from LargeTest for now
+    //@LargeTest
     public void testFreeStorage() throws Exception {
         boolean TRACKING = true;
         StatFs st = new StatFs("/data");
