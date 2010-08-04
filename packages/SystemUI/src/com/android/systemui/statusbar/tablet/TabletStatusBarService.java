@@ -37,6 +37,7 @@ import android.view.WindowManager;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.view.WindowManagerImpl;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -59,18 +60,19 @@ public class TabletStatusBarService extends StatusBarService {
 
     H mHandler = new H();
 
-    private View mNotificationPanel;
-    private View mSystemPanel;
+    View mNotificationPanel;
+    View mSystemPanel;
 
-    private NotificationIconArea.IconLayout mIconLayout;
+    ViewGroup mPile;
+    TextView mClearButton;
 
-    private NotificationData mHaps = new NotificationData();
+    NotificationIconArea.IconLayout mIconLayout;
+
+    private NotificationData mNotns = new NotificationData();
     
     protected void addPanelWindows() {
-        if (mNotificationPanel == null) {
-            mNotificationPanel = View.inflate(this, R.layout.sysbar_panel_notifications, null);
-            mSystemPanel = View.inflate(this, R.layout.sysbar_panel_system, null);
-        }
+        mNotificationPanel = View.inflate(this, R.layout.sysbar_panel_notifications, null);
+        mSystemPanel = View.inflate(this, R.layout.sysbar_panel_system, null);
 
         mNotificationPanel.setVisibility(View.GONE);
         mSystemPanel.setVisibility(View.GONE);
@@ -80,7 +82,7 @@ public class TabletStatusBarService extends StatusBarService {
             com.android.internal.R.dimen.status_bar_height);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                300, // ViewGroup.LayoutParams.WRAP_CONTENT,
+                400, // ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
@@ -112,10 +114,14 @@ public class TabletStatusBarService extends StatusBarService {
         WindowManagerImpl.getDefault().addView(mSystemPanel, lp);
 
         // Lorem ipsum, Dolores
-        TextView tv = ((TextView) mNotificationPanel.findViewById(R.id.notificationPanelDummy));
-        if (tv != null) tv.setText("(You probably have new email)");
-        tv = ((TextView) mSystemPanel.findViewById(R.id.systemPanelDummy));
+        TextView tv = ((TextView) mSystemPanel.findViewById(R.id.systemPanelDummy));
         if (tv != null) tv.setText("System status: great");
+
+        mPile = (ViewGroup)mNotificationPanel.findViewById(R.id.content);
+        mPile.removeAllViews();
+
+        mClearButton = (TextView)mNotificationPanel.findViewById(R.id.clear_all_button);
+        mClearButton.setOnClickListener(mClearButtonListener);
     }
 
     @Override
@@ -196,7 +202,7 @@ public class TabletStatusBarService extends StatusBarService {
     public void updateNotification(IBinder key, StatusBarNotification notification) {
         if (DEBUG) Slog.d(TAG, "updateNotification(" + key + " -> " + notification + ") // TODO");
         
-        final NotificationData.Entry oldEntry = mHaps.findByKey(key);
+        final NotificationData.Entry oldEntry = mNotns.findByKey(key);
         if (oldEntry == null) {
             Slog.w(TAG, "updateNotification for unknown key: " + key);
             return;
@@ -285,6 +291,9 @@ public class TabletStatusBarService extends StatusBarService {
 
     public void notificationIconsClicked(View v) {
         if (DEBUG) Slog.d(TAG, "clicked notification icons");
+        mHandler.removeMessages(H.MSG_CLOSE_SYSTEM_PANEL);
+        mHandler.sendEmptyMessage(H.MSG_CLOSE_SYSTEM_PANEL);
+
         int msg = (mNotificationPanel.getVisibility() == View.GONE) 
             ? H.MSG_OPEN_NOTIFICATION_PANEL
             : H.MSG_CLOSE_NOTIFICATION_PANEL;
@@ -294,6 +303,9 @@ public class TabletStatusBarService extends StatusBarService {
 
     public void systemInfoClicked(View v) {
         if (DEBUG) Slog.d(TAG, "clicked system info");
+        mHandler.removeMessages(H.MSG_CLOSE_NOTIFICATION_PANEL);
+        mHandler.sendEmptyMessage(H.MSG_CLOSE_NOTIFICATION_PANEL);
+
         int msg = (mSystemPanel.getVisibility() == View.GONE) 
             ? H.MSG_OPEN_SYSTEM_PANEL
             : H.MSG_CLOSE_SYSTEM_PANEL;
@@ -312,6 +324,17 @@ public class TabletStatusBarService extends StatusBarService {
             // The end is nigh.
         }
     }
+
+    private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            try {
+                mBarService.onClearAllNotifications();
+            } catch (RemoteException ex) {
+                // system process is dead if we're here.
+            }
+            animateCollapse();
+        }
+    };
 
     private class NotificationClicker implements View.OnClickListener {
         private PendingIntent mIntent;
@@ -365,7 +388,7 @@ public class TabletStatusBarService extends StatusBarService {
     }
 
     StatusBarNotification removeNotificationViews(IBinder key) {
-        NotificationData.Entry entry = mHaps.remove(key);
+        NotificationData.Entry entry = mNotns.remove(key);
         if (entry == null) {
             Slog.w(TAG, "removeNotification for unknown key: " + key);
             return null;
@@ -374,21 +397,16 @@ public class TabletStatusBarService extends StatusBarService {
         ViewGroup rowParent = (ViewGroup)entry.row.getParent();
         if (rowParent != null) rowParent.removeView(entry.row);
         // Remove the icon.
-        ViewGroup iconParent = (ViewGroup)entry.icon.getParent();
-        if (iconParent != null) iconParent.removeView(entry.icon);
+//        ViewGroup iconParent = (ViewGroup)entry.icon.getParent();
+//        if (iconParent != null) iconParent.removeView(entry.icon);
+        refreshIcons();
 
         return entry.notification;
     }
 
     StatusBarIconView addNotificationViews(IBinder key, StatusBarNotification notification) {
-        NotificationData list = mHaps;
-        ViewGroup parent = null;
-        final boolean isOngoing = notification.isOngoing();
-        if (isOngoing) {
-//            parent = mOngoingItems;
-        } else {
-//            parent = mIconLayout;
-        }
+        NotificationData list = mNotns;
+        ViewGroup parent = mPile;
         // Construct the icon.
         final StatusBarIconView iconView = new StatusBarIconView(this,
                 notification.pkg + "/0x" + Integer.toHexString(notification.id));
@@ -413,10 +431,25 @@ public class TabletStatusBarService extends StatusBarService {
         final int viewIndex = list.add(entry);
         if (parent != null) parent.addView(entry.row, viewIndex);
         // Add the icon.
-        final int iconIndex = 0; // XXX: sort into ongoing and regular buckets
-        mIconLayout.addView(iconView, iconIndex,
-                new LinearLayout.LayoutParams(mIconSize, mIconSize));
+//        final int iconIndex = 0; // XXX: sort into ongoing and regular buckets
+//        mIconLayout.addView(iconView, iconIndex,
+//                new LinearLayout.LayoutParams(mIconSize, mIconSize));
+
+        refreshIcons();
+
         return iconView;
+    }
+
+    private void refreshIcons() {
+        // XXX: need to implement a new limited linear layout class
+        // to avoid removing & readding everything
+        mIconLayout.removeAllViews();
+        int N = mNotns.size();
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(mIconSize, mIconSize);
+        for (int i=0; i<4; i++) {
+            if (i>=N) break;
+            mIconLayout.addView(mNotns.get(N-i-1).icon, i, params);
+        }
     }
 
     private boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
@@ -429,6 +462,20 @@ public class TabletStatusBarService extends StatusBarService {
         // create the row view
         LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View row = inflater.inflate(R.layout.status_bar_latest_event, parent, false);
+        View vetoButton = row.findViewById(R.id.veto);
+        final String _pkg = sbn.pkg;
+        final String _tag = sbn.tag;
+        final int _id = sbn.id;
+        vetoButton.setOnClickListener(new View.OnClickListener() { 
+                public void onClick(View v) {
+                    try {
+                        mBarService.onNotificationClear(_pkg, _tag, _id);
+                    } catch (RemoteException ex) {
+                        // system process is dead if we're here.
+                    }
+//                    animateCollapse();
+                }
+            });
 
         // bind the click event to the content area
         ViewGroup content = (ViewGroup)row.findViewById(R.id.content);

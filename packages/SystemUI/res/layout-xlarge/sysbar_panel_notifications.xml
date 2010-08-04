@@ -19,14 +19,33 @@
 -->
 
 <!--    android:background="@drawable/status_bar_closed_default_background" -->
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
-    android:paddingLeft="8dip"
-    android:paddingRight="8dip"
+    android:background="#FF000000"
+    android:orientation="vertical"
     >
-        
+
+    <TextView android:id="@+id/clear_all_button"
+        style="?android:attr/textAppearance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|center_vertical"
+        android:layout_marginTop="2dip"
+        android:layout_marginBottom="1dip"
+        android:layout_marginRight="10dip"
+        android:padding="6dip"
+        android:textSize="14sp"
+        android:text="@string/status_bar_clear_all_button"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1sp"
+        android:background="@android:drawable/divider_horizontal_dark"
+        />
+
     <LinearLayout 
         android:id="@+id/content"
         android:layout_width="match_parent"
@@ -39,15 +58,5 @@
         android:focusable="true"
         android:descendantFocusability="afterDescendants"
         >
-        <TextView
-            android:id="@+id/notificationPanelDummy"
-            android:layout_width="wrap_content"
-            android:layout_height="75dip"
-            android:layout_centerInParent="true"
-            android:gravity="center"
-            android:textColor="#FFCCCCCC"
-            android:textSize="18sp"
-            android:padding="4dip"
-            />
     </LinearLayout>
-</FrameLayout>
+</LinearLayout>

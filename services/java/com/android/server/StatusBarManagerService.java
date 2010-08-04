@@ -84,6 +84,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         void onSetDisabled(int status);
         void onClearAll();
         void onNotificationClick(String pkg, String tag, int id);
+        void onNotificationClear(String pkg, String tag, int id);
         void onPanelRevealed();
         void onNotificationError(String pkg, String tag, int id,
                 int uid, int initialPid, String message);
@@ -300,6 +301,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub
 
         // WARNING: this will call back into us to do the remove.  Don't hold any locks.
         mNotificationCallbacks.onNotificationError(pkg, tag, id, uid, initialPid, message);
+    }
+
+    public void onNotificationClear(String pkg, String tag, int id) {
+        enforceStatusBarService();
+
+        mNotificationCallbacks.onNotificationClear(pkg, tag, id);
     }
 
     public void onClearAllNotifications() {

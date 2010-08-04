@@ -54,6 +54,10 @@ public class NotificationData {
         return mEntries.size();
     }
 
+    public Entry get(int i) {
+        return mEntries.get(i);
+    }
+
     public Entry findByKey(IBinder key) {
         for (Entry e : mEntries) {
             if (e.key == key) {
