@@ -68,7 +68,7 @@ private:
     bool mIsAvc;
     bool mIsAudio;
     bool mIsMPEG4;
-    int64_t mMaxTimeStampUs;
+    int64_t mTrackDurationUs;
     int64_t mEstimatedTrackSizeBytes;
     int64_t mMaxWriteTimeUs;
     int32_t mTimeScale;
@@ -711,7 +711,7 @@ MPEG4Writer::Track::Track(
       mDone(false),
       mPaused(false),
       mResumed(false),
-      mMaxTimeStampUs(0),
+      mTrackDurationUs(0),
       mEstimatedTrackSizeBytes(0),
       mSamplesHaveSameSize(true),
       mCodecSpecificData(NULL),
@@ -958,7 +958,7 @@ status_t MPEG4Writer::Track::start(MetaData *params) {
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
     mDone = false;
-    mMaxTimeStampUs = 0;
+    mTrackDurationUs = 0;
     mReachedEOS = false;
     mEstimatedTrackSizeBytes = 0;
 
@@ -1300,15 +1300,15 @@ void MPEG4Writer::Track::threadEntry() {
         }
 
         if (mResumed) {
-            previousPausedDurationUs += (timestampUs - mMaxTimeStampUs - lastDurationUs);
+            previousPausedDurationUs += (timestampUs - mTrackDurationUs - lastDurationUs);
             mResumed = false;
         }
 
         timestampUs -= previousPausedDurationUs;
         LOGV("time stamp: %lld and previous paused duration %lld",
                 timestampUs, previousPausedDurationUs);
-        if (timestampUs > mMaxTimeStampUs) {
-            mMaxTimeStampUs = timestampUs;
+        if (timestampUs > mTrackDurationUs) {
+            mTrackDurationUs = timestampUs;
         }
 
         mSampleSizes.push_back(sampleSize);
@@ -1407,6 +1407,7 @@ void MPEG4Writer::Track::threadEntry() {
     }
     SttsTableEntry sttsEntry(sampleCount, lastDurationUs);
     mSttsTableEntries.push_back(sttsEntry);
+    mTrackDurationUs += lastDurationUs;
     mReachedEOS = true;
     LOGI("Received total/0-length (%d/%d) buffers and encoded %d frames. Max write time: %lld us - %s",
             count, nZeroLengthFrames, mNumSamples, mMaxWriteTimeUs, mIsAudio? "audio": "video");
@@ -1472,7 +1473,7 @@ void MPEG4Writer::trackProgressStatus(
 void MPEG4Writer::Track::findMinAvgMaxSampleDurationMs(
         int32_t *min, int32_t *avg, int32_t *max) {
     CHECK(!mSampleSizes.empty());
-    int32_t avgSampleDurationMs = mMaxTimeStampUs / 1000 / mNumSamples;
+    int32_t avgSampleDurationMs = mTrackDurationUs / 1000 / mNumSamples;
     int32_t minSampleDurationMs = 0x7FFFFFFF;
     int32_t maxSampleDurationMs = 0;
     for (List<SttsTableEntry>::iterator it = mSttsTableEntries.begin();
@@ -1514,7 +1515,7 @@ void MPEG4Writer::Track::findMinMaxChunkDurations(int64_t *min, int64_t *max) {
 }
 
 void MPEG4Writer::Track::logStatisticalData(bool isAudio) {
-    if (mMaxTimeStampUs <= 0 || mSampleSizes.empty()) {
+    if (mTrackDurationUs <= 0 || mSampleSizes.empty()) {
         LOGI("nothing is recorded");
         return;
     }
@@ -1523,7 +1524,7 @@ void MPEG4Writer::Track::logStatisticalData(bool isAudio) {
 
     if (collectStats) {
         LOGI("%s track - duration %lld us, total %d frames",
-                isAudio? "audio": "video", mMaxTimeStampUs,
+                isAudio? "audio": "video", mTrackDurationUs,
                 mNumSamples);
         int32_t min, avg, max;
         findMinAvgMaxSampleDurationMs(&min, &avg, &max);
@@ -1541,7 +1542,7 @@ void MPEG4Writer::Track::logStatisticalData(bool isAudio) {
             it != mSampleSizes.end(); ++it) {
             totalBytes += (*it);
         }
-        float bitRate = (totalBytes * 8000000.0) / mMaxTimeStampUs;
+        float bitRate = (totalBytes * 8000000.0) / mTrackDurationUs;
         LOGI("avg bit rate (bps): %.2f", bitRate);
 
         int64_t duration = mOwner->interleaveDuration();
@@ -1568,7 +1569,7 @@ void MPEG4Writer::Track::bufferChunk(int64_t timestampUs) {
 }
 
 int64_t MPEG4Writer::Track::getDurationUs() const {
-    return mMaxTimeStampUs;
+    return mTrackDurationUs;
 }
 
 int64_t MPEG4Writer::Track::getEstimatedTrackSizeBytes() const {
