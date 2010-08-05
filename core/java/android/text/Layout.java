@@ -234,7 +234,7 @@ public abstract class Layout {
                             LineBackgroundSpan.class);
                     // All LineBackgroundSpans on a line contribute to its
                     // background.
-                   spans = sp.getSpans(start, end, LineBackgroundSpan.class);
+                   spans = getParagraphSpans(sp, start, end, LineBackgroundSpan.class);
                 }
 
                 for (int n = 0; n < spans.length; n++) {
@@ -309,7 +309,7 @@ public abstract class Layout {
                 if (start >= spanEnd && (i == first || isFirstParaLine)) {
                     spanEnd = sp.nextSpanTransition(start, textLength,
                                                     ParagraphStyle.class);
-                    spans = sp.getSpans(start, spanEnd, ParagraphStyle.class);
+                    spans = getParagraphSpans(sp, start, spanEnd, ParagraphStyle.class);
 
                     align = mAlignment;
                     for (int n = spans.length-1; n >= 0; n--) {
@@ -425,7 +425,7 @@ public abstract class Layout {
                 int start = getLineStart(line);
                 int spanEnd = spanned.nextSpanTransition(start, spanned.length(),
                         TabStopSpan.class);
-                TabStopSpan[] tabSpans = spanned.getSpans(start, spanEnd, TabStopSpan.class);
+                TabStopSpan[] tabSpans = getParagraphSpans(spanned, start, spanEnd, TabStopSpan.class);
                 if (tabSpans.length > 0) {
                     tabStops = new TabStops(TAB_INCREMENT, tabSpans);
                 }
@@ -713,7 +713,7 @@ public abstract class Layout {
         if (hasTabOrEmoji && mText instanceof Spanned) {
             // Just checking this line should be good enough, tabs should be
             // consistent across all lines in a paragraph.
-            TabStopSpan[] tabs = ((Spanned) mText).getSpans(start, end, TabStopSpan.class);
+            TabStopSpan[] tabs = getParagraphSpans((Spanned) mText, start, end, TabStopSpan.class);
             if (tabs.length > 0) {
                 tabStops = new TabStops(TAB_INCREMENT, tabs); // XXX should reuse
             }
@@ -820,7 +820,7 @@ public abstract class Layout {
         if (hasTabsOrEmoji && mText instanceof Spanned) {
             // Just checking this line should be good enough, tabs should be
             // consistent across all lines in a paragraph.
-            TabStopSpan[] tabs = ((Spanned) mText).getSpans(start, end, TabStopSpan.class);
+            TabStopSpan[] tabs = getParagraphSpans((Spanned) mText, start, end, TabStopSpan.class);
             if (tabs.length > 0) {
                 tabStops = new TabStops(TAB_INCREMENT, tabs); // XXX should reuse
             }
@@ -1308,7 +1308,7 @@ public abstract class Layout {
 
         if (mSpannedText) {
             Spanned sp = (Spanned) mText;
-            AlignmentSpan[] spans = sp.getSpans(getLineStart(line),
+            AlignmentSpan[] spans = getParagraphSpans(sp, getLineStart(line),
                                                 getLineEnd(line),
                                                 AlignmentSpan.class);
 
@@ -1361,7 +1361,7 @@ public abstract class Layout {
         int lineEnd = getLineEnd(line);
         int spanEnd = spanned.nextSpanTransition(lineStart, lineEnd,
                 LeadingMarginSpan.class);
-        LeadingMarginSpan[] spans = spanned.getSpans(lineStart, spanEnd,
+        LeadingMarginSpan[] spans = getParagraphSpans(spanned, lineStart, spanEnd,
                                                 LeadingMarginSpan.class);
         if (spans.length == 0) {
             return 0; // no leading margin span;
@@ -1416,7 +1416,7 @@ public abstract class Layout {
                         Spanned spanned = (Spanned) text;
                         int spanEnd = spanned.nextSpanTransition(start, end,
                                 TabStopSpan.class);
-                        TabStopSpan[] spans = spanned.getSpans(start, spanEnd,
+                        TabStopSpan[] spans = getParagraphSpans(spanned, start, spanEnd,
                                 TabStopSpan.class);
                         if (spans.length > 0) {
                             tabStops = new TabStops(TAB_INCREMENT, spans);
@@ -1513,7 +1513,7 @@ public abstract class Layout {
 
         if (text instanceof Spanned) {
             if (tabs == null) {
-                tabs = ((Spanned) text).getSpans(start, end, TabStopSpan.class);
+                tabs = getParagraphSpans((Spanned) text, start, end, TabStopSpan.class);
                 alltabs = true;
             }
 
@@ -1538,6 +1538,38 @@ public abstract class Layout {
 
     protected final boolean isSpanned() {
         return mSpannedText;
+    }
+
+    /**
+     * Returns the same as <code>text.getSpans()</code>, except where
+     * <code>start</code> and <code>end</code> are the same and are not
+     * at the very beginning of the text, in which case an empty array
+     * is returned instead.
+     * <p>
+     * This is needed because of the special case that <code>getSpans()</code>
+     * on an empty range returns the spans adjacent to that range, which is
+     * primarily for the sake of <code>TextWatchers</code> so they will get
+     * notifications when text goes from empty to non-empty.  But it also
+     * has the unfortunate side effect that if the text ends with an empty
+     * paragraph, that paragraph accidentally picks up the styles of the
+     * preceding paragraph (even though those styles will not be picked up
+     * by new text that is inserted into the empty paragraph).
+     * <p>
+     * The reason it just checks whether <code>start</code> and <code>end</code>
+     * is the same is that the only time a line can contain 0 characters
+     * is if it is the final paragraph of the Layout; otherwise any line will
+     * contain at least one printing or newline character.  The reason for the
+     * additional check if <code>start</code> is greater than 0 is that
+     * if the empty paragraph is the entire content of the buffer, paragraph
+     * styles that are already applied to the buffer will apply to text that
+     * is inserted into it.
+     */
+    /* package */ static <T> T[] getParagraphSpans(Spanned text, int start, int end, Class<T> type) {
+        if (start == end && start > 0) {
+            return (T[]) ArrayUtils.emptyArray(type);
+        }
+
+        return text.getSpans(start, end, type);
     }
 
     private void ellipsize(int start, int end, int line,
