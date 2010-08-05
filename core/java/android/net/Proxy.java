@@ -150,36 +150,23 @@ public final class Proxy {
                     // Return no proxy
                     retval = java.net.Proxy.NO_PROXY;
                 } else {
-                    java.net.Proxy retProxy =
+                    retval =
                         new java.net.Proxy(java.net.Proxy.Type.HTTP, sGlobalProxySpec.proxyAddress);
-                    sProxyInfoLock.readLock().unlock();
-                    if (isLocalHost(url)) {
-                        sProxyInfoLock.readLock().lock();
-                        retval = java.net.Proxy.NO_PROXY;
-                    } else {
-                        sProxyInfoLock.readLock().lock();
-                        retval = retProxy;
-                    }
                 }
             } else {
                 // If network is WiFi, return no proxy.
                 // Otherwise, return the Mobile Operator proxy.
                 if (!isNetworkWifi(ctx)) {
-                    java.net.Proxy retProxy = getDefaultProxy(url);
-                    sProxyInfoLock.readLock().unlock();
-                    if (isLocalHost(url)) {
-                        sProxyInfoLock.readLock().lock();
-                        retval = java.net.Proxy.NO_PROXY;
-                    } else {
-                        sProxyInfoLock.readLock().lock();
-                        retval = retProxy;
-                    }
+                    retval = getDefaultProxy(url);
                 } else {
                     retval = java.net.Proxy.NO_PROXY;
                 }
             }
         } finally {
             sProxyInfoLock.readLock().unlock();
+        }
+        if ((retval != java.net.Proxy.NO_PROXY) && (isLocalHost(url))) {
+            retval = java.net.Proxy.NO_PROXY;
         }
         return retval;
     }
@@ -348,7 +335,7 @@ public final class Proxy {
         private Context mContext;
 
         SettingsObserver(Context ctx) {
-            super(new Handler());
+            super(new Handler(ctx.getMainLooper()));
             mContext = ctx;
         }
 
@@ -368,10 +355,13 @@ public final class Proxy {
         // No lock upgrading (from read to write) allowed
         sProxyInfoLock.readLock().unlock();
         sProxyInfoLock.writeLock().lock();
-        sGlobalProxyChangedObserver = new SettingsObserver(ctx);
-        // Downgrading locks (from write to read) is allowed
-        sProxyInfoLock.readLock().lock();
-        sProxyInfoLock.writeLock().unlock();
+        try {
+            sGlobalProxyChangedObserver = new SettingsObserver(ctx);
+        } finally {
+            // Downgrading locks (from write to read) is allowed
+            sProxyInfoLock.readLock().lock();
+            sProxyInfoLock.writeLock().unlock();
+        }
         ctx.getContentResolver().registerContentObserver(uriGlobalProxy, false,
                 sGlobalProxyChangedObserver);
         ctx.getContentResolver().registerContentObserver(uriGlobalExclList, false,
