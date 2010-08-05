@@ -1627,6 +1627,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 case NetworkStateTracker.EVENT_NOTIFICATION_CHANGED:
                     handleNotificationChange(msg.arg1 == 1, msg.arg2,
                             (Notification) msg.obj);
+                    break;
 
                 case NetworkStateTracker.EVENT_CONFIGURATION_CHANGED:
                     // TODO - make this handle ip/proxy/gateway/dns changes
