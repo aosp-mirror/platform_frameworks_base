@@ -63,6 +63,7 @@ enum {
 
 static jfieldID offset_db_handle;
 static jmethodID method_custom_function_callback;
+static jclass string_class = NULL;
 
 static char *createStr(const char *path, short extra) {
     int len = strlen(path) + extra;
@@ -394,27 +395,36 @@ static void custom_function_callback(sqlite3_context * context, int argc, sqlite
         LOGE("custom_function_callback cannot call into Java on this thread");
         return;
     }
+    // get global ref to CustomFunction object from our user data
+    jobject function = (jobject)sqlite3_user_data(context);
 
     // pack up the arguments into a string array
-    jobjectArray strArray = env->NewObjectArray(argc, env->FindClass("java/lang/String"), NULL);
-    if (!strArray) {
-        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
-        return;
-    }
+    if (!string_class)
+        string_class = (jclass)env->NewGlobalRef(env->FindClass("java/lang/String"));
+    jobjectArray strArray = env->NewObjectArray(argc, string_class, NULL);
+    if (!strArray)
+        goto done;
     for (int i = 0; i < argc; i++) {
         char* arg = (char *)sqlite3_value_text(argv[i]);
-        jobject obj = env->NewStringUTF(arg);
-        if (!obj) {
-            jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+        if (!arg) {
+            LOGE("NULL argument in custom_function_callback.  This should not happen.");
             return;
         }
+        jobject obj = env->NewStringUTF(arg);
+        if (!obj)
+            goto done;
         env->SetObjectArrayElement(strArray, i, obj);
         env->DeleteLocalRef(obj);
     }
 
-    // get global ref to CustomFunction object from our user data
-    jobject function = (jobject)sqlite3_user_data(context);
     env->CallVoidMethod(function, method_custom_function_callback, strArray);
+
+done:
+    if (env->ExceptionCheck()) {
+        LOGE("An exception was thrown by custom sqlite3 function.");
+        LOGE_EX(env);
+        env->ExceptionClear();
+    }
 }
 
 static jint native_addCustomFunction(JNIEnv* env, jobject object,
@@ -423,7 +433,7 @@ static jint native_addCustomFunction(JNIEnv* env, jobject object,
     sqlite3 * handle = (sqlite3 *)env->GetIntField(object, offset_db_handle);
     char const *nameStr = env->GetStringUTFChars(name, NULL);
     jobject ref = env->NewGlobalRef(function);
-    LOGD("native_addCustomFunction %s ref: %d", nameStr, ref);
+    LOGD("native_addCustomFunction %s ref: %p", nameStr, ref);
     int err = sqlite3_create_function(handle, nameStr, numArgs, SQLITE_UTF8,
             (void *)ref, custom_function_callback, NULL, NULL);
     env->ReleaseStringUTFChars(name, nameStr);
