@@ -66,6 +66,7 @@ public class ProgramFragment extends Program {
         public static final int MAX_TEXTURE = 2;
         RenderScript mRS;
         boolean mPointSpriteEnable;
+        boolean mVaryingColorEnable;
 
         public enum EnvMode {
             REPLACE (1),
@@ -120,9 +121,14 @@ public class ProgramFragment extends Program {
             return this;
         }
 
+        public Builder setVaryingColor(boolean enable) {
+            mVaryingColorEnable = enable;
+            return this;
+        }
+
         public ProgramFragment create() {
             mRS.validate();
-            int[] tmp = new int[MAX_TEXTURE * 2 + 1];
+            int[] tmp = new int[MAX_TEXTURE * 2 + 2];
             if (mSlots[0] != null) {
                 tmp[0] = mSlots[0].env.mID;
                 tmp[1] = mSlots[0].format.mID;
@@ -132,6 +138,7 @@ public class ProgramFragment extends Program {
                 tmp[3] = mSlots[1].format.mID;
             }
             tmp[4] = mPointSpriteEnable ? 1 : 0;
+            tmp[5] = mVaryingColorEnable ? 1 : 0;
             int id = mRS.nProgramFragmentCreate(tmp);
             ProgramFragment pf = new ProgramFragment(id, mRS);
             pf.mTextureCount = MAX_TEXTURE;

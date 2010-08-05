@@ -34,6 +34,10 @@ public class FountainRS {
         mRS = rs;
         mRes = res;
 
+        ProgramFragment.Builder pfb = new ProgramFragment.Builder(rs);
+        pfb.setVaryingColor(true);
+        rs.contextBindProgramFragment(pfb.create());
+
         ScriptField_Point points = new ScriptField_Point(mRS, PART_COUNT);
 
         Mesh.AllocationBuilder smb = new Mesh.AllocationBuilder(mRS);

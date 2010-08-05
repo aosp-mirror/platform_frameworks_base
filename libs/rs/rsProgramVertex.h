@@ -83,9 +83,6 @@ public:
     ObjectBaseRef<Allocation> mDefaultAlloc;
 
     ObjectBaseRef<Type> mAllocType;
-
-
-    float color[4];
 };
 
 

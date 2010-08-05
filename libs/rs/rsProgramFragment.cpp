@@ -38,13 +38,21 @@ ProgramFragment::ProgramFragment(Context *rsc, const uint32_t * params,
 {
     mAllocFile = __FILE__;
     mAllocLine = __LINE__;
-    rsAssert(paramLength = 5);
+    rsAssert(paramLength == 6);
+
+    mConstantColor[0] = 1.f;
+    mConstantColor[1] = 1.f;
+    mConstantColor[2] = 1.f;
+    mConstantColor[3] = 1.f;
 
     mEnvModes[0] = (RsTexEnvMode)params[0];
     mTextureFormats[0] = params[1];
     mEnvModes[1] = (RsTexEnvMode)params[2];
     mTextureFormats[1] = params[3];
     mPointSpriteEnable = params[4] != 0;
+    mVaryingColor = false;
+    if (paramLength > 5)
+        mVaryingColor = params[5] != 0;
 
     mTextureEnableMask = 0;
     if (mEnvModes[0]) {
@@ -53,7 +61,17 @@ ProgramFragment::ProgramFragment(Context *rsc, const uint32_t * params,
     if (mEnvModes[1]) {
         mTextureEnableMask |= 2;
     }
-    init(rsc);
+
+    mUniformCount = 0;
+    mUniformNames[mUniformCount++].setTo("uni_Tex0");
+    mUniformNames[mUniformCount++].setTo("uni_Tex1");
+
+    mConstantColorUniformIndex = -1;
+    //if (!mVaryingColor) {
+        mConstantColorUniformIndex = mUniformCount;
+        mUniformNames[mUniformCount++].setTo("uni_Color");
+    //}
+    createShader();
 }
 
 ProgramFragment::ProgramFragment(Context *rsc, const char * shaderText,
@@ -64,7 +82,19 @@ ProgramFragment::ProgramFragment(Context *rsc, const char * shaderText,
     mAllocFile = __FILE__;
     mAllocLine = __LINE__;
 
-    init(rsc);
+    mConstantColor[0] = 1.f;
+    mConstantColor[1] = 1.f;
+    mConstantColor[2] = 1.f;
+    mConstantColor[3] = 1.f;
+
+    LOGE("Custom FP");
+
+    mUniformCount = 2;
+    mUniformNames[0].setTo("uni_Tex0");
+    mUniformNames[1].setTo("uni_Tex1");
+
+    createShader();
+
     mTextureEnableMask = (1 << mTextureCount) -1;
 }
 
@@ -73,79 +103,17 @@ ProgramFragment::~ProgramFragment()
 {
 }
 
+void ProgramFragment::setConstantColor(float r, float g, float b, float a)
+{
+    mConstantColor[0] = r;
+    mConstantColor[1] = g;
+    mConstantColor[2] = b;
+    mConstantColor[3] = a;
+    mDirty = true;
+}
+
 void ProgramFragment::setupGL(const Context *rsc, ProgramFragmentState *state)
 {
-    if ((state->mLast.get() == this) && !mDirty) {
-        return;
-    }
-    state->mLast.set(this);
-
-    for (uint32_t ct=0; ct < MAX_TEXTURE; ct++) {
-        glActiveTexture(GL_TEXTURE0 + ct);
-        if (!(mTextureEnableMask & (1 << ct)) || !mTextures[ct].get()) {
-            glDisable(GL_TEXTURE_2D);
-            continue;
-        }
-
-        glEnable(GL_TEXTURE_2D);
-        if (rsc->checkVersion1_1()) {
-#ifndef ANDROID_RS_BUILD_FOR_HOST // These are GLES only
-            if (mPointSpriteEnable) {
-                glEnable(GL_POINT_SPRITE_OES);
-            } else {
-                glDisable(GL_POINT_SPRITE_OES);
-            }
-            glTexEnvi(GL_POINT_SPRITE_OES, GL_COORD_REPLACE_OES, mPointSpriteEnable);
-#endif //ANDROID_RS_BUILD_FOR_HOST
-
-        }
-        mTextures[ct]->uploadCheck(rsc);
-        glBindTexture(GL_TEXTURE_2D, mTextures[ct]->getTextureID());
-
-        switch(mEnvModes[ct]) {
-        case RS_TEX_ENV_MODE_NONE:
-            rsAssert(0);
-            break;
-        case RS_TEX_ENV_MODE_REPLACE:
-            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-            break;
-        case RS_TEX_ENV_MODE_MODULATE:
-            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-            break;
-        case RS_TEX_ENV_MODE_DECAL:
-            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-            break;
-        }
-
-        if (mSamplers[ct].get()) {
-            mSamplers[ct]->setupGL(rsc, mTextures[ct]->getType()->getIsNp2());
-        } else {
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        }
-
-        // Gross hack.
-        if (ct == 2) {
-            glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
-
-            glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_ADD);
-            glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_RGB, GL_PREVIOUS);
-            glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_RGB, GL_TEXTURE);
-            glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
-            glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR);
-
-            glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_ADD);
-            glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_ALPHA, GL_PREVIOUS);
-            glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_ALPHA, GL_TEXTURE);
-            glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA);
-            glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, GL_SRC_ALPHA);
-        }
-    }
-    glActiveTexture(GL_TEXTURE0);
-    mDirty = false;
-    rsc->checkError("ProgramFragment::setupGL");
 }
 
 void ProgramFragment::setupGL2(const Context *rsc, ProgramFragmentState *state, ShaderCache *sc)
@@ -158,6 +126,14 @@ void ProgramFragment::setupGL2(const Context *rsc, ProgramFragmentState *state, 
     state->mLast.set(this);
 
     rsc->checkError("ProgramFragment::setupGL2 start");
+
+    if (!mVaryingColor &&
+        (sc->fragUniformSlot(mConstantColorUniformIndex) >= 0)) {
+        //LOGE("mConstantColorUniformIndex %i %i", mConstantColorUniformIndex, sc->fragUniformSlot(mConstantColorUniformIndex));
+        glUniform4fv(sc->fragUniformSlot(mConstantColorUniformIndex), 1, mConstantColor);
+        rsc->checkError("ProgramFragment::color setup");
+    }
+
     for (uint32_t ct=0; ct < MAX_TEXTURE; ct++) {
         glActiveTexture(GL_TEXTURE0 + ct);
         if (!(mTextureEnableMask & (1 << ct)) || !mTextures[ct].get()) {
@@ -195,6 +171,7 @@ void ProgramFragment::createShader()
     mShader.setTo("precision mediump float;\n");
     mShader.append("varying vec4 varColor;\n");
     mShader.append("varying vec4 varTex0;\n");
+    mShader.append("uniform vec4 uni_Color;\n");
 
     if (mUserShader.length() > 1) {
         for (uint32_t ct=0; ct < mTextureCount; ct++) {
@@ -221,7 +198,11 @@ void ProgramFragment::createShader()
 
 
         mShader.append("void main() {\n");
-        mShader.append("  vec4 col = varColor;\n");
+        if (mVaryingColor) {
+            mShader.append("  vec4 col = varColor;\n");
+        } else {
+            mShader.append("  vec4 col = uni_Color;\n");
+        }
 
         if (mTextureEnableMask) {
             if (mPointSpriteEnable) {
@@ -291,11 +272,6 @@ void ProgramFragment::createShader()
 
 void ProgramFragment::init(Context *rsc)
 {
-    mUniformCount = 2;
-    mUniformNames[0].setTo("uni_Tex0");
-    mUniformNames[1].setTo("uni_Tex1");
-
-    createShader();
 }
 
 void ProgramFragment::serialize(OStream *stream) const
@@ -321,12 +297,12 @@ ProgramFragmentState::~ProgramFragmentState()
 
 void ProgramFragmentState::init(Context *rsc)
 {
-    uint32_t tmp[5] = {
+    uint32_t tmp[] = {
         RS_TEX_ENV_MODE_NONE, 0,
         RS_TEX_ENV_MODE_NONE, 0,
-        0
+        0, 0
     };
-    ProgramFragment *pf = new ProgramFragment(rsc, tmp, 5);
+    ProgramFragment *pf = new ProgramFragment(rsc, tmp, 6);
     mDefault.set(pf);
     pf->init(rsc);
 }

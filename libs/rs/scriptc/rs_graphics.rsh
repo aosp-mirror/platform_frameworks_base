@@ -26,6 +26,9 @@ extern void __attribute__((overloadable))
 extern void __attribute__((overloadable))
     rsgProgramVertexLoadTextureMatrix(const rs_matrix4x4 *);
 
+extern void __attribute__((overloadable))
+    rsgProgramFragmentConstantColor(rs_program_fragment, float, float, float, float);
+
 extern uint __attribute__((overloadable))
     rsgGetWidth(void);
 extern uint __attribute__((overloadable))
@@ -76,6 +79,8 @@ extern void __attribute__((overloadable))
 
 ///////////////////////////////////////////////////////
 // misc
+
+// Depricated
 extern void __attribute__((overloadable))
     color(float, float, float, float);
 

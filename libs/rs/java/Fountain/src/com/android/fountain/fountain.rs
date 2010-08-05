@@ -3,6 +3,8 @@
 
 #pragma rs java_package_name(com.android.fountain)
 
+#pragma stateFragment(parent)
+
 #include "rs_graphics.rsh"
 
 static int newPart = 0;

@@ -44,6 +44,8 @@ public:
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_FRAGMENT; }
     static ProgramFragment *createFromStream(Context *rsc, IStream *stream);
 
+    void setConstantColor(float, float, float, float);
+
 protected:
     // Hacks to create a program for now
     uint32_t mTextureFormats[MAX_TEXTURE];
@@ -51,6 +53,10 @@ protected:
     RsTexEnvMode mEnvModes[MAX_TEXTURE];
     uint32_t mTextureEnableMask;
     bool mPointSpriteEnable;
+    bool mVaryingColor;
+
+    float mConstantColor[4];
+    int32_t mConstantColorUniformIndex;
 };
 
 class ProgramFragmentState

@@ -379,12 +379,12 @@ bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *r
 
 void FontState::initRenderState()
 {
-    uint32_t tmp[5] = {
+    uint32_t tmp[] = {
         RS_TEX_ENV_MODE_REPLACE, 1,
         RS_TEX_ENV_MODE_NONE, 0,
-        0
+        0, 0
     };
-    ProgramFragment *pf = new ProgramFragment(mRSC, tmp, 5);
+    ProgramFragment *pf = new ProgramFragment(mRSC, tmp, 6);
     mFontShaderF.set(pf);
     mFontShaderF->init(mRSC);
 

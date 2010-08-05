@@ -110,6 +110,13 @@ static void SC_vpLoadTextureMatrix(const rsc_Matrix *m)
 }
 
 
+static void SC_pfConstantColor(RsProgramFragment vpf, float r, float g, float b, float a)
+{
+    //GET_TLS();
+    ProgramFragment *pf = static_cast<ProgramFragment *>(vpf);
+    pf->setConstantColor(r, g, b, a);
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Drawing
@@ -253,13 +260,8 @@ static void SC_drawMeshPrimitiveRange(RsMesh vsm, uint32_t primIndex, uint32_t s
 static void SC_color(float r, float g, float b, float a)
 {
     GET_TLS();
-    rsc->mStateVertex.color[0] = r;
-    rsc->mStateVertex.color[1] = g;
-    rsc->mStateVertex.color[2] = b;
-    rsc->mStateVertex.color[3] = a;
-    if (!rsc->checkVersion2_0()) {
-        glColor4f(r, g, b, a);
-    }
+    ProgramFragment *pf = (ProgramFragment *)rsc->getFragment();
+    pf->setConstantColor(r, g, b, a);
 }
 
 static void SC_uploadToTexture2(RsAllocation va, uint32_t baseMipLevel)
@@ -370,6 +372,8 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z36rsgProgramVertexLoadProjectionMatrixPK12rs_matrix4x4", (void *)&SC_vpLoadProjectionMatrix },
     { "_Z31rsgProgramVertexLoadModelMatrixPK12rs_matrix4x4", (void *)&SC_vpLoadModelMatrix },
     { "_Z33rsgProgramVertexLoadTextureMatrixPK12rs_matrix4x4", (void *)&SC_vpLoadTextureMatrix },
+
+    { "_Z31rsgProgramFragmentConstantColor19rs_program_fragmentffff", (void *)&SC_pfConstantColor },
 
     { "_Z11rsgGetWidthv", (void *)&SC_getWidth },
     { "_Z12rsgGetHeightv", (void *)&SC_getHeight },

@@ -221,7 +221,6 @@ void ProgramVertex::setupGL2(const Context *rsc, ProgramVertexState *state, Shad
     }
 
     rsc->checkError("ProgramVertex::setupGL2 start");
-    glVertexAttrib4f(1, state->color[0], state->color[1], state->color[2], state->color[3]);
 
     const float *f = static_cast<const float *>(mConstants[0]->getPtr());
 
@@ -404,11 +403,6 @@ void ProgramVertexState::init(Context *rsc)
     mDefault.set(pv);
     pv->init(rsc);
     pv->bindAllocation(alloc, 0);
-
-    color[0] = 1.f;
-    color[1] = 1.f;
-    color[2] = 1.f;
-    color[3] = 1.f;
 
     updateSize(rsc);
 #endif //ANDROID_RS_BUILD_FOR_HOST
