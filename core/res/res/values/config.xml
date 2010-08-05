@@ -405,4 +405,8 @@
 
     <!-- IP address of the dns server to use if nobody else suggests one -->
     <string name="config_default_dns_server">8.8.8.8</string>
+
+    <!-- The default character set for GsmAlphabet -->
+    <!-- Empty string means MBCS is not considered -->
+    <string name="gsm_alphabet_default_charset"></string>
 </resources>

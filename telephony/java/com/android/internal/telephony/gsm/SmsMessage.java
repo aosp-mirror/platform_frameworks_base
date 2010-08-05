@@ -33,6 +33,7 @@ import java.io.UnsupportedEncodingException;
 import static android.telephony.SmsMessage.ENCODING_7BIT;
 import static android.telephony.SmsMessage.ENCODING_8BIT;
 import static android.telephony.SmsMessage.ENCODING_16BIT;
+import static android.telephony.SmsMessage.ENCODING_KSC5601;
 import static android.telephony.SmsMessage.ENCODING_UNKNOWN;
 import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES;
 import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES_WITH_HEADER;
@@ -776,6 +777,27 @@ public class SmsMessage extends SmsMessageBase {
             return ret;
         }
 
+        /**
+         * Interprets the user data payload as KSC-5601 characters, and
+         * decodes them into a String.
+         *
+         * @param byteCount the number of bytes in the user data payload
+         * @return a String with the decoded characters
+         */
+        String getUserDataKSC5601(int byteCount) {
+            String ret;
+
+            try {
+                ret = new String(pdu, cur, byteCount, "KSC5601");
+            } catch (UnsupportedEncodingException ex) {
+                ret = "";
+                Log.e(LOG_TAG, "implausible UnsupportedEncodingException", ex);
+            }
+
+            cur += byteCount;
+            return ret;
+        }
+
         boolean moreDataPresent() {
             return (pdu.length > cur);
         }
@@ -1111,6 +1133,16 @@ public class SmsMessage extends SmsMessageBase {
                 Log.w(LOG_TAG, "MWI for fax, email, or other "
                         + (dataCodingScheme & 0xff));
             }
+        } else if ((dataCodingScheme & 0xC0) == 0x80) {
+            // 3GPP TS 23.038 V7.0.0 (2006-03) section 4
+            // 0x80..0xBF == Reserved coding groups
+            if (dataCodingScheme == 0x84) {
+                // This value used for KSC5601 by carriers in Korea.
+                encodingType = ENCODING_KSC5601;
+            } else {
+                Log.w(LOG_TAG, "5 - Unsupported SMS data coding scheme "
+                        + (dataCodingScheme & 0xff));
+            }
         } else {
             Log.w(LOG_TAG, "3 - Unsupported SMS data coding scheme "
                     + (dataCodingScheme & 0xff));
@@ -1134,6 +1166,10 @@ public class SmsMessage extends SmsMessageBase {
 
         case ENCODING_16BIT:
             messageBody = p.getUserDataUCS2(count);
+            break;
+
+        case ENCODING_KSC5601:
+            messageBody = p.getUserDataKSC5601(count);
             break;
         }
 
