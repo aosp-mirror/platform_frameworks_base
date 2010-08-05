@@ -762,6 +762,65 @@ static size_t getFrameSize(
     }
 }
 
+status_t OMXCodec::findTargetColorFormat(
+        const sp<MetaData>& meta, OMX_COLOR_FORMATTYPE *colorFormat) {
+    LOGV("findTargetColorFormat");
+    CHECK(mIsEncoder);
+
+    *colorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
+    int32_t targetColorFormat;
+    if (meta->findInt32(kKeyColorFormat, &targetColorFormat)) {
+        *colorFormat = (OMX_COLOR_FORMATTYPE) targetColorFormat;
+    } else {
+        if (!strcasecmp("OMX.TI.Video.encoder", mComponentName)) {
+            *colorFormat = OMX_COLOR_FormatYCbYCr;
+        }
+    }
+
+    // Check whether the target color format is supported.
+    return isColorFormatSupported(*colorFormat, kPortIndexInput);
+}
+
+status_t OMXCodec::isColorFormatSupported(
+        OMX_COLOR_FORMATTYPE colorFormat, int portIndex) {
+    LOGV("isColorFormatSupported: %d", static_cast<int>(colorFormat));
+
+    // Enumerate all the color formats supported by
+    // the omx component to see whether the given
+    // color format is supported.
+    OMX_VIDEO_PARAM_PORTFORMATTYPE portFormat;
+    InitOMXParams(&portFormat);
+    portFormat.nPortIndex = portIndex;
+    OMX_U32 index = 0;
+    portFormat.nIndex = index;
+    while (true) {
+        if (OMX_ErrorNone != mOMX->getParameter(
+                mNode, OMX_IndexParamVideoPortFormat,
+                &portFormat, sizeof(portFormat))) {
+
+            return UNKNOWN_ERROR;
+        }
+        // Make sure that omx component does not overwrite
+        // the incremented index (bug 2897413).
+        CHECK_EQ(index, portFormat.nIndex);
+        if ((portFormat.eColorFormat == colorFormat)) {
+            LOGV("Found supported color format: %d", portFormat.eColorFormat);
+            return OK;  // colorFormat is supported!
+        }
+        ++index;
+        portFormat.nIndex = index;
+
+        // OMX Spec defines less than 50 color formats
+        // 1000 is more than enough for us to tell whether the omx
+        // component in question is buggy or not.
+        if (index >= 1000) {
+            LOGE("More than %ld color formats are supported???", index);
+            break;
+        }
+    }
+    return UNKNOWN_ERROR;
+}
+
 void OMXCodec::setVideoInputFormat(
         const char *mime, const sp<MetaData>& meta) {
 
@@ -787,10 +846,8 @@ void OMXCodec::setVideoInputFormat(
         CHECK(!"Should not be here. Not a supported video mime type.");
     }
 
-    OMX_COLOR_FORMATTYPE colorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
-    if (!strcasecmp("OMX.TI.Video.encoder", mComponentName)) {
-        colorFormat = OMX_COLOR_FormatYCbYCr;
-    }
+    OMX_COLOR_FORMATTYPE colorFormat;
+    CHECK_EQ(OK, findTargetColorFormat(meta, &colorFormat));
 
     status_t err;
     OMX_PARAM_PORTDEFINITIONTYPE def;

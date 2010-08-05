@@ -181,6 +181,11 @@ private:
     status_t setupH263EncoderParameters(const sp<MetaData>& meta);
     status_t setupMPEG4EncoderParameters(const sp<MetaData>& meta);
     status_t setupAVCEncoderParameters(const sp<MetaData>& meta);
+    status_t findTargetColorFormat(
+            const sp<MetaData>& meta, OMX_COLOR_FORMATTYPE *colorFormat);
+
+    status_t isColorFormatSupported(
+            OMX_COLOR_FORMATTYPE colorFormat, int portIndex);
 
     // If profile/level is set in the meta data, its value in the meta
     // data will be used; otherwise, the default value will be used.
