@@ -155,7 +155,7 @@ extends Layout
             LineHeightSpan[] chooseht = null;
 
             if (spanned != null) {
-                LeadingMarginSpan[] sp = spanned.getSpans(paraStart, paraEnd,
+                LeadingMarginSpan[] sp = getParagraphSpans(spanned, paraStart, paraEnd,
                         LeadingMarginSpan.class);
                 for (int i = 0; i < sp.length; i++) {
                     LeadingMarginSpan lms = sp[i];
@@ -174,7 +174,7 @@ extends Layout
                     }
                 }
 
-                chooseht = spanned.getSpans(paraStart, paraEnd, LineHeightSpan.class);
+                chooseht = getParagraphSpans(spanned, paraStart, paraEnd, LineHeightSpan.class);
 
                 if (chooseht.length != 0) {
                     if (choosehtv == null ||
@@ -267,7 +267,7 @@ extends Layout
                             hasTabOrEmoji = true;
                             if (spanned != null) {
                                 // First tab this para, check for tabstops
-                                TabStopSpan[] spans = spanned.getSpans(paraStart,
+                                TabStopSpan[] spans = getParagraphSpans(spanned, paraStart,
                                         paraEnd, TabStopSpan.class);
                                 if (spans.length > 0) {
                                     tabStops = new TabStops(TAB_INCREMENT, spans);
