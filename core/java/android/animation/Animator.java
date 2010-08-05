@@ -65,6 +65,7 @@ public class Animator extends Animatable {
     private static final int RUNNING    = 1; // Playing normally
     private static final int CANCELED   = 2; // cancel() called - need to end it
     private static final int ENDED      = 3; // end() called - need to end it
+    private static final int SEEKED     = 4; // Seeked to some time value
 
     /**
      * Enum values used in XML attributes to indicate the value for mValueType
@@ -84,6 +85,12 @@ public class Animator extends Animatable {
     // determine elapsed time (and therefore the elapsed fraction) in subsequent calls
     // to animateFrame()
     private long mStartTime;
+
+    /**
+     * Set when setCurrentPlayTime() is called. If negative, animation is not currently seeked
+     * to a value.
+     */
+    private long mSeekTime = -1;
 
     // The static sAnimationHandler processes the internal timing loop on which all animations
     // are based
@@ -143,6 +150,12 @@ public class Animator extends Animatable {
     private static final ArrayList<Animator> sEndingAnims = new ArrayList<Animator>();
     private static final ArrayList<Animator> sDelayedAnims = new ArrayList<Animator>();
     private static final ArrayList<Animator> sReadyAnims = new ArrayList<Animator>();
+
+    /**
+     * Flag that denotes whether the animation is set up and ready to go. Used by seek() to
+     * set up animation that has not yet been started.
+     */
+    private boolean mInitialized = false;
 
     //
     // Backing variables
@@ -411,6 +424,44 @@ public class Animator extends Animatable {
         }
         mPlayingBackwards = false;
         mCurrentIteration = 0;
+        mInitialized = true;
+    }
+
+    /**
+     * Sets the position of the animation to the specified point in time. This time should
+     * be between 0 and the total duration of the animation, including any repetition. If
+     * the animation has not yet been started, then it will not advance forward after it is
+     * set to this time; it will simply set the time to this value and perform any appropriate
+     * actions based on that time. If the animation is already running, then seek() will
+     * set the current playing time to this value and continue playing from that point.
+     *
+     * @param playTime The time, in milliseconds, to which the animation is advanced or rewound.
+     */
+    public void setCurrentPlayTime(long playTime) {
+        if (!mInitialized) {
+            initAnimation();
+        }
+        long currentTime = AnimationUtils.currentAnimationTimeMillis();
+        if (mPlayingState != RUNNING) {
+            mSeekTime = playTime;
+            mPlayingState = SEEKED;
+        }
+        mStartTime = currentTime - playTime;
+        animationFrame(currentTime);
+    }
+
+    /**
+     * Gets the current position of the animation in time, which is equal to the current
+     * time minus the time that the animation started. An animation that is not yet started will
+     * return a value of zero.
+     *
+     * @return The current position in time of the animation.
+     */
+    public long getCurrentPlayTime() {
+        if (!mInitialized) {
+            return 0;
+        }
+        return AnimationUtils.currentAnimationTimeMillis() - mStartTime;
     }
 
     /**
@@ -740,6 +791,7 @@ public class Animator extends Animatable {
     }
 
     public void start() {
+        mPlayingState = STOPPED;
         sPendingAnimations.add(this);
         if (sAnimationHandler == null) {
             sAnimationHandler = new AnimationHandler();
@@ -845,10 +897,17 @@ public class Animator extends Animatable {
 
         if (mPlayingState == STOPPED) {
             mPlayingState = RUNNING;
-            mStartTime = currentTime;
+            if (mSeekTime < 0) {
+                mStartTime = currentTime;
+            } else {
+                mStartTime = currentTime - mSeekTime;
+                // Now that we're playing, reset the seek time
+                mSeekTime = -1;
+            }
         }
         switch (mPlayingState) {
         case RUNNING:
+        case SEEKED:
             float fraction = (float)(currentTime - mStartTime) / mDuration;
             if (fraction >= 1f) {
                 if (mCurrentIteration < mRepeatCount || mRepeatCount == INFINITE) {
