@@ -19,7 +19,7 @@ package android.media;
 /**
  * The AudioFormat class is used to access a number of audio format and
  * channel configuration constants. They are for instance used
- * in __link AudioTrack} and __link AudioRecord}.
+ * in {@link AudioTrack} and {@link AudioRecord}.
  * 
  */
 public class AudioFormat {
