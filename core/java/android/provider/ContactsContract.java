@@ -30,7 +30,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.database.sqlite.SQLiteException;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.RemoteException;
@@ -233,14 +232,31 @@ public final class ContactsContract {
      * </p>
      * <p>
      * Clients should send directory requests to Contacts Provider and let it
-     * forward them to the respective providers rather than constructing directory provider
-     * URIs by themselves.  This level of indirection allows Contacts Provider to
-     * implement additional system-level features and optimizations.
-     * Also, directory providers may reject requests coming from other
-     * clients than the Contacts Provider itself.
+     * forward them to the respective providers rather than constructing
+     * directory provider URIs by themselves. This level of indirection allows
+     * Contacts Provider to implement additional system-level features and
+     * optimizations. Access to Contacts Provider is protected by the
+     * READ_CONTACTS permission, but access to the directory provider is not.
+     * Therefore directory providers must reject requests coming from clients
+     * other than the Contacts Provider itself. An easy way to prevent such
+     * unauthorized access is to check the name of the calling package:
+     * <pre>
+     * private boolean isCallerAllowed() {
+     *   PackageManager pm = getContext().getPackageManager();
+     *   for (String packageName: pm.getPackagesForUid(Binder.getCallingUid())) {
+     *     if (packageName.equals("com.android.providers.contacts")) {
+     *       return true;
+     *     }
+     *   }
+     *   return false;
+     * }
+     * </pre>
      * </p>
      * <p>
-     * The Directory table always has at least these two rows:
+     * The Directory table is read-only and is maintained by the Contacts Provider
+     * automatically.
+     * </p>
+     * <p>It always has at least these two rows:
      * <ul>
      * <li>
      * The local directory. It has {@link Directory#_ID Directory._ID} =
@@ -254,18 +270,54 @@ public final class ContactsContract {
      * </li>
      * </ul>
      * </p>
+     * <p>Custom Directories are discovered by the Contacts Provider following this procedure:
+     * <ul>
+     * <li>It finds all installed content providers with meta data identifying them
+     * as directory providers in AndroidManifest.xml:
+     * <code>
+     * &lt;meta-data android:name="android.content.ContactDirectory"
+     *               android:value="true" /&gt;
+     * </code>
      * <p>
-     * Other directories should register themselves by explicitly adding rows to this table.
+     * This tag should be placed inside the corresponding content provider declaration.
+     * </p>
+     * </li>
+     * <li>
+     * Then Contacts Provider sends a {@link Directory#CONTENT_URI Directory.CONTENT_URI}
+     * query to each of the directory authorities.  A directory provider must implement
+     * this query and return a list of directories.  Each directory returned by
+     * the provider must have a unique combination for the {@link #ACCOUNT_NAME} and
+     * {@link #ACCOUNT_TYPE} columns (nulls are allowed).  Since directory IDs are assigned
+     * automatically, the _ID field will not be part of the query projection.
+     * </li>
+     * <li>Contacts Provider compiles directory lists received from all directory
+     * providers into one, assigns each individual directory a globally unique ID and
+     * stores all directory records in the Directory table.
+     * </li>
+     * </ul>
+     * </p>
+     * <p>Contacts Provider automatically interrogates newly installed or replaced packages.
+     * Thus simply installing a package containing a directory provider is sufficient
+     * to have that provider registered.  A package supplying a directory provider does
+     * not have to contain launchable activities.
      * </p>
      * <p>
-     * When a row is inserted in this table, it is automatically associated with the package
-     * (apk) that made the request.  If the package is later uninstalled, all directory rows
-     * it inserted are automatically removed.
+     * Every row in the Directory table is automatically associated with the corresponding package
+     * (apk).  If the package is later uninstalled, all corresponding directory rows
+     * are automatically removed from the Contacts Provider.
      * </p>
      * <p>
-     * A directory row can be optionally associated with an account.
-     * If the account is later removed, the corresponding directory rows are
-     * automatically removed.
+     * When the list of directories handled by a directory provider changes
+     * (for instance when the user adds a new Directory account), the directory provider
+     * should call {@link #notifyDirectoryChange} to notify the Contacts Provider of the change.
+     * In response, the Contacts Provider will requery the directory provider to obtain the
+     * new list of directories.
+     * </p>
+     * <p>
+     * A directory row can be optionally associated with an existing account
+     * (see {@link android.accounts.AccountManager}). If the account is later removed,
+     * the corresponding directory rows are
+     * automatically removed from the Contacts Provider.
      * </p>
      *
      * @hide
@@ -317,11 +369,10 @@ public final class ContactsContract {
         public static final long LOCAL_INVISIBLE = 1;
 
         /**
-         * The name of the package that owns this directory. This field is
-         * required in an insert request and must match the name of the package
-         * making the request. If the package is later uninstalled, the
-         * directories it owns are automatically removed from this table. Only
-         * the specified package is allowed to modify or delete this row later.
+         * The name of the package that owns this directory. Contacts Provider
+         * fill it in with the name of the package containing the directory provider.
+         * If the package is later uninstalled, the directories it owns are
+         * automatically removed from this table.
          *
          * <p>TYPE: TEXT</p>
          *
@@ -349,8 +400,15 @@ public final class ContactsContract {
         public static final String DISPLAY_NAME = "displayName";
 
         /**
-         * The authority to which the request should forwarded in order to access
-         * this directory.
+         * <p>
+         * The authority of the Directory Provider. Contacts Provider will
+         * use this authority to forward requests to the directory provider.
+         * A directory provider can leave this column empty - Contacts Provider will fill it in.
+         * </p>
+         * <p>
+         * Clients of this API should not send requests directly to this authority.
+         * All directory requests must be routed through Contacts Provider.
+         * </p>
          *
          * <p>TYPE: text</p>
          *
@@ -444,6 +502,22 @@ public final class ContactsContract {
          * @hide
          */
         public static final int SHORTCUT_SUPPORT_FULL = 2;
+
+        /**
+         * Notifies the system of a change in the list of directories handled by
+         * a particular directory provider. The Contacts provider will turn around
+         * and send a query to the directory provider for the full list of directories,
+         * which will replace the previous list.
+         *
+         * @hide
+         */
+        public static void notifyDirectoryChange(ContentResolver resolver) {
+            // This is done to trigger a query by Contacts Provider back to the directory provider.
+            // No data needs to be sent back, because the provider can infer the calling
+            // package from binder.
+            ContentValues contentValues = new ContentValues();
+            resolver.update(Directory.CONTENT_URI, contentValues, null, null);
+        }
     }
 
     /**
