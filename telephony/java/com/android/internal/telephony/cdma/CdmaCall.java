@@ -75,8 +75,7 @@ public final class CdmaCall extends Call {
 
     public Phone
     getPhone() {
-        //TODO, see GsmCall
-        return null;
+        return owner.phone;
     }
 
     public boolean isMultiparty() {

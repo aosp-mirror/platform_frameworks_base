@@ -70,8 +70,7 @@ class GsmCall extends Call {
 
     public Phone
     getPhone() {
-        //TODO
-        return null;
+        return owner.phone;
     }
 
     public boolean

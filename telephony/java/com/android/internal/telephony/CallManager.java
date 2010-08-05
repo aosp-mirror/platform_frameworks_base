@@ -16,15 +16,12 @@
 
 package com.android.internal.telephony;
 
-
-
 import android.content.Context;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RegistrantList;
 import android.telephony.PhoneStateListener;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +46,23 @@ import java.util.List;
 public final class CallManager {
 
     private static final int EVENT_DISCONNECT = 100;
-    private static final int EVENT_CALL_STATE_CHANGED = 101;
-
+    private static final int EVENT_PRECISE_CALL_STATE_CHANGED = 101;
+    private static final int EVENT_NEW_RINGING_CONNECTION = 102;
+    private static final int EVENT_UNKNOWN_CONNECTION = 103;
+    private static final int EVENT_INCOMING_RING = 104;
+    private static final int EVENT_RINGBACK_TONE = 105;
+    private static final int EVENT_IN_CALL_VOICE_PRIVACY_ON = 106;
+    private static final int EVENT_IN_CALL_VOICE_PRIVACY_OFF = 107;
+    private static final int EVENT_CALL_WAITING = 108;
+    private static final int EVENT_DISPLAY_INFO = 109;
+    private static final int EVENT_SIGNAL_INFO = 110;
+    private static final int EVENT_CDMA_OTA_STATUS_CHANGE = 111;
+    private static final int EVENT_RESEND_INCALL_MUTE = 112;
+    private static final int EVENT_MMI_INITIATE = 113;
+    private static final int EVENT_MMI_COMPLETE = 114;
+    private static final int EVENT_ECM_TIMER_RESET = 115;
+    private static final int EVENT_SUBSCRIPTION_INFO_READY = 116;
+    private static final int EVENT_SUPP_SERVICE_FAILED = 117;
 
     // Singleton instance
     private static final CallManager INSTANCE = new CallManager();
@@ -89,13 +101,46 @@ public final class CallManager {
     protected final RegistrantList mServiceStateRegistrants
     = new RegistrantList();
 
-    protected final RegistrantList mMmiCompleteRegistrants
-    = new RegistrantList();
-
     protected final RegistrantList mMmiRegistrants
     = new RegistrantList();
 
     protected final RegistrantList mUnknownConnectionRegistrants
+    = new RegistrantList();
+
+    protected final RegistrantList mRingbackToneRegistrants
+    = new RegistrantList();
+
+    protected final RegistrantList mInCallVoicePrivacyOnRegistrants
+    = new RegistrantList();
+
+    protected final RegistrantList mInCallVoicePrivacyOffRegistrants
+    = new RegistrantList();
+
+    protected final RegistrantList mCallWaitingRegistrants
+    = new RegistrantList();
+
+    protected final RegistrantList mDisplayInfoRegistrants
+    = new RegistrantList();
+
+    protected final RegistrantList mSignalInfoRegistrants
+    = new RegistrantList();
+
+    protected final RegistrantList mCdmaOtaStatusChangeRegistrants
+    = new RegistrantList();
+
+    protected final RegistrantList mResendIncallMuteRegistrants
+    = new RegistrantList();
+
+    protected final RegistrantList mMmiInitiateRegistrants
+    = new RegistrantList();
+
+    protected final RegistrantList mMmiCompleteRegistrants
+    = new RegistrantList();
+
+    protected final RegistrantList mEcmTimerResetRegistrants
+    = new RegistrantList();
+
+    protected final RegistrantList mSubscriptionInfoReadyRegistrants
     = new RegistrantList();
 
     protected final RegistrantList mSuppServiceFailedRegistrants
@@ -118,9 +163,28 @@ public final class CallManager {
     }
 
     /**
+     * Get current coarse-grained voice call state.
+     * If the Call Manager has an active call and call waiting occurs,
+     * then the phone state is RINGING not OFFHOOK
+     *
+     */
+    public Phone.State getState() {
+        Phone.State s = Phone.State.IDLE;
+
+        for(Phone phone : mPhones) {
+            if (phone.getState() == Phone.State.RINGING) {
+                return Phone.State.RINGING;
+            } else if (phone.getState() == Phone.State.OFFHOOK) {
+                s = Phone.State.OFFHOOK;
+            }
+        }
+        return s;
+    }
+
+    /**
      * Register phone to CallManager
      * @param phone
-     * @return
+     * @return true if register successfully
      */
     public boolean registerPhone(Phone phone) {
         if (phone != null && !mPhones.contains(phone)) {
@@ -159,13 +223,45 @@ public final class CallManager {
     }
 
     private void registerForPhoneStates(Phone phone) {
-        phone.registerForPreciseCallStateChanged(mHandler, EVENT_CALL_STATE_CHANGED, null);
+        phone.registerForPreciseCallStateChanged(mHandler, EVENT_PRECISE_CALL_STATE_CHANGED, null);
         phone.registerForDisconnect(mHandler, EVENT_DISCONNECT, null);
+        phone.registerForNewRingingConnection(mHandler, EVENT_NEW_RINGING_CONNECTION, null);
+        phone.registerForUnknownConnection(mHandler, EVENT_UNKNOWN_CONNECTION, null);
+        phone.registerForIncomingRing(mHandler, EVENT_INCOMING_RING, null);
+        phone.registerForRingbackTone(mHandler, EVENT_RINGBACK_TONE, null);
+        phone.registerForInCallVoicePrivacyOn(mHandler, EVENT_IN_CALL_VOICE_PRIVACY_ON, null);
+        phone.registerForInCallVoicePrivacyOff(mHandler, EVENT_IN_CALL_VOICE_PRIVACY_OFF, null);
+        phone.registerForCallWaiting(mHandler, EVENT_CALL_WAITING, null);
+        phone.registerForDisplayInfo(mHandler, EVENT_DISPLAY_INFO, null);
+        phone.registerForSignalInfo(mHandler, EVENT_SIGNAL_INFO, null);
+        phone.registerForCdmaOtaStatusChange(mHandler, EVENT_CDMA_OTA_STATUS_CHANGE, null);
+        phone.registerForResendIncallMute(mHandler, EVENT_RESEND_INCALL_MUTE, null);
+        phone.registerForMmiInitiate(mHandler, EVENT_MMI_INITIATE, null);
+        phone.registerForMmiComplete(mHandler, EVENT_MMI_COMPLETE, null);
+        phone.registerForEcmTimerReset(mHandler, EVENT_ECM_TIMER_RESET, null);
+        phone.registerForSubscriptionInfoReady(mHandler, EVENT_SUBSCRIPTION_INFO_READY, null);
+        phone.registerForSuppServiceFailed(mHandler, EVENT_SUPP_SERVICE_FAILED, null);
     }
 
     private void unregisterForPhoneStates(Phone phone) {
         phone.unregisterForPreciseCallStateChanged(mHandler);
         phone.unregisterForDisconnect(mHandler);
+        phone.unregisterForNewRingingConnection(mHandler);
+        phone.unregisterForUnknownConnection(mHandler);
+        phone.unregisterForIncomingRing(mHandler);
+        phone.unregisterForRingbackTone(mHandler);
+        phone.unregisterForInCallVoicePrivacyOn(mHandler);
+        phone.unregisterForInCallVoicePrivacyOff(mHandler);
+        phone.unregisterForCallWaiting(mHandler);
+        phone.unregisterForDisplayInfo(mHandler);
+        phone.unregisterForSignalInfo(mHandler);
+        phone.unregisterForCdmaOtaStatusChange(mHandler);
+        phone.unregisterForResendIncallMute(mHandler);
+        phone.unregisterForMmiInitiate(mHandler);
+        phone.unregisterForMmiComplete(mHandler);
+        phone.unregisterForEcmTimerReset(mHandler);
+        phone.unregisterForSubscriptionInfoReady(mHandler);
+        phone.unregisterForSuppServiceFailed(mHandler);
     }
 
     /**
@@ -523,12 +619,16 @@ public final class CallManager {
      * Notifies when a previously untracked non-ringing/waiting connection has appeared.
      * This is likely due to some other entity (eg, SIM card application) initiating a call.
      */
-    public void registerForUnknownConnection(Handler h, int what, Object obj){}
+    public void registerForUnknownConnection(Handler h, int what, Object obj){
+        mUnknownConnectionRegistrants.addUnique(h, what, obj);
+    }
 
     /**
      * Unregisters for unknown connection notifications.
      */
-    public void unregisterForUnknownConnection(Handler h){}
+    public void unregisterForUnknownConnection(Handler h){
+        mUnknownConnectionRegistrants.remove(h);
+    }
 
 
     /**
@@ -543,14 +643,18 @@ public final class CallManager {
      *  If Connection.isRinging() is true, then
      *   Connection.getCall() == Phone.getRingingCall()
      */
-    public void registerForNewRingingConnection(Handler h, int what, Object obj){}
+    public void registerForNewRingingConnection(Handler h, int what, Object obj){
+        mNewRingingConnectionRegistrants.addUnique(h, what, obj);
+    }
 
     /**
      * Unregisters for new ringing connection notification.
      * Extraneous calls are tolerated silently
      */
 
-    public void unregisterForNewRingingConnection(Handler h){}
+    public void unregisterForNewRingingConnection(Handler h){
+        mNewRingingConnectionRegistrants.remove(h);
+    }
 
     /**
      * Notifies when an incoming call rings.<p>
@@ -560,14 +664,18 @@ public final class CallManager {
      *  AsyncResult.userObj = obj
      *  AsyncResult.result = a Connection. <p>
      */
-    public void registerForIncomingRing(Handler h, int what, Object obj){}
+    public void registerForIncomingRing(Handler h, int what, Object obj){
+        mIncomingRingRegistrants.addUnique(h, what, obj);
+    }
 
     /**
      * Unregisters for ring notification.
      * Extraneous calls are tolerated silently
      */
 
-    public void unregisterForIncomingRing(Handler h){}
+    public void unregisterForIncomingRing(Handler h){
+        mIncomingRingRegistrants.remove(h);
+    }
 
     /**
      * Notifies when out-band ringback tone is needed.<p>
@@ -578,26 +686,32 @@ public final class CallManager {
      *  AsyncResult.result = boolean, true to start play ringback tone
      *                       and false to stop. <p>
      */
-    public void registerForRingbackTone(Handler h, int what, Object obj){}
+    public void registerForRingbackTone(Handler h, int what, Object obj){
+        mRingbackToneRegistrants.addUnique(h, what, obj);
+    }
 
     /**
      * Unregisters for ringback tone notification.
      */
 
-    public void unregisterForRingbackTone(Handler h){}
+    public void unregisterForRingbackTone(Handler h){
+        mRingbackToneRegistrants.remove(h);
+    }
 
     /**
      * Registers the handler to reset the uplink mute state to get
      * uplink audio.
      */
-    public void registerForResendIncallMute(Handler h, int what, Object obj){}
+    public void registerForResendIncallMute(Handler h, int what, Object obj){
+        mResendIncallMuteRegistrants.addUnique(h, what, obj);
+    }
 
     /**
      * Unregisters for resend incall mute notifications.
      */
-    public void unregisterForResendIncallMute(Handler h){}
-
-
+    public void unregisterForResendIncallMute(Handler h){
+        mResendIncallMuteRegistrants.remove(h);
+    }
 
     /**
      * Register for notifications of initiation of a new MMI code request.
@@ -610,13 +724,17 @@ public final class CallManager {
      *
      * <code>obj.result</code> will be an "MmiCode" object.
      */
-    public void registerForMmiInitiate(Handler h, int what, Object obj){}
+    public void registerForMmiInitiate(Handler h, int what, Object obj){
+        mMmiInitiateRegistrants.addUnique(h, what, obj);
+    }
 
     /**
      * Unregisters for new MMI initiate notification.
      * Extraneous calls are tolerated silently
      */
-    public void unregisterForMmiInitiate(Handler h){}
+    public void unregisterForMmiInitiate(Handler h){
+        mMmiInitiateRegistrants.remove(h);
+    }
 
     /**
      * Register for notifications that an MMI request has completed
@@ -626,13 +744,17 @@ public final class CallManager {
      * <code>Message.obj</code> will contain an AsyncResult.
      * <code>obj.result</code> will be an "MmiCode" object
      */
-    public void registerForMmiComplete(Handler h, int what, Object obj){}
+    public void registerForMmiComplete(Handler h, int what, Object obj){
+        mMmiCompleteRegistrants.addUnique(h, what, obj);
+    }
 
     /**
      * Unregisters for MMI complete notification.
      * Extraneous calls are tolerated silently
      */
-    public void unregisterForMmiComplete(Handler h){}
+    public void unregisterForMmiComplete(Handler h){
+        mMmiCompleteRegistrants.remove(h);
+    }
 
     /**
      * Registration point for Ecm timer reset
@@ -640,15 +762,17 @@ public final class CallManager {
      * @param what user-defined message code
      * @param obj placed in Message.obj
      */
-    public void registerForEcmTimerReset(Handler h, int what, Object obj){}
+    public void registerForEcmTimerReset(Handler h, int what, Object obj){
+        mEcmTimerResetRegistrants.addUnique(h, what, obj);
+    }
 
     /**
      * Unregister for notification for Ecm timer reset
      * @param h Handler to be removed from the registrant list.
      */
-    public void unregisterForEcmTimerReset(Handler h){}
-
-
+    public void unregisterForEcmTimerReset(Handler h){
+        mEcmTimerResetRegistrants.remove(h);
+    }
 
     /**
      * Register for ServiceState changed.
@@ -664,25 +788,6 @@ public final class CallManager {
     public void unregisterForServiceStateChanged(Handler h){}
 
     /**
-     * Register for Supplementary Service notifications from the network.
-     * Message.obj will contain an AsyncResult.
-     * AsyncResult.result will be a SuppServiceNotification instance.
-     *
-     * @param h Handler that receives the notification message.
-     * @param what User-defined message code.
-     * @param obj User object.
-     */
-    public void registerForSuppServiceNotification(Handler h, int what, Object obj){}
-
-    /**
-     * Unregisters for Supplementary Service notifications.
-     * Extraneous calls are tolerated silently
-     *
-     * @param h Handler to be removed from the registrant list.
-     */
-    public void unregisterForSuppServiceNotification(Handler h){}
-
-    /**
      * Register for notifications when a supplementary service attempt fails.
      * Message.obj will contain an AsyncResult.
      *
@@ -690,7 +795,9 @@ public final class CallManager {
      * @param what User-defined message code.
      * @param obj User object.
      */
-    public void registerForSuppServiceFailed(Handler h, int what, Object obj){}
+    public void registerForSuppServiceFailed(Handler h, int what, Object obj){
+        mSuppServiceFailedRegistrants.addUnique(h, what, obj);
+    }
 
     /**
      * Unregister for notifications when a supplementary service attempt fails.
@@ -698,7 +805,9 @@ public final class CallManager {
      *
      * @param h Handler to be removed from the registrant list.
      */
-    public void unregisterForSuppServiceFailed(Handler h){}
+    public void unregisterForSuppServiceFailed(Handler h){
+        mSuppServiceFailedRegistrants.remove(h);
+    }
 
     /**
      * Register for notifications when a sInCall VoicePrivacy is enabled
@@ -707,14 +816,18 @@ public final class CallManager {
      * @param what User-defined message code.
      * @param obj User object.
      */
-    public void registerForInCallVoicePrivacyOn(Handler h, int what, Object obj){}
+    public void registerForInCallVoicePrivacyOn(Handler h, int what, Object obj){
+        mInCallVoicePrivacyOnRegistrants.addUnique(h, what, obj);
+    }
 
     /**
-     * Unegister for notifications when a sInCall VoicePrivacy is enabled
+     * Unregister for notifications when a sInCall VoicePrivacy is enabled
      *
      * @param h Handler to be removed from the registrant list.
      */
-    public void unregisterForInCallVoicePrivacyOn(Handler h){}
+    public void unregisterForInCallVoicePrivacyOn(Handler h){
+        mInCallVoicePrivacyOnRegistrants.remove(h);
+    }
 
     /**
      * Register for notifications when a sInCall VoicePrivacy is disabled
@@ -723,14 +836,85 @@ public final class CallManager {
      * @param what User-defined message code.
      * @param obj User object.
      */
-    public void registerForInCallVoicePrivacyOff(Handler h, int what, Object obj){}
+    public void registerForInCallVoicePrivacyOff(Handler h, int what, Object obj){
+        mInCallVoicePrivacyOffRegistrants.addUnique(h, what, obj);
+    }
 
     /**
-     * Unegister for notifications when a sInCall VoicePrivacy is disabled
+     * Unregister for notifications when a sInCall VoicePrivacy is disabled
      *
      * @param h Handler to be removed from the registrant list.
      */
-    public void unregisterForInCallVoicePrivacyOff(Handler h){}
+    public void unregisterForInCallVoicePrivacyOff(Handler h){
+        mInCallVoicePrivacyOffRegistrants.remove(h);
+    }
+
+    /**
+     * Register for notifications when CDMA call waiting comes
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    public void registerForCallWaiting(Handler h, int what, Object obj){
+        mCallWaitingRegistrants.addUnique(h, what, obj);
+    }
+
+    /**
+     * Unregister for notifications when CDMA Call waiting comes
+     * @param h Handler to be removed from the registrant list.
+     */
+    public void unregisterForCallWaiting(Handler h){
+        mCallWaitingRegistrants.remove(h);
+    }
+
+
+    /**
+     * Register for signal information notifications from the network.
+     * Message.obj will contain an AsyncResult.
+     * AsyncResult.result will be a SuppServiceNotification instance.
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+
+    public void registerForSignalInfo(Handler h, int what, Object obj){
+        mSignalInfoRegistrants.addUnique(h, what, obj);
+    }
+
+    /**
+     * Unregisters for signal information notifications.
+     * Extraneous calls are tolerated silently
+     *
+     * @param h Handler to be removed from the registrant list.
+     */
+    public void unregisterForSignalInfo(Handler h){
+        mSignalInfoRegistrants.remove(h);
+    }
+
+    /**
+     * Register for display information notifications from the network.
+     * Message.obj will contain an AsyncResult.
+     * AsyncResult.result will be a SuppServiceNotification instance.
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    public void registerForDisplayInfo(Handler h, int what, Object obj){
+        mDisplayInfoRegistrants.addUnique(h, what, obj);
+    }
+
+    /**
+     * Unregisters for display information notifications.
+     * Extraneous calls are tolerated silently
+     *
+     * @param h Handler to be removed from the registrant list.
+     */
+    public void unregisterForDisplayInfo(Handler h) {
+        mDisplayInfoRegistrants.remove(h);
+    }
 
     /**
      * Register for notifications when CDMA OTA Provision status change
@@ -739,13 +923,17 @@ public final class CallManager {
      * @param what User-defined message code.
      * @param obj User object.
      */
-    public void registerForCdmaOtaStatusChange(Handler h, int what, Object obj){}
+    public void registerForCdmaOtaStatusChange(Handler h, int what, Object obj){
+        mCdmaOtaStatusChangeRegistrants.addUnique(h, what, obj);
+    }
 
     /**
-     * Unegister for notifications when CDMA OTA Provision status change
+     * Unregister for notifications when CDMA OTA Provision status change
      * @param h Handler to be removed from the registrant list.
      */
-    public void unregisterForCdmaOtaStatusChange(Handler h){}
+    public void unregisterForCdmaOtaStatusChange(Handler h){
+        mCdmaOtaStatusChangeRegistrants.remove(h);
+    }
 
     /**
      * Registration point for subscription info ready
@@ -753,13 +941,17 @@ public final class CallManager {
      * @param what what code of message when delivered
      * @param obj placed in Message.obj
      */
-    public void registerForSubscriptionInfoReady(Handler h, int what, Object obj){}
+    public void registerForSubscriptionInfoReady(Handler h, int what, Object obj){
+        mSubscriptionInfoReadyRegistrants.addUnique(h, what, obj);
+    }
 
     /**
      * Unregister for notifications for subscription info
      * @param h Handler to be removed from the registrant list.
      */
-    public void unregisterForSubscriptionInfoReady(Handler h){}
+    public void unregisterForSubscriptionInfoReady(Handler h){
+        mSubscriptionInfoReadyRegistrants.remove(h);
+    }
 
     /* APIs to access foregroudCalls, backgroudCalls, and ringingCalls
      * 1. APIs to access list of calls
@@ -974,8 +1166,56 @@ public final class CallManager {
                 case EVENT_DISCONNECT:
                     mDisconnectRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
-                case EVENT_CALL_STATE_CHANGED:
+                case EVENT_PRECISE_CALL_STATE_CHANGED:
                     mPreciseCallStateRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    break;
+                case EVENT_NEW_RINGING_CONNECTION:
+                    mNewRingingConnectionRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    break;
+                case EVENT_UNKNOWN_CONNECTION:
+                    mUnknownConnectionRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    break;
+                case EVENT_INCOMING_RING:
+                    mIncomingRingRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    break;
+                case EVENT_RINGBACK_TONE:
+                    mRingbackToneRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    break;
+                case EVENT_IN_CALL_VOICE_PRIVACY_ON:
+                    mInCallVoicePrivacyOnRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    break;
+                case EVENT_IN_CALL_VOICE_PRIVACY_OFF:
+                    mInCallVoicePrivacyOffRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    break;
+                case EVENT_CALL_WAITING:
+                    mCallWaitingRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    break;
+                case EVENT_DISPLAY_INFO:
+                    mDisplayInfoRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    break;
+                case EVENT_SIGNAL_INFO:
+                    mSignalInfoRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    break;
+                case EVENT_CDMA_OTA_STATUS_CHANGE:
+                    mCdmaOtaStatusChangeRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    break;
+                case EVENT_RESEND_INCALL_MUTE:
+                    mResendIncallMuteRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    break;
+                case EVENT_MMI_INITIATE:
+                    mMmiInitiateRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    break;
+                case EVENT_MMI_COMPLETE:
+                    mMmiCompleteRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    break;
+                case EVENT_ECM_TIMER_RESET:
+                    mEcmTimerResetRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    break;
+                case EVENT_SUBSCRIPTION_INFO_READY:
+                    mSubscriptionInfoReadyRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    break;
+                case EVENT_SUPP_SERVICE_FAILED:
+                    mSuppServiceFailedRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
             }
         }
