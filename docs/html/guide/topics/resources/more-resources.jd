@@ -310,7 +310,7 @@ float fontSize = res.{@link android.content.res.Resources#getDimension(int) getD
 &lt;TextView
     android:layout_height="@dimen/textview_height"
     android:layout_width="@dimen/textview_width"
-    android:textSize="@dimen/sixteen_sp"/>
+    android:textSize="@dimen/font_size"/>
 </pre>
   </dl>
 </dd> <!-- end example -->

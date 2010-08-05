@@ -45,7 +45,6 @@ import java.util.Arrays;
  *   &lt;item android:state_focused="true" android:color="@color/testcolor1"/&gt;
  *   &lt;item android:state_pressed="true" android:state_enabled="false" android:color="@color/testcolor2" /&gt;
  *   &lt;item android:state_enabled="false" android:color="@color/testcolor3" /&gt;
- *   &lt;item android:state_active="true" android:color="@color/testcolor4" /&gt;
  *   &lt;item android:color="@color/testcolor5"/&gt;
  * &lt;/selector&gt;
  * </pre>
@@ -56,6 +55,9 @@ import java.util.Arrays;
  * An item with no state spec is considered to match any set of states and is generally useful as
  * a final item to be used as a default.  Note that if you have such an item before any other items
  * in the list then any subsequent items will end up being ignored.
+ * <p>For more information, see the guide to <a
+ * href="{@docRoot}guide/topics/resources/color-list-resource.html">Color State
+ * List Resource</a>.</p>
  */
 public class ColorStateList implements Parcelable {
 
