@@ -92,7 +92,7 @@ import android.os.Vibrator;
 import android.os.FileUtils.FileStatus;
 import android.os.storage.StorageManager;
 import android.telephony.TelephonyManager;
-import android.text.ClipboardManager;
+import android.content.ClipboardManager;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.ContextThemeWrapper;

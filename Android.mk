@@ -100,9 +100,11 @@ LOCAL_SRC_FILES += \
 	core/java/android/bluetooth/IBluetoothCallback.aidl \
 	core/java/android/bluetooth/IBluetoothHeadset.aidl \
 	core/java/android/bluetooth/IBluetoothPbap.aidl \
+	core/java/android/content/IClipboard.aidl \
 	core/java/android/content/IContentService.aidl \
 	core/java/android/content/IIntentReceiver.aidl \
 	core/java/android/content/IIntentSender.aidl \
+	core/java/android/content/IOnPrimaryClipChangedListener.aidl \
 	core/java/android/content/ISyncAdapter.aidl \
 	core/java/android/content/ISyncContext.aidl \
 	core/java/android/content/ISyncStatusObserver.aidl \
@@ -132,7 +134,6 @@ LOCAL_SRC_FILES += \
     core/java/android/service/wallpaper/IWallpaperConnection.aidl \
     core/java/android/service/wallpaper/IWallpaperEngine.aidl \
     core/java/android/service/wallpaper/IWallpaperService.aidl \
-	core/java/android/text/IClipboard.aidl \
 	core/java/android/view/accessibility/IAccessibilityManager.aidl \
 	core/java/android/view/accessibility/IAccessibilityManagerClient.aidl \
 	core/java/android/view/IApplicationToken.aidl \

@@ -2359,6 +2359,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             
             if (proc.thread != null) {
+                if (proc.pid == Process.myPid()) {
+                    Log.w(TAG, "crashApplication: trying to crash self!");
+                    return;
+                }
                 long ident = Binder.clearCallingIdentity();
                 try {
                     proc.thread.scheduleCrash(message);
