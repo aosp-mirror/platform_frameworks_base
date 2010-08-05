@@ -92,7 +92,9 @@ static sp<ABuffer> decodeHex(const AString &s) {
 
 static sp<ABuffer> MakeAVCCodecSpecificData(const char *params) {
     AString val;
-    CHECK(GetAttribute(params, "profile-level-id", &val));
+    if (!GetAttribute(params, "profile-level-id", &val)) {
+        return NULL;
+    }
 
     sp<ABuffer> profileLevelID = decodeHex(val);
     CHECK(profileLevelID != NULL);
@@ -105,7 +107,10 @@ static sp<ABuffer> MakeAVCCodecSpecificData(const char *params) {
     size_t numPicParameterSets = 0;
     size_t totalPicParameterSetSize = 0;
 
-    CHECK(GetAttribute(params, "sprop-parameter-sets", &val));
+    if (!GetAttribute(params, "sprop-parameter-sets", &val)) {
+        return NULL;
+    }
+
     size_t start = 0;
     for (;;) {
         ssize_t commaPos = val.find(",", start);
@@ -256,9 +261,11 @@ APacketSource::APacketSource(
         sp<ABuffer> codecSpecificData =
             MakeAVCCodecSpecificData(params.c_str());
 
-        mFormat->setData(
-                kKeyAVCC, 0,
-                codecSpecificData->data(), codecSpecificData->size());
+        if (codecSpecificData != NULL) {
+            mFormat->setData(
+                    kKeyAVCC, 0,
+                    codecSpecificData->data(), codecSpecificData->size());
+        }
     } else if (!strncmp(desc.c_str(), "H263-2000/", 10)
             || !strncmp(desc.c_str(), "H263-1998/", 10)) {
         mFormat->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_H263);
