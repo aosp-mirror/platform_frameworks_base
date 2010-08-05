@@ -34,6 +34,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Röstbrevlåda"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Anslutningsproblem eller ogiltig MMI-kod."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"Endast fasta nummer kan användas."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Tjänsten har aktiverats."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Tjänsten har aktiverats för:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Tjänsten har inaktiverats."</string>
@@ -171,6 +172,8 @@
     <string name="permgroupdesc_storage" msgid="9203302214915355774">"Få åtkomst till SD-kortet."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"inaktivera eller ändra statusfält"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Tillåter att programmet inaktiverar statusfältet eller lägger till och tar bort systemikoner."</string>
+    <string name="permlab_statusBarService" msgid="7247281911387931485">"statusfält"</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Tillåter att programmet visas i statusfältet."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"expandera/komprimera statusfält"</string>
     <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Tillåter att program expanderar eller komprimerar statusfältet."</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"spärra utgående samtal"</string>
@@ -311,8 +314,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Tillåter att ett program ändrar globala ljudinställningar, till exempel volym och routning."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"spela in ljud"</string>
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"Tillåter att program får åtkomst till sökvägen för ljudinspelning."</string>
-    <string name="permlab_camera" msgid="8059288807274039014">"ta bilder"</string>
-    <string name="permdesc_camera" msgid="9013476258810982546">"Tillåter att program tar kort med kameran. Då kan programmet när som helst samla bilderna som visas i kameran."</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"ta bilder och spela in videoklipp"</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"Tillåter att program tar kort och spelar in video med kameran. Då kan programmet när som helst fotografera eller spela in det som visas i kameran."</string>
     <string name="permlab_brick" msgid="8337817093326370537">"inaktivera telefonen permanent"</string>
     <string name="permdesc_brick" msgid="5569526552607599221">"Tillåter att programmet inaktiverar hela telefonen permanent. Detta är mycket farligt."</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"tvinga omstart av telefon"</string>
@@ -335,6 +338,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Tillåter att programmet styr vibratorn."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"styra lampa"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Tillåter att programmet styr lampan."</string>
+    <string name="permlab_accessUsb" msgid="7362327818655760496">"åtkomst till USB-enheter"</string>
+    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Tillåter att programmet använder USB-enheter."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testa maskinvara"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Tillåter att ett program styr kringutrustning i syfte att testa maskinvara."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ringa telefonnummer direkt"</string>
@@ -431,6 +436,10 @@
     <string name="policydesc_forceLock" msgid="2819868664946089740">"Kontrollera när enheten låses, vilket kräver att du anger lösenordet igen."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Radera alla data"</string>
     <string name="policydesc_wipeData" msgid="2314060933796396205">"Återställ fabriksinställningarna och ta bort alla data utan någon bekräftelse."</string>
+    <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
+    <skip />
+    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Hem"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -524,10 +533,9 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Arbete"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Övrigt"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Anpassad"</string>
-    <string name="contact_status_update_attribution" msgid="5112589886094402795">"via <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
-    <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g> via <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Ange PIN-kod"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Ange lösenord för att låsa upp"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Ange PIN-kod för att låsa upp"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Fel PIN-kod!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Tryck på Menu och sedan på 0 om du vill låsa upp."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Nödsamtalsnummer"</string>
@@ -540,6 +548,7 @@
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Återgå till samtalet"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Korrekt!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Försök igen"</string>
+    <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Försök igen"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Laddar (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Laddad."</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
@@ -554,6 +563,8 @@
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM-kortet är låst."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Låser upp SIM-kort…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%d</xliff:g> gånger. "\n\n"Försök igen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"Du har angett ditt lösenord fel <xliff:g id="NUMBER_0">%d</xliff:g> gånger. "\n\n"Försök igen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Du har angett din PIN-kod fel <xliff:g id="NUMBER_0">%d</xliff:g> gånger. "\n\n"Försök igen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter <xliff:g id="NUMBER_1">%d</xliff:g> försök till kommer du att uppmanas att låsa upp telefonen med din Google-inloggning."\n\n" Försök igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Försök igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Glömt ditt grafiska lösenord?"</string>
@@ -573,16 +584,6 @@
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Ta bort"</string>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Inga aviseringar"</string>
-    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Pågående"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Meddelanden"</string>
-    <string name="battery_status_text_percent_format" msgid="7660311274698797147">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="battery_status_charging" msgid="756617993998772213">"Laddar…"</string>
-    <string name="battery_low_title" msgid="7923774589611311406">"Anslut laddaren"</string>
-    <string name="battery_low_subtitle" msgid="7388781709819722764">"Batteriet håller på att ta slut:"</string>
-    <string name="battery_low_percent_format" msgid="696154104579022959">"<xliff:g id="NUMBER">%d%%</xliff:g> eller mindre kvar."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Batteriförbrukning"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Det gick fel vid fabrikstestet"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Åtgärden FACTORY_TEST stöds endast för paket som har installerats i /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Vi hittade inget paket som erbjuder åtgärden FACTORY_TEST."</string>
@@ -708,17 +709,17 @@
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"Välj alla"</string>
-    <string name="selectText" msgid="3889149123626888637">"Markera text"</string>
-    <string name="stopSelectingText" msgid="4157931463872320996">"Sluta välja text"</string>
     <string name="cut" msgid="3092569408438626261">"Klipp ut"</string>
-    <string name="cutAll" msgid="2436383270024931639">"Klipp ut alla"</string>
     <string name="copy" msgid="2681946229533511987">"Kopiera"</string>
-    <string name="copyAll" msgid="2590829068100113057">"Kopiera alla"</string>
     <string name="paste" msgid="5629880836805036433">"Klistra in"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Kopiera webbadress"</string>
+    <!-- no translation found for selectTextMode (6738556348861347240) -->
+    <skip />
+    <!-- no translation found for textSelectionCABTitle (5236850394370820357) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"Indatametod"</string>
-    <string name="addToDictionary" msgid="8793624991686948709">"Lägg till \"<xliff:g id="WORD">%s</xliff:g>\" i ordlistan"</string>
-    <string name="editTextMenuTitle" msgid="1672989176958581452">"Redigera text"</string>
+    <!-- no translation found for editTextMenuTitle (4909135564941815494) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Dåligt med utrymme"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"Telefonens lagringsutrymme håller på att ta slut."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
@@ -726,6 +727,7 @@
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Avbryt"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Obs!"</string>
+    <string name="loading" msgid="1760724998928255250">"Läser in..."</string>
     <string name="capital_on" msgid="1544682755514494298">"PÅ"</string>
     <string name="capital_off" msgid="6815870386972805832">"AV"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Slutför åtgärd genom att använda"</string>
@@ -744,6 +746,16 @@
     <string name="force_close" msgid="3653416315450806396">"Tvinga fram en stängning"</string>
     <string name="report" msgid="4060218260984795706">"Rapportera"</string>
     <string name="wait" msgid="7147118217226317732">"Vänta"</string>
+    <string name="smv_application" msgid="295583804361236288">"Programmet <xliff:g id="APPLICATION">%1$s</xliff:g> (processen <xliff:g id="PROCESS">%2$s</xliff:g>) har brutit mot sin egen StrictMode-policy."</string>
+    <string name="smv_process" msgid="5120397012047462446">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> har brutit mot sin egen StrictMode-policy."</string>
+    <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> körs"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Välj om du vill växla till programmet"</string>
+    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Vill du byta program?"</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Ett annat program som körs måste avslutas innan du kan starta ett nytt."</string>
+    <string name="old_app_action" msgid="493129172238566282">"Gå tillbaka till <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="old_app_description" msgid="942967900237208466">"Starta inte det nya programmet."</string>
+    <string name="new_app_action" msgid="5472756926945440706">"Starta <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="6830398339826789493">"Avbryt det gamla programmet utan att spara."</string>
     <string name="sendText" msgid="5132506121645618310">"Välj en åtgärd för text"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Ringvolym"</string>
     <string name="volume_music" msgid="5421651157138628171">"Mediavolym"</string>
@@ -850,13 +862,15 @@
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"I förväg delad L2TP/IPSec VPN-nyckel"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"Certifikatsbaserad L2TP/IPSec VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"Välj fil"</string>
+    <string name="no_file_chosen" msgid="6363648562170759465">"Ingen fil har valts"</string>
     <string name="reset" msgid="2448168080964209908">"Återställ"</string>
     <string name="submit" msgid="1602335572089911941">"Skicka"</string>
-    <string name="description_star" msgid="2654319874908576133">"favorit"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Billäge aktiverat"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Välj om du vill avsluta billäge."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Internetdelning eller surfpunkt aktiverad"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Tryck om du vill konfigurera"</string>
+    <string name="back_button_label" msgid="2300470004503343439">"Tillbaka"</string>
+    <string name="next_button_label" msgid="1080555104677992408">"Nästa"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Hög mobildataanvändning"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Tryck om du vill veta mer om mobildataanvändning"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Gränsen för mobildata har överskridits"</string>

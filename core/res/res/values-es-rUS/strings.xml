@@ -34,6 +34,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Correo de voz"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problema de conexión o código incorrecto de MMI."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"La operación está limitada a números de marcación fija."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Se ha activado el servicio."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Se activó el servicio para:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Se ha desactivado el servicio."</string>
@@ -171,6 +172,8 @@
     <string name="permgroupdesc_storage" msgid="9203302214915355774">"Acceder a la tarjeta SD."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"desactivar o modificar la barra de estado"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Admite que la aplicación desactive la barra de estado, o agregue y elimine íconos del sistema."</string>
+    <string name="permlab_statusBarService" msgid="7247281911387931485">"barra de estado"</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Permite que la aplicación sea la barra de estado."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"expandir o reducir la barra de estado"</string>
     <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Admite que la aplicación expanda o reduzca la barra de estado."</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"interceptar llamadas salientes"</string>
@@ -311,8 +314,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Admite que la aplicación modifique la configuración global de audio, como el volumen y el enrutamiento."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"grabar audio"</string>
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"Admite que la aplicación acceda a la ruta de grabación de audio."</string>
-    <string name="permlab_camera" msgid="8059288807274039014">"tomar fotografías"</string>
-    <string name="permdesc_camera" msgid="9013476258810982546">"Admite una aplicación que toma fotografías con la cámara. Esto permite que la aplicación en cualquier momento recopile imágenes que esté viendo la cámara."</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"tomar fotografías y grabar videos"</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"Admite una aplicación que toma fotografías y graba video con la cámara. Esto permite que la aplicación en cualquier momento recopile imágenes que esté viendo la cámara."</string>
     <string name="permlab_brick" msgid="8337817093326370537">"desactivar teléfono de manera permanente"</string>
     <string name="permdesc_brick" msgid="5569526552607599221">"Admite que la aplicación desactive todo el teléfono de manera permanente. Esto es muy peligroso."</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"provocar el reinicio del teléfono"</string>
@@ -335,6 +338,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Admite que la aplicación controle el vibrador."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"controlar linterna"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Admite que la aplicación controle la linterna."</string>
+    <string name="permlab_accessUsb" msgid="7362327818655760496">"acceder a dispositivos USB"</string>
+    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Permite que la aplicación acceda a dispositivos USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"probar el hardware"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Admite que la aplicación controle diversos periféricos con el fin de probar el hardware."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"llamar directamente a números de teléfono"</string>
@@ -431,6 +436,10 @@
     <string name="policydesc_forceLock" msgid="2819868664946089740">"Controlar cuando se bloquee el dispositivo, requiere que vuelvas a ingresar tu contraseña."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Borrar todos los datos"</string>
     <string name="policydesc_wipeData" msgid="2314060933796396205">"Realizar un reestablecimiento de fábrica y borrar todos tus datos sin ninguna confirmación."</string>
+    <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
+    <skip />
+    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Celular"</item>
@@ -524,10 +533,9 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Trabajo"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Otro"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Personalizado"</string>
-    <string name="contact_status_update_attribution" msgid="5112589886094402795">"a través de <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
-    <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g> a través de <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Ingresar el código de PIN"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Ingresar la contraseña para desbloquear"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Ingresa el PIN para desbloquear"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"¡Código de PIN incorrecto!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Para desbloquear, presiona el menú y luego 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Número de emergencia"</string>
@@ -540,6 +548,7 @@
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Regresar a llamada"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Correcto"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Lo sentimos, vuelve a intentarlo"</string>
+    <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Lo sentimos, vuelve a intentarlo"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Cargando (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Cargada."</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"Segmento <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
@@ -554,6 +563,8 @@
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"La tarjeta SIM está bloqueada."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Desbloqueando tarjeta SIM…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Has extraído incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. "\n\n"Vuelve a intentarlo en <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"Has ingresado tu contraseña de manera incorrecta <xliff:g id="NUMBER_0">%d</xliff:g> veces. "\n\n"Vuelve a intentarlo en <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Has ingresado tu PIN de manera incorrecta <xliff:g id="NUMBER_0">%d</xliff:g> veces. "\n\n"Vuelve a intentarlo en <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"Has extraído incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. Luego de <xliff:g id="NUMBER_1">%d</xliff:g> intentos incorrectos, se te solicitará que desbloquees tu teléfono al iniciar sesión en Google. "\n\n" Vuelve a intentarlo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Vuelve a intentarlo en <xliff:g id="NUMBER">%d</xliff:g> segundos."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"¿Olvidaste el patrón?"</string>
@@ -573,16 +584,6 @@
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Borrar"</string>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"No hay notificaciones"</string>
-    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Continuo"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificaciones"</string>
-    <string name="battery_status_text_percent_format" msgid="7660311274698797147">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="battery_status_charging" msgid="756617993998772213">"Cargando..."</string>
-    <string name="battery_low_title" msgid="7923774589611311406">"Conecta el cargador"</string>
-    <string name="battery_low_subtitle" msgid="7388781709819722764">"Hay poca batería:"</string>
-    <string name="battery_low_percent_format" msgid="696154104579022959">"Restan <xliff:g id="NUMBER">%d%%</xliff:g> o menos."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Uso de la batería"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Error en la prueba de fábrica"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"La acción FACTORY_TEST se admite solamente en paquetes instalados en /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"No se ha encontrado ningún paquete que proporcione la acción FACTORY_TEST ."</string>
@@ -708,17 +709,17 @@
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"Seleccionar todos"</string>
-    <string name="selectText" msgid="3889149123626888637">"Seleccionar texto"</string>
-    <string name="stopSelectingText" msgid="4157931463872320996">"Detener la selección de texto"</string>
     <string name="cut" msgid="3092569408438626261">"Cortar"</string>
-    <string name="cutAll" msgid="2436383270024931639">"Cortar llamada"</string>
     <string name="copy" msgid="2681946229533511987">"Copiar"</string>
-    <string name="copyAll" msgid="2590829068100113057">"Copiar todo"</string>
     <string name="paste" msgid="5629880836805036433">"Pegar"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Copiar URL"</string>
+    <!-- no translation found for selectTextMode (6738556348861347240) -->
+    <skip />
+    <!-- no translation found for textSelectionCABTitle (5236850394370820357) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"Método de entrada"</string>
-    <string name="addToDictionary" msgid="8793624991686948709">"Agregar \"<xliff:g id="WORD">%s</xliff:g>\" al diccionario"</string>
-    <string name="editTextMenuTitle" msgid="1672989176958581452">"Editar texto"</string>
+    <!-- no translation found for editTextMenuTitle (4909135564941815494) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Poco espacio de almacenamiento"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"Hay poco espacio de almacenamiento en el teléfono."</string>
     <string name="ok" msgid="5970060430562524910">"Aceptar"</string>
@@ -726,6 +727,7 @@
     <string name="yes" msgid="5362982303337969312">"Aceptar"</string>
     <string name="no" msgid="5141531044935541497">"Cancelar"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Atención"</string>
+    <string name="loading" msgid="1760724998928255250">"Cargando..."</string>
     <string name="capital_on" msgid="1544682755514494298">"Encendido"</string>
     <string name="capital_off" msgid="6815870386972805832">"APAGADO"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Completar la acción mediante"</string>
@@ -744,6 +746,16 @@
     <string name="force_close" msgid="3653416315450806396">"Provocar acercamiento"</string>
     <string name="report" msgid="4060218260984795706">"Notificar"</string>
     <string name="wait" msgid="7147118217226317732">"Espera"</string>
+    <string name="smv_application" msgid="295583804361236288">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> (proceso <xliff:g id="PROCESS">%2$s</xliff:g>) ha violado su política StrictMode autoimpuesta."</string>
+    <string name="smv_process" msgid="5120397012047462446">"El proceso <xliff:g id="PROCESS">%1$s</xliff:g> ha violado su política StrictMode autoimpuesta."</string>
+    <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> Correr"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Selecciona cambiar la aplicación"</string>
+    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"¿Deseas cambiar aplicaciones?"</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Ya se está ejecutando una aplicación que debe detenerse antes de iniciar una nueva."</string>
+    <string name="old_app_action" msgid="493129172238566282">"Regresar a <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="old_app_description" msgid="942967900237208466">"No inicies la nueva aplicación."</string>
+    <string name="new_app_action" msgid="5472756926945440706">"Inicio <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="6830398339826789493">"Interrumpe la aplicación anterior sin guardar."</string>
     <string name="sendText" msgid="5132506121645618310">"Selecciona una acción para el texto"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volumen del timbre"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volumen de los medios"</string>
@@ -850,13 +862,15 @@
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"Clave previamente compartida según L2TP/IPSec VPN"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"Certificado según L2TP/IPSec VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"Elegir archivo"</string>
+    <string name="no_file_chosen" msgid="6363648562170759465">"No se seleccionó un archivo."</string>
     <string name="reset" msgid="2448168080964209908">"Restablecer"</string>
     <string name="submit" msgid="1602335572089911941">"Enviar"</string>
-    <string name="description_star" msgid="2654319874908576133">"favorito"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Modo auto habilitado"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Seleccionar para salir del modo auto"</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Anclaje a red o zona activa conectados"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Tocar para configurar"</string>
+    <string name="back_button_label" msgid="2300470004503343439">"Atrás"</string>
+    <string name="next_button_label" msgid="1080555104677992408">"Siguiente"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Amplia utilización de datos móviles"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Toca para obtener más información acerca de la utilización de datos móviles."</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Límite de datos móviles excedido "</string>
