@@ -68,7 +68,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-class NotificationManagerService extends INotificationManager.Stub
+/** {@hide} */
+public class NotificationManagerService extends INotificationManager.Stub
 {
     private static final String TAG = "NotificationService";
     private static final boolean DBG = false;
@@ -316,7 +317,8 @@ class NotificationManagerService extends INotificationManager.Stub
 
         public void onNotificationError(String pkg, String tag, int id,
                 int uid, int initialPid, String message) {
-            Slog.d(TAG, "onNotification error pkg=" + pkg + " tag=" + tag + " id=" + id);
+            Slog.d(TAG, "onNotification error pkg=" + pkg + " tag=" + tag + " id=" + id
+                    + "; will crashApplication(uid=" + uid + ", pid=" + initialPid + ")");
             cancelNotification(pkg, tag, id, 0, 0);
             long ident = Binder.clearCallingIdentity();
             try {
@@ -671,11 +673,20 @@ class NotificationManagerService extends INotificationManager.Stub
         enqueueNotificationWithTag(pkg, null /* tag */, id, notification, idOut);
     }
 
-    public void enqueueNotificationWithTag(String pkg, String tag, int id,
-            Notification notification, int[] idOut)
+    public void enqueueNotificationWithTag(String pkg, String tag, int id, Notification notification,
+            int[] idOut)
     {
-        final int callingUid = Binder.getCallingUid();
-        final int callingPid = Binder.getCallingPid();
+        enqueueNotificationInternal(pkg, Binder.getCallingUid(), Binder.getCallingPid(),
+                tag, id, notification, idOut);
+    }
+
+    // Not exposed via Binder; for system use only (otherwise malicious apps could spoof the
+    // uid/pid of another application)
+    public void enqueueNotificationInternal(String pkg, int callingUid, int callingPid,
+            String tag, int id, Notification notification, int[] idOut)
+    {
+        Slog.d(TAG, "enqueueNotificationWithTag: calling uid=" + callingUid 
+                + ", pid=" + callingPid);
         
         checkIncomingCall(pkg);
 
