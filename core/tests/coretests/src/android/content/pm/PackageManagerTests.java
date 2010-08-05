@@ -69,7 +69,7 @@ public class PackageManagerTests extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        mOrigState = getMediaState();
+        mOrigState = checkMediaState(Environment.MEDIA_MOUNTED);
         if (!mountMedia()) {
             Log.i(TAG, "sdcard not mounted? Some of these tests might fail");
         }
@@ -78,12 +78,12 @@ public class PackageManagerTests extends AndroidTestCase {
     @Override
     protected void tearDown() throws Exception {
         // Restore media state.
-        boolean newState = getMediaState();
+        boolean newState = checkMediaState(Environment.MEDIA_MOUNTED);
         if (newState != mOrigState) {
             if (mOrigState) {
-                getMs().mountVolume(Environment.getExternalStorageDirectory().getPath());
+                mountMedia();
             } else {
-                getMs().unmountVolume(Environment.getExternalStorageDirectory().getPath(), true);
+                unmountMedia();
             }
         }
         super.tearDown();
@@ -576,6 +576,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     @LargeTest
     public void testInstallSdcard() {
+        mountMedia();
         sampleInstallFromRawResource(PackageManager.INSTALL_EXTERNAL, true);
     }
 
@@ -913,41 +914,62 @@ public class PackageManagerTests extends AndroidTestCase {
         return null;
     }
 
-    boolean getMediaState() {
+    boolean checkMediaState(String desired) {
         try {
-        String mPath = Environment.getExternalStorageDirectory().getPath();
-        String state = getMs().getVolumeState(mPath);
-        return Environment.MEDIA_MOUNTED.equals(state);
+            String mPath = Environment.getExternalStorageDirectory().getPath();
+            String actual = getMs().getVolumeState(mPath);
+            if (desired.equals(actual)) {
+                return true;
+            } else {
+                return false;
+            }
         } catch (RemoteException e) {
+            Log.e(TAG, "Exception while checking media state", e);
             return false;
         }
     }
 
     boolean mountMedia() {
-        if (getMediaState()) {
+        if (checkMediaState(Environment.MEDIA_MOUNTED)) {
             return true;
         }
+
+        final String path = Environment.getExternalStorageDirectory().toString();
+        StorageListener observer = new StorageListener(Environment.MEDIA_MOUNTED);
+        StorageManager sm = (StorageManager) mContext.getSystemService(Context.STORAGE_SERVICE);
+        sm.registerListener(observer);
         try {
-        String mPath = Environment.getExternalStorageDirectory().toString();
-        int ret = getMs().mountVolume(mPath);
-        return ret == StorageResultCode.OperationSucceeded;
-        } catch (RemoteException e) {
+            // Wait on observer
+            synchronized (observer) {
+                int ret = getMs().mountVolume(path);
+                if (ret != StorageResultCode.OperationSucceeded) {
+                    throw new Exception("Could not mount the media");
+                }
+                long waitTime = 0;
+                while ((!observer.isDone()) && (waitTime < MAX_WAIT_TIME)) {
+                    observer.wait(WAIT_TIME_INCR);
+                    waitTime += WAIT_TIME_INCR;
+                }
+                if (!observer.isDone()) {
+                    throw new Exception("Timed out waiting for unmount media notification");
+                }
+                return true;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Exception : " + e);
             return false;
+        } finally {
+            sm.unregisterListener(observer);
         }
     }
 
     private boolean unmountMedia() {
-        String path = Environment.getExternalStorageDirectory().getPath();
-        try {
-            String state = getMs().getVolumeState(path);
-            if (Environment.MEDIA_UNMOUNTED.equals(state)) {
-                return true;
-            }
-        } catch (RemoteException e) {
-            failStr(e);
+        if (checkMediaState(Environment.MEDIA_UNMOUNTED)) {
+            return true;
         }
 
-        StorageListener observer = new StorageListener();
+        final String path = Environment.getExternalStorageDirectory().getPath();
+        StorageListener observer = new StorageListener(Environment.MEDIA_UNMOUNTED);
         StorageManager sm = (StorageManager) mContext.getSystemService(Context.STORAGE_SERVICE);
         sm.registerListener(observer);
         try {
@@ -976,7 +998,7 @@ public class PackageManagerTests extends AndroidTestCase {
         // Install pkg on sdcard
         InstallParams ip = sampleInstallFromRawResource(PackageManager.INSTALL_EXTERNAL, false);
         if (localLOGV) Log.i(TAG, "Installed pkg on sdcard");
-        boolean origState = getMediaState();
+        boolean origState = checkMediaState(Environment.MEDIA_MOUNTED);
         boolean registeredReceiver = false;
         SdMountReceiver receiver = new SdMountReceiver(new String[]{ip.pkg.packageName});
         try {
@@ -1468,7 +1490,7 @@ public class PackageManagerTests extends AndroidTestCase {
      */
     @LargeTest
     public void testInstallSdcardUnmount() {
-        boolean origState = getMediaState();
+        boolean origState = checkMediaState(Environment.MEDIA_MOUNTED);
         try {
             // Unmount sdcard
             assertTrue(unmountMedia());
@@ -1493,22 +1515,22 @@ public class PackageManagerTests extends AndroidTestCase {
      */
     @LargeTest
     public void testInstallManifestSdcardUnmount() {
-       boolean origState = getMediaState();
-       try {
-           // Unmount sdcard
-           assertTrue(unmountMedia());
-           InstallParams ip = new InstallParams("install.apk", R.raw.install_loc_sdcard);
-           installFromRawResource(ip, 0, true, false, -1,
-                   PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
-       } finally {
-           // Restore original media state
-           if (origState) {
-               mountMedia();
-           } else {
-               unmountMedia();
-           }
-       }
-   }
+        boolean origState = checkMediaState(Environment.MEDIA_MOUNTED);
+        try {
+            // Unmount sdcard
+            assertTrue(unmountMedia());
+            InstallParams ip = new InstallParams("install.apk", R.raw.install_loc_sdcard);
+            installFromRawResource(ip, 0, true, false, -1,
+                    PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+        } finally {
+            // Restore original media state
+            if (origState) {
+                mountMedia();
+            } else {
+                unmountMedia();
+            }
+        }
+    }
 
    /*---------- Recommended install location tests ----*/
    /* Precedence: FlagManifestExistingUser
@@ -2269,7 +2291,7 @@ public class PackageManagerTests extends AndroidTestCase {
     @LargeTest
     public void testInstallOnSdPermissionsUnmount() {
         InstallParams ip = null;
-        boolean origMediaState = getMediaState();
+        boolean origMediaState = checkMediaState(Environment.MEDIA_MOUNTED);
         try {
             // **: Upon installing a package, are its declared permissions published?
             int iFlags = PackageManager.INSTALL_INTERNAL;
@@ -2300,8 +2322,10 @@ public class PackageManagerTests extends AndroidTestCase {
      */
     @LargeTest
     public void testInstallSdcardStaleContainer() {
-        boolean origMediaState = getMediaState();
+        boolean origMediaState = checkMediaState(Environment.MEDIA_MOUNTED);
         try {
+            // Mount media first
+            mountMedia();
             String outFileName = "install.apk";
             int rawResId = R.raw.install;
             PackageManager pm = mContext.getPackageManager();
@@ -2342,7 +2366,7 @@ public class PackageManagerTests extends AndroidTestCase {
      */
     @LargeTest
     public void testInstallSdcardStaleContainerReinstall() {
-        boolean origMediaState = getMediaState();
+        boolean origMediaState = checkMediaState(Environment.MEDIA_MOUNTED);
         try {
             // Mount media first
             mountMedia();
@@ -2375,7 +2399,6 @@ public class PackageManagerTests extends AndroidTestCase {
             } else {
                 unmountMedia();
             }
-
         }
     }
     /*
