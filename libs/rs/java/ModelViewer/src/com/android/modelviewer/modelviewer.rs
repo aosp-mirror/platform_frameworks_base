@@ -62,7 +62,7 @@ int root(int launchID) {
 
     rsgDrawMesh(gTestMesh);
 
-    color(0.3f, 0.3f, 0.3f, 1.0f);
+    rsgFontColor(0.3f, 0.3f, 0.3f, 1.0f);
     rsgDrawText("Renderscript model test", 30, 695);
 
     rsgBindFont(gItalic);
