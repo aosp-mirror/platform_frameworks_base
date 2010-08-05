@@ -635,6 +635,7 @@ public class Activity extends ContextThemeWrapper
     /*package*/ ActivityThread mMainThread;
     Activity mParent;
     boolean mCalled;
+    boolean mCheckedForLoaderManager;
     boolean mStarted;
     private boolean mResumed;
     private boolean mStopped;
@@ -774,16 +775,17 @@ public class Activity extends ContextThemeWrapper
         if (mLoaderManager != null) {
             return mLoaderManager;
         }
-        mLoaderManager = getLoaderManager(-1, mStarted);
+        mCheckedForLoaderManager = true;
+        mLoaderManager = getLoaderManager(-1, mStarted, true);
         return mLoaderManager;
     }
     
-    LoaderManagerImpl getLoaderManager(int index, boolean started) {
+    LoaderManagerImpl getLoaderManager(int index, boolean started, boolean create) {
         if (mAllLoaderManagers == null) {
             mAllLoaderManagers = new SparseArray<LoaderManagerImpl>();
         }
         LoaderManagerImpl lm = mAllLoaderManagers.get(index);
-        if (lm == null) {
+        if (lm == null && create) {
             lm = new LoaderManagerImpl(started);
             mAllLoaderManagers.put(index, lm);
         }
@@ -992,7 +994,10 @@ public class Activity extends ContextThemeWrapper
         mStarted = true;
         if (mLoaderManager != null) {
             mLoaderManager.doStart();
+        } else if (!mCheckedForLoaderManager) {
+            mLoaderManager = getLoaderManager(-1, mStarted, false);
         }
+        mCheckedForLoaderManager = true;
     }
 
     /**
@@ -1550,13 +1555,14 @@ public class Activity extends ContextThemeWrapper
         ArrayList<Fragment> fragments = mFragments.retainNonConfig();
         boolean retainLoaders = false;
         if (mAllLoaderManagers != null) {
-            // prune out any loader managers that were already stopped, so
+            // prune out any loader managers that were already stopped and so
             // have nothing useful to retain.
             for (int i=mAllLoaderManagers.size()-1; i>=0; i--) {
                 LoaderManagerImpl lm = mAllLoaderManagers.valueAt(i);
                 if (lm.mRetaining) {
                     retainLoaders = true;
                 } else {
+                    lm.doDestroy();
                     mAllLoaderManagers.removeAt(i);
                 }
             }
@@ -1586,7 +1592,12 @@ public class Activity extends ContextThemeWrapper
     }
     
     void invalidateFragmentIndex(int index) {
+        //Log.v(TAG, "invalidateFragmentIndex: index=" + index);
         if (mAllLoaderManagers != null) {
+            LoaderManagerImpl lm = mAllLoaderManagers.get(index);
+            if (lm != null) {
+                lm.doDestroy();
+            }
             mAllLoaderManagers.remove(index);
         }
     }
@@ -4289,6 +4300,9 @@ public class Activity extends ContextThemeWrapper
     final void performDestroy() {
         mFragments.dispatchDestroy();
         onDestroy();
+        if (mLoaderManager != null) {
+            mLoaderManager.doDestroy();
+        }
     }
     
     final boolean isResumed() {

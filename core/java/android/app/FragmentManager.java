@@ -385,12 +385,12 @@ public class FragmentManager {
     }
     
     public void addFragment(Fragment fragment, boolean moveToStateNow) {
-        if (DEBUG) Log.v(TAG, "add: " + fragment);
         if (mAdded == null) {
             mAdded = new ArrayList<Fragment>();
         }
         mAdded.add(fragment);
         makeActive(fragment);
+        if (DEBUG) Log.v(TAG, "add: " + fragment);
         fragment.mAdded = true;
         if (fragment.mHasMenu) {
             mNeedMenuInvalidate = true;
@@ -401,18 +401,18 @@ public class FragmentManager {
     }
     
     public void removeFragment(Fragment fragment, int transition, int transitionStyle) {
-        if (DEBUG) Log.v(TAG, "remove: " + fragment);
+        if (DEBUG) Log.v(TAG, "remove: " + fragment + " nesting=" + fragment.mBackStackNesting);
         mAdded.remove(fragment);
         final boolean inactive = fragment.mBackStackNesting <= 0;
-        if (inactive) {
-            makeInactive(fragment);
-        }
         if (fragment.mHasMenu) {
             mNeedMenuInvalidate = true;
         }
         fragment.mAdded = false;
         moveToState(fragment, inactive ? Fragment.INITIALIZING : Fragment.CREATED,
                 transition, transitionStyle);
+        if (inactive) {
+            makeInactive(fragment);
+        }
     }
     
     public void hideFragment(Fragment fragment, int transition, int transitionStyle) {

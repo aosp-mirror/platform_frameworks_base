@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -216,6 +217,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     
     LoaderManagerImpl mLoaderManager;
     boolean mStarted;
+    boolean mCheckedForLoaderManager;
     
     /**
      * Default constructor.  <strong>Every</string> fragment must have an
@@ -426,7 +428,8 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
         if (mLoaderManager != null) {
             return mLoaderManager;
         }
-        mLoaderManager = mActivity.getLoaderManager(mIndex, mStarted);
+        mCheckedForLoaderManager = true;
+        mLoaderManager = mActivity.getLoaderManager(mIndex, mStarted, true);
         return mLoaderManager;
     }
     
@@ -567,6 +570,10 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     public void onStart() {
         mCalled = true;
         mStarted = true;
+        if (!mCheckedForLoaderManager) {
+            mCheckedForLoaderManager = true;
+            mLoaderManager = mActivity.getLoaderManager(mIndex, mStarted, false);
+        }
         if (mLoaderManager != null) {
             mLoaderManager.doStart();
         }
@@ -628,6 +635,12 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      */
     public void onDestroy() {
         mCalled = true;
+        //Log.v("foo", "onDestroy: mCheckedForLoaderManager=" + mCheckedForLoaderManager
+        //        + " mLoaderManager=" + mLoaderManager);
+        if (!mCheckedForLoaderManager) {
+            mCheckedForLoaderManager = true;
+            mLoaderManager = mActivity.getLoaderManager(mIndex, mStarted, false);
+        }
         if (mLoaderManager != null) {
             mLoaderManager.doDestroy();
         }
@@ -777,6 +790,10 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
         onStop();
         if (mStarted) {
             mStarted = false;
+            if (!mCheckedForLoaderManager) {
+                mCheckedForLoaderManager = true;
+                mLoaderManager = mActivity.getLoaderManager(mIndex, mStarted, false);
+            }
             if (mLoaderManager != null) {
                 if (mActivity == null || !mActivity.mChangingConfigurations) {
                     mLoaderManager.doStop();
