@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.annotation.Widget;
 import android.app.AlertDialog;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -45,7 +46,6 @@ import android.os.Message;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
-import android.text.IClipboard;
 import android.text.Selection;
 import android.text.Spannable;
 import android.util.AttributeSet;
@@ -4053,13 +4053,9 @@ public class WebView extends AbsoluteLayout
                     , com.android.internal.R.string.text_copied
                     , Toast.LENGTH_SHORT).show();
             copiedSomething = true;
-            try {
-                IClipboard clip = IClipboard.Stub.asInterface(
-                        ServiceManager.getService("clipboard"));
-                        clip.setClipboardText(selection);
-            } catch (android.os.RemoteException e) {
-                Log.e(LOGTAG, "Clipboard failed", e);
-            }
+            ClipboardManager cm = (ClipboardManager)getContext()
+                    .getSystemService(Context.CLIPBOARD_SERVICE);
+            cm.setText(selection);
         }
         invalidate(); // remove selection region and pointer
         return copiedSomething;
