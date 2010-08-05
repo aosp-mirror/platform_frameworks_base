@@ -73,6 +73,7 @@ public class FileFilter {
 
     static final String[] ignoreTestList = {
         "editing/selection/move-left-right.html", // Causes DumpRenderTree to hang
+        "fast/dom/DeviceOrientation/basic-operation.html", // Will cause crash until mock DeviceOrientationClient is hooked up.
         "fast/js/excessive-comma-usage.html", // Tests huge initializer list, causes OOM.
         "fast/js/regexp-charclass-crash.html", // RegExp is too large, causing OOM
         "fast/regex/test1.html", // Causes DumpRenderTree to hang with V8
