@@ -19,8 +19,8 @@ package android.net.http;
 import android.content.Context;
 import android.util.Log;
 import org.apache.harmony.xnet.provider.jsse.FileClientSessionCache;
+import org.apache.harmony.xnet.provider.jsse.OpenSSLContextImpl;
 import org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache;
-import org.apache.harmony.xnet.provider.jsse.SSLContextImpl;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -79,7 +79,7 @@ public class HttpsConnection extends Connection {
                 cache = FileClientSessionCache.usingDirectory(sessionDir);
             }
 
-            SSLContextImpl sslContext = new SSLContextImpl();
+            OpenSSLContextImpl sslContext = new OpenSSLContextImpl();
 
             // here, trust managers is a single trust-all manager
             TrustManager[] trustManagers = new TrustManager[] {
