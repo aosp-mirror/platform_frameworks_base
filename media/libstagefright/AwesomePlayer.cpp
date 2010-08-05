@@ -854,7 +854,7 @@ void AwesomePlayer::setVideoSource(sp<MediaSource> source) {
 
 status_t AwesomePlayer::initVideoDecoder() {
     uint32_t flags = 0;
-#if 1
+#if 0
     if (mRTPSession != NULL) {
         // XXX hack.
 
@@ -1240,39 +1240,6 @@ status_t AwesomePlayer::finishSetDataSource_l() {
         mLooper->registerHandler(mRTPSession);
 
 #if 0
-        // My H264 SDP
-        static const char *raw =
-            "v=0\r\n"
-            "o=- 64 233572944 IN IP4 127.0.0.0\r\n"
-            "s=QuickTime\r\n"
-            "t=0 0\r\n"
-            "a=range:npt=0-315\r\n"
-            "a=isma-compliance:2,2.0,2\r\n"
-            "m=video 5434 RTP/AVP 97\r\n"
-            "c=IN IP4 127.0.0.1\r\n"
-            "b=AS:30\r\n"
-            "a=rtpmap:97 H264/90000\r\n"
-            "a=fmtp:97 packetization-mode=1;profile-level-id=42000C;"
-              "sprop-parameter-sets=Z0IADJZUCg+I,aM44gA==\r\n"
-            "a=mpeg4-esid:201\r\n"
-            "a=cliprect:0,0,240,320\r\n"
-            "a=framesize:97 320-240\r\n";
-#elif 0
-        // My H263 SDP
-        static const char *raw =
-            "v=0\r\n"
-            "o=- 64 233572944 IN IP4 127.0.0.0\r\n"
-            "s=QuickTime\r\n"
-            "t=0 0\r\n"
-            "a=range:npt=0-315\r\n"
-            "a=isma-compliance:2,2.0,2\r\n"
-            "m=video 5434 RTP/AVP 97\r\n"
-            "c=IN IP4 127.0.0.1\r\n"
-            "b=AS:30\r\n"
-            "a=rtpmap:97 H263-1998/90000\r\n"
-            "a=cliprect:0,0,240,320\r\n"
-            "a=framesize:97 320-240\r\n";
-#elif 0
         // My AMR SDP
         static const char *raw =
             "v=0\r\n"
@@ -1299,12 +1266,9 @@ status_t AwesomePlayer::finishSetDataSource_l() {
             "c=IN IP4 127.0.0.1\r\n"
             "b=AS:30\r\n"
             "a=rtpmap:97 H264/90000\r\n"
-            "a=fmtp:97 packetization-mode=1;profile-level-id=42E00D;"
-              "sprop-parameter-sets=J0LgDZWgUG/lQA==,KM4DnoA=\r\n"
-            "a=mpeg4-esid:201\r\n"
             "a=cliprect:0,0,200,320\r\n"
             "a=framesize:97 320-200\r\n";
-#elif 0
+#else
         // GTalk H263 SDP
         static const char *raw =
             "v=0\r\n"
@@ -1319,22 +1283,6 @@ status_t AwesomePlayer::finishSetDataSource_l() {
             "a=rtpmap:98 H263-1998/90000\r\n"
             "a=cliprect:0,0,200,320\r\n"
             "a=framesize:98 320-200\r\n";
-#else
-    // sholes H264 SDP
-    static const char *raw =
-        "v=0\r\n"
-        "o=- 64 233572944 IN IP4 127.0.0.0\r\n"
-        "s=QuickTime\r\n"
-        "t=0 0\r\n"
-        "a=range:npt=now-\r\n"
-        "m=video 5434 RTP/AVP 96\r\n"
-        "c=IN IP4 127.0.0.1\r\n"
-        "b=AS:320000\r\n"
-        "a=rtpmap:96 H264/90000\r\n"
-        "a=fmtp:96 packetization-mode=1;profile-level-id=42001E;"
-          "sprop-parameter-sets=Z0KACukCg+QgAAB9AAAOpgCA,aM48gA==\r\n"
-        "a=cliprect:0,0,240,320\r\n"
-        "a=framesize:96 320-240\r\n";
 #endif
 
         sp<ASessionDescription> desc = new ASessionDescription;
