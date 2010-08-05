@@ -188,6 +188,9 @@ public class MediaRecorder
         public static final int AAC_ADIF = 5;
         /** @hide AAC ADTS file format */
         public static final int AAC_ADTS = 6;
+
+        /** @hide Stream over a socket, limited to a single stream */
+        public static final int OUTPUT_FORMAT_RTP_AVP = 7;
     };
 
     /**

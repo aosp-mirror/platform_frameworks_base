@@ -38,9 +38,7 @@ struct MyHandler : public AHandler {
           mConn(new ARTSPConnection),
           mRTPConn(new ARTPConnection),
           mSessionURL(url),
-          mSetupTracksSuccessful(false),
-          mFirstAccessUnit(true),
-          mFirstAccessUnitNTP(-1) {
+          mSetupTracksSuccessful(false) {
 
         mNetLooper->start(false /* runOnCallingThread */,
                           false /* canCallJava */,
@@ -161,8 +159,11 @@ struct MyHandler : public AHandler {
                 size_t index;
                 CHECK(msg->findSize("index", &index));
 
+                TrackInfo *track = NULL;
                 size_t trackIndex;
-                CHECK(msg->findSize("track-index", &trackIndex));
+                if (msg->findSize("track-index", &trackIndex)) {
+                    track = &mTracks.editItemAt(trackIndex);
+                }
 
                 int32_t result;
                 CHECK(msg->findInt32("result", &result));
@@ -170,9 +171,16 @@ struct MyHandler : public AHandler {
                 LOG(INFO) << "SETUP(" << index << ") completed with result "
                      << result << " (" << strerror(-result) << ")";
 
-                TrackInfo *track = &mTracks.editItemAt(trackIndex);
+                if (result != OK) {
+                    if (track) {
+                        close(track->mRTPSocket);
+                        close(track->mRTCPSocket);
 
-                if (result == OK) {
+                        mTracks.removeItemsAt(trackIndex);
+                    }
+                } else {
+                    CHECK(track != NULL);
+
                     sp<RefBase> obj;
                     CHECK(msg->findObject("response", &obj));
                     sp<ARTSPResponse> response =
@@ -200,24 +208,13 @@ struct MyHandler : public AHandler {
                             mSessionDesc, index,
                             notify);
 
-                    track->mPacketSource =
-                        new APacketSource(mSessionDesc, index);
-
                     mSetupTracksSuccessful = true;
-
-                    ++index;
-                    if (index < mSessionDesc->countTracks()) {
-                        setupTrack(index);
-                        break;
-                    }
-                } else {
-                    close(track->mRTPSocket);
-                    close(track->mRTCPSocket);
-
-                    mTracks.removeItemsAt(mTracks.size() - 1);
                 }
 
-                if (mSetupTracksSuccessful) {
+                ++index;
+                if (index < mSessionDesc->countTracks()) {
+                    setupTrack(index);
+                } else if (mSetupTracksSuccessful) {
                     AString request = "PLAY ";
                     request.append(mSessionURL);
                     request.append(" RTSP/1.0\r\n");
@@ -321,16 +318,6 @@ struct MyHandler : public AHandler {
                 CHECK(accessUnit->meta()->findInt64(
                             "ntp-time", (int64_t *)&ntpTime));
 
-                if (mFirstAccessUnit) {
-                    mFirstAccessUnit = false;
-                    mFirstAccessUnitNTP = ntpTime;
-                }
-                if (ntpTime > mFirstAccessUnitNTP) {
-                    ntpTime -= mFirstAccessUnitNTP;
-                } else {
-                    ntpTime = 0;
-                }
-
                 accessUnit->meta()->setInt64("ntp-time", ntpTime);
 
 #if 0
@@ -374,8 +361,6 @@ private:
     AString mBaseURL;
     AString mSessionID;
     bool mSetupTracksSuccessful;
-    bool mFirstAccessUnit;
-    uint64_t mFirstAccessUnitNTP;
 
     struct TrackInfo {
         int mRTPSocket;
@@ -386,6 +371,19 @@ private:
     Vector<TrackInfo> mTracks;
 
     void setupTrack(size_t index) {
+        sp<APacketSource> source =
+            new APacketSource(mSessionDesc, index);
+        if (source->initCheck() != OK) {
+            LOG(WARNING) << "Unsupported format. Ignoring track #"
+                         << index << ".";
+
+            sp<AMessage> reply = new AMessage('setu', id());
+            reply->setSize("index", index);
+            reply->setInt32("result", ERROR_UNSUPPORTED);
+            reply->post();
+            return;
+        }
+
         AString url;
         CHECK(mSessionDesc->findAttribute(index, "a=control", &url));
 
@@ -394,6 +392,7 @@ private:
 
         mTracks.push(TrackInfo());
         TrackInfo *info = &mTracks.editItemAt(mTracks.size() - 1);
+        info->mPacketSource = source;
 
         unsigned rtpPort;
         ARTPConnection::MakePortPair(

@@ -38,6 +38,8 @@ struct NuCachedSource2;
 
 struct ALooper;
 struct ARTSPController;
+struct ARTPSession;
+struct UDPPusher;
 
 struct AwesomeRenderer : public RefBase {
     AwesomeRenderer() {}
@@ -178,6 +180,8 @@ private:
 
     sp<ALooper> mLooper;
     sp<ARTSPController> mRTSPController;
+    sp<ARTPSession> mRTPSession;
+    sp<UDPPusher> mRTPPusher, mRTCPPusher;
 
     struct SuspensionState {
         String8 mUri;

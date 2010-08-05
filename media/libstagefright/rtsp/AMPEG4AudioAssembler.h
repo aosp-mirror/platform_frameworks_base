@@ -35,6 +35,7 @@ protected:
     virtual ~AMPEG4AudioAssembler();
 
     virtual AssemblyStatus assembleMore(const sp<ARTPSource> &source);
+    virtual void onByeReceived();
     virtual void packetLost();
 
 private:

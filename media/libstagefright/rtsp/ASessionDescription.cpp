@@ -49,7 +49,7 @@ bool ASessionDescription::parse(const void *data, size_t size) {
     mFormats.push(AString("[root]"));
 
     AString desc((const char *)data, size);
-    LOG(VERBOSE) << desc;
+    LOG(INFO) << desc;
 
     size_t i = 0;
     for (;;) {
@@ -114,6 +114,24 @@ bool ASessionDescription::parse(const void *data, size_t size) {
 
                 mTracks.push(Attribs());
                 mFormats.push(AString(line, 2, line.size() - 2));
+                break;
+            }
+
+            default:
+            {
+                AString key, value;
+
+                ssize_t equalPos = line.find("=");
+
+                key = AString(line, 0, equalPos + 1);
+                value = AString(line, equalPos + 1, line.size() - equalPos - 1);
+
+                key.trim();
+                value.trim();
+
+                LOG(VERBOSE) << "adding '" << key << "' => '" << value << "'";
+
+                mTracks.editItemAt(mTracks.size() - 1).add(key, value);
                 break;
             }
         }

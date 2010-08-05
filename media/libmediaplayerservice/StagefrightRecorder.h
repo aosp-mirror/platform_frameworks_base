@@ -105,10 +105,11 @@ private:
     status_t startMPEG4Recording();
     status_t startAMRRecording();
     status_t startAACRecording();
+    status_t startRTPRecording();
     sp<MediaSource> createAudioSource();
     status_t setupCameraSource();
     status_t setupAudioEncoder(const sp<MediaWriter>& writer);
-    status_t setupVideoEncoder(const sp<MediaWriter>& writer);
+    status_t setupVideoEncoder(sp<MediaSource> *source);
 
     // Encoding parameter handling utilities
     status_t setParameter(const String8 &key, const String8 &value);
