@@ -5867,8 +5867,17 @@ class PackageManagerService extends IPackageManager.Stub {
         if ((newPackage.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
             retCode = mInstaller.movedex(newPackage.mScanPath, newPackage.mPath);
             if (retCode != 0) {
-                Slog.e(TAG, "Couldn't rename dex file: " + newPackage.mPath);
-                return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+                if (mNoDexOpt) {
+                    /*
+                     * If we're in an engineering build, programs are lazily run
+                     * through dexopt. If the .dex file doesn't exist yet, it
+                     * will be created when the program is run next.
+                     */
+                    Slog.i(TAG, "dex file doesn't exist, skipping move: " + newPackage.mPath);
+                } else {
+                    Slog.e(TAG, "Couldn't rename dex file: " + newPackage.mPath);
+                    return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+                }
             }
         }
         return PackageManager.INSTALL_SUCCEEDED;
