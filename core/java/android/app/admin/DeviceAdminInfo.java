@@ -109,7 +109,6 @@ public final class DeviceAdminInfo implements Parcelable {
      *
      * <p>To control this policy, the device admin must have a "set-global-proxy"
      * tag in the "uses-policies" section of its meta-data.
-     * @hide
      */
     public static final int USES_POLICY_SETS_GLOBAL_PROXY = 5;
 
