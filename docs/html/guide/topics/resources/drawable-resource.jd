@@ -638,7 +638,6 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
         android:state_pressed=["true" | "false"]
         android:state_focused=["true" | "false"]
         android:state_selected=["true" | "false"]
-        android:state_active=["true" | "false"]
         android:state_checkable=["true" | "false"]
         android:state_checked=["true" | "false"]
         android:state_enabled=["true" | "false"]
