@@ -58,6 +58,7 @@ ARTPSource::ARTPSource(
     } else if (!strncmp(desc.c_str(), "H263-1998/", 10)
             || !strncmp(desc.c_str(), "H263-2000/", 10)) {
         mAssembler = new AH263Assembler(notify);
+        mIssueFIRRequests = true;
     } else if (!strncmp(desc.c_str(), "AMR/", 4)) {
         mAssembler = new AAMRAssembler(notify, false /* isWide */, params);
     } else  if (!strncmp(desc.c_str(), "AMR-WB/", 7)) {

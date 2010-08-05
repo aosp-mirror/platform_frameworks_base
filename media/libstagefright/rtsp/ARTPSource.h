@@ -46,6 +46,10 @@ struct ARTPSource : public RefBase {
     void addReceiverReport(const sp<ABuffer> &buffer);
     void addFIR(const sp<ABuffer> &buffer);
 
+    bool timeEstablished() const {
+        return mNumTimes == 2;
+    }
+
 private:
     uint32_t mID;
     uint32_t mHighestSeqNumber;
