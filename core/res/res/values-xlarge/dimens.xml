@@ -22,5 +22,10 @@
     <!-- Height of the status bar -->
     <dimen name="status_bar_icon_size">50dip</dimen>
     <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
+    
+    <!-- Default height of a key in the password keyboard for alpha -->
+    <dimen name="password_keyboard_key_height_alpha">0.35in</dimen>
+    <!-- Default height of a key in the password keyboard for numeric -->
+    <dimen name="password_keyboard_key_height_numeric">0.47in</dimen>
 </resources>
 

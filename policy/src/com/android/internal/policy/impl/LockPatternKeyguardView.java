@@ -645,7 +645,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             // Show LockScreen first for any screen other than Pattern unlock.
             final boolean usingLockPattern = mLockPatternUtils.getKeyguardStoredPasswordQuality()
                     == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
-            if (isSecure() && usingLockPattern) {
+
+            boolean showSlidingTab = getResources().getBoolean(R.bool.config_enableSlidingTabFirst);
+            if (isSecure() && (usingLockPattern || !showSlidingTab)) {
                 return Mode.UnlockScreen;
             } else {
                 return Mode.LockScreen;
@@ -688,7 +690,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
     private void showTimeoutDialog() {
         int timeoutInSeconds = (int) LockPatternUtils.FAILED_ATTEMPT_TIMEOUT_MS / 1000;
-        int messageId = R.string.lockscreen_too_many_failed_attempts_dialog_message;;
+        int messageId = R.string.lockscreen_too_many_failed_attempts_dialog_message;
         if(getUnlockMode() == UnlockMode.Password) {
             if(mLockPatternUtils.getKeyguardStoredPasswordQuality() ==
                 DevicePolicyManager.PASSWORD_QUALITY_NUMERIC) {

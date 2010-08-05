@@ -24,5 +24,10 @@
          interface.  This name is in the ComponentName flattened format (package/class)  -->
     <string name="config_statusBarComponent">com.android.systemui/com.android.systemui.statusbar.tablet.TabletStatusBarService</string>
     <bool name="config_statusBarCanHide">false</bool>
+
+    <!-- Show sliding tab before lockscreen -->
+    <bool name="config_enableSlidingTabFirst">false</bool>
+    <!-- Enable lockscreen rotation -->
+    <bool name="config_enableLockScreenRotation">true</bool>
 </resources>
 

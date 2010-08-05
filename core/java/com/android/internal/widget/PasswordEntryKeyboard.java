@@ -67,8 +67,22 @@ public class PasswordEntryKeyboard extends Keyboard {
         this(context, xmlLayoutResId, 0);
     }
 
+    public PasswordEntryKeyboard(Context context, int xmlLayoutResId, int width, int height) {
+        this(context, xmlLayoutResId, 0, width, height);
+    }
+
     public PasswordEntryKeyboard(Context context, int xmlLayoutResId, int mode) {
         super(context, xmlLayoutResId, mode);
+        init(context);
+    }
+
+    public PasswordEntryKeyboard(Context context, int xmlLayoutResId, int mode,
+            int width, int height) {
+        super(context, xmlLayoutResId, mode, width, height);
+        init(context);
+    }
+
+    private void init(Context context) {
         final Resources res = context.getResources();
         mRes = res;
         mShiftIcon = res.getDrawable(R.drawable.sym_keyboard_shift);

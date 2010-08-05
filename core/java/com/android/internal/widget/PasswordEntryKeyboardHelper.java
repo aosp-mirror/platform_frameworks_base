@@ -54,16 +54,49 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
     private Vibrator mVibrator;
 
     public PasswordEntryKeyboardHelper(Context context, KeyboardView keyboardView, View targetView) {
+        this(context, keyboardView, targetView, true);
+    }
+
+    public PasswordEntryKeyboardHelper(Context context, KeyboardView keyboardView, View targetView,
+            boolean useFullScreenWidth) {
         mContext = context;
         mTargetView = targetView;
         mKeyboardView = keyboardView;
-        createKeyboards();
+        if (useFullScreenWidth || mKeyboardView.getLayoutParams().width == -1) {
+            createKeyboards();
+        } else {
+            createKeyboardsWithSpecificSize(mKeyboardView.getLayoutParams().width,
+                    mKeyboardView.getLayoutParams().height);
+        }
         mKeyboardView.setOnKeyboardActionListener(this);
         mVibrator = new Vibrator();
     }
 
     public boolean isAlpha() {
         return mKeyboardMode == KEYBOARD_MODE_ALPHA;
+    }
+
+    private void createKeyboardsWithSpecificSize(int viewWidth, int viewHeight) {
+        mNumericKeyboard = new PasswordEntryKeyboard(mContext, R.xml.password_kbd_numeric,
+                viewWidth, viewHeight);
+        mQwertyKeyboard = new PasswordEntryKeyboard(mContext,
+                R.xml.password_kbd_qwerty, R.id.mode_normal, viewWidth, viewHeight);
+        mQwertyKeyboard.enableShiftLock();
+
+        mQwertyKeyboardShifted = new PasswordEntryKeyboard(mContext,
+                R.xml.password_kbd_qwerty_shifted,
+                R.id.mode_normal, viewWidth, viewHeight);
+        mQwertyKeyboardShifted.enableShiftLock();
+        mQwertyKeyboardShifted.setShifted(true); // always shifted.
+
+        mSymbolsKeyboard = new PasswordEntryKeyboard(mContext, R.xml.password_kbd_symbols,
+                viewWidth, viewHeight);
+        mSymbolsKeyboard.enableShiftLock();
+
+        mSymbolsKeyboardShifted = new PasswordEntryKeyboard(mContext,
+                R.xml.password_kbd_symbols_shift, viewWidth, viewHeight);
+        mSymbolsKeyboardShifted.enableShiftLock();
+        mSymbolsKeyboardShifted.setShifted(true); // always shifted
     }
 
     private void createKeyboards() {

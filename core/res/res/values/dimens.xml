@@ -41,8 +41,10 @@
     <dimen name="fastscroll_thumb_width">64dp</dimen>
     <!-- Height of the fastscroll thumb -->
     <dimen name="fastscroll_thumb_height">52dp</dimen>
-    <!-- Default height of a key in the password keyboard -->
-    <dimen name="password_keyboard_key_height">56dip</dimen>
+    <!-- Default height of a key in the password keyboard for alpha -->
+    <dimen name="password_keyboard_key_height_alpha">56dip</dimen>
+    <!-- Default height of a key in the password keyboard for numeric -->
+    <dimen name="password_keyboard_key_height_numeric">56dip</dimen>
     <!-- Default correction for the space key in the password keyboard -->
     <dimen name="password_keyboard_spacebar_vertical_correction">4dip</dimen>
     <!-- Distance between the text base line and virtual finger position used to position cursor -->

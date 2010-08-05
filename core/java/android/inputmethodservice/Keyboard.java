@@ -500,7 +500,30 @@ public class Keyboard {
     public Keyboard(Context context, int xmlLayoutResId) {
         this(context, xmlLayoutResId, 0);
     }
-    
+
+    /**
+     * Creates a keyboard from the given xml key layout file. Weeds out rows
+     * that have a keyboard mode defined but don't match the specified mode.
+     * @param context the application or service context
+     * @param xmlLayoutResId the resource file that contains the keyboard layout and keys.
+     * @param modeId keyboard mode identifier
+     * @param width sets width of keyboard
+     * @param height sets height of keyboard
+     */
+    public Keyboard(Context context, int xmlLayoutResId, int modeId, int width, int height) {
+        mDisplayWidth = width;
+        mDisplayHeight = height;
+
+        mDefaultHorizontalGap = 0;
+        mDefaultWidth = mDisplayWidth / 10;
+        mDefaultVerticalGap = 0;
+        mDefaultHeight = mDefaultWidth;
+        mKeys = new ArrayList<Key>();
+        mModifierKeys = new ArrayList<Key>();
+        mKeyboardMode = modeId;
+        loadKeyboard(context, context.getResources().getXml(xmlLayoutResId));
+    }
+
     /**
      * Creates a keyboard from the given xml key layout file. Weeds out rows
      * that have a keyboard mode defined but don't match the specified mode. 

@@ -59,12 +59,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     private final KeyguardUpdateMonitor mUpdateMonitor;
     private final KeyguardScreenCallback mCallback;
 
-    private TextView mCarrier;
     private SlidingTab mSelector;
-    private TextView mTime;
-    private TextView mDate;
-    private TextView mStatus1;
-    private TextView mStatus2;
     private TextView mScreenLocked;
     private TextView mEmergencyCallText;
     private Button mEmergencyCallButton;
@@ -92,6 +87,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     private String mDateFormatString;
     private java.text.DateFormat mTimeFormat;
     private boolean mEnableMenuKeyInLockScreen;
+
+    private StatusView mStatusView;
 
     /**
      * The status of this lock screen.
@@ -195,14 +192,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
             inflater.inflate(R.layout.keyguard_screen_tab_unlock_land, this, true);
         }
 
-        mCarrier = (TextView) findViewById(R.id.carrier);
-        // Required for Marquee to work
-        mCarrier.setSelected(true);
-        mCarrier.setTextColor(0xffffffff);
-
-        mDate = (TextView) findViewById(R.id.date);
-        mStatus1 = (TextView) findViewById(R.id.status1);
-        mStatus2 = (TextView) findViewById(R.id.status2);
+        mStatusView = new StatusView(this, mUpdateMonitor, mLockPatternUtils);
 
         mScreenLocked = (TextView) findViewById(R.id.screenLocked);
         mSelector = (SlidingTab) findViewById(R.id.tab_selector);
@@ -427,38 +417,11 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     }
 
     private void refreshTimeAndDateDisplay() {
-        mDate.setText(DateFormat.format(mDateFormatString, new Date()));
+        mStatusView.refreshTimeAndDateDisplay();
     }
 
     private void updateStatusLines() {
-        if (!mStatus.showStatusLines()
-                || (mCharging == null && mNextAlarm == null)) {
-            mStatus1.setVisibility(View.INVISIBLE);
-            mStatus2.setVisibility(View.INVISIBLE);
-        } else if (mCharging != null && mNextAlarm == null) {
-            // charging only
-            mStatus1.setVisibility(View.VISIBLE);
-            mStatus2.setVisibility(View.INVISIBLE);
-
-            mStatus1.setText(mCharging);
-            mStatus1.setCompoundDrawablesWithIntrinsicBounds(mChargingIcon, null, null, null);
-        } else if (mNextAlarm != null && mCharging == null) {
-            // next alarm only
-            mStatus1.setVisibility(View.VISIBLE);
-            mStatus2.setVisibility(View.INVISIBLE);
-
-            mStatus1.setText(mNextAlarm);
-            mStatus1.setCompoundDrawablesWithIntrinsicBounds(mAlarmIcon, null, null, null);
-        } else if (mCharging != null && mNextAlarm != null) {
-            // both charging and next alarm
-            mStatus1.setVisibility(View.VISIBLE);
-            mStatus2.setVisibility(View.VISIBLE);
-
-            mStatus1.setText(mCharging);
-            mStatus1.setCompoundDrawablesWithIntrinsicBounds(mChargingIcon, null, null, null);
-            mStatus2.setText(mNextAlarm);
-            mStatus2.setCompoundDrawablesWithIntrinsicBounds(mAlarmIcon, null, null, null);
-        }
+        mStatusView.updateStatusLines(mStatus.showStatusLines(), mCharging, mChargingIcon, mAlarmIcon);
     }
 
     /** {@inheritDoc} */
@@ -508,7 +471,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         switch (status) {
             case Normal:
                 // text
-                mCarrier.setText(
+                mStatusView.setCarrierText(
                         getCarrierString(
                                 mUpdateMonitor.getTelephonyPlmn(),
                                 mUpdateMonitor.getTelephonySpn()));
@@ -524,7 +487,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
             case NetworkLocked:
                 // The carrier string shows both sim card status (i.e. No Sim Card) and
                 // carrier's name and/or "Emergency Calls Only" status
-                mCarrier.setText(
+                mStatusView.setCarrierText(
                         getCarrierString(
                                 mUpdateMonitor.getTelephonyPlmn(),
                                 getContext().getText(R.string.lockscreen_network_locked_message)));
@@ -537,7 +500,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
                 break;
             case SimMissing:
                 // text
-                mCarrier.setText(R.string.lockscreen_missing_sim_message_short);
+                mStatusView.setCarrierText(R.string.lockscreen_missing_sim_message_short);
                 mScreenLocked.setText(R.string.lockscreen_missing_sim_instructions);
 
                 // layout
@@ -548,7 +511,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
                 break;
             case SimMissingLocked:
                 // text
-                mCarrier.setText(
+                mStatusView.setCarrierText(
                         getCarrierString(
                                 mUpdateMonitor.getTelephonyPlmn(),
                                 getContext().getText(R.string.lockscreen_missing_sim_message_short)));
@@ -562,7 +525,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
                 break;
             case SimLocked:
                 // text
-                mCarrier.setText(
+                mStatusView.setCarrierText(
                         getCarrierString(
                                 mUpdateMonitor.getTelephonyPlmn(),
                                 getContext().getText(R.string.lockscreen_sim_locked_message)));
@@ -574,7 +537,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
                 break;
             case SimPukLocked:
                 // text
-                mCarrier.setText(
+                mStatusView.setCarrierText(
                         getCarrierString(
                                 mUpdateMonitor.getTelephonyPlmn(),
                                 getContext().getText(R.string.lockscreen_sim_puk_locked_message)));
