@@ -697,8 +697,6 @@ com.ibm.icu4jni.charset.CharsetEncoderICU
 com.ibm.icu4jni.charset.CharsetICU
 com.ibm.icu4jni.charset.NativeConverter
 com.ibm.icu4jni.common.ErrorCode
-com.ibm.icu4jni.lang.UCharacter
-com.ibm.icu4jni.regex.NativeRegEx
 com.ibm.icu4jni.text.Collator
 com.ibm.icu4jni.text.NativeBreakIterator
 com.ibm.icu4jni.text.NativeCollation
@@ -1168,7 +1166,6 @@ org.apache.harmony.security.x509.SubjectPublicKeyInfo
 org.apache.harmony.security.x509.TBSCertificate
 org.apache.harmony.security.x509.Time
 org.apache.harmony.security.x509.Validity
-org.apache.harmony.text.BidiWrapper
 org.apache.harmony.xml.ExpatAttributes
 org.apache.harmony.xml.ExpatParser
 org.apache.harmony.xml.ExpatPullParser
