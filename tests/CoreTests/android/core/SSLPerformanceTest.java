@@ -19,8 +19,8 @@ package android.core;
 import android.test.AndroidTestCase;
 import android.os.Debug;
 import org.apache.harmony.xnet.provider.jsse.FileClientSessionCache;
+import org.apache.harmony.xnet.provider.jsse.OpenSSLContextImpl;
 import org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache;
-import org.apache.harmony.xnet.provider.jsse.SSLContextImpl;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ClientConnectionManager;
@@ -189,14 +189,14 @@ public class SSLPerformanceTest extends AndroidTestCase {
     public void testEngineInit() throws IOException, KeyManagementException {
         Stopwatch stopwatch = new Stopwatch();
 
-        new SSLContextImpl().engineInit(null, null, null);
+        new OpenSSLContextImpl().engineInit(null, null, null);
 
         stopwatch.stop();
     }
 
     public void testWebRequestWithoutCache() throws IOException,
             KeyManagementException {
-        SSLContextImpl sslContext = new SSLContextImpl();
+        OpenSSLContextImpl sslContext = new OpenSSLContextImpl();
         sslContext.engineInit(null, null, null);
 
         Stopwatch stopwatch = new Stopwatch();
@@ -210,7 +210,7 @@ public class SSLPerformanceTest extends AndroidTestCase {
             KeyManagementException {
         deleteDirectory();
 
-        SSLContextImpl sslContext = new SSLContextImpl();
+        OpenSSLContextImpl sslContext = new OpenSSLContextImpl();
         sslContext.engineInit(null, null, null,
                 FileClientSessionCache.usingDirectory(getCacheDirectory()),
                 null);
@@ -234,7 +234,7 @@ public class SSLPerformanceTest extends AndroidTestCase {
             KeyManagementException {
         deleteDirectory();
 
-        SSLContextImpl sslContext = new SSLContextImpl();
+        OpenSSLContextImpl sslContext = new OpenSSLContextImpl();
         sslContext.engineInit(null, null, null);
 
         // Make sure www.google.com is in the cache.
@@ -247,7 +247,7 @@ public class SSLPerformanceTest extends AndroidTestCase {
         stopwatch.stop();
     }
 
-    private void getVerisignDotCom(SSLContextImpl sslContext)
+    private void getVerisignDotCom(OpenSSLContextImpl sslContext)
             throws IOException {
         SchemeRegistry schemeRegistry = new SchemeRegistry();
         schemeRegistry.register(new Scheme("https",
