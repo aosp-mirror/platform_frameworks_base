@@ -89,8 +89,7 @@ public class SipManager {
 
     private void createSipService(Context context) {
         if (mSipService != null) return;
-        // TODO: change back to Context.SIP_SERVICE later.
-        IBinder b = ServiceManager.getService("sip");
+        IBinder b = ServiceManager.getService(Context.SIP_SERVICE);
         mSipService = ISipService.Stub.asInterface(b);
     }
 
