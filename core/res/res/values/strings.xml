@@ -1610,7 +1610,7 @@
 
     <!-- Do not translate.  WebView User Agent string -->
     <string name="web_user_agent" translatable="false">Mozilla/5.0 (Linux; U; <xliff:g id="x">Android %s</xliff:g>)
-        AppleWebKit/534.4 (KHTML, like Gecko) Version/4.0 <xliff:g id="mobile">%s</xliff:g>Safari/534.4</string>
+        AppleWebKit/534.5 (KHTML, like Gecko) Version/4.0 <xliff:g id="mobile">%s</xliff:g>Safari/534.5</string>
     <!-- Do not translate.  WebView User Agent targeted content -->
     <string name="web_user_agent_target_content" translatable="false">"Mobile "</string>
 
