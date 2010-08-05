@@ -476,6 +476,124 @@ rsMatrixMultiply(rs_matrix2x2 *m, float2 in) {
     return ret;
 }
 
+// Returns true if the matrix was successfully inversed
+static bool __attribute__((overloadable))
+rsMatrixInverse(rs_matrix4x4 *m) {
+    rs_matrix4x4 result;
+
+    int i, j;
+    for (i = 0; i < 4; ++i) {
+        for (j = 0; j < 4; ++j) {
+            // computeCofactor for int i, int j
+            int c0 = (i+1) % 4;
+            int c1 = (i+2) % 4;
+            int c2 = (i+3) % 4;
+            int r0 = (j+1) % 4;
+            int r1 = (j+2) % 4;
+            int r2 = (j+3) % 4;
+
+            float minor = (m->m[c0 + 4*r0] * (m->m[c1 + 4*r1] * m->m[c2 + 4*r2] - m->m[c1 + 4*r2] * m->m[c2 + 4*r1]))
+                         - (m->m[c0 + 4*r1] * (m->m[c1 + 4*r0] * m->m[c2 + 4*r2] - m->m[c1 + 4*r2] * m->m[c2 + 4*r0]))
+                         + (m->m[c0 + 4*r2] * (m->m[c1 + 4*r0] * m->m[c2 + 4*r1] - m->m[c1 + 4*r1] * m->m[c2 + 4*r0]));
+
+            float cofactor = (i+j) & 1 ? -minor : minor;
+
+            result.m[4*i + j] = cofactor;
+        }
+    }
+
+    // Dot product of 0th column of source and 0th row of result
+    float det = m->m[0]*result.m[0] + m->m[4]*result.m[1] +
+                 m->m[8]*result.m[2] + m->m[12]*result.m[3];
+
+    if (fabs(det) < 1e-6) {
+        return false;
+    }
+
+    det = 1.0f / det;
+    for (i = 0; i < 16; ++i) {
+        m->m[i] = result.m[i] * det;
+    }
+
+    return true;
+}
+
+// Returns true if the matrix was successfully inversed
+static bool __attribute__((overloadable))
+rsMatrixInverseTranspose(rs_matrix4x4 *m) {
+    rs_matrix4x4 result;
+
+    int i, j;
+    for (i = 0; i < 4; ++i) {
+        for (j = 0; j < 4; ++j) {
+            // computeCofactor for int i, int j
+            int c0 = (i+1) % 4;
+            int c1 = (i+2) % 4;
+            int c2 = (i+3) % 4;
+            int r0 = (j+1) % 4;
+            int r1 = (j+2) % 4;
+            int r2 = (j+3) % 4;
+
+            float minor = (m->m[c0 + 4*r0] * (m->m[c1 + 4*r1] * m->m[c2 + 4*r2] - m->m[c1 + 4*r2] * m->m[c2 + 4*r1]))
+                         - (m->m[c0 + 4*r1] * (m->m[c1 + 4*r0] * m->m[c2 + 4*r2] - m->m[c1 + 4*r2] * m->m[c2 + 4*r0]))
+                         + (m->m[c0 + 4*r2] * (m->m[c1 + 4*r0] * m->m[c2 + 4*r1] - m->m[c1 + 4*r1] * m->m[c2 + 4*r0]));
+
+            float cofactor = (i+j) & 1 ? -minor : minor;
+
+            result.m[4*j + i] = cofactor;
+        }
+    }
+
+    // Dot product of 0th column of source and 0th column of result
+    float det = m->m[0]*result.m[0] + m->m[4]*result.m[4] +
+                 m->m[8]*result.m[8] + m->m[12]*result.m[12];
+
+    if (fabs(det) < 1e-6) {
+        return false;
+    }
+
+    det = 1.0f / det;
+    for (i = 0; i < 16; ++i) {
+        m->m[i] = result.m[i] * det;
+    }
+
+    return true;
+}
+
+static void __attribute__((overloadable))
+rsMatrixTranspose(rs_matrix4x4 *m) {
+    int i, j;
+    float temp;
+    for (i = 0; i < 3; ++i) {
+        for (j = i + 1; j < 4; ++j) {
+            temp = m->m[i*4 + j];
+            m->m[i*4 + j] = m->m[j*4 + i];
+            m->m[j*4 + i] = temp;
+        }
+    }
+}
+
+static void __attribute__((overloadable))
+rsMatrixTranspose(rs_matrix3x3 *m) {
+    int i, j;
+    float temp;
+    for (i = 0; i < 2; ++i) {
+        for (j = i + 1; j < 3; ++j) {
+            temp = m->m[i*3 + j];
+            m->m[i*3 + j] = m->m[j*4 + i];
+            m->m[j*3 + i] = temp;
+        }
+    }
+}
+
+static void __attribute__((overloadable))
+rsMatrixTranspose(rs_matrix2x2 *m) {
+    float temp = m->m[1];
+    m->m[1] = m->m[2];
+    m->m[2] = temp;
+}
+
+
 /////////////////////////////////////////////////////
 // int ops
 /////////////////////////////////////////////////////

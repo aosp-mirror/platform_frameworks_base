@@ -179,6 +179,15 @@ public class Matrix4f {
         tmp.loadTranslate(x, y, z);
         multiply(tmp);
     }
+    public void transpose() {
+        for(int i = 0; i < 3; ++i) {
+            for(int j = i + 1; j < 4; ++j) {
+                float temp = mMat[i*4 + j];
+                mMat[i*4 + j] = mMat[j*4 + i];
+                mMat[j*4 + i] = temp;
+            }
+        }
+    }
 
     final float[] mMat;
 }

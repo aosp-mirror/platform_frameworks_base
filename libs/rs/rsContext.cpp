@@ -263,38 +263,38 @@ void Context::displayDebugStats()
 {
     char buffer[128];
     sprintf(buffer, "Frame %i ms, Script %i ms", mTimeMSLastFrame, mTimeMSLastScript);
-    float oldR = mStateVertex.color[0];
+    /*float oldR = mStateVertex.color[0];
     float oldG = mStateVertex.color[1];
     float oldB = mStateVertex.color[2];
-    float oldA = mStateVertex.color[3];
+    float oldA = mStateVertex.color[3];*/
 
     float shadowCol = 0.2f;
-    mStateVertex.color[0] = shadowCol;
+    /*mStateVertex.color[0] = shadowCol;
     mStateVertex.color[1] = shadowCol;
     mStateVertex.color[2] = shadowCol;
     mStateVertex.color[3] = 1.0f;
     if (!checkVersion2_0()) {
         glColor4f(shadowCol, shadowCol, shadowCol, 1.0f);
-    }
+    }*/
     mStateFont.renderText(buffer, 5, getHeight() - 5);
 
-    float textCol = 0.9f;
+    /*float textCol = 0.9f;
     mStateVertex.color[0] = textCol;
     mStateVertex.color[1] = textCol;
     mStateVertex.color[2] = textCol;
     mStateVertex.color[3] = 1.0f;
     if (!checkVersion2_0()) {
         glColor4f(textCol, textCol, textCol, 1.0f);
-    }
+    }*/
     mStateFont.renderText(buffer, 4, getHeight() - 6);
 
-    mStateVertex.color[0] = oldR;
+    /*mStateVertex.color[0] = oldR;
     mStateVertex.color[1] = oldG;
     mStateVertex.color[2] = oldB;
     mStateVertex.color[3] = oldA;
     if (!checkVersion2_0()) {
         glColor4f(oldR, oldG, oldB, oldA);
-    }
+    }*/
 }
 
 void * Context::threadProc(void *vrsc)

@@ -165,6 +165,15 @@ public class Matrix3f {
         tmp.loadTranslate(x, y);
         multiply(tmp);
     }
+    public void transpose() {
+        for(int i = 0; i < 2; ++i) {
+            for(int j = i + 1; j < 3; ++j) {
+                float temp = mMat[i*3 + j];
+                mMat[i*3 + j] = mMat[j*3 + i];
+                mMat[j*3 + i] = temp;
+            }
+        }
+    }
 
     final float[] mMat;
 }

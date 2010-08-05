@@ -96,6 +96,11 @@ public class Matrix2f {
         tmp.loadScale(x, y);
         multiply(tmp);
     }
+    public void transpose() {
+        float temp = mMat[1];
+        mMat[1] = mMat[2];
+        mMat[2] = temp;
+    }
 
     final float[] mMat;
 }
