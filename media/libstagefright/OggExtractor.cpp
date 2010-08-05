@@ -361,11 +361,17 @@ status_t MyVorbisExtractor::readNextPacket(MediaBuffer **out) {
                 memcpy(tmp->data(), buffer->data(), buffer->range_length());
                 tmp->set_range(0, buffer->range_length());
                 buffer->release();
-            } else if (mVi.rate) {
+            } else {
                 // XXX Not only is this not technically the correct time for
                 // this packet, we also stamp every packet in this page
                 // with the same time. This needs fixing later.
-                timeUs = mCurrentPage.mGranulePosition * 1000000ll / mVi.rate;
+
+                if (mVi.rate) {
+                    // Rate may not have been initialized yet if we're currently
+                    // reading the configuration packets...
+                    // Fortunately, the timestamp doesn't matter for those.
+                    timeUs = mCurrentPage.mGranulePosition * 1000000ll / mVi.rate;
+                }
                 tmp->set_range(0, 0);
             }
             buffer = tmp;
