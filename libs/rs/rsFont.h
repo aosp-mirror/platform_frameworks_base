@@ -117,6 +117,7 @@ public:
     void renderText(Allocation *alloc, uint32_t start, int len, int x, int y);
 
     void setFontColor(float r, float g, float b, float a);
+    void getFontColor(float *r, float *g, float *b, float *a) const;
 
 protected:
 

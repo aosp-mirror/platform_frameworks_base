@@ -259,7 +259,7 @@ FontState::FontState()
     mCurrentQuadIndex = 0;
     mRSC = NULL;
     mLibrary = NULL;
-    setFontColor(0.0f, 0.0f, 0.0f, 1.0f);
+    setFontColor(0.1f, 0.1f, 0.1f, 1.0f);
 }
 
 FontState::~FontState()
@@ -521,6 +521,11 @@ void FontState::issueDrawCommand() {
     ObjectBaseRef<const ProgramStore> tmpPS(mRSC->getFragmentStore());
     mRSC->setFragmentStore(mFontProgramStore.get());
 
+    if(mFontColorDirty) {
+        mFontShaderF->setConstantColor(mFontColor[0], mFontColor[1], mFontColor[2], mFontColor[3]);
+        mFontColorDirty = false;
+    }
+
     if (!mRSC->setupCheck()) {
         mRSC->setVertex((ProgramVertex *)tmpV.get());
         mRSC->setRaster((ProgramRaster *)tmpR.get());
@@ -667,6 +672,13 @@ void FontState::setFontColor(float r, float g, float b, float a) {
     mFontColor[2] = b;
     mFontColor[3] = a;
     mFontColorDirty = true;
+}
+
+void FontState::getFontColor(float *r, float *g, float *b, float *a) const {
+    *r = mFontColor[0];
+    *g = mFontColor[1];
+    *b = mFontColor[2];
+    *a = mFontColor[3];
 }
 
 void FontState::deinit(Context *rsc)
