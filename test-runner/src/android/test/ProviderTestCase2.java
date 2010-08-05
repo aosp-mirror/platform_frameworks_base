@@ -144,7 +144,7 @@ public abstract class ProviderTestCase2<T extends ContentProvider> extends Andro
      * Tears down the environment for the test fixture.
      * <p>
      * Calls {@link android.content.ContentProvider#shutdown()} on the
-     * {@link android.content.ContentProvider} represented by {@link #mProvider}.
+     * {@link android.content.ContentProvider} represented by mProvider.
      */
     @Override
     protected void tearDown() throws Exception {
