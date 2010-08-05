@@ -935,8 +935,6 @@ public class DevicePolicyManager {
      * @param proxySpec the global proxy desired. Must be an HTTP Proxy.
      *            Pass Proxy.NO_PROXY to reset the proxy.
      * @param exclusionList a list of domains to be excluded from the global proxy.
-     * @param proxyAdmins an empty, mutable list that will contain any proxy admins
-     *            that define a global proxy.
      * @return returns null if the proxy was successfully set, or a {@link ComponentName}
      *            of the device admin that sets thew proxy otherwise.
      */
