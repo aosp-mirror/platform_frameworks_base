@@ -610,6 +610,16 @@ public abstract class PackageManager {
     public static final int MOVE_FAILED_INTERNAL_ERROR = -6;
 
     /**
+     * Error code that is passed to the {@link IPackageMoveObserver} by
+     * {@link #movePackage(android.net.Uri, IPackageMoveObserver)} if the
+     * specified package already has an operation pending in the
+     * {@link PackageHandler} queue.
+     * 
+     * @hide
+     */
+    public static final int MOVE_FAILED_OPERATION_PENDING = -7;
+
+    /**
      * Flag parameter for {@link #movePackage} to indicate that
      * the package should be moved to internal storage if its
      * been installed on external media.
