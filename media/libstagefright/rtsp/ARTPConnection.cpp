@@ -405,6 +405,14 @@ status_t ARTPConnection::parseRTP(StreamInfo *s, const sp<ABuffer> &buffer) {
     buffer->setInt32Data(u16at(&data[2]));
     buffer->setRange(payloadOffset, size - payloadOffset);
 
+#if IGNORE_RTCP_TIME
+    if (!source->timeEstablished()) {
+        source->timeUpdate(rtpTime, 0);
+        source->timeUpdate(rtpTime + 20, 0x100000000ll);
+        CHECK(source->timeEstablished());
+    }
+#endif
+
     source->processRTPPacket(buffer);
 
     return OK;
@@ -540,12 +548,6 @@ sp<ARTPSource> ARTPConnection::findSource(StreamInfo *info, uint32_t srcId) {
 
         source = new ARTPSource(
                 srcId, info->mSessionDesc, info->mIndex, info->mNotifyMsg);
-
-#if IGNORE_RTCP_TIME
-        // For H.263 gtalk to work...
-        source->timeUpdate(0, 0);
-        source->timeUpdate(30, 0x100000000ll);
-#endif
 
         info->mSources.add(srcId, source);
     } else {

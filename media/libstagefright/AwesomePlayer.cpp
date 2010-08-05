@@ -1225,7 +1225,10 @@ status_t AwesomePlayer::finishSetDataSource_l() {
     } else if (!strcmp("rtsp://gtalk", mUri.string())) {
         if (mLooper == NULL) {
             mLooper = new ALooper;
-            mLooper->start();
+            mLooper->start(
+                    false /* runOnCallingThread */,
+                    false /* canCallJava */,
+                    PRIORITY_HIGHEST);
         }
 
 #if 0
