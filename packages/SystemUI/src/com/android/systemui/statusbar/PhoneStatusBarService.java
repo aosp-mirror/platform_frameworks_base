@@ -1086,12 +1086,12 @@ public class PhoneStatusBarService extends StatusBarService {
     }
 
     private class MyTicker extends Ticker {
-        MyTicker(Context context, StatusBarView sb) {
+        MyTicker(Context context, View sb) {
             super(context, sb);
         }
 
         @Override
-        void tickerStarting() {
+        public void tickerStarting() {
             mTicking = true;
             mIcons.setVisibility(View.GONE);
             mTickerView.setVisibility(View.VISIBLE);
@@ -1103,7 +1103,7 @@ public class PhoneStatusBarService extends StatusBarService {
         }
 
         @Override
-        void tickerDone() {
+        public void tickerDone() {
             mIcons.setVisibility(View.VISIBLE);
             mTickerView.setVisibility(View.GONE);
             mIcons.startAnimation(loadAnim(com.android.internal.R.anim.push_down_in, null));
@@ -1114,7 +1114,7 @@ public class PhoneStatusBarService extends StatusBarService {
             }
         }
 
-        void tickerHalting() {
+        public void tickerHalting() {
             mIcons.setVisibility(View.VISIBLE);
             mTickerView.setVisibility(View.GONE);
             mIcons.startAnimation(loadAnim(com.android.internal.R.anim.fade_in, null));

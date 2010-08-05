@@ -34,5 +34,9 @@ public class TickerView extends TextSwitcher
         super.onSizeChanged(w, h, oldw, oldh);
         mTicker.reflowText();
     }
+
+    public void setTicker(Ticker t) {
+        mTicker = t;
+    }
 }
 

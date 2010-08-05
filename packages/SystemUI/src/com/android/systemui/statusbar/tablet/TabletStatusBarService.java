@@ -16,30 +16,34 @@
 
 package com.android.systemui.statusbar.tablet;
 
+import android.animation.Animator;
+import android.app.ActivityManagerNative;
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.RemoteException;
 import android.util.Slog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.widget.RemoteViews;
-import android.app.ActivityManagerNative;
-import android.app.PendingIntent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.graphics.Rect;
-import android.os.RemoteException;
 import android.view.WindowManagerImpl;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RemoteViews;
+import android.widget.ScrollView;
+import android.widget.TextSwitcher;
 import android.widget.TextView;
 
 import com.android.internal.statusbar.StatusBarIcon;
@@ -53,12 +57,17 @@ public class TabletStatusBarService extends StatusBarService {
     public static final boolean DEBUG = false;
     public static final String TAG = "TabletStatusBar";
 
-    View mStatusBarView;
-    NotificationIconArea mNotificationIconArea;
+
 
     int mIconSize;
 
     H mHandler = new H();
+
+    // tracking all current notifications
+    private NotificationData mNotns = new NotificationData();
+    
+    View mStatusBarView;
+    NotificationIconArea mNotificationIconArea;
 
     View mNotificationPanel;
     View mSystemPanel;
@@ -68,8 +77,14 @@ public class TabletStatusBarService extends StatusBarService {
 
     NotificationIconArea.IconLayout mIconLayout;
 
-    private NotificationData mNotns = new NotificationData();
-    
+    KickerController mKicker;
+    View mKickerView;
+    boolean mTicking;
+    boolean mExpandedVisible;
+
+    // for disabling the status bar
+    int mDisabled = 0;
+
     protected void addPanelWindows() {
         mNotificationPanel = View.inflate(this, R.layout.sysbar_panel_notifications, null);
         mSystemPanel = View.inflate(this, R.layout.sysbar_panel_system, null);
@@ -86,8 +101,8 @@ public class TabletStatusBarService extends StatusBarService {
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                    | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
                 PixelFormat.TRANSLUCENT);
@@ -102,8 +117,8 @@ public class TabletStatusBarService extends StatusBarService {
                 200, // ViewGroup.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                    | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
                 PixelFormat.TRANSLUCENT);
@@ -112,23 +127,11 @@ public class TabletStatusBarService extends StatusBarService {
         lp.windowAnimations = com.android.internal.R.style.Animation_SlidingCard;
 
         WindowManagerImpl.getDefault().addView(mSystemPanel, lp);
-
-        // Lorem ipsum, Dolores
-        TextView tv = ((TextView) mSystemPanel.findViewById(R.id.systemPanelDummy));
-        if (tv != null) tv.setText("System status: great");
-
-        mPile = (ViewGroup)mNotificationPanel.findViewById(R.id.content);
-        mPile.removeAllViews();
-
-        mClearButton = (TextView)mNotificationPanel.findViewById(R.id.clear_all_button);
-        mClearButton.setOnClickListener(mClearButtonListener);
     }
 
     @Override
     public void onCreate() {
         super.onCreate(); // will add the main bar view
-
-        addPanelWindows();
     }
 
     protected View makeStatusBarView() {
@@ -144,6 +147,24 @@ public class TabletStatusBarService extends StatusBarService {
 
         // where the icons go
         mIconLayout = (NotificationIconArea.IconLayout) sb.findViewById(R.id.icons);
+
+        mKicker = new KickerController((Context)this, mStatusBarView);
+
+        // Add the windows
+        addPanelWindows();
+
+        // Lorem ipsum, Dolores
+        TextView tv = ((TextView) mSystemPanel.findViewById(R.id.systemPanelDummy));
+        if (tv != null) tv.setText("System status: great");
+
+        mPile = (ViewGroup)mNotificationPanel.findViewById(R.id.content);
+        mPile.removeAllViews();
+        
+        ScrollView scroller = (ScrollView)mPile.getParent();
+        scroller.setFillViewport(true);
+
+        mClearButton = (TextView)mNotificationPanel.findViewById(R.id.clear_all_button);
+        mClearButton.setOnClickListener(mClearButtonListener);
 
         return sb;
     }
@@ -162,10 +183,12 @@ public class TabletStatusBarService extends StatusBarService {
                 case MSG_OPEN_NOTIFICATION_PANEL:
                     if (DEBUG) Slog.d(TAG, "opening notifications panel");
                     mNotificationPanel.setVisibility(View.VISIBLE);
+                    mExpandedVisible = true;
                     break;
                 case MSG_CLOSE_NOTIFICATION_PANEL:
                     if (DEBUG) Slog.d(TAG, "closing notifications panel");
                     mNotificationPanel.setVisibility(View.GONE);
+                    mExpandedVisible = false;
                     break;
                 case MSG_OPEN_SYSTEM_PANEL:
                     if (DEBUG) Slog.d(TAG, "opening system panel");
@@ -195,8 +218,7 @@ public class TabletStatusBarService extends StatusBarService {
     public void addNotification(IBinder key, StatusBarNotification notification) {
         if (DEBUG) Slog.d(TAG, "addNotification(" + key + " -> " + notification + ")");
         addNotificationViews(key, notification);
-
-        // TODO: kicker; immersive mode
+        // tick()
     }
 
     public void updateNotification(IBinder key, StatusBarNotification notification) {
@@ -274,7 +296,127 @@ public class TabletStatusBarService extends StatusBarService {
     }
 
     public void disable(int state) {
-        // TODO
+        /*
+        final int old = mDisabled;
+        final int diff = state ^ old;
+        mDisabled = state;
+
+        if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
+            if ((state & StatusBarManager.DISABLE_EXPAND) != 0) {
+                Slog.d(TAG, "DISABLE_EXPAND: yes");
+                animateCollapse();
+            }
+        }
+        if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
+            if ((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
+                Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
+                if (mTicking) {
+                    mKicker.halt();
+                } else {
+                    mNotificationIconArea.setVisibility(View.INVISIBLE);
+                }
+            } else {
+                Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: no");
+                if (!mExpandedVisible) {
+                    mNotificationIconArea.setVisibility(View.VISIBLE);
+                }
+            }
+        } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
+            if (mTicking && (state & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
+                Slog.d(TAG, "DISABLE_NOTIFICATION_TICKER: yes");
+                mKicker.halt();
+            }
+        }
+        */
+    }
+
+    void performDisableActions(int net) {
+        /*
+        int old = mDisabled;
+        int diff = net ^ old;
+        mDisabled = net;
+
+        // act accordingly
+        if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
+            if ((net & StatusBarManager.DISABLE_EXPAND) != 0) {
+                Slog.d(TAG, "DISABLE_EXPAND: yes");
+                animateCollapse();
+            }
+        }
+        if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
+            if ((net & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
+                Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
+                if (mTicking) {
+                    mNotificationIconArea.setVisibility(View.INVISIBLE);
+                    mKicker.halt();
+                } else {
+                    mNotificationIconArea.setVisibility(View.INVISIBLE);
+                }
+            } else {
+                Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: no");
+                if (!mExpandedVisible) {
+                    mNotificationIconArea.setVisibility(View.VISIBLE);
+                }
+            }
+        } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
+            if (mTicking && (net & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
+                mKicker.halt();
+            }
+        }
+        */
+    }
+
+    private void tick(StatusBarNotification n) {
+        // Show the ticker if one is requested. Also don't do this
+        // until status bar window is attached to the window manager,
+        // because...  well, what's the point otherwise?  And trying to
+        // run a ticker without being attached will crash!
+        if (n.notification.tickerText != null && mStatusBarView.getWindowToken() != null) {
+            if (0 == (mDisabled & (StatusBarManager.DISABLE_NOTIFICATION_ICONS
+                            | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
+                mKicker.addEntry(n);
+            }
+        }
+    }
+
+    private class KickerController {
+        View mView;
+        ImageView mKickerIcon;
+        TextSwitcher mKickerText;
+
+        public KickerController(Context context, View sb) {
+            mView = sb.findViewById(R.id.ticker);
+            mKickerIcon = (ImageView) mView.findViewById(R.id.tickerIcon);
+            mKickerText = (TextSwitcher) mView.findViewById(R.id.tickerText);
+        }
+
+        public void halt() {
+            tickerHalting();
+        }
+
+        public void addEntry(StatusBarNotification n) {
+            mKickerIcon.setImageResource(n.notification.icon);
+            mKickerText.setCurrentText(n.notification.tickerText);
+            tickerStarting();
+        }
+
+        public void tickerStarting() {
+            mTicking = true;
+            mIconLayout.setVisibility(View.GONE);
+            mKickerView.setVisibility(View.VISIBLE);
+        }
+
+        public void tickerDone() {
+            mIconLayout.setVisibility(View.VISIBLE);
+            mKickerView.setVisibility(View.GONE);
+            mTicking = false;
+        }
+
+        public void tickerHalting() {
+            mIconLayout.setVisibility(View.VISIBLE);
+            mKickerView.setVisibility(View.GONE);
+            mTicking = false;
+        }
     }
 
     public void animateExpand() {
@@ -405,8 +547,9 @@ public class TabletStatusBarService extends StatusBarService {
     }
 
     StatusBarIconView addNotificationViews(IBinder key, StatusBarNotification notification) {
-        NotificationData list = mNotns;
-        ViewGroup parent = mPile;
+        if (DEBUG) {
+            Slog.d(TAG, "addNotificationViews(key=" + key + ", notification=" + notification);
+        }
         // Construct the icon.
         final StatusBarIconView iconView = new StatusBarIconView(this,
                 notification.pkg + "/0x" + Integer.toHexString(notification.id));
@@ -422,19 +565,13 @@ public class TabletStatusBarService extends StatusBarService {
         }
         // Construct the expanded view.
         NotificationData.Entry entry = new NotificationData.Entry(key, notification, iconView);
-        if (!inflateViews(entry, parent)) {
+        if (!inflateViews(entry, mPile)) {
             handleNotificationError(key, notification, "Couldn't expand RemoteViews for: "
                     + notification);
             return null;
         }
-        // Add the expanded view.
-        final int viewIndex = list.add(entry);
-        if (parent != null) parent.addView(entry.row, viewIndex);
         // Add the icon.
-//        final int iconIndex = 0; // XXX: sort into ongoing and regular buckets
-//        mIconLayout.addView(iconView, iconIndex,
-//                new LinearLayout.LayoutParams(mIconSize, mIconSize));
-
+        mNotns.add(entry);
         refreshIcons();
 
         return iconView;
@@ -443,12 +580,24 @@ public class TabletStatusBarService extends StatusBarService {
     private void refreshIcons() {
         // XXX: need to implement a new limited linear layout class
         // to avoid removing & readding everything
-        mIconLayout.removeAllViews();
+
         int N = mNotns.size();
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(mIconSize, mIconSize);
+
+        if (DEBUG) {
+            Slog.d(TAG, "refreshing icons (" + N + " notifications, mIconLayout="
+                    + mIconLayout + ", mPile=" + mPile);
+        }
+
+        mIconLayout.removeAllViews();
         for (int i=0; i<4; i++) {
             if (i>=N) break;
             mIconLayout.addView(mNotns.get(N-i-1).icon, i, params);
+        }
+
+        mPile.removeAllViews();
+        for (int i=0; i<N; i++) {
+            mPile.addView(mNotns.get(N-i-1).row);
         }
     }
 

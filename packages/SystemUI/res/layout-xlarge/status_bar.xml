@@ -39,13 +39,13 @@
             android:onClick="notificationIconsClicked"
             android:background="@drawable/status_bar_icon_tray"
             >
-            <view
+            <ImageView
                 class="com.android.systemui.statusbar.tablet.NotificationIconArea$MoreView"
-                android:id="@+id/more"
+                android:id="@+id/expand"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:src="@drawable/stat_notify_more"
-                android:layout_marginLeft="10dip"
+                android:layout_height="wrap_content"
+                android:src="@drawable/status_bar_expand"
+                android:onClick="notificationIconsClicked"
                 />
             <view
                 class="com.android.systemui.statusbar.tablet.NotificationIconArea$IconLayout"
@@ -64,39 +64,47 @@
 
         </com.android.systemui.statusbar.tablet.NotificationIconArea>
 
-        <RelativeLayout android:id="@+id/systemInfo"
-            android:layout_width="200dip"
+        <LinearLayout android:id="@+id/ticker"
+            android:layout_width="300dip"
             android:layout_height="match_parent"
-            android:layout_centerHorizontal="true"
-            android:clickable="true"
-            android:onClick="systemInfoClicked"
+            android:paddingLeft="6dip"
+            android:animationCache="false"
+            android:layout_alignLeft="@id/notificationIcons"
+            android:layout_alignTop="@id/notificationIcons"
+            android:orientation="horizontal"
+            android:visibility="gone"
             >
-            <com.android.systemui.statusbar.Clock
-                android:id="@+id/clock"
-                android:textAppearance="@*android:style/TextAppearance.StatusBar.Icon"
+            <ImageView android:id="@+id/tickerIcon"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:singleLine="true"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:padding="6dip"
+                android:layout_height="match_parent"
+                android:layout_marginRight="8dip"
                 />
-            <ImageView
-                android:layout_width="wrap_content"
+            <com.android.systemui.statusbar.TickerView android:id="@+id/tickerText"
+                android:layout_width="0dip"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:layout_toLeftOf="@id/clock"
-                android:layout_centerVertical="true"
-                android:src="@drawable/dots_empty"
-                />
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/clock"
-                android:layout_centerVertical="true"
-                android:src="@drawable/dots_full"
-                />
-        </RelativeLayout>
+                android:paddingTop="2dip"
+                android:paddingRight="10dip">
+                <TextView
+                    android:textAppearance="@*android:style/TextAppearance.StatusBar.Ticker"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    />
+                <TextView
+                    android:textAppearance="@*android:style/TextAppearance.StatusBar.Ticker"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    />
+            </com.android.systemui.statusbar.TickerView>
+        </LinearLayout>
+
+        <include layout="@layout/status_bar_center"
+            android:layout_width="100dip"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            />
 
         <com.android.systemui.statusbar.KeyButtonView android:id="@+id/back"
             android:layout_width="wrap_content"
@@ -125,60 +133,5 @@
             android:src="@drawable/status_bar_home"
             systemui:keyCode="3"
             />
-            
-<!--
-        
-    <LinearLayout android:id="@+id/ticker"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingLeft="6dip"
-        android:animationCache="false"
-        android:orientation="horizontal" >
-        <ImageSwitcher android:id="@+id/tickerIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginRight="8dip"
-            >
-            <com.android.systemui.statusbar.AnimatedImageView
-                android:layout_width="25dip"
-                android:layout_height="25dip"
-                />
-            <com.android.systemui.statusbar.AnimatedImageView
-                android:layout_width="25dip"
-                android:layout_height="25dip"
-                />
-        </ImageSwitcher>
-        <com.android.systemui.statusbar.TickerView android:id="@+id/tickerText"
-            android:layout_width="0dip"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:paddingTop="2dip"
-            android:paddingRight="10dip">
-            <TextView
-                android:textAppearance="@*android:style/TextAppearance.StatusBar.Ticker"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                />
-            <TextView
-                android:textAppearance="@*android:style/TextAppearance.StatusBar.Ticker"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                />
-        </com.android.systemui.statusbar.TickerView>
-    </LinearLayout>
-
-    <com.android.systemui.statusbar.DateView android:id="@+id/date"
-        android:textAppearance="@*android:style/TextAppearance.StatusBar.Icon"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:singleLine="true"
-        android:gravity="center_vertical|left"
-        android:paddingLeft="6px"
-        android:paddingRight="6px"
-        android:background="@drawable/status_bar_background"
-        />
--->
 </RelativeLayout>
 
