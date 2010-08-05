@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,7 @@ import java.util.StringTokenizer;
  * <p>To attach the Equalizer to a particular AudioTrack or MediaPlayer, specify the audio session
  * ID of this AudioTrack or MediaPlayer when constructing the Equalizer. If the audio session ID 0
  * is specified, the Equalizer applies to the main audio output mix.
- // TODO when AudioEffect is unhidden
- // <p> See {_at_link android.media.AudioEffect} class for more details on controlling audio effects.
- *
- * {@hide Pending API council review}
+ * <p> See {@link android.media.AudioEffect} class for more details on controlling audio effects.
  */
 
 public class Equalizer extends AudioEffect {
@@ -54,7 +51,7 @@ public class Equalizer extends AudioEffect {
     // These constants must be synchronized with those in
     // frameworks/base/include/media/EffectEqualizerApi.h
     /**
-     * Number of bands. Parameter ID for {@link android.media.Equalizer.OnParameterChangeListener}
+     * Number of bands. Parameter ID for OnParameterChangeListener
      */
     public static final int PARAM_NUM_BANDS = 0;
     /**
@@ -70,11 +67,13 @@ public class Equalizer extends AudioEffect {
      */
     public static final int PARAM_CENTER_FREQ = 3;
     /**
-     * Band frequency range. Parameter ID for OnParameterChangeListener
+     * Band frequency range. Parameter ID for
+     * {@link android.media.Equalizer.OnParameterChangeListener}
      */
     public static final int PARAM_BAND_FREQ_RANGE = 4;
     /**
      * Band for a given frequency. Parameter ID for OnParameterChangeListener
+     *
      */
     public static final int PARAM_GET_BAND = 5;
     /**
@@ -92,7 +91,7 @@ public class Equalizer extends AudioEffect {
     // used by setProperties()/getProperties
     private static final int PARAM_PROPERTIES = 9;
     /**
-     * maximum size for perset name
+     * Maximum size for preset name
      */
     public static final int PARAM_STRING_SIZE_MAX = 32;
 
@@ -131,7 +130,7 @@ public class Equalizer extends AudioEffect {
      * engine. As the same engine can be shared by several applications, this parameter indicates
      * how much the requesting application needs control of effect parameters. The normal priority
      * is 0, above normal is a positive number, below normal a negative number.
-     * @param audioSession  System wide unique audio session identifier. If audioSession
+     * @param audioSession  system wide unique audio session identifier. If audioSession
      *  is not 0, the Equalizer will be attached to the MediaPlayer or AudioTrack in the
      *  same audio session. Otherwise, the Equalizer will apply to the output mix.
      *
@@ -189,7 +188,7 @@ public class Equalizer extends AudioEffect {
     }
 
     /**
-     * Gets the level range for use by {@link #setBandLevel(int,short)}. The level is expressed in
+     * Gets the level range for use by {@link #setBandLevel(short,short)}. The level is expressed in
      * milliBel.
      * @return the band level range in an array of short integers. The first element is the lower
      * limit of the range, the second element the upper limit.
@@ -206,13 +205,14 @@ public class Equalizer extends AudioEffect {
 
     /**
      * Sets the given equalizer band to the given gain value.
-     * @param band Frequency band that will have the new gain. The numbering of the bands starts
-     * from 0 and ends at (number of bands - 1). See @see #getNumberOfBands().
-     * @param level New gain in millibels that will be set to the given band. getBandLevelRange()
+     * @param band frequency band that will have the new gain. The numbering of the bands starts
+     * from 0 and ends at (number of bands - 1).
+     * @param level new gain in millibels that will be set to the given band. getBandLevelRange()
      * will define the maximum and minimum values.
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
+     * @see #getNumberOfBands()
      */
     public void setBandLevel(short band, short level)
     throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
@@ -227,9 +227,9 @@ public class Equalizer extends AudioEffect {
 
     /**
      * Gets the gain set for the given equalizer band.
-     * @param band Frequency band whose gain is requested. The numbering of the bands starts
+     * @param band frequency band whose gain is requested. The numbering of the bands starts
      * from 0 and ends at (number of bands - 1).
-     * @return Gain in millibels of the given band.
+     * @return the gain in millibels of the given band.
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
@@ -249,9 +249,9 @@ public class Equalizer extends AudioEffect {
 
     /**
      * Gets the center frequency of the given band.
-     * @param band Frequency band whose center frequency is requested. The numbering of the bands
+     * @param band frequency band whose center frequency is requested. The numbering of the bands
      * starts from 0 and ends at (number of bands - 1).
-     * @return The center frequency in milliHertz
+     * @return the center frequency in milliHertz
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
@@ -270,9 +270,9 @@ public class Equalizer extends AudioEffect {
 
     /**
      * Gets the frequency range of the given frequency band.
-     * @param band Frequency band whose frequency range is requested. The numbering of the bands
+     * @param band frequency band whose frequency range is requested. The numbering of the bands
      * starts from 0 and ends at (number of bands - 1).
-     * @return The frequency range in millHertz in an array of integers. The first element is the
+     * @return the frequency range in millHertz in an array of integers. The first element is the
      * lower limit of the range, the second element the upper limit.
      * @throws IllegalStateException
      * @throws IllegalArgumentException
@@ -291,8 +291,8 @@ public class Equalizer extends AudioEffect {
 
     /**
      * Gets the band that has the most effect on the given frequency.
-     * @param frequency Frequency in milliHertz which is to be equalized via the returned band.
-     * @return Frequency band that has most effect on the given frequency.
+     * @param frequency frequency in milliHertz which is to be equalized via the returned band.
+     * @return the frequency band that has most effect on the given frequency.
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
@@ -311,7 +311,7 @@ public class Equalizer extends AudioEffect {
 
     /**
      * Gets current preset.
-     * @return Preset that is set at the moment.
+     * @return the preset that is set at the moment.
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
@@ -325,11 +325,12 @@ public class Equalizer extends AudioEffect {
 
     /**
      * Sets the equalizer according to the given preset.
-     * @param preset New preset that will be taken into use. The valid range is [0,
-     * number of presets-1]. See {@see #getNumberOfPresets()}.
+     * @param preset new preset that will be taken into use. The valid range is [0,
+     * number of presets-1].
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
+     * @see #getNumberOfPresets()
      */
     public void usePreset(short preset)
     throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
@@ -339,7 +340,7 @@ public class Equalizer extends AudioEffect {
     /**
      * Gets the total number of presets the equalizer supports. The presets will have indices
      * [0, number of presets-1].
-     * @return The number of presets the equalizer supports.
+     * @return the number of presets the equalizer supports.
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
@@ -353,8 +354,8 @@ public class Equalizer extends AudioEffect {
 
     /**
      * Gets the preset name based on the index.
-     * @param preset Index of the preset. The valid range is [0, number of presets-1].
-     * @return A string containing the name of the given preset.
+     * @param preset index of the preset. The valid range is [0, number of presets-1].
+     * @return a string containing the name of the given preset.
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
@@ -379,8 +380,7 @@ public class Equalizer extends AudioEffect {
          * Equalizer engine.
          * @param effect the Equalizer on which the interface is registered.
          * @param status status of the set parameter operation.
-         // TODO when AudioEffect is unhidden
-         // See {_at_link android.media.AudioEffect#setParameter(byte[], byte[])}.
+         * See {@link android.media.AudioEffect#setParameter(byte[], byte[])}.
          * @param param1 ID of the modified parameter. See {@link #PARAM_BAND_LEVEL} ...
          * @param param2 additional parameter qualifier (e.g the band for band level parameter).
          * @param value the new parameter value.
@@ -539,6 +539,7 @@ public class Equalizer extends AudioEffect {
     /**
      * Sets the equalizer properties. This method is useful when equalizer settings have to
      * be applied from a previous backup.
+     * @param settings an Equalizer.Settings object containing the properties to apply
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException

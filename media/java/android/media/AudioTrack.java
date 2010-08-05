@@ -298,8 +298,6 @@ public class AudioTrack
      * @param mode streaming or static buffer. See {@link #MODE_STATIC} and {@link #MODE_STREAM}
      * @param sessionId Id of audio session the AudioTrack must be attached to
      * @throws java.lang.IllegalArgumentException
-     // FIXME: unhide.
-     * @hide
      */
     public AudioTrack(int streamType, int sampleRateInHz, int channelConfig, int audioFormat,
             int bufferSizeInBytes, int mode, int sessionId)
@@ -648,9 +646,6 @@ public class AudioTrack
      * Returns the audio session ID.
      *
      * @return the ID of the audio session this AudioTrack belongs to.
-     // FIXME: unhide.
-     // FIXME: link to AudioEffect class when public.
-     * @hide
      */
     public int getAudioSessionId() {
         return mSessionId;
@@ -972,17 +967,14 @@ public class AudioTrack
      * reverberation effect which can be applied on any sound source that directs a certain
      * amount of its energy to this effect. This amount is defined by setAuxEffectSendLevel().
      * {@see #setAuxEffectSendLevel(float)}.
-     // TODO when AudioEffect are unhidden
-     * <p>After creating an auxiliary effect (e.g. {_at_link android.media.EnvironmentalReverb}),
-     * retrieve its ID with {_at_link android.media.AudioEffect#getId()} and use it when calling
+     * <p>After creating an auxiliary effect (e.g. {@link android.media.EnvironmentalReverb}),
+     * retrieve its ID with {@link android.media.AudioEffect#getId()} and use it when calling
      * this method to attach the audio track to the effect.
      * <p>To detach the effect from the audio track, call this method with a null effect id.
      *
      * @param effectId system wide unique id of the effect to attach
      * @return error code or success, see {@link #SUCCESS},
      *    {@link #ERROR_INVALID_OPERATION}, {@link #ERROR_BAD_VALUE}
-     // FIXME: unhide.
-     * @hide
      */
     public int attachAuxEffect(int effectId) {
         if (mState != STATE_INITIALIZED) {
@@ -1005,8 +997,6 @@ public class AudioTrack
      * @param level send level scalar
      * @return error code or success, see {@link #SUCCESS},
      *    {@link #ERROR_INVALID_OPERATION}
-     // FIXME: unhide.
-     * @hide
      */
     public int setAuxEffectSendLevel(float level) {
         if (mState != STATE_INITIALIZED) {
