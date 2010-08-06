@@ -267,18 +267,31 @@ const void * SC_getElementAtXYZ(RsAllocation va, uint32_t x, uint32_t y, uint32_
 static void SC_debugF(const char *s, float f) {
     LOGE("%s %f, 0x%08x", s, f, *((int *) (&f)));
 }
-static void SC_debugFv2(const char *s, rsvF_2 fv) {
-    float *f = (float *)&fv;
-    LOGE("%s {%f, %f}", s, f[0], f[1]);
+static void SC_debugFv2(const char *s, float f1, float f2) {
+    LOGE("%s {%f, %f}", s, f1, f2);
 }
-static void SC_debugFv3(const char *s, rsvF_4 fv) {
-    float *f = (float *)&fv;
-    LOGE("%s {%f, %f, %f}", s, f[0], f[1], f[2]);
+static void SC_debugFv3(const char *s, float f1, float f2, float f3) {
+    LOGE("%s {%f, %f, %f}", s, f1, f2, f3);
 }
-static void SC_debugFv4(const char *s, rsvF_4 fv) {
-    float *f = (float *)&fv;
-    LOGE("%s {%f, %f, %f, %f}", s, f[0], f[1], f[2], f[3]);
+static void SC_debugFv4(const char *s, float f1, float f2, float f3, float f4) {
+    LOGE("%s {%f, %f, %f, %f}", s, f1, f2, f3, f4);
 }
+static void SC_debugFM4v4(const char *s, const float *f) {
+    LOGE("%s {%f, %f, %f, %f", s, f[0], f[4], f[8], f[12]);
+    LOGE("%s  %f, %f, %f, %f", s, f[1], f[5], f[9], f[13]);
+    LOGE("%s  %f, %f, %f, %f", s, f[2], f[6], f[10], f[14]);
+    LOGE("%s  %f, %f, %f, %f}", s, f[3], f[7], f[11], f[15]);
+}
+static void SC_debugFM3v3(const char *s, const float *f) {
+    LOGE("%s {%f, %f, %f", s, f[0], f[3], f[6]);
+    LOGE("%s  %f, %f, %f", s, f[1], f[4], f[7]);
+    LOGE("%s  %f, %f, %f}",s, f[2], f[5], f[8]);
+}
+static void SC_debugFM2v2(const char *s, const float *f) {
+    LOGE("%s {%f, %f", s, f[0], f[2]);
+    LOGE("%s  %f, %f}",s, f[1], f[3]);
+}
+
 static void SC_debugI32(const char *s, int32_t i) {
     LOGE("%s %i  0x%x", s, i, i);
 }
@@ -394,9 +407,12 @@ static ScriptCState::SymbolTable_t gSyms[] = {
 
     // Debug
     { "_Z7rsDebugPKcf", (void *)&SC_debugF },
-    { "_Z7rsDebugPKcDv2_f", (void *)&SC_debugFv2 },
-    { "_Z7rsDebugPKcDv3_f", (void *)&SC_debugFv3 },
-    { "_Z7rsDebugPKcDv4_f", (void *)&SC_debugFv4 },
+    { "_Z7rsDebugPKcff", (void *)&SC_debugFv2 },
+    { "_Z7rsDebugPKcfff", (void *)&SC_debugFv3 },
+    { "_Z7rsDebugPKcffff", (void *)&SC_debugFv4 },
+    { "_Z7rsDebugPKcPK12rs_matrix4x4", (void *)&SC_debugFM4v4 },
+    { "_Z7rsDebugPKcPK12rs_matrix3x3", (void *)&SC_debugFM3v3 },
+    { "_Z7rsDebugPKcPK12rs_matrix2x2", (void *)&SC_debugFM2v2 },
     { "_Z7rsDebugPKci", (void *)&SC_debugI32 },
     { "_Z7rsDebugPKcj", (void *)&SC_debugU32 },
     { "_Z7rsDebugPKcPKv", (void *)&SC_debugP },

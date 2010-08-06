@@ -1,6 +1,15 @@
 #ifndef __RS_CORE_RSH__
 #define __RS_CORE_RSH__
 
+static void __attribute__((overloadable)) rsDebug(const char *s, float2 v) {
+    rsDebug(s, v.x, v.y);
+}
+static void __attribute__((overloadable)) rsDebug(const char *s, float3 v) {
+    rsDebug(s, v.x, v.y, v.z);
+}
+static void __attribute__((overloadable)) rsDebug(const char *s, float4 v) {
+    rsDebug(s, v.x, v.y, v.z, v.w);
+}
 
 static uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b)
 {
