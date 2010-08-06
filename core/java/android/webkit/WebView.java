@@ -21,8 +21,8 @@ import android.app.AlertDialog;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -43,7 +43,6 @@ import android.net.http.SslCertificate;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.text.Selection;
@@ -74,13 +73,15 @@ import android.webkit.WebViewCore.TouchHighlightData;
 import android.widget.AbsoluteLayout;
 import android.widget.Adapter;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.CheckedTextView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Scroller;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
+
+import junit.framework.Assert;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -94,8 +95,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import junit.framework.Assert;
 
 /**
  * <p>A View that displays web pages. This class is the basis upon which you
@@ -291,7 +290,7 @@ import junit.framework.Assert;
  * property to {@code device-dpi}. This stops Android from performing scaling in your web page and
  * allows you to make the necessary adjustments for each density via CSS and JavaScript.</p>
  *
- * 
+ *
  */
 @Widget
 public class WebView extends AbsoluteLayout
@@ -1057,8 +1056,10 @@ public class WebView extends AbsoluteLayout
 
     /*
      * Return the amount of the titlebarview (if any) that is visible
+     *
+     * @hide
      */
-    int getVisibleTitleHeight() {
+    public int getVisibleTitleHeight() {
         return Math.max(getTitleHeight() - mScrollY, 0);
     }
 
@@ -2693,6 +2694,16 @@ public class WebView extends AbsoluteLayout
             return;
         }
         mWebViewCore.sendMessage(EventHub.DOC_HAS_IMAGES, response);
+    }
+
+    /**
+     * Request the scroller to abort any ongoing animation
+     *
+     * @hide
+     */
+    public void stopScroll() {
+        mScroller.forceFinished(true);
+        mLastVelocity = 0;
     }
 
     @Override
