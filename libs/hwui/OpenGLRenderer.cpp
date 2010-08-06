@@ -436,6 +436,8 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, const S
     }
 
     const Texture* texture = mTextureCache.get(bitmap);
+    const AutoTexture autoCleanup(texture);
+
     drawTextureRect(left, top, right, bottom, texture, paint);
 }
 
@@ -449,6 +451,8 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix, const 
     }
 
     const Texture* texture = mTextureCache.get(bitmap);
+    const AutoTexture autoCleanup(texture);
+
     drawTextureRect(r.left, r.top, r.right, r.bottom, texture, paint);
 }
 
@@ -461,6 +465,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     }
 
     const Texture* texture = mTextureCache.get(bitmap);
+    const AutoTexture autoCleanup(texture);
 
     const float width = texture->width;
     const float height = texture->height;
@@ -484,6 +489,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
     }
 
     const Texture* texture = mTextureCache.get(bitmap);
+    const AutoTexture autoCleanup(texture);
 
     int alpha;
     SkXfermode::Mode mode;
@@ -610,7 +616,8 @@ void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
     GLuint textureUnit = 0;
     glActiveTexture(gTextureUnits[textureUnit]);
 
-    PathTexture* texture = mPathCache.get(path, paint);
+    const PathTexture* texture = mPathCache.get(path, paint);
+    const AutoTexture autoCleanup(texture);
 
     int alpha;
     SkXfermode::Mode mode;

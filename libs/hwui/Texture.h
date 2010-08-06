@@ -26,6 +26,10 @@ namespace uirenderer {
  * Represents an OpenGL texture.
  */
 struct Texture {
+    Texture() {
+        cleanup = false;
+    }
+
     /**
      * Name of the texture.
      */
@@ -46,7 +50,25 @@ struct Texture {
      * Height of the backing bitmap.
      */
     uint32_t height;
+    /**
+     * Indicates whether this texture should be cleaned up after use.
+     */
+    bool cleanup;
 }; // struct Texture
+
+class AutoTexture {
+public:
+    AutoTexture(const Texture* texture): mTexture(texture) { }
+    ~AutoTexture() {
+        if (mTexture && mTexture->cleanup) {
+            glDeleteTextures(1, &mTexture->id);
+            delete mTexture;
+        }
+    }
+
+private:
+    const Texture* mTexture;
+}; // class AutoTexture
 
 }; // namespace uirenderer
 }; // namespace android

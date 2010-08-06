@@ -88,7 +88,6 @@ PathTexture* PathCache::get(SkPath* path, SkPaint* paint) {
         texture = addTexture(entry, path, paint);
     }
 
-    // TODO: Do something to destroy the texture object if it's too big for the cache
     return texture;
 }
 
@@ -129,6 +128,8 @@ PathTexture* PathCache::addTexture(const PathCacheEntry& entry,
     if (size < mMaxSize) {
         mSize += size;
         mCache.put(entry, texture);
+    } else {
+        texture->cleanup = true;
     }
 
     return texture;

@@ -93,11 +93,13 @@ Texture* TextureCache::get(SkBitmap* bitmap) {
         if (size < mMaxSize) {
             mSize += size;
             mCache.put(bitmap, texture);
+        } else {
+            texture->cleanup = true;
         }
     } else if (bitmap->getGenerationID() != texture->generation) {
         generateTexture(bitmap, texture, true);
     }
-    // TODO: Do something to destroy the texture object if it's too big for the cache
+
     return texture;
 }
 

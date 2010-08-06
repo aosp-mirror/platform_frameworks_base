@@ -71,6 +71,9 @@ struct PathCacheEntry {
  * Alpha texture used to represent a path.
  */
 struct PathTexture: public Texture {
+    PathTexture(): Texture() {
+    }
+
     /**
      * Left coordinate of the path bounds.
      */
