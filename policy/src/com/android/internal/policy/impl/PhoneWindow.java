@@ -2412,8 +2412,17 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
             } else {
                 mActionBar = (ActionBarView) findViewById(com.android.internal.R.id.action_bar);
-                if (mActionBar != null && mActionBar.getTitle() == null) {
-                    mActionBar.setWindowTitle(mTitle);
+                if (mActionBar != null) {
+                    if (mActionBar.getTitle() == null) {
+                        mActionBar.setWindowTitle(mTitle);
+                    }
+                    // Post the panel invalidate for later; avoid application onCreateOptionsMenu
+                    // being called in the middle of onCreate or similar.
+                    mDecor.post(new Runnable() {
+                        public void run() {
+                            invalidatePanelMenu(FEATURE_ACTION_BAR);
+                        }
+                    });
                 }
             }
         }
