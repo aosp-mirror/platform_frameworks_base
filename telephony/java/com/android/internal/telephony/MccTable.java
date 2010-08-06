@@ -416,7 +416,7 @@ public final class MccTable
 		table.add(new MccEntry(438,"tm",2));	//Turkmenistan
 		table.add(new MccEntry(440,"jp",2,"ja",14));	//Japan
 		table.add(new MccEntry(441,"jp",2,"ja",14));	//Japan
-		table.add(new MccEntry(450,"kr",2));	//Korea (Republic of)
+		table.add(new MccEntry(450,"kr",2,"ko",13));	//Korea (Republic of)
 		table.add(new MccEntry(452,"vn",2));	//Viet Nam (Socialist Republic of)
 		table.add(new MccEntry(454,"hk",2));	//"Hong Kong, China"
 		table.add(new MccEntry(455,"mo",2));	//"Macao, China"
