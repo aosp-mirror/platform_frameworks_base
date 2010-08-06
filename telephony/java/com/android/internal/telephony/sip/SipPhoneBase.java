@@ -19,6 +19,7 @@ package com.android.internal.telephony.sip;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.NetworkProperties;
 import android.net.Uri;
 import android.os.AsyncResult;
 import android.os.Handler;
@@ -65,7 +66,7 @@ import com.android.internal.telephony.PhoneNotifier;
 import com.android.internal.telephony.PhoneProxy;
 import com.android.internal.telephony.PhoneSubInfo;
 import com.android.internal.telephony.TelephonyProperties;
-//import com.android.internal.telephony.UUSInfo;
+import com.android.internal.telephony.UUSInfo;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -102,13 +103,11 @@ abstract class SipPhoneBase extends PhoneBase {
 
     public abstract Call getRingingCall();
 
-    /*
     public Connection dial(String dialString, UUSInfo uusInfo)
             throws CallStateException {
         // ignore UUSInfo
         return dial(dialString);
     }
-    */
 
     void migrateFrom(SipPhoneBase from) {
         migrate(mRingbackRegistrants, from.mRingbackRegistrants);
@@ -536,6 +535,18 @@ abstract class SipPhoneBase extends PhoneBase {
 
     public void setCellBroadcastSmsConfig(int[] configValuesArray, Message response){
         Log.e(LOG_TAG, "Error! This functionality is not implemented for SIP.");
+    }
+
+    //@Override
+    public boolean needsOtaServiceProvisioning() {
+        // FIXME: what's this for SIP?
+        return false;
+    }
+
+    //@Override
+    public NetworkProperties getNetworkProperties(String apnType) {
+        // FIXME: what's this for SIP?
+        return null;
     }
 
     void updatePhoneState() {

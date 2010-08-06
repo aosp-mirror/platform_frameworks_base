@@ -58,7 +58,6 @@ import com.android.internal.telephony.PhoneNotifier;
 import com.android.internal.telephony.PhoneProxy;
 import com.android.internal.telephony.PhoneSubInfo;
 import com.android.internal.telephony.TelephonyProperties;
-import com.android.internal.telephony.UUSInfo;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -98,6 +97,14 @@ public class SipPhone extends SipPhoneBase {
         //Change the system property
         //SystemProperties.set(TelephonyProperties.CURRENT_ACTIVE_PHONE,
         //        new Integer(Phone.PHONE_TYPE_GSM).toString());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof SipPhone)) return false;
+        SipPhone that = (SipPhone) o;
+        return mProfile.getUriString().equals(that.mProfile.getUriString());
     }
 
     public String getPhoneName() {
@@ -163,10 +170,6 @@ public class SipPhone extends SipPhoneBase {
                 throw new CallStateException("phone not ringing");
             }
         }
-    }
-
-    public Connection dial(String dialString, UUSInfo uusinfo) throws CallStateException {
-        return dial(dialString);
     }
 
     public Connection dial(String dialString) throws CallStateException {
@@ -715,10 +718,6 @@ public class SipPhone extends SipPhoneBase {
             */
         }
 
-        @Override
-        public UUSInfo getUUSInfo() {
-            return null;
-        }
     }
 
     private static Call.State getCallStateFrom(SipAudioCall sipAudioCall) {
