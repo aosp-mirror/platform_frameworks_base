@@ -32,6 +32,7 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 /**
@@ -100,6 +101,15 @@ public class MockIContentProvider implements IContentProvider {
     }
 
     public IBinder asBinder() {
+        throw new UnsupportedOperationException("unimplemented mock method");
+    }
+
+    public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException {
+        throw new UnsupportedOperationException("unimplemented mock method");
+    }
+
+    public AssetFileDescriptor openTypedAssetFile(Uri url, String mimeType, Bundle opts)
+            throws RemoteException, FileNotFoundException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 }

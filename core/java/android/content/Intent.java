@@ -985,6 +985,15 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_INSERT = "android.intent.action.INSERT";
     /**
+     * Activity Action: Create a new item in the given container, initializing it
+     * from the current contents of the clipboard.
+     * <p>Input: {@link #getData} is URI of the directory (vnd.android.cursor.dir/*)
+     * in which to place the data.
+     * <p>Output: URI of the new data that was created.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_PASTE = "android.intent.action.PASTE";
+    /**
      * Activity Action: Delete the given data from its container.
      * <p>Input: {@link #getData} is URI of data to be deleted.
      * <p>Output: nothing.

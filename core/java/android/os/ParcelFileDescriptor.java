@@ -134,6 +134,25 @@ public class ParcelFileDescriptor implements Parcelable {
     private static native FileDescriptor getFileDescriptorFromSocket(Socket socket);
 
     /**
+     * Create two ParcelFileDescriptors structured as a data pipe.  The first
+     * ParcelFileDescriptor in the returned array is the read side; the second
+     * is the write side.
+     */
+    public static ParcelFileDescriptor[] createPipe() throws IOException {
+        FileDescriptor[] fds = new FileDescriptor[2];
+        int res = createPipeNative(fds);
+        if (res == 0) {
+            ParcelFileDescriptor[] pfds = new ParcelFileDescriptor[2];
+            pfds[0] = new ParcelFileDescriptor(fds[0]);
+            pfds[1] = new ParcelFileDescriptor(fds[1]);
+            return pfds;
+        }
+        throw new IOException("Unable to create pipe: errno=" + -res);
+    }
+
+    private static native int createPipeNative(FileDescriptor[] outFds);
+
+    /**
      * Retrieve the actual FileDescriptor associated with this object.
      * 
      * @return Returns the FileDescriptor associated with this object.

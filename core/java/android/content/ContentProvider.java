@@ -28,6 +28,7 @@ import android.database.IBulkCursor;
 import android.database.IContentObserver;
 import android.database.SQLException;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -36,6 +37,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -249,6 +251,18 @@ public abstract class ContentProvider implements ComponentCallbacks {
          */
         public Bundle call(String method, String request, Bundle args) {
             return ContentProvider.this.call(method, request, args);
+        }
+
+        @Override
+        public String[] getStreamTypes(Uri uri, String mimeTypeFilter) {
+            return ContentProvider.this.getStreamTypes(uri, mimeTypeFilter);
+        }
+
+        @Override
+        public AssetFileDescriptor openTypedAssetFile(Uri uri, String mimeType, Bundle opts)
+                throws FileNotFoundException {
+            enforceReadPermission(uri);
+            return ContentProvider.this.openTypedAssetFile(uri, mimeType, opts);
         }
 
         private void enforceReadPermission(Uri uri) {
@@ -752,6 +766,164 @@ public abstract class ContentProvider implements ComponentCallbacks {
     }
 
     /**
+     * Helper to compare two MIME types, where one may be a pattern.
+     * @param concreteType A fully-specified MIME type.
+     * @param desiredType A desired MIME type that may be a pattern such as *\/*.
+     * @return Returns true if the two MIME types match.
+     */
+    public static boolean compareMimeTypes(String concreteType, String desiredType) {
+        final int typeLength = desiredType.length();
+        if (typeLength == 3 && desiredType.equals("*/*")) {
+            return true;
+        }
+
+        final int slashpos = desiredType.indexOf('/');
+        if (slashpos > 0) {
+            if (typeLength == slashpos+2 && desiredType.charAt(slashpos+1) == '*') {
+                if (desiredType.regionMatches(0, concreteType, 0, slashpos+1)) {
+                    return true;
+                }
+            } else if (desiredType.equals(concreteType)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Called by a client to determine the types of data streams that this
+     * content provider supports for the given URI.  The default implementation
+     * returns null, meaning no types.  If your content provider stores data
+     * of a particular type, return that MIME type if it matches the given
+     * mimeTypeFilter.  If it can perform type conversions, return an array
+     * of all supported MIME types that match mimeTypeFilter.
+     *
+     * @param uri The data in the content provider being queried.
+     * @param mimeTypeFilter The type of data the client desires.  May be
+     * a pattern, such as *\/* to retrieve all possible data types.
+     * @returns Returns null if there are no possible data streams for the
+     * given mimeTypeFilter.  Otherwise returns an array of all available
+     * concrete MIME types.
+     *
+     * @see #getType(Uri)
+     * @see #openTypedAssetFile(Uri, String, Bundle)
+     * @see #compareMimeTypes(String, String)
+     */
+    public String[] getStreamTypes(Uri uri, String mimeTypeFilter) {
+        return null;
+    }
+
+    /**
+     * Called by a client to open a read-only stream containing data of a
+     * particular MIME type.  This is like {@link #openAssetFile(Uri, String)},
+     * except the file can only be read-only and the content provider may
+     * perform data conversions to generate data of the desired type.
+     *
+     * <p>The default implementation compares the given mimeType against the
+     * result of {@link #getType(Uri)} and, if the match, simple calls
+     * {@link #openAssetFile(Uri, String)}.
+     *
+     * <p>See {@link ClippedData} for examples of the use and implementation
+     * of this method.
+     *
+     * @param uri The data in the content provider being queried.
+     * @param mimeTypeFilter The type of data the client desires.  May be
+     * a pattern, such as *\/*, if the caller does not have specific type
+     * requirements; in this case the content provider will pick its best
+     * type matching the pattern.
+     * @param opts Additional options from the client.  The definitions of
+     * these are specific to the content provider being called.
+     *
+     * @return Returns a new AssetFileDescriptor from which the client can
+     * read data of the desired type.
+     *
+     * @throws FileNotFoundException Throws FileNotFoundException if there is
+     * no file associated with the given URI or the mode is invalid.
+     * @throws SecurityException Throws SecurityException if the caller does
+     * not have permission to access the data.
+     * @throws IllegalArgumentException Throws IllegalArgumentException if the
+     * content provider does not support the requested MIME type.
+     *
+     * @see #getStreamTypes(Uri, String)
+     * @see #openAssetFile(Uri, String)
+     * @see #compareMimeTypes(String, String)
+     */
+    public AssetFileDescriptor openTypedAssetFile(Uri uri, String mimeTypeFilter, Bundle opts)
+            throws FileNotFoundException {
+        String baseType = getType(uri);
+        if (baseType != null && compareMimeTypes(baseType, mimeTypeFilter)) {
+            return openAssetFile(uri, "r");
+        }
+        throw new FileNotFoundException("Can't open " + uri + " as type " + mimeTypeFilter);
+    }
+
+    /**
+     * Interface to write a stream of data to a pipe.  Use with
+     * {@link ContentProvider#openPipeHelper}.
+     */
+    public interface PipeDataWriter<T> {
+        /**
+         * Called from a background thread to stream data out to a pipe.
+         * Note that the pipe is blocking, so this thread can block on
+         * writes for an arbitrary amount of time if the client is slow
+         * at reading.
+         *
+         * @param output The pipe where data should be written.  This will be
+         * closed for you upon returning from this function.
+         * @param uri The URI whose data is to be written.
+         * @param mimeType The desired type of data to be written.
+         * @param opts Options supplied by caller.
+         * @param args Your own custom arguments.
+         */
+        public void writeDataToPipe(ParcelFileDescriptor output, Uri uri, String mimeType,
+                Bundle opts, T args);
+    }
+
+    /**
+     * A helper function for implementing {@link #openTypedAssetFile}, for
+     * creating a data pipe and background thread allowing you to stream
+     * generated data back to the client.  This function returns a new
+     * ParcelFileDescriptor that should be returned to the caller (the caller
+     * is responsible for closing it).
+     *
+     * @param uri The URI whose data is to be written.
+     * @param mimeType The desired type of data to be written.
+     * @param opts Options supplied by caller.
+     * @param args Your own custom arguments.
+     * @param func Interface implementing the function that will actually
+     * stream the data.
+     * @return Returns a new ParcelFileDescriptor holding the read side of
+     * the pipe.  This should be returned to the caller for reading; the caller
+     * is responsible for closing it when done.
+     */
+    public <T> ParcelFileDescriptor openPipeHelper(final Uri uri, final String mimeType,
+            final Bundle opts, final T args, final PipeDataWriter<T> func)
+            throws FileNotFoundException {
+        try {
+            final ParcelFileDescriptor[] fds = ParcelFileDescriptor.createPipe();
+
+            AsyncTask<Object, Object, Object> task = new AsyncTask<Object, Object, Object>() {
+                @Override
+                protected Object doInBackground(Object... params) {
+                    func.writeDataToPipe(fds[1], uri, mimeType, opts, args);
+                    try {
+                        fds[1].close();
+                    } catch (IOException e) {
+                        Log.w(TAG, "Failure closing pipe", e);
+                    }
+                    return null;
+                }
+            };
+            task.execute((Object[])null);
+
+            return fds[0];
+        } catch (IOException e) {
+            throw new FileNotFoundException("failure making pipe");
+        }
+    }
+
+    /**
      * Returns true if this instance is a temporary content provider.
      * @return true if this instance is a temporary content provider
      */
@@ -777,6 +949,11 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * @param info Registered information about this content provider
      */
     public void attachInfo(Context context, ProviderInfo info) {
+        /*
+         * We may be using AsyncTask from binder threads.  Make it init here
+         * so its static handler is on the main thread.
+         */
+        AsyncTask.init();
 
         /*
          * Only allow it to be set once, so after the content service gives

@@ -175,6 +175,11 @@ public abstract class AsyncTask<Params, Progress, Result> {
         FINISHED,
     }
 
+    /** @hide Used to force static handler to be created. */
+    public static void init() {
+        sHandler.getLooper();
+    }
+
     /**
      * Creates a new asynchronous task. This constructor must be invoked on the UI thread.
      */

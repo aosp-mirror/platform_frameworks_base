@@ -21,7 +21,9 @@ import com.android.internal.widget.EditableInputConnection;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.content.ClippedData;
 import android.content.Context;
+import android.content.ClipboardManager;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -34,6 +36,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -42,7 +45,6 @@ import android.os.Parcelable;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.text.BoringLayout;
-import android.text.ClipboardManager;
 import android.text.DynamicLayout;
 import android.text.Editable;
 import android.text.GetChars;
@@ -7061,7 +7063,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 getSelectionStart() >= 0 &&
                 getSelectionEnd() >= 0 &&
                 ((ClipboardManager)getContext().getSystemService(Context.CLIPBOARD_SERVICE)).
-                hasText());
+                hasPrimaryClip());
     }
 
     /**
@@ -7270,7 +7272,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int min = Math.max(0, Math.min(selStart, selEnd));
         int max = Math.max(0, Math.max(selStart, selEnd));
 
-        ClipboardManager clip = (ClipboardManager)getContext()
+        ClipboardManager clipboard = (ClipboardManager)getContext()
                 .getSystemService(Context.CLIPBOARD_SERVICE);
 
         switch (id) {
@@ -7278,8 +7280,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 MetaKeyKeyListener.stopSelecting(this, (Spannable) mText);
 
                 URLSpan[] urls = ((Spanned) mText).getSpans(min, max, URLSpan.class);
-                if (urls.length == 1) {
-                    clip.setText(urls[0].getURL());
+                if (urls.length >= 1) {
+                    ClippedData clip = null;
+                    for (int i=0; i<urls.length; i++) {
+                        Uri uri = Uri.parse(urls[0].getURL());
+                        ClippedData.Item item = new ClippedData.Item(uri);
+                        if (clip == null) {
+                            clip = new ClippedData(null, null, item);
+                        } else {
+                            clip.addItem(item);
+                        }
+                    }
+                    clipboard.setPrimaryClip(clip);
                 }
                 return true;
 
@@ -7490,8 +7502,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return true;
             }
 
-            ClipboardManager clip = (ClipboardManager) getContext().
-                                                        getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipboardManager clipboard = (ClipboardManager) getContext().
+                    getSystemService(Context.CLIPBOARD_SERVICE);
 
             int min = 0;
             int max = mText.length();
@@ -7506,23 +7518,36 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             switch (item.getItemId()) {
                 case ID_PASTE:
-                    CharSequence paste = clip.getText();
-
-                    if (paste != null) {
-                        Selection.setSelection((Spannable) mText, max);
-                        ((Editable) mText).replace(min, max, paste);
+                    ClippedData clip = clipboard.getPrimaryClip();
+                    if (clip != null) {
+                        boolean didfirst = false;
+                        for (int i=0; i<clip.getItemCount(); i++) {
+                            CharSequence paste = clip.getItem(i).coerceToText(getContext());
+                            if (paste != null) {
+                                if (!didfirst) {
+                                    Selection.setSelection((Spannable) mText, max);
+                                    ((Editable) mText).replace(min, max, paste);
+                                } else {
+                                    ((Editable) mText).insert(getSelectionEnd(), "\n");
+                                    ((Editable) mText).insert(getSelectionEnd(), paste);
+                                }
+                            }
+                        }
                         finishSelectionActionMode();
                     }
+
                     return true;
 
                 case ID_CUT:
-                    clip.setText(mTransformed.subSequence(min, max));
+                    clipboard.setPrimaryClip(new ClippedData(null, null,
+                            new ClippedData.Item(mTransformed.subSequence(min, max))));
                     ((Editable) mText).delete(min, max);
                     finishSelectionActionMode();
                     return true;
 
                 case ID_COPY:
-                    clip.setText(mTransformed.subSequence(min, max));
+                    clipboard.setPrimaryClip(new ClippedData(null, null,
+                            new ClippedData.Item(mTransformed.subSequence(min, max))));
                     finishSelectionActionMode();
                     return true;
             }

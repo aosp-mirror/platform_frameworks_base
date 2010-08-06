@@ -34,6 +34,12 @@ import java.util.ArrayList;
  * You do not instantiate this class directly; instead, retrieve it through
  * {@link android.content.Context#getSystemService}.
  *
+ * <p>
+ * The ClipboardManager API itself is very simple: it consists of methods
+ * to atomically get and set the current primary clipboard data.  That data
+ * is expressed as a {@link ClippedData} object, which defines the protocol
+ * for data exchange between applications.
+ *
  * @see android.content.Context#getSystemService
  */
 public class ClipboardManager extends android.text.ClipboardManager {
@@ -152,7 +158,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
     public CharSequence getText() {
         ClippedData clip = getPrimaryClip();
         if (clip != null && clip.getItemCount() > 0) {
-            return clip.getItem(0).getText();
+            return clip.getItem(0).coerceToText(mContext);
         }
         return null;
     }
@@ -167,11 +173,11 @@ public class ClipboardManager extends android.text.ClipboardManager {
     }
 
     /**
-     * Returns true if the clipboard has a primary clip containing text; false otherwise.
+     * @deprecated Use {@link #hasPrimaryClip()} instead.
      */
     public boolean hasText() {
         try {
-            return getService().hasClipboardText();
+            return getService().hasPrimaryClip();
         } catch (RemoteException e) {
             return false;
         }

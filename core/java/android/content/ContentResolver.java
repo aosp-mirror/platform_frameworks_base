@@ -186,14 +186,46 @@ public abstract class ContentResolver {
      * using the content:// scheme.
      * @return A MIME type for the content, or null if the URL is invalid or the type is unknown
      */
-    public final String getType(Uri url)
-    {
+    public final String getType(Uri url) {
         IContentProvider provider = acquireProvider(url);
         if (provider == null) {
             return null;
         }
         try {
             return provider.getType(url);
+        } catch (RemoteException e) {
+            return null;
+        } catch (java.lang.Exception e) {
+            return null;
+        } finally {
+            releaseProvider(provider);
+        }
+    }
+
+    /**
+     * Query for the possible MIME types for the representations the given
+     * content URL can be returned when opened as as stream with
+     * {@link #openTypedAssetFileDescriptor}.  Note that the types here are
+     * not necessarily a superset of the type returned by {@link #getType} --
+     * many content providers can not return a raw stream for the structured
+     * data that they contain.
+     *
+     * @param url A Uri identifying content (either a list or specific type),
+     * using the content:// scheme.
+     * @param mimeTypeFilter The desired MIME type.  This may be a pattern,
+     * such as *\/*, to query for all available MIME types that match the
+     * pattern.
+     * @return Returns an array of MIME type strings for all availablle
+     * data streams that match the given mimeTypeFilter.  If there are none,
+     * null is returned.
+     */
+    public String[] getStreamTypes(Uri url, String mimeTypeFilter) {
+        IContentProvider provider = acquireProvider(url);
+        if (provider == null) {
+            return null;
+        }
+        try {
+            return provider.getStreamTypes(url, mimeTypeFilter);
         } catch (RemoteException e) {
             return null;
         } catch (java.lang.Exception e) {
@@ -349,7 +381,7 @@ public abstract class ContentResolver {
     }
 
     /**
-     * Open a raw file descriptor to access data under a "content:" URI.  This
+     * Open a raw file descriptor to access data under a URI.  This
      * is like {@link #openAssetFileDescriptor(Uri, String)}, but uses the
      * underlying {@link ContentProvider#openFile}
      * ContentProvider.openFile()} method, so will <em>not</em> work with
@@ -399,7 +431,7 @@ public abstract class ContentResolver {
     }
 
     /**
-     * Open a raw file descriptor to access data under a "content:" URI.  This
+     * Open a raw file descriptor to access data under a URI.  This
      * interacts with the underlying {@link ContentProvider#openAssetFile}
      * method of the provider associated with the given URI, to retrieve any file stored there.
      *
@@ -433,6 +465,11 @@ public abstract class ContentResolver {
      * </li>
      * </ul>
      *
+     * <p>Note that if this function is called for read-only input (mode is "r")
+     * on a content: URI, it will instead call {@link #openTypedAssetFileDescriptor}
+     * for you with a MIME type of "*\/*".  This allows such callers to benefit
+     * from any built-in data conversion that a provider implements.
+     *
      * @param uri The desired URI to open.
      * @param mode The file mode to use, as per {@link ContentProvider#openAssetFile
      * ContentProvider.openAssetFile}.
@@ -459,29 +496,97 @@ public abstract class ContentResolver {
                     new File(uri.getPath()), modeToMode(uri, mode));
             return new AssetFileDescriptor(pfd, 0, -1);
         } else {
-            IContentProvider provider = acquireProvider(uri);
-            if (provider == null) {
-                throw new FileNotFoundException("No content provider: " + uri);
-            }
-            try {
-                AssetFileDescriptor fd = provider.openAssetFile(uri, mode);
-                if(fd == null) {
-                    releaseProvider(provider);
-                    return null;
+            if ("r".equals(mode)) {
+                return openTypedAssetFileDescriptor(uri, "*/*", null);
+            } else {
+                IContentProvider provider = acquireProvider(uri);
+                if (provider == null) {
+                    throw new FileNotFoundException("No content provider: " + uri);
                 }
-                ParcelFileDescriptor pfd = new ParcelFileDescriptorInner(
-                        fd.getParcelFileDescriptor(), provider);
-                return new AssetFileDescriptor(pfd, fd.getStartOffset(),
-                        fd.getDeclaredLength());
-            } catch (RemoteException e) {
+                try {
+                    AssetFileDescriptor fd = provider.openAssetFile(uri, mode);
+                    if(fd == null) {
+                        releaseProvider(provider);
+                        return null;
+                    }
+                    ParcelFileDescriptor pfd = new ParcelFileDescriptorInner(
+                            fd.getParcelFileDescriptor(), provider);
+
+                    // Success!  Don't release the provider when exiting, let
+                    // ParcelFileDescriptorInner do that when it is closed.
+                    provider = null;
+
+                    return new AssetFileDescriptor(pfd, fd.getStartOffset(),
+                            fd.getDeclaredLength());
+                } catch (RemoteException e) {
+                    throw new FileNotFoundException("Dead content provider: " + uri);
+                } catch (FileNotFoundException e) {
+                    throw e;
+                } finally {
+                    if (provider != null) {
+                        releaseProvider(provider);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Open a raw file descriptor to access (potentially type transformed)
+     * data from a "content:" URI.  This interacts with the underlying
+     * {@link ContentProvider#openTypedAssetFile} method of the provider
+     * associated with the given URI, to retrieve retrieve any appropriate
+     * data stream for the data stored there.
+     *
+     * <p>Unlike {@link #openAssetFileDescriptor}, this function only works
+     * with "content:" URIs, because content providers are the only facility
+     * with an associated MIME type to ensure that the returned data stream
+     * is of the desired type.
+     *
+     * <p>All text/* streams are encoded in UTF-8.
+     *
+     * @param uri The desired URI to open.
+     * @param mimeType The desired MIME type of the returned data.  This can
+     * be a pattern such as *\/*, which will allow the content provider to
+     * select a type, though there is no way for you to determine what type
+     * it is returning.
+     * @param opts Additional provider-dependent options.
+     * @return Returns a new ParcelFileDescriptor from which you can read the
+     * data stream from the provider.  Note that this may be a pipe, meaning
+     * you can't seek in it.  The only seek you should do is if the
+     * AssetFileDescriptor contains an offset, to move to that offset before
+     * reading.  You own this descriptor and are responsible for closing it when done.
+     * @throws FileNotFoundException Throws FileNotFoundException of no
+     * data of the desired type exists under the URI.
+     */
+    public final AssetFileDescriptor openTypedAssetFileDescriptor(Uri uri,
+            String mimeType, Bundle opts) throws FileNotFoundException {
+        IContentProvider provider = acquireProvider(uri);
+        if (provider == null) {
+            throw new FileNotFoundException("No content provider: " + uri);
+        }
+        try {
+            AssetFileDescriptor fd = provider.openTypedAssetFile(uri, mimeType, opts);
+            if (fd == null) {
                 releaseProvider(provider);
-                throw new FileNotFoundException("Dead content provider: " + uri);
-            } catch (FileNotFoundException e) {
+                return null;
+            }
+            ParcelFileDescriptor pfd = new ParcelFileDescriptorInner(
+                    fd.getParcelFileDescriptor(), provider);
+
+            // Success!  Don't release the provider when exiting, let
+            // ParcelFileDescriptorInner do that when it is closed.
+            provider = null;
+
+            return new AssetFileDescriptor(pfd, fd.getStartOffset(),
+                    fd.getDeclaredLength());
+        } catch (RemoteException e) {
+            throw new FileNotFoundException("Dead content provider: " + uri);
+        } catch (FileNotFoundException e) {
+            throw e;
+        } finally {
+            if (provider != null) {
                 releaseProvider(provider);
-                throw e;
-            } catch (RuntimeException e) {
-                releaseProvider(provider);
-                throw e;
             }
         }
     }

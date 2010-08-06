@@ -129,8 +129,12 @@ public class AssetFileDescriptor implements Parcelable {
     /**
      * Checks whether this file descriptor is for a memory file.
      */
-    private boolean isMemoryFile() throws IOException {
-        return MemoryFile.isMemoryFile(mFd.getFileDescriptor());
+    private boolean isMemoryFile() {
+        try {
+            return MemoryFile.isMemoryFile(mFd.getFileDescriptor());
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     /**

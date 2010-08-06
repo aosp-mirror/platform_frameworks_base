@@ -127,6 +127,16 @@ public class MockContentProvider extends ContentProvider {
             throw new UnsupportedOperationException();
         }
 
+        @SuppressWarnings("unused")
+        public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException {
+            return MockContentProvider.this.getStreamTypes(url, mimeTypeFilter);
+        }
+
+        @SuppressWarnings("unused")
+        public AssetFileDescriptor openTypedAssetFile(Uri url, String mimeType, Bundle opts)
+                throws RemoteException, FileNotFoundException {
+            return MockContentProvider.this.openTypedAssetFile(url, mimeType, opts);
+        }
     }
     private final InversionIContentProvider mIContentProvider = new InversionIContentProvider();
 
@@ -219,6 +229,14 @@ public class MockContentProvider extends ContentProvider {
      */
     @Override
     public Bundle call(String method, String request, Bundle args) {
+        throw new UnsupportedOperationException("unimplemented mock method call");
+    }
+
+    public String[] getStreamTypes(Uri url, String mimeTypeFilter) {
+        throw new UnsupportedOperationException("unimplemented mock method call");
+    }
+
+    public AssetFileDescriptor openTypedAssetFile(Uri url, String mimeType, Bundle opts) {
         throw new UnsupportedOperationException("unimplemented mock method call");
     }
 
