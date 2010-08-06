@@ -186,6 +186,10 @@ LOCAL_SRC_FILES += \
 	wifi/java/android/net/wifi/IWifiManager.aidl \
 	telephony/java/com/android/internal/telephony/IExtendedNetworkService.aidl \
 	vpn/java/android/net/vpn/IVpnService.aidl \
+	voip/java/android/net/sip/ISipSession.aidl \
+	voip/java/android/net/sip/ISipSessionListener.aidl \
+	voip/java/android/net/sip/ISipService.aidl
+#
 
 
 # FRAMEWORKS_BASE_JAVA_SRC_DIRS comes from build/core/pathmap.mk
@@ -575,6 +579,7 @@ include $(BUILD_DROIDDOC)
 # ============================================================
 
 ext_dirs := \
+	../../external/nist-sip/java \
 	../../external/apache-http/src \
 	../../external/tagsoup/src \
 	../../external/libphonenumber/java/src
