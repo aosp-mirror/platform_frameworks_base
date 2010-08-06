@@ -169,7 +169,7 @@ void ProgramFragment::loadShader(Context *rsc) {
 void ProgramFragment::createShader()
 {
     mShader.setTo("precision mediump float;\n");
-    mShader.append("varying vec4 varColor;\n");
+    mShader.append("varying lowp vec4 varColor;\n");
     mShader.append("varying vec4 varTex0;\n");
     mShader.append("uniform vec4 uni_Color;\n");
 
@@ -199,9 +199,9 @@ void ProgramFragment::createShader()
 
         mShader.append("void main() {\n");
         if (mVaryingColor) {
-            mShader.append("  vec4 col = varColor;\n");
+            mShader.append("  lowp vec4 col = varColor;\n");
         } else {
-            mShader.append("  vec4 col = uni_Color;\n");
+            mShader.append("  lowp vec4 col = uni_Color;\n");
         }
 
         if (mTextureEnableMask) {
