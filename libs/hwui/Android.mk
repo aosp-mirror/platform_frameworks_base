@@ -9,6 +9,7 @@ LOCAL_SRC_FILES:= \
 	OpenGLRenderer.cpp \
 	Patch.cpp \
 	PatchCache.cpp \
+	PathCache.cpp \
 	Program.cpp \
 	ProgramCache.cpp \
 	SkiaColorFilter.cpp \

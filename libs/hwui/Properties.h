@@ -26,10 +26,10 @@
 #define PROPERTY_TEXTURE_CACHE_SIZE "ro.hwui.texture_cache_size"
 #define PROPERTY_LAYER_CACHE_SIZE "ro.hwui.layer_cache_size"
 #define PROPERTY_GRADIENT_CACHE_SIZE "ro.hwui.gradient_cache_size"
+#define PROPERTY_PATH_CACHE_SIZE "ro.hwui.path_cache_size"
 
 // These properties are defined in pixels
 #define PROPERTY_TEXT_CACHE_WIDTH "ro.hwui.text_cache_width"
 #define PROPERTY_TEXT_CACHE_HEIGHT "ro.hwui.text_cache_height"
 
 #endif // ANDROID_UI_PROPERTIES_H
-

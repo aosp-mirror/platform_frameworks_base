@@ -90,7 +90,7 @@ const char* gFS_Uniforms_ColorOp[4] = {
 };
 const char* gFS_Main =
         "\nvoid main(void) {\n"
-        "    vec4 fragColor;\n";
+        "    lowp vec4 fragColor;\n";
 const char* gFS_Main_FetchColor =
         "    fragColor = color;\n";
 const char* gFS_Main_FetchTexture =

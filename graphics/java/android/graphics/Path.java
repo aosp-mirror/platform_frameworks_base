@@ -593,5 +593,8 @@ public class Path {
     private static native void native_transform(int nPath, int matrix);
     private static native void finalizer(int nPath);
 
-    private final int mNativePath;
+    /**
+     * @hide
+     */
+    public final int mNativePath;
 }
