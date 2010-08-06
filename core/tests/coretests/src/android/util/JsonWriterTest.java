@@ -346,7 +346,7 @@ public final class JsonWriterTest extends TestCase {
     public void testPrettyPrintObject() throws IOException {
         StringWriter stringWriter = new StringWriter();
         JsonWriter jsonWriter = new JsonWriter(stringWriter);
-        jsonWriter.setIndentSpaces(3);
+        jsonWriter.setIndent("   ");
 
         jsonWriter.beginObject();
         jsonWriter.name("a").value(true);
@@ -383,7 +383,7 @@ public final class JsonWriterTest extends TestCase {
     public void testPrettyPrintArray() throws IOException {
         StringWriter stringWriter = new StringWriter();
         JsonWriter jsonWriter = new JsonWriter(stringWriter);
-        jsonWriter.setIndentSpaces(3);
+        jsonWriter.setIndent("   ");
 
         jsonWriter.beginArray();
         jsonWriter.value(true);

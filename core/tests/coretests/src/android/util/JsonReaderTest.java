@@ -32,6 +32,14 @@ public final class JsonReaderTest extends TestCase {
         assertEquals(JsonToken.END_DOCUMENT, reader.peek());
     }
 
+    public void testReadEmptyArray() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[]"));
+        reader.beginArray();
+        assertFalse(reader.hasNext());
+        reader.endArray();
+        assertEquals(JsonToken.END_DOCUMENT, reader.peek());
+    }
+
     public void testReadObject() throws IOException {
         JsonReader reader = new JsonReader(new StringReader(
                 "{\"a\": \"android\", \"b\": \"banana\"}"));
@@ -40,6 +48,14 @@ public final class JsonReaderTest extends TestCase {
         assertEquals("android", reader.nextString());
         assertEquals("b", reader.nextName());
         assertEquals("banana", reader.nextString());
+        reader.endObject();
+        assertEquals(JsonToken.END_DOCUMENT, reader.peek());
+    }
+
+    public void testReadEmptyObject() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{}"));
+        reader.beginObject();
+        assertFalse(reader.hasNext());
         reader.endObject();
         assertEquals(JsonToken.END_DOCUMENT, reader.peek());
     }
@@ -411,5 +427,257 @@ public final class JsonReaderTest extends TestCase {
             fail();
         } catch (IllegalStateException expected) {
         }
+    }
+
+    public void testStrictNameValueSeparator() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\"=true}"));
+        reader.beginObject();
+        assertEquals("a", reader.nextName());
+        try {
+            reader.nextBoolean();
+            fail();
+        } catch (IOException expected) {
+        }
+
+        reader = new JsonReader(new StringReader("{\"a\"=>true}"));
+        reader.beginObject();
+        assertEquals("a", reader.nextName());
+        try {
+            reader.nextBoolean();
+            fail();
+        } catch (IOException expected) {
+        }
+    }
+
+    public void testLenientNameValueSeparator() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\"=true}"));
+        reader.setLenient(true);
+        reader.beginObject();
+        assertEquals("a", reader.nextName());
+        assertEquals(true, reader.nextBoolean());
+
+        reader = new JsonReader(new StringReader("{\"a\"=>true}"));
+        reader.setLenient(true);
+        reader.beginObject();
+        assertEquals("a", reader.nextName());
+        assertEquals(true, reader.nextBoolean());
+    }
+
+    public void testStrictComments() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[// comment \n true]"));
+        reader.beginArray();
+        try {
+            reader.nextBoolean();
+            fail();
+        } catch (IOException expected) {
+        }
+
+        reader = new JsonReader(new StringReader("[# comment \n true]"));
+        reader.beginArray();
+        try {
+            reader.nextBoolean();
+            fail();
+        } catch (IOException expected) {
+        }
+
+        reader = new JsonReader(new StringReader("[/* comment */ true]"));
+        reader.beginArray();
+        try {
+            reader.nextBoolean();
+            fail();
+        } catch (IOException expected) {
+        }
+    }
+
+    public void testLenientComments() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[// comment \n true]"));
+        reader.setLenient(true);
+        reader.beginArray();
+        assertEquals(true, reader.nextBoolean());
+
+        reader = new JsonReader(new StringReader("[# comment \n true]"));
+        reader.setLenient(true);
+        reader.beginArray();
+        assertEquals(true, reader.nextBoolean());
+
+        reader = new JsonReader(new StringReader("[/* comment */ true]"));
+        reader.setLenient(true);
+        reader.beginArray();
+        assertEquals(true, reader.nextBoolean());
+    }
+
+    public void testStrictUnquotedNames() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{a:true}"));
+        reader.beginObject();
+        try {
+            reader.nextName();
+            fail();
+        } catch (IOException expected) {
+        }
+    }
+
+    public void testLenientUnquotedNames() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{a:true}"));
+        reader.setLenient(true);
+        reader.beginObject();
+        assertEquals("a", reader.nextName());
+    }
+
+    public void testStrictSingleQuotedNames() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{'a':true}"));
+        reader.beginObject();
+        try {
+            reader.nextName();
+            fail();
+        } catch (IOException expected) {
+        }
+    }
+
+    public void testLenientSingleQuotedNames() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{'a':true}"));
+        reader.setLenient(true);
+        reader.beginObject();
+        assertEquals("a", reader.nextName());
+    }
+
+    public void testStrictUnquotedStrings() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[a]"));
+        reader.beginArray();
+        try {
+            reader.nextString();
+            fail();
+        } catch (IOException expected) {
+        }
+    }
+
+    public void testLenientUnquotedStrings() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[a]"));
+        reader.setLenient(true);
+        reader.beginArray();
+        assertEquals("a", reader.nextString());
+    }
+
+    public void testStrictSingleQuotedStrings() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("['a']"));
+        reader.beginArray();
+        try {
+            reader.nextString();
+            fail();
+        } catch (IOException expected) {
+        }
+    }
+
+    public void testLenientSingleQuotedStrings() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("['a']"));
+        reader.setLenient(true);
+        reader.beginArray();
+        assertEquals("a", reader.nextString());
+    }
+
+    public void testStrictSemicolonDelimitedArray() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[true;true]"));
+        reader.beginArray();
+        try {
+            reader.nextBoolean();
+            reader.nextBoolean();
+            fail();
+        } catch (IOException expected) {
+        }
+    }
+
+    public void testLenientSemicolonDelimitedArray() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[true;true]"));
+        reader.setLenient(true);
+        reader.beginArray();
+        assertEquals(true, reader.nextBoolean());
+        assertEquals(true, reader.nextBoolean());
+    }
+
+    public void testStrictSemicolonDelimitedNameValuePair() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\":true;\"b\":true}"));
+        reader.beginObject();
+        assertEquals("a", reader.nextName());
+        try {
+            reader.nextBoolean();
+            reader.nextName();
+            fail();
+        } catch (IOException expected) {
+        }
+    }
+
+    public void testLenientSemicolonDelimitedNameValuePair() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\":true;\"b\":true}"));
+        reader.setLenient(true);
+        reader.beginObject();
+        assertEquals("a", reader.nextName());
+        assertEquals(true, reader.nextBoolean());
+        assertEquals("b", reader.nextName());
+    }
+
+    public void testStrictUnnecessaryArraySeparators() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[true,,true]"));
+        reader.beginArray();
+        assertEquals(true, reader.nextBoolean());
+        try {
+            reader.nextNull();
+            fail();
+        } catch (IOException expected) {
+        }
+
+        reader = new JsonReader(new StringReader("[,true]"));
+        reader.beginArray();
+        try {
+            reader.nextNull();
+            fail();
+        } catch (IOException expected) {
+        }
+
+        reader = new JsonReader(new StringReader("[true,]"));
+        reader.beginArray();
+        assertEquals(true, reader.nextBoolean());
+        try {
+            reader.nextNull();
+            fail();
+        } catch (IOException expected) {
+        }
+
+        reader = new JsonReader(new StringReader("[,]"));
+        reader.beginArray();
+        try {
+            reader.nextNull();
+            fail();
+        } catch (IOException expected) {
+        }
+    }
+
+    public void testLenientUnnecessaryArraySeparators() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[true,,true]"));
+        reader.setLenient(true);
+        reader.beginArray();
+        assertEquals(true, reader.nextBoolean());
+        reader.nextNull();
+        assertEquals(true, reader.nextBoolean());
+        reader.endArray();
+
+        reader = new JsonReader(new StringReader("[,true]"));
+        reader.setLenient(true);
+        reader.beginArray();
+        reader.nextNull();
+        assertEquals(true, reader.nextBoolean());
+        reader.endArray();
+
+        reader = new JsonReader(new StringReader("[true,]"));
+        reader.setLenient(true);
+        reader.beginArray();
+        assertEquals(true, reader.nextBoolean());
+        reader.nextNull();
+        reader.endArray();
+
+        reader = new JsonReader(new StringReader("[,]"));
+        reader.setLenient(true);
+        reader.beginArray();
+        reader.nextNull();
+        reader.nextNull();
+        reader.endArray();
     }
 }

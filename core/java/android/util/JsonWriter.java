@@ -16,10 +16,10 @@
 
 package android.util;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -117,7 +117,7 @@ import java.util.List;
  * Instances of this class are not thread safe. Calls that would result in a
  * malformed JSON string will fail with an {@link IllegalStateException}.
  */
-public final class JsonWriter {
+public final class JsonWriter implements Closeable {
 
     /** The output data, containing at most one top-level array or object. */
     private final Writer out;
@@ -151,23 +151,20 @@ public final class JsonWriter {
     }
 
     /**
-     * Sets the number of spaces to indent each line in the encoded document.
-     * If {@code indent == 0} the encoded document will be compact. If {@code
-     * indent > 0}, the encoded document will be more human-readable.
+     * Sets the indentation string to be repeated for each level of indentation
+     * in the encoded document. If {@code indent.isEmpty()} the encoded document
+     * will be compact. Otherwise the encoded document will be more
+     * human-readable.
+     *
+     * @param indent a string containing only whitespace.
      */
-    public void setIndentSpaces(int indent) {
-        if (indent < 0) {
-            throw new IllegalArgumentException("indent < 0");
-        }
-
-        if (indent > 0) {
-            char[] indentChars = new char[indent];
-            Arrays.fill(indentChars, ' ');
-            this.indent = new String(indentChars);
-            this.separator = ": ";
-        } else {
+    public void setIndent(String indent) {
+        if (indent.isEmpty()) {
             this.indent = null;
             this.separator = ":";
+        } else {
+            this.indent = indent;
+            this.separator = ": ";
         }
     }
 

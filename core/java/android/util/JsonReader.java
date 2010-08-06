@@ -172,6 +172,9 @@ public final class JsonReader implements Closeable {
     /** The input JSON. */
     private final Reader in;
 
+    /** True to accept non-spec compliant JSON */
+    private boolean lenient = false;
+
     /**
      * Use a manual buffer to easily read and unread upcoming characters, and
      * also so we can create strings without an intermediate StringBuilder.
@@ -207,9 +210,6 @@ public final class JsonReader implements Closeable {
     /** The text of the next literal value. */
     private String value;
 
-    // TODO: make this parser strict and offer an optional lenient mode?
-    // TODO: document how this reader is non-strict
-
     /**
      * Creates a new instance that reads a JSON-encoded stream from {@code in}.
      */
@@ -218,6 +218,31 @@ public final class JsonReader implements Closeable {
             throw new NullPointerException("in == null");
         }
         this.in = in;
+    }
+
+    /**
+     * Configure this parser to be  be liberal in what it accepts. By default,
+     * this parser is strict and only accepts JSON as specified by <a
+     * href="http://www.ietf.org/rfc/rfc4627.txt">RFC 4627</a>. Setting the
+     * parser to lenient causes it to ignore the following syntax errors:
+     *
+     * <ul>
+     *   <li>End of line comments starting with {@code //} or {@code #} and
+     *       ending with a newline character.
+     *   <li>C-style comments starting with {@code /*} and ending with
+     *       {@code *}{@code /}. Such comments may not be nested.
+     *   <li>Names that are unquoted or {@code 'single quoted'}.
+     *   <li>Strings that are unquoted or {@code 'single quoted'}.
+     *   <li>Array elements separated by {@code ;} instead of {@code ,}.
+     *   <li>Unnecessary array separators. These are interpreted as if null
+     *       was the omitted value.
+     *   <li>Names and values separated by {@code =} or {@code =>} instead of
+     *       {@code :}.
+     *   <li>Name/value pairs separated by {@code ;} instead of {@code ,}.
+     * </ul>
+     */
+    public void setLenient(boolean lenient) {
+        this.lenient = lenient;
     }
 
     /**
@@ -253,11 +278,12 @@ public final class JsonReader implements Closeable {
     }
 
     /**
-     * Consumes {@code token}.
+     * Consumes {@code expected}.
      */
-    private void expect(JsonToken token) throws IOException {
-        if (quickPeek() != token) {
-            throw new IllegalStateException("Expected " + token + " but was " + peek());
+    private void expect(JsonToken expected) throws IOException {
+        quickPeek();
+        if (token != expected) {
+            throw new IllegalStateException("Expected " + expected + " but was " + peek());
         }
         advance();
     }
@@ -266,8 +292,8 @@ public final class JsonReader implements Closeable {
      * Returns true if the current array or object has another element.
      */
     public boolean hasNext() throws IOException {
-        JsonToken peek = quickPeek();
-        return peek != JsonToken.END_OBJECT && peek != JsonToken.END_ARRAY;
+        quickPeek();
+        return token != JsonToken.END_OBJECT && token != JsonToken.END_ARRAY;
     }
 
     /**
@@ -285,11 +311,8 @@ public final class JsonReader implements Closeable {
 
     /**
      * Ensures that a token is ready. After this call either {@code token} or
-     * {@code value} will be non-null.
-     *
-     * @return the type of the next token, of {@code null} if it is unknown. For
-     *     a definitive result, use {@link #peek()} which decodes the token
-     *     type.
+     * {@code value} will be non-null. To ensure {@code token} has a definitive
+     * value, use {@link #peek()}
      */
     private JsonToken quickPeek() throws IOException {
         if (hasToken) {
@@ -347,7 +370,8 @@ public final class JsonReader implements Closeable {
      *     name.
      */
     public String nextName() throws IOException {
-        if (quickPeek() != JsonToken.NAME) {
+        quickPeek();
+        if (token != JsonToken.NAME) {
             throw new IllegalStateException("Expected a name but was " + peek());
         }
         String result = name;
@@ -364,8 +388,8 @@ public final class JsonReader implements Closeable {
      *     this reader is closed.
      */
     public String nextString() throws IOException {
-        JsonToken peek = peek();
-        if (value == null || (peek != JsonToken.STRING && peek != JsonToken.NUMBER)) {
+        peek();
+        if (value == null || (token != JsonToken.STRING && token != JsonToken.NUMBER)) {
             throw new IllegalStateException("Expected a string but was " + peek());
         }
 
@@ -382,8 +406,8 @@ public final class JsonReader implements Closeable {
      *     this reader is closed.
      */
     public boolean nextBoolean() throws IOException {
-        JsonToken peek = quickPeek();
-        if (value == null || peek == JsonToken.STRING) {
+        quickPeek();
+        if (value == null || token == JsonToken.STRING) {
             throw new IllegalStateException("Expected a boolean but was " + peek());
         }
 
@@ -408,8 +432,8 @@ public final class JsonReader implements Closeable {
      *     reader is closed.
      */
     public void nextNull() throws IOException {
-        JsonToken peek = quickPeek();
-        if (value == null || peek == JsonToken.STRING) {
+        quickPeek();
+        if (value == null || token == JsonToken.STRING) {
             throw new IllegalStateException("Expected null but was " + peek());
         }
 
@@ -570,36 +594,43 @@ public final class JsonReader implements Closeable {
 
     private JsonToken nextInArray(boolean firstElement) throws IOException {
         if (firstElement) {
-            switch (nextNonWhitespace()) {
-                case ']':
-                    pop();
-                    hasToken = true;
-                    return token = JsonToken.END_ARRAY;
-                case ',':
-                case ';':
-                    /* a separator without a value first means "null". */
-                    // TODO: forbid this in strict mode
-                    hasToken = true;
-                    return token = JsonToken.NULL;
-                default:
-                    replaceTop(JsonScope.NONEMPTY_ARRAY);
-                    pos--;
-            }
+            replaceTop(JsonScope.NONEMPTY_ARRAY);
         } else {
+            /* Look for a comma before each element after the first element. */
             switch (nextNonWhitespace()) {
                 case ']':
                     pop();
                     hasToken = true;
                     return token = JsonToken.END_ARRAY;
-                case ',':
                 case ';':
+                    checkLenient(); // fall-through
+                case ',':
                     break;
                 default:
                     throw syntaxError("Unterminated array");
             }
         }
 
-        return nextValue();
+        switch (nextNonWhitespace()) {
+            case ']':
+                if (firstElement) {
+                    pop();
+                    hasToken = true;
+                    return token = JsonToken.END_ARRAY;
+                }
+                // fall-through to handle ",]"
+            case ';':
+            case ',':
+                /* In lenient mode, a 0-length literal means 'null' */
+                checkLenient();
+                pos--;
+                hasToken = true;
+                value = "null";
+                return token = JsonToken.NULL;
+            default:
+                pos--;
+                return nextValue();
+        }
     }
 
     private JsonToken nextInObject(boolean firstElement) throws IOException {
@@ -636,10 +667,12 @@ public final class JsonReader implements Closeable {
         int quote = nextNonWhitespace();
         switch (quote) {
             case '\'':
+                checkLenient(); // fall-through
             case '"':
                 name = nextString((char) quote);
                 break;
             default:
+                checkLenient();
                 pos--;
                 name = nextLiteral();
                 if (name.isEmpty()) {
@@ -653,19 +686,21 @@ public final class JsonReader implements Closeable {
     }
 
     private JsonToken objectValue() throws IOException {
-        // TODO: accept only ":" in strict mode
-
         /*
-         * Read the name/value separator. Usually a colon ':', an equals sign
-         * '=', or an arrow "=>". The last two are bogus but we include them
-         * because that's what org.json does.
+         * Read the name/value separator. Usually a colon ':'. In lenient mode
+         * we also accept an equals sign '=', or an arrow "=>".
          */
-        int separator = nextNonWhitespace();
-        if (separator != ':' && separator != '=') {
-            throw syntaxError("Expected ':'");
-        }
-        if (separator == '=' && (pos < limit || fillBuffer(1)) && buffer[pos] == '>') {
-            pos++;
+        switch (nextNonWhitespace()) {
+            case ':':
+                break;
+            case '=':
+                checkLenient();
+                if ((pos < limit || fillBuffer(1)) && buffer[pos] == '>') {
+                    pos++;
+                }
+                break;
+            default:
+                throw syntaxError("Expected ':'");
         }
 
         replaceTop(JsonScope.NONEMPTY_OBJECT);
@@ -686,6 +721,7 @@ public final class JsonReader implements Closeable {
                 return token = JsonToken.BEGIN_ARRAY;
 
             case '\'':
+                checkLenient(); // fall-through
             case '"':
                 value = nextString((char) c);
                 hasToken = true;
@@ -722,8 +758,6 @@ public final class JsonReader implements Closeable {
     }
 
     private int nextNonWhitespace() throws IOException {
-        // TODO: no comments in strict mode
-
         while (pos < limit || fillBuffer(1)) {
             int c = buffer[pos++];
             switch (c) {
@@ -738,6 +772,7 @@ public final class JsonReader implements Closeable {
                         return c;
                     }
 
+                    checkLenient();
                     char peek = buffer[pos];
                     switch (peek) {
                         case '*':
@@ -765,6 +800,7 @@ public final class JsonReader implements Closeable {
                      * specify this behaviour, but it's required to parse
                      * existing documents. See http://b/2571423.
                      */
+                    checkLenient();
                     skipToEndOfLine();
                     continue;
 
@@ -774,6 +810,12 @@ public final class JsonReader implements Closeable {
         }
 
         throw syntaxError("End of input");
+    }
+
+    private void checkLenient() throws IOException {
+        if (!lenient) {
+            throw syntaxError("Use JsonReader.setLenient(true) to accept malformed JSON");
+        }
     }
 
     /**
@@ -853,9 +895,6 @@ public final class JsonReader implements Closeable {
      * does not consume the delimiter character.
      */
     private String nextLiteral() throws IOException {
-        // TODO: use a much smaller set of permitted literal characters in strict mode;
-        //       these characters are derived from org.json's lenient mode
-
         StringBuilder builder = null;
         do {
             /* the index of the first character not yet appended to the builder. */
@@ -863,17 +902,19 @@ public final class JsonReader implements Closeable {
             while (pos < limit) {
                 int c = buffer[pos++];
                 switch (c) {
+                    case '/':
+                    case '\\':
+                    case ';':
+                    case '#':
+                    case '=':
+                        checkLenient(); // fall-through
+
                     case '{':
                     case '}':
                     case '[':
                     case ']':
-                    case '/':
-                    case '\\':
                     case ':':
-                    case '=':
                     case ',':
-                    case ';':
-                    case '#':
                     case ' ':
                     case '\t':
                     case '\f':
@@ -965,7 +1006,7 @@ public final class JsonReader implements Closeable {
     /**
      * Assigns {@code nextToken} based on the value of {@code nextValue}.
      */
-    private void decodeLiteral() {
+    private void decodeLiteral() throws IOException {
         if (value.equalsIgnoreCase("null")) {
             token = JsonToken.NULL;
         } else if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
@@ -975,7 +1016,8 @@ public final class JsonReader implements Closeable {
                 Double.parseDouble(value); // this work could potentially be cached
                 token = JsonToken.NUMBER;
             } catch (NumberFormatException ignored) {
-                /* an unquoted string. This document is not well-formed! */
+                // this must be an unquoted string
+                checkLenient();
                 token = JsonToken.STRING;
             }
         }
