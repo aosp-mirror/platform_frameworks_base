@@ -279,9 +279,19 @@
         <item name="android:button">@android:drawable/btn_check</item>
     </style>
 
+    <style name="Widget.CompoundButton.CheckBox.Inverse">
+        <item name="android:background">@android:drawable/btn_check_label_background_light</item>
+        <item name="android:button">@android:drawable/btn_check_light</item>
+    </style>
+
     <style name="Widget.CompoundButton.RadioButton">
         <item name="android:background">@android:drawable/btn_radio_label_background</item>
         <item name="android:button">@android:drawable/btn_radio</item>
+    </style>
+
+    <style name="Widget.CompoundButton.RadioButton.Inverse">
+        <item name="android:background">@android:drawable/btn_radio_label_background_light</item>
+        <item name="android:button">@android:drawable/btn_radio_light</item>
     </style>
 
     <style name="Widget.CompoundButton.Star">
