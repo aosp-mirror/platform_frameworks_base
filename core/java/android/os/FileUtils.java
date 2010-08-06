@@ -85,6 +85,8 @@ public class FileUtils
 
     public static native int getPermissions(String file, int[] outPermissions);
 
+    public static native int setUMask(int mask);
+
     /** returns the FAT file system volume ID for the volume mounted 
      * at the given mount point, or -1 for failure
      * @param mount point for FAT volume

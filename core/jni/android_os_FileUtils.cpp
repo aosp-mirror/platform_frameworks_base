@@ -113,6 +113,11 @@ jint android_os_FileUtils_getPermissions(JNIEnv* env, jobject clazz,
     #endif
 }
 
+jint android_os_FileUtils_setUMask(JNIEnv* env, jobject clazz, jint mask)
+{
+    return umask(mask);
+}
+
 jint android_os_FileUtils_getFatVolumeId(JNIEnv* env, jobject clazz, jstring path)
 {
     #if HAVE_ANDROID_OS
@@ -170,6 +175,7 @@ jboolean android_os_FileUtils_getFileStatus(JNIEnv* env, jobject clazz, jstring 
 static const JNINativeMethod methods[] = {
     {"setPermissions",  "(Ljava/lang/String;III)I", (void*)android_os_FileUtils_setPermissions},
     {"getPermissions",  "(Ljava/lang/String;[I)I", (void*)android_os_FileUtils_getPermissions},
+    {"setUMask",        "(I)I",                    (void*)android_os_FileUtils_setUMask},
     {"getFatVolumeId",  "(Ljava/lang/String;)I", (void*)android_os_FileUtils_getFatVolumeId},
     {"getFileStatus",  "(Ljava/lang/String;Landroid/os/FileUtils$FileStatus;)Z", (void*)android_os_FileUtils_getFileStatus},
 };
