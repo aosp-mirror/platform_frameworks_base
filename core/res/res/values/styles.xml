@@ -74,6 +74,10 @@
         <item name="wallpaperIntraOpenExitAnimation">@anim/wallpaper_intra_open_exit</item>
         <item name="wallpaperIntraCloseEnterAnimation">@anim/wallpaper_intra_close_enter</item>
         <item name="wallpaperIntraCloseExitAnimation">@anim/wallpaper_intra_close_exit</item>
+        <item name="fragmentOpenEnterAnimation">@anim/fragment_open_enter</item>
+        <item name="fragmentOpenExitAnimation">@anim/fragment_open_exit</item>
+        <item name="fragmentCloseEnterAnimation">@anim/fragment_close_enter</item>
+        <item name="fragmentCloseExitAnimation">@anim/fragment_close_exit</item>
     </style>
 
     <!-- Standard animations for a non-full-screen window or activity. -->

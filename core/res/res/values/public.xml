@@ -1316,6 +1316,12 @@
   <public type="attr" name="ordering" />
   <public type="attr" name="fragment" />
   <public type="attr" name="windowActionBarOverlay" />
+  <public type="attr" name="fragmentOpenEnterAnimation" />
+  <public type="attr" name="fragmentOpenExitAnimation" />
+  <public type="attr" name="fragmentCloseEnterAnimation" />
+  <public type="attr" name="fragmentCloseExitAnimation" />
+  <public type="anim" name="animator_fade_in" />
+  <public type="anim" name="animator_fade_out" />
 
   <public type="id" name="home" />
   <!-- Context menu ID for the "Select text..." menu item to switch to text

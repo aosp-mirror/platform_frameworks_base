@@ -1021,6 +1021,14 @@
         <attr name="centerMedium" format="reference|color" />
     </declare-styleable>
 
+    <!-- Fragment animation class attributes. -->
+    <declare-styleable name="FragmentAnimation">
+        <attr name="fragmentOpenEnterAnimation" format="reference" />
+        <attr name="fragmentOpenExitAnimation" format="reference" />
+        <attr name="fragmentCloseEnterAnimation" format="reference" />
+        <attr name="fragmentCloseExitAnimation" format="reference" />
+    </declare-styleable>
+
     <!-- Window animation class attributes. -->
     <declare-styleable name="WindowAnimation">
         <!-- The animation used when a window is being added. -->

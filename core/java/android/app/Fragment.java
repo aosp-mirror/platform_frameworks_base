@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.animation.Animatable;
 import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.Intent;
@@ -35,7 +36,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnCreateContextMenuListener;
-import android.view.animation.Animation;
 import android.widget.AdapterView;
 
 import java.lang.reflect.InvocationTargetException;
@@ -495,7 +495,10 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
         mCalled = true;
     }
     
-    public Animation onCreateAnimation(int transit, boolean enter, int nextAnim) {
+    /**
+     * Called when a fragment loads an animation.
+     */
+    public Animatable onCreateAnimatable(int transit, boolean enter, int nextAnim) {
         return null;
     }
     

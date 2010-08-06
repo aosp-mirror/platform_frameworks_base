@@ -16,6 +16,9 @@
 
 package android.app;
 
+import android.animation.Animatable;
+import android.animation.PropertyAnimator;
+import android.animation.Sequencer;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,7 +31,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import java.util.ArrayList;
@@ -106,16 +108,16 @@ public class FragmentManager {
         }
     };
     
-    Animation loadAnimation(Fragment fragment, int transit, boolean enter,
+    Animatable loadAnimatable(Fragment fragment, int transit, boolean enter,
             int transitionStyle) {
-        Animation animObj = fragment.onCreateAnimation(transitionStyle, enter,
+        Animatable animObj = fragment.onCreateAnimatable(transit, enter,
                 fragment.mNextAnim);
         if (animObj != null) {
             return animObj;
         }
         
         if (fragment.mNextAnim != 0) {
-            Animation anim = AnimationUtils.loadAnimation(mActivity, fragment.mNextAnim);
+            Animatable anim = AnimationUtils.loadAnimator(mActivity, fragment.mNextAnim);
             if (anim != null) {
                 return anim;
             }
@@ -138,7 +140,7 @@ public class FragmentManager {
         }
         
         TypedArray attrs = mActivity.obtainStyledAttributes(transitionStyle,
-                com.android.internal.R.styleable.WindowAnimation);
+                com.android.internal.R.styleable.FragmentAnimation);
         int anim = attrs.getResourceId(styleIndex, 0);
         attrs.recycle();
         
@@ -146,7 +148,7 @@ public class FragmentManager {
             return null;
         }
         
-        return AnimationUtils.loadAnimation(mActivity, anim);
+        return AnimationUtils.loadAnimator(mActivity, anim);
     }
     
     void moveToState(Fragment f, int newState, int transit, int transitionStyle) {
@@ -208,10 +210,15 @@ public class FragmentManager {
                             if (f.mView != null) {
                                 f.mView.setSaveFromParentEnabled(false);
                                 if (container != null) {
-                                    Animation anim = loadAnimation(f, transit, true,
+                                    Animatable anim = loadAnimatable(f, transit, true,
                                             transitionStyle);
                                     if (anim != null) {
-                                        f.mView.setAnimation(anim);
+                                        if (anim instanceof Sequencer) {
+                                            ((Sequencer)anim).setTarget(f.mView);
+                                        } else if (anim instanceof PropertyAnimator) {
+                                            ((PropertyAnimator)anim).setTarget(f.mView);
+                                        }
+                                        anim.start();
                                     }
                                     container.addView(f.mView);
                                     f.restoreViewState();
@@ -290,10 +297,15 @@ public class FragmentManager {
                             }
                             if (f.mContainer != null) {
                                 if (mCurState > Fragment.INITIALIZING) {
-                                    Animation anim = loadAnimation(f, transit, false,
+                                    Animatable anim = loadAnimatable(f, transit, true,
                                             transitionStyle);
                                     if (anim != null) {
-                                        f.mView.setAnimation(anim);
+                                        if (anim instanceof Sequencer) {
+                                            ((Sequencer)anim).setTarget(f.mView);
+                                        } else if (anim instanceof PropertyAnimator) {
+                                            ((PropertyAnimator)anim).setTarget(f.mView);
+                                        }
+                                        anim.start();
                                     }
                                 }
                                 f.mContainer.removeView(f.mView);
@@ -420,10 +432,15 @@ public class FragmentManager {
         if (!fragment.mHidden) {
             fragment.mHidden = true;
             if (fragment.mView != null) {
-                Animation anim = loadAnimation(fragment, transition, false,
+                Animatable anim = loadAnimatable(fragment, transition, true,
                         transitionStyle);
                 if (anim != null) {
-                    fragment.mView.setAnimation(anim);
+                    if (anim instanceof Sequencer) {
+                        ((Sequencer)anim).setTarget(fragment.mView);
+                    } else if (anim instanceof PropertyAnimator) {
+                        ((PropertyAnimator)anim).setTarget(fragment.mView);
+                    }
+                    anim.start();
                 }
                 fragment.mView.setVisibility(View.GONE);
             }
@@ -439,10 +456,15 @@ public class FragmentManager {
         if (fragment.mHidden) {
             fragment.mHidden = false;
             if (fragment.mView != null) {
-                Animation anim = loadAnimation(fragment, transition, true,
+                Animatable anim = loadAnimatable(fragment, transition, true,
                         transitionStyle);
                 if (anim != null) {
-                    fragment.mView.setAnimation(anim);
+                    if (anim instanceof Sequencer) {
+                        ((Sequencer)anim).setTarget(fragment.mView);
+                    } else if (anim instanceof PropertyAnimator) {
+                        ((PropertyAnimator)anim).setTarget(fragment.mView);
+                    }
+                    anim.start();
                 }
                 fragment.mView.setVisibility(View.VISIBLE);
             }
@@ -981,47 +1003,11 @@ public class FragmentManager {
     public static int reverseTransit(int transit) {
         int rev = 0;
         switch (transit) {
-            case FragmentTransaction.TRANSIT_ENTER:
-                rev = FragmentTransaction.TRANSIT_EXIT;
+            case FragmentTransaction.TRANSIT_FRAGMENT_OPEN:
+                rev = FragmentTransaction.TRANSIT_FRAGMENT_CLOSE;
                 break;
-            case FragmentTransaction.TRANSIT_EXIT:
-                rev = FragmentTransaction.TRANSIT_ENTER;
-                break;
-            case FragmentTransaction.TRANSIT_SHOW:
-                rev = FragmentTransaction.TRANSIT_HIDE;
-                break;
-            case FragmentTransaction.TRANSIT_HIDE:
-                rev = FragmentTransaction.TRANSIT_SHOW;
-                break;
-            case FragmentTransaction.TRANSIT_ACTIVITY_OPEN:
-                rev = FragmentTransaction.TRANSIT_ACTIVITY_CLOSE;
-                break;
-            case FragmentTransaction.TRANSIT_ACTIVITY_CLOSE:
-                rev = FragmentTransaction.TRANSIT_ACTIVITY_OPEN;
-                break;
-            case FragmentTransaction.TRANSIT_TASK_OPEN:
-                rev = FragmentTransaction.TRANSIT_TASK_CLOSE;
-                break;
-            case FragmentTransaction.TRANSIT_TASK_CLOSE:
-                rev = FragmentTransaction.TRANSIT_TASK_OPEN;
-                break;
-            case FragmentTransaction.TRANSIT_TASK_TO_FRONT:
-                rev = FragmentTransaction.TRANSIT_TASK_TO_BACK;
-                break;
-            case FragmentTransaction.TRANSIT_TASK_TO_BACK:
-                rev = FragmentTransaction.TRANSIT_TASK_TO_FRONT;
-                break;
-            case FragmentTransaction.TRANSIT_WALLPAPER_OPEN:
-                rev = FragmentTransaction.TRANSIT_WALLPAPER_CLOSE;
-                break;
-            case FragmentTransaction.TRANSIT_WALLPAPER_CLOSE:
-                rev = FragmentTransaction.TRANSIT_WALLPAPER_OPEN;
-                break;
-            case FragmentTransaction.TRANSIT_WALLPAPER_INTRA_OPEN:
-                rev = FragmentTransaction.TRANSIT_WALLPAPER_INTRA_CLOSE;
-                break;
-            case FragmentTransaction.TRANSIT_WALLPAPER_INTRA_CLOSE:
-                rev = FragmentTransaction.TRANSIT_WALLPAPER_INTRA_OPEN;
+            case FragmentTransaction.TRANSIT_FRAGMENT_CLOSE:
+                rev = FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
                 break;
         }
         return rev;
@@ -1031,67 +1017,15 @@ public class FragmentManager {
     public static int transitToStyleIndex(int transit, boolean enter) {
         int animAttr = -1;
         switch (transit) {
-            case FragmentTransaction.TRANSIT_ENTER:
-                animAttr = com.android.internal.R.styleable.WindowAnimation_windowEnterAnimation;
-                break;
-            case FragmentTransaction.TRANSIT_EXIT:
-                animAttr = com.android.internal.R.styleable.WindowAnimation_windowExitAnimation;
-                break;
-            case FragmentTransaction.TRANSIT_SHOW:
-                animAttr = com.android.internal.R.styleable.WindowAnimation_windowShowAnimation;
-                break;
-            case FragmentTransaction.TRANSIT_HIDE:
-                animAttr = com.android.internal.R.styleable.WindowAnimation_windowHideAnimation;
-                break;
-            case FragmentTransaction.TRANSIT_ACTIVITY_OPEN:
+            case FragmentTransaction.TRANSIT_FRAGMENT_OPEN:
                 animAttr = enter
-                        ? com.android.internal.R.styleable.WindowAnimation_activityOpenEnterAnimation
-                        : com.android.internal.R.styleable.WindowAnimation_activityOpenExitAnimation;
+                    ? com.android.internal.R.styleable.FragmentAnimation_fragmentOpenEnterAnimation
+                    : com.android.internal.R.styleable.FragmentAnimation_fragmentOpenExitAnimation;
                 break;
-            case FragmentTransaction.TRANSIT_ACTIVITY_CLOSE:
+            case FragmentTransaction.TRANSIT_FRAGMENT_CLOSE:
                 animAttr = enter
-                        ? com.android.internal.R.styleable.WindowAnimation_activityCloseEnterAnimation
-                        : com.android.internal.R.styleable.WindowAnimation_activityCloseExitAnimation;
-                break;
-            case FragmentTransaction.TRANSIT_TASK_OPEN:
-                animAttr = enter
-                        ? com.android.internal.R.styleable.WindowAnimation_taskOpenEnterAnimation
-                        : com.android.internal.R.styleable.WindowAnimation_taskOpenExitAnimation;
-                break;
-            case FragmentTransaction.TRANSIT_TASK_CLOSE:
-                animAttr = enter
-                        ? com.android.internal.R.styleable.WindowAnimation_taskCloseEnterAnimation
-                        : com.android.internal.R.styleable.WindowAnimation_taskCloseExitAnimation;
-                break;
-            case FragmentTransaction.TRANSIT_TASK_TO_FRONT:
-                animAttr = enter
-                        ? com.android.internal.R.styleable.WindowAnimation_taskToFrontEnterAnimation
-                        : com.android.internal.R.styleable.WindowAnimation_taskToFrontExitAnimation;
-                break;
-            case FragmentTransaction.TRANSIT_TASK_TO_BACK:
-                animAttr = enter
-                        ? com.android.internal.R.styleable.WindowAnimation_taskToBackEnterAnimation
-                        : com.android.internal.R.styleable.WindowAnimation_taskToBackExitAnimation;
-                break;
-            case FragmentTransaction.TRANSIT_WALLPAPER_OPEN:
-                animAttr = enter
-                        ? com.android.internal.R.styleable.WindowAnimation_wallpaperOpenEnterAnimation
-                        : com.android.internal.R.styleable.WindowAnimation_wallpaperOpenExitAnimation;
-                break;
-            case FragmentTransaction.TRANSIT_WALLPAPER_CLOSE:
-                animAttr = enter
-                        ? com.android.internal.R.styleable.WindowAnimation_wallpaperCloseEnterAnimation
-                        : com.android.internal.R.styleable.WindowAnimation_wallpaperCloseExitAnimation;
-                break;
-            case FragmentTransaction.TRANSIT_WALLPAPER_INTRA_OPEN:
-                animAttr = enter
-                        ? com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenEnterAnimation
-                        : com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation;
-                break;
-            case FragmentTransaction.TRANSIT_WALLPAPER_INTRA_CLOSE:
-                animAttr = enter
-                        ? com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseEnterAnimation
-                        : com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseExitAnimation;
+                    ? com.android.internal.R.styleable.FragmentAnimation_fragmentCloseEnterAnimation
+                    : com.android.internal.R.styleable.FragmentAnimation_fragmentCloseExitAnimation;
                 break;
         }
         return animAttr;

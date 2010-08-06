@@ -140,6 +140,24 @@ public final class Sequencer extends Animatable {
     }
 
     /**
+     * Sets the target object for all current {@link #getChildAnimations() child animations}
+     * of this Sequencer that take targets ({@link android.animation.PropertyAnimator} and
+     * Sequencer).
+     *
+     * @param target The object being animated
+     */
+    public void setTarget(Object target) {
+        for (Node node : mNodes) {
+            Animatable animation = node.animation;
+            if (animation instanceof Sequencer) {
+                ((Sequencer)animation).setTarget(target);
+            } else if (animation instanceof PropertyAnimator) {
+                ((PropertyAnimator)animation).setTarget(target);
+            }
+        }
+    }
+
+    /**
      * This method creates a <code>Builder</code> object, which is used to
      * set up playing constraints. This initial <code>play()</code> method
      * tells the <code>Builder</code> the animation that is the dependency for
