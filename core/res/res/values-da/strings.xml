@@ -34,6 +34,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Voicemail"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Forbindelsesproblemer eller ugyldigt MMI-nummer."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"Du kan kun foretage handlinger med faste opkaldsnumre."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Tjenesten blev aktiveret."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Tjenesten blev aktiveret for:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Tjenesten er deaktiveret."</string>
@@ -171,6 +172,8 @@
     <string name="permgroupdesc_storage" msgid="9203302214915355774">"Få adgang til SD-kortet."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktiver eller rediger statuslinje"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Tillader, at et program deaktiverer statuslinjen eller tilføjer eller fjerner systemikoner."</string>
+    <string name="permlab_statusBarService" msgid="7247281911387931485">"statusbjælke"</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Tillader, at programmet er statusbjælken."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"udvid/skjul statuslinje"</string>
     <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Tillader, at et program udvider eller skjuler statuslinjen."</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"opfang udgående opkald"</string>
@@ -311,8 +314,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Tillader, at et program ændrer globale lydindstillinger som f.eks. lydstyrke og kanalisering."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"optag lyd"</string>
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"Tillader, at et program får adgang til lydregistreringsstien."</string>
-    <string name="permlab_camera" msgid="8059288807274039014">"tag billeder"</string>
-    <string name="permdesc_camera" msgid="9013476258810982546">"Tillader, at programmet tager billeder med kameraet. Dette giver programmet mulighed for altid at indsamle de billeder, kameraet ser."</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"tag billeder og optag video"</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"Tillader, at programmet tager billeder og optager video med kameraet. Dette giver programmet mulighed for altid at indsamle de billeder, kameraet ser."</string>
     <string name="permlab_brick" msgid="8337817093326370537">"deaktiver telefonen permanent"</string>
     <string name="permdesc_brick" msgid="5569526552607599221">"Tillader, at programmet deaktiverer hele telefonen permanent. Dette er meget farligt."</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"tving telefon til at genstarte"</string>
@@ -335,6 +338,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Lader programmet kontrollere vibratoren."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"kontroller lommelygte"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Tillader, at programmet kontrollerer lommelygten."</string>
+    <string name="permlab_accessUsb" msgid="7362327818655760496">"adgang til USB-enheder."</string>
+    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Tillader, at programmet har adgang til USB-enheder."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"test hardware"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Tillader, at et program kontrollerer forskellige perifere enheder for at teste hardwaren."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ring direkte op til telefonnumre"</string>
@@ -431,6 +436,10 @@
     <string name="policydesc_forceLock" msgid="2819868664946089740">"Kontrol når enheden låses, så du skal indtaste adgangskoden igen."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Slet alle data"</string>
     <string name="policydesc_wipeData" msgid="2314060933796396205">"Foretag en fabriksnulstilling, der sletter alle dine data uden bekræftelse."</string>
+    <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
+    <skip />
+    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Hjem"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -524,10 +533,9 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Arbejde"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Andre"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Tilpasset"</string>
-    <string name="contact_status_update_attribution" msgid="5112589886094402795">"via <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
-    <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g> via <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Indtast PIN-kode"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Indtast adgangskode for at låse op"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Indtast pinkode for at låse op"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Forkert PIN-kode!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Tryk på Menu og dernæst på 0 for at låse op."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Nødnummer"</string>
@@ -540,6 +548,7 @@
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Tilbage til opkald"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Rigtigt!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Beklager! Prøv igen"</string>
+    <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Beklager! Prøv igen"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Oplader (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Opladt."</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
@@ -554,6 +563,8 @@
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM-kortet er låst."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Låser SIM-kortet op ..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. "\n\n"Prøv igen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"Du har indtastet din adgangskode forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. "\n\n"Prøv igen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Du har indtastet din pinkode forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. "\n\n"Prøv igen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> forsøg mere vil du blive bedt om at låse din telefon op ved hjælp af dit Google-login"\n\n" Prøv igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Prøv igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Har du glemt mønstret?"</string>
@@ -573,16 +584,6 @@
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Ryd"</string>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ingen meddelelser"</string>
-    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"I gang"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Meddelelser"</string>
-    <string name="battery_status_text_percent_format" msgid="7660311274698797147">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="battery_status_charging" msgid="756617993998772213">"Oplader ..."</string>
-    <string name="battery_low_title" msgid="7923774589611311406">"Forbind oplader"</string>
-    <string name="battery_low_subtitle" msgid="7388781709819722764">"Batteriet er ved at være fladt:"</string>
-    <string name="battery_low_percent_format" msgid="696154104579022959">"<xliff:g id="NUMBER">%d%%</xliff:g> eller mindre tilbage."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Batteriforbrug"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Fabrikstest mislykkedes"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Handlingen FACTORY_TEST understøttes kun af pakker installeret i /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Der blev ikke fundet nogen pakke, som leverer handlingen FACTORY_TEST."</string>
@@ -708,17 +709,17 @@
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"Vælg alle"</string>
-    <string name="selectText" msgid="3889149123626888637">"Marker tekst"</string>
-    <string name="stopSelectingText" msgid="4157931463872320996">"Hold op med at markere tekst"</string>
     <string name="cut" msgid="3092569408438626261">"Klip"</string>
-    <string name="cutAll" msgid="2436383270024931639">"Klip alle"</string>
     <string name="copy" msgid="2681946229533511987">"Kopier"</string>
-    <string name="copyAll" msgid="2590829068100113057">"Kopier alle"</string>
     <string name="paste" msgid="5629880836805036433">"Indsæt"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Kopier webadresse"</string>
+    <!-- no translation found for selectTextMode (6738556348861347240) -->
+    <skip />
+    <!-- no translation found for textSelectionCABTitle (5236850394370820357) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"Inputmetode"</string>
-    <string name="addToDictionary" msgid="8793624991686948709">"Føj \"<xliff:g id="WORD">%s</xliff:g>\" til ordbog"</string>
-    <string name="editTextMenuTitle" msgid="1672989176958581452">"Rediger tekst"</string>
+    <!-- no translation found for editTextMenuTitle (4909135564941815494) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Der er ikke så meget plads tilbage"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"Der er næsten ikke mere plads på telefonen."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
@@ -726,6 +727,7 @@
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Annuller"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Bemærk"</string>
+    <string name="loading" msgid="1760724998928255250">"Indlæser..."</string>
     <string name="capital_on" msgid="1544682755514494298">"TIL"</string>
     <string name="capital_off" msgid="6815870386972805832">"FRA"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Fuldfør handling ved hjælp af"</string>
@@ -744,6 +746,16 @@
     <string name="force_close" msgid="3653416315450806396">"Tving til at lukke"</string>
     <string name="report" msgid="4060218260984795706">"Rapporter"</string>
     <string name="wait" msgid="7147118217226317732">"Vent"</string>
+    <string name="smv_application" msgid="295583804361236288">"Programmet <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) har overtrådt sin egen StrictMode-politik."</string>
+    <string name="smv_process" msgid="5120397012047462446">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> har overtrådt sin egen StrictMode-politik."</string>
+    <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> er i gang"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Vælg for at skifte program"</string>
+    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Skift program?"</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Der kører et andet program, der skal stoppes, før du kan starte et nyt."</string>
+    <string name="old_app_action" msgid="493129172238566282">"Tilbage til <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="old_app_description" msgid="942967900237208466">"Start ikke det nye program."</string>
+    <string name="new_app_action" msgid="5472756926945440706">"Start <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="6830398339826789493">"Stop det gamle program uden at gemme."</string>
     <string name="sendText" msgid="5132506121645618310">"Vælg en handling for teksten"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Lydstyrke for opkald"</string>
     <string name="volume_music" msgid="5421651157138628171">"Lydstyrke for medier"</string>
@@ -850,13 +862,15 @@
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"L2TP/IPSec VPN baseret på forhåndsdelt nøglekodning"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"Certifikatbaseret L2TP/IPSec VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"Vælg fil"</string>
+    <string name="no_file_chosen" msgid="6363648562170759465">"Ingen fil er valgt"</string>
     <string name="reset" msgid="2448168080964209908">"Nulstil"</string>
     <string name="submit" msgid="1602335572089911941">"Send"</string>
-    <string name="description_star" msgid="2654319874908576133">"favorit"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Biltilstand er aktiveret"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Vælg for at afslutte biltilstand."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Tethering eller hotspot er aktivt"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Tryk for at konfigurere"</string>
+    <string name="back_button_label" msgid="2300470004503343439">"Tilbage"</string>
+    <string name="next_button_label" msgid="1080555104677992408">"Næste"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Højt mobildataforbrug"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Tryk for oplysninger om brug af mobildata"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Grænsen for mobildata er overskredet"</string>

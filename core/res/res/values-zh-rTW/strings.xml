@@ -34,6 +34,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"語音留言"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"連線發生問題或錯誤的 MMI 碼。"</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"僅允許在固定撥號時使用此操作。"</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"服務已啟用。"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"已啟用服務："</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"服務已停用。"</string>
@@ -171,6 +172,8 @@
     <string name="permgroupdesc_storage" msgid="9203302214915355774">"存取 SD 卡。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"停用或變更狀態列"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"允許應用程式停用狀態列或新增、移除系統圖示。"</string>
+    <string name="permlab_statusBarService" msgid="7247281911387931485">"狀態列"</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"允許應用程式成為狀態列。"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"展開/收攏狀態列"</string>
     <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"允許應用程式展開或收攏狀態列。"</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"攔截撥出電話"</string>
@@ -311,8 +314,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"允許應用程式編輯全域音訊設定，例如音量與路由。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"錄製音訊"</string>
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"允許應用程式存取音訊錄製路徑。"</string>
-    <string name="permlab_camera" msgid="8059288807274039014">"照相"</string>
-    <string name="permdesc_camera" msgid="9013476258810982546">"允許應用程式使用相機拍照。此功能可讓應用程式隨時透過相機拍攝照片。"</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"拍照和錄影"</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"允許應用程式使用相機拍照和錄影。此功能可讓應用程式隨時透過相機收集圖片。"</string>
     <string name="permlab_brick" msgid="8337817093326370537">"永久停用電話"</string>
     <string name="permdesc_brick" msgid="5569526552607599221">"允許應用程式永久停用手機。此項操作非常危險。"</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"強制重開機"</string>
@@ -335,6 +338,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"允許應用程式控制震動。"</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"控制閃光燈"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"允許應用程式控制閃光燈。"</string>
+    <string name="permlab_accessUsb" msgid="7362327818655760496">"存取 USB 裝置"</string>
+    <string name="permdesc_accessUsb" msgid="2414271762914049292">"允許應用程式存取 USB 裝置。"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"測試硬體"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"允許應用程式控制各種週邊設備，以供測試用。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"直接撥打電話號碼"</string>
@@ -431,6 +436,10 @@
     <string name="policydesc_forceLock" msgid="2819868664946089740">"裝置鎖定時可取得控制，但必須重新輸入密碼。"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"清除所有資料"</string>
     <string name="policydesc_wipeData" msgid="2314060933796396205">"重設為原廠設定 (系統會刪除所有資料，且不會向您進行確認)。"</string>
+    <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
+    <skip />
+    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"住家電話"</item>
     <item msgid="869923650527136615">"行動電話"</item>
@@ -524,10 +533,9 @@
     <string name="orgTypeWork" msgid="29268870505363872">"公司"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"其他"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"自訂"</string>
-    <string name="contact_status_update_attribution" msgid="5112589886094402795">"透過 <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
-    <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g>透過「<xliff:g id="SOURCE">%2$s</xliff:g>」"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"輸入 PIN 碼"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"輸入密碼即可解鎖"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"輸入 PIN 即可解鎖"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"PIN 碼錯誤！"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"如要解鎖，請按 Menu 鍵，然後按 0。"</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"緊急電話號碼"</string>
@@ -540,6 +548,7 @@
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"返回通話"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"正確！"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"很抱歉，請再試一次"</string>
+    <string name="lockscreen_password_wrong" msgid="6237443657358168819">"很抱歉，請再試一次"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"正在充電 (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"充電完成。"</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
@@ -554,6 +563,8 @@
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM 卡已鎖定。"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"解鎖 SIM 卡中..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"畫出解鎖圖形已錯誤 <xliff:g id="NUMBER_0">%d</xliff:g> 次。"\n\n" 請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再嘗試。"</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"您已輸入 <xliff:g id="NUMBER_0">%d</xliff:g> 次不正確的密碼。"\n\n"請於 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"您已輸入 <xliff:g id="NUMBER_0">%d</xliff:g> 次不正確的 PIN。"\n\n"請於 <xliff:g id="NUMBER_1">%d</xliff:g> 秒內再試一次。"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"畫出解鎖圖形已錯誤 <xliff:g id="NUMBER_0">%d</xliff:g> 次。再錯誤 <xliff:g id="NUMBER_1">%d</xliff:g> 次後，系統會要求使用 Google 登入來解鎖。"\n\n" 請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> 秒後再試一次。"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"忘記解鎖圖形？"</string>
@@ -573,16 +584,6 @@
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"清除"</string>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"沒有通知"</string>
-    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"進行中"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"通知"</string>
-    <string name="battery_status_text_percent_format" msgid="7660311274698797147">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="battery_status_charging" msgid="756617993998772213">"充電中"</string>
-    <string name="battery_low_title" msgid="7923774589611311406">"請連接充電器"</string>
-    <string name="battery_low_subtitle" msgid="7388781709819722764">"電池電量即將不足："</string>
-    <string name="battery_low_percent_format" msgid="696154104579022959">"還剩 <xliff:g id="NUMBER">%d%%</xliff:g> 以下。"</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"電池使用狀況"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"出廠測試失敗"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"只有安裝在 /system/app 裡的程式才能支援 FACTORY_TEST 操作。"</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"找不到提供 FACTORY_TEST 的程式。"</string>
@@ -708,17 +709,17 @@
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"全部選取"</string>
-    <string name="selectText" msgid="3889149123626888637">"選取文字"</string>
-    <string name="stopSelectingText" msgid="4157931463872320996">"停止選取文字"</string>
     <string name="cut" msgid="3092569408438626261">"剪下"</string>
-    <string name="cutAll" msgid="2436383270024931639">"全部剪下"</string>
     <string name="copy" msgid="2681946229533511987">"複製"</string>
-    <string name="copyAll" msgid="2590829068100113057">"全部複製"</string>
     <string name="paste" msgid="5629880836805036433">"貼上"</string>
     <string name="copyUrl" msgid="2538211579596067402">"複製網址"</string>
+    <!-- no translation found for selectTextMode (6738556348861347240) -->
+    <skip />
+    <!-- no translation found for textSelectionCABTitle (5236850394370820357) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"輸入方式"</string>
-    <string name="addToDictionary" msgid="8793624991686948709">"將「<xliff:g id="WORD">%s</xliff:g>」新增至字典"</string>
-    <string name="editTextMenuTitle" msgid="1672989176958581452">"編輯文字"</string>
+    <!-- no translation found for editTextMenuTitle (4909135564941815494) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"儲存空間即將不足"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"手機儲存空間即將不足。"</string>
     <string name="ok" msgid="5970060430562524910">"確定"</string>
@@ -726,6 +727,7 @@
     <string name="yes" msgid="5362982303337969312">"確定"</string>
     <string name="no" msgid="5141531044935541497">"取消"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"注意"</string>
+    <string name="loading" msgid="1760724998928255250">"載入中..."</string>
     <string name="capital_on" msgid="1544682755514494298">"開啟"</string>
     <string name="capital_off" msgid="6815870386972805832">"關閉"</string>
     <string name="whichApplication" msgid="4533185947064773386">"完成操作需使用"</string>
@@ -744,6 +746,16 @@
     <string name="force_close" msgid="3653416315450806396">"強制關閉"</string>
     <string name="report" msgid="4060218260984795706">"回報"</string>
     <string name="wait" msgid="7147118217226317732">"等待"</string>
+    <string name="smv_application" msgid="295583804361236288">"應用程式 <xliff:g id="APPLICATION">%1$s</xliff:g> (處理程序 <xliff:g id="PROCESS">%2$s</xliff:g>) 已違反其自行實施的 StrictMode 政策。"</string>
+    <string name="smv_process" msgid="5120397012047462446">"處理程序 <xliff:g id="PROCESS">%1$s</xliff:g> 已違反其自行實施的 StrictMode 政策。"</string>
+    <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> 執行中"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"選取切換應用程式"</string>
+    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"切換應用程式？"</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"其他應用程式已在執行中，您必須停止執行，才能啟動新的應用程式。"</string>
+    <string name="old_app_action" msgid="493129172238566282">"返回 <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="old_app_description" msgid="942967900237208466">"請勿啟動新的應用程式。"</string>
+    <string name="new_app_action" msgid="5472756926945440706">"啟動 <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="6830398339826789493">"停止舊的應用程式，且不儲存。"</string>
     <string name="sendText" msgid="5132506121645618310">"訊息傳送方式"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"鈴聲音量"</string>
     <string name="volume_music" msgid="5421651157138628171">"媒體音量"</string>
@@ -850,13 +862,15 @@
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"採用預先共用金鑰的 L2TP/IPSec VPN"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"採用憑證的 L2TP/IPSec VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"選擇檔案"</string>
+    <string name="no_file_chosen" msgid="6363648562170759465">"沒有選擇檔案"</string>
     <string name="reset" msgid="2448168080964209908">"重設"</string>
     <string name="submit" msgid="1602335572089911941">"提交"</string>
-    <string name="description_star" msgid="2654319874908576133">"我的最愛"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"已啟用車用模式"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"選取結束車用模式。"</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"數據連線或無線基地台已啟用"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"輕觸以設定"</string>
+    <string name="back_button_label" msgid="2300470004503343439">"上一個"</string>
+    <string name="next_button_label" msgid="1080555104677992408">"下一個"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"高行動資料用量"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"輕觸即可瞭解更多有關行動資料用量的詳細資訊"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"已達行動資料上限"</string>
