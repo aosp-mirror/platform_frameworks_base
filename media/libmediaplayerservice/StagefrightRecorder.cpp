@@ -38,8 +38,8 @@
 #include <surfaceflinger/ISurface.h>
 #include <utils/Errors.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <ctype.h>
+#include <unistd.h>
 
 #include "ARTPWriter.h"
 
@@ -906,7 +906,7 @@ void StagefrightRecorder::clipVideoFrameWidth() {
 }
 
 status_t StagefrightRecorder::setupCameraSource() {
-    if(!mCaptureTimeLapse) {
+    if (!mCaptureTimeLapse) {
         // Dont clip for time lapse capture as encoder will have enough
         // time to encode because of slow capture rate of time lapse.
         clipVideoBitRate();
@@ -929,9 +929,10 @@ status_t StagefrightRecorder::setupCameraSource() {
     // Set the actual video recording frame size
     CameraParameters params(mCamera->getParameters());
 
-    // dont change the preview size for time lapse as mVideoWidth, mVideoHeight
-    // may correspond to HD resolution not supported by video camera.
-    if (!mCaptureTimeLapse) {
+    // dont change the preview size when using still camera for time lapse
+    // as mVideoWidth, mVideoHeight may correspond to HD resolution not
+    // supported by the video camera.
+    if (!(mCaptureTimeLapse && mUseStillCameraForTimeLapse)) {
         params.setPreviewSize(mVideoWidth, mVideoHeight);
     }
 
@@ -947,7 +948,7 @@ status_t StagefrightRecorder::setupCameraSource() {
     // Check on video frame size
     int frameWidth = 0, frameHeight = 0;
     newCameraParams.getPreviewSize(&frameWidth, &frameHeight);
-    if (!mCaptureTimeLapse &&
+    if (!(mCaptureTimeLapse && mUseStillCameraForTimeLapse) &&
         (frameWidth  < 0 || frameWidth  != mVideoWidth ||
         frameHeight < 0 || frameHeight != mVideoHeight)) {
         LOGE("Failed to set the video frame size to %dx%d",
