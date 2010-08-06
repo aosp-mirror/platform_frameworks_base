@@ -133,9 +133,9 @@ SkiaLinearGradientShader::SkiaLinearGradientShader(float* bounds, uint32_t* colo
 }
 
 SkiaLinearGradientShader::~SkiaLinearGradientShader() {
-    delete mBounds;
-    delete mColors;
-    delete mPositions;
+    delete[] mBounds;
+    delete[] mColors;
+    delete[] mPositions;
 }
 
 void SkiaLinearGradientShader::describe(ProgramDescription& description,
