@@ -296,6 +296,7 @@ status_t MatroskaSource::read(
 
     MediaBuffer *buffer = new MediaBuffer(size + 2);
     buffer->meta_data()->setInt64(kKeyTime, timeUs);
+    buffer->meta_data()->setInt32(kKeyIsSyncFrame, block->IsKey());
 
     long res = block->Read(
             mExtractor->mReader, (unsigned char *)buffer->data() + 2);

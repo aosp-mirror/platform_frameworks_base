@@ -683,6 +683,7 @@ status_t MP3Source::read(
     buffer->set_range(0, frame_size);
 
     buffer->meta_data()->setInt64(kKeyTime, mCurrentTimeUs);
+    buffer->meta_data()->setInt32(kKeyIsSyncFrame, 1);
 
     mCurrentPos += frame_size;
     mCurrentTimeUs += frame_size * 8000ll / bitrate;
