@@ -236,11 +236,9 @@ abstract class SipConnectionBase extends Connection {
         return Connection.PRESENTATION_ALLOWED;
     }
 
-    /*
     @Override
     public UUSInfo getUUSInfo() {
         // FIXME: what's this for SIP?
         return null;
     }
-    */
 }

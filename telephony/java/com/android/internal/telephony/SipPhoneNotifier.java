@@ -16,6 +16,7 @@
 
 package com.android.internal.telephony;
 
+import android.net.NetworkProperties;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -94,15 +95,32 @@ public class SipPhoneNotifier implements PhoneNotifier {
         }
     }
 
-    public void notifyDataConnection(Phone sender, String reason) {
+    public void notifyDataConnection(Phone sender, String reason, String apnType) {
+        doNotifyDataConnection(sender, reason, apnType, sender.getDataConnectionState(apnType));
+    }
+
+    public void notifyDataConnection(Phone sender, String reason, String apnType,
+            Phone.DataState state) {
+        doNotifyDataConnection(sender, reason, apnType, state);
+    }
+
+    private void doNotifyDataConnection(Phone sender, String reason, String apnType,
+            Phone.DataState state) {
+        // TODO
+        // use apnType as the key to which connection we're talking about.
+        // pass apnType back up to fetch particular for this one.
         TelephonyManager telephony = TelephonyManager.getDefault();
+        NetworkProperties networkProperties = null;
+        if (state == Phone.DataState.CONNECTED) {
+            networkProperties = sender.getNetworkProperties(apnType);
+        }
         try {
             mRegistry.notifyDataConnection(
-                    convertDataState(sender.getDataConnectionState()),
+                    convertDataState(state),
                     sender.isDataConnectivityPossible(), reason,
                     sender.getActiveApn(),
-                    sender.getActiveApnTypes(),
-                    sender.getInterfaceName(null),
+                    apnType,
+                    networkProperties,
                     ((telephony!=null) ? telephony.getNetworkType() :
                     TelephonyManager.NETWORK_TYPE_UNKNOWN));
         } catch (RemoteException ex) {
@@ -110,9 +128,9 @@ public class SipPhoneNotifier implements PhoneNotifier {
         }
     }
 
-    public void notifyDataConnectionFailed(Phone sender, String reason) {
+    public void notifyDataConnectionFailed(Phone sender, String reason, String apnType) {
         try {
-            mRegistry.notifyDataConnectionFailed(reason);
+            mRegistry.notifyDataConnectionFailed(reason, apnType);
         } catch (RemoteException ex) {
             // system process is dead
         }

@@ -21,6 +21,7 @@ import com.android.internal.telephony.gsm.NetworkInfo;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 
 import android.content.Context;
+import android.net.NetworkProperties;
 import android.os.Handler;
 import android.os.Message;
 import android.telephony.CellLocation;
@@ -92,6 +93,10 @@ public class SipPhoneProxy implements Phone {
 
     public DataState getDataConnectionState() {
         return mActivePhone.getDataConnectionState();
+    }
+
+    public DataState getDataConnectionState(String apnType) {
+        return mActivePhone.getDataConnectionState(apnType);
     }
 
     public DataActivityState getDataActivityState() {
@@ -327,10 +332,6 @@ public class SipPhoneProxy implements Phone {
     }
 
     public Connection dial(String dialString) throws CallStateException {
-        return mActivePhone.dial(dialString);
-    }
-
-    public Connection dial(String dialString, UUSInfo uusInfo) throws CallStateException {
         return mActivePhone.dial(dialString);
     }
 
@@ -745,5 +746,18 @@ public class SipPhoneProxy implements Phone {
 
     public void unsetOnEcbModeExitResponse(Handler h){
         mActivePhone.unsetOnEcbModeExitResponse(h);
+    }
+
+    public Connection dial(String dialString, UUSInfo uusInfo)
+            throws CallStateException {
+        return mActivePhone.dial(dialString, uusInfo);
+    }
+
+    public boolean needsOtaServiceProvisioning() {
+        return mActivePhone.needsOtaServiceProvisioning();
+    }
+
+    public NetworkProperties getNetworkProperties(String apnType) {
+        return mActivePhone.getNetworkProperties(apnType);
     }
 }
