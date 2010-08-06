@@ -429,3 +429,7 @@ const char *dump_vm_traces() {
     rename(anr_traces_path, traces_path);
     return dump_traces_path;
 }
+
+void play_sound(const char* path) {
+    run_command(NULL, 5, "/system/bin/stagefright", "-o", "-a", path, NULL);
+}

@@ -167,8 +167,11 @@ static void dumpstate() {
 }
 
 static void usage() {
-    fprintf(stderr, "usage: dumpstate [-d] [-o file] [-s] [-z]\n"
+    fprintf(stderr, "usage: dumpstate [-b file] [-d] [-e file] [-o file] [-s] "
+            "[-z]\n"
+            "  -b: play sound file instead of vibrate, at beginning of job\n"
             "  -d: append date to filename (requires -o)\n"
+            "  -e: play sound file instead of vibrate, at end of job\n"
             "  -o: write to file (instead of stdout)\n"
             "  -s: write output to control socket (for init)\n"
             "  -z: gzip output (requires -o)\n");
@@ -178,6 +181,8 @@ int main(int argc, char *argv[]) {
     int do_add_date = 0;
     int do_compress = 0;
     char* use_outfile = 0;
+    char* begin_sound = 0;
+    char* end_sound = 0;
     int use_socket = 0;
 
     LOGI("begin\n");
@@ -194,9 +199,11 @@ int main(int argc, char *argv[]) {
     dump_traces_path = dump_vm_traces();
 
     int c;
-    while ((c = getopt(argc, argv, "dho:svz")) != -1) {
+    while ((c = getopt(argc, argv, "b:de:ho:svz")) != -1) {
         switch (c) {
+            case 'b': begin_sound = optarg;  break;
             case 'd': do_add_date = 1;       break;
+            case 'e': end_sound = optarg;    break;
             case 'o': use_outfile = optarg;  break;
             case 's': use_socket = 1;        break;
             case 'v': break;  // compatibility no-op
@@ -244,16 +251,18 @@ int main(int argc, char *argv[]) {
         gzip_pid = redirect_to_file(stdout, tmp_path, do_compress);
     }
 
-    /* bzzzzzz */
-    if (vibrator) {
+    if (begin_sound) {
+        play_sound(begin_sound);
+    } else if (vibrator) {
         fputs("150", vibrator);
         fflush(vibrator);
     }
 
     dumpstate();
 
-    /* bzzz bzzz bzzz */
-    if (vibrator) {
+    if (end_sound) {
+        play_sound(end_sound);
+    } else if (vibrator) {
         int i;
         for (i = 0; i < 3; i++) {
             fputs("75\n", vibrator);
