@@ -1627,9 +1627,16 @@ final class WebViewCore {
                     + evt);
         }
         int keyCode = evt.getKeyCode();
-        if (!nativeKey(keyCode, evt.getUnicodeChar(),
-                evt.getRepeatCount(), evt.isShiftPressed(), evt.isAltPressed(),
-                evt.isSymPressed(),
+        int unicodeChar = evt.getUnicodeChar();
+
+        if (keyCode == KeyEvent.KEYCODE_UNKNOWN && evt.getCharacters() != null
+                && evt.getCharacters().length() > 0) {
+            // we should only receive individual complex characters
+            unicodeChar = evt.getCharacters().codePointAt(0);
+        }
+
+        if (!nativeKey(keyCode, unicodeChar, evt.getRepeatCount(), evt.isShiftPressed(),
+                evt.isAltPressed(), evt.isSymPressed(),
                 isDown) && keyCode != KeyEvent.KEYCODE_ENTER) {
             if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
                     && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {

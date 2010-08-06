@@ -3762,6 +3762,19 @@ public class WebView extends AbsoluteLayout
     private boolean mGotCenterDown = false;
 
     @Override
+    public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event) {
+        // send complex characters to webkit for use by JS and plugins
+        if (keyCode == KeyEvent.KEYCODE_UNKNOWN && event.getCharacters() != null) {
+            // pass the key to DOM
+            mWebViewCore.sendMessage(EventHub.KEY_DOWN, event);
+            mWebViewCore.sendMessage(EventHub.KEY_UP, event);
+            // return true as DOM handles the key
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "keyDown at " + System.currentTimeMillis()
