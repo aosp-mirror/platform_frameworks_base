@@ -177,7 +177,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // flags to trigger NTP or XTRA data download when network becomes available
     // initialized to true so we do NTP and XTRA when the network comes up after booting
     private boolean mInjectNtpTimePending = true;
-    private boolean mDownloadXtraDataPending = true;
+    private boolean mDownloadXtraDataPending = false;
 
     // true if GPS is navigating
     private boolean mNavigating;
@@ -495,7 +495,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     }
 
     private void handleDownloadXtraData() {
-        if (!mDownloadXtraDataPending) {
+        if (!mNetworkAvailable) {
             // try again when network is up
             mDownloadXtraDataPending = true;
             return;
