@@ -1,6 +1,31 @@
 #ifndef __RS_MATH_RSH__
 #define __RS_MATH_RSH__
 
+// Debugging, print to the LOG a description string and a value.
+extern void __attribute__((overloadable))
+    rsDebug(const char *, float);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, float, float);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, float, float, float);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, float, float, float, float);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, const rs_matrix4x4 *);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, const rs_matrix3x3 *);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, const rs_matrix2x2 *);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, int);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, uint);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, const void *);
+#define RS_DEBUG(a) rsDebug(#a, a)
+#define RS_DEBUG_MARKER rsDebug(__FILE__, __LINE__)
+
+
 #include "rs_cl.rsh"
 #include "rs_core.rsh"
 
@@ -30,25 +55,6 @@ extern const void * __attribute__((overloadable))
     rsGetElementAt(rs_allocation, uint32_t x, uint32_t y);
 extern const void * __attribute__((overloadable))
     rsGetElementAt(rs_allocation, uint32_t x, uint32_t y, uint32_t z);
-
-
-// Debugging, print to the LOG a description string and a value.
-extern void __attribute__((overloadable))
-    rsDebug(const char *, float);
-extern void __attribute__((overloadable))
-    rsDebug(const char *, float2);
-extern void __attribute__((overloadable))
-    rsDebug(const char *, float3);
-extern void __attribute__((overloadable))
-    rsDebug(const char *, float4);
-extern void __attribute__((overloadable))
-    rsDebug(const char *, int);
-extern void __attribute__((overloadable))
-    rsDebug(const char *, uint);
-extern void __attribute__((overloadable))
-    rsDebug(const char *, const void *);
-#define RS_DEBUG(a) rsDebug(#a, a)
-#define RS_DEBUG_MARKER rsDebug(__FILE__, __LINE__)
 
 // Return a random value between 0 (or min_value) and max_malue.
 extern int __attribute__((overloadable))
