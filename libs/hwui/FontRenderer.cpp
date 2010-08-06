@@ -62,6 +62,27 @@ void Font::invalidateTextureCache() {
     }
 }
 
+void Font::measureCachedGlyph(CachedGlyphInfo *glyph, int x, int y, Rect *bounds) {
+    int nPenX = x + glyph->mBitmapLeft;
+    int nPenY = y + glyph->mBitmapTop;
+
+    int width = (int) glyph->mBitmapWidth;
+    int height = (int) glyph->mBitmapHeight;
+
+    if(bounds->bottom > nPenY) {
+        bounds->bottom = nPenY;
+    }
+    if(bounds->left > nPenX) {
+        bounds->left = nPenX;
+    }
+    if(bounds->right < nPenX + width) {
+        bounds->right = nPenX + width;
+    }
+    if(bounds->top < nPenY + height) {
+        bounds->top = nPenY + height;
+    }
+}
+
 void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y) {
     int nPenX = x + glyph->mBitmapLeft;
     int nPenY = y + glyph->mBitmapTop + glyph->mBitmapHeight;
@@ -88,22 +109,17 @@ void Font::drawCachedGlyph(CachedGlyphInfo *glyph, int x, int y,
     uint32_t endX = glyph->mStartX + glyph->mBitmapWidth;
     uint32_t endY = glyph->mStartY + glyph->mBitmapHeight;
 
-    if(nPenX < 0 || nPenY < 0) {
-        LOGE("Cannot render into a bitmap, some of the glyph is below zero");
-        return;
-    }
-
-    if(nPenX + glyph->mBitmapWidth >= bitmapW || nPenY + glyph->mBitmapHeight >= bitmapH) {
-        LOGE("Cannot render into a bitmap, dimentions too small");
-        return;
-    }
-
     uint32_t cacheWidth = mState->getCacheWidth();
     const uint8_t* cacheBuffer = mState->getTextTextureData();
 
-    uint32_t cacheX = 0, bX = 0, cacheY = 0, bY = 0;
+    uint32_t cacheX = 0, cacheY = 0;
+    int32_t bX = 0, bY = 0;
     for (cacheX = glyph->mStartX, bX = nPenX; cacheX < endX; cacheX++, bX++) {
         for (cacheY = glyph->mStartY, bY = nPenY; cacheY < endY; cacheY++, bY++) {
+            if(bX < 0 || bY < 0 || bX >= (int32_t)bitmapW || bY >= (int32_t)bitmapH) {
+                LOGE("Skipping invalid index");
+                continue;
+            }
             uint8_t tempCol = cacheBuffer[cacheY * cacheWidth + cacheX];
             bitmap[bY * bitmapW + bX] = tempCol;
         }
@@ -127,7 +143,33 @@ Font::CachedGlyphInfo* Font::getCachedUTFChar(SkPaint* paint, int32_t utfChar) {
 }
 
 void Font::renderUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
-        int numGlyphs, int x, int y, uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH) {
+                       int numGlyphs, int x, int y,
+                       uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH) {
+    if(bitmap != NULL && bitmapW > 0 && bitmapH > 0) {
+        renderUTF(paint, text, start, len, numGlyphs, x, y, BITMAP,
+                   bitmap, bitmapW, bitmapH, NULL);
+    }
+    else {
+        renderUTF(paint, text, start, len, numGlyphs, x, y, FRAMEBUFFER,
+                   NULL, 0, 0, NULL);
+    }
+
+}
+
+void Font::measureUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
+                       int numGlyphs, Rect *bounds) {
+    if(bounds == NULL) {
+        LOGE("No return rectangle provided to measure text");
+        return;
+    }
+    bounds->set(1e6, -1e6, -1e6, 1e6);
+    renderUTF(paint, text, start, len, numGlyphs, 0, 0, MEASURE, NULL, 0, 0, bounds);
+}
+
+void Font::renderUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
+                       int numGlyphs, int x, int y, RenderMode mode,
+                       uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH,
+                       Rect *bounds) {
     if (numGlyphs == 0 || text == NULL || len == 0) {
         return;
     }
@@ -152,11 +194,16 @@ void Font::renderUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t 
 
         // If it's still not valid, we couldn't cache it, so we shouldn't draw garbage
         if (cachedGlyph->mIsValid) {
-            if(bitmap != NULL) {
-                drawCachedGlyph(cachedGlyph, penX, penY, bitmap, bitmapW, bitmapH);
-            }
-            else {
+            switch(mode) {
+            case FRAMEBUFFER:
                 drawCachedGlyph(cachedGlyph, penX, penY);
+                break;
+            case BITMAP:
+                drawCachedGlyph(cachedGlyph, penX, penY, bitmap, bitmapW, bitmapH);
+                break;
+            case MEASURE:
+                measureCachedGlyph(cachedGlyph, penX, penY, bounds);
+                break;
             }
         }
 
@@ -569,6 +616,32 @@ void FontRenderer::setFont(SkPaint* paint, uint32_t fontId, float fontSize) {
         precacheLatin(paint);
     }
 }
+FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const char *text,
+                                uint32_t startIndex, uint32_t len, int numGlyphs, uint32_t radius) {
+
+    Rect bounds;
+    mCurrentFont->measureUTF(paint, text, startIndex, len, numGlyphs, &bounds);
+    uint32_t paddedWidth = (uint32_t)(bounds.right - bounds.left) + 2*radius;
+    uint32_t paddedHeight = (uint32_t)(bounds.top - bounds.bottom) + 2*radius;
+    uint8_t* dataBuffer = new uint8_t[paddedWidth * paddedHeight];
+    for(uint32_t i = 0; i < paddedWidth * paddedHeight; i ++) {
+        dataBuffer[i] = 0;
+    }
+    int penX = radius - bounds.left;
+    int penY = radius - bounds.bottom;
+
+    mCurrentFont->renderUTF(paint, text, startIndex, len, numGlyphs, penX, penY,
+                              dataBuffer, paddedWidth, paddedHeight);
+    blurImage(dataBuffer, paddedWidth, paddedHeight, radius);
+
+    DropShadow image;
+    image.width = paddedWidth;
+    image.height = paddedHeight;
+    image.image = dataBuffer;
+    image.penX = penX;
+    image.penY = penY;
+    return image;
+}
 
 void FontRenderer::renderText(SkPaint* paint, const Rect* clip, const char *text,
         uint32_t startIndex, uint32_t len, int numGlyphs, int x, int y) {
@@ -598,11 +671,11 @@ void FontRenderer::computeGaussianWeights(float* weights, int32_t radius) {
     // and sigma varies with radius.
     // Based on some experimental radius values and sigma's
     // we approximately fit sigma = f(radius) as
-    // sigma = radius * 0.4  + 0.6
+    // sigma = radius * 0.3  + 0.6
     // The larger the radius gets, the more our gaussian blur
     // will resemble a box blur since with large sigma
     // the gaussian curve begins to lose its shape
-    float sigma = 0.4f * (float)radius + 0.6f;
+    float sigma = 0.3f * (float)radius + 0.6f;
 
     // Now compute the coefficints
     // We will store some redundant values to save some math during

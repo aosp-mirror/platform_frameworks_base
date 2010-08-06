@@ -45,6 +45,7 @@ public:
 
     /**
      * Renders the specified string of text.
+     * If bitmap is specified, it will be used as the render target
      */
     void renderUTF(SkPaint* paint, const char *text, uint32_t start, uint32_t len,
                      int numGlyphs, int x, int y,
@@ -56,6 +57,20 @@ public:
 
 protected:
     friend class FontRenderer;
+
+    enum RenderMode {
+        FRAMEBUFFER,
+        BITMAP,
+        MEASURE,
+    };
+
+    void renderUTF(SkPaint* paint, const char *text, uint32_t start, uint32_t len,
+                     int numGlyphs, int x, int y, RenderMode mode,
+                     uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH,
+                     Rect *bounds);
+
+    void measureUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
+                      int numGlyphs, Rect *bounds);
 
     struct CachedGlyphInfo {
         // Has the cache been invalidated?
@@ -89,6 +104,7 @@ protected:
 
     CachedGlyphInfo* cacheGlyph(SkPaint* paint, int32_t glyph);
     void updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyphInfo *glyph);
+    void measureCachedGlyph(CachedGlyphInfo *glyph, int x, int y, Rect *bounds);
     void drawCachedGlyph(CachedGlyphInfo *glyph, int x, int y);
     void drawCachedGlyph(CachedGlyphInfo *glyph, int x, int y,
                           uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH);
@@ -111,6 +127,19 @@ public:
     void setFont(SkPaint* paint, uint32_t fontId, float fontSize);
     void renderText(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
             uint32_t len, int numGlyphs, int x, int y);
+
+    struct DropShadow {
+        uint32_t width;
+        uint32_t height;
+        uint8_t* image;
+        int32_t penX;
+        int32_t penY;
+    };
+
+    // After renderDropShadow returns, the called owns the memory in DropShadow.image
+    // and is responsible for releasing it when it's done with it
+    DropShadow renderDropShadow(SkPaint* paint, const char *text, uint32_t startIndex,
+                                   uint32_t len, int numGlyphs, uint32_t radius);
 
     GLuint getTexture() {
         checkInit();
