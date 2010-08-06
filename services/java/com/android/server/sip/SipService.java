@@ -1038,54 +1038,54 @@ public final class SipService extends ISipService.Stub {
             return toString();
         }
 
-        private static class MyEvent {
-            int mPeriod;
-            int mMaxPeriod;
-            long mTriggerTime;
-            long mLastTriggerTime;
-            Runnable mCallback;
-
-            MyEvent(int period, Runnable callback, long now) {
-                mPeriod = mMaxPeriod = period;
-                mCallback = callback;
-                mLastTriggerTime = now;
-            }
-
-            @Override
-            public String toString() {
-                String s = super.toString();
-                s = s.substring(s.indexOf("@"));
-                return s + ":" + (mPeriod / 1000) + ":" + (mMaxPeriod / 1000) + ":"
-                        + toString(mCallback);
-            }
-
-            private String toString(Object o) {
-                String s = o.toString();
-                int index = s.indexOf("$");
-                if (index > 0) s = s.substring(index + 1);
-                return s;
-            }
-        }
-
-        private static class MyEventComparator implements Comparator<MyEvent> {
-            public int compare(MyEvent e1, MyEvent e2) {
-                if (e1 == e2) return 0;
-                int diff = e1.mMaxPeriod - e2.mMaxPeriod;
-                if (diff == 0) diff = -1;
-                return diff;
-            }
-
-            public boolean equals(Object that) {
-                return (this == that);
-            }
-        }
-
-        private static String showTime(long time) {
+        private String showTime(long time) {
             int ms = (int) (time % 1000);
             int s = (int) (time / 1000);
             int m = s / 60;
             s %= 60;
             return String.format("%d.%d.%d", m, s, ms);
+        }
+    }
+
+    private static class MyEvent {
+        int mPeriod;
+        int mMaxPeriod;
+        long mTriggerTime;
+        long mLastTriggerTime;
+        Runnable mCallback;
+
+        MyEvent(int period, Runnable callback, long now) {
+            mPeriod = mMaxPeriod = period;
+            mCallback = callback;
+            mLastTriggerTime = now;
+        }
+
+        @Override
+        public String toString() {
+            String s = super.toString();
+            s = s.substring(s.indexOf("@"));
+            return s + ":" + (mPeriod / 1000) + ":" + (mMaxPeriod / 1000) + ":"
+                    + toString(mCallback);
+        }
+
+        private String toString(Object o) {
+            String s = o.toString();
+            int index = s.indexOf("$");
+            if (index > 0) s = s.substring(index + 1);
+            return s;
+        }
+    }
+
+    private static class MyEventComparator implements Comparator<MyEvent> {
+        public int compare(MyEvent e1, MyEvent e2) {
+            if (e1 == e2) return 0;
+            int diff = e1.mMaxPeriod - e2.mMaxPeriod;
+            if (diff == 0) diff = -1;
+            return diff;
+        }
+
+        public boolean equals(Object that) {
+            return (this == that);
         }
     }
 }
