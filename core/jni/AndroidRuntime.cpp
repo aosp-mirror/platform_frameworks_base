@@ -700,15 +700,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         }
     }
 
-    /* enable poisoning of memory of freed objects */
-    property_get("dalvik.vm.gc.overwritefree", propBuf, "false");
-    if (strcmp(propBuf, "true") == 0) {
-        opt.optionString = "-Xgc:overwritefree";
-        mOptions.add(opt);
-    } else if (strcmp(propBuf, "false") != 0) {
-        LOGW("dalvik.vm.gc.overwritefree should be 'true' or 'false'");
-    }
-
     /* enable debugging; set suspend=y to pause during VM init */
 #ifdef HAVE_ANDROID_OS
     /* use android ADB transport */
