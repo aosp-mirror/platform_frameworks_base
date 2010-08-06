@@ -260,7 +260,7 @@ rsMatrixLoadRotate(rs_matrix4x4 *m, float rot, float x, float y, float z) {
     s = sin(rot);
 
     const float len = x*x + y*y + z*z;
-    if (!(len != 1)) {
+    if (len != 1) {
         const float recipLen = 1.f / sqrt(len);
         x *= recipLen;
         y *= recipLen;
