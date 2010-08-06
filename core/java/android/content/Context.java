@@ -1546,6 +1546,15 @@ public abstract class Context {
     public static final String DOWNLOAD_SERVICE = "download";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.net.sip.SipManager} for accessing the SIP related service.
+     *
+     * @see #getSystemService
+     */
+    /** @hide */
+    public static final String SIP_SERVICE = "sip";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

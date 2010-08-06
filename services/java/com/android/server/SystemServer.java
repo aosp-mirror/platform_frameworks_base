@@ -17,6 +17,7 @@
 package com.android.server;
 
 import com.android.server.am.ActivityManagerService;
+import com.android.server.sip.SipService;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
 
@@ -412,6 +413,13 @@ class ServerThread extends Thread {
             try {
                 Slog.i(TAG, "DiskStats Service");
                 ServiceManager.addService("diskstats", new DiskStatsService(context));
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting DiskStats Service", e);
+            }
+
+            try {
+                Slog.i(TAG, "Sip Service");
+                ServiceManager.addService("sip", new SipService(context));
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting DiskStats Service", e);
             }
