@@ -7,7 +7,8 @@ ifneq ($(TARGET_SIMULATOR),true)
 # Build the unit tests.
 test_src_files := \
 	ObbFile_test.cpp \
-	PollLoop_test.cpp
+	PollLoop_test.cpp \
+	String8_test.cpp
 
 shared_libraries := \
 	libz \

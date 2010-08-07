@@ -374,7 +374,7 @@ inline String8& String8::operator+=(const String8& other)
 
 inline String8 String8::operator+(const String8& other) const
 {
-    String8 tmp;
+    String8 tmp(*this);
     tmp += other;
     return tmp;
 }
@@ -387,7 +387,7 @@ inline String8& String8::operator+=(const char* other)
 
 inline String8 String8::operator+(const char* other) const
 {
-    String8 tmp;
+    String8 tmp(*this);
     tmp += other;
     return tmp;
 }
