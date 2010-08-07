@@ -241,12 +241,6 @@ public class DownloadManager {
      */
     public static class Request {
         /**
-         * Bit flag for {@link #setShowNotification} indicating a notification should be created
-         * while the download is running.
-         */
-        public static final int NOTIFICATION_WHEN_RUNNING = 1;
-
-        /**
          * Bit flag for {@link #setAllowedNetworkTypes} corresponding to
          * {@link ConnectivityManager#TYPE_MOBILE}.
          */
@@ -269,7 +263,7 @@ public class DownloadManager {
         private Map<String, String> mRequestHeaders = new HashMap<String, String>();
         private String mTitle;
         private String mDescription;
-        private int mNotificationFlags = 0;
+        private boolean mShowNotification = true;
         private String mMediaType;
         private boolean mRoamingAllowed = true;
         private int mAllowedNetworkTypes = ~0; // default to all network types allowed
@@ -344,15 +338,20 @@ public class DownloadManager {
         }
 
         /**
-         * Control system notifications posted by the download manager for this download.  If
-         * enabled, the download manager posts notifications about downloads through the system
-         * {@link android.app.NotificationManager}. By default, no notification is shown.
+         * Control whether a system notification is posted by the download manager while this
+         * download is running. If enabled, the download manager posts notifications about downloads
+         * through the system {@link android.app.NotificationManager}. By default, a notification is
+         * shown.
          *
-         * @param flags any combination of the NOTIFICATION_* bit flags
+         * If set to false, this requires the permission
+         * android.permission.DOWNLOAD_WITHOUT_NOTIFICATION.
+         *
+         * @param show whether the download manager should show a notification for this download.
          * @return this object
+         * @hide
          */
-        public Request setShowNotification(int flags) {
-            mNotificationFlags = flags;
+        public Request setShowRunningNotification(boolean show) {
+            mShowNotification = show;
             return this;
         }
 
@@ -404,11 +403,9 @@ public class DownloadManager {
             putIfNonNull(values, Downloads.COLUMN_DESCRIPTION, mDescription);
             putIfNonNull(values, Downloads.COLUMN_MIME_TYPE, mMediaType);
 
-            int visibility = Downloads.VISIBILITY_HIDDEN;
-            if ((mNotificationFlags & NOTIFICATION_WHEN_RUNNING) != 0) {
-                visibility = Downloads.VISIBILITY_VISIBLE;
-            }
-            values.put(Downloads.COLUMN_VISIBILITY, visibility);
+            values.put(Downloads.COLUMN_VISIBILITY,
+                    mShowNotification ? Downloads.VISIBILITY_VISIBLE
+                            : Downloads.VISIBILITY_HIDDEN);
 
             values.put(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES, mAllowedNetworkTypes);
             values.put(Downloads.Impl.COLUMN_ALLOW_ROAMING, mRoamingAllowed);
