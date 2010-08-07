@@ -181,6 +181,8 @@ status_t OggSource::read(
     }
 #endif
 
+    packet->meta_data()->setInt32(kKeyIsSyncFrame, 1);
+
     *out = packet;
 
     return OK;

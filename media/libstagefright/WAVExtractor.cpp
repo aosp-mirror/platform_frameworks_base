@@ -358,6 +358,7 @@ status_t WAVSource::read(
             1000000LL * (mCurrentPos - mOffset)
                 / (mNumChannels * bytesPerSample) / mSampleRate);
 
+    buffer->meta_data()->setInt32(kKeyIsSyncFrame, 1);
 
     *out = buffer;
 
