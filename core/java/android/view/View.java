@@ -1828,8 +1828,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     private int[] mDrawableState = null;
 
-    private SoftReference<Bitmap> mDrawingCache;
-    private SoftReference<Bitmap> mUnscaledDrawingCache;
+    private Bitmap mDrawingCache;
+    private Bitmap mUnscaledDrawingCache;
 
     /**
      * When this view has focus and the next focus is {@link #FOCUS_LEFT},
@@ -6916,8 +6916,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if ((mViewFlags & DRAWING_CACHE_ENABLED) == DRAWING_CACHE_ENABLED) {
             buildDrawingCache(autoScale);
         }
-        return autoScale ? (mDrawingCache == null ? null : mDrawingCache.get()) :
-                (mUnscaledDrawingCache == null ? null : mUnscaledDrawingCache.get());
+        return autoScale ? mDrawingCache : mUnscaledDrawingCache;
     }
 
     /**
@@ -6932,13 +6931,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void destroyDrawingCache() {
         if (mDrawingCache != null) {
-            final Bitmap bitmap = mDrawingCache.get();
-            if (bitmap != null) bitmap.recycle();
+            mDrawingCache.recycle();
             mDrawingCache = null;
         }
         if (mUnscaledDrawingCache != null) {
-            final Bitmap bitmap = mUnscaledDrawingCache.get();
-            if (bitmap != null) bitmap.recycle();
+            mUnscaledDrawingCache.recycle();
             mUnscaledDrawingCache = null;
         }
     }
@@ -6999,8 +6996,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void buildDrawingCache(boolean autoScale) {
         if ((mPrivateFlags & DRAWING_CACHE_VALID) == 0 || (autoScale ?
-                (mDrawingCache == null || mDrawingCache.get() == null) :
-                (mUnscaledDrawingCache == null || mUnscaledDrawingCache.get() == null))) {
+                mDrawingCache == null : mUnscaledDrawingCache == null)) {
 
             if (ViewDebug.TRACE_HIERARCHY) {
                 ViewDebug.trace(this, ViewDebug.HierarchyTraceType.BUILD_CACHE);
@@ -7033,8 +7029,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             }
 
             boolean clear = true;
-            Bitmap bitmap = autoScale ? (mDrawingCache == null ? null : mDrawingCache.get()) :
-                    (mUnscaledDrawingCache == null ? null : mUnscaledDrawingCache.get());
+            Bitmap bitmap = autoScale ? mDrawingCache : mUnscaledDrawingCache;
 
             if (bitmap == null || bitmap.getWidth() != width || bitmap.getHeight() != height) {
                 Bitmap.Config quality;
@@ -7066,9 +7061,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     bitmap = Bitmap.createBitmap(width, height, quality);
                     bitmap.setDensity(getResources().getDisplayMetrics().densityDpi);
                     if (autoScale) {
-                        mDrawingCache = new SoftReference<Bitmap>(bitmap);
+                        mDrawingCache = bitmap;
                     } else {
-                        mUnscaledDrawingCache = new SoftReference<Bitmap>(bitmap);
+                        mUnscaledDrawingCache = bitmap;
                     }
                     if (opaque && translucentWindow) bitmap.setHasAlpha(false);
                 } catch (OutOfMemoryError e) {

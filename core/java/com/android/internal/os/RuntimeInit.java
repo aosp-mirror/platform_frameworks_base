@@ -24,6 +24,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.util.Config;
+import android.util.Finalizers;
 import android.util.Log;
 import android.util.Slog;
 
@@ -140,6 +141,12 @@ public class RuntimeInit {
             Slog.i(TAG, "NOTE: emulator trace profiling enabled");
             Debug.enableEmulatorTraceOutput();
         }
+
+        /**
+         * Initialize the thread used to reclaim resources without
+         * going through finalizers.
+         */
+        Finalizers.init();
 
         initialized = true;
     }
@@ -330,9 +337,6 @@ public class RuntimeInit {
             Slog.e(TAG, "Error reporting WTF", t2);
         }
     }
-
-    /** Counter used to prevent reentrancy in {@link #reportException}. */
-    private static final AtomicInteger sInReportException = new AtomicInteger();
 
     /**
      * Set the object identifying this application/process, for reporting VM
