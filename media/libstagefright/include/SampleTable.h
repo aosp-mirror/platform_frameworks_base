@@ -60,7 +60,8 @@ public:
             uint32_t sampleIndex,
             off_t *offset,
             size_t *size,
-            uint32_t *decodingTime);
+            uint32_t *decodingTime,
+            bool *isSyncSample = NULL);
 
     enum {
         kFlagBefore,
@@ -105,6 +106,8 @@ private:
 
     off_t mSyncSampleOffset;
     uint32_t mNumSyncSamples;
+    uint32_t *mSyncSamples;
+    size_t mLastSyncSampleIndex;
 
     SampleIterator *mSampleIterator;
 

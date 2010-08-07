@@ -1551,13 +1551,14 @@ status_t MPEG4Source::read(
     off_t offset;
     size_t size;
     uint32_t dts;
+    bool isSyncSample;
     bool newBuffer = false;
     if (mBuffer == NULL) {
         newBuffer = true;
 
         status_t err =
             mSampleTable->getMetaDataForSample(
-                    mCurrentSampleIndex, &offset, &size, &dts);
+                    mCurrentSampleIndex, &offset, &size, &dts, &isSyncSample);
 
         if (err != OK) {
             return err;
@@ -1592,6 +1593,10 @@ status_t MPEG4Source::read(
             if (targetSampleTimeUs >= 0) {
                 mBuffer->meta_data()->setInt64(
                         kKeyTargetTime, targetSampleTimeUs);
+            }
+
+            if (isSyncSample) {
+                mBuffer->meta_data()->setInt32(kKeyIsSyncFrame, 1);
             }
 
             ++mCurrentSampleIndex;
@@ -1694,6 +1699,10 @@ status_t MPEG4Source::read(
         if (targetSampleTimeUs >= 0) {
             mBuffer->meta_data()->setInt64(
                     kKeyTargetTime, targetSampleTimeUs);
+        }
+
+        if (isSyncSample) {
+            mBuffer->meta_data()->setInt32(kKeyIsSyncFrame, 1);
         }
 
         ++mCurrentSampleIndex;

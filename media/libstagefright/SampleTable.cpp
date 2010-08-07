@@ -55,6 +55,8 @@ SampleTable::SampleTable(const sp<DataSource> &source)
       mTimeToSample(NULL),
       mSyncSampleOffset(-1),
       mNumSyncSamples(0),
+      mSyncSamples(NULL),
+      mLastSyncSampleIndex(0),
       mSampleToChunkEntries(NULL) {
     mSampleIterator = new SampleIterator(this);
 }
@@ -62,6 +64,9 @@ SampleTable::SampleTable(const sp<DataSource> &source)
 SampleTable::~SampleTable() {
     delete[] mSampleToChunkEntries;
     mSampleToChunkEntries = NULL;
+
+    delete[] mSyncSamples;
+    mSyncSamples = NULL;
 
     delete[] mTimeToSample;
     mTimeToSample = NULL;
@@ -278,6 +283,18 @@ status_t SampleTable::setSyncSampleParams(off_t data_offset, size_t data_size) {
     if (mNumSyncSamples < 2) {
         LOGW("Table of sync samples is empty or has only a single entry!");
     }
+
+    mSyncSamples = new uint32_t[mNumSyncSamples];
+    size_t size = mNumSyncSamples * sizeof(uint32_t);
+    if (mDataSource->readAt(mSyncSampleOffset + 8, mSyncSamples, size)
+            != (ssize_t)size) {
+        return ERROR_IO;
+    }
+
+    for (size_t i = 0; i < mNumSyncSamples; ++i) {
+        mSyncSamples[i] = ntohl(mSyncSamples[i]) - 1;
+    }
+
     return OK;
 }
 
@@ -394,14 +411,7 @@ status_t SampleTable::findSyncSampleNear(
 
     uint32_t left = 0;
     while (left < mNumSyncSamples) {
-        uint32_t x;
-        if (mDataSource->readAt(
-                    mSyncSampleOffset + 8 + left * 4, &x, 4) != 4) {
-            return ERROR_IO;
-        }
-
-        x = ntohl(x);
-        --x;
+        uint32_t x = mSyncSamples[left];
 
         if (x >= start_sample_index) {
             break;
@@ -421,14 +431,7 @@ status_t SampleTable::findSyncSampleNear(
     --x;
 
     if (left + 1 < mNumSyncSamples) {
-        uint32_t y;
-        if (mDataSource->readAt(
-                    mSyncSampleOffset + 8 + (left + 1) * 4, &y, 4) != 4) {
-            return ERROR_IO;
-        }
-
-        y = ntohl(y);
-        --y;
+        uint32_t y = mSyncSamples[left + 1];
 
         // our sample lies between sync samples x and y.
 
@@ -486,13 +489,7 @@ status_t SampleTable::findSyncSampleNear(
                     return ERROR_OUT_OF_RANGE;
                 }
 
-                if (mDataSource->readAt(
-                            mSyncSampleOffset + 8 + (left + 1) * 4, &x, 4) != 4) {
-                    return ERROR_IO;
-                }
-
-                x = ntohl(x);
-                --x;
+                x = mSyncSamples[left + 1];
 
                 CHECK(x >= start_sample_index);
             }
@@ -532,13 +529,7 @@ status_t SampleTable::findThumbnailSample(uint32_t *sample_index) {
     }
 
     for (size_t i = 0; i < numSamplesToScan; ++i) {
-        uint32_t x;
-        if (mDataSource->readAt(
-                    mSyncSampleOffset + 8 + i * 4, &x, 4) != 4) {
-            return ERROR_IO;
-        }
-        x = ntohl(x);
-        --x;
+        uint32_t x = mSyncSamples[i];
 
         // Now x is a sample index.
         size_t sampleSize;
@@ -568,7 +559,8 @@ status_t SampleTable::getMetaDataForSample(
         uint32_t sampleIndex,
         off_t *offset,
         size_t *size,
-        uint32_t *decodingTime) {
+        uint32_t *decodingTime,
+        bool *isSyncSample) {
     Mutex::Autolock autoLock(mLock);
 
     status_t err;
@@ -586,6 +578,28 @@ status_t SampleTable::getMetaDataForSample(
 
     if (decodingTime) {
         *decodingTime = mSampleIterator->getSampleTime();
+    }
+
+    if (isSyncSample) {
+        *isSyncSample = false;
+        if (mSyncSampleOffset < 0) {
+            // Every sample is a sync sample.
+            *isSyncSample = true;
+        } else {
+            size_t i = (mLastSyncSampleIndex < mNumSyncSamples)
+                    && (mSyncSamples[mLastSyncSampleIndex] <= sampleIndex)
+                ? mLastSyncSampleIndex : 0;
+
+            while (i < mNumSyncSamples && mSyncSamples[i] < sampleIndex) {
+                ++i;
+            }
+
+            if (i < mNumSyncSamples && mSyncSamples[i] == sampleIndex) {
+                *isSyncSample = true;
+            }
+
+            mLastSyncSampleIndex = i;
+        }
     }
 
     return OK;
