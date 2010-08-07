@@ -60,6 +60,8 @@ class ViewServer implements Runnable {
     private static final String COMMAND_WINDOW_MANAGER_LIST = "LIST";
     // Keeps a connection open and notifies when the list of windows changes
     private static final String COMMAND_WINDOW_MANAGER_AUTOLIST = "AUTOLIST";
+    // Returns the focused window
+    private static final String COMMAND_WINDOW_MANAGER_GET_FOCUS = "GET_FOCUS";
 
     private ServerSocket mServer;
     private Thread mThread;
@@ -250,6 +252,8 @@ class ViewServer implements Runnable {
                     result = writeValue(mClient, VALUE_SERVER_VERSION);
                 } else if (COMMAND_WINDOW_MANAGER_LIST.equalsIgnoreCase(command)) {
                     result = mWindowManager.viewServerListWindows(mClient);
+                } else if (COMMAND_WINDOW_MANAGER_GET_FOCUS.equalsIgnoreCase(command)) {
+                    result = mWindowManager.viewServerGetFocusedWindow(mClient);
                 } else if(COMMAND_WINDOW_MANAGER_AUTOLIST.equalsIgnoreCase(command)) {
                     result = windowManagerAutolistLoop();
                 } else {

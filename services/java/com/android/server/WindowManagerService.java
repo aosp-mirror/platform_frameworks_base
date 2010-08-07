@@ -4720,6 +4720,51 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
+     * Returns the focused window in the following format:
+     * windowHashCodeInHexadecimal windowName
+     *
+     * @param client The remote client to send the listing to.
+     * @return False if an error occurred, true otherwise.
+     */
+    boolean viewServerGetFocusedWindow(Socket client) {
+        if (isSystemSecure()) {
+            return false;
+        }
+
+        boolean result = true;
+
+        WindowState focusedWindow = getFocusedWindow();
+
+        BufferedWriter out = null;
+
+        // Any uncaught exception will crash the system process
+        try {
+            OutputStream clientStream = client.getOutputStream();
+            out = new BufferedWriter(new OutputStreamWriter(clientStream), 8 * 1024);
+
+            if(focusedWindow != null) {
+                out.write(Integer.toHexString(System.identityHashCode(focusedWindow)));
+                out.write(' ');
+                out.append(focusedWindow.mAttrs.getTitle());
+            }
+            out.write('\n');
+            out.flush();
+        } catch (Exception e) {
+            result = false;
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    result = false;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Sends a command to a target window. The result of the command, if any, will be
      * written in the output stream of the specified socket.
      *
