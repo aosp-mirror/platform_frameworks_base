@@ -624,11 +624,17 @@ public final class Downloads {
                 "android.permission.SEND_DOWNLOAD_COMPLETED_INTENTS";
 
         /**
-         * The permission to downloads files to the cache partition that won't be automatically
+         * The permission to download files to the cache partition that won't be automatically
          * purged when space is needed.
          */
         public static final String PERMISSION_CACHE_NON_PURGEABLE =
                 "android.permission.DOWNLOAD_CACHE_NON_PURGEABLE";
+
+        /**
+         * The permission to download files without any system notification being shown.
+         */
+        public static final String PERMISSION_NO_NOTIFICATION =
+                "android.permission.DOWNLOAD_WITHOUT_NOTIFICATION";
 
         /**
          * The content:// URI for the data table in the provider
