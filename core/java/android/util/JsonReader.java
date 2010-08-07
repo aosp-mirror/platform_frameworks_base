@@ -210,6 +210,9 @@ public final class JsonReader implements Closeable {
     /** The text of the next literal value. */
     private String value;
 
+    /** True if we're currently handling a skipValue() call. */
+    private boolean skipping = false;
+
     /**
      * Creates a new instance that reads a JSON-encoded stream from {@code in}.
      */
@@ -560,17 +563,20 @@ public final class JsonReader implements Closeable {
      * stream contains unrecognized or unhandled values.
      */
     public void skipValue() throws IOException {
-        // TODO: suppress string creation while elements are being skipped!
-
-        int count = 0;
-        do {
-            JsonToken token = advance();
-            if (token == JsonToken.BEGIN_ARRAY || token == JsonToken.BEGIN_OBJECT) {
-                count++;
-            } else if (token == JsonToken.END_ARRAY || token == JsonToken.END_OBJECT) {
-                count--;
-            }
-        } while (count != 0);
+        skipping = true;
+        try {
+            int count = 0;
+            do {
+                JsonToken token = advance();
+                if (token == JsonToken.BEGIN_ARRAY || token == JsonToken.BEGIN_OBJECT) {
+                    count++;
+                } else if (token == JsonToken.END_ARRAY || token == JsonToken.END_OBJECT) {
+                    count--;
+                }
+            } while (count != 0);
+        } finally {
+            skipping = false;
+        }
     }
 
     private JsonScope peekStack() {
@@ -864,7 +870,9 @@ public final class JsonReader implements Closeable {
                 int c = buffer[pos++];
 
                 if (c == quote) {
-                    if (builder == null) {
+                    if (skipping) {
+                        return "skipped!";
+                    } else if (builder == null) {
                         return new String(buffer, start, pos - start - 1);
                     } else {
                         builder.append(buffer, start, pos - start - 1);
@@ -921,7 +929,9 @@ public final class JsonReader implements Closeable {
                     case '\r':
                     case '\n':
                         pos--;
-                        if (builder == null) {
+                        if (skipping) {
+                            return "skipped!";
+                        } else if (builder == null) {
                             return new String(buffer, start, pos - start);
                         } else {
                             builder.append(buffer, start, pos - start);
