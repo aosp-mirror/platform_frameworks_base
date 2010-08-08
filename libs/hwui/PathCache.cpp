@@ -34,6 +34,10 @@ PathCache::PathCache(uint32_t maxByteSize):
         mCache(GenerationCache<PathCacheEntry, PathTexture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(maxByteSize) {
     mCache.setOnEntryRemovedListener(this);
+
+    GLint maxTextureSize;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+    mMaxTextureSize = maxTextureSize;
 }
 
 PathCache::~PathCache() {
@@ -94,9 +98,18 @@ PathTexture* PathCache::get(SkPath* path, SkPaint* paint) {
 PathTexture* PathCache::addTexture(const PathCacheEntry& entry,
         const SkPath *path, const SkPaint* paint) {
     const SkRect& bounds = path->getBounds();
+
+    const float pathWidth = bounds.width();
+    const float pathHeight = bounds.height();
+
+    if (pathWidth > mMaxTextureSize || pathHeight > mMaxTextureSize) {
+        LOGW("Path too large to be rendered into a texture");
+        return NULL;
+    }
+
     const float offset = entry.strokeWidth * 1.5f;
-    const uint32_t width = uint32_t(bounds.width() + offset * 2.0 + 0.5);
-    const uint32_t height = uint32_t(bounds.height() + offset * 2.0 + 0.5);
+    const uint32_t width = uint32_t(pathWidth + offset * 2.0 + 0.5);
+    const uint32_t height = uint32_t(pathHeight + offset * 2.0 + 0.5);
 
     const uint32_t size = width * height;
     // Don't even try to cache a bitmap that's bigger than the cache

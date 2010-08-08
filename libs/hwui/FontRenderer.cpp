@@ -292,6 +292,9 @@ FontRenderer::FontRenderer() {
     mCurrentQuadIndex = 0;
     mTextureId = 0;
 
+    mTextMeshPtr = NULL;
+    mTextTexture = NULL;
+
     mIndexBufferID = 0;
 
     mCacheWidth = DEFAULT_TEXT_CACHE_WIDTH;
@@ -319,10 +322,12 @@ FontRenderer::~FontRenderer() {
     }
     mCacheLines.clear();
 
-    delete[] mTextMeshPtr;
-    delete[] mTextTexture;
+    if (mInitialized) {
+        delete[] mTextMeshPtr;
+        delete[] mTextTexture;
+    }
 
-    if(mTextureId) {
+    if (mTextureId) {
         glDeleteTextures(1, &mTextureId);
     }
 

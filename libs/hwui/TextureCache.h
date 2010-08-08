@@ -82,6 +82,7 @@ private:
 
     uint32_t mSize;
     uint32_t mMaxSize;
+    GLuint mMaxTextureSize;
 }; // class TextureCache
 
 }; // namespace uirenderer

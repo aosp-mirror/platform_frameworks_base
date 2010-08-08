@@ -31,6 +31,11 @@ TextureCache::TextureCache(uint32_t maxByteSize):
         mCache(GenerationCache<SkBitmap*, Texture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(maxByteSize) {
     mCache.setOnEntryRemovedListener(this);
+
+    GLint maxTextureSize;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+    LOGD("Maximum texture dimension is %d pixels", maxTextureSize);
+    mMaxTextureSize = maxTextureSize;
 }
 
 TextureCache::~TextureCache() {
@@ -79,6 +84,11 @@ void TextureCache::operator()(SkBitmap*& bitmap, Texture*& texture) {
 Texture* TextureCache::get(SkBitmap* bitmap) {
     Texture* texture = mCache.get(bitmap);
     if (!texture) {
+        if (bitmap->width() > mMaxTextureSize || bitmap->height() > mMaxTextureSize) {
+            LOGW("Bitmap too large to be uploaded into a texture");
+            return NULL;
+        }
+
         const uint32_t size = bitmap->rowBytes() * bitmap->height();
         // Don't even try to cache a bitmap that's bigger than the cache
         if (size < mMaxSize) {
