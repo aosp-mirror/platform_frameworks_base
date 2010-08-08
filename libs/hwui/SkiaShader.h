@@ -116,6 +116,7 @@ private:
     }
 
     SkBitmap* mBitmap;
+    const Texture* mTexture;
 }; // struct SkiaBitmapShader
 
 /**

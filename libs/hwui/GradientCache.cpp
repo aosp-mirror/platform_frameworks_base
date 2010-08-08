@@ -80,8 +80,7 @@ void GradientCache::operator()(SkShader*& shader, Texture*& texture) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Texture* GradientCache::get(SkShader* shader) {
-    Texture* texture = mCache.get(shader);
-    return texture;
+    return mCache.get(shader);
 }
 
 void GradientCache::remove(SkShader* shader) {

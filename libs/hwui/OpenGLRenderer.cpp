@@ -436,6 +436,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, const S
     }
 
     const Texture* texture = mTextureCache.get(bitmap);
+    if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
     drawTextureRect(left, top, right, bottom, texture, paint);
@@ -451,6 +452,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix, const 
     }
 
     const Texture* texture = mTextureCache.get(bitmap);
+    if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
     drawTextureRect(r.left, r.top, r.right, r.bottom, texture, paint);
@@ -465,6 +467,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     }
 
     const Texture* texture = mTextureCache.get(bitmap);
+    if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
     const float width = texture->width;
@@ -489,6 +492,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
     }
 
     const Texture* texture = mTextureCache.get(bitmap);
+    if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
     int alpha;
@@ -617,6 +621,7 @@ void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
     glActiveTexture(gTextureUnits[textureUnit]);
 
     const PathTexture* texture = mPathCache.get(path, paint);
+    if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
     int alpha;

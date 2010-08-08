@@ -75,11 +75,13 @@ void SkiaShader::bindTexture(GLuint texture, GLenum wrapS, GLenum wrapT, GLuint 
 
 SkiaBitmapShader::SkiaBitmapShader(SkBitmap* bitmap, SkShader* key, SkShader::TileMode tileX,
         SkShader::TileMode tileY, SkMatrix* matrix, bool blend):
-        SkiaShader(kBitmap, key, tileX, tileY, matrix, blend), mBitmap(bitmap) {
+        SkiaShader(kBitmap, key, tileX, tileY, matrix, blend), mBitmap(bitmap), mTexture(NULL) {
 }
 
 void SkiaBitmapShader::describe(ProgramDescription& description, const Extensions& extensions) {
     const Texture* texture = mTextureCache->get(mBitmap);
+    if (!texture) return;
+    mTexture = texture;
 
     const float width = texture->width;
     const float height = texture->height;
@@ -98,7 +100,11 @@ void SkiaBitmapShader::setupProgram(Program* program, const mat4& modelView,
         const Snapshot& snapshot, GLuint* textureUnit) {
     GLuint textureSlot = (*textureUnit)++;
     glActiveTexture(gTextureUnitsMap[textureSlot]);
-    const Texture* texture = mTextureCache->get(mBitmap);
+
+    const Texture* texture = mTexture;
+    mTexture = NULL;
+    if (!texture) return;
+    const AutoTexture autoCleanup(texture);
 
     const float width = texture->width;
     const float height = texture->height;
