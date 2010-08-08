@@ -337,14 +337,18 @@ status_t AVCEncoder::read(
 
     MediaBuffer *outputBuffer;
     CHECK_EQ(OK, mGroup->acquire_buffer(&outputBuffer));
-    uint8_t *outPtr = (uint8_t *) outputBuffer->data();
-    uint32_t dataLength = outputBuffer->size();
+
+    // Add 4 bytes for the start code 0x00000001
+    uint8_t *outPtr = (uint8_t *) outputBuffer->data() + 4;
+    uint32_t dataLength = outputBuffer->size() - 4;
 
     int32_t type;
     AVCEnc_Status encoderStatus = AVCENC_SUCCESS;
 
-    // Return SPS and PPS for the first two buffers
-    if (!mSpsPpsHeaderReceived) {
+    // Combine SPS and PPS and place them in the very first output buffer
+    // SPS and PPS are separated by start code 0x00000001
+    // Assume that we have exactly one SPS and exactly one PPS.
+    while (!mSpsPpsHeaderReceived && mNumInputFrames <= 0) {
         encoderStatus = PVAVCEncodeNAL(mHandle, outPtr, &dataLength, &type);
         if (encoderStatus == AVCENC_WRONG_STATE) {
             mSpsPpsHeaderReceived = true;
@@ -352,11 +356,22 @@ status_t AVCEncoder::read(
         } else {
             switch (type) {
                 case AVC_NALTYPE_SPS:
-                case AVC_NALTYPE_PPS:
-                    LOGV("%s received",
-                            (type == AVC_NALTYPE_SPS)? "SPS": "PPS");
                     ++mNumInputFrames;
-                    outputBuffer->set_range(0, dataLength);
+                    memcpy(outputBuffer->data(), "\x00\x00\x00\x01", 4);
+                    outputBuffer->set_range(0, dataLength + 4);
+                    outPtr += (dataLength + 4);  // 4 bytes for next start code
+                    dataLength = outputBuffer->size() -
+                            (outputBuffer->range_length() + 4);
+                    break;
+                case AVC_NALTYPE_PPS:
+                    ++mNumInputFrames;
+                    memcpy(((uint8_t *) outputBuffer->data()) +
+                            outputBuffer->range_length(),
+                            "\x00\x00\x00\x01", 4);
+                    outputBuffer->set_range(0,
+                            dataLength + outputBuffer->range_length() + 4);
+                    outputBuffer->meta_data()->setInt32(kKeyIsCodecConfig, 1);
+                    outputBuffer->meta_data()->setInt64(kKeyTime, 0);
                     *out = outputBuffer;
                     return OK;
                 default:
