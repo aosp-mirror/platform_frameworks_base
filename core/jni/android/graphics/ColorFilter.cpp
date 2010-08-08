@@ -36,40 +36,25 @@ public:
         obj->safeUnref();
     }
 
-    static SkColorFilter* CreatePorterDuffFilter(JNIEnv* env, jobject, jint srcColor,
-            SkPorterDuff::Mode mode) {
-        return SkColorFilter::CreateModeFilter(srcColor, SkPorterDuff::ToXfermodeMode(mode));
-    }
- 
     static SkiaColorFilter* glCreatePorterDuffFilter(JNIEnv* env, jobject, jint srcColor,
             SkPorterDuff::Mode mode) {
+#ifdef USE_OPENGL_RENDERER
         return new SkiaBlendFilter(srcColor, SkPorterDuff::ToXfermodeMode(mode));
-    }
-
-    static SkColorFilter* CreateLightingFilter(JNIEnv* env, jobject, jint mul, jint add) {
-        return SkColorFilter::CreateLightingFilter(mul, add);
-    }
-    
-    static SkiaColorFilter* glCreateLightingFilter(JNIEnv* env, jobject, jint mul, jint add) {
-        return new SkiaLightingFilter(mul, add);
-    }
-
-    static SkColorFilter* CreateColorMatrixFilter(JNIEnv* env, jobject, jfloatArray jarray) {
-        AutoJavaFloatArray autoArray(env, jarray, 20);
-        const float* src = autoArray.ptr();
-
-#ifdef SK_SCALAR_IS_FIXED
-        SkFixed array[20];
-        for (int i = 0; i < 20; i++) {
-            array[i] = SkFloatToScalar(src[i]);
-        }
-        return new SkColorMatrixFilter(array);
 #else
-        return new SkColorMatrixFilter(src);
+        return NULL;
+#endif
+    }
+
+    static SkiaColorFilter* glCreateLightingFilter(JNIEnv* env, jobject, jint mul, jint add) {
+#ifdef USE_OPENGL_RENDERER
+        return new SkiaLightingFilter(mul, add);
+#else
+        return NULL;
 #endif
     }
 
     static SkiaColorFilter* glCreateColorMatrixFilter(JNIEnv* env, jobject, jfloatArray jarray) {
+#ifdef USE_OPENGL_RENDERER
         AutoJavaFloatArray autoArray(env, jarray, 20);
         const float* src = autoArray.ptr();
 
@@ -86,6 +71,33 @@ public:
         colorVector[3] = src[19];
 
         return new SkiaColorMatrixFilter(colorMatrix, colorVector);
+#else
+        return NULL;
+#endif
+    }
+
+    static SkColorFilter* CreatePorterDuffFilter(JNIEnv* env, jobject, jint srcColor,
+            SkPorterDuff::Mode mode) {
+        return SkColorFilter::CreateModeFilter(srcColor, SkPorterDuff::ToXfermodeMode(mode));
+    }
+
+    static SkColorFilter* CreateLightingFilter(JNIEnv* env, jobject, jint mul, jint add) {
+        return SkColorFilter::CreateLightingFilter(mul, add);
+    }
+
+    static SkColorFilter* CreateColorMatrixFilter(JNIEnv* env, jobject, jfloatArray jarray) {
+        AutoJavaFloatArray autoArray(env, jarray, 20);
+        const float* src = autoArray.ptr();
+
+#ifdef SK_SCALAR_IS_FIXED
+        SkFixed array[20];
+        for (int i = 0; i < 20; i++) {
+            array[i] = SkFloatToScalar(src[i]);
+        }
+        return new SkColorMatrixFilter(array);
+#else
+        return new SkColorMatrixFilter(src);
+#endif
     }
 };
 

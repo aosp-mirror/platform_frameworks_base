@@ -41,6 +41,13 @@ namespace android {
 
 using namespace uirenderer;
 
+/**
+ * Note: OpenGLRenderer JNI layer is generated and compiled only on supported
+ *       devices. This means all the logic must be compiled only when the
+ *       preprocessor variable USE_OPENGL_RENDERER is defined.
+ */
+#ifdef USE_OPENGL_RENDERER
+
 // ----------------------------------------------------------------------------
 // Java APIs
 // ----------------------------------------------------------------------------
@@ -284,6 +291,20 @@ static void android_view_GLES20Canvas_drawText(JNIEnv* env, jobject canvas,
     env->ReleaseStringChars(text, textArray);
 }
 
+#endif // USE_OPENGL_RENDERER
+
+// ----------------------------------------------------------------------------
+// Common
+// ----------------------------------------------------------------------------
+
+static jboolean android_view_GLES20Canvas_isAvailable(JNIEnv* env, jobject clazz) {
+#ifdef USE_OPENGL_RENDERER
+    return JNI_TRUE;
+#else
+    return JNI_FALSE;
+#endif
+}
+
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
@@ -291,6 +312,9 @@ static void android_view_GLES20Canvas_drawText(JNIEnv* env, jobject canvas,
 const char* const kClassPathName = "android/view/GLES20Canvas";
 
 static JNINativeMethod gMethods[] = {
+    {   "nIsAvailable",       "()Z",             (void*) android_view_GLES20Canvas_isAvailable },
+#ifdef USE_OPENGL_RENDERER
+
     {   "nCreateRenderer",    "()I",             (void*) android_view_GLES20Canvas_createRenderer },
     {   "nDestroyRenderer",   "(I)V",            (void*) android_view_GLES20Canvas_destroyRenderer },
     {   "nSetViewport",       "(III)V",          (void*) android_view_GLES20Canvas_setViewport },
@@ -334,16 +358,22 @@ static JNINativeMethod gMethods[] = {
 
     {   "nGetClipBounds",     "(ILandroid/graphics/Rect;)Z",
             (void*) android_view_GLES20Canvas_getClipBounds },
+#endif
 };
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
-
-#define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
-        var = env->GetMethodID(clazz, methodName, methodDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find method " methodName);
+#ifdef USE_OPENGL_RENDERER
+    #define FIND_CLASS(var, className) \
+            var = env->FindClass(className); \
+            LOG_FATAL_IF(! var, "Unable to find class " className); \
+            var = jclass(env->NewGlobalRef(var));
+    
+    #define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
+            var = env->GetMethodID(clazz, methodName, methodDescriptor); \
+            LOG_FATAL_IF(! var, "Unable to find method " methodName);
+#else
+    #define FIND_CLASS(var, className)
+    #define GET_METHOD_ID(var, clazz, methodName, methodDescriptor)
+#endif
 
 int register_android_view_GLES20Canvas(JNIEnv* env) {
     FIND_CLASS(gRectClassInfo.clazz, "android/graphics/Rect");

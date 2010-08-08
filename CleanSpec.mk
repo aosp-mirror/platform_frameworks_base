@@ -68,6 +68,14 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/SHARED_LIBRARIES/libreverb_inte
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/SHARED_LIBRARIES/libreverbtest_intermediates)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/lib/soundfx/)
 $(call add-clean-step, find . -type f -name "*.rs" -print0 | xargs -0 touch)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/SHARED_LIBRARIES/libandroid_runtime_intermediates)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/lib/libandroid_runtime.so)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/symbols/system/lib/libandroid_runtime.so)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/lib/libandroid_runtime.so)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/SHARED_LIBRARIES/libhwui_intermediates)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/lib/libhwui.so)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/symbols/system/lib/libhwui.so)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/lib/libhwui.so)
 
 # ************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST

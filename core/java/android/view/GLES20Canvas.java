@@ -40,7 +40,6 @@ import javax.microedition.khronos.opengles.GL;
 /**
  * An implementation of Canvas on top of OpenGL ES 2.0.
  */
-@SuppressWarnings({"deprecation"})
 class GLES20Canvas extends Canvas {
     @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
     private final GL mGl;
@@ -56,6 +55,17 @@ class GLES20Canvas extends Canvas {
     private final Rect mClipBounds = new Rect();
 
     private DrawFilter mFilter;
+    
+    ///////////////////////////////////////////////////////////////////////////
+    // JNI
+    ///////////////////////////////////////////////////////////////////////////
+
+    private static native boolean nIsAvailable();
+    private static boolean sIsAvailable = nIsAvailable();
+
+    static boolean isAvailable() {
+        return sIsAvailable;
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Constructors
@@ -88,11 +98,6 @@ class GLES20Canvas extends Canvas {
     @Override
     public boolean isHardwareAccelerated() {
         return true;
-    }
-
-    @Override
-    public GL getGL() {
-        throw new UnsupportedOperationException();
     }
 
     @Override

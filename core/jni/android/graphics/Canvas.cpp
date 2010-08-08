@@ -20,7 +20,6 @@
 
 #include "SkCanvas.h"
 #include "SkDevice.h"
-#include "SkGLCanvas.h"
 #include "SkGraphics.h"
 #include "SkImageRef_GlobalPool.h"
 #include "SkPorterDuff.h"
@@ -67,13 +66,8 @@ public:
         return bitmap ? new SkCanvas(*bitmap) : new SkCanvas;
     }
     
-    static SkCanvas* initGL(JNIEnv* env, jobject) {
-        return new SkGLCanvas;
-    }
-    
     static void freeCaches(JNIEnv* env, jobject) {
         // these are called in no particular order
-        SkGLCanvas::DeleteAllTextures();
         SkImageRef_GlobalPool::SetRAMUsed(0);
         SkGraphics::SetFontCacheUsed(0);
     }
@@ -110,11 +104,6 @@ public:
         return canvas->getDevice()->accessBitmap(false).height();
     }
 
-    static void setViewport(JNIEnv* env, jobject, SkCanvas* canvas,
-                            int width, int height) {
-        canvas->setViewport(width, height);
-    }
-    
     static void setBitmap(JNIEnv* env, jobject, SkCanvas* canvas,
                           SkBitmap* bitmap) {
         canvas->setBitmapDevice(*bitmap);
@@ -880,12 +869,10 @@ public:
 static JNINativeMethod gCanvasMethods[] = {
     {"finalizer", "(I)V", (void*) SkCanvasGlue::finalizer},
     {"initRaster","(I)I", (void*) SkCanvasGlue::initRaster},
-    {"initGL","()I", (void*) SkCanvasGlue::initGL},
     {"isOpaque","()Z", (void*) SkCanvasGlue::isOpaque},
     {"getWidth","()I", (void*) SkCanvasGlue::getWidth},
     {"getHeight","()I", (void*) SkCanvasGlue::getHeight},
     {"native_setBitmap","(II)V", (void*) SkCanvasGlue::setBitmap},
-    {"nativeSetViewport", "(III)V", (void*) SkCanvasGlue::setViewport},
     {"save","()I", (void*) SkCanvasGlue::saveAll},
     {"save","(I)I", (void*) SkCanvasGlue::save},
     {"native_saveLayer","(ILandroid/graphics/RectF;II)I",

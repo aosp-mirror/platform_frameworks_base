@@ -19,6 +19,10 @@ ifneq ($(USE_CUSTOM_RUNTIME_HEAP_MAX),)
   LOCAL_CFLAGS += -DCUSTOM_RUNTIME_HEAP_MAX=$(USE_CUSTOM_RUNTIME_HEAP_MAX)
 endif
 
+ifeq ($(USE_OPENGL_RENDERER),true)
+	LOCAL_CFLAGS += -DUSE_OPENGL_RENDERER
+endif
+
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 
 LOCAL_SRC_FILES:= \
@@ -47,7 +51,6 @@ LOCAL_SRC_FILES:= \
 	android_view_InputChannel.cpp \
 	android_view_InputQueue.cpp \
 	android_view_KeyEvent.cpp \
-	android_view_HardwareRenderer.cpp \
 	android_view_GLES20Canvas.cpp \
 	android_view_MotionEvent.cpp \
 	android_text_AndroidCharacter.cpp \
@@ -170,7 +173,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libbinder \
 	libnetutils \
 	libui \
-	libhwui \
 	libgui \
 	libsurfaceflinger_client \
 	libcamera_client \
@@ -192,6 +194,10 @@ LOCAL_SHARED_LIBRARIES := \
 	libmedia \
 	libwpa_client \
 	libjpeg
+
+ifeq ($(USE_OPENGL_RENDERER),true)
+	LOCAL_SHARED_LIBRARIES += libhwui
+endif
 
 ifeq ($(BOARD_HAVE_BLUETOOTH),true)
 LOCAL_C_INCLUDES += \

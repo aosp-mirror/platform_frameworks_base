@@ -42,7 +42,6 @@ public class Canvas {
         for both to be null.
     */
     private Bitmap  mBitmap;    // if not null, mGL must be null
-    private GL      mGL;        // if not null, mBitmap must be null
     
     // optional field set by the caller
     private DrawFilter mDrawFilter;
@@ -106,31 +105,22 @@ public class Canvas {
         mDensity = bitmap.mDensity;
     }
     
-    /*package*/ Canvas(int nativeCanvas) {
+    Canvas(int nativeCanvas) {
         if (nativeCanvas == 0) {
             throw new IllegalStateException();
         }
         mNativeCanvas = nativeCanvas;
         mDensity = Bitmap.getDefaultDensity();
     }
-    
+
     /**
-     * Construct a canvas with the specified gl context. All drawing through
-     * this canvas will be redirected to OpenGL. Note: some features may not
-     * be supported in this mode (e.g. some GL implementations may not support
-     * antialiasing or certain effects like ColorMatrix or certain Xfermodes).
-     * However, no exception will be thrown in those cases.
+     * Returns null.
      * 
-     * <p>The initial target density of the canvas is the same as the initial
-     * density of bitmaps as per {@link Bitmap#getDensity() Bitmap.getDensity()}.
-     * 
-     * @deprecated This constructor is not supported and should not be invoked.
+     * @deprecated This method is not supported and should not be invoked.
      */
     @Deprecated
-    public Canvas(GL gl) {
-        mNativeCanvas = initGL();
-        mGL = gl;
-        mDensity = Bitmap.getDefaultDensity();
+    protected GL getGL() {
+        return null;
     }
 
     /**
@@ -143,32 +133,9 @@ public class Canvas {
      *         false otherwise.
      */
     public boolean isHardwareAccelerated() {
-        return mGL != null;
+        return false;
     }
-    
-    /**
-     * Return the GL object associated with this canvas, or null if it is not
-     * backed by GL.
-     * 
-     * @deprecated This method is not supported and should not be invoked.
-     */
-    @Deprecated
-    public GL getGL() {
-        return mGL;
-    }
-    
-    /**
-     * Call this to free up OpenGL resources that may be cached or allocated
-     * on behalf of the Canvas. Any subsequent drawing with a GL-backed Canvas
-     * will have to recreate those resources.
-     * 
-     * @deprecated This method is not supported and should not be invoked.
-     */
-    @Deprecated
-    public static void freeGlCaches() {
-        freeCaches();
-    }
-        
+
     /**
      * Specify a bitmap for the canvas to draw into.  As a side-effect, also
      * updates the canvas's target density to match that of the bitmap.
@@ -182,7 +149,7 @@ public class Canvas {
         if (!bitmap.isMutable()) {
             throw new IllegalStateException();
         }
-        if (mGL != null) {
+        if (isHardwareAccelerated()) {
             throw new RuntimeException("Can't set a bitmap device on a GL canvas");
         }
         throwIfRecycled(bitmap);
@@ -196,16 +163,12 @@ public class Canvas {
      * Set the viewport dimensions if this canvas is GL based. If it is not,
      * this method is ignored and no exception is thrown.
      *
-     *  @param width The width of the viewport
-     *  @param height The height of the viewport
+     * @param width The width of the viewport
+     * @param height The height of the viewport
      * 
-     * @deprecated This method is not supported and should not be invoked.
+     * @hide
      */
-    @Deprecated
     public void setViewport(int width, int height) {
-        if (mGL != null) {
-            nativeSetViewport(mNativeCanvas, width, height);
-        }
     }
 
     /**
@@ -1591,26 +1554,26 @@ public class Canvas {
     
     @Override
     protected void finalize() throws Throwable {
-        super.finalize();
-        // If the constructor threw an exception before setting mNativeCanvas, the native finalizer
-        // must not be invoked.
-        if (mNativeCanvas != 0) {
-            finalizer(mNativeCanvas);
+        try {
+            super.finalize();
+        } finally {
+            // If the constructor threw an exception before setting mNativeCanvas,
+            // the native finalizer must not be invoked.
+            if (mNativeCanvas != 0) {
+                finalizer(mNativeCanvas);
+            }
         }
     }
 
     /**
-     * Free up as much memory as possible from private caches (e.g. fonts,
-     * images)
+     * Free up as much memory as possible from private caches (e.g. fonts, images)
      *
-     * @hide - for now
+     * @hide
      */
     public static native void freeCaches();
 
     private static native int initRaster(int nativeBitmapOrZero);
-    private static native int initGL();
     private static native void native_setBitmap(int nativeCanvas, int bitmap);
-    private static native void nativeSetViewport(int nCanvas, int w, int h);
     private static native int native_saveLayer(int nativeCanvas, RectF bounds,
                                                int paint, int layerFlags);
     private static native int native_saveLayer(int nativeCanvas, float l,

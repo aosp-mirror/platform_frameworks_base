@@ -28,10 +28,6 @@ import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
-import javax.microedition.khronos.opengles.GL11;
-
-import static javax.microedition.khronos.opengles.GL10.GL_COLOR_BUFFER_BIT;
-import static javax.microedition.khronos.opengles.GL10.GL_SCISSOR_TEST;
 
 /**
  * Interface for rendering a ViewRoot using hardware acceleration.
@@ -110,10 +106,8 @@ abstract class HardwareRenderer {
      */
     static HardwareRenderer createGlRenderer(int glVersion, boolean translucent) {
         switch (glVersion) {
-            case 1:
-                return new Gl10Renderer(translucent);
             case 2:
-                return new Gl20Renderer(translucent);
+                return Gl20Renderer.create(translucent);
         }
         throw new IllegalArgumentException("Unknown GL version: " + glVersion);
     }
@@ -520,43 +514,13 @@ abstract class HardwareRenderer {
         @Override
         void onPreDraw() {
             mGlCanvas.onPreDraw();
-        }        
-    }
-
-    /**
-     * Hardware renderer using OpenGL ES 1.0.
-     */
-    @SuppressWarnings({"deprecation"})
-    static class Gl10Renderer extends GlRenderer {
-        Gl10Renderer(boolean translucent) {
-            super(1, translucent);
         }
 
-        @Override
-        Canvas createCanvas() {
-            return new Canvas(mGl);
-        }
-
-        @Override
-        void destroy() {
-            if (isEnabled()) {
-                nativeAbandonGlCaches();
+        static HardwareRenderer create(boolean translucent) {
+            if (GLES20Canvas.isAvailable()) {
+                return new Gl20Renderer(translucent);
             }
-
-            super.destroy();
-        }
-
-        @Override
-        void onPreDraw() {
-            GL11 gl = (GL11) mGl;
-            gl.glDisable(GL_SCISSOR_TEST);
-            gl.glClearColor(0, 0, 0, 0);
-            gl.glClear(GL_COLOR_BUFFER_BIT);
-            gl.glEnable(GL_SCISSOR_TEST);
+            return null;
         }
     }
-
-    // Inform Skia to just abandon its texture cache IDs doesn't call glDeleteTextures
-    // Used only by the native Skia OpenGL ES 1.x implementation
-    private static native void nativeAbandonGlCaches();
 }

@@ -32,10 +32,8 @@ TextureCache::TextureCache(uint32_t maxByteSize):
         mSize(0), mMaxSize(maxByteSize) {
     mCache.setOnEntryRemovedListener(this);
 
-    GLint maxTextureSize;
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-    LOGD("Maximum texture dimension is %d pixels", maxTextureSize);
-    mMaxTextureSize = maxTextureSize;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
+    LOGD("Maximum texture dimension is %d pixels", mMaxTextureSize);
 }
 
 TextureCache::~TextureCache() {

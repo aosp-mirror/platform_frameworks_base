@@ -71,7 +71,9 @@ static void Shader_setLocalMatrix(JNIEnv* env, jobject o, SkShader* shader, Skia
         else {
             shader->setLocalMatrix(*matrix);
         }
+#ifdef USE_OPENGL_RENDERER
         skiaShader->setMatrix(const_cast<SkMatrix*>(matrix));
+#endif
     }
 }
 
@@ -90,10 +92,14 @@ static SkShader* BitmapShader_constructor(JNIEnv* env, jobject o, const SkBitmap
 
 static SkiaShader* BitmapShader_postConstructor(JNIEnv* env, jobject o, SkShader* shader,
         SkBitmap* bitmap, int tileModeX, int tileModeY) {
+#ifdef USE_OPENGL_RENDERER
     SkiaShader* skiaShader = new SkiaBitmapShader(bitmap, shader,
             static_cast<SkShader::TileMode>(tileModeX), static_cast<SkShader::TileMode>(tileModeY),
             NULL, (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
     return skiaShader;
+#else
+    return NULL;
+#endif
 }
     
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -134,7 +140,7 @@ static SkShader* LinearGradient_create1(JNIEnv* env, jobject o,
 static SkiaShader* LinearGradient_postCreate1(JNIEnv* env, jobject o, SkShader* shader,
         float x0, float y0, float x1, float y1, jintArray colorArray,
         jfloatArray posArray, int tileMode) {
-
+#ifdef USE_OPENGL_RENDERER
     size_t count = env->GetArrayLength(colorArray);
     const jint* colorValues = env->GetIntArrayElements(colorArray, NULL);
 
@@ -162,10 +168,14 @@ static SkiaShader* LinearGradient_postCreate1(JNIEnv* env, jobject o, SkShader* 
 
     env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues), JNI_ABORT);
     return skiaShader;
+#else
+    return NULL;
+#endif
 }
 
 static SkiaShader* LinearGradient_postCreate2(JNIEnv* env, jobject o, SkShader* shader,
         float x0, float y0, float x1, float y1, int color0, int color1, int tileMode) {
+#ifdef USE_OPENGL_RENDERER
     float* storedBounds = new float[4];
     storedBounds[0] = x0; storedBounds[1] = y0;
     storedBounds[2] = x1; storedBounds[3] = y1;
@@ -183,6 +193,9 @@ static SkiaShader* LinearGradient_postCreate2(JNIEnv* env, jobject o, SkShader* 
             (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
 
     return skiaShader;
+#else
+    return NULL;
+#endif
 }
 
 static SkShader* LinearGradient_create2(JNIEnv* env, jobject o,
@@ -315,6 +328,7 @@ static SkShader* ComposeShader_create2(JNIEnv* env, jobject o,
 
 static SkiaShader* ComposeShader_postCreate2(JNIEnv* env, jobject o, SkShader* shader,
         SkiaShader* shaderA, SkiaShader* shaderB, SkPorterDuff::Mode porterDuffMode) {
+#ifdef USE_OPENGL_RENDERER
     SkAutoUnref au(SkPorterDuff::CreateXfermode(porterDuffMode));
     SkXfermode* mode = (SkXfermode*) au.get();
     SkXfermode::Mode skiaMode;
@@ -322,15 +336,22 @@ static SkiaShader* ComposeShader_postCreate2(JNIEnv* env, jobject o, SkShader* s
         skiaMode = SkXfermode::kSrcOver_Mode;
     }
     return new SkiaComposeShader(shaderA, shaderB, skiaMode, shader);
+#else
+    return NULL;
+#endif
 }
 
 static SkiaShader* ComposeShader_postCreate1(JNIEnv* env, jobject o, SkShader* shader,
         SkiaShader* shaderA, SkiaShader* shaderB, SkXfermode* mode) {
+#ifdef USE_OPENGL_RENDERER
     SkXfermode::Mode skiaMode;
     if (!SkXfermode::IsMode(mode, &skiaMode)) {
         skiaMode = SkXfermode::kSrcOver_Mode;
     }
     return new SkiaComposeShader(shaderA, shaderB, skiaMode, shader);
+#else
+    return NULL;
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
