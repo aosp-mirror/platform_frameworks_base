@@ -1203,4 +1203,18 @@ public class DatabaseUtils {
         }
         return STATEMENT_OTHER;
     }
+
+    /**
+     * Appends one set of selection args to another. This is useful when adding a selection
+     * argument to a user provided set.
+     */
+    public static String[] appendSelectionArgs(String[] originalValues, String[] newValues) {
+        if (originalValues == null || originalValues.length == 0) {
+            return newValues;
+        }
+        String[] result = new String[originalValues.length + newValues.length ];
+        System.arraycopy(originalValues, 0, result, 0, originalValues.length);
+        System.arraycopy(newValues, 0, result, originalValues.length, newValues.length);
+        return result;
+    }
 }

@@ -1568,7 +1568,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
             throw new UnsupportedOperationException(NOT_HIERARCHICAL);
         }
         if (key == null) {
-          throw new NullPointerException("key");
+            throw new NullPointerException("key");
         }
 
         final String query = getEncodedQuery();
@@ -1606,6 +1606,24 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
             }
         }
         return null;
+    }
+
+    /**
+     * Searches the query string for the first value with the given key and interprets it
+     * as a boolean value. "false" and "0" are interpreted as <code>false</code>, everything
+     * else is interpreted as <code>true</code>.
+     *
+     * @param key which will be decoded
+     * @param defaultValue the default value to return if there is no query parameter for key
+     * @return the boolean interpretation of the query parameter key
+     */
+    public boolean getBooleanQueryParameter(String key, boolean defaultValue) {
+        String flag = getQueryParameter(key);
+        if (flag == null) {
+            return defaultValue;
+        }
+        flag = flag.toLowerCase();
+        return (!"false".equals(flag) && !"0".equals(flag));
     }
 
     /** Identifies a null parcelled Uri. */
