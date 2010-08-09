@@ -24,8 +24,10 @@ import com.android.internal.widget.ActionBarView;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.view.ActionMode;
@@ -54,7 +56,9 @@ public class ActionBarImpl extends ActionBar {
     private static final int TAB_SWITCH_SHOW_HIDE = 0;
     private static final int TAB_SWITCH_ADD_REMOVE = 1;
 
+    private Context mContext;
     private Activity mActivity;
+    private Dialog mDialog;
 
     private ViewAnimator mAnimatorView;
     private ActionBarView mActionView;
@@ -88,8 +92,17 @@ public class ActionBarImpl extends ActionBar {
     };
 
     public ActionBarImpl(Activity activity) {
-        final View decor = activity.getWindow().getDecorView();
         mActivity = activity;
+        init(activity.getWindow().getDecorView());
+    }
+
+    public ActionBarImpl(Dialog dialog) {
+        mDialog = dialog;
+        init(dialog.getWindow().getDecorView());
+    }
+
+    private void init(View decor) {
+        mContext = decor.getContext();
         mActionView = (ActionBarView) decor.findViewById(com.android.internal.R.id.action_bar);
         mUpperContextView = (ActionBarContextView) decor.findViewById(
                 com.android.internal.R.id.action_context_bar);
@@ -109,23 +122,23 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void setStandardNavigationMode(int titleResId, int subtitleResId) {
-        setStandardNavigationMode(mActivity.getString(titleResId),
-                mActivity.getString(subtitleResId));
+        setStandardNavigationMode(mContext.getString(titleResId),
+                mContext.getString(subtitleResId));
     }
 
     @Override
     public void setStandardNavigationMode(int titleResId) {
-        setStandardNavigationMode(mActivity.getString(titleResId));
+        setStandardNavigationMode(mContext.getString(titleResId));
     }
 
     @Override
     public void setTitle(int resId) {
-        setTitle(mActivity.getString(resId));
+        setTitle(mContext.getString(resId));
     }
 
     @Override
     public void setSubtitle(int resId) {
-        setSubtitle(mActivity.getString(resId));
+        setSubtitle(mContext.getString(resId));
     }
 
     public void setCustomNavigationMode(View view) {
@@ -345,6 +358,10 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void setTabNavigationMode() {
+        if (mActivity == null) {
+            throw new IllegalStateException(
+                    "Tab navigation mode cannot be used outside of an Activity");
+        }
         mActionView.setNavigationMode(NAVIGATION_MODE_TABS);
     }
 
@@ -396,7 +413,7 @@ public class ActionBarImpl extends ActionBar {
 
         @Override
         public MenuInflater getMenuInflater() {
-            return new MenuInflater(mActivity);
+            return new MenuInflater(mContext);
         }
 
         @Override
@@ -485,7 +502,7 @@ public class ActionBarImpl extends ActionBar {
                 return true;
             }
 
-            new MenuPopupHelper(mActivity, subMenu).show();
+            new MenuPopupHelper(mContext, subMenu).show();
             return true;
         }
 
