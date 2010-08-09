@@ -167,6 +167,7 @@ public class Summarizer {
 
     /** TODO: Make it a setting */
     private static final String HTML_SUMMARY_RELATIVE_PATH = "summary.html";
+    private static final String TXT_SUMMARY_RELATIVE_PATH = "summary.txt";
 
     private int mCrashedTestsCount = 0;
     private List<AbstractResult> mFailedNotIgnoredTests = new ArrayList<AbstractResult>();
@@ -175,6 +176,8 @@ public class Summarizer {
 
     private FileFilter mFileFilter;
     private String mResultsRootDirPath;
+
+    private String mTitleString;
 
     public Summarizer(FileFilter fileFilter, String resultsRootDirPath) {
         mFileFilter = fileFilter;
@@ -198,6 +201,27 @@ public class Summarizer {
     }
 
     public void summarize() {
+        createHtmlSummary();
+        createTxtSummary();
+    }
+
+    private void createTxtSummary() {
+        StringBuilder txt = new StringBuilder();
+
+        txt.append(getTitleString() + "\n");
+        if (mCrashedTestsCount > 0) {
+            txt.append("CRASHED (total among all tests): " + mCrashedTestsCount + "\n");
+            txt.append("-------------");
+        }
+        txt.append("FAILED:  " + mFailedNotIgnoredTests.size() + "\n");
+        txt.append("IGNORED: " + mIgnoredTests.size() + "\n");
+        txt.append("PASSED:  " + mPassedNotIgnoredTests.size() + "\n");
+
+        FsUtils.writeDataToStorage(new File(mResultsRootDirPath, TXT_SUMMARY_RELATIVE_PATH),
+                txt.toString().getBytes(), false);
+    }
+
+    private void createHtmlSummary() {
         StringBuilder html = new StringBuilder();
 
         html.append("<html><head>");
@@ -219,13 +243,20 @@ public class Summarizer {
                 html.toString().getBytes(), false);
     }
 
+    private String getTitleString() {
+        if (mTitleString == null) {
+            int total = mFailedNotIgnoredTests.size() +
+                    mPassedNotIgnoredTests.size() +
+                    mIgnoredTests.size();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            mTitleString = " - total of " + total + " tests - " + dateFormat.format(new Date());
+        }
+
+        return mTitleString;
+    }
+
     private void createTopSummaryTable(StringBuilder html) {
-        int total = mFailedNotIgnoredTests.size() +
-                mPassedNotIgnoredTests.size() +
-                mIgnoredTests.size();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        html.append("<h1> - total of " + total + " tests - ");
-        html.append(dateFormat.format(new Date()) + "</h1>");
+        html.append("<h1>" + getTitleString() + "</h1>");
 
         html.append("<table class=\"summary\">");
         createSummaryTableRow(html, "CRASHED", mCrashedTestsCount);
