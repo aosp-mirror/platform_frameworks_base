@@ -43,6 +43,7 @@ private:
     sp<DataSource> mDataSource;
     status_t mInitCheck;
     bool mValidFormat;
+    uint16_t mWaveFormat;
     uint16_t mNumChannels;
     uint32_t mSampleRate;
     uint16_t mBitsPerSample;
