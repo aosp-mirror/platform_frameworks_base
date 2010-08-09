@@ -766,6 +766,25 @@ public class WifiService extends IWifiManager.Stub {
         mWifiStateMachine.clearBlacklist();
     }
 
+    public void connectNetworkWithId(int networkId) {
+        enforceChangePermission();
+        mWifiStateMachine.connectNetwork(networkId);
+    }
+
+    public void connectNetworkWithConfig(WifiConfiguration config) {
+        enforceChangePermission();
+        mWifiStateMachine.connectNetwork(config);
+    }
+
+    public void saveNetwork(WifiConfiguration config) {
+        enforceChangePermission();
+        mWifiStateMachine.saveNetwork(config);
+    }
+
+    public void forgetNetwork(int netId) {
+        enforceChangePermission();
+        mWifiStateMachine.forgetNetwork(netId);
+    }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
