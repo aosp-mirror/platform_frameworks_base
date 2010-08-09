@@ -16,7 +16,6 @@
 
 package com.android.internal.telephony.sip;
 
-import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneNotifier;
 
 import android.content.Context;
@@ -26,42 +25,25 @@ import android.util.Log;
 import java.text.ParseException;
 
 /**
- * @hide
+ * {@hide}
  */
 public class SipPhoneFactory {
-    private static PhoneNotifier sPhoneNotifier = makeDefaultPhoneNotifier();
-    private static Context sContext;
-
-    public static void makeDefaultPhones(Context context) {
-        makeDefaultPhone(context);
-    }
-
-    public static void makeDefaultPhone(Context context) {
-        sContext = context;
-        SipPhoneProxy.getInstance().setPhone(
-                makePhone("sip:anonymous@localhost"));
-    }
-
-    public static Phone getDefaultPhone() {
-       return SipPhoneProxy.getInstance();
-    }
-
-    public static SipPhone makePhone(String sipProfileUri) {
+    /**
+     * Makes a {@link SipPhone} object.
+     * @param sipUri the local SIP URI the phone runs on
+     * @param context {@code Context} needed to create a Phone object
+     * @param phoneNotifier {@code PhoneNotifier} needed to create a Phone
+     *      object
+     * @return the {@code SipPhone} object or null if the SIP URI is not valid
+     */
+    public static SipPhone makePhone(String sipUri, Context context,
+            PhoneNotifier phoneNotifier) {
         try {
-            SipProfile profile = new SipProfile.Builder(sipProfileUri).build();
-            return new SipPhone(sContext, sPhoneNotifier, profile);
+            SipProfile profile = new SipProfile.Builder(sipUri).build();
+            return new SipPhone(context, phoneNotifier, profile);
         } catch (ParseException e) {
-            Log.v("SipPhoneProxy", "setPhone", e);
+            Log.w("SipPhoneProxy", "setPhone", e);
             return null;
-        }
-    }
-
-    private static PhoneNotifier makeDefaultPhoneNotifier() {
-        try {
-            return new com.android.internal.telephony.SipPhoneNotifier();
-        } catch (Error e) {
-            Log.e("SipPhoneProxy", "makeDefaultPhoneNotifier", e);
-            throw e;
         }
     }
 }
