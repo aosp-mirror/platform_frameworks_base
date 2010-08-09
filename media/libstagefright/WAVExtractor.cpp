@@ -31,7 +31,11 @@
 
 namespace android {
 
-static uint16_t WAVE_FORMAT_PCM = 1;
+enum {
+    WAVE_FORMAT_PCM = 1,
+    WAVE_FORMAT_ALAW = 6,
+    WAVE_FORMAT_MULAW = 7,
+};
 
 static uint32_t U32_LE_AT(const uint8_t *ptr) {
     return ptr[3] << 24 | ptr[2] << 16 | ptr[1] << 8 | ptr[0];
@@ -45,6 +49,7 @@ struct WAVSource : public MediaSource {
     WAVSource(
             const sp<DataSource> &dataSource,
             const sp<MetaData> &meta,
+            uint16_t waveFormat,
             int32_t bitsPerSample,
             off_t offset, size_t size);
 
@@ -63,6 +68,7 @@ private:
 
     sp<DataSource> mDataSource;
     sp<MetaData> mMeta;
+    uint16_t mWaveFormat;
     int32_t mSampleRate;
     int32_t mNumChannels;
     int32_t mBitsPerSample;
@@ -108,7 +114,7 @@ sp<MediaSource> WAVExtractor::getTrack(size_t index) {
 
     return new WAVSource(
             mDataSource, mTrackMeta,
-            mBitsPerSample, mDataOffset, mDataSize);
+            mWaveFormat, mBitsPerSample, mDataOffset, mDataSize);
 }
 
 sp<MetaData> WAVExtractor::getTrackMetaData(
@@ -160,8 +166,10 @@ status_t WAVExtractor::init() {
                 return NO_INIT;
             }
 
-            uint16_t format = U16_LE_AT(formatSpec);
-            if (format != WAVE_FORMAT_PCM) {
+            mWaveFormat = U16_LE_AT(formatSpec);
+            if (mWaveFormat != WAVE_FORMAT_PCM
+                    && mWaveFormat != WAVE_FORMAT_ALAW
+                    && mWaveFormat != WAVE_FORMAT_MULAW) {
                 return ERROR_UNSUPPORTED;
             }
 
@@ -178,9 +186,17 @@ status_t WAVExtractor::init() {
 
             mBitsPerSample = U16_LE_AT(&formatSpec[14]);
 
-            if (mBitsPerSample != 8 && mBitsPerSample != 16
-                && mBitsPerSample != 24) {
-                return ERROR_UNSUPPORTED;
+            if (mWaveFormat == WAVE_FORMAT_PCM) {
+                if (mBitsPerSample != 8 && mBitsPerSample != 16
+                    && mBitsPerSample != 24) {
+                    return ERROR_UNSUPPORTED;
+                }
+            } else {
+                CHECK(mWaveFormat == WAVE_FORMAT_MULAW
+                        || mWaveFormat == WAVE_FORMAT_ALAW);
+                if (mBitsPerSample != 8) {
+                    return ERROR_UNSUPPORTED;
+                }
             }
 
             mValidFormat = true;
@@ -190,7 +206,23 @@ status_t WAVExtractor::init() {
                 mDataSize = chunkSize;
 
                 mTrackMeta = new MetaData;
-                mTrackMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
+
+                switch (mWaveFormat) {
+                    case WAVE_FORMAT_PCM:
+                        mTrackMeta->setCString(
+                                kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
+                        break;
+                    case WAVE_FORMAT_ALAW:
+                        mTrackMeta->setCString(
+                                kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_G711_ALAW);
+                        break;
+                    default:
+                        CHECK_EQ(mWaveFormat, WAVE_FORMAT_MULAW);
+                        mTrackMeta->setCString(
+                                kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_G711_MLAW);
+                        break;
+                }
+
                 mTrackMeta->setInt32(kKeyChannelCount, mNumChannels);
                 mTrackMeta->setInt32(kKeySampleRate, mSampleRate);
 
@@ -217,10 +249,12 @@ const size_t WAVSource::kMaxFrameSize = 32768;
 WAVSource::WAVSource(
         const sp<DataSource> &dataSource,
         const sp<MetaData> &meta,
+        uint16_t waveFormat,
         int32_t bitsPerSample,
         off_t offset, size_t size)
     : mDataSource(dataSource),
       mMeta(meta),
+      mWaveFormat(waveFormat),
       mSampleRate(0),
       mNumChannels(0),
       mBitsPerSample(bitsPerSample),
@@ -312,43 +346,45 @@ status_t WAVSource::read(
 
     buffer->set_range(0, n);
 
-    if (mBitsPerSample == 8) {
-        // Convert 8-bit unsigned samples to 16-bit signed.
+    if (mWaveFormat == WAVE_FORMAT_PCM) {
+        if (mBitsPerSample == 8) {
+            // Convert 8-bit unsigned samples to 16-bit signed.
 
-        MediaBuffer *tmp;
-        CHECK_EQ(mGroup->acquire_buffer(&tmp), OK);
+            MediaBuffer *tmp;
+            CHECK_EQ(mGroup->acquire_buffer(&tmp), OK);
 
-        // The new buffer holds the sample number of samples, but each
-        // one is 2 bytes wide.
-        tmp->set_range(0, 2 * n);
+            // The new buffer holds the sample number of samples, but each
+            // one is 2 bytes wide.
+            tmp->set_range(0, 2 * n);
 
-        int16_t *dst = (int16_t *)tmp->data();
-        const uint8_t *src = (const uint8_t *)buffer->data();
-        while (n-- > 0) {
-            *dst++ = ((int16_t)(*src) - 128) * 256;
-            ++src;
+            int16_t *dst = (int16_t *)tmp->data();
+            const uint8_t *src = (const uint8_t *)buffer->data();
+            while (n-- > 0) {
+                *dst++ = ((int16_t)(*src) - 128) * 256;
+                ++src;
+            }
+
+            buffer->release();
+            buffer = tmp;
+        } else if (mBitsPerSample == 24) {
+            // Convert 24-bit signed samples to 16-bit signed.
+
+            const uint8_t *src =
+                (const uint8_t *)buffer->data() + buffer->range_offset();
+            int16_t *dst = (int16_t *)src;
+
+            size_t numSamples = buffer->range_length() / 3;
+            for (size_t i = 0; i < numSamples; ++i) {
+                int32_t x = (int32_t)(src[0] | src[1] << 8 | src[2] << 16);
+                x = (x << 8) >> 8;  // sign extension
+
+                x = x >> 8;
+                *dst++ = (int16_t)x;
+                src += 3;
+            }
+
+            buffer->set_range(buffer->range_offset(), 2 * numSamples);
         }
-
-        buffer->release();
-        buffer = tmp;
-    } else if (mBitsPerSample == 24) {
-        // Convert 24-bit signed samples to 16-bit signed.
-
-        const uint8_t *src =
-            (const uint8_t *)buffer->data() + buffer->range_offset();
-        int16_t *dst = (int16_t *)src;
-
-        size_t numSamples = buffer->range_length() / 3;
-        for (size_t i = 0; i < numSamples; ++i) {
-            int32_t x = (int32_t)(src[0] | src[1] << 8 | src[2] << 16);
-            x = (x << 8) >> 8;  // sign extension
-
-            x = x >> 8;
-            *dst++ = (int16_t)x;
-            src += 3;
-        }
-
-        buffer->set_range(buffer->range_offset(), 2 * numSamples);
     }
 
     size_t bytesPerSample = mBitsPerSample >> 3;
