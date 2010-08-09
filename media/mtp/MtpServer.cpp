@@ -268,7 +268,7 @@ void MtpServer::sendObjectRemoved(MtpObjectHandle handle) {
 }
 
 void MtpServer::initObjectProperties() {
-    mObjectProperties.push(new MtpProperty(MTP_PROPERTY_STORAGE_ID, MTP_TYPE_UINT16));
+    mObjectProperties.push(new MtpProperty(MTP_PROPERTY_STORAGE_ID, MTP_TYPE_UINT32));
     mObjectProperties.push(new MtpProperty(MTP_PROPERTY_OBJECT_FORMAT, MTP_TYPE_UINT16));
     mObjectProperties.push(new MtpProperty(MTP_PROPERTY_OBJECT_SIZE, MTP_TYPE_UINT64));
     mObjectProperties.push(new MtpProperty(MTP_PROPERTY_OBJECT_FILE_NAME, MTP_TYPE_STR));

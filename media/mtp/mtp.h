@@ -465,8 +465,8 @@
 
 // Storage Access Capability
 #define MTP_STORAGE_READ_WRITE                      0x0000
-#define MTP_STORAGE_READ_ONLY_WITHOUT_DELETE        0x0000
-#define MTP_STORAGE_READ_ONLY_WITH_DELETE           0x0000
+#define MTP_STORAGE_READ_ONLY_WITHOUT_DELETE        0x0001
+#define MTP_STORAGE_READ_ONLY_WITH_DELETE           0x0002
 
 // Association Type
 #define MTP_ASSOCIATION_TYPE_UNDEFINED              0x0000

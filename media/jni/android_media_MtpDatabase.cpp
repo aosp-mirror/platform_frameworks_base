@@ -333,7 +333,7 @@ struct PropertyTableEntry {
 static const PropertyTableEntry   kPropertyTable[] = {
     {   MTP_PROPERTY_PARENT_OBJECT,     MTP_TYPE_UINT32 },
     {   MTP_PROPERTY_STORAGE_ID,        MTP_TYPE_UINT32 },
-    {   MTP_PROPERTY_OBJECT_FORMAT,     MTP_TYPE_UINT32 },
+    {   MTP_PROPERTY_OBJECT_FORMAT,     MTP_TYPE_UINT16 },
     {   MTP_PROPERTY_OBJECT_FILE_NAME,  MTP_TYPE_STR    },
     {   MTP_PROPERTY_OBJECT_SIZE,       MTP_TYPE_UINT64 },
     {   MTP_PROPERTY_DATE_MODIFIED,     MTP_TYPE_STR    },
