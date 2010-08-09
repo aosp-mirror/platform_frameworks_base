@@ -474,6 +474,7 @@ public final class BluetoothAdapter {
      * @return     true if the name was set, false otherwise
      */
     public boolean setName(String name) {
+        if (getState() != STATE_ON) return false;
         try {
             return mService.setName(name);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
@@ -493,6 +494,7 @@ public final class BluetoothAdapter {
      * @return scan mode
      */
     public int getScanMode() {
+        if (getState() != STATE_ON) return SCAN_MODE_NONE;
         try {
             return mService.getScanMode();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
@@ -524,6 +526,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     public boolean setScanMode(int mode, int duration) {
+        if (getState() != STATE_ON) return false;
         try {
             return mService.setScanMode(mode, duration);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
@@ -532,11 +535,13 @@ public final class BluetoothAdapter {
 
     /** @hide */
     public boolean setScanMode(int mode) {
+        if (getState() != STATE_ON) return false;
         return setScanMode(mode, 120);
     }
 
     /** @hide */
     public int getDiscoverableTimeout() {
+        if (getState() != STATE_ON) return -1;
         try {
             return mService.getDiscoverableTimeout();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
@@ -545,6 +550,7 @@ public final class BluetoothAdapter {
 
     /** @hide */
     public void setDiscoverableTimeout(int timeout) {
+        if (getState() != STATE_ON) return;
         try {
             mService.setDiscoverableTimeout(timeout);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
@@ -577,6 +583,7 @@ public final class BluetoothAdapter {
      * @return true on success, false on error
      */
     public boolean startDiscovery() {
+        if (getState() != STATE_ON) return false;
         try {
             return mService.startDiscovery();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
@@ -597,6 +604,7 @@ public final class BluetoothAdapter {
      * @return true on success, false on error
      */
     public boolean cancelDiscovery() {
+        if (getState() != STATE_ON) return false;
         try {
             mService.cancelDiscovery();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
@@ -619,6 +627,7 @@ public final class BluetoothAdapter {
      * @return true if discovering
      */
     public boolean isDiscovering() {
+        if (getState() != STATE_ON) return false;
         try {
             return mService.isDiscovering();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
@@ -633,6 +642,7 @@ public final class BluetoothAdapter {
      * @return unmodifiable set of {@link BluetoothDevice}, or null on error
      */
     public Set<BluetoothDevice> getBondedDevices() {
+        if (getState() != STATE_ON) return null;
         try {
             return toDeviceSet(mService.listBonds());
         } catch (RemoteException e) {Log.e(TAG, "", e);}
