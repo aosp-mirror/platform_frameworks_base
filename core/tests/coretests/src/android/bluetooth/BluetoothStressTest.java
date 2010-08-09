@@ -17,13 +17,11 @@
 package android.bluetooth;
 
 import android.app.Instrumentation;
-import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
 public class BluetoothStressTest extends InstrumentationTestCase {
@@ -161,7 +159,6 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         mContext.unregisterReceiver(mReceiver);
     }
 
-    @LargeTest
     public void testEnableDisable() {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -172,7 +169,6 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         }
     }
 
-    @LargeTest
     public void testDiscoverable() {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         enable(adapter);
@@ -186,7 +182,6 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         disable(adapter);
     }
 
-    @LargeTest
     public void testScan() {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         enable(adapter);
@@ -336,7 +331,7 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         mReceiver.resetFiredFlags();
 
         if (!adapter.isEnabled()) {
-            fail("undiscoverable(): bluetooth not enabled");
+            fail("undiscoverable() bluetooth not enabled");
         }
 
         int scanMode = adapter.getScanMode();
@@ -374,7 +369,7 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         mReceiver.resetFiredFlags();
 
         if (!adapter.isEnabled()) {
-            fail("startScan(): bluetooth not enabled");
+            fail("startScan() bluetooth not enabled");
         }
 
         if (adapter.isDiscovering()) {
@@ -404,7 +399,7 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         mReceiver.resetFiredFlags();
 
         if (!adapter.isEnabled()) {
-            fail("stopScan(): bluetooth not enabled");
+            fail("stopScan() bluetooth not enabled");
         }
 
         if (!adapter.isDiscovering()) {
