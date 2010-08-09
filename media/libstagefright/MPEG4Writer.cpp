@@ -38,6 +38,9 @@
 
 namespace android {
 
+static const uint8_t kNalUnitTypeSeqParamSet = 0x07;
+static const uint8_t kNalUnitTypePicParamSet = 0x08;
+
 class MPEG4Writer::Track {
 public:
     Track(MPEG4Writer *owner, const sp<MediaSource> &source);
@@ -111,6 +114,20 @@ private:
     };
     List<SttsTableEntry> mSttsTableEntries;
 
+    // Sequence parameter set or picture parameter set
+    struct AVCParamSet {
+        AVCParamSet(uint16_t length, const uint8_t *data)
+            : mLength(length), mData(data) {}
+
+        uint16_t mLength;
+        const uint8_t *mData;
+    };
+    List<AVCParamSet> mSeqParamSets;
+    List<AVCParamSet> mPicParamSets;
+    uint8_t mProfileIdc;
+    uint8_t mProfileCompatible;
+    uint8_t mLevelIdc;
+
     void *mCodecSpecificData;
     size_t mCodecSpecificDataSize;
     bool mGotAllCodecSpecificData;
@@ -124,7 +141,14 @@ private:
     static void *ThreadWrapper(void *me);
     void threadEntry();
 
+    const uint8_t *parseParamSet(
+        const uint8_t *data, size_t length, int type, size_t *paramSetLen);
+
     status_t makeAVCCodecSpecificData(
+            const uint8_t *data, size_t size);
+    status_t copyAVCCodecSpecificData(
+            const uint8_t *data, size_t size);
+    status_t parseAVCCodecSpecificData(
             const uint8_t *data, size_t size);
 
     // Track authoring progress status
@@ -1038,6 +1062,174 @@ static void hexdump(const void *_data, size_t size) {
     }
 }
 
+static void getNalUnitType(uint8_t byte, uint8_t* type) {
+    LOGV("getNalUnitType: %d", byte);
+
+    // nal_unit_type: 5-bit unsigned integer
+    *type = (byte & 0x1F);
+}
+
+static const uint8_t *findNextStartCode(
+        const uint8_t *data, size_t length) {
+
+    LOGV("findNextStartCode: %p %d", data, length);
+
+    size_t bytesLeft = length;
+    while (bytesLeft > 4  &&
+            memcmp("\x00\x00\x00\x01", &data[length - bytesLeft], 4)) {
+        --bytesLeft;
+    }
+    if (bytesLeft <= 4) {
+        bytesLeft = 0; // Last parameter set
+    }
+    return &data[length - bytesLeft];
+}
+
+const uint8_t *MPEG4Writer::Track::parseParamSet(
+        const uint8_t *data, size_t length, int type, size_t *paramSetLen) {
+
+    LOGV("parseParamSet");
+    CHECK(type == kNalUnitTypeSeqParamSet ||
+          type == kNalUnitTypePicParamSet);
+
+    const uint8_t *nextStartCode = findNextStartCode(data, length);
+    *paramSetLen = nextStartCode - data;
+    if (*paramSetLen == 0) {
+        LOGE("Param set is malformed, since its length is 0");
+        return NULL;
+    }
+
+    AVCParamSet paramSet(*paramSetLen, data);
+    if (type == kNalUnitTypeSeqParamSet) {
+        if (*paramSetLen < 4) {
+            LOGE("Seq parameter set malformed");
+            return NULL;
+        }
+        if (mSeqParamSets.empty()) {
+            mProfileIdc = data[1];
+            mProfileCompatible = data[2];
+            mLevelIdc = data[3];
+        } else {
+            if (mProfileIdc != data[1] ||
+                mProfileCompatible != data[2] ||
+                mLevelIdc != data[3]) {
+                LOGE("Inconsistent profile/level found in seq parameter sets");
+                return NULL;
+            }
+        }
+        mSeqParamSets.push_back(paramSet);
+    } else {
+        mPicParamSets.push_back(paramSet);
+    }
+    return nextStartCode;
+}
+
+status_t MPEG4Writer::Track::copyAVCCodecSpecificData(
+        const uint8_t *data, size_t size) {
+    LOGV("copyAVCCodecSpecificData");
+
+    // 2 bytes for each of the parameter set length field
+    // plus the 7 bytes for the header
+    if (size < 4 + 7) {
+        LOGE("Codec specific data length too short: %d", size);
+        return ERROR_MALFORMED;
+    }
+
+    mCodecSpecificDataSize = size;
+    mCodecSpecificData = malloc(size);
+    memcpy(mCodecSpecificData, data, size);
+    return OK;
+}
+
+status_t MPEG4Writer::Track::parseAVCCodecSpecificData(
+        const uint8_t *data, size_t size) {
+
+    LOGV("parseAVCCodecSpecificData");
+    // Data starts with a start code.
+    // SPS and PPS are separated with start codes.
+    // Also, SPS must come before PPS
+    uint8_t type = kNalUnitTypeSeqParamSet;
+    bool gotSps = false;
+    bool gotPps = false;
+    const uint8_t *tmp = data;
+    const uint8_t *nextStartCode = data;
+    size_t bytesLeft = size;
+    size_t paramSetLen = 0;
+    mCodecSpecificDataSize = 0;
+    while (bytesLeft > 4 && !memcmp("\x00\x00\x00\x01", tmp, 4)) {
+        getNalUnitType(*(tmp + 4), &type);
+        if (type == kNalUnitTypeSeqParamSet) {
+            if (gotPps) {
+                LOGE("SPS must come before PPS");
+                return ERROR_MALFORMED;
+            }
+            if (!gotSps) {
+                gotSps = true;
+            }
+            nextStartCode = parseParamSet(tmp + 4, bytesLeft - 4, type, &paramSetLen);
+        } else if (type == kNalUnitTypePicParamSet) {
+            if (!gotSps) {
+                LOGE("SPS must come before PPS");
+                return ERROR_MALFORMED;
+            }
+            if (!gotPps) {
+                gotPps = true;
+            }
+            nextStartCode = parseParamSet(tmp + 4, bytesLeft - 4, type, &paramSetLen);
+        } else {
+            LOGE("Only SPS and PPS Nal units are expected");
+            return ERROR_MALFORMED;
+        }
+
+        if (nextStartCode == NULL) {
+            return ERROR_MALFORMED;
+        }
+
+        // Move on to find the next parameter set
+        bytesLeft -= nextStartCode - tmp;
+        tmp = nextStartCode;
+        mCodecSpecificDataSize += (2 + paramSetLen);
+    }
+
+    {
+        // Check on the number of seq parameter sets
+        size_t nSeqParamSets = mSeqParamSets.size();
+        if (nSeqParamSets == 0) {
+            LOGE("Cound not find sequence parameter set");
+            return ERROR_MALFORMED;
+        }
+
+        if (nSeqParamSets > 0x1F) {
+            LOGE("Too many seq parameter sets (%d) found", nSeqParamSets);
+            return ERROR_MALFORMED;
+        }
+    }
+
+    {
+        // Check on the number of pic parameter sets
+        size_t nPicParamSets = mPicParamSets.size();
+        if (nPicParamSets == 0) {
+            LOGE("Cound not find picture parameter set");
+            return ERROR_MALFORMED;
+        }
+        if (nPicParamSets > 0xFF) {
+            LOGE("Too many pic parameter sets (%d) found", nPicParamSets);
+            return ERROR_MALFORMED;
+        }
+    }
+
+    {
+        // Check on the profiles
+        // These profiles requires additional parameter set extensions
+        if (mProfileIdc == 100 || mProfileIdc == 110 ||
+            mProfileIdc == 122 || mProfileIdc == 144) {
+            LOGE("Sorry, no support for profile_idc: %d!", mProfileIdc);
+            return BAD_VALUE;
+        }
+    }
+
+    return OK;
+}
 
 status_t MPEG4Writer::Track::makeAVCCodecSpecificData(
         const uint8_t *data, size_t size) {
@@ -1048,50 +1240,67 @@ status_t MPEG4Writer::Track::makeAVCCodecSpecificData(
         return ERROR_MALFORMED;
     }
 
-    if (size < 4 || memcmp("\x00\x00\x00\x01", data, 4)) {
-        LOGE("Must start with a start code");
+    if (size < 4) {
+        LOGE("Codec specific data length too short: %d", size);
         return ERROR_MALFORMED;
     }
 
-    size_t picParamOffset = 4;
-    while (picParamOffset + 3 < size
-            && memcmp("\x00\x00\x00\x01", &data[picParamOffset], 4)) {
-        ++picParamOffset;
+    // Data is in the form of AVCCodecSpecificData
+    if (memcmp("\x00\x00\x00\x01", data, 4)) {
+        return copyAVCCodecSpecificData(data, size);
     }
 
-    if (picParamOffset + 3 >= size) {
-        LOGE("Could not find start-code for pictureParameterSet");
+    if (parseAVCCodecSpecificData(data, size) != OK) {
         return ERROR_MALFORMED;
     }
 
-    size_t seqParamSetLength = picParamOffset - 4;
-    size_t picParamSetLength = size - picParamOffset - 4;
-
-    mCodecSpecificDataSize =
-        6 + 1 + seqParamSetLength + 2 + picParamSetLength + 2;
-
+    // ISO 14496-15: AVC file format
+    mCodecSpecificDataSize += 7;  // 7 more bytes in the header
     mCodecSpecificData = malloc(mCodecSpecificDataSize);
     uint8_t *header = (uint8_t *)mCodecSpecificData;
-    header[0] = 1;
-    header[1] = 0x42;  // profile
-    header[2] = 0x80;
-    header[3] = 0x1e;  // level
+    header[0] = 1;                     // version
+    header[1] = mProfileIdc;           // profile indication
+    header[2] = mProfileCompatible;    // profile compatibility
+    header[3] = mLevelIdc;
 
+    // 6-bit '111111' followed by 2-bit to lengthSizeMinuusOne
 #if USE_NALLEN_FOUR
     header[4] = 0xfc | 3;  // length size == 4 bytes
 #else
     header[4] = 0xfc | 1;  // length size == 2 bytes
 #endif
 
-    header[5] = 0xe0 | 1;
-    header[6] = seqParamSetLength >> 8;
-    header[7] = seqParamSetLength & 0xff;
-    memcpy(&header[8], &data[4], seqParamSetLength);
-    header += 8 + seqParamSetLength;
-    header[0] = 1;
-    header[1] = picParamSetLength >> 8;
-    header[2] = picParamSetLength & 0xff;
-    memcpy(&header[3], &data[picParamOffset + 4], picParamSetLength);
+    // 3-bit '111' followed by 5-bit numSequenceParameterSets
+    int nSequenceParamSets = mSeqParamSets.size();
+    header[5] = 0xe0 | nSequenceParamSets;
+    header += 6;
+    for (List<AVCParamSet>::iterator it = mSeqParamSets.begin();
+         it != mSeqParamSets.end(); ++it) {
+        // 16-bit sequence parameter set length
+        uint16_t seqParamSetLength = it->mLength;
+        header[0] = seqParamSetLength >> 8;
+        header[1] = seqParamSetLength & 0xff;
+
+        // SPS NAL unit (sequence parameter length bytes)
+        memcpy(&header[2], it->mData, seqParamSetLength);
+        header += (2 + seqParamSetLength);
+    }
+
+    // 8-bit nPictureParameterSets
+    int nPictureParamSets = mPicParamSets.size();
+    header[0] = nPictureParamSets;
+    header += 1;
+    for (List<AVCParamSet>::iterator it = mPicParamSets.begin();
+         it != mPicParamSets.end(); ++it) {
+        // 16-bit picture parameter set length
+        uint16_t picParamSetLength = it->mLength;
+        header[0] = picParamSetLength >> 8;
+        header[1] = picParamSetLength & 0xff;
+
+        // PPS Nal unit (picture parameter set length bytes)
+        memcpy(&header[2], it->mData, picParamSetLength);
+        header += (2 + picParamSetLength);
+    }
 
     return OK;
 }
