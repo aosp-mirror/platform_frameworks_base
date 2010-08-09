@@ -185,11 +185,14 @@ class LoaderManagerImpl implements LoaderManager {
         void stop() {
             if (DEBUG) Log.v(TAG, "  Stopping: " + this);
             mStarted = false;
-            if (mLoader != null && mListenerRegistered) {
-                // Let the loader know we're done with it
-                mListenerRegistered = false;
-                mLoader.unregisterListener(this);
-                mLoader.stopLoading();
+            if (!mRetaining) {
+                if (mLoader != null && mListenerRegistered) {
+                    // Let the loader know we're done with it
+                    mListenerRegistered = false;
+                    mLoader.unregisterListener(this);
+                    mLoader.stopLoading();
+                }
+                mData = null;
             }
         }
         
