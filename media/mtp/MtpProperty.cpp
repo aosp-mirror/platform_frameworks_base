@@ -31,6 +31,7 @@ MtpProperty::MtpProperty()
         mDefaultArrayValues(NULL),
         mCurrentArrayLength(0),
         mCurrentArrayValues(NULL),
+        mGroupCode(0),
         mFormFlag(kFormNone),
         mEnumLength(0),
         mEnumValues(NULL)
@@ -52,6 +53,7 @@ MtpProperty::MtpProperty(MtpPropertyCode propCode,
         mDefaultArrayValues(NULL),
         mCurrentArrayLength(0),
         mCurrentArrayValues(NULL),
+        mGroupCode(0),
         mFormFlag(kFormNone),
         mEnumLength(0),
         mEnumValues(NULL)
@@ -142,6 +144,7 @@ void MtpProperty::read(MtpDataPacket& packet, bool deviceProp) {
             if (deviceProp)
                 readValue(packet, mCurrentValue);
     }
+    mGroupCode = packet.getUInt32();
     mFormFlag = packet.getUInt8();
 
     if (mFormFlag == kFormRange) {
@@ -178,6 +181,7 @@ void MtpProperty::write(MtpDataPacket& packet) {
         default:
             writeValue(packet, mDefaultValue);
     }
+    packet.putUInt32(mGroupCode);
     packet.putUInt8(mFormFlag);
     if (mFormFlag == kFormRange) {
             writeValue(packet, mMinimumValue);
