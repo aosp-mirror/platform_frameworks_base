@@ -166,7 +166,7 @@ public class Summarizer {
             "</script>";
 
     /** TODO: Make it a setting */
-    private static final String HTML_SUMMARY_RELATIVE_PATH = "summary.html";
+    private static final String HTML_DETAILS_RELATIVE_PATH = "details.html";
     private static final String TXT_SUMMARY_RELATIVE_PATH = "summary.txt";
 
     private int mCrashedTestsCount = 0;
@@ -201,7 +201,7 @@ public class Summarizer {
     }
 
     public void summarize() {
-        createHtmlSummary();
+        createHtmlDetails();
         createTxtSummary();
     }
 
@@ -229,7 +229,7 @@ public class Summarizer {
                 txt.toString().getBytes(), false);
     }
 
-    private void createHtmlSummary() {
+    private void createHtmlDetails() {
         StringBuilder html = new StringBuilder();
 
         html.append("<html><head>");
@@ -247,7 +247,7 @@ public class Summarizer {
 
         html.append("</body></html>");
 
-        FsUtils.writeDataToStorage(new File(mResultsRootDirPath, HTML_SUMMARY_RELATIVE_PATH),
+        FsUtils.writeDataToStorage(new File(mResultsRootDirPath, HTML_DETAILS_RELATIVE_PATH),
                 html.toString().getBytes(), false);
     }
 

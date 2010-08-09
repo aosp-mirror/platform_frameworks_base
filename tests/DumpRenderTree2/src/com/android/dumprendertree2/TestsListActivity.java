@@ -24,6 +24,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.Window;
 
+import com.android.dumprendertree2.scriptsupport.OnEverythingFinishedCallback;
+
 import java.util.ArrayList;
 
 /**
@@ -56,6 +58,9 @@ public class TestsListActivity extends Activity {
 
     private ArrayList<String> mTestsList;
     private int mTotalTestCount;
+
+    private OnEverythingFinishedCallback mOnEverythingFinishedCallback;
+    private boolean mEverythingFinished;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,8 +115,19 @@ public class TestsListActivity extends Activity {
         }
     }
 
+    public void registerOnEverythingFinishedCallback(OnEverythingFinishedCallback callback) {
+        mOnEverythingFinishedCallback = callback;
+        if (mEverythingFinished) {
+            mOnEverythingFinishedCallback.onFinished();
+        }
+    }
+
     private void onEverythingFinishedIntent(Intent intent) {
         /** TODO: Show some kind of summary to the user */
+        mEverythingFinished = true;
+        if (mOnEverythingFinishedCallback != null) {
+            mOnEverythingFinishedCallback.onFinished();
+        }
     }
 
     @Override
