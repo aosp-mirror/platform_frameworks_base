@@ -42,6 +42,8 @@ public:
         kFormRange = 1,
         kFormEnum = 2,
     };
+
+    uint32_t            mGroupCode;
     uint8_t             mFormFlag;
 
     // for range form
