@@ -38,6 +38,10 @@ public class ManagerService extends Service {
 
     private static final String LOG_TAG = "ManagerService";
 
+    private static final int MSG_TEST_CRASHED = 0;
+
+    private static final int CRASH_TIMEOUT_MS = 20 * 1000;
+
     /** TODO: make it a setting */
     static final String TESTS_ROOT_DIR_PATH =
             Environment.getExternalStorageDirectory() +
@@ -67,11 +71,21 @@ public class ManagerService extends Service {
 
     static final int MSG_PROCESS_ACTUAL_RESULTS = 0;
     static final int MSG_ALL_TESTS_FINISHED = 1;
+    static final int MSG_FIRST_TEST = 2;
 
+    /**
+     * This handler is purely for IPC. It is used to create mMessenger
+     * that generates a binder returned in onBind method.
+     */
     private Handler mIncomingHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
+                case MSG_FIRST_TEST:
+                    Bundle bundle = msg.getData();
+                    ensureNextTestSetup(bundle.getString("firstTest"), bundle.getInt("index"));
+                    break;
+
                 case MSG_PROCESS_ACTUAL_RESULTS:
                     Log.d(LOG_TAG + ".mIncomingHandler", msg.getData().getString("relativePath"));
                     onActualResultsObtained(msg.getData());
@@ -86,8 +100,20 @@ public class ManagerService extends Service {
 
     private Messenger mMessenger = new Messenger(mIncomingHandler);
 
+    private Handler mCrashMessagesHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == MSG_TEST_CRASHED) {
+                onTestCrashed();
+            }
+        }
+    };
+
     private FileFilter mFileFilter;
     private Summarizer mSummarizer;
+
+    private String mCurrentlyRunningTest;
+    private int mCurrentlyRunningTestIndex;
 
     @Override
     public void onCreate() {
@@ -98,13 +124,54 @@ public class ManagerService extends Service {
     }
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_STICKY;
+    }
+
+    @Override
     public IBinder onBind(Intent intent) {
         return mMessenger.getBinder();
     }
 
     private void onActualResultsObtained(Bundle bundle) {
+        mCrashMessagesHandler.removeMessages(MSG_TEST_CRASHED);
+        ensureNextTestSetup(bundle.getString("nextTest"), bundle.getInt("testIndex") + 1);
+
         AbstractResult results =
                 AbstractResult.TestType.valueOf(bundle.getString("type")).createResult(bundle);
+
+        handleResults(results);
+    }
+
+    private void ensureNextTestSetup(String nextTest, int index) {
+        if (nextTest == null) {
+            return;
+        }
+
+        mCurrentlyRunningTest = nextTest;
+        mCurrentlyRunningTestIndex = index;
+        mCrashMessagesHandler.sendEmptyMessageDelayed(MSG_TEST_CRASHED, CRASH_TIMEOUT_MS);
+    }
+
+    /**
+     * This sends an intent to TestsListActivity to restart LayoutTestsExecutor.
+     * The more detailed description of the flow is in the comment of onNewIntent
+     * method in TestsListActivity.
+     */
+    private void onTestCrashed() {
+        handleResults(new CrashedDummyResult(mCurrentlyRunningTest));
+
+        Log.w(LOG_TAG + "::onTestCrashed", mCurrentlyRunningTest +
+                "(" + mCurrentlyRunningTestIndex + ")");
+
+        Intent intent = new Intent(this, TestsListActivity.class);
+        intent.setAction(Intent.ACTION_REBOOT);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.putExtra("crashedTestIndex", mCurrentlyRunningTestIndex);
+        startActivity(intent);
+    }
+
+    private void handleResults(AbstractResult results) {
         String relativePath = results.getRelativePath();
         results.setExpectedTextResult(getExpectedTextResult(relativePath));
         results.setExpectedImageResult(getExpectedImageResult(relativePath));
@@ -134,7 +201,8 @@ public class ManagerService extends Service {
             return;
         }
 
-        String resultPath = FileFilter.setPathEnding(testPath, "-actual." + IMAGE_RESULT_EXTENSION);
+        String resultPath = FileFilter.setPathEnding(testPath,
+                "-actual." + IMAGE_RESULT_EXTENSION);
         FsUtils.writeDataToStorage(new File(RESULTS_ROOT_DIR_PATH, resultPath),
                 actualImageResult, false);
     }

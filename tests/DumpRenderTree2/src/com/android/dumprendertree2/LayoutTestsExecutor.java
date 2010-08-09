@@ -82,6 +82,7 @@ public class LayoutTestsExecutor extends Activity {
 
     private static final int DEFAULT_TIME_OUT_MS = 15 * 1000;
 
+    /** A list of tests that remain to run since last crash */
     private List<String> mTestsList;
 
     /**
@@ -91,6 +92,7 @@ public class LayoutTestsExecutor extends Activity {
      */
     private int mCurrentTestIndex;
 
+    /** The total number of tests to run, doesn't reset after crash */
     private int mTotalTestCount;
 
     private WebView mCurrentWebView;
@@ -119,7 +121,7 @@ public class LayoutTestsExecutor extends Activity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mManagerServiceMessenger = new Messenger(service);
-            runNextTest();
+            startTests();
         }
 
         @Override
@@ -303,6 +305,26 @@ public class LayoutTestsExecutor extends Activity {
         webViewSettings.setXSSAuditorEnabled(false);
     }
 
+    private void startTests() {
+        try {
+            Message serviceMsg =
+                    Message.obtain(null, ManagerService.MSG_FIRST_TEST);
+
+            Bundle bundle = new Bundle();
+            if (!mTestsList.isEmpty()) {
+                bundle.putString("firstTest", mTestsList.get(0));
+                bundle.putInt("index", mCurrentTestIndex);
+            }
+
+            serviceMsg.setData(bundle);
+            mManagerServiceMessenger.send(serviceMsg);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG + "::startTests", e.getMessage());
+        }
+
+        runNextTest();
+    }
+
     private void runNextTest() {
         assert mCurrentState == CurrentState.IDLE : "mCurrentState = " + mCurrentState.name();
 
@@ -312,6 +334,8 @@ public class LayoutTestsExecutor extends Activity {
         }
 
         mCurrentTestRelativePath = mTestsList.remove(0);
+        Log.d(LOG_TAG + "::runNextTest", "Start: " + mCurrentTestRelativePath +
+                "(" + mCurrentTestIndex + ")");
         mCurrentTestUri =
                 Uri.fromFile(new File(TESTS_ROOT_DIR_PATH, mCurrentTestRelativePath)).toString();
 
@@ -385,6 +409,9 @@ public class LayoutTestsExecutor extends Activity {
             bundle.putInt("testIndex", mCurrentTestIndex);
             if (mCurrentTestTimedOut) {
                 bundle.putString("resultCode", AbstractResult.ResultCode.FAIL_TIMED_OUT.name());
+            }
+            if (!mTestsList.isEmpty()) {
+                bundle.putString("nextTest", mTestsList.get(0));
             }
 
             serviceMsg.setData(bundle);
