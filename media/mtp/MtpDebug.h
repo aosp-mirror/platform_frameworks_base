@@ -17,7 +17,7 @@
 #ifndef _MTP_DEBUG_H
 #define _MTP_DEBUG_H
 
-// #define LOG_NDEBUG 0
+#define LOG_NDEBUG 0
 #include <utils/Log.h>
 
 #include "MtpTypes.h"
@@ -27,6 +27,9 @@ namespace android {
 class MtpDebug {
 public:
     static const char* getOperationCodeName(MtpOperationCode code);
+    static const char* getFormatCodeName(MtpObjectFormat code);
+    static const char* getObjectPropCodeName(MtpPropertyCode code);
+    static const char* getDevicePropCodeName(MtpPropertyCode code);
 };
 
 }; // namespace android
