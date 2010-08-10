@@ -122,7 +122,7 @@ public class PopupWindow {
     private OnScrollChangedListener mOnScrollChangedListener =
         new OnScrollChangedListener() {
             public void onScrollChanged() {
-                View anchor = mAnchor.get();
+                View anchor = mAnchor != null ? mAnchor.get() : null;
                 if (anchor != null && mPopupView != null) {
                     WindowManager.LayoutParams p = (WindowManager.LayoutParams)
                             mPopupView.getLayoutParams();
