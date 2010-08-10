@@ -7862,6 +7862,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             } catch (RemoteException e) {
                                 // Ignore if process has died.
                             }
+                            notifyFocusChanged();
                         }
 
                         if (lastFocus != null) {
@@ -7871,7 +7872,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             } catch (RemoteException e) {
                                 // Ignore if process has died.
                             }
-                            notifyFocusChanged();
                         }
                     }
                 } break;
