@@ -149,10 +149,10 @@ void CameraSourceTimeLapse::threadTimeLapseEntry() {
             LOGV("threadTimeLapseEntry: taking picture");
             CHECK_EQ(OK, mCamera->takePicture());
             mCameraIdle = false;
-            sleep(mTimeBetweenTimeLapseFrameCaptureUs/1E6);
+            usleep(mTimeBetweenTimeLapseFrameCaptureUs);
         } else {
             LOGV("threadTimeLapseEntry: camera busy with old takePicture. Sleeping a little.");
-            sleep(.01);
+            usleep(1E4);
         }
     }
 }
