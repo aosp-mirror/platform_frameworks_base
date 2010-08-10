@@ -613,13 +613,13 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
     @Override
     public void setAdapter(Adapter adapter) {
+        if (mAdapter != null && mDataSetObserver != null) {
+            mAdapter.unregisterDataSetObserver(mDataSetObserver);
+        }
+
         mAdapter = adapter;
 
         if (mAdapter != null) {
-            if (mDataSetObserver != null) {
-                mAdapter.unregisterDataSetObserver(mDataSetObserver);
-            }
-
             mDataSetObserver = new AdapterDataSetObserver();
             mAdapter.registerDataSetObserver(mDataSetObserver);
         }
