@@ -132,9 +132,9 @@ public final class InputQueue {
             synchronized (sLock) {
                 FinishedCallback callback = sRecycleHead;
                 if (callback != null) {
-                    callback.mRecycleNext = null;
                     sRecycleHead = callback.mRecycleNext;
                     sRecycleCount -= 1;
+                    callback.mRecycleNext = null;
                 } else {
                     callback = new FinishedCallback();
                 }
