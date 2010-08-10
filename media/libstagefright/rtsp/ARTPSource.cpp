@@ -98,7 +98,7 @@ void ARTPSource::timeUpdate(uint32_t rtpTime, uint64_t ntpTime) {
     mNTPTime[mNumTimes] = ntpTime;
     mRTPTime[mNumTimes++] = rtpTime;
 
-    if (mNumTimes == 2) {
+    if (timeEstablished()) {
         for (List<sp<ABuffer> >::iterator it = mQueue.begin();
              it != mQueue.end(); ++it) {
             sp<AMessage> meta = (*it)->meta();
@@ -112,13 +112,6 @@ void ARTPSource::timeUpdate(uint32_t rtpTime, uint64_t ntpTime) {
 }
 
 bool ARTPSource::queuePacket(const sp<ABuffer> &buffer) {
-#if 1
-    if (mNumTimes != 2) {
-        // Drop incoming packets until we've established a time base.
-        return false;
-    }
-#endif
-
     uint32_t seqNum = (uint32_t)buffer->int32Data();
 
     if (mNumTimes == 2) {

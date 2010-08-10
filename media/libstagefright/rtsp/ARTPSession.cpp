@@ -40,7 +40,10 @@ status_t ARTPSession::setup(const sp<ASessionDescription> &desc) {
 
     mDesc = desc;
 
-    mRTPConn = new ARTPConnection;
+    mRTPConn = new ARTPConnection(
+            ARTPConnection::kFakeTimestamps
+                | ARTPConnection::kRegularlyRequestFIR);
+
     looper()->registerHandler(mRTPConn);
 
     for (size_t i = 1; i < mDesc->countTracks(); ++i) {

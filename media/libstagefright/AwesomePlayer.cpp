@@ -1019,6 +1019,12 @@ void AwesomePlayer::onVideoEvent() {
 
     int64_t latenessUs = nowUs - timeUs;
 
+    if (mRTPSession != NULL) {
+        // We'll completely ignore timestamps for gtalk videochat
+        // and we'll play incoming video as fast as we get it.
+        latenessUs = 0;
+    }
+
     if (latenessUs > 40000) {
         // We're more than 40ms late.
         LOGV("we're late by %lld us (%.2f secs)", latenessUs, latenessUs / 1E6);
