@@ -93,6 +93,7 @@ public class ManagerService extends Service {
                     break;
 
                 case MSG_ALL_TESTS_FINISHED:
+                    mSummarizer.setTestsRelativePath(mAllTestsRelativePath);
                     mSummarizer.summarize();
                     Intent intent = new Intent(ManagerService.this, TestsListActivity.class);
                     intent.setAction(Intent.ACTION_SHUTDOWN);
@@ -121,6 +122,8 @@ public class ManagerService extends Service {
     private String mCurrentlyRunningTest;
     private int mCurrentlyRunningTestIndex;
 
+    private String mAllTestsRelativePath;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -131,6 +134,8 @@ public class ManagerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        mAllTestsRelativePath = intent.getStringExtra("path");
+        assert mAllTestsRelativePath != null;
         return START_STICKY;
     }
 
