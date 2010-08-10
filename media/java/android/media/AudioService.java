@@ -239,6 +239,9 @@ public class AudioService extends IAudioService.Stub {
     //  independently change its priority)
     private final BroadcastReceiver mMediaButtonReceiver = new MediaButtonBroadcastReceiver();
 
+    // Used to alter media button redirection when the phone is ringing.
+    private boolean mIsRinging = false;
+
     // Devices currently connected
     private HashMap <Integer, String> mConnectedDevices = new HashMap <Integer, String>();
 
@@ -1956,11 +1959,16 @@ public class AudioService extends IAudioService.Stub {
 
     private final static Object mAudioFocusLock = new Object();
 
+    private final static Object mRingingLock = new Object();
+
     private PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
             if (state == TelephonyManager.CALL_STATE_RINGING) {
                 //Log.v(TAG, " CALL_STATE_RINGING");
+                synchronized(mRingingLock) {
+                    mIsRinging = true;
+                }
                 int ringVolume = AudioService.this.getStreamVolume(AudioManager.STREAM_RING);
                 if (ringVolume > 0) {
                     requestAudioFocus(AudioManager.STREAM_RING,
@@ -1970,12 +1978,18 @@ public class AudioService extends IAudioService.Stub {
                 }
             } else if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
                 //Log.v(TAG, " CALL_STATE_OFFHOOK");
+                synchronized(mRingingLock) {
+                    mIsRinging = false;
+                }
                 requestAudioFocus(AudioManager.STREAM_RING,
                         AudioManager.AUDIOFOCUS_GAIN_TRANSIENT,
                         null, null /* both allowed to be null only for this clientId */,
                         IN_VOICE_COMM_FOCUS_ID /*clientId*/);
             } else if (state == TelephonyManager.CALL_STATE_IDLE) {
                 //Log.v(TAG, " CALL_STATE_IDLE");
+                synchronized(mRingingLock) {
+                    mIsRinging = false;
+                }
                 abandonAudioFocus(null, IN_VOICE_COMM_FOCUS_ID);
             }
         }
@@ -2243,9 +2257,11 @@ public class AudioService extends IAudioService.Stub {
                 // if in a call or ringing, do not break the current phone app behavior
                 // TODO modify this to let the phone app specifically get the RC focus
                 //      add modify the phone app to take advantage of the new API
-                if ((getMode() == AudioSystem.MODE_IN_CALL) ||
-                        (getMode() == AudioSystem.MODE_RINGTONE)) {
-                    return;
+                synchronized(mRingingLock) {
+                    if (mIsRinging || (getMode() == AudioSystem.MODE_IN_CALL) ||
+                            (getMode() == AudioSystem.MODE_RINGTONE) ) {
+                        return;
+                    }
                 }
                 synchronized(mRCStack) {
                     if (!mRCStack.empty()) {
