@@ -68,9 +68,6 @@ public class SipManager {
 
     private ISipService mSipService;
 
-    // Will be removed once the SIP service is integrated into framework
-    private BinderHelper<ISipService> mBinderHelper;
-
     /**
      * Creates a manager instance and initializes the background SIP service.
      * Will be removed once the SIP service is integrated into framework.

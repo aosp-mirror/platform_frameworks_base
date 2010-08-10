@@ -74,8 +74,6 @@ public class SipPhone extends SipPhoneBase {
     private static final String LOG_TAG = "SipPhone";
     private static final boolean LOCAL_DEBUG = true;
 
-    //private List<SipConnection> connections = new ArrayList<SipConnection>();
-
     // A call that is ringing or (call) waiting
     private SipCall ringingCall = new SipCall();
     private SipCall foregroundCall = new SipCall();
