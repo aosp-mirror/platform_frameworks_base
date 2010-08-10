@@ -469,6 +469,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         screenOnOffFilt.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         mContext.registerReceiver(new ScreenOnOffReceiver(), screenOnOffFilt);
 
+        mStatusBar = statusBar;
+        mInputMethodData = IconData.makeIcon("ime", null, 0, 0, 0);
+        mInputMethodIcon = statusBar.addIcon(mInputMethodData, null);
+        statusBar.setIconVisibility(mInputMethodIcon, false);
+
         buildInputMethodListLocked(mMethodList, mMethodMap);
 
         final String enabledStr = Settings.Secure.getString(
@@ -509,11 +514,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         Settings.Secure.DEFAULT_INPUT_METHOD, defIm.getId());
             }
         }
-
-        mStatusBar = statusBar;
-        mInputMethodData = IconData.makeIcon("ime", null, 0, 0, 0);
-        mInputMethodIcon = statusBar.addIcon(mInputMethodData, null);
-        statusBar.setIconVisibility(mInputMethodIcon, false);
 
         mSettingsObserver = new SettingsObserver(mHandler);
         updateFromSettingsLocked();
