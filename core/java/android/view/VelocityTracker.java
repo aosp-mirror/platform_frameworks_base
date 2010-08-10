@@ -33,14 +33,15 @@ import android.util.PoolableManager;
  * and {@link #getXVelocity()}.
  */
 public final class VelocityTracker implements Poolable<VelocityTracker> {
-    static final String TAG = "VelocityTracker";
-    static final boolean DEBUG = false;
-    static final boolean localLOGV = DEBUG || Config.LOGV;
+    private static final String TAG = "VelocityTracker";
+    private static final boolean DEBUG = false;
+    private static final boolean localLOGV = DEBUG || Config.LOGV;
 
-    static final int NUM_PAST = 10;
-    static final int MAX_AGE_MILLISECONDS = 200;
+    private static final int NUM_PAST = 10;
+    private static final int MAX_AGE_MILLISECONDS = 200;
+    
+    private static final int POINTER_POOL_CAPACITY = 20;
 
-    static final VelocityTracker[] mPool = new VelocityTracker[1];
     private static final Pool<VelocityTracker> sPool = Pools.synchronizedPool(
             Pools.finitePool(new PoolableManager<VelocityTracker>() {
                 public VelocityTracker newInstance() {
@@ -48,16 +49,19 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
                 }
 
                 public void onAcquired(VelocityTracker element) {
-                    element.clear();
                 }
 
                 public void onReleased(VelocityTracker element) {
+                    element.clear();
                 }
             }, 2));
     
-    private static final int INITIAL_POINTERS = 5;
+    private static Pointer sRecycledPointerListHead;
+    private static int sRecycledPointerCount;
     
-    private static final class PointerData {
+    private static final class Pointer {
+        public Pointer next;
+        
         public int id;
         public float xVelocity;
         public float yVelocity;
@@ -65,11 +69,13 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
         public final float[] pastX = new float[NUM_PAST];
         public final float[] pastY = new float[NUM_PAST];
         public final long[] pastTime = new long[NUM_PAST]; // uses Long.MIN_VALUE as a sentinel
+        
+        public int generation;
     }
     
-    private PointerData[] mPointers = new PointerData[INITIAL_POINTERS];
-    private int mNumPointers;
+    private Pointer mPointerListHead; // sorted by id in increasing order
     private int mLastTouchIndex;
+    private int mGeneration;
 
     private VelocityTracker mNext;
 
@@ -115,7 +121,9 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      * Reset the velocity tracker back to its initial state.
      */
     public void clear() {
-        mNumPointers = 0;
+        releasePointerList(mPointerListHead);
+        
+        mPointerListHead = null;
         mLastTouchIndex = 0;
     }
     
@@ -134,56 +142,62 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
         final int lastTouchIndex = mLastTouchIndex;
         final int nextTouchIndex = (lastTouchIndex + 1) % NUM_PAST;
         final int finalTouchIndex = (nextTouchIndex + historySize) % NUM_PAST;
+        final int generation = mGeneration++;
         
-        if (pointerCount < mNumPointers) {
-            final PointerData[] pointers = mPointers;
-            int i = mNumPointers;
-            while (--i >= 0) {
-                final PointerData pointerData = pointers[i];
-                if (ev.findPointerIndex(pointerData.id) == -1) {
-                    // Pointer went up.
-                    // Shuffle pointers down to fill the hole.  Place the old pointer data at
-                    // the end so we can recycle it if more pointers are added later.
-                    mNumPointers -= 1;
-                    final int remaining = mNumPointers - i;
-                    if (remaining != 0) {
-                        System.arraycopy(pointers, i + 1, pointers, i, remaining);
-                        pointers[mNumPointers] = pointerData;
-                    }
-                }
-            }
-        }
-        
+        mLastTouchIndex = finalTouchIndex;
+
+        // Update pointer data.
+        Pointer previousPointer = null;
         for (int i = 0; i < pointerCount; i++){
             final int pointerId = ev.getPointerId(i);
-            PointerData pointerData = getPointerData(pointerId);
-            if (pointerData == null) {
-                // Pointer went down.
-                // Add a new entry.  Write a sentinel at the end of the pastTime trace so we
-                // will be able to tell where the trace started.
-                final PointerData[] oldPointers = mPointers;
-                final int newPointerIndex = mNumPointers;
-                if (newPointerIndex < oldPointers.length) {
-                    pointerData = oldPointers[newPointerIndex];
-                    if (pointerData == null) {
-                        pointerData = new PointerData();
-                        oldPointers[newPointerIndex] = pointerData;
-                    }
-                } else {
-                    final PointerData[] newPointers = new PointerData[newPointerIndex * 2];
-                    System.arraycopy(oldPointers, 0, newPointers, 0, newPointerIndex);
-                    mPointers = newPointers;
-                    pointerData = new PointerData();
-                    newPointers[newPointerIndex] = pointerData;
-                }
-                pointerData.id = pointerId;
-                pointerData.pastTime[lastTouchIndex] = Long.MIN_VALUE;
-                mNumPointers += 1;
+            
+            // Find the pointer data for this pointer id.
+            // This loop is optimized for the common case where pointer ids in the event
+            // are in sorted order.  However, we check for this case explicitly and
+            // perform a full linear scan from the start if needed.
+            Pointer nextPointer;
+            if (previousPointer == null || pointerId < previousPointer.id) {
+                previousPointer = null;
+                nextPointer = mPointerListHead;
+            } else {
+                nextPointer = previousPointer.next;
             }
             
-            final float[] pastX = pointerData.pastX;
-            final float[] pastY = pointerData.pastY;
-            final long[] pastTime = pointerData.pastTime;
+            final Pointer pointer;
+            for (;;) {
+                if (nextPointer != null) {
+                    final int nextPointerId = nextPointer.id;
+                    if (nextPointerId == pointerId) {
+                        pointer = nextPointer;
+                        break;
+                    }
+                    if (nextPointerId < pointerId) {
+                        nextPointer = nextPointer.next;
+                        continue;
+                    }
+                }
+                
+                // Pointer went down.  Add it to the list.
+                // Write a sentinel at the end of the pastTime trace so we will be able to
+                // tell when the trace started.
+                pointer = obtainPointer();
+                pointer.id = pointerId;
+                pointer.pastTime[lastTouchIndex] = Long.MIN_VALUE;
+                pointer.next = nextPointer;
+                if (previousPointer == null) {
+                    mPointerListHead = pointer;
+                } else {
+                    previousPointer.next = pointer;
+                }
+                break;
+            }
+            
+            pointer.generation = generation;
+            previousPointer = pointer;
+            
+            final float[] pastX = pointer.pastX;
+            final float[] pastY = pointer.pastY;
+            final long[] pastTime = pointer.pastTime;
             
             for (int j = 0; j < historySize; j++) {
                 final int touchIndex = (nextTouchIndex + j) % NUM_PAST;
@@ -196,7 +210,23 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
             pastTime[finalTouchIndex] = ev.getEventTime();
         }
         
-        mLastTouchIndex = finalTouchIndex;
+        // Find removed pointers.
+        previousPointer = null;
+        for (Pointer pointer = mPointerListHead; pointer != null; ) {
+            final Pointer nextPointer = pointer.next;
+            if (pointer.generation != generation) {
+                // Pointer went up.  Remove it from the list.
+                if (previousPointer == null) {
+                    mPointerListHead = nextPointer;
+                } else {
+                    previousPointer.next = nextPointer;
+                }
+                releasePointer(pointer);
+            } else {
+                previousPointer = pointer;
+            }
+            pointer = nextPointer;
+        }
     }
 
     /**
@@ -223,13 +253,10 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      * must be positive.
      */
     public void computeCurrentVelocity(int units, float maxVelocity) {
-        final int numPointers = mNumPointers;
-        final PointerData[] pointers = mPointers;
         final int lastTouchIndex = mLastTouchIndex;
         
-        for (int p = 0; p < numPointers; p++) {
-            final PointerData pointerData = pointers[p];
-            final long[] pastTime = pointerData.pastTime;
+        for (Pointer pointer = mPointerListHead; pointer != null; pointer = pointer.next) {
+            final long[] pastTime = pointer.pastTime;
             
             // Search backwards in time for oldest acceptable time.
             // Stop at the beginning of the trace as indicated by the sentinel time Long.MIN_VALUE.
@@ -253,8 +280,8 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
             }
             
             // Kind-of stupid.
-            final float[] pastX = pointerData.pastX;
-            final float[] pastY = pointerData.pastY;
+            final float[] pastX = pointer.pastX;
+            final float[] pastY = pointer.pastY;
             
             final float oldestX = pastX[oldestTouchIndex];
             final float oldestY = pastY[oldestTouchIndex];
@@ -290,11 +317,11 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
                 accumY = maxVelocity;
             }
             
-            pointerData.xVelocity = accumX;
-            pointerData.yVelocity = accumY;
+            pointer.xVelocity = accumX;
+            pointer.yVelocity = accumY;
             
             if (localLOGV) {
-                Log.v(TAG, "[" + p + "] Pointer " + pointerData.id
+                Log.v(TAG, "Pointer " + pointer.id
                     + ": Y velocity=" + accumX +" X velocity=" + accumY + " N=" + numTouches);
             }
         }
@@ -307,8 +334,8 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      * @return The previously computed X velocity.
      */
     public float getXVelocity() {
-        PointerData pointerData = getPointerData(0);
-        return pointerData != null ? pointerData.xVelocity : 0;
+        Pointer pointer = getPointer(0);
+        return pointer != null ? pointer.xVelocity : 0;
     }
     
     /**
@@ -318,8 +345,8 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      * @return The previously computed Y velocity.
      */
     public float getYVelocity() {
-        PointerData pointerData = getPointerData(0);
-        return pointerData != null ? pointerData.yVelocity : 0;
+        Pointer pointer = getPointer(0);
+        return pointer != null ? pointer.yVelocity : 0;
     }
     
     /**
@@ -330,8 +357,8 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      * @return The previously computed X velocity.
      */
     public float getXVelocity(int id) {
-        PointerData pointerData = getPointerData(id);
-        return pointerData != null ? pointerData.xVelocity : 0;
+        Pointer pointer = getPointer(id);
+        return pointer != null ? pointer.xVelocity : 0;
     }
     
     /**
@@ -342,19 +369,68 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      * @return The previously computed Y velocity.
      */
     public float getYVelocity(int id) {
-        PointerData pointerData = getPointerData(id);
-        return pointerData != null ? pointerData.yVelocity : 0;
+        Pointer pointer = getPointer(id);
+        return pointer != null ? pointer.yVelocity : 0;
     }
     
-    private final PointerData getPointerData(int id) {
-        final PointerData[] pointers = mPointers;
-        final int numPointers = mNumPointers;
-        for (int p = 0; p < numPointers; p++) {
-            PointerData pointerData = pointers[p];
-            if (pointerData.id == id) {
-                return pointerData;
+    private final Pointer getPointer(int id) {
+        for (Pointer pointer = mPointerListHead; pointer != null; pointer = pointer.next) {
+            if (pointer.id == id) {
+                return pointer;
             }
         }
         return null;
+    }
+    
+    private static final Pointer obtainPointer() {
+        synchronized (sPool) {
+            if (sRecycledPointerCount != 0) {
+                Pointer element = sRecycledPointerListHead;
+                sRecycledPointerCount -= 1;
+                sRecycledPointerListHead = element.next;
+                element.next = null;
+                return element;
+            }
+        }
+        return new Pointer();
+    }
+    
+    private static final void releasePointer(Pointer pointer) {
+        synchronized (sPool) {
+            if (sRecycledPointerCount < POINTER_POOL_CAPACITY) {
+                pointer.next = sRecycledPointerListHead;
+                sRecycledPointerCount += 1;
+                sRecycledPointerListHead = pointer;
+            }
+        }
+    }
+    
+    private static final void releasePointerList(Pointer pointer) {
+        if (pointer != null) {
+            synchronized (sPool) {
+                int count = sRecycledPointerCount;
+                if (count >= POINTER_POOL_CAPACITY) {
+                    return;
+                }
+                
+                Pointer tail = pointer;
+                for (;;) {
+                    count += 1;
+                    if (count >= POINTER_POOL_CAPACITY) {
+                        break;
+                    }
+                    
+                    Pointer next = tail.next;
+                    if (next == null) {
+                        break;
+                    }
+                    tail = next;
+                }
+
+                tail.next = sRecycledPointerListHead;
+                sRecycledPointerCount = count;
+                sRecycledPointerListHead = pointer;
+            }
+        }
     }
 }
