@@ -527,11 +527,18 @@ class GLES20Canvas extends Canvas {
     @Override
     public void drawPath(Path path, Paint paint) {
         boolean hasModifier = setupModifiers(paint);
-        nDrawPath(mRenderer, path.mNativePath, paint.mNativePaint);
+        if (path.isSimplePath) {
+            if (path.rects != null) {
+                nDrawRects(mRenderer, path.rects.mNativeRegion, paint.mNativePaint);
+            }
+        } else {
+            nDrawPath(mRenderer, path.mNativePath, paint.mNativePaint);
+        }
         if (hasModifier) nResetModifiers(mRenderer);
     }
 
     private native void nDrawPath(int renderer, int path, int paint);
+    private native void nDrawRects(int renderer, int region, int paint);
 
     @Override
     public void drawPicture(Picture picture) {

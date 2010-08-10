@@ -137,9 +137,6 @@ SkiaLinearGradientShader::SkiaLinearGradientShader(float* bounds, uint32_t* colo
         SkMatrix* matrix, bool blend):
         SkiaShader(kLinearGradient, key, tileMode, tileMode, matrix, blend),
         mBounds(bounds), mColors(colors), mPositions(positions), mCount(count) {
-    for (int i = 0; i < count; i++) {
-        LOGD("[GL] Gradient color %d = 0x%x", i, colors[i]);
-    }
 }
 
 SkiaLinearGradientShader::~SkiaLinearGradientShader() {

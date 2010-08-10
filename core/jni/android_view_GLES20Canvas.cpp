@@ -236,6 +236,16 @@ static void android_view_GLES20Canvas_drawRect(JNIEnv* env, jobject canvas,
     renderer->drawRect(left, top, right, bottom, paint);
 }
 
+static void android_view_GLES20Canvas_drawRects(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, SkRegion* region, SkPaint* paint) {
+    SkRegion::Iterator it(*region);
+    while (!it.done()) {
+        const SkIRect& r = it.rect();
+        renderer->drawRect(r.fLeft, r.fTop, r.fRight, r.fBottom, paint);
+        it.next();
+    }
+}
+
 static void android_view_GLES20Canvas_drawPath(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, SkPath* path, SkPaint* paint) {
     renderer->drawPath(path, paint);
@@ -386,6 +396,7 @@ static JNINativeMethod gMethods[] = {
     { "nDrawPatch",         "(II[BFFFFI)V",    (void*) android_view_GLES20Canvas_drawPatch },
     { "nDrawColor",         "(III)V",          (void*) android_view_GLES20Canvas_drawColor },
     { "nDrawRect",          "(IFFFFI)V",       (void*) android_view_GLES20Canvas_drawRect },
+    { "nDrawRects",         "(III)V",          (void*) android_view_GLES20Canvas_drawRects },
     { "nDrawPath",          "(III)V",          (void*) android_view_GLES20Canvas_drawPath },
 
     { "nResetModifiers",    "(I)V",            (void*) android_view_GLES20Canvas_resetModifiers },
