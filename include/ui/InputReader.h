@@ -454,6 +454,8 @@ public:
     virtual void reset();
     virtual void process(const RawEvent* rawEvent);
 
+    virtual int32_t getScanCodeState(uint32_t sourceMask, int32_t scanCode);
+
 private:
     // Amount that trackball needs to move in order to generate a key event.
     static const int32_t TRACKBALL_MOVEMENT_THRESHOLD = 6;

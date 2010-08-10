@@ -156,7 +156,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     //  those new codes.  This is intended to maintain a consistent
     //  set of key code definitions across all Android devices.
    
-    private static final int LAST_KEYCODE           = KEYCODE_SWITCH_CHARSET;
+    private static final int LAST_KEYCODE           = KEYCODE_BUTTON_MODE;
     
     /**
      * @deprecated There are now more than MAX_KEYCODE keycodes.

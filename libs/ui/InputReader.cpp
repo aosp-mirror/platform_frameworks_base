@@ -1080,6 +1080,14 @@ void TrackballInputMapper::applyPolicyAndDispatch(nsecs_t when, int32_t motionEv
             1, & pointerId, pointerCoords, mXPrecision, mYPrecision, downTime);
 }
 
+int32_t TrackballInputMapper::getScanCodeState(uint32_t sourceMask, int32_t scanCode) {
+    if (scanCode >= BTN_MOUSE && scanCode < BTN_JOYSTICK) {
+        return getEventHub()->getScanCodeState(getDeviceId(), scanCode);
+    } else {
+        return AKEY_STATE_UNKNOWN;
+    }
+}
+
 
 // --- TouchInputMapper ---
 
