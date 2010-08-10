@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -39,6 +40,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     private int mMaxItems;
     private boolean mReserveOverflow;
     private OverflowMenuButton mOverflowButton;
+    private WeakReference<MenuPopupHelper> mOverflowPopup;
     
     public ActionMenuView(Context context) {
         this(context, null);
@@ -145,6 +147,16 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         if (mOverflowButton != null) {
             MenuPopupHelper popup = new MenuPopupHelper(getContext(), mMenu, mOverflowButton, true);
             popup.show();
+            mOverflowPopup = new WeakReference<MenuPopupHelper>(popup);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean hideOverflowMenu() {
+        MenuPopupHelper popup = mOverflowPopup != null ? mOverflowPopup.get() : null;
+        if (popup != null) {
+            popup.dismiss();
             return true;
         }
         return false;
