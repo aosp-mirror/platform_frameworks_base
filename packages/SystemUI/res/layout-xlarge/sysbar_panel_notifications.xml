@@ -46,17 +46,23 @@
         android:background="@android:drawable/divider_horizontal_dark"
         />
 
-    <LinearLayout 
-        android:id="@+id/content"
-        android:layout_width="match_parent"
+    <ScrollView
+        android:id="@+id/notificationScroller"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal|bottom"
-        android:animationCache="false"
-        android:orientation="vertical"
-        android:background="@drawable/status_bar_background"
-        android:clickable="true"
-        android:focusable="true"
-        android:descendantFocusability="afterDescendants"
+        android:layout_width="match_parent"
         >
-    </LinearLayout>
+        <LinearLayout 
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal|bottom"
+            android:animationCache="false"
+            android:orientation="vertical"
+            android:background="@drawable/status_bar_background"
+            android:clickable="true"
+            android:focusable="true"
+            android:descendantFocusability="afterDescendants"
+            >
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

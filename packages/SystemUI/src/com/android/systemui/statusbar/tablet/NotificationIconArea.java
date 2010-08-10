@@ -31,22 +31,14 @@ import com.android.systemui.R;
 public class NotificationIconArea extends LinearLayout {
     private static final String TAG = "NotificationIconArea";
 
-    MoreView mMoreView;
     IconLayout mIconLayout;
     DraggerView mDraggerView;
 
     public NotificationIconArea(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        mMoreView = (MoreView) findViewById(R.id.more);
         mIconLayout = (IconLayout)findViewById(R.id.icons);
         mDraggerView = (DraggerView) findViewById(R.id.handle);
-    }
-
-    static class MoreView extends ImageView {
-        public MoreView(Context context, AttributeSet attrs) {
-            super(context, attrs);
-        }
     }
 
     static class IconLayout extends LinearLayout {
