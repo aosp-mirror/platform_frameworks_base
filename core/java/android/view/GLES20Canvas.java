@@ -610,9 +610,13 @@ class GLES20Canvas extends Canvas {
         if ((index | count | (index + count) | (text.length - index - count)) < 0) {
             throw new IndexOutOfBoundsException();
         }
+
         boolean hasModifier = setupModifiers(paint);
-        nDrawText(mRenderer, text, index, count, x, y, paint.mBidiFlags, paint.mNativePaint);
-        if (hasModifier) nResetModifiers(mRenderer);
+        try {
+            nDrawText(mRenderer, text, index, count, x, y, paint.mBidiFlags, paint.mNativePaint);
+        } finally {
+            if (hasModifier) nResetModifiers(mRenderer);
+        }
     }
     
     private native void nDrawText(int renderer, char[] text, int index, int count, float x, float y,
@@ -621,20 +625,23 @@ class GLES20Canvas extends Canvas {
     @Override
     public void drawText(CharSequence text, int start, int end, float x, float y, Paint paint) {
         boolean hasModifier = setupModifiers(paint);
-        if (text instanceof String || text instanceof SpannedString ||
-                text instanceof SpannableString) {
-            nDrawText(mRenderer, text.toString(), start, end, x, y, paint.mBidiFlags,
-                    paint.mNativePaint);
-        } else if (text instanceof GraphicsOperations) {
-            ((GraphicsOperations) text).drawText(this, start, end, x, y,
-                                                     paint);
-        } else {
-            char[] buf = TemporaryBuffer.obtain(end - start);
-            TextUtils.getChars(text, start, end, buf, 0);
-            nDrawText(mRenderer, buf, 0, end - start, x, y, paint.mBidiFlags, paint.mNativePaint);
-            TemporaryBuffer.recycle(buf);
+        try {
+            if (text instanceof String || text instanceof SpannedString ||
+                    text instanceof SpannableString) {
+                nDrawText(mRenderer, text.toString(), start, end, x, y, paint.mBidiFlags,
+                        paint.mNativePaint);
+            } else if (text instanceof GraphicsOperations) {
+                ((GraphicsOperations) text).drawText(this, start, end, x, y,
+                                                         paint);
+            } else {
+                char[] buf = TemporaryBuffer.obtain(end - start);
+                TextUtils.getChars(text, start, end, buf, 0);
+                nDrawText(mRenderer, buf, 0, end - start, x, y, paint.mBidiFlags, paint.mNativePaint);
+                TemporaryBuffer.recycle(buf);
+            }
+        } finally {
+            if (hasModifier) nResetModifiers(mRenderer);
         }
-        if (hasModifier) nResetModifiers(mRenderer);
     }
 
     @Override
@@ -642,9 +649,13 @@ class GLES20Canvas extends Canvas {
         if ((start | end | (end - start) | (text.length() - end)) < 0) {
             throw new IndexOutOfBoundsException();
         }
+
         boolean hasModifier = setupModifiers(paint);
-        nDrawText(mRenderer, text, start, end, x, y, paint.mBidiFlags, paint.mNativePaint);
-        if (hasModifier) nResetModifiers(mRenderer);
+        try {
+            nDrawText(mRenderer, text, start, end, x, y, paint.mBidiFlags, paint.mNativePaint);
+        } finally {
+            if (hasModifier) nResetModifiers(mRenderer);
+        }
     }
 
     private native void nDrawText(int renderer, String text, int start, int end, float x, float y,
@@ -653,8 +664,12 @@ class GLES20Canvas extends Canvas {
     @Override
     public void drawText(String text, float x, float y, Paint paint) {
         boolean hasModifier = setupModifiers(paint);
-        nDrawText(mRenderer, text, 0, text.length(), x, y, paint.mBidiFlags, paint.mNativePaint);
-        if (hasModifier) nResetModifiers(mRenderer);
+        try {
+            nDrawText(mRenderer, text, 0, text.length(), x, y, paint.mBidiFlags,
+                    paint.mNativePaint);
+        } finally {
+            if (hasModifier) nResetModifiers(mRenderer);
+        }
     }
 
     @Override
@@ -671,14 +686,58 @@ class GLES20Canvas extends Canvas {
     @Override
     public void drawTextRun(char[] text, int index, int count, int contextIndex, int contextCount,
             float x, float y, int dir, Paint paint) {
-        throw new UnsupportedOperationException();
+        if ((index | count | text.length - index - count) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (dir != DIRECTION_LTR && dir != DIRECTION_RTL) {
+            throw new IllegalArgumentException("Unknown direction: " + dir);
+        }
+
+        boolean hasModifier = setupModifiers(paint);
+        try {
+            nDrawTextRun(mRenderer, text, index, count, contextIndex, contextCount, x, y, dir,
+                    paint.mNativePaint);
+        } finally {
+            if (hasModifier) nResetModifiers(mRenderer);
+        }
     }
+
+    private native void nDrawTextRun(int renderer, char[] text, int index, int count,
+            int contextIndex, int contextCount, float x, float y, int dir, int nativePaint);
 
     @Override
     public void drawTextRun(CharSequence text, int start, int end, int contextStart, int contextEnd,
             float x, float y, int dir, Paint paint) {
-        throw new UnsupportedOperationException();
+        if ((start | end | end - start | text.length() - end) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        boolean hasModifier = setupModifiers(paint);
+        try {
+            int flags = dir == 0 ? 0 : 1;
+            if (text instanceof String || text instanceof SpannedString ||
+                    text instanceof SpannableString) {
+                nDrawTextRun(mRenderer, text.toString(), start, end, contextStart,
+                        contextEnd, x, y, flags, paint.mNativePaint);
+            } else if (text instanceof GraphicsOperations) {
+                ((GraphicsOperations) text).drawTextRun(this, start, end,
+                        contextStart, contextEnd, x, y, flags, paint);
+            } else {
+                int contextLen = contextEnd - contextStart;
+                int len = end - start;
+                char[] buf = TemporaryBuffer.obtain(contextLen);
+                TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
+                nDrawTextRun(mRenderer, buf, start - contextStart, len, 0, contextLen,
+                        x, y, flags, paint.mNativePaint);
+                TemporaryBuffer.recycle(buf);
+            }
+        } finally {
+            if (hasModifier) nResetModifiers(mRenderer);
+        }
     }
+
+    private native void nDrawTextRun(int renderer, String text, int start, int end,
+            int contextStart, int contextEnd, float x, float y, int flags, int nativePaint);
 
     @Override
     public void drawVertices(VertexMode mode, int vertexCount, float[] verts, int vertOffset,

@@ -162,7 +162,8 @@ void PathCache::generateTexture(SkBitmap& bitmap, Texture* texture) {
     glGenTextures(1, &texture->id);
 
     glBindTexture(GL_TEXTURE_2D, texture->id);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap.bytesPerPixel());
+    // Textures are Alpha8
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     texture->blend = true;
     glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, bitmap.rowBytesAsPixels(), texture->height, 0,

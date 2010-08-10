@@ -221,6 +221,18 @@ void TextLayout::handleText(SkPaint *paint, const jchar* text, jsize len,
     }
 }
 
+bool TextLayout::prepareRtlTextRun(const jchar* context, jsize start, jsize& count,
+        jsize contextCount, jchar* shaped) {
+    UErrorCode status = U_ZERO_ERROR;
+    count = shapeRtlText(context, start, count, contextCount, shaped, status);
+    if (U_SUCCESS(status)) {
+        return true;
+    } else {
+        LOG(LOG_WARN, "LAYOUT", "drawTextRun error %d\n", status);
+    }
+    return false;
+}
+
 void TextLayout::drawTextRun(SkPaint* paint, const jchar* chars,
                              jint start, jint count, jint contextCount,
                              int dirFlags, jfloat x, jfloat y, SkCanvas* canvas) {
@@ -231,12 +243,8 @@ void TextLayout::drawTextRun(SkPaint* paint, const jchar* chars,
      uint8_t rtl = dirFlags & 0x1;
      if (rtl) {
          SkAutoSTMalloc<80, jchar> buffer(contextCount);
-         UErrorCode status = U_ZERO_ERROR;
-         count = shapeRtlText(chars, start, count, contextCount, buffer.get(), status);
-         if (U_SUCCESS(status)) {
+         if (prepareRtlTextRun(chars, start, count, contextCount, buffer.get())) {
              canvas->drawText(buffer.get(), count << 1, x_, y_, *paint);
-         } else {
-             LOG(LOG_WARN, "LAYOUT", "drawTextRun error %d\n", status);
          }
      } else {
          canvas->drawText(chars + start, count << 1, x_, y_, *paint);

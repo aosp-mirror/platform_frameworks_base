@@ -435,6 +435,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, const S
         return;
     }
 
+    glActiveTexture(GL_TEXTURE0);
     const Texture* texture = mTextureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
@@ -451,6 +452,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix, const 
         return;
     }
 
+    glActiveTexture(GL_TEXTURE0);
     const Texture* texture = mTextureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
@@ -466,6 +468,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
         return;
     }
 
+    glActiveTexture(GL_TEXTURE0);
     const Texture* texture = mTextureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
@@ -491,6 +494,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
         return;
     }
 
+    glActiveTexture(GL_TEXTURE0);
     const Texture* texture = mTextureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);

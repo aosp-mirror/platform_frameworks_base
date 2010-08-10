@@ -376,6 +376,9 @@ void ProgramCache::generateTextureWrap(String8& shader, GLenum wrapS, GLenum wra
     }
     shader.append("    return vec2(");
     switch (wrapS) {
+        case GL_CLAMP_TO_EDGE:
+            shader.append("texCoords.x");
+            break;
         case GL_REPEAT:
             shader.append("mod(texCoords.x, 1.0)");
             break;
@@ -385,6 +388,9 @@ void ProgramCache::generateTextureWrap(String8& shader, GLenum wrapS, GLenum wra
     }
     shader.append(", ");
     switch (wrapT) {
+        case GL_CLAMP_TO_EDGE:
+            shader.append("texCoords.y");
+            break;
         case GL_REPEAT:
             shader.append("mod(texCoords.y, 1.0)");
             break;

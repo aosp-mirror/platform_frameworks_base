@@ -27,6 +27,7 @@
 #include <SkPaint.h>
 #include <SkRegion.h>
 #include <SkScalerContext.h>
+#include <SkTemplates.h>
 #include <SkXfermode.h>
 
 #include <OpenGLRenderer.h>
@@ -275,6 +276,23 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
     }
 }
 
+static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
+        jint start, jint count, jint contextCount, jfloat x, jfloat y,
+        int flags, SkPaint* paint) {
+    uint8_t rtl = flags & 0x1;
+    if (rtl) {
+        SkAutoSTMalloc<80, jchar> buffer(contextCount);
+        jchar* shaped = buffer.get();
+        if (TextLayout::prepareRtlTextRun(text, start, count, contextCount, shaped)) {
+            renderer->drawText((const char*) shaped, count << 1, count, x, y, paint);
+        } else {
+            LOGW("drawTextRun error");
+        }
+    } else {
+        renderer->drawText((const char*) (text + start), count << 1, count, x, y, paint);
+    }
+}
+
 static void android_view_GLES20Canvas_drawTextArray(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, jcharArray text, int index, int count,
         jfloat x, jfloat y, int flags, SkPaint* paint) {
@@ -288,6 +306,28 @@ static void android_view_GLES20Canvas_drawText(JNIEnv* env, jobject canvas,
         jfloat x, jfloat y, int flags, SkPaint* paint) {
     const jchar* textArray = env->GetStringChars(text, NULL);
     renderText(renderer, textArray + start, end - start, x, y, flags, paint);
+    env->ReleaseStringChars(text, textArray);
+}
+
+static void android_view_GLES20Canvas_drawTextRunArray(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, jcharArray text, int index, int count,
+        int contextIndex, int contextCount, jfloat x, jfloat y, int dirFlags,
+        SkPaint* paint) {
+    jchar* textArray = env->GetCharArrayElements(text, NULL);
+    renderTextRun(renderer, textArray + contextIndex, index - contextIndex,
+            count, contextCount, x, y, dirFlags, paint);
+    env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
+ }
+
+static void android_view_GLES20Canvas_drawTextRun(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, jstring text, int start, int end,
+        int contextStart, int contextEnd, jfloat x, jfloat y, int dirFlags,
+        SkPaint* paint) {
+    const jchar* textArray = env->GetStringChars(text, NULL);
+    jint count = end - start;
+    jint contextCount = contextEnd - contextStart;
+    renderTextRun(renderer, textArray + contextStart, start - contextStart,
+            count, contextCount, x, y, dirFlags, paint);
     env->ReleaseStringChars(text, textArray);
 }
 
@@ -312,49 +352,53 @@ static jboolean android_view_GLES20Canvas_isAvailable(JNIEnv* env, jobject clazz
 const char* const kClassPathName = "android/view/GLES20Canvas";
 
 static JNINativeMethod gMethods[] = {
-    {   "nIsAvailable",       "()Z",             (void*) android_view_GLES20Canvas_isAvailable },
+    { "nIsAvailable",       "()Z",             (void*) android_view_GLES20Canvas_isAvailable },
+
 #ifdef USE_OPENGL_RENDERER
+    { "nCreateRenderer",    "()I",             (void*) android_view_GLES20Canvas_createRenderer },
+    { "nDestroyRenderer",   "(I)V",            (void*) android_view_GLES20Canvas_destroyRenderer },
+    { "nSetViewport",       "(III)V",          (void*) android_view_GLES20Canvas_setViewport },
+    { "nPrepare",           "(I)V",            (void*) android_view_GLES20Canvas_prepare },
 
-    {   "nCreateRenderer",    "()I",             (void*) android_view_GLES20Canvas_createRenderer },
-    {   "nDestroyRenderer",   "(I)V",            (void*) android_view_GLES20Canvas_destroyRenderer },
-    {   "nSetViewport",       "(III)V",          (void*) android_view_GLES20Canvas_setViewport },
-    {   "nPrepare",           "(I)V",            (void*) android_view_GLES20Canvas_prepare },
+    { "nSave",              "(II)I",           (void*) android_view_GLES20Canvas_save },
+    { "nRestore",           "(I)V",            (void*) android_view_GLES20Canvas_restore },
+    { "nRestoreToCount",    "(II)V",           (void*) android_view_GLES20Canvas_restoreToCount },
+    { "nGetSaveCount",      "(I)I",            (void*) android_view_GLES20Canvas_getSaveCount },
 
-    {   "nSave",              "(II)I",           (void*) android_view_GLES20Canvas_save },
-    {   "nRestore",           "(I)V",            (void*) android_view_GLES20Canvas_restore },
-    {   "nRestoreToCount",    "(II)V",           (void*) android_view_GLES20Canvas_restoreToCount },
-    {   "nGetSaveCount",      "(I)I",            (void*) android_view_GLES20Canvas_getSaveCount },
+    { "nSaveLayer",         "(IFFFFII)I",      (void*) android_view_GLES20Canvas_saveLayer },
+    { "nSaveLayerAlpha",    "(IFFFFII)I",      (void*) android_view_GLES20Canvas_saveLayerAlpha },
 
-    {   "nSaveLayer",         "(IFFFFII)I",      (void*) android_view_GLES20Canvas_saveLayer },
-    {   "nSaveLayerAlpha",    "(IFFFFII)I",      (void*) android_view_GLES20Canvas_saveLayerAlpha },
+    { "nQuickReject",       "(IFFFFI)Z",       (void*) android_view_GLES20Canvas_quickReject },
+    { "nClipRect",          "(IFFFFI)Z",       (void*) android_view_GLES20Canvas_clipRectF },
+    { "nClipRect",          "(IIIIII)Z",       (void*) android_view_GLES20Canvas_clipRect },
 
-    {   "nQuickReject",       "(IFFFFI)Z",       (void*) android_view_GLES20Canvas_quickReject },
-    {   "nClipRect",          "(IFFFFI)Z",       (void*) android_view_GLES20Canvas_clipRectF },
-    {   "nClipRect",          "(IIIIII)Z",       (void*) android_view_GLES20Canvas_clipRect },
+    { "nTranslate",         "(IFF)V",          (void*) android_view_GLES20Canvas_translate },
+    { "nRotate",            "(IF)V",           (void*) android_view_GLES20Canvas_rotate },
+    { "nScale",             "(IFF)V",          (void*) android_view_GLES20Canvas_scale },
 
-    {   "nTranslate",         "(IFF)V",          (void*) android_view_GLES20Canvas_translate },
-    {   "nRotate",            "(IF)V",           (void*) android_view_GLES20Canvas_rotate },
-    {   "nScale",             "(IFF)V",          (void*) android_view_GLES20Canvas_scale },
+    { "nSetMatrix",         "(II)V",           (void*) android_view_GLES20Canvas_setMatrix },
+    { "nGetMatrix",         "(II)V",           (void*) android_view_GLES20Canvas_getMatrix },
+    { "nConcatMatrix",      "(II)V",           (void*) android_view_GLES20Canvas_concatMatrix },
 
-    {   "nSetMatrix",         "(II)V",           (void*) android_view_GLES20Canvas_setMatrix },
-    {   "nGetMatrix",         "(II)V",           (void*) android_view_GLES20Canvas_getMatrix },
-    {   "nConcatMatrix",      "(II)V",           (void*) android_view_GLES20Canvas_concatMatrix },
+    { "nDrawBitmap",        "(IIFFI)V",        (void*) android_view_GLES20Canvas_drawBitmap },
+    { "nDrawBitmap",        "(IIFFFFFFFFI)V",  (void*) android_view_GLES20Canvas_drawBitmapRect },
+    { "nDrawBitmap",        "(IIII)V",         (void*) android_view_GLES20Canvas_drawBitmapMatrix },
+    { "nDrawPatch",         "(II[BFFFFI)V",    (void*) android_view_GLES20Canvas_drawPatch },
+    { "nDrawColor",         "(III)V",          (void*) android_view_GLES20Canvas_drawColor },
+    { "nDrawRect",          "(IFFFFI)V",       (void*) android_view_GLES20Canvas_drawRect },
+    { "nDrawPath",          "(III)V",          (void*) android_view_GLES20Canvas_drawPath },
 
-    {   "nDrawBitmap",        "(IIFFI)V",        (void*) android_view_GLES20Canvas_drawBitmap },
-    {   "nDrawBitmap",        "(IIFFFFFFFFI)V",  (void*) android_view_GLES20Canvas_drawBitmapRect },
-    {   "nDrawBitmap",        "(IIII)V",         (void*) android_view_GLES20Canvas_drawBitmapMatrix },
-    {   "nDrawPatch",         "(II[BFFFFI)V",    (void*) android_view_GLES20Canvas_drawPatch },
-    {   "nDrawColor",         "(III)V",          (void*) android_view_GLES20Canvas_drawColor },
-    {   "nDrawRect",          "(IFFFFI)V",       (void*) android_view_GLES20Canvas_drawRect },
-    {   "nDrawPath",          "(III)V",          (void*) android_view_GLES20Canvas_drawPath },
+    { "nResetModifiers",    "(I)V",            (void*) android_view_GLES20Canvas_resetModifiers },
+    { "nSetupShader",       "(II)V",           (void*) android_view_GLES20Canvas_setupShader },
+    { "nSetupColorFilter",  "(II)V",           (void*) android_view_GLES20Canvas_setupColorFilter },
 
-    {   "nResetModifiers",    "(I)V",            (void*) android_view_GLES20Canvas_resetModifiers },
-    {   "nSetupShader",       "(II)V",           (void*) android_view_GLES20Canvas_setupShader },
-    {   "nSetupColorFilter",  "(II)V",           (void*) android_view_GLES20Canvas_setupColorFilter },
-
-    {   "nDrawText",          "(I[CIIFFII)V",    (void*) android_view_GLES20Canvas_drawTextArray },
-    {   "nDrawText",          "(ILjava/lang/String;IIFFII)V",
+    { "nDrawText",          "(I[CIIFFII)V",    (void*) android_view_GLES20Canvas_drawTextArray },
+    { "nDrawText",          "(ILjava/lang/String;IIFFII)V",
             (void*) android_view_GLES20Canvas_drawText },
+
+    { "nDrawTextRun",       "(I[CIIIIFFII)V",  (void*) android_view_GLES20Canvas_drawTextRunArray },
+    { "nDrawTextRun",       "(ILjava/lang/String;IIIIFFII)V",
+            (void*) android_view_GLES20Canvas_drawTextRun },
 
     {   "nGetClipBounds",     "(ILandroid/graphics/Rect;)Z",
             (void*) android_view_GLES20Canvas_getClipBounds },

@@ -24,6 +24,10 @@ package android.graphics;
  * text on a path.
  */
 public class Path {
+    /**
+     * @hide
+     */
+    public final int mNativePath;
 
     /**
      * Create an empty path
@@ -537,8 +541,8 @@ public class Path {
             super.finalize();
         }
     }
-    
-    /*package*/ final int ni() {
+
+    final int ni() {
         return mNativePath;
     }
 
@@ -592,9 +596,4 @@ public class Path {
                                                 int dst_path);
     private static native void native_transform(int nPath, int matrix);
     private static native void finalizer(int nPath);
-
-    /**
-     * @hide
-     */
-    public final int mNativePath;
 }
