@@ -934,65 +934,76 @@ public class ViewDebug {
 
     private static void profileViewAndChildren(final View view, BufferedWriter out)
             throws IOException {
-        final long durationMeasure = profileViewOperation(view, new ViewOperation<Void>() {
-            public Void[] pre() {
-                forceLayout(view);
-                return null;
-            }
+        profileViewAndChildren(view, out, true);
+    }
 
-            private void forceLayout(View view) {
-                view.forceLayout();
-                if (view instanceof ViewGroup) {
-                    ViewGroup group = (ViewGroup) view;
-                    final int count = group.getChildCount();
-                    for (int i = 0; i < count; i++) {
-                        forceLayout(group.getChildAt(i));
-                    }
-                }
-            }
+    private static void profileViewAndChildren(final View view, BufferedWriter out, boolean root)
+            throws IOException {
 
-            public void run(Void... data) {
-                view.measure(view.mOldWidthMeasureSpec, view.mOldHeightMeasureSpec);
-            }
+        long durationMeasure =
+                (root || (view.mPrivateFlags & View.MEASURED_DIMENSION_SET) != 0) ? profileViewOperation(
+                        view, new ViewOperation<Void>() {
+                            public Void[] pre() {
+                                forceLayout(view);
+                                return null;
+                            }
 
-            public void post(Void... data) {
-            }
-        });
+                            private void forceLayout(View view) {
+                                view.forceLayout();
+                                if (view instanceof ViewGroup) {
+                                    ViewGroup group = (ViewGroup) view;
+                                    final int count = group.getChildCount();
+                                    for (int i = 0; i < count; i++) {
+                                        forceLayout(group.getChildAt(i));
+                                    }
+                                }
+                            }
 
-        final long durationLayout = profileViewOperation(view, new ViewOperation<Void>() {
-            public Void[] pre() {
-                return null;
-            }
+                            public void run(Void... data) {
+                                view.measure(view.mOldWidthMeasureSpec, view.mOldHeightMeasureSpec);
+                            }
 
-            public void run(Void... data) {
-                view.layout(view.mLeft, view.mTop, view.mRight, view.mBottom);
-            }
+                            public void post(Void... data) {
+                            }
+                        })
+                        : 0;
+        long durationLayout =
+                (root || (view.mPrivateFlags & View.LAYOUT_REQUIRED) != 0) ? profileViewOperation(
+                        view, new ViewOperation<Void>() {
+                            public Void[] pre() {
+                                return null;
+                            }
 
-            public void post(Void... data) {
-            }
-        });
+                            public void run(Void... data) {
+                                view.layout(view.mLeft, view.mTop, view.mRight, view.mBottom);
+                            }
 
-        final long durationDraw = profileViewOperation(view, new ViewOperation<Object>() {
-            public Object[] pre() {
-                final DisplayMetrics metrics = view.getResources().getDisplayMetrics();
-                final Bitmap bitmap =
-                        Bitmap.createBitmap(metrics.widthPixels, metrics.heightPixels,
-                                Bitmap.Config.RGB_565);
-                final Canvas canvas = new Canvas(bitmap);
-                return new Object[] {
-                        bitmap, canvas
-                };
-            }
+                            public void post(Void... data) {
+                            }
+                        }) : 0;
+        long durationDraw =
+                (root || (view.mPrivateFlags & View.DRAWN) != 0) ? profileViewOperation(view,
+                        new ViewOperation<Object>() {
+                            public Object[] pre() {
+                                final DisplayMetrics metrics =
+                                        view.getResources().getDisplayMetrics();
+                                final Bitmap bitmap =
+                                        Bitmap.createBitmap(metrics.widthPixels,
+                                                metrics.heightPixels, Bitmap.Config.RGB_565);
+                                final Canvas canvas = new Canvas(bitmap);
+                                return new Object[] {
+                                        bitmap, canvas
+                                };
+                            }
 
-            public void run(Object... data) {
-                view.draw((Canvas) data[1]);
-            }
+                            public void run(Object... data) {
+                                view.draw((Canvas) data[1]);
+                            }
 
-            public void post(Object... data) {
-                ((Bitmap) data[0]).recycle();
-            }
-        });
-
+                            public void post(Object... data) {
+                                ((Bitmap) data[0]).recycle();
+                            }
+                        }) : 0;
         out.write(String.valueOf(durationMeasure));
         out.write(' ');
         out.write(String.valueOf(durationLayout));
@@ -1003,7 +1014,7 @@ public class ViewDebug {
             ViewGroup group = (ViewGroup) view;
             final int count = group.getChildCount();
             for (int i = 0; i < count; i++) {
-                profileViewAndChildren(group.getChildAt(i), out);
+                profileViewAndChildren(group.getChildAt(i), out, false);
             }
         }
     }
@@ -1033,7 +1044,10 @@ public class ViewDebug {
         });
 
         try {
-            latch.await(CAPTURE_TIMEOUT, TimeUnit.MILLISECONDS);
+            if (!latch.await(CAPTURE_TIMEOUT, TimeUnit.MILLISECONDS)) {
+                Log.w("View", "Could not complete the profiling of the view " + view);
+                return -1;
+            }
         } catch (InterruptedException e) {
             Log.w("View", "Could not complete the profiling of the view " + view);
             Thread.currentThread().interrupt();
