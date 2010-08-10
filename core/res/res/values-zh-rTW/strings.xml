@@ -34,7 +34,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"語音留言"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"連線發生問題或錯誤的 MMI 碼。"</string>
-    <string name="mmiFdnError" msgid="5224398216385316471">"僅允許在固定撥號時使用此操作。"</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"僅限對固定撥號號碼執行此作業。"</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"服務已啟用。"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"已啟用服務："</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"服務已停用。"</string>
@@ -173,7 +173,7 @@
     <string name="permlab_statusBar" msgid="7417192629601890791">"停用或變更狀態列"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"允許應用程式停用狀態列或新增、移除系統圖示。"</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"狀態列"</string>
-    <string name="permdesc_statusBarService" msgid="4097605867643520920">"允許應用程式成為狀態列。"</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"允許應用程式以狀態列顯示。"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"展開/收攏狀態列"</string>
     <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"允許應用程式展開或收攏狀態列。"</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"攔截撥出電話"</string>
@@ -314,8 +314,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"允許應用程式編輯全域音訊設定，例如音量與路由。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"錄製音訊"</string>
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"允許應用程式存取音訊錄製路徑。"</string>
-    <string name="permlab_camera" msgid="3616391919559751192">"拍照和錄影"</string>
-    <string name="permdesc_camera" msgid="6004878235852154239">"允許應用程式使用相機拍照和錄影。此功能可讓應用程式隨時透過相機收集圖片。"</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"拍照和拍攝影片"</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"允許應用程式使用相機拍照和錄影，此功能可讓應用程式隨時透過相機收集圖片。"</string>
     <string name="permlab_brick" msgid="8337817093326370537">"永久停用電話"</string>
     <string name="permdesc_brick" msgid="5569526552607599221">"允許應用程式永久停用手機。此項操作非常危險。"</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"強制重開機"</string>
@@ -739,12 +739,12 @@
     <string name="force_close" msgid="3653416315450806396">"強制關閉"</string>
     <string name="report" msgid="4060218260984795706">"回報"</string>
     <string name="wait" msgid="7147118217226317732">"等待"</string>
-    <string name="smv_application" msgid="295583804361236288">"應用程式 <xliff:g id="APPLICATION">%1$s</xliff:g> (處理程序 <xliff:g id="PROCESS">%2$s</xliff:g>) 已違反其自行實施的 StrictMode 政策。"</string>
-    <string name="smv_process" msgid="5120397012047462446">"處理程序 <xliff:g id="PROCESS">%1$s</xliff:g> 已違反其自行實施的 StrictMode 政策。"</string>
+    <string name="smv_application" msgid="295583804361236288">"應用程式 <xliff:g id="APPLICATION">%1$s</xliff:g> (處理程序 <xliff:g id="PROCESS">%2$s</xliff:g>) 已違反其自行強制實施的嚴格模式 (StrictMode) 政策。"</string>
+    <string name="smv_process" msgid="5120397012047462446">"處理程序 <xliff:g id="PROCESS">%1$s</xliff:g> 已違反其自行強制實施的嚴格模式 (StrictMode) 政策。"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> 執行中"</string>
-    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"選取切換應用程式"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"選取以切換到該應用程式"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"切換應用程式？"</string>
-    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"其他應用程式已在執行中，您必須停止執行，才能啟動新的應用程式。"</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"其他應用程式已在執行中，您必須停止執行該應用程式，才能啟動新的應用程式。"</string>
     <string name="old_app_action" msgid="493129172238566282">"返回 <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="old_app_description" msgid="942967900237208466">"請勿啟動新的應用程式。"</string>
     <string name="new_app_action" msgid="5472756926945440706">"啟動 <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
