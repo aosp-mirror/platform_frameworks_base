@@ -1001,7 +1001,7 @@ public abstract class ContentProvider implements ComponentCallbacks {
     /**
      * @hide -- until interface has proven itself
      *
-     * Call an provider-defined method.  This can be used to implement
+     * Call a provider-defined method.  This can be used to implement
      * interfaces that are cheaper than using a Cursor.
      *
      * @param method Method name to call.  Opaque to framework.
@@ -1013,29 +1013,26 @@ public abstract class ContentProvider implements ComponentCallbacks {
     }
 
     /**
-     * Shuts down this instance of the ContentProvider. It is useful when writing tests that use
-     * the ContentProvider.
+     * Implement this to shut down the ContentProvider instance. You can then
+     * invoke this method in unit tests.
+     * 
      * <p>
-     * If a unittest starts the ContentProvider in its test(..() methods, it could run into sqlite
-     * errors "disk I/O error" or "corruption" in the following scenario:
-     * <ul>
-     *   <li>Say, there are 2 test methods in the unittest</li>
-     *   <li>test1() (or setUp()) causes ContentProvider object to be initialized and
-     *   assume it opens a database connection to "foo.db"</li>
-     *   <li>est1() completes and test2() starts</li>
-     *   <li>During the execution of test2() there will be 2 connections to "foo.db"</li>
-     *   <li>Different threads in the ContentProvider may have one of these two connection
-     *   handles. This is not a problem per se</li>
-     *   <li>But if the two threads with 2 database connections don't interact correctly,
-     *   there could be unexpected errors from sqlite</li>
-     *   <li>Some of those unexpected errros are "disk I/O error" or "corruption" error</li>
-     *   <li>Common practice in tearDown() is to delete test directory (and the database files)</li>
-     *   <li>If this is done while some threads are still holding unclosed database connections,
-     *   sqlite quite easily gets into corruption and disk I/O errors</li>
-     * </ul>
+     * Android normally handles ContentProvider startup and shutdown
+     * automatically. You do not need to start up or shut down a
+     * ContentProvider. When you invoke a test method on a ContentProvider,
+     * however, a ContentProvider instance is started and keeps running after
+     * the test finishes, even if a succeeding test instantiates another
+     * ContentProvider. A conflict develops because the two instances are
+     * usually running against the same underlying data source (for example, an
+     * sqlite database).
+     * </p>
      * <p>
-     * tearDown() in the unittests should call this method to have ContentProvider gracefully
-     * shutdown all database connections.
+     * Implementing shutDown() avoids this conflict by providing a way to
+     * terminate the ContentProvider. This method can also prevent memory leaks
+     * from multiple instantiations of the ContentProvider, and it can ensure
+     * unit test isolation by allowing you to completely clean up the test
+     * fixture before moving on to the next test.
+     * </p>
      */
     public void shutdown() {
         Log.w(TAG, "implement ContentProvider shutdown() to make sure all database " +
