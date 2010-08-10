@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.graphics.Camera;
 import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
 
@@ -1537,6 +1538,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     private static final int AWAKEN_SCROLL_BARS_ON_ATTACH = 0x08000000;
 
     /**
+     * Indicates that pivotX or pivotY were explicitly set and we should not assume the center
+     * for transform operations
+     *
+     * @hide
+     */
+    private static final int PIVOT_EXPLICITLY_SET = 0x10000000;
+
+    /**
      * The parent this view is attached to.
      * {@hide}
      *
@@ -1625,6 +1634,42 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * is only valid after a call to getMatrix().
      */
     private boolean mMatrixIsIdentity = true;
+
+    /**
+     * The Camera object is used to compute a 3D matrix when rotationX or rotationY are set.
+     */
+    private Camera mCamera = null;
+
+    /**
+     * This matrix is used when computing the matrix for 3D rotations.
+     */
+    private Matrix matrix3D = null;
+
+    /**
+     * These prev values are used to recalculate a centered pivot point when necessary. The
+     * pivot point is only used in matrix operations (when rotation, scale, or translation are
+     * set), so thes values are only used then as well.
+     */
+    private int mPrevWidth = -1;
+    private int mPrevHeight = -1;
+
+    /**
+     * Convenience value to check for float values that are close enough to zero to be considered
+     * zero.
+     */
+    private static float NONZERO_EPSILON = .001f;
+
+    /**
+     * The degrees rotation around the vertical axis through the pivot point.
+     */
+    @ViewDebug.ExportedProperty
+    private float mRotationY = 0f;
+
+    /**
+     * The degrees rotation around the horizontal axis through the pivot point.
+     */
+    @ViewDebug.ExportedProperty
+    private float mRotationX = 0f;
 
     /**
      * The degrees rotation around the pivot point.
@@ -4888,6 +4933,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Utility function to determine if the value is far enough away from zero to be
+     * considered non-zero.
+     * @param value A floating point value to check for zero-ness
+     * @return whether the passed-in value is far enough away from zero to be considered non-zero
+     */
+    private static boolean nonzero(float value) {
+        return (value < -NONZERO_EPSILON || value > NONZERO_EPSILON);
+    }
+
+    /**
      * Recomputes the transform matrix if necessary.
      * 
      * @return True if the transform matrix is the identity matrix, false otherwise.
@@ -4896,10 +4951,34 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (mMatrixDirty) {
             // transform-related properties have changed since the last time someone
             // asked for the matrix; recalculate it with the current values
+
+            // Figure out if we need to update the pivot point
+            if ((mPrivateFlags & PIVOT_EXPLICITLY_SET) == 0) {
+                if ((mRight - mLeft) != mPrevWidth && (mBottom - mTop) != mPrevHeight) {
+                    mPrevWidth = mRight - mLeft;
+                    mPrevHeight = mBottom - mTop;
+                    mPivotX = (float) mPrevWidth / 2f;
+                    mPivotY = (float) mPrevHeight / 2f;
+                }
+            }
             mMatrix.reset();
             mMatrix.setTranslate(mTranslationX, mTranslationY);
             mMatrix.preRotate(mRotation, mPivotX, mPivotY);
             mMatrix.preScale(mScaleX, mScaleY, mPivotX, mPivotY);
+            if (nonzero(mRotationX) || nonzero(mRotationY)) {
+                if (mCamera == null) {
+                    mCamera = new Camera();
+                    matrix3D = new Matrix();
+                }
+                mCamera.save();
+                mCamera.rotateX(mRotationX);
+                mCamera.rotateY(mRotationY);
+                mCamera.getMatrix(matrix3D);
+                matrix3D.preTranslate(-mPivotX, -mPivotY);
+                matrix3D.postTranslate(mPivotX, mPivotY);
+                mMatrix.postConcat(matrix3D);
+                mCamera.restore();
+            }
             mMatrixDirty = false;
             mMatrixIsIdentity = mMatrix.isIdentity();
             mInverseMatrixDirty = true;
@@ -4948,6 +5027,64 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate();
             mRotation = rotation;
+            mMatrixDirty = true;
+            mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+            invalidate();
+        }
+    }
+
+    /**
+     * The degrees that the view is rotated around the vertical axis through the pivot point.
+     *
+     * @see #getPivotX()
+     * @see #getPivotY()
+     * @return The degrees of Y rotation.
+     */
+    public float getRotationY() {
+        return mRotationY;
+    }
+
+    /**
+     * Sets the degrees that the view is rotated around the vertical axis through pivot point.
+     *
+     * @param rotationY The degrees of Y rotation.
+     * @see #getPivotX()
+     * @see #getPivotY()
+     */
+    public void setRotationY(float rotationY) {
+        if (mRotationY != rotationY) {
+            // Double-invalidation is necessary to capture view's old and new areas
+            invalidate();
+            mRotationY = rotationY;
+            mMatrixDirty = true;
+            mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+            invalidate();
+        }
+    }
+
+    /**
+     * The degrees that the view is rotated around the horizontal axis through the pivot point.
+     *
+     * @see #getPivotX()
+     * @see #getPivotY()
+     * @return The degrees of X rotation.
+     */
+    public float getRotationX() {
+        return mRotationX;
+    }
+
+    /**
+     * Sets the degrees that the view is rotated around the horizontal axis through pivot point.
+     *
+     * @param rotationX The degrees of X rotation.
+     * @see #getPivotX()
+     * @see #getPivotY()
+     */
+    public void setRotationX(float rotationX) {
+        if (mRotationX != rotationX) {
+            // Double-invalidation is necessary to capture view's old and new areas
+            invalidate();
+            mRotationX = rotationX;
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate();
@@ -5035,6 +5172,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Sets the x location of the point around which the view is
      * {@link #setRotation(float) rotated} and {@link #setScaleX(float) scaled}.
+     * By default, the pivot point is centered on the object.
+     * Setting this property disables this behavior and causes the view to use only the
+     * explicitly set pivotX and pivotY values.
      *
      * @param pivotX The x location of the pivot point.
      * @see #getRotation()
@@ -5043,6 +5183,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #getPivotY()
      */
     public void setPivotX(float pivotX) {
+        mPrivateFlags |= PIVOT_EXPLICITLY_SET;
         if (mPivotX != pivotX) {
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate();
@@ -5069,7 +5210,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     /**
      * Sets the y location of the point around which the view is {@link #setRotation(float) rotated}
-     * and {@link #setScaleY(float) scaled}.
+     * and {@link #setScaleY(float) scaled}. By default, the pivot point is centered on the object.
+     * Setting this property disables this behavior and causes the view to use only the
+     * explicitly set pivotX and pivotY values.
      *
      * @param pivotY The y location of the pivot point.
      * @see #getRotation()
@@ -5078,6 +5221,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #getPivotY()
      */
     public void setPivotY(float pivotY) {
+        mPrivateFlags |= PIVOT_EXPLICITLY_SET;
         if (mPivotY != pivotY) {
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate();
@@ -5312,15 +5456,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * is still within the view.
      */
     private boolean pointInView(float localX, float localY, float slop) {
-        if (!hasIdentityMatrix() && mAttachInfo != null) {
-            // non-identity matrix: transform the point into the view's coordinates
-            final float[] localXY = mAttachInfo.mTmpTransformLocation;
-            localXY[0] = localX;
-            localXY[1] = localY;
-            getInverseMatrix().mapPoints(localXY);
-            localX = localXY[0];
-            localY = localXY[1];
-        }
         return localX > -slop && localY > -slop && localX < ((mRight - mLeft) + slop) &&
                 localY < ((mBottom - mTop) + slop);
     }

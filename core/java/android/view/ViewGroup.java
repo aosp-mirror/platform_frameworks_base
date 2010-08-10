@@ -905,19 +905,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         // Calculate the offset point into the target's local coordinates
-        float xc;
-        float yc;
-        if (target.hasIdentityMatrix() || mAttachInfo == null) {
-            xc = scrolledXFloat - (float) target.mLeft;
-            yc = scrolledYFloat - (float) target.mTop;
-        } else {
+        float xc = scrolledXFloat - (float) target.mLeft;
+        float yc = scrolledYFloat - (float) target.mTop;
+        if (!target.hasIdentityMatrix() && mAttachInfo != null) {
             // non-identity matrix: transform the point into the view's coordinates
             final float[] localXY = mAttachInfo.mTmpTransformLocation;
-            localXY[0] = scrolledXFloat;
-            localXY[1] = scrolledYFloat;
+            localXY[0] = xc;
+            localXY[1] = yc;
             target.getInverseMatrix().mapPoints(localXY);
-            xc = localXY[0] - (float) target.mLeft;
-            yc = localXY[1] - (float) target.mTop;
+            xc = localXY[0];
+            yc = localXY[1];
         }
 
         // if have a target, see if we're allowed to and want to intercept its
