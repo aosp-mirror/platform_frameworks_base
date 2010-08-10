@@ -266,6 +266,13 @@ void MtpDataPacket::putAUInt16(const uint16_t* values, int count) {
         putUInt16(*values++);
 }
 
+void MtpDataPacket::putAUInt16(const UInt16List* values) {
+    size_t count = (values ? values->size() : 0);
+    putUInt32(count);
+    for (size_t i = 0; i < count; i++)
+        putUInt16((*values)[i]);
+}
+
 void MtpDataPacket::putAInt32(const int32_t* values, int count) {
     putUInt32(count);
     for (int i = 0; i < count; i++)

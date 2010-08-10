@@ -17,7 +17,7 @@
 #ifndef _MTP_DEBUG_H
 #define _MTP_DEBUG_H
 
-#define LOG_NDEBUG 0
+// #define LOG_NDEBUG 0
 #include <utils/Log.h>
 
 #include "MtpTypes.h"

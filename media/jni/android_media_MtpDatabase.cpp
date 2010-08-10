@@ -40,6 +40,10 @@ static jmethodID method_beginSendObject;
 static jmethodID method_endSendObject;
 static jmethodID method_getObjectList;
 static jmethodID method_getNumObjects;
+static jmethodID method_getSupportedPlaybackFormats;
+static jmethodID method_getSupportedCaptureFormats;
+static jmethodID method_getSupportedObjectProperties;
+static jmethodID method_getSupportedDeviceProperties;
 static jmethodID method_getObjectProperty;
 static jmethodID method_getObjectInfo;
 static jmethodID method_getObjectFilePath;
@@ -86,6 +90,13 @@ public:
     virtual int                     getNumObjects(MtpStorageID storageID,
                                             MtpObjectFormat format,
                                             MtpObjectHandle parent);
+
+    // callee should delete[] the results from these
+    // results can be NULL
+    virtual MtpObjectFormatList*    getSupportedPlaybackFormats();
+    virtual MtpObjectFormatList*    getSupportedCaptureFormats();
+    virtual MtpObjectPropertyList*  getSupportedObjectProperties(MtpObjectFormat format);
+    virtual MtpDevicePropertyList*  getSupportedDeviceProperties();
 
     virtual MtpResponseCode         getObjectProperty(MtpObjectHandle handle,
                                             MtpObjectProperty property,
@@ -188,6 +199,66 @@ int MyMtpDatabase::getNumObjects(MtpStorageID storageID,
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     return env->CallIntMethod(mDatabase, method_getNumObjects,
                 (jint)storageID, (jint)format, (jint)parent);
+}
+
+MtpObjectFormatList* MyMtpDatabase::getSupportedPlaybackFormats() {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    jintArray array = (jintArray)env->CallObjectMethod(mDatabase,
+            method_getSupportedPlaybackFormats);
+    if (!array)
+        return NULL;
+    MtpObjectFormatList* list = new MtpObjectFormatList();
+    jint* formats = env->GetIntArrayElements(array, 0);
+    jsize length = env->GetArrayLength(array);
+    for (int i = 0; i < length; i++)
+        list->push(formats[i]);
+   env->ReleaseIntArrayElements(array, formats, 0);
+   return list;
+}
+
+MtpObjectFormatList* MyMtpDatabase::getSupportedCaptureFormats() {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    jintArray array = (jintArray)env->CallObjectMethod(mDatabase,
+            method_getSupportedCaptureFormats);
+    if (!array)
+        return NULL;
+    MtpObjectFormatList* list = new MtpObjectFormatList();
+    jint* formats = env->GetIntArrayElements(array, 0);
+    jsize length = env->GetArrayLength(array);
+    for (int i = 0; i < length; i++)
+        list->push(formats[i]);
+   env->ReleaseIntArrayElements(array, formats, 0);
+   return list;
+}
+
+MtpObjectPropertyList* MyMtpDatabase::getSupportedObjectProperties(MtpObjectFormat format) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    jintArray array = (jintArray)env->CallObjectMethod(mDatabase,
+            method_getSupportedObjectProperties, (jint)format);
+    if (!array)
+        return NULL;
+    MtpObjectPropertyList* list = new MtpObjectPropertyList();
+    jint* properties = env->GetIntArrayElements(array, 0);
+    jsize length = env->GetArrayLength(array);
+    for (int i = 0; i < length; i++)
+        list->push(properties[i]);
+   env->ReleaseIntArrayElements(array, properties, 0);
+   return list;
+}
+
+MtpDevicePropertyList* MyMtpDatabase::getSupportedDeviceProperties() {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    jintArray array = (jintArray)env->CallObjectMethod(mDatabase,
+            method_getSupportedDeviceProperties);
+    if (!array)
+        return NULL;
+    MtpDevicePropertyList* list = new MtpDevicePropertyList();
+    jint* properties = env->GetIntArrayElements(array, 0);
+    jsize length = env->GetArrayLength(array);
+    for (int i = 0; i < length; i++)
+        list->push(properties[i]);
+   env->ReleaseIntArrayElements(array, properties, 0);
+   return list;
 }
 
 MtpResponseCode MyMtpDatabase::getObjectProperty(MtpObjectHandle handle,
@@ -458,6 +529,26 @@ int register_android_media_MtpDatabase(JNIEnv *env)
     method_getNumObjects = env->GetMethodID(clazz, "getNumObjects", "(III)I");
     if (method_getNumObjects == NULL) {
         LOGE("Can't find getNumObjects");
+        return -1;
+    }
+    method_getSupportedPlaybackFormats = env->GetMethodID(clazz, "getSupportedPlaybackFormats", "()[I");
+    if (method_getSupportedPlaybackFormats == NULL) {
+        LOGE("Can't find getSupportedPlaybackFormats");
+        return -1;
+    }
+    method_getSupportedCaptureFormats = env->GetMethodID(clazz, "getSupportedCaptureFormats", "()[I");
+    if (method_getSupportedCaptureFormats == NULL) {
+        LOGE("Can't find getSupportedCaptureFormats");
+        return -1;
+    }
+    method_getSupportedObjectProperties = env->GetMethodID(clazz, "getSupportedObjectProperties", "(I)[I");
+    if (method_getSupportedObjectProperties == NULL) {
+        LOGE("Can't find getSupportedObjectProperties");
+        return -1;
+    }
+    method_getSupportedDeviceProperties = env->GetMethodID(clazz, "getSupportedDeviceProperties", "()[I");
+    if (method_getSupportedDeviceProperties == NULL) {
+        LOGE("Can't find getSupportedDeviceProperties");
         return -1;
     }
     method_getObjectProperty = env->GetMethodID(clazz, "getObjectProperty", "(II[J[C)I");
