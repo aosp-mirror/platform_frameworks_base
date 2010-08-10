@@ -749,7 +749,7 @@
     <string name="smv_application" msgid="295583804361236288">"Die Anwendung <xliff:g id="APPLICATION">%1$s</xliff:g> (Prozess <xliff:g id="PROCESS">%2$s</xliff:g>) hat gegen ihre selbsterzwungene StrictMode-Richtlinie verstoßen."</string>
     <string name="smv_process" msgid="5120397012047462446">"Der Prozess <xliff:g id="PROCESS">%1$s</xliff:g> hat gegen seine selbsterzwungene StrictMode-Richtlinie verstoßen."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> läuft"</string>
-    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Auswahl zum Wechseln in die Anwendung"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Auswählen zum Wechseln in die Anwendung"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Anwendung wechseln?"</string>
     <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Eine andere Anwendung wird bereits ausgeführt und muss vor dem Start einer neuen Anwendung beendet werden."</string>
     <string name="old_app_action" msgid="493129172238566282">"Zu <xliff:g id="OLD_APP">%1$s</xliff:g> zurückkehren"</string>

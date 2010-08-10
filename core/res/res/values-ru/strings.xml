@@ -173,7 +173,7 @@
     <string name="permlab_statusBar" msgid="7417192629601890791">"отключать или изменять строку состояния"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Позволяет приложению отключать строку состояния или добавлять/удалять системные значки."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"строка состояния"</string>
-    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Позволяет приложению быть строкой состояния."</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Позволяет приложению заменять строку состояния."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"разворачивать/сворачивать строку состояния"</string>
     <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Позволяет приложению разворачивать или сворачивать строку состояния."</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"перехватывать исходящие вызовы"</string>
@@ -315,7 +315,7 @@
     <string name="permlab_recordAudio" msgid="3876049771427466323">"записывать аудио"</string>
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"Позволяет приложению получать доступ к пути аудиозаписи."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"снимать фото и видео"</string>
-    <string name="permdesc_camera" msgid="6004878235852154239">"Позволяет приложению делать снимки и видео с помощью камеры. Это дает приложению возможность в любое время получать изображения с объектива камеры."</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"Позволяет приложению делать снимки и видео с помощью камеры в любое время."</string>
     <string name="permlab_brick" msgid="8337817093326370537">"отключать телефон"</string>
     <string name="permdesc_brick" msgid="5569526552607599221">"Позволяет данному приложению отключить телефон навсегда. Это очень опасно."</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"принудительно перезагружать телефон"</string>
@@ -749,7 +749,7 @@
     <string name="smv_application" msgid="295583804361236288">"Приложение <xliff:g id="APPLICATION">%1$s</xliff:g> (процесс <xliff:g id="PROCESS">%2$s</xliff:g>) нарушило собственную политику StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Процесс <xliff:g id="PROCESS">%1$s</xliff:g> нарушил собственную политику StrictMode."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Приложение <xliff:g id="APP">%1$s</xliff:g> запущено"</string>
-    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Нажмите, чтобы переключиться в приложение"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Нажмите, чтобы перейти к приложению"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Переключить приложения?"</string>
     <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Выполняется другое приложение, которое должно быть остановлено прежде, чем запускать новое."</string>
     <string name="old_app_action" msgid="493129172238566282">"Вернуться к приложению <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
