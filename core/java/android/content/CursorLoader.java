@@ -100,8 +100,8 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     public void stopLoading() {
         if (mCursor != null && !mCursor.isClosed()) {
             mCursor.close();
-            mCursor = null;
         }
+        mCursor = null;
 
         // Attempt to cancel the current load task if possible.
         cancelLoad();
