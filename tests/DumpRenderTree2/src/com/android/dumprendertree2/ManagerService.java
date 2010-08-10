@@ -93,6 +93,11 @@ public class ManagerService extends Service {
 
                 case MSG_ALL_TESTS_FINISHED:
                     mSummarizer.summarize();
+                    Intent intent = new Intent(ManagerService.this, TestsListActivity.class);
+                    intent.setAction(Intent.ACTION_SHUTDOWN);
+                    /** This flag is needed because we send the intent from the service */
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
                     break;
             }
         }
@@ -166,7 +171,8 @@ public class ManagerService extends Service {
 
         Intent intent = new Intent(this, TestsListActivity.class);
         intent.setAction(Intent.ACTION_REBOOT);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        /** This flag is needed because we send the intent from the service */
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("crashedTestIndex", mCurrentlyRunningTestIndex);
         startActivity(intent);
     }
