@@ -292,8 +292,18 @@ status_t M4vH263Encoder::read(
     if (OK != mSource->read(&mInputBuffer, options)) {
         LOGE("Failed to read from data source");
         outputBuffer->release();
+        mInputBuffer->release();
+        mInputBuffer = NULL;
         return UNKNOWN_ERROR;
     }
+
+    if (mInputBuffer->size() - ((mVideoWidth * mVideoHeight * 3) >> 1) != 0) {
+        outputBuffer->release();
+        mInputBuffer->release();
+        mInputBuffer = NULL;
+        return UNKNOWN_ERROR;
+    }
+
     int64_t timeUs;
     CHECK(mInputBuffer->meta_data()->findInt64(kKeyTime, &timeUs));
     if (mNextModTimeUs > timeUs) {
