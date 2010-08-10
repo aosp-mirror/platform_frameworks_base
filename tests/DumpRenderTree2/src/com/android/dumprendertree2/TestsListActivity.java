@@ -85,6 +85,15 @@ public class TestsListActivity extends Activity {
         new TestsListPreloaderThread(path, doneMsg).start();
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        if (intent.getAction().equals(Intent.ACTION_REBOOT)) {
+            onCrashIntent(intent);
+        } else if (intent.getAction().equals(Intent.ACTION_SHUTDOWN)) {
+            onEverythingFinishedIntent(intent);
+        }
+    }
+
     /**
      * This method handles an intent that comes from ManageService when crash is detected.
      * The intent contains an index in mTestsList of the test that crashed. TestsListActivity
@@ -94,16 +103,15 @@ public class TestsListActivity extends Activity {
      * LayoutTestExecutor runs then as usual, sending reports to ManagerService. If it
      * detects the crash it sends a new intent and the flow repeats.
      */
-    @Override
-    protected void onNewIntent(Intent intent) {
-        if (!intent.getAction().equals(Intent.ACTION_REBOOT)) {
-            return;
-        }
-
+    private void onCrashIntent(Intent intent) {
         int nextTestToRun = intent.getIntExtra("crashedTestIndex", -1) + 1;
         if (nextTestToRun > 0 && nextTestToRun <= mTotalTestCount) {
             restartExecutor(nextTestToRun);
         }
+    }
+
+    private void onEverythingFinishedIntent(Intent intent) {
+        /** TODO: Show some kind of summary to the user */
     }
 
     @Override

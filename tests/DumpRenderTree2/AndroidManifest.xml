@@ -25,8 +25,15 @@ limitations under the License.
             </intent-filter>
         </activity>
 
+        <!-- android:launchMode="singleTask" is there so we only have a one instance
+             of this activity. However, it doesn't seem to work exactly like described in the
+             documentation, because the behaviour of the application suggest
+             there is only a single task for all 3 activities. We don't understand
+             how exactly it all works, but at the moment it works just fine.
+             It can lead to some weird behaviour in the future. -->
         <activity android:name=".TestsListActivity"
-                  android:label="Tests' list activity">
+                  android:label="Tests' list activity"
+                  android:launchMode="singleTask">
         </activity>
 
         <activity android:name=".LayoutTestsExecutor"
