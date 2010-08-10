@@ -1420,8 +1420,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     static final int MEASURED_DIMENSION_SET         = 0x00000800;
     /** {@hide} */
     static final int FORCE_LAYOUT                   = 0x00001000;
-
-    private static final int LAYOUT_REQUIRED        = 0x00002000;
+    /** {@hide} */
+    static final int LAYOUT_REQUIRED                = 0x00002000;
 
     private static final int PRESSED                = 0x00004000;
 
