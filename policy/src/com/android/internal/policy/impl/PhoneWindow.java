@@ -406,7 +406,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public final void openPanel(int featureId, KeyEvent event) {
-        openPanel(getPanelState(featureId, true), event);
+        if (featureId == FEATURE_OPTIONS_PANEL && mActionBar != null &&
+                mActionBar.isOverflowReserved()) {
+            mActionBar.showOverflowMenu();
+        } else {
+            openPanel(getPanelState(featureId, true), event);
+        }
     }
 
     private void openPanel(PanelFeatureState st, KeyEvent event) {
@@ -497,7 +502,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public final void closePanel(int featureId) {
-        if (featureId == FEATURE_CONTEXT_MENU) {
+        if (featureId == FEATURE_OPTIONS_PANEL && mActionBar != null &&
+                mActionBar.isOverflowReserved()) {
+            mActionBar.hideOverflowMenu();
+        } else if (featureId == FEATURE_CONTEXT_MENU) {
             closeContextMenu();
         } else {
             closePanel(getPanelState(featureId, true), true);
