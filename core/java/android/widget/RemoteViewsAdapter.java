@@ -433,6 +433,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
                     int cacheIndex = getCacheIndex(position);
                     FrameLayout flipper = mViewCache[cacheIndex].flipper;
                     flipper.setVisibility(View.VISIBLE);
+                    flipper.setAlpha(1.0f);
 
                     if (indexInfo == null) {
                         // hide the item view and show the loading view
