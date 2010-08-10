@@ -28,8 +28,6 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-#define IGNORE_RTCP_TIME        0
-
 namespace android {
 
 static const size_t kMaxUDPSize = 1500;
@@ -61,8 +59,9 @@ struct ARTPConnection::StreamInfo {
     struct sockaddr_in mRemoteRTCPAddr;
 };
 
-ARTPConnection::ARTPConnection()
-    : mPollEventPending(false),
+ARTPConnection::ARTPConnection(uint32_t flags)
+    : mFlags(flags),
+      mPollEventPending(false),
       mLastReceiverReportTimeUs(-1) {
 }
 
@@ -280,7 +279,10 @@ void ARTPConnection::onPollStreams() {
                 sp<ARTPSource> source = s->mSources.valueAt(i);
 
                 source->addReceiverReport(buffer);
-                source->addFIR(buffer);
+
+                if (mFlags & kRegularlyRequestFIR) {
+                    source->addFIR(buffer);
+                }
             }
 
             if (buffer->size() > 0) {
@@ -405,13 +407,11 @@ status_t ARTPConnection::parseRTP(StreamInfo *s, const sp<ABuffer> &buffer) {
     buffer->setInt32Data(u16at(&data[2]));
     buffer->setRange(payloadOffset, size - payloadOffset);
 
-#if IGNORE_RTCP_TIME
-    if (!source->timeEstablished()) {
+    if ((mFlags & kFakeTimestamps) && !source->timeEstablished()) {
         source->timeUpdate(rtpTime, 0);
-        source->timeUpdate(rtpTime + 20, 0x100000000ll);
+        source->timeUpdate(rtpTime + 90000, 0x100000000ll);
         CHECK(source->timeEstablished());
     }
-#endif
 
     source->processRTPPacket(buffer);
 
@@ -533,9 +533,9 @@ status_t ARTPConnection::parseSR(
 
     sp<ARTPSource> source = findSource(s, id);
 
-#if !IGNORE_RTCP_TIME
-    source->timeUpdate(rtpTime, ntpTime);
-#endif
+    if ((mFlags & kFakeTimestamps) == 0) {
+        source->timeUpdate(rtpTime, ntpTime);
+    }
 
     return 0;
 }

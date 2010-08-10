@@ -28,7 +28,12 @@ struct ARTPSource;
 struct ASessionDescription;
 
 struct ARTPConnection : public AHandler {
-    ARTPConnection();
+    enum Flags {
+        kFakeTimestamps      = 1,
+        kRegularlyRequestFIR = 2,
+    };
+
+    ARTPConnection(uint32_t flags = 0);
 
     void addStream(
             int rtpSocket, int rtcpSocket,
@@ -55,6 +60,8 @@ private:
     };
 
     static const int64_t kSelectTimeoutUs;
+
+    uint32_t mFlags;
 
     struct StreamInfo;
     List<StreamInfo> mStreams;
