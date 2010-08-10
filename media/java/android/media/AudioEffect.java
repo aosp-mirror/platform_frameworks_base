@@ -101,15 +101,15 @@ public class AudioEffect {
     public static final int STATE_INITIALIZED = 1;
 
     // to keep in sync with
-    // frameworks/base/media/jni/audioeffect/android_media_AudioEffect.cpp
-    /**
-     * Event id for engine state change notification.
-     */
-    public static final int NATIVE_EVENT_ENABLED_STATUS = 0;
+    // frameworks/base/include/media/AudioEffect.h
     /**
      * Event id for engine control ownership change notification.
      */
-    public static final int NATIVE_EVENT_CONTROL_STATUS = 1;
+    public static final int NATIVE_EVENT_CONTROL_STATUS = 0;
+    /**
+     * Event id for engine state change notification.
+     */
+    public static final int NATIVE_EVENT_ENABLED_STATUS = 1;
     /**
      * Event id for engine parameter change notification.
      */
@@ -795,7 +795,7 @@ public class AudioEffect {
     // Interface definitions
     // --------------------
     /**
-     * The OnParameterChangeListener interface defines a method called by the AudioEffect
+     * The OnEnableStatusChangeListener interface defines a method called by the AudioEffect
      * when a the enabled state of the effect engine was changed by the controlling application.
      */
     public interface OnEnableStatusChangeListener {
@@ -922,7 +922,6 @@ public class AudioEffect {
         if (effect == null) {
             return;
         }
-
         if (effect.mNativeEventHandler != null) {
             Message m = effect.mNativeEventHandler.obtainMessage(what, arg1,
                     arg2, obj);
