@@ -412,7 +412,7 @@ MtpResponseCode MtpServer::doGetObjectPropsSupported() {
     MtpObjectFormat format = mRequest.getParameter(1);
     MtpDevicePropertyList* properties = mDatabase->getSupportedObjectProperties(format);
     mData.putAUInt16(properties);
-    delete[] properties;
+    delete properties;
     return MTP_RESPONSE_OK;
 }
 
