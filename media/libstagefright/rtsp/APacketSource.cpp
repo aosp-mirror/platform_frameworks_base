@@ -356,24 +356,10 @@ status_t APacketSource::read(
     if (!mBuffers.empty()) {
         const sp<ABuffer> buffer = *mBuffers.begin();
 
-        uint64_t ntpTime;
-        CHECK(buffer->meta()->findInt64(
-                    "ntp-time", (int64_t *)&ntpTime));
-
         MediaBuffer *mediaBuffer = new MediaBuffer(buffer->size());
-        mediaBuffer->meta_data()->setInt64(kKeyNTPTime, ntpTime);
 
-        if (mFirstAccessUnit) {
-            mFirstAccessUnit = false;
-            mFirstAccessUnitNTP = ntpTime;
-        }
-        if (ntpTime > mFirstAccessUnitNTP) {
-            ntpTime -= mFirstAccessUnitNTP;
-        } else {
-            ntpTime = 0;
-        }
-
-        int64_t timeUs = (int64_t)(ntpTime * 1E6 / (1ll << 32));
+        int64_t timeUs;
+        CHECK(buffer->meta()->findInt64("timeUs", &timeUs));
 
         mediaBuffer->meta_data()->setInt64(kKeyTime, timeUs);
 
@@ -390,9 +376,28 @@ status_t APacketSource::read(
 void APacketSource::queueAccessUnit(const sp<ABuffer> &buffer) {
     int32_t damaged;
     if (buffer->meta()->findInt32("damaged", &damaged) && damaged) {
-        // LOG(VERBOSE) << "discarding damaged AU";
+        LOG(INFO) << "discarding damaged AU";
         return;
     }
+
+    uint64_t ntpTime;
+    CHECK(buffer->meta()->findInt64(
+                "ntp-time", (int64_t *)&ntpTime));
+
+    if (mFirstAccessUnit) {
+        mFirstAccessUnit = false;
+        mFirstAccessUnitNTP = ntpTime;
+    }
+
+    if (ntpTime > mFirstAccessUnitNTP) {
+        ntpTime -= mFirstAccessUnitNTP;
+    } else {
+        ntpTime = 0;
+    }
+
+    int64_t timeUs = (int64_t)(ntpTime * 1E6 / (1ll << 32));
+
+    buffer->meta()->setInt64("timeUs", timeUs);
 
     Mutex::Autolock autoLock(mLock);
     mBuffers.push_back(buffer);
