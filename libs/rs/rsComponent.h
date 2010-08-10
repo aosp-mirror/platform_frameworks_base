@@ -51,6 +51,8 @@ public:
     void serialize(OStream *stream) const;
     void loadFromStream(IStream *stream);
 
+    bool isReference() const;
+
 protected:
     RsDataType mType;
     RsDataKind mKind;

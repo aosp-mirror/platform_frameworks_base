@@ -234,6 +234,12 @@ void Allocation::data(const void *data, uint32_t sizeBytes)
         LOGE("Allocation::data called with mismatched size expected %i, got %i", size, sizeBytes);
         return;
     }
+
+    if (mType->getElement()->getHasReferences()) {
+        incRefs(data, sizeBytes / mType->getElement()->getSizeBytes());
+        decRefs(mPtr, sizeBytes / mType->getElement()->getSizeBytes());
+    }
+
     memcpy(mPtr, data, size);
     sendDirty();
     mUploadDefered = true;
@@ -256,6 +262,12 @@ void Allocation::subData(uint32_t xoff, uint32_t count, const void *data, uint32
         mType->dumpLOGV("type info");
         return;
     }
+
+    if (mType->getElement()->getHasReferences()) {
+        incRefs(data, count);
+        decRefs(ptr, count);
+    }
+
     memcpy(ptr, data, size);
     sendDirty();
     mUploadDefered = true;
@@ -279,6 +291,10 @@ void Allocation::subData(uint32_t xoff, uint32_t yoff,
 
     for (uint32_t line=yoff; line < (yoff+h); line++) {
         uint8_t * ptr = static_cast<uint8_t *>(mPtr);
+        if (mType->getElement()->getHasReferences()) {
+            incRefs(src, w);
+            decRefs(dst, w);
+        }
         memcpy(dst, src, lineSize);
         src += lineSize;
         dst += destW * eSize;
@@ -384,6 +400,32 @@ void Allocation::sendDirty() const
 {
     for (size_t ct=0; ct < mToDirtyList.size(); ct++) {
         mToDirtyList[ct]->forceDirty();
+    }
+}
+
+void Allocation::incRefs(const void *ptr, size_t ct) const
+{
+    const uint8_t *p = static_cast<const uint8_t *>(ptr);
+    const Element *e = mType->getElement();
+    uint32_t stride = e->getSizeBytes();
+
+    while (ct > 0) {
+        e->incRefs(p);
+        ct --;
+        p += stride;
+    }
+}
+
+void Allocation::decRefs(const void *ptr, size_t ct) const
+{
+    const uint8_t *p = static_cast<const uint8_t *>(ptr);
+    const Element *e = mType->getElement();
+    uint32_t stride = e->getSizeBytes();
+
+    while (ct > 0) {
+        e->decRefs(p);
+        ct --;
+        p += stride;
     }
 }
 
