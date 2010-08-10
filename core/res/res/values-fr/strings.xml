@@ -739,8 +739,8 @@
     <string name="force_close" msgid="3653416315450806396">"Forcer la fermeture"</string>
     <string name="report" msgid="4060218260984795706">"Rapport"</string>
     <string name="wait" msgid="7147118217226317732">"Attendre"</string>
-    <string name="smv_application" msgid="295583804361236288">"L\'application <xliff:g id="APPLICATION">%1$s</xliff:g> (processus <xliff:g id="PROCESS">%2$s</xliff:g>) a enfreint ses propres règles StrictMode."</string>
-    <string name="smv_process" msgid="5120397012047462446">"Le processus <xliff:g id="PROCESS">%1$s</xliff:g> a enfreint ses propres règles StrictMode."</string>
+    <string name="smv_application" msgid="295583804361236288">"L\'application <xliff:g id="APPLICATION">%1$s</xliff:g> (processus <xliff:g id="PROCESS">%2$s</xliff:g>) a enfreint ses propres règles du mode strict."</string>
+    <string name="smv_process" msgid="5120397012047462446">"Le processus <xliff:g id="PROCESS">%1$s</xliff:g> a enfreint ses propres règles du mode strict."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> en cours d\'exécution"</string>
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Sélectionner pour changer d\'application"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Passer d\'une application à l\'autre ?"</string>

@@ -315,7 +315,7 @@
     <string name="permlab_recordAudio" msgid="3876049771427466323">"录音"</string>
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"允许应用程序访问录音路径。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"拍摄照片和视频"</string>
-    <string name="permdesc_camera" msgid="6004878235852154239">"允许应用程序使用相机拍摄照片和视频，这样应用程序可随时收集进入相机镜头中看到的图片。"</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"允许应用程序使用相机拍摄照片和视频，这样应用程序可随时收集进入相机镜头中的图片。"</string>
     <string name="permlab_brick" msgid="8337817093326370537">"永久停用手机"</string>
     <string name="permdesc_brick" msgid="5569526552607599221">"允许应用程序永久停用整个手机，这非常危险。"</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"强行重新启动手机"</string>
@@ -740,7 +740,7 @@
     <string name="report" msgid="4060218260984795706">"报告"</string>
     <string name="wait" msgid="7147118217226317732">"等待"</string>
     <string name="smv_application" msgid="295583804361236288">"应用程序<xliff:g id="APPLICATION">%1$s</xliff:g>（<xliff:g id="PROCESS">%2$s</xliff:g> 进程）违反了自我强制执行的严格模式 (StrictMode) 政策。"</string>
-    <string name="smv_process" msgid="5120397012047462446">"进程 <xliff:g id="PROCESS">%1$s</xliff:g> 违反了自我强制执行的严格模式 (StrictMode) 政策"</string>
+    <string name="smv_process" msgid="5120397012047462446">"进程 <xliff:g id="PROCESS">%1$s</xliff:g> 违反了自我强制执行的严格模式 (StrictMode) 政策。"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g>正在运行"</string>
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"选择以切换到该应用程序"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"要切换应用程序吗？"</string>
