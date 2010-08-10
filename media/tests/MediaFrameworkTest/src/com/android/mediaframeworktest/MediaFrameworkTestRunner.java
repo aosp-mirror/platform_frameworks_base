@@ -25,6 +25,11 @@ import com.android.mediaframeworktest.functional.MediaRecorderTest;
 import com.android.mediaframeworktest.functional.SimTonesTest;
 import com.android.mediaframeworktest.functional.MediaPlayerInvokeTest;
 import com.android.mediaframeworktest.functional.MediaAudioManagerTest;
+import com.android.mediaframeworktest.functional.MediaAudioEffectTest;
+import com.android.mediaframeworktest.functional.MediaBassBoostTest;
+import com.android.mediaframeworktest.functional.MediaEqualizerTest;
+import com.android.mediaframeworktest.functional.MediaVirtualizerTest;
+import com.android.mediaframeworktest.functional.MediaVisualizerTest;
 import junit.framework.TestSuite;
 
 import android.test.InstrumentationTestRunner;
@@ -55,6 +60,11 @@ public class MediaFrameworkTestRunner extends InstrumentationTestRunner {
         suite.addTestSuite(MediaMimeTest.class);
         suite.addTestSuite(MediaPlayerInvokeTest.class);
         suite.addTestSuite(MediaAudioManagerTest.class);
+        suite.addTestSuite(MediaAudioEffectTest.class);
+        suite.addTestSuite(MediaBassBoostTest.class);
+        suite.addTestSuite(MediaEqualizerTest.class);
+        suite.addTestSuite(MediaVirtualizerTest.class);
+        suite.addTestSuite(MediaVisualizerTest.class);
         return suite;
     }
 
