@@ -854,18 +854,6 @@ void AwesomePlayer::setVideoSource(sp<MediaSource> source) {
 
 status_t AwesomePlayer::initVideoDecoder() {
     uint32_t flags = 0;
-#if 0
-    if (mRTPSession != NULL) {
-        // XXX hack.
-
-        const char *mime;
-        CHECK(mVideoTrack->getFormat()->findCString(kKeyMIMEType, &mime));
-        if (!strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC)) {
-            flags |= OMXCodec::kPreferSoftwareCodecs;
-        }
-    }
-#endif
-
     mVideoSource = OMXCodec::Create(
             mClient.interface(), mVideoTrack->getFormat(),
             false, // createEncoder
