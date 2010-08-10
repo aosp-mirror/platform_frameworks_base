@@ -56,17 +56,17 @@ static const MtpOperationCode kSupportedOperationCodes[] = {
 //    MTP_OPERATION_SET_OBJECT_PROTECTION,
 //    MTP_OPERATION_POWER_DOWN,
 //    MTP_OPERATION_GET_DEVICE_PROP_DESC,
-//    MTP_OPERATION_GET_DEVICE_PROP_VALUE,
-//    MTP_OPERATION_SET_DEVICE_PROP_VALUE,
-//    MTP_OPERATION_RESET_DEVICE_PROP_VALUE,
+    MTP_OPERATION_GET_DEVICE_PROP_VALUE,
+    MTP_OPERATION_SET_DEVICE_PROP_VALUE,
+    MTP_OPERATION_RESET_DEVICE_PROP_VALUE,
 //    MTP_OPERATION_TERMINATE_OPEN_CAPTURE,
 //    MTP_OPERATION_MOVE_OBJECT,
 //    MTP_OPERATION_COPY_OBJECT,
 //    MTP_OPERATION_GET_PARTIAL_OBJECT,
 //    MTP_OPERATION_INITIATE_OPEN_CAPTURE,
     MTP_OPERATION_GET_OBJECT_PROPS_SUPPORTED,
-//    MTP_OPERATION_GET_OBJECT_PROP_DESC,
-    MTP_OPERATION_GET_OBJECT_PROP_VALUE,
+    MTP_OPERATION_GET_OBJECT_PROP_DESC,
+//    MTP_OPERATION_GET_OBJECT_PROP_VALUE,
 //    MTP_OPERATION_SET_OBJECT_PROP_VALUE,
     MTP_OPERATION_GET_OBJECT_REFERENCES,
     MTP_OPERATION_SET_OBJECT_REFERENCES,
@@ -91,7 +91,6 @@ MtpServer::MtpServer(int fd, MtpDatabase* database,
         mSendObjectFormat(0),
         mSendObjectFileSize(0)
 {
-    initObjectProperties();
 }
 
 MtpServer::~MtpServer() {
@@ -136,7 +135,9 @@ void MtpServer::run() {
 
         // FIXME need to generalize this
         bool dataIn = (operation == MTP_OPERATION_SEND_OBJECT_INFO
-                    || operation == MTP_OPERATION_SET_OBJECT_REFERENCES);
+                    || operation == MTP_OPERATION_SET_OBJECT_REFERENCES
+                    || operation == MTP_OPERATION_SET_OBJECT_PROP_VALUE
+                    || operation == MTP_OPERATION_SET_DEVICE_PROP_VALUE);
         if (dataIn) {
             int ret = mData.read(fd);
             if (ret < 0) {
@@ -158,7 +159,6 @@ void MtpServer::run() {
                 mData.setOperationCode(operation);
                 mData.setTransactionID(transaction);
                 LOGV("sending data:");
-                mData.dump();
                 ret = mData.write(fd);
                 if (ret < 0) {
                     LOGE("request write returned %d, errno: %d", ret, errno);
@@ -187,24 +187,6 @@ void MtpServer::run() {
     }
 }
 
-MtpProperty* MtpServer::getObjectProperty(MtpPropertyCode propCode) {
-    for (int i = 0; i < mObjectProperties.size(); i++) {
-        MtpProperty* property = mObjectProperties[i];
-        if (property->getPropertyCode() == propCode)
-            return property;
-    }
-    return NULL;
-}
-
-MtpProperty* MtpServer::getDeviceProperty(MtpPropertyCode propCode) {
-    for (int i = 0; i < mDeviceProperties.size(); i++) {
-        MtpProperty* property = mDeviceProperties[i];
-        if (property->getPropertyCode() == propCode)
-            return property;
-    }
-    return NULL;
-}
-
 void MtpServer::sendObjectAdded(MtpObjectHandle handle) {
     if (mSessionOpen) {
         LOGD("sendObjectAdded %d\n", handle);
@@ -225,14 +207,6 @@ void MtpServer::sendObjectRemoved(MtpObjectHandle handle) {
         int ret = mEvent.write(mFD);
         LOGD("mEvent.write returned %d\n", ret);
     }
-}
-
-void MtpServer::initObjectProperties() {
-    mObjectProperties.push(new MtpProperty(MTP_PROPERTY_STORAGE_ID, MTP_TYPE_UINT32));
-    mObjectProperties.push(new MtpProperty(MTP_PROPERTY_OBJECT_FORMAT, MTP_TYPE_UINT16));
-    mObjectProperties.push(new MtpProperty(MTP_PROPERTY_OBJECT_SIZE, MTP_TYPE_UINT64));
-    mObjectProperties.push(new MtpProperty(MTP_PROPERTY_OBJECT_FILE_NAME, MTP_TYPE_STR));
-    mObjectProperties.push(new MtpProperty(MTP_PROPERTY_PARENT_OBJECT, MTP_TYPE_UINT32));
 }
 
 bool MtpServer::handleRequest() {
@@ -280,6 +254,18 @@ bool MtpServer::handleRequest() {
             break;
         case MTP_OPERATION_GET_OBJECT_PROP_VALUE:
             response = doGetObjectPropValue();
+            break;
+        case MTP_OPERATION_SET_OBJECT_PROP_VALUE:
+            response = doSetObjectPropValue();
+            break;
+        case MTP_OPERATION_GET_DEVICE_PROP_VALUE:
+            response = doGetDevicePropValue();
+            break;
+        case MTP_OPERATION_SET_DEVICE_PROP_VALUE:
+            response = doSetDevicePropValue();
+            break;
+        case MTP_OPERATION_RESET_DEVICE_PROP_VALUE:
+            response = doResetDevicePropValue();
             break;
         case MTP_OPERATION_GET_OBJECT_INFO:
             response = doGetObjectInfo();
@@ -456,13 +442,15 @@ MtpResponseCode MtpServer::doGetObjectReferences() {
     if (!mSessionOpen)
         return MTP_RESPONSE_SESSION_NOT_OPEN;
     MtpStorageID handle = mRequest.getParameter(1);
+
+    // FIXME - check for invalid object handle
     MtpObjectHandleList* handles = mDatabase->getObjectReferences(handle);
-    if (!handles) {
+    if (handles) {
+        mData.putAUInt32(handles);
+        delete handles;
+    } else {
         mData.putEmptyArray();
-        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
     }
-    mData.putAUInt32(handles);
-    delete handles;
     return MTP_RESPONSE_OK;
 }
 
@@ -479,8 +467,43 @@ MtpResponseCode MtpServer::doSetObjectReferences() {
 MtpResponseCode MtpServer::doGetObjectPropValue() {
     MtpObjectHandle handle = mRequest.getParameter(1);
     MtpObjectProperty property = mRequest.getParameter(2);
+    LOGD("GetObjectPropValue %d %s\n", handle,
+            MtpDebug::getObjectPropCodeName(property));
 
-    return mDatabase->getObjectProperty(handle, property, mData);
+    return mDatabase->getObjectPropertyValue(handle, property, mData);
+}
+
+MtpResponseCode MtpServer::doSetObjectPropValue() {
+    MtpObjectHandle handle = mRequest.getParameter(1);
+    MtpObjectProperty property = mRequest.getParameter(2);
+    LOGD("SetObjectPropValue %d %s\n", handle,
+            MtpDebug::getObjectPropCodeName(property));
+
+    return mDatabase->setObjectPropertyValue(handle, property, mData);
+}
+
+MtpResponseCode MtpServer::doGetDevicePropValue() {
+    MtpDeviceProperty property = mRequest.getParameter(1);
+    LOGD("GetDevicePropValue %s\n",
+            MtpDebug::getDevicePropCodeName(property));
+
+    return mDatabase->getDevicePropertyValue(property, mData);
+}
+
+MtpResponseCode MtpServer::doSetDevicePropValue() {
+    MtpDeviceProperty property = mRequest.getParameter(1);
+    LOGD("SetDevicePropValue %s\n",
+            MtpDebug::getDevicePropCodeName(property));
+
+    return mDatabase->setDevicePropertyValue(property, mData);
+}
+
+MtpResponseCode MtpServer::doResetDevicePropValue() {
+    MtpDeviceProperty property = mRequest.getParameter(1);
+    LOGD("ResetDevicePropValue %s\n",
+            MtpDebug::getDevicePropCodeName(property));
+
+    return mDatabase->resetDeviceProperty(property);
 }
 
 MtpResponseCode MtpServer::doGetObjectInfo() {
@@ -592,7 +615,7 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
     }
 
     mResponse.setParameter(1, storageID);
-    mResponse.setParameter(2, (parent == 0 ? 0xFFFFFFFF: parent));
+    mResponse.setParameter(2, parent);
     mResponse.setParameter(3, handle);
 
     return MTP_RESPONSE_OK;
@@ -677,11 +700,24 @@ MtpResponseCode MtpServer::doDeleteObject() {
 MtpResponseCode MtpServer::doGetObjectPropDesc() {
     MtpObjectProperty propCode = mRequest.getParameter(1);
     MtpObjectFormat format = mRequest.getParameter(2);
-    MtpProperty* property = getObjectProperty(propCode);
+    LOGD("GetObjectPropDesc %s %s\n", MtpDebug::getObjectPropCodeName(propCode),
+                                        MtpDebug::getFormatCodeName(format));
+    MtpProperty* property = mDatabase->getObjectPropertyDesc(propCode, format);
     if (!property)
         return MTP_RESPONSE_OBJECT_PROP_NOT_SUPPORTED;
-
     property->write(mData);
+    delete property;
+    return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MtpServer::doGetDevicePropDesc() {
+    MtpDeviceProperty propCode = mRequest.getParameter(1);
+    LOGD("GetDevicePropDesc %s\n", MtpDebug::getDevicePropCodeName(propCode));
+    MtpProperty* property = mDatabase->getDevicePropertyDesc(propCode);
+    if (!property)
+        return MTP_RESPONSE_DEVICE_PROP_NOT_SUPPORTED;
+    property->write(mData);
+    delete property;
     return MTP_RESPONSE_OK;
 }
 

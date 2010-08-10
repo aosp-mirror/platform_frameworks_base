@@ -28,7 +28,6 @@
 namespace android {
 
 class MtpDatabase;
-class MtpProperty;
 class MtpStorage;
 
 class MtpServer {
@@ -57,9 +56,6 @@ private:
 
     MtpStorageList      mStorages;
 
-    MtpPropertyList     mObjectProperties;
-    MtpPropertyList     mDeviceProperties;
-
     // handle for new object, set by SendObjectInfo and used by SendObject
     MtpObjectHandle     mSendObjectHandle;
     MtpObjectFormat     mSendObjectFormat;
@@ -76,15 +72,10 @@ public:
     MtpStorage*         getStorage(MtpStorageID id);
     void                run();
 
-    MtpProperty*        getObjectProperty(MtpPropertyCode propCode);
-    MtpProperty*        getDeviceProperty(MtpPropertyCode propCode);
-
     void                sendObjectAdded(MtpObjectHandle handle);
     void                sendObjectRemoved(MtpObjectHandle handle);
 
 private:
-    void                initObjectProperties();
-
     bool                handleRequest();
 
     MtpResponseCode     doGetDeviceInfo();
@@ -98,12 +89,17 @@ private:
     MtpResponseCode     doGetObjectReferences();
     MtpResponseCode     doSetObjectReferences();
     MtpResponseCode     doGetObjectPropValue();
+    MtpResponseCode     doSetObjectPropValue();
+    MtpResponseCode     doGetDevicePropValue();
+    MtpResponseCode     doSetDevicePropValue();
+    MtpResponseCode     doResetDevicePropValue();
     MtpResponseCode     doGetObjectInfo();
     MtpResponseCode     doGetObject();
     MtpResponseCode     doSendObjectInfo();
     MtpResponseCode     doSendObject();
     MtpResponseCode     doDeleteObject();
     MtpResponseCode     doGetObjectPropDesc();
+    MtpResponseCode     doGetDevicePropDesc();
 };
 
 }; // namespace android
