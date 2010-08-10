@@ -1764,7 +1764,7 @@ public class Activity extends ContextThemeWrapper
      */
     private void initActionBar() {
         Window window = getWindow();
-        if (!window.hasFeature(Window.FEATURE_ACTION_BAR) || mActionBar != null) {
+        if (isChild() || !window.hasFeature(Window.FEATURE_ACTION_BAR) || mActionBar != null) {
             return;
         }
         
