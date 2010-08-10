@@ -35,6 +35,7 @@ public class MediaNames {
     public static final String WAV = "/sdcard/media_api/music/rings_2ch.wav";
     public static final String AMR = "/sdcard/media_api/music/test_amr_ietf.amr";
     public static final String OGG = "/sdcard/media_api/music/Revelation.ogg";
+    public static final String SINE_200_1000 = "/sdcard/media_api/music/sine_200+1000Hz_44K_mo.wav";
   
     public static final int MP3CBR_LENGTH = 71000;
     public static final int MP3VBR_LENGTH = 71000;
