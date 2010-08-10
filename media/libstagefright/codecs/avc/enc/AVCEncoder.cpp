@@ -391,8 +391,18 @@ status_t AVCEncoder::read(
         if (err != OK) {
             LOGE("Failed to read input video frame: %d", err);
             outputBuffer->release();
+            mInputBuffer->release();
+            mInputBuffer = NULL;
             return err;
         }
+
+        if (mInputBuffer->size() - ((mVideoWidth * mVideoHeight * 3) >> 1) != 0) {
+            outputBuffer->release();
+            mInputBuffer->release();
+            mInputBuffer = NULL;
+            return UNKNOWN_ERROR;
+        }
+
         int64_t timeUs;
         CHECK(mInputBuffer->meta_data()->findInt64(kKeyTime, &timeUs));
         outputBuffer->meta_data()->setInt64(kKeyTime, timeUs);
