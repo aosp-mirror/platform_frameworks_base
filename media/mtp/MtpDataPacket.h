@@ -74,6 +74,7 @@ public:
     void                putAUInt8(const uint8_t* values, int count);
     void                putAInt16(const int16_t* values, int count);
     void                putAUInt16(const uint16_t* values, int count);
+    void                putAUInt16(const UInt16List* values);
     void                putAInt32(const int32_t* values, int count);
     void                putAUInt32(const uint32_t* values, int count);
     void                putAUInt32(const UInt32List* list);

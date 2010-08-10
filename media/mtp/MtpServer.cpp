@@ -78,46 +78,6 @@ static const MtpEventCode kSupportedEventCodes[] = {
     MTP_EVENT_OBJECT_REMOVED,
 };
 
-static const MtpObjectProperty kSupportedObjectProperties[] = {
-    MTP_PROPERTY_STORAGE_ID,
-    MTP_PROPERTY_OBJECT_FORMAT,
-    MTP_PROPERTY_OBJECT_SIZE,
-    MTP_PROPERTY_OBJECT_FILE_NAME,
-    MTP_PROPERTY_PARENT_OBJECT,
-};
-
-static const MtpObjectFormat kSupportedPlaybackFormats[] = {
-    // MTP_FORMAT_UNDEFINED,
-    MTP_FORMAT_ASSOCIATION,
-    // MTP_FORMAT_TEXT,
-    // MTP_FORMAT_HTML,
-    MTP_FORMAT_MP3,
-    //MTP_FORMAT_AVI,
-    MTP_FORMAT_MPEG,
-    // MTP_FORMAT_ASF,
-    MTP_FORMAT_EXIF_JPEG,
-    MTP_FORMAT_TIFF_EP,
-    // MTP_FORMAT_BMP,
-    MTP_FORMAT_GIF,
-    MTP_FORMAT_JFIF,
-    MTP_FORMAT_PNG,
-    MTP_FORMAT_TIFF,
-    MTP_FORMAT_WMA,
-    MTP_FORMAT_OGG,
-    MTP_FORMAT_AAC,
-    // MTP_FORMAT_FLAC,
-    // MTP_FORMAT_WMV,
-    MTP_FORMAT_MP4_CONTAINER,
-    MTP_FORMAT_MP2,
-    MTP_FORMAT_3GP_CONTAINER,
-    // MTP_FORMAT_ABSTRACT_AUDIO_ALBUM,
-    MTP_FORMAT_ABSTRACT_AV_PLAYLIST,
-    MTP_FORMAT_WPL_PLAYLIST,
-    MTP_FORMAT_M3U_PLAYLIST,
-    // MTP_FORMAT_MPL_PLAYLIST,
-    MTP_FORMAT_PLS_PLAYLIST,
-};
-
 MtpServer::MtpServer(int fd, MtpDatabase* database,
                     int fileGroup, int filePerm, int directoryPerm)
     :   mFD(fd),
@@ -354,6 +314,10 @@ MtpResponseCode MtpServer::doGetDeviceInfo() {
     MtpStringBuffer   string;
     char prop_value[PROPERTY_VALUE_MAX];
 
+    MtpObjectFormatList* playbackFormats = mDatabase->getSupportedPlaybackFormats();
+    MtpObjectFormatList* captureFormats = mDatabase->getSupportedCaptureFormats();
+    MtpDevicePropertyList* deviceProperties = mDatabase->getSupportedDeviceProperties();
+
     // fill in device info
     mData.putUInt16(MTP_STANDARD_VERSION);
     mData.putUInt32(6); // MTP Vendor Extension ID
@@ -365,10 +329,9 @@ MtpResponseCode MtpServer::doGetDeviceInfo() {
             sizeof(kSupportedOperationCodes) / sizeof(uint16_t)); // Operations Supported
     mData.putAUInt16(kSupportedEventCodes,
             sizeof(kSupportedEventCodes) / sizeof(uint16_t)); // Events Supported
-    mData.putEmptyArray(); // Device Properties Supported
-    mData.putEmptyArray(); // Capture Formats
-    mData.putAUInt16(kSupportedPlaybackFormats,
-            sizeof(kSupportedPlaybackFormats) / sizeof(uint16_t)); // Playback Formats
+    mData.putAUInt16(deviceProperties); // Device Properties Supported
+    mData.putAUInt16(captureFormats); // Capture Formats
+    mData.putAUInt16(playbackFormats);  // Playback Formats
     // FIXME
     string.set("Google, Inc.");
     mData.putString(string);   // Manufacturer
@@ -382,6 +345,10 @@ MtpResponseCode MtpServer::doGetDeviceInfo() {
     property_get("ro.serialno", prop_value, "????????");
     string.set(prop_value);
     mData.putString(string);   // Serial Number
+
+    delete playbackFormats;
+    delete captureFormats;
+    delete deviceProperties;
 
     return MTP_RESPONSE_OK;
 }
@@ -443,8 +410,9 @@ MtpResponseCode MtpServer::doGetObjectPropsSupported() {
     if (!mSessionOpen)
         return MTP_RESPONSE_SESSION_NOT_OPEN;
     MtpObjectFormat format = mRequest.getParameter(1);
-    mData.putAUInt16(kSupportedObjectProperties,
-            sizeof(kSupportedObjectProperties) / sizeof(uint16_t));
+    MtpDevicePropertyList* properties = mDatabase->getSupportedObjectProperties(format);
+    mData.putAUInt16(properties);
+    delete[] properties;
     return MTP_RESPONSE_OK;
 }
 

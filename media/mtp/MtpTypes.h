@@ -78,6 +78,7 @@ typedef Vector<int16_t> Int16List;
 typedef Vector<int32_t> Int32List;
 typedef Vector<int64_t> Int64List;
 
+typedef UInt16List MtpObjectPropertyList;
 typedef UInt16List MtpDevicePropertyList;
 typedef UInt16List MtpObjectFormatList;
 typedef UInt32List MtpObjectHandleList;

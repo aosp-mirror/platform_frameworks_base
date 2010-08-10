@@ -51,6 +51,13 @@ public:
                                             MtpObjectFormat format,
                                             MtpObjectHandle parent) = 0;
 
+    // callee should delete[] the results from these
+    // results can be NULL
+    virtual MtpObjectFormatList*    getSupportedPlaybackFormats() = 0;
+    virtual MtpObjectFormatList*    getSupportedCaptureFormats() = 0;
+    virtual MtpObjectPropertyList*  getSupportedObjectProperties(MtpObjectFormat format) = 0;
+    virtual MtpDevicePropertyList*  getSupportedDeviceProperties() = 0;
+
     virtual MtpResponseCode         getObjectProperty(MtpObjectHandle handle,
                                             MtpObjectProperty property,
                                             MtpDataPacket& packet) = 0;

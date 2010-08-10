@@ -308,6 +308,13 @@ public final class Mtp
         public static final int FORMAT_ABSTRACT_CONTACT = 0xBB81;
         public static final int FORMAT_VCARD_2 = 0xBB82;
 
+        // Object properties we support
+        public static final int PROPERTY_STORAGE_ID = 0xDC01;
+        public static final int PROPERTY_OBJECT_FORMAT = 0xDC02;
+        public static final int PROPERTY_OBJECT_SIZE = 0xDC04;
+        public static final int PROPERTY_OBJECT_FILE_NAME = 0xDC07;
+        public static final int PROPERTY_PARENT_OBJECT = 0xDC0B;
+
         /**
          * Object is not protected. It may be modified and deleted, and its properties
          * may be modified.

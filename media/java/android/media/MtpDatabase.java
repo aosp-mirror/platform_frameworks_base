@@ -220,6 +220,50 @@ public class MtpDatabase {
         return -1;
     }
 
+    private int[] getSupportedPlaybackFormats() {
+        return new int[] {
+            Mtp.Object.FORMAT_ASSOCIATION,
+            Mtp.Object.FORMAT_MP3,
+            Mtp.Object.FORMAT_MPEG,
+            Mtp.Object.FORMAT_EXIF_JPEG,
+            Mtp.Object.FORMAT_TIFF_EP,
+            Mtp.Object.FORMAT_GIF,
+            Mtp.Object.FORMAT_JFIF,
+            Mtp.Object.FORMAT_PNG,
+            Mtp.Object.FORMAT_TIFF,
+            Mtp.Object.FORMAT_WMA,
+            Mtp.Object.FORMAT_OGG,
+            Mtp.Object.FORMAT_AAC,
+            Mtp.Object.FORMAT_MP4_CONTAINER,
+            Mtp.Object.FORMAT_MP2,
+            Mtp.Object.FORMAT_3GP_CONTAINER,
+            Mtp.Object.FORMAT_ABSTRACT_AV_PLAYLIST,
+            Mtp.Object.FORMAT_WPL_PLAYLIST,
+            Mtp.Object.FORMAT_M3U_PLAYLIST,
+            Mtp.Object.FORMAT_PLS_PLAYLIST,
+        };
+    }
+
+    private int[] getSupportedCaptureFormats() {
+        // no capture formats yet
+        return null;
+    }
+
+    private int[] getSupportedObjectProperties(int handle) {
+        return new int[] {
+            Mtp.Object.PROPERTY_STORAGE_ID,
+            Mtp.Object.PROPERTY_OBJECT_FORMAT,
+            Mtp.Object.PROPERTY_OBJECT_SIZE,
+            Mtp.Object.PROPERTY_OBJECT_FILE_NAME,
+            Mtp.Object.PROPERTY_PARENT_OBJECT,
+        };
+    }
+
+    private int[] getSupportedDeviceProperties() {
+        // no device properties yet
+        return null;
+    }
+
     private int getObjectProperty(int handle, int property,
                             long[] outIntValue, char[] outStringValue) {
         Log.d(TAG, "getObjectProperty: " + property);
