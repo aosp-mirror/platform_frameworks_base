@@ -1748,13 +1748,11 @@ public class Activity extends ContextThemeWrapper
     
     /**
      * Retrieve a reference to this activity's ActionBar.
-     * 
-     * <p><em>Note:</em> The ActionBar is initialized when a content view
-     * is set. This function will return null if called before {@link #setContentView}
-     * or {@link #addContentView}.
+     *
      * @return The Activity's ActionBar, or null if it does not have one.
      */
     public ActionBar getActionBar() {
+        initActionBar();
         return mActionBar;
     }
     
@@ -4093,6 +4091,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     public ActionMode onStartActionMode(ActionMode.Callback callback) {
+        initActionBar();
         if (mActionBar != null) {
             return mActionBar.startActionMode(callback);
         }
