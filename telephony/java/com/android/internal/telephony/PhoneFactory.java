@@ -24,6 +24,8 @@ import android.util.Log;
 
 import com.android.internal.telephony.cdma.CDMAPhone;
 import com.android.internal.telephony.gsm.GSMPhone;
+import com.android.internal.telephony.sip.SipPhone;
+import com.android.internal.telephony.sip.SipPhoneFactory;
 
 /**
  * {@hide}
@@ -174,5 +176,14 @@ public class PhoneFactory {
             Phone phone = new GSMPhone(sContext, sCommandsInterface, sPhoneNotifier);
             return phone;
         }
+    }
+
+    /**
+     * Makes a {@link SipPhone} object.
+     * @param sipUri the local SIP URI the phone runs on
+     * @return the {@code SipPhone} object or null if the SIP URI is not valid
+     */
+    public static SipPhone makeSipPhone(String sipUri) {
+        return SipPhoneFactory.makePhone(sipUri, sContext, sPhoneNotifier);
     }
 }
