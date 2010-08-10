@@ -1685,6 +1685,14 @@ void OMXCodec::on_message(const omx_message &msg) {
 
                 MediaBuffer *buffer = info->mMediaBuffer;
 
+                if (msg.u.extended_buffer_data.range_offset
+                        + msg.u.extended_buffer_data.range_length
+                            > buffer->size()) {
+                    CODEC_LOGE(
+                            "Codec lied about its buffer size requirements, "
+                            "sending a buffer larger than the originally "
+                            "advertised size in FILL_BUFFER_DONE!");
+                }
                 buffer->set_range(
                         msg.u.extended_buffer_data.range_offset,
                         msg.u.extended_buffer_data.range_length);
