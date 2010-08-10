@@ -572,13 +572,12 @@ final class WebViewCore {
     /**
      * Modifies the current selection.
      *
-     * @param alter Specifies how to alter the selection.
      * @param direction The direction in which to alter the selection.
      * @param granularity The granularity of the selection modification.
      *
      * @return The selection string.
      */
-    private native String nativeModifySelection(String alter, String direction, String granularity);
+    private native String nativeModifySelection(int direction, int granularity);
 
     // EventHub for processing messages
     private final EventHub mEventHub;
@@ -722,12 +721,6 @@ final class WebViewCore {
         String mOrigin;
         boolean mAllow;
         boolean mRemember;
-    }
-
-    static class ModifySelectionData {
-        String mAlter;
-        String mDirection;
-        String mGranularity;
     }
 
         static final String[] HandlerDebugString = {
@@ -1270,16 +1263,9 @@ final class WebViewCore {
                             break;
 
                         case MODIFY_SELECTION:
-                            ModifySelectionData modifySelectionData =
-                                (ModifySelectionData) msg.obj;
-                            String selectionString = nativeModifySelection(
-                                    modifySelectionData.mAlter,
-                                    modifySelectionData.mDirection,
-                                    modifySelectionData.mGranularity);
-
-                            mWebView.mPrivateHandler.obtainMessage(
-                                    WebView.SELECTION_STRING_CHANGED, selectionString)
-                                    .sendToTarget();
+                            String selectionString = nativeModifySelection(msg.arg1, msg.arg2);
+                            mWebView.mPrivateHandler.obtainMessage(WebView.SELECTION_STRING_CHANGED,
+                                    selectionString).sendToTarget();
                             break;
 
                         case LISTBOX_CHOICES:
