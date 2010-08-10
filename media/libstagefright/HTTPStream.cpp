@@ -68,7 +68,7 @@ status_t HTTPStream::connect(const char *server, int port) {
         return UNKNOWN_ERROR;
     }
 
-    setReceiveTimeout(5);  // Time out reads after 5 secs by default
+    setReceiveTimeout(30);  // Time out reads after 30 secs by default
 
     mState = CONNECTING;
 
@@ -158,7 +158,7 @@ status_t HTTPStream::send(const char *data) {
 // The workaround accepts both behaviours but could potentially break
 // legitimate responses that use a single newline to "fold" headers, which is
 // why it's not yet on by default.
-#define WORKAROUND_FOR_MISSING_CR       0
+#define WORKAROUND_FOR_MISSING_CR       1
 
 status_t HTTPStream::receive_line(char *line, size_t size) {
     if (mState != CONNECTED) {
