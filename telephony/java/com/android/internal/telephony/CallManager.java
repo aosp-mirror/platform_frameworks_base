@@ -24,6 +24,7 @@ import android.os.RegistrantList;
 import android.telephony.PhoneStateListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -160,6 +161,14 @@ public final class CallManager {
      */
     public static CallManager getInstance() {
         return INSTANCE;
+    }
+
+    /**
+     * Returns all the registered phone objects.
+     * @return all the registered phone objects.
+     */
+    public List<Phone> getAllPhones() {
+        return Collections.unmodifiableList(mPhones);
     }
 
     /**
