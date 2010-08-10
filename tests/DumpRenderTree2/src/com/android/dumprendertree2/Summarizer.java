@@ -205,6 +205,14 @@ public class Summarizer {
         createTxtSummary();
     }
 
+    public void reset() {
+        mCrashedTestsCount = 0;
+        mFailedNotIgnoredTests.clear();
+        mIgnoredTests.clear();
+        mPassedNotIgnoredTests.clear();
+        mTitleString = null;
+    }
+
     private void createTxtSummary() {
         StringBuilder txt = new StringBuilder();
 
