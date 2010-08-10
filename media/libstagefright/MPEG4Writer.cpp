@@ -1377,91 +1377,6 @@ void MPEG4Writer::Track::threadEntry() {
 
             mGotAllCodecSpecificData = true;
             continue;
-        } else if (!mGotAllCodecSpecificData &&
-                count == 1 && mIsMPEG4 && mCodecSpecificData == NULL) {
-            // The TI mpeg4 encoder does not properly set the
-            // codec-specific-data flag.
-
-            const uint8_t *data =
-                (const uint8_t *)buffer->data() + buffer->range_offset();
-
-            const size_t size = buffer->range_length();
-
-            size_t offset = 0;
-            while (offset + 3 < size) {
-                if (data[offset] == 0x00 && data[offset + 1] == 0x00
-                    && data[offset + 2] == 0x01 && data[offset + 3] == 0xb6) {
-                    break;
-                }
-
-                ++offset;
-            }
-
-            // CHECK(offset + 3 < size);
-            if (offset + 3 >= size) {
-                // XXX assume the entire first chunk of data is the codec specific
-                // data.
-                offset = size;
-            }
-
-            mCodecSpecificDataSize = offset;
-            mCodecSpecificData = malloc(offset);
-            memcpy(mCodecSpecificData, data, offset);
-
-            buffer->set_range(buffer->range_offset() + offset, size - offset);
-
-            if (size == offset) {
-                buffer->release();
-                buffer = NULL;
-
-                continue;
-            }
-
-            mGotAllCodecSpecificData = true;
-        } else if (!mGotAllCodecSpecificData && mIsAvc && count < 3) {
-            // The TI video encoder does not flag codec specific data
-            // as such and also splits up SPS and PPS across two buffers.
-
-            const uint8_t *data =
-                (const uint8_t *)buffer->data() + buffer->range_offset();
-
-            size_t size = buffer->range_length();
-
-            CHECK(count == 2 || mCodecSpecificData == NULL);
-
-            size_t offset = mCodecSpecificDataSize;
-            mCodecSpecificDataSize += size + 4;
-            mCodecSpecificData =
-                realloc(mCodecSpecificData, mCodecSpecificDataSize);
-
-            memcpy((uint8_t *)mCodecSpecificData + offset,
-                   "\x00\x00\x00\x01", 4);
-
-            memcpy((uint8_t *)mCodecSpecificData + offset + 4, data, size);
-
-            buffer->release();
-            buffer = NULL;
-
-            if (count == 2) {
-                void *tmp = mCodecSpecificData;
-                size = mCodecSpecificDataSize;
-                mCodecSpecificData = NULL;
-                mCodecSpecificDataSize = 0;
-
-                status_t err = makeAVCCodecSpecificData(
-                        (const uint8_t *)tmp, size);
-                free(tmp);
-                tmp = NULL;
-                CHECK_EQ(OK, err);
-
-                mGotAllCodecSpecificData = true;
-            }
-
-            continue;
-        }
-
-        if (!mGotAllCodecSpecificData) {
-            mGotAllCodecSpecificData = true;
         }
 
         // Make a deep copy of the MediaBuffer and Metadata and release
@@ -1962,6 +1877,8 @@ void MPEG4Writer::Track::writeTrackHeader(
                   mOwner->writeInt32(samplerate << 16);
                   if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mime)) {
                     mOwner->beginBox("esds");
+                        CHECK(mCodecSpecificData);
+                        CHECK(mCodecSpecificDataSize > 0);
 
                         mOwner->writeInt32(0);     // version=0, flags=0
                         mOwner->writeInt8(0x03);   // ES_DescrTag
@@ -2039,6 +1956,8 @@ void MPEG4Writer::Track::writeTrackHeader(
                   mOwner->writeInt16(0x18);        // depth
                   mOwner->writeInt16(-1);          // predefined
 
+                  CHECK(mCodecSpecificData);
+                  CHECK(mCodecSpecificDataSize > 0);
                   CHECK(23 + mCodecSpecificDataSize < 128);
 
                   if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_MPEG4, mime)) {
@@ -2086,6 +2005,8 @@ void MPEG4Writer::Track::writeTrackHeader(
 
                       mOwner->endBox();  // d263
                   } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mime)) {
+                      CHECK(mCodecSpecificData);
+                      CHECK(mCodecSpecificDataSize > 0);
                       mOwner->beginBox("avcC");
                         mOwner->write(mCodecSpecificData, mCodecSpecificDataSize);
                       mOwner->endBox();  // avcC
