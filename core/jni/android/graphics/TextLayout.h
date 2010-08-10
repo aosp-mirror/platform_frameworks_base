@@ -66,6 +66,9 @@ public:
                                
    static bool prepareText(SkPaint *paint, const jchar* text, jsize len, jint bidiFlags,
         const jchar** outText, int32_t* outBytes, jchar** outBuffer);
+    static bool prepareRtlTextRun(const jchar* context, jsize start, jsize& count,
+        jsize contextCount, jchar* shaped);
+        
 
 private:
     static bool needsLayout(const jchar* text, jint len, jint bidiFlags);

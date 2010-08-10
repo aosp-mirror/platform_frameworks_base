@@ -149,7 +149,9 @@ static SkiaShader* LinearGradient_postCreate1(JNIEnv* env, jobject o, SkShader* 
     storedBounds[2] = x1; storedBounds[3] = y1;
     jfloat* storedPositions = new jfloat[count];
     uint32_t* storedColors = new uint32_t[count];
-    memcpy(storedColors, colorValues, count);
+    for (size_t i = 0; i < count; i++) {
+        storedColors[i] = static_cast<uint32_t>(colorValues[i]);
+    }
 
     if (posArray) {
         AutoJavaFloatArray autoPos(env, posArray, count);
@@ -185,8 +187,8 @@ static SkiaShader* LinearGradient_postCreate2(JNIEnv* env, jobject o, SkShader* 
     storedPositions[1] = 1.0f;
 
     uint32_t* storedColors = new uint32_t[2];
-    storedColors[0] = color0;
-    storedColors[1] = color1;
+    storedColors[0] = static_cast<uint32_t>(color0);
+    storedColors[1] = static_cast<uint32_t>(color1);
 
     SkiaShader* skiaShader = new SkiaLinearGradientShader(storedBounds, storedColors,
             storedPositions, 2, shader, static_cast<SkShader::TileMode>(tileMode), NULL,

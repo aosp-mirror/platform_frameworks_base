@@ -34,10 +34,21 @@ import javax.microedition.khronos.opengles.GL;
  * 
  * @hide
  */
-abstract class HardwareRenderer {
+public abstract class HardwareRenderer {
     private boolean mEnabled;
     private boolean mRequested = true;
     private static final String LOG_TAG = "HardwareRenderer";
+
+    /**
+     * Indicates whether hardware acceleration is available under any form for
+     * the view hierarchy.
+     * 
+     * @return True if the view hierarchy can potentially be hardware accelerated,
+     *         false otherwise
+     */
+    public static boolean isAvailable() {
+        return GLES20Canvas.isAvailable();
+    }
 
     /**
      * Destroys the hardware rendering context.

@@ -69,16 +69,16 @@ void Font::measureCachedGlyph(CachedGlyphInfo *glyph, int x, int y, Rect *bounds
     int width = (int) glyph->mBitmapWidth;
     int height = (int) glyph->mBitmapHeight;
 
-    if(bounds->bottom > nPenY) {
+    if (bounds->bottom > nPenY) {
         bounds->bottom = nPenY;
     }
-    if(bounds->left > nPenX) {
+    if (bounds->left > nPenX) {
         bounds->left = nPenX;
     }
-    if(bounds->right < nPenX + width) {
+    if (bounds->right < nPenX + width) {
         bounds->right = nPenX + width;
     }
-    if(bounds->top < nPenY + height) {
+    if (bounds->top < nPenY + height) {
         bounds->top = nPenY + height;
     }
 }
@@ -102,7 +102,7 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y) {
 }
 
 void Font::drawCachedGlyph(CachedGlyphInfo *glyph, int x, int y,
-                             uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH) {
+        uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH) {
     int nPenX = x + glyph->mBitmapLeft;
     int nPenY = y + glyph->mBitmapTop;
 
@@ -116,7 +116,7 @@ void Font::drawCachedGlyph(CachedGlyphInfo *glyph, int x, int y,
     int32_t bX = 0, bY = 0;
     for (cacheX = glyph->mStartX, bX = nPenX; cacheX < endX; cacheX++, bX++) {
         for (cacheY = glyph->mStartY, bY = nPenY; cacheY < endY; cacheY++, bY++) {
-            if(bX < 0 || bY < 0 || bX >= (int32_t)bitmapW || bY >= (int32_t)bitmapH) {
+            if (bX < 0 || bY < 0 || bX >= (int32_t)bitmapW || bY >= (int32_t)bitmapH) {
                 LOGE("Skipping invalid index");
                 continue;
             }
@@ -143,22 +143,19 @@ Font::CachedGlyphInfo* Font::getCachedUTFChar(SkPaint* paint, int32_t utfChar) {
 }
 
 void Font::renderUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
-                       int numGlyphs, int x, int y,
-                       uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH) {
-    if(bitmap != NULL && bitmapW > 0 && bitmapH > 0) {
-        renderUTF(paint, text, start, len, numGlyphs, x, y, BITMAP,
-                   bitmap, bitmapW, bitmapH, NULL);
-    }
-    else {
-        renderUTF(paint, text, start, len, numGlyphs, x, y, FRAMEBUFFER,
-                   NULL, 0, 0, NULL);
+        int numGlyphs, int x, int y, uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH) {
+    if (bitmap != NULL && bitmapW > 0 && bitmapH > 0) {
+        renderUTF(paint, text, start, len, numGlyphs, x, y, BITMAP, bitmap,
+                bitmapW, bitmapH, NULL);
+    } else {
+        renderUTF(paint, text, start, len, numGlyphs, x, y, FRAMEBUFFER, NULL, 0, 0, NULL);
     }
 
 }
 
 void Font::measureUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
-                       int numGlyphs, Rect *bounds) {
-    if(bounds == NULL) {
+        int numGlyphs, Rect *bounds) {
+    if (bounds == NULL) {
         LOGE("No return rectangle provided to measure text");
         return;
     }
@@ -167,9 +164,8 @@ void Font::measureUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t
 }
 
 void Font::renderUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
-                       int numGlyphs, int x, int y, RenderMode mode,
-                       uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH,
-                       Rect *bounds) {
+        int numGlyphs, int x, int y, RenderMode mode, uint8_t *bitmap,
+        uint32_t bitmapW, uint32_t bitmapH,Rect *bounds) {
     if (numGlyphs == 0 || text == NULL || len == 0) {
         return;
     }
@@ -185,7 +181,7 @@ void Font::renderUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t 
     while (glyphsLeft > 0) {
         int32_t utfChar = SkUTF16_NextUnichar((const uint16_t**) &text);
 
-        // Reached the end of the string or encountered
+        // Reached the end of the string
         if (utfChar < 0) {
             break;
         }
@@ -422,7 +418,7 @@ void FontRenderer::initTextTexture() {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     // Initialize texture dimentions
     glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, mCacheWidth, mCacheHeight, 0,
-                  GL_ALPHA, GL_UNSIGNED_BYTE, 0);
+            GL_ALPHA, GL_UNSIGNED_BYTE, 0);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -527,7 +523,6 @@ void FontRenderer::checkTextureUpdate() {
 }
 
 void FontRenderer::issueDrawCommand() {
-
     checkTextureUpdate();
 
     float* vtx = mTextMeshPtr;

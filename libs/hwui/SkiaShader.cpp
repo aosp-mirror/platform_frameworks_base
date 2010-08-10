@@ -89,7 +89,8 @@ void SkiaBitmapShader::describe(ProgramDescription& description, const Extension
     description.hasBitmap = true;
     // The driver does not support non-power of two mirrored/repeated
     // textures, so do it ourselves
-    if (!extensions.hasNPot() && !isPowerOfTwo(width) && !isPowerOfTwo(height)) {
+    if (!extensions.hasNPot() && (!isPowerOfTwo(width) || !isPowerOfTwo(height)) &&
+            (mTileX != SkShader::kClamp_TileMode || mTileY != SkShader::kClamp_TileMode)) {
         description.isBitmapNpot = true;
         description.bitmapWrapS = gTileModes[mTileX];
         description.bitmapWrapT = gTileModes[mTileY];
@@ -136,6 +137,9 @@ SkiaLinearGradientShader::SkiaLinearGradientShader(float* bounds, uint32_t* colo
         SkMatrix* matrix, bool blend):
         SkiaShader(kLinearGradient, key, tileMode, tileMode, matrix, blend),
         mBounds(bounds), mColors(colors), mPositions(positions), mCount(count) {
+    for (int i = 0; i < count; i++) {
+        LOGD("[GL] Gradient color %d = 0x%x", i, colors[i]);
+    }
 }
 
 SkiaLinearGradientShader::~SkiaLinearGradientShader() {
