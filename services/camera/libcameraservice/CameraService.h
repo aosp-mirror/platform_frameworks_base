@@ -79,6 +79,12 @@ private:
     sp<MediaPlayer>     mSoundPlayer[NUM_SOUNDS];
     int                 mSoundRef;  // reference count (release all MediaPlayer when 0)
 
+    // Used by Client objects to extract the ISurface from a Surface object.
+    // This is used because making Client a friend class of Surface would
+    // require including this header in Surface.h since Client is a nested
+    // class.
+    static sp<ISurface> getISurface(const sp<Surface>& surface);
+
     class Client : public BnCamera
     {
     public:
@@ -87,7 +93,7 @@ private:
         virtual status_t        connect(const sp<ICameraClient>& client);
         virtual status_t        lock();
         virtual status_t        unlock();
-        virtual status_t        setPreviewDisplay(const sp<ISurface>& surface);
+        virtual status_t        setPreviewDisplay(const sp<Surface>& surface);
         virtual void            setPreviewCallbackFlag(int flag);
         virtual status_t        startPreview();
         virtual void            stopPreview();
@@ -169,6 +175,7 @@ private:
         // Ensures atomicity among the public methods
         mutable Mutex                   mLock;
         sp<ISurface>                    mSurface;
+        sp<ANativeWindow>               mPreviewWindow;
 
         // If the user want us to return a copy of the preview frame (instead
         // of the original one), we allocate mPreviewBuffer and reuse it if possible.

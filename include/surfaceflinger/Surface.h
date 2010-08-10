@@ -94,7 +94,7 @@ private:
     friend class SurfaceComposerClient;
 
     // camera and camcorder need access to the ISurface binder interface for preview
-    friend class Camera;
+    friend class CameraService;
     friend class MediaRecorder;
     // mediaplayer needs access to ISurface for display
     friend class MediaPlayer;
@@ -173,7 +173,7 @@ private:
      * (eventually this should go away and be replaced by proper APIs)
      */
     // camera and camcorder need access to the ISurface binder interface for preview
-    friend class Camera;
+    friend class CameraService;
     friend class MediaRecorder;
     // MediaPlayer needs access to ISurface for display
     friend class MediaPlayer;
@@ -310,4 +310,3 @@ private:
 }; // namespace android
 
 #endif // ANDROID_SF_SURFACE_H
-

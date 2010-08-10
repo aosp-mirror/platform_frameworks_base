@@ -20,7 +20,7 @@
 #include <utils/RefBase.h>
 #include <binder/IInterface.h>
 #include <binder/Parcel.h>
-#include <surfaceflinger/ISurface.h>
+#include <surfaceflinger/Surface.h>
 #include <binder/IMemory.h>
 #include <utils/String8.h>
 #include <camera/Camera.h>
@@ -45,8 +45,8 @@ public:
     // allow other processes to use this ICamera interface
     virtual status_t        unlock() = 0;
 
-    // pass the buffered ISurface to the camera service
-    virtual status_t        setPreviewDisplay(const sp<ISurface>& surface) = 0;
+    // pass the buffered Surface to the camera service
+    virtual status_t        setPreviewDisplay(const sp<Surface>& surface) = 0;
 
     // set the preview callback flag to affect how the received frames from
     // preview are handled.

@@ -1745,12 +1745,15 @@ ssize_t UserClient::getTokenForSurface(const sp<ISurface>& sur) const
 {
     int32_t name = NAME_NOT_FOUND;
     sp<Layer> layer(mFlinger->getLayer(sur));
-    if (layer == 0) return name;
+    if (layer == 0) {
+        return name;
+    }
 
     // if this layer already has a token, just return it
     name = layer->getToken();
-    if ((name >= 0) && (layer->getClient() == this))
+    if ((name >= 0) && (layer->getClient() == this)) {
         return name;
+    }
 
     name = 0;
     do {
