@@ -11,11 +11,9 @@ LOCAL_SRC_FILES := \
 	$(call all-java-files-under, DisabledTestApp/src) \
 	$(call all-java-files-under, EnabledTestApp/src)
 
-LOCAL_STATIC_JAVA_LIBRARIES += android-common
-
 LOCAL_DX_FLAGS := --core-library
-LOCAL_STATIC_JAVA_LIBRARIES := core-tests-supportlib
-LOCAL_JAVA_LIBRARIES := android.test.runner android-common
+LOCAL_STATIC_JAVA_LIBRARIES := core-tests-supportlib android-common
+LOCAL_JAVA_LIBRARIES := android.test.runner
 LOCAL_PACKAGE_NAME := FrameworksCoreTests
 
 LOCAL_CERTIFICATE := platform
