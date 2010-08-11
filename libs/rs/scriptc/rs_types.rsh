@@ -55,17 +55,21 @@ typedef int int3 __attribute__((ext_vector_type(3)));
 typedef int int4 __attribute__((ext_vector_type(4)));
 
 
-typedef struct {
+typedef struct rs_matrix4x4_s {
     float m[16];
 } rs_matrix4x4;
 
-typedef struct {
+typedef struct rs_matrix3x3_s {
     float m[9];
 } rs_matrix3x3;
 
-typedef struct {
+typedef struct rs_matrix2x2_s {
     float m[4];
 } rs_matrix2x2;
+
+typedef struct rs_quaternion_s {
+    float w, x, y, z;
+} rs_quaternion;
 
 
 #define RS_PACKED __attribute__((packed, aligned(4)))
