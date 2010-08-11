@@ -114,6 +114,7 @@ Element *Element::createFromStream(Context *rsc, IStream *stream)
     Element *elem = new Element(rsc);
     elem->mComponent.loadFromStream(stream);
     elem->mBits = elem->mComponent.getBits();
+    elem->mHasReference = elem->mComponent.isReference();
 
     elem->mFieldCount = stream->loadU32();
     if(elem->mFieldCount) {
@@ -125,6 +126,10 @@ Element *Element::createFromStream(Context *rsc, IStream *stream)
             elem->mFields[ct].e.set(fieldElem);
             elem->mFields[ct].offsetBits = offset;
             offset += fieldElem->getSizeBits();
+            // Check if our sub-elements have references
+            if(fieldElem->mHasReference) {
+                elem->mHasReference = true;
+            }
         }
     }
 
