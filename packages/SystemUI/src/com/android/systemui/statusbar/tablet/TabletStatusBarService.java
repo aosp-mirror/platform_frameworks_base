@@ -70,7 +70,7 @@ public class TabletStatusBarService extends StatusBarService {
     NotificationIconArea mNotificationIconArea;
 
     View mNotificationPanel;
-    View mSystemPanel;
+    SystemPanel mSystemPanel;
 
     ViewGroup mPile;
     TextView mClearButton;
@@ -87,7 +87,7 @@ public class TabletStatusBarService extends StatusBarService {
 
     protected void addPanelWindows() {
         mNotificationPanel = View.inflate(this, R.layout.sysbar_panel_notifications, null);
-        mSystemPanel = View.inflate(this, R.layout.sysbar_panel_system, null);
+        mSystemPanel = (SystemPanel) View.inflate(this, R.layout.sysbar_panel_system, null);
 
         mNotificationPanel.setVisibility(View.GONE);
         mSystemPanel.setVisibility(View.GONE);
@@ -113,8 +113,8 @@ public class TabletStatusBarService extends StatusBarService {
         WindowManagerImpl.getDefault().addView(mNotificationPanel, lp);
 
         lp = new WindowManager.LayoutParams(
-                400, // ViewGroup.LayoutParams.WRAP_CONTENT,
-                200, // ViewGroup.LayoutParams.WRAP_CONTENT,
+                500, // ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -127,6 +127,7 @@ public class TabletStatusBarService extends StatusBarService {
         lp.windowAnimations = com.android.internal.R.style.Animation_SlidingCard;
 
         WindowManagerImpl.getDefault().addView(mSystemPanel, lp);
+        mSystemPanel.setBar(this);
     }
 
     @Override
@@ -152,10 +153,6 @@ public class TabletStatusBarService extends StatusBarService {
 
         // Add the windows
         addPanelWindows();
-
-        // Lorem ipsum, Dolores
-        TextView tv = ((TextView) mSystemPanel.findViewById(R.id.systemPanelDummy));
-        if (tv != null) tv.setText("System status: great");
 
         mPile = (ViewGroup)mNotificationPanel.findViewById(R.id.content);
         mPile.removeAllViews();
