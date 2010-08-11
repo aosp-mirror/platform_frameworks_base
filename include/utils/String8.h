@@ -171,7 +171,8 @@ public:
             status_t            append(const char* other);
             status_t            append(const char* other, size_t numChars);
 
-            status_t            appendFormat(const char* fmt, ...);
+            status_t            appendFormat(const char* fmt, ...)
+                    __attribute__((format (printf, 2, 3)));
 
             // Note that this function takes O(N) time to calculate the value.
             // No cache value is stored.
