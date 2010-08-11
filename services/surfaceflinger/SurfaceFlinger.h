@@ -40,9 +40,6 @@
 
 #include "MessageQueue.h"
 
-struct copybit_device_t;
-struct overlay_device_t;
-
 namespace android {
 
 // ---------------------------------------------------------------------------
@@ -379,6 +376,8 @@ private:
                 bool                        mFreezeDisplay;
                 int32_t                     mFreezeCount;
                 nsecs_t                     mFreezeDisplayTime;
+                Vector< sp<LayerBase> >     mVisibleLayersSortedByZ;
+
 
                 // don't use a lock for these, we don't care
                 int                         mDebugRegion;
