@@ -16,28 +16,14 @@
 
 package android.os.storage;
 
-import android.content.Context;
-import android.os.Binder;
-import android.os.Bundle;
-import android.os.Looper;
-import android.os.Parcelable;
-import android.os.ParcelFileDescriptor;
-import android.os.Process;
-import android.os.RemoteException;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.storage.IMountService;
-import android.os.storage.IMountServiceListener;
 import android.util.Log;
-import android.util.SparseArray;
 
-import java.io.FileDescriptor;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * StorageManager is the interface to the systems storage service.
@@ -83,6 +69,17 @@ public class StorageManager
             for (int i = 0; i < size; i++) {
                 mListeners.get(i).sendStorageStateChanged(path, oldState, newState);
             }
+        }
+    }
+
+    /**
+     * Binder listener for OBB action results.
+     */
+    private final ObbActionBinderListener mObbActionListener = new ObbActionBinderListener();
+    private class ObbActionBinderListener extends IObbActionListener.Stub {
+        @Override
+        public void onObbResult(String filename, String status) throws RemoteException {
+            Log.i(TAG, "filename = " + filename + ", result = " + status);
         }
     }
 
@@ -299,12 +296,23 @@ public class StorageManager
     }
 
     /**
-     * Mount an OBB file.
+     * Mount an Opaque Binary Blob (OBB) file. If a <code>key</code> is
+     * specified, it is supplied to the mounting process to be used in any
+     * encryption used in the OBB.
+     * <p>
+     * <em>Note:</em> you can only mount OBB files for which the OBB tag on the
+     * file matches a package ID that is owned by the calling program's UID.
+     * That is, shared UID applications can obtain access to any other
+     * application's OBB that shares its UID.
+     * 
+     * @param filename the path to the OBB file
+     * @param key decryption key
+     * @return whether the mount call was successfully queued or not
      */
     public boolean mountObb(String filename, String key) {
         try {
-            return mMountService.mountObb(filename, key)
-                    == StorageResultCode.OperationSucceeded;
+            mMountService.mountObb(filename, key, mObbActionListener);
+            return true;
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to mount OBB", e);
         }
@@ -313,12 +321,24 @@ public class StorageManager
     }
 
     /**
-     * Mount an OBB file.
+     * Unmount an Opaque Binary Blob (OBB) file. If the <code>force</code> flag
+     * is true, it will kill any application needed to unmount the given OBB.
+     * <p>
+     * <em>Note:</em> you can only mount OBB files for which the OBB tag on the
+     * file matches a package ID that is owned by the calling program's UID.
+     * That is, shared UID applications can obtain access to any other
+     * application's OBB that shares its UID.
+     * 
+     * @param filename path to the OBB file
+     * @param force whether to kill any programs using this in order to unmount
+     *            it
+     * @return whether the unmount call was successfully queued or not
+     * @throws IllegalArgumentException when OBB is not already mounted
      */
-    public boolean unmountObb(String filename, boolean force) {
+    public boolean unmountObb(String filename, boolean force) throws IllegalArgumentException {
         try {
-            return mMountService.unmountObb(filename, force)
-                    == StorageResultCode.OperationSucceeded;
+            mMountService.unmountObb(filename, force, mObbActionListener);
+            return true;
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to mount OBB", e);
         }
@@ -326,7 +346,13 @@ public class StorageManager
         return false;
     }
 
-    public boolean isObbMounted(String filename) {
+    /**
+     * Check whether an Opaque Binary Blob (OBB) is mounted or not.
+     * 
+     * @param filename path to OBB image
+     * @return true if OBB is mounted; false if not mounted or on error
+     */
+    public boolean isObbMounted(String filename) throws IllegalArgumentException {
         try {
             return mMountService.isObbMounted(filename);
         } catch (RemoteException e) {
@@ -337,13 +363,21 @@ public class StorageManager
     }
 
     /**
-     * Check the mounted path of an OBB file.
+     * Check the mounted path of an Opaque Binary Blob (OBB) file. This will
+     * give you the path to where you can obtain access to the internals of the
+     * OBB.
+     * 
+     * @param filename path to OBB image
+     * @return absolute path to mounted OBB image data or <code>null</code> if
+     *         not mounted or exception encountered trying to read status
      */
     public String getMountedObbPath(String filename) {
         try {
             return mMountService.getMountedObbPath(filename);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to find mounted path for OBB", e);
+        } catch (IllegalArgumentException e) {
+            Log.d(TAG, "Couldn't read OBB file", e);
         }
 
         return null;
