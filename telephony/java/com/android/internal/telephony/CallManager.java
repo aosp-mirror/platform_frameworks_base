@@ -215,7 +215,7 @@ public final class CallManager {
      * @param phone
      */
     public void unregisterPhone(Phone phone) {
-        if (phone != null && !mPhones.contains(phone)) {
+        if (phone != null && mPhones.contains(phone)) {
             mPhones.remove(phone);
             mRingingCalls.remove(phone.getRingingCall());
             mBackgroundCalls.remove(phone.getBackgroundCall());
