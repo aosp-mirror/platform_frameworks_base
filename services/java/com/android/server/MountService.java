@@ -1013,7 +1013,7 @@ class MountService extends IMountService.Stub
 
     private void setUmsEnabling(boolean enable) {
         synchronized (mListeners) {
-            mUmsEnabling = true;
+            mUmsEnabling = enable;
         }
     }
 
