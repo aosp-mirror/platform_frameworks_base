@@ -34,6 +34,7 @@ import android.view.KeyEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.webkit.DeviceOrientationManager;
+import android.webkit.DeviceOrientationService;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -118,6 +119,7 @@ final class WebViewCore {
     private int mWebkitScrollY = 0;
 
     private DeviceOrientationManager mDeviceOrientationManager = new DeviceOrientationManager(this);
+    private DeviceOrientationService mDeviceOrientationService;
 
     // The thread name used to identify the WebCore thread and for use in
     // debugging other classes that require operation within the WebCore thread.
@@ -2498,6 +2500,13 @@ final class WebViewCore {
             boolean canProvideBeta, double beta, boolean canProvideGamma, double gamma) {
         mDeviceOrientationManager.setMockOrientation(canProvideAlpha, alpha, canProvideBeta, beta,
                 canProvideGamma, gamma);
+    }
+
+    protected DeviceOrientationService getDeviceOrientationService() {
+        if (mDeviceOrientationService == null) {
+            mDeviceOrientationService = new DeviceOrientationService(mDeviceOrientationManager);
+        }
+        return mDeviceOrientationService;
     }
 
     private native void nativePause();
