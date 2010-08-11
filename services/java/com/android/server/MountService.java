@@ -16,34 +16,42 @@
 
 package com.android.server;
 
+import com.android.internal.app.IMediaContainerService;
 import com.android.server.am.ActivityManagerService;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.res.ObbInfo;
-import android.content.res.ObbScanner;
 import android.net.Uri;
-import android.os.storage.IMountService;
-import android.os.storage.IMountServiceListener;
-import android.os.storage.IMountShutdownObserver;
-import android.os.storage.StorageResultCode;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.IBinder;
-import android.os.Environment;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.storage.IMountService;
+import android.os.storage.IMountServiceListener;
+import android.os.storage.IMountShutdownObserver;
+import android.os.storage.IObbActionListener;
+import android.os.storage.StorageResultCode;
 import android.util.Slog;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * MountService implements back-end services for platform storage
@@ -137,9 +145,77 @@ class MountService extends IMountService.Stub
     final private HashSet<String> mAsecMountSet = new HashSet<String>();
 
     /**
-     * Private hash of currently mounted filesystem images.
+     * Mounted OBB tracking information. Used to track the current state of all
+     * OBBs.
      */
-    final private HashSet<String> mObbMountSet = new HashSet<String>();
+    final private Map<IObbActionListener, ObbState> mObbMounts = new HashMap<IObbActionListener, ObbState>();
+    final private Map<String, ObbState> mObbPathToStateMap = new HashMap<String, ObbState>();
+
+    class ObbState implements IBinder.DeathRecipient {
+        public ObbState(String filename, IObbActionListener token, int callerUid) {
+            this.filename = filename;
+            this.token = token;
+            this.callerUid = callerUid;
+            mounted = false;
+        }
+
+        // OBB source filename
+        String filename;
+
+        // Token of remote Binder caller
+        IObbActionListener token;
+
+        // Binder.callingUid()
+        public int callerUid;
+
+        // Whether this is mounted currently.
+        boolean mounted;
+
+        @Override
+        public void binderDied() {
+            ObbAction action = new UnmountObbAction(this, true);
+            mObbActionHandler.sendMessage(mObbActionHandler.obtainMessage(OBB_RUN_ACTION, action));
+
+            removeObbState(this);
+
+            token.asBinder().unlinkToDeath(this, 0);
+        }
+    }
+
+    // OBB Action Handler
+    final private ObbActionHandler mObbActionHandler;
+
+    // OBB action handler messages
+    private static final int OBB_RUN_ACTION = 1;
+    private static final int OBB_MCS_BOUND = 2;
+    private static final int OBB_MCS_UNBIND = 3;
+    private static final int OBB_MCS_RECONNECT = 4;
+    private static final int OBB_MCS_GIVE_UP = 5;
+
+    /*
+     * Default Container Service information
+     */
+    static final ComponentName DEFAULT_CONTAINER_COMPONENT = new ComponentName(
+            "com.android.defcontainer", "com.android.defcontainer.DefaultContainerService");
+
+    final private DefaultContainerConnection mDefContainerConn = new DefaultContainerConnection();
+
+    class DefaultContainerConnection implements ServiceConnection {
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            if (DEBUG_OBB)
+                Slog.i(TAG, "onServiceConnected");
+            IMediaContainerService imcs = IMediaContainerService.Stub.asInterface(service);
+            mObbActionHandler.sendMessage(mObbActionHandler.obtainMessage(OBB_MCS_BOUND, imcs));
+        }
+
+        public void onServiceDisconnected(ComponentName name) {
+            if (DEBUG_OBB)
+                Slog.i(TAG, "onServiceDisconnected");
+        }
+    };
+
+    // Used in the ObbActionHandler
+    private IMediaContainerService mContainerService = null;
 
     // Handler messages
     private static final int H_UNMOUNT_PM_UPDATE = 1;
@@ -363,7 +439,7 @@ class MountService extends IMountService.Stub
 
         public void binderDied() {
             if (LOCAL_LOGD) Slog.d(TAG, "An IMountServiceListener has died!");
-            synchronized(mListeners) {
+            synchronized (mListeners) {
                 mListeners.remove(this);
                 mListener.asBinder().unlinkToDeath(this, 0);
             }
@@ -917,6 +993,9 @@ class MountService extends IMountService.Stub
         mHandlerThread.start();
         mHandler = new MountServiceHandler(mHandlerThread.getLooper());
 
+        // Add OBB Action Handler to MountService thread.
+        mObbActionHandler = new ObbActionHandler(mHandlerThread.getLooper());
+
         /*
          * Vold does not run in the simulator, so pretend the connector thread
          * ran and did its thing.
@@ -1351,12 +1430,16 @@ class MountService extends IMountService.Stub
         mHandler.sendEmptyMessage(H_UNMOUNT_PM_DONE);
     }
 
-    private boolean isCallerOwnerOfPackage(String packageName) {
+    private boolean isCallerOwnerOfPackageOrSystem(String packageName) {
         final int callerUid = Binder.getCallingUid();
-        return isUidOwnerOfPackage(packageName, callerUid);
+        return isUidOwnerOfPackageOrSystem(packageName, callerUid);
     }
 
-    private boolean isUidOwnerOfPackage(String packageName, int callerUid) {
+    private boolean isUidOwnerOfPackageOrSystem(String packageName, int callerUid) {
+        if (callerUid == android.os.Process.SYSTEM_UID) {
+            return true;
+        }
+
         if (packageName == null) {
             return false;
         }
@@ -1375,12 +1458,6 @@ class MountService extends IMountService.Stub
         waitForReady();
         warnOnNotMounted();
 
-        // XXX replace with call to IMediaContainerService
-        ObbInfo obbInfo = ObbScanner.getObbInfo(filename);
-        if (!isCallerOwnerOfPackage(obbInfo.packageName)) {
-            throw new IllegalArgumentException("Caller package does not match OBB file");
-        }
-
         try {
             ArrayList<String> rsp = mConnector.doCommand(String.format("obb path %s", filename));
             String []tok = rsp.get(0).split(" ");
@@ -1392,7 +1469,7 @@ class MountService extends IMountService.Stub
         } catch (NativeDaemonConnectorException e) {
             int code = e.getCode();
             if (code == VoldResponseCode.OpFailedStorageNotFound) {
-                throw new IllegalArgumentException(String.format("OBB '%s' not found", filename));
+                return null;
             } else {
                 throw new IllegalStateException(String.format("Unexpected response code %d", code));
             }
@@ -1400,95 +1477,390 @@ class MountService extends IMountService.Stub
     }
 
     public boolean isObbMounted(String filename) {
-        waitForReady();
-        warnOnNotMounted();
-
-        // XXX replace with call to IMediaContainerService
-        ObbInfo obbInfo = ObbScanner.getObbInfo(filename);
-        if (!isCallerOwnerOfPackage(obbInfo.packageName)) {
-            throw new IllegalArgumentException("Caller package does not match OBB file");
-        }
-
-        synchronized (mObbMountSet) {
-            return mObbMountSet.contains(filename);
+        synchronized (mObbMounts) {
+            return mObbPathToStateMap.containsKey(filename);
         }
     }
 
-    public int mountObb(String filename, String key) {
+    public void mountObb(String filename, String key, IObbActionListener token) {
         waitForReady();
         warnOnNotMounted();
 
-        synchronized (mObbMountSet) {
-            if (mObbMountSet.contains(filename)) {
-                return StorageResultCode.OperationFailedStorageMounted;
+        final ObbState obbState;
+
+        synchronized (mObbMounts) {
+            if (isObbMounted(filename)) {
+                throw new IllegalArgumentException("OBB file is already mounted");
             }
+
+            if (mObbMounts.containsKey(token)) {
+                throw new IllegalArgumentException("You may only have one OBB mounted at a time");
+            }
+
+            final int callerUid = Binder.getCallingUid();
+            obbState = new ObbState(filename, token, callerUid);
+            addObbState(obbState);
         }
 
-        final int callerUid = Binder.getCallingUid();
-
-        // XXX replace with call to IMediaContainerService
-        ObbInfo obbInfo = ObbScanner.getObbInfo(filename);
-        if (!isUidOwnerOfPackage(obbInfo.packageName, callerUid)) {
-            throw new IllegalArgumentException("Caller package does not match OBB file");
-        }
-
-        if (key == null) {
-            key = "none";
-        }
-
-        int rc = StorageResultCode.OperationSucceeded;
-        String cmd = String.format("obb mount %s %s %d", filename, key, callerUid);
         try {
-            mConnector.doCommand(cmd);
-        } catch (NativeDaemonConnectorException e) {
-            int code = e.getCode();
-            if (code != VoldResponseCode.OpFailedStorageBusy) {
-                rc = StorageResultCode.OperationFailedInternalError;
-            }
+            token.asBinder().linkToDeath(obbState, 0);
+        } catch (RemoteException rex) {
+            Slog.e(TAG, "Failed to link to listener death");
         }
 
-        if (rc == StorageResultCode.OperationSucceeded) {
-            synchronized (mObbMountSet) {
-                mObbMountSet.add(filename);
-            }
-        }
-        return rc;
+        MountObbAction action = new MountObbAction(obbState, key);
+        mObbActionHandler.sendMessage(mObbActionHandler.obtainMessage(OBB_RUN_ACTION, action));
+
+        if (DEBUG_OBB)
+            Slog.i(TAG, "Send to OBB handler: " + action.toString());
     }
 
-    public int unmountObb(String filename, boolean force) {
-        waitForReady();
-        warnOnNotMounted();
+    public void unmountObb(String filename, boolean force, IObbActionListener token) {
+        final ObbState obbState;
 
-        ObbInfo obbInfo = ObbScanner.getObbInfo(filename);
-        if (!isCallerOwnerOfPackage(obbInfo.packageName)) {
-            throw new IllegalArgumentException("Caller package does not match OBB file");
+        synchronized (mObbMounts) {
+            if (!isObbMounted(filename)) {
+                throw new IllegalArgumentException("OBB is not mounted");
+            }
+            obbState = mObbPathToStateMap.get(filename);
         }
 
-        synchronized (mObbMountSet) {
-            if (!mObbMountSet.contains(filename)) {
-                return StorageResultCode.OperationFailedStorageNotMounted;
-            }
-         }
+        UnmountObbAction action = new UnmountObbAction(obbState, force);
+        mObbActionHandler.sendMessage(mObbActionHandler.obtainMessage(OBB_RUN_ACTION, action));
 
-        int rc = StorageResultCode.OperationSucceeded;
-        String cmd = String.format("obb unmount %s%s", filename, (force ? " force" : ""));
-        try {
-            mConnector.doCommand(cmd);
-        } catch (NativeDaemonConnectorException e) {
-            int code = e.getCode();
-            if (code == VoldResponseCode.OpFailedStorageBusy) {
-                rc = StorageResultCode.OperationFailedStorageBusy;
+        if (DEBUG_OBB)
+            Slog.i(TAG, "Send to OBB handler: " + action.toString());
+    }
+
+    private void addObbState(ObbState obbState) {
+        synchronized (mObbMounts) {
+            mObbMounts.put(obbState.token, obbState);
+            mObbPathToStateMap.put(obbState.filename, obbState);
+        }
+    }
+
+    private void removeObbState(ObbState obbState) {
+        synchronized (mObbMounts) {
+            mObbMounts.remove(obbState.token);
+            mObbPathToStateMap.remove(obbState.filename);
+        }
+    }
+
+    private class ObbActionHandler extends Handler {
+        private boolean mBound = false;
+        private List<ObbAction> mActions = new LinkedList<ObbAction>();
+
+        ObbActionHandler(Looper l) {
+            super(l);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case OBB_RUN_ACTION: {
+                    ObbAction action = (ObbAction) msg.obj;
+
+                    if (DEBUG_OBB)
+                        Slog.i(TAG, "OBB_RUN_ACTION: " + action.toString());
+
+                    // If a bind was already initiated we don't really
+                    // need to do anything. The pending install
+                    // will be processed later on.
+                    if (!mBound) {
+                        // If this is the only one pending we might
+                        // have to bind to the service again.
+                        if (!connectToService()) {
+                            Slog.e(TAG, "Failed to bind to media container service");
+                            action.handleError();
+                            return;
+                        } else {
+                            // Once we bind to the service, the first
+                            // pending request will be processed.
+                            mActions.add(action);
+                        }
+                    } else {
+                        // Already bound to the service. Just make
+                        // sure we trigger off processing the first request.
+                        if (mActions.size() == 0) {
+                            mObbActionHandler.sendEmptyMessage(OBB_MCS_BOUND);
+                        }
+
+                        mActions.add(action);
+                    }
+                    break;
+                }
+                case OBB_MCS_BOUND: {
+                    if (DEBUG_OBB)
+                        Slog.i(TAG, "OBB_MCS_BOUND");
+                    if (msg.obj != null) {
+                        mContainerService = (IMediaContainerService) msg.obj;
+                    }
+                    if (mContainerService == null) {
+                        // Something seriously wrong. Bail out
+                        Slog.e(TAG, "Cannot bind to media container service");
+                        for (ObbAction action : mActions) {
+                            // Indicate service bind error
+                            action.handleError();
+                        }
+                        mActions.clear();
+                    } else if (mActions.size() > 0) {
+                        ObbAction action = mActions.get(0);
+                        if (action != null) {
+                            action.execute(this);
+                        }
+                    } else {
+                        // Should never happen ideally.
+                        Slog.w(TAG, "Empty queue");
+                    }
+                    break;
+                }
+                case OBB_MCS_RECONNECT: {
+                    if (DEBUG_OBB)
+                        Slog.i(TAG, "OBB_MCS_RECONNECT");
+                    if (mActions.size() > 0) {
+                        if (mBound) {
+                            disconnectService();
+                        }
+                        if (!connectToService()) {
+                            Slog.e(TAG, "Failed to bind to media container service");
+                            for (ObbAction action : mActions) {
+                                // Indicate service bind error
+                                action.handleError();
+                            }
+                            mActions.clear();
+                        }
+                    }
+                    break;
+                }
+                case OBB_MCS_UNBIND: {
+                    if (DEBUG_OBB)
+                        Slog.i(TAG, "OBB_MCS_UNBIND");
+
+                    // Delete pending install
+                    if (mActions.size() > 0) {
+                        mActions.remove(0);
+                    }
+                    if (mActions.size() == 0) {
+                        if (mBound) {
+                            disconnectService();
+                        }
+                    } else {
+                        // There are more pending requests in queue.
+                        // Just post MCS_BOUND message to trigger processing
+                        // of next pending install.
+                        mObbActionHandler.sendEmptyMessage(OBB_MCS_BOUND);
+                    }
+                    break;
+                }
+                case OBB_MCS_GIVE_UP: {
+                    if (DEBUG_OBB)
+                        Slog.i(TAG, "OBB_MCS_GIVE_UP");
+                    mActions.remove(0);
+                    break;
+                }
+            }
+        }
+
+        private boolean connectToService() {
+            if (DEBUG_OBB)
+                Slog.i(TAG, "Trying to bind to DefaultContainerService");
+
+            Intent service = new Intent().setComponent(DEFAULT_CONTAINER_COMPONENT);
+            if (mContext.bindService(service, mDefContainerConn, Context.BIND_AUTO_CREATE)) {
+                mBound = true;
+                return true;
+            }
+            return false;
+        }
+
+        private void disconnectService() {
+            mContainerService = null;
+            mBound = false;
+            mContext.unbindService(mDefContainerConn);
+        }
+    }
+
+    abstract class ObbAction {
+        private static final int MAX_RETRIES = 3;
+        private int mRetries;
+
+        ObbState mObbState;
+
+        ObbAction(ObbState obbState) {
+            mObbState = obbState;
+        }
+
+        public void execute(ObbActionHandler handler) {
+            try {
+                if (DEBUG_OBB)
+                    Slog.i(TAG, "Starting to execute action: " + this.toString());
+                mRetries++;
+                if (mRetries > MAX_RETRIES) {
+                    Slog.w(TAG, "Failed to invoke remote methods on default container service. Giving up");
+                    mObbActionHandler.sendEmptyMessage(OBB_MCS_GIVE_UP);
+                    handleError();
+                    return;
+                } else {
+                    handleExecute();
+                    if (DEBUG_OBB)
+                        Slog.i(TAG, "Posting install MCS_UNBIND");
+                    mObbActionHandler.sendEmptyMessage(OBB_MCS_UNBIND);
+                }
+            } catch (RemoteException e) {
+                if (DEBUG_OBB)
+                    Slog.i(TAG, "Posting install MCS_RECONNECT");
+                mObbActionHandler.sendEmptyMessage(OBB_MCS_RECONNECT);
+            } catch (Exception e) {
+                if (DEBUG_OBB)
+                    Slog.d(TAG, "Error handling OBB action", e);
+                handleError();
+            }
+        }
+
+        abstract void handleExecute() throws RemoteException;
+        abstract void handleError();
+    }
+
+    class MountObbAction extends ObbAction {
+        private String mKey;
+
+        MountObbAction(ObbState obbState, String key) {
+            super(obbState);
+            mKey = key;
+        }
+
+        public void handleExecute() throws RemoteException {
+            ObbInfo obbInfo = mContainerService.getObbInfo(mObbState.filename);
+            if (!isUidOwnerOfPackageOrSystem(obbInfo.packageName, mObbState.callerUid)) {
+                throw new IllegalArgumentException("Caller package does not match OBB file");
+            }
+
+            if (mKey == null) {
+                mKey = "none";
+            }
+
+            int rc = StorageResultCode.OperationSucceeded;
+            String cmd = String.format("obb mount %s %s %d", mObbState.filename, mKey,
+                    mObbState.callerUid);
+            try {
+                mConnector.doCommand(cmd);
+            } catch (NativeDaemonConnectorException e) {
+                int code = e.getCode();
+                if (code != VoldResponseCode.OpFailedStorageBusy) {
+                    rc = StorageResultCode.OperationFailedInternalError;
+                }
+            }
+
+            if (rc == StorageResultCode.OperationSucceeded) {
+                try {
+                    mObbState.token.onObbResult(mObbState.filename, "mounted");
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "MountServiceListener went away while calling onObbStateChanged");
+                }
             } else {
-                rc = StorageResultCode.OperationFailedInternalError;
+                Slog.e(TAG, "Couldn't mount OBB file");
+
+                // We didn't succeed, so remove this from the mount-set.
+                removeObbState(mObbState);
             }
         }
 
-        if (rc == StorageResultCode.OperationSucceeded) {
-            synchronized (mObbMountSet) {
-                mObbMountSet.remove(filename);
+        public void handleError() {
+            removeObbState(mObbState);
+
+            try {
+                mObbState.token.onObbResult(mObbState.filename, "error");
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Couldn't send back OBB mount error for " + mObbState.filename);
             }
         }
-        return rc;
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("MountObbAction{");
+            sb.append("filename=");
+            sb.append(mObbState.filename);
+            sb.append(",callerUid=");
+            sb.append(mObbState.callerUid);
+            sb.append(",token=");
+            sb.append(mObbState.token != null ? mObbState.token.toString() : "NULL");
+            sb.append('}');
+            return sb.toString();
+        }
+    }
+
+    class UnmountObbAction extends ObbAction {
+        private boolean mForceUnmount;
+
+        UnmountObbAction(ObbState obbState, boolean force) {
+            super(obbState);
+            mForceUnmount = force;
+        }
+
+        public void handleExecute() throws RemoteException {
+            ObbInfo obbInfo = mContainerService.getObbInfo(mObbState.filename);
+
+            if (!isCallerOwnerOfPackageOrSystem(obbInfo.packageName)) {
+                throw new IllegalArgumentException("Caller package does not match OBB file");
+            }
+
+            int rc = StorageResultCode.OperationSucceeded;
+            String cmd = String.format("obb unmount %s%s", mObbState.filename,
+                    (mForceUnmount ? " force" : ""));
+            try {
+                mConnector.doCommand(cmd);
+            } catch (NativeDaemonConnectorException e) {
+                int code = e.getCode();
+                if (code == VoldResponseCode.OpFailedStorageBusy) {
+                    rc = StorageResultCode.OperationFailedStorageBusy;
+                } else {
+                    rc = StorageResultCode.OperationFailedInternalError;
+                }
+            }
+
+            if (rc == StorageResultCode.OperationSucceeded) {
+                removeObbState(mObbState);
+
+                try {
+                    mObbState.token.onObbResult(mObbState.filename, "unmounted");
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "MountServiceListener went away while calling onObbStateChanged");
+                }
+            } else {
+                try {
+                    mObbState.token.onObbResult(mObbState.filename, "error");
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "MountServiceListener went away while calling onObbStateChanged");
+                }
+            }
+        }
+
+        public void handleError() {
+            removeObbState(mObbState);
+
+            try {
+                mObbState.token.onObbResult(mObbState.filename, "error");
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Couldn't send back OBB unmount error for " + mObbState.filename);
+            }
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("UnmountObbAction{");
+            sb.append("filename=");
+            sb.append(mObbState.filename != null ? mObbState.filename : "null");
+            sb.append(",force=");
+            sb.append(mForceUnmount);
+            sb.append(",callerUid=");
+            sb.append(mObbState.callerUid);
+            sb.append(",token=");
+            sb.append(mObbState.token != null ? mObbState.token.toString() : "null");
+            sb.append('}');
+            return sb.toString();
+        }
     }
 }
 
