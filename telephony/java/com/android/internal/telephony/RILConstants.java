@@ -79,6 +79,7 @@ public interface RILConstants {
     int NO_PHONE = 0;
     int GSM_PHONE = 1;
     int CDMA_PHONE = 2;
+    int SIP_PHONE  = 3;
 
     int CDM_TTY_MODE_DISABLED = 0;
     int CDM_TTY_MODE_ENABLED = 1;
