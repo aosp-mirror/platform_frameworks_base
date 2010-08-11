@@ -180,6 +180,11 @@ public class Looper {
         return mThread;
     }
     
+    /** @hide */
+    public MessageQueue getQueue() {
+        return mQueue;
+    }
+    
     public void dump(Printer pw, String prefix) {
         pw.println(prefix + this);
         pw.println(prefix + "mRun=" + mRun);

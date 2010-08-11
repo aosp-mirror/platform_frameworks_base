@@ -4382,9 +4382,17 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         return mInputManager.getKeyCodeState(-1, InputDevice.SOURCE_DPAD, sw);
     }
-
+    
     public boolean hasKeys(int[] keycodes, boolean[] keyExists) {
         return mInputManager.hasKeys(-1, InputDevice.SOURCE_ANY, keycodes, keyExists);
+    }
+
+    public InputChannel monitorInput(String inputChannelName) {
+        if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
+                "monitorInput()")) {
+            throw new SecurityException("Requires READ_INPUT_STATE permission");
+        }
+        return mInputManager.monitorInput(inputChannelName);
     }
 
     public void enableScreenAfterBoot() {
