@@ -68,15 +68,15 @@ public class TestsListPreloaderThread extends Thread {
         File file = new File(TESTS_ROOT_DIR_PATH, mRelativePath);
         if (!file.exists()) {
             Log.e(LOG_TAG + "::run", "Path does not exist: " + mRelativePath);
-            return;
+        } else {
+            /** Populate the tests' list accordingly */
+            if (file.isDirectory()) {
+                preloadTests(mRelativePath);
+            } else {
+                mTestsList.add(mRelativePath);
+            }
         }
 
-        /** Populate the tests' list accordingly */
-        if (file.isDirectory()) {
-            preloadTests(mRelativePath);
-        } else {
-            mTestsList.add(mRelativePath);
-        }
         mDoneMsg.obj = mTestsList;
         mDoneMsg.sendToTarget();
     }

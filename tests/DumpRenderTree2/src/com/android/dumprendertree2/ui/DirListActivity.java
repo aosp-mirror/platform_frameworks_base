@@ -378,6 +378,10 @@ public class DirListActivity extends ListActivity {
     private ListItem[] getDirList(String dirPath) {
         File dir = new File(mRootDirPath, dirPath);
 
+        if (!dir.exists()) {
+            return new ListItem[0];
+        }
+
         List<ListItem> subDirs = new ArrayList<ListItem>();
         List<ListItem> subFiles = new ArrayList<ListItem>();
 
