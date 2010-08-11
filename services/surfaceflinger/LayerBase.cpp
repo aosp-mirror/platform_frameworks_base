@@ -39,8 +39,11 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
+int32_t LayerBase::sSequence = 1;
+
 LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
     : dpy(display), contentDirty(false),
+      sequence(uint32_t(android_atomic_inc(&sSequence))),
       mFlinger(flinger),
       mNeedsFiltering(false),
       mOrientation(0),
