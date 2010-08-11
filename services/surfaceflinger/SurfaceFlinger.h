@@ -243,21 +243,19 @@ private:
     status_t setClientState(const sp<Client>& client,
             int32_t count, const layer_state_t* states);
 
-
-    class LayerVector {
+    class LayerVector : public SortedVector< sp<LayerBase> > {
     public:
-        inline              LayerVector() { }
-                            LayerVector(const LayerVector&);
-        inline size_t       size() const { return layers.size(); }
-        inline sp<LayerBase> const* array() const { return layers.array(); }
-        ssize_t             add(const sp<LayerBase>&, Vector< sp<LayerBase> >::compar_t);
-        ssize_t             remove(const sp<LayerBase>&);
-        ssize_t             reorder(const sp<LayerBase>&, Vector< sp<LayerBase> >::compar_t);
-        ssize_t             indexOf(const sp<LayerBase>& key, size_t guess=0) const;
-        inline sp<LayerBase> operator [] (size_t i) const { return layers[i]; }
-    private:
-        KeyedVector< sp<LayerBase> , size_t> lookup;
-        Vector< sp<LayerBase> >              layers;
+        LayerVector() { }
+        LayerVector(const LayerVector& rhs) : SortedVector< sp<LayerBase> >(rhs) { }
+        virtual int do_compare(const void* lhs, const void* rhs) const {
+            const sp<LayerBase>& l(*reinterpret_cast<const sp<LayerBase>*>(lhs));
+            const sp<LayerBase>& r(*reinterpret_cast<const sp<LayerBase>*>(rhs));
+            // sort layers by Z order
+            uint32_t lz = l->currentState().z;
+            uint32_t rz = r->currentState().z;
+            // then by sequence, so we get a stable ordering
+            return (lz != rz) ? (lz - rz) : (l->sequence - r->sequence);
+        }
     };
 
     struct State {
