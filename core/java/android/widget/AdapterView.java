@@ -56,7 +56,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     /**
      * The position of the first child displayed
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "scrolling")
     int mFirstPosition = 0;
 
     /**
@@ -141,7 +141,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      * The position within the adapter's data set of the item to select
      * during the next layout.
      */
-    @ViewDebug.ExportedProperty    
+    @ViewDebug.ExportedProperty(category = "list")
     int mNextSelectedPosition = INVALID_POSITION;
 
     /**
@@ -152,7 +152,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     /**
      * The position within the adapter's data set of the currently selected item.
      */
-    @ViewDebug.ExportedProperty    
+    @ViewDebug.ExportedProperty(category = "list")
     int mSelectedPosition = INVALID_POSITION;
 
     /**
@@ -168,7 +168,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     /**
      * The number of items in the current adapter.
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "list")
     int mItemCount;
 
     /**

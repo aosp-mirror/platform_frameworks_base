@@ -336,7 +336,7 @@ public class ProgressBar extends View {
      *
      * @return true if the progress bar is in indeterminate mode
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "progress")
     public synchronized boolean isIndeterminate() {
         return mIndeterminate;
     }
@@ -609,7 +609,7 @@ public class ProgressBar extends View {
      * @see #setMax(int)
      * @see #getMax()
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "progress")
     public synchronized int getProgress() {
         return mIndeterminate ? 0 : mProgress;
     }
@@ -626,7 +626,7 @@ public class ProgressBar extends View {
      * @see #setMax(int)
      * @see #getMax()
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "progress")
     public synchronized int getSecondaryProgress() {
         return mIndeterminate ? 0 : mSecondaryProgress;
     }
@@ -640,7 +640,7 @@ public class ProgressBar extends View {
      * @see #getProgress()
      * @see #getSecondaryProgress()
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "progress")
     public synchronized int getMax() {
         return mMax;
     }

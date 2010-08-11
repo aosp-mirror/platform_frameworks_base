@@ -1186,7 +1186,7 @@ public class ListView extends AbsListView {
      *         UNSPECIFIED/AT_MOST modes, false otherwise.
      * @hide
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "list")
     protected boolean recycleOnMeasure() {
         return true;
     }
