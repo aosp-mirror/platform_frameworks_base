@@ -244,6 +244,7 @@ void CameraSource::releaseOneRecordingFrame(const sp<IMemory>& frame) {
 
 void CameraSource::signalBufferReturned(MediaBuffer *buffer) {
     LOGV("signalBufferReturned: %p", buffer->data());
+    Mutex::Autolock autoLock(mLock);
     for (List<sp<IMemory> >::iterator it = mFramesBeingEncoded.begin();
          it != mFramesBeingEncoded.end(); ++it) {
         if ((*it)->pointer() ==  buffer->data()) {
@@ -312,6 +313,7 @@ status_t CameraSource::read(
                 (*buffer)->setObserver(this);
                 (*buffer)->add_ref();
                 (*buffer)->meta_data()->setInt64(kKeyTime, frameTime);
+
                 return OK;
             }
         }
