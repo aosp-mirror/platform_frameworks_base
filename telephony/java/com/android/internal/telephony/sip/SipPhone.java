@@ -109,6 +109,10 @@ public class SipPhone extends SipPhoneBase {
         return mProfile.getProfileName();
     }
 
+    public String getSipUri() {
+        return mProfile.getUriString();
+    }
+
     public boolean canTake(Object incomingCall) {
         synchronized (SipPhone.class) {
             if (!(incomingCall instanceof SipAudioCall)) return false;
