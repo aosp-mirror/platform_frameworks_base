@@ -37,6 +37,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocalPowerManager;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -48,15 +49,20 @@ import android.provider.Settings;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.ITelephony;
+import com.android.internal.view.BaseInputHandler;
 import com.android.internal.widget.PointerLocationView;
 
 import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Slog;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.IWindowManager;
+import android.view.InputChannel;
+import android.view.InputQueue;
+import android.view.InputHandler;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.WindowOrientationListener;
@@ -221,6 +227,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     int mPointerLocationMode = 0;
     PointerLocationView mPointerLocationView = null;
+    InputChannel mPointerLocationInputChannel;
+    
+    private final InputHandler mPointerLocationInputHandler = new BaseInputHandler() {
+        @Override
+        public void handleMotion(MotionEvent event, Runnable finishedCallback) {
+            finishedCallback.run();
+            synchronized (mLock) {
+                mPointerLocationView.addTouchEvent(event);
+            }
+        }
+    };
     
     // The current size of the screen.
     int mW, mH;
@@ -617,8 +634,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             WindowManagerImpl wm = (WindowManagerImpl)
                     mContext.getSystemService(Context.WINDOW_SERVICE);
             wm.addView(addView, lp);
+            
+            if (mPointerLocationInputChannel == null) {
+                try {
+                    mPointerLocationInputChannel =
+                        mWindowManager.monitorInput("PointerLocationView");
+                    InputQueue.registerInputChannel(mPointerLocationInputChannel,
+                            mPointerLocationInputHandler, mHandler.getLooper().getQueue());
+                } catch (RemoteException ex) {
+                    Slog.e(TAG, "Could not set up input monitoring channel for PointerLocation.",
+                            ex);
+                }
+            }
         }
         if (removeView != null) {
+            if (mPointerLocationInputChannel != null) {
+                InputQueue.unregisterInputChannel(mPointerLocationInputChannel);
+                mPointerLocationInputChannel.dispose();
+                mPointerLocationInputChannel = null;
+            }
+            
             WindowManagerImpl wm = (WindowManagerImpl)
                     mContext.getSystemService(Context.WINDOW_SERVICE);
             wm.removeView(removeView);
@@ -730,20 +765,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         == Configuration.HARDKEYBOARDHIDDEN_NO || mHasSoftInput)
                 ? Configuration.KEYBOARDHIDDEN_NO
                 : Configuration.KEYBOARDHIDDEN_YES;
-    }
-    
-    public void dispatchedPointerEventLw(MotionEvent ev, int targetX, int targetY) {
-        if (mPointerLocationView == null) {
-            return;
-        }
-        synchronized (mLock) {
-            if (mPointerLocationView == null) {
-                return;
-            }
-            ev.offsetLocation(targetX, targetY);
-            mPointerLocationView.addTouchEvent(ev);
-            ev.offsetLocation(-targetX, -targetY);
-        }
     }
     
     /** {@inheritDoc} */
