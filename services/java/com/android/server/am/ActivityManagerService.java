@@ -3578,6 +3578,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             
             if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
                 // Tell anyone interested that we are done booting!
+                SystemProperties.set("sys.boot_completed", "1");
                 broadcastIntentLocked(null, null,
                         new Intent(Intent.ACTION_BOOT_COMPLETED, null),
                         null, null, 0, null, null,
