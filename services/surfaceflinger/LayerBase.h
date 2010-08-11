@@ -35,6 +35,8 @@
 
 #include <pixelflinger/pixelflinger.h>
 
+#include <hardware/hwcomposer.h>
+
 #include "Transform.h"
 
 namespace android {
@@ -107,6 +109,10 @@ public:
     virtual sp<LayerBaseClient> getLayerBaseClient() const { return 0; }
 
     virtual const char* getTypeId() const { return "LayerBase"; }
+
+    virtual void setGeometry(hwc_layer_t* hwcl);
+
+    virtual void setPerFrameData(hwc_layer_t* hwcl);
 
     /**
      * draw - performs some global clipping optimizations
