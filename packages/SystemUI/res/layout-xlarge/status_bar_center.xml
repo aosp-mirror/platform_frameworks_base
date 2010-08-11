@@ -27,9 +27,10 @@
     <com.android.systemui.statusbar.Clock
         style="@*android:style/TextAppearance.StatusBar.Icon"
         android:id="@+id/clock"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:singleLine="true"
+        android:gravity="center"
         android:textSize="16sp"
         android:textStyle="bold"
         android:padding="2dip"
