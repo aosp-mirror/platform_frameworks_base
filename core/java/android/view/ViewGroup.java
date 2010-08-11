@@ -363,7 +363,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @return one of {@link #FOCUS_BEFORE_DESCENDANTS}, {@link #FOCUS_AFTER_DESCENDANTS},
      *   {@link #FOCUS_BLOCK_DESCENDANTS}.
      */
-    @ViewDebug.ExportedProperty(mapping = {
+    @ViewDebug.ExportedProperty(category = "focus", mapping = {
         @ViewDebug.IntToString(from = FOCUS_BEFORE_DESCENDANTS, to = "FOCUS_BEFORE_DESCENDANTS"),
         @ViewDebug.IntToString(from = FOCUS_AFTER_DESCENDANTS, to = "FOCUS_AFTER_DESCENDANTS"),
         @ViewDebug.IntToString(from = FOCUS_BLOCK_DESCENDANTS, to = "FOCUS_BLOCK_DESCENDANTS")
@@ -2764,7 +2764,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #setChildrenDrawnWithCacheEnabled(boolean)
      * @see View#setDrawingCacheEnabled(boolean)
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "drawing")
     public boolean isAlwaysDrawnWithCacheEnabled() {
         return (mGroupFlags & FLAG_ALWAYS_DRAWN_WITH_CACHE) == FLAG_ALWAYS_DRAWN_WITH_CACHE;
     }
@@ -2799,7 +2799,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #setAlwaysDrawnWithCacheEnabled(boolean)
      * @see #setChildrenDrawnWithCacheEnabled(boolean)
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "drawing")
     protected boolean isChildrenDrawnWithCacheEnabled() {
         return (mGroupFlags & FLAG_CHILDREN_DRAWN_WITH_CACHE) == FLAG_CHILDREN_DRAWN_WITH_CACHE;
     }
@@ -2831,7 +2831,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #setChildrenDrawingOrderEnabled(boolean)
      * @see #getChildDrawingOrder(int, int)
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "drawing")
     protected boolean isChildrenDrawingOrderEnabled() {
         return (mGroupFlags & FLAG_USE_CHILD_DRAWING_ORDER) == FLAG_USE_CHILD_DRAWING_ORDER;
     }
@@ -2868,7 +2868,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *         {@link #PERSISTENT_ANIMATION_CACHE}, {@link #PERSISTENT_SCROLLING_CACHE}
      *         and {@link #PERSISTENT_ALL_CACHES}
      */
-    @ViewDebug.ExportedProperty(mapping = {
+    @ViewDebug.ExportedProperty(category = "drawing", mapping = {
         @ViewDebug.IntToString(from = PERSISTENT_NO_CACHE,        to = "NONE"),
         @ViewDebug.IntToString(from = PERSISTENT_ALL_CACHES,      to = "ANIMATION"),
         @ViewDebug.IntToString(from = PERSISTENT_SCROLLING_CACHE, to = "SCROLLING"),
@@ -3501,7 +3501,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * constants FILL_PARENT (replaced by MATCH_PARENT ,
          * in API Level 8) or WRAP_CONTENT. or an exact size.
          */
-        @ViewDebug.ExportedProperty(mapping = {
+        @ViewDebug.ExportedProperty(category = "layout", mapping = {
             @ViewDebug.IntToString(from = MATCH_PARENT, to = "MATCH_PARENT"),
             @ViewDebug.IntToString(from = WRAP_CONTENT, to = "WRAP_CONTENT")
         })
@@ -3512,7 +3512,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * constants FILL_PARENT (replaced by MATCH_PARENT ,
          * in API Level 8) or WRAP_CONTENT. or an exact size.
          */
-        @ViewDebug.ExportedProperty(mapping = {
+        @ViewDebug.ExportedProperty(category = "layout", mapping = {
             @ViewDebug.IntToString(from = MATCH_PARENT, to = "MATCH_PARENT"),
             @ViewDebug.IntToString(from = WRAP_CONTENT, to = "WRAP_CONTENT")
         })
@@ -3637,25 +3637,25 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         /**
          * The left margin in pixels of the child.
          */
-        @ViewDebug.ExportedProperty
+        @ViewDebug.ExportedProperty(category = "layout")
         public int leftMargin;
 
         /**
          * The top margin in pixels of the child.
          */
-        @ViewDebug.ExportedProperty
+        @ViewDebug.ExportedProperty(category = "layout")
         public int topMargin;
 
         /**
          * The right margin in pixels of the child.
          */
-        @ViewDebug.ExportedProperty
+        @ViewDebug.ExportedProperty(category = "layout")
         public int rightMargin;
 
         /**
          * The bottom margin in pixels of the child.
          */
-        @ViewDebug.ExportedProperty
+        @ViewDebug.ExportedProperty(category = "layout")
         public int bottomMargin;
 
         /**

@@ -5738,7 +5738,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Convenience for {@link Selection#getSelectionStart}.
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "text")
     public int getSelectionStart() {
         return Selection.getSelectionStart(getText());
     }
@@ -5746,7 +5746,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Convenience for {@link Selection#getSelectionEnd}.
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "text")
     public int getSelectionEnd() {
         return Selection.getSelectionEnd(getText());
     }
@@ -7300,7 +7300,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return false;
     }
 
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "text")
     private CharSequence            mText;
     private CharSequence            mTransformed;
     private BufferType              mBufferType = BufferType.NORMAL;
