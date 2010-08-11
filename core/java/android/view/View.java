@@ -5602,7 +5602,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * of ViewGroup that are responsible for arranging their children.
      * @return The LayoutParams associated with this view
      */
-    @ViewDebug.ExportedProperty(deepExport = true, category = "layout")
+    @ViewDebug.ExportedProperty(deepExport = true, prefix = "layout_")
     public ViewGroup.LayoutParams getLayoutParams() {
         return mLayoutParams;
     }
