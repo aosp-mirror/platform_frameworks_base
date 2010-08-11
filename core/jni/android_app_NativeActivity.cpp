@@ -600,7 +600,7 @@ static bool mainWorkCallback(int fd, int events, void* data) {
 static jint
 loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jobject messageQueue,
         jstring internalDataDir, jstring externalDataDir, int sdkVersion,
-        jobject jAssetMgr)
+        jobject jAssetMgr, jbyteArray savedState)
 {
     LOG_TRACE("loadNativeCode_native");
 
@@ -666,7 +666,18 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jobject messageQ
         
         code->assetManager = assetManagerForJavaObject(env, jAssetMgr);
 
-        code->createActivityFunc(code, NULL, 0);
+        jbyte* rawSavedState = NULL;
+        jsize rawSavedSize = 0;
+        if (savedState != NULL) {
+            rawSavedState = env->GetByteArrayElements(savedState, NULL);
+            rawSavedSize = env->GetArrayLength(savedState);
+        }
+
+        code->createActivityFunc(code, rawSavedState, rawSavedSize);
+
+        if (rawSavedState != NULL) {
+            env->ReleaseByteArrayElements(savedState, rawSavedState, 0);
+        }
     }
     
     return (jint)code;
@@ -706,17 +717,31 @@ onResume_native(JNIEnv* env, jobject clazz, jint handle)
     }
 }
 
-static void
+static jbyteArray
 onSaveInstanceState_native(JNIEnv* env, jobject clazz, jint handle)
 {
     LOG_TRACE("onSaveInstanceState_native");
+
+    jbyteArray array = NULL;
+
     if (handle != 0) {
         NativeCode* code = (NativeCode*)handle;
         if (code->callbacks.onSaveInstanceState != NULL) {
             size_t len = 0;
-            code->callbacks.onSaveInstanceState(code, &len);
+            jbyte* state = (jbyte*)code->callbacks.onSaveInstanceState(code, &len);
+            if (len > 0) {
+                array = env->NewByteArray(len);
+                if (array != NULL) {
+                    env->SetByteArrayRegion(array, 0, len, state);
+                }
+            }
+            if (state != NULL) {
+                free(state);
+            }
         }
     }
+
+    return array;
 }
 
 static void
@@ -739,6 +764,18 @@ onStop_native(JNIEnv* env, jobject clazz, jint handle)
         NativeCode* code = (NativeCode*)handle;
         if (code->callbacks.onStop != NULL) {
             code->callbacks.onStop(code);
+        }
+    }
+}
+
+static void
+onConfigurationChanged_native(JNIEnv* env, jobject clazz, jint handle)
+{
+    LOG_TRACE("onConfigurationChanged_native");
+    if (handle != 0) {
+        NativeCode* code = (NativeCode*)handle;
+        if (code->callbacks.onConfigurationChanged != NULL) {
+            code->callbacks.onConfigurationChanged(code);
         }
     }
 }
@@ -934,14 +971,15 @@ finishPreDispatchKeyEvent_native(JNIEnv* env, jobject clazz, jint handle,
 }
 
 static const JNINativeMethod g_methods[] = {
-    { "loadNativeCode", "(Ljava/lang/String;Landroid/os/MessageQueue;Ljava/lang/String;Ljava/lang/String;ILandroid/content/res/AssetManager;)I",
+    { "loadNativeCode", "(Ljava/lang/String;Landroid/os/MessageQueue;Ljava/lang/String;Ljava/lang/String;ILandroid/content/res/AssetManager;[B)I",
             (void*)loadNativeCode_native },
     { "unloadNativeCode", "(I)V", (void*)unloadNativeCode_native },
     { "onStartNative", "(I)V", (void*)onStart_native },
     { "onResumeNative", "(I)V", (void*)onResume_native },
-    { "onSaveInstanceStateNative", "(I)V", (void*)onSaveInstanceState_native },
+    { "onSaveInstanceStateNative", "(I)[B", (void*)onSaveInstanceState_native },
     { "onPauseNative", "(I)V", (void*)onPause_native },
     { "onStopNative", "(I)V", (void*)onStop_native },
+    { "onConfigurationChangedNative", "(I)V", (void*)onConfigurationChanged_native },
     { "onLowMemoryNative", "(I)V", (void*)onLowMemory_native },
     { "onWindowFocusChangedNative", "(IZ)V", (void*)onWindowFocusChanged_native },
     { "onSurfaceCreatedNative", "(ILandroid/view/Surface;)V", (void*)onSurfaceCreated_native },

@@ -129,6 +129,8 @@ public:
      */
     void setConfiguration(const ResTable_config& config, const char* locale = NULL);
 
+    void getConfiguration(ResTable_config* outConfig) const;
+
     typedef Asset::AccessMode AccessMode;       // typing shortcut
 
     /*
