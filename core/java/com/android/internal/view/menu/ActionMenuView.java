@@ -20,6 +20,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -82,6 +83,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         if (p instanceof LayoutParams) {
             LayoutParams lp = (LayoutParams) p;
             return lp.leftMargin == mItemMargin && lp.rightMargin == mItemMargin &&
+                    lp.gravity == Gravity.CENTER_VERTICAL &&
                     lp.width == LayoutParams.WRAP_CONTENT && lp.height == LayoutParams.WRAP_CONTENT;
         }
         return false;
@@ -93,6 +95,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
                 LayoutParams.WRAP_CONTENT);
         params.leftMargin = mItemMargin;
         params.rightMargin = mItemMargin;
+        params.gravity = Gravity.CENTER_VERTICAL;
         return params;
     }
     

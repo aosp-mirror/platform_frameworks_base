@@ -118,7 +118,6 @@ public class ActionBarView extends ViewGroup {
         super(context, attrs);
 
         final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        mContentHeight = (int) (CONTENT_HEIGHT_DIP * metrics.density + 0.5f);
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ActionBar);
 
@@ -157,14 +156,18 @@ public class ActionBarView extends ViewGroup {
             LayoutInflater inflater = LayoutInflater.from(context);
             mCustomNavView = (View) inflater.inflate(customNavId, null);
             mNavigationMode = ActionBar.NAVIGATION_MODE_CUSTOM;
+            addView(mCustomNavView);
         }
+
+        final int padding = a.getDimensionPixelSize(R.styleable.ActionBar_padding,
+                (int) (CONTENT_PADDING_DIP * metrics.density + 0.5f));
+        setPadding(padding, padding, padding, padding);
+        mContentHeight = a.getDimensionPixelSize(R.styleable.ActionBar_height,
+                (int) (CONTENT_PADDING_DIP * metrics.density + 0.5f)) - padding * 2;
 
         a.recycle();
 
         // TODO: Set this in the theme
-        int padding = (int) (CONTENT_PADDING_DIP * metrics.density + 0.5f);
-        setPadding(padding, padding, padding, padding);
-
         mSpacing = (int) (CONTENT_SPACING_DIP * metrics.density + 0.5f);
         mActionSpacing = (int) (CONTENT_ACTION_SPACING_DIP * metrics.density + 0.5f);
         

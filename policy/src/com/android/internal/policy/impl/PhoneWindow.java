@@ -2247,6 +2247,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             requestFeature(FEATURE_ACTION_BAR);
         }
 
+        if (a.getBoolean(com.android.internal.R.styleable.Window_windowActionBarOverlay, false)) {
+            requestFeature(FEATURE_ACTION_BAR_OVERLAY);
+        }
+
         if (a.getBoolean(com.android.internal.R.styleable.Window_windowActionModeOverlay, false)) {
             requestFeature(FEATURE_ACTION_MODE_OVERLAY);
         }
@@ -2333,7 +2337,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (mIsFloating) {
                 layoutResource = com.android.internal.R.layout.dialog_title;
             } else if ((features & (1 << FEATURE_ACTION_BAR)) != 0) {
-                layoutResource = com.android.internal.R.layout.screen_action_bar;
+                if ((features & (1 << FEATURE_ACTION_BAR_OVERLAY)) != 0) {
+                    layoutResource = com.android.internal.R.layout.screen_action_bar_overlay;
+                } else {
+                    layoutResource = com.android.internal.R.layout.screen_action_bar;
+                }
             } else {
                 layoutResource = com.android.internal.R.layout.screen_title;
             }
