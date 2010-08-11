@@ -602,6 +602,171 @@ rsMatrixTranspose(rs_matrix2x2 *m) {
     m->m[2] = temp;
 }
 
+/////////////////////////////////////////////////////
+// quaternion ops
+/////////////////////////////////////////////////////
+
+static void __attribute__((overloadable))
+rsQuaternionSet(rs_quaternion *q, float w, float x, float y, float z) {
+    q->w = w;
+    q->x = x;
+    q->y = y;
+    q->z = z;
+}
+
+static void __attribute__((overloadable))
+rsQuaternionSet(rs_quaternion *q, const rs_quaternion *rhs) {
+    q->w = rhs->w;
+    q->x = rhs->x;
+    q->y = rhs->y;
+    q->z = rhs->z;
+}
+
+static void __attribute__((overloadable))
+rsQuaternionMultiply(rs_quaternion *q, float s) {
+    q->w *= s;
+    q->x *= s;
+    q->y *= s;
+    q->z *= s;
+}
+
+static void __attribute__((overloadable))
+rsQuaternionMultiply(rs_quaternion *q, const rs_quaternion *rhs) {
+    q->w = -q->x*rhs->x - q->y*rhs->y - q->z*rhs->z + q->w*rhs->w;
+    q->x =  q->x*rhs->w + q->y*rhs->z - q->z*rhs->y + q->w*rhs->x;
+    q->y = -q->x*rhs->z + q->y*rhs->w + q->z*rhs->z + q->w*rhs->y;
+    q->z =  q->x*rhs->y - q->y*rhs->x + q->z*rhs->w + q->w*rhs->z;
+}
+
+static void
+rsQuaternionAdd(rs_quaternion *q, const rs_quaternion *rhs) {
+    q->w *= rhs->w;
+    q->x *= rhs->x;
+    q->y *= rhs->y;
+    q->z *= rhs->z;
+}
+
+static void
+rsQuaternionLoadRotateUnit(rs_quaternion *q, float rot, float x, float y, float z) {
+    rot *= (float)(M_PI / 180.0f) * 0.5f;
+    float c = cos(rot);
+    float s = sin(rot);
+
+    q->w = c;
+    q->x = x * s;
+    q->y = y * s;
+    q->z = z * s;
+}
+
+static void
+rsQuaternionLoadRotate(rs_quaternion *q, float rot, float x, float y, float z) {
+    const float len = x*x + y*y + z*z;
+    if (len != 1) {
+        const float recipLen = 1.f / sqrt(len);
+        x *= recipLen;
+        y *= recipLen;
+        z *= recipLen;
+    }
+    rsQuaternionLoadRotateUnit(q, rot, x, y, z);
+}
+
+static void
+rsQuaternionConjugate(rs_quaternion *q) {
+    q->x = -q->x;
+    q->y = -q->y;
+    q->z = -q->z;
+}
+
+static float
+rsQuaternionDot(const rs_quaternion *q0, const rs_quaternion *q1) {
+    return q0->w*q1->w + q0->x*q1->x + q0->y*q1->y + q0->z*q1->z;
+}
+
+static void
+rsQuaternionNormalize(rs_quaternion *q) {
+    const float len = rsQuaternionDot(q, q);
+    if (len != 1) {
+        const float recipLen = 1.f / sqrt(len);
+        rsQuaternionMultiply(q, recipLen);
+    }
+}
+
+static void
+rsQuaternionSlerp(rs_quaternion *q, const rs_quaternion *q0, const rs_quaternion *q1, float t) {
+    if(t <= 0.0f) {
+        rsQuaternionSet(q, q0);
+        return;
+    }
+    if(t >= 1.0f) {
+        rsQuaternionSet(q, q1);
+        return;
+    }
+
+    rs_quaternion tempq0, tempq1;
+    rsQuaternionSet(&tempq0, q0);
+    rsQuaternionSet(&tempq1, q1);
+
+    float angle = rsQuaternionDot(q0, q1);
+    if(angle < 0) {
+        rsQuaternionMultiply(&tempq0, -1.0f);
+        angle *= -1.0f;
+    }
+
+    float scale, invScale;
+    if (angle + 1.0f > 0.05f) {
+        if (1.0f - angle >= 0.05f) {
+            float theta = acos(angle);
+            float invSinTheta = 1.0f / sin(theta);
+            scale = sin(theta * (1.0f - t)) * invSinTheta;
+            invScale = sin(theta * t) * invSinTheta;
+        }
+        else {
+            scale = 1.0f - t;
+            invScale = t;
+        }
+    }
+    else {
+        rsQuaternionSet(&tempq1, tempq0.z, -tempq0.y, tempq0.x, -tempq0.w);
+        scale = sin(M_PI * (0.5f - t));
+        invScale = sin(M_PI * t);
+    }
+
+    rsQuaternionSet(q, tempq0.w*scale + tempq1.w*invScale, tempq0.x*scale + tempq1.x*invScale,
+                        tempq0.y*scale + tempq1.y*invScale, tempq0.z*scale + tempq1.z*invScale);
+}
+
+static void rsQuaternionGetMatrixUnit(rs_matrix4x4 *m, const rs_quaternion *q) {
+    float x2 = 2.0f * q->x * q->x;
+    float y2 = 2.0f * q->y * q->y;
+    float z2 = 2.0f * q->z * q->z;
+    float xy = 2.0f * q->x * q->y;
+    float wz = 2.0f * q->w * q->z;
+    float xz = 2.0f * q->x * q->z;
+    float wy = 2.0f * q->w * q->y;
+    float wx = 2.0f * q->w * q->x;
+    float yz = 2.0f * q->y * q->z;
+
+    m->m[0] = 1.0f - y2 - z2;
+    m->m[1] = xy - wz;
+    m->m[2] = xz + wy;
+    m->m[3] = 0.0f;
+
+    m->m[4] = xy + wz;
+    m->m[5] = 1.0f - x2 - z2;
+    m->m[6] = yz - wx;
+    m->m[7] = 0.0f;
+
+    m->m[8] = xz - wy;
+    m->m[9] = yz - wx;
+    m->m[10] = 1.0f - x2 - y2;
+    m->m[11] = 0.0f;
+
+    m->m[12] = 0.0f;
+    m->m[13] = 0.0f;
+    m->m[14] = 0.0f;
+    m->m[15] = 1.0f;
+}
+
 
 /////////////////////////////////////////////////////
 // int ops

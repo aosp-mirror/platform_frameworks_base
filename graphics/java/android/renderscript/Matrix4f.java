@@ -179,6 +179,76 @@ public class Matrix4f {
         tmp.loadTranslate(x, y, z);
         multiply(tmp);
     }
+    private float computeCofactor(int i, int j) {
+        int c0 = (i+1) % 4;
+        int c1 = (i+2) % 4;
+        int c2 = (i+3) % 4;
+        int r0 = (j+1) % 4;
+        int r1 = (j+2) % 4;
+        int r2 = (j+3) % 4;
+
+        float minor = (mMat[c0 + 4*r0] * (mMat[c1 + 4*r1] * mMat[c2 + 4*r2] -
+                                            mMat[c1 + 4*r2] * mMat[c2 + 4*r1]))
+                     - (mMat[c0 + 4*r1] * (mMat[c1 + 4*r0] * mMat[c2 + 4*r2] -
+                                            mMat[c1 + 4*r2] * mMat[c2 + 4*r0]))
+                     + (mMat[c0 + 4*r2] * (mMat[c1 + 4*r0] * mMat[c2 + 4*r1] -
+                                            mMat[c1 + 4*r1] * mMat[c2 + 4*r0]));
+
+        float cofactor = ((i+j) & 1) != 0 ? -minor : minor;
+        return cofactor;
+    }
+
+    public boolean inverse() {
+
+        Matrix4f result = new Matrix4f();
+
+        for (int i = 0; i < 4; ++i) {
+            for (int j = 0; j < 4; ++j) {
+                result.mMat[4*i + j] = computeCofactor(i, j);
+            }
+        }
+
+        // Dot product of 0th column of source and 0th row of result
+        float det = mMat[0]*result.mMat[0] + mMat[4]*result.mMat[1] +
+                     mMat[8]*result.mMat[2] + mMat[12]*result.mMat[3];
+
+        if (Math.abs(det) < 1e-6) {
+            return false;
+        }
+
+        det = 1.0f / det;
+        for (int i = 0; i < 16; ++i) {
+            mMat[i] = result.mMat[i] * det;
+        }
+
+        return true;
+    }
+
+    public boolean inverseTranspose() {
+
+        Matrix4f result = new Matrix4f();
+
+        for (int i = 0; i < 4; ++i) {
+            for (int j = 0; j < 4; ++j) {
+                result.mMat[4*j + i] = computeCofactor(i, j);
+            }
+        }
+
+        float det = mMat[0]*result.mMat[0] + mMat[4]*result.mMat[4] +
+                     mMat[8]*result.mMat[8] + mMat[12]*result.mMat[12];
+
+        if (Math.abs(det) < 1e-6) {
+            return false;
+        }
+
+        det = 1.0f / det;
+        for (int i = 0; i < 16; ++i) {
+            mMat[i] = result.mMat[i] * det;
+        }
+
+        return true;
+    }
+
     public void transpose() {
         for(int i = 0; i < 3; ++i) {
             for(int j = i + 1; j < 4; ++j) {
