@@ -35,6 +35,8 @@ public:
     bool readFrom(int fd);
     bool writeTo(const char* filename);
     bool writeTo(int fd);
+    bool removeFrom(const char* filename);
+    bool removeFrom(int fd);
 
     const char* getFileName() const {
         return mFileName;
@@ -77,6 +79,8 @@ private:
     const char* mFileName;
 
     size_t mFileSize;
+
+    size_t mFooterStart;
 
     unsigned char* mReadBuf;
 
