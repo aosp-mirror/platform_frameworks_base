@@ -1377,9 +1377,8 @@ public class ViewDebug {
                 Object methodValue = method.invoke(view, (Object[]) null);
                 final Class<?> returnType = method.getReturnType();
                 final ExportedProperty property = sAnnotations.get(method);
-                String fullName = (property.category().length() == 0) ?
-                        method.getName() :
-                        (property.category() + ":" + method.getName());
+                String categoryPrefix =
+                        property.category().length() != 0 ? property.category() + ":" : "";
 
                 if (returnType == int.class) {
 
@@ -1390,7 +1389,8 @@ public class ViewDebug {
                         final FlagToString[] flagsMapping = property.flagMapping();
                         if (flagsMapping.length > 0) {
                             final int intValue = (Integer) methodValue;
-                            final String valuePrefix = prefix + fullName + '_';
+                            final String valuePrefix =
+                                    categoryPrefix + prefix + method.getName() + '_';
                             exportUnrolledFlags(out, flagsMapping, intValue, valuePrefix);
                         }
 
@@ -1415,7 +1415,7 @@ public class ViewDebug {
                     }
                 } else if (returnType == int[].class) {
                     final int[] array = (int[]) methodValue;
-                    final String valuePrefix = prefix + fullName + '_';
+                    final String valuePrefix = categoryPrefix + prefix + method.getName() + '_';
                     final String suffix = "()";
 
                     exportUnrolledArray(context, out, property, array, valuePrefix, suffix);
@@ -1429,7 +1429,7 @@ public class ViewDebug {
                     }
                 }
 
-                writeEntry(out, prefix, fullName, "()", methodValue);
+                writeEntry(out, categoryPrefix + prefix, method.getName(), "()", methodValue);
             } catch (IllegalAccessException e) {
             } catch (InvocationTargetException e) {
             }
@@ -1450,9 +1450,8 @@ public class ViewDebug {
                 Object fieldValue = null;
                 final Class<?> type = field.getType();
                 final ExportedProperty property = sAnnotations.get(field);
-                String fullName = (property.category().length() == 0) ?
-                        field.getName() :
-                        (property.category() + ":" + field.getName());
+                String categoryPrefix =
+                        property.category().length() != 0 ? property.category() + ":" : "";
 
                 if (type == int.class) {
 
@@ -1463,7 +1462,8 @@ public class ViewDebug {
                         final FlagToString[] flagsMapping = property.flagMapping();
                         if (flagsMapping.length > 0) {
                             final int intValue = field.getInt(view);
-                            final String valuePrefix = prefix + fullName + '_';
+                            final String valuePrefix =
+                                    categoryPrefix + prefix + field.getName() + '_';
                             exportUnrolledFlags(out, flagsMapping, intValue, valuePrefix);
                         }
 
@@ -1486,7 +1486,7 @@ public class ViewDebug {
                     }
                 } else if (type == int[].class) {
                     final int[] array = (int[]) field.get(view);
-                    final String valuePrefix = prefix + fullName + '_';
+                    final String valuePrefix = categoryPrefix + prefix + field.getName() + '_';
                     final String suffix = "";
 
                     exportUnrolledArray(context, out, property, array, valuePrefix, suffix);
@@ -1495,8 +1495,8 @@ public class ViewDebug {
                     return;
                 } else if (!type.isPrimitive()) {
                     if (property.deepExport()) {
-                        dumpViewProperties(context, field.get(view), out,
-                                prefix + property.prefix());
+                        dumpViewProperties(context, field.get(view), out, prefix
+                                + property.prefix());
                         continue;
                     }
                 }
@@ -1505,7 +1505,7 @@ public class ViewDebug {
                     fieldValue = field.get(view);
                 }
 
-                writeEntry(out, prefix, fullName, "", fieldValue);
+                writeEntry(out, categoryPrefix + prefix, field.getName(), "", fieldValue);
             } catch (IllegalAccessException e) {
             }
         }
