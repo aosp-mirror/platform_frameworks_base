@@ -2034,7 +2034,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case SUP_DISCONNECTION_EVENT:
                 case DRIVER_START_EVENT:
                 case DRIVER_STOP_EVENT:
-                case DRIVER_HUNG_EVENT:
                 case NETWORK_CONNECTION_EVENT:
                 case NETWORK_DISCONNECTION_EVENT:
                 case SCAN_RESULTS_EVENT:
