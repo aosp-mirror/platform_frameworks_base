@@ -125,6 +125,9 @@ public abstract class PreferenceActivity extends ListActivity implements
     // Back will then return RESULT_CANCELED and Next RESULT_OK
     private static final String EXTRA_PREFS_SHOW_BUTTON_BAR = "extra_prefs_show_button_bar";
 
+    // add a Skip button?
+    private static final String EXTRA_PREFS_SHOW_SKIP = "extra_prefs_show_skip";
+
     // specify custom text for the Back or Next buttons, or cause a button to not appear
     // at all by setting it to null
     private static final String EXTRA_PREFS_SET_NEXT_TEXT = "extra_prefs_set_next_text";
@@ -307,6 +310,13 @@ public abstract class PreferenceActivity extends ListActivity implements
                     finish();
                 }
             });
+            Button skipButton = (Button)findViewById(com.android.internal.R.id.skip_button);
+            skipButton.setOnClickListener(new OnClickListener() {
+                public void onClick(View v) {
+                    setResult(RESULT_OK);
+                    finish();
+                }
+            });
             mNextButton = (Button)findViewById(com.android.internal.R.id.next_button);
             mNextButton.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
@@ -333,6 +343,9 @@ public abstract class PreferenceActivity extends ListActivity implements
                 else {
                     backButton.setText(buttonText);
                 }
+            }
+            if (intent.getBooleanExtra(EXTRA_PREFS_SHOW_SKIP, false)) {
+                skipButton.setVisibility(View.VISIBLE);
             }
         }
     }

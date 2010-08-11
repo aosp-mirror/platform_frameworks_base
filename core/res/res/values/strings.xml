@@ -807,8 +807,8 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_writeCalendar">add or modify calendar events and send email to guests</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeCalendar">Allows an application to add or change the 
-        events on your calendar, which may send email to guests. Malicious applications can use this 
+    <string name="permdesc_writeCalendar">Allows an application to add or change the
+        events on your calendar, which may send email to guests. Malicious applications can use this
         to erase or modify your calendar events or to send email to guests.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1918,7 +1918,7 @@
 
     <!-- Text shown by list fragment when waiting for data to display. -->
     <string name="loading">Loading...</string>
-    
+
     <!-- Default text for a button that can be toggled on and off. -->
     <string name="capital_on">ON</string>
     <!-- Default text for a button that can be toggled on and off. -->
@@ -1969,23 +1969,23 @@
 
     <!-- Notification text to tell the user that a heavy-weight application is running. -->
     <string name="heavy_weight_notification"><xliff:g id="app">%1$s</xliff:g> running</string>
-    
+
     <!-- Notification details to tell the user that a heavy-weight application is running. -->
     <string name="heavy_weight_notification_detail">Select to switch to application</string>
-    
+
     <!-- Title of dialog prompting whether user wants to switch between heavy-weight apps. -->
     <string name="heavy_weight_switcher_title">Switch applications?</string>
-    
+
     <!-- Descriptive text for switching to a new heavy-weight application. -->
     <string name="heavy_weight_switcher_text">Another application is already running
     that must be stopped before you can start a new one.</string>
-    
+
     <string name="old_app_action">Return to <xliff:g id="old_app">%1$s</xliff:g></string>
     <string name="old_app_description">Don\'t start the new application.</string>
-    
+
     <string name="new_app_action">Start <xliff:g id="old_app">%1$s</xliff:g></string>
     <string name="new_app_description">Stop the old application without saving.</string>
-    
+
     <!-- Displayed in the title of the chooser for things to do with text that
          is to be sent to another application. For example, I can send
          text through SMS or IM.  A dialog with those choices would be shown,
@@ -2277,6 +2277,9 @@
     <!--  Strings for possible PreferenceActivity Back/Next buttons -->
     <string name="back_button_label">Back</string>
     <string name="next_button_label">Next</string>
+
+    <!-- Optional button to Skip a PreferenceActivity [CHAR LIMIT=20] -->
+    <string name="skip_button_label">Skip</string>
 
     <!-- Strings for throttling notification -->
     <!-- Shown when the user is in danger of being throttled -->
