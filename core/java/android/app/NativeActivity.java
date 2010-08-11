@@ -10,6 +10,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,12 +33,27 @@ import java.lang.ref.WeakReference;
 
 /**
  * Convenience for implementing an activity that will be implemented
- * purely in native code.  That is, a game (or game-like thing).
+ * purely in native code.  That is, a game (or game-like thing).  There
+ * is no need to derive from this class; you can simply declare it in your
+ * manifest, and use the NDK APIs from there.
+ *
+ * <p>A typical manifest would look like:
+ *
+ * {@sample development/ndk/platforms/android-9/samples/native-activity/AndroidManifest.xml
+ *      manifest}
+ *
+ * <p>A very simple example of native code that is run by NativeActivity
+ * follows.  This reads input events from the user and uses OpenGLES to
+ * draw into the native activity's window.
+ *
+ * {@sample development/ndk/platforms/android-9/samples/native-activity/jni/main.c all}
  */
 public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
         InputQueue.Callback, OnGlobalLayoutListener {
     public static final String META_DATA_LIB_NAME = "android.app.lib_name";
     
+    public static final String KEY_NATIVE_SAVED_STATE = "android:native_state";
+
     private NativeContentView mNativeContentView;
     private InputMethodManager mIMM;
     private InputMethodCallback mInputMethodCallback;
@@ -59,14 +75,15 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
     
     private native int loadNativeCode(String path, MessageQueue queue,
             String internalDataPath, String externalDataPath, int sdkVersion,
-            AssetManager assetMgr);
+            AssetManager assetMgr, byte[] savedState);
     private native void unloadNativeCode(int handle);
     
     private native void onStartNative(int handle);
     private native void onResumeNative(int handle);
-    private native void onSaveInstanceStateNative(int handle);
+    private native byte[] onSaveInstanceStateNative(int handle);
     private native void onPauseNative(int handle);
     private native void onStopNative(int handle);
+    private native void onConfigurationChangedNative(int handle);
     private native void onLowMemoryNative(int handle);
     private native void onWindowFocusChangedNative(int handle, boolean focused);
     private native void onSurfaceCreatedNative(int handle, Surface surface);
@@ -165,10 +182,13 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
             throw new IllegalArgumentException("Unable to find native library: " + libname);
         }
         
+        byte[] nativeSavedState = savedInstanceState != null
+                ? savedInstanceState.getByteArray(KEY_NATIVE_SAVED_STATE) : null;
+
         mNativeHandle = loadNativeCode(path, Looper.myQueue(),
                  getFilesDir().toString(),
                  Environment.getExternalStorageAppFilesDirectory(ai.packageName).toString(),
-                 Build.VERSION.SDK_INT, getAssets());
+                 Build.VERSION.SDK_INT, getAssets(), nativeSavedState);
         
         if (mNativeHandle == 0) {
             throw new IllegalArgumentException("Unable to load native library: " + path);
@@ -206,7 +226,10 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        onSaveInstanceStateNative(mNativeHandle);
+        byte[] state = onSaveInstanceStateNative(mNativeHandle);
+        if (state != null) {
+            outState.putByteArray(KEY_NATIVE_SAVED_STATE, state);
+        }
     }
 
     @Override
@@ -219,6 +242,14 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
     protected void onStop() {
         super.onStop();
         onStopNative(mNativeHandle);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (!mDestroyed) {
+            onConfigurationChangedNative(mNativeHandle);
+        }
     }
 
     @Override

@@ -232,6 +232,12 @@ void AssetManager::setConfiguration(const ResTable_config& config, const char* l
     }
 }
 
+void AssetManager::getConfiguration(ResTable_config* outConfig) const
+{
+    AutoMutex _l(mLock);
+    *outConfig = *mConfig;
+}
+
 /*
  * Open an asset.
  *
