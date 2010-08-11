@@ -36,6 +36,7 @@ public class Input implements Parcelable {
     public boolean echo;
     public boolean yesNo;
     public boolean helpAvailable;
+    public Duration duration;
 
     Input() {
         text = "";
@@ -49,6 +50,7 @@ public class Input implements Parcelable {
         echo = false;
         yesNo = false;
         helpAvailable = false;
+        duration = null;
     }
 
     private Input(Parcel in) {
@@ -63,6 +65,7 @@ public class Input implements Parcelable {
         echo = in.readInt() == 1 ? true : false;
         yesNo = in.readInt() == 1 ? true : false;
         helpAvailable = in.readInt() == 1 ? true : false;
+        duration = in.readParcelable(null);
     }
 
     public int describeContents() {
@@ -81,6 +84,7 @@ public class Input implements Parcelable {
         dest.writeInt(echo ? 1 : 0);
         dest.writeInt(yesNo ? 1 : 0);
         dest.writeInt(helpAvailable ? 1 : 0);
+        dest.writeParcelable(duration, 0);
     }
 
     public static final Parcelable.Creator<Input> CREATOR = new Parcelable.Creator<Input>() {
