@@ -50,7 +50,7 @@ public class LinearLayout extends ViewGroup {
      * Whether the children of this layout are baseline aligned.  Only applicable
      * if {@link #mOrientation} is horizontal.
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "layout")
     private boolean mBaselineAligned = true;
 
     /**
@@ -60,7 +60,7 @@ public class LinearLayout extends ViewGroup {
      * Note: this is orthogonal to {@link #mBaselineAligned}, which is concerned
      * with whether the children of this layout are baseline aligned.
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "layout")
     private int mBaselineAlignedChildIndex = -1;
 
     /**
@@ -68,12 +68,13 @@ public class LinearLayout extends ViewGroup {
      * We'll calculate the baseline of this layout as we measure vertically; for
      * horizontal linear layouts, the offset of 0 is appropriate.
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "measurement")
     private int mBaselineChildTop = 0;
 
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "measurement")
     private int mOrientation;
-    @ViewDebug.ExportedProperty(mapping = {
+
+    @ViewDebug.ExportedProperty(category = "measurement", mapping = {
             @ViewDebug.IntToString(from =  -1,                       to = "NONE"),
             @ViewDebug.IntToString(from = Gravity.NO_GRAVITY,        to = "NONE"),
             @ViewDebug.IntToString(from = Gravity.TOP,               to = "TOP"),
@@ -88,13 +89,14 @@ public class LinearLayout extends ViewGroup {
             @ViewDebug.IntToString(from = Gravity.FILL,              to = "FILL")
         })
     private int mGravity = Gravity.LEFT | Gravity.TOP;
-    @ViewDebug.ExportedProperty
+
+    @ViewDebug.ExportedProperty(category = "measurement")
     private int mTotalLength;
 
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "layout")
     private float mWeightSum;
 
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "layout")
     private boolean mUseLargestChild;
 
     private int[] mMaxAscent;
@@ -1364,7 +1366,7 @@ public class LinearLayout extends ViewGroup {
          * 0 if the view should not be stretched. Otherwise the extra pixels
          * will be pro-rated among all views whose weight is greater than 0.
          */
-        @ViewDebug.ExportedProperty
+        @ViewDebug.ExportedProperty(category = "layout")
         public float weight;
 
         /**
@@ -1372,7 +1374,7 @@ public class LinearLayout extends ViewGroup {
          *
          * @see android.view.Gravity
          */
-        @ViewDebug.ExportedProperty(mapping = {
+        @ViewDebug.ExportedProperty(category = "layout", mapping = {
             @ViewDebug.IntToString(from =  -1,                       to = "NONE"),
             @ViewDebug.IntToString(from = Gravity.NO_GRAVITY,        to = "NONE"),
             @ViewDebug.IntToString(from = Gravity.TOP,               to = "TOP"),
