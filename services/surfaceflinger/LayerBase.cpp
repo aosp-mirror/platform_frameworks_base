@@ -307,22 +307,8 @@ void LayerBase::drawRegion(const Region& reg) const
     }
 }
 
-void LayerBase::draw(const Region& inClip) const
+void LayerBase::draw(const Region& clip) const
 {
-    // invalidate the region we'll update
-    Region clip(inClip);  // copy-on-write, so no-op most of the time
-
-    // Remove the transparent area from the clipping region
-    const State& s = drawingState();
-    if (LIKELY(!s.transparentRegion.isEmpty())) {
-        clip.subtract(transparentRegionScreen);
-        if (clip.isEmpty()) {
-            // usually this won't happen because this should be taken care of
-            // by SurfaceFlinger::computeVisibleRegions()
-            return;
-        }        
-    }
-
     // reset GL state
     glEnable(GL_SCISSOR_TEST);
 
