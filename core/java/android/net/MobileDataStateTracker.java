@@ -526,12 +526,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         return -1;
     }
 
-    /**
-     * This is not supported.
-     */
-    public void interpretScanResultsAvailable() {
-    }
-
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer("Mobile data state: ");

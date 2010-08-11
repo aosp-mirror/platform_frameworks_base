@@ -293,6 +293,21 @@ public class WifiManager {
     public static final String EXTRA_NEW_RSSI = "newRssi";
 
     /**
+     * Broadcast intent action indicating that the IP configuration
+     * changed on wifi.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String CONFIG_CHANGED_ACTION = "android.net.wifi.CONFIG_CHANGED";
+    /**
+     * The lookup key for a {@link android.net.NetworkProperties} object associated with the
+     * Wi-Fi network. Retrieve with
+     * {@link android.content.Intent#getParcelableExtra(String)}.
+     * @hide
+     */
+    public static final String EXTRA_NETWORK_PROPERTIES = "networkProperties";
+
+    /**
      * The network IDs of the configured networks could have changed.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
@@ -832,6 +847,82 @@ public class WifiManager {
     public boolean setWifiApConfiguration(WifiConfiguration wifiConfig) {
         try {
             mService.setWifiApConfiguration(wifiConfig);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+   /**
+     * Start the driver and connect to network.
+     *
+     * This function will over-ride WifiLock and device idle status. For example,
+     * even if the device is idle or there is only a scan-only lock held,
+     * a start wifi would mean that wifi connection is kept active until
+     * a stopWifi() is sent.
+     *
+     * This API is used by WifiStateTracker
+     *
+     * @return {@code true} if the operation succeeds else {@code false}
+     * @hide
+     */
+    public boolean startWifi() {
+        try {
+            mService.startWifi();
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Disconnect from a network (if any) and stop the driver.
+     *
+     * This function will over-ride WifiLock and device idle status. Wi-Fi
+     * stays inactive until a startWifi() is issued.
+     *
+     * This API is used by WifiStateTracker
+     *
+     * @return {@code true} if the operation succeeds else {@code false}
+     * @hide
+     */
+    public boolean stopWifi() {
+        try {
+            mService.stopWifi();
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Add a bssid to the supplicant blacklist
+     *
+     * This API is used by WifiWatchdogService
+     *
+     * @return {@code true} if the operation succeeds else {@code false}
+     * @hide
+     */
+    public boolean addToBlacklist(String bssid) {
+        try {
+            mService.addToBlacklist(bssid);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Clear the supplicant blacklist
+     *
+     * This API is used by WifiWatchdogService
+     *
+     * @return {@code true} if the operation succeeds else {@code false}
+     * @hide
+     */
+    public boolean clearBlacklist() {
+        try {
+            mService.clearBlacklist();
             return true;
         } catch (RemoteException e) {
             return false;

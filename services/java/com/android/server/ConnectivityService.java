@@ -314,14 +314,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             case ConnectivityManager.TYPE_WIFI:
                 if (DBG) Slog.v(TAG, "Starting Wifi Service.");
                 WifiStateTracker wst = new WifiStateTracker(context, mHandler);
-                WifiService wifiService = new WifiService(context, wst);
+                WifiService wifiService = new WifiService(context);
                 ServiceManager.addService(Context.WIFI_SERVICE, wifiService);
-                wifiService.startWifi();
+                wifiService.checkAndStartWifi();
                 mNetTrackers[ConnectivityManager.TYPE_WIFI] = wst;
                 wst.startMonitoring();
 
                 //TODO: as part of WWS refactor, create only when needed
-                mWifiWatchdogService = new WifiWatchdogService(context, wst);
+                mWifiWatchdogService = new WifiWatchdogService(context);
 
                 break;
             case ConnectivityManager.TYPE_MOBILE:
@@ -1205,16 +1205,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         sendConnectedBroadcast(info);
     }
 
-    private void handleScanResultsAvailable(NetworkInfo info) {
-        int networkType = info.getType();
-        if (networkType != ConnectivityManager.TYPE_WIFI) {
-            if (DBG) Slog.v(TAG, "Got ScanResultsAvailable for " +
-                    info.getTypeName() + " network. Don't know how to handle.");
-        }
-
-        mNetTrackers[networkType].interpretScanResultsAvailable();
-    }
-
     private void handleNotificationChange(boolean visible, int id,
             Notification notification) {
         NotificationManager notificationManager = (NotificationManager) mContext
@@ -1617,11 +1607,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     } else if (state == NetworkInfo.State.CONNECTED) {
                         handleConnect(info);
                     }
-                    break;
-
-                case NetworkStateTracker.EVENT_SCAN_RESULTS_AVAILABLE:
-                    info = (NetworkInfo) msg.obj;
-                    handleScanResultsAvailable(info);
                     break;
 
                 case NetworkStateTracker.EVENT_NOTIFICATION_CHANGED:
