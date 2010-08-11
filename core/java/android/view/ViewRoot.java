@@ -52,7 +52,6 @@ import android.Manifest;
 import android.media.AudioManager;
 
 import java.lang.ref.WeakReference;
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -1869,7 +1868,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (LOCAL_LOGV) Log.v(
                 TAG, "Dispatching key "
                 + msg.obj + " to " + mView);
-            deliverKeyEvent((KeyEvent)msg.obj, true);
+            deliverKeyEvent((KeyEvent)msg.obj, msg.arg1 != 0);
             break;
         case DISPATCH_POINTER: {
             MotionEvent event = (MotionEvent) msg.obj;
@@ -2021,9 +2020,14 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
     
     private void finishKeyEvent(KeyEvent event) {
+        if (LOCAL_LOGV) Log.v(TAG, "Telling window manager key is finished");
+
         if (mFinishedCallback != null) {
             mFinishedCallback.run();
             mFinishedCallback = null;
+        } else {
+            Slog.w(TAG, "Attempted to tell the input queue that the current key event "
+                    + "is finished but there is no key event actually in progress.");
         }
     }
     
@@ -2483,8 +2487,6 @@ public final class ViewRoot extends Handler implements ViewParent,
                 ? mView.dispatchKeyEventPreIme(event) : true;
         if (handled) {
             if (sendDone) {
-                if (LOCAL_LOGV) Log.v(
-                    TAG, "Telling window manager key is finished");
                 finishKeyEvent(event);
             }
             return;
@@ -2516,8 +2518,6 @@ public final class ViewRoot extends Handler implements ViewParent,
                 deliverKeyEventToViewHierarchy(event, sendDone);
                 return;
             } else if (sendDone) {
-                if (LOCAL_LOGV) Log.v(
-                        TAG, "Telling window manager key is finished");
                 finishKeyEvent(event);
             } else {
                 Log.w(TAG, "handleFinishedEvent(seq=" + seq
@@ -2591,8 +2591,6 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         } finally {
             if (sendDone) {
-                if (LOCAL_LOGV) Log.v(
-                    TAG, "Telling window manager key is finished");
                 finishKeyEvent(event);
             }
             // Let the exception fall through -- the looper will catch
@@ -2776,9 +2774,14 @@ public final class ViewRoot extends Handler implements ViewParent,
     
     private final InputHandler mInputHandler = new InputHandler() {
         public void handleKey(KeyEvent event, Runnable finishedCallback) {
+            if (mFinishedCallback != null) {
+                Slog.w(TAG, "Received a new key event from the input queue but there is "
+                        + "already an unfinished key event in progress.");
+            }
+
             mFinishedCallback = finishedCallback;
 
-            dispatchKey(event);
+            dispatchKey(event, true);
         }
 
         public void handleMotion(MotionEvent event, Runnable finishedCallback) {
@@ -2789,9 +2792,13 @@ public final class ViewRoot extends Handler implements ViewParent,
     };
 
     public void dispatchKey(KeyEvent event) {
-        if (event.getAction() == KeyEvent.ACTION_DOWN) {
-            //noinspection ConstantConditions
-            if (false && event.getKeyCode() == KeyEvent.KEYCODE_CAMERA) {
+        dispatchKey(event, false);
+    }
+
+    private void dispatchKey(KeyEvent event, boolean sendDone) {
+        //noinspection ConstantConditions
+        if (false && event.getAction() == KeyEvent.ACTION_DOWN) {
+            if (event.getKeyCode() == KeyEvent.KEYCODE_CAMERA) {
                 if (Config.LOGD) Log.d("keydisp",
                         "===================================================");
                 if (Config.LOGD) Log.d("keydisp", "Focused view Hierarchy is:");
@@ -2804,6 +2811,7 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         Message msg = obtainMessage(DISPATCH_KEY);
         msg.obj = event;
+        msg.arg1 = sendDone ? 1 : 0;
 
         if (LOCAL_LOGV) Log.v(
             TAG, "sending key " + event + " to " + mView);
