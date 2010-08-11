@@ -16,8 +16,6 @@
 
 package android.webkit;
 
-import android.util.Log;
-
 /**
  * This class is simply a container for the methods used to configure WebKit's
  * mock DeviceOrientationClient for use in LayoutTests.
@@ -27,23 +25,28 @@ import android.util.Log;
  * @hide
  */
 public final class DeviceOrientationManager {
-    /**
-     * Sets whether the Page for the specified WebViewCore should use a mock DeviceOrientation
-     * client.
-     */
-    public static void useMock(WebViewCore webViewCore) {
-        assert WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName());
-        nativeUseMock(webViewCore);
+    private WebViewCore mWebViewCore;
+
+    public DeviceOrientationManager(WebViewCore webViewCore) {
+        mWebViewCore = webViewCore;
     }
 
     /**
-     * Set the position for the mock DeviceOrientation service for the supplied WebViewCore.
+     * Sets whether the Page for this WebViewCore should use a mock DeviceOrientation
+     * client.
      */
-    public static void setMockOrientation(WebViewCore webViewCore, boolean canProvideAlpha,
-            double alpha, boolean canProvideBeta, double beta, boolean canProvideGamma,
-            double gamma) {
+    public void useMock() {
         assert WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName());
-        nativeSetMockOrientation(webViewCore, canProvideAlpha, alpha, canProvideBeta, beta,
+        nativeUseMock(mWebViewCore);
+    }
+
+    /**
+     * Set the position for the mock DeviceOrientation service for this WebViewCore.
+     */
+    public void setMockOrientation(boolean canProvideAlpha, double alpha, boolean canProvideBeta,
+            double beta, boolean canProvideGamma, double gamma) {
+        assert WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName());
+        nativeSetMockOrientation(mWebViewCore, canProvideAlpha, alpha, canProvideBeta, beta,
                 canProvideGamma, gamma);
     }
 

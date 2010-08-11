@@ -117,6 +117,8 @@ final class WebViewCore {
     private int mWebkitScrollX = 0;
     private int mWebkitScrollY = 0;
 
+    private DeviceOrientationManager mDeviceOrientationManager = new DeviceOrientationManager(this);
+
     // The thread name used to identify the WebCore thread and for use in
     // debugging other classes that require operation within the WebCore thread.
     /* package */ static final String THREAD_NAME = "WebViewCoreThread";
@@ -2489,7 +2491,13 @@ final class WebViewCore {
     }
 
     private void useMockDeviceOrientation() {
-        DeviceOrientationManager.useMock(this);
+        mDeviceOrientationManager.useMock();
+    }
+
+    public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,
+            boolean canProvideBeta, double beta, boolean canProvideGamma, double gamma) {
+        mDeviceOrientationManager.setMockOrientation(canProvideAlpha, alpha, canProvideBeta, beta,
+                canProvideGamma, gamma);
     }
 
     private native void nativePause();
