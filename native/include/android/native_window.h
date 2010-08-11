@@ -36,12 +36,23 @@ struct ANativeWindow;
 typedef struct ANativeWindow ANativeWindow;
 
 typedef struct ANativeWindow_Buffer {
+    // The number of pixels that are show horizontally.
     int32_t width;
+
+    // The number of pixels that are shown vertically.
     int32_t height;
+
+    // The number of *pixels* that a line in the buffer takes in
+    // memory.  This may be >= width.
     int32_t stride;
+
+    // The format of the buffer.  One of WINDOW_FORMAT_*
     int32_t format;
+
+    // The actual bits.
     void* bits;
     
+    // Do not touch.
     uint32_t reserved[6];
 } ANativeWindow_Buffer;
 

@@ -197,6 +197,12 @@ typedef struct ANativeActivityCallbacks {
     void (*onContentRectChanged)(ANativeActivity* activity, const ARect* rect);
 
     /**
+     * The current device AConfiguration has changed.  The new configuration can
+     * be retrieved from assetManager.
+     */
+    void (*onConfigurationChanged)(ANativeActivity* activity);
+
+    /**
      * The system is running low on memory.  Use this callback to release
      * resources you do not need, to help the system avoid killing more
      * important processes.
@@ -208,7 +214,9 @@ typedef struct ANativeActivityCallbacks {
  * This is the function that must be in the native code to instantiate the
  * application's native activity.  It is called with the activity instance (see
  * above); if the code is being instantiated from a previously saved instance,
- * the savedState will be non-NULL and point to the saved data.
+ * the savedState will be non-NULL and point to the saved data.  You must make
+ * any copy of this data you need -- it will be released after you return from
+ * this function.
  */
 typedef void ANativeActivity_createFunc(ANativeActivity* activity,
         void* savedState, size_t savedStateSize);

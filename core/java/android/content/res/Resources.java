@@ -1293,7 +1293,7 @@ public class Resources {
                 height = mMetrics.widthPixels;
             }
             int keyboardHidden = mConfiguration.keyboardHidden;
-            if (keyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO
+            if (keyboardHidden == Configuration.KEYBOARDHIDDEN_NO
                     && mConfiguration.hardKeyboardHidden
                             == Configuration.HARDKEYBOARDHIDDEN_YES) {
                 keyboardHidden = Configuration.KEYBOARDHIDDEN_SOFT;

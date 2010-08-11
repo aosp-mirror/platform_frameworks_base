@@ -1275,6 +1275,9 @@
                 android:finishOnCloseSystemDialogs="true"
                 android:excludeFromRecents="true">
         </activity>
+        <activity android:name="com.android.internal.app.PlatLogoActivity"
+                android:theme="@style/Theme.NoTitleBar.Fullscreen">
+        </activity>
         <activity android:name="com.android.internal.app.DisableCarModeActivity"
                 android:theme="@style/Theme.NoDisplay"
                 android:excludeFromRecents="true">
