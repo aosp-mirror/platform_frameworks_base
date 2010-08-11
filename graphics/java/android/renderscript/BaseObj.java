@@ -24,10 +24,10 @@ import android.util.Log;
  **/
 class BaseObj {
 
-    BaseObj(RenderScript rs) {
+    BaseObj(int id, RenderScript rs) {
         rs.validate();
         mRS = rs;
-        mID = 0;
+        mID = id;
         mDestroyed = false;
     }
 

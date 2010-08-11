@@ -47,8 +47,7 @@ public class Sampler extends BaseObj {
     }
 
     Sampler(int id, RenderScript rs) {
-        super(rs);
-        mID = id;
+        super(id, rs);
     }
 
     Sampler mSampler_CLAMP_NEAREST;

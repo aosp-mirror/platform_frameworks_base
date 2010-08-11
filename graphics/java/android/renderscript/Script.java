@@ -56,8 +56,7 @@ public class Script extends BaseObj {
 
 
     Script(int id, RenderScript rs) {
-        super(rs);
-        mID = id;
+        super(id, rs);
     }
 
     public void bindAllocation(Allocation va, int slot) {

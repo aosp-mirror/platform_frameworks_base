@@ -76,8 +76,7 @@ public class ProgramStore extends BaseObj {
 
 
     ProgramStore(int id, RenderScript rs) {
-        super(rs);
-        mID = id;
+        super(id, rs);
     }
 
 

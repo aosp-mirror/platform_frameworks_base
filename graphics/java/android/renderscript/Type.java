@@ -97,8 +97,7 @@ public class Type extends BaseObj {
 
 
     Type(int id, RenderScript rs) {
-        super(rs);
-        mID = id;
+        super(id, rs);
         mNativeCache = 0;
     }
 
@@ -125,7 +124,7 @@ public class Type extends BaseObj {
 
         int elementID = dataBuffer[5];
         if(elementID != 0) {
-            mElement = new Element(mRS, elementID);
+            mElement = new Element(elementID, mRS);
             mElement.updateFromNative();
         }
         calcElementCount();

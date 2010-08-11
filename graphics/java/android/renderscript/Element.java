@@ -286,32 +286,27 @@ public class Element extends BaseObj {
     }
 
 
-    Element(RenderScript rs, Element[] e, String[] n) {
-        super(rs);
+    Element(int id, RenderScript rs, Element[] e, String[] n) {
+        super(id, rs);
         mSize = 0;
         mElements = e;
         mElementNames = n;
-        int[] ids = new int[mElements.length];
         for (int ct = 0; ct < mElements.length; ct++ ) {
             mSize += mElements[ct].mSize;
-            ids[ct] = mElements[ct].mID;
         }
-        mID = rs.nElementCreate2(ids, mElementNames);
     }
 
-    Element(RenderScript rs, DataType dt, DataKind dk, boolean norm, int size) {
-        super(rs);
+    Element(int id, RenderScript rs, DataType dt, DataKind dk, boolean norm, int size) {
+        super(id, rs);
         mSize = dt.mSize * size;
         mType = dt;
         mKind = dk;
         mNormalized = norm;
         mVectorSize = size;
-        mID = rs.nElementCreate(dt.mID, dk.mID, norm, size);
     }
 
-    Element(RenderScript rs, int id) {
-        super(rs);
-        mID = id;
+    Element(int id, RenderScript rs) {
+        super(id, rs);
     }
 
     @Override
@@ -320,9 +315,14 @@ public class Element extends BaseObj {
         // we will pack mType; mKind; mNormalized; mVectorSize; NumSubElements
         int[] dataBuffer = new int[5];
         mRS.nElementGetNativeData(mID, dataBuffer);
+
+        mNormalized = dataBuffer[2] == 1 ? true : false;
+        mVectorSize = dataBuffer[3];
+        mSize = 0;
         for (DataType dt: DataType.values()) {
             if(dt.mID == dataBuffer[0]){
                 mType = dt;
+                mSize = mType.mSize * mVectorSize;
             }
         }
         for (DataKind dk: DataKind.values()) {
@@ -331,8 +331,6 @@ public class Element extends BaseObj {
             }
         }
 
-        mNormalized = dataBuffer[2] == 1 ? true : false;
-        mVectorSize = dataBuffer[3];
         int numSubElements = dataBuffer[4];
         if(numSubElements > 0) {
             mElements = new Element[numSubElements];
@@ -341,8 +339,9 @@ public class Element extends BaseObj {
             int[] subElementIds = new int[numSubElements];
             mRS.nElementGetSubElements(mID, subElementIds, mElementNames);
             for(int i = 0; i < numSubElements; i ++) {
-                mElements[i] = new Element(mRS, subElementIds[i]);
+                mElements[i] = new Element(subElementIds[i], mRS);
                 mElements[i].updateFromNative();
+                mSize += mElements[i].mSize;
             }
         }
 
@@ -354,14 +353,21 @@ public class Element extends BaseObj {
 
     /////////////////////////////////////////
     public static Element createUser(RenderScript rs, DataType dt) {
-        return new Element(rs, dt, DataKind.USER, false, 1);
+        DataKind dk = DataKind.USER;
+        boolean norm = false;
+        int vecSize = 1;
+        int id = rs.nElementCreate(dt.mID, dk.mID, norm, vecSize);
+        return new Element(id, rs, dt, dk, norm, vecSize);
     }
 
     public static Element createVector(RenderScript rs, DataType dt, int size) {
         if (size < 2 || size > 4) {
             throw new IllegalArgumentException("Bad size");
         }
-        return new Element(rs, dt, DataKind.USER, false, size);
+        DataKind dk = DataKind.USER;
+        boolean norm = false;
+        int id = rs.nElementCreate(dt.mID, dk.mID, norm, size);
+        return new Element(id, rs, dt, dk, norm, size);
     }
 
     public static Element createPixel(RenderScript rs, DataType dt, DataKind dk) {
@@ -399,7 +405,9 @@ public class Element extends BaseObj {
             size = 4;
         }
 
-        return new Element(rs, dt, dk, true, size);
+        boolean norm = true;
+        int id = rs.nElementCreate(dt.mID, dk.mID, norm, size);
+        return new Element(id, rs, dt, dk, norm, size);
     }
 
     public static class Builder {
@@ -435,7 +443,13 @@ public class Element extends BaseObj {
             String[] sin = new String[mCount];
             java.lang.System.arraycopy(mElements, 0, ein, 0, mCount);
             java.lang.System.arraycopy(mElementNames, 0, sin, 0, mCount);
-            return new Element(mRS, ein, sin);
+
+            int[] ids = new int[ein.length];
+            for (int ct = 0; ct < ein.length; ct++ ) {
+                ids[ct] = ein[ct].mID;
+            }
+            int id = mRS.nElementCreate2(ids, sin);
+            return new Element(id, mRS, ein, sin);
         }
     }
 

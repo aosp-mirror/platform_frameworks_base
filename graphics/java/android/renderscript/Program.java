@@ -38,8 +38,7 @@ public class Program extends BaseObj {
     String mShader;
 
     Program(int id, RenderScript rs) {
-        super(rs);
-        mID = id;
+        super(id, rs);
     }
 
     public void bindConstants(Allocation a, int slot) {

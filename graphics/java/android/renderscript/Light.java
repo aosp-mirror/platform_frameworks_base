@@ -25,8 +25,7 @@ import android.util.Log;
  **/
 public class Light extends BaseObj {
     Light(int id, RenderScript rs) {
-        super(rs);
-        mID = id;
+        super(id, rs);
     }
 
     public void setColor(float r, float g, float b) {

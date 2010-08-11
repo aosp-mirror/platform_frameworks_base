@@ -45,8 +45,7 @@ public class ProgramRaster extends BaseObj {
     CullMode mCullMode;
 
     ProgramRaster(int id, RenderScript rs) {
-        super(rs);
-        mID = id;
+        super(id, rs);
 
         mLineWidth = 1.0f;
         mPointSmooth = false;

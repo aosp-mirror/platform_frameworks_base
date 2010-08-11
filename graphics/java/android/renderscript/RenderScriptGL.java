@@ -102,8 +102,7 @@ public class RenderScriptGL extends RenderScript {
 
     public class File extends BaseObj {
         File(int id) {
-            super(RenderScriptGL.this);
-            mID = id;
+            super(id, RenderScriptGL.this);
         }
     }
 

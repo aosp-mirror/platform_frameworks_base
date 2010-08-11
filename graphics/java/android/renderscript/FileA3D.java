@@ -146,8 +146,7 @@ public class FileA3D extends BaseObj {
     IndexEntry[] mFileEntries;
 
     FileA3D(int id, RenderScript rs) {
-        super(rs);
-        mID = id;
+        super(id, rs);
     }
 
     private void initEntries() {

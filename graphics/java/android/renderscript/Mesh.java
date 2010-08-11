@@ -32,8 +32,7 @@ public class Mesh extends BaseObj {
     Primitive[] mPrimitives;
 
     Mesh(int id, RenderScript rs) {
-        super(rs);
-        mID = id;
+        super(id, rs);
     }
 
     public int getVertexAllocationCount() {

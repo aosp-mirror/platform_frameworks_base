@@ -31,8 +31,7 @@ import android.util.TypedValue;
 public class Font extends BaseObj {
 
     Font(int id, RenderScript rs) {
-        super(rs);
-        mID = id;
+        super(id, rs);
     }
 
     static public Font create(RenderScript rs, Resources res, String fileName, int size)

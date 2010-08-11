@@ -35,14 +35,12 @@ public class Allocation extends BaseObj {
     Bitmap mBitmap;
 
     Allocation(int id, RenderScript rs, Type t) {
-        super(rs);
-        mID = id;
+        super(id, rs);
         mType = t;
     }
 
     Allocation(int id, RenderScript rs) {
-        super(rs);
-        mID = id;
+        super(id, rs);
     }
 
     @Override
@@ -182,8 +180,7 @@ public class Allocation extends BaseObj {
 
     public class Adapter1D extends BaseObj {
         Adapter1D(int id, RenderScript rs) {
-            super(rs);
-            mID = id;
+            super(id, rs);
         }
 
         public void setConstraint(Dimension dim, int value) {
@@ -225,8 +222,7 @@ public class Allocation extends BaseObj {
 
     public class Adapter2D extends BaseObj {
         Adapter2D(int id, RenderScript rs) {
-            super(rs);
-            mID = id;
+            super(id, rs);
         }
 
         public void setConstraint(Dimension dim, int value) {
