@@ -960,6 +960,7 @@ public class Camera {
         private static final String KEY_PREVIEW_SIZE = "preview-size";
         private static final String KEY_PREVIEW_FORMAT = "preview-format";
         private static final String KEY_PREVIEW_FRAME_RATE = "preview-frame-rate";
+        private static final String KEY_PREVIEW_FPS_RANGE = "preview-fps-range";
         private static final String KEY_PICTURE_SIZE = "picture-size";
         private static final String KEY_PICTURE_FORMAT = "picture-format";
         private static final String KEY_JPEG_THUMBNAIL_SIZE = "jpeg-thumbnail-size";
@@ -1218,6 +1219,22 @@ public class Camera {
          * typically the center.
          */
         public static final String METERING_MODE_SPOT = "spot";
+
+        /**
+         * The array index of minimum preview fps for use with {@link
+         * #getPreviewFpsRange(int[])} or {@link
+         * #getSupportedPreviewFpsRange()}.
+         * @hide
+         */
+        public static final int PREVIEW_FPS_MIN_INDEX = 0;
+
+        /**
+         * The array index of maximum preview fps for use with {@link
+         * #getPreviewFpsRange(int[])} or {@link
+         * #getSupportedPreviewFpsRange()}.
+         * @hide
+         */
+        public static final int PREVIEW_FPS_MAX_INDEX = 1;
 
         // Formats for setPreviewFormat and setPictureFormat.
         private static final String PIXEL_FORMAT_YUV422SP = "yuv422sp";
@@ -1479,6 +1496,64 @@ public class Camera {
         public List<Integer> getSupportedPreviewFrameRates() {
             String str = get(KEY_PREVIEW_FRAME_RATE + SUPPORTED_VALUES_SUFFIX);
             return splitInt(str);
+        }
+
+        /**
+         * Sets the maximum and maximum preview fps. This controls the rate of
+         * preview frames received in {@link #PreviewCallback}. The minimum and
+         * maximum preview fps must be one of the elements from {@link
+         * #getSupportedPreviewFpsRange}.
+         *
+         * @param min the minimum preview fps (scaled by 1000).
+         * @param max the maximum preview fps (scaled by 1000).
+         * @throws RuntimeException if fps range is invalid.
+         * @see #setPreviewCallbackWithBuffer(Camera.PreviewCallback)
+         * @see #getSupportedPreviewFpsRange()
+         * @hide
+         */
+        public void setPreviewFpsRange(int min, int max) {
+            set(KEY_PREVIEW_FPS_RANGE, "" + min + "," + max);
+        }
+
+        /**
+         * Returns the current minimum and maximum preview fps. The values are
+         * one of the elements returned by {@link #getSupportedPreviewFpsRange}.
+         *
+         * @return range the minimum and maximum preview fps (scaled by 1000).
+         * @see #PREVIEW_FPS_MIN_INDEX
+         * @see #PREVIEW_FPS_MAX_INDEX
+         * @see #getSupportedPreviewFpsRange()
+         * @hide
+         */
+        public void getPreviewFpsRange(int[] range) {
+            if (range == null || range.length != 2) {
+                throw new IllegalArgumentException(
+                        "range must be an float array with two elements.");
+            }
+            splitInt(get(KEY_PREVIEW_FPS_RANGE), range);
+        }
+
+        /**
+         * Gets the supported preview fps (frame-per-second) ranges. Each range
+         * contains a minimum fps and maximum fps. If minimum fps equals to
+         * maximum fps, the camera outputs frames in fixed frame rate. If not,
+         * the camera outputs frames in auto frame rate. The actual frame rate
+         * fluctuates between the minimum and the maximum. The values are
+         * multiplied by 1000 and represented in integers. For example, if frame
+         * rate is 26.623 frames per second, the value is 26623.
+         *
+         * @return a list of supported preview fps ranges. This method returns a
+         *         list with at least one element. Every element is an int array
+         *         of two values - minimum fps and maximum fps. The list is
+         *         sorted from small to large (first by maximum fps and then
+         *         minimum fps).
+         * @see #PREVIEW_FPS_MIN_INDEX
+         * @see #PREVIEW_FPS_MAX_INDEX
+         * @hide
+         */
+        public List<int[]> getSupportedPreviewFpsRange() {
+            String str = get(KEY_PREVIEW_FPS_RANGE + SUPPORTED_VALUES_SUFFIX);
+            return splitRange(str);
         }
 
         /**
@@ -2184,10 +2259,7 @@ public class Camera {
                 throw new IllegalArgumentException(
                         "output must be an float array with three elements.");
             }
-            List<Float> distances = splitFloat(get(KEY_FOCUS_DISTANCES));
-            output[0] = distances.get(0);
-            output[1] = distances.get(1);
-            output[2] = distances.get(2);
+            splitFloat(get(KEY_FOCUS_DISTANCES), output);
         }
 
         /**
@@ -2255,19 +2327,27 @@ public class Camera {
             return substrings;
         }
 
-        // Splits a comma delimited string to an ArrayList of Float.
-        // Return null if the passing string is null or the size is 0.
-        private ArrayList<Float> splitFloat(String str) {
-            if (str == null) return null;
+        private void splitInt(String str, int[] output) {
+            if (str == null) return;
 
             StringTokenizer tokenizer = new StringTokenizer(str, ",");
-            ArrayList<Float> substrings = new ArrayList<Float>();
+            int index = 0;
             while (tokenizer.hasMoreElements()) {
                 String token = tokenizer.nextToken();
-                substrings.add(Float.parseFloat(token));
+                output[index++] = Integer.parseInt(token);
             }
-            if (substrings.size() == 0) return null;
-            return substrings;
+        }
+
+        // Splits a comma delimited string to an ArrayList of Float.
+        private void splitFloat(String str, float[] output) {
+            if (str == null) return;
+
+            StringTokenizer tokenizer = new StringTokenizer(str, ",");
+            int index = 0;
+            while (tokenizer.hasMoreElements()) {
+                String token = tokenizer.nextToken();
+                output[index++] = Float.parseFloat(token);
+            }
         }
 
         // Returns the value of a float parameter.
@@ -2317,6 +2397,31 @@ public class Camera {
             }
             Log.e(TAG, "Invalid size parameter string=" + str);
             return null;
+        }
+
+        // Splits a comma delimited string to an ArrayList of int array.
+        // Example string: "(10000,26623),(10000,30000)". Return null if the
+        // passing string is null or the size is 0.
+        private ArrayList<int[]> splitRange(String str) {
+            if (str == null || str.charAt(0) != '('
+                    || str.charAt(str.length() - 1) != ')') {
+                Log.e(TAG, "Invalid range list string=" + str);
+                return null;
+            }
+
+            ArrayList<int[]> rangeList = new ArrayList<int[]>();
+            int endIndex, fromIndex = 1;
+            do {
+                int[] range = new int[2];
+                endIndex = str.indexOf("),(", fromIndex);
+                if (endIndex == -1) endIndex = str.length() - 1;
+                splitInt(str.substring(fromIndex, endIndex), range);
+                rangeList.add(range);
+                fromIndex = endIndex + 3;
+            } while (endIndex != str.length() - 1);
+
+            if (rangeList.size() == 0) return null;
+            return rangeList;
         }
     };
 }
