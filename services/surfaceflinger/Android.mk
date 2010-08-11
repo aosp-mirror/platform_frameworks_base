@@ -5,6 +5,7 @@ LOCAL_SRC_FILES:= \
     clz.cpp.arm \
     DisplayHardware/DisplayHardware.cpp \
     DisplayHardware/DisplayHardwareBase.cpp \
+    DisplayHardware/HWComposer.cpp \
     BlurFilter.cpp.arm \
     GLExtensions.cpp \
     Layer.cpp \
