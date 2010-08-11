@@ -52,6 +52,9 @@ class CommandParamsFactory extends Handler {
     static final int REFRESH_NAA_INIT                       = 0x03;
     static final int REFRESH_UICC_RESET                     = 0x04;
 
+    // Command Qualifier values for PLI command
+    static final int LANGUAGE_SETTING                       = 0x04;
+
     static synchronized CommandParamsFactory getInstance(RilMessageDecoder caller,
             IccFileHandler fh) {
         if (sInstance != null) {
@@ -112,7 +115,10 @@ class CommandParamsFactory extends Handler {
         AppInterface.CommandType cmdType = AppInterface.CommandType
                 .fromInt(cmdDet.typeOfCommand);
         if (cmdType == null) {
-            sendCmdParams(ResultCode.CMD_TYPE_NOT_UNDERSTOOD);
+            // This PROACTIVE COMMAND is presently not handled. Hence set
+            // result code as BEYOND_TERMINAL_CAPABILITY in TR.
+            mCmdParams = new CommandParams(cmdDet);
+            sendCmdParams(ResultCode.BEYOND_TERMINAL_CAPABILITY);
             return;
         }
 
@@ -155,10 +161,13 @@ class CommandParamsFactory extends Handler {
              case PLAY_TONE:
                 cmdPending = processPlayTone(cmdDet, ctlvs);
                 break;
+             case PROVIDE_LOCAL_INFORMATION:
+                cmdPending = processProvideLocalInfo(cmdDet, ctlvs);
+                break;
             default:
                 // unsupported proactive commands
                 mCmdParams = new CommandParams(cmdDet);
-                sendCmdParams(ResultCode.CMD_TYPE_NOT_UNDERSTOOD);
+                sendCmdParams(ResultCode.BEYOND_TERMINAL_CAPABILITY);
                 return;
             }
         } catch (ResultException e) {
@@ -378,6 +387,12 @@ class CommandParamsFactory extends Handler {
         ctlv = searchForTag(ComprehensionTlvTag.ICON_ID, ctlvs);
         if (ctlv != null) {
             iconId = ValueParser.retrieveIconId(ctlv);
+        }
+
+        // parse duration
+        ctlv = searchForTag(ComprehensionTlvTag.DURATION, ctlvs);
+        if (ctlv != null) {
+            input.duration = ValueParser.retrieveDuration(ctlv);
         }
 
         input.minLen = 1;
@@ -860,6 +875,22 @@ class CommandParamsFactory extends Handler {
             mIconLoader.loadIcons(recordNumbers, this
                     .obtainMessage(MSG_ID_LOAD_ICON_DONE));
             return true;
+        }
+        return false;
+    }
+
+    private boolean processProvideLocalInfo(CommandDetails cmdDet, List<ComprehensionTlv> ctlvs)
+            throws ResultException {
+        CatLog.d(this, "process ProvideLocalInfo");
+        switch (cmdDet.commandQualifier) {
+            case LANGUAGE_SETTING:
+                CatLog.d(this, "PLI [LANGUAGE_SETTING]");
+                mCmdParams = new CommandParams(cmdDet);
+                break;
+            default:
+                CatLog.d(this, "PLI[" + cmdDet.commandQualifier + "] Command Not Supported");
+                mCmdParams = new CommandParams(cmdDet);
+                throw new ResultException(ResultCode.BEYOND_TERMINAL_CAPABILITY);
         }
         return false;
     }
