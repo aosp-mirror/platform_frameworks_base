@@ -727,6 +727,9 @@ public class WebViewDatabase {
     }
 
     long getCacheTotalSize() {
+        if (mCacheDatabase == null) {
+            return 0;
+        }
         long size = 0;
         Cursor cursor = null;
         final String query = "SELECT SUM(contentlength) as sum FROM cache";
