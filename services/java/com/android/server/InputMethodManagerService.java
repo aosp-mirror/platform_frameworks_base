@@ -1220,6 +1220,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (mCurClient == null || client == null
                     || mCurClient.client.asBinder() != client.asBinder()) {
                 Slog.w(TAG, "Ignoring showInputMethodDialogFromClient of: " + client);
+                return;
             }
 
             mHandler.sendEmptyMessage(MSG_SHOW_IM_PICKER);
