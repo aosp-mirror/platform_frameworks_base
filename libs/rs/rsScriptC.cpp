@@ -278,7 +278,7 @@ void ScriptC::runForEach(Context *rsc,
     }
 
 
-    if ((rsc->getWorkerPoolSize() > 1) &&
+    if ((rsc->getWorkerPoolSize() > 1) && mEnviroment.mIsThreadable &&
         ((mtls.dimY * mtls.dimZ * mtls.dimArray) > 1)) {
 
         //LOGE("launch 1");
@@ -350,10 +350,12 @@ void ScriptCState::clear()
 static BCCvoid* symbolLookup(BCCvoid* pContext, const BCCchar* name)
 {
     const ScriptCState::SymbolTable_t *sym;
+    ScriptC *s = (ScriptC *)pContext;
     sym = ScriptCState::lookupSymbol(name);
     if (sym) {
         return sym->mPtr;
     }
+    s->mEnviroment.mIsThreadable = false;
     sym = ScriptCState::lookupSymbolCL(name);
     if (sym) {
         return sym->mPtr;
@@ -371,8 +373,9 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
     LOGV("ScriptCState::runCompiler ");
 
     s->mBccScript = bccCreateScript();
+    s->mEnviroment.mIsThreadable = true;
     bccScriptBitcode(s->mBccScript, s->mEnviroment.mScriptText, s->mEnviroment.mScriptTextLength);
-    bccRegisterSymbolCallback(s->mBccScript, symbolLookup, NULL);
+    bccRegisterSymbolCallback(s->mBccScript, symbolLookup, s);
     bccCompileScript(s->mBccScript);
     bccGetScriptLabel(s->mBccScript, "root", (BCCvoid**) &s->mProgram.mRoot);
     bccGetScriptLabel(s->mBccScript, "init", (BCCvoid**) &s->mProgram.mInit);
