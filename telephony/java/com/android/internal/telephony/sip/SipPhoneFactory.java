@@ -42,7 +42,7 @@ public class SipPhoneFactory {
             SipProfile profile = new SipProfile.Builder(sipUri).build();
             return new SipPhone(context, phoneNotifier, profile);
         } catch (ParseException e) {
-            Log.w("SipPhoneProxy", "setPhone", e);
+            Log.w("SipPhoneFactory", "makePhone", e);
             return null;
         }
     }
