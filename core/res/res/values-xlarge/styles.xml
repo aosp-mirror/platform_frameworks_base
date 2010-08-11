@@ -19,7 +19,6 @@
 
     <style name="TextAppearance.StatusBar">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
     </style>
     <style name="TextAppearance.StatusBar.Ticker">
     </style>
