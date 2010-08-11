@@ -203,10 +203,10 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                 throw new UnknownHostException(addrString);
             }
 
-            int a = Integer.parseInt(parts[0])      ;
-            int b = Integer.parseInt(parts[1]) <<  8;
-            int c = Integer.parseInt(parts[2]) << 16;
-            int d = Integer.parseInt(parts[3]) << 24;
+            int a = Integer.parseInt(parts[0]) << 24;
+            int b = Integer.parseInt(parts[1]) << 16;
+            int c = Integer.parseInt(parts[2]) <<  8;
+            int d = Integer.parseInt(parts[3])      ;
 
             return a | b | c | d;
         } catch (NumberFormatException ex) {
