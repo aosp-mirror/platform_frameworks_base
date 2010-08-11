@@ -24,6 +24,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
+import android.content.res.ObbInfo;
+import android.content.res.ObbScanner;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.IBinder;
@@ -141,6 +143,10 @@ public class DefaultContainerService extends IntentService {
 
         public boolean checkFreeStorage(boolean external, Uri fileUri) {
             return checkFreeStorageInner(external, fileUri);
+        }
+
+        public ObbInfo getObbInfo(String filename) {
+            return ObbScanner.getObbInfo(filename);
         }
     };
 

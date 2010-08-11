@@ -19,6 +19,7 @@ package android.os.storage;
 
 import android.os.storage.IMountServiceListener;
 import android.os.storage.IMountShutdownObserver;
+import android.os.storage.IObbActionListener;
 
 /** WARNING! Update IMountService.h and IMountService.cpp if you change this file.
  * In particular, the ordering of the methods below must match the 
@@ -156,14 +157,20 @@ interface IMountService
     /**
      * Mounts an Opaque Binary Blob (OBB) with the specified decryption key and only
      * allows the calling process's UID access to the contents.
+     *
+     * MountService will call back to the supplied IObbActionListener to inform
+     * it of the terminal state of the call.
      */
-    int mountObb(String filename, String key);
+    void mountObb(String filename, String key, IObbActionListener token);
 
     /**
      * Unmounts an Opaque Binary Blob (OBB). When the force flag is specified, any
      * program using it will be forcibly killed to unmount the image.
+     *
+     * MountService will call back to the supplied IObbActionListener to inform
+     * it of the terminal state of the call.
      */
-    int unmountObb(String filename, boolean force);
+    void unmountObb(String filename, boolean force, IObbActionListener token);
 
     /**
      * Checks whether the specified Opaque Binary Blob (OBB) is mounted somewhere.
