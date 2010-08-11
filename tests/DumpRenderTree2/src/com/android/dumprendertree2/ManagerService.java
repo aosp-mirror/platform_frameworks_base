@@ -82,6 +82,7 @@ public class ManagerService extends Service {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_FIRST_TEST:
+                    mSummarizer.reset();
                     Bundle bundle = msg.getData();
                     ensureNextTestSetup(bundle.getString("firstTest"), bundle.getInt("index"));
                     break;
