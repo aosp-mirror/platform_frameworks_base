@@ -36,11 +36,11 @@
 
 #include "DisplayHardware/DisplayHardware.h"
 
-#include <hardware/copybit.h>
 #include <hardware/overlay.h>
 #include <hardware/gralloc.h>
 
 #include "GLExtensions.h"
+#include "HWComposer.h"
 
 using namespace android;
 
@@ -76,7 +76,7 @@ DisplayHardware::DisplayHardware(
         const sp<SurfaceFlinger>& flinger,
         uint32_t dpy)
     : DisplayHardwareBase(flinger, dpy),
-      mFlags(0)
+      mFlags(0), mHwc(0)
 {
     init(dpy);
 }
@@ -262,6 +262,17 @@ void DisplayHardware::init(uint32_t dpy)
 
     // Unbind the context from this thread
     eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+
+    // initialize the H/W composer
+    mHwc = new HWComposer();
+    if (mHwc->initCheck() == NO_ERROR) {
+        mHwc->setFrameBuffer(mDisplay, mSurface);
+    }
+}
+
+HWComposer& DisplayHardware::getHwComposer() const {
+    return *mHwc;
 }
 
 /*
@@ -317,7 +328,12 @@ void DisplayHardware::flip(const Region& dirty) const
     }
     
     mPageFlipCount++;
-    eglSwapBuffers(dpy, surface);
+
+    if (mHwc->initCheck() == NO_ERROR) {
+        mHwc->commit();
+    } else {
+        eglSwapBuffers(dpy, surface);
+    }
     checkEGLErrors("eglSwapBuffers");
 
     // for debugging
