@@ -187,6 +187,7 @@ void CameraSourceTimeLapse::stopCameraRecording() {
     if (mUseStillCameraForTimeLapse) {
         void *dummy;
         pthread_join(mThreadTimeLapse, &dummy);
+        CHECK_EQ(OK, mCamera->startPreview());
     } else {
         mCamera->stopRecording();
     }
