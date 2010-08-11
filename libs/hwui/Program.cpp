@@ -51,6 +51,8 @@ Program::Program(const char* vertex, const char* fragment) {
             LOGE("Error while linking shaders: %s", log);
             delete log;
         }
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
         glDeleteProgram(id);
     }
 
