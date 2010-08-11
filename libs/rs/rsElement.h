@@ -40,9 +40,11 @@ public:
         return (getSizeBits() + 7) >> 3;
     }
 
-    size_t getFieldOffsetBits(uint32_t componentNumber) const;
+    size_t getFieldOffsetBits(uint32_t componentNumber) const {
+        return mFields[componentNumber].offsetBits;
+    }
     size_t getFieldOffsetBytes(uint32_t componentNumber) const {
-        return (getFieldOffsetBits(componentNumber) + 7) >> 3;
+        return mFields[componentNumber].offsetBits >> 3;
     }
 
     uint32_t getFieldCount() const {return mFieldCount;}
@@ -66,6 +68,10 @@ public:
     static const Element * create(Context *rsc, size_t count, const Element **,
                             const char **, const size_t * lengths);
 
+    void incRefs(const void *) const;
+    void decRefs(const void *) const;
+    bool getHasReferences() const {return mHasReference;}
+
 protected:
     // deallocate any components that are part of this element.
     void clear();
@@ -73,9 +79,11 @@ protected:
     typedef struct {
         String8 name;
         ObjectBaseRef<const Element> e;
+        uint32_t offsetBits;
     } ElementField_t;
     ElementField_t *mFields;
     size_t mFieldCount;
+    bool mHasReference;
 
 
     Element(Context *);

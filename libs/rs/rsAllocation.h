@@ -81,6 +81,9 @@ public:
     bool getIsTexture() const {return mIsTexture;}
     bool getIsBufferObject() const {return mIsVertexBuffer;}
 
+    void incRefs(const void *ptr, size_t ct) const;
+    void decRefs(const void *ptr, size_t ct) const;
+
 protected:
     void sendDirty() const;
 

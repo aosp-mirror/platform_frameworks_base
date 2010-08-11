@@ -34,6 +34,7 @@ Element::Element(Context *rsc) : ObjectBase(rsc)
     mAllocLine = __LINE__;
     mFields = NULL;
     mFieldCount = 0;
+    mHasReference = false;
 }
 
 
@@ -53,6 +54,7 @@ void Element::clear()
     delete [] mFields;
     mFields = NULL;
     mFieldCount = 0;
+    mHasReference = false;
 }
 
 size_t Element::getSizeBits() const
@@ -66,15 +68,6 @@ size_t Element::getSizeBits() const
         total += mFields[ct].e->mBits;
     }
     return total;
-}
-
-size_t Element::getFieldOffsetBits(uint32_t componentNumber) const
-{
-    size_t offset = 0;
-    for (uint32_t ct = 0; ct < componentNumber; ct++) {
-        offset += mFields[ct].e->mBits;
-    }
-    return offset;
 }
 
 void Element::dumpLOGV(const char *prefix) const
@@ -124,11 +117,14 @@ Element *Element::createFromStream(Context *rsc, IStream *stream)
 
     elem->mFieldCount = stream->loadU32();
     if(elem->mFieldCount) {
+        uint32_t offset = 0;
         elem->mFields = new ElementField_t [elem->mFieldCount];
         for(uint32_t ct = 0; ct < elem->mFieldCount; ct ++) {
             stream->loadString(&elem->mFields[ct].name);
             Element *fieldElem = Element::createFromStream(rsc, stream);
             elem->mFields[ct].e.set(fieldElem);
+            elem->mFields[ct].offsetBits = offset;
+            offset += fieldElem->getSizeBits();
         }
     }
 
@@ -193,6 +189,7 @@ const Element * Element::create(Context *rsc, RsDataType dt, RsDataKind dk,
     Element *e = new Element(rsc);
     e->mComponent.set(dt, dk, isNorm, vecSize);
     e->mBits = e->mComponent.getBits();
+    e->mHasReference = e->mComponent.isReference();
     rsc->mStateElement.mElements.push(e);
     return e;
 }
@@ -223,9 +220,16 @@ const Element * Element::create(Context *rsc, size_t count, const Element **ein,
     Element *e = new Element(rsc);
     e->mFields = new ElementField_t [count];
     e->mFieldCount = count;
+    size_t bits = 0;
     for (size_t ct=0; ct < count; ct++) {
         e->mFields[ct].e.set(ein[ct]);
         e->mFields[ct].name.setTo(nin[ct], lengths[ct]);
+        e->mFields[ct].offsetBits = bits;
+        bits += ein[ct]->getSizeBits();
+
+        if (ein[ct]->mHasReference) {
+            e->mHasReference = true;
+        }
     }
 
     rsc->mStateElement.mElements.push(e);
@@ -251,6 +255,43 @@ String8 Element::getGLSLType(uint32_t indent) const
     return s;
 }
 
+void Element::incRefs(const void *ptr) const
+{
+    if (!mFieldCount) {
+        if (mComponent.isReference()) {
+            ObjectBase *const*obp = static_cast<ObjectBase *const*>(ptr);
+            ObjectBase *ob = obp[0];
+            ob->incSysRef();
+        }
+        return;
+    }
+
+    const uint8_t *p = static_cast<const uint8_t *>(ptr);
+    for (uint32_t i=0; i < mFieldCount; i++) {
+        if (mFields[i].e->mHasReference) {
+            mFields[i].e->incRefs(&p[mFields[i].offsetBits >> 3]);
+        }
+    }
+}
+
+void Element::decRefs(const void *ptr) const
+{
+    if (!mFieldCount) {
+        if (mComponent.isReference()) {
+            ObjectBase *const*obp = static_cast<ObjectBase *const*>(ptr);
+            ObjectBase *ob = obp[0];
+            ob->decSysRef();
+        }
+        return;
+    }
+
+    const uint8_t *p = static_cast<const uint8_t *>(ptr);
+    for (uint32_t i=0; i < mFieldCount; i++) {
+        if (mFields[i].e->mHasReference) {
+            mFields[i].e->decRefs(&p[mFields[i].offsetBits >> 3]);
+        }
+    }
+}
 
 
 ElementState::ElementState()

@@ -161,6 +161,10 @@ void Component::set(RsDataType dt, RsDataKind dk, bool norm, uint32_t vecSize)
     mBits = mTypeBits * mVectorSize;
 }
 
+bool Component::isReference() const
+{
+    return (mType >= RS_TYPE_ELEMENT);
+}
 
 
 
