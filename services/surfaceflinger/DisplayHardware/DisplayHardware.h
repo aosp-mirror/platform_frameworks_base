@@ -34,12 +34,11 @@
 #include "DisplayHardware/DisplayHardwareBase.h"
 
 struct overlay_control_device_t;
-struct framebuffer_device_t;
-struct copybit_image_t;
 
 namespace android {
 
 class FramebufferNativeWindow;
+class HWComposer;
 
 class DisplayHardware : public DisplayHardwareBase
 {
@@ -80,6 +79,9 @@ public:
     uint32_t getPageFlipCount() const;
     EGLDisplay getEGLDisplay() const { return mDisplay; }
     overlay_control_device_t* getOverlayEngine() const { return mOverlayEngine; }
+
+    // Hardware Composer
+    HWComposer& getHwComposer() const;
     
     status_t compositionComplete() const;
     
@@ -107,6 +109,8 @@ private:
     GLint           mMaxViewportDims;
     GLint           mMaxTextureSize;
     
+    HWComposer*     mHwc;
+
     sp<FramebufferNativeWindow> mNativeWindow;
     overlay_control_device_t* mOverlayEngine;
 };
