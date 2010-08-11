@@ -343,8 +343,11 @@ public class SipAudioCallImpl extends SipSessionAdapter
     public synchronized void endCall() throws SipException {
         try {
             stopRinging();
-            if (mSipSession != null) mSipSession.endCall();
             stopCall(true);
+            mInCall = false;
+
+            // perform the above local ops first and then network op
+            if (mSipSession != null) mSipSession.endCall();
         } catch (Throwable e) {
             throwSipException(e);
         }
