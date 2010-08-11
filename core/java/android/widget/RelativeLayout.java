@@ -1011,7 +1011,7 @@ public class RelativeLayout extends ViewGroup {
      * @attr ref android.R.styleable#RelativeLayout_Layout_layout_centerVertical
      */
     public static class LayoutParams extends ViewGroup.MarginLayoutParams {
-        @ViewDebug.ExportedProperty(resolveId = true, indexMapping = {
+        @ViewDebug.ExportedProperty(category = "layout", resolveId = true, indexMapping = {
             @ViewDebug.IntToString(from = ABOVE,               to = "above"),
             @ViewDebug.IntToString(from = ALIGN_BASELINE,      to = "alignBaseline"),
             @ViewDebug.IntToString(from = ALIGN_BOTTOM,        to = "alignBottom"),
@@ -1040,7 +1040,7 @@ public class RelativeLayout extends ViewGroup {
          * When true, uses the parent as the anchor if the anchor doesn't exist or if
          * the anchor's visibility is GONE.
          */
-        @ViewDebug.ExportedProperty
+        @ViewDebug.ExportedProperty(category = "layout")
         public boolean alignWithParent;
 
         public LayoutParams(Context c, AttributeSet attrs) {

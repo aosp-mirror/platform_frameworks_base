@@ -1375,14 +1375,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Width as measured during measure pass.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "measurement")
     protected int mMeasuredWidth;
 
     /**
      * Height as measured during measure pass.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "measurement")
     protected int mMeasuredHeight;
 
     /**
@@ -1729,28 +1729,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * to the left edge of this view.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "layout")
     protected int mLeft;
     /**
      * The distance in pixels from the left edge of this view's parent
      * to the right edge of this view.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "layout")
     protected int mRight;
     /**
      * The distance in pixels from the top edge of this view's parent
      * to the top edge of this view.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "layout")
     protected int mTop;
     /**
      * The distance in pixels from the top edge of this view's parent
      * to the bottom edge of this view.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "layout")
     protected int mBottom;
 
     /**
@@ -1758,14 +1758,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * horizontally.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "scrolling")
     protected int mScrollX;
     /**
      * The offset, in pixels, by which the content of this view is scrolled
      * vertically.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "scrolling")
     protected int mScrollY;
 
     /**
@@ -1773,28 +1773,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * left edge of this view and the left edge of its content.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "padding")
     protected int mPaddingLeft;
     /**
      * The right padding in pixels, that is the distance in pixels between the
      * right edge of this view and the right edge of its content.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "padding")
     protected int mPaddingRight;
     /**
      * The top padding in pixels, that is the distance in pixels between the
      * top edge of this view and the top edge of its content.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "padding")
     protected int mPaddingTop;
     /**
      * The bottom padding in pixels, that is the distance in pixels between the
      * bottom edge of this view and the bottom edge of its content.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "padding")
     protected int mPaddingBottom;
 
     /**
@@ -1805,13 +1805,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Cache the paddingRight set by the user to append to the scrollbar's size.
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "padding")
     int mUserPaddingRight;
 
     /**
      * Cache the paddingBottom set by the user to append to the scrollbar's size.
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "padding")
     int mUserPaddingBottom;
 
     /**
@@ -1918,14 +1918,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * The minimum height of the view. We'll try our best to have the height
      * of this view to at least this amount.
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "measurement")
     private int mMinHeight;
 
     /**
      * The minimum width of the view. We'll try our best to have the width
      * of this view to at least this amount.
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "measurement")
     private int mMinWidth;
 
     /**
@@ -2767,7 +2767,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @return True if this view has or contains focus, false otherwise.
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "focus")
     public boolean hasFocus() {
         return (mPrivateFlags & FOCUSED) != 0;
     }
@@ -2945,7 +2945,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @return True if this view has focus, false otherwise.
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "focus")
     public boolean isFocused() {
         return (mPrivateFlags & FOCUSED) != 0;
     }
@@ -3356,7 +3356,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @return true if this view has nothing to draw, false otherwise
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "drawing")
     public boolean willNotDraw() {
         return (mViewFlags & DRAW_MASK) == WILL_NOT_DRAW;
     }
@@ -3379,7 +3379,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @return true if this view does not cache its drawing, false otherwise
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "drawing")
     public boolean willNotCacheDrawing() {
         return (mViewFlags & WILL_NOT_CACHE_DRAWING) == WILL_NOT_CACHE_DRAWING;
     }
@@ -3554,7 +3554,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return True if this view can take focus, or false otherwise.
      * @attr ref android.R.styleable#View_focusable
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "focus")
     public final boolean isFocusable() {
         return FOCUSABLE == (mViewFlags & FOCUSABLE_MASK);
     }
@@ -4865,7 +4865,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @return The width of your view, in pixels.
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "layout")
     public final int getWidth() {
         return mRight - mLeft;
     }
@@ -4875,7 +4875,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @return The height of your view, in pixels.
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "layout")
     public final int getHeight() {
         return mBottom - mTop;
     }
@@ -5602,7 +5602,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * of ViewGroup that are responsible for arranging their children.
      * @return The LayoutParams associated with this view
      */
-    @ViewDebug.ExportedProperty(deepExport = true, prefix = "layout_")
+    @ViewDebug.ExportedProperty(deepExport = true, category = "layout")
     public ViewGroup.LayoutParams getLayoutParams() {
         return mLayoutParams;
     }
@@ -5916,7 +5916,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @return True if this View is guaranteed to be fully opaque, false otherwise.
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "drawing")
     public boolean isOpaque() {
         return (mPrivateFlags & OPAQUE_MASK) == OPAQUE_MASK;
     }
@@ -7001,7 +7001,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #setDrawingCacheEnabled(boolean)
      * @see #getDrawingCache()
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "drawing")
     public boolean isDrawingCacheEnabled() {
         return (mViewFlags & DRAWING_CACHE_ENABLED) == DRAWING_CACHE_ENABLED;
     }
@@ -8865,7 +8865,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return the offset of the baseline within the widget's bounds or -1
      *         if baseline alignment is not supported
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "layout")
     public int getBaseline() {
         return -1;
     }

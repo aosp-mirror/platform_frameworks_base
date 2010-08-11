@@ -387,13 +387,13 @@ public class TableRow extends LinearLayout {
         /**
          * <p>The column index of the cell represented by the widget.</p>
          */
-        @ViewDebug.ExportedProperty
+        @ViewDebug.ExportedProperty(category = "layout")
         public int column;
 
         /**
          * <p>The number of columns the widgets spans over.</p>
          */
-        @ViewDebug.ExportedProperty
+        @ViewDebug.ExportedProperty(category = "layout")
         public int span;
 
         private static final int LOCATION = 0;

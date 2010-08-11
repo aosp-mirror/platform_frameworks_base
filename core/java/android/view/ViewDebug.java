@@ -255,6 +255,14 @@ public class ViewDebug {
          * @see #deepExport()
          */
         String prefix() default "";
+
+        /**
+         * Specifies the category the property falls into, such as measurement,
+         * layout, drawing, etc.
+         *
+         * @return the category as String
+         */
+        String category() default "";
     }
 
     /**
@@ -1368,9 +1376,13 @@ public class ViewDebug {
                 // TODO: This should happen on the UI thread
                 Object methodValue = method.invoke(view, (Object[]) null);
                 final Class<?> returnType = method.getReturnType();
+                final ExportedProperty property = sAnnotations.get(method);
+                String fullName = (property.category().length() == 0) ?
+                        method.getName() :
+                        (property.category() + ":" + method.getName());
 
                 if (returnType == int.class) {
-                    final ExportedProperty property = sAnnotations.get(method);
+
                     if (property.resolveId() && context != null) {
                         final int id = (Integer) methodValue;
                         methodValue = resolveId(context, id);
@@ -1378,7 +1390,7 @@ public class ViewDebug {
                         final FlagToString[] flagsMapping = property.flagMapping();
                         if (flagsMapping.length > 0) {
                             final int intValue = (Integer) methodValue;
-                            final String valuePrefix = prefix + method.getName() + '_';
+                            final String valuePrefix = prefix + fullName + '_';
                             exportUnrolledFlags(out, flagsMapping, intValue, valuePrefix);
                         }
 
@@ -1402,21 +1414,22 @@ public class ViewDebug {
                         }
                     }
                 } else if (returnType == int[].class) {
-                    final ExportedProperty property = sAnnotations.get(method);
                     final int[] array = (int[]) methodValue;
-                    final String valuePrefix = prefix + method.getName() + '_';
+                    final String valuePrefix = prefix + fullName + '_';
                     final String suffix = "()";
 
                     exportUnrolledArray(context, out, property, array, valuePrefix, suffix);
+
+                    // Probably want to return here, same as for fields.
+                    return;
                 } else if (!returnType.isPrimitive()) {
-                    final ExportedProperty property = sAnnotations.get(method);
                     if (property.deepExport()) {
                         dumpViewProperties(context, methodValue, out, prefix + property.prefix());
                         continue;
                     }
                 }
 
-                writeEntry(out, prefix, method.getName(), "()", methodValue);
+                writeEntry(out, prefix, fullName, "()", methodValue);
             } catch (IllegalAccessException e) {
             } catch (InvocationTargetException e) {
             }
@@ -1436,9 +1449,13 @@ public class ViewDebug {
             try {
                 Object fieldValue = null;
                 final Class<?> type = field.getType();
+                final ExportedProperty property = sAnnotations.get(field);
+                String fullName = (property.category().length() == 0) ?
+                        field.getName() :
+                        (property.category() + ":" + field.getName());
 
                 if (type == int.class) {
-                    final ExportedProperty property = sAnnotations.get(field);
+
                     if (property.resolveId() && context != null) {
                         final int id = field.getInt(view);
                         fieldValue = resolveId(context, id);
@@ -1446,7 +1463,7 @@ public class ViewDebug {
                         final FlagToString[] flagsMapping = property.flagMapping();
                         if (flagsMapping.length > 0) {
                             final int intValue = field.getInt(view);
-                            final String valuePrefix = prefix + field.getName() + '_';
+                            final String valuePrefix = prefix + fullName + '_';
                             exportUnrolledFlags(out, flagsMapping, intValue, valuePrefix);
                         }
 
@@ -1468,9 +1485,8 @@ public class ViewDebug {
                         }
                     }
                 } else if (type == int[].class) {
-                    final ExportedProperty property = sAnnotations.get(field);
                     final int[] array = (int[]) field.get(view);
-                    final String valuePrefix = prefix + field.getName() + '_';
+                    final String valuePrefix = prefix + fullName + '_';
                     final String suffix = "";
 
                     exportUnrolledArray(context, out, property, array, valuePrefix, suffix);
@@ -1478,7 +1494,6 @@ public class ViewDebug {
                     // We exit here!
                     return;
                 } else if (!type.isPrimitive()) {
-                    final ExportedProperty property = sAnnotations.get(field);
                     if (property.deepExport()) {
                         dumpViewProperties(context, field.get(view), out,
                                 prefix + property.prefix());
@@ -1490,7 +1505,7 @@ public class ViewDebug {
                     fieldValue = field.get(view);
                 }
 
-                writeEntry(out, prefix, field.getName(), "", fieldValue);
+                writeEntry(out, prefix, fullName, "", fieldValue);
             } catch (IllegalAccessException e) {
             }
         }
