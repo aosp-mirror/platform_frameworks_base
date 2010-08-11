@@ -391,7 +391,8 @@ Allocation *Allocation::createFromStream(Context *rsc, IStream *stream)
     alloc->setName(name.string(), name.size());
 
     // Read in all of our allocation data
-    stream->loadByteArray(alloc->getPtr(), dataSize);
+    alloc->data(stream->getPtr() + stream->getPos(), dataSize);
+    stream->reset(stream->getPos() + dataSize);
 
     return alloc;
 }
