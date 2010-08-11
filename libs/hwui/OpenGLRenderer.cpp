@@ -542,13 +542,17 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
     drawColorRect(left, top, right, bottom, color, mode);
 }
 
+#define kStdStrikeThru_Offset   (-6.0f / 21.0f)
+#define kStdUnderline_Offset    (1.0f / 9.0f)
+#define kStdUnderline_Thickness (1.0f / 18.0f)
+
 void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         float x, float y, SkPaint* paint) {
     if (text == NULL || count == 0 || (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
         return;
     }
 
-    float length;
+    float length = -1.0f;
     switch (paint->getTextAlign()) {
         case SkPaint::kCenter_Align:
             length = paint->measureText(text, bytesCount);
@@ -611,13 +615,56 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         mColorFilter->setupProgram(mCurrentProgram);
     }
 
-    // TODO: Implement scale properly
     const Rect& clip = mSnapshot->getLocalClip();
     mFontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()), paint->getTextSize());
     mFontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glDisableVertexAttribArray(texCoordsSlot);
+
+    // Handle underline and strike-through
+    uint32_t flags = paint->getFlags();
+    if (flags & (SkPaint::kUnderlineText_Flag | SkPaint::kStrikeThruText_Flag)) {
+        float underlineWidth = length;
+        // If length is > 0.0f, we already measured the text for the text alignment
+        if (length <= 0.0f) {
+            underlineWidth = paint->measureText(text, bytesCount);
+        }
+
+        float offsetX = 0;
+        switch (paint->getTextAlign()) {
+            case SkPaint::kCenter_Align:
+                offsetX = underlineWidth * 0.5f;
+                break;
+            case SkPaint::kRight_Align:
+                offsetX = underlineWidth;
+                break;
+            default:
+                break;
+        }
+
+        if (underlineWidth > 0.0f) {
+            float textSize = paint->getTextSize();
+            float height = textSize * kStdUnderline_Thickness;
+
+            float left = x - offsetX;
+            float top = 0.0f;
+            float right = left + underlineWidth;
+            float bottom = 0.0f;
+
+            if (flags & SkPaint::kUnderlineText_Flag) {
+                top = y + textSize * kStdUnderline_Offset;
+                bottom = top + height;
+                drawRect(left, top, right, bottom, paint);
+            }
+
+            if (flags & SkPaint::kStrikeThruText_Flag) {
+                top = y + textSize * kStdStrikeThru_Offset;
+                bottom = top + height;
+                drawRect(left, top, right, bottom, paint);
+            }
+        }
+    }
 }
 
 void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
