@@ -344,7 +344,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mTetheringConfigValid = (((mNetTrackers[ConnectivityManager.TYPE_MOBILE_DUN] != null) ||
                                   !mTethering.isDunRequired()) &&
                                  (mTethering.getTetherableUsbRegexs().length != 0 ||
-                                  mTethering.getTetherableWifiRegexs().length != 0) &&
+                                  mTethering.getTetherableWifiRegexs().length != 0 ||
+                                  mTethering.getTetherableBluetoothRegexs().length != 0) &&
                                  mTethering.getUpstreamIfaceRegexs().length != 0);
 
     }
@@ -1671,6 +1672,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         enforceTetherAccessPermission();
         if (isTetheringSupported()) {
             return mTethering.getTetherableWifiRegexs();
+        } else {
+            return new String[0];
+        }
+    }
+
+    public String[] getTetherableBluetoothRegexs() {
+        enforceTetherAccessPermission();
+        if (isTetheringSupported()) {
+            return mTethering.getTetherableBluetoothRegexs();
         } else {
             return new String[0];
         }

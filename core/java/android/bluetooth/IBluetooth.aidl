@@ -81,4 +81,11 @@ interface IBluetooth
     int getInputDeviceState(in BluetoothDevice device);
     boolean setInputDevicePriority(in BluetoothDevice device, int priority);
     int getInputDevicePriority(in BluetoothDevice device);
+
+    boolean isTetheringOn();
+    void setBluetoothTethering(boolean value, String uuid, String bridge);
+    int getPanDeviceState(in BluetoothDevice device);
+    BluetoothDevice[] getConnectedPanDevices();
+    boolean connectPanDevice(in BluetoothDevice device);
+    boolean disconnectPanDevice(in BluetoothDevice device);
 }

@@ -66,6 +66,8 @@ static jmethodID method_onAgentCancel;
 
 static jmethodID method_onInputDevicePropertyChanged;
 static jmethodID method_onInputDeviceConnectionResult;
+static jmethodID method_onPanDevicePropertyChanged;
+static jmethodID method_onPanDeviceConnectionResult;
 
 typedef event_loop_native_data_t native_data_t;
 
@@ -120,9 +122,13 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
     method_onDisplayPasskey = env->GetMethodID(clazz, "onDisplayPasskey",
                                                "(Ljava/lang/String;II)V");
     method_onInputDevicePropertyChanged = env->GetMethodID(clazz, "onInputDevicePropertyChanged",
-                                                      "(Ljava/lang/String;[Ljava/lang/String;)V");
+                                               "(Ljava/lang/String;[Ljava/lang/String;)V");
     method_onInputDeviceConnectionResult = env->GetMethodID(clazz, "onInputDeviceConnectionResult",
-                                                      "(Ljava/lang/String;Z)V");
+                                               "(Ljava/lang/String;Z)V");
+    method_onPanDevicePropertyChanged = env->GetMethodID(clazz, "onPanDevicePropertyChanged",
+                                               "(Ljava/lang/String;[Ljava/lang/String;)V");
+    method_onPanDeviceConnectionResult = env->GetMethodID(clazz, "onPanDeviceConnectionResult",
+                                               "(Ljava/lang/String;Z)V");
 
     field_mNativeData = env->GetFieldID(clazz, "mNativeData", "I");
 #endif
@@ -890,7 +896,23 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
             LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
         }
         goto success;
-    }
+    } else if (dbus_message_is_signal(msg,
+                                     "org.bluez.Network",
+                                     "PropertyChanged")) {
+
+       jobjectArray str_array =
+                   parse_pan_property_change(env, msg);
+       if (str_array != NULL) {
+           const char *c_path = dbus_message_get_path(msg);
+           env->CallVoidMethod(nat->me,
+                               method_onPanDevicePropertyChanged,
+                               env->NewStringUTF(c_path),
+                               str_array);
+       } else {
+           LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
+       }
+       goto success;
+   }
 
     ret = a2dp_event_filter(msg, env);
     env->PopLocalFrame(NULL);
@@ -1267,6 +1289,31 @@ void onInputDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
     jstring jPath = env->NewStringUTF(path);
     env->CallVoidMethod(nat->me,
                         method_onInputDeviceConnectionResult,
+                        jPath,
+                        result);
+    env->DeleteLocalRef(jPath);
+    free(user);
+}
+
+void onPanDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
+    LOGV(__FUNCTION__);
+
+    native_data_t *nat = (native_data_t *)n;
+    const char *path = (const char *)user;
+    DBusError err;
+    dbus_error_init(&err);
+    JNIEnv *env;
+    nat->vm->GetEnv((void**)&env, nat->envVer);
+
+    bool result = JNI_TRUE;
+    if (dbus_set_error_from_message(&err, msg)) {
+        LOG_AND_FREE_DBUS_ERROR(&err);
+        result = JNI_FALSE;
+    }
+    LOGV("... Pan Device Path = %s, result = %d", path, result);
+    jstring jPath = env->NewStringUTF(path);
+    env->CallVoidMethod(nat->me,
+                        method_onPanDeviceConnectionResult,
                         jPath,
                         result);
     env->DeleteLocalRef(jPath);

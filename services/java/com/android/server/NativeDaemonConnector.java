@@ -128,11 +128,12 @@ final class NativeDaemonConnector implements Runnable {
                                     Slog.e(TAG, String.format(
                                             "Error handling '%s'", event), ex);
                                 }
-                            }
-                            try {
-                                mResponseQueue.put(event);
-                            } catch (InterruptedException ex) {
-                                Slog.e(TAG, "Failed to put response onto queue", ex);
+                            } else {
+                                try {
+                                    mResponseQueue.put(event);
+                                } catch (InterruptedException ex) {
+                                    Slog.e(TAG, "Failed to put response onto queue", ex);
+                                }
                             }
                         } catch (NumberFormatException nfe) {
                             Slog.w(TAG, String.format("Bad msg (%s)", event));
@@ -209,6 +210,7 @@ final class NativeDaemonConnector implements Runnable {
      */
     public synchronized ArrayList<String> doCommand(String cmd)
             throws NativeDaemonConnectorException  {
+        mResponseQueue.clear();
         sendCommand(cmd);
 
         ArrayList<String> response = new ArrayList<String>();
