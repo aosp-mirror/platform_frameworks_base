@@ -216,10 +216,13 @@ is specified with a number followed by a unit of measure.
 For example: 10px, 2in, 5sp. The following units of measure are supported by Android:</p>
 <dl>
   <dt>{@code dp}</dt>
-    <dd>Density-independent Pixels - an abstract unit that is based on the physical density of the screen.
-    These units are relative to a 160 dpi screen, so one dp is one pixel on a 160 dpi screen. The ratio of
-    dp-to-pixel will change with the screen density, but not necessarily in direct proportion. The
-      compiler accepts both "dip" and "dp", though "dp" is more consistent with "sp".</dd>
+    <dd>Density-independent Pixels - an abstract unit that is based on the physical density of the
+screen. These units are relative to a 160 dpi (dots per inch) screen, so <em>{@code 160dp} is
+always one inch</em> regardless of the screen density. The ratio of dp-to-pixel will change with the
+screen density, but not necessarily in direct proportion. You should use these units when specifying
+view dimensions in your layout, so the UI properly scales to render at the same actual size on
+different screens. (The compiler accepts both "dip" and "dp", though "dp" is more consistent with
+"sp".)</dd>
   <dt>{@code sp}</dt>
     <dd>Scale-independent Pixels - this is like the dp unit, but it is also scaled by the user's font
     size preference. It is recommend you use this unit when specifying font sizes, so they will be adjusted
