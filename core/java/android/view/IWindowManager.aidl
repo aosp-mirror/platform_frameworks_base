@@ -28,6 +28,7 @@ import android.view.IWindowSession;
 import android.view.KeyEvent;
 import android.view.InputEvent;
 import android.view.MotionEvent;
+import android.view.InputChannel;
 
 /**
  * System private interface to the window manager.
@@ -119,6 +120,7 @@ interface IWindowManager
     int getKeycodeStateForDevice(int devid, int sw);
     int getTrackballKeycodeState(int sw);
     int getDPadKeycodeState(int sw);
+    InputChannel monitorInput(String inputChannelName);
     
     // Report whether the hardware supports the given keys; returns true if successful
     boolean hasKeys(in int[] keycodes, inout boolean[] keyExists);

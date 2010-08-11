@@ -213,7 +213,7 @@ public:
     void setDisplayOrientation(int32_t displayId, int32_t orientation);
 
     status_t registerInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel,
-            jweak inputChannelObjWeak);
+            jweak inputChannelObjWeak, bool monitor);
     status_t unregisterInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel);
 
     void setInputWindows(JNIEnv* env, jobjectArray windowObjArray);
@@ -334,6 +334,7 @@ private:
     bool mWindowsReady;
     Vector<InputWindow> mWindows;
     Vector<InputWindow*> mWallpaperWindows;
+    Vector<sp<InputChannel> > mMonitoringChannels;
 
     // Focus tracking for keys, trackball, etc.
     InputWindow* mFocusedWindow;
@@ -381,6 +382,10 @@ private:
     static bool populateWindow(JNIEnv* env, jobject windowObj, InputWindow& outWindow);
     static void addTarget(const InputWindow* window, int32_t targetFlags,
             nsecs_t timeSpentWaitingForApplication, Vector<InputTarget>& outTargets);
+
+    void registerMonitoringChannel(const sp<InputChannel>& inputChannel);
+    void unregisterMonitoringChannel(const sp<InputChannel>& inputChannel);
+    void addMonitoringTargetsLd(Vector<InputTarget>& outTargets);
 
     static inline JNIEnv* jniEnv() {
         return AndroidRuntime::getJNIEnv();
@@ -492,7 +497,7 @@ void NativeInputManager::setDisplayOrientation(int32_t displayId, int32_t orient
 }
 
 status_t NativeInputManager::registerInputChannel(JNIEnv* env,
-        const sp<InputChannel>& inputChannel, jobject inputChannelObj) {
+        const sp<InputChannel>& inputChannel, jobject inputChannelObj, bool monitor) {
     jweak inputChannelObjWeak = env->NewWeakGlobalRef(inputChannelObj);
     if (! inputChannelObjWeak) {
         LOGE("Could not create weak reference for input channel.");
@@ -519,9 +524,14 @@ status_t NativeInputManager::registerInputChannel(JNIEnv* env,
 
     status = mInputManager->registerInputChannel(inputChannel);
     if (! status) {
+        // Success.
+        if (monitor) {
+            registerMonitoringChannel(inputChannel);
+        }
         return OK;
     }
 
+    // Failed!
     {
         AutoMutex _l(mInputChannelRegistryLock);
         mInputChannelObjWeakByReceiveFd.removeItem(inputChannel->getReceivePipeFd());
@@ -551,6 +561,8 @@ status_t NativeInputManager::unregisterInputChannel(JNIEnv* env,
     }
 
     env->DeleteWeakGlobalRef(inputChannelObjWeak);
+
+    unregisterMonitoringChannel(inputChannel);
 
     return mInputManager->unregisterInputChannel(inputChannel);
 }
@@ -829,6 +841,8 @@ void NativeInputManager::notifyInputChannelBroken(const sp<InputChannel>& inputC
 
         env->DeleteLocalRef(inputChannelObjLocal);
     }
+
+    unregisterMonitoringChannel(inputChannel);
 }
 
 bool NativeInputManager::notifyInputChannelANR(const sp<InputChannel>& inputChannel,
@@ -1429,7 +1443,9 @@ int32_t NativeInputManager::waitForTouchedWindowLd(MotionEvent* motionEvent, uin
 
             // If there is no currently touched window then fail.
             if (! mTouchedWindow) {
-                LOGW("Dropping event because there is no touched window to receive it.");
+#if DEBUG_INPUT_DISPATCHER_POLICY
+                LOGD("Dropping event because there is no touched window to receive it.");
+#endif
                 injectionResult = INPUT_EVENT_INJECTION_FAILED;
                 injectionPermission = INJECTION_PERMISSION_GRANTED;
                 break; // failed, exit wait loop
@@ -1587,6 +1603,8 @@ int32_t NativeInputManager::waitForKeyEventTargets(KeyEvent* keyEvent, uint32_t 
             outTargets.clear();
             return INPUT_EVENT_INJECTION_SUCCEEDED;
         }
+
+        addMonitoringTargetsLd(outTargets);
     }
 
     pokeUserActivityIfNeeded(windowType, POWER_MANAGER_BUTTON_EVENT);
@@ -1631,6 +1649,8 @@ int32_t NativeInputManager::waitForNonTouchEventTargets(MotionEvent* motionEvent
         }
 
         windowType = focusedWindow->layoutParamsType;
+
+        addMonitoringTargetsLd(outTargets);
     } // release lock
 
     pokeUserActivityIfNeeded(windowType, POWER_MANAGER_BUTTON_EVENT);
@@ -1657,6 +1677,8 @@ int32_t NativeInputManager::waitForTouchEventTargets(MotionEvent* motionEvent,
         }
 
         windowType = touchedWindow->layoutParamsType;
+
+        addMonitoringTargetsLd(outTargets);
     } // release lock
 
     int32_t eventType;
@@ -1712,6 +1734,39 @@ void NativeInputManager::pokeUserActivityIfNeeded(int32_t windowType, int32_t ev
 
 void NativeInputManager::pokeUserActivity(nsecs_t eventTime, int32_t eventType) {
     android_server_PowerManagerService_userActivity(eventTime, eventType);
+}
+
+void NativeInputManager::registerMonitoringChannel(const sp<InputChannel>& inputChannel) {
+    { // acquire lock
+         AutoMutex _l(mDispatchLock);
+         mMonitoringChannels.push(inputChannel);
+    } // release lock
+}
+
+void NativeInputManager::unregisterMonitoringChannel(const sp<InputChannel>& inputChannel) {
+    { // acquire lock
+         AutoMutex _l(mDispatchLock);
+
+         for (size_t i = 0; i < mMonitoringChannels.size(); i++) {
+             if (mMonitoringChannels[i] == inputChannel) {
+                 mMonitoringChannels.removeAt(i);
+                 break;
+             }
+         }
+    } // release lock
+}
+
+void NativeInputManager::addMonitoringTargetsLd(Vector<InputTarget>& outTargets) {
+    for (size_t i = 0; i < mMonitoringChannels.size(); i++) {
+        outTargets.push();
+
+        InputTarget& target = outTargets.editTop();
+        target.inputChannel = mMonitoringChannels[i];
+        target.flags = 0;
+        target.timeout = -1;
+        target.xOffset = 0;
+        target.yOffset = 0;
+    }
 }
 
 static void dumpMotionRange(String8& dump,
@@ -1804,6 +1859,11 @@ void NativeInputManager::dumpDispatchStateLd(String8& dump) {
                 mWindows[i].touchableAreaRight, mWindows[i].touchableAreaBottom,
                 mWindows[i].ownerPid, mWindows[i].ownerUid,
                 mWindows[i].dispatchingTimeout / 1000000.0);
+    }
+
+    for (size_t i = 0; i < mMonitoringChannels.size(); i++) {
+        dump.appendFormat("  monitoringChannel[%d]: '%s'\n",
+                i, mMonitoringChannels[i]->getName().string());
     }
 }
 
@@ -2012,7 +2072,7 @@ static void android_server_InputManager_handleInputChannelDisposed(JNIEnv* env,
 }
 
 static void android_server_InputManager_nativeRegisterInputChannel(JNIEnv* env, jclass clazz,
-        jobject inputChannelObj) {
+        jobject inputChannelObj, jboolean monitor) {
     if (checkInputManagerUnitialized(env)) {
         return;
     }
@@ -2026,15 +2086,17 @@ static void android_server_InputManager_nativeRegisterInputChannel(JNIEnv* env, 
 
 
     status_t status = gNativeInputManager->registerInputChannel(
-            env, inputChannel, inputChannelObj);
+            env, inputChannel, inputChannelObj, monitor);
     if (status) {
         jniThrowRuntimeException(env, "Failed to register input channel.  "
                 "Check logs for details.");
         return;
     }
 
-    android_view_InputChannel_setDisposeCallback(env, inputChannelObj,
-            android_server_InputManager_handleInputChannelDisposed, NULL);
+    if (! monitor) {
+        android_view_InputChannel_setDisposeCallback(env, inputChannelObj,
+                android_server_InputManager_handleInputChannelDisposed, NULL);
+    }
 }
 
 static void android_server_InputManager_nativeUnregisterInputChannel(JNIEnv* env, jclass clazz,
@@ -2149,7 +2211,7 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) android_server_InputManager_nativeGetSwitchState },
     { "nativeHasKeys", "(II[I[Z)Z",
             (void*) android_server_InputManager_nativeHasKeys },
-    { "nativeRegisterInputChannel", "(Landroid/view/InputChannel;)V",
+    { "nativeRegisterInputChannel", "(Landroid/view/InputChannel;Z)V",
             (void*) android_server_InputManager_nativeRegisterInputChannel },
     { "nativeUnregisterInputChannel", "(Landroid/view/InputChannel;)V",
             (void*) android_server_InputManager_nativeUnregisterInputChannel },

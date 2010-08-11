@@ -75,7 +75,8 @@ public class InputManager {
             int sw);
     private static native boolean nativeHasKeys(int deviceId, int sourceMask,
             int[] keyCodes, boolean[] keyExists);
-    private static native void nativeRegisterInputChannel(InputChannel inputChannel);
+    private static native void nativeRegisterInputChannel(InputChannel inputChannel,
+            boolean monitor);
     private static native void nativeUnregisterInputChannel(InputChannel inputChannel);
     private static native int nativeInjectInputEvent(InputEvent event,
             int injectorPid, int injectorUid, int syncMode, int timeoutMillis);
@@ -225,14 +226,38 @@ public class InputManager {
         return nativeHasKeys(deviceId, sourceMask, keyCodes, keyExists);
     }
     
+    /**
+     * Creates an input channel that will receive all input from the input dispatcher.
+     * @param inputChannelName The input channel name.
+     * @return The input channel.
+     */
+    public InputChannel monitorInput(String inputChannelName) {
+        if (inputChannelName == null) {
+            throw new IllegalArgumentException("inputChannelName must not be null.");
+        }
+        
+        InputChannel[] inputChannels = InputChannel.openInputChannelPair(inputChannelName);
+        nativeRegisterInputChannel(inputChannels[0], true);
+        inputChannels[0].dispose(); // don't need to retain the Java object reference
+        return inputChannels[1];
+    }
+
+    /**
+     * Registers an input channel so that it can be used as an input event target.
+     * @param inputChannel The input channel to register.
+     */
     public void registerInputChannel(InputChannel inputChannel) {
         if (inputChannel == null) {
             throw new IllegalArgumentException("inputChannel must not be null.");
         }
         
-        nativeRegisterInputChannel(inputChannel);
+        nativeRegisterInputChannel(inputChannel, false);
     }
     
+    /**
+     * Unregisters an input channel.
+     * @param inputChannel The input channel to unregister.
+     */
     public void unregisterInputChannel(InputChannel inputChannel) {
         if (inputChannel == null) {
             throw new IllegalArgumentException("inputChannel must not be null.");

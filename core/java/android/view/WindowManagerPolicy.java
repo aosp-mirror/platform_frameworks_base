@@ -779,11 +779,6 @@ public interface WindowManagerPolicy {
      */
     public void enableScreenAfterBoot();
     
-    /**
-     * Called every time the window manager is dispatching a pointer event.
-     */
-    public void dispatchedPointerEventLw(MotionEvent ev, int targetX, int targetY);
-    
     public void setCurrentOrientationLw(int newOrientation);
     
     /**
