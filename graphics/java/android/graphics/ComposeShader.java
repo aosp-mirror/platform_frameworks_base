@@ -20,7 +20,12 @@ package android.graphics;
     an {@link android.graphics.Xfermode} subclass.
 */
 public class ComposeShader extends Shader {
+    /**
+     * Hold onto the shaders to avoid GC.
+     */
+    @SuppressWarnings({"UnusedDeclaration"})
     private final Shader mShaderA;
+    @SuppressWarnings({"UnusedDeclaration"})
     private final Shader mShaderB;
 
     /** Create a new compose shader, given shaders A, B, and a combining mode.
@@ -36,8 +41,14 @@ public class ComposeShader extends Shader {
         mShaderB = shaderB;
         native_instance = nativeCreate1(shaderA.native_instance, shaderB.native_instance,
                 (mode != null) ? mode.native_instance : 0);
-        native_shader = nativePostCreate1(native_instance, shaderA.native_shader,
-                shaderB.native_shader, (mode != null) ? mode.native_instance : 0);
+        if (mode instanceof PorterDuffXfermode) {
+            PorterDuff.Mode pdMode = ((PorterDuffXfermode) mode).mode;
+            native_shader = nativePostCreate1(native_instance, shaderA.native_shader,
+                    shaderB.native_shader, pdMode != null ? pdMode.nativeInt : 0);
+        } else {
+            native_shader = nativePostCreate1(native_instance, shaderA.native_shader,
+                    shaderB.native_shader, mode != null ? mode.native_instance : 0);
+        }
     }
 
     /** Create a new compose shader, given shaders A, B, and a combining PorterDuff mode.
