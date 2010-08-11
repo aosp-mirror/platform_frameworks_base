@@ -521,6 +521,10 @@ void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
 {
     Vector< sp<LayerBase> > ditchedLayers;
 
+    /*
+     * Perform and commit the transaction
+     */
+
     { // scope for the lock
         Mutex::Autolock _l(mStateLock);
         const nsecs_t now = systemTime();
@@ -528,9 +532,13 @@ void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
         handleTransactionLocked(transactionFlags, ditchedLayers);
         mLastTransactionTime = systemTime() - now;
         mDebugInTransaction = 0;
+        // here the transaction has been committed
     }
 
-    // do this without lock held
+    /*
+     * Clean-up all layers that went away
+     * (do this without the lock held)
+     */
     const size_t count = ditchedLayers.size();
     for (size_t i=0 ; i<count ; i++) {
         if (ditchedLayers[i] != 0) {
@@ -773,6 +781,19 @@ void SurfaceFlinger::handlePageFlip()
         if (visibleRegions) {
             Region opaqueRegion;
             computeVisibleRegions(currentLayers, mDirtyRegion, opaqueRegion);
+
+            /*
+             *  rebuild the visible layer list
+             */
+            mVisibleLayersSortedByZ.clear();
+            const LayerVector& currentLayers(mDrawingState.layersSortedByZ);
+            size_t count = currentLayers.size();
+            mVisibleLayersSortedByZ.setCapacity(count);
+            for (size_t i=0 ; i<count ; i++) {
+                if (!currentLayers[i]->visibleRegionScreen.isEmpty())
+                    mVisibleLayersSortedByZ.add(currentLayers[i]);
+            }
+
             mWormholeRegion = screenRegion.subtract(opaqueRegion);
             mVisibleRegionsDirty = false;
         }
@@ -869,18 +890,13 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
         // draw something...
         drawWormhole();
     }
-    const SurfaceFlinger& flinger(*this);
-    const LayerVector& drawingLayers(mDrawingState.layersSortedByZ);
-    const size_t count = drawingLayers.size();
-    sp<LayerBase> const* const layers = drawingLayers.array();
+    const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);
+    const size_t count = layers.size();
     for (size_t i=0 ; i<count ; ++i) {
-        const sp<LayerBase>& layer = layers[i];
-        const Region& visibleRegion(layer->visibleRegionScreen);
-        if (!visibleRegion.isEmpty())  {
-            const Region clip(dirty.intersect(visibleRegion));
-            if (!clip.isEmpty()) {
-                layer->draw(clip);
-            }
+        const sp<LayerBase>& layer(layers[i]);
+        const Region clip(dirty.intersect(layer->visibleRegionScreen));
+        if (!clip.isEmpty()) {
+            layer->draw(clip);
         }
     }
 }
