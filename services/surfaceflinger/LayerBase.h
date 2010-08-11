@@ -53,6 +53,8 @@ class Texture;
 
 class LayerBase : public RefBase
 {
+    static int32_t sSequence;
+
 public:
             LayerBase(SurfaceFlinger* flinger, DisplayID display);
 
@@ -61,6 +63,7 @@ public:
             Region      visibleRegionScreen;
             Region      transparentRegionScreen;
             Region      coveredRegionScreen;
+            int32_t     sequence;
             
             struct State {
                 uint32_t        w;
@@ -209,12 +212,6 @@ public:
     inline  const State&    drawingState() const    { return mDrawingState; }
     inline  const State&    currentState() const    { return mCurrentState; }
     inline  State&          currentState()          { return mCurrentState; }
-
-    static int compareCurrentStateZ(
-            sp<LayerBase> const * layerA,
-            sp<LayerBase> const * layerB) {
-        return layerA[0]->currentState().z - layerB[0]->currentState().z;
-    }
 
     int32_t  getOrientation() const { return mOrientation; }
     int  tx() const             { return mLeft; }

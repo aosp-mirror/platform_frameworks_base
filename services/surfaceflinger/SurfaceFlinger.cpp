@@ -65,95 +65,6 @@
 namespace android {
 // ---------------------------------------------------------------------------
 
-SurfaceFlinger::LayerVector::LayerVector(const SurfaceFlinger::LayerVector& rhs)
-    : lookup(rhs.lookup), layers(rhs.layers)
-{
-}
-
-ssize_t SurfaceFlinger::LayerVector::indexOf(
-        const sp<LayerBase>& key, size_t guess) const
-{
-    if (guess<size() && lookup.keyAt(guess) == key)
-        return guess;
-    const ssize_t i = lookup.indexOfKey(key);
-    if (i>=0) {
-        const size_t idx = lookup.valueAt(i);
-        LOGE_IF(layers[idx]!=key,
-            "LayerVector[%p]: layers[%d]=%p, key=%p",
-            this, int(idx), layers[idx].get(), key.get());
-        return idx;
-    }
-    return i;
-}
-
-ssize_t SurfaceFlinger::LayerVector::add(
-        const sp<LayerBase>& layer,
-        Vector< sp<LayerBase> >::compar_t cmp)
-{
-    size_t count = layers.size();
-    ssize_t l = 0;
-    ssize_t h = count-1;
-    ssize_t mid;
-    sp<LayerBase> const* a = layers.array();
-    while (l <= h) {
-        mid = l + (h - l)/2;
-        const int c = cmp(a+mid, &layer);
-        if (c == 0)     { l = mid; break; }
-        else if (c<0)   { l = mid+1; }
-        else            { h = mid-1; }
-    }
-    size_t order = l;
-    while (order<count && !cmp(&layer, a+order)) {
-        order++;
-    }
-    count = lookup.size();
-    for (size_t i=0 ; i<count ; i++) {
-        if (lookup.valueAt(i) >= order) {
-            lookup.editValueAt(i)++;
-        }
-    }
-    layers.insertAt(layer, order);
-    lookup.add(layer, order);
-    return order;
-}
-
-ssize_t SurfaceFlinger::LayerVector::remove(const sp<LayerBase>& layer)
-{
-    const ssize_t keyIndex = lookup.indexOfKey(layer);
-    if (keyIndex >= 0) {
-        const size_t index = lookup.valueAt(keyIndex);
-        LOGE_IF(layers[index]!=layer,
-                "LayerVector[%p]: layers[%u]=%p, layer=%p",
-                this, int(index), layers[index].get(), layer.get());
-        layers.removeItemsAt(index);
-        lookup.removeItemsAt(keyIndex);
-        const size_t count = lookup.size();
-        for (size_t i=0 ; i<count ; i++) {
-            if (lookup.valueAt(i) >= size_t(index)) {
-                lookup.editValueAt(i)--;
-            }
-        }
-        return index;
-    }
-    return NAME_NOT_FOUND;
-}
-
-ssize_t SurfaceFlinger::LayerVector::reorder(
-        const sp<LayerBase>& layer,
-        Vector< sp<LayerBase> >::compar_t cmp)
-{
-    // XXX: it's a little lame. but oh well...
-    ssize_t err = remove(layer);
-    if (err >=0)
-        err = add(layer, cmp);
-    return err;
-}
-
-// ---------------------------------------------------------------------------
-#if 0
-#pragma mark -
-#endif
-
 SurfaceFlinger::SurfaceFlinger()
     :   BnSurfaceComposer(), Thread(false),
         mTransactionFlags(0),
@@ -1045,8 +956,7 @@ status_t SurfaceFlinger::addLayer(const sp<LayerBase>& layer)
 
 status_t SurfaceFlinger::addLayer_l(const sp<LayerBase>& layer)
 {
-    ssize_t i = mCurrentState.layersSortedByZ.add(
-                layer, &LayerBase::compareCurrentStateZ);
+    ssize_t i = mCurrentState.layersSortedByZ.add(layer);
     return (i < 0) ? status_t(i) : status_t(NO_ERROR);
 }
 
@@ -1388,9 +1298,10 @@ status_t SurfaceFlinger::setClientState(
                     flags |= eTraversalNeeded;
             }
             if (what & eLayerChanged) {
+                ssize_t idx = mCurrentState.layersSortedByZ.indexOf(layer);
                 if (layer->setLayer(s.z)) {
-                    mCurrentState.layersSortedByZ.reorder(
-                            layer, &Layer::compareCurrentStateZ);
+                    mCurrentState.layersSortedByZ.removeAt(idx);
+                    mCurrentState.layersSortedByZ.add(layer);
                     // we need traversal (state changed)
                     // AND transaction (list changed)
                     flags |= eTransactionNeeded|eTraversalNeeded;
