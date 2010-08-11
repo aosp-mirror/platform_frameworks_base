@@ -56,6 +56,13 @@ class ZoomManager {
     private ZoomControlExternal mExternalZoomControl;
 
     /*
+     * For large screen devices, the defaultScale usually set to 1.0 and
+     * equal to the overview scale, to differentiate the zoom level for double tapping,
+     * a minimum reading level scale is used.
+     */
+    private static final float MIN_READING_LEVEL_SCALE = 1.5f;
+
+    /*
      * The scale factors that determine the upper and lower bounds for the
      * default zoom scale.
      */
@@ -245,6 +252,10 @@ class ZoomManager {
         return mDefaultScale;
     }
 
+    public final float getReadingLevelScale() {
+      return Math.max(mDefaultScale, MIN_READING_LEVEL_SCALE);
+    }
+
     public final float getInvDefaultScale() {
         return mInvDefaultScale;
     }
@@ -337,9 +348,9 @@ class ZoomManager {
         mInitialScrollX = mWebView.getScrollX();
         mInitialScrollY = mWebView.getScrollY();
 
-        // snap to DEFAULT_SCALE if it is close
-        if (!exceedsMinScaleIncrement(scale, mDefaultScale)) {
-            scale = mDefaultScale;
+        // snap to reading level scale if it is close
+        if (!exceedsMinScaleIncrement(scale, getReadingLevelScale())) {
+            scale = getReadingLevelScale();
         }
 
         setZoomScale(scale, reflowText);
@@ -535,7 +546,7 @@ class ZoomManager {
         } else if (!mInZoomOverview) {
             zoomToOverview();
         } else {
-            zoomToDefaultLevel();
+            zoomToReadingLevel();
         }
     }
 
@@ -563,7 +574,8 @@ class ZoomManager {
         startZoomAnimation(getZoomOverviewScale(), true);
     }
 
-    private void zoomToDefaultLevel() {
+    private void zoomToReadingLevel() {
+        final float readingScale = getReadingLevelScale();
         int left = mWebView.nativeGetBlockLeftEdge(mAnchorX, mAnchorY, mActualScale);
         if (left != WebView.NO_LEFTEDGE) {
             // add a 5pt padding to the left edge.
@@ -572,13 +584,13 @@ class ZoomManager {
             // Re-calculate the zoom center so that the new scroll x will be
             // on the left edge.
             if (viewLeft > 0) {
-                mZoomCenterX = viewLeft * mDefaultScale / (mDefaultScale - mActualScale);
+                mZoomCenterX = viewLeft * readingScale / (readingScale - mActualScale);
             } else {
                 mWebView.scrollBy(viewLeft, 0);
                 mZoomCenterX = 0;
             }
         }
-        startZoomAnimation(mDefaultScale, true);
+        startZoomAnimation(readingScale, true);
     }
 
     public void updateMultiTouchSupport(Context context) {
