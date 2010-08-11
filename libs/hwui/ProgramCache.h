@@ -35,7 +35,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Debug
-#define DEBUG_PROGRAM_CACHE 1
+#define DEBUG_PROGRAM_CACHE 0
 
 // Debug
 #if DEBUG_PROGRAM_CACHE
