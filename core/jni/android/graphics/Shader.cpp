@@ -331,13 +331,8 @@ static SkShader* ComposeShader_create2(JNIEnv* env, jobject o,
 static SkiaShader* ComposeShader_postCreate2(JNIEnv* env, jobject o, SkShader* shader,
         SkiaShader* shaderA, SkiaShader* shaderB, SkPorterDuff::Mode porterDuffMode) {
 #ifdef USE_OPENGL_RENDERER
-    SkAutoUnref au(SkPorterDuff::CreateXfermode(porterDuffMode));
-    SkXfermode* mode = (SkXfermode*) au.get();
-    SkXfermode::Mode skiaMode;
-    if (!SkXfermode::IsMode(mode, &skiaMode)) {
-        skiaMode = SkXfermode::kSrcOver_Mode;
-    }
-    return new SkiaComposeShader(shaderA, shaderB, skiaMode, shader);
+    SkXfermode::Mode mode = SkPorterDuff::ToXfermodeMode(porterDuffMode);
+    return new SkiaComposeShader(shaderA, shaderB, mode, shader);
 #else
     return NULL;
 #endif
@@ -348,6 +343,7 @@ static SkiaShader* ComposeShader_postCreate1(JNIEnv* env, jobject o, SkShader* s
 #ifdef USE_OPENGL_RENDERER
     SkXfermode::Mode skiaMode;
     if (!SkXfermode::IsMode(mode, &skiaMode)) {
+        // TODO: Support other modes
         skiaMode = SkXfermode::kSrcOver_Mode;
     }
     return new SkiaComposeShader(shaderA, shaderB, skiaMode, shader);

@@ -35,7 +35,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Debug
-#define DEBUG_PROGRAM_CACHE 0
+#define DEBUG_PROGRAM_CACHE 1
 
 // Debug
 #if DEBUG_PROGRAM_CACHE
@@ -57,9 +57,9 @@ namespace uirenderer {
 #define PROGRAM_KEY_BITMAP_WRAPS_MASK 0x600
 #define PROGRAM_KEY_BITMAP_WRAPT_MASK 0x1800
 
-// Support only the 12 Porter-Duff modes for now
-#define PROGRAM_MAX_XFERMODE 0xC
-#define PROGRAM_XFERMODE_SHADER_SHIFT 24
+// Encode the xfermodes on 6 bits
+#define PROGRAM_MAX_XFERMODE 0x1f
+#define PROGRAM_XFERMODE_SHADER_SHIFT 26
 #define PROGRAM_XFERMODE_COLOR_OP_SHIFT 20
 
 #define PROGRAM_BITMAP_WRAPS_SHIFT 9
@@ -177,7 +177,7 @@ private:
     Program* generateProgram(const ProgramDescription& description, programid key);
     String8 generateVertexShader(const ProgramDescription& description);
     String8 generateFragmentShader(const ProgramDescription& description);
-    void generatePorterDuffBlend(String8& shader, const char* name, SkXfermode::Mode mode);
+    void generateBlend(String8& shader, const char* name, SkXfermode::Mode mode);
     void generateTextureWrap(String8& shader, GLenum wrapS, GLenum wrapT);
 
     void printLongString(const String8& shader) const;

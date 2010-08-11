@@ -137,7 +137,7 @@ const char* gFS_Footer =
 // PorterDuff snippets
 ///////////////////////////////////////////////////////////////////////////////
 
-const char* gPorterDuff[12] = {
+const char* gBlendOps[18] = {
         // Clear
         "return vec4(0.0, 0.0, 0.0, 0.0);\n",
         // Src
@@ -161,8 +161,26 @@ const char* gPorterDuff[12] = {
         // DstAtop
         "return vec4(dst.rgb * src.a + (1.0 - dst.a) * src.rgb, src.a);\n",
         // Xor
-        "return vec4(src.rgb * (1.0 - dst.a) + (1.0 - src.a) * dst.rgb, 1.0, "
+        "return vec4(src.rgb * (1.0 - dst.a) + (1.0 - src.a) * dst.rgb, "
                 "src.a + dst.a - 2.0 * src.a * dst.a);\n",
+        // Add
+        "return min(src + dst, 1.0);\n",
+        // Multiply
+        "return src * dst;\n",
+        // Screen
+        "return src + dst - src * dst;\n",
+        // Overlay
+        "return clamp(vec4(mix("
+                "2.0 * src.rgb * dst.rgb + src.rgb * (1.0 - dst.a) + dst.rgb * (1.0 - src.a), "
+                "src.a * dst.a - 2.0 * (dst.a - dst.rgb) * (src.a - src.rgb) + src.rgb * (1.0 - dst.a) + dst.rgb * (1.0 - src.a), "
+                "step(dst.a, 2.0 * dst.rgb)), "
+                "src.a + dst.a - src.a * dst.a), 0.0, 1.0);\n",
+        // Darken
+        "return vec4(src.rgb * (1.0 - dst.a) + (1.0 - src.a) * dst.rgb + "
+                "min(src.rgb * dst.a, dst.rgb * src.a), src.a + dst.a - src.a * dst.a);\n",
+        // Lighten
+        "return vec4(src.rgb * (1.0 - dst.a) + (1.0 - src.a) * dst.rgb + "
+                "max(src.rgb * dst.a, dst.rgb * src.a), src.a + dst.a - src.a * dst.a);\n",
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -292,10 +310,10 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
 
     // Generate required functions
     if (description.hasGradient && description.hasBitmap) {
-        generatePorterDuffBlend(shader, "blendShaders", description.shadersMode);
+        generateBlend(shader, "blendShaders", description.shadersMode);
     }
     if (description.colorOp == ProgramDescription::kColorBlend) {
-        generatePorterDuffBlend(shader, "blendColors", description.colorMode);
+        generateBlend(shader, "blendColors", description.colorMode);
     }
     if (description.isBitmapNpot) {
         generateTextureWrap(shader, description.bitmapWrapS, description.bitmapWrapT);
@@ -354,13 +372,12 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     return shader;
 }
 
-void ProgramCache::generatePorterDuffBlend(String8& shader, const char* name,
-        SkXfermode::Mode mode) {
+void ProgramCache::generateBlend(String8& shader, const char* name, SkXfermode::Mode mode) {
     shader.append("\nvec4 ");
     shader.append(name);
     shader.append("(vec4 src, vec4 dst) {\n");
     shader.append("    ");
-    shader.append(gPorterDuff[mode]);
+    shader.append(gBlendOps[mode]);
     shader.append("}\n");
 }
 
