@@ -95,6 +95,8 @@
         <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio</item>
         <item name="listChoiceIndicatorMultiple">@android:drawable/btn_check</item>
 
+        <item name="listChoiceBackgroundIndicator">@android:drawable/list_selected_background</item>
+
         <item name="expandableListPreferredItemPaddingLeft">40dip</item>
         <item name="expandableListPreferredChildPaddingLeft">
                 ?android:attr/expandableListPreferredItemPaddingLeft</item>
@@ -261,6 +263,8 @@
         <item name="textColorLinkInverse">@android:color/link_text_dark</item>
         
         <item name="editTextColor">?android:attr/textColorPrimary</item>
+        <item name="listChoiceBackgroundIndicator">@android:drawable/list_selected_background_light</item>
+
         <item name="popupWindowStyle">@android:style/Widget.PopupWindow</item>
         
         <item name="textCheckMark">@android:drawable/indicator_check_mark_light</item>

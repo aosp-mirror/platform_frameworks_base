@@ -148,6 +148,9 @@
         <!-- Drawable to use for single choice indicators. -->
         <attr name="listChoiceIndicatorSingle" format="reference" />
 
+        <!-- Drawable used as a background for selected list items. -->
+        <attr name="listChoiceBackgroundIndicator" format="reference" />
+
         <!-- ============= -->
         <!-- Button styles -->
         <!-- ============= -->

@@ -513,7 +513,7 @@
     </style>
     
     <style name="Widget.ListView.White" parent="Widget.AbsListView">
-        <item name="android:listSelector">@android:drawable/list_selector_background</item>
+        <item name="android:listSelector">@android:drawable/list_selector_background_light</item>
         <item name="android:cacheColorHint">?android:attr/colorBackgroundCacheHint</item>
         <item name="android:divider">@android:drawable/divider_horizontal_bright_opaque</item>
     </style>    
