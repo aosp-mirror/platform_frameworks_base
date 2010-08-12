@@ -96,14 +96,9 @@ public:
     bool clip(float left, float top, float right, float bottom, SkRegion::Op op) {
         bool clipped = false;
 
-        SkRect sr;
-        sr.set(left, top, right, bottom);
+        Rect r(left, top, right, bottom);
+        transform.mapRect(r);
 
-        SkMatrix m;
-        transform.copyTo(m);
-        m.mapRect(&sr);
-
-        Rect r(sr.fLeft, sr.fTop, sr.fRight, sr.fBottom);
         switch (op) {
             case SkRegion::kDifference_Op:
                 break;
@@ -143,14 +138,8 @@ public:
             mat4 inverse;
             inverse.loadInverse(transform);
 
-            SkRect sr;
-            sr.set(clipRect.left, clipRect.top, clipRect.right, clipRect.bottom);
-
-            SkMatrix m;
-            inverse.copyTo(m);
-            m.mapRect(&sr);
-
-            localClip.set(sr.fLeft, sr.fTop, sr.fRight, sr.fBottom);
+            localClip.set(clipRect);
+            inverse.mapRect(localClip);
 
             flags &= ~Snapshot::kFlagDirtyLocalClip;
         }

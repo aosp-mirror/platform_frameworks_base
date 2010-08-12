@@ -30,86 +30,106 @@ namespace android {
 namespace uirenderer {
 
 void Matrix4::loadIdentity() {
-    data[0]  = 1.0f;
-    data[1]  = 0.0f;
-    data[2]  = 0.0f;
-    data[3]  = 0.0f;
+    data[kScaleX]       = 1.0f;
+    data[kSkewY]        = 0.0f;
+    data[2]             = 0.0f;
+    data[kPerspective0] = 0.0f;
 
-    data[4]  = 0.0f;
-    data[5]  = 1.0f;
-    data[6]  = 0.0f;
-    data[7]  = 0.0f;
+    data[kSkewX]        = 0.0f;
+    data[kScaleY]       = 1.0f;
+    data[6]             = 0.0f;
+    data[kPerspective1] = 0.0f;
 
-    data[8]  = 0.0f;
-    data[9]  = 0.0f;
-    data[10] = 1.0f;
-    data[11] = 0.0f;
+    data[8]             = 0.0f;
+    data[9]             = 0.0f;
+    data[kScaleZ]       = 1.0f;
+    data[11]            = 0.0f;
 
-    data[12] = 0.0f;
-    data[13] = 0.0f;
-    data[14] = 0.0f;
-    data[15] = 1.0f;
+    data[kTranslateX]   = 0.0f;
+    data[kTranslateY]   = 0.0f;
+    data[kTranslateZ]   = 0.0f;
+    data[kPerspective2] = 1.0f;
+
+    mSimpleMatrix = true;
 }
 
 void Matrix4::load(const float* v) {
     memcpy(data, v, sizeof(data));
+    mSimpleMatrix = false;
 }
 
 void Matrix4::load(const Matrix4& v) {
     memcpy(data, v.data, sizeof(data));
+    mSimpleMatrix = v.mSimpleMatrix;
 }
 
 void Matrix4::load(const SkMatrix& v) {
     memset(data, 0, sizeof(data));
 
-    data[0]  = v[SkMatrix::kMScaleX];
-    data[4]  = v[SkMatrix::kMSkewX];
-    data[12] = v[SkMatrix::kMTransX];
+    data[kScaleX]     = v[SkMatrix::kMScaleX];
+    data[kSkewX]      = v[SkMatrix::kMSkewX];
+    data[kTranslateX] = v[SkMatrix::kMTransX];
 
-    data[1]  = v[SkMatrix::kMSkewY];
-    data[5]  = v[SkMatrix::kMScaleY];
-    data[13] = v[SkMatrix::kMTransY];
+    data[kSkewY]      = v[SkMatrix::kMSkewY];
+    data[kScaleY]     = v[SkMatrix::kMScaleY];
+    data[kTranslateY] = v[SkMatrix::kMTransY];
 
-    data[3]  = v[SkMatrix::kMPersp0];
-    data[7]  = v[SkMatrix::kMPersp1];
-    data[15] = v[SkMatrix::kMPersp2];
+    data[kPerspective0]  = v[SkMatrix::kMPersp0];
+    data[kPerspective1]  = v[SkMatrix::kMPersp1];
+    data[kPerspective2]  = v[SkMatrix::kMPersp2];
 
-    data[10] = 1.0f;
+    data[kScaleZ] = 1.0f;
+
+    mSimpleMatrix = (!v[SkMatrix::kMPersp0] && !v[SkMatrix::kMPersp1] && !v[SkMatrix::kMPersp2]);
 }
 
 void Matrix4::copyTo(SkMatrix& v) const {
     v.reset();
 
-    v.set(SkMatrix::kMScaleX, data[0]);
-    v.set(SkMatrix::kMSkewX,  data[4]);
-    v.set(SkMatrix::kMTransX, data[12]);
+    v.set(SkMatrix::kMScaleX, data[kScaleX]);
+    v.set(SkMatrix::kMSkewX,  data[kSkewX]);
+    v.set(SkMatrix::kMTransX, data[kTranslateX]);
 
-    v.set(SkMatrix::kMSkewY,  data[1]);
-    v.set(SkMatrix::kMScaleY, data[5]);
-    v.set(SkMatrix::kMTransY, data[13]);
+    v.set(SkMatrix::kMSkewY,  data[kSkewY]);
+    v.set(SkMatrix::kMScaleY, data[kScaleY]);
+    v.set(SkMatrix::kMTransY, data[kTranslateY]);
 
-    v.set(SkMatrix::kMPersp0, data[3]);
-    v.set(SkMatrix::kMPersp1, data[7]);
-    v.set(SkMatrix::kMPersp2, data[15]);
+    v.set(SkMatrix::kMPersp0, data[kPerspective0]);
+    v.set(SkMatrix::kMPersp1, data[kPerspective1]);
+    v.set(SkMatrix::kMPersp2, data[kPerspective2]);
 }
 
 void Matrix4::loadInverse(const Matrix4& v) {
     double scale = 1.0 /
-            (v.data[0]  * ((double) v.data[5]  * v.data[15] - (double) v.data[13] * v.data[7]) +
-             v.data[4]  * ((double) v.data[13] * v.data[3]  - (double) v.data[1]  * v.data[15]) +
-             v.data[12] * ((double) v.data[1]  * v.data[7]  - (double) v.data[5]  * v.data[3]));
+            (v.data[kScaleX] * ((double) v.data[kScaleY]  * v.data[kPerspective2] -
+                    (double) v.data[kTranslateY] * v.data[kPerspective1]) +
+             v.data[kSkewX] * ((double) v.data[kTranslateY] * v.data[kPerspective0] -
+                     (double) v.data[kSkewY] * v.data[kPerspective2]) +
+             v.data[kTranslateX] * ((double) v.data[kSkewY] * v.data[kPerspective1] -
+                     (double) v.data[kScaleY] * v.data[kPerspective0]));
 
-    data[0]  = (v.data[5] * v.data[15] - v.data[13] * v.data[7])  * scale;
-    data[4]  = (v.data[12] * v.data[7] - v.data[4]  * v.data[15]) * scale;
-    data[12] = (v.data[4] * v.data[13] - v.data[12] * v.data[5])  * scale;
+    data[kScaleX] = (v.data[kScaleY] * v.data[kPerspective2] -
+            v.data[kTranslateY] * v.data[kPerspective1])  * scale;
+    data[kSkewX] = (v.data[kTranslateX] * v.data[kPerspective1] -
+            v.data[kSkewX]  * v.data[kPerspective2]) * scale;
+    data[kTranslateX] = (v.data[kSkewX] * v.data[kTranslateY] -
+            v.data[kTranslateX] * v.data[kScaleY])  * scale;
 
-    data[1]  = (v.data[13] * v.data[3] - v.data[1]  * v.data[15]) * scale;
-    data[5]  = (v.data[0] * v.data[15] - v.data[12] * v.data[3])  * scale;
-    data[13] = (v.data[12] * v.data[1] - v.data[0]  * v.data[13]) * scale;
+    data[kSkewY] = (v.data[kTranslateY] * v.data[kPerspective0] -
+            v.data[kSkewY]  * v.data[kPerspective2]) * scale;
+    data[kScaleY] = (v.data[kScaleX] * v.data[kPerspective2] -
+            v.data[kTranslateX] * v.data[kPerspective0])  * scale;
+    data[kTranslateY] = (v.data[kTranslateX] * v.data[kSkewY] -
+            v.data[kScaleX]  * v.data[kTranslateY]) * scale;
 
-    data[3]  = (v.data[1] * v.data[7] - v.data[5] * v.data[3]) * scale;
-    data[7]  = (v.data[4] * v.data[3] - v.data[0] * v.data[7]) * scale;
-    data[15] = (v.data[0] * v.data[5] - v.data[4] * v.data[1]) * scale;
+    data[kPerspective0] = (v.data[kSkewY] * v.data[kPerspective1] -
+            v.data[kScaleY] * v.data[kPerspective0]) * scale;
+    data[kPerspective1] = (v.data[kSkewX] * v.data[kPerspective0] -
+            v.data[kScaleX] * v.data[kPerspective1]) * scale;
+    data[kPerspective2] = (v.data[kScaleX] * v.data[kScaleY] -
+            v.data[kSkewX] * v.data[kSkewY]) * scale;
+
+    mSimpleMatrix = v.mSimpleMatrix;
 }
 
 void Matrix4::copyTo(float* v) const {
@@ -117,35 +137,35 @@ void Matrix4::copyTo(float* v) const {
 }
 
 float Matrix4::getTranslateX() {
-    return data[12];
+    return data[kTranslateX];
 }
 
 float Matrix4::getTranslateY() {
-    return data[13];
+    return data[kTranslateY];
 }
 
 void Matrix4::loadTranslate(float x, float y, float z) {
     loadIdentity();
-    data[12] = x;
-    data[13] = y;
-    data[14] = z;
+    data[kTranslateX] = x;
+    data[kTranslateY] = y;
+    data[kTranslateZ] = z;
 }
 
 void Matrix4::loadScale(float sx, float sy, float sz) {
     loadIdentity();
-    data[0]  = sx;
-    data[5]  = sy;
-    data[10] = sz;
+    data[kScaleX] = sx;
+    data[kScaleY] = sy;
+    data[kScaleZ] = sz;
 }
 
 void Matrix4::loadRotate(float angle, float x, float y, float z) {
-    data[3]  = 0.0f;
-    data[7]  = 0.0f;
-    data[11] = 0.0f;
-    data[12] = 0.0f;
-    data[13] = 0.0f;
-    data[14] = 0.0f;
-    data[15] = 1.0f;
+    data[kPerspective0]  = 0.0f;
+    data[kPerspective1]  = 0.0f;
+    data[11]             = 0.0f;
+    data[kTranslateX]    = 0.0f;
+    data[kTranslateY]    = 0.0f;
+    data[kTranslateZ]    = 0.0f;
+    data[kPerspective2]  = 1.0f;
 
     angle *= float(M_PI / 180.0f);
     float c = cosf(angle);
@@ -165,15 +185,17 @@ void Matrix4::loadRotate(float angle, float x, float y, float z) {
     const float ys = y * s;
     const float zs = z * s;
 
-    data[0]  = x * x * nc +  c;
-    data[4]  =    xy * nc - zs;
-    data[8]  =    zx * nc + ys;
-    data[1]  =    xy * nc + zs;
-    data[5]  = y * y * nc +  c;
-    data[9]  =    yz * nc - xs;
-    data[2]  =    zx * nc - ys;
-    data[6]  =    yz * nc + xs;
-    data[10] = z * z * nc +  c;
+    data[kScaleX] = x * x * nc +  c;
+    data[kSkewX]  =    xy * nc - zs;
+    data[8]       =    zx * nc + ys;
+    data[kSkewY]  =    xy * nc + zs;
+    data[kScaleY] = y * y * nc +  c;
+    data[9]       =    yz * nc - xs;
+    data[2]       =    zx * nc - ys;
+    data[6]       =    yz * nc + xs;
+    data[kScaleZ] = z * z * nc +  c;
+
+    mSimpleMatrix = false;
 }
 
 void Matrix4::loadMultiply(const Matrix4& u, const Matrix4& v) {
@@ -196,39 +218,72 @@ void Matrix4::loadMultiply(const Matrix4& u, const Matrix4& v) {
         set(i, 2, z);
         set(i, 3, w);
     }
+
+    mSimpleMatrix = u.mSimpleMatrix && v.mSimpleMatrix;
 }
 
 void Matrix4::loadOrtho(float left, float right, float bottom, float top, float near, float far) {
     loadIdentity();
-    data[0]  = 2.0f / (right - left);
-    data[5]  = 2.0f / (top - bottom);
-    data[10] = -2.0f / (far - near);
-    data[12] = -(right + left) / (right - left);
-    data[13] = -(top + bottom) / (top - bottom);
-    data[14] = -(far + near) / (far - near);
+    data[kScaleX] = 2.0f / (right - left);
+    data[kScaleY] = 2.0f / (top - bottom);
+    data[kScaleZ] = -2.0f / (far - near);
+    data[kTranslateX] = -(right + left) / (right - left);
+    data[kTranslateY] = -(top + bottom) / (top - bottom);
+    data[kTranslateZ] = -(far + near) / (far - near);
 }
 
-#define MUL_ADD_STORE(a, b, c) a = (a) * (b) + (c)
-
 void Matrix4::mapRect(Rect& r) const {
-    const float sx = data[0];
-    const float sy = data[5];
+    if (mSimpleMatrix) {
+        #define MUL_ADD_STORE(a, b, c) a = (a) * (b) + (c)
+        MUL_ADD_STORE(r.left, data[kScaleX], data[kTranslateX]);
+        MUL_ADD_STORE(r.right, data[kScaleX], data[kTranslateX]);
+        MUL_ADD_STORE(r.top, data[kScaleY], data[kTranslateY]);
+        MUL_ADD_STORE(r.bottom, data[kScaleY], data[kTranslateY]);
+        return;
+    }
 
-    const float tx = data[12];
-    const float ty = data[13];
+    float vertices[] = {
+            r.left, r.top,
+            r.right, r.top,
+            r.right, r.bottom,
+            r.left, r.bottom
+    };
 
-    MUL_ADD_STORE(r.left, sx, tx);
-    MUL_ADD_STORE(r.right, sx, tx);
-    MUL_ADD_STORE(r.top, sy, ty);
-    MUL_ADD_STORE(r.bottom, sy, ty);
+    float x, y, z;
+
+    for (int i = 0; i < 8; i+= 2) {
+        float px = vertices[i];
+        float py = vertices[i + 1];
+
+        x = px * data[kScaleX] + py * data[kSkewX] + data[kTranslateX];
+        y = px * data[kSkewY] + py * data[kScaleY] + data[kTranslateY];
+        z = px * data[kPerspective0] + py * data[kPerspective1] + data[kPerspective2];
+        if (z) z = 1.0f / z;
+
+        vertices[i] = x * z;
+        vertices[i + 1] = y * z;
+    }
+
+    r.left = r.right = vertices[0];
+    r.top = r.bottom = vertices[1];
+
+    for (int i = 2; i < 8; i += 2) {
+        x = vertices[i];
+        y = vertices[i + 1];
+
+        if (x < r.left) r.left = x;
+        else if (x > r.right) r.right = x;
+        if (y < r.top) r.top = y;
+        else if (y > r.bottom) r.bottom = y;
+    }
 }
 
 void Matrix4::dump() const {
-    LOGD("Matrix4[");
-    LOGD("  %f %f %f %f", data[0], data[4], data[ 8], data[12]);
-    LOGD("  %f %f %f %f", data[1], data[5], data[ 9], data[13]);
-    LOGD("  %f %f %f %f", data[2], data[6], data[10], data[14]);
-    LOGD("  %f %f %f %f", data[3], data[7], data[11], data[15]);
+    LOGD("Matrix4[simple=%d", mSimpleMatrix);
+    LOGD("  %f %f %f %f", data[kScaleX], data[kSkewX], data[ 8], data[kTranslateX]);
+    LOGD("  %f %f %f %f", data[kSkewY], data[kScaleY], data[ 9], data[kTranslateY]);
+    LOGD("  %f %f %f %f", data[2], data[6], data[kScaleZ], data[kTranslateZ]);
+    LOGD("  %f %f %f %f", data[kPerspective0], data[kPerspective1], data[11], data[kPerspective2]);
     LOGD("]");
 }
 
