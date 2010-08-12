@@ -93,5 +93,13 @@ interface IWifiManager
     void addToBlacklist(String bssid);
 
     void clearBlacklist();
+
+    void connectNetworkWithConfig(in WifiConfiguration wifiConfig);
+
+    void connectNetworkWithId(int networkId);
+
+    void saveNetwork(in WifiConfiguration wifiConfig);
+
+    void forgetNetwork(int networkId);
 }
 

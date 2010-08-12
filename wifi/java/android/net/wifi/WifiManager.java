@@ -274,7 +274,14 @@ public class WifiManager {
      * @see #ERROR_AUTHENTICATING
      */
     public static final String EXTRA_SUPPLICANT_ERROR = "supplicantError";
-
+    /**
+     * Broadcast intent action indicating that the supplicant configuration changed.
+     * This can be as a result of adding/updating/deleting a network
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String SUPPLICANT_CONFIG_CHANGED_ACTION =
+        "android.net.wifi.supplicant.CONFIG_CHANGE";
     /**
      * An access point scan has completed, and results are available from the supplicant.
      * Call {@link #getScanResults()} to obtain the results.
@@ -927,6 +934,90 @@ public class WifiManager {
         } catch (RemoteException e) {
             return false;
         }
+    }
+
+    /* TODO: deprecate synchronous API and open up the following API */
+    /**
+     * Connect to a network with the given configuration. The network also
+     * gets added to the supplicant configuration.
+     *
+     * For a new network, this function is used instead of a
+     * sequence of addNetwork(), enableNetwork(), saveConfiguration() and
+     * reconnect()
+     *
+     * @param config the set of variables that describe the configuration,
+     *            contained in a {@link WifiConfiguration} object.
+     * @hide
+     */
+    public void connectNetwork(WifiConfiguration config) {
+        if (config == null) {
+            return;
+        }
+        try {
+            mService.connectNetworkWithConfig(config);
+        } catch (RemoteException e) { }
+    }
+
+    /**
+     * Connect to a network with the given networkId.
+     *
+     * This function is used instead of a enableNetwork(), saveConfiguration() and
+     * reconnect()
+     *
+     * @param networkId the network id identifiying the network in the
+     *                supplicant configuration list
+     * @hide
+     */
+    public void connectNetwork(int networkId) {
+        if (networkId < 0) {
+            return;
+        }
+        try {
+            mService.connectNetworkWithId(networkId);
+        } catch (RemoteException e) { }
+    }
+
+    /**
+     * Save the given network in the supplicant config. If the network already
+     * exists, the configuration is updated. A new network is enabled
+     * by default.
+     *
+     * For a new network, this function is used instead of a
+     * sequence of addNetwork(), enableNetwork() and saveConfiguration().
+     *
+     * For an existing network, it accomplishes the task of updateNetwork()
+     * and saveConfiguration()
+     *
+     * @param config the set of variables that describe the configuration,
+     *            contained in a {@link WifiConfiguration} object.
+     * @hide
+     */
+    public void saveNetwork(WifiConfiguration config) {
+        if (config == null) {
+            return;
+        }
+        try {
+            mService.saveNetwork(config);
+        } catch (RemoteException e) { }
+    }
+
+    /**
+     * Delete the network in the supplicant config.
+     *
+     * This function is used instead of a sequence of removeNetwork()
+     * and saveConfiguration().
+     *
+     * @param config the set of variables that describe the configuration,
+     *            contained in a {@link WifiConfiguration} object.
+     * @hide
+     */
+    public void forgetNetwork(int netId) {
+        if (netId < 0) {
+            return;
+        }
+        try {
+            mService.forgetNetwork(netId);
+        } catch (RemoteException e) { }
     }
 
     /**
