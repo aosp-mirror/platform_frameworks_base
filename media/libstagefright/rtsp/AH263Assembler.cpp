@@ -110,7 +110,7 @@ ARTPAssembler::AssemblyStatus AH263Assembler::addPacket(
         buffer->data()[0] = 0x00;
         buffer->data()[1] = 0x00;
     } else {
-        buffer->setRange(2, buffer->size() - 2);
+        buffer->setRange(buffer->offset() + 2, buffer->size() - 2);
     }
 
     mPackets.push_back(buffer);
