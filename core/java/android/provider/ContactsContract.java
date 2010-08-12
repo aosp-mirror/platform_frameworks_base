@@ -32,6 +32,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.net.Uri.Builder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -40,6 +41,7 @@ import android.view.View;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 /**
  * <p>
@@ -1487,6 +1489,106 @@ public final class ContactsContract {
              * {@link android.provider.ContactsContract.Contacts#CONTENT_FILTER_URI}.
              */
             public static final String CONTENT_DIRECTORY = "suggestions";
+
+            /**
+             * Used with {@link Builder#addParameter} to specify what kind of data is
+             * supplied for the suggestion query.
+             *
+             * @hide
+             */
+            public static final String PARAMETER_MATCH_NAME = "name";
+
+            /**
+             * Used with {@link Builder#addParameter} to specify what kind of data is
+             * supplied for the suggestion query.
+             *
+             * @hide
+             */
+            public static final String PARAMETER_MATCH_EMAIL = "email";
+
+            /**
+             * Used with {@link Builder#addParameter} to specify what kind of data is
+             * supplied for the suggestion query.
+             *
+             * @hide
+             */
+            public static final String PARAMETER_MATCH_PHONE = "phone";
+
+            /**
+             * Used with {@link Builder#addParameter} to specify what kind of data is
+             * supplied for the suggestion query.
+             *
+             * @hide
+             */
+            public static final String PARAMETER_MATCH_NICKNAME = "nickname";
+
+            /**
+             * A convenience builder for aggregation suggestion content URIs.
+             *
+             * TODO: change documentation for this class to use the builder.
+             * @hide
+             */
+            public static final class Builder {
+                private long mContactId;
+                private ArrayList<String> mKinds = new ArrayList<String>();
+                private ArrayList<String> mValues = new ArrayList<String>();
+                private int mLimit;
+
+                /**
+                 * Optional existing contact ID.  If it is not provided, the search
+                 * will be based exclusively on the values supplied with {@link #addParameter}.
+                 */
+                public Builder setContactId(long contactId) {
+                    this.mContactId = contactId;
+                    return this;
+                }
+
+                /**
+                 * A value that can be used when searching for an aggregation
+                 * suggestion.
+                 *
+                 * @param kind can be one of
+                 *            {@link AggregationSuggestions#PARAMETER_MATCH_NAME},
+                 *            {@link AggregationSuggestions#PARAMETER_MATCH_EMAIL},
+                 *            {@link AggregationSuggestions#PARAMETER_MATCH_NICKNAME},
+                 *            {@link AggregationSuggestions#PARAMETER_MATCH_PHONE}
+                 */
+                public Builder addParameter(String kind, String value) {
+                    if (!TextUtils.isEmpty(value)) {
+                        mKinds.add(kind);
+                        mValues.add(value);
+                    }
+                    return this;
+                }
+
+                public Builder setLimit(int limit) {
+                    mLimit = limit;
+                    return this;
+                }
+
+                public Uri build() {
+                    android.net.Uri.Builder builder = Contacts.CONTENT_URI.buildUpon();
+                    builder.appendEncodedPath(String.valueOf(mContactId));
+                    builder.appendPath(Contacts.AggregationSuggestions.CONTENT_DIRECTORY);
+                    if (mLimit != 0) {
+                        builder.appendQueryParameter("limit", String.valueOf(mLimit));
+                    }
+
+                    int count = mKinds.size();
+                    for (int i = 0; i < count; i++) {
+                        builder.appendQueryParameter("query", mKinds.get(i) + ":" + mValues.get(i));
+                    }
+
+                    return builder.build();
+                }
+            }
+
+            /**
+             * @hide
+             */
+            public static final Builder builder() {
+                return new Builder();
+            }
         }
 
         /**
