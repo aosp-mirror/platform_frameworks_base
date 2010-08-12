@@ -2072,7 +2072,7 @@ public class Activity extends ContextThemeWrapper
      * to pop, else false.
      */
     public boolean popBackStack() {
-        return popBackStack(null, -1);
+        return popBackStack(null, 0);
     }
 
     /**
