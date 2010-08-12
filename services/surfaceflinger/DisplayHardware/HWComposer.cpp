@@ -34,7 +34,7 @@ namespace android {
 // ---------------------------------------------------------------------------
 
 HWComposer::HWComposer()
-    : mModule(0), mHwc(0), mList(0),
+    : mModule(0), mHwc(0), mList(0), mCapacity(0),
       mDpy(EGL_NO_DISPLAY), mSur(EGL_NO_SURFACE)
 {
     int err = hw_get_module(HWC_HARDWARE_MODULE_ID, &mModule);
@@ -63,10 +63,13 @@ void HWComposer::setFrameBuffer(EGLDisplay dpy, EGLSurface sur) {
 }
 
 status_t HWComposer::createWorkList(size_t numLayers) {
-    if (mHwc && (!mList || mList->numHwLayers < numLayers)) {
-        free(mList);
-        size_t size = sizeof(hwc_layer_list) + numLayers*sizeof(hwc_layer_t);
-        mList = (hwc_layer_list_t*)malloc(size);
+    if (mHwc) {
+        if (!mList || mCapacity < numLayers) {
+            free(mList);
+            size_t size = sizeof(hwc_layer_list) + numLayers*sizeof(hwc_layer_t);
+            mList = (hwc_layer_list_t*)malloc(size);
+            mCapacity = numLayers;
+        }
         mList->flags = HWC_GEOMETRY_CHANGED;
         mList->numHwLayers = numLayers;
     }
@@ -84,12 +87,12 @@ status_t HWComposer::commit() const {
     return (status_t)err;
 }
 
-HWComposer::iterator HWComposer::begin() {
-    return mList ? &(mList->hwLayers[0]) : NULL;
+size_t HWComposer::getNumLayers() const {
+    return mList ? mList->numHwLayers : 0;
 }
 
-HWComposer::iterator HWComposer::end() {
-    return mList ? &(mList->hwLayers[mList->numHwLayers]) : NULL;
+hwc_layer_t* HWComposer::getLayers() const {
+    return mList ? mList->hwLayers : 0;
 }
 
 // ---------------------------------------------------------------------------
