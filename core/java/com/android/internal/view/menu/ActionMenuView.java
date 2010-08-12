@@ -148,10 +148,24 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
     public boolean showOverflowMenu() {
         if (mOverflowButton != null) {
-            MenuPopupHelper popup = new MenuPopupHelper(getContext(), mMenu, mOverflowButton, true);
-            popup.show();
+            final MenuPopupHelper popup =
+                    new MenuPopupHelper(getContext(), mMenu, mOverflowButton, true);
+            // Post this for later; we might still need a layout for the anchor to be right.
+            post(new Runnable() {
+                public void run() {
+                    popup.show();
+                }
+            });
             mOverflowPopup = new WeakReference<MenuPopupHelper>(popup);
             return true;
+        }
+        return false;
+    }
+
+    public boolean isOverflowMenuShowing() {
+        MenuPopupHelper popup = mOverflowPopup != null ? mOverflowPopup.get() : null;
+        if (popup != null) {
+            return popup.isShowing();
         }
         return false;
     }
@@ -177,7 +191,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             final Resources res = context.getResources();
             setClickable(true);
             setFocusable(true);
-            // TODO setTitle() to a localized string for accessibility
+            setContentDescription(res.getString(com.android.internal.R.string.more_item_label));
             setImageDrawable(res.getDrawable(com.android.internal.R.drawable.ic_menu_more));
             setVisibility(VISIBLE);
             setEnabled(true);
@@ -189,7 +203,8 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
                 return true;
             }
 
-            showOverflowMenu();
+            // Change to overflow mode
+            mMenu.getCallback().onMenuModeChange(mMenu);
             return true;
         }
     }

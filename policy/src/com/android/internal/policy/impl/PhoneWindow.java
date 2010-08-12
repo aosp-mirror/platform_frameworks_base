@@ -599,7 +599,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // The panel key was pushed, so set the chording key
             mPanelChordingKey = keyCode;
             mPanelMayLongPress = false;
-            
+
             PanelFeatureState st = getPanelState(featureId, true);
             if (!st.isOpen) {
                 if (getContext().getResources().getConfiguration().keyboard
@@ -608,7 +608,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
                 return preparePanel(st, event);
             }
-            
         } else if (mPanelMayLongPress && mPanelChordingKey == keyCode
                 && (event.getFlags()&KeyEvent.FLAG_LONG_PRESS) != 0) {
             // We have had a long press while in a state where this
@@ -643,25 +642,40 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
             
             boolean playSoundEffect = false;
-            PanelFeatureState st = getPanelState(featureId, true);
-            if (st.isOpen || st.isHandled) {
+            final PanelFeatureState st = getPanelState(featureId, true);
+            if (featureId == FEATURE_OPTIONS_PANEL && mActionBar != null) {
+                if (mActionBar.isOverflowReserved()) {
+                    if (!mActionBar.isOverflowMenuShowing()) {
+                        final Callback cb = getCallback();
+                        if (cb != null) {
+                            if (cb.onPreparePanel(featureId, st.createdPanelView, st.menu)) {
+                                playSoundEffect = mActionBar.showOverflowMenu();
+                            }
+                        }
+                    } else {
+                        playSoundEffect = mActionBar.hideOverflowMenu();
+                    }
+                }
+            } else {
+                if (st.isOpen || st.isHandled) {
 
-                // Play the sound effect if the user closed an open menu (and not if
-                // they just released a menu shortcut)
-                playSoundEffect = st.isOpen;
+                    // Play the sound effect if the user closed an open menu (and not if
+                    // they just released a menu shortcut)
+                    playSoundEffect = st.isOpen;
 
-                // Close menu
-                closePanel(st, true);
+                    // Close menu
+                    closePanel(st, true);
 
-            } else if (st.isPrepared) {
+                } else if (st.isPrepared) {
 
-                // Write 'menu opened' to event log
-                EventLog.writeEvent(50001, 0);
+                    // Write 'menu opened' to event log
+                    EventLog.writeEvent(50001, 0);
 
-                // Show menu
-                openPanel(st, event);
+                    // Show menu
+                    openPanel(st, event);
 
-                playSoundEffect = true;
+                    playSoundEffect = true;
+                }
             }
 
             if (playSoundEffect) {
@@ -841,6 +855,21 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     private void reopenMenu(boolean toggleMenuMode) {
+        if (mActionBar != null) {
+            if (!mActionBar.isOverflowMenuShowing() || !toggleMenuMode) {
+                final Callback cb = getCallback();
+                if (cb != null) {
+                    final PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, true);
+                    if (cb.onPreparePanel(FEATURE_OPTIONS_PANEL, st.createdPanelView, st.menu)) {
+                        mActionBar.showOverflowMenu();
+                    }
+                }
+            } else {
+                mActionBar.hideOverflowMenu();
+            }
+            return;
+        }
+
         PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, true);
 
         // Save the future expanded mode state since closePanel will reset it
@@ -1387,12 +1416,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             case KeyEvent.KEYCODE_MENU: {
-                if (mActionBar != null && mActionBar.isOverflowReserved()) {
-                    mActionBar.showOverflowMenu();
-                } else {
-                    onKeyUpPanel(featureId < 0 ? FEATURE_OPTIONS_PANEL : featureId,
-                            event);
-                }
+                onKeyUpPanel(featureId < 0 ? FEATURE_OPTIONS_PANEL : featureId,
+                        event);
                 return true;
             }
 

@@ -531,6 +531,8 @@ public class ActionBarImpl extends ActionBar {
         }
 
         public void onMenuModeChange(MenuBuilder menu) {
+            invalidate();
+            mUpperContextView.showOverflowMenu();
         }
     }
 

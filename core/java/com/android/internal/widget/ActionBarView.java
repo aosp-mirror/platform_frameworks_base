@@ -219,6 +219,13 @@ public class ActionBarView extends ViewGroup {
         return false;
     }
 
+    public boolean isOverflowMenuShowing() {
+        if (mMenuView != null) {
+            return mMenuView.isOverflowMenuShowing();
+        }
+        return false;
+    }
+
     public boolean isOverflowReserved() {
         return mMenuView != null && mMenuView.isOverflowReserved();
     }
