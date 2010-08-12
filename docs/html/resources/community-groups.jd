@@ -87,27 +87,27 @@ phrasing your questions, read <a href="http://www.catb.org/%7Eesr/faqs/smart-que
 <h3 id="ApplicationDeveloperLists">Application developer mailing lists</h3>
 <ul>
 <li><strong><a href="http://groups.google.com/group/android-developers">android-developers</a></strong>
-(<a href="mailto:android-developers-subscribe@googlegroups.com">subscribe via email</a>)<br>
+(<a href="http://groups.google.com/group/android-developers/subscribe">subscribe</a>)<br>
 You're now an experienced Android application developer. You've grasped the basics of Android app development, you're comfortable using the SDK, now you want to move to advanced topics. Get help here with troubleshooting applications, advice on implementation, and strategies for improving your application's performance and user experience. This is the not the right place to discuss user issues (use android-discuss for that) or beginner questions with the Android SDK (use android-beginners for that).
 </li>
 
 <li><strong><a href="http://groups.google.com/group/android-discuss">android-discuss</a></strong>
-(<a href="mailto:android-discuss-subscribe@googlegroups.com">subscribe via email</a>)<br>
+(<a href="http://groups.google.com/group/android-discuss/subscribe">subscribe</a>)<br>
 The "water cooler" of Android discussion. You can discuss just about anything Android-related here, ideas for the Android platform, announcements about your applications, discussions about Android devices, community resources... As long as your discussion is related to Android, it's on-topic here. However, if you have a discussion here that could belong on another list, you are probably not reaching all of your target audience here and may want to consider shifting to a more targeted list.
 </li>
 
 <li><strong><a href="http://groups.google.com/group/android-ndk">android-ndk</a></strong>
-(<a href="mailto:android-ndk-subscribe@googlegroups.com">subscribe via email</a>)<br>
+(<a href="http://groups.google.com/group/android-ndk/subscribe">subscribe</a>)<br>
 A place for discussing the Android NDK and topics related to using native code in Android applications.
 </li>
 
 <li><strong><a href="http://groups.google.com/group/android-security-discuss">android-security-discuss</a></strong>
-(<a href="mailto:android-security-discuss-subscribe@googlegroups.com">subscribe via email</a>)<br>
+(<a href="http://groups.google.com/group/android-security-discuss/subscribe">subscribe</a>)<br>
 A place for open discussion on secure development, emerging security concerns, and best practices for and by android developers. Please don't disclose vulnerabilities directly on this list, you'd be putting all Android users at risk.
 </li>
 
 <li><strong><a href="http://groups.google.com/group/android-security-announce">android-security-announce</a></strong>
-(<a href="mailto:android-security-announce-subscribe@googlegroups.com">subscribe via email</a>)<br>
+(<a href="http://groups.google.com/group/android-security-announce/subscribe">subscribe</a>)<br>
 A low-volume group for security-related announcements by the Android Security Team.
 </li>
 </ul>
