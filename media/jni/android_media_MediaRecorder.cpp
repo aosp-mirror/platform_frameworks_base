@@ -318,6 +318,15 @@ android_media_MediaRecorder_prepare(JNIEnv *env, jobject thiz)
     jobject surface = env->GetObjectField(thiz, fields.surface);
     if (surface != NULL) {
         const sp<Surface> native_surface = get_surface(env, surface);
+
+        // The application may misbehave and
+        // the preview surface becomes unavailable
+        if (native_surface.get() == 0) {
+            LOGE("Application lost the surface");
+            jniThrowException(env, "java/io/IOException", "invalid preview surface");
+            return;
+        }
+
         LOGI("prepare: surface=%p (identity=%d)", native_surface.get(), native_surface->getIdentity());
         if (process_media_recorder_call(env, mr->setPreviewSurface(native_surface), "java/lang/RuntimeException", "setPreviewSurface failed.")) {
             return;
