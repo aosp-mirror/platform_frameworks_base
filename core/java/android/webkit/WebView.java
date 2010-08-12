@@ -66,7 +66,6 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.DeviceOrientationManager;
 import android.webkit.WebTextView.AutoCompleteAdapter;
 import android.webkit.WebViewCore.EventHub;
 import android.webkit.WebViewCore.TouchEventData;
@@ -3763,8 +3762,8 @@ public class WebView extends AbsoluteLayout
      */
     public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,
             boolean canProvideBeta, double beta, boolean canProvideGamma, double gamma) {
-        DeviceOrientationManager.setMockOrientation(mWebViewCore, canProvideAlpha, alpha,
-                canProvideBeta, beta, canProvideGamma, gamma);
+        mWebViewCore.setMockDeviceOrientation(canProvideAlpha, alpha, canProvideBeta, beta,
+                canProvideGamma, gamma);
     }
 
     /**
