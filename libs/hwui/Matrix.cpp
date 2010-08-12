@@ -80,7 +80,7 @@ void Matrix4::load(const SkMatrix& v) {
 
     data[kScaleZ] = 1.0f;
 
-    mSimpleMatrix = (!v[SkMatrix::kMPersp0] && !v[SkMatrix::kMPersp1] && !v[SkMatrix::kMPersp2]);
+    mSimpleMatrix = (v.getType() <= SkMatrix::kScale_Mask);
 }
 
 void Matrix4::copyTo(SkMatrix& v) const {
@@ -232,9 +232,26 @@ void Matrix4::loadOrtho(float left, float right, float bottom, float top, float 
     data[kTranslateZ] = -(far + near) / (far - near);
 }
 
+#define MUL_ADD_STORE(a, b, c) a = (a) * (b) + (c)
+
+void Matrix4::mapPoint(float& x, float& y) const {
+    if (mSimpleMatrix) {
+        MUL_ADD_STORE(x, data[kScaleX], data[kTranslateX]);
+        MUL_ADD_STORE(y, data[kScaleY], data[kTranslateY]);
+        return;
+    }
+
+    float dx = x * data[kScaleX] + y * data[kSkewX] + data[kTranslateX];
+    float dy = x * data[kSkewY] + y * data[kScaleY] + data[kTranslateY];
+    float dz = x * data[kPerspective0] + y * data[kPerspective1] + data[kPerspective2];
+    if (dz) dz = 1.0f / dz;
+
+    x = dx * dz;
+    y = dy * dz;
+}
+
 void Matrix4::mapRect(Rect& r) const {
     if (mSimpleMatrix) {
-        #define MUL_ADD_STORE(a, b, c) a = (a) * (b) + (c)
         MUL_ADD_STORE(r.left, data[kScaleX], data[kTranslateX]);
         MUL_ADD_STORE(r.right, data[kScaleX], data[kTranslateX]);
         MUL_ADD_STORE(r.top, data[kScaleY], data[kTranslateY]);

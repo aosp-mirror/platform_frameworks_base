@@ -104,10 +104,8 @@ public:
     void copyTo(float* v) const;
     void copyTo(SkMatrix& v) const;
 
-    /**
-     * Does not apply rotations!
-     */
     void mapRect(Rect& r) const;
+    void mapPoint(float& x, float& y) const;
 
     float getTranslateX();
     float getTranslateY();
