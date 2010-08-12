@@ -160,7 +160,9 @@ OpenGLRenderer::~OpenGLRenderer() {
     mTextureCache.clear();
     mLayerCache.clear();
     mGradientCache.clear();
+    mPathCache.clear();
     mPatchCache.clear();
+    mProgramCache.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -410,8 +412,14 @@ const Rect& OpenGLRenderer::getClipBounds() {
 }
 
 bool OpenGLRenderer::quickReject(float left, float top, float right, float bottom) {
-    Rect r(left, top, right, bottom);
-    mSnapshot->transform.mapRect(r);
+    SkRect sr;
+    sr.set(left, top, right, bottom);
+
+    SkMatrix m;
+    mSnapshot->transform.copyTo(m);
+    m.mapRect(&sr);
+
+    Rect r(sr.fLeft, sr.fTop, sr.fRight, sr.fBottom);
     return !mSnapshot->clipRect.intersects(r);
 }
 
