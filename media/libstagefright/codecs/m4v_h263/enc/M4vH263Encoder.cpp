@@ -306,14 +306,23 @@ status_t M4vH263Encoder::read(
 
     int64_t timeUs;
     CHECK(mInputBuffer->meta_data()->findInt64(kKeyTime, &timeUs));
-    if (mNextModTimeUs > timeUs) {
-        LOGV("mNextModTimeUs %lld > timeUs %lld", mNextModTimeUs, timeUs);
+
+    // When the timestamp of the current sample is the same as that
+    // of the previous sample, encoding of the current sample is
+    // bypassed, and the output length of the sample is set to 0
+    if (mNumInputFrames >= 1 &&
+        (mNextModTimeUs > timeUs || mPrevTimestampUs == timeUs)) {
+        // Frame arrives too late
         outputBuffer->set_range(0, 0);
         *out = outputBuffer;
         mInputBuffer->release();
         mInputBuffer = NULL;
         return OK;
     }
+
+    // Don't accept out-of-order samples
+    CHECK(mPrevTimestampUs < timeUs);
+    mPrevTimestampUs = timeUs;
 
     // Color convert to OMX_COLOR_FormatYUV420Planar if necessary
     outputBuffer->meta_data()->setInt64(kKeyTime, timeUs);
