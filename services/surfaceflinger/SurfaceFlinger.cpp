@@ -755,10 +755,9 @@ void SurfaceFlinger::handleWorkList()
         const Vector< sp<LayerBase> >& currentLayers(mVisibleLayersSortedByZ);
         const size_t count = currentLayers.size();
         hwc.createWorkList(count);
-        HWComposer::iterator cur(hwc.begin());
-        HWComposer::iterator last(hwc.end());
-        for (size_t i=0 ; (i<count) && (cur!=last) ; ++i, ++cur) {
-            currentLayers[i]->setGeometry(cur);
+        hwc_layer_t* const cur(hwc.getLayers());
+        for (size_t i=0 ; cur && i<count ; i++) {
+            currentLayers[i]->setGeometry(&cur[i]);
         }
     }
 }
@@ -829,47 +828,41 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
 
     status_t err = NO_ERROR;
     const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);
-    const size_t count = layers.size();
+    size_t count = layers.size();
 
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     HWComposer& hwc(hw.getHwComposer());
-    HWComposer::iterator cur(hwc.begin());
-    HWComposer::iterator last(hwc.end());
+    hwc_layer_t* const cur(hwc.getLayers());
 
-    // update the per-frame h/w composer data for each layer
-    if (cur != last) {
-        for (size_t i=0 ; i<count && cur!=last ; ++i, ++cur) {
-            layers[i]->setPerFrameData(cur);
+    LOGE_IF(cur && hwc.getNumLayers() != count,
+            "HAL number of layers (%d) doesn't match surfaceflinger (%d)",
+            hwc.getNumLayers(), count);
+
+    // just to be extra-safe, use the smallest count
+    count = count < hwc.getNumLayers() ? count : hwc.getNumLayers();
+
+    /*
+     *  update the per-frame h/w composer data for each layer
+     *  and build the transparent region of the FB
+     */
+    Region transparent;
+    if (cur) {
+        for (size_t i=0 ; i<count ; i++) {
+            const sp<LayerBase>& layer(layers[i]);
+            layer->setPerFrameData(&cur[i]);
+            if (cur[i].hints & HWC_HINT_CLEAR_FB) {
+                if (!(layer->needsBlending())) {
+                    transparent.orSelf(layer->visibleRegionScreen);
+                }
+            }
         }
         err = hwc.prepare();
         LOGE_IF(err, "HWComposer::prepare failed (%s)", strerror(-err));
     }
 
-    // and then, render the layers targeted at the framebuffer
-    Region transparent(hw.bounds());
-    for (size_t i=0 ; i<count ; ++i) {
-
-        // see if we need to skip this layer
-        if (!err && cur != last) {
-            if (!((cur->compositionType == HWC_FRAMEBUFFER) ||
-                    (cur->flags & HWC_SKIP_LAYER))) {
-                ++cur;
-                continue;
-            }
-            ++cur;
-        }
-
-        // draw the layer into the framebuffer
-        const sp<LayerBase>& layer(layers[i]);
-        transparent.subtractSelf(layer->visibleRegionScreen);
-        const Region clip(dirty.intersect(layer->visibleRegionScreen));
-        if (!clip.isEmpty()) {
-            layer->draw(clip);
-        }
-    }
-
-    // finally clear everything we didn't draw as a result of calling
-    // prepare (this leaves the FB transparent).
+    /*
+     *  clear the area of the FB that need to be transparent
+     */
     transparent.andSelf(dirty);
     if (!transparent.isEmpty()) {
         glClearColor(0,0,0,0);
@@ -881,6 +874,25 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
             const GLint sy = height - (r.top + r.height());
             glScissor(r.left, sy, r.width(), r.height());
             glClear(GL_COLOR_BUFFER_BIT);
+        }
+    }
+
+
+    /*
+     * and then, render the layers targeted at the framebuffer
+     */
+    for (size_t i=0 ; i<count ; i++) {
+        if (cur) {
+            if (!(cur[i].compositionType == HWC_FRAMEBUFFER) ||
+                    cur[i].flags & HWC_SKIP_LAYER) {
+                // skip layers handled by the HAL
+                continue;
+            }
+        }
+        const sp<LayerBase>& layer(layers[i]);
+        const Region clip(dirty.intersect(layer->visibleRegionScreen));
+        if (!clip.isEmpty()) {
+            layer->draw(clip);
         }
     }
 }
