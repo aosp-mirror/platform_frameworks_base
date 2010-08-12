@@ -33,7 +33,7 @@ import android.view.View.OnTouchListener;
 
 /**
  * A ListPopupWindow anchors itself to a host view and displays a
- * list of choices. When one is selected, the popup is dismissed.
+ * list of choices.
  * 
  * <p>ListPopupWindow contains a number of tricky behaviors surrounding
  * positioning, scrolling parents to fit the dropdown, interacting
