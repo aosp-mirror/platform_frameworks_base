@@ -300,7 +300,6 @@ public abstract class HardwareRenderer {
              */
             if (!mEgl.eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
                 throw new RuntimeException("eglMakeCurrent failed");
-                
             }
 
             return mEglContext.getGL();
@@ -373,6 +372,15 @@ public abstract class HardwareRenderer {
                 attachInfo.mDrawingTime = SystemClock.uptimeMillis();
                 attachInfo.mIgnoreDirtyState = true;
                 view.mPrivateFlags |= View.DRAWN;
+
+                // TODO: Don't check the current context when we have one per UI thread
+                // TODO: Use a threadlocal flag to know whether the surface has changed
+                if (mEgl.eglGetCurrentContext() != mEglContext ||
+                        mEgl.eglGetCurrentSurface(EGL10.EGL_DRAW) != mEglSurface) {
+                    if (!mEgl.eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
+                        throw new RuntimeException("eglMakeCurrent failed");
+                    }
+                }
 
                 onPreDraw();
 
