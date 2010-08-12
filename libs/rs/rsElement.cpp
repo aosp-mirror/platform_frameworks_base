@@ -266,7 +266,7 @@ void Element::incRefs(const void *ptr) const
         if (mComponent.isReference()) {
             ObjectBase *const*obp = static_cast<ObjectBase *const*>(ptr);
             ObjectBase *ob = obp[0];
-            ob->incSysRef();
+            if (ob) ob->incSysRef();
         }
         return;
     }
@@ -285,7 +285,7 @@ void Element::decRefs(const void *ptr) const
         if (mComponent.isReference()) {
             ObjectBase *const*obp = static_cast<ObjectBase *const*>(ptr);
             ObjectBase *ob = obp[0];
-            ob->decSysRef();
+            if (ob) ob->decSysRef();
         }
         return;
     }
