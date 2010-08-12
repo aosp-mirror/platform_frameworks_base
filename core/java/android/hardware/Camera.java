@@ -1166,6 +1166,14 @@ public class Camera {
          */
         public static final String FOCUS_MODE_EDOF = "edof";
 
+        /**
+         * Continuous auto focus mode. The camera continuously tries to focus.
+         * This is ideal for shooting video or shooting photo of moving object.
+         * Auto focus starts when the parameter is set. Applications should not
+         * call {@link #autoFocus(AutoFocusCallback)} in this mode.
+         */
+        public static final String FOCUS_MODE_CONTINUOUS = "continuous";
+
         // Indices for focus distance array.
         /**
          * The array index of near focus distance for use with
@@ -1184,16 +1192,6 @@ public class Camera {
          * {@link #getFocusDistances(float[])}.
          */
         public static final int FOCUS_DISTANCE_FAR_INDEX = 2;
-
-        /**
-         * Continuous focus mode. The camera continuously tries to focus. This
-         * is ideal for shooting video or shooting photo of moving object.
-         * Continuous focus starts when {@link #autoFocus(AutoFocusCallback)} is
-         * called. Continuous focus stops when {@link #cancelAutoFocus()} is
-         * called. AutoFocusCallback will be only called once as soon as the
-         * picture is in focus.
-         */
-        public static final String FOCUS_MODE_CONTINUOUS = "continuous";
 
         /**
          * The camera determines the exposure by giving more weight to the
@@ -1942,15 +1940,15 @@ public class Camera {
         /**
          * Gets the current focus mode setting.
          *
-         * @return current focus mode. If the camera does not support
-         *         auto-focus, this should return {@link #FOCUS_MODE_FIXED}. If
-         *         the focus mode is not FOCUS_MODE_FIXED or {@link
-         *         #FOCUS_MODE_INFINITY}, applications should call {@link
-         *         #autoFocus(AutoFocusCallback)} to start the focus.
+         * @return current focus mode. This method will always return a non-null
+         *         value. Applications should call {@link
+         *         #autoFocus(AutoFocusCallback)} to start the focus if focus
+         *         mode is FOCUS_MODE_AUTO or FOCUS_MODE_MACRO.
          * @see #FOCUS_MODE_AUTO
          * @see #FOCUS_MODE_INFINITY
          * @see #FOCUS_MODE_MACRO
          * @see #FOCUS_MODE_FIXED
+         * @see #FOCUS_MODE_CONTINUOUS
          */
         public String getFocusMode() {
             return get(KEY_FOCUS_MODE);
@@ -2152,8 +2150,14 @@ public class Camera {
          * #autoFocus(AutoFocusCallback)}, {@link #cancelAutoFocus}, or {@link
          * #startPreview()}. Applications can call {@link #getParameters()}
          * and this method anytime to get the latest focus distances. If the
-         * focus mode is FOCUS_MODE_CONTINUOUS and autofocus has started, focus
-         * distances may change from time to time.
+         * focus mode is FOCUS_MODE_CONTINUOUS, focus distances may change from
+         * time to time.
+         *
+         * This method is intended to estimate the distance between the camera
+         * and the subject. After autofocus, the subject distance may be within
+         * near and far focus distance. However, the precision depends on the
+         * camera hardware, autofocus algorithm, the focus area, and the scene.
+         * The error can be large and it should be only used as a reference.
          *
          * Far focus distance >= optimal focus distance >= near focus distance.
          * If the focus distance is infinity, the value will be
