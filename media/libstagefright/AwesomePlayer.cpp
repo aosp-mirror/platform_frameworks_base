@@ -1216,7 +1216,7 @@ status_t AwesomePlayer::finishSetDataSource_l() {
             MediaExtractor::Create(dataSource, MEDIA_MIMETYPE_CONTAINER_MPEG2TS);
 
         return setDataSource_l(extractor);
-    } else if (!strcmp("rtsp://gtalk", mUri.string())) {
+    } else if (!strncmp("rtsp://gtalk/", mUri.string(), 13)) {
         if (mLooper == NULL) {
             mLooper = new ALooper;
             mLooper->start(
@@ -1224,6 +1224,22 @@ status_t AwesomePlayer::finishSetDataSource_l() {
                     false /* canCallJava */,
                     PRIORITY_HIGHEST);
         }
+
+        const char *startOfCodecString = &mUri.string()[13];
+        const char *startOfSlash1 = strchr(startOfCodecString, '/');
+        if (startOfSlash1 == NULL) {
+            return BAD_VALUE;
+        }
+        const char *startOfWidthString = &startOfSlash1[1];
+        const char *startOfSlash2 = strchr(startOfWidthString, '/');
+        if (startOfSlash2 == NULL) {
+            return BAD_VALUE;
+        }
+        const char *startOfHeightString = &startOfSlash2[1];
+
+        String8 codecString(startOfCodecString, startOfSlash1 - startOfCodecString);
+        String8 widthString(startOfWidthString, startOfSlash2 - startOfWidthString);
+        String8 heightString(startOfHeightString);
 
 #if 0
         mRTPPusher = new UDPPusher("/data/misc/rtpout.bin", 5434);
@@ -1251,8 +1267,8 @@ status_t AwesomePlayer::finishSetDataSource_l() {
             "a=rtpmap:97 AMR/8000/1\r\n"
             "a=fmtp:97 octet-align\r\n";
 #elif 1
-        // My GTalk H.264 SDP
-        static const char *raw =
+        String8 sdp;
+        sdp.appendFormat(
             "v=0\r\n"
             "o=- 64 233572944 IN IP4 127.0.0.0\r\n"
             "s=QuickTime\r\n"
@@ -1262,24 +1278,16 @@ status_t AwesomePlayer::finishSetDataSource_l() {
             "m=video 5434 RTP/AVP 97\r\n"
             "c=IN IP4 127.0.0.1\r\n"
             "b=AS:30\r\n"
-            "a=rtpmap:97 H264/90000\r\n"
-            "a=cliprect:0,0,200,320\r\n"
-            "a=framesize:97 320-200\r\n";
-#else
-        // GTalk H263 SDP
-        static const char *raw =
-            "v=0\r\n"
-            "o=- 64 233572944 IN IP4 127.0.0.0\r\n"
-            "s=QuickTime\r\n"
-            "t=0 0\r\n"
-            "a=range:npt=0-315\r\n"
-            "a=isma-compliance:2,2.0,2\r\n"
-            "m=video 5434 RTP/AVP 98\r\n"
-            "c=IN IP4 127.0.0.1\r\n"
-            "b=AS:30\r\n"
-            "a=rtpmap:98 H263-1998/90000\r\n"
-            "a=cliprect:0,0,200,320\r\n"
-            "a=framesize:98 320-200\r\n";
+            "a=rtpmap:97 %s/90000\r\n"
+            "a=cliprect:0,0,%s,%s\r\n"
+            "a=framesize:97 %s-%s\r\n",
+
+            codecString.string(),
+            heightString.string(), widthString.string(),
+            widthString.string(), heightString.string()
+            );
+        const char *raw = sdp.string();
+
 #endif
 
         sp<ASessionDescription> desc = new ASessionDescription;
