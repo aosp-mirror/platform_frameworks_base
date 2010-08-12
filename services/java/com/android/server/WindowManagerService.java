@@ -62,10 +62,14 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.Typeface;
+import android.graphics.Paint.FontMetricsInt;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
@@ -92,6 +96,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseIntArray;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -115,6 +120,7 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
+import android.view.Surface.OutOfResourcesException;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
@@ -370,6 +376,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private DimAnimator mDimAnimator = null;
     Surface mBlurSurface;
     boolean mBlurShown;
+    Watermark mWatermark;
 
     int mTransactionSequence = 0;
 
@@ -8515,12 +8522,6 @@ public class WindowManagerService extends IWindowManager.Stub
             updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES);
         }
         
-        if (mFxSession == null) {
-            mFxSession = new SurfaceSession();
-        }
-
-        if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION");
-
         // Initialize state of exiting tokens.
         for (i=mExitingTokens.size()-1; i>=0; i--) {
             mExitingTokens.get(i).hasVisible = false;
@@ -8537,8 +8538,24 @@ public class WindowManagerService extends IWindowManager.Stub
         float buttonBrightness = -1;
         boolean focusDisplayed = false;
         boolean animating = false;
+        boolean createWatermark = false;
+
+        if (mFxSession == null) {
+            mFxSession = new SurfaceSession();
+            createWatermark = true;
+        }
+
+        if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION");
 
         Surface.openTransaction();
+
+        if (createWatermark) {
+            createWatermark();
+        }
+        if (mWatermark != null) {
+            mWatermark.positionSurface(dw, dh);
+        }
+
         try {
             boolean wallpaperForceHidingChanged = false;
             int repeats = 0;
@@ -10053,6 +10070,93 @@ public class WindowManagerService extends IWindowManager.Stub
                 2000);
 
         mScreenFrozenLock.release();
+    }
+
+    static int getPropertyInt(String name, int defUnits, int defDps, DisplayMetrics dm) {
+        String str = SystemProperties.get(name);
+        try {
+            int val = Integer.parseInt(str);
+            return val;
+        } catch (Exception e) {
+        }
+        if (defUnits == TypedValue.COMPLEX_UNIT_PX) {
+            return defDps;
+        }
+        int val = (int)TypedValue.applyDimension(defUnits, defDps, dm);
+        return val;
+    }
+
+    class Watermark {
+        Surface mSurface;
+        int mWidth;
+        int mHeight;
+        int mXPercent;
+        int mYPercent;
+
+        Watermark(SurfaceSession session, String text) {
+            final DisplayMetrics dm = new DisplayMetrics();
+            mDisplay.getMetrics(dm);
+
+            int fontSize = getPropertyInt("ro.watermark.height",
+                    TypedValue.COMPLEX_UNIT_DIP, 48, dm);
+            mXPercent = getPropertyInt("ro.watermark.x",
+                    TypedValue.COMPLEX_UNIT_PX, 50, dm);
+            mYPercent = getPropertyInt("ro.watermark.y",
+                    TypedValue.COMPLEX_UNIT_PX, 99, dm);
+            int color = getPropertyInt("ro.watermark.color",
+                    TypedValue.COMPLEX_UNIT_PX, 0x80ffffff, dm);
+            int shadowRadius = getPropertyInt("ro.watermark.shadow.radius",
+                    TypedValue.COMPLEX_UNIT_PX, 5, dm);
+            int shadowDx = getPropertyInt("ro.watermark.shadow.dx",
+                    TypedValue.COMPLEX_UNIT_PX, 0, dm);
+            int shadowDy = getPropertyInt("ro.watermark.shadow.dy",
+                    TypedValue.COMPLEX_UNIT_PX, 0, dm);
+            int shadowColor = getPropertyInt("ro.watermark.shadow.color",
+                    TypedValue.COMPLEX_UNIT_PX, 0xff000000, dm);
+
+            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            paint.setTextSize(fontSize);
+            paint.setColor(color);
+            paint.setShadowLayer(shadowRadius, shadowDx, shadowDy, shadowColor);
+            paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
+
+            FontMetricsInt fm = paint.getFontMetricsInt();
+            mHeight = fm.descent - fm.ascent + 20;
+            mWidth = (int)paint.measureText(text) + 20;
+
+            try {
+                mSurface = new Surface(session, 0,
+                        "WatermarkSurface",
+                        -1, mWidth, mHeight, PixelFormat.TRANSLUCENT, 0);
+                mSurface.setLayer(TYPE_LAYER_MULTIPLIER*100);
+                Rect dirty = new Rect(0, 0, mWidth, mHeight);
+                Canvas c = mSurface.lockCanvas(dirty);
+                c.drawText(text, 10, -fm.ascent+10, paint);
+                mSurface.unlockCanvasAndPost(c);
+                mSurface.show();
+            } catch (OutOfResourcesException e) {
+            }
+        }
+
+        void positionSurface(int dw, int dh) {
+            int availW = dw - mWidth;
+            int availH = dh - mHeight;
+            mSurface.setPosition((availW*mXPercent)/100,
+                    (availH*mYPercent)/100);
+        }
+    }
+
+    void createWatermark() {
+        if (mWatermark != null) {
+            return;
+        }
+
+        String text = SystemProperties.get("ro.watermark.text");
+        if (text == null || text.length() <= 0) {
+            return;
+        }
+
+        mWatermark = new Watermark(mFxSession, text);
     }
 
     @Override
