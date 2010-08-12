@@ -29,12 +29,13 @@
 
 #define kFooterTagSize 8  /* last two 32-bit integers */
 
-#define kFooterMinSize 21 /* 32-bit signature version
-                           * 32-bit package version
-                           * 32-bit package name size
-                           * 1-character package name
-                           * 32-bit footer size
-                           * 32-bit footer marker
+#define kFooterMinSize 25 /* 32-bit signature version (4 bytes)
+                           * 32-bit package version (4 bytes)
+                           * 32-bit flags (4 bytes)
+                           * 32-bit package name size (4-bytes)
+                           * >=1-character package name (1 byte)
+                           * 32-bit footer size (4 bytes)
+                           * 32-bit footer marker (4 bytes)
                            */
 
 #define kMaxBufSize    32768 /* Maximum file read buffer */
@@ -45,8 +46,9 @@
 
 /* offsets in version 1 of the header */
 #define kPackageVersionOffset 4
-#define kPackageNameLenOffset 8
-#define kPackageNameOffset    12
+#define kFlagsOffset          8
+#define kPackageNameLenOffset 12
+#define kPackageNameOffset    16
 
 /*
  * TEMP_FAILURE_RETRY is defined by some, but not all, versions of
@@ -78,7 +80,10 @@ typedef off64_t my_off64_t;
 namespace android {
 
 ObbFile::ObbFile() :
-        mVersion(-1) {
+        mPackageName(""),
+        mVersion(-1),
+        mFlags(0)
+{
 }
 
 ObbFile::~ObbFile() {
@@ -199,6 +204,7 @@ bool ObbFile::parseObbFile(int fd)
     }
 
     mVersion = (int32_t) get4LE((unsigned char*)scanBuf + kPackageVersionOffset);
+    mFlags = (int32_t) get4LE((unsigned char*)scanBuf + kFlagsOffset);
 
     uint32_t packageNameLen = get4LE((unsigned char*)scanBuf + kPackageNameLenOffset);
     if (packageNameLen <= 0
@@ -268,6 +274,12 @@ bool ObbFile::writeTo(int fd)
         return false;
     }
 
+    put4LE(intBuf, mFlags);
+    if (write(fd, &intBuf, sizeof(uint32_t)) != (ssize_t)sizeof(uint32_t)) {
+        LOGW("couldn't write package version");
+        return false;
+    }
+
     size_t packageNameLen = mPackageName.size();
     put4LE(intBuf, packageNameLen);
     if (write(fd, &intBuf, sizeof(uint32_t)) != (ssize_t)sizeof(uint32_t)) {
@@ -280,7 +292,7 @@ bool ObbFile::writeTo(int fd)
         return false;
     }
 
-    put4LE(intBuf, 3*sizeof(uint32_t) + packageNameLen);
+    put4LE(intBuf, kPackageNameOffset + packageNameLen);
     if (write(fd, &intBuf, sizeof(uint32_t)) != (ssize_t)sizeof(uint32_t)) {
         LOGW("couldn't write footer size: %s", strerror(errno));
         return false;
