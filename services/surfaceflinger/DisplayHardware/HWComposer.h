@@ -49,16 +49,14 @@ public:
     status_t commit() const;
 
 
-    typedef hwc_layer_t const * const_iterator;
-    typedef hwc_layer_t* iterator;
-
-    iterator begin();
-    iterator end();
+    size_t getNumLayers() const;
+    hwc_layer_t* getLayers() const;
 
 private:
     hw_module_t const*      mModule;
     hwc_composer_device_t*  mHwc;
     hwc_layer_list_t*       mList;
+    size_t                  mCapacity;
     hwc_display_t           mDpy;
     hwc_surface_t           mSur;
 };
