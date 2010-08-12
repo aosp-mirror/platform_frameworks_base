@@ -60,7 +60,8 @@ private:
     int64_t mStartTimeUs;
     int16_t mMaxAmplitude;
     int64_t mPrevSampleTimeUs;
-    int64_t mNumLostFrames;
+    int64_t mTotalLostFrames;
+    int64_t mPrevLostBytes;
 
     MediaBufferGroup *mGroup;
 
