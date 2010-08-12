@@ -391,8 +391,6 @@ status_t AVCEncoder::read(
         if (err != OK) {
             LOGE("Failed to read input video frame: %d", err);
             outputBuffer->release();
-            mInputBuffer->release();
-            mInputBuffer = NULL;
             return err;
         }
 
