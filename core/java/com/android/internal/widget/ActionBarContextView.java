@@ -163,6 +163,27 @@ public class ActionBarContextView extends ViewGroup {
         mMenuView = null;
     }
 
+    public boolean showOverflowMenu() {
+        if (mMenuView != null) {
+            return mMenuView.showOverflowMenu();
+        }
+        return false;
+    }
+
+    public boolean hideOverflowMenu() {
+        if (mMenuView != null) {
+            return mMenuView.hideOverflowMenu();
+        }
+        return false;
+    }
+
+    public boolean isOverflowMenuShowing() {
+        if (mMenuView != null) {
+            return mMenuView.isOverflowMenuShowing();
+        }
+        return false;
+    }
+
     @Override
     protected LayoutParams generateDefaultLayoutParams() {
         // Used by custom views if they don't supply layout params. Everything else
