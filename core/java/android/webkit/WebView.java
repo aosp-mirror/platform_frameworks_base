@@ -1817,9 +1817,12 @@ public class WebView extends AbsoluteLayout
     private void clearTextEntry(boolean disableFocusController) {
         if (inEditingMode()) {
             mWebTextView.remove();
-            if (disableFocusController) {
-                setFocusControllerInactive();
-            }
+        } else {
+            // The keyboard may be open with the WebView as the served view
+            hideSoftKeyboard();
+        }
+        if (disableFocusController) {
+            setFocusControllerInactive();
         }
     }
 
