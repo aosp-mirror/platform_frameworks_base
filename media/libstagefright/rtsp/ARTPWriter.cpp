@@ -43,7 +43,7 @@ ARTPWriter::ARTPWriter(int fd)
 #if 1
     mRTPAddr.sin_addr.s_addr = INADDR_ANY;
 #else
-    mRTPAddr.sin_addr.s_addr = inet_addr("172.19.19.74");
+    mRTPAddr.sin_addr.s_addr = inet_addr("172.19.18.246");
 #endif
 
     mRTPAddr.sin_port = htons(5634);
