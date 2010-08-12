@@ -23,6 +23,7 @@
 #include <camera/ICamera.h>
 #include <media/IMediaRecorderClient.h>
 #include <media/IMediaRecorder.h>
+#include <unistd.h>
 
 namespace android {
 
@@ -373,6 +374,7 @@ status_t BnMediaRecorder::onTransact(
             int64_t offset = data.readInt64();
             int64_t length = data.readInt64();
             reply->writeInt32(setOutputFile(fd, offset, length));
+            ::close(fd);
             return NO_ERROR;
         } break;
         case SET_VIDEO_SIZE: {
