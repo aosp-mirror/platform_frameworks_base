@@ -18,6 +18,7 @@ package android.app;
 
 import android.graphics.drawable.Drawable;
 import android.view.View;
+import android.view.Window;
 import android.widget.SpinnerAdapter;
 
 /**
@@ -381,6 +382,34 @@ public abstract class ActionBar {
      * @param tab Tab to select
      */
     public abstract void selectTab(Tab tab);
+
+    /**
+     * Retrieve the current height of the ActionBar.
+     *
+     * @return The ActionBar's height
+     */
+    public abstract int getHeight();
+
+    /**
+     * Show the ActionBar if it is not currently showing.
+     * If the window hosting the ActionBar does not have the feature
+     * {@link Window#FEATURE_ACTION_BAR_OVERLAY} it will resize application
+     * content to fit the new space available.
+     */
+    public abstract void show();
+
+    /**
+     * Hide the ActionBar if it is not currently showing.
+     * If the window hosting the ActionBar does not have the feature
+     * {@link Window#FEATURE_ACTION_BAR_OVERLAY} it will resize application
+     * content to fit the new space available.
+     */
+    public abstract void hide();
+
+    /**
+     * @return <code>true</code> if the ActionBar is showing, <code>false</code> otherwise.
+     */
+    public abstract boolean isShowing();
 
     /**
      * Callback interface for ActionBar navigation events. 

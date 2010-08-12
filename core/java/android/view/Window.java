@@ -64,14 +64,24 @@ public abstract class Window {
      */
     public static final int FEATURE_ACTION_BAR = 8;
     /**
+     * Flag for requesting an Action Bar that overlays window content.
+     * Normally an Action Bar will sit in the space above window content, but if this
+     * feature is requested along with {@link #FEATURE_ACTION_BAR} it will be layered over
+     * the window content itself. This is useful if you would like your app to have more control
+     * over how the Action Bar is displayed, such as letting application content scroll beneath
+     * an Action Bar with a transparent background or otherwise displaying a transparent/translucent
+     * Action Bar over application content.
+     */
+    public static final int FEATURE_ACTION_BAR_OVERLAY = 9;
+    /**
      * Flag for specifying the behavior of action modes when an Action Bar is not present.
      * If overlay is enabled, the action mode UI will be allowed to cover existing window content.
      */
-    public static final int FEATURE_ACTION_MODE_OVERLAY = 9;
+    public static final int FEATURE_ACTION_MODE_OVERLAY = 10;
     /**
      * Flag for requesting this window to be hardware accelerated, if possible. 
      */
-    public static final int FEATURE_HARDWARE_ACCELERATED = 10;
+    public static final int FEATURE_HARDWARE_ACCELERATED = 11;
     /** Flag for setting the progress bar's visibility to VISIBLE */
     public static final int PROGRESS_VISIBILITY_ON = -1;
     /** Flag for setting the progress bar's visibility to GONE */

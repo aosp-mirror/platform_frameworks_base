@@ -397,6 +397,27 @@ public class ActionBarImpl extends ActionBar {
         trans.commit();
     }
 
+    @Override
+    public int getHeight() {
+        return mActionView.getHeight();
+    }
+
+    @Override
+    public void show() {
+        // TODO animate!
+        mAnimatorView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void hide() {
+        // TODO animate!
+        mAnimatorView.setVisibility(View.GONE);
+    }
+
+    public boolean isShowing() {
+        return mAnimatorView.getVisibility() == View.VISIBLE;
+    }
+
     /**
      * @hide 
      */

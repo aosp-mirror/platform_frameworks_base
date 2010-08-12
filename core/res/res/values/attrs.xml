@@ -248,6 +248,11 @@
              in place of the usual title bar. -->
         <attr name="windowActionBar" format="boolean" />
 
+        <!-- Flag indicating whether this window's Action Bar should overlay
+             application content. Does nothing if the window would not
+             have an Action Bar. -->
+        <attr name="windowActionBarOverlay" format="boolean" />
+
         <!-- Reference to a style for the Action Bar -->
         <attr name="windowActionBarStyle" format="reference" />
 
@@ -999,6 +1004,7 @@
         <attr name="windowActionBar" />
         <attr name="windowActionBarStyle" />
         <attr name="windowActionModeOverlay" />
+        <attr name="windowActionBarOverlay" />
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->
@@ -3987,6 +3993,10 @@
         <attr name="background" />
         <!-- Specifies a layout for custom navigation. Overrides navigationMode. -->
         <attr name="customNavigationLayout" format="reference" />
+        <!-- Specifies a fixed height. -->
+        <attr name="height" />
+        <!-- Specifies padding around all sides. -->
+        <attr name="padding" />
     </declare-styleable>
 
 </resources>
