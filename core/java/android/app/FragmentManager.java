@@ -17,6 +17,7 @@
 package android.app;
 
 import android.animation.Animatable;
+import android.animation.AnimatableInflater;
 import android.animation.PropertyAnimator;
 import android.animation.Sequencer;
 import android.content.res.TypedArray;
@@ -31,7 +32,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 
 import java.util.ArrayList;
 
@@ -257,7 +257,7 @@ final class FragmentManagerImpl implements FragmentManager {
         }
         
         if (fragment.mNextAnim != 0) {
-            Animatable anim = AnimationUtils.loadAnimator(mActivity, fragment.mNextAnim);
+            Animatable anim = AnimatableInflater.loadAnimatable(mActivity, fragment.mNextAnim);
             if (anim != null) {
                 return anim;
             }
@@ -288,7 +288,7 @@ final class FragmentManagerImpl implements FragmentManager {
             return null;
         }
         
-        return AnimationUtils.loadAnimator(mActivity, anim);
+        return AnimatableInflater.loadAnimatable(mActivity, anim);
     }
     
     void moveToState(Fragment f, int newState, int transit, int transitionStyle) {

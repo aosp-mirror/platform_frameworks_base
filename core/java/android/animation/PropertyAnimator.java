@@ -16,9 +16,6 @@
 
 package android.animation;
 
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.util.AttributeSet;
 import android.util.Log;
 
 import java.lang.reflect.Method;
@@ -81,25 +78,6 @@ public final class PropertyAnimator<T> extends Animator<T> {
     }
 
     /**
-     * Creates a new animation whose parameters come from the specified context and
-     * attributes set.
-     *
-     * @param context the application environment
-     * @param attrs the set of attributes holding the animation parameters
-     */
-    public PropertyAnimator(Context context, AttributeSet attrs) {
-        super(context, attrs);
-
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.PropertyAnimator);
-
-        setPropertyName(a.getString(
-                com.android.internal.R.styleable.PropertyAnimator_propertyName));
-
-
-        a.recycle();
-    }
-    /**
      * Determine the setter or getter function using the JavaBeans convention of setFoo or
      * getFoo for a property named 'foo'. This function figures out what the name of the
      * function should be and uses reflection to find the Method with that name on the
@@ -127,6 +105,14 @@ public final class PropertyAnimator<T> extends Animator<T> {
                     "Couldn't find setter/getter for property " + mPropertyName + ": " + e);
         }
         return returnVal;
+    }
+
+    /**
+     * Creates a new PropertyAnimator object. This default constructor is primarily for
+     * use internally; the other constructors which take parameters are more generally
+     * useful.
+     */
+    public PropertyAnimator() {
     }
 
     /**
