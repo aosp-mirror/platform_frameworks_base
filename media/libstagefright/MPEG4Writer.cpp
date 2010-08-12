@@ -1956,11 +1956,11 @@ void MPEG4Writer::Track::writeTrackHeader(
                   mOwner->writeInt16(0x18);        // depth
                   mOwner->writeInt16(-1);          // predefined
 
-                  CHECK(mCodecSpecificData);
-                  CHECK(mCodecSpecificDataSize > 0);
                   CHECK(23 + mCodecSpecificDataSize < 128);
 
                   if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_MPEG4, mime)) {
+                      CHECK(mCodecSpecificData);
+                      CHECK(mCodecSpecificDataSize > 0);
                       mOwner->beginBox("esds");
 
                         mOwner->writeInt32(0);           // version=0, flags=0
