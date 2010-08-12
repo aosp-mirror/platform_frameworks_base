@@ -1719,7 +1719,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             if (LOCAL_LOGV) Log.v(
                 TAG, "Dispatching key "
                 + msg.obj + " to " + mView);
-            deliverKeyEvent((KeyEvent)msg.obj, true);
+            deliverKeyEvent((KeyEvent)msg.obj, msg.arg1 != 0);
             break;
         case DISPATCH_POINTER: {
             MotionEvent event = (MotionEvent) msg.obj;
@@ -1860,9 +1860,14 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     }
     
     private void finishKeyEvent(KeyEvent event) {
+        if (LOCAL_LOGV) Log.v(TAG, "Telling window manager key is finished");
+
         if (mFinishedCallback != null) {
             mFinishedCallback.run();
             mFinishedCallback = null;
+        } else {
+            Slog.w(TAG, "Attempted to tell the input queue that the current key event "
+                    + "is finished but there is no key event actually in progress.");
         }
     }
     
@@ -2321,8 +2326,6 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         boolean handled = mView == null || mView.dispatchKeyEventPreIme(event);
         if (handled) {
             if (sendDone) {
-                if (LOCAL_LOGV) Log.v(
-                    TAG, "Telling window manager key is finished");
                 finishKeyEvent(event);
             }
             return;
@@ -2353,8 +2356,6 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             if (!handled) {
                 deliverKeyEventToViewHierarchy(event, sendDone);
             } else if (sendDone) {
-                if (LOCAL_LOGV) Log.v(
-                        TAG, "Telling window manager key is finished");
                 finishKeyEvent(event);
             } else {
                 Log.w(TAG, "handleFinishedEvent(seq=" + seq
@@ -2428,8 +2429,6 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
 
         } finally {
             if (sendDone) {
-                if (LOCAL_LOGV) Log.v(
-                    TAG, "Telling window manager key is finished");
                 finishKeyEvent(event);
             }
             // Let the exception fall through -- the looper will catch
@@ -2613,9 +2612,14 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     
     private final InputHandler mInputHandler = new InputHandler() {
         public void handleKey(KeyEvent event, Runnable finishedCallback) {
+            if (mFinishedCallback != null) {
+                Slog.w(TAG, "Received a new key event from the input queue but there is "
+                        + "already an unfinished key event in progress.");
+            }
+
             mFinishedCallback = finishedCallback;
 
-            dispatchKey(event);
+            dispatchKey(event, true);
         }
 
         public void handleMotion(MotionEvent event, Runnable finishedCallback) {
@@ -2626,9 +2630,13 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     };
 
     public void dispatchKey(KeyEvent event) {
-        if (event.getAction() == KeyEvent.ACTION_DOWN) {
-            //noinspection ConstantConditions
-            if (false && event.getKeyCode() == KeyEvent.KEYCODE_CAMERA) {
+        dispatchKey(event, false);
+    }
+
+    private void dispatchKey(KeyEvent event, boolean sendDone) {
+        //noinspection ConstantConditions
+        if (false && event.getAction() == KeyEvent.ACTION_DOWN) {
+            if (event.getKeyCode() == KeyEvent.KEYCODE_CAMERA) {
                 if (DBG) Log.d("keydisp", "===================================================");
                 if (DBG) Log.d("keydisp", "Focused view Hierarchy is:");
 
@@ -2640,6 +2648,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
 
         Message msg = obtainMessage(DISPATCH_KEY);
         msg.obj = event;
+        msg.arg1 = sendDone ? 1 : 0;
 
         if (LOCAL_LOGV) Log.v(
             TAG, "sending key " + event + " to " + mView);
