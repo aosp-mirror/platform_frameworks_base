@@ -32,6 +32,20 @@ class Matrix4 {
 public:
     float data[16];
 
+    enum Entry {
+        kScaleX = 0,
+        kSkewY = 1,
+        kPerspective0 = 3,
+        kSkewX = 4,
+        kScaleY = 5,
+        kPerspective1 = 7,
+        kScaleZ = 10,
+        kTranslateX = 12,
+        kTranslateY = 13,
+        kTranslateZ = 14,
+        kPerspective2 = 15
+    };
+
     Matrix4() {
         loadIdentity();
     }
@@ -101,6 +115,8 @@ public:
     void dump() const;
 
 private:
+    bool mSimpleMatrix;
+
     inline float get(int i, int j) const {
         return data[i * 4 + j];
     }
