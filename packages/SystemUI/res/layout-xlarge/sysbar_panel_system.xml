@@ -2,7 +2,7 @@
 <!--
 /* apps/common/assets/default/default/skins/StatusBar.xml
 **
-** Copyright 2006, The Android Open Source Project
+** Copyright 2010, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License"); 
 ** you may not use this file except in compliance with the License. 
@@ -18,35 +18,118 @@
 */
 -->
 
-<!--    android:background="@drawable/status_bar_closed_default_background" -->
-<FrameLayout
+<com.android.systemui.statusbar.tablet.SystemPanel
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="300dip"
-    android:layout_width="400dip"
-    android:paddingLeft="8dip"
-    android:paddingRight="8dip"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
     android:background="#FF000000"
+    android:orientation="vertical"
     >
-        
-    <RelativeLayout 
-        android:id="@+id/content"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:animationCache="false"
-        android:background="@drawable/status_bar_background"
-        android:clickable="true"
-        android:focusable="true"
-        android:descendantFocusability="afterDescendants"
-        >
 
-        <TextView
-            android:id="@+id/systemPanelDummy"
+    <TextView android:id="@+id/settings_button"
+        style="?android:attr/textAppearance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left|center_vertical"
+        android:layout_marginTop="2dip"
+        android:layout_marginBottom="1dip"
+        android:layout_marginRight="10dip"
+        android:padding="8dip"
+        android:textSize="20sp"
+        android:text="@string/system_panel_settings_button"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1sp"
+        android:background="@android:drawable/divider_horizontal_dark"
+        />
+
+    <LinearLayout
+        android:padding="8dip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        >
+        <ImageButton android:id="@+id/brightness"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:textColor="#FFCCCCCC"
-            android:textSize="18sp"
+            android:src="@drawable/system_panel_brightness_default"
+            android:background="@drawable/button_frame"
+            />
+        <ImageButton android:id="@+id/sound"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dip"
+            android:src="@drawable/system_panel_sound_default"
+            android:background="@drawable/button_frame"
+            />
+        <ImageButton android:id="@+id/orientation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dip"
+            android:src="@drawable/system_panel_orientation_default"
+            android:background="@drawable/button_frame"
+            />
+        <ImageButton android:id="@+id/airplane"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dip"
+            android:src="@drawable/system_panel_airplane_default"
+            android:background="@drawable/button_frame"
+            />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:padding="8dip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <ImageView android:id="@+id/battery_meter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:src="@drawable/dots_empty"
+            />
+
+        <TextView android:id="@+id/battery_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/battery_meter"
+            />
+
+        <com.android.systemui.statusbar.Clock
+            style="@*android:style/TextAppearance.StatusBar.Icon"
+            android:id="@+id/clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:padding="2dip"
+            android:layout_centerHorizontal="true"
+            />
+
+        <TextView android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/clock"
+            />
+
+        <ImageView android:id="@+id/signal_meter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/dots_full"
+            />
+
+        <TextView android:id="@+id/signal_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/signal_meter"
             />
 
     </RelativeLayout>
-</FrameLayout>
+
+</com.android.systemui.statusbar.tablet.SystemPanel>

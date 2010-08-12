@@ -51,4 +51,7 @@
          power usage activity to find out what drained the battery. -->
     <string name="battery_low_why">Battery use</string>
 
+    <!-- Name of the button that links to the Settings app. [MAXCHARS=NONE] -->
+    <string name="system_panel_settings_button">Settings</string>
+
 </resources>
