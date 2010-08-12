@@ -35,6 +35,100 @@ import android.view.animation.AnimationUtils;
 
 import java.util.ArrayList;
 
+/**
+ * Interface for interacting with {@link Fragment} objects inside of an
+ * {@link Activity}
+ */
+public interface FragmentManager {
+    /**
+     * Start a series of edit operations on the Fragments associated with
+     * this FragmentManager.
+     */
+    public FragmentTransaction openTransaction();
+
+    /**
+     * Finds a fragment that was identified by the given id either when inflated
+     * from XML or as the container ID when added in a transaction.  This first
+     * searches through fragments that are currently added to the manager's
+     * activity; if no such fragment is found, then all fragments currently
+     * on the back stack associated with this ID are searched.
+     * @return The fragment if found or null otherwise.
+     */
+    public Fragment findFragmentById(int id);
+
+    /**
+     * Finds a fragment that was identified by the given tag either when inflated
+     * from XML or as supplied when added in a transaction.  This first
+     * searches through fragments that are currently added to the manager's
+     * activity; if no such fragment is found, then all fragments currently
+     * on the back stack are searched.
+     * @return The fragment if found or null otherwise.
+     */
+    public Fragment findFragmentByTag(String tag);
+
+    /**
+     * Flag for {@link #popBackStack(String, int)}
+     * and {@link #popBackStack(int, int)}: If set, and the name or ID of
+     * a back stack entry has been supplied, then all matching entries will
+     * be consumed until one that doesn't match is found or the bottom of
+     * the stack is reached.  Otherwise, all entries up to but not including that entry
+     * will be removed.
+     */
+    public static final int POP_BACK_STACK_INCLUSIVE = 1<<0;
+
+    /**
+     * Pop the top state off the back stack.  Returns true if there was one
+     * to pop, else false.
+     */
+    public boolean popBackStack();
+
+    /**
+     * Pop the last fragment transition from the manager's fragment
+     * back stack.  If there is nothing to pop, false is returned.
+     * @param name If non-null, this is the name of a previous back state
+     * to look for; if found, all states up to that state will be popped.  The
+     * {@link #POP_BACK_STACK_INCLUSIVE} flag can be used to control whether
+     * the named state itself is popped. If null, only the top state is popped.
+     * @param flags Either 0 or {@link #POP_BACK_STACK_INCLUSIVE}.
+     */
+    public boolean popBackStack(String name, int flags);
+
+    /**
+     * Pop all back stack states up to the one with the given identifier.
+     * @param id Identifier of the stated to be popped. If no identifier exists,
+     * false is returned.
+     * The identifier is the number returned by
+     * {@link FragmentTransaction#commit() FragmentTransaction.commit()}.  The
+     * {@link #POP_BACK_STACK_INCLUSIVE} flag can be used to control whether
+     * the named state itself is popped.
+     * @param flags Either 0 or {@link #POP_BACK_STACK_INCLUSIVE}.
+     */
+    public boolean popBackStack(int id, int flags);
+
+    /**
+     * Put a reference to a fragment in a Bundle.  This Bundle can be
+     * persisted as saved state, and when later restoring
+     * {@link #getFragment(Bundle, String)} will return the current
+     * instance of the same fragment.
+     *
+     * @param bundle The bundle in which to put the fragment reference.
+     * @param key The name of the entry in the bundle.
+     * @param fragment The Fragment whose reference is to be stored.
+     */
+    public void putFragment(Bundle bundle, String key, Fragment fragment);
+
+    /**
+     * Retrieve the current Fragment instance for a reference previously
+     * placed with {@link #putFragment(Bundle, String, Fragment)}.
+     *
+     * @param bundle The bundle from which to retrieve the fragment reference.
+     * @param key The name of the entry in the bundle.
+     * @return Returns the current Fragment instance that is associated with
+     * the given reference.
+     */
+    public Fragment getFragment(Bundle bundle, String key);
+}
+
 final class FragmentManagerState implements Parcelable {
     FragmentState[] mActive;
     int[] mAdded;
@@ -75,7 +169,7 @@ final class FragmentManagerState implements Parcelable {
  * @hide
  * Container for fragments associated with an activity.
  */
-public class FragmentManager {
+class FragmentManagerImpl implements FragmentManager {
     static final boolean DEBUG = true;
     static final String TAG = "FragmentManager";
     
@@ -108,6 +202,47 @@ public class FragmentManager {
         }
     };
     
+    public FragmentTransaction openTransaction() {
+        return new BackStackEntry(this);
+    }
+
+    public boolean popBackStack() {
+        return popBackStackState(mActivity.mHandler, null, -1, 0);
+    }
+
+    public boolean popBackStack(String name, int flags) {
+        return popBackStackState(mActivity.mHandler, name, -1, flags);
+    }
+
+    public boolean popBackStack(int id, int flags) {
+        if (id < 0) {
+            throw new IllegalArgumentException("Bad id: " + id);
+        }
+        return popBackStackState(mActivity.mHandler, null, id, flags);
+    }
+
+    public void putFragment(Bundle bundle, String key, Fragment fragment) {
+        if (fragment.mIndex < 0) {
+            throw new IllegalStateException("Fragment " + fragment
+                    + " is not currently in the FragmentManager");
+        }
+        bundle.putInt(key, fragment.mIndex);
+    }
+
+    public Fragment getFragment(Bundle bundle, String key) {
+        int index = bundle.getInt(key);
+        if (index >= mActive.size()) {
+            throw new IllegalStateException("Fragement no longer exists for key "
+                    + key + ": index " + index);
+        }
+        Fragment f = mActive.get(index);
+        if (f == null) {
+            throw new IllegalStateException("Fragement no longer exists for key "
+                    + key + ": index " + index);
+        }
+        return f;
+    }
+
     Animatable loadAnimatable(Fragment fragment, int transit, boolean enter,
             int transitionStyle) {
         Animatable animObj = fragment.onCreateAnimatable(transit, enter,
@@ -387,6 +522,7 @@ public class FragmentManager {
             return;
         }
         
+        if (DEBUG) Log.v(TAG, "Freeing fragment index " + f.mIndex);
         mActive.set(f.mIndex, null);
         if (mAvailIndices == null) {
             mAvailIndices = new ArrayList<Integer>();
@@ -636,17 +772,6 @@ public class FragmentManager {
         mBackStack.add(state);
     }
     
-    public boolean popBackStackState(Handler handler, String name, int flags) {
-        return popBackStackState(handler, name, -1, flags);
-    }
-
-    public boolean popBackStackState(Handler handler, int id, int flags) {
-        if (id < 0) {
-            return false;
-        }
-        return popBackStackState(handler, null, id, flags);
-    }
-
     boolean popBackStackState(Handler handler, String name, int id, int flags) {
         if (mBackStack == null) {
             return false;
@@ -787,10 +912,13 @@ public class FragmentManager {
                     }
                 }
                 
+                if (DEBUG) Log.v(TAG, "Saved state of " + f + ": "
+                        + fs.mSavedFragmentState);
             }
         }
         
         if (!haveFragments) {
+            if (DEBUG) Log.v(TAG, "saveAllState: no fragments!");
             return null;
         }
         
@@ -803,6 +931,8 @@ public class FragmentManager {
             added = new int[N];
             for (int i=0; i<N; i++) {
                 added[i] = mAdded.get(i).mIndex;
+                if (DEBUG) Log.v(TAG, "saveAllState: adding fragment #" + i
+                        + ": " + mAdded.get(i));
             }
         }
         
@@ -813,6 +943,8 @@ public class FragmentManager {
                 backStack = new BackStackState[N];
                 for (int i=0; i<N; i++) {
                     backStack[i] = new BackStackState(this, mBackStack.get(i));
+                    if (DEBUG) Log.v(TAG, "saveAllState: adding back stack #" + i
+                            + ": " + mBackStack.get(i));
                 }
             }
         }
@@ -836,6 +968,7 @@ public class FragmentManager {
         if (nonConfig != null) {
             for (int i=0; i<nonConfig.size(); i++) {
                 Fragment f = nonConfig.get(i);
+                if (DEBUG) Log.v(TAG, "restoreAllState: re-attaching retained " + f);
                 FragmentState fs = fms.mActive[f.mIndex];
                 fs.mInstance = f;
                 f.mSavedViewState = null;
@@ -857,12 +990,16 @@ public class FragmentManager {
         for (int i=0; i<fms.mActive.length; i++) {
             FragmentState fs = fms.mActive[i];
             if (fs != null) {
-                mActive.add(fs.instantiate(mActivity));
+                Fragment f = fs.instantiate(mActivity);
+                if (DEBUG) Log.v(TAG, "restoreAllState: adding #" + i + ": " + f);
+                mActive.add(f);
             } else {
+                if (DEBUG) Log.v(TAG, "restoreAllState: adding #" + i + ": (null)");
                 mActive.add(null);
                 if (mAvailIndices == null) {
                     mAvailIndices = new ArrayList<Integer>();
                 }
+                if (DEBUG) Log.v(TAG, "restoreAllState: adding avail #" + i);
                 mAvailIndices.add(i);
             }
         }
@@ -878,6 +1015,7 @@ public class FragmentManager {
                 }
                 f.mAdded = true;
                 f.mImmediateActivity = mActivity;
+                if (DEBUG) Log.v(TAG, "restoreAllState: making added #" + i + ": " + f);
                 mAdded.add(f);
             }
         } else {
@@ -889,6 +1027,8 @@ public class FragmentManager {
             mBackStack = new ArrayList<BackStackEntry>(fms.mBackStack.length);
             for (int i=0; i<fms.mBackStack.length; i++) {
                 BackStackEntry bse = fms.mBackStack[i].instantiate(this);
+                if (DEBUG) Log.v(TAG, "restoreAllState: adding bse #" + i
+                        + " (index " + bse.mIndex + "): " + bse);
                 mBackStack.add(bse);
                 if (bse.mIndex >= 0) {
                     setBackStackIndex(bse.mIndex, bse);

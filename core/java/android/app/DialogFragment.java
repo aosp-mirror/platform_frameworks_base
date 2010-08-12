@@ -84,11 +84,12 @@ public class DialogFragment extends Fragment
     }
 
     /**
-     * Constructor to customize the basic appearance and behavior of the
+     * Call to customize the basic appearance and behavior of the
      * fragment's dialog.  This can be used for some common dialog behaviors,
      * taking care of selecting flags, theme, and other options for you.  The
      * same effect can be achieve by manually setting Dialog and Window
-     * attributes yourself.
+     * attributes yourself.  Calling this after the fragment's Dialog is
+     * created will have no effect.
      *
      * @param style Selects a standard style: may be {@link #STYLE_NORMAL},
      * {@link #STYLE_NO_TITLE}, {@link #STYLE_NO_FRAME}, or
@@ -96,7 +97,7 @@ public class DialogFragment extends Fragment
      * @param theme Optional custom theme.  If 0, an appropriate theme (based
      * on the style) will be selected for you.
      */
-    public DialogFragment(int style, int theme) {
+    public void setStyle(int style, int theme) {
         mStyle = style;
         if (mStyle == STYLE_NO_FRAME || mStyle == STYLE_NO_INPUT) {
             mTheme = android.R.style.Theme_Dialog_NoFrame;

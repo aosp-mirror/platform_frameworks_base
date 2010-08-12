@@ -29,7 +29,7 @@ final class BackStackState implements Parcelable {
     final String mName;
     final int mIndex;
     
-    public BackStackState(FragmentManager fm, BackStackEntry bse) {
+    public BackStackState(FragmentManagerImpl fm, BackStackEntry bse) {
         int numRemoved = 0;
         BackStackEntry.Op op = bse.mHead;
         while (op != null) {
@@ -38,6 +38,10 @@ final class BackStackState implements Parcelable {
         }
         mOps = new int[bse.mNumOp*5 + numRemoved];
         
+        if (!bse.mAddToBackStack) {
+            throw new IllegalStateException("Not on back stack");
+        }
+
         op = bse.mHead;
         int pos = 0;
         while (op != null) {
@@ -70,14 +74,15 @@ final class BackStackState implements Parcelable {
         mIndex = in.readInt();
     }
     
-    public BackStackEntry instantiate(FragmentManager fm) {
+    public BackStackEntry instantiate(FragmentManagerImpl fm) {
         BackStackEntry bse = new BackStackEntry(fm);
         int pos = 0;
         while (pos < mOps.length) {
             BackStackEntry.Op op = new BackStackEntry.Op();
             op.cmd = mOps[pos++];
+            if (FragmentManagerImpl.DEBUG) Log.v(FragmentManagerImpl.TAG,
+                    "BSE " + bse + " set base fragment #" + mOps[pos]);
             Fragment f = fm.mActive.get(mOps[pos++]);
-            f.mBackStackNesting++;
             op.fragment = f;
             op.enterAnim = mOps[pos++];
             op.exitAnim = mOps[pos++];
@@ -85,7 +90,10 @@ final class BackStackState implements Parcelable {
             if (N > 0) {
                 op.removed = new ArrayList<Fragment>(N);
                 for (int i=0; i<N; i++) {
-                    op.removed.add(fm.mActive.get(mOps[pos++]));
+                    if (FragmentManagerImpl.DEBUG) Log.v(FragmentManagerImpl.TAG,
+                            "BSE " + bse + " set remove fragment #" + mOps[pos]);
+                    Fragment r = fm.mActive.get(mOps[pos++]);
+                    op.removed.add(r);
                 }
             }
             bse.addOp(op);
@@ -94,6 +102,8 @@ final class BackStackState implements Parcelable {
         bse.mTransitionStyle = mTransitionStyle;
         bse.mName = mName;
         bse.mIndex = mIndex;
+        bse.mAddToBackStack = true;
+        bse.bumpBackStackNesting(1);
         return bse;
     }
     
@@ -127,7 +137,7 @@ final class BackStackState implements Parcelable {
 final class BackStackEntry implements FragmentTransaction, Runnable {
     static final String TAG = "BackStackEntry";
     
-    final FragmentManager mManager;
+    final FragmentManagerImpl mManager;
     
     static final int OP_NULL = 0;
     static final int OP_ADD = 1;
@@ -158,7 +168,7 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
     boolean mCommitted;
     int mIndex;
     
-    public BackStackEntry(FragmentManager manager) {
+    public BackStackEntry(FragmentManagerImpl manager) {
         mManager = manager;
     }
     
@@ -295,9 +305,32 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
         return this;
     }
 
+    void bumpBackStackNesting(int amt) {
+        if (!mAddToBackStack) {
+            return;
+        }
+        if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Bump nesting in " + this
+                + " by " + amt);
+        Op op = mHead;
+        while (op != null) {
+            op.fragment.mBackStackNesting += amt;
+            if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Bump nesting of "
+                    + op.fragment + " to " + op.fragment.mBackStackNesting);
+            if (op.removed != null) {
+                for (int i=op.removed.size()-1; i>=0; i--) {
+                    Fragment r = op.removed.get(i);
+                    r.mBackStackNesting += amt;
+                    if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Bump nesting of "
+                            + r + " to " + r.mBackStackNesting);
+                }
+            }
+            op = op.next;
+        }
+    }
+
     public int commit() {
         if (mCommitted) throw new IllegalStateException("commit already called");
-        if (FragmentManager.DEBUG) Log.v(TAG, "Commit: " + this);
+        if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Commit: " + this);
         mCommitted = true;
         if (mAddToBackStack) {
             mIndex = mManager.allocBackStackIndex(this);
@@ -309,7 +342,7 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
     }
     
     public void run() {
-        if (FragmentManager.DEBUG) Log.v(TAG, "Run: " + this);
+        if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Run: " + this);
         
         if (mAddToBackStack) {
             if (mIndex < 0) {
@@ -317,14 +350,13 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
             }
         }
 
+        bumpBackStackNesting(1);
+
         Op op = mHead;
         while (op != null) {
             switch (op.cmd) {
                 case OP_ADD: {
                     Fragment f = op.fragment;
-                    if (mAddToBackStack) {
-                        f.mBackStackNesting++;
-                    }
                     f.mNextAnim = op.enterAnim;
                     mManager.addFragment(f, false);
                 } break;
@@ -333,48 +365,38 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
                     if (mManager.mAdded != null) {
                         for (int i=0; i<mManager.mAdded.size(); i++) {
                             Fragment old = mManager.mAdded.get(i);
-                            if (FragmentManager.DEBUG) Log.v(TAG,
+                            if (FragmentManagerImpl.DEBUG) Log.v(TAG,
                                     "OP_REPLACE: adding=" + f + " old=" + old);
                             if (old.mContainerId == f.mContainerId) {
                                 if (op.removed == null) {
                                     op.removed = new ArrayList<Fragment>();
                                 }
                                 op.removed.add(old);
-                                if (mAddToBackStack) {
-                                    old.mBackStackNesting++;
-                                }
                                 old.mNextAnim = op.exitAnim;
+                                if (mAddToBackStack) {
+                                    old.mBackStackNesting += 1;
+                                    if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Bump nesting of "
+                                            + old + " to " + old.mBackStackNesting);
+                                }
                                 mManager.removeFragment(old, mTransition, mTransitionStyle);
                             }
                         }
-                    }
-                    if (mAddToBackStack) {
-                        f.mBackStackNesting++;
                     }
                     f.mNextAnim = op.enterAnim;
                     mManager.addFragment(f, false);
                 } break;
                 case OP_REMOVE: {
                     Fragment f = op.fragment;
-                    if (mAddToBackStack) {
-                        f.mBackStackNesting++;
-                    }
                     f.mNextAnim = op.exitAnim;
                     mManager.removeFragment(f, mTransition, mTransitionStyle);
                 } break;
                 case OP_HIDE: {
                     Fragment f = op.fragment;
-                    if (mAddToBackStack) {
-                        f.mBackStackNesting++;
-                    }
                     f.mNextAnim = op.exitAnim;
                     mManager.hideFragment(f, mTransition, mTransitionStyle);
                 } break;
                 case OP_SHOW: {
                     Fragment f = op.fragment;
-                    if (mAddToBackStack) {
-                        f.mBackStackNesting++;
-                    }
                     f.mNextAnim = op.enterAnim;
                     mManager.showFragment(f, mTransition, mTransitionStyle);
                 } break;
@@ -399,36 +421,29 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
     }
     
     public void popFromBackStack() {
-        if (FragmentManager.DEBUG) Log.v(TAG, "popFromBackStack: " + this);
+        if (FragmentManagerImpl.DEBUG) Log.v(TAG, "popFromBackStack: " + this);
+
+        bumpBackStackNesting(-1);
         
         Op op = mTail;
         while (op != null) {
             switch (op.cmd) {
                 case OP_ADD: {
                     Fragment f = op.fragment;
-                    if (mAddToBackStack) {
-                        f.mBackStackNesting--;
-                    }
                     f.mImmediateActivity = null;
                     mManager.removeFragment(f,
-                            FragmentManager.reverseTransit(mTransition),
+                            FragmentManagerImpl.reverseTransit(mTransition),
                             mTransitionStyle);
                 } break;
                 case OP_REPLACE: {
                     Fragment f = op.fragment;
-                    if (mAddToBackStack) {
-                        f.mBackStackNesting--;
-                    }
                     f.mImmediateActivity = null;
                     mManager.removeFragment(f,
-                            FragmentManager.reverseTransit(mTransition),
+                            FragmentManagerImpl.reverseTransit(mTransition),
                             mTransitionStyle);
                     if (op.removed != null) {
                         for (int i=0; i<op.removed.size(); i++) {
                             Fragment old = op.removed.get(i);
-                            if (mAddToBackStack) {
-                                old.mBackStackNesting--;
-                            }
                             f.mImmediateActivity = mManager.mActivity;
                             mManager.addFragment(old, false);
                         }
@@ -436,27 +451,18 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
                 } break;
                 case OP_REMOVE: {
                     Fragment f = op.fragment;
-                    if (mAddToBackStack) {
-                        f.mBackStackNesting--;
-                    }
                     f.mImmediateActivity = mManager.mActivity;
                     mManager.addFragment(f, false);
                 } break;
                 case OP_HIDE: {
                     Fragment f = op.fragment;
-                    if (mAddToBackStack) {
-                        f.mBackStackNesting--;
-                    }
                     mManager.showFragment(f,
-                            FragmentManager.reverseTransit(mTransition), mTransitionStyle);
+                            FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle);
                 } break;
                 case OP_SHOW: {
                     Fragment f = op.fragment;
-                    if (mAddToBackStack) {
-                        f.mBackStackNesting--;
-                    }
                     mManager.hideFragment(f,
-                            FragmentManager.reverseTransit(mTransition), mTransitionStyle);
+                            FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle);
                 } break;
                 default: {
                     throw new IllegalArgumentException("Unknown cmd: " + op.cmd);
@@ -467,7 +473,7 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
         }
         
         mManager.moveToState(mManager.mCurState,
-                FragmentManager.reverseTransit(mTransition), mTransitionStyle, true);
+                FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle, true);
         if (mManager.mNeedMenuInvalidate && mManager.mActivity != null) {
             mManager.mActivity.invalidateOptionsMenu();
             mManager.mNeedMenuInvalidate = false;

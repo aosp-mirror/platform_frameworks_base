@@ -113,9 +113,28 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     private static final String PREFERENCES_TAG = "android:preferences";
 
-    private static final String EXTRA_PREFS_SHOW_FRAGMENT = ":android:show_fragment";
+    /**
+     * When starting this activity, the invoking Intent can contain this extra
+     * string to specify which fragment should be initially displayed.
+     */
+    public static final String EXTRA_SHOW_FRAGMENT = ":android:show_fragment";
 
-    private static final String EXTRA_PREFS_NO_HEADERS = ":android:no_headers";
+    /**
+     * When starting this activity and using {@link #EXTRA_SHOW_FRAGMENT},
+     * this extra can also be specify to supply a Bundle of arguments to pass
+     * to that fragment when it is instantiated during the initial creation
+     * of PreferenceActivity.
+     */
+    public static final String EXTRA_SHOW_FRAGMENT_ARGUMENTS = ":android:show_fragment_args";
+
+    /**
+     * When starting this activity, the invoking Intent can contain this extra
+     * boolean that the header list should not be displayed.  This is most often
+     * used in conjunction with {@link #EXTRA_SHOW_FRAGMENT} to launch
+     * the activity to display a specific fragment that the user has navigated
+     * to.
+     */
+    public static final String EXTRA_NO_HEADERS = ":android:no_headers";
 
     private static final String BACK_STACK_PREFS = ":android:prefs";
 
@@ -159,13 +178,17 @@ public abstract class PreferenceActivity extends ListActivity implements
     private static final int FIRST_REQUEST_CODE = 100;
 
     private static final int MSG_BIND_PREFERENCES = 0;
+    private static final int MSG_BUILD_HEADERS = 1;
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-
                 case MSG_BIND_PREFERENCES:
                     bindPreferences();
+                    break;
+                case MSG_BUILD_HEADERS:
+                    onBuildHeaders(mHeaders);
+                    mAdapter.notifyDataSetChanged();
                     break;
             }
         }
@@ -250,6 +273,12 @@ public abstract class PreferenceActivity extends ListActivity implements
          * @attr ref android.R.styleable#PreferenceHeader_fragment
          */
         String fragment;
+
+        /**
+         * Optional arguments to supply to the fragment when it is
+         * instantiated.
+         */
+        Bundle fragmentArguments;
     }
 
     @Override
@@ -261,7 +290,8 @@ public abstract class PreferenceActivity extends ListActivity implements
         mPrefsContainer = findViewById(com.android.internal.R.id.prefs);
         boolean hidingHeaders = onIsHidingHeaders();
         mSinglePane = hidingHeaders || !onIsMultiPane();
-        String initialFragment = getIntent().getStringExtra(EXTRA_PREFS_SHOW_FRAGMENT);
+        String initialFragment = getIntent().getStringExtra(EXTRA_SHOW_FRAGMENT);
+        Bundle initialArguments = getIntent().getBundleExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS);
 
         if (initialFragment != null && mSinglePane) {
             // If we are just showing a fragment, we want to run in
@@ -269,7 +299,7 @@ public abstract class PreferenceActivity extends ListActivity implements
             // the headers.
             getListView().setVisibility(View.GONE);
             mPrefsContainer.setVisibility(View.VISIBLE);
-            switchToHeader(initialFragment);
+            switchToHeader(initialFragment, initialArguments);
 
         } else {
             // We need to try to build the headers.
@@ -283,8 +313,12 @@ public abstract class PreferenceActivity extends ListActivity implements
                 setListAdapter(mAdapter);
                 if (!mSinglePane) {
                     mPrefsContainer.setVisibility(View.VISIBLE);
-                    switchToHeader(initialFragment != null
-                            ? initialFragment : onGetInitialFragment());
+                    if (initialFragment != null) {
+                        Header h = onGetInitialHeader();
+                        initialFragment = h.fragment;
+                        initialArguments = h.fragmentArguments;
+                    }
+                    switchToHeader(initialFragment, initialArguments);
                 }
 
             // If there are no headers, we are in the old "just show a screen
@@ -371,15 +405,18 @@ public abstract class PreferenceActivity extends ListActivity implements
      * when not in multi-pane mode.
      */
     public boolean onIsHidingHeaders() {
-        return getIntent().getBooleanExtra(EXTRA_PREFS_NO_HEADERS, false);
+        return getIntent().getBooleanExtra(EXTRA_NO_HEADERS, false);
     }
 
     /**
-     * Called to determine the initial fragment to be shown.  The default
-     * implementation simply returns the fragment of the first header.
+     * Called to determine the initial header to be shown.  The default
+     * implementation simply returns the fragment of the first header.  Note
+     * that the returned Header object does not actually need to exist in
+     * your header list -- whatever its fragment is will simply be used to
+     * show for the initial UI.
      */
-    public String onGetInitialFragment() {
-        return mHeaders.get(0).fragment;
+    public Header onGetInitialHeader() {
+        return mHeaders.get(0);
     }
 
     /**
@@ -396,6 +433,16 @@ public abstract class PreferenceActivity extends ListActivity implements
      * @param target The list in which to place the headers.
      */
     public void onBuildHeaders(List<Header> target) {
+    }
+
+    /**
+     * Call when you need to change the headers being displayed.  Will result
+     * in onBuildHeaders() later being called to retrieve the new list.
+     */
+    public void invalidateHeaders() {
+        if (!mHandler.hasMessages(MSG_BUILD_HEADERS)) {
+            mHandler.sendEmptyMessage(MSG_BUILD_HEADERS);
+        }
     }
 
     /**
@@ -552,9 +599,9 @@ public abstract class PreferenceActivity extends ListActivity implements
      */
     public void onHeaderClick(Header header, int position) {
         if (mSinglePane) {
-            startWithFragment(header.fragment);
+            startWithFragment(header.fragment, header.fragmentArguments);
         } else {
-            switchToHeader(header.fragment);
+            switchToHeader(header.fragment, header.fragmentArguments);
         }
     }
 
@@ -565,12 +612,14 @@ public abstract class PreferenceActivity extends ListActivity implements
      * and fill the entire activity.
      *
      * @param fragmentName The name of the fragment to display.
+     * @param args Optional arguments to supply to the fragment.
      */
-    public void startWithFragment(String fragmentName) {
+    public void startWithFragment(String fragmentName, Bundle args) {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.setClass(this, getClass());
-        intent.putExtra(EXTRA_PREFS_SHOW_FRAGMENT, fragmentName);
-        intent.putExtra(EXTRA_PREFS_NO_HEADERS, true);
+        intent.putExtra(EXTRA_SHOW_FRAGMENT, fragmentName);
+        intent.putExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS, args);
+        intent.putExtra(EXTRA_NO_HEADERS, true);
         startActivity(intent);
     }
 
@@ -579,29 +628,18 @@ public abstract class PreferenceActivity extends ListActivity implements
      * preference fragment.
      *
      * @param fragmentName The name of the fragment to display.
+     * @param args Optional arguments to supply to the fragment.
      */
-    public void switchToHeader(String fragmentName) {
+    public void switchToHeader(String fragmentName, Bundle args) {
         popBackStack(BACK_STACK_PREFS, POP_BACK_STACK_INCLUSIVE);
 
-        Fragment f;
-        try {
-            f = Fragment.instantiate(this, fragmentName);
-        } catch (Exception e) {
-            Log.w(TAG, "Failure instantiating fragment " + fragmentName, e);
-            return;
-        }
+        Fragment f = Fragment.instantiate(this, fragmentName, args);
         openFragmentTransaction().replace(com.android.internal.R.id.prefs, f).commit();
     }
 
     @Override
     public boolean onPreferenceStartFragment(PreferenceFragment caller, Preference pref) {
-        Fragment f;
-        try {
-            f = Fragment.instantiate(this, pref.getFragment());
-        } catch (Exception e) {
-            Log.w(TAG, "Failure instantiating fragment " + pref.getFragment(), e);
-            return false;
-        }
+        Fragment f = Fragment.instantiate(this, pref.getFragment());
         openFragmentTransaction().replace(com.android.internal.R.id.prefs, f)
                 .addToBackStack(BACK_STACK_PREFS).commit();
         return true;

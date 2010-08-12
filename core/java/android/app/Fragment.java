@@ -24,6 +24,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.AndroidRuntimeException;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -38,7 +39,6 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnCreateContextMenuListener;
 import android.widget.AdapterView;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
 final class FragmentState implements Parcelable {
@@ -51,6 +51,7 @@ final class FragmentState implements Parcelable {
     final int mContainerId;
     final String mTag;
     final boolean mRetainInstance;
+    final Bundle mArguments;
     
     Bundle mSavedFragmentState;
     
@@ -64,6 +65,7 @@ final class FragmentState implements Parcelable {
         mContainerId = frag.mContainerId;
         mTag = frag.mTag;
         mRetainInstance = frag.mRetainInstance;
+        mArguments = frag.mArguments;
     }
     
     public FragmentState(Parcel in) {
@@ -74,6 +76,7 @@ final class FragmentState implements Parcelable {
         mContainerId = in.readInt();
         mTag = in.readString();
         mRetainInstance = in.readInt() != 0;
+        mArguments = in.readBundle();
         mSavedFragmentState = in.readBundle();
     }
     
@@ -82,11 +85,7 @@ final class FragmentState implements Parcelable {
             return mInstance;
         }
         
-        try {
-            mInstance = Fragment.instantiate(activity, mClassName);
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to restore fragment " + mClassName, e);
-        }
+        mInstance = Fragment.instantiate(activity, mClassName, mArguments);
         
         if (mSavedFragmentState != null) {
             mSavedFragmentState.setClassLoader(activity.getClassLoader());
@@ -116,6 +115,7 @@ final class FragmentState implements Parcelable {
         dest.writeInt(mContainerId);
         dest.writeString(mTag);
         dest.writeInt(mRetainInstance ? 1 : 0);
+        dest.writeBundle(mArguments);
         dest.writeBundle(mSavedFragmentState);
     }
     
@@ -157,6 +157,9 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     // Internal unique name for this fragment;
     String mWho;
     
+    // Construction arguments;
+    Bundle mArguments;
+
     // True if the fragment is in the list of added fragments.
     boolean mAdded;
     
@@ -220,14 +223,38 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     boolean mCheckedForLoaderManager;
     
     /**
+     * Thrown by {@link Fragment#instantiate(Context, String, Bundle)} when
+     * there is an instantiation failure.
+     */
+    static public class InstantiationException extends AndroidRuntimeException {
+        public InstantiationException(String msg, Exception cause) {
+            super(msg, cause);
+        }
+    }
+
+    /**
      * Default constructor.  <strong>Every</string> fragment must have an
      * empty constructor, so it can be instantiated when restoring its
      * activity's state.  It is strongly recommended that subclasses do not
      * have other constructors with parameters, since these constructors
      * will not be called when the fragment is re-instantiated; instead,
+     * arguments can be supplied by the caller with {@link #setArguments}
+     * and later retrieved by the Fragment with {@link #getArguments}.
+     * 
+     * <p>The first place where application code should generally run is in
+     * {@link #onAttach(Activity)}, which is the point where the fragment is
+     * actually attached to its activity and thus capable of doing most
      * retrieve such parameters from the activity in {@link #onAttach(Activity)}.
      */
     public Fragment() {
+    }
+
+    /**
+     * Like {@link #instantiate(Context, String, Bundle)} but with a null
+     * argument Bundle.
+     */
+    public static Fragment instantiate(Context context, String fname) {
+        return instantiate(context, fname, null);
     }
 
     /**
@@ -237,29 +264,40 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      * @param context The calling context being used to instantiate the fragment.
      * This is currently just used to get its ClassLoader.
      * @param fname The class name of the fragment to instantiate.
+     * @param args Bundle of arguments to supply to the fragment, which it
+     * can retrieve with {@link #getArguments()}.  May be null.
      * @return Returns a new fragment instance.
-     * @throws NoSuchMethodException The fragment does not have an empty constructor.
-     * @throws ClassNotFoundException The fragment class does not exist.
-     * @throws IllegalArgumentException Bad arguments supplied to fragment class
-     * constructor (should not happen).
-     * @throws InstantiationException Caller does not have permission to instantiate
-     * the fragment (for example its constructor is not public).
-     * @throws IllegalAccessException Caller does not have permission to access
-     * the given fragment class.
-     * @throws InvocationTargetException Failure running the fragment's constructor.
+     * @throws InstantiationException If there is a failure in instantiating
+     * the given fragment class.  This is a runtime exception; it is not
+     * normally expected to happen.
      */
-    public static Fragment instantiate(Context context, String fname)
-            throws NoSuchMethodException, ClassNotFoundException,
-            IllegalArgumentException, InstantiationException,
-            IllegalAccessException, InvocationTargetException {
-        Class<?> clazz = sClassMap.get(fname);
-
-        if (clazz == null) {
-            // Class not found in the cache, see if it's real, and try to add it
-            clazz = context.getClassLoader().loadClass(fname);
-            sClassMap.put(fname, clazz);
+    public static Fragment instantiate(Context context, String fname, Bundle args) {
+        try {
+            Class<?> clazz = sClassMap.get(fname);
+            if (clazz == null) {
+                // Class not found in the cache, see if it's real, and try to add it
+                clazz = context.getClassLoader().loadClass(fname);
+                sClassMap.put(fname, clazz);
+            }
+            Fragment f = (Fragment)clazz.newInstance();
+            if (args != null) {
+                args.setClassLoader(f.getClass().getClassLoader());
+                f.mArguments = args;
+            }
+            return f;
+        } catch (ClassNotFoundException e) {
+            throw new InstantiationException("Unable to instantiate fragment " + fname
+                    + ": make sure class name exists, is public, and has an"
+                    + " empty constructor that is public", e);
+        } catch (java.lang.InstantiationException e) {
+            throw new InstantiationException("Unable to instantiate fragment " + fname
+                    + ": make sure class name exists, is public, and has an"
+                    + " empty constructor that is public", e);
+        } catch (IllegalAccessException e) {
+            throw new InstantiationException("Unable to instantiate fragment " + fname
+                    + ": make sure class name exists, is public, and has an"
+                    + " empty constructor that is public", e);
         }
-        return (Fragment)clazz.newInstance();
     }
     
     void restoreViewState() {
@@ -331,12 +369,42 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     }
     
     /**
+     * Supply the construction arguments for this fragment.  This can only
+     * be called before the fragment has been attached to its activity; that
+     * is, you should call it immediately after constructing the fragment.  The
+     * arguments supplied here will be retained across fragment destroy and
+     * creation.
+     */
+    final public void setArguments(Bundle args) {
+        if (mIndex >= 0) {
+            throw new IllegalStateException("Fragment already active");
+        }
+        mArguments = args;
+    }
+
+    /**
+     * Return the arguments supplied when the fragment was instantiated,
+     * if any.
+     */
+    final public Bundle getArguments() {
+        return mArguments;
+    }
+
+    /**
      * Return the Activity this fragment is currently associated with.
      */
     final public Activity getActivity() {
         return mActivity;
     }
     
+    /**
+     * Return the FragmentManager for interacting with fragments associated
+     * with this fragment's activity.
+     */
+    final public FragmentManager getFragmentManager() {
+        return mActivity.mFragments;
+    }
+
     /**
      * Return true if the fragment is currently added to its activity.
      */

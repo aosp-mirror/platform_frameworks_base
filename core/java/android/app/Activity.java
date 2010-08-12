@@ -667,7 +667,7 @@ public class Activity extends ContextThemeWrapper
     private CharSequence mTitle;
     private int mTitleColor = 0;
 
-    final FragmentManager mFragments = new FragmentManager();
+    final FragmentManagerImpl mFragments = new FragmentManagerImpl();
     
     SparseArray<LoaderManagerImpl> mAllLoaderManagers;
     LoaderManagerImpl mLoaderManager;
@@ -1580,11 +1580,19 @@ public class Activity extends ContextThemeWrapper
     }
     
     /**
+     * Return the FragmentManager for interacting with fragments associated
+     * with this activity.
+     */
+    public FragmentManager getFragmentManager() {
+        return mFragments;
+    }
+
+    /**
      * Start a series of edit operations on the Fragments associated with
      * this activity.
      */
     public FragmentTransaction openFragmentTransaction() {
-        return new BackStackEntry(mFragments);
+        return mFragments.openTransaction();
     }
     
     void invalidateFragmentIndex(int index) {
@@ -2072,7 +2080,7 @@ public class Activity extends ContextThemeWrapper
      * to pop, else false.
      */
     public boolean popBackStack() {
-        return popBackStack(null, 0);
+        return mFragments.popBackStack();
     }
 
     /**
@@ -2085,7 +2093,7 @@ public class Activity extends ContextThemeWrapper
      * @param flags Either 0 or {@link #POP_BACK_STACK_INCLUSIVE}.
      */
     public boolean popBackStack(String name, int flags) {
-        return mFragments.popBackStackState(mHandler, name, flags);
+        return mFragments.popBackStack(name, flags);
     }
 
     /**
@@ -2099,7 +2107,7 @@ public class Activity extends ContextThemeWrapper
      * @param flags Either 0 or {@link #POP_BACK_STACK_INCLUSIVE}.
      */
     public boolean popBackStack(int id, int flags) {
-        return mFragments.popBackStackState(mHandler, id, flags);
+        return mFragments.popBackStack(id, flags);
     }
     
     /**
@@ -3999,43 +4007,36 @@ public class Activity extends ContextThemeWrapper
                     + ": Must specify unique android:id for " + fname);
         }
         
-        try {
-            // If we restored from a previous state, we may already have
-            // instantiated this fragment from the state and should use
-            // that instance instead of making a new one.
-            Fragment fragment = mFragments.findFragmentById(id);
-            if (FragmentManager.DEBUG) Log.v(TAG, "onCreateView: id=0x"
-                    + Integer.toHexString(id) + " fname=" + fname
-                    + " existing=" + fragment);
-            if (fragment == null) {
-                fragment = Fragment.instantiate(this, fname);
-                fragment.mFromLayout = true;
-                fragment.mFragmentId = id;
-                fragment.mTag = tag;
-                fragment.mImmediateActivity = this;
-                mFragments.addFragment(fragment, true);
-            }
-            // If this fragment is newly instantiated (either right now, or
-            // from last saved state), then give it the attributes to
-            // initialize itself.
-            if (!fragment.mRetaining) {
-                fragment.onInflate(this, attrs, fragment.mSavedFragmentState);
-            }
-            if (fragment.mView == null) {
-                throw new IllegalStateException("Fragment " + fname
-                        + " did not create a view.");
-            }
-            fragment.mView.setId(id);
-            if (fragment.mView.getTag() == null) {
-                fragment.mView.setTag(tag);
-            }
-            return fragment.mView;
-        } catch (Exception e) {
-            InflateException ie = new InflateException(attrs.getPositionDescription()
-                    + ": Error inflating fragment " + fname);
-            ie.initCause(e);
-            throw ie;
+        // If we restored from a previous state, we may already have
+        // instantiated this fragment from the state and should use
+        // that instance instead of making a new one.
+        Fragment fragment = mFragments.findFragmentById(id);
+        if (FragmentManagerImpl.DEBUG) Log.v(TAG, "onCreateView: id=0x"
+                + Integer.toHexString(id) + " fname=" + fname
+                + " existing=" + fragment);
+        if (fragment == null) {
+            fragment = Fragment.instantiate(this, fname);
+            fragment.mFromLayout = true;
+            fragment.mFragmentId = id;
+            fragment.mTag = tag;
+            fragment.mImmediateActivity = this;
+            mFragments.addFragment(fragment, true);
         }
+        // If this fragment is newly instantiated (either right now, or
+        // from last saved state), then give it the attributes to
+        // initialize itself.
+        if (!fragment.mRetaining) {
+            fragment.onInflate(this, attrs, fragment.mSavedFragmentState);
+        }
+        if (fragment.mView == null) {
+            throw new IllegalStateException("Fragment " + fname
+                    + " did not create a view.");
+        }
+        fragment.mView.setId(id);
+        if (fragment.mView.getTag() == null) {
+            fragment.mView.setTag(tag);
+        }
+        return fragment.mView;
     }
 
     /**

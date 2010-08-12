@@ -27,6 +27,10 @@ public class AndroidException extends Exception {
         super(name);
     }
 
+    public AndroidException(String name, Throwable cause) {
+        super(name, cause);
+    }
+
     public AndroidException(Exception cause) {
         super(cause);
     }
