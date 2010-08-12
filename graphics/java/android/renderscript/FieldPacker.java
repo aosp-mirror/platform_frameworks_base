@@ -76,6 +76,7 @@ public class FieldPacker {
 
     public void addU8(short v) {
         if ((v < 0) || (v > 0xff)) {
+            android.util.Log.e("rs", "FieldPacker.addU8( " + v + " )");
             throw new IllegalArgumentException("Saving value out of range for type");
         }
         mData[mPos++] = (byte)v;
@@ -83,6 +84,7 @@ public class FieldPacker {
 
     public void addU16(int v) {
         if ((v < 0) || (v > 0xffff)) {
+            android.util.Log.e("rs", "FieldPacker.addU16( " + v + " )");
             throw new IllegalArgumentException("Saving value out of range for type");
         }
         align(2);
@@ -91,7 +93,8 @@ public class FieldPacker {
     }
 
     public void addU32(long v) {
-        if ((v < 0) || (v > 0xffffffff)) {
+        if ((v < 0) || (v > 0xffffffffL)) {
+            android.util.Log.e("rs", "FieldPacker.addU32( " + v + " )");
             throw new IllegalArgumentException("Saving value out of range for type");
         }
         align(4);
@@ -103,6 +106,7 @@ public class FieldPacker {
 
     public void addU64(long v) {
         if (v < 0) {
+            android.util.Log.e("rs", "FieldPacker.addU64( " + v + " )");
             throw new IllegalArgumentException("Saving value out of range for type");
         }
         align(8);

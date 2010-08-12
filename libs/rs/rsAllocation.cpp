@@ -34,6 +34,9 @@ Allocation::Allocation(Context *rsc, const Type *type) : ObjectBase(rsc)
     init(rsc, type);
 
     mPtr = malloc(mType->getSizeBytes());
+    if (mType->getElement()->getHasReferences()) {
+        memset(mPtr, 0, mType->getSizeBytes());
+    }
     if (!mPtr) {
         LOGE("Allocation::Allocation, alloc failure");
     }
