@@ -871,6 +871,8 @@
     <string name="tethered_notification_message" msgid="3067108323903048927">"Trykk for å konfigurere"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Tilbake"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Neste"</string>
+    <!-- no translation found for skip_button_label (1275362299471631819) -->
+    <skip />
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Høy mobildatabruk"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Berør for å lese mer om bruk av mobildata"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Grensen for mobildatabruk er overskredet"</string>

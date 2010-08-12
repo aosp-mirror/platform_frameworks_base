@@ -871,6 +871,8 @@
     <string name="tethered_notification_message" msgid="3067108323903048927">"Αγγίξτε για να γίνει διαμόρφωση"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Πίσω"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Επόμενο"</string>
+    <!-- no translation found for skip_button_label (1275362299471631819) -->
+    <skip />
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Υψηλή χρήση δεδομένων κινητής τηλεφωνίας"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Αγγίξτε για να μάθετε περισσότερα σχετικά με τη χρήση δεδομένων κινητής τηλεφωνίας"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Ξεπεράστηκε το όριο δεδομένων κινητής τηλεφωνίας"</string>

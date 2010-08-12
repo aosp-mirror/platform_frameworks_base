@@ -871,6 +871,8 @@
     <string name="tethered_notification_message" msgid="3067108323903048927">"触摸可进行配置"</string>
     <string name="back_button_label" msgid="2300470004503343439">"上一步"</string>
     <string name="next_button_label" msgid="1080555104677992408">"下一步"</string>
+    <!-- no translation found for skip_button_label (1275362299471631819) -->
+    <skip />
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"手机流量过多"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"轻触以了解有关手机流量详情"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"已超出手机数据上限"</string>
