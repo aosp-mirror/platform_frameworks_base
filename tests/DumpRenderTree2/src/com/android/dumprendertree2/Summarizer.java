@@ -16,12 +16,20 @@
 
 package com.android.dumprendertree2;
 
+import android.content.res.AssetManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.os.Build;
+import android.util.DisplayMetrics;
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A class that collects information about tests that ran and can create HTML
@@ -177,7 +185,9 @@ public class Summarizer {
     private FileFilter mFileFilter;
     private String mResultsRootDirPath;
 
-    private String mTitleString;
+    private String mTestsRelativePath;
+
+    private Date mDate;
 
     public Summarizer(FileFilter fileFilter, String resultsRootDirPath) {
         mFileFilter = fileFilter;
@@ -200,6 +210,10 @@ public class Summarizer {
         }
     }
 
+    public void setTestsRelativePath(String testsRelativePath) {
+        mTestsRelativePath = testsRelativePath;
+    }
+
     public void summarize() {
         createHtmlDetails();
         createTxtSummary();
@@ -210,13 +224,19 @@ public class Summarizer {
         mFailedNotIgnoredTests.clear();
         mIgnoredTests.clear();
         mPassedNotIgnoredTests.clear();
-        mTitleString = null;
+        mDate = new Date();
     }
 
     private void createTxtSummary() {
         StringBuilder txt = new StringBuilder();
 
-        txt.append(getTitleString() + "\n");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        txt.append(mTestsRelativePath + "\n");
+        txt.append("Date: " + dateFormat.format(mDate) + "\n");
+        txt.append("Build fingerprint: " + Build.FINGERPRINT + "\n");
+        txt.append("WebKit version: " + getWebKitVersionFromUserAgentString() + "\n");
+
+        txt.append("TOTAL:   " + getTotalTestCount() + "\n");
         if (mCrashedTestsCount > 0) {
             txt.append("CRASHED (total among all tests): " + mCrashedTestsCount + "\n");
             txt.append("-------------");
@@ -251,22 +271,34 @@ public class Summarizer {
                 html.toString().getBytes(), false);
     }
 
-    private String getTitleString() {
-        if (mTitleString == null) {
-            int total = mFailedNotIgnoredTests.size() +
-                    mPassedNotIgnoredTests.size() +
-                    mIgnoredTests.size();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-            mTitleString = " - total of " + total + " tests - " + dateFormat.format(new Date());
-        }
+    private int getTotalTestCount() {
+        return mFailedNotIgnoredTests.size() +
+                mPassedNotIgnoredTests.size() +
+                mIgnoredTests.size();
+    }
 
-        return mTitleString;
+    private String getWebKitVersionFromUserAgentString() {
+        Resources resources = new Resources(new AssetManager(), new DisplayMetrics(),
+                new Configuration());
+        String userAgent =
+                resources.getString(com.android.internal.R.string.web_user_agent);
+
+        Matcher matcher = Pattern.compile("AppleWebKit/([0-9]+?\\.[0-9])").matcher(userAgent);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return "unknown";
     }
 
     private void createTopSummaryTable(StringBuilder html) {
-        html.append("<h1>" + getTitleString() + "</h1>");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        html.append("<h1>" + mTestsRelativePath + "</h1>");
+        html.append("<h3>" + "Date: " + dateFormat.format(new Date()) + "</h3>");
+        html.append("<h3>" + "Build fingerprint: " + Build.FINGERPRINT + "</h3>");
+        html.append("<h3>" + "WebKit version: " + getWebKitVersionFromUserAgentString() + "</h3>");
 
         html.append("<table class=\"summary\">");
+        createSummaryTableRow(html, "TOTAL", getTotalTestCount());
         createSummaryTableRow(html, "CRASHED", mCrashedTestsCount);
         createSummaryTableRow(html, "FAILED", mFailedNotIgnoredTests.size());
         createSummaryTableRow(html, "IGNORED", mIgnoredTests.size());

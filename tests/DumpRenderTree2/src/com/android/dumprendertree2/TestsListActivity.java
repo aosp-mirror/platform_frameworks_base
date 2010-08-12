@@ -85,6 +85,7 @@ public class TestsListActivity extends Activity {
         Message doneMsg = Message.obtain(mHandler, MSG_TEST_LIST_PRELOADER_DONE);
 
         Intent serviceIntent = new Intent(this, ManagerService.class);
+        serviceIntent.putExtra("path", path);
         startService(serviceIntent);
 
         new TestsListPreloaderThread(path, doneMsg).start();
