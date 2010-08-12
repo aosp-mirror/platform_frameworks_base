@@ -871,6 +871,8 @@
     <string name="tethered_notification_message" msgid="3067108323903048927">"Нажмите для настройки"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Назад"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Далее"</string>
+    <!-- no translation found for skip_button_label (1275362299471631819) -->
+    <skip />
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Активная передача данных"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Нажмите, чтобы узнать больше о мобильной передаче данных"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Превышен лимит на мобильные данные"</string>

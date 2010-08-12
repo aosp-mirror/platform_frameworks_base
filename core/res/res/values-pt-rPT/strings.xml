@@ -871,6 +871,8 @@
     <string name="tethered_notification_message" msgid="3067108323903048927">"Tocar para configurar"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Anterior"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Seguinte"</string>
+    <!-- no translation found for skip_button_label (1275362299471631819) -->
+    <skip />
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Utilização elevada de dados móveis"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Toque para saber mais sobre a utilização de dados móveis"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Limite de dados móveis excedido"</string>
