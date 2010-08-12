@@ -376,7 +376,7 @@ status_t APacketSource::read(
 void APacketSource::queueAccessUnit(const sp<ABuffer> &buffer) {
     int32_t damaged;
     if (buffer->meta()->findInt32("damaged", &damaged) && damaged) {
-        LOG(INFO) << "discarding damaged AU";
+        LOG(VERBOSE) << "discarding damaged AU";
         return;
     }
 
