@@ -33,6 +33,7 @@ import android.util.Config;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.EventLog;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
