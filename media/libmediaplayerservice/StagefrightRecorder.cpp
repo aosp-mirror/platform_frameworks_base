@@ -55,11 +55,6 @@ StagefrightRecorder::StagefrightRecorder()
 StagefrightRecorder::~StagefrightRecorder() {
     LOGV("Destructor");
     stop();
-
-    if (mOutputFd >= 0) {
-        ::close(mOutputFd);
-        mOutputFd = -1;
-    }
 }
 
 status_t StagefrightRecorder::init() {
@@ -1082,6 +1077,11 @@ status_t StagefrightRecorder::stop() {
         mCamera.clear();
         IPCThreadState::self()->restoreCallingIdentity(token);
         mFlags = 0;
+    }
+
+    if (mOutputFd >= 0) {
+        ::close(mOutputFd);
+        mOutputFd = -1;
     }
 
     return OK;
