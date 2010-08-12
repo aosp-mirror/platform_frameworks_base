@@ -2,7 +2,7 @@
 
 #define MAX_RADIUS 25
 
-typedef struct {
+typedef struct FilterStruct_s {
     rs_allocation ain;
 
     float *gaussian; //[MAX_RADIUS * 2 + 1];
