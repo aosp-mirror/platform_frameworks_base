@@ -64,6 +64,7 @@ private:
     int32_t  mVideoBitRate;
     int32_t  mVideoColorFormat;
     int64_t  mNumInputFrames;
+    int64_t  mPrevTimestampUs;
     status_t mInitCheck;
     bool     mStarted;
     bool     mSpsPpsHeaderReceived;

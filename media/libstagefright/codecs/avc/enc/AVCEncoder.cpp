@@ -407,6 +407,22 @@ status_t AVCEncoder::read(
         CHECK(mInputBuffer->meta_data()->findInt64(kKeyTime, &timeUs));
         outputBuffer->meta_data()->setInt64(kKeyTime, timeUs);
 
+        // When the timestamp of the current sample is the same as
+        // that of the previous sample, the encoding of the sample
+        // is bypassed, and the output length is set to 0.
+        if (mNumInputFrames >= 1 && mPrevTimestampUs == timeUs) {
+            // Frame arrives too late
+            mInputBuffer->release();
+            mInputBuffer = NULL;
+            outputBuffer->set_range(0, 0);
+            *out = outputBuffer;
+            return OK;
+        }
+
+        // Don't accept out-of-order samples
+        CHECK(mPrevTimestampUs < timeUs);
+        mPrevTimestampUs = timeUs;
+
         AVCFrameIO videoInput;
         memset(&videoInput, 0, sizeof(videoInput));
         videoInput.height = ((mVideoHeight  + 15) >> 4) << 4;
