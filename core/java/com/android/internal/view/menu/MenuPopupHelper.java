@@ -92,7 +92,9 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
     }
 
     public void dismiss() {
-        mPopup.dismiss();
+        if (isShowing()) {
+            mPopup.dismiss();
+        }
         mPopup = null;
     }
 
