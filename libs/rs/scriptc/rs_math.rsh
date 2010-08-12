@@ -112,8 +112,19 @@ extern void __attribute__((overloadable))
 extern void __attribute__((overloadable))
     rsSendToClientBlocking(int cmdID, const void *data, uint len);
 
+
 // Script to Script
+enum rs_for_each_strategy {
+    RS_FOR_EACH_STRATEGY_SERIAL,
+    RS_FOR_EACH_STRATEGY_DONT_CARE,
+    RS_FOR_EACH_STRATEGY_DST_LINEAR,
+    RS_FOR_EACH_STRATEGY_TILE_SMALL,
+    RS_FOR_EACH_STRATEGY_TILE_MEDIUM,
+    RS_FOR_EACH_STRATEGY_TILE_LARGE
+};
+
 typedef struct rs_script_call {
+    enum rs_for_each_strategy strategy;
     uint32_t xStart;
     uint32_t xEnd;
     uint32_t yStart;
@@ -122,7 +133,6 @@ typedef struct rs_script_call {
     uint32_t zEnd;
     uint32_t arrayStart;
     uint32_t arrayEnd;
-
 } rs_script_call_t;
 
 extern void __attribute__((overloadable))

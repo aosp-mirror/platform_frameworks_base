@@ -56,6 +56,8 @@ public:
 
         char * mScriptText;
         uint32_t mScriptTextLength;
+
+        bool mIsThreadable;
     };
     Enviroment_t mEnviroment;
 
