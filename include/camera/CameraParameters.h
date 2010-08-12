@@ -171,10 +171,9 @@ public:
     // Supported flash modes.
     // Example value: "auto,on,off". Read only.
     static const char KEY_SUPPORTED_FLASH_MODES[];
-    // Current focus mode. If the camera does not support auto-focus, the value
-    // should be FOCUS_MODE_FIXED. If the focus mode is not FOCUS_MODE_FIXED or
-    // or FOCUS_MODE_INFINITY, applications should call
-    // CameraHardwareInterface.autoFocus to start the focus.
+    // Current focus mode. This will not be empty. Applications should call
+    // CameraHardwareInterface.autoFocus to start the focus if focus mode is
+    // FOCUS_MODE_AUTO or FOCUS_MODE_MACRO.
     // Example value: "auto" or FOCUS_MODE_XXX constants. Read/write.
     static const char KEY_FOCUS_MODE[];
     // Supported focus modes.
@@ -231,11 +230,16 @@ public:
     // be in focus. The object is sharpest at the optimal focus distance. The
     // depth of field is the far focus distance minus near focus distance.
     //
-    // Applications can read this parameter anytime to get the latest focus
-    // distances. If the focus mode is FOCUS_MODE_EDOF, the values may be all
-    // 0, which means focus distance is not applicable. If the focus mode is
-    // FOCUS_MODE_CONTINUOUS and autofocus has started, focus distances may
-    // change from time to time.
+    // Focus distances may change after starting auto focus, canceling auto
+    // focus, or starting the preview. Applications can read this anytime to get
+    // the latest focus distances. If the focus mode is FOCUS_MODE_CONTINUOUS,
+    // focus distances may change from time to time.
+    //
+    // This is intended to estimate the distance between the camera and the
+    // subject. After autofocus, the subject distance may be within near and far
+    // focus distance. However, the precision depends on the camera hardware,
+    // autofocus algorithm, the focus area, and the scene. The error can be
+    // large and it should be only used as a reference.
     //
     // Far focus distance > optimal focus distance > near focus distance. If
     // the far focus distance is infinity, the value should be "Infinity" (case
@@ -348,10 +352,10 @@ public:
     // continuously. Applications should not call
     // CameraHardwareInterface.autoFocus in this mode.
     static const char FOCUS_MODE_EDOF[];
-    // Continuous focus mode. The camera continuously tries to focus. This is
-    // ideal for shooting video or shooting photo of moving object. Continuous
-    // focus starts when CameraHardwareInterface.autoFocus is called. Focus
-    // callback will be only called once as soon as the picture is in focus.
+    // Continuous auto focus mode. The camera continuously tries to focus. This
+    // is ideal for shooting video or shooting photo of moving object. Auto
+    // focus starts when the parameter is set. Applications should not call
+    // CameraHardwareInterface.autoFocus in this mode.
     static const char FOCUS_MODE_CONTINUOUS[];
 
     // The camera determines the exposure by giving more weight to the
