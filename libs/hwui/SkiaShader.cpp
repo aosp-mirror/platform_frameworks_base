@@ -164,7 +164,8 @@ void SkiaLinearGradientShader::setupProgram(Program* program, const mat4& modelV
     Rect start(mBounds[0], mBounds[1], mBounds[2], mBounds[3]);
     if (mMatrix) {
         mat4 shaderMatrix(*mMatrix);
-        shaderMatrix.mapRect(start);
+        shaderMatrix.mapPoint(start.left, start.top);
+        shaderMatrix.mapPoint(start.right, start.bottom);
     }
     snapshot.transform.mapRect(start);
 

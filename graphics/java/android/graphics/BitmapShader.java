@@ -22,6 +22,12 @@ package android.graphics;
  */
 public class BitmapShader extends Shader {
     /**
+     * Prevent garbage collection.
+     */
+    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
+    private final Bitmap mBitmap;
+
+    /**
      * Call this to create a new shader that will draw with a bitmap.
      *
      * @param bitmap            The bitmap to use inside the shader
@@ -29,6 +35,7 @@ public class BitmapShader extends Shader {
      * @param tileY             The tiling mode for y to draw the bitmap in.
      */
     public BitmapShader(Bitmap bitmap, TileMode tileX, TileMode tileY) {
+        mBitmap = bitmap;
         final int b = bitmap.ni();
         native_instance = nativeCreate(b, tileX.nativeInt, tileY.nativeInt);
         native_shader = nativePostCreate(native_instance, b, tileX.nativeInt, tileY.nativeInt);
