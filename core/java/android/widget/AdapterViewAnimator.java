@@ -685,14 +685,6 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
             verticalOffset = 0;
         }
 
-        void setHorizontalOffset(int newHorizontalOffset) {
-            horizontalOffset = newHorizontalOffset;
-            if (mView != null) {
-                mView.requestLayout();
-                mView.invalidate();
-            }
-        }
-
         private Rect parentRect = new Rect();
         void invalidateGlobalRegion(View v, Rect r) {
             View p = v;
@@ -719,6 +711,18 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                 int top = Math.min(mView.getTop() + offsetDelta, mView.getTop());
                 int bottom = Math.max(mView.getBottom() + offsetDelta, mView.getBottom());
                 invalidateRect.set(mView.getLeft(), top, mView.getRight(), bottom);
+                invalidateGlobalRegion(mView, invalidateRect);
+            }
+        }
+
+        public void setHorizontalOffset(int newHorizontalOffset) {
+            int offsetDelta = newHorizontalOffset - horizontalOffset;
+            horizontalOffset = newHorizontalOffset;
+            if (mView != null) {
+                mView.requestLayout();
+                int left = Math.min(mView.getLeft() + offsetDelta, mView.getLeft());
+                int right = Math.max(mView.getRight() + offsetDelta, mView.getRight());
+                invalidateRect.set(left, mView.getTop(), right, mView.getBottom());
                 invalidateGlobalRegion(mView, invalidateRect);
             }
         }
