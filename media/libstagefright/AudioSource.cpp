@@ -35,7 +35,8 @@ AudioSource::AudioSource(
     : mStarted(false),
       mCollectStats(false),
       mPrevSampleTimeUs(0),
-      mNumLostFrames(0),
+      mTotalLostFrames(0),
+      mPrevLostBytes(0),
       mGroup(NULL) {
 
     LOGV("sampleRate: %d, channels: %d", sampleRate, channels);
@@ -108,7 +109,8 @@ status_t AudioSource::stop() {
     mStarted = false;
 
     if (mCollectStats) {
-        LOGI("Total lost audio frames: %lld", mNumLostFrames);
+        LOGI("Total lost audio frames: %lld",
+            mTotalLostFrames + (mPrevLostBytes >> 1));
     }
 
     return OK;
@@ -186,10 +188,11 @@ status_t AudioSource::read(
         // Insert null frames when lost frames are detected.
         int64_t timestampUs = mPrevSampleTimeUs;
         uint32_t numLostBytes = mRecord->getInputFramesLost() << 1;
+        numLostBytes += mPrevLostBytes;
 #if 0
         // Simulate lost frames
-        numLostBytes = ((rand() * 1.0 / RAND_MAX)) * kMaxBufferSize;
-        numLostBytes &= 0xFFFFFFFE; // Alignment request
+        numLostBytes = ((rand() * 1.0 / RAND_MAX)) * 2 * kMaxBufferSize;
+        numLostBytes &= 0xFFFFFFFE; // Alignment requirement
 
         // Reduce the chance to lose
         if (rand() * 1.0 / RAND_MAX >= 0.05) {
@@ -197,13 +200,18 @@ status_t AudioSource::read(
         }
 #endif
         if (numLostBytes > 0) {
-            // Not expect too many lost frames!
-            CHECK(numLostBytes <= kMaxBufferSize);
+            if (numLostBytes > kMaxBufferSize) {
+                mPrevLostBytes = numLostBytes - kMaxBufferSize;
+                numLostBytes = kMaxBufferSize;
+            }
 
-            timestampUs += (1000000LL * numLostBytes >> 1) / sampleRate;
+            CHECK_EQ(numLostBytes & 1, 0);
+            timestampUs += ((1000000LL * (numLostBytes >> 1)) +
+                    (sampleRate >> 1)) / sampleRate;
+
             CHECK(timestampUs > mPrevSampleTimeUs);
             if (mCollectStats) {
-                mNumLostFrames += (numLostBytes >> 1);
+                mTotalLostFrames += (numLostBytes >> 1);
             }
             if ((err = skipFrame(timestampUs, options)) == -1) {
                 buffer->release();
@@ -240,7 +248,7 @@ status_t AudioSource::read(
 
         buffer->meta_data()->setInt64(kKeyTime, mPrevSampleTimeUs);
         CHECK(timestampUs > mPrevSampleTimeUs);
-        if (mNumLostFrames == 0) {
+        if (mTotalLostFrames == 0) {
             CHECK_EQ(mPrevSampleTimeUs,
                 mStartTimeUs + (1000000LL * numFramesRecorded) / sampleRate);
         }
