@@ -1830,6 +1830,16 @@ ssize_t AaptAssets::slurpResourceTree(Bundle* bundle, const String8& srcDir)
             continue;
         }
 
+        if (bundle->getMaxResVersion() != NULL && group.version.length() != 0) {
+            int maxResInt = atoi(bundle->getMaxResVersion());
+            const char *verString = group.version.string();
+            int dirVersionInt = atoi(verString + 1); // skip 'v' in version name
+            if (dirVersionInt > maxResInt) {
+              fprintf(stderr, "max res %d, skipping %s\n", maxResInt, entry->d_name);
+              continue;
+            }
+        }
+
         FileType type = getFileType(subdirName.string());
 
         if (type == kFileTypeDirectory) {
