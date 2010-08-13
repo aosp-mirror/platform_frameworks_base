@@ -89,6 +89,8 @@ public class FileFilter {
         // This first block of tests are for features for which Android
         // should pass all tests. They are skipped only temporarily.
         // TODO: Fix these failing tests and remove them from this list.
+        ignoreResultList.add("fast/dom/Geolocation/delayed-permission-allowed.html"); // requires layoutTestController.permissionSet
+        ignoreResultList.add("fast/dom/Geolocation/delayed-permission-denied.html"); // requires layoutTestController.permissionSet
         ignoreResultList.add("fast/events/touch/basic-multi-touch-events.html"); // Requires multi-touch
         ignoreResultList.add("fast/events/touch/touch-target.html"); // Requires multi-touch
         ignoreResultList.add("http/tests/appcache/empty-manifest.html"); // flaky
