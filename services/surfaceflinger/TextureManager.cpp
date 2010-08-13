@@ -190,7 +190,7 @@ status_t TextureManager::loadTexture(Texture* texture,
         return err;
     }
 
-    if (texture->target != GL_TEXTURE_2D)
+    if (texture->target != Texture::TEXTURE_2D)
         return INVALID_OPERATION;
 
     glBindTexture(GL_TEXTURE_2D, texture->name);
