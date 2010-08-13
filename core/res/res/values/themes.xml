@@ -53,6 +53,10 @@
         <item name="textColorHint">@android:color/hint_foreground_dark</item>
         <item name="textColorHintInverse">@android:color/hint_foreground_light</item>
         <item name="textColorSearchUrl">@android:color/search_url_text</item>
+        <item name="textColorHighlight">@android:color/highlighted_text_dark</item>
+        <item name="textColorHighlightInverse">@android:color/highlighted_text_light</item>
+        <item name="textColorLink">@android:color/link_text_dark</item>
+        <item name="textColorLinkInverse">@android:color/link_text_light</item>
 
         <item name="textAppearanceLarge">@android:style/TextAppearance.Large</item>
         <item name="textAppearanceMedium">@android:style/TextAppearance.Medium</item>
@@ -233,7 +237,7 @@
         <item name="colorBackground">@android:color/background_light</item>
         <item name="colorForeground">@color/bright_foreground_light</item>
         <item name="colorForegroundInverse">@android:color/bright_foreground_light_inverse</item>
-
+        
         <item name="textColorPrimary">@android:color/primary_text_light</item>
         <item name="textColorSecondary">@android:color/secondary_text_light</item>
         <item name="textColorTertiary">@android:color/tertiary_text_light</item>
@@ -247,7 +251,11 @@
         <item name="textColorPrimaryInverseNoDisable">@android:color/primary_text_dark_nodisable</item>
         <item name="textColorSecondaryInverseNoDisable">@android:color/secondary_text_dark_nodisable</item>
         <item name="textColorHint">@android:color/hint_foreground_light</item>
-        <item name="textColorHintInverse">@android:color/hint_foreground_dark</item>
+        <item name="textColorHintInverse">@android:color/hint_foreground_dark</item>        
+        <item name="textColorHighlight">@android:color/highlighted_text_light</item>
+        <item name="textColorHighlightInverse">@android:color/highlighted_text_dark</item>
+        <item name="textColorLink">@android:color/link_text_light</item>
+        <item name="textColorLinkInverse">@android:color/link_text_dark</item>
         
         <item name="popupWindowStyle">@android:style/Widget.PopupWindow</item>
         

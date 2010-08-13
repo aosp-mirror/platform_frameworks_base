@@ -46,6 +46,7 @@
              theme does not set this value, meaning it is based on whether the
              window is floating. -->
         <attr name="backgroundDimEnabled" format="boolean" />
+        
 
         <!-- =========== -->
         <!-- Text styles -->
@@ -95,6 +96,12 @@
 
         <!-- Text color for urls in search suggestions, used by things like global search and the browser. @hide -->
         <attr name="textColorSearchUrl" format="reference|color" />
+
+        <!-- Color of highlighted text, when used in a light theme. @hide -->
+        <attr name="textColorHighlightInverse" format="reference|color" />
+        <!-- Color of link text (URLs), when used in a light theme. @hide -->
+        <attr name="textColorLinkInverse" format="reference|color" />
+        
         <!-- Search widget more corpus result item background. -->
         <attr name="searchWidgetCorpusItemBackground" format="reference|color" />
 

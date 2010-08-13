@@ -1329,7 +1329,7 @@
   <!-- Context menu ID for the "Select text..." menu item to switch to text
        selection context mode in text views. -->
   <public type="id" name="selectTextMode" />
-
+  
   <public type="style" name="Theme.WithActionBar" />
   <public type="style" name="Widget.Spinner.DropDown" />
   <public type="style" name="Widget.ActionButton" />

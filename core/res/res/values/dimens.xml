@@ -47,6 +47,4 @@
     <dimen name="password_keyboard_key_height_numeric">56dip</dimen>
     <!-- Default correction for the space key in the password keyboard -->
     <dimen name="password_keyboard_spacebar_vertical_correction">4dip</dimen>
-    <!-- Distance between the text base line and virtual finger position used to position cursor -->
-    <dimen name="cursor_controller_vertical_offset">12dp</dimen>
 </resources>

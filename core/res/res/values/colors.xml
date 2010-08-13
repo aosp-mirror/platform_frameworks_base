@@ -54,6 +54,12 @@
     <color name="dim_foreground_light_inverse">#bebebe</color>
     <color name="dim_foreground_light_inverse_disabled">#80bebebe</color>
     <color name="hint_foreground_light">#808080</color>
+    <color name="highlight_background">#cc475925</color>
+    <color name="highlight_background_inverse">#ccd2e461</color>
+    <color name="highlighted_text_dark">#cc475925</color>
+    <color name="highlighted_text_light">#ccd2e461</color>
+    <color name="link_text_dark">#5c5cff</color>
+    <color name="link_text_light">#0000ee</color>
 
     <drawable name="stat_notify_sync_noanim">@drawable/stat_notify_sync_anim0</drawable>
     <drawable name="stat_sys_download_done">@drawable/stat_sys_download_anim0</drawable>

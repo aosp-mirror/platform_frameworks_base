@@ -640,9 +640,9 @@
 
     <style name="TextAppearance">
         <item name="android:textColor">?textColorPrimary</item>
-        <item name="android:textColorHighlight">#D077A14B</item>
+        <item name="android:textColorHighlight">?textColorHighlight</item>
         <item name="android:textColorHint">?textColorHint</item>
-        <item name="android:textColorLink">#5C5CFF</item>
+        <item name="android:textColorLink">?textColorLink</item>
         <item name="android:textSize">16sp</item>
         <item name="android:textStyle">normal</item>
     </style>
@@ -650,7 +650,8 @@
     <style name="TextAppearance.Inverse">
         <item name="textColor">?textColorPrimaryInverse</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
-        <item name="android:textColorLink">#0000EE</item>
+        <item name="android:textColorHighlight">?textColorHighlightInverse</item>
+        <item name="android:textColorLink">?textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Theme">
@@ -671,6 +672,8 @@
     <style name="TextAppearance.Large.Inverse">
         <item name="android:textColor">?textColorPrimaryInverse</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
+        <item name="android:textColorHighlight">?textColorHighlightInverse</item>
+        <item name="android:textColorLink">?textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Medium">
@@ -682,6 +685,8 @@
     <style name="TextAppearance.Medium.Inverse">
         <item name="android:textColor">?textColorPrimaryInverse</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
+        <item name="android:textColorHighlight">?textColorHighlightInverse</item>
+        <item name="android:textColorLink">?textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Small">
@@ -693,6 +698,8 @@
     <style name="TextAppearance.Small.Inverse">
         <item name="android:textColor">?textColorSecondaryInverse</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
+        <item name="android:textColorHighlight">?textColorHighlightInverse</item>
+        <item name="android:textColorLink">?textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Theme.Dialog" parent="TextAppearance.Theme">

@@ -21,9 +21,9 @@ import com.android.internal.widget.EditableInputConnection;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.content.ClipboardManager;
 import android.content.ClippedData;
 import android.content.Context;
-import android.content.ClipboardManager;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -4410,6 +4410,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return super.onKeyUp(keyCode, event);
         }
 
+        hideControllers();
+        
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 /*
@@ -6263,6 +6265,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         
         sendOnTextChanged(buffer, start, before, after);
         onTextChanged(buffer, start, before, after);
+        hideControllers();
     }
     
     /**
@@ -6747,11 +6750,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void prepareCursorControllers() {
-        boolean atLeastOneController = false;
-
         // TODO Add an extra android:cursorController flag to disable the controller?
         if (mCursorVisible && mLayout != null) {
-            atLeastOneController = true;
             if (mInsertionPointCursorController == null) {
                 mInsertionPointCursorController = new InsertionPointCursorController();
             }
@@ -6760,7 +6760,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (canSelectText() && mLayout != null) {
-            atLeastOneController = true;
             if (mSelectionModifierCursorController == null) {
                 mSelectionModifierCursorController = new SelectionModifierCursorController();
             }
@@ -6768,12 +6767,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mSelectionModifierCursorController = null;
             // Stop selection mode if the controller becomes unavailable.
             finishSelectionActionMode();
-        }
-
-        if (atLeastOneController) {
-            Resources res = mContext.getResources();
-            mCursorControllerVerticalOffset = res.getDimensionPixelOffset(
-                    com.android.internal.R.dimen.cursor_controller_vertical_offset);
         }
     }
 
@@ -7620,6 +7613,75 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public void draw(Canvas canvas);
     }
 
+    private class Handle {
+        Drawable mDrawable;
+        // Vertical extension of the touch region
+        int mTopExtension, mBottomExtension;
+        // Position of the virtual finger position on screen
+        int mHopSpotVertcalPosition;
+        
+        Handle(Drawable drawable) {
+            mDrawable = drawable;
+        }
+        
+        void positionAtCursor(final int offset, boolean bottom) {
+            final int drawableWidth = mDrawable.getIntrinsicWidth();
+            final int drawableHeight = mDrawable.getIntrinsicHeight();
+            final int line = mLayout.getLineForOffset(offset);
+            final int lineTop = mLayout.getLineTop(line);
+            final int lineBottom = mLayout.getLineBottom(line);
+
+            mHopSpotVertcalPosition = lineTop + (bottom ? (3 * (lineBottom - lineTop)) / 4 :
+                (lineBottom - lineTop) / 4);
+
+            final Rect bounds = sCursorControllerTempRect;
+            bounds.left = (int) (mLayout.getPrimaryHorizontal(offset) - drawableWidth / 2.0);
+            bounds.top = (bottom ? lineBottom : lineTop) - drawableHeight / 2;
+
+            mTopExtension = bottom ? 0 : drawableHeight / 2;
+            mBottomExtension = drawableHeight;
+
+            // Extend touch region up when editing the last line of text (or a single line) so that
+            // it is easier to grab.
+            if (line == mLayout.getLineCount() - 1) {
+                  mTopExtension = (lineBottom - lineTop) - drawableHeight / 2;
+            }
+
+            bounds.right = bounds.left + drawableWidth;
+            bounds.bottom = bounds.top + drawableHeight;
+
+            int boundTopBefore = bounds.top;
+            convertFromViewportToContentCoordinates(bounds);
+            mHopSpotVertcalPosition += bounds.top - boundTopBefore;
+            mDrawable.setBounds(bounds);
+            postInvalidate();
+        }
+
+        boolean hasFingerOn(float x, float y) {
+            // Simulate a 'fat finger' to ease grabbing of the controller.
+            // Expands according to controller image size instead of using dip distance.
+            // Assumes controller imager has a sensible size, proportionnal to screen density.
+            final int drawableWidth = mDrawable.getIntrinsicWidth();
+            final Rect fingerRect = sCursorControllerTempRect;
+            fingerRect.set((int) (x - drawableWidth / 2.0),
+                           (int) (y - mBottomExtension),
+                           (int) (x + drawableWidth / 2.0),
+                           (int) (y + mTopExtension));
+            return Rect.intersects(mDrawable.getBounds(), fingerRect);
+        }
+
+        void postInvalidate() {
+            final Rect bounds = mDrawable.getBounds();
+            TextView.this.postInvalidate(bounds.left, bounds.top, bounds.right, bounds.bottom);
+        }
+
+        void postInvalidateDelayed(long delay) {
+            final Rect bounds = mDrawable.getBounds();
+            TextView.this.postInvalidateDelayed(delay, bounds.left, bounds.top,
+                                                       bounds.right, bounds.bottom);
+        }
+    }
+
     class InsertionPointCursorController implements CursorController {
         private static final int DELAY_BEFORE_FADE_OUT = 2100;
 
@@ -7628,7 +7690,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // Starting time of the fade timer
         private long mFadeOutTimerStart;
         // The cursor controller image
-        private final Drawable mDrawable;
+        private final Handle mHandle;
         // Used to detect a tap (vs drag) on the controller
         private long mOnDownTimerStart;
         // Offset between finger hot point on cursor controller and actual cursor
@@ -7636,7 +7698,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         InsertionPointCursorController() {
             Resources res = mContext.getResources();
-            mDrawable = res.getDrawable(com.android.internal.R.drawable.cursor_controller);
+            mHandle = new Handle(res.getDrawable(com.android.internal.R.drawable.text_select_handle));
         }
 
         public void show() {
@@ -7652,7 +7714,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // Start fading out, only if not already in progress
                 if (time - mFadeOutTimerStart < DELAY_BEFORE_FADE_OUT) {
                     mFadeOutTimerStart = time - DELAY_BEFORE_FADE_OUT;
-                    postInvalidate(mDrawable);
+                    mHandle.postInvalidate();
                 }
             }
         }
@@ -7661,19 +7723,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mIsVisible) {
                 int time = (int) (System.currentTimeMillis() - mFadeOutTimerStart);
                 if (time <= DELAY_BEFORE_FADE_OUT) {
-                    postInvalidateDelayed(DELAY_BEFORE_FADE_OUT - time, mDrawable);
+                    mHandle.postInvalidateDelayed(DELAY_BEFORE_FADE_OUT - time);
                 } else {
                     time -= DELAY_BEFORE_FADE_OUT;
                     if (time <= FADE_OUT_DURATION) {
-                        final int alpha = 255 * (FADE_OUT_DURATION - time) / FADE_OUT_DURATION;
-                        mDrawable.setAlpha(alpha);
-                        postInvalidateDelayed(30, mDrawable);
+                        final int alpha = (int)
+                                         ((255.0 * (FADE_OUT_DURATION - time)) / FADE_OUT_DURATION);
+                        mHandle.mDrawable.setAlpha(alpha);
+                        mHandle.postInvalidateDelayed(30);
                     } else {
-                        mDrawable.setAlpha(0);
+                        mHandle.mDrawable.setAlpha(0);
                         mIsVisible = false;
                     }
                 }
-                mDrawable.draw(canvas);
+                mHandle.mDrawable.draw(canvas);
             }
         }
 
@@ -7688,7 +7751,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private void updateDrawablePosition() {
             if (mIsVisible) {
                 // Clear previous cursor controller before bounds are updated
-                postInvalidate(mDrawable);
+                mHandle.postInvalidate();
             }
 
             final int offset = getSelectionStart();
@@ -7700,10 +7763,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return;
             }
 
-            positionDrawableUnderCursor(offset, mDrawable);
+            mHandle.positionAtCursor(offset, true);
 
             mFadeOutTimerStart = System.currentTimeMillis();
-            mDrawable.setAlpha(255);
+            mHandle.mDrawable.setAlpha(255);
         }
 
         public void onTouchEvent(MotionEvent event) {
@@ -7713,7 +7776,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         final float x = event.getX();
                         final float y = event.getY();
 
-                        if (fingerIsOnDrawable(x, y, mDrawable)) {
+                        if (mHandle.hasFingerOn(x, y)) {
                             show();
 
                             if (mMovement instanceof ArrowKeyMovementMethod) {
@@ -7726,9 +7789,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 mParent.requestDisallowInterceptTouchEvent(true);
                             }
 
-                            final Rect bounds = mDrawable.getBounds();
+                            final Rect bounds = mHandle.mDrawable.getBounds();
                             mOffsetX = (bounds.left + bounds.right) / 2.0f - x;
-                            mOffsetY = bounds.top - mCursorControllerVerticalOffset - y;
+                            mOffsetY = mHandle.mHopSpotVertcalPosition - y;
 
                             mOnDownTimerStart = event.getEventTime();
                         }
@@ -7769,7 +7832,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // Starting time of the fade timer
         private long mFadeOutTimerStart;
         // The cursor controller images
-        private final Drawable mStartDrawable, mEndDrawable;
+        private final Handle mStartHandle, mEndHandle;
         // Offset between finger hot point on active cursor controller and actual cursor
         private float mOffsetX, mOffsetY;
         // The offsets of that last touch down event. Remembered to start selection there.
@@ -7777,8 +7840,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         SelectionModifierCursorController() {
             Resources res = mContext.getResources();
-            mStartDrawable = res.getDrawable(com.android.internal.R.drawable.selection_start_handle);
-            mEndDrawable = res.getDrawable(com.android.internal.R.drawable.selection_end_handle);
+            mStartHandle = new Handle(res.getDrawable(com.android.internal.R.drawable.text_select_handle));
+            mEndHandle = new Handle(res.getDrawable(com.android.internal.R.drawable.text_select_handle));
         }
 
         public void show() {
@@ -7793,15 +7856,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public void hide() {
             if (mIsVisible && (mFadeOutTimerStart < 0)) {
                 mFadeOutTimerStart = System.currentTimeMillis();
-                postInvalidate(mStartDrawable);
-                postInvalidate(mEndDrawable);
+                mStartHandle.postInvalidate();
+                mEndHandle.postInvalidate();
             }
         }
 
         public void cancelFadeOutAnimation() {
             mIsVisible = false;
-            postInvalidate(mStartDrawable);
-            postInvalidate(mEndDrawable);
+            mStartHandle.postInvalidate();
+            mEndHandle.postInvalidate();
         }
 
         public void draw(Canvas canvas) {
@@ -7810,18 +7873,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     int time = (int) (System.currentTimeMillis() - mFadeOutTimerStart);
                     if (time <= FADE_OUT_DURATION) {
                         final int alpha = 255 * (FADE_OUT_DURATION - time) / FADE_OUT_DURATION;
-                        mStartDrawable.setAlpha(alpha);
-                        mEndDrawable.setAlpha(alpha);
-                        postInvalidateDelayed(30, mStartDrawable);
-                        postInvalidateDelayed(30, mEndDrawable);
+                        mStartHandle.mDrawable.setAlpha(alpha);
+                        mEndHandle.mDrawable.setAlpha(alpha);
+                        mStartHandle.postInvalidateDelayed(30);
+                        mEndHandle.postInvalidateDelayed(30);
                     } else {
-                        mStartDrawable.setAlpha(0);
-                        mEndDrawable.setAlpha(0);
+                        mStartHandle.mDrawable.setAlpha(0);
+                        mEndHandle.mDrawable.setAlpha(0);
                         mIsVisible = false;
                     }
                 }
-                mStartDrawable.draw(canvas);
-                mEndDrawable.draw(canvas);
+                mStartHandle.mDrawable.draw(canvas);
+                mEndHandle.mDrawable.draw(canvas);
             }
         }
 
@@ -7861,8 +7924,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private void updateDrawablesPositions() {
             if (mIsVisible) {
                 // Clear previous cursor controller before bounds are updated
-                postInvalidate(mStartDrawable);
-                postInvalidate(mEndDrawable);
+                mStartHandle.postInvalidate();
+                mEndHandle.postInvalidate();
             }
 
             final int selectionStart = getSelectionStart();
@@ -7875,11 +7938,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return;
             }
 
-            positionDrawableUnderCursor(selectionStart, mStartDrawable);
-            positionDrawableUnderCursor(selectionEnd, mEndDrawable);
+            boolean oneLineSelection = mLayout.getLineForOffset(selectionStart) == mLayout.getLineForOffset(selectionEnd); 
+            mStartHandle.positionAtCursor(selectionStart, oneLineSelection);
+            mEndHandle.positionAtCursor(selectionEnd, true);
 
-            mStartDrawable.setAlpha(255);
-            mEndDrawable.setAlpha(255);
+            mStartHandle.mDrawable.setAlpha(255);
+            mEndHandle.mDrawable.setAlpha(255);
         }
 
         public void onTouchEvent(MotionEvent event) {
@@ -7889,26 +7953,27 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         final int x = (int) event.getX();
                         final int y = (int) event.getY();
 
-                        // Remember finger down position, to be able to start selection on that point
+                        // Remember finger down position, to be able to start selection from there
                         mMinTouchOffset = mMaxTouchOffset = getOffset(x, y);
 
                         if (mIsVisible) {
                             if (mMovement instanceof ArrowKeyMovementMethod) {
-                                boolean isOnStart = fingerIsOnDrawable(x, y, mStartDrawable);
-                                boolean isOnEnd = fingerIsOnDrawable(x, y, mEndDrawable);
+                                boolean isOnStart = mStartHandle.hasFingerOn(x, y);
+                                boolean isOnEnd = mEndHandle.hasFingerOn(x, y);
                                 if (isOnStart || isOnEnd) {
                                     if (mParent != null) {
-                                        // Prevent possible scrollView parent from scrolling, so that
-                                        // we can use auto-scrolling.
+                                        // Prevent possible scrollView parent from scrolling, so
+                                        // that we can use auto-scrolling.
                                         mParent.requestDisallowInterceptTouchEvent(true);
                                     }
 
-                                    // Start handle will be dragged in case BOTH controller are under finger
-                                    mStartIsDragged = isOnStart;
-                                    final Rect bounds =
-                                        (mStartIsDragged ? mStartDrawable : mEndDrawable).getBounds();
+                                    // In case both controllers are under finger (very small
+                                    // selection region), arbitrarily pick end controller.
+                                    mStartIsDragged = !isOnEnd;
+                                    final Handle draggedHandle = mStartIsDragged ? mStartHandle : mEndHandle;
+                                    final Rect bounds = draggedHandle.mDrawable.getBounds();
                                     mOffsetX = (bounds.left + bounds.right) / 2.0f - x;
-                                    mOffsetY = bounds.top - mCursorControllerVerticalOffset - y;
+                                    mOffsetY = draggedHandle.mHopSpotVertcalPosition - y;
 
                                     ((ArrowKeyMovementMethod)mMovement).setCursorController(this);
                                 }
@@ -7967,59 +8032,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    // Helper methods used by CursorController implementations
-
-    private void positionDrawableUnderCursor(final int offset, Drawable drawable) {
-        final int drawableWidth = drawable.getIntrinsicWidth();
-        final int drawableHeight = drawable.getIntrinsicHeight();
-        final int line = mLayout.getLineForOffset(offset);
-
-        final Rect bounds = sCursorControllerTempRect;
-        bounds.left = (int) (mLayout.getPrimaryHorizontal(offset) - 0.5 - drawableWidth / 2.0);
-        bounds.top = mLayout.getLineTop(line + 1);
-
-        // Move cursor controller a little bit up when editing the last line of text
-        // (or a single line) so that it is visible and easier to grab.
-        if (line == mLayout.getLineCount() - 1) {
-            bounds.top -= Math.max(0, drawableHeight / 2 - getExtendedPaddingBottom());
-        }
-
-        bounds.right = bounds.left + drawableWidth;
-        bounds.bottom = bounds.top + drawableHeight;
-
-        convertFromViewportToContentCoordinates(bounds);
-        drawable.setBounds(bounds);
-        postInvalidate(bounds.left, bounds.top, bounds.right, bounds.bottom);
-    }
-
-    private boolean fingerIsOnDrawable(float x, float y, Drawable drawable) {
-        // Simulate a 'fat finger' to ease grabbing of the controller.
-        // Expands according to controller image size instead of using density.
-        // Assumes controller imager has a sensible size, proportionnal to density.
-        final int drawableWidth = drawable.getIntrinsicWidth();
-        final int drawableHeight = drawable.getIntrinsicHeight();
-        final Rect fingerRect = sCursorControllerTempRect;
-        fingerRect.set((int) (x - drawableWidth / 2.0),
-                       (int) (y - drawableHeight),
-                       (int) (x + drawableWidth / 2.0),
-                       (int) y);
-        return Rect.intersects(drawable.getBounds(), fingerRect);
-    }
-
-    private void postInvalidate(Drawable drawable) {
-        final Rect bounds = drawable.getBounds();
-        postInvalidate(bounds.left, bounds.top, bounds.right, bounds.bottom);
-    }
-
-    private void postInvalidateDelayed(long delay, Drawable drawable) {
-        final Rect bounds = drawable.getBounds();
-        postInvalidateDelayed(delay, bounds.left, bounds.top, bounds.right, bounds.bottom);
-    }
-
     private void hideInsertionPointCursorController() {
         if (mInsertionPointCursorController != null) {
             mInsertionPointCursorController.hide();
         }
+    }
+
+    private void hideControllers() {
+        hideInsertionPointCursorController();
+        finishSelectionActionMode();
     }
 
     /**
@@ -8083,7 +8104,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private final TextPaint         mTextPaint;
     private boolean                 mUserSetTextScaleX;
     private final Paint             mHighlightPaint;
-    private int                     mHighlightColor = 0xD077A14B;
+    private int                     mHighlightColor = 0xCC475925;
     private Layout                  mLayout;
 
     private long                    mShowCursor;
@@ -8093,8 +8114,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // Cursor Controllers. Null when disabled.
     private CursorController        mInsertionPointCursorController;
     private CursorController        mSelectionModifierCursorController;
-    // Stored once and for all.
-    private int                     mCursorControllerVerticalOffset;
     private boolean                 mShouldStartSelectionActionMode = false;
     private ActionMode              mSelectionActionMode;
     // Created once and shared by different CursorController helper methods.
