@@ -276,6 +276,9 @@ public class WifiStateTracker extends NetworkStateTracker {
     
     private boolean mIsScanModeActive;
     private boolean mEnableRssiPolling;
+    private boolean mIsHighPerfEnabled;
+    private int mPowerModeRefCount = 0;
+    private int mOptimizationsDisabledRefCount = 0;
 
     /**
      * One of  {@link WifiManager#WIFI_STATE_DISABLED},
@@ -659,6 +662,67 @@ public class WifiStateTracker extends NetworkStateTracker {
         }
     }
 
+    /**
+     * Set suspend mode optimizations. These include:
+     * - packet filtering
+     * - turn off roaming
+     * - DTIM settings
+     *
+     * Uses reference counting to keep the suspend optimizations disabled
+     * as long as one entity wants optimizations disabled.
+     *
+     * For example, WifiLock can keep suspend optimizations disabled
+     * or the user setting (wifi never sleeps) can keep suspend optimizations
+     * disabled. As long as one entity wants it disabled, it should stay
+     * that way
+     *
+     * @param enabled true if optimizations need enabled, false otherwise
+     */
+    public synchronized void setSuspendModeOptimizations(boolean enabled) {
+
+        /* It is good to plumb suspend optimization enable
+         * or disable even if ref count indicates already done
+         * since we could have a case of previous failure.
+         */
+        if (!enabled) {
+            mOptimizationsDisabledRefCount++;
+        } else {
+            mOptimizationsDisabledRefCount--;
+            if (mOptimizationsDisabledRefCount > 0) {
+                return;
+            } else {
+                /* Keep refcount from becoming negative */
+                mOptimizationsDisabledRefCount = 0;
+            }
+        }
+
+        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
+            return;
+        }
+
+        WifiNative.setSuspendOptimizationsCommand(enabled);
+    }
+
+
+    /**
+     * Set high performance mode of operation. This would mean
+     * use active power mode and disable suspend optimizations
+     * @param enabled true if enabled, false otherwise
+     */
+    public synchronized void setHighPerfMode(boolean enabled) {
+        if (mIsHighPerfEnabled != enabled) {
+            if (enabled) {
+                setPowerMode(DRIVER_POWER_MODE_ACTIVE);
+                setSuspendModeOptimizations(false);
+            } else {
+                setPowerMode(DRIVER_POWER_MODE_AUTO);
+                setSuspendModeOptimizations(true);
+            }
+            mIsHighPerfEnabled = enabled;
+            Log.d(TAG,"high performance mode: " + enabled);
+        }
+    }
+
 
     private void checkIsBluetoothPlaying() {
         boolean isBluetoothPlaying = false;
@@ -744,6 +808,9 @@ public class WifiStateTracker extends NetworkStateTracker {
                 dhcpThread.start();
                 mDhcpTarget = new DhcpHandler(dhcpThread.getLooper(), this);
                 mIsScanModeActive = true;
+                mIsHighPerfEnabled = false;
+                mOptimizationsDisabledRefCount = 0;
+                mPowerModeRefCount = 0;
                 mTornDownByConnMgr = false;
                 mLastBssid = null;
                 mLastSsid = null;
@@ -1947,13 +2014,41 @@ public class WifiStateTracker extends NetworkStateTracker {
      * @param mode
      *     DRIVER_POWER_MODE_AUTO
      *     DRIVER_POWER_MODE_ACTIVE
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     *
+     * Uses reference counting to keep power mode active
+     * as long as one entity wants power mode to be active.
+     *
+     * For example, WifiLock high perf mode can keep power mode active
+     * or a DHCP session can keep it active. As long as one entity wants
+     * it enabled, it should stay that way
+     *
      */
-    public synchronized boolean setPowerMode(int mode) {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return false;
+    private synchronized void setPowerMode(int mode) {
+
+        /* It is good to plumb power mode change
+         * even if ref count indicates already done
+         * since we could have a case of previous failure.
+         */
+        switch(mode) {
+            case DRIVER_POWER_MODE_ACTIVE:
+                mPowerModeRefCount++;
+                break;
+            case DRIVER_POWER_MODE_AUTO:
+                mPowerModeRefCount--;
+                if (mPowerModeRefCount > 0) {
+                    return;
+                } else {
+                    /* Keep refcount from becoming negative */
+                    mPowerModeRefCount = 0;
+                }
+                break;
         }
-        return WifiNative.setPowerModeCommand(mode);
+
+        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
+            return;
+        }
+
+        WifiNative.setPowerModeCommand(mode);
     }
 
     /**
