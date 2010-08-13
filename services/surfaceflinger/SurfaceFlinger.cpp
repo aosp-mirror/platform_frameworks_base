@@ -839,7 +839,9 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
             hwc.getNumLayers(), count);
 
     // just to be extra-safe, use the smallest count
-    count = count < hwc.getNumLayers() ? count : hwc.getNumLayers();
+    if (hwc.initCheck() == NO_ERROR) {
+        count = count < hwc.getNumLayers() ? count : hwc.getNumLayers();
+    }
 
     /*
      *  update the per-frame h/w composer data for each layer
