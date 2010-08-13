@@ -256,6 +256,12 @@
         <!-- Reference to a style for the Action Bar -->
         <attr name="windowActionBarStyle" format="reference" />
 
+        <!-- Size of the Action Bar, including the contextual
+             bar used to present Action Modes. -->
+        <attr name="windowActionBarSize" format="dimension" >
+            <enum name="wrap_content" value="0" />
+        </attr>
+
         <!-- Flag indicating whether action modes should overlay window content
              when there is not reserved space for their UI (such as an Action Bar). -->
         <attr name="windowActionModeOverlay" format="boolean" />
@@ -1005,6 +1011,7 @@
         <attr name="windowActionBarStyle" />
         <attr name="windowActionModeOverlay" />
         <attr name="windowActionBarOverlay" />
+        <attr name="windowActionBarSize" />
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->
@@ -4003,8 +4010,6 @@
         <attr name="customNavigationLayout" format="reference" />
         <!-- Specifies a fixed height. -->
         <attr name="height" />
-        <!-- Specifies padding around all sides. -->
-        <attr name="padding" />
     </declare-styleable>
 
 </resources>

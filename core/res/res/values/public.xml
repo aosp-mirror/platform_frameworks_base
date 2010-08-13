@@ -1320,6 +1320,8 @@
   <public type="attr" name="fragmentOpenExitAnimation" />
   <public type="attr" name="fragmentCloseEnterAnimation" />
   <public type="attr" name="fragmentCloseExitAnimation" />
+  <public type="attr" name="windowActionBarSize" />
+
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
 

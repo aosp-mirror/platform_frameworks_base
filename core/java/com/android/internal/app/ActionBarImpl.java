@@ -110,6 +110,7 @@ public class ActionBarImpl extends ActionBar {
                 com.android.internal.R.id.lower_action_context_bar);
         mAnimatorView = (ViewAnimator) decor.findViewById(
                 com.android.internal.R.id.action_bar_animator);
+        mActionView.setContextView(mUpperContextView);
         
         if (mActionView == null || mUpperContextView == null || mAnimatorView == null) {
             throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +

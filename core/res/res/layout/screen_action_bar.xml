@@ -24,8 +24,8 @@ This is an optimized layout for a screen with the Action Bar enabled.
     <ViewAnimator android:id="@+id/action_bar_animator"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inAnimation="@anim/push_down_in"
-        android:outAnimation="@anim/push_down_out">
+        android:inAnimation="@anim/push_down_in_no_alpha"
+        android:outAnimation="@anim/push_down_out_no_alpha">
         <com.android.internal.widget.ActionBarView
             android:id="@+id/action_bar"
             android:layout_width="match_parent"

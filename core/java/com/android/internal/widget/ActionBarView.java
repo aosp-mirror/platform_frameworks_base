@@ -53,7 +53,6 @@ public class ActionBarView extends ViewGroup {
     private static final String TAG = "ActionBarView";
     
     // TODO: This must be defined in the default theme
-    private static final int CONTENT_HEIGHT_DIP = 50;
     private static final int CONTENT_PADDING_DIP = 3;
     private static final int CONTENT_SPACING_DIP = 6;
     private static final int CONTENT_ACTION_SPACING_DIP = 12;
@@ -90,12 +89,17 @@ public class ActionBarView extends ViewGroup {
     private LinearLayout mTabLayout;
     private View mCustomNavView;
     
+    private int mTitleStyleRes;
+    private int mSubtitleStyleRes;
+
     private boolean mShowMenu;
     private boolean mUserTitle;
 
     private MenuBuilder mOptionsMenu;
     private ActionMenuView mMenuView;
     
+    private ActionBarContextView mContextView;
+
     private ActionMenuItem mLogoNavItem;
     
     private NavigationCallback mCallback;
@@ -151,6 +155,9 @@ public class ActionBarView extends ViewGroup {
             setBackgroundDrawable(background);
         }
         
+        mTitleStyleRes = a.getResourceId(R.styleable.ActionBar_titleTextStyle, 0);
+        mSubtitleStyleRes = a.getResourceId(R.styleable.ActionBar_subtitleTextStyle, 0);
+
         final int customNavId = a.getResourceId(R.styleable.ActionBar_customNavigationLayout, 0);
         if (customNavId != 0) {
             LayoutInflater inflater = LayoutInflater.from(context);
@@ -159,11 +166,7 @@ public class ActionBarView extends ViewGroup {
             addView(mCustomNavView);
         }
 
-        final int padding = a.getDimensionPixelSize(R.styleable.ActionBar_padding,
-                (int) (CONTENT_PADDING_DIP * metrics.density + 0.5f));
-        setPadding(padding, padding, padding, padding);
-        mContentHeight = a.getDimensionPixelSize(R.styleable.ActionBar_height,
-                (int) (CONTENT_PADDING_DIP * metrics.density + 0.5f)) - padding * 2;
+        mContentHeight = a.getLayoutDimension(R.styleable.ActionBar_height, 0);
 
         a.recycle();
 
@@ -473,13 +476,22 @@ public class ActionBarView extends ViewGroup {
         mTitleLayout = (LinearLayout) inflater.inflate(R.layout.action_bar_title_item, null);
         mTitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_title);
         mSubtitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_subtitle);
+
+        if (mTitleStyleRes != 0) {
+            mTitleView.setTextAppearance(mContext, mTitleStyleRes);
+        }
         if (mTitle != null) {
             mTitleView.setText(mTitle);
+        }
+
+        if (mSubtitleStyleRes != 0) {
+            mSubtitleView.setTextAppearance(mContext, mSubtitleStyleRes);
         }
         if (mSubtitle != null) {
             mSubtitleView.setText(mSubtitle);
             mSubtitleView.setVisibility(VISIBLE);
         }
+
         addView(mTitleLayout);
     }
 
@@ -489,6 +501,10 @@ public class ActionBarView extends ViewGroup {
             final View child = mTabLayout.getChildAt(i);
             child.setSelected(i == position);
         }
+    }
+
+    public void setContextView(ActionBarContextView view) {
+        mContextView = view;
     }
 
     @Override
@@ -506,9 +522,13 @@ public class ActionBarView extends ViewGroup {
         }
 
         int contentWidth = MeasureSpec.getSize(widthMeasureSpec);
+
+        int maxHeight = mContentHeight > 0 ?
+                mContentHeight : MeasureSpec.getSize(heightMeasureSpec);
         
+        final int verticalPadding = getPaddingTop() + getPaddingBottom();
         int availableWidth = contentWidth - getPaddingLeft() - getPaddingRight();
-        final int height = mContentHeight - getPaddingTop() - getPaddingBottom();
+        final int height = maxHeight - verticalPadding;
         final int childSpecHeight = MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST);
 
         if (mLogoView != null && mLogoView.getVisibility() != GONE) {
@@ -561,7 +581,24 @@ public class ActionBarView extends ViewGroup {
             break;
         }
 
-        setMeasuredDimension(contentWidth, mContentHeight);
+        if (mContentHeight <= 0) {
+            int measuredHeight = 0;
+            final int count = getChildCount();
+            for (int i = 0; i < count; i++) {
+                View v = getChildAt(i);
+                int paddedViewHeight = v.getMeasuredHeight() + verticalPadding;
+                if (paddedViewHeight > measuredHeight) {
+                    measuredHeight = paddedViewHeight;
+                }
+            }
+            setMeasuredDimension(contentWidth, measuredHeight);
+        } else {
+            setMeasuredDimension(contentWidth, maxHeight);
+        }
+
+        if (mContextView != null) {
+            mContextView.setHeight(getMeasuredHeight());
+        }
     }
 
     private int measureChildView(View child, int availableWidth, int childSpecHeight, int spacing) {
