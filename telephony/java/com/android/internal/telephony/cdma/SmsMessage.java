@@ -287,7 +287,7 @@ public class SmsMessage extends SmsMessageBase {
      * @param destAddr              Address of the recipient.
      * @param message               String representation of the message payload.
      * @param statusReportRequested Indicates whether a report is requested for this message.
-     * @param headerData            Array containing the data for the User Data Header, preceded
+     * @param smsHeader             Array containing the data for the User Data Header, preceded
      *                              by the Element Identifiers.
      * @return a <code>SubmitPdu</code> containing the encoded SC
      *         address, if applicable, and the encoded message.
@@ -355,7 +355,7 @@ public class SmsMessage extends SmsMessageBase {
      * Get an SMS-SUBMIT PDU for a data message to a destination address &amp; port
      *
      * @param destAddr the address of the destination for the message
-     * @param userDara the data for the message
+     * @param userData the data for the message
      * @param statusReportRequested Indicates whether a report is requested for this message.
      * @return a <code>SubmitPdu</code> containing the encoded SC
      *         address, if applicable, and the encoded message.
@@ -446,7 +446,7 @@ public class SmsMessage extends SmsMessageBase {
      */
     public static TextEncodingDetails calculateLength(CharSequence messageBody,
             boolean use7bitOnly) {
-        return BearerData.calcTextEncodingDetails(messageBody.toString(), use7bitOnly);
+        return BearerData.calcTextEncodingDetails(messageBody, use7bitOnly);
     }
 
     /**
