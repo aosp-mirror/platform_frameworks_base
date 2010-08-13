@@ -1132,7 +1132,8 @@ public class WifiStateTracker extends NetworkStateTracker {
                     setDetailedState(DetailedState.CONNECTED);
                     sendNetworkStateChangeBroadcast(mWifiInfo.getBSSID());
                 } else {
-                    mTarget.sendEmptyMessage(EVENT_CONFIGURATION_CHANGED);
+                    msg = mTarget.obtainMessage(EVENT_CONFIGURATION_CHANGED, mNetworkInfo);
+                    msg.sendToTarget();
                 }
                 if (LOCAL_LOGD) Log.v(TAG, "IP configuration: " + mDhcpInfo);
                 // Wi-Fi interface configuration state changed:
@@ -2476,7 +2477,8 @@ public class WifiStateTracker extends NetworkStateTracker {
                 resetConnections(true);
                 configureInterface();
                 if (mUseStaticIp) {
-                    mTarget.sendEmptyMessage(EVENT_CONFIGURATION_CHANGED);
+                    Message msg = mTarget.obtainMessage(EVENT_CONFIGURATION_CHANGED, mNetworkInfo);
+                    msg.sendToTarget();
                 }
             }
         }

@@ -582,7 +582,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         !network.isTeardownRequested()) {
                     if (ni.isConnected() == true) {
                         // add the pid-specific dns
-                        handleDnsConfigurationChange();
+                        handleDnsConfigurationChange(networkType);
                         if (DBG) Slog.d(TAG, "special network already active");
                         return Phone.APN_ALREADY_ACTIVE;
                     }
@@ -914,7 +914,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
         // do this before we broadcast the change
-        handleConnectivityChange();
+        handleConnectivityChange(prevNetType);
 
         sendStickyBroadcast(intent);
         /*
@@ -1070,9 +1070,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
 
-        // do this before we broadcast the change
-        handleConnectivityChange();
-
         sendStickyBroadcast(intent);
         /*
          * If the failover network is already connected, then immediately send
@@ -1143,7 +1140,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         thisNet.setTeardownRequested(false);
         thisNet.updateNetworkSettings();
-        handleConnectivityChange();
+        handleConnectivityChange(type);
         sendConnectedBroadcast(info);
     }
 
@@ -1170,38 +1167,29 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     /**
-     * After any kind of change in the connectivity state of any network,
-     * make sure that anything that depends on the connectivity state of
-     * more than one network is set up correctly. We're mainly concerned
-     * with making sure that the list of DNS servers is set up  according
-     * to which networks are connected, and ensuring that the right routing
-     * table entries exist.
+     * After a change in the connectivity state of any network, We're mainly
+     * concerned with making sure that the list of DNS servers is setupup
+     * according to which networks are connected, and ensuring that the
+     * right routing table entries exist.
      */
-    private void handleConnectivityChange() {
+    private void handleConnectivityChange(int netType) {
         /*
          * If a non-default network is enabled, add the host routes that
-         * will allow it's DNS servers to be accessed.  Only
-         * If both mobile and wifi are enabled, add the host routes that
-         * will allow MMS traffic to pass on the mobile network. But
-         * remove the default route for the mobile network, so that there
-         * will be only one default route, to ensure that all traffic
-         * except MMS will travel via Wi-Fi.
+         * will allow it's DNS servers to be accessed.
          */
-        handleDnsConfigurationChange();
+        handleDnsConfigurationChange(netType);
 
-        for (int netType : mPriorityList) {
-            if (mNetTrackers[netType].getNetworkInfo().isConnected()) {
-                if (mNetAttributes[netType].isDefault()) {
-                    mNetTrackers[netType].addDefaultRoute();
-                } else {
-                    mNetTrackers[netType].addPrivateDnsRoutes();
-                }
+        if (mNetTrackers[netType].getNetworkInfo().isConnected()) {
+            if (mNetAttributes[netType].isDefault()) {
+                mNetTrackers[netType].addDefaultRoute();
             } else {
-                if (mNetAttributes[netType].isDefault()) {
-                    mNetTrackers[netType].removeDefaultRoute();
-                } else {
-                    mNetTrackers[netType].removePrivateDnsRoutes();
-                }
+                mNetTrackers[netType].addPrivateDnsRoutes();
+            }
+        } else {
+            if (mNetAttributes[netType].isDefault()) {
+                mNetTrackers[netType].removeDefaultRoute();
+            } else {
+                mNetTrackers[netType].removePrivateDnsRoutes();
             }
         }
     }
@@ -1272,41 +1260,36 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         SystemProperties.set("net.dnschange", "" + (n+1));
     }
 
-    private void handleDnsConfigurationChange() {
+    private void handleDnsConfigurationChange(int netType) {
         // add default net's dns entries
-        for (int x = mPriorityList.length-1; x>= 0; x--) {
-            int netType = mPriorityList[x];
-            NetworkStateTracker nt = mNetTrackers[netType];
-            if (nt != null && nt.getNetworkInfo().isConnected() &&
-                    !nt.isTeardownRequested()) {
-                String[] dnsList = nt.getNameServers();
-                if (mNetAttributes[netType].isDefault()) {
-                    int j = 1;
-                    for (String dns : dnsList) {
-                        if (dns != null && !TextUtils.equals(dns, "0.0.0.0")) {
-                            if (DBG) {
-                                Slog.d(TAG, "adding dns " + dns + " for " +
-                                        nt.getNetworkInfo().getTypeName());
-                            }
-                            SystemProperties.set("net.dns" + j++, dns);
+        NetworkStateTracker nt = mNetTrackers[netType];
+        if (nt != null && nt.getNetworkInfo().isConnected() && !nt.isTeardownRequested()) {
+            String[] dnsList = nt.getNameServers();
+            if (mNetAttributes[netType].isDefault()) {
+                int j = 1;
+                for (String dns : dnsList) {
+                    if (dns != null && !TextUtils.equals(dns, "0.0.0.0")) {
+                        if (DBG) {
+                            Slog.d(TAG, "adding dns " + dns + " for " +
+                                    nt.getNetworkInfo().getTypeName());
                         }
+                        SystemProperties.set("net.dns" + j++, dns);
                     }
-                    for (int k=j ; k<mNumDnsEntries; k++) {
-                        if (DBG) Slog.d(TAG, "erasing net.dns" + k);
-                        SystemProperties.set("net.dns" + k, "");
-                    }
-                    mNumDnsEntries = j;
-                } else {
-                    // set per-pid dns for attached secondary nets
-                    List pids = mNetRequestersPids[netType];
-                    for (int y=0; y< pids.size(); y++) {
-                        Integer pid = (Integer)pids.get(y);
-                        writePidDns(dnsList, pid.intValue());
-                    }
+                }
+                for (int k=j ; k<mNumDnsEntries; k++) {
+                    if (DBG) Slog.d(TAG, "erasing net.dns" + k);
+                    SystemProperties.set("net.dns" + k, "");
+                }
+                mNumDnsEntries = j;
+            } else {
+                // set per-pid dns for attached secondary nets
+                List pids = mNetRequestersPids[netType];
+                for (int y=0; y< pids.size(); y++) {
+                    Integer pid = (Integer)pids.get(y);
+                    writePidDns(dnsList, pid.intValue());
                 }
             }
         }
-
         bumpDns();
     }
 
@@ -1437,9 +1420,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 case NetworkStateTracker.EVENT_NOTIFICATION_CHANGED:
                     handleNotificationChange(msg.arg1 == 1, msg.arg2,
                             (Notification) msg.obj);
+                    break;
 
                 case NetworkStateTracker.EVENT_CONFIGURATION_CHANGED:
-                    handleDnsConfigurationChange();
+                    info = (NetworkInfo) msg.obj;
+                    type = info.getType();
+                    handleDnsConfigurationChange(type);
                     break;
 
                 case NetworkStateTracker.EVENT_ROAMING_CHANGED:

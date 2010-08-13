@@ -45,7 +45,6 @@ public abstract class NetworkStateTracker extends Handler {
     protected String[] mDnsPropNames;
     private boolean mPrivateDnsRouteSet;
     protected int mDefaultGatewayAddr;
-    private boolean mDefaultRouteSet;
     private boolean mTeardownRequested;
 
     private static boolean DBG = true;
@@ -153,25 +152,22 @@ public abstract class NetworkStateTracker extends Handler {
     }
 
     public void addDefaultRoute() {
-        if ((mInterfaceName != null) && (mDefaultGatewayAddr != 0) &&
-                mDefaultRouteSet == false) {
+        if ((mInterfaceName != null) && (mDefaultGatewayAddr != 0)) {
             if (DBG) {
                 Log.d(TAG, "addDefaultRoute for " + mNetworkInfo.getTypeName() +
                         " (" + mInterfaceName + "), GatewayAddr=" + mDefaultGatewayAddr);
             }
             NetworkUtils.setDefaultRoute(mInterfaceName, mDefaultGatewayAddr);
-            mDefaultRouteSet = true;
         }
     }
 
     public void removeDefaultRoute() {
-        if (mInterfaceName != null && mDefaultRouteSet == true) {
+        if (mInterfaceName != null) {
             if (DBG) {
                 Log.d(TAG, "removeDefaultRoute for " + mNetworkInfo.getTypeName() + " (" +
                         mInterfaceName + ")");
             }
             NetworkUtils.removeDefaultRoute(mInterfaceName);
-            mDefaultRouteSet = false;
         }
     }
 
