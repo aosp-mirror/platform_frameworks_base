@@ -524,6 +524,7 @@ public class PhoneNumberUtilsTest extends AndroidTestCase {
         assertEquals("6502910000", PhoneNumberUtils.normalizeNumber("650 2910000"));
         assertEquals("1234567", PhoneNumberUtils.normalizeNumber("12,3#4*567"));
         assertEquals("8004664114", PhoneNumberUtils.normalizeNumber("800-GOOG-114"));
+        assertEquals("+16502910000", PhoneNumberUtils.normalizeNumber("+1 650 2910000"));
     }
 
 }
