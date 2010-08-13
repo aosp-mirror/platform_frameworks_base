@@ -199,6 +199,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     // The minimum amount of time between successive GC requests for a process.
     static final int GC_MIN_INTERVAL = 60*1000;
 
+    // The rate at which we check for apps using excessive wake locks -- 15 mins.
+    static final int WAKE_LOCK_CHECK_DELAY = 15*60*1000;
+
     // How long we allow a receiver to run before giving up on it.
     static final int BROADCAST_TIMEOUT = 10*1000;
 
@@ -770,6 +773,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     boolean mDidAppSwitch;
     
     /**
+     * Last time (in realtime) at which we checked for wake lock usage.
+     */
+    long mLastWakeLockCheckTime;
+
+    /**
      * Set while we are wanting to sleep, to prevent any
      * activities from being started/resumed.
      */
@@ -914,6 +922,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final int POST_HEAVY_NOTIFICATION_MSG = 24;
     static final int CANCEL_HEAVY_NOTIFICATION_MSG = 25;
     static final int SHOW_STRICT_MODE_VIOLATION_MSG = 26;
+    static final int CHECK_EXCESSIVE_WAKE_LOCKS_MSG = 27;
 
     AlertDialog mUidAlert;
 
@@ -1171,6 +1180,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     Slog.w(ActivityManagerService.TAG,
                             "Error canceling notification for service", e);
                 } catch (RemoteException e) {
+                }
+            } break;
+            case CHECK_EXCESSIVE_WAKE_LOCKS_MSG: {
+                synchronized (ActivityManagerService.this) {
+                    checkExcessiveWakeLocksLocked(true);
+                    mHandler.removeMessages(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
+                    if (mSleeping) {
+                        Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
+                        mHandler.sendMessageDelayed(nmsg, WAKE_LOCK_CHECK_DELAY);
+                    }
                 }
             } break;
             }
@@ -2555,6 +2574,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         mProcDeaths[0]++;
         
+        BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+        synchronized (stats) {
+            stats.noteProcessDiedLocked(app.info.uid, pid);
+        }
+
         // Clean up already done if the process has been re-started.
         if (app.pid == pid && app.thread != null &&
                 app.thread.asBinder() == thread.asBinder()) {
@@ -3570,6 +3594,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             
             if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
+                // Start looking for apps that are abusing wake locks.
+                Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
+                mHandler.sendMessageDelayed(nmsg, WAKE_LOCK_CHECK_DELAY);
                 // Tell anyone interested that we are done booting!
                 SystemProperties.set("sys.boot_completed", "1");
                 broadcastIntentLocked(null, null,
@@ -5375,6 +5402,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             } else {
                 Slog.w(TAG, "goingToSleep with no resumed activity!");
             }
+
+            // Initialize the wake times of all processes.
+            checkExcessiveWakeLocksLocked(false);
+            mHandler.removeMessages(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
+            Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
+            mHandler.sendMessageDelayed(nmsg, WAKE_LOCK_CHECK_DELAY);
         }
     }
 
@@ -5424,6 +5457,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mWindowManager.setEventDispatching(true);
             mSleeping = false;
             mMainStack.resumeTopActivityLocked(null);
+            mHandler.removeMessages(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
         }
     }
 
@@ -11259,6 +11293,52 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
+    final void checkExcessiveWakeLocksLocked(boolean doKills) {
+        BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+        if (mLastWakeLockCheckTime == 0) {
+            doKills = false;
+        }
+        if (stats.isScreenOn()) {
+            doKills = false;
+        }
+        final long curRealtime = SystemClock.elapsedRealtime();
+        final long timeSince = curRealtime - mLastWakeLockCheckTime;
+        mLastWakeLockCheckTime = curRealtime;
+        if (timeSince < 5*60*1000) {
+            doKills = false;
+        }
+        int i = mLruProcesses.size();
+        while (i > 0) {
+            i--;
+            ProcessRecord app = mLruProcesses.get(i);
+            if (app.curAdj >= HIDDEN_APP_MIN_ADJ) {
+                long wtime;
+                synchronized (stats) {
+                    wtime = stats.getProcessWakeTime(app.info.uid,
+                            app.pid, curRealtime);
+                }
+                long timeUsed = wtime - app.lastWakeTime;
+                Slog.i(TAG, "Wake for " + app + ": over "
+                        + timeSince + " used " + timeUsed
+                        + " (" + ((timeUsed*100)/timeSince) + "%)");
+                // If a process has held a wake lock for more
+                // than 50% of the time during this period,
+                // that sounds pad.  Kill!
+                if (doKills && timeSince > 0
+                        && ((timeUsed*100)/timeSince) >= 50) {
+                    Slog.i(TAG, "Excessive wake lock in " + app.processName
+                            + " (pid " + app.pid + "): held " + timeUsed
+                            + " during " + timeSince);
+                    EventLog.writeEvent(EventLogTags.AM_KILL, app.pid,
+                            app.processName, app.setAdj, "excessive wake lock");
+                    Process.killProcessQuiet(app.pid);
+                } else {
+                    app.lastWakeTime = wtime;
+                }
+            }
+        }
+    }
+
     private final boolean updateOomAdjLocked(
         ProcessRecord app, int hiddenAdj, ProcessRecord TOP_APP) {
         app.hiddenAdj = hiddenAdj;
@@ -11281,6 +11361,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     // Likewise do a gc when an app is moving in to the
                     // background (such as a service stopping).
                     scheduleAppGcLocked(app);
+                    // And note its current wake lock time.
+                    BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+                    synchronized (stats) {
+                        app.lastWakeTime = stats.getProcessWakeTime(app.info.uid,
+                                app.pid, SystemClock.elapsedRealtime());
+                    }
                 }
                 app.setRawAdj = app.curRawAdj;
             }

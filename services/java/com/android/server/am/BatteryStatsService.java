@@ -93,31 +93,31 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         return data;
     }
     
-    public void noteStartWakelock(int uid, String name, int type) {
+    public void noteStartWakelock(int uid, int pid, String name, int type) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.getUidStatsLocked(uid).noteStartWakeLocked(name, type);
+            mStats.noteStartWakeLocked(uid, pid, name, type);
         }
     }
 
-    public void noteStopWakelock(int uid, String name, int type) {
+    public void noteStopWakelock(int uid, int pid, String name, int type) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.getUidStatsLocked(uid).noteStopWakeLocked(name, type);
+            mStats.noteStopWakeLocked(uid, pid, name, type);
         }
     }
 
     public void noteStartSensor(int uid, int sensor) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.getUidStatsLocked(uid).noteStartSensor(sensor);
+            mStats.noteStartSensorLocked(uid, sensor);
         }
     }
     
     public void noteStopSensor(int uid, int sensor) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.getUidStatsLocked(uid).noteStopSensor(sensor);
+            mStats.noteStopSensorLocked(uid, sensor);
         }
     }
     
