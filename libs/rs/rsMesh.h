@@ -61,6 +61,11 @@ public:
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_MESH; }
     static Mesh *createFromStream(Context *rsc, IStream *stream);
 
+    // Bounding volumes
+    float mBBoxMin[3];
+    float mBBoxMax[3];
+    void computeBBox();
+
 protected:
 };
 

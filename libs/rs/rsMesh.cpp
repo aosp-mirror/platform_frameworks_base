@@ -224,6 +224,49 @@ Mesh *Mesh::createFromStream(Context *rsc, IStream *stream)
     return mesh;
 }
 
+void Mesh::computeBBox() {
+    float *posPtr = NULL;
+    uint32_t vectorSize = 0;
+    uint32_t stride = 0;
+    uint32_t numVerts = 0;
+    // First we need to find the position ptr and stride
+    for (uint32_t ct=0; ct < mVertexBufferCount; ct++) {
+        const Type *bufferType = mVertexBuffers[ct]->getType();
+        const Element *bufferElem = bufferType->getElement();
+
+        for (uint32_t ct=0; ct < bufferElem->getFieldCount(); ct++) {
+            if(strcmp(bufferElem->getFieldName(ct), "position") == 0) {
+                vectorSize = bufferElem->getField(ct)->getComponent().getVectorSize();
+                stride = bufferElem->getSizeBytes() / sizeof(float);
+                uint32_t offset = bufferElem->getFieldOffsetBytes(ct);
+                posPtr = (float*)((uint8_t*)mVertexBuffers[ct]->getPtr() + offset);
+                numVerts = bufferType->getDimX();
+                break;
+            }
+        }
+        if(posPtr) {
+            break;
+        }
+    }
+
+    mBBoxMin[0] = mBBoxMin[1] = mBBoxMin[2] = 1e6;
+    mBBoxMax[0] = mBBoxMax[1] = mBBoxMax[2] = -1e6;
+    if(!posPtr) {
+        LOGE("Unable to compute bounding box");
+        mBBoxMin[0] = mBBoxMin[1] = mBBoxMin[2] = 0.0f;
+        mBBoxMax[0] = mBBoxMax[1] = mBBoxMax[2] = 0.0f;
+        return;
+    }
+
+    for(uint32_t i = 0; i < numVerts; i ++) {
+        for(uint32_t v = 0; v < vectorSize; v ++) {
+            mBBoxMin[v] = rsMin(mBBoxMin[v], posPtr[v]);
+            mBBoxMax[v] = rsMax(mBBoxMax[v], posPtr[v]);
+        }
+        posPtr += stride;
+    }
+}
+
 
 MeshContext::MeshContext()
 {
