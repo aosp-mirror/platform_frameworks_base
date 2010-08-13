@@ -20,6 +20,12 @@ import java.util.WeakHashMap;
 
 import android.animation.PropertyAnimator;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -72,11 +78,9 @@ public class StackView extends AdapterViewAnimator {
      * These variables are all related to the current state of touch interaction
      * with the stack
      */
-    private boolean mGestureComplete = false;
     private float mInitialY;
     private float mInitialX;
     private int mActivePointerId;
-    private int mYOffset = 0;
     private int mYVelocity = 0;
     private int mSwipeGestureType = GESTURE_NONE;
     private int mViewHeight;
@@ -85,6 +89,8 @@ public class StackView extends AdapterViewAnimator {
     private int mMaximumVelocity;
     private VelocityTracker mVelocityTracker;
 
+    private ImageView mHighlight;
+    private StackSlider mStackSlider;
     private boolean mFirstLayoutHappened = false;
 
     // TODO: temp hack to get this thing started
@@ -107,6 +113,15 @@ public class StackView extends AdapterViewAnimator {
         mTouchSlop = configuration.getScaledTouchSlop();// + 5;
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mActivePointerId = INVALID_POINTER;
+
+        mHighlight = new ImageView(getContext());
+        mHighlight.setLayoutParams(new LayoutParams(mHighlight));
+        addViewInLayout(mHighlight, -1, new LayoutParams(mHighlight));
+        mStackSlider = new StackSlider();
+
+        if (!sPaintsInitialized) {
+            initializePaints(getContext());
+        }
     }
 
     /**
@@ -124,6 +139,7 @@ public class StackView extends AdapterViewAnimator {
         } else if (fromIndex == mNumActiveViews - 1 && toIndex == mNumActiveViews - 2) {
             // Slide item in
             view.setVisibility(VISIBLE);
+
             LayoutParams lp = (LayoutParams) view.getLayoutParams();
 
             int largestDuration = (int) Math.round(
@@ -136,19 +152,18 @@ public class StackView extends AdapterViewAnimator {
             duration = Math.min(duration, largestDuration);
             duration = Math.max(duration, MINIMUM_ANIMATION_DURATION);
 
-            PropertyAnimator slideDown = new PropertyAnimator(duration, lp,
-                    "verticalOffset", lp.verticalOffset, 0);
-            slideDown.start();
+            PropertyAnimator slideInY = new PropertyAnimator(duration, mStackSlider,
+                    "YProgress", mStackSlider.getYProgress(), 0);
+            slideInY.start();
+            PropertyAnimator slideInX = new PropertyAnimator(duration, mStackSlider,
+                    "XProgress", mStackSlider.getXProgress(), 0);
+            slideInX.start();
 
-            PropertyAnimator fadeIn = new PropertyAnimator(duration, view,
-                    "alpha", view.getAlpha(), 1.0f);
-            fadeIn.start();
         } else if (fromIndex == mNumActiveViews - 2 && toIndex == mNumActiveViews - 1) {
             // Slide item out
             LayoutParams lp = (LayoutParams) view.getLayoutParams();
 
-            int largestDuration = (int) Math.round(
-                    (1 - (lp.verticalOffset*1.0f/-mViewHeight))*DEFAULT_ANIMATION_DURATION);
+            int largestDuration = (int) Math.round(mStackSlider.getYProgress()*DEFAULT_ANIMATION_DURATION);
             int duration = largestDuration;
             if (mYVelocity != 0) {
                 duration = 1000*(lp.verticalOffset + mViewHeight)/Math.abs(mYVelocity);
@@ -157,13 +172,13 @@ public class StackView extends AdapterViewAnimator {
             duration = Math.min(duration, largestDuration);
             duration = Math.max(duration, MINIMUM_ANIMATION_DURATION);
 
-            PropertyAnimator slideUp = new PropertyAnimator(duration, lp,
-                    "verticalOffset", lp.verticalOffset, -mViewHeight);
-            slideUp.start();
+            PropertyAnimator slideOutY = new PropertyAnimator(duration, mStackSlider,
+                    "YProgress", mStackSlider.getYProgress(), 1);
+            slideOutY.start();
+            PropertyAnimator slideOutX = new PropertyAnimator(duration, mStackSlider,
+                    "XProgress", mStackSlider.getXProgress(), 0);
+            slideOutX.start();
 
-            PropertyAnimator fadeOut = new PropertyAnimator(duration, view,
-                    "alpha", view.getAlpha(), 0.0f);
-            fadeOut.start();
         } else if (fromIndex == -1 && toIndex == mNumActiveViews - 1) {
             // Make sure this view that is "waiting in the wings" is invisible
             view.setAlpha(0.0f);
@@ -233,7 +248,6 @@ public class StackView extends AdapterViewAnimator {
                 view.setClipChildren(false);
                 view.setClipToPadding(false);
             }
-
             mFirstLayoutHappened = true;
         }
     }
@@ -258,16 +272,10 @@ public class StackView extends AdapterViewAnimator {
                     Log.d(TAG, "Error: No data for our primary pointer.");
                     return false;
                 }
-
                 float newY = ev.getY(pointerIndex);
                 float deltaY = newY - mInitialY;
 
-                if ((int) Math.abs(deltaY) > mTouchSlop && mSwipeGestureType == GESTURE_NONE) {
-                    mSwipeGestureType = deltaY < 0 ? GESTURE_SLIDE_UP : GESTURE_SLIDE_DOWN;
-                    mGestureComplete = false;
-                    cancelLongPress();
-                    requestDisallowInterceptTouchEvent(true);
-                }
+                beginGestureIfNeeded(deltaY);
                 break;
             }
             case MotionEvent.ACTION_POINTER_UP: {
@@ -278,11 +286,31 @@ public class StackView extends AdapterViewAnimator {
             case MotionEvent.ACTION_CANCEL: {
                 mActivePointerId = INVALID_POINTER;
                 mSwipeGestureType = GESTURE_NONE;
-                mGestureComplete = true;
             }
         }
 
         return mSwipeGestureType != GESTURE_NONE;
+    }
+
+    private void beginGestureIfNeeded(float deltaY) {
+        if ((int) Math.abs(deltaY) > mTouchSlop && mSwipeGestureType == GESTURE_NONE) {
+            mSwipeGestureType = deltaY < 0 ? GESTURE_SLIDE_UP : GESTURE_SLIDE_DOWN;
+            cancelLongPress();
+            requestDisallowInterceptTouchEvent(true);
+
+            int activeIndex = mSwipeGestureType == GESTURE_SLIDE_DOWN ? mNumActiveViews - 1
+                    : mNumActiveViews - 2;
+
+            View v = getViewAtRelativeIndex(activeIndex);
+            if (v != null) {
+                mHighlight.setImageBitmap(createOutline(v));
+                mHighlight.bringToFront();
+                v.bringToFront();
+                mStackSlider.setView(v);
+                if (mSwipeGestureType == GESTURE_SLIDE_DOWN)
+                    v.setVisibility(VISIBLE);
+            }
+        }
     }
 
     @Override
@@ -296,8 +324,9 @@ public class StackView extends AdapterViewAnimator {
         }
 
         float newY = ev.getY(pointerIndex);
+        float newX = ev.getX(pointerIndex);
         float deltaY = newY - mInitialY;
-
+        float deltaX = newX - mInitialX;
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
         }
@@ -305,48 +334,21 @@ public class StackView extends AdapterViewAnimator {
 
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_MOVE: {
-                if ((int) Math.abs(deltaY) > mTouchSlop && mSwipeGestureType == GESTURE_NONE) {
-                    mSwipeGestureType = deltaY < 0 ? GESTURE_SLIDE_UP : GESTURE_SLIDE_DOWN;
-                    mGestureComplete = false;
-                    cancelLongPress();
-                    requestDisallowInterceptTouchEvent(true);
+                beginGestureIfNeeded(deltaY);
+
+                float rx = 0.3f*deltaX/(mViewHeight*1.0f);
+                if (mSwipeGestureType == GESTURE_SLIDE_DOWN) {
+                    float r = (deltaY-mTouchSlop*1.0f)/mViewHeight*1.0f;
+                    mStackSlider.setYProgress(1 - r);
+                    mStackSlider.setXProgress(rx);
+                    return true;
+                } else if (mSwipeGestureType == GESTURE_SLIDE_UP) {
+                    float r = -(deltaY + mTouchSlop*1.0f)/mViewHeight*1.0f;
+                    mStackSlider.setYProgress(r);
+                    mStackSlider.setXProgress(rx);
+                    return true;
                 }
 
-                if (!mGestureComplete) {
-                    if (mSwipeGestureType == GESTURE_SLIDE_DOWN) {
-                        View v = getViewAtRelativeIndex(mNumActiveViews - 1);
-                        if (v != null) {
-                            // This view is present but hidden, make sure it's visible
-                            // if they pull down
-                            v.setVisibility(VISIBLE);
-
-                            float r = (deltaY-mTouchSlop)*1.0f / (mSwipeThreshold);
-                            mYOffset = Math.min(-mViewHeight + (int)  Math.round(
-                                    r*mSwipeThreshold) - mTouchSlop, 0);
-                            LayoutParams lp = (LayoutParams) v.getLayoutParams();
-                            lp.setVerticalOffset(mYOffset);
-
-                            float alpha = Math.max(0.0f, 1.0f - (1.0f*mYOffset/-mViewHeight));
-                            alpha = Math.min(1.0f, alpha);
-                            v.setAlpha(alpha);
-                        }
-                        return true;
-                    } else if (mSwipeGestureType == GESTURE_SLIDE_UP) {
-                        View v = getViewAtRelativeIndex(mNumActiveViews - 2);
-
-                        if (v != null) {
-                            float r = -(deltaY*1.0f + mTouchSlop) / (mSwipeThreshold);
-                            mYOffset = Math.min((int) Math.round(r*-mSwipeThreshold), 0);
-                            LayoutParams lp = (LayoutParams) v.getLayoutParams();
-                            lp.setVerticalOffset(mYOffset);
-
-                            float alpha = Math.max(0.0f, 1.0f - (1.0f*mYOffset/-mViewHeight));
-                            alpha = Math.min(1.0f, alpha);
-                            v.setAlpha(alpha);
-                        }
-                        return true;
-                    }
-                }
                 break;
             }
             case MotionEvent.ACTION_UP: {
@@ -359,9 +361,7 @@ public class StackView extends AdapterViewAnimator {
             }
             case MotionEvent.ACTION_CANCEL: {
                 mActivePointerId = INVALID_POINTER;
-                mGestureComplete = true;
                 mSwipeGestureType = GESTURE_NONE;
-                mYOffset = 0;
                 break;
             }
         }
@@ -427,61 +427,158 @@ public class StackView extends AdapterViewAnimator {
             mVelocityTracker = null;
         }
 
-        if (deltaY > mSwipeThreshold && mSwipeGestureType == GESTURE_SLIDE_DOWN &&
-                !mGestureComplete) {
+        if (deltaY > mSwipeThreshold && mSwipeGestureType == GESTURE_SLIDE_DOWN) {
             // Swipe threshold exceeded, swipe down
             showNext();
-        } else if (deltaY < -mSwipeThreshold && mSwipeGestureType == GESTURE_SLIDE_UP &&
-                !mGestureComplete) {
+            mHighlight.bringToFront();
+        } else if (deltaY < -mSwipeThreshold && mSwipeGestureType == GESTURE_SLIDE_UP) {
             // Swipe threshold exceeded, swipe up
             showPrevious();
-        } else if (mSwipeGestureType == GESTURE_SLIDE_UP && !mGestureComplete) {
+            mHighlight.bringToFront();
+        } else if (mSwipeGestureType == GESTURE_SLIDE_UP) {
             // Didn't swipe up far enough, snap back down
-            View v = getViewAtRelativeIndex(mNumActiveViews - 2);
-            if (v != null) {
-                // Compute the animation duration based on how far they pulled it up
-                LayoutParams lp = (LayoutParams) v.getLayoutParams();
-                int duration = (int) Math.round(
-                        lp.verticalOffset*1.0f/-mViewHeight*DEFAULT_ANIMATION_DURATION);
-                duration = Math.max(MINIMUM_ANIMATION_DURATION, duration);
+            int duration = (int) Math.round(mStackSlider.getYProgress()*DEFAULT_ANIMATION_DURATION);
 
-                // Animate back down
-                PropertyAnimator slideDown = new PropertyAnimator(duration, lp,
-                        "verticalOffset", lp.verticalOffset, 0);
-                slideDown.start();
-                PropertyAnimator fadeIn = new PropertyAnimator(duration, v,
-                        "alpha",v.getAlpha(), 1.0f);
-                fadeIn.start();
-            }
-        } else if (mSwipeGestureType == GESTURE_SLIDE_DOWN && !mGestureComplete) {
+            PropertyAnimator snapBackY = new PropertyAnimator(duration, mStackSlider,
+                    "YProgress", mStackSlider.getYProgress(), 0);
+            snapBackY.start();
+            PropertyAnimator snapBackX = new PropertyAnimator(duration, mStackSlider,
+                    "XProgress", mStackSlider.getXProgress(), 0);
+            snapBackX.start();
+        } else if (mSwipeGestureType == GESTURE_SLIDE_DOWN) {
             // Didn't swipe down far enough, snap back up
-            View v = getViewAtRelativeIndex(mNumActiveViews - 1);
-            if (v != null) {
-                // Compute the animation duration based on how far they pulled it down
-                LayoutParams lp = (LayoutParams) v.getLayoutParams();
-                int duration = (int) Math.round(
-                        (1 - lp.verticalOffset*1.0f/-mViewHeight)*DEFAULT_ANIMATION_DURATION);
-                duration = Math.max(MINIMUM_ANIMATION_DURATION, duration);
-
-                // Animate back up
-                PropertyAnimator slideUp = new PropertyAnimator(duration, lp,
-                        "verticalOffset", lp.verticalOffset, -mViewHeight);
-                slideUp.start();
-                PropertyAnimator fadeOut = new PropertyAnimator(duration, v,
-                        "alpha",v.getAlpha(), 0.0f);
-                fadeOut.start();
-            }
+            int duration = (int) Math.round((1 -
+                    mStackSlider.getYProgress())*DEFAULT_ANIMATION_DURATION);
+            PropertyAnimator snapBackY = new PropertyAnimator(duration, mStackSlider,
+                    "YProgress", mStackSlider.getYProgress(), 1);
+            snapBackY.start();
+            PropertyAnimator snapBackX = new PropertyAnimator(duration, mStackSlider,
+                    "XProgress", mStackSlider.getXProgress(), 0);
+            snapBackX.start();
         }
 
         mActivePointerId = INVALID_POINTER;
-        mGestureComplete = true;
         mSwipeGestureType = GESTURE_NONE;
-        mYOffset = 0;
+    }
+
+    private class StackSlider {
+        View mView;
+        float mYProgress;
+        float mXProgress;
+
+        private float cubic(float r) {
+            return (float) (Math.pow(2*r-1, 3) + 1)/2.0f;
+        }
+
+        private float highlightAlphaInterpolator(float r) {
+            float pivot = 0.4f;
+            if (r < pivot) {
+                return 0.85f*cubic(r/pivot);
+            } else {
+                return 0.85f*cubic(1 - (r-pivot)/(1-pivot));
+            }
+        }
+
+        private float viewAlphaInterpolator(float r) {
+            float pivot = 0.3f;
+            if (r > pivot) {
+                return (r - pivot)/(1 - pivot);
+            } else {
+                return 0;
+            }
+        }
+
+        void setView(View v) {
+            mView = v;
+        }
+
+        public void setYProgress(float r) {
+            // enforce r between 0 and 1
+            r = Math.min(1.0f, r);
+            r = Math.max(0, r);
+
+            mYProgress = r;
+
+            final LayoutParams viewLp = (LayoutParams) mView.getLayoutParams();
+            final LayoutParams highlightLp = (LayoutParams) mHighlight.getLayoutParams();
+
+            viewLp.setVerticalOffset((int) Math.round(-r*mViewHeight));
+            highlightLp.setVerticalOffset((int) Math.round(-r*mViewHeight));
+            mHighlight.setAlpha(highlightAlphaInterpolator(r));
+            mView.setAlpha(viewAlphaInterpolator(1-r));
+        }
+
+        public void setXProgress(float r) {
+            // enforce r between 0 and 1
+            r = Math.min(1.0f, r);
+            r = Math.max(-1.0f, r);
+
+            mXProgress = r;
+
+            final LayoutParams viewLp = (LayoutParams) mView.getLayoutParams();
+            final LayoutParams highlightLp = (LayoutParams) mHighlight.getLayoutParams();
+
+            viewLp.setHorizontalOffset((int) Math.round(r*mViewHeight));
+            highlightLp.setHorizontalOffset((int) Math.round(r*mViewHeight));
+        }
+
+        float getYProgress() {
+            return mYProgress;
+        }
+
+        float getXProgress() {
+            return mXProgress;
+        }
     }
 
     @Override
     public void onRemoteAdapterConnected() {
         super.onRemoteAdapterConnected();
         setDisplayedChild(mIndex);
+    }
+
+    private static final Paint sHolographicPaint = new Paint();
+    private static final Paint sErasePaint = new Paint();
+    private static boolean sPaintsInitialized = false;
+    private static final float STROKE_WIDTH = 3.0f;
+
+    static void initializePaints(Context context) {
+        sHolographicPaint.setColor(0xff6699ff);
+        sHolographicPaint.setFilterBitmap(true);
+        sErasePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
+        sErasePaint.setFilterBitmap(true);
+        sPaintsInitialized = true;
+    }
+
+    static Bitmap createOutline(View v) {
+        Bitmap bitmap = Bitmap.createBitmap(v.getMeasuredWidth(), v.getMeasuredHeight(),
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+
+        canvas.concat(v.getMatrix());
+        v.draw(canvas);
+
+        Bitmap outlineBitmap = Bitmap.createBitmap(v.getMeasuredWidth(), v.getMeasuredHeight(),
+                Bitmap.Config.ARGB_8888);
+        Canvas outlineCanvas = new Canvas(outlineBitmap);
+        drawOutline(outlineCanvas, v.getMeasuredWidth(), v.getMeasuredHeight(), bitmap);
+        bitmap.recycle();
+        return outlineBitmap;
+    }
+
+    static void drawOutline(Canvas dest, int destWidth, int destHeight, Bitmap src) {
+        dest.drawColor(0, PorterDuff.Mode.CLEAR);
+
+        Bitmap mask = src.extractAlpha();
+        Matrix id = new Matrix();
+
+        Matrix m = new Matrix();
+        float xScale = STROKE_WIDTH*2/(src.getWidth());
+        float yScale = STROKE_WIDTH*2/(src.getHeight());
+        m.preScale(1+xScale, 1+yScale, src.getWidth()/2, src.getHeight()/2);
+        dest.drawBitmap(mask, m, sHolographicPaint);
+
+        dest.drawBitmap(src, id, sErasePaint);
+        mask.recycle();
     }
 }
