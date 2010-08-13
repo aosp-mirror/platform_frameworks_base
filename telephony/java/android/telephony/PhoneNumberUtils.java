@@ -1692,6 +1692,15 @@ public class PhoneNumberUtils
     }
 
     /**
+     * @hide
+     * @param number
+     * @return true if number contains @
+     */
+    public static boolean isUriNumber(String number) {
+        return number != null && number.contains("@");
+    }
+
+    /**
      * This function handles the plus code conversion within NANP CDMA network
      * If the number format is
      * 1)+1NANP,remove +,
