@@ -98,6 +98,7 @@ AVCEncoder::AVCEncoder(
     : mSource(source),
       mMeta(meta),
       mNumInputFrames(-1),
+      mPrevTimestampUs(-1),
       mStarted(false),
       mInputBuffer(NULL),
       mInputFrameData(NULL),

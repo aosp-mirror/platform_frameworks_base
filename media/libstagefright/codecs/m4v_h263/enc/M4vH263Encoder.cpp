@@ -69,6 +69,7 @@ M4vH263Encoder::M4vH263Encoder(
       mMeta(meta),
       mNumInputFrames(-1),
       mNextModTimeUs(0),
+      mPrevTimestampUs(-1),
       mStarted(false),
       mInputBuffer(NULL),
       mInputFrameData(NULL),
@@ -292,8 +293,6 @@ status_t M4vH263Encoder::read(
     if (OK != mSource->read(&mInputBuffer, options)) {
         LOGE("Failed to read from data source");
         outputBuffer->release();
-        mInputBuffer->release();
-        mInputBuffer = NULL;
         return UNKNOWN_ERROR;
     }
 
