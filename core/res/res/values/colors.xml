@@ -18,8 +18,8 @@
 */
 -->
 <resources>
-	<drawable name="screen_background_light">#ffffffff</drawable>
-	<drawable name="screen_background_dark">#ff000000</drawable>
+	<drawable name="screen_background_light">#ffefefef</drawable>
+	<drawable name="screen_background_dark">#ff101010</drawable>
     <drawable name="status_bar_closed_default_background">#ff000000</drawable>
     <drawable name="status_bar_opened_default_background">#ff000000</drawable>
     <drawable name="search_bar_default_color">#ff000000</drawable>
@@ -36,18 +36,18 @@
     <color name="white">#ffffffff</color>
     <color name="black">#ff000000</color>
     <color name="transparent">#00000000</color>
-    <color name="background_dark">#ff000000</color>
-    <color name="bright_foreground_dark">#ffffffff</color>
+    <color name="background_dark">#ff101010</color>
+    <color name="bright_foreground_dark">#ffefefef</color>
     <color name="bright_foreground_dark_disabled">#80ffffff</color>
-    <color name="bright_foreground_dark_inverse">#ff000000</color>
+    <color name="bright_foreground_dark_inverse">@android:color/background_dark</color>
     <color name="dim_foreground_dark">#bebebe</color>
     <color name="dim_foreground_dark_disabled">#80bebebe</color>
     <color name="dim_foreground_dark_inverse">#323232</color>
     <color name="dim_foreground_dark_inverse_disabled">#80323232</color>
     <color name="hint_foreground_dark">#808080</color>
-    <color name="background_light">#ffffffff</color>
-    <color name="bright_foreground_light">#ff000000</color>
-    <color name="bright_foreground_light_inverse">#ffffffff</color>
+    <color name="background_light">@android:color/bright_foreground_dark</color>
+    <color name="bright_foreground_light">@android:color/background_dark</color>
+    <color name="bright_foreground_light_inverse">@android:color/bright_foreground_dark</color>
     <color name="bright_foreground_light_disabled">#80000000</color>
     <color name="dim_foreground_light">#323232</color>
     <color name="dim_foreground_light_disabled">#80323232</color>
