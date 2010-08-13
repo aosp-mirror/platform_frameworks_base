@@ -1675,6 +1675,9 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
     float masterVolume = mMasterVolume;
     bool  masterMute = mMasterMute;
 
+    if (masterMute) {
+        masterVolume = 0;
+    }
 #ifdef LVMX
     bool tracksConnectedChanged = false;
     bool stateChanged = false;
@@ -1696,10 +1699,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
     // Delegate master volume control to effect in output mix effect chain if needed
     sp<EffectChain> chain = getEffectChain_l(AudioSystem::SESSION_OUTPUT_MIX);
     if (chain != 0) {
-        uint32_t v = 0;
-        if (!masterMute) {
-            v = (uint32_t)(masterVolume * (1 << 24));
-        }
+        uint32_t v = (uint32_t)(masterVolume * (1 << 24));
         chain->setVolume_l(&v, &v);
         masterVolume = (float)((v + (1 << 23)) >> 24);
         chain.clear();
