@@ -1147,7 +1147,7 @@ public class WebView extends AbsoluteLayout
      * methods may be called on a WebView after destroy.
      */
     public void destroy() {
-        clearTextEntry(false);
+        clearTextEntry();
         if (mWebViewCore != null) {
             // Set the handlers to null before destroying WebViewCore so no
             // more messages will be posted.
@@ -1459,7 +1459,7 @@ public class WebView extends AbsoluteLayout
         arg.mUrl = url;
         arg.mExtraHeaders = extraHeaders;
         mWebViewCore.sendMessage(EventHub.LOAD_URL, arg);
-        clearTextEntry(false);
+        clearTextEntry();
     }
 
     /**
@@ -1488,7 +1488,7 @@ public class WebView extends AbsoluteLayout
             arg.mUrl = url;
             arg.mPostData = postData;
             mWebViewCore.sendMessage(EventHub.POST_URL, arg);
-            clearTextEntry(false);
+            clearTextEntry();
         } else {
             loadUrl(url);
         }
@@ -1544,7 +1544,7 @@ public class WebView extends AbsoluteLayout
         arg.mEncoding = encoding;
         arg.mHistoryUrl = historyUrl;
         mWebViewCore.sendMessage(EventHub.LOAD_DATA, arg);
-        clearTextEntry(false);
+        clearTextEntry();
     }
 
     /**
@@ -1600,7 +1600,7 @@ public class WebView extends AbsoluteLayout
      * Reload the current url.
      */
     public void reload() {
-        clearTextEntry(false);
+        clearTextEntry();
         switchOutDrawHistory();
         mWebViewCore.sendMessage(EventHub.RELOAD);
     }
@@ -1680,7 +1680,7 @@ public class WebView extends AbsoluteLayout
 
     private void goBackOrForward(int steps, boolean ignoreSnapshot) {
         if (steps != 0) {
-            clearTextEntry(false);
+            clearTextEntry();
             mWebViewCore.sendMessage(EventHub.GO_BACK_FORWARD, steps,
                     ignoreSnapshot ? 1 : 0);
         }
@@ -1811,18 +1811,13 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Remove the WebTextView.
-     * @param disableFocusController If true, send a message to webkit
-     *     disabling the focus controller, so the caret stops blinking.
      */
-    private void clearTextEntry(boolean disableFocusController) {
+    private void clearTextEntry() {
         if (inEditingMode()) {
             mWebTextView.remove();
         } else {
             // The keyboard may be open with the WebView as the served view
             hideSoftKeyboard();
-        }
-        if (disableFocusController) {
-            setFocusControllerInactive();
         }
     }
 
@@ -1856,7 +1851,7 @@ public class WebView extends AbsoluteLayout
             Log.w(LOGTAG, "This WebView doesn't support zoom.");
             return;
         }
-        clearTextEntry(false);
+        clearTextEntry();
         mZoomManager.invokeZoomPicker();
     }
 
@@ -3284,7 +3279,7 @@ public class WebView extends AbsoluteLayout
             centerKeyPressOnTextField();
             rebuildWebTextView();
         } else {
-            clearTextEntry(true);
+            clearTextEntry();
         }
         if (inEditingMode()) {
             return mWebTextView.performLongClick();
@@ -4037,7 +4032,7 @@ public class WebView extends AbsoluteLayout
                 }
                 return true;
             }
-            clearTextEntry(true);
+            clearTextEntry();
             nativeSetFollowedLink(true);
             if (!mCallbackProxy.uiOverrideUrlLoading(nativeCursorText())) {
                 mWebViewCore.sendMessage(EventHub.CLICK, data.mFrame,
@@ -4169,7 +4164,7 @@ public class WebView extends AbsoluteLayout
 
     @Override
     protected void onDetachedFromWindow() {
-        clearTextEntry(false);
+        clearTextEntry();
         mZoomManager.dismissZoomPicker();
         if (hasWindowFocus()) setActive(false);
         super.onDetachedFromWindow();
@@ -4214,16 +4209,17 @@ public class WebView extends AbsoluteLayout
                 // If our window regained focus, and we have focus, then begin
                 // drawing the cursor ring
                 mDrawCursorRing = true;
+                setFocusControllerActive(true);
                 if (mNativeClass != 0) {
                     nativeRecordButtons(true, false, true);
-                    if (inEditingMode()) {
-                        mWebViewCore.sendMessage(EventHub.SET_ACTIVE, 1, 0);
-                    }
                 }
             } else {
-                // If our window gained focus, but we do not have it, do not
-                // draw the cursor ring.
-                mDrawCursorRing = false;
+                if (!inEditingMode()) {
+                    // If our window gained focus, but we do not have it, do not
+                    // draw the cursor ring.
+                    mDrawCursorRing = false;
+                    setFocusControllerActive(false);
+                }
                 // We do not call nativeRecordButtons here because we assume
                 // that when we lost focus, or window focus, it got called with
                 // false for the first parameter
@@ -4246,7 +4242,7 @@ public class WebView extends AbsoluteLayout
             if (mNativeClass != 0) {
                 nativeRecordButtons(false, false, true);
             }
-            setFocusControllerInactive();
+            setFocusControllerActive(false);
         }
         invalidate();
     }
@@ -4270,11 +4266,9 @@ public class WebView extends AbsoluteLayout
      * not draw the blinking cursor.  It gets set to "active" to draw the cursor
      * in WebViewCore.cpp, when the WebCore thread receives key events/clicks.
      */
-    /* package */ void setFocusControllerInactive() {
-        // Do not need to also check whether mWebViewCore is null, because
-        // mNativeClass is only set if mWebViewCore is non null
-        if (mNativeClass == 0) return;
-        mWebViewCore.sendMessage(EventHub.SET_ACTIVE, 0, 0);
+    /* package */ void setFocusControllerActive(boolean active) {
+        if (mWebViewCore == null) return;
+        mWebViewCore.sendMessage(EventHub.SET_ACTIVE, active ? 1 : 0, 0);
     }
 
     @Override
@@ -4291,6 +4285,7 @@ public class WebView extends AbsoluteLayout
                 if (mNativeClass != 0) {
                     nativeRecordButtons(true, false, true);
                 }
+                setFocusControllerActive(true);
             //} else {
                 // The WebView has gained focus while we do not have
                 // windowfocus.  When our window lost focus, we should have
@@ -4304,7 +4299,7 @@ public class WebView extends AbsoluteLayout
                 if (mNativeClass != 0) {
                     nativeRecordButtons(false, false, true);
                 }
-                setFocusControllerInactive();
+                setFocusControllerActive(false);
             }
             mGotKeyDown = false;
         }
@@ -6287,7 +6282,7 @@ public class WebView extends AbsoluteLayout
                             // is necessary for page loads driven by webkit, and in
                             // particular when the user was on a password field, so
                             // the WebTextView was visible.
-                            clearTextEntry(false);
+                            clearTextEntry();
                         }
                     }
 
@@ -6381,7 +6376,7 @@ public class WebView extends AbsoluteLayout
                     }
                     break;
                 case CLEAR_TEXT_ENTRY:
-                    clearTextEntry(false);
+                    clearTextEntry();
                     break;
                 case INVAL_RECT_MSG_ID: {
                     Rect r = (Rect)msg.obj;
@@ -7007,7 +7002,7 @@ public class WebView extends AbsoluteLayout
      */
     private void sendMoveMouseIfLatest(boolean removeFocus) {
         if (removeFocus) {
-            clearTextEntry(true);
+            clearTextEntry();
         }
         mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE_IF_LATEST,
                 cursorData());

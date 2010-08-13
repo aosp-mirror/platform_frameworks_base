@@ -350,9 +350,6 @@ import java.util.ArrayList;
         switch (actionCode) {
         case EditorInfo.IME_ACTION_NEXT:
             if (mWebView.nativeMoveCursorToNextTextInput()) {
-                // Since the cursor will no longer be in the same place as the
-                // focus, set the focus controller back to inactive
-                mWebView.setFocusControllerInactive();
                 // Preemptively rebuild the WebTextView, so that the action will
                 // be set properly.
                 mWebView.rebuildWebTextView();
