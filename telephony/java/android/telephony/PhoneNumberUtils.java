@@ -1385,7 +1385,7 @@ public class PhoneNumberUtils
      * Normalize a phone number by removing the characters other than digits. If
      * the given number has keypad letters, the letters will be converted to
      * digits first.
-     * 
+     *
      * @param phoneNumber
      *            the number to be normalized.
      * @return the normalized number.
@@ -1397,9 +1397,9 @@ public class PhoneNumberUtils
         int len = phoneNumber.length();
         for (int i = 0; i < len; i++) {
             char c = phoneNumber.charAt(i);
-            if (PhoneNumberUtils.isISODigit(c)) {
+            if ((i == 0 && c == '+') || PhoneNumberUtils.isISODigit(c)) {
                 sb.append(c);
-            } else if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
+            } else if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
                 return normalizeNumber(PhoneNumberUtils.convertKeypadLettersToDigits(phoneNumber));
             }
         }
