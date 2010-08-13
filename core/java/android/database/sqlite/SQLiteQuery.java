@@ -18,6 +18,7 @@ package android.database.sqlite;
 
 import android.database.CursorWindow;
 import android.os.SystemClock;
+import android.util.Log;
 
 /**
  * A SQLite program that represents a query that reads the resulting rows into a CursorWindow.
@@ -58,6 +59,7 @@ public class SQLiteQuery extends SQLiteProgram {
     /* package */ SQLiteQuery(SQLiteDatabase db, SQLiteQuery query) {
         super(db, query.mSql);
         this.mBindArgs = query.mBindArgs;
+        this.mOffsetIndex = query.mOffsetIndex;
     }
 
     /**
@@ -78,8 +80,8 @@ public class SQLiteQuery extends SQLiteProgram {
                 // if the start pos is not equal to 0, then most likely window is
                 // too small for the data set, loading by another thread
                 // is not safe in this situation. the native code will ignore maxRead
-                int numRows = native_fill_window(window, window.getStartPosition(), mOffsetIndex,
-                        maxRead, lastPos);
+                int numRows = native_fill_window(window, window.getStartPosition(),
+                        mOffsetIndex, maxRead, lastPos);
                 mDatabase.logTimeStat(mSql, timeStart);
                 return numRows;
             } catch (IllegalStateException e){
@@ -87,6 +89,9 @@ public class SQLiteQuery extends SQLiteProgram {
                 return 0;
             } catch (SQLiteDatabaseCorruptException e) {
                 mDatabase.onCorruption();
+                throw e;
+            } catch (SQLiteException e) {
+                Log.e(TAG, "exception: " + e.getMessage() + "; query: " + mSql);
                 throw e;
             } finally {
                 window.releaseReference();
