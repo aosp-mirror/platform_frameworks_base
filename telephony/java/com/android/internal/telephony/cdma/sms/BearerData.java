@@ -405,7 +405,8 @@ public final class BearerData {
     /**
      * Calculate the message text encoding length, fragmentation, and other details.
      *
-     * @param force ignore (but still count) illegal characters if true
+     * @param msg message text
+     * @param force7BitEncoding ignore (but still count) illegal characters if true
      * @return septet count, or -1 on failure
      */
     public static TextEncodingDetails calcTextEncodingDetails(CharSequence msg,
@@ -427,9 +428,10 @@ public final class BearerData {
                 ted.codeUnitCount = msg.length();
                 int octets = ted.codeUnitCount * 2;
                 if (octets > MAX_USER_DATA_BYTES) {
-                    ted.msgCount = (octets / MAX_USER_DATA_BYTES_WITH_HEADER) + 1;
-                    ted.codeUnitsRemaining = (MAX_USER_DATA_BYTES_WITH_HEADER
-                              - (octets % MAX_USER_DATA_BYTES_WITH_HEADER))/2;
+                    ted.msgCount = (octets + (MAX_USER_DATA_BYTES_WITH_HEADER - 1)) /
+                            MAX_USER_DATA_BYTES_WITH_HEADER;
+                    ted.codeUnitsRemaining = ((ted.msgCount *
+                            MAX_USER_DATA_BYTES_WITH_HEADER) - octets) / 2;
                 } else {
                     ted.msgCount = 1;
                     ted.codeUnitsRemaining = (MAX_USER_DATA_BYTES - octets)/2;
@@ -802,9 +804,8 @@ public final class BearerData {
      * Create serialized representation for BearerData object.
      * (See 3GPP2 C.R1001-F, v1.0, section 4.5 for layout details)
      *
-     * @param bearerData an instance of BearerData.
-     *
-     * @return data byta array of raw encoded SMS bearer data.
+     * @param bData an instance of BearerData.
+     * @return byte array of raw encoded SMS bearer data.
      */
     public static byte[] encode(BearerData bData) {
         bData.hasUserDataHeader = ((bData.userData != null) &&
