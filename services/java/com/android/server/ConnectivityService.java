@@ -313,21 +313,21 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             switch (mNetAttributes[netType].mRadio) {
             case ConnectivityManager.TYPE_WIFI:
                 if (DBG) Slog.v(TAG, "Starting Wifi Service.");
-                WifiStateTracker wst = new WifiStateTracker(context, mHandler);
+                WifiStateTracker wst = new WifiStateTracker();
                 WifiService wifiService = new WifiService(context);
                 ServiceManager.addService(Context.WIFI_SERVICE, wifiService);
                 wifiService.checkAndStartWifi();
                 mNetTrackers[ConnectivityManager.TYPE_WIFI] = wst;
-                wst.startMonitoring();
+                wst.startMonitoring(context, mHandler);
 
                 //TODO: as part of WWS refactor, create only when needed
                 mWifiWatchdogService = new WifiWatchdogService(context);
 
                 break;
             case ConnectivityManager.TYPE_MOBILE:
-                mNetTrackers[netType] = new MobileDataStateTracker(context, mHandler,
-                    netType, mNetAttributes[netType].mName);
-                mNetTrackers[netType].startMonitoring();
+                mNetTrackers[netType] = new MobileDataStateTracker(netType,
+                        mNetAttributes[netType].mName);
+                mNetTrackers[netType].startMonitoring(context, mHandler);
                 if (noMobileData) {
                     if (DBG) Slog.d(TAG, "tearing down Mobile networks due to setting");
                     mNetTrackers[netType].teardown();
@@ -1205,18 +1205,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         sendConnectedBroadcast(info);
     }
 
-    private void handleNotificationChange(boolean visible, int id,
-            Notification notification) {
-        NotificationManager notificationManager = (NotificationManager) mContext
-                .getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (visible) {
-            notificationManager.notify(id, notification);
-        } else {
-            notificationManager.cancel(id);
-        }
-    }
-
     /**
      * After a change in the connectivity state of a network. We're mainly
      * concerned with making sure that the list of DNS servers is set up
@@ -1608,24 +1596,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         handleConnect(info);
                     }
                     break;
-
-                case NetworkStateTracker.EVENT_NOTIFICATION_CHANGED:
-                    handleNotificationChange(msg.arg1 == 1, msg.arg2,
-                            (Notification) msg.obj);
-                    break;
-
                 case NetworkStateTracker.EVENT_CONFIGURATION_CHANGED:
                     // TODO - make this handle ip/proxy/gateway/dns changes
                     info = (NetworkInfo) msg.obj;
                     type = info.getType();
                     handleDnsConfigurationChange(type);
-                    break;
-                case NetworkStateTracker.EVENT_ROAMING_CHANGED:
-                    // fill me in
-                    break;
-
-                case NetworkStateTracker.EVENT_NETWORK_SUBTYPE_CHANGED:
-                    // fill me in
                     break;
                 case NetworkStateTracker.EVENT_RESTORE_DEFAULT_NETWORK:
                     FeatureUser u = (FeatureUser)msg.obj;

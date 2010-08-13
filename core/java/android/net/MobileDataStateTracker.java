@@ -67,15 +67,10 @@ public class MobileDataStateTracker implements NetworkStateTracker {
 
     /**
      * Create a new MobileDataStateTracker
-     * @param context the application context of the caller
-     * @param target a message handler for getting callbacks about state changes
      * @param netType the ConnectivityManager network type
-     * @param apnType the Phone apnType
      * @param tag the name of this network
      */
-    public MobileDataStateTracker(Context context, Handler target, int netType, String tag) {
-        mTarget = target;
-        mContext = context;
+    public MobileDataStateTracker(int netType, String tag) {
         mNetworkInfo = new NetworkInfo(netType,
                 TelephonyManager.getDefault().getNetworkType(), tag,
                 TelephonyManager.getDefault().getNetworkTypeName());
@@ -98,6 +93,25 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                 "net.gprs.dns2",
                 "net.ppp0.dns1",
                 "net.ppp0.dns2"};
+    }
+
+    /**
+     * Begin monitoring data connectivity.
+     *
+     * @param context is the current Android context
+     * @param target is the Hander to which to return the events.
+     */
+    public void startMonitoring(Context context, Handler target) {
+        mTarget = target;
+        mContext = context;
+
+        IntentFilter filter =
+                new IntentFilter(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
+        filter.addAction(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED);
+        filter.addAction(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
+
+        mContext.registerReceiver(new MobileDataStateReceiver(), filter);
+        mMobileDataState = Phone.DataState.DISCONNECTED;
     }
 
     /**
@@ -137,45 +151,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
      * This is not implemented.
      */
     public void releaseWakeLock() {
-    }
-
-    /**
-     * Begin monitoring mobile data connectivity.
-     */
-    public void startMonitoring() {
-        IntentFilter filter =
-                new IntentFilter(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
-        filter.addAction(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED);
-        filter.addAction(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
-
-        mContext.registerReceiver(new MobileDataStateReceiver(), filter);
-        mMobileDataState = Phone.DataState.DISCONNECTED;
-    }
-
-    /**
-     * Record the roaming status of the device, and if it is a change from the previous
-     * status, send a notification to any listeners.
-     * @param isRoaming {@code true} if the device is now roaming, {@code false}
-     * if it is no longer roaming.
-     */
-    private void setRoamingStatus(boolean isRoaming) {
-        if (isRoaming != mNetworkInfo.isRoaming()) {
-            mNetworkInfo.setRoaming(isRoaming);
-            Message msg = mTarget.obtainMessage(EVENT_ROAMING_CHANGED, mNetworkInfo);
-            msg.sendToTarget();
-        }
-    }
-
-    private void setSubtype(int subtype, String subtypeName) {
-        if (mNetworkInfo.isConnected()) {
-            int oldSubtype = mNetworkInfo.getSubtype();
-            if (subtype != oldSubtype) {
-                mNetworkInfo.setSubtype(subtype, subtypeName);
-                Message msg = mTarget.obtainMessage(
-                        EVENT_NETWORK_SUBTYPE_CHANGED, oldSubtype, 0, mNetworkInfo);
-                msg.sendToTarget();
-            }
-        }
     }
 
     private class MobileDataStateReceiver extends BroadcastReceiver {
@@ -279,8 +254,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                 setDetailedState(DetailedState.FAILED, reason, apnName);
             }
             TelephonyManager tm = TelephonyManager.getDefault();
-            setRoamingStatus(tm.isNetworkRoaming());
-            setSubtype(tm.getNetworkType(), tm.getNetworkTypeName());
         }
     }
 
