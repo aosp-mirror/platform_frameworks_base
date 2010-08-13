@@ -851,8 +851,14 @@ public abstract class ContentProvider implements ComponentCallbacks {
      */
     public AssetFileDescriptor openTypedAssetFile(Uri uri, String mimeTypeFilter, Bundle opts)
             throws FileNotFoundException {
+        if ("*/*".equals(mimeTypeFilter)) {
+            // If they can take anything, the untyped open call is good enough.
+            return openAssetFile(uri, "r");
+        }
         String baseType = getType(uri);
         if (baseType != null && compareMimeTypes(baseType, mimeTypeFilter)) {
+            // Use old untyped open call if this provider has a type for this
+            // URI and it matches the request.
             return openAssetFile(uri, "r");
         }
         throw new FileNotFoundException("Can't open " + uri + " as type " + mimeTypeFilter);
