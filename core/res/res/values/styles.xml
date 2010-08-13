@@ -893,8 +893,11 @@
         <item name="android:background">@android:drawable/action_bar_background</item>
         <item name="android:displayOptions">useLogo</item>
         <item name="android:divider">@android:drawable/action_bar_divider</item>
-        <item name="android:height">56dip</item>
-        <item name="android:padding">3dip</item>
+        <item name="android:height">?android:attr/windowActionBarSize</item>
+        <item name="android:paddingLeft">3dip</item>
+        <item name="android:paddingTop">3dip</item>
+        <item name="android:paddingRight">3dip</item>
+        <item name="android:paddingBottom">3dip</item>
     </style>
 
     <style name="Widget.ActionButton">

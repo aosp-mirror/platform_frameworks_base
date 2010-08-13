@@ -118,6 +118,7 @@
         <item name="windowActionBar">false</item>
         <item name="windowActionModeOverlay">false</item>
         <item name="windowActionBarStyle">@android:style/ActionBar</item>
+        <item name="windowActionBarSize">50dip</item>
 
         <!-- Dialog attributes -->
         <item name="alertDialogStyle">@android:style/AlertDialog</item>

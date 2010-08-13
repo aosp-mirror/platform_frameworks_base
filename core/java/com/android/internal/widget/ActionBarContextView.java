@@ -27,6 +27,7 @@ import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.MeasureSpec;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -35,9 +36,6 @@ import android.widget.TextView;
  * @hide
  */
 public class ActionBarContextView extends ViewGroup {
-    // TODO: This must be defined in the default theme
-    private static final int CONTENT_HEIGHT_DIP = 50;
-    
     private int mItemPadding;
     private int mItemMargin;
     private int mActionSpacing;
@@ -75,11 +73,15 @@ public class ActionBarContextView extends ViewGroup {
                 com.android.internal.R.styleable.Theme_actionModeCloseDrawable);
         mItemMargin = mItemPadding / 2;
 
-        mContentHeight =
-                (int) (CONTENT_HEIGHT_DIP * getResources().getDisplayMetrics().density + 0.5f);
+        mContentHeight = a.getLayoutDimension(
+                com.android.internal.R.styleable.Theme_windowActionBarSize, 0);
         a.recycle();
     }
     
+    public void setHeight(int height) {
+        mContentHeight = height;
+    }
+
     public void setCustomView(View view) {
         if (mCustomView != null) {
             removeView(mCustomView);
@@ -208,8 +210,12 @@ public class ActionBarContextView extends ViewGroup {
         final int contentWidth = MeasureSpec.getSize(widthMeasureSpec);
         final int itemMargin = mItemPadding;
 
+        int maxHeight = mContentHeight > 0 ?
+                mContentHeight : MeasureSpec.getSize(heightMeasureSpec);
+
+        final int verticalPadding = getPaddingTop() + getPaddingBottom();
         int availableWidth = contentWidth - getPaddingLeft() - getPaddingRight();
-        final int height = mContentHeight - getPaddingTop() - getPaddingBottom();
+        final int height = maxHeight - verticalPadding;
         final int childSpecHeight = MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST);
         
         if (mCloseButton != null) {
@@ -246,7 +252,20 @@ public class ActionBarContextView extends ViewGroup {
                     MeasureSpec.makeMeasureSpec(customHeight, customHeightMode));
         }
 
-        setMeasuredDimension(contentWidth, mContentHeight);
+        if (mContentHeight <= 0) {
+            int measuredHeight = 0;
+            final int count = getChildCount();
+            for (int i = 0; i < count; i++) {
+                View v = getChildAt(i);
+                int paddedViewHeight = v.getMeasuredHeight() + verticalPadding;
+                if (paddedViewHeight > measuredHeight) {
+                    measuredHeight = paddedViewHeight;
+                }
+            }
+            setMeasuredDimension(contentWidth, measuredHeight);
+        } else {
+            setMeasuredDimension(contentWidth, maxHeight);
+        }
     }
 
     @Override
