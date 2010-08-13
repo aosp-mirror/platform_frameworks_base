@@ -591,8 +591,8 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     /**
      * Called when the user selects an item in the header list.  The default
-     * implementation will call either {@link #startWithFragment(String)}
-     * or {@link #switchToHeader(String)} as appropriate.
+     * implementation will call either {@link #startWithFragment(String, Bundle)}
+     * or {@link #switchToHeader(String, Bundle)} as appropriate.
      *
      * @param header The header that was selected.
      * @param position The header's position in the list.

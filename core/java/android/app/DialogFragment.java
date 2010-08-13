@@ -41,26 +41,26 @@ public class DialogFragment extends Fragment
         implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
 
     /**
-     * Style for {@link #DialogFragment(int, int)} constructor: a basic,
+     * Style for {@link #setStyle(int, int)}: a basic,
      * normal dialog.
      */
     public static final int STYLE_NORMAL = 0;
 
     /**
-     * Style for {@link #DialogFragment(int, int)} constructor: don't include
+     * Style for {@link #setStyle(int, int)}: don't include
      * a title area.
      */
     public static final int STYLE_NO_TITLE = 1;
 
     /**
-     * Style for {@link #DialogFragment(int, int)} constructor: don't draw
+     * Style for {@link #setStyle(int, int)}: don't draw
      * any frame at all; the view hierarchy returned by {@link #onCreateView}
      * is entirely responsible for drawing the dialog.
      */
     public static final int STYLE_NO_FRAME = 2;
 
     /**
-     * Style for {@link #DialogFragment(int, int)} constructor: like
+     * Style for {@link #setStyle(int, int)}: like
      * {@link #STYLE_NO_FRAME}, but also disables all input to the dialog.
      * The user can not touch it, and its window will not receive input focus.
      */
