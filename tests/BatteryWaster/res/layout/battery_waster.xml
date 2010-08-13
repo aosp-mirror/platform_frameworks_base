@@ -30,6 +30,16 @@
         android:text="@string/waste_away"
         />
 
+    <CheckBox android:id="@+id/checkbox_wake"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="25dp"
+        android:layout_marginTop="25dp"
+        android:textSize="18sp"
+        android:textColor="#ffffffff"
+        android:text="@string/wake_away"
+        />
+
     <ScrollView android:id="@+id/scroll"
         android:layout_width="match_parent"
         android:layout_height="0px"

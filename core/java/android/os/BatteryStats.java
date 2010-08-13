@@ -290,6 +290,11 @@ public abstract class BatteryStats implements Parcelable {
          */
         public static abstract class Proc {
 
+            public static class ExcessiveWake {
+                public long overTime;
+                public long usedTime;
+            }
+
             /**
              * Returns the total time (in 1/100 sec) spent executing in user code.
              *
@@ -326,6 +331,10 @@ public abstract class BatteryStats implements Parcelable {
              * @see BatteryStats#getCpuSpeedSteps()
              */
             public abstract long getTimeAtCpuSpeedStep(int speedStep, int which);
+
+            public abstract int countExcessiveWakes();
+
+            public abstract ExcessiveWake getExcessiveWake(int i);
         }
 
         /**
@@ -421,6 +430,8 @@ public abstract class BatteryStats implements Parcelable {
         public static final int STATE_BLUETOOTH_ON_FLAG = 1<<20;
         public static final int STATE_AUDIO_ON_FLAG = 1<<19;
         public static final int STATE_VIDEO_ON_FLAG = 1<<18;
+        public static final int STATE_WAKE_LOCK_FLAG = 1<<17;
+        public static final int STATE_SENSOR_ON_FLAG = 1<<16;
         
         public int states;
 
@@ -469,6 +480,16 @@ public abstract class BatteryStats implements Parcelable {
             batteryTemperature = o.batteryTemperature;
             batteryVoltage = o.batteryVoltage;
             states = o.states;
+        }
+
+        public boolean same(HistoryItem o) {
+            return batteryLevel == o.batteryLevel
+                    && batteryStatus == o.batteryStatus
+                    && batteryHealth == o.batteryHealth
+                    && batteryPlugType == o.batteryPlugType
+                    && batteryTemperature == o.batteryTemperature
+                    && batteryVoltage == o.batteryVoltage
+                    && states == o.states;
         }
     }
     
@@ -633,6 +654,8 @@ public abstract class BatteryStats implements Parcelable {
         new BitDescription(HistoryItem.STATE_BLUETOOTH_ON_FLAG, "bluetooth"),
         new BitDescription(HistoryItem.STATE_AUDIO_ON_FLAG, "audio"),
         new BitDescription(HistoryItem.STATE_VIDEO_ON_FLAG, "video"),
+        new BitDescription(HistoryItem.STATE_WAKE_LOCK_FLAG, "wake_lock"),
+        new BitDescription(HistoryItem.STATE_SENSOR_ON_FLAG, "sensor"),
         new BitDescription(HistoryItem.STATE_BRIGHTNESS_MASK,
                 HistoryItem.STATE_BRIGHTNESS_SHIFT, "brightness",
                 SCREEN_BRIGHTNESS_NAMES),
@@ -1376,13 +1399,19 @@ public abstract class BatteryStats implements Parcelable {
                         pw.println(getDischargeStartLevel());
                 pw.print(prefix); pw.print("    Discharge cycle current level: ");
                         pw.println(getDischargeCurrentLevel());
-            } else {
                 pw.print(prefix); pw.println("  Device is currently plugged into power");
                 pw.print(prefix); pw.print("    Last discharge cycle start level: "); 
                         pw.println(getDischargeStartLevel());
                 pw.print(prefix); pw.print("    Last discharge cycle end level: "); 
                         pw.println(getDischargeCurrentLevel());
             }
+            pw.println(" ");
+        } else {
+            pw.print(prefix); pw.println("  Device battery use since last full charge");
+            pw.print(prefix); pw.print("    Amount discharged (lower bound): ");
+                    pw.println(getLowDischargeAmountSinceCharge());
+            pw.print(prefix); pw.print("    Amount discharged (upper bound): ");
+                    pw.println(getHighDischargeAmountSinceCharge());
             pw.println(" ");
         }
         
@@ -1524,12 +1553,16 @@ public abstract class BatteryStats implements Parcelable {
                     long userTime;
                     long systemTime;
                     int starts;
+                    int numExcessive;
 
                     userTime = ps.getUserTime(which);
                     systemTime = ps.getSystemTime(which);
                     starts = ps.getStarts(which);
+                    numExcessive = which == STATS_SINCE_CHARGED
+                            ? ps.countExcessiveWakes() : 0;
 
-                    if (userTime != 0 || systemTime != 0 || starts != 0) {
+                    if (userTime != 0 || systemTime != 0 || starts != 0
+                            || numExcessive != 0) {
                         sb.setLength(0);
                         sb.append(prefix); sb.append("    Proc ");
                                 sb.append(ent.getKey()); sb.append(":\n");
@@ -1539,6 +1572,16 @@ public abstract class BatteryStats implements Parcelable {
                         sb.append(prefix); sb.append("      "); sb.append(starts);
                                 sb.append(" proc starts");
                         pw.println(sb.toString());
+                        for (int e=0; e<numExcessive; e++) {
+                            Uid.Proc.ExcessiveWake ew = ps.getExcessiveWake(e);
+                            if (ew != null) {
+                                pw.print(prefix); pw.print("      * Killed for wake lock use: ");
+                                        pw.print(ew.usedTime); pw.print("ms over ");
+                                        pw.print(ew.overTime); pw.print("ms (");
+                                        pw.print((ew.usedTime*100)/ew.overTime);
+                                        pw.println("%)");
+                            }
+                        }
                         uidActivity = true;
                     }
                 }

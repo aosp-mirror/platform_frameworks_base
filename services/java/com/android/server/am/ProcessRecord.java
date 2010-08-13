@@ -74,6 +74,7 @@ class ProcessRecord {
     Bundle instrumentationArguments;// as given to us
     ComponentName instrumentationResultClass;// copy of instrumentationClass
     BroadcastRecord curReceiver;// receiver currently running in the app
+    long lastWakeTime;          // How long proc held wake lock at last check
     long lastRequestedGc;       // When we last asked the app to do a gc
     long lastLowMemory;         // When we last told the app that memory is low
     boolean reportLowMemory;    // Set to true when waiting to report low mem
@@ -158,7 +159,7 @@ class ProcessRecord {
         pw.print(prefix); pw.print("pid="); pw.print(pid); pw.print(" starting=");
                 pw.print(starting); pw.print(" lastPss="); pw.println(lastPss);
         pw.print(prefix); pw.print("lastActivityTime="); pw.print(lastActivityTime);
-                pw.print(" lruWeight="); pw.println(lruWeight);
+                pw.print(" lruWeight="); pw.print(lruWeight);
                 pw.print(" hidden="); pw.print(hidden);
                 pw.print(" empty="); pw.println(empty);
         pw.print(prefix); pw.print("oom: max="); pw.print(maxAdj);
@@ -177,6 +178,10 @@ class ProcessRecord {
                 pw.print(" persistentActivities="); pw.println(persistentActivities);
         pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
                 pw.print(" lruSeq="); pw.println(lruSeq);
+        pw.print(prefix); pw.print("lastWakeTime="); pw.print(lastWakeTime);
+                pw.print(" lastRequestedGc="); pw.print(lastRequestedGc);
+                pw.print(" lastLowMemory="); pw.print(lastLowMemory);
+                pw.print(" reportLowMemory="); pw.println(reportLowMemory);
         if (killedBackground) {
             pw.print(prefix); pw.print("killedBackground="); pw.println(killedBackground);
         }

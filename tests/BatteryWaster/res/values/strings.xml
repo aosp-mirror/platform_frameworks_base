@@ -18,5 +18,7 @@
 
     <string name="waste_away">Discharge my battery!</string>
 
+    <string name="wake_away">Keep my device awake!</string>
+
 </resources>
 
