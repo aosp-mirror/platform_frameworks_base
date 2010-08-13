@@ -2461,18 +2461,19 @@ public final class ContactsContract {
         public static final String CHAT_CAPABILITY = "chat_capability";
 
         /**
-         * An allowed value of {@link #CHAT_CAPABILITY}. Indicates that the contact's device can
+         * An allowed flag of {@link #CHAT_CAPABILITY}. Indicates audio-chat capability (microphone
+         * and speaker)
+         */
+        public static final int CAPABILITY_HAS_VOICE = 1;
+
+        /**
+         * An allowed flag of {@link #CHAT_CAPABILITY}. Indicates that the contact's device can
          * display a video feed.
          */
-        public static final int CAPABILITY_HAS_VIDEO_PLAYBACK_ONLY = 1;
+        public static final int CAPABILITY_HAS_VIDEO = 2;
 
         /**
-         * An allowed value of {@link #CHAT_CAPABILITY}. Indicates audio-chat capability.
-         */
-        public static final int CAPABILITY_HAS_VOICE = 2;
-
-        /**
-         * An allowed value of {@link #CHAT_CAPABILITY}. Indicates that the contact's device has a
+         * An allowed flag of {@link #CHAT_CAPABILITY}. Indicates that the contact's device has a
          * camera that can be used for video chat (e.g. a front-facing camera on a phone).
          */
         public static final int CAPABILITY_HAS_CAMERA = 4;
@@ -3632,10 +3633,11 @@ public final class ContactsContract {
      * <td>int</td>
      * <td>{@link #CHAT_CAPABILITY}</td>
      * <td>read/write</td>
-     * <td>Contact IM chat compatibility value. The allowed values are:
+     * <td>Contact IM chat compatibility value. The allowed values combinations of the following
+     * flags. If None of these flags is set, the device can only do text messaging.
      * <p>
      * <ul>
-     * <li>{@link #CAPABILITY_HAS_VIDEO_PLAYBACK_ONLY}</li>
+     * <li>{@link #CAPABILITY_HAS_VIDEO}</li>
      * <li>{@link #CAPABILITY_HAS_VOICE}</li>
      * <li>{@link #CAPABILITY_HAS_CAMERA}</li>
      * </ul>
