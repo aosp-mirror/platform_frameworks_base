@@ -28,6 +28,11 @@ public class Float2 {
     public Float2() {
     }
 
+    public Float2(float initX, float initY) {
+        x = initX;
+        y = initY;
+    }
+
     public float x;
     public float y;
 }
