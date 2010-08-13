@@ -23,7 +23,7 @@ import android.util.Log;
 
 /**
  * This class implements the character set mapping between
- * the GSM SMS 7-bit alphabet specifed in TS 23.038 6.2.1
+ * the GSM SMS 7-bit alphabet specified in TS 23.038 6.2.1
  * and UTF-16
  *
  * {@hide}

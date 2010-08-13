@@ -304,9 +304,9 @@ public class SmsMessage {
             int septets = GsmAlphabet.countGsmSeptets(messageBody, !use7bitOnly);
             ret[1] = septets;
             if (septets > MAX_USER_DATA_SEPTETS) {
-                ret[0] = (septets / MAX_USER_DATA_SEPTETS_WITH_HEADER) + 1;
-                ret[2] = MAX_USER_DATA_SEPTETS_WITH_HEADER
-                            - (septets % MAX_USER_DATA_SEPTETS_WITH_HEADER);
+                ret[0] = (septets + (MAX_USER_DATA_SEPTETS_WITH_HEADER - 1)) /
+                            MAX_USER_DATA_SEPTETS_WITH_HEADER;
+                ret[2] = (ret[0] * MAX_USER_DATA_SEPTETS_WITH_HEADER) - septets;
             } else {
                 ret[0] = 1;
                 ret[2] = MAX_USER_DATA_SEPTETS - septets;
@@ -318,9 +318,9 @@ public class SmsMessage {
             ret[1] = messageBody.length();
             if (octets > MAX_USER_DATA_BYTES) {
                 // 6 is the size of the user data header
-                ret[0] = (octets / MAX_USER_DATA_BYTES_WITH_HEADER) + 1;
-                ret[2] = (MAX_USER_DATA_BYTES_WITH_HEADER
-                            - (octets % MAX_USER_DATA_BYTES_WITH_HEADER))/2;
+                ret[0] = (octets + (MAX_USER_DATA_BYTES_WITH_HEADER - 1)) /
+                            MAX_USER_DATA_BYTES_WITH_HEADER;
+                ret[2] = ((ret[0] * MAX_USER_DATA_BYTES_WITH_HEADER) - octets) / 2;
             } else {
                 ret[0] = 1;
                 ret[2] = (MAX_USER_DATA_BYTES - octets)/2;
