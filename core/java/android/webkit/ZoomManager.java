@@ -784,6 +784,8 @@ class ZoomManager {
                 && Math.abs((viewWidth * mInvActualScale) - mZoomOverviewWidth) > 1))) {
             mInitialZoomOverview = false;
             setZoomScale(zoomOverviewScale, !willScaleTriggerZoom(mTextWrapScale));
+        } else {
+            mInZoomOverview = !exceedsMinScaleIncrement(mActualScale, zoomOverviewScale);
         }
     }
 
