@@ -21,11 +21,17 @@ import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RegistrantList;
+import android.util.Log;
+
 import android.telephony.PhoneStateListener;
+import android.telephony.ServiceState;
+
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+
 
 /**
  * @hide
@@ -45,6 +51,9 @@ import java.util.List;
  *
  */
 public final class CallManager {
+
+    private static final String LOG_TAG ="GSM";
+    private static final boolean LOCAL_DEBUG = true;
 
     private static final int EVENT_DISCONNECT = 100;
     private static final int EVENT_PRECISE_CALL_STATE_CHANGED = 101;
@@ -180,7 +189,7 @@ public final class CallManager {
     public Phone.State getState() {
         Phone.State s = Phone.State.IDLE;
 
-        for(Phone phone : mPhones) {
+        for (Phone phone : mPhones) {
             if (phone.getState() == Phone.State.RINGING) {
                 return Phone.State.RINGING;
             } else if (phone.getState() == Phone.State.OFFHOOK) {
@@ -188,6 +197,41 @@ public final class CallManager {
             }
         }
         return s;
+    }
+
+    /**
+     * @return the service state of CallManager, which represents the
+     * highest priority state of all the service states of phones
+     *
+     * The priority is defined as
+     *
+     * STATE_IN_SERIVCE > STATE_OUT_OF_SERIVCE > STATE_EMERGENCY > STATE_POWER_OFF
+     *
+     */
+
+    public int getServiceState() {
+        int resultState = ServiceState.STATE_OUT_OF_SERVICE;
+
+        for (Phone phone : mPhones) {
+            int serviceState = phone.getServiceState().getState();
+            if (serviceState == ServiceState.STATE_IN_SERVICE) {
+                // IN_SERVICE has the highest priority
+                resultState = serviceState;
+                break;
+            } else if (serviceState == ServiceState.STATE_OUT_OF_SERVICE) {
+                // OUT_OF_SERVICE replaces EMERGENCY_ONLY and POWER_OFF
+                // Note: EMERGENCY_ONLY is not in use at this moment
+                if ( resultState == ServiceState.STATE_EMERGENCY_ONLY ||
+                        resultState == ServiceState.STATE_POWER_OFF) {
+                    resultState = serviceState;
+                }
+            } else if (serviceState == ServiceState.STATE_EMERGENCY_ONLY) {
+                if (resultState == ServiceState.STATE_POWER_OFF) {
+                    resultState = serviceState;
+                }
+            }
+        }
+        return resultState;
     }
 
     /**
@@ -208,6 +252,34 @@ public final class CallManager {
             return true;
         }
         return false;
+    }
+
+    /**
+     * return the default phone or null if no phone available
+     */
+    public Phone getDefaultPhone() {
+        return mDefaultPhone;
+    }
+
+    /**
+     * @return the phone associated with the foreground call
+     */
+    public Phone getFgPhone() {
+        return getActiveFgCall().getPhone();
+    }
+
+    /**
+     * @return the phone associated with the background call
+     */
+    public Phone getBgPhone() {
+        return getFirstActiveBgCall().getPhone();
+    }
+
+    /**
+     * @return the phone associated with the ringing call
+     */
+    public Phone getRingingPhone() {
+        return getFirstActiveRingingCall().getPhone();
     }
 
     /**
@@ -291,8 +363,12 @@ public final class CallManager {
 
         if ( hasActiveFgCall() ) {
             Phone activePhone = getActiveFgCall().getPhone();
-            boolean hasBgCall = activePhone.getBackgroundCall().isIdle();
+            boolean hasBgCall = ! (activePhone.getBackgroundCall().isIdle());
             boolean sameChannel = (activePhone == ringingPhone);
+
+            if (LOCAL_DEBUG) {
+                Log.d(LOG_TAG, "hasBgCall: "+ hasBgCall + "sameChannel:" + sameChannel);
+            }
 
             if (sameChannel && hasBgCall) {
                 getActiveFgCall().hangup();
@@ -322,8 +398,15 @@ public final class CallManager {
     }
 
     /**
-     * Places any active calls on hold, and makes any held calls
-     *  active. Switch occurs asynchronously and may fail.
+     * Places active call on hold, and makes held call active.
+     * Switch occurs asynchronously and may fail.
+     *
+     * There are 4 scenarios
+     * 1. only active call but no held call, aka, hold
+     * 2. no active call but only held call, aka, unhold
+     * 3. both active and held calls from same phone, aka, swap
+     * 4. active and held calls from different phones, aka, phone swap
+     *
      * Final notification occurs via
      * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
      * java.lang.Object) registerForPreciseCallStateChanged()}.
@@ -344,11 +427,13 @@ public final class CallManager {
             heldPhone = heldCall.getPhone();
         }
 
-        if (activePhone != heldPhone) {
+        if (activePhone != null) {
             activePhone.switchHoldingAndActive();
         }
 
-        heldPhone.switchHoldingAndActive();
+        if (heldPhone != null && heldPhone != activePhone) {
+            heldPhone.switchHoldingAndActive();
+        }
     }
 
     /**
@@ -398,6 +483,24 @@ public final class CallManager {
      * handled asynchronously.
      */
     public Connection dial(Phone phone, String dialString) throws CallStateException {
+        if ( hasActiveFgCall() ) {
+            Phone activePhone = getActiveFgCall().getPhone();
+            boolean hasBgCall = !(activePhone.getBackgroundCall().isIdle());
+
+            if (LOCAL_DEBUG) {
+                Log.d(LOG_TAG, "hasBgCall: "+ hasBgCall + "sameChannel:" + (activePhone != phone));
+            }
+
+            if (activePhone != phone) {
+                if (hasBgCall) {
+                    Log.d(LOG_TAG, "Hangup");
+                    getActiveFgCall().hangup();
+                } else {
+                    Log.d(LOG_TAG, "Switch");
+                    activePhone.switchHoldingAndActive();
+                }
+            }
+        }
         return phone.dial(dialString);
     }
 
@@ -975,7 +1078,7 @@ public final class CallManager {
      * @return list of ringing calls
      */
     public ArrayList<Call> getRingingCalls() {
-        return mBackgroundCalls;
+        return mRingingCalls;
     }
 
     /**

@@ -179,6 +179,7 @@ public interface Phone {
     static final int PHONE_TYPE_NONE = RILConstants.NO_PHONE;
     static final int PHONE_TYPE_GSM = RILConstants.GSM_PHONE;
     static final int PHONE_TYPE_CDMA = RILConstants.CDMA_PHONE;
+    static final int PHONE_TYPE_SIP = RILConstants.SIP_PHONE;
 
     // Used for preferred network type
     // Note NT_* substitute RILConstants.NETWORK_MODE_* above the Phone
