@@ -77,6 +77,23 @@ extern void __attribute__((overloadable))
 extern void __attribute__((overloadable))
     rsgFontColor(float, float, float, float);
 
+extern void __attribute__((overloadable))
+    rsgMeshComputeBoundingBox(rs_mesh mesh, float *minX, float *minY, float *minZ,
+                                                float *maxX, float *maxY, float *maxZ);
+void __attribute__((overloadable))
+rsgMeshComputeBoundingBox(rs_mesh mesh, float3 *bBoxMin, float3 *bBoxMax) {
+    float x1, y1, z1, x2, y2, z2;
+    rsgMeshComputeBoundingBox(mesh, &x1, &y1, &z1, &x2, &y2, &z2);
+    bBoxMin->x = x1;
+    bBoxMin->y = y1;
+    bBoxMin->z = z1;
+    bBoxMax->x = x2;
+    bBoxMax->y = y2;
+    bBoxMax->z = z2;
+}
+
+
+
 ///////////////////////////////////////////////////////
 // misc
 

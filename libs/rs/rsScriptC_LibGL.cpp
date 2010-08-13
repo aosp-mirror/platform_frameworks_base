@@ -251,6 +251,20 @@ static void SC_drawMeshPrimitiveRange(RsMesh vsm, uint32_t primIndex, uint32_t s
     sm->renderPrimitiveRange(rsc, primIndex, start, len);
 }
 
+static void SC_meshComputeBoundingBox(RsMesh vsm, float *minX, float *minY, float *minZ,
+                                                     float *maxX, float *maxY, float *maxZ)
+{
+    GET_TLS();
+    Mesh *sm = static_cast<Mesh *>(vsm);
+    sm->computeBBox();
+    *minX = sm->mBBoxMin[0];
+    *minY = sm->mBBoxMin[1];
+    *minZ = sm->mBBoxMin[2];
+    *maxX = sm->mBBoxMax[0];
+    *maxY = sm->mBBoxMax[1];
+    *maxZ = sm->mBBoxMax[2];
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -390,6 +404,7 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z11rsgDrawMesh7rs_mesh", (void *)&SC_drawMesh },
     { "_Z11rsgDrawMesh7rs_meshj", (void *)&SC_drawMeshPrimitive },
     { "_Z11rsgDrawMesh7rs_meshjjj", (void *)&SC_drawMeshPrimitiveRange },
+    { "_Z25rsgMeshComputeBoundingBox7rs_meshPfS0_S0_S0_S0_S0_", (void *)&SC_meshComputeBoundingBox },
 
     { "_Z13rsgClearColorffff", (void *)&SC_ClearColor },
     { "_Z13rsgClearDepthf", (void *)&SC_ClearDepth },
