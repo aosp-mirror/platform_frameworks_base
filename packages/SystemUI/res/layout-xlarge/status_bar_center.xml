@@ -36,18 +36,20 @@
         android:padding="2dip"
         />
     <ImageView
-        android:layout_width="wrap_content"
+        android:id="@+id/battery"
+        android:layout_width="50dip"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@id/clock"
-        android:src="@drawable/dots_empty"
+        android:src="@drawable/battery"
         />
     <ImageView
-        android:layout_width="wrap_content"
+        android:id="@+id/signal"
+        android:layout_width="50dip"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@id/clock"
-        android:src="@drawable/dots_full"
+        android:src="@drawable/signal"
         />
 </RelativeLayout>
 

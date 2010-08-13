@@ -75,6 +75,9 @@ public class TabletStatusBarService extends StatusBarService {
     ViewGroup mPile;
     TextView mClearButton;
 
+    ImageView mBatteryMeter;
+    ImageView mSignalMeter;
+
     NotificationIconArea.IconLayout mIconLayout;
 
     KickerController mKicker;
@@ -151,6 +154,10 @@ public class TabletStatusBarService extends StatusBarService {
 
         mKicker = new KickerController((Context)this, mStatusBarView);
 
+        // System info (center)
+        mBatteryMeter = (ImageView) sb.findViewById(R.id.battery);
+        mSignalMeter = (ImageView) sb.findViewById(R.id.signal);
+
         // Add the windows
         addPanelWindows();
 
@@ -198,18 +205,27 @@ public class TabletStatusBarService extends StatusBarService {
             }
         }
     }
+    
+    StatusBarIcon mBatterySBI;
+    StatusBarIcon mSignalSBI;
+    public void updateBatteryDisplay(int level, boolean plugged) {
+        if (DEBUG) Slog.d(TAG, "battery=" + level + (plugged ? " - plugged" : " - unplugged"));
+        mBatteryMeter.setImageResource(plugged ? R.drawable.battery_charging : R.drawable.battery);
+        mBatteryMeter.setImageLevel(level);
+        mSystemPanel.setBatteryLevel(level, plugged);
+    }
 
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
-        // TODO
+        if (DEBUG) Slog.d(TAG, "addIcon(" + slot + ") -> " + icon);
     }
 
     public void updateIcon(String slot, int index, int viewIndex,
             StatusBarIcon old, StatusBarIcon icon) {
-        // TODO
+        if (DEBUG) Slog.d(TAG, "updateIcon(" + slot + ") -> " + icon);
     }
 
     public void removeIcon(String slot, int index, int viewIndex) {
-        // TODO
+        if (DEBUG) Slog.d(TAG, "removeIcon(" + slot + ")");
     }
 
     public void addNotification(IBinder key, StatusBarNotification notification) {

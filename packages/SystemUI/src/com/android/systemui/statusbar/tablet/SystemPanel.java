@@ -78,20 +78,37 @@ public class SystemPanel extends LinearLayout {
     private ImageButton mOrientationButton;
     private ImageButton mAirplaneButton;
 
+    private ImageView mBatteryMeter;
+    private ImageView mSignalMeter;
+
+    private TextView mBatteryText;
+    private TextView mSignalText;
+
     private final AudioManager mAudioManager;
 
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
+            final String action = intent.getAction();
+            if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
                 mSoundButton.setAlpha(getSilentMode() ? 0x7F : 0xFF);
+            } else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
+                // hack for now
+                mBar.updateBatteryDisplay(intent.getIntExtra("level", 0), 
+                        (intent.getIntExtra("plugged", 0) != 0));
             }
         }
     };
 
     public void setBar(TabletStatusBarService bar) {
         mBar = bar;
+    }
+
+    public void setBatteryLevel(int level, boolean plugged) {
+        mBatteryMeter.setImageResource(plugged ? R.drawable.battery_charging : R.drawable.battery);
+        mBatteryMeter.setImageLevel(level);
+        mBatteryText.setText(String.format("Battery: %d%%", level));
     }
     
     public SystemPanel(Context context, AttributeSet attrs) {
@@ -151,8 +168,21 @@ public class SystemPanel extends LinearLayout {
             }
         });
 
-        IntentFilter filter = new IntentFilter(AudioManager.RINGER_MODE_CHANGED_ACTION);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
+        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        filter.addAction(Intent.ACTION_POWER_CONNECTED);
         getContext().registerReceiver(mReceiver, filter);
+
+        mBatteryMeter = (ImageView)findViewById(R.id.battery_meter);
+        mBatteryMeter.setImageResource(R.drawable.battery);
+        mBatteryMeter.setImageLevel(0);
+        mSignalMeter = (ImageView)findViewById(R.id.signal_meter);
+        mBatteryMeter.setImageResource(R.drawable.signal);
+        mBatteryMeter.setImageLevel(0);
+
+        mBatteryText = (TextView)findViewById(R.id.battery_info);
+        mSignalText = (TextView)findViewById(R.id.signal_info);
     }
 
     public void onDetachedFromWindow() {

@@ -96,6 +96,7 @@
         <TextView android:id="@+id/battery_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:layout_below="@id/battery_meter"
             />
 
@@ -121,12 +122,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:src="@drawable/dots_full"
+            android:src="@drawable/signal"
             />
 
         <TextView android:id="@+id/signal_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:layout_below="@id/signal_meter"
             />
 
