@@ -91,7 +91,8 @@ public final class PreferenceScreen extends PreferenceGroup implements AdapterVi
 
     /**
      * Returns an adapter that can be attached to a {@link PreferenceActivity}
-     * to show the preferences contained in this {@link PreferenceScreen}.
+     * or {@link PreferenceFragment} to show the preferences contained in this
+     * {@link PreferenceScreen}.
      * <p>
      * This {@link PreferenceScreen} will NOT appear in the returned adapter, instead
      * it appears in the hierarchy above this {@link PreferenceScreen}.
