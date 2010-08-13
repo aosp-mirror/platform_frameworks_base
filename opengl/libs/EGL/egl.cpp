@@ -1409,7 +1409,9 @@ __eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
                 egl_connection_t* const cnx = &gEGLImpl[i];
                 if (cnx->dso && cnx->egl.eglGetProcAddress) {
                     found = true;
-                    cnx->hooks[i]->ext.extensions[slot] =
+                    // Extensions are independent of the bound context
+                    cnx->hooks[GLESv1_INDEX]->ext.extensions[slot] =
+                    cnx->hooks[GLESv2_INDEX]->ext.extensions[slot] =
                             cnx->egl.eglGetProcAddress(procname);
                 }
             }
@@ -1421,7 +1423,6 @@ __eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
         }
 
     pthread_mutex_unlock(&gInitDriverMutex);
-
     return addr;
 }
 
