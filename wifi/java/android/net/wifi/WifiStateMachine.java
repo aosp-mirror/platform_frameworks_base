@@ -246,11 +246,20 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private static final int CMD_RECONNECT                        = 75;
     /* Reassociate to a network */
     private static final int CMD_REASSOCIATE                      = 76;
-    /* Set power mode
-     * POWER_MODE_ACTIVE
-     * POWER_MODE_AUTO
+    /* Controls power mode and suspend mode optimizations
+     *
+     * When high perf mode is enabled, power mode is set to
+     * POWER_MODE_ACTIVE and suspend mode optimizations are disabled
+     *
+     * When high perf mode is disabled, power mode is set to
+     * POWER_MODE_AUTO and suspend mode optimizations are enabled
+     *
+     * Suspend mode optimizations include:
+     * - packet filtering
+     * - turn off roaming
+     * - DTIM wake up settings
      */
-    private static final int CMD_SET_POWER_MODE                   = 77;
+    private static final int CMD_SET_HIGH_PERF_MODE               = 77;
     /* Set bluetooth co-existence
      * BLUETOOTH_COEXISTENCE_MODE_ENABLED
      * BLUETOOTH_COEXISTENCE_MODE_DISABLED
@@ -335,8 +344,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      */
     private static final int DEFAULT_MAX_DHCP_RETRIES = 9;
 
-    private static final int DRIVER_POWER_MODE_ACTIVE = 1;
-    private static final int DRIVER_POWER_MODE_AUTO = 0;
+    private static final int POWER_MODE_ACTIVE = 1;
+    private static final int POWER_MODE_AUTO = 0;
 
     /* Default parent state */
     private HierarchicalState mDefaultState = new DefaultState();
@@ -856,13 +865,13 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     /**
-     * Set power mode
-     * @param mode
-     *     DRIVER_POWER_MODE_AUTO
-     *     DRIVER_POWER_MODE_ACTIVE
+     * Set high performance mode of operation.
+     * Enabling would set active power mode and disable suspend optimizations;
+     * disabling would set auto power mode and enable suspend optimizations
+     * @param enable true if enable, false otherwise
      */
-    public void setPowerMode(int mode) {
-        sendMessage(obtainMessage(CMD_SET_POWER_MODE, mode, 0));
+    public void setHighPerfModeEnabled(boolean enable) {
+        sendMessage(obtainMessage(CMD_SET_HIGH_PERF_MODE, enable ? 1 : 0, 0));
     }
 
     /**
@@ -1269,6 +1278,21 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         return null;
     }
 
+    private void setHighPerfModeEnabledNative(boolean enable) {
+        if(!WifiNative.setSuspendOptimizationsCommand(!enable)) {
+            Log.e(TAG, "set suspend optimizations failed!");
+        }
+        if (enable) {
+            if (!WifiNative.setPowerModeCommand(POWER_MODE_ACTIVE)) {
+                Log.e(TAG, "set power mode active failed!");
+            }
+        } else {
+            if (!WifiNative.setPowerModeCommand(POWER_MODE_AUTO)) {
+                Log.e(TAG, "set power mode auto failed!");
+            }
+        }
+    }
+
     private void configureLinkProperties() {
         if (WifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
             mLinkProperties = WifiConfigStore.getLinkProperties(mLastNetworkId);
@@ -1654,7 +1678,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_CLEAR_BLACKLIST:
                 case CMD_SET_SCAN_MODE:
                 case CMD_SET_SCAN_TYPE:
-                case CMD_SET_POWER_MODE:
+                case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_BLUETOOTH_COEXISTENCE:
                 case CMD_SET_BLUETOOTH_SCAN_MODE:
                 case CMD_SET_NUM_ALLOWED_CHANNELS:
@@ -1756,7 +1780,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_STOP_DRIVER:
                 case CMD_SET_SCAN_MODE:
                 case CMD_SET_SCAN_TYPE:
-                case CMD_SET_POWER_MODE:
+                case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_BLUETOOTH_COEXISTENCE:
                 case CMD_SET_BLUETOOTH_SCAN_MODE:
                 case CMD_SET_NUM_ALLOWED_CHANNELS:
@@ -1884,7 +1908,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_STOP_DRIVER:
                 case CMD_SET_SCAN_MODE:
                 case CMD_SET_SCAN_TYPE:
-                case CMD_SET_POWER_MODE:
+                case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_BLUETOOTH_COEXISTENCE:
                 case CMD_SET_BLUETOOTH_SCAN_MODE:
                 case CMD_SET_NUM_ALLOWED_CHANNELS:
@@ -1981,7 +2005,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_STOP_DRIVER:
                 case CMD_SET_SCAN_MODE:
                 case CMD_SET_SCAN_TYPE:
-                case CMD_SET_POWER_MODE:
+                case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_BLUETOOTH_COEXISTENCE:
                 case CMD_SET_BLUETOOTH_SCAN_MODE:
                 case CMD_SET_NUM_ALLOWED_CHANNELS:
@@ -2138,7 +2162,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case NETWORK_DISCONNECTION_EVENT:
                 case PASSWORD_MAY_BE_INCORRECT_EVENT:
                 case CMD_SET_SCAN_TYPE:
-                case CMD_SET_POWER_MODE:
+                case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_BLUETOOTH_COEXISTENCE:
                 case CMD_SET_BLUETOOTH_SCAN_MODE:
                 case CMD_SET_NUM_ALLOWED_CHANNELS:
@@ -2192,8 +2216,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         WifiNative.setScanModeCommand(false);
                     }
                     break;
-                case CMD_SET_POWER_MODE:
-                    WifiNative.setPowerModeCommand(message.arg1);
+                case CMD_SET_HIGH_PERF_MODE:
+                    setHighPerfModeEnabledNative(message.arg1 == 1);
                     break;
                 case CMD_SET_BLUETOOTH_COEXISTENCE:
                     WifiNative.setBluetoothCoexistenceModeCommand(message.arg1);
@@ -2256,7 +2280,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_START_DRIVER:
                 case CMD_STOP_DRIVER:
                 case CMD_SET_SCAN_TYPE:
-                case CMD_SET_POWER_MODE:
+                case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_BLUETOOTH_COEXISTENCE:
                 case CMD_SET_BLUETOOTH_SCAN_MODE:
                 case CMD_SET_NUM_ALLOWED_CHANNELS:
@@ -2505,7 +2529,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             if (!mUseStaticIp) {
                 mDhcpThread = null;
                 mModifiedBluetoothCoexistenceMode = false;
-                mPowerMode = DRIVER_POWER_MODE_AUTO;
+                mPowerMode = POWER_MODE_AUTO;
 
                 if (shouldDisableCoexistenceMode()) {
                     /*
@@ -2535,10 +2559,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 if (mPowerMode < 0) {
                   // Handle the case where supplicant driver does not support
                   // getPowerModeCommand.
-                    mPowerMode = DRIVER_POWER_MODE_AUTO;
+                    mPowerMode = POWER_MODE_AUTO;
                 }
-                if (mPowerMode != DRIVER_POWER_MODE_ACTIVE) {
-                    WifiNative.setPowerModeCommand(DRIVER_POWER_MODE_ACTIVE);
+                if (mPowerMode != POWER_MODE_ACTIVE) {
+                    WifiNative.setPowerModeCommand(POWER_MODE_ACTIVE);
                 }
 
                 Log.d(TAG, "DHCP request started");
@@ -2639,6 +2663,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
               case CMD_RECONFIGURE_IP:
                   deferMessage(message);
                   break;
+                  /* Defer any power mode changes since we must keep active power mode at DHCP */
+              case CMD_SET_HIGH_PERF_MODE:
+                  deferMessage(message);
+                  break;
               default:
                 return NOT_HANDLED;
           }
@@ -2650,7 +2678,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
       public void exit() {
           /* reset power state & bluetooth coexistence if on DHCP */
           if (!mUseStaticIp) {
-              if (mPowerMode != DRIVER_POWER_MODE_ACTIVE) {
+              if (mPowerMode != POWER_MODE_ACTIVE) {
                   WifiNative.setPowerModeCommand(mPowerMode);
               }
 
