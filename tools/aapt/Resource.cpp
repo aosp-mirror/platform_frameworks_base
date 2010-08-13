@@ -1880,7 +1880,7 @@ addProguardKeepRule(ProguardKeepSet* keep, const String8& inClassName,
             className.append(inClassName);
         }
     }
-    
+
     String8 rule("-keep class ");
     rule += className;
     rule += " { <init>(...); }";
@@ -1955,7 +1955,7 @@ writeProguardForAndroidManifest(ProguardKeepSet* keep, const sp<AaptAssets>& ass
             if (tag == "application") {
                 inApplication = true;
                 keepTag = true;
-                
+
                 String8 agent = getAttribute(tree, "http://schemas.android.com/apk/res/android",
                         "backupAgent", &error);
                 if (agent.length() > 0) {
@@ -1988,9 +1988,17 @@ writeProguardForAndroidManifest(ProguardKeepSet* keep, const sp<AaptAssets>& ass
     return NO_ERROR;
 }
 
+struct NamespaceAttributePair {
+    const char* ns;
+    const char* attr;
+
+    NamespaceAttributePair(const char* n, const char* a) : ns(n), attr(a) {}
+    NamespaceAttributePair() : ns(NULL), attr(NULL) {}
+};
+
 status_t
 writeProguardForXml(ProguardKeepSet* keep, const sp<AaptFile>& layoutFile,
-        const char* startTag, const char* altTag)
+        const char* startTag, const KeyedVector<String8, NamespaceAttributePair>* tagAttrPairs)
 {
     status_t err;
     ResXMLTree tree;
@@ -2020,7 +2028,7 @@ writeProguardForXml(ProguardKeepSet* keep, const sp<AaptFile>& layoutFile,
             return NO_ERROR;
         }
     }
-    
+
     while ((code=tree.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
         if (code != ResXMLTree::START_TAG) {
             continue;
@@ -2031,16 +2039,21 @@ writeProguardForXml(ProguardKeepSet* keep, const sp<AaptFile>& layoutFile,
         if (strchr(tag.string(), '.')) {
             addProguardKeepRule(keep, tag, NULL,
                     layoutFile->getPrintableSource(), tree.getLineNumber());
-        } else if (altTag != NULL && tag == altTag) {
-            ssize_t classIndex = tree.indexOfAttribute(NULL, "class");
-            if (classIndex < 0) {
-                fprintf(stderr, "%s:%d: <view> does not have class attribute.\n",
-                        layoutFile->getPrintableSource().string(), tree.getLineNumber());
-            } else {
-                size_t len;
-                addProguardKeepRule(keep,
-                        String8(tree.getAttributeStringValue(classIndex, &len)), NULL,
-                        layoutFile->getPrintableSource(), tree.getLineNumber());
+        } else if (tagAttrPairs != NULL) {
+            ssize_t tagIndex = tagAttrPairs->indexOfKey(tag);
+            if (tagIndex >= 0) {
+                const NamespaceAttributePair& nsAttr = tagAttrPairs->valueAt(tagIndex);
+                ssize_t attrIndex = tree.indexOfAttribute(nsAttr.ns, nsAttr.attr);
+                if (attrIndex < 0) {
+                    // fprintf(stderr, "%s:%d: <%s> does not have attribute %s:%s.\n",
+                    //        layoutFile->getPrintableSource().string(), tree.getLineNumber(),
+                    //        tag.string(), nsAttr.ns, nsAttr.attr);
+                } else {
+                    size_t len;
+                    addProguardKeepRule(keep,
+                                        String8(tree.getAttributeStringValue(attrIndex, &len)), NULL,
+                                        layoutFile->getPrintableSource(), tree.getLineNumber());
+                }
             }
         }
     }
@@ -2048,25 +2061,42 @@ writeProguardForXml(ProguardKeepSet* keep, const sp<AaptFile>& layoutFile,
     return NO_ERROR;
 }
 
+static void addTagAttrPair(KeyedVector<String8, NamespaceAttributePair>* dest,
+        const char* tag, const char* ns, const char* attr) {
+    dest->add(String8(tag), NamespaceAttributePair(ns, attr));
+}
+
 status_t
 writeProguardForLayouts(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
 {
     status_t err;
+
+    // tag:attribute pairs that should be checked in layout files.
+    KeyedVector<String8, NamespaceAttributePair> kLayoutTagAttrPairs;
+    addTagAttrPair(&kLayoutTagAttrPairs, "view", NULL, "class");
+    addTagAttrPair(&kLayoutTagAttrPairs, "fragment", RESOURCES_ANDROID_NAMESPACE, "name");
+
+    // tag:attribute pairs that should be checked in xml files.
+    KeyedVector<String8, NamespaceAttributePair> kXmlTagAttrPairs;
+    addTagAttrPair(&kXmlTagAttrPairs, "PreferenceScreen", RESOURCES_ANDROID_NAMESPACE, "fragment");
+    addTagAttrPair(&kXmlTagAttrPairs, "Header", RESOURCES_ANDROID_NAMESPACE, "fragment");
+
     const Vector<sp<AaptDir> >& dirs = assets->resDirs();
     const size_t K = dirs.size();
     for (size_t k=0; k<K; k++) {
         const sp<AaptDir>& d = dirs.itemAt(k);
         const String8& dirName = d->getLeaf();
         const char* startTag = NULL;
-        const char* altTag = NULL;
+        const KeyedVector<String8, NamespaceAttributePair>* tagAttrPairs = NULL;
         if ((dirName == String8("layout")) || (strncmp(dirName.string(), "layout-", 7) == 0)) {
-            altTag = "view";
+            tagAttrPairs = &kLayoutTagAttrPairs;
         } else if ((dirName == String8("xml")) || (strncmp(dirName.string(), "xml-", 4) == 0)) {
             startTag = "PreferenceScreen";
+            tagAttrPairs = &kXmlTagAttrPairs;
         } else {
             continue;
         }
-        
+
         const KeyedVector<String8,sp<AaptGroup> > groups = d->getFiles();
         const size_t N = groups.size();
         for (size_t i=0; i<N; i++) {
@@ -2074,7 +2104,7 @@ writeProguardForLayouts(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
             const DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> >& files = group->getFiles();
             const size_t M = files.size();
             for (size_t j=0; j<M; j++) {
-                err = writeProguardForXml(keep, files.valueAt(j), startTag, altTag);
+                err = writeProguardForXml(keep, files.valueAt(j), startTag, tagAttrPairs);
                 if (err < 0) {
                     return err;
                 }
