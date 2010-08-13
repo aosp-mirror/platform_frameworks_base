@@ -844,7 +844,6 @@ public final class SimulatedCommands extends BaseCommands
         ret[11] = null;
         ret[12] = null;
         ret[13] = null;
-        ret[14] = null;
 
         resultSuccess(result, ret);
     }
