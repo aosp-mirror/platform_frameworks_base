@@ -365,7 +365,8 @@ public class ActivityManager {
         
         /**
          * The time when the service was first made active, either by someone
-         * starting or binding to it.
+         * starting or binding to it.  This
+         * is in units of {@link android.os.SystemClock#elapsedRealtime()}.
          */
         public long activeSince;
         
@@ -387,7 +388,8 @@ public class ActivityManager {
         
         /**
          * The time when there was last activity in the service (either
-         * explicit requests to start it or clients binding to it).
+         * explicit requests to start it or clients binding to it).  This
+         * is in units of {@link android.os.SystemClock#uptimeMillis()}.
          */
         public long lastActivityTime;
         

@@ -151,6 +151,7 @@ class PowerManagerService extends IPowerManager.Stub
     static final int INITIAL_KEYBOARD_BRIGHTNESS = Power.BRIGHTNESS_OFF;
 
     private final int MY_UID;
+    private final int MY_PID;
 
     private boolean mDoneBooting = false;
     private boolean mBootCompleted = false;
@@ -309,7 +310,7 @@ class PowerManagerService extends IPowerManager.Stub
                 long ident = Binder.clearCallingIdentity();
                 try {
                     PowerManagerService.this.acquireWakeLockLocked(mFlags, mToken,
-                            MY_UID, mTag);
+                            MY_UID, MY_PID, mTag);
                     mHeld = true;
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -434,11 +435,11 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    PowerManagerService()
-    {
+    PowerManagerService() {
         // Hack to get our uid...  should have a func for this.
         long token = Binder.clearCallingIdentity();
-        MY_UID = Binder.getCallingUid();
+        MY_UID = Process.myUid();
+        MY_PID = Process.myPid();
         Binder.restoreCallingIdentity(token);
 
         // XXX remove this when the kernel doesn't timeout wake locks
@@ -573,13 +574,13 @@ class PowerManagerService extends IPowerManager.Stub
 
     private class WakeLock implements IBinder.DeathRecipient
     {
-        WakeLock(int f, IBinder b, String t, int u) {
+        WakeLock(int f, IBinder b, String t, int u, int p) {
             super();
             flags = f;
             binder = b;
             tag = t;
             uid = u == MY_UID ? Process.SYSTEM_UID : u;
-            pid = Binder.getCallingPid();
+            pid = p;
             if (u != MY_UID || (
                     !"KEEP_SCREEN_ON_FLAG".equals(tag)
                     && !"KeyInputQueue".equals(tag))) {
@@ -631,21 +632,23 @@ class PowerManagerService extends IPowerManager.Stub
 
     public void acquireWakeLock(int flags, IBinder lock, String tag) {
         int uid = Binder.getCallingUid();
+        int pid = Binder.getCallingPid();
         if (uid != Process.myUid()) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
         }
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mLocks) {
-                acquireWakeLockLocked(flags, lock, uid, tag);
+                acquireWakeLockLocked(flags, lock, uid, pid, tag);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    public void acquireWakeLockLocked(int flags, IBinder lock, int uid, String tag) {
+    public void acquireWakeLockLocked(int flags, IBinder lock, int uid, int pid, String tag) {
         int acquireUid = -1;
+        int acquirePid = -1;
         String acquireName = null;
         int acquireType = -1;
 
@@ -657,7 +660,7 @@ class PowerManagerService extends IPowerManager.Stub
         WakeLock wl;
         boolean newlock;
         if (index < 0) {
-            wl = new WakeLock(flags, lock, tag, uid);
+            wl = new WakeLock(flags, lock, tag, uid, pid);
             switch (wl.flags & LOCK_MASK)
             {
                 case PowerManager.FULL_WAKE_LOCK:
@@ -730,13 +733,14 @@ class PowerManagerService extends IPowerManager.Stub
         }
         if (newlock) {
             acquireUid = wl.uid;
+            acquirePid = wl.pid;
             acquireName = wl.tag;
             acquireType = wl.monitorType;
         }
 
         if (acquireType >= 0) {
             try {
-                mBatteryStats.noteStartWakelock(acquireUid, acquireName, acquireType);
+                mBatteryStats.noteStartWakelock(acquireUid, acquirePid, acquireName, acquireType);
             } catch (RemoteException e) {
                 // Ignore
             }
@@ -756,6 +760,7 @@ class PowerManagerService extends IPowerManager.Stub
 
     private void releaseWakeLockLocked(IBinder lock, int flags, boolean death) {
         int releaseUid;
+        int releasePid;
         String releaseName;
         int releaseType;
 
@@ -800,13 +805,14 @@ class PowerManagerService extends IPowerManager.Stub
         // Unlink the lock from the binder.
         wl.binder.unlinkToDeath(wl, 0);
         releaseUid = wl.uid;
+        releasePid = wl.pid;
         releaseName = wl.tag;
         releaseType = wl.monitorType;
 
         if (releaseType >= 0) {
             long origId = Binder.clearCallingIdentity();
             try {
-                mBatteryStats.noteStopWakelock(releaseUid, releaseName, releaseType);
+                mBatteryStats.noteStopWakelock(releaseUid, releasePid, releaseName, releaseType);
             } catch (RemoteException e) {
                 // Ignore
             } finally {

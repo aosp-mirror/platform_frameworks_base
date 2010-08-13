@@ -149,7 +149,9 @@ class ServiceRecord extends Binder {
                     pw.print(" foregroundId="); pw.print(foregroundId);
                     pw.print(" foregroundNoti="); pw.println(foregroundNoti);
         }
-        pw.print(prefix); pw.print("lastActivity="); pw.print(lastActivity-now);
+        pw.print(prefix); pw.print("createTime=");
+                pw.print(createTime-SystemClock.elapsedRealtime());
+                pw.print(" lastActivity="); pw.print(lastActivity-now);
                 pw.print(" executingStart="); pw.print(executingStart-now);
                 pw.print(" restartTime="); pw.println(restartTime);
         if (startRequested || lastStartId != 0) {
@@ -213,7 +215,8 @@ class ServiceRecord extends Binder {
         dataDir = sInfo.applicationInfo.dataDir;
         exported = sInfo.exported;
         this.restarter = restarter;
-        createTime = lastActivity = SystemClock.uptimeMillis();
+        createTime = SystemClock.elapsedRealtime();
+        lastActivity = SystemClock.uptimeMillis();
     }
 
     public AppBindRecord retrieveAppBindingLocked(Intent intent,
