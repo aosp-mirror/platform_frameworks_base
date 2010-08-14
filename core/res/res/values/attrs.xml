@@ -1594,6 +1594,26 @@
         <attr name="smoothScrollbar" format="boolean" />
         <!-- A reference to an XML description of the adapter to attach to the list. -->
         <attr name="adapter" format="reference" />
+        <!-- Defines the choice behavior for the view. By default, lists do not have
+             any choice behavior. By setting the choiceMode to singleChoice, the list
+             allows up to one item to be in a chosen state. By setting the choiceMode to
+             multipleChoice, the list allows any number of items to be chosen.
+             Finally, by setting the choiceMode to multipleChoiceModal the list allows
+             any number of items to be chosen in a special selection mode.
+             The application will supply a
+             {@link android.widget.AbsListView.MultiChoiceModeListener} using
+             {@link android.widget.AbsListView#setMultiChoiceModeListener} to control the
+             selection mode. This uses the {@link android.view.ActionMode} API. -->
+        <attr name="choiceMode">
+            <!-- Normal list that does not indicate choices. -->
+            <enum name="none" value="0" />
+            <!-- The list allows up to one choice. -->
+            <enum name="singleChoice" value="1" />
+            <!-- The list allows multiple choices. -->
+            <enum name="multipleChoice" value="2" />
+            <!-- The list allows multiple choices in a custom selection mode. -->
+            <enum name="multipleChoiceModal" value="3" />
+        </attr>
     </declare-styleable>
     <declare-styleable name="AbsSpinner">
         <!-- Reference to an array resource that will populate the Spinner.  For static content,
@@ -1800,20 +1820,6 @@
         <!-- Height of the divider. Will use the intrinsic height of the divider if this
              is not specified. -->
         <attr name="dividerHeight" format="dimension" />
-        <!-- Defines the choice behavior for the ListView. By default, lists do not have
-             any choice behavior. By setting the choiceMode to singleChoice, the List
-             allows up to one item to be in a chosen state. By setting the choiceMode to
-             multipleChoice, the list allows any number of items to be chosen. -->
-        <attr name="choiceMode">
-            <!-- Normal list that does not indicate choices. -->
-            <enum name="none" value="0" />
-            <!-- The list allows up to one choice. -->
-            <enum name="singleChoice" value="1" />
-            <!-- The list allows multiple choices. -->
-            <enum name="multipleChoice" value="2" />
-            <!-- The list allows multiple choices in a custom selection mode. -->
-            <enum name="multipleChoiceModal" value="3" />
-        </attr>
         <!-- When set to false, the ListView will not draw the divider after each header view.
              The default value is true. -->
         <attr name="headerDividersEnabled" format="boolean" />
