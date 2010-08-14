@@ -16,28 +16,74 @@
 
 package android.net;
 
+import android.content.Context;
+import android.os.Handler;
+
 /**
- * Interface for connectivity service to act on a network interface.
- * All state information for a network should be kept in a Tracker class.
- * This interface defines network-type-independent functions that should
- * be implemented by the Tracker class.
+ * Interface provides the {@link com.android.server.ConnectivityService}
+ * with three services. Events to the ConnectivityService when
+ * changes occur, an API for controlling the network and storage
+ * for network specific information.
+ *
+ * The Connectivity will call startMonitoring before any other
+ * method is called.
  *
  * {@hide}
  */
 public interface NetworkStateTracker {
 
-    public static final int EVENT_STATE_CHANGED = 1;
     /**
-     * arg1: 1 to show, 0 to hide
-     * arg2: ID of the notification
-     * obj: Notification (if showing)
+     * -------------------------------------------------------------
+     * Event Interface back to ConnectivityService.
+     *
+     * The events that are to be sent back to the Handler passed
+     * to startMonitoring when the particular event occurs.
+     * -------------------------------------------------------------
      */
-    public static final int EVENT_NOTIFICATION_CHANGED = 2;
+
+    /**
+     * The network state has changed and the NetworkInfo object
+     * contains the new state.
+     *
+     * msg.what = EVENT_STATE_CHANGED
+     * msg.obj = NetworkInfo object
+     */
+    public static final int EVENT_STATE_CHANGED = 1;
+
+    /**
+     * msg.what = EVENT_CONFIGURATION_CHANGED
+     * msg.obj = NetworkInfo object
+     */
     public static final int EVENT_CONFIGURATION_CHANGED = 3;
-    public static final int EVENT_ROAMING_CHANGED = 4;
-    public static final int EVENT_NETWORK_SUBTYPE_CHANGED = 5;
+
+    /**
+     * msg.what = EVENT_RESTORE_DEFAULT_NETWORK
+     * msg.obj = FeatureUser object
+     */
     public static final int EVENT_RESTORE_DEFAULT_NETWORK = 6;
+
+    /**
+     * USED by ConnectivityService only
+     *
+     * msg.what = EVENT_CLEAR_NET_TRANSITION_WAKELOCK
+     * msg.arg1 = mNetTransitionWakeLockSerialNumber
+     */
     public static final int EVENT_CLEAR_NET_TRANSITION_WAKELOCK = 7;
+
+    /**
+     * -------------------------------------------------------------
+     * Control Interface
+     * -------------------------------------------------------------
+     */
+    /**
+     * Begin monitoring data connectivity.
+     *
+     * This is the first method called when this interface is used.
+     *
+     * @param context is the current Android context
+     * @param target is the Hander to which to return the events.
+     */
+    public void startMonitoring(Context context, Handler target);
 
     /**
      * Fetch NetworkInfo for the network
@@ -54,43 +100,6 @@ public interface NetworkStateTracker {
      * for this network.
      */
     public String getTcpBufferSizesPropName();
-
-    /**
-     * Check if private DNS route is set for the network
-     */
-    public boolean isPrivateDnsRouteSet();
-
-    /**
-     * Set a flag indicating private DNS route is set
-     */
-    public void privateDnsRouteSet(boolean enabled);
-
-    /**
-     * Fetch default gateway address for the network
-     */
-    public int getDefaultGatewayAddr();
-
-    /**
-     * Check if default route is set
-     */
-    public boolean isDefaultRouteSet();
-
-    /**
-     * Set a flag indicating default route is set for the network
-     */
-    public void defaultRouteSet(boolean enabled);
-
-    /**
-     * Indicate tear down requested from connectivity
-     */
-    public void setTeardownRequested(boolean isRequested);
-
-    /**
-     * Check if tear down was requested
-     */
-    public boolean isTeardownRequested();
-
-    public void startMonitoring();
 
     /**
      * Disable connectivity to a network
@@ -119,6 +128,11 @@ public interface NetworkStateTracker {
     public boolean isAvailable();
 
     /**
+     * Fetch default gateway address for the network
+     */
+    public int getDefaultGatewayAddr();
+
+    /**
      * Tells the underlying networking system that the caller wants to
      * begin using the named feature. The interpretation of {@code feature}
      * is completely up to each networking implementation.
@@ -145,5 +159,42 @@ public interface NetworkStateTracker {
      * always indicates failure.
      */
     public int stopUsingNetworkFeature(String feature, int callingPid, int callingUid);
+
+    /**
+     * -------------------------------------------------------------
+     * Storage API used by ConnectivityService for saving
+     * Network specific information.
+     * -------------------------------------------------------------
+     */
+
+    /**
+     * Check if private DNS route is set for the network
+     */
+    public boolean isPrivateDnsRouteSet();
+
+    /**
+     * Set a flag indicating private DNS route is set
+     */
+    public void privateDnsRouteSet(boolean enabled);
+
+    /**
+     * Check if default route is set
+     */
+    public boolean isDefaultRouteSet();
+
+    /**
+     * Set a flag indicating default route is set for the network
+     */
+    public void defaultRouteSet(boolean enabled);
+
+    /**
+     * Check if tear down was requested
+     */
+    public boolean isTeardownRequested();
+
+    /**
+     * Indicate tear down requested from connectivity
+     */
+    public void setTeardownRequested(boolean isRequested);
 
 }

@@ -1387,9 +1387,7 @@ public class WifiService extends IWifiManager.Stub {
             }
 
             if (mNotification == null) {
-                // Cache the Notification mainly so we can remove the
-                // EVENT_NOTIFICATION_CHANGED message with this Notification from
-                // the queue later
+                // Cache the Notification object.
                 mNotification = new Notification();
                 mNotification.when = 0;
                 mNotification.icon = ICON_NETWORKS_AVAILABLE;
@@ -1408,29 +1406,9 @@ public class WifiService extends IWifiManager.Stub {
             mNotificationRepeatTime = System.currentTimeMillis() + NOTIFICATION_REPEAT_DELAY_MS;
 
             notificationManager.notify(ICON_NETWORKS_AVAILABLE, mNotification);
-            /*
-             * TODO: Clean up connectivity service & remove this
-             */
-            /* message = mCsHandler.obtainMessage(EVENT_NOTIFICATION_CHANGED, 1,
-                    ICON_NETWORKS_AVAILABLE, mNotification); */
-
-
         } else {
-
             notificationManager.cancel(ICON_NETWORKS_AVAILABLE);
-            /*
-             * TODO: Clean up connectivity service & remove this
-             */
-            /*
-            // Remove any pending messages to show the notification
-            mCsHandler.removeMessages(EVENT_NOTIFICATION_CHANGED, mNotification);
-
-            message = mCsHandler.obtainMessage(EVENT_NOTIFICATION_CHANGED, 0,
-                    ICON_NETWORKS_AVAILABLE);
-             */
         }
-
-        //mCsHandler.sendMessageDelayed(message, delay);
 
         mNotificationShown = visible;
     }

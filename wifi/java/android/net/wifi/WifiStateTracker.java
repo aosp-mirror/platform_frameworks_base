@@ -56,10 +56,7 @@ public class WifiStateTracker implements NetworkStateTracker {
     private BroadcastReceiver mWifiStateReceiver;
     private WifiManager mWifiManager;
 
-    public WifiStateTracker(Context context, Handler target) {
-        mCsHandler = target;
-        mContext = context;
-
+    public WifiStateTracker() {
         mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0, NETWORKTYPE, "");
         mNetworkProperties = new NetworkProperties();
 
@@ -80,7 +77,10 @@ public class WifiStateTracker implements NetworkStateTracker {
     /**
      * Begin monitoring wifi connectivity
      */
-    public void startMonitoring() {
+    public void startMonitoring(Context context, Handler target) {
+        mCsHandler = target;
+        mContext = context;
+
         mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
