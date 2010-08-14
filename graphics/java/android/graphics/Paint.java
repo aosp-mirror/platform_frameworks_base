@@ -43,6 +43,28 @@ public class Paint {
     private boolean     mHasCompatScaling;
     private float       mCompatScaling;
     private float       mInvCompatScaling;
+
+    /**
+     * @hide
+     */
+    public boolean hasShadow;
+    /**
+     * @hide
+     */
+    public float shadowDx;
+    /**
+     * @hide
+     */
+    public float shadowDy;
+    /**
+     * @hide
+     */
+    public float shadowRadius;
+    /**
+     * @hide
+     */
+    public int shadowColor;
+
     /**
      * @hide
      */
@@ -935,13 +957,23 @@ public class Paint {
      * offset and color, and blur radius. If radius is 0, then the shadow
      * layer is removed.
      */
-    public native void setShadowLayer(float radius, float dx, float dy, int color);
+    public void setShadowLayer(float radius, float dx, float dy, int color) {
+        hasShadow = radius > 0.0f;
+        shadowRadius = radius;
+        shadowDx = dx;
+        shadowDy = dy;
+        shadowColor = color;
+        nSetShadowLayer(radius, dx, dy, color);
+    }
+    
+    private native void nSetShadowLayer(float radius, float dx, float dy, int color);
 
     /**
      * Clear the shadow layer.
      */
     public void clearShadowLayer() {
-        setShadowLayer(0, 0, 0, 0);
+        hasShadow = false;
+        nSetShadowLayer(0, 0, 0, 0);
     }
 
     /**

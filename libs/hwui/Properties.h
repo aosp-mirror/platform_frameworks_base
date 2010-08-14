@@ -27,6 +27,7 @@
 #define PROPERTY_LAYER_CACHE_SIZE "ro.hwui.layer_cache_size"
 #define PROPERTY_GRADIENT_CACHE_SIZE "ro.hwui.gradient_cache_size"
 #define PROPERTY_PATH_CACHE_SIZE "ro.hwui.path_cache_size"
+#define PROPERTY_DROP_SHADOW_CACHE_SIZE "ro.hwui.drop_shadow_cache_size"
 
 // These properties are defined in pixels
 #define PROPERTY_TEXT_CACHE_WIDTH "ro.hwui.text_cache_width"

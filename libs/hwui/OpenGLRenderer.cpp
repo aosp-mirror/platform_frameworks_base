@@ -41,6 +41,7 @@ namespace uirenderer {
 #define DEFAULT_PATH_CACHE_SIZE 6.0f
 #define DEFAULT_PATCH_CACHE_SIZE 100
 #define DEFAULT_GRADIENT_CACHE_SIZE 0.5f
+#define DEFAULT_DROP_SHADOW_CACHE_SIZE 1.0f
 
 #define REQUIRED_TEXTURE_UNITS_COUNT 3
 
@@ -107,7 +108,8 @@ OpenGLRenderer::OpenGLRenderer():
         mLayerCache(MB(DEFAULT_LAYER_CACHE_SIZE)),
         mGradientCache(MB(DEFAULT_GRADIENT_CACHE_SIZE)),
         mPathCache(MB(DEFAULT_PATH_CACHE_SIZE)),
-        mPatchCache(DEFAULT_PATCH_CACHE_SIZE) {
+        mPatchCache(DEFAULT_PATCH_CACHE_SIZE),
+        mDropShadowCache(MB(DEFAULT_DROP_SHADOW_CACHE_SIZE)) {
     LOGD("Create OpenGLRenderer");
 
     char property[PROPERTY_VALUE_MAX];
@@ -139,9 +141,18 @@ OpenGLRenderer::OpenGLRenderer():
         LOGD("  Using default path cache size of %.2fMB", DEFAULT_PATH_CACHE_SIZE);
     }
 
+    if (property_get(PROPERTY_DROP_SHADOW_CACHE_SIZE, property, NULL) > 0) {
+        LOGD("  Setting drop shadow cache size to %sMB", property);
+        mDropShadowCache.setMaxSize(MB(atof(property)));
+    } else {
+        LOGD("  Using default drop shadow cache size of %.2fMB", DEFAULT_DROP_SHADOW_CACHE_SIZE);
+    }
+    mDropShadowCache.setFontRenderer(mFontRenderer);
+
     mCurrentProgram = NULL;
     mShader = NULL;
     mColorFilter = NULL;
+    mHasShadow = false;
 
     memcpy(mMeshVertices, gMeshVertices, sizeof(gMeshVertices));
 
@@ -163,6 +174,7 @@ OpenGLRenderer::~OpenGLRenderer() {
     mPathCache.clear();
     mPatchCache.clear();
     mProgramCache.clear();
+    mDropShadowCache.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -550,6 +562,78 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
     drawColorRect(left, top, right, bottom, color, mode);
 }
 
+void OpenGLRenderer::renderShadow(const ShadowTexture* texture, float x, float y,
+        SkXfermode::Mode mode) {
+    const float sx = x - texture->left + mShadowDx;
+    const float sy = y - texture->top + mShadowDy;
+
+    const GLfloat a = ((mShadowColor >> 24) & 0xFF) / 255.0f;
+    const GLfloat r = a * ((mShadowColor >> 16) & 0xFF) / 255.0f;
+    const GLfloat g = a * ((mShadowColor >>  8) & 0xFF) / 255.0f;
+    const GLfloat b = a * ((mShadowColor      ) & 0xFF) / 255.0f;
+
+    GLuint textureUnit = 0;
+    renderTextureAlpha8(texture, textureUnit, sx, sy, r, g, b, a, mode, false);
+}
+
+void OpenGLRenderer::renderTextureAlpha8(const Texture* texture, GLuint& textureUnit,
+        float x, float y, float r, float g, float b, float a, SkXfermode::Mode mode,
+        bool applyFilters) {
+     // Describe the required shaders
+     ProgramDescription description;
+     description.hasTexture = true;
+     description.hasAlpha8Texture = true;
+
+     if (applyFilters) {
+         if (mShader) {
+             mShader->describe(description, mExtensions);
+         }
+         if (mColorFilter) {
+             mColorFilter->describe(description, mExtensions);
+         }
+     }
+
+     // Build and use the appropriate shader
+     useProgram(mProgramCache.get(description));
+
+     // Setup the blending mode
+     chooseBlending(true, mode);
+     bindTexture(texture->id, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, textureUnit);
+     glUniform1i(mCurrentProgram->getUniform("sampler"), textureUnit);
+
+     int texCoordsSlot = mCurrentProgram->getAttrib("texCoords");
+     glEnableVertexAttribArray(texCoordsSlot);
+
+     // Setup attributes
+     glVertexAttribPointer(mCurrentProgram->position, 2, GL_FLOAT, GL_FALSE,
+             gMeshStride, &mMeshVertices[0].position[0]);
+     glVertexAttribPointer(texCoordsSlot, 2, GL_FLOAT, GL_FALSE,
+             gMeshStride, &mMeshVertices[0].texture[0]);
+
+     // Setup uniforms
+     mModelView.loadTranslate(x, y, 0.0f);
+     mModelView.scale(texture->width, texture->height, 1.0f);
+     mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+
+     glUniform4f(mCurrentProgram->color, r, g, b, a);
+
+     textureUnit++;
+     if (applyFilters) {
+         // Setup attributes and uniforms required by the shaders
+         if (mShader) {
+             mShader->setupProgram(mCurrentProgram, mModelView, *mSnapshot, &textureUnit);
+         }
+         if (mColorFilter) {
+             mColorFilter->setupProgram(mCurrentProgram);
+         }
+     }
+
+     // Draw the mesh
+     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
+
+     glDisableVertexAttribArray(texCoordsSlot);
+}
+
 #define kStdStrikeThru_Offset   (-6.0f / 21.0f)
 #define kStdUnderline_Offset    (1.0f / 9.0f)
 #define kStdUnderline_Thickness (1.0f / 18.0f)
@@ -577,6 +661,15 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
+
+    mFontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()), paint->getTextSize());
+    if (mHasShadow) {
+        glActiveTexture(gTextureUnits[0]);
+        const ShadowTexture* shadow = mDropShadowCache.get(paint, text, bytesCount,
+                count, mShadowRadius);
+        const AutoTexture autoCleanup(shadow);
+        renderShadow(shadow, x, y, mode);
+    }
 
     uint32_t color = paint->getColor();
     const GLfloat a = alpha / 255.0f;
@@ -624,7 +717,6 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     }
 
     const Rect& clip = mSnapshot->getLocalClip();
-    mFontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()), paint->getTextSize());
     mFontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -693,55 +785,9 @@ void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
     const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
     const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
 
-    // Describe the required shaders
-    ProgramDescription description;
-    description.hasTexture = true;
-    description.hasAlpha8Texture = true;
-    if (mShader) {
-        mShader->describe(description, mExtensions);
-    }
-    if (mColorFilter) {
-        mColorFilter->describe(description, mExtensions);
-    }
-
-    // Build and use the appropriate shader
-    useProgram(mProgramCache.get(description));
-
-    // Setup the blending mode
-    chooseBlending(true, mode);
-    bindTexture(texture->id, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, textureUnit);
-    glUniform1i(mCurrentProgram->getUniform("sampler"), textureUnit);
-
-    int texCoordsSlot = mCurrentProgram->getAttrib("texCoords");
-    glEnableVertexAttribArray(texCoordsSlot);
-
-    // Setup attributes
-    glVertexAttribPointer(mCurrentProgram->position, 2, GL_FLOAT, GL_FALSE,
-            gMeshStride, &mMeshVertices[0].position[0]);
-    glVertexAttribPointer(texCoordsSlot, 2, GL_FLOAT, GL_FALSE,
-            gMeshStride, &mMeshVertices[0].texture[0]);
-
-    // Setup uniforms
-    mModelView.loadTranslate(texture->left - texture->offset,
-            texture->top - texture->offset, 0.0f);
-    mModelView.scale(texture->width, texture->height, 1.0f);
-    mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
-
-    glUniform4f(mCurrentProgram->color, r, g, b, a);
-
-    textureUnit++;
-    // Setup attributes and uniforms required by the shaders
-    if (mShader) {
-        mShader->setupProgram(mCurrentProgram, mModelView, *mSnapshot, &textureUnit);
-    }
-    if (mColorFilter) {
-        mColorFilter->setupProgram(mCurrentProgram);
-    }
-
-    // Draw the mesh
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
-
-    glDisableVertexAttribArray(texCoordsSlot);
+    const float x = texture->left - texture->offset;
+    const float y = texture->top - texture->offset;
+    renderTextureAlpha8(texture, textureUnit, x, y, r, g, b, a, mode, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -769,6 +815,22 @@ void OpenGLRenderer::resetColorFilter() {
 
 void OpenGLRenderer::setupColorFilter(SkiaColorFilter* filter) {
     mColorFilter = filter;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Drop shadow
+///////////////////////////////////////////////////////////////////////////////
+
+void OpenGLRenderer::resetShadow() {
+    mHasShadow = false;
+}
+
+void OpenGLRenderer::setupShadow(float radius, float dx, float dy, int color) {
+    mHasShadow = true;
+    mShadowRadius = radius;
+    mShadowDx = dx;
+    mShadowDy = dy;
+    mShadowColor = color;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

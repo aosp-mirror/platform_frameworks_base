@@ -738,7 +738,7 @@ static JNINativeMethod methods[] = {
                                         (void*) SkPaintGlue::getStringBounds },
     {"nativeGetCharArrayBounds", "(I[CIILandroid/graphics/Rect;)V",
                                     (void*) SkPaintGlue::getCharArrayBounds },
-    {"setShadowLayer", "(FFFI)V", (void*)SkPaintGlue::setShadowLayer}
+    {"nSetShadowLayer", "(FFFI)V", (void*)SkPaintGlue::setShadowLayer}
 };
 
 static jfieldID req_fieldID(jfieldID id) {

@@ -259,6 +259,7 @@ static void android_view_GLES20Canvas_resetModifiers(JNIEnv* env, jobject canvas
         OpenGLRenderer* renderer) {
     renderer->resetShader();
     renderer->resetColorFilter();
+    renderer->resetShadow();
 }
 
 static void android_view_GLES20Canvas_setupShader(JNIEnv* env, jobject canvas,
@@ -269,6 +270,11 @@ static void android_view_GLES20Canvas_setupShader(JNIEnv* env, jobject canvas,
 static void android_view_GLES20Canvas_setupColorFilter(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, SkiaColorFilter* filter) {
     renderer->setupColorFilter(filter);
+}
+
+static void android_view_GLES20Canvas_setupShadow(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, jfloat radius, jfloat dx, jfloat dy, jint color) {
+    renderer->setupShadow(radius, dx, dy, color);
 }
 
 // ----------------------------------------------------------------------------
@@ -402,6 +408,7 @@ static JNINativeMethod gMethods[] = {
     { "nResetModifiers",    "(I)V",            (void*) android_view_GLES20Canvas_resetModifiers },
     { "nSetupShader",       "(II)V",           (void*) android_view_GLES20Canvas_setupShader },
     { "nSetupColorFilter",  "(II)V",           (void*) android_view_GLES20Canvas_setupColorFilter },
+    { "nSetupShadow",       "(IFFFI)V",        (void*) android_view_GLES20Canvas_setupShadow },
 
     { "nDrawText",          "(I[CIIFFII)V",    (void*) android_view_GLES20Canvas_drawTextArray },
     { "nDrawText",          "(ILjava/lang/String;IIFFII)V",

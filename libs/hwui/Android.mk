@@ -17,7 +17,8 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		ProgramCache.cpp \
 		SkiaColorFilter.cpp \
 		SkiaShader.cpp \
-		TextureCache.cpp
+		TextureCache.cpp \
+		TextDropShadowCache.cpp
 	
 	LOCAL_C_INCLUDES += \
 		$(JNI_H_INCLUDE) \

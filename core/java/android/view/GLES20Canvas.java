@@ -756,6 +756,12 @@ class GLES20Canvas extends Canvas {
     private boolean setupModifiers(Paint paint) {
         boolean hasModifier = false;
 
+        if (paint.hasShadow) {
+            nSetupShadow(mRenderer, paint.shadowRadius, paint.shadowDx, paint.shadowDy,
+                    paint.shadowColor);
+            hasModifier = true;
+        }
+
         final Shader shader = paint.getShader();
         if (shader != null) {
             nSetupShader(mRenderer, shader.native_shader);
@@ -770,7 +776,7 @@ class GLES20Canvas extends Canvas {
 
         return hasModifier;
     }
-    
+
     private boolean setupColorFilter(Paint paint) {
         final ColorFilter filter = paint.getColorFilter();
         if (filter != null) {
@@ -782,5 +788,7 @@ class GLES20Canvas extends Canvas {
     
     private native void nSetupShader(int renderer, int shader);
     private native void nSetupColorFilter(int renderer, int colorFilter);
+    private native void nSetupShadow(int renderer, float radius, float dx, float dy, int color);
+
     private native void nResetModifiers(int renderer);
 }

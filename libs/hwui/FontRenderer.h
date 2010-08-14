@@ -129,6 +129,14 @@ public:
             uint32_t len, int numGlyphs, int x, int y);
 
     struct DropShadow {
+        DropShadow() { };
+
+        DropShadow(const DropShadow& dropShadow):
+            width(dropShadow.width), height(dropShadow.height),
+            image(dropShadow.image), penX(dropShadow.penX),
+            penY(dropShadow.penY) {
+        }
+
         uint32_t width;
         uint32_t height;
         uint8_t* image;
@@ -139,7 +147,7 @@ public:
     // After renderDropShadow returns, the called owns the memory in DropShadow.image
     // and is responsible for releasing it when it's done with it
     DropShadow renderDropShadow(SkPaint* paint, const char *text, uint32_t startIndex,
-                                   uint32_t len, int numGlyphs, uint32_t radius);
+            uint32_t len, int numGlyphs, uint32_t radius);
 
     GLuint getTexture() {
         checkInit();
@@ -154,7 +162,7 @@ protected:
         uint16_t mMaxWidth;
         uint32_t mCurrentRow;
         uint32_t mCurrentCol;
-        bool     mDirty;
+        bool mDirty;
 
         CacheTextureLine(uint16_t maxWidth, uint16_t maxHeight, uint32_t currentRow,
                 uint32_t currentCol):
@@ -237,9 +245,9 @@ protected:
 
     void computeGaussianWeights(float* weights, int32_t radius);
     void horizontalBlur(float* weights, int32_t radius, const uint8_t *source, uint8_t *dest,
-                         int32_t width, int32_t height);
+            int32_t width, int32_t height);
     void verticalBlur(float* weights, int32_t radius, const uint8_t *source, uint8_t *dest,
-                         int32_t width, int32_t height);
+            int32_t width, int32_t height);
     void blurImage(uint8_t* image, int32_t width, int32_t height, int32_t radius);
 };
 

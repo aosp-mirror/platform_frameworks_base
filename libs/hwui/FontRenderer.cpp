@@ -128,8 +128,11 @@ void Font::drawCachedGlyph(CachedGlyphInfo *glyph, int x, int y,
 }
 
 Font::CachedGlyphInfo* Font::getCachedUTFChar(SkPaint* paint, int32_t utfChar) {
-    CachedGlyphInfo* cachedGlyph = mCachedGlyphs.valueFor(utfChar);
-    if (cachedGlyph == NULL) {
+    CachedGlyphInfo* cachedGlyph = NULL;
+    ssize_t index = mCachedGlyphs.indexOfKey(utfChar);
+    if (index >= 0) {
+        cachedGlyph = mCachedGlyphs.valueAt(index);
+    } else {
         cachedGlyph = cacheGlyph(paint, utfChar);
     }
 
@@ -510,10 +513,10 @@ void FontRenderer::checkTextureUpdate() {
             uint32_t yOffset = cl->mCurrentRow;
             uint32_t width   = mCacheWidth;
             uint32_t height  = cl->mMaxHeight;
-            void*    textureData = mTextTexture + yOffset*width;
+            void* textureData = mTextTexture + yOffset*width;
 
             glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height,
-                             GL_ALPHA, GL_UNSIGNED_BYTE, textureData);
+                    GL_ALPHA, GL_UNSIGNED_BYTE, textureData);
 
             cl->mDirty = false;
         }
@@ -617,21 +620,33 @@ void FontRenderer::setFont(SkPaint* paint, uint32_t fontId, float fontSize) {
     }
 }
 FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const char *text,
-                                uint32_t startIndex, uint32_t len, int numGlyphs, uint32_t radius) {
+        uint32_t startIndex, uint32_t len, int numGlyphs, uint32_t radius) {
+    checkInit();
+
+    if (!mCurrentFont) {
+        DropShadow image;
+        image.width = 0;
+        image.height = 0;
+        image.image = NULL;
+        image.penX = 0;
+        image.penY = 0;
+        return image;
+    }
 
     Rect bounds;
     mCurrentFont->measureUTF(paint, text, startIndex, len, numGlyphs, &bounds);
-    uint32_t paddedWidth = (uint32_t)(bounds.right - bounds.left) + 2*radius;
-    uint32_t paddedHeight = (uint32_t)(bounds.top - bounds.bottom) + 2*radius;
+    uint32_t paddedWidth = (uint32_t) (bounds.right - bounds.left) + 2 * radius;
+    uint32_t paddedHeight = (uint32_t) (bounds.top - bounds.bottom) + 2 * radius;
     uint8_t* dataBuffer = new uint8_t[paddedWidth * paddedHeight];
-    for(uint32_t i = 0; i < paddedWidth * paddedHeight; i ++) {
+    for (uint32_t i = 0; i < paddedWidth * paddedHeight; i++) {
         dataBuffer[i] = 0;
     }
+
     int penX = radius - bounds.left;
     int penY = radius - bounds.bottom;
 
     mCurrentFont->renderUTF(paint, text, startIndex, len, numGlyphs, penX, penY,
-                              dataBuffer, paddedWidth, paddedHeight);
+            dataBuffer, paddedWidth, paddedHeight);
     blurImage(dataBuffer, paddedWidth, paddedHeight, radius);
 
     DropShadow image;
@@ -699,8 +714,7 @@ void FontRenderer::computeGaussianWeights(float* weights, int32_t radius) {
 }
 
 void FontRenderer::horizontalBlur(float* weights, int32_t radius,
-                                    const uint8_t* source, uint8_t* dest,
-                                    int32_t width, int32_t height) {
+        const uint8_t* source, uint8_t* dest, int32_t width, int32_t height) {
     float blurredPixel = 0.0f;
     float currentPixel = 0.0f;
 
@@ -744,8 +758,7 @@ void FontRenderer::horizontalBlur(float* weights, int32_t radius,
 }
 
 void FontRenderer::verticalBlur(float* weights, int32_t radius,
-                                  const uint8_t* source, uint8_t* dest,
-                                  int32_t width, int32_t height) {
+        const uint8_t* source, uint8_t* dest, int32_t width, int32_t height) {
     float blurredPixel = 0.0f;
     float currentPixel = 0.0f;
 

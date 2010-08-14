@@ -45,6 +45,7 @@
 #include "SkiaShader.h"
 #include "SkiaColorFilter.h"
 #include "PathCache.h"
+#include "TextDropShadowCache.h"
 
 namespace android {
 namespace uirenderer {
@@ -100,6 +101,9 @@ public:
 
     void resetColorFilter();
     void setupColorFilter(SkiaColorFilter* filter);
+
+    void resetShadow();
+    void setupShadow(float radius, float dx, float dy, int color);
 
     void drawText(const char* text, int bytesCount, int count, float x, float y, SkPaint* paint);
 
@@ -222,6 +226,34 @@ private:
             GLvoid* vertices, GLvoid* texCoords, GLvoid* indices, GLsizei elementsCount = 0);
 
     /**
+     * Renders the specified shadow.
+     *
+     * @param texture The shadow texture
+     * @param x The x coordinate of the shadow
+     * @param y The y coordinate of the shadow
+     * @param mode The blending mode
+     */
+    void renderShadow(const ShadowTexture* texture, float x, float y, SkXfermode::Mode mode);
+
+    /**
+     * Renders the specified Alpha8 texture as a rectangle.
+     *
+     * @param texture The texture to render with
+     * @param textureUnit The texture unit to use, may be modified
+     * @param x The x coordinate of the rectangle to draw
+     * @param y The y coordinate of the rectangle to draw
+     * @param r The red component of the color
+     * @param g The green component of the color
+     * @param b The blue component of the color
+     * @param a The alpha component of the color
+     * @param mode The blending mode
+     * @param applyFilters Whether or not to take color filters and
+     *        shaders into account
+     */
+    void renderTextureAlpha8(const Texture* texture, GLuint& textureUnit, float x, float y,
+            float r, float g, float b, float a, SkXfermode::Mode mode, bool applyFilters);
+
+    /**
      * Resets the texture coordinates stored in mMeshVertices. Setting the values
      * back to default is achieved by calling:
      *
@@ -304,6 +336,13 @@ private:
     // Font renderer
     FontRenderer mFontRenderer;
 
+    // Drop shadow
+    bool mHasShadow;
+    float mShadowRadius;
+    float mShadowDx;
+    float mShadowDy;
+    int mShadowColor;
+
     // Various caches
     TextureCache mTextureCache;
     LayerCache mLayerCache;
@@ -311,6 +350,7 @@ private:
     ProgramCache mProgramCache;
     PathCache mPathCache;
     PatchCache mPatchCache;
+    TextDropShadowCache mDropShadowCache;
 }; // class OpenGLRenderer
 
 }; // namespace uirenderer
