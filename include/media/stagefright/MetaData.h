@@ -86,9 +86,9 @@ enum {
 
     // Track authoring progress status
     // kKeyTrackTimeStatus is used to track progress in elapsed time
-    // kKeyTrackFrameStatus is used to track progress in authored frames
-    kKeyTrackFrameStatus  = 'tkfm',  // int32_t
     kKeyTrackTimeStatus   = 'tktm',  // int64_t
+
+    kKeyNotRealTime       = 'ntrt',  // bool (int32_t)
 
 };
 

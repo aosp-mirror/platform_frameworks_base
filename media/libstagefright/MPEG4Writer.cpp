@@ -72,6 +72,11 @@ private:
     bool mIsAudio;
     bool mIsMPEG4;
     int64_t mTrackDurationUs;
+
+    // For realtime applications, we need to adjust the media clock
+    // for video track based on the audio media clock
+    bool mIsRealTimeRecording;
+    int64_t mMaxTimeStampUs;
     int64_t mEstimatedTrackSizeBytes;
     int64_t mMaxWriteTimeUs;
     int32_t mTimeScale;
@@ -940,6 +945,7 @@ status_t MPEG4Writer::startWriterThread() {
 
     mDone = false;
     mIsFirstChunk = true;
+    mDriftTimeUs = 0;
     for (List<Track *>::iterator it = mTracks.begin();
          it != mTracks.end(); ++it) {
         ChunkInfo info;
@@ -965,6 +971,14 @@ status_t MPEG4Writer::Track::start(MetaData *params) {
     int64_t startTimeUs;
     if (params == NULL || !params->findInt64(kKeyTime, &startTimeUs)) {
         startTimeUs = 0;
+    }
+
+    mIsRealTimeRecording = true;
+    {
+        int32_t isNotRealTime;
+        if (params && params->findInt32(kKeyNotRealTime, &isNotRealTime)) {
+            mIsRealTimeRecording = (isNotRealTime == 0);
+        }
     }
 
     initTrackingProgressStatus(params);
@@ -1326,6 +1340,10 @@ void MPEG4Writer::Track::threadEntry() {
     uint32_t previousSampleSize = 0;  // Size of the previous sample
     int64_t previousPausedDurationUs = 0;
     int64_t timestampUs;
+
+    int64_t wallClockTimeUs = 0;
+    int64_t lastWallClockTimeUs = 0;
+
     sp<MetaData> meta_data;
     bool collectStats = collectStatisticalData();
 
@@ -1429,6 +1447,33 @@ void MPEG4Writer::Track::threadEntry() {
         }
 
         timestampUs -= previousPausedDurationUs;
+        if (mIsRealTimeRecording && !mIsAudio) {
+            // The minor adjustment on the timestamp is heuristic/experimental
+            // We are adjusting the timestamp to reduce the fluctuation of the duration
+            // of neighboring samples. This in turn helps reduce the track header size,
+            // especially, the number of entries in the "stts" box.
+            if (mNumSamples > 1) {
+                int64_t durationUs = timestampUs + mOwner->getDriftTimeUs() - lastTimestampUs;
+                int64_t diffUs = (durationUs > lastDurationUs)
+                            ? durationUs - lastDurationUs
+                            : lastDurationUs - durationUs;
+                if (diffUs <= 5000) {  // XXX: Magic number 5ms
+                    timestampUs = lastTimestampUs + lastDurationUs;
+                } else {
+                    timestampUs += mOwner->getDriftTimeUs();
+                }
+            }
+        }
+        CHECK(timestampUs >= 0);
+        if (mNumSamples > 1) {
+            if (timestampUs <= lastTimestampUs) {
+                LOGW("Drop a frame, since it arrives too late!");
+                copy->release();
+                copy = NULL;
+                continue;
+            }
+        }
+
         LOGV("time stamp: %lld and previous paused duration %lld",
                 timestampUs, previousPausedDurationUs);
         if (timestampUs > mTrackDurationUs) {
@@ -1454,6 +1499,14 @@ void MPEG4Writer::Track::threadEntry() {
         }
         lastDurationUs = timestampUs - lastTimestampUs;
         lastTimestampUs = timestampUs;
+        if (mIsRealTimeRecording && mIsAudio) {
+            wallClockTimeUs = systemTime() / 1000;
+            int64_t wallClockDurationUs = wallClockTimeUs - lastWallClockTimeUs;
+            if (mNumSamples > 2) {
+                mOwner->addDriftTimeUs(lastDurationUs - wallClockDurationUs);
+            }
+            lastWallClockTimeUs = wallClockTimeUs;
+        }
 
         if (isSync != 0) {
             mStssTableEntries.push_back(mNumSamples);
@@ -1677,6 +1730,18 @@ void MPEG4Writer::Track::logStatisticalData(bool isAudio) {
                 minChunk, duration, maxChunk);
         }
     }
+}
+
+void MPEG4Writer::addDriftTimeUs(int64_t driftTimeUs) {
+    LOGV("addDriftTimeUs: %lld us", driftTimeUs);
+    Mutex::Autolock autolock(mLock);
+    mDriftTimeUs += driftTimeUs;
+}
+
+int64_t MPEG4Writer::getDriftTimeUs() {
+    LOGV("getDriftTimeUs: %lld us", mDriftTimeUs);
+    Mutex::Autolock autolock(mLock);
+    return mDriftTimeUs;
 }
 
 void MPEG4Writer::Track::bufferChunk(int64_t timestampUs) {
