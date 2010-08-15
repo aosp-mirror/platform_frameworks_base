@@ -79,6 +79,7 @@ public class DialogFragment extends Fragment
 
     Dialog mDialog;
     boolean mDestroyed;
+    boolean mRemoved;
 
     public DialogFragment() {
     }
@@ -136,6 +137,7 @@ public class DialogFragment extends Fragment
      */
     public int show(Activity activity, FragmentTransaction transaction, String tag) {
         transaction.add(this, tag);
+        mRemoved = false;
         mBackStackId = transaction.commit();
         return mBackStackId;
     }
@@ -149,12 +151,15 @@ public class DialogFragment extends Fragment
     public void dismiss() {
         if (mDialog != null) {
             mDialog.dismiss();
+            mDialog = null;
         }
+        mRemoved = true;
         if (mBackStackId >= 0) {
-            getActivity().popBackStack(mBackStackId, Activity.POP_BACK_STACK_INCLUSIVE);
+            getFragmentManager().popBackStack(mBackStackId,
+                    FragmentManager.POP_BACK_STACK_INCLUSIVE);
             mBackStackId = -1;
         } else {
-            FragmentTransaction ft = getActivity().openFragmentTransaction();
+            FragmentTransaction ft = getFragmentManager().openTransaction();
             ft.remove(this);
             ft.commit();
         }
@@ -193,15 +198,12 @@ public class DialogFragment extends Fragment
     }
 
     public void onCancel(DialogInterface dialog) {
-        if (mBackStackId >= 0) {
-            // If this fragment is part of the back stack, then cancelling
-            // the dialog means popping off the back stack.
-            getActivity().popBackStack(mBackStackId, Activity.POP_BACK_STACK_INCLUSIVE);
-            mBackStackId = -1;
-        }
     }
 
     public void onDismiss(DialogInterface dialog) {
+        if (!mRemoved) {
+            dismiss();
+        }
     }
 
     @Override
@@ -241,7 +243,10 @@ public class DialogFragment extends Fragment
     @Override
     public void onStart() {
         super.onStart();
-        mDialog.show();
+        if (mDialog != null) {
+            mRemoved = false;
+            mDialog.show();
+        }
     }
 
     @Override
@@ -262,17 +267,25 @@ public class DialogFragment extends Fragment
     @Override
     public void onStop() {
         super.onStop();
-        mDialog.hide();
+        if (mDialog != null) {
+            mDialog.hide();
+        }
     }
 
     /**
-     * Detach from list view.
+     * Remove dialog.
      */
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         mDestroyed = true;
-        mDialog.dismiss();
-        mDialog = null;
+        if (mDialog != null) {
+            // Set removed here because this dismissal is just to hide
+            // the dialog -- we don't want this to cause the fragment to
+            // actually be removed.
+            mRemoved = true;
+            mDialog.dismiss();
+            mDialog = null;
+        }
     }
 }

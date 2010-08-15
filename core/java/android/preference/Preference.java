@@ -90,6 +90,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
     private String mKey;
     private Intent mIntent;
     private String mFragment;
+    private Bundle mExtras;
     private boolean mEnabled = true;
     private boolean mSelectable = true;
     private boolean mRequiresKey;
@@ -336,6 +337,26 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      */
     public String getFragment() {
         return mFragment;
+    }
+
+    /**
+     * Return the extras Bundle object associated with this preference, creating
+     * a new Bundle if there currently isn't one.  You can use this to get and
+     * set individual extra key/value pairs.
+     */
+    public Bundle getExtras() {
+        if (mExtras == null) {
+            mExtras = new Bundle();
+        }
+        return mExtras;
+    }
+
+    /**
+     * Return the extras Bundle object associated with this preference,
+     * returning null if there is not currently one.
+     */
+    public Bundle peekExtras() {
+        return mExtras;
     }
 
     /**

@@ -1590,7 +1590,9 @@ public class Activity extends ContextThemeWrapper
     /**
      * Start a series of edit operations on the Fragments associated with
      * this activity.
+     * @deprecated use {@link #getFragmentManager}.
      */
+    @Deprecated
     public FragmentTransaction openFragmentTransaction() {
         return mFragments.openTransaction();
     }
@@ -1782,7 +1784,9 @@ public class Activity extends ContextThemeWrapper
      * from XML or as the container ID when added in a transaction.  This only
      * returns fragments that are currently added to the activity's content.
      * @return The fragment if found or null otherwise.
+     * @deprecated use {@link #getFragmentManager}.
      */
+    @Deprecated
     public Fragment findFragmentById(int id) {
         return mFragments.findFragmentById(id);
     }
@@ -1792,7 +1796,9 @@ public class Activity extends ContextThemeWrapper
      * from XML or as supplied when added in a transaction.  This only
      * returns fragments that are currently added to the activity's content.
      * @return The fragment if found or null otherwise.
+     * @deprecated use {@link #getFragmentManager}.
      */
+    @Deprecated
     public Fragment findFragmentByTag(String tag) {
         return mFragments.findFragmentByTag(tag);
     }
@@ -2078,7 +2084,9 @@ public class Activity extends ContextThemeWrapper
     /**
      * Pop the top state off the back stack.  Returns true if there was one
      * to pop, else false.
+     * @deprecated use {@link #getFragmentManager}.
      */
+    @Deprecated
     public boolean popBackStack() {
         return mFragments.popBackStack();
     }
@@ -2091,7 +2099,9 @@ public class Activity extends ContextThemeWrapper
      * {@link #POP_BACK_STACK_INCLUSIVE} flag can be used to control whether
      * the named state itself is popped. If null, only the top state is popped.
      * @param flags Either 0 or {@link #POP_BACK_STACK_INCLUSIVE}.
+     * @deprecated use {@link #getFragmentManager}.
      */
+    @Deprecated
     public boolean popBackStack(String name, int flags) {
         return mFragments.popBackStack(name, flags);
     }
@@ -2105,7 +2115,9 @@ public class Activity extends ContextThemeWrapper
      * {@link #POP_BACK_STACK_INCLUSIVE} flag can be used to control whether
      * the named state itself is popped.
      * @param flags Either 0 or {@link #POP_BACK_STACK_INCLUSIVE}.
+     * @deprecated use {@link #getFragmentManager}.
      */
+    @Deprecated
     public boolean popBackStack(int id, int flags) {
         return mFragments.popBackStack(id, flags);
     }
@@ -2116,7 +2128,7 @@ public class Activity extends ContextThemeWrapper
      * but you can override this to do whatever you want.
      */
     public void onBackPressed() {
-        if (!popBackStack()) {
+        if (!mFragments.popBackStack()) {
             finish();
         }
     }
@@ -3995,9 +4007,12 @@ public class Activity extends ContextThemeWrapper
             return null;
         }
         
+        String fname = attrs.getAttributeValue(null, "class");
         TypedArray a = 
             context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.Fragment);
-        String fname = a.getString(com.android.internal.R.styleable.Fragment_name);
+        if (fname == null) {
+            fname = a.getString(com.android.internal.R.styleable.Fragment_name);
+        }
         int id = a.getResourceId(com.android.internal.R.styleable.Fragment_id, 0);
         String tag = a.getString(com.android.internal.R.styleable.Fragment_tag);
         a.recycle();
@@ -4020,13 +4035,13 @@ public class Activity extends ContextThemeWrapper
             fragment.mFragmentId = id;
             fragment.mTag = tag;
             fragment.mImmediateActivity = this;
+            // If this fragment is newly instantiated (either right now, or
+            // from last saved state), then give it the attributes to
+            // initialize itself.
+            if (!fragment.mRetaining) {
+                fragment.onInflate(attrs, fragment.mSavedFragmentState);
+            }
             mFragments.addFragment(fragment, true);
-        }
-        // If this fragment is newly instantiated (either right now, or
-        // from last saved state), then give it the attributes to
-        // initialize itself.
-        if (!fragment.mRetaining) {
-            fragment.onInflate(this, attrs, fragment.mSavedFragmentState);
         }
         if (fragment.mView == null) {
             throw new IllegalStateException("Fragment " + fname

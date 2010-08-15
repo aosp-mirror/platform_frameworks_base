@@ -1559,7 +1559,7 @@ public class Resources {
     /**
      * Parse a series of {@link android.R.styleable#Extra &lt;extra&gt;} tags from
      * an XML file.  You call this when you are at the parent tag of the
-     * extra tags, and it return once all of the child tags have been parsed.
+     * extra tags, and it will return once all of the child tags have been parsed.
      * This will call {@link #parseBundleExtra} for each extra tag encountered.
      * 
      * @param parser The parser from which to retrieve the extras.

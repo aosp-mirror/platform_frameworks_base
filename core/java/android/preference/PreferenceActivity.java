@@ -313,7 +313,7 @@ public abstract class PreferenceActivity extends ListActivity implements
                 setListAdapter(mAdapter);
                 if (!mSinglePane) {
                     mPrefsContainer.setVisibility(View.VISIBLE);
-                    if (initialFragment != null) {
+                    if (initialFragment == null) {
                         Header h = onGetInitialHeader();
                         initialFragment = h.fragment;
                         initialArguments = h.fragmentArguments;
@@ -464,11 +464,13 @@ public abstract class PreferenceActivity extends ListActivity implements
             }
 
             String nodeName = parser.getName();
-            if (!"PreferenceHeaders".equals(nodeName)) {
+            if (!"preference-headers".equals(nodeName)) {
                 throw new RuntimeException(
-                        "XML document must start with <PreferenceHeaders> tag; found"
+                        "XML document must start with <preference-headers> tag; found"
                         + nodeName + " at " + parser.getPositionDescription());
             }
+
+            Bundle curBundle = null;
 
             int outerDepth = parser.getDepth();
             while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
@@ -478,7 +480,7 @@ public abstract class PreferenceActivity extends ListActivity implements
                 }
 
                 nodeName = parser.getName();
-                if ("Header".equals(nodeName)) {
+                if ("header".equals(nodeName)) {
                     Header header = new Header();
 
                     TypedArray sa = getResources().obtainAttributes(attrs,
@@ -493,9 +495,16 @@ public abstract class PreferenceActivity extends ListActivity implements
                             com.android.internal.R.styleable.PreferenceHeader_fragment);
                     sa.recycle();
 
-                    target.add(header);
+                    if (curBundle == null) {
+                        curBundle = new Bundle();
+                    }
+                    getResources().parseBundleExtras(parser, curBundle);
+                    if (curBundle.size() > 0) {
+                        header.fragmentArguments = curBundle;
+                        curBundle = null;
+                    }
 
-                    XmlUtils.skipCurrentTag(parser);
+                    target.add(header);
                 } else {
                     XmlUtils.skipCurrentTag(parser);
                 }
@@ -631,16 +640,17 @@ public abstract class PreferenceActivity extends ListActivity implements
      * @param args Optional arguments to supply to the fragment.
      */
     public void switchToHeader(String fragmentName, Bundle args) {
-        popBackStack(BACK_STACK_PREFS, POP_BACK_STACK_INCLUSIVE);
+        getFragmentManager().popBackStack(BACK_STACK_PREFS, POP_BACK_STACK_INCLUSIVE);
 
         Fragment f = Fragment.instantiate(this, fragmentName, args);
-        openFragmentTransaction().replace(com.android.internal.R.id.prefs, f).commit();
+        getFragmentManager().openTransaction().replace(
+                com.android.internal.R.id.prefs, f).commit();
     }
 
     @Override
     public boolean onPreferenceStartFragment(PreferenceFragment caller, Preference pref) {
-        Fragment f = Fragment.instantiate(this, pref.getFragment());
-        openFragmentTransaction().replace(com.android.internal.R.id.prefs, f)
+        Fragment f = Fragment.instantiate(this, pref.getFragment(), pref.getExtras());
+        getFragmentManager().openTransaction().replace(com.android.internal.R.id.prefs, f)
                 .addToBackStack(BACK_STACK_PREFS).commit();
         return true;
     }

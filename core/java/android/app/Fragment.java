@@ -42,8 +42,6 @@ import android.widget.AdapterView;
 import java.util.HashMap;
 
 final class FragmentState implements Parcelable {
-    static final String VIEW_STATE_TAG = "android:view_state";
-    
     final String mClassName;
     final int mIndex;
     final boolean mFromLayout;
@@ -90,8 +88,6 @@ final class FragmentState implements Parcelable {
         if (mSavedFragmentState != null) {
             mSavedFragmentState.setClassLoader(activity.getClassLoader());
             mInstance.mSavedFragmentState = mSavedFragmentState;
-            mInstance.mSavedViewState
-                    = mSavedFragmentState.getSparseParcelableArray(VIEW_STATE_TAG);
         }
         mInstance.setIndex(mIndex);
         mInstance.mFromLayout = mFromLayout;
@@ -159,6 +155,12 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     
     // Construction arguments;
     Bundle mArguments;
+
+    // Target fragment.
+    Fragment mTarget;
+
+    // Target request code.
+    int mTargetRequestCode;
 
     // True if the fragment is in the list of added fragments.
     boolean mAdded;
@@ -375,7 +377,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      * arguments supplied here will be retained across fragment destroy and
      * creation.
      */
-    final public void setArguments(Bundle args) {
+    public void setArguments(Bundle args) {
         if (mIndex >= 0) {
             throw new IllegalStateException("Fragment already active");
         }
@@ -388,6 +390,36 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      */
     final public Bundle getArguments() {
         return mArguments;
+    }
+
+    /**
+     * Optional target for this fragment.  This may be used, for example,
+     * if this fragment is being started by another, and when done wants to
+     * give a result back to the first.  The target set here is retained
+     * across instances via {@link FragmentManager#putFragment
+     * FragmentManager.putFragment()}.
+     *
+     * @param fragment The fragment that is the target of this one.
+     * @param requestCode Optional request code, for convenience if you
+     * are going to call back with {@link #onActivityResult(int, int, Intent)}.
+     */
+    public void setTargetFragment(Fragment fragment, int requestCode) {
+        mTarget = fragment;
+        mTargetRequestCode = requestCode;
+    }
+
+    /**
+     * Return the target fragment set by {@link #setTargetFragment(Fragment)}.
+     */
+    final public Fragment getTargetFragment() {
+        return mTarget;
+    }
+
+    /**
+     * Return the target request code set by {@link #setTargetFragment(Fragment)}.
+     */
+    final public int getTargetRequestCode() {
+        return mTargetRequestCode;
     }
 
     /**
@@ -537,21 +569,30 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     /**
      * Called when a fragment is being created as part of a view layout
      * inflation, typically from setting the content view of an activity.  This
-     * will be called both the first time the fragment is created, as well
-     * later when it is being re-created from its saved state (which is also
-     * given here).
+     * will be called immediately after the fragment is created from a <fragment>
+     * tag in a layout file.  Note this is <em>before</em> the fragment's
+     * {@link #onAttach(Activity)} has been called; all you should do here is
+     * parse the attributes and save them away.  A convenient thing to do is
+     * simply copy them into a Bundle that is given to {@link #setArguments(Bundle)}.
      * 
-     * XXX This is kind-of yucky...  maybe we could just supply the
-     * AttributeSet to onCreate()?
+     * <p>This is called every time the fragment is inflated, even if it is
+     * being inflated into a new instance with saved state.  Because a fragment's
+     * arguments are retained across instances, it may make no sense to re-parse
+     * the attributes into new arguments.  You may want to first check
+     * {@link #getArguments()} and only parse the attributes if it returns null,
+     * the assumption being that if it is non-null those are the same arguments
+     * from the first time the fragment was inflated.  (That said, you may want
+     * to have layouts change for different configurations such as landscape
+     * and portrait, which can have different attributes.  If so, you will need
+     * to re-parse the attributes each time this is called to generate new
+     * arguments.)</p>
      * 
-     * @param activity The Activity that is inflating the fragment.
      * @param attrs The attributes at the tag where the fragment is
      * being created.
      * @param savedInstanceState If the fragment is being re-created from
      * a previous saved state, this is the state.
      */
-    public void onInflate(Activity activity, AttributeSet attrs,
-            Bundle savedInstanceState) {
+    public void onInflate(AttributeSet attrs, Bundle savedInstanceState) {
         mCalled = true;
     }
     
@@ -693,8 +734,10 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      * Called when the view previously created by {@link #onCreateView} has
      * been detached from the fragment.  The next time the fragment needs
      * to be displayed, a new view will be created.  This is called
-     * after {@link #onStop()} and before {@link #onDestroy()}; it is only
-     * called if {@link #onCreateView} returns a non-null View.
+     * after {@link #onStop()} and before {@link #onDestroy()}.  It is called
+     * <em>regardless</em> of whether {@link #onCreateView} returned a
+     * non-null view.  Internally it is called after the view's state has
+     * been saved but before it has been removed from its parent.
      */
     public void onDestroyView() {
         mCalled = true;

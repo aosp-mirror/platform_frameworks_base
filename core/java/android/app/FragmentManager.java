@@ -166,13 +166,16 @@ final class FragmentManagerState implements Parcelable {
 }
 
 /**
- * @hide
  * Container for fragments associated with an activity.
  */
-class FragmentManagerImpl implements FragmentManager {
+final class FragmentManagerImpl implements FragmentManager {
     static final boolean DEBUG = true;
     static final String TAG = "FragmentManager";
     
+    static final String TARGET_REQUEST_CODE_STATE_TAG = "android:target_req_state";
+    static final String TARGET_STATE_TAG = "android:target_state";
+    static final String VIEW_STATE_TAG = "android:view_state";
+
     ArrayList<Runnable> mPendingActions;
     Runnable[] mTmpActions;
     boolean mExecutingActions;
@@ -201,7 +204,6 @@ class FragmentManagerImpl implements FragmentManager {
             execPendingActions();
         }
     };
-    
     public FragmentTransaction openTransaction() {
         return new BackStackEntry(this);
     }
@@ -230,7 +232,10 @@ class FragmentManagerImpl implements FragmentManager {
     }
 
     public Fragment getFragment(Bundle bundle, String key) {
-        int index = bundle.getInt(key);
+        int index = bundle.getInt(key, -1);
+        if (index == -1) {
+            return null;
+        }
         if (index >= mActive.size()) {
             throw new IllegalStateException("Fragement no longer exists for key "
                     + key + ": index " + index);
@@ -296,6 +301,16 @@ class FragmentManagerImpl implements FragmentManager {
             switch (f.mState) {
                 case Fragment.INITIALIZING:
                     if (DEBUG) Log.v(TAG, "moveto CREATED: " + f);
+                    if (f.mSavedFragmentState != null) {
+                        f.mSavedViewState = f.mSavedFragmentState.getSparseParcelableArray(
+                                FragmentManagerImpl.VIEW_STATE_TAG);
+                        f.mTarget = getFragment(f.mSavedFragmentState,
+                                FragmentManagerImpl.TARGET_STATE_TAG);
+                        if (f.mTarget != null) {
+                            f.mTargetRequestCode = f.mSavedFragmentState.getInt(
+                                    FragmentManagerImpl.TARGET_REQUEST_CODE_STATE_TAG, 0);
+                        }
+                    }
                     f.mActivity = mActivity;
                     f.mCalled = false;
                     f.onAttach(mActivity);
@@ -419,32 +434,32 @@ class FragmentManagerImpl implements FragmentManager {
                     if (newState < Fragment.ACTIVITY_CREATED) {
                         if (DEBUG) Log.v(TAG, "movefrom CONTENT: " + f);
                         if (f.mView != null) {
-                            f.mCalled = false;
-                            f.onDestroyView();
-                            if (!f.mCalled) {
-                                throw new SuperNotCalledException("Fragment " + f
-                                        + " did not call through to super.onDestroyedView()");
-                            }
                             // Need to save the current view state if not
                             // done already.
                             if (!mActivity.isFinishing() && f.mSavedFragmentState == null) {
                                 saveFragmentViewState(f);
                             }
-                            if (f.mContainer != null) {
-                                if (mCurState > Fragment.INITIALIZING) {
-                                    Animatable anim = loadAnimatable(f, transit, true,
-                                            transitionStyle);
-                                    if (anim != null) {
-                                        if (anim instanceof Sequencer) {
-                                            ((Sequencer)anim).setTarget(f.mView);
-                                        } else if (anim instanceof PropertyAnimator) {
-                                            ((PropertyAnimator)anim).setTarget(f.mView);
-                                        }
-                                        anim.start();
+                        }
+                        f.mCalled = false;
+                        f.onDestroyView();
+                        if (!f.mCalled) {
+                            throw new SuperNotCalledException("Fragment " + f
+                                    + " did not call through to super.onDestroyedView()");
+                        }
+                        if (f.mView != null && f.mContainer != null) {
+                            if (mCurState > Fragment.INITIALIZING) {
+                                Animatable anim = loadAnimatable(f, transit, true,
+                                        transitionStyle);
+                                if (anim != null) {
+                                    if (anim instanceof Sequencer) {
+                                        ((Sequencer)anim).setTarget(f.mView);
+                                    } else if (anim instanceof PropertyAnimator) {
+                                        ((PropertyAnimator)anim).setTarget(f.mView);
                                     }
+                                    anim.start();
                                 }
-                                f.mContainer.removeView(f.mView);
                             }
+                            f.mContainer.removeView(f.mView);
                         }
                         f.mContainer = null;
                         f.mView = null;
@@ -908,7 +923,20 @@ class FragmentManagerImpl implements FragmentManager {
                             fs.mSavedFragmentState = new Bundle();
                         }
                         fs.mSavedFragmentState.putSparseParcelableArray(
-                                FragmentState.VIEW_STATE_TAG, f.mSavedViewState);
+                                FragmentManagerImpl.VIEW_STATE_TAG, f.mSavedViewState);
+                    }
+                }
+
+                if (f.mTarget != null) {
+                    if (fs.mSavedFragmentState == null) {
+                        fs.mSavedFragmentState = new Bundle();
+                    }
+                    putFragment(fs.mSavedFragmentState,
+                            FragmentManagerImpl.TARGET_STATE_TAG, f.mTarget);
+                    if (f.mTargetRequestCode != 0) {
+                        fs.mSavedFragmentState.putInt(
+                                FragmentManagerImpl.TARGET_REQUEST_CODE_STATE_TAG,
+                                f.mTargetRequestCode);
                     }
                 }
                 
@@ -976,7 +1004,7 @@ class FragmentManagerImpl implements FragmentManager {
                 f.mAdded = false;
                 if (fs.mSavedFragmentState != null) {
                     f.mSavedViewState = fs.mSavedFragmentState.getSparseParcelableArray(
-                            FragmentState.VIEW_STATE_TAG);
+                            FragmentManagerImpl.VIEW_STATE_TAG);
                 }
             }
         }
