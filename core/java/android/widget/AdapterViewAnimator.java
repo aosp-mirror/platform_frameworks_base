@@ -25,6 +25,8 @@ import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -94,15 +96,6 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     int mCurrentWindowStartUnbounded = 0;
 
     /**
-     * Indicates whether to treat the adapter to be a circular structure, ie.
-     * the view before 0 is considered to be <code>mAdapter.getCount() - 1</code>
-     *
-     * TODO: this doesn't do anything yet
-     *
-     */
-    boolean mCycleViews = false;
-
-    /**
      * Handler to post events to the main thread
      */
     Handler mMainQueue;
@@ -126,6 +119,12 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * Specifies whether this is the first time the animator is showing views
      */
     boolean mFirstTime = true;
+
+    /**
+     * Specifies if the animator should wrap from 0 to the end and vice versa
+     * or have hard boundaries at the beginning and end
+     */
+    boolean mShouldLoop = true;
 
     /**
      * TODO: Animation stuff is still in flux, waiting on the new framework to settle a bit.
@@ -184,8 +183,10 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      *        and {@link #setDisplayedChild(int)} is called with 10, then the effective window will
      *        be the indexes 9, 10, and 11. In the same example, if activeOffset were 0, then the
      *        window would instead contain indexes 10, 11 and 12.
+     * @param shouldLoop If the animator is show view 0, and setPrevious() is called, do we
+     *        we loop back to the end, or do we do nothing
      */
-     void configureViewAnimator(int numVisibleViews, int activeOffset) {
+     void configureViewAnimator(int numVisibleViews, int activeOffset, boolean shouldLoop) {
         if (activeOffset > numVisibleViews - 1) {
             // Throw an exception here.
         }
@@ -196,6 +197,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         removeAllViewsInLayout();
         mCurrentWindowStart = 0;
         mCurrentWindowEnd = -1;
+        mShouldLoop = shouldLoop;
     }
 
     /**
@@ -211,6 +213,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     void animateViewForTransition(int fromIndex, int toIndex, View view) {
         PropertyAnimator pa;
         if (fromIndex == -1) {
+            view.setAlpha(0.0f);
             pa = new PropertyAnimator(400, view, "alpha", 0.0f, 1.0f);
             pa.start();
         } else if (toIndex == -1) {
@@ -228,9 +231,9 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         if (mAdapter != null) {
             mWhichChild = whichChild;
             if (whichChild >= mAdapter.getCount()) {
-                mWhichChild = 0;
+                mWhichChild = mShouldLoop ? 0 : mAdapter.getCount() - 1;
             } else if (whichChild < 0) {
-                mWhichChild = mAdapter.getCount() - 1;
+                mWhichChild = mShouldLoop ? mAdapter.getCount() - 1 : 0;
             }
 
             boolean hasFocus = getFocusedChild() != null;
@@ -323,7 +326,10 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     private LayoutParams createOrReuseLayoutParams(View v) {
         final ViewGroup.LayoutParams currentLp = v.getLayoutParams();
         if (currentLp instanceof LayoutParams) {
-            return (LayoutParams) currentLp;
+            LayoutParams lp = (LayoutParams) currentLp;
+            lp.setHorizontalOffset(0);
+            lp.setVerticalOffset(0);
+            return lp;
         }
         return new LayoutParams(v);
     }
@@ -358,6 +364,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                     int previousViewRelativeIndex = modulo(index - mCurrentWindowStart,
                             mNumActiveViews);
                     animateViewForTransition(previousViewRelativeIndex, -1, previousView);
+                    mActiveViews[index] = null;
                 }
             }
         }
@@ -462,6 +469,66 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                     childRight + lp.horizontalOffset, childBottom + lp.verticalOffset);
         }
         mDataChanged = false;
+    }
+
+    static class SavedState extends BaseSavedState {
+        int whichChild;
+
+        /**
+         * Constructor called from {@link AdapterViewAnimator#onSaveInstanceState()}
+         */
+        SavedState(Parcelable superState, int whichChild) {
+            super(superState);
+            this.whichChild = whichChild;
+        }
+
+        /**
+         * Constructor called from {@link #CREATOR}
+         */
+        private SavedState(Parcel in) {
+            super(in);
+            whichChild = in.readInt();
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeInt(whichChild);
+        }
+
+        @Override
+        public String toString() {
+            return "AdapterViewAnimator.SavedState{ whichChild = " + whichChild + " }";
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR
+                = new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
+    @Override
+    public Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+        return new SavedState(superState, mWhichChild);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        SavedState ss = (SavedState) state;
+        super.onRestoreInstanceState(ss.getSuperState());
+
+        // Here we set mWhichChild in addition to setDisplayedChild
+        // We do the former in case mAdapter is null, and hence setDisplayedChild won't
+        // set mWhichChild
+        mWhichChild = ss.whichChild;
+        setDisplayedChild(mWhichChild);
     }
 
     @Override
@@ -663,6 +730,24 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         }
     }
 
+    private final Rect dirtyRect = new Rect();
+    @Override
+    public void removeViewInLayout(View view) {
+        // TODO: need to investigate this block a bit more
+        // and perhaps fix some other invalidations issues.
+        View parent = null;
+        view.setVisibility(INVISIBLE);
+        if (view.getLayoutParams() instanceof LayoutParams) {
+            LayoutParams lp = (LayoutParams) view.getLayoutParams();
+            parent = lp.getParentAndDirtyRegion(dirtyRect);
+        }
+
+        super.removeViewInLayout(view);
+
+        if (parent != null)
+            parent.invalidate(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom);
+    }
+
     static class LayoutParams extends ViewGroup.LayoutParams {
         int horizontalOffset;
         int verticalOffset;
@@ -695,6 +780,25 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                         p.getRight() - p.getScrollX(), p.getBottom() - p.getScrollY());
             }
             p.invalidate(r.left, r.top, r.right, r.bottom);
+        }
+
+        public View getParentAndDirtyRegion(Rect globalRect) {
+            globalRect.set(mView.getLeft(), mView.getTop(), mView.getRight(), mView.getBottom());
+            View p = mView;
+            boolean firstPass = true;
+            parentRect.set(0, 0, 0, 0);
+            while (p.getParent() != null && p.getParent() instanceof View
+                    && !parentRect.contains(globalRect)) {
+                if (!firstPass) {
+                    globalRect.offset(p.getLeft() - p.getScrollX(), p.getTop() - p.getScrollY());
+                }
+
+                firstPass = false;
+                p = (View) p.getParent();
+                parentRect.set(p.getLeft() - p.getScrollX(), p.getTop() - p.getScrollY(),
+                        p.getRight() - p.getScrollX(), p.getBottom() - p.getScrollY());
+            }
+            return p;
         }
 
         private Rect invalidateRect = new Rect();

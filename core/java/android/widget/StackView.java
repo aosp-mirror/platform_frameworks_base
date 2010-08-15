@@ -34,6 +34,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
 import android.widget.RemoteViews.RemoteView;
 
 @RemoteView
@@ -47,8 +48,8 @@ public class StackView extends AdapterViewAnimator {
     /**
      * Default animation parameters
      */
-    private static final int DEFAULT_ANIMATION_DURATION = 400;
-    private static final int MINIMUM_ANIMATION_DURATION = 50;
+    private final int DEFAULT_ANIMATION_DURATION = 500;
+    private final int MINIMUM_ANIMATION_DURATION = 50;
 
     /**
      * These specify the different gesture states
@@ -93,9 +94,6 @@ public class StackView extends AdapterViewAnimator {
     private StackSlider mStackSlider;
     private boolean mFirstLayoutHappened = false;
 
-    // TODO: temp hack to get this thing started
-    int mIndex = 5;
-
     public StackView(Context context) {
         super(context);
         initStackView();
@@ -107,10 +105,10 @@ public class StackView extends AdapterViewAnimator {
     }
 
     private void initStackView() {
-        configureViewAnimator(4, 2);
+        configureViewAnimator(4, 2, false);
         setStaticTransformationsEnabled(true);
         final ViewConfiguration configuration = ViewConfiguration.get(getContext());
-        mTouchSlop = configuration.getScaledTouchSlop();// + 5;
+        mTouchSlop = configuration.getScaledTouchSlop();
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mActivePointerId = INVALID_POINTER;
 
@@ -133,6 +131,8 @@ public class StackView extends AdapterViewAnimator {
             if (view.getAlpha() == 1) {
                 view.setAlpha(0);
             }
+            view.setVisibility(VISIBLE);
+
             PropertyAnimator fadeIn = new PropertyAnimator(DEFAULT_ANIMATION_DURATION,
                     view, "alpha", view.getAlpha(), 1.0f);
             fadeIn.start();
@@ -152,13 +152,15 @@ public class StackView extends AdapterViewAnimator {
             duration = Math.min(duration, largestDuration);
             duration = Math.max(duration, MINIMUM_ANIMATION_DURATION);
 
-            PropertyAnimator slideInY = new PropertyAnimator(duration, mStackSlider,
+            StackSlider animationSlider = new StackSlider(mStackSlider);
+            PropertyAnimator slideInY = new PropertyAnimator(duration, animationSlider,
                     "YProgress", mStackSlider.getYProgress(), 0);
+            slideInY.setInterpolator(new LinearInterpolator());
             slideInY.start();
-            PropertyAnimator slideInX = new PropertyAnimator(duration, mStackSlider,
+            PropertyAnimator slideInX = new PropertyAnimator(duration, animationSlider,
                     "XProgress", mStackSlider.getXProgress(), 0);
+            slideInX.setInterpolator(new LinearInterpolator());
             slideInX.start();
-
         } else if (fromIndex == mNumActiveViews - 2 && toIndex == mNumActiveViews - 1) {
             // Slide item out
             LayoutParams lp = (LayoutParams) view.getLayoutParams();
@@ -172,16 +174,21 @@ public class StackView extends AdapterViewAnimator {
             duration = Math.min(duration, largestDuration);
             duration = Math.max(duration, MINIMUM_ANIMATION_DURATION);
 
-            PropertyAnimator slideOutY = new PropertyAnimator(duration, mStackSlider,
+            StackSlider animationSlider = new StackSlider(mStackSlider);
+            PropertyAnimator slideOutY = new PropertyAnimator(duration, animationSlider,
                     "YProgress", mStackSlider.getYProgress(), 1);
+            slideOutY.setInterpolator(new LinearInterpolator());
             slideOutY.start();
-            PropertyAnimator slideOutX = new PropertyAnimator(duration, mStackSlider,
+            PropertyAnimator slideOutX = new PropertyAnimator(duration, animationSlider,
                     "XProgress", mStackSlider.getXProgress(), 0);
+            slideOutX.setInterpolator(new LinearInterpolator());
             slideOutX.start();
-
         } else if (fromIndex == -1 && toIndex == mNumActiveViews - 1) {
             // Make sure this view that is "waiting in the wings" is invisible
             view.setAlpha(0.0f);
+            view.setVisibility(INVISIBLE);
+            LayoutParams lp = (LayoutParams) view.getLayoutParams();
+            lp.setVerticalOffset(-mViewHeight);
         } else if (toIndex == -1) {
             // Fade item out
             PropertyAnimator fadeOut = new PropertyAnimator(DEFAULT_ANIMATION_DURATION,
@@ -435,21 +442,27 @@ public class StackView extends AdapterViewAnimator {
             // Didn't swipe up far enough, snap back down
             int duration = Math.round(mStackSlider.getYProgress()*DEFAULT_ANIMATION_DURATION);
 
-            PropertyAnimator snapBackY = new PropertyAnimator(duration, mStackSlider,
+            StackSlider animationSlider = new StackSlider(mStackSlider);
+            PropertyAnimator snapBackY = new PropertyAnimator(duration, animationSlider,
                     "YProgress", mStackSlider.getYProgress(), 0);
+            snapBackY.setInterpolator(new LinearInterpolator());
             snapBackY.start();
-            PropertyAnimator snapBackX = new PropertyAnimator(duration, mStackSlider,
+            PropertyAnimator snapBackX = new PropertyAnimator(duration, animationSlider,
                     "XProgress", mStackSlider.getXProgress(), 0);
+            snapBackX.setInterpolator(new LinearInterpolator());
             snapBackX.start();
         } else if (mSwipeGestureType == GESTURE_SLIDE_DOWN) {
             // Didn't swipe down far enough, snap back up
             int duration = Math.round((1 -
                     mStackSlider.getYProgress())*DEFAULT_ANIMATION_DURATION);
-            PropertyAnimator snapBackY = new PropertyAnimator(duration, mStackSlider,
+            StackSlider animationSlider = new StackSlider(mStackSlider);
+            PropertyAnimator snapBackY = new PropertyAnimator(duration, animationSlider,
                     "YProgress", mStackSlider.getYProgress(), 1);
+            snapBackY.setInterpolator(new LinearInterpolator());
             snapBackY.start();
-            PropertyAnimator snapBackX = new PropertyAnimator(duration, mStackSlider,
+            PropertyAnimator snapBackX = new PropertyAnimator(duration, animationSlider,
                     "XProgress", mStackSlider.getXProgress(), 0);
+            snapBackX.setInterpolator(new LinearInterpolator());
             snapBackX.start();
         }
 
@@ -461,6 +474,15 @@ public class StackView extends AdapterViewAnimator {
         View mView;
         float mYProgress;
         float mXProgress;
+
+        public StackSlider() {
+        }
+
+        public StackSlider(StackSlider copy) {
+            mView = copy.mView;
+            mYProgress = copy.mYProgress;
+            mXProgress = copy.mXProgress;
+        }
 
         private float cubic(float r) {
             return (float) (Math.pow(2*r-1, 3) + 1)/2.0f;
@@ -484,6 +506,15 @@ public class StackView extends AdapterViewAnimator {
             }
         }
 
+        private float rotationInterpolator(float r) {
+            float pivot = 0.2f;
+            if (r < pivot) {
+                return 0;
+            } else {
+                return (r-pivot)/(1-pivot);
+            }
+        }
+
         void setView(View v) {
             mView = v;
         }
@@ -501,7 +532,20 @@ public class StackView extends AdapterViewAnimator {
             viewLp.setVerticalOffset(Math.round(-r*mViewHeight));
             highlightLp.setVerticalOffset(Math.round(-r*mViewHeight));
             mHighlight.setAlpha(highlightAlphaInterpolator(r));
+
+            float alpha = viewAlphaInterpolator(1-r);
+
+            // We make sure that views which can't be seen (have 0 alpha) are also invisible
+            // so that they don't interfere with click events.
+            if (mView.getAlpha() == 0 && alpha != 0 && mView.getVisibility() != VISIBLE) {
+                mView.setVisibility(VISIBLE);
+            } else if (alpha == 0 && mView.getAlpha() != 0 && mView.getVisibility() == VISIBLE) {
+                mView.setVisibility(INVISIBLE);
+            }
+
             mView.setAlpha(viewAlphaInterpolator(1-r));
+            mView.setRotationX(90.0f*rotationInterpolator(r));
+            mHighlight.setRotationX(90.0f*rotationInterpolator(r));
         }
 
         public void setXProgress(float r) {
@@ -530,7 +574,7 @@ public class StackView extends AdapterViewAnimator {
     @Override
     public void onRemoteAdapterConnected() {
         super.onRemoteAdapterConnected();
-        setDisplayedChild(mIndex);
+        setDisplayedChild(mWhichChild);
     }
 
     private static final Paint sHolographicPaint = new Paint();
@@ -547,12 +591,19 @@ public class StackView extends AdapterViewAnimator {
     }
 
     static Bitmap createOutline(View v) {
+        if (v.getMeasuredWidth() == 0 || v.getMeasuredHeight() == 0) {
+            return null;
+        }
+
         Bitmap bitmap = Bitmap.createBitmap(v.getMeasuredWidth(), v.getMeasuredHeight(),
                 Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
 
+        float rotationX = v.getRotationX();
+        v.setRotationX(0);
         canvas.concat(v.getMatrix());
         v.draw(canvas);
+        v.setRotationX(rotationX);
 
         Bitmap outlineBitmap = Bitmap.createBitmap(v.getMeasuredWidth(), v.getMeasuredHeight(),
                 Bitmap.Config.ARGB_8888);
