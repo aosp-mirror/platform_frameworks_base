@@ -266,6 +266,63 @@ public class RemoteViews implements Parcelable, Filter {
         public final static int TAG = 3;
     }
     
+    private class ReflectionActionWithoutParams extends Action {
+        int viewId;
+        String methodName;
+
+        public final static int TAG = 5;
+
+        ReflectionActionWithoutParams(int viewId, String methodName) {
+            this.viewId = viewId;
+            this.methodName = methodName;
+        }
+
+        ReflectionActionWithoutParams(Parcel in) {
+            this.viewId = in.readInt();
+            this.methodName = in.readString();
+        }
+
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeInt(TAG);
+            out.writeInt(this.viewId);
+            out.writeString(this.methodName);
+        }
+
+        @Override
+        public void apply(View root) {
+            final View view = root.findViewById(viewId);
+            if (view == null) {
+                throw new ActionException("can't find view: 0x" + Integer.toHexString(viewId));
+            }
+
+            Class klass = view.getClass();
+            Method method;
+            try {
+                method = klass.getMethod(this.methodName);
+            } catch (NoSuchMethodException ex) {
+                throw new ActionException("view: " + klass.getName() + " doesn't have method: "
+                        + this.methodName + "()");
+            }
+
+            if (!method.isAnnotationPresent(RemotableViewMethod.class)) {
+                throw new ActionException("view: " + klass.getName()
+                        + " can't use method with RemoteViews: "
+                        + this.methodName + "()");
+            }
+
+            try {
+                //noinspection ConstantIfStatement
+                if (false) {
+                    Log.d("RemoteViews", "view: " + klass.getName() + " calling method: "
+                        + this.methodName + "()");
+                }
+                method.invoke(view);
+            } catch (Exception ex) {
+                throw new ActionException(ex);
+            }
+        }
+    }
+
     /**
      * Base class for the reflection actions.
      */
@@ -571,6 +628,9 @@ public class RemoteViews implements Parcelable, Filter {
                 case ViewGroupAction.TAG:
                     mActions.add(new ViewGroupAction(parcel));
                     break;
+                case ReflectionActionWithoutParams.TAG:
+                    mActions.add(new ReflectionActionWithoutParams(parcel));
+                    break;
                 default:
                     throw new ActionException("Tag " + tag + " not found");
                 }
@@ -629,6 +689,24 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void removeAllViews(int viewId) {
         addAction(new ViewGroupAction(viewId, null));
+    }
+
+    /**
+     * Equivalent to calling {@link AdapterViewFlipper#showNext()}
+     *
+     * @param viewId The id of the view on which to call {@link AdapterViewFlipper#showNext()}
+     */
+    public void showNext(int viewId) {
+        addAction(new ReflectionActionWithoutParams(viewId, "showNext"));
+    }
+
+    /**
+     * Equivalent to calling {@link AdapterViewFlipper#showPrevious()}
+     *
+     * @param viewId The id of the view on which to call {@link AdapterViewFlipper#showPrevious()}
+     */
+    public void showPrevious(int viewId) {
+        addAction(new ReflectionActionWithoutParams(viewId, "showPrevious"));
     }
 
     /**

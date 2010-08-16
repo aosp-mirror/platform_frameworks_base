@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.RemotableViewMethod;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.RemoteViews.RemoteView;
@@ -137,6 +138,38 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    @RemotableViewMethod
+    public void showNext() {
+        // if the flipper is currently flipping automatically, and showNext() is called
+        // we should we should make sure to reset the timer
+        if (mRunning) {
+            mHandler.removeMessages(FLIP_MSG);
+            Message msg = mHandler.obtainMessage(FLIP_MSG);
+            mHandler.sendMessageDelayed(msg, mFlipInterval);
+        }
+        super.showNext();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @RemotableViewMethod
+    public void showPrevious() {
+        // if the flipper is currently flipping automatically, and showPrevious() is called
+        // we should we should make sure to reset the timer
+        if (mRunning) {
+            mHandler.removeMessages(FLIP_MSG);
+            Message msg = mHandler.obtainMessage(FLIP_MSG);
+            mHandler.sendMessageDelayed(msg, mFlipInterval);
+        }
+        super.showPrevious();
+    }
+
+    /**
      * How long to wait before flipping to the next view
      *
      * @param milliseconds
@@ -229,8 +262,6 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
             if (msg.what == FLIP_MSG) {
                 if (mRunning) {
                     showNext();
-                    msg = obtainMessage(FLIP_MSG);
-                    sendMessageDelayed(msg, mFlipInterval);
                 }
             }
         }
