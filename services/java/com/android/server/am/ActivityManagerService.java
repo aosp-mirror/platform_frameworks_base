@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import com.android.internal.R;
-import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.AttributeCache;
 import com.android.server.IntentResolver;
@@ -39,7 +38,6 @@ import android.app.AppGlobals;
 import android.app.ApplicationErrorReport;
 import android.app.Dialog;
 import android.app.IActivityController;
-import android.app.IActivityManager;
 import android.app.IActivityWatcher;
 import android.app.IApplicationThread;
 import android.app.IInstrumentationWatcher;
@@ -50,7 +48,6 @@ import android.app.Instrumentation;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.ResultInfo;
 import android.app.Service;
 import android.app.backup.IBackupManager;
 import android.content.ActivityNotFoundException;
@@ -95,7 +92,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
-import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -110,6 +106,7 @@ import android.util.Slog;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.SparseArray;
+import android.util.TimeUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -1186,10 +1183,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             case CHECK_EXCESSIVE_WAKE_LOCKS_MSG: {
                 synchronized (ActivityManagerService.this) {
                     checkExcessiveWakeLocksLocked(true);
-                    mHandler.removeMessages(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
+                    removeMessages(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
                     if (mSleeping) {
-                        Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
-                        mHandler.sendMessageDelayed(nmsg, WAKE_LOCK_CHECK_DELAY);
+                        Message nmsg = obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
+                        sendMessageDelayed(nmsg, WAKE_LOCK_CHECK_DELAY);
                     }
                 }
             } break;
@@ -11332,7 +11329,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         final long curRealtime = SystemClock.elapsedRealtime();
         final long timeSince = curRealtime - mLastWakeLockCheckTime;
         mLastWakeLockCheckTime = curRealtime;
-        if (timeSince < 5*60*1000) {
+        if (timeSince < (WAKE_LOCK_CHECK_DELAY/3)) {
             doKills = false;
         }
         int i = mLruProcesses.size();
@@ -11346,9 +11343,19 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             app.pid, curRealtime);
                 }
                 long timeUsed = wtime - app.lastWakeTime;
-                Slog.i(TAG, "Wake for " + app + ": over "
-                        + timeSince + " used " + timeUsed
-                        + " (" + ((timeUsed*100)/timeSince) + "%)");
+                if (false) {
+                    StringBuilder sb = new StringBuilder(128);
+                    sb.append("Wake for ");
+                    app.toShortString(sb);
+                    sb.append(": over ");
+                    TimeUtils.formatDuration(timeSince, sb);
+                    sb.append(" used ");
+                    TimeUtils.formatDuration(timeUsed, sb);
+                    sb.append(" (");
+                    sb.append((timeUsed*100)/timeSince);
+                    sb.append("%)");
+                    Slog.i(TAG, sb.toString());
+                }
                 // If a process has held a wake lock for more
                 // than 50% of the time during this period,
                 // that sounds pad.  Kill!

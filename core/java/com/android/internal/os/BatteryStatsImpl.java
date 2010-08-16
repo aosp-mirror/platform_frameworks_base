@@ -27,7 +27,6 @@ import android.os.ParcelFormatException;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.SystemClock;
-import android.os.BatteryStats.Uid.Proc.ExcessiveWake;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
@@ -1243,25 +1242,31 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mWakeLockNesting;
 
     public void noteStartWakeLocked(int uid, int pid, String name, int type) {
-        if (mWakeLockNesting == 0) {
-            mHistoryCur.states |= HistoryItem.STATE_WAKE_LOCK_FLAG;
-            if (DEBUG_HISTORY) Slog.v(TAG, "Start wake lock to: "
-                    + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(SystemClock.elapsedRealtime());
+        if (type == WAKE_TYPE_PARTIAL) {
+            // Only care about partial wake locks, since full wake locks
+            // will be canceled when the user puts the screen to sleep.
+            if (mWakeLockNesting == 0) {
+                mHistoryCur.states |= HistoryItem.STATE_WAKE_LOCK_FLAG;
+                if (DEBUG_HISTORY) Slog.v(TAG, "Start wake lock to: "
+                        + Integer.toHexString(mHistoryCur.states));
+                addHistoryRecordLocked(SystemClock.elapsedRealtime());
+            }
+            mWakeLockNesting++;
         }
-        mWakeLockNesting++;
         if (uid >= 0) {
             getUidStatsLocked(uid).noteStartWakeLocked(pid, name, type);
         }
     }
 
     public void noteStopWakeLocked(int uid, int pid, String name, int type) {
-        mWakeLockNesting--;
-        if (mWakeLockNesting == 0) {
-            mHistoryCur.states &= ~HistoryItem.STATE_WAKE_LOCK_FLAG;
-            if (DEBUG_HISTORY) Slog.v(TAG, "Stop wake lock to: "
-                    + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(SystemClock.elapsedRealtime());
+        if (type == WAKE_TYPE_PARTIAL) {
+            mWakeLockNesting--;
+            if (mWakeLockNesting == 0) {
+                mHistoryCur.states &= ~HistoryItem.STATE_WAKE_LOCK_FLAG;
+                if (DEBUG_HISTORY) Slog.v(TAG, "Stop wake lock to: "
+                        + Integer.toHexString(mHistoryCur.states));
+                addHistoryRecordLocked(SystemClock.elapsedRealtime());
+            }
         }
         if (uid >= 0) {
             getUidStatsLocked(uid).noteStopWakeLocked(pid, name, type);
@@ -1355,7 +1360,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             // Fake a wake lock, so we consider the device waked as long
             // as the screen is on.
-            noteStartWakeLocked(-1, -1, "dummy", 0);
+            noteStartWakeLocked(-1, -1, "dummy", WAKE_TYPE_PARTIAL);
         }
     }
     
@@ -1371,7 +1376,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mScreenBrightnessTimer[mScreenBrightnessBin].stopRunningLocked(this);
             }
 
-            noteStopWakeLocked(-1, -1, "dummy", 0);
+            noteStopWakeLocked(-1, -1, "dummy", WAKE_TYPE_PARTIAL);
         }
     }
     
@@ -3465,7 +3470,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (t != null) {
                 t.startRunningLocked(BatteryStatsImpl.this);
             }
-            if (pid >= 0) {
+            if (pid >= 0 && type == WAKE_TYPE_PARTIAL) {
                 Pid p = getPidStatsLocked(pid);
                 p.mWakeStart = SystemClock.elapsedRealtime();
             }
@@ -3476,7 +3481,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (t != null) {
                 t.stopRunningLocked(BatteryStatsImpl.this);
             }
-            if (pid >= 0) {
+            if (pid >= 0 && type == WAKE_TYPE_PARTIAL) {
                 Pid p = mPids.get(pid);
                 if (p != null) {
                     p.mWakeSum += SystemClock.elapsedRealtime() - p.mWakeStart;

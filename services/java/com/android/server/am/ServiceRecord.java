@@ -31,6 +31,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Slog;
+import android.util.TimeUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -117,7 +118,10 @@ class ServiceRecord extends Binder {
             StartItem si = list.get(i);
             pw.print(prefix); pw.print("#"); pw.print(i);
                     pw.print(" id="); pw.print(si.id);
-                    if (now != 0) pw.print(" dur="); pw.print(now-si.deliveredTime);
+                    if (now != 0) {
+                        pw.print(" dur=");
+                        TimeUtils.formatDuration(si.deliveredTime, now, pw);
+                    }
                     if (si.deliveryCount != 0) {
                         pw.print(" dc="); pw.print(si.deliveryCount);
                     }
@@ -140,9 +144,10 @@ class ServiceRecord extends Binder {
             pw.print(prefix); pw.print("permission="); pw.println(permission);
         }
         long now = SystemClock.uptimeMillis();
-        pw.print(prefix); pw.print("baseDir="); pw.print(baseDir);
-                if (!resDir.equals(baseDir)) pw.print(" resDir="); pw.print(resDir);
-                pw.print(" dataDir="); pw.println(dataDir);
+        long nowReal = SystemClock.elapsedRealtime();
+        pw.print(prefix); pw.print("baseDir="); pw.println(baseDir);
+        if (!resDir.equals(baseDir)) pw.print(prefix); pw.print("resDir="); pw.println(resDir);
+        pw.print(prefix); pw.print("dataDir="); pw.println(dataDir);
         pw.print(prefix); pw.print("app="); pw.println(app);
         if (isForeground || foregroundId != 0) {
             pw.print(prefix); pw.print("isForeground="); pw.print(isForeground);
@@ -150,10 +155,15 @@ class ServiceRecord extends Binder {
                     pw.print(" foregroundNoti="); pw.println(foregroundNoti);
         }
         pw.print(prefix); pw.print("createTime=");
-                pw.print(createTime-SystemClock.elapsedRealtime());
-                pw.print(" lastActivity="); pw.print(lastActivity-now);
-                pw.print(" executingStart="); pw.print(executingStart-now);
-                pw.print(" restartTime="); pw.println(restartTime);
+                TimeUtils.formatDuration(createTime, nowReal, pw);
+                pw.print(" lastActivity=");
+                TimeUtils.formatDuration(lastActivity, now, pw);
+                pw.println("");
+        pw.print(prefix); pw.print(" executingStart=");
+                TimeUtils.formatDuration(executingStart, now, pw);
+                pw.print(" restartTime=");
+                TimeUtils.formatDuration(restartTime, now, pw);
+                pw.println("");
         if (startRequested || lastStartId != 0) {
             pw.print(prefix); pw.print("startRequested="); pw.print(startRequested);
                     pw.print(" stopIfKilled="); pw.print(stopIfKilled);
@@ -164,13 +174,15 @@ class ServiceRecord extends Binder {
                 || restartDelay != 0 || nextRestartTime != 0) {
             pw.print(prefix); pw.print("executeNesting="); pw.print(executeNesting);
                     pw.print(" restartCount="); pw.print(restartCount);
-                    pw.print(" restartDelay="); pw.print(restartDelay-now);
-                    pw.print(" nextRestartTime="); pw.print(nextRestartTime-now);
+                    pw.print(" restartDelay=");
+                    TimeUtils.formatDuration(restartDelay, now, pw);
+                    pw.print(" nextRestartTime=");
+                    TimeUtils.formatDuration(nextRestartTime, now, pw);
                     pw.print(" crashCount="); pw.println(crashCount);
         }
         if (deliveredStarts.size() > 0) {
             pw.print(prefix); pw.println("Delivered Starts:");
-            dumpStartList(pw, prefix, deliveredStarts, SystemClock.uptimeMillis());
+            dumpStartList(pw, prefix, deliveredStarts, now);
         }
         if (pendingStarts.size() > 0) {
             pw.print(prefix); pw.println("Pending Starts:");

@@ -192,10 +192,11 @@ public class Looper {
         pw.println(prefix + "mQueue=" + ((mQueue != null) ? mQueue : "(null"));
         if (mQueue != null) {
             synchronized (mQueue) {
+                long now = SystemClock.uptimeMillis();
                 Message msg = mQueue.mMessages;
                 int n = 0;
                 while (msg != null) {
-                    pw.println(prefix + "  Message " + n + ": " + msg);
+                    pw.println(prefix + "  Message " + n + ": " + msg.toString(now));
                     n++;
                     msg = msg.next;
                 }

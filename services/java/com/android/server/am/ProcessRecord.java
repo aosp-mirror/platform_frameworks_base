@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import com.android.internal.os.BatteryStatsImpl;
-import com.android.server.Watchdog;
 
 import android.app.ActivityManager;
 import android.app.Dialog;
@@ -27,8 +26,9 @@ import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.PrintWriterPrinter;
+import android.util.TimeUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -129,6 +129,8 @@ class ProcessRecord {
     ComponentName errorReportReceiver;
 
     void dump(PrintWriter pw, String prefix) {
+        final long now = SystemClock.uptimeMillis();
+
         if (info.className != null) {
             pw.print(prefix); pw.print("class="); pw.println(info.className);
         }
@@ -158,7 +160,8 @@ class ProcessRecord {
                 pw.print(" curReceiver="); pw.println(curReceiver);
         pw.print(prefix); pw.print("pid="); pw.print(pid); pw.print(" starting=");
                 pw.print(starting); pw.print(" lastPss="); pw.println(lastPss);
-        pw.print(prefix); pw.print("lastActivityTime="); pw.print(lastActivityTime);
+        pw.print(prefix); pw.print("lastActivityTime=");
+                TimeUtils.formatDuration(lastActivityTime, now, pw);
                 pw.print(" lruWeight="); pw.print(lruWeight);
                 pw.print(" hidden="); pw.print(hidden);
                 pw.print(" empty="); pw.println(empty);
@@ -179,8 +182,10 @@ class ProcessRecord {
         pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
                 pw.print(" lruSeq="); pw.println(lruSeq);
         pw.print(prefix); pw.print("lastWakeTime="); pw.print(lastWakeTime);
-                pw.print(" lastRequestedGc="); pw.print(lastRequestedGc);
-                pw.print(" lastLowMemory="); pw.print(lastLowMemory);
+                pw.print(" lastRequestedGc=");
+                TimeUtils.formatDuration(lastRequestedGc, now, pw);
+                pw.print(" lastLowMemory=");
+                TimeUtils.formatDuration(lastLowMemory, now, pw);
                 pw.print(" reportLowMemory="); pw.println(reportLowMemory);
         if (killedBackground) {
             pw.print(prefix); pw.print("killedBackground="); pw.println(killedBackground);
