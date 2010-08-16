@@ -27,7 +27,8 @@ public class Display
 
     
     /**
-     * Use the WindowManager interface to create a Display object.
+     * Use {@link android.view.WindowManager#getDefaultDisplay()
+     * WindowManager.getDefaultDisplay()} to create a Display object.
      * Display gives you access to some information about a particular display
      * connected to the device.
      */
