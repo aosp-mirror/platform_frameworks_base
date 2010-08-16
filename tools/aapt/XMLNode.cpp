@@ -166,7 +166,7 @@ status_t hasSubstitutionErrors(const char* fileName,
     if (argCount > 1 && nonpositional) {
         SourcePos(String8(fileName), inXml->getLineNumber()).error(
                 "Multiple substitutions specified in non-positional format; "
-                "did you mean to add the formatted=\"true\" attribute?\n");
+                "did you mean to add the formatted=\"false\" attribute?\n");
         return NOT_ENOUGH_DATA;
     }
 
