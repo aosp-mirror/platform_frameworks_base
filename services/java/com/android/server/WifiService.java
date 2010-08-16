@@ -171,6 +171,7 @@ public class WifiService extends IWifiManager.Stub {
     private static final int MESSAGE_START_ACCESS_POINT = 6;
     private static final int MESSAGE_STOP_ACCESS_POINT  = 7;
     private static final int MESSAGE_SET_CHANNELS       = 8;
+    private static final int MESSAGE_ENABLE_NETWORKS    = 9;
 
 
     private final  WifiHandler mWifiHandler;
@@ -1663,6 +1664,12 @@ public class WifiService extends IWifiManager.Stub {
                 mDeviceIdle = false;
                 mScreenOff = false;
                 mWifiStateTracker.enableRssiPolling(true);
+                /* DHCP or other temporary failures in the past can prevent
+                 * a disabled network from being connected to, enable on screen on
+                 */
+                if (mWifiStateTracker.isAnyNetworkDisabled()) {
+                    sendEnableNetworksMessage();
+                }
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 Slog.d(TAG, "ACTION_SCREEN_OFF");
                 mScreenOff = true;
@@ -1792,6 +1799,10 @@ public class WifiService extends IWifiManager.Stub {
         Message.obtain(mWifiHandler,
                 (enable ? MESSAGE_START_ACCESS_POINT : MESSAGE_STOP_ACCESS_POINT),
                 uid, 0, wifiConfig).sendToTarget();
+    }
+
+    private void sendEnableNetworksMessage() {
+        Message.obtain(mWifiHandler, MESSAGE_ENABLE_NETWORKS).sendToTarget();
     }
 
     private void updateWifiState() {
@@ -1954,6 +1965,10 @@ public class WifiService extends IWifiManager.Stub {
 
                 case MESSAGE_SET_CHANNELS:
                     setNumAllowedChannelsBlocking(msg.arg1, msg.arg2 == 1);
+                    break;
+
+                case MESSAGE_ENABLE_NETWORKS:
+                    mWifiStateTracker.enableAllNetworks(getConfiguredNetworks());
                     break;
 
             }
