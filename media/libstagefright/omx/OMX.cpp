@@ -495,12 +495,17 @@ sp<IOMXRenderer> OMX::createRenderer(
     }
 
     if (!impl) {
+#if 0
         LOGW("Using software renderer.");
         impl = new SoftwareRenderer(
                 colorFormat,
                 surface,
                 displayWidth, displayHeight,
                 encodedWidth, encodedHeight);
+#else
+        CHECK(!"Should not be here.");
+        return NULL;
+#endif
     }
 
     return new OMXRenderer(impl);

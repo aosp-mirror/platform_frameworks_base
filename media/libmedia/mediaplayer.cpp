@@ -206,10 +206,15 @@ status_t MediaPlayer::setVideoSurface(const sp<Surface>& surface)
     LOGV("setVideoSurface");
     Mutex::Autolock _l(mLock);
     if (mPlayer == 0) return NO_INIT;
-    if (surface != NULL)
-        return  mPlayer->setVideoSurface(surface->getISurface());
-    else
-        return  mPlayer->setVideoSurface(NULL);
+
+    status_t err = mPlayer->setVideoISurface(
+            surface == NULL ? NULL : surface->getISurface());
+
+    if (err != OK) {
+        return err;
+    }
+
+    return mPlayer->setVideoSurface(surface);
 }
 
 // must call with lock held
