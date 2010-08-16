@@ -24,6 +24,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.TimeZone;
 import java.util.Date;
 
@@ -129,5 +130,129 @@ public class TimeUtils {
      */
     public static String getTimeZoneDatabaseVersion() {
         return ZoneInfoDB.getVersion();
+    }
+
+    private static final int SECONDS_PER_MINUTE = 60;
+    private static final int SECONDS_PER_HOUR = 60 * 60;
+    private static final int SECONDS_PER_DAY = 24 * 60 * 60;
+
+    /** @hide Just for debugging; not internationalized. */
+    public static void formatDuration(long duration, StringBuilder builder) {
+        if (duration == 0) {
+            builder.append("0");
+            return;
+        }
+        if (duration > 0) {
+            builder.append("+");
+        } else {
+            builder.append("-");
+            duration = -duration;
+        }
+
+        int millis = (int)(duration%1000);
+        int seconds = (int) Math.floor(duration / 1000);
+        int days = 0, hours = 0, minutes = 0;
+
+        if (seconds > SECONDS_PER_DAY) {
+            days = seconds / SECONDS_PER_DAY;
+            seconds -= days * SECONDS_PER_DAY;
+        }
+        if (seconds > SECONDS_PER_HOUR) {
+            hours = seconds / SECONDS_PER_HOUR;
+            seconds -= hours * SECONDS_PER_HOUR;
+        }
+        if (seconds > SECONDS_PER_MINUTE) {
+            minutes = seconds / SECONDS_PER_MINUTE;
+            seconds -= minutes * SECONDS_PER_MINUTE;
+        }
+
+        boolean doall = false;
+        if (days > 0) {
+            builder.append(days);
+            builder.append('d');
+            doall = true;
+        }
+        if (doall || hours > 0) {
+            builder.append(hours);
+            builder.append('h');
+            doall = true;
+        }
+        if (doall || minutes > 0) {
+            builder.append(minutes);
+            builder.append('m');
+            doall = true;
+        }
+        if (doall || seconds > 0) {
+            builder.append(seconds);
+            builder.append('s');
+            doall = true;
+        }
+        builder.append(millis);
+        builder.append("ms");
+    }
+
+    /** @hide Just for debugging; not internationalized. */
+    public static void formatDuration(long duration, PrintWriter pw) {
+        if (duration == 0) {
+            pw.print("0");
+            return;
+        }
+        if (duration > 0) {
+            pw.print("+");
+        } else {
+            pw.print("-");
+            duration = -duration;
+        }
+
+        int millis = (int)(duration%1000);
+        int seconds = (int) Math.floor(duration / 1000);
+        int days = 0, hours = 0, minutes = 0;
+
+        if (seconds > SECONDS_PER_DAY) {
+            days = seconds / SECONDS_PER_DAY;
+            seconds -= days * SECONDS_PER_DAY;
+        }
+        if (seconds > SECONDS_PER_HOUR) {
+            hours = seconds / SECONDS_PER_HOUR;
+            seconds -= hours * SECONDS_PER_HOUR;
+        }
+        if (seconds > SECONDS_PER_MINUTE) {
+            minutes = seconds / SECONDS_PER_MINUTE;
+            seconds -= minutes * SECONDS_PER_MINUTE;
+        }
+
+        boolean doall = false;
+        if (days > 0) {
+            pw.print(days);
+            pw.print('d');
+            doall = true;
+        }
+        if (doall || hours > 0) {
+            pw.print(hours);
+            pw.print('h');
+            doall = true;
+        }
+        if (doall || minutes > 0) {
+            pw.print(minutes);
+            pw.print('m');
+            doall = true;
+        }
+        if (doall || seconds > 0) {
+            pw.print(seconds);
+            pw.print('s');
+            doall = true;
+        }
+        pw.print(millis);
+        pw.print("ms");
+    }
+
+
+    /** @hide Just for debugging; not internationalized. */
+    public static void formatDuration(long time, long now, PrintWriter pw) {
+        if (time == 0) {
+            pw.print("--");
+            return;
+        }
+        formatDuration(time-now, pw);
     }
 }

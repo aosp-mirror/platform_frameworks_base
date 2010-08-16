@@ -23,6 +23,7 @@ import java.util.Map;
 import android.util.Log;
 import android.util.Printer;
 import android.util.SparseArray;
+import android.util.TimeUtils;
 
 /**
  * A class providing access to battery usage statistics, including information on
@@ -1576,8 +1577,10 @@ public abstract class BatteryStats implements Parcelable {
                             Uid.Proc.ExcessiveWake ew = ps.getExcessiveWake(e);
                             if (ew != null) {
                                 pw.print(prefix); pw.print("      * Killed for wake lock use: ");
-                                        pw.print(ew.usedTime); pw.print("ms over ");
-                                        pw.print(ew.overTime); pw.print("ms (");
+                                        TimeUtils.formatDuration(ew.usedTime, pw);
+                                        pw.print(" over ");
+                                        TimeUtils.formatDuration(ew.overTime, pw);
+                                        pw.print(" (");
                                         pw.print((ew.usedTime*100)/ew.overTime);
                                         pw.println("%)");
                             }
