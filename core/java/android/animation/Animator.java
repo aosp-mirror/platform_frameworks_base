@@ -19,6 +19,7 @@ package android.animation;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -197,15 +198,13 @@ public class Animator<T> extends Animatable {
     /**
      * The property/value sets being animated.
      */
-    HashMap<String, PropertyValuesHolder> mValues;
+    PropertyValuesHolder[] mValues;
 
     /**
-     * This value is used in the simple/common case of animating just one value; the user
-     * may call getAnimatedValue(), which should return the value of the first (and only)
-     * ProeprtyValuesHolder animated value, which is looked up using this string.
+     * A hashmap of the PropertyValuesHolder objects. This map is used to lookup animated values
+     * by property name during calls to getAnimatedValue(String).
      */
-    String mFirstPropertyName;
-
+    HashMap<String, PropertyValuesHolder> mValuesMap;
 
     /**
      * The type of the values, as determined by the valueFrom/valueTo properties.
@@ -290,11 +289,11 @@ public class Animator<T> extends Animatable {
                 break;
         }
 
-        mValues = new HashMap<String, PropertyValuesHolder>(1);
-        mFirstPropertyName = "";
-        PropertyValuesHolder valuesHolder = new PropertyValuesHolder(mFirstPropertyName,
-                valueFrom, valueTo);
-        mValues.put(mFirstPropertyName, valuesHolder);
+        PropertyValuesHolder valuesHolder = new PropertyValuesHolder("", valueFrom, valueTo);
+        mValues = new PropertyValuesHolder[1];
+        mValues[0] = valuesHolder;
+        mValuesMap = new HashMap<String, PropertyValuesHolder>(1);
+        mValuesMap.put("", valuesHolder);
 
         mRepeatCount = a.getInt(com.android.internal.R.styleable.Animator_repeatCount, mRepeatCount);
         mRepeatMode = a.getInt(com.android.internal.R.styleable.Animator_repeatMode, RESTART);
@@ -323,15 +322,11 @@ public class Animator<T> extends Animatable {
 
     public void setValues(PropertyValuesHolder... values) {
         int numValues = values.length;
-        mValues = new HashMap<String, PropertyValuesHolder>(numValues);
+        mValues = values;
+        mValuesMap = new HashMap<String, PropertyValuesHolder>(numValues);
         for (int i = 0; i < numValues; ++i) {
             PropertyValuesHolder valuesHolder = (PropertyValuesHolder) values[i];
-            mValues.put(valuesHolder.getPropertyName(), valuesHolder);
-        }
-        if (numValues > 0 && values[0] != null) {
-            mFirstPropertyName = ((PropertyValuesHolder) values[0]).getPropertyName();
-        } else {
-            mFirstPropertyName = "";
+            mValuesMap.put(valuesHolder.getPropertyName(), valuesHolder);
         }
     }
 
@@ -348,26 +343,12 @@ public class Animator<T> extends Animatable {
      * @param values The set of values to animate between.
      */
     public void setValues(T... values) {
-        if (values[0] instanceof PropertyValuesHolder) {
-            int numValues = values.length;
-            mValues = new HashMap<String, PropertyValuesHolder>(numValues);
-            for (int i = 0; i < numValues; ++i) {
-                PropertyValuesHolder valuesHolder = (PropertyValuesHolder) values[i];
-                mValues.put(valuesHolder.getPropertyName(), valuesHolder);
-            }
-            if (numValues > 0 && values[0] != null) {
-                mFirstPropertyName = ((PropertyValuesHolder) values[0]).getPropertyName();
-            } else {
-                mFirstPropertyName = "";
-            }
+        if (mValues == null || mValues.length == 0) {
+            setValues(new PropertyValuesHolder[]{
+                    new PropertyValuesHolder("", (Object[])values)});
         } else {
-            if (mValues == null) {
-                setValues(new PropertyValuesHolder[]{
-                        new PropertyValuesHolder("", (Object[])values)});
-            } else {
-                PropertyValuesHolder valuesHolder = mValues.get(mFirstPropertyName);
-                valuesHolder.setValues(values);
-            }
+            PropertyValuesHolder valuesHolder = mValues[0];
+            valuesHolder.setValues(values);
         }
     }
 
@@ -382,8 +363,9 @@ public class Animator<T> extends Animatable {
      *  that internal mechanisms for the animation are set up correctly.</p>
      */
     void initAnimation() {
-        for (PropertyValuesHolder pvHolder: mValues.values()) {
-            pvHolder.init();
+        int numValues = mValues.length;
+        for (int i = 0; i < numValues; ++i) {
+            mValues[i].init();
         }
         mCurrentIteration = 0;
         mInitialized = true;
@@ -394,8 +376,8 @@ public class Animator<T> extends Animatable {
      * be between 0 and the total duration of the animation, including any repetition. If
      * the animation has not yet been started, then it will not advance forward after it is
      * set to this time; it will simply set the time to this value and perform any appropriate
-     * actions based on that time. If the animation is already running, then seek() will
-     * set the current playing time to this value and continue playing from that point.
+     * actions based on that time. If the animation is already running, then setCurrentPlayTime()
+     * will set the current playing time to this value and continue playing from that point.
      *
      * @param playTime The time, in milliseconds, to which the animation is advanced or rewound.
      */
@@ -587,7 +569,11 @@ public class Animator<T> extends Animatable {
      * returns the animated value for the first of those objects.
      */
     public Object getAnimatedValue() {
-        return getAnimatedValue(mFirstPropertyName);
+        if (mValues != null && mValues.length > 0) {
+            return mValues[0].getAnimatedValue();
+        }
+        // Shouldn't get here; should always have values unless Animator was set up wrong
+        return null;
     }
 
     /**
@@ -601,7 +587,13 @@ public class Animator<T> extends Animatable {
      * by this <code>Animator</code>.
      */
     public Object getAnimatedValue(String propertyName) {
-        return mValues.get(mFirstPropertyName).getAnimatedValue();
+        PropertyValuesHolder valuesHolder = mValuesMap.get(propertyName);
+        if (valuesHolder != null) {
+            return valuesHolder.getAnimatedValue();
+        } else {
+            // At least avoid crashing if called with bogus propertyName
+            return null;
+        }
     }
 
     /**
@@ -691,6 +683,15 @@ public class Animator<T> extends Animatable {
     }
 
     /**
+     * Returns the timing interpolator that this Animator uses.
+     *
+     * @return The timing interpolator for this Animator.
+     */
+    public Interpolator getInterpolator() {
+        return mInterpolator;
+    }
+
+    /**
      * The type evaluator to be used when calculating the animated values of this animation.
      * The system will automatically assign a float, int, or double evaluator based on the type
      * of <code>startValue</code> and <code>endValue</code> in the constructor. But if these values
@@ -707,8 +708,8 @@ public class Animator<T> extends Animatable {
      * @param value the evaluator to be used this animation
      */
     public void setEvaluator(TypeEvaluator value) {
-        if (value != null && mValues != null) {
-            mValues.get(mFirstPropertyName).setEvaluator(value);
+        if (value != null && mValues != null && mValues.length > 0) {
+            mValues[0].setEvaluator(value);
         }
     }
 
@@ -720,6 +721,10 @@ public class Animator<T> extends Animatable {
      * @param playBackwards Whether the Animator should start playing in reverse.
      */
     private void start(boolean playBackwards) {
+        if ((mStartDelay == 0) && (Thread.currentThread() == Looper.getMainLooper().getThread())) {
+            // This sets the initial value of the animation, prior to actually starting it running
+            setCurrentPlayTime(getCurrentPlayTime());
+        }
         mPlayingBackwards = playBackwards;
         mPlayingState = STOPPED;
         sPendingAnimations.add(this);
@@ -729,6 +734,15 @@ public class Animator<T> extends Animatable {
         // TODO: does this put too many messages on the queue if the handler
         // is already running?
         sAnimationHandler.sendEmptyMessage(ANIMATION_START);
+    }
+
+    /**
+     * Returns the duration that this animation will run for.
+     *
+     * @return The length in time of the animation, in milliseconds.
+     */
+    public long getDuration() {
+        return mDuration;
     }
 
     @Override
@@ -928,8 +942,9 @@ public class Animator<T> extends Animatable {
      */
     void animateValue(float fraction) {
         fraction = mInterpolator.getInterpolation(fraction);
-        for (PropertyValuesHolder valuesHolder : mValues.values()) {
-            valuesHolder.calculateValue(fraction);
+        int numValues = mValues.length;
+        for (int i = 0; i < numValues; ++i) {
+            mValues[i].calculateValue(fraction);
         }
         if (mUpdateListeners != null) {
             int numListeners = mUpdateListeners.size();

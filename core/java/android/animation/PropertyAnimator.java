@@ -21,10 +21,7 @@ import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.Log;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * This subclass of {@link Animator} provides support for animating properties on target objects.
@@ -61,10 +58,12 @@ public final class PropertyAnimator<T> extends Animator<T> {
      */
     public void setPropertyName(String propertyName) {
         if (mValues != null) {
-            // should always be the case
-            PropertyValuesHolder valuesHolder = mValues.get(mFirstPropertyName);
+            // mValues should always be non-null
+            PropertyValuesHolder valuesHolder = mValues[0];
+            String oldName = valuesHolder.getPropertyName();
             valuesHolder.setPropertyName(propertyName);
-            mFirstPropertyName = propertyName;
+            mValuesMap.remove(oldName);
+            mValuesMap.put(propertyName, valuesHolder);
         }
         mPropertyName = propertyName;
     }
@@ -184,8 +183,9 @@ public final class PropertyAnimator<T> extends Animator<T> {
     @Override
     void initAnimation() {
         super.initAnimation();
-        for (PropertyValuesHolder valuesHolder : mValues.values()) {
-            valuesHolder.setupSetterAndGetter(mTarget);
+        int numValues = mValues.length;
+        for (int i = 0; i < numValues; ++i) {
+            mValues[i].setupSetterAndGetter(mTarget);
         }
     }
 
@@ -223,8 +223,9 @@ public final class PropertyAnimator<T> extends Animator<T> {
     @Override
     void animateValue(float fraction) {
         super.animateValue(fraction);
-        for (PropertyValuesHolder valuesHolder : mValues.values()) {
-            valuesHolder.setAnimatedValue(mTarget);
+        int numValues = mValues.length;
+        for (int i = 0; i < numValues; ++i) {
+            mValues[i].setAnimatedValue(mTarget);
         }
     }
 }
