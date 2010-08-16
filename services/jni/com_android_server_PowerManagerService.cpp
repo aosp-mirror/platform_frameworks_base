@@ -22,6 +22,7 @@
 #include "jni.h"
 #include <limits.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <utils/Timers.h>
 #include "com_android_server_PowerManagerService.h"
 
 namespace android {
@@ -42,6 +43,11 @@ static jobject gPowerManagerServiceObj;
 static Mutex gPowerManagerLock;
 static bool gScreenOn;
 static bool gScreenBright;
+
+static nsecs_t gLastEventTime[POWER_MANAGER_LAST_EVENT + 1];
+
+// Throttling interval for user activity calls.
+static const nsecs_t MIN_TIME_BETWEEN_USERACTIVITIES = 500 * 1000000L; // 500ms
 
 // ----------------------------------------------------------------------------
 
@@ -67,6 +73,21 @@ bool android_server_PowerManagerService_isScreenBright() {
 
 void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType) {
     if (gPowerManagerServiceObj) {
+        // Throttle calls into user activity by event type.
+        // We're a little conservative about argument checking here in case the caller
+        // passes in bad data which could corrupt system state.
+        if (eventType >= 0 && eventType <= POWER_MANAGER_LAST_EVENT) {
+            nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
+            if (eventTime > now) {
+                eventTime = now;
+            }
+
+            if (gLastEventTime[eventType] + MIN_TIME_BETWEEN_USERACTIVITIES > eventTime) {
+                return;
+            }
+            gLastEventTime[eventType] = eventTime;
+        }
+
         JNIEnv* env = AndroidRuntime::getJNIEnv();
 
         env->CallVoidMethod(gPowerManagerServiceObj, gPowerManagerServiceClassInfo.userActivity,
@@ -136,6 +157,12 @@ int register_android_server_PowerManagerService(JNIEnv* env) {
     GET_METHOD_ID(gPowerManagerServiceClassInfo.userActivity, gPowerManagerServiceClassInfo.clazz,
             "userActivity", "(JZIZ)V");
 
+    // Initialize
+    for (int i = 0; i < POWER_MANAGER_LAST_EVENT; i++) {
+        gLastEventTime[i] = LLONG_MIN;
+    }
+    gScreenOn = true;
+    gScreenBright = true;
     return 0;
 }
 
