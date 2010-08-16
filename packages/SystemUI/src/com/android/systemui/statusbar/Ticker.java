@@ -185,11 +185,11 @@ public abstract class Ticker {
         final Segment newSegment = new Segment(n, icon, n.notification.tickerText);
 
         // If there's already a notification schedule for this package and id, remove it.
-        for (int i=0; i<initialCount; i++) {
+        for (int i=0; i<mSegments.size(); i++) {
             Segment seg = mSegments.get(i);
             if (n.id == seg.notification.id && n.pkg.equals(seg.notification.pkg)) {
                 // just update that one to use this new data instead
-                mSegments.remove(i);
+                mSegments.remove(i--); // restart iteration here
             }
         }
 
