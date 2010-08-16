@@ -8,14 +8,14 @@ int radius;
 
 uchar4 * InPixel;
 uchar4 * OutPixel;
-uchar4 * ScratchPixel;
+float4 * ScratchPixel1;
+float4 * ScratchPixel2;
 
-#pragma rs export_var(height, width, radius, InPixel, OutPixel, ScratchPixel, vBlurScript, hBlurScript, levelsScript)
-#pragma rs export_func(filter, filterBenchmark);
+#pragma rs export_var(height, width, radius, InPixel, OutPixel, ScratchPixel1, ScratchPixel2, vBlurScript, hBlurScript)
+#pragma rs export_func(filter);
 
 rs_script vBlurScript;
 rs_script hBlurScript;
-rs_script levelsScript;
 
 const int CMD_FINISHED = 1;
 
@@ -64,7 +64,21 @@ static void computeGaussianWeights() {
 }
 
 
-static void blur() {
+static void copyInput() {
+    RS_DEBUG_MARKER;
+    rs_allocation ain = rsGetAllocation(InPixel);
+    uint32_t dimx = rsAllocationGetDimX(ain);
+    uint32_t dimy = rsAllocationGetDimY(ain);
+    for(uint32_t y = 0; y < dimy; y++) {
+        for(uint32_t x = 0; x < dimx; x++) {
+            ScratchPixel1[x + y * dimx] = convert_float4(InPixel[x + y * dimx]);
+        }
+    }
+    RS_DEBUG_MARKER;
+}
+
+void filter() {
+    copyInput();
     computeGaussianWeights();
 
     FilterStruct fs;
@@ -73,28 +87,11 @@ static void blur() {
     fs.height = height;
     fs.radius = radius;
 
-    fs.ain = rsGetAllocation(InPixel);
-    rsForEach(hBlurScript, fs.ain, rsGetAllocation(ScratchPixel), &fs);
+    fs.ain = rsGetAllocation(ScratchPixel1);
+    rsForEach(hBlurScript, fs.ain, rsGetAllocation(ScratchPixel2), &fs);
 
-    fs.ain = rsGetAllocation(ScratchPixel);
+    fs.ain = rsGetAllocation(ScratchPixel2);
     rsForEach(vBlurScript, fs.ain, rsGetAllocation(OutPixel), &fs);
-}
-
-void filter() {
-    //RS_DEBUG(radius);
-
-    if(radius > 0) {
-        blur();
-        rsForEach(levelsScript, rsGetAllocation(OutPixel), rsGetAllocation(OutPixel), 0);
-    } else {
-        rsForEach(levelsScript, rsGetAllocation(InPixel), rsGetAllocation(OutPixel), 0);
-    }
-
-    rsSendToClientBlocking(CMD_FINISHED);
-}
-
-void filterBenchmark() {
-    blur();
     rsSendToClientBlocking(CMD_FINISHED);
 }
 

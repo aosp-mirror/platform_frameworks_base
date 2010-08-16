@@ -44,7 +44,6 @@ public class ImageProcessingActivity extends Activity
     private ScriptC_Threshold mScript;
     private ScriptC_Vertical_blur mScriptVBlur;
     private ScriptC_Horizontal_blur mScriptHBlur;
-    private ScriptC_Levels mScriptLevels;
     private int mRadius = 0;
     private SeekBar mRadiusSeekBar;
 
@@ -73,7 +72,8 @@ public class ImageProcessingActivity extends Activity
     @SuppressWarnings({"FieldCanBeLocal"})
     private Allocation mOutPixelsAllocation;
     @SuppressWarnings({"FieldCanBeLocal"})
-    private Allocation mScratchPixelsAllocation;
+    private Allocation mScratchPixelsAllocation1;
+    private Allocation mScratchPixelsAllocation2;
 
     private SurfaceView mSurfaceView;
     private ImageView mDisplayView;
@@ -261,29 +261,29 @@ public class ImageProcessingActivity extends Activity
             }
             else if(seekBar == mInBlackSeekBar) {
                 mInBlack = (float)progress;
-                mScriptLevels.invoke_setLevels(mInBlack, mOutBlack, mInWhite, mOutWhite);
+                mScriptVBlur.invoke_setLevels(mInBlack, mOutBlack, mInWhite, mOutWhite);
             }
             else if(seekBar == mOutBlackSeekBar) {
                 mOutBlack = (float)progress;
-                mScriptLevels.invoke_setLevels(mInBlack, mOutBlack, mInWhite, mOutWhite);
+                mScriptVBlur.invoke_setLevels(mInBlack, mOutBlack, mInWhite, mOutWhite);
             }
             else if(seekBar == mInWhiteSeekBar) {
                 mInWhite = (float)progress + 127.0f;
-                mScriptLevels.invoke_setLevels(mInBlack, mOutBlack, mInWhite, mOutWhite);
+                mScriptVBlur.invoke_setLevels(mInBlack, mOutBlack, mInWhite, mOutWhite);
             }
             else if(seekBar == mOutWhiteSeekBar) {
                 mOutWhite = (float)progress + 127.0f;
-                mScriptLevels.invoke_setLevels(mInBlack, mOutBlack, mInWhite, mOutWhite);
+                mScriptVBlur.invoke_setLevels(mInBlack, mOutBlack, mInWhite, mOutWhite);
             }
             else if(seekBar == mGammaSeekBar) {
                 mGamma = (float)progress/100.0f;
                 mGamma = Math.max(mGamma, 0.1f);
                 mGamma = 1.0f / mGamma;
-                mScriptLevels.invoke_setGamma(mGamma);
+                mScriptVBlur.invoke_setGamma(mGamma);
             }
             else if(seekBar == mSaturationSeekBar) {
                 mSaturation = (float)progress / 50.0f;
-                mScriptLevels.invoke_setSaturation(mSaturation);
+                mScriptVBlur.invoke_setSaturation(mSaturation);
             }
 
             long t = java.lang.System.currentTimeMillis();
@@ -373,28 +373,32 @@ public class ImageProcessingActivity extends Activity
 
         mInPixelsAllocation = Allocation.createBitmapRef(mRS, mBitmapIn);
         mOutPixelsAllocation = Allocation.createBitmapRef(mRS, mBitmapOut);
-        mScratchPixelsAllocation = Allocation.createBitmapRef(mRS, mBitmapScratch);
+
+        Type.Builder tb = new Type.Builder(mRS, Element.F32_4(mRS));
+        tb.add(android.renderscript.Dimension.X, mBitmapIn.getWidth());
+        tb.add(android.renderscript.Dimension.Y, mBitmapIn.getHeight());
+        mScratchPixelsAllocation1 = Allocation.createTyped(mRS, tb.create());
+        mScratchPixelsAllocation2 = Allocation.createTyped(mRS, tb.create());
 
         mScriptVBlur = new ScriptC_Vertical_blur(mRS, getResources(), R.raw.vertical_blur, false);
         mScriptHBlur = new ScriptC_Horizontal_blur(mRS, getResources(), R.raw.horizontal_blur, false);
-        mScriptLevels = new ScriptC_Levels(mRS, getResources(), R.raw.levels, false);
 
         mScript = new ScriptC_Threshold(mRS, getResources(), R.raw.threshold, false);
         mScript.set_width(mBitmapIn.getWidth());
         mScript.set_height(mBitmapIn.getHeight());
         mScript.set_radius(mRadius);
 
-        mScriptLevels.invoke_setLevels(mInBlack, mOutBlack, mInWhite, mOutWhite);
-        mScriptLevels.invoke_setGamma(mGamma);
-        mScriptLevels.invoke_setSaturation(mSaturation);
+        mScriptVBlur.invoke_setLevels(mInBlack, mOutBlack, mInWhite, mOutWhite);
+        mScriptVBlur.invoke_setGamma(mGamma);
+        mScriptVBlur.invoke_setSaturation(mSaturation);
 
         mScript.bind_InPixel(mInPixelsAllocation);
         mScript.bind_OutPixel(mOutPixelsAllocation);
-        mScript.bind_ScratchPixel(mScratchPixelsAllocation);
+        mScript.bind_ScratchPixel1(mScratchPixelsAllocation1);
+        mScript.bind_ScratchPixel2(mScratchPixelsAllocation2);
 
         mScript.set_vBlurScript(mScriptVBlur);
         mScript.set_hBlurScript(mScriptHBlur);
-        mScript.set_levelsScript(mScriptLevels);
     }
 
     private Bitmap loadBitmap(int resource) {
@@ -420,15 +424,15 @@ public class ImageProcessingActivity extends Activity
 
         long t = java.lang.System.currentTimeMillis();
 
-        mScript.invoke_filterBenchmark();
+        mScript.invoke_filter();
         mRS.finish();
 
         t = java.lang.System.currentTimeMillis() - t;
         android.util.Log.v("Img", "Renderscript frame time core ms " + t);
 
-        long javaTime = javaFilter();
-        mBenchmarkResult.setText("RS: " + t + " ms  Java: " + javaTime + " ms");
-        //mBenchmarkResult.setText("RS: " + t + " ms");
+        //long javaTime = javaFilter();
+        //mBenchmarkResult.setText("RS: " + t + " ms  Java: " + javaTime + " ms");
+        mBenchmarkResult.setText("RS: " + t + " ms");
 
         mRadius = oldRadius;
         mScript.set_radius(mRadius);
