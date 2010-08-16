@@ -802,7 +802,7 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * @param uri The data in the content provider being queried.
      * @param mimeTypeFilter The type of data the client desires.  May be
      * a pattern, such as *\/* to retrieve all possible data types.
-     * @returns Returns null if there are no possible data streams for the
+     * @return Returns null if there are no possible data streams for the
      * given mimeTypeFilter.  Otherwise returns an array of all available
      * concrete MIME types.
      *

@@ -409,14 +409,14 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     }
 
     /**
-     * Return the target fragment set by {@link #setTargetFragment(Fragment)}.
+     * Return the target fragment set by {@link #setTargetFragment}.
      */
     final public Fragment getTargetFragment() {
         return mTarget;
     }
 
     /**
-     * Return the target request code set by {@link #setTargetFragment(Fragment)}.
+     * Return the target request code set by {@link #setTargetFragment}.
      */
     final public int getTargetRequestCode() {
         return mTargetRequestCode;
