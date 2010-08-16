@@ -264,7 +264,7 @@ public class AppWidgetHostView extends FrameLayout {
      * Process data-changed notifications for the specified view in the specified
      * set of {@link RemoteViews} views.
      */
-    void viewDataChanged(RemoteViews remoteViews, int viewId) {
+    void viewDataChanged(int viewId) {
         View v = findViewById(viewId);
         if ((v != null) && (v instanceof AdapterView<?>)) {
             AdapterView<?> adapterView = (AdapterView<?>) v;

@@ -20,6 +20,7 @@ import android.widget.RemoteViews;
 
 /** {@hide} */
 interface IRemoteViewsFactory {
+    void onDataSetChanged();
     int getCount();
     RemoteViews getViewAt(int position);
     RemoteViews getLoadingView();

@@ -353,12 +353,11 @@ public class AppWidgetManager {
      * to invalidate their currently data.
      *
      * @param appWidgetIds  The AppWidget instances for which to notify of view data changes.
-     * @param views         The RemoteViews which contains the view referenced at viewId.
      * @param viewId        The collection view id.
      */
-    public void notifyAppWidgetViewDataChanged(int[] appWidgetIds, RemoteViews views, int viewId) {
+    public void notifyAppWidgetViewDataChanged(int[] appWidgetIds, int viewId) {
         try {
-            sService.notifyAppWidgetViewDataChanged(appWidgetIds, views, viewId);
+            sService.notifyAppWidgetViewDataChanged(appWidgetIds, viewId);
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
@@ -370,11 +369,10 @@ public class AppWidgetManager {
      * to invalidate it's currently data.
      *
      * @param appWidgetId  The AppWidget instance for which to notify of view data changes.
-     * @param views         The RemoteViews which contains the view referenced at viewId.
      * @param viewId        The collection view id.
      */
-    public void notifyAppWidgetViewDataChanged(int appWidgetId, RemoteViews views, int viewId) {
-        notifyAppWidgetViewDataChanged(new int[] { appWidgetId }, views, viewId);
+    public void notifyAppWidgetViewDataChanged(int appWidgetId, int viewId) {
+        notifyAppWidgetViewDataChanged(new int[] { appWidgetId }, viewId);
     }
 
     /**

@@ -62,11 +62,10 @@ public class AppWidgetHost {
             msg.sendToTarget();
         }
 
-        public void viewDataChanged(int appWidgetId, RemoteViews views, int viewId) {
+        public void viewDataChanged(int appWidgetId, int viewId) {
             Message msg = mHandler.obtainMessage(HANDLE_VIEW_DATA_CHANGED);
             msg.arg1 = appWidgetId;
             msg.arg2 = viewId;
-            msg.obj = views;
             msg.sendToTarget();
         }
     }
@@ -87,7 +86,7 @@ public class AppWidgetHost {
                     break;
                 }
                 case HANDLE_VIEW_DATA_CHANGED: {
-                    viewDataChanged(msg.arg1, (RemoteViews) msg.obj, msg.arg2);
+                    viewDataChanged(msg.arg1, msg.arg2);
                     break;
                 }
             }
@@ -264,13 +263,13 @@ public class AppWidgetHost {
         }
     }
 
-    void viewDataChanged(int appWidgetId, RemoteViews views, int viewId) {
+    void viewDataChanged(int appWidgetId, int viewId) {
         AppWidgetHostView v;
         synchronized (mViews) {
             v = mViews.get(appWidgetId);
         }
         if (v != null) {
-            v.viewDataChanged(views, viewId);
+            v.viewDataChanged(viewId);
         }
     }
 }

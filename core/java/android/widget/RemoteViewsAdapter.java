@@ -202,6 +202,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
             int count;
             int viewTypeCount;
             boolean hasStableIds;
+            boolean isDataDirty;
             Map<Integer, Integer> mTypeIdIndexMap;
 
             RemoteViewsInfo() {
@@ -209,6 +210,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
                 // by default there is at least one dummy view type
                 viewTypeCount = 1;
                 hasStableIds = true;
+                isDataDirty = false;
                 mTypeIdIndexMap = new HashMap<Integer, Integer>();
             }
         }
@@ -280,6 +282,39 @@ public class RemoteViewsAdapter extends BaseAdapter {
                     e.printStackTrace();
                 }
             }
+        }
+
+        protected void onNotifyDataSetChanged() {
+            // we mark the data as dirty so that the next call to fetch views will result in
+            // an onDataSetDirty() call from the adapter
+            synchronized (mViewCacheInfo) {
+                mViewCacheInfo.isDataDirty = true;
+            }
+        }
+
+        private void updateNotifyDataSetChanged() {
+            // actually calls through to the factory to notify it to update
+            if (mServiceConnection.isConnected()) {
+                IRemoteViewsFactory factory = mServiceConnection.getRemoteViewsFactory();
+                try {
+                    factory.onDataSetChanged();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            // re-request the new metadata (only after the notification to the factory)
+            requestMetaData();
+
+            // post a new runnable on the main thread to propagate the notification back
+            // to the base adapter
+            mMainQueue.post(new Runnable() {
+                @Override
+                public void run() {
+                   completeNotifyDataSetChanged();
+                }
+            });
         }
 
         protected void updateRemoteViewsInfo(int position) {
@@ -499,6 +534,16 @@ public class RemoteViewsAdapter extends BaseAdapter {
                 @Override
                 public void run() {
                     while (mBackgroundLoaderEnabled) {
+                        // notify the RemoteViews factory if necessary
+                        boolean isDataDirty = false;
+                        synchronized (mViewCacheInfo) {
+                            isDataDirty = mViewCacheInfo.isDataDirty;
+                            mViewCacheInfo.isDataDirty = false;
+                        }
+                        if (isDataDirty) {
+                            updateNotifyDataSetChanged();
+                        }
+
                         int index = -1;
                         synchronized (mViewCacheLoadIndices) {
                             if (!mViewCacheLoadIndices.isEmpty()) {
@@ -668,6 +713,12 @@ public class RemoteViewsAdapter extends BaseAdapter {
     public void notifyDataSetChanged() {
         // flush the cache so that we can reload new items from the service
         mViewCache.flushCache();
+
+        // notify the factory that it's data may no longer be valid
+        mViewCache.onNotifyDataSetChanged();
+    }
+
+    public void completeNotifyDataSetChanged() {
         super.notifyDataSetChanged();
     }
 

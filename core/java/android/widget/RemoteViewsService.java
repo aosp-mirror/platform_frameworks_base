@@ -43,9 +43,24 @@ public abstract class RemoteViewsService extends Service {
      * An interface for an adapter between a remote collection view (ListView, GridView, etc) and
      * the underlying data for that view.  The implementor is responsible for making a RemoteView
      * for each item in the data set.
+     * 
+     * @see android.widget.Adapter
      */
     public interface RemoteViewsFactory {
+        /**
+         * Called when your factory is first constructed. The same factory may be shared across
+         * multiple RemoteViewAdapters depending on the intent passed.
+         */
         public void onCreate();
+        /**
+         * Called upon {@link AppWidgetManager#notifyAppWidgetViewDataChanged} to allow a factory
+         * implementation to respond to data changes by updating any internal references.
+         */
+        public void onDataSetChanged();
+        /**
+         * Called when the last RemoteViewsAdapter that is associated with this factory is
+         * unbound.
+         */
         public void onDestroy();
 
         public int getCount();
@@ -64,7 +79,9 @@ public abstract class RemoteViewsService extends Service {
         public RemoteViewsFactoryAdapter(RemoteViewsFactory factory) {
             mFactory = factory;
         }
-
+        public void onDataSetChanged() {
+            mFactory.onDataSetChanged();
+        }
         public int getCount() {
             return mFactory.getCount();
         }

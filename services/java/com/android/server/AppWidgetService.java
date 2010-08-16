@@ -442,7 +442,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         }
     }
 
-    public void notifyAppWidgetViewDataChanged(int[] appWidgetIds, RemoteViews views, int viewId) {
+    public void notifyAppWidgetViewDataChanged(int[] appWidgetIds, int viewId) {
         if (appWidgetIds == null) {
             return;
         }
@@ -454,7 +454,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         synchronized (mAppWidgetIds) {
             for (int i=0; i<N; i++) {
                 AppWidgetId id = lookupAppWidgetIdLocked(appWidgetIds[i]);
-                notifyAppWidgetViewDataChangedInstanceLocked(id, views, viewId);
+                notifyAppWidgetViewDataChangedInstanceLocked(id, viewId);
             }
         }
     }
@@ -502,18 +502,16 @@ class AppWidgetService extends IAppWidgetService.Stub
         }
     }
 
-    void notifyAppWidgetViewDataChangedInstanceLocked(AppWidgetId id, RemoteViews views, int viewId) {
+    void notifyAppWidgetViewDataChangedInstanceLocked(AppWidgetId id, int viewId) {
         // allow for stale appWidgetIds and other badness
         // lookup also checks that the calling process can access the appWidgetId
         // drop unbound appWidgetIds (shouldn't be possible under normal circumstances)
         if (id != null && id.provider != null && !id.provider.zombie && !id.host.zombie) {
-            id.views = views;
-
             // is anyone listening?
             if (id.host.callbacks != null) {
                 try {
                     // the lock is held, but this is a oneway call
-                    id.host.callbacks.viewDataChanged(id.appWidgetId, views, viewId);
+                    id.host.callbacks.viewDataChanged(id.appWidgetId, viewId);
                 } catch (RemoteException e) {
                     // It failed; remove the callback. No need to prune because
                     // we know that this host is still referenced by this instance.

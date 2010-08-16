@@ -42,7 +42,7 @@ interface IAppWidgetService {
     void updateAppWidgetIds(in int[] appWidgetIds, in RemoteViews views);
     void partiallyUpdateAppWidgetIds(in int[] appWidgetIds, in RemoteViews views);
     void updateAppWidgetProvider(in ComponentName provider, in RemoteViews views);
-    void notifyAppWidgetViewDataChanged(in int[] appWidgetIds, in RemoteViews views, int viewId);
+    void notifyAppWidgetViewDataChanged(in int[] appWidgetIds, int viewId);
     List<AppWidgetProviderInfo> getInstalledProviders();
     AppWidgetProviderInfo getAppWidgetInfo(int appWidgetId);
     void bindAppWidgetId(int appWidgetId, in ComponentName provider);
