@@ -8085,12 +8085,12 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (oldHold != newHold) {
                         try {
                             if (oldHold != null) {
-                                mBatteryStats.noteStopWakelock(oldHold.mUid,
+                                mBatteryStats.noteStopWakelock(oldHold.mUid, -1,
                                         "window",
                                         BatteryStats.WAKE_TYPE_WINDOW);
                             }
                             if (newHold != null) {
-                                mBatteryStats.noteStartWakelock(newHold.mUid,
+                                mBatteryStats.noteStartWakelock(newHold.mUid, -1,
                                         "window",
                                         BatteryStats.WAKE_TYPE_WINDOW);
                             }

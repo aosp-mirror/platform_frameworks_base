@@ -41,6 +41,8 @@ public class BatteryWaster extends Activity {
     PowerManager.WakeLock mWakeLock;
     SpinThread mThread;
 
+    boolean mWasting, mWaking;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +52,7 @@ public class BatteryWaster extends Activity {
         setContentView(R.layout.battery_waster);
 
         findViewById(R.id.checkbox).setOnClickListener(mClickListener);
+        findViewById(R.id.checkbox_wake).setOnClickListener(mWakeClickListener);
         mLog = (TextView)findViewById(R.id.log);
 
         mDateFormat = DateFormat.getInstance();
@@ -67,7 +70,16 @@ public class BatteryWaster extends Activity {
 
     @Override
     public void onPause() {
+        super.onPause();
         stopRunning();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mWakeLock.isHeld()) {
+            mWakeLock.release();
+        }
     }
 
     View.OnClickListener mClickListener = new View.OnClickListener() {
@@ -81,23 +93,54 @@ public class BatteryWaster extends Activity {
         }
     };
 
+    View.OnClickListener mWakeClickListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            CheckBox checkbox = (CheckBox)v;
+            if (checkbox.isChecked()) {
+                mWaking = true;
+                updateWakeLock();
+            } else {
+                mWaking = false;
+                updateWakeLock();
+            }
+        }
+    };
+
     void startRunning() {
-        log("Start");
-        registerReceiver(mReceiver, mFilter);
-        mWakeLock.acquire();
-        if (mThread == null) {
-            mThread = new SpinThread();
-            mThread.start();
+        if (!mWasting) {
+            log("Start");
+            registerReceiver(mReceiver, mFilter);
+            mWasting = true;
+            updateWakeLock();
+            if (mThread == null) {
+                mThread = new SpinThread();
+                mThread.start();
+            }
         }
     }
 
     void stopRunning() {
-        log("Stop");
-        unregisterReceiver(mReceiver);
-        mWakeLock.release();
-        if (mThread != null) {
-            mThread.quit();
-            mThread = null;
+        if (mWasting) {
+            log("Stop");
+            unregisterReceiver(mReceiver);
+            mWasting = false;
+            updateWakeLock();
+            if (mThread != null) {
+                mThread.quit();
+                mThread = null;
+            }
+        }
+    }
+
+    void updateWakeLock() {
+        if (mWasting || mWaking) {
+            if (!mWakeLock.isHeld()) {
+                mWakeLock.acquire();
+            }
+        } else {
+            if (mWakeLock.isHeld()) {
+                mWakeLock.release();
+            }
         }
     }
 
