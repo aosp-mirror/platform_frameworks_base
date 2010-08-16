@@ -49,6 +49,8 @@ import java.util.List;
  * within a larger container.
  * 
  * <p>ScrollView only supports vertical scrolling.
+ *
+ * @attr ref android.R.styleable#ScrollView_fillViewport
  */
 public class ScrollView extends FrameLayout {
     static final int ANIMATED_SCROLL_GAP = 250;
@@ -247,6 +249,8 @@ public class ScrollView extends FrameLayout {
      * Indicates whether this ScrollView's content is stretched to fill the viewport.
      *
      * @return True if the content fills the viewport, false otherwise.
+     * 
+     * @attr ref android.R.styleable#ScrollView_fillViewport
      */
     public boolean isFillViewport() {
         return mFillViewport;
@@ -258,6 +262,8 @@ public class ScrollView extends FrameLayout {
      *
      * @param fillViewport True to stretch the content's height to the viewport's
      *        boundaries, false otherwise.
+     * 
+     * @attr ref android.R.styleable#ScrollView_fillViewport
      */
     public void setFillViewport(boolean fillViewport) {
         if (fillViewport != mFillViewport) {
@@ -566,16 +572,6 @@ public class ScrollView extends FrameLayout {
         }
     }
     
-    private int getScrollRange() {
-        int scrollRange = 0;
-        if (getChildCount() > 0) {
-            View child = getChildAt(0);
-            scrollRange = Math.max(0,
-                    child.getHeight() - getHeight() - mPaddingBottom - mPaddingTop);
-        }
-        return scrollRange;
-    }
-
     /**
      * <p>
      * Finds the next focusable component that fits in this View's bounds

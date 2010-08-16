@@ -53,6 +53,8 @@ import java.util.List;
  * within a larger container.
  *
  * <p>HorizontalScrollView only supports horizontal scrolling.
+ * 
+ * @attr ref android.R.styleable#HorizontalScrollView_fillViewport 
  */
 public class HorizontalScrollView extends FrameLayout {
     private static final int ANIMATED_SCROLL_GAP = ScrollView.ANIMATED_SCROLL_GAP;
@@ -248,20 +250,25 @@ public class HorizontalScrollView extends FrameLayout {
     }
 
     /**
-     * Indicates whether this ScrollView's content is stretched to fill the viewport.
+     * Indicates whether this HorizontalScrollView's content is stretched to
+     * fill the viewport.
      *
      * @return True if the content fills the viewport, false otherwise.
+     *
+     * @attr ref android.R.styleable#HorizontalScrollView_fillViewport
      */
     public boolean isFillViewport() {
         return mFillViewport;
     }
 
     /**
-     * Indicates this ScrollView whether it should stretch its content width to fill
-     * the viewport or not.
+     * Indicates this HorizontalScrollView whether it should stretch its content width
+     * to fill the viewport or not.
      *
      * @param fillViewport True to stretch the content's width to the viewport's
      *        boundaries, false otherwise.
+     * 
+     * @attr ref android.R.styleable#HorizontalScrollView_fillViewport
      */
     public void setFillViewport(boolean fillViewport) {
         if (fillViewport != mFillViewport) {
