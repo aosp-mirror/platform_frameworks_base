@@ -442,7 +442,7 @@ public class SmsMessage extends SmsMessageBase {
      */
     public static TextEncodingDetails calculateLength(CharSequence messageBody,
             boolean use7bitOnly) {
-        return BearerData.calcTextEncodingDetails(messageBody.toString(), use7bitOnly);
+        return BearerData.calcTextEncodingDetails(messageBody, use7bitOnly);
     }
 
     /**

@@ -402,6 +402,7 @@ public final class BearerData {
     /**
      * Calculate the message text encoding length, fragmentation, and other details.
      *
+     * @param msg message text
      * @param force7BitEncoding ignore (but still count) illegal characters if true
      * @return septet count, or -1 on failure
      */
@@ -424,9 +425,10 @@ public final class BearerData {
                 ted.codeUnitCount = msg.length();
                 int octets = ted.codeUnitCount * 2;
                 if (octets > MAX_USER_DATA_BYTES) {
-                    ted.msgCount = (octets / MAX_USER_DATA_BYTES_WITH_HEADER) + 1;
-                    ted.codeUnitsRemaining = (MAX_USER_DATA_BYTES_WITH_HEADER
-                              - (octets % MAX_USER_DATA_BYTES_WITH_HEADER))/2;
+                    ted.msgCount = (octets + (MAX_USER_DATA_BYTES_WITH_HEADER - 1)) /
+                            MAX_USER_DATA_BYTES_WITH_HEADER;
+                    ted.codeUnitsRemaining = ((ted.msgCount *
+                            MAX_USER_DATA_BYTES_WITH_HEADER) - octets) / 2;
                 } else {
                     ted.msgCount = 1;
                     ted.codeUnitsRemaining = (MAX_USER_DATA_BYTES - octets)/2;
@@ -801,7 +803,7 @@ public final class BearerData {
      *
      * @param bData an instance of BearerData.
      *
-     * @return data byte array of raw encoded SMS bearer data.
+     * @return byte array of raw encoded SMS bearer data.
      */
     public static byte[] encode(BearerData bData) {
         bData.hasUserDataHeader = ((bData.userData != null) &&
