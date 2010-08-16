@@ -39,6 +39,7 @@ public class BatteryWaster extends Activity {
     DateFormat mDateFormat;
     IntentFilter mFilter;
     PowerManager.WakeLock mWakeLock;
+    PowerManager.WakeLock mPartialWakeLock;
     SpinThread mThread;
 
     boolean mWasting, mWaking;
@@ -66,6 +67,8 @@ public class BatteryWaster extends Activity {
         PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "BatteryWaster");
         mWakeLock.setReferenceCounted(false);
+        mPartialWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "BatteryWaster");
+        mPartialWakeLock.setReferenceCounted(false);
     }
 
     @Override
@@ -79,6 +82,9 @@ public class BatteryWaster extends Activity {
         super.onDestroy();
         if (mWakeLock.isHeld()) {
             mWakeLock.release();
+        }
+        if (mPartialWakeLock.isHeld()) {
+            mPartialWakeLock.release();
         }
     }
 
@@ -133,13 +139,22 @@ public class BatteryWaster extends Activity {
     }
 
     void updateWakeLock() {
-        if (mWasting || mWaking) {
+        if (mWasting) {
             if (!mWakeLock.isHeld()) {
                 mWakeLock.acquire();
             }
         } else {
             if (mWakeLock.isHeld()) {
                 mWakeLock.release();
+            }
+        }
+        if (mWaking) {
+            if (!mPartialWakeLock.isHeld()) {
+                mPartialWakeLock.acquire();
+            }
+        } else {
+            if (mPartialWakeLock.isHeld()) {
+                mPartialWakeLock.release();
             }
         }
     }
