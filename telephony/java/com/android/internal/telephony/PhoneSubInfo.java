@@ -111,7 +111,7 @@ public class PhoneSubInfo extends IPhoneSubInfo.Stub {
     }
 
     /**
-     * Retrieves the compelete voice mail number.
+     * Retrieves the complete voice mail number.
      *
      * @hide
      */
