@@ -191,11 +191,8 @@ public interface SipAudioCall {
      */
     void continueCall() throws SipException;
 
-    /** Puts the device to in-call mode. */
-    void setInCallMode();
-
     /** Puts the device to speaker mode. */
-    void setSpeakerMode();
+    void setSpeakerMode(boolean speakerMode);
 
     /** Toggles mute. */
     void toggleMute();
