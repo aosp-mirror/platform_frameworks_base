@@ -239,7 +239,7 @@ static uint32_t SC_allocGetDimFaces(RsAllocation va)
     return a->getType()->getDimFaces();
 }
 
-const void * SC_getElementAtX(RsAllocation va, uint32_t x)
+static const void * SC_getElementAtX(RsAllocation va, uint32_t x)
 {
     const Allocation *a = static_cast<const Allocation *>(va);
     const Type *t = a->getType();
@@ -247,7 +247,7 @@ const void * SC_getElementAtX(RsAllocation va, uint32_t x)
     return &p[t->getElementSizeBytes() * x];
 }
 
-const void * SC_getElementAtXY(RsAllocation va, uint32_t x, uint32_t y)
+static const void * SC_getElementAtXY(RsAllocation va, uint32_t x, uint32_t y)
 {
     const Allocation *a = static_cast<const Allocation *>(va);
     const Type *t = a->getType();
@@ -255,13 +255,27 @@ const void * SC_getElementAtXY(RsAllocation va, uint32_t x, uint32_t y)
     return &p[t->getElementSizeBytes() * (x + y*t->getDimX())];
 }
 
-const void * SC_getElementAtXYZ(RsAllocation va, uint32_t x, uint32_t y, uint32_t z)
+static const void * SC_getElementAtXYZ(RsAllocation va, uint32_t x, uint32_t y, uint32_t z)
 {
     const Allocation *a = static_cast<const Allocation *>(va);
     const Type *t = a->getType();
     const uint8_t *p = (const uint8_t *)a->getPtr();
     return &p[t->getElementSizeBytes() * (x + y*t->getDimX())];
 }
+
+static void SC_setObject(void **vdst, void * vsrc) {
+    static_cast<ObjectBase *>(vsrc)->incSysRef();
+    static_cast<ObjectBase *>(vdst[0])->decSysRef();
+    *vdst = vsrc;
+}
+static void SC_clearObject(void **vdst) {
+    static_cast<ObjectBase *>(vdst[0])->decSysRef();
+    *vdst = NULL;
+}
+static bool SC_isObject(RsAllocation vsrc) {
+    return vsrc != NULL;
+}
+
 
 
 static void SC_debugF(const char *s, float f) {
@@ -404,6 +418,11 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z14rsGetElementAt13rs_allocationj", (void *)&SC_getElementAtX },
     { "_Z14rsGetElementAt13rs_allocationjj", (void *)&SC_getElementAtXY },
     { "_Z14rsGetElementAt13rs_allocationjjj", (void *)&SC_getElementAtXYZ },
+
+    { "_Z11rsSetObjectP13rs_allocation13rs_allocation", (void *)&SC_setObject },
+    { "_Z13rsClearObjectP13rs_allocation", (void *)&SC_clearObject },
+    { "_Z10rsIsObject13rs_allocation", (void *)&SC_isObject },
+
 
     // Debug
     { "_Z7rsDebugPKcf", (void *)&SC_debugF },

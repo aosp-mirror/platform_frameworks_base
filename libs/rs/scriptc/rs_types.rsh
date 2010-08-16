@@ -14,17 +14,18 @@ typedef uint16_t ushort;
 typedef uint32_t uint;
 typedef uint64_t ulong;
 
-typedef struct { int* p; } __attribute__((packed, aligned(4))) rs_element;
-typedef struct { int* p; } __attribute__((packed, aligned(4))) rs_type;
-typedef struct { int* p; } __attribute__((packed, aligned(4))) rs_allocation;
-typedef struct { int* p; } __attribute__((packed, aligned(4))) rs_sampler;
-typedef struct { int* p; } __attribute__((packed, aligned(4))) rs_script;
-typedef struct { int* p; } __attribute__((packed, aligned(4))) rs_mesh;
-typedef struct { int* p; } __attribute__((packed, aligned(4))) rs_program_fragment;
-typedef struct { int* p; } __attribute__((packed, aligned(4))) rs_program_vertex;
-typedef struct { int* p; } __attribute__((packed, aligned(4))) rs_program_raster;
-typedef struct { int* p; } __attribute__((packed, aligned(4))) rs_program_store;
-typedef struct { int* p; } __attribute__((packed, aligned(4))) rs_font;
+typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_element;
+typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_type;
+typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_allocation;
+typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_sampler;
+typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_script;
+typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_mesh;
+typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_program_fragment;
+typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_program_vertex;
+typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_program_raster;
+typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_program_store;
+typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_font;
+
 
 typedef float float2 __attribute__((ext_vector_type(2)));
 typedef float float3 __attribute__((ext_vector_type(3)));

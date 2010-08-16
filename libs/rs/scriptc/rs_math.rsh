@@ -29,6 +29,77 @@ extern void __attribute__((overloadable))
 #include "rs_cl.rsh"
 #include "rs_core.rsh"
 
+extern void __attribute__((overloadable))
+    rsSetObject(rs_element *dst, rs_element src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_type *dst, rs_type src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_allocation *dst, rs_allocation src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_sampler *dst, rs_sampler src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_script *dst, rs_script src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_mesh *dst, rs_mesh src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_program_fragment *dst, rs_program_fragment src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_program_vertex *dst, rs_program_vertex src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_program_raster *dst, rs_program_raster src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_program_store *dst, rs_program_store src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_font *dst, rs_font src);
+
+extern void __attribute__((overloadable))
+    rsClearObject(rs_element *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_type *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_allocation *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_sampler *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_script *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_mesh *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_program_fragment *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_program_vertex *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_program_raster *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_program_store *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_font *dst);
+
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_element);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_type);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_allocation);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_sampler);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_script);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_mesh);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_program_fragment);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_program_vertex);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_program_raster);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_program_store);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_font);
+
+
+
 // Allocations
 
 // Return the rs_allocation associated with a bound data
