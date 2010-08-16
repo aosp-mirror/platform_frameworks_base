@@ -158,7 +158,7 @@ status_t OggSource::read(
     ReadOptions::SeekMode mode;
     if (options && options->getSeekTo(&seekTimeUs, &mode)) {
         off_t pos = seekTimeUs * mExtractor->mImpl->approxBitrate() / 8000000ll;
-        LOGI("seeking to offset %ld", pos);
+        LOGV("seeking to offset %ld", pos);
 
         if (mExtractor->mImpl->seekToOffset(pos) != OK) {
             return ERROR_END_OF_STREAM;
@@ -267,7 +267,7 @@ ssize_t MyVorbisExtractor::readPage(off_t offset, Page *page) {
     uint8_t header[27];
     if (mSource->readAt(offset, header, sizeof(header))
             < (ssize_t)sizeof(header)) {
-        LOGE("failed to read %d bytes at offset 0x%08lx", sizeof(header), offset);
+        LOGV("failed to read %d bytes at offset 0x%08lx", sizeof(header), offset);
 
         return ERROR_IO;
     }
@@ -384,7 +384,7 @@ status_t MyVorbisExtractor::readNextPacket(MediaBuffer **out) {
                     packetSize);
 
             if (n < (ssize_t)packetSize) {
-                LOGE("failed to read %d bytes at 0x%08lx", packetSize, dataOffset);
+                LOGV("failed to read %d bytes at 0x%08lx", packetSize, dataOffset);
                 return ERROR_IO;
             }
 
@@ -418,7 +418,7 @@ status_t MyVorbisExtractor::readNextPacket(MediaBuffer **out) {
                 buffer = NULL;
             }
 
-            LOGE("readPage returned %ld", n);
+            LOGV("readPage returned %ld", n);
 
             return n < 0 ? n : (status_t)ERROR_END_OF_STREAM;
         }
