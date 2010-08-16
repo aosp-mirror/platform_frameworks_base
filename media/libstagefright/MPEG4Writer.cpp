@@ -168,6 +168,12 @@ private:
 
     void getCodecSpecificDataFromInputFormatIfPossible();
 
+    // Determine the track time scale
+    // If it is an audio track, try to use the sampling rate as
+    // the time scale; however, if user chooses the overwrite
+    // value, the user-supplied time scale will be used.
+    void setTimeScale();
+
     Track(const Track &);
     Track &operator=(const Track &);
 };
@@ -434,7 +440,7 @@ void MPEG4Writer::stop() {
     mMoovBoxBuffer = (uint8_t *) malloc(mEstimatedMoovBoxSize);
     mMoovBoxBufferOffset = 0;
     CHECK(mMoovBoxBuffer != NULL);
-    int32_t duration = (maxDurationUs * mTimeScale) / 1E6;
+    int32_t duration = (maxDurationUs * mTimeScale + 5E5) / 1E6;
 
     beginBox("moov");
 
@@ -749,16 +755,34 @@ MPEG4Writer::Track::Track(
       mReachedEOS(false) {
     getCodecSpecificDataFromInputFormatIfPossible();
 
-    if (!mMeta->findInt32(kKeyTimeScale, &mTimeScale)) {
-        mTimeScale = 1000;
-    }
-
     const char *mime;
     mMeta->findCString(kKeyMIMEType, &mime);
     mIsAvc = !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC);
     mIsAudio = !strncasecmp(mime, "audio/", 6);
     mIsMPEG4 = !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_MPEG4) ||
                !strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC);
+
+    setTimeScale();
+}
+
+void MPEG4Writer::Track::setTimeScale() {
+    LOGV("setTimeScale");
+    // Default time scale
+    mTimeScale = 90000;
+
+    if (mIsAudio) {
+        // Use the sampling rate as the default time scale for audio track.
+        int32_t sampleRate;
+        bool success = mMeta->findInt32(kKeySampleRate, &sampleRate);
+        CHECK(success);
+        mTimeScale = sampleRate;
+    }
+
+    // If someone would like to overwrite the timescale, use user-supplied value.
+    int32_t timeScale;
+    if (mMeta->findInt32(kKeyTimeScale, &timeScale)) {
+        mTimeScale = timeScale;
+    }
 
     CHECK(mTimeScale > 0);
 }
@@ -1336,6 +1360,8 @@ void MPEG4Writer::Track::threadEntry() {
     int32_t nZeroLengthFrames = 0;
     int64_t lastTimestampUs = 0;  // Previous sample time stamp in ms
     int64_t lastDurationUs = 0;   // Between the previous two samples in ms
+    int64_t currDurationTicks = 0;  // Timescale based ticks
+    int64_t lastDurationTicks = 0;  // Timescale based ticks
     int32_t sampleCount = 1;      // Sample count in the current stts table entry
     uint32_t previousSampleSize = 0;  // Size of the previous sample
     int64_t previousPausedDurationUs = 0;
@@ -1483,7 +1509,16 @@ void MPEG4Writer::Track::threadEntry() {
         mSampleSizes.push_back(sampleSize);
         ++mNumSamples;
         if (mNumSamples > 2) {
-            if (lastDurationUs != timestampUs - lastTimestampUs) {
+            // We need to use the time scale based ticks, rather than the
+            // timestamp itself to determine whether we have to use a new
+            // stts entry, since we may have rounding errors.
+            // The calculation is intended to reduce the accumulated
+            // rounding errors.
+            currDurationTicks =
+                     ((timestampUs * mTimeScale + 500000LL) / 1000000LL -
+                     (lastTimestampUs * mTimeScale + 500000LL) / 1000000LL);
+
+            if (currDurationTicks != lastDurationTicks) {
                 SttsTableEntry sttsEntry(sampleCount, lastDurationUs);
                 mSttsTableEntries.push_back(sttsEntry);
                 sampleCount = 1;
@@ -1498,6 +1533,7 @@ void MPEG4Writer::Track::threadEntry() {
             previousSampleSize = sampleSize;
         }
         lastDurationUs = timestampUs - lastTimestampUs;
+        lastDurationTicks = currDurationTicks;
         lastTimestampUs = timestampUs;
         if (mIsRealTimeRecording && mIsAudio) {
             wallClockTimeUs = systemTime() / 1000;
@@ -1773,7 +1809,6 @@ void MPEG4Writer::Track::writeTrackHeader(
 
     LOGV("%s track time scale: %d",
         mIsAudio? "Audio": "Video", mTimeScale);
-
 
     time_t now = time(NULL);
     int32_t mvhdTimeScale = mOwner->getTimeScale();
@@ -2089,10 +2124,18 @@ void MPEG4Writer::Track::writeTrackHeader(
           mOwner->beginBox("stts");
             mOwner->writeInt32(0);  // version=0, flags=0
             mOwner->writeInt32(mSttsTableEntries.size());
+            int64_t prevTimestampUs = 0;
             for (List<SttsTableEntry>::iterator it = mSttsTableEntries.begin();
                  it != mSttsTableEntries.end(); ++it) {
                 mOwner->writeInt32(it->sampleCount);
-                int32_t dur = (it->sampleDurationUs * mTimeScale + 5E5) / 1E6;
+
+                // Make sure that we are calculating the sample duration the exactly
+                // same way as we made decision on how to create stts entries.
+                int64_t currTimestampUs = prevTimestampUs + it->sampleDurationUs;
+                int32_t dur = ((currTimestampUs * mTimeScale + 500000LL) / 1000000LL -
+                               (prevTimestampUs * mTimeScale + 500000LL) / 1000000LL);
+                prevTimestampUs += (it->sampleCount * it->sampleDurationUs);
+
                 mOwner->writeInt32(dur);
             }
           mOwner->endBox();  // stts

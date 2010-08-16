@@ -675,7 +675,9 @@ sp<MediaSource> StagefrightRecorder::createAudioSource() {
     encMeta->setInt32(kKeyChannelCount, mAudioChannels);
     encMeta->setInt32(kKeySampleRate, mSampleRate);
     encMeta->setInt32(kKeyBitRate, mAudioBitRate);
-    encMeta->setInt32(kKeyTimeScale, mAudioTimeScale);
+    if (mAudioTimeScale > 0) {
+        encMeta->setInt32(kKeyTimeScale, mAudioTimeScale);
+    }
 
     OMXClient client;
     CHECK_EQ(client.connect(), OK);
@@ -961,7 +963,9 @@ status_t StagefrightRecorder::setupVideoEncoder(sp<MediaSource> *source) {
     enc_meta->setInt32(kKeyStride, stride);
     enc_meta->setInt32(kKeySliceHeight, sliceHeight);
     enc_meta->setInt32(kKeyColorFormat, colorFormat);
-    enc_meta->setInt32(kKeyTimeScale, mVideoTimeScale);
+    if (mVideoTimeScale > 0) {
+        enc_meta->setInt32(kKeyTimeScale, mVideoTimeScale);
+    }
     if (mVideoEncoderProfile != -1) {
         enc_meta->setInt32(kKeyVideoProfile, mVideoEncoderProfile);
     }
@@ -1041,7 +1045,9 @@ status_t StagefrightRecorder::startMPEG4Recording() {
     meta->setInt32(kKeyFileType, mOutputFormat);
     meta->setInt32(kKeyBitRate, totalBitRate);
     meta->setInt32(kKey64BitFileOffset, mUse64BitFileOffset);
-    meta->setInt32(kKeyTimeScale, mMovieTimeScale);
+    if (mMovieTimeScale > 0) {
+        meta->setInt32(kKeyTimeScale, mMovieTimeScale);
+    }
     if (mTrackEveryTimeDurationUs > 0) {
         meta->setInt64(kKeyTrackTimeStatus, mTrackEveryTimeDurationUs);
     }
@@ -1117,9 +1123,9 @@ status_t StagefrightRecorder::reset() {
     mIFramesIntervalSec = 1;
     mAudioSourceNode = 0;
     mUse64BitFileOffset = false;
-    mMovieTimeScale  = 1000;
-    mAudioTimeScale  = 1000;
-    mVideoTimeScale  = 1000;
+    mMovieTimeScale  = -1;
+    mAudioTimeScale  = -1;
+    mVideoTimeScale  = -1;
     mCameraId        = 0;
     mVideoEncoderProfile = -1;
     mVideoEncoderLevel   = -1;
