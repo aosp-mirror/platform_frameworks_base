@@ -643,17 +643,16 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             
             boolean playSoundEffect = false;
             final PanelFeatureState st = getPanelState(featureId, true);
-            if (featureId == FEATURE_OPTIONS_PANEL && mActionBar != null) {
-                if (mActionBar.isOverflowReserved()) {
-                    if (!mActionBar.isOverflowMenuShowing()) {
-                        final Callback cb = getCallback();
-                        if (cb != null &&
-                                cb.onPreparePanel(featureId, st.createdPanelView, st.menu)) {
-                            playSoundEffect = mActionBar.showOverflowMenu();
-                        }
-                    } else {
-                        playSoundEffect = mActionBar.hideOverflowMenu();
+            if (featureId == FEATURE_OPTIONS_PANEL && mActionBar != null &&
+                    mActionBar.isOverflowReserved()) {
+                if (!mActionBar.isOverflowMenuShowing()) {
+                    final Callback cb = getCallback();
+                    if (cb != null &&
+                            cb.onPreparePanel(featureId, st.createdPanelView, st.menu)) {
+                        playSoundEffect = mActionBar.showOverflowMenu();
                     }
+                } else {
+                    playSoundEffect = mActionBar.hideOverflowMenu();
                 }
             } else {
                 if (st.isOpen || st.isHandled) {
