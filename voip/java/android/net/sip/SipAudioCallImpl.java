@@ -485,16 +485,9 @@ public class SipAudioCallImpl extends SipSessionAdapter
         return mMuted;
     }
 
-    public synchronized void setInCallMode() {
+    public synchronized void setSpeakerMode(boolean speakerMode) {
         ((AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE))
-                .setSpeakerphoneOn(false);
-        ((AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE))
-                .setMode(AudioManager.MODE_NORMAL);
-    }
-
-    public synchronized void setSpeakerMode() {
-        ((AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE))
-                .setSpeakerphoneOn(true);
+                .setSpeakerphoneOn(speakerMode);
     }
 
     public void sendDtmf(int code) {
@@ -587,8 +580,15 @@ public class SipAudioCallImpl extends SipSessionAdapter
                     Log.d(TAG, "   not sending");
                     audioStream.setMode(RtpStream.MODE_RECEIVE_ONLY);
                 }
+            } else {
+                /* The recorder volume will be very low if the device is in
+                 * IN_CALL mode. Therefore, we have to set the mode to NORMAL
+                 * in order to have the normal microphone level.
+                 */
+                ((AudioManager) mContext.getSystemService
+                        (Context.AUDIO_SERVICE))
+                        .setMode(AudioManager.MODE_NORMAL);
             }
-            setInCallMode();
 
             AudioGroup audioGroup = new AudioGroup();
             audioStream.join(audioGroup);
@@ -614,7 +614,6 @@ public class SipAudioCallImpl extends SipSessionAdapter
                 mRtpSession = null;
             }
         }
-        setInCallMode();
     }
 
     private int getLocalMediaPort() {
