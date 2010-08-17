@@ -46,6 +46,10 @@ void doThrowOOME(JNIEnv* env, const char* msg) {
     doThrow(env, "java/lang/OutOfMemoryError", msg);
 }
 
+void doThrowIOE(JNIEnv* env, const char* msg) {
+    doThrow(env, "java/lang/IOException", msg);
+}
+
 bool GraphicsJNI::hasException(JNIEnv *env) {
     if (env->ExceptionCheck() != 0) {
         LOGE("*** Uncaught exception returned from Java call!\n");
@@ -164,6 +168,9 @@ static jmethodID gBitmap_allocBufferMethodID;
 
 static jclass   gBitmapConfig_class;
 static jfieldID gBitmapConfig_nativeInstanceID;
+
+static jclass   gLargeBitmap_class;
+static jmethodID gLargeBitmap_constructorMethodID;
 
 static jclass   gCanvas_class;
 static jfieldID gCanvas_nativeInstanceID;
@@ -370,6 +377,23 @@ jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, bool isMutable,
     }
     return obj;
 }
+jobject GraphicsJNI::createLargeBitmap(JNIEnv* env, SkLargeBitmap* bitmap)
+{
+    SkASSERT(bitmap != NULL);
+
+    jobject obj = env->AllocObject(gLargeBitmap_class);
+    if (hasException(env)) {
+        obj = NULL;
+        return obj;
+    }
+    if (obj) {
+        env->CallVoidMethod(obj, gLargeBitmap_constructorMethodID, (jint)bitmap);
+        if (hasException(env)) {
+            obj = NULL;
+        }
+    }
+    return obj;
+}
 
 jobject GraphicsJNI::createRegion(JNIEnv* env, SkRegion* region)
 {
@@ -502,6 +526,35 @@ bool JavaPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+JavaMemoryUsageReporter::JavaMemoryUsageReporter(JNIEnv* env)
+    : fEnv(env), fTotalSize(0) {}
+
+JavaMemoryUsageReporter::~JavaMemoryUsageReporter() {
+    jlong jtotalSize = fTotalSize;
+    fEnv->CallVoidMethod(gVMRuntime_singleton,
+            gVMRuntime_trackExternalFreeMethodID,
+            jtotalSize);
+}
+
+bool JavaMemoryUsageReporter::reportMemory(size_t memorySize) {
+    jlong jsize = memorySize;  // the VM wants longs for the size
+    bool r = fEnv->CallBooleanMethod(gVMRuntime_singleton,
+            gVMRuntime_trackExternalAllocationMethodID,
+            jsize);
+    if (GraphicsJNI::hasException(fEnv)) {
+        return false;
+    }
+    if (!r) {
+        LOGE("VM won't let us allocate %zd bytes\n", memorySize);
+        doThrowOOME(fEnv, "bitmap size exceeds VM budget");
+        return false;
+    }
+    fTotalSize += memorySize;
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 static jclass make_globalref(JNIEnv* env, const char classname[])
 {
     jclass c = env->FindClass(classname);
@@ -546,6 +599,9 @@ int register_android_graphics_Graphics(JNIEnv* env)
     gBitmap_nativeInstanceID = getFieldIDCheck(env, gBitmap_class, "mNativeBitmap", "I");    
     gBitmap_constructorMethodID = env->GetMethodID(gBitmap_class, "<init>",
                                             "(IZ[BI)V");
+
+    gLargeBitmap_class = make_globalref(env, "android/graphics/LargeBitmap");
+    gLargeBitmap_constructorMethodID = env->GetMethodID(gLargeBitmap_class, "<init>", "(I)V");
 
     gBitmapConfig_class = make_globalref(env, "android/graphics/Bitmap$Config");
     gBitmapConfig_nativeInstanceID = getFieldIDCheck(env, gBitmapConfig_class,
