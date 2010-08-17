@@ -194,13 +194,13 @@ public abstract class PreferenceActivity extends ListActivity implements
         }
     };
 
-    private class HeaderViewHolder {
-        ImageView icon;
-        TextView title;
-        TextView summary;
-    }
+    private static class HeaderAdapter extends ArrayAdapter<Header> {
+        private static class HeaderViewHolder {
+            ImageView icon;
+            TextView title;
+            TextView summary;
+        }
 
-    private class HeaderAdapter extends ArrayAdapter<Header> {
         private LayoutInflater mInflater;
 
         public HeaderAdapter(Context context, List<Header> objects) {
@@ -217,23 +217,31 @@ public abstract class PreferenceActivity extends ListActivity implements
                 view = mInflater.inflate(com.android.internal.R.layout.preference_list_item,
                         parent, false);
                 holder = new HeaderViewHolder();
-                holder.icon = (ImageView)view.findViewById(
-                        com.android.internal.R.id.icon);
-                holder.title = (TextView)view.findViewById(
-                        com.android.internal.R.id.title);
-                holder.summary = (TextView)view.findViewById(
-                        com.android.internal.R.id.summary);
+                holder.icon = (ImageView) view.findViewById(com.android.internal.R.id.icon);
+                holder.title = (TextView) view.findViewById(com.android.internal.R.id.title);
+                holder.summary = (TextView) view.findViewById(com.android.internal.R.id.summary);
                 view.setTag(holder);
             } else {
                 view = convertView;
-                holder = (HeaderViewHolder)view.getTag();
+                holder = (HeaderViewHolder) view.getTag();
             }
 
+            // All view fields must be updated every time, because the view may be recycled 
             Header header = getItem(position);
-            if (header.icon != null) holder.icon.setImageDrawable(header.icon);
-            else if (header.iconRes != 0) holder.icon.setImageResource(header.iconRes);
-            if (header.title != null) holder.title.setText(header.title);
-            if (header.summary != null) holder.summary.setText(header.summary);
+            if (header.icon == null) {
+                holder.icon.setImageDrawable(null);
+                holder.icon.setImageResource(header.iconRes);
+            } else {
+                holder.icon.setImageResource(0);
+                holder.icon.setImageDrawable(header.icon);
+            }
+            holder.title.setText(header.title);
+            if (TextUtils.isEmpty(header.summary)) {
+                holder.summary.setVisibility(View.GONE);
+            } else {
+                holder.summary.setVisibility(View.VISIBLE);
+                holder.summary.setText(header.summary);
+            }
 
             return view;
         }
@@ -247,38 +255,38 @@ public abstract class PreferenceActivity extends ListActivity implements
          * Title of the header that is shown to the user.
          * @attr ref android.R.styleable#PreferenceHeader_title
          */
-        CharSequence title;
+        public CharSequence title;
 
         /**
          * Optional summary describing what this header controls.
          * @attr ref android.R.styleable#PreferenceHeader_summary
          */
-        CharSequence summary;
+        public CharSequence summary;
 
         /**
          * Optional icon resource to show for this header.
          * @attr ref android.R.styleable#PreferenceHeader_icon
          */
-        int iconRes;
+        public int iconRes;
 
         /**
          * Optional icon drawable to show for this header.  (If this is non-null,
          * the iconRes will be ignored.)
          */
-        Drawable icon;
+        public Drawable icon;
 
         /**
          * Full class name of the fragment to display when this header is
          * selected.
          * @attr ref android.R.styleable#PreferenceHeader_fragment
          */
-        String fragment;
+        public String fragment;
 
         /**
          * Optional arguments to supply to the fragment when it is
          * instantiated.
          */
-        Bundle fragmentArguments;
+        public Bundle fragmentArguments;
     }
 
     @Override
