@@ -145,7 +145,12 @@ sp<ICamera> CameraService::connect(
         return NULL;
     }
 
-    client = new Client(this, cameraClient, cameraId, callingPid);
+    sp<CameraHardwareInterface> hardware = HAL_openCameraHardware(cameraId);
+    if (hardware == NULL) {
+        LOGE("Fail to open camera hardware (id=%d)", cameraId);
+        return NULL;
+    }
+    client = new Client(this, cameraClient, hardware, cameraId, callingPid);
     mClient[cameraId] = client;
     LOG1("CameraService::connect X");
     return client;
@@ -285,16 +290,17 @@ void CameraService::playSound(sound_kind kind) {
 // ----------------------------------------------------------------------------
 
 CameraService::Client::Client(const sp<CameraService>& cameraService,
-        const sp<ICameraClient>& cameraClient, int cameraId, int clientPid) {
+        const sp<ICameraClient>& cameraClient,
+        const sp<CameraHardwareInterface>& hardware,
+        int cameraId, int clientPid) {
     int callingPid = getCallingPid();
     LOG1("Client::Client E (pid %d)", callingPid);
 
     mCameraService = cameraService;
     mCameraClient = cameraClient;
+    mHardware = hardware;
     mCameraId = cameraId;
     mClientPid = clientPid;
-
-    mHardware = HAL_openCameraHardware(cameraId);
     mUseOverlay = mHardware->useOverlay();
     mMsgEnabled = 0;
 
