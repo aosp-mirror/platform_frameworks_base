@@ -319,9 +319,9 @@ private:
     bool isScreenOn();
     bool isScreenBright();
 
-    // Weak references to all currently registered input channels by receive fd.
+    // Weak references to all currently registered input channels by connection pointer.
     Mutex mInputChannelRegistryLock;
-    KeyedVector<int, jweak> mInputChannelObjWeakByReceiveFd;
+    KeyedVector<InputChannel*, jweak> mInputChannelObjWeakTable;
 
     jobject getInputChannelObjLocal(JNIEnv* env, const sp<InputChannel>& inputChannel);
 
@@ -509,8 +509,7 @@ status_t NativeInputManager::registerInputChannel(JNIEnv* env,
     {
         AutoMutex _l(mInputChannelRegistryLock);
 
-        ssize_t index = mInputChannelObjWeakByReceiveFd.indexOfKey(
-                inputChannel->getReceivePipeFd());
+        ssize_t index = mInputChannelObjWeakTable.indexOfKey(inputChannel.get());
         if (index >= 0) {
             LOGE("Input channel object '%s' has already been registered",
                     inputChannel->getName().string());
@@ -518,8 +517,7 @@ status_t NativeInputManager::registerInputChannel(JNIEnv* env,
             goto DeleteWeakRef;
         }
 
-        mInputChannelObjWeakByReceiveFd.add(inputChannel->getReceivePipeFd(),
-                inputChannelObjWeak);
+        mInputChannelObjWeakTable.add(inputChannel.get(), inputChannelObjWeak);
     }
 
     status = mInputManager->registerInputChannel(inputChannel);
@@ -534,7 +532,7 @@ status_t NativeInputManager::registerInputChannel(JNIEnv* env,
     // Failed!
     {
         AutoMutex _l(mInputChannelRegistryLock);
-        mInputChannelObjWeakByReceiveFd.removeItem(inputChannel->getReceivePipeFd());
+        mInputChannelObjWeakTable.removeItem(inputChannel.get());
     }
 
 DeleteWeakRef:
@@ -548,16 +546,15 @@ status_t NativeInputManager::unregisterInputChannel(JNIEnv* env,
     {
         AutoMutex _l(mInputChannelRegistryLock);
 
-        ssize_t index = mInputChannelObjWeakByReceiveFd.indexOfKey(
-                inputChannel->getReceivePipeFd());
+        ssize_t index = mInputChannelObjWeakTable.indexOfKey(inputChannel.get());
         if (index < 0) {
             LOGE("Input channel object '%s' is not currently registered",
                     inputChannel->getName().string());
             return INVALID_OPERATION;
         }
 
-        inputChannelObjWeak = mInputChannelObjWeakByReceiveFd.valueAt(index);
-        mInputChannelObjWeakByReceiveFd.removeItemsAt(index);
+        inputChannelObjWeak = mInputChannelObjWeakTable.valueAt(index);
+        mInputChannelObjWeakTable.removeItemsAt(index);
     }
 
     env->DeleteWeakGlobalRef(inputChannelObjWeak);
@@ -572,13 +569,12 @@ jobject NativeInputManager::getInputChannelObjLocal(JNIEnv* env,
     {
         AutoMutex _l(mInputChannelRegistryLock);
 
-        ssize_t index = mInputChannelObjWeakByReceiveFd.indexOfKey(
-                inputChannel->getReceivePipeFd());
+        ssize_t index = mInputChannelObjWeakTable.indexOfKey(inputChannel.get());
         if (index < 0) {
             return NULL;
         }
 
-        jweak inputChannelObjWeak = mInputChannelObjWeakByReceiveFd.valueAt(index);
+        jweak inputChannelObjWeak = mInputChannelObjWeakTable.valueAt(index);
         return env->NewLocalRef(inputChannelObjWeak);
     }
 }
