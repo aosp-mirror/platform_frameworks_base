@@ -1060,6 +1060,16 @@ public final class Downloads {
         public static final int STATUS_PRECONDITION_FAILED = 412;
 
         /**
+         * The lowest-valued error status that is not an actual HTTP status code.
+         */
+        public static final int MIN_ARTIFICIAL_ERROR_STATUS = 489;
+
+        /**
+         * Some possibly transient error occurred, but we can't resume the download.
+         */
+        public static final int STATUS_CANNOT_RESUME = 489;
+
+        /**
          * This download was canceled
          */
         public static final int STATUS_CANCELED = 490;
