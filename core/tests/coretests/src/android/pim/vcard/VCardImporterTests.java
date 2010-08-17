@@ -1008,4 +1008,26 @@ public class VCardImporterTests extends VCardTestsBase {
                 .put(Phone.TYPE, Phone.TYPE_PAGER)
                 .put(Phone.NUMBER, "6101231234@pagersample.com");
     }
+
+    public void testMultiBytePropV30_Parse() {
+        mVerifier.initForImportTest(V30, R.raw.v30_multibyte_param);
+        mVerifier.addPropertyNodesVerifierElem()
+                .addExpectedNodeWithOrder("VERSION", "3.0")
+                .addExpectedNodeWithOrder("N", Arrays.asList("F", "G", "M", "", ""))
+                .addExpectedNodeWithOrder("TEL", "1", new TypeSet("\u8D39"));
+    }
+
+    public void testMultiBytePropV30() {
+        mVerifier.initForImportTest(V30, R.raw.v30_multibyte_param);
+        final ContentValuesVerifierElem elem = mVerifier.addContentValuesVerifierElem();
+        elem.addExpected(StructuredName.CONTENT_ITEM_TYPE)
+                .put(StructuredName.FAMILY_NAME, "F")
+                .put(StructuredName.MIDDLE_NAME, "M")
+                .put(StructuredName.GIVEN_NAME, "G")
+                .put(StructuredName.DISPLAY_NAME, "G M F");
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.TYPE, Phone.TYPE_CUSTOM)
+                .put(Phone.LABEL, "\u8D39")
+                .put(Phone.NUMBER, "1");
+    }
 }

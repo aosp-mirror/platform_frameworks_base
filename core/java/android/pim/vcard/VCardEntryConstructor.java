@@ -157,10 +157,14 @@ public class VCardEntryConstructor implements VCardInterpreter {
         mParamType = type;
     }
 
+    @Override
     public void propertyParamValue(String value) {
         if (mParamType == null) {
             // From vCard 2.1 specification. vCard 3.0 formally does not allow this case.
             mParamType = "TYPE";
+        }
+        if (!VCardUtils.containsOnlyAlphaDigitHyphen(value)) {
+            value = encodeString(value, mCharsetForDecodedBytes);
         }
         mCurrentProperty.addParameter(mParamType, value);
         mParamType = null;

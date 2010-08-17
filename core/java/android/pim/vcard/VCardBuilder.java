@@ -1463,6 +1463,9 @@ public class VCardBuilder {
                     parameterList.add(VCardConstants.PARAM_TYPE_VOICE);
                 } else if (VCardUtils.isMobilePhoneLabel(label)) {
                     parameterList.add(VCardConstants.PARAM_TYPE_CELL);
+                } else if (mIsV30) {
+                    // This label is appropriately encoded in appendTypeParameters.
+                    parameterList.add(label);
                 } else {
                     final String upperLabel = label.toUpperCase();
                     if (VCardUtils.isValidInV21ButUnknownToContactsPhoteType(upperLabel)) {
@@ -1741,21 +1744,30 @@ public class VCardBuilder {
         // which would be recommended way in vcard 3.0 though not valid in vCard 2.1.
         boolean first = true;
         for (final String typeValue : types) {
-            // Note: vCard 3.0 specifies the different type of acceptable type Strings, but
-            //       we don't emit that kind of vCard 3.0 specific type since there should be
-            //       high probabilyty in which external importers cannot understand them.
-            //
-            // e.g. TYPE="\u578B\u306B\u3087" (vCard 3.0 allows non-Ascii characters if they
-            //      are quoted.)
-            if (!VCardUtils.isV21Word(typeValue)) {
-                continue;
+            if (VCardConfig.isV30(mVCardType)) {
+                // Note: vCard 3.0 specifies the different type of acceptable type Strings, but
+                //       we don't emit that kind of vCard 3.0 specific type since there should be
+                //       high probabilyty in which external importers cannot understand them.
+                //
+                // e.g. TYPE="\u578B\u306B\u3087" (vCard 3.0 allows non-Ascii characters if they
+                //      are quoted.)
+                if (first) {
+                    first = false;
+                } else {
+                    mBuilder.append(VCARD_PARAM_SEPARATOR);
+                }
+                appendTypeParameter(VCardUtils.toStringAvailableAsV30ParameValue(typeValue));
+            } else {  // vCard 2.1
+                if (!VCardUtils.isV21Word(typeValue)) {
+                    continue;
+                }
+                if (first) {
+                    first = false;
+                } else {
+                    mBuilder.append(VCARD_PARAM_SEPARATOR);
+                }
+                appendTypeParameter(typeValue);
             }
-            if (first) {
-                first = false;
-            } else {
-                mBuilder.append(VCARD_PARAM_SEPARATOR);
-            }
-            appendTypeParameter(typeValue);
         }
     }
 
