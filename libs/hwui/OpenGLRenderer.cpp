@@ -183,12 +183,12 @@ OpenGLRenderer::~OpenGLRenderer() {
 
 void OpenGLRenderer::setViewport(int width, int height) {
     glViewport(0, 0, width, height);
-
     mOrthoMatrix.loadOrtho(0, width, height, 0, -1, 1);
 
     mWidth = width;
     mHeight = height;
     mFirstSnapshot->height = height;
+    mFirstSnapshot->viewport.set(0, 0, width, height);
 }
 
 void OpenGLRenderer::prepare() {
@@ -254,6 +254,8 @@ bool OpenGLRenderer::restoreSnapshot() {
     sp<Snapshot> previous = mSnapshot->previous;
 
     if (restoreOrtho) {
+        Rect& r = previous->viewport;
+        glViewport(r.left, r.top, r.right, r.bottom);
         mOrthoMatrix.load(current->orthoMatrix);
     }
 
@@ -265,39 +267,6 @@ bool OpenGLRenderer::restoreSnapshot() {
     mSaveCount--;
 
     return restoreClip;
-}
-
-void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
-    if (!current->layer) {
-        LOGE("Attempting to compose a layer that does not exist");
-        return;
-    }
-
-    // Unbind current FBO and restore previous one
-    // Most of the time, previous->fbo will be 0 to bind the default buffer
-    glBindFramebuffer(GL_FRAMEBUFFER, previous->fbo);
-
-    // Restore the clip from the previous snapshot
-    const Rect& clip = previous->clipRect;
-    glScissor(clip.left, mHeight - clip.bottom, clip.getWidth(), clip.getHeight());
-
-    Layer* layer = current->layer;
-    const Rect& rect = layer->layer;
-
-    drawTextureRect(rect.left, rect.top, rect.right, rect.bottom,
-            layer->texture, layer->alpha, layer->mode, layer->blend);
-
-    LayerSize size(rect.getWidth(), rect.getHeight());
-    // Failing to add the layer to the cache should happen only if the
-    // layer is too large
-    if (!mLayerCache.put(size, layer)) {
-        LAYER_LOGD("Deleting layer");
-
-        glDeleteFramebuffers(1, &layer->fbo);
-        glDeleteTextures(1, &layer->texture);
-
-        delete layer;
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -366,19 +335,56 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
     // Creates a new snapshot to draw into the FBO
     saveSnapshot();
-    // TODO: This doesn't preserve other transformations (check Skia first)
+
     mSnapshot->transform.loadTranslate(-left, -top, 0.0f);
     mSnapshot->setClip(0.0f, 0.0f, right - left, bottom - top);
+    mSnapshot->viewport.set(0.0f, 0.0f, right - left, bottom - top);
     mSnapshot->height = bottom - top;
+
     setScissorFromClip();
 
     mSnapshot->flags = Snapshot::kFlagDirtyOrtho | Snapshot::kFlagClipSet;
     mSnapshot->orthoMatrix.load(mOrthoMatrix);
 
     // Change the ortho projection
-    mOrthoMatrix.loadOrtho(0.0f, right - left, bottom - top, 0.0f, 0.0f, 1.0f);
+    glViewport(0, 0, right - left, bottom - top);
+    // Don't flip the FBO, it will get flipped when drawing back to the framebuffer
+    mOrthoMatrix.loadOrtho(0.0f, right - left, 0.0f, bottom - top, -1.0f, 1.0f);
 
     return true;
+}
+
+void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
+    if (!current->layer) {
+        LOGE("Attempting to compose a layer that does not exist");
+        return;
+    }
+
+    // Unbind current FBO and restore previous one
+    // Most of the time, previous->fbo will be 0 to bind the default buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, previous->fbo);
+
+    // Restore the clip from the previous snapshot
+    const Rect& clip = previous->clipRect;
+    glScissor(clip.left, mHeight - clip.bottom, clip.getWidth(), clip.getHeight());
+
+    Layer* layer = current->layer;
+    const Rect& rect = layer->layer;
+
+    drawTextureRect(rect.left, rect.top, rect.right, rect.bottom,
+            layer->texture, layer->alpha, layer->mode, layer->blend);
+
+    LayerSize size(rect.getWidth(), rect.getHeight());
+    // Failing to add the layer to the cache should happen only if the
+    // layer is too large
+    if (!mLayerCache.put(size, layer)) {
+        LAYER_LOGD("Deleting layer");
+
+        glDeleteFramebuffers(1, &layer->fbo);
+        glDeleteTextures(1, &layer->texture);
+
+        delete layer;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -424,14 +430,9 @@ const Rect& OpenGLRenderer::getClipBounds() {
 }
 
 bool OpenGLRenderer::quickReject(float left, float top, float right, float bottom) {
-    SkRect sr;
-    sr.set(left, top, right, bottom);
+    Rect r(left, top, right, bottom);
+    mSnapshot->transform.mapRect(r);
 
-    SkMatrix m;
-    mSnapshot->transform.copyTo(m);
-    m.mapRect(&sr);
-
-    Rect r(sr.fLeft, sr.fTop, sr.fRight, sr.fBottom);
     return !mSnapshot->clipRect.intersects(r);
 }
 
@@ -759,7 +760,6 @@ void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t
          mModelView.loadIdentity();
      }
      mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
-
      glUniform4f(mCurrentProgram->color, r, g, b, a);
 
      textureUnit++;

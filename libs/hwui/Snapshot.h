@@ -57,7 +57,8 @@ public:
             flags(0),
             previous(s),
             layer(NULL),
-            fbo(s->fbo) {
+            fbo(s->fbo),
+            viewport(s->viewport) {
         if ((s->flags & Snapshot::kFlagClipSet) &&
                 !(s->flags & Snapshot::kFlagDirtyLocalClip)) {
             localClip.set(s->localClip);
@@ -178,6 +179,11 @@ public:
      */
     Layer* layer;
     GLuint fbo;
+
+    /**
+     * Current viewport.
+     */
+    Rect viewport;
 
     /**
      * Contains the previous ortho matrix.

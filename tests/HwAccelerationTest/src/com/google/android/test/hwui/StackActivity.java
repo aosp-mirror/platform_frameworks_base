@@ -19,14 +19,13 @@ package com.google.android.test.hwui;
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.StackView;
+import android.widget.TextView;
 
 @SuppressWarnings({"UnusedDeclaration"})
 public class StackActivity extends Activity {
@@ -34,32 +33,27 @@ public class StackActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        StackView stack = new StackView(this);
+        setContentView(R.layout.stack);
+
+        StackView stack = (StackView) findViewById(R.id.stack_view);
         stack.setAdapter(new ArrayAdapter<Drawable>(this, android.R.layout.simple_list_item_1,
                 android.R.id.text1, new Drawable[] {
             getResources().getDrawable(R.drawable.sunset1),
             getResources().getDrawable(R.drawable.sunset2),
-            getResources().getDrawable(R.drawable.sunset1),
-            getResources().getDrawable(R.drawable.sunset2),
-            getResources().getDrawable(R.drawable.sunset1),
-            getResources().getDrawable(R.drawable.sunset2)                
         }) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
-                ImageView image;
-                if (convertView == null) {
-                    image = new ImageView(StackActivity.this);
-                } else {
-                    image = (ImageView) convertView;
+                View item = convertView;
+                if (item == null) {
+                    item = LayoutInflater.from(getContext()).inflate(
+                            R.layout.stack_item, null, false);                    
                 }
-                image.setImageDrawable(getItem(position % getCount()));
-                return image;
+                ((ImageView) item.findViewById(R.id.textview_icon)).setImageDrawable(
+                        getItem(position % getCount()));
+                ((TextView) item.findViewById(R.id.mini_text)).setText("" + position);
+                return item;
             }
         });
         stack.setDisplayedChild(0);
-
-        FrameLayout layout = new FrameLayout(this);
-        layout.addView(stack, new FrameLayout.LayoutParams(500, 500, Gravity.CENTER));
-        setContentView(layout);
     }
 }
