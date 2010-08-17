@@ -47,7 +47,7 @@ struct ShadowText {
 
     ShadowText(const ShadowText& shadow):
             paint(shadow.paint), radius(shadow.radius), len(shadow.len), hash(shadow.hash) {
-        text = new char[len];
+        text = new char[shadow.len];
         memcpy(text, shadow.text, shadow.len);
     }
 
