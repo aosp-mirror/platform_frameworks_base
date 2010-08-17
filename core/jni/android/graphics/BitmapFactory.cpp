@@ -1,14 +1,15 @@
 #define LOG_TAG "BitmapFactory"
 
+#include "BitmapFactory.h"
 #include "SkImageDecoder.h"
 #include "SkImageRef_ashmem.h"
 #include "SkImageRef_GlobalPool.h"
 #include "SkPixelRef.h"
 #include "SkStream.h"
-#include "GraphicsJNI.h"
 #include "SkTemplates.h"
 #include "SkUtils.h"
 #include "CreateJavaOutputStreamAdaptor.h"
+#include "AutoDecodeCancel.h"
 
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Asset.h>
@@ -16,18 +17,18 @@
 #include <netinet/in.h>
 #include <sys/mman.h>
 
-static jclass gOptions_class;
-static jfieldID gOptions_justBoundsFieldID;
-static jfieldID gOptions_sampleSizeFieldID;
-static jfieldID gOptions_configFieldID;
-static jfieldID gOptions_ditherFieldID;
-static jfieldID gOptions_purgeableFieldID;
-static jfieldID gOptions_shareableFieldID;
-static jfieldID gOptions_nativeAllocFieldID;
-static jfieldID gOptions_widthFieldID;
-static jfieldID gOptions_heightFieldID;
-static jfieldID gOptions_mimeFieldID;
-static jfieldID gOptions_mCancelID;
+jclass gOptions_class;
+jfieldID gOptions_justBoundsFieldID;
+jfieldID gOptions_sampleSizeFieldID;
+jfieldID gOptions_configFieldID;
+jfieldID gOptions_ditherFieldID;
+jfieldID gOptions_purgeableFieldID;
+jfieldID gOptions_shareableFieldID;
+jfieldID gOptions_nativeAllocFieldID;
+jfieldID gOptions_widthFieldID;
+jfieldID gOptions_heightFieldID;
+jfieldID gOptions_mimeFieldID;
+jfieldID gOptions_mCancelID;
 
 static jclass gFileDescriptor_class;
 static jfieldID gFileDescriptor_descriptor;
@@ -37,129 +38,6 @@ static jfieldID gFileDescriptor_descriptor;
 #else
     #define TRACE_BITMAP(code)
 #endif
-
-///////////////////////////////////////////////////////////////////////////////
-
-class AutoDecoderCancel {
-public:
-    AutoDecoderCancel(jobject options, SkImageDecoder* decoder);
-    ~AutoDecoderCancel();
-
-    static bool RequestCancel(jobject options);
-    
-private:
-    AutoDecoderCancel*  fNext;
-    AutoDecoderCancel*  fPrev;
-    jobject             fJOptions;  // java options object
-    SkImageDecoder*     fDecoder;
-    
-#ifdef SK_DEBUG
-    static void Validate();
-#else
-    static void Validate() {}
-#endif
-};
-
-static SkMutex  gAutoDecoderCancelMutex;
-static AutoDecoderCancel* gAutoDecoderCancel;
-#ifdef SK_DEBUG
-    static int gAutoDecoderCancelCount;
-#endif
-
-AutoDecoderCancel::AutoDecoderCancel(jobject joptions,
-                                       SkImageDecoder* decoder) {
-    fJOptions = joptions;
-    fDecoder = decoder;
-
-    if (NULL != joptions) {
-        SkAutoMutexAcquire ac(gAutoDecoderCancelMutex);
-
-        // Add us as the head of the list
-        fPrev = NULL;
-        fNext = gAutoDecoderCancel;
-        if (gAutoDecoderCancel) {
-            gAutoDecoderCancel->fPrev = this;
-        }
-        gAutoDecoderCancel = this;
-        
-        SkDEBUGCODE(gAutoDecoderCancelCount += 1;)
-        Validate();
-    }
-}
-
-AutoDecoderCancel::~AutoDecoderCancel() {
-    if (NULL != fJOptions) {
-        SkAutoMutexAcquire ac(gAutoDecoderCancelMutex);
-        
-        // take us out of the dllist
-        AutoDecoderCancel* prev = fPrev;
-        AutoDecoderCancel* next = fNext;
-        
-        if (prev) {
-            SkASSERT(prev->fNext == this);
-            prev->fNext = next;
-        } else {
-            SkASSERT(gAutoDecoderCancel == this);
-            gAutoDecoderCancel = next;
-        }
-        if (next) {
-            SkASSERT(next->fPrev == this);
-            next->fPrev = prev;
-        }
-
-        SkDEBUGCODE(gAutoDecoderCancelCount -= 1;)
-        Validate();
-    }
-}
-
-bool AutoDecoderCancel::RequestCancel(jobject joptions) {
-    SkAutoMutexAcquire ac(gAutoDecoderCancelMutex);
-
-    Validate();
-
-    AutoDecoderCancel* pair = gAutoDecoderCancel;
-    while (pair != NULL) {
-        if (pair->fJOptions == joptions) {
-            pair->fDecoder->cancelDecode();
-            return true;
-        }
-        pair = pair->fNext;
-    }
-    return false;
-}
-
-#ifdef SK_DEBUG
-// can only call this inside a lock on gAutoDecoderCancelMutex 
-void AutoDecoderCancel::Validate() {
-    const int gCount = gAutoDecoderCancelCount;
-
-    if (gCount == 0) {
-        SkASSERT(gAutoDecoderCancel == NULL);
-    } else {
-        SkASSERT(gCount > 0);
-        
-        AutoDecoderCancel* curr = gAutoDecoderCancel;
-        SkASSERT(curr);
-        SkASSERT(curr->fPrev == NULL);
-
-        int count = 0;
-        while (curr) {
-            count += 1;
-            SkASSERT(count <= gCount);
-            if (curr->fPrev) {
-                SkASSERT(curr->fPrev->fNext == curr);
-            }
-            if (curr->fNext) {
-                SkASSERT(curr->fNext->fPrev == curr);
-            }
-            curr = curr->fNext;
-        }
-        SkASSERT(count == gCount);
-    }
-}
-#endif
-
-///////////////////////////////////////////////////////////////////////////////
 
 using namespace android;
 
@@ -279,7 +157,7 @@ static inline int32_t validOrNeg1(bool isValid, int32_t value) {
     return ((int32_t)isValid - 1) | value;
 }
 
-static jstring getMimeTypeString(JNIEnv* env, SkImageDecoder::Format format) {
+jstring getMimeTypeString(JNIEnv* env, SkImageDecoder::Format format) {
     static const struct {
         SkImageDecoder::Format fFormat;
         const char*            fMimeType;
@@ -477,7 +355,7 @@ static jobject nativeDecodeStream(JNIEnv* env, jobject clazz,
                                   jobject padding,
                                   jobject options) {  // BitmapFactory$Options
     jobject bitmap = NULL;
-    SkStream* stream = CreateJavaInputStreamAdaptor(env, is, storage);
+    SkStream* stream = CreateJavaInputStreamAdaptor(env, is, storage, 0);
 
     if (stream) {
         // for now we don't allow purgeable with java inputstreams
@@ -682,6 +560,107 @@ static void nativeSetDefaultConfig(JNIEnv* env, jobject, int nativeConfig) {
     }
 }
 
+static jobject doBuildTileIndex(JNIEnv* env, SkStream* stream, bool isShareable) {
+    SkImageDecoder* decoder = SkImageDecoder::Factory(stream);
+    int width, height;
+    if (NULL == decoder) {
+        doThrowIOE(env, "Image format not supported");
+        return nullObjectReturn("SkImageDecoder::Factory returned null");
+    }
+
+    JavaPixelAllocator *javaAllocator = new JavaPixelAllocator(env, true);
+    decoder->setAllocator(javaAllocator);
+    JavaMemoryUsageReporter *javaMemoryReporter = new JavaMemoryUsageReporter(env);
+    decoder->setReporter(javaMemoryReporter);
+    javaAllocator->unref();
+    javaMemoryReporter->unref();
+
+    if (!decoder->buildTileIndex(stream, &width, &height, isShareable)) {
+        char msg[1024];
+        snprintf(msg, 1023, "Image failed to decode using %s decoder", decoder->getFormatName());
+        doThrowIOE(env, msg);
+        return nullObjectReturn("decoder->buildTileIndex returned false");
+    }
+
+    SkLargeBitmap *bm = new SkLargeBitmap(decoder, width, height);
+
+    return GraphicsJNI::createLargeBitmap(env, bm);
+}
+
+static jobject nativeCreateLargeBitmapFromByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
+                                     int offset, int length, jboolean isShareable) {
+    AutoJavaByteArray ar(env, byteArray);
+    SkStream* stream = new SkMemoryStream(ar.ptr() + offset, length, false);
+    SkAutoUnref aur(stream);
+    if (isShareable) {
+        aur.detach();
+    }
+    return doBuildTileIndex(env, stream, isShareable);
+}
+
+static jobject nativeCreateLargeBitmapFromFileDescriptor(JNIEnv* env, jobject clazz,
+                                          jobject fileDescriptor, jboolean isShareable) {
+    NPE_CHECK_RETURN_ZERO(env, fileDescriptor);
+
+    jint descriptor = env->GetIntField(fileDescriptor,
+                                       gFileDescriptor_descriptor);
+    bool weOwnTheFD = false;
+
+    if (isShareable) {
+        int newFD = ::dup(descriptor);
+        if (-1 != newFD) {
+            weOwnTheFD = true;
+            descriptor = newFD;
+        }
+    }
+
+    SkFDStream* stream = new SkFDStream(descriptor, weOwnTheFD);
+    SkAutoUnref aur(stream);
+    if (!stream->isValid()) {
+        return NULL;
+    }
+
+    if (isShareable) {
+        aur.detach();
+    }
+
+    /* Restore our offset when we leave, so we can be called more than once
+       with the same descriptor. This is only required if we didn't dup the
+       file descriptor, but it is OK to do it all the time.
+    */
+    AutoFDSeek as(descriptor);
+
+    return doBuildTileIndex(env, stream, isShareable);
+}
+
+static jobject nativeCreateLargeBitmapFromStream(JNIEnv* env, jobject clazz,
+                                  jobject is,       // InputStream
+                                  jbyteArray storage, // byte[]
+                                  jboolean isShareable) {
+    jobject largeBitmap = NULL;
+    SkStream* stream = CreateJavaInputStreamAdaptor(env, is, storage, 1024);
+
+    if (stream) {
+        // for now we don't allow shareable with java inputstreams
+        largeBitmap = doBuildTileIndex(env, stream, false);
+        stream->unref();
+    }
+    return largeBitmap;
+}
+
+static jobject nativeCreateLargeBitmapFromAsset(JNIEnv* env, jobject clazz,
+                                 jint native_asset, // Asset
+                                 jboolean isShareable) {
+    SkStream* stream;
+    Asset* asset = reinterpret_cast<Asset*>(native_asset);
+    stream = new AssetStreamAdaptor(asset);
+    SkAutoUnref aur(stream);
+    if (isShareable) {
+        aur.detach();
+    }
+    return doBuildTileIndex(env, stream, isShareable);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static JNINativeMethod gMethods[] = {
@@ -711,6 +690,26 @@ static JNINativeMethod gMethods[] = {
     },
 
     {   "nativeSetDefaultConfig", "(I)V", (void*)nativeSetDefaultConfig },
+
+    {   "nativeCreateLargeBitmap",
+        "([BIIZ)Landroid/graphics/LargeBitmap;",
+        (void*)nativeCreateLargeBitmapFromByteArray
+    },
+
+    {   "nativeCreateLargeBitmap",
+        "(Ljava/io/InputStream;[BZ)Landroid/graphics/LargeBitmap;",
+        (void*)nativeCreateLargeBitmapFromStream
+    },
+
+    {   "nativeCreateLargeBitmap",
+        "(Ljava/io/FileDescriptor;Z)Landroid/graphics/LargeBitmap;",
+        (void*)nativeCreateLargeBitmapFromFileDescriptor
+    },
+
+    {   "nativeCreateLargeBitmap",
+        "(IZ)Landroid/graphics/LargeBitmap;",
+        (void*)nativeCreateLargeBitmapFromAsset
+    },
 };
 
 static JNINativeMethod gOptionsMethods[] = {

@@ -27,6 +27,7 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.FileNotFoundException;
 
 /**
  * Creates Bitmap objects from various sources, including files, streams,
@@ -581,6 +582,139 @@ public class BitmapFactory {
         nativeSetDefaultConfig(config.nativeInt);
     }
 
+    /**
+     * Create a LargeBitmap from the specified byte array.
+     * Currently only the Jpeg format is supported.
+     *
+     * @param data byte array of compressed image data.
+     * @param offset offset into data for where the decoder should begin
+     *               parsing.
+     * @param length the number of bytes, beginning at offset, to parse
+     * @param isShareable If this is true, then the LargeBitmap may keep a
+     *                    shallow reference to the input. If this is false,
+     *                    then the LargeBitmap will explicitly make a copy of the
+     *                    input data, and keep that. Even if sharing is allowed,
+     *                    the implementation may still decide to make a deep
+     *                    copy of the input data. If an image is progressively encoded,
+     *                    allowing sharing may degrade the decoding speed.
+     * @return LargeBitmap, or null if the image data could not be decoded.
+     * @throws IOException if the image format is not supported or can not be decoded.
+     * @hide
+     */
+    public static LargeBitmap createLargeBitmap(byte[] data,
+            int offset, int length, boolean isShareable) throws IOException {
+        if ((offset | length) < 0 || data.length < offset + length) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        return nativeCreateLargeBitmap(data, offset, length, isShareable);
+    }
+
+    /**
+     * Create a LargeBitmap from the file descriptor.
+     * The position within the descriptor will not be changed when
+     * this returns, so the descriptor can be used again as is.
+     * Currently only the Jpeg format is supported.
+     *
+     * @param fd The file descriptor containing the data to decode
+     * @param isShareable If this is true, then the LargeBitmap may keep a
+     *                    shallow reference to the input. If this is false,
+     *                    then the LargeBitmap will explicitly make a copy of the
+     *                    input data, and keep that. Even if sharing is allowed,
+     *                    the implementation may still decide to make a deep
+     *                    copy of the input data. If an image is progressively encoded,
+     *                    allowing sharing may degrade the decoding speed.
+     * @return LargeBitmap, or null if the image data could not be decoded.
+     * @throws IOException if the image format is not supported or can not be decoded.
+     * @hide
+     */
+    public static LargeBitmap createLargeBitmap(
+            FileDescriptor fd, boolean isShareable) throws IOException {
+        if (MemoryFile.isMemoryFile(fd)) {
+            int mappedlength = MemoryFile.getSize(fd);
+            MemoryFile file = new MemoryFile(fd, mappedlength, "r");
+            InputStream is = file.getInputStream();
+            return createLargeBitmap(is, isShareable);
+        }
+        return nativeCreateLargeBitmap(fd, isShareable);
+    }
+
+    /**
+     * Create a LargeBitmap from an input stream.
+     * The stream's position will be where ever it was after the encoded data
+     * was read.
+     * Currently only the Jpeg format is supported.
+     *
+     * @param is The input stream that holds the raw data to be decoded into a
+     *           LargeBitmap.
+     * @param isShareable If this is true, then the LargeBitmap may keep a
+     *                    shallow reference to the input. If this is false,
+     *                    then the LargeBitmap will explicitly make a copy of the
+     *                    input data, and keep that. Even if sharing is allowed,
+     *                    the implementation may still decide to make a deep
+     *                    copy of the input data. If an image is progressively encoded,
+     *                    allowing sharing may degrade the decoding speed.
+     * @return LargeBitmap, or null if the image data could not be decoded.
+     * @throws IOException if the image format is not supported or can not be decoded.
+     * @hide
+     */
+    public static LargeBitmap createLargeBitmap(InputStream is,
+            boolean isShareable) throws IOException {
+        // we need mark/reset to work properly in JNI
+
+        if (!is.markSupported()) {
+            is = new BufferedInputStream(is, 16 * 1024);
+        }
+
+        if (is instanceof AssetManager.AssetInputStream) {
+            return nativeCreateLargeBitmap(
+                    ((AssetManager.AssetInputStream) is).getAssetInt(),
+                    isShareable);
+        } else {
+            // pass some temp storage down to the native code. 1024 is made up,
+            // but should be large enough to avoid too many small calls back
+            // into is.read(...).
+            byte [] tempStorage = null;
+            tempStorage = new byte[16 * 1024];
+            return nativeCreateLargeBitmap(is, tempStorage, isShareable);
+        }
+    }
+
+    /**
+     * Create a LargeBitmap from a file path.
+     * Currently only the Jpeg format is supported.
+     *
+     * @param pathName complete path name for the file to be decoded.
+     * @param isShareable If this is true, then the LargeBitmap may keep a
+     *                    shallow reference to the input. If this is false,
+     *                    then the LargeBitmap will explicitly make a copy of the
+     *                    input data, and keep that. Even if sharing is allowed,
+     *                    the implementation may still decide to make a deep
+     *                    copy of the input data. If an image is progressively encoded,
+     *                    allowing sharing may degrade the decoding speed.
+     * @return LargeBitmap, or null if the image data could not be decoded.
+     * @throws IOException if the image format is not supported or can not be decoded.
+     * @hide
+     */
+    public static LargeBitmap createLargeBitmap(String pathName,
+            boolean isShareable) throws FileNotFoundException, IOException {
+        LargeBitmap bm = null;
+        InputStream stream = null;
+
+        try {
+            stream = new FileInputStream(pathName);
+            bm = createLargeBitmap(stream, isShareable);
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    // do nothing here
+                }
+            }
+        }
+        return bm;
+    }
+
     private static native void nativeSetDefaultConfig(int nativeConfig);
     private static native Bitmap nativeDecodeStream(InputStream is, byte[] storage,
             Rect padding, Options opts);
@@ -590,5 +724,14 @@ public class BitmapFactory {
     private static native Bitmap nativeDecodeByteArray(byte[] data, int offset,
             int length, Options opts);
     private static native byte[] nativeScaleNinePatch(byte[] chunk, float scale, Rect pad);
+
+    private static native LargeBitmap nativeCreateLargeBitmap(
+            byte[] data, int offset, int length, boolean isShareable);
+    private static native LargeBitmap nativeCreateLargeBitmap(
+            FileDescriptor fd, boolean isShareable);
+    private static native LargeBitmap nativeCreateLargeBitmap(
+            InputStream is, byte[] storage, boolean isShareable);
+    private static native LargeBitmap nativeCreateLargeBitmap(
+            int asset, boolean isShareable);
 }
 
