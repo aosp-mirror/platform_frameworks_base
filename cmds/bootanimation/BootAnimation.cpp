@@ -49,6 +49,9 @@
 
 #include "BootAnimation.h"
 
+#define USER_BOOTANIMATION_FILE "/data/local/bootanimation.zip"
+#define SYSTEM_BOOTANIMATION_FILE "/system/media/bootanimation.zip"
+
 namespace android {
 
 // ---------------------------------------------------------------------------
@@ -244,12 +247,12 @@ status_t BootAnimation::readyToRun() {
     mFlingerSurfaceControl = control;
     mFlingerSurface = s;
 
-    mAndroidAnimation = false;
-    status_t err = mZip.open("/data/local/bootanimation.zip");
-    if (err != NO_ERROR) {
-        err = mZip.open("/system/media/bootanimation.zip");
-        if (err != NO_ERROR) {
-            mAndroidAnimation = true;
+    mAndroidAnimation = true;
+    if ((access(USER_BOOTANIMATION_FILE, R_OK) == 0) ||
+        (access(SYSTEM_BOOTANIMATION_FILE, R_OK) == 0)) {
+        if ((mZip.open(USER_BOOTANIMATION_FILE) != NO_ERROR) ||
+            (mZip.open(SYSTEM_BOOTANIMATION_FILE) != NO_ERROR)) {
+            mAndroidAnimation = false;
         }
     }
 
