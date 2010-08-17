@@ -163,7 +163,6 @@ public class ActionBarView extends ViewGroup {
             LayoutInflater inflater = LayoutInflater.from(context);
             mCustomNavView = (View) inflater.inflate(customNavId, null);
             mNavigationMode = ActionBar.NAVIGATION_MODE_CUSTOM;
-            addView(mCustomNavView);
         }
 
         mContentHeight = a.getLayoutDimension(R.styleable.ActionBar_height, 0);
@@ -553,7 +552,7 @@ public class ActionBarView extends ViewGroup {
             if (mSpinner != null) {
                 mSpinner.measure(
                         MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
-                        MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+                        MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
             }
             break;
         case ActionBar.NAVIGATION_MODE_CUSTOM:
@@ -563,8 +562,16 @@ public class ActionBarView extends ViewGroup {
                         MeasureSpec.EXACTLY : MeasureSpec.AT_MOST;
                 final int customNavWidth = lp.width >= 0 ?
                         Math.min(lp.width, availableWidth) : availableWidth;
-                final int customNavHeightMode = lp.height != LayoutParams.WRAP_CONTENT ?
-                        MeasureSpec.EXACTLY : MeasureSpec.AT_MOST;
+
+                // If the action bar is wrapping to its content height, don't allow a custom
+                // view to MATCH_PARENT.
+                int customNavHeightMode;
+                if (mContentHeight <= 0) {
+                    customNavHeightMode = MeasureSpec.AT_MOST;
+                } else {
+                    customNavHeightMode = lp.height != LayoutParams.WRAP_CONTENT ?
+                            MeasureSpec.EXACTLY : MeasureSpec.AT_MOST;
+                }
                 final int customNavHeight = lp.height >= 0 ?
                         Math.min(lp.height, height) : height;
                 mCustomNavView.measure(
@@ -576,7 +583,7 @@ public class ActionBarView extends ViewGroup {
             if (mTabLayout != null) {
                 mTabLayout.measure(
                         MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
-                        MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+                        MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
             }
             break;
         }
