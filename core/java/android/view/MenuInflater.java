@@ -53,14 +53,24 @@ public class MenuInflater {
     private static final int NO_ID = 0;
     
     private Context mContext;
-    
+
+    private int mDefaultShowAsAction;
+
     /**
      * Constructs a menu inflater.
      * 
      * @see Activity#getMenuInflater()
      */
     public MenuInflater(Context context) {
+        this(context, MenuItem.SHOW_AS_ACTION_NEVER);
+    }
+
+    /**
+     * @hide used internally to change the default showAsAction setting in action modes
+     */
+    public MenuInflater(Context context, int defaultShowAsAction) {
         mContext = context;
+        mDefaultShowAsAction = defaultShowAsAction;
     }
 
     /**
@@ -247,7 +257,7 @@ public class MenuInflater {
          * - 1: ifRoom
          * - 2: always
          */
-        private int itemShowAsAction = MenuItem.SHOW_AS_ACTION_NEVER;
+        private int itemShowAsAction;
         
         private String itemListenerMethodName;
         
@@ -262,6 +272,7 @@ public class MenuInflater {
         
         public MenuState(final Menu menu) {
             this.menu = menu;
+            this.itemShowAsAction = mDefaultShowAsAction;
             
             resetGroup();
         }

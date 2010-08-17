@@ -112,7 +112,7 @@ public class StandaloneActionMode extends ActionMode implements MenuBuilder.Call
 
     @Override
     public MenuInflater getMenuInflater() {
-        return new MenuInflater(mContext);
+        return new MenuInflater(mContext, MenuItem.SHOW_AS_ACTION_IF_ROOM);
     }
 
     public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {

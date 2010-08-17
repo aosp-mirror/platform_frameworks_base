@@ -435,7 +435,7 @@ public class ActionBarImpl extends ActionBar {
 
         @Override
         public MenuInflater getMenuInflater() {
-            return new MenuInflater(mContext);
+            return new MenuInflater(mContext, MenuItem.SHOW_AS_ACTION_IF_ROOM);
         }
 
         @Override
