@@ -93,6 +93,7 @@ protected:
     bool mHasKerning;
 
     DefaultKeyedVector<uint32_t, CachedGlyphInfo* > mCachedGlyphs;
+    CachedGlyphInfo* getCachedUTFChar(int32_t utfChar);
 
     CachedGlyphInfo *cacheGlyph(uint32_t glyph);
     void updateGlyphCache(CachedGlyphInfo *glyph);
@@ -129,9 +130,11 @@ protected:
         uint32_t mMaxWidth;
         uint32_t mCurrentRow;
         uint32_t mCurrentCol;
+        bool mDirty;
 
         CacheTextureLine(uint32_t maxHeight, uint32_t maxWidth, uint32_t currentRow, uint32_t currentCol) :
-            mMaxHeight(maxHeight), mMaxWidth(maxWidth), mCurrentRow(currentRow), mCurrentCol(currentCol) {
+            mMaxHeight(maxHeight), mMaxWidth(maxWidth), mCurrentRow(currentRow), mCurrentCol(currentCol),
+            mDirty(false)  {
         }
 
         bool fitBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *retOriginY) {
@@ -143,6 +146,7 @@ protected:
                *retOriginX = mCurrentCol;
                *retOriginY = mCurrentRow;
                mCurrentCol += bitmap->width;
+               mDirty = true;
                return true;
             }
 
@@ -151,6 +155,10 @@ protected:
     };
 
     Vector<CacheTextureLine*> mCacheLines;
+    uint32_t getRemainingCacheCapacity();
+
+    void precacheLatin(Font *font);
+    String8 mLatinPrecache;
 
     Context *mRSC;
 

@@ -130,15 +130,7 @@ void Font::renderUTF(const char *text, uint32_t len, uint32_t start, int numGlyp
         // Move to the next character in the array
         index = nextIndex;
 
-        CachedGlyphInfo *cachedGlyph = mCachedGlyphs.valueFor((uint32_t)utfChar);
-
-        if(cachedGlyph == NULL) {
-            cachedGlyph = cacheGlyph((uint32_t)utfChar);
-        }
-        // Is the glyph still in texture cache?
-        if(!cachedGlyph->mIsValid) {
-            updateGlyphCache(cachedGlyph);
-        }
+        CachedGlyphInfo *cachedGlyph = getCachedUTFChar(utfChar);
 
         // If it's still not valid, we couldn't cache it, so we shouldn't draw garbage
         if(cachedGlyph->mIsValid) {
@@ -152,6 +144,20 @@ void Font::renderUTF(const char *text, uint32_t len, uint32_t start, int numGlyp
             glyphsLeft --;
         }
     }
+}
+
+Font::CachedGlyphInfo* Font::getCachedUTFChar(int32_t utfChar) {
+
+    CachedGlyphInfo *cachedGlyph = mCachedGlyphs.valueFor((uint32_t)utfChar);
+    if(cachedGlyph == NULL) {
+        cachedGlyph = cacheGlyph((uint32_t)utfChar);
+    }
+    // Is the glyph still in texture cache?
+    if(!cachedGlyph->mIsValid) {
+        updateGlyphCache(cachedGlyph);
+    }
+
+    return cachedGlyph;
 }
 
 void Font::updateGlyphCache(CachedGlyphInfo *glyph)
@@ -225,6 +231,7 @@ Font * Font::create(Context *rsc, const char *name, uint32_t fontSize, uint32_t 
     bool isInitialized = newFont->init(name, fontSize, dpi);
     if(isInitialized) {
         activeFonts.push(newFont);
+        rsc->mStateFont.precacheLatin(newFont);
         return newFont;
     }
 
@@ -422,6 +429,8 @@ void FontState::initTextTexture()
     nextLine += mCacheLines.top()->mMaxHeight;
     mCacheLines.push(new CacheTextureLine(24, texType->getDimX(), nextLine, 0));
     nextLine += mCacheLines.top()->mMaxHeight;
+    mCacheLines.push(new CacheTextureLine(24, texType->getDimX(), nextLine, 0));
+    nextLine += mCacheLines.top()->mMaxHeight;
     mCacheLines.push(new CacheTextureLine(32, texType->getDimX(), nextLine, 0));
     nextLine += mCacheLines.top()->mMaxHeight;
     mCacheLines.push(new CacheTextureLine(32, texType->getDimX(), nextLine, 0));
@@ -611,11 +620,32 @@ void FontState::appendMeshQuad(float x1, float y1, float z1,
     }
 }
 
+uint32_t FontState::getRemainingCacheCapacity() {
+    uint32_t remainingCapacity = 0;
+    float totalPixels = 0;
+    for(uint32_t i = 0; i < mCacheLines.size(); i ++) {
+         remainingCapacity += (mCacheLines[i]->mMaxWidth - mCacheLines[i]->mCurrentCol);
+         totalPixels += mCacheLines[i]->mMaxWidth;
+    }
+    remainingCapacity = (remainingCapacity * 100) / totalPixels;
+    return remainingCapacity;
+}
+
+void FontState::precacheLatin(Font *font) {
+    // Remaining capacity is measured in %
+    uint32_t remainingCapacity = getRemainingCacheCapacity();
+    uint32_t precacheIdx = 0;
+    while(remainingCapacity > 25 && precacheIdx < mLatinPrecache.size()) {
+        font->getCachedUTFChar((int32_t)mLatinPrecache[precacheIdx]);
+        remainingCapacity = getRemainingCacheCapacity();
+        precacheIdx ++;
+    }
+}
+
+
 void FontState::renderText(const char *text, uint32_t len, uint32_t startIndex, int numGlyphs, int x, int y)
 {
     checkInit();
-
-    //String8 text8(text);
 
     // Render code here
     Font *currentFont = mRSC->getFont();
@@ -636,6 +666,12 @@ void FontState::renderText(const char *text, uint32_t len, uint32_t startIndex, 
         issueDrawCommand();
         mCurrentQuadIndex = 0;
     }
+
+    // We store a string with letters in a rough frequency of occurrence
+    mLatinPrecache = String8(" eisarntolcdugpmhbyfvkwzxjq");
+    mLatinPrecache += String8("EISARNTOLCDUGPMHBYFVKWZXJQ");
+    mLatinPrecache += String8(",.?!()-+@;:`'");
+    mLatinPrecache += String8("0123456789");
 }
 
 void FontState::renderText(const char *text, int x, int y)
