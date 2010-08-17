@@ -767,6 +767,92 @@ static void rsQuaternionGetMatrixUnit(rs_matrix4x4 *m, const rs_quaternion *q) {
     m->m[15] = 1.0f;
 }
 
+/////////////////////////////////////////////////////
+// utility funcs
+/////////////////////////////////////////////////////
+void __attribute__((overloadable))
+rsExtractFrustumPlanes(const rs_matrix4x4 *modelViewProj,
+                         float4 *left, float4 *right,
+                         float4 *top, float4 *bottom,
+                         float4 *near, float4 *far) {
+    // x y z w = a b c d in the plane equation
+    left->x = modelViewProj->m[3] + modelViewProj->m[0];
+    left->y = modelViewProj->m[7] + modelViewProj->m[4];
+    left->z = modelViewProj->m[11] + modelViewProj->m[8];
+    left->w = modelViewProj->m[15] + modelViewProj->m[12];
+
+    right->x = modelViewProj->m[3] - modelViewProj->m[0];
+    right->y = modelViewProj->m[7] - modelViewProj->m[4];
+    right->z = modelViewProj->m[11] - modelViewProj->m[8];
+    right->w = modelViewProj->m[15] - modelViewProj->m[12];
+
+    top->x = modelViewProj->m[3] - modelViewProj->m[1];
+    top->y = modelViewProj->m[7] - modelViewProj->m[5];
+    top->z = modelViewProj->m[11] - modelViewProj->m[9];
+    top->w = modelViewProj->m[15] - modelViewProj->m[13];
+
+    bottom->x = modelViewProj->m[3] + modelViewProj->m[1];
+    bottom->y = modelViewProj->m[7] + modelViewProj->m[5];
+    bottom->z = modelViewProj->m[11] + modelViewProj->m[9];
+    bottom->w = modelViewProj->m[15] + modelViewProj->m[13];
+
+    near->x = modelViewProj->m[3] + modelViewProj->m[2];
+    near->y = modelViewProj->m[7] + modelViewProj->m[6];
+    near->z = modelViewProj->m[11] + modelViewProj->m[10];
+    near->w = modelViewProj->m[15] + modelViewProj->m[14];
+
+    far->x = modelViewProj->m[3] - modelViewProj->m[2];
+    far->y = modelViewProj->m[7] - modelViewProj->m[6];
+    far->z = modelViewProj->m[11] - modelViewProj->m[10];
+    far->w = modelViewProj->m[15] - modelViewProj->m[14];
+
+    float len = length(left->xyz);
+    *left /= len;
+    len = length(right->xyz);
+    *right /= len;
+    len = length(top->xyz);
+    *top /= len;
+    len = length(bottom->xyz);
+    *bottom /= len;
+    len = length(near->xyz);
+    *near /= len;
+    len = length(far->xyz);
+    *far /= len;
+}
+
+bool __attribute__((overloadable))
+rsIsSphereInFrustum(float4 *sphere,
+                      float4 *left, float4 *right,
+                      float4 *top, float4 *bottom,
+                      float4 *near, float4 *far) {
+
+    float distToCenter = dot(left->xyz, sphere->xyz) + left->w;
+    if(distToCenter < -sphere->w) {
+        return false;
+    }
+    distToCenter = dot(right->xyz, sphere->xyz) + right->w;
+    if(distToCenter < -sphere->w) {
+        return false;
+    }
+    distToCenter = dot(top->xyz, sphere->xyz) + top->w;
+    if(distToCenter < -sphere->w) {
+        return false;
+    }
+    distToCenter = dot(bottom->xyz, sphere->xyz) + bottom->w;
+    if(distToCenter < -sphere->w) {
+        return false;
+    }
+    distToCenter = dot(near->xyz, sphere->xyz) + near->w;
+    if(distToCenter < -sphere->w) {
+        return false;
+    }
+    distToCenter = dot(far->xyz, sphere->xyz) + far->w;
+    if(distToCenter < -sphere->w) {
+        return false;
+    }
+    return true;
+}
+
 
 /////////////////////////////////////////////////////
 // int ops
