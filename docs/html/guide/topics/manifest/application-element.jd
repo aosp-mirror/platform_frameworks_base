@@ -12,6 +12,7 @@ page.title=&lt;application&gt;
              android:<a href="#icon">icon</a>="<i>drawable resource</i>"
              android:<a href="#killrst">killAfterRestore</a>=["true" | "false"]
              android:<a href="#label">label</a>="<i>string resource</i>"
+             android:<a href="#logo">logo</a>="<i>drawable resource</i>"
              android:<a href="#space">manageSpaceActivity</a>="<i>string</i>"
              android:<a href="#nm">name</a>="<i>string</i>"
              android:<a href="#prmsn">permission</a>="<i>string</i>"
@@ -121,7 +122,7 @@ each of the application's components.  See the individual
 
 <p>
 This attribute must be set as a reference to a drawable resource containing
-the image definition.   There is no default icon.
+the image (for example {@code "@drawable/icon"}).   There is no default icon.
 </p></dd>
 
 <dt><a name="killrst"></a>{@code android:killAfterRestore}</dt>
@@ -153,6 +154,11 @@ it can be localized like other strings in the user interface.
 However, as a convenience while you're developing the application, 
 it can also be set as a raw string.
 </p></dd>
+
+<dt><a name="logo"></a>{@code android:logo}</dt>
+<dd>A logo for the application as whole, and the default logo for activities.
+<p>This attribute must be set as a reference to a drawable resource containing
+the image (for example {@code "@drawable/logo"}).  There is no default logo.</p></dd>
 
 <dt><a name="space"></a>{@code android:manageSpaceActivity}</dt>
 <dd>The fully qualified name of an Activity subclass that the system 
