@@ -185,6 +185,12 @@ public class DownloadManager {
     public final static int ERROR_DEVICE_NOT_FOUND = 1007;
 
     /**
+     * Value of {@link #COLUMN_ERROR_CODE} when some possibly transient error occurred but we can't
+     * resume the download.
+     */
+    public final static int ERROR_CANNOT_RESUME = 1008;
+
+    /**
      * Broadcast intent action sent by the download manager when a download completes.
      */
     public final static String ACTION_DOWNLOAD_COMPLETE = "android.intent.action.DOWNLOAD_COMPLETE";
@@ -715,7 +721,8 @@ public class DownloadManager {
             if (translateStatus(status) != STATUS_FAILED) {
                 return 0; // arbitrary value when status is not an error
             }
-            if ((400 <= status && status < 490) || (500 <= status && status < 600)) {
+            if ((400 <= status && status < Downloads.Impl.MIN_ARTIFICIAL_ERROR_STATUS)
+                    || (500 <= status && status < 600)) {
                 // HTTP status code
                 return status;
             }
@@ -739,6 +746,9 @@ public class DownloadManager {
 
                 case Downloads.STATUS_DEVICE_NOT_FOUND_ERROR:
                     return ERROR_DEVICE_NOT_FOUND;
+
+                case Downloads.Impl.STATUS_CANNOT_RESUME:
+                    return ERROR_CANNOT_RESUME;
 
                 default:
                     return ERROR_UNKNOWN;
