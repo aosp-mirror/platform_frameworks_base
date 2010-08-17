@@ -438,36 +438,6 @@ ProgramVertexCreate2 {
 	ret RsProgramVertex
 	}
 
-LightBegin {
-	}
-
-LightSetLocal {
-	param bool isLocal
-	}
-
-LightSetMonochromatic {
-	param bool isMono
-	}
-
-LightCreate {
-	ret RsLight light
-	}
-
-
-LightSetPosition {
-	param RsLight light
-	param float x
-	param float y
-	param float z
-	}
-
-LightSetColor {
-	param RsLight light
-	param float r
-	param float g
-	param float b
-	}
-
 FileA3DCreateFromAssetStream {
 	param const void * data
 	param size_t len
