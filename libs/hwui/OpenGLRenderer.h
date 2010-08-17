@@ -226,17 +226,17 @@ private:
             GLvoid* vertices, GLvoid* texCoords, GLvoid* indices, GLsizei elementsCount = 0);
 
     /**
-     * Renders the specified shadow.
+     * Prepares the renderer to draw the specified shadow.
      *
      * @param texture The shadow texture
      * @param x The x coordinate of the shadow
      * @param y The y coordinate of the shadow
      * @param mode The blending mode
      */
-    void renderShadow(const ShadowTexture* texture, float x, float y, SkXfermode::Mode mode);
+    void setupShadow(const ShadowTexture* texture, float x, float y, SkXfermode::Mode mode);
 
     /**
-     * Renders the specified Alpha8 texture as a rectangle.
+     * Prepares the renderer to draw the specified Alpha8 texture as a rectangle.
      *
      * @param texture The texture to render with
      * @param textureUnit The texture unit to use, may be modified
@@ -247,11 +247,50 @@ private:
      * @param b The blue component of the color
      * @param a The alpha component of the color
      * @param mode The blending mode
+     * @param transforms True if the matrix passed to the shader should be multiplied
+     *        by the model-view matrix
      * @param applyFilters Whether or not to take color filters and
      *        shaders into account
      */
-    void renderTextureAlpha8(const Texture* texture, GLuint& textureUnit, float x, float y,
-            float r, float g, float b, float a, SkXfermode::Mode mode, bool applyFilters);
+    void setupTextureAlpha8(const Texture* texture, GLuint& textureUnit, float x, float y,
+            float r, float g, float b, float a, SkXfermode::Mode mode, bool transforms,
+            bool applyFilters);
+
+    /**
+     * Prepares the renderer to draw the specified Alpha8 texture as a rectangle.
+     *
+     * @param texture The texture to render with
+     * @param width The width of the texture
+     * @param height The height of the texture
+     * @param textureUnit The texture unit to use, may be modified
+     * @param x The x coordinate of the rectangle to draw
+     * @param y The y coordinate of the rectangle to draw
+     * @param r The red component of the color
+     * @param g The green component of the color
+     * @param b The blue component of the color
+     * @param a The alpha component of the color
+     * @param mode The blending mode
+     * @param transforms True if the matrix passed to the shader should be multiplied
+     *        by the model-view matrix
+     * @param applyFilters Whether or not to take color filters and
+     *        shaders into account
+     */
+    void setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t height,
+            GLuint& textureUnit, float x, float y, float r, float g, float b, float a,
+            SkXfermode::Mode mode, bool transforms, bool applyFilters);
+
+    /**
+     * Draws text underline and strike-through if needed.
+     *
+     * @param text The text to decor
+     * @param bytesCount The number of bytes in the text
+     * @param length The length in pixels of the text, can be <= 0.0f to force a measurement
+     * @param x The x coordinate where the text will be drawn
+     * @param y The y coordinate where the text will be drawn
+     * @param paint The paint to draw the text with
+     */
+    void drawTextDecorations(const char* text, int bytesCount, float length,
+            float x, float y, SkPaint* paint);
 
     /**
      * Resets the texture coordinates stored in mMeshVertices. Setting the values

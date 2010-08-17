@@ -562,82 +562,6 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
     drawColorRect(left, top, right, bottom, color, mode);
 }
 
-void OpenGLRenderer::renderShadow(const ShadowTexture* texture, float x, float y,
-        SkXfermode::Mode mode) {
-    const float sx = x - texture->left + mShadowDx;
-    const float sy = y - texture->top + mShadowDy;
-
-    const GLfloat a = ((mShadowColor >> 24) & 0xFF) / 255.0f;
-    const GLfloat r = a * ((mShadowColor >> 16) & 0xFF) / 255.0f;
-    const GLfloat g = a * ((mShadowColor >>  8) & 0xFF) / 255.0f;
-    const GLfloat b = a * ((mShadowColor      ) & 0xFF) / 255.0f;
-
-    GLuint textureUnit = 0;
-    renderTextureAlpha8(texture, textureUnit, sx, sy, r, g, b, a, mode, false);
-}
-
-void OpenGLRenderer::renderTextureAlpha8(const Texture* texture, GLuint& textureUnit,
-        float x, float y, float r, float g, float b, float a, SkXfermode::Mode mode,
-        bool applyFilters) {
-     // Describe the required shaders
-     ProgramDescription description;
-     description.hasTexture = true;
-     description.hasAlpha8Texture = true;
-
-     if (applyFilters) {
-         if (mShader) {
-             mShader->describe(description, mExtensions);
-         }
-         if (mColorFilter) {
-             mColorFilter->describe(description, mExtensions);
-         }
-     }
-
-     // Build and use the appropriate shader
-     useProgram(mProgramCache.get(description));
-
-     // Setup the blending mode
-     chooseBlending(true, mode);
-     bindTexture(texture->id, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, textureUnit);
-     glUniform1i(mCurrentProgram->getUniform("sampler"), textureUnit);
-
-     int texCoordsSlot = mCurrentProgram->getAttrib("texCoords");
-     glEnableVertexAttribArray(texCoordsSlot);
-
-     // Setup attributes
-     glVertexAttribPointer(mCurrentProgram->position, 2, GL_FLOAT, GL_FALSE,
-             gMeshStride, &mMeshVertices[0].position[0]);
-     glVertexAttribPointer(texCoordsSlot, 2, GL_FLOAT, GL_FALSE,
-             gMeshStride, &mMeshVertices[0].texture[0]);
-
-     // Setup uniforms
-     mModelView.loadTranslate(x, y, 0.0f);
-     mModelView.scale(texture->width, texture->height, 1.0f);
-     mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
-
-     glUniform4f(mCurrentProgram->color, r, g, b, a);
-
-     textureUnit++;
-     if (applyFilters) {
-         // Setup attributes and uniforms required by the shaders
-         if (mShader) {
-             mShader->setupProgram(mCurrentProgram, mModelView, *mSnapshot, &textureUnit);
-         }
-         if (mColorFilter) {
-             mColorFilter->setupProgram(mCurrentProgram);
-         }
-     }
-
-     // Draw the mesh
-     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
-
-     glDisableVertexAttribArray(texCoordsSlot);
-}
-
-#define kStdStrikeThru_Offset   (-6.0f / 21.0f)
-#define kStdUnderline_Offset    (1.0f / 9.0f)
-#define kStdUnderline_Thickness (1.0f / 18.0f)
-
 void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         float x, float y, SkPaint* paint) {
     if (text == NULL || count == 0 || (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
@@ -668,7 +592,12 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         const ShadowTexture* shadow = mDropShadowCache.get(paint, text, bytesCount,
                 count, mShadowRadius);
         const AutoTexture autoCleanup(shadow);
-        renderShadow(shadow, x, y, mode);
+
+        setupShadow(shadow, x, y, mode);
+
+        // Draw the mesh
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
+        glDisableVertexAttribArray(mCurrentProgram->getAttrib("texCoords"));
     }
 
     uint32_t color = paint->getColor();
@@ -677,94 +606,19 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
     const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
 
-    mModelView.loadIdentity();
-
     GLuint textureUnit = 0;
-    // Needs to be set prior to calling FontRenderer::getTexture()
     glActiveTexture(gTextureUnits[textureUnit]);
 
-    ProgramDescription description;
-    description.hasTexture = true;
-    description.hasAlpha8Texture = true;
-    if (mShader) {
-        mShader->describe(description, mExtensions);
-    }
-    if (mColorFilter) {
-        mColorFilter->describe(description, mExtensions);
-    }
-
-    useProgram(mProgramCache.get(description));
-    mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
-
-    // Text is always blended, no need to check the shader
-    chooseBlending(true, mode);
-    bindTexture(mFontRenderer.getTexture(), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, textureUnit);
-    glUniform1i(mCurrentProgram->getUniform("sampler"), textureUnit);
-
-    int texCoordsSlot = mCurrentProgram->getAttrib("texCoords");
-    glEnableVertexAttribArray(texCoordsSlot);
-
-    // Always premultiplied
-    glUniform4f(mCurrentProgram->color, r, g, b, a);
-
-    textureUnit++;
-    // Setup attributes and uniforms required by the shaders
-    if (mShader) {
-        mShader->setupProgram(mCurrentProgram, mModelView, *mSnapshot, &textureUnit);
-    }
-    if (mColorFilter) {
-        mColorFilter->setupProgram(mCurrentProgram);
-    }
+    setupTextureAlpha8(mFontRenderer.getTexture(), 0, 0, textureUnit, x, y, r, g, b, a,
+            mode, false, true);
 
     const Rect& clip = mSnapshot->getLocalClip();
     mFontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glDisableVertexAttribArray(texCoordsSlot);
+    glDisableVertexAttribArray(mCurrentProgram->getAttrib("texCoords"));
 
-    // Handle underline and strike-through
-    uint32_t flags = paint->getFlags();
-    if (flags & (SkPaint::kUnderlineText_Flag | SkPaint::kStrikeThruText_Flag)) {
-        float underlineWidth = length;
-        // If length is > 0.0f, we already measured the text for the text alignment
-        if (length <= 0.0f) {
-            underlineWidth = paint->measureText(text, bytesCount);
-        }
-
-        float offsetX = 0;
-        switch (paint->getTextAlign()) {
-            case SkPaint::kCenter_Align:
-                offsetX = underlineWidth * 0.5f;
-                break;
-            case SkPaint::kRight_Align:
-                offsetX = underlineWidth;
-                break;
-            default:
-                break;
-        }
-
-        if (underlineWidth > 0.0f) {
-            float textSize = paint->getTextSize();
-            float height = textSize * kStdUnderline_Thickness;
-
-            float left = x - offsetX;
-            float top = 0.0f;
-            float right = left + underlineWidth;
-            float bottom = 0.0f;
-
-            if (flags & SkPaint::kUnderlineText_Flag) {
-                top = y + textSize * kStdUnderline_Offset;
-                bottom = top + height;
-                drawRect(left, top, right, bottom, paint);
-            }
-
-            if (flags & SkPaint::kStrikeThruText_Flag) {
-                top = y + textSize * kStdStrikeThru_Offset;
-                bottom = top + height;
-                drawRect(left, top, right, bottom, paint);
-            }
-        }
-    }
+    drawTextDecorations(text, bytesCount, length, x, y, paint);
 }
 
 void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
@@ -787,7 +641,12 @@ void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
 
     const float x = texture->left - texture->offset;
     const float y = texture->top - texture->offset;
-    renderTextureAlpha8(texture, textureUnit, x, y, r, g, b, a, mode, true);
+
+    setupTextureAlpha8(texture, textureUnit, x, y, r, g, b, a, mode, true, true);
+
+    // Draw the mesh
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
+    glDisableVertexAttribArray(mCurrentProgram->getAttrib("texCoords"));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -836,6 +695,135 @@ void OpenGLRenderer::setupShadow(float radius, float dx, float dy, int color) {
 ///////////////////////////////////////////////////////////////////////////////
 // Drawing implementation
 ///////////////////////////////////////////////////////////////////////////////
+
+void OpenGLRenderer::setupShadow(const ShadowTexture* texture, float x, float y,
+        SkXfermode::Mode mode) {
+    const float sx = x - texture->left + mShadowDx;
+    const float sy = y - texture->top + mShadowDy;
+
+    const GLfloat a = ((mShadowColor >> 24) & 0xFF) / 255.0f;
+    const GLfloat r = a * ((mShadowColor >> 16) & 0xFF) / 255.0f;
+    const GLfloat g = a * ((mShadowColor >>  8) & 0xFF) / 255.0f;
+    const GLfloat b = a * ((mShadowColor      ) & 0xFF) / 255.0f;
+
+    GLuint textureUnit = 0;
+    setupTextureAlpha8(texture, textureUnit, sx, sy, r, g, b, a, mode, true, false);
+}
+
+void OpenGLRenderer::setupTextureAlpha8(const Texture* texture, GLuint& textureUnit,
+        float x, float y, float r, float g, float b, float a, SkXfermode::Mode mode,
+        bool transforms, bool applyFilters) {
+    setupTextureAlpha8(texture->id, texture->width, texture->height, textureUnit,
+            x, y, r, g, b, a, mode, transforms, applyFilters);
+}
+
+void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t height,
+        GLuint& textureUnit, float x, float y, float r, float g, float b, float a,
+        SkXfermode::Mode mode, bool transforms, bool applyFilters) {
+     // Describe the required shaders
+     ProgramDescription description;
+     description.hasTexture = true;
+     description.hasAlpha8Texture = true;
+
+     if (applyFilters) {
+         if (mShader) {
+             mShader->describe(description, mExtensions);
+         }
+         if (mColorFilter) {
+             mColorFilter->describe(description, mExtensions);
+         }
+     }
+
+     // Build and use the appropriate shader
+     useProgram(mProgramCache.get(description));
+
+     // Setup the blending mode
+     chooseBlending(true, mode);
+     bindTexture(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, textureUnit);
+     glUniform1i(mCurrentProgram->getUniform("sampler"), textureUnit);
+
+     int texCoordsSlot = mCurrentProgram->getAttrib("texCoords");
+     glEnableVertexAttribArray(texCoordsSlot);
+
+     // Setup attributes
+     glVertexAttribPointer(mCurrentProgram->position, 2, GL_FLOAT, GL_FALSE,
+             gMeshStride, &mMeshVertices[0].position[0]);
+     glVertexAttribPointer(texCoordsSlot, 2, GL_FLOAT, GL_FALSE,
+             gMeshStride, &mMeshVertices[0].texture[0]);
+
+     // Setup uniforms
+     if (transforms) {
+         mModelView.loadTranslate(x, y, 0.0f);
+         mModelView.scale(width, height, 1.0f);
+     } else {
+         mModelView.loadIdentity();
+     }
+     mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+
+     glUniform4f(mCurrentProgram->color, r, g, b, a);
+
+     textureUnit++;
+     if (applyFilters) {
+         // Setup attributes and uniforms required by the shaders
+         if (mShader) {
+             mShader->setupProgram(mCurrentProgram, mModelView, *mSnapshot, &textureUnit);
+         }
+         if (mColorFilter) {
+             mColorFilter->setupProgram(mCurrentProgram);
+         }
+     }
+}
+
+#define kStdStrikeThru_Offset   (-6.0f / 21.0f)
+#define kStdUnderline_Offset    (1.0f / 9.0f)
+#define kStdUnderline_Thickness (1.0f / 18.0f)
+
+void OpenGLRenderer::drawTextDecorations(const char* text, int bytesCount, float length,
+        float x, float y, SkPaint* paint) {
+    // Handle underline and strike-through
+    uint32_t flags = paint->getFlags();
+    if (flags & (SkPaint::kUnderlineText_Flag | SkPaint::kStrikeThruText_Flag)) {
+        float underlineWidth = length;
+        // If length is > 0.0f, we already measured the text for the text alignment
+        if (length <= 0.0f) {
+            underlineWidth = paint->measureText(text, bytesCount);
+        }
+
+        float offsetX = 0;
+        switch (paint->getTextAlign()) {
+            case SkPaint::kCenter_Align:
+                offsetX = underlineWidth * 0.5f;
+                break;
+            case SkPaint::kRight_Align:
+                offsetX = underlineWidth;
+                break;
+            default:
+                break;
+        }
+
+        if (underlineWidth > 0.0f) {
+            float textSize = paint->getTextSize();
+            float height = textSize * kStdUnderline_Thickness;
+
+            float left = x - offsetX;
+            float top = 0.0f;
+            float right = left + underlineWidth;
+            float bottom = 0.0f;
+
+            if (flags & SkPaint::kUnderlineText_Flag) {
+                top = y + textSize * kStdUnderline_Offset;
+                bottom = top + height;
+                drawRect(left, top, right, bottom, paint);
+            }
+
+            if (flags & SkPaint::kStrikeThruText_Flag) {
+                top = y + textSize * kStdStrikeThru_Offset;
+                bottom = top + height;
+                drawRect(left, top, right, bottom, paint);
+            }
+        }
+    }
+}
 
 void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom,
         int color, SkXfermode::Mode mode, bool ignoreTransform) {
