@@ -30,6 +30,8 @@ enum {
     POWER_MANAGER_LONG_TOUCH_EVENT = 3,
     POWER_MANAGER_TOUCH_UP_EVENT = 4,
     POWER_MANAGER_BUTTON_EVENT = 5, // Button and trackball events.
+
+    POWER_MANAGER_LAST_EVENT = POWER_MANAGER_BUTTON_EVENT, // Last valid event code.
 };
 
 extern bool android_server_PowerManagerService_isScreenOn();
