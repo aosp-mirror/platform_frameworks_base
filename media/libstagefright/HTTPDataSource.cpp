@@ -158,7 +158,7 @@ HTTPDataSource::HTTPDataSource(
     string path;
     int port;
 
-    char *slash = strchr(uri + 7, '/');
+    const char *slash = strchr(uri + 7, '/');
     if (slash == NULL) {
         host = uri + 7;
         path = "/";
@@ -167,7 +167,7 @@ HTTPDataSource::HTTPDataSource(
         path = slash;
     }
 
-    char *colon = strchr(host.c_str(), ':');
+    const char *colon = strchr(host.c_str(), ':');
     if (colon == NULL) {
         port = 80;
     } else {

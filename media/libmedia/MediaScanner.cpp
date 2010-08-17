@@ -77,13 +77,13 @@ status_t MediaScanner::processDirectory(
 }
 
 static bool fileMatchesExtension(const char* path, const char* extensions) {
-    char* extension = strrchr(path, '.');
+    const char* extension = strrchr(path, '.');
     if (!extension) return false;
     ++extension;    // skip the dot
     if (extension[0] == 0) return false;
 
     while (extensions[0]) {
-        char* comma = strchr(extensions, ',');
+        const char* comma = strchr(extensions, ',');
         size_t length = (comma ? comma - extensions : strlen(extensions));
         if (length == strlen(extension) && strncasecmp(extension, extensions, length) == 0) return true;
         extensions += length;
