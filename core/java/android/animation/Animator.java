@@ -26,6 +26,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * This class provides a simple timing engine for running animations
@@ -39,7 +40,7 @@ import java.util.ArrayList;
  * out of an animation. This behavior can be changed by calling
  * {@link Animator#setInterpolator(Interpolator)}.</p>
  */
-public class Animator extends Animatable {
+public class Animator<T> extends Animatable {
 
     /**
      * Internal constants
@@ -164,12 +165,6 @@ public class Animator extends Animatable {
     // How long the animation should last in ms
     private long mDuration;
 
-    // The value that the animation should start from, set in the constructor
-    private Object mValueFrom;
-
-    // The value that the animation should animate to, set in the constructor
-    private Object mValueTo;
-
     // The amount of time in ms to delay starting the animation after start() is called
     private long mStartDelay = 0;
 
@@ -195,29 +190,22 @@ public class Animator extends Animatable {
     private Interpolator mInterpolator = sDefaultInterpolator;
 
     /**
-     * The type evaluator used to calculate the animated values. This evaluator is determined
-     * automatically based on the type of the start/end objects passed into the constructor,
-     * but the system only knows about the primitive types int, double, and float. Any other
-     * type will need to set the evaluator to a custom evaluator for that type.
-     */
-    private TypeEvaluator mEvaluator;
-
-    /**
      * The set of listeners to be sent events through the life of an animation.
      */
     private ArrayList<AnimatorUpdateListener> mUpdateListeners = null;
 
     /**
-     * The current value calculated by the animation. The value is calculated in animateFraction(),
-     * prior to calling the setter (if set) and sending out the onAnimationUpdate() callback
-     * to the update listeners.
+     * The property/value sets being animated.
      */
-    private Object mAnimatedValue = null;
+    HashMap<String, PropertyValuesHolder> mValues;
 
     /**
-     * The set of keyframes (time/value pairs) that define this animation.
+     * This value is used in the simple/common case of animating just one value; the user
+     * may call getAnimatedValue(), which should return the value of the first (and only)
+     * ProeprtyValuesHolder animated value, which is looked up using this string.
      */
-    private KeyframeSet mKeyframeSet = null;
+    String mFirstPropertyName;
+
 
     /**
      * The type of the values, as determined by the valueFrom/valueTo properties.
@@ -267,37 +255,46 @@ public class Animator extends Animatable {
         int valueType = a.getInt(com.android.internal.R.styleable.Animator_valueType,
                 VALUE_TYPE_FLOAT);
 
+        Object valueFrom = null;
+        Object valueTo = null;
+
         switch (valueType) {
             case VALUE_TYPE_FLOAT:
-                mValueFrom = a.getFloat(com.android.internal.R.styleable.Animator_valueFrom, 0f);
-                mValueTo = a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
+                valueFrom = a.getFloat(com.android.internal.R.styleable.Animator_valueFrom, 0f);
+                valueTo = a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
                 mValueType = float.class;
                 break;
             case VALUE_TYPE_INT:
-                mValueFrom = a.getInt(com.android.internal.R.styleable.Animator_valueFrom, 0);
-                mValueTo = a.getInt(com.android.internal.R.styleable.Animator_valueTo, 0);
+                valueFrom = a.getInt(com.android.internal.R.styleable.Animator_valueFrom, 0);
+                valueTo = a.getInt(com.android.internal.R.styleable.Animator_valueTo, 0);
                 mValueType = int.class;
                 break;
             case VALUE_TYPE_DOUBLE:
-                mValueFrom = (double)
+                valueFrom = (double)
                         a.getFloat(com.android.internal.R.styleable.Animator_valueFrom, 0f);
-                mValueTo = (double)
+                valueTo = (double)
                         a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
                 mValueType = double.class;
                 break;
             case VALUE_TYPE_COLOR:
-                mValueFrom = a.getInt(com.android.internal.R.styleable.Animator_valueFrom, 0);
-                mValueTo = a.getInt(com.android.internal.R.styleable.Animator_valueTo, 0);
-                mEvaluator = new RGBEvaluator();
+                valueFrom = a.getInt(com.android.internal.R.styleable.Animator_valueFrom, 0);
+                valueTo = a.getInt(com.android.internal.R.styleable.Animator_valueTo, 0);
+                setEvaluator(new RGBEvaluator());
                 mValueType = int.class;
                 break;
             case VALUE_TYPE_CUSTOM:
                 // TODO: How to get an 'Object' value?
-                mValueFrom = a.getFloat(com.android.internal.R.styleable.Animator_valueFrom, 0f);
-                mValueTo = a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
+                valueFrom = a.getFloat(com.android.internal.R.styleable.Animator_valueFrom, 0f);
+                valueTo = a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
                 mValueType = Object.class;
                 break;
         }
+
+        mValues = new HashMap<String, PropertyValuesHolder>(1);
+        mFirstPropertyName = "";
+        PropertyValuesHolder valuesHolder = new PropertyValuesHolder(mFirstPropertyName,
+                valueFrom, valueTo);
+        mValues.put(mFirstPropertyName, valuesHolder);
 
         mRepeatCount = a.getInt(com.android.internal.R.styleable.Animator_repeatCount, mRepeatCount);
         mRepeatMode = a.getInt(com.android.internal.R.styleable.Animator_repeatMode, RESTART);
@@ -305,106 +302,73 @@ public class Animator extends Animatable {
         a.recycle();
     }
 
-    private Animator(long duration, Object valueFrom, Object valueTo, Class valueType) {
+
+    /**
+     * Constructs an Animator object with the specified duration and set of
+     * values. If the values are a set of PropertyValuesHolder objects, then these objects
+     * define the potentially multiple properties being animated and the values the properties are
+     * animated between. Otherwise, the values define a single set of values animated between.
+     *
+     * @param duration The length of the animation, in milliseconds.
+     * @param values The set of values to animate between. If these values are not
+     * PropertyValuesHolder objects, then there should be more than one value, since the values
+     * determine the interval to animate between.
+     */
+    public Animator(long duration, T...values) {
         mDuration = duration;
-        mValueFrom = valueFrom;
-        mValueTo= valueTo;
-        this.mValueType = valueType;
+        if (values.length > 0) {
+            setValues(values);
+        }
+    }
+
+    public void setValues(PropertyValuesHolder... values) {
+        int numValues = values.length;
+        mValues = new HashMap<String, PropertyValuesHolder>(numValues);
+        for (int i = 0; i < numValues; ++i) {
+            PropertyValuesHolder valuesHolder = (PropertyValuesHolder) values[i];
+            mValues.put(valuesHolder.getPropertyName(), valuesHolder);
+        }
+        if (numValues > 0 && values[0] != null) {
+            mFirstPropertyName = ((PropertyValuesHolder) values[0]).getPropertyName();
+        } else {
+            mFirstPropertyName = "";
+        }
     }
 
     /**
-     * This constructor takes a set of {@link Keyframe} objects that define the values
-     * for the animation, along with the times at which those values will hold true during
-     * the animation.
+     * Sets the values to animate between for this animation. If <code>values</code> is
+     * a set of PropertyValuesHolder objects, these objects will become the set of properties
+     * animated and the values that those properties are animated between. Otherwise, this method
+     * will set only one set of values for the Animator. Also, if the values are not
+     * PropertyValuesHolder objects and if there are already multiple sets of
+     * values defined for this Animator via
+     * more than one PropertyValuesHolder objects, this method will set the values for
+     * the first of those objects.
      *
-     * @param duration The length of the animation, in milliseconds.
-     * @param keyframes The set of keyframes that define the time/value pairs for the animation.
+     * @param values The set of values to animate between.
      */
-    public Animator(long duration, Keyframe...keyframes) {
-        mDuration = duration;
-        mKeyframeSet = new KeyframeSet(keyframes);
-        mValueType = keyframes[0].getType();
-    }
-
-    /**
-     * A constructor that takes <code>float</code> values.
-     *
-     * @param duration The length of the animation, in milliseconds.
-     * @param valueFrom The initial value of the property when the animation begins.
-     * @param valueTo The value to which the property will animate.
-     */
-    public Animator(long duration, float valueFrom, float valueTo) {
-        this(duration, valueFrom, valueTo, float.class);
-    }
-
-    /**
-     * A constructor that takes <code>int</code> values.
-     *
-     * @param duration The length of the animation, in milliseconds.
-     * @param valueFrom The initial value of the property when the animation begins.
-     * @param valueTo The value to which the property will animate.
-     */
-    public Animator(long duration, int valueFrom, int valueTo) {
-        this(duration, valueFrom, valueTo, int.class);
-    }
-
-    /**
-     * A constructor that takes <code>double</code> values.
-     *
-     * @param duration The length of the animation, in milliseconds.
-     * @param valueFrom The initial value of the property when the animation begins.
-     * @param valueTo The value to which the property will animate.
-     */
-    public Animator(long duration, double valueFrom, double valueTo) {
-        this(duration, valueFrom, valueTo, double.class);
-    }
-
-    /**
-     * A constructor that takes <code>Object</code> values.
-     *
-     * @param duration The length of the animation, in milliseconds.
-     * @param valueFrom The initial value of the property when the animation begins.
-     * @param valueTo The value to which the property will animate.
-     */
-    public Animator(long duration, Object valueFrom, Object valueTo) {
-        this(duration, valueFrom, valueTo,
-                (valueFrom != null) ? valueFrom.getClass() : valueTo.getClass());
-    }
-
-    /**
-     * Internal constructor that takes a single <code>float</code> value.
-     * This constructor is called by PropertyAnimator.
-     *
-     * @param duration The length of the animation, in milliseconds.
-     * @param valueFrom The initial value of the property when the animation begins.
-     * @param valueTo The value to which the property will animate.
-     */
-    Animator(long duration, float valueTo) {
-        this(duration, null, valueTo, float.class);
-    }
-
-    /**
-     * Internal constructor that takes a single <code>int</code> value.
-     * This constructor is called by PropertyAnimator.
-     *
-     * @param duration The length of the animation, in milliseconds.
-     * @param valueFrom The initial value of the property when the animation begins.
-     * @param valueTo The value to which the property will animate.
-     */
-    Animator(long duration, int valueTo) {
-        this(duration, null, valueTo, int.class);
-    }
-
-    /**
-     * Internal constructor that takes a single <code>double</code> value.
-     * This constructor is called by PropertyAnimator.
-     *
-     * @param duration The length of the animation, in milliseconds.
-     * @param valueFrom The initial value of the property when the animation begins.
-     * @param valueTo The value to which the property will animate.
-     */
-    Animator(long duration, double valueTo) {
-        this(duration, null, valueTo, double.class);
+    public void setValues(T... values) {
+        if (values[0] instanceof PropertyValuesHolder) {
+            int numValues = values.length;
+            mValues = new HashMap<String, PropertyValuesHolder>(numValues);
+            for (int i = 0; i < numValues; ++i) {
+                PropertyValuesHolder valuesHolder = (PropertyValuesHolder) values[i];
+                mValues.put(valuesHolder.getPropertyName(), valuesHolder);
+            }
+            if (numValues > 0 && values[0] != null) {
+                mFirstPropertyName = ((PropertyValuesHolder) values[0]).getPropertyName();
+            } else {
+                mFirstPropertyName = "";
+            }
+        } else {
+            if (mValues == null) {
+                setValues(new PropertyValuesHolder[]{
+                        new PropertyValuesHolder("", (Object[])values)});
+            } else {
+                PropertyValuesHolder valuesHolder = mValues.get(mFirstPropertyName);
+                valuesHolder.setValues(values);
+            }
+        }
     }
 
     /**
@@ -418,9 +382,8 @@ public class Animator extends Animatable {
      *  that internal mechanisms for the animation are set up correctly.</p>
      */
     void initAnimation() {
-        if (mEvaluator == null) {
-            mEvaluator = (mValueType == int.class) ? sIntEvaluator :
-                (mValueType == double.class) ? sDoubleEvaluator : sFloatEvaluator;
+        for (PropertyValuesHolder pvHolder: mValues.values()) {
+            pvHolder.init();
         }
         mCurrentIteration = 0;
         mInitialized = true;
@@ -599,67 +562,6 @@ public class Animator extends Animatable {
     }
 
     /**
-     * Gets the set of keyframes that define this animation.
-     *
-     * @return KeyframeSet The set of keyframes for this animation.
-     */
-    KeyframeSet getKeyframes() {
-        return mKeyframeSet;
-    }
-
-    /**
-     * Gets the value that this animation will start from.
-     *
-     * @return Object The starting value for the animation.
-     */
-    public Object getValueFrom() {
-        if (mKeyframeSet != null) {
-            return mKeyframeSet.mKeyframes.get(0).getValue();
-        }
-        return mValueFrom;
-    }
-
-    /**
-     * Sets the value that this animation will start from.
-     */
-    public void setValueFrom(Object valueFrom) {
-        if (mKeyframeSet != null) {
-            Keyframe kf = mKeyframeSet.mKeyframes.get(0);
-            kf.setValue(valueFrom);
-        } else {
-            mValueFrom = valueFrom;
-        }
-    }
-
-    /**
-     * Gets the value that this animation will animate to.
-     *
-     * @return Object The ending value for the animation.
-     */
-    public Object getValueTo() {
-        if (mKeyframeSet != null) {
-            int numKeyframes = mKeyframeSet.mKeyframes.size();
-            return mKeyframeSet.mKeyframes.get(numKeyframes - 1).getValue();
-        }
-        return mValueTo;
-    }
-
-    /**
-     * Sets the value that this animation will animate to.
-     *
-     * @return Object The ending value for the animation.
-     */
-    public void setValueTo(Object valueTo) {
-        if (mKeyframeSet != null) {
-            int numKeyframes = mKeyframeSet.mKeyframes.size();
-            Keyframe kf = mKeyframeSet.mKeyframes.get(numKeyframes - 1);
-            kf.setValue(valueTo);
-        } else {
-            mValueTo = valueTo;
-        }
-    }
-
-    /**
      * The amount of time, in milliseconds, between each frame of the animation. This is a
      * requested time that the animation will attempt to honor, but the actual delay between
      * frames may be different, depending on system load and capabilities. This is a static
@@ -673,17 +575,33 @@ public class Animator extends Animatable {
     }
 
     /**
-     * The most recent value calculated by this <code>Animator</code> for the property
-     * being animated. This value is only sensible while the animation is running. The main
+     * The most recent value calculated by this <code>Animator</code> when there is just one
+     * property being animated. This value is only sensible while the animation is running. The main
      * purpose for this read-only property is to retrieve the value from the <code>Animator</code>
      * during a call to {@link AnimatorUpdateListener#onAnimationUpdate(Animator)}, which
      * is called during each animation frame, immediately after the value is calculated.
      *
      * @return animatedValue The value most recently calculated by this <code>Animator</code> for
-     * the property specified in the constructor.
+     * the single property being animated. If there are several properties being animated
+     * (specified by several PropertyValuesHolder objects in the constructor), this function
+     * returns the animated value for the first of those objects.
      */
     public Object getAnimatedValue() {
-        return mAnimatedValue;
+        return getAnimatedValue(mFirstPropertyName);
+    }
+
+    /**
+     * The most recent value calculated by this <code>Animator</code> for <code>propertyName</code>.
+     * The main purpose for this read-only property is to retrieve the value from the
+     * <code>Animator</code> during a call to
+     * {@link AnimatorUpdateListener#onAnimationUpdate(Animator)}, which
+     * is called during each animation frame, immediately after the value is calculated.
+     *
+     * @return animatedValue The value most recently calculated for the named property
+     * by this <code>Animator</code>.
+     */
+    public Object getAnimatedValue(String propertyName) {
+        return mValues.get(mFirstPropertyName).getAnimatedValue();
     }
 
     /**
@@ -781,14 +699,26 @@ public class Animator extends Animatable {
      * For example, when running an animation on color values, the {@link RGBEvaluator}
      * should be used to get correct RGB color interpolation.
      *
+     * <p>If this Animator has only one set of values being animated between, this evaluator
+     * will be used for that set. If there are several sets of values being animated, which is
+     * the case if PropertyValuesHOlder objects were set on the Animator, then the evaluator
+     * is assigned just to the first PropertyValuesHolder object.</p>
+     *
      * @param value the evaluator to be used this animation
      */
     public void setEvaluator(TypeEvaluator value) {
-        if (value != null) {
-            mEvaluator = value;
+        if (value != null && mValues != null) {
+            mValues.get(mFirstPropertyName).setEvaluator(value);
         }
     }
 
+    /**
+     * Start the animation playing. This version of start() takes a boolean flag that indicates
+     * whether the animation should play in reverse. The flag is usually false, but may be set
+     * to true if called from the reverse() method/
+     *
+     * @param playBackwards Whether the Animator should start playing in reverse.
+     */
     private void start(boolean playBackwards) {
         mPlayingBackwards = playBackwards;
         mPlayingState = STOPPED;
@@ -998,10 +928,8 @@ public class Animator extends Animatable {
      */
     void animateValue(float fraction) {
         fraction = mInterpolator.getInterpolation(fraction);
-        if (mKeyframeSet != null) {
-            mAnimatedValue = mKeyframeSet.getValue(fraction, mEvaluator);
-        } else {
-            mAnimatedValue = mEvaluator.evaluate(fraction, mValueFrom, mValueTo);
+        for (PropertyValuesHolder valuesHolder : mValues.values()) {
+            valuesHolder.calculateValue(fraction);
         }
         if (mUpdateListeners != null) {
             int numListeners = mUpdateListeners.size();
