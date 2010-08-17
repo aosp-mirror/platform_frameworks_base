@@ -1138,9 +1138,9 @@ public class Camera {
          */
         public static final String SCENE_MODE_BARCODE = "barcode";
 
-        // Values for focus mode settings.
         /**
-         * Auto-focus mode.
+         * Auto-focus mode. Applications should call {@link
+         * #autoFocus(AutoFocusCallback)} to start the focus in this mode.
          */
         public static final String FOCUS_MODE_AUTO = "auto";
 
@@ -1149,6 +1149,12 @@ public class Camera {
          * {@link #autoFocus(AutoFocusCallback)} in this mode.
          */
         public static final String FOCUS_MODE_INFINITY = "infinity";
+
+        /**
+         * Macro (close-up) focus mode. Applications should call
+         * {@link #autoFocus(AutoFocusCallback)} to start the focus in this
+         * mode.
+         */
         public static final String FOCUS_MODE_MACRO = "macro";
 
         /**
@@ -1170,7 +1176,9 @@ public class Camera {
          * Continuous auto focus mode. The camera continuously tries to focus.
          * This is ideal for shooting video or shooting photo of moving object.
          * Auto focus starts when the parameter is set. Applications should not
-         * call {@link #autoFocus(AutoFocusCallback)} in this mode.
+         * call {@link #autoFocus(AutoFocusCallback)} in this mode. To stop
+         * continuous focus, applications should change the focus mode to other
+         * modes.
          */
         public static final String FOCUS_MODE_CONTINUOUS = "continuous";
 
@@ -1948,6 +1956,7 @@ public class Camera {
          * @see #FOCUS_MODE_INFINITY
          * @see #FOCUS_MODE_MACRO
          * @see #FOCUS_MODE_FIXED
+         * @see #FOCUS_MODE_EDOF
          * @see #FOCUS_MODE_CONTINUOUS
          */
         public String getFocusMode() {
