@@ -22,8 +22,8 @@ import com.android.internal.view.menu.ActionMenuView;
 import com.android.internal.view.menu.MenuBuilder;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.ActionBar.NavigationCallback;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -34,6 +34,7 @@ import android.graphics.drawable.Drawable;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -185,6 +186,12 @@ public class ActionBarView extends ViewGroup {
                 }
             };
         }
+    }
+
+    @Override
+    public ActionMode startActionModeForChild(View child, ActionMode.Callback callback) {
+        // No starting an action mode for an action bar child! (Where would it go?)
+        return null;
     }
 
     public void setCallback(NavigationCallback callback) {

@@ -78,6 +78,12 @@ public class ActionBarContextView extends ViewGroup {
         a.recycle();
     }
     
+    @Override
+    public ActionMode startActionModeForChild(View child, ActionMode.Callback callback) {
+        // No starting an action mode for an existing action mode UI child! (Where would it go?)
+        return null;
+    }
+
     public void setHeight(int height) {
         mContentHeight = height;
     }
