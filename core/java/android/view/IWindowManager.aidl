@@ -156,4 +156,17 @@ interface IWindowManager
      * calls back when it changes.
      */
     int watchRotation(IRotationWatcher watcher);
+
+	/**
+	 * Lock the device orientation to the current rotation. Sensor input will
+	 * be ignored until thawRotation() is called.
+	 * @hide
+	 */
+	void freezeRotation();
+
+	/**
+	 * Release the orientation lock imposed by freezeRotation().
+	 * @hide
+	 */
+	void thawRotation();
 }
