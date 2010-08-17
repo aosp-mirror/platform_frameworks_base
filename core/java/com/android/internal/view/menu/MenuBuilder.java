@@ -171,6 +171,11 @@ public class MenuBuilder implements Menu {
     private boolean mReserveActionOverflow;
 
     /**
+     * Default value for how added items should show in the action list.
+     */
+    private int mDefaultShowAsAction = MenuItem.SHOW_AS_ACTION_NEVER;
+
+    /**
      * Current use case is Context Menus: As Views populate the context menu, each one has
      * extra information that should be passed along.  This is the current menu info that
      * should be set on all items added to this menu.
@@ -328,6 +333,11 @@ public class MenuBuilder implements Menu {
                 (mResources.getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS);
     }
     
+    public MenuBuilder setDefaultShowAsAction(int defaultShowAsAction) {
+        mDefaultShowAsAction = defaultShowAsAction;
+        return this;
+    }
+    
     public void setCallback(Callback callback) {
         mCallback = callback;
     }
@@ -411,7 +421,8 @@ public class MenuBuilder implements Menu {
     private MenuItem addInternal(int group, int id, int categoryOrder, CharSequence title) {
         final int ordering = getOrdering(categoryOrder);
         
-        final MenuItemImpl item = new MenuItemImpl(this, group, id, categoryOrder, ordering, title);
+        final MenuItemImpl item = new MenuItemImpl(this, group, id, categoryOrder,
+                ordering, title, mDefaultShowAsAction);
 
         if (mCurrentMenuInfo != null) {
             // Pass along the current menu info

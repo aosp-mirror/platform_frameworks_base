@@ -44,7 +44,7 @@ public class StandaloneActionMode extends ActionMode implements MenuBuilder.Call
         mContextView = view;
         mCallback = callback;
 
-        mMenu = new MenuBuilder(context);
+        mMenu = new MenuBuilder(context).setDefaultShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         mMenu.setCallback(this);
     }
 
@@ -112,7 +112,7 @@ public class StandaloneActionMode extends ActionMode implements MenuBuilder.Call
 
     @Override
     public MenuInflater getMenuInflater() {
-        return new MenuInflater(mContext, MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        return new MenuInflater(mContext);
     }
 
     public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
