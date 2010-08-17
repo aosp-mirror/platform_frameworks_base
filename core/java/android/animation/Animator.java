@@ -422,7 +422,6 @@ public class Animator extends Animatable {
             mEvaluator = (mValueType == int.class) ? sIntEvaluator :
                 (mValueType == double.class) ? sDoubleEvaluator : sFloatEvaluator;
         }
-        mPlayingBackwards = false;
         mCurrentIteration = 0;
         mInitialized = true;
     }
@@ -790,7 +789,8 @@ public class Animator extends Animatable {
         }
     }
 
-    public void start() {
+    private void start(boolean playBackwards) {
+        mPlayingBackwards = playBackwards;
         mPlayingState = STOPPED;
         sPendingAnimations.add(this);
         if (sAnimationHandler == null) {
@@ -801,6 +801,12 @@ public class Animator extends Animatable {
         sAnimationHandler.sendEmptyMessage(ANIMATION_START);
     }
 
+    @Override
+    public void start() {
+        start(false);
+    }
+
+    @Override
     public void cancel() {
         if (mListeners != null) {
             ArrayList<AnimatableListener> tmpListeners =
@@ -814,10 +820,38 @@ public class Animator extends Animatable {
         mPlayingState = CANCELED;
     }
 
+    @Override
     public void end() {
         // Just set the ENDED flag - this causes the animation to end the next time a frame
         // is processed.
         mPlayingState = ENDED;
+    }
+
+    /**
+     * Returns whether this Animator is currently running (having been started and not yet ended).
+     * @return Wehther the Animator is running.
+     */
+    public boolean isRunning() {
+        return mPlayingState == RUNNING;
+    }
+
+    /**
+     * Plays the Animator in reverse. If the animation is already running,
+     * it will stop itself and play backwards from the point reached when reverse was called.
+     * If the animation is not currently running, then it will start from the end and
+     * play backwards. This behavior is only set for the current animation; future playing
+     * of the animation will use the default behavior of playing forward.
+     */
+    public void reverse() {
+        mPlayingBackwards = !mPlayingBackwards;
+        if (mPlayingState == RUNNING) {
+            long currentTime = AnimationUtils.currentAnimationTimeMillis();
+            long currentPlayTime = currentTime - mStartTime;
+            long timeLeft = mDuration - currentPlayTime;
+            mStartTime = currentTime - timeLeft;
+        } else {
+            start(true);
+        }
     }
 
     /**
@@ -892,7 +926,6 @@ public class Animator extends Animatable {
      * <code>repeatCount</code> has been exceeded and the animation should be ended.
      */
     private boolean animationFrame(long currentTime) {
-
         boolean done = false;
 
         if (mPlayingState == STOPPED) {
