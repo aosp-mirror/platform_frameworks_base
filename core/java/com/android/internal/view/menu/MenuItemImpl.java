@@ -108,7 +108,7 @@ public final class MenuItemImpl implements MenuItem {
      * @param title The text to display for the item.
      */
     MenuItemImpl(MenuBuilder menu, int group, int id, int categoryOrder, int ordering,
-            CharSequence title) {
+            CharSequence title, int showAsAction) {
 
         if (sPrependShortcutLabel == null) {
             // This is instantiated from the UI thread, so no chance of sync issues 
@@ -129,6 +129,7 @@ public final class MenuItemImpl implements MenuItem {
         mCategoryOrder = categoryOrder;
         mOrdering = ordering;
         mTitle = title;
+        mShowAsAction = showAsAction;
     }
     
     /**

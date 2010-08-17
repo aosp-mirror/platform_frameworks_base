@@ -429,13 +429,14 @@ public class ActionBarImpl extends ActionBar {
         
         public ActionModeImpl(ActionMode.Callback callback) {
             mCallback = callback;
-            mMenu = new MenuBuilder(mActionView.getContext());
+            mMenu = new MenuBuilder(mActionView.getContext())
+                    .setDefaultShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             mMenu.setCallback(this);
         }
 
         @Override
         public MenuInflater getMenuInflater() {
-            return new MenuInflater(mContext, MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            return new MenuInflater(mContext);
         }
 
         @Override
