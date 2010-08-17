@@ -65,6 +65,24 @@ public class BrowserContract {
     }
 
     /**
+     * Convenience definitions for use in implementing chrome bookmarks sync in the Bookmarks table.
+     */
+    public static final class ChromeSyncColumns {
+        private ChromeSyncColumns() {}
+
+        /** The server unique ID for an item */
+        public static final String SERVER_UNIQUE = BaseSyncColumns.SYNC3;
+
+        public static final String FOLDER_NAME_ROOT = "google_chrome";
+        public static final String FOLDER_NAME_BOOKMARKS = "google_chrome_bookmarks";
+        public static final String FOLDER_NAME_BOOKMARKS_BAR = "bookmark_bar";
+        public static final String FOLDER_NAME_OTHER_BOOKMARKS = "other_bookmarks";
+        
+        /** The client unique ID for an item */
+        public static final String CLIENT_UNIQUE = BaseSyncColumns.SYNC4;
+    }
+    
+    /**
      * Columns that appear when each row of a table belongs to a specific
      * account, including sync information that an account may need.
      */
