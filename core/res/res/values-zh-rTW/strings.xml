@@ -869,8 +869,8 @@
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"選取結束車用模式。"</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"數據連線或無線基地台已啟用"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"輕觸以設定"</string>
-    <string name="back_button_label" msgid="2300470004503343439">"上一頁"</string>
-    <string name="next_button_label" msgid="1080555104677992408">"下一頁"</string>
+    <string name="back_button_label" msgid="2300470004503343439">"返回"</string>
+    <string name="next_button_label" msgid="1080555104677992408">"繼續"</string>
     <!-- no translation found for skip_button_label (1275362299471631819) -->
     <skip />
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"高行動資料用量"</string>
