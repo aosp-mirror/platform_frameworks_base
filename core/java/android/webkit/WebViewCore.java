@@ -1686,7 +1686,7 @@ final class WebViewCore {
         if (mSettings.getUseWideViewPort()) {
             if (mViewportWidth == -1) {
                 if (mSettings.getLayoutAlgorithm() ==
-                        WebSettings.LayoutAlgorithm.NORMAL) {
+                        WebSettings.LayoutAlgorithm.NORMAL || mSettings.getUseFixedViewport()) {
                     width = WebView.DEFAULT_VIEWPORT_WIDTH;
                 } else {
                     /*

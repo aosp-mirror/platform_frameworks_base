@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.util.DisplayMetrics;
 import android.util.EventLog;
 
 import java.util.Locale;
@@ -176,6 +177,7 @@ public class WebSettings {
     private boolean         mJavaScriptCanOpenWindowsAutomatically = false;
     private boolean         mUseDoubleTree = false;
     private boolean         mUseWideViewport = false;
+    private boolean         mUseFixedViewport = false;
     private boolean         mSupportMultipleWindows = false;
     private boolean         mShrinksStandaloneImagesToFit = false;
     private long            mMaximumDecodedImageSize = 0; // 0 means default
@@ -317,6 +319,11 @@ public class WebSettings {
         mWebView = webview;
         mDefaultTextEncoding = context.getString(com.android.internal.
                                                  R.string.default_text_encoding);
+
+        // Detect tablet device for fixed viewport mode.
+        final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        mUseFixedViewport = (metrics.density == 1.0f 
+            && (metrics.widthPixels >= 800 ||metrics.heightPixels >= 800));
 
         if (sLockForLocaleSettings == null) {
             sLockForLocaleSettings = new Object();
@@ -1467,6 +1474,13 @@ public class WebSettings {
             mMaximumDecodedImageSize = size;
             postSync();
         }
+    }
+
+    /**
+     * Returns whether to use fixed viewport.
+     */
+    /* package */ boolean getUseFixedViewport() {
+        return mUseFixedViewport;
     }
 
     /**

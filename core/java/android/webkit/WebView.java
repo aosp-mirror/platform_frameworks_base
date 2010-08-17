@@ -651,7 +651,7 @@ public class WebView extends AbsoluteLayout
 
     // If the site doesn't use the viewport meta tag to specify the viewport,
     // use DEFAULT_VIEWPORT_WIDTH as the default viewport width
-    static final int DEFAULT_VIEWPORT_WIDTH = 800;
+    static final int DEFAULT_VIEWPORT_WIDTH = 1040;
 
     // normally we try to fit the content to the minimum preferred width
     // calculated by the Webkit. To avoid the bad behavior when some site's

@@ -541,7 +541,9 @@ class ZoomManager {
         }
 
         if (settings.getLayoutAlgorithm() == WebSettings.LayoutAlgorithm.NARROW_COLUMNS
-                && willScaleTriggerZoom(mTextWrapScale)) {
+                && willScaleTriggerZoom(mTextWrapScale)
+                // For tablet, not much need to reflow text w/o double tapping.
+                && !settings.getUseFixedViewport()) {
             refreshZoomScale(true);
         } else if (!mInZoomOverview) {
             zoomToOverview();
@@ -765,7 +767,8 @@ class ZoomManager {
     public void onNewPicture(WebViewCore.DrawData drawData) {
         final int viewWidth = mWebView.getViewWidth();
 
-        if (mWebView.getSettings().getUseWideViewPort()) {
+        if (!mWebView.getSettings().getUseFixedViewport()
+            && mWebView.getSettings().getUseWideViewPort()) {
             // limit mZoomOverviewWidth upper bound to
             // sMaxViewportWidth so that if the page doesn't behave
             // well, the WebView won't go insane. limit the lower
@@ -819,7 +822,8 @@ class ZoomManager {
                 reflowText = false;
             } else {
                 WebSettings settings = mWebView.getSettings();
-                if (settings.getUseWideViewPort() && settings.getLoadWithOverviewMode()) {
+                if (settings.getUseWideViewPort()
+                    && (settings.getLoadWithOverviewMode() || settings.getUseFixedViewport())) {
                     mInitialZoomOverview = true;
                     scale = (float) mWebView.getViewWidth() / WebView.DEFAULT_VIEWPORT_WIDTH;
                 } else {
