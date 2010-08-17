@@ -43,6 +43,7 @@ public:
     void addLight(const Light *);
 
     void setProjectionMatrix(const rsc_Matrix *) const;
+    void getProjectionMatrix(rsc_Matrix *) const;
     void setModelviewMatrix(const rsc_Matrix *) const;
     void setTextureMatrix(const rsc_Matrix *) const;
 

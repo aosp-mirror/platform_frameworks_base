@@ -27,6 +27,9 @@ extern void __attribute__((overloadable))
     rsgProgramVertexLoadTextureMatrix(const rs_matrix4x4 *);
 
 extern void __attribute__((overloadable))
+    rsgProgramVertexGetProjectionMatrix(rs_matrix4x4 *);
+
+extern void __attribute__((overloadable))
     rsgProgramFragmentConstantColor(rs_program_fragment, float, float, float, float);
 
 extern uint __attribute__((overloadable))
@@ -91,8 +94,6 @@ rsgMeshComputeBoundingBox(rs_mesh mesh, float3 *bBoxMin, float3 *bBoxMax) {
     bBoxMax->y = y2;
     bBoxMax->z = z2;
 }
-
-
 
 ///////////////////////////////////////////////////////
 // misc

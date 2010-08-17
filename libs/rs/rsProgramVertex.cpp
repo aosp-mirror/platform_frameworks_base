@@ -318,6 +318,12 @@ void ProgramVertex::setTextureMatrix(const rsc_Matrix *m) const
     mDirty = true;
 }
 
+void ProgramVertex::getProjectionMatrix(rsc_Matrix *m) const
+{
+    float *f = static_cast<float *>(mConstants[0]->getPtr());
+    memcpy(m, &f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET], sizeof(rsc_Matrix));
+}
+
 void ProgramVertex::transformToScreen(const Context *rsc, float *v4out, const float *v3in) const
 {
     float *f = static_cast<float *>(mConstants[0]->getPtr());

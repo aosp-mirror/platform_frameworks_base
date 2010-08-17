@@ -117,6 +117,12 @@ static void SC_pfConstantColor(RsProgramFragment vpf, float r, float g, float b,
     pf->setConstantColor(r, g, b, a);
 }
 
+static void SC_vpGetProjectionMatrix(rsc_Matrix *m)
+{
+    GET_TLS();
+    rsc->getVertex()->getProjectionMatrix(m);
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Drawing
@@ -386,6 +392,8 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z36rsgProgramVertexLoadProjectionMatrixPK12rs_matrix4x4", (void *)&SC_vpLoadProjectionMatrix },
     { "_Z31rsgProgramVertexLoadModelMatrixPK12rs_matrix4x4", (void *)&SC_vpLoadModelMatrix },
     { "_Z33rsgProgramVertexLoadTextureMatrixPK12rs_matrix4x4", (void *)&SC_vpLoadTextureMatrix },
+
+    { "_Z35rsgProgramVertexGetProjectionMatrixP12rs_matrix4x4", (void *)&SC_vpGetProjectionMatrix },
 
     { "_Z31rsgProgramFragmentConstantColor19rs_program_fragmentffff", (void *)&SC_pfConstantColor },
 
