@@ -117,6 +117,7 @@ private:
         uint8_t*        keyBitmask;
         KeyLayoutMap*   layoutMap;
         String8         keylayoutFilename;
+        int             fd;
         device_t*       next;
         
         device_t(int32_t _id, const char* _path, const char* name);
