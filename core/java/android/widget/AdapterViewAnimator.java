@@ -17,8 +17,6 @@
 package android.widget;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
 
 import android.animation.PropertyAnimator;
 import android.content.Context;
@@ -28,10 +26,8 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
@@ -140,7 +136,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
     public AdapterViewAnimator(Context context) {
         super(context);
-        initViewAnimator(context, null);
+        initViewAnimator();
     }
 
     public AdapterViewAnimator(Context context, AttributeSet attrs) {
@@ -165,13 +161,13 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
         a.recycle();
 
-        initViewAnimator(context, attrs);
+        initViewAnimator();
     }
 
     /**
      * Initialize this {@link AdapterViewAnimator}
      */
-    private void initViewAnimator(Context context, AttributeSet attrs) {
+    private void initViewAnimator() {
         mMainQueue = new Handler(Looper.myLooper());
         mActiveViews = new View[mNumActiveViews];
         mPreviousViews = new ArrayList<View>();
@@ -183,10 +179,10 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * desired number of views, and specify the offset
      *
      * @param numVisibleViews The number of views the animator keeps in the {@link ViewGroup}
-     * @param activeOffset This parameter specifies where the current index ({@link mWhichChild})
+     * @param activeOffset This parameter specifies where the current index ({@link #mWhichChild})
      *        sits within the window. For example if activeOffset is 1, and numVisibleViews is 3,
-     *        and {@link setDisplayedChild} is called with 10, then the effective window will be
-     *        the indexes 9, 10, and 11. In the same example, if activeOffset were 0, then the
+     *        and {@link #setDisplayedChild(int)} is called with 10, then the effective window will
+     *        be the indexes 9, 10, and 11. In the same example, if activeOffset were 0, then the
      *        window would instead contain indexes 10, 11 and 12.
      */
      void configureViewAnimator(int numVisibleViews, int activeOffset) {
@@ -325,9 +321,9 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     }
 
     private LayoutParams createOrReuseLayoutParams(View v) {
-        final LayoutParams currentLp = (LayoutParams) v.getLayoutParams();
+        final ViewGroup.LayoutParams currentLp = v.getLayoutParams();
         if (currentLp instanceof LayoutParams) {
-            return currentLp;
+            return (LayoutParams) currentLp;
         }
         return new LayoutParams(v);
     }
