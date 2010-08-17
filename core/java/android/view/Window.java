@@ -130,6 +130,8 @@ public abstract class Window {
 
     private boolean mHasSoftInputMode = false;
     
+    private boolean mDestroyed;
+
     // The current window attributes.
     private final WindowManager.LayoutParams mWindowAttributes =
         new WindowManager.LayoutParams();
@@ -382,6 +384,16 @@ public abstract class Window {
         return mHasChildren;
     }
     
+    /** @hide */
+    public final void destroy() {
+        mDestroyed = true;
+    }
+
+    /** @hide */
+    public final boolean isDestroyed() {
+        return mDestroyed;
+    }
+
     /**
      * Set the window manager for use by this Window to, for example,
      * display panels.  This is <em>not</em> used for displaying the

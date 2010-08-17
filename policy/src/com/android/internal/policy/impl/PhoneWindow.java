@@ -2459,7 +2459,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     // being called in the middle of onCreate or similar.
                     mDecor.post(new Runnable() {
                         public void run() {
-                            invalidatePanelMenu(FEATURE_ACTION_BAR);
+                            if (!isDestroyed()) {
+                                invalidatePanelMenu(FEATURE_ACTION_BAR);
+                            }
                         }
                     });
                 }

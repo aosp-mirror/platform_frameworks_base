@@ -393,6 +393,22 @@ public abstract class PreferenceActivity extends ListActivity implements
     }
 
     /**
+     * Returns true if this activity is currently showing the header list.
+     */
+    public boolean hasHeaders() {
+        return getListView().getVisibility() == View.VISIBLE
+                && mPreferenceManager == null;
+    }
+
+    /**
+     * Returns true if this activity is showing multiple panes -- the headers
+     * and a preference fragment.
+     */
+    public boolean isMultiPane() {
+        return hasHeaders() && mPrefsContainer.getVisibility() == View.VISIBLE;
+    }
+
+    /**
      * Called to determine if the activity should run in multi-pane mode.
      * The default implementation returns true if the screen is large
      * enough.
@@ -408,9 +424,11 @@ public abstract class PreferenceActivity extends ListActivity implements
     }
 
     /**
-     * Called to determine whether the header list should be hidden.  The
-     * default implementation hides the list if the activity is being re-launched
-     * when not in multi-pane mode.
+     * Called to determine whether the header list should be hidden.
+     * The default implementation returns the
+     * value given in {@link #EXTRA_NO_HEADERS} or false if it is not supplied.
+     * This is set to false, for example, when the activity is being re-launched
+     * to show a particular preference activity.
      */
     public boolean onIsHidingHeaders() {
         return getIntent().getBooleanExtra(EXTRA_NO_HEADERS, false);
