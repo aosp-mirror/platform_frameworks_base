@@ -62,7 +62,7 @@ class BaseObj {
     {
         if (!mDestroyed) {
             if(mID != 0 && mRS.isAlive()) {
-                mRS.nObjDestroyOOB(mID);
+                mRS.nObjDestroy(mID);
             }
             mRS = null;
             mID = 0;

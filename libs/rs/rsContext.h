@@ -137,7 +137,6 @@ public:
 
 
     ThreadIO mIO;
-    void objDestroyAdd(ObjectBase *);
 
     // Timers
     enum Timers {
@@ -247,16 +246,6 @@ protected:
     ObjectBaseRef<ProgramStore> mFragmentStore;
     ObjectBaseRef<ProgramRaster> mRaster;
     ObjectBaseRef<Font> mFont;
-
-    struct ObjDestroyOOB {
-        Mutex mMutex;
-        Vector<ObjectBase *> mDestroyList;
-        bool mNeedToEmpty;
-    };
-    ObjDestroyOOB mObjDestroy;
-    bool objDestroyOOBInit();
-    void objDestroyOOBRun();
-    void objDestroyOOBDestroy();
 
     void displayDebugStats();
 

@@ -63,7 +63,6 @@ void rsDeviceSetConfig(RsDevice, RsDeviceParam, int32_t value);
 RsContext rsContextCreate(RsDevice, uint32_t version);
 RsContext rsContextCreateGL(RsDevice, uint32_t version, bool useDepth);
 void rsContextDestroy(RsContext);
-void rsObjDestroyOOB(RsContext, void *);
 
 uint32_t rsContextGetMessage(RsContext, void *data, size_t *receiveLen, size_t bufferLen, bool wait);
 void rsContextInitToClient(RsContext);
