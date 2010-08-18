@@ -17,6 +17,9 @@
 #define DBUS_ADAPTER_IFACE BLUEZ_DBUS_BASE_IFC ".Adapter"
 #define DBUS_DEVICE_IFACE BLUEZ_DBUS_BASE_IFC ".Device"
 #define DBUS_INPUT_IFACE BLUEZ_DBUS_BASE_IFC ".Input"
+#define DBUS_NETWORK_IFACE BLUEZ_DBUS_BASE_IFC ".Network"
+#define DBUS_NETWORKSERVER_IFACE BLUEZ_DBUS_BASE_IFC ".NetworkServer"
+
 
 #define LOG_TAG "BluetoothService.cpp"
 
@@ -71,6 +74,8 @@ void onCreatePairedDeviceResult(DBusMessage *msg, void *user, void *nat);
 void onDiscoverServicesResult(DBusMessage *msg, void *user, void *nat);
 void onCreateDeviceResult(DBusMessage *msg, void *user, void *nat);
 void onInputDeviceConnectionResult(DBusMessage *msg, void *user, void *nat);
+void onConnectPanResult(DBusMessage *msg, void *user, void *n);
+void onPanDeviceConnectionResult(DBusMessage *msg, void *user, void *nat);
 
 
 /** Get native data stored in the opaque (Java code maintained) pointer mNativeData
@@ -939,6 +944,105 @@ static jboolean disconnectInputDeviceNative(JNIEnv *env, jobject object,
     return JNI_FALSE;
 }
 
+static jboolean setBluetoothTetheringNative(JNIEnv *env, jobject object, jboolean value,
+                                            jstring src_role, jstring bridge) {
+    LOGV(__FUNCTION__);
+#ifdef HAVE_BLUETOOTH
+    native_data_t *nat = get_native_data(env, object);
+    if (nat) {
+        DBusMessage *reply;
+        const char *c_role = env->GetStringUTFChars(src_role, NULL);
+        const char *c_bridge = env->GetStringUTFChars(bridge, NULL);
+        if (value) {
+            LOGE("setBluetoothTetheringNative true");
+            reply = dbus_func_args(env, nat->conn,
+                                  get_adapter_path(env, object),
+                                  DBUS_NETWORKSERVER_IFACE,
+                                  "Register",
+                                  DBUS_TYPE_STRING, &c_role,
+                                  DBUS_TYPE_STRING, &c_bridge,
+                                  DBUS_TYPE_INVALID);
+        } else {
+            LOGE("setBluetoothTetheringNative false");
+            reply = dbus_func_args(env, nat->conn,
+                                  get_adapter_path(env, object),
+                                  DBUS_NETWORKSERVER_IFACE,
+                                  "Unregister",
+                                  DBUS_TYPE_STRING, &c_role,
+                                  DBUS_TYPE_INVALID);
+        }
+        env->ReleaseStringUTFChars(src_role, c_role);
+        env->ReleaseStringUTFChars(bridge, c_bridge);
+        return reply ? JNI_TRUE : JNI_FALSE;
+    }
+#endif
+    return JNI_FALSE;
+}
+
+static jboolean connectPanDeviceNative(JNIEnv *env, jobject object, jstring path,
+                                       jstring srcRole, jstring dstRole) {
+    LOGV(__FUNCTION__);
+#ifdef HAVE_BLUETOOTH
+    LOGE("connectPanDeviceNative");
+    native_data_t *nat = get_native_data(env, object);
+    jobject eventLoop = env->GetObjectField(object, field_mEventLoop);
+    struct event_loop_native_data_t *eventLoopNat =
+            get_EventLoop_native_data(env, eventLoop);
+
+    if (nat && eventLoopNat) {
+        const char *c_path = env->GetStringUTFChars(path, NULL);
+        const char *src = env->GetStringUTFChars(srcRole, NULL);
+        const char *dst = env->GetStringUTFChars(dstRole, NULL);
+
+        int len = env->GetStringLength(path) + 1;
+        char *context_path = (char *)calloc(len, sizeof(char));
+        strlcpy(context_path, c_path, len);  // for callback
+
+        bool ret = dbus_func_args_async(env, nat->conn, -1,onPanDeviceConnectionResult,
+                                    context_path, eventLoopNat, c_path,
+                                    DBUS_NETWORK_IFACE, "Connect",
+                                    DBUS_TYPE_STRING, &src,
+                                    DBUS_TYPE_STRING, &dst,
+                                    DBUS_TYPE_INVALID);
+
+        env->ReleaseStringUTFChars(path, c_path);
+        env->ReleaseStringUTFChars(srcRole, src);
+        env->ReleaseStringUTFChars(dstRole, dst);
+        return ret ? JNI_TRUE : JNI_FALSE;
+    }
+#endif
+    return JNI_FALSE;
+}
+
+static jboolean disconnectPanDeviceNative(JNIEnv *env, jobject object,
+                                     jstring path) {
+    LOGV(__FUNCTION__);
+#ifdef HAVE_BLUETOOTH
+    LOGE("disconnectPanDeviceNative");
+    native_data_t *nat = get_native_data(env, object);
+    jobject eventLoop = env->GetObjectField(object, field_mEventLoop);
+    struct event_loop_native_data_t *eventLoopNat =
+            get_EventLoop_native_data(env, eventLoop);
+
+    if (nat && eventLoopNat) {
+        const char *c_path = env->GetStringUTFChars(path, NULL);
+
+        int len = env->GetStringLength(path) + 1;
+        char *context_path = (char *)calloc(len, sizeof(char));
+        strlcpy(context_path, c_path, len);  // for callback
+
+        bool ret = dbus_func_args_async(env, nat->conn, -1,onPanDeviceConnectionResult,
+                                        context_path, eventLoopNat, c_path,
+                                        DBUS_NETWORK_IFACE, "Disconnect",
+                                        DBUS_TYPE_INVALID);
+
+        env->ReleaseStringUTFChars(path, c_path);
+        return ret ? JNI_TRUE : JNI_FALSE;
+    }
+#endif
+    return JNI_FALSE;
+}
+
 static JNINativeMethod sMethods[] = {
      /* name, signature, funcPtr */
     {"classInitNative", "()V", (void*)classInitNative},
@@ -987,7 +1091,14 @@ static JNINativeMethod sMethods[] = {
     // HID functions
     {"connectInputDeviceNative", "(Ljava/lang/String;)Z", (void *)connectInputDeviceNative},
     {"disconnectInputDeviceNative", "(Ljava/lang/String;)Z", (void *)disconnectInputDeviceNative},
+
+    {"setBluetoothTetheringNative", "(ZLjava/lang/String;Ljava/lang/String;)Z",
+              (void *)setBluetoothTetheringNative},
+    {"connectPanDeviceNative", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z",
+              (void *)connectPanDeviceNative},
+    {"disconnectPanDeviceNative", "(Ljava/lang/String;)Z", (void *)disconnectPanDeviceNative},
 };
+
 
 int register_android_server_BluetoothService(JNIEnv *env) {
     return AndroidRuntime::registerNativeMethods(env,

@@ -324,14 +324,14 @@ public class ConnectivityManager
      * <p>
      * All applications that have background services that use the network
      * should listen to {@link #ACTION_BACKGROUND_DATA_SETTING_CHANGED}.
-     * 
+     *
      * @return Whether background data usage is allowed.
      */
     public boolean getBackgroundDataSetting() {
         try {
             return mService.getBackgroundDataSetting();
         } catch (RemoteException e) {
-            // Err on the side of safety 
+            // Err on the side of safety
             return false;
         }
     }
@@ -484,6 +484,17 @@ public class ConnectivityManager
     public String[] getTetherableWifiRegexs() {
         try {
             return mService.getTetherableWifiRegexs();
+        } catch (RemoteException e) {
+            return new String[0];
+        }
+    }
+
+    /**
+     * {@hide}
+     */
+    public String[] getTetherableBluetoothRegexs() {
+        try {
+            return mService.getTetherableBluetoothRegexs();
         } catch (RemoteException e) {
             return new String[0];
         }

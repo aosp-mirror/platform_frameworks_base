@@ -19,8 +19,8 @@ package com.android.server.connectivity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothPan;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -32,7 +32,6 @@ import android.net.InterfaceConfiguration;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.NetworkInfo;
-import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.HandlerThread;
@@ -53,6 +52,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Set;
 /**
  * @hide
@@ -75,6 +75,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     // TODO - remove both of these - should be part of interface inspection/selection stuff
     private String[] mTetherableUsbRegexs;
     private String[] mTetherableWifiRegexs;
+    private String[] mTetherableBluetoothRegexs;
     private String[] mUpstreamIfaceRegexs;
 
     private Looper mLooper;
@@ -94,6 +95,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private static final String DHCP_DEFAULT_RANGE1_STOP  = "192.168.42.254";
     private static final String DHCP_DEFAULT_RANGE2_START = "192.168.43.2";
     private static final String DHCP_DEFAULT_RANGE2_STOP  = "192.168.43.254";
+    private static final String DHCP_DEFAULT_RANGE3_START = "192.168.44.9";
+    private static final String DHCP_DEFAULT_RANGE3_STOP  = "192.168.44.254";
 
     private String[] mDnsServers;
     private static final String DNS_DEFAULT_SERVER1 = "8.8.8.8";
@@ -153,11 +156,13 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         mDhcpRange = context.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_dhcp_range);
         if ((mDhcpRange.length == 0) || (mDhcpRange.length % 2 ==1)) {
-            mDhcpRange = new String[4];
+            mDhcpRange = new String[6];
             mDhcpRange[0] = DHCP_DEFAULT_RANGE1_START;
             mDhcpRange[1] = DHCP_DEFAULT_RANGE1_STOP;
             mDhcpRange[2] = DHCP_DEFAULT_RANGE2_START;
             mDhcpRange[3] = DHCP_DEFAULT_RANGE2_STOP;
+            mDhcpRange[4] = DHCP_DEFAULT_RANGE3_START;
+            mDhcpRange[5] = DHCP_DEFAULT_RANGE3_STOP;
         }
         mDunRequired = false; // resample when we turn on
 
@@ -165,6 +170,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 com.android.internal.R.array.config_tether_usb_regexs);
         mTetherableWifiRegexs = context.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_wifi_regexs);
+        mTetherableBluetoothRegexs = context.getResources().getStringArray(
+                com.android.internal.R.array.config_tether_bluetooth_regexs);
         mUpstreamIfaceRegexs = context.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_upstream_regexs);
 
@@ -183,6 +190,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         } else if (isUsb(iface)) {
             found = true;
             usb = true;
+        } else if (isBluetooth(iface)) {
+            found = true;
         }
         if (found == false) return;
 
@@ -217,6 +226,12 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         return false;
     }
 
+    public boolean isBluetooth(String iface) {
+        for (String regex : mTetherableBluetoothRegexs) {
+            if (iface.matches(regex)) return true;
+        }
+        return false;
+    }
     public void interfaceAdded(String iface) {
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
         INetworkManagementService service = INetworkManagementService.Stub.asInterface(b);
@@ -228,6 +243,9 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         if (isUsb(iface)) {
             found = true;
             usb = true;
+        }
+        if (isBluetooth(iface)) {
+            found = true;
         }
         if (found == false) {
             if (DEBUG) Log.d(TAG, iface + " is not a tetherable iface, ignoring");
@@ -324,13 +342,14 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
         boolean wifiTethered = false;
         boolean usbTethered = false;
+        boolean bluetoothTethered = false;
 
         synchronized (mIfaces) {
             Set ifaces = mIfaces.keySet();
             for (Object iface : ifaces) {
                 TetherInterfaceSM sm = mIfaces.get(iface);
                 if (sm != null) {
-                    if(sm.isErrored()) {
+                    if (sm.isErrored()) {
                         erroredList.add((String)iface);
                     } else if (sm.isAvailable()) {
                         availableList.add((String)iface);
@@ -339,6 +358,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                             usbTethered = true;
                         } else if (isWifi((String)iface)) {
                             wifiTethered = true;
+                      } else if (isBluetooth((String)iface)) {
+                            bluetoothTethered = true;
                         }
                         activeList.add((String)iface);
                     }
@@ -359,13 +380,19 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         }
 
         if (usbTethered) {
-            if (wifiTethered) {
+            if (wifiTethered || bluetoothTethered) {
                 showTetheredNotification(com.android.internal.R.drawable.stat_sys_tether_general);
             } else {
                 showTetheredNotification(com.android.internal.R.drawable.stat_sys_tether_usb);
             }
         } else if (wifiTethered) {
-            showTetheredNotification(com.android.internal.R.drawable.stat_sys_tether_wifi);
+            if (bluetoothTethered) {
+                showTetheredNotification(com.android.internal.R.drawable.stat_sys_tether_general);
+            } else {
+                showTetheredNotification(com.android.internal.R.drawable.stat_sys_tether_wifi);
+            }
+        } else if (bluetoothTethered) {
+            showTetheredNotification(com.android.internal.R.drawable.stat_sys_tether_bluetooth);
         } else {
             clearTetheredNotification();
         }
@@ -396,7 +423,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         CharSequence message = r.getText(com.android.internal.R.string.
                 tethered_notification_message);
 
-        if(mTetheredNotification == null) {
+        if (mTetheredNotification == null) {
             mTetheredNotification = new Notification();
             mTetheredNotification.when = 0;
         }
@@ -471,7 +498,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         }
     }
 
-    // toggled when we enter/leave the fully teathered state
+    // toggled when we enter/leave the fully tethered state
     private boolean enableUsbRndis(boolean enabled) {
         if (DEBUG) Log.d(TAG, "enableUsbRndis(" + enabled + ")");
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
@@ -552,6 +579,10 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
     public String[] getTetherableWifiRegexs() {
         return mTetherableWifiRegexs;
+    }
+
+    public String[] getTetherableBluetoothRegexs() {
+        return mTetherableBluetoothRegexs;
     }
 
     public String[] getUpstreamIfaceRegexs() {

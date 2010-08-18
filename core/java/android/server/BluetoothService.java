@@ -24,28 +24,30 @@
 
 package android.server;
 
-import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothDeviceProfileState;
+import android.bluetooth.BluetoothPan;
 import android.bluetooth.BluetoothProfileState;
 import android.bluetooth.BluetoothInputDevice;
 import android.bluetooth.BluetoothSocket;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetooth;
 import android.bluetooth.IBluetoothCallback;
-import android.bluetooth.IBluetoothHeadset;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.InterfaceConfiguration;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
@@ -89,6 +91,7 @@ public class BluetoothService extends IBluetooth.Stub {
     private int mBluetoothState;
     private boolean mRestart = false;  // need to call enable() after disable()
     private boolean mIsDiscovering;
+    private boolean mTetheringOn;
 
     private BluetoothAdapter mAdapter;  // constant after init()
     private final BondState mBondState = new BondState();  // local cache of bondings
@@ -108,6 +111,10 @@ public class BluetoothService extends IBluetooth.Stub {
     private static final int MESSAGE_FINISH_DISABLE = 2;
     private static final int MESSAGE_UUID_INTENT = 3;
     private static final int MESSAGE_DISCOVERABLE_TIMEOUT = 4;
+
+    private ArrayList<String> mBluetoothIfaceAddresses;
+    private static final String BLUETOOTH_NEAR_IFACE_ADDR_PREFIX= "192.168.44.";
+    private static final String BLUETOOTH_NETMASK        = "255.255.255.0";
 
     // The timeout used to sent the UUIDs Intent
     // This timeout should be greater than the page timeout
@@ -136,6 +143,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private BluetoothA2dpService mA2dpService;
     private final HashMap<BluetoothDevice, Integer> mInputDevices;
+    private final HashMap<BluetoothDevice, Integer> mPanDevices;
 
     private static String mDockAddress;
     private String mDockPin;
@@ -187,6 +195,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
         mBluetoothState = BluetoothAdapter.STATE_OFF;
         mIsDiscovering = false;
+        mTetheringOn = false;
         mAdapterProperties = new HashMap<String, String>();
         mDeviceProperties = new HashMap<String, Map<String,String>>();
 
@@ -199,6 +208,12 @@ public class BluetoothService extends IBluetooth.Stub {
         mHfpProfileState = new BluetoothProfileState(mContext, BluetoothProfileState.HFP);
         mHidProfileState = new BluetoothProfileState(mContext, BluetoothProfileState.HID);
 
+        // Can tether to up to 7 devices
+        mBluetoothIfaceAddresses = new ArrayList<String>(BluetoothPan.MAX_CONNECTIONS);
+        for (int i=1; i <= BluetoothPan.MAX_CONNECTIONS; i++) {
+            mBluetoothIfaceAddresses.add(BLUETOOTH_NEAR_IFACE_ADDR_PREFIX + i);
+        }
+
         mHfpProfileState.start();
         mA2dpProfileState.start();
         mHidProfileState.start();
@@ -209,6 +224,7 @@ public class BluetoothService extends IBluetooth.Stub {
         filter.addAction(Intent.ACTION_DOCK_EVENT);
         mContext.registerReceiver(mReceiver, filter);
         mInputDevices = new HashMap<BluetoothDevice, Integer>();
+        mPanDevices = new HashMap<BluetoothDevice, Integer>();
     }
 
     public static synchronized String readDockBluetoothAddress() {
@@ -336,6 +352,7 @@ public class BluetoothService extends IBluetooth.Stub {
         }
         setBluetoothState(BluetoothAdapter.STATE_TURNING_OFF);
         mHandler.removeMessages(MESSAGE_REGISTER_SDP_RECORDS);
+        setBluetoothTethering(false, BluetoothPan.NAP_ROLE, BluetoothPan.NAP_BRIDGE);
 
         // Allow 3 seconds for profiles to gracefully disconnect
         // TODO: Introduce a callback mechanism so that each profile can notify
@@ -1235,6 +1252,194 @@ public class BluetoothService extends IBluetooth.Stub {
         return sp.contains(SHARED_PREFERENCE_DOCK_ADDRESS + address);
     }
 
+    public synchronized boolean isTetheringOn() {
+        return mTetheringOn;
+    }
+
+    public synchronized void setBluetoothTethering(boolean value, String uuid, String bridge) {
+        mTetheringOn = value;
+        if (!value) {
+            disconnectPan();
+        }
+        setBluetoothTetheringNative(value, uuid, bridge);
+    }
+
+    public synchronized int getPanDeviceState(BluetoothDevice device) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+
+        if (mPanDevices.get(device) == null) {
+            return BluetoothPan.STATE_DISCONNECTED;
+        }
+        return mPanDevices.get(device);
+    }
+
+    public synchronized boolean connectPanDevice(BluetoothDevice device) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
+
+        String objectPath = getObjectPathFromAddress(device.getAddress());
+        if (DBG) log("connect PAN(" + objectPath + ")");
+        if (getPanDeviceState(device) != BluetoothPan.STATE_DISCONNECTED) {
+            log (device + " already connected to PAN");
+        }
+
+        int connectedCount = 0;
+        for (BluetoothDevice BTdevice: mPanDevices.keySet()) {
+            if (getPanDeviceState(BTdevice) == BluetoothPan.STATE_CONNECTED) {
+                connectedCount ++;
+            }
+        }
+        if (connectedCount > 8) {
+            log (device + " could not connect to PAN because 8 other devices are already connected");
+            return false;
+        }
+
+        handlePanDeviceStateChange(device, BluetoothPan.STATE_CONNECTING);
+        if (connectPanDeviceNative(objectPath, "nap", "panu")) {
+            log ("connecting to PAN");
+            return true;
+        } else {
+            handlePanDeviceStateChange(device, BluetoothPan.STATE_DISCONNECTED);
+            log ("could not connect to PAN");
+            return false;
+        }
+    }
+
+    private synchronized boolean disconnectPan() {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        if (DBG) log("disconnect all PAN devices");
+
+        for (BluetoothDevice device: mPanDevices.keySet()) {
+            if (getPanDeviceState(device) == BluetoothPan.STATE_CONNECTED) {
+                if (!disconnectPanDevice(device)) {
+                    log ("could not disconnect Pan Device "+device.getAddress());
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public synchronized BluetoothDevice[] getConnectedPanDevices() {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+
+        Set<BluetoothDevice> devices = new HashSet<BluetoothDevice>();
+        for (BluetoothDevice device: mPanDevices.keySet()) {
+            if (getPanDeviceState(device) == BluetoothPan.STATE_CONNECTED) {
+                devices.add(device);
+            }
+        }
+        return devices.toArray(new BluetoothDevice[devices.size()]);
+    }
+
+    public synchronized boolean disconnectPanDevice(BluetoothDevice device) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
+        String objectPath = getObjectPathFromAddress(device.getAddress());
+        if (DBG) log("disconnect PAN(" + objectPath + ")");
+        if (getPanDeviceState(device) != BluetoothPan.STATE_CONNECTED) {
+            log (device + " already disconnected from PAN");
+        }
+        handlePanDeviceStateChange(device, BluetoothPan.STATE_DISCONNECTING);
+        return disconnectPanDeviceNative(objectPath);
+    }
+
+    /*package*/ void handlePanDeviceStateChange(BluetoothDevice device, int state) {
+        int prevState;
+        if (mPanDevices.get(device) == null) {
+            prevState = BluetoothPan.STATE_DISCONNECTED;
+        } else {
+            prevState = mPanDevices.get(device);
+        }
+        if (prevState == state) return;
+
+        mPanDevices.put(device, state);
+
+        if (state == BluetoothPan.STATE_CONNECTED) {
+            updateTetherState(true);
+        }
+
+        Intent intent = new Intent(BluetoothPan.ACTION_PAN_STATE_CHANGED);
+        intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
+        intent.putExtra(BluetoothPan.EXTRA_PREVIOUS_PAN_STATE, prevState);
+        intent.putExtra(BluetoothPan.EXTRA_PAN_STATE, state);
+        mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+
+        if (DBG) log("Pan Device state : device: " + device + " State:" + prevState + "->" + state);
+
+    }
+
+    // configured when we start tethering and unconfig'd on error or conclusion
+    private boolean updateTetherState(boolean enabled) {
+        Log.d(TAG, "configureBluetoothIface(" + enabled + ")");
+
+        IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
+        INetworkManagementService service = INetworkManagementService.Stub.asInterface(b);
+        ConnectivityManager cm =
+            (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        String[] bluetoothRegexs = cm.getTetherableBluetoothRegexs();
+
+        // bring toggle the interfaces
+        String[] ifaces = new String[0];
+        try {
+            ifaces = service.listInterfaces();
+        } catch (Exception e) {
+            Log.e(TAG, "Error listing Interfaces :" + e);
+            return false;
+        }
+
+        ArrayList<String> ifaceAddresses = (ArrayList<String>) mBluetoothIfaceAddresses.clone();
+        for (String iface : ifaces) {
+            for (String regex : bluetoothRegexs) {
+                if (iface.matches(regex)) {
+                    InterfaceConfiguration ifcg = null;
+                    try {
+                        ifcg = service.getInterfaceConfig(iface);
+                        if (ifcg != null) {
+                            if (enabled) {
+                                String[] addr = BLUETOOTH_NETMASK.split("\\.");
+                                ifcg.netmask = (Integer.parseInt(addr[0]) << 24) +
+                                        (Integer.parseInt(addr[1]) << 16) +
+                                        (Integer.parseInt(addr[2]) << 8) +
+                                        (Integer.parseInt(addr[3]));
+                                if (ifcg.ipAddr == 0 && !ifaceAddresses.isEmpty()) {
+                                    addr = ifaceAddresses.remove(0).split("\\.");
+                                    ifcg.ipAddr = (Integer.parseInt(addr[0]) << 24) +
+                                            (Integer.parseInt(addr[1]) << 16) +
+                                            (Integer.parseInt(addr[2]) << 8) +
+                                            (Integer.parseInt(addr[3]));
+                                } else {
+                                    String IfaceAddress =
+                                            String.valueOf(ifcg.ipAddr >>> 24) + "." +
+                                            String.valueOf((ifcg.ipAddr & 0x00FF0000) >>> 16) + "." +
+                                            String.valueOf((ifcg.ipAddr & 0x0000FF00) >>> 8) + "." +
+                                            String.valueOf(ifcg.ipAddr & 0x000000FF);
+                                    ifaceAddresses.remove(IfaceAddress);
+                                }
+                                ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
+                            } else {
+                                ifcg.interfaceFlags = ifcg.interfaceFlags.replace("up", "down");
+                            }
+                            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("running", "");
+                            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("  "," ");
+                            service.setInterfaceConfig(iface, ifcg);
+                            if (enabled) {
+                                if (cm.tether(iface) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
+                                    Log.e(TAG, "Error tethering "+ifaces);
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error configuring interface " + iface + ", :" + e);
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
     public synchronized boolean connectInputDevice(BluetoothDevice device) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
@@ -1418,7 +1623,7 @@ public class BluetoothService extends IBluetooth.Stub {
             if (updateRemoteDevicePropertiesCache(address))
                 return getRemoteDeviceProperty(address, property);
         }
-        Log.e(TAG, "getRemoteDeviceProperty: " + property + "not present:" + address);
+        Log.e(TAG, "getRemoteDeviceProperty: " + property + " not present: " + address);
         return null;
     }
 
@@ -2281,4 +2486,8 @@ public class BluetoothService extends IBluetooth.Stub {
     private native boolean setLinkTimeoutNative(String path, int num_slots);
     private native boolean connectInputDeviceNative(String path);
     private native boolean disconnectInputDeviceNative(String path);
+
+    private native boolean setBluetoothTetheringNative(boolean value, String nap, String bridge);
+    private native boolean connectPanDeviceNative(String path, String srcRole, String dstRole);
+    private native boolean disconnectPanDeviceNative(String path);
 }

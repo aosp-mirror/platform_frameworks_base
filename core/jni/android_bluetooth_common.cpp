@@ -73,6 +73,12 @@ static Properties input_properties[] = {
     {"Connected", DBUS_TYPE_BOOLEAN},
 };
 
+static Properties pan_properties[] = {
+    {"Connected", DBUS_TYPE_BOOLEAN},
+    {"Interface", DBUS_TYPE_STRING},
+    {"UUID", DBUS_TYPE_STRING},
+};
+
 typedef union {
     char *str_val;
     int int_val;
@@ -191,6 +197,7 @@ dbus_bool_t dbus_func_args_async(JNIEnv *env,
     dbus_bool_t ret;
     va_list lst;
     va_start(lst, first_arg_type);
+
     ret = dbus_func_args_async_valist(env, conn,
                                       timeout_ms,
                                       reply, user, nat,
@@ -706,6 +713,11 @@ jobjectArray parse_remote_device_property_change(JNIEnv *env, DBusMessage *msg) 
 jobjectArray parse_input_property_change(JNIEnv *env, DBusMessage *msg) {
     return parse_property_change(env, msg, (Properties *) &input_properties,
                     sizeof(input_properties) / sizeof(Properties));
+}
+
+jobjectArray parse_pan_property_change(JNIEnv *env, DBusMessage *msg) {
+    return parse_property_change(env, msg, (Properties *) &pan_properties,
+                    sizeof(pan_properties) / sizeof(Properties));
 }
 
 jobjectArray parse_adapter_properties(JNIEnv *env, DBusMessageIter *iter) {
