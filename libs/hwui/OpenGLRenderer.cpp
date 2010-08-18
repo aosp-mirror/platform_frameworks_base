@@ -255,10 +255,7 @@ bool OpenGLRenderer::restoreSnapshot() {
         composeLayer(current, previous);
     }
 
-    bool skip = mSnapshot->skip;
-    if (!skip) {
-        mSaveCount--;
-    }
+    mSaveCount--;
     mSnapshot = previous;
 
     if (restoreClip) {
