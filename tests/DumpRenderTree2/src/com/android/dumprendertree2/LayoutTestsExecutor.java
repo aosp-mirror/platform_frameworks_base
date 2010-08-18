@@ -40,11 +40,14 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.webkit.GeolocationPermissions.Callback;
+import android.webkit.GeolocationPermissions;
 import android.webkit.WebStorage.QuotaUpdater;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This activity executes the test. It contains WebView and logic of LayoutTestController
@@ -107,8 +110,9 @@ public class LayoutTestsExecutor extends Activity {
     private LayoutTestController mLayoutTestController = new LayoutTestController(this);
     private boolean mCanOpenWindows;
     private boolean mDumpDatabaseCallbacks;
-    private boolean mSetGeolocationPermissionCalled;
+    private boolean mIsGeolocationPermissionSet;
     private boolean mGeolocationPermission;
+    private Map mPendingGeolocationPermissionCallbacks;
 
     private EventSender mEventSender = new EventSender();
 
@@ -230,10 +234,17 @@ public class LayoutTestsExecutor extends Activity {
         }
 
         @Override
-        public void onGeolocationPermissionsShowPrompt(String origin, Callback callback) {
-            if (mSetGeolocationPermissionCalled) {
+        public void onGeolocationPermissionsShowPrompt(String origin,
+                GeolocationPermissions.Callback callback) {
+            if (mIsGeolocationPermissionSet) {
                 callback.invoke(origin, mGeolocationPermission, false);
+                return;
             }
+            if (mPendingGeolocationPermissionCallbacks == null) {
+                mPendingGeolocationPermissionCallbacks =
+                        new HashMap<GeolocationPermissions.Callback, String>();
+            }
+            mPendingGeolocationPermissionCallbacks.put(callback, origin);
         }
     };
 
@@ -465,7 +476,7 @@ public class LayoutTestsExecutor extends Activity {
     private static final int MSG_DUMP_CHILD_FRAMES_AS_TEXT = 3;
     private static final int MSG_SET_CAN_OPEN_WINDOWS = 4;
     private static final int MSG_DUMP_DATABASE_CALLBACKS = 5;
-    private static final int MSG_SET_GEOLOCATION_PREMISSION = 6;
+    private static final int MSG_SET_GEOLOCATION_PERMISSION = 6;
 
     Handler mLayoutTestControllerHandler = new Handler() {
         @Override
@@ -513,9 +524,20 @@ public class LayoutTestsExecutor extends Activity {
                     mDumpDatabaseCallbacks = true;
                     break;
 
-                case MSG_SET_GEOLOCATION_PREMISSION:
-                    mSetGeolocationPermissionCalled = true;
+                case MSG_SET_GEOLOCATION_PERMISSION:
+                    mIsGeolocationPermissionSet = true;
                     mGeolocationPermission = msg.arg1 == 1;
+
+                    if (mPendingGeolocationPermissionCallbacks != null) {
+                        Iterator iter = mPendingGeolocationPermissionCallbacks.keySet().iterator();
+                        while (iter.hasNext()) {
+                            GeolocationPermissions.Callback callback =
+                                    (GeolocationPermissions.Callback) iter.next();
+                            String origin = (String) mPendingGeolocationPermissionCallbacks.get(callback);
+                            callback.invoke(origin, mGeolocationPermission, false);
+                        }
+                        mPendingGeolocationPermissionCallbacks = null;
+                    }
                     break;
 
                 default:
@@ -528,8 +550,8 @@ public class LayoutTestsExecutor extends Activity {
     private void resetLayoutTestController() {
         mCanOpenWindows = false;
         mDumpDatabaseCallbacks = false;
-        mSetGeolocationPermissionCalled = false;
-        mGeolocationPermission = false;
+        mIsGeolocationPermissionSet = false;
+        mPendingGeolocationPermissionCallbacks = null;
     }
 
     public void waitUntilDone() {
@@ -568,7 +590,7 @@ public class LayoutTestsExecutor extends Activity {
 
     public void setGeolocationPermission(boolean allow) {
         Log.w(LOG_TAG + "::setGeolocationPermission", "called");
-        Message msg = mLayoutTestControllerHandler.obtainMessage(MSG_SET_GEOLOCATION_PREMISSION);
+        Message msg = mLayoutTestControllerHandler.obtainMessage(MSG_SET_GEOLOCATION_PERMISSION);
         msg.arg1 = allow ? 1 : 0;
         msg.sendToTarget();
     }

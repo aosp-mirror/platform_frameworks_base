@@ -57,6 +57,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
@@ -493,8 +494,19 @@ public class TestShellActivity extends Activity implements LayoutTestController 
      * Sets the Geolocation permission state to be used for all future requests.
      */
     public void setGeolocationPermission(boolean allow) {
-        mGeolocationPermissionSet = true;
+        mIsGeolocationPermissionSet = true;
         mGeolocationPermission = allow;
+
+        if (mPendingGeolocationPermissionCallbacks != null) {
+            Iterator iter = mPendingGeolocationPermissionCallbacks.keySet().iterator();
+            while (iter.hasNext()) {
+                GeolocationPermissions.Callback callback =
+                        (GeolocationPermissions.Callback) iter.next();
+                String origin = (String) mPendingGeolocationPermissionCallbacks.get(callback);
+                callback.invoke(origin, mGeolocationPermission, false);
+            }
+            mPendingGeolocationPermissionCallbacks = null;
+        }
     }
 
     public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,
@@ -697,9 +709,15 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         @Override
         public void onGeolocationPermissionsShowPrompt(String origin,
                 GeolocationPermissions.Callback callback) {
-            if (mGeolocationPermissionSet) {
+            if (mIsGeolocationPermissionSet) {
                 callback.invoke(origin, mGeolocationPermission, false);
+                return;
             }
+            if (mPendingGeolocationPermissionCallbacks == null) {
+                mPendingGeolocationPermissionCallbacks =
+                        new HashMap<GeolocationPermissions.Callback, String>();
+            }
+            mPendingGeolocationPermissionCallbacks.put(callback, origin);
         }
 
         @Override
@@ -785,6 +803,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mGetDrawtime = false;
         mSaveImagePath = null;
         setDefaultWebSettings(mWebView);
+        mIsGeolocationPermissionSet = false;
+        mPendingGeolocationPermissionCallbacks = null;
     }
 
     private long[] getDrawWebViewTime(WebView view, int count) {
@@ -920,6 +940,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     static final String DRAW_TIME_LOG = Environment.getExternalStorageDirectory() +
         "/android/page_draw_time.txt";
 
-    private boolean mGeolocationPermissionSet;
+    private boolean mIsGeolocationPermissionSet;
     private boolean mGeolocationPermission;
+    private Map mPendingGeolocationPermissionCallbacks;
 }
