@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+import com.android.internal.telephony.sip.SipPhone;
+
 import android.content.Context;
 import android.os.AsyncResult;
 import android.os.Handler;
@@ -453,7 +455,7 @@ public final class CallManager {
             heldPhone = heldCall.getPhone();
         }
 
-        return (heldPhone == activePhone);
+        return heldPhone.getClass().equals(activePhone.getClass());
     }
 
     /**
@@ -466,10 +468,14 @@ public final class CallManager {
      * In these cases, this operation may not be performed.
      */
     public void conference(Call heldCall) throws CallStateException {
-        if (canConference(heldCall))
+        Phone fgPhone = getFgPhone();
+        if (fgPhone instanceof SipPhone) {
+            ((SipPhone) fgPhone).conference(heldCall);
+        } else if (canConference(heldCall)) {
+            fgPhone.conference();
+        } else {
             throw(new CallStateException("Can't conference foreground and selected background call"));
-
-        heldCall.getPhone().conference();
+        }
     }
 
     /**
