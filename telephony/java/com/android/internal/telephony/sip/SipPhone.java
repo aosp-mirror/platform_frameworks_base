@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.net.rtp.AudioGroup;
+import android.net.rtp.AudioStream;
 import android.net.sip.SipAudioCall;
 import android.net.sip.SipManager;
 import android.net.sip.SipProfile;
@@ -221,7 +222,21 @@ public class SipPhone extends SipPhoneBase {
     }
 
     public void conference() throws CallStateException {
-        // TODO
+        if ((foregroundCall.getState() != SipCall.State.ACTIVE)
+                || (foregroundCall.getState() != SipCall.State.ACTIVE)) {
+            throw new CallStateException("wrong state to merge calls: fg="
+                    + foregroundCall.getState() + ", bg="
+                    + backgroundCall.getState());
+        }
+        foregroundCall.merge(backgroundCall);
+    }
+
+    public void conference(Call that) throws CallStateException {
+        if (!(that instanceof SipCall)) {
+            throw new CallStateException("expect " + SipCall.class
+                    + ", cannot merge with " + that.getClass());
+        }
+        foregroundCall.merge((SipCall) that);
     }
 
     public boolean canTransfer() {
@@ -467,6 +482,18 @@ public class SipPhone extends SipPhoneBase {
             return (audioGroup.getMode() == AudioGroup.MODE_MUTED);
         }
 
+        void merge(SipCall that) throws CallStateException {
+            AudioGroup myGroup = getAudioGroup();
+            for (Connection c : that.connections) {
+                SipConnection conn = (SipConnection) c;
+                conn.mergeTo(myGroup);
+                connections.add(conn);
+                conn.changeOwner(this);
+            }
+            that.connections.clear();
+            that.setState(Call.State.IDLE);
+        }
+
         void sendDtmf(char c) {
             AudioGroup audioGroup = getAudioGroup();
             if (audioGroup == null) return;
@@ -541,6 +568,7 @@ public class SipPhone extends SipPhoneBase {
     private class SipConnection extends SipConnectionBase {
         private SipCall mOwner;
         private SipAudioCall mSipAudioCall;
+        private AudioGroup mOriginalGroup;
         private Call.State mState = Call.State.IDLE;
         private SipProfile mPeer;
         private boolean mIncoming = false;
@@ -660,6 +688,16 @@ public class SipPhone extends SipPhoneBase {
             }
         }
 
+        void mergeTo(AudioGroup group) throws CallStateException {
+            AudioStream stream = mSipAudioCall.getAudioStream();
+            if (stream == null) {
+                throw new CallStateException("wrong state to merge: "
+                        + mSipAudioCall.getState());
+            }
+            if (mOriginalGroup == null) mOriginalGroup = getAudioGroup();
+            stream.join(group);
+        }
+
         @Override
         protected void setState(Call.State state) {
             if (state == mState) return;
@@ -694,6 +732,8 @@ public class SipPhone extends SipPhoneBase {
 
         @Override
         public void hangup() throws CallStateException {
+            // TODO: need to pull AudioStream out of the AudioGroup in case
+            // this conn was part of a conf call
             Log.v(LOG_TAG, "hangup conn: " + mPeer.getUriString() + ": "
                     + ": on phone " + getPhone());
             try {
