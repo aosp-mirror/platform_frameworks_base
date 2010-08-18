@@ -576,41 +576,44 @@ EGLBoolean egl_window_surface_v2_t::swapBuffers()
     buffer = 0;
 
     // dequeue a new buffer
-    nativeWindow->dequeueBuffer(nativeWindow, &buffer);
-    
-    // TODO: lockBuffer should rather be executed when the very first
-    // direct rendering occurs.
-    nativeWindow->lockBuffer(nativeWindow, buffer);
-    
-    // reallocate the depth-buffer if needed
-    if ((width != buffer->width) || (height != buffer->height)) {
-        // TODO: we probably should reset the swap rect here
-        // if the window size has changed
-        width = buffer->width;
-        height = buffer->height;
-        if (depth.data) {
-            free(depth.data);
-            depth.width   = width;
-            depth.height  = height;
-            depth.stride  = buffer->stride;
-            depth.data    = (GGLubyte*)malloc(depth.stride*depth.height*2);
-            if (depth.data == 0) {
-                setError(EGL_BAD_ALLOC, EGL_FALSE);
-                return EGL_FALSE;
+    if (nativeWindow->dequeueBuffer(nativeWindow, &buffer) == NO_ERROR) {
+
+        // TODO: lockBuffer should rather be executed when the very first
+        // direct rendering occurs.
+        nativeWindow->lockBuffer(nativeWindow, buffer);
+
+        // reallocate the depth-buffer if needed
+        if ((width != buffer->width) || (height != buffer->height)) {
+            // TODO: we probably should reset the swap rect here
+            // if the window size has changed
+            width = buffer->width;
+            height = buffer->height;
+            if (depth.data) {
+                free(depth.data);
+                depth.width   = width;
+                depth.height  = height;
+                depth.stride  = buffer->stride;
+                depth.data    = (GGLubyte*)malloc(depth.stride*depth.height*2);
+                if (depth.data == 0) {
+                    setError(EGL_BAD_ALLOC, EGL_FALSE);
+                    return EGL_FALSE;
+                }
             }
         }
-    }
-    
-    // keep a reference on the buffer
-    buffer->common.incRef(&buffer->common);
 
-    // finally pin the buffer down
-    if (lock(buffer, GRALLOC_USAGE_SW_READ_OFTEN | 
-            GRALLOC_USAGE_SW_WRITE_OFTEN, &bits) != NO_ERROR) {
-        LOGE("eglSwapBuffers() failed to lock buffer %p (%ux%u)",
-                buffer, buffer->width, buffer->height);
-        return setError(EGL_BAD_ACCESS, EGL_FALSE);
-        // FIXME: we should make sure we're not accessing the buffer anymore
+        // keep a reference on the buffer
+        buffer->common.incRef(&buffer->common);
+
+        // finally pin the buffer down
+        if (lock(buffer, GRALLOC_USAGE_SW_READ_OFTEN |
+                GRALLOC_USAGE_SW_WRITE_OFTEN, &bits) != NO_ERROR) {
+            LOGE("eglSwapBuffers() failed to lock buffer %p (%ux%u)",
+                    buffer, buffer->width, buffer->height);
+            return setError(EGL_BAD_ACCESS, EGL_FALSE);
+            // FIXME: we should make sure we're not accessing the buffer anymore
+        }
+    } else {
+        return setError(EGL_BAD_CURRENT_SURFACE, EGL_FALSE);
     }
 
     return EGL_TRUE;
