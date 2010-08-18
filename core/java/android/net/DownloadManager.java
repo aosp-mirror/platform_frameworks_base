@@ -51,14 +51,14 @@ public class DownloadManager {
     public final static String COLUMN_ID = "id";
 
     /**
-     * The client-supplied title for this download.  This will be displayed in system notifications,
-     * if enabled.
+     * The client-supplied title for this download.  This will be displayed in system notifications.
+     * Defaults to the empty string.
      */
     public final static String COLUMN_TITLE = "title";
 
     /**
      * The client-supplied description of this download.  This will be displayed in system
-     * notifications, if enabled.
+     * notifications.  Defaults to the empty string.
      */
     public final static String COLUMN_DESCRIPTION = "description";
 
@@ -68,22 +68,24 @@ public class DownloadManager {
     public final static String COLUMN_URI = "uri";
 
     /**
-     * Internet Media Type of the downloaded file.  This will be filled in based on the server's
-     * response once the download has started.
+     * Internet Media Type of the downloaded file.  If no value is provided upon creation, this will
+     * initially be null and will be filled in based on the server's response once the download has
+     * started.
      *
      * @see <a href="http://www.ietf.org/rfc/rfc1590.txt">RFC 1590, defining Media Types</a>
      */
     public final static String COLUMN_MEDIA_TYPE = "media_type";
 
     /**
-     * Total size of the download in bytes.  This will be filled in once the download starts.
+     * Total size of the download in bytes.  This will initially be -1 and will be filled in once
+     * the download starts.
      */
     public final static String COLUMN_TOTAL_SIZE_BYTES = "total_size";
 
     /**
      * Uri where downloaded file will be stored.  If a destination is supplied by client, that URI
-     * will be used here.  Otherwise, the value will be filled in with a generated URI once the
-     * download has started.
+     * will be used here.  Otherwise, the value will initially be null and will be filled in with a
+     * generated URI once the download has started.
      */
     public final static String COLUMN_LOCAL_URI = "local_uri";
 
@@ -688,8 +690,13 @@ public class DownloadManager {
             if (column.equals(COLUMN_MEDIA_TYPE)) {
                 return getUnderlyingString(Downloads.COLUMN_MIME_TYPE);
             }
+
             assert column.equals(COLUMN_LOCAL_URI);
-            return Uri.fromFile(new File(getUnderlyingString(Downloads._DATA))).toString();
+            String localUri = getUnderlyingString(Downloads._DATA);
+            if (localUri == null) {
+                return null;
+            }
+            return Uri.fromFile(new File(localUri)).toString();
         }
 
         private long translateLong(String column) {
