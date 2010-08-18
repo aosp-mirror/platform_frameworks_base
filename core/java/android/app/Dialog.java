@@ -228,6 +228,9 @@ public class Dialog implements DialogInterface, Window.Callback,
     public void show() {
         if (mShowing) {
             if (mDecor != null) {
+                if (mWindow.hasFeature(Window.FEATURE_ACTION_BAR)) {
+                    mWindow.invalidatePanelMenu(Window.FEATURE_ACTION_BAR);
+                }
                 mDecor.setVisibility(View.VISIBLE);
             }
             return;
@@ -789,6 +792,13 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     public void closeOptionsMenu() {
         mWindow.closePanel(Window.FEATURE_OPTIONS_PANEL);
+    }
+
+    /**
+     * @see Activity#invalidateOptionsMenu()
+     */
+    public void invalidateOptionsMenu() {
+        mWindow.invalidatePanelMenu(Window.FEATURE_OPTIONS_PANEL);
     }
 
     /**
