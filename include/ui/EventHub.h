@@ -267,6 +267,12 @@ private:
 #ifdef EV_SW
     int32_t         mSwitches[SW_MAX + 1];
 #endif
+
+    static const int INPUT_BUFFER_SIZE = 64;
+    struct input_event mInputBufferData[INPUT_BUFFER_SIZE];
+    int32_t mInputBufferIndex;
+    int32_t mInputBufferCount;
+    int32_t mInputDeviceIndex;
 };
 
 }; // namespace android
