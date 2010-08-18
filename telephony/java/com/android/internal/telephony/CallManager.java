@@ -322,7 +322,9 @@ public final class CallManager {
                 }
                 break;
         }
-        audioManager.setMode(mode);
+        // calling audioManager.setMode() multiple times in a short period of
+        // time seems to break the audio recorder in in-call mode
+        if (audioManager.getMode() != mode) audioManager.setMode(mode);
     }
 
     private Context getContext() {
