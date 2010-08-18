@@ -4257,9 +4257,9 @@ public class WebView extends AbsoluteLayout
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         setActive(hasWindowFocus);
         if (hasWindowFocus) {
-            BrowserFrame.sJavaBridge.setActiveWebView(this);
+            JWebCoreJavaBridge.setActiveWebView(this);
         } else {
-            BrowserFrame.sJavaBridge.removeActiveWebView(this);
+            JWebCoreJavaBridge.removeActiveWebView(this);
         }
         super.onWindowFocusChanged(hasWindowFocus);
     }
