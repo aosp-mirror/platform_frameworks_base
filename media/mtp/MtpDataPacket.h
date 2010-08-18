@@ -83,7 +83,7 @@ public:
     void                putString(const MtpStringBuffer& string);
     void                putString(const char* string);
     void                putString(const uint16_t* string);
-    inline void         putEmptyString() { putUInt16(0); }
+    inline void         putEmptyString() { putUInt8(0); }
     inline void         putEmptyArray() { putUInt32(0); }
 
 

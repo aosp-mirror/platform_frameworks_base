@@ -325,9 +325,12 @@ void MtpDataPacket::putString(const uint16_t* string) {
         else
             break;
     }
-    putUInt8(count);
+    putUInt8(count > 0 ? count + 1 : 0);
     for (int i = 0; i < count; i++)
         putUInt16(string[i]);
+    // only terminate with zero if string is not empty
+    if (count > 0)
+        putUInt16(0);
 }
 
 #ifdef MTP_DEVICE 

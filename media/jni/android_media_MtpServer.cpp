@@ -55,7 +55,6 @@ private:
     MtpDatabase*    mDatabase;
     MtpServer*      mServer;
     String8         mStoragePath;
-    bool            mDone;
     jobject         mJavaServer;
 
 public:
@@ -63,41 +62,31 @@ public:
         : mDatabase(database),
             mServer(NULL),
             mStoragePath(storagePath),
-            mDone(false),
             mJavaServer(javaServer)
     {
     }
 
     virtual bool threadLoop() {
-        while (1) {
-            int fd = open("/dev/mtp_usb", O_RDWR);
-            printf("open returned %d\n", fd);
-            if (fd < 0) {
-                LOGE("could not open MTP driver\n");
-                break;
-            }
-
-            sMutex.lock();
-            mServer = new MtpServer(fd, mDatabase, AID_SDCARD_RW, 0664, 0775);
-            mServer->addStorage(mStoragePath);
-            sMutex.unlock();
-
-            LOGD("MtpThread mServer->run");
-            mServer->run();
-            close(fd);
-
-            sMutex.lock();
-            delete mServer;
-            mServer = NULL;
-            if (mDone)
-                goto done;
-            sMutex.unlock();
-            // wait a bit before retrying
-            sleep(1);
+        int fd = open("/dev/mtp_usb", O_RDWR);
+        printf("open returned %d\n", fd);
+        if (fd < 0) {
+            LOGE("could not open MTP driver\n");
+            return false;
         }
 
         sMutex.lock();
-done:
+        mServer = new MtpServer(fd, mDatabase, AID_SDCARD_RW, 0664, 0775);
+        mServer->addStorage(mStoragePath);
+        sMutex.unlock();
+
+        LOGD("MtpThread mServer->run");
+        mServer->run();
+        close(fd);
+
+        sMutex.lock();
+        delete mServer;
+        mServer = NULL;
+
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         env->SetIntField(mJavaServer, field_context, 0);
         env->DeleteGlobalRef(mJavaServer);
@@ -105,11 +94,6 @@ done:
 
         LOGD("threadLoop returning");
         return false;
-    }
-
-    void setDone() {
-        LOGD("setDone");
-        mDone = true; 
     }
 
     void sendObjectAdded(MtpObjectHandle handle) {
@@ -171,11 +155,6 @@ android_media_MtpServer_stop(JNIEnv *env, jobject thiz)
 {
 #ifdef HAVE_ANDROID_OS
     LOGD("stop\n");
-    sMutex.lock();
-    MtpThread *thread = (MtpThread *)env->GetIntField(thiz, field_context);
-    if (thread)
-        thread->setDone();
-    sMutex.unlock();
 #endif
 }
 

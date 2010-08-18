@@ -112,7 +112,7 @@ void MtpStringBuffer::readFromPacket(MtpDataPacket* packet) {
 void MtpStringBuffer::writeToPacket(MtpDataPacket* packet) const {
     int count = mCharCount;
     const uint8_t* src = mBuffer;
-    packet->putUInt8(count);
+    packet->putUInt8(count > 0 ? count + 1 : 0);
 
     // expand utf8 to 16 bit chars
     for (int i = 0; i < count; i++) {
@@ -133,6 +133,9 @@ void MtpStringBuffer::writeToPacket(MtpDataPacket* packet) const {
         }
         packet->putUInt16(ch);
     }
+    // only terminate with zero if string is not empty
+    if (count > 0)
+        packet->putUInt16(0);
 }
 
 }  // namespace android
