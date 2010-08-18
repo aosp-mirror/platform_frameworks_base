@@ -45,6 +45,7 @@ public abstract class RemoteViewsService extends Service {
      * for each item in the data set.
      * 
      * @see android.widget.Adapter
+     * @see android.appwidget.AppWidgetManager
      */
     public interface RemoteViewsFactory {
         /**
@@ -53,8 +54,10 @@ public abstract class RemoteViewsService extends Service {
          */
         public void onCreate();
         /**
-         * Called upon {@link AppWidgetManager#notifyAppWidgetViewDataChanged} to allow a factory
-         * implementation to respond to data changes by updating any internal references.
+         * Called when notifyDataSetChanged() is triggered on the remote adapter. This allows a
+         * RemoteViewsFactory to respond to data changes by updating any internal references.
+         *
+         * @see android.appwidget.AppWidgetManager#notifyAppWidgetViewDataChanged(int[], int)
          */
         public void onDataSetChanged();
         /**
