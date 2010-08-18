@@ -1657,7 +1657,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Convenience value to check for float values that are close enough to zero to be considered
      * zero.
      */
-    private static float NONZERO_EPSILON = .001f;
+    private static final float NONZERO_EPSILON = .001f;
 
     /**
      * The degrees rotation around the vertical axis through the pivot point.

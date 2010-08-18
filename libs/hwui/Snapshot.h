@@ -42,7 +42,7 @@ namespace uirenderer {
  */
 class Snapshot: public LightRefBase<Snapshot> {
 public:
-    Snapshot(): skip(false), flags(0), previous(NULL), layer(NULL), fbo(0) { }
+    Snapshot(): flags(0), previous(NULL), layer(NULL), fbo(0) { }
 
     /**
      * Copies the specified snapshot. Only the transform and clip rectangle
@@ -54,7 +54,6 @@ public:
             height(s->height),
             transform(s->transform),
             clipRect(s->clipRect),
-            skip(false),
             flags(0),
             previous(s),
             layer(NULL),
@@ -164,12 +163,6 @@ public:
      * (screen-space coordinates in the regular case.)
      */
     Rect clipRect;
-
-    /**
-     * This snapshot should be skipped. Snapshots marked as skipped are
-     * created by the renderer and should be hidden from the user.
-     */
-    bool skip;
 
     /**
      * Dirty flags.

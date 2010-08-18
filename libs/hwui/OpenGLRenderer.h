@@ -120,8 +120,7 @@ private:
     /**
      * Restores the current snapshot; mSnapshot becomes mSnapshot->previous.
      *
-     * @return True if the clip should be also reapplied by calling
-     *         #setScissorFromClip().
+     * @return True if the clip was modified.
      */
     bool restoreSnapshot();
 
@@ -232,8 +231,10 @@ private:
      * @param x The x coordinate of the shadow
      * @param y The y coordinate of the shadow
      * @param mode The blending mode
+     * @param alpha The alpha value
      */
-    void setupShadow(const ShadowTexture* texture, float x, float y, SkXfermode::Mode mode);
+    void setupShadow(const ShadowTexture* texture, float x, float y, SkXfermode::Mode mode,
+            float alpha);
 
     /**
      * Prepares the renderer to draw the specified Alpha8 texture as a rectangle.
