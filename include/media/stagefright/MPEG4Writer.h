@@ -40,6 +40,7 @@ public:
     virtual status_t stop();
     virtual status_t pause();
     virtual bool reachedEOS();
+    virtual status_t dump(int fd, const Vector<String16>& args);
 
     void beginBox(const char *fourcc);
     void writeInt8(int8_t x);
