@@ -405,7 +405,14 @@ public class WifiService extends IWifiManager.Stub {
         }
 
         mWifiStateMachine.setWifiEnabled(enable);
+
+        /*
+         * Caller might not have WRITE_SECURE_SETTINGS,
+         * only CHANGE_WIFI_STATE is enforced
+         */
+        long ident = Binder.clearCallingIdentity();
         persistWifiEnabled(enable);
+        Binder.restoreCallingIdentity(ident);
 
         if (enable) {
             if (!mIsReceiverRegistered) {
@@ -451,7 +458,13 @@ public class WifiService extends IWifiManager.Stub {
                 wifiConfig.SSID = mContext.getString(R.string.wifi_tether_configure_ssid_default);
                 wifiConfig.allowedKeyManagement.set(KeyMgmt.NONE);
             }
+            /*
+             * Caller might not have WRITE_SECURE_SETTINGS,
+             * only CHANGE_WIFI_STATE is enforced
+             */
+            long ident = Binder.clearCallingIdentity();
             setWifiApConfiguration(wifiConfig);
+            Binder.restoreCallingIdentity(ident);
         }
 
         mWifiStateMachine.setWifiApEnabled(wifiConfig, enabled);
