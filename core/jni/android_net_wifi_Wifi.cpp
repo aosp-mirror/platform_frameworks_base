@@ -30,6 +30,23 @@ namespace android {
 
 static jboolean sScanModeActive = false;
 
+/*
+ * The following remembers the jfieldID's of the fields
+ * of the DhcpInfo Java object, so that we don't have
+ * to look them up every time.
+ */
+static struct fieldIds {
+    jclass dhcpInfoClass;
+    jmethodID constructorId;
+    jfieldID ipaddress;
+    jfieldID gateway;
+    jfieldID netmask;
+    jfieldID dns1;
+    jfieldID dns2;
+    jfieldID serverAddress;
+    jfieldID leaseDuration;
+} dhcpInfoFieldIds;
+
 static int doCommand(const char *cmd, char *replybuf, int replybuflen)
 {
     size_t reply_len = replybuflen - 1;
@@ -476,6 +493,28 @@ static jboolean android_net_wifi_clearBlacklistCommand(JNIEnv* env, jobject claz
     return doBooleanCommand("BLACKLIST clear", "OK");
 }
 
+static jboolean android_net_wifi_doDhcpRequest(JNIEnv* env, jobject clazz, jobject info)
+{
+    jint ipaddr, gateway, mask, dns1, dns2, server, lease;
+    jboolean succeeded = ((jboolean)::do_dhcp_request(&ipaddr, &gateway, &mask,
+                                        &dns1, &dns2, &server, &lease) == 0);
+    if (succeeded && dhcpInfoFieldIds.dhcpInfoClass != NULL) {
+        env->SetIntField(info, dhcpInfoFieldIds.ipaddress, ipaddr);
+        env->SetIntField(info, dhcpInfoFieldIds.gateway, gateway);
+        env->SetIntField(info, dhcpInfoFieldIds.netmask, mask);
+        env->SetIntField(info, dhcpInfoFieldIds.dns1, dns1);
+        env->SetIntField(info, dhcpInfoFieldIds.dns2, dns2);
+        env->SetIntField(info, dhcpInfoFieldIds.serverAddress, server);
+        env->SetIntField(info, dhcpInfoFieldIds.leaseDuration, lease);
+    }
+    return succeeded;
+}
+
+static jstring android_net_wifi_getDhcpError(JNIEnv* env, jobject clazz)
+{
+    return env->NewStringUTF(::get_dhcp_error_string());
+}
+
 // ----------------------------------------------------------------------------
 
 /*
@@ -532,12 +571,27 @@ static JNINativeMethod gWifiMethods[] = {
     { "setScanResultHandlingCommand", "(I)Z", (void*) android_net_wifi_setScanResultHandlingCommand },
     { "addToBlacklistCommand", "(Ljava/lang/String;)Z", (void*) android_net_wifi_addToBlacklistCommand },
     { "clearBlacklistCommand", "()Z", (void*) android_net_wifi_clearBlacklistCommand },
+
+    { "doDhcpRequest", "(Landroid/net/DhcpInfo;)Z", (void*) android_net_wifi_doDhcpRequest },
+    { "getDhcpError", "()Ljava/lang/String;", (void*) android_net_wifi_getDhcpError },
 };
 
 int register_android_net_wifi_WifiManager(JNIEnv* env)
 {
     jclass wifi = env->FindClass(WIFI_PKG_NAME);
     LOG_FATAL_IF(wifi == NULL, "Unable to find class " WIFI_PKG_NAME);
+
+    dhcpInfoFieldIds.dhcpInfoClass = env->FindClass("android/net/DhcpInfo");
+    if (dhcpInfoFieldIds.dhcpInfoClass != NULL) {
+        dhcpInfoFieldIds.constructorId = env->GetMethodID(dhcpInfoFieldIds.dhcpInfoClass, "<init>", "()V");
+        dhcpInfoFieldIds.ipaddress = env->GetFieldID(dhcpInfoFieldIds.dhcpInfoClass, "ipAddress", "I");
+        dhcpInfoFieldIds.gateway = env->GetFieldID(dhcpInfoFieldIds.dhcpInfoClass, "gateway", "I");
+        dhcpInfoFieldIds.netmask = env->GetFieldID(dhcpInfoFieldIds.dhcpInfoClass, "netmask", "I");
+        dhcpInfoFieldIds.dns1 = env->GetFieldID(dhcpInfoFieldIds.dhcpInfoClass, "dns1", "I");
+        dhcpInfoFieldIds.dns2 = env->GetFieldID(dhcpInfoFieldIds.dhcpInfoClass, "dns2", "I");
+        dhcpInfoFieldIds.serverAddress = env->GetFieldID(dhcpInfoFieldIds.dhcpInfoClass, "serverAddress", "I");
+        dhcpInfoFieldIds.leaseDuration = env->GetFieldID(dhcpInfoFieldIds.dhcpInfoClass, "leaseDuration", "I");
+    }
 
     return AndroidRuntime::registerNativeMethods(env,
             WIFI_PKG_NAME, gWifiMethods, NELEM(gWifiMethods));

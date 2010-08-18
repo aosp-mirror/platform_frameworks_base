@@ -22,8 +22,29 @@
 #include <utils/Log.h>
 #include <arpa/inet.h>
 
-#include <netutils/ifc.h>
-#include <netutils/dhcp.h>
+extern "C" {
+int ifc_enable(const char *ifname);
+int ifc_disable(const char *ifname);
+int ifc_add_host_route(const char *ifname, uint32_t addr);
+int ifc_remove_host_routes(const char *ifname);
+int ifc_set_default_route(const char *ifname, uint32_t gateway);
+int ifc_get_default_route(const char *ifname);
+int ifc_remove_default_route(const char *ifname);
+int ifc_reset_connections(const char *ifname);
+int ifc_configure(const char *ifname, in_addr_t ipaddr, in_addr_t netmask, in_addr_t gateway, in_addr_t dns1, in_addr_t dns2);
+
+int dhcp_do_request(const char *ifname,
+                    in_addr_t *ipaddr,
+                    in_addr_t *gateway,
+                    in_addr_t *mask,
+                    in_addr_t *dns1,
+                    in_addr_t *dns2,
+                    in_addr_t *server,
+                    uint32_t  *lease);
+int dhcp_stop(const char *ifname);
+int dhcp_release_lease(const char *ifname);
+char *dhcp_get_errmsg();
+}
 
 #define NETUTILS_PKG_NAME "android/net/NetworkUtils"
 
