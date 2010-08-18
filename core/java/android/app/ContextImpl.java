@@ -2844,6 +2844,7 @@ class ContextImpl extends Context {
                 boolean returnValue;
 
                 boolean hasListeners;
+                boolean changesMade = false;
                 List<String> keysModified = null;
                 Set<OnSharedPreferenceChangeListener> listeners = null;
 
@@ -2857,17 +2858,31 @@ class ContextImpl extends Context {
 
                     synchronized (this) {
                         if (mClear) {
-                            mMap.clear();
+                            if (!mMap.isEmpty()) {
+                                changesMade = true;
+                                mMap.clear();
+                            }
                             mClear = false;
                         }
 
                         for (Entry<String, Object> e : mModified.entrySet()) {
                             String k = e.getKey();
                             Object v = e.getValue();
-                            if (v == this) {
-                                mMap.remove(k);
+                            if (v == this) {  // magic value for a removal mutation
+                                if (mMap.containsKey(k)) {
+                                    mMap.remove(k);
+                                    changesMade = true;
+                                }
                             } else {
-                                mMap.put(k, v);
+                                boolean isSame = false;
+                                if (mMap.containsKey(k)) {
+                                    Object existingValue = mMap.get(k);
+                                    isSame = existingValue != null && existingValue.equals(v);
+                                }
+                                if (!isSame) {
+                                    mMap.put(k, v);
+                                    changesMade = true;
+                                }
                             }
 
                             if (hasListeners) {
@@ -2878,7 +2893,7 @@ class ContextImpl extends Context {
                         mModified.clear();
                     }
 
-                    returnValue = writeFileLocked();
+                    returnValue = writeFileLocked(changesMade);
                 }
 
                 if (hasListeners) {
@@ -2923,9 +2938,16 @@ class ContextImpl extends Context {
             return str;
         }
 
-        private boolean writeFileLocked() {
+        private boolean writeFileLocked(boolean changesMade) {
             // Rename the current file so it may be used as a backup during the next read
             if (mFile.exists()) {
+                if (!changesMade) {
+                    // If the file already exists, but no changes were
+                    // made to the underlying map, it's wasteful to
+                    // re-write the file.  Return as if we wrote it
+                    // out.
+                    return true;
+                }
                 if (!mBackupFile.exists()) {
                     if (!mFile.renameTo(mBackupFile)) {
                         Log.e(TAG, "Couldn't rename file " + mFile
