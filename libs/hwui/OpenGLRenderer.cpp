@@ -193,7 +193,7 @@ void OpenGLRenderer::setViewport(int width, int height) {
 
 void OpenGLRenderer::prepare() {
     mSnapshot = new Snapshot(mFirstSnapshot);
-    mSaveCount = 0;
+    mSaveCount = 1;
 
     glDisable(GL_SCISSOR_TEST);
 
@@ -219,19 +219,17 @@ int OpenGLRenderer::save(int flags) {
 }
 
 void OpenGLRenderer::restore() {
-    if (mSaveCount == 0) return;
-
-    if (restoreSnapshot()) {
+    if (mSaveCount > 1 && restoreSnapshot()) {
         setScissorFromClip();
     }
 }
 
 void OpenGLRenderer::restoreToCount(int saveCount) {
-    if (saveCount <= 0 || saveCount > mSaveCount) return;
+    if (saveCount < 1) saveCount = 1;
 
     bool restoreClip = false;
 
-    while (mSaveCount != saveCount - 1) {
+    while (mSaveCount > saveCount) {
         restoreClip |= restoreSnapshot();
     }
 
@@ -242,7 +240,7 @@ void OpenGLRenderer::restoreToCount(int saveCount) {
 
 int OpenGLRenderer::saveSnapshot() {
     mSnapshot = new Snapshot(mSnapshot);
-    return ++mSaveCount;
+    return mSaveCount++;
 }
 
 bool OpenGLRenderer::restoreSnapshot() {
@@ -263,10 +261,18 @@ bool OpenGLRenderer::restoreSnapshot() {
         composeLayer(current, previous);
     }
 
+    bool skip = mSnapshot->skip;
+    if (!skip) {
+        mSaveCount--;
+    }
     mSnapshot = previous;
-    mSaveCount--;
 
-    return restoreClip;
+    if (!skip) {
+        return restoreClip;
+    } else {
+        bool restorePreviousClip = restoreSnapshot();
+        return restoreClip || restorePreviousClip;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -324,18 +330,20 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     glClear(GL_COLOR_BUFFER_BIT);
     glEnable(GL_SCISSOR_TEST);
 
-    // Save the layer in the snapshot
-    snapshot->flags |= Snapshot::kFlagIsLayer;
     layer->mode = mode;
     layer->alpha = alpha / 255.0f;
     layer->layer.set(left, top, right, bottom);
 
+    // Save the layer in the snapshot
+    snapshot->flags |= Snapshot::kFlagIsLayer;
     snapshot->layer = layer;
     snapshot->fbo = layer->fbo;
 
     // Creates a new snapshot to draw into the FBO
     saveSnapshot();
+    mSaveCount--;
 
+    mSnapshot->skip = true;
     mSnapshot->transform.loadTranslate(-left, -top, 0.0f);
     mSnapshot->setClip(0.0f, 0.0f, right - left, bottom - top);
     mSnapshot->viewport.set(0.0f, 0.0f, right - left, bottom - top);
@@ -432,7 +440,6 @@ const Rect& OpenGLRenderer::getClipBounds() {
 bool OpenGLRenderer::quickReject(float left, float top, float right, float bottom) {
     Rect r(left, top, right, bottom);
     mSnapshot->transform.mapRect(r);
-
     return !mSnapshot->clipRect.intersects(r);
 }
 

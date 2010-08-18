@@ -23,6 +23,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 @SuppressWarnings({"UnusedDeclaration"})
@@ -50,6 +51,32 @@ public class QuickRejectActivity extends Activity {
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
+
+            int count = canvas.getSaveCount();
+            Log.d("OpenGLRenderer", "count=" + count);
+            count = canvas.save();
+            Log.d("OpenGLRenderer", "count after save=" + count);
+            count = canvas.getSaveCount();
+            Log.d("OpenGLRenderer", "getSaveCount after save=" + count);
+            canvas.restore();
+            count = canvas.getSaveCount();
+            Log.d("OpenGLRenderer", "count after restore=" + count);
+            canvas.save();
+            Log.d("OpenGLRenderer", "count after save=" + canvas.getSaveCount());
+            canvas.save();
+            Log.d("OpenGLRenderer", "count after save=" + canvas.getSaveCount());
+            canvas.save();
+            Log.d("OpenGLRenderer", "count after save=" + canvas.getSaveCount());
+            canvas.restoreToCount(count);
+            count = canvas.getSaveCount();
+            Log.d("OpenGLRenderer", "count after restoreToCount=" + count);
+            count = canvas.saveLayer(0, 0, 10, 10, mBitmapPaint, Canvas.ALL_SAVE_FLAG);
+            Log.d("OpenGLRenderer", "count after saveLayer=" + count);
+            count = canvas.getSaveCount();
+            Log.d("OpenGLRenderer", "getSaveCount after saveLayer=" + count);
+            canvas.restore();
+            count = canvas.getSaveCount();
+            Log.d("OpenGLRenderer", "count after restore=" + count);
 
             canvas.save();
             canvas.clipRect(0.0f, 0.0f, 40.0f, 40.0f);

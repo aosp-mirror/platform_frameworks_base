@@ -385,7 +385,7 @@ public abstract class HardwareRenderer {
                 onPreDraw();
 
                 Canvas canvas = mCanvas;
-                int saveCount = canvas.save(Canvas.MATRIX_SAVE_FLAG);
+                int saveCount = canvas.save();
                 canvas.translate(0, -yOffset);
 
                 try {

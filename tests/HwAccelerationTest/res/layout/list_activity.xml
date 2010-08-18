@@ -19,6 +19,31 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        
+        <Button
+            android:layout_width="0dip"
+            android:layout_weight="1.0"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dip"
+            android:layout_marginRight="3dip"
+
+            android:text="Add" />
+        
+        <Button
+            android:layout_width="0dip"
+            android:layout_weight="1.0"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="3dip"
+            android:layout_marginRight="10dip"
+
+            android:text="Remove" />
+        
+    </LinearLayout>
+    
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"

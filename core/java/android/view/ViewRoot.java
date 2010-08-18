@@ -1363,7 +1363,6 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                                 ", metrics=" + cxt.getResources().getDisplayMetrics() +
                                 ", compatibilityInfo=" + cxt.getResources().getCompatibilityInfo());
                     }
-                    int saveCount = canvas.save(Canvas.MATRIX_SAVE_FLAG);
                     try {
                         canvas.translate(0, -yoff);
                         if (mTranslator != null) {
@@ -1374,7 +1373,6 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                         mView.draw(canvas);
                     } finally {
                         mAttachInfo.mIgnoreDirtyState = false;
-                        canvas.restoreToCount(saveCount);
                     }
 
                     if (Config.DEBUG && ViewDebug.consistencyCheckEnabled) {
