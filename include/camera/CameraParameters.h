@@ -354,11 +354,14 @@ public:
     static const char PIXEL_FORMAT_JPEG[];
 
     // Values for focus mode settings.
-    // Auto-focus mode.
+    // Auto-focus mode. Applications should call
+    // CameraHardwareInterface.autoFocus to start the focus in this mode.
     static const char FOCUS_MODE_AUTO[];
     // Focus is set at infinity. Applications should not call
     // CameraHardwareInterface.autoFocus in this mode.
     static const char FOCUS_MODE_INFINITY[];
+    // Macro (close-up) focus mode. Applications should call
+    // CameraHardwareInterface.autoFocus to start the focus in this mode.
     static const char FOCUS_MODE_MACRO[];
     // Focus is fixed. The camera is always in this mode if the focus is not
     // adjustable. If the camera has auto-focus, this mode can fix the
@@ -372,7 +375,8 @@ public:
     // Continuous auto focus mode. The camera continuously tries to focus. This
     // is ideal for shooting video or shooting photo of moving object. Auto
     // focus starts when the parameter is set. Applications should not call
-    // CameraHardwareInterface.autoFocus in this mode.
+    // CameraHardwareInterface.autoFocus in this mode.  To stop continuous
+    // focus, applications should change the focus mode to other modes.
     static const char FOCUS_MODE_CONTINUOUS[];
 
     // The camera determines the exposure by giving more weight to the
