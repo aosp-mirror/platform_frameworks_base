@@ -135,11 +135,8 @@ public final class ContactsContract {
      * {@link Directory}. The parameter value should be the _ID of the corresponding
      * directory, e.g.
      * {@code content://com.android.contacts/data/emails/filter/acme?directory=3}
-     *
-     * @hide
      */
     public static final String DIRECTORY_PARAM_KEY = "directory";
-
 
     /**
      * @hide
@@ -318,11 +315,8 @@ public final class ContactsContract {
      * <p>
      * A directory row can be optionally associated with an existing account
      * (see {@link android.accounts.AccountManager}). If the account is later removed,
-     * the corresponding directory rows are
-     * automatically removed from the Contacts Provider.
+     * the corresponding directory rows are automatically removed from the Contacts Provider.
      * </p>
-     *
-     * @hide
      */
     public static final class Directory implements BaseColumns {
 
@@ -335,8 +329,6 @@ public final class ContactsContract {
         /**
          * The content:// style URI for this table.  Requests to this URI can be
          * performed on the UI thread because they are always unblocking.
-         *
-         * @hide
          */
         public static final Uri CONTENT_URI =
                 Uri.withAppendedPath(AUTHORITY_URI, "directories");
@@ -344,8 +336,6 @@ public final class ContactsContract {
         /**
          * The MIME-type of {@link #CONTENT_URI} providing a directory of
          * contact directories.
-         *
-         * @hide
          */
         public static final String CONTENT_TYPE =
                 "vnd.android.cursor.dir/contact_directories";
@@ -358,15 +348,11 @@ public final class ContactsContract {
 
         /**
          * _ID of the default directory, which represents locally stored contacts.
-         *
-         * @hide
          */
         public static final long DEFAULT = 0;
 
         /**
          * _ID of the directory that represents locally stored invisible contacts.
-         *
-         * @hide
          */
         public static final long LOCAL_INVISIBLE = 1;
 
@@ -377,8 +363,6 @@ public final class ContactsContract {
          * automatically removed from this table.
          *
          * <p>TYPE: TEXT</p>
-         *
-         * @hide
          */
         public static final String PACKAGE_NAME = "packageName";
 
@@ -387,8 +371,6 @@ public final class ContactsContract {
          * package {@link #PACKAGE_NAME}, e.g. "Corporate Directory"
          *
          * <p>TYPE: INTEGER</p>
-         *
-         * @hide
          */
         public static final String TYPE_RESOURCE_ID = "typeResourceId";
 
@@ -396,8 +378,6 @@ public final class ContactsContract {
          * An optional name that can be used in the UI to represent this directory,
          * e.g. "Acme Corp"
          * <p>TYPE: text</p>
-         *
-         * @hide
          */
         public static final String DISPLAY_NAME = "displayName";
 
@@ -413,8 +393,6 @@ public final class ContactsContract {
          * </p>
          *
          * <p>TYPE: text</p>
-         *
-         * @hide
          */
         public static final String DIRECTORY_AUTHORITY = "authority";
 
@@ -422,8 +400,6 @@ public final class ContactsContract {
          * The account type which this directory is associated.
          *
          * <p>TYPE: text</p>
-         *
-         * @hide
          */
         public static final String ACCOUNT_TYPE = "accountType";
 
@@ -432,8 +408,6 @@ public final class ContactsContract {
          * removed, the directories it owns are automatically removed from this table.
          *
          * <p>TYPE: text</p>
-         *
-         * @hide
          */
         public static final String ACCOUNT_NAME = "accountName";
 
@@ -441,16 +415,12 @@ public final class ContactsContract {
          * One of {@link #EXPORT_SUPPORT_NONE}, {@link #EXPORT_SUPPORT_ANY_ACCOUNT},
          * {@link #EXPORT_SUPPORT_SAME_ACCOUNT_ONLY}. This is the expectation the
          * directory has for data exported from it.  Clients must obey this setting.
-         *
-         * @hide
          */
         public static final String EXPORT_SUPPORT = "exportSupport";
 
         /**
          * An {@link #EXPORT_SUPPORT} setting that indicates that the directory
          * does not allow any data to be copied out of it.
-         *
-         * @hide
          */
         public static final int EXPORT_SUPPORT_NONE = 0;
 
@@ -458,16 +428,12 @@ public final class ContactsContract {
          * An {@link #EXPORT_SUPPORT} setting that indicates that the directory
          * allow its data copied only to the account specified by
          * {@link #ACCOUNT_TYPE}/{@link #ACCOUNT_NAME}.
-         *
-         * @hide
          */
         public static final int EXPORT_SUPPORT_SAME_ACCOUNT_ONLY = 1;
 
         /**
          * An {@link #EXPORT_SUPPORT} setting that indicates that the directory
          * allow its data copied to any contacts account.
-         *
-         * @hide
          */
         public static final int EXPORT_SUPPORT_ANY_ACCOUNT = 2;
 
@@ -475,16 +441,12 @@ public final class ContactsContract {
          * One of {@link #SHORTCUT_SUPPORT_NONE}, {@link #SHORTCUT_SUPPORT_DATA_ITEMS_ONLY},
          * {@link #SHORTCUT_SUPPORT_FULL}, This is the expectation the directory
          * has for shortcuts created for its elements. Clients must obey this setting.
-         *
-         * @hide
          */
         public static final String SHORTCUT_SUPPORT = "shortcutSupport";
 
         /**
          * An {@link #SHORTCUT_SUPPORT} setting that indicates that the directory
          * does not allow any shortcuts created for its contacts.
-         *
-         * @hide
          */
         public static final int SHORTCUT_SUPPORT_NONE = 0;
 
@@ -492,16 +454,12 @@ public final class ContactsContract {
          * An {@link #SHORTCUT_SUPPORT} setting that indicates that the directory
          * allow creation of shortcuts for data items like email, phone or postal address,
          * but not the entire contact.
-         *
-         * @hide
          */
         public static final int SHORTCUT_SUPPORT_DATA_ITEMS_ONLY = 1;
 
         /**
          * An {@link #SHORTCUT_SUPPORT} setting that indicates that the directory
          * allow creation of shortcuts for contact as well as their constituent elements.
-         *
-         * @hide
          */
         public static final int SHORTCUT_SUPPORT_FULL = 2;
 
@@ -510,8 +468,6 @@ public final class ContactsContract {
          * a particular directory provider. The Contacts provider will turn around
          * and send a query to the directory provider for the full list of directories,
          * which will replace the previous list.
-         *
-         * @hide
          */
         public static void notifyDirectoryChange(ContentResolver resolver) {
             // This is done to trigger a query by Contacts Provider back to the directory provider.
@@ -1642,7 +1598,6 @@ public final class ContactsContract {
              * that could be inflated using {@link android.graphics.BitmapFactory}.
              * <p>
              * Type: BLOB
-             * @hide TODO: Unhide in a separate CL
              */
             public static final String PHOTO = DATA15;
         }
@@ -1744,7 +1699,6 @@ public final class ContactsContract {
          * The "read-only" flag: "0" by default, "1" if the row cannot be modified or
          * deleted except by a sync adapter.  See {@link ContactsContract#CALLER_IS_SYNCADAPTER}.
          * <P>Type: INTEGER</P>
-         * @hide
          */
         public static final String RAW_CONTACT_IS_READ_ONLY = "raw_contact_is_read_only";
     }
@@ -2523,7 +2477,6 @@ public final class ContactsContract {
          * The "read-only" flag: "0" by default, "1" if the row cannot be modified or
          * deleted except by a sync adapter.  See {@link ContactsContract#CALLER_IS_SYNCADAPTER}.
          * <P>Type: INTEGER</P>
-         * @hide
          */
         public static final String IS_READ_ONLY = "is_read_only";
 
@@ -4385,7 +4338,6 @@ public final class ContactsContract {
             /**
              * The email address.
              * <P>Type: TEXT</P>
-             * @hide TODO: Unhide in a separate CL
              */
             public static final String ADDRESS = DATA1;
 
