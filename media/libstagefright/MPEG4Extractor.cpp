@@ -1273,6 +1273,14 @@ status_t MPEG4Extractor::updateAudioTrackInfoFromESDS_MPEG4Audio(
     hexdump(csd, csd_size);
 #endif
 
+    if (csd_size == 0) {
+        // There's no further information, i.e. no codec specific data
+        // Let's assume that the information provided in the mpeg4 headers
+        // is accurate and hope for the best.
+
+        return OK;
+    }
+
     if (csd_size < 2) {
         return ERROR_MALFORMED;
     }
