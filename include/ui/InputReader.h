@@ -480,10 +480,6 @@ private:
         inline void clear() {
             fields = 0;
         }
-
-        inline bool isDirty() {
-            return fields != 0;
-        }
     } mAccumulator;
 
     float mXScale;
@@ -702,7 +698,7 @@ private:
         } historyData[AVERAGING_HISTORY_SIZE];
     } mAveragingTouchFilter;
 
-    struct JumpTouchFilterState {
+    struct JumpyTouchFilterState {
         uint32_t jumpyPointsDropped;
     } mJumpyTouchFilter;
 
@@ -765,10 +761,6 @@ private:
         inline void clear() {
             fields = 0;
         }
-
-        inline bool isDirty() {
-            return fields != 0;
-        }
     } mAccumulator;
 
     bool mDown;
@@ -804,7 +796,8 @@ private:
             FIELD_ABS_MT_WIDTH_MAJOR = 16,
             FIELD_ABS_MT_WIDTH_MINOR = 32,
             FIELD_ABS_MT_ORIENTATION = 64,
-            FIELD_ABS_MT_TRACKING_ID = 128
+            FIELD_ABS_MT_TRACKING_ID = 128,
+            FIELD_ABS_MT_PRESSURE = 256,
         };
 
         uint32_t pointerCount;
@@ -819,6 +812,7 @@ private:
             int32_t absMTWidthMinor;
             int32_t absMTOrientation;
             int32_t absMTTrackingId;
+            int32_t absMTPressure;
 
             inline void clear() {
                 fields = 0;
@@ -828,10 +822,6 @@ private:
         inline void clear() {
             pointerCount = 0;
             pointers[0].clear();
-        }
-
-        inline bool isDirty() {
-            return pointerCount != 0;
         }
     } mAccumulator;
 
