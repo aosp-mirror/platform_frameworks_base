@@ -219,22 +219,16 @@ int OpenGLRenderer::save(int flags) {
 }
 
 void OpenGLRenderer::restore() {
-    if (mSaveCount > 1 && restoreSnapshot()) {
-        setScissorFromClip();
+    if (mSaveCount > 1) {
+        restoreSnapshot();
     }
 }
 
 void OpenGLRenderer::restoreToCount(int saveCount) {
     if (saveCount < 1) saveCount = 1;
 
-    bool restoreClip = false;
-
     while (mSaveCount > saveCount) {
-        restoreClip |= restoreSnapshot();
-    }
-
-    if (restoreClip) {
-        setScissorFromClip();
+        restoreSnapshot();
     }
 }
 
@@ -267,12 +261,11 @@ bool OpenGLRenderer::restoreSnapshot() {
     }
     mSnapshot = previous;
 
-    if (!skip) {
-        return restoreClip;
-    } else {
-        bool restorePreviousClip = restoreSnapshot();
-        return restoreClip || restorePreviousClip;
+    if (restoreClip) {
+        setScissorFromClip();
     }
+
+    return restoreClip;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -339,20 +332,14 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     snapshot->layer = layer;
     snapshot->fbo = layer->fbo;
 
-    // Creates a new snapshot to draw into the FBO
-    saveSnapshot();
-    mSaveCount--;
-
-    mSnapshot->skip = true;
-    mSnapshot->transform.loadTranslate(-left, -top, 0.0f);
-    mSnapshot->setClip(0.0f, 0.0f, right - left, bottom - top);
-    mSnapshot->viewport.set(0.0f, 0.0f, right - left, bottom - top);
-    mSnapshot->height = bottom - top;
+    snapshot->transform.loadTranslate(-left, -top, 0.0f);
+    snapshot->setClip(0.0f, 0.0f, right - left, bottom - top);
+    snapshot->viewport.set(0.0f, 0.0f, right - left, bottom - top);
+    snapshot->height = bottom - top;
+    snapshot->flags |= Snapshot::kFlagDirtyOrtho;
+    snapshot->orthoMatrix.load(mOrthoMatrix);
 
     setScissorFromClip();
-
-    mSnapshot->flags = Snapshot::kFlagDirtyOrtho | Snapshot::kFlagClipSet;
-    mSnapshot->orthoMatrix.load(mOrthoMatrix);
 
     // Change the ortho projection
     glViewport(0, 0, right - left, bottom - top);
@@ -594,6 +581,12 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
+    uint32_t color = paint->getColor();
+    const GLfloat a = alpha / 255.0f;
+    const GLfloat r = a * ((color >> 16) & 0xFF) / 255.0f;
+    const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
+    const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
+
     mFontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()), paint->getTextSize());
     if (mHasShadow) {
         glActiveTexture(gTextureUnits[0]);
@@ -601,18 +594,12 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
                 count, mShadowRadius);
         const AutoTexture autoCleanup(shadow);
 
-        setupShadow(shadow, x, y, mode);
+        setupShadow(shadow, x, y, mode, a);
 
         // Draw the mesh
         glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
         glDisableVertexAttribArray(mCurrentProgram->getAttrib("texCoords"));
     }
-
-    uint32_t color = paint->getColor();
-    const GLfloat a = alpha / 255.0f;
-    const GLfloat r = a * ((color >> 16) & 0xFF) / 255.0f;
-    const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
-    const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
 
     GLuint textureUnit = 0;
     glActiveTexture(gTextureUnits[textureUnit]);
@@ -705,11 +692,12 @@ void OpenGLRenderer::setupShadow(float radius, float dx, float dy, int color) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::setupShadow(const ShadowTexture* texture, float x, float y,
-        SkXfermode::Mode mode) {
+        SkXfermode::Mode mode, float alpha) {
     const float sx = x - texture->left + mShadowDx;
     const float sy = y - texture->top + mShadowDy;
 
-    const GLfloat a = ((mShadowColor >> 24) & 0xFF) / 255.0f;
+    const int shadowAlpha = ((mShadowColor >> 24) & 0xFF);
+    const GLfloat a = shadowAlpha < 255 ? shadowAlpha / 255.0f : alpha;
     const GLfloat r = a * ((mShadowColor >> 16) & 0xFF) / 255.0f;
     const GLfloat g = a * ((mShadowColor >>  8) & 0xFF) / 255.0f;
     const GLfloat b = a * ((mShadowColor      ) & 0xFF) / 255.0f;

@@ -73,7 +73,9 @@ public class TextActivity extends Activity {
             mLargePaint.setShadowLayer(2.5f, 3.0f, 3.0f, 0xff000000);
             canvas.drawText("Hello OpenGL renderer!", 100, 400, mLargePaint);
             mLargePaint.setShadowLayer(3.0f, 3.0f, 3.0f, 0xff00ff00);
+            mLargePaint.setAlpha(100);
             canvas.drawText("Hello OpenGL renderer!", 100, 500, mLargePaint);
+            mLargePaint.setAlpha(255);
             mLargePaint.clearShadowLayer();
             
             canvas.drawText("Hello OpenGL renderer!", 500, 40, mStrikePaint);
