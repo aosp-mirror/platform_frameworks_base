@@ -100,6 +100,7 @@ EventHub::EventHub(void)
     , mDevicesById(0), mNumDevicesById(0)
     , mOpeningDevices(0), mClosingDevices(0)
     , mDevices(0), mFDs(0), mFDCount(0), mOpened(false)
+    , mInputBufferIndex(0), mInputBufferCount(0), mInputDeviceIndex(0)
 {
     acquire_wake_lock(PARTIAL_WAKE_LOCK, WAKE_LOCK_ID);
 #ifdef EV_SW
@@ -343,13 +344,6 @@ bool EventHub::getEvent(RawEvent* outEvent)
     outEvent->value = 0;
     outEvent->when = 0;
 
-    status_t err;
-
-    int i;
-    int res;
-    int pollres;
-    struct input_event iev;
-
     // Note that we only allow one caller to getEvent(), so don't need
     // to do locking here...  only when adding/removing devices.
 
@@ -358,9 +352,8 @@ bool EventHub::getEvent(RawEvent* outEvent)
         mOpened = true;
     }
 
-    while(1) {
-
-        // First, report any devices that had last been added/removed.
+    for (;;) {
+        // Report any devices that had last been added/removed.
         if (mClosingDevices != NULL) {
             device_t* device = mClosingDevices;
             LOGV("Reporting device closed: id=0x%x, name=%s\n",
@@ -390,76 +383,95 @@ bool EventHub::getEvent(RawEvent* outEvent)
             return true;
         }
 
-        release_wake_lock(WAKE_LOCK_ID);
+        // Grab the next input event.
+        for (;;) {
+            // Consume buffered input events, if any.
+            if (mInputBufferIndex < mInputBufferCount) {
+                const struct input_event& iev = mInputBufferData[mInputBufferIndex++];
+                const device_t* device = mDevices[mInputDeviceIndex];
 
-        pollres = poll(mFDs, mFDCount, -1);
-
-        acquire_wake_lock(PARTIAL_WAKE_LOCK, WAKE_LOCK_ID);
-
-        if (pollres <= 0) {
-            if (errno != EINTR) {
-                LOGW("select failed (errno=%d)\n", errno);
-                usleep(100000);
-            }
-            continue;
-        }
-
-        //printf("poll %d, returned %d\n", mFDCount, pollres);
-
-        // mFDs[0] is used for inotify, so process regular events starting at mFDs[1]
-        for(i = 1; i < mFDCount; i++) {
-            if(mFDs[i].revents) {
-                LOGV("revents for %d = 0x%08x", i, mFDs[i].revents);
-                if(mFDs[i].revents & POLLIN) {
-                    res = read(mFDs[i].fd, &iev, sizeof(iev));
-                    if (res == sizeof(iev)) {
-                        device_t* device = mDevices[i];
-                        LOGV("%s got: t0=%d, t1=%d, type=%d, code=%d, v=%d",
-                             device->path.string(),
-                             (int) iev.time.tv_sec, (int) iev.time.tv_usec,
-                             iev.type, iev.code, iev.value);
-                        if (device->id == mFirstKeyboardId) {
-                            outEvent->deviceId = 0;
-                        } else {
-                            outEvent->deviceId = device->id;
-                        }
-                        outEvent->type = iev.type;
-                        outEvent->scanCode = iev.code;
-                        if (iev.type == EV_KEY) {
-                            err = device->layoutMap->map(iev.code,
-                                    & outEvent->keyCode, & outEvent->flags);
-                            LOGV("iev.code=%d keyCode=%d flags=0x%08x err=%d\n",
-                                iev.code, outEvent->keyCode, outEvent->flags, err);
-                            if (err != 0) {
-                                outEvent->keyCode = AKEYCODE_UNKNOWN;
-                                outEvent->flags = 0;
-                            }
-                        } else {
-                            outEvent->keyCode = iev.code;
-                        }
-                        outEvent->value = iev.value;
-
-                        // Use an event timestamp in the same timebase as
-                        // java.lang.System.nanoTime() and android.os.SystemClock.uptimeMillis()
-                        // as expected by the rest of the system.
-                        outEvent->when = systemTime(SYSTEM_TIME_MONOTONIC);
-                        return true;
-                    } else {
-                        if (res<0) {
-                            LOGW("could not get event (errno=%d)", errno);
-                        } else {
-                            LOGE("could not get event (wrong size: %d)", res);
-                        }
-                        continue;
+                LOGV("%s got: t0=%d, t1=%d, type=%d, code=%d, v=%d", device->path.string(),
+                     (int) iev.time.tv_sec, (int) iev.time.tv_usec, iev.type, iev.code, iev.value);
+                if (device->id == mFirstKeyboardId) {
+                    outEvent->deviceId = 0;
+                } else {
+                    outEvent->deviceId = device->id;
+                }
+                outEvent->type = iev.type;
+                outEvent->scanCode = iev.code;
+                if (iev.type == EV_KEY) {
+                    status_t err = device->layoutMap->map(iev.code,
+                            & outEvent->keyCode, & outEvent->flags);
+                    LOGV("iev.code=%d keyCode=%d flags=0x%08x err=%d\n",
+                        iev.code, outEvent->keyCode, outEvent->flags, err);
+                    if (err != 0) {
+                        outEvent->keyCode = AKEYCODE_UNKNOWN;
+                        outEvent->flags = 0;
                     }
+                } else {
+                    outEvent->keyCode = iev.code;
+                }
+                outEvent->value = iev.value;
+
+                // Use an event timestamp in the same timebase as
+                // java.lang.System.nanoTime() and android.os.SystemClock.uptimeMillis()
+                // as expected by the rest of the system.
+                outEvent->when = systemTime(SYSTEM_TIME_MONOTONIC);
+                return true;
+            }
+
+            // Finish reading all events from devices identified in previous poll().
+            // This code assumes that mInputDeviceIndex is initially 0 and that the
+            // revents member of pollfd is initialized to 0 when the device is first added.
+            // Since mFDs[0] is used for inotify, we process regular events starting at index 1.
+            mInputDeviceIndex += 1;
+            if (mInputDeviceIndex >= mFDCount) {
+                mInputDeviceIndex = 0;
+                break;
+            }
+
+            const struct pollfd &pfd = mFDs[mInputDeviceIndex];
+            if (pfd.revents & POLLIN) {
+                int32_t readSize = read(pfd.fd, mInputBufferData,
+                        sizeof(struct input_event) * INPUT_BUFFER_SIZE);
+                if (readSize < 0) {
+                    if (errno != EAGAIN && errno != EINTR) {
+                        LOGW("could not get event (errno=%d)", errno);
+                    }
+                } else if ((readSize % sizeof(struct input_event)) != 0) {
+                    LOGE("could not get event (wrong size: %d)", readSize);
+                } else {
+                    mInputBufferCount = readSize / sizeof(struct input_event);
+                    mInputBufferIndex = 0;
                 }
             }
         }
-        
+
         // read_notify() will modify mFDs and mFDCount, so this must be done after
         // processing all other events.
         if(mFDs[0].revents & POLLIN) {
             read_notify(mFDs[0].fd);
+        }
+
+        // Poll for events.  Mind the wake lock dance!
+        // We hold a wake lock at all times except during poll().  This works due to some
+        // subtle choreography.  When a device driver has pending (unread) events, it acquires
+        // a kernel wake lock.  However, once the last pending event has been read, the device
+        // driver will release the kernel wake lock.  To prevent the system from going to sleep
+        // when this happens, the EventHub holds onto its own user wake lock while the client
+        // is processing events.  Thus the system can only sleep if there are no events
+        // pending or currently being processed.
+        release_wake_lock(WAKE_LOCK_ID);
+
+        int pollResult = poll(mFDs, mFDCount, -1);
+
+        acquire_wake_lock(PARTIAL_WAKE_LOCK, WAKE_LOCK_ID);
+
+        if (pollResult <= 0) {
+            if (errno != EINTR) {
+                LOGW("select failed (errno=%d)\n", errno);
+                usleep(100000);
+            }
         }
     }
 }
@@ -478,6 +490,7 @@ bool EventHub::openPlatformInput(void)
     mFDs = (pollfd *)calloc(1, sizeof(mFDs[0]));
     mDevices = (device_t **)calloc(1, sizeof(mDevices[0]));
     mFDs[0].events = POLLIN;
+    mFDs[0].revents = 0;
     mDevices[0] = NULL;
 #ifdef HAVE_INOTIFY
     mFDs[0].fd = inotify_init();
@@ -584,6 +597,12 @@ int EventHub::open_device(const char *deviceName)
         idstr[0] = '\0';
     }
 
+    if (fcntl(fd, F_SETFL, O_NONBLOCK)) {
+        LOGE("Error %d making device file descriptor non-blocking.", errno);
+        close(fd);
+        return -1;
+    }
+
     int devid = 0;
     while (devid < mNumDevicesById) {
         if (mDevicesById[devid].device == NULL) {
@@ -640,6 +659,7 @@ int EventHub::open_device(const char *deviceName)
 
     mFDs[mFDCount].fd = fd;
     mFDs[mFDCount].events = POLLIN;
+    mFDs[mFDCount].revents = 0;
 
     // Figure out the kinds of events the device reports.
     
