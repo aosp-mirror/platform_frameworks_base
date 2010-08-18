@@ -1004,8 +1004,8 @@ public class WifiManager {
      * Creates a new WifiLock.
      *
      * @param lockType the type of lock to create. See {@link #WIFI_MODE_FULL},
-     * {@link #WIFI_MODE_SCAN_ONLY} and {@link #WIFI_MODE_FULL_HIGH_PERF} for descriptions
-     * of the types of Wi-Fi locks.
+     * and {@link #WIFI_MODE_SCAN_ONLY} for descriptions of the types of Wi-Fi locks.
+     *
      * @param tag a tag for the WifiLock to identify it in debugging messages.  This string is 
      *            never shown to the user under normal conditions, but should be descriptive 
      *            enough to identify your application and the specific WifiLock within it, if it
