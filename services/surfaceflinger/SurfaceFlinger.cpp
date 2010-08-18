@@ -52,7 +52,6 @@
 #include "SurfaceFlinger.h"
 
 #include "DisplayHardware/DisplayHardware.h"
-#include "DisplayHardware/HWComposer.h"
 
 /* ideally AID_GRAPHICS would be in a semi-public header
  * or there would be a way to map a user/group name to its id
@@ -77,7 +76,6 @@ SurfaceFlinger::SurfaceFlinger()
         mAccessSurfaceFlinger("android.permission.ACCESS_SURFACE_FLINGER"),
         mDump("android.permission.DUMP"),
         mVisibleRegionsDirty(false),
-        mHwWorkListDirty(false),
         mDeferReleaseConsole(false),
         mFreezeDisplay(false),
         mFreezeCount(0),
@@ -370,11 +368,6 @@ bool SurfaceFlinger::threadLoop()
     // post surfaces (if needed)
     handlePageFlip();
 
-    if (UNLIKELY(mHwWorkListDirty)) {
-        // build the h/w work list
-        handleWorkList();
-    }
-
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     if (LIKELY(hw.canDraw() && !isFrozen())) {
         // repaint the framebuffer (if needed)
@@ -450,7 +443,6 @@ void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
         handleTransactionLocked(transactionFlags, ditchedLayers);
         mLastTransactionTime = systemTime() - now;
         mDebugInTransaction = 0;
-        mHwWorkListDirty = true;
         // here the transaction has been committed
     }
 
@@ -458,7 +450,6 @@ void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
      * Clean-up all layers that went away
      * (do this without the lock held)
      */
-
     const size_t count = ditchedLayers.size();
     for (size_t i=0 ; i<count ; i++) {
         if (ditchedLayers[i] != 0) {
@@ -692,8 +683,8 @@ void SurfaceFlinger::commitTransaction()
 void SurfaceFlinger::handlePageFlip()
 {
     bool visibleRegions = mVisibleRegionsDirty;
-    LayerVector& currentLayers(
-            const_cast<LayerVector&>(mDrawingState.layersSortedByZ));
+    LayerVector& currentLayers = const_cast<LayerVector&>(
+            mDrawingState.layersSortedByZ);
     visibleRegions |= lockPageFlip(currentLayers);
 
         const DisplayHardware& hw = graphicPlane(0).displayHardware();
@@ -716,7 +707,6 @@ void SurfaceFlinger::handlePageFlip()
 
             mWormholeRegion = screenRegion.subtract(opaqueRegion);
             mVisibleRegionsDirty = false;
-            mHwWorkListDirty = true;
         }
 
     unlockPageFlip(currentLayers);
@@ -747,20 +737,6 @@ void SurfaceFlinger::unlockPageFlip(const LayerVector& currentLayers)
     }
 }
 
-void SurfaceFlinger::handleWorkList()
-{
-    mHwWorkListDirty = false;
-    HWComposer& hwc(graphicPlane(0).displayHardware().getHwComposer());
-    if (hwc.initCheck() == NO_ERROR) {
-        const Vector< sp<LayerBase> >& currentLayers(mVisibleLayersSortedByZ);
-        const size_t count = currentLayers.size();
-        hwc.createWorkList(count);
-        hwc_layer_t* const cur(hwc.getLayers());
-        for (size_t i=0 ; cur && i<count ; i++) {
-            currentLayers[i]->setGeometry(&cur[i]);
-        }
-    }
-}
 
 void SurfaceFlinger::handleRepaint()
 {
@@ -825,72 +801,9 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
         // draw something...
         drawWormhole();
     }
-
-    status_t err = NO_ERROR;
     const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);
-    size_t count = layers.size();
-
-    const DisplayHardware& hw(graphicPlane(0).displayHardware());
-    HWComposer& hwc(hw.getHwComposer());
-    hwc_layer_t* const cur(hwc.getLayers());
-
-    LOGE_IF(cur && hwc.getNumLayers() != count,
-            "HAL number of layers (%d) doesn't match surfaceflinger (%d)",
-            hwc.getNumLayers(), count);
-
-    // just to be extra-safe, use the smallest count
-    if (hwc.initCheck() == NO_ERROR) {
-        count = count < hwc.getNumLayers() ? count : hwc.getNumLayers();
-    }
-
-    /*
-     *  update the per-frame h/w composer data for each layer
-     *  and build the transparent region of the FB
-     */
-    Region transparent;
-    if (cur) {
-        for (size_t i=0 ; i<count ; i++) {
-            const sp<LayerBase>& layer(layers[i]);
-            layer->setPerFrameData(&cur[i]);
-            if (cur[i].hints & HWC_HINT_CLEAR_FB) {
-                if (!(layer->needsBlending())) {
-                    transparent.orSelf(layer->visibleRegionScreen);
-                }
-            }
-        }
-        err = hwc.prepare();
-        LOGE_IF(err, "HWComposer::prepare failed (%s)", strerror(-err));
-    }
-
-    /*
-     *  clear the area of the FB that need to be transparent
-     */
-    transparent.andSelf(dirty);
-    if (!transparent.isEmpty()) {
-        glClearColor(0,0,0,0);
-        Region::const_iterator it = transparent.begin();
-        Region::const_iterator const end = transparent.end();
-        const int32_t height = hw.getHeight();
-        while (it != end) {
-            const Rect& r(*it++);
-            const GLint sy = height - (r.top + r.height());
-            glScissor(r.left, sy, r.width(), r.height());
-            glClear(GL_COLOR_BUFFER_BIT);
-        }
-    }
-
-
-    /*
-     * and then, render the layers targeted at the framebuffer
-     */
-    for (size_t i=0 ; i<count ; i++) {
-        if (cur) {
-            if (!(cur[i].compositionType == HWC_FRAMEBUFFER) ||
-                    cur[i].flags & HWC_SKIP_LAYER) {
-                // skip layers handled by the HAL
-                continue;
-            }
-        }
+    const size_t count = layers.size();
+    for (size_t i=0 ; i<count ; ++i) {
         const sp<LayerBase>& layer(layers[i]);
         const Region clip(dirty.intersect(layer->visibleRegionScreen));
         if (!clip.isEmpty()) {
