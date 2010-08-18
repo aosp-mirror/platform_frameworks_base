@@ -14,7 +14,7 @@
 
 #pragma version(1)
 
-#pragma rs java_package_name(com.android.scenegraph)
+#pragma rs java_package_name(com.android.modelviewer)
 
 #define TRANSFORM_NONE 0
 #define TRANSFORM_TRANSLATE 1
