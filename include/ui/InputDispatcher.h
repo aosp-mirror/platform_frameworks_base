@@ -554,6 +554,8 @@ private:
     // All registered connections mapped by receive pipe file descriptor.
     KeyedVector<int, sp<Connection> > mConnectionsByReceiveFd;
 
+    ssize_t getConnectionIndex(const sp<InputChannel>& inputChannel);
+
     // Active connections are connections that have a non-empty outbound queue.
     // We don't use a ref-counted pointer here because we explicitly abort connections
     // during unregistration which causes the connection's outbound queue to be cleared

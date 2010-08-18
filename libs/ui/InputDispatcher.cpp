@@ -433,8 +433,7 @@ void InputDispatcher::dispatchEventToCurrentInputTargetsLocked(nsecs_t currentTi
     for (size_t i = 0; i < mCurrentInputTargets.size(); i++) {
         const InputTarget& inputTarget = mCurrentInputTargets.itemAt(i);
 
-        ssize_t connectionIndex = mConnectionsByReceiveFd.indexOfKey(
-                inputTarget.inputChannel->getReceivePipeFd());
+        ssize_t connectionIndex = getConnectionIndex(inputTarget.inputChannel);
         if (connectionIndex >= 0) {
             sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
             prepareDispatchCycleLocked(currentTime, connection, eventEntry, & inputTarget,
@@ -1367,12 +1366,10 @@ status_t InputDispatcher::registerInputChannel(const sp<InputChannel>& inputChan
     LOGD("channel '%s' ~ registerInputChannel", inputChannel->getName().string());
 #endif
 
-    int receiveFd;
     { // acquire lock
         AutoMutex _l(mLock);
 
-        receiveFd = inputChannel->getReceivePipeFd();
-        if (mConnectionsByReceiveFd.indexOfKey(receiveFd) >= 0) {
+        if (getConnectionIndex(inputChannel) >= 0) {
             LOGW("Attempted to register already registered input channel '%s'",
                     inputChannel->getName().string());
             return BAD_VALUE;
@@ -1386,12 +1383,13 @@ status_t InputDispatcher::registerInputChannel(const sp<InputChannel>& inputChan
             return status;
         }
 
+        int32_t receiveFd = inputChannel->getReceivePipeFd();
         mConnectionsByReceiveFd.add(receiveFd, connection);
+
+        mPollLoop->setCallback(receiveFd, POLLIN, handleReceiveCallback, this);
 
         runCommandsLockedInterruptible();
     } // release lock
-
-    mPollLoop->setCallback(receiveFd, POLLIN, handleReceiveCallback, this);
     return OK;
 }
 
@@ -1400,12 +1398,10 @@ status_t InputDispatcher::unregisterInputChannel(const sp<InputChannel>& inputCh
     LOGD("channel '%s' ~ unregisterInputChannel", inputChannel->getName().string());
 #endif
 
-    int32_t receiveFd;
     { // acquire lock
         AutoMutex _l(mLock);
 
-        receiveFd = inputChannel->getReceivePipeFd();
-        ssize_t connectionIndex = mConnectionsByReceiveFd.indexOfKey(receiveFd);
+        ssize_t connectionIndex = getConnectionIndex(inputChannel);
         if (connectionIndex < 0) {
             LOGW("Attempted to unregister already unregistered input channel '%s'",
                     inputChannel->getName().string());
@@ -1417,18 +1413,30 @@ status_t InputDispatcher::unregisterInputChannel(const sp<InputChannel>& inputCh
 
         connection->status = Connection::STATUS_ZOMBIE;
 
+        mPollLoop->removeCallback(inputChannel->getReceivePipeFd());
+
         nsecs_t currentTime = now();
         abortDispatchCycleLocked(currentTime, connection, true /*broken*/);
 
         runCommandsLockedInterruptible();
     } // release lock
 
-    mPollLoop->removeCallback(receiveFd);
-
     // Wake the poll loop because removing the connection may have changed the current
     // synchronization state.
     mPollLoop->wake();
     return OK;
+}
+
+ssize_t InputDispatcher::getConnectionIndex(const sp<InputChannel>& inputChannel) {
+    ssize_t connectionIndex = mConnectionsByReceiveFd.indexOfKey(inputChannel->getReceivePipeFd());
+    if (connectionIndex >= 0) {
+        sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
+        if (connection->inputChannel.get() == inputChannel.get()) {
+            return connectionIndex;
+        }
+    }
+
+    return -1;
 }
 
 void InputDispatcher::activateConnectionLocked(Connection* connection) {
