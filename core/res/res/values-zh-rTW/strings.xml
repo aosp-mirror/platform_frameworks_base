@@ -706,9 +706,7 @@
     <string name="selectText" msgid="3889149123626888637">"選取文字"</string>
     <string name="stopSelectingText" msgid="4157931463872320996">"停止選取文字"</string>
     <string name="cut" msgid="3092569408438626261">"剪下"</string>
-    <string name="cutAll" msgid="2436383270024931639">"全部剪下"</string>
     <string name="copy" msgid="2681946229533511987">"複製"</string>
-    <string name="copyAll" msgid="2590829068100113057">"全部複製"</string>
     <string name="paste" msgid="5629880836805036433">"貼上"</string>
     <string name="copyUrl" msgid="2538211579596067402">"複製網址"</string>
     <string name="inputMethod" msgid="1653630062304567879">"輸入方式"</string>

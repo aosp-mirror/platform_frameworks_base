@@ -75,6 +75,7 @@ public final class Rect implements Parcelable {
         bottom = r.bottom;
     }
 
+    @Override
     public boolean equals(Object obj) {
         Rect r = (Rect) obj;
         if (r != null) {
@@ -84,6 +85,7 @@ public final class Rect implements Parcelable {
         return false;
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(32);
         sb.append("Rect("); sb.append(left); sb.append(", ");
@@ -351,7 +353,7 @@ public final class Rect implements Parcelable {
      * rectangle, return true and set this rectangle to that intersection,
      * otherwise return false and do not change this rectangle. No check is
      * performed to see if either rectangle is empty. Note: To just test for
-     * intersection, use intersects()
+     * intersection, use {@link #intersects(Rect, Rect)}.
      *
      * @param left The left side of the rectangle being intersected with this
      *             rectangle
@@ -445,7 +447,7 @@ public final class Rect implements Parcelable {
     /**
      * Returns true iff the two specified rectangles intersect. In no event are
      * either of the rectangles modified. To record the intersection,
-     * use intersect() or setIntersect().
+     * use {@link #intersect(Rect)} or {@link #setIntersect(Rect, Rect)}.
      *
      * @param a The first rectangle being tested for intersection
      * @param b The second rectangle being tested for intersection

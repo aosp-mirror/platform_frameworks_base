@@ -706,9 +706,7 @@
     <string name="selectText" msgid="3889149123626888637">"텍스트 선택"</string>
     <string name="stopSelectingText" msgid="4157931463872320996">"텍스트 선택 중지"</string>
     <string name="cut" msgid="3092569408438626261">"잘라내기"</string>
-    <string name="cutAll" msgid="2436383270024931639">"모두 잘라내기"</string>
     <string name="copy" msgid="2681946229533511987">"복사"</string>
-    <string name="copyAll" msgid="2590829068100113057">"모두 복사"</string>
     <string name="paste" msgid="5629880836805036433">"붙여넣기"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL 복사"</string>
     <string name="inputMethod" msgid="1653630062304567879">"입력 방법"</string>
