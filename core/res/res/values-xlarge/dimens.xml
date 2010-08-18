@@ -22,6 +22,8 @@
     <!-- Height of the status bar -->
     <dimen name="status_bar_icon_size">50dip</dimen>
     <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
+    <!-- Margin for permanent screen decorations at the bottom. -->
+    <dimen name="screen_margin_bottom">50dip</dimen>
     
     <!-- Default height of a key in the password keyboard for alpha -->
     <dimen name="password_keyboard_key_height_alpha">0.35in</dimen>
