@@ -945,7 +945,6 @@ void TrackballInputMapper::reset() {
         mAccumulator.fields = Accumulator::FIELD_BTN_MOUSE;
         mAccumulator.btnMouse = false;
         sync(when);
-        mAccumulator.clear();
     }
 
     InputMapper::reset();
@@ -958,9 +957,9 @@ void TrackballInputMapper::process(const RawEvent* rawEvent) {
         case BTN_MOUSE:
             mAccumulator.fields |= Accumulator::FIELD_BTN_MOUSE;
             mAccumulator.btnMouse = rawEvent->value != 0;
-
+            // Sync now since BTN_MOUSE is not necessarily followed by SYN_REPORT and
+            // we need to ensure that we report the up/down promptly.
             sync(rawEvent->when);
-            mAccumulator.clear();
             break;
         }
         break;
@@ -981,10 +980,7 @@ void TrackballInputMapper::process(const RawEvent* rawEvent) {
     case EV_SYN:
         switch (rawEvent->scanCode) {
         case SYN_REPORT:
-            if (mAccumulator.isDirty()) {
-                sync(rawEvent->when);
-                mAccumulator.clear();
-            }
+            sync(rawEvent->when);
             break;
         }
         break;
@@ -992,13 +988,17 @@ void TrackballInputMapper::process(const RawEvent* rawEvent) {
 }
 
 void TrackballInputMapper::sync(nsecs_t when) {
+    uint32_t fields = mAccumulator.fields;
+    if (fields == 0) {
+        return; // no new state changes, so nothing to do
+    }
+
     int motionEventAction;
     PointerCoords pointerCoords;
     nsecs_t downTime;
     { // acquire lock
         AutoMutex _l(mLock);
 
-        uint32_t fields = mAccumulator.fields;
         bool downChanged = fields & Accumulator::FIELD_BTN_MOUSE;
 
         if (downChanged) {
@@ -1061,6 +1061,8 @@ void TrackballInputMapper::sync(nsecs_t when) {
     } // release lock
 
     applyPolicyAndDispatch(when, motionEventAction, & pointerCoords, downTime);
+
+    mAccumulator.clear();
 }
 
 void TrackballInputMapper::applyPolicyAndDispatch(nsecs_t when, int32_t motionEventAction,
@@ -2380,8 +2382,8 @@ void SingleTouchInputMapper::initialize() {
     mDown = false;
     mX = 0;
     mY = 0;
-    mPressure = 0;
-    mSize = 0;
+    mPressure = 1; // default to 1 for devices that don't report pressure
+    mSize = 0; // default to 0 for devices that don't report size
 }
 
 void SingleTouchInputMapper::reset() {
@@ -2397,9 +2399,9 @@ void SingleTouchInputMapper::process(const RawEvent* rawEvent) {
         case BTN_TOUCH:
             mAccumulator.fields |= Accumulator::FIELD_BTN_TOUCH;
             mAccumulator.btnTouch = rawEvent->value != 0;
-
-            sync(rawEvent->when);
-            mAccumulator.clear();
+            // Don't sync immediately.  Wait until the next SYN_REPORT since we might
+            // not have received valid position information yet.  This logic assumes that
+            // BTN_TOUCH is always followed by SYN_REPORT as part of a complete packet.
             break;
         }
         break;
@@ -2428,10 +2430,7 @@ void SingleTouchInputMapper::process(const RawEvent* rawEvent) {
     case EV_SYN:
         switch (rawEvent->scanCode) {
         case SYN_REPORT:
-            if (mAccumulator.isDirty()) {
-                sync(rawEvent->when);
-                mAccumulator.clear();
-            }
+            sync(rawEvent->when);
             break;
         }
         break;
@@ -2439,9 +2438,10 @@ void SingleTouchInputMapper::process(const RawEvent* rawEvent) {
 }
 
 void SingleTouchInputMapper::sync(nsecs_t when) {
-    /* Update device state */
-
     uint32_t fields = mAccumulator.fields;
+    if (fields == 0) {
+        return; // no new state changes, so nothing to do
+    }
 
     if (fields & Accumulator::FIELD_BTN_TOUCH) {
         mDown = mAccumulator.btnTouch;
@@ -2472,8 +2472,8 @@ void SingleTouchInputMapper::sync(nsecs_t when) {
         mCurrentTouch.pointers[0].y = mY;
         mCurrentTouch.pointers[0].pressure = mPressure;
         mCurrentTouch.pointers[0].size = mSize;
-        mCurrentTouch.pointers[0].touchMajor = mPressure;
-        mCurrentTouch.pointers[0].touchMinor = mPressure;
+        mCurrentTouch.pointers[0].touchMajor = mSize;
+        mCurrentTouch.pointers[0].touchMinor = mSize;
         mCurrentTouch.pointers[0].toolMajor = mSize;
         mCurrentTouch.pointers[0].toolMinor = mSize;
         mCurrentTouch.pointers[0].orientation = 0;
@@ -2482,6 +2482,8 @@ void SingleTouchInputMapper::sync(nsecs_t when) {
     }
 
     syncTouch(when, true);
+
+    mAccumulator.clear();
 }
 
 void SingleTouchInputMapper::configureAxes() {
@@ -2494,8 +2496,8 @@ void SingleTouchInputMapper::configureAxes() {
     getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_PRESSURE, & mAxes.pressure);
     getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_TOOL_WIDTH, & mAxes.size);
 
-    mAxes.touchMajor = mAxes.pressure;
-    mAxes.touchMinor = mAxes.pressure;
+    mAxes.touchMajor = mAxes.size;
+    mAxes.touchMinor = mAxes.size;
     mAxes.toolMajor = mAxes.size;
     mAxes.toolMinor = mAxes.size;
 }
@@ -2585,10 +2587,7 @@ void MultiTouchInputMapper::process(const RawEvent* rawEvent) {
         }
 
         case SYN_REPORT:
-            if (mAccumulator.isDirty()) {
-                sync(rawEvent->when);
-                mAccumulator.clear();
-            }
+            sync(rawEvent->when);
             break;
         }
         break;
@@ -2598,11 +2597,7 @@ void MultiTouchInputMapper::process(const RawEvent* rawEvent) {
 void MultiTouchInputMapper::sync(nsecs_t when) {
     static const uint32_t REQUIRED_FIELDS =
             Accumulator::FIELD_ABS_MT_POSITION_X
-            | Accumulator::FIELD_ABS_MT_POSITION_Y
-            | Accumulator::FIELD_ABS_MT_TOUCH_MAJOR
-            | Accumulator::FIELD_ABS_MT_WIDTH_MAJOR;
-
-    /* Update device state */
+            | Accumulator::FIELD_ABS_MT_POSITION_Y;
 
     uint32_t inCount = mAccumulator.pointerCount;
     uint32_t outCount = 0;
@@ -2611,53 +2606,76 @@ void MultiTouchInputMapper::sync(nsecs_t when) {
     mCurrentTouch.clear();
 
     for (uint32_t inIndex = 0; inIndex < inCount; inIndex++) {
-        uint32_t fields = mAccumulator.pointers[inIndex].fields;
+        const Accumulator::Pointer& inPointer = mAccumulator.pointers[inIndex];
+        uint32_t fields = inPointer.fields;
 
         if ((fields & REQUIRED_FIELDS) != REQUIRED_FIELDS) {
-#if DEBUG_POINTERS
-            LOGD("Pointers: Missing required multitouch pointer fields: index=%d, fields=%d",
-                    inIndex, fields);
-            continue;
-#endif
-        }
-
-        if (mAccumulator.pointers[inIndex].absMTTouchMajor <= 0) {
-            // Pointer is not down.  Drop it.
+            // Some drivers send empty MT sync packets without X / Y to indicate a pointer up.
+            // Drop this finger.
             continue;
         }
 
-        mCurrentTouch.pointers[outCount].x = mAccumulator.pointers[inIndex].absMTPositionX;
-        mCurrentTouch.pointers[outCount].y = mAccumulator.pointers[inIndex].absMTPositionY;
+        PointerData& outPointer = mCurrentTouch.pointers[outCount];
+        outPointer.x = inPointer.absMTPositionX;
+        outPointer.y = inPointer.absMTPositionY;
 
-        mCurrentTouch.pointers[outCount].touchMajor =
-                mAccumulator.pointers[inIndex].absMTTouchMajor;
-        mCurrentTouch.pointers[outCount].touchMinor =
-                (fields & Accumulator::FIELD_ABS_MT_TOUCH_MINOR) != 0
-                ? mAccumulator.pointers[inIndex].absMTTouchMinor
-                        : mAccumulator.pointers[inIndex].absMTTouchMajor;
+        if (fields & Accumulator::FIELD_ABS_MT_TOUCH_MAJOR) {
+            int32_t value = inPointer.absMTTouchMajor;
+            if (value <= 0) {
+                // Some devices send sync packets with X / Y but with a 0 touch major to indicate
+                // a pointer up.  Drop this finger.
+                continue;
+            }
+            outPointer.touchMajor = inPointer.absMTTouchMajor;
+        } else {
+            outPointer.touchMajor = 0;
+        }
 
-        mCurrentTouch.pointers[outCount].toolMajor =
-                mAccumulator.pointers[inIndex].absMTWidthMajor;
-        mCurrentTouch.pointers[outCount].toolMinor =
-                (fields & Accumulator::FIELD_ABS_MT_WIDTH_MINOR) != 0
-                ? mAccumulator.pointers[inIndex].absMTWidthMinor
-                        : mAccumulator.pointers[inIndex].absMTWidthMajor;
+        if (fields & Accumulator::FIELD_ABS_MT_TOUCH_MINOR) {
+            outPointer.touchMinor = inPointer.absMTTouchMinor;
+        } else {
+            outPointer.touchMinor = outPointer.touchMajor;
+        }
 
-        mCurrentTouch.pointers[outCount].orientation =
-                (fields & Accumulator::FIELD_ABS_MT_ORIENTATION) != 0
-                ? mAccumulator.pointers[inIndex].absMTOrientation : 0;
+        if (fields & Accumulator::FIELD_ABS_MT_WIDTH_MAJOR) {
+            outPointer.toolMajor = inPointer.absMTWidthMajor;
+        } else {
+            outPointer.toolMajor = outPointer.touchMajor;
+        }
 
-        // Derive an approximation of pressure and size.
-        // FIXME assignment of pressure may be incorrect, probably better to let
-        // pressure = touch / width.  Later on we pass width to MotionEvent as a size, which
-        // isn't quite right either.  Should be using touch for that.
-        mCurrentTouch.pointers[outCount].pressure = mAccumulator.pointers[inIndex].absMTTouchMajor;
-        mCurrentTouch.pointers[outCount].size = mAccumulator.pointers[inIndex].absMTWidthMajor;
+        if (fields & Accumulator::FIELD_ABS_MT_WIDTH_MINOR) {
+            outPointer.toolMinor = inPointer.absMTWidthMinor;
+        } else {
+            outPointer.toolMinor = outPointer.toolMajor;
+        }
+
+        if (fields & Accumulator::FIELD_ABS_MT_ORIENTATION) {
+            outPointer.orientation = inPointer.absMTOrientation;
+        } else {
+            outPointer.orientation = 0;
+        }
+
+        if (fields & Accumulator::FIELD_ABS_MT_PRESSURE) {
+            outPointer.pressure = inPointer.absMTPressure;
+        } else {
+            // Derive an approximation of pressure.
+            // FIXME Traditionally we have just passed a normalized value based on
+            //       ABS_MT_TOUCH_MAJOR as an estimate of pressure but the result is not
+            //       very meaningful, particularly on large displays.  We should probably let
+            //       pressure = touch_major / tool_major but it is unclear whether that will
+            //       break applications.
+            outPointer.pressure = outPointer.touchMajor;
+        }
+
+        // Size is an alias for a normalized tool width.
+        // FIXME Normalized tool width doesn't actually make much sense since it literally
+        //       means the approaching contact major axis is divided by its full range as
+        //       reported by the driver.  On a large display this could produce very small values.
+        outPointer.size = outPointer.toolMajor;
 
         if (havePointerIds) {
-            if (fields & Accumulator::
-                    FIELD_ABS_MT_TRACKING_ID) {
-                uint32_t id = uint32_t(mAccumulator.pointers[inIndex].absMTTrackingId);
+            if (fields & Accumulator::FIELD_ABS_MT_TRACKING_ID) {
+                uint32_t id = uint32_t(inPointer.absMTTrackingId);
 
                 if (id > MAX_POINTER_ID) {
 #if DEBUG_POINTERS
@@ -2668,7 +2686,7 @@ void MultiTouchInputMapper::sync(nsecs_t when) {
                     havePointerIds = false;
                 }
                 else {
-                    mCurrentTouch.pointers[outCount].id = id;
+                    outPointer.id = id;
                     mCurrentTouch.idToIndex[id] = outCount;
                     mCurrentTouch.idBits.markBit(id);
                 }
@@ -2683,6 +2701,8 @@ void MultiTouchInputMapper::sync(nsecs_t when) {
     mCurrentTouch.pointerCount = outCount;
 
     syncTouch(when, havePointerIds);
+
+    mAccumulator.clear();
 }
 
 void MultiTouchInputMapper::configureAxes() {
@@ -2697,6 +2717,7 @@ void MultiTouchInputMapper::configureAxes() {
     getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_WIDTH_MAJOR, & mAxes.toolMajor);
     getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_WIDTH_MINOR, & mAxes.toolMinor);
     getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_ORIENTATION, & mAxes.orientation);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_PRESSURE, & mAxes.pressure);
 
     if (! mAxes.touchMinor.valid) {
         mAxes.touchMinor = mAxes.touchMajor;
@@ -2706,7 +2727,10 @@ void MultiTouchInputMapper::configureAxes() {
         mAxes.toolMinor = mAxes.toolMajor;
     }
 
-    mAxes.pressure = mAxes.touchMajor;
+    if (! mAxes.pressure.valid) {
+        mAxes.pressure = mAxes.touchMajor;
+    }
+
     mAxes.size = mAxes.toolMajor;
 }
 
