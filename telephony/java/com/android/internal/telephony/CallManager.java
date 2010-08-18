@@ -19,15 +19,14 @@ package com.android.internal.telephony;
 import com.android.internal.telephony.sip.SipPhone;
 
 import android.content.Context;
+import android.media.AudioManager;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RegistrantList;
-import android.util.Log;
-
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
-
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,7 +53,7 @@ import java.util.List;
  */
 public final class CallManager {
 
-    private static final String LOG_TAG ="GSM";
+    private static final String LOG_TAG ="Phone";
     private static final boolean LOCAL_DEBUG = true;
 
     private static final int EVENT_DISCONNECT = 100;
@@ -303,6 +302,32 @@ public final class CallManager {
                 }
             }
         }
+    }
+
+    public void setAudioMode() {
+        Context context = getContext();
+        if (context == null) return;
+        AudioManager audioManager = (AudioManager)
+                context.getSystemService(Context.AUDIO_SERVICE);
+
+        int mode = AudioManager.MODE_NORMAL;
+        switch (getState()) {
+            case RINGING:
+                mode = AudioManager.MODE_RINGTONE;
+                break;
+            case OFFHOOK:
+                Phone fgPhone = getFgPhone();
+                if (!(fgPhone instanceof SipPhone)) {
+                    mode = AudioManager.MODE_IN_CALL;
+                }
+                break;
+        }
+        audioManager.setMode(mode);
+    }
+
+    private Context getContext() {
+        Phone defaultPhone = getDefaultPhone();
+        return ((defaultPhone == null) ? null : defaultPhone.getContext());
     }
 
     private void registerForPhoneStates(Phone phone) {
