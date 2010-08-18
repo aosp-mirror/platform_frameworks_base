@@ -990,7 +990,8 @@ public class ViewDebug {
                             }
                         }) : 0;
         long durationDraw =
-                (root || (view.mPrivateFlags & View.DRAWN) != 0) ? profileViewOperation(view,
+                (root || !view.willNotDraw() || (view.mPrivateFlags & View.DRAWN) != 0) ? profileViewOperation(
+                        view,
                         new ViewOperation<Object>() {
                             public Object[] pre() {
                                 final DisplayMetrics metrics =
