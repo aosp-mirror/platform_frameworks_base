@@ -1683,7 +1683,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         @Override
         public boolean dispatchKeyEvent(KeyEvent event) {
             final int keyCode = event.getKeyCode();
-            final boolean isDown = event.getAction() == KeyEvent.ACTION_DOWN;
+            final int action = event.getAction();
+            final boolean isDown = action == KeyEvent.ACTION_DOWN;
 
             /*
              * If the user hits another key within the play sound delay, then
@@ -1738,6 +1739,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         return true;
                     }
                 }
+            }
+
+            // Back cancels action modes first.
+            if (mActionMode != null && keyCode == KeyEvent.KEYCODE_BACK) {
+                if (action == KeyEvent.ACTION_UP) {
+                    mActionMode.finish();
+                }
+                return true;
             }
 
             final Callback cb = getCallback();
@@ -1976,7 +1985,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 mActionMode.finish();
             }
 
-            ActionMode mode = getCallback().onStartActionMode(callback);
+            final ActionMode.Callback wrappedCallback = new ActionModeCallbackWrapper(callback);
+            ActionMode mode = getCallback().onStartActionMode(wrappedCallback);
             if (mode != null) {
                 mActionMode = mode;
             } else {
@@ -1989,13 +1999,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     } else {
                         ViewStub stub = (ViewStub) findViewById(
                                 com.android.internal.R.id.action_mode_bar_stub);
-                        mActionModeView = (ActionBarContextView) stub.inflate();
+                        if (stub != null) {
+                            mActionModeView = (ActionBarContextView) stub.inflate();
+                        }
                     }
                 }
 
                 if (mActionModeView != null) {
-                    mode = new StandaloneActionMode(getContext(), mActionModeView,
-                            new ActionModeCallbackWrapper(callback));
+                    mode = new StandaloneActionMode(getContext(), mActionModeView, wrappedCallback);
                     if (callback.onCreateActionMode(mode, mode.getMenu())) {
                         mode.invalidate();
                         mActionModeView.initForMode(mode);
@@ -2213,7 +2224,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             public void onDestroyActionMode(ActionMode mode) {
                 mWrapped.onDestroyActionMode(mode);
-                mActionModeView.removeAllViews();
+                if (mActionModeView != null) {
+                    mActionModeView.removeAllViews();
+                }
                 mActionMode = null;
             }
         }
