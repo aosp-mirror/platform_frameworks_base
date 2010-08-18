@@ -35,7 +35,6 @@
 #include "Layer.h"
 #include "SurfaceFlinger.h"
 #include "DisplayHardware/DisplayHardware.h"
-#include "DisplayHardware/HWComposer.h"
 
 
 #define DEBUG_RESIZE    0
@@ -176,62 +175,6 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
 
     mSurface = new SurfaceLayer(mFlinger, this);
     return NO_ERROR;
-}
-
-void Layer::setGeometry(hwc_layer_t* hwcl)
-{
-    hwcl->compositionType = HWC_FRAMEBUFFER;
-    hwcl->hints = 0;
-    hwcl->flags = 0;
-    hwcl->transform = 0;
-    hwcl->blending = HWC_BLENDING_NONE;
-
-    // we can't do alpha-fade with the hwc HAL
-    const State& s(drawingState());
-    if (s.alpha < 0xFF) {
-        hwcl->flags = HWC_SKIP_LAYER;
-        return;
-    }
-
-    // we can only handle simple transformation
-    if (mOrientation & Transform::ROT_INVALID) {
-        hwcl->flags = HWC_SKIP_LAYER;
-        return;
-    }
-
-    hwcl->transform = mOrientation;
-
-    if (needsBlending()) {
-        hwcl->blending = mPremultipliedAlpha ?
-                HWC_BLENDING_PREMULT : HWC_BLENDING_COVERAGE;
-    }
-
-    hwcl->displayFrame.left   = mTransformedBounds.left;
-    hwcl->displayFrame.top    = mTransformedBounds.top;
-    hwcl->displayFrame.right  = mTransformedBounds.right;
-    hwcl->displayFrame.bottom = mTransformedBounds.bottom;
-
-    hwcl->visibleRegionScreen.rects =
-            reinterpret_cast<hwc_rect_t const *>(
-                    visibleRegionScreen.getArray(
-                            &hwcl->visibleRegionScreen.numRects));
-}
-
-void Layer::setPerFrameData(hwc_layer_t* hwcl) {
-    sp<GraphicBuffer> buffer(mBufferManager.getActiveBuffer());
-    if (buffer == NULL) {
-        // this situation can happen if we ran out of memory for instance.
-        // not much we can do. continue to use whatever texture was bound
-        // to this context.
-        hwcl->handle = NULL;
-        return;
-    }
-    hwcl->handle = const_cast<native_handle_t*>(buffer->handle);
-    // TODO: set the crop value properly
-    hwcl->sourceCrop.left   = 0;
-    hwcl->sourceCrop.top    = 0;
-    hwcl->sourceCrop.right  = buffer->width;
-    hwcl->sourceCrop.bottom = buffer->height;
 }
 
 void Layer::reloadTexture(const Region& dirty)

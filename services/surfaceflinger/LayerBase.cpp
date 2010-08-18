@@ -307,15 +307,6 @@ void LayerBase::drawRegion(const Region& reg) const
     }
 }
 
-void LayerBase::setGeometry(hwc_layer_t* hwcl) {
-    hwcl->flags |= HWC_SKIP_LAYER;
-}
-
-void LayerBase::setPerFrameData(hwc_layer_t* hwcl) {
-    hwcl->compositionType = HWC_FRAMEBUFFER;
-    hwcl->handle = NULL;
-}
-
 void LayerBase::draw(const Region& clip) const
 {
     // reset GL state
