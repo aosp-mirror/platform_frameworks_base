@@ -287,6 +287,8 @@ public class BrowserContract {
          * <p>Type: INTEGER</p>
          */
         public static final String VISITS = "visits";
+
+        public static final String USER_ENTERED = "user_entered";
     }
 
     /**
