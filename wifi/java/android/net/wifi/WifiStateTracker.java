@@ -319,8 +319,6 @@ public class WifiStateTracker extends NetworkStateTracker {
     private static String[] sDnsPropNames;
     private Runnable mReleaseWakeLockCallback;
 
-    private static String[] sDnsPropNames;
-
     /**
      * A structure for supplying information about a supplicant state
      * change in the STATE_CHANGE event message that comes from the
