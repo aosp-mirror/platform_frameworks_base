@@ -912,4 +912,25 @@ public class TelephonyManager {
             return null;
         }
     }
+
+    /**
+     * @return true if the current device is "voice capable".
+     * <p>
+     * "Voice capable" means that this device supports circuit-switched
+     * (i.e. voice) phone calls over the telephony network, and is allowed
+     * to display the in-call UI while a cellular voice call is active.
+     * This will be false on "data only" devices which can't make voice
+     * calls and don't support any in-call UI.
+     * <p>
+     * Note: the meaning of this flag is subtly different from the
+     * PackageManager.FEATURE_TELEPHONY system feature, which is available
+     * on any device with a telephony radio, even if the device is
+     * data-only.
+     *
+     * @hide pending API review
+     */
+    public boolean isVoiceCapable() {
+        return mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_voice_capable);
+    }
 }
