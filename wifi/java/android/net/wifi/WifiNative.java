@@ -149,6 +149,8 @@ public class WifiNative {
 
     public native static String getDhcpError();
 
+    public native static boolean setSuspendOptimizationsCommand(boolean enabled);
+
     /**
      * Wait for the supplicant to send an event, returning the event string.
      * @return the event string sent by the supplicant.

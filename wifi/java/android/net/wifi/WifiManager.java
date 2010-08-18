@@ -307,6 +307,16 @@ public class WifiManager {
     public static final String ACTION_PICK_WIFI_NETWORK = "android.net.wifi.PICK_WIFI_NETWORK";
 
     /**
+     * In this Wi-Fi lock mode, Wi-Fi will behave as in the mode
+     * {@link #WIFI_MODE_FULL} but it operates at high performance
+     * at the expense of power. This mode should be used
+     * only when the wifi connection needs to have minimum loss and low
+     * latency as it can impact the battery life.
+     * @hide
+     */
+    public static final int WIFI_MODE_FULL_HIGH_PERF = 3;
+
+    /**
      * In this Wi-Fi lock mode, Wi-Fi will be kept active,
      * and will behave normally, i.e., it will attempt to automatically
      * establish a connection to a remembered access point that is
@@ -993,8 +1003,9 @@ public class WifiManager {
     /**
      * Creates a new WifiLock.
      *
-     * @param lockType the type of lock to create. See {@link #WIFI_MODE_FULL} and
-     * {@link #WIFI_MODE_SCAN_ONLY} for descriptions of the types of Wi-Fi locks.
+     * @param lockType the type of lock to create. See {@link #WIFI_MODE_FULL},
+     * {@link #WIFI_MODE_SCAN_ONLY} and {@link #WIFI_MODE_FULL_HIGH_PERF} for descriptions
+     * of the types of Wi-Fi locks.
      * @param tag a tag for the WifiLock to identify it in debugging messages.  This string is 
      *            never shown to the user under normal conditions, but should be descriptive 
      *            enough to identify your application and the specific WifiLock within it, if it
