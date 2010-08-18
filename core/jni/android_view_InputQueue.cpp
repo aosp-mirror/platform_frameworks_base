@@ -76,9 +76,13 @@ private:
             STATUS_ZOMBIE
         };
 
-        Connection(const sp<InputChannel>& inputChannel, const sp<PollLoop>& pollLoop);
+        Connection(uint16_t id,
+                const sp<InputChannel>& inputChannel, const sp<PollLoop>& pollLoop);
 
         inline const char* getInputChannelName() const { return inputChannel->getName().string(); }
+
+        // A unique id for this connection.
+        uint16_t id;
 
         Status status;
 
@@ -91,29 +95,34 @@ private:
         // The sequence number of the current event being dispatched.
         // This is used as part of the finished token as a way to determine whether the finished
         // token is still valid before sending a finished signal back to the publisher.
-        uint32_t messageSeqNum;
+        uint16_t messageSeqNum;
 
         // True if a message has been received from the publisher but not yet finished.
         bool messageInProgress;
     };
 
     Mutex mLock;
+    uint16_t mNextConnectionId;
     KeyedVector<int32_t, sp<Connection> > mConnectionsByReceiveFd;
+
+    ssize_t getConnectionIndex(const sp<InputChannel>& inputChannel);
 
     static void handleInputChannelDisposed(JNIEnv* env,
             jobject inputChannelObj, const sp<InputChannel>& inputChannel, void* data);
 
     static bool handleReceiveCallback(int receiveFd, int events, void* data);
 
-    static jlong generateFinishedToken(int32_t receiveFd, int32_t messageSeqNum);
+    static jlong generateFinishedToken(int32_t receiveFd,
+            uint16_t connectionId, uint16_t messageSeqNum);
 
     static void parseFinishedToken(jlong finishedToken,
-            int32_t* outReceiveFd, uint32_t* outMessageIndex);
+            int32_t* outReceiveFd, uint16_t* outConnectionId, uint16_t* outMessageIndex);
 };
 
 // ----------------------------------------------------------------------------
 
-NativeInputQueue::NativeInputQueue() {
+NativeInputQueue::NativeInputQueue() :
+        mNextConnectionId(0) {
 }
 
 NativeInputQueue::~NativeInputQueue() {
@@ -134,18 +143,17 @@ status_t NativeInputQueue::registerInputChannel(JNIEnv* env, jobject inputChanne
 
     sp<PollLoop> pollLoop = android_os_MessageQueue_getPollLoop(env, messageQueueObj);
 
-    int receiveFd;
     { // acquire lock
         AutoMutex _l(mLock);
 
-        receiveFd = inputChannel->getReceivePipeFd();
-        if (mConnectionsByReceiveFd.indexOfKey(receiveFd) >= 0) {
+        if (getConnectionIndex(inputChannel) >= 0) {
             LOGW("Attempted to register already registered input channel '%s'",
                     inputChannel->getName().string());
             return BAD_VALUE;
         }
 
-        sp<Connection> connection = new Connection(inputChannel, pollLoop);
+        uint16_t connectionId = mNextConnectionId++;
+        sp<Connection> connection = new Connection(connectionId, inputChannel, pollLoop);
         status_t result = connection->inputConsumer.initialize();
         if (result) {
             LOGW("Failed to initialize input consumer for input channel '%s', status=%d",
@@ -155,13 +163,14 @@ status_t NativeInputQueue::registerInputChannel(JNIEnv* env, jobject inputChanne
 
         connection->inputHandlerObjGlobal = env->NewGlobalRef(inputHandlerObj);
 
+        int32_t receiveFd = inputChannel->getReceivePipeFd();
         mConnectionsByReceiveFd.add(receiveFd, connection);
+
+        pollLoop->setCallback(receiveFd, POLLIN, handleReceiveCallback, this);
     } // release lock
 
     android_view_InputChannel_setDisposeCallback(env, inputChannelObj,
             handleInputChannelDisposed, this);
-
-    pollLoop->setCallback(receiveFd, POLLIN, handleReceiveCallback, this);
     return OK;
 }
 
@@ -177,38 +186,56 @@ status_t NativeInputQueue::unregisterInputChannel(JNIEnv* env, jobject inputChan
     LOGD("channel '%s' - Unregistered", inputChannel->getName().string());
 #endif
 
-    int32_t receiveFd;
-    sp<Connection> connection;
     { // acquire lock
         AutoMutex _l(mLock);
 
-        receiveFd = inputChannel->getReceivePipeFd();
-        ssize_t connectionIndex = mConnectionsByReceiveFd.indexOfKey(receiveFd);
+        ssize_t connectionIndex = getConnectionIndex(inputChannel);
         if (connectionIndex < 0) {
             LOGW("Attempted to unregister already unregistered input channel '%s'",
                     inputChannel->getName().string());
             return BAD_VALUE;
         }
 
-        connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
+        sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
         mConnectionsByReceiveFd.removeItemsAt(connectionIndex);
 
         connection->status = Connection::STATUS_ZOMBIE;
 
+        connection->pollLoop->removeCallback(inputChannel->getReceivePipeFd());
+
         env->DeleteGlobalRef(connection->inputHandlerObjGlobal);
         connection->inputHandlerObjGlobal = NULL;
+
+        if (connection->messageInProgress) {
+            LOGI("Sending finished signal for input channel '%s' since it is being unregistered "
+                    "while an input message is still in progress.",
+                    connection->getInputChannelName());
+            connection->messageInProgress = false;
+            connection->inputConsumer.sendFinishedSignal(); // ignoring result
+        }
     } // release lock
 
     android_view_InputChannel_setDisposeCallback(env, inputChannelObj, NULL, NULL);
-
-    connection->pollLoop->removeCallback(receiveFd);
     return OK;
+}
+
+ssize_t NativeInputQueue::getConnectionIndex(const sp<InputChannel>& inputChannel) {
+    ssize_t connectionIndex = mConnectionsByReceiveFd.indexOfKey(inputChannel->getReceivePipeFd());
+    if (connectionIndex >= 0) {
+        sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
+        if (connection->inputChannel.get() == inputChannel.get()) {
+            return connectionIndex;
+        }
+    }
+
+    return -1;
 }
 
 status_t NativeInputQueue::finished(JNIEnv* env, jlong finishedToken, bool ignoreSpuriousFinish) {
     int32_t receiveFd;
-    uint32_t messageSeqNum;
-    parseFinishedToken(finishedToken, &receiveFd, &messageSeqNum);
+    uint16_t connectionId;
+    uint16_t messageSeqNum;
+    parseFinishedToken(finishedToken, &receiveFd, &connectionId, &messageSeqNum);
 
     { // acquire lock
         AutoMutex _l(mLock);
@@ -216,16 +243,25 @@ status_t NativeInputQueue::finished(JNIEnv* env, jlong finishedToken, bool ignor
         ssize_t connectionIndex = mConnectionsByReceiveFd.indexOfKey(receiveFd);
         if (connectionIndex < 0) {
             if (! ignoreSpuriousFinish) {
-                LOGW("Attempted to finish input on channel that is no longer registered.");
+                LOGI("Ignoring finish signal on channel that is no longer registered.");
             }
             return DEAD_OBJECT;
         }
 
         sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
+        if (connectionId != connection->id) {
+            if (! ignoreSpuriousFinish) {
+                LOGI("Ignoring finish signal on channel that is no longer registered.");
+            }
+            return DEAD_OBJECT;
+        }
+
         if (messageSeqNum != connection->messageSeqNum || ! connection->messageInProgress) {
             if (! ignoreSpuriousFinish) {
-                LOGW("Attempted to finish input twice on channel '%s'.",
-                        connection->getInputChannelName());
+                LOGW("Attempted to finish input twice on channel '%s'.  "
+                        "finished messageSeqNum=%d, current messageSeqNum=%d, messageInProgress=%d",
+                        connection->getInputChannelName(),
+                        messageSeqNum, connection->messageSeqNum, connection->messageInProgress);
             }
             return INVALID_OPERATION;
         }
@@ -312,7 +348,7 @@ bool NativeInputQueue::handleReceiveCallback(int receiveFd, int events, void* da
         connection->messageInProgress = true;
         connection->messageSeqNum += 1;
 
-        finishedToken = generateFinishedToken(receiveFd, connection->messageSeqNum);
+        finishedToken = generateFinishedToken(receiveFd, connection->id, connection->messageSeqNum);
 
         inputHandlerObjLocal = env->NewLocalRef(connection->inputHandlerObjGlobal);
     } // release lock
@@ -384,20 +420,23 @@ bool NativeInputQueue::handleReceiveCallback(int receiveFd, int events, void* da
     return true;
 }
 
-jlong NativeInputQueue::generateFinishedToken(int32_t receiveFd, int32_t messageSeqNum) {
-    return (jlong(receiveFd) << 32) | jlong(messageSeqNum);
+jlong NativeInputQueue::generateFinishedToken(int32_t receiveFd, uint16_t connectionId,
+        uint16_t messageSeqNum) {
+    return (jlong(receiveFd) << 32) | (jlong(connectionId) << 16) | jlong(messageSeqNum);
 }
 
 void NativeInputQueue::parseFinishedToken(jlong finishedToken,
-        int32_t* outReceiveFd, uint32_t* outMessageIndex) {
+        int32_t* outReceiveFd, uint16_t* outConnectionId, uint16_t* outMessageIndex) {
     *outReceiveFd = int32_t(finishedToken >> 32);
-    *outMessageIndex = uint32_t(finishedToken & 0xffffffff);
+    *outConnectionId = uint16_t(finishedToken >> 16);
+    *outMessageIndex = uint16_t(finishedToken);
 }
 
 // ----------------------------------------------------------------------------
 
-NativeInputQueue::Connection::Connection(const sp<InputChannel>& inputChannel, const sp<PollLoop>& pollLoop) :
-    status(STATUS_NORMAL), inputChannel(inputChannel), inputConsumer(inputChannel),
+NativeInputQueue::Connection::Connection(uint16_t id,
+        const sp<InputChannel>& inputChannel, const sp<PollLoop>& pollLoop) :
+    id(id), status(STATUS_NORMAL), inputChannel(inputChannel), inputConsumer(inputChannel),
     pollLoop(pollLoop), inputHandlerObjGlobal(NULL),
     messageSeqNum(0), messageInProgress(false) {
 }
