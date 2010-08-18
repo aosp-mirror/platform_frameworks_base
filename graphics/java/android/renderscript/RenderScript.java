@@ -143,10 +143,6 @@ public class RenderScript {
     synchronized void nObjDestroy(int id) {
         rsnObjDestroy(mContext, id);
     }
-    native void rsnObjDestroyOOB(int con, int id);
-    synchronized void nObjDestroyOOB(int id) {
-        rsnObjDestroyOOB(mContext, id);
-    }
     native int  rsnFileOpen(int con, byte[] name);
     synchronized int nFileOpen(byte[] name) {
         return rsnFileOpen(mContext, name);

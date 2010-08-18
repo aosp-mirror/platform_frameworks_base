@@ -340,9 +340,6 @@ void * Context::threadProc(void *vrsc)
              rsc->timerPrint();
              rsc->timerReset();
          }
-         if (rsc->mObjDestroy.mNeedToEmpty) {
-             rsc->objDestroyOOBRun();
-         }
          if (rsc->mThreadPriority > 0 && targetTime) {
              int32_t t = (targetTime - (int32_t)(rsc->mTimeMSLastScript + rsc->mTimeMSLastSwap)) * 1000;
              if (t > 0) {
@@ -366,9 +363,6 @@ void * Context::threadProc(void *vrsc)
          rsc->mStateFont.deinit(rsc);
      }
      ObjectBase::zeroAllUserRef(rsc);
-
-     rsc->mObjDestroy.mNeedToEmpty = true;
-     rsc->objDestroyOOBRun();
 
      if (rsc->mIsGraphicsContext) {
          pthread_mutex_lock(&gInitMutex);
@@ -488,7 +482,6 @@ Context::Context(Device *dev, bool isGraphics, bool useDepth)
 
     mWndSurface = NULL;
 
-    objDestroyOOBInit();
     timerInit();
     timerSet(RS_TIMER_INTERNAL);
 
@@ -534,8 +527,6 @@ Context::~Context()
 
     mIO.shutdown();
     int status = pthread_join(mThreadId, &res);
-    mObjDestroy.mNeedToEmpty = true;
-    objDestroyOOBRun();
 
     // Global structure cleanup.
     pthread_mutex_lock(&gInitMutex);
@@ -548,8 +539,6 @@ Context::~Context()
         mDev = NULL;
     }
     pthread_mutex_unlock(&gInitMutex);
-
-    objDestroyOOBDestroy();
 }
 
 void Context::setSurface(uint32_t w, uint32_t h, ANativeWindow *sur)
@@ -719,49 +708,6 @@ void Context::removeName(ObjectBase *obj)
             return;
         }
     }
-}
-
-bool Context::objDestroyOOBInit()
-{
-    if (!mObjDestroy.mMutex.init()) {
-        LOGE("Context::ObjDestroyOOBInit mutex init failure");
-        return false;
-    }
-    return true;
-}
-
-void Context::objDestroyOOBRun()
-{
-    if (mObjDestroy.mNeedToEmpty) {
-        if (!mObjDestroy.mMutex.lock()) {
-            LOGE("Context::ObjDestroyOOBRun: error locking for OOBRun.");
-            return;
-        }
-
-        for (size_t ct = 0; ct < mObjDestroy.mDestroyList.size(); ct++) {
-            mObjDestroy.mDestroyList[ct]->decUserRef();
-        }
-        mObjDestroy.mDestroyList.clear();
-        mObjDestroy.mNeedToEmpty = false;
-        mObjDestroy.mMutex.unlock();
-    }
-}
-
-void Context::objDestroyOOBDestroy()
-{
-    rsAssert(!mObjDestroy.mNeedToEmpty);
-}
-
-void Context::objDestroyAdd(ObjectBase *obj)
-{
-    if (!mObjDestroy.mMutex.lock()) {
-        LOGE("Context::ObjDestroyOOBRun: error locking for OOBRun.");
-        return;
-    }
-
-    mObjDestroy.mNeedToEmpty = true;
-    mObjDestroy.mDestroyList.add(obj);
-    mObjDestroy.mMutex.unlock();
 }
 
 uint32_t Context::getMessageToClient(void *data, size_t *receiveLen, size_t bufferLen, bool wait)
@@ -1001,12 +947,6 @@ void rsContextDestroy(RsContext vrsc)
 {
     Context * rsc = static_cast<Context *>(vrsc);
     delete rsc;
-}
-
-void rsObjDestroyOOB(RsContext vrsc, void *obj)
-{
-    Context * rsc = static_cast<Context *>(vrsc);
-    rsc->objDestroyAdd(static_cast<ObjectBase *>(obj));
 }
 
 uint32_t rsContextGetMessage(RsContext vrsc, void *data, size_t *receiveLen, size_t bufferLen, bool wait)

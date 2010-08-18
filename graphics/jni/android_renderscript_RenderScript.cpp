@@ -117,14 +117,6 @@ nObjDestroy(JNIEnv *_env, jobject _this, RsContext con, jint obj)
     rsObjDestroy(con, (void *)obj);
 }
 
-static void
-nObjDestroyOOB(JNIEnv *_env, jobject _this, RsContext con, jint obj)
-{
-    // This function only differs from nObjDestroy in that it calls the
-    // special Out Of Band version of ObjDestroy which is thread safe.
-    LOG_API("nObjDestroyOOB, con(%p) obj(%p)", con, (void *)obj);
-    rsObjDestroyOOB(con, (void *)obj);
-}
 
 static jint
 nFileOpen(JNIEnv *_env, jobject _this, RsContext con, jbyteArray str)
@@ -1377,7 +1369,6 @@ static JNINativeMethod methods[] = {
 {"rsnAssignName",                    "(II[B)V",                               (void*)nAssignName },
 {"rsnGetName",                       "(II)Ljava/lang/String;",               (void*)nGetName },
 {"rsnObjDestroy",                    "(II)V",                                 (void*)nObjDestroy },
-{"rsnObjDestroyOOB",                 "(II)V",                                 (void*)nObjDestroyOOB },
 
 {"rsnFileOpen",                      "(I[B)I",                                (void*)nFileOpen },
 {"rsnFileA3DCreateFromAssetStream",  "(II)I",                                 (void*)nFileA3DCreateFromAssetStream },
