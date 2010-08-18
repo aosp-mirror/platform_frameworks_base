@@ -46,4 +46,18 @@ public class SimpleTestUsingMockRil extends InstrumentationTestCase {
         Log.v(TAG, "testGetRadioState: " + state);
         assertTrue(state >= 0 && state <= 9);
     }
+
+    /**
+     * Set the current radio state of RIL
+     * and verify the radio state is set correctly
+     */
+    public void testSetRadioState() {
+        for (int state = 0; state <= 9; state++) {
+            Log.v(TAG, "set radio state to be " + state);
+            assertTrue("set radio state: " + state + " failed.",
+                       mMockRilCtrl.setRadioState(state));
+        }
+        assertFalse("use an invalid radio state", mMockRilCtrl.setRadioState(-1));
+        assertFalse("the radio state doesn't exist", mMockRilCtrl.setRadioState(10));
+    }
 }

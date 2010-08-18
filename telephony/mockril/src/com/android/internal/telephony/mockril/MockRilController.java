@@ -104,4 +104,32 @@ public class MockRilController {
         else
             return -1;
     }
+
+    /**
+     * Set the radio state of mock ril to the given state
+     * @param state for given radio state
+     * @return true if the state is set successful, false if it fails
+     */
+    public boolean setRadioState(int state) {
+        RilCtrlCmds.CtrlReqRadioState req = new RilCtrlCmds.CtrlReqRadioState();
+        if (state < 0 || state > RilCmds.RADIOSTATE_NV_READY) {
+            Log.v(TAG, "the give radio state is not valid.");
+            return false;
+        }
+        req.setState(state);
+        if (!sendCtrlCommand(RilCtrlCmds.CTRL_CMD_SET_RADIO_STATE, 0, 0, req)) {
+            Log.v(TAG, "send set radio state request failed.");
+            return false;
+        }
+        Msg response = getCtrlResponse();
+        if (response == null) {
+            Log.v(TAG, "failed to get response for setRadioState");
+            return false;
+        }
+        response.printHeader(TAG);
+        RilCtrlCmds.CtrlRspRadioState resp =
+            response.getDataAs(RilCtrlCmds.CtrlRspRadioState.class);
+        int curstate = resp.getState();
+        return curstate == state;
+    }
 }

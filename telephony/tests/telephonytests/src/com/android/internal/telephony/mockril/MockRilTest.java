@@ -26,6 +26,7 @@ import com.android.internal.communication.MsgHeader;
 import com.android.internal.communication.Msg;
 import com.android.internal.telephony.RilChannel;
 import com.android.internal.telephony.ril_proto.RilCtrlCmds;
+import com.android.internal.telephony.ril_proto.RilCmds;
 
 import com.android.frameworks.telephonytests.TelephonyMockRilTestRunner;
 import com.google.protobuf.micro.InvalidProtocolBufferMicroException;
@@ -172,5 +173,25 @@ public class MockRilTest extends InstrumentationTestCase {
                 ((state >= 0) && (state <= 9)));
 
         log("testGetRadioState X");
+    }
+
+    public void testSetRadioState() throws IOException {
+        log("testSetRadioState E");
+
+        RilCtrlCmds.CtrlReqRadioState cmdrs = new RilCtrlCmds.CtrlReqRadioState();
+        assertEquals(0, cmdrs.getState());
+
+        cmdrs.setState(RilCmds.RADIOSTATE_SIM_NOT_READY);
+        assertEquals(2, cmdrs.getState());
+
+        Msg.send(mMockRilChannel, RilCtrlCmds.CTRL_CMD_SET_RADIO_STATE, 0, 0, cmdrs);
+
+        Msg resp = Msg.recv(mMockRilChannel);
+
+        RilCtrlCmds.CtrlRspRadioState rsp = resp.getDataAs(RilCtrlCmds.CtrlRspRadioState.class);
+
+        int state = rsp.getState();
+        log("get response for testSetRadioState: " + state);
+        assertTrue(RilCmds.RADIOSTATE_SIM_NOT_READY == state);
     }
 }
