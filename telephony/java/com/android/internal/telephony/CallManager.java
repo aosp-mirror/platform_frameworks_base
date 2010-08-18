@@ -1288,7 +1288,10 @@ public final class CallManager {
                     mUnknownConnectionRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
                 case EVENT_INCOMING_RING:
-                    mIncomingRingRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    // The event may come from RIL who's not aware of an ongoing fg call
+                    if (!hasActiveFgCall()) {
+                        mIncomingRingRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    }
                     break;
                 case EVENT_RINGBACK_TONE:
                     mRingbackToneRegistrants.notifyRegistrants((AsyncResult) msg.obj);
