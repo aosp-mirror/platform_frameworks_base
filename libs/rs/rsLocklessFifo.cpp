@@ -169,6 +169,30 @@ void LocklessCommandFifo::next()
     //dumpState("next");
 }
 
+bool LocklessCommandFifo::makeSpaceNonBlocking(uint32_t bytes)
+{
+    //dumpState("make space non-blocking");
+    if ((mPut+bytes) > mEnd) {
+        // Need to loop regardless of where get is.
+        if((mGet > mPut) && (mBuffer+4 >= mGet)) {
+            return false;
+        }
+
+        // Toss in a reset then the normal wait for space will do the rest.
+        reinterpret_cast<uint16_t *>(mPut)[0] = 0;
+        reinterpret_cast<uint16_t *>(mPut)[1] = 0;
+        mPut = mBuffer;
+        mSignalToWorker.set();
+    }
+
+    // it will fit here so we just need to wait for space.
+    if(getFreeSpace() < bytes) {
+        return false;
+    }
+
+    return true;
+}
+
 void LocklessCommandFifo::makeSpace(uint32_t bytes)
 {
     //dumpState("make space");
@@ -182,6 +206,7 @@ void LocklessCommandFifo::makeSpace(uint32_t bytes)
         reinterpret_cast<uint16_t *>(mPut)[0] = 0;
         reinterpret_cast<uint16_t *>(mPut)[1] = 0;
         mPut = mBuffer;
+        mSignalToWorker.set();
     }
 
     // it will fit here so we just need to wait for space.
@@ -193,6 +218,6 @@ void LocklessCommandFifo::makeSpace(uint32_t bytes)
 
 void LocklessCommandFifo::dumpState(const char *s) const
 {
-    LOGV("%s  put %p, get %p,  buf %p,  end %p", s, mPut, mGet, mBuffer, mEnd);
+    LOGV("%s %p  put %p, get %p,  buf %p,  end %p", s, this, mPut, mGet, mBuffer, mEnd);
 }
 

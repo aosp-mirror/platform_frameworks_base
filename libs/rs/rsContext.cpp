@@ -744,7 +744,7 @@ bool Context::sendMessageToClient(void *data, uint32_t cmdID, size_t len, bool w
         return false;
     }
     if (!waitForSpace) {
-        if (mIO.mToClient.getFreeSpace() <= (len + 8)) {
+        if (!mIO.mToClient.makeSpaceNonBlocking(len + 8)) {
             // Not enough room, and not waiting.
             return false;
         }

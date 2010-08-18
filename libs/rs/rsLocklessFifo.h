@@ -62,6 +62,7 @@ public:
     void next();
 
     void makeSpace(uint32_t bytes);
+    bool makeSpaceNonBlocking(uint32_t bytes);
 
     bool isEmpty() const;
     uint32_t getFreeSpace() const;
