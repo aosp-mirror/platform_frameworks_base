@@ -39,6 +39,9 @@ LOCAL_SRC_FILES += \
        core/java/android/webkit/EventLogTags.logtags \
        telephony/java/com/android/internal/telephony/EventLogTags.logtags \
 
+# RenderScript files for internal widgets
+LOCAL_SRC_FILES += $(call all-renderscript-files-under, core/java/com/android/internal/widget)
+
 # The following filters out code we are temporarily not including at all.
 # TODO: Move AWT and beans (and associated harmony code) back into libcore.
 # TODO: Maybe remove javax.microedition entirely?
