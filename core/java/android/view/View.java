@@ -6630,9 +6630,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see android.widget.ScrollBarDrawable
      * @hide
      */
-    protected void onDrawHorizontalScrollBar(Canvas canvas,
-                                             Drawable scrollBar,
-                                             int l, int t, int r, int b) {
+    protected void onDrawHorizontalScrollBar(Canvas canvas, Drawable scrollBar,
+            int l, int t, int r, int b) {
         scrollBar.setBounds(l, t, r, b);
         scrollBar.draw(canvas);
     }
@@ -6651,9 +6650,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see android.widget.ScrollBarDrawable
      * @hide
      */
-    protected void onDrawVerticalScrollBar(Canvas canvas,
-                                           Drawable scrollBar,
-                                           int l, int t, int r, int b) {
+    protected void onDrawVerticalScrollBar(Canvas canvas, Drawable scrollBar,
+            int l, int t, int r, int b) {
         scrollBar.setBounds(l, t, r, b);
         scrollBar.draw(canvas);
     }
@@ -10018,8 +10016,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         public final Interpolator scrollBarInterpolator = new Interpolator(1, 2);
 
-        private final float[] mOpaque = {255.0f};
-        private final float[] mTransparent = {0.0f};
+        private final float[] mOpaque = { 255.0f };
+        private final float[] mTransparent = { 0.0f };
         
         /**
          * When fading should start. This time moves into the future every time
