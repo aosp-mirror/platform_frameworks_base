@@ -129,7 +129,152 @@ final class FragmentState implements Parcelable {
 
 /**
  * A Fragment is a piece of an application's user interface or behavior
- * that can be placed in an {@link Activity}.
+ * that can be placed in an {@link Activity}.  Interaction with fragments
+ * is done through {@link FragmentManager}, which can be obtained via
+ * {@link Activity#getFragmentManager() Activity.getFragmentManager()} and
+ * {@link Fragment#getFragmentManager() Fragment.getFragmentManager()}.
+ *
+ * <p>The Fragment class can be used many ways to achieve a wide variety of
+ * results.  It is core, it represents a particular operation or interface
+ * that is running within a larger {@link Activity}.  A Fragment is closely
+ * tied to the Activity it is in, and can not be used apart from one.  Though
+ * Fragment defines its own lifecycle, that lifecycle is dependent on its
+ * activity: if the activity is stopped, no fragments inside of it can be
+ * started; when the activity is destroyed, all fragments will be destroyed.
+ *
+ * <p>All subclasses of Fragment must include a public empty constructor.
+ * The framework will often re-instantiate a fragment class when needed,
+ * in particular during state restore, and needs to be able to find this
+ * constructor to instantiate it.  If the empty constructor is not available,
+ * a runtime exception will occur in some cases during state restore.
+ *
+ * <p>Topics covered here:
+ * <ol>
+ * <li><a href="#Lifecycle">Lifecycle</a>
+ * <li><a href="#Layout">Layout</a>
+ * <li><a href="#BackStack">Back Stack</a>
+ * </ol>
+ *
+ * <a name="Lifecycle"></a>
+ * <h3>Lifecycle</h3>
+ *
+ * <p>Though a Fragment's lifecycle is tied to its owning activity, it has
+ * its own wrinkle on the standard activity lifecycle.  It includes basic
+ * activity lifecycle methods such as {@link #onResume}, but also important
+ * are methods related to interactions with the activity and UI generation.
+ *
+ * <p>The core series of lifecycle methods that are called to bring a fragment
+ * up to resumed state (interacting with the user) are:
+ *
+ * <ol>
+ * <li> {@link #onAttach} called once the fragment is associated with its activity.
+ * <li> {@link #onCreate} called to do initial creation of the fragment.
+ * <li> {@link #onCreateView} creates and returns the view hierarchy associated
+ * with the fragment.
+ * <li> {@link #onActivityCreated} tells the fragment that its activity has
+ * completed its own {@link Activity#onCreate Activity.onCreaate}.
+ * <li> {@link #onStart} makes the fragment visible to the user (based on its
+ * containing activity being started).
+ * <li> {@link #onResume} makes the fragment interacting with the user (based on its
+ * containing activity being resumed).
+ * </ol>
+ *
+ * <p>As a fragment is no longer being used, it goes through a reverse
+ * series of callbacks:
+ *
+ * <ol>
+ * <li> {@link #onPause} fragment is no longer interacting with the user either
+ * because its activity is being paused or a fragment operation is modifying it
+ * in the activity.
+ * <li> {@link #onStop} fragment is no longer visible to the user either
+ * because its activity is being stopped or a fragment operation is modifying it
+ * in the activity.
+ * <li> {@link #onDestroyView} allows the fragment to clean up resources
+ * associated with its View.
+ * <li> {@link #onDestroy} called to do final cleanup of the fragment's state.
+ * <li> {@link #onDetach} called immediately prior to the fragment no longer
+ * being associated with its activity.
+ * </ol>
+ *
+ * <a name="Layout"></a>
+ * <h3>Layout</h3>
+ *
+ * <p>Fragments can be used as part of your application's layout, allowing
+ * you to better modularize your code and more easily adjust your user
+ * interface to the screen it is running on.  As an example, we can look
+ * at a simple program consisting of a list of items, and display of the
+ * details of each item.</p>
+ *
+ * <p>An activity's layout XML can include <code>&lt;fragment&gt;</code> tags
+ * to embed fragment instances inside of the layout.  For example, here is
+ * a simply layout that embeds one fragment:</p>
+ *
+ * {@sample development/samples/ApiDemos/res/layout/fragment_layout.xml layout}
+ *
+ * <p>The layout is installed in the activity in the normal way:</p>
+ *
+ * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
+ *      main}
+ *
+ * <p>The titles fragment, showing a list of titles, is very simple, relying
+ * on {@link ListFragment} for most of its work.  Note the implementation of
+ * clicking an item, which can either update
+ * the content of the details fragment or start a new activity show the
+ * details depending on whether the current activity's layout can show the
+ * details.</p>
+ *
+ * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
+ *      titles}
+ *
+ * <p>The details fragment showing the contents of selected item here just
+ * displays a string of text based on an index of a string array built in to
+ * the app:</p>
+ *
+ * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
+ *      details}
+ *
+ * <p>In this case when the user clicks on a title, there is no details
+ * fragment in the current activity, so the title title fragment's click code will
+ * launch a new activity to display the details fragment:</p>
+ *
+ * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
+ *      details_activity}
+ *
+ * <p>However the screen may be large enough to show both the list of titles
+ * and details about the currently selected title.  To use such a layout on
+ * a landscape screen, this alternative layout can be placed under layout-land:</p>
+ *
+ * {@sample development/samples/ApiDemos/res/layout-land/fragment_layout.xml layout}
+ *
+ * <p>Note how the prior code will adjust to this alternative UI flow: the
+ * titles fragment will now show its text inside of its activity, and the
+ * details activity will finish of it finds itself running in a configuration
+ * where the details can be shown inline.
+ *
+ * <a name="BackStack"></a>
+ * <h3>Back Stack</h3>
+ *
+ * <p>The transaction in which fragments are modified can be placed on an
+ * internal back-stack of the owning activity.  When the user presses back
+ * in the activity, any transactions on the back stack are popped off before
+ * the activity itself is finished.
+ *
+ * <p>For example, consider this simple fragment that is instantiated with
+ * an integer argument and displays that in a TextView in its UI:</p>
+ *
+ * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentStack.java
+ *      fragment}
+ *
+ * <p>A function that creates a new instance of the fragment, replacing
+ * whatever current fragment instance is being shown and pushing that change
+ * on to the back stack could be written as:
+ *
+ * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentStack.java
+ *      add_stack}
+ *
+ * <p>After each call to this function, a new entry is on the stack, and
+ * pressing back will pop it to return the user to whatever previous state
+ * the activity UI was in.
  */
 public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener {
     private static final HashMap<String, Class<?>> sClassMap =
@@ -235,7 +380,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     }
 
     /**
-     * Default constructor.  <strong>Every</string> fragment must have an
+     * Default constructor.  <strong>Every</strong> fragment must have an
      * empty constructor, so it can be instantiated when restoring its
      * activity's state.  It is strongly recommended that subclasses do not
      * have other constructors with parameters, since these constructors
@@ -243,10 +388,13 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      * arguments can be supplied by the caller with {@link #setArguments}
      * and later retrieved by the Fragment with {@link #getArguments}.
      * 
-     * <p>The first place where application code should generally run is in
-     * {@link #onAttach(Activity)}, which is the point where the fragment is
-     * actually attached to its activity and thus capable of doing most
-     * retrieve such parameters from the activity in {@link #onAttach(Activity)}.
+     * <p>Applications should generally not implement a constructor.  The
+     * first place application code an run where the fragment is ready to
+     * be used is in {@link #onAttach(Activity)}, the point where the fragment
+     * is actually associated with its activity.  Some applications may also
+     * want to implement {@link #onInflate} to retrieve attributes from a
+     * layout resource, though should take care here because this happens for
+     * the fragment is attached to its activity.
      */
     public Fragment() {
     }

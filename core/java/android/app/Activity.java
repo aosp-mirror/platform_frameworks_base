@@ -56,7 +56,6 @@ import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.ContextThemeWrapper;
-import android.view.InflateException;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -114,6 +113,7 @@ import java.util.HashMap;
  * 
  * <p>Topics covered here:
  * <ol>
+ * <li><a href="#Fragments">Fragments</a>
  * <li><a href="#ActivityLifecycle">Activity Lifecycle</a>
  * <li><a href="#ConfigurationChanges">Configuration Changes</a>
  * <li><a href="#StartingActivities">Starting Activities and Getting Results</a>
@@ -122,6 +122,14 @@ import java.util.HashMap;
  * <li><a href="#ProcessLifecycle">Process Lifecycle</a>
  * </ol>
  * 
+ * <a name="Fragments"></a>
+ * <h3>Fragments</h3>
+ *
+ * <p>Starting with {@link android.os.Build.VERSION_CODES#HONEYCOMB}, Activity
+ * implementations can make use of the {@link Fragment} class to better
+ * modularize their code, build more sophisticated user interfaces for larger
+ * screens, and help scale their application between small and large screens.
+ *
  * <a name="ActivityLifecycle"></a>
  * <h3>Activity Lifecycle</h3>
  *
@@ -1485,6 +1493,11 @@ public class Activity extends ContextThemeWrapper
      * {@link #getLastNonConfigurationInstance()} in the new activity
      * instance.
      * 
+     * <em>If you are targeting {@link android.os.Build.VERSION_CODES#HONEYCOMB}
+     * or later, consider instead using a {@link Fragment} with
+     * {@link Fragment#setRetainInstance(boolean)
+     * Fragment.setRetainInstance(boolean}.</em>
+     *
      * <p>This function is called purely as an optimization, and you must
      * not rely on it being called.  When it is called, a number of guarantees
      * will be made to help optimize configuration switching:
@@ -1623,6 +1636,10 @@ public class Activity extends ContextThemeWrapper
      * {@link #startManagingCursor} so that the activity will manage its
      * lifecycle for you.
      * 
+     * <em>If you are targeting {@link android.os.Build.VERSION_CODES#HONEYCOMB}
+     * or later, consider instead using {@link LoaderManager} instead, available
+     * via {@link #getLoaderManager()}.</em>
+     *
      * @param uri The URI of the content provider to query.
      * @param projection List of columns to return.
      * @param selection SQL WHERE clause.
@@ -1634,11 +1651,8 @@ public class Activity extends ContextThemeWrapper
      * @see #startManagingCursor
      * @hide
      */
-    public final Cursor managedQuery(Uri uri,
-                                     String[] projection,
-                                     String selection,
-                                     String sortOrder)
-    {
+    public final Cursor managedQuery(Uri uri, String[] projection, String selection,
+            String sortOrder) {
         Cursor c = getContentResolver().query(uri, projection, selection, null, sortOrder);
         if (c != null) {
             startManagingCursor(c);
@@ -1653,6 +1667,10 @@ public class Activity extends ContextThemeWrapper
      * {@link #startManagingCursor} so that the activity will manage its
      * lifecycle for you.
      * 
+     * <em>If you are targeting {@link android.os.Build.VERSION_CODES#HONEYCOMB}
+     * or later, consider instead using {@link LoaderManager} instead, available
+     * via {@link #getLoaderManager()}.</em>
+     *
      * @param uri The URI of the content provider to query.
      * @param projection List of columns to return.
      * @param selection SQL WHERE clause.
@@ -1664,12 +1682,8 @@ public class Activity extends ContextThemeWrapper
      * @see ContentResolver#query(android.net.Uri , String[], String, String[], String)
      * @see #startManagingCursor
      */
-    public final Cursor managedQuery(Uri uri,
-                                     String[] projection,
-                                     String selection,
-                                     String[] selectionArgs,
-                                     String sortOrder)
-    {
+    public final Cursor managedQuery(Uri uri, String[] projection, String selection,
+            String[] selectionArgs, String sortOrder) {
         Cursor c = getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
         if (c != null) {
             startManagingCursor(c);
@@ -1685,6 +1699,10 @@ public class Activity extends ContextThemeWrapper
      * it will call {@link Cursor#requery} for you.  When the activity is
      * destroyed, all managed Cursors will be closed automatically.
      * 
+     * <em>If you are targeting {@link android.os.Build.VERSION_CODES#HONEYCOMB}
+     * or later, consider instead using {@link LoaderManager} instead, available
+     * via {@link #getLoaderManager()}.</em>
+     *
      * @param c The Cursor to be managed.
      * 
      * @see #managedQuery(android.net.Uri , String[], String, String[], String)
@@ -2689,6 +2707,9 @@ public class Activity extends ContextThemeWrapper
      * by the activity.  The default implementation calls through to
      * {@link #onCreateDialog(int)} for compatibility.
      *
+     * <em>If you are targeting {@link android.os.Build.VERSION_CODES#HONEYCOMB}
+     * or later, consider instead using a {@link DialogFragment} instead.</em>
+     *
      * <p>If you use {@link #showDialog(int)}, the activity will call through to
      * this method the first time, and hang onto it thereafter.  Any dialog
      * that is created by this method will automatically be saved and restored
@@ -2760,6 +2781,9 @@ public class Activity extends ContextThemeWrapper
      * Show a dialog managed by this activity.  A call to {@link #onCreateDialog(int, Bundle)}
      * will be made with the same id the first time this is called for a given
      * id.  From thereafter, the dialog will be automatically saved and restored.
+     *
+     * <em>If you are targeting {@link android.os.Build.VERSION_CODES#HONEYCOMB}
+     * or later, consider instead using a {@link DialogFragment} instead.</em>
      *
      * <p>Each time a dialog is shown, {@link #onPrepareDialog(int, Dialog, Bundle)} will
      * be made to provide an opportunity to do any timely preparation.
@@ -4309,6 +4333,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     final void performDestroy() {
+        mWindow.destroy();
         mFragments.dispatchDestroy();
         onDestroy();
         if (mLoaderManager != null) {
