@@ -19,7 +19,7 @@
   Apache2 must be installed with mod_php!
 
   Usage:
-    run-apache2.py start|stop|restart
+    run_apache2.py start|stop|restart
 """
 
 import sys
@@ -38,7 +38,7 @@ def main():
 
   if not run_cmd in ("start", "stop", "restart"):
     logging.info("illegal argument: " + run_cmd)
-    logging.info("Usage: python run-apache2.py start|stop|restart")
+    logging.info("Usage: python run_apache2.py start|stop|restart")
     return
 
   #Create /tmp/WebKit if it doesn't exist. This is needed for various files used by apache2
