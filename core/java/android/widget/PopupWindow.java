@@ -16,9 +16,10 @@
 
 package android.widget;
 
-import java.lang.ref.WeakReference;
+import com.android.internal.R;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -31,13 +32,13 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.WindowManager;
-import android.view.View.OnTouchListener;
 import android.view.ViewTreeObserver.OnScrollChangedListener;
+import android.view.WindowManager;
 
-import com.android.internal.R;
+import java.lang.ref.WeakReference;
 
 /**
  * <p>A popup window that can be used to display an arbitrary view. The popup
@@ -1032,7 +1033,9 @@ public class PopupWindow {
         
         int bottomEdge = displayFrame.bottom;
         if (ignoreBottomDecorations) {
-            bottomEdge = anchor.getContext().getResources().getDisplayMetrics().heightPixels;
+            Resources res = anchor.getContext().getResources();
+            bottomEdge = res.getDisplayMetrics().heightPixels -
+                    (int) res.getDimension(com.android.internal.R.dimen.screen_margin_bottom);
         }
         final int distanceToBottom = bottomEdge - (anchorPos[1] + anchor.getHeight()) - yOffset;
         final int distanceToTop = anchorPos[1] - displayFrame.top + yOffset;
