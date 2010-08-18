@@ -1162,7 +1162,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     } catch (RemoteException e) {
                     }
                 } catch (NameNotFoundException e) {
-                    Log.w(TAG, "Unable to create context for heavy notification", e);
+                    Slog.w(TAG, "Unable to create context for heavy notification", e);
                 }
             } break;
             case CANCEL_HEAVY_NOTIFICATION_MSG: {
@@ -2367,7 +2367,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             
             if (proc == null) {
-                Log.w(TAG, "crashApplication: nothing for uid=" + uid
+                Slog.w(TAG, "crashApplication: nothing for uid=" + uid
                         + " initialPid=" + initialPid
                         + " packageName=" + packageName);
                 return;
@@ -4051,6 +4051,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     return false;
                 }
             }
+            if (!pi.exported && pi.applicationInfo.uid != uid) {
+                return false;
+            }
             return true;
         } catch (RemoteException e) {
             return false;
@@ -4199,8 +4202,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (perm == null) {
             perm = new UriPermission(targetUid, uri);
             targetUris.put(uri, perm);
-
         }
+
         perm.modeFlags |= modeFlags;
         if (activity == null) {
             perm.globalModeFlags |= modeFlags;
@@ -4221,6 +4224,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     void grantUriPermissionFromIntentLocked(int callingUid,
             String targetPkg, Intent intent, ActivityRecord activity) {
+        if (DEBUG_URI_PERMISSION) Slog.v(TAG,
+                "Grant URI perm to " + (intent != null ? intent.getData() : null)
+                + " from " + intent + "; flags=0x"
+                + Integer.toHexString(intent != null ? intent.getFlags() : 0));
+
         if (intent == null) {
             return;
         }
@@ -4899,13 +4907,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     private final String checkContentProviderPermissionLocked(
-            ProviderInfo cpi, ProcessRecord r, int mode) {
+            ProviderInfo cpi, ProcessRecord r) {
         final int callingPid = (r != null) ? r.pid : Binder.getCallingPid();
         final int callingUid = (r != null) ? r.info.uid : Binder.getCallingUid();
         if (checkComponentPermission(cpi.readPermission, callingPid, callingUid,
                 cpi.exported ? -1 : cpi.applicationInfo.uid)
-                == PackageManager.PERMISSION_GRANTED
-                && mode == ParcelFileDescriptor.MODE_READ_ONLY || mode == -1) {
+                == PackageManager.PERMISSION_GRANTED) {
             return null;
         }
         if (checkComponentPermission(cpi.writePermission, callingPid, callingUid,
@@ -4922,8 +4929,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 PathPermission pp = pps[i];
                 if (checkComponentPermission(pp.getReadPermission(), callingPid, callingUid,
                         cpi.exported ? -1 : cpi.applicationInfo.uid)
-                        == PackageManager.PERMISSION_GRANTED
-                        && mode == ParcelFileDescriptor.MODE_READ_ONLY || mode == -1) {
+                        == PackageManager.PERMISSION_GRANTED) {
                     return null;
                 }
                 if (checkComponentPermission(pp.getWritePermission(), callingPid, callingUid,
@@ -4934,6 +4940,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
         
+        HashMap<Uri, UriPermission> perms = mGrantedUriPermissions.get(callingUid);
+        if (perms != null) {
+            for (Map.Entry<Uri, UriPermission> uri : perms.entrySet()) {
+                if (uri.getKey().getAuthority().equals(cpi.authority)) {
+                    return null;
+                }
+            }
+        }
+
         String msg = "Permission Denial: opening provider " + cpi.name
                 + " from " + (r != null ? r : "(null)") + " (pid=" + callingPid
                 + ", uid=" + callingUid + ") requires "
@@ -4963,10 +4978,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             cpr = mProvidersByName.get(name);
             if (cpr != null) {
                 cpi = cpr.info;
-                if (checkContentProviderPermissionLocked(cpi, r, -1) != null) {
-                    return new ContentProviderHolder(cpi,
-                            cpi.readPermission != null
-                                    ? cpi.readPermission : cpi.writePermission);
+                String msg;
+                if ((msg=checkContentProviderPermissionLocked(cpi, r)) != null) {
+                    throw new SecurityException(msg);
                 }
 
                 if (r != null && cpr.canRunHere(r)) {
@@ -5026,10 +5040,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     return null;
                 }
 
-                if (checkContentProviderPermissionLocked(cpi, r, -1) != null) {
-                    return new ContentProviderHolder(cpi,
-                            cpi.readPermission != null
-                                    ? cpi.readPermission : cpi.writePermission);
+                String msg;
+                if ((msg=checkContentProviderPermissionLocked(cpi, r)) != null) {
+                    throw new SecurityException(msg);
                 }
 
                 if (!mSystemReady && !mDidUpdate && !mWaitingUpdate
@@ -6180,7 +6193,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 Binder.restoreCallingIdentity(origId);
             }
             int res = result.get();
-            Log.w(TAG, "handleApplicationStrictModeViolation; res=" + res);
+            Slog.w(TAG, "handleApplicationStrictModeViolation; res=" + res);
         }
     }
 

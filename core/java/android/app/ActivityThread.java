@@ -3298,10 +3298,6 @@ public final class ActivityThread {
             Slog.e(TAG, "Failed to find provider info for " + name);
             return null;
         }
-        if (holder.permissionFailure != null) {
-            throw new SecurityException("Permission " + holder.permissionFailure
-                    + " required for provider " + name);
-        }
 
         IContentProvider prov = installProvider(context, holder.provider,
                 holder.info, true);
