@@ -82,4 +82,34 @@ public class VCardUtilsTests extends TestCase {
             assertFalse(VCardUtils.containsOnlyAlphaDigitHyphen(String.valueOf((char)i)));
         }
     }
+
+    public void testToStringAvailableAsV30ParamValue() {
+        // Smoke tests.
+        assertEquals("HOME", VCardUtils.toStringAvailableAsV30ParameValue("HOME"));
+        assertEquals("TEL", VCardUtils.toStringAvailableAsV30ParameValue("TEL"));
+        assertEquals("PAGER", VCardUtils.toStringAvailableAsV30ParameValue("PAGER"));
+
+        assertEquals("\"\"", VCardUtils.toStringAvailableAsV30ParameValue(""));
+
+        // non-Ascii must be allowed
+        assertEquals("\u4E8B\u52D9\u6240",
+                VCardUtils.toStringAvailableAsV30ParameValue("\u4E8B\u52D9\u6240"));
+        // Reported as bug report.
+        assertEquals("\u8D39", VCardUtils.toStringAvailableAsV30ParameValue("\u8D39"));
+        assertEquals("\"comma,separated\"",
+                VCardUtils.toStringAvailableAsV30ParameValue("comma,separated"));
+        assertEquals("\"colon:aware\"",
+                VCardUtils.toStringAvailableAsV30ParameValue("colon:aware"));
+        // CTL characters.
+        assertEquals("CTLExample",
+                VCardUtils.toStringAvailableAsV30ParameValue("CTL\u0001Example"));
+        // DQUOTE must be removed.
+        assertEquals("quoted",
+                VCardUtils.toStringAvailableAsV30ParameValue("\"quoted\""));
+        // DQUOTE must be removed basically, but we should detect a space, which
+        // require us to use DQUOTE again.
+        // Right-side has one more illegal dquote to test quote-handle code thoroughly.
+        assertEquals("\"Already quoted\"",
+                VCardUtils.toStringAvailableAsV30ParameValue("\"Already quoted\"\""));
+    }
 }

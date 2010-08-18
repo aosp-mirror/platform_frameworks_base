@@ -16,10 +16,10 @@
 package android.pim.vcard;
 
 import android.content.ContentProviderOperation;
-import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.CommonDataKinds.Im;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
+import android.provider.ContactsContract.Data;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 
@@ -475,6 +475,43 @@ public class VCardUtils {
             }
         }
         return true;
+    }
+
+    /**
+     * <P>
+     * Returns String available as parameter value in vCard 3.0.
+     * </P>
+     * <P>
+     * RFC 2426 requires vCard composer to quote parameter values when it contains
+     * semi-colon, for example (See RFC 2426 for more information).
+     * This method checks whether the given String can be used without quotes.
+     * </P>
+     * <P>
+     * Note: We remove DQUOTE silently for now.
+     * </P>
+     */
+    public static String toStringAvailableAsV30ParameValue(String value) {
+        if (TextUtils.isEmpty(value)) {
+            value = "";
+        }
+        final int asciiFirst = 0x20;
+        final int asciiLast = 0x7E;  // included
+        final StringBuilder builder = new StringBuilder();
+        final int length = value.length();
+        boolean needQuote = false;
+        for (int i = 0; i < length; i = value.offsetByCodePoints(i, 1)) {
+            final int codePoint = value.codePointAt(i);
+            if (codePoint < asciiFirst || codePoint == '"') {
+                // CTL characters and DQUOTE are never accepted. Remove them.
+                continue;
+            }
+            builder.appendCodePoint(codePoint);
+            if (codePoint == ':' || codePoint == ',' || codePoint == ' ') {
+                needQuote = true;
+            }
+        }
+        final String result = builder.toString();
+        return ((needQuote || result.isEmpty()) ? ('"' + result + '"') : result);
     }
 
     public static String toHalfWidthString(final String orgString) {
