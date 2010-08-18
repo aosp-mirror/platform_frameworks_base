@@ -341,10 +341,14 @@ status_t StagefrightRecorder::setParamVideoEncodingBitRate(int32_t bitRate) {
 
 status_t StagefrightRecorder::setParamMaxFileDurationUs(int64_t timeUs) {
     LOGV("setParamMaxFileDurationUs: %lld us", timeUs);
-    if (timeUs <= 100000LL) {  // XXX: 100 milli-seconds
+    if (timeUs <= 0) {
+        LOGW("Max file duration is not positive: %lld us. Disabling duration limit.", timeUs);
+        timeUs = 0; // Disable the duration limit for zero or negative values.
+    } else if (timeUs <= 100000LL) {  // XXX: 100 milli-seconds
         LOGE("Max file duration is too short: %lld us", timeUs);
         return BAD_VALUE;
     }
+
     mMaxFileDurationUs = timeUs;
     return OK;
 }
