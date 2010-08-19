@@ -708,9 +708,7 @@ public class TypedArray {
         outValue.resourceId = data[index+AssetManager.STYLE_RESOURCE_ID];
         outValue.changingConfigurations = data[index+AssetManager.STYLE_CHANGING_CONFIGURATIONS];
         outValue.density = data[index+AssetManager.STYLE_DENSITY];
-        if (type == TypedValue.TYPE_STRING) {
-            outValue.string = loadStringValueAt(index);
-        }
+        outValue.string = (type == TypedValue.TYPE_STRING) ? loadStringValueAt(index) : null;
         return true;
     }
 
