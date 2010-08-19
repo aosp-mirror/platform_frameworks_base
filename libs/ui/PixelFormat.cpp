@@ -63,7 +63,6 @@ status_t getPixelFormatInfo(PixelFormat format, PixelFormatInfo* info)
         info->bitsPerPixel = 16;
         goto done;
     case HAL_PIXEL_FORMAT_YCrCb_420_SP:
-    case HAL_PIXEL_FORMAT_YCbCr_420_SP_TILED:
     case HAL_PIXEL_FORMAT_YV12:
         info->bitsPerPixel = 12;
      done:
