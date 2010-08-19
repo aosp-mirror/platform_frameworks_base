@@ -1601,7 +1601,7 @@ bool AudioFlinger::MixerThread::threadLoop()
         }
 
         if (mSuspended) {
-            sleepTime = idleSleepTime;
+            sleepTime = suspendSleepTimeUs();
         }
         // sleepTime == 0 means we must write to audio hardware
         if (sleepTime == 0) {
@@ -2021,6 +2021,11 @@ uint32_t AudioFlinger::MixerThread::idleSleepTimeUs()
     return (uint32_t)(((mFrameCount * 1000) / mSampleRate) * 1000) / 2;
 }
 
+uint32_t AudioFlinger::MixerThread::suspendSleepTimeUs()
+{
+    return (uint32_t)(((mFrameCount * 1000) / mSampleRate) * 1000);
+}
+
 // ----------------------------------------------------------------------------
 AudioFlinger::DirectOutputThread::DirectOutputThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id, uint32_t device)
     :   PlaybackThread(audioFlinger, output, id, device)
@@ -2365,7 +2370,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
         }
 
         if (mSuspended) {
-            sleepTime = idleSleepTime;
+            sleepTime = suspendSleepTimeUs();
         }
         // sleepTime == 0 means we must write to audio hardware
         if (sleepTime == 0) {
@@ -2485,6 +2490,18 @@ uint32_t AudioFlinger::DirectOutputThread::idleSleepTimeUs()
     }
     return time;
 }
+
+uint32_t AudioFlinger::DirectOutputThread::suspendSleepTimeUs()
+{
+    uint32_t time;
+    if (AudioSystem::isLinearPCM(mFormat)) {
+        time = (uint32_t)(((mFrameCount * 1000) / mSampleRate) * 1000);
+    } else {
+        time = 10000;
+    }
+    return time;
+}
+
 
 // ----------------------------------------------------------------------------
 
@@ -2612,7 +2629,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
         }
 
         if (mSuspended) {
-            sleepTime = idleSleepTime;
+            sleepTime = suspendSleepTimeUs();
         }
         // sleepTime == 0 means we must write to audio hardware
         if (sleepTime == 0) {

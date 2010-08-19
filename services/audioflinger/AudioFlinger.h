@@ -664,6 +664,7 @@ private:
         virtual void            deleteTrackName_l(int name) = 0;
         virtual uint32_t        activeSleepTimeUs() = 0;
         virtual uint32_t        idleSleepTimeUs() = 0;
+        virtual uint32_t        suspendSleepTimeUs() = 0;
 
     private:
 
@@ -724,6 +725,7 @@ private:
         virtual     void        deleteTrackName_l(int name);
         virtual     uint32_t    activeSleepTimeUs();
         virtual     uint32_t    idleSleepTimeUs();
+        virtual     uint32_t    suspendSleepTimeUs();
 
         AudioMixer*                     mAudioMixer;
     };
@@ -744,6 +746,7 @@ private:
         virtual     void        deleteTrackName_l(int name);
         virtual     uint32_t    activeSleepTimeUs();
         virtual     uint32_t    idleSleepTimeUs();
+        virtual     uint32_t    suspendSleepTimeUs();
 
     private:
         void applyVolume(uint16_t leftVol, uint16_t rightVol, bool ramp);
