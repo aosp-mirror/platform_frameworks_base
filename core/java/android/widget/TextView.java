@@ -195,7 +195,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     static final String LOG_TAG = "TextView";
     static final boolean DEBUG_EXTRACT = false;
     
-    private static int PRIORITY = 100;
+    private static final int PRIORITY = 100;
 
     private ColorStateList mTextColor;
     private int mCurTextColor;

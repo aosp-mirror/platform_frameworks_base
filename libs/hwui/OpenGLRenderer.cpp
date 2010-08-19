@@ -41,7 +41,7 @@ namespace uirenderer {
 #define DEFAULT_PATH_CACHE_SIZE 6.0f
 #define DEFAULT_PATCH_CACHE_SIZE 100
 #define DEFAULT_GRADIENT_CACHE_SIZE 0.5f
-#define DEFAULT_DROP_SHADOW_CACHE_SIZE 1.0f
+#define DEFAULT_DROP_SHADOW_CACHE_SIZE 2.0f
 
 #define REQUIRED_TEXTURE_UNITS_COUNT 3
 
@@ -251,12 +251,12 @@ bool OpenGLRenderer::restoreSnapshot() {
         mOrthoMatrix.load(current->orthoMatrix);
     }
 
+    mSaveCount--;
+    mSnapshot = previous;
+
     if (restoreLayer) {
         composeLayer(current, previous);
     }
-
-    mSaveCount--;
-    mSnapshot = previous;
 
     if (restoreClip) {
         setScissorFromClip();
@@ -287,7 +287,11 @@ int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
         mode = SkXfermode::kSrcOver_Mode;
     }
 
-    createLayer(mSnapshot, left, top, right, bottom, alpha, mode, flags);
+    if (alpha > 0 && !mSnapshot->invisible) {
+        createLayer(mSnapshot, left, top, right, bottom, alpha, mode, flags);
+    } else {
+        mSnapshot->invisible = true;
+    }
 
     return count;
 }
@@ -295,7 +299,11 @@ int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
 int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bottom,
         int alpha, int flags) {
     int count = saveSnapshot();
-    createLayer(mSnapshot, left, top, right, bottom, alpha, SkXfermode::kSrcOver_Mode, flags);
+    if (alpha > 0 && !mSnapshot->invisible) {
+        createLayer(mSnapshot, left, top, right, bottom, alpha, SkXfermode::kSrcOver_Mode, flags);
+    } else {
+        mSnapshot->invisible = true;
+    }
     return count;
 }
 
@@ -328,7 +336,6 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     snapshot->flags |= Snapshot::kFlagIsLayer;
     snapshot->layer = layer;
     snapshot->fbo = layer->fbo;
-
     snapshot->transform.loadTranslate(-left, -top, 0.0f);
     snapshot->setClip(0.0f, 0.0f, right - left, bottom - top);
     snapshot->viewport.set(0.0f, 0.0f, right - left, bottom - top);
@@ -340,8 +347,7 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
     // Change the ortho projection
     glViewport(0, 0, right - left, bottom - top);
-    // Don't flip the FBO, it will get flipped when drawing back to the framebuffer
-    mOrthoMatrix.loadOrtho(0.0f, right - left, 0.0f, bottom - top, -1.0f, 1.0f);
+    mOrthoMatrix.loadOrtho(0.0f, right - left, bottom - top, 0.0f, -1.0f, 1.0f);
 
     return true;
 }
@@ -363,8 +369,13 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     Layer* layer = current->layer;
     const Rect& rect = layer->layer;
 
+    // FBOs are already drawn with a top-left origin, don't flip the texture
+    resetDrawTextureTexCoords(0.0f, 1.0f, 1.0f, 0.0f);
+
     drawTextureRect(rect.left, rect.top, rect.right, rect.bottom,
             layer->texture, layer->alpha, layer->mode, layer->blend);
+
+    resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
 
     LayerSize size(rect.getWidth(), rect.getHeight());
     // Failing to add the layer to the cache should happen only if the
@@ -422,6 +433,8 @@ const Rect& OpenGLRenderer::getClipBounds() {
 }
 
 bool OpenGLRenderer::quickReject(float left, float top, float right, float bottom) {
+    if (mSnapshot->invisible) return true;
+
     Rect r(left, top, right, bottom);
     mSnapshot->transform.mapRect(r);
     return !mSnapshot->clipRect.intersects(r);
@@ -527,6 +540,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
 }
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
+    if (mSnapshot->invisible) return;
     const Rect& clip = mSnapshot->clipRect;
     drawColorRect(clip.left, clip.top, clip.right, clip.bottom, color, mode, true);
 }
@@ -556,7 +570,8 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
 
 void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         float x, float y, SkPaint* paint) {
-    if (text == NULL || count == 0 || (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
+    if (mSnapshot->invisible || text == NULL || count == 0 ||
+            (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
         return;
     }
 
@@ -614,12 +629,21 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 }
 
 void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
+    if (mSnapshot->invisible) return;
+
     GLuint textureUnit = 0;
     glActiveTexture(gTextureUnits[textureUnit]);
 
     const PathTexture* texture = mPathCache.get(path, paint);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
+
+    const float x = texture->left - texture->offset;
+    const float y = texture->top - texture->offset;
+
+    if (quickReject(x, y, x + texture->width, y + texture->height)) {
+        return;
+    }
 
     int alpha;
     SkXfermode::Mode mode;
@@ -630,9 +654,6 @@ void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
     const GLfloat r = a * ((color >> 16) & 0xFF) / 255.0f;
     const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
     const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
-
-    const float x = texture->left - texture->offset;
-    const float y = texture->top - texture->offset;
 
     setupTextureAlpha8(texture, textureUnit, x, y, r, g, b, a, mode, true, true);
 

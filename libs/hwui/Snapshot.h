@@ -42,7 +42,7 @@ namespace uirenderer {
  */
 class Snapshot: public LightRefBase<Snapshot> {
 public:
-    Snapshot(): flags(0), previous(NULL), layer(NULL), fbo(0) { }
+    Snapshot(): invisible(false), flags(0), previous(NULL), layer(NULL), fbo(0) { }
 
     /**
      * Copies the specified snapshot. Only the transform and clip rectangle
@@ -54,6 +54,7 @@ public:
             height(s->height),
             transform(s->transform),
             clipRect(s->clipRect),
+            invisible(s->invisible),
             flags(0),
             previous(s),
             layer(NULL),
@@ -163,6 +164,11 @@ public:
      * (screen-space coordinates in the regular case.)
      */
     Rect clipRect;
+
+    /**
+     * If true, the layer won't be rendered.
+     */
+    bool invisible;
 
     /**
      * Dirty flags.
