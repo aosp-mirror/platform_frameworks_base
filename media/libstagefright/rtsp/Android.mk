@@ -7,6 +7,7 @@ LOCAL_SRC_FILES:=       \
         AAVCAssembler.cpp           \
         AH263Assembler.cpp          \
         AMPEG4AudioAssembler.cpp    \
+        AMPEG4ElementaryAssembler.cpp \
         APacketSource.cpp           \
         ARTPAssembler.cpp           \
         ARTPConnection.cpp          \
