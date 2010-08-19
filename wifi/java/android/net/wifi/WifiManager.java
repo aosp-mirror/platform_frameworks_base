@@ -765,8 +765,9 @@ public class WifiManager {
         } else if (rssi >= MAX_RSSI) {
             return numLevels - 1;
         } else {
-            int partitionSize = (MAX_RSSI - MIN_RSSI) / (numLevels - 1);
-            return (rssi - MIN_RSSI) / partitionSize;
+            float inputRange = (MAX_RSSI - MIN_RSSI);
+            float outputRange = (numLevels - 1);
+            return (int)((float)(rssi - MIN_RSSI) * outputRange / inputRange);
         }
     }
     
