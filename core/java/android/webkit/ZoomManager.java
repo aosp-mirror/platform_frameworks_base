@@ -856,7 +856,8 @@ class ZoomManager {
     private ZoomControlBase getCurrentZoomControl() {
         if (mWebView.getSettings() != null && mWebView.getSettings().supportZoom()) {
             if (mWebView.getSettings().getBuiltInZoomControls()) {
-                if (mEmbeddedZoomControl == null) {
+                if ((mEmbeddedZoomControl == null)
+                        && mWebView.getSettings().getDisplayZoomControls()) {
                     mEmbeddedZoomControl = new ZoomControlEmbedded(this, mWebView);
                 }
                 return mEmbeddedZoomControl;

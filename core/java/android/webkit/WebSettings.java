@@ -211,6 +211,7 @@ public class WebSettings {
     private boolean         mNavDump = false;
     private boolean         mSupportZoom = true;
     private boolean         mBuiltInZoomControls = false;
+    private boolean         mDisplayZoomControls = true;
     private boolean         mAllowFileAccess = true;
     private boolean         mLoadWithOverviewMode = false;
     private boolean         mEnableSmoothTransition = false;
@@ -505,6 +506,26 @@ public class WebSettings {
      */
     public boolean getBuiltInZoomControls() {
         return mBuiltInZoomControls;
+    }
+
+    /**
+     * Sets whether the on screen zoom buttons are used.
+     * A combination of built in zoom controls enabled
+     * and on screen zoom controls disabled allows for pinch to zoom
+     * to work without the on screen controls
+     * @hide
+     */
+    public void setDisplayZoomControls(boolean enabled) {
+        mDisplayZoomControls = enabled;
+        mWebView.updateMultiTouchSupport(mContext);
+    }
+
+    /**
+     * Returns true if the on screen zoom buttons are being used.
+     * @hide
+     */
+    public boolean getDisplayZoomControls() {
+        return mDisplayZoomControls;
     }
 
     /**
