@@ -29,7 +29,7 @@ static const char* gProgVersion = "1.0";
 static int wantUsage = 0;
 static int wantVersion = 0;
 
-#define ADD_OPTS "n:v:f:c:"
+#define ADD_OPTS "n:v:o"
 static const struct option longopts[] = {
     {"help",       no_argument, &wantUsage,   1},
     {"version",    no_argument, &wantVersion, 1},
@@ -37,8 +37,7 @@ static const struct option longopts[] = {
     /* Args for "add" */
     {"name",       required_argument, NULL, 'n'},
     {"version",    required_argument, NULL, 'v'},
-    {"filesystem", required_argument, NULL, 'f'},
-    {"crypto",     required_argument, NULL, 'c'},
+    {"overlay",    optional_argument, NULL, 'o'},
 
     {NULL, 0, NULL, '\0'}
 };
@@ -46,8 +45,7 @@ static const struct option longopts[] = {
 struct package_info_t {
     char* packageName;
     int packageVersion;
-    char* filesystem;
-    char* crypto;
+    bool overlay;
 };
 
 /*
@@ -77,6 +75,7 @@ void doAdd(const char* filename, struct package_info_t* info) {
 
     obb->setPackageName(String8(info->packageName));
     obb->setVersion(info->packageVersion);
+    obb->setOverlay(info->overlay);
 
     if (!obb->writeTo(filename)) {
         fprintf(stderr, "ERROR: %s: couldn't write OBB signature: %s\n",
@@ -112,6 +111,8 @@ void doInfo(const char* filename) {
     printf("OBB info for '%s':\n", filename);
     printf("Package name: %s\n", obb->getPackageName().string());
     printf("     Version: %d\n", obb->getVersion());
+    printf("       Flags: 0x%08x\n", obb->getFlags());
+    printf("     Overlay: %s\n", obb->isOverlay() ? "true" : "false");
 }
 
 /*
@@ -143,7 +144,7 @@ int main(int argc, char* const argv[])
         case 'n':
             package_info.packageName = optarg;
             break;
-        case 'v':
+        case 'v': {
             char *end;
             package_info.packageVersion = strtol(optarg, &end, 10);
             if (*optarg == '\0' || *end != '\0') {
@@ -152,11 +153,9 @@ int main(int argc, char* const argv[])
                 goto bail;
             }
             break;
-        case 'f':
-            package_info.filesystem = optarg;
-            break;
-        case 'c':
-            package_info.crypto = optarg;
+        }
+        case 'o':
+            package_info.overlay = true;
             break;
         case '?':
             wantUsage = 1;

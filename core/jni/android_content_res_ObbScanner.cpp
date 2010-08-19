@@ -31,6 +31,7 @@ static struct {
 
     jfieldID packageName;
     jfieldID version;
+    jfieldID flags;
 } gObbInfoClassInfo;
 
 static jboolean android_content_res_ObbScanner_getObbInfo(JNIEnv* env, jobject clazz, jstring file,
@@ -85,6 +86,8 @@ int register_android_content_res_ObbScanner(JNIEnv* env)
             "packageName", "Ljava/lang/String;");
     GET_FIELD_ID(gObbInfoClassInfo.version, gObbInfoClassInfo.clazz,
             "version", "I");
+    GET_FIELD_ID(gObbInfoClassInfo.flags, gObbInfoClassInfo.clazz,
+            "flags", "I");
 
     return AndroidRuntime::registerNativeMethods(env, "android/content/res/ObbScanner", gMethods,
             NELEM(gMethods));
