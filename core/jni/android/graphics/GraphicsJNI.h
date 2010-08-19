@@ -80,7 +80,7 @@ public:
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
     
 private:
-    JNIEnv* fEnv;
+    JavaVM* fVM;
     bool fReportSizeToVM;
 };
 
@@ -92,7 +92,7 @@ public:
     virtual bool reportMemory(size_t memorySize);
 
 private:
-    JNIEnv* fEnv;
+    JavaVM* fVM;
     size_t fTotalSize;
 };
 
