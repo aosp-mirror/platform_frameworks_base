@@ -340,9 +340,14 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         for (int i = 0; i < mPreviousViews.size(); i++) {
             View viewToRemove = mPreviousViews.get(i);
             viewToRemove.clearAnimation();
+            if (viewToRemove instanceof ViewGroup) {
+                ViewGroup vg = (ViewGroup) viewToRemove;
+                vg.removeAllViewsInLayout();
+            }
             // applyTransformForChildAtIndex here just allows for any cleanup
             // associated with this view that may need to be done by a subclass
             applyTransformForChildAtIndex(viewToRemove, -1);
+
             removeViewInLayout(viewToRemove);
         }
         mPreviousViews.clear();
@@ -405,10 +410,14 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                     // and apply any transform / animation
                     View newView = mAdapter.getView(i, null, this);
                     if (newView != null) {
-                        mActiveViews[index] = newView;
-                        addViewInLayout(newView, -1, createOrReuseLayoutParams(newView));
-                        applyTransformForChildAtIndex(newView, newRelativeIndex);
-                        animateViewForTransition(-1, newRelativeIndex, newView);
+                        // We wrap the new view in a FrameLayout so as to respect the contract
+                        // with the adapter, that is, that we don't modify this view directly
+                        FrameLayout fl = new FrameLayout(mContext);
+                        fl.addView(newView);
+                        mActiveViews[index] = fl;
+                        addViewInLayout(fl, -1, createOrReuseLayoutParams(fl));
+                        applyTransformForChildAtIndex(fl, newRelativeIndex);
+                        animateViewForTransition(-1, newRelativeIndex, fl);
                     }
                 }
                 mActiveViews[index].bringToFront();
