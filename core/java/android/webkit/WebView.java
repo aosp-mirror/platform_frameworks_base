@@ -1278,6 +1278,7 @@ public class WebView extends AbsoluteLayout
             outState.putBundle("certificate",
                                SslCertificate.saveState(mCertificate));
         }
+        outState.putBoolean("privateBrowsingEnabled", isPrivateBrowsingEnabled());
         return list;
     }
 
@@ -1439,6 +1440,10 @@ public class WebView extends AbsoluteLayout
                 returnList = copyBackForwardList();
                 // Update the copy to have the correct index.
                 returnList.setCurrentIndex(index);
+            }
+            // Restore private browsing setting.
+            if (inState.getBoolean("privateBrowsingEnabled")) {
+                getSettings().setPrivateBrowsingEnabled(true);
             }
             // Remove all pending messages because we are restoring previous
             // state.
@@ -1702,18 +1707,7 @@ public class WebView extends AbsoluteLayout
         getSettings().setPrivateBrowsingEnabled(true);
 
         if (!wasPrivateBrowsingEnabled) {
-            StringBuilder data = new StringBuilder(1024);
-            try {
-                InputStreamReader file = new InputStreamReader(mContext.getResources().openRawResource(com.android.internal.R.raw.incognito_mode_start_page));
-                int size;
-                char[] buffer = new char[1024];
-                while ((size = file.read(buffer)) != -1) {
-                    data.append(buffer, 0, size);
-                }
-            } catch (IOException e) {
-                // This should never happen since this is a static resource.
-            }
-            loadDataWithBaseURL(null, data.toString(), "text/html", "utf-8", null);
+            loadUrl("browser:incognito");
         }
     }
 
