@@ -40,8 +40,8 @@ struct ARTPWriter : public MediaWriter {
     virtual status_t addSource(const sp<MediaSource> &source);
     virtual bool reachedEOS();
     virtual status_t start(MetaData *params);
-    virtual void stop();
-    virtual void pause();
+    virtual status_t stop();
+    virtual status_t pause();
 
     virtual void onMessageReceived(const sp<AMessage> &msg);
 
