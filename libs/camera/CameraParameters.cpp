@@ -269,7 +269,7 @@ void CameraParameters::remove(const char *key)
     mMap.removeItem(String8(key));
 }
 
-static int parse_size(const char *str, int &width, int &height)
+static int parse_size(const char *str, int &width, int &height, char **endptr = NULL)
 {
     // Find the width.
     char *end;
@@ -279,12 +279,40 @@ static int parse_size(const char *str, int &width, int &height)
         return -1;
 
     // Find the height, immediately after the 'x'.
-    int h = (int)strtol(end+1, 0, 10);
+    int h = (int)strtol(end+1, &end, 10);
 
     width = w;
     height = h;
 
+    if (endptr) {
+        *endptr = end;
+    }
+
     return 0;
+}
+
+static void parseSizesList(const char *sizesStr, Vector<Size> &sizes)
+{
+    if (sizesStr == 0) {
+        return;
+    }
+
+    char *sizeStartPtr = (char *)sizesStr;
+
+    while (true) {
+        int width, height;
+        int success = parse_size(sizeStartPtr, width, height, &sizeStartPtr);
+        if (success == -1 || (*sizeStartPtr != ',' && *sizeStartPtr != '\0')) {
+            LOGE("Picture sizes string \"%s\" contains invalid character.", sizesStr);
+            return;
+        }
+        sizes.push(Size(width, height));
+
+        if (*sizeStartPtr == '\0') {
+            return;
+        }
+        sizeStartPtr++;
+    }
 }
 
 void CameraParameters::setPreviewSize(int width, int height)
@@ -309,6 +337,12 @@ void CameraParameters::getPreviewSize(int *width, int *height) const
         *width = w;
         *height = h;
     }
+}
+
+void CameraParameters::getSupportedPreviewSizes(Vector<Size> &sizes) const
+{
+    const char *previewSizesStr = get(KEY_SUPPORTED_PREVIEW_SIZES);
+    parseSizesList(previewSizesStr, sizes);
 }
 
 void CameraParameters::setPreviewFrameRate(int fps)
@@ -353,6 +387,12 @@ void CameraParameters::getPictureSize(int *width, int *height) const
         *width = w;
         *height = h;
     }
+}
+
+void CameraParameters::getSupportedPictureSizes(Vector<Size> &sizes) const
+{
+    const char *pictureSizesStr = get(KEY_SUPPORTED_PICTURE_SIZES);
+    parseSizesList(pictureSizesStr, sizes);
 }
 
 void CameraParameters::setPictureFormat(const char *format)

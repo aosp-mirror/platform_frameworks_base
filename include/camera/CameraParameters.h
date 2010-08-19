@@ -22,6 +22,21 @@
 
 namespace android {
 
+struct Size {
+    int width;
+    int height;
+
+    Size() {
+        width = 0;
+        height = 0;
+    }
+
+    Size(int w, int h) {
+        width = w;
+        height = h;
+    }
+};
+
 class CameraParameters
 {
 public:
@@ -43,12 +58,14 @@ public:
 
     void setPreviewSize(int width, int height);
     void getPreviewSize(int *width, int *height) const;
+    void getSupportedPreviewSizes(Vector<Size> &sizes) const;
     void setPreviewFrameRate(int fps);
     int getPreviewFrameRate() const;
     void setPreviewFormat(const char *format);
     const char *getPreviewFormat() const;
     void setPictureSize(int width, int height);
     void getPictureSize(int *width, int *height) const;
+    void getSupportedPictureSizes(Vector<Size> &sizes) const;
     void setPictureFormat(const char *format);
     const char *getPictureFormat() const;
 
