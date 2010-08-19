@@ -201,7 +201,8 @@ void InputDispatcher::dispatchOnce() {
                     }
 #endif
 
-                    mThrottleState.lastEventTime = currentTime;
+                    mThrottleState.lastEventTime = entry->eventTime < currentTime
+                            ? entry->eventTime : currentTime;
                     mThrottleState.lastDeviceId = deviceId;
                     mThrottleState.lastSource = source;
                 }
