@@ -1626,9 +1626,15 @@ int BassBoost_getParameter(EffectContext     *pContext,
 
     switch (param){
         case BASSBOOST_PARAM_STRENGTH_SUPPORTED:
+            if (*pValueSize != sizeof(uint32_t)){
+                LOGV("\tLVM_ERROR : BassBoost_getParameter() invalid pValueSize %d", *pValueSize);
+                return -EINVAL;
+            }
+            *pValueSize = sizeof(uint32_t);
+            break;
         case BASSBOOST_PARAM_STRENGTH:
             if (*pValueSize != sizeof(int16_t)){
-                LOGV("\tLVM_ERROR : BassBoost_getParameter() invalid pValueSize2 %d", *pValueSize);
+                LOGV("\tLVM_ERROR : BassBoost_getParameter() invalid pValueSize %d", *pValueSize);
                 return -EINVAL;
             }
             *pValueSize = sizeof(int16_t);
@@ -1736,9 +1742,16 @@ int Virtualizer_getParameter(EffectContext        *pContext,
 
     switch (param){
         case VIRTUALIZER_PARAM_STRENGTH_SUPPORTED:
+            if (*pValueSize != sizeof(uint32_t)){
+                LOGV("\tLVM_ERROR : Virtualizer_getParameter() invalid pValueSize %d",*pValueSize);
+                return -EINVAL;
+            }
+            *pValueSize = sizeof(uint32_t);
+            break;
+
         case VIRTUALIZER_PARAM_STRENGTH:
             if (*pValueSize != sizeof(int16_t)){
-                LOGV("\tLVM_ERROR : Virtualizer_getParameter() invalid pValueSize2 %d",*pValueSize);
+                LOGV("\tLVM_ERROR : Virtualizer_getParameter() invalid pValueSize %d",*pValueSize);
                 return -EINVAL;
             }
             *pValueSize = sizeof(int16_t);
