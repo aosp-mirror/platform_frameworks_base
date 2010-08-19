@@ -970,7 +970,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             mMotionTarget = null;
         }
 
-        return target.dispatchTouchEvent(ev);
+        if (target.dispatchTouchEvent(ev)) {
+            return true;
+        } else {
+            ev.setLocation(xf, yf);
+        }
+        return false;
     }
 
     /**
@@ -1006,7 +1011,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // There are many subtle interactions in touch event dispatch; change at your own risk.
             child.mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
             ev.offsetLocation(localX - x, localY - y);
-            return child.dispatchTouchEvent(ev);
+            if (child.dispatchTouchEvent(ev)) {
+                return true;
+            } else {
+                ev.offsetLocation(x - localX, y - localY);
+                return false;
+            }
         }
         return false;
     }
