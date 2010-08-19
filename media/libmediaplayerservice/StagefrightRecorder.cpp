@@ -1067,8 +1067,9 @@ status_t StagefrightRecorder::pause() {
 
 status_t StagefrightRecorder::stop() {
     LOGV("stop");
+    status_t err = OK;
     if (mWriter != NULL) {
-        mWriter->stop();
+        err = mWriter->stop();
         mWriter.clear();
     }
 
@@ -1090,7 +1091,7 @@ status_t StagefrightRecorder::stop() {
         mOutputFd = -1;
     }
 
-    return OK;
+    return err;
 }
 
 status_t StagefrightRecorder::close() {
