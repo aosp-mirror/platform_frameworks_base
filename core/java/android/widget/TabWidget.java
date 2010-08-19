@@ -40,6 +40,9 @@ import android.view.View.OnFocusChangeListener;
  * handler, and manage callbacks. You might call this object to iterate the list
  * of tabs, or to tweak the layout of the tab list, but most methods should be
  * called on the containing TabHost object.
+ *
+ * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-tabwidget.html">Tab Layout
+ * tutorial</a>.</p>
  * 
  * @attr ref android.R.styleable#TabWidget_divider
  * @attr ref android.R.styleable#TabWidget_tabStripEnabled

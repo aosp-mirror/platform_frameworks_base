@@ -37,6 +37,9 @@ import android.widget.RemoteViews.RemoteView;
  * {@link android.widget.LinearLayout.LayoutParams LinearLayout.LayoutParams}.
  * The default orientation is horizontal.
  *
+ * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-linearlayout.html">Linear Layout
+ * tutorial</a>.</p>
+ *
  * <p>
  * Also see {@link LinearLayout.LayoutParams android.widget.LinearLayout.LayoutParams}
  * for layout attributes </p>
