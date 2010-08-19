@@ -16,9 +16,10 @@
 
 #include "ATSParser.h"
 
-#include "ABitReader.h"
 #include "AnotherPacketSource.h"
+#include "include/avc_utils.h"
 
+#include <media/stagefright/foundation/ABitReader.h>
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
@@ -473,60 +474,6 @@ static sp<ABuffer> FindNAL(
     }
 }
 
-static unsigned parseUE(ABitReader *br) {
-    unsigned numZeroes = 0;
-    while (br->getBits(1) == 0) {
-        ++numZeroes;
-    }
-
-    unsigned x = br->getBits(numZeroes);
-
-    return x + (1u << numZeroes) - 1;
-}
-
-// Determine video dimensions from the sequence parameterset.
-static void FindDimensions(
-        const sp<ABuffer> seqParamSet, int32_t *width, int32_t *height) {
-    ABitReader br(seqParamSet->data() + 1, seqParamSet->size() - 1);
-
-    unsigned profile_idc = br.getBits(8);
-    br.skipBits(16);
-    parseUE(&br);  // seq_parameter_set_id
-
-    if (profile_idc == 100 || profile_idc == 110
-            || profile_idc == 122 || profile_idc == 144) {
-        TRESPASS();
-    }
-
-    parseUE(&br);  // log2_max_frame_num_minus4
-    unsigned pic_order_cnt_type = parseUE(&br);
-
-    if (pic_order_cnt_type == 0) {
-        parseUE(&br);  // log2_max_pic_order_cnt_lsb_minus4
-    } else if (pic_order_cnt_type == 1) {
-        br.getBits(1);  // delta_pic_order_always_zero_flag
-        parseUE(&br);  // offset_for_non_ref_pic
-        parseUE(&br);  // offset_for_top_to_bottom_field
-
-        unsigned num_ref_frames_in_pic_order_cnt_cycle = parseUE(&br);
-        for (unsigned i = 0; i < num_ref_frames_in_pic_order_cnt_cycle; ++i) {
-            parseUE(&br);  // offset_for_ref_frame
-        }
-    }
-
-    parseUE(&br);  // num_ref_frames
-    br.getBits(1);  // gaps_in_frame_num_value_allowed_flag
-
-    unsigned pic_width_in_mbs_minus1 = parseUE(&br);
-    unsigned pic_height_in_map_units_minus1 = parseUE(&br);
-    unsigned frame_mbs_only_flag = br.getBits(1);
-
-    *width = pic_width_in_mbs_minus1 * 16 + 16;
-
-    *height = (2 - frame_mbs_only_flag)
-        * (pic_height_in_map_units_minus1 * 16 + 16);
-}
-
 static sp<ABuffer> MakeAVCCodecSpecificData(
         const sp<ABuffer> &buffer, int32_t *width, int32_t *height) {
     const uint8_t *data = buffer->data();
@@ -537,7 +484,7 @@ static sp<ABuffer> MakeAVCCodecSpecificData(
         return NULL;
     }
 
-    FindDimensions(seqParamSet, width, height);
+    FindAVCDimensions(seqParamSet, width, height);
 
     size_t stopOffset;
     sp<ABuffer> picParamSet = FindNAL(data, size, 8, &stopOffset);
