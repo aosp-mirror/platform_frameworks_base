@@ -18,6 +18,8 @@
 
 #include "ASessionDescription.h"
 
+#include <ctype.h>
+
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
@@ -37,6 +39,10 @@ static bool GetAttribute(const char *s, const char *key, AString *value) {
     size_t keyLen = strlen(key);
 
     for (;;) {
+        while (isspace(*s)) {
+            ++s;
+        }
+
         const char *colonPos = strchr(s, ';');
 
         size_t len =
@@ -253,7 +259,11 @@ APacketSource::APacketSource(
         mFormat->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_AVC);
 
         int32_t width, height;
-        sessionDesc->getDimensions(index, PT, &width, &height);
+        if (!sessionDesc->getDimensions(index, PT, &width, &height)) {
+            // TODO: extract dimensions from sequence parameter set.
+            mInitCheck = ERROR_UNSUPPORTED;
+            return;
+        }
 
         mFormat->setInt32(kKeyWidth, width);
         mFormat->setInt32(kKeyHeight, height);
@@ -271,7 +281,10 @@ APacketSource::APacketSource(
         mFormat->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_H263);
 
         int32_t width, height;
-        sessionDesc->getDimensions(index, PT, &width, &height);
+        if (!sessionDesc->getDimensions(index, PT, &width, &height)) {
+            mInitCheck = ERROR_UNSUPPORTED;
+            return;
+        }
 
         mFormat->setInt32(kKeyWidth, width);
         mFormat->setInt32(kKeyHeight, height);
