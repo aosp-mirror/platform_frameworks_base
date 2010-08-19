@@ -2750,6 +2750,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             try {
                 mBatteryStats.noteWifiStopped();
             } catch (RemoteException ignore) { }
+            mScanResults = null;
         }
     }
 
