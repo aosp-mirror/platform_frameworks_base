@@ -48,9 +48,6 @@ import java.util.ArrayList;
 
 /*
  * Wraps the C++ InputManager and provides its callbacks.
- * 
- * XXX Tempted to promote this to a first-class service, ie. InputManagerService, to
- *     improve separation of concerns with respect to the window manager.
  */
 public class InputManager {
     static final String TAG = "InputManager";
@@ -517,7 +514,7 @@ public class InputManager {
             } catch (NumberFormatException e) {
             }
             if (result < 1) {
-                result = 35;
+                result = 60;
             }
             return result;
         }
