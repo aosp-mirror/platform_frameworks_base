@@ -3,7 +3,6 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=                 \
-        ABitReader.cpp            \
         AnotherPacketSource.cpp   \
         ATSParser.cpp             \
         MPEG2TSExtractor.cpp      \
