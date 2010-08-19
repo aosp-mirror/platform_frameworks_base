@@ -201,8 +201,8 @@ public final class ContactsContract {
      * </p>
      * <p>
      * The most important use case for Directories is search.  A Directory provider is
-     * expected to support at least {@link Contacts#CONTENT_FILTER_URI
-     * Contacts#CONTENT_FILTER_URI}.  If a Directory provider wants to participate
+     * expected to support at least {@link ContactsContract.Contacts#CONTENT_FILTER_URI
+     * Contacts.CONTENT_FILTER_URI}.  If a Directory provider wants to participate
      * in email and phone lookup functionalities, it should also implement
      * {@link CommonDataKinds.Email#CONTENT_FILTER_URI CommonDataKinds.Email.CONTENT_FILTER_URI}
      * and
@@ -225,7 +225,7 @@ public final class ContactsContract {
      * <li>The URI authority is replaced with the corresponding {@link #DIRECTORY_AUTHORITY}.</li>
      * <li>The {@code accountName=} and {@code accountType=} parameters are added or
      * replaced using the corresponding {@link #ACCOUNT_TYPE} and {@link #ACCOUNT_NAME} values.</li>
-     * <li>If the URI is missing a {@link ContactsContract#REQUESTING_PACKAGE_PARAM_KEY}
+     * <li>If the URI is missing a ContactsContract.REQUESTING_PACKAGE_PARAM_KEY
      * parameter, this parameter is added.</li>
      * </ul>
      * </p>
