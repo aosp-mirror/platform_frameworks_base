@@ -86,6 +86,7 @@ public abstract class ContentProvider implements ComponentCallbacks {
     private String mReadPermission;
     private String mWritePermission;
     private PathPermission[] mPathPermissions;
+    private boolean mExported;
 
     private Transport mTransport = new Transport();
 
@@ -257,9 +258,9 @@ public abstract class ContentProvider implements ComponentCallbacks {
             final Context context = getContext();
             final String rperm = getReadPermission();
             final int pid = Binder.getCallingPid();
-            if (rperm == null
+            if (mExported && (rperm == null
                     || context.checkPermission(rperm, pid, uid)
-                    == PackageManager.PERMISSION_GRANTED) {
+                    == PackageManager.PERMISSION_GRANTED)) {
                 return;
             }
             
@@ -303,9 +304,9 @@ public abstract class ContentProvider implements ComponentCallbacks {
             final Context context = getContext();
             final String wperm = getWritePermission();
             final int pid = Binder.getCallingPid();
-            if (wperm == null
+            if (mExported && (wperm == null
                     || context.checkPermission(wperm, pid, uid)
-                    == PackageManager.PERMISSION_GRANTED) {
+                    == PackageManager.PERMISSION_GRANTED)) {
                 return true;
             }
             
@@ -786,6 +787,7 @@ public abstract class ContentProvider implements ComponentCallbacks {
                 setReadPermission(info.readPermission);
                 setWritePermission(info.writePermission);
                 setPathPermissions(info.pathPermissions);
+                mExported = info.exported;
             }
             ContentProvider.this.onCreate();
         }
