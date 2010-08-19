@@ -40,8 +40,8 @@ LOCAL_RESOURCE_DIR := $(framework_GENERATED_SOURCE_DIR)/renderscript/res $(LOCAL
 
 include $(BUILD_PACKAGE)
 
-# Make sure the system .rs files get compiled when building this package
-$(LOCAL_BUILT_MODULE): $(framework_RenderScript_STAMP_FILE)
+# Make sure the system .rs files get compiled before building the package-export.apk.
+$(resource_export_package): $(framework_RenderScript_STAMP_FILE)
 
 # define a global intermediate target that other module may depend on.
 .PHONY: framework-res-package-target
