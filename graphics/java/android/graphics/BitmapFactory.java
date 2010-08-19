@@ -26,7 +26,6 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileNotFoundException;
 
 /**
  * Creates Bitmap objects from various sources, including files, streams,
@@ -39,7 +38,7 @@ public class BitmapFactory {
          * the same result from the decoder as if null were passed.
          */
         public Options() {
-            inDither = true;
+            inDither = false;
             inScaled = true;
         }
 
@@ -69,8 +68,11 @@ public class BitmapFactory {
          * the decoder will try to pick the best matching config based on the
          * system's screen depth, and characteristics of the original image such
          * as if it has per-pixel alpha (requiring a config that also does).
+         * 
+         * Image are loaded with the {@link Bitmap.Config#ARGB_8888} config by
+         * default.
          */
-        public Bitmap.Config inPreferredConfig;
+        public Bitmap.Config inPreferredConfig = Bitmap.Config.ARGB_8888;
 
         /**
          * If dither is true, the decoder will attempt to dither the decoded
@@ -452,10 +454,8 @@ public class BitmapFactory {
             // into is.read(...) This number is not related to the value passed
             // to mark(...) above.
             byte [] tempStorage = null;
-            if (opts != null)
-                tempStorage = opts.inTempStorage;
-            if (tempStorage == null)
-                tempStorage = new byte[16 * 1024];
+            if (opts != null) tempStorage = opts.inTempStorage;
+            if (tempStorage == null) tempStorage = new byte[16 * 1024];
             bm = nativeDecodeStream(is, tempStorage, outPadding, opts);
         }
 
@@ -474,8 +474,7 @@ public class BitmapFactory {
         
         bm.setDensity(density);
         final int targetDensity = opts.inTargetDensity;
-        if (targetDensity == 0 || density == targetDensity
-                || density == opts.inScreenDensity) {
+        if (targetDensity == 0 || density == targetDensity || density == opts.inScreenDensity) {
             return bm;
         }
         
@@ -652,8 +651,7 @@ public class BitmapFactory {
             // pass some temp storage down to the native code. 1024 is made up,
             // but should be large enough to avoid too many small calls back
             // into is.read(...).
-            byte [] tempStorage = null;
-            tempStorage = new byte[16 * 1024];
+            byte [] tempStorage = new byte[16 * 1024];
             return nativeCreateLargeBitmap(is, tempStorage, isShareable);
         }
     }
@@ -674,8 +672,8 @@ public class BitmapFactory {
      * @throws IOException if the image format is not supported or can not be decoded.
      * @hide
      */
-    public static LargeBitmap createLargeBitmap(String pathName,
-            boolean isShareable) throws FileNotFoundException, IOException {
+    public static LargeBitmap createLargeBitmap(String pathName, boolean isShareable)
+            throws IOException {
         LargeBitmap bm = null;
         InputStream stream = null;
 
