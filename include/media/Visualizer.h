@@ -151,7 +151,6 @@ private:
     void *mCaptureCbkUser;
     sp<CaptureThread> mCaptureThread;
     uint32_t mCaptureFlags;
-    void *mFftTable;
 };
 
 
