@@ -2076,9 +2076,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return mDeskDockRotation;
             } else {
                 if (useSensorForOrientationLp(orientation)) {
-                    // If the user has enabled auto rotation by default, do it.
-                    int curRotation = mOrientationListener.getCurrentRotation();
-                    return curRotation >= 0 ? curRotation : lastRotation;
+                    return mOrientationListener.getCurrentRotation(lastRotation);
                 }
                 return Surface.ROTATION_0;
             }
