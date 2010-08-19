@@ -1324,6 +1324,7 @@
   <public type="attr" name="imeSubtypeLocale" />
   <public type="attr" name="imeSubtypeMode" />
   <public type="attr" name="imeSubtypeExtraValue" />
+  <public type="attr" name="splitMotionEvents" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
