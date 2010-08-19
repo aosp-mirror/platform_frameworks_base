@@ -685,8 +685,8 @@ static void drawPrimitivesTriangleFanOrStrip(ogles_context_t* c,
             } while (num);
         }
         if (count) {
-            v0 = c->vc.vBuffer + 2 + num - 2;
-            v1 = c->vc.vBuffer + 2 + num - 1;
+            v0 = c->vc.vBuffer + 2 + vcs - 2;
+            v1 = c->vc.vBuffer + 2 + vcs - 1;
             if ((winding&2) == 0) {
                 // for strips copy back the two last compiled vertices
                 c->vc.vBuffer[0] = *v0;
