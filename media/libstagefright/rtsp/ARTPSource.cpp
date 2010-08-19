@@ -20,6 +20,7 @@
 #include "AAVCAssembler.h"
 #include "AH263Assembler.h"
 #include "AMPEG4AudioAssembler.h"
+#include "AMPEG4ElementaryAssembler.h"
 #include "ASessionDescription.h"
 
 #include <media/stagefright/foundation/ABuffer.h>
@@ -63,6 +64,9 @@ ARTPSource::ARTPSource(
         mAssembler = new AAMRAssembler(notify, false /* isWide */, params);
     } else  if (!strncmp(desc.c_str(), "AMR-WB/", 7)) {
         mAssembler = new AAMRAssembler(notify, true /* isWide */, params);
+    } else if (!strncmp(desc.c_str(), "MP4V-ES/", 8)) {
+        mAssembler = new AMPEG4ElementaryAssembler(notify);
+        mIssueFIRRequests = true;
     } else {
         TRESPASS();
     }
