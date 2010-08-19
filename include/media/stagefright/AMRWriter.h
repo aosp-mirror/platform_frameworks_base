@@ -37,8 +37,8 @@ struct AMRWriter : public MediaWriter {
     virtual status_t addSource(const sp<MediaSource> &source);
     virtual bool reachedEOS();
     virtual status_t start(MetaData *params = NULL);
-    virtual void stop();
-    virtual void pause();
+    virtual status_t stop();
+    virtual status_t pause();
 
 protected:
     virtual ~AMRWriter();
@@ -57,7 +57,7 @@ private:
     int64_t mEstimatedDurationUs;
 
     static void *ThreadWrapper(void *);
-    void threadFunc();
+    status_t threadFunc();
     bool exceedsFileSizeLimit();
     bool exceedsFileDurationLimit();
 

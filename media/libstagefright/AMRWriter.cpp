@@ -136,16 +136,17 @@ status_t AMRWriter::start(MetaData *params) {
     return OK;
 }
 
-void AMRWriter::pause() {
+status_t AMRWriter::pause() {
     if (!mStarted) {
-        return;
+        return OK;
     }
     mPaused = true;
+    return OK;
 }
 
-void AMRWriter::stop() {
+status_t AMRWriter::stop() {
     if (!mStarted) {
-        return;
+        return OK;
     }
 
     mDone = true;
@@ -153,9 +154,17 @@ void AMRWriter::stop() {
     void *dummy;
     pthread_join(mThread, &dummy);
 
-    mSource->stop();
+    status_t err = (status_t) dummy;
+    {
+        status_t status = mSource->stop();
+        if (err == OK &&
+            (status != OK && status != ERROR_END_OF_STREAM)) {
+            err = status;
+        }
+    }
 
     mStarted = false;
+    return err;
 }
 
 bool AMRWriter::exceedsFileSizeLimit() {
@@ -174,21 +183,20 @@ bool AMRWriter::exceedsFileDurationLimit() {
 
 // static
 void *AMRWriter::ThreadWrapper(void *me) {
-    static_cast<AMRWriter *>(me)->threadFunc();
-
-    return NULL;
+    return (void *) static_cast<AMRWriter *>(me)->threadFunc();
 }
 
-void AMRWriter::threadFunc() {
+status_t AMRWriter::threadFunc() {
     mEstimatedDurationUs = 0;
     mEstimatedSizeBytes = 0;
     bool stoppedPrematurely = true;
     int64_t previousPausedDurationUs = 0;
     int64_t maxTimestampUs = 0;
+    status_t err = OK;
 
     while (!mDone) {
         MediaBuffer *buffer;
-        status_t err = mSource->read(&buffer);
+        err = mSource->read(&buffer);
 
         if (err != OK) {
             break;
@@ -260,6 +268,10 @@ void AMRWriter::threadFunc() {
     fclose(mFile);
     mFile = NULL;
     mReachedEOS = true;
+    if (err == ERROR_END_OF_STREAM) {
+        return OK;
+    }
+    return err;
 }
 
 bool AMRWriter::reachedEOS() {
