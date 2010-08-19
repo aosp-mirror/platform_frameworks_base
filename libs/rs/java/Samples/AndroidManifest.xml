@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.samples">
-    <application android:label="Samples">
+    <application android:label="Samples"
+    android:icon="@drawable/test_pattern">
         <activity android:name="RsList"
-                  android:label="RsList"
+                  android:label="RsList"                  
                   android:theme="@android:style/Theme.Black.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
