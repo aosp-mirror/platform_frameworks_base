@@ -321,6 +321,8 @@ status_t ARTPConnection::receive(StreamInfo *s, bool receiveRTP) {
 
     buffer->setRange(0, nbytes);
 
+    // LOG(INFO) << "received " << buffer->size() << " bytes.";
+
     status_t err;
     if (receiveRTP) {
         err = parseRTP(s, buffer);
