@@ -54,7 +54,7 @@ import com.android.systemui.statusbar.*;
 import com.android.systemui.R;
 
 public class TabletStatusBarService extends StatusBarService {
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
     public static final String TAG = "TabletStatusBar";
 
 
@@ -206,13 +206,16 @@ public class TabletStatusBarService extends StatusBarService {
         }
     }
     
-    StatusBarIcon mBatterySBI;
-    StatusBarIcon mSignalSBI;
-    public void updateBatteryDisplay(int level, boolean plugged) {
+    public void setBatteryMeter(int level, boolean plugged) {
         if (DEBUG) Slog.d(TAG, "battery=" + level + (plugged ? " - plugged" : " - unplugged"));
         mBatteryMeter.setImageResource(plugged ? R.drawable.battery_charging : R.drawable.battery);
         mBatteryMeter.setImageLevel(level);
-        mSystemPanel.setBatteryLevel(level, plugged);
+    }
+
+    public void setWifiMeter(int level) {
+        if (DEBUG) Slog.d(TAG, "wifi=" + level);
+        mSignalMeter.setImageResource(R.drawable.signal);
+        mSignalMeter.setImageLevel(level);
     }
 
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {

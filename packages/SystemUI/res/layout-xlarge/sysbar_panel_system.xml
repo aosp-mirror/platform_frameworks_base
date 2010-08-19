@@ -86,19 +86,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         >
-        <ImageView android:id="@+id/battery_meter"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="120dip"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:src="@drawable/dots_empty"
-            />
+            >
+            <ImageView android:id="@+id/battery_meter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/battery"
+                />
 
-        <TextView android:id="@+id/battery_info"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_below="@id/battery_meter"
-            />
+            <TextView android:id="@+id/battery_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_below="@id/battery_meter"
+                />
+        </RelativeLayout>
 
         <com.android.systemui.statusbar.Clock
             style="@*android:style/TextAppearance.StatusBar.Icon"
@@ -118,19 +123,24 @@
             android:layout_below="@id/clock"
             />
 
-        <ImageView android:id="@+id/signal_meter"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="120dip"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:src="@drawable/signal"
-            />
+            >
+            <ImageView android:id="@+id/signal_meter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/signal"
+                />
 
-        <TextView android:id="@+id/signal_info"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_below="@id/signal_meter"
-            />
+            <TextView android:id="@+id/signal_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_below="@id/signal_meter"
+                />
+        </RelativeLayout>
 
     </RelativeLayout>
 

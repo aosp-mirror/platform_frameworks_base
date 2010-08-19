@@ -29,6 +29,11 @@ import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.media.AudioManager;
+import android.net.NetworkInfo;
+import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.IBinder;
@@ -59,6 +64,8 @@ import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.List;
+
 import com.android.systemui.statusbar.*;
 import com.android.systemui.R;
 
@@ -85,6 +92,7 @@ public class SystemPanel extends LinearLayout {
     private TextView mSignalText;
 
     private final AudioManager mAudioManager;
+    private final WifiManager mWifiManager;
 
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -94,21 +102,100 @@ public class SystemPanel extends LinearLayout {
             if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
                 mSoundButton.setAlpha(getSilentMode() ? 0x7F : 0xFF);
             } else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
-                // hack for now
-                mBar.updateBatteryDisplay(intent.getIntExtra("level", 0), 
-                        (intent.getIntExtra("plugged", 0) != 0));
+                updateBattery(intent);
+            } else if (action.equals(WifiManager.RSSI_CHANGED_ACTION)
+                    || action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)
+                    || action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)
+                    || action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
+                updateWifi(intent);
             }
         }
     };
+
+    boolean mWifiEnabled, mWifiConnected;
+    int mWifiLevel;
+    String mWifiSsid;
+
+    private void updateWifi(Intent intent) {
+        if (TabletStatusBarService.DEBUG)
+            Slog.d(TabletStatusBarService.TAG, "updateWifi: " + intent);
+
+        final String action = intent.getAction();
+        final boolean wasConnected = mWifiConnected;
+
+        if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
+            mWifiEnabled = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
+                    WifiManager.WIFI_STATE_UNKNOWN) == WifiManager.WIFI_STATE_ENABLED;
+        } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
+            final NetworkInfo networkInfo = (NetworkInfo)
+                    intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+            mWifiConnected = networkInfo != null && networkInfo.isConnected();
+        } else if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
+            final NetworkInfo.DetailedState detailedState = WifiInfo.getDetailedStateOf(
+                    (SupplicantState)intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE));
+            mWifiConnected = detailedState == NetworkInfo.DetailedState.CONNECTED;
+        } else if (action.equals(WifiManager.RSSI_CHANGED_ACTION)) {
+            final int newRssi = intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200);
+            int newSignalLevel = WifiManager.calculateSignalLevel(newRssi, 6) * 20;
+            mWifiLevel = mWifiConnected ? newSignalLevel : 0;
+        }
+
+        if (mWifiConnected && !wasConnected) {
+            WifiInfo info = mWifiManager.getConnectionInfo();
+            if (TabletStatusBarService.DEBUG)
+                Slog.d(TabletStatusBarService.TAG, "updateWifi: just connected: info=" + info);
+
+            if (info != null) {
+                // grab the initial signal strength
+                mWifiLevel = WifiManager.calculateSignalLevel(info.getRssi(), 101);
+
+                // find the SSID
+                mWifiSsid = info.getSSID();
+                if (mWifiSsid == null) {
+                    // OK, it's not in the connectionInfo; we have to go hunting for it
+                    List<WifiConfiguration> networks = mWifiManager.getConfiguredNetworks();
+                    for (WifiConfiguration net : networks) {
+                        if (net.networkId == info.getNetworkId()) {
+                            mWifiSsid = net.SSID;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!mWifiEnabled) {
+            mWifiSsid = "disabled";
+            mWifiLevel = 0;
+        } else if (!mWifiConnected) {
+            mWifiSsid = "disconnected";
+            mWifiLevel = 0;
+        } else if (mWifiSsid == null) {
+            mWifiSsid = "unknown";
+        }
+
+        mSignalMeter.setImageResource(R.drawable.signal);
+        mSignalMeter.setImageLevel(mWifiLevel);
+        mSignalText.setText(String.format("Wi-Fi: %s", mWifiSsid)); // XXX: localize
+
+        // hack for now
+        mBar.setWifiMeter(mWifiLevel);
+    }
 
     public void setBar(TabletStatusBarService bar) {
         mBar = bar;
     }
 
-    public void setBatteryLevel(int level, boolean plugged) {
+    public void updateBattery(Intent intent) {
+        final int level = intent.getIntExtra("level", 0);
+        final boolean plugged = intent.getIntExtra("plugged", 0) != 0;
+
         mBatteryMeter.setImageResource(plugged ? R.drawable.battery_charging : R.drawable.battery);
         mBatteryMeter.setImageLevel(level);
         mBatteryText.setText(String.format("Battery: %d%%", level));
+
+        // hack for now
+        mBar.setBatteryMeter(level, plugged);
     }
     
     public SystemPanel(Context context, AttributeSet attrs) {
@@ -123,6 +210,10 @@ public class SystemPanel extends LinearLayout {
                 (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         telephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_SERVICE_STATE);
 
+        // wifi status info
+        mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        
+        // audio status notifications
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
     }
 
@@ -171,7 +262,10 @@ public class SystemPanel extends LinearLayout {
         IntentFilter filter = new IntentFilter();
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-        filter.addAction(Intent.ACTION_POWER_CONNECTED);
+        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
         getContext().registerReceiver(mReceiver, filter);
 
         mBatteryMeter = (ImageView)findViewById(R.id.battery_meter);
