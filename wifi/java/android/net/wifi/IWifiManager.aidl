@@ -40,15 +40,15 @@ interface IWifiManager
 
     boolean pingSupplicant();
 
-    boolean startScan(boolean forceActive);
+    void startScan(boolean forceActive);
 
     List<ScanResult> getScanResults();
 
-    boolean disconnect();
+    void disconnect();
 
-    boolean reconnect();
+    void reconnect();
 
-    boolean reassociate();
+    void reassociate();
 
     WifiInfo getConnectionInfo();
 

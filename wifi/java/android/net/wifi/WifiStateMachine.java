@@ -495,9 +495,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     /**
      * TODO: doc
      */
-    public boolean startScan(boolean forceActive) {
-        return sendSyncMessage(obtainMessage(CMD_START_SCAN, forceActive ?
-                SCAN_ACTIVE : SCAN_PASSIVE, 0)).boolValue;
+    public void startScan(boolean forceActive) {
+        sendMessage(obtainMessage(CMD_START_SCAN, forceActive ?
+                SCAN_ACTIVE : SCAN_PASSIVE, 0));
     }
 
     /**
@@ -642,22 +642,22 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     /**
      * Disconnect from Access Point
      */
-    public boolean disconnectCommand() {
-        return sendSyncMessage(CMD_DISCONNECT).boolValue;
+    public void disconnectCommand() {
+        sendMessage(CMD_DISCONNECT);
     }
 
     /**
      * Initiate a reconnection to AP
      */
-    public boolean reconnectCommand() {
-        return sendSyncMessage(CMD_RECONNECT).boolValue;
+    public void reconnectCommand() {
+        sendMessage(CMD_RECONNECT);
     }
 
     /**
      * Initiate a re-association to AP
      */
-    public boolean reassociateCommand() {
-        return sendSyncMessage(CMD_REASSOCIATE).boolValue;
+    public void reassociateCommand() {
+        sendMessage(CMD_REASSOCIATE);
     }
 
     /**
@@ -2056,10 +2056,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             switch (message.what) {
                     /* Synchronous call returns */
                 case CMD_PING_SUPPLICANT:
-                case CMD_START_SCAN:
-                case CMD_DISCONNECT:
-                case CMD_RECONNECT:
-                case CMD_REASSOCIATE:
                 case CMD_REMOVE_NETWORK:
                 case CMD_ENABLE_NETWORK:
                 case CMD_DISABLE_NETWORK:
@@ -2093,6 +2089,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_STOP_DRIVER:
                 case CMD_START_AP:
                 case CMD_STOP_AP:
+                case CMD_START_SCAN:
+                case CMD_DISCONNECT:
+                case CMD_RECONNECT:
+                case CMD_REASSOCIATE:
                 case CMD_RECONFIGURE_IP:
                 case SUP_CONNECTION_EVENT:
                 case SUP_DISCONNECTION_EVENT:
@@ -2647,16 +2647,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_NUM_ALLOWED_CHANNELS:
                 case CMD_START_PACKET_FILTERING:
                 case CMD_STOP_PACKET_FILTERING:
-                    deferMessage(message);
-                    break;
-                    /* Queue the asynchronous version of these commands */
                 case CMD_START_SCAN:
                 case CMD_DISCONNECT:
                 case CMD_REASSOCIATE:
                 case CMD_RECONNECT:
-                    if (message.arg2 != SYNCHRONOUS_CALL) {
-                        deferMessage(message);
-                    }
+                    deferMessage(message);
                     break;
                 default:
                     return NOT_HANDLED;
@@ -2781,16 +2776,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_NUM_ALLOWED_CHANNELS:
                 case CMD_START_PACKET_FILTERING:
                 case CMD_STOP_PACKET_FILTERING:
-                    deferMessage(message);
-                    break;
-                    /* Queue the asynchronous version of these commands */
                 case CMD_START_SCAN:
                 case CMD_DISCONNECT:
                 case CMD_REASSOCIATE:
                 case CMD_RECONNECT:
-                    if (message.arg2 != SYNCHRONOUS_CALL) {
-                        deferMessage(message);
-                    }
+                    deferMessage(message);
                     break;
                 default:
                     return NOT_HANDLED;
@@ -2836,15 +2826,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     }
                     break;
                 case CMD_START_SCAN:
-                    if (message.arg2 == SYNCHRONOUS_CALL) {
-                        syncParams = (SyncParams) message.obj;
-                        syncParams.mSyncReturn.boolValue = WifiNative.scanCommand(
-                                message.arg1 == SCAN_ACTIVE);
-                        notifyOnMsgObject(message);
-                    } else {
-                        /* asynchronous handling */
-                        WifiNative.scanCommand(message.arg1 == SCAN_ACTIVE);
-                    }
+                    WifiNative.scanCommand(message.arg1 == SCAN_ACTIVE);
                     break;
                     /* Ignore */
                 case CMD_DISCONNECT:
@@ -2882,11 +2864,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     mSupplicantStateTracker.handleEvent(stateChangeResult);
                     break;
                 case CMD_START_SCAN:
-                    if (message.arg2 == SYNCHRONOUS_CALL) {
-                        syncParams = (SyncParams) message.obj;
-                        syncParams.mSyncReturn.boolValue = true;
-                        notifyOnMsgObject(message);
-                    }
                     /* We need to set scan type in completed state */
                     Message newMsg = obtainMessage();
                     newMsg.copyFrom(message);
@@ -2894,34 +2871,13 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     break;
                     /* Do a redundant disconnect without transition */
                 case CMD_DISCONNECT:
-                    if (message.arg2 == SYNCHRONOUS_CALL) {
-                        syncParams = (SyncParams) message.obj;
-                        syncParams.mSyncReturn.boolValue = WifiNative.disconnectCommand();
-                        notifyOnMsgObject(message);
-                    } else {
-                        /* asynchronous handling */
-                        WifiNative.disconnectCommand();
-                    }
+                    WifiNative.disconnectCommand();
                     break;
                 case CMD_RECONNECT:
-                    if (message.arg2 == SYNCHRONOUS_CALL) {
-                        syncParams = (SyncParams) message.obj;
-                        syncParams.mSyncReturn.boolValue = WifiNative.reconnectCommand();
-                        notifyOnMsgObject(message);
-                    } else {
-                        /* asynchronous handling */
-                        WifiNative.reconnectCommand();
-                    }
+                    WifiNative.reconnectCommand();
                     break;
                 case CMD_REASSOCIATE:
-                    if (message.arg2 == SYNCHRONOUS_CALL) {
-                        syncParams = (SyncParams) message.obj;
-                        syncParams.mSyncReturn.boolValue = WifiNative.reassociateCommand();
-                        notifyOnMsgObject(message);
-                    } else {
-                        /* asynchronous handling */
-                        WifiNative.reassociateCommand();
-                    }
+                    WifiNative.reassociateCommand();
                     break;
                 case CMD_CONNECT_NETWORK:
                     int netId = message.arg1;
@@ -3125,14 +3081,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                   transitionTo(mDisconnectingState);
                   break;
               case CMD_DISCONNECT:
-                  if (message.arg2 == SYNCHRONOUS_CALL) {
-                      SyncParams syncParams = (SyncParams) message.obj;
-                      syncParams.mSyncReturn.boolValue = WifiNative.disconnectCommand();
-                      notifyOnMsgObject(message);
-                  } else {
-                      /* asynchronous handling */
-                      WifiNative.disconnectCommand();
-                  }
+                  WifiNative.disconnectCommand();
                   transitionTo(mDisconnectingState);
                   break;
                   /* Ignore */
@@ -3187,14 +3136,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             switch (message.what) {
                 case CMD_DISCONNECT:
-                    if (message.arg2 == SYNCHRONOUS_CALL) {
-                        SyncParams syncParams = (SyncParams) message.obj;
-                        syncParams.mSyncReturn.boolValue = WifiNative.disconnectCommand();
-                        notifyOnMsgObject(message);
-                    } else {
-                        /* asynchronous handling */
-                        WifiNative.disconnectCommand();
-                    }
+                    WifiNative.disconnectCommand();
                     transitionTo(mDisconnectingState);
                     break;
                 case CMD_RECONFIGURE_IP:
