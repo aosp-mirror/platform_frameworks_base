@@ -1729,7 +1729,7 @@ public abstract class Layout {
     private Alignment mAlignment = Alignment.ALIGN_NORMAL;
     private float mSpacingMult;
     private float mSpacingAdd;
-    private static Rect sTempRect = new Rect();
+    private static final Rect sTempRect = new Rect();
     private boolean mSpannedText;
 
     public static final int DIR_LEFT_TO_RIGHT = 1;
