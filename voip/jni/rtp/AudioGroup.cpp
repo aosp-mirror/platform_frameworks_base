@@ -367,7 +367,7 @@ void AudioStream::decode(int tick)
             MSG_TRUNC | MSG_DONTWAIT);
 
         // Do we need to check SSRC, sequence, and timestamp? They are not
-        // reliable but at least they can be used to identity duplicates?
+        // reliable but at least they can be used to identify duplicates?
         if (length < 12 || length > (int)sizeof(buffer) ||
             (ntohl(*(uint32_t *)buffer) & 0xC07F0000) != mCodecMagic) {
             LOGD("stream[%d] malformed packet", mSocket);
@@ -697,6 +697,10 @@ bool AudioGroup::remove(int socket)
     for (AudioStream *stream = mChain; stream->mNext; stream = stream->mNext) {
         AudioStream *target = stream->mNext;
         if (target->mSocket == socket) {
+            if (epoll_ctl(mEventQueue, EPOLL_CTL_DEL, socket, NULL)) {
+                LOGE("epoll_ctl: %s", strerror(errno));
+                return false;
+            }
             stream->mNext = target->mNext;
             LOGD("stream[%d] leaves group[%d]", socket, mDeviceSocket);
             delete target;
@@ -800,7 +804,7 @@ bool AudioGroup::deviceLoop()
 static jfieldID gNative;
 static jfieldID gMode;
 
-jint add(JNIEnv *env, jobject thiz, jint mode,
+void add(JNIEnv *env, jobject thiz, jint mode,
     jint socket, jstring jRemoteAddress, jint remotePort,
     jstring jCodecName, jint sampleRate, jint sampleCount,
     jint codecType, jint dtmfType)
@@ -813,7 +817,7 @@ jint add(JNIEnv *env, jobject thiz, jint mode,
     sockaddr_storage remote;
     if (parse(env, jRemoteAddress, remotePort, &remote) < 0) {
         // Exception already thrown.
-        return -1;
+        goto error;
     }
     if (sampleRate < 0 || sampleCount < 0 || codecType < 0 || codecType > 127) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
@@ -821,12 +825,12 @@ jint add(JNIEnv *env, jobject thiz, jint mode,
     }
     if (!jCodecName) {
         jniThrowNullPointerException(env, "codecName");
-        return -1;
+        goto error;
     }
     codecName = env->GetStringUTFChars(jCodecName, NULL);
     if (!codecName) {
         // Exception already thrown.
-        return -1;
+        goto error;
     }
 
     // Create audio stream.
@@ -835,8 +839,10 @@ jint add(JNIEnv *env, jobject thiz, jint mode,
         codecType, dtmfType)) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "cannot initialize audio stream");
+        env->ReleaseStringUTFChars(jCodecName, codecName);
         goto error;
     }
+    env->ReleaseStringUTFChars(jCodecName, codecName);
     socket = -1;
 
     // Create audio group.
@@ -860,16 +866,13 @@ jint add(JNIEnv *env, jobject thiz, jint mode,
 
     // Succeed.
     env->SetIntField(thiz, gNative, (int)group);
-    env->ReleaseStringUTFChars(jCodecName, codecName);
-    return socket;
+    return;
 
 error:
     delete group;
     delete stream;
     close(socket);
     env->SetIntField(thiz, gNative, NULL);
-    env->ReleaseStringUTFChars(jCodecName, codecName);
-    return -1;
 }
 
 void remove(JNIEnv *env, jobject thiz, jint socket)
@@ -902,7 +905,7 @@ void sendDtmf(JNIEnv *env, jobject thiz, jint event)
 }
 
 JNINativeMethod gMethods[] = {
-    {"add", "(IILjava/lang/String;ILjava/lang/String;IIII)I", (void *)add},
+    {"add", "(IILjava/lang/String;ILjava/lang/String;IIII)V", (void *)add},
     {"remove", "(I)V", (void *)remove},
     {"setMode", "(I)V", (void *)setMode},
     {"sendDtmf", "(I)V", (void *)sendDtmf},

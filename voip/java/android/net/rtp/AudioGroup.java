@@ -49,27 +49,28 @@ public class AudioGroup {
     synchronized void add(AudioStream stream, AudioCodec codec, int codecType, int dtmfType) {
         if (!mStreams.containsKey(stream)) {
             try {
-                int id = add(stream.getMode(), stream.dup(),
+                int socket = stream.dup();
+                add(stream.getMode(), socket,
                         stream.getRemoteAddress().getHostAddress(), stream.getRemotePort(),
                         codec.name, codec.sampleRate, codec.sampleCount, codecType, dtmfType);
-                mStreams.put(stream, id);
+                mStreams.put(stream, socket);
             } catch (NullPointerException e) {
                 throw new IllegalStateException(e);
             }
         }
     }
 
-    private native int add(int mode, int socket, String remoteAddress, int remotePort,
+    private native void add(int mode, int socket, String remoteAddress, int remotePort,
             String codecName, int sampleRate, int sampleCount, int codecType, int dtmfType);
 
     synchronized void remove(AudioStream stream) {
-        Integer id = mStreams.remove(stream);
-        if (id != null) {
-            remove(id);
+        Integer socket = mStreams.remove(stream);
+        if (socket != null) {
+            remove(socket);
         }
     }
 
-    private native void remove(int id);
+    private native void remove(int socket);
 
     /**
      * Sends a DTMF digit to every {@link AudioStream} in this group. Currently
