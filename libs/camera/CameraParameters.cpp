@@ -291,6 +291,30 @@ static int parse_size(const char *str, int &width, int &height, char **endptr = 
     return 0;
 }
 
+static void parseSizesList(const char *sizesStr, Vector<Size> &sizes)
+{
+    if (sizesStr == 0) {
+        return;
+    }
+
+    char *sizeStartPtr = (char *)sizesStr;
+
+    while (true) {
+        int width, height;
+        int success = parse_size(sizeStartPtr, width, height, &sizeStartPtr);
+        if (success == -1 || (*sizeStartPtr != ',' && *sizeStartPtr != '\0')) {
+            LOGE("Picture sizes string \"%s\" contains invalid character.", sizesStr);
+            return;
+        }
+        sizes.push(Size(width, height));
+
+        if (*sizeStartPtr == '\0') {
+            return;
+        }
+        sizeStartPtr++;
+    }
+}
+
 void CameraParameters::setPreviewSize(int width, int height)
 {
     char str[32];
@@ -313,6 +337,12 @@ void CameraParameters::getPreviewSize(int *width, int *height) const
         *width = w;
         *height = h;
     }
+}
+
+void CameraParameters::getSupportedPreviewSizes(Vector<Size> &sizes) const
+{
+    const char *previewSizesStr = get(KEY_SUPPORTED_PREVIEW_SIZES);
+    parseSizesList(previewSizesStr, sizes);
 }
 
 void CameraParameters::setPreviewFrameRate(int fps)
@@ -342,31 +372,6 @@ void CameraParameters::setPictureSize(int width, int height)
     set(KEY_PICTURE_SIZE, str);
 }
 
-void CameraParameters::getSupportedPictureSizes(Vector<Size> &sizes) const
-{
-    const char *pictureSizesStr = get(KEY_SUPPORTED_PICTURE_SIZES);
-    if (pictureSizesStr == 0) {
-        return;
-    }
-
-    char *sizeStartPtr = (char *)pictureSizesStr;
-
-    while (true) {
-        int width, height;
-        int success = parse_size(sizeStartPtr, width, height, &sizeStartPtr);
-        if (success == -1 || (*sizeStartPtr != ',' && *sizeStartPtr != '\0')) {
-            LOGE("Picture sizes string \"%s\" contains invalid character.", pictureSizesStr);
-            return;
-        }
-        sizes.push(Size(width, height));
-
-        if (*sizeStartPtr == '\0') {
-            return;
-        }
-        sizeStartPtr++;
-    }
-}
-
 void CameraParameters::getPictureSize(int *width, int *height) const
 {
     *width = -1;
@@ -382,6 +387,12 @@ void CameraParameters::getPictureSize(int *width, int *height) const
         *width = w;
         *height = h;
     }
+}
+
+void CameraParameters::getSupportedPictureSizes(Vector<Size> &sizes) const
+{
+    const char *pictureSizesStr = get(KEY_SUPPORTED_PICTURE_SIZES);
+    parseSizesList(pictureSizesStr, sizes);
 }
 
 void CameraParameters::setPictureFormat(const char *format)
