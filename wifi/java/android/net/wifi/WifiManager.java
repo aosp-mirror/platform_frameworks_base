@@ -524,7 +524,8 @@ public class WifiManager {
      */
     public boolean disconnect() {
         try {
-            return mService.disconnect();
+            mService.disconnect();
+            return true;
         } catch (RemoteException e) {
             return false;
         }
@@ -538,7 +539,8 @@ public class WifiManager {
      */
     public boolean reconnect() {
         try {
-            return mService.reconnect();
+            mService.reconnect();
+            return true;
         } catch (RemoteException e) {
             return false;
         }
@@ -552,7 +554,8 @@ public class WifiManager {
      */
     public boolean reassociate() {
         try {
-            return mService.reassociate();
+            mService.reassociate();
+            return true;
         } catch (RemoteException e) {
             return false;
         }
@@ -581,7 +584,8 @@ public class WifiManager {
      */
     public boolean startScan() {
         try {
-            return mService.startScan(false);
+            mService.startScan(false);
+            return true;
         } catch (RemoteException e) {
             return false;
         }
@@ -599,7 +603,8 @@ public class WifiManager {
      */
     public boolean startScanActive() {
         try {
-            return mService.startScan(true);
+            mService.startScan(true);
+            return true;
         } catch (RemoteException e) {
             return false;
         }

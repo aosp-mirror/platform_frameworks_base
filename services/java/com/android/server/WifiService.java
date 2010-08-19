@@ -362,11 +362,10 @@ public class WifiService extends IWifiManager.Stub {
 
     /**
      * see {@link android.net.wifi.WifiManager#startScan()}
-     * @return {@code true} if the operation succeeds
      */
-    public boolean startScan(boolean forceActive) {
+    public void startScan(boolean forceActive) {
         enforceChangePermission();
-        return mWifiStateMachine.startScan(forceActive);
+        mWifiStateMachine.startScan(forceActive);
     }
 
     private void enforceAccessPermission() {
@@ -528,29 +527,26 @@ public class WifiService extends IWifiManager.Stub {
 
     /**
      * see {@link android.net.wifi.WifiManager#disconnect()}
-     * @return {@code true} if the operation succeeds
      */
-    public boolean disconnect() {
+    public void disconnect() {
         enforceChangePermission();
-        return mWifiStateMachine.disconnectCommand();
+        mWifiStateMachine.disconnectCommand();
     }
 
     /**
      * see {@link android.net.wifi.WifiManager#reconnect()}
-     * @return {@code true} if the operation succeeds
      */
-    public boolean reconnect() {
+    public void reconnect() {
         enforceChangePermission();
-        return mWifiStateMachine.reconnectCommand();
+        mWifiStateMachine.reconnectCommand();
     }
 
     /**
      * see {@link android.net.wifi.WifiManager#reassociate()}
-     * @return {@code true} if the operation succeeds
      */
-    public boolean reassociate() {
+    public void reassociate() {
         enforceChangePermission();
-        return mWifiStateMachine.reassociateCommand();
+        mWifiStateMachine.reassociateCommand();
     }
 
     /**
