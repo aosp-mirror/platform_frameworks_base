@@ -44,7 +44,7 @@ struct ASessionDescription : public RefBase {
             size_t index, unsigned long *PT,
             AString *desc, AString *params) const;
 
-    void getDimensions(
+    bool getDimensions(
             size_t index, unsigned long PT,
             int32_t *width, int32_t *height) const;
 
