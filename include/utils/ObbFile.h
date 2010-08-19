@@ -18,11 +18,15 @@
 #define OBBFILE_H_
 
 #include <stdint.h>
+#include <strings.h>
 
 #include <utils/RefBase.h>
 #include <utils/String8.h>
 
 namespace android {
+
+// OBB flags (bit 0)
+#define OBB_OVERLAY         (1 << 0)
 
 class ObbFile : public RefBase {
 protected:
@@ -46,16 +50,36 @@ public:
         return mPackageName;
     }
 
-    int32_t getVersion() const {
-        return mVersion;
-    }
-
     void setPackageName(String8 packageName) {
         mPackageName = packageName;
     }
 
+    int32_t getVersion() const {
+        return mVersion;
+    }
+
     void setVersion(int32_t version) {
         mVersion = version;
+    }
+
+    int32_t getFlags() const {
+        return mFlags;
+    }
+
+    void setFlags(int32_t flags) {
+        mFlags = flags;
+    }
+
+    bool isOverlay() {
+        return (mFlags & OBB_OVERLAY) == OBB_OVERLAY;
+    }
+
+    void setOverlay(bool overlay) {
+        if (overlay) {
+            mFlags |= OBB_OVERLAY;
+        } else {
+            mFlags &= ~OBB_OVERLAY;
+        }
     }
 
     static inline uint32_t get4LE(const unsigned char* buf) {
@@ -75,6 +99,9 @@ private:
 
     /* Package version this ObbFile is associated with */
     int32_t mVersion;
+
+    /* Flags for this OBB type. */
+    int32_t mFlags;
 
     const char* mFileName;
 

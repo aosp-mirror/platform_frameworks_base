@@ -25,6 +25,9 @@ import android.os.Parcelable;
  * @hide
  */
 public class ObbInfo implements Parcelable {
+    /** Flag noting that this OBB is an overlay patch for a base OBB. */
+    public static final int OBB_OVERLAY = 1 << 0;
+
     /**
      * The name of the package to which the OBB file belongs.
      */
@@ -35,13 +38,26 @@ public class ObbInfo implements Parcelable {
      */
     public int version;
 
+    /**
+     * The flags relating to the OBB.
+     */
+    public int flags;
+
     public ObbInfo() {
     }
 
     public String toString() {
-        return "ObbInfo{"
-            + Integer.toHexString(System.identityHashCode(this))
-            + " packageName=" + packageName + ",version=" + version + "}";
+        StringBuilder sb = new StringBuilder();
+        sb.append("ObbInfo{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(" packageName=");
+        sb.append(packageName);
+        sb.append(",version=");
+        sb.append(version);
+        sb.append(",flags=");
+        sb.append(flags);
+        sb.append('}');
+        return sb.toString();
     }
 
     public int describeContents() {
@@ -51,6 +67,7 @@ public class ObbInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         dest.writeString(packageName);
         dest.writeInt(version);
+        dest.writeInt(flags);
     }
 
     public static final Parcelable.Creator<ObbInfo> CREATOR
@@ -67,5 +84,6 @@ public class ObbInfo implements Parcelable {
     private ObbInfo(Parcel source) {
         packageName = source.readString();
         version = source.readInt();
+        flags = source.readInt();
     }
 }
