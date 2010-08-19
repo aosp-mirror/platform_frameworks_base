@@ -269,7 +269,7 @@ void CameraParameters::remove(const char *key)
     mMap.removeItem(String8(key));
 }
 
-static int parse_size(const char *str, int &width, int &height)
+static int parse_size(const char *str, int &width, int &height, char **endptr = NULL)
 {
     // Find the width.
     char *end;
@@ -279,10 +279,14 @@ static int parse_size(const char *str, int &width, int &height)
         return -1;
 
     // Find the height, immediately after the 'x'.
-    int h = (int)strtol(end+1, 0, 10);
+    int h = (int)strtol(end+1, &end, 10);
 
     width = w;
     height = h;
+
+    if (endptr) {
+        *endptr = end;
+    }
 
     return 0;
 }
@@ -336,6 +340,31 @@ void CameraParameters::setPictureSize(int width, int height)
     char str[32];
     sprintf(str, "%dx%d", width, height);
     set(KEY_PICTURE_SIZE, str);
+}
+
+void CameraParameters::getSupportedPictureSizes(Vector<Size> &sizes) const
+{
+    const char *pictureSizesStr = get(KEY_SUPPORTED_PICTURE_SIZES);
+    if (pictureSizesStr == 0) {
+        return;
+    }
+
+    char *sizeStartPtr = (char *)pictureSizesStr;
+
+    while (true) {
+        int width, height;
+        int success = parse_size(sizeStartPtr, width, height, &sizeStartPtr);
+        if (success == -1 || (*sizeStartPtr != ',' && *sizeStartPtr != '\0')) {
+            LOGE("Picture sizes string \"%s\" contains invalid character.", pictureSizesStr);
+            return;
+        }
+        sizes.push(Size(width, height));
+
+        if (*sizeStartPtr == '\0') {
+            return;
+        }
+        sizeStartPtr++;
+    }
 }
 
 void CameraParameters::getPictureSize(int *width, int *height) const
