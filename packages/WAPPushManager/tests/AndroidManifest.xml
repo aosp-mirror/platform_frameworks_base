@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2008 The Android Open Source Project
+
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+
+-->
+
+<!-- package name must be unique so suffix with "tests" so package loader doesn't ignore us -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.smspush.unitTests">
+
+
+     <uses-permission android:name="com.android.smspush.WAPPUSH_MANAGER_BIND" />
+     <uses-permission android:name="android.permission.RECEIVE_WAP_PUSH" />
+     <!--testing.../-->
+     <application android:icon="@drawable/icon" android:label="wappush test">
+         <uses-library android:name="android.test.runner" />
+         <activity android:name=".ClientTest"
+             android:label="wappush test">
+             <intent-filter>
+                 <action android:name="android.intent.action.MAIN" />
+                 <category android:name="android.intent.category.LAUNCHER" />
+             </intent-filter>
+         </activity>
+
+         <receiver android:name=".DrmReceiver" android:enabled="true">
+             <intent-filter>
+                 <action android:name="android.provider.Telephony.WAP_PUSH_RECEIVED" />
+                 <data android:mimeType="application/vnd.oma.drm.rights+xml" />
+                 <data android:value="application/vnd.oma.drm.rights+wbxml" />
+             </intent-filter>
+         </receiver>
+
+         <service android:enabled="true" android:name=".ReceiverService"
+            android:exported="true"/>
+
+         <activity android:name=".ReceiverActivity"
+             android:exported="true" android:label="test receiver" />
+
+        <service android:name=".DataVerify"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.smspush.unitTests.IDataVerify" />
+            </intent-filter>
+        </service>
+
+     </application>
+
+     <!--
+     This declares that this application uses the instrumentation test runner targeting
+     the package of com.android.smspush.  To run the tests use the command:
+     "adb shell am instrument -w
+        com.android.smspush.unitTests/android.test.InstrumentationTestRunner"
+     -->
+     <instrumentation android:name="android.test.InstrumentationTestRunner"
+         android:targetPackage="com.android.smspush"
+         android:label="Tests for WAPPushManager"/>
+
+</manifest>
+
