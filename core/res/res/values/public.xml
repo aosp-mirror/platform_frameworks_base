@@ -1346,5 +1346,18 @@
        the base class. -->
   <public type="layout" name="list_content" />
 
+  <!-- A dark holographic theme. -->
+  <public type="style" name="Theme.Holo" />
+  <!-- A light holographic theme. -->
+  <public type="style" name="Theme.Light.Holo" />
+  <!-- Variant of the holographic (dark) theme with no title bar -->
+  <public type="style" name="Theme.Holo.NoTitleBar" />
+  <!-- Variant of the holographic (dark) theme that has no title bar and fills the entire screen -->
+  <public type="style" name="Theme.Holo.NoTitleBar.Fullscreen" />
+  <!-- Variant of the holographic light theme with no title bar -->
+  <public type="style" name="Theme.Light.Holo.NoTitleBar" />
+  <!-- Variant of the holographic light theme that has no title bar and fills the entire screen -->
+  <public type="style" name="Theme.Light.Holo.NoTitleBar.Fullscreen" />
+
   <public type="string" name="selectTextMode" id="0x01040030" />
 </resources>
