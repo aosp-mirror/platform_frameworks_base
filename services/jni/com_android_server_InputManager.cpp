@@ -934,7 +934,7 @@ int32_t NativeInputManager::getMaxEventsPerSecond() {
         jint result = env->CallIntMethod(mCallbacksObj,
                 gCallbacksClassInfo.getMaxEventsPerSecond);
         if (checkAndClearExceptionFromCallback(env, "getMaxEventsPerSecond")) {
-            result = 35;
+            result = 60;
         }
 
         mMaxEventsPerSecond = result;
