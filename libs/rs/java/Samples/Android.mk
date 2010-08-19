@@ -24,7 +24,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := $(call all-java-files-under, src) $(call all-renderscript-files-under, src)
 #LOCAL_STATIC_JAVA_LIBRARIES := android.renderscript
 
-LOCAL_PACKAGE_NAME := SceneGraph
+LOCAL_PACKAGE_NAME := Samples
 
 include $(BUILD_PACKAGE)
 

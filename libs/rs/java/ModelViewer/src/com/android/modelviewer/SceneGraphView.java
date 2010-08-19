@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.scenegraph;
+package com.android.modelviewer;
 
 import java.io.Writer;
 import java.util.ArrayList;
