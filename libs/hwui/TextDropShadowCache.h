@@ -29,12 +29,17 @@ namespace android {
 namespace uirenderer {
 
 struct ShadowText {
-    ShadowText() { }
+    ShadowText() {
+        text = NULL;
+    }
 
     ShadowText(SkPaint* paint, uint32_t radius, uint32_t len, const char* srcText):
-            paint(paint), radius(radius), len(len) {
+            radius(radius), len(len) {
         text = new char[len];
         memcpy(text, srcText, len);
+
+        textSize = paint->getTextSize();
+        typeface = paint->getTypeface();
 
         hash = 0;
         uint32_t multiplier = 1;
@@ -46,7 +51,8 @@ struct ShadowText {
     }
 
     ShadowText(const ShadowText& shadow):
-            paint(shadow.paint), radius(shadow.radius), len(shadow.len), hash(shadow.hash) {
+            radius(shadow.radius), len(shadow.len), hash(shadow.hash),
+            textSize(shadow.textSize), typeface(shadow.typeface) {
         text = new char[shadow.len];
         memcpy(text, shadow.text, shadow.len);
     }
@@ -55,10 +61,11 @@ struct ShadowText {
         delete[] text;
     }
 
-    SkPaint* paint;
     uint32_t radius;
     uint32_t len;
     uint32_t hash;
+    float textSize;
+    SkTypeface* typeface;
     char *text;
 
     bool operator<(const ShadowText& rhs) const {
@@ -66,11 +73,14 @@ struct ShadowText {
         else if (len == rhs.len) {
             if (radius < rhs.radius) return true;
             else if (radius == rhs.radius) {
-                if (paint < rhs.paint) return true;
-                else if (paint == rhs.paint) {
-                    if (hash < rhs.hash) return true;
-                    if (hash == rhs.hash) {
-                        return strncmp(text, rhs.text, len) < 0;
+                if (textSize < rhs.textSize) return true;
+                else if (textSize == rhs.textSize) {
+                    if (typeface < rhs.typeface) return true;
+                    else if (typeface == rhs.typeface) {
+                        if (hash < rhs.hash) return true;
+                        if (hash == rhs.hash) {
+                            return strncmp(text, rhs.text, len) < 0;
+                        }
                     }
                 }
             }

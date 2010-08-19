@@ -197,6 +197,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     
     private static final int PRIORITY = 100;
 
+    private int mCurrentAlpha = 255;    
     private ColorStateList mTextColor;
     private int mCurTextColor;
     private ColorStateList mHintTextColor;
@@ -3857,6 +3858,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
+    protected boolean onSetAlpha(int alpha) {
+        if (mMovement == null && getBackground() == null) {
+            mCurrentAlpha = alpha;
+            final Drawables dr = mDrawables;
+            if (dr != null) {
+                if (dr.mDrawableLeft != null) dr.mDrawableLeft.setAlpha(alpha);
+                if (dr.mDrawableTop != null) dr.mDrawableTop.setAlpha(alpha);
+                if (dr.mDrawableRight != null) dr.mDrawableRight.setAlpha(alpha);
+                if (dr.mDrawableBottom != null) dr.mDrawableBottom.setAlpha(alpha);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         restartMarqueeIfNeeded();
 
@@ -3953,6 +3970,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         mTextPaint.setColor(color);
+        mTextPaint.setAlpha(mCurrentAlpha);
         mTextPaint.drawableState = getDrawableState();
 
         canvas.save();
