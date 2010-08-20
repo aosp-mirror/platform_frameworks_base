@@ -45,7 +45,7 @@ import android.util.Log;
  * This BluetoothHeadset object is not immediately bound to the
  * BluetoothHeadset service. Use the ServiceListener interface to obtain a
  * notification when it is bound, this is especially important if you wish to
- * immediately call methods on BluetootHeadset after construction.
+ * immediately call methods on BluetoothHeadset after construction.
  *
  * Android only supports one connected Bluetooth Headset at a time.
  *
@@ -85,6 +85,43 @@ public final class BluetoothHeadset {
             "android.bluetooth.headset.extra.DISCONNECT_INITIATOR";
 
     /**
+     * Broadcast Action: Indicates a headset has posted a vendor-specific event.
+     * <p>Always contains the extra fields {@link #EXTRA_DEVICE},
+     * {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD}, and
+     * {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_ARGS}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_VENDOR_SPECIFIC_HEADSET_EVENT =
+            "android.bluetooth.headset.action.VENDOR_SPECIFIC_HEADSET_EVENT";
+
+    /**
+     * A String extra field in {@link #ACTION_VENDOR_SPECIFIC_HEADSET_EVENT}
+     * intents that contains the name of the vendor-specific command.
+     */
+    public static final String EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD =
+            "android.bluetooth.headset.extra.VENDOR_SPECIFIC_HEADSET_EVENT_CMD";
+
+    /**
+     * An int extra field in {@link #ACTION_VENDOR_SPECIFIC_HEADSET_EVENT}
+     * intents that contains the Company ID of the vendor defining the vendor-specific
+     * command.
+     * @see <a href="https://www.bluetooth.org/Technical/AssignedNumbers/identifiers.htm">
+     * Bluetooth SIG Assigned Numbers - Company Identifiers</a>
+     */
+    public static final String EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_COMPANY_ID =
+            "android.bluetooth.headset.extra.VENDOR_SPECIFIC_HEADSET_EVENT_COMPANY_ID";
+
+    /**
+     * A Parcelable String array extra field in
+     * {@link #ACTION_VENDOR_SPECIFIC_HEADSET_EVENT} intents that contains
+     * the arguments to the vendor-specific command.
+     */
+    public static final String EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_ARGS =
+            "android.bluetooth.headset.extra.VENDOR_SPECIFIC_HEADSET_EVENT_ARGS";
+
+
+    /**
      * TODO(API release): Consider incorporating as new state in
      * HEADSET_STATE_CHANGED
      */
@@ -108,7 +145,7 @@ public final class BluetoothHeadset {
 
     public static final int RESULT_FAILURE = 0;
     public static final int RESULT_SUCCESS = 1;
-    /** Connection canceled before completetion. */
+    /** Connection canceled before completion. */
     public static final int RESULT_CANCELED = 2;
 
     /** Values for {@link #EXTRA_DISCONNECT_INITIATOR} */
