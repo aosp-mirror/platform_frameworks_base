@@ -36,7 +36,7 @@ public class DoubleEvaluator implements TypeEvaluator {
      *         <code>fraction</code> parameter.
      */
     public Object evaluate(float fraction, Object startValue, Object endValue) {
-        double startDouble = (Double) startValue;
-        return startDouble + fraction * ((Double) endValue - startDouble);
+        double startDouble = ((Number) startValue).doubleValue();
+        return startDouble + fraction * (((Number) endValue).doubleValue() - startDouble);
     }
 }
