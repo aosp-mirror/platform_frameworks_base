@@ -1798,11 +1798,11 @@ public class WebView extends AbsoluteLayout
     /**
      * Returns true if private browsing is enabled in this WebView.
      */
-    public boolean isPrivateBrowsingEnabled () {
+    public boolean isPrivateBrowsingEnabled() {
         return getSettings().isPrivateBrowsingEnabled();
     }
 
-    private void startPrivateBrowsing () {
+    private void startPrivateBrowsing() {
         boolean wasPrivateBrowsingEnabled = isPrivateBrowsingEnabled();
 
         getSettings().setPrivateBrowsingEnabled(true);
@@ -1811,6 +1811,23 @@ public class WebView extends AbsoluteLayout
             loadUrl("browser:incognito");
         }
     }
+
+    /**
+     * Deletes any files that were created as a part of the last private
+     * browsing session and clears any internal state associated with that
+     * session. The consequences of calling this method while a private
+     * browsing session is active are unspecified.
+     * @param context The same context which was used to create the private
+     *                browsing WebView.
+     * @return True if the private browsing files were successfully deleted,
+     *         false otherwise.
+     * @hide pending API council approval.
+     */
+    public static boolean cleanupPrivateBrowsingFiles(Context context) {
+        return nativeCleanupPrivateBrowsingFiles(context.getFilesDir().getParent());
+    }
+
+    private static native boolean nativeCleanupPrivateBrowsingFiles(String dataDirectory);
 
     private boolean extendScroll(int y) {
         int finalY = mScroller.getFinalY();
