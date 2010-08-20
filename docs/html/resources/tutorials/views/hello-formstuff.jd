@@ -32,9 +32,19 @@ public void onCreate(Bundle savedInstanceState) {
 }
 </pre>
 
+<p>Now select which kind of form widget you'd like to create:</p>
+<ul>
+  <li><a href="#CustomButton">Custom Button</a></li>
+  <li><a href="#EditText">Edit Text</a></li>
+  <li><a href="#Checkbox">Checkbox</a></li>
+  <li><a href="#RadioButtons">Radio Buttons</a></li>
+  <li><a href="#ToggleButton">Toggle Button</a></li>
+  <li><a href="#RatingBar">Rating Bar</a></li>
+</ul>
 
 
-<h2>Custom Button</h2>
+
+<h2 id="CustomButton">Custom Button</h2>
 
 <p>In this section, you will create a button with a custom image instead of text, using the {@link
 android.widget.Button} widget and an XML file that defines three different images to use for the
@@ -111,7 +121,8 @@ defines the action to be made when the button is clicked. In this example, a
 </ol>
 
 
-<h2>EditText</h2>
+
+<h2 id="EditText">Edit Text</h2>
 
 <p>In this section, you will create a text field for user input, using the {@link
 android.widget.EditText} widget. Once text has been entered into the field, the "Enter" key will
@@ -158,7 +169,8 @@ result in a carriage return in the text field).</p>
 </ol>
 
 
-<h2>CheckBox</h2>
+
+<h2 id="Checkbox">Checkbox</h2>
 
 <p>In this section, you will create a checkbox for selecting items, using the {@link
 android.widget.CheckBox} widget. When the checkbox is pressed, a toast message will
@@ -209,7 +221,8 @@ use the {@link android.widget.CompoundButton#setChecked(boolean)} or {@link
 android.widget.CompoundButton#toggle()} method.</p>
 
 
-<h2>RadioButton</h2>
+
+<h2 id="RadioButtons">Radio Buttons</h2>
 
 <p>In this section, you will create two mutually-exclusive radio buttons (enabling one disables
 the other), using the {@link android.widget.RadioGroup} and {@link android.widget.RadioButton}
@@ -274,7 +287,8 @@ use the {@link android.widget.CompoundButton#setChecked(boolean)} or {@link
 android.widget.CompoundButton#toggle()} method.</p>
 
 
-<h2>ToggleButton</h2>
+
+<h2 id="ToggleButton">Toggle Button</h2>
 
 <p>In this section, you'll create a button used specifically for toggling between two
 states, using the {@link android.widget.ToggleButton} widget. This widget is an excellent
@@ -330,7 +344,7 @@ android.widget.CompoundButton#toggle()} method.</p>
 
 
 
-<h2>RatingBar</h2>
+<h2 id="RatingBar">Rating Bar</h2>
 
 <p>In this section, you'll create a widget that allows the user to provide a rating,
 with the {@link android.widget.RatingBar} widget.</p>

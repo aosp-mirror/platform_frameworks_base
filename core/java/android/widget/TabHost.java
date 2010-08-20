@@ -40,6 +40,9 @@ import java.util.List;
  * user clicks to select a specific tab, and a FrameLayout object that displays the contents of that
  * page. The individual elements are typically controlled using this container object, rather than
  * setting values on the child elements themselves.
+ *
+ * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-tabwidget.html">Tab Layout
+ * tutorial</a>.</p>
  */
 public class TabHost extends FrameLayout implements ViewTreeObserver.OnTouchModeChangeListener {
 
