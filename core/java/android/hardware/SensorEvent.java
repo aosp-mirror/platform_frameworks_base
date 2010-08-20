@@ -119,6 +119,16 @@ public class SensorEvent {
      *  All values are in micro-Tesla (uT) and measure the ambient magnetic
      *  field in the X, Y and Z axis.
      *
+     * <p>{@link android.hardware.Sensor#TYPE_GYROSCOPE Sensor.TYPE_GYROSCOPE}:<p>
+     *  All values are in radians/second and measure the rate of rotation
+     *  around the X, Y and Z axis. The coordinate system is the same as is
+     *  used for the acceleration sensor.  Rotation is positive in the counter-clockwise
+     *  direction.  That is, an observer looking from some positive location on the x, y.
+     *  or z axis at a device positioned on the origin would report positive rotation
+     *  if the device appeared to be rotating counter clockwise.  Note that this is the
+     *  standard mathematical definition of positive rotation and does not agree with the
+     *  definition of roll given earlier.
+     *
      * <p>{@link android.hardware.Sensor#TYPE_LIGHT Sensor.TYPE_LIGHT}:<p>
      *
      *  <p>values[0]: Ambient light level in SI lux units
@@ -130,7 +140,29 @@ public class SensorEvent {
      *  <p> Note that some proximity sensors only support a binary "close" or "far" measurement.
      *   In this case, the sensor should report its maxRange value in the "far" state and a value
      *   less than maxRange in the "near" state.
+     *
+     *  <p>{@link android.hardware.Sensor#TYPE_GRAVITY Sensor.TYPE_GRAVITY}:<p>
+     *  A three dimensional vector indicating the direction and magnitude of gravity.  Units
+     *  are m/s^2.  The coordinate system is the same as is used by the acceleration sensor.
+     *
+     *  <p>{@link android.hardware.Sensor#TYPE_LINEAR_ACCELERATION Sensor.TYPE_LINEAR_ACCELERATION}:<p>
+     *  A three dimensional vector indicating acceleration along each device axis, not including
+     *  gravity.  All values have units of m/s^2.  The coordinate system is the same as is used by the
+     * acceleration sensor.
+     *
+     *  <p>{@link android.hardware.Sensor#TYPE_ROTATION_VECTOR Sensor.TYPE_ROTATION_VECTOR}:<p>
+     *  The rotation vector represents the orientation of the device as a combination of an angle
+     *  and an axis, in which the device has rotated through an angle theta around an axis
+     *  <x, y, z>. The three elements of the rotation vector are
+     *  <x*sin(theta/2), y*sin(theta/2), z*sin(theta/2)>, such that the magnitude of the rotation
+     *  vector is equal to sin(theta/2), and the direction of the rotation vector is equal to the
+     *  direction of the axis of rotation. The three elements of the rotation vector are equal to
+     *  the last three components of a unit quaternion
+     *  <cos(theta/2), x*sin(theta/2), y*sin(theta/2), z*sin(theta/2)>.  Elements of the rotation
+     *  vector are unitless.  The x,y, and z axis are defined in the same way as the acceleration
+     *  sensor.
      */
+
     public final float[] values;
 
     /**
