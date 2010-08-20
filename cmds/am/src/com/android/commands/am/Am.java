@@ -626,7 +626,7 @@ public class Am {
                 "        [-e|--es <EXTRA_KEY> <EXTRA_STRING_VALUE> ...]\n" +
                 "        [--esn <EXTRA_KEY> ...]\n" +
                 "        [--ez <EXTRA_KEY> <EXTRA_BOOLEAN_VALUE> ...]\n" +
-                "        [-e|--ei <EXTRA_KEY> <EXTRA_INT_VALUE> ...]\n" +
+                "        [--ei <EXTRA_KEY> <EXTRA_INT_VALUE> ...]\n" +
                 "        [-n <COMPONENT>] [-f <FLAGS>]\n" +
                 "        [--grant-read-uri-permission] [--grant-write-uri-permission]\n" +
                 "        [--debug-log-resolution]\n" +
