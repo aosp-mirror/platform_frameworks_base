@@ -88,13 +88,61 @@ void take_screenshot(FILE *fb_in, FILE *fb_out) {
     png_destroy_write_struct(&png, NULL);
 }
 
+void fork_sound(const char* path) {
+    pid_t pid = fork();
+    if (pid == 0) {
+        execl("/system/bin/stagefright", "stagefright", "-o", "-a", path, NULL);
+    }
+}
+
+void usage() {
+    fprintf(stderr,
+            "usage: screenshot [-s soundfile] filename.png\n"
+            "   -s: play a sound effect to signal success\n"
+            "   -i: autoincrement to avoid overwriting filename.png\n"
+    );
+}
+
 int main(int argc, char**argv) {
     FILE *png = NULL;
     FILE *fb_in = NULL;
-    if (argc < 2) {
-        fprintf(stderr, "usage: screenshot filename.png\n");
-        exit(1);
+    char outfile[PATH_MAX] = "";
+
+    char * soundfile = NULL;
+    int do_increment = 0;
+
+    int c;
+    while ((c = getopt(argc, argv, "s:i")) != -1) {
+        switch (c) {
+            case 's': soundfile = optarg; break;
+            case 'i': do_increment = 1; break;
+            case '?':
+            case 'h':
+                usage(); exit(1);
+        }
     }
+    argc -= optind;
+    argv += optind;
+
+    if (argc < 1) {
+        usage(); exit(1);
+    }
+
+    strlcpy(outfile, argv[0], PATH_MAX);
+    if (do_increment) {
+        struct stat st;
+        char base[PATH_MAX] = "";
+        int i = 0;
+        while (stat(outfile, &st) == 0) {
+            if (!base[0]) {
+                char *p = strrchr(outfile, '.');
+                if (p) *p = '\0';
+                strcpy(base, outfile);
+            }
+            snprintf(outfile, PATH_MAX, "%s-%d.png", base, ++i);
+        }
+    }
+
     fb_in = fopen("/dev/graphics/fb0", "r");
     if (!fb_in) {
         fprintf(stderr, "error: could not read framebuffer\n");
@@ -106,13 +154,18 @@ int main(int argc, char**argv) {
     setgroups(sizeof(groups)/sizeof(groups[0]), groups);
     setuid(AID_SHELL);
 
-    png = fopen(argv[1], "w");
+    png = fopen(outfile, "w");
     if (!png) {
-        fprintf(stderr, "error: writing file %s: %s\n", argv[1], strerror(errno));
+        fprintf(stderr, "error: writing file %s: %s\n",
+                outfile, strerror(errno));
         exit(1);
     }
 
     take_screenshot(fb_in, png);
+
+    if (soundfile) {
+        fork_sound(soundfile);
+    }
 
     exit(0);
 }
