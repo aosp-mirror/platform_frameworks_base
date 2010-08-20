@@ -389,15 +389,17 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         if (permission != null) {
             pw.println(prefix + "permission=" + permission);
         }
-        pw.println(prefix + "uid=" + uid + " taskAffinity=" + taskAffinity);
-        if (theme != 0) {
-            pw.println(prefix + "theme=0x" + Integer.toHexString(theme));
-        }
-        pw.println(prefix + "flags=0x" + Integer.toHexString(flags)
-                + " processName=" + processName);
+        pw.println(prefix + "processName=" + processName);
+        pw.println(prefix + "taskAffinity=" + taskAffinity);
+        pw.println(prefix + "uid=" + uid + " flags=0x" + Integer.toHexString(flags)
+                + " theme=0x" + Integer.toHexString(theme));
         pw.println(prefix + "sourceDir=" + sourceDir);
-        pw.println(prefix + "publicSourceDir=" + publicSourceDir);
-        pw.println(prefix + "resourceDirs=" + resourceDirs);
+        if (!sourceDir.equals(publicSourceDir)) {
+            pw.println(prefix + "publicSourceDir=" + publicSourceDir);
+        }
+        if (resourceDirs != null) {
+            pw.println(prefix + "resourceDirs=" + resourceDirs);
+        }
         pw.println(prefix + "dataDir=" + dataDir);
         if (sharedLibraryFiles != null) {
             pw.println(prefix + "sharedLibraryFiles=" + sharedLibraryFiles);

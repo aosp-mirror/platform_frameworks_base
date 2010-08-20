@@ -22,13 +22,20 @@ import android.net.Uri;
 import java.io.PrintWriter;
 import java.util.HashSet;
 
+interface UriPermissionOwner {
+    void addReadPermission(UriPermission perm);
+    void addWritePermission(UriPermission perm);
+    void removeReadPermission(UriPermission perm);
+    void removeWritePermission(UriPermission perm);
+}
+
 class UriPermission {
     final int uid;
     final Uri uri;
     int modeFlags = 0;
     int globalModeFlags = 0;
-    final HashSet<ActivityRecord> readActivities = new HashSet<ActivityRecord>();
-    final HashSet<ActivityRecord> writeActivities = new HashSet<ActivityRecord>();
+    final HashSet<UriPermissionOwner> readOwners = new HashSet<UriPermissionOwner>();
+    final HashSet<UriPermissionOwner> writeOwners = new HashSet<UriPermissionOwner>();
     
     String stringName;
     
@@ -41,27 +48,21 @@ class UriPermission {
         if ((modeFlags&Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0) {
             globalModeFlags &= ~Intent.FLAG_GRANT_READ_URI_PERMISSION;
             modeFlags &= ~Intent.FLAG_GRANT_READ_URI_PERMISSION;
-            if (readActivities.size() > 0) {
-                for (ActivityRecord r : readActivities) {
-                    r.readUriPermissions.remove(this);
-                    if (r.readUriPermissions.size() == 0) {
-                        r.readUriPermissions = null;
-                    }
+            if (readOwners.size() > 0) {
+                for (UriPermissionOwner r : readOwners) {
+                    r.removeReadPermission(this);
                 }
-                readActivities.clear();
+                readOwners.clear();
             }
         }
         if ((modeFlags&Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0) {
             globalModeFlags &= ~Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
             modeFlags &= ~Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-            if (readActivities.size() > 0) {
-                for (ActivityRecord r : readActivities) {
-                    r.writeUriPermissions.remove(this);
-                    if (r.writeUriPermissions.size() == 0) {
-                        r.writeUriPermissions = null;
-                    }
+            if (readOwners.size() > 0) {
+                for (UriPermissionOwner r : writeOwners) {
+                    r.removeWritePermission(this);
                 }
-                readActivities.clear();
+                readOwners.clear();
             }
         }
     }
@@ -85,11 +86,17 @@ class UriPermission {
                 pw.print(" uid="); pw.print(uid); 
                 pw.print(" globalModeFlags=0x");
                 pw.println(Integer.toHexString(globalModeFlags));
-        if (readActivities.size() != 0) {
-            pw.print(prefix); pw.print("readActivities="); pw.println(readActivities);
+        if (readOwners.size() != 0) {
+            pw.print(prefix); pw.println("readOwners:");
+            for (UriPermissionOwner owner : readOwners) {
+                pw.print(prefix); pw.print("  * "); pw.println(owner);
+            }
         }
-        if (writeActivities.size() != 0) {
-            pw.print(prefix); pw.print("writeActivities="); pw.println(writeActivities);
+        if (writeOwners.size() != 0) {
+            pw.print(prefix); pw.println("writeOwners:");
+            for (UriPermissionOwner owner : writeOwners) {
+                pw.print(prefix); pw.print("  * "); pw.println(owner);
+            }
         }
     }
 }
