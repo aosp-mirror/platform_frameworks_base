@@ -363,6 +363,17 @@ public class Allocation extends BaseObj {
     static public Allocation createFromBitmapResourceBoxed(RenderScript rs, Resources res, int id, Element dstFmt, boolean genMips)
         throws IllegalArgumentException {
 
+        mBitmapOptions.inPreferredConfig = null;
+        if (dstFmt == rs.mElement_RGBA_8888) {
+            mBitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        } else if (dstFmt == rs.mElement_RGB_888) {
+            mBitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        } else if (dstFmt == rs.mElement_RGBA_4444) {
+            mBitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_4444;
+        } else if (dstFmt == rs.mElement_RGB_565) {
+            mBitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565;
+        }
+
         Bitmap b = BitmapFactory.decodeResource(res, id, mBitmapOptions);
         return createFromBitmapBoxed(rs, b, dstFmt, genMips);
     }
