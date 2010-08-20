@@ -12,7 +12,8 @@ LOCAL_SRC_FILES:= \
     looper.cpp \
     native_activity.cpp \
     native_window.cpp \
-    sensor.cpp
+    sensor.cpp \
+    storage_manager.cpp
 
 LOCAL_SHARED_LIBRARIES := \
     libcutils \
@@ -22,6 +23,9 @@ LOCAL_SHARED_LIBRARIES := \
     libgui \
     libsurfaceflinger_client \
     libandroid_runtime
+
+LOCAL_STATIC_LIBRARIES := \
+    libstorage
 
 LOCAL_C_INCLUDES += \
     frameworks/base/native/include \
