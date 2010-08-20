@@ -459,8 +459,7 @@ public class WebView extends AbsoluteLayout
     private static final int TOUCH_SHORTPRESS_MODE = 5;
     private static final int TOUCH_DOUBLE_TAP_MODE = 6;
     private static final int TOUCH_DONE_MODE = 7;
-    private static final int TOUCH_SELECT_MODE = 8;
-    private static final int TOUCH_PINCH_DRAG = 9;
+    private static final int TOUCH_PINCH_DRAG = 8;
 
     // Whether to forward the touch events to WebCore
     private boolean mForwardTouchEvents = false;
@@ -2693,6 +2692,14 @@ public class WebView extends AbsoluteLayout
         nativeSetFindIsUp(isUp);
     }
 
+    /**
+     * @hide
+     */
+    public int findIndex() {
+        if (0 == mNativeClass) return -1;
+        return nativeFindIndex();
+    }
+
     // Used to know whether the find dialog is open.  Affects whether
     // or not we draw the highlights for matches.
     private boolean mFindIsUp;
@@ -3309,12 +3316,33 @@ public class WebView extends AbsoluteLayout
             // Send the click so that the textfield is in focus
             centerKeyPressOnTextField();
             rebuildWebTextView();
+        } else {
+            clearTextEntry(true);
         }
         if (inEditingMode()) {
             return mWebTextView.performLongClick();
-        } else {
-            return super.performLongClick();
         }
+        /* if long click brings up a context menu, the super function
+         * returns true and we're done. Otherwise, nothing happened when
+         * the user clicked. */
+        if (super.performLongClick()) {
+            return true;
+        }
+        /* In the case where the application hasn't already handled the long
+         * click action, look for a word under the  click. If one is found,
+         * animate the text selection into view.
+         * FIXME: no animation code yet */
+        if (mSelectingText) return false; // long click does nothing on selection
+        int x = viewToContentX((int) mLastTouchX + mScrollX);
+        int y = viewToContentY((int) mLastTouchY + mScrollY);
+        setUpSelect();
+        if (mNativeClass != 0 && nativeWordSelection(x, y)) {
+            nativeSetExtendSelection();
+            getWebChromeClient().onSelectionStart(this);
+            return true;
+        }
+        notifySelectDialogDismissed();
+        return false;
     }
 
     boolean inAnimateZoom() {
@@ -3465,19 +3493,12 @@ public class WebView extends AbsoluteLayout
         // decide which adornments to draw
         int extras = DRAW_EXTRAS_NONE;
         if (mFindIsUp) {
-            // When the FindDialog is up, only draw the matches if we are not in
-            // the process of scrolling them into view.
-            if (!animateScroll) {
                 extras = DRAW_EXTRAS_FIND;
-            }
-        } else if (mShiftIsPressed && !nativeFocusIsPlugin()) {
-            if (!animateZoom && !mPreviewZoomOnly) {
-                extras = DRAW_EXTRAS_SELECTION;
-                nativeSetSelectionRegion(mTouchSelection || mExtendSelection);
-                nativeSetSelectionPointer(!mTouchSelection, mInvActualScale,
-                        mSelectX, mSelectY - getTitleHeight(),
-                        mExtendSelection);
-            }
+        } else if (mSelectingText) {
+            extras = DRAW_EXTRAS_SELECTION;
+            nativeSetSelectionPointer(mDrawSelectionPointer,
+                    mInvActualScale,
+                    mSelectX, mSelectY - getTitleHeight());
         } else if (drawCursorRing) {
             extras = DRAW_EXTRAS_CURSOR_RING;
         }
@@ -3486,11 +3507,6 @@ public class WebView extends AbsoluteLayout
         if (extras == DRAW_EXTRAS_CURSOR_RING) {
             if (mTouchMode == TOUCH_SHORTPRESS_START_MODE) {
                 mTouchMode = TOUCH_SHORTPRESS_MODE;
-                HitTestResult hitTest = getHitTestResult();
-                if (hitTest == null
-                        || hitTest.mType == HitTestResult.UNKNOWN_TYPE) {
-                    mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
-                }
             }
         }
         if (mFocusSizeChanged) {
@@ -3829,8 +3845,8 @@ public class WebView extends AbsoluteLayout
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
             if (nativeFocusIsPlugin()) {
                 mShiftIsPressed = true;
-            } else if (!nativeCursorWantsKeyEvents() && !mShiftIsPressed) {
-                setUpSelectXY();
+            } else if (!nativeCursorWantsKeyEvents() && !mSelectingText) {
+                setUpSelect();
             }
         }
 
@@ -3851,7 +3867,7 @@ public class WebView extends AbsoluteLayout
                 letPluginHandleNavKey(keyCode, event.getEventTime(), true);
                 return true;
             }
-            if (mShiftIsPressed) {
+            if (mSelectingText) {
                 int xRate = keyCode == KeyEvent.KEYCODE_DPAD_LEFT
                     ? -1 : keyCode == KeyEvent.KEYCODE_DPAD_RIGHT ? 1 : 0;
                 int yRate = keyCode == KeyEvent.KEYCODE_DPAD_UP ?
@@ -3871,7 +3887,7 @@ public class WebView extends AbsoluteLayout
         if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
             switchOutDrawHistory();
             if (event.getRepeatCount() == 0) {
-                if (mShiftIsPressed && !nativeFocusIsPlugin()) {
+                if (mSelectingText) {
                     return true; // discard press if copy in progress
                 }
                 mGotCenterDown = true;
@@ -3889,10 +3905,8 @@ public class WebView extends AbsoluteLayout
         if (keyCode != KeyEvent.KEYCODE_SHIFT_LEFT
                 && keyCode != KeyEvent.KEYCODE_SHIFT_RIGHT) {
             // turn off copy select if a shift-key combo is pressed
-            mExtendSelection = mShiftIsPressed = false;
-            if (mTouchMode == TOUCH_SELECT_MODE) {
-                mTouchMode = TOUCH_INIT_MODE;
-            }
+            selectionDone();
+            mShiftIsPressed = false;
         }
 
         if (getSettings().getNavDump()) {
@@ -3982,7 +3996,8 @@ public class WebView extends AbsoluteLayout
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
             if (nativeFocusIsPlugin()) {
                 mShiftIsPressed = false;
-            } else if (commitCopy()) {
+            } else if (copySelection()) {
+                selectionDone();
                 return true;
             }
         }
@@ -4003,11 +4018,13 @@ public class WebView extends AbsoluteLayout
             mPrivateHandler.removeMessages(LONG_PRESS_CENTER);
             mGotCenterDown = false;
 
-            if (mShiftIsPressed && !nativeFocusIsPlugin()) {
+            if (mSelectingText) {
                 if (mExtendSelection) {
-                    commitCopy();
+                    copySelection();
+                    selectionDone();
                 } else {
                     mExtendSelection = true;
+                    nativeSetExtendSelection();
                     invalidate(); // draw the i-beam instead of the arrow
                 }
                 return true; // discard press if copy in progress
@@ -4052,9 +4069,18 @@ public class WebView extends AbsoluteLayout
         return false;
     }
 
-    private void setUpSelectXY() {
+    /**
+     * @hide pending API council approval.
+     */
+    public void setUpSelect() {
+        if (0 == mNativeClass) return; // client isn't initialized
+        if (inFullScreenMode()) return;
+        if (mSelectingText) return;
         mExtendSelection = false;
-        mShiftIsPressed = true;
+        mSelectingText = mDrawSelectionPointer = true;
+        // don't let the picture change during text selection
+        WebViewCore.pauseUpdatePicture(mWebViewCore);
+        nativeResetSelection();
         if (nativeHasCursorNode()) {
             Rect rect = nativeCursorNodeBounds();
             mSelectX = contentToViewX(rect.left);
@@ -4074,38 +4100,80 @@ public class WebView extends AbsoluteLayout
      * Do not rely on this functionality; it will be deprecated in the future.
      */
     public void emulateShiftHeld() {
-        if (0 == mNativeClass) return; // client isn't initialized
-        setUpSelectXY();
+        setUpSelect();
     }
 
-    private boolean commitCopy() {
+    /**
+     * @hide pending API council approval.
+     */
+    public void selectAll() {
+        if (0 == mNativeClass) return; // client isn't initialized
+        if (inFullScreenMode()) return;
+        if (!mSelectingText) setUpSelect();
+        nativeSelectAll();
+        mDrawSelectionPointer = false;
+        mExtendSelection = true;
+        invalidate();
+    }
+
+    /**
+     * @hide pending API council approval.
+     */
+    public boolean selectDialogIsUp() {
+        return mSelectingText;
+    }
+
+    /**
+     * @hide pending API council approval.
+     */
+    public void notifySelectDialogDismissed() {
+        mSelectingText = false;
+        WebViewCore.resumeUpdatePicture(mWebViewCore);
+    }
+
+    /**
+     * @hide pending API council approval.
+     */
+    public void selectionDone() {
+        if (mSelectingText) {
+            getWebChromeClient().onSelectionDone(this);
+            invalidate(); // redraw without selection
+            notifySelectDialogDismissed();
+        }
+    }
+
+    /**
+     * @hide pending API council approval.
+     */
+    public boolean copySelection() {
         boolean copiedSomething = false;
-        if (mExtendSelection) {
-            String selection = nativeGetSelection();
-            if (selection != "") {
-                if (DebugFlags.WEB_VIEW) {
-                    Log.v(LOGTAG, "commitCopy \"" + selection + "\"");
-                }
-                Toast.makeText(mContext
-                        , com.android.internal.R.string.text_copied
-                        , Toast.LENGTH_SHORT).show();
-                copiedSomething = true;
-                try {
-                    IClipboard clip = IClipboard.Stub.asInterface(
-                            ServiceManager.getService("clipboard"));
-                            clip.setClipboardText(selection);
-                } catch (android.os.RemoteException e) {
-                    Log.e(LOGTAG, "Clipboard failed", e);
-                }
+        String selection = getSelection();
+        if (selection != "") {
+            if (DebugFlags.WEB_VIEW) {
+                Log.v(LOGTAG, "copySelection \"" + selection + "\"");
             }
-            mExtendSelection = false;
+            Toast.makeText(mContext
+                    , com.android.internal.R.string.text_copied
+                    , Toast.LENGTH_SHORT).show();
+            copiedSomething = true;
+            try {
+                IClipboard clip = IClipboard.Stub.asInterface(
+                        ServiceManager.getService("clipboard"));
+                clip.setClipboardText(selection);
+            } catch (android.os.RemoteException e) {
+                Log.e(LOGTAG, "Clipboard failed", e);
+            }
         }
-        mShiftIsPressed = false;
         invalidate(); // remove selection region and pointer
-        if (mTouchMode == TOUCH_SELECT_MODE) {
-            mTouchMode = TOUCH_INIT_MODE;
-        }
         return copiedSomething;
+    }
+
+    /**
+     * @hide pending API council approval.
+     */
+    public String getSelection() {
+        if (mNativeClass == 0) return "";
+        return nativeGetSelection();
     }
 
     @Override
@@ -4682,7 +4750,7 @@ public class WebView extends AbsoluteLayout
 
     private boolean shouldForwardTouchEvent() {
         return mFullScreenHolder != null || (mForwardTouchEvents
-                && mTouchMode != TOUCH_SELECT_MODE
+                && !mSelectingText
                 && mPreventDefault != PREVENT_DEFAULT_IGNORE);
     }
 
@@ -4770,16 +4838,6 @@ public class WebView extends AbsoluteLayout
                     mTouchMode = TOUCH_DRAG_START_MODE;
                     mConfirmMove = true;
                     mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
-                } else if (!inFullScreenMode() && mShiftIsPressed) {
-                    mSelectX = mScrollX + (int) x;
-                    mSelectY = mScrollY + (int) y;
-                    mTouchMode = TOUCH_SELECT_MODE;
-                    if (DebugFlags.WEB_VIEW) {
-                        Log.v(LOGTAG, "select=" + mSelectX + "," + mSelectY);
-                    }
-                    nativeMoveSelection(contentX, contentY, false);
-                    mTouchSelection = mExtendSelection = true;
-                    invalidate(); // draw the i-beam instead of the arrow
                 } else if (mPrivateHandler.hasMessages(RELEASE_SINGLE_TAP)) {
                     mPrivateHandler.removeMessages(RELEASE_SINGLE_TAP);
                     if (deltaX * deltaX + deltaY * deltaY < mDoubleTapSlopSquare) {
@@ -4803,6 +4861,14 @@ public class WebView extends AbsoluteLayout
                     if (mLogEvent && eventTime - mLastTouchUpTime < 1000) {
                         EventLog.writeEvent(EventLogTags.BROWSER_DOUBLE_TAP_DURATION,
                                 (eventTime - mLastTouchUpTime), eventTime);
+                    }
+                    if (mSelectingText) {
+                        mDrawSelectionPointer = false;
+                        mSelectionStarted = nativeStartSelection(contentX, contentY);
+                        if (DebugFlags.WEB_VIEW) {
+                            Log.v(LOGTAG, "select=" + contentX + "," + contentY);
+                        }
+                        invalidate();
                     }
                 }
                 // Trigger the link
@@ -4895,17 +4961,17 @@ public class WebView extends AbsoluteLayout
                             + " mTouchMode = " + mTouchMode);
                 }
                 mVelocityTracker.addMovement(ev);
-                if (mTouchMode != TOUCH_DRAG_MODE) {
-                    if (mTouchMode == TOUCH_SELECT_MODE) {
-                        mSelectX = mScrollX + (int) x;
-                        mSelectY = mScrollY + (int) y;
-                        if (DebugFlags.WEB_VIEW) {
-                            Log.v(LOGTAG, "xtend=" + mSelectX + "," + mSelectY);
-                        }
-                        nativeMoveSelection(contentX, contentY, true);
-                        invalidate();
-                        break;
+                if (mSelectingText && mSelectionStarted) {
+                    if (DebugFlags.WEB_VIEW) {
+                        Log.v(LOGTAG, "extend=" + contentX + "," + contentY);
                     }
+                    nativeExtendSelection(contentX, contentY);
+                    invalidate();
+                    break;
+                }
+
+                if (mTouchMode != TOUCH_DRAG_MODE) {
+
                     if (!mConfirmMove) {
                         break;
                     }
@@ -5072,10 +5138,6 @@ public class WebView extends AbsoluteLayout
                             mTouchMode = TOUCH_DONE_MODE;
                         }
                         break;
-                    case TOUCH_SELECT_MODE:
-                        commitCopy();
-                        mTouchSelection = false;
-                        break;
                     case TOUCH_INIT_MODE: // tap
                     case TOUCH_SHORTPRESS_START_MODE:
                     case TOUCH_SHORTPRESS_MODE:
@@ -5106,6 +5168,13 @@ public class WebView extends AbsoluteLayout
                                 break;
                             }
                         } else {
+                            if (mSelectingText) {
+                                // tapping on selection or controls does nothing
+                                if (!nativeHitSelection(contentX, contentY)) {
+                                    selectionDone();
+                                }
+                                break;
+                            }
                             if (mTouchMode == TOUCH_INIT_MODE) {
                                 mPrivateHandler.sendEmptyMessageDelayed(
                                         RELEASE_SINGLE_TAP, ViewConfiguration
@@ -5276,8 +5345,10 @@ public class WebView extends AbsoluteLayout
     private float mTrackballRemainsY = 0.0f;
     private int mTrackballXMove = 0;
     private int mTrackballYMove = 0;
+    private boolean mSelectingText = false;
+    private boolean mSelectionStarted = false;
     private boolean mExtendSelection = false;
-    private boolean mTouchSelection = false;
+    private boolean mDrawSelectionPointer = false;
     private static final int TRACKBALL_KEY_TIMEOUT = 1000;
     private static final int TRACKBALL_TIMEOUT = 200;
     private static final int TRACKBALL_WAIT = 100;
@@ -5316,10 +5387,8 @@ public class WebView extends AbsoluteLayout
             if (ev.getY() < 0) pageUp(true);
             return true;
         }
-        boolean shiftPressed = mShiftIsPressed && (mNativeClass == 0
-                || !nativeFocusIsPlugin());
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            if (shiftPressed) {
+            if (mSelectingText) {
                 return true; // discard press if copy in progress
             }
             mTrackballDown = true;
@@ -5344,11 +5413,13 @@ public class WebView extends AbsoluteLayout
             mPrivateHandler.removeMessages(LONG_PRESS_CENTER);
             mTrackballDown = false;
             mTrackballUpTime = time;
-            if (shiftPressed) {
+            if (mSelectingText) {
                 if (mExtendSelection) {
-                    commitCopy();
+                    copySelection();
+                    selectionDone();
                 } else {
                     mExtendSelection = true;
+                    nativeSetExtendSelection();
                     invalidate(); // draw the i-beam instead of the arrow
                 }
                 return true; // discard press if copy in progress
@@ -5415,8 +5486,7 @@ public class WebView extends AbsoluteLayout
                     + " yRate=" + yRate
                     );
         }
-        nativeMoveSelection(viewToContentX(mSelectX),
-                viewToContentY(mSelectY), mExtendSelection);
+        nativeMoveSelection(viewToContentX(mSelectX), viewToContentY(mSelectY));
         int scrollX = mSelectX < mScrollX ? -SELECT_CURSOR_OFFSET
                 : mSelectX > maxX - SELECT_CURSOR_OFFSET ? SELECT_CURSOR_OFFSET
                 : 0;
@@ -5482,7 +5552,16 @@ public class WebView extends AbsoluteLayout
         float yRate = mTrackballRemainsY * 1000 / elapsed;
         int viewWidth = getViewWidth();
         int viewHeight = getViewHeight();
-        if (mShiftIsPressed && (mNativeClass == 0 || !nativeFocusIsPlugin())) {
+        if (mSelectingText) {
+            if (!mDrawSelectionPointer) {
+                // The last selection was made by touch, disabling drawing the
+                // selection pointer. Allow the trackball to adjust the
+                // position of the touch control.
+                mSelectX = contentToViewX(nativeSelectionX());
+                mSelectY = contentToViewY(nativeSelectionY());
+                mDrawSelectionPointer = mExtendSelection = true;
+                nativeSetExtendSelection();
+            }
             moveSelection(scaleTrackballX(xRate, viewWidth),
                     scaleTrackballY(yRate, viewHeight));
             mTrackballRemainsX = mTrackballRemainsY = 0;
@@ -7402,6 +7481,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeDebugDump();
     private native void     nativeDestroy();
     private native boolean  nativeEvaluateLayersAnimations();
+    private native void     nativeExtendSelection(int x, int y);
     private native void     nativeDrawExtras(Canvas canvas, int extra);
     private native void     nativeDumpDisplayTree(String urlOrNull);
     private native int      nativeFindAll(String findLower, String findUpper);
@@ -7430,6 +7510,7 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeHasCursorNode();
     private native boolean  nativeHasFocusNode();
     private native void     nativeHideCursor();
+    private native boolean  nativeHitSelection(int x, int y);
     private native String   nativeImageURI(int x, int y);
     private native void     nativeInstrumentReport();
     /* package */ native boolean nativeMoveCursorToNextTextInput();
@@ -7439,21 +7520,27 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeMoveCursor(int keyCode, int count,
             boolean noScroll);
     private native int      nativeMoveGeneration();
-    private native void     nativeMoveSelection(int x, int y,
-            boolean extendSelection);
+    private native void     nativeMoveSelection(int x, int y);
     private native boolean  nativePointInNavCache(int x, int y, int slop);
     // Like many other of our native methods, you must make sure that
     // mNativeClass is not null before calling this method.
     private native void     nativeRecordButtons(boolean focused,
             boolean pressed, boolean invalidate);
+    private native void     nativeResetSelection();
+    private native void     nativeSelectAll();
     private native void     nativeSelectBestAt(Rect rect);
+    private native int      nativeSelectionX();
+    private native int      nativeSelectionY();
+    private native int      nativeFindIndex();
+    private native void     nativeSetExtendSelection();
     private native void     nativeSetFindIsEmpty();
     private native void     nativeSetFindIsUp(boolean isUp);
     private native void     nativeSetFollowedLink(boolean followed);
     private native void     nativeSetHeightCanMeasure(boolean measure);
     private native void     nativeSetRootLayer(int layer);
     private native void     nativeSetSelectionPointer(boolean set,
-            float scale, int x, int y, boolean extendSelection);
+            float scale, int x, int y);
+    private native boolean  nativeStartSelection(int x, int y);
     private native void     nativeSetSelectionRegion(boolean set);
     private native Rect     nativeSubtractLayers(Rect content);
     private native int      nativeTextGeneration();
@@ -7461,6 +7548,7 @@ public class WebView extends AbsoluteLayout
     // we always want to pass in our generation number.
     private native void     nativeUpdateCachedTextfield(String updatedText,
             int generation);
+    private native boolean  nativeWordSelection(int x, int y);
     // return NO_LEFTEDGE means failure.
     private static final int NO_LEFTEDGE = -1;
     private native int      nativeGetBlockLeftEdge(int x, int y, float scale);
