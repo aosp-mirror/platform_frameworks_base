@@ -155,8 +155,15 @@ bool YUVImage::getYUVAddresses(int32_t x, int32_t y,
     return true;
 }
 
+bool YUVImage::validPixel(int32_t x, int32_t y) const {
+    return (x >= 0 && x < mWidth &&
+            y >= 0 && y < mHeight);
+}
+
 bool YUVImage::getPixelValue(int32_t x, int32_t y,
         uint8_t *yPtr, uint8_t *uPtr, uint8_t *vPtr) const {
+    CHECK(validPixel(x, y));
+
     uint8_t *yAddr;
     uint8_t *uAddr;
     uint8_t *vAddr;
@@ -171,6 +178,8 @@ bool YUVImage::getPixelValue(int32_t x, int32_t y,
 
 bool YUVImage::setPixelValue(int32_t x, int32_t y,
         uint8_t yValue, uint8_t uValue, uint8_t vValue) {
+    CHECK(validPixel(x, y));
+
     uint8_t *yAddr;
     uint8_t *uAddr;
     uint8_t *vAddr;
