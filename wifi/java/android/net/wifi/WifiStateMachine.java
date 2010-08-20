@@ -1156,6 +1156,23 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         mScanResults = scanList;
     }
 
+    private String fetchSSID() {
+        String status = WifiNative.statusCommand();
+        if (status == null) {
+            return null;
+        }
+        // extract ssid from a series of "name=value"
+        String[] lines = status.split("\n");
+        for (String line : lines) {
+            String[] prop = line.split(" *= *");
+            if (prop.length < 2) continue;
+            String name = prop[0];
+            String value = prop[1];
+            if (name.equalsIgnoreCase("ssid")) return value;
+        }
+        return null;
+    }
+
     private void configureNetworkProperties() {
         try {
             mNetworkProperties.setInterface(NetworkInterface.getByName(mInterfaceName));
@@ -2924,6 +2941,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     Log.d(TAG,"Network connection established");
                     stateChangeResult = (StateChangeResult) message.obj;
 
+                    //TODO: make supplicant modification to push this in events
+                    mWifiInfo.setSSID(fetchSSID());
                     mWifiInfo.setBSSID(mLastBssid = stateChangeResult.BSSID);
                     mWifiInfo.setNetworkId(stateChangeResult.networkId);
                     mLastNetworkId = stateChangeResult.networkId;
@@ -3390,8 +3409,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             setDetailedState(WifiInfo.getDetailedStateOf(supState));
             mWifiInfo.setSupplicantState(supState);
             mWifiInfo.setNetworkId(stateChangeResult.networkId);
-            //TODO: Modify WifiMonitor to report SSID on events
-            //mWifiInfo.setSSID()
             return HANDLED;
         }
 
