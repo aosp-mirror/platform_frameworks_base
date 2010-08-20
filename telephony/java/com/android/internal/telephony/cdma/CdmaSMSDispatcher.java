@@ -28,21 +28,20 @@ import android.database.SQLException;
 import android.os.AsyncResult;
 import android.os.Message;
 import android.os.SystemProperties;
+import android.preference.PreferenceManager;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
-import android.preference.PreferenceManager;
-import android.util.Config;
-import android.util.Log;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage.MessageClass;
+import android.util.Config;
+import android.util.Log;
 
-import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.CommandsInterface;
+import com.android.internal.telephony.SMSDispatcher;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
-import com.android.internal.telephony.SMSDispatcher;
 import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
-import com.android.internal.telephony.cdma.SmsMessage;
+import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.cdma.sms.SmsEnvelope;
 import com.android.internal.telephony.cdma.sms.UserData;
 import com.android.internal.util.HexDump;
@@ -51,20 +50,16 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.lang.Boolean;
 
 
 final class CdmaSMSDispatcher extends SMSDispatcher {
     private static final String TAG = "CDMA";
-
-    private CDMAPhone mCdmaPhone;
 
     private byte[] mLastDispatchedSmsFingerprint;
     private byte[] mLastAcknowledgedSmsFingerprint;
 
     CdmaSMSDispatcher(CDMAPhone phone) {
         super(phone);
-        mCdmaPhone = phone;
     }
 
     /**
@@ -129,7 +124,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             Log.d(TAG, "Voicemail count=" + voicemailCount);
             // Store the voicemail count in preferences.
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(
-                    ((CDMAPhone) mPhone).getContext());
+                    mPhone.getContext());
             SharedPreferences.Editor editor = sp.edit();
             editor.putInt(CDMAPhone.VM_COUNT_CDMA, voicemailCount);
             editor.commit();
@@ -176,7 +171,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
          * TODO(cleanup): Why are we using a getter method for this
          * (and for so many other sms fields)?  Trivial getters and
          * setters like this are direct violations of the style guide.
-         * If the purpose is to protect agaist writes (by not
+         * If the purpose is to protect against writes (by not
          * providing a setter) then any protection is illusory (and
          * hence bad) for cases where the values are not primitives,
          * such as this call for the header.  Since this is an issue
@@ -440,7 +435,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
     protected void sendSms(SmsTracker tracker) {
         HashMap map = tracker.mData;
 
-        byte smsc[] = (byte[]) map.get("smsc");
+        // byte smsc[] = (byte[]) map.get("smsc");  // unused for CDMA
         byte pdu[] = (byte[]) map.get("pdu");
 
         Message reply = obtainMessage(EVENT_SEND_SMS_COMPLETE, tracker);
