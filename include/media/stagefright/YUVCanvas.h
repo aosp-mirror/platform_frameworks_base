@@ -55,6 +55,18 @@ public:
             int32_t destStartX, int32_t destStartY,
             const YUVImage &srcImage);
 
+    // Downsamples the srcImage into the canvas' target image (mYUVImage)
+    // The downsampling copies pixels from the source image starting at
+    // (srcOffsetX, srcOffsetY) to the target image, starting at (0, 0).
+    // For each X increment in the target image, skipX pixels are skipped
+    // in the source image.
+    // Similarly for each Y increment in the target image, skipY pixels
+    // are skipped in the source image.
+    void downsample(
+            int32_t srcOffsetX, int32_t srcOffsetY,
+            int32_t skipX, int32_t skipY,
+            const YUVImage &srcImage);
+
 private:
     YUVImage& mYUVImage;
 
