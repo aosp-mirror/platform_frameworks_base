@@ -1400,6 +1400,7 @@ public abstract class BatteryStats implements Parcelable {
                         pw.println(getDischargeStartLevel());
                 pw.print(prefix); pw.print("    Discharge cycle current level: ");
                         pw.println(getDischargeCurrentLevel());
+            } else {
                 pw.print(prefix); pw.println("  Device is currently plugged into power");
                 pw.print(prefix); pw.print("    Last discharge cycle start level: "); 
                         pw.println(getDischargeStartLevel());
