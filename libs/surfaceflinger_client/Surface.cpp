@@ -422,8 +422,10 @@ void Surface::init()
     const_cast<int&>(ANativeWindow::maxSwapInterval) = 1;
     const_cast<uint32_t&>(ANativeWindow::flags) = 0;
 
+    mNextBufferTransform = 0;
     mConnected = 0;
     mSwapRectangle.makeInvalid();
+    mNextBufferCrop = Rect(0,0);
     // two buffers by default
     mBuffers.setCapacity(2);
     mBuffers.insertAt(0, 2);
@@ -631,6 +633,7 @@ int Surface::queueBuffer(android_native_buffer_t* buffer)
     }
     
     int32_t bufIdx = getBufferIndex(GraphicBuffer::getSelf(buffer));
+    mSharedBufferClient->setTransform(bufIdx, mNextBufferTransform);
     mSharedBufferClient->setCrop(bufIdx, mNextBufferCrop);
     mSharedBufferClient->setDirtyRegion(bufIdx, mDirtyRegion);
     err = mSharedBufferClient->queue(bufIdx);
@@ -685,6 +688,9 @@ int Surface::perform(int operation, va_list args)
     case NATIVE_WINDOW_SET_BUFFERS_GEOMETRY:
         res = dispatch_set_buffers_geometry( args );
         break;
+    case NATIVE_WINDOW_SET_BUFFERS_TRANSFORM:
+        res = dispatch_set_buffers_transform( args );
+        break;
     default:
         res = NAME_NOT_FOUND;
         break;
@@ -717,6 +723,11 @@ int Surface::dispatch_set_buffers_geometry(va_list args) {
     int h = va_arg(args, int);
     int f = va_arg(args, int);
     return setBuffersGeometry(w, h, f);
+}
+
+int Surface::dispatch_set_buffers_transform(va_list args) {
+    int transform = va_arg(args, int);
+    return setBuffersTransform(transform);
 }
 
 void Surface::setUsage(uint32_t reqUsage)
@@ -765,6 +776,10 @@ int Surface::disconnect(int api)
 
 int Surface::crop(Rect const* rect)
 {
+    // empty/invalid rects are not allowed
+    if (rect->isEmpty())
+        return BAD_VALUE;
+
     Mutex::Autolock _l(mSurfaceLock);
     // TODO: validate rect size
     mNextBufferCrop = *rect;
@@ -801,6 +816,13 @@ int Surface::setBuffersGeometry(int w, int h, int format)
 
     Mutex::Autolock _l(mSurfaceLock);
     mBufferInfo.set(w, h, format);
+    return NO_ERROR;
+}
+
+int Surface::setBuffersTransform(int transform)
+{
+    Mutex::Autolock _l(mSurfaceLock);
+    mNextBufferTransform = transform;
     return NO_ERROR;
 }
 
