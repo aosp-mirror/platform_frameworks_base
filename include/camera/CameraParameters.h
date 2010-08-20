@@ -61,6 +61,7 @@ public:
     void getSupportedPreviewSizes(Vector<Size> &sizes) const;
     void setPreviewFrameRate(int fps);
     int getPreviewFrameRate() const;
+    void getPreviewFpsRange(int *min_fps, int *max_fps) const;
     void setPreviewFormat(const char *format);
     const char *getPreviewFormat() const;
     void setPictureSize(int width, int height);
@@ -82,6 +83,20 @@ public:
     // Supported preview frame sizes in pixels.
     // Example value: "800x600,480x320". Read only.
     static const char KEY_SUPPORTED_PREVIEW_SIZES[];
+    // The current minimum and maximum preview fps. This controls the rate of
+    // preview frames received (CAMERA_MSG_PREVIEW_FRAME). The minimum and
+    // maximum fps must be one of the elements from
+    // KEY_SUPPORTED_PREVIEW_FPS_RANGE parameter.
+    // Example value: "10500,26623"
+    static const char KEY_PREVIEW_FPS_RANGE[];
+    // The supported preview fps (frame-per-second) ranges. Each range contains
+    // a minimum fps and maximum fps. If minimum fps equals to maximum fps, the
+    // camera outputs frames in fixed frame rate. If not, the camera outputs
+    // frames in auto frame rate. The actual frame rate fluctuates between the
+    // minimum and the maximum. The list has at least one element. The list is
+    // sorted from small to large (first by maximum fps and then minimum fps).
+    // Example value: "(10500,26623),(15000,26623),(30000,30000)"
+    static const char KEY_SUPPORTED_PREVIEW_FPS_RANGE[];
     // The image format for preview frames. See CAMERA_MSG_PREVIEW_FRAME in
     // frameworks/base/include/camera/Camera.h.
     // Example value: "yuv420sp" or PIXEL_FORMAT_XXX constants. Read/write.
