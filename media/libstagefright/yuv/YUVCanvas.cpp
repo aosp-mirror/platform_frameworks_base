@@ -17,6 +17,7 @@
 #define LOG_NDEBUG 0
 #define LOG_TAG "YUVCanvas"
 
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/YUVCanvas.h>
 #include <media/stagefright/YUVImage.h>
 #include <ui/Rect.h>
@@ -74,9 +75,36 @@ void YUVCanvas::CopyImageRect(
             uint8_t uValue;
             uint8_t vValue;
 
-            srcImage.getPixelValue(srcX, srcY, &yValue, &uValue, & vValue);
+            srcImage.getPixelValue(srcX, srcY, &yValue, &uValue, &vValue);
             mYUVImage.setPixelValue(destX, destY, yValue, uValue, vValue);
         }
+    }
+}
+
+void YUVCanvas::downsample(
+        int32_t srcOffsetX, int32_t srcOffsetY,
+        int32_t skipX, int32_t skipY,
+        const YUVImage &srcImage) {
+    // TODO: Add a low pass filter for downsampling.
+
+    // Check that srcImage is big enough to fill mYUVImage.
+    CHECK((srcOffsetX + (mYUVImage.width() - 1) * skipX) < srcImage.width());
+    CHECK((srcOffsetY + (mYUVImage.height() - 1) * skipY) < srcImage.height());
+
+    uint8_t yValue;
+    uint8_t uValue;
+    uint8_t vValue;
+
+    int32_t srcY = srcOffsetY;
+    for (int32_t y = 0; y < mYUVImage.height(); ++y) {
+        int32_t srcX = srcOffsetX;
+        for (int32_t x = 0; x < mYUVImage.width(); ++x) {
+            srcImage.getPixelValue(srcX, srcY, &yValue, &uValue, &vValue);
+            mYUVImage.setPixelValue(x, y, yValue, uValue, vValue);
+
+            srcX += skipX;
+        }
+        srcY += skipY;
     }
 }
 
