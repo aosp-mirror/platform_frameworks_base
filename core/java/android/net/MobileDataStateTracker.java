@@ -240,6 +240,7 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                                 if (mInterfaceName == null) {
                                     Log.d(TAG, "CONNECTED event did not supply interface name.");
                                 }
+                                mDefaultGatewayAddr = intent.getIntExtra(Phone.DATA_GATEWAY_KEY, 0);
                                 setDetailedState(DetailedState.CONNECTED, reason, apnName);
                                 break;
                         }
