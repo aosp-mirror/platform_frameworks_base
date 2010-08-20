@@ -425,9 +425,9 @@
         <item name="android:focusable">true</item>
         <item name="android:focusableInTouchMode">true</item>
         <item name="android:clickable">true</item>
-        <item name="android:background">@android:drawable/edit_text</item>
+        <item name="android:background">?android:attr/editTextBackground</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMediumInverse</item>
-        <item name="android:textColor">@android:color/primary_text_light</item>
+        <item name="android:textColor">?android:attr/editTextColor</item>
         <item name="android:gravity">center_vertical</item>
     </style>
     
@@ -659,14 +659,10 @@
 
     <style name="TextAppearance.DialogWindowTitle">
         <item name="android:textSize">18sp</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">?textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Large">
         <item name="android:textSize">22sp</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">?textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Large.Inverse">
@@ -678,8 +674,6 @@
 
     <style name="TextAppearance.Medium">
         <item name="android:textSize">18sp</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">?textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Medium.Inverse">
@@ -691,7 +685,6 @@
 
     <style name="TextAppearance.Small">
         <item name="android:textSize">14sp</item>
-        <item name="android:textStyle">normal</item>
         <item name="android:textColor">?textColorSecondary</item>
     </style>
 

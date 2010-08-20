@@ -124,9 +124,13 @@
         <!-- Text color, typeface, size, and style for system search result subtitle. Defaults to primary inverse text color. -->
         <attr name="textAppearanceSearchResultSubtitle" format="reference" />
 
-
         <!-- Text color, typeface, size, and style for the text inside of a button. -->
         <attr name="textAppearanceButton" format="reference" />
+
+        <!-- EditText text foreground color. -->
+        <attr name="editTextColor" format="reference|color" />
+        <!-- EditText background drawable. -->
+        <attr name="editTextBackground" format="reference" />
 
         <!-- A styled string, specifying the style to be used for showing
              inline candidate text when composing with an input method.  The

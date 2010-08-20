@@ -39,7 +39,7 @@
     <color name="background_dark">#ff101010</color>
     <color name="bright_foreground_dark">#ffefefef</color>
     <color name="bright_foreground_dark_disabled">#80ffffff</color>
-    <color name="bright_foreground_dark_inverse">@android:color/background_dark</color>
+    <color name="bright_foreground_dark_inverse">@android:color/dim_foreground_dark</color>
     <color name="dim_foreground_dark">#bebebe</color>
     <color name="dim_foreground_dark_disabled">#80bebebe</color>
     <color name="dim_foreground_dark_inverse">#323232</color>
