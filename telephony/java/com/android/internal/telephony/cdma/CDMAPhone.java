@@ -452,9 +452,14 @@ public class CDMAPhone extends PhoneBase {
         return mMeid;
     }
 
-    //returns MEID in CDMA
+    //returns MEID or ESN in CDMA
     public String getDeviceId() {
-        return getMeid();
+        String id = getMeid();
+        if ((id == null) || id.matches("^0*$")) {
+            Log.d(LOG_TAG, "getDeviceId(): MEID is not initialized use ESN");
+            id = getEsn();
+        }
+        return id;
     }
 
     public String getDeviceSvn() {
