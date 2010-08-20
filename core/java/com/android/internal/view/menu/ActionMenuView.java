@@ -56,18 +56,34 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
                 com.android.internal.R.styleable.Theme_actionButtonPadding, 0);
         mItemMargin = mItemPadding / 2;
         a.recycle();
-        
+
+        // Measure for initial configuration
+        mMaxItems = measureMaxActionButtons();
+
+        // TODO There has to be a better way to indicate that we don't have a hard menu key.
+        final int screen = getResources().getConfiguration().screenLayout;
+        mReserveOverflow = (screen & Configuration.SCREENLAYOUT_SIZE_MASK) ==
+                Configuration.SCREENLAYOUT_SIZE_XLARGE;
+    }
+
+    public void onConfigurationChanged(Configuration newConfig) {
+        final int screen = newConfig.screenLayout;
+        mReserveOverflow = (screen & Configuration.SCREENLAYOUT_SIZE_MASK) ==
+                Configuration.SCREENLAYOUT_SIZE_XLARGE;
+        mMaxItems = measureMaxActionButtons();
+        if (mMenu != null) {
+            mMenu.setMaxActionItems(mMaxItems);
+            updateChildren(false);
+        }
+    }
+
+    private int measureMaxActionButtons() {
         final Resources res = getResources();
         final int size = res.getDimensionPixelSize(com.android.internal.R.dimen.action_icon_size);
         final int spaceAvailable = res.getDisplayMetrics().widthPixels / 2;
         final int itemSpace = size + mItemPadding;
         
-        mMaxItems = spaceAvailable / (itemSpace > 0 ? itemSpace : 1);
-
-        // TODO There has to be a better way to indicate that we don't have a hard menu key.
-        final int screen = res.getConfiguration().screenLayout;
-        mReserveOverflow = (screen & Configuration.SCREENLAYOUT_SIZE_MASK) ==
-                Configuration.SCREENLAYOUT_SIZE_XLARGE;
+        return spaceAvailable / (itemSpace > 0 ? itemSpace : 1);
     }
 
     public boolean isOverflowReserved() {
