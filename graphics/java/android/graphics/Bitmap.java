@@ -1002,6 +1002,7 @@ public final class Bitmap implements Parcelable {
     @Override
     protected void finalize() throws Throwable {
         try {
+            mRecycled = true;
             nativeDestructor(mNativeBitmap);
         } finally {
             super.finalize();
