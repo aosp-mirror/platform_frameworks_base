@@ -633,6 +633,20 @@ public class NotificationTestList extends TestActivity
             }
         },
 
+        new Test("Ticker") {
+            public void run() {
+                Notification not = new Notification(
+                    R.drawable.app_gmail, 
+                    "New mail from joeo@example.com, on the topic of very long ticker texts",
+                    System.currentTimeMillis());
+                not.setLatestEventInfo(NotificationTestList.this,
+                    "A new message awaits",
+                    "The contents are very interesting and important",
+                    makeIntent());
+                mNM.notify(1, not);
+            }
+        },
+
         new Test("Crash") {
             public void run()
             {

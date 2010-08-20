@@ -817,7 +817,8 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
 
     void performCollapse() {
         if (SPEW) Slog.d(TAG, "performCollapse: mExpanded=" + mExpanded
-                + " mExpandedVisible=" + mExpandedVisible);
+                + " mExpandedVisible=" + mExpandedVisible
+                + " mTicking=" + mTicking);
 
         if (!mExpandedVisible) {
             return;
@@ -832,7 +833,9 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
         if ((mDisabled & StatusBarManager.DISABLE_NOTIFICATION_ICONS) == 0) {
             setNotificationIconVisibility(true, com.android.internal.R.anim.fade_in);
         }
-        setDateViewVisibility(false, com.android.internal.R.anim.fade_out);
+        if (mDateView.getVisibility() == View.VISIBLE) {
+            setDateViewVisibility(false, com.android.internal.R.anim.fade_out);
+        }
 
         if (!mExpanded) {
             return;
@@ -1147,6 +1150,7 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
 
         @Override
         void tickerStarting() {
+            if (SPEW) Slog.d(TAG, "tickerStarting");
             mTicking = true;
             mIcons.setVisibility(View.GONE);
             mTickerView.setVisibility(View.VISIBLE);
@@ -1159,37 +1163,29 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
 
         @Override
         void tickerDone() {
+            if (SPEW) Slog.d(TAG, "tickerDone");
+            mTicking = false;
             mIcons.setVisibility(View.VISIBLE);
             mTickerView.setVisibility(View.GONE);
             mIcons.startAnimation(loadAnim(com.android.internal.R.anim.push_down_in, null));
-            mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.push_down_out,
-                        mTickingDoneListener));
+            mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.push_down_out, null));
             if (mExpandedVisible) {
                 setDateViewVisibility(true, com.android.internal.R.anim.push_down_in);
             }
         }
 
         void tickerHalting() {
+            if (SPEW) Slog.d(TAG, "tickerHalting");
+            mTicking = false;
             mIcons.setVisibility(View.VISIBLE);
             mTickerView.setVisibility(View.GONE);
             mIcons.startAnimation(loadAnim(com.android.internal.R.anim.fade_in, null));
-            mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.fade_out,
-                        mTickingDoneListener));
+            mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.fade_out, null));
             if (mExpandedVisible) {
                 setDateViewVisibility(true, com.android.internal.R.anim.fade_in);
             }
         }
     }
-
-    Animation.AnimationListener mTickingDoneListener = new Animation.AnimationListener() {;
-        public void onAnimationEnd(Animation animation) {
-            mTicking = false;
-        }
-        public void onAnimationRepeat(Animation animation) {
-        }
-        public void onAnimationStart(Animation animation) {
-        }
-    };
 
     private Animation loadAnim(int id, Animation.AnimationListener listener) {
         Animation anim = AnimationUtils.loadAnimation(StatusBarService.this, id);
@@ -1373,7 +1369,8 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
     void updateExpandedViewPos(int expandedPosition) {
         if (SPEW) {
             Slog.d(TAG, "updateExpandedViewPos before expandedPosition=" + expandedPosition
-                    + " mTrackingParams.y=" + mTrackingParams.y
+                    + " mTrackingParams.y=" 
+                    + ((mTrackingParams == null) ? "???" : mTrackingParams.y)
                     + " mTrackingPosition=" + mTrackingPosition);
         }
 
@@ -1518,6 +1515,9 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
                 }
             }
         } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
+            Slog.d(TAG, "DISABLE_NOTIFICATION_TICKER: "
+                + (((net & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0)
+                    ? "yes" : "no"));
             if (mTicking && (net & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
                 mTicker.halt();
             }
