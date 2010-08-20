@@ -706,9 +706,7 @@
     <string name="selectText" msgid="3889149123626888637">"Označit text"</string>
     <string name="stopSelectingText" msgid="4157931463872320996">"Zastavit označování textu"</string>
     <string name="cut" msgid="3092569408438626261">"Vyjmout"</string>
-    <string name="cutAll" msgid="2436383270024931639">"Vyjmout vše"</string>
     <string name="copy" msgid="2681946229533511987">"Kopírovat"</string>
-    <string name="copyAll" msgid="2590829068100113057">"Kopírovat vše"</string>
     <string name="paste" msgid="5629880836805036433">"Vložit"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Kopírovat adresu URL"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Metoda zadávání dat"</string>

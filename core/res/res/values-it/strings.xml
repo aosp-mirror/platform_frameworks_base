@@ -706,9 +706,7 @@
     <string name="selectText" msgid="3889149123626888637">"Seleziona testo"</string>
     <string name="stopSelectingText" msgid="4157931463872320996">"Termina selezione testo"</string>
     <string name="cut" msgid="3092569408438626261">"Taglia"</string>
-    <string name="cutAll" msgid="2436383270024931639">"Taglia tutto"</string>
     <string name="copy" msgid="2681946229533511987">"Copia"</string>
-    <string name="copyAll" msgid="2590829068100113057">"Copia tutto"</string>
     <string name="paste" msgid="5629880836805036433">"Incolla"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Copia URL"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Metodo inserimento"</string>

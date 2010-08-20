@@ -772,7 +772,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * 
      * @param pointerId The identifier of the pointer to be found.
      * @return Returns either the index of the pointer (for use with
-     * {@link #getX(int) et al.), or -1 if there is no data available for
+     * {@link #getX(int)} et al.), or -1 if there is no data available for
      * that pointer identifier.
      */
     public final int findPointerIndex(int pointerId) {

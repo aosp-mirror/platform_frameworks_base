@@ -1245,7 +1245,7 @@
   <public type="anim" name="cycle_interpolator" id="0x010a000c" />
 
 <!-- ===============================================================
-     Resources introduced in kraken.
+     Resources introduced in Gingerbread.
      =============================================================== -->
      
   <public type="attr" name="logo" id="0x010102be" />
@@ -1273,5 +1273,4 @@
   <public-padding type="dimen" name="kraken_resource_pad" end="0x01050010" />
   <public-padding type="color" name="kraken_resource_pad" end="0x01060020" />
   <public-padding type="array" name="kraken_resource_pad" end="0x01070010" />
-
 </resources>

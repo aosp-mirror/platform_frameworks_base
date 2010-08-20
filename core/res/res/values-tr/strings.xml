@@ -706,9 +706,7 @@
     <string name="selectText" msgid="3889149123626888637">"Metin seç"</string>
     <string name="stopSelectingText" msgid="4157931463872320996">"Metin seçmeyi durdur"</string>
     <string name="cut" msgid="3092569408438626261">"Kes"</string>
-    <string name="cutAll" msgid="2436383270024931639">"Tümünü kes"</string>
     <string name="copy" msgid="2681946229533511987">"Kopyala"</string>
-    <string name="copyAll" msgid="2590829068100113057">"Tümünü kopyala"</string>
     <string name="paste" msgid="5629880836805036433">"Yapıştır"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL\'yi kopyala"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Giriş yöntemi"</string>
