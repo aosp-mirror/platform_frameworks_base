@@ -27,13 +27,12 @@ import android.telephony.ServiceState;
 import android.util.Config;
 import android.util.Log;
 
-import com.android.internal.telephony.IccUtils;
-import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
-import com.android.internal.telephony.gsm.SmsMessage;
 import com.android.internal.telephony.CommandsInterface;
+import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.SMSDispatcher;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
+import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -97,20 +96,20 @@ final class GsmSMSDispatcher extends SMSDispatcher {
         if (sms.isTypeZero()) {
             // As per 3GPP TS 23.040 9.2.3.9, Type Zero messages should not be
             // Displayed/Stored/Notified. They should only be acknowledged.
-            Log.d(TAG, "Received short message type 0, Dont display or store it. Send Ack");
+            Log.d(TAG, "Received short message type 0, Don't display or store it. Send Ack");
             return Intents.RESULT_SMS_HANDLED;
         }
 
         // Special case the message waiting indicator messages
         if (sms.isMWISetMessage()) {
             mGsmPhone.updateMessageWaitingIndicator(true);
-            handled |= sms.isMwiDontStore();
+            handled = sms.isMwiDontStore();
             if (Config.LOGD) {
                 Log.d(TAG, "Received voice mail indicator set SMS shouldStore=" + !handled);
             }
         } else if (sms.isMWIClearMessage()) {
             mGsmPhone.updateMessageWaitingIndicator(false);
-            handled |= sms.isMwiDontStore();
+            handled = sms.isMwiDontStore();
             if (Config.LOGD) {
                 Log.d(TAG, "Received voice mail indicator clear SMS shouldStore=" + !handled);
             }
@@ -301,7 +300,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
             map.put("smsc", pdus.encodedScAddress);
             map.put("pdu", pdus.encodedMessage);
 
-            SmsTracker tracker =  SmsTrackerFactory(map, sentIntent, deliveryIntent);
+            SmsTracker tracker = SmsTrackerFactory(map, sentIntent, deliveryIntent);
             sendSms(tracker);
         }
     }
