@@ -104,7 +104,8 @@ public class SipPhoneNotifier implements PhoneNotifier {
                     sender.getActiveApnTypes(),
                     sender.getInterfaceName(null),
                     ((telephony!=null) ? telephony.getNetworkType() :
-                    TelephonyManager.NETWORK_TYPE_UNKNOWN));
+                    TelephonyManager.NETWORK_TYPE_UNKNOWN),
+                    sender.getGateway(null));
         } catch (RemoteException ex) {
             // system process is dead
         }

@@ -103,6 +103,7 @@ public interface Phone {
     static final String DATA_APN_KEY = "apn";
 
     static final String DATA_IFACE_NAME_KEY = "iface";
+    static final String DATA_GATEWAY_KEY = "gateway";
     static final String NETWORK_UNAVAILABLE_KEY = "networkUnvailable";
     static final String PHONE_IN_ECM_STATE = "phoneinECMState";
 
