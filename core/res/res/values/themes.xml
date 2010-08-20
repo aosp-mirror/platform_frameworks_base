@@ -92,7 +92,7 @@
         <item name="listDivider">@drawable/divider_horizontal_dark</item>
         <item name="listSeparatorTextViewStyle">@android:style/Widget.TextView.ListSeparator</item>   
 
-		    <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio</item>
+        <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio</item>
         <item name="listChoiceIndicatorMultiple">@android:drawable/btn_check</item>
 
         <item name="expandableListPreferredItemPaddingLeft">40dip</item>
@@ -168,8 +168,8 @@
         <item name="progressBarStyleSmallTitle">@android:style/Widget.ProgressBar.Small.Title</item>
         <item name="progressBarStyleLarge">@android:style/Widget.ProgressBar.Large</item>
         <item name="progressBarStyleInverse">@android:style/Widget.ProgressBar.Inverse</item>
-		    <item name="progressBarStyleSmallInverse">@android:style/Widget.ProgressBar.Small.Inverse</item>
-	      <item name="progressBarStyleLargeInverse">@android:style/Widget.ProgressBar.Large.Inverse</item>
+        <item name="progressBarStyleSmallInverse">@android:style/Widget.ProgressBar.Small.Inverse</item>
+        <item name="progressBarStyleLargeInverse">@android:style/Widget.ProgressBar.Large.Inverse</item>
         <item name="seekBarStyle">@android:style/Widget.SeekBar</item>
         <item name="ratingBarStyle">@android:style/Widget.RatingBar</item>
         <item name="ratingBarStyleIndicator">@android:style/Widget.RatingBar.Indicator</item>
@@ -266,24 +266,18 @@
         <item name="textCheckMark">@android:drawable/indicator_check_mark_light</item>
         <item name="textCheckMarkInverse">@android:drawable/indicator_check_mark_dark</item>
 
-        <!-- List attributes -->
-        <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio_light</item>
-        <item name="listChoiceIndicatorMultiple">@android:drawable/btn_check_light</item>
-
-        <!-- Widget styles -->
-        <item name="checkboxStyle">@android:style/Widget.CompoundButton.CheckBox.Inverse</item>
         <item name="gestureOverlayViewStyle">@android:style/Widget.GestureOverlayView.White</item>
         <item name="expandableListViewStyle">@android:style/Widget.ExpandableListView.White</item>
         <item name="listViewStyle">@android:style/Widget.ListView.White</item>
         <item name="listDivider">@drawable/divider_horizontal_bright</item>
         <item name="listSeparatorTextViewStyle">@android:style/Widget.TextView.ListSeparator.White</item>
+
         <item name="progressBarStyle">@android:style/Widget.ProgressBar.Inverse</item>
         <item name="progressBarStyleSmall">@android:style/Widget.ProgressBar.Small.Inverse</item>
         <item name="progressBarStyleLarge">@android:style/Widget.ProgressBar.Large.Inverse</item>
         <item name="progressBarStyleInverse">@android:style/Widget.ProgressBar</item>
         <item name="progressBarStyleSmallInverse">@android:style/Widget.ProgressBar.Small</item>
-		    <item name="progressBarStyleLargeInverse">@android:style/Widget.ProgressBar.Large</item>
-        <item name="radioButtonStyle">@android:style/Widget.CompoundButton.RadioButton.Inverse</item>
+        <item name="progressBarStyleLargeInverse">@android:style/Widget.ProgressBar.Large</item>
     </style>
     
     <!-- Variant of the light theme with no title bar -->
@@ -584,6 +578,8 @@
         <item name="editTextBackground">@android:drawable/edit_text_holo_dark</item>
         <item name="editTextColor">?android:attr/textColorPrimary</item>
         <item name="android:windowActionBar">true</item>
+        <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio_holo_dark</item>
+        <item name="listChoiceIndicatorMultiple">@android:drawable/btn_check_holo_dark</item>
     </style>
 
     <!-- New Honeycomb holographic theme. Light version.  The widgets in the
@@ -593,6 +589,8 @@
          UI style also includes a full action bar by default. -->
     <style name="Theme.Light.Holo">
         <item name="editTextBackground">@android:drawable/edit_text_holo_light</item>
+        <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio_holo_light</item>
+        <item name="listChoiceIndicatorMultiple">@android:drawable/btn_check_holo_light</item>
     </style>
 
     <!-- Variant of the holographic (dark) theme with no action bar. -->
