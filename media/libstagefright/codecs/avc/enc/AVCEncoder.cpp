@@ -338,10 +338,15 @@ status_t AVCEncoder::read(
 
     MediaBuffer *outputBuffer;
     CHECK_EQ(OK, mGroup->acquire_buffer(&outputBuffer));
+    uint8_t *outPtr = (uint8_t *) outputBuffer->data();
+    uint32_t dataLength = outputBuffer->size();
 
-    // Add 4 bytes for the start code 0x00000001
-    uint8_t *outPtr = (uint8_t *) outputBuffer->data() + 4;
-    uint32_t dataLength = outputBuffer->size() - 4;
+    if (!mSpsPpsHeaderReceived && mNumInputFrames < 0) {
+        // 4 bytes are reserved for holding the start code 0x00000001
+        // of the sequence parameter set at the beginning.
+        outPtr += 4;
+        dataLength -= 4;
+    }
 
     int32_t type;
     AVCEnc_Status encoderStatus = AVCENC_SUCCESS;
@@ -358,7 +363,7 @@ status_t AVCEncoder::read(
             switch (type) {
                 case AVC_NALTYPE_SPS:
                     ++mNumInputFrames;
-                    memcpy(outputBuffer->data(), "\x00\x00\x00\x01", 4);
+                    memcpy((uint8_t *)outputBuffer->data(), "\x00\x00\x00\x01", 4);
                     outputBuffer->set_range(0, dataLength + 4);
                     outPtr += (dataLength + 4);  // 4 bytes for next start code
                     dataLength = outputBuffer->size() -
