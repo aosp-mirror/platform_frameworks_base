@@ -453,30 +453,23 @@ static jint android_media_AudioRecord_get_pos_update_period(JNIEnv *env,  jobjec
 // return -1 if there was an error querying the buffer size.
 static jint android_media_AudioRecord_get_min_buff_size(JNIEnv *env,  jobject thiz,
     jint sampleRateInHertz, jint nbChannels, jint audioFormat) {
-    
-    size_t inputBuffSize = 0;
+
     LOGV(">> android_media_AudioRecord_get_min_buff_size(%d, %d, %d)", sampleRateInHertz, nbChannels, audioFormat);
-    
-    status_t result = AudioSystem::getInputBufferSize(
-                        sampleRateInHertz, 
-                        (audioFormat == javaAudioRecordFields.PCM16 ? 
-                            AudioSystem::PCM_16_BIT : AudioSystem::PCM_8_BIT), 
-                        nbChannels, &inputBuffSize);
-    switch(result) {
-    case(NO_ERROR):
-        if(inputBuffSize == 0) {
-            LOGV("Recording parameters are not supported: %dHz, %d channel(s), (java) format %d",
-                sampleRateInHertz, nbChannels, audioFormat);
-            return 0;
-        } else {
-            // the minimum buffer size is twice the hardware input buffer size
-            return 2*inputBuffSize;
-        }
-        break;
-    case(PERMISSION_DENIED):
-    default:
-        return -1; 
+
+    int frameCount = 0;
+    status_t result = AudioRecord::getMinFrameCount(&frameCount,
+            sampleRateInHertz,
+            (audioFormat == javaAudioRecordFields.PCM16 ?
+                AudioSystem::PCM_16_BIT : AudioSystem::PCM_8_BIT),
+            nbChannels);
+
+    if (result == BAD_VALUE) {
+        return 0;
     }
+    if (result != NO_ERROR) {
+        return -1;
+    }
+    return frameCount * nbChannels * (audioFormat == javaAudioRecordFields.PCM16 ? 2 : 1);
 }
 
 
