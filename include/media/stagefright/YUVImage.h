@@ -67,18 +67,22 @@ public:
     // memory.
     static size_t bufferSize(YUVFormat yuvFormat, int32_t width, int32_t height);
 
-    int32_t width() {return mWidth;}
-    int32_t height() {return mHeight;}
+    int32_t width() const {return mWidth;}
+    int32_t height() const {return mHeight;}
+
+    // Returns true if pixel is the range [0, width-1] x [0, height-1]
+    // and false otherwise.
+    bool validPixel(int32_t x, int32_t y) const;
 
     // Get the pixel YUV value at pixel (x,y).
     // Note that the range of x is [0, width-1] and the range of y is [0, height-1].
-    // Returns true if get was succesful and false otherwise.
+    // Returns true if get was successful and false otherwise.
     bool getPixelValue(int32_t x, int32_t y,
             uint8_t *yPtr, uint8_t *uPtr, uint8_t *vPtr) const;
 
     // Set the pixel YUV value at pixel (x,y).
     // Note that the range of x is [0, width-1] and the range of y is [0, height-1].
-    // Returns true if set was succesful and false otherwise.
+    // Returns true if set was successful and false otherwise.
     bool setPixelValue(int32_t x, int32_t y,
             uint8_t yValue, uint8_t uValue, uint8_t vValue);
 
