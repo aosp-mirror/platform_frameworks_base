@@ -37,6 +37,7 @@
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
+#include "android_runtime/android_view_Surface.h"
 
 #include <RenderScript.h>
 #include <RenderScriptEnv.h>
@@ -184,9 +185,7 @@ nContextSetSurface(JNIEnv *_env, jobject _this, RsContext con, jint width, jint 
     if (wnd == NULL) {
 
     } else {
-        jclass surface_class = _env->FindClass("android/view/Surface");
-        jfieldID surfaceFieldID = _env->GetFieldID(surface_class, ANDROID_VIEW_SURFACE_JNI_ID, "I");
-        window = (Surface*)_env->GetIntField(wnd, surfaceFieldID);
+        window = (Surface*) android_Surface_getNativeWindow(_env, wnd).get();
     }
 
     rsContextSetSurface(con, width, height, window);
