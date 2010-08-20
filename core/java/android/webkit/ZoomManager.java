@@ -727,7 +727,8 @@ class ZoomManager {
             if (mWebView.getWebViewCore() != null) {
                 // we always force, in case our height changed, in which case we
                 // still want to send the notification over to webkit.
-                refreshZoomScale(mUpdateTextWrap);
+                setZoomScale(Math.max(mActualScale, getZoomOverviewScale()),
+                    mUpdateTextWrap, true);
                 // update the zoom buttons as the scale can be changed
                 updateZoomPicker();
             }
@@ -787,8 +788,6 @@ class ZoomManager {
                 && Math.abs((viewWidth * mInvActualScale) - mZoomOverviewWidth) > 1))) {
             mInitialZoomOverview = false;
             setZoomScale(zoomOverviewScale, !willScaleTriggerZoom(mTextWrapScale));
-        } else {
-            mInZoomOverview = !exceedsMinScaleIncrement(mActualScale, zoomOverviewScale);
         }
     }
 

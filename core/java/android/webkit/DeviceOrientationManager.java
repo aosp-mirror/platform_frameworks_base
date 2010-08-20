@@ -17,8 +17,8 @@
 package android.webkit;
 
 /**
- * This class is simply a container for the methods used to configure WebKit's
- * mock DeviceOrientationClient for use in LayoutTests.
+ * This class is simply a container for the methods used to implement DeviceOrientation,
+ * including the mock DeviceOrientationClient for use in LayoutTests.
  *
  * This could be part of WebViewCore, but have moved it to its own class to
  * avoid bloat there.
@@ -26,6 +26,7 @@ package android.webkit;
  */
 public final class DeviceOrientationManager {
     private WebViewCore mWebViewCore;
+    private DeviceOrientationService mService;
 
     public DeviceOrientationManager(WebViewCore webViewCore) {
         mWebViewCore = webViewCore;
@@ -50,9 +51,19 @@ public final class DeviceOrientationManager {
                 canProvideGamma, gamma);
     }
 
+    public void onOrientationChange(Double alpha, Double beta, Double gamma) {
+        nativeOnOrientationChange(mWebViewCore,
+                alpha != null, alpha != null ? alpha.doubleValue() : 0.0,
+                beta != null, beta != null ? beta.doubleValue() : 0.0,
+                gamma != null, gamma != null ? gamma.doubleValue() : 0.0);
+    }
+
     // Native functions
     private static native void nativeUseMock(WebViewCore webViewCore);
     private static native void nativeSetMockOrientation(WebViewCore webViewCore,
+            boolean canProvideAlpha, double alpha, boolean canProvideBeta, double beta,
+            boolean canProvideGamma, double gamma);
+    private static native void nativeOnOrientationChange(WebViewCore webViewCore,
             boolean canProvideAlpha, double alpha, boolean canProvideBeta, double beta,
             boolean canProvideGamma, double gamma);
 }

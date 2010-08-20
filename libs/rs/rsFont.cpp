@@ -218,6 +218,7 @@ Font::CachedGlyphInfo *Font::cacheGlyph(uint32_t glyph)
 
 Font * Font::create(Context *rsc, const char *name, uint32_t fontSize, uint32_t dpi)
 {
+    rsc->mStateFont.checkInit();
     Vector<Font*> &activeFonts = rsc->mStateFont.mActiveFonts;
 
     for(uint32_t i = 0; i < activeFonts.size(); i ++) {
@@ -513,6 +514,12 @@ void FontState::checkInit()
 
     initVertexArrayBuffers();
 
+    // We store a string with letters in a rough frequency of occurrence
+    mLatinPrecache = String8(" eisarntolcdugpmhbyfvkwzxjq");
+    mLatinPrecache += String8("EISARNTOLCDUGPMHBYFVKWZXJQ");
+    mLatinPrecache += String8(",.?!()-+@;:`'");
+    mLatinPrecache += String8("0123456789");
+
     mInitialized = true;
 }
 
@@ -622,7 +629,7 @@ void FontState::appendMeshQuad(float x1, float y1, float z1,
 
 uint32_t FontState::getRemainingCacheCapacity() {
     uint32_t remainingCapacity = 0;
-    float totalPixels = 0;
+    uint32_t totalPixels = 0;
     for(uint32_t i = 0; i < mCacheLines.size(); i ++) {
          remainingCapacity += (mCacheLines[i]->mMaxWidth - mCacheLines[i]->mCurrentCol);
          totalPixels += mCacheLines[i]->mMaxWidth;
@@ -666,12 +673,6 @@ void FontState::renderText(const char *text, uint32_t len, uint32_t startIndex, 
         issueDrawCommand();
         mCurrentQuadIndex = 0;
     }
-
-    // We store a string with letters in a rough frequency of occurrence
-    mLatinPrecache = String8(" eisarntolcdugpmhbyfvkwzxjq");
-    mLatinPrecache += String8("EISARNTOLCDUGPMHBYFVKWZXJQ");
-    mLatinPrecache += String8(",.?!()-+@;:`'");
-    mLatinPrecache += String8("0123456789");
 }
 
 void FontState::renderText(const char *text, int x, int y)

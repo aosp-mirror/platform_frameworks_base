@@ -372,7 +372,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since ./frameworks/base/api/7.xml 7 \
     -since ./frameworks/base/api/8.xml 8 \
     -since ./frameworks/base/api/current.xml HC \
-		-error 101 -error 102 -warning 103 -error 104 -error 106 -error 108 \
+		-error 101 -error 102 -warning 103 -error 104 -error 106 -error 108 -warning 113 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
 framework_docs_LOCAL_ADDITIONAL_JAVA_DIR:=$(call intermediates-dir-for,JAVA_LIBRARIES,framework)

@@ -32,8 +32,8 @@ import android.widget.RemoteViews.RemoteView;
 
 /**
  * FrameLayout is designed to block out an area on the screen to display
- * a single item. You can add multiple children to a FrameLayout, but all
- * children are pegged to the top left of the screen.
+ * a single item. You can add multiple children to a FrameLayout and control their
+ * position within the FrameLayout using {@link android.widget.FrameLayout.LayoutParams#gravity}.
  * Children are drawn in a stack, with the most recently added child on top.
  * The size of the frame layout is the size of its largest child (plus padding), visible
  * or not (if the FrameLayout's parent permits). Views that are GONE are used for sizing
@@ -440,6 +440,8 @@ public class FrameLayout extends ViewGroup {
      * Per-child layout information for layouts that support margins.
      * See {@link android.R.styleable#FrameLayout_Layout FrameLayout Layout Attributes}
      * for a list of all child view attributes that this class supports.
+     * 
+     * @attr ref android.R.styleable#FrameLayout_Layout_layout_gravity
      */
     public static class LayoutParams extends MarginLayoutParams {
         /**
@@ -447,6 +449,8 @@ public class FrameLayout extends ViewGroup {
          * are associated.
          *
          * @see android.view.Gravity
+         * 
+         * @attr ref android.R.styleable#FrameLayout_Layout_layout_gravity
          */
         public int gravity = -1;
 

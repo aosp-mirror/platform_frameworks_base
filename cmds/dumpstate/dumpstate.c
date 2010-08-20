@@ -39,6 +39,8 @@
 static char cmdline_buf[16384] = "(unknown)";
 static const char *dump_traces_path = NULL;
 
+static char screenshot_path[PATH_MAX] = "";
+
 /* dumps the current system state to stdout */
 static void dumpstate() {
     time_t now = time(NULL);
@@ -75,6 +77,12 @@ static void dumpstate() {
     dump_file("VMALLOC INFO", "/proc/vmallocinfo");
     dump_file("SLAB INFO", "/proc/slabinfo");
     dump_file("ZONEINFO", "/proc/zoneinfo");
+
+    if (screenshot_path[0]) {
+        LOGI("taking screenshot\n");
+        run_command(NULL, 5, "su", "root", "screenshot", screenshot_path, NULL);
+        LOGI("wrote screenshot: %s\n", screenshot_path);
+    }
 
     run_command("SYSTEM LOG", 20, "logcat", "-v", "time", "-d", "*:v", NULL);
 
@@ -167,14 +175,15 @@ static void dumpstate() {
 }
 
 static void usage() {
-    fprintf(stderr, "usage: dumpstate [-b file] [-d] [-e file] [-o file] [-s] "
-            "[-z]\n"
-            "  -b: play sound file instead of vibrate, at beginning of job\n"
-            "  -d: append date to filename (requires -o)\n"
-            "  -e: play sound file instead of vibrate, at end of job\n"
+    fprintf(stderr, "usage: dumpstate [-b soundfile] [-e soundfile] [-o file [-d] [-p] [-z]] [-s]\n"
             "  -o: write to file (instead of stdout)\n"
+            "  -d: append date to filename (requires -o)\n"
+            "  -z: gzip output (requires -o)\n"
+            "  -p: capture screenshot to filename.png (requires -o)\n"
             "  -s: write output to control socket (for init)\n"
-            "  -z: gzip output (requires -o)\n");
+            "  -b: play sound file instead of vibrate, at beginning of job\n"
+            "  -e: play sound file instead of vibrate, at end of job\n"
+		);
 }
 
 int main(int argc, char *argv[]) {
@@ -184,6 +193,7 @@ int main(int argc, char *argv[]) {
     char* begin_sound = 0;
     char* end_sound = 0;
     int use_socket = 0;
+    int do_fb = 0;
 
     LOGI("begin\n");
 
@@ -199,7 +209,7 @@ int main(int argc, char *argv[]) {
     dump_traces_path = dump_vm_traces();
 
     int c;
-    while ((c = getopt(argc, argv, "b:de:ho:svz")) != -1) {
+    while ((c = getopt(argc, argv, "b:de:ho:svzp")) != -1) {
         switch (c) {
             case 'b': begin_sound = optarg;  break;
             case 'd': do_add_date = 1;       break;
@@ -208,6 +218,7 @@ int main(int argc, char *argv[]) {
             case 's': use_socket = 1;        break;
             case 'v': break;  // compatibility no-op
             case 'z': do_compress = 6;       break;
+            case 'p': do_fb = 1;             break;
             case '?': printf("\n");
             case 'h':
                 usage();
@@ -243,6 +254,10 @@ int main(int argc, char *argv[]) {
             time_t now = time(NULL);
             strftime(date, sizeof(date), "-%Y-%m-%d-%H-%M-%S", localtime(&now));
             strlcat(path, date, sizeof(path));
+        }
+        if (do_fb) {
+            strlcpy(screenshot_path, path, sizeof(screenshot_path));
+            strlcat(screenshot_path, ".png", sizeof(screenshot_path));
         }
         strlcat(path, ".txt", sizeof(path));
         if (do_compress) strlcat(path, ".gz", sizeof(path));

@@ -36,7 +36,7 @@ public class FloatEvaluator implements TypeEvaluator {
      *         <code>fraction</code> parameter.
      */
     public Object evaluate(float fraction, Object startValue, Object endValue) {
-        float startFloat = (Float) startValue;
-        return startFloat + fraction * ((Float) endValue - startFloat);
+        float startFloat = ((Number) startValue).floatValue();
+        return startFloat + fraction * (((Number) endValue).floatValue() - startFloat);
     }
 }

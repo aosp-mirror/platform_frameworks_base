@@ -1525,7 +1525,22 @@ public class SensorManager
      * Typically the atmospheric pressure is read from a
      * {@link Sensor#TYPE_PRESSURE} sensor. The pressure at sea level must be
      * known, usually it can be retrieved from airport databases in the
-     * vicinity.
+     * vicinity. If unknown, you can use {@link #PRESSURE_STANDARD_ATMOSPHERE}
+     * as an approximation, but absolute altitudes won't be accurate.
+     * </p>
+     * <p>
+     * To calculate altitude differences, you must calculate the difference
+     * between the altitudes at both points. If you don't know the altitude
+     * as sea level, you can use {@link #PRESSURE_STANDARD_ATMOSPHERE} instead,
+     * which will give good results considering the range of pressure typically
+     * involved.
+     * </p>
+     * <p>
+     * <code><ul>
+     *  float altitude_difference =
+     *      getAltitude(SensorManager.PRESSURE_STANDARD_ATMOSPHERE, pressure_at_point2)
+     *      - getAltitude(SensorManager.PRESSURE_STANDARD_ATMOSPHERE, pressure_at_point1);
+     * </ul></code>
      * </p>
      *
      * @param p0 pressure at sea level

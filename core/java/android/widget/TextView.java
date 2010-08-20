@@ -6584,7 +6584,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             onEndBatchEdit();
 
             hideInsertionPointCursorController();
-            stopSelectionActionMode();
+            terminateSelectionActionMode();
         }
 
         startStopMarquee(focused);
@@ -6680,7 +6680,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         return;
                     } else {
                         // Tapping outside stops selection mode, if any
-                        finishSelectionActionMode();
+                        stopSelectionActionMode();
                     }
                 }
 
@@ -6782,9 +6782,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mSelectionModifierCursorController = new SelectionModifierCursorController();
             }
         } else {
-            mSelectionModifierCursorController = null;
             // Stop selection mode if the controller becomes unavailable.
-            finishSelectionActionMode();
+            stopSelectionActionMode();
+            mSelectionModifierCursorController = null;
         }
     }
 
@@ -7029,7 +7029,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private boolean canSelectAll() {
-        return canSelectText();
+        return canSelectText() && mText.length() != 0;
     }
 
     private boolean canSelectText() {
@@ -7037,7 +7037,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // If you change this condition, make sure prepareCursorController is called anywhere
         // the value of this condition might be changed.
         return (mText instanceof Spannable &&
-                mText.length() != 0 &&
                 mMovement != null &&
                 mMovement.canSelectArbitrarily());
     }
@@ -7388,13 +7387,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Same as {@link #finishSelectionActionMode()}, except that there is no cursor controller
+     * Same as {@link #stopSelectionActionMode()}, except that there is no cursor controller
      * fade out animation. Needed since the drawable and their alpha values are shared by all
      * TextViews. Switching from one TextView to another would fade the cursor controllers in the
      * new one otherwise.
      */
-    private void stopSelectionActionMode() {
-        finishSelectionActionMode();
+    private void terminateSelectionActionMode() {
+        stopSelectionActionMode();
         if (mSelectionModifierCursorController != null) {
             SelectionModifierCursorController selectionModifierCursorController =
                 (SelectionModifierCursorController) mSelectionModifierCursorController;
@@ -7402,7 +7401,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private void finishSelectionActionMode() {
+    private void stopSelectionActionMode() {
         if (mSelectionActionMode != null) {
             mSelectionActionMode.finish();
         }
@@ -7544,7 +7543,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 }
                             }
                         }
-                        finishSelectionActionMode();
+                        stopSelectionActionMode();
                     }
 
                     return true;
@@ -7553,13 +7552,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     clipboard.setPrimaryClip(new ClippedData(null, null,
                             new ClippedData.Item(mTransformed.subSequence(min, max))));
                     ((Editable) mText).delete(min, max);
-                    finishSelectionActionMode();
+                    stopSelectionActionMode();
                     return true;
 
                 case ID_COPY:
                     clipboard.setPrimaryClip(new ClippedData(null, null,
                             new ClippedData.Item(mTransformed.subSequence(min, max))));
-                    finishSelectionActionMode();
+                    stopSelectionActionMode();
                     return true;
             }
 
@@ -8058,7 +8057,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private void hideControllers() {
         hideInsertionPointCursorController();
-        finishSelectionActionMode();
+        stopSelectionActionMode();
     }
 
     /**
