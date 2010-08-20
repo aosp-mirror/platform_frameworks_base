@@ -2413,11 +2413,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Call this view's OnLongClickListener, if it is defined. Invokes the context menu
-     * if the OnLongClickListener did not consume the event.
+     * Call this view's OnLongClickListener, if it is defined. Invokes the context menu if the
+     * OnLongClickListener did not consume the event.
      *
-     * @return True there was an assigned OnLongClickListener that was called, false
-     *         otherwise is returned.
+     * @return True if one of the above receivers consumed the event, false otherwise.
      */
     public boolean performLongClick() {
         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
@@ -4217,6 +4216,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Show the context menu for this view. It is not safe to hold on to the
      * menu after returning from this method.
+     *
+     * You should normally not overload this method. Overload
+     * {@link #onCreateContextMenu(ContextMenu)} or define an
+     * {@link OnCreateContextMenuListener} to add items to the context menu.
      *
      * @param menu The context menu to populate
      */

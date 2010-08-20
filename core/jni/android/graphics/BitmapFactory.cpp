@@ -218,6 +218,7 @@ static SkPixelRef* installPixelRef(SkBitmap* bitmap, SkStream* stream,
     }
     pr->setDitherImage(ditherImage);
     bitmap->setPixelRef(pr)->unref();
+    pr->isOpaque(bitmap);
     return pr;
 }
 
@@ -464,10 +465,8 @@ static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz,
                                  jobject options) { // BitmapFactory$Options
     SkStream* stream;
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
-    // assets can always be rebuilt, so force this
-    bool forcePurgeable = true;
-
-    if (forcePurgeable || optionsPurgeable(env, options)) {
+    bool forcePurgeable = optionsPurgeable(env, options);
+    if (forcePurgeable) {
         // if we could "ref/reopen" the asset, we may not need to copy it here
         // and we could assume optionsShareable, since assets are always RO
         stream = copyAssetToStream(asset);

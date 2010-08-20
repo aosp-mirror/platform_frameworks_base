@@ -417,8 +417,8 @@ public class Selection {
         }
     }
 
-    private static final class START implements NoCopySpan { };
-    private static final class END implements NoCopySpan { };
+    private static final class START implements NoCopySpan { }
+    private static final class END implements NoCopySpan { }
     
     /*
      * Public constants

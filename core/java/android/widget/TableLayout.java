@@ -67,6 +67,9 @@ import java.util.regex.Pattern;
  * <p>Although the typical child of a TableLayout is a TableRow, you can
  * actually use any View subclass as a direct child of TableLayout. The View
  * will be displayed as a single row that spans all the table columns.</p>
+ *
+ * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-tablelayout.html">Table
+ * Layout tutorial</a>.</p>
  */
 public class TableLayout extends LinearLayout {
     private int[] mMaxWidths;

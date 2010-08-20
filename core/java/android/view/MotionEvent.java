@@ -772,7 +772,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * 
      * @param pointerId The identifier of the pointer to be found.
      * @return Returns either the index of the pointer (for use with
-     * {@link #getX(int) et al.), or -1 if there is no data available for
+     * {@link #getX(int)} et al.), or -1 if there is no data available for
      * that pointer identifier.
      */
     public final int findPointerIndex(int pointerId) {
@@ -1319,21 +1319,24 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @param y New absolute Y location.
      */
     public final void setLocation(float x, float y) {
-        mXOffset = x - mDataSamples[mLastDataSampleIndex + SAMPLE_X];
-        mYOffset = y - mDataSamples[mLastDataSampleIndex + SAMPLE_Y];
+        final float[] dataSamples = mDataSamples;
+        final int lastDataSampleIndex = mLastDataSampleIndex;
+        mXOffset = x - dataSamples[lastDataSampleIndex + SAMPLE_X];
+        mYOffset = y - dataSamples[lastDataSampleIndex + SAMPLE_Y];
     }
     
     private final void getPointerCoordsAtSampleIndex(int sampleIndex,
             PointerCoords outPointerCoords) {
-        outPointerCoords.x = mDataSamples[sampleIndex + SAMPLE_X] + mXOffset;
-        outPointerCoords.y = mDataSamples[sampleIndex + SAMPLE_Y] + mYOffset;
-        outPointerCoords.pressure = mDataSamples[sampleIndex + SAMPLE_PRESSURE];
-        outPointerCoords.size = mDataSamples[sampleIndex + SAMPLE_SIZE];
-        outPointerCoords.touchMajor = mDataSamples[sampleIndex + SAMPLE_TOUCH_MAJOR];
-        outPointerCoords.touchMinor = mDataSamples[sampleIndex + SAMPLE_TOUCH_MINOR];
-        outPointerCoords.toolMajor = mDataSamples[sampleIndex + SAMPLE_TOOL_MAJOR];
-        outPointerCoords.toolMinor = mDataSamples[sampleIndex + SAMPLE_TOOL_MINOR];
-        outPointerCoords.orientation = mDataSamples[sampleIndex + SAMPLE_ORIENTATION];
+        final float[] dataSamples = mDataSamples;
+        outPointerCoords.x = dataSamples[sampleIndex + SAMPLE_X] + mXOffset;
+        outPointerCoords.y = dataSamples[sampleIndex + SAMPLE_Y] + mYOffset;
+        outPointerCoords.pressure = dataSamples[sampleIndex + SAMPLE_PRESSURE];
+        outPointerCoords.size = dataSamples[sampleIndex + SAMPLE_SIZE];
+        outPointerCoords.touchMajor = dataSamples[sampleIndex + SAMPLE_TOUCH_MAJOR];
+        outPointerCoords.touchMinor = dataSamples[sampleIndex + SAMPLE_TOUCH_MINOR];
+        outPointerCoords.toolMajor = dataSamples[sampleIndex + SAMPLE_TOOL_MAJOR];
+        outPointerCoords.toolMinor = dataSamples[sampleIndex + SAMPLE_TOOL_MINOR];
+        outPointerCoords.orientation = dataSamples[sampleIndex + SAMPLE_ORIENTATION];
     }
     
     private final void setPointerCoordsAtSampleIndex(int sampleIndex,
@@ -1347,28 +1350,30 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     
     private final void setPointerCoordsAtSampleIndex(int sampleIndex,
             PointerCoords pointerCoords) {
-        mDataSamples[sampleIndex + SAMPLE_X] = pointerCoords.x - mXOffset;
-        mDataSamples[sampleIndex + SAMPLE_Y] = pointerCoords.y - mYOffset;
-        mDataSamples[sampleIndex + SAMPLE_PRESSURE] = pointerCoords.pressure;
-        mDataSamples[sampleIndex + SAMPLE_SIZE] = pointerCoords.size;
-        mDataSamples[sampleIndex + SAMPLE_TOUCH_MAJOR] = pointerCoords.touchMajor;
-        mDataSamples[sampleIndex + SAMPLE_TOUCH_MINOR] = pointerCoords.touchMinor;
-        mDataSamples[sampleIndex + SAMPLE_TOOL_MAJOR] = pointerCoords.toolMajor;
-        mDataSamples[sampleIndex + SAMPLE_TOOL_MINOR] = pointerCoords.toolMinor;
-        mDataSamples[sampleIndex + SAMPLE_ORIENTATION] = pointerCoords.orientation;
+        final float[] dataSamples = mDataSamples;
+        dataSamples[sampleIndex + SAMPLE_X] = pointerCoords.x - mXOffset;
+        dataSamples[sampleIndex + SAMPLE_Y] = pointerCoords.y - mYOffset;
+        dataSamples[sampleIndex + SAMPLE_PRESSURE] = pointerCoords.pressure;
+        dataSamples[sampleIndex + SAMPLE_SIZE] = pointerCoords.size;
+        dataSamples[sampleIndex + SAMPLE_TOUCH_MAJOR] = pointerCoords.touchMajor;
+        dataSamples[sampleIndex + SAMPLE_TOUCH_MINOR] = pointerCoords.touchMinor;
+        dataSamples[sampleIndex + SAMPLE_TOOL_MAJOR] = pointerCoords.toolMajor;
+        dataSamples[sampleIndex + SAMPLE_TOOL_MINOR] = pointerCoords.toolMinor;
+        dataSamples[sampleIndex + SAMPLE_ORIENTATION] = pointerCoords.orientation;
     }
     
     private final void setPointerCoordsAtSampleIndex(int sampleIndex,
             float x, float y, float pressure, float size) {
-        mDataSamples[sampleIndex + SAMPLE_X] = x - mXOffset;
-        mDataSamples[sampleIndex + SAMPLE_Y] = y - mYOffset;
-        mDataSamples[sampleIndex + SAMPLE_PRESSURE] = pressure;
-        mDataSamples[sampleIndex + SAMPLE_SIZE] = size;
-        mDataSamples[sampleIndex + SAMPLE_TOUCH_MAJOR] = pressure;
-        mDataSamples[sampleIndex + SAMPLE_TOUCH_MINOR] = pressure;
-        mDataSamples[sampleIndex + SAMPLE_TOOL_MAJOR] = size;
-        mDataSamples[sampleIndex + SAMPLE_TOOL_MINOR] = size;
-        mDataSamples[sampleIndex + SAMPLE_ORIENTATION] = 0;
+        final float[] dataSamples = mDataSamples;
+        dataSamples[sampleIndex + SAMPLE_X] = x - mXOffset;
+        dataSamples[sampleIndex + SAMPLE_Y] = y - mYOffset;
+        dataSamples[sampleIndex + SAMPLE_PRESSURE] = pressure;
+        dataSamples[sampleIndex + SAMPLE_SIZE] = size;
+        dataSamples[sampleIndex + SAMPLE_TOUCH_MAJOR] = pressure;
+        dataSamples[sampleIndex + SAMPLE_TOUCH_MINOR] = pressure;
+        dataSamples[sampleIndex + SAMPLE_TOOL_MAJOR] = size;
+        dataSamples[sampleIndex + SAMPLE_TOOL_MINOR] = size;
+        dataSamples[sampleIndex + SAMPLE_ORIENTATION] = 0;
     }
     
     private final void incrementNumSamplesAndReserveStorage(int dataSampleStride) {

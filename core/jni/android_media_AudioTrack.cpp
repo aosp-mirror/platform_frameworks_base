@@ -782,29 +782,13 @@ static jint android_media_AudioTrack_get_output_sample_rate(JNIEnv *env,  jobjec
 // returns -1 if there was an error querying the hardware.
 static jint android_media_AudioTrack_get_min_buff_size(JNIEnv *env,  jobject thiz,
     jint sampleRateInHertz, jint nbChannels, jint audioFormat) {
-    int afSamplingRate;
-    int afFrameCount;
-    uint32_t afLatency;
-    
-    if (AudioSystem::getOutputSamplingRate(&afSamplingRate) != NO_ERROR) {
+
+    int frameCount = 0;
+    if (AudioTrack::getMinFrameCount(&frameCount, AudioSystem::DEFAULT,
+            sampleRateInHertz) != NO_ERROR) {
         return -1;
     }
-    if (AudioSystem::getOutputFrameCount(&afFrameCount) != NO_ERROR) {
-        return -1;
-    }
-    
-    if (AudioSystem::getOutputLatency(&afLatency) != NO_ERROR) {
-        return -1;
-    }
-    
-    // Ensure that buffer depth covers at least audio hardware latency
-    uint32_t minBufCount = afLatency / ((1000 * afFrameCount)/afSamplingRate);
-    if (minBufCount < 2) minBufCount = 2;
-    uint32_t minFrameCount = (afFrameCount*sampleRateInHertz*minBufCount)/afSamplingRate;
-    int minBuffSize = minFrameCount 
-            * (audioFormat == javaAudioTrackFields.PCM16 ? 2 : 1)
-            * nbChannels;
-    return minBuffSize;
+    return frameCount * nbChannels * (audioFormat == javaAudioTrackFields.PCM16 ? 2 : 1);
 }
 
 // ----------------------------------------------------------------------------

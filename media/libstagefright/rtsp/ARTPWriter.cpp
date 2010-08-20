@@ -134,10 +134,10 @@ status_t ARTPWriter::start(MetaData *params) {
     return OK;
 }
 
-void ARTPWriter::stop() {
+status_t ARTPWriter::stop() {
     Mutex::Autolock autoLock(mLock);
     if (!(mFlags & kFlagStarted)) {
-        return;
+        return OK;
     }
 
     (new AMessage(kWhatStop, mReflector->id()))->post();
@@ -145,9 +145,11 @@ void ARTPWriter::stop() {
     while (mFlags & kFlagStarted) {
         mCondition.wait(mLock);
     }
+    return OK;
 }
 
-void ARTPWriter::pause() {
+status_t ARTPWriter::pause() {
+    return OK;
 }
 
 static void StripStartcode(MediaBuffer *buffer) {
