@@ -336,6 +336,7 @@ enum {
     SMALL_SCREEN_ATTR = 0x01010284,
     NORMAL_SCREEN_ATTR = 0x01010285,
     LARGE_SCREEN_ATTR = 0x01010286,
+    XLARGE_SCREEN_ATTR = 0x010102bf,
     REQUIRED_ATTR = 0x0101028e,
 };
 
@@ -569,6 +570,7 @@ int doDump(Bundle* bundle)
             int smallScreen = 1;
             int normalScreen = 1;
             int largeScreen = 1;
+            int xlargeScreen = 1;
             String8 pkg;
             String8 activityName;
             String8 activityLabel;
@@ -751,6 +753,8 @@ int doDump(Bundle* bundle)
                                 NORMAL_SCREEN_ATTR, NULL, 1);
                         largeScreen = getIntegerAttribute(tree,
                                 LARGE_SCREEN_ATTR, NULL, 1);
+                        xlargeScreen = getIntegerAttribute(tree,
+                                XLARGE_SCREEN_ATTR, NULL, 1);
                     } else if (tag == "uses-feature") {
                         String8 name = getAttribute(tree, NAME_ATTR, &error);
 
@@ -1079,10 +1083,15 @@ int doDump(Bundle* bundle)
             if (largeScreen > 0) {
                 largeScreen = targetSdk >= 4 ? -1 : 0;
             }
+            if (xlargeScreen > 0) {
+                // Introduced in Honeycomb.
+                xlargeScreen = targetSdk >= 10 ? -1 : 0;
+            }
             printf("supports-screens:");
             if (smallScreen != 0) printf(" 'small'");
             if (normalScreen != 0) printf(" 'normal'");
             if (largeScreen != 0) printf(" 'large'");
+            if (xlargeScreen != 0) printf(" 'xlarge'");
             printf("\n");
 
             printf("locales:");
