@@ -1524,10 +1524,24 @@ status_t MPEG4Writer::Track::threadEntry() {
         CHECK(timestampUs >= 0);
         if (mNumSamples > 1) {
             if (timestampUs <= lastTimestampUs) {
-                LOGW("Drop a frame, since it arrives too late!");
+                LOGW("Frame arrives too late!");
+#if 0
+                // Drop the late frame.
                 copy->release();
                 copy = NULL;
                 continue;
+#else
+                // Don't drop the late frame, since dropping a frame may cause
+                // problems later during playback
+
+                // The idea here is to avoid having two or more samples with the
+                // same timestamp in the output file.
+                if (mTimeScale >= 1000000LL) {
+                    timestampUs += 1;
+                } else {
+                    timestampUs += (1000000LL + (mTimeScale >> 1)) / mTimeScale;
+                }
+#endif
             }
         }
 
