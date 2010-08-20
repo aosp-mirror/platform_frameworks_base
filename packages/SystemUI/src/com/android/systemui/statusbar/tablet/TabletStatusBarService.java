@@ -54,7 +54,7 @@ import com.android.systemui.statusbar.*;
 import com.android.systemui.R;
 
 public class TabletStatusBarService extends StatusBarService {
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     public static final String TAG = "TabletStatusBar";
 
 
@@ -234,7 +234,26 @@ public class TabletStatusBarService extends StatusBarService {
     public void addNotification(IBinder key, StatusBarNotification notification) {
         if (DEBUG) Slog.d(TAG, "addNotification(" + key + " -> " + notification + ")");
         addNotificationViews(key, notification);
-        // tick()
+
+        boolean immersive = false;
+        try {
+            immersive = ActivityManagerNative.getDefault().isTopActivityImmersive();
+            Slog.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
+        } catch (RemoteException ex) {
+        }
+        if (immersive) {
+            // TODO: immersive mode popups for tablet
+        } else if (notification.notification.fullScreenIntent != null) {
+            // not immersive & a full-screen alert should be shown
+            Slog.d(TAG, "Notification has fullScreenIntent and activity is not immersive;"
+                    + " sending fullScreenIntent");
+            try {
+                notification.notification.fullScreenIntent.send();
+            } catch (PendingIntent.CanceledException e) {
+            }
+        } else {
+            // tick()
+        }
     }
 
     public void updateNotification(IBinder key, StatusBarNotification notification) {
