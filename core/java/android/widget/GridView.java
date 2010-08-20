@@ -31,6 +31,9 @@ import android.view.animation.GridLayoutAnimationController;
 /**
  * A view that shows items in two-dimensional scrolling grid. The items in the
  * grid come from the {@link ListAdapter} associated with this view.
+ *
+ * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-gridview.html">Grid
+ * View tutorial</a>.</p>
  */
 public class GridView extends AbsListView {
     public static final int NO_STRETCH = 0;

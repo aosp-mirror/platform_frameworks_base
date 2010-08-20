@@ -117,6 +117,9 @@ import junit.framework.Assert;
  * href="{@docRoot}guide/topics/manifest/manifest-element.html">{@code &lt;manifest&gt;}</a>
  * element.</p>
  *
+ * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-webview.html">Web View
+ * tutorial</a>.</p>
+ *
  * <h3>Basic usage</h3>
  *
  * <p>By default, a WebView provides no browser-like widgets, does not

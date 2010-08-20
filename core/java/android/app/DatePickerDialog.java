@@ -35,6 +35,9 @@ import java.util.Calendar;
 
 /**
  * A simple dialog containing an {@link android.widget.DatePicker}.
+ *
+ * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-datepicker.html">Date Picker
+ * tutorial</a>.</p>
  */
 public class DatePickerDialog extends AlertDialog implements OnClickListener, 
         OnDateChangedListener {
