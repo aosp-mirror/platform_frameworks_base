@@ -196,12 +196,16 @@ void Layer::reloadTexture(const Region& dirty)
     } else {
 slowpath:
         GGLSurface t;
-        status_t res = buffer->lock(&t, GRALLOC_USAGE_SW_READ_OFTEN);
-        LOGE_IF(res, "error %d (%s) locking buffer %p",
-                res, strerror(res), buffer.get());
-        if (res == NO_ERROR) {
-            mBufferManager.loadTexture(dirty, t);
-            buffer->unlock();
+        if (buffer->usage & GRALLOC_USAGE_SW_READ_MASK) {
+            status_t res = buffer->lock(&t, GRALLOC_USAGE_SW_READ_OFTEN);
+            LOGE_IF(res, "error %d (%s) locking buffer %p",
+                    res, strerror(res), buffer.get());
+            if (res == NO_ERROR) {
+                mBufferManager.loadTexture(dirty, t);
+                buffer->unlock();
+            }
+        } else {
+            // we can't do anything
         }
     }
 }
