@@ -62,6 +62,9 @@ import java.util.Map;
  * it will only be applied after {@code android:state_pressed} and {@code
  * android:state_focused} have both evaluated false.</p>
  *
+ * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-formstuff.html">Form Stuff
+ * tutorial</a>.</p>
+ *
  * <p><strong>XML attributes</strong></p>
  * <p>
  * See {@link android.R.styleable#ImageView Button Attributes},
