@@ -1790,7 +1790,7 @@ public class SensorManager
      *   |  R[ 8]   R[ 9]   R[10]   R[11]  |
      *   \  R[12]   R[13]   R[14]   R[15]  /
      *</pre>
-     * @param R current rotation matrix see {@link android.hardware.Sensor#TYPE_ROTATION_MATRIX}.
+     * @param R current rotation matrix
      * @param prevR previous rotation matrix
      * @param angleChange an array of floats in which the angle change is stored
      */
