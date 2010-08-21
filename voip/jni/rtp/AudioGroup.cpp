@@ -526,70 +526,6 @@ AudioGroup::~AudioGroup()
     LOGD("group[%d] is dead", mDeviceSocket);
 }
 
-#define FROYO_COMPATIBLE
-#ifdef FROYO_COMPATIBLE
-
-// Copied from AudioRecord.cpp.
-status_t AudioRecord_getMinFrameCount(
-        int* frameCount,
-        uint32_t sampleRate,
-        int format,
-        int channelCount)
-{
-    size_t size = 0;
-    if (AudioSystem::getInputBufferSize(sampleRate, format, channelCount, &size)
-            != NO_ERROR) {
-        LOGE("AudioSystem could not query the input buffer size.");
-        return NO_INIT;
-    }
-
-    if (size == 0) {
-        LOGE("Unsupported configuration: sampleRate %d, format %d, channelCount %d",
-            sampleRate, format, channelCount);
-        return BAD_VALUE;
-    }
-
-    // We double the size of input buffer for ping pong use of record buffer.
-    size <<= 1;
-
-    if (AudioSystem::isLinearPCM(format)) {
-        size /= channelCount * (format == AudioSystem::PCM_16_BIT ? 2 : 1);
-    }
-
-    *frameCount = size;
-    return NO_ERROR;
-}
-
-// Copied from AudioTrack.cpp.
-status_t AudioTrack_getMinFrameCount(
-        int* frameCount,
-        int streamType,
-        uint32_t sampleRate)
-{
-    int afSampleRate;
-    if (AudioSystem::getOutputSamplingRate(&afSampleRate, streamType) != NO_ERROR) {
-        return NO_INIT;
-    }
-    int afFrameCount;
-    if (AudioSystem::getOutputFrameCount(&afFrameCount, streamType) != NO_ERROR) {
-        return NO_INIT;
-    }
-    uint32_t afLatency;
-    if (AudioSystem::getOutputLatency(&afLatency, streamType) != NO_ERROR) {
-        return NO_INIT;
-    }
-
-    // Ensure that buffer depth covers at least audio hardware latency
-    uint32_t minBufCount = afLatency / ((1000 * afFrameCount) / afSampleRate);
-    if (minBufCount < 2) minBufCount = 2;
-
-    *frameCount = (sampleRate == 0) ? afFrameCount * minBufCount :
-              afFrameCount * minBufCount * sampleRate / afSampleRate;
-    return NO_ERROR;
-}
-
-#endif
-
 bool AudioGroup::set(int sampleRate, int sampleCount)
 {
     mEventQueue = epoll_create(2);
@@ -603,15 +539,6 @@ bool AudioGroup::set(int sampleRate, int sampleCount)
     // Find out the frame count for AudioTrack and AudioRecord.
     int output = 0;
     int input = 0;
-#ifdef FROYO_COMPATIBLE
-    if (AudioTrack_getMinFrameCount(&output, AudioSystem::VOICE_CALL,
-        sampleRate) != NO_ERROR || output <= 0 ||
-        AudioRecord_getMinFrameCount(&input, sampleRate,
-        AudioSystem::PCM_16_BIT, 1) != NO_ERROR || input <= 0) {
-        LOGE("cannot compute frame count");
-        return false;
-    }
-#else
     if (AudioTrack::getMinFrameCount(&output, AudioSystem::VOICE_CALL,
         sampleRate) != NO_ERROR || output <= 0 ||
         AudioRecord::getMinFrameCount(&input, sampleRate,
@@ -619,7 +546,6 @@ bool AudioGroup::set(int sampleRate, int sampleCount)
         LOGE("cannot compute frame count");
         return false;
     }
-#endif
     LOGD("reported frame count: output %d, input %d", output, input);
 
     output = (output + sampleCount - 1) / sampleCount * sampleCount;
