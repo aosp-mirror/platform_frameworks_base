@@ -124,9 +124,13 @@
         <!-- Text color, typeface, size, and style for system search result subtitle. Defaults to primary inverse text color. -->
         <attr name="textAppearanceSearchResultSubtitle" format="reference" />
 
-
         <!-- Text color, typeface, size, and style for the text inside of a button. -->
         <attr name="textAppearanceButton" format="reference" />
+
+        <!-- EditText text foreground color. -->
+        <attr name="editTextColor" format="reference|color" />
+        <!-- EditText background drawable. -->
+        <attr name="editTextBackground" format="reference" />
 
         <!-- A styled string, specifying the style to be used for showing
              inline candidate text when composing with an input method.  The
@@ -1449,6 +1453,17 @@
             <enum name="blocksDescendants" value="2" />
         </attr>
 
+        <!-- Sets whether this ViewGroup should split MotionEvents
+             to separate child views during touch event dispatch.
+             If false (default), touch events will be dispatched to
+             the child view where the first pointer went down until
+             the last pointer goes up.
+             If true, touch events may be dispatched to multiple children.
+             MotionEvents for each pointer will be dispatched to the child
+             view where the initial ACTION_DOWN event happened.
+             See {@link android.view.ViewGroup#setMotionEventSplittingEnabled(boolean)}
+             for more information. -->
+        <attr name="splitMotionEvents" format="boolean" />
     </declare-styleable>
 
     <!-- A {@link android.view.ViewStub} lets you lazily include other XML layouts

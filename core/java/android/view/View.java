@@ -16,7 +16,6 @@
 
 package android.view;
 
-import android.graphics.Camera;
 import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
 
@@ -25,6 +24,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Camera;
 import android.graphics.Canvas;
 import android.graphics.Interpolator;
 import android.graphics.LinearGradient;
@@ -69,7 +69,6 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ScrollBarDrawable;
 
-import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -5416,37 +5415,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             outRect.set((int) tmpRect.left + mLeft, (int) tmpRect.top + mTop,
                     (int) tmpRect.right + mLeft, (int) tmpRect.bottom + mTop);
         }
-    }
-
-    /**
-     * This method detects whether the given event is inside the view and, if so,
-     * handles it via the dispatchEvent(MotionEvent) method.
-     *
-     * @param ev The event that is being dispatched.
-     * @param parentX The x location of the event in the parent's coordinates.
-     * @param parentY The y location of the event in the parent's coordinates.
-     * @return true if the event was inside this view, false otherwise.
-     */
-    boolean dispatchTouchEvent(MotionEvent ev, float parentX, float parentY) {
-        float localX = parentX - mLeft;
-        float localY = parentY - mTop;
-        if (!hasIdentityMatrix() && mAttachInfo != null) {
-            // non-identity matrix: transform the point into the view's coordinates
-            final float[] localXY = mAttachInfo.mTmpTransformLocation;
-            localXY[0] = localX;
-            localXY[1] = localY;
-            getInverseMatrix().mapPoints(localXY);
-            localX = localXY[0];
-            localY = localXY[1];
-        }
-        if (localX >= 0 && localY >= 0 && localX < (mRight - mLeft) && localY < (mBottom - mTop)) {
-            // It would be safer to clone the event here but we don't for performance.
-            // There are many subtle interactions in touch event dispatch; change at your own risk.
-            mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
-            ev.setLocation(localX, localY);
-            return dispatchTouchEvent(ev);
-        }
-        return false;
     }
 
     /**

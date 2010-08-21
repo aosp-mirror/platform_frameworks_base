@@ -1551,9 +1551,9 @@ public class GridView extends AbsListView {
         int nextPage = -1;
 
         if (direction == FOCUS_UP) {
-            nextPage = Math.max(0, mSelectedPosition - getChildCount() - 1);
+            nextPage = Math.max(0, mSelectedPosition - getChildCount());
         } else if (direction == FOCUS_DOWN) {
-            nextPage = Math.min(mItemCount - 1, mSelectedPosition + getChildCount() - 1);
+            nextPage = Math.min(mItemCount - 1, mSelectedPosition + getChildCount());
         }
 
         if (nextPage >= 0) {

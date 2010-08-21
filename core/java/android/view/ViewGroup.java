@@ -43,6 +43,7 @@ import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * <p>
@@ -107,6 +108,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     // Target of Motion events
     private View mMotionTarget;
+
+    // Targets of MotionEvents in split mode
+    private SplitMotionTargets mSplitMotionTargets;
 
     // Layout animation
     private LayoutAnimationController mLayoutAnimationController;
@@ -242,6 +246,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     protected static final int FLAG_DISALLOW_INTERCEPT = 0x80000;
 
     /**
+     * When set, this ViewGroup will split MotionEvents to multiple child Views when appropriate.
+     */
+    private static final int FLAG_SPLIT_MOTION_EVENTS = 0x100000;
+
+    /**
      * Indicates which types of drawing caches are to be kept in memory.
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
@@ -361,6 +370,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     break;
                 case R.styleable.ViewGroup_descendantFocusability:
                     setDescendantFocusability(DESCENDANT_FOCUSABILITY_FLAGS[a.getInt(attr, 0)]);
+                    break;
+                case R.styleable.ViewGroup_splitMotionEvents:
+                    setMotionEventSplittingEnabled(a.getBoolean(attr, false));
                     break;
             }
         }
@@ -843,6 +855,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        if ((mGroupFlags & FLAG_SPLIT_MOTION_EVENTS) == FLAG_SPLIT_MOTION_EVENTS) {
+            return dispatchSplitTouchEvent(ev);
+        }
+
         final int action = ev.getAction();
         final float xf = ev.getX();
         final float yf = ev.getY();
@@ -872,7 +888,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     final View child = children[i];
                     if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE
                             || child.getAnimation() != null) {
-                        if (child.dispatchTouchEvent(ev, scrolledXFloat, scrolledYFloat)) {
+                        // Single dispatch always picks its target based on the initial down
+                        // event's position - index 0
+                        if (dispatchTouchEventIfInView(child, ev, 0)) {
                             mMotionTarget = child;
                             return true;
                         }
@@ -950,6 +968,276 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         return target.dispatchTouchEvent(ev);
+    }
+
+    /**
+     * This method detects whether the pointer location at <code>pointerIndex</code> within
+     * <code>ev</code> is inside the specified view. If so, the transformed event is dispatched to
+     * <code>child</code>.
+     *
+     * @param child View to hit test against
+     * @param ev MotionEvent to test
+     * @param pointerIndex Index of the pointer within <code>ev</code> to test
+     * @return <code>false</code> if the hit test failed, or the result of
+     *         <code>child.dispatchTouchEvent</code>
+     */
+    private boolean dispatchTouchEventIfInView(View child, MotionEvent ev, int pointerIndex) {
+        final float x = ev.getX(pointerIndex);
+        final float y = ev.getY(pointerIndex);
+        final float scrolledX = x + mScrollX;
+        final float scrolledY = y + mScrollY;
+        float localX = scrolledX - child.mLeft;
+        float localY = scrolledY - child.mTop;
+        if (!child.hasIdentityMatrix() && mAttachInfo != null) {
+            // non-identity matrix: transform the point into the view's coordinates
+            final float[] localXY = mAttachInfo.mTmpTransformLocation;
+            localXY[0] = localX;
+            localXY[1] = localY;
+            child.getInverseMatrix().mapPoints(localXY);
+            localX = localXY[0];
+            localY = localXY[1];
+        }
+        if (localX >= 0 && localY >= 0 && localX < (child.mRight - child.mLeft) &&
+                localY < (child.mBottom - child.mTop)) {
+            // It would be safer to clone the event here but we don't for performance.
+            // There are many subtle interactions in touch event dispatch; change at your own risk.
+            child.mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
+            ev.offsetLocation(localX - x, localY - y);
+            return child.dispatchTouchEvent(ev);
+        }
+        return false;
+    }
+
+    private boolean dispatchSplitTouchEvent(MotionEvent ev) {
+        final SplitMotionTargets targets = mSplitMotionTargets;
+        final int action = ev.getAction();
+        final int maskedAction = ev.getActionMasked();
+        float xf = ev.getX();
+        float yf = ev.getY();
+        float scrolledXFloat = xf + mScrollX;
+        float scrolledYFloat = yf + mScrollY;
+
+        boolean disallowIntercept = (mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0;
+
+        if (maskedAction == MotionEvent.ACTION_DOWN ||
+                maskedAction == MotionEvent.ACTION_POINTER_DOWN) {
+            final int actionIndex = ev.getActionIndex();
+            final int actionId = ev.getPointerId(actionIndex);
+
+            // Clear out any current target for this ID.
+            // XXX: We should probably send an ACTION_UP to the current
+            // target if present.
+            targets.removeById(actionId);
+
+            // If we're disallowing intercept or if we're allowing and we didn't
+            // intercept
+            if (disallowIntercept || !onInterceptTouchEvent(ev)) {
+                // reset this event's action (just to protect ourselves)
+                ev.setAction(action);
+                // We know we want to dispatch the event down, try to find a child
+                // who can handle it, start with the front-most child.
+                final View[] children = mChildren;
+                final int count = mChildrenCount;
+                for (int i = count - 1; i >= 0; i--) {
+                    final View child = children[i];
+                    if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE
+                            || child.getAnimation() != null) {
+                        final MotionEvent childEvent = targets.filterMotionEventForChild(ev, child);
+                        if (childEvent != null) {
+                            try {
+                                final int childActionIndex = childEvent.findPointerIndex(actionId);
+                                if (dispatchTouchEventIfInView(child, childEvent,
+                                        childActionIndex)) {
+                                    targets.add(actionId, child);
+
+                                    return true;
+                                }
+                            } finally {
+                                childEvent.recycle();
+                            }
+                        }
+                    }
+                }
+
+                // Didn't find a new target. Do we have a "primary" target to send to?
+                final View primaryTarget = targets.getPrimaryTarget();
+                if (primaryTarget != null) {
+                    final MotionEvent childEvent =
+                            targets.filterMotionEventForChild(ev, primaryTarget);
+                    if (childEvent != null) {
+                        try {
+                            // Calculate the offset point into the target's local coordinates
+                            float xc = scrolledXFloat - (float) primaryTarget.mLeft;
+                            float yc = scrolledYFloat - (float) primaryTarget.mTop;
+                            if (!primaryTarget.hasIdentityMatrix() && mAttachInfo != null) {
+                                // non-identity matrix: transform the point into the view's
+                                // coordinates
+                                final float[] localXY = mAttachInfo.mTmpTransformLocation;
+                                localXY[0] = xc;
+                                localXY[1] = yc;
+                                primaryTarget.getInverseMatrix().mapPoints(localXY);
+                                xc = localXY[0];
+                                yc = localXY[1];
+                            }
+                            childEvent.setLocation(xc, yc);
+                            if (primaryTarget.dispatchTouchEvent(childEvent)) {
+                                targets.add(actionId, primaryTarget);
+                                return true;
+                            }
+                        } finally {
+                            childEvent.recycle();
+                        }
+                    }
+                }
+            }
+        }
+
+        boolean isUpOrCancel = (action == MotionEvent.ACTION_UP) ||
+                (action == MotionEvent.ACTION_CANCEL);
+
+        if (isUpOrCancel) {
+            // Note, we've already copied the previous state to our local
+            // variable, so this takes effect on the next event
+            mGroupFlags &= ~FLAG_DISALLOW_INTERCEPT;
+        }
+
+        if (targets.isEmpty()) {
+            // We don't have any targets, this means we're handling the
+            // event as a regular view.
+            ev.setLocation(xf, yf);
+            if ((mPrivateFlags & CANCEL_NEXT_UP_EVENT) != 0) {
+                ev.setAction(MotionEvent.ACTION_CANCEL);
+                mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
+            }
+            return super.dispatchTouchEvent(ev);
+        }
+
+        // if we have targets, see if we're allowed to and want to intercept their
+        // events
+        int uniqueTargetCount = targets.getUniqueTargetCount();
+        if (!disallowIntercept && onInterceptTouchEvent(ev)) {
+            mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
+
+            for (int uniqueIndex = 0; uniqueIndex < uniqueTargetCount; uniqueIndex++) {
+                final View target = targets.getUniqueTargetAt(uniqueIndex);
+
+                // Calculate the offset point into the target's local coordinates
+                float xc = scrolledXFloat - (float) target.mLeft;
+                float yc = scrolledYFloat - (float) target.mTop;
+                if (!target.hasIdentityMatrix() && mAttachInfo != null) {
+                    // non-identity matrix: transform the point into the view's coordinates
+                    final float[] localXY = mAttachInfo.mTmpTransformLocation;
+                    localXY[0] = xc;
+                    localXY[1] = yc;
+                    target.getInverseMatrix().mapPoints(localXY);
+                    xc = localXY[0];
+                    yc = localXY[1];
+                }
+
+                ev.setAction(MotionEvent.ACTION_CANCEL);
+                ev.setLocation(xc, yc);
+                if (!target.dispatchTouchEvent(ev)) {
+                    // target didn't handle ACTION_CANCEL. not much we can do
+                    // but they should have.
+                }
+            }
+            targets.clear();
+            // Don't dispatch this event to our own view, because we already
+            // saw it when intercepting; we just want to give the following
+            // event to the normal onTouchEvent().
+            return true;
+        }
+
+        boolean handled = false;
+        for (int uniqueIndex = 0; uniqueIndex < uniqueTargetCount; uniqueIndex++) {
+            final View target = targets.getUniqueTargetAt(uniqueIndex);
+
+            final MotionEvent targetEvent = targets.filterMotionEventForChild(ev, target);
+            if (targetEvent == null) {
+                continue;
+            }
+
+            try {
+                // Calculate the offset point into the target's local coordinates
+                xf = targetEvent.getX();
+                yf = targetEvent.getY();
+                scrolledXFloat = xf + mScrollX;
+                scrolledYFloat = yf + mScrollY;
+                float xc = scrolledXFloat - (float) target.mLeft;
+                float yc = scrolledYFloat - (float) target.mTop;
+                if (!target.hasIdentityMatrix() && mAttachInfo != null) {
+                    // non-identity matrix: transform the point into the view's coordinates
+                    final float[] localXY = mAttachInfo.mTmpTransformLocation;
+                    localXY[0] = xc;
+                    localXY[1] = yc;
+                    target.getInverseMatrix().mapPoints(localXY);
+                    xc = localXY[0];
+                    yc = localXY[1];
+                }
+
+                // finally offset the event to the target's coordinate system and
+                // dispatch the event.
+                targetEvent.setLocation(xc, yc);
+
+                if ((target.mPrivateFlags & CANCEL_NEXT_UP_EVENT) != 0) {
+                    targetEvent.setAction(MotionEvent.ACTION_CANCEL);
+                    target.mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
+                    targets.removeView(target);
+                    uniqueIndex--;
+                    uniqueTargetCount--;
+                }
+
+                handled |= target.dispatchTouchEvent(targetEvent);
+            } finally {
+                targetEvent.recycle();
+            }
+        }
+
+        if (maskedAction == MotionEvent.ACTION_POINTER_UP) {
+            final int removeId = ev.getPointerId(ev.getActionIndex());
+            targets.removeById(removeId);
+        }
+
+        if (isUpOrCancel) {
+            targets.clear();
+        }
+
+        return handled;
+    }
+
+    /**
+     * Enable or disable the splitting of MotionEvents to multiple children during touch event
+     * dispatch. This behavior is disabled by default.
+     *
+     * <p>When this option is enabled MotionEvents may be split and dispatched to different child
+     * views depending on where each pointer initially went down. This allows for user interactions
+     * such as scrolling two panes of content independently, chording of buttons, and performing
+     * independent gestures on different pieces of content.
+     *
+     * @param split <code>true</code> to allow MotionEvents to be split and dispatched to multiple
+     *              child views. <code>false</code> to only allow one child view to be the target of
+     *              any MotionEvent received by this ViewGroup.
+     */
+    public void setMotionEventSplittingEnabled(boolean split) {
+        // TODO Applications really shouldn't change this setting mid-touch event,
+        // but perhaps this should handle that case and send ACTION_CANCELs to any child views
+        // with gestures in progress when this is changed.
+        if (split) {
+            if ((mGroupFlags & FLAG_SPLIT_MOTION_EVENTS) == 0) {
+                mSplitMotionTargets = new SplitMotionTargets();
+            }
+            mGroupFlags |= FLAG_SPLIT_MOTION_EVENTS;
+        } else {
+            mGroupFlags &= ~FLAG_SPLIT_MOTION_EVENTS;
+            mSplitMotionTargets = null;
+        }
+    }
+
+    /**
+     * @return true if MotionEvents dispatched to this ViewGroup can be split to multiple children.
+     */
+    public boolean isMotionEventSplittingEnabled() {
+        return (mGroupFlags & FLAG_SPLIT_MOTION_EVENTS) == FLAG_SPLIT_MOTION_EVENTS;
     }
 
     /**
@@ -3810,6 +4098,265 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             topMargin = top;
             rightMargin = right;
             bottomMargin = bottom;
+        }
+    }
+
+    private static class SplitMotionTargets {
+        private SparseArray<View> mTargets;
+        private View[] mUniqueTargets;
+        private int mUniqueTargetCount;
+        private long mDownTime;
+        private MotionEvent.PointerCoords[] mPointerCoords;
+        private int[] mPointerIds;
+
+        private static final int INITIAL_UNIQUE_MOTION_TARGETS_SIZE = 5;
+        private static final int INITIAL_BUCKET_SIZE = 5;
+
+        public SplitMotionTargets() {
+            mTargets = new SparseArray<View>();
+            mUniqueTargets = new View[INITIAL_UNIQUE_MOTION_TARGETS_SIZE];
+            mPointerIds = new int[INITIAL_BUCKET_SIZE];
+            mPointerCoords = new MotionEvent.PointerCoords[INITIAL_BUCKET_SIZE];
+            for (int i = 0; i < INITIAL_BUCKET_SIZE; i++) {
+                mPointerCoords[i] = new MotionEvent.PointerCoords();
+            }
+        }
+
+        public void clear() {
+            mTargets.clear();
+            Arrays.fill(mUniqueTargets, null);
+            mUniqueTargetCount = 0;
+        }
+
+        public void add(int pointerId, View target) {
+            mTargets.put(pointerId, target);
+
+            final int uniqueCount = mUniqueTargetCount;
+            boolean addUnique = true;
+            for (int i = 0; i < uniqueCount; i++) {
+                if (mUniqueTargets[i] == target) {
+                    addUnique = false;
+                }
+            }
+            if (addUnique) {
+                if (mUniqueTargets == null) {
+                    mUniqueTargets = new View[INITIAL_UNIQUE_MOTION_TARGETS_SIZE];
+                }
+                if (mUniqueTargets.length == uniqueCount) {
+                    View[] newTargets =
+                        new View[uniqueCount + INITIAL_UNIQUE_MOTION_TARGETS_SIZE];
+                    System.arraycopy(mUniqueTargets, 0, newTargets, 0, uniqueCount);
+                    mUniqueTargets = newTargets;
+                }
+                mUniqueTargets[uniqueCount] = target;
+                mUniqueTargetCount++;
+            }
+        }
+
+        public int getIdCount() {
+            return mTargets.size();
+        }
+
+        public int getUniqueTargetCount() {
+            return mUniqueTargetCount;
+        }
+
+        public View getUniqueTargetAt(int index) {
+            return mUniqueTargets[index];
+        }
+
+        public View get(int id) {
+            return mTargets.get(id);
+        }
+
+        public int indexOfId(int id) {
+            return mTargets.indexOfKey(id);
+        }
+
+        public int indexOfTarget(View target) {
+            return mTargets.indexOfValue(target);
+        }
+
+        public int idAt(int index) {
+            return mTargets.keyAt(index);
+        }
+
+        public View targetAt(int index) {
+            return mTargets.valueAt(index);
+        }
+
+        public View getPrimaryTarget() {
+            if (!isEmpty()) {
+                return mUniqueTargets[0];
+            }
+            return null;
+        }
+
+        public boolean hasTarget(View target) {
+            final View[] unique = mUniqueTargets;
+            final int uniqueCount = mUniqueTargetCount;
+            for (int i = 0; i < uniqueCount; i++) {
+                if (unique[i] == target) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public boolean isEmpty() {
+            return mUniqueTargetCount == 0;
+        }
+
+        public void removeById(int id) {
+            final int index = mTargets.indexOfKey(id);
+            removeAt(index);
+        }
+        
+        public void removeView(View view) {
+            int i = 0;
+            while (i < mTargets.size()) {
+                if (mTargets.valueAt(i) == view) {
+                    mTargets.removeAt(i);
+                } else {
+                    i++;
+                }
+            }
+            removeUnique(view);
+        }
+
+        public void removeAt(int index) {
+            if (index < 0 || index >= mTargets.size()) {
+                return;
+            }
+
+            final View removeView = mTargets.valueAt(index);
+            mTargets.removeAt(index);
+            if (mTargets.indexOfValue(removeView) < 0) {
+                removeUnique(removeView);
+            }
+        }
+
+        private void removeUnique(View removeView) {
+            View[] unique = mUniqueTargets;
+            int uniqueCount = mUniqueTargetCount;
+            for (int i = 0; i < uniqueCount; i++) {
+                if (unique[i] == removeView) {
+                    unique[i] = unique[--uniqueCount];
+                    unique[uniqueCount] = null;
+                    break;
+                }
+            }
+
+            mUniqueTargetCount = uniqueCount;
+        }
+
+        /**
+         * Return a new (obtain()ed) MotionEvent containing only data for pointers that should
+         * be dispatched to child. Don't forget to recycle it!
+         */
+        public MotionEvent filterMotionEventForChild(MotionEvent ev, View child) {
+            int action = ev.getAction();
+            final int maskedAction = action & MotionEvent.ACTION_MASK;
+
+            // Only send pointer up events if this child was the target. Drop it otherwise.
+            if (maskedAction == MotionEvent.ACTION_POINTER_UP &&
+                    get(ev.getPointerId(ev.getActionIndex())) != child) {
+                return null;
+            }
+
+            int pointerCount = 0;
+            final int idCount = getIdCount();
+            for (int i = 0; i < idCount; i++) {
+                if (targetAt(i) == child) {
+                    pointerCount++;
+                }
+            }
+
+            int actionId = -1;
+            boolean needsNewIndex = false; // True if we should fill in the action's masked index
+
+            // If we have a down event, it wasn't counted above.
+            if (maskedAction == MotionEvent.ACTION_DOWN) {
+                pointerCount++;
+                actionId = ev.getPointerId(0);
+                mDownTime = ev.getDownTime();
+            } else if (maskedAction == MotionEvent.ACTION_POINTER_DOWN) {
+                pointerCount++;
+
+                actionId = ev.getPointerId(ev.getActionIndex());
+
+                if (indexOfTarget(child) < 0) {
+                    // The new action should be ACTION_DOWN if this child isn't currently getting
+                    // any events.
+                    action = MotionEvent.ACTION_DOWN;
+                } else {
+                    // Fill in the index portion of the action later.
+                    needsNewIndex = true;
+                }
+            } else if (maskedAction == MotionEvent.ACTION_POINTER_UP) {
+                actionId = ev.getPointerId(ev.getActionIndex());
+                if (pointerCount == 1) {
+                    // The new action should be ACTION_UP if there's only one pointer left for
+                    // this target.
+                    action = MotionEvent.ACTION_UP;
+                } else {
+                    // Fill in the index portion of the action later.
+                    needsNewIndex = true;
+                }
+            }
+
+            if (pointerCount == 0) {
+                return null;
+            }
+
+            // Fill the buckets with pointer data!
+            final int eventPointerCount = ev.getPointerCount();
+            int bucketIndex = 0;
+            int newActionIndex = -1;
+            for (int evp = 0; evp < eventPointerCount; evp++) {
+                final int id = ev.getPointerId(evp);
+
+                // Add this pointer to the bucket if it is new or targeted at child
+                if (id == actionId || get(id) == child) {
+                    // Expand scratch arrays if needed
+                    if (mPointerCoords.length <= bucketIndex) {
+                        int[] pointerIds = new int[pointerCount];
+                        MotionEvent.PointerCoords[] pointerCoords =
+                                new MotionEvent.PointerCoords[pointerCount];
+                        for (int i = mPointerCoords.length; i < pointerCoords.length; i++) {
+                            pointerCoords[i] = new MotionEvent.PointerCoords();
+                        }
+
+                        System.arraycopy(mPointerCoords, 0,
+                                pointerCoords, 0, mPointerCoords.length);
+                        System.arraycopy(mPointerIds, 0, pointerIds, 0, mPointerIds.length);
+
+                        mPointerCoords = pointerCoords;
+                        mPointerIds = pointerIds;
+                    }
+
+                    mPointerIds[bucketIndex] = id;
+                    ev.getPointerCoords(evp, mPointerCoords[bucketIndex]);
+
+                    if (needsNewIndex && id == actionId) {
+                        newActionIndex = bucketIndex;
+                    }
+
+                    bucketIndex++;
+                }
+            }
+
+            // Encode the new action index if we have one
+            if (newActionIndex >= 0) {
+                action = (action & MotionEvent.ACTION_MASK) |
+                        (newActionIndex << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
+            }
+
+            MotionEvent result = MotionEvent.obtain(mDownTime, ev.getEventTime(),
+                    action, pointerCount, mPointerIds, mPointerCoords, ev.getMetaState(),
+                    ev.getXPrecision(), ev.getYPrecision(), ev.getDeviceId(), ev.getEdgeFlags(),
+                    ev.getSource());
+            return result;
         }
     }
 }

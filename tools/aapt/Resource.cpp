@@ -2074,12 +2074,13 @@ writeProguardForLayouts(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
     // tag:attribute pairs that should be checked in layout files.
     KeyedVector<String8, NamespaceAttributePair> kLayoutTagAttrPairs;
     addTagAttrPair(&kLayoutTagAttrPairs, "view", NULL, "class");
+    addTagAttrPair(&kLayoutTagAttrPairs, "fragment", NULL, "class");
     addTagAttrPair(&kLayoutTagAttrPairs, "fragment", RESOURCES_ANDROID_NAMESPACE, "name");
 
     // tag:attribute pairs that should be checked in xml files.
     KeyedVector<String8, NamespaceAttributePair> kXmlTagAttrPairs;
     addTagAttrPair(&kXmlTagAttrPairs, "PreferenceScreen", RESOURCES_ANDROID_NAMESPACE, "fragment");
-    addTagAttrPair(&kXmlTagAttrPairs, "Header", RESOURCES_ANDROID_NAMESPACE, "fragment");
+    addTagAttrPair(&kXmlTagAttrPairs, "header", RESOURCES_ANDROID_NAMESPACE, "fragment");
 
     const Vector<sp<AaptDir> >& dirs = assets->resDirs();
     const size_t K = dirs.size();

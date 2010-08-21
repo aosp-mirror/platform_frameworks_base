@@ -69,6 +69,9 @@
         
         <item name="textAppearanceButton">@android:style/TextAppearance.Widget.Button</item>
         
+        <item name="editTextColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="editTextBackground">@android:drawable/edit_text</item>
+        
         <item name="candidatesTextStyleSpans">@android:string/candidates_style</item>
         
         <item name="textCheckMark">@android:drawable/indicator_check_mark_dark</item>
@@ -257,6 +260,7 @@
         <item name="textColorLink">@android:color/link_text_light</item>
         <item name="textColorLinkInverse">@android:color/link_text_dark</item>
         
+        <item name="editTextColor">?android:attr/textColorPrimary</item>
         <item name="popupWindowStyle">@android:style/Widget.PopupWindow</item>
         
         <item name="textCheckMark">@android:drawable/indicator_check_mark_light</item>
@@ -570,4 +574,38 @@
     <style name="Theme.NoTitleBar.OverlayActionModes">
         <item name="android:windowActionModeOverlay">true</item>
     </style>
+    
+    <!-- New Honeycomb holographic theme. Dark version -->
+    <style name="Theme.Holo">
+        <item name="editTextBackground">@android:drawable/edit_text_holo_dark</item>
+        <item name="editTextColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <!-- New Honeycomb holographic theme. Light version -->
+    <style name="Theme.Light.Holo">
+        <item name="editTextBackground">@android:drawable/edit_text_holo_light</item>
+    </style>
+
+    <!-- Variant of the holo (dark) theme with no title bar -->
+    <style name="Theme.Holo.NoTitleBar">
+        <item name="android:windowNoTitle">true</item>
+    </style>
+    
+    <!-- Variant of the holo (dark) theme that has no title bar and fills the entire screen -->
+    <style name="Theme.Holo.NoTitleBar.Fullscreen">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <!-- Variant of the holo light theme with no title bar -->
+    <style name="Theme.Light.Holo.NoTitleBar">
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- Variant of the holo light theme that has no title bar and fills the entire screen -->
+    <style name="Theme.Light.Holo.NoTitleBar.Fullscreen">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+ 
 </resources>
