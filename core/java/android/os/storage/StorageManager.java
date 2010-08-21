@@ -295,6 +295,8 @@ public class StorageManager
      * file matches a package ID that is owned by the calling program's UID.
      * That is, shared UID applications can obtain access to any other
      * application's OBB that shares its UID.
+     * <p>
+     * STOPSHIP document more; discuss lack of guarantees of security
      * 
      * @param filename the path to the OBB file
      * @param key decryption key
@@ -319,6 +321,8 @@ public class StorageManager
      * file matches a package ID that is owned by the calling program's UID.
      * That is, shared UID applications can obtain access to any other
      * application's OBB that shares its UID.
+     * <p>
+     * STOPSHIP document more; discuss lack of guarantees of security
      * 
      * @param filename path to the OBB file
      * @param force whether to kill any programs using this in order to unmount
