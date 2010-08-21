@@ -22,6 +22,7 @@
 
 #include <ctype.h>
 
+#include <media/stagefright/foundation/ABitReader.h>
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
@@ -246,6 +247,161 @@ sp<ABuffer> MakeAACCodecSpecificData(const char *params) {
     return csd;
 }
 
+static size_t GetSizeWidth(size_t x) {
+    size_t n = 1;
+    while (x > 127) {
+        ++n;
+        x >>= 7;
+    }
+    return n;
+}
+
+static uint8_t *EncodeSize(uint8_t *dst, size_t x) {
+    while (x > 127) {
+        *dst++ = (x & 0x7f) | 0x80;
+        x >>= 7;
+    }
+    *dst++ = x;
+    return dst;
+}
+
+static bool ExtractDimensionsFromVOLHeader(
+        const sp<ABuffer> &config, int32_t *width, int32_t *height) {
+    *width = 0;
+    *height = 0;
+
+    const uint8_t *ptr = config->data();
+    size_t offset = 0;
+    bool foundVOL = false;
+    while (offset + 3 < config->size()) {
+        if (memcmp("\x00\x00\x01", &ptr[offset], 3)
+                || (ptr[offset + 3] & 0xf0) != 0x20) {
+            ++offset;
+            continue;
+        }
+
+        foundVOL = true;
+        break;
+    }
+
+    if (!foundVOL) {
+        return false;
+    }
+
+    ABitReader br(&ptr[offset + 4], config->size() - offset - 4);
+    br.skipBits(1);  // random_accessible_vol
+    unsigned video_object_type_indication = br.getBits(8);
+
+    CHECK_NE(video_object_type_indication,
+             0x21u /* Fine Granularity Scalable */);
+
+    unsigned video_object_layer_verid;
+    unsigned video_object_layer_priority;
+    if (br.getBits(1)) {
+        video_object_layer_verid = br.getBits(4);
+        video_object_layer_priority = br.getBits(3);
+    }
+    unsigned aspect_ratio_info = br.getBits(4);
+    if (aspect_ratio_info == 0x0f /* extended PAR */) {
+        br.skipBits(8);  // par_width
+        br.skipBits(8);  // par_height
+    }
+    if (br.getBits(1)) {  // vol_control_parameters
+        br.skipBits(2);  // chroma_format
+        br.skipBits(1);  // low_delay
+        if (br.getBits(1)) {  // vbv_parameters
+            TRESPASS();
+        }
+    }
+    unsigned video_object_layer_shape = br.getBits(2);
+    CHECK_EQ(video_object_layer_shape, 0x00u /* rectangular */);
+
+    CHECK(br.getBits(1));  // marker_bit
+    unsigned vop_time_increment_resolution = br.getBits(16);
+    CHECK(br.getBits(1));  // marker_bit
+
+    if (br.getBits(1)) {  // fixed_vop_rate
+        // range [0..vop_time_increment_resolution)
+
+        // vop_time_increment_resolution
+        // 2 => 0..1, 1 bit
+        // 3 => 0..2, 2 bits
+        // 4 => 0..3, 2 bits
+        // 5 => 0..4, 3 bits
+        // ...
+
+        CHECK_GT(vop_time_increment_resolution, 0u);
+        --vop_time_increment_resolution;
+
+        unsigned numBits = 0;
+        while (vop_time_increment_resolution > 0) {
+            ++numBits;
+            vop_time_increment_resolution >>= 1;
+        }
+
+        br.skipBits(numBits);  // fixed_vop_time_increment
+    }
+
+    CHECK(br.getBits(1));  // marker_bit
+    unsigned video_object_layer_width = br.getBits(13);
+    CHECK(br.getBits(1));  // marker_bit
+    unsigned video_object_layer_height = br.getBits(13);
+    CHECK(br.getBits(1));  // marker_bit
+
+    unsigned interlaced = br.getBits(1);
+
+    *width = video_object_layer_width;
+    *height = video_object_layer_height;
+
+    LOG(INFO) << "VOL dimensions = " << *width << "x" << *height;
+
+    return true;
+}
+
+sp<ABuffer> MakeMPEG4VideoCodecSpecificData(
+        const char *params, int32_t *width, int32_t *height) {
+    *width = 0;
+    *height = 0;
+
+    AString val;
+    CHECK(GetAttribute(params, "config", &val));
+
+    sp<ABuffer> config = decodeHex(val);
+    CHECK(config != NULL);
+
+    if (!ExtractDimensionsFromVOLHeader(config, width, height)) {
+        return NULL;
+    }
+
+    size_t len1 = config->size() + GetSizeWidth(config->size()) + 1;
+    size_t len2 = len1 + GetSizeWidth(len1) + 1 + 13;
+    size_t len3 = len2 + GetSizeWidth(len2) + 1 + 3;
+
+    sp<ABuffer> csd = new ABuffer(len3);
+    uint8_t *dst = csd->data();
+    *dst++ = 0x03;
+    dst = EncodeSize(dst, len2 + 3);
+    *dst++ = 0x00;  // ES_ID
+    *dst++ = 0x00;
+    *dst++ = 0x00;  // streamDependenceFlag, URL_Flag, OCRstreamFlag
+
+    *dst++ = 0x04;
+    dst = EncodeSize(dst, len1 + 13);
+    *dst++ = 0x01;  // Video ISO/IEC 14496-2 Simple Profile
+    for (size_t i = 0; i < 12; ++i) {
+        *dst++ = 0x00;
+    }
+
+    *dst++ = 0x05;
+    dst = EncodeSize(dst, config->size());
+    memcpy(dst, config->data(), config->size());
+    dst += config->size();
+
+    // hexdump(csd->data(), csd->size());
+
+    return csd;
+}
+
 APacketSource::APacketSource(
         const sp<ASessionDescription> &sessionDesc, size_t index)
     : mInitCheck(NO_INIT),
@@ -351,6 +507,36 @@ APacketSource::APacketSource(
         if (sampleRate != 16000 || numChannels != 1) {
             mInitCheck = ERROR_UNSUPPORTED;
         }
+    } else if (!strncmp(desc.c_str(), "MP4V-ES/", 8)) {
+        mFormat->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_MPEG4);
+
+        int32_t width, height;
+        if (!sessionDesc->getDimensions(index, PT, &width, &height)) {
+            width = -1;
+            height = -1;
+        }
+
+        int32_t encWidth, encHeight;
+        sp<ABuffer> codecSpecificData =
+            MakeMPEG4VideoCodecSpecificData(
+                    params.c_str(), &encWidth, &encHeight);
+
+        if (codecSpecificData != NULL) {
+            mFormat->setData(
+                    kKeyESDS, 0,
+                    codecSpecificData->data(), codecSpecificData->size());
+
+            if (width < 0) {
+                width = encWidth;
+                height = encHeight;
+            }
+        } else if (width < 0) {
+            mInitCheck = ERROR_UNSUPPORTED;
+            return;
+        }
+
+        mFormat->setInt32(kKeyWidth, width);
+        mFormat->setInt32(kKeyHeight, height);
     } else {
         mInitCheck = ERROR_UNSUPPORTED;
     }
