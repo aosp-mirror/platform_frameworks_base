@@ -21,8 +21,9 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
-import android.graphics.Shader;
 import android.graphics.Rect;
+import android.graphics.Shader;
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ClipDrawable;
@@ -30,11 +31,14 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.StateListDrawable;
-import android.graphics.drawable.Animatable;
 import android.graphics.drawable.shapes.RoundRectShape;
 import android.graphics.drawable.shapes.Shape;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.RemotableViewMethod;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.animation.AlphaAnimation;
@@ -44,9 +48,6 @@ import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.Transformation;
 import android.widget.RemoteViews.RemoteView;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.os.SystemClock;
 
 import com.android.internal.R;
 
@@ -762,6 +763,7 @@ public class ProgressBar extends View {
     }
 
     @Override
+    @RemotableViewMethod
     public void setVisibility(int v) {
         if (getVisibility() != v) {
             super.setVisibility(v);
