@@ -159,6 +159,12 @@ public:
     virtual int32_t waitForMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
             int32_t injectorPid, int32_t injectorUid,
             Vector<InputTarget>& outTargets) = 0;
+
+    /* Gets the maximum suggested event delivery rate per second.
+     * This value is used to throttle motion event movement actions on a per-device
+     * basis.  It is not intended to be a hard limit.
+     */
+    virtual int32_t getMaxEventsPerSecond() = 0;
 };
 
 
@@ -332,6 +338,8 @@ private:
         // Linked list of motion samples associated with this motion event.
         MotionSample firstSample;
         MotionSample* lastSample;
+
+        uint32_t countSamples() const;
     };
 
     // Tracks the progress of dispatching a particular event to a particular connection.
@@ -586,6 +594,17 @@ private:
 
     Condition mInjectionSyncFinishedCondition;
     void decrementPendingSyncDispatchesLocked(EventEntry* entry);
+
+    // Throttling state.
+    struct ThrottleState {
+        nsecs_t minTimeBetweenEvents;
+
+        nsecs_t lastEventTime;
+        int32_t lastDeviceId;
+        uint32_t lastSource;
+
+        uint32_t originalSampleCount; // only collected during debugging
+    } mThrottleState;
 
     // Key repeat tracking.
     // XXX Move this up to the input reader instead.

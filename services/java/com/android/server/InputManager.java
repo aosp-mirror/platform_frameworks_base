@@ -26,6 +26,7 @@ import android.content.res.Configuration;
 import android.os.Environment;
 import android.os.LocalPowerManager;
 import android.os.PowerManager;
+import android.os.SystemProperties;
 import android.util.Slog;
 import android.util.Xml;
 import android.view.InputChannel;
@@ -506,6 +507,19 @@ public class InputManager {
             }
             
             return names.toArray(new String[names.size()]);
+        }
+        
+        @SuppressWarnings("unused")
+        public int getMaxEventsPerSecond() {
+            int result = 0;
+            try {
+                result = Integer.parseInt(SystemProperties.get("windowsmgr.max_events_per_sec"));
+            } catch (NumberFormatException e) {
+            }
+            if (result < 1) {
+                result = 35;
+            }
+            return result;
         }
     }
 }
