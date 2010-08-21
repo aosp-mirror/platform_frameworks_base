@@ -18,6 +18,8 @@
 
 #include "ASessionDescription.h"
 
+#include "avc_utils.h"
+
 #include <ctype.h>
 
 #include <media/stagefright/foundation/ABuffer.h>
@@ -96,7 +98,11 @@ static sp<ABuffer> decodeHex(const AString &s) {
     return buffer;
 }
 
-static sp<ABuffer> MakeAVCCodecSpecificData(const char *params) {
+static sp<ABuffer> MakeAVCCodecSpecificData(
+        const char *params, int32_t *width, int32_t *height) {
+    *width = 0;
+    *height = 0;
+
     AString val;
     if (!GetAttribute(params, "profile-level-id", &val)) {
         return NULL;
@@ -178,6 +184,11 @@ static sp<ABuffer> MakeAVCCodecSpecificData(const char *params) {
         memcpy(out, nal->data(), nal->size());
 
         out += nal->size();
+
+        if (i == 0) {
+            FindAVCDimensions(nal, width, height);
+            LOG(INFO) << "dimensions " << *width << "x" << *height;
+        }
     }
 
     *out++ = numPicParameterSets;
@@ -193,7 +204,7 @@ static sp<ABuffer> MakeAVCCodecSpecificData(const char *params) {
         out += nal->size();
     }
 
-    hexdump(csd->data(), csd->size());
+    // hexdump(csd->data(), csd->size());
 
     return csd;
 }
@@ -230,7 +241,7 @@ sp<ABuffer> MakeAACCodecSpecificData(const char *params) {
     csd->data()[sizeof(kStaticESDS)] = (x >> 8) & 0xff;
     csd->data()[sizeof(kStaticESDS) + 1] = x & 0xff;
 
-    hexdump(csd->data(), csd->size());
+    // hexdump(csd->data(), csd->size());
 
     return csd;
 }
@@ -260,22 +271,32 @@ APacketSource::APacketSource(
 
         int32_t width, height;
         if (!sessionDesc->getDimensions(index, PT, &width, &height)) {
-            // TODO: extract dimensions from sequence parameter set.
+            width = -1;
+            height = -1;
+        }
+
+        int32_t encWidth, encHeight;
+        sp<ABuffer> codecSpecificData =
+            MakeAVCCodecSpecificData(params.c_str(), &encWidth, &encHeight);
+
+        if (codecSpecificData != NULL) {
+            if (width < 0) {
+                // If no explicit width/height given in the sdp, use the dimensions
+                // extracted from the first sequence parameter set.
+                width = encWidth;
+                height = encHeight;
+            }
+
+            mFormat->setData(
+                    kKeyAVCC, 0,
+                    codecSpecificData->data(), codecSpecificData->size());
+        } else if (width < 0) {
             mInitCheck = ERROR_UNSUPPORTED;
             return;
         }
 
         mFormat->setInt32(kKeyWidth, width);
         mFormat->setInt32(kKeyHeight, height);
-
-        sp<ABuffer> codecSpecificData =
-            MakeAVCCodecSpecificData(params.c_str());
-
-        if (codecSpecificData != NULL) {
-            mFormat->setData(
-                    kKeyAVCC, 0,
-                    codecSpecificData->data(), codecSpecificData->size());
-        }
     } else if (!strncmp(desc.c_str(), "H263-2000/", 10)
             || !strncmp(desc.c_str(), "H263-1998/", 10)) {
         mFormat->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_H263);

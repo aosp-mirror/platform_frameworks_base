@@ -40,6 +40,7 @@ LOCAL_SRC_FILES:=                         \
         TimedEventQueue.cpp               \
         Utils.cpp                         \
         WAVExtractor.cpp                  \
+        avc_utils.cpp                     \
         string.cpp
 
 LOCAL_C_INCLUDES:= \
