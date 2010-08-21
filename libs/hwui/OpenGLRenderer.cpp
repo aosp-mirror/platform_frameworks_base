@@ -575,6 +575,14 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         return;
     }
 
+    float scaleX = paint->getTextScaleX();
+    bool applyScaleX = scaleX < 0.9999f || scaleX > 1.0001f;
+    if (applyScaleX) {
+        save(0);
+        translate(x - (x * scaleX), 0.0f);
+        scale(scaleX, 1.0f);
+    }
+
     float length = -1.0f;
     switch (paint->getTextAlign()) {
         case SkPaint::kCenter_Align:
@@ -626,6 +634,10 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     glDisableVertexAttribArray(mCurrentProgram->getAttrib("texCoords"));
 
     drawTextDecorations(text, bytesCount, length, x, y, paint);
+
+    if (applyScaleX) {
+        restore();
+    }
 }
 
 void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
