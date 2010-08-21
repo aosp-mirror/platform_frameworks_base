@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Track the state of Wifi connectivity. All event handling is done here,
@@ -215,6 +216,9 @@ public class WifiStateTracker extends NetworkStateTracker {
     private int mLastNetworkId = -1;
     private boolean mUseStaticIp = false;
     private int mReconnectCount;
+
+    /* Tracks if any network in the configuration is disabled */
+    private AtomicBoolean mIsAnyNetworkDisabled = new AtomicBoolean(false);
 
     // used to store the (non-persisted) num determined during device boot 
     // (from mcc or other phone info) before the driver is started.
@@ -814,6 +818,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                 mTornDownByConnMgr = false;
                 mLastBssid = null;
                 mLastSsid = null;
+                mIsAnyNetworkDisabled.set(false);
                 requestConnectionInfo();
                 SupplicantState supplState = mWifiInfo.getSupplicantState();
                 /**
@@ -1585,6 +1590,10 @@ public class WifiStateTracker extends NetworkStateTracker {
         mWifiState.set(wifiState);
     }
 
+    public boolean isAnyNetworkDisabled() {
+        return mIsAnyNetworkDisabled.get();
+    }
+
    /**
      * The WifiNative interface functions are listed below.
      * The only native call that is not synchronized on
@@ -1785,7 +1794,25 @@ public class WifiStateTracker extends NetworkStateTracker {
         if (mWifiState.get() != WIFI_STATE_ENABLED) {
             return false;
         }
+        if (disableOthers) mIsAnyNetworkDisabled.set(true);
         return WifiNative.enableNetworkCommand(netId, disableOthers);
+    }
+
+    /**
+     * Enable all networks
+     *
+     * @param networks list of configured networks
+     */
+    public synchronized void enableAllNetworks(List<WifiConfiguration> networks) {
+        if (mWifiState.get() != WIFI_STATE_ENABLED) {
+            return;
+        }
+        mIsAnyNetworkDisabled.set(false);
+        for (WifiConfiguration config : networks) {
+            if (config.status == WifiConfiguration.Status.DISABLED) {
+                WifiNative.enableNetworkCommand(config.networkId, false);
+            }
+        }
     }
 
     /**
@@ -1798,6 +1825,7 @@ public class WifiStateTracker extends NetworkStateTracker {
         if (mWifiState.get() != WIFI_STATE_ENABLED) {
             return false;
         }
+        mIsAnyNetworkDisabled.set(true);
         return WifiNative.disableNetworkCommand(netId);
     }
 
