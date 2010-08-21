@@ -74,6 +74,10 @@ public final class Message implements Parcelable {
      */
     public Messenger replyTo;
     
+    /*package*/ static final int FLAG_IN_USE = 1;
+    
+    /*package*/ int flags;
+    
     /*package*/ long when;
     
     /*package*/ Bundle data;
@@ -253,6 +257,7 @@ public final class Message implements Parcelable {
      * target/callback of the original message.
      */
     public void copyFrom(Message o) {
+        this.flags = o.flags;
         this.what = o.what;
         this.arg1 = o.arg1;
         this.arg2 = o.arg2;
@@ -350,6 +355,7 @@ public final class Message implements Parcelable {
     }
 
     /*package*/ void clearForRecycle() {
+        flags = 0;
         what = 0;
         arg1 = 0;
         arg2 = 0;
@@ -359,6 +365,14 @@ public final class Message implements Parcelable {
         target = null;
         callback = null;
         data = null;
+    }
+
+    /*package*/ boolean isInUse() {
+        return ((flags & FLAG_IN_USE) == FLAG_IN_USE);
+    }
+
+    /*package*/ void markInUse() {
+        flags |= FLAG_IN_USE;
     }
 
     /** Constructor (but the preferred way to get a Message is to call {@link #obtain() Message.obtain()}).
@@ -453,4 +467,3 @@ public final class Message implements Parcelable {
         replyTo = Messenger.readMessengerOrNullFromParcel(source);
     }
 }
-
