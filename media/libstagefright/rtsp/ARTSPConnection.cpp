@@ -136,6 +136,20 @@ bool ARTSPConnection::ParseURL(
     return true;
 }
 
+static void MakeSocketBlocking(int s, bool blocking) {
+    // Make socket non-blocking.
+    int flags = fcntl(s, F_GETFL, 0);
+    CHECK_NE(flags, -1);
+
+    if (blocking) {
+        flags &= ~O_NONBLOCK;
+    } else {
+        flags |= O_NONBLOCK;
+    }
+
+    CHECK_NE(fcntl(s, F_SETFL, flags), -1);
+}
+
 void ARTSPConnection::onConnect(const sp<AMessage> &msg) {
     ++mConnectionID;
 
@@ -150,10 +164,7 @@ void ARTSPConnection::onConnect(const sp<AMessage> &msg) {
 
     mSocket = socket(AF_INET, SOCK_STREAM, 0);
 
-    // Make socket non-blocking.
-    int flags = fcntl(mSocket, F_GETFL, 0);
-    CHECK_NE(flags, -1);
-    CHECK_NE(fcntl(mSocket, F_SETFL, flags | O_NONBLOCK), -1);
+    MakeSocketBlocking(mSocket, false);
 
     AString url;
     CHECK(msg->findString("url", &url));
@@ -210,7 +221,7 @@ void ARTSPConnection::onDisconnect(const sp<AMessage> &msg) {
         mSocket = -1;
 
         flushPendingRequests();
-    } 
+    }
 
     sp<AMessage> reply;
     CHECK(msg->findMessage("reply", &reply));
@@ -347,7 +358,13 @@ void ARTSPConnection::onReceiveResponse() {
     CHECK_GE(res, 0);
 
     if (res == 1) {
-        if (!receiveRTSPReponse()) {
+        MakeSocketBlocking(mSocket, true);
+
+        bool success = receiveRTSPReponse();
+
+        MakeSocketBlocking(mSocket, false);
+
+        if (!success) {
             // Something horrible, irreparable has happened.
             flushPendingRequests();
             return;
