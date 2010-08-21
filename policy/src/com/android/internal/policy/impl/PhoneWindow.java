@@ -364,29 +364,32 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
-        if ((st != null) && (st.menu != null)) {
-            final MenuBuilder menuBuilder = (MenuBuilder) st.menu;
+        // Action bars handle their own menu state
+        if (mActionBar == null) {
+            PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
+            if ((st != null) && (st.menu != null)) {
+                final MenuBuilder menuBuilder = (MenuBuilder) st.menu;
 
-            if (st.isOpen) {
-                // Freeze state
-                final Bundle state = new Bundle();
-                menuBuilder.saveHierarchyState(state);
+                if (st.isOpen) {
+                    // Freeze state
+                    final Bundle state = new Bundle();
+                    menuBuilder.saveHierarchyState(state);
 
-                // Remove the menu views since they need to be recreated
-                // according to the new configuration
-                clearMenuViews(st);
+                    // Remove the menu views since they need to be recreated
+                    // according to the new configuration
+                    clearMenuViews(st);
 
-                // Re-open the same menu
-                reopenMenu(false);
+                    // Re-open the same menu
+                    reopenMenu(false);
 
-                // Restore state
-                menuBuilder.restoreHierarchyState(state);
+                    // Restore state
+                    menuBuilder.restoreHierarchyState(state);
 
-            } else {
-                // Clear menu views so on next menu opening, it will use
-                // the proper layout
-                clearMenuViews(st);
+                } else {
+                    // Clear menu views so on next menu opening, it will use
+                    // the proper layout
+                    clearMenuViews(st);
+                }
             }
         }
     }
@@ -1515,6 +1518,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     static private final String FOCUSED_ID_TAG = "android:focusedViewId";
     static private final String VIEWS_TAG = "android:views";
     static private final String PANELS_TAG = "android:Panels";
+    static private final String ACTION_BAR_TAG = "android:ActionBar";
 
     /** {@inheritDoc} */
     @Override
@@ -1546,6 +1550,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         savePanelState(panelStates);
         if (panelStates.size() > 0) {
             outState.putSparseParcelableArray(PANELS_TAG, panelStates);
+        }
+
+        if (mActionBar != null) {
+            outState.putBoolean(ACTION_BAR_TAG, mActionBar.isOverflowMenuShowing());
         }
 
         return outState;
@@ -1581,6 +1589,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         SparseArray<Parcelable> panelStates = savedInstanceState.getSparseParcelableArray(PANELS_TAG);
         if (panelStates != null) {
             restorePanelState(panelStates);
+        }
+
+        if (mActionBar != null && savedInstanceState.getBoolean(ACTION_BAR_TAG)) {
+            mActionBar.postShowOverflowMenu();
         }
     }
 
