@@ -5,6 +5,7 @@
         >
 
     <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
 
     <application
         android:persistent="true"
@@ -24,6 +25,12 @@
 
         <activity android:name=".usb.UsbStorageActivity"
                 android:excludeFromRecents="true">
+        </activity>
+
+        <activity android:name=".statusbar.RecentApplicationsActivity"
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:excludeFromRecents="true"
+            android:exported="true">
         </activity>
 
     </application>
