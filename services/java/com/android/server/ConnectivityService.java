@@ -27,6 +27,7 @@ import android.net.IConnectivityManager;
 import android.net.MobileDataStateTracker;
 import android.net.NetworkInfo;
 import android.net.NetworkStateTracker;
+import android.net.NetworkUtils;
 import android.net.wifi.WifiStateTracker;
 import android.os.Binder;
 import android.os.Handler;
@@ -49,6 +50,8 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * @hide
@@ -730,6 +733,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     /**
+     * @deprecated use requestRouteToHostAddress instead
+     *
      * Ensure that a network route exists to deliver traffic to the specified
      * host via the specified network interface.
      * @param networkType the type of the network over which traffic to the
@@ -739,6 +744,25 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * @return {@code true} on success, {@code false} on failure
      */
     public boolean requestRouteToHost(int networkType, int hostAddress) {
+        InetAddress inetAddress = NetworkUtils.intToInetAddress(hostAddress);
+
+        if (inetAddress == null) {
+            return false;
+        }
+
+        return requestRouteToHostAddress(networkType, inetAddress.getAddress());
+    }
+
+    /**
+     * Ensure that a network route exists to deliver traffic to the specified
+     * host via the specified network interface.
+     * @param networkType the type of the network over which traffic to the
+     * specified host is to be routed
+     * @param hostAddress the IP address of the host to which the route is
+     * desired
+     * @return {@code true} on success, {@code false} on failure
+     */
+    public boolean requestRouteToHostAddress(int networkType, byte[] hostAddress) {
         enforceChangePermission();
         if (!ConnectivityManager.isNetworkTypeValid(networkType)) {
             return false;
@@ -748,11 +772,18 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (tracker == null || !tracker.getNetworkInfo().isConnected() ||
                 tracker.isTeardownRequested()) {
             if (DBG) {
-                Slog.d(TAG, "requestRouteToHost on down network (" + networkType + ") - dropped");
+                Slog.d(TAG, "requestRouteToHostAddress on down network " +
+                           "(" + networkType + ") - dropped");
             }
             return false;
         }
-        return tracker.requestRouteToHost(hostAddress);
+
+        try {
+            InetAddress inetAddress = InetAddress.getByAddress(hostAddress);
+            return tracker.requestRouteToHost(inetAddress);
+        } catch (UnknownHostException e) {
+            return false;
+        }
     }
 
     /**
