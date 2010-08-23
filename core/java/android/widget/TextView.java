@@ -7480,7 +7480,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         /**
          * Update the controller's position.
          */
-        public void updatePosition(int offset);
+        public void updatePosition(int x, int y);
 
         /**
          * The controller and the cursor's positions can be link by a fixed offset,
@@ -7515,7 +7515,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // Vertical extension of the touch region
         int mTopExtension, mBottomExtension;
         // Position of the virtual finger position on screen
-        int mHopSpotVertcalPosition;
+        int mHotSpotVerticalPosition;
 
         Handle(Drawable drawable) {
             mDrawable = drawable;
@@ -7528,8 +7528,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final int lineTop = mLayout.getLineTop(line);
             final int lineBottom = mLayout.getLineBottom(line);
 
-            mHopSpotVertcalPosition = lineTop + (bottom ? (3 * (lineBottom - lineTop)) / 4 :
-                (lineBottom - lineTop) / 4);
+            mHotSpotVerticalPosition = lineTop;
 
             final Rect bounds = sCursorControllerTempRect;
             bounds.left = (int) (mLayout.getPrimaryHorizontal(offset) - drawableWidth / 2.0);
@@ -7549,7 +7548,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             int boundTopBefore = bounds.top;
             convertFromViewportToContentCoordinates(bounds);
-            mHopSpotVertcalPosition += bounds.top - boundTopBefore;
+            mHotSpotVerticalPosition += bounds.top - boundTopBefore;
             mDrawable.setBounds(bounds);
             postInvalidate();
         }
@@ -7575,7 +7574,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         void postInvalidateDelayed(long delay) {
             final Rect bounds = mDrawable.getBounds();
             TextView.this.postInvalidateDelayed(delay, bounds.left, bounds.top,
-                    bounds.right, bounds.bottom);
+                                                       bounds.right, bounds.bottom);
         }
     }
 
@@ -7600,7 +7599,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         public void show() {
             updateDrawablePosition();
-            // Has to be done after updatePosition, so that previous position invalidate
+            // Has to be done after updateDrawablePosition, so that previous position invalidate
             // in only done if necessary.
             mIsVisible = true;
         }
@@ -7625,7 +7624,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     time -= DELAY_BEFORE_FADE_OUT;
                     if (time <= FADE_OUT_DURATION) {
                         final int alpha = (int)
-                        ((255.0 * (FADE_OUT_DURATION - time)) / FADE_OUT_DURATION);
+                                         ((255.0 * (FADE_OUT_DURATION - time)) / FADE_OUT_DURATION);
                         mHandle.mDrawable.setAlpha(alpha);
                         mHandle.postInvalidateDelayed(30);
                     } else {
@@ -7637,12 +7636,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        public void updatePosition(int offset) {
-            if (offset == getSelectionStart()) {
-                return; // No change, no need to redraw
+        public void updatePosition(int x, int y) {
+            final int previousOffset = getSelectionStart();
+            int offset = getHysteresisOffset(x, y, previousOffset);
+
+            if (offset != previousOffset) {
+                Selection.setSelection((Spannable) mText, offset);
+                updateDrawablePosition();
             }
-            Selection.setSelection((Spannable) mText, offset);
-            updateDrawablePosition();
         }
 
         private void updateDrawablePosition() {
@@ -7688,7 +7689,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                             final Rect bounds = mHandle.mDrawable.getBounds();
                             mOffsetX = (bounds.left + bounds.right) / 2.0f - x;
-                            mOffsetY = mHandle.mHopSpotVertcalPosition - y;
+                            mOffsetY = mHandle.mHotSpotVerticalPosition - y;
 
                             mOnDownTimerStart = event.getEventTime();
                         }
@@ -7743,7 +7744,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         public void show() {
             updateDrawablesPositions();
-            // Has to be done after updatePosition, so that previous position invalidate
+            // Has to be done after updateDrawablePositions, so that previous position invalidate
             // in only done if necessary.
             mIsVisible = true;
             mFadeOutTimerStart = -1;
@@ -7785,9 +7786,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        public void updatePosition(int offset) {
+        public void updatePosition(int x, int y) {
             int selectionStart = getSelectionStart();
             int selectionEnd = getSelectionEnd();
+
+            final int previousOffset = mStartIsDragged ? selectionStart : selectionEnd;
+            int offset = getHysteresisOffset(x, y, previousOffset);
 
             // Handle the case where start and end are swapped, making sure start <= end
             if (mStartIsDragged) {
@@ -7870,7 +7874,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                     final Handle draggedHandle = mStartIsDragged ? mStartHandle : mEndHandle;
                                     final Rect bounds = draggedHandle.mDrawable.getBounds();
                                     mOffsetX = (bounds.left + bounds.right) / 2.0f - x;
-                                    mOffsetY = draggedHandle.mHopSpotVertcalPosition - y;
+                                    mOffsetY = draggedHandle.mHotSpotVerticalPosition - y;
 
                                     ((ArrowKeyMovementMethod)mMovement).setCursorController(this);
                                 }
@@ -7940,6 +7944,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         stopTextSelectionMode();
     }
 
+    private int getOffsetForHorizontal(int line, int x) {
+        x -= getTotalPaddingLeft();
+        // Clamp the position to inside of the view.
+        x = Math.max(0, x);
+        x = Math.min(getWidth() - getTotalPaddingRight() - 1, x);
+        x += getScrollX();
+        return getLayout().getOffsetForHorizontal(line, x);
+    }
+
     /**
      * Get the offset character closest to the specified absolute position.
      *
@@ -7951,32 +7964,44 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @hide
      */
     public int getOffset(int x, int y) {
-        x -= getTotalPaddingLeft();
+        if (getLayout() == null) return -1;
+
         y -= getTotalPaddingTop();
-
         // Clamp the position to inside of the view.
-        if (x < 0) {
-            x = 0;
-        } else if (x >= (getWidth() - getTotalPaddingRight())) {
-            x = getWidth()-getTotalPaddingRight() - 1;
-        }
-        if (y < 0) {
-            y = 0;
-        } else if (y >= (getHeight() - getTotalPaddingBottom())) {
-            y = getHeight()-getTotalPaddingBottom() - 1;
-        }
-
-        x += getScrollX();
+        y = Math.max(0, y);
+        y = Math.min(getHeight() - getTotalPaddingBottom() - 1, y);
         y += getScrollY();
 
-        Layout layout = getLayout();
-        if (layout != null) {
-            final int line = layout.getLineForVertical(y);
-            final int offset = layout.getOffsetForHorizontal(line, x);
-            return offset;
-        } else {
-            return -1;
+        final int line = getLayout().getLineForVertical(y);
+        final int offset = getOffsetForHorizontal(line, x);
+        return offset;
+    }
+
+    int getHysteresisOffset(int x, int y, int previousOffset) {
+        final Layout layout = getLayout();
+        if (layout == null) return -1;
+
+        y -= getTotalPaddingTop();
+        // Clamp the position to inside of the view.
+        y = Math.max(0, y);
+        y = Math.min(getHeight() - getTotalPaddingBottom() - 1, y);
+        y += getScrollY();
+
+        int line = getLayout().getLineForVertical(y);
+
+        final int previousLine = layout.getLineForOffset(previousOffset);
+        final int previousLineTop = layout.getLineTop(previousLine);
+        final int previousLineBottom = layout.getLineBottom(previousLine);
+        final int hysteresisThreshold = (previousLineBottom - previousLineTop) / 2;
+
+        // If new line is just before or after previous line and y position is less than
+        // hysteresisThreshold away from previous line, keep cursor on previous line.
+        if (((line == previousLine + 1) && ((y - previousLineBottom) < hysteresisThreshold)) ||
+            ((line == previousLine - 1) && ((previousLineTop - y)    < hysteresisThreshold))) {
+            line = previousLine;
         }
+
+        return getOffsetForHorizontal(line, x);
     }
 
     @ViewDebug.ExportedProperty
