@@ -44,7 +44,7 @@
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/OMXCodec.h>
 
-#include <surfaceflinger/ISurface.h>
+#include <surfaceflinger/Surface.h>
 
 #include <media/stagefright/foundation/ALooper.h>
 
@@ -97,13 +97,14 @@ struct AwesomeLocalRenderer : public AwesomeRenderer {
             bool previewOnly,
             const char *componentName,
             OMX_COLOR_FORMATTYPE colorFormat,
-            const sp<ISurface> &surface,
+            const sp<ISurface> &isurface,
+            const sp<Surface> &surface,
             size_t displayWidth, size_t displayHeight,
             size_t decodedWidth, size_t decodedHeight)
         : mTarget(NULL),
           mLibHandle(NULL) {
             init(previewOnly, componentName,
-                 colorFormat, surface, displayWidth,
+                 colorFormat, isurface, surface, displayWidth,
                  displayHeight, decodedWidth, decodedHeight);
     }
 
@@ -135,7 +136,8 @@ private:
             bool previewOnly,
             const char *componentName,
             OMX_COLOR_FORMATTYPE colorFormat,
-            const sp<ISurface> &surface,
+            const sp<ISurface> &isurface,
+            const sp<Surface> &surface,
             size_t displayWidth, size_t displayHeight,
             size_t decodedWidth, size_t decodedHeight);
 
@@ -147,7 +149,8 @@ void AwesomeLocalRenderer::init(
         bool previewOnly,
         const char *componentName,
         OMX_COLOR_FORMATTYPE colorFormat,
-        const sp<ISurface> &surface,
+        const sp<ISurface> &isurface,
+        const sp<Surface> &surface,
         size_t displayWidth, size_t displayHeight,
         size_t decodedWidth, size_t decodedHeight) {
     if (!previewOnly) {
@@ -173,7 +176,7 @@ void AwesomeLocalRenderer::init(
 
             if (func) {
                 mTarget =
-                    (*func)(surface, componentName, colorFormat,
+                    (*func)(isurface, componentName, colorFormat,
                         displayWidth, displayHeight,
                         decodedWidth, decodedHeight);
             }
@@ -619,8 +622,18 @@ status_t AwesomePlayer::play_l() {
     return OK;
 }
 
+void AwesomePlayer::notifyVideoSize_l() {
+    sp<MetaData> meta = mVideoSource->getFormat();
+
+    int32_t decodedWidth, decodedHeight;
+    CHECK(meta->findInt32(kKeyWidth, &decodedWidth));
+    CHECK(meta->findInt32(kKeyHeight, &decodedHeight));
+
+    notifyListener_l(MEDIA_SET_VIDEO_SIZE, decodedWidth, decodedHeight);
+}
+
 void AwesomePlayer::initRenderer_l() {
-    if (mISurface != NULL) {
+    if (mSurface != NULL || mISurface != NULL) {
         sp<MetaData> meta = mVideoSource->getFormat();
 
         int32_t format;
@@ -637,7 +650,18 @@ void AwesomePlayer::initRenderer_l() {
         // before creating a new one.
         IPCThreadState::self()->flushCommands();
 
-        if (!strncmp("OMX.", component, 4)) {
+        if (mSurface != NULL) {
+            // Other decoders are instantiated locally and as a consequence
+            // allocate their buffers in local address space.
+            mVideoRenderer = new AwesomeLocalRenderer(
+                false,  // previewOnly
+                component,
+                (OMX_COLOR_FORMATTYPE)format,
+                mISurface,
+                mSurface,
+                mVideoWidth, mVideoHeight,
+                decodedWidth, decodedHeight);
+        } else {
             // Our OMX codecs allocate buffers on the media_server side
             // therefore they require a remote IOMXRenderer that knows how
             // to display them.
@@ -647,16 +671,6 @@ void AwesomePlayer::initRenderer_l() {
                         (OMX_COLOR_FORMATTYPE)format,
                         decodedWidth, decodedHeight,
                         mVideoWidth, mVideoHeight));
-        } else {
-            // Other decoders are instantiated locally and as a consequence
-            // allocate their buffers in local address space.
-            mVideoRenderer = new AwesomeLocalRenderer(
-                false,  // previewOnly
-                component,
-                (OMX_COLOR_FORMATTYPE)format,
-                mISurface,
-                mVideoWidth, mVideoHeight,
-                decodedWidth, decodedHeight);
         }
     }
 }
@@ -693,6 +707,12 @@ void AwesomePlayer::setISurface(const sp<ISurface> &isurface) {
     Mutex::Autolock autoLock(mLock);
 
     mISurface = isurface;
+}
+
+void AwesomePlayer::setSurface(const sp<Surface> &surface) {
+    Mutex::Autolock autoLock(mLock);
+
+    mSurface = surface;
 }
 
 void AwesomePlayer::setAudioSink(
@@ -936,6 +956,8 @@ void AwesomePlayer::onVideoEvent() {
 
                 if (err == INFO_FORMAT_CHANGED) {
                     LOGV("VideoSource signalled format change.");
+
+                    notifyVideoSize_l();
 
                     if (mVideoRenderer != NULL) {
                         mVideoRendererIsPreview = false;
@@ -1422,10 +1444,10 @@ void AwesomePlayer::onPrepareAsyncEvent() {
     Mutex::Autolock autoLock(mLock);
 
     if (mIsAsyncPrepare) {
-        if (mVideoWidth < 0 || mVideoHeight < 0) {
+        if (mVideoSource == NULL) {
             notifyListener_l(MEDIA_SET_VIDEO_SIZE, 0, 0);
         } else {
-            notifyListener_l(MEDIA_SET_VIDEO_SIZE, mVideoWidth, mVideoHeight);
+            notifyVideoSize_l();
         }
 
         notifyListener_l(MEDIA_PREPARED);
@@ -1540,13 +1562,14 @@ status_t AwesomePlayer::resume() {
 
     mFlags = state->mFlags & (LOOPING | AT_EOS);
 
-    if (state->mLastVideoFrame && mISurface != NULL) {
+    if (state->mLastVideoFrame && (mSurface != NULL || mISurface != NULL)) {
         mVideoRenderer =
             new AwesomeLocalRenderer(
                     true,  // previewOnly
                     "",
                     (OMX_COLOR_FORMATTYPE)state->mColorFormat,
                     mISurface,
+                    mSurface,
                     state->mVideoWidth,
                     state->mVideoHeight,
                     state->mDecodedWidth,

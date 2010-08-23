@@ -17,6 +17,11 @@ LOCAL_SHARED_LIBRARIES :=       \
         libsurfaceflinger_client\
         libcamera_client
 
+# ifeq ($(TARGET_BOARD_PLATFORM),msm7k)
+ifeq ($(TARGET_PRODUCT),passion)
+	LOCAL_CFLAGS += -DHAS_YCBCR420_SP_ADRENO
+endif
+
 LOCAL_MODULE:= libstagefright_color_conversion
 
 include $(BUILD_SHARED_LIBRARY)

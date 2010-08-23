@@ -22,65 +22,169 @@
 #include <binder/MemoryHeapBase.h>
 #include <binder/MemoryHeapPmem.h>
 #include <media/stagefright/MediaDebug.h>
-#include <surfaceflinger/ISurface.h>
+#include <surfaceflinger/Surface.h>
+#include <ui/android_native_buffer.h>
+#include <ui/GraphicBufferMapper.h>
 
 namespace android {
 
 SoftwareRenderer::SoftwareRenderer(
         OMX_COLOR_FORMATTYPE colorFormat,
-        const sp<ISurface> &surface,
+        const sp<Surface> &surface,
         size_t displayWidth, size_t displayHeight,
         size_t decodedWidth, size_t decodedHeight)
     : mColorFormat(colorFormat),
-      mConverter(colorFormat, OMX_COLOR_Format16bitRGB565),
-      mISurface(surface),
+      mConverter(NULL),
+      mYUVMode(None),
+      mSurface(surface),
       mDisplayWidth(displayWidth),
       mDisplayHeight(displayHeight),
       mDecodedWidth(decodedWidth),
-      mDecodedHeight(decodedHeight),
-      mFrameSize(mDecodedWidth * mDecodedHeight * 2),  // RGB565
-      mIndex(0) {
-    mMemoryHeap = new MemoryHeapBase("/dev/pmem_adsp", 2 * mFrameSize);
-    if (mMemoryHeap->heapID() < 0) {
-        LOGI("Creating physical memory heap failed, reverting to regular heap.");
-        mMemoryHeap = new MemoryHeapBase(2 * mFrameSize);
-    } else {
-        sp<MemoryHeapPmem> pmemHeap = new MemoryHeapPmem(mMemoryHeap);
-        pmemHeap->slap();
-        mMemoryHeap = pmemHeap;
+      mDecodedHeight(decodedHeight) {
+    LOGI("input format = %d", mColorFormat);
+    LOGI("display = %d x %d, decoded = %d x %d",
+            mDisplayWidth, mDisplayHeight, mDecodedWidth, mDecodedHeight);
+
+    int halFormat;
+    switch (mColorFormat) {
+#if HAS_YCBCR420_SP_ADRENO
+        case OMX_COLOR_FormatYUV420Planar:
+        {
+            halFormat = HAL_PIXEL_FORMAT_YCrCb_420_SP_ADRENO;
+            mYUVMode = YUV420ToYUV420sp;
+            break;
+        }
+
+        case 0x7fa30c00:
+        {
+            halFormat = HAL_PIXEL_FORMAT_YCrCb_420_SP_ADRENO;
+            mYUVMode = YUV420spToYUV420sp;
+            break;
+        }
+#endif
+
+        default:
+            halFormat = HAL_PIXEL_FORMAT_RGB_565;
+
+            mConverter = new ColorConverter(
+                    mColorFormat, OMX_COLOR_Format16bitRGB565);
+            CHECK(mConverter->isValid());
+            break;
     }
 
-    CHECK(mISurface.get() != NULL);
+    CHECK(mSurface.get() != NULL);
     CHECK(mDecodedWidth > 0);
     CHECK(mDecodedHeight > 0);
-    CHECK(mMemoryHeap->heapID() >= 0);
-    CHECK(mConverter.isValid());
+    CHECK(mConverter == NULL || mConverter->isValid());
 
-    ISurface::BufferHeap bufferHeap(
-            mDisplayWidth, mDisplayHeight,
-            mDecodedWidth, mDecodedHeight,
-            PIXEL_FORMAT_RGB_565,
-            mMemoryHeap);
+    CHECK_EQ(0,
+            native_window_set_usage(
+            mSurface.get(),
+            GRALLOC_USAGE_SW_READ_NEVER | GRALLOC_USAGE_SW_WRITE_OFTEN
+            | GRALLOC_USAGE_HW_TEXTURE));
 
-    status_t err = mISurface->registerBuffers(bufferHeap);
-    CHECK_EQ(err, OK);
+    CHECK_EQ(0, native_window_set_buffer_count(mSurface.get(), 2));
+
+    // Width must be multiple of 32???
+    CHECK_EQ(0, native_window_set_buffers_geometry(
+                mSurface.get(), mDecodedWidth, mDecodedHeight,
+                halFormat));
 }
 
 SoftwareRenderer::~SoftwareRenderer() {
-    mISurface->unregisterBuffers();
+    delete mConverter;
+    mConverter = NULL;
+}
+
+static inline size_t ALIGN(size_t x, size_t alignment) {
+    return (x + alignment - 1) & ~(alignment - 1);
 }
 
 void SoftwareRenderer::render(
         const void *data, size_t size, void *platformPrivate) {
-    size_t offset = mIndex * mFrameSize;
-    void *dst = (uint8_t *)mMemoryHeap->getBase() + offset;
+    android_native_buffer_t *buf;
+    CHECK_EQ(0, mSurface->dequeueBuffer(mSurface.get(), &buf));
+    CHECK_EQ(0, mSurface->lockBuffer(mSurface.get(), buf));
 
-    mConverter.convert(
-            mDecodedWidth, mDecodedHeight,
-            data, 0, dst, 2 * mDecodedWidth);
+    GraphicBufferMapper &mapper = GraphicBufferMapper::get();
 
-    mISurface->postBuffer(offset);
-    mIndex = 1 - mIndex;
+    Rect bounds(mDecodedWidth, mDecodedHeight);
+
+    void *dst;
+    CHECK_EQ(0, mapper.lock(
+                buf->handle, GRALLOC_USAGE_SW_WRITE_OFTEN, bounds, &dst));
+
+    if (mConverter) {
+        mConverter->convert(
+                mDecodedWidth, mDecodedHeight,
+                data, 0, dst, buf->stride * 2);
+    } else if (mYUVMode == YUV420spToYUV420sp) {
+        // Input and output are both YUV420sp, but the alignment requirements
+        // are different.
+        size_t srcYStride = mDecodedWidth;
+        const uint8_t *srcY = (const uint8_t *)data;
+        uint8_t *dstY = (uint8_t *)dst;
+        for (size_t i = 0; i < mDecodedHeight; ++i) {
+            memcpy(dstY, srcY, mDecodedWidth);
+            srcY += srcYStride;
+            dstY += buf->stride;
+        }
+
+        size_t srcUVStride = (mDecodedWidth + 1) & ~1;
+        size_t dstUVStride = ALIGN(mDecodedWidth / 2, 32) * 2;
+
+        const uint8_t *srcUV = (const uint8_t *)data
+            + mDecodedHeight * mDecodedWidth;
+
+        size_t dstUVOffset = ALIGN(ALIGN(mDecodedHeight, 32) * buf->stride, 4096);
+        uint8_t *dstUV = (uint8_t *)dst + dstUVOffset;
+
+        for (size_t i = 0; i < (mDecodedHeight + 1) / 2; ++i) {
+            memcpy(dstUV, srcUV, (mDecodedWidth + 1) & ~1);
+            srcUV += srcUVStride;
+            dstUV += dstUVStride;
+        }
+    } else if (mYUVMode == YUV420ToYUV420sp) {
+        // Input is YUV420 planar, output is YUV420sp, adhere to proper
+        // alignment requirements.
+        size_t srcYStride = mDecodedWidth;
+        const uint8_t *srcY = (const uint8_t *)data;
+        uint8_t *dstY = (uint8_t *)dst;
+        for (size_t i = 0; i < mDecodedHeight; ++i) {
+            memcpy(dstY, srcY, mDecodedWidth);
+            srcY += srcYStride;
+            dstY += buf->stride;
+        }
+
+        size_t srcUVStride = (mDecodedWidth + 1) / 2;
+        size_t dstUVStride = ALIGN(mDecodedWidth / 2, 32) * 2;
+
+        const uint8_t *srcU = (const uint8_t *)data
+            + mDecodedHeight * mDecodedWidth;
+
+        const uint8_t *srcV =
+            srcU + ((mDecodedWidth + 1) / 2) * ((mDecodedHeight + 1) / 2);
+
+        size_t dstUVOffset = ALIGN(ALIGN(mDecodedHeight, 32) * buf->stride, 4096);
+        uint8_t *dstUV = (uint8_t *)dst + dstUVOffset;
+
+        for (size_t i = 0; i < (mDecodedHeight + 1) / 2; ++i) {
+            for (size_t j = 0; j < (mDecodedWidth + 1) / 2; ++j) {
+                dstUV[2 * j + 1] = srcU[j];
+                dstUV[2 * j] = srcV[j];
+            }
+            srcU += srcUVStride;
+            srcV += srcUVStride;
+            dstUV += dstUVStride;
+        }
+    } else {
+        memcpy(dst, data, size);
+    }
+
+    CHECK_EQ(0, mapper.unlock(buf->handle));
+
+    CHECK_EQ(0, mSurface->queueBuffer(mSurface.get(), buf));
+    buf = NULL;
 }
 
 }  // namespace android

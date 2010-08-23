@@ -178,6 +178,7 @@ private:
     // MediaPlayer needs access to ISurface for display
     friend class MediaPlayer;
     friend class IOMX;
+    friend class SoftwareRenderer;
     // this is just to be able to write some unit tests
     friend class Test;
 
