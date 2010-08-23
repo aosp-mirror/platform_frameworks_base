@@ -34,6 +34,7 @@ import android.net.INetworkManagementEventObserver;
 import android.net.NetworkInfo;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
@@ -113,6 +114,14 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     // broadcasts so track them so we can decide what to do when either changes
     private boolean mUsbMassStorageOff;  // track the status of USB Mass Storage
     private boolean mUsbConnected;       // track the status of USB connection
+
+    // mUsbHandler message
+    static final int USB_STATE_CHANGE = 1;
+    static final int USB_DISCONNECTED = 0;
+    static final int USB_CONNECTED = 1;
+
+    // Time to delay before processing USB disconnect events
+    static final long USB_DISCONNECT_DELAY = 1000;
 
     public Tethering(Context context, Looper looper) {
         Log.d(TAG, "Tethering starting");
@@ -453,12 +462,25 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         }
     }
 
+    private Handler mUsbHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            mUsbConnected = (msg.arg1 == USB_CONNECTED);
+            updateUsbStatus();
+        }
+    };
+
     private class StateReceiver extends BroadcastReceiver {
         public void onReceive(Context content, Intent intent) {
             String action = intent.getAction();
             if (action.equals(Usb.ACTION_USB_STATE)) {
-                mUsbConnected = intent.getExtras().getBoolean(Usb.USB_CONNECTED);
-                updateUsbStatus();
+                // process connect events immediately, but delay handling disconnects
+                // to debounce USB configuration changes
+                boolean connected = intent.getExtras().getBoolean(Usb.USB_CONNECTED);
+                Message msg = Message.obtain(mUsbHandler, USB_STATE_CHANGE,
+                        (connected ? USB_CONNECTED : USB_DISCONNECTED), 0);
+                mUsbHandler.removeMessages(USB_STATE_CHANGE);
+                mUsbHandler.sendMessageDelayed(msg, connected ? 0 : USB_DISCONNECT_DELAY);
             } else if (action.equals(Intent.ACTION_MEDIA_SHARED)) {
                 mUsbMassStorageOff = false;
                 updateUsbStatus();
