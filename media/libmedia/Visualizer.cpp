@@ -26,10 +26,7 @@
 
 #include <media/Visualizer.h>
 
-extern "C" {
-#define FLOATING_POINT 1
-#include "fftwrap.h"
-}
+extern void fixed_fft_real(int n, int32_t *v);
 
 namespace android {
 
@@ -47,18 +44,10 @@ Visualizer::Visualizer (int32_t priority,
         mCaptureCbkUser(NULL)
 {
     initCaptureSize();
-    if (mCaptureSize != 0) {
-        mFftTable = spx_fft_init(mCaptureSize);
-    } else {
-        mFftTable = NULL;
-    }
 }
 
 Visualizer::~Visualizer()
 {
-    if (mFftTable != NULL) {
-        spx_fft_destroy(mFftTable);
-    }
 }
 
 status_t Visualizer::setEnabled(bool enabled)
@@ -163,11 +152,6 @@ status_t Visualizer::setCaptureSize(uint32_t size)
     }
     if (status == NO_ERROR) {
         mCaptureSize = size;
-        if (mFftTable != NULL) {
-            spx_fft_destroy(mFftTable);
-        }
-        mFftTable = spx_fft_init(mCaptureSize);
-        LOGV("setCaptureSize size %d mFftTable %p", mCaptureSize, mFftTable);
     }
 
     return status;
@@ -219,19 +203,24 @@ status_t Visualizer::getFft(uint8_t *fft)
 
 status_t Visualizer::doFft(uint8_t *fft, uint8_t *waveform)
 {
-    if (mFftTable == NULL) {
-        return NO_INIT;
+    int32_t workspace[mCaptureSize >> 1];
+    int32_t nonzero = 0;
+
+    for (uint32_t i = 0; i < mCaptureSize; i += 2) {
+        workspace[i >> 1] = (waveform[i] ^ 0x80) << 23;
+        workspace[i >> 1] |= (waveform[i + 1] ^ 0x80) << 7;
+        nonzero |= workspace[i >> 1];
     }
 
-    float fsrc[mCaptureSize];
-    for (uint32_t i = 0; i < mCaptureSize; i++) {
-        fsrc[i] = (int16_t)(waveform[i] ^ 0x80) << 8;
+    if (nonzero) {
+        fixed_fft_real(mCaptureSize >> 1, workspace);
     }
-    float fdst[mCaptureSize];
-    spx_fft_float(mFftTable, fsrc, fdst);
-    for (uint32_t i = 0; i < mCaptureSize; i++) {
-        fft[i] = (uint8_t)((int32_t)fdst[i] >> 8);
+
+    for (uint32_t i = 0; i < mCaptureSize; i += 2) {
+        fft[i] = workspace[i >> 1] >> 23;
+        fft[i + 1] = workspace[i >> 1] >> 7;
     }
+
     return NO_ERROR;
 }
 
