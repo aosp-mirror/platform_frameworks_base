@@ -44,10 +44,6 @@ import android.util.Config;
 import android.util.Log;
 import android.view.WindowManager;
 
-import com.android.internal.telephony.CommandsInterface;
-import com.android.internal.telephony.SmsMessageBase;
-import com.android.internal.telephony.SmsResponse;
-import com.android.internal.telephony.WapPushOverSms;
 import com.android.internal.util.HexDump;
 
 import java.io.ByteArrayOutputStream;
@@ -75,15 +71,13 @@ public abstract class SMSDispatcher extends Handler {
     private static final int DEFAULT_SMS_MAX_COUNT = 100;
 
     /** Default timeout for SMS sent query */
-    private static final int DEFAULT_SMS_TIMOUEOUT = 6000;
+    private static final int DEFAULT_SMS_TIMEOUT = 6000;
 
     protected static final String[] RAW_PROJECTION = new String[] {
         "pdu",
         "sequence",
         "destination_port",
     };
-
-    static final int MAIL_SEND_SMS = 1;
 
     static final protected int EVENT_NEW_SMS = 1;
 
@@ -153,10 +147,6 @@ public abstract class SMSDispatcher extends Handler {
      * any receiver(s) to grab its own wake lock.
      */
     private final int WAKE_LOCK_TIMEOUT = 5000;
-
-    private static SmsMessage mSmsMessage;
-    private static SmsMessageBase mSmsMessageBase;
-    private SmsMessageBase.SubmitPduBase mSubmitPduBase;
 
     protected boolean mStorageAvailable = true;
     protected boolean mReportMemoryStatusPending = false;
@@ -838,7 +828,7 @@ public abstract class SMSDispatcher extends Handler {
 
         mSTrackers.add(tracker);
         sendMessageDelayed ( obtainMessage(EVENT_ALERT_TIMEOUT, d),
-                DEFAULT_SMS_TIMOUEOUT);
+                DEFAULT_SMS_TIMEOUT);
     }
 
     protected String getAppNameByIntent(PendingIntent intent) {
@@ -932,7 +922,7 @@ public abstract class SMSDispatcher extends Handler {
     }
 
     /**
-     * Keeps track of an SMS that has been sent to the RIL, until it it has
+     * Keeps track of an SMS that has been sent to the RIL, until it has
      * successfully been sent, or we're done trying.
      *
      */
@@ -973,27 +963,26 @@ public abstract class SMSDispatcher extends Handler {
             }
         };
 
-        private BroadcastReceiver mResultReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_LOW)) {
-                    mStorageAvailable = false;
-                    mCm.reportSmsMemoryStatus(false, obtainMessage(EVENT_REPORT_MEMORY_STATUS_DONE));
-                } else if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_OK)) {
-                    mStorageAvailable = true;
-                    mCm.reportSmsMemoryStatus(true, obtainMessage(EVENT_REPORT_MEMORY_STATUS_DONE));
-                } else {
-                    // Assume the intent is one of the SMS receive intents that
-                    // was sent as an ordered broadcast.  Check result and ACK.
-                    int rc = getResultCode();
-                    boolean success = (rc == Activity.RESULT_OK)
-                                        || (rc == Intents.RESULT_SMS_HANDLED);
+    private BroadcastReceiver mResultReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_LOW)) {
+                mStorageAvailable = false;
+                mCm.reportSmsMemoryStatus(false, obtainMessage(EVENT_REPORT_MEMORY_STATUS_DONE));
+            } else if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_OK)) {
+                mStorageAvailable = true;
+                mCm.reportSmsMemoryStatus(true, obtainMessage(EVENT_REPORT_MEMORY_STATUS_DONE));
+            } else {
+                // Assume the intent is one of the SMS receive intents that
+                // was sent as an ordered broadcast.  Check result and ACK.
+                int rc = getResultCode();
+                boolean success = (rc == Activity.RESULT_OK)
+                        || (rc == Intents.RESULT_SMS_HANDLED);
 
-                    // For a multi-part message, this only ACKs the last part.
-                    // Previous parts were ACK'd as they were received.
-                    acknowledgeLastIncomingSms(success, rc, null);
-                }
+                // For a multi-part message, this only ACKs the last part.
+                // Previous parts were ACK'd as they were received.
+                acknowledgeLastIncomingSms(success, rc, null);
             }
-
-        };
+        }
+    };
 }
