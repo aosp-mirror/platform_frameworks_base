@@ -18,11 +18,8 @@ package android.widget;
 
 import com.android.internal.util.FastMath;
 import com.android.internal.widget.EditableInputConnection;
+import com.example.android.apis.text.Marquee;
 
-import org.xmlpull.v1.XmlPullParserException;
-
-import android.content.ClipboardManager;
-import android.content.ClippedData;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -44,7 +41,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
+import android.provider.Mtp.Object;
+import android.provider.Settings.System;
 import android.text.BoringLayout;
+import android.text.ClipboardManager;
 import android.text.DynamicLayout;
 import android.text.Editable;
 import android.text.GetChars;
@@ -85,7 +85,6 @@ import android.util.AttributeSet;
 import android.util.FloatMath;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -97,9 +96,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
-import android.view.ViewGroup.LayoutParams;
 import android.view.ViewRoot;
 import android.view.ViewTreeObserver;
+import android.view.View.MeasureSpec;
+import android.view.ViewGroup.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
@@ -111,10 +111,6 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.RemoteViews.RemoteView;
-
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 
 /**
  * Displays text to the user and optionally allows them to edit it.  A TextView
@@ -7271,16 +7267,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * this will be {@link android.R.id#copyUrl} or {@link android.R.id#selectTextMode}.
      */
     public boolean onTextContextMenuItem(int id) {
-        int selStart = getSelectionStart();
-        int selEnd = getSelectionEnd();
-
-        if (!isFocused()) {
-            selStart = 0;
-            selEnd = mText.length();
+        int min = 0;
+        int max = mText.length();
+        
+        if (isFocused()) {
+            int selStart = getSelectionStart();
+            int selEnd = getSelectionEnd();
+            min = Math.max(0, Math.min(selStart, selEnd));
+            max = Math.max(0, Math.max(selStart, selEnd));
         }
-
-        int min = Math.max(0, Math.min(selStart, selEnd));
-        int max = Math.max(0, Math.max(selStart, selEnd));
 
         ClipboardManager clipboard = (ClipboardManager)getContext()
                 .getSystemService(Context.CLIPBOARD_SERVICE);
@@ -7955,7 +7950,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return;
             }
 
-            boolean oneLineSelection = mLayout.getLineForOffset(selectionStart) == mLayout.getLineForOffset(selectionEnd); 
+            boolean oneLineSelection =
+                mLayout.getLineForOffset(selectionStart) == mLayout.getLineForOffset(selectionEnd);
             mStartHandle.positionAtCursor(selectionStart, oneLineSelection);
             mEndHandle.positionAtCursor(selectionEnd, true);
 
