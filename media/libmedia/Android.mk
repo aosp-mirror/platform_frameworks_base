@@ -31,7 +31,8 @@ LOCAL_SRC_FILES:= \
     IEffect.cpp \
     IEffectClient.cpp \
     AudioEffect.cpp \
-    Visualizer.cpp
+    Visualizer.cpp \
+    fixedfft.cpp.arm
 
 LOCAL_SHARED_LIBRARIES := \
 	libui libcutils libutils libbinder libsonivox libicuuc libexpat libsurfaceflinger_client libcamera_client
@@ -50,11 +51,7 @@ LOCAL_C_INCLUDES := \
     $(JNI_H_INCLUDE) \
     $(call include-path-for, graphics corecg) \
     $(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include \
-    external/speex/include \
-    external/speex/libspeex \
     external/icu4c/common \
     external/expat/lib
-
-LOCAL_STATIC_LIBRARIES := libspeex
 
 include $(BUILD_SHARED_LIBRARY)
