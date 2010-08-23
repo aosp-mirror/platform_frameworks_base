@@ -26,6 +26,9 @@
 #include <ui/android_native_buffer.h>
 #include <ui/GraphicBufferMapper.h>
 
+// XXX: Temporary hack to allow referencing the _ADRENO pixel format here.
+#include <libgralloc-qsd8k/gralloc_priv.h>
+
 namespace android {
 
 SoftwareRenderer::SoftwareRenderer(
