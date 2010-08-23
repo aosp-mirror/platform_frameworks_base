@@ -35,7 +35,7 @@
 #include <camera/ICamera.h>
 #include <camera/Camera.h>
 #include <camera/CameraParameters.h>
-#include <surfaceflinger/ISurface.h>
+#include <surfaceflinger/Surface.h>
 #include <utils/Errors.h>
 #include <sys/types.h>
 #include <ctype.h>
@@ -201,7 +201,7 @@ status_t StagefrightRecorder::setCamera(const sp<ICamera> &camera) {
     return OK;
 }
 
-status_t StagefrightRecorder::setPreviewSurface(const sp<ISurface> &surface) {
+status_t StagefrightRecorder::setPreviewSurface(const sp<Surface> &surface) {
     LOGV("setPreviewSurface: %p", surface.get());
     mPreviewSurface = surface;
 

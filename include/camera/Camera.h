@@ -22,8 +22,6 @@
 
 namespace android {
 
-class ISurface;
-
 /*
  * A set of bit masks for specifying how the received preview frames are
  * handled before the previewCallback() call.
@@ -152,9 +150,8 @@ public:
 
             status_t    getStatus() { return mStatus; }
 
-            // pass the buffered ISurface to the camera service
+            // pass the buffered Surface to the camera service
             status_t    setPreviewDisplay(const sp<Surface>& surface);
-            status_t    setPreviewDisplay(const sp<ISurface>& surface);
 
             // start preview mode, must call setPreviewDisplay first
             status_t    startPreview();

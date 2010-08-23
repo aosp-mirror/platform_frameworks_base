@@ -22,7 +22,7 @@
 
 namespace android {
 
-class ISurface;
+class Surface;
 class ICamera;
 class IMediaRecorderClient;
 
@@ -32,7 +32,7 @@ public:
     DECLARE_META_INTERFACE(MediaRecorder);
 
     virtual	status_t		setCamera(const sp<ICamera>& camera) = 0;
-    virtual	status_t		setPreviewSurface(const sp<ISurface>& surface) = 0;
+    virtual	status_t		setPreviewSurface(const sp<Surface>& surface) = 0;
     virtual	status_t		setVideoSource(int vs) = 0;
     virtual	status_t		setAudioSource(int as) = 0;
     virtual	status_t		setOutputFormat(int of) = 0;
@@ -68,4 +68,3 @@ public:
 }; // namespace android
 
 #endif // ANDROID_IMEDIARECORDER_H
-

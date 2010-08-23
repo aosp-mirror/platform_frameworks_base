@@ -65,7 +65,7 @@ status_t MediaRecorder::setPreviewSurface(const sp<Surface>& surface)
         return INVALID_OPERATION;
     }
 
-    status_t ret = mMediaRecorder->setPreviewSurface(surface->getISurface());
+    status_t ret = mMediaRecorder->setPreviewSurface(surface);
     if (OK != ret) {
         LOGV("setPreviewSurface failed: %d", ret);
         mCurrentState = MEDIA_RECORDER_ERROR;
@@ -643,4 +643,3 @@ void MediaRecorder::died()
 }
 
 }; // namespace android
-
