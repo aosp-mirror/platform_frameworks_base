@@ -46,6 +46,9 @@ public class ProgramVertex extends Program {
         public Builder(RenderScript rs, Element in, Element out) {
             mRS = rs;
         }
+        public Builder(RenderScript rs) {
+            mRS = rs;
+        }
 
         public Builder setTextureMatrixEnable(boolean enable) {
             mTextureMatrixEnable = enable;

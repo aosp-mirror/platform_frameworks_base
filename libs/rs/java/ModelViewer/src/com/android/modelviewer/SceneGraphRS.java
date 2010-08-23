@@ -90,7 +90,7 @@ public class SceneGraphRS {
     }
 
     private void initPFS() {
-        ProgramStore.Builder b = new ProgramStore.Builder(mRS, null, null);
+        ProgramStore.Builder b = new ProgramStore.Builder(mRS);
 
         b.setDepthFunc(ProgramStore.DepthFunc.LESS);
         b.setDitherEnable(false);
@@ -118,7 +118,7 @@ public class SceneGraphRS {
     }
 
     private void initPV() {
-        ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS, null, null);
+        ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS);
         mPVBackground = pvb.create();
 
         mPVA = new ProgramVertex.MatrixAllocation(mRS);

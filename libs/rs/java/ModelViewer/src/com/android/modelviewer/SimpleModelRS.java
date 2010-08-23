@@ -24,7 +24,7 @@ import android.renderscript.ProgramStore.DepthFunc;
 import android.util.Log;
 
 
-public class ModelViewerRS {
+public class SimpleModelRS {
 
     private final int STATE_LAST_FOCUS = 1;
 
@@ -32,7 +32,7 @@ public class ModelViewerRS {
     int mHeight;
     int mRotation;
 
-    public ModelViewerRS() {
+    public SimpleModelRS() {
     }
 
     public void init(RenderScriptGL rs, Resources res, int width, int height) {
@@ -60,7 +60,7 @@ public class ModelViewerRS {
     private Font mItalic;
     private Allocation mTextAlloc;
 
-    private ScriptC_Modelviewer mScript;
+    private ScriptC_Simplemodel mScript;
 
     int mLastX;
     int mLastY;
@@ -86,7 +86,7 @@ public class ModelViewerRS {
     }
 
     private void initPFS() {
-        ProgramStore.Builder b = new ProgramStore.Builder(mRS, null, null);
+        ProgramStore.Builder b = new ProgramStore.Builder(mRS);
 
         b.setDepthFunc(ProgramStore.DepthFunc.LESS);
         b.setDitherEnable(false);
@@ -114,7 +114,7 @@ public class ModelViewerRS {
     }
 
     private void initPV() {
-        ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS, null, null);
+        ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS);
         mPVBackground = pvb.create();
 
         mPVA = new ProgramVertex.MatrixAllocation(mRS);
@@ -139,7 +139,7 @@ public class ModelViewerRS {
 
     private void initRS() {
 
-        mScript = new ScriptC_Modelviewer(mRS, mRes, R.raw.modelviewer, true);
+        mScript = new ScriptC_Simplemodel(mRS, mRes, R.raw.simplemodel, true);
 
         initPFS();
         initPF();

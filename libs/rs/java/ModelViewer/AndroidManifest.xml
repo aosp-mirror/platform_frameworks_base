@@ -2,7 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.modelviewer">
     <application android:label="ModelViewer">
-        <activity android:name="ModelViewer"
+        <activity android:name="SimpleModel"
+                  android:label="SimpleModel"
                   android:screenOrientation="portrait"
                   android:theme="@android:style/Theme.Black.NoTitleBar">
             <intent-filter>

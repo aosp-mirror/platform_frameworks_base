@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.modelviewer;
+package com.android.samples;
 
 import android.renderscript.RSSurfaceView;
 import android.renderscript.RenderScript;
@@ -37,9 +37,9 @@ import android.widget.ListView;
 
 import java.lang.Runtime;
 
-public class ModelViewer extends Activity {
+public class RsRenderStates extends Activity {
 
-    private ModelViewerView mView;
+    private RsRenderStatesView mView;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -47,7 +47,7 @@ public class ModelViewer extends Activity {
 
         // Create our Preview view and set it as the content of our
         // Activity
-        mView = new ModelViewerView(this);
+        mView = new RsRenderStatesView(this);
         setContentView(mView);
     }
 
