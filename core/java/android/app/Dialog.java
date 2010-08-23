@@ -330,7 +330,7 @@ public class Dialog implements DialogInterface, Window.Callback,
     }
 
     /**
-     * Similar to {@link Activity#onCreate}, you should initialized your dialog
+     * Similar to {@link Activity#onCreate}, you should initialize your dialog
      * in this method, including calling {@link #setContentView}.
      * @param savedInstanceState If this dialog is being reinitalized after a
      *     the hosting activity was previously shut down, holds the result from

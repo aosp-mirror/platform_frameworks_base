@@ -22,7 +22,7 @@ import java.util.ArrayList;
  * This is the superclass for classes which provide basic support for animations which can be
  * started, ended, and have <code>AnimatableListeners</code> added to them.
  */
-public abstract class Animatable {
+public abstract class Animatable implements Cloneable {
 
 
     /**
@@ -105,6 +105,20 @@ public abstract class Animatable {
             mListeners.clear();
             mListeners = null;
         }
+    }
+
+    @Override
+    public Animatable clone() throws CloneNotSupportedException {
+        final Animatable anim = (Animatable) super.clone();
+        if (mListeners != null) {
+            ArrayList<AnimatableListener> oldListeners = mListeners;
+            anim.mListeners = new ArrayList<AnimatableListener>();
+            int numListeners = oldListeners.size();
+            for (int i = 0; i < numListeners; ++i) {
+                anim.mListeners.add(oldListeners.get(i));
+            }
+        }
+        return anim;
     }
 
     /**

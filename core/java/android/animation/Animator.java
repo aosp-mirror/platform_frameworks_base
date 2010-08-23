@@ -80,8 +80,10 @@ public class Animator<T> extends Animatable {
 
     /**
      * Internal variables
+     * NOTE: This object implements the clone() method, making a deep copy of any referenced
+     * objects. As other non-trivial fields are added to this class, make sure to add logic
+     * to clone() to make deep copies of them.
      */
-
 
     // The first time that the animation's animateFrame() method is called. This time is used to
     // determine elapsed time (and therefore the elapsed fraction) in subsequent calls
@@ -402,7 +404,7 @@ public class Animator<T> extends Animatable {
      * @return The current position in time of the animation.
      */
     public long getCurrentPlayTime() {
-        if (!mInitialized) {
+        if (!mInitialized || mPlayingState == STOPPED) {
             return 0;
         }
         return AnimationUtils.currentAnimationTimeMillis() - mStartTime;
@@ -952,6 +954,39 @@ public class Animator<T> extends Animatable {
                 mUpdateListeners.get(i).onAnimationUpdate(this);
             }
         }
+    }
+
+    @Override
+    public Animator clone() throws CloneNotSupportedException {
+        final Animator anim = (Animator) super.clone();
+        if (mUpdateListeners != null) {
+            ArrayList<AnimatorUpdateListener> oldListeners = mUpdateListeners;
+            anim.mUpdateListeners = new ArrayList<AnimatorUpdateListener>();
+            int numListeners = oldListeners.size();
+            for (int i = 0; i < numListeners; ++i) {
+                anim.mUpdateListeners.add(oldListeners.get(i));
+            }
+        }
+        anim.mSeekTime = -1;
+        anim.mPlayingBackwards = false;
+        anim.mCurrentIteration = 0;
+        anim.mInitialized = false;
+        anim.mPlayingState = STOPPED;
+        anim.mStartedDelay = false;
+        PropertyValuesHolder[] oldValues = mValues;
+        if (oldValues != null) {
+            int numValues = oldValues.length;
+            anim.mValues = new PropertyValuesHolder[numValues];
+            for (int i = 0; i < numValues; ++i) {
+                anim.mValues[i] = oldValues[i];
+            }
+            anim.mValuesMap = new HashMap<String, PropertyValuesHolder>(numValues);
+            for (int i = 0; i < numValues; ++i) {
+                PropertyValuesHolder valuesHolder = mValues[i];
+                anim.mValuesMap.put(valuesHolder.getPropertyName(), valuesHolder);
+            }
+        }
+        return anim;
     }
 
     /**
