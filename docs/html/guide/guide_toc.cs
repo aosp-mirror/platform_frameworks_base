@@ -220,9 +220,16 @@
             <li><a style="color:gray;">Accelerometer</a></li>
           </ul>
       </li> -->
-      <li><a href="<?cs var:toroot ?>guide/topics/location/index.html">
-            <span class="en">Location and Maps</span>
-          </a></li>
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>guide/topics/location/index.html">
+               <span class="en">Location and Maps</span>
+             </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>guide/topics/location/obtaining-user-location.html">
+                <span class="en">Obtaining User Location</span>
+              </a> <span class="new">new!</span></li>
+        </ul>
+      </li>
   <!--<li class="toggle-list">
         <div><a style="color:gray;">Wireless Controls</a></div>
           <ul>
