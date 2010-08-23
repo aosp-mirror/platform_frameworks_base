@@ -6,7 +6,8 @@ LOCAL_SRC_FILES:=                     \
         SoftwareRenderer.cpp
 
 LOCAL_C_INCLUDES := \
-        $(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include
+        $(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include \
+        $(TOP)/hardware/msm7k
 
 LOCAL_SHARED_LIBRARIES :=       \
         libbinder               \
