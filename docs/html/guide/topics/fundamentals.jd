@@ -770,9 +770,9 @@ return to what that instance was doing before the new intent arrived.
 </p>
 
 <p>
-For more on launch modes, see the description of the 
-<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
-element. 
+For more on launch modes, see the description of the <code><a 
+href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">&lt;activity&gt;</a></code>
+element.
 </p>
 
 
