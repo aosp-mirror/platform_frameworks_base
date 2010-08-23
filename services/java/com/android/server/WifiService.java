@@ -357,7 +357,7 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean pingSupplicant() {
         enforceAccessPermission();
-        return mWifiStateMachine.pingSupplicant();
+        return mWifiStateMachine.syncPingSupplicant();
     }
 
     /**
@@ -436,7 +436,7 @@ public class WifiService extends IWifiManager.Stub {
      */
     public int getWifiEnabledState() {
         enforceAccessPermission();
-        return mWifiStateMachine.getWifiState();
+        return mWifiStateMachine.syncGetWifiState();
     }
 
     /**
@@ -481,7 +481,7 @@ public class WifiService extends IWifiManager.Stub {
      */
     public int getWifiApEnabledState() {
         enforceAccessPermission();
-        return mWifiStateMachine.getWifiApState();
+        return mWifiStateMachine.syncGetWifiApState();
     }
 
     /**
@@ -555,7 +555,7 @@ public class WifiService extends IWifiManager.Stub {
      */
     public List<WifiConfiguration> getConfiguredNetworks() {
         enforceAccessPermission();
-        return mWifiStateMachine.getConfiguredNetworks();
+        return mWifiStateMachine.syncGetConfiguredNetworks();
     }
 
     /**
@@ -565,7 +565,7 @@ public class WifiService extends IWifiManager.Stub {
      */
     public int addOrUpdateNetwork(WifiConfiguration config) {
         enforceChangePermission();
-        return mWifiStateMachine.addOrUpdateNetwork(config);
+        return mWifiStateMachine.syncAddOrUpdateNetwork(config);
     }
 
      /**
@@ -576,7 +576,7 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean removeNetwork(int netId) {
         enforceChangePermission();
-        return mWifiStateMachine.removeNetwork(netId);
+        return mWifiStateMachine.syncRemoveNetwork(netId);
     }
 
     /**
@@ -588,7 +588,7 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean enableNetwork(int netId, boolean disableOthers) {
         enforceChangePermission();
-        return mWifiStateMachine.enableNetwork(netId, disableOthers);
+        return mWifiStateMachine.syncEnableNetwork(netId, disableOthers);
     }
 
     /**
@@ -599,7 +599,7 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean disableNetwork(int netId) {
         enforceChangePermission();
-        return mWifiStateMachine.disableNetwork(netId);
+        return mWifiStateMachine.syncDisableNetwork(netId);
     }
 
     /**
@@ -612,7 +612,7 @@ public class WifiService extends IWifiManager.Stub {
          * Make sure we have the latest information, by sending
          * a status request to the supplicant.
          */
-        return mWifiStateMachine.requestConnectionInfo();
+        return mWifiStateMachine.syncRequestConnectionInfo();
     }
 
     /**
@@ -622,7 +622,7 @@ public class WifiService extends IWifiManager.Stub {
      */
     public List<ScanResult> getScanResults() {
         enforceAccessPermission();
-        return mWifiStateMachine.getScanResultsList();
+        return mWifiStateMachine.syncGetScanResultsList();
     }
 
     /**
@@ -634,7 +634,7 @@ public class WifiService extends IWifiManager.Stub {
     public boolean saveConfiguration() {
         boolean result = true;
         enforceChangePermission();
-        return mWifiStateMachine.saveConfig();
+        return mWifiStateMachine.syncSaveConfig();
     }
 
     /**
@@ -723,7 +723,7 @@ public class WifiService extends IWifiManager.Stub {
      */
     public DhcpInfo getDhcpInfo() {
         enforceAccessPermission();
-        return mWifiStateMachine.getDhcpInfo();
+        return mWifiStateMachine.syncGetDhcpInfo();
     }
 
     /**
@@ -823,7 +823,7 @@ public class WifiService extends IWifiManager.Stub {
                  * or plugged in to AC).
                  */
                 if (!shouldWifiStayAwake(stayAwakeConditions, mPluggedType)) {
-                    WifiInfo info = mWifiStateMachine.requestConnectionInfo();
+                    WifiInfo info = mWifiStateMachine.syncRequestConnectionInfo();
                     if (info.getSupplicantState() != SupplicantState.COMPLETED) {
                         // we used to go to sleep immediately, but this caused some race conditions
                         // we don't have time to track down for this release.  Delay instead,
@@ -1002,7 +1002,7 @@ public class WifiService extends IWifiManager.Stub {
                     + ", uid=" + Binder.getCallingUid());
             return;
         }
-        pw.println("Wi-Fi is " + mWifiStateMachine.getWifiStateByName());
+        pw.println("Wi-Fi is " + mWifiStateMachine.syncGetWifiStateByName());
         pw.println("Stay-awake conditions: " +
                 Settings.System.getInt(mContext.getContentResolver(),
                                        Settings.System.STAY_ON_WHILE_PLUGGED_IN, 0));
@@ -1012,7 +1012,7 @@ public class WifiService extends IWifiManager.Stub {
         pw.println(mWifiStateMachine);
         pw.println();
         pw.println("Latest scan results:");
-        List<ScanResult> scanResults = mWifiStateMachine.getScanResultsList();
+        List<ScanResult> scanResults = mWifiStateMachine.syncGetScanResultsList();
         if (scanResults != null && scanResults.size() != 0) {
             pw.println("  BSSID              Frequency   RSSI  Flags             SSID");
             for (ScanResult r : scanResults) {
@@ -1320,7 +1320,7 @@ public class WifiService extends IWifiManager.Stub {
         if ((state == NetworkInfo.State.DISCONNECTED)
                 || (state == NetworkInfo.State.UNKNOWN)) {
             // Look for an open network
-            List<ScanResult> scanResults = mWifiStateMachine.getScanResultsList();
+            List<ScanResult> scanResults = mWifiStateMachine.syncGetScanResultsList();
             if (scanResults != null) {
                 int numOpenNetworks = 0;
                 for (int i = scanResults.size() - 1; i >= 0; i--) {
