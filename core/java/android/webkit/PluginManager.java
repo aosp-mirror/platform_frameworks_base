@@ -149,40 +149,10 @@ public class PluginManager {
                     continue;
                 }
 
-                // check if the plugin has the required permissions
-                String permissions[] = pkgInfo.requestedPermissions;
-                if (permissions == null) {
+                // check if the plugin has the required permissions and
+                // signatures
+                if (!containsPluginPermissionAndSignatures(pkgInfo)) {
                     continue;
-                }
-                boolean permissionOk = false;
-                for (String permit : permissions) {
-                    if (PLUGIN_PERMISSION.equals(permit)) {
-                        permissionOk = true;
-                        break;
-                    }
-                }
-                if (!permissionOk) {
-                    continue;
-                }
-
-                // check to ensure the plugin is properly signed
-                Signature signatures[] = pkgInfo.signatures;
-                if (signatures == null) {
-                    continue;
-                }
-                if (SystemProperties.getBoolean("ro.secure", false)) {
-                    boolean signatureMatch = false;
-                    for (Signature signature : signatures) {
-                        for (int i = 0; i < SIGNATURES.length; i++) {
-                            if (SIGNATURES[i].equals(signature)) {
-                                signatureMatch = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (!signatureMatch) {
-                        continue;
-                    }
                 }
 
                 // determine the type of plugin from the manifest
@@ -223,6 +193,64 @@ public class PluginManager {
         }
 
         return directories.toArray(new String[directories.size()]);
+    }
+
+    /* package */
+    boolean containsPluginPermissionAndSignatures(String pluginAPKName) {
+        PackageManager pm = mContext.getPackageManager();
+
+        // retrieve information from the plugin's manifest
+        try {
+            PackageInfo pkgInfo = pm.getPackageInfo(pluginAPKName, PackageManager.GET_PERMISSIONS
+                    | PackageManager.GET_SIGNATURES);
+            if (pkgInfo != null) {
+                return containsPluginPermissionAndSignatures(pkgInfo);
+            }
+        } catch (NameNotFoundException e) {
+            Log.w(LOGTAG, "Can't find plugin: " + pluginAPKName);
+        }
+        return false;
+    }
+
+    private static boolean containsPluginPermissionAndSignatures(PackageInfo pkgInfo) {
+
+        // check if the plugin has the required permissions
+        String permissions[] = pkgInfo.requestedPermissions;
+        if (permissions == null) {
+            return false;
+        }
+        boolean permissionOk = false;
+        for (String permit : permissions) {
+            if (PLUGIN_PERMISSION.equals(permit)) {
+                permissionOk = true;
+                break;
+            }
+        }
+        if (!permissionOk) {
+            return false;
+        }
+
+        // check to ensure the plugin is properly signed
+        Signature signatures[] = pkgInfo.signatures;
+        if (signatures == null) {
+            return false;
+        }
+        if (SystemProperties.getBoolean("ro.secure", false)) {
+            boolean signatureMatch = false;
+            for (Signature signature : signatures) {
+                for (int i = 0; i < SIGNATURES.length; i++) {
+                    if (SIGNATURES[i].equals(signature)) {
+                        signatureMatch = true;
+                        break;
+                    }
+                }
+            }
+            if (!signatureMatch) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /* package */
