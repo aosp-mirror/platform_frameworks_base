@@ -19,6 +19,7 @@
 #define A_RTSP_CONTROLLER_H_
 
 #include <media/stagefright/foundation/ABase.h>
+#include <media/stagefright/foundation/AHandlerReflector.h>
 #include <media/stagefright/MediaExtractor.h>
 
 namespace android {
@@ -38,12 +39,32 @@ struct ARTSPController : public MediaExtractor {
     virtual sp<MetaData> getTrackMetaData(
             size_t index, uint32_t flags);
 
+    void onMessageReceived(const sp<AMessage> &msg);
+
 protected:
     virtual ~ARTSPController();
 
 private:
+    enum {
+        kWhatConnectDone    = 'cdon',
+        kWhatDisconnectDone = 'ddon',
+    };
+
+    enum State {
+        DISCONNECTED,
+        CONNECTED,
+        CONNECTING,
+    };
+
+    Mutex mLock;
+    Condition mCondition;
+
+    State mState;
+    status_t mConnectionResult;
+
     sp<ALooper> mLooper;
     sp<MyHandler> mHandler;
+    sp<AHandlerReflector<ARTSPController> > mReflector;
 
     DISALLOW_EVIL_CONSTRUCTORS(ARTSPController);
 };
