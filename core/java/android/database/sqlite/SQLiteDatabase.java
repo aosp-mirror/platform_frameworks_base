@@ -2392,10 +2392,9 @@ public class SQLiteDatabase extends SQLiteClosable {
         ArrayList<DbStats> dbStatsList = new ArrayList<DbStats>();
         // make a local copy of mActiveDatabases - so that this method is not competing
         // for synchronization lock on mActiveDatabases
-        ArrayList<WeakReference<SQLiteDatabase>> tempList =
-                new ArrayList<WeakReference<SQLiteDatabase>>();
+        ArrayList<WeakReference<SQLiteDatabase>> tempList;
         synchronized(mActiveDatabases) {
-            Collections.copy(tempList, mActiveDatabases);
+            tempList = (ArrayList<WeakReference<SQLiteDatabase>>)mActiveDatabases.clone();
         }
         for (WeakReference<SQLiteDatabase> w : tempList) {
             SQLiteDatabase db = w.get();
