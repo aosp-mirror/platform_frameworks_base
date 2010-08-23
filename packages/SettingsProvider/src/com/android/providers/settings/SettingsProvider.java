@@ -222,16 +222,11 @@ public class SettingsProvider extends ContentProvider {
             final String value = c.moveToNext() ? c.getString(0) : null;
             if (value == null) {
                 final SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
-                String serial = SystemProperties.get("ro.serialno");
-                if (serial != null) {
-                    try {
-                        random.setSeed(serial.getBytes("UTF-8"));
-                    } catch (UnsupportedEncodingException ignore) {
-                        // stick with default seed
-                    }
-                }
+                String serial = SystemProperties.get("ro.serialno", "");
+                random.setSeed(
+                    (serial + System.nanoTime() + new SecureRandom().nextLong()).getBytes());
                 final String newAndroidIdValue = Long.toHexString(random.nextLong());
-                Log.d(TAG, "Generated and saved new ANDROID_ID");
+                Log.d(TAG, "Generated and saved new ANDROID_ID [" + newAndroidIdValue + "]");
                 final ContentValues values = new ContentValues();
                 values.put(Settings.NameValueTable.NAME, Settings.Secure.ANDROID_ID);
                 values.put(Settings.NameValueTable.VALUE, newAndroidIdValue);

@@ -33,6 +33,9 @@ import android.view.ViewGroup;
  * A view that displays one child at a time and lets the user pick among them.
  * The items in the Spinner come from the {@link Adapter} associated with
  * this view.
+ *
+ * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-spinner.html">Spinner
+ * tutorial</a>.</p>
  * 
  * @attr ref android.R.styleable#Spinner_prompt
  */

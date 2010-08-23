@@ -28,6 +28,9 @@
 // Log debug messages about input event injection.
 #define DEBUG_INJECTION 0
 
+// Log debug messages about input event throttling.
+#define DEBUG_THROTTLING 0
+
 #include <cutils/log.h>
 #include <ui/InputDispatcher.h>
 
@@ -65,6 +68,15 @@ InputDispatcher::InputDispatcher(const sp<InputDispatcherPolicyInterface>& polic
     mInboundQueue.tail.eventTime = LONG_LONG_MAX;
 
     mKeyRepeatState.lastKeyEntry = NULL;
+
+    int32_t maxEventsPerSecond = policy->getMaxEventsPerSecond();
+    mThrottleState.minTimeBetweenEvents = 1000000000LL / maxEventsPerSecond;
+    mThrottleState.lastDeviceId = -1;
+
+#if DEBUG_THROTTLING
+    mThrottleState.originalSampleCount = 0;
+    LOGD("Throttling - Max events per second = %d", maxEventsPerSecond);
+#endif
 
     mCurrentInputTargetsValid = false;
 }
@@ -144,12 +156,61 @@ void InputDispatcher::dispatchOnce() {
                 }
             } else {
                 // Inbound queue has at least one entry.
-                // Start processing it but leave it on the queue until later so that the
+                EventEntry* entry = mInboundQueue.head.next;
+
+                // Consider throttling the entry if it is a move event and there are no
+                // other events behind it in the queue.  Due to movement batching, additional
+                // samples may be appended to this event by the time the throttling timeout
+                // expires.
+                // TODO Make this smarter and consider throttling per device independently.
+                if (entry->type == EventEntry::TYPE_MOTION) {
+                    MotionEntry* motionEntry = static_cast<MotionEntry*>(entry);
+                    int32_t deviceId = motionEntry->deviceId;
+                    uint32_t source = motionEntry->source;
+                    if (motionEntry->next == & mInboundQueue.tail
+                            && motionEntry->action == AMOTION_EVENT_ACTION_MOVE
+                            && deviceId == mThrottleState.lastDeviceId
+                            && source == mThrottleState.lastSource) {
+                        nsecs_t nextTime = mThrottleState.lastEventTime
+                                + mThrottleState.minTimeBetweenEvents;
+                        if (currentTime < nextTime) {
+                            // Throttle it!
+#if DEBUG_THROTTLING
+                            LOGD("Throttling - Delaying motion event for "
+                                    "device 0x%x, source 0x%08x by up to %0.3fms.",
+                                    deviceId, source, (nextTime - currentTime) * 0.000001);
+#endif
+                            if (nextTime < nextWakeupTime) {
+                                nextWakeupTime = nextTime;
+                            }
+                            if (mThrottleState.originalSampleCount == 0) {
+                                mThrottleState.originalSampleCount =
+                                        motionEntry->countSamples();
+                            }
+                            goto Throttle;
+                        }
+                    }
+
+#if DEBUG_THROTTLING
+                    if (mThrottleState.originalSampleCount != 0) {
+                        uint32_t count = motionEntry->countSamples();
+                        LOGD("Throttling - Motion event sample count grew by %d from %d to %d.",
+                                count - mThrottleState.originalSampleCount,
+                                mThrottleState.originalSampleCount, count);
+                        mThrottleState.originalSampleCount = 0;
+                    }
+#endif
+
+                    mThrottleState.lastEventTime = entry->eventTime < currentTime
+                            ? entry->eventTime : currentTime;
+                    mThrottleState.lastDeviceId = deviceId;
+                    mThrottleState.lastSource = source;
+                }
+
+                // Start processing the entry but leave it on the queue until later so that the
                 // input reader can keep appending samples onto a motion event between the
                 // time we started processing it and the time we finally enqueue dispatch
                 // entries for it.
-                EventEntry* entry = mInboundQueue.head.next;
-
                 switch (entry->type) {
                 case EventEntry::TYPE_CONFIGURATION_CHANGED: {
                     ConfigurationChangedEntry* typedEntry =
@@ -179,6 +240,8 @@ void InputDispatcher::dispatchOnce() {
                 mInboundQueue.dequeue(entry);
                 mAllocator.releaseEventEntry(entry);
                 skipPoll = true;
+
+            Throttle: ;
             }
         }
 
@@ -192,8 +255,8 @@ void InputDispatcher::dispatchOnce() {
         return;
     }
 
-    // Wait for callback or timeout or wake.
-    nsecs_t timeout = nanoseconds_to_milliseconds(nextWakeupTime - currentTime);
+    // Wait for callback or timeout or wake.  (make sure we round up, not down)
+    nsecs_t timeout = (nextWakeupTime - currentTime + 999999LL) / 1000000LL;
     int32_t timeoutMillis = timeout > INT_MAX ? -1 : timeout > 0 ? int32_t(timeout) : 0;
     mPollLoop->pollOnce(timeoutMillis);
 }
@@ -1706,6 +1769,16 @@ void InputDispatcher::Allocator::appendMotionSample(MotionEntry* motionEntry,
     sample->next = NULL;
     motionEntry->lastSample->next = sample;
     motionEntry->lastSample = sample;
+}
+
+// --- InputDispatcher::MotionEntry ---
+
+uint32_t InputDispatcher::MotionEntry::countSamples() const {
+    uint32_t count = 1;
+    for (MotionSample* sample = firstSample.next; sample != NULL; sample = sample->next) {
+        count += 1;
+    }
+    return count;
 }
 
 // --- InputDispatcher::Connection ---

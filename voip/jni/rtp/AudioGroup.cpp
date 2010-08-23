@@ -367,7 +367,7 @@ void AudioStream::decode(int tick)
             MSG_TRUNC | MSG_DONTWAIT);
 
         // Do we need to check SSRC, sequence, and timestamp? They are not
-        // reliable but at least they can be used to identity duplicates?
+        // reliable but at least they can be used to identify duplicates?
         if (length < 12 || length > (int)sizeof(buffer) ||
             (ntohl(*(uint32_t *)buffer) & 0xC07F0000) != mCodecMagic) {
             LOGD("stream[%d] malformed packet", mSocket);
@@ -526,70 +526,6 @@ AudioGroup::~AudioGroup()
     LOGD("group[%d] is dead", mDeviceSocket);
 }
 
-#define FROYO_COMPATIBLE
-#ifdef FROYO_COMPATIBLE
-
-// Copied from AudioRecord.cpp.
-status_t AudioRecord_getMinFrameCount(
-        int* frameCount,
-        uint32_t sampleRate,
-        int format,
-        int channelCount)
-{
-    size_t size = 0;
-    if (AudioSystem::getInputBufferSize(sampleRate, format, channelCount, &size)
-            != NO_ERROR) {
-        LOGE("AudioSystem could not query the input buffer size.");
-        return NO_INIT;
-    }
-
-    if (size == 0) {
-        LOGE("Unsupported configuration: sampleRate %d, format %d, channelCount %d",
-            sampleRate, format, channelCount);
-        return BAD_VALUE;
-    }
-
-    // We double the size of input buffer for ping pong use of record buffer.
-    size <<= 1;
-
-    if (AudioSystem::isLinearPCM(format)) {
-        size /= channelCount * (format == AudioSystem::PCM_16_BIT ? 2 : 1);
-    }
-
-    *frameCount = size;
-    return NO_ERROR;
-}
-
-// Copied from AudioTrack.cpp.
-status_t AudioTrack_getMinFrameCount(
-        int* frameCount,
-        int streamType,
-        uint32_t sampleRate)
-{
-    int afSampleRate;
-    if (AudioSystem::getOutputSamplingRate(&afSampleRate, streamType) != NO_ERROR) {
-        return NO_INIT;
-    }
-    int afFrameCount;
-    if (AudioSystem::getOutputFrameCount(&afFrameCount, streamType) != NO_ERROR) {
-        return NO_INIT;
-    }
-    uint32_t afLatency;
-    if (AudioSystem::getOutputLatency(&afLatency, streamType) != NO_ERROR) {
-        return NO_INIT;
-    }
-
-    // Ensure that buffer depth covers at least audio hardware latency
-    uint32_t minBufCount = afLatency / ((1000 * afFrameCount) / afSampleRate);
-    if (minBufCount < 2) minBufCount = 2;
-
-    *frameCount = (sampleRate == 0) ? afFrameCount * minBufCount :
-              afFrameCount * minBufCount * sampleRate / afSampleRate;
-    return NO_ERROR;
-}
-
-#endif
-
 bool AudioGroup::set(int sampleRate, int sampleCount)
 {
     mEventQueue = epoll_create(2);
@@ -603,15 +539,6 @@ bool AudioGroup::set(int sampleRate, int sampleCount)
     // Find out the frame count for AudioTrack and AudioRecord.
     int output = 0;
     int input = 0;
-#ifdef FROYO_COMPATIBLE
-    if (AudioTrack_getMinFrameCount(&output, AudioSystem::VOICE_CALL,
-        sampleRate) != NO_ERROR || output <= 0 ||
-        AudioRecord_getMinFrameCount(&input, sampleRate,
-        AudioSystem::PCM_16_BIT, 1) != NO_ERROR || input <= 0) {
-        LOGE("cannot compute frame count");
-        return false;
-    }
-#else
     if (AudioTrack::getMinFrameCount(&output, AudioSystem::VOICE_CALL,
         sampleRate) != NO_ERROR || output <= 0 ||
         AudioRecord::getMinFrameCount(&input, sampleRate,
@@ -619,7 +546,6 @@ bool AudioGroup::set(int sampleRate, int sampleCount)
         LOGE("cannot compute frame count");
         return false;
     }
-#endif
     LOGD("reported frame count: output %d, input %d", output, input);
 
     output = (output + sampleCount - 1) / sampleCount * sampleCount;
@@ -771,6 +697,10 @@ bool AudioGroup::remove(int socket)
     for (AudioStream *stream = mChain; stream->mNext; stream = stream->mNext) {
         AudioStream *target = stream->mNext;
         if (target->mSocket == socket) {
+            if (epoll_ctl(mEventQueue, EPOLL_CTL_DEL, socket, NULL)) {
+                LOGE("epoll_ctl: %s", strerror(errno));
+                return false;
+            }
             stream->mNext = target->mNext;
             LOGD("stream[%d] leaves group[%d]", socket, mDeviceSocket);
             delete target;
@@ -874,7 +804,7 @@ bool AudioGroup::deviceLoop()
 static jfieldID gNative;
 static jfieldID gMode;
 
-jint add(JNIEnv *env, jobject thiz, jint mode,
+void add(JNIEnv *env, jobject thiz, jint mode,
     jint socket, jstring jRemoteAddress, jint remotePort,
     jstring jCodecName, jint sampleRate, jint sampleCount,
     jint codecType, jint dtmfType)
@@ -887,7 +817,7 @@ jint add(JNIEnv *env, jobject thiz, jint mode,
     sockaddr_storage remote;
     if (parse(env, jRemoteAddress, remotePort, &remote) < 0) {
         // Exception already thrown.
-        return -1;
+        goto error;
     }
     if (sampleRate < 0 || sampleCount < 0 || codecType < 0 || codecType > 127) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
@@ -895,12 +825,12 @@ jint add(JNIEnv *env, jobject thiz, jint mode,
     }
     if (!jCodecName) {
         jniThrowNullPointerException(env, "codecName");
-        return -1;
+        goto error;
     }
     codecName = env->GetStringUTFChars(jCodecName, NULL);
     if (!codecName) {
         // Exception already thrown.
-        return -1;
+        goto error;
     }
 
     // Create audio stream.
@@ -909,8 +839,10 @@ jint add(JNIEnv *env, jobject thiz, jint mode,
         codecType, dtmfType)) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "cannot initialize audio stream");
+        env->ReleaseStringUTFChars(jCodecName, codecName);
         goto error;
     }
+    env->ReleaseStringUTFChars(jCodecName, codecName);
     socket = -1;
 
     // Create audio group.
@@ -934,16 +866,13 @@ jint add(JNIEnv *env, jobject thiz, jint mode,
 
     // Succeed.
     env->SetIntField(thiz, gNative, (int)group);
-    env->ReleaseStringUTFChars(jCodecName, codecName);
-    return socket;
+    return;
 
 error:
     delete group;
     delete stream;
     close(socket);
     env->SetIntField(thiz, gNative, NULL);
-    env->ReleaseStringUTFChars(jCodecName, codecName);
-    return -1;
 }
 
 void remove(JNIEnv *env, jobject thiz, jint socket)
@@ -976,7 +905,7 @@ void sendDtmf(JNIEnv *env, jobject thiz, jint event)
 }
 
 JNINativeMethod gMethods[] = {
-    {"add", "(IILjava/lang/String;ILjava/lang/String;IIII)I", (void *)add},
+    {"add", "(IILjava/lang/String;ILjava/lang/String;IIII)V", (void *)add},
     {"remove", "(I)V", (void *)remove},
     {"setMode", "(I)V", (void *)setMode},
     {"sendDtmf", "(I)V", (void *)sendDtmf},

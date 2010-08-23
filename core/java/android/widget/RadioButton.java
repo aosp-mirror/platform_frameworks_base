@@ -34,6 +34,9 @@ import android.util.AttributeSet;
  * a radio group, checking one radio button unchecks all the others.</p>
  * </p>
  *
+ * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-formstuff.html">Form Stuff
+ * tutorial</a>.</p>
+ *
  * <p><strong>XML attributes</strong></p>
  * <p> 
  * See {@link android.R.styleable#CompoundButton CompoundButton Attributes}, 

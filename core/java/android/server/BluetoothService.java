@@ -1256,12 +1256,32 @@ public class BluetoothService extends IBluetooth.Stub {
         return mTetheringOn;
     }
 
-    public synchronized void setBluetoothTethering(boolean value, String uuid, String bridge) {
+    private BroadcastReceiver mTetheringReceiver = null;
+
+    public synchronized void setBluetoothTethering(boolean value, 
+            final String uuid, final String bridge) {
         mTetheringOn = value;
         if (!value) {
             disconnectPan();
         }
-        setBluetoothTetheringNative(value, uuid, bridge);
+
+        if (getBluetoothState() != BluetoothAdapter.STATE_ON && mTetheringOn) {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+            mTetheringReceiver = new BroadcastReceiver() {
+                @Override
+                public synchronized void onReceive(Context context, Intent intent) {
+                    if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.STATE_OFF)
+                            == BluetoothAdapter.STATE_ON) {
+                        setBluetoothTethering(true, uuid, bridge);
+                        mContext.unregisterReceiver(mTetheringReceiver);
+                    }
+                }
+            };
+            mContext.registerReceiver(mTetheringReceiver, filter);
+        } else {
+            setBluetoothTetheringNative(value, uuid, bridge);
+        }
     }
 
     public synchronized int getPanDeviceState(BluetoothDevice device) {

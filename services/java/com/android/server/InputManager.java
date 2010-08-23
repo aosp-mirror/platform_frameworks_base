@@ -26,6 +26,7 @@ import android.content.res.Configuration;
 import android.os.Environment;
 import android.os.LocalPowerManager;
 import android.os.PowerManager;
+import android.os.SystemProperties;
 import android.util.Slog;
 import android.util.Xml;
 import android.view.InputChannel;
@@ -47,9 +48,6 @@ import java.util.ArrayList;
 
 /*
  * Wraps the C++ InputManager and provides its callbacks.
- * 
- * XXX Tempted to promote this to a first-class service, ie. InputManagerService, to
- *     improve separation of concerns with respect to the window manager.
  */
 public class InputManager {
     static final String TAG = "InputManager";
@@ -506,6 +504,19 @@ public class InputManager {
             }
             
             return names.toArray(new String[names.size()]);
+        }
+        
+        @SuppressWarnings("unused")
+        public int getMaxEventsPerSecond() {
+            int result = 0;
+            try {
+                result = Integer.parseInt(SystemProperties.get("windowsmgr.max_events_per_sec"));
+            } catch (NumberFormatException e) {
+            }
+            if (result < 1) {
+                result = 60;
+            }
+            return result;
         }
     }
 }

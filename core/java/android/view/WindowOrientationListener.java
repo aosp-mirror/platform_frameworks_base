@@ -103,11 +103,11 @@ public abstract class WindowOrientationListener {
         }
     }
 
-    public int getCurrentRotation() {
+    public int getCurrentRotation(int lastRotation) {
         if (mEnabled) {
-            return mSensorEventListener.getCurrentRotation();
+            return mSensorEventListener.getCurrentRotation(lastRotation);
         }
-        return -1;
+        return lastRotation;
     }
 
     /**
@@ -153,8 +153,14 @@ public abstract class WindowOrientationListener {
         private static final int ROTATION_270 = 2;
 
         // Mapping our internal aliases into actual Surface rotation values
-        private static final int[] SURFACE_ROTATIONS = new int[] {
+        private static final int[] INTERNAL_TO_SURFACE_ROTATION = new int[] {
             Surface.ROTATION_0, Surface.ROTATION_90, Surface.ROTATION_270};
+
+        // Mapping Surface rotation values to internal aliases.
+        // We have no constant for Surface.ROTATION_180.  That should never happen, but if it
+        // does, we'll arbitrarily choose a mapping.
+        private static final int[] SURFACE_TO_INTERNAL_ROTATION = new int[] {
+            ROTATION_0, ROTATION_90, ROTATION_90, ROTATION_270};
 
         // Threshold ranges of orientation angle to transition into other orientation states.
         // The first list is for transitions from ROTATION_0, the next for ROTATION_90, etc.
@@ -243,8 +249,12 @@ public abstract class WindowOrientationListener {
             return (float) SAMPLING_PERIOD_MS / (timeConstantMs + SAMPLING_PERIOD_MS);
         }
 
-        int getCurrentRotation() {
-            return SURFACE_ROTATIONS[mRotation];
+        int getCurrentRotation(int lastRotation) {
+            if (mTiltDistrust > 0) {
+                // we really don't know the current orientation, so trust what's currently displayed
+                mRotation = SURFACE_TO_INTERNAL_ROTATION[lastRotation];
+            }
+            return INTERNAL_TO_SURFACE_ROTATION[mRotation];
         }
 
         private void calculateNewRotation(float orientation, float tiltAngle) {
@@ -267,7 +277,7 @@ public abstract class WindowOrientationListener {
 
             if (localLOGV) Log.i(TAG, " new rotation = " + rotation);
             mRotation = rotation;
-            mOrientationListener.onOrientationChanged(getCurrentRotation());
+            mOrientationListener.onOrientationChanged(INTERNAL_TO_SURFACE_ROTATION[mRotation]);
         }
 
         private float lowpassFilter(float newValue, float oldValue, float alpha) {
@@ -306,7 +316,8 @@ public abstract class WindowOrientationListener {
             mTiltAngle = lowpassFilter(newTiltAngle, mTiltAngle, alpha);
 
             float absoluteTilt = Math.abs(mTiltAngle);
-            if (checkFullyTilted(absoluteTilt)) {
+            checkFullyTilted(absoluteTilt);
+            if (mTiltDistrust > 0) {
                 return; // when fully tilted, ignore orientation entirely
             }
 
@@ -347,11 +358,9 @@ public abstract class WindowOrientationListener {
          * get un-tilted.
          *
          * @param absoluteTilt the absolute value of the current tilt angle
-         * @return true if the phone is fully tilted
          */
-        private boolean checkFullyTilted(float absoluteTilt) {
-            boolean fullyTilted = absoluteTilt > MAX_TILT;
-            if (fullyTilted) {
+        private void checkFullyTilted(float absoluteTilt) {
+            if (absoluteTilt > MAX_TILT) {
                 if (mRotation == ROTATION_0) {
                     mOrientationAngle = 0;
                 } else if (mRotation == ROTATION_90) {
@@ -366,7 +375,6 @@ public abstract class WindowOrientationListener {
             } else if (mTiltDistrust > 0) {
                 mTiltDistrust--;
             }
-            return fullyTilted;
         }
 
         /**
@@ -389,8 +397,8 @@ public abstract class WindowOrientationListener {
          */
         private void filterOrientation(float absoluteTilt, float orientationAngle) {
             float alpha = DEFAULT_LOWPASS_ALPHA;
-            if (mTiltDistrust > 0 || mAccelerationDistrust > 1) {
-                // when fully tilted, or under more than a transient acceleration, distrust heavily
+            if (mAccelerationDistrust > 1) {
+                // when under more than a transient acceleration, distrust heavily
                 alpha = ACCELERATING_LOWPASS_ALPHA;
             } else if (absoluteTilt > PARTIAL_TILT || mAccelerationDistrust == 1) {
                 // when tilted partway, or under transient acceleration, distrust lightly

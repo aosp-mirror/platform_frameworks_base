@@ -36,6 +36,7 @@ public class TextActivity extends Activity {
         private final Paint mMediumPaint;
         private final Paint mLargePaint;
         private final Paint mStrikePaint;
+        private final Paint mScaledPaint;
 
         CustomTextView(Context c) {
             super(c);
@@ -43,14 +44,19 @@ public class TextActivity extends Activity {
             mMediumPaint = new Paint();
             mMediumPaint.setAntiAlias(true);
             mMediumPaint.setColor(0xffff0000);
+
             mLargePaint = new Paint();
             mLargePaint.setAntiAlias(true);
             mLargePaint.setTextSize(36.0f);
+
             mStrikePaint = new Paint();
             mStrikePaint.setAntiAlias(true);
             mStrikePaint.setTextSize(16.0f);
             mStrikePaint.setUnderlineText(true);
-            
+
+            mScaledPaint = new Paint();
+            mScaledPaint.setAntiAlias(true);
+            mScaledPaint.setTextSize(16.0f);
         }
 
         @Override
@@ -85,6 +91,13 @@ public class TextActivity extends Activity {
             canvas.drawText("Hello OpenGL renderer!", 500, 100, mStrikePaint);
             mStrikePaint.setStrikeThruText(false);
             mStrikePaint.setUnderlineText(true);
+            
+            mScaledPaint.setTextScaleX(0.5f);
+            canvas.drawText("Hello OpenGL renderer!", 500, 200, mScaledPaint);
+            mScaledPaint.setTextScaleX(2.0f);
+            canvas.drawText("Hello OpenGL renderer!", 500, 230, mScaledPaint);
+            mScaledPaint.setTextScaleX(1.0f);
+            canvas.drawText("Hello OpenGL renderer!", 500, 260, mScaledPaint);
             
             canvas.save();
             canvas.clipRect(150.0f, 220.0f, 450.0f, 320.0f);

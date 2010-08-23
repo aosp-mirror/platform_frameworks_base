@@ -330,28 +330,19 @@ public interface IActivityManager extends IInterface {
     /** Information you can retrieve about a particular application. */
     public static class ContentProviderHolder implements Parcelable {
         public final ProviderInfo info;
-        public final String permissionFailure;
         public IContentProvider provider;
         public boolean noReleaseNeeded;
 
         public ContentProviderHolder(ProviderInfo _info) {
             info = _info;
-            permissionFailure = null;
         }
 
-        public ContentProviderHolder(ProviderInfo _info,
-                String _permissionFailure) {
-            info = _info;
-            permissionFailure = _permissionFailure;
-        }
-        
         public int describeContents() {
             return 0;
         }
 
         public void writeToParcel(Parcel dest, int flags) {
             info.writeToParcel(dest, 0);
-            dest.writeString(permissionFailure);
             if (provider != null) {
                 dest.writeStrongBinder(provider.asBinder());
             } else {
@@ -373,7 +364,6 @@ public interface IActivityManager extends IInterface {
 
         private ContentProviderHolder(Parcel source) {
             info = ProviderInfo.CREATOR.createFromParcel(source);
-            permissionFailure = source.readString();
             provider = ContentProviderNative.asInterface(
                 source.readStrongBinder());
             noReleaseNeeded = source.readInt() != 0;

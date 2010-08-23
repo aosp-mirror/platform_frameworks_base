@@ -48,8 +48,8 @@ public:
     ~Track();
 
     status_t start(MetaData *params);
-    void stop();
-    void pause();
+    status_t stop();
+    status_t pause();
     bool reachedEOS();
 
     int64_t getDurationUs() const;
@@ -144,7 +144,7 @@ private:
     int64_t mTrackEveryTimeDurationUs;
 
     static void *ThreadWrapper(void *me);
-    void threadEntry();
+    status_t threadEntry();
 
     const uint8_t *parseParamSet(
         const uint8_t *data, size_t length, int type, size_t *paramSetLen);
@@ -378,15 +378,20 @@ status_t MPEG4Writer::start(MetaData *param) {
     return OK;
 }
 
-void MPEG4Writer::pause() {
+status_t MPEG4Writer::pause() {
     if (mFile == NULL) {
-        return;
+        return OK;
     }
     mPaused = true;
+    status_t err = OK;
     for (List<Track *>::iterator it = mTracks.begin();
          it != mTracks.end(); ++it) {
-        (*it)->pause();
+        status_t status = (*it)->pause();
+        if (status != OK) {
+            err = status;
+        }
     }
+    return err;
 }
 
 void MPEG4Writer::stopWriterThread() {
@@ -403,15 +408,19 @@ void MPEG4Writer::stopWriterThread() {
     pthread_join(mThread, &dummy);
 }
 
-void MPEG4Writer::stop() {
+status_t MPEG4Writer::stop() {
     if (mFile == NULL) {
-        return;
+        return OK;
     }
 
+    status_t err = OK;
     int64_t maxDurationUs = 0;
     for (List<Track *>::iterator it = mTracks.begin();
          it != mTracks.end(); ++it) {
-        (*it)->stop();
+        status_t status = (*it)->stop();
+        if (err == OK && status != OK) {
+            err = status;
+        }
 
         int64_t durationUs = (*it)->getDurationUs();
         if (durationUs > maxDurationUs) {
@@ -420,6 +429,15 @@ void MPEG4Writer::stop() {
     }
 
     stopWriterThread();
+
+    // Do not write out movie header on error.
+    if (err != OK) {
+        fflush(mFile);
+        fclose(mFile);
+        mFile = NULL;
+        mStarted = false;
+        return err;
+    }
 
     // Fix up the size of the 'mdat' chunk.
     if (mUse32BitOffset) {
@@ -508,6 +526,7 @@ void MPEG4Writer::stop() {
     fclose(mFile);
     mFile = NULL;
     mStarted = false;
+    return err;
 }
 
 status_t MPEG4Writer::setInterleaveDuration(uint32_t durationUs) {
@@ -1030,13 +1049,14 @@ status_t MPEG4Writer::Track::start(MetaData *params) {
     return OK;
 }
 
-void MPEG4Writer::Track::pause() {
+status_t MPEG4Writer::Track::pause() {
     mPaused = true;
+    return OK;
 }
 
-void MPEG4Writer::Track::stop() {
+status_t MPEG4Writer::Track::stop() {
     if (mDone) {
-        return;
+        return OK;
     }
 
     mDone = true;
@@ -1044,7 +1064,16 @@ void MPEG4Writer::Track::stop() {
     void *dummy;
     pthread_join(mThread, &dummy);
 
-    mSource->stop();
+    status_t err = (status_t) dummy;
+
+    {
+        status_t status = mSource->stop();
+        if (err == OK && status != OK && status != ERROR_END_OF_STREAM) {
+            err = status;
+        }
+    }
+
+    return err;
 }
 
 bool MPEG4Writer::Track::reachedEOS() {
@@ -1055,9 +1084,8 @@ bool MPEG4Writer::Track::reachedEOS() {
 void *MPEG4Writer::Track::ThreadWrapper(void *me) {
     Track *track = static_cast<Track *>(me);
 
-    track->threadEntry();
-
-    return NULL;
+    status_t err = track->threadEntry();
+    return (void *) err;
 }
 
 #include <ctype.h>
@@ -1352,7 +1380,7 @@ static bool collectStatisticalData() {
     return false;
 }
 
-void MPEG4Writer::Track::threadEntry() {
+status_t MPEG4Writer::Track::threadEntry() {
     int32_t count = 0;
     const int64_t interleaveDurationUs = mOwner->interleaveDuration();
     int64_t chunkTimestampUs = 0;
@@ -1595,7 +1623,7 @@ void MPEG4Writer::Track::threadEntry() {
     }
 
     if (mSampleSizes.empty()) {
-        err = UNKNOWN_ERROR;
+        err = ERROR_MALFORMED;
     }
     mOwner->trackProgressStatus(this, -1, err);
 
@@ -1626,6 +1654,10 @@ void MPEG4Writer::Track::threadEntry() {
             count, nZeroLengthFrames, mNumSamples, mMaxWriteTimeUs, mIsAudio? "audio": "video");
 
     logStatisticalData(mIsAudio);
+    if (err == ERROR_END_OF_STREAM) {
+        return OK;
+    }
+    return err;
 }
 
 void MPEG4Writer::Track::trackProgressStatus(int64_t timeUs, status_t err) {
@@ -1973,7 +2005,6 @@ void MPEG4Writer::Track::writeTrackHeader(
                   int32_t samplerate;
                   bool success = mMeta->findInt32(kKeySampleRate, &samplerate);
                   CHECK(success);
-
                   mOwner->writeInt32(samplerate << 16);
                   if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mime)) {
                     mOwner->beginBox("esds");

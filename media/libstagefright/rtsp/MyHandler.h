@@ -309,6 +309,16 @@ struct MyHandler : public AHandler {
                 size_t trackIndex;
                 CHECK(msg->findSize("track-index", &trackIndex));
 
+                int32_t eos;
+                if (msg->findInt32("eos", &eos)) {
+                    LOG(INFO) << "received BYE on track index " << trackIndex;
+#if 0
+                    TrackInfo *track = &mTracks.editItemAt(trackIndex);
+                    track->mPacketSource->signalEOS(ERROR_END_OF_STREAM);
+#endif
+                    return;
+                }
+
                 sp<RefBase> obj;
                 CHECK(msg->findObject("access-unit", &obj));
 

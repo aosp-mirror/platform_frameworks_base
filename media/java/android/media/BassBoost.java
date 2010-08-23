@@ -99,7 +99,7 @@ public class BassBoost extends AudioEffect {
            UnsupportedOperationException, RuntimeException {
         super(EFFECT_TYPE_BASS_BOOST, EFFECT_TYPE_NULL, priority, audioSession);
 
-        short[] value = new short[1];
+        int[] value = new int[1];
         checkStatus(getParameter(PARAM_STRENGTH_SUPPORTED, value));
         mStrengthSupported = (value[0] != 0);
     }

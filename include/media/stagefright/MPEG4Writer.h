@@ -37,9 +37,9 @@ public:
 
     virtual status_t addSource(const sp<MediaSource> &source);
     virtual status_t start(MetaData *param = NULL);
+    virtual status_t stop();
+    virtual status_t pause();
     virtual bool reachedEOS();
-    virtual void stop();
-    virtual void pause();
 
     void beginBox(const char *fourcc);
     void writeInt8(int8_t x);

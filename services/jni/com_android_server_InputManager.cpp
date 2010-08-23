@@ -139,6 +139,7 @@ static struct {
     jmethodID filterJumpyTouchEvents;
     jmethodID getVirtualKeyDefinitions;
     jmethodID getExcludedDeviceNames;
+    jmethodID getMaxEventsPerSecond;
 } gCallbacksClassInfo;
 
 static struct {
@@ -249,6 +250,7 @@ public:
             int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets);
     virtual int32_t waitForMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
             int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets);
+    virtual int32_t getMaxEventsPerSecond();
 
 private:
     struct InputWindow {
@@ -309,6 +311,9 @@ private:
     // Cached filtering policies.
     int32_t mFilterTouchEvents;
     int32_t mFilterJumpyTouchEvents;
+
+    // Cached throttling policy.
+    int32_t mMaxEventsPerSecond;
 
     // Cached display state.  (lock mDisplayLock)
     Mutex mDisplayLock;
@@ -400,6 +405,7 @@ private:
 
 NativeInputManager::NativeInputManager(jobject callbacksObj) :
     mFilterTouchEvents(-1), mFilterJumpyTouchEvents(-1),
+    mMaxEventsPerSecond(-1),
     mDisplayWidth(-1), mDisplayHeight(-1), mDisplayOrientation(ROTATION_0),
     mDispatchEnabled(true), mDispatchFrozen(false), mWindowsReady(true),
     mFocusedWindow(NULL), mTouchDown(false), mTouchedWindow(NULL),
@@ -919,6 +925,21 @@ nsecs_t NativeInputManager::getKeyRepeatTimeout() {
         // TODO use ViewConfiguration.getLongPressTimeout()
         return milliseconds_to_nanoseconds(500);
     }
+}
+
+int32_t NativeInputManager::getMaxEventsPerSecond() {
+    if (mMaxEventsPerSecond < 0) {
+        JNIEnv* env = jniEnv();
+
+        jint result = env->CallIntMethod(mCallbacksObj,
+                gCallbacksClassInfo.getMaxEventsPerSecond);
+        if (checkAndClearExceptionFromCallback(env, "getMaxEventsPerSecond")) {
+            result = 60;
+        }
+
+        mMaxEventsPerSecond = result;
+    }
+    return mMaxEventsPerSecond;
 }
 
 void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowObjArray) {
@@ -2292,6 +2313,9 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gCallbacksClassInfo.getExcludedDeviceNames, gCallbacksClassInfo.clazz,
             "getExcludedDeviceNames", "()[Ljava/lang/String;");
+
+    GET_METHOD_ID(gCallbacksClassInfo.getMaxEventsPerSecond, gCallbacksClassInfo.clazz,
+            "getMaxEventsPerSecond", "()I");
 
     // VirtualKeyDefinition
 

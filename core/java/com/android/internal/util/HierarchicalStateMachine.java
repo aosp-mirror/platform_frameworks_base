@@ -137,7 +137,7 @@ class HelloWorld extends HierarchicalStateMachine {
     }
 
     class State1 extends HierarchicalState {
-        @Override public boolean processMessage(Message message) {
+        \@Override public boolean processMessage(Message message) {
             Log.d(TAG, "Hello World");
             return HANDLED;
         }
@@ -257,10 +257,10 @@ class Hsm1 extends HierarchicalStateMachine {
     }
 
     class P1 extends HierarchicalState {
-        @Override public void enter() {
+        \@Override public void enter() {
             Log.d(TAG, "mP1.enter");
         }
-        @Override public boolean processMessage(Message message) {
+        \@Override public boolean processMessage(Message message) {
             boolean retVal;
             Log.d(TAG, "mP1.processMessage what=" + message.what);
             switch(message.what) {
@@ -278,16 +278,16 @@ class Hsm1 extends HierarchicalStateMachine {
             }
             return retVal;
         }
-        @Override public void exit() {
+        \@Override public void exit() {
             Log.d(TAG, "mP1.exit");
         }
     }
 
     class S1 extends HierarchicalState {
-        @Override public void enter() {
+        \@Override public void enter() {
             Log.d(TAG, "mS1.enter");
         }
-        @Override public boolean processMessage(Message message) {
+        \@Override public boolean processMessage(Message message) {
             Log.d(TAG, "S1.processMessage what=" + message.what);
             if (message.what == CMD_1) {
                 // Transition to ourself to show that enter/exit is called
@@ -298,16 +298,16 @@ class Hsm1 extends HierarchicalStateMachine {
                 return NOT_HANDLED;
             }
         }
-        @Override public void exit() {
+        \@Override public void exit() {
             Log.d(TAG, "mS1.exit");
         }
     }
 
     class S2 extends HierarchicalState {
-        @Override public void enter() {
+        \@Override public void enter() {
             Log.d(TAG, "mS2.enter");
         }
-        @Override public boolean processMessage(Message message) {
+        \@Override public boolean processMessage(Message message) {
             boolean retVal;
             Log.d(TAG, "mS2.processMessage what=" + message.what);
             switch(message.what) {
@@ -326,17 +326,17 @@ class Hsm1 extends HierarchicalStateMachine {
             }
             return retVal;
         }
-        @Override public void exit() {
+        \@Override public void exit() {
             Log.d(TAG, "mS2.exit");
         }
     }
 
     class P2 extends HierarchicalState {
-        @Override public void enter() {
+        \@Override public void enter() {
             Log.d(TAG, "mP2.enter");
             sendMessage(obtainMessage(CMD_5));
         }
-        @Override public boolean processMessage(Message message) {
+        \@Override public boolean processMessage(Message message) {
             Log.d(TAG, "P2.processMessage what=" + message.what);
             switch(message.what) {
             case(CMD_3):
@@ -349,12 +349,12 @@ class Hsm1 extends HierarchicalStateMachine {
             }
             return HANDLED;
         }
-        @Override public void exit() {
+        \@Override public void exit() {
             Log.d(TAG, "mP2.exit");
         }
     }
 
-    @Override
+    \@Override
     void halting() {
         Log.d(TAG, "halting");
         synchronized (this) {
