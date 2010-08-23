@@ -16,11 +16,6 @@
 
 package com.android.server;
 
-import static android.os.LocalPowerManager.CHEEK_EVENT;
-import static android.os.LocalPowerManager.OTHER_EVENT;
-import static android.os.LocalPowerManager.TOUCH_EVENT;
-import static android.os.LocalPowerManager.LONG_TOUCH_EVENT;
-import static android.os.LocalPowerManager.TOUCH_UP_EVENT;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
@@ -76,7 +71,6 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.LatencyTimer;
 import android.os.LocalPowerManager;
 import android.os.Looper;
 import android.os.Message;
@@ -109,13 +103,11 @@ import android.view.IWindowSession;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
-import android.view.InputQueue;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceSession;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
@@ -127,9 +119,13 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -165,8 +161,6 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_FREEZE = false;
     static final boolean SHOW_TRANSACTIONS = false;
     static final boolean HIDE_STACK_CRAWLS = true;
-    static final boolean MEASURE_LATENCY = false;
-    static private LatencyTimer lt;
 
     static final boolean PROFILE_ORIENTATION = false;
     static final boolean BLUR = true;
@@ -604,10 +598,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private WindowManagerService(Context context, PowerManagerService pm,
             boolean haveInputMethods) {
-        if (MEASURE_LATENCY) {
-            lt = new LatencyTimer(100, 1000);
-        }
-
         mContext = context;
         mHaveInputMethods = haveInputMethods;
         mLimitedAlphaCompositing = context.getResources().getBoolean(
@@ -9579,6 +9569,10 @@ public class WindowManagerService extends IWindowManager.Stub
         
         Surface.closeTransaction();
 
+        if (mWatermark != null) {
+            mWatermark.drawIfNeeded();
+        }
+
         if (DEBUG_ORIENTATION && mDisplayFrozen) Slog.v(TAG,
                 "With display frozen, orientationChangeComplete="
                 + orientationChangeComplete);
@@ -10072,12 +10066,17 @@ public class WindowManagerService extends IWindowManager.Stub
         mScreenFrozenLock.release();
     }
 
-    static int getPropertyInt(String name, int defUnits, int defDps, DisplayMetrics dm) {
-        String str = SystemProperties.get(name);
-        try {
-            int val = Integer.parseInt(str);
-            return val;
-        } catch (Exception e) {
+    static int getPropertyInt(String[] tokens, int index, int defUnits, int defDps,
+            DisplayMetrics dm) {
+        if (index < tokens.length) {
+            String str = tokens[index];
+            if (str != null && str.length() > 0) {
+                try {
+                    int val = Integer.parseInt(str);
+                    return val;
+                } catch (Exception e) {
+                }
+            }
         }
         if (defUnits == TypedValue.COMPLEX_UNIT_PX) {
             return defDps;
@@ -10087,62 +10086,142 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     class Watermark {
-        Surface mSurface;
-        int mWidth;
-        int mHeight;
-        int mXPercent;
-        int mYPercent;
+        final String[] mTokens;
+        final String mText;
+        final Paint mTextPaint;
+        final int mTextWidth;
+        final int mTextHeight;
+        final int mTextAscent;
+        final int mTextDescent;
+        final int mDeltaX;
+        final int mDeltaY;
 
-        Watermark(SurfaceSession session, String text) {
+        Surface mSurface;
+        int mLastDW;
+        int mLastDH;
+        boolean mDrawNeeded;
+
+        Watermark(SurfaceSession session, String[] tokens) {
             final DisplayMetrics dm = new DisplayMetrics();
             mDisplay.getMetrics(dm);
 
-            int fontSize = getPropertyInt("ro.watermark.height",
-                    TypedValue.COMPLEX_UNIT_DIP, 48, dm);
-            mXPercent = getPropertyInt("ro.watermark.x",
-                    TypedValue.COMPLEX_UNIT_PX, 50, dm);
-            mYPercent = getPropertyInt("ro.watermark.y",
-                    TypedValue.COMPLEX_UNIT_PX, 99, dm);
-            int color = getPropertyInt("ro.watermark.color",
-                    TypedValue.COMPLEX_UNIT_PX, 0x80ffffff, dm);
-            int shadowRadius = getPropertyInt("ro.watermark.shadow.radius",
-                    TypedValue.COMPLEX_UNIT_PX, 5, dm);
-            int shadowDx = getPropertyInt("ro.watermark.shadow.dx",
-                    TypedValue.COMPLEX_UNIT_PX, 0, dm);
-            int shadowDy = getPropertyInt("ro.watermark.shadow.dy",
-                    TypedValue.COMPLEX_UNIT_PX, 0, dm);
-            int shadowColor = getPropertyInt("ro.watermark.shadow.color",
-                    TypedValue.COMPLEX_UNIT_PX, 0xff000000, dm);
+            if (false) {
+                Log.i(TAG, "*********************** WATERMARK");
+                for (int i=0; i<tokens.length; i++) {
+                    Log.i(TAG, "  TOKEN #" + i + ": " + tokens[i]);
+                }
+            }
 
-            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            paint.setTextSize(fontSize);
-            paint.setColor(color);
-            paint.setShadowLayer(shadowRadius, shadowDx, shadowDy, shadowColor);
-            paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
+            mTokens = tokens;
 
-            FontMetricsInt fm = paint.getFontMetricsInt();
-            mHeight = fm.descent - fm.ascent + 20;
-            mWidth = (int)paint.measureText(text) + 20;
+            StringBuilder builder = new StringBuilder(32);
+            int len = mTokens[0].length();
+            len = len & ~1;
+            for (int i=0; i<len; i+=2) {
+                int c1 = mTokens[0].charAt(i);
+                int c2 = mTokens[0].charAt(i+1);
+                if (c1 >= 'a' && c1 <= 'f') c1 = c1 - 'a' + 10;
+                else if (c1 >= 'A' && c1 <= 'F') c1 = c1 - 'A' + 10;
+                else c1 -= '0';
+                if (c2 >= 'a' && c2 <= 'f') c2 = c2 - 'a' + 10;
+                else if (c2 >= 'A' && c2 <= 'F') c2 = c2 - 'A' + 10;
+                else c2 -= '0';
+                builder.append((char)(255-((c1*16)+c2)));
+            }
+            mText = builder.toString();
+            if (false) {
+                Log.i(TAG, "Final text: " + mText);
+            }
+
+            int fontSize = getPropertyInt(tokens, 1,
+                    TypedValue.COMPLEX_UNIT_DIP, 20, dm);
+
+            mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            mTextPaint.setTextSize(fontSize);
+            mTextPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
+
+            FontMetricsInt fm = mTextPaint.getFontMetricsInt();
+            mTextWidth = (int)mTextPaint.measureText(mText);
+            mTextAscent = fm.ascent;
+            mTextDescent = fm.descent;
+            mTextHeight = fm.descent - fm.ascent;
+
+            mDeltaX = getPropertyInt(tokens, 2,
+                    TypedValue.COMPLEX_UNIT_PX, mTextWidth*2, dm);
+            mDeltaY = getPropertyInt(tokens, 3,
+                    TypedValue.COMPLEX_UNIT_PX, mTextHeight*3, dm);
+            int shadowColor = getPropertyInt(tokens, 4,
+                    TypedValue.COMPLEX_UNIT_PX, 0xb0000000, dm);
+            int color = getPropertyInt(tokens, 5,
+                    TypedValue.COMPLEX_UNIT_PX, 0x60ffffff, dm);
+            int shadowRadius = getPropertyInt(tokens, 6,
+                    TypedValue.COMPLEX_UNIT_PX, 7, dm);
+            int shadowDx = getPropertyInt(tokens, 8,
+                    TypedValue.COMPLEX_UNIT_PX, 0, dm);
+            int shadowDy = getPropertyInt(tokens, 9,
+                    TypedValue.COMPLEX_UNIT_PX, 0, dm);
+
+            mTextPaint.setColor(color);
+            mTextPaint.setShadowLayer(shadowRadius, shadowDx, shadowDy, shadowColor);
 
             try {
                 mSurface = new Surface(session, 0,
-                        "WatermarkSurface",
-                        -1, mWidth, mHeight, PixelFormat.TRANSLUCENT, 0);
+                        "WatermarkSurface", -1, 1, 1, PixelFormat.TRANSLUCENT, 0);
                 mSurface.setLayer(TYPE_LAYER_MULTIPLIER*100);
-                Rect dirty = new Rect(0, 0, mWidth, mHeight);
-                Canvas c = mSurface.lockCanvas(dirty);
-                c.drawText(text, 10, -fm.ascent+10, paint);
-                mSurface.unlockCanvasAndPost(c);
+                mSurface.setPosition(0, 0);
                 mSurface.show();
             } catch (OutOfResourcesException e) {
             }
         }
 
         void positionSurface(int dw, int dh) {
-            int availW = dw - mWidth;
-            int availH = dh - mHeight;
-            mSurface.setPosition((availW*mXPercent)/100,
-                    (availH*mYPercent)/100);
+            if (mLastDW != dw || mLastDH != dh) {
+                mLastDW = dw;
+                mLastDH = dh;
+                mSurface.setSize(dw, dh);
+                mDrawNeeded = true;
+            }
+        }
+
+        void drawIfNeeded() {
+            if (mDrawNeeded) {
+                final int dw = mLastDW;
+                final int dh = mLastDH;
+
+                mDrawNeeded = false;
+                Rect dirty = new Rect(0, 0, dw, dh);
+                Canvas c = null;
+                try {
+                    c = mSurface.lockCanvas(dirty);
+                } catch (IllegalArgumentException e) {
+                } catch (OutOfResourcesException e) {
+                }
+                if (c != null) {
+                    int deltaX = mDeltaX;
+                    int deltaY = mDeltaY;
+
+                    // deltaX shouldn't be close to a round fraction of our
+                    // x step, or else things will line up too much.
+                    int div = (dw+mTextWidth)/deltaX;
+                    int rem = (dw+mTextWidth) - (div*deltaX);
+                    int qdelta = deltaX/4;
+                    if (rem < qdelta || rem > (deltaX-qdelta)) {
+                        deltaX += deltaX/3;
+                    }
+
+                    int y = -mTextHeight;
+                    int x = -mTextWidth;
+                    while (y < (dh+mTextHeight)) {
+                        c.drawText(mText, x, y, mTextPaint);
+                        x += deltaX;
+                        if (x >= dw) {
+                            x -= (dw+mTextWidth);
+                            y += deltaY;
+                        }
+                    }
+                    mSurface.unlockCanvasAndPost(c);
+                }
+            }
         }
     }
 
@@ -10151,12 +10230,28 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        String text = SystemProperties.get("ro.watermark.text");
-        if (text == null || text.length() <= 0) {
-            return;
+        File file = new File("/system/etc/setup.conf");
+        FileInputStream in = null;
+        try {
+            in = new FileInputStream(file);
+            DataInputStream ind = new DataInputStream(in);
+            String line = ind.readLine();
+            if (line != null) {
+                String[] toks = line.split("%");
+                if (toks != null && toks.length > 0) {
+                    mWatermark = new Watermark(mFxSession, toks);
+                }
+            }
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                }
+            }
         }
-
-        mWatermark = new Watermark(mFxSession, text);
     }
 
     @Override
