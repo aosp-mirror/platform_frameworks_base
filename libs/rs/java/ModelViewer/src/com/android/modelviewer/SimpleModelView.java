@@ -39,15 +39,15 @@ import android.view.SurfaceView;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
-public class ModelViewerView extends RSSurfaceView {
+public class SimpleModelView extends RSSurfaceView {
 
-    public ModelViewerView(Context context) {
+    public SimpleModelView(Context context) {
         super(context);
         //setFocusable(true);
     }
 
     private RenderScriptGL mRS;
-    private ModelViewerRS mRender;
+    private SimpleModelRS mRender;
 
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
@@ -55,7 +55,7 @@ public class ModelViewerView extends RSSurfaceView {
         if (mRS == null) {
             mRS = createRenderScript(true);
             mRS.contextSetSurface(w, h, holder.getSurface());
-            mRender = new ModelViewerRS();
+            mRender = new SimpleModelRS();
             mRender.init(mRS, getResources(), w, h);
         }
     }
