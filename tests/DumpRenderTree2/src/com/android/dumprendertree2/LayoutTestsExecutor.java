@@ -44,6 +44,8 @@ import android.webkit.GeolocationPermissions;
 import android.webkit.WebStorage.QuotaUpdater;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -306,6 +308,8 @@ public class LayoutTestsExecutor extends Activity {
          */
         webView.setTouchInterval(-1);
 
+        webView.clearCache(true);
+
         WebSettings webViewSettings = webView.getSettings();
         webViewSettings.setAppCacheEnabled(true);
         webViewSettings.setAppCachePath(getApplicationContext().getCacheDir().getPath());
@@ -353,10 +357,11 @@ public class LayoutTestsExecutor extends Activity {
         }
 
         mCurrentTestRelativePath = mTestsList.remove(0);
-        Log.d(LOG_TAG + "::runNextTest", "Start: " + mCurrentTestRelativePath +
-                "(" + mCurrentTestIndex + ")");
-        mCurrentTestUri =
-                Uri.fromFile(new File(TESTS_ROOT_DIR_PATH, mCurrentTestRelativePath)).toString();
+
+        Log.i(LOG_TAG, "runNextTest(): Start: " + mCurrentTestRelativePath +
+                " (" + mCurrentTestIndex + ")");
+
+        mCurrentTestUri = FileFilter.getUrl(mCurrentTestRelativePath).toString();
 
         reset();
 

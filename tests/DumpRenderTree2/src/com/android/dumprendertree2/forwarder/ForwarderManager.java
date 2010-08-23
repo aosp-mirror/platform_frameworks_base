@@ -16,6 +16,8 @@
 
 package com.android.dumprendertree2.forwarder;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,6 +39,8 @@ public class ForwarderManager {
     public static final int HTTP_PORT = 8080;
     public static final int HTTPS_PORT = 8443;
 
+    public static final String HOST = "localhost";
+
     private static ForwarderManager forwarderManager;
 
     private Set<Forwarder> mServers;
@@ -45,6 +49,33 @@ public class ForwarderManager {
         mServers = new HashSet<Forwarder>(2);
         mServers.add(new Forwarder(HTTP_PORT, HOST_IP));
         mServers.add(new Forwarder(HTTPS_PORT, HOST_IP));
+    }
+
+    /**
+     * Returns the main part of the URL with the trailing slash
+     *
+     * @param isHttps
+     * @return
+     */
+    public static final String getHostSchemePort(boolean isHttps) {
+        int port;
+        String protocol;
+        if (isHttps) {
+            protocol = "https";
+            port = HTTPS_PORT;
+        } else {
+            protocol = "http";
+            port = HTTP_PORT;
+        }
+
+        URL url = null;
+        try {
+            url = new URL(protocol, HOST, port, "/");
+        } catch (MalformedURLException e) {
+            assert false : "isHttps=" + isHttps;
+        }
+
+        return url.toString();
     }
 
     public static synchronized ForwarderManager getForwarderManager() {

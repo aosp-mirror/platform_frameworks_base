@@ -243,7 +243,7 @@ public class ManagerService extends Service {
         int size = EXPECTED_RESULT_LOCATION_RELATIVE_DIR_PREFIXES.size();
         for (int i = 0; bytes == null && i < size; i++) {
             relativePath = locations.get(i) + originalRelativePath;
-            bytes = FsUtils.readDataFromStorage(new File(TESTS_ROOT_DIR_PATH, relativePath));
+            bytes = FsUtils.readDataFromUrl(FileFilter.getUrl(relativePath));
         }
 
         return bytes;

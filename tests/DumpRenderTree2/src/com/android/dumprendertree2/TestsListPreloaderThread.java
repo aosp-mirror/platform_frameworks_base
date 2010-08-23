@@ -18,8 +18,6 @@ package com.android.dumprendertree2;
 
 import android.os.Environment;
 import android.os.Message;
-import android.util.Log;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -64,17 +62,10 @@ public class TestsListPreloaderThread extends Thread {
 
     @Override
     public void run() {
-        /** Check if the path is correct */
-        File file = new File(TESTS_ROOT_DIR_PATH, mRelativePath);
-        if (!file.exists()) {
-            Log.e(LOG_TAG + "::run", "Path does not exist: " + mRelativePath);
+        if (FileFilter.isTestFile(mRelativePath)) {
+            mTestsList.add(mRelativePath);
         } else {
-            /** Populate the tests' list accordingly */
-            if (file.isDirectory()) {
-                preloadTests(mRelativePath);
-            } else {
-                mTestsList.add(mRelativePath);
-            }
+            loadTestsFromUrl(mRelativePath);
         }
 
         mDoneMsg.obj = mTestsList;
@@ -87,29 +78,29 @@ public class TestsListPreloaderThread extends Thread {
      *
      * @param dirRelativePath
      */
-    private void preloadTests(String dirRelativePath) {
+    private void loadTestsFromUrl(String dirRelativePath) {
         LinkedList<String> foldersList = new LinkedList<String>();
         foldersList.add(dirRelativePath);
 
         String relativePath;
-        String currentDirRelativePath;
         String itemName;
-        File[] items;
         while (!foldersList.isEmpty()) {
-            currentDirRelativePath = foldersList.removeFirst();
-            items = new File(TESTS_ROOT_DIR_PATH, currentDirRelativePath).listFiles();
-            for (File item : items) {
-                itemName = item.getName();
-                relativePath = currentDirRelativePath + File.separator + itemName;
+            relativePath = foldersList.removeFirst();
 
-                if (item.isDirectory() && FileFilter.isTestDir(itemName)) {
-                    foldersList.add(relativePath);
-                    continue;
+            for (String folderRelativePath : FsUtils.getLayoutTestsDirContents(relativePath,
+                    false, true)) {
+                itemName = new File(folderRelativePath).getName();
+                if (FileFilter.isTestDir(itemName)) {
+                    foldersList.add(folderRelativePath);
                 }
+            }
 
+            for (String testRelativePath : FsUtils.getLayoutTestsDirContents(relativePath,
+                    false, false)) {
+                itemName = new File(testRelativePath).getName();
                 if (FileFilter.isTestFile(itemName)) {
-                    if (!mFileFilter.isSkip(relativePath)) {
-                        mTestsList.add(relativePath);
+                    if (!mFileFilter.isSkip(testRelativePath)) {
+                        mTestsList.add(testRelativePath);
                     } else {
                         //mSummarizer.addSkippedTest(relativePath);
                         /** TODO: Summarizer is now in service - figure out how to send the info */

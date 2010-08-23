@@ -17,8 +17,10 @@
 package com.android.dumprendertree2.ui;
 
 import com.android.dumprendertree2.FileFilter;
+import com.android.dumprendertree2.FsUtils;
 import com.android.dumprendertree2.TestsListActivity;
 import com.android.dumprendertree2.R;
+import com.android.dumprendertree2.forwarder.ForwarderManager;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -43,7 +45,6 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -143,7 +144,7 @@ public class DirListActivity extends ListActivity {
                 return false;
             }
 
-            return mRelativePath.equals(((ListItem) o).getRelativePath());
+            return mRelativePath.equals(((ListItem)o).getRelativePath());
         }
 
         @Override
@@ -172,10 +173,10 @@ public class DirListActivity extends ListActivity {
             LayoutInflater inflater = mContext.getLayoutInflater();
             View row = inflater.inflate(R.layout.dirlist_row, null);
 
-            TextView label = (TextView) row.findViewById(R.id.label);
+            TextView label = (TextView)row.findViewById(R.id.label);
             label.setText(mItems[position].getName());
 
-            ImageView icon = (ImageView) row.findViewById(R.id.icon);
+            ImageView icon = (ImageView)row.findViewById(R.id.icon);
             if (mItems[position].isDirectory()) {
                 icon.setImageResource(R.drawable.folder);
             } else {
@@ -190,13 +191,15 @@ public class DirListActivity extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        ForwarderManager.getForwarderManager().start();
+
         mFileFilter = new FileFilter(ROOT_DIR_PATH);
         mListView = getListView();
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ListItem item = (ListItem) parent.getItemAtPosition(position);
+                ListItem item = (ListItem)parent.getItemAtPosition(position);
 
                 if (item.isDirectory()) {
                     showDir(item.getRelativePath());
@@ -214,7 +217,7 @@ public class DirListActivity extends ListActivity {
         mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                ListItem item = (ListItem) parent.getItemAtPosition(position);
+                ListItem item = (ListItem)parent.getItemAtPosition(position);
 
                 if (item.isDirectory()) {
                     Bundle arguments = new Bundle(1);
@@ -376,25 +379,22 @@ public class DirListActivity extends ListActivity {
      * The dirPath is relative.
      */
     private ListItem[] getDirList(String dirPath) {
-        File dir = new File(mRootDirPath, dirPath);
-
-        if (!dir.exists()) {
-            return new ListItem[0];
-        }
-
         List<ListItem> subDirs = new ArrayList<ListItem>();
         List<ListItem> subFiles = new ArrayList<ListItem>();
 
-        for (File item : dir.listFiles()) {
-            if (item.isDirectory() && FileFilter.isTestDir(item.getName())) {
-                subDirs.add(new ListItem(mFileFilter.getRelativePath(item), true));
-            } else if (FileFilter.isTestFile(item.getName())) {
-                subFiles.add(new ListItem(mFileFilter.getRelativePath(item), false));
+        for (String dirRelativePath : FsUtils.getLayoutTestsDirContents(dirPath, false,
+                true)) {
+            if (FileFilter.isTestDir(new File(dirRelativePath).getName())) {
+                subDirs.add(new ListItem(dirRelativePath, true));
             }
         }
 
-        Collections.sort(subDirs);
-        Collections.sort(subFiles);
+        for (String testRelativePath : FsUtils.getLayoutTestsDirContents(dirPath, false,
+                false)) {
+            if (FileFilter.isTestFile(new File(testRelativePath).getName())) {
+                subFiles.add(new ListItem(testRelativePath, false));
+            }
+        }
 
         /** Concatenate the two lists */
         subDirs.addAll(subFiles);
