@@ -319,25 +319,9 @@ public class ArrowKeyMovementMethod implements MovementMethod {
 
     public void onTakeFocus(TextView view, Spannable text, int dir) {
         if ((dir & (View.FOCUS_FORWARD | View.FOCUS_DOWN)) != 0) {
-            Layout layout = view.getLayout();
-
-            if (layout == null) {
-                /*
-                 * This shouldn't be null, but do something sensible if it is.
-                 */
+            if (view.getLayout() == null) {
+                // This shouldn't be null, but do something sensible if it is.
                 Selection.setSelection(text, text.length());
-            } else {
-                /*
-                 * Put the cursor at the end of the first line, which is
-                 * either the last offset if there is only one line, or the
-                 * offset before the first character of the second line
-                 * if there is more than one line.
-                 */
-                if (layout.getLineCount() == 1) {
-                    Selection.setSelection(text, text.length());
-                } else {
-                    Selection.setSelection(text, layout.getLineStart(1) - 1);
-                }
             }
         } else {
             Selection.setSelection(text, text.length());
