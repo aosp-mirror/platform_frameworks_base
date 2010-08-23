@@ -46,6 +46,8 @@
     <bool name="def_netstats_enabled">true</bool>
     <bool name="def_usb_mass_storage_enabled">true</bool>
     <bool name="def_wifi_on">false</bool>
+    <!-- 0 == default, 1 == never while plugged, 2 == never -->
+    <integer name="def_wifi_sleep_policy">0</integer>
     <bool name="def_networks_available_notification_on">true</bool>
 
     <bool name="def_backup_enabled">false</bool>
