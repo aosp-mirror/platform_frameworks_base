@@ -432,6 +432,38 @@ public class WifiConfiguration implements Parcelable {
         return 0;
     }
 
+    /**
+     * Returns a copy of this WifiConfiguration.
+     *
+     * @return a copy of this WifiConfiguration.
+     * @hide
+     */
+    public WifiConfiguration clone() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.networkId = networkId;
+        config.status = status;
+        config.SSID = SSID;
+        config.BSSID = BSSID;
+        config.preSharedKey = preSharedKey;
+
+        for (int i = 0; i < wepKeys.length; i++)
+            config.wepKeys[i] = wepKeys[i];
+
+        config.wepTxKeyIndex = wepTxKeyIndex;
+        config.priority = priority;
+        config.hiddenSSID = hiddenSSID;
+        config.allowedKeyManagement   = (BitSet) allowedKeyManagement.clone();
+        config.allowedProtocols       = (BitSet) allowedProtocols.clone();
+        config.allowedAuthAlgorithms  = (BitSet) allowedAuthAlgorithms.clone();
+        config.allowedPairwiseCiphers = (BitSet) allowedPairwiseCiphers.clone();
+        config.allowedGroupCiphers    = (BitSet) allowedGroupCiphers.clone();
+
+        for (int i = 0; i < enterpriseFields.length; i++) {
+            config.enterpriseFields[i].setValue(enterpriseFields[i].value());
+        }
+        return config;
+    }
+
     /** Implement the Parcelable interface {@hide} */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(networkId);
