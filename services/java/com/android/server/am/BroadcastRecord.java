@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.PrintWriterPrinter;
+import android.util.TimeUtils;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -73,61 +74,65 @@ class BroadcastRecord extends Binder {
     ActivityInfo curReceiver;   // info about the receiver that is currently running.
 
     void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + this);
-        pw.println(prefix + intent);
+        final long now = SystemClock.uptimeMillis();
+
+        pw.print(prefix); pw.println(this);
+        pw.print(prefix); pw.println(intent);
         if (sticky) {
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
-                pw.println(prefix + "extras: " + bundle.toString());
+                pw.print(prefix); pw.print("extras: "); pw.println(bundle.toString());
             }
         }
-        pw.println(prefix + "proc=" + callerApp);
-        pw.println(prefix + "caller=" + callerPackage
-                + " callingPid=" + callingPid
-                + " callingUid=" + callingUid);
+        pw.print(prefix); pw.print("caller="); pw.print(callerPackage); pw.println(" ");
+                pw.println(callerApp != null ? callerApp.toShortString() : "null");
+                pw.print(" pid="); pw.print(callingPid);
+                pw.print(" uid="); pw.println(callingUid);
         if (requiredPermission != null) {
-            pw.println(prefix + "requiredPermission=" + requiredPermission);
+            pw.print(prefix); pw.print("requiredPermission="); pw.println(requiredPermission);
         }
-        pw.println(prefix + "dispatchTime=" + dispatchTime + " ("
-                + (SystemClock.uptimeMillis()-dispatchTime) + "ms since now)");
+        pw.print(prefix); pw.print("dispatchTime=");
+                TimeUtils.formatDuration(dispatchTime, now, pw);
         if (finishTime != 0) {
-            pw.println(prefix + "finishTime=" + finishTime + " ("
-                    + (SystemClock.uptimeMillis()-finishTime) + "ms since now)");
+            pw.print(" finishTime="); TimeUtils.formatDuration(finishTime, now, pw);
         } else {
-            pw.println(prefix + "receiverTime=" + receiverTime + " ("
-                    + (SystemClock.uptimeMillis()-receiverTime) + "ms since now)");
+            pw.print(" receiverTime="); TimeUtils.formatDuration(receiverTime, now, pw);
         }
+        pw.println("");
         if (anrCount != 0) {
-            pw.println(prefix + "anrCount=" + anrCount);
+            pw.print(prefix); pw.print("anrCount="); pw.println(anrCount);
         }
         if (resultTo != null || resultCode != -1 || resultData != null) {
-            pw.println(prefix + "resultTo=" + resultTo
-                  + " resultCode=" + resultCode + " resultData=" + resultData);
+            pw.print(prefix); pw.print("resultTo="); pw.print(resultTo);
+                    pw.print(" resultCode="); pw.print(resultCode);
+                    pw.print(" resultData="); pw.println(resultData);
         }
         if (resultExtras != null) {
-            pw.println(prefix + "resultExtras=" + resultExtras);
+            pw.print(prefix); pw.print("resultExtras="); pw.println(resultExtras);
         }
         if (resultAbort || ordered || sticky || initialSticky) {
-            pw.println(prefix + "resultAbort=" + resultAbort
-                    + " ordered=" + ordered + " sticky=" + sticky
-                    + " initialSticky=" + initialSticky);
+            pw.print(prefix); pw.print("resultAbort="); pw.print(resultAbort);
+                    pw.print(" ordered="); pw.print(ordered);
+                    pw.print(" sticky="); pw.print(sticky);
+                    pw.print(" initialSticky="); pw.println(initialSticky);
         }
         if (nextReceiver != 0 || receiver != null) {
-            pw.println(prefix + "nextReceiver=" + nextReceiver
-                  + " receiver=" + receiver);
+            pw.print(prefix); pw.print("nextReceiver="); pw.print(nextReceiver);
+                    pw.print(" receiver="); pw.println(receiver);
         }
         if (curFilter != null) {
-            pw.println(prefix + "curFilter=" + curFilter);
+            pw.print(prefix); pw.print("curFilter="); pw.println(curFilter);
         }
         if (curReceiver != null) {
-            pw.println(prefix + "curReceiver=" + curReceiver);
+            pw.print(prefix); pw.print("curReceiver="); pw.println(curReceiver);
         }
         if (curApp != null) {
-            pw.println(prefix + "curApp=" + curApp);
-            pw.println(prefix + "curComponent="
-                    + (curComponent != null ? curComponent.toShortString() : "--"));
+            pw.print(prefix); pw.print("curApp="); pw.println(curApp);
+            pw.print(prefix); pw.print("curComponent=");
+                    pw.println((curComponent != null ? curComponent.toShortString() : "--"));
             if (curReceiver != null && curReceiver.applicationInfo != null) {
-                pw.println(prefix + "curSourceDir=" + curReceiver.applicationInfo.sourceDir);
+                pw.print(prefix); pw.print("curSourceDir=");
+                        pw.println(curReceiver.applicationInfo.sourceDir);
             }
         }
         String stateStr = " (?)";
@@ -137,13 +142,14 @@ class BroadcastRecord extends Binder {
             case CALL_IN_RECEIVE:   stateStr=" (CALL_IN_RECEIVE)"; break;
             case CALL_DONE_RECEIVE: stateStr=" (CALL_DONE_RECEIVE)"; break;
         }
-        pw.println(prefix + "state=" + state + stateStr);
+        pw.print(prefix); pw.print("state="); pw.print(state); pw.println(stateStr);
         final int N = receivers != null ? receivers.size() : 0;
         String p2 = prefix + "  ";
         PrintWriterPrinter printer = new PrintWriterPrinter(pw);
         for (int i=0; i<N; i++) {
             Object o = receivers.get(i);
-            pw.println(prefix + "Receiver #" + i + ": " + o);
+            pw.print(prefix); pw.print("Receiver #"); pw.print(i);
+                    pw.print(": "); pw.println(o);
             if (o instanceof BroadcastFilter)
                 ((BroadcastFilter)o).dumpBrief(pw, p2);
             else if (o instanceof ResolveInfo)

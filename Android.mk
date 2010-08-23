@@ -118,10 +118,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/net/IThrottleManager.aidl \
 	core/java/android/os/IHardwareService.aidl \
 	core/java/android/os/IMessenger.aidl \
-	core/java/android/os/storage/IMountService.aidl \
-	core/java/android/os/storage/IMountServiceListener.aidl \
-	core/java/android/os/storage/IMountShutdownObserver.aidl \
-	core/java/android/os/storage/IObbActionListener.aidl \
 	core/java/android/os/INetworkManagementService.aidl \
 	core/java/android/os/INetStatService.aidl \
 	core/java/android/os/IPermissionController.aidl \
@@ -375,8 +371,6 @@ sample_dir := development/samples
 # (see development/build/sdk.atree)
 web_docs_sample_code_flags := \
 		-hdf android.hasSamples 1 \
-		-samplecode $(sample_dir)/AccessibilityService \
-		            resources/samples/AccessibilityService "Accessibility Service" \
 		-samplecode $(sample_dir)/ApiDemos \
 		            resources/samples/ApiDemos "API Demos" \
 		-samplecode $(sample_dir)/BackupRestore \
