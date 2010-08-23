@@ -22,9 +22,25 @@
 #include <utils/Log.h>
 #include <ui/Input.h>
 #include "android_view_MotionEvent.h"
+#include "android/graphics/Matrix.h"
+
+#include <math.h>
+#include "SkMatrix.h"
+#include "SkScalar.h"
 
 // Number of float items per entry in a DVM sample data array
 #define NUM_SAMPLE_DATA 9
+
+#define SAMPLE_X 0
+#define SAMPLE_Y 1
+#define SAMPLE_PRESSURE 2
+#define SAMPLE_SIZE 3
+#define SAMPLE_TOUCH_MAJOR 4
+#define SAMPLE_TOUCH_MINOR 5
+#define SAMPLE_TOOL_MAJOR 6
+#define SAMPLE_TOOL_MINOR 7
+#define SAMPLE_ORIENTATION 8
+
 
 namespace android {
 
@@ -238,7 +254,86 @@ void android_view_MotionEvent_recycle(JNIEnv* env, jobject eventObj) {
     }
 }
 
+static inline float transformAngle(const SkMatrix* matrix, float angleRadians) {
+    // Construct and transform a vector oriented at the specified clockwise angle from vertical.
+    // Coordinate system: down is increasing Y, right is increasing X.
+    SkPoint vector;
+    vector.fX = SkFloatToScalar(sinf(angleRadians));
+    vector.fY = SkFloatToScalar(- cosf(angleRadians));
+    matrix->mapVectors(& vector, 1);
+
+    // Derive the transformed vector's clockwise angle from vertical.
+    float result = atan2f(SkScalarToFloat(vector.fX), SkScalarToFloat(- vector.fY));
+    if (result < - M_PI_2) {
+        result += M_PI;
+    } else if (result > M_PI_2) {
+        result -= M_PI;
+    }
+    return result;
+}
+
+static void android_view_MotionEvent_nativeTransform(JNIEnv* env,
+        jobject eventObj, jobject matrixObj) {
+    SkMatrix* matrix = android_graphics_Matrix_getSkMatrix(env, matrixObj);
+
+    jfloat oldXOffset = env->GetFloatField(eventObj, gMotionEventClassInfo.mXOffset);
+    jfloat oldYOffset = env->GetFloatField(eventObj, gMotionEventClassInfo.mYOffset);
+    jint numPointers = env->GetIntField(eventObj, gMotionEventClassInfo.mNumPointers);
+    jint numSamples = env->GetIntField(eventObj, gMotionEventClassInfo.mNumSamples);
+    jfloatArray dataSampleArray = jfloatArray(env->GetObjectField(eventObj,
+            gMotionEventClassInfo.mDataSamples));
+    jfloat* dataSamples = (jfloat*)env->GetPrimitiveArrayCritical(dataSampleArray, NULL);
+
+    // The tricky part of this implementation is to preserve the value of
+    // rawX and rawY.  So we apply the transformation to the first point
+    // then derive an appropriate new X/Y offset that will preserve rawX and rawY.
+    SkPoint point;
+    jfloat rawX = dataSamples[SAMPLE_X];
+    jfloat rawY = dataSamples[SAMPLE_Y];
+    matrix->mapXY(SkFloatToScalar(rawX + oldXOffset), SkFloatToScalar(rawY + oldYOffset),
+            & point);
+    jfloat newX = SkScalarToFloat(point.fX);
+    jfloat newY = SkScalarToFloat(point.fY);
+    jfloat newXOffset = newX - rawX;
+    jfloat newYOffset = newY - rawY;
+
+    dataSamples[SAMPLE_ORIENTATION] = transformAngle(matrix, dataSamples[SAMPLE_ORIENTATION]);
+
+    // Apply the transformation to all samples.
+    jfloat* currentDataSample = dataSamples;
+    jfloat* endDataSample = dataSamples + numPointers * numSamples * NUM_SAMPLE_DATA;
+    for (;;) {
+        currentDataSample += NUM_SAMPLE_DATA;
+        if (currentDataSample == endDataSample) {
+            break;
+        }
+
+        jfloat x = currentDataSample[SAMPLE_X] + oldXOffset;
+        jfloat y = currentDataSample[SAMPLE_Y] + oldYOffset;
+        matrix->mapXY(SkFloatToScalar(x), SkFloatToScalar(y), & point);
+        currentDataSample[SAMPLE_X] = SkScalarToFloat(point.fX) - newXOffset;
+        currentDataSample[SAMPLE_Y] = SkScalarToFloat(point.fY) - newYOffset;
+
+        currentDataSample[SAMPLE_ORIENTATION] = transformAngle(matrix,
+                currentDataSample[SAMPLE_ORIENTATION]);
+    }
+
+    env->ReleasePrimitiveArrayCritical(dataSampleArray, dataSamples, 0);
+
+    env->SetFloatField(eventObj, gMotionEventClassInfo.mXOffset, newXOffset);
+    env->SetFloatField(eventObj, gMotionEventClassInfo.mYOffset, newYOffset);
+
+    env->DeleteLocalRef(dataSampleArray);
+}
+
 // ----------------------------------------------------------------------------
+
+static JNINativeMethod gMotionEventMethods[] = {
+    /* name, signature, funcPtr */
+    { "nativeTransform",
+            "(Landroid/graphics/Matrix;)V",
+            (void*)android_view_MotionEvent_nativeTransform },
+};
 
 #define FIND_CLASS(var, className) \
         var = env->FindClass(className); \
@@ -258,6 +353,10 @@ void android_view_MotionEvent_recycle(JNIEnv* env, jobject eventObj) {
         LOG_FATAL_IF(! var, "Unable to find field " fieldName);
 
 int register_android_view_MotionEvent(JNIEnv* env) {
+    int res = jniRegisterNativeMethods(env, "android/view/MotionEvent",
+            gMotionEventMethods, NELEM(gMotionEventMethods));
+    LOG_FATAL_IF(res < 0, "Unable to register native methods.");
+
     FIND_CLASS(gMotionEventClassInfo.clazz, "android/view/MotionEvent");
 
     GET_STATIC_METHOD_ID(gMotionEventClassInfo.obtain, gMotionEventClassInfo.clazz,

@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.graphics.Matrix;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -346,6 +347,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     private MotionEvent mNext;
     private RuntimeException mRecycledLocation;
     private boolean mRecycled;
+
+    private native void nativeTransform(Matrix matrix);
 
     private MotionEvent(int pointerCount, int sampleCount) {
         mPointerIdentifiers = new int[pointerCount];
@@ -1413,6 +1416,19 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         mYOffset = y - dataSamples[lastDataSampleIndex + SAMPLE_Y];
     }
     
+    /**
+     * Applies a transformation matrix to all of the points in the event.
+     *
+     * @param matrix The transformation matrix to apply.
+     */
+    public final void transform(Matrix matrix) {
+        if (matrix == null) {
+            throw new IllegalArgumentException("matrix must not be null");
+        }
+
+        nativeTransform(matrix);
+    }
+
     private final void getPointerCoordsAtSampleIndex(int sampleIndex,
             PointerCoords outPointerCoords) {
         final float[] dataSamples = mDataSamples;

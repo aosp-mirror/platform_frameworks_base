@@ -5761,13 +5761,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Determines whether the given point, in local coordinates is inside the view.
+     */
+    /*package*/ final boolean pointInView(float localX, float localY) {
+        return localX >= 0 && localX < (mRight - mLeft)
+                && localY >= 0 && localY < (mBottom - mTop);
+    }
+
+    /**
      * Utility method to determine whether the given point, in local coordinates,
      * is inside the view, where the area of the view is expanded by the slop factor.
      * This method is called while processing touch-move events to determine if the event
      * is still within the view.
      */
     private boolean pointInView(float localX, float localY, float slop) {
-        return localX > -slop && localY > -slop && localX < ((mRight - mLeft) + slop) &&
+        return localX >= -slop && localY >= -slop && localX < ((mRight - mLeft) + slop) &&
                 localY < ((mBottom - mTop) + slop);
     }
 
