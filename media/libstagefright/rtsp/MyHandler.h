@@ -45,18 +45,21 @@ struct MyHandler : public AHandler {
                           PRIORITY_HIGHEST);
     }
 
-    void connect() {
+    void connect(const sp<AMessage> &doneMsg) {
+        mDoneMsg = doneMsg;
+
         mLooper->registerHandler(this);
         mLooper->registerHandler(mConn);
         (1 ? mNetLooper : mLooper)->registerHandler(mRTPConn);
-        sp<AMessage> reply = new AMessage('conn', id());
 
+        sp<AMessage> reply = new AMessage('conn', id());
         mConn->connect(mSessionURL.c_str(), reply);
     }
 
-    void disconnect() {
-        sp<AMessage> reply = new AMessage('disc', id());
-        mConn->disconnect(reply);
+    void disconnect(const sp<AMessage> &doneMsg) {
+        mDoneMsg = doneMsg;
+
+        (new AMessage('abor', id()))->post();
     }
 
     virtual void onMessageReceived(const sp<AMessage> &msg) {
@@ -250,8 +253,9 @@ struct MyHandler : public AHandler {
 
                     CHECK_EQ(response->mStatusCode, 200u);
 
-                    sp<AMessage> msg = new AMessage('abor', id());
-                    msg->post(60000000ll);
+                    mDoneMsg->setInt32("result", OK);
+                    mDoneMsg->post();
+                    mDoneMsg = NULL;
                 } else {
                     sp<AMessage> reply = new AMessage('disc', id());
                     mConn->disconnect(reply);
@@ -301,6 +305,11 @@ struct MyHandler : public AHandler {
 
             case 'quit':
             {
+                if (mDoneMsg != NULL) {
+                    mDoneMsg->setInt32("result", UNKNOWN_ERROR);
+                    mDoneMsg->post();
+                    mDoneMsg = NULL;
+                }
                 break;
             }
 
@@ -379,6 +388,8 @@ private:
         sp<APacketSource> mPacketSource;
     };
     Vector<TrackInfo> mTracks;
+
+    sp<AMessage> mDoneMsg;
 
     void setupTrack(size_t index) {
         sp<APacketSource> source =
