@@ -32,6 +32,7 @@ namespace uirenderer {
  */
 class TextureCache: public OnEntryRemoved<SkBitmap*, Texture*> {
 public:
+    TextureCache();
     TextureCache(uint32_t maxByteSize);
     ~TextureCache();
 
@@ -77,6 +78,8 @@ private:
      *        no new texture is generated.
      */
     void generateTexture(SkBitmap* bitmap, Texture* texture, bool regenerate = false);
+
+    void init();
 
     GenerationCache<SkBitmap*, Texture*> mCache;
 

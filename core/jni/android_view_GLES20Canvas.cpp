@@ -34,7 +34,6 @@
 #include <SkiaShader.h>
 #include <SkiaColorFilter.h>
 #include <Rect.h>
-#include <ui/Rect.h>
 
 #include "TextLayout.h"
 
@@ -418,7 +417,7 @@ static JNINativeMethod gMethods[] = {
     { "nDrawTextRun",       "(ILjava/lang/String;IIIIFFII)V",
             (void*) android_view_GLES20Canvas_drawTextRun },
 
-    {   "nGetClipBounds",     "(ILandroid/graphics/Rect;)Z",
+    { "nGetClipBounds",     "(ILandroid/graphics/Rect;)Z",
             (void*) android_view_GLES20Canvas_getClipBounds },
 #endif
 };

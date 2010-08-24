@@ -17,6 +17,8 @@
 #ifndef ANDROID_UI_PROPERTIES_H
 #define ANDROID_UI_PROPERTIES_H
 
+#include <cutils/properties.h>
+
 /**
  * This file contains the list of system properties used to configure
  * the OpenGLRenderer.
@@ -32,5 +34,15 @@
 // These properties are defined in pixels
 #define PROPERTY_TEXT_CACHE_WIDTH "ro.hwui.text_cache_width"
 #define PROPERTY_TEXT_CACHE_HEIGHT "ro.hwui.text_cache_height"
+
+// Converts a number of mega-bytes into bytes
+#define MB(s) s * 1024 * 1024
+
+#define DEFAULT_TEXTURE_CACHE_SIZE 20.0f
+#define DEFAULT_LAYER_CACHE_SIZE 6.0f
+#define DEFAULT_PATH_CACHE_SIZE 6.0f
+#define DEFAULT_PATCH_CACHE_SIZE 100
+#define DEFAULT_GRADIENT_CACHE_SIZE 0.5f
+#define DEFAULT_DROP_SHADOW_CACHE_SIZE 2.0f
 
 #endif // ANDROID_UI_PROPERTIES_H

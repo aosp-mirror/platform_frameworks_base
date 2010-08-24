@@ -20,6 +20,7 @@
 #include <utils/ResourceTypes.h>
 
 #include "PatchCache.h"
+#include "Properties.h"
 
 namespace android {
 namespace uirenderer {
@@ -27,6 +28,9 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
+
+PatchCache::PatchCache(): mCache(DEFAULT_PATCH_CACHE_SIZE) {
+}
 
 PatchCache::PatchCache(uint32_t maxEntries): mCache(maxEntries) {
 }

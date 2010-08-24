@@ -251,7 +251,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         mTempRect = new Rect();
         mVisRect = new Rect();
         mWinFrame = new Rect();
-        mWindow = new W(this, context);
+        mWindow = new W(this);
         mInputMethodCallback = new InputMethodCallback(this);
         mViewVisibility = View.GONE;
         mTransparentRegion = new Region();
@@ -469,6 +469,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             if (attrs != null &&
                     (attrs.flags & WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0) {
                 final boolean translucent = attrs.format != PixelFormat.OPAQUE;
+                destroyHardwareRenderer();
                 mHwRenderer = HardwareRenderer.createGlRenderer(2, translucent);
             }
         }
@@ -677,9 +678,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             attachInfo.mWindowVisibility = viewVisibility;
             host.dispatchWindowVisibilityChanged(viewVisibility);
             if (viewVisibility != View.VISIBLE || mNewSurfaceNeeded) {
-                if (mHwRenderer != null) {
-                    mHwRenderer.destroy();
-                }
+                destroyHardwareRenderer();
             }
             if (viewVisibility == View.GONE) {
                 // After making a window gone, we will count it as being
@@ -963,7 +962,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             }
             
             if (hwIntialized) {
-                mHwRenderer.setup(mWidth, mHeight, mAttachInfo);
+                mHwRenderer.setup(mWidth, mHeight);
             }
 
             boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
@@ -1598,9 +1597,9 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         mAttachInfo.mRootView = null;
         mAttachInfo.mSurface = null;
 
-        if (mHwRenderer != null) {
-            mHwRenderer.destroy();
-        }
+        destroyHardwareRenderer();
+        mHwRenderer = null;
+        
         mSurface.release();
 
         if (mInputChannel != null) {
@@ -1622,6 +1621,12 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         if (mInputChannel != null) {
             mInputChannel.dispose();
             mInputChannel = null;
+        }
+    }
+
+    private void destroyHardwareRenderer() {
+        if (mHwRenderer != null) {
+            mHwRenderer.destroy();
         }
     }
 
@@ -2734,10 +2739,6 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     public void childDrawableStateChanged(View child) {
     }
 
-    protected Rect getWindowFrame() {
-        return mWinFrame;
-    }
-
     void checkThread() {
         if (mThread != Thread.currentThread()) {
             throw new CalledFromWrongThreadException(
@@ -2816,16 +2817,15 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     static class W extends IWindow.Stub {
         private final WeakReference<ViewRoot> mViewRoot;
 
-        public W(ViewRoot viewRoot, Context context) {
+        W(ViewRoot viewRoot) {
             mViewRoot = new WeakReference<ViewRoot>(viewRoot);
         }
 
-        public void resized(int w, int h, Rect coveredInsets,
-                Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
+        public void resized(int w, int h, Rect coveredInsets, Rect visibleInsets,
+                boolean reportDraw, Configuration newConfig) {
             final ViewRoot viewRoot = mViewRoot.get();
             if (viewRoot != null) {
-                viewRoot.dispatchResized(w, h, coveredInsets,
-                        visibleInsets, reportDraw, newConfig);
+                viewRoot.dispatchResized(w, h, coveredInsets, visibleInsets, reportDraw, newConfig);
             }
         }
 

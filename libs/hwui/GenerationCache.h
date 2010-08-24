@@ -104,12 +104,14 @@ void GenerationCache<K, V>::setOnEntryRemovedListener(OnEntryRemoved<K, V>* list
 template<typename K, typename V>
 void GenerationCache<K, V>::clear() {
     if (mListener) {
-        while (mCache.size() > 0) {
-            removeOldest();
+        for (uint32_t i = 0; i < mCache.size(); i++) {
+            sp<Entry<K, V> > entry = mCache.valueAt(i);
+            if (mListener) {
+                (*mListener)(entry->key, entry->value);
+            }
         }
-    } else {
-        mCache.clear();
     }
+    mCache.clear();
     mYoungest.clear();
     mOldest.clear();
 }

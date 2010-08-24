@@ -35,9 +35,10 @@ import javax.microedition.khronos.opengles.GL;
  * @hide
  */
 public abstract class HardwareRenderer {
+    private static final String LOG_TAG = "HardwareRenderer";
+
     private boolean mEnabled;
     private boolean mRequested = true;
-    private static final String LOG_TAG = "HardwareRenderer";
 
     /**
      * Indicates whether hardware acceleration is available under any form for
@@ -70,9 +71,8 @@ public abstract class HardwareRenderer {
      * 
      * @param width Width of the drawing surface.
      * @param height Height of the drawing surface.
-     * @param attachInfo The AttachInfo used to render the ViewRoot. 
      */
-    abstract void setup(int width, int height, View.AttachInfo attachInfo);
+    abstract void setup(int width, int height);
 
     /**
      * Draws the specified view.
@@ -96,12 +96,11 @@ public abstract class HardwareRenderer {
      */
     void initializeIfNeeded(int width, int height, View.AttachInfo attachInfo,
             SurfaceHolder holder) {
-
         if (isRequested()) {
             // We lost the gl context, so recreate it.
             if (!isEnabled()) {
                 if (initialize(holder)) {
-                    setup(width, height, attachInfo);
+                    setup(width, height);
                 }
             }
         }        
@@ -165,17 +164,22 @@ public abstract class HardwareRenderer {
     static abstract class GlRenderer extends HardwareRenderer {
         private static final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
 
-        EGL10 mEgl;
-        EGLDisplay mEglDisplay;
-        EGLContext mEglContext;
-        EGLSurface mEglSurface;
-        EGLConfig mEglConfig;
+        static EGLContext sEglContext;
+        static EGL10 sEgl;
+        static EGLDisplay sEglDisplay;
+        static EGLConfig sEglConfig;
 
+        private static Thread sEglThread;        
+
+        EGLSurface mEglSurface;
+        
         GL mGl;
-        Canvas mCanvas;
+        GLES20Canvas mCanvas;
 
         final int mGlVersion;
         final boolean mTranslucent;
+
+        private boolean mDestroyed;
 
         GlRenderer(int glVersion, boolean translucent) {
             mGlVersion = glVersion;
@@ -189,7 +193,7 @@ public abstract class HardwareRenderer {
          */
         void checkErrors() {
             if (isEnabled()) {
-                int error = mEgl.eglGetError();
+                int error = sEgl.eglGetError();
                 if (error != EGL10.EGL_SUCCESS) {
                     // something bad has happened revert to
                     // normal rendering.
@@ -208,13 +212,17 @@ public abstract class HardwareRenderer {
             if (isRequested() && !isEnabled()) {
                 initializeEgl();
                 mGl = createEglSurface(holder);
+                mDestroyed = false;
 
                 if (mGl != null) {
-                    int err = mEgl.eglGetError();
+                    int err = sEgl.eglGetError();
                     if (err != EGL10.EGL_SUCCESS) {
                         destroy();
                         setRequested(false);
                     } else {
+                        if (mCanvas != null) {
+                            destroyCanvas();
+                        }
                         mCanvas = createCanvas();
                         if (mCanvas != null) {
                             setEnabled(true);
@@ -229,42 +237,54 @@ public abstract class HardwareRenderer {
             return false;
         }
 
-        abstract Canvas createCanvas();
+        private void destroyCanvas() {
+            mCanvas.destroy();
+            mCanvas = null;
+        }
+
+        abstract GLES20Canvas createCanvas();
 
         void initializeEgl() {
-            mEgl = (EGL10) EGLContext.getEGL();
+            if (sEglContext != null) return;
+
+            sEglThread = Thread.currentThread();
+            sEgl = (EGL10) EGLContext.getEGL();
             
             // Get to the default display.
-            mEglDisplay = mEgl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
+            sEglDisplay = sEgl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
             
-            if (mEglDisplay == EGL10.EGL_NO_DISPLAY) {
+            if (sEglDisplay == EGL10.EGL_NO_DISPLAY) {
                 throw new RuntimeException("eglGetDisplay failed");
             }
             
             // We can now initialize EGL for that display
             int[] version = new int[2];
-            if (!mEgl.eglInitialize(mEglDisplay, version)) {
+            if (!sEgl.eglInitialize(sEglDisplay, version)) {
                 throw new RuntimeException("eglInitialize failed");
             }
-            mEglConfig = getConfigChooser(mGlVersion).chooseConfig(mEgl, mEglDisplay);
+            sEglConfig = getConfigChooser(mGlVersion).chooseConfig(sEgl, sEglDisplay);
             
             /*
             * Create an EGL context. We want to do this as rarely as we can, because an
             * EGL context is a somewhat heavy object.
             */
-            mEglContext = createContext(mEgl, mEglDisplay, mEglConfig);
+            sEglContext = createContext(sEgl, sEglDisplay, sEglConfig);
         }
 
         GL createEglSurface(SurfaceHolder holder) {
             // Check preconditions.
-            if (mEgl == null) {
+            if (sEgl == null) {
                 throw new RuntimeException("egl not initialized");
             }
-            if (mEglDisplay == null) {
+            if (sEglDisplay == null) {
                 throw new RuntimeException("eglDisplay not initialized");
             }
-            if (mEglConfig == null) {
+            if (sEglConfig == null) {
                 throw new RuntimeException("mEglConfig not initialized");
+            }
+            if (Thread.currentThread() != sEglThread) {
+                throw new IllegalStateException("HardwareRenderer cannot be used " 
+                        + "from multiple threads");
             }
 
             /*
@@ -272,21 +292,20 @@ public abstract class HardwareRenderer {
              *  surface.
              */
             if (mEglSurface != null && mEglSurface != EGL10.EGL_NO_SURFACE) {
-
                 /*
                  * Unbind and destroy the old EGL surface, if
                  * there is one.
                  */
-                mEgl.eglMakeCurrent(mEglDisplay, EGL10.EGL_NO_SURFACE,
+                sEgl.eglMakeCurrent(sEglDisplay, EGL10.EGL_NO_SURFACE,
                         EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
-                mEgl.eglDestroySurface(mEglDisplay, mEglSurface);
+                sEgl.eglDestroySurface(sEglDisplay, mEglSurface);
             }
 
             // Create an EGL surface we can render into.
-            mEglSurface = mEgl.eglCreateWindowSurface(mEglDisplay, mEglConfig, holder, null);
+            mEglSurface = sEgl.eglCreateWindowSurface(sEglDisplay, sEglConfig, holder, null);
 
             if (mEglSurface == null || mEglSurface == EGL10.EGL_NO_SURFACE) {
-                int error = mEgl.eglGetError();
+                int error = sEgl.eglGetError();
                 if (error == EGL10.EGL_BAD_NATIVE_WINDOW) {
                     Log.e("EglHelper", "createWindowSurface returned EGL_BAD_NATIVE_WINDOW.");
                     return null;
@@ -298,11 +317,11 @@ public abstract class HardwareRenderer {
              * Before we can issue GL commands, we need to make sure
              * the context is current and bound to a surface.
              */
-            if (!mEgl.eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
+            if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, sEglContext)) {
                 throw new RuntimeException("eglMakeCurrent failed");
             }
 
-            return mEglContext.getGL();
+            return sEglContext.getGL();
         }
 
         EGLContext createContext(EGL10 egl, EGLDisplay eglDisplay, EGLConfig eglConfig) {
@@ -315,7 +334,6 @@ public abstract class HardwareRenderer {
         @Override
         void initializeIfNeeded(int width, int height, View.AttachInfo attachInfo,
                 SurfaceHolder holder) {
-
             if (isRequested()) {
                 checkErrors();
                 super.initializeIfNeeded(width, height, attachInfo, holder);
@@ -324,28 +342,34 @@ public abstract class HardwareRenderer {
         
         @Override
         void destroy() {
-            if (!isEnabled()) return;
+            if (!isEnabled() || mDestroyed) return;
 
-            mEgl.eglMakeCurrent(mEglDisplay, EGL10.EGL_NO_SURFACE,
+            mDestroyed = true;
+
+            checkCurrent();
+            // Destroy the Canvas first in case it needs to use a GL context
+            // to perform its cleanup.
+            destroyCanvas();
+
+            sEgl.eglMakeCurrent(sEglDisplay, EGL10.EGL_NO_SURFACE,
                     EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
-            mEgl.eglDestroyContext(mEglDisplay, mEglContext);
-            mEgl.eglDestroySurface(mEglDisplay, mEglSurface);
-            mEgl.eglTerminate(mEglDisplay);
+            sEgl.eglDestroySurface(sEglDisplay, mEglSurface);
 
-            mEglContext = null;
             mEglSurface = null;
-            mEglDisplay = null;
-            mEgl = null;
             mGl = null;
-            mCanvas = null;
+
+            // mEgl.eglDestroyContext(mEglDisplay, mEglContext);
+            // mEglContext = null;            
+            // mEgl.eglTerminate(mEglDisplay);
+            // mEgl = null;
+            // mEglDisplay = null;
 
             setEnabled(false);
-        }        
-        
+        }
+
         @Override
-        void setup(int width, int height, View.AttachInfo attachInfo) {
-            final float scale = attachInfo.mApplicationScale;
-            mCanvas.setViewport((int) (width * scale + 0.5f), (int) (height * scale + 0.5f));
+        void setup(int width, int height) {
+            mCanvas.setViewport(width, height);
         }
         
         boolean canDraw() {
@@ -363,7 +387,8 @@ public abstract class HardwareRenderer {
          * @param glVersion
          */
         EglConfigChooser getConfigChooser(int glVersion) {
-            return new ComponentSizeChooser(glVersion, 8, 8, 8, mTranslucent ? 8 : 0, 0, 0);
+            // TODO: Check for mTranslucent here, which means at least 2 EGL contexts
+            return new ComponentSizeChooser(glVersion, 8, 8, 8, 8, 0, 0);
         }
 
         @Override
@@ -373,14 +398,7 @@ public abstract class HardwareRenderer {
                 attachInfo.mIgnoreDirtyState = true;
                 view.mPrivateFlags |= View.DRAWN;
 
-                // TODO: Don't check the current context when we have one per UI thread
-                // TODO: Use a threadlocal flag to know whether the surface has changed
-                if (mEgl.eglGetCurrentContext() != mEglContext ||
-                        mEgl.eglGetCurrentSurface(EGL10.EGL_DRAW) != mEglSurface) {
-                    if (!mEgl.eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
-                        throw new RuntimeException("eglMakeCurrent failed");
-                    }
-                }
+                checkCurrent();
 
                 onPreDraw();
 
@@ -396,8 +414,19 @@ public abstract class HardwareRenderer {
 
                 attachInfo.mIgnoreDirtyState = false;
 
-                mEgl.eglSwapBuffers(mEglDisplay, mEglSurface);
+                sEgl.eglSwapBuffers(sEglDisplay, mEglSurface);
                 checkErrors();
+            }
+        }
+
+        private void checkCurrent() {
+            // TODO: Don't check the current context when we have one per UI thread
+            // TODO: Use a threadlocal flag to know whether the surface has changed
+            if (sEgl.eglGetCurrentContext() != sEglContext ||
+                    sEgl.eglGetCurrentSurface(EGL10.EGL_DRAW) != mEglSurface) {
+                if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, sEglContext)) {
+                    throw new RuntimeException("eglMakeCurrent failed");
+                }
             }
         }
 
@@ -496,7 +525,7 @@ public abstract class HardwareRenderer {
                         int g = findConfigAttrib(egl, display, config, EGL10.EGL_GREEN_SIZE, 0);
                         int b = findConfigAttrib(egl, display, config, EGL10.EGL_BLUE_SIZE, 0);
                         int a = findConfigAttrib(egl, display, config, EGL10.EGL_ALPHA_SIZE, 0);
-                        if (r == mRedSize && g == mGreenSize && b == mBlueSize && a >= mAlphaSize) {
+                        if (r >= mRedSize && g >= mGreenSize && b >= mBlueSize && a >= mAlphaSize) {
                             return config;
                         }
                     }
@@ -514,7 +543,7 @@ public abstract class HardwareRenderer {
             }
         }
     }
-    
+
     /**
      * Hardware renderer using OpenGL ES 2.0.
      */
@@ -526,8 +555,9 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        Canvas createCanvas() {
-            return mGlCanvas = new GLES20Canvas(mGl, mTranslucent);
+        GLES20Canvas createCanvas() {
+            // TODO: Pass mTranslucent instead of true
+            return mGlCanvas = new GLES20Canvas(mGl, true);
         }
 
         @Override

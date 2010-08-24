@@ -32,6 +32,7 @@ namespace uirenderer {
  */
 class GradientCache: public OnEntryRemoved<SkShader*, Texture*> {
 public:
+    GradientCache();
     GradientCache(uint32_t maxByteSize);
     ~GradientCache();
 
