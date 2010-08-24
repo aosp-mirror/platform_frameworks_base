@@ -651,14 +651,40 @@ public class DatabaseUtils {
      * @return the number of rows in the table
      */
     public static long queryNumEntries(SQLiteDatabase db, String table) {
-        Cursor cursor = db.query(table, countProjection,
-                null, null, null, null, null);
-        try {
-            cursor.moveToFirst();
-            return cursor.getLong(0);
-        } finally {
-            cursor.close();
-        }
+        return queryNumEntries(db, table, null, null);
+    }
+
+    /**
+     * Query the table for the number of rows in the table.
+     * @param db the database the table is in
+     * @param table the name of the table to query
+     * @param selection A filter declaring which rows to return,
+     *              formatted as an SQL WHERE clause (excluding the WHERE itself).
+     *              Passing null will count all rows for the given table
+     * @return the number of rows in the table filtered by the selection
+     */
+    public static long queryNumEntries(SQLiteDatabase db, String table, String selection) {
+        return queryNumEntries(db, table, selection, null);
+    }
+
+    /**
+     * Query the table for the number of rows in the table.
+     * @param db the database the table is in
+     * @param table the name of the table to query
+     * @param selection A filter declaring which rows to return,
+     *              formatted as an SQL WHERE clause (excluding the WHERE itself).
+     *              Passing null will count all rows for the given table
+     * @param selectionArgs You may include ?s in selection,
+     *              which will be replaced by the values from selectionArgs,
+     *              in order that they appear in the selection.
+     *              The values will be bound as Strings.
+     * @return the number of rows in the table filtered by the selection
+     */
+    public static long queryNumEntries(SQLiteDatabase db, String table, String selection,
+            String[] selectionArgs) {
+        String s = (!TextUtils.isEmpty(selection)) ? " where " + selection : "";
+        return longForQuery(db, "select count(*) from " + table + s,
+                    selectionArgs);
     }
 
     /**
