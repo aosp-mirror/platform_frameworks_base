@@ -307,7 +307,7 @@ public abstract class Animation implements Cloneable {
      * animated as well as the objects parents. (This is to support animation
      * sizes being specifed relative to these dimensions.)
      *
-     * <p>Objects that interpret a Animations should call this method when
+     * <p>Objects that interpret Animations should call this method when
      * the sizes of the object being animated and its parent are known, and
      * before calling {@link #getTransformation}.
      *

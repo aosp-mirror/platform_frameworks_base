@@ -3438,7 +3438,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Sets the pressed that for this view.
+     * Sets the pressed state for this view.
      *
      * @see #isClickable()
      * @see #setClickable(boolean)
