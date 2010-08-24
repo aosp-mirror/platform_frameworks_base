@@ -175,10 +175,6 @@ abstract class SipPhoneBase extends PhoneBase {
         return state;
     }
 
-    public String getPhoneName() {
-        return "SIP";
-    }
-
     public int getPhoneType() {
         // FIXME: add SIP phone type
         return Phone.PHONE_TYPE_GSM;

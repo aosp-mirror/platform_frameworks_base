@@ -100,7 +100,7 @@ public class SipPhone extends SipPhoneBase {
     }
 
     public String getPhoneName() {
-        return mProfile.getProfileName();
+        return "SIP:" + getUriString(mProfile);
     }
 
     public String getSipUri() {
@@ -222,21 +222,25 @@ public class SipPhone extends SipPhoneBase {
     }
 
     public void conference() throws CallStateException {
-        if ((foregroundCall.getState() != SipCall.State.ACTIVE)
-                || (foregroundCall.getState() != SipCall.State.ACTIVE)) {
-            throw new CallStateException("wrong state to merge calls: fg="
-                    + foregroundCall.getState() + ", bg="
-                    + backgroundCall.getState());
+        synchronized (SipPhone.class) {
+            if ((foregroundCall.getState() != SipCall.State.ACTIVE)
+                    || (foregroundCall.getState() != SipCall.State.ACTIVE)) {
+                throw new CallStateException("wrong state to merge calls: fg="
+                        + foregroundCall.getState() + ", bg="
+                        + backgroundCall.getState());
+            }
+            foregroundCall.merge(backgroundCall);
         }
-        foregroundCall.merge(backgroundCall);
     }
 
     public void conference(Call that) throws CallStateException {
-        if (!(that instanceof SipCall)) {
-            throw new CallStateException("expect " + SipCall.class
-                    + ", cannot merge with " + that.getClass());
+        synchronized (SipPhone.class) {
+            if (!(that instanceof SipCall)) {
+                throw new CallStateException("expect " + SipCall.class
+                        + ", cannot merge with " + that.getClass());
+            }
+            foregroundCall.merge((SipCall) that);
         }
-        foregroundCall.merge((SipCall) that);
     }
 
     public boolean canTransfer() {
@@ -248,12 +252,14 @@ public class SipPhone extends SipPhoneBase {
     }
 
     public void clearDisconnected() {
-        ringingCall.clearDisconnected();
-        foregroundCall.clearDisconnected();
-        backgroundCall.clearDisconnected();
+        synchronized (SipPhone.class) {
+            ringingCall.clearDisconnected();
+            foregroundCall.clearDisconnected();
+            backgroundCall.clearDisconnected();
 
-        updatePhoneState();
-        notifyPreciseCallStateChanged();
+            updatePhoneState();
+            notifyPreciseCallStateChanged();
+        }
     }
 
     public void sendDtmf(char c) {
@@ -261,7 +267,9 @@ public class SipPhone extends SipPhoneBase {
             Log.e(LOG_TAG,
                     "sendDtmf called with invalid character '" + c + "'");
         } else if (foregroundCall.getState().isAlive()) {
-            foregroundCall.sendDtmf(c);
+            synchronized (SipPhone.class) {
+                foregroundCall.sendDtmf(c);
+            }
         }
     }
 
@@ -307,7 +315,9 @@ public class SipPhone extends SipPhoneBase {
     }
 
     public void setMute(boolean muted) {
-        foregroundCall.setMute(muted);
+        synchronized (SipPhone.class) {
+            foregroundCall.setMute(muted);
+        }
     }
 
     public boolean getMute() {
@@ -410,18 +420,20 @@ public class SipPhone extends SipPhoneBase {
 
         @Override
         public void hangup() throws CallStateException {
-            Log.v(LOG_TAG, "hang up call: " + getState() + ": " + this
-                    + " on phone " + getPhone());
-            CallStateException excp = null;
-            for (Connection c : connections) {
-                try {
-                    c.hangup();
-                } catch (CallStateException e) {
-                    excp = e;
+            synchronized (SipPhone.class) {
+                Log.v(LOG_TAG, "hang up call: " + getState() + ": " + this
+                        + " on phone " + getPhone());
+                CallStateException excp = null;
+                for (Connection c : connections) {
+                    try {
+                        c.hangup();
+                    } catch (CallStateException e) {
+                        excp = e;
+                    }
                 }
+                if (excp != null) throw excp;
+                setState(State.DISCONNECTING);
             }
-            if (excp != null) throw excp;
-            setState(State.DISCONNECTING);
         }
 
         void initIncomingCall(SipAudioCall sipAudioCall, boolean makeCallWait) {
@@ -454,19 +466,20 @@ public class SipPhone extends SipPhoneBase {
         }
 
         void hold() throws CallStateException {
-            AudioGroup audioGroup = getAudioGroup();
-            if (audioGroup == null) return;
-            audioGroup.setMode(AudioGroup.MODE_ON_HOLD);
             setState(State.HOLDING);
+            AudioGroup audioGroup = getAudioGroup();
+            if (audioGroup != null) {
+                audioGroup.setMode(AudioGroup.MODE_ON_HOLD);
+            }
             for (Connection c : connections) ((SipConnection) c).hold();
         }
 
         void unhold() throws CallStateException {
-            AudioGroup audioGroup = getAudioGroup();
-            if (audioGroup == null) return;
-            audioGroup.setMode(AudioGroup.MODE_NORMAL);
             setState(State.ACTIVE);
-            for (Connection c : connections) ((SipConnection) c).unhold();
+            AudioGroup audioGroup = new AudioGroup();
+            for (Connection c : connections) {
+                ((SipConnection) c).unhold(audioGroup);
+            }
         }
 
         void setMute(boolean muted) {
@@ -483,15 +496,24 @@ public class SipPhone extends SipPhoneBase {
         }
 
         void merge(SipCall that) throws CallStateException {
-            AudioGroup myGroup = getAudioGroup();
+            AudioGroup audioGroup = getAudioGroup();
             for (Connection c : that.connections) {
                 SipConnection conn = (SipConnection) c;
-                conn.mergeTo(myGroup);
-                connections.add(conn);
-                conn.changeOwner(this);
+                add(conn);
+                if (conn.getState() == Call.State.HOLDING) {
+                    conn.unhold(audioGroup);
+                }
             }
-            that.connections.clear();
             that.setState(Call.State.IDLE);
+        }
+
+        private void add(SipConnection conn) {
+            SipCall call = conn.getCall();
+            if (call == this) return;
+            if (call != null) call.connections.remove(conn);
+
+            connections.add(conn);
+            conn.changeOwner(this);
         }
 
         void sendDtmf(char c) {
@@ -568,7 +590,6 @@ public class SipPhone extends SipPhoneBase {
     private class SipConnection extends SipConnectionBase {
         private SipCall mOwner;
         private SipAudioCall mSipAudioCall;
-        private AudioGroup mOriginalGroup;
         private Call.State mState = Call.State.IDLE;
         private SipProfile mPeer;
         private boolean mIncoming = false;
@@ -673,6 +694,7 @@ public class SipPhone extends SipPhoneBase {
         }
 
         void hold() throws CallStateException {
+            setState(Call.State.HOLDING);
             try {
                 mSipAudioCall.holdCall();
             } catch (SipException e) {
@@ -680,22 +702,14 @@ public class SipPhone extends SipPhoneBase {
             }
         }
 
-        void unhold() throws CallStateException {
+        void unhold(AudioGroup audioGroup) throws CallStateException {
+            mSipAudioCall.setAudioGroup(audioGroup);
+            setState(Call.State.ACTIVE);
             try {
                 mSipAudioCall.continueCall();
             } catch (SipException e) {
                 throw new CallStateException("unhold(): " + e);
             }
-        }
-
-        void mergeTo(AudioGroup group) throws CallStateException {
-            AudioStream stream = mSipAudioCall.getAudioStream();
-            if (stream == null) {
-                throw new CallStateException("wrong state to merge: "
-                        + mSipAudioCall.getState());
-            }
-            if (mOriginalGroup == null) mOriginalGroup = getAudioGroup();
-            stream.join(group);
         }
 
         @Override
@@ -732,29 +746,36 @@ public class SipPhone extends SipPhoneBase {
 
         @Override
         public void hangup() throws CallStateException {
-            // TODO: need to pull AudioStream out of the AudioGroup in case
-            // this conn was part of a conf call
-            Log.v(LOG_TAG, "hangup conn: " + mPeer.getUriString() + ": "
-                    + ": on phone " + getPhone());
-            try {
-                mSipAudioCall.endCall();
-                setState(Call.State.DISCONNECTING);
-                setDisconnectCause(DisconnectCause.LOCAL);
-            } catch (SipException e) {
-                throw new CallStateException("hangup(): " + e);
+            synchronized (SipPhone.class) {
+                Log.v(LOG_TAG, "hangup conn: " + mPeer.getUriString() + ": "
+                        + ": on phone " + getPhone().getPhoneName());
+                try {
+                    mSipAudioCall.endCall();
+                    setState(Call.State.DISCONNECTING);
+                    setDisconnectCause(DisconnectCause.LOCAL);
+                } catch (SipException e) {
+                    throw new CallStateException("hangup(): " + e);
+                }
             }
         }
 
         @Override
         public void separate() throws CallStateException {
-            // TODO: what's this for SIP?
-            /*
-            if (!disconnected) {
-                owner.separate(this);
-            } else {
-                throw new CallStateException ("disconnected");
+            synchronized (SipPhone.class) {
+                SipCall call = (SipCall) SipPhone.this.getBackgroundCall();
+                if (call.getState() != Call.State.IDLE) {
+                    throw new CallStateException(
+                            "cannot put conn back to a call in non-idle state: "
+                            + call.getState());
+                }
+                Log.v(LOG_TAG, "separate conn: " + mPeer.getUriString()
+                        + " from " + mOwner + " back to " + call);
+
+                AudioGroup audioGroup = call.getAudioGroup(); // may be null
+                call.add(this);
+                mSipAudioCall.setAudioGroup(audioGroup);
+                call.hold();
             }
-            */
         }
 
         @Override
