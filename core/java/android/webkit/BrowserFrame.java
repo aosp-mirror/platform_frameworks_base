@@ -38,6 +38,8 @@ import android.view.WindowManager;
 
 import junit.framework.Assert;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.URLEncoder;
@@ -655,6 +657,96 @@ class BrowserFrame extends Handler {
      */
     private static String getDataDirectory() {
         return sDataDirectory;
+    }
+
+    /**
+     * Called by JNI.
+     * Read from an InputStream into a supplied byte[]
+     * This method catches any exceptions so they don't crash the JVM.
+     * @param inputStream InputStream to read from.
+     * @param output Bytearray that gets the output.
+     * @return the number of bytes read, or -i if then end of stream has been reached
+     */
+    private static int readFromStream(InputStream inputStream, byte[] output) {
+        try {
+            return inputStream.read(output);
+        } catch(java.io.IOException e) {
+            // If we get an exception, return end of stream
+            return -1;
+        }
+    }
+
+    /**
+     * Get the InputStream for an Android resource
+     * There are three different kinds of android resources:
+     * - file:///android_res
+     * - file:///android_asset
+     * - content://
+     * @param url The url to load.
+     * @return An InputStream to the android resource
+     */
+    private InputStream inputStreamForAndroidResource(String url, int type) {
+        final int RESOURCE = 1;
+        final int ASSET = 2;
+        final int CONTENT = 3;
+
+        if (type == RESOURCE) {
+            // file:///android_res
+            if (url == null || url.length() == 0) {
+                Log.e(LOGTAG, "url has length 0 " + url);
+                return null;
+            }
+            int slash = url.indexOf('/');
+            int dot = url.indexOf('.', slash);
+            if (slash == -1 || dot == -1) {
+                Log.e(LOGTAG, "Incorrect res path: " + url);
+                return null;
+            }
+            String subClassName = url.substring(0, slash);
+            String fieldName = url.substring(slash + 1, dot);
+            String errorMsg = null;
+            try {
+                final Class<?> d = mContext.getApplicationContext()
+                        .getClassLoader().loadClass(
+                                mContext.getPackageName() + ".R$"
+                                        + subClassName);
+                final java.lang.reflect.Field field = d.getField(fieldName);
+                final int id = field.getInt(null);
+                TypedValue value = new TypedValue();
+                mContext.getResources().getValue(id, value, true);
+                if (value.type == TypedValue.TYPE_STRING) {
+                    return mContext.getAssets().openNonAsset(
+                            value.assetCookie, value.string.toString(),
+                            AssetManager.ACCESS_STREAMING);
+                } else {
+                    // Old stack only supports TYPE_STRING for res files
+                    Log.e(LOGTAG, "not of type string: " + url);
+                    return null;
+                }
+            } catch (Exception e) {
+                Log.e(LOGTAG, "Exception: " + url);
+                return null;
+            }
+
+        } else if (type == ASSET) {
+            // file:///android_asset
+            try {
+                AssetManager assets = mContext.getAssets();
+                return assets.open(url, AssetManager.ACCESS_STREAMING);
+            } catch (IOException e) {
+                return null;
+            }
+        } else if (type == CONTENT) {
+            try {
+                Uri uri = Uri.parse(url);
+                return mContext.getContentResolver().openInputStream(uri);
+            } catch (Exception e) {
+                Log.e(LOGTAG, "Exception: " + url);
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     /**
