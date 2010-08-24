@@ -856,6 +856,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if ((mGroupFlags & FLAG_SPLIT_MOTION_EVENTS) == FLAG_SPLIT_MOTION_EVENTS) {
+            if (mSplitMotionTargets == null) {
+                mSplitMotionTargets = new SplitMotionTargets();
+            }
             return dispatchSplitTouchEvent(ev);
         }
 
@@ -1036,19 +1039,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 ev.setAction(action);
                 // We know we want to dispatch the event down, try to find a child
                 // who can handle it, start with the front-most child.
+                final long downTime = ev.getEventTime();
                 final View[] children = mChildren;
                 final int count = mChildrenCount;
                 for (int i = count - 1; i >= 0; i--) {
                     final View child = children[i];
                     if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE
                             || child.getAnimation() != null) {
-                        final MotionEvent childEvent = targets.filterMotionEventForChild(ev, child);
+                        final MotionEvent childEvent =
+                                targets.filterMotionEventForChild(ev, child, downTime);
                         if (childEvent != null) {
                             try {
                                 final int childActionIndex = childEvent.findPointerIndex(actionId);
                                 if (dispatchTouchEventIfInView(child, childEvent,
                                         childActionIndex)) {
-                                    targets.add(actionId, child);
+                                    targets.add(actionId, child, downTime);
 
                                     return true;
                                 }
@@ -1060,10 +1065,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 }
 
                 // Didn't find a new target. Do we have a "primary" target to send to?
-                final View primaryTarget = targets.getPrimaryTarget();
-                if (primaryTarget != null) {
-                    final MotionEvent childEvent =
-                            targets.filterMotionEventForChild(ev, primaryTarget);
+                final SplitMotionTargets.TargetInfo primaryTargetInfo = targets.getPrimaryTarget();
+                if (primaryTargetInfo != null) {
+                    final View primaryTarget = primaryTargetInfo.view;
+                    final MotionEvent childEvent = targets.filterMotionEventForChild(ev,
+                            primaryTarget, primaryTargetInfo.downTime);
                     if (childEvent != null) {
                         try {
                             // Calculate the offset point into the target's local coordinates
@@ -1081,7 +1087,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                             }
                             childEvent.setLocation(xc, yc);
                             if (primaryTarget.dispatchTouchEvent(childEvent)) {
-                                targets.add(actionId, primaryTarget);
+                                targets.add(actionId, primaryTarget, primaryTargetInfo.downTime);
                                 return true;
                             }
                         } finally {
@@ -1119,7 +1125,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
 
             for (int uniqueIndex = 0; uniqueIndex < uniqueTargetCount; uniqueIndex++) {
-                final View target = targets.getUniqueTargetAt(uniqueIndex);
+                final View target = targets.getUniqueTargetAt(uniqueIndex).view;
 
                 // Calculate the offset point into the target's local coordinates
                 float xc = scrolledXFloat - (float) target.mLeft;
@@ -1150,9 +1156,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         boolean handled = false;
         for (int uniqueIndex = 0; uniqueIndex < uniqueTargetCount; uniqueIndex++) {
-            final View target = targets.getUniqueTargetAt(uniqueIndex);
+            final SplitMotionTargets.TargetInfo targetInfo = targets.getUniqueTargetAt(uniqueIndex);
+            final View target = targetInfo.view;
 
-            final MotionEvent targetEvent = targets.filterMotionEventForChild(ev, target);
+            final MotionEvent targetEvent =
+                    targets.filterMotionEventForChild(ev, target, targetInfo.downTime);
             if (targetEvent == null) {
                 continue;
             }
@@ -1187,7 +1195,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     uniqueTargetCount--;
                 }
 
-                handled |= target.dispatchTouchEvent(targetEvent);
+                final boolean childHandled = target.dispatchTouchEvent(targetEvent);
+                handled |= childHandled;
+                if (!childHandled) {
+                    // Child doesn't want these events anymore, but we're still dispatching
+                    // other split events to children.
+                    targets.removeView(target);
+                }
             } finally {
                 targetEvent.recycle();
             }
@@ -1223,9 +1237,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // but perhaps this should handle that case and send ACTION_CANCELs to any child views
         // with gestures in progress when this is changed.
         if (split) {
-            if ((mGroupFlags & FLAG_SPLIT_MOTION_EVENTS) == 0) {
-                mSplitMotionTargets = new SplitMotionTargets();
-            }
             mGroupFlags |= FLAG_SPLIT_MOTION_EVENTS;
         } else {
             mGroupFlags &= ~FLAG_SPLIT_MOTION_EVENTS;
@@ -4103,9 +4114,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     private static class SplitMotionTargets {
         private SparseArray<View> mTargets;
-        private View[] mUniqueTargets;
+        private TargetInfo[] mUniqueTargets;
         private int mUniqueTargetCount;
-        private long mDownTime;
         private MotionEvent.PointerCoords[] mPointerCoords;
         private int[] mPointerIds;
 
@@ -4114,7 +4124,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         public SplitMotionTargets() {
             mTargets = new SparseArray<View>();
-            mUniqueTargets = new View[INITIAL_UNIQUE_MOTION_TARGETS_SIZE];
+            mUniqueTargets = new TargetInfo[INITIAL_UNIQUE_MOTION_TARGETS_SIZE];
             mPointerIds = new int[INITIAL_BUCKET_SIZE];
             mPointerCoords = new MotionEvent.PointerCoords[INITIAL_BUCKET_SIZE];
             for (int i = 0; i < INITIAL_BUCKET_SIZE; i++) {
@@ -4124,31 +4134,32 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         public void clear() {
             mTargets.clear();
-            Arrays.fill(mUniqueTargets, null);
+            final int count = mUniqueTargetCount;
+            for (int i = 0; i < count; i++) {
+                mUniqueTargets[i].recycle();
+                mUniqueTargets[i] = null;
+            }
             mUniqueTargetCount = 0;
         }
 
-        public void add(int pointerId, View target) {
+        public void add(int pointerId, View target, long downTime) {
             mTargets.put(pointerId, target);
 
             final int uniqueCount = mUniqueTargetCount;
             boolean addUnique = true;
             for (int i = 0; i < uniqueCount; i++) {
-                if (mUniqueTargets[i] == target) {
+                if (mUniqueTargets[i].view == target) {
                     addUnique = false;
                 }
             }
             if (addUnique) {
-                if (mUniqueTargets == null) {
-                    mUniqueTargets = new View[INITIAL_UNIQUE_MOTION_TARGETS_SIZE];
-                }
                 if (mUniqueTargets.length == uniqueCount) {
-                    View[] newTargets =
-                        new View[uniqueCount + INITIAL_UNIQUE_MOTION_TARGETS_SIZE];
+                    TargetInfo[] newTargets =
+                        new TargetInfo[uniqueCount + INITIAL_UNIQUE_MOTION_TARGETS_SIZE];
                     System.arraycopy(mUniqueTargets, 0, newTargets, 0, uniqueCount);
                     mUniqueTargets = newTargets;
                 }
-                mUniqueTargets[uniqueCount] = target;
+                mUniqueTargets[uniqueCount] = TargetInfo.obtain(target, downTime);
                 mUniqueTargetCount++;
             }
         }
@@ -4161,7 +4172,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return mUniqueTargetCount;
         }
 
-        public View getUniqueTargetAt(int index) {
+        public TargetInfo getUniqueTargetAt(int index) {
             return mUniqueTargets[index];
         }
 
@@ -4185,18 +4196,29 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return mTargets.valueAt(index);
         }
 
-        public View getPrimaryTarget() {
+        public TargetInfo getPrimaryTarget() {
             if (!isEmpty()) {
-                return mUniqueTargets[0];
+                // Find the longest-lived target
+                long firstTime = Long.MAX_VALUE;
+                int firstIndex = 0;
+                final int uniqueCount = mUniqueTargetCount;
+                for (int i = 0; i < uniqueCount; i++) {
+                    TargetInfo info = mUniqueTargets[i];
+                    if (info.downTime < firstTime) {
+                        firstTime = info.downTime;
+                        firstIndex = i;
+                    }
+                }
+                return mUniqueTargets[firstIndex];
             }
             return null;
         }
 
         public boolean hasTarget(View target) {
-            final View[] unique = mUniqueTargets;
+            final TargetInfo[] unique = mUniqueTargets;
             final int uniqueCount = mUniqueTargetCount;
             for (int i = 0; i < uniqueCount; i++) {
-                if (unique[i] == target) {
+                if (unique[i].view == target) {
                     return true;
                 }
             }
@@ -4237,10 +4259,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         private void removeUnique(View removeView) {
-            View[] unique = mUniqueTargets;
+            TargetInfo[] unique = mUniqueTargets;
             int uniqueCount = mUniqueTargetCount;
             for (int i = 0; i < uniqueCount; i++) {
-                if (unique[i] == removeView) {
+                if (unique[i].view == removeView) {
+                    unique[i].recycle();
                     unique[i] = unique[--uniqueCount];
                     unique[uniqueCount] = null;
                     break;
@@ -4254,7 +4277,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * Return a new (obtain()ed) MotionEvent containing only data for pointers that should
          * be dispatched to child. Don't forget to recycle it!
          */
-        public MotionEvent filterMotionEventForChild(MotionEvent ev, View child) {
+        public MotionEvent filterMotionEventForChild(MotionEvent ev, View child, long downTime) {
             int action = ev.getAction();
             final int maskedAction = action & MotionEvent.ACTION_MASK;
 
@@ -4279,7 +4302,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (maskedAction == MotionEvent.ACTION_DOWN) {
                 pointerCount++;
                 actionId = ev.getPointerId(0);
-                mDownTime = ev.getDownTime();
             } else if (maskedAction == MotionEvent.ACTION_POINTER_DOWN) {
                 pointerCount++;
 
@@ -4352,11 +4374,49 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         (newActionIndex << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
             }
 
-            MotionEvent result = MotionEvent.obtain(mDownTime, ev.getEventTime(),
+            MotionEvent result = MotionEvent.obtain(downTime, ev.getEventTime(),
                     action, pointerCount, mPointerIds, mPointerCoords, ev.getMetaState(),
                     ev.getXPrecision(), ev.getYPrecision(), ev.getDeviceId(), ev.getEdgeFlags(),
                     ev.getSource());
             return result;
+        }
+
+        static class TargetInfo {
+            public View view;
+            public long downTime;
+
+            private TargetInfo mNextRecycled;
+
+            private static TargetInfo sRecycleBin;
+            private static int sRecycledCount;
+
+            private static int MAX_RECYCLED = 15;
+
+            private TargetInfo() {
+            }
+
+            public static TargetInfo obtain(View v, long time) {
+                TargetInfo info;
+                if (sRecycleBin == null) {
+                    info = new TargetInfo();
+                } else {
+                    info = sRecycleBin;
+                    sRecycleBin = info.mNextRecycled;
+                    sRecycledCount--;
+                }
+                info.view = v;
+                info.downTime = time;
+                return info;
+            }
+
+            public void recycle() {
+                if (sRecycledCount >= MAX_RECYCLED) {
+                    return;
+                }
+                mNextRecycled = sRecycleBin;
+                sRecycleBin = this;
+                sRecycledCount++;
+            }
         }
     }
 }
