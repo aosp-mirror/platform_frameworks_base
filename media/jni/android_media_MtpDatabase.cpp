@@ -118,6 +118,18 @@ public:
                                             MtpObjectHandleList* references);
 };
 
+// ----------------------------------------------------------------------------
+
+static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
+    if (env->ExceptionCheck()) {
+        LOGE("An exception was thrown by callback '%s'.", methodName);
+        LOGE_EX(env);
+        env->ExceptionClear();
+    }
+}
+
+// ----------------------------------------------------------------------------
+
 MyMtpDatabase::MyMtpDatabase(JNIEnv *env, jobject client)
     :   mDatabase(env->NewGlobalRef(client)),
         mIntBuffer(NULL),
@@ -165,8 +177,12 @@ MtpObjectHandle MyMtpDatabase::beginSendObject(const char* path,
                                             uint64_t size,
                                             time_t modified) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    return env->CallIntMethod(mDatabase, method_beginSendObject, env->NewStringUTF(path),
-                (jint)format, (jint)parent, (jint)storage, (jlong)size, (jlong)modified);
+    MtpObjectHandle result = env->CallIntMethod(mDatabase, method_beginSendObject,
+            env->NewStringUTF(path), (jint)format, (jint)parent, (jint)storage,
+            (jlong)size, (jlong)modified);
+
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    return result;
 }
 
 void MyMtpDatabase::endSendObject(const char* path, MtpObjectHandle handle,
@@ -174,6 +190,8 @@ void MyMtpDatabase::endSendObject(const char* path, MtpObjectHandle handle,
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     env->CallVoidMethod(mDatabase, method_endSendObject, env->NewStringUTF(path),
                         (jint)handle, (jint)format, (jboolean)succeeded);
+
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
 MtpObjectHandleList* MyMtpDatabase::getObjectList(MtpStorageID storageID,
@@ -189,16 +207,21 @@ MtpObjectHandleList* MyMtpDatabase::getObjectList(MtpStorageID storageID,
     jsize length = env->GetArrayLength(array);
     for (int i = 0; i < length; i++)
         list->push(handles[i]);
-   env->ReleaseIntArrayElements(array, handles, 0);
-   return list;
+    env->ReleaseIntArrayElements(array, handles, 0);
+
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    return list;
 }
 
 int MyMtpDatabase::getNumObjects(MtpStorageID storageID,
                                 MtpObjectFormat format,
                                 MtpObjectHandle parent) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    return env->CallIntMethod(mDatabase, method_getNumObjects,
+    int result = env->CallIntMethod(mDatabase, method_getNumObjects,
                 (jint)storageID, (jint)format, (jint)parent);
+
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    return result;
 }
 
 MtpObjectFormatList* MyMtpDatabase::getSupportedPlaybackFormats() {
@@ -212,8 +235,10 @@ MtpObjectFormatList* MyMtpDatabase::getSupportedPlaybackFormats() {
     jsize length = env->GetArrayLength(array);
     for (int i = 0; i < length; i++)
         list->push(formats[i]);
-   env->ReleaseIntArrayElements(array, formats, 0);
-   return list;
+    env->ReleaseIntArrayElements(array, formats, 0);
+
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    return list;
 }
 
 MtpObjectFormatList* MyMtpDatabase::getSupportedCaptureFormats() {
@@ -227,8 +252,10 @@ MtpObjectFormatList* MyMtpDatabase::getSupportedCaptureFormats() {
     jsize length = env->GetArrayLength(array);
     for (int i = 0; i < length; i++)
         list->push(formats[i]);
-   env->ReleaseIntArrayElements(array, formats, 0);
-   return list;
+    env->ReleaseIntArrayElements(array, formats, 0);
+
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    return list;
 }
 
 MtpObjectPropertyList* MyMtpDatabase::getSupportedObjectProperties(MtpObjectFormat format) {
@@ -242,8 +269,10 @@ MtpObjectPropertyList* MyMtpDatabase::getSupportedObjectProperties(MtpObjectForm
     jsize length = env->GetArrayLength(array);
     for (int i = 0; i < length; i++)
         list->push(properties[i]);
-   env->ReleaseIntArrayElements(array, properties, 0);
-   return list;
+    env->ReleaseIntArrayElements(array, properties, 0);
+
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    return list;
 }
 
 MtpDevicePropertyList* MyMtpDatabase::getSupportedDeviceProperties() {
@@ -257,8 +286,10 @@ MtpDevicePropertyList* MyMtpDatabase::getSupportedDeviceProperties() {
     jsize length = env->GetArrayLength(array);
     for (int i = 0; i < length; i++)
         list->push(properties[i]);
-   env->ReleaseIntArrayElements(array, properties, 0);
-   return list;
+    env->ReleaseIntArrayElements(array, properties, 0);
+
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    return list;
 }
 
 MtpResponseCode MyMtpDatabase::getObjectProperty(MtpObjectHandle handle,
@@ -315,6 +346,8 @@ MtpResponseCode MyMtpDatabase::getObjectProperty(MtpObjectHandle handle,
             LOGE("unsupported object type\n");
             return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
     }
+
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return MTP_RESPONSE_OK;
 }
 
@@ -368,6 +401,7 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
     packet.putString(date);   // date modified
     packet.putEmptyString();   // keywords
 
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return MTP_RESPONSE_OK;
 }
 
@@ -388,12 +422,16 @@ MtpResponseCode MyMtpDatabase::getObjectFilePath(MtpObjectHandle handle,
     fileLength = longValues[0];
     env->ReleaseLongArrayElements(mLongBuffer, longValues, 0);
     
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return result;
 }
 
 MtpResponseCode MyMtpDatabase::deleteFile(MtpObjectHandle handle) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    return env->CallIntMethod(mDatabase, method_deleteFile, (jint)handle);
+    MtpResponseCode result = env->CallIntMethod(mDatabase, method_deleteFile, (jint)handle);
+
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    return result;
 }
 
 struct PropertyTableEntry {
@@ -433,11 +471,14 @@ MtpObjectHandleList* MyMtpDatabase::getObjectReferences(MtpObjectHandle handle) 
     jsize length = env->GetArrayLength(array);
     for (int i = 0; i < length; i++)
         list->push(handles[i]);
-   env->ReleaseIntArrayElements(array, handles, 0);
-   return list;
+    env->ReleaseIntArrayElements(array, handles, 0);
+
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    return list;
 }
 
-MtpResponseCode MyMtpDatabase::setObjectReferences(MtpObjectHandle handle, MtpObjectHandleList* references) {
+MtpResponseCode MyMtpDatabase::setObjectReferences(MtpObjectHandle handle,
+                                                    MtpObjectHandleList* references) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     int count = references->size();
     jintArray array = env->NewIntArray(count);
@@ -449,18 +490,11 @@ MtpResponseCode MyMtpDatabase::setObjectReferences(MtpObjectHandle handle, MtpOb
      for (int i = 0; i < count; i++)
         handles[i] = (*references)[i];
     env->ReleaseIntArrayElements(array, handles, 0);
-    return env->CallIntMethod(mDatabase, method_setObjectReferences,
+    MtpResponseCode result = env->CallIntMethod(mDatabase, method_setObjectReferences,
                 (jint)handle, array);
-}
 
-// ----------------------------------------------------------------------------
-
-static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
-    if (env->ExceptionCheck()) {
-        LOGE("An exception was thrown by callback '%s'.", methodName);
-        LOGE_EX(env);
-        env->ExceptionClear();
-    }
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    return result;
 }
 
 #endif // HAVE_ANDROID_OS
