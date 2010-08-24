@@ -6474,6 +6474,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (!mFrozenWithFocus || (selStart < 0 || selEnd < 0)) {
                 boolean selMoved = mSelectionMoved;
 
+                final int touchOffset = 
+                    ((SelectionModifierCursorController) mSelectionModifierCursorController).
+                    getMinTouchOffset();
+                Selection.setSelection((Spannable) mText, touchOffset);
+
                 if (mMovement != null) {
                     mMovement.onTakeFocus(this, (Spannable) mText, direction);
                 }
@@ -6685,13 +6690,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (isTextEditable()) {
                 if (action == MotionEvent.ACTION_UP && isFocused() && !mScrolled) {
                     InputMethodManager imm = (InputMethodManager)
-                            getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                          getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                     
                     final int newSelStart = getSelectionStart();
                     final int newSelEnd = getSelectionEnd();
                     
                     CommitSelectionReceiver csr = null;
-                    if (newSelStart != oldSelStart || newSelEnd != oldSelEnd) {
+                    if (newSelStart != oldSelStart || newSelEnd != oldSelEnd ||
+                            didTouchFocusSelect()) {
                         csr = new CommitSelectionReceiver(oldSelStart, oldSelEnd,
                                 newSelStart, newSelEnd);
                     }
