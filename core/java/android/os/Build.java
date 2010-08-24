@@ -206,7 +206,8 @@ public class Build {
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
          * <ul>
-         * <li> Alerts UI change?
+         * <li> The default theme for applications is now dark holographic:
+         *      {@link android.R.style#Theme_Holo}.
          * </ul>
          */
         public static final int HONEYCOMB = CUR_DEVELOPMENT;

@@ -1494,12 +1494,18 @@ public class PackageParser {
             ai.nonLocalizedLabel = v.coerceToString();
         }
 
+        int defaultTheme = 0;
+        if (owner.applicationInfo.targetSdkVersion >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+            // As of honeycomb, the default application theme is holographic.
+            defaultTheme = android.R.style.Theme_Holo;
+        }
+
         ai.icon = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestApplication_icon, 0);
         ai.logo = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestApplication_logo, 0);
         ai.theme = sa.getResourceId(
-                com.android.internal.R.styleable.AndroidManifestApplication_theme, 0);
+                com.android.internal.R.styleable.AndroidManifestApplication_theme, defaultTheme);
         ai.descriptionRes = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestApplication_description, 0);
 
