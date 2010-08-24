@@ -216,6 +216,7 @@ private:
     int  dispatch_crop(va_list args);
     int  dispatch_set_buffer_count(va_list args);
     int  dispatch_set_buffers_geometry(va_list args);
+    int  dispatch_set_buffers_transform(va_list args);
     
     void setUsage(uint32_t reqUsage);
     int  connect(int api);
@@ -223,6 +224,7 @@ private:
     int  crop(Rect const* rect);
     int  setBufferCount(int bufferCount);
     int  setBuffersGeometry(int w, int h, int format);
+    int  setBuffersTransform(int transform);
 
     /*
      *  private stuff...
@@ -278,6 +280,7 @@ private:
     Rect                        mSwapRectangle;
     int                         mConnected;
     Rect                        mNextBufferCrop;
+    uint32_t                    mNextBufferTransform;
     BufferInfo                  mBufferInfo;
     
     // protected by mSurfaceLock. These are also used from lock/unlock

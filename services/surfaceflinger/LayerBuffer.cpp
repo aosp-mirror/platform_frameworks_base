@@ -485,7 +485,7 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
         mTextureManager.loadTexture(&mTexture, dirty, t);
     }
 
-    mTexture.transform = mBufferHeap.transform;
+    mLayer.setBufferTransform(mBufferHeap.transform);
     mLayer.drawWithOpenGL(clip, mTexture);
 }
 
