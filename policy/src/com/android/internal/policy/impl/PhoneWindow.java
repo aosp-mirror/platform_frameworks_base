@@ -199,6 +199,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             /* Custom title feature is enabled and the user is trying to enable another feature */
             throw new AndroidRuntimeException("You cannot combine custom titles with other title features");
         }
+        if ((features & (1 << FEATURE_NO_TITLE)) != 0 && featureId == FEATURE_ACTION_BAR) {
+            return false; // Ignore. No title dominates.
+        }
+        if ((features & (1 << FEATURE_ACTION_BAR)) != 0 && featureId == FEATURE_NO_TITLE) {
+            // Remove the action bar feature if we have no title. No title dominates.
+            removeFeature(FEATURE_ACTION_BAR);
+        }
         return super.requestFeature(featureId);
     }
 
@@ -2365,11 +2372,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             } else {
                 layoutResource = com.android.internal.R.layout.screen_title_icons;
             }
+            // XXX Remove this once action bar supports these features.
+            removeFeature(FEATURE_ACTION_BAR);
             // System.out.println("Title Icons!");
         } else if ((features & ((1 << FEATURE_PROGRESS) | (1 << FEATURE_INDETERMINATE_PROGRESS))) != 0) {
             // Special case for a window with only a progress bar (and title).
             // XXX Need to have a no-title version of embedded windows.
             layoutResource = com.android.internal.R.layout.screen_progress;
+            // XXX Remove this once action bar supports these features.
+            removeFeature(FEATURE_ACTION_BAR);
             // System.out.println("Progress!");
         } else if ((features & (1 << FEATURE_CUSTOM_TITLE)) != 0) {
             // Special case for a window with a custom title.
@@ -2379,6 +2390,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             } else {
                 layoutResource = com.android.internal.R.layout.screen_custom_title;
             }
+            // XXX Remove this once action bar supports these features.
+            removeFeature(FEATURE_ACTION_BAR);
         } else if ((features & (1 << FEATURE_NO_TITLE)) == 0) {
             // If no other features and not embedded, only need a title.
             // If the window is floating, we need a dialog layout
