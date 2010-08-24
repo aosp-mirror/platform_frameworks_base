@@ -26,31 +26,57 @@
 namespace android {
 
 ARTSPController::ARTSPController(const sp<ALooper> &looper)
-    : mLooper(looper) {
+    : mState(DISCONNECTED),
+      mLooper(looper) {
+    mReflector = new AHandlerReflector<ARTSPController>(this);
+    looper->registerHandler(mReflector);
 }
 
 ARTSPController::~ARTSPController() {
+    disconnect();
+    mLooper->unregisterHandler(mReflector->id());
 }
 
 status_t ARTSPController::connect(const char *url) {
-    if (mHandler != NULL) {
+    Mutex::Autolock autoLock(mLock);
+
+    if (mState != DISCONNECTED) {
         return ERROR_ALREADY_CONNECTED;
     }
 
+    sp<AMessage> msg = new AMessage(kWhatConnectDone, mReflector->id());
+
     mHandler = new MyHandler(url, mLooper);
-    mHandler->connect();
 
-    sleep(10);
+    mState = CONNECTING;
 
-    return OK;
+    mHandler->connect(msg);
+
+    while (mState == CONNECTING) {
+        mCondition.wait(mLock);
+    }
+
+    if (mState != CONNECTED) {
+        mHandler.clear();
+    }
+
+    return mConnectionResult;
 }
 
 void ARTSPController::disconnect() {
-    if (mHandler == NULL) {
+    Mutex::Autolock autoLock(mLock);
+
+    if (mState != CONNECTED) {
         return;
     }
 
-    mHandler->disconnect();
+    sp<AMessage> msg = new AMessage(kWhatDisconnectDone, mReflector->id());
+    mHandler->disconnect(msg);
+
+    while (mState == CONNECTED) {
+        mCondition.wait(mLock);
+    }
+
     mHandler.clear();
 }
 
@@ -73,6 +99,33 @@ sp<MetaData> ARTSPController::getTrackMetaData(
     CHECK(mHandler != NULL);
 
     return mHandler->getPacketSource(index)->getFormat();
+}
+
+void ARTSPController::onMessageReceived(const sp<AMessage> &msg) {
+    switch (msg->what()) {
+        case kWhatConnectDone:
+        {
+            Mutex::Autolock autoLock(mLock);
+
+            CHECK(msg->findInt32("result", &mConnectionResult));
+            mState = (mConnectionResult == OK) ? CONNECTED : DISCONNECTED;
+
+            mCondition.signal();
+            break;
+        }
+
+        case kWhatDisconnectDone:
+        {
+            Mutex::Autolock autoLock(mLock);
+            mState = DISCONNECTED;
+            mCondition.signal();
+            break;
+        }
+
+        default:
+            TRESPASS();
+            break;
+    }
 }
 
 }  // namespace android
