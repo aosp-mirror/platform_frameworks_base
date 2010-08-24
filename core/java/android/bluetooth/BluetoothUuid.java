@@ -55,6 +55,8 @@ public final class BluetoothUuid {
             ParcelUuid.fromString("00001115-0000-1000-8000-00805F9B34FB");
     public static final ParcelUuid NAP =
             ParcelUuid.fromString("00001116-0000-1000-8000-00805F9B34FB");
+    public static final ParcelUuid BNEP =
+            ParcelUuid.fromString("0000000f-0000-1000-8000-00805F9B34FB");
 
     public static final ParcelUuid[] RESERVED_UUIDS = {
         AudioSink, AudioSource, AdvAudioDist, HSP, Handsfree, AvrcpController, AvrcpTarget,
@@ -92,12 +94,16 @@ public final class BluetoothUuid {
         return uuid.equals(Hid);
     }
 
-    public static boolean isPANU(ParcelUuid uuid) {
+    public static boolean isPanu(ParcelUuid uuid) {
         return uuid.equals(PANU);
     }
 
-    public static boolean isNAP(ParcelUuid uuid) {
+    public static boolean isNap(ParcelUuid uuid) {
         return uuid.equals(NAP);
+    }
+
+    public static boolean isBnep(ParcelUuid uuid) {
+        return uuid.equals(BNEP);
     }
     /**
      * Returns true if ParcelUuid is present in uuidArray
