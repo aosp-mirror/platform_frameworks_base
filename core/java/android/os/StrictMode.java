@@ -114,7 +114,7 @@ public final class StrictMode {
      *
      * @param policyMask a bitmask of DISALLOW_* and PENALTY_* values.
      */
-    public static void setThreadBlockingPolicy(final int policyMask) {
+    public static void setThreadPolicy(final int policyMask) {
         // In addition to the Java-level thread-local in Dalvik's
         // BlockGuard, we also need to keep a native thread-local in
         // Binder in order to propagate the value across Binder calls,
@@ -164,8 +164,40 @@ public final class StrictMode {
      *
      * @return the bitmask of all the DISALLOW_* and PENALTY_* bits currently enabled
      */
-    public static int getThreadBlockingPolicy() {
+    public static int getThreadPolicy() {
         return BlockGuard.getThreadPolicy().getPolicyMask();
+    }
+
+    /**
+     * Updates the current thread's policy mask to allow reading &amp;
+     * writing to disk.
+     *
+     * @return the old policy mask, to be passed to setThreadPolicy to
+     *         restore the policy.
+     */
+    public static int allowThreadDiskWrites() {
+        int oldPolicy = getThreadPolicy();
+        int newPolicy = oldPolicy & ~(DISALLOW_DISK_WRITE | DISALLOW_DISK_READ);
+        if (newPolicy != oldPolicy) {
+            setThreadPolicy(newPolicy);
+        }
+        return oldPolicy;
+    }
+
+    /**
+     * Updates the current thread's policy mask to allow reading from
+     * disk.
+     *
+     * @return the old policy mask, to be passed to setThreadPolicy to
+     *         restore the policy.
+     */
+    public static int allowThreadDiskReads() {
+        int oldPolicy = getThreadPolicy();
+        int newPolicy = oldPolicy & ~(DISALLOW_DISK_READ);
+        if (newPolicy != oldPolicy) {
+            setThreadPolicy(newPolicy);
+        }
+        return oldPolicy;
     }
 
     /**
@@ -413,13 +445,13 @@ public final class StrictMode {
             if (violationMaskSubset != 0) {
                 int violationBit = parseViolationFromMessage(info.crashInfo.exceptionMessage);
                 violationMaskSubset |= violationBit;
-                final int savedPolicy = getThreadBlockingPolicy();
+                final int savedPolicy = getThreadPolicy();
                 try {
                     // First, remove any policy before we call into the Activity Manager,
                     // otherwise we'll infinite recurse as we try to log policy violations
                     // to disk, thus violating policy, thus requiring logging, etc...
                     // We restore the current policy below, in the finally block.
-                    setThreadBlockingPolicy(0);
+                    setThreadPolicy(0);
 
                     ActivityManagerNative.getDefault().handleApplicationStrictModeViolation(
                         RuntimeInit.getApplicationObject(),
@@ -429,7 +461,7 @@ public final class StrictMode {
                     Log.e(TAG, "RemoteException trying to handle StrictMode violation", e);
                 } finally {
                     // Restore the policy.
-                    setThreadBlockingPolicy(savedPolicy);
+                    setThreadPolicy(savedPolicy);
                 }
             }
 
@@ -487,7 +519,7 @@ public final class StrictMode {
         new LogStackTrace().printStackTrace(new PrintWriter(sw));
         String ourStack = sw.toString();
 
-        int policyMask = getThreadBlockingPolicy();
+        int policyMask = getThreadPolicy();
         boolean currentlyGathering = (policyMask & PENALTY_GATHER) != 0;
 
         int numViolations = p.readInt();
