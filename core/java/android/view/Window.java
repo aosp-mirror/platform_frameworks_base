@@ -771,6 +771,15 @@ public abstract class Window {
         return (mFeatures&flag) != 0;
     }
 
+    /**
+     * @hide Used internally to help resolve conflicting features.
+     */
+    protected void removeFeature(int featureId) {
+        final int flag = 1<<featureId;
+        mFeatures &= ~flag;
+        mLocalFeatures &= ~(mContainer != null ? (flag&~mContainer.mFeatures) : flag);
+    }
+
     public final void makeActive() {
         if (mContainer != null) {
             if (mContainer.mActiveChild != null) {
