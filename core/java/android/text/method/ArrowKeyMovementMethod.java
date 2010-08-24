@@ -287,8 +287,7 @@ public class ArrowKeyMovementMethod implements MovementMethod {
                     // Offset the current touch position (from controller to cursor)
                     final float x = event.getX() + mCursorController.getOffsetX();
                     final float y = event.getY() + mCursorController.getOffsetY();
-                    int offset = widget.getOffset((int) x, (int) y);
-                    mCursorController.updatePosition(offset);
+                    mCursorController.updatePosition((int) x, (int) y);
                     return true;
 
                 case MotionEvent.ACTION_UP:
