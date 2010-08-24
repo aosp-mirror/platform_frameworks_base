@@ -17,9 +17,9 @@
 
 /****************************************************************************************
 
-     $Author: nxp007753 $
-     $Revision: 1081 $
-     $Date: 2010-07-05 11:48:44 +0200 (Mon, 05 Jul 2010) $
+     $Author: beq06068 $
+     $Revision: 1400 $
+     $Date: 2010-08-03 09:22:37 +0200 (Tue, 03 Aug 2010) $
 
 *****************************************************************************************/
 
@@ -89,9 +89,15 @@ LVDBE_ReturnStatus_en LVDBE_Process(LVDBE_Handle_t            hInstance,
 
     LVDBE_Instance_t    *pInstance =(LVDBE_Instance_t  *)hInstance;
     LVM_INT32           *pScratch  = (LVM_INT32 *)pInstance->MemoryTable.Region[LVDBE_MEMREGION_SCRATCH].pBaseAddress;
-    LVM_INT32           *pMono     = (LVM_INT32 *)pOutData;
+    LVM_INT32           *pMono;
     LVM_INT16           *pInput    = (LVM_INT16 *)pInData;
 
+
+    /* Scratch for Volume Control starts at offset of 2*NumSamples short values from pScratch */
+    LVM_INT16           *pScratchVol = (LVM_INT16 *)(&pScratch[NumSamples]);
+
+    /* Scratch for Mono path starts at offset of 2*NumSamples 32-bit values from pScratch */
+    pMono                            = &pScratch[2*NumSamples];
 
     /*
      * Check the number of samples is not too large
@@ -104,18 +110,20 @@ LVDBE_ReturnStatus_en LVDBE_Process(LVDBE_Handle_t            hInstance,
     /*
      * Check if the algorithm is enabled
      */
-    if ((pInstance->Params.OperatingMode != LVDBE_OFF) ||
-        (pInstance->bTransitionOnToOff == LVM_TRUE))
+    /* DBE path is processed when DBE is ON or during On/Off transitions */
+    if ((pInstance->Params.OperatingMode == LVDBE_ON)||
+        (LVC_Mixer_GetCurrent(&pInstance->pData->BypassMixer.MixerStream[0])
+         !=LVC_Mixer_GetTarget(&pInstance->pData->BypassMixer.MixerStream[0])))
     {
 
         /*
          * Convert 16-bit samples to 32-bit and scale
          * (For a 16-bit implementation apply headroom loss here)
          */
-        Int16LShiftToInt32_16x32(pInput,                               /* Source 16-bit data      */
-                                 pScratch,                             /* Destination 32-bit data */
-                                 (LVM_INT16)(2*NumSamples),            /* Left and right          */
-                                 LVDBE_SCALESHIFT);                    /* Shift scale             */
+        Int16LShiftToInt32_16x32(pInput,                               /* Source 16-bit data    */
+                                 pScratch,                             /* Dest. 32-bit data     */
+                                 (LVM_INT16)(2*NumSamples),            /* Left and right        */
+                                 LVDBE_SCALESHIFT);                    /* Shift scale           */
 
 
         /*
@@ -123,61 +131,54 @@ LVDBE_ReturnStatus_en LVDBE_Process(LVDBE_Handle_t            hInstance,
          */
         if (pInstance->Params.HPFSelect == LVDBE_HPF_ON)
         {
-              BQ_2I_D32F32C30_TRC_WRA_01(&pInstance->pCoef->HPFInstance,    /* Filter instance         */
-                                       (LVM_INT32 *)pScratch,               /* Source                  */
-                                       (LVM_INT32 *)pScratch,               /* Destination             */
-                                       (LVM_INT16)NumSamples);              /* Number of samples       */
+              BQ_2I_D32F32C30_TRC_WRA_01(&pInstance->pCoef->HPFInstance,/* Filter instance      */
+                                       (LVM_INT32 *)pScratch,           /* Source               */
+                                       (LVM_INT32 *)pScratch,           /* Destination          */
+                                       (LVM_INT16)NumSamples);          /* Number of samples    */
         }
 
 
         /*
          * Create the mono stream
          */
-        From2iToMono_32(pScratch,                                      /* Stereo source           */
-                        pMono,                                         /* Mono destination        */
-                        (LVM_INT16)NumSamples);                        /* Number of samples       */
+        From2iToMono_32(pScratch,                                      /* Stereo source         */
+                        pMono,                                         /* Mono destination      */
+                        (LVM_INT16)NumSamples);                        /* Number of samples     */
 
 
         /*
          * Apply the band pass filter
          */
-          BP_1I_D32F32C30_TRC_WRA_02(&pInstance->pCoef->BPFInstance,     /* Filter instance         */
-                                   (LVM_INT32 *)pMono,                 /* Source                  */
-                                   (LVM_INT32 *)pMono,                 /* Destination             */
-                                   (LVM_INT16)NumSamples);             /* Number of samples       */
+        BP_1I_D32F32C30_TRC_WRA_02(&pInstance->pCoef->BPFInstance,     /* Filter instance       */
+                                   (LVM_INT32 *)pMono,                 /* Source                */
+                                   (LVM_INT32 *)pMono,                 /* Destination           */
+                                   (LVM_INT16)NumSamples);             /* Number of samples     */
 
 
         /*
          * Apply the AGC and mix
          */
-        AGC_MIX_VOL_2St1Mon_D32_WRA(&pInstance->pData->AGCInstance,    /* Instance pointer        */
-                                    pScratch,                          /* Stereo source           */
-                                    pMono,                             /* Mono band pass source   */
-                                    pScratch,                          /* Stereo destination      */
-                                    NumSamples);                       /* Number of samples       */
-
-        if(pInstance->bTransitionOnToOff == LVM_TRUE)
-        {
-            if ((pInstance->pData->AGCInstance.AGC_Gain == pInstance->pData->AGCInstance.AGC_Target)&&
-                (pInstance->pData->AGCInstance.AGC_Gain == 0))
-            {
-                    pInstance->bTransitionOnToOff = LVM_FALSE;
-            }
-        }
-
-
+        AGC_MIX_VOL_2St1Mon_D32_WRA(&pInstance->pData->AGCInstance,    /* Instance pointer      */
+                                    pScratch,                          /* Stereo source         */
+                                    pMono,                             /* Mono band pass source */
+                                    pScratch,                          /* Stereo destination    */
+                                    NumSamples);                       /* Number of samples     */
 
         /*
          * Convert 32-bit samples to 16-bit and saturate
          * (Not required for 16-bit implemenations)
          */
-        Int32RShiftToInt16_Sat_32x16(pScratch,                         /* Source 32-bit data      */
-                                     pOutData,                         /* Destination 16-bit data */
-                                     (LVM_INT16)(2*NumSamples),        /* Left and right          */
-                                     LVDBE_SCALESHIFT);                /* Shift scale             */
+        Int32RShiftToInt16_Sat_32x16(pScratch,                         /* Source 32-bit data    */
+                                     (LVM_INT16 *)pScratch,            /* Dest. 16-bit data     */
+                                     (LVM_INT16)(2*NumSamples),        /* Left and right        */
+                                     LVDBE_SCALESHIFT);                /* Shift scale           */
 
     }
-    else
+
+    /* Bypass Volume path is processed when DBE is OFF or during On/Off transitions */
+    if ((pInstance->Params.OperatingMode == LVDBE_OFF)||
+        (LVC_Mixer_GetCurrent(&pInstance->pData->BypassMixer.MixerStream[1])
+         !=LVC_Mixer_GetTarget(&pInstance->pData->BypassMixer.MixerStream[1])))
     {
 
         /*
@@ -186,10 +187,19 @@ LVDBE_ReturnStatus_en LVDBE_Process(LVDBE_Handle_t            hInstance,
          */
         LVC_MixSoft_1St_D16C31_SAT(&pInstance->pData->BypassVolume,
                                   pInData,
-                               pOutData,
-                               (LVM_INT16)(2*NumSamples));           /* Left and right           */
+                                  pScratchVol,
+                               (LVM_INT16)(2*NumSamples));           /* Left and right          */
 
     }
+
+    /*
+     * Mix DBE processed path and bypass volume path
+     */
+    LVC_MixSoft_2St_D16C31_SAT(&pInstance->pData->BypassMixer,
+                                    (LVM_INT16 *) pScratch,
+                                    pScratchVol,
+                                    pOutData,
+                                    (LVM_INT16)(2*NumSamples));
 
     return(LVDBE_SUCCESS);
 }
