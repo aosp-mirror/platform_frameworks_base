@@ -575,35 +575,48 @@
         <item name="android:windowActionModeOverlay">true</item>
     </style>
     
-    <!-- New Honeycomb holographic theme. Dark version -->
+    <!-- New Honeycomb holographic theme. Dark version.  The widgets in the
+         holographic theme are translucent on their brackground, so applications
+         must ensure that any background they use with this theme is itself
+         dark; otherwise, it will be difficult to see the widgets.  The new
+         UI style also includes a full action bar by default. -->
     <style name="Theme.Holo">
         <item name="editTextBackground">@android:drawable/edit_text_holo_dark</item>
         <item name="editTextColor">?android:attr/textColorPrimary</item>
+        <item name="android:windowActionBar">true</item>
     </style>
 
-    <!-- New Honeycomb holographic theme. Light version -->
+    <!-- New Honeycomb holographic theme. Light version.  The widgets in the
+         holographic theme are translucent on their brackground, so applications
+         must ensure that any background they use with this theme is itself
+         light; otherwise, it will be difficult to see the widgets.  The new
+         UI style also includes a full action bar by default. -->
     <style name="Theme.Light.Holo">
         <item name="editTextBackground">@android:drawable/edit_text_holo_light</item>
     </style>
 
-    <!-- Variant of the holo (dark) theme with no title bar -->
-    <style name="Theme.Holo.NoTitleBar">
+    <!-- Variant of the holographic (dark) theme with no action bar. -->
+    <style name="Theme.Holo.NoActionBar">
+        <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
     </style>
     
-    <!-- Variant of the holo (dark) theme that has no title bar and fills the entire screen -->
-    <style name="Theme.Holo.NoTitleBar.Fullscreen">
+    <!-- Variant of the holographic (dark) theme that has no title bar and fills
+         the entire screen -->
+    <style name="Theme.Holo.NoActionBar.Fullscreen">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
-    <!-- Variant of the holo light theme with no title bar -->
-    <style name="Theme.Light.Holo.NoTitleBar">
+    <!-- Variant of the holographic light theme with no action bar -->
+    <style name="Theme.Light.Holo.NoActionBar">
+        <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <!-- Variant of the holo light theme that has no title bar and fills the entire screen -->
-    <style name="Theme.Light.Holo.NoTitleBar.Fullscreen">
+    <!-- Variant of the holographic light theme that has no title bar and fills
+         the entire screen -->
+    <style name="Theme.Light.Holo.NoActionBar.Fullscreen">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
