@@ -85,8 +85,10 @@ abstract class SipConnectionBase extends Connection {
     protected void setState(Call.State state) {
         switch (state) {
             case ACTIVE:
-                connectTimeReal = SystemClock.elapsedRealtime();
-                connectTime = System.currentTimeMillis();
+                if (connectTime == 0) {
+                    connectTimeReal = SystemClock.elapsedRealtime();
+                    connectTime = System.currentTimeMillis();
+                }
                 break;
             case DISCONNECTED:
                 duration = SystemClock.elapsedRealtime() - connectTimeReal;

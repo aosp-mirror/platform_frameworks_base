@@ -60,6 +60,7 @@ public:
     bool isAudio() const { return mIsAudio; }
     bool isMPEG4() const { return mIsMPEG4; }
     void addChunkOffset(off_t offset) { mChunkOffsets.push_back(offset); }
+    status_t dump(int fd, const Vector<String16>& args) const;
 
 private:
     MPEG4Writer *mOwner;
@@ -215,6 +216,37 @@ MPEG4Writer::~MPEG4Writer() {
         delete *it;
     }
     mTracks.clear();
+}
+
+status_t MPEG4Writer::dump(
+        int fd, const Vector<String16>& args) {
+    const size_t SIZE = 256;
+    char buffer[SIZE];
+    String8 result;
+    snprintf(buffer, SIZE, "   MPEG4Writer %p\n", this);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     mStarted: %s\n", mStarted? "true": "false");
+    result.append(buffer);
+    ::write(fd, result.string(), result.size());
+    for (List<Track *>::iterator it = mTracks.begin();
+         it != mTracks.end(); ++it) {
+        (*it)->dump(fd, args);
+    }
+    return OK;
+}
+
+status_t MPEG4Writer::Track::dump(
+        int fd, const Vector<String16>& args) const {
+    const size_t SIZE = 256;
+    char buffer[SIZE];
+    String8 result;
+    snprintf(buffer, SIZE, "     %s track\n", mIsAudio? "Audio": "Video");
+    result.append(buffer);
+    snprintf(buffer, SIZE, "       reached EOS: %s\n",
+            mReachedEOS? "true": "false");
+    result.append(buffer);
+    ::write(fd, result.string(), result.size());
+    return OK;
 }
 
 status_t MPEG4Writer::addSource(const sp<MediaSource> &source) {

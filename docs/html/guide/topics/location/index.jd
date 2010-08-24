@@ -4,94 +4,63 @@ page.title=Location and Maps
 <div id="qv-wrapper">
 <div id="qv">
 
-  <h2>Location and Maps quickview</h2>
+  <h2>Quickview</h2>
   <ul>
-    <li>Android provides a location framework that your application can use to determine the device's location and bearing and register for updates.</li>
-    <li>A Google Maps external library is available that lets you display and manage Maps data.</li>
+    <li>Android provides a location framework that your application can use to determine the
+device's location and bearing and register for updates</li>
+    <li>A Google Maps external library is available that lets you display and manage Maps data</li>
   </ul>
-  <h2>In this document</h2>
+
+  <h2>Topics</h2>
   <ol>
-    <li><a href="#location">Location Services</a></li>
-    <li><a href="#maps">Google Maps External Library</a></li>
+    <li><a href="{@docRoot}guide/topics/location/obtaining-user-location.html">Obtaining User
+Location</a></li>
   </ol>
+  
   <h2>See Also</h2>
   <ol>
-    <li><a href="http://code.google.com/android/add-ons/google-apis/index.html">Google APIs add-on download&raquo;</a></li>
+    <li><a
+href="http://code.google.com/android/add-ons/google-apis/maps-overview.html">Google
+Maps External Library &raquo;</a></li>
   </ol>
 </div>
 </div>
 
-<p>Location- and maps-based applications and services are compelling for mobile device users. You can build these capabilities into your applications using the classes of the {@link android.location} package and the Google Maps external library. The sections below provide details. </p>
+<p>Location and maps-based applications are compelling for mobile device users. You
+can build these capabilities into your applications using the classes of the {@link
+android.location} package and the Google Maps external library. The sections below provide details.
+</p>
 
 <h2 id="location">Location Services</h2>
 
 <p>Android gives your applications access to the location services supported by
-the device through the classes in the <code>android.location</code> package. The
+the device through the classes in the {@code android.location} package. The
 central component of the location framework is the 
-{@link android.location.LocationManager} system service, which provides an API to
-determine location and bearing if the underlying device (if it supports location
-capabilities). </p>
+{@link android.location.LocationManager} system service, which provides APIs to
+determine location and bearing of the underlying device (if available). </p>
 
-<p>As with other system services, you do not instantiate a LocationManager directly. 
-Rather, you request an LocationManager instance from the system by calling 
-{@link android.content.Context#getSystemService(String) getSystemService(Context.LOCATION_SERVICE)}. 
-The method returns a handle to a new LocationManager instance.</p>
+<p>As with other system services, you do not instantiate a {@link android.location.LocationManager}
+directly. Rather, you request an instance from the system by calling
+{@link android.content.Context#getSystemService(String)
+getSystemService(Context.LOCATION_SERVICE)}. The method returns a handle to a new {@link
+android.location.LocationManager} instance.</p>
 
-<p>Once your application has a handle to a LocationManager instance, your application 
-will be able to do three things:</p>
+<p>Once your application has a {@link android.location.LocationManager}, your application
+is able to do three things:</p>
 
 <ul>
-    <li>Query for the list of all LocationProviders known to the
-    LocationManager for its last known location.</li>
-    <li>Register/unregister for periodic updates of current location from a
-    LocationProvider (specified either by Criteria or name).</li>
-    <li>Register/unregister for a given Intent to be fired if the device comes
-    within a given proximity (specified by radius in meters) of a given
-    lat/long.</li>
+    <li>Query for the list of all {@link android.location.LocationProvider}s for the last known
+user location.</li>
+    <li>Register/unregister for periodic updates of the user's current location from a
+    location provider (specified either by criteria or name).</li>
+    <li>Register/unregister for a given {@link android.content.Intent} to be fired if the device
+comes within a given proximity (specified by radius in meters) of a given lat/long.</li>
 </ul>
 
-<p>However, during initial development in the emulator, you may not have access to real 
-data from a real location provider (Network or GPS). In that case, it may be necessary to
-spoof some data for your application using a mock location provider.</p>
+<p>For more information, read the guide to <a
+href="{@docRoot}guide/topics/location/obtaining-user-location.html">Obtaining User
+Location</a>.</p>
 
-<p class="note"><strong>Note:</strong> If you've used mock LocationProviders in
-previous versions of the SDK, you can no longer provide canned LocationProviders
-in the /system/etc/location directory. These directories will be wiped during boot-up.
-Please follow the new procedures outlined below.</p>
-
-<h3>Providing Mock Location Data</h3>
-
-<p>When testing your application on the Android emulator, there are a couple different
-ways to send it some mock location data: you can use the DDMS tool or the "geo" command 
-option in the emulator console.</p>
-
-<h4 id="ddms">Using DDMS</h4>
-<p>With the DDMS tool, you can simulate location data a few different ways:</p>
-<ul>
-    <li>Manually send individual longitude/latitude coordinates to the device.</li>
-    <li>Use a GPX file describing a route for playback to the device.</li>
-    <li>Use a KML file describing individual placemarks for sequenced playback to the device.</li>
-</ul>
-<p>For more information on using DDMS to spoof location data, see the 
-<a href="{@docRoot}guide/developing/tools/ddms.html#emulator-control">Using DDMS guide</a>.
-
-<h4 id="geo">Using the "geo" command in the emulator console</h4>
-<p>Launch your application in the Android emulator and open a terminal/console in
-your SDK's <code>/tools</code> directory. Connect to the emulator console. Now you can use:</p>
-<ul><li><code>geo fix</code> to send a fixed geo-location.
-	<p>This command accepts a longitude and latitude in decimal degrees, and
-	an optional altitude in meters. For example:</p>
-	<pre>geo fix -121.45356 46.51119 4392</pre>
-    </li>
-    <li><code>geo nmea</code> to send an NMEA 0183 sentence.
-	<p>This command accepts a single NMEA sentence of type '$GPGGA' (fix data) or '$GPRMC' (transit data).
-	For example:</p>
-	<pre>geo nmea $GPRMC,081836,A,3751.65,S,14507.36,E,000.0,360.0,130998,011.3,E*62</pre>
-    </li>
-</ul>
-
-<p>For information about how to connect to the emulator console, see 
-<a href="{@docRoot}guide/developing/tools/emulator.html#console">Using the Emulator Console</a>.</p>
 
 <h2 id="maps">Google Maps External Library</h2>
 
@@ -128,9 +97,9 @@ Google APIs add-on, visit</p>
 <p style="margin-left:2em;"><a
 href="http://code.google.com/android/add-ons/google-apis">http://code.google.com/android/add-ons/google-apis</a></p>
 
-<p>For your convenience, the Google APIs add-on is also included in the Android
-SDK. <!-- To learn now to use the Maps external library in your application, see
-[[Using External Libraries]].--></p>
+<p>For your convenience, the Google APIs add-on is also available as a downloadable component from
+the Android SDK and AVD Manager (see <a href="{@docRoot}sdk/adding-components.html">Adding SDK
+Components</a>).</p>
 
 <p class="note"><strong>Note:</strong> In order to display Google Maps data in a
 MapView, you must register with the Google Maps service and obtain a Maps API
