@@ -2504,7 +2504,8 @@ final class WebViewCore {
 
     protected DeviceOrientationService getDeviceOrientationService() {
         if (mDeviceOrientationService == null) {
-            mDeviceOrientationService = new DeviceOrientationService(mDeviceOrientationManager);
+            mDeviceOrientationService =
+                    new DeviceOrientationService(mDeviceOrientationManager, mContext);
         }
         return mDeviceOrientationService;
     }
