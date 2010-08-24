@@ -265,7 +265,7 @@ public class SQLiteStatement extends SQLiteProgram
         clearBindings();
         // release the compiled sql statement so that the caller's SQLiteStatement no longer
         // has a hard reference to a database object that may get deallocated at any point.
-        releaseCompiledSqlIfNotInCache();
+        release();
         // restore the database connection handle to the original value
         mDatabase = mOrigDb;
         nHandle = mDatabase.mNativeHandle;

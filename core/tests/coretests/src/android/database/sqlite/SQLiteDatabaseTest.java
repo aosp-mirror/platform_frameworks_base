@@ -19,8 +19,11 @@ package android.database.sqlite;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseErrorHandler;
 import android.database.DatabaseUtils;
+import android.database.DefaultDatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteStatement;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
@@ -41,6 +44,7 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
     private static final int INSERT = 1;
     private static final int UPDATE = 2;
     private static final int DELETE = 3;
+    private static final String DB_NAME = "database_test.db";
 
     @Override
     protected void setUp() throws Exception {
@@ -61,7 +65,7 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
 
     private void dbSetUp() throws Exception {
         File dbDir = getContext().getDir(this.getClass().getName(), Context.MODE_PRIVATE);
-        mDatabaseFile = new File(dbDir, "database_test.db");
+        mDatabaseFile = new File(dbDir, DB_NAME);
         if (mDatabaseFile.exists()) {
             mDatabaseFile.delete();
         }
@@ -860,7 +864,7 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
                     "select count(*) from " + TEST_TABLE, null));
             // query in a different thread. but since the transaction is started using
             // execSQ() instead of beginTransaction(), cursor's query is considered part of
-            // the same ransaction - and hence it should see the above inserted row
+            // the same transaction - and hence it should see the above inserted row
             Thread t = new Thread() {
                 @Override public void run() {
                     c1.requery();
@@ -878,11 +882,11 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
 
     /**
      * This test is same as {@link #testTransactionAndWalInterplay2()} except the following:
-     * instead of commiting the data, do rollback and make sure the data seen by the query
+     * instead of committing the data, do rollback and make sure the data seen by the query
      * within the transaction is now gone.
      */
     @SmallTest
-    public void testTransactionAndWalInterplay3() throws InterruptedException {
+    public void testTransactionAndWalInterplay3() {
         createTableAndClearCache();
         mDatabase.execSQL("INSERT into " + TEST_TABLE + " values(10, 999);");
         String sql = "select * from " + TEST_TABLE;
@@ -908,5 +912,37 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         assertEquals(1, DatabaseUtils.longForQuery(mDatabase,
                 "select count(*) from " + TEST_TABLE, null));
         c.close();
+    }
+
+    /**
+     * http://b/issue?id=2943028
+     * SQLiteOpenHelper maintains a Singleton even if it is in bad state.
+     */
+    @SmallTest
+    public void testCloseAndReopen() {
+        mDatabase.close();
+        TestOpenHelper helper = new TestOpenHelper(getContext(), DB_NAME, null,
+                CURRENT_DATABASE_VERSION, new DefaultDatabaseErrorHandler());
+        mDatabase = helper.getWritableDatabase();
+        createTableAndClearCache();
+        mDatabase.execSQL("INSERT into " + TEST_TABLE + " values(10, 999);");
+        Cursor c = mDatabase.query(TEST_TABLE, new String[]{"i", "j"}, null, null, null, null, null);
+        assertEquals(1, c.getCount());
+        c.close();
+        mDatabase.close();
+        assertFalse(mDatabase.isOpen());
+        mDatabase = helper.getReadableDatabase();
+        assertTrue(mDatabase.isOpen());
+        c = mDatabase.query(TEST_TABLE, new String[]{"i", "j"}, null, null, null, null, null);
+        assertEquals(1, c.getCount());
+        c.close();
+    }
+    private class TestOpenHelper extends SQLiteOpenHelper {
+        public TestOpenHelper(Context context, String name, CursorFactory factory, int version,
+                DatabaseErrorHandler errorHandler) {
+            super(context, name, factory, version, errorHandler);
+        }
+        @Override public void onCreate(SQLiteDatabase db) {}
+        @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
     }
 }
