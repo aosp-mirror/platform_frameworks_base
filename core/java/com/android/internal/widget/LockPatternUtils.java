@@ -19,6 +19,7 @@ package com.android.internal.widget;
 import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.os.FileObserver;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -33,6 +34,7 @@ import com.android.internal.R;
 import com.android.internal.telephony.ITelephony;
 import com.google.android.collect.Lists;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -40,6 +42,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Utilities for the lock patten and its settings.
@@ -48,8 +51,9 @@ public class LockPatternUtils {
 
     private static final String TAG = "LockPatternUtils";
 
-    private static final String LOCK_PATTERN_FILE = "/system/gesture.key";
-    private static final String LOCK_PASSWORD_FILE = "/system/password.key";
+    private static final String SYSTEM_DIRECTORY = "/system/";
+    private static final String LOCK_PATTERN_FILE = "gesture.key";
+    private static final String LOCK_PASSWORD_FILE = "password.key";
 
     /**
      * The maximum number of incorrect attempts before the user is prevented
@@ -100,6 +104,10 @@ public class LockPatternUtils {
     private static String sLockPatternFilename;
     private static String sLockPasswordFilename;
 
+    private static final AtomicBoolean sHaveNonZeroPatternFile = new AtomicBoolean(false);
+    private static final AtomicBoolean sHaveNonZeroPasswordFile = new AtomicBoolean(false);
+    private static FileObserver sPasswordObserver;
+
     public DevicePolicyManager getDevicePolicyManager() {
         if (mDevicePolicyManager == null) {
             mDevicePolicyManager =
@@ -117,14 +125,31 @@ public class LockPatternUtils {
     public LockPatternUtils(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
-        // Initialize the location of gesture lock file
-        if (sLockPatternFilename == null) {
-            sLockPatternFilename = android.os.Environment.getDataDirectory()
-                    .getAbsolutePath() + LOCK_PATTERN_FILE;
-            sLockPasswordFilename = android.os.Environment.getDataDirectory()
-                    .getAbsolutePath() + LOCK_PASSWORD_FILE;
-        }
 
+        // Initialize the location of gesture & PIN lock files
+        if (sLockPatternFilename == null) {
+            String dataSystemDirectory =
+                    android.os.Environment.getDataDirectory().getAbsolutePath() +
+                    SYSTEM_DIRECTORY;
+            sLockPatternFilename =  dataSystemDirectory + LOCK_PATTERN_FILE;
+            sLockPasswordFilename = dataSystemDirectory + LOCK_PASSWORD_FILE;
+            sHaveNonZeroPatternFile.set(new File(sLockPatternFilename).length() > 0);
+            sHaveNonZeroPasswordFile.set(new File(sLockPasswordFilename).length() > 0);
+            int fileObserverMask = FileObserver.CLOSE_WRITE | FileObserver.DELETE |
+                    FileObserver.MOVED_TO | FileObserver.CREATE;
+            sPasswordObserver = new FileObserver(dataSystemDirectory, fileObserverMask) {
+                    public void onEvent(int event, String path) {
+                        if (LOCK_PATTERN_FILE.equals(path)) {
+                            Log.d(TAG, "lock pattern file changed");
+                            sHaveNonZeroPatternFile.set(new File(sLockPatternFilename).length() > 0);
+                        } else if (LOCK_PASSWORD_FILE.equals(path)) {
+                            Log.d(TAG, "lock password file changed");
+                            sHaveNonZeroPasswordFile.set(new File(sLockPasswordFilename).length() > 0);
+                        }
+                    }
+                };
+            sPasswordObserver.startWatching();
+        }
     }
 
     public int getRequestedMinimumPasswordLength() {
@@ -258,32 +283,11 @@ public class LockPatternUtils {
     }
 
     /**
-     * Checks to see if the given file exists and contains any data. Returns
-     * true if it does, false otherwise.
-     *
-     * @param filename
-     * @return true if file exists and is non-empty.
-     */
-    private boolean nonEmptyFileExists(String filename) {
-        try {
-            // Check if we can read a byte from the file
-            RandomAccessFile raf = new RandomAccessFile(filename, "r");
-            raf.readByte();
-            raf.close();
-            return true;
-        } catch (FileNotFoundException fnfe) {
-            return false;
-        } catch (IOException ioe) {
-            return false;
-        }
-    }
-
-    /**
      * Check to see if the user has stored a lock pattern.
      * @return Whether a saved pattern exists.
      */
     public boolean savedPatternExists() {
-        return nonEmptyFileExists(sLockPatternFilename);
+        return sHaveNonZeroPatternFile.get();
     }
 
     /**
@@ -291,7 +295,7 @@ public class LockPatternUtils {
      * @return Whether a saved pattern exists.
      */
     public boolean savedPasswordExists() {
-        return nonEmptyFileExists(sLockPasswordFilename);
+        return sHaveNonZeroPasswordFile.get();
     }
 
     /**
