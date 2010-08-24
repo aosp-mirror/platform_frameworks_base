@@ -79,6 +79,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -126,6 +127,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private int mReconnectCount = 0;
     private boolean mIsScanMode = false;
     private boolean mConfigChanged = false;
+    private List<WifiConfiguration> mConfiguredNetworks = new ArrayList<WifiConfiguration>();
 
     /**
      * Instance of the bluetooth headset helper. This needs to be created
@@ -232,10 +234,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private static final int CMD_BLACKLIST_NETWORK                = 56;
     /* Clear the blacklist network list */
     private static final int CMD_CLEAR_BLACKLIST                  = 57;
-    /* Get the configured networks */
-    private static final int CMD_GET_NETWORK_CONFIG               = 58;
     /* Save configuration */
-    private static final int CMD_SAVE_CONFIG                      = 59;
+    private static final int CMD_SAVE_CONFIG                      = 58;
 
     /* Supplicant commands after driver start*/
     /* Initiate a scan */
@@ -664,7 +664,14 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     public List<WifiConfiguration> syncGetConfiguredNetworks() {
-        return sendSyncMessage(CMD_GET_NETWORK_CONFIG).configList;
+        List<WifiConfiguration> networks = new ArrayList<WifiConfiguration>();
+        synchronized (mConfiguredNetworks) {
+            Iterator<WifiConfiguration> iterator = mConfiguredNetworks.iterator();
+            while(iterator.hasNext()) {
+                networks.add(iterator.next().clone());
+            }
+        }
+        return networks;
     }
 
     /**
@@ -892,7 +899,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         int intValue;
         String stringValue;
         Object objValue;
-        List<WifiConfiguration> configList;
     }
 
     class SyncParams {
@@ -1388,7 +1394,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         mContext.sendStickyBroadcast(intent);
     }
 
-    private void sendSupplicantConfigChangedBroadcast() {
+    private void updateConfigAndSendChangeBroadcast() {
+        updateConfiguredNetworks();
         Intent intent = new Intent(WifiManager.SUPPLICANT_CONFIG_CHANGED_ACTION);
         mContext.sendBroadcast(intent);
     }
@@ -1462,14 +1469,13 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private void enableAllNetworks() {
         if (mEnableAllNetworks) {
             mEnableAllNetworks = false;
-            List<WifiConfiguration> configList = getConfiguredNetworksNative();
-            for (WifiConfiguration config : configList) {
+            for (WifiConfiguration config : mConfiguredNetworks) {
                 if(config != null && config.status == Status.DISABLED) {
                     WifiNative.enableNetworkCommand(config.networkId, false);
                 }
             }
             WifiNative.saveConfigCommand();
-            sendSupplicantConfigChangedBroadcast();
+            updateConfigAndSendChangeBroadcast();
         }
     }
 
@@ -1664,43 +1670,46 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         return -1;
     }
 
-    private List<WifiConfiguration> getConfiguredNetworksNative() {
+    private void updateConfiguredNetworks() {
         String listStr = WifiNative.listNetworksCommand();
         mLastPriority = 0;
-        List<WifiConfiguration> networks =
-            new ArrayList<WifiConfiguration>();
-        if (listStr == null)
-            return networks;
 
-        String[] lines = listStr.split("\n");
-        // Skip the first line, which is a header
-        for (int i = 1; i < lines.length; i++) {
-            String[] result = lines[i].split("\t");
-            // network-id | ssid | bssid | flags
-            WifiConfiguration config = new WifiConfiguration();
-            try {
-                config.networkId = Integer.parseInt(result[0]);
-            } catch(NumberFormatException e) {
-                continue;
-            }
-            if (result.length > 3) {
-                if (result[3].indexOf("[CURRENT]") != -1)
-                    config.status = WifiConfiguration.Status.CURRENT;
-                else if (result[3].indexOf("[DISABLED]") != -1)
-                    config.status = WifiConfiguration.Status.DISABLED;
-                else
+        synchronized (mConfiguredNetworks) {
+            mConfiguredNetworks.clear();
+
+            if (listStr == null)
+                return;
+
+            String[] lines = listStr.split("\n");
+            // Skip the first line, which is a header
+            for (int i = 1; i < lines.length; i++) {
+                String[] result = lines[i].split("\t");
+                // network-id | ssid | bssid | flags
+                WifiConfiguration config = new WifiConfiguration();
+                try {
+                    config.networkId = Integer.parseInt(result[0]);
+                } catch(NumberFormatException e) {
+                    continue;
+                }
+                if (result.length > 3) {
+                    if (result[3].indexOf("[CURRENT]") != -1)
+                        config.status = WifiConfiguration.Status.CURRENT;
+                    else if (result[3].indexOf("[DISABLED]") != -1)
+                        config.status = WifiConfiguration.Status.DISABLED;
+                    else
+                        config.status = WifiConfiguration.Status.ENABLED;
+                } else {
                     config.status = WifiConfiguration.Status.ENABLED;
-            } else {
-                config.status = WifiConfiguration.Status.ENABLED;
+                }
+                readNetworkVariables(config);
+                if (config.priority > mLastPriority) {
+                    mLastPriority = config.priority;
+                }
+                mConfiguredNetworks.add(config);
             }
-            readNetworkVariables(config);
-            if (config.priority > mLastPriority) {
-                mLastPriority = config.priority;
-            }
-            networks.add(config);
         }
-        return networks;
     }
+
 
     /**
      * Read the variables from the supplicant daemon that are needed to
@@ -2057,12 +2066,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_GET_LINK_SPEED:
                 case CMD_GET_MAC_ADDR:
                 case CMD_SAVE_CONFIG:
-                case CMD_GET_NETWORK_CONFIG:
                     syncParams = (SyncParams) message.obj;
                     syncParams.mSyncReturn.boolValue = false;
                     syncParams.mSyncReturn.intValue = -1;
                     syncParams.mSyncReturn.stringValue = null;
-                    syncParams.mSyncReturn.configList = null;
                     notifyOnMsgObject(message);
                     break;
                 case CMD_ENABLE_RSSI_POLL:
@@ -2395,6 +2402,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
                     mWifiInfo.setMacAddress(WifiNative.getMacAddressCommand());
 
+                    updateConfigAndSendChangeBroadcast();
+
                     //TODO: initialize and fix multicast filtering
                     //mWM.initializeMulticastFiltering();
 
@@ -2493,16 +2502,16 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     syncParams = (SyncParams) message.obj;
                     config = (WifiConfiguration) syncParams.mParameter;
                     syncParams.mSyncReturn.intValue = addOrUpdateNetworkNative(config);
+                    updateConfigAndSendChangeBroadcast();
                     notifyOnMsgObject(message);
-                    sendSupplicantConfigChangedBroadcast();
                     break;
                 case CMD_REMOVE_NETWORK:
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
                     syncParams = (SyncParams) message.obj;
                     syncParams.mSyncReturn.boolValue = WifiNative.removeNetworkCommand(
                             message.arg1);
+                    updateConfigAndSendChangeBroadcast();
                     notifyOnMsgObject(message);
-                    sendSupplicantConfigChangedBroadcast();
                     break;
                 case CMD_ENABLE_NETWORK:
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
@@ -2510,16 +2519,16 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     EnableNetParams enableNetParams = (EnableNetParams) syncParams.mParameter;
                     syncParams.mSyncReturn.boolValue = WifiNative.enableNetworkCommand(
                             enableNetParams.netId, enableNetParams.disableOthers);
+                    updateConfigAndSendChangeBroadcast();
                     notifyOnMsgObject(message);
-                    sendSupplicantConfigChangedBroadcast();
                     break;
                 case CMD_DISABLE_NETWORK:
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
                     syncParams = (SyncParams) message.obj;
                     syncParams.mSyncReturn.boolValue = WifiNative.disableNetworkCommand(
                             message.arg1);
+                    updateConfigAndSendChangeBroadcast();
                     notifyOnMsgObject(message);
-                    sendSupplicantConfigChangedBroadcast();
                     break;
                 case CMD_BLACKLIST_NETWORK:
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
@@ -2527,11 +2536,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     break;
                 case CMD_CLEAR_BLACKLIST:
                     WifiNative.clearBlacklistCommand();
-                    break;
-                case CMD_GET_NETWORK_CONFIG:
-                    syncParams = (SyncParams) message.obj;
-                    syncParams.mSyncReturn.configList = getConfiguredNetworksNative();
-                    notifyOnMsgObject(message);
                     break;
                 case CMD_SAVE_CONFIG:
                     syncParams = (SyncParams) message.obj;
@@ -2570,12 +2574,12 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         WifiNative.enableNetworkCommand(netId, false);
                     }
                     WifiNative.saveConfigCommand();
-                    sendSupplicantConfigChangedBroadcast();
+                    updateConfigAndSendChangeBroadcast();
                     break;
                 case CMD_FORGET_NETWORK:
                     WifiNative.removeNetworkCommand(message.arg1);
                     WifiNative.saveConfigCommand();
-                    sendSupplicantConfigChangedBroadcast();
+                    updateConfigAndSendChangeBroadcast();
                     break;
                 default:
                     return NOT_HANDLED;
@@ -2852,8 +2856,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     }
                     // Reset the priority of each network at start or if it goes too high.
                     if (mLastPriority == -1 || mLastPriority > 1000000) {
-                        List<WifiConfiguration> configList = getConfiguredNetworksNative();
-                        for (WifiConfiguration conf : configList) {
+                        for (WifiConfiguration conf : mConfiguredNetworks) {
                             if (conf.networkId != -1) {
                                 conf.priority = 0;
                                 addOrUpdateNetworkNative(conf);
@@ -2874,10 +2877,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     WifiNative.enableNetworkCommand(netId, true);
                     WifiNative.reconnectCommand();
                     mEnableAllNetworks = true;
-                    /* Dont send a supplicant config change broadcast here
-                     * as it is better to not expose the temporary disabling
-                     * of all networks
+                    /* update the configured networks but not send a
+                     * broadcast to avoid a fetch from settings
+                     * during this temporary disabling of networks
                      */
+                    updateConfiguredNetworks();
                     break;
                 case SCAN_RESULTS_EVENT:
                     /* Set the scan setting back to "connect" mode */
@@ -3037,7 +3041,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                           Log.e(TAG, "Failed " +
                                   mReconnectCount + " times, Disabling " + mLastNetworkId);
                       WifiNative.disableNetworkCommand(mLastNetworkId);
-                      sendSupplicantConfigChangedBroadcast();
+                      updateConfigAndSendChangeBroadcast();
                   }
 
                   /* DHCP times out after about 30 seconds, we do a
@@ -3450,7 +3454,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                      WifiNative.disableNetworkCommand(mWifiInfo.getNetworkId());
                      mPasswordKeyMayBeIncorrect = false;
                      sendSupplicantStateChangedBroadcast(stateChangeResult, true);
-                     sendSupplicantConfigChangedBroadcast();
+                     updateConfigAndSendChangeBroadcast();
                  }
                  else {
                      sendSupplicantStateChangedBroadcast(stateChangeResult, false);
@@ -3510,7 +3514,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                  }
                  if (mLoopDetectCount > MAX_SUPPLICANT_LOOP_ITERATIONS) {
                      WifiNative.disableNetworkCommand(stateChangeResult.networkId);
-                     sendSupplicantConfigChangedBroadcast();
+                     updateConfigAndSendChangeBroadcast();
                      mLoopDetectCount = 0;
                  }
 
