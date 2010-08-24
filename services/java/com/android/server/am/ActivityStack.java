@@ -2033,16 +2033,6 @@ public class ActivityStack {
             }
         }
 
-        if (grantedUriPermissions != null && callingUid > 0) {
-            for (int i=0; i<grantedUriPermissions.length; i++) {
-                mService.grantUriPermissionLocked(callingUid, r.packageName,
-                        grantedUriPermissions[i], grantedMode, r);
-            }
-        }
-
-        mService.grantUriPermissionFromIntentLocked(callingUid, r.packageName,
-                intent, r);
-
         if (sourceRecord == null) {
             // This activity is not being started from another...  in this
             // case we -always- start a new task.
@@ -2150,7 +2140,7 @@ public class ActivityStack {
                                 top.task.setIntent(r.intent, r.info);
                             }
                             logStartActivity(EventLogTags.AM_NEW_INTENT, r, top.task);
-                            top.deliverNewIntentLocked(r.intent);
+                            top.deliverNewIntentLocked(callingUid, r.intent);
                         } else {
                             // A special case: we need to
                             // start the activity because it is not currently
@@ -2175,7 +2165,7 @@ public class ActivityStack {
                             if (taskTop.frontOfTask) {
                                 taskTop.task.setIntent(r.intent, r.info);
                             }
-                            taskTop.deliverNewIntentLocked(r.intent);
+                            taskTop.deliverNewIntentLocked(callingUid, r.intent);
                         } else if (!r.intent.filterEquals(taskTop.task.intent)) {
                             // In this case we are launching the root activity
                             // of the task, but with a different intent.  We
@@ -2243,7 +2233,7 @@ public class ActivityStack {
                                 // is the case, so this is it!
                                 return START_RETURN_INTENT_TO_CALLER;
                             }
-                            top.deliverNewIntentLocked(r.intent);
+                            top.deliverNewIntentLocked(callingUid, r.intent);
                             return START_DELIVERED_TO_TOP;
                         }
                     }
@@ -2288,7 +2278,7 @@ public class ActivityStack {
                         sourceRecord.task.taskId, r, launchFlags, true);
                 if (top != null) {
                     logStartActivity(EventLogTags.AM_NEW_INTENT, r, top.task);
-                    top.deliverNewIntentLocked(r.intent);
+                    top.deliverNewIntentLocked(callingUid, r.intent);
                     // For paranoia, make sure we have correctly
                     // resumed the top activity.
                     if (doResume) {
@@ -2305,7 +2295,7 @@ public class ActivityStack {
                 if (where >= 0) {
                     ActivityRecord top = moveActivityToFrontLocked(where);
                     logStartActivity(EventLogTags.AM_NEW_INTENT, r, top.task);
-                    top.deliverNewIntentLocked(r.intent);
+                    top.deliverNewIntentLocked(callingUid, r.intent);
                     if (doResume) {
                         resumeTopActivityLocked(null);
                     }
@@ -2333,6 +2323,17 @@ public class ActivityStack {
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in new guessed " + r.task);
         }
+
+        if (grantedUriPermissions != null && callingUid > 0) {
+            for (int i=0; i<grantedUriPermissions.length; i++) {
+                mService.grantUriPermissionLocked(callingUid, r.packageName,
+                        grantedUriPermissions[i], grantedMode, r);
+            }
+        }
+
+        mService.grantUriPermissionFromIntentLocked(callingUid, r.packageName,
+                intent, r);
+
         if (newTask) {
             EventLog.writeEvent(EventLogTags.AM_CREATE_TASK, r.task.taskId);
         }
