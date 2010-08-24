@@ -70,7 +70,8 @@ public class SipAudioCallImpl extends SipSessionAdapter
     private ISipSession mSipSession;
     private SdpSessionDescription mPeerSd;
 
-    private AudioStream mRtpSession;
+    private AudioStream mAudioStream;
+    private AudioGroup mAudioGroup;
     private SdpSessionDescription.AudioCodec mCodec;
     private long mSessionId = -1L; // SDP session ID
     private boolean mInCall = false;
@@ -505,11 +506,19 @@ public class SipAudioCallImpl extends SipSessionAdapter
     }
 
     public synchronized AudioStream getAudioStream() {
-        return mRtpSession;
+        return mAudioStream;
     }
 
     public synchronized AudioGroup getAudioGroup() {
-        return ((mRtpSession == null) ? null : mRtpSession.getAudioGroup());
+        if (mAudioGroup != null) return mAudioGroup;
+        return ((mAudioStream == null) ? null : mAudioStream.getAudioGroup());
+    }
+
+    public synchronized void setAudioGroup(AudioGroup group) {
+        if ((mAudioStream != null) && (mAudioStream.getAudioGroup() != null)) {
+            mAudioStream.join(group);
+        }
+        mAudioGroup = group;
     }
 
     private SdpSessionDescription.AudioCodec getCodec(SdpSessionDescription sd) {
@@ -561,7 +570,7 @@ public class SipAudioCallImpl extends SipSessionAdapter
             // TODO: get sample rate from sdp
             mCodec = getCodec(peerSd);
 
-            AudioStream audioStream = mRtpSession;
+            AudioStream audioStream = mAudioStream;
             audioStream.associate(InetAddress.getByName(peerMediaAddress),
                     peerMediaPort);
             audioStream.setCodec(convert(mCodec), mCodec.payloadType);
@@ -580,7 +589,7 @@ public class SipAudioCallImpl extends SipSessionAdapter
                     Log.d(TAG, "   not sending");
                     audioStream.setMode(RtpStream.MODE_RECEIVE_ONLY);
                 }
-            } else {
+
                 /* The recorder volume will be very low if the device is in
                  * IN_CALL mode. Therefore, we have to set the mode to NORMAL
                  * in order to have the normal microphone level.
@@ -590,14 +599,22 @@ public class SipAudioCallImpl extends SipSessionAdapter
                         .setMode(AudioManager.MODE_NORMAL);
             }
 
-            AudioGroup audioGroup = new AudioGroup();
-            audioStream.join(audioGroup);
+            // AudioGroup logic:
+            AudioGroup audioGroup = getAudioGroup();
             if (mHold) {
-                audioGroup.setMode(AudioGroup.MODE_ON_HOLD);
-            } else if (mMuted) {
-                audioGroup.setMode(AudioGroup.MODE_MUTED);
+                if (audioGroup != null) {
+                    audioGroup.setMode(AudioGroup.MODE_ON_HOLD);
+                }
+                // don't create an AudioGroup here; doing so will fail if
+                // there's another AudioGroup out there that's active
             } else {
-                audioGroup.setMode(AudioGroup.MODE_NORMAL);
+                if (audioGroup == null) audioGroup = new AudioGroup();
+                audioStream.join(audioGroup);
+                if (mMuted) {
+                    audioGroup.setMode(AudioGroup.MODE_MUTED);
+                } else {
+                    audioGroup.setMode(AudioGroup.MODE_NORMAL);
+                }
             }
         } catch (Exception e) {
             Log.e(TAG, "call()", e);
@@ -606,20 +623,20 @@ public class SipAudioCallImpl extends SipSessionAdapter
 
     private void stopCall(boolean releaseSocket) {
         Log.d(TAG, "stop audiocall");
-        if (mRtpSession != null) {
-            mRtpSession.join(null);
+        if (mAudioStream != null) {
+            mAudioStream.join(null);
 
             if (releaseSocket) {
-                mRtpSession.release();
-                mRtpSession = null;
+                mAudioStream.release();
+                mAudioStream = null;
             }
         }
     }
 
     private int getLocalMediaPort() {
-        if (mRtpSession != null) return mRtpSession.getLocalPort();
+        if (mAudioStream != null) return mAudioStream.getLocalPort();
         try {
-            AudioStream s = mRtpSession =
+            AudioStream s = mAudioStream =
                     new AudioStream(InetAddress.getByName(getLocalIp()));
             return s.getLocalPort();
         } catch (IOException e) {
