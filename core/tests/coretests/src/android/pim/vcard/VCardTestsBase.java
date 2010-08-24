@@ -110,7 +110,7 @@ class MockContentProvider extends ContentProvider {
  * BaseClass for vCard unit tests with utility classes.
  * Please do not add each unit test here.
  */
-/* package */ class VCardTestsBase extends AndroidTestCase {
+public class VCardTestsBase extends AndroidTestCase {
     public static final int V21 = VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8;
     public static final int V30 = VCardConfig.VCARD_TYPE_V30_GENERIC_UTF8;
 
