@@ -17,9 +17,9 @@
 
 /****************************************************************************************
 
-     $Author: nxp007753 $
-     $Revision: 1315 $
-     $Date: 2010-07-23 11:52:08 +0200 (Fri, 23 Jul 2010) $
+     $Author: beq06068 $
+     $Revision: 1401 $
+     $Date: 2010-08-03 09:52:22 +0200 (Tue, 03 Aug 2010) $
 
 *****************************************************************************************/
 
@@ -128,7 +128,7 @@ void    LVDBE_SetFilters(LVDBE_Instance_t     *pInstance,
                  (void *)&pInstance->pData->HPFTaps,                /* Destination Cast to void: \
                                                                      no dereferencing in function*/
                  sizeof(pInstance->pData->HPFTaps)/sizeof(LVM_INT16));   /* Number of words */
-    BQ_2I_D32F32Cll_TRC_WRA_01_Init(&pInstance->pCoef->HPFInstance,      /* Initialise the filter */
+    BQ_2I_D32F32Cll_TRC_WRA_01_Init(&pInstance->pCoef->HPFInstance,         /* Initialise the filter */
                                     &pInstance->pData->HPFTaps,
                                     (BQ_C32_Coefs_t *)&LVDBE_HPF_Table[Offset]);
 
@@ -140,7 +140,7 @@ void    LVDBE_SetFilters(LVDBE_Instance_t     *pInstance,
                  (void *)&pInstance->pData->BPFTaps,                /* Destination Cast to void:\
                                                                      no dereferencing in function*/
                  sizeof(pInstance->pData->BPFTaps)/sizeof(LVM_INT16));   /* Number of words */
-    BP_1I_D32F32Cll_TRC_WRA_02_Init(&pInstance->pCoef->BPFInstance,      /* Initialise the filter */
+    BP_1I_D32F32Cll_TRC_WRA_02_Init(&pInstance->pCoef->BPFInstance,         /* Initialise the filter */
                                     &pInstance->pData->BPFTaps,
                                     (BP_C32_Coefs_t *)&LVDBE_BPF_Table[Offset]);
 
@@ -317,6 +317,7 @@ LVDBE_ReturnStatus_en LVDBE_Control(LVDBE_Handle_t         hInstance,
 {
 
     LVDBE_Instance_t    *pInstance =(LVDBE_Instance_t  *)hInstance;
+    LVMixer3_2St_st     *pBypassMixer_Instance = &pInstance->pData->BypassMixer;
 
 
     /*
@@ -339,6 +340,14 @@ LVDBE_ReturnStatus_en LVDBE_Control(LVDBE_Handle_t         hInstance,
     {
         LVDBE_SetAGC(pInstance,                         /* Instance pointer */
                      pParams);                          /* New parameters */
+
+        LVC_Mixer_SetTimeConstant(&pBypassMixer_Instance->MixerStream[0],
+            LVDBE_BYPASS_MIXER_TC,pParams->SampleRate,2);
+
+        LVC_Mixer_SetTimeConstant(&pBypassMixer_Instance->MixerStream[1],
+            LVDBE_BYPASS_MIXER_TC,pParams->SampleRate,2);
+
+
     }
 
 
@@ -356,17 +365,13 @@ LVDBE_ReturnStatus_en LVDBE_Control(LVDBE_Handle_t         hInstance,
 
     if (pInstance->Params.OperatingMode==LVDBE_ON && pParams->OperatingMode==LVDBE_OFF)
     {
-        LVDBE_Params_t  Params  = *pParams;             /* make local copy of params */
-        Params.EffectLevel      = 0;                    /* zero effect level before switching off module*/
-        pInstance->bTransitionOnToOff  = LVM_TRUE;             /* Set the CallBack */
-        LVDBE_SetAGC(pInstance,                         /* Instance pointer */
-                     &Params);                          /* New parameters */
+        LVC_Mixer_SetTarget(&pInstance->pData->BypassMixer.MixerStream[0],0);
+        LVC_Mixer_SetTarget(&pInstance->pData->BypassMixer.MixerStream[1],0x00007FFF);
     }
     if (pInstance->Params.OperatingMode==LVDBE_OFF && pParams->OperatingMode==LVDBE_ON)
     {
-        pInstance->bTransitionOnToOff  = LVM_FALSE;     /* Set the CallBack */
-        LVDBE_SetAGC(pInstance,                         /* Instance pointer */
-                     pParams);                          /* New parameters */
+        LVC_Mixer_SetTarget(&pInstance->pData->BypassMixer.MixerStream[0],0x00007FFF);
+        LVC_Mixer_SetTarget(&pInstance->pData->BypassMixer.MixerStream[1],0);
     }
 
     /*
