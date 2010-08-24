@@ -2066,11 +2066,9 @@ public class SQLiteDatabase extends SQLiteClosable {
      * mapping is NOT replaced with the new mapping).
      */
     /* package */ void addToCompiledQueries(String sql, SQLiteCompiledSql compiledStatement) {
-        SQLiteCompiledSql compiledSql = null;
         synchronized(mCompiledQueries) {
             // don't insert the new mapping if a mapping already exists
-            compiledSql = mCompiledQueries.get(sql);
-            if (compiledSql != null) {
+            if (mCompiledQueries.containsKey(sql)) {
                 return;
             }
 

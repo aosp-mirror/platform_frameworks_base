@@ -121,8 +121,13 @@ public abstract class SQLiteOpenHelper {
      * @return a read/write database object valid until {@link #close} is called
      */
     public synchronized SQLiteDatabase getWritableDatabase() {
-        if (mDatabase != null && mDatabase.isOpen() && !mDatabase.isReadOnly()) {
-            return mDatabase;  // The database is already open for business
+        if (mDatabase != null) {
+            if (!mDatabase.isOpen()) {
+                // darn! the user closed the database by calling mDatabase.close()
+                mDatabase = null;
+            } else if (!mDatabase.isReadOnly()) {
+                return mDatabase;  // The database is already open for business
+            }
         }
 
         if (mIsInitializing) {
@@ -207,8 +212,13 @@ public abstract class SQLiteOpenHelper {
      *     or {@link #close} is called.
      */
     public synchronized SQLiteDatabase getReadableDatabase() {
-        if (mDatabase != null && mDatabase.isOpen()) {
-            return mDatabase;  // The database is already open for business
+        if (mDatabase != null) {
+            if (!mDatabase.isOpen()) {
+                // darn! the user closed the database by calling mDatabase.close()
+                mDatabase = null;
+            } else {
+                return mDatabase;  // The database is already open for business
+            }
         }
 
         if (mIsInitializing) {

@@ -158,18 +158,18 @@ public abstract class SQLiteProgram extends SQLiteClosable {
 
     @Override
     protected void onAllReferencesReleased() {
-        releaseCompiledSqlIfNotInCache();
+        release();
         mDatabase.removeSQLiteClosable(this);
         mDatabase.releaseReference();
     }
 
     @Override
     protected void onAllReferencesReleasedFromContainer() {
-        releaseCompiledSqlIfNotInCache();
+        release();
         mDatabase.releaseReference();
     }
 
-    /* package */ synchronized void releaseCompiledSqlIfNotInCache() {
+    /* package */ synchronized void release() {
         if (mCompiledSql == null) {
             return;
         }
