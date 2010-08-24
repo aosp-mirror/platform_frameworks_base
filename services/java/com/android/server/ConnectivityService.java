@@ -943,7 +943,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
-        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
         if (info.isFailover()) {
             intent.putExtra(ConnectivityManager.EXTRA_IS_FAILOVER, true);
@@ -1059,7 +1058,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void sendConnectedBroadcast(NetworkInfo info) {
         Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
-        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
         if (info.isFailover()) {
             intent.putExtra(ConnectivityManager.EXTRA_IS_FAILOVER, true);
@@ -1097,7 +1095,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
-        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
         if (getActiveNetworkInfo() == null) {
             intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
