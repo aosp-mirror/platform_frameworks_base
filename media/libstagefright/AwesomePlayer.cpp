@@ -196,6 +196,7 @@ AwesomePlayer::AwesomePlayer()
       mExtractorFlags(0),
       mLastVideoBuffer(NULL),
       mVideoBuffer(NULL),
+      mRTSPTimeOffset(0),
       mSuspensionState(NULL) {
     CHECK_EQ(mClient.connect(), OK);
 
@@ -393,7 +394,11 @@ void AwesomePlayer::reset_l() {
         mVideoBuffer = NULL;
     }
 
-    mRTSPController.clear();
+    if (mRTSPController != NULL) {
+        mRTSPController->disconnect();
+        mRTSPController.clear();
+    }
+
     mRTPPusher.clear();
     mRTCPPusher.clear();
     mRTPSession.clear();
@@ -738,6 +743,10 @@ status_t AwesomePlayer::getPosition(int64_t *positionUs) {
         *positionUs = 0;
     }
 
+    if (mRTSPController != NULL) {
+        *positionUs += mRTSPTimeOffset;
+    }
+
     return OK;
 }
 
@@ -753,6 +762,17 @@ status_t AwesomePlayer::seekTo(int64_t timeUs) {
 }
 
 status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
+    if (mRTSPController != NULL) {
+        pause_l();
+        mRTSPController->seek(timeUs);
+        play_l();
+
+        notifyListener_l(MEDIA_SEEK_COMPLETE);
+        mSeekNotificationSent = true;
+        mRTSPTimeOffset = timeUs;
+        return OK;
+    }
+
     if (mFlags & CACHE_UNDERRUN) {
         mFlags &= ~CACHE_UNDERRUN;
         play_l();
