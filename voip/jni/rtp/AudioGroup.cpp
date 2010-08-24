@@ -548,10 +548,11 @@ bool AudioGroup::set(int sampleRate, int sampleCount)
     }
     LOGD("reported frame count: output %d, input %d", output, input);
 
-    output = (output + sampleCount - 1) / sampleCount * sampleCount;
-    input = (input + sampleCount - 1) / sampleCount * sampleCount;
-    if (input < output * 2) {
-        input = output * 2;
+    if (output < sampleCount * 2) {
+        output = sampleCount * 2;
+    }
+    if (input < sampleCount * 2) {
+        input = sampleCount * 2;
     }
     LOGD("adjusted frame count: output %d, input %d", output, input);
 
@@ -587,7 +588,7 @@ bool AudioGroup::set(int sampleRate, int sampleCount)
     // Give device socket a reasonable timeout and buffer size.
     timeval tv;
     tv.tv_sec = 0;
-    tv.tv_usec = 1000 * sampleCount / sampleRate * 500;
+    tv.tv_usec = 1000 * sampleCount / sampleRate * 1000;
     if (setsockopt(pair[0], SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) ||
         setsockopt(pair[0], SOL_SOCKET, SO_RCVBUF, &output, sizeof(output)) ||
         setsockopt(pair[1], SOL_SOCKET, SO_SNDBUF, &output, sizeof(output))) {
@@ -764,38 +765,62 @@ bool AudioGroup::deviceLoop()
     if (recv(mDeviceSocket, output, sizeof(output), 0) <= 0) {
         memset(output, 0, sizeof(output));
     }
-    if (mTrack.write(output, sizeof(output)) != (int)sizeof(output)) {
-        LOGE("cannot write to AudioTrack");
+
+    int16_t input[mSampleCount];
+    int toWrite = mSampleCount;
+    int toRead = (mMode == MUTED) ? 0 : mSampleCount;
+    int chances = 100;
+
+    while (--chances > 0 && (toWrite > 0 || toRead > 0)) {
+        if (toWrite > 0) {
+            AudioTrack::Buffer buffer;
+            buffer.frameCount = toWrite;
+
+            status_t status = mTrack.obtainBuffer(&buffer, 1);
+            if (status == NO_ERROR) {
+                memcpy(buffer.i8, &output[mSampleCount - toWrite], buffer.size);
+                toWrite -= buffer.frameCount;
+                mTrack.releaseBuffer(&buffer);
+            } else if (status != TIMED_OUT && status != WOULD_BLOCK) {
+                LOGE("cannot write to AudioTrack");
+                return false;
+            }
+        }
+
+        if (toRead > 0) {
+            AudioRecord::Buffer buffer;
+            buffer.frameCount = mRecord.frameCount();
+
+            status_t status = mRecord.obtainBuffer(&buffer, 1);
+            if (status == NO_ERROR) {
+                int count = (buffer.frameCount < toRead) ?
+                        buffer.frameCount : toRead;
+                memcpy(&input[mSampleCount - toRead], buffer.i8, count * 2);
+                toRead -= count;
+                if (buffer.frameCount < mRecord.frameCount()) {
+                    buffer.frameCount = count;
+                }
+                mRecord.releaseBuffer(&buffer);
+            } else if (status != TIMED_OUT && status != WOULD_BLOCK) {
+                LOGE("cannot read from AudioRecord");
+                return false;
+            }
+        }
+    }
+
+    if (!chances) {
+        LOGE("device loop timeout");
         return false;
     }
 
     if (mMode != MUTED) {
-        uint32_t frameCount = mRecord.frameCount();
-        AudioRecord::Buffer input;
-        input.frameCount = frameCount;
-
-        if (mRecord.obtainBuffer(&input, -1) != NO_ERROR) {
-            LOGE("cannot read from AudioRecord");
-            return false;
-        }
-
-        if (input.frameCount < (uint32_t)mSampleCount) {
-            input.frameCount = 0;
+        if (mMode == NORMAL) {
+            send(mDeviceSocket, input, sizeof(input), MSG_DONTWAIT);
         } else {
-            if (mMode == NORMAL) {
-                send(mDeviceSocket, input.i8, sizeof(output), MSG_DONTWAIT);
-            } else {
-                // TODO: Echo canceller runs here.
-                send(mDeviceSocket, input.i8, sizeof(output), MSG_DONTWAIT);
-            }
-            if (input.frameCount < frameCount) {
-                input.frameCount = mSampleCount;
-            }
+            // TODO: Echo canceller runs here.
+            send(mDeviceSocket, input, sizeof(input), MSG_DONTWAIT);
         }
-
-        mRecord.releaseBuffer(&input);
     }
-
     return true;
 }
 
