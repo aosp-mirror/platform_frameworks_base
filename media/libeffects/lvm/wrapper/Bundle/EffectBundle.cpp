@@ -66,7 +66,9 @@ namespace {
 
 // Flag to allow a one time init of global memory, only happens on first call ever
 int LvmInitFlag = LVM_FALSE;
-SessionContext GlobalSessionMemory[32];
+int LvmSessionsActive = 0;
+SessionContext GlobalSessionMemory[LVM_MAX_SESSIONS];
+int SessionIndex[LVM_MAX_SESSIONS];
 
 // NXP SW BassBoost UUID
 const effect_descriptor_t gBassBoostDescriptor = {
@@ -125,24 +127,24 @@ int  LvmEffect_enable          (EffectContext *pContext);
 int  LvmEffect_disable         (EffectContext *pContext);
 void LvmEffect_free            (EffectContext *pContext);
 int  Effect_configure          (EffectContext *pContext, effect_config_t *pConfig);
-int  BassBoost_setParameter    (EffectContext *pContext, int32_t *pParam, void *pValue);
+int  BassBoost_setParameter    (EffectContext *pContext, void *pParam, void *pValue);
 int  BassBoost_getParameter    (EffectContext *pContext,
-                               int32_t        *pParam,
+                               void           *pParam,
                                size_t         *pValueSize,
                                void           *pValue);
-int  Virtualizer_setParameter  (EffectContext *pContext, int32_t *pParam, void *pValue);
+int  Virtualizer_setParameter  (EffectContext *pContext, void *pParam, void *pValue);
 int  Virtualizer_getParameter  (EffectContext *pContext,
-                               int32_t        *pParam,
+                               void           *pParam,
                                size_t         *pValueSize,
                                void           *pValue);
-int  Equalizer_setParameter    (EffectContext *pContext, int32_t *pParam, void *pValue);
+int  Equalizer_setParameter    (EffectContext *pContext, void *pParam, void *pValue);
 int  Equalizer_getParameter    (EffectContext *pContext,
-                                int32_t       *pParam,
+                                void          *pParam,
                                 size_t        *pValueSize,
                                 void          *pValue);
-int  Volume_setParameter       (EffectContext *pContext, int32_t *pParam, void *pValue);
+int  Volume_setParameter       (EffectContext *pContext, void *pParam, void *pValue);
 int  Volume_getParameter       (EffectContext *pContext,
-                                int32_t       *pParam,
+                                void          *pParam,
                                 size_t        *pValueSize,
                                 void          *pValue);
 
@@ -189,6 +191,7 @@ extern "C" int EffectCreate(effect_uuid_t       *uuid,
                             int32_t             ioId,
                             effect_interface_t  *pInterface){
     int ret;
+    int sessionNo;
     int i;
     EffectContext *pContext = new EffectContext;
 
@@ -199,7 +202,7 @@ extern "C" int EffectCreate(effect_uuid_t       *uuid,
         return -EINVAL;
     }
 
-    if((sessionId < 0)||(sessionId >= LVM_MAX_SESSIONS)){
+    if(sessionId < 0){
         LOGV("\tLVM_ERROR : EffectCreate sessionId is less than 0");
         return -EINVAL;
     }
@@ -210,16 +213,41 @@ extern "C" int EffectCreate(effect_uuid_t       *uuid,
         LvmGlobalBundle_init();
     }
 
+    LOGV("\tEffectCreate: There are %d LVM sessions acive\n", LvmSessionsActive);
+
+    // Find next available sessionNo
+    for(i=0; i<LVM_MAX_SESSIONS; i++){
+        if((SessionIndex[i] == -1)||(SessionIndex[i] == sessionId)){
+            sessionNo       = i;
+            SessionIndex[i] = sessionId;
+            LOGV("\tEffectCreate: Allocating SessionNo %d for SessionId %d\n", sessionNo,sessionId);
+            break;
+        }
+    }
+
+    if(i==LVM_MAX_SESSIONS){
+        LOGV("\tLVM_ERROR : Cannot find memory to allocate for current session");
+        return -EINVAL;
+    }
     // If this is the first create in this session
-    if(GlobalSessionMemory[sessionId].bBundledEffectsEnabled == LVM_FALSE){
-        LOGV("\tEffectCreate - This is the first effect in current session %d", sessionId);
-        LOGV("\tEffectCreate - Setting up Bundled Effects Instance for session %d", sessionId);
+    if(GlobalSessionMemory[sessionNo].bBundledEffectsEnabled == LVM_FALSE){
+        LOGV("\tEffectCreate - This is the first effect in current sessionId %d sessionNo %d",
+                sessionId, sessionNo);
 
-        GlobalSessionMemory[sessionId].bBundledEffectsEnabled = LVM_TRUE;
-        GlobalSessionMemory[sessionId].pBundledContext        = new BundledEffectContext;
+        LvmSessionsActive++;
 
-        pContext->pBundledContext = GlobalSessionMemory[sessionId].pBundledContext;
-        pContext->pBundledContext->SessionNo                = sessionId;
+        if(LvmSessionsActive >= LVM_MAX_SESSIONS){
+            LOGV("\tLVM_ERROR : Number of active session is greater than LVM_MAX_SESSIONS (%d)",
+                  LVM_MAX_SESSIONS);
+            return -EINVAL;
+        }
+
+        GlobalSessionMemory[sessionNo].bBundledEffectsEnabled = LVM_TRUE;
+        GlobalSessionMemory[sessionNo].pBundledContext        = new BundledEffectContext;
+
+        pContext->pBundledContext = GlobalSessionMemory[sessionNo].pBundledContext;
+        pContext->pBundledContext->SessionNo                = sessionNo;
+        pContext->pBundledContext->SessionId                = sessionId;
         pContext->pBundledContext->hInstance                = NULL;
         pContext->pBundledContext->bVolumeEnabled           = LVM_FALSE;
         pContext->pBundledContext->bEqualizerEnabled        = LVM_FALSE;
@@ -267,37 +295,39 @@ extern "C" int EffectCreate(effect_uuid_t       *uuid,
         }
     }
     else{
-        pContext->pBundledContext = GlobalSessionMemory[sessionId].pBundledContext;
+        LOGV("\tEffectCreate - Assigning memory for previously created effect on sessionNo %d",
+                sessionNo);
+        pContext->pBundledContext =
+                GlobalSessionMemory[sessionNo].pBundledContext;
     }
-
     LOGV("\tEffectCreate - pBundledContext is %p", pContext->pBundledContext);
 
     // Create each Effect
     if (memcmp(uuid, &gBassBoostDescriptor.uuid, sizeof(effect_uuid_t)) == 0){
         // Create Bass Boost
         LOGV("\tEffectCreate - Effect to be created is LVM_BASS_BOOST");
-        GlobalSessionMemory[sessionId].bBassInstantiated = LVM_TRUE;
+        GlobalSessionMemory[pContext->pBundledContext->SessionNo].bBassInstantiated = LVM_TRUE;
 
         pContext->itfe       = &gLvmEffectInterface;
         pContext->EffectType = LVM_BASS_BOOST;
     } else if (memcmp(uuid, &gVirtualizerDescriptor.uuid, sizeof(effect_uuid_t)) == 0){
         // Create Virtualizer
         LOGV("\tEffectCreate - Effect to be created is LVM_VIRTUALIZER");
-        GlobalSessionMemory[sessionId].bVirtualizerInstantiated = LVM_TRUE;
+        GlobalSessionMemory[pContext->pBundledContext->SessionNo].bVirtualizerInstantiated=LVM_TRUE;
 
         pContext->itfe       = &gLvmEffectInterface;
         pContext->EffectType = LVM_VIRTUALIZER;
     } else if (memcmp(uuid, &gEqualizerDescriptor.uuid, sizeof(effect_uuid_t)) == 0){
         // Create Equalizer
         LOGV("\tEffectCreate - Effect to be created is LVM_EQUALIZER");
-        GlobalSessionMemory[sessionId].bEqualizerInstantiated = LVM_TRUE;
+        GlobalSessionMemory[pContext->pBundledContext->SessionNo].bEqualizerInstantiated = LVM_TRUE;
 
         pContext->itfe       = &gLvmEffectInterface;
         pContext->EffectType = LVM_EQUALIZER;
     } else if (memcmp(uuid, &gVolumeDescriptor.uuid, sizeof(effect_uuid_t)) == 0){
         // Create Volume
         LOGV("\tEffectCreate - Effect to be created is LVM_VOLUME");
-        GlobalSessionMemory[sessionId].bVolumeInstantiated = LVM_TRUE;
+        GlobalSessionMemory[pContext->pBundledContext->SessionNo].bVolumeInstantiated = LVM_TRUE;
 
         pContext->itfe       = &gLvmEffectInterface;
         pContext->EffectType = LVM_VOLUME;
@@ -316,6 +346,7 @@ extern "C" int EffectRelease(effect_interface_t interface){
     LOGV("\n\tEffectRelease start %p", interface);
     EffectContext * pContext = (EffectContext *)interface;
 
+    LOGV("\n\tEffectRelease start interface: %p, context %p", interface, pContext->pBundledContext);
     if (pContext == NULL){
         LOGV("\tLVM_ERROR : EffectRelease called with NULL pointer");
         return -EINVAL;
@@ -349,13 +380,28 @@ extern "C" int EffectRelease(effect_interface_t interface){
         fclose(pContext->pBundledContext->PcmInPtr);
         fclose(pContext->pBundledContext->PcmOutPtr);
         #endif
+
+        LvmSessionsActive--;
+        LOGV("\tEffectRelease: There are %d LVM sessions remaining\n", LvmSessionsActive);
+
+        // Clear the SessionIndex
+        for(int i=0; i<LVM_MAX_SESSIONS; i++){
+            if(SessionIndex[i] == pContext->pBundledContext->SessionId){
+                SessionIndex[i] = -1;
+                LOGV("\tEffectRelease: Clearing SessionIndex SessionNo %d for SessionId %d\n",
+                        i, pContext->pBundledContext->SessionId);
+                break;
+            }
+        }
+
         LOGV("\tEffectRelease: All effects are no longer instantiated\n");
         GlobalSessionMemory[pContext->pBundledContext->SessionNo].bBundledEffectsEnabled =LVM_FALSE;
         GlobalSessionMemory[pContext->pBundledContext->SessionNo].pBundledContext = LVM_NULL;
         LOGV("\tEffectRelease: Freeing LVM Bundle memory\n");
         LvmEffect_free(pContext);
-        LOGV("\tEffectRelease: Deleting LVM Bundle context\n");
+        LOGV("\tEffectRelease: Deleting LVM Bundle context %p\n", pContext->pBundledContext);
         delete pContext->pBundledContext;
+        pContext->pBundledContext = LVM_NULL;
     }
     // free the effect context for current effect
     delete pContext;
@@ -374,6 +420,8 @@ void LvmGlobalBundle_init(){
         GlobalSessionMemory[i].bBassInstantiated        = LVM_FALSE;
         GlobalSessionMemory[i].bVirtualizerInstantiated = LVM_FALSE;
         GlobalSessionMemory[i].pBundledContext          = LVM_NULL;
+
+        SessionIndex[i] = -1;
     }
     return;
 }
@@ -505,6 +553,9 @@ int LvmBundle_init(EffectContext *pContext){
     params.SpeakerType            = LVM_HEADPHONES;
 
     pContext->pBundledContext->SampleRate = LVM_FS_44100;
+    pContext->pBundledContext->SamplesToExitCountEq   = 44100*2*2; // 2 secs Stereo
+    pContext->pBundledContext->SamplesToExitCountBb   = 44100*2*2; // 2 secs Stereo
+    pContext->pBundledContext->SamplesToExitCountVirt = 44100*2*2; // 2 secs Stereo
 
     /* Concert Sound parameters */
     params.VirtualizerOperatingMode   = LVM_MODE_OFF;
@@ -842,21 +893,27 @@ int Effect_configure(EffectContext *pContext, effect_config_t *pConfig){
     switch (pConfig->inputCfg.samplingRate) {
     case 8000:
         SampleRate = LVM_FS_8000;
+        pContext->pBundledContext->SamplesPerSecond = 8000*2; // 2 secs Stereo
         break;
     case 16000:
         SampleRate = LVM_FS_16000;
+        pContext->pBundledContext->SamplesPerSecond = 16000*2; // 2 secs Stereo
         break;
     case 22050:
         SampleRate = LVM_FS_22050;
+        pContext->pBundledContext->SamplesPerSecond = 22050*2; // 2 secs Stereo
         break;
     case 32000:
         SampleRate = LVM_FS_32000;
+        pContext->pBundledContext->SamplesPerSecond = 32000*2; // 2 secs Stereo
         break;
     case 44100:
         SampleRate = LVM_FS_44100;
+        pContext->pBundledContext->SamplesPerSecond = 44100*2; // 2 secs Stereo
         break;
     case 48000:
         SampleRate = LVM_FS_48000;
+        pContext->pBundledContext->SamplesPerSecond = 48000*2; // 2 secs Stereo
         break;
     default:
         LOGV("\tEffect_Configure invalid sampling rate %d", pConfig->inputCfg.samplingRate);
@@ -881,6 +938,7 @@ int Effect_configure(EffectContext *pContext, effect_config_t *pConfig){
 
         LVM_ERROR_CHECK(LvmStatus, "LVM_SetControlParameters", "Effect_configure")
         LOGV("\tEffect_configure Succesfully called LVM_SetControlParameters\n");
+        pContext->pBundledContext->SampleRate = SampleRate;
 
     }else{
         //LOGV("\tEffect_configure keep sampling rate at %d", SampleRate);
@@ -1461,7 +1519,7 @@ int VolumeSetStereoPosition(EffectContext *pContext, int16_t position){
     LVM_ReturnStatus_en     LvmStatus=LVM_SUCCESS;     /* Function call status */
     LVM_INT16               Balance = 0;
 
-    
+
 
     pContext->pBundledContext->positionSaved = position;
     Balance = VolumeConvertStereoPosition(pContext->pBundledContext->positionSaved);
@@ -1614,11 +1672,12 @@ int32_t VolumeEnableStereoPosition(EffectContext *pContext, uint32_t enabled){
 //----------------------------------------------------------------------------
 
 int BassBoost_getParameter(EffectContext     *pContext,
-                           int32_t           *pParam,
+                           void              *pParam,
                            size_t            *pValueSize,
                            void              *pValue){
     int status = 0;
-    int32_t param = *pParam++;
+    int32_t *pParamTemp = (int32_t *)pParam;
+    int32_t param = *pParamTemp++;
     int32_t param2;
     char *name;
 
@@ -1685,13 +1744,14 @@ int BassBoost_getParameter(EffectContext     *pContext,
 //
 //----------------------------------------------------------------------------
 
-int BassBoost_setParameter (EffectContext *pContext, int32_t *pParam, void *pValue){
+int BassBoost_setParameter (EffectContext *pContext, void *pParam, void *pValue){
     int status = 0;
     int16_t strength;
+    int32_t *pParamTemp = (int32_t *)pParam;
 
     //LOGV("\tBassBoost_setParameter start");
 
-    switch (*pParam){
+    switch (*pParamTemp){
         case BASSBOOST_PARAM_STRENGTH:
             strength = *(int16_t *)pValue;
             //LOGV("\tBassBoost_setParameter() BASSBOOST_PARAM_STRENGTH value is %d", strength);
@@ -1700,7 +1760,7 @@ int BassBoost_setParameter (EffectContext *pContext, int32_t *pParam, void *pVal
             //LOGV("\tBassBoost_setParameter() Called pBassBoost->BassSetStrength");
            break;
         default:
-            LOGV("\tLVM_ERROR : BassBoost_setParameter() invalid param %d", *pParam);
+            LOGV("\tLVM_ERROR : BassBoost_setParameter() invalid param %d", *pParamTemp);
             break;
     }
 
@@ -1730,11 +1790,12 @@ int BassBoost_setParameter (EffectContext *pContext, int32_t *pParam, void *pVal
 //----------------------------------------------------------------------------
 
 int Virtualizer_getParameter(EffectContext        *pContext,
-                             int32_t              *pParam,
+                             void                 *pParam,
                              size_t               *pValueSize,
                              void                 *pValue){
     int status = 0;
-    int32_t param = *pParam++;
+    int32_t *pParamTemp = (int32_t *)pParam;
+    int32_t param = *pParamTemp++;
     int32_t param2;
     char *name;
 
@@ -1802,13 +1863,15 @@ int Virtualizer_getParameter(EffectContext        *pContext,
 //
 //----------------------------------------------------------------------------
 
-int Virtualizer_setParameter (EffectContext *pContext, int32_t *pParam, void *pValue){
+int Virtualizer_setParameter (EffectContext *pContext, void *pParam, void *pValue){
     int status = 0;
     int16_t strength;
+    int32_t *pParamTemp = (int32_t *)pParam;
+    int32_t param = *pParamTemp++;
 
     //LOGV("\tVirtualizer_setParameter start");
 
-    switch (*pParam){
+    switch (param){
         case VIRTUALIZER_PARAM_STRENGTH:
             strength = *(int16_t *)pValue;
             //LOGV("\tVirtualizer_setParameter() VIRTUALIZER_PARAM_STRENGTH value is %d", strength);
@@ -1817,7 +1880,7 @@ int Virtualizer_setParameter (EffectContext *pContext, int32_t *pParam, void *pV
             //LOGV("\tVirtualizer_setParameter() Called pVirtualizer->setStrength");
            break;
         default:
-            LOGV("\tLVM_ERROR : Virtualizer_setParameter() invalid param %d", *pParam);
+            LOGV("\tLVM_ERROR : Virtualizer_setParameter() invalid param %d", param);
             break;
     }
 
@@ -1846,12 +1909,13 @@ int Virtualizer_setParameter (EffectContext *pContext, int32_t *pParam, void *pV
 //
 //----------------------------------------------------------------------------
 int Equalizer_getParameter(EffectContext     *pContext,
-                           int32_t           *pParam,
+                           void              *pParam,
                            size_t            *pValueSize,
                            void              *pValue){
     int status = 0;
     int bMute = 0;
-    int32_t param = *pParam++;
+    int32_t *pParamTemp = (int32_t *)pParam;
+    int32_t param = *pParamTemp++;
     int32_t param2;
     char *name;
 
@@ -1924,7 +1988,7 @@ int Equalizer_getParameter(EffectContext     *pContext,
         break;
 
     case EQ_PARAM_BAND_LEVEL:
-        param2 = *pParam;
+        param2 = *pParamTemp;
         if (param2 >= FIVEBAND_NUMBANDS) {
             status = -EINVAL;
             break;
@@ -1935,7 +1999,7 @@ int Equalizer_getParameter(EffectContext     *pContext,
         break;
 
     case EQ_PARAM_CENTER_FREQ:
-        param2 = *pParam;
+        param2 = *pParamTemp;
         if (param2 >= FIVEBAND_NUMBANDS) {
             status = -EINVAL;
             break;
@@ -1946,7 +2010,7 @@ int Equalizer_getParameter(EffectContext     *pContext,
         break;
 
     case EQ_PARAM_BAND_FREQ_RANGE:
-        param2 = *pParam;
+        param2 = *pParamTemp;
         if (param2 >= FIVEBAND_NUMBANDS) {
             status = -EINVAL;
             break;
@@ -1957,7 +2021,7 @@ int Equalizer_getParameter(EffectContext     *pContext,
         break;
 
     case EQ_PARAM_GET_BAND:
-        param2 = *pParam;
+        param2 = *pParamTemp;
         *(uint16_t *)pValue = (uint16_t)EqualizerGetBand(pContext, param2);
         //LOGV("\tEqualizer_getParameter() EQ_PARAM_GET_BAND frequency %d, band %d",
         //      param2, *(int32_t *)pValue);
@@ -1974,7 +2038,7 @@ int Equalizer_getParameter(EffectContext     *pContext,
         break;
 
     case EQ_PARAM_GET_PRESET_NAME:
-        param2 = *pParam;
+        param2 = *pParamTemp;
         if (param2 >= EqualizerGetNumPresets()) {
         //if (param2 >= 20) {     // AGO FIX
             status = -EINVAL;
@@ -2022,12 +2086,14 @@ int Equalizer_getParameter(EffectContext     *pContext,
 // Outputs:
 //
 //----------------------------------------------------------------------------
-int Equalizer_setParameter (EffectContext *pContext, int32_t *pParam, void *pValue){
+int Equalizer_setParameter (EffectContext *pContext, void *pParam, void *pValue){
     int status = 0;
     int32_t preset;
     int32_t band;
     int32_t level;
-    int32_t param = *pParam++;
+    int32_t *pParamTemp = (int32_t *)pParam;
+    int32_t param = *pParamTemp++;
+
 
     //LOGV("\tEqualizer_setParameter start");
     switch (param) {
@@ -2042,7 +2108,7 @@ int Equalizer_setParameter (EffectContext *pContext, int32_t *pParam, void *pVal
         EqualizerSetPreset(pContext, preset);
         break;
     case EQ_PARAM_BAND_LEVEL:
-        band =  *pParam;
+        band =  *pParamTemp;
         level = (int32_t)(*(int16_t *)pValue);
         //LOGV("\tEqualizer_setParameter() EQ_PARAM_BAND_LEVEL band %d, level %d", band, level);
         if (band >= FIVEBAND_NUMBANDS) {
@@ -2102,13 +2168,13 @@ int Equalizer_setParameter (EffectContext *pContext, int32_t *pParam, void *pVal
 //----------------------------------------------------------------------------
 
 int Volume_getParameter(EffectContext     *pContext,
-                        int32_t           *pParam,
+                        void              *pParam,
                         size_t            *pValueSize,
                         void              *pValue){
     int status = 0;
     int bMute = 0;
-    int32_t param = *pParam++;
-    int32_t param2;
+    int32_t *pParamTemp = (int32_t *)pParam;
+    int32_t param = *pParamTemp++;;
     char *name;
 
     LOGV("\tVolume_getParameter start");
@@ -2195,16 +2261,18 @@ int Volume_getParameter(EffectContext     *pContext,
 //
 //----------------------------------------------------------------------------
 
-int Volume_setParameter (EffectContext *pContext, int32_t *pParam, void *pValue){
+int Volume_setParameter (EffectContext *pContext, void *pParam, void *pValue){
     int      status = 0;
     int16_t  level;
     int16_t  position;
     uint32_t mute;
     uint32_t positionEnabled;
+    int32_t *pParamTemp = (int32_t *)pParam;
+    int32_t param = *pParamTemp++;
 
     LOGV("\tVolume_setParameter start");
 
-    switch (*pParam){
+    switch (param){
         case VOLUME_PARAM_LEVEL:
             level = *(int16_t *)pValue;
             LOGV("\tVolume_setParameter() VOLUME_PARAM_LEVEL value is %d", level);
@@ -2237,7 +2305,7 @@ int Volume_setParameter (EffectContext *pContext, int32_t *pParam, void *pValue)
             break;
 
         default:
-            LOGV("\tLVM_ERROR : Volume_setParameter() invalid param %d", *pParam);
+            LOGV("\tLVM_ERROR : Volume_setParameter() invalid param %d", param);
             break;
     }
 
@@ -2299,13 +2367,27 @@ extern "C" int Effect_process(effect_interface_t     self,
                               audio_buffer_t         *inBuffer,
                               audio_buffer_t         *outBuffer){
     EffectContext * pContext = (EffectContext *) self;
+    LVM_ControlParams_t     ActiveParams;                           /* Current control Parameters */
+    LVM_ReturnStatus_en     LvmStatus = LVM_SUCCESS;                /* Function call status */
     int    status = 0;
+    int    status2Sec = 0;
     int    lvmStatus = 0;
     LVM_INT16   *in  = (LVM_INT16 *)inBuffer->raw;
     LVM_INT16   *out = (LVM_INT16 *)outBuffer->raw;
 
     //LOGV("\tEffect_process Start : Enabled = %d     Called = %d",
     //pContext->pBundledContext->NumberEffectsEnabled,pContext->pBundledContext->NumberEffectsCalled);
+//    LOGV("\tEffect_process Start : Samples left %d %d %d",
+//    pContext->pBundledContext->SamplesToExitCountBb,
+//    pContext->pBundledContext->SamplesToExitCountVirt,
+//    pContext->pBundledContext->SamplesToExitCountEq);
+
+//    LvmStatus = LVM_GetControlParameters(pContext->pBundledContext->hInstance, &ActiveParams);
+//    LVM_ERROR_CHECK(LvmStatus, "LVM_GetControlParameters", "VolumeGetStereoPosition")
+//    if(LvmStatus != LVM_SUCCESS) return -EINVAL;
+//    LOGV("\tEffect_process Internal Operating Modes: BB %d   VIRT %d    EQ %d",
+//        ActiveParams.BE_OperatingMode, ActiveParams.VirtualizerOperatingMode,
+//        ActiveParams.EQNB_OperatingMode);
 
     if (pContext == NULL){
         LOGV("\tLVM_ERROR : Effect_process() ERROR pContext == NULL");
@@ -2319,23 +2401,44 @@ extern "C" int Effect_process(effect_interface_t     self,
     }
     if ((pContext->pBundledContext->bBassEnabled == LVM_FALSE)&&
         (pContext->EffectType == LVM_BASS_BOOST)){
-        LOGV("\tEffect_process() ERROR LVM_BASS_BOOST Effect is not enabled");
+        //LOGV("\tEffect_process() LVM_BASS_BOOST Effect is not enabled");
+        if(pContext->pBundledContext->SamplesToExitCountBb > 0){
+            status2Sec = -ENODATA;
+            pContext->pBundledContext->SamplesToExitCountBb -= outBuffer->frameCount * 2; // STEREO
+            //LOGV("\tEffect_process: Waiting for 2 secs to turn off BASS_BOOST, %d samples left",
+            //    pContext->pBundledContext->SamplesToExitCountBb);
+        } else {
         status = -ENODATA;
+        }
     }
     if ((pContext->pBundledContext->bVolumeEnabled == LVM_FALSE)&&
         (pContext->EffectType == LVM_VOLUME)){
-        LOGV("\tEffect_process() ERROR LVM_VOLUME Effect is not enabled");
+        //LOGV("\tEffect_process() LVM_VOLUME Effect is not enabled");
         status = -ENODATA;
     }
     if ((pContext->pBundledContext->bEqualizerEnabled == LVM_FALSE)&&
         (pContext->EffectType == LVM_EQUALIZER)){
-        LOGV("\tEffect_process() ERROR LVM_EQUALIZER Effect is not enabled");
-        status = -ENODATA;
+        //LOGV("\tEffect_process() LVM_EQUALIZER Effect is not enabled");
+        if(pContext->pBundledContext->SamplesToExitCountEq > 0){
+            status2Sec = -ENODATA;
+            pContext->pBundledContext->SamplesToExitCountEq -= outBuffer->frameCount * 2; // STEREO
+            //LOGV("\tEffect_process: Waiting for 2 secs to turn off EQUALIZER, %d samples left",
+            //    pContext->pBundledContext->SamplesToExitCountEq);
+        } else {
+            status = -ENODATA;
+        }
     }
     if ((pContext->pBundledContext->bVirtualizerEnabled == LVM_FALSE)&&
         (pContext->EffectType == LVM_VIRTUALIZER)){
-        LOGV("\tEffect_process() ERROR LVM_VIRTUALIZER Effect is not enabled");
-        status = -ENODATA;
+        //LOGV("\tEffect_process() LVM_VIRTUALIZER Effect is not enabled");
+        if(pContext->pBundledContext->SamplesToExitCountVirt > 0){
+            status2Sec = -ENODATA;
+            pContext->pBundledContext->SamplesToExitCountVirt -= outBuffer->frameCount * 2;// STEREO
+            //LOGV("\tEffect_process: Waiting for 2 secs to turn off VIRTUALIZER, %d samples left",
+            //    pContext->pBundledContext->SamplesToExitCountVirt);
+        } else {
+            status = -ENODATA;
+        }
     }
 
     // If this is the last frame of an effect process its output with no effect
@@ -2352,7 +2455,7 @@ extern "C" int Effect_process(effect_interface_t     self,
         }
     }
 
-    if(status != -ENODATA){
+    if((status2Sec != -ENODATA)&&(status != -ENODATA)){
         pContext->pBundledContext->NumberEffectsCalled++;
     }
 
@@ -2496,7 +2599,7 @@ extern "C" int Effect_command(effect_interface_t  self,
                 int voffset = ((p->psize - 1) / sizeof(int32_t) + 1) * sizeof(int32_t);
 
                 p->status = android::BassBoost_getParameter(pContext,
-                                                            (int32_t *)p->data,
+                                                            p->data,
                                                             (size_t  *)&p->vsize,
                                                             p->data + voffset);
 
@@ -2527,7 +2630,7 @@ extern "C" int Effect_command(effect_interface_t  self,
                 int voffset = ((p->psize - 1) / sizeof(int32_t) + 1) * sizeof(int32_t);
 
                 p->status = android::Virtualizer_getParameter(pContext,
-                                                             (int32_t *)p->data,
+                                                             (void *)p->data,
                                                              (size_t  *)&p->vsize,
                                                               p->data + voffset);
 
@@ -2558,8 +2661,10 @@ extern "C" int Effect_command(effect_interface_t  self,
 
                 int voffset = ((p->psize - 1) / sizeof(int32_t) + 1) * sizeof(int32_t);
 
-                p->status = android::Equalizer_getParameter(pContext, (int32_t *)p->data, &p->vsize,
-                        p->data + voffset);
+                p->status = android::Equalizer_getParameter(pContext,
+                                                            p->data,
+                                                            &p->vsize,
+                                                            p->data + voffset);
 
                 *replySize = sizeof(effect_param_t) + voffset + p->vsize;
 
@@ -2590,7 +2695,7 @@ extern "C" int Effect_command(effect_interface_t  self,
                 int voffset = ((p->psize - 1) / sizeof(int32_t) + 1) * sizeof(int32_t);
 
                 p->status = android::Volume_getParameter(pContext,
-                                                         (int32_t *)p->data,
+                                                         (void *)p->data,
                                                          (size_t  *)&p->vsize,
                                                          p->data + voffset);
 
@@ -2636,7 +2741,7 @@ extern "C" int Effect_command(effect_interface_t  self,
                 //        cmdSize, sizeof(effect_param_t), p->psize, p->vsize );
 
                 *(int *)pReplyData = android::BassBoost_setParameter(pContext,
-                                                                    (int32_t *)p->data,
+                                                                    (void *)p->data,
                                                                     p->data + p->psize);
             }
             if(pContext->EffectType == LVM_VIRTUALIZER){
@@ -2669,7 +2774,7 @@ extern "C" int Effect_command(effect_interface_t  self,
                 //        cmdSize, sizeof(effect_param_t), p->psize, p->vsize );
 
                 *(int *)pReplyData = android::Virtualizer_setParameter(pContext,
-                                                                      (int32_t *)p->data,
+                                                                      (void *)p->data,
                                                                        p->data + p->psize);
             }
             if(pContext->EffectType == LVM_EQUALIZER){
@@ -2689,7 +2794,7 @@ extern "C" int Effect_command(effect_interface_t  self,
                 effect_param_t *p = (effect_param_t *) pCmdData;
 
                 *(int *)pReplyData = android::Equalizer_setParameter(pContext,
-                                                                    (int32_t *)p->data,
+                                                                    (void *)p->data,
                                                                      p->data + p->psize);
             }
             if(pContext->EffectType == LVM_VOLUME){
@@ -2711,14 +2816,14 @@ extern "C" int Effect_command(effect_interface_t  self,
                 effect_param_t *p = (effect_param_t *) pCmdData;
 
                 *(int *)pReplyData = android::Volume_setParameter(pContext,
-                                                                 (int32_t *)p->data,
+                                                                 (void *)p->data,
                                                                  p->data + p->psize);
             }
             //LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_SET_PARAM end");
         } break;
 
         case EFFECT_CMD_ENABLE:
-            //LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_ENABLE start");
+            LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_ENABLE start");
             if (pReplyData == NULL || *replySize != sizeof(int)){
                 LOGV("\tLVM_ERROR : Effect_command cmdCode Case: EFFECT_CMD_ENABLE: ERROR");
                 return -EINVAL;
@@ -2768,6 +2873,14 @@ extern "C" int Effect_command(effect_interface_t  self,
             *(int *)pReplyData = 0;
             pContext->pBundledContext->NumberEffectsEnabled++;
             android::LvmEffect_enable(pContext);
+            pContext->pBundledContext->SamplesToExitCountEq =
+                 (LVM_INT32)(pContext->pBundledContext->SamplesPerSecond*1); // 0.1 secs Stereo
+            pContext->pBundledContext->SamplesToExitCountBb =
+                 (LVM_INT32)(pContext->pBundledContext->SamplesPerSecond*6); // 2 secs Stereo
+            pContext->pBundledContext->SamplesToExitCountVirt =
+                 (LVM_INT32)(pContext->pBundledContext->SamplesPerSecond*1); // 2 secs Stereo
+            LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_ENABLE Samples to Exit = %d",
+                pContext->pBundledContext->SamplesToExitCountBb);
             //LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_ENABLE NumberEffectsEnabled = %d",
             //        pContext->pBundledContext->NumberEffectsEnabled);
             //LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_ENABLE end");
@@ -2906,11 +3019,8 @@ extern "C" int Effect_command(effect_interface_t  self,
         }
         case EFFECT_CMD_SET_VOLUME:
         {
-            int32_t channels = cmdSize/sizeof(int32_t);
             int32_t vol     = *(int32_t *)pCmdData;
-            int16_t vol_db;
             int16_t dB;
-            int16_t vol_db_rnd;
             int32_t vol_ret[2] = {1<<24,1<<24}; // Apply no volume
 
             // if pReplyData is NULL, VOL_CTRL is delegated to another effect

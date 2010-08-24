@@ -17,9 +17,9 @@
 
 /****************************************************************************************
 
-     $Author: nxp007753 $
-     $Revision: 1081 $
-     $Date: 2010-07-05 11:48:44 +0200 (Mon, 05 Jul 2010) $
+     $Author: beq06068 $
+     $Revision: 1399 $
+     $Date: 2010-08-03 08:16:00 +0200 (Tue, 03 Aug 2010) $
 
 *****************************************************************************************/
 
@@ -75,6 +75,8 @@ extern "C" {
 #define LVDBE_SCRATCHBUFFERS_INPLACE     4       /* Number of buffers required for inplace processing */
 
 #define LVDBE_MIXER_TC                   5       /* Mixer time  */
+#define LVDBE_BYPASS_MIXER_TC            100     /* Bypass mixer time */
+
 
 /****************************************************************************************/
 /*                                                                                      */
@@ -92,6 +94,7 @@ typedef struct
     Biquad_2I_Order2_Taps_t     HPFTaps;            /* High pass filter taps */
     Biquad_1I_Order2_Taps_t     BPFTaps;            /* Band pass filter taps */
     LVMixer3_1St_st             BypassVolume;       /* Bypass volume scaler */
+    LVMixer3_2St_st             BypassMixer;        /* Bypass Mixer for Click Removal */
 
 } LVDBE_Data_t;
 
@@ -115,9 +118,6 @@ typedef struct
     /* Data and coefficient pointers */
     LVDBE_Data_t                *pData;                /* Instance data */
     LVDBE_Coef_t                *pCoef;                /* Instance coefficients */
-
-    LVM_INT32                   bTransitionOnToOff;
-
 } LVDBE_Instance_t;
 
 

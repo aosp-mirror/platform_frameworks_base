@@ -58,6 +58,7 @@ struct PresetConfig {
 struct BundledEffectContext{
     LVM_Handle_t                    hInstance;                /* Instance handle */
     int                             SessionNo;                /* Current session number */
+    int                             SessionId;                /* Current session id */
     bool                            bVolumeEnabled;           /* Flag for Volume */
     bool                            bEqualizerEnabled;        /* Flag for EQ */
     bool                            bBassEnabled;             /* Flag for Bass */
@@ -80,6 +81,10 @@ struct BundledEffectContext{
     bool                            bStereoPositionEnabled;
     int                             frameCount;
     LVM_Fs_en                       SampleRate;
+    int                             SamplesPerSecond;
+    int                             SamplesToExitCountEq;
+    int                             SamplesToExitCountBb;
+    int                             SamplesToExitCountVirt;
     #ifdef LVM_PCM
     FILE                            *PcmInPtr;
     FILE                            *PcmOutPtr;
