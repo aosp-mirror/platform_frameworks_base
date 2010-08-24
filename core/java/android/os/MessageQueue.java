@@ -120,7 +120,6 @@ public class MessageQueue {
                 now = SystemClock.uptimeMillis();
                 Message msg = pullNextLocked(now);
                 if (msg != null) {
-                    msg.markInUse();
                     return msg;
                 }
                 
@@ -193,7 +192,7 @@ public class MessageQueue {
     }
 
     final boolean enqueueMessage(Message msg, long when) {
-        if (msg.isInUse()) {
+        if (msg.when != 0) {
             throw new AndroidRuntimeException(msg
                     + " This message is already in use.");
         }
