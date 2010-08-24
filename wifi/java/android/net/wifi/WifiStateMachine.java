@@ -1376,6 +1376,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     private void sendConfigChangeBroadcast() {
+        if (!ActivityManagerNative.isSystemReady()) return;
         Intent intent = new Intent(WifiManager.CONFIG_CHANGED_ACTION);
         intent.putExtra(WifiManager.EXTRA_NETWORK_PROPERTIES, mNetworkProperties);
         mContext.sendBroadcast(intent);
@@ -1396,6 +1397,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
     private void updateConfigAndSendChangeBroadcast() {
         updateConfiguredNetworks();
+        if (!ActivityManagerNative.isSystemReady()) return;
         Intent intent = new Intent(WifiManager.SUPPLICANT_CONFIG_CHANGED_ACTION);
         mContext.sendBroadcast(intent);
     }
