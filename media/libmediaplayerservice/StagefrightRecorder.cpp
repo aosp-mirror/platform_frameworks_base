@@ -1239,11 +1239,19 @@ status_t StagefrightRecorder::getMaxAmplitude(int *max) {
     return OK;
 }
 
-status_t StagefrightRecorder::dump(int fd, const Vector<String16>& args) const {
+status_t StagefrightRecorder::dump(
+        int fd, const Vector<String16>& args) const {
+    LOGV("dump");
     const size_t SIZE = 256;
     char buffer[SIZE];
     String8 result;
-    snprintf(buffer, SIZE, "   Recorder: %p", this);
+    if (mWriter != 0) {
+        mWriter->dump(fd, args);
+    } else {
+        snprintf(buffer, SIZE, "   No file writer\n");
+        result.append(buffer);
+    }
+    snprintf(buffer, SIZE, "   Recorder: %p\n", this);
     snprintf(buffer, SIZE, "   Output file (fd %d):\n", mOutputFd);
     result.append(buffer);
     snprintf(buffer, SIZE, "     File format: %d\n", mOutputFormat);
