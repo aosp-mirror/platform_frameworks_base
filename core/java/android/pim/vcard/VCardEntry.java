@@ -954,7 +954,7 @@ public class VCardEntry {
                 }
             }
             if (type < 0) {
-                type = Phone.TYPE_HOME;
+                type = Im.TYPE_HOME;
             }
             addIm(protocol, null, type, propValue, isPrimary);
         } else if (propName.equals(VCardConstants.PROPERTY_NOTE)) {
@@ -1195,12 +1195,14 @@ public class VCardEntry {
                 builder.withValue(Data.MIMETYPE, Im.CONTENT_ITEM_TYPE);
                 builder.withValue(Im.TYPE, imData.type);
                 builder.withValue(Im.PROTOCOL, imData.protocol);
+                builder.withValue(Im.DATA, imData.data);
                 if (imData.protocol == Im.PROTOCOL_CUSTOM) {
                     builder.withValue(Im.CUSTOM_PROTOCOL, imData.customProtocol);
                 }
                 if (imData.isPrimary) {
                     builder.withValue(Data.IS_PRIMARY, 1);
                 }
+                operationList.add(builder.build());
             }
         }
 
