@@ -75,6 +75,14 @@ status_t SharedBufferStack::setCrop(int buffer, const Rect& crop)
     return NO_ERROR;
 }
 
+status_t SharedBufferStack::setTransform(int buffer, uint8_t transform)
+{
+    if (uint32_t(buffer) >= NUM_BUFFER_MAX)
+        return BAD_INDEX;
+    buffers[buffer].transform = transform;
+    return NO_ERROR;
+}
+
 status_t SharedBufferStack::setDirtyRegion(int buffer, const Region& dirty)
 {
     if (uint32_t(buffer) >= NUM_BUFFER_MAX)
@@ -136,6 +144,26 @@ Region SharedBufferStack::getDirtyRegion(int buffer) const
     }
     return res;
 }
+
+Rect SharedBufferStack::getCrop(int buffer) const
+{
+    Rect res(-1, -1);
+    if (uint32_t(buffer) >= NUM_BUFFER_MAX)
+        return res;
+    res.left = buffers[buffer].crop.l;
+    res.top = buffers[buffer].crop.t;
+    res.right = buffers[buffer].crop.r;
+    res.bottom = buffers[buffer].crop.b;
+    return res;
+}
+
+uint32_t SharedBufferStack::getTransform(int buffer) const
+{
+    if (uint32_t(buffer) >= NUM_BUFFER_MAX)
+        return 0;
+    return buffers[buffer].transform;
+}
+
 
 // ----------------------------------------------------------------------------
 
@@ -433,6 +461,12 @@ status_t SharedBufferClient::setCrop(int buf, const Rect& crop)
     return stack.setCrop(buf, crop);
 }
 
+status_t SharedBufferClient::setTransform(int buf, uint32_t transform)
+{
+    SharedBufferStack& stack( *mSharedStack );
+    return stack.setTransform(buf, uint8_t(transform));
+}
+
 status_t SharedBufferClient::setDirtyRegion(int buf, const Region& reg)
 {
     SharedBufferStack& stack( *mSharedStack );
@@ -547,6 +581,18 @@ Region SharedBufferServer::getDirtyRegion(int buf) const
 {
     SharedBufferStack& stack( *mSharedStack );
     return stack.getDirtyRegion(buf);
+}
+
+Rect SharedBufferServer::getCrop(int buf) const
+{
+    SharedBufferStack& stack( *mSharedStack );
+    return stack.getCrop(buf);
+}
+
+uint32_t SharedBufferServer::getTransform(int buf) const
+{
+    SharedBufferStack& stack( *mSharedStack );
+    return stack.getTransform(buf);
 }
 
 /*
