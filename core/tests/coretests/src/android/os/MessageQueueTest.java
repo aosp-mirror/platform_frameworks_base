@@ -41,10 +41,6 @@ public class MessageQueueTest extends TestCase {
         }
 
         public void handleMessage(Message msg) {
-            if (!msg.isInUse()) {
-                failure(new RuntimeException(
-                        "msg.isInuse is false, should always be true, #" + msg.what));
-            }
             if (mCount <= mLastMessage) {
                 if (msg.what != mCount) {
                     failure(new RuntimeException(
@@ -104,3 +100,4 @@ public class MessageQueueTest extends TestCase {
         tester.doTest(1000);
     }
 }
+
