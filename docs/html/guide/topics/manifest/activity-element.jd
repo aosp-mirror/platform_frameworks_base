@@ -336,10 +336,10 @@ it can also be set as a raw string.
 </p></dd>
 
 <dt><a name="lmode"></a>{@code android:launchMode}</dt>
-<dd>An instruction on how the activity should be launched.  There are four modes 
+<dd>An instruction on how the activity should be launched.  There are four modes
 that work in conjunction with activity flags ({@code FLAG_ACTIVITY_*} constants) 
-in {@link android.content.Intent} objects to determine what should happen when 
-the activity is called upon to handle an intent.  They are:
+in {@link android.content.Intent} objects to determine what should happen when
+the activity is called upon to handle an intent. They are:</p>
 
 <p style="margin-left: 2em">"{@code standard}"
 <br>"{@code singleTop}"
@@ -351,55 +351,109 @@ The default mode is "{@code standard}".
 </p>
 
 <p>
-The modes fall into two main groups, with "{@code standard}" and 
-"{@code singleTop}" activities on one side, and "{@code singleTask}" and 
-"{@code singleInstance}" activities on the other.  An activity with the 
-"{@code standard}" or "{@code singleTop}" launch mode can be instantiated 
-multiple times.  The instances can belong to any task and can be located 
-anywhere in the activity stack.  Typically, they're launched into the task 
-that called 
+As shown in the table below, the modes fall into two main groups, with
+"{@code standard}" and "{@code singleTop}" activities on one side, and
+"{@code singleTask}" and "{@code singleInstance}" activities on the other.
+An activity with the "{@code standard}" or "{@code singleTop}" launch mode
+can be instantiated multiple times.  The instances can belong to any task
+and can be located anywhere in the activity stack.  Typically, they're
+launched into the task that called 
 <code>{@link android.content.Context#startActivity startActivity()}</code>
-(unless the Intent object contains a 
-<code>{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}</code> 
-instruction, in which case a different task is chosen &mdash; see the 
+(unless the Intent object contains a
+<code>{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}</code>
+instruction, in which case a different task is chosen &mdash; see the
 <a href="#aff">taskAffinity</a> attribute).
 </p>
 
 <p>
-In contrast, "{@code singleTask}" and "{@code singleInstance}" activities 
-can only begin a task.  They are always at the root of the activity stack. 
-Moreover, the device can hold only one instance of the activity at a time 
+In contrast, "<code>singleTask</code>" and "<code>singleInstance</code>" activities
+can only begin a task.  They are always at the root of the activity stack.
+Moreover, the device can hold only one instance of the activity at a time
 &mdash; only one such task.
 </p>
 
 <p>
 The "{@code standard}" and "{@code singleTop}" modes differ from each other 
-in just one respect:  Every time there's new intent for a "{@code standard}" 
-activity, a new instance of the class is created to respond to that intent.  
+in just one respect:  Every time there's a new intent for a "{@code standard}"
+activity, a new instance of the class is created to respond to that intent.
 Each instance handles a single intent.
-Similarly, a new instance of a "{@code singleTop}" activity may also be 
-created to handle a new intent.  However, if the target task already has an 
-existing instance of the activity at the top of its stack, that instance 
-will receive the new intent (in an 
+Similarly, a new instance of a "{@code singleTop}" activity may also be
+created to handle a new intent.  However, if the target task already has an
+existing instance of the activity at the top of its stack, that instance
+will receive the new intent (in an
 <code>{@link android.app.Activity#onNewIntent onNewIntent()}</code> call);
 a new instance is not created.
-In other circumstances &mdash; for example, if an existing instance of the 
-"{@code singleTop}" activity is in the target task, but not at the top of 
-the stack, or if it's at the top of a stack, but not in the target task 
+In other circumstances &mdash; for example, if an existing instance of the
+"{@code singleTop}" activity is in the target task, but not at the top of
+the stack, or if it's at the top of a stack, but not in the target task
 &mdash; a new instance would be created and pushed on the stack.
-</p>  
+</p>
 
 <p>
-The "{@code singleTask}" and "{@code singleInstance}" modes also differ from 
-each other in only one respect:  A "{@code singleTask}" activity allows other 
-activities to be part of its task.  It's at the root of the activity stack, 
-but other activities (necessarily "{@code standard}" and "{@code singleTop}" 
-activities) can be launched into the same task.  A "{@code singleInstance}" 
-activity, on the other hand, permits no other activities to be part of its 
-task.  It's the only activity in the task.  If it starts another activity, 
-that activity is assigned to a different task &mdash; as if {@code
+The "{@code singleTask}" and "{@code singleInstance}" modes also differ from
+each other in only one respect:  A "{@code singleTask}" activity allows other
+activities to be part of its task. It's always at the root of its task, but
+other activities (necessarily "{@code standard}" and "{@code singleTop}"
+activities) can be launched into that task.  A "{@code singleInstance}"
+activity, on the other hand, permits no other activities to be part of its task.
+It's the only activity in the task.  If it starts another activity, that
+activity is assigned to a different task &mdash; as if {@code
 FLAG_ACTIVITY_NEW_TASK} was in the intent.
 </p>
+
+<table>
+<tr>
+<th>Use Cases</th>
+<th>Launch Mode</th>
+<th>Multiple Instances?</th>
+<th>Comments</th>
+</tr>
+<tr>
+<td rowspan="2" style="width:20%;">Normal launches for most activities</td>
+<td>"<code>standard</code>"</td>
+<td>Yes</td>
+<td>Default. The system always creates a new instance of the activity in the
+target task and routes the intent to it.</td>
+</tr>
+<tr>
+<td>"<code>singleTop</code>"</td>
+<td>Conditionally</td>
+<td>If an instance of the activity already exists at the top of the target task,
+the system routes the intent to that instance through a call to its {@link
+android.app.Activity#onNewIntent onNewIntent()} method, rather than creating a
+new instance of the activity.</td>
+</tr>
+<tr>
+<td rowspan="2">Specialized launches<br>
+<em>(not recommended for general use)</em></td>
+<td>"<code>singleTask</code>"</td>
+<td>No</td>
+<td>The system creates the activity at the root of a new task and routes the
+intent to it. However, if an instance of the activity already exists, the system
+routes the intent to existing instance through a call to its {@link
+android.app.Activity#onNewIntent onNewIntent()} method, rather than creating a
+new one.</td>
+</tr>
+<tr>
+<td>"<code>singleInstance</code>"</td>
+<td>No</td>
+<td>Same as "<code>singleTask"</code>, except that the system doesn't launch any
+other activities into the task holding the instance. The activity is always the
+single and only member of its task.</td>
+</tr>
+</table>
+
+<p>As shown in the table above, <code>standard</code> is the default mode and is
+appropriate for most types of activities. <code>SingleTop</code> is also a
+common and useful launch mode for many types of activities. The other modes
+&mdash; <code>singleTask</code> and <code>singleInstance</code> &mdash; are
+<span style="color:red">not appropriate for most applications</span>,
+since they result in an interaction model that is likely to be unfamiliar to
+users and is very different from most other applications. 
+
+<p>Regardless of the launch mode that you choose, make sure to test the usability
+of the activity during launch and when navigating back to it from
+other activities and tasks using the BACK key. </p>
 
 <p>For more information on launch modes and their interaction with Intent
 flags, see the 
