@@ -33,6 +33,8 @@ struct ARTSPController : public MediaExtractor {
     status_t connect(const char *url);
     void disconnect();
 
+    void seek(int64_t timeUs);
+
     virtual size_t countTracks();
     virtual sp<MediaSource> getTrack(size_t index);
 

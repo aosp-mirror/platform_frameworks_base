@@ -33,7 +33,7 @@ ARTSPController::ARTSPController(const sp<ALooper> &looper)
 }
 
 ARTSPController::~ARTSPController() {
-    disconnect();
+    CHECK_EQ((int)mState, (int)DISCONNECTED);
     mLooper->unregisterHandler(mReflector->id());
 }
 
@@ -78,6 +78,16 @@ void ARTSPController::disconnect() {
     }
 
     mHandler.clear();
+}
+
+void ARTSPController::seek(int64_t timeUs) {
+    Mutex::Autolock autoLock(mLock);
+
+    if (mState != CONNECTED) {
+        return;
+    }
+
+    mHandler->seek(timeUs);
 }
 
 size_t ARTSPController::countTracks() {
