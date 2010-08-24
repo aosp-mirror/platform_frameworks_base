@@ -406,9 +406,7 @@ APacketSource::APacketSource(
         const sp<ASessionDescription> &sessionDesc, size_t index)
     : mInitCheck(NO_INIT),
       mFormat(new MetaData),
-      mEOSResult(OK),
-      mFirstAccessUnit(true),
-      mFirstAccessUnitNTP(0) {
+      mEOSResult(OK) {
     unsigned long PT;
     AString desc;
     AString params;
@@ -550,9 +548,6 @@ status_t APacketSource::initCheck() const {
 }
 
 status_t APacketSource::start(MetaData *params) {
-    mFirstAccessUnit = true;
-    mFirstAccessUnitNTP = 0;
-
     return OK;
 }
 
@@ -600,25 +595,6 @@ void APacketSource::queueAccessUnit(const sp<ABuffer> &buffer) {
         return;
     }
 
-    uint64_t ntpTime;
-    CHECK(buffer->meta()->findInt64(
-                "ntp-time", (int64_t *)&ntpTime));
-
-    if (mFirstAccessUnit) {
-        mFirstAccessUnit = false;
-        mFirstAccessUnitNTP = ntpTime;
-    }
-
-    if (ntpTime > mFirstAccessUnitNTP) {
-        ntpTime -= mFirstAccessUnitNTP;
-    } else {
-        ntpTime = 0;
-    }
-
-    int64_t timeUs = (int64_t)(ntpTime * 1E6 / (1ll << 32));
-
-    buffer->meta()->setInt64("timeUs", timeUs);
-
     Mutex::Autolock autoLock(mLock);
     mBuffers.push_back(buffer);
     mCondition.signal();
@@ -632,31 +608,9 @@ void APacketSource::signalEOS(status_t result) {
     mCondition.signal();
 }
 
-int64_t APacketSource::getQueuedDuration(bool *eos) {
+void APacketSource::flushQueue() {
     Mutex::Autolock autoLock(mLock);
-
-    *eos = (mEOSResult != OK);
-
-    if (mBuffers.empty()) {
-        return 0;
-    }
-
-    sp<ABuffer> buffer = *mBuffers.begin();
-
-    uint64_t ntpTime;
-    CHECK(buffer->meta()->findInt64(
-                "ntp-time", (int64_t *)&ntpTime));
-
-    int64_t firstTimeUs = (int64_t)(ntpTime * 1E6 / (1ll << 32));
-
-    buffer = *--mBuffers.end();
-
-    CHECK(buffer->meta()->findInt64(
-                "ntp-time", (int64_t *)&ntpTime));
-
-    int64_t lastTimeUs = (int64_t)(ntpTime * 1E6 / (1ll << 32));
-
-    return lastTimeUs - firstTimeUs;
+    mBuffers.clear();
 }
 
 }  // namespace android

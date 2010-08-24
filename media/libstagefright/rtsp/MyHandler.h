@@ -38,7 +38,10 @@ struct MyHandler : public AHandler {
           mConn(new ARTSPConnection),
           mRTPConn(new ARTPConnection),
           mSessionURL(url),
-          mSetupTracksSuccessful(false) {
+          mSetupTracksSuccessful(false),
+          mSeekPending(false),
+          mFirstAccessUnit(true),
+          mFirstAccessUnitNTP(0) {
 
         mNetLooper->start(false /* runOnCallingThread */,
                           false /* canCallJava */,
@@ -60,6 +63,12 @@ struct MyHandler : public AHandler {
         mDoneMsg = doneMsg;
 
         (new AMessage('abor', id()))->post();
+    }
+
+    void seek(int64_t timeUs) {
+        sp<AMessage> msg = new AMessage('seek', id());
+        msg->setInt64("time", timeUs);
+        msg->post();
     }
 
     virtual void onMessageReceived(const sp<AMessage> &msg) {
@@ -88,8 +97,6 @@ struct MyHandler : public AHandler {
 
             case 'disc':
             {
-                LOG(INFO) << "disconnect completed";
-
                 (new AMessage('quit', id()))->post();
                 break;
             }
@@ -337,7 +344,20 @@ struct MyHandler : public AHandler {
                 CHECK(accessUnit->meta()->findInt64(
                             "ntp-time", (int64_t *)&ntpTime));
 
-                accessUnit->meta()->setInt64("ntp-time", ntpTime);
+                if (mFirstAccessUnit) {
+                    mFirstAccessUnit = false;
+                    mFirstAccessUnitNTP = ntpTime;
+                }
+
+                if (ntpTime >= mFirstAccessUnitNTP) {
+                    ntpTime -= mFirstAccessUnitNTP;
+                } else {
+                    ntpTime = 0;
+                }
+
+                int64_t timeUs = (int64_t)(ntpTime * 1E6 / (1ll << 32));
+
+                accessUnit->meta()->setInt64("timeUs", timeUs);
 
 #if 0
                 int32_t damaged;
@@ -349,6 +369,84 @@ struct MyHandler : public AHandler {
                 {
                     TrackInfo *track = &mTracks.editItemAt(trackIndex);
                     track->mPacketSource->queueAccessUnit(accessUnit);
+                }
+                break;
+            }
+
+            case 'seek':
+            {
+                if (mSeekPending) {
+                    break;
+                }
+
+                int64_t timeUs;
+                CHECK(msg->findInt64("time", &timeUs));
+
+                mSeekPending = true;
+
+                AString request = "PAUSE ";
+                request.append(mSessionURL);
+                request.append(" RTSP/1.0\r\n");
+
+                request.append("Session: ");
+                request.append(mSessionID);
+                request.append("\r\n");
+
+                request.append("\r\n");
+
+                sp<AMessage> reply = new AMessage('see1', id());
+                reply->setInt64("time", timeUs);
+                mConn->sendRequest(request.c_str(), reply);
+                break;
+            }
+
+            case 'see1':
+            {
+                int64_t timeUs;
+                CHECK(msg->findInt64("time", &timeUs));
+
+                AString request = "PLAY ";
+                request.append(mSessionURL);
+                request.append(" RTSP/1.0\r\n");
+
+                request.append("Session: ");
+                request.append(mSessionID);
+                request.append("\r\n");
+
+                request.append(
+                        StringPrintf(
+                            "Range: npt=%lld-\r\n", timeUs / 1000000ll));
+
+                request.append("\r\n");
+
+                sp<AMessage> reply = new AMessage('see2', id());
+                mConn->sendRequest(request.c_str(), reply);
+                break;
+            }
+
+            case 'see2':
+            {
+                CHECK(mSeekPending);
+
+                LOG(INFO) << "seek completed.";
+                mSeekPending = false;
+
+                int32_t result;
+                CHECK(msg->findInt32("result", &result));
+                if (result != OK) {
+                    LOG(ERROR) << "seek FAILED";
+                    break;
+                }
+
+                sp<RefBase> obj;
+                CHECK(msg->findObject("response", &obj));
+                sp<ARTSPResponse> response =
+                    static_cast<ARTSPResponse *>(obj.get());
+
+                CHECK_EQ(response->mStatusCode, 200u);
+
+                for (size_t i = 0; i < mTracks.size(); ++i) {
+                    mTracks.editItemAt(i).mPacketSource->flushQueue();
                 }
                 break;
             }
@@ -380,6 +478,9 @@ private:
     AString mBaseURL;
     AString mSessionID;
     bool mSetupTracksSuccessful;
+    bool mSeekPending;
+    bool mFirstAccessUnit;
+    uint64_t mFirstAccessUnitNTP;
 
     struct TrackInfo {
         int mRTPSocket;
