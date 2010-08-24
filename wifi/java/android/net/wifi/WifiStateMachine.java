@@ -236,8 +236,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private static final int CMD_GET_NETWORK_CONFIG               = 58;
     /* Save configuration */
     private static final int CMD_SAVE_CONFIG                      = 59;
-    /* Connection status */
-    private static final int CMD_CONNECTION_STATUS                = 60;
 
     /* Supplicant commands after driver start*/
     /* Initiate a scan */
@@ -379,10 +377,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     /* Soft Ap is running */
     private HierarchicalState mSoftApStartedState = new SoftApStartedState();
 
-    /* Argument for Message object to indicate a synchronous call */
-    private static final int SYNCHRONOUS_CALL = 1;
-    private static final int ASYNCHRONOUS_CALL = 0;
-
 
     /**
      * One of  {@link WifiManager#WIFI_STATE_DISABLED},
@@ -488,7 +482,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     /**
      * TODO: doc
      */
-    public boolean pingSupplicant() {
+    public boolean syncPingSupplicant() {
         return sendSyncMessage(CMD_PING_SUPPLICANT).boolValue;
     }
 
@@ -535,14 +529,14 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     /**
      * TODO: doc
      */
-    public int getWifiState() {
+    public int syncGetWifiState() {
         return mWifiState.get();
     }
 
     /**
      * TODO: doc
      */
-    public String getWifiStateByName() {
+    public String syncGetWifiStateByName() {
         switch (mWifiState.get()) {
             case WIFI_STATE_DISABLING:
                 return "disabling";
@@ -562,14 +556,14 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     /**
      * TODO: doc
      */
-    public int getWifiApState() {
+    public int syncGetWifiApState() {
         return mWifiApState.get();
     }
 
     /**
      * TODO: doc
      */
-    public String getWifiApStateByName() {
+    public String syncGetWifiApStateByName() {
         switch (mWifiApState.get()) {
             case WIFI_AP_STATE_DISABLING:
                 return "disabling";
@@ -591,11 +585,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * @return a {@link WifiInfo} object containing information about the current connection
      *
      */
-    public WifiInfo requestConnectionInfo() {
+    public WifiInfo syncRequestConnectionInfo() {
         return mWifiInfo;
     }
 
-    public DhcpInfo getDhcpInfo() {
+    public DhcpInfo syncGetDhcpInfo() {
         return mDhcpInfo;
     }
 
@@ -635,7 +629,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     /**
      * TODO: doc
      */
-    public List<ScanResult> getScanResultsList() {
+    public List<ScanResult> syncGetScanResultsList() {
         return mScanResults;
     }
 
@@ -665,11 +659,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      *
      * @return network id of the new network
      */
-    public int addOrUpdateNetwork(WifiConfiguration config) {
+    public int syncAddOrUpdateNetwork(WifiConfiguration config) {
         return sendSyncMessage(CMD_ADD_OR_UPDATE_NETWORK, config).intValue;
     }
 
-    public List<WifiConfiguration> getConfiguredNetworks() {
+    public List<WifiConfiguration> syncGetConfiguredNetworks() {
         return sendSyncMessage(CMD_GET_NETWORK_CONFIG).configList;
     }
 
@@ -678,7 +672,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      *
      * @param networkId id of the network to be removed
      */
-    public boolean removeNetwork(int networkId) {
+    public boolean syncRemoveNetwork(int networkId) {
         return sendSyncMessage(obtainMessage(CMD_REMOVE_NETWORK, networkId, 0)).boolValue;
     }
 
@@ -697,7 +691,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * @param disableOthers true, if all other networks have to be disabled
      * @return {@code true} if the operation succeeds, {@code false} otherwise
      */
-    public boolean enableNetwork(int netId, boolean disableOthers) {
+    public boolean syncEnableNetwork(int netId, boolean disableOthers) {
         return sendSyncMessage(CMD_ENABLE_NETWORK,
                 new EnableNetParams(netId, disableOthers)).boolValue;
     }
@@ -708,7 +702,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * @param netId network id of the network
      * @return {@code true} if the operation succeeds, {@code false} otherwise
      */
-    public boolean disableNetwork(int netId) {
+    public boolean syncDisableNetwork(int netId) {
         return sendSyncMessage(obtainMessage(CMD_DISABLE_NETWORK, netId, 0)).boolValue;
     }
 
@@ -746,23 +740,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         sendMessage(obtainMessage(CMD_FORGET_NETWORK, netId, 0));
     }
 
-    /**
-     * Get detailed status of the connection
-     *
-     * @return Example status result
-     *  bssid=aa:bb:cc:dd:ee:ff
-     *  ssid=TestNet
-     *  id=3
-     *  pairwise_cipher=NONE
-     *  group_cipher=NONE
-     *  key_mgmt=NONE
-     *  wpa_state=COMPLETED
-     *  ip_address=X.X.X.X
-     */
-    public String status() {
-        return sendSyncMessage(CMD_CONNECTION_STATUS).stringValue;
-    }
-
     public void enableRssiPolling(boolean enabled) {
        sendMessage(obtainMessage(CMD_ENABLE_RSSI_POLL, enabled ? 1 : 0, 0));
     }
@@ -771,7 +748,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      *
      * @return RSSI value, -1 on failure
      */
-    public int getRssi() {
+    public int syncGetRssi() {
         return sendSyncMessage(CMD_GET_RSSI).intValue;
     }
 
@@ -780,7 +757,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      *
      * @return RSSI value, -1 on failure
      */
-    public int getRssiApprox() {
+    public int syncGetRssiApprox() {
         return sendSyncMessage(CMD_GET_RSSI_APPROX).intValue;
     }
 
@@ -789,7 +766,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      *
      * @return link speed, -1 on failure
      */
-    public int getLinkSpeed() {
+    public int syncGetLinkSpeed() {
         return sendSyncMessage(CMD_GET_LINK_SPEED).intValue;
     }
 
@@ -798,7 +775,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      *
      * @return MAC address, null on failure
      */
-    public String getMacAddress() {
+    public String syncGetMacAddress() {
         return sendSyncMessage(CMD_GET_MAC_ADDR).stringValue;
     }
 
@@ -895,7 +872,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      *
      * TODO: deprecate this
      */
-    public boolean saveConfig() {
+    public boolean syncSaveConfig() {
         return sendSyncMessage(CMD_SAVE_CONFIG).boolValue;
     }
 
@@ -931,12 +908,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     /**
-     * message.arg2 is reserved to indicate synchronized
      * message.obj is used to store SyncParams
      */
     private SyncReturn syncedSend(Message msg) {
         SyncParams syncParams = (SyncParams) msg.obj;
-        msg.arg2 = SYNCHRONOUS_CALL;
         synchronized(syncParams) {
             if (DBG) Log.d(TAG, "syncedSend " + msg);
             sendMessage(msg);
@@ -995,7 +970,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
         mWifiState.set(wifiState);
 
-        if (DBG) Log.d(TAG, "setWifiState: " + getWifiStateByName());
+        if (DBG) Log.d(TAG, "setWifiState: " + syncGetWifiStateByName());
 
         final Intent intent = new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
@@ -1020,7 +995,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         // Update state
         mWifiApState.set(wifiApState);
 
-        if (DBG) Log.d(TAG, "setWifiApState: " + getWifiApStateByName());
+        if (DBG) Log.d(TAG, "setWifiApState: " + syncGetWifiApStateByName());
 
         final Intent intent = new Intent(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
@@ -2082,16 +2057,13 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_GET_LINK_SPEED:
                 case CMD_GET_MAC_ADDR:
                 case CMD_SAVE_CONFIG:
-                case CMD_CONNECTION_STATUS:
                 case CMD_GET_NETWORK_CONFIG:
-                    if (message.arg2 == SYNCHRONOUS_CALL) {
-                        syncParams = (SyncParams) message.obj;
-                        syncParams.mSyncReturn.boolValue = false;
-                        syncParams.mSyncReturn.intValue = -1;
-                        syncParams.mSyncReturn.stringValue = null;
-                        syncParams.mSyncReturn.configList = null;
-                        notifyOnMsgObject(message);
-                    }
+                    syncParams = (SyncParams) message.obj;
+                    syncParams.mSyncReturn.boolValue = false;
+                    syncParams.mSyncReturn.intValue = -1;
+                    syncParams.mSyncReturn.stringValue = null;
+                    syncParams.mSyncReturn.configList = null;
+                    notifyOnMsgObject(message);
                     break;
                 case CMD_ENABLE_RSSI_POLL:
                     mEnableRssiPolling = (message.arg1 == 1);
@@ -2526,42 +2498,27 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     break;
                 case CMD_REMOVE_NETWORK:
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
-                    if (message.arg2 == SYNCHRONOUS_CALL) {
-                        syncParams = (SyncParams) message.obj;
-                        syncParams.mSyncReturn.boolValue = WifiNative.removeNetworkCommand(
-                                message.arg1);
-                        notifyOnMsgObject(message);
-                    } else {
-                        /* asynchronous handling */
-                        WifiNative.removeNetworkCommand(message.arg1);
-                    }
+                    syncParams = (SyncParams) message.obj;
+                    syncParams.mSyncReturn.boolValue = WifiNative.removeNetworkCommand(
+                            message.arg1);
+                    notifyOnMsgObject(message);
                     sendSupplicantConfigChangedBroadcast();
                     break;
                 case CMD_ENABLE_NETWORK:
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
-                    if (message.arg2 == SYNCHRONOUS_CALL) {
-                        syncParams = (SyncParams) message.obj;
-                        EnableNetParams enableNetParams = (EnableNetParams) syncParams.mParameter;
-                        syncParams.mSyncReturn.boolValue = WifiNative.enableNetworkCommand(
-                                enableNetParams.netId, enableNetParams.disableOthers);
-                        notifyOnMsgObject(message);
-                    } else {
-                        /* asynchronous handling */
-                        WifiNative.enableNetworkCommand(message.arg1, message.arg2 == 1);
-                    }
+                    syncParams = (SyncParams) message.obj;
+                    EnableNetParams enableNetParams = (EnableNetParams) syncParams.mParameter;
+                    syncParams.mSyncReturn.boolValue = WifiNative.enableNetworkCommand(
+                            enableNetParams.netId, enableNetParams.disableOthers);
+                    notifyOnMsgObject(message);
                     sendSupplicantConfigChangedBroadcast();
                     break;
                 case CMD_DISABLE_NETWORK:
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
-                    if (message.arg2 == SYNCHRONOUS_CALL) {
-                        syncParams = (SyncParams) message.obj;
-                        syncParams.mSyncReturn.boolValue = WifiNative.disableNetworkCommand(
-                                message.arg1);
-                        notifyOnMsgObject(message);
-                    } else {
-                        /* asynchronous handling */
-                        WifiNative.disableNetworkCommand(message.arg1);
-                    }
+                    syncParams = (SyncParams) message.obj;
+                    syncParams.mSyncReturn.boolValue = WifiNative.disableNetworkCommand(
+                            message.arg1);
+                    notifyOnMsgObject(message);
                     sendSupplicantConfigChangedBroadcast();
                     break;
                 case CMD_BLACKLIST_NETWORK:
@@ -2577,14 +2534,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     notifyOnMsgObject(message);
                     break;
                 case CMD_SAVE_CONFIG:
-                    if (message.arg2 == SYNCHRONOUS_CALL) {
-                        syncParams = (SyncParams) message.obj;
-                        syncParams.mSyncReturn.boolValue = WifiNative.saveConfigCommand();
-                        notifyOnMsgObject(message);
-                    } else {
-                        /* asynchronous handling */
-                        WifiNative.saveConfigCommand();
-                    }
+                    syncParams = (SyncParams) message.obj;
+                    syncParams.mSyncReturn.boolValue = WifiNative.saveConfigCommand();
+                    notifyOnMsgObject(message);
                     // Inform the backup manager about a data change
                     IBackupManager ibm = IBackupManager.Stub.asInterface(
                             ServiceManager.getService(Context.BACKUP_SERVICE));
@@ -2595,11 +2547,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                             // Try again later
                         }
                     }
-                    break;
-                case CMD_CONNECTION_STATUS:
-                    syncParams = (SyncParams) message.obj;
-                    syncParams.mSyncReturn.stringValue = WifiNative.statusCommand();
-                    notifyOnMsgObject(message);
                     break;
                 case CMD_GET_MAC_ADDR:
                     syncParams = (SyncParams) message.obj;

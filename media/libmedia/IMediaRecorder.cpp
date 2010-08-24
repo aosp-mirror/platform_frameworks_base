@@ -19,7 +19,7 @@
 #define LOG_TAG "IMediaRecorder"
 #include <utils/Log.h>
 #include <binder/Parcel.h>
-#include <surfaceflinger/ISurface.h>
+#include <surfaceflinger/Surface.h>
 #include <camera/ICamera.h>
 #include <media/IMediaRecorderClient.h>
 #include <media/IMediaRecorder.h>
@@ -69,12 +69,12 @@ public:
         return reply.readInt32();
     }
 
-    status_t setPreviewSurface(const sp<ISurface>& surface)
+    status_t setPreviewSurface(const sp<Surface>& surface)
     {
         LOGV("setPreviewSurface(%p)", surface.get());
         Parcel data, reply;
         data.writeInterfaceToken(IMediaRecorder::getInterfaceDescriptor());
-        data.writeStrongBinder(surface->asBinder());
+        Surface::writeToParcel(surface, &data);
         remote()->transact(SET_PREVIEW_SURFACE, data, &reply);
         return reply.readInt32();
     }
@@ -409,7 +409,7 @@ status_t BnMediaRecorder::onTransact(
         case SET_PREVIEW_SURFACE: {
             LOGV("SET_PREVIEW_SURFACE");
             CHECK_INTERFACE(IMediaRecorder, data, reply);
-            sp<ISurface> surface = interface_cast<ISurface>(data.readStrongBinder());
+            sp<Surface> surface = Surface::readFromParcel(data);
             reply->writeInt32(setPreviewSurface(surface));
             return NO_ERROR;
         } break;

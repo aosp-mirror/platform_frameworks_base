@@ -429,6 +429,15 @@ rsMatrixLoadFrustum(rs_matrix4x4 *m, float left, float right, float bottom, floa
     m->m[15]= 0.f;
 }
 
+static void __attribute__((overloadable))
+rsMatrixLoadPerspective(rs_matrix4x4* m, float fovy, float aspect, float near, float far) {
+    float top = near * tan((float) (fovy * M_PI / 360.0f));
+    float bottom = -top;
+    float left = bottom * aspect;
+    float right = top * aspect;
+    rsMatrixLoadFrustum(m, left, right, bottom, top, near, far);
+}
+
 static float4 __attribute__((overloadable))
 rsMatrixMultiply(rs_matrix4x4 *m, float4 in) {
     float4 ret;

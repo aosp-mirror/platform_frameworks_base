@@ -7271,16 +7271,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * this will be {@link android.R.id#copyUrl} or {@link android.R.id#selectTextMode}.
      */
     public boolean onTextContextMenuItem(int id) {
-        int selStart = getSelectionStart();
-        int selEnd = getSelectionEnd();
-
-        if (!isFocused()) {
-            selStart = 0;
-            selEnd = mText.length();
+        int min = 0;
+        int max = mText.length();
+        
+        if (isFocused()) {
+            int selStart = getSelectionStart();
+            int selEnd = getSelectionEnd();
+            min = Math.max(0, Math.min(selStart, selEnd));
+            max = Math.max(0, Math.max(selStart, selEnd));
         }
-
-        int min = Math.max(0, Math.min(selStart, selEnd));
-        int max = Math.max(0, Math.max(selStart, selEnd));
 
         ClipboardManager clipboard = (ClipboardManager)getContext()
                 .getSystemService(Context.CLIPBOARD_SERVICE);
@@ -7955,7 +7954,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return;
             }
 
-            boolean oneLineSelection = mLayout.getLineForOffset(selectionStart) == mLayout.getLineForOffset(selectionEnd); 
+            boolean oneLineSelection =
+                mLayout.getLineForOffset(selectionStart) == mLayout.getLineForOffset(selectionEnd);
             mStartHandle.positionAtCursor(selectionStart, oneLineSelection);
             mEndHandle.positionAtCursor(selectionEnd, true);
 

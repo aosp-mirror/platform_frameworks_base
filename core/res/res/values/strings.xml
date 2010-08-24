@@ -1887,16 +1887,16 @@
     <!-- Item on EditText context menu. This action is used to copy a URL from the edit field into the clipboard. -->
     <string name="copyUrl">Copy URL</string>
 
-    <!-- Item on EditText context menu. Added only when the context menu is not empty, it enable selection context mode. -->
+    <!-- Item on EditText context menu. Added only when the context menu is not empty, it enable selection context mode. [CHAR LIMIT=20] -->
     <string name="selectTextMode">Select text...</string>
 
-    <!-- Text selection contextual mode title, displayed in the CAB.. -->
+    <!-- Text selection contextual mode title, displayed in the CAB. [CHAR LIMIT=20] -->
     <string name="textSelectionCABTitle">Text selection</string>
 
     <!-- EditText context menu -->
     <string name="inputMethod">Input method</string>
 
-    <!-- Title for EditText context menu -->
+    <!-- Title for EditText context menu [CHAR LIMIT=20] -->
     <string name="editTextMenuTitle">Text actions</string>
 
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the title of that notification. -->

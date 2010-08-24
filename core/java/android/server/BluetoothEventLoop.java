@@ -644,7 +644,7 @@ class BluetoothEventLoop {
              } else {
                  Log.i(TAG, "Rejecting incoming HID connection from " + address);
              }
-        } else if (BluetoothUuid.isNAP(uuid)){
+        } else if (BluetoothUuid.isBnep(uuid) || BluetoothUuid.isNap(uuid)){
             authorized = true;
         } else {
             Log.i(TAG, "Rejecting incoming " + deviceUuid + " connection from " + address);

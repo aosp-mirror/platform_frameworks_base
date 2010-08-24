@@ -79,7 +79,140 @@ public class ProgramStore extends BaseObj {
         super(id, rs);
     }
 
+    public static ProgramStore BlendNone_DepthTest(RenderScript rs) {
+        if(rs.mProgramStore_BlendNone_DepthTest == null) {
+            ProgramStore.Builder builder = new ProgramStore.Builder(rs);
+            builder.setDepthFunc(ProgramStore.DepthFunc.LESS);
+            builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ZERO);
+            builder.setDitherEnable(false);
+            builder.setDepthMask(true);
+            rs.mProgramStore_BlendNone_DepthTest = builder.create();
+        }
+        return rs.mProgramStore_BlendNone_DepthTest;
+    }
+    public static ProgramStore BlendNone_DepthNoDepth(RenderScript rs) {
+        if(rs.mProgramStore_BlendNone_DepthNoDepth == null) {
+            ProgramStore.Builder builder = new ProgramStore.Builder(rs);
+            builder.setDepthFunc(ProgramStore.DepthFunc.ALWAYS);
+            builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ZERO);
+            builder.setDitherEnable(false);
+            builder.setDepthMask(false);
+            rs.mProgramStore_BlendNone_DepthNoDepth = builder.create();
+        }
+        return rs.mProgramStore_BlendNone_DepthNoDepth;
+    }
+    public static ProgramStore BlendNone_DepthNoTest(RenderScript rs) {
+        if(rs.mProgramStore_BlendNone_DepthNoTest == null) {
+            ProgramStore.Builder builder = new ProgramStore.Builder(rs);
+            builder.setDepthFunc(ProgramStore.DepthFunc.ALWAYS);
+            builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ZERO);
+            builder.setDitherEnable(false);
+            builder.setDepthMask(true);
+            rs.mProgramStore_BlendNone_DepthNoTest = builder.create();
+        }
+        return rs.mProgramStore_BlendNone_DepthNoTest;
+    }
+    public static ProgramStore BlendNone_DepthNoWrite(RenderScript rs) {
+        if(rs.mProgramStore_BlendNone_DepthNoWrite == null) {
+            ProgramStore.Builder builder = new ProgramStore.Builder(rs);
+            builder.setDepthFunc(ProgramStore.DepthFunc.LESS);
+            builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ZERO);
+            builder.setDitherEnable(false);
+            builder.setDepthMask(false);
+            rs.mProgramStore_BlendNone_DepthNoWrite = builder.create();
+        }
+        return rs.mProgramStore_BlendNone_DepthNoWrite;
+    }
 
+    public static ProgramStore BlendAlpha_DepthTest(RenderScript rs) {
+        if(rs.mProgramStore_BlendAlpha_DepthTest == null) {
+            ProgramStore.Builder builder = new ProgramStore.Builder(rs);
+            builder.setDepthFunc(ProgramStore.DepthFunc.LESS);
+            builder.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
+            builder.setDitherEnable(false);
+            builder.setDepthMask(true);
+            rs.mProgramStore_BlendAlpha_DepthTest = builder.create();
+        }
+        return rs.mProgramStore_BlendAlpha_DepthTest;
+    }
+    public static ProgramStore BlendAlpha_DepthNoDepth(RenderScript rs) {
+        if(rs.mProgramStore_BlendAlpha_DepthNoDepth == null) {
+            ProgramStore.Builder builder = new ProgramStore.Builder(rs);
+            builder.setDepthFunc(ProgramStore.DepthFunc.ALWAYS);
+            builder.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
+            builder.setDitherEnable(false);
+            builder.setDepthMask(false);
+            rs.mProgramStore_BlendAlpha_DepthNoDepth = builder.create();
+        }
+        return rs.mProgramStore_BlendAlpha_DepthNoDepth;
+    }
+    public static ProgramStore BlendAlpha_DepthNoTest(RenderScript rs) {
+        if(rs.mProgramStore_BlendAlpha_DepthNoTest == null) {
+            ProgramStore.Builder builder = new ProgramStore.Builder(rs);
+            builder.setDepthFunc(ProgramStore.DepthFunc.ALWAYS);
+            builder.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
+            builder.setDitherEnable(false);
+            builder.setDepthMask(true);
+            rs.mProgramStore_BlendAlpha_DepthNoTest = builder.create();
+        }
+        return rs.mProgramStore_BlendAlpha_DepthNoTest;
+    }
+    public static ProgramStore BlendAlpha_DepthNoWrite(RenderScript rs) {
+        if(rs.mProgramStore_BlendAlpha_DepthNoWrite == null) {
+            ProgramStore.Builder builder = new ProgramStore.Builder(rs);
+            builder.setDepthFunc(ProgramStore.DepthFunc.LESS);
+            builder.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
+            builder.setDitherEnable(false);
+            builder.setDepthMask(false);
+            rs.mProgramStore_BlendAlpha_DepthNoWrite = builder.create();
+        }
+        return rs.mProgramStore_BlendAlpha_DepthNoWrite;
+    }
+
+    public static ProgramStore BlendAdd_DepthTest(RenderScript rs) {
+        if(rs.mProgramStore_BlendAdd_DepthTest == null) {
+            ProgramStore.Builder builder = new ProgramStore.Builder(rs);
+            builder.setDepthFunc(ProgramStore.DepthFunc.LESS);
+            builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ONE);
+            builder.setDitherEnable(false);
+            builder.setDepthMask(true);
+            rs.mProgramStore_BlendAdd_DepthTest = builder.create();
+        }
+        return rs.mProgramStore_BlendAdd_DepthTest;
+    }
+    public static ProgramStore BlendAdd_DepthNoDepth(RenderScript rs) {
+        if(rs.mProgramStore_BlendAdd_DepthNoDepth == null) {
+            ProgramStore.Builder builder = new ProgramStore.Builder(rs);
+            builder.setDepthFunc(ProgramStore.DepthFunc.ALWAYS);
+            builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ONE);
+            builder.setDitherEnable(false);
+            builder.setDepthMask(false);
+            rs.mProgramStore_BlendAdd_DepthNoDepth = builder.create();
+        }
+        return rs.mProgramStore_BlendAdd_DepthNoDepth;
+    }
+    public static ProgramStore BlendAdd_DepthNoTest(RenderScript rs) {
+        if(rs.mProgramStore_BlendAdd_DepthNoTest == null) {
+            ProgramStore.Builder builder = new ProgramStore.Builder(rs);
+            builder.setDepthFunc(ProgramStore.DepthFunc.ALWAYS);
+            builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ONE);
+            builder.setDitherEnable(false);
+            builder.setDepthMask(true);
+            rs.mProgramStore_BlendAdd_DepthNoDepth = builder.create();
+        }
+        return rs.mProgramStore_BlendAdd_DepthNoTest;
+    }
+    public static ProgramStore BlendAdd_DepthNoWrite(RenderScript rs) {
+        if(rs.mProgramStore_BlendAdd_DepthNoWrite == null) {
+            ProgramStore.Builder builder = new ProgramStore.Builder(rs);
+            builder.setDepthFunc(ProgramStore.DepthFunc.ALWAYS);
+            builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ONE);
+            builder.setDitherEnable(false);
+            builder.setDepthMask(false);
+            rs.mProgramStore_BlendAdd_DepthNoWrite = builder.create();
+        }
+        return rs.mProgramStore_BlendAdd_DepthNoWrite;
+    }
 
     public static class Builder {
         RenderScript mRS;
@@ -109,8 +242,20 @@ public class ProgramStore extends BaseObj {
             mColorMaskA = true;
             mBlendSrc = BlendSrcFunc.ONE;
             mBlendDst = BlendDstFunc.ZERO;
+        }
 
-
+        public Builder(RenderScript rs) {
+            mRS = rs;
+            mIn = null;
+            mOut = null;
+            mDepthFunc = DepthFunc.ALWAYS;
+            mDepthMask = false;
+            mColorMaskR = true;
+            mColorMaskG = true;
+            mColorMaskB = true;
+            mColorMaskA = true;
+            mBlendSrc = BlendSrcFunc.ONE;
+            mBlendDst = BlendDstFunc.ZERO;
         }
 
         public Builder setDepthFunc(DepthFunc func) {

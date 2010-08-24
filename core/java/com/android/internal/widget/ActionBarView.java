@@ -221,6 +221,14 @@ public class ActionBarView extends ViewGroup {
         return false;
     }
 
+    public void postShowOverflowMenu() {
+        post(new Runnable() {
+            public void run() {
+                showOverflowMenu();
+            }
+        });
+    }
+
     public boolean hideOverflowMenu() {
         if (mMenuView != null) {
             return mMenuView.hideOverflowMenu();

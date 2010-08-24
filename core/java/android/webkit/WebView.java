@@ -18,10 +18,14 @@ package android.webkit;
 
 import android.annotation.Widget;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.IntentFilter;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.Intent;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
@@ -40,6 +44,7 @@ import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.net.http.SslCertificate;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -92,6 +97,7 @@ import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -877,11 +883,102 @@ public class WebView extends AbsoluteLayout
          * such as the mZoomManager.
          */
         init();
+        setupPackageListener(context);
         updateMultiTouchSupport(context);
 
         if (privateBrowsing) {
             startPrivateBrowsing();
         }
+    }
+
+    /*
+     * The intent receiver that monitors for changes to relevant packages (e.g.,
+     * sGoogleApps) and notifies WebViewCore of their existence.
+     */
+    private static BroadcastReceiver sPackageInstallationReceiver = null;
+
+    /*
+     * A set of Google packages we monitor for the
+     * navigator.isApplicationInstalled() API. Add additional packages as
+     * needed.
+     */
+    private static Set<String> sGoogleApps;
+    static {
+        sGoogleApps = new HashSet<String>();
+        sGoogleApps.add("com.google.android.youtube");
+    }
+
+    private void setupPackageListener(Context context) {
+
+        /*
+         * we must synchronize the instance check and the creation of the
+         * receiver to ensure that only ONE receiver exists for all WebView
+         * instances.
+         */
+        synchronized (WebView.class) {
+
+            // if the receiver already exists then we do not need to register it
+            // again
+            if (sPackageInstallationReceiver != null) {
+                return;
+            }
+
+            IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+            filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+            filter.addDataScheme("package");
+            sPackageInstallationReceiver = new BroadcastReceiver() {
+
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    final String action = intent.getAction();
+                    final String packageName = intent.getData().getSchemeSpecificPart();
+                    final boolean replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+                    if (Intent.ACTION_PACKAGE_REMOVED.equals(action) && replacing) {
+                        // if it is replacing, refreshPlugins() when adding
+                        return;
+                    }
+
+                    if (sGoogleApps.contains(packageName)) {
+                        if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
+                            mWebViewCore.sendMessage(EventHub.ADD_PACKAGE_NAME, packageName);
+                        } else {
+                            mWebViewCore.sendMessage(EventHub.REMOVE_PACKAGE_NAME, packageName);
+                        }
+                    }
+
+                    PluginManager pm = PluginManager.getInstance(context);
+                    if (pm.containsPluginPermissionAndSignatures(packageName)) {
+                        pm.refreshPlugins(Intent.ACTION_PACKAGE_ADDED.equals(action));
+                    }
+                }
+            };
+
+            context.getApplicationContext().registerReceiver(sPackageInstallationReceiver, filter);
+        }
+
+        // check if any of the monitored apps are already installed
+        AsyncTask<Void, Void, Set<String>> task = new AsyncTask<Void, Void, Set<String>>() {
+
+            @Override
+            protected Set<String> doInBackground(Void... unused) {
+                Set<String> installedPackages = new HashSet<String>();
+                PackageManager pm = mContext.getPackageManager();
+                List<PackageInfo> packages = pm.getInstalledPackages(0);
+                for (PackageInfo p : packages) {
+                    if (sGoogleApps.contains(p.packageName)) {
+                        installedPackages.add(p.packageName);
+                    }
+                }
+                return installedPackages;
+            }
+
+            // Executes on the UI thread
+            @Override
+            protected void onPostExecute(Set<String> installedPackages) {
+                mWebViewCore.sendMessage(EventHub.ADD_PACKAGE_NAMES, installedPackages);
+            }
+        };
+        task.execute();
     }
 
     void updateMultiTouchSupport(Context context) {
@@ -1278,6 +1375,7 @@ public class WebView extends AbsoluteLayout
             outState.putBundle("certificate",
                                SslCertificate.saveState(mCertificate));
         }
+        outState.putBoolean("privateBrowsingEnabled", isPrivateBrowsingEnabled());
         return list;
     }
 
@@ -1439,6 +1537,10 @@ public class WebView extends AbsoluteLayout
                 returnList = copyBackForwardList();
                 // Update the copy to have the correct index.
                 returnList.setCurrentIndex(index);
+            }
+            // Restore private browsing setting.
+            if (inState.getBoolean("privateBrowsingEnabled")) {
+                getSettings().setPrivateBrowsingEnabled(true);
             }
             // Remove all pending messages because we are restoring previous
             // state.
@@ -1702,18 +1804,7 @@ public class WebView extends AbsoluteLayout
         getSettings().setPrivateBrowsingEnabled(true);
 
         if (!wasPrivateBrowsingEnabled) {
-            StringBuilder data = new StringBuilder(1024);
-            try {
-                InputStreamReader file = new InputStreamReader(mContext.getResources().openRawResource(com.android.internal.R.raw.incognito_mode_start_page));
-                int size;
-                char[] buffer = new char[1024];
-                while ((size = file.read(buffer)) != -1) {
-                    data.append(buffer, 0, size);
-                }
-            } catch (IOException e) {
-                // This should never happen since this is a static resource.
-            }
-            loadDataWithBaseURL(null, data.toString(), "text/html", "utf-8", null);
+            loadUrl("browser:incognito");
         }
     }
 
@@ -3080,45 +3171,6 @@ public class WebView extends AbsoluteLayout
      */
     public WebSettings getSettings() {
         return (mWebViewCore != null) ? mWebViewCore.getSettings() : null;
-    }
-
-    /**
-     * Use this method to inform the webview about packages that are installed
-     * in the system. This information will be used by the
-     * navigator.isApplicationInstalled() API.
-     * @param packageNames is a set of package names that are known to be
-     * installed in the system.
-     *
-     * @hide not a public API
-     */
-    public void addPackageNames(Set<String> packageNames) {
-        mWebViewCore.sendMessage(EventHub.ADD_PACKAGE_NAMES, packageNames);
-    }
-
-    /**
-     * Use this method to inform the webview about single packages that are
-     * installed in the system. This information will be used by the
-     * navigator.isApplicationInstalled() API.
-     * @param packageName is the name of a package that is known to be
-     * installed in the system.
-     *
-     * @hide not a public API
-     */
-    public void addPackageName(String packageName) {
-        mWebViewCore.sendMessage(EventHub.ADD_PACKAGE_NAME, packageName);
-    }
-
-    /**
-     * Use this method to inform the webview about packages that are uninstalled
-     * in the system. This information will be used by the
-     * navigator.isApplicationInstalled() API.
-     * @param packageName is the name of a package that has been uninstalled in
-     * the system.
-     *
-     * @hide not a public API
-     */
-    public void removePackageName(String packageName) {
-        mWebViewCore.sendMessage(EventHub.REMOVE_PACKAGE_NAME, packageName);
     }
 
    /**

@@ -167,31 +167,19 @@ status_t Camera::unlock()
     return c->unlock();
 }
 
-// pass the buffered ISurface to the camera service
+// pass the buffered Surface to the camera service
 status_t Camera::setPreviewDisplay(const sp<Surface>& surface)
 {
-    LOGV("setPreviewDisplay");
+    LOGV("setPreviewDisplay(%p)", surface.get());
     sp <ICamera> c = mCamera;
     if (c == 0) return NO_INIT;
     if (surface != 0) {
-        return c->setPreviewDisplay(surface->getISurface());
+        return c->setPreviewDisplay(surface);
     } else {
         LOGD("app passed NULL surface");
         return c->setPreviewDisplay(0);
     }
 }
-
-status_t Camera::setPreviewDisplay(const sp<ISurface>& surface)
-{
-    LOGV("setPreviewDisplay");
-    if (surface == 0) {
-        LOGD("app passed NULL surface");
-    }
-    sp <ICamera> c = mCamera;
-    if (c == 0) return NO_INIT;
-    return c->setPreviewDisplay(surface);
-}
-
 
 // start preview mode
 status_t Camera::startPreview()
@@ -375,4 +363,3 @@ void Camera::DeathNotifier::binderDied(const wp<IBinder>& who) {
 }
 
 }; // namespace android
-

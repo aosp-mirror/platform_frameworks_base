@@ -22,12 +22,14 @@
 
 #include <media/IMediaPlayer.h>
 #include <surfaceflinger/ISurface.h>
+#include <surfaceflinger/Surface.h>
 
 namespace android {
 
 enum {
     DISCONNECT = IBinder::FIRST_CALL_TRANSACTION,
     SET_VIDEO_SURFACE,
+    SET_VIDEO_ISURFACE,
     PREPARE_ASYNC,
     START,
     STOP,
@@ -65,11 +67,20 @@ public:
         remote()->transact(DISCONNECT, data, &reply);
     }
 
-    status_t setVideoSurface(const sp<ISurface>& surface)
+    status_t setVideoISurface(const sp<ISurface>& surface)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
         data.writeStrongBinder(surface->asBinder());
+        remote()->transact(SET_VIDEO_ISURFACE, data, &reply);
+        return reply.readInt32();
+    }
+
+    status_t setVideoSurface(const sp<Surface>& surface)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+        Surface::writeToParcel(surface, &data);
         remote()->transact(SET_VIDEO_SURFACE, data, &reply);
         return reply.readInt32();
     }
@@ -256,9 +267,15 @@ status_t BnMediaPlayer::onTransact(
             disconnect();
             return NO_ERROR;
         } break;
-        case SET_VIDEO_SURFACE: {
+        case SET_VIDEO_ISURFACE: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
             sp<ISurface> surface = interface_cast<ISurface>(data.readStrongBinder());
+            reply->writeInt32(setVideoISurface(surface));
+            return NO_ERROR;
+        } break;
+        case SET_VIDEO_SURFACE: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            sp<Surface> surface = Surface::readFromParcel(data);
             reply->writeInt32(setVideoSurface(surface));
             return NO_ERROR;
         } break;

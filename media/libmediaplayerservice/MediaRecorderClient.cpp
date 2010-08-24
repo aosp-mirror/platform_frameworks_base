@@ -70,7 +70,7 @@ status_t MediaRecorderClient::setCamera(const sp<ICamera>& camera)
     return mRecorder->setCamera(camera);
 }
 
-status_t MediaRecorderClient::setPreviewSurface(const sp<ISurface>& surface)
+status_t MediaRecorderClient::setPreviewSurface(const sp<Surface>& surface)
 {
     LOGV("setPreviewSurface");
     Mutex::Autolock lock(mLock);
@@ -337,4 +337,3 @@ status_t MediaRecorderClient::dump(int fd, const Vector<String16>& args) const {
 }
 
 }; // namespace android
-

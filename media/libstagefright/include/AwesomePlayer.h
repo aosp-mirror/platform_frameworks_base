@@ -76,6 +76,7 @@ struct AwesomePlayer {
     bool isPlaying() const;
 
     void setISurface(const sp<ISurface> &isurface);
+    void setSurface(const sp<Surface> &surface);
     void setAudioSink(const sp<MediaPlayerBase::AudioSink> &audioSink);
     status_t setLooping(bool shouldLoop);
 
@@ -117,6 +118,7 @@ private:
     wp<MediaPlayerBase> mListener;
 
     sp<ISurface> mISurface;
+    sp<Surface> mSurface;
     sp<MediaPlayerBase::AudioSink> mAudioSink;
 
     SystemTimeSource mSystemTimeSource;
@@ -219,6 +221,7 @@ private:
     status_t seekTo_l(int64_t timeUs);
     status_t pause_l();
     void initRenderer_l();
+    void notifyVideoSize_l();
     void seekAudioIfNecessary_l();
 
     void cancelPlayerEvents(bool keepBufferingGoing = false);

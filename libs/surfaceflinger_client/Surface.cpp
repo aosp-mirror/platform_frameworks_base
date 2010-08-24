@@ -363,6 +363,13 @@ status_t Surface::writeToParcel(
         height   = surface->mHeight;
         format   = surface->mFormat;
         flags    = surface->mFlags;
+    } else if (surface != 0 && surface->mSurface != 0) {
+        LOGW("Parceling invalid surface with non-NULL ISurface as NULL: "
+             "mSurface = %p, mIdentity = %d, mWidth = %d, mHeight = %d, "
+             "mFormat = %d, mFlags = 0x%08x, mInitCheck = %d",
+             surface->mSurface.get(), surface->mIdentity, surface->mWidth,
+             surface->mHeight, surface->mFormat, surface->mFlags,
+             surface->mInitCheck);
     }
     parcel->writeStrongBinder(sur!=0 ? sur->asBinder() : NULL);
     parcel->writeInt32(identity);
@@ -434,6 +441,9 @@ void Surface::init()
             mSharedBufferClient = new SharedBufferClient(
                     mClient.getSharedClient(), token, 2, mIdentity);
             mInitCheck = mClient.getSharedClient()->validate(token);
+        } else {
+            LOGW("Not initializing the shared buffer client because token = %d",
+                    token);
         }
     }
 }

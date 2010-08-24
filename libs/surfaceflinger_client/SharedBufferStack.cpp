@@ -344,11 +344,6 @@ ssize_t SharedBufferClient::dequeue()
 {
     SharedBufferStack& stack( *mSharedStack );
 
-    if (stack.head == tail && stack.available == mNumBuffers) {
-        LOGW("dequeue: tail=%d, head=%d, avail=%d, queued=%d",
-                tail, stack.head, stack.available, stack.queued);
-    }
-
     RWLock::AutoRLock _rd(mLock);
 
     const nsecs_t dequeueTime = systemTime(SYSTEM_TIME_THREAD);

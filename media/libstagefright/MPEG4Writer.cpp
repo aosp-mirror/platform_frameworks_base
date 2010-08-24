@@ -174,6 +174,9 @@ private:
     // value, the user-supplied time scale will be used.
     void setTimeScale();
 
+    // Simple validation on the codec specific data
+    status_t checkCodecSpecificData() const;
+
     Track(const Track &);
     Track &operator=(const Track &);
 };
@@ -1521,10 +1524,24 @@ status_t MPEG4Writer::Track::threadEntry() {
         CHECK(timestampUs >= 0);
         if (mNumSamples > 1) {
             if (timestampUs <= lastTimestampUs) {
-                LOGW("Drop a frame, since it arrives too late!");
+                LOGW("Frame arrives too late!");
+#if 0
+                // Drop the late frame.
                 copy->release();
                 copy = NULL;
                 continue;
+#else
+                // Don't drop the late frame, since dropping a frame may cause
+                // problems later during playback
+
+                // The idea here is to avoid having two or more samples with the
+                // same timestamp in the output file.
+                if (mTimeScale >= 1000000LL) {
+                    timestampUs += 1;
+                } else {
+                    timestampUs += (1000000LL + (mTimeScale >> 1)) / mTimeScale;
+                }
+#endif
             }
         }
 
@@ -1623,6 +1640,8 @@ status_t MPEG4Writer::Track::threadEntry() {
     }
 
     if (mSampleSizes.empty()) {
+        err = ERROR_MALFORMED;
+    } else if (OK != checkCodecSpecificData()) {
         err = ERROR_MALFORMED;
     }
     mOwner->trackProgressStatus(this, -1, err);
@@ -1831,6 +1850,27 @@ int64_t MPEG4Writer::Track::getDurationUs() const {
 
 int64_t MPEG4Writer::Track::getEstimatedTrackSizeBytes() const {
     return mEstimatedTrackSizeBytes;
+}
+
+status_t MPEG4Writer::Track::checkCodecSpecificData() const {
+    const char *mime;
+    CHECK(mMeta->findCString(kKeyMIMEType, &mime));
+    if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mime) ||
+        !strcasecmp(MEDIA_MIMETYPE_VIDEO_MPEG4, mime) ||
+        !strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mime)) {
+        if (!mCodecSpecificData ||
+            mCodecSpecificDataSize <= 0) {
+            // Missing codec specific data
+            return ERROR_MALFORMED;
+        }
+    } else {
+        if (mCodecSpecificData ||
+            mCodecSpecificDataSize > 0) {
+            // Unexepected codec specific data found
+            return ERROR_MALFORMED;
+        }
+    }
+    return OK;
 }
 
 void MPEG4Writer::Track::writeTrackHeader(

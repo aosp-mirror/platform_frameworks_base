@@ -18,6 +18,7 @@
 #define ANDROID_HARDWARE_CAMERA_HARDWARE_INTERFACE_H
 
 #include <binder/IMemory.h>
+#include <ui/egl/android_natives.h>
 #include <utils/RefBase.h>
 #include <surfaceflinger/ISurface.h>
 #include <camera/Camera.h>
@@ -86,8 +87,8 @@ class CameraHardwareInterface : public virtual RefBase {
 public:
     virtual ~CameraHardwareInterface() { }
 
-    /** Return the IMemoryHeap for the preview image heap */
-    virtual sp<IMemoryHeap>         getPreviewHeap() const = 0;
+    /** Set the ISurface from which the preview buffers should be dequeued */
+    virtual status_t setPreviewWindow(const sp<ANativeWindow>& buf) = 0;
 
     /** Return the IMemoryHeap for the raw image heap */
     virtual sp<IMemoryHeap>         getRawHeap() const = 0;
@@ -221,6 +222,7 @@ public:
  */
 extern "C" int HAL_getNumberOfCameras();
 extern "C" void HAL_getCameraInfo(int cameraId, struct CameraInfo* cameraInfo);
+/* HAL should return NULL if it fails to open camera hardware. */
 extern "C" sp<CameraHardwareInterface> HAL_openCameraHardware(int cameraId);
 
 };  // namespace android

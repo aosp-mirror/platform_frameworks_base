@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.View.MeasureSpec;
 import android.widget.AdapterView;
 import android.widget.ListPopupWindow;
+import android.widget.PopupWindow;
 
 import java.lang.ref.WeakReference;
 
@@ -41,6 +42,12 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
     private int mPopupMaxWidth;
     private WeakReference<View> mAnchorView;
     private boolean mOverflowOnly;
+
+    private PopupWindow.OnDismissListener mDismissListener = new PopupWindow.OnDismissListener() {
+        public void onDismiss() {
+            mPopup = null;
+        }
+    };
 
     public MenuPopupHelper(Context context, MenuBuilder menu) {
         this(context, menu, null, false);
@@ -69,6 +76,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         mPopup = new ListPopupWindow(mContext, null, 0,
                 com.android.internal.R.style.Widget_Spinner);
         mPopup.setOnItemClickListener(this);
+        mPopup.setOnDismissListener(mDismissListener);
 
         final MenuAdapter adapter = mOverflowOnly ?
                 mMenu.getOverflowMenuAdapter(MenuBuilder.TYPE_POPUP) :
@@ -95,7 +103,6 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         if (isShowing()) {
             mPopup.dismiss();
         }
-        mPopup = null;
     }
 
     public boolean isShowing() {

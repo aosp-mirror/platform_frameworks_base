@@ -50,13 +50,6 @@ public class Sampler extends BaseObj {
         super(id, rs);
     }
 
-    Sampler mSampler_CLAMP_NEAREST;
-    Sampler mSampler_CLAMP_LINEAR;
-    Sampler mSampler_CLAMP_LINEAR_MIP;
-    Sampler mSampler_WRAP_NEAREST;
-    Sampler mSampler_WRAP_LINEAR;
-    Sampler mSampler_WRAP_LINEAR_MIP;
-
     public static Sampler CLAMP_NEAREST(RenderScript rs) {
         if(rs.mSampler_CLAMP_NEAREST == null) {
             Builder b = new Builder(rs);

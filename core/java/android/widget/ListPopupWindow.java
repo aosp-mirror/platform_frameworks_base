@@ -604,6 +604,15 @@ public class ListPopupWindow {
         mDropDownList = null;
     }
 
+    /**
+     * Set a listener to receive a callback when the popup is dismissed.
+     *
+     * @param listener Listener that will be notified when the popup is dismissed.
+     */
+    public void setOnDismissListener(PopupWindow.OnDismissListener listener) {
+        mPopup.setOnDismissListener(listener);
+    }
+
     private void removePromptView() {
         if (mPromptView != null) {
             final ViewParent parent = mPromptView.getParent();
