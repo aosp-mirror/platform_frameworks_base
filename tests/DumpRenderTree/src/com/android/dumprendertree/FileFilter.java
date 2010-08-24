@@ -95,6 +95,7 @@ public class FileFilter {
         ignoreResultList.add("http/tests/appcache/fallback.html"); // http://b/issue?id=2713004
         ignoreResultList.add("http/tests/appcache/foreign-iframe-main.html"); // flaky - skips states
         ignoreResultList.add("http/tests/appcache/manifest-with-empty-file.html"); // flaky
+        ignoreResultList.add("http/tests/appcache/origin-quota.html"); // needs clearAllApplicationCaches(), see http://b/issue?id=2944196
         ignoreResultList.add("storage/database-lock-after-reload.html"); // Succeeds but DumpRenderTree does not read result correctly
         ignoreResultList.add("storage/hash-change-with-xhr.html"); // Succeeds but DumpRenderTree does not read result correctly
         ignoreResultList.add("storage/open-database-creation-callback-isolated-world.html"); // Requires layoutTestController.evaluateScriptInIsolatedWorld()
