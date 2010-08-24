@@ -42,30 +42,40 @@ public class RsRenderStatesRS {
         mOptionsARGB.inScaled = false;
         mOptionsARGB.inPreferredConfig = Bitmap.Config.ARGB_8888;
         mMode = 0;
-        mMaxModes = 4;
+        mMaxModes = 7;
         initRS();
     }
 
     private Resources mRes;
     private RenderScriptGL mRS;
 
-    private Sampler mSampler;
+    private Sampler mLinearClamp;
+    private Sampler mLinearWrap;
+    private Sampler mMipLinearWrap;
+    private Sampler mNearestClamp;
 
+    private ProgramStore mProgStoreBlendNoneDepth;
     private ProgramStore mProgStoreBlendNone;
     private ProgramStore mProgStoreBlendAlpha;
     private ProgramStore mProgStoreBlendAdd;
 
     private ProgramFragment mProgFragmentTexture;
     private ProgramFragment mProgFragmentColor;
+
     private ProgramVertex mProgVertex;
     private ProgramVertex.MatrixAllocation mPVA;
 
+    private ProgramRaster mCullBack;
+    private ProgramRaster mCullFront;
+
+    private Allocation mTexTorus;
     private Allocation mTexOpaque;
     private Allocation mTexTransparent;
 
     private Allocation mAllocPV;
 
     private Mesh mMbyNMesh;
+    private Mesh mTorus;
 
     Font mFontSans;
     Font mFontSerif;
@@ -89,10 +99,40 @@ public class RsRenderStatesRS {
         mScript.set_gDisplayMode(mMode);
     }
 
+    private Mesh getMbyNMesh(float width, float height, int wResolution, int hResolution) {
+
+        Mesh.TriangleMeshBuilder tmb = new Mesh.TriangleMeshBuilder(mRS,
+                                           2, Mesh.TriangleMeshBuilder.TEXTURE_0);
+
+        for (int y = 0; y <= hResolution; y++) {
+            final float normalizedY = (float)y / hResolution;
+            final float yOffset = (normalizedY - 0.5f) * height;
+            for (int x = 0; x <= wResolution; x++) {
+                float normalizedX = (float)x / wResolution;
+                float xOffset = (normalizedX - 0.5f) * width;
+                tmb.setTexture(normalizedX, normalizedY);
+                tmb.addVertex(xOffset, yOffset);
+             }
+        }
+
+        for (int y = 0; y < hResolution; y++) {
+            final int curY = y * (wResolution + 1);
+            final int belowY = (y + 1) * (wResolution + 1);
+            for (int x = 0; x < wResolution; x++) {
+                int curV = curY + x;
+                int belowV = belowY + x;
+                tmb.addTriangle(curV, belowV, curV + 1);
+                tmb.addTriangle(belowV, belowV + 1, curV + 1);
+            }
+        }
+
+        return tmb.create(true);
+    }
 
     private void initProgramStore() {
         // Use stock the stock program store object
-        mProgStoreBlendNone = ProgramStore.BlendNone_DepthNoDepth(mRS);
+        mProgStoreBlendNoneDepth = ProgramStore.BLEND_NONE_DEPTH_TEST(mRS);
+        mProgStoreBlendNone = ProgramStore.BLEND_NONE_DEPTH_NO_DEPTH(mRS);
 
         // Create a custom program store
         ProgramStore.Builder builder = new ProgramStore.Builder(mRS);
@@ -103,8 +143,9 @@ public class RsRenderStatesRS {
         builder.setDepthMask(false);
         mProgStoreBlendAlpha = builder.create();
 
-        mProgStoreBlendAdd = ProgramStore.BlendAdd_DepthNoDepth(mRS);
+        mProgStoreBlendAdd = ProgramStore.BLEND_ADD_DEPTH_NO_DEPTH(mRS);
 
+        mScript.set_gProgStoreBlendNoneDepth(mProgStoreBlendNoneDepth);
         mScript.set_gProgStoreBlendNone(mProgStoreBlendNone);
         mScript.set_gProgStoreBlendAlpha(mProgStoreBlendAlpha);
         mScript.set_gProgStoreBlendAdd(mProgStoreBlendAdd);
@@ -112,18 +153,11 @@ public class RsRenderStatesRS {
 
     private void initProgramFragment() {
 
-        Sampler.Builder bs = new Sampler.Builder(mRS);
-        bs.setMin(Sampler.Value.LINEAR);
-        bs.setMag(Sampler.Value.LINEAR);
-        bs.setWrapS(Sampler.Value.CLAMP);
-        bs.setWrapT(Sampler.Value.CLAMP);
-        mSampler = bs.create();
-
         ProgramFragment.Builder texBuilder = new ProgramFragment.Builder(mRS);
         texBuilder.setTexture(ProgramFragment.Builder.EnvMode.REPLACE,
                               ProgramFragment.Builder.Format.RGBA, 0);
         mProgFragmentTexture = texBuilder.create();
-        mProgFragmentTexture.bindSampler(mSampler, 0);
+        mProgFragmentTexture.bindSampler(mLinearClamp, 0);
 
         ProgramFragment.Builder colBuilder = new ProgramFragment.Builder(mRS);
         colBuilder.setVaryingColor(false);
@@ -146,22 +180,24 @@ public class RsRenderStatesRS {
 
     private Allocation loadTextureRGB(int id) {
         final Allocation allocation = Allocation.createFromBitmapResource(mRS, mRes,
-                id, Element.RGB_565(mRS), false);
+                id, Element.RGB_565(mRS), true);
         allocation.uploadToTexture(0);
         return allocation;
     }
 
     private Allocation loadTextureARGB(int id) {
         Bitmap b = BitmapFactory.decodeResource(mRes, id, mOptionsARGB);
-        final Allocation allocation = Allocation.createFromBitmap(mRS, b, Element.RGBA_8888(mRS), false);
+        final Allocation allocation = Allocation.createFromBitmap(mRS, b, Element.RGBA_8888(mRS), true);
         allocation.uploadToTexture(0);
         return allocation;
     }
 
     private void loadImages() {
+        mTexTorus = loadTextureRGB(R.drawable.torusmap);
         mTexOpaque = loadTextureRGB(R.drawable.data);
         mTexTransparent = loadTextureARGB(R.drawable.leaf);
 
+        mScript.set_gTexTorus(mTexTorus);
         mScript.set_gTexOpaque(mTexOpaque);
         mScript.set_gTexTransparent(mTexTransparent);
     }
@@ -185,19 +221,59 @@ public class RsRenderStatesRS {
         mScript.set_gFontMono(mFontMono);
     }
 
+    private void initMesh() {
+        mMbyNMesh = getMbyNMesh(256, 256, 10, 10);
+        mScript.set_gMbyNMesh(mMbyNMesh);
+
+        FileA3D model = FileA3D.createFromResource(mRS, mRes, R.raw.torus);
+        FileA3D.IndexEntry entry = model.getIndexEntry(0);
+        if(entry == null || entry.getClassID() != FileA3D.ClassID.MESH) {
+            Log.e("rs", "could not load model");
+        }
+        else {
+            mTorus = (Mesh)entry.getObject();
+            mScript.set_gTorusMesh(mTorus);
+        }
+    }
+
+    private void initSamplers() {
+        Sampler.Builder bs = new Sampler.Builder(mRS);
+        bs.setMin(Sampler.Value.LINEAR);
+        bs.setMag(Sampler.Value.LINEAR);
+        bs.setWrapS(Sampler.Value.WRAP);
+        bs.setWrapT(Sampler.Value.WRAP);
+        mLinearWrap = bs.create();
+
+        mLinearClamp = Sampler.CLAMP_LINEAR(mRS);
+        mNearestClamp = Sampler.CLAMP_NEAREST(mRS);
+        mMipLinearWrap = Sampler.WRAP_LINEAR_MIP_LINEAR(mRS);
+
+        mScript.set_gLinearClamp(mLinearClamp);
+        mScript.set_gLinearWrap(mLinearWrap);
+        mScript.set_gMipLinearWrap(mMipLinearWrap);
+        mScript.set_gNearestClamp(mNearestClamp);
+    }
+
+    private void initProgramRaster() {
+        mCullBack = ProgramRaster.CULL_BACK(mRS);
+        mCullFront = ProgramRaster.CULL_FRONT(mRS);
+
+        mScript.set_gCullBack(mCullBack);
+        mScript.set_gCullFront(mCullFront);
+    }
+
     private void initRS() {
 
         mScript = new ScriptC_Rsrenderstates(mRS, mRes, R.raw.rsrenderstates, true);
 
+        initSamplers();
         initProgramStore();
         initProgramFragment();
         initProgramVertex();
-
         initFonts();
-
         loadImages();
-
-
+        initMesh();
+        initProgramRaster();
 
         mRS.contextBindRootScript(mScript);
     }

@@ -549,19 +549,22 @@ public class RenderScript {
     Sampler mSampler_WRAP_LINEAR;
     Sampler mSampler_WRAP_LINEAR_MIP_LINEAR;
 
-    ProgramStore mProgramStore_BlendNone_DepthTest;
-    ProgramStore mProgramStore_BlendNone_DepthNoDepth;
-    ProgramStore mProgramStore_BlendNone_DepthNoTest;
-    ProgramStore mProgramStore_BlendNone_DepthNoWrite;
-    ProgramStore mProgramStore_BlendAlpha_DepthTest;
-    ProgramStore mProgramStore_BlendAlpha_DepthNoDepth;
-    ProgramStore mProgramStore_BlendAlpha_DepthNoTest;
-    ProgramStore mProgramStore_BlendAlpha_DepthNoWrite;
-    ProgramStore mProgramStore_BlendAdd_DepthTest;
-    ProgramStore mProgramStore_BlendAdd_DepthNoDepth;
-    ProgramStore mProgramStore_BlendAdd_DepthNoTest;
-    ProgramStore mProgramStore_BlendAdd_DepthNoWrite;
+    ProgramStore mProgramStore_BLEND_NONE_DEPTH_TEST;
+    ProgramStore mProgramStore_BLEND_NONE_DEPTH_NO_DEPTH;
+    ProgramStore mProgramStore_BLEND_NONE_DEPTH_NO_TEST;
+    ProgramStore mProgramStore_BLEND_NONE_DEPTH_NO_WRITE;
+    ProgramStore mProgramStore_BLEND_ALPHA_DEPTH_TEST;
+    ProgramStore mProgramStore_BLEND_ALPHA_DEPTH_NO_DEPTH;
+    ProgramStore mProgramStore_BLEND_ALPHA_DEPTH_NO_TEST;
+    ProgramStore mProgramStore_BLEND_ALPHA_DEPTH_NO_WRITE;
+    ProgramStore mProgramStore_BLEND_ADD_DEPTH_TEST;
+    ProgramStore mProgramStore_BLEND_ADD_DEPTH_NO_DEPTH;
+    ProgramStore mProgramStore_BLEND_ADD_DEPTH_NO_TEST;
+    ProgramStore mProgramStore_BLEND_ADD_DEPTH_NO_WRITE;
 
+    ProgramRaster mProgramRaster_CULL_BACK;
+    ProgramRaster mProgramRaster_CULL_FRONT;
+    ProgramRaster mProgramRaster_CULL_NONE;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //

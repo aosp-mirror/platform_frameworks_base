@@ -67,17 +67,46 @@ public class ProgramRaster extends BaseObj {
         mRS.nProgramRasterSetCullMode(mID, m.mID);
     }
 
+    public static ProgramRaster CULL_BACK(RenderScript rs) {
+        if(rs.mProgramRaster_CULL_BACK == null) {
+            ProgramRaster.Builder builder = new ProgramRaster.Builder(rs);
+            builder.setCullMode(CullMode.BACK);
+            rs.mProgramRaster_CULL_BACK = builder.create();
+        }
+        return rs.mProgramRaster_CULL_BACK;
+    }
+
+    public static ProgramRaster CULL_FRONT(RenderScript rs) {
+        if(rs.mProgramRaster_CULL_FRONT == null) {
+            ProgramRaster.Builder builder = new ProgramRaster.Builder(rs);
+            builder.setCullMode(CullMode.FRONT);
+            rs.mProgramRaster_CULL_FRONT = builder.create();
+        }
+        return rs.mProgramRaster_CULL_FRONT;
+    }
+
+    public static ProgramRaster CULL_NONE(RenderScript rs) {
+        if(rs.mProgramRaster_CULL_NONE == null) {
+            ProgramRaster.Builder builder = new ProgramRaster.Builder(rs);
+            builder.setCullMode(CullMode.NONE);
+            rs.mProgramRaster_CULL_NONE = builder.create();
+        }
+        return rs.mProgramRaster_CULL_NONE;
+    }
+
     public static class Builder {
         RenderScript mRS;
         boolean mPointSprite;
         boolean mPointSmooth;
         boolean mLineSmooth;
+        CullMode mCullMode;
 
         public Builder(RenderScript rs) {
             mRS = rs;
             mPointSmooth = false;
             mLineSmooth = false;
             mPointSprite = false;
+            mCullMode = CullMode.BACK;
         }
 
         public Builder setPointSpriteEnable(boolean enable) {
@@ -95,9 +124,15 @@ public class ProgramRaster extends BaseObj {
             return this;
         }
 
+        public Builder setCullMode(CullMode m) {
+            mCullMode = m;
+            return this;
+        }
+
         static synchronized ProgramRaster internalCreate(RenderScript rs, Builder b) {
             int id = rs.nProgramRasterCreate(b.mPointSmooth, b.mLineSmooth, b.mPointSprite);
             ProgramRaster pr = new ProgramRaster(id, rs);
+            pr.setCullMode(b.mCullMode);
             return pr;
         }
 
