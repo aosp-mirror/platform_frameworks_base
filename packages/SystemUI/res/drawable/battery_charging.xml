@@ -19,33 +19,27 @@
 -->
 
 <level-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:maxLevel="20">
+    <item android:maxLevel="25">
         <animation-list android:oneshot="false">
             <item android:drawable="@drawable/battery_0" android:duration="1000" />
-            <item android:drawable="@drawable/battery_20" android:duration="1000" />
+            <item android:drawable="@drawable/battery_25" android:duration="1000" />
         </animation-list>
     </item>
-    <item android:maxLevel="40">
+    <item android:maxLevel="50">
         <animation-list android:oneshot="false">
-            <item android:drawable="@drawable/battery_20" android:duration="1000" />
-            <item android:drawable="@drawable/battery_40" android:duration="1000" />
+            <item android:drawable="@drawable/battery_25" android:duration="1000" />
+            <item android:drawable="@drawable/battery_50" android:duration="1000" />
         </animation-list>
     </item>
-    <item android:maxLevel="60">
+    <item android:maxLevel="75">
         <animation-list android:oneshot="false">
-            <item android:drawable="@drawable/battery_40" android:duration="1000" />
-            <item android:drawable="@drawable/battery_60" android:duration="1000" />
-        </animation-list>
-    </item>
-    <item android:maxLevel="80">
-        <animation-list android:oneshot="false">
-            <item android:drawable="@drawable/battery_60" android:duration="1000" />
-            <item android:drawable="@drawable/battery_80" android:duration="1000" />
+            <item android:drawable="@drawable/battery_50" android:duration="1000" />
+            <item android:drawable="@drawable/battery_75" android:duration="1000" />
         </animation-list>
     </item>
     <item android:maxLevel="92">
         <animation-list android:oneshot="false">
-            <item android:drawable="@drawable/battery_80" android:duration="1000" />
+            <item android:drawable="@drawable/battery_75" android:duration="1000" />
             <item android:drawable="@drawable/battery_100" android:duration="1000" />
         </animation-list>
     </item>
