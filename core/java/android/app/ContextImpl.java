@@ -2840,6 +2840,11 @@ class ContextImpl extends Context {
                 }
             }
 
+            public void startCommit() {
+                // TODO: implement
+                commit();
+            }
+
             public boolean commit() {
                 boolean returnValue;
 
@@ -2914,7 +2919,7 @@ class ContextImpl extends Context {
         public Editor edit() {
             return new EditorImpl();
         }
-        
+
         private FileOutputStream createFileOutputStream(File file) {
             FileOutputStream str = null;
             try {
