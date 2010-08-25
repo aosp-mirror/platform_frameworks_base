@@ -19,8 +19,11 @@ package android.widget;
 import com.android.internal.R;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
@@ -59,7 +62,9 @@ public class ScrollView extends FrameLayout {
     private long mLastScroll;
 
     private final Rect mTempRect = new Rect();
-    private Scroller mScroller;
+    private OverScroller mScroller;
+    private EdgeGlow mEdgeGlowTop;
+    private EdgeGlow mEdgeGlowBottom;
 
     /**
      * Flag to indicate that we are moving focus ourselves. This is so the
@@ -113,6 +118,9 @@ public class ScrollView extends FrameLayout {
     private int mMinimumVelocity;
     private int mMaximumVelocity;
     
+    private int mOverscrollDistance;
+    private int mOverflingDistance;
+
     /**
      * ID of the active pointer. This is used to retain consistency during
      * drags/flings if multiple pointers are used.
@@ -185,7 +193,7 @@ public class ScrollView extends FrameLayout {
 
 
     private void initScrollView() {
-        mScroller = new Scroller(getContext());
+        mScroller = new OverScroller(getContext());
         setFocusable(true);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
         setWillNotDraw(false);
@@ -193,6 +201,8 @@ public class ScrollView extends FrameLayout {
         mTouchSlop = configuration.getScaledTouchSlop();
         mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
+        mOverscrollDistance = configuration.getScaledOverscrollDistance();
+        mOverflingDistance = configuration.getScaledOverflingDistance();
     }
 
     @Override
@@ -453,6 +463,9 @@ public class ScrollView extends FrameLayout {
                 /* Release the drag */
                 mIsBeingDragged = false;
                 mActivePointerId = INVALID_POINTER;
+                if (mScroller.springback(mScrollX, mScrollY, 0, 0, 0, getScrollRange())) {
+                    invalidate();
+                }
                 break;
             case MotionEvent.ACTION_POINTER_UP:
                 onSecondaryPointerUp(ev);
@@ -510,7 +523,22 @@ public class ScrollView extends FrameLayout {
                     final int deltaY = (int) (mLastMotionY - y);
                     mLastMotionY = y;
 
-                    scrollBy(0, deltaY);
+                    final int oldX = mScrollX;
+                    final int oldY = mScrollY;
+                    final int range = getScrollRange();
+                    if (overscrollBy(0, deltaY, 0, mScrollY, 0, range,
+                            0, mOverscrollDistance, true)) {
+                        // Break our velocity if we hit a scroll barrier.
+                        mVelocityTracker.clear();
+                    }
+                    onScrollChanged(mScrollX, mScrollY, oldX, oldY);
+
+                    final int pulledToY = oldY + deltaY;
+                    if (pulledToY < 0) {
+                        mEdgeGlowTop.onPull((float) deltaY / getHeight());
+                    } else if (pulledToY > range) {
+                        mEdgeGlowBottom.onPull((float) deltaY / getHeight());
+                    }
                 }
                 break;
             case MotionEvent.ACTION_UP: 
@@ -519,8 +547,15 @@ public class ScrollView extends FrameLayout {
                     velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
                     int initialVelocity = (int) velocityTracker.getYVelocity(mActivePointerId);
 
-                    if (getChildCount() > 0 && Math.abs(initialVelocity) > mMinimumVelocity) {
-                        fling(-initialVelocity);
+                    if (getChildCount() > 0) {
+                        if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
+                            fling(-initialVelocity);
+                        } else {
+                            final int bottom = getScrollRange();
+                            if (mScroller.springback(mScrollX, mScrollY, 0, 0, 0, bottom)) {
+                                invalidate();
+                            }
+                        }
                     }
 
                     mActivePointerId = INVALID_POINTER;
@@ -529,16 +564,27 @@ public class ScrollView extends FrameLayout {
                     if (mVelocityTracker != null) {
                         mVelocityTracker.recycle();
                         mVelocityTracker = null;
+                    }
+                    if (mEdgeGlowTop != null) {
+                        mEdgeGlowTop.onRelease();
+                        mEdgeGlowBottom.onRelease();
                     }
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
                 if (mIsBeingDragged && getChildCount() > 0) {
+                    if (mScroller.springback(mScrollX, mScrollY, 0, 0, 0, getScrollRange())) {
+                        invalidate();
+                    }
                     mActivePointerId = INVALID_POINTER;
                     mIsBeingDragged = false;
                     if (mVelocityTracker != null) {
                         mVelocityTracker.recycle();
                         mVelocityTracker = null;
+                    }
+                    if (mEdgeGlowTop != null) {
+                        mEdgeGlowTop.onRelease();
+                        mEdgeGlowBottom.onRelease();
                     }
                 }
                 break;
@@ -566,6 +612,22 @@ public class ScrollView extends FrameLayout {
         }
     }
     
+    @Override
+    protected void onOverscrolled(int scrollX, int scrollY,
+            boolean clampedX, boolean clampedY) {
+        // Treat animating scrolls differently; see #computeScroll() for why.
+        if (!mScroller.isFinished()) {
+            mScrollX = scrollX;
+            mScrollY = scrollY;
+            if (clampedY) {
+                mScroller.springback(mScrollX, mScrollY, 0, 0, 0, getScrollRange());
+            }
+        } else {
+            super.scrollTo(scrollX, scrollY);
+        }
+        awakenScrollBars();
+    }
+
     private int getScrollRange() {
         int scrollRange = 0;
         if (getChildCount() > 0) {
@@ -952,7 +1014,16 @@ public class ScrollView extends FrameLayout {
             return contentHeight;
         }
         
-        return getChildAt(0).getBottom();
+        int scrollRange = getChildAt(0).getBottom();
+        final int scrollY = mScrollY;
+        final int overscrollBottom = Math.max(0, scrollRange - contentHeight);
+        if (scrollY < 0) {
+            scrollRange -= scrollY;
+        } else if (scrollY > overscrollBottom) {
+            scrollRange += scrollY - overscrollBottom;
+        }
+
+        return scrollRange;
     }
 
     @Override
@@ -1013,14 +1084,16 @@ public class ScrollView extends FrameLayout {
             int x = mScroller.getCurrX();
             int y = mScroller.getCurrY();
 
-            if (getChildCount() > 0) {
-                View child = getChildAt(0);
-                x = clamp(x, getWidth() - mPaddingRight - mPaddingLeft, child.getWidth());
-                y = clamp(y, getHeight() - mPaddingBottom - mPaddingTop, child.getHeight());
-                if (x != oldX || y != oldY) {
-                    mScrollX = x;
-                    mScrollY = y;
-                    onScrollChanged(x, y, oldX, oldY);
+            if (oldX != x || oldY != y) {
+                overscrollBy(x - oldX, y - oldY, oldX, oldY, 0, getScrollRange(),
+                        0, mOverflingDistance, false);
+                onScrollChanged(mScrollX, mScrollY, oldX, oldY);
+
+                final int range = getScrollRange();
+                if (y < 0 && oldY >= 0) {
+                    mEdgeGlowTop.onAbsorb((int) mScroller.getCurrVelocity());
+                } else if (y > range && oldY <= range) {
+                    mEdgeGlowBottom.onAbsorb((int) mScroller.getCurrVelocity());
                 }
             }
             awakenScrollBars();
@@ -1258,7 +1331,7 @@ public class ScrollView extends FrameLayout {
             int bottom = getChildAt(0).getHeight();
     
             mScroller.fling(mScrollX, mScrollY, 0, velocityY, 0, 0, 0, 
-                    Math.max(0, bottom - height));
+                    Math.max(0, bottom - height), 0, height/2);
     
             final boolean movingDown = velocityY > 0;
     
@@ -1292,6 +1365,55 @@ public class ScrollView extends FrameLayout {
             y = clamp(y, getHeight() - mPaddingBottom - mPaddingTop, child.getHeight());
             if (x != mScrollX || y != mScrollY) {
                 super.scrollTo(x, y);
+            }
+        }
+    }
+
+    @Override
+    public void setOverscrollMode(int mode) {
+        if (mode != OVERSCROLL_NEVER) {
+            if (mEdgeGlowTop == null) {
+                final Resources res = getContext().getResources();
+                final Drawable edge = res.getDrawable(R.drawable.edge_light);
+                final Drawable glow = res.getDrawable(R.drawable.overscroll_glow);
+                mEdgeGlowTop = new EdgeGlow(edge, glow);
+                mEdgeGlowBottom = new EdgeGlow(edge, glow);
+            }
+        } else {
+            mEdgeGlowTop = null;
+            mEdgeGlowBottom = null;
+        }
+        super.setOverscrollMode(mode);
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+        super.draw(canvas);
+        if (mEdgeGlowTop != null) {
+            final int scrollY = mScrollY;
+            if (!mEdgeGlowTop.isFinished()) {
+                final int restoreCount = canvas.save();
+                final int width = getWidth();
+
+                canvas.translate(-width / 2, scrollY);
+                mEdgeGlowTop.setSize(width * 2, getHeight());
+                if (mEdgeGlowTop.draw(canvas)) {
+                    invalidate();
+                }
+                canvas.restoreToCount(restoreCount);
+            }
+            if (!mEdgeGlowBottom.isFinished()) {
+                final int restoreCount = canvas.save();
+                final int width = getWidth();
+                final int height = getHeight();
+
+                canvas.translate(-width / 2, scrollY + height);
+                canvas.rotate(180, width, 0);
+                mEdgeGlowBottom.setSize(width * 2, height);
+                if (mEdgeGlowBottom.draw(canvas)) {
+                    invalidate();
+                }
+                canvas.restoreToCount(restoreCount);
             }
         }
     }
