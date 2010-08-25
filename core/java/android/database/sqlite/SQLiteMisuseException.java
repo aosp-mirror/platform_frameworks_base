@@ -16,6 +16,18 @@
 
 package android.database.sqlite;
 
+/**
+ * This error can occur if the application creates a SQLiteStatement object and allows multiple
+ * threads in the application use it at the same time.
+ * Sqlite returns this error if bind and execute methods on this object occur at the same time
+ * from multiple threads, like so:
+ *     thread # 1: in execute() method of the SQLiteStatement object
+ *     while thread # 2: is in bind..() on the same object.
+ *</p>
+ * FIX this by NEVER sharing the same SQLiteStatement object between threads.
+ * Create a local instance of the SQLiteStatement whenever it is needed, use it and close it ASAP.
+ * NEVER make it globally available.
+ */
 public class SQLiteMisuseException extends SQLiteException {
     public SQLiteMisuseException() {}
 

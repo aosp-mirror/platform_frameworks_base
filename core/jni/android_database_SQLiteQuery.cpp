@@ -205,7 +205,7 @@ static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
                     int offset = window->alloc(size);
                     if (!offset) {
                         window->freeLastRow();
-                        LOGE("Failed allocating %u bytes for text/blob at %d,%d", size,
+                        LOGD("Failed allocating %u bytes for text/blob at %d,%d", size,
                                    startPos + numRows, i);
                         return startPos + numRows + finish_program_and_get_row_count(statement) + 1;
                     }
@@ -225,7 +225,7 @@ static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
                     int64_t value = sqlite3_column_int64(statement, i);
                     if (!window->putLong(numRows, i, value)) {
                         window->freeLastRow();
-                        LOGE("Failed allocating space for a long in column %d", i);
+                        LOGD("Failed allocating space for a long in column %d", i);
                         return startPos + numRows + finish_program_and_get_row_count(statement) + 1;
                     }
                     LOG_WINDOW("%d,%d is INTEGER 0x%016llx", startPos + numRows, i, value);
@@ -234,7 +234,7 @@ static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
                     double value = sqlite3_column_double(statement, i);
                     if (!window->putDouble(numRows, i, value)) {
                         window->freeLastRow();
-                        LOGE("Failed allocating space for a double in column %d", i);
+                        LOGD("Failed allocating space for a double in column %d", i);
                         return startPos + numRows + finish_program_and_get_row_count(statement) + 1;
                     }
                     LOG_WINDOW("%d,%d is FLOAT %lf", startPos + numRows, i, value);
@@ -245,7 +245,7 @@ static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
                     int offset = window->alloc(size);
                     if (!offset) {
                         window->freeLastRow();
-                        LOGE("Failed allocating %u bytes for blob at %d,%d", size,
+                        LOGD("Failed allocating %u bytes for blob at %d,%d", size,
                                    startPos + numRows, i);
                         return startPos + numRows + finish_program_and_get_row_count(statement) + 1;
                     }
