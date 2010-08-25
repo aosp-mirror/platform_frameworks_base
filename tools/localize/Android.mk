@@ -34,7 +34,7 @@ LOCAL_STATIC_LIBRARIES := \
 	libcutils
     
 ifeq ($(HOST_OS),linux)
-LOCAL_LDLIBS += -lrt
+LOCAL_LDLIBS += -lrt -lpthread
 endif
 
 
