@@ -22,6 +22,7 @@
 
 namespace android {
 
+struct AMessage;
 class String8;
 
 class AMRExtractor : public MediaExtractor {
@@ -49,7 +50,8 @@ private:
 };
 
 bool SniffAMR(
-        const sp<DataSource> &source, String8 *mimeType, float *confidence);
+        const sp<DataSource> &source, String8 *mimeType, float *confidence,
+        sp<AMessage> *);
 
 }  // namespace android
 
