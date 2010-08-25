@@ -27,6 +27,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -66,8 +67,6 @@ public class StackView extends AdapterViewAnimator {
     private static final float SLIDE_UP_RATIO = 0.7f;
 
     private final WeakHashMap<View, Float> mRotations = new WeakHashMap<View, Float>();
-    private final WeakHashMap<View, Integer>
-            mChildrenToApplyTransformsTo = new WeakHashMap<View, Integer>();
 
     /**
      * Sentinel value for no current active pointer.
@@ -90,9 +89,12 @@ public class StackView extends AdapterViewAnimator {
     private int mMaximumVelocity;
     private VelocityTracker mVelocityTracker;
 
+    private static HolographicHelper sHolographicHelper;
     private ImageView mHighlight;
     private StackSlider mStackSlider;
     private boolean mFirstLayoutHappened = false;
+    private ViewGroup mAncestorContainingAllChildren = null;
+    private int mAncestorHeight = 0;
 
     public StackView(Context context) {
         super(context);
@@ -117,9 +119,11 @@ public class StackView extends AdapterViewAnimator {
         addViewInLayout(mHighlight, -1, new LayoutParams(mHighlight));
         mStackSlider = new StackSlider();
 
-        if (!sPaintsInitialized) {
-            initializePaints();
+        if (sHolographicHelper == null) {
+            sHolographicHelper = new HolographicHelper();
         }
+        setClipChildren(false);
+        setClipToPadding(false);
     }
 
     /**
@@ -205,6 +209,7 @@ public class StackView extends AdapterViewAnimator {
         if (!mRotations.containsKey(child)) {
             float rotation = (float) (Math.random()*26 - 13);
             mRotations.put(child, rotation);
+            child.setRotation(rotation);
         }
 
         // Child has been removed
@@ -212,47 +217,36 @@ public class StackView extends AdapterViewAnimator {
             if (mRotations.containsKey(child)) {
                 mRotations.remove(child);
             }
-            if (mChildrenToApplyTransformsTo.containsKey(child)) {
-                mChildrenToApplyTransformsTo.remove(child);
-            }
         }
-
-        // if this view is already in the layout, we need to
-        // wait until layout has finished in order to set the
-        // pivot point of the rotation (requiring getMeasuredWidth/Height())
-        mChildrenToApplyTransformsTo.put(child, relativeIndex);
     }
 
     @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
+    protected void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+    }
 
-        if (!mChildrenToApplyTransformsTo.isEmpty()) {
-            for (View child: mChildrenToApplyTransformsTo.keySet()) {
-                if (mRotations.containsKey(child)) {
-                    child.setPivotX(child.getMeasuredWidth()/2);
-                    child.setPivotY(child.getMeasuredHeight()/2);
-                    child.setRotation(mRotations.get(child));
-                }
+    // TODO: right now, this code walks up the hierarchy as far as needed and disables clipping
+    // so that the stack's children can draw outside of the stack's bounds. This is fine within
+    // the context of widgets in the launcher, but is destructive in general, as the clipping
+    // values are not being reset. For this to be a full framework level widget, we will need
+    // framework level support for drawing outside of a parent's bounds.
+    private void disableParentalClipping() {
+        if (mAncestorContainingAllChildren != null) {
+            Log.v(TAG, "Disabling parental clipping.");
+            ViewGroup vg = this;
+            while (vg.getParent() != null && vg.getParent() instanceof ViewGroup) {
+                if (vg == mAncestorContainingAllChildren) break;
+                vg = (ViewGroup) vg.getParent();
+                vg.setClipChildren(false);
+                vg.setClipToPadding(false);
             }
-            mChildrenToApplyTransformsTo.clear();
         }
+    }
 
+    private void onLayout() {
         if (!mFirstLayoutHappened) {
             mViewHeight = Math.round(SLIDE_UP_RATIO*getMeasuredHeight());
             mSwipeThreshold = Math.round(SWIPE_THRESHOLD_RATIO*mViewHeight);
-
-            // TODO: Right now this walks all the way up the view hierarchy and disables
-            // ClipChildren and ClipToPadding. We're probably going  to want to reset
-            // these flags as well.
-            setClipChildren(false);
-            setClipToPadding(false);
-            ViewGroup view = this;
-            while (view.getParent() != null && view.getParent() instanceof ViewGroup) {
-                view = (ViewGroup) view.getParent();
-                view.setClipChildren(false);
-                view.setClipToPadding(false);
-            }
             mFirstLayoutHappened = true;
         }
     }
@@ -261,7 +255,6 @@ public class StackView extends AdapterViewAnimator {
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         int action = ev.getAction();
         switch(action & MotionEvent.ACTION_MASK) {
-
             case MotionEvent.ACTION_DOWN: {
                 if (mActivePointerId == INVALID_POINTER) {
                     mInitialX = ev.getX();
@@ -320,7 +313,7 @@ public class StackView extends AdapterViewAnimator {
             View v = getViewAtRelativeIndex(activeIndex);
             if (v == null) return;
 
-            mHighlight.setImageBitmap(createOutline(v));
+            mHighlight.setImageBitmap(sHolographicHelper.createOutline(v));
             mHighlight.bringToFront();
             v.bringToFront();
             mStackSlider.setView(v);
@@ -640,7 +633,6 @@ public class StackView extends AdapterViewAnimator {
         float getXProgress() {
             return mXProgress;
         }
-
     }
 
     @Override
@@ -649,55 +641,206 @@ public class StackView extends AdapterViewAnimator {
         setDisplayedChild(mWhichChild);
     }
 
-    private static final Paint sHolographicPaint = new Paint();
-    private static final Paint sErasePaint = new Paint();
-    private static boolean sPaintsInitialized = false;
-    private static final float STROKE_WIDTH = 3.0f;
-
-    static void initializePaints() {
-        sHolographicPaint.setColor(0xff6699ff);
-        sHolographicPaint.setFilterBitmap(true);
-        sErasePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
-        sErasePaint.setFilterBitmap(true);
-        sPaintsInitialized = true;
+    LayoutParams createOrReuseLayoutParams(View v) {
+        final ViewGroup.LayoutParams currentLp = v.getLayoutParams();
+        if (currentLp instanceof LayoutParams) {
+            LayoutParams lp = (LayoutParams) currentLp;
+            lp.setHorizontalOffset(0);
+            lp.setVerticalOffset(0);
+            return lp;
+        }
+        return new LayoutParams(v);
     }
 
-    static Bitmap createOutline(View v) {
-        if (v.getMeasuredWidth() == 0 || v.getMeasuredHeight() == 0) {
-            return null;
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        boolean dataChanged = mDataChanged;
+        if (dataChanged) {
+            handleDataChanged();
+
+            // if the data changes, mWhichChild might be out of the bounds of the adapter
+            // in this case, we reset mWhichChild to the beginning
+            if (mWhichChild >= mAdapter.getCount())
+                mWhichChild = 0;
+
+            showOnly(mWhichChild, true, true);
         }
 
-        Bitmap bitmap = Bitmap.createBitmap(v.getMeasuredWidth(), v.getMeasuredHeight(),
-                Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
+        final int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            final View child = getChildAt(i);
 
-        float rotationX = v.getRotationX();
-        v.setRotationX(0);
-        canvas.concat(v.getMatrix());
-        v.draw(canvas);
-        v.setRotationX(rotationX);
+            int childRight = mPaddingLeft + child.getMeasuredWidth();
+            int childBottom = mPaddingTop + child.getMeasuredHeight();
+            LayoutParams lp = (LayoutParams) child.getLayoutParams();
 
-        Bitmap outlineBitmap = Bitmap.createBitmap(v.getMeasuredWidth(), v.getMeasuredHeight(),
-                Bitmap.Config.ARGB_8888);
-        Canvas outlineCanvas = new Canvas(outlineBitmap);
-        drawOutline(outlineCanvas, bitmap);
-        bitmap.recycle();
-        return outlineBitmap;
+            child.layout(mPaddingLeft + lp.horizontalOffset, mPaddingTop + lp.verticalOffset,
+                    childRight + lp.horizontalOffset, childBottom + lp.verticalOffset);
+
+            //TODO: temp until fix in View
+            child.setPivotX(child.getMeasuredWidth()/2);
+            child.setPivotY(child.getMeasuredHeight()/2);
+        }
+
+        mDataChanged = false;
+        onLayout();
     }
 
-    static void drawOutline(Canvas dest, Bitmap src) {
-        dest.drawColor(0, PorterDuff.Mode.CLEAR);
+    class LayoutParams extends ViewGroup.LayoutParams {
+        int horizontalOffset;
+        int verticalOffset;
+        View mView;
 
-        Bitmap mask = src.extractAlpha();
-        Matrix id = new Matrix();
+        LayoutParams(View view) {
+            super(0, 0);
+            horizontalOffset = 0;
+            verticalOffset = 0;
+            mView = view;
+        }
 
-        Matrix m = new Matrix();
-        float xScale = STROKE_WIDTH*2/(src.getWidth());
-        float yScale = STROKE_WIDTH*2/(src.getHeight());
-        m.preScale(1+xScale, 1+yScale, src.getWidth()/2, src.getHeight()/2);
-        dest.drawBitmap(mask, m, sHolographicPaint);
+        LayoutParams(Context c, AttributeSet attrs) {
+            super(c, attrs);
+            horizontalOffset = 0;
+            verticalOffset = 0;
+        }
 
-        dest.drawBitmap(src, id, sErasePaint);
-        mask.recycle();
+        private Rect parentRect = new Rect();
+        void invalidateGlobalRegion(View v, Rect r) {
+            View p = v;
+            if (!(v.getParent() != null && v.getParent() instanceof View)) return;
+
+            View gp = (View) v.getParent();
+            boolean firstPass = true;
+            parentRect.set(0, 0, 0, 0);
+            int depth = 0;
+            while (gp.getParent() != null && gp.getParent() instanceof View
+                    && !parentRect.contains(r)) {
+                if (!firstPass) {
+                    r.offset(p.getLeft() - gp.getScrollX(), p.getTop() - gp.getScrollY());
+                    depth++;
+                }
+                firstPass = false;
+                p = (View) p.getParent();
+                gp = (View) p.getParent();
+                parentRect.set(p.getLeft() - gp.getScrollX(), p.getTop() - gp.getScrollY(),
+                        p.getRight() - gp.getScrollX(), p.getBottom() - gp.getScrollY());
+            }
+
+            if (depth > mAncestorHeight) {
+                mAncestorContainingAllChildren = (ViewGroup) p;
+                mAncestorHeight = depth;
+                disableParentalClipping();
+            }
+
+            p.invalidate(r.left, r.top, r.right, r.bottom);
+        }
+
+        private Rect invalidateRect = new Rect();
+        private RectF invalidateRectf = new RectF();
+        // This is public so that PropertyAnimator can access it
+        public void setVerticalOffset(int newVerticalOffset) {
+            int offsetDelta = newVerticalOffset - verticalOffset;
+            verticalOffset = newVerticalOffset;
+
+            if (mView != null) {
+                mView.requestLayout();
+                int top = Math.min(mView.getTop() + offsetDelta, mView.getTop());
+                int bottom = Math.max(mView.getBottom() + offsetDelta, mView.getBottom());
+
+                invalidateRectf.set(mView.getLeft(),  top, mView.getRight(), bottom);
+
+                float xoffset = -invalidateRectf.left;
+                float yoffset = -invalidateRectf.top;
+                invalidateRectf.offset(xoffset, yoffset);
+                mView.getMatrix().mapRect(invalidateRectf);
+                invalidateRectf.offset(-xoffset, -yoffset);
+                invalidateRect.set((int) Math.floor(invalidateRectf.left),
+                        (int) Math.floor(invalidateRectf.top),
+                        (int) Math.ceil(invalidateRectf.right),
+                        (int) Math.ceil(invalidateRectf.bottom));
+
+                invalidateGlobalRegion(mView, invalidateRect);
+            }
+        }
+
+        public void setHorizontalOffset(int newHorizontalOffset) {
+            int offsetDelta = newHorizontalOffset - horizontalOffset;
+            horizontalOffset = newHorizontalOffset;
+
+            if (mView != null) {
+                mView.requestLayout();
+                int left = Math.min(mView.getLeft() + offsetDelta, mView.getLeft());
+                int right = Math.max(mView.getRight() + offsetDelta, mView.getRight());
+                invalidateRectf.set(left,  mView.getTop(), right, mView.getBottom());
+
+                float xoffset = -invalidateRectf.left;
+                float yoffset = -invalidateRectf.top;
+                invalidateRectf.offset(xoffset, yoffset);
+                mView.getMatrix().mapRect(invalidateRectf);
+                invalidateRectf.offset(-xoffset, -yoffset);
+
+                invalidateRect.set((int) Math.floor(invalidateRectf.left),
+                        (int) Math.floor(invalidateRectf.top),
+                        (int) Math.ceil(invalidateRectf.right),
+                        (int) Math.ceil(invalidateRectf.bottom));
+
+                invalidateGlobalRegion(mView, invalidateRect);
+            }
+        }
+    }
+
+    private static class HolographicHelper {
+        private final Paint mHolographicPaint = new Paint();
+        private final Paint mErasePaint = new Paint();
+        private final float STROKE_WIDTH = 3.0f;
+
+        HolographicHelper() {
+            initializePaints();
+        }
+
+        void initializePaints() {
+            mHolographicPaint.setColor(0xff6699ff);
+            mHolographicPaint.setFilterBitmap(true);
+            mErasePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
+            mErasePaint.setFilterBitmap(true);
+        }
+
+        Bitmap createOutline(View v) {
+            if (v.getMeasuredWidth() == 0 || v.getMeasuredHeight() == 0) {
+                return null;
+            }
+
+            Bitmap bitmap = Bitmap.createBitmap(v.getMeasuredWidth(), v.getMeasuredHeight(),
+                    Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+
+            float rotationX = v.getRotationX();
+            v.setRotationX(0);
+            canvas.concat(v.getMatrix());
+            v.draw(canvas);
+
+            v.setRotationX(rotationX);
+
+            drawOutline(canvas, bitmap);
+            return bitmap;
+        }
+
+        final Matrix id = new Matrix();
+        final Matrix scaleMatrix = new Matrix();
+        void drawOutline(Canvas dest, Bitmap src) {
+            Bitmap mask = src.extractAlpha();
+
+            dest.drawColor(0, PorterDuff.Mode.CLEAR);
+
+            float xScale = STROKE_WIDTH*2/(dest.getWidth());
+            float yScale = STROKE_WIDTH*2/(dest.getHeight());
+
+            scaleMatrix.reset();
+            scaleMatrix.preScale(1+xScale, 1+yScale, dest.getWidth()/2, dest.getHeight()/2);
+            dest.setMatrix(id);
+            dest.drawBitmap(mask, scaleMatrix, mHolographicPaint);
+            dest.drawBitmap(mask, id, mErasePaint);
+            mask.recycle();
+        }
     }
 }
