@@ -699,15 +699,21 @@ public class Animator<T> extends Animatable {
 
     @Override
     public void end() {
+        if (!sAnimations.contains(this) &&
+                (Thread.currentThread() == Looper.getMainLooper().getThread())) {
+            // Special case if the animation has not yet started. Set the end value.
+            long endTime = mDuration;
+            if (mRepeatCount > 0) {
+                endTime += mRepeatCount * mDuration;
+            }
+            setCurrentPlayTime(endTime);
+        }
         // Just set the ENDED flag - this causes the animation to end the next time a frame
         // is processed.
         mPlayingState = ENDED;
     }
 
-    /**
-     * Returns whether this Animator is currently running (having been started and not yet ended).
-     * @return Wehther the Animator is running.
-     */
+    @Override
     public boolean isRunning() {
         return mPlayingState == RUNNING;
     }
@@ -737,6 +743,7 @@ public class Animator<T> extends Animatable {
      */
     private void endAnimation() {
         sAnimations.remove(this);
+        mPlayingState = STOPPED;
         if (mListeners != null) {
             ArrayList<AnimatableListener> tmpListeners =
                     (ArrayList<AnimatableListener>) mListeners.clone();
@@ -744,7 +751,6 @@ public class Animator<T> extends Animatable {
                 listener.onAnimationEnd(this);
             }
         }
-        mPlayingState = STOPPED;
     }
 
     /**

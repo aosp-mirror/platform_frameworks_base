@@ -56,6 +56,13 @@ public abstract class Animatable implements Cloneable {
     public void end() {
     }
 
+
+    /**
+     * Returns whether this Animatable is currently running (having been started and not yet ended).
+     * @return Whether the Animatable is running.
+     */
+    public abstract boolean isRunning();
+
     /**
      * Adds a listener to the set of listeners that are sent events through the life of an
      * animation, such as start, repeat, and end.
