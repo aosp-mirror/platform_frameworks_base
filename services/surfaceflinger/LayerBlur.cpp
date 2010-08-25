@@ -241,6 +241,8 @@ void LayerBlur::onDraw(const Region& clip) const
             glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
         }
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glLoadIdentity();
+        glMatrixMode(GL_MODELVIEW);
     }
 }
 

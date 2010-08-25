@@ -54,11 +54,6 @@ class SharedClient;
 
 // ----------------------------------------------------------------------------
 
-// 4 * (11 + 7 + (1 + 2*NUM_RECT_MAX) * NUM_BUFFER_MAX) * NUM_LAYERS_MAX
-// 4 * (11 + 7 + (1 + 2*7)*16) * 31
-// 1032 * 31
-// = ~27 KiB (31992)
-
 class SharedBufferStack
 {
     friend class SharedClient;
@@ -85,7 +80,7 @@ public:
     };
 
     struct FlatRegion { // 52 bytes = 4 * (1 + 2*N)
-        static const unsigned int NUM_RECT_MAX = 6;
+        static const unsigned int NUM_RECT_MAX = 5;
         uint32_t    count;
         SmallRect   rects[NUM_RECT_MAX];
     };
@@ -93,13 +88,18 @@ public:
     struct BufferData {
         FlatRegion dirtyRegion;
         SmallRect  crop;
+        uint8_t transform;
+        uint8_t reserved[3];
     };
     
     SharedBufferStack();
     void init(int32_t identity);
     status_t setDirtyRegion(int buffer, const Region& reg);
     status_t setCrop(int buffer, const Rect& reg);
+    status_t setTransform(int buffer, uint8_t transform);
     Region getDirtyRegion(int buffer) const;
+    Rect getCrop(int buffer) const;
+    uint32_t getTransform(int buffer) const;
 
     // these attributes are part of the conditions/updates
     volatile int32_t head;      // server's current front buffer
@@ -117,7 +117,7 @@ public:
     int32_t     reserved32[1];
     Statistics  stats;
     int32_t     reserved;
-    BufferData  buffers[NUM_BUFFER_MAX];     // 960 bytes
+    BufferData  buffers[NUM_BUFFER_MAX];     // 1024 bytes
 };
 
 // ----------------------------------------------------------------------------
@@ -206,7 +206,7 @@ public:
     bool needNewBuffer(int buffer) const;
     status_t setDirtyRegion(int buffer, const Region& reg);
     status_t setCrop(int buffer, const Rect& reg);
-    
+    status_t setTransform(int buffer, uint32_t transform);
 
     class SetBufferCountCallback {
         friend class SharedBufferClient;
@@ -275,6 +275,8 @@ public:
     status_t reallocateAllExcept(int buffer);
     int32_t getQueuedCount() const;
     Region getDirtyRegion(int buffer) const;
+    Rect getCrop(int buffer) const;
+    uint32_t getTransform(int buffer) const;
 
     status_t resize(int newNumBuffers);
 
