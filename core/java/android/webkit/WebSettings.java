@@ -268,6 +268,8 @@ public class WebSettings {
 
     private AutoFillProfile mAutoFillProfile;
 
+    private boolean         mUseWebViewBackgroundForOverscroll = true;
+
     // private WebSettings, not accessible by the host activity
     static private int      mDoubleTapToastCount = 3;
 
@@ -628,6 +630,23 @@ public class WebSettings {
      */
     public boolean enableSmoothTransition() {
         return mEnableSmoothTransition;
+    }
+
+    /**
+     * Set whether the WebView uses its background for over scroll background.
+     * If true, it will use the WebView's background. If false, it will use an
+     * internal pattern. Default is true.
+     */
+    public void setUseWebViewBackgroundForOverscrollBackground(boolean view) {
+        mUseWebViewBackgroundForOverscroll = view;
+    }
+
+    /**
+     * Returns true if this WebView uses WebView's background instead of
+     * internal pattern for over scroll background.
+     */
+    public boolean getUseWebViewBackgroundForOverscrollBackground() {
+        return mUseWebViewBackgroundForOverscroll;
     }
 
     /**

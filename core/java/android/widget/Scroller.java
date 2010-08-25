@@ -52,14 +52,10 @@ public class Scroller  {
     private float mDurationReciprocal;
     private float mDeltaX;
     private float mDeltaY;
-    private float mViscousFluidScale;
-    private float mViscousFluidNormalize;
     private boolean mFinished;
     private Interpolator mInterpolator;
     private boolean mFlywheel;
 
-    private float mCoeffX = 0.0f;
-    private float mCoeffY = 1.0f;
     private float mVelocity;
 
     private static final int DEFAULT_DURATION = 250;
@@ -94,7 +90,16 @@ public class Scroller  {
             SPLINE[i] = d;
         }
         SPLINE[NB_SAMPLES] = 1.0f;
+
+        // This controls the viscous fluid effect (how much of it)
+        sViscousFluidScale = 8.0f;
+        // must be set to 1.0 (used in viscousFluid())
+        sViscousFluidNormalize = 1.0f;
+        sViscousFluidNormalize = 1.0f / viscousFluid(1.0f);
     }
+
+    private static float sViscousFluidScale;
+    private static float sViscousFluidNormalize;
 
     /**
      * Create a Scroller with the default duration and interpolator.
@@ -103,6 +108,11 @@ public class Scroller  {
         this(context, null);
     }
 
+    /**
+     * Create a Scroller with the specified interpolator. If the interpolator is
+     * null, the default (viscous) interpolator will be used. "Flywheel" behavior will
+     * be in effect for apps targeting Honeycomb or newer.
+     */
     public Scroller(Context context, Interpolator interpolator) {
         this(context, interpolator,
                 context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB);
@@ -110,7 +120,8 @@ public class Scroller  {
 
     /**
      * Create a Scroller with the specified interpolator. If the interpolator is
-     * null, the default (viscous) interpolator will be used.
+     * null, the default (viscous) interpolator will be used. Specify whether or
+     * not to support progressive "flywheel" behavior in flinging.
      */
     public Scroller(Context context, Interpolator interpolator, boolean flywheel) {
         mFinished = true;
@@ -332,12 +343,7 @@ public class Scroller  {
         mFinalY = startY + dy;
         mDeltaX = dx;
         mDeltaY = dy;
-        mDurationReciprocal = 1.0f / mDuration;
-        // This controls the viscous fluid effect (how much of it)
-        mViscousFluidScale = 8.0f;
-        // must be set to 1.0 (used in viscousFluid())
-        mViscousFluidNormalize = 1.0f;
-        mViscousFluidNormalize = 1.0f / viscousFluid(1.0f);
+        mDurationReciprocal = 1.0f / (float) mDuration;
     }
 
     /**
@@ -393,8 +399,8 @@ public class Scroller  {
         mStartX = startX;
         mStartY = startY;
 
-        mCoeffX = velocity == 0 ? 1.0f : velocityX / velocity; 
-        mCoeffY = velocity == 0 ? 1.0f : velocityY / velocity;
+        float coeffX = velocity == 0 ? 1.0f : velocityX / velocity;
+        float coeffY = velocity == 0 ? 1.0f : velocityY / velocity;
 
         int totalDistance =
                 (int) (ALPHA * Math.exp(DECELERATION_RATE / (DECELERATION_RATE - 1.0) * l));
@@ -404,22 +410,20 @@ public class Scroller  {
         mMinY = minY;
         mMaxY = maxY;
 
-        mFinalX = startX + Math.round(totalDistance * mCoeffX);
+        mFinalX = startX + Math.round(totalDistance * coeffX);
         // Pin to mMinX <= mFinalX <= mMaxX
         mFinalX = Math.min(mFinalX, mMaxX);
         mFinalX = Math.max(mFinalX, mMinX);
         
-        mFinalY = startY + Math.round(totalDistance * mCoeffY);
+        mFinalY = startY + Math.round(totalDistance * coeffY);
         // Pin to mMinY <= mFinalY <= mMaxY
         mFinalY = Math.min(mFinalY, mMaxY);
         mFinalY = Math.max(mFinalY, mMinY);
     }
     
-    
-    
-    private float viscousFluid(float x)
+    static float viscousFluid(float x)
     {
-        x *= mViscousFluidScale;
+        x *= sViscousFluidScale;
         if (x < 1.0f) {
             x -= (1.0f - (float)Math.exp(-x));
         } else {
@@ -427,7 +431,7 @@ public class Scroller  {
             x = 1.0f - (float)Math.exp(1.0f - x);
             x = start + x * (1.0f - start);
         }
-        x *= mViscousFluidNormalize;
+        x *= sViscousFluidNormalize;
         return x;
     }
     

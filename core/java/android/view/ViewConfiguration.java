@@ -144,7 +144,7 @@ public class ViewConfiguration {
     /**
      * Maximum velocity to initiate a fling, as measured in pixels per second
      */
-    private static final int MAXIMUM_FLING_VELOCITY = 4000;
+    private static final int MAXIMUM_FLING_VELOCITY = 8000;
 
     /**
      * The maximum size of View's drawing cache, expressed in bytes. This size
@@ -158,6 +158,16 @@ public class ViewConfiguration {
      */
     private static float SCROLL_FRICTION = 0.015f;
 
+    /**
+     * Max distance to overscroll for edge effects
+     */
+    private static final int OVERSCROLL_DISTANCE = 0;
+
+    /**
+     * Max distance to overfling for edge effects
+     */
+    private static final int OVERFLING_DISTANCE = 4;
+
     private final int mEdgeSlop;
     private final int mFadingEdgeLength;
     private final int mMinimumFlingVelocity;
@@ -168,6 +178,8 @@ public class ViewConfiguration {
     private final int mDoubleTapSlop;
     private final int mWindowTouchSlop;
     private final int mMaximumDrawingCacheSize;
+    private final int mOverscrollDistance;
+    private final int mOverflingDistance;
 
     private static final SparseArray<ViewConfiguration> sConfigurations =
             new SparseArray<ViewConfiguration>(2);
@@ -188,6 +200,8 @@ public class ViewConfiguration {
         mWindowTouchSlop = WINDOW_TOUCH_SLOP;
         //noinspection deprecation
         mMaximumDrawingCacheSize = MAXIMUM_DRAWING_CACHE_SIZE;
+        mOverscrollDistance = OVERSCROLL_DISTANCE;
+        mOverflingDistance = OVERFLING_DISTANCE;
     }
 
     /**
@@ -216,6 +230,9 @@ public class ViewConfiguration {
 
         // Size of the screen in bytes, in ARGB_8888 format
         mMaximumDrawingCacheSize = 4 * metrics.widthPixels * metrics.heightPixels;
+
+        mOverscrollDistance = (int) (density * OVERSCROLL_DISTANCE + 0.5f);
+        mOverflingDistance = (int) (density * OVERFLING_DISTANCE + 0.5f);
     }
 
     /**
@@ -470,6 +487,20 @@ public class ViewConfiguration {
      */
     public int getScaledMaximumDrawingCacheSize() {
         return mMaximumDrawingCacheSize;
+    }
+
+    /**
+     * @return The maximum distance a View should overscroll by when showing edge effects.
+     */
+    public int getScaledOverscrollDistance() {
+        return mOverscrollDistance;
+    }
+
+    /**
+     * @return The maximum distance a View should overfling by when showing edge effects.
+     */
+    public int getScaledOverflingDistance() {
+        return mOverflingDistance;
     }
 
     /**
