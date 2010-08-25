@@ -163,14 +163,47 @@ public interface SharedPreferences {
          * {@link SharedPreferences} object it is editing.  This atomically
          * performs the requested modifications, replacing whatever is currently
          * in the SharedPreferences.
-         * 
+         *
          * <p>Note that when two editors are modifying preferences at the same
          * time, the last one to call commit wins.
-         * 
+         *
+         * <p>If you don't care about the return value and you're
+         * using this from your application's main thread, consider
+         * using {@link #startCommit} instead.
+         *
          * @return Returns true if the new values were successfully written
          * to persistent storage.
          */
         boolean commit();
+
+        /**
+         * Commit your preferences changes back from this Editor to the
+         * {@link SharedPreferences} object it is editing.  This atomically
+         * performs the requested modifications, replacing whatever is currently
+         * in the SharedPreferences.
+         *
+         * <p>Note that when two editors are modifying preferences at the same
+         * time, the last one to call commit wins.
+         *
+         * <p>Unlike {@link #commit}, which writes its preferences out
+         * to persistent storage synchronously, {@link #startCommit}
+         * commits its changes to the in-memory
+         * {@link SharedPreferences} immediately but starts an
+         * asynchronous commit to disk and you won't be notified of
+         * any failures.  If another editor on this
+         * {@link SharedPreferences} does a regular {@link #commit}
+         * while a {@link #startCommit} is still outstanding, the
+         * {@link #commit} will block until all async commits are
+         * completed as well as the commit itself.
+         *
+         * <p>If you call this from an {@link android.app.Activity},
+         * the base class will wait for any async commits to finish in
+         * its {@link android.app.Activity#onPause}.</p>
+         *
+         * @return Returns true if the new values were successfully written
+         * to persistent storage.
+         */
+        void startCommit();
     }
 
     /**
