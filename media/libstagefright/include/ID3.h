@@ -80,6 +80,7 @@ private:
     bool parseV1(const sp<DataSource> &source);
     bool parseV2(const sp<DataSource> &source);
     void removeUnsynchronization();
+    bool removeUnsynchronizationV2_4();
 
     static bool ParseSyncsafeInteger(const uint8_t encoded[4], size_t *x);
 
