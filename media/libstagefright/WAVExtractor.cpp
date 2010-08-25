@@ -404,7 +404,8 @@ status_t WAVSource::read(
 ////////////////////////////////////////////////////////////////////////////////
 
 bool SniffWAV(
-        const sp<DataSource> &source, String8 *mimeType, float *confidence) {
+        const sp<DataSource> &source, String8 *mimeType, float *confidence,
+        sp<AMessage> *) {
     char header[12];
     if (source->readAt(0, header, sizeof(header)) < (ssize_t)sizeof(header)) {
         return false;

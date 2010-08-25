@@ -1738,7 +1738,7 @@ static bool LegacySniffMPEG4(
         || !memcmp(header, "ftypM4A ", 8) || !memcmp(header, "ftypf4v ", 8)
         || !memcmp(header, "ftypkddi", 8) || !memcmp(header, "ftypM4VP", 8)) {
         *mimeType = MEDIA_MIMETYPE_CONTAINER_MPEG4;
-        *confidence = 0.1;
+        *confidence = 0.4;
 
         return true;
     }
@@ -1805,13 +1805,14 @@ static bool BetterSniffMPEG4(
     }
 
     *mimeType = MEDIA_MIMETYPE_CONTAINER_MPEG4;
-    *confidence = 0.3f;
+    *confidence = 0.4f;
 
     return true;
 }
 
 bool SniffMPEG4(
-        const sp<DataSource> &source, String8 *mimeType, float *confidence) {
+        const sp<DataSource> &source, String8 *mimeType, float *confidence,
+        sp<AMessage> *) {
     if (BetterSniffMPEG4(source, mimeType, confidence)) {
         return true;
     }

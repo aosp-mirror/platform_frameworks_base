@@ -28,6 +28,7 @@
 
 namespace android {
 
+struct AMessage;
 class String8;
 
 class DataSource : public RefBase {
@@ -59,10 +60,14 @@ public:
 
     ////////////////////////////////////////////////////////////////////////////
 
-    bool sniff(String8 *mimeType, float *confidence);
+    bool sniff(String8 *mimeType, float *confidence, sp<AMessage> *meta);
 
+    // The sniffer can optionally fill in "meta" with an AMessage containing
+    // a dictionary of values that helps the corresponding extractor initialize
+    // its state without duplicating effort already exerted by the sniffer.
     typedef bool (*SnifferFunc)(
-            const sp<DataSource> &source, String8 *mimeType, float *confidence);
+            const sp<DataSource> &source, String8 *mimeType,
+            float *confidence, sp<AMessage> *meta);
 
     static void RegisterSniffer(SnifferFunc func);
     static void RegisterDefaultSniffers();
