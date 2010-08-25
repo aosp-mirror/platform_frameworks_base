@@ -913,7 +913,7 @@ public class WifiService extends IWifiManager.Stub {
          * of {@code 0} isn't really a plugged type, but rather an indication that the
          * device isn't plugged in at all, there is no bit value corresponding to a
          * {@code pluggedType} value of {@code 0}. That is why we shift by
-         * {@code pluggedType&nbsp;&#8212;&nbsp;1} instead of by {@code pluggedType}.
+         * {@code pluggedType - 1} instead of by {@code pluggedType}.
          * @param stayAwakeConditions a bit string specifying which "plugged types" should
          * keep the device (and hence Wi-Fi) awake.
          * @param pluggedType the type of plug (USB, AC, or none) for which the check is

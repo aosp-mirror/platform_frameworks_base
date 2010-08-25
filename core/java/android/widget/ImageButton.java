@@ -32,7 +32,7 @@ import java.util.Map;
  * {@link android.widget.Button}, with the standard button background
  * that changes color during different button states. The image on the surface
  * of the button is defined either by the {@code android:src} attribute in the
- * {@code &lt;ImageButton&gt;} XML element or by the 
+ * {@code <ImageButton>} XML element or by the
  * {@link #setImageResource(int)} method.</p>
  * 
  * <p>To remove the standard button background image, define your own 
@@ -57,7 +57,7 @@ import java.util.Map;
  * based on the state of the button and the corresponding images
  * defined in the XML.</p>
  *
- * <p>The order of the {@code &lt;item>} elements is important because they are
+ * <p>The order of the {@code <item>} elements is important because they are
  * evaluated in order. This is why the "normal" button image comes last, because
  * it will only be applied after {@code android:state_pressed} and {@code
  * android:state_focused} have both evaluated false.</p>

@@ -50,7 +50,7 @@ public class SpeechRecognizer {
     private static final String TAG = "SpeechRecognizer";
 
     /**
-     * Used to retrieve an {@code ArrayList&lt;String&gt;} from the {@link Bundle} passed to the
+     * Used to retrieve an {@code ArrayList<String>} from the {@link Bundle} passed to the
      * {@link RecognitionListener#onResults(Bundle)} and
      * {@link RecognitionListener#onPartialResults(Bundle)} methods. These strings are the possible
      * recognition results, where the first element is the most likely candidate.

@@ -1253,14 +1253,14 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      * concurrent use.
      *
      * <p>An absolute hierarchical URI reference follows the pattern:
-     * {@code &lt;scheme&gt;://&lt;authority&gt;&lt;absolute path&gt;?&lt;query&gt;#&lt;fragment&gt;}
+     * {@code <scheme>://<authority><absolute path>?<query>#<fragment>}
      *
      * <p>Relative URI references (which are always hierarchical) follow one
-     * of two patterns: {@code &lt;relative or absolute path&gt;?&lt;query&gt;#&lt;fragment&gt;}
-     * or {@code //&lt;authority&gt;&lt;absolute path&gt;?&lt;query&gt;#&lt;fragment&gt;}
+     * of two patterns: {@code <relative or absolute path>?<query>#<fragment>}
+     * or {@code //<authority><absolute path>?<query>#<fragment>}
      *
      * <p>An opaque URI follows this pattern:
-     * {@code &lt;scheme&gt;:&lt;opaque part&gt;#&lt;fragment&gt;}
+     * {@code <scheme>:<opaque part>#<fragment>}
      */
     public static final class Builder {
 
