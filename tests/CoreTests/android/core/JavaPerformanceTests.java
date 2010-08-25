@@ -23,7 +23,6 @@ public class JavaPerformanceTests {
 
     public static String[] children() {
         return new String[] {
-                StringTest.class.getName(),
                 HashMapPerformanceTest.class.getName(),
                 ArrayListPerformanceTest.class.getName(),
                 TreeMapPerformanceTest.class.getName(),
