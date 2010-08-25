@@ -593,6 +593,7 @@
          UI style also includes a full action bar by default. -->
     <style name="Theme.Light.Holo">
         <item name="editTextBackground">@android:drawable/edit_text_holo_light</item>
+        <item name="android:windowActionBar">true</item>
         <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio_holo_light</item>
         <item name="listChoiceIndicatorMultiple">@android:drawable/btn_check_holo_light</item>
     </style>
