@@ -69,6 +69,8 @@ public:
     void                putUInt64(uint64_t value);
     void                putInt128(const int128_t& value);
     void                putUInt128(const uint128_t& value);
+    void                putInt128(int64_t value);
+    void                putUInt128(uint64_t value);
 
     void                putAInt8(const int8_t* values, int count);
     void                putAUInt8(const uint8_t* values, int count);

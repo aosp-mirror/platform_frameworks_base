@@ -242,6 +242,16 @@ void MtpDataPacket::putUInt128(const uint128_t& value) {
     putUInt32(value[3]);
 }
 
+void MtpDataPacket::putInt128(int64_t value) {
+    putInt64(value);
+    putUInt64(value < 0 ? 0xFFFFFFFFFFFFFFFF : 0);
+}
+
+void MtpDataPacket::putUInt128(uint64_t value) {
+    putUInt64(value);
+    putUInt64(0);
+}
+
 void MtpDataPacket::putAInt8(const int8_t* values, int count) {
     putUInt32(count);
     for (int i = 0; i < count; i++)
@@ -363,7 +373,7 @@ int MtpDataPacket::readDataHeader(int fd) {
 int MtpDataPacket::write(int fd) {
     MtpPacket::putUInt32(MTP_CONTAINER_LENGTH_OFFSET, mPacketSize);
     MtpPacket::putUInt16(MTP_CONTAINER_TYPE_OFFSET, MTP_CONTAINER_TYPE_DATA);
-
+    dump();
     // send header separately from data
     int ret = ::write(fd, mBuffer, MTP_CONTAINER_HEADER_SIZE);
     if (ret == MTP_CONTAINER_HEADER_SIZE)

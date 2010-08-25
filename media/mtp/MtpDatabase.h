@@ -22,6 +22,7 @@
 namespace android {
 
 class MtpDataPacket;
+class MtpProperty;
 
 class MtpDatabase {
 public:
@@ -58,9 +59,21 @@ public:
     virtual MtpObjectPropertyList*  getSupportedObjectProperties(MtpObjectFormat format) = 0;
     virtual MtpDevicePropertyList*  getSupportedDeviceProperties() = 0;
 
-    virtual MtpResponseCode         getObjectProperty(MtpObjectHandle handle,
+    virtual MtpResponseCode         getObjectPropertyValue(MtpObjectHandle handle,
                                             MtpObjectProperty property,
                                             MtpDataPacket& packet) = 0;
+
+    virtual MtpResponseCode         setObjectPropertyValue(MtpObjectHandle handle,
+                                            MtpObjectProperty property,
+                                            MtpDataPacket& packet) = 0;
+
+    virtual MtpResponseCode         getDevicePropertyValue(MtpDeviceProperty property,
+                                            MtpDataPacket& packet) = 0;
+
+    virtual MtpResponseCode         setDevicePropertyValue(MtpDeviceProperty property,
+                                            MtpDataPacket& packet) = 0;
+
+    virtual MtpResponseCode         resetDeviceProperty(MtpDeviceProperty property) = 0;
 
     virtual MtpResponseCode         getObjectInfo(MtpObjectHandle handle,
                                             MtpDataPacket& packet) = 0;
@@ -76,6 +89,10 @@ public:
     virtual MtpResponseCode         setObjectReferences(MtpObjectHandle handle,
                                             MtpObjectHandleList* references) = 0;
 
+    virtual MtpProperty*            getObjectPropertyDesc(MtpObjectProperty property,
+                                            MtpObjectFormat format) = 0;
+
+    virtual MtpProperty*            getDevicePropertyDesc(MtpDeviceProperty property) = 0;
 };
 
 }; // namespace android
