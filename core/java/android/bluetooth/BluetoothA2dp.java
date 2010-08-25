@@ -18,88 +18,104 @@ package android.bluetooth;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.server.BluetoothA2dpService;
 import android.content.Context;
-import android.os.ServiceManager;
-import android.os.RemoteException;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.server.BluetoothA2dpService;
 import android.util.Log;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
+
 
 /**
- * Public API for controlling the Bluetooth A2DP Profile Service.
+ * This class provides the public APIs to control the Bluetooth A2DP
+ * profile.
  *
- * BluetoothA2dp is a proxy object for controlling the Bluetooth A2DP
- * Service via IPC.
+ *<p>BluetoothA2dp is a proxy object for controlling the Bluetooth A2DP
+ * Service via IPC. Use {@link BluetoothAdapter#getProfileProxy} to get
+ * the BluetoothA2dp proxy object.
  *
- * Creating a BluetoothA2dp object will initiate a binding with the
- * BluetoothHeadset service. Users of this object should call close() when they
- * are finished, so that this proxy object can unbind from the service.
- *
- * Currently the BluetoothA2dp service runs in the system server and this
- * proxy object will be immediately bound to the service on construction.
- *
- * Currently this class provides methods to connect to A2DP audio sinks.
- *
- * @hide
+ * <p> Android only supports one connected Bluetooth A2dp device at a time.
+ * Each method is protected with its appropriate permission.
  */
-public final class BluetoothA2dp {
+public final class BluetoothA2dp implements BluetoothProfile {
     private static final String TAG = "BluetoothA2dp";
     private static final boolean DBG = false;
 
-    /** int extra for ACTION_SINK_STATE_CHANGED */
-    public static final String EXTRA_SINK_STATE =
-        "android.bluetooth.a2dp.extra.SINK_STATE";
-    /** int extra for ACTION_SINK_STATE_CHANGED */
-    public static final String EXTRA_PREVIOUS_SINK_STATE =
-        "android.bluetooth.a2dp.extra.PREVIOUS_SINK_STATE";
-
-    /** Indicates the state of an A2DP audio sink has changed.
-     * This intent will always contain EXTRA_SINK_STATE,
-     * EXTRA_PREVIOUS_SINK_STATE and BluetoothDevice.EXTRA_DEVICE
-     * extras.
+    /**
+     * Intent used to broadcast the change in connection state of the A2DP
+     * profile.
+     *
+     * <p>This intent will have 3 extras:
+     * {@link #EXTRA_STATE} - The current state of the profile.
+     * {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile
+     * {@link BluetoothDevice#EXTRA_DEVICE} - The remote device.
+     *
+     * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
+     * {@link #STATE_DISCONNECTED}, {@link #STATE_CONNECTING},
+     * {@link #STATE_CONNECTED}, {@link #STATE_DISCONNECTING}.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_SINK_STATE_CHANGED =
-        "android.bluetooth.a2dp.action.SINK_STATE_CHANGED";
+    public static final String ACTION_CONNECTION_STATE_CHANGED =
+        "android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED";
 
-    public static final int STATE_DISCONNECTED = 0;
-    public static final int STATE_CONNECTING   = 1;
-    public static final int STATE_CONNECTED    = 2;
-    public static final int STATE_DISCONNECTING = 3;
-    /** Playing implies connected */
-    public static final int STATE_PLAYING    = 4;
+    /**
+     * Intent used to broadcast the change in the Playing state of the A2DP
+     * profile.
+     *
+     * <p>This intent will have 3 extras:
+     * {@link #EXTRA_STATE} - The current state of the profile.
+     * {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile
+     * {@link BluetoothDevice#EXTRA_DEVICE} - The remote device.
+     *
+     * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
+     * {@link #STATE_PLAYING}, {@link #STATE_NOT_PLAYING},
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PLAYING_STATE_CHANGED =
+        "android.bluetooth.a2dp.profile.action.PLAYING_STATE_CHANGED";
 
-    /** Default priority for a2dp devices that we try to auto-connect
-     * and allow incoming connections */
-    public static final int PRIORITY_AUTO_CONNECT = 1000;
-    /** Default priority for a2dp devices that should allow incoming
-     * connections */
-    public static final int PRIORITY_ON = 100;
-    /** Default priority for a2dp devices that should not allow incoming
-     * connections */
-    public static final int PRIORITY_OFF = 0;
-    /** Default priority when not set or when the device is unpaired */
-    public static final int PRIORITY_UNDEFINED = -1;
+    /**
+     * A2DP sink device is streaming music. This state can be one of
+     * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} of
+     * {@link #ACTION_PLAYING_STATE_CHANGED} intent.
+     */
+    public static final int STATE_PLAYING   =  10;
 
-    private final IBluetoothA2dp mService;
-    private final Context mContext;
+    /**
+     * A2DP sink device is NOT streaming music. This state can be one of
+     * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} of
+     * {@link #ACTION_PLAYING_STATE_CHANGED} intent.
+     */
+    public static final int STATE_NOT_PLAYING   =  11;
+
+    private ServiceListener mServiceListener;
+    private IBluetoothA2dp mService;
+    private BluetoothAdapter mAdapter;
 
     /**
      * Create a BluetoothA2dp proxy object for interacting with the local
      * Bluetooth A2DP service.
-     * @param c Context
+     *
      */
-    public BluetoothA2dp(Context c) {
-        mContext = c;
-
+    /*package*/ BluetoothA2dp(Context mContext, ServiceListener l) {
         IBinder b = ServiceManager.getService(BluetoothA2dpService.BLUETOOTH_A2DP_SERVICE);
+        mServiceListener = l;
+        mAdapter = BluetoothAdapter.getDefaultAdapter();
         if (b != null) {
             mService = IBluetoothA2dp.Stub.asInterface(b);
+            if (mServiceListener != null) {
+                mServiceListener.onServiceConnected(BluetoothProfile.A2DP, this);
+            }
         } else {
             Log.w(TAG, "Bluetooth A2DP service not available!");
 
@@ -109,167 +125,222 @@ public final class BluetoothA2dp {
         }
     }
 
-    /** Initiate a connection to an A2DP sink.
-     *  Listen for SINK_STATE_CHANGED_ACTION to find out when the
-     *  connection is completed.
-     *  @param device Remote BT device.
-     *  @return false on immediate error, true otherwise
-     *  @hide
+    /**
+     * {@inheritDoc}
+     * @hide
      */
-    public boolean connectSink(BluetoothDevice device) {
-        if (DBG) log("connectSink(" + device + ")");
-        try {
-            return mService.connectSink(device);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return false;
+    public boolean connect(BluetoothDevice device) {
+        if (DBG) log("connect(" + device + ")");
+        if (mService != null && isEnabled() &&
+            isValidDevice(device)) {
+            try {
+                return mService.connect(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return false;
+            }
         }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return false;
     }
 
-    /** Initiate disconnect from an A2DP sink.
-     *  Listen for SINK_STATE_CHANGED_ACTION to find out when
-     *  disconnect is completed.
-     *  @param device Remote BT device.
-     *  @return false on immediate error, true otherwise
-     *  @hide
+    /**
+     * {@inheritDoc}
+     * @hide
      */
-    public boolean disconnectSink(BluetoothDevice device) {
-        if (DBG) log("disconnectSink(" + device + ")");
-        try {
-            return mService.disconnectSink(device);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return false;
+    public boolean disconnect(BluetoothDevice device) {
+        if (DBG) log("disconnect(" + device + ")");
+        if (mService != null && isEnabled() &&
+            isValidDevice(device)) {
+            try {
+                return mService.disconnect(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return false;
+            }
         }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return false;
     }
 
-    /** Initiate suspend from an A2DP sink.
-     *  Listen for SINK_STATE_CHANGED_ACTION to find out when
-     *  suspend is completed.
-     *  @param device Remote BT device.
-     *  @return false on immediate error, true otherwise
-     *  @hide
+    /**
+     * {@inheritDoc}
+     */
+    public Set<BluetoothDevice> getConnectedDevices() {
+        if (DBG) log("getConnectedDevices()");
+        if (mService != null && isEnabled()) {
+            try {
+                return toDeviceSet(mService.getConnectedDevices());
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return toDeviceSet(new BluetoothDevice[0]);
+            }
+        }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return toDeviceSet(new BluetoothDevice[0]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Set<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
+        if (DBG) log("getDevicesMatchingStates()");
+        if (mService != null && isEnabled()) {
+            try {
+                return toDeviceSet(mService.getDevicesMatchingConnectionStates(states));
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return toDeviceSet(new BluetoothDevice[0]);
+            }
+        }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return toDeviceSet(new BluetoothDevice[0]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getConnectionState(BluetoothDevice device) {
+        if (DBG) log("getState(" + device + ")");
+        if (mService != null && isEnabled()
+            && isValidDevice(device)) {
+            try {
+                return mService.getConnectionState(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return BluetoothProfile.STATE_DISCONNECTED;
+            }
+        }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return BluetoothProfile.STATE_DISCONNECTED;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @hide
+     */
+    public boolean setPriority(BluetoothDevice device, int priority) {
+        if (DBG) log("setPriority(" + device + ", " + priority + ")");
+        if (mService != null && isEnabled()
+            && isValidDevice(device)) {
+            if (priority != BluetoothProfile.PRIORITY_OFF &&
+                priority != BluetoothProfile.PRIORITY_ON) {
+              return false;
+            }
+            try {
+                return mService.setPriority(device, priority);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return false;
+            }
+        }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @hide
+     */
+    public int getPriority(BluetoothDevice device) {
+        if (DBG) log("getPriority(" + device + ")");
+        if (mService != null && isEnabled()
+            && isValidDevice(device)) {
+            try {
+                return mService.getPriority(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return BluetoothProfile.PRIORITY_OFF;
+            }
+        }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return BluetoothProfile.PRIORITY_OFF;
+    }
+
+    /**
+     * Check if A2DP profile is streaming music.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     *
+     * @param device BluetoothDevice device
+     */
+    public boolean isA2dpPlaying(BluetoothDevice device) {
+        if (mService != null && isEnabled()
+            && isValidDevice(device)) {
+            try {
+                return mService.isA2dpPlaying(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return false;
+            }
+        }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return false;
+    }
+
+    /**
+     * Initiate suspend from an A2DP sink.
+     *
+     * <p> This API will return false in scenarios like the A2DP
+     * device is not in connected state etc. When this API returns,
+     * true, it is guaranteed that {@link #ACTION_SINK_STATE_CHANGED}
+     * intent will be broadcasted with the state. Users can get the
+     * state of the A2DP device from this intent.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     *
+     * @param device Remote A2DP sink
+     * @return false on immediate error,
+     *               true otherwise
+     * @hide
      */
     public boolean suspendSink(BluetoothDevice device) {
-        try {
-            return mService.suspendSink(device);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return false;
+        if (mService != null && isEnabled()
+            && isValidDevice(device)) {
+            try {
+                return mService.suspendSink(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return false;
+            }
         }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return false;
     }
 
-    /** Initiate resume from an suspended A2DP sink.
-     *  Listen for SINK_STATE_CHANGED_ACTION to find out when
-     *  resume is completed.
-     *  @param device Remote BT device.
-     *  @return false on immediate error, true otherwise
-     *  @hide
+    /**
+     * Initiate resume from a suspended A2DP sink.
+     *
+     * <p> This API will return false in scenarios like the A2DP
+     * device is not in suspended state etc. When this API returns,
+     * true, it is guaranteed that {@link #ACTION_SINK_STATE_CHANGED}
+     * intent will be broadcasted with the state. Users can get the
+     * state of the A2DP device from this intent.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     *
+     * @param device Remote A2DP sink
+     * @return false on immediate error,
+     *               true otherwise
+     * @hide
      */
     public boolean resumeSink(BluetoothDevice device) {
-        try {
-            return mService.resumeSink(device);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return false;
+        if (mService != null && isEnabled()
+            && isValidDevice(device)) {
+            try {
+                return mService.resumeSink(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return false;
+            }
         }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return false;
     }
 
-    /** Check if a specified A2DP sink is connected.
-     *  @param device Remote BT device.
-     *  @return True if connected (or playing), false otherwise and on error.
-     *  @hide
-     */
-    public boolean isSinkConnected(BluetoothDevice device) {
-        if (DBG) log("isSinkConnected(" + device + ")");
-        int state = getSinkState(device);
-        return state == STATE_CONNECTED || state == STATE_PLAYING;
-    }
-
-    /** Check if any A2DP sink is connected.
-     * @return a unmodifiable set of connected A2DP sinks, or null on error.
-     * @hide
-     */
-    public Set<BluetoothDevice> getConnectedSinks() {
-        if (DBG) log("getConnectedSinks()");
-        try {
-            return Collections.unmodifiableSet(
-                    new HashSet<BluetoothDevice>(Arrays.asList(mService.getConnectedSinks())));
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return null;
-        }
-    }
-
-    /** Check if any A2DP sink is in Non Disconnected state
-     * i.e playing, connected, connecting, disconnecting.
-     * @return a unmodifiable set of connected A2DP sinks, or null on error.
-     * @hide
-     */
-    public Set<BluetoothDevice> getNonDisconnectedSinks() {
-        if (DBG) log("getNonDisconnectedSinks()");
-        try {
-            return Collections.unmodifiableSet(
-                    new HashSet<BluetoothDevice>(Arrays.asList(mService.getNonDisconnectedSinks())));
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return null;
-        }
-    }
-
-    /** Get the state of an A2DP sink
-     *  @param device Remote BT device.
-     *  @return State code, one of STATE_
-     *  @hide
-     */
-    public int getSinkState(BluetoothDevice device) {
-        if (DBG) log("getSinkState(" + device + ")");
-        try {
-            return mService.getSinkState(device);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return BluetoothA2dp.STATE_DISCONNECTED;
-        }
-    }
-
-    /**
-     * Set priority of a2dp sink.
-     * Priority is a non-negative integer. By default paired sinks will have
-     * a priority of PRIORITY_AUTO, and unpaired headset PRIORITY_NONE (0).
-     * Sinks with priority greater than zero will accept incoming connections
-     * (if no sink is currently connected).
-     * Priority for unpaired sink must be PRIORITY_NONE.
-     * @param device Paired sink
-     * @param priority Integer priority, for example PRIORITY_AUTO or
-     *                 PRIORITY_NONE
-     * @return true if priority is set, false on error
-     */
-    public boolean setSinkPriority(BluetoothDevice device, int priority) {
-        if (DBG) log("setSinkPriority(" + device + ", " + priority + ")");
-        try {
-            return mService.setSinkPriority(device, priority);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return false;
-        }
-    }
-
-    /**
-     * Get priority of a2dp sink.
-     * @param device Sink
-     * @return non-negative priority, or negative error code on error.
-     */
-    public int getSinkPriority(BluetoothDevice device) {
-        if (DBG) log("getSinkPriority(" + device + ")");
-        try {
-            return mService.getSinkPriority(device);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return PRIORITY_OFF;
-        }
-    }
-
-    /** Helper for converting a state to a string.
+     /**
+     * Helper for converting a state to a string.
+     *
      * For debug use only - strings are not internationalized.
      * @hide
      */
@@ -285,12 +356,31 @@ public final class BluetoothA2dp {
             return "disconnecting";
         case STATE_PLAYING:
             return "playing";
+        case STATE_NOT_PLAYING:
+          return "not playing";
         default:
             return "<unknown state " + state + ">";
         }
     }
 
+    private boolean isEnabled() {
+       if (mAdapter.getState() == BluetoothAdapter.STATE_ON) return true;
+       return false;
+    }
+
+    private boolean isValidDevice(BluetoothDevice device) {
+       if (device == null) return false;
+
+       if (BluetoothAdapter.checkBluetoothAddress(device.getAddress())) return true;
+       return false;
+    }
+
+    private Set<BluetoothDevice> toDeviceSet(BluetoothDevice[] devices) {
+       return Collections.unmodifiableSet(
+          new HashSet<BluetoothDevice>(Arrays.asList(devices)));
+    }
+
     private static void log(String msg) {
-        Log.d(TAG, msg);
+      Log.d(TAG, msg);
     }
 }
