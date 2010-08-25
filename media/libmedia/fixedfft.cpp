@@ -26,7 +26,9 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#ifdef __ARM_ARCH__
 #include <machine/cpu-features.h>
+#endif
 
 #define LOG_FFT_SIZE 10
 #define MAX_FFT_SIZE (1 << LOG_FFT_SIZE)
