@@ -76,10 +76,10 @@ int root(int launchID) {
     rsgBindProgramStore(gPFSBackground);
     rsgBindTexture(gPFBackground, 0, gTGrid);
 
-    rsgProgramVertexLoadModelMatrix((rs_matrix4x4 *)&robot1Ptr->globalMat_Row0);
+    rsgProgramVertexLoadModelMatrix(&robot1Ptr->globalMat);
     rsgDrawMesh(gTestMesh);
 
-    rsgProgramVertexLoadModelMatrix((rs_matrix4x4 *)&robot2Ptr->globalMat_Row0);
+    rsgProgramVertexLoadModelMatrix(&robot2Ptr->globalMat);
     rsgDrawMesh(gTestMesh);
 
     color(0.3f, 0.3f, 0.3f, 1.0f);

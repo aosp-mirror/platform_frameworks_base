@@ -95,6 +95,26 @@ void Component::set(RsDataType dt, RsDataKind dk, bool norm, uint32_t vecSize)
         mNormalized = true;
         rsAssert(mKind == RS_KIND_PIXEL_RGBA);
         return;
+
+    case RS_TYPE_MATRIX_4X4:
+        mTypeBits = 16 * 32;
+        rsAssert(mVectorSize == 1);
+        rsAssert(mNormalized == false);
+        rsAssert(mKind == RS_KIND_USER);
+        break;
+    case RS_TYPE_MATRIX_3X3:
+        mTypeBits = 9 * 32;
+        rsAssert(mVectorSize == 1);
+        rsAssert(mNormalized == false);
+        rsAssert(mKind == RS_KIND_USER);
+        break;
+    case RS_TYPE_MATRIX_2X2:
+        mTypeBits = 4 * 32;
+        rsAssert(mVectorSize == 1);
+        rsAssert(mNormalized == false);
+        rsAssert(mKind == RS_KIND_USER);
+        break;
+
     case RS_TYPE_ELEMENT:
     case RS_TYPE_TYPE:
     case RS_TYPE_ALLOCATION:
@@ -218,10 +238,19 @@ String8 Component::getGLSLType() const
         case 4: return String8("vec4");
         }
     }
+    if ((mType == RS_TYPE_MATRIX_4X4) && (mVectorSize == 1)) {
+        return String8("mat4");
+    }
+    if ((mType == RS_TYPE_MATRIX_3X3) && (mVectorSize == 1)) {
+        return String8("mat3");
+    }
+    if ((mType == RS_TYPE_MATRIX_2X2) && (mVectorSize == 1)) {
+        return String8("mat2");
+    }
     return String8();
 }
 
-static const char * gTypeStrings[] = {
+static const char * gTypeBasicStrings[] = {
     "NONE",
     "F16",
     "F32",
@@ -238,6 +267,12 @@ static const char * gTypeStrings[] = {
     "UP_565",
     "UP_5551",
     "UP_4444",
+    "MATRIX_4X4",
+    "MATRIX_3X3",
+    "MATRIX_2X2",
+};
+
+static const char * gTypeObjStrings[] = {
     "ELEMENT",
     "TYPE",
     "ALLOCATION",
@@ -267,8 +302,13 @@ static const char * gKindStrings[] = {
 
 void Component::dumpLOGV(const char *prefix) const
 {
-    LOGV("%s   Component: %s, %s, vectorSize=%i, bits=%i",
-         prefix, gTypeStrings[mType], gKindStrings[mKind], mVectorSize, mBits);
+    if (mType >= RS_TYPE_ELEMENT) {
+        LOGV("%s   Component: %s, %s, vectorSize=%i, bits=%i",
+             prefix, gTypeObjStrings[mType - RS_TYPE_ELEMENT], gKindStrings[mKind], mVectorSize, mBits);
+    } else {
+        LOGV("%s   Component: %s, %s, vectorSize=%i, bits=%i",
+             prefix, gTypeBasicStrings[mType], gKindStrings[mKind], mVectorSize, mBits);
+    }
 }
 
 void Component::serialize(OStream *stream) const

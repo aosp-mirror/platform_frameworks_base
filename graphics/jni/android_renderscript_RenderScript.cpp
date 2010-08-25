@@ -228,7 +228,8 @@ nContextGetMessage(JNIEnv *_env, jobject _this, RsContext con, jintArray data, j
     size_t receiveLen;
     int id = rsContextGetMessage(con, ptr, &receiveLen, len * 4, wait);
     if (!id && receiveLen) {
-        LOGE("message receive buffer too small.  %i", receiveLen);
+        LOGV("message receive buffer too small.  %i", receiveLen);
+        *ptr = (jint)receiveLen;
     }
     _env->ReleaseIntArrayElements(data, ptr, 0);
     return id;

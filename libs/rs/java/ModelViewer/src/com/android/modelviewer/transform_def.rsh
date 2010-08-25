@@ -22,15 +22,8 @@
 #define TRANSFORM_SCALE 3
 
 typedef struct {
-    float4 globalMat_Row0;
-    float4 globalMat_Row1;
-    float4 globalMat_Row2;
-    float4 globalMat_Row3;
-
-    float4 localMat_Row0;
-    float4 localMat_Row1;
-    float4 localMat_Row2;
-    float4 localMat_Row3;
+    rs_matrix4x4 globalMat;
+    rs_matrix4x4 localMat;
 
     float4 transforms0;
     float4 transforms1;
