@@ -17,7 +17,7 @@
 
 #define LOG_TAG "Reverb"
 #define ARRAY_SIZE(array) (sizeof array / sizeof array[0])
-#define LOG_NDEBUG 0
+//#define LOG_NDEBUG 0
 
 #include <cutils/log.h>
 #include <assert.h>
@@ -61,40 +61,79 @@ namespace {
 /* Preset definitions                                                               */
 /*                                                                                  */
 /************************************************************************************/
-LVM_UINT16 RevPreset_Level[]    = {  32,   32,   32,   32,   32,    32,   32,   32,   32,   32};
-LVM_UINT16 RevPreset_LPF[]      = {1298, 1000, 5012, 3542, 3400, 23999, 2536, 1000, 1000, 1000};
-LVM_UINT16 RevPreset_HPF[]      = {  50,   50,   50,   50,   50,    50,   50,   50,   50,   50};
-LVM_UINT16 RevPreset_T60[]      = {1490,  500, 2310, 4230, 3920,  2910, 7000, 1490, 1490,  170};
-LVM_UINT16 RevPreset_Density[]  = { 100,  100,  100,  100,  100,   100,  100,  100,  100,  100};
-LVM_UINT16 RevPreset_Damping[]  = {  54,   10,   64,   59,   70,   100,   33,   54,   21,   10};
-LVM_UINT16 RevPreset_RoomSize[] = { 100,  100,  100,  100,  100,   100,  100,  100,  100,  100};
 
-/************************************************************************************/
-/*                                                                                  */
-/* Preset definitions                                                               */
-/*                                                                                  */
-/************************************************************************************/
-#define REV_PRESET_BATHROOM         0
-#define REV_PRESET_LIVINGROOM       1
-#define REV_PRESET_STONEROOM        2
-#define REV_PRESET_AUDITORIUM       3
-#define REV_PRESET_CONCERTHALL      4
-#define REV_PRESET_CAVE             5
-#define REV_PRESET_ARENA            6
-#define REV_PRESET_FOREST           7
-#define REV_PRESET_MOUNTAINS        8
-#define REV_PRESET_PADDEDCELL       9
+const static t_reverb_settings sReverbPresets[] = {
+        // REVERB_PRESET_NONE: values are unused
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        // REVERB_PRESET_SMALLROOM
+        {-1000, -600, 1100, 830, -400, 5, 500, 10, 1000, 1000},
+        // REVERB_PRESET_MEDIUMROOM
+        {-1000, -600, 1300, 830, -1000, 20, -200, 20, 1000, 1000},
+        // REVERB_PRESET_LARGEROOM
+        {-1000, -600, 1500, 830, -1600, 5, -1000, 40, 1000, 1000},
+        // REVERB_PRESET_MEDIUMHALL
+        {-1000, -600, 1800, 700, -1300, 15, -800, 30, 1000, 1000},
+        // REVERB_PRESET_LARGEHALL
+        {-1000, -600, 1800, 700, -2000, 30, -1400, 60, 1000, 1000},
+        // REVERB_PRESET_PLATE
+        {-1000, -200, 1300, 900, 0, 2, 0, 10, 1000, 750},
+};
 
-// NXP SW Reverb UUID
-const effect_descriptor_t gReverbDescriptor = {
+
+// NXP SW auxiliary environmental reverb
+const effect_descriptor_t gAuxEnvReverbDescriptor = {
         { 0xc2e5d5f0, 0x94bd, 0x4763, 0x9cac, { 0x4e, 0x23, 0x4d, 0x06, 0x83, 0x9e } },
         { 0x4a387fc0, 0x8ab3, 0x11df, 0x8bad, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
         EFFECT_API_VERSION,
-        (EFFECT_FLAG_TYPE_AUXILIARY | EFFECT_FLAG_INSERT_LAST),
+        EFFECT_FLAG_TYPE_AUXILIARY,
         0, // TODO
         1,
-        "Reverb",
+        "Auxiliary Environmental Reverb",
         "NXP Software Ltd.",
+};
+
+// NXP SW insert environmental reverb
+static const effect_descriptor_t gInsertEnvReverbDescriptor = {
+        {0xc2e5d5f0, 0x94bd, 0x4763, 0x9cac, {0x4e, 0x23, 0x4d, 0x06, 0x83, 0x9e}},
+        {0xc7a511a0, 0xa3bb, 0x11df, 0x860e, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
+        EFFECT_API_VERSION,
+        EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_FIRST,
+        0, // TODO
+        1,
+        "Insert Environmental Reverb",
+        "NXP Software Ltd.",
+};
+
+// NXP SW auxiliary preset reverb
+static const effect_descriptor_t gAuxPresetReverbDescriptor = {
+        {0x47382d60, 0xddd8, 0x11db, 0xbf3a, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
+        {0xf29a1400, 0xa3bb, 0x11df, 0x8ddc, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
+        EFFECT_API_VERSION,
+        EFFECT_FLAG_TYPE_AUXILIARY,
+        0, // TODO
+        1,
+        "Auxiliary Preset Reverb",
+        "NXP Software Ltd.",
+};
+
+// NXP SW insert preset reverb
+static const effect_descriptor_t gInsertPresetReverbDescriptor = {
+        {0x47382d60, 0xddd8, 0x11db, 0xbf3a, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
+        {0x172cdf00, 0xa3bc, 0x11df, 0xa72f, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
+        EFFECT_API_VERSION,
+        EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_FIRST,
+        0, // TODO
+        1,
+        "Insert Preset Reverb",
+        "NXP Software Ltd.",
+};
+
+// gDescriptors contains pointers to all defined effect descriptor in this library
+static const effect_descriptor_t * const gDescriptors[] = {
+        &gAuxEnvReverbDescriptor,
+        &gInsertEnvReverbDescriptor,
+        &gAuxPresetReverbDescriptor,
+        &gInsertPresetReverbDescriptor
 };
 
 struct ReverbContext{
@@ -114,7 +153,13 @@ struct ReverbContext{
     FILE                            *PcmOutPtr;
     #endif
     LVM_Fs_en                       SampleRate;
+    bool                            auxiliary;
+    bool                            preset;
+    uint16_t                        curPreset;
+    uint16_t                        nextPreset;
 };
+
+#define REVERB_DEFAULT_PRESET REVERB_PRESET_MEDIUMROOM
 
 //--- local function prototypes
 int  Reverb_init            (ReverbContext *pContext);
@@ -125,11 +170,12 @@ int  Reverb_getParameter    (ReverbContext *pContext,
                              void          *pParam,
                              size_t        *pValueSize,
                              void          *pValue);
+int Reverb_LoadPreset       (ReverbContext   *pContext);
 
 /* Effect Library Interface Implementation */
 extern "C" int EffectQueryNumberEffects(uint32_t *pNumEffects){
     LOGV("\n\tEffectQueryNumberEffects start");
-    *pNumEffects = 1;
+    *pNumEffects = sizeof(gDescriptors) / sizeof(const effect_descriptor_t *);
     LOGV("\tEffectQueryNumberEffects creating %d effects", *pNumEffects);
     LOGV("\tEffectQueryNumberEffects end\n");
     return 0;
@@ -142,11 +188,11 @@ extern "C" int EffectQueryEffect(uint32_t index, effect_descriptor_t *pDescripto
         LOGV("\tLVM_ERROR : EffectQueryEffect was passed NULL pointer");
         return -EINVAL;
     }
-    if (index > 0){
+    if (index >= sizeof(gDescriptors) / sizeof(const effect_descriptor_t *)) {
         LOGV("\tLVM_ERROR : EffectQueryEffect index out of range %d", index);
         return -ENOENT;
     }
-    memcpy(pDescriptor, &gReverbDescriptor, sizeof(effect_descriptor_t));
+    memcpy(pDescriptor, gDescriptors[index], sizeof(effect_descriptor_t));
     LOGV("\tEffectQueryEffect end\n");
     return 0;
 }     /* end EffectQueryEffect */
@@ -157,6 +203,8 @@ extern "C" int EffectCreate(effect_uuid_t       *uuid,
                             effect_interface_t  *pInterface){
     int ret;
     int i;
+    int length = sizeof(gDescriptors) / sizeof(const effect_descriptor_t *);
+    const effect_descriptor_t *desc;
 
     LOGV("\t\nEffectCreate start");
 
@@ -165,15 +213,35 @@ extern "C" int EffectCreate(effect_uuid_t       *uuid,
         return -EINVAL;
     }
 
-    if (memcmp(uuid, &gReverbDescriptor.uuid, sizeof(effect_uuid_t)) != 0){
-        LOGV("\tLVM_ERROR : EffectCreate() invalid UUID");
-        return -EINVAL;
+    for (i = 0; i < length; i++) {
+        desc = gDescriptors[i];
+        if (memcmp(uuid, &desc->uuid, sizeof(effect_uuid_t))
+                == 0) {
+            break;
+        }
+    }
+
+    if (i == length) {
+        return -ENOENT;
     }
 
     ReverbContext *pContext = new ReverbContext;
 
     pContext->itfe      = &gReverbInterface;
     pContext->hInstance = NULL;
+
+    pContext->auxiliary = false;
+    if ((desc->flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY){
+        pContext->auxiliary = true;
+    }
+
+    pContext->preset = false;
+    if (memcmp(&desc->type, SL_IID_PRESETREVERB, sizeof(effect_uuid_t)) == 0) {
+        pContext->preset = true;
+        // force reloading preset at first call to process()
+        pContext->curPreset = REVERB_PRESET_LAST + 1;
+        pContext->nextPreset = REVERB_DEFAULT_PRESET;
+    }
 
     LOGV("\tEffectCreate - Calling Reverb_init");
     ret = Reverb_init(pContext);
@@ -288,6 +356,14 @@ void From2iToMono_32( const LVM_INT32 *src,
 
    return;
 }
+
+static inline int16_t clamp16(int32_t sample)
+{
+    if ((sample>>15) ^ (sample>>31))
+        sample = 0x7FFF ^ (sample>>31);
+    return sample;
+}
+
 //----------------------------------------------------------------------------
 // process()
 //----------------------------------------------------------------------------
@@ -344,6 +420,9 @@ int process( LVM_INT16     *pIn,
     fflush(pContext->PcmInPtr);
     #endif
 
+    if (pContext->preset && pContext->nextPreset != pContext->curPreset) {
+        Reverb_LoadPreset(pContext);
+    }
     // Convert to Input 32 bits
     for(int i=0; i<frameCount*samplesPerFrame; i++){
         InFrames32[i] = (LVM_INT32)pIn[i]<<8;
@@ -359,18 +438,28 @@ int process( LVM_INT16     *pIn,
     //frameCount, pContext->config.inputCfg.channels, CHANNEL_MONO,
     //pContext->config.outputCfg.channels, CHANNEL_STEREO);
 
+    if (pContext->preset && pContext->curPreset == REVERB_PRESET_NONE) {
+        memset(OutFrames32, 0, frameCount * sizeof(LVM_INT32) * 2);
+    } else {
     /* Process the samples */
     LvmStatus = LVREV_Process(pContext->hInstance,      /* Instance handle */
                               InFrames32,               /* Input buffer */
                               OutFrames32,              /* Output buffer */
                               frameCount);              /* Number of samples to read */
+    }
+
+    if (!pContext->auxiliary) {
+        for (int i=0; i<frameCount*2; i++){
+            OutFrames32[i] += InFrames32[i];
+        }
+    }
 
     LVM_ERROR_CHECK(LvmStatus, "LVREV_Process", "process")
     if(LvmStatus != LVREV_SUCCESS) return -EINVAL;
 
     // Convert to 16 bits
     for(int i=0; i<frameCount*2; i++){  // Always stereo
-        OutFrames16[i] = (LVM_INT16)(OutFrames32[i]>>8);
+        OutFrames16[i] = clamp16(OutFrames32[i]>>8);
     }
 
     #ifdef LVM_PCM
@@ -382,7 +471,7 @@ int process( LVM_INT16     *pIn,
     if (pContext->config.outputCfg.accessMode == EFFECT_BUFFER_ACCESS_ACCUMULATE){
         //LOGV("\tBuffer access is ACCUMULATE");
         for (int i=0; i<frameCount*2; i++){
-            pOut[i] +=  OutFrames16[i];
+            pOut[i] = clamp16((int32_t)pOut[i] + (int32_t)OutFrames16[i]);
         }
     }else{
         //LOGV("\tBuffer access is WRITE");
@@ -462,6 +551,8 @@ int Reverb_configure(ReverbContext *pContext, effect_config_t *pConfig){
 
     CHECK_ARG(pConfig->inputCfg.samplingRate == pConfig->outputCfg.samplingRate);
     CHECK_ARG(pConfig->inputCfg.format == pConfig->outputCfg.format);
+    CHECK_ARG((pContext->auxiliary && pConfig->inputCfg.channels == CHANNEL_MONO) ||
+              ((!pContext->auxiliary) && pConfig->inputCfg.channels == CHANNEL_STEREO));
     CHECK_ARG(pConfig->outputCfg.channels == CHANNEL_STEREO);
     CHECK_ARG(pConfig->outputCfg.accessMode == EFFECT_BUFFER_ACCESS_WRITE
               || pConfig->outputCfg.accessMode == EFFECT_BUFFER_ACCESS_ACCUMULATE);
@@ -540,18 +631,8 @@ int Reverb_configure(ReverbContext *pContext, effect_config_t *pConfig){
 
 int Reverb_init(ReverbContext *pContext){
     int status;
-    int channel_mode;
 
-    LOGV("\tReverb_init start %d", gReverbDescriptor.flags);
-
-    if((gReverbDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_INSERT){
-        LOGV("\tReverb_init EFFECT_FLAG_TYPE_INSERT");
-        channel_mode = CHANNEL_STEREO;
-    }
-    if((gReverbDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY ){
-        LOGV("\tReverb_init EFFECT_FLAG_TYPE_AUXILIARY");
-        channel_mode = CHANNEL_MONO;
-    }
+    LOGV("\tReverb_init start");
 
     CHECK_ARG(pContext != NULL);
 
@@ -560,7 +641,12 @@ int Reverb_init(ReverbContext *pContext){
     }
 
     pContext->config.inputCfg.accessMode                    = EFFECT_BUFFER_ACCESS_READ;
-    pContext->config.inputCfg.channels                      = channel_mode;
+    if (pContext->auxiliary) {
+        pContext->config.inputCfg.channels                  = CHANNEL_MONO;
+    } else {
+        pContext->config.inputCfg.channels                  = CHANNEL_STEREO;
+    }
+
     pContext->config.inputCfg.format                        = SAMPLE_FORMAT_PCM_S15;
     pContext->config.inputCfg.samplingRate                  = 44100;
     pContext->config.inputCfg.bufferProvider.getBuffer      = NULL;
@@ -653,11 +739,11 @@ int Reverb_init(ReverbContext *pContext){
     /* Reverb parameters */
     params.Level          = 0;
     params.LPF            = 23999;
-    params.HPF            = RevPreset_HPF[REV_PRESET_MOUNTAINS];
-    params.T60            = RevPreset_T60[REV_PRESET_MOUNTAINS];
-    params.Density        = RevPreset_Density[REV_PRESET_MOUNTAINS];
-    params.Damping        = RevPreset_Damping[REV_PRESET_MOUNTAINS];
-    params.RoomSize       = RevPreset_RoomSize[REV_PRESET_MOUNTAINS];
+    params.HPF            = 50;
+    params.T60            = 1490;
+    params.Density        = 100;
+    params.Damping        = 21;
+    params.RoomSize       = 100;
 
     /* Saved strength is used to return the exact strength that was used in the set to the get
      * because we map the original strength range of 0:1000 to 1:15, and this will avoid
@@ -1294,6 +1380,44 @@ int32_t ReverbGetDensity(ReverbContext *pContext){
 }
 
 //----------------------------------------------------------------------------
+// Reverb_LoadPreset()
+//----------------------------------------------------------------------------
+// Purpose:
+// Load a the next preset
+//
+// Inputs:
+//  pContext         - handle to instance data
+//
+// Outputs:
+//
+// Side Effects:
+//
+//----------------------------------------------------------------------------
+int Reverb_LoadPreset(ReverbContext   *pContext)
+{
+    //TODO: add reflections delay, level and reverb delay when early reflections are
+    // implemented
+    pContext->curPreset = pContext->nextPreset;
+
+    if (pContext->curPreset != REVERB_PRESET_NONE) {
+        const t_reverb_settings *preset = &sReverbPresets[pContext->curPreset];
+        ReverbSetRoomLevel(pContext, preset->roomLevel);
+        ReverbSetRoomHfLevel(pContext, preset->roomHFLevel);
+        ReverbSetDecayTime(pContext, preset->decayTime);
+        ReverbSetDecayHfRatio(pContext, preset->decayHFRatio);
+        //reflectionsLevel
+        //reflectionsDelay
+        ReverbSetReverbLevel(pContext, preset->reverbLevel);
+        // reverbDelay
+        ReverbSetDiffusion(pContext, preset->diffusion);
+        ReverbSetDensity(pContext, preset->density);
+    }
+
+    return 0;
+}
+
+
+//----------------------------------------------------------------------------
 // Reverb_getParameter()
 //----------------------------------------------------------------------------
 // Purpose:
@@ -1325,6 +1449,15 @@ int Reverb_getParameter(ReverbContext *pContext,
     t_reverb_settings *pProperties;
 
     //LOGV("\tReverb_getParameter start");
+    if (pContext->preset) {
+        if (param != REVERB_PARAM_PRESET || *pValueSize < sizeof(uint16_t)) {
+            return -EINVAL;
+        }
+
+        *(uint16_t *)pValue = pContext->nextPreset;
+        LOGV("get REVERB_PARAM_PRESET, preset %d", pContext->nextPreset);
+        return 0;
+    }
 
     switch (param){
         case REVERB_PARAM_ROOM_LEVEL:
@@ -1531,6 +1664,18 @@ int Reverb_setParameter (ReverbContext *pContext, void *pParam, void *pValue){
     int32_t param = *pParamTemp++;
 
     //LOGV("\tReverb_setParameter start");
+    if (pContext->preset) {
+        if (param != REVERB_PARAM_PRESET) {
+            return -EINVAL;
+        }
+
+        uint16_t preset = *(uint16_t *)pValue;
+        LOGV("set REVERB_PARAM_PRESET, preset %d", preset);
+        if (preset > REVERB_PRESET_LAST) {
+            return -EINVAL;
+        }
+        pContext->nextPreset = preset;
+    }
 
     switch (param){
         case REVERB_PARAM_PROPERTIES:
