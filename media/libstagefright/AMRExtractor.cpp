@@ -87,7 +87,7 @@ AMRExtractor::AMRExtractor(const sp<DataSource> &source)
       mInitCheck(NO_INIT) {
     String8 mimeType;
     float confidence;
-    if (!SniffAMR(mDataSource, &mimeType, &confidence)) {
+    if (!SniffAMR(mDataSource, &mimeType, &confidence, NULL)) {
         return;
     }
 
@@ -276,7 +276,8 @@ status_t AMRSource::read(
 ////////////////////////////////////////////////////////////////////////////////
 
 bool SniffAMR(
-        const sp<DataSource> &source, String8 *mimeType, float *confidence) {
+        const sp<DataSource> &source, String8 *mimeType, float *confidence,
+        sp<AMessage> *) {
     char header[9];
 
     if (source->readAt(0, header, sizeof(header)) != sizeof(header)) {

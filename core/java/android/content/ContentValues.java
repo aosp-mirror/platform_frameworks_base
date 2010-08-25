@@ -497,6 +497,10 @@ public final class ContentValues implements Parcelable {
         return (ArrayList<String>) mValues.get(key);
     }
 
+    /**
+     * Returns a string containing a concise, human-readable description of this object.
+     * @return a printable representation of this object.
+     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

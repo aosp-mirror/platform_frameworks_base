@@ -22,13 +22,14 @@
 
 namespace android {
 
+struct AMessage;
 class DataSource;
 class String8;
 
 class MP3Extractor : public MediaExtractor {
 public:
     // Extractor assumes ownership of "source".
-    MP3Extractor(const sp<DataSource> &source);
+    MP3Extractor(const sp<DataSource> &source, const sp<AMessage> &meta);
 
     virtual size_t countTracks();
     virtual sp<MediaSource> getTrack(size_t index);
@@ -52,7 +53,8 @@ private:
 };
 
 bool SniffMP3(
-        const sp<DataSource> &source, String8 *mimeType, float *confidence);
+        const sp<DataSource> &source, String8 *mimeType, float *confidence,
+        sp<AMessage> *meta);
 
 }  // namespace android
 

@@ -3355,7 +3355,8 @@ public class WebView extends AbsoluteLayout
         setUpSelect();
         if (mNativeClass != 0 && nativeWordSelection(x, y)) {
             nativeSetExtendSelection();
-            getWebChromeClient().onSelectionStart(this);
+            WebChromeClient client = getWebChromeClient();
+            if (client != null) client.onSelectionStart(this);
             return true;
         }
         notifySelectDialogDismissed();
@@ -4088,7 +4089,7 @@ public class WebView extends AbsoluteLayout
                 return true;
             }
             clearTextEntry();
-            nativeSetFollowedLink(true);
+            nativeShowCursorTimed();
             if (!mCallbackProxy.uiOverrideUrlLoading(nativeCursorText())) {
                 mWebViewCore.sendMessage(EventHub.CLICK, data.mFrame,
                         nativeCursorNodePointer());
@@ -4175,7 +4176,8 @@ public class WebView extends AbsoluteLayout
      */
     public void selectionDone() {
         if (mSelectingText) {
-            getWebChromeClient().onSelectionDone(this);
+            WebChromeClient client = getWebChromeClient();
+            if (client != null) client.onSelectionDone(this);
             invalidate(); // redraw without selection
             notifySelectDialogDismissed();
         }
@@ -7327,9 +7329,9 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetExtendSelection();
     private native void     nativeSetFindIsEmpty();
     private native void     nativeSetFindIsUp(boolean isUp);
-    private native void     nativeSetFollowedLink(boolean followed);
     private native void     nativeSetHeightCanMeasure(boolean measure);
     private native void     nativeSetBaseLayer(int layer);
+    private native void     nativeShowCursorTimed();
     private native void     nativeReplaceBaseContent(int content);
     private native void     nativeCopyBaseContentToPicture(Picture pict);
     private native boolean  nativeHasContent();

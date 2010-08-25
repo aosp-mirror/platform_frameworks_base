@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
@@ -323,15 +324,13 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         return null;
     }
 
-    private LayoutParams createOrReuseLayoutParams(View v) {
+    LayoutParams createOrReuseLayoutParams(View v) {
         final ViewGroup.LayoutParams currentLp = v.getLayoutParams();
-        if (currentLp instanceof LayoutParams) {
+        if (currentLp instanceof ViewGroup.LayoutParams) {
             LayoutParams lp = (LayoutParams) currentLp;
-            lp.setHorizontalOffset(0);
-            lp.setVerticalOffset(0);
             return lp;
         }
-        return new LayoutParams(v);
+        return new ViewGroup.LayoutParams(0, 0);
     }
 
     void showOnly(int childIndex, boolean animate, boolean onLayout) {
@@ -472,10 +471,9 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
             int childRight = mPaddingLeft + child.getMeasuredWidth();
             int childBottom = mPaddingTop + child.getMeasuredHeight();
-            LayoutParams lp = (LayoutParams) child.getLayoutParams();
 
-            child.layout(mPaddingLeft + lp.horizontalOffset, mPaddingTop + lp.verticalOffset,
-                    childRight + lp.horizontalOffset, childBottom + lp.verticalOffset);
+            child.layout(mPaddingLeft, mPaddingTop,
+                    childRight, childBottom);
         }
         mDataChanged = false;
     }
@@ -736,104 +734,6 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         if (mRemoteViewsAdapter != mAdapter) {
             mRemoteViewsAdapter = null;
             setAdapter(mRemoteViewsAdapter);
-        }
-    }
-
-    private final Rect dirtyRect = new Rect();
-    @Override
-    public void removeViewInLayout(View view) {
-        // TODO: need to investigate this block a bit more
-        // and perhaps fix some other invalidations issues.
-        View parent = null;
-        view.setVisibility(INVISIBLE);
-        if (view.getLayoutParams() instanceof LayoutParams) {
-            LayoutParams lp = (LayoutParams) view.getLayoutParams();
-            parent = lp.getParentAndDirtyRegion(dirtyRect);
-        }
-
-        super.removeViewInLayout(view);
-
-        if (parent != null)
-            parent.invalidate(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom);
-    }
-
-    static class LayoutParams extends ViewGroup.LayoutParams {
-        int horizontalOffset;
-        int verticalOffset;
-        View mView;
-
-        LayoutParams(View view) {
-            super(0, 0);
-            horizontalOffset = 0;
-            verticalOffset = 0;
-            mView = view;
-        }
-
-        LayoutParams(Context c, AttributeSet attrs) {
-            super(c, attrs);
-            horizontalOffset = 0;
-            verticalOffset = 0;
-        }
-
-        private Rect parentRect = new Rect();
-        void invalidateGlobalRegion(View v, Rect r) {
-            View p = v;
-            boolean firstPass = true;
-            parentRect.set(0, 0, 0, 0);
-            while (p.getParent() != null && p.getParent() instanceof View
-                    && !parentRect.contains(r)) {
-                if (!firstPass) r.offset(p.getLeft() - p.getScrollX(), p.getTop() - p.getScrollY());
-                firstPass = false;
-                p = (View) p.getParent();
-                parentRect.set(p.getLeft() - p.getScrollX(), p.getTop() - p.getScrollY(),
-                        p.getRight() - p.getScrollX(), p.getBottom() - p.getScrollY());
-            }
-            p.invalidate(r.left, r.top, r.right, r.bottom);
-        }
-
-        public View getParentAndDirtyRegion(Rect globalRect) {
-            globalRect.set(mView.getLeft(), mView.getTop(), mView.getRight(), mView.getBottom());
-            View p = mView;
-            boolean firstPass = true;
-            parentRect.set(0, 0, 0, 0);
-            while (p.getParent() != null && p.getParent() instanceof View
-                    && !parentRect.contains(globalRect)) {
-                if (!firstPass) {
-                    globalRect.offset(p.getLeft() - p.getScrollX(), p.getTop() - p.getScrollY());
-                }
-
-                firstPass = false;
-                p = (View) p.getParent();
-                parentRect.set(p.getLeft() - p.getScrollX(), p.getTop() - p.getScrollY(),
-                        p.getRight() - p.getScrollX(), p.getBottom() - p.getScrollY());
-            }
-            return p;
-        }
-
-        private Rect invalidateRect = new Rect();
-        // This is public so that PropertyAnimator can access it
-        public void setVerticalOffset(int newVerticalOffset) {
-            int offsetDelta = newVerticalOffset - verticalOffset;
-            verticalOffset = newVerticalOffset;
-            if (mView != null) {
-                mView.requestLayout();
-                int top = Math.min(mView.getTop() + offsetDelta, mView.getTop());
-                int bottom = Math.max(mView.getBottom() + offsetDelta, mView.getBottom());
-                invalidateRect.set(mView.getLeft(), top, mView.getRight(), bottom);
-                invalidateGlobalRegion(mView, invalidateRect);
-            }
-        }
-
-        public void setHorizontalOffset(int newHorizontalOffset) {
-            int offsetDelta = newHorizontalOffset - horizontalOffset;
-            horizontalOffset = newHorizontalOffset;
-            if (mView != null) {
-                mView.requestLayout();
-                int left = Math.min(mView.getLeft() + offsetDelta, mView.getLeft());
-                int right = Math.max(mView.getRight() + offsetDelta, mView.getRight());
-                invalidateRect.set(left, mView.getTop(), right, mView.getBottom());
-                invalidateGlobalRegion(mView, invalidateRect);
-            }
         }
     }
 }

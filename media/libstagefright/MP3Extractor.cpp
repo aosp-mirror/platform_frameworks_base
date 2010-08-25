@@ -22,6 +22,7 @@
 
 #include "include/ID3.h"
 
+#include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
@@ -456,15 +457,31 @@ private:
     MP3Source &operator=(const MP3Source &);
 };
 
-MP3Extractor::MP3Extractor(const sp<DataSource> &source)
+MP3Extractor::MP3Extractor(
+        const sp<DataSource> &source, const sp<AMessage> &meta)
     : mDataSource(source),
       mFirstFramePos(-1),
       mFixedHeader(0),
       mByteNumber(0) {
     off_t pos = 0;
     uint32_t header;
-    bool success = Resync(mDataSource, 0, &pos, &header);
-    CHECK(success);
+    bool success;
+
+    int64_t meta_offset;
+    uint32_t meta_header;
+    if (meta != NULL
+            && meta->findInt64("offset", &meta_offset)
+            && meta->findInt32("header", (int32_t *)&meta_header)) {
+        // The sniffer has already done all the hard work for us, simply
+        // accept its judgement.
+        pos = (off_t)meta_offset;
+        header = meta_header;
+
+        success = true;
+    } else {
+        success = Resync(mDataSource, 0, &pos, &header);
+        CHECK(success);
+    }
 
     if (success) {
         mFirstFramePos = pos;
@@ -759,15 +776,20 @@ sp<MetaData> MP3Extractor::getMetaData() {
 }
 
 bool SniffMP3(
-        const sp<DataSource> &source, String8 *mimeType, float *confidence) {
+        const sp<DataSource> &source, String8 *mimeType,
+        float *confidence, sp<AMessage> *meta) {
     off_t pos = 0;
     uint32_t header;
     if (!Resync(source, 0, &pos, &header)) {
         return false;
     }
 
+    *meta = new AMessage;
+    (*meta)->setInt64("offset", pos);
+    (*meta)->setInt32("header", header);
+
     *mimeType = MEDIA_MIMETYPE_AUDIO_MPEG;
-    *confidence = 0.3f;
+    *confidence = 0.2f;
 
     return true;
 }
