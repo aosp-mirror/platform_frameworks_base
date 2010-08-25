@@ -43,6 +43,7 @@ namespace uirenderer {
 
 class LayerCache: public OnEntryRemoved<LayerSize, Layer*> {
 public:
+    LayerCache();
     LayerCache(uint32_t maxByteSize);
     ~LayerCache();
 

@@ -43,6 +43,7 @@ namespace uirenderer {
 
 class PatchCache: public OnEntryRemoved<PatchDescription, Patch*> {
 public:
+    PatchCache();
     PatchCache(uint32_t maxCapacity);
     ~PatchCache();
 

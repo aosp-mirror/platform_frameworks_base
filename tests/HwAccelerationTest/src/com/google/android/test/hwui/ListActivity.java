@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.ContextMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -83,6 +84,17 @@ public class ListActivity extends Activity {
 
         ListView list = (ListView) findViewById(R.id.list);
         list.setAdapter(adapter);
+        
+        registerForContextMenu(list);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        menu.setHeaderTitle("Context menu");
+        menu.add("List item 1");
+        menu.add("List item 2");
+        menu.add("List item 3");
     }
 
     private static class SimpleListAdapter extends ArrayAdapter<String> {

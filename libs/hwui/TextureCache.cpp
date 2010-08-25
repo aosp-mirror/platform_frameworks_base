@@ -19,6 +19,7 @@
 #include <GLES2/gl2.h>
 
 #include "TextureCache.h"
+#include "Properties.h"
 
 namespace android {
 namespace uirenderer {
@@ -27,17 +28,35 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
+TextureCache::TextureCache():
+        mCache(GenerationCache<SkBitmap*, Texture*>::kUnlimitedCapacity),
+        mSize(0), mMaxSize(MB(DEFAULT_TEXTURE_CACHE_SIZE)) {
+    char property[PROPERTY_VALUE_MAX];
+    if (property_get(PROPERTY_TEXTURE_CACHE_SIZE, property, NULL) > 0) {
+        LOGD("  Setting texture cache size to %sMB", property);
+        setMaxSize(MB(atof(property)));
+    } else {
+        LOGD("  Using default texture cache size of %.2fMB", DEFAULT_TEXTURE_CACHE_SIZE);
+    }
+
+    init();
+}
+
 TextureCache::TextureCache(uint32_t maxByteSize):
         mCache(GenerationCache<SkBitmap*, Texture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(maxByteSize) {
-    mCache.setOnEntryRemovedListener(this);
-
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
-    LOGD("Maximum texture dimension is %d pixels", mMaxTextureSize);
+    init();
 }
 
 TextureCache::~TextureCache() {
     mCache.clear();
+}
+
+void TextureCache::init() {
+    mCache.setOnEntryRemovedListener(this);
+
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
+    LOGD("    Maximum texture dimension is %d pixels", mMaxTextureSize);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

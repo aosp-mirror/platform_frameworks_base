@@ -183,7 +183,6 @@ private:
     void printLongString(const String8& shader) const;
 
     KeyedVector<programid, Program*> mCache;
-
 }; // class ProgramCache
 
 }; // namespace uirenderer

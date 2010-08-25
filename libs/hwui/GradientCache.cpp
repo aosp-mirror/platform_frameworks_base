@@ -22,6 +22,7 @@
 #include <SkGradientShader.h>
 
 #include "GradientCache.h"
+#include "Properties.h"
 
 namespace android {
 namespace uirenderer {
@@ -29,6 +30,20 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
+
+GradientCache::GradientCache():
+        mCache(GenerationCache<SkShader*, Texture*>::kUnlimitedCapacity),
+        mSize(0), mMaxSize(MB(DEFAULT_GRADIENT_CACHE_SIZE)) {
+    char property[PROPERTY_VALUE_MAX];
+    if (property_get(PROPERTY_GRADIENT_CACHE_SIZE, property, NULL) > 0) {
+        LOGD("  Setting gradient cache size to %sMB", property);
+        setMaxSize(MB(atof(property)));
+    } else {
+        LOGD("  Using default gradient cache size of %.2fMB", DEFAULT_GRADIENT_CACHE_SIZE);
+    }
+
+    mCache.setOnEntryRemovedListener(this);
+}
 
 GradientCache::GradientCache(uint32_t maxByteSize):
         mCache(GenerationCache<SkShader*, Texture*>::kUnlimitedCapacity),

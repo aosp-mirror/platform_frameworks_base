@@ -95,6 +95,7 @@ struct PathTexture: public Texture {
  */
 class PathCache: public OnEntryRemoved<PathCacheEntry, PathTexture*> {
 public:
+    PathCache();
     PathCache(uint32_t maxByteSize);
     ~PathCache();
 
@@ -134,6 +135,8 @@ private:
     void generateTexture(SkBitmap& bitmap, Texture* texture);
 
     PathTexture* addTexture(const PathCacheEntry& entry, const SkPath *path, const SkPaint* paint);
+
+    void init();
 
     GenerationCache<PathCacheEntry, PathTexture*> mCache;
 

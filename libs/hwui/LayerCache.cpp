@@ -21,6 +21,7 @@
 #include <utils/Log.h>
 
 #include "LayerCache.h"
+#include "Properties.h"
 
 namespace android {
 namespace uirenderer {
@@ -28,6 +29,18 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
+
+LayerCache::LayerCache():
+        mCache(GenerationCache<LayerSize, Layer*>::kUnlimitedCapacity),
+        mIdGenerator(1), mSize(0), mMaxSize(MB(DEFAULT_LAYER_CACHE_SIZE)) {
+    char property[PROPERTY_VALUE_MAX];
+    if (property_get(PROPERTY_LAYER_CACHE_SIZE, property, NULL) > 0) {
+        LOGD("  Setting layer cache size to %sMB", property);
+        setMaxSize(MB(atof(property)));
+    } else {
+        LOGD("  Using default layer cache size of %.2fMB", DEFAULT_LAYER_CACHE_SIZE);
+    }
+}
 
 LayerCache::LayerCache(uint32_t maxByteSize):
         mCache(GenerationCache<LayerSize, Layer*>::kUnlimitedCapacity),
