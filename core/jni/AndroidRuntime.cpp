@@ -506,7 +506,7 @@ static void blockSigpipe()
 static void readLocale(char* language, char* region)
 {
     char propLang[PROPERTY_VALUE_MAX], propRegn[PROPERTY_VALUE_MAX];
-    
+
     property_get("persist.sys.language", propLang, "");
     property_get("persist.sys.country", propRegn, "");
     if (*propLang == 0 && *propRegn == 0) {
@@ -701,6 +701,42 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         }
     }
 
+    /* enable poisoning of memory of freed objects */
+    property_get("dalvik.vm.gc.overwritefree", propBuf, "false");
+    if (strcmp(propBuf, "true") == 0) {
+        opt.optionString = "-Xgc:overwritefree";
+        mOptions.add(opt);
+    } else if (strcmp(propBuf, "false") != 0) {
+        LOGW("dalvik.vm.gc.overwritefree should be 'true' or 'false'");
+    }
+
+    /* enable heap verification before each gc */
+    property_get("dalvik.vm.gc.preverify", propBuf, "false");
+    if (strcmp(propBuf, "true") == 0) {
+        opt.optionString = "-Xgc:preverify";
+        mOptions.add(opt);
+    } else if (strcmp(propBuf, "false") != 0) {
+        LOGW("dalvik.vm.gc.preverify should be 'true' or 'false'");
+    }
+
+    /* enable heap verification after each gc */
+    property_get("dalvik.vm.gc.postverify", propBuf, "false");
+    if (strcmp(propBuf, "true") == 0) {
+        opt.optionString = "-Xgc:postverify";
+        mOptions.add(opt);
+    } else if (strcmp(propBuf, "false") != 0) {
+        LOGW("dalvik.vm.gc.postverify should be 'true' or 'false'");
+    }
+
+    /* enable card table verification for partial gc */
+    property_get("dalvik.vm.gc.verifycardtable", propBuf, "false");
+    if (strcmp(propBuf, "true") == 0) {
+        opt.optionString = "-Xgc:verifycardtable";
+        mOptions.add(opt);
+    } else if (strcmp(propBuf, "false") != 0) {
+        LOGW("dalvik.vm.gc.verifycardtable should be 'true' or 'false'");
+    }
+
     /* enable debugging; set suspend=y to pause during VM init */
 #ifdef HAVE_ANDROID_OS
     /* use android ADB transport */
@@ -748,16 +784,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     }
 
 #if defined(WITH_JIT)
-    /* Minimal profile threshold to trigger JIT compilation */
-    char jitThresholdBuf[sizeof("-Xjitthreshold:") + PROPERTY_VALUE_MAX];
-    property_get("dalvik.vm.jit.threshold", propBuf, "");
-    if (strlen(propBuf) > 0) {
-        strcpy(jitThresholdBuf, "-Xjitthreshold:");
-        strcat(jitThresholdBuf, propBuf);
-        opt.optionString = jitThresholdBuf;
-        mOptions.add(opt);
-    }
-
     /* Force interpreter-only mode for selected opcodes. Eg "1-0a,3c,f1-ff" */
     char jitOpBuf[sizeof("-Xjitop:") + PROPERTY_VALUE_MAX];
     property_get("dalvik.vm.jit.op", propBuf, "");
@@ -768,16 +794,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         mOptions.add(opt);
     }
 
-    /*
-     * Reverse the polarity of dalvik.vm.jit.op and force interpreter-only
-     * for non-selected opcodes.
-     */
-    property_get("dalvik.vm.jit.includeop", propBuf, "");
-    if (strlen(propBuf) > 0) {
-        opt.optionString = "-Xincludeselectedop";
-        mOptions.add(opt);
-    }
-
     /* Force interpreter-only mode for selected methods */
     char jitMethodBuf[sizeof("-Xjitmethod:") + PROPERTY_VALUE_MAX];
     property_get("dalvik.vm.jit.method", propBuf, "");
@@ -785,37 +801,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         strcpy(jitMethodBuf, "-Xjitmethod:");
         strcat(jitMethodBuf, propBuf);
         opt.optionString = jitMethodBuf;
-        mOptions.add(opt);
-    }
-
-    /*
-     * Reverse the polarity of dalvik.vm.jit.method and force interpreter-only
-     * for non-selected methods.
-     */
-    property_get("dalvik.vm.jit.includemethod", propBuf, "");
-    if (strlen(propBuf) > 0) {
-        opt.optionString = "-Xincludeselectedmethod";
-        mOptions.add(opt);
-    }
-
-    /*
-     * Enable profile collection on JIT'ed code.
-     */
-    property_get("dalvik.vm.jit.profile", propBuf, "");
-    if (strlen(propBuf) > 0) {
-        opt.optionString = "-Xjitprofile";
-        mOptions.add(opt);
-    }
-
-    /*
-     * Disable optimizations by setting the corresponding bit to 1.
-     */
-    char jitOptBuf[sizeof("-Xjitdisableopt:") + PROPERTY_VALUE_MAX];
-    property_get("dalvik.vm.jit.disableopt", propBuf, "");
-    if (strlen(propBuf) > 0) {
-        strcpy(jitOptBuf, "-Xjitdisableopt:");
-        strcat(jitOptBuf, propBuf);
-        opt.optionString = jitOptBuf;
         mOptions.add(opt);
     }
 #endif
