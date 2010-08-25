@@ -142,6 +142,11 @@ public class Am {
                 String value = nextArgRequired();
                 intent.putExtra(key, Integer.valueOf(value));
                 hasIntentInfo = true;
+            } else if (opt.equals("--el")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                intent.putExtra(key, Long.valueOf(value));
+                hasIntentInfo = true;
             } else if (opt.equals("--ez")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
@@ -627,6 +632,7 @@ public class Am {
                 "        [--esn <EXTRA_KEY> ...]\n" +
                 "        [--ez <EXTRA_KEY> <EXTRA_BOOLEAN_VALUE> ...]\n" +
                 "        [--ei <EXTRA_KEY> <EXTRA_INT_VALUE> ...]\n" +
+                "        [--el <EXTRA_KEY> <EXTRA_LONG_VALUE> ...]\n" +
                 "        [-n <COMPONENT>] [-f <FLAGS>]\n" +
                 "        [--grant-read-uri-permission] [--grant-write-uri-permission]\n" +
                 "        [--debug-log-resolution]\n" +
