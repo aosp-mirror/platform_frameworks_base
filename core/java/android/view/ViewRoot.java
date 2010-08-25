@@ -469,7 +469,9 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             if (attrs != null &&
                     (attrs.flags & WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0) {
                 final boolean translucent = attrs.format != PixelFormat.OPAQUE;
-                destroyHardwareRenderer();
+                if (mHwRenderer != null) {
+                    mHwRenderer.destroy(true);
+                }                
                 mHwRenderer = HardwareRenderer.createGlRenderer(2, translucent);
             }
         }
@@ -678,7 +680,9 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             attachInfo.mWindowVisibility = viewVisibility;
             host.dispatchWindowVisibilityChanged(viewVisibility);
             if (viewVisibility != View.VISIBLE || mNewSurfaceNeeded) {
-                destroyHardwareRenderer();
+                if (mHwRenderer != null) {
+                    mHwRenderer.destroy(false);
+                }                
             }
             if (viewVisibility == View.GONE) {
                 // After making a window gone, we will count it as being
@@ -1597,9 +1601,11 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         mAttachInfo.mRootView = null;
         mAttachInfo.mSurface = null;
 
-        destroyHardwareRenderer();
-        mHwRenderer = null;
-        
+        if (mHwRenderer != null) {
+            mHwRenderer.destroy(true);
+            mHwRenderer = null;
+        }
+
         mSurface.release();
 
         if (mInputChannel != null) {
@@ -1621,12 +1627,6 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         if (mInputChannel != null) {
             mInputChannel.dispose();
             mInputChannel = null;
-        }
-    }
-
-    private void destroyHardwareRenderer() {
-        if (mHwRenderer != null) {
-            mHwRenderer.destroy();
         }
     }
 
