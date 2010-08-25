@@ -322,6 +322,8 @@ public final class MediaStore {
         private static final int MICRO_KIND = 3;
         private static final String[] PROJECTION = new String[] {_ID, MediaColumns.DATA};
         static final int DEFAULT_GROUP_ID = 0;
+        private static final Object sThumbBufLock = new Object();
+        private static byte[] sThumbBuf;
 
         private static Bitmap getMiniThumbFromFile(Cursor c, Uri baseUri, ContentResolver cr, BitmapFactory.Options options) {
             Bitmap bitmap = null;
@@ -397,11 +399,15 @@ public final class MediaStore {
                 long magic = thumbFile.getMagic(origId);
                 if (magic != 0) {
                     if (kind == MICRO_KIND) {
-                        byte[] data = new byte[MiniThumbFile.BYTES_PER_MINTHUMB];
-                        if (thumbFile.getMiniThumbFromFile(origId, data) != null) {
-                            bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                            if (bitmap == null) {
-                                Log.w(TAG, "couldn't decode byte array.");
+                        synchronized (sThumbBufLock) {
+                            if (sThumbBuf == null) {
+                                sThumbBuf = new byte[MiniThumbFile.BYTES_PER_MINTHUMB];
+                            }
+                            if (thumbFile.getMiniThumbFromFile(origId, sThumbBuf) != null) {
+                                bitmap = BitmapFactory.decodeByteArray(sThumbBuf, 0, sThumbBuf.length);
+                                if (bitmap == null) {
+                                    Log.w(TAG, "couldn't decode byte array.");
+                                }
                             }
                         }
                         return bitmap;
@@ -427,11 +433,15 @@ public final class MediaStore {
 
                 // Assuming thumbnail has been generated, at least original image exists.
                 if (kind == MICRO_KIND) {
-                    byte[] data = new byte[MiniThumbFile.BYTES_PER_MINTHUMB];
-                    if (thumbFile.getMiniThumbFromFile(origId, data) != null) {
-                        bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                        if (bitmap == null) {
-                            Log.w(TAG, "couldn't decode byte array.");
+                    synchronized (sThumbBufLock) {
+                        if (sThumbBuf == null) {
+                            sThumbBuf = new byte[MiniThumbFile.BYTES_PER_MINTHUMB];
+                        }
+                        if (thumbFile.getMiniThumbFromFile(origId, sThumbBuf) != null) {
+                            bitmap = BitmapFactory.decodeByteArray(sThumbBuf, 0, sThumbBuf.length);
+                            if (bitmap == null) {
+                                Log.w(TAG, "couldn't decode byte array.");
+                            }
                         }
                     }
                 } else if (kind == MINI_KIND) {
