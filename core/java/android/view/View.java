@@ -262,7 +262,8 @@ import java.util.WeakHashMap;
  * <ul>
  * <li>Define a Button in the layout file and assign it a unique ID.
  * <pre>
- * &lt;Button id="@+id/my_button"
+ * &lt;Button
+ *     android:id="@+id/my_button"
  *     android:layout_width="wrap_content"
  *     android:layout_height="wrap_content"
  *     android:text="@string/my_button_text"/&gt;
