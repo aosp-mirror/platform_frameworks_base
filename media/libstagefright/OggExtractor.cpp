@@ -804,7 +804,8 @@ sp<MetaData> OggExtractor::getMetaData() {
 }
 
 bool SniffOgg(
-        const sp<DataSource> &source, String8 *mimeType, float *confidence) {
+        const sp<DataSource> &source, String8 *mimeType, float *confidence,
+        sp<AMessage> *) {
     char tmp[4];
     if (source->readAt(0, tmp, 4) < 4 || memcmp(tmp, "OggS", 4)) {
         return false;

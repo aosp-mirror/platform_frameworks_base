@@ -25,6 +25,7 @@
 
 #include "matroska/MatroskaExtractor.h"
 
+#include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/FileSource.h>
 #include <media/stagefright/MediaErrors.h>
@@ -56,19 +57,23 @@ status_t DataSource::getSize(off_t *size) {
 Mutex DataSource::gSnifferMutex;
 List<DataSource::SnifferFunc> DataSource::gSniffers;
 
-bool DataSource::sniff(String8 *mimeType, float *confidence) {
+bool DataSource::sniff(
+        String8 *mimeType, float *confidence, sp<AMessage> *meta) {
     *mimeType = "";
     *confidence = 0.0f;
+    meta->clear();
 
     Mutex::Autolock autoLock(gSnifferMutex);
     for (List<SnifferFunc>::iterator it = gSniffers.begin();
          it != gSniffers.end(); ++it) {
         String8 newMimeType;
         float newConfidence;
-        if ((*it)(this, &newMimeType, &newConfidence)) {
+        sp<AMessage> newMeta;
+        if ((*it)(this, &newMimeType, &newConfidence, &newMeta)) {
             if (newConfidence > *confidence) {
                 *mimeType = newMimeType;
                 *confidence = newConfidence;
+                *meta = newMeta;
             }
         }
     }
@@ -92,13 +97,13 @@ void DataSource::RegisterSniffer(SnifferFunc func) {
 
 // static
 void DataSource::RegisterDefaultSniffers() {
-    RegisterSniffer(SniffMP3);
     RegisterSniffer(SniffMPEG4);
-    RegisterSniffer(SniffAMR);
-    RegisterSniffer(SniffWAV);
-    RegisterSniffer(SniffOgg);
     RegisterSniffer(SniffMatroska);
+    RegisterSniffer(SniffOgg);
+    RegisterSniffer(SniffWAV);
+    RegisterSniffer(SniffAMR);
     RegisterSniffer(SniffMPEG2TS);
+    RegisterSniffer(SniffMP3);
 }
 
 // static
