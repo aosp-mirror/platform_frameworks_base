@@ -610,8 +610,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * All currently bound service connections.  Keys are the IBinder of
      * the client's IServiceConnection.
      */
-    final HashMap<IBinder, ConnectionRecord> mServiceConnections
-            = new HashMap<IBinder, ConnectionRecord>();
+    final HashMap<IBinder, ArrayList<ConnectionRecord>> mServiceConnections
+            = new HashMap<IBinder, ArrayList<ConnectionRecord>>();
 
     /**
      * List of services that we have been asked to start,
@@ -7400,12 +7400,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (mServiceConnections.size() > 0) {
                 if (needSep) pw.println(" ");
                 pw.println("  Connection bindings to services:");
-                Iterator<ConnectionRecord> it
+                Iterator<ArrayList<ConnectionRecord>> it
                         = mServiceConnections.values().iterator();
                 while (it.hasNext()) {
-                    ConnectionRecord r = it.next();
-                    pw.print("  * "); pw.println(r);
-                    r.dump(pw, "    ");
+                    ArrayList<ConnectionRecord> r = it.next();
+                    for (int i=0; i<r.size(); i++) {
+                        pw.print("  * "); pw.println(r.get(i));
+                        r.get(i).dump(pw, "    ");
+                    }
                 }
                 needSep = true;
             }
@@ -7683,18 +7685,21 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 while (it.hasNext()) {
                     ServiceRecord r = it.next();
                     if (r.connections.size() > 0) {
-                        Iterator<ConnectionRecord> jt
+                        Iterator<ArrayList<ConnectionRecord>> jt
                                 = r.connections.values().iterator();
                         while (jt.hasNext()) {
-                            ConnectionRecord c = jt.next();
-                            if (c.binding.client != app) {
-                                try {
-                                    //c.conn.connected(r.className, null);
-                                } catch (Exception e) {
-                                    // todo: this should be asynchronous!
-                                    Slog.w(TAG, "Exception thrown disconnected servce "
-                                          + r.shortName
-                                          + " from app " + app.processName, e);
+                            ArrayList<ConnectionRecord> cl = jt.next();
+                            for (int i=0; i<cl.size(); i++) {
+                                ConnectionRecord c = cl.get(i);
+                                if (c.binding.client != app) {
+                                    try {
+                                        //c.conn.connected(r.className, null);
+                                    } catch (Exception e) {
+                                        // todo: this should be asynchronous!
+                                        Slog.w(TAG, "Exception thrown disconnected servce "
+                                              + r.shortName
+                                              + " from app " + app.processName, e);
+                                    }
                                 }
                             }
                         }
@@ -7724,7 +7729,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
                 sr.app = null;
                 sr.executeNesting = 0;
-                mStoppingServices.remove(sr);
+                if (mStoppingServices.remove(sr)) {
+                    if (DEBUG_SERVICE) Slog.v(TAG, "killServices remove stopping " + sr);
+                }
                 
                 boolean hasClients = sr.bindings.size() > 0;
                 if (hasClients) {
@@ -7777,6 +7784,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             ServiceRecord sr = mStoppingServices.get(i);
             if (sr.app == app) {
                 mStoppingServices.remove(i);
+                if (DEBUG_SERVICE) Slog.v(TAG, "killServices remove stopping " + sr);
             }
         }
         
@@ -8040,11 +8048,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (r.app != null && r.app.persistent) {
             info.flags |= ActivityManager.RunningServiceInfo.FLAG_PERSISTENT_PROCESS;
         }
-        for (ConnectionRecord conn : r.connections.values()) {
-            if (conn.clientLabel != 0) {
-                info.clientPackage = conn.binding.client.info.packageName;
-                info.clientLabel = conn.clientLabel;
-                break;
+
+        for (ArrayList<ConnectionRecord> connl : r.connections.values()) {
+            for (int i=0; i<connl.size(); i++) {
+                ConnectionRecord conn = connl.get(i);
+                if (conn.clientLabel != 0) {
+                    info.clientPackage = conn.binding.client.info.packageName;
+                    info.clientLabel = conn.clientLabel;
+                    return info;
+                }
             }
         }
         return info;
@@ -8079,9 +8091,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         synchronized (this) {
             ServiceRecord r = mServices.get(name);
             if (r != null) {
-                for (ConnectionRecord conn : r.connections.values()) {
-                    if (conn.clientIntent != null) {
-                        return conn.clientIntent;
+                for (ArrayList<ConnectionRecord> conn : r.connections.values()) {
+                    for (int i=0; i<conn.size(); i++) {
+                        if (conn.get(i).clientIntent != null) {
+                            return conn.get(i).clientIntent;
+                        }
                     }
                 }
             }
@@ -8258,8 +8272,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         while (r.pendingStarts.size() > 0) {
             try {
                 ServiceRecord.StartItem si = r.pendingStarts.remove(0);
-                if (DEBUG_SERVICE) Slog.v(TAG, "Sending arguments to service: "
-                        + r.name + " " + r.intent + " args=" + si.intent);
+                if (DEBUG_SERVICE) Slog.v(TAG, "Sending arguments to: "
+                        + r + " " + r.intent + " args=" + si.intent);
                 if (si.intent == null) {
                     // If somehow we got a dummy start at the front, then
                     // just drop it here.
@@ -8272,6 +8286,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     grantUriPermissionUncheckedFromIntentLocked(si.targetPermissionUid,
                             r.packageName, si.intent, si);
                 }
+                if (DEBUG_SERVICE) Slog.v(TAG, ">>> EXECUTING start of " + r);
                 bumpServiceExecutingLocked(r);
                 if (!oomAdjusted) {
                     oomAdjusted = true;
@@ -8288,6 +8303,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             } catch (RemoteException e) {
                 // Remote process gone...  we'll let the normal cleanup take
                 // care of this.
+                if (DEBUG_SERVICE) Slog.v(TAG, "Crashed while scheduling start: " + r);
                 break;
             } catch (Exception e) {
                 Slog.w(TAG, "Unexpected exception", e);
@@ -8304,9 +8320,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
         if ((!i.requested || rebind) && i.apps.size() > 0) {
             try {
+                if (DEBUG_SERVICE) Slog.v(TAG, ">>> EXECUTING bind of " + r
+                        + " in " + i + ": shouldUnbind=" + i.hasBound);
                 bumpServiceExecutingLocked(r);
-                if (DEBUG_SERVICE) Slog.v(TAG, "Connecting binding " + i
-                        + ": shouldUnbind=" + i.hasBound);
                 r.app.thread.scheduleBindService(r, i.intent.getIntent(), rebind);
                 if (!rebind) {
                     i.requested = true;
@@ -8314,6 +8330,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 i.hasBound = true;
                 i.doRebind = false;
             } catch (RemoteException e) {
+                if (DEBUG_SERVICE) Slog.v(TAG, "Crashed while binding " + r);
                 return false;
             }
         }
@@ -8340,13 +8357,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         r.restartTime = r.lastActivity = SystemClock.uptimeMillis();
 
         app.services.add(r);
+        if (DEBUG_SERVICE) Slog.v(TAG, ">>> EXECUTING create of " + r + " " + r.intent);
         bumpServiceExecutingLocked(r);
         updateLruProcessLocked(app, true, true);
 
         boolean created = false;
         try {
-            if (DEBUG_SERVICE) Slog.v(TAG, "Scheduling start service: "
-                    + r.name + " " + r.intent);
             mStringBuilder.setLength(0);
             r.intent.getIntent().toShortString(mStringBuilder, false, true);
             EventLog.writeEvent(EventLogTags.AM_CREATE_SERVICE,
@@ -8506,8 +8522,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             return true;
         }
 
-        if (DEBUG_SERVICE) Slog.v(TAG, "Bringing up service " + r.name
-                + " " + r.intent);
+        if (DEBUG_SERVICE) Slog.v(TAG, "Bringing up " + r + " " + r.intent);
 
         // We are now bringing the service up, so no longer in the
         // restarting state.
@@ -8558,27 +8573,30 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (!force) {
                 // XXX should probably keep a count of the number of auto-create
                 // connections directly in the service.
-                Iterator<ConnectionRecord> it = r.connections.values().iterator();
+                Iterator<ArrayList<ConnectionRecord>> it = r.connections.values().iterator();
                 while (it.hasNext()) {
-                    ConnectionRecord cr = it.next();
-                    if ((cr.flags&Context.BIND_AUTO_CREATE) != 0) {
-                        return;
+                    ArrayList<ConnectionRecord> cr = it.next();
+                    for (int i=0; i<cr.size(); i++) {
+                        if ((cr.get(i).flags&Context.BIND_AUTO_CREATE) != 0) {
+                            return;
+                        }
                     }
                 }
             }
 
             // Report to all of the connections that the service is no longer
             // available.
-            Iterator<ConnectionRecord> it = r.connections.values().iterator();
+            Iterator<ArrayList<ConnectionRecord>> it = r.connections.values().iterator();
             while (it.hasNext()) {
-                ConnectionRecord c = it.next();
-                try {
-                    // todo: shouldn't be a synchronous call!
-                    c.conn.connected(r.name, null);
-                } catch (Exception e) {
-                    Slog.w(TAG, "Failure disconnecting service " + r.name +
-                          " to connection " + c.conn.asBinder() +
-                          " (in " + c.binding.client.processName + ")", e);
+                ArrayList<ConnectionRecord> c = it.next();
+                for (int i=0; i<c.size(); i++) {
+                    try {
+                        c.get(i).conn.connected(r.name, null);
+                    } catch (Exception e) {
+                        Slog.w(TAG, "Failure disconnecting service " + r.name +
+                              " to connection " + c.get(i).conn.asBinder() +
+                              " (in " + c.get(i).binding.client.processName + ")", e);
+                    }
                 }
             }
         }
@@ -8592,6 +8610,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         + ": hasBound=" + ibr.hasBound);
                 if (r.app != null && r.app.thread != null && ibr.hasBound) {
                     try {
+                        if (DEBUG_SERVICE) Slog.v(TAG, ">>> EXECUTING bring down unbind of " + r
+                                + " for " + ibr);
                         bumpServiceExecutingLocked(r);
                         updateOomAdjLocked(r.app);
                         ibr.hasBound = false;
@@ -8606,15 +8626,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
 
-        if (DEBUG_SERVICE) Slog.v(TAG, "Bringing down service " + r.name
-                 + " " + r.intent);
+        if (DEBUG_SERVICE) Slog.v(TAG, "Bringing down " + r + " " + r.intent);
         EventLog.writeEvent(EventLogTags.AM_DESTROY_SERVICE,
                 System.identityHashCode(r), r.shortName,
                 (r.app != null) ? r.app.pid : -1);
 
         mServices.remove(r.name);
         mServicesByIntent.remove(r.intent);
-        if (localLOGV) Slog.v(TAG, "BRING DOWN SERVICE: " + r.shortName);
         r.totalRestartCount = 0;
         unscheduleServiceRestartLocked(r);
 
@@ -8623,8 +8641,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         for (int i=0; i<N; i++) {
             if (mPendingServices.get(i) == r) {
                 mPendingServices.remove(i);
-                if (DEBUG_SERVICE) Slog.v(
-                    TAG, "Removed pending service: " + r.shortName);
+                if (DEBUG_SERVICE) Slog.v(TAG, "Removed pending: " + r);
                 i--;
                 N--;
             }
@@ -8646,8 +8663,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             r.app.services.remove(r);
             if (r.app.thread != null) {
                 try {
-                    if (DEBUG_SERVICE) Slog.v(TAG,
-                            "Stopping service: " + r.shortName);
+                    if (DEBUG_SERVICE) {
+                        RuntimeException here = new RuntimeException();
+                        here.fillInStackTrace();
+                        Slog.v(TAG, ">>> EXECUTING stop of " + r, here);
+                    }
                     bumpServiceExecutingLocked(r);
                     mStoppingServices.add(r);
                     updateOomAdjLocked(r.app);
@@ -8660,11 +8680,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 updateServiceForegroundLocked(r.app, false);
             } else {
                 if (DEBUG_SERVICE) Slog.v(
-                    TAG, "Removed service that has no process: " + r.shortName);
+                    TAG, "Removed service that has no process: " + r);
             }
         } else {
             if (DEBUG_SERVICE) Slog.v(
-                TAG, "Removed service that is not running: " + r.shortName);
+                TAG, "Removed service that is not running: " + r);
         }
     }
 
@@ -8699,8 +8719,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             int targetPermissionUid = checkGrantUriPermissionFromIntentLocked(
                     callingUid, r.packageName, service);
             if (unscheduleServiceRestartLocked(r)) {
-                if (DEBUG_SERVICE) Slog.v(TAG, "START SERVICE WHILE RESTART PENDING: "
-                        + r.shortName);
+                if (DEBUG_SERVICE) Slog.v(TAG, "START SERVICE WHILE RESTART PENDING: " + r);
             }
             r.startRequested = true;
             r.callStart = false;
@@ -8994,7 +9013,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             if (unscheduleServiceRestartLocked(s)) {
                 if (DEBUG_SERVICE) Slog.v(TAG, "BIND SERVICE WHILE RESTART PENDING: "
-                        + s.shortName);
+                        + s);
             }
 
             AppBindRecord b = s.retrieveAppBindingLocked(service, callerApp);
@@ -9002,7 +9021,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     connection, flags, clientLabel, clientIntent);
 
             IBinder binder = connection.asBinder();
-            s.connections.put(binder, c);
+            ArrayList<ConnectionRecord> clist = s.connections.get(binder);
+            if (clist == null) {
+                clist = new ArrayList<ConnectionRecord>();
+                s.connections.put(binder, clist);
+            }
+            clist.add(c);
             b.connections.add(c);
             if (activity != null) {
                 if (activity.connections == null) {
@@ -9011,7 +9035,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 activity.connections.add(c);
             }
             b.client.connections.add(c);
-            mServiceConnections.put(binder, c);
+            clist = mServiceConnections.get(binder);
+            if (clist == null) {
+                clist = new ArrayList<ConnectionRecord>();
+                mServiceConnections.put(binder, clist);
+            }
+            clist.add(c);
 
             if ((flags&Context.BIND_AUTO_CREATE) != 0) {
                 s.lastActivity = SystemClock.uptimeMillis();
@@ -9062,7 +9091,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         IBinder binder = c.conn.asBinder();
         AppBindRecord b = c.binding;
         ServiceRecord s = b.service;
-        s.connections.remove(binder);
+        ArrayList<ConnectionRecord> clist = s.connections.get(binder);
+        if (clist != null) {
+            clist.remove(c);
+            if (clist.size() == 0) {
+                s.connections.remove(binder);
+            }
+        }
         b.connections.remove(c);
         if (c.activity != null && c.activity != skipAct) {
             if (c.activity.connections != null) {
@@ -9072,7 +9107,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (b.client != skipApp) {
             b.client.connections.remove(c);
         }
-        mServiceConnections.remove(binder);
+        clist = mServiceConnections.get(binder);
+        if (clist != null) {
+            clist.remove(c);
+            if (clist.size() == 0) {
+                mServiceConnections.remove(binder);
+            }
+        }
 
         if (b.connections.size() == 0) {
             b.intent.apps.remove(b.client);
@@ -9083,6 +9124,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (s.app != null && s.app.thread != null && b.intent.apps.size() == 0
                 && b.intent.hasBound) {
             try {
+                if (DEBUG_SERVICE) Slog.v(TAG, ">>> EXECUTING unbind of " + s
+                        + " from " + b);
                 bumpServiceExecutingLocked(s);
                 updateOomAdjLocked(s.app);
                 b.intent.hasBound = false;
@@ -9105,8 +9148,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         synchronized (this) {
             IBinder binder = connection.asBinder();
             if (DEBUG_SERVICE) Slog.v(TAG, "unbindService: conn=" + binder);
-            ConnectionRecord r = mServiceConnections.get(binder);
-            if (r == null) {
+            ArrayList<ConnectionRecord> clist = mServiceConnections.get(binder);
+            if (clist == null) {
                 Slog.w(TAG, "Unbind failed: could not find connection for "
                       + connection.asBinder());
                 return false;
@@ -9114,11 +9157,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             final long origId = Binder.clearCallingIdentity();
 
-            removeConnectionLocked(r, null, null);
+            while (clist.size() > 0) {
+                ConnectionRecord r = clist.get(0);
+                removeConnectionLocked(r, null, null);
 
-            if (r.binding.service.app != null) {
-                // This could have made the service less important.
-                updateOomAdjLocked(r.binding.service.app);
+                if (r.binding.service.app != null) {
+                    // This could have made the service less important.
+                    updateOomAdjLocked(r.binding.service.app);
+                }
             }
 
             Binder.restoreCallingIdentity(origId);
@@ -9141,7 +9187,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             final long origId = Binder.clearCallingIdentity();
 
-            if (DEBUG_SERVICE) Slog.v(TAG, "PUBLISHING SERVICE " + r.name
+            if (DEBUG_SERVICE) Slog.v(TAG, "PUBLISHING " + r
                     + " " + intent + ": " + service);
             if (r != null) {
                 Intent.FilterComparison filter
@@ -9152,26 +9198,29 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     b.requested = true;
                     b.received = true;
                     if (r.connections.size() > 0) {
-                        Iterator<ConnectionRecord> it
+                        Iterator<ArrayList<ConnectionRecord>> it
                                 = r.connections.values().iterator();
                         while (it.hasNext()) {
-                            ConnectionRecord c = it.next();
-                            if (!filter.equals(c.binding.intent.intent)) {
-                                if (DEBUG_SERVICE) Slog.v(
-                                        TAG, "Not publishing to: " + c);
-                                if (DEBUG_SERVICE) Slog.v(
-                                        TAG, "Bound intent: " + c.binding.intent.intent);
-                                if (DEBUG_SERVICE) Slog.v(
-                                        TAG, "Published intent: " + intent);
-                                continue;
-                            }
-                            if (DEBUG_SERVICE) Slog.v(TAG, "Publishing to: " + c);
-                            try {
-                                c.conn.connected(r.name, service);
-                            } catch (Exception e) {
-                                Slog.w(TAG, "Failure sending service " + r.name +
-                                      " to connection " + c.conn.asBinder() +
-                                      " (in " + c.binding.client.processName + ")", e);
+                            ArrayList<ConnectionRecord> clist = it.next();
+                            for (int i=0; i<clist.size(); i++) {
+                                ConnectionRecord c = clist.get(i);
+                                if (!filter.equals(c.binding.intent.intent)) {
+                                    if (DEBUG_SERVICE) Slog.v(
+                                            TAG, "Not publishing to: " + c);
+                                    if (DEBUG_SERVICE) Slog.v(
+                                            TAG, "Bound intent: " + c.binding.intent.intent);
+                                    if (DEBUG_SERVICE) Slog.v(
+                                            TAG, "Published intent: " + intent);
+                                    continue;
+                                }
+                                if (DEBUG_SERVICE) Slog.v(TAG, "Publishing to: " + c);
+                                try {
+                                    c.conn.connected(r.name, service);
+                                } catch (Exception e) {
+                                    Slog.w(TAG, "Failure sending service " + r.name +
+                                          " to connection " + c.conn.asBinder() +
+                                          " (in " + c.binding.client.processName + ")", e);
+                                }
                             }
                         }
                     }
@@ -9232,9 +9281,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             ServiceRecord r = (ServiceRecord)token;
             boolean inStopping = mStoppingServices.contains(token);
             if (r != null) {
-                if (DEBUG_SERVICE) Slog.v(TAG, "DONE EXECUTING SERVICE " + r.name
-                        + ": nesting=" + r.executeNesting
-                        + ", inStopping=" + inStopping);
                 if (r != token) {
                     Slog.w(TAG, "Done executing service " + r.name
                           + " with incorrect token: given " + token
@@ -9291,13 +9337,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 serviceDoneExecutingLocked(r, inStopping);
                 Binder.restoreCallingIdentity(origId);
             } else {
-                Slog.w(TAG, "Done executing unknown service " + r.name
-                        + " with token " + token);
+                Slog.w(TAG, "Done executing unknown service from pid "
+                        + Binder.getCallingPid());
             }
         }
     }
 
     public void serviceDoneExecutingLocked(ServiceRecord r, boolean inStopping) {
+        if (DEBUG_SERVICE) Slog.v(TAG, "<<< DONE EXECUTING " + r
+                + ": nesting=" + r.executeNesting
+                + ", inStopping=" + inStopping + ", app=" + r.app);
         r.executeNesting--;
         if (r.executeNesting <= 0 && r.app != null) {
             r.app.executingServices.remove(r);
@@ -9305,6 +9354,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 mHandler.removeMessages(SERVICE_TIMEOUT_MSG, r.app);
             }
             if (inStopping) {
+                if (DEBUG_SERVICE) Slog.v(TAG, "doneExecuting remove stopping " + r);
                 mStoppingServices.remove(r);
             }
             updateOomAdjLocked(r.app);
@@ -11095,61 +11145,64 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
                 if (s.connections.size() > 0 && (adj > FOREGROUND_APP_ADJ
                         || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE)) {
-                    Iterator<ConnectionRecord> kt
+                    Iterator<ArrayList<ConnectionRecord>> kt
                             = s.connections.values().iterator();
                     while (kt.hasNext() && adj > FOREGROUND_APP_ADJ) {
-                        // XXX should compute this based on the max of
-                        // all connected clients.
-                        ConnectionRecord cr = kt.next();
-                        if (cr.binding.client == app) {
-                            // Binding to ourself is not interesting.
-                            continue;
-                        }
-                        if ((cr.flags&Context.BIND_AUTO_CREATE) != 0) {
-                            ProcessRecord client = cr.binding.client;
-                            int myHiddenAdj = hiddenAdj;
-                            if (myHiddenAdj > client.hiddenAdj) {
-                                if (client.hiddenAdj >= VISIBLE_APP_ADJ) {
-                                    myHiddenAdj = client.hiddenAdj;
-                                } else {
-                                    myHiddenAdj = VISIBLE_APP_ADJ;
+                        ArrayList<ConnectionRecord> clist = kt.next();
+                        for (int i=0; i<clist.size() && adj > FOREGROUND_APP_ADJ; i++) {
+                            // XXX should compute this based on the max of
+                            // all connected clients.
+                            ConnectionRecord cr = clist.get(i);
+                            if (cr.binding.client == app) {
+                                // Binding to ourself is not interesting.
+                                continue;
+                            }
+                            if ((cr.flags&Context.BIND_AUTO_CREATE) != 0) {
+                                ProcessRecord client = cr.binding.client;
+                                int myHiddenAdj = hiddenAdj;
+                                if (myHiddenAdj > client.hiddenAdj) {
+                                    if (client.hiddenAdj >= VISIBLE_APP_ADJ) {
+                                        myHiddenAdj = client.hiddenAdj;
+                                    } else {
+                                        myHiddenAdj = VISIBLE_APP_ADJ;
+                                    }
+                                }
+                                int clientAdj = computeOomAdjLocked(
+                                    client, myHiddenAdj, TOP_APP, true);
+                                if (adj > clientAdj) {
+                                    adj = clientAdj >= VISIBLE_APP_ADJ
+                                            ? clientAdj : VISIBLE_APP_ADJ;
+                                    if (!client.hidden) {
+                                        app.hidden = false;
+                                    }
+                                    app.adjType = "service";
+                                    app.adjTypeCode = ActivityManager.RunningAppProcessInfo
+                                            .REASON_SERVICE_IN_USE;
+                                    app.adjSource = cr.binding.client;
+                                    app.adjTarget = s.name;
+                                }
+                                if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
+                                    if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
+                                        schedGroup = Process.THREAD_GROUP_DEFAULT;
+                                    }
                                 }
                             }
-                            int clientAdj = computeOomAdjLocked(
-                                client, myHiddenAdj, TOP_APP, true);
-                            if (adj > clientAdj) {
-                                adj = clientAdj >= VISIBLE_APP_ADJ
-                                        ? clientAdj : VISIBLE_APP_ADJ;
-                                if (!client.hidden) {
-                                    app.hidden = false;
-                                }
+                            ActivityRecord a = cr.activity;
+                            //if (a != null) {
+                            //    Slog.i(TAG, "Connection to " + a ": state=" + a.state);
+                            //}
+                            if (a != null && adj > FOREGROUND_APP_ADJ &&
+                                    (a.state == ActivityState.RESUMED
+                                     || a.state == ActivityState.PAUSING)) {
+                                adj = FOREGROUND_APP_ADJ;
+                                schedGroup = Process.THREAD_GROUP_DEFAULT;
+                                app.hidden = false;
                                 app.adjType = "service";
                                 app.adjTypeCode = ActivityManager.RunningAppProcessInfo
                                         .REASON_SERVICE_IN_USE;
-                                app.adjSource = cr.binding.client;
+                                app.adjSource = a;
                                 app.adjTarget = s.name;
                             }
-                            if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
-                                if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
-                                    schedGroup = Process.THREAD_GROUP_DEFAULT;
-                                }
-                            }
-                        }
-                        ActivityRecord a = cr.activity;
-                        //if (a != null) {
-                        //    Slog.i(TAG, "Connection to " + a ": state=" + a.state);
-                        //}
-                        if (a != null && adj > FOREGROUND_APP_ADJ &&
-                                (a.state == ActivityState.RESUMED
-                                 || a.state == ActivityState.PAUSING)) {
-                            adj = FOREGROUND_APP_ADJ;
-                            schedGroup = Process.THREAD_GROUP_DEFAULT;
-                            app.hidden = false;
-                            app.adjType = "service";
-                            app.adjTypeCode = ActivityManager.RunningAppProcessInfo
-                                    .REASON_SERVICE_IN_USE;
-                            app.adjSource = a;
-                            app.adjTarget = s.name;
                         }
                     }
                 }

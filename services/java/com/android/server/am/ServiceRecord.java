@@ -72,8 +72,8 @@ class ServiceRecord extends Binder {
     final HashMap<Intent.FilterComparison, IntentBindRecord> bindings
             = new HashMap<Intent.FilterComparison, IntentBindRecord>();
                             // All active bindings to the service.
-    final HashMap<IBinder, ConnectionRecord> connections
-            = new HashMap<IBinder, ConnectionRecord>();
+    final HashMap<IBinder, ArrayList<ConnectionRecord>> connections
+            = new HashMap<IBinder, ArrayList<ConnectionRecord>>();
                             // IBinder -> ConnectionRecord of all bound clients
 
     ProcessRecord app;      // where this service is running or null.
@@ -296,10 +296,12 @@ class ServiceRecord extends Binder {
         }
         if (connections.size() > 0) {
             pw.print(prefix); pw.println("All Connections:");
-            Iterator<ConnectionRecord> it = connections.values().iterator();
+            Iterator<ArrayList<ConnectionRecord>> it = connections.values().iterator();
             while (it.hasNext()) {
-                ConnectionRecord c = it.next();
-                pw.print(prefix); pw.print("  "); pw.println(c);
+                ArrayList<ConnectionRecord> c = it.next();
+                for (int i=0; i<c.size(); i++) {
+                    pw.print(prefix); pw.print("  "); pw.println(c.get(i));
+                }
             }
         }
     }
