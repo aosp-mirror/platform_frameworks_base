@@ -244,7 +244,7 @@ void MtpDataPacket::putUInt128(const uint128_t& value) {
 
 void MtpDataPacket::putInt128(int64_t value) {
     putInt64(value);
-    putUInt64(value < 0 ? 0xFFFFFFFFFFFFFFFF : 0);
+    putInt64(value < 0 ? -1 : 0);
 }
 
 void MtpDataPacket::putUInt128(uint64_t value) {
