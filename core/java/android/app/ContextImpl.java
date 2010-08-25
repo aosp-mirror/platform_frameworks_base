@@ -2838,6 +2838,11 @@ class ContextImpl extends Context {
                 }
             }
 
+            public void startCommit() {
+                // TODO: implement
+                commit();
+            }
+
             public boolean commit() {
                 boolean returnValue;
 
