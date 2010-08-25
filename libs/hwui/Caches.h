@@ -67,8 +67,10 @@ public:
 
 }; // namespace uirenderer
 
+#ifdef USE_OPENGL_RENDERER
 using namespace uirenderer;
 ANDROID_SINGLETON_STATIC_INSTANCE(Caches);
+#endif
 
 }; // namespace android
 
