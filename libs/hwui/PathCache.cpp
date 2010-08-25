@@ -22,6 +22,7 @@
 #include <SkRect.h>
 
 #include "PathCache.h"
+#include "Properties.h"
 
 namespace android {
 namespace uirenderer {
@@ -30,18 +31,35 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
+PathCache::PathCache():
+        mCache(GenerationCache<PathCacheEntry, PathTexture*>::kUnlimitedCapacity),
+        mSize(0), mMaxSize(MB(DEFAULT_PATH_CACHE_SIZE)) {
+    char property[PROPERTY_VALUE_MAX];
+    if (property_get(PROPERTY_PATH_CACHE_SIZE, property, NULL) > 0) {
+        LOGD("  Setting path cache size to %sMB", property);
+        setMaxSize(MB(atof(property)));
+    } else {
+        LOGD("  Using default path cache size of %.2fMB", DEFAULT_PATH_CACHE_SIZE);
+    }
+    init();
+}
+
 PathCache::PathCache(uint32_t maxByteSize):
         mCache(GenerationCache<PathCacheEntry, PathTexture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(maxByteSize) {
+    init();
+}
+
+PathCache::~PathCache() {
+    mCache.clear();
+}
+
+void PathCache::init() {
     mCache.setOnEntryRemovedListener(this);
 
     GLint maxTextureSize;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
     mMaxTextureSize = maxTextureSize;
-}
-
-PathCache::~PathCache() {
-    mCache.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -381,14 +381,29 @@ class SipSessionGroup implements SipListener {
                     : listener);
         }
 
+        // process the command in a new thread
+        private void doCommandAsync(final EventObject command) {
+            new Thread(new Runnable() {
+                    public void run() {
+                        try {
+                            processCommand(command);
+                        } catch (SipException e) {
+                            // TODO: find a better way to do this
+                            if ((command instanceof RegisterCommand)
+                                    || (command == DEREGISTER)) {
+                                onRegistrationFailed(e);
+                            } else {
+                                onError(e);
+                            }
+                        }
+                    }
+            }).start();
+        }
+
         public void makeCall(SipProfile peerProfile,
                 SessionDescription sessionDescription) {
-            try {
-                processCommand(
-                        new MakeCallCommand(peerProfile, sessionDescription));
-            } catch (SipException e) {
-                onError(e);
-            }
+            doCommandAsync(
+                    new MakeCallCommand(peerProfile, sessionDescription));
         }
 
         public void answerCall(SessionDescription sessionDescription) {
@@ -401,36 +416,20 @@ class SipSessionGroup implements SipListener {
         }
 
         public void endCall() {
-            try {
-                processCommand(END_CALL);
-            } catch (SipException e) {
-                onError(e);
-            }
+            doCommandAsync(END_CALL);
         }
 
         public void changeCall(SessionDescription sessionDescription) {
-            try {
-                processCommand(
-                        new MakeCallCommand(mPeerProfile, sessionDescription));
-            } catch (SipException e) {
-                onError(e);
-            }
+            doCommandAsync(
+                    new MakeCallCommand(mPeerProfile, sessionDescription));
         }
 
         public void register(int duration) {
-            try {
-                processCommand(new RegisterCommand(duration));
-            } catch (SipException e) {
-                onRegistrationFailed(e);
-            }
+            doCommandAsync(new RegisterCommand(duration));
         }
 
         public void unregister() {
-            try {
-                processCommand(DEREGISTER);
-            } catch (SipException e) {
-                onRegistrationFailed(e);
-            }
+            doCommandAsync(DEREGISTER);
         }
 
         public boolean isReRegisterRequired() {

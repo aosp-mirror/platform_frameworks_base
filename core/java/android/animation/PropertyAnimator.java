@@ -228,4 +228,10 @@ public final class PropertyAnimator<T> extends Animator<T> {
             mValues[i].setAnimatedValue(mTarget);
         }
     }
+
+    @Override
+    public PropertyAnimator clone() throws CloneNotSupportedException {
+        final PropertyAnimator anim = (PropertyAnimator) super.clone();
+        return anim;
+    }
 }

@@ -3693,8 +3693,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mTrackBatteryPastRealtime += realtime - mTrackBatteryRealtimeStart;
                 mDischargeCurrentLevel = level;
                 if (level < mDischargeUnplugLevel) {
-                    mLowDischargeAmountSinceCharge = mDischargeUnplugLevel-level-1;
-                    mHighDischargeAmountSinceCharge = mDischargeUnplugLevel-level;
+                    mLowDischargeAmountSinceCharge += mDischargeUnplugLevel-level-1;
+                    mHighDischargeAmountSinceCharge += mDischargeUnplugLevel-level;
                 }
                 doPlugLocked(getBatteryUptimeLocked(uptime), getBatteryRealtimeLocked(realtime));
             }

@@ -29,6 +29,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.EventLog;
 import android.util.Log;
@@ -43,7 +44,7 @@ import java.util.HashSet;
 /**
  * An entry in the history stack, representing an activity.
  */
-class ActivityRecord extends IApplicationToken.Stub {
+class ActivityRecord extends IApplicationToken.Stub implements UriPermissionOwner {
     final ActivityManagerService service; // owner
     final ActivityStack stack; // owner
     final ActivityInfo info; // all about me
@@ -340,16 +341,22 @@ class ActivityRecord extends IApplicationToken.Stub {
      * Deliver a new Intent to an existing activity, so that its onNewIntent()
      * method will be called at the proper time.
      */
-    final void deliverNewIntentLocked(Intent intent) {
+    final void deliverNewIntentLocked(int callingUid, Intent intent) {
         boolean sent = false;
         if (state == ActivityState.RESUMED
                 && app != null && app.thread != null) {
             try {
                 ArrayList<Intent> ar = new ArrayList<Intent>();
-                ar.add(new Intent(intent));
+                intent = new Intent(intent);
+                ar.add(intent);
+                service.grantUriPermissionFromIntentLocked(callingUid, packageName,
+                        intent, this);
                 app.thread.scheduleNewIntent(ar, this);
                 sent = true;
-            } catch (Exception e) {
+            } catch (RemoteException e) {
+                Slog.w(ActivityManagerService.TAG,
+                        "Exception thrown sending new intent to " + this, e);
+            } catch (NullPointerException e) {
                 Slog.w(ActivityManagerService.TAG,
                         "Exception thrown sending new intent to " + this, e);
             }
@@ -362,23 +369,25 @@ class ActivityRecord extends IApplicationToken.Stub {
     void removeUriPermissionsLocked() {
         if (readUriPermissions != null) {
             for (UriPermission perm : readUriPermissions) {
-                perm.readActivities.remove(this);
-                if (perm.readActivities.size() == 0 && (perm.globalModeFlags
+                perm.readOwners.remove(this);
+                if (perm.readOwners.size() == 0 && (perm.globalModeFlags
                         &Intent.FLAG_GRANT_READ_URI_PERMISSION) == 0) {
                     perm.modeFlags &= ~Intent.FLAG_GRANT_READ_URI_PERMISSION;
-                   service.removeUriPermissionIfNeededLocked(perm);
+                    service.removeUriPermissionIfNeededLocked(perm);
                 }
             }
+            readUriPermissions = null;
         }
         if (writeUriPermissions != null) {
             for (UriPermission perm : writeUriPermissions) {
-                perm.writeActivities.remove(this);
-                if (perm.writeActivities.size() == 0 && (perm.globalModeFlags
+                perm.writeOwners.remove(this);
+                if (perm.writeOwners.size() == 0 && (perm.globalModeFlags
                         &Intent.FLAG_GRANT_WRITE_URI_PERMISSION) == 0) {
                     perm.modeFlags &= ~Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
                     service.removeUriPermissionIfNeededLocked(perm);
                 }
             }
+            writeUriPermissions = null;
         }
     }
 
@@ -569,6 +578,37 @@ class ActivityRecord extends IApplicationToken.Stub {
                 state == ActivityState.RESUMED;
      }
     
+    @Override
+    public void addReadPermission(UriPermission perm) {
+        if (readUriPermissions == null) {
+            readUriPermissions = new HashSet<UriPermission>();
+        }
+        readUriPermissions.add(perm);
+    }
+
+    @Override
+    public void addWritePermission(UriPermission perm) {
+        if (writeUriPermissions == null) {
+            writeUriPermissions = new HashSet<UriPermission>();
+        }
+        writeUriPermissions.add(perm);
+    }
+
+    @Override
+    public void removeReadPermission(UriPermission perm) {
+        readUriPermissions.remove(perm);
+        if (readUriPermissions.size() == 0) {
+            readUriPermissions = null;
+        }
+    }
+
+    @Override
+    public void removeWritePermission(UriPermission perm) {
+        writeUriPermissions.remove(perm);
+        if (writeUriPermissions.size() == 0) {
+            writeUriPermissions = null;
+        }
+    }
     
     public String toString() {
         if (stringName != null) {

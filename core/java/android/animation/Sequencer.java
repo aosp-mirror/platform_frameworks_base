@@ -46,10 +46,17 @@ import java.util.HashMap;
 public final class Sequencer extends Animatable {
 
     /**
+     * Internal variables
+     * NOTE: This object implements the clone() method, making a deep copy of any referenced
+     * objects. As other non-trivial fields are added to this class, make sure to add logic
+     * to clone() to make deep copies of them.
+     */
+
+    /**
      * Tracks animations currently being played, so that we know what to
      * cancel or end when cancel() or end() is called on this Sequencer
      */
-    private final ArrayList<Animatable> mPlayingSet = new ArrayList<Animatable>();
+    private ArrayList<Animatable> mPlayingSet = new ArrayList<Animatable>();
 
     /**
      * Contains all nodes, mapped to their respective Animatables. When new
@@ -57,21 +64,21 @@ public final class Sequencer extends Animatable {
      * to a single node representing that Animatable, not create a new Node
      * if one already exists.
      */
-    private final HashMap<Animatable, Node> mNodeMap = new HashMap<Animatable, Node>();
+    private HashMap<Animatable, Node> mNodeMap = new HashMap<Animatable, Node>();
 
     /**
      * Set of all nodes created for this Sequencer. This list is used upon
      * starting the sequencer, and the nodes are placed in sorted order into the
      * sortedNodes collection.
      */
-    private final ArrayList<Node> mNodes = new ArrayList<Node>();
+    private ArrayList<Node> mNodes = new ArrayList<Node>();
 
     /**
      * The sorted list of nodes. This is the order in which the animations will
      * be played. The details about when exactly they will be played depend
      * on the dependency relationships of the nodes.
      */
-    private final ArrayList<Node> mSortedNodes = new ArrayList<Node>();
+    private ArrayList<Node> mSortedNodes = new ArrayList<Node>();
 
     /**
      * Flag indicating whether the nodes should be sorted prior to playing. This
@@ -281,6 +288,75 @@ public final class Sequencer extends Animatable {
                 listener.onAnimationStart(this);
             }
         }
+    }
+
+    @Override
+    public Sequencer clone() throws CloneNotSupportedException {
+        final Sequencer anim = (Sequencer) super.clone();
+        /*
+         * The basic clone() operation copies all items. This doesn't work very well for
+         * Sequencer, because it will copy references that need to be recreated and state
+         * that may not apply. What we need to do now is put the clone in an uninitialized
+         * state, with fresh, empty data structures. Then we will build up the nodes list
+         * manually, as we clone each Node (and its animation). The clone will then be sorted,
+         * and will populate any appropriate lists, when it is started.
+         */
+        anim.mNeedsSort = true;
+        anim.mCanceled = false;
+        anim.mPlayingSet = new ArrayList<Animatable>();
+        anim.mNodeMap = new HashMap<Animatable, Node>();
+        anim.mNodes = new ArrayList<Node>();
+        anim.mSortedNodes = new ArrayList<Node>();
+
+        // Walk through the old nodes list, cloning each node and adding it to the new nodemap.
+        // One problem is that the old node dependencies point to nodes in the old sequencer.
+        // We need to track the old/new nodes in order to reconstruct the dependencies in the clone.
+        HashMap<Node, Node> nodeCloneMap = new HashMap<Node, Node>(); // <old, new>
+        for (Node node : mNodes) {
+            Node nodeClone = node.clone();
+            nodeCloneMap.put(node, nodeClone);
+            anim.mNodes.add(nodeClone);
+            anim.mNodeMap.put(nodeClone.animation, nodeClone);
+            // Clear out the dependencies in the clone; we'll set these up manually later
+            nodeClone.dependencies = null;
+            nodeClone.tmpDependencies = null;
+            nodeClone.nodeDependents = null;
+            nodeClone.nodeDependencies = null;
+            // clear out any listeners that were set up by the sequencer; these will
+            // be set up when the clone's nodes are sorted
+            ArrayList<AnimatableListener> cloneListeners = nodeClone.animation.getListeners();
+            if (cloneListeners != null) {
+                ArrayList<AnimatableListener> listenersToRemove = null;
+                for (AnimatableListener listener : cloneListeners) {
+                    if (listener instanceof SequencerAnimatableListener) {
+                        if (listenersToRemove == null) {
+                            listenersToRemove = new ArrayList<AnimatableListener>();
+                        }
+                        listenersToRemove.add(listener);
+                    }
+                }
+                if (listenersToRemove != null) {
+                    for (AnimatableListener listener : listenersToRemove) {
+                        cloneListeners.remove(listener);
+                    }
+                }
+            }
+        }
+        // Now that we've cloned all of the nodes, we're ready to walk through their
+        // dependencies, mapping the old dependencies to the new nodes
+        for (Node node : mNodes) {
+            Node nodeClone = nodeCloneMap.get(node);
+            if (node.dependencies != null) {
+                for (Dependency dependency : node.dependencies) {
+                    Node clonedDependencyNode = nodeCloneMap.get(dependency.node);
+                    Dependency cloneDependency = new Dependency(clonedDependencyNode,
+                            dependency.rule);
+                    nodeClone.addDependency(cloneDependency);
+                }
+            }
+        }
+
+        return anim;
     }
 
     /**
@@ -514,7 +590,7 @@ public final class Sequencer extends Animatable {
      * both dependencies upon other nodes (in the dependencies list) as
      * well as dependencies of other nodes upon this (in the nodeDependents list).
      */
-    private static class Node {
+    private static class Node implements Cloneable {
         public Animatable animation;
 
         /**
@@ -586,6 +662,13 @@ public final class Sequencer extends Animatable {
                 dependencyNode.nodeDependents = new ArrayList<Node>();
             }
             dependencyNode.nodeDependents.add(this);
+        }
+
+        @Override
+        public Node clone() throws CloneNotSupportedException {
+            Node node = (Node) super.clone();
+            node.animation = (Animatable) animation.clone();
+            return node;
         }
     }
 

@@ -69,16 +69,16 @@ struct ShadowText {
     char *text;
 
     bool operator<(const ShadowText& rhs) const {
-        if (len < rhs.len) return true;
-        else if (len == rhs.len) {
-            if (radius < rhs.radius) return true;
-            else if (radius == rhs.radius) {
-                if (textSize < rhs.textSize) return true;
-                else if (textSize == rhs.textSize) {
-                    if (typeface < rhs.typeface) return true;
-                    else if (typeface == rhs.typeface) {
-                        if (hash < rhs.hash) return true;
-                        if (hash == rhs.hash) {
+        if (hash < rhs.hash) return true;
+        else if (hash == rhs.hash) {
+            if (len < rhs.len) return true;
+            else if (len == rhs.len) {
+                if (radius < rhs.radius) return true;
+                else if (radius == rhs.radius) {
+                    if (textSize < rhs.textSize) return true;
+                    else if (textSize == rhs.textSize) {
+                        if (typeface < rhs.typeface) return true;
+                        else if (typeface == rhs.typeface) {
                             return strncmp(text, rhs.text, len) < 0;
                         }
                     }
@@ -102,6 +102,7 @@ struct ShadowTexture: public Texture {
 
 class TextDropShadowCache: public OnEntryRemoved<ShadowText, ShadowTexture*> {
 public:
+    TextDropShadowCache();
     TextDropShadowCache(uint32_t maxByteSize);
     ~TextDropShadowCache();
 

@@ -3151,7 +3151,7 @@ public final class ActivityThread {
              (ApplicationInfo.FLAG_SYSTEM |
               ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0 &&
             !"user".equals(Build.TYPE)) {
-            StrictMode.setThreadBlockingPolicy(
+            StrictMode.setThreadPolicy(
                 StrictMode.DISALLOW_DISK_WRITE |
                 StrictMode.DISALLOW_DISK_READ |
                 StrictMode.DISALLOW_NETWORK |

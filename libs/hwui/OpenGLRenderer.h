@@ -35,17 +35,10 @@
 #include "Program.h"
 #include "Rect.h"
 #include "Snapshot.h"
-#include "TextureCache.h"
-#include "LayerCache.h"
-#include "GradientCache.h"
-#include "PatchCache.h"
 #include "Vertex.h"
-#include "FontRenderer.h"
-#include "ProgramCache.h"
 #include "SkiaShader.h"
 #include "SkiaColorFilter.h"
-#include "PathCache.h"
-#include "TextDropShadowCache.h"
+#include "Caches.h"
 
 namespace android {
 namespace uirenderer {
@@ -356,7 +349,6 @@ private:
     sp<Snapshot> mSnapshot;
 
     // Shaders
-    Program* mCurrentProgram;
     SkiaShader* mShader;
 
     // Color filters
@@ -365,16 +357,8 @@ private:
     // Used to draw textured quads
     TextureVertex mMeshVertices[4];
 
-    // Last known blend state
-    bool mBlend;
-    GLenum mLastSrcMode;
-    GLenum mLastDstMode;
-
     // GL extensions
     Extensions mExtensions;
-
-    // Font renderer
-    FontRenderer mFontRenderer;
 
     // Drop shadow
     bool mHasShadow;
@@ -384,13 +368,7 @@ private:
     int mShadowColor;
 
     // Various caches
-    TextureCache mTextureCache;
-    LayerCache mLayerCache;
-    GradientCache mGradientCache;
-    ProgramCache mProgramCache;
-    PathCache mPathCache;
-    PatchCache mPatchCache;
-    TextDropShadowCache mDropShadowCache;
+    Caches& mCaches;
 }; // class OpenGLRenderer
 
 }; // namespace uirenderer

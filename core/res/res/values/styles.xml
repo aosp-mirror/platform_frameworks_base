@@ -280,22 +280,12 @@
 
     <style name="Widget.CompoundButton.CheckBox">
         <item name="android:background">@android:drawable/btn_check_label_background</item>
-        <item name="android:button">@android:drawable/btn_check</item>
-    </style>
-
-    <style name="Widget.CompoundButton.CheckBox.Inverse">
-        <item name="android:background">@android:drawable/btn_check_label_background_light</item>
-        <item name="android:button">@android:drawable/btn_check_light</item>
+        <item name="android:button">?android:attr/listChoiceIndicatorMultiple</item>
     </style>
 
     <style name="Widget.CompoundButton.RadioButton">
         <item name="android:background">@android:drawable/btn_radio_label_background</item>
-        <item name="android:button">@android:drawable/btn_radio</item>
-    </style>
-
-    <style name="Widget.CompoundButton.RadioButton.Inverse">
-        <item name="android:background">@android:drawable/btn_radio_label_background_light</item>
-        <item name="android:button">@android:drawable/btn_radio_light</item>
+        <item name="android:button">?android:attr/listChoiceIndicatorSingle</item>
     </style>
 
     <style name="Widget.CompoundButton.Star">
@@ -503,7 +493,7 @@
     </style>
     
     <style name="Widget.DropDownItem.Spinner">
-        <item name="android:checkMark">@android:drawable/btn_radio</item>
+        <item name="android:checkMark">?android:attr/listChoiceIndicatorSingle</item>
     </style>
 
     <style name="Widget.ScrollView">
@@ -523,7 +513,7 @@
     </style>
     
     <style name="Widget.ListView.White" parent="Widget.AbsListView">
-        <item name="android:listSelector">@android:drawable/list_selector_background</item>
+        <item name="android:listSelector">@android:drawable/list_selector_background_light</item>
         <item name="android:cacheColorHint">?android:attr/colorBackgroundCacheHint</item>
         <item name="android:divider">@android:drawable/divider_horizontal_bright_opaque</item>
     </style>    

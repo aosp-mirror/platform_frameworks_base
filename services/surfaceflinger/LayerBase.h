@@ -232,8 +232,16 @@ protected:
           void clearWithOpenGL(const Region& clip) const;
           void drawWithOpenGL(const Region& clip, const Texture& texture) const;
           
+          // these must be called from the post/drawing thread
+          void setBufferCrop(const Rect& crop);
+          void setBufferTransform(uint32_t transform);
+
                 sp<SurfaceFlinger> mFlinger;
                 uint32_t        mFlags;
+
+                // post/drawing thread
+                Rect mBufferCrop;
+                uint32_t mBufferTransform;
 
                 // cached during validateVisibility()
                 bool            mNeedsFiltering;

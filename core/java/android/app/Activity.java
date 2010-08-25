@@ -4281,7 +4281,14 @@ public class Activity extends ContextThemeWrapper
 
     final void performPause() {
         mFragments.dispatchPause();
+        mCalled = false;
         onPause();
+        if (!mCalled && getApplicationInfo().targetSdkVersion
+                >= android.os.Build.VERSION_CODES.GINGERBREAD) {
+            throw new SuperNotCalledException(
+                    "Activity " + mComponent.toShortString() +
+                    " did not call through to super.onPause()");
+        }
     }
     
     final void performUserLeaving() {

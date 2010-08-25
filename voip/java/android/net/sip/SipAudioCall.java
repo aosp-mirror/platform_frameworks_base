@@ -244,13 +244,23 @@ public interface SipAudioCall {
      * Also, the {@code AudioStream} may change its group during a call (e.g.,
      * after the call is held/un-held). Finally, the {@code AudioGroup} object
      * returned by this method is undefined after the call ends or the
-     * {@link #close} method is called.
+     * {@link #close} method is called. If a group object is set by
+     * {@link #setAudioGroup(AudioGroup)}, then this method returns that object.
      *
      * @return the {@link AudioGroup} object or null if the RTP stream has not
      *      yet been set up
      * @see #getAudioStream
      */
     AudioGroup getAudioGroup();
+
+    /**
+     * Sets the {@link AudioGroup} object which the {@link AudioStream} object
+     * joins. If {@code audioGroup} is null, then the {@code AudioGroup} object
+     * will be dynamically created when needed.
+     *
+     * @see #getAudioStream
+     */
+    void setAudioGroup(AudioGroup audioGroup);
 
     /**
      * Checks if the call is established.

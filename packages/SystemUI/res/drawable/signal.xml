@@ -20,10 +20,9 @@
 
 <level-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:maxLevel="01" android:drawable="@drawable/signal_0" />
-    <item android:maxLevel="20" android:drawable="@drawable/signal_20" />
-    <item android:maxLevel="40" android:drawable="@drawable/signal_40" />
-    <item android:maxLevel="60" android:drawable="@drawable/signal_60" />
-    <item android:maxLevel="80" android:drawable="@drawable/signal_80" />
+    <item android:maxLevel="25" android:drawable="@drawable/signal_25" />
+    <item android:maxLevel="50" android:drawable="@drawable/signal_50" />
+    <item android:maxLevel="75" android:drawable="@drawable/signal_75" />
     <item android:maxLevel="101" android:drawable="@drawable/signal_100" />
 
 </level-list>

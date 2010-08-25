@@ -441,6 +441,8 @@ final class WebViewCore {
      */
     private native void nativeClearContent();
 
+    private native void nativeContentInvalidateAll();
+
     /**
      * Redraw a portion of the picture set. The Point wh returns the
      * width and height of the overall picture.
@@ -1880,10 +1882,10 @@ final class WebViewCore {
 
             synchronized (core) {
                 core.mDrawIsPaused = false;
-                if (core.mDrawIsScheduled) {
-                    core.mDrawIsScheduled = false;
-                    core.contentDraw();
-                }
+                // always redraw on resume to reenable gif animations
+                core.mDrawIsScheduled = false;
+                core.nativeContentInvalidateAll();
+                core.contentDraw();
             }
         }
     }
@@ -2504,7 +2506,8 @@ final class WebViewCore {
 
     protected DeviceOrientationService getDeviceOrientationService() {
         if (mDeviceOrientationService == null) {
-            mDeviceOrientationService = new DeviceOrientationService(mDeviceOrientationManager);
+            mDeviceOrientationService =
+                    new DeviceOrientationService(mDeviceOrientationManager, mContext);
         }
         return mDeviceOrientationService;
     }

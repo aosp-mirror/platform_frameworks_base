@@ -22,14 +22,17 @@ rs_program_vertex gProgVertex;
 rs_program_fragment gProgFragmentColor;
 rs_program_fragment gProgFragmentTexture;
 
+rs_program_store gProgStoreBlendNoneDepth;
 rs_program_store gProgStoreBlendNone;
 rs_program_store gProgStoreBlendAlpha;
 rs_program_store gProgStoreBlendAdd;
 
 rs_allocation gTexOpaque;
+rs_allocation gTexTorus;
 rs_allocation gTexTransparent;
 
 rs_mesh gMbyNMesh;
+rs_mesh gTorusMesh;
 
 rs_font gFontSans;
 rs_font gFontSerif;
@@ -40,11 +43,21 @@ rs_font gFontMono;
 
 int gDisplayMode;
 
+rs_sampler gLinearClamp;
+rs_sampler gLinearWrap;
+rs_sampler gMipLinearWrap;
+rs_sampler gNearestClamp;
+
+rs_program_raster gCullBack;
+rs_program_raster gCullFront;
+
 #pragma rs export_var(gProgVertex, gProgFragmentColor, gProgFragmentTexture)
-#pragma rs export_var(gProgStoreBlendNone, gProgStoreBlendAlpha, gProgStoreBlendAdd)
-#pragma rs export_var(gTexOpaque, gTexTransparent)
-#pragma rs export_var(gMbyNMesh)
+#pragma rs export_var(gProgStoreBlendNoneDepth, gProgStoreBlendNone, gProgStoreBlendAlpha, gProgStoreBlendAdd)
+#pragma rs export_var(gTexOpaque, gTexTorus, gTexTransparent)
+#pragma rs export_var(gMbyNMesh, gTorusMesh)
 #pragma rs export_var(gFontSans, gFontSerif, gFontSerifBold, gFontSerifItalic, gFontSerifBoldItalic, gFontMono)
+#pragma rs export_var(gLinearClamp, gLinearWrap, gMipLinearWrap, gNearestClamp)
+#pragma rs export_var(gCullBack, gCullFront)
 
 //What we are showing
 #pragma rs export_var(gDisplayMode)
@@ -78,9 +91,17 @@ void displayFontSamples() {
     rsgDrawText("Monospace font sample", 30, yPos);
 }
 
-void displayShaderSamples() {
+void bindProgramVertexOrtho() {
     // Default vertex sahder
     rsgBindProgramVertex(gProgVertex);
+    // Setup the projectioni matrix
+    rs_matrix4x4 proj;
+    rsMatrixLoadOrtho(&proj, 0, rsgGetWidth(), rsgGetHeight(), 0, -1,1);
+    rsgProgramVertexLoadProjectionMatrix(&proj);
+}
+
+void displayShaderSamples() {
+    bindProgramVertexOrtho();
     rs_matrix4x4 matrix;
     rsMatrixLoadIdentity(&matrix);
     rsgProgramVertexLoadModelMatrix(&matrix);
@@ -88,24 +109,31 @@ void displayShaderSamples() {
     // Fragment shader with texture
     rsgBindProgramStore(gProgStoreBlendNone);
     rsgBindProgramFragment(gProgFragmentTexture);
+    rsgBindSampler(gProgFragmentTexture, 0, gLinearClamp);
     rsgBindTexture(gProgFragmentTexture, 0, gTexOpaque);
 
-    rsgDrawQuadTexCoords(0, 0,     0, 0, 0,
-                         0, 256,   0, 0, 1,
-                         256, 256, 0, 1, 1,
-                         256, 0,   0, 1, 0);
+    float startX = 0, startY = 0;
+    float width = 256, height = 256;
+    rsgDrawQuadTexCoords(startX, startY, 0, 0, 0,
+                         startX, startY + height, 0, 0, 1,
+                         startX + width, startY + height, 0, 1, 1,
+                         startX + width, startY, 0, 1, 0);
 
-    rsgDrawQuadTexCoords(200, 0,     0, 0, 0,
-                         200, 128,   0, 0, 1,
-                         328, 128,   0, 1, 1,
-                         328, 0,     0, 1, 0);
+    startX = 200; startY = 0;
+    width = 128; height = 128;
+    rsgDrawQuadTexCoords(startX, startY, 0, 0, 0,
+                         startX, startY + height, 0, 0, 1,
+                         startX + width, startY + height, 0, 1, 1,
+                         startX + width, startY, 0, 1, 0);
 
     rsgBindProgramStore(gProgStoreBlendAlpha);
     rsgBindTexture(gProgFragmentTexture, 0, gTexTransparent);
-    rsgDrawQuadTexCoords(0, 200,   0, 0, 0,
-                         0, 328,   0, 0, 1,
-                         128, 328, 0, 1, 1,
-                         128, 200, 0, 1, 0);
+    startX = 0; startY = 200;
+    width = 128; height = 128;
+    rsgDrawQuadTexCoords(startX, startY, 0, 0, 0,
+                         startX, startY + height, 0, 0, 1,
+                         startX + width, startY + height, 0, 1, 1,
+                         startX + width, startY, 0, 1, 0);
 
     // Fragment program with simple color
     rsgBindProgramFragment(gProgFragmentColor);
@@ -124,7 +152,7 @@ void displayShaderSamples() {
 void displayBlendingSamples() {
     int i;
 
-    rsgBindProgramVertex(gProgVertex);
+    bindProgramVertexOrtho();
     rs_matrix4x4 matrix;
     rsMatrixLoadIdentity(&matrix);
     rsgProgramVertexLoadModelMatrix(&matrix);
@@ -168,11 +196,128 @@ void displayBlendingSamples() {
 }
 
 void displayMeshSamples() {
+
+    bindProgramVertexOrtho();
+    rs_matrix4x4 matrix;
+    rsMatrixLoadTranslate(&matrix, 128, 128, 0);
+    rsgProgramVertexLoadModelMatrix(&matrix);
+
+    // Fragment shader with texture
+    rsgBindProgramStore(gProgStoreBlendNone);
+    rsgBindProgramFragment(gProgFragmentTexture);
+    rsgBindSampler(gProgFragmentTexture, 0, gLinearClamp);
+    rsgBindTexture(gProgFragmentTexture, 0, gTexOpaque);
+
+    rsgDrawMesh(gMbyNMesh);
+
+    rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
+    rsgBindFont(gFontMono);
+    rsgDrawText("User gen 10 by 10 grid mesh", 10, 250);
+}
+
+void displayTextureSamplers() {
+
+    bindProgramVertexOrtho();
+    rs_matrix4x4 matrix;
+    rsMatrixLoadIdentity(&matrix);
+    rsgProgramVertexLoadModelMatrix(&matrix);
+
+    // Fragment shader with texture
+    rsgBindProgramStore(gProgStoreBlendNone);
+    rsgBindProgramFragment(gProgFragmentTexture);
+    rsgBindTexture(gProgFragmentTexture, 0, gTexOpaque);
+
+    // Linear clamp
+    rsgBindSampler(gProgFragmentTexture, 0, gLinearClamp);
+    float startX = 0, startY = 0;
+    float width = 300, height = 300;
+    rsgDrawQuadTexCoords(startX, startY, 0, 0, 0,
+                         startX, startY + height, 0, 0, 1.1,
+                         startX + width, startY + height, 0, 1.1, 1.1,
+                         startX + width, startY, 0, 1.1, 0);
+
+    // Linear Wrap
+    rsgBindSampler(gProgFragmentTexture, 0, gLinearWrap);
+    startX = 0; startY = 300;
+    width = 300; height = 300;
+    rsgDrawQuadTexCoords(startX, startY, 0, 0, 0,
+                         startX, startY + height, 0, 0, 1.1,
+                         startX + width, startY + height, 0, 1.1, 1.1,
+                         startX + width, startY, 0, 1.1, 0);
+
+    // Nearest
+    rsgBindSampler(gProgFragmentTexture, 0, gNearestClamp);
+    startX = 300; startY = 0;
+    width = 300; height = 300;
+    rsgDrawQuadTexCoords(startX, startY, 0, 0, 0,
+                         startX, startY + height, 0, 0, 1.1,
+                         startX + width, startY + height, 0, 1.1, 1.1,
+                         startX + width, startY, 0, 1.1, 0);
+
+    rsgBindSampler(gProgFragmentTexture, 0, gMipLinearWrap);
+    startX = 300; startY = 300;
+    width = 300; height = 300;
+    rsgDrawQuadTexCoords(startX, startY, 0, 0, 0,
+                         startX, startY + height, 0, 0, 1.5,
+                         startX + width, startY + height, 0, 1.5, 1.5,
+                         startX + width, startY, 0, 1.5, 0);
+
+
+    rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
+    rsgBindFont(gFontMono);
+    rsgDrawText("Filtering: linear clamp", 10, 290);
+    rsgDrawText("Filtering: linear wrap", 10, 590);
+    rsgDrawText("Filtering: nearest clamp", 310, 290);
+    rsgDrawText("Filtering: miplinear wrap", 310, 590);
+
+}
+
+float gTorusRotation = 0;
+
+void displayCullingSamplers() {
+    rsgBindProgramVertex(gProgVertex);
+    // Setup the projectioni matrix with 60 degree field of view
+    rs_matrix4x4 proj;
+    float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
+    rsMatrixLoadPerspective(&proj, 30.0f, aspect, 0.1f, 100.0f);
+    rsgProgramVertexLoadProjectionMatrix(&proj);
+
+    // Fragment shader with texture
+    rsgBindProgramStore(gProgStoreBlendNoneDepth);
+    rsgBindProgramFragment(gProgFragmentTexture);
+    rsgBindSampler(gProgFragmentTexture, 0, gLinearClamp);
+    rsgBindTexture(gProgFragmentTexture, 0, gTexTorus);
+
+    // Aplly a rotation to our mesh
+    gTorusRotation += 50.0f * rsGetDt();
+    if(gTorusRotation > 360.0f) {
+        gTorusRotation -= 360.0f;
+    }
+
+    rs_matrix4x4 matrix;
+    // Position our model on the screen
+    rsMatrixLoadTranslate(&matrix, -2.0f, 0.0f, -10.0f);
+    rsMatrixRotate(&matrix, gTorusRotation, 1.0f, 0.0f, 0.0f);
+    rsgProgramVertexLoadModelMatrix(&matrix);
+    // Use front face culling
+    rsgBindProgramRaster(gCullFront);
+    rsgDrawMesh(gTorusMesh);
+
+    rsMatrixLoadTranslate(&matrix, 2.0f, 0.0f, -10.0f);
+    rsMatrixRotate(&matrix, gTorusRotation, 1.0f, 0.0f, 0.0f);
+    rsgProgramVertexLoadModelMatrix(&matrix);
+    // Use back face culling
+    rsgBindProgramRaster(gCullBack);
+    rsgDrawMesh(gTorusMesh);
+
+    rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
+    rsgBindFont(gFontMono);
+    rsgDrawText("Displaying mesh front/back face culling", 10, rsgGetHeight() - 10);
 }
 
 int root(int launchID) {
 
-    rsgClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    rsgClearColor(0.2f, 0.2f, 0.2f, 0.0f);
     rsgClearDepth(1.0f);
 
     switch(gDisplayMode) {
@@ -187,6 +332,12 @@ int root(int launchID) {
         break;
     case 3:
         displayMeshSamples();
+        break;
+    case 4:
+        displayTextureSamplers();
+        break;
+    case 5:
+        displayCullingSamplers();
         break;
     }
 

@@ -1329,6 +1329,8 @@
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
 
+  <public type="attr" name="listChoiceBackgroundIndicator" id="0x01010330" />
+
   <public type="id" name="home" />
   <!-- Context menu ID for the "Select text..." menu item to switch to text
        selection context mode in text views. -->
@@ -1353,6 +1355,9 @@
   <public type="style" name="Theme.Holo.NoActionBar.Fullscreen" />
   <public type="style" name="Theme.Light.Holo.NoActionBar" />
   <public type="style" name="Theme.Light.Holo.NoActionBar.Fullscreen" />
+
+  <!-- A simple ListView item layout which can contain text and support (single or multiple) item selection. -->
+  <public type="layout" name="simple_selectable_list_item" id="0x01090022" />
 
   <public type="string" name="selectTextMode" id="0x01040030" />
 </resources>

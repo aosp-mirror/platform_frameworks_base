@@ -23,11 +23,9 @@
 #include <SkCanvas.h>
 #include <SkTypeface.h>
 
-#include <cutils/properties.h>
 #include <utils/Log.h>
 
 #include "OpenGLRenderer.h"
-#include "Properties.h"
 
 namespace android {
 namespace uirenderer {
@@ -36,17 +34,7 @@ namespace uirenderer {
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
 
-#define DEFAULT_TEXTURE_CACHE_SIZE 20.0f
-#define DEFAULT_LAYER_CACHE_SIZE 6.0f
-#define DEFAULT_PATH_CACHE_SIZE 6.0f
-#define DEFAULT_PATCH_CACHE_SIZE 100
-#define DEFAULT_GRADIENT_CACHE_SIZE 0.5f
-#define DEFAULT_DROP_SHADOW_CACHE_SIZE 2.0f
-
 #define REQUIRED_TEXTURE_UNITS_COUNT 3
-
-// Converts a number of mega-bytes into bytes
-#define MB(s) s * 1024 * 1024
 
 // Generates simple and textured vertices
 #define FV(x, y, u, v) { { x, y }, { u, v } }
@@ -102,54 +90,9 @@ static const GLenum gTextureUnits[] = {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-OpenGLRenderer::OpenGLRenderer():
-        mBlend(false), mLastSrcMode(GL_ZERO), mLastDstMode(GL_ZERO),
-        mTextureCache(MB(DEFAULT_TEXTURE_CACHE_SIZE)),
-        mLayerCache(MB(DEFAULT_LAYER_CACHE_SIZE)),
-        mGradientCache(MB(DEFAULT_GRADIENT_CACHE_SIZE)),
-        mPathCache(MB(DEFAULT_PATH_CACHE_SIZE)),
-        mPatchCache(DEFAULT_PATCH_CACHE_SIZE),
-        mDropShadowCache(MB(DEFAULT_DROP_SHADOW_CACHE_SIZE)) {
+OpenGLRenderer::OpenGLRenderer(): mCaches(Caches::getInstance()) {
     LOGD("Create OpenGLRenderer");
 
-    char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_TEXTURE_CACHE_SIZE, property, NULL) > 0) {
-        LOGD("  Setting texture cache size to %sMB", property);
-        mTextureCache.setMaxSize(MB(atof(property)));
-    } else {
-        LOGD("  Using default texture cache size of %.2fMB", DEFAULT_TEXTURE_CACHE_SIZE);
-    }
-
-    if (property_get(PROPERTY_LAYER_CACHE_SIZE, property, NULL) > 0) {
-        LOGD("  Setting layer cache size to %sMB", property);
-        mLayerCache.setMaxSize(MB(atof(property)));
-    } else {
-        LOGD("  Using default layer cache size of %.2fMB", DEFAULT_LAYER_CACHE_SIZE);
-    }
-
-    if (property_get(PROPERTY_GRADIENT_CACHE_SIZE, property, NULL) > 0) {
-        LOGD("  Setting gradient cache size to %sMB", property);
-        mGradientCache.setMaxSize(MB(atof(property)));
-    } else {
-        LOGD("  Using default gradient cache size of %.2fMB", DEFAULT_GRADIENT_CACHE_SIZE);
-    }
-
-    if (property_get(PROPERTY_PATH_CACHE_SIZE, property, NULL) > 0) {
-        LOGD("  Setting path cache size to %sMB", property);
-        mPathCache.setMaxSize(MB(atof(property)));
-    } else {
-        LOGD("  Using default path cache size of %.2fMB", DEFAULT_PATH_CACHE_SIZE);
-    }
-
-    if (property_get(PROPERTY_DROP_SHADOW_CACHE_SIZE, property, NULL) > 0) {
-        LOGD("  Setting drop shadow cache size to %sMB", property);
-        mDropShadowCache.setMaxSize(MB(atof(property)));
-    } else {
-        LOGD("  Using default drop shadow cache size of %.2fMB", DEFAULT_DROP_SHADOW_CACHE_SIZE);
-    }
-    mDropShadowCache.setFontRenderer(mFontRenderer);
-
-    mCurrentProgram = NULL;
     mShader = NULL;
     mColorFilter = NULL;
     mHasShadow = false;
@@ -167,14 +110,6 @@ OpenGLRenderer::OpenGLRenderer():
 
 OpenGLRenderer::~OpenGLRenderer() {
     LOGD("Destroy OpenGLRenderer");
-
-    mTextureCache.clear();
-    mLayerCache.clear();
-    mGradientCache.clear();
-    mPathCache.clear();
-    mPatchCache.clear();
-    mProgramCache.clear();
-    mDropShadowCache.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -194,6 +129,8 @@ void OpenGLRenderer::setViewport(int width, int height) {
 void OpenGLRenderer::prepare() {
     mSnapshot = new Snapshot(mFirstSnapshot);
     mSaveCount = 1;
+
+    glViewport(0, 0, mWidth, mHeight);
 
     glDisable(GL_SCISSOR_TEST);
 
@@ -310,12 +247,12 @@ int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bot
 bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         float right, float bottom, int alpha, SkXfermode::Mode mode,int flags) {
     LAYER_LOGD("Requesting layer %fx%f", right - left, bottom - top);
-    LAYER_LOGD("Layer cache size = %d", mLayerCache.getSize());
+    LAYER_LOGD("Layer cache size = %d", mCaches.layerCache.getSize());
 
     GLuint previousFbo = snapshot->previous.get() ? snapshot->previous->fbo : 0;
     LayerSize size(right - left, bottom - top);
 
-    Layer* layer = mLayerCache.get(size, previousFbo);
+    Layer* layer = mCaches.layerCache.get(size, previousFbo);
     if (!layer) {
         return false;
     }
@@ -380,7 +317,7 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     LayerSize size(rect.getWidth(), rect.getHeight());
     // Failing to add the layer to the cache should happen only if the
     // layer is too large
-    if (!mLayerCache.put(size, layer)) {
+    if (!mCaches.layerCache.put(size, layer)) {
         LAYER_LOGD("Deleting layer");
 
         glDeleteFramebuffers(1, &layer->fbo);
@@ -461,7 +398,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, const S
     }
 
     glActiveTexture(GL_TEXTURE0);
-    const Texture* texture = mTextureCache.get(bitmap);
+    const Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
@@ -478,7 +415,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix, const 
     }
 
     glActiveTexture(GL_TEXTURE0);
-    const Texture* texture = mTextureCache.get(bitmap);
+    const Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
@@ -494,7 +431,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     }
 
     glActiveTexture(GL_TEXTURE0);
-    const Texture* texture = mTextureCache.get(bitmap);
+    const Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
@@ -520,7 +457,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
     }
 
     glActiveTexture(GL_TEXTURE0);
-    const Texture* texture = mTextureCache.get(bitmap);
+    const Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
@@ -528,7 +465,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    Patch* mesh = mPatchCache.get(patch);
+    Patch* mesh = mCaches.patchCache.get(patch);
     mesh->updateVertices(bitmap, left, top, right, bottom,
             &patch->xDivs[0], &patch->yDivs[0], patch->numXDivs, patch->numYDivs);
 
@@ -607,10 +544,11 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
     const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
 
-    mFontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()), paint->getTextSize());
+    mCaches.fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
+            paint->getTextSize());
     if (mHasShadow) {
         glActiveTexture(gTextureUnits[0]);
-        const ShadowTexture* shadow = mDropShadowCache.get(paint, text, bytesCount,
+        const ShadowTexture* shadow = mCaches.dropShadowCache.get(paint, text, bytesCount,
                 count, mShadowRadius);
         const AutoTexture autoCleanup(shadow);
 
@@ -618,20 +556,20 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
         // Draw the mesh
         glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
-        glDisableVertexAttribArray(mCurrentProgram->getAttrib("texCoords"));
+        glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));
     }
 
     GLuint textureUnit = 0;
     glActiveTexture(gTextureUnits[textureUnit]);
 
-    setupTextureAlpha8(mFontRenderer.getTexture(), 0, 0, textureUnit, x, y, r, g, b, a,
+    setupTextureAlpha8(mCaches.fontRenderer.getTexture(), 0, 0, textureUnit, x, y, r, g, b, a,
             mode, false, true);
 
     const Rect& clip = mSnapshot->getLocalClip();
-    mFontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y);
+    mCaches.fontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glDisableVertexAttribArray(mCurrentProgram->getAttrib("texCoords"));
+    glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));
 
     drawTextDecorations(text, bytesCount, length, x, y, paint);
 
@@ -646,7 +584,7 @@ void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
     GLuint textureUnit = 0;
     glActiveTexture(gTextureUnits[textureUnit]);
 
-    const PathTexture* texture = mPathCache.get(path, paint);
+    const PathTexture* texture = mCaches.pathCache.get(path, paint);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
@@ -671,7 +609,7 @@ void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
 
     // Draw the mesh
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
-    glDisableVertexAttribArray(mCurrentProgram->getAttrib("texCoords"));
+    glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -685,7 +623,7 @@ void OpenGLRenderer::resetShader() {
 void OpenGLRenderer::setupShader(SkiaShader* shader) {
     mShader = shader;
     if (mShader) {
-        mShader->set(&mTextureCache, &mGradientCache);
+        mShader->set(&mCaches.textureCache, &mCaches.gradientCache);
     }
 }
 
@@ -761,18 +699,18 @@ void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t
      }
 
      // Build and use the appropriate shader
-     useProgram(mProgramCache.get(description));
+     useProgram(mCaches.programCache.get(description));
 
      // Setup the blending mode
      chooseBlending(true, mode);
      bindTexture(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, textureUnit);
-     glUniform1i(mCurrentProgram->getUniform("sampler"), textureUnit);
+     glUniform1i(mCaches.currentProgram->getUniform("sampler"), textureUnit);
 
-     int texCoordsSlot = mCurrentProgram->getAttrib("texCoords");
+     int texCoordsSlot = mCaches.currentProgram->getAttrib("texCoords");
      glEnableVertexAttribArray(texCoordsSlot);
 
      // Setup attributes
-     glVertexAttribPointer(mCurrentProgram->position, 2, GL_FLOAT, GL_FALSE,
+     glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
              gMeshStride, &mMeshVertices[0].position[0]);
      glVertexAttribPointer(texCoordsSlot, 2, GL_FLOAT, GL_FALSE,
              gMeshStride, &mMeshVertices[0].texture[0]);
@@ -784,17 +722,17 @@ void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t
      } else {
          mModelView.loadIdentity();
      }
-     mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
-     glUniform4f(mCurrentProgram->color, r, g, b, a);
+     mCaches.currentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+     glUniform4f(mCaches.currentProgram->color, r, g, b, a);
 
      textureUnit++;
      if (applyFilters) {
          // Setup attributes and uniforms required by the shaders
          if (mShader) {
-             mShader->setupProgram(mCurrentProgram, mModelView, *mSnapshot, &textureUnit);
+             mShader->setupProgram(mCaches.currentProgram, mModelView, *mSnapshot, &textureUnit);
          }
          if (mColorFilter) {
-             mColorFilter->setupProgram(mCurrentProgram);
+             mColorFilter->setupProgram(mCaches.currentProgram);
          }
      }
 }
@@ -879,29 +817,29 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     }
 
     // Build and use the appropriate shader
-    useProgram(mProgramCache.get(description));
+    useProgram(mCaches.programCache.get(description));
 
     // Setup attributes
-    glVertexAttribPointer(mCurrentProgram->position, 2, GL_FLOAT, GL_FALSE,
+    glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
             gMeshStride, &mMeshVertices[0].position[0]);
 
     // Setup uniforms
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
     if (!ignoreTransform) {
-        mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+        mCaches.currentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
     } else {
         mat4 identity;
-        mCurrentProgram->set(mOrthoMatrix, mModelView, identity);
+        mCaches.currentProgram->set(mOrthoMatrix, mModelView, identity);
     }
-    glUniform4f(mCurrentProgram->color, r, g, b, a);
+    glUniform4f(mCaches.currentProgram->color, r, g, b, a);
 
     // Setup attributes and uniforms required by the shaders
     if (mShader) {
-        mShader->setupProgram(mCurrentProgram, mModelView, *mSnapshot, &textureUnit);
+        mShader->setupProgram(mCaches.currentProgram, mModelView, *mSnapshot, &textureUnit);
     }
     if (mColorFilter) {
-        mColorFilter->setupProgram(mCurrentProgram);
+        mColorFilter->setupProgram(mCaches.currentProgram);
     }
 
     // Draw the mesh
@@ -936,28 +874,28 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
 
-    useProgram(mProgramCache.get(description));
-    mCurrentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+    useProgram(mCaches.programCache.get(description));
+    mCaches.currentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
 
     chooseBlending(blend || alpha < 1.0f, mode);
 
     // Texture
     bindTexture(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, 0);
-    glUniform1i(mCurrentProgram->getUniform("sampler"), 0);
+    glUniform1i(mCaches.currentProgram->getUniform("sampler"), 0);
 
     // Always premultiplied
-    glUniform4f(mCurrentProgram->color, alpha, alpha, alpha, alpha);
+    glUniform4f(mCaches.currentProgram->color, alpha, alpha, alpha, alpha);
 
     // Mesh
-    int texCoordsSlot = mCurrentProgram->getAttrib("texCoords");
+    int texCoordsSlot = mCaches.currentProgram->getAttrib("texCoords");
     glEnableVertexAttribArray(texCoordsSlot);
-    glVertexAttribPointer(mCurrentProgram->position, 2, GL_FLOAT, GL_FALSE,
+    glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
             gMeshStride, vertices);
     glVertexAttribPointer(texCoordsSlot, 2, GL_FLOAT, GL_FALSE, gMeshStride, texCoords);
 
     // Color filter
     if (mColorFilter) {
-        mColorFilter->setupProgram(mCurrentProgram);
+        mColorFilter->setupProgram(mCaches.currentProgram);
     }
 
     if (!indices) {
@@ -971,7 +909,7 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
 void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode, bool isPremultiplied) {
     blend = blend || mode != SkXfermode::kSrcOver_Mode;
     if (blend) {
-        if (!mBlend) {
+        if (!mCaches.blend) {
             glEnable(GL_BLEND);
         }
 
@@ -981,22 +919,22 @@ void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode, bool isPr
             sourceMode = GL_SRC_ALPHA;
         }
 
-        if (sourceMode != mLastSrcMode || destMode != mLastDstMode) {
+        if (sourceMode != mCaches.lastSrcMode || destMode != mCaches.lastDstMode) {
             glBlendFunc(sourceMode, destMode);
-            mLastSrcMode = sourceMode;
-            mLastDstMode = destMode;
+            mCaches.lastSrcMode = sourceMode;
+            mCaches.lastDstMode = destMode;
         }
-    } else if (mBlend) {
+    } else if (mCaches.blend) {
         glDisable(GL_BLEND);
     }
-    mBlend = blend;
+    mCaches.blend = blend;
 }
 
 bool OpenGLRenderer::useProgram(Program* program) {
     if (!program->isInUse()) {
-        if (mCurrentProgram != NULL) mCurrentProgram->remove();
+        if (mCaches.currentProgram != NULL) mCaches.currentProgram->remove();
         program->use();
-        mCurrentProgram = program;
+        mCaches.currentProgram = program;
         return false;
     }
     return true;

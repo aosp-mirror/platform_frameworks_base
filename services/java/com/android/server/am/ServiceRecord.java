@@ -36,6 +36,7 @@ import android.util.TimeUtils;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -43,6 +44,12 @@ import java.util.List;
  * A running application service.
  */
 class ServiceRecord extends Binder {
+    // Maximum number of delivery attempts before giving up.
+    static final int MAX_DELIVERY_COUNT = 3;
+
+    // Maximum number of times it can fail during execution before giving up.
+    static final int MAX_DONE_EXECUTING_COUNT = 6;
+
     final ActivityManagerService ams;
     final BatteryStatsImpl.Uid.Pkg.Serv stats;
     final ComponentName name; // service component.
@@ -68,29 +75,6 @@ class ServiceRecord extends Binder {
     final HashMap<IBinder, ConnectionRecord> connections
             = new HashMap<IBinder, ConnectionRecord>();
                             // IBinder -> ConnectionRecord of all bound clients
-    
-    // Maximum number of delivery attempts before giving up.
-    static final int MAX_DELIVERY_COUNT = 3;
-    
-    // Maximum number of times it can fail during execution before giving up.
-    static final int MAX_DONE_EXECUTING_COUNT = 6;
-    
-    static class StartItem {
-        final int id;
-        final Intent intent;
-        long deliveredTime;
-        int deliveryCount;
-        int doneExecutingCount;
-        
-        StartItem(int _id, Intent _intent) {
-            id = _id;
-            intent = _intent;
-        }
-    }
-    final ArrayList<StartItem> deliveredStarts = new ArrayList<StartItem>();
-                            // start() arguments which been delivered.
-    final ArrayList<StartItem> pendingStarts = new ArrayList<StartItem>();
-                            // start() arguments that haven't yet been delivered.
 
     ProcessRecord app;      // where this service is running or null.
     boolean isForeground;   // is service currently in foreground mode?
@@ -112,6 +96,104 @@ class ServiceRecord extends Binder {
 
     String stringName;      // caching of toString
     
+    static class StartItem implements UriPermissionOwner {
+        final ServiceRecord sr;
+        final int id;
+        final Intent intent;
+        final int targetPermissionUid;
+        long deliveredTime;
+        int deliveryCount;
+        int doneExecutingCount;
+
+        String stringName;      // caching of toString
+
+        HashSet<UriPermission> readUriPermissions; // special access to reading uris.
+        HashSet<UriPermission> writeUriPermissions; // special access to writing uris.
+
+        StartItem(ServiceRecord _sr, int _id, Intent _intent, int _targetPermissionUid) {
+            sr = _sr;
+            id = _id;
+            intent = _intent;
+            targetPermissionUid = _targetPermissionUid;
+        }
+
+        void removeUriPermissionsLocked() {
+            if (readUriPermissions != null) {
+                for (UriPermission perm : readUriPermissions) {
+                    perm.readOwners.remove(this);
+                    if (perm.readOwners.size() == 0 && (perm.globalModeFlags
+                            &Intent.FLAG_GRANT_READ_URI_PERMISSION) == 0) {
+                        perm.modeFlags &= ~Intent.FLAG_GRANT_READ_URI_PERMISSION;
+                        sr.ams.removeUriPermissionIfNeededLocked(perm);
+                    }
+                }
+                readUriPermissions = null;
+            }
+            if (writeUriPermissions != null) {
+                for (UriPermission perm : writeUriPermissions) {
+                    perm.writeOwners.remove(this);
+                    if (perm.writeOwners.size() == 0 && (perm.globalModeFlags
+                            &Intent.FLAG_GRANT_WRITE_URI_PERMISSION) == 0) {
+                        perm.modeFlags &= ~Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+                        sr.ams.removeUriPermissionIfNeededLocked(perm);
+                    }
+                }
+                writeUriPermissions = null;
+            }
+        }
+
+        @Override
+        public void addReadPermission(UriPermission perm) {
+            if (readUriPermissions == null) {
+                readUriPermissions = new HashSet<UriPermission>();
+            }
+            readUriPermissions.add(perm);
+        }
+
+        @Override
+        public void addWritePermission(UriPermission perm) {
+            if (writeUriPermissions == null) {
+                writeUriPermissions = new HashSet<UriPermission>();
+            }
+            writeUriPermissions.add(perm);
+        }
+
+        @Override
+        public void removeReadPermission(UriPermission perm) {
+            readUriPermissions.remove(perm);
+            if (readUriPermissions.size() == 0) {
+                readUriPermissions = null;
+            }
+        }
+
+        @Override
+        public void removeWritePermission(UriPermission perm) {
+            writeUriPermissions.remove(perm);
+            if (writeUriPermissions.size() == 0) {
+                writeUriPermissions = null;
+            }
+        }
+
+        public String toString() {
+            if (stringName != null) {
+                return stringName;
+            }
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("ServiceRecord{")
+                .append(Integer.toHexString(System.identityHashCode(sr)))
+                .append(' ').append(sr.shortName)
+                .append(" StartItem ")
+                .append(Integer.toHexString(System.identityHashCode(this)))
+                .append(" id=").append(id).append('}');
+            return stringName = sb.toString();
+        }
+    }
+
+    final ArrayList<StartItem> deliveredStarts = new ArrayList<StartItem>();
+                            // start() arguments which been delivered.
+    final ArrayList<StartItem> pendingStarts = new ArrayList<StartItem>();
+                            // start() arguments that haven't yet been delivered.
+
     void dumpStartList(PrintWriter pw, String prefix, List<StartItem> list, long now) {
         final int N = list.size();
         for (int i=0; i<N; i++) {
@@ -128,9 +210,22 @@ class ServiceRecord extends Binder {
                     if (si.doneExecutingCount != 0) {
                         pw.print(" dxc="); pw.print(si.doneExecutingCount);
                     }
-                    pw.print(" ");
+                    pw.println("");
+            pw.print(prefix); pw.print("  intent=");
                     if (si.intent != null) pw.println(si.intent.toString());
                     else pw.println("null");
+            if (si.targetPermissionUid >= 0) {
+                pw.print(prefix); pw.print("  targetPermissionUid=");
+                        pw.println(si.targetPermissionUid);
+            }
+            if (si.readUriPermissions != null) {
+                pw.print(prefix); pw.print("  readUriPermissions=");
+                        pw.println(si.readUriPermissions);
+            }
+            if (si.writeUriPermissions != null) {
+                pw.print(prefix); pw.print("  writeUriPermissions=");
+                        pw.println(si.writeUriPermissions);
+            }
         }
     }
     
@@ -324,6 +419,13 @@ class ServiceRecord extends Binder {
         }
     }
     
+    public void clearDeliveredStartsLocked() {
+        for (int i=deliveredStarts.size()-1; i>=0; i--) {
+            deliveredStarts.get(i).removeUriPermissionsLocked();
+        }
+        deliveredStarts.clear();
+    }
+
     public String toString() {
         if (stringName != null) {
             return stringName;

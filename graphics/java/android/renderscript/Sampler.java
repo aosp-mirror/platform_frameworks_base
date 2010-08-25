@@ -78,7 +78,7 @@ public class Sampler extends BaseObj {
         if(rs.mSampler_CLAMP_LINEAR_MIP_LINEAR == null) {
             Builder b = new Builder(rs);
             b.setMin(Value.LINEAR_MIP_LINEAR);
-            b.setMag(Value.LINEAR_MIP_LINEAR);
+            b.setMag(Value.LINEAR);
             b.setWrapS(Value.CLAMP);
             b.setWrapT(Value.CLAMP);
             rs.mSampler_CLAMP_LINEAR_MIP_LINEAR = b.create();
@@ -114,7 +114,7 @@ public class Sampler extends BaseObj {
         if(rs.mSampler_WRAP_LINEAR_MIP_LINEAR == null) {
             Builder b = new Builder(rs);
             b.setMin(Value.LINEAR_MIP_LINEAR);
-            b.setMag(Value.LINEAR_MIP_LINEAR);
+            b.setMag(Value.LINEAR);
             b.setWrapS(Value.WRAP);
             b.setWrapT(Value.WRAP);
             rs.mSampler_WRAP_LINEAR_MIP_LINEAR = b.create();

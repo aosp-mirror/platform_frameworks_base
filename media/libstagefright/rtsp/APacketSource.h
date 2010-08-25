@@ -43,7 +43,7 @@ struct APacketSource : public MediaSource {
     void queueAccessUnit(const sp<ABuffer> &buffer);
     void signalEOS(status_t result);
 
-    int64_t getQueuedDuration(bool *eos);
+    void flushQueue();
 
 protected:
     virtual ~APacketSource();
@@ -57,9 +57,6 @@ private:
     sp<MetaData> mFormat;
     List<sp<ABuffer> > mBuffers;
     status_t mEOSResult;
-
-    bool mFirstAccessUnit;
-    uint64_t mFirstAccessUnitNTP;
 
     DISALLOW_EVIL_CONSTRUCTORS(APacketSource);
 };

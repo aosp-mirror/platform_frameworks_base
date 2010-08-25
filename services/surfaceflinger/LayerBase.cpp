@@ -54,6 +54,8 @@ LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
 {
     const DisplayHardware& hw(flinger->graphicPlane(0).displayHardware());
     mFlags = hw.getFlags();
+    mBufferCrop.makeInvalid();
+    mBufferTransform = 0;
 }
 
 LayerBase::~LayerBase()
@@ -354,6 +356,14 @@ void LayerBase::clearWithOpenGL(const Region& clip) const
     clearWithOpenGL(clip,0,0,0,0);
 }
 
+template <typename T>
+static inline
+void swap(T& a, T& b) {
+    T t(a);
+    a = b;
+    b = t;
+}
+
 void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
 {
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
@@ -387,37 +397,72 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
         }
     }
 
-    Region::const_iterator it = clip.begin();
-    Region::const_iterator const end = clip.end();
-    const GLfloat texCoords[4][2] = {
-            { 0,  0 },
-            { 0,  1 },
-            { 1,  1 },
-            { 1,  0 }
+    /*
+     *  compute texture coordinates
+     *  here, we handle NPOT, cropping and buffer transformations
+     */
+
+    GLfloat cl, ct, cr, cb;
+    if (!mBufferCrop.isEmpty()) {
+        // source is cropped
+        const GLfloat us = (texture.NPOTAdjust ? texture.wScale : 1.0f) / width;
+        const GLfloat vs = (texture.NPOTAdjust ? texture.hScale : 1.0f) / height;
+        cl = mBufferCrop.left   * us;
+        ct = mBufferCrop.top    * vs;
+        cr = mBufferCrop.right  * us;
+        cb = mBufferCrop.bottom * vs;
+    } else {
+        cl = 0;
+        ct = 0;
+        cr = (texture.NPOTAdjust ? texture.wScale : 1.0f);
+        cb = (texture.NPOTAdjust ? texture.hScale : 1.0f);
+    }
+
+    struct TexCoords {
+        GLfloat u;
+        GLfloat v;
     };
 
-    glMatrixMode(GL_TEXTURE);
-    glLoadIdentity();
+    enum {
+        // name of the corners in the texture map
+        LB = 0, // left-bottom
+        LT = 1, // left-top
+        RT = 2, // right-top
+        RB = 3  // right-bottom
+    };
+
+    // vertices in screen space
+    int vLT = LB;
+    int vLB = LT;
+    int vRB = RT;
+    int vRT = RB;
 
     // the texture's source is rotated
-    switch (texture.transform) {
-        case HAL_TRANSFORM_ROT_90:
-            glTranslatef(0, 1, 0);
-            glRotatef(-90, 0, 0, 1);
-            break;
-        case HAL_TRANSFORM_ROT_180:
-            glTranslatef(1, 1, 0);
-            glRotatef(-180, 0, 0, 1);
-            break;
-        case HAL_TRANSFORM_ROT_270:
-            glTranslatef(1, 0, 0);
-            glRotatef(-270, 0, 0, 1);
-            break;
+    uint32_t transform = mBufferTransform;
+    if (transform & HAL_TRANSFORM_ROT_90) {
+        vLT = RB;
+        vLB = LB;
+        vRB = LT;
+        vRT = RT;
+    }
+    if (transform & HAL_TRANSFORM_FLIP_V) {
+        swap(vLT, vLB);
+        swap(vRB, vRT);
+    }
+    if (transform & HAL_TRANSFORM_FLIP_H) {
+        swap(vLT, vRB);
+        swap(vLB, vRT);
     }
 
-    if (texture.NPOTAdjust) {
-        glScalef(texture.wScale, texture.hScale, 1.0f);
-    }
+    TexCoords texCoords[4];
+    texCoords[vLT].u = cl;
+    texCoords[vLT].v = ct;
+    texCoords[vLB].u = cl;
+    texCoords[vLB].v = cb;
+    texCoords[vRB].u = cr;
+    texCoords[vRB].v = cb;
+    texCoords[vRT].u = cr;
+    texCoords[vRT].v = ct;
 
     if (needsDithering()) {
         glEnable(GL_DITHER);
@@ -429,6 +474,8 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
     glVertexPointer(2, GL_FLOAT, 0, mVertices);
     glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
 
+    Region::const_iterator it = clip.begin();
+    Region::const_iterator const end = clip.end();
     while (it != end) {
         const Rect& r = *it++;
         const GLint sy = fbHeight - (r.top + r.height());
@@ -436,6 +483,16 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+}
+
+void LayerBase::setBufferCrop(const Rect& crop) {
+    if (!crop.isEmpty()) {
+        mBufferCrop = crop;
+    }
+}
+
+void LayerBase::setBufferTransform(uint32_t transform) {
+    mBufferTransform = transform;
 }
 
 void LayerBase::dump(String8& result, char* buffer, size_t SIZE) const

@@ -44,7 +44,7 @@ class GLES20Canvas extends Canvas {
     @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
     private final GL mGl;
     private final boolean mOpaque;
-    private final int mRenderer;
+    private int mRenderer;
     
     private int mWidth;
     private int mHeight;
@@ -76,16 +76,25 @@ class GLES20Canvas extends Canvas {
         mOpaque = !translucent;
 
         mRenderer = nCreateRenderer();
+        if (mRenderer == 0) {
+            throw new IllegalStateException("Could not create GLES20Canvas renderer");
+        }
     }
-
+    
     private native int nCreateRenderer();
 
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            super.finalize();
-        } finally {
+    /**
+     * This method <strong>must</strong> be called before releasing a
+     * reference to a GLES20Canvas. This method is responsible for freeing
+     * native resources associated with the hardware. Not invoking this
+     * method properly can result in memory leaks.
+     * 
+     * @hide
+     */
+    public synchronized void destroy() {
+        if (mRenderer != 0) {
             nDestroyRenderer(mRenderer);
+            mRenderer = 0;
         }
     }
 

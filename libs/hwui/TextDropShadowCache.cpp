@@ -25,6 +25,20 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
+TextDropShadowCache::TextDropShadowCache():
+        mCache(GenerationCache<ShadowText, ShadowTexture*>::kUnlimitedCapacity),
+        mSize(0), mMaxSize(MB(DEFAULT_DROP_SHADOW_CACHE_SIZE)) {
+    char property[PROPERTY_VALUE_MAX];
+    if (property_get(PROPERTY_DROP_SHADOW_CACHE_SIZE, property, NULL) > 0) {
+        LOGD("  Setting drop shadow cache size to %sMB", property);
+        setMaxSize(MB(atof(property)));
+    } else {
+        LOGD("  Using default drop shadow cache size of %.2fMB", DEFAULT_DROP_SHADOW_CACHE_SIZE);
+    }
+
+    mCache.setOnEntryRemovedListener(this);
+}
+
 TextDropShadowCache::TextDropShadowCache(uint32_t maxByteSize):
         mCache(GenerationCache<ShadowText, ShadowTexture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(maxByteSize) {

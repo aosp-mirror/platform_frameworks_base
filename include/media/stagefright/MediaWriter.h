@@ -44,6 +44,10 @@ struct MediaWriter : public RefBase {
         mListener = listener;
     }
 
+    virtual status_t dump(int fd, const Vector<String16>& args) {
+        return OK;
+    }
+
 protected:
     virtual ~MediaWriter() {}
     int64_t mMaxFileSizeLimitBytes;

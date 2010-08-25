@@ -556,7 +556,8 @@ public class MediaScanner
                 mTitle = value;
             } else if (name.equalsIgnoreCase("artist") || name.startsWith("artist;")) {
                 mArtist = value.trim();
-            } else if (name.equalsIgnoreCase("albumartist") || name.startsWith("albumartist;")) {
+            } else if (name.equalsIgnoreCase("albumartist") || name.startsWith("albumartist;")
+                    || name.equalsIgnoreCase("band") || name.startsWith("band;")) {
                 mAlbumArtist = value.trim();
             } else if (name.equalsIgnoreCase("album") || name.startsWith("album;")) {
                 mAlbum = value.trim();

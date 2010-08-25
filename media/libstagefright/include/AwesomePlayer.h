@@ -182,6 +182,7 @@ private:
 
     sp<ALooper> mLooper;
     sp<ARTSPController> mRTSPController;
+    int64_t mRTSPTimeOffset;
     sp<ARTPSession> mRTPSession;
     sp<UDPPusher> mRTPPusher, mRTCPPusher;
 
