@@ -17,11 +17,9 @@
 package android.animation;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.AttributeSet;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
@@ -68,15 +66,6 @@ public class Animator<T> extends Animatable {
     private static final int CANCELED   = 2; // cancel() called - need to end it
     private static final int ENDED      = 3; // end() called - need to end it
     private static final int SEEKED     = 4; // Seeked to some time value
-
-    /**
-     * Enum values used in XML attributes to indicate the value for mValueType
-     */
-    private static final int VALUE_TYPE_FLOAT       = 0;
-    private static final int VALUE_TYPE_INT         = 1;
-    private static final int VALUE_TYPE_DOUBLE      = 2;
-    private static final int VALUE_TYPE_COLOR       = 3;
-    private static final int VALUE_TYPE_CUSTOM      = 4;
 
     /**
      * Internal variables
@@ -209,11 +198,6 @@ public class Animator<T> extends Animatable {
     HashMap<String, PropertyValuesHolder> mValuesMap;
 
     /**
-     * The type of the values, as determined by the valueFrom/valueTo properties.
-     */
-    Class mValueType;
-
-    /**
      * Public constants
      */
 
@@ -234,75 +218,12 @@ public class Animator<T> extends Animatable {
     public static final int INFINITE = -1;
 
     /**
-     * Creates a new animation whose parameters come from the specified context and
-     * attributes set.
-     *
-     * @param context the application environment
-     * @param attrs the set of attributes holding the animation parameters
+     * Creates a new Animator object. This default constructor is primarily for
+     * use internally; the other constructors which take parameters are more generally
+     * useful.
      */
-    public Animator(Context context, AttributeSet attrs) {
-        TypedArray a =
-                context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.Animator);
-
-        mDuration = (long) a.getInt(com.android.internal.R.styleable.Animator_duration, 0);
-
-        mStartDelay = (long) a.getInt(com.android.internal.R.styleable.Animator_startOffset, 0);
-
-        final int resID =
-                a.getResourceId(com.android.internal.R.styleable.Animator_interpolator, 0);
-        if (resID > 0) {
-            setInterpolator(AnimationUtils.loadInterpolator(context, resID));
-        }
-        int valueType = a.getInt(com.android.internal.R.styleable.Animator_valueType,
-                VALUE_TYPE_FLOAT);
-
-        Object valueFrom = null;
-        Object valueTo = null;
-
-        switch (valueType) {
-            case VALUE_TYPE_FLOAT:
-                valueFrom = a.getFloat(com.android.internal.R.styleable.Animator_valueFrom, 0f);
-                valueTo = a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
-                mValueType = float.class;
-                break;
-            case VALUE_TYPE_INT:
-                valueFrom = a.getInt(com.android.internal.R.styleable.Animator_valueFrom, 0);
-                valueTo = a.getInt(com.android.internal.R.styleable.Animator_valueTo, 0);
-                mValueType = int.class;
-                break;
-            case VALUE_TYPE_DOUBLE:
-                valueFrom = (double)
-                        a.getFloat(com.android.internal.R.styleable.Animator_valueFrom, 0f);
-                valueTo = (double)
-                        a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
-                mValueType = double.class;
-                break;
-            case VALUE_TYPE_COLOR:
-                valueFrom = a.getInt(com.android.internal.R.styleable.Animator_valueFrom, 0);
-                valueTo = a.getInt(com.android.internal.R.styleable.Animator_valueTo, 0);
-                setEvaluator(new RGBEvaluator());
-                mValueType = int.class;
-                break;
-            case VALUE_TYPE_CUSTOM:
-                // TODO: How to get an 'Object' value?
-                valueFrom = a.getFloat(com.android.internal.R.styleable.Animator_valueFrom, 0f);
-                valueTo = a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
-                mValueType = Object.class;
-                break;
-        }
-
-        PropertyValuesHolder valuesHolder = new PropertyValuesHolder("", valueFrom, valueTo);
-        mValues = new PropertyValuesHolder[1];
-        mValues[0] = valuesHolder;
-        mValuesMap = new HashMap<String, PropertyValuesHolder>(1);
-        mValuesMap.put("", valuesHolder);
-
-        mRepeatCount = a.getInt(com.android.internal.R.styleable.Animator_repeatCount, mRepeatCount);
-        mRepeatMode = a.getInt(com.android.internal.R.styleable.Animator_repeatMode, RESTART);
-
-        a.recycle();
+    public Animator() {
     }
-
 
     /**
      * Constructs an Animator object with the specified duration and set of
@@ -371,6 +292,25 @@ public class Animator<T> extends Animatable {
         }
         mCurrentIteration = 0;
         mInitialized = true;
+    }
+
+
+    /**
+     * Sets the length of the animation.
+     *
+     * @param duration The length of the animation, in milliseconds.
+     */
+    public void setDuration(long duration) {
+        mDuration = duration;
+    }
+
+    /**
+     * Gets the length of the animation.
+     *
+     * @return The length of the animation, in milliseconds.
+     */
+    public long getDuration() {
+        return mDuration;
     }
 
     /**
@@ -723,11 +663,11 @@ public class Animator<T> extends Animatable {
      * @param playBackwards Whether the Animator should start playing in reverse.
      */
     private void start(boolean playBackwards) {
+        mPlayingBackwards = playBackwards;
         if ((mStartDelay == 0) && (Thread.currentThread() == Looper.getMainLooper().getThread())) {
             // This sets the initial value of the animation, prior to actually starting it running
             setCurrentPlayTime(getCurrentPlayTime());
         }
-        mPlayingBackwards = playBackwards;
         mPlayingState = STOPPED;
         sPendingAnimations.add(this);
         if (sAnimationHandler == null) {
@@ -736,15 +676,6 @@ public class Animator<T> extends Animatable {
         // TODO: does this put too many messages on the queue if the handler
         // is already running?
         sAnimationHandler.sendEmptyMessage(ANIMATION_START);
-    }
-
-    /**
-     * Returns the duration that this animation will run for.
-     *
-     * @return The length in time of the animation, in milliseconds.
-     */
-    public long getDuration() {
-        return mDuration;
     }
 
     @Override
