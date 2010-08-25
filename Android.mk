@@ -355,7 +355,7 @@ framework_docs_LOCAL_JAVA_LIBRARIES := \
 			framework \
 
 framework_docs_LOCAL_MODULE_CLASS := JAVA_LIBRARIES
-framework_docs_LOCAL_DROIDDOC_HTML_DIR := docs/html
+framework_docs_LOCAL_DROIDDOC_HTML_DIR := $(LOCAL_PATH)/docs/html $(OUT_DOCS)/gen
 # The since flag (-since N.xml API_LEVEL) is used to add API Level information
 # to the reference documentation. Must be in order of oldest to newest.
 framework_docs_LOCAL_DROIDDOC_OPTIONS := \
@@ -550,8 +550,8 @@ LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
 
 include $(BUILD_DROIDDOC)
 
-# explicitly specify that online-sdk depends on framework-res.
-$(full_target): framework-res-package-target
+# explicitly specify that online-sdk depends on framework-res and any generated docs
+$(full_target): framework-res-package-target $(ALL_GENERATED_DOCS)
 
 # ==== docs that have all of the stuff that's @hidden =======================
 include $(CLEAR_VARS)
