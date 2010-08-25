@@ -72,6 +72,11 @@ public:
     off_t getCompressedLen(void) const { return mCDE.mCompressedSize; }
 
     /*
+     * Return the offset of the local file header.
+     */
+    off_t getLFHOffset(void) const { return mCDE.mLocalHeaderRelOffset; }
+
+    /*
      * Return the absolute file offset of the start of the compressed or
      * uncompressed data.
      */
@@ -184,11 +189,6 @@ protected:
      * Set the modification date.
      */
     void setModWhen(time_t when);
-
-    /*
-     * Return the offset of the local file header.
-     */
-    off_t getLFHOffset(void) const { return mCDE.mLocalHeaderRelOffset; }
 
     /*
      * Set the offset of the local file header, relative to the start of
