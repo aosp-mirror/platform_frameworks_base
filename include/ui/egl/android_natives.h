@@ -85,11 +85,26 @@ enum {
     NATIVE_WINDOW_SET_CROP,
     NATIVE_WINDOW_SET_BUFFER_COUNT,
     NATIVE_WINDOW_SET_BUFFERS_GEOMETRY,
+    NATIVE_WINDOW_SET_BUFFERS_TRANSFORM,
 };
 
 /* parameter for NATIVE_WINDOW_[DIS]CONNECT */
 enum {
     NATIVE_WINDOW_API_EGL = 1
+};
+
+/* parameter for NATIVE_WINDOW_SET_BUFFERS_TRANSFORM */
+enum {
+    /* flip source image horizontally */
+    NATIVE_WINDOW_TRANSFORM_FLIP_H = HAL_TRANSFORM_FLIP_H ,
+    /* flip source image vertically */
+    NATIVE_WINDOW_TRANSFORM_FLIP_V = HAL_TRANSFORM_FLIP_V,
+    /* rotate source image 90 degrees clock-wise */
+    NATIVE_WINDOW_TRANSFORM_ROT_90 = HAL_TRANSFORM_ROT_90,
+    /* rotate source image 180 degrees */
+    NATIVE_WINDOW_TRANSFORM_ROT_180 = HAL_TRANSFORM_ROT_180,
+    /* rotate source image 270 degrees clock-wise */
+    NATIVE_WINDOW_TRANSFORM_ROT_270 = HAL_TRANSFORM_ROT_270,
 };
 
 struct ANativeWindow 
@@ -196,6 +211,7 @@ struct ANativeWindow
      *     NATIVE_WINDOW_SET_CROP
      *     NATIVE_WINDOW_SET_BUFFER_COUNT
      *     NATIVE_WINDOW_SET_BUFFERS_GEOMETRY
+     *     NATIVE_WINDOW_SET_BUFFERS_TRANSFORM
      *  
      */
     
@@ -296,6 +312,19 @@ static inline int native_window_set_buffers_geometry(
 {
     return window->perform(window, NATIVE_WINDOW_SET_BUFFERS_GEOMETRY,
             w, h, format);
+}
+
+/*
+ * native_window_set_buffers_transform(..., int transform)
+ * All buffers queued after this call will be displayed transformed according
+ * to the transform parameter specified.
+ */
+static inline int native_window_set_buffers_transform(
+        ANativeWindow* window,
+        int transform)
+{
+    return window->perform(window, NATIVE_WINDOW_SET_BUFFERS_TRANSFORM,
+            transform);
 }
 
 // ---------------------------------------------------------------------------

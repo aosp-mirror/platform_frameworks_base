@@ -473,9 +473,9 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
         return;
     }
 
-    // get the dirty region
     sp<GraphicBuffer> newFrontBuffer(getBuffer(buf));
     if (newFrontBuffer != NULL) {
+        // get the dirty region
         // compute the posted region
         const Region dirty(lcblk->getDirtyRegion(buf));
         mPostedDirtyRegion = dirty.intersect( newFrontBuffer->getBounds() );
@@ -511,6 +511,13 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
             // we now have the correct size, unfreeze the screen
             mFreezeLock.clear();
         }
+
+        // get the crop region
+        setBufferCrop( lcblk->getCrop(buf) );
+
+        // get the transformation
+        setBufferTransform( lcblk->getTransform(buf) );
+
     } else {
         // this should not happen unless we ran out of memory while
         // allocating the buffer. we're hoping that things will get back

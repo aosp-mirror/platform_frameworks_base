@@ -16,101 +16,14 @@
 
 package android.pim.vcard;
 
-import android.content.ContentProvider;
-import android.content.ContentProviderOperation;
-import android.content.ContentProviderResult;
 import android.content.ContentValues;
-import android.content.EntityIterator;
-import android.content.res.AssetFileDescriptor;
-import android.database.Cursor;
-import android.database.CursorWindow;
-import android.database.IBulkCursor;
-import android.database.IContentObserver;
-import android.net.Uri;
-import android.os.IBinder;
-import android.os.ParcelFileDescriptor;
-import android.os.RemoteException;
-import android.pim.vcard.VCardConfig;
 import android.test.AndroidTestCase;
-import android.util.Log;
-
-import java.util.ArrayList;
-
-/**
- * Almost a dead copy of android.test.mock.MockContentProvider, but different in that this
- * class extends ContentProvider, not implementing IContentProvider,
- * so that MockContentResolver is able to accept this class :(
- */
-class MockContentProvider extends ContentProvider {
-    @Override
-    public boolean onCreate() {
-        return true;
-    }
-
-    @Override
-    public int bulkInsert(Uri url, ContentValues[] initialValues) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @SuppressWarnings("unused")
-    public IBulkCursor bulkQuery(Uri url, String[] projection, String selection,
-            String[] selectionArgs, String sortOrder, IContentObserver observer,
-            CursorWindow window) throws RemoteException {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @Override
-    @SuppressWarnings("unused")
-    public int delete(Uri url, String selection, String[] selectionArgs) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @Override
-    public String getType(Uri url) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @Override
-    public Uri insert(Uri url, ContentValues initialValues) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @Override
-    public ParcelFileDescriptor openFile(Uri url, String mode) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @Override
-    public AssetFileDescriptor openAssetFile(Uri uri, String mode) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @Override
-    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @Override
-    public Cursor query(Uri url, String[] projection, String selection, String[] selectionArgs,
-            String sortOrder) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @Override
-    public int update(Uri url, ContentValues values, String selection, String[] selectionArgs) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    public IBinder asBinder() {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-}
 
 /**
  * BaseClass for vCard unit tests with utility classes.
  * Please do not add each unit test here.
  */
-/* package */ class VCardTestsBase extends AndroidTestCase {
+public class VCardTestsBase extends AndroidTestCase {
     public static final int V21 = VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8;
     public static final int V30 = VCardConfig.VCARD_TYPE_V30_GENERIC_UTF8;
 

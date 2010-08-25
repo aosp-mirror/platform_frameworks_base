@@ -22,6 +22,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.backup.BackupManager;
 import android.content.ContentProvider;
@@ -37,6 +39,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.FileObserver;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemProperties;
 import android.provider.DrmStore;
@@ -56,9 +59,15 @@ public class SettingsProvider extends ContentProvider {
 
     // Cache for settings, access-ordered for acting as LRU.
     // Guarded by themselves.
-    private static final int MAX_CACHE_ENTRIES = 50;
-    private static final SettingsCache sSystemCache = new SettingsCache();
-    private static final SettingsCache sSecureCache = new SettingsCache();
+    private static final int MAX_CACHE_ENTRIES = 200;
+    private static final SettingsCache sSystemCache = new SettingsCache("system");
+    private static final SettingsCache sSecureCache = new SettingsCache("secure");
+
+    // The count of how many known (handled by SettingsProvider)
+    // database mutations are currently being handled.  Used by
+    // sFileObserver to not reload the database when it's ourselves
+    // modifying it.
+    private static final AtomicInteger sKnownMutationsInFlight = new AtomicInteger(0);
 
     // Over this size we don't reject loading or saving settings but
     // we do consider them broken/malicious and don't keep them in
@@ -66,6 +75,10 @@ public class SettingsProvider extends ContentProvider {
     private static final int MAX_CACHE_ENTRY_SIZE = 500;
 
     private static final Bundle NULL_SETTING = Bundle.forPair("value", null);
+
+    // Used as a sentinel value in an instance equality test when we
+    // want to cache the existence of a key, but not store its value.
+    private static final Bundle TOO_LARGE_TO_CACHE_MARKER = Bundle.forPair("_dummy", null);
 
     protected DatabaseHelper mOpenHelper;
     private BackupManager mBackupManager;
@@ -201,6 +214,43 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
+    // FileObserver for external modifications to the database file.
+    // Note that this is for platform developers only with
+    // userdebug/eng builds who should be able to tinker with the
+    // sqlite database out from under the SettingsProvider, which is
+    // normally the exclusive owner of the database.  But we keep this
+    // enabled all the time to minimize development-vs-user
+    // differences in testing.
+    private static SettingsFileObserver sObserverInstance;
+    private class SettingsFileObserver extends FileObserver {
+        private final AtomicBoolean mIsDirty = new AtomicBoolean(false);
+        private final String mPath;
+
+        public SettingsFileObserver(String path) {
+            super(path, FileObserver.CLOSE_WRITE |
+                  FileObserver.CREATE | FileObserver.DELETE |
+                  FileObserver.MOVED_TO | FileObserver.MODIFY);
+            mPath = path;
+        }
+
+        public void onEvent(int event, String path) {
+            int modsInFlight = sKnownMutationsInFlight.get();
+            if (modsInFlight > 0) {
+                // our own modification.
+                return;
+            }
+            Log.d(TAG, "external modification to " + mPath + "; event=" + event);
+            if (!mIsDirty.compareAndSet(false, true)) {
+                // already handled. (we get a few update events
+                // during an sqlite write)
+                return;
+            }
+            Log.d(TAG, "updating our caches for " + mPath);
+            fullyPopulateCaches();
+            mIsDirty.set(false);
+        }
+    }
+
     @Override
     public boolean onCreate() {
         mOpenHelper = new DatabaseHelper(getContext());
@@ -210,7 +260,63 @@ public class SettingsProvider extends ContentProvider {
             return false;
         }
 
+        // Watch for external modifications to the database file,
+        // keeping our cache in sync.
+        // It's kinda lame to call mOpenHelper.getReadableDatabase()
+        // during onCreate(), but since ensureAndroidIdIsSet has
+        // already done it above and initialized/upgraded the
+        // database, might as well just use it...
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        sObserverInstance = new SettingsFileObserver(db.getPath());
+        sObserverInstance.startWatching();
+        startAsyncCachePopulation();
         return true;
+    }
+
+    private void startAsyncCachePopulation() {
+        new Thread("populate-settings-caches") {
+            public void run() {
+                fullyPopulateCaches();
+            }
+        }.start();
+    }
+
+    private void fullyPopulateCaches() {
+        fullyPopulateCache("secure", sSecureCache);
+        fullyPopulateCache("system", sSystemCache);
+    }
+
+    // Slurp all values (if sane in number & size) into cache.
+    private void fullyPopulateCache(String table, SettingsCache cache) {
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        Cursor c = db.query(
+            table,
+            new String[] { Settings.NameValueTable.NAME, Settings.NameValueTable.VALUE },
+            null, null, null, null, null,
+            "" + (MAX_CACHE_ENTRIES + 1) /* limit */);
+        try {
+            synchronized (cache) {
+                cache.clear();
+                cache.setFullyMatchesDisk(true);  // optimistic
+                int rows = 0;
+                while (c.moveToNext()) {
+                    rows++;
+                    String name = c.getString(0);
+                    String value = c.getString(1);
+                    cache.populate(name, value);
+                }
+                if (rows > MAX_CACHE_ENTRIES) {
+                    // Somewhat redundant, as removeEldestEntry() will
+                    // have already done this, but to be explicit:
+                    cache.setFullyMatchesDisk(false);
+                    Log.d(TAG, "row count exceeds max cache entries for table " + table);
+                }
+                Log.d(TAG, "cache for settings table '" + table + "' fullycached=" +
+                      cache.fullyMatchesDisk());
+            }
+        } finally {
+            c.close();
+        }
     }
 
     private boolean ensureAndroidIdIsSet() {
@@ -262,7 +368,19 @@ public class SettingsProvider extends ContentProvider {
     private Bundle lookupValue(String table, SettingsCache cache, String key) {
         synchronized (cache) {
             if (cache.containsKey(key)) {
-                return cache.get(key);
+                Bundle value = cache.get(key);
+                if (value != TOO_LARGE_TO_CACHE_MARKER) {
+                    return value;
+                }
+                // else we fall through and read the value from disk
+            } else if (cache.fullyMatchesDisk()) {
+                // Fast path (very common).  Don't even try touch disk
+                // if we know we've slurped it all in.  Trying to
+                // touch the disk would mean waiting for yaffs2 to
+                // give us access, which could takes hundreds of
+                // milliseconds.  And we're very likely being called
+                // from somebody's UI thread...
+                return NULL_SETTING;
             }
         }
 
@@ -338,6 +456,7 @@ public class SettingsProvider extends ContentProvider {
         checkWritePermissions(args);
         SettingsCache cache = SettingsCache.forTable(args.table);
 
+        sKnownMutationsInFlight.incrementAndGet();
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
@@ -350,6 +469,7 @@ public class SettingsProvider extends ContentProvider {
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
+            sKnownMutationsInFlight.decrementAndGet();
         }
 
         sendNotify(uri);
@@ -449,8 +569,10 @@ public class SettingsProvider extends ContentProvider {
             return Uri.withAppendedPath(url, name);
         }
 
+        sKnownMutationsInFlight.incrementAndGet();
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final long rowId = db.insert(args.table, null, initialValues);
+        sKnownMutationsInFlight.decrementAndGet();
         if (rowId <= 0) return null;
 
         SettingsCache.populate(cache, initialValues);  // before we notify
@@ -471,12 +593,15 @@ public class SettingsProvider extends ContentProvider {
         }
         checkWritePermissions(args);
 
+        sKnownMutationsInFlight.incrementAndGet();
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         int count = db.delete(args.table, args.where, args.args);
+        sKnownMutationsInFlight.decrementAndGet();
         if (count > 0) {
             SettingsCache.wipe(args.table);  // before we notify
             sendNotify(url);
         }
+        startAsyncCachePopulation();
         if (LOCAL_LOGV) Log.v(TAG, args.table + ": " + count + " row(s) deleted");
         return count;
     }
@@ -489,12 +614,15 @@ public class SettingsProvider extends ContentProvider {
         }
         checkWritePermissions(args);
 
+        sKnownMutationsInFlight.incrementAndGet();
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        sKnownMutationsInFlight.decrementAndGet();
         int count = db.update(args.table, initialValues, args.where, args.args);
         if (count > 0) {
             SettingsCache.wipe(args.table);  // before we notify
             sendNotify(url);
         }
+        startAsyncCachePopulation();
         if (LOCAL_LOGV) Log.v(TAG, args.table + ": " + count + " row(s) <- " + initialValues);
         return count;
     }
@@ -506,12 +634,12 @@ public class SettingsProvider extends ContentProvider {
          * When a client attempts to openFile the default ringtone or
          * notification setting Uri, we will proxy the call to the current
          * default ringtone's Uri (if it is in the DRM or media provider).
-         */ 
+         */
         int ringtoneType = RingtoneManager.getDefaultType(uri);
         // Above call returns -1 if the Uri doesn't match a default type
         if (ringtoneType != -1) {
             Context context = getContext();
-            
+
             // Get the current value for the default sound
             Uri soundUri = RingtoneManager.getActualDefaultRingtoneUri(context, ringtoneType);
 
@@ -531,7 +659,7 @@ public class SettingsProvider extends ContentProvider {
                             throw new FileNotFoundException(e.getMessage());
                         }
                     }
-                    
+
                     return context.getContentResolver().openFileDescriptor(soundUri, mode);
                 }
             }
@@ -607,13 +735,38 @@ public class SettingsProvider extends ContentProvider {
      */
     private static final class SettingsCache extends LinkedHashMap<String, Bundle> {
 
-        public SettingsCache() {
+        private final String mCacheName;
+        private boolean mCacheFullyMatchesDisk = false;  // has the whole database slurped.
+
+        public SettingsCache(String name) {
             super(MAX_CACHE_ENTRIES, 0.75f /* load factor */, true /* access ordered */);
+            mCacheName = name;
+        }
+
+        /**
+         * Is the whole database table slurped into this cache?
+         */
+        public boolean fullyMatchesDisk() {
+            synchronized (this) {
+                return mCacheFullyMatchesDisk;
+            }
+        }
+
+        public void setFullyMatchesDisk(boolean value) {
+            synchronized (this) {
+                mCacheFullyMatchesDisk = value;
+            }
         }
 
         @Override
         protected boolean removeEldestEntry(Map.Entry eldest) {
-            return size() > MAX_CACHE_ENTRIES;
+            if (size() <= MAX_CACHE_ENTRIES) {
+                return false;
+            }
+            synchronized (this) {
+                mCacheFullyMatchesDisk = false;
+            }
+            return true;
         }
 
         /**
@@ -658,11 +811,15 @@ public class SettingsProvider extends ContentProvider {
                 return;
             }
             String value = contentValues.getAsString(Settings.NameValueTable.VALUE);
-            synchronized (cache) {
+            cache.populate(name, value);
+        }
+
+        public void populate(String name, String value) {
+            synchronized (this) {
                 if (value == null || value.length() <= MAX_CACHE_ENTRY_SIZE) {
-                    cache.put(name, Bundle.forPair(Settings.NameValueTable.VALUE, value));
+                    put(name, Bundle.forPair(Settings.NameValueTable.VALUE, value));
                 } else {
-                    cache.remove(name);
+                    put(name, TOO_LARGE_TO_CACHE_MARKER);
                 }
             }
         }
@@ -678,6 +835,7 @@ public class SettingsProvider extends ContentProvider {
             }
             synchronized (cache) {
                 cache.clear();
+                cache.mCacheFullyMatchesDisk = true;
             }
         }
 

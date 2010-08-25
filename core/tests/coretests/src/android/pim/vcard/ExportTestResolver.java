@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
+import android.test.mock.MockContentProvider;
 import android.test.mock.MockContentResolver;
 import android.test.mock.MockCursor;
 
@@ -43,6 +44,10 @@ import java.util.List;
 
     public ContactEntry addInputContactEntry() {
         return mProvider.buildInputEntry();
+    }
+
+    public ExportTestProvider getProvider() {
+        return mProvider;
     }
 }
 
