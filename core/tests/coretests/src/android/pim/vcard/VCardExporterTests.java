@@ -438,14 +438,26 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(Phone.TYPE, Phone.TYPE_CUSTOM)
                 .put(Phone.LABEL, "invalid");
         PropertyNodesVerifierElem elem = mVerifier.addPropertyNodesVerifierElemWithEmptyName();
-        elem.addExpectedNode("TEL", "1", new TypeSet("MODEM"))
-                .addExpectedNode("TEL", "2", new TypeSet("MSG"))
-                .addExpectedNode("TEL", "3", new TypeSet("BBS"))
-                .addExpectedNode("TEL", "4", new TypeSet("VIDEO"))
-                .addExpectedNode("TEL", "5", new TypeSet("VOICE"))
-                .addExpectedNode("TEL", "6", new TypeSet("CELL"))
-                .addExpectedNode("TEL", "7", new TypeSet("CELL"))
-                .addExpectedNode("TEL", "8", new TypeSet("X-invalid"));
+        if (VCardConfig.isV30(vcardType)) {
+            // vCard 3.0 accepts "invalid". Also stop using toUpper()
+            elem.addExpectedNode("TEL", "1", new TypeSet("Modem"))
+                    .addExpectedNode("TEL", "2", new TypeSet("MSG"))
+                    .addExpectedNode("TEL", "3", new TypeSet("BBS"))
+                    .addExpectedNode("TEL", "4", new TypeSet("VIDEO"))
+                    .addExpectedNode("TEL", "5", new TypeSet("VOICE"))
+                    .addExpectedNode("TEL", "6", new TypeSet("CELL"))
+                    .addExpectedNode("TEL", "7", new TypeSet("CELL"))
+                    .addExpectedNode("TEL", "8", new TypeSet("invalid"));
+        } else {
+            elem.addExpectedNode("TEL", "1", new TypeSet("MODEM"))
+                    .addExpectedNode("TEL", "2", new TypeSet("MSG"))
+                    .addExpectedNode("TEL", "3", new TypeSet("BBS"))
+                    .addExpectedNode("TEL", "4", new TypeSet("VIDEO"))
+                    .addExpectedNode("TEL", "5", new TypeSet("VOICE"))
+                    .addExpectedNode("TEL", "6", new TypeSet("CELL"))
+                    .addExpectedNode("TEL", "7", new TypeSet("CELL"))
+                    .addExpectedNode("TEL", "8", new TypeSet("X-invalid"));
+        }
     }
 
     public void testPhoneTypeHandlingV21() {
