@@ -41,6 +41,7 @@ final class DeviceOrientationService implements SensorEventListener {
     private Double mAlpha;
     private Double mBeta;
     private Double mGamma;
+    private boolean mHaveSentErrorEvent;
 
     private static final double DELTA_DEGRESS = 1.0;
 
@@ -75,11 +76,16 @@ final class DeviceOrientationService implements SensorEventListener {
 
     private void sendErrorEvent() {
         assert WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName());
+        // The spec requires that each listener receives the error event only once.
+        if (mHaveSentErrorEvent)
+            return;
+        mHaveSentErrorEvent = true;
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 assert WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName());
                 if (mIsRunning) {
+                    // The special case of all nulls is used to signify a failure to get data.
                     mManager.onOrientationChange(null, null, null);
                 }
             }
@@ -169,6 +175,8 @@ final class DeviceOrientationService implements SensorEventListener {
             mBeta = beta;
             mGamma = gamma;
             mManager.onOrientationChange(mAlpha, mBeta, mGamma);
+            // Now that we have successfully sent some data, reset whether we've sent an error.
+            mHaveSentErrorEvent = false;
         }
     }
 
