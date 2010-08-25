@@ -713,10 +713,10 @@ void Context::removeName(ObjectBase *obj)
 uint32_t Context::getMessageToClient(void *data, size_t *receiveLen, size_t bufferLen, bool wait)
 {
     //LOGE("getMessageToClient %i %i", bufferLen, wait);
+    *receiveLen = 0;
     if (!wait) {
         if (mIO.mToClient.isEmpty()) {
             // No message to get and not going to wait for one.
-            receiveLen = 0;
             return 0;
         }
     }

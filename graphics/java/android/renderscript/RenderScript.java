@@ -542,6 +542,10 @@ public class RenderScript {
     Element mElement_FLOAT_4;
     Element mElement_UCHAR_4;
 
+    Element mElement_MATRIX_4X4;
+    Element mElement_MATRIX_3X3;
+    Element mElement_MATRIX_2X2;
+
     Sampler mSampler_CLAMP_NEAREST;
     Sampler mSampler_CLAMP_LINEAR;
     Sampler mSampler_CLAMP_LINEAR_MIP_LINEAR;
@@ -614,15 +618,22 @@ public class RenderScript {
             int[] rbuf = new int[16];
             mRS.nContextInitToClient(mRS.mContext);
             while(mRun) {
+                rbuf[0] = 0;
                 int msg = mRS.nContextGetMessage(mRS.mContext, rbuf, true);
                 if (msg == 0) {
-                    // Should only happen during teardown.
-                    // But we want to avoid starving other threads during
-                    // teardown by yielding until the next line in the destructor
-                    // can execute to set mRun = false
-                    try {
-                        sleep(1, 0);
-                    } catch(InterruptedException e) {
+                    // Can happen for two reasons
+                    if (rbuf[0] > 0) {
+                        // 1: Buffer needs to be enlarged.
+                        rbuf = new int[rbuf[0] + 2];
+                    } else {
+                        // 2: teardown.
+                        // But we want to avoid starving other threads during
+                        // teardown by yielding until the next line in the destructor
+                        // can execute to set mRun = false
+                        try {
+                            sleep(1, 0);
+                        } catch(InterruptedException e) {
+                        }
                     }
                 }
                 if(mRS.mMessageCallback != null) {
