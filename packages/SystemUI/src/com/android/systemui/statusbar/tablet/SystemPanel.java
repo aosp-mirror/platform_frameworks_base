@@ -45,6 +45,7 @@ import android.os.ServiceManager;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Slog;
@@ -66,11 +67,18 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import com.android.internal.telephony.IccCard;
+import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.telephony.cdma.EriInfo;
+import com.android.internal.telephony.cdma.TtyIntent;
+
 import com.android.systemui.statusbar.*;
 import com.android.systemui.R;
 
 public class SystemPanel extends LinearLayout {
     private static final String TAG = "SystemPanel";
+    private static final boolean DEBUG = TabletStatusBarService.DEBUG;
+    private static final boolean DEBUG_SIGNAL = true;
 
     private static final int MINIMUM_BACKLIGHT = android.os.Power.BRIGHTNESS_DIM + 5;
     private static final int MAXIMUM_BACKLIGHT = android.os.Power.BRIGHTNESS_ON;
@@ -93,7 +101,22 @@ public class SystemPanel extends LinearLayout {
 
     private final AudioManager mAudioManager;
     private final WifiManager mWifiManager;
+    private final TelephonyManager mPhone;
 
+    // state trackers for telephony code
+    IccCard.State mSimState = IccCard.State.READY;
+    int mPhoneState = TelephonyManager.CALL_STATE_IDLE;
+    int mDataState = TelephonyManager.DATA_DISCONNECTED;
+    ServiceState mServiceState;
+    SignalStrength mSignalStrength;
+
+    // state for the meters
+    boolean mWifiEnabled, mWifiConnected;
+    int mWifiLevel;
+    String mWifiSsid;
+
+    boolean mDataEnabled, mDataConnected, mDataRoaming;
+    int mDataLevel;
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -107,18 +130,154 @@ public class SystemPanel extends LinearLayout {
                     || action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)
                     || action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)
                     || action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
-                updateWifi(intent);
+                updateWifiState(intent);
+            } else if (action.equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
+                updateSimState(intent);
             }
         }
     };
 
-    boolean mWifiEnabled, mWifiConnected;
-    int mWifiLevel;
-    String mWifiSsid;
+    private final void updateSimState(Intent intent) {
+        String stateExtra = intent.getStringExtra(IccCard.INTENT_KEY_ICC_STATE);
+        if (IccCard.INTENT_VALUE_ICC_ABSENT.equals(stateExtra)) {
+            mSimState = IccCard.State.ABSENT;
+        }
+        else if (IccCard.INTENT_VALUE_ICC_READY.equals(stateExtra)) {
+            mSimState = IccCard.State.READY;
+        }
+        else if (IccCard.INTENT_VALUE_ICC_LOCKED.equals(stateExtra)) {
+            final String lockedReason = intent.getStringExtra(IccCard.INTENT_KEY_LOCKED_REASON);
+            if (IccCard.INTENT_VALUE_LOCKED_ON_PIN.equals(lockedReason)) {
+                mSimState = IccCard.State.PIN_REQUIRED;
+            }
+            else if (IccCard.INTENT_VALUE_LOCKED_ON_PUK.equals(lockedReason)) {
+                mSimState = IccCard.State.PUK_REQUIRED;
+            }
+            else {
+                mSimState = IccCard.State.NETWORK_LOCKED;
+            }
+        } else {
+            mSimState = IccCard.State.UNKNOWN;
+        }
+        updateDataState();
+    }
 
-    private void updateWifi(Intent intent) {
-        if (TabletStatusBarService.DEBUG)
-            Slog.d(TabletStatusBarService.TAG, "updateWifi: " + intent);
+    private boolean isCdma() {
+        return (mSignalStrength != null) && !mSignalStrength.isGsm();
+    }
+
+    private boolean isEvdo() {
+        return ( (mServiceState != null)
+                 && ((mServiceState.getRadioTechnology()
+                        == ServiceState.RADIO_TECHNOLOGY_EVDO_0)
+                     || (mServiceState.getRadioTechnology()
+                        == ServiceState.RADIO_TECHNOLOGY_EVDO_A)
+                     || (mServiceState.getRadioTechnology()
+                        == ServiceState.RADIO_TECHNOLOGY_EVDO_B)));
+    }
+
+    private boolean hasService() {
+        if (mServiceState != null) {
+            switch (mServiceState.getState()) {
+                case ServiceState.STATE_OUT_OF_SERVICE:
+                case ServiceState.STATE_POWER_OFF:
+                    return false;
+                default:
+                    return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    private int getCdmaLevel() {
+        if (mSignalStrength == null) return 0;
+        final int cdmaDbm = mSignalStrength.getCdmaDbm();
+        final int cdmaEcio = mSignalStrength.getCdmaEcio();
+        int levelDbm = 0;
+        int levelEcio = 0;
+
+        if (cdmaDbm >= -75) levelDbm = 4;
+        else if (cdmaDbm >= -85) levelDbm = 3;
+        else if (cdmaDbm >= -95) levelDbm = 2;
+        else if (cdmaDbm >= -100) levelDbm = 1;
+        else levelDbm = 0;
+
+        // Ec/Io are in dB*10
+        if (cdmaEcio >= -90) levelEcio = 4;
+        else if (cdmaEcio >= -110) levelEcio = 3;
+        else if (cdmaEcio >= -130) levelEcio = 2;
+        else if (cdmaEcio >= -150) levelEcio = 1;
+        else levelEcio = 0;
+
+        return (levelDbm < levelEcio) ? levelDbm : levelEcio;
+    }
+
+    private int getEvdoLevel() {
+        if (mSignalStrength == null) return 0;
+        int evdoDbm = mSignalStrength.getEvdoDbm();
+        int evdoSnr = mSignalStrength.getEvdoSnr();
+        int levelEvdoDbm = 0;
+        int levelEvdoSnr = 0;
+
+        if (evdoDbm >= -65) levelEvdoDbm = 4;
+        else if (evdoDbm >= -75) levelEvdoDbm = 3;
+        else if (evdoDbm >= -90) levelEvdoDbm = 2;
+        else if (evdoDbm >= -105) levelEvdoDbm = 1;
+        else levelEvdoDbm = 0;
+
+        if (evdoSnr >= 7) levelEvdoSnr = 4;
+        else if (evdoSnr >= 5) levelEvdoSnr = 3;
+        else if (evdoSnr >= 3) levelEvdoSnr = 2;
+        else if (evdoSnr >= 1) levelEvdoSnr = 1;
+        else levelEvdoSnr = 0;
+
+        return (levelEvdoDbm < levelEvdoSnr) ? levelEvdoDbm : levelEvdoSnr;
+    }
+
+    private void updateDataState() {
+        mDataConnected = hasService() && (mDataState == TelephonyManager.DATA_CONNECTED);
+
+        if (isCdma()) {
+            // these functions return a value from 0 to 4, inclusive
+            if ((mPhoneState == TelephonyManager.CALL_STATE_IDLE) && isEvdo()){
+                mDataLevel = getEvdoLevel() * 25;
+            } else {
+                mDataLevel = getCdmaLevel() * 25;
+            }
+        } else {
+            // GSM
+            
+            int asu = (mSignalStrength == null) ? 0 : mSignalStrength.getGsmSignalStrength();
+
+            // asu on [0,31]; 99 = unknown
+            // Android has historically shown anything >=12 as "full"
+            // XXX: tune this based on Industry Best Practices(TM)
+            if (asu <= 2 || asu == 99) mDataLevel = 0;
+            else mDataLevel = (int)(((float)Math.max(asu, 15) / 15) * 100);
+
+            mDataRoaming = mPhone.isNetworkRoaming();
+
+            mDataConnected = mDataConnected
+                && (mSimState == IccCard.State.READY || mSimState == IccCard.State.UNKNOWN);
+        }
+
+        if (DEBUG_SIGNAL || DEBUG) {
+            Slog.d(TAG, "updateDataState: connected=" + mDataConnected 
+                    + " level=" + mDataLevel
+                    + " isEvdo=" + isEvdo()
+                    + " isCdma=" + isCdma()
+                    + " mPhoneState=" + mPhoneState
+                    + " mDataState=" + mDataState
+                    );
+        }
+
+        refreshSignalMeters();
+    }
+
+    private void updateWifiState(Intent intent) {
+        if (DEBUG)
+            Slog.d(TAG, "updateWifiState: " + intent);
 
         final String action = intent.getAction();
         final boolean wasConnected = mWifiConnected;
@@ -142,8 +301,8 @@ public class SystemPanel extends LinearLayout {
 
         if (mWifiConnected && !wasConnected) {
             WifiInfo info = mWifiManager.getConnectionInfo();
-            if (TabletStatusBarService.DEBUG)
-                Slog.d(TabletStatusBarService.TAG, "updateWifi: just connected: info=" + info);
+            if (DEBUG)
+                Slog.d(TAG, "updateWifiState: just connected: info=" + info);
 
             if (info != null) {
                 // grab the initial signal strength
@@ -164,22 +323,40 @@ public class SystemPanel extends LinearLayout {
             }
         }
 
-        if (!mWifiEnabled) {
-            mWifiSsid = "disabled";
-            mWifiLevel = 0;
-        } else if (!mWifiConnected) {
-            mWifiSsid = "disconnected";
-            mWifiLevel = 0;
-        } else if (mWifiSsid == null) {
-            mWifiSsid = "unknown";
+        refreshSignalMeters();
+    }
+
+    // figure out what to show: first wifi, then 3G, then nothing
+    void refreshSignalMeters() {
+        if (mSignalMeter == null) return; // no UI yet
+
+        Context ctxt = getContext();
+
+        String text = null;
+        int level = 0;
+
+        if (mWifiConnected) {
+            if (mWifiSsid == null) {
+                text = ctxt.getString(R.string.system_panel_signal_meter_wifi_nossid);
+            } else {
+                text = ctxt.getString(R.string.system_panel_signal_meter_wifi_ssid_format,
+                                      mWifiSsid);
+            }
+            level = mWifiLevel;
+        } else if (mDataConnected) {
+            text = ctxt.getString(R.string.system_panel_signal_meter_data_connected);
+            level = mDataLevel;
+        } else {
+            text = ctxt.getString(R.string.system_panel_signal_meter_disconnected);
+            level = 0;
         }
 
-        mSignalMeter.setImageResource(R.drawable.signal);
-        mSignalMeter.setImageLevel(mWifiLevel);
-        mSignalText.setText(String.format("Wi-Fi: %s", mWifiSsid)); // XXX: localize
+        mSignalMeter.setImageResource(mWifiConnected ? R.drawable.wifi : R.drawable.signal);
+        mSignalMeter.setImageLevel(level);
+        mSignalText.setText(text);
 
         // hack for now
-        mBar.setWifiMeter(mWifiLevel);
+        mBar.setSignalMeter(level, mWifiConnected);
     }
 
     public void setBar(TabletStatusBarService bar) {
@@ -192,7 +369,8 @@ public class SystemPanel extends LinearLayout {
 
         mBatteryMeter.setImageResource(plugged ? R.drawable.battery_charging : R.drawable.battery);
         mBatteryMeter.setImageLevel(level);
-        mBatteryText.setText(String.format("Battery: %d%%", level));
+        mBatteryText.setText(getContext()
+                .getString(R.string.system_panel_battery_meter_format, level));
 
         // hack for now
         mBar.setBatteryMeter(level, plugged);
@@ -208,13 +386,21 @@ public class SystemPanel extends LinearLayout {
         // get notified of phone state changes
         TelephonyManager telephonyManager =
                 (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        telephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_SERVICE_STATE);
+        telephonyManager.listen(mPhoneStateListener,
+                          PhoneStateListener.LISTEN_SERVICE_STATE
+                        | PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
+                        | PhoneStateListener.LISTEN_CALL_STATE
+                        | PhoneStateListener.LISTEN_DATA_CONNECTION_STATE
+                        | PhoneStateListener.LISTEN_DATA_ACTIVITY);
 
         // wifi status info
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         
-        // audio status notifications
+        // audio status 
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+
+        // mobile data 
+        mPhone = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
     }
 
     public void onAttachedToWindow() {
@@ -259,6 +445,7 @@ public class SystemPanel extends LinearLayout {
             }
         });
 
+        // register for broadcasts
         IntentFilter filter = new IntentFilter();
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
@@ -266,8 +453,9 @@ public class SystemPanel extends LinearLayout {
         filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
+        filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         getContext().registerReceiver(mReceiver, filter);
-
+        
         mBatteryMeter = (ImageView)findViewById(R.id.battery_meter);
         mBatteryMeter.setImageResource(R.drawable.battery);
         mBatteryMeter.setImageLevel(0);
@@ -277,6 +465,8 @@ public class SystemPanel extends LinearLayout {
 
         mBatteryText = (TextView)findViewById(R.id.battery_info);
         mSignalText = (TextView)findViewById(R.id.signal_info);
+
+        refreshSignalMeters();
     }
 
     public void onDetachedFromWindow() {
@@ -362,11 +552,42 @@ public class SystemPanel extends LinearLayout {
     PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
         @Override
         public void onServiceStateChanged(ServiceState serviceState) {
-            Slog.d(TAG, "phone service state changed: " + serviceState.getState());
+            if (DEBUG_SIGNAL || DEBUG) {
+                Slog.d(TAG, "phone service state changed: " + serviceState.getState());
+            }
+            mServiceState = serviceState;
             mAirplaneMode = serviceState.getState() == ServiceState.STATE_POWER_OFF;
             if (mAirplaneButton != null) {
                 mAirplaneButton.setAlpha(mAirplaneMode ? 0xFF : 0x7F);
             }
+            updateDataState();
+        }
+        @Override
+        public void onSignalStrengthsChanged(SignalStrength signalStrength) {
+            if (DEBUG_SIGNAL || DEBUG) {
+                Slog.d(TAG, "onSignalStrengthsChanged: " + signalStrength);
+            }
+            mSignalStrength = signalStrength;
+            updateDataState();
+        }
+        @Override
+        public void onCallStateChanged(int state, String incomingNumber) {
+            mPhoneState = state;
+            // In cdma, if a voice call is made, RSSI should switch to 1x.
+            if (isCdma()) {
+                updateDataState();
+            }
+        }
+
+        @Override
+        public void onDataConnectionStateChanged(int state, int networkType) {
+            if (DEBUG_SIGNAL || DEBUG) {
+                Slog.d(TAG, "onDataConnectionStateChanged: state=" + state 
+                        + " type=" + networkType);
+            }
+            mDataState = state;
+//            updateDataNetType(networkType);
+            updateDataState();
         }
     };
 

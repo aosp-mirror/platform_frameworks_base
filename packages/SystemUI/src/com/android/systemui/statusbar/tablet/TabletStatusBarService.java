@@ -212,10 +212,15 @@ public class TabletStatusBarService extends StatusBarService {
         mBatteryMeter.setImageLevel(level);
     }
 
-    public void setWifiMeter(int level) {
-        if (DEBUG) Slog.d(TAG, "wifi=" + level);
-        mSignalMeter.setImageResource(R.drawable.signal);
-        mSignalMeter.setImageLevel(level);
+    public void setSignalMeter(int level, boolean isWifi) {
+        if (DEBUG) Slog.d(TAG, "signal=" + level);
+        if (level < 0) {
+            mSignalMeter.setImageResource(isWifi ? R.drawable.wifi_scan : R.drawable.signal_scan);
+            mSignalMeter.setImageLevel(0);
+        } else {
+            mSignalMeter.setImageResource(isWifi ? R.drawable.wifi : R.drawable.signal);
+            mSignalMeter.setImageLevel(level);
+        }
     }
 
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {

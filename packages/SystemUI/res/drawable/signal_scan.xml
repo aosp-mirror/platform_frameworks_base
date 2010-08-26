@@ -18,13 +18,12 @@
 */
 -->
 
-<level-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:maxLevel="1" android:drawable="@drawable/battery_0" />
-    <item android:maxLevel="5" android:drawable="@drawable/battery_5" />
-    <item android:maxLevel="10" android:drawable="@drawable/battery_10" />
-    <item android:maxLevel="25" android:drawable="@drawable/battery_25" />
-    <item android:maxLevel="50" android:drawable="@drawable/battery_50" />
-    <item android:maxLevel="75" android:drawable="@drawable/battery_75" />
-    <item android:maxLevel="101" android:drawable="@drawable/battery_100" />
-</level-list>
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/signal_scan1" android:duration="500" />
+    <item android:drawable="@drawable/signal_scan2" android:duration="500" />
+    <item android:drawable="@drawable/signal_scan3" android:duration="500" />
+    <item android:drawable="@drawable/signal_scan4" android:duration="500" />
+    <item android:drawable="@drawable/signal_scan3" android:duration="500" />
+    <item android:drawable="@drawable/signal_scan2" android:duration="500" />
+</animation-list>
 
