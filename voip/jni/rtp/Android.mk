@@ -32,11 +32,10 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libmedia
 
-LOCAL_STATIC_LIBRARIES := libspeex
+LOCAL_STATIC_LIBRARIES :=
 
 LOCAL_C_INCLUDES += \
-	$(JNI_H_INCLUDE) \
-	external/speex/include
+	$(JNI_H_INCLUDE)
 
 LOCAL_CFLAGS += -fvisibility=hidden
 
