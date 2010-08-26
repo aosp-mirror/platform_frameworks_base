@@ -894,6 +894,37 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         sendMessage(CMD_REQUEST_CM_WAKELOCK);
     }
 
+    @Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        String LS = System.getProperty("line.separator");
+        sb.append("current HSM state: ").append(getCurrentState().getName()).append(LS);
+        sb.append("mNetworkProperties ").append(mNetworkProperties).append(LS);
+        sb.append("mWifiInfo ").append(mWifiInfo).append(LS);
+        sb.append("mDhcpInfo ").append(mDhcpInfo).append(LS);
+        sb.append("mNetworkInfo ").append(mNetworkInfo).append(LS);
+        sb.append("mNumAllowedChannels ").append(mNumAllowedChannels).append(LS);
+        sb.append("mLastSignalLevel ").append(mLastSignalLevel).append(LS);
+        sb.append("mLastBssid ").append(mLastBssid).append(LS);
+        sb.append("mLastNetworkId ").append(mLastNetworkId).append(LS);
+        sb.append("mLastPriority ").append(mLastPriority).append(LS);
+        sb.append("mEnableAllNetworks ").append(mEnableAllNetworks).append(LS);
+        sb.append("mEnableRssiPolling ").append(mEnableRssiPolling).append(LS);
+        sb.append("mPasswordKeyMayBeIncorrect ").append(mPasswordKeyMayBeIncorrect).append(LS);
+        sb.append("mUseStaticIp ").append(mUseStaticIp).append(LS);
+        sb.append("mReconnectCount ").append(mReconnectCount).append(LS);
+        sb.append("mIsScanMode ").append(mIsScanMode).append(LS);
+        sb.append("mConfigChanged ").append(mConfigChanged).append(LS).append(LS);
+        sb.append("Supplicant status").append(LS)
+                .append(WifiNative.statusCommand()).append(LS).append(LS);
+        sb.append("mConfigChanged ").append(mConfigChanged).append(LS);
+        sb.append("Configured networks ").append(LS);
+        for (WifiConfiguration conf : mConfiguredNetworks) {
+            sb.append(conf).append(LS);
+        }
+        return sb.toString();
+    }
+
     /*********************************************************
      * Internal private functions
      ********************************************************/
