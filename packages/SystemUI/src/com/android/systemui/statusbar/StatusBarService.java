@@ -1540,7 +1540,7 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
             String action = intent.getAction();
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
                     || Intent.ACTION_SCREEN_OFF.equals(action)) {
-                //collapse();
+                animateCollapse();
             }
             else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
                 updateResources();
