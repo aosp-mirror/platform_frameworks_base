@@ -71,31 +71,31 @@ public class PresetReverb extends AudioEffect {
     /**
      * No reverb or reflections
      */
-    public static final int PRESET_NONE        = 0;
+    public static final short PRESET_NONE        = 0;
     /**
      * Reverb preset representing a small room less than five meters in length
      */
-    public static final int PRESET_SMALLROOM   = 1;
+    public static final short PRESET_SMALLROOM   = 1;
     /**
      * Reverb preset representing a medium room with a length of ten meters or less
      */
-    public static final int PRESET_MEDIUMROOM  = 2;
+    public static final short PRESET_MEDIUMROOM  = 2;
     /**
      * Reverb preset representing a large-sized room suitable for live performances
      */
-    public static final int PRESET_LARGEROOM   = 3;
+    public static final short PRESET_LARGEROOM   = 3;
     /**
      * Reverb preset representing a medium-sized hall
      */
-    public static final int PRESET_MEDIUMHALL  = 4;
+    public static final short PRESET_MEDIUMHALL  = 4;
     /**
      * Reverb preset representing a large-sized hall suitable for a full orchestra
      */
-    public static final int PRESET_LARGEHALL   = 5;
+    public static final short PRESET_LARGEHALL   = 5;
     /**
      * Reverb preset representing a synthesis of the traditional plate reverb
      */
-    public static final int PRESET_PLATE       = 6;
+    public static final short PRESET_PLATE       = 6;
 
     /**
      * Registered listener for parameter changes.
