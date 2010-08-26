@@ -4297,12 +4297,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         + " when granting permission to uri " + uri);
             }
             if (targetPkg == null) {
-                Slog.w(TAG, "grantUriPermission: null target");
-                return;
+                throw new IllegalArgumentException("null target");
             }
             if (uri == null) {
-                Slog.w(TAG, "grantUriPermission: null uri");
-                return;
+                throw new IllegalArgumentException("null uri");
             }
 
             grantUriPermissionLocked(r.info.uid, targetPkg, uri, modeFlags,
@@ -4451,6 +4449,56 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
 
             revokeUriPermissionLocked(r.info.uid, uri, modeFlags);
+        }
+    }
+
+    @Override
+    public IBinder newUriPermissionOwner(String name) {
+        synchronized(this) {
+            UriPermissionOwner owner = new UriPermissionOwner(this, name);
+            return owner.getExternalTokenLocked();
+        }
+    }
+
+    @Override
+    public void grantUriPermissionFromOwner(IBinder token, int fromUid, String targetPkg,
+            Uri uri, int modeFlags) {
+        synchronized(this) {
+            UriPermissionOwner owner = UriPermissionOwner.fromExternalToken(token);
+            if (owner == null) {
+                throw new IllegalArgumentException("Unknown owner: " + token);
+            }
+            if (fromUid != Binder.getCallingUid()) {
+                if (Binder.getCallingUid() != Process.myUid()) {
+                    // Only system code can grant URI permissions on behalf
+                    // of other users.
+                    throw new SecurityException("nice try");
+                }
+            }
+            if (targetPkg == null) {
+                throw new IllegalArgumentException("null target");
+            }
+            if (uri == null) {
+                throw new IllegalArgumentException("null uri");
+            }
+
+            grantUriPermissionLocked(fromUid, targetPkg, uri, modeFlags, owner);
+        }
+    }
+
+    @Override
+    public void revokeUriPermissionFromOwner(IBinder token, Uri uri, int mode) {
+        synchronized(this) {
+            UriPermissionOwner owner = UriPermissionOwner.fromExternalToken(token);
+            if (owner == null) {
+                throw new IllegalArgumentException("Unknown owner: " + token);
+            }
+
+            if (uri == null) {
+                owner.removeUriPermissionsLocked(mode);
+            } else {
+                owner.removeUriPermissionLocked(uri, mode);
+            }
         }
     }
 
@@ -8284,7 +8332,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 si.deliveryCount++;
                 if (si.targetPermissionUid >= 0) {
                     grantUriPermissionUncheckedFromIntentLocked(si.targetPermissionUid,
-                            r.packageName, si.intent, si);
+                            r.packageName, si.intent, si.getUriPermissionsLocked());
                 }
                 if (DEBUG_SERVICE) Slog.v(TAG, ">>> EXECUTING start of " + r);
                 bumpServiceExecutingLocked(r);

@@ -434,6 +434,10 @@ public abstract class LayoutInflater {
                 throw ex;
             }
 
+            // Told retain static reference on context.
+            mConstructorArgs[0] = null;
+            mConstructorArgs[1] = null;
+
             return result;
         }
     }
