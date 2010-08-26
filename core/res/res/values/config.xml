@@ -299,6 +299,9 @@
     <!-- Diable lockscreen rotation by default -->
     <bool name="config_enableLockScreenRotation">false</bool>
 
+    <!-- Enable 3D RecentApplications view -->
+    <bool name="config_enableRecentApps3D">false</bool>
+
     <!-- Array of light sensor LUX values to define our levels for auto backlight brightness support.
          The N entries of this array define N + 1 zones as follows:
 

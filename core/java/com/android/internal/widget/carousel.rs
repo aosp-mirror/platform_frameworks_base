@@ -53,19 +53,22 @@ enum {
 };
 
 // Client messages *** THIS LIST MUST MATCH THOSE IN CarouselRS.java. ***
-const int CMD_CARD_SELECTED = 100;
-const int CMD_REQUEST_TEXTURE = 200;
-const int CMD_INVALIDATE_TEXTURE = 210;
-const int CMD_REQUEST_GEOMETRY = 300;
-const int CMD_INVALIDATE_GEOMETRY = 310;
-const int CMD_ANIMATION_STARTED = 400;
-const int CMD_ANIMATION_FINISHED = 500;
-const int CMD_PING = 600;
+static const int CMD_CARD_SELECTED = 100;
+static const int CMD_REQUEST_TEXTURE = 200;
+static const int CMD_INVALIDATE_TEXTURE = 210;
+static const int CMD_REQUEST_GEOMETRY = 300;
+static const int CMD_INVALIDATE_GEOMETRY = 310;
+static const int CMD_ANIMATION_STARTED = 400;
+static const int CMD_ANIMATION_FINISHED = 500;
+static const int CMD_PING = 600;
 
+// Constants
+static const int ANIMATION_SCALE_TIME = 200; // Time it takes to animate selected card, in ms
+static const float3 SELECTED_SCALE_FACTOR = { 0.2f, 0.2f, 0.2f }; // increase by this %
 
 // Debug flags
-bool debugCamera = false;
-bool debugPicking = false;
+bool debugCamera = false; // dumps ray/camera coordinate stuff
+bool debugPicking = false; // renders picking area on top of geometry
 
 // Exported variables. These will be reflected to Java set_* variables.
 Card_t *cards; // array of cards to draw
@@ -96,8 +99,11 @@ rs_matrix4x4 modelviewMatrix;
 static float bias; // rotation bias, in radians. Used for animation and dragging.
 static bool updateCamera;    // force a recompute of projection and lookat matrices
 static bool initialized;
-static float3 backgroundColor = { 0.5f, 0.5f, 0.5f };
+static float3 backgroundColor = { 0.0f, 0.0f, 0.0f };
 static const float FLT_MAX = 1.0e37;
+static int currentSelection = -1;
+static int64_t touchTime = -1;  // time of first touch (see doStart())
+static float touchBias = 0.0f; // bias on first touch
 
 // Default geometry when card.geometry is not set.
 static const float3 cardVertices[4] = {
@@ -121,10 +127,12 @@ static PerspectiveCamera camera = {
 // Forward references
 static int intersectGeometry(Ray* ray, float *bestTime);
 static bool makeRayForPixelAt(Ray* ray, float x, float y);
+static float deltaTimeInSeconds(int64_t current);
 
 void init() {
     // initializers currently have a problem when the variables are exported, so initialize
     // globals here.
+    rsDebug("Renderscript: init()", 0);
     startAngle = 0.0f;
     slotCount = 10;
     visibleSlotCount = 1;
@@ -245,12 +253,24 @@ void setGeometry(int n, rs_mesh geometry)
         cards[n].geometryState = STATE_INVALID;
 }
 
+static float3 getAnimatedScaleForSelected()
+{
+    int64_t dt = (rsUptimeMillis() - touchTime);
+    float fraction = (dt < ANIMATION_SCALE_TIME) ? (float) dt / ANIMATION_SCALE_TIME : 1.0f;
+    const float3 one = { 1.0f, 1.0f, 1.0f };
+    return one + fraction * SELECTED_SCALE_FACTOR;
+}
+
 static void getMatrixForCard(rs_matrix4x4* matrix, int i)
 {
     float theta = cardPosition(i);
     rsMatrixRotate(matrix, degrees(theta), 0, 1, 0);
     rsMatrixTranslate(matrix, radius, 0, 0);
     rsMatrixRotate(matrix, degrees(-theta + cardRotation), 0, 1, 0);
+    if (i == currentSelection) {
+        float3 scale = getAnimatedScaleForSelected();
+        rsMatrixScale(matrix, scale.x, scale.y, scale.z);
+    }
     // TODO: apply custom matrix for cards[i].geometry
 }
 
@@ -353,27 +373,30 @@ void doStart(float x, float y)
     }
     velocityTracker = 0.0f;
     velocityTrackerCount = 0;
+    touchTime = rsUptimeMillis();
+    touchBias = bias;
+    currentSelection = doSelection(x, y);
 }
 
 
 void doStop(float x, float y)
 {
+    int64_t currentTime = rsUptimeMillis();
     updateAllocationVars();
-
-    velocity = velocityTrackerCount > 0 ?
-            (velocityTracker / velocityTrackerCount) : 0.0f;  // avg velocity
-    if (fabs(velocity) > velocityThreshold) {
-        animating = true;
-        rsSendToClient(CMD_ANIMATION_STARTED);
+    if (currentSelection != -1 && (currentTime - touchTime) < ANIMATION_SCALE_TIME) {
+        rsDebug("HIT!", currentSelection);
+        int data[1];
+        data[0] = currentSelection;
+        rsSendToClientBlocking(CMD_CARD_SELECTED, data, sizeof(data));
     } else {
-        const int selection = doSelection(x, y);  // velocity too small; treat as a tap
-        if (selection != -1) {
-            rsDebug("HIT!", selection);
-            int data[1];
-            data[0] = selection;
-            rsSendToClient(CMD_CARD_SELECTED, data, sizeof(data));
+        velocity = velocityTrackerCount > 0 ?
+                    (velocityTracker / velocityTrackerCount) : 0.0f;  // avg velocity
+        if (fabs(velocity) > velocityThreshold) {
+            animating = true;
+            rsSendToClient(CMD_ANIMATION_STARTED);
         }
     }
+    currentSelection = -1;
     lastTime = rsUptimeMillis();
 }
 
@@ -394,6 +417,14 @@ void doMotion(float x, float y)
         //    velocityTracker = v;
         //    velocityTrackerCount = 1;
         //}
+    }
+
+    // Drop current selection if user drags position +- a partial slot
+    if (currentSelection != -1) {
+        const float slotMargin = 0.5f * (2.0f * M_PI / slotCount);
+        if (fabs(touchBias - bias) > slotMargin) {
+            currentSelection = -1;
+        }
     }
     lastTime = currentTime;
 }
@@ -431,6 +462,8 @@ rayTriangleIntersect(Ray* ray, float3 p0, float3 p1, float3 p2, float *tout)
     return true;
 }
 
+// Creates a ray for an Android pixel coordinate.
+// Note that the Y coordinate is opposite of GL rendering coordinates.
 static bool makeRayForPixelAt(Ray* ray, float x, float y)
 {
     if (debugCamera) {
@@ -444,7 +477,7 @@ static bool makeRayForPixelAt(Ray* ray, float x, float y)
     // TODO: pre-compute lowerLeftRay, du, dv to eliminate most of this math.
     if (true) {
         const float u = x / rsgGetWidth();
-        const float v = (y / rsgGetHeight());
+        const float v = 1.0f - (y / rsgGetHeight());
         const float aspect = (float) rsgGetWidth() / rsgGetHeight();
         const float tanfov2 = 2.0f * tan(radians(camera.fov / 2.0f));
         float3 dir = normalize(camera.at - camera.from);
@@ -537,9 +570,8 @@ static int intersectGeometry(Ray* ray, float *bestTime)
 // This method computes the position of all the cards by updating bias based on a
 // simple physics model.
 // If the cards are still in motion, returns true.
-static bool updateNextPosition()
+static bool updateNextPosition(int64_t currentTime)
 {
-    int64_t currentTime = rsUptimeMillis();
     if (animating) {
         float dt = deltaTimeInSeconds(currentTime);
         if (dt <= 0.0f)
@@ -658,8 +690,7 @@ static void updateCardResources()
             // ask the host to remove the texture
             if (cards[i].textureState == STATE_LOADED) {
                 data[0] = i;
-                bool enqueued = true;
-                rsSendToClientBlocking(CMD_INVALIDATE_TEXTURE, data, sizeof(data));
+                bool enqueued = rsSendToClient(CMD_INVALIDATE_TEXTURE, data, sizeof(data));
                 if (enqueued) {
                     cards[i].textureState = STATE_INVALID;
                 } else {
@@ -669,8 +700,7 @@ static void updateCardResources()
             // ask the host to remove the geometry
             if (cards[i].geometryState == STATE_LOADED) {
                 data[0] = i;
-                bool enqueued = true;
-                rsSendToClientBlocking(CMD_INVALIDATE_GEOMETRY, data, sizeof(data));
+                bool enqueued = rsSendToClient(CMD_INVALIDATE_GEOMETRY, data, sizeof(data));
                 if (enqueued) {
                     cards[i].geometryState = STATE_INVALID;
                 } else {
@@ -699,7 +729,7 @@ static void renderWithRays()
             if (makeRayForPixelAt(&ray, posX, posY)) {
                 float bestTime = FLT_MAX;
                 if (intersectGeometry(&ray, &bestTime) != -1) {
-                    rsgDrawSpriteScreenspace(posX, posY, 0.0f, 2.0f, 2.0f);
+                    rsgDrawSpriteScreenspace(posX, h - posY - 1, 0.0f, 2.0f, 2.0f);
                 }
             }
         }
@@ -707,8 +737,9 @@ static void renderWithRays()
 }
 
 int root() {
-    rsgClearDepth(1.0f);
+    int64_t currentTime = rsUptimeMillis();
 
+    rsgClearDepth(1.0f);
     rsgBindProgramVertex(vertexProgram);
     rsgBindProgramFragment(fragmentProgram);
     rsgBindProgramStore(programStore);
@@ -735,7 +766,11 @@ int root() {
 
     updateCameraMatrix(rsgGetWidth(), rsgGetHeight());
 
-    bool stillAnimating = updateNextPosition();
+    const bool timeExpired = (currentTime - touchTime) > ANIMATION_SCALE_TIME;
+    if (timeExpired) {
+        //currentSelection = -1;
+    }
+    bool stillAnimating = updateNextPosition(currentTime) || !timeExpired;
 
     cullCards();
 

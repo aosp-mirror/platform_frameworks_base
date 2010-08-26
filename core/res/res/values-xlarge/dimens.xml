@@ -29,5 +29,9 @@
     <dimen name="password_keyboard_key_height_alpha">0.35in</dimen>
     <!-- Default height of a key in the password keyboard for numeric -->
     <dimen name="password_keyboard_key_height_numeric">0.47in</dimen>
-</resources>
 
+    <!-- The width that is used when creating thumbnails of applications. -->
+    <dimen name="thumbnail_width">256dp</dimen>
+    <!-- The height that is used when creating thumbnails of applications. -->
+    <dimen name="thumbnail_height">255dp</dimen>
+</resources>

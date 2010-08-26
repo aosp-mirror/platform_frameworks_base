@@ -29,5 +29,9 @@
     <bool name="config_enableSlidingTabFirst">false</bool>
     <!-- Enable lockscreen rotation -->
     <bool name="config_enableLockScreenRotation">true</bool>
+
+    <!-- Enables 3d task switcher on xlarge device -->
+    <bool name="config_enableRecentApps3D">true</bool>
+
 </resources>
 

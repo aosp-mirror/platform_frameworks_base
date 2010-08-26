@@ -16,21 +16,26 @@
 
 package com.android.internal.widget;
 
+import com.android.internal.R;
 import com.android.internal.widget.CarouselRS.CarouselCallback;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.graphics.Bitmap.Config;
 import android.renderscript.FileA3D;
 import android.renderscript.Mesh;
 import android.renderscript.RSSurfaceView;
 import android.renderscript.RenderScriptGL;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
 public class CarouselView extends RSSurfaceView {
+    private static final boolean USE_DEPTH_BUFFER = true;
     private final int DEFAULT_SLOT_COUNT = 10;
     private final Bitmap DEFAULT_BITMAP = Bitmap.createBitmap(1, 1, Config.RGB_565);
     private static final String TAG = "CarouselView";
@@ -46,20 +51,28 @@ public class CarouselView extends RSSurfaceView {
     private int mVisibleSlots = 0;
     private float mStartAngle;
     private int mSlotCount = DEFAULT_SLOT_COUNT;
-    
+
     public CarouselView(Context context) {
-        super(context);
+        this(context, null);
+    }
+
+    /**
+     * Constructor used when this widget is created from a layout file.
+     */
+    public CarouselView(Context context, AttributeSet attrs) {
+        super(context, attrs);
         mContext = context;
         boolean useDepthBuffer = true;
-        mRS = createRenderScript(useDepthBuffer);
+        mRS = createRenderScript(USE_DEPTH_BUFFER);
         mRenderScript = new CarouselRS();
         mRenderScript.init(mRS, getResources());
+        // TODO: add parameters to layout
     }
-    
+
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         super.surfaceChanged(holder, format, w, h);
-        mRS.contextSetSurface(w, h, holder.getSurface());
+        //mRS.contextSetSurface(w, h, holder.getSurface());
         mRenderScript.init(mRS, getResources());
         setSlotCount(mSlotCount);
         createCards(mCardCount);
@@ -172,9 +185,18 @@ public class CarouselView extends RSSurfaceView {
     
     @Override
     protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
         if(mRS != null) {
             mRS = null;
             destroyRenderScript();
+        }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (mRS == null) {
+            mRS = createRenderScript(USE_DEPTH_BUFFER);
         }
     }
     
