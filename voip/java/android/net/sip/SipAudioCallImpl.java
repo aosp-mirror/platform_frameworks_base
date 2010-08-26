@@ -36,6 +36,7 @@ import android.net.sip.SipManager;
 import android.net.sip.SipProfile;
 import android.net.sip.SipSessionAdapter;
 import android.net.sip.SipSessionState;
+import android.net.wifi.WifiManager;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.Vibrator;
@@ -84,10 +85,13 @@ public class SipAudioCallImpl extends SipSessionAdapter
     private ToneGenerator mRingbackTone;
 
     private SipProfile mPendingCallRequest;
+    private WifiManager mWm;
+    private WifiManager.WifiLock mWifiHighPerfLock;
 
     public SipAudioCallImpl(Context context, SipProfile localProfile) {
         mContext = context;
         mLocalProfile = localProfile;
+        mWm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     }
 
     public void setListener(SipAudioCall.Listener listener) {
@@ -422,6 +426,28 @@ public class SipAudioCallImpl extends SipSessionAdapter
         }
     }
 
+    private void grabWifiHighPerfLock() {
+        if (mWifiHighPerfLock == null) {
+            Log.v(TAG, "acquire wifi high perf lock");
+            mWifiHighPerfLock = ((WifiManager)
+                    mContext.getSystemService(Context.WIFI_SERVICE))
+                    .createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, TAG);
+            mWifiHighPerfLock.acquire();
+        }
+    }
+
+    private void releaseWifiHighPerfLock() {
+        if (mWifiHighPerfLock != null) {
+            Log.v(TAG, "release wifi high perf lock");
+            mWifiHighPerfLock.release();
+            mWifiHighPerfLock = null;
+        }
+    }
+
+    private boolean isWifiOn() {
+        return (mWm.getConnectionInfo().getBSSID() == null) ? false : true;
+    }
+
     private SessionDescription createContinueSessionDescription() {
         return createSdpBuilder(true, mCodec).build();
     }
@@ -556,7 +582,7 @@ public class SipAudioCallImpl extends SipSessionAdapter
 
     private void startCall(SdpSessionDescription peerSd) {
         stopCall(DONT_RELEASE_SOCKET);
-
+        if (isWifiOn()) grabWifiHighPerfLock();
         mPeerSd = peerSd;
         String peerMediaAddress = peerSd.getPeerMediaAddress(AUDIO);
         // TODO: handle multiple media fields
@@ -623,6 +649,7 @@ public class SipAudioCallImpl extends SipSessionAdapter
 
     private void stopCall(boolean releaseSocket) {
         Log.d(TAG, "stop audiocall");
+        releaseWifiHighPerfLock();
         if (mAudioStream != null) {
             mAudioStream.join(null);
 
