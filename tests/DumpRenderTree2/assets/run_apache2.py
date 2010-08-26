@@ -58,6 +58,7 @@ def main():
   export_envvars_cmd = "source " + envvars_path
 
   error_log_path = os.path.join(tmp_WebKit, "apache2-error.log")
+  custom_log_path = os.path.join(tmp_WebKit, "apache2-access.log")
 
   #Prepare the command to (re)start/stop the server with specified settings
   apache2_restart_cmd = "apache2 -k " + run_cmd
@@ -72,6 +73,7 @@ def main():
   directives += " -c \"LoadModule autoindex_module /usr/lib/apache2/modules/mod_autoindex.so\""
 
   directives += " -c \"ErrorLog " + error_log_path +"\""
+  directives += " -c \"CustomLog " + custom_log_path + " combined\""
   directives += " -c \"SSLCertificateFile " + os.path.join ("external", "webkit", "LayoutTests",
     "http", "conf", "webkit-httpd.pem") + "\""
   directives += " -c \"User ${APACHE_RUN_USER}\""
