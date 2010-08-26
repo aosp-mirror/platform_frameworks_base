@@ -65,4 +65,8 @@ import com.android.internal.view.IInputContextCallback;
     void clearMetaKeyStates(int states);
     
     void performPrivateCommand(String action, in Bundle data);
+
+    void setComposingRegion(int start, int end);
+
+    void getSelectedText(int flags, int seq, IInputContextCallback callback);
 }
