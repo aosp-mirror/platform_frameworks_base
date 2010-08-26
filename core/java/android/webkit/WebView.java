@@ -1376,6 +1376,7 @@ public class WebView extends AbsoluteLayout
                                SslCertificate.saveState(mCertificate));
         }
         outState.putBoolean("privateBrowsingEnabled", isPrivateBrowsingEnabled());
+        mZoomManager.saveZoomState(outState);
         return list;
     }
 
@@ -1542,6 +1543,7 @@ public class WebView extends AbsoluteLayout
             if (inState.getBoolean("privateBrowsingEnabled")) {
                 getSettings().setPrivateBrowsingEnabled(true);
             }
+            mZoomManager.restoreZoomState(inState);
             // Remove all pending messages because we are restoring previous
             // state.
             mWebViewCore.removeMessages();
