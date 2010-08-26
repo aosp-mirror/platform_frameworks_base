@@ -1138,22 +1138,24 @@ public class ViewDebug {
 
         final View captureView = findView(root, parameter);
         Bitmap b = performViewCapture(captureView, false);
-       
-        if (b != null) {
-            BufferedOutputStream out = null;
-            try {
-                out = new BufferedOutputStream(clientStream, 32 * 1024);
-                b.compress(Bitmap.CompressFormat.PNG, 100, out);
-                out.flush();
-            } finally {
-                if (out != null) {
-                    out.close();
-                }
-                b.recycle();
-            }
-        } else {
+
+        if (b == null) {
             Log.w("View", "Failed to create capture bitmap!");
-            clientStream.close();
+            // Send an empty one so that it doesn't get stuck waiting for
+            // something.
+            b = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        }
+
+        BufferedOutputStream out = null;
+        try {
+            out = new BufferedOutputStream(clientStream, 32 * 1024);
+            b.compress(Bitmap.CompressFormat.PNG, 100, out);
+            out.flush();
+        } finally {
+            if (out != null) {
+                out.close();
+            }
+            b.recycle();
         }
     }
 

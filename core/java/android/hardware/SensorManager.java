@@ -34,11 +34,19 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
+ * <p>
  * SensorManager lets you access the device's {@link android.hardware.Sensor
  * sensors}. Get an instance of this class by calling
  * {@link android.content.Context#getSystemService(java.lang.String)
  * Context.getSystemService()} with the argument
  * {@link android.content.Context#SENSOR_SERVICE}.
+ * </p>
+ * <p>
+ * Always make sure to disable sensors you don't need, especially when your
+ * activity is paused. Failing to do so can drain the battery in just a few
+ * hours. Note that the system will <i>not</i> disable sensors automatically when
+ * the screen turns off.
+ * </p>
  *
  * <pre class="prettyprint">
  * public class SensorActivity extends Activity, implements SensorEventListener {
@@ -48,13 +56,22 @@ import java.util.List;
  *     public SensorActivity() {
  *         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
  *         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+ *     }
+ *
+ *     protected void onResume() {
+ *         super.onResume();
  *         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+ *     }
+ *
+ *     protected void onPause() {
+ *         super.onPause();
+ *         mSensorManager.unregisterListener(this);
  *     }
  *
  *     public void onAccuracyChanged(Sensor sensor, int accuracy) {
  *     }
  *
- *     public abstract void onSensorChanged(SensorEvent event) {
+ *     public void onSensorChanged(SensorEvent event) {
  *     }
  * }
  * </pre>

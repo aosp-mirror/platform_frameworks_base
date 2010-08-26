@@ -142,11 +142,22 @@ struct id3_header {
     mSize = size;
 
     if (source->readAt(sizeof(header), mData, mSize) != (ssize_t)mSize) {
+        free(mData);
+        mData = NULL;
+
         return false;
     }
 
-    if (header.flags & 0x80) {
+    if (header.version_major == 4) {
+        if (!removeUnsynchronizationV2_4()) {
+            free(mData);
+            mData = NULL;
+
+            return false;
+        }
+    } else if (header.flags & 0x80) {
         LOGV("removing unsynchronization");
+
         removeUnsynchronization();
     }
 
@@ -241,6 +252,74 @@ void ID3::removeUnsynchronization() {
             --mSize;
         }
     }
+}
+
+static void WriteSyncsafeInteger(uint8_t *dst, size_t x) {
+    for (size_t i = 0; i < 4; ++i) {
+        dst[3 - i] = (x & 0x7f);
+        x >>= 7;
+    }
+}
+
+bool ID3::removeUnsynchronizationV2_4() {
+    size_t oldSize = mSize;
+
+    size_t offset = 0;
+    while (offset + 10 <= mSize) {
+        if (!memcmp(&mData[offset], "\0\0\0\0", 4)) {
+            break;
+        }
+
+        size_t dataSize;
+        if (!ParseSyncsafeInteger(&mData[offset + 4], &dataSize)) {
+            return false;
+        }
+
+        if (offset + dataSize + 10 > mSize) {
+            return false;
+        }
+
+        uint16_t flags = U16_AT(&mData[offset + 8]);
+        uint16_t prevFlags = flags;
+
+        if (flags & 1) {
+            // Strip data length indicator
+
+            memmove(&mData[offset + 10], &mData[offset + 14], mSize - offset - 14);
+            mSize -= 4;
+            dataSize -= 4;
+
+            flags &= ~1;
+        }
+
+        if (flags & 2) {
+            // Unsynchronization added.
+
+            for (size_t i = 0; i + 1 < dataSize; ++i) {
+                if (mData[offset + 10 + i] == 0xff
+                        && mData[offset + 11 + i] == 0x00) {
+                    memmove(&mData[offset + 11 + i], &mData[offset + 12 + i],
+                            mSize - offset - 12 - i);
+                    --mSize;
+                    --dataSize;
+                }
+            }
+
+            flags &= ~2;
+        }
+
+        if (flags != prevFlags) {
+            WriteSyncsafeInteger(&mData[offset + 4], dataSize);
+            mData[offset + 8] = flags >> 8;
+            mData[offset + 9] = flags & 0xff;
+        }
+
+        offset += 10 + dataSize;
+    }
+
+    memset(&mData[mSize], 0, oldSize - mSize);
+
+    return true;
 }
 
 ID3::Iterator::Iterator(const ID3 &parent, const char *id)
@@ -529,10 +608,11 @@ void ID3::Iterator::findFrame() {
 
             uint16_t flags = U16_AT(&mParent.mData[mOffset + 8]);
 
-            if ((mParent.mVersion == ID3_V2_4 && (flags & 0x000e))
+            if ((mParent.mVersion == ID3_V2_4 && (flags & 0x000c))
                 || (mParent.mVersion == ID3_V2_3 && (flags & 0x00c0))) {
-                // Compression, Encryption or per-Frame unsynchronization
-                // are not supported at this time.
+                // Compression or encryption are not supported at this time.
+                // Per-frame unsynchronization and data-length indicator
+                // have already been taken care of.
 
                 LOGV("Skipping unsupported frame (compression, encryption "
                      "or per-frame unsynchronization flagged");

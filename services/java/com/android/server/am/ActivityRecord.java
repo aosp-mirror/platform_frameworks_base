@@ -44,7 +44,7 @@ import java.util.HashSet;
 /**
  * An entry in the history stack, representing an activity.
  */
-class ActivityRecord extends IApplicationToken.Stub implements UriPermissionOwner {
+class ActivityRecord extends IApplicationToken.Stub {
     final ActivityManagerService service; // owner
     final ActivityStack stack; // owner
     final ActivityInfo info; // all about me
@@ -78,8 +78,7 @@ class ActivityRecord extends IApplicationToken.Stub implements UriPermissionOwne
     HashSet<WeakReference<PendingIntentRecord>> pendingResults; // all pending intents for this act
     ArrayList newIntents;   // any pending new intents for single-top mode
     HashSet<ConnectionRecord> connections; // All ConnectionRecord we hold
-    HashSet<UriPermission> readUriPermissions; // special access to reading uris.
-    HashSet<UriPermission> writeUriPermissions; // special access to writing uris.
+    UriPermissionOwner uriPermissions; // current special URI access perms.
     ProcessRecord app;  // if non-null, hosting application
     Bitmap thumbnail;       // icon representation of paused screen
     CharSequence description; // textual description of paused screen
@@ -141,11 +140,15 @@ class ActivityRecord extends IApplicationToken.Stub implements UriPermissionOwne
         if (pendingResults != null) {
             pw.print(prefix); pw.print("pendingResults="); pw.println(pendingResults);
         }
-        if (readUriPermissions != null) {
-            pw.print(prefix); pw.print("readUriPermissions="); pw.println(readUriPermissions);
-        }
-        if (writeUriPermissions != null) {
-            pw.print(prefix); pw.print("writeUriPermissions="); pw.println(writeUriPermissions);
+        if (uriPermissions != null) {
+            if (uriPermissions.readUriPermissions != null) {
+                pw.print(prefix); pw.print("readUriPermissions=");
+                        pw.println(uriPermissions.readUriPermissions);
+            }
+            if (uriPermissions.writeUriPermissions != null) {
+                pw.print(prefix); pw.print("writeUriPermissions=");
+                        pw.println(uriPermissions.writeUriPermissions);
+            }
         }
         pw.print(prefix); pw.print("launchFailed="); pw.print(launchFailed);
                 pw.print(" haveState="); pw.print(haveState);
@@ -301,6 +304,13 @@ class ActivityRecord extends IApplicationToken.Stub implements UriPermissionOwne
         }
     }
 
+    UriPermissionOwner getUriPermissionsLocked() {
+        if (uriPermissions == null) {
+            uriPermissions = new UriPermissionOwner(service, this);
+        }
+        return uriPermissions;
+    }
+
     void addResultLocked(ActivityRecord from, String resultWho,
             int requestCode, int resultCode,
             Intent resultData) {
@@ -350,7 +360,7 @@ class ActivityRecord extends IApplicationToken.Stub implements UriPermissionOwne
                 intent = new Intent(intent);
                 ar.add(intent);
                 service.grantUriPermissionFromIntentLocked(callingUid, packageName,
-                        intent, this);
+                        intent, getUriPermissionsLocked());
                 app.thread.scheduleNewIntent(ar, this);
                 sent = true;
             } catch (RemoteException e) {
@@ -367,27 +377,9 @@ class ActivityRecord extends IApplicationToken.Stub implements UriPermissionOwne
     }
 
     void removeUriPermissionsLocked() {
-        if (readUriPermissions != null) {
-            for (UriPermission perm : readUriPermissions) {
-                perm.readOwners.remove(this);
-                if (perm.readOwners.size() == 0 && (perm.globalModeFlags
-                        &Intent.FLAG_GRANT_READ_URI_PERMISSION) == 0) {
-                    perm.modeFlags &= ~Intent.FLAG_GRANT_READ_URI_PERMISSION;
-                    service.removeUriPermissionIfNeededLocked(perm);
-                }
-            }
-            readUriPermissions = null;
-        }
-        if (writeUriPermissions != null) {
-            for (UriPermission perm : writeUriPermissions) {
-                perm.writeOwners.remove(this);
-                if (perm.writeOwners.size() == 0 && (perm.globalModeFlags
-                        &Intent.FLAG_GRANT_WRITE_URI_PERMISSION) == 0) {
-                    perm.modeFlags &= ~Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-                    service.removeUriPermissionIfNeededLocked(perm);
-                }
-            }
-            writeUriPermissions = null;
+        if (uriPermissions != null) {
+            uriPermissions.removeUriPermissionsLocked();
+            uriPermissions = null;
         }
     }
 
@@ -577,38 +569,6 @@ class ActivityRecord extends IApplicationToken.Stub implements UriPermissionOwne
         return visible || nowVisible || state == ActivityState.PAUSING || 
                 state == ActivityState.RESUMED;
      }
-    
-    @Override
-    public void addReadPermission(UriPermission perm) {
-        if (readUriPermissions == null) {
-            readUriPermissions = new HashSet<UriPermission>();
-        }
-        readUriPermissions.add(perm);
-    }
-
-    @Override
-    public void addWritePermission(UriPermission perm) {
-        if (writeUriPermissions == null) {
-            writeUriPermissions = new HashSet<UriPermission>();
-        }
-        writeUriPermissions.add(perm);
-    }
-
-    @Override
-    public void removeReadPermission(UriPermission perm) {
-        readUriPermissions.remove(perm);
-        if (readUriPermissions.size() == 0) {
-            readUriPermissions = null;
-        }
-    }
-
-    @Override
-    public void removeWritePermission(UriPermission perm) {
-        writeUriPermissions.remove(perm);
-        if (writeUriPermissions.size() == 0) {
-            writeUriPermissions = null;
-        }
-    }
     
     public String toString() {
         if (stringName != null) {

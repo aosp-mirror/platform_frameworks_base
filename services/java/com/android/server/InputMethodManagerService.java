@@ -77,9 +77,12 @@ import android.view.inputmethod.EditorInfo;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * This class provides a system service that manages input methods.
@@ -463,14 +466,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         screenOnOffFilt.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         mContext.registerReceiver(new ScreenOnOffReceiver(), screenOnOffFilt);
 
+        mStatusBar = statusBar;
+        statusBar.setIconVisibility("ime", false);
+
         buildInputMethodListLocked(mMethodList, mMethodMap);
 
         final String enabledStr = Settings.Secure.getString(
                 mContext.getContentResolver(),
                 Settings.Secure.ENABLED_INPUT_METHODS);
         Slog.i(TAG, "Enabled input methods: " + enabledStr);
-        if (enabledStr == null) {
-            Slog.i(TAG, "Enabled input methods has not been set, enabling all");
+        final String defaultIme = Settings.Secure.getString(mContext
+                .getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
+        if (enabledStr == null || TextUtils.isEmpty(defaultIme)) {
+            Slog.i(TAG, "Enabled input methods or default IME has not been set, enabling all");
             InputMethodInfo defIm = null;
             StringBuilder sb = new StringBuilder(256);
             final int N = mMethodList.size();
@@ -503,9 +511,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         Settings.Secure.DEFAULT_INPUT_METHOD, defIm.getId());
             }
         }
-
-        mStatusBar = statusBar;
-        statusBar.setIconVisibility("ime", false);
 
         mSettingsObserver = new SettingsObserver(mHandler);
         updateFromSettingsLocked();
@@ -978,7 +983,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     void setInputMethodLocked(String id) {
         InputMethodInfo info = mMethodMap.get(id);
         if (info == null) {
-            throw new IllegalArgumentException("Unknown id: " + mCurMethodId);
+            throw new IllegalArgumentException("Unknown id: " + id);
         }
 
         if (id.equals(mCurMethodId)) {
@@ -1476,7 +1481,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         String defaultIme = Settings.Secure.getString(mContext
                 .getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
-        if (!map.containsKey(defaultIme)) {
+        if (!TextUtils.isEmpty(defaultIme) && !map.containsKey(defaultIme)) {
             if (chooseNewDefaultIMELocked()) {
                 updateFromSettingsLocked();
             }
@@ -1506,21 +1511,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             hideInputMethodMenuLocked();
 
             int N = immis.size();
-    
-            mItems = new CharSequence[N];
-            mIms = new InputMethodInfo[N];
-    
-            int j = 0;
+
+            final Map<CharSequence, InputMethodInfo> imMap =
+                new TreeMap<CharSequence, InputMethodInfo>(Collator.getInstance());
+
             for (int i = 0; i < N; ++i) {
                 InputMethodInfo property = immis.get(i);
                 if (property == null) {
                     continue;
                 }
-                mItems[j] = property.loadLabel(pm);
-                mIms[j] = property;
-                j++;
+                imMap.put(property.loadLabel(pm), property);
             }
-    
+
+            N = imMap.size();
+            mItems = imMap.keySet().toArray(new CharSequence[N]);
+            mIms = imMap.values().toArray(new InputMethodInfo[N]);
+
             int checkedItem = 0;
             for (int i = 0; i < N; ++i) {
                 if (mIms[i].getId().equals(lastInputMethodId)) {

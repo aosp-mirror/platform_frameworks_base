@@ -174,7 +174,8 @@ status_t MPEG2TSExtractor::feedMore() {
 ////////////////////////////////////////////////////////////////////////////////
 
 bool SniffMPEG2TS(
-        const sp<DataSource> &source, String8 *mimeType, float *confidence) {
+        const sp<DataSource> &source, String8 *mimeType, float *confidence,
+        sp<AMessage> *) {
 #if 0
     char header;
     if (source->readAt(0, &header, 1) != 1 || header != 0x47) {

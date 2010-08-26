@@ -72,8 +72,8 @@ class ServiceRecord extends Binder {
     final HashMap<Intent.FilterComparison, IntentBindRecord> bindings
             = new HashMap<Intent.FilterComparison, IntentBindRecord>();
                             // All active bindings to the service.
-    final HashMap<IBinder, ConnectionRecord> connections
-            = new HashMap<IBinder, ConnectionRecord>();
+    final HashMap<IBinder, ArrayList<ConnectionRecord>> connections
+            = new HashMap<IBinder, ArrayList<ConnectionRecord>>();
                             // IBinder -> ConnectionRecord of all bound clients
 
     ProcessRecord app;      // where this service is running or null.
@@ -96,7 +96,7 @@ class ServiceRecord extends Binder {
 
     String stringName;      // caching of toString
     
-    static class StartItem implements UriPermissionOwner {
+    static class StartItem {
         final ServiceRecord sr;
         final int id;
         final Intent intent;
@@ -104,11 +104,9 @@ class ServiceRecord extends Binder {
         long deliveredTime;
         int deliveryCount;
         int doneExecutingCount;
+        UriPermissionOwner uriPermissions;
 
         String stringName;      // caching of toString
-
-        HashSet<UriPermission> readUriPermissions; // special access to reading uris.
-        HashSet<UriPermission> writeUriPermissions; // special access to writing uris.
 
         StartItem(ServiceRecord _sr, int _id, Intent _intent, int _targetPermissionUid) {
             sr = _sr;
@@ -117,60 +115,17 @@ class ServiceRecord extends Binder {
             targetPermissionUid = _targetPermissionUid;
         }
 
+        UriPermissionOwner getUriPermissionsLocked() {
+            if (uriPermissions == null) {
+                uriPermissions = new UriPermissionOwner(sr.ams, this);
+            }
+            return uriPermissions;
+        }
+
         void removeUriPermissionsLocked() {
-            if (readUriPermissions != null) {
-                for (UriPermission perm : readUriPermissions) {
-                    perm.readOwners.remove(this);
-                    if (perm.readOwners.size() == 0 && (perm.globalModeFlags
-                            &Intent.FLAG_GRANT_READ_URI_PERMISSION) == 0) {
-                        perm.modeFlags &= ~Intent.FLAG_GRANT_READ_URI_PERMISSION;
-                        sr.ams.removeUriPermissionIfNeededLocked(perm);
-                    }
-                }
-                readUriPermissions = null;
-            }
-            if (writeUriPermissions != null) {
-                for (UriPermission perm : writeUriPermissions) {
-                    perm.writeOwners.remove(this);
-                    if (perm.writeOwners.size() == 0 && (perm.globalModeFlags
-                            &Intent.FLAG_GRANT_WRITE_URI_PERMISSION) == 0) {
-                        perm.modeFlags &= ~Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-                        sr.ams.removeUriPermissionIfNeededLocked(perm);
-                    }
-                }
-                writeUriPermissions = null;
-            }
-        }
-
-        @Override
-        public void addReadPermission(UriPermission perm) {
-            if (readUriPermissions == null) {
-                readUriPermissions = new HashSet<UriPermission>();
-            }
-            readUriPermissions.add(perm);
-        }
-
-        @Override
-        public void addWritePermission(UriPermission perm) {
-            if (writeUriPermissions == null) {
-                writeUriPermissions = new HashSet<UriPermission>();
-            }
-            writeUriPermissions.add(perm);
-        }
-
-        @Override
-        public void removeReadPermission(UriPermission perm) {
-            readUriPermissions.remove(perm);
-            if (readUriPermissions.size() == 0) {
-                readUriPermissions = null;
-            }
-        }
-
-        @Override
-        public void removeWritePermission(UriPermission perm) {
-            writeUriPermissions.remove(perm);
-            if (writeUriPermissions.size() == 0) {
-                writeUriPermissions = null;
+            if (uriPermissions != null) {
+                uriPermissions.removeUriPermissionsLocked();
+                uriPermissions = null;
             }
         }
 
@@ -218,13 +173,15 @@ class ServiceRecord extends Binder {
                 pw.print(prefix); pw.print("  targetPermissionUid=");
                         pw.println(si.targetPermissionUid);
             }
-            if (si.readUriPermissions != null) {
-                pw.print(prefix); pw.print("  readUriPermissions=");
-                        pw.println(si.readUriPermissions);
-            }
-            if (si.writeUriPermissions != null) {
-                pw.print(prefix); pw.print("  writeUriPermissions=");
-                        pw.println(si.writeUriPermissions);
+            if (si.uriPermissions != null) {
+                if (si.uriPermissions.readUriPermissions != null) {
+                    pw.print(prefix); pw.print("  readUriPermissions=");
+                            pw.println(si.uriPermissions.readUriPermissions);
+                }
+                if (si.uriPermissions.writeUriPermissions != null) {
+                    pw.print(prefix); pw.print("  writeUriPermissions=");
+                            pw.println(si.uriPermissions.writeUriPermissions);
+                }
             }
         }
     }
@@ -296,10 +253,12 @@ class ServiceRecord extends Binder {
         }
         if (connections.size() > 0) {
             pw.print(prefix); pw.println("All Connections:");
-            Iterator<ConnectionRecord> it = connections.values().iterator();
+            Iterator<ArrayList<ConnectionRecord>> it = connections.values().iterator();
             while (it.hasNext()) {
-                ConnectionRecord c = it.next();
-                pw.print(prefix); pw.print("  "); pw.println(c);
+                ArrayList<ConnectionRecord> c = it.next();
+                for (int i=0; i<c.size(); i++) {
+                    pw.print(prefix); pw.print("  "); pw.println(c.get(i));
+                }
             }
         }
     }

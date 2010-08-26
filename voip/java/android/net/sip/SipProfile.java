@@ -35,7 +35,7 @@ import javax.sip.address.URI;
  * Class containing a SIP account, domain and server information.
  * @hide
  */
-public class SipProfile implements Parcelable, Serializable {
+public class SipProfile implements Parcelable, Serializable, Cloneable {
     private static final long serialVersionUID = 1L;
     private static final int DEFAULT_PORT = 5060;
     private Address mAddress;
@@ -46,6 +46,8 @@ public class SipProfile implements Parcelable, Serializable {
     private String mProfileName;
     private boolean mSendKeepAlive = false;
     private boolean mAutoRegistration = true;
+    private boolean mAllowOutgoingCall = false;
+    private int mCallingUid = -1;
 
     /** @hide */
     public static final Parcelable.Creator<SipProfile> CREATOR =
@@ -76,6 +78,23 @@ public class SipProfile implements Parcelable, Serializable {
             } catch (PeerUnavailableException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        /**
+         * Creates a builder based on the given profile.
+         */
+        public Builder(SipProfile profile) {
+            if (profile == null) throw new NullPointerException();
+            try {
+                mProfile = (SipProfile) profile.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException("should not occur", e);
+            }
+            mProfile.mAddress = null;
+            mUri = profile.getUri();
+            mUri.setUserPassword(profile.getPassword());
+            mDisplayName = profile.getDisplayName();
+            mProxyAddress = profile.getProxyAddress();
         }
 
         /**
@@ -226,6 +245,18 @@ public class SipProfile implements Parcelable, Serializable {
         }
 
         /**
+         * Sets the allow-outgoing-call flag.
+         *
+         * @param flag true if allowing to make outgoing call on the profile;
+         *      false otherwise
+         * @return this builder object
+         */
+        public Builder setOutgoingCallAllowed(boolean flag) {
+            mProfile.mAllowOutgoingCall = flag;
+            return this;
+        }
+
+        /**
          * Builds and returns the SIP profile object.
          *
          * @return the profile object created
@@ -262,6 +293,8 @@ public class SipProfile implements Parcelable, Serializable {
         mProfileName = in.readString();
         mSendKeepAlive = (in.readInt() == 0) ? false : true;
         mAutoRegistration = (in.readInt() == 0) ? false : true;
+        mAllowOutgoingCall = (in.readInt() == 0) ? false : true;
+        mCallingUid = in.readInt();
     }
 
     /** @hide */
@@ -274,6 +307,8 @@ public class SipProfile implements Parcelable, Serializable {
         out.writeString(mProfileName);
         out.writeInt(mSendKeepAlive ? 1 : 0);
         out.writeInt(mAutoRegistration ? 1 : 0);
+        out.writeInt(mAllowOutgoingCall ? 1 : 0);
+        out.writeInt(mCallingUid);
     }
 
     /** @hide */
@@ -397,5 +432,28 @@ public class SipProfile implements Parcelable, Serializable {
      */
     public boolean getAutoRegistration() {
         return mAutoRegistration;
+    }
+
+    /**
+     * Returns true if allowing to make outgoing calls on this profile.
+     */
+    public boolean isOutgoingCallAllowed() {
+        return mAllowOutgoingCall;
+    }
+
+    /**
+     * Sets the calling process's Uid in the sip service.
+     * @hide
+     */
+    public void setCallingUid(int uid) {
+        mCallingUid = uid;
+    }
+
+    /**
+     * Gets the calling process's Uid in the sip settings.
+     * @hide
+     */
+    public int getCallingUid() {
+        return mCallingUid;
     }
 }

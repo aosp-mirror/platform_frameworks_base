@@ -162,9 +162,13 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
     const uint32_t hwFlags = hw.getFlags();
     
     mFormat = format;
-    mReqFormat = format;
     mWidth  = w;
     mHeight = h;
+
+    mReqFormat = format;
+    mReqWidth = w;
+    mReqHeight = h;
+
     mSecure = (flags & ISurfaceComposer::eSecure) ? true : false;
     mNeedsBlending = (info.h_alpha - info.l_alpha) > 0;
 
@@ -196,12 +200,16 @@ void Layer::reloadTexture(const Region& dirty)
     } else {
 slowpath:
         GGLSurface t;
-        status_t res = buffer->lock(&t, GRALLOC_USAGE_SW_READ_OFTEN);
-        LOGE_IF(res, "error %d (%s) locking buffer %p",
-                res, strerror(res), buffer.get());
-        if (res == NO_ERROR) {
-            mBufferManager.loadTexture(dirty, t);
-            buffer->unlock();
+        if (buffer->usage & GRALLOC_USAGE_SW_READ_MASK) {
+            status_t res = buffer->lock(&t, GRALLOC_USAGE_SW_READ_OFTEN);
+            LOGE_IF(res, "error %d (%s) locking buffer %p",
+                    res, strerror(res), buffer.get());
+            if (res == NO_ERROR) {
+                mBufferManager.loadTexture(dirty, t);
+                buffer->unlock();
+            }
+        } else {
+            // we can't do anything
         }
     }
 }
@@ -300,16 +308,22 @@ sp<GraphicBuffer> Layer::requestBuffer(int index,
     uint32_t w, h, f;
     { // scope for the lock
         Mutex::Autolock _l(mLock);
-        const bool fixedSizeChanged = mFixedSize != (reqWidth && reqHeight);
-        const bool formatChanged    = mReqFormat != reqFormat;
-        mReqWidth  = reqWidth;
-        mReqHeight = reqHeight;
-        mReqFormat = reqFormat;
-        mFixedSize = reqWidth && reqHeight;
-        w = reqWidth  ? reqWidth  : mWidth;
-        h = reqHeight ? reqHeight : mHeight;
-        f = reqFormat ? reqFormat : mFormat;
-        if (fixedSizeChanged || formatChanged) {
+
+        // zero means default
+        if (!reqFormat) reqFormat = mFormat;
+        if (!reqWidth)  reqWidth = mWidth;
+        if (!reqHeight) reqHeight = mHeight;
+
+        w = reqWidth;
+        h = reqHeight;
+        f = reqFormat;
+
+        if ((reqWidth != mReqWidth) || (reqHeight != mReqHeight) ||
+                (reqFormat != mReqFormat)) {
+            mReqWidth  = reqWidth;
+            mReqHeight = reqHeight;
+            mReqFormat = reqFormat;
+
             lcblk->reallocateAllExcept(index);
         }
     }

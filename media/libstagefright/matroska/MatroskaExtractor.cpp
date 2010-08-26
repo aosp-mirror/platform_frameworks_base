@@ -579,7 +579,8 @@ sp<MetaData> MatroskaExtractor::getMetaData() {
 }
 
 bool SniffMatroska(
-        const sp<DataSource> &source, String8 *mimeType, float *confidence) {
+        const sp<DataSource> &source, String8 *mimeType, float *confidence,
+        sp<AMessage> *) {
     DataSourceReader reader(source);
     mkvparser::EBMLHeader ebmlHeader;
     long long pos;

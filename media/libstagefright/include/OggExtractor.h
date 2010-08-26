@@ -22,6 +22,7 @@
 
 namespace android {
 
+struct AMessage;
 class DataSource;
 class String8;
 
@@ -53,7 +54,8 @@ private:
 };
 
 bool SniffOgg(
-        const sp<DataSource> &source, String8 *mimeType, float *confidence);
+        const sp<DataSource> &source, String8 *mimeType, float *confidence,
+        sp<AMessage> *);
 
 }  // namespace android
 

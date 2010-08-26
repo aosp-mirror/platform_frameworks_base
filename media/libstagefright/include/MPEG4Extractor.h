@@ -23,6 +23,7 @@
 
 namespace android {
 
+struct AMessage;
 class DataSource;
 class SampleTable;
 class String8;
@@ -75,7 +76,8 @@ private:
 };
 
 bool SniffMPEG4(
-        const sp<DataSource> &source, String8 *mimeType, float *confidence);
+        const sp<DataSource> &source, String8 *mimeType, float *confidence,
+        sp<AMessage> *);
 
 }  // namespace android
 
