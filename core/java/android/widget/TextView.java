@@ -7117,6 +7117,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         int selectionStart, selectionEnd;
 
+        // selectionModifierCursorController is not null at that point
         SelectionModifierCursorController selectionModifierCursorController =
             ((SelectionModifierCursorController) mSelectionModifierCursorController);
         int minOffset = selectionModifierCursorController.getMinTouchOffset();
@@ -7140,6 +7141,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
     
     private String getWordForDictionary() {
+        if (mSelectionModifierCursorController == null) {
+            return null;
+        }
+
         int offset = ((SelectionModifierCursorController) mSelectionModifierCursorController).
                      getMinTouchOffset();
 
