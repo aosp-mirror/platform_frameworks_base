@@ -7052,14 +7052,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return -1;
         }
 
-        int end = offset;
+        int len = mText.length();
+        int end = Math.min(offset, len);
 
         if (end < 0) {
             return -1;
         }
 
         int start = end;
-        int len = mText.length();
 
         for (; start > 0; start--) {
             char c = mTransformed.charAt(start - 1);
