@@ -124,6 +124,9 @@ public class StackView extends AdapterViewAnimator {
         }
         setClipChildren(false);
         setClipToPadding(false);
+
+        // This is a flag to indicate the the stack is loading for the first time
+        mWhichChild = -1;
     }
 
     /**
@@ -638,6 +641,10 @@ public class StackView extends AdapterViewAnimator {
     @Override
     public void onRemoteAdapterConnected() {
         super.onRemoteAdapterConnected();
+        // On first run, we want to set the stack to the end.
+        if (mAdapter != null && mWhichChild == -1) {
+            mWhichChild = mAdapter.getCount() - 1;
+        }
         setDisplayedChild(mWhichChild);
     }
 

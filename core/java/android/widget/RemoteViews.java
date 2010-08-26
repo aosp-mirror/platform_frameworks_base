@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.app.PendingIntent;
+import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -107,6 +108,42 @@ public class RemoteViews implements Parcelable, Filter {
 
         public int describeContents() {
             return 0;
+        }
+    }
+
+    private class SetEmptyView extends Action {
+        int viewId;
+        int emptyViewId;
+
+        public final static int TAG = 6;
+
+        SetEmptyView(int viewId, int emptyViewId) {
+            this.viewId = viewId;
+            this.emptyViewId = emptyViewId;
+        }
+
+        SetEmptyView(Parcel in) {
+            this.viewId = in.readInt();
+            this.emptyViewId = in.readInt();
+        }
+
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeInt(TAG);
+            out.writeInt(this.viewId);
+            out.writeInt(this.emptyViewId);
+        }
+
+        @Override
+        public void apply(View root) {
+            final View view = root.findViewById(viewId);
+            if (!(view instanceof AdapterView<?>)) return;
+
+            AdapterView<?> adapterView = (AdapterView<?>) view;
+
+            final View emptyView = root.findViewById(emptyViewId);
+            if (emptyView == null) return;
+
+            adapterView.setEmptyView(emptyView);
         }
     }
 
@@ -631,6 +668,9 @@ public class RemoteViews implements Parcelable, Filter {
                 case ReflectionActionWithoutParams.TAG:
                     mActions.add(new ReflectionActionWithoutParams(parcel));
                     break;
+                case SetEmptyView.TAG:
+                    mActions.add(new SetEmptyView(parcel));
+                    break;
                 default:
                     throw new ActionException("Tag " + tag + " not found");
                 }
@@ -757,6 +797,16 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setImageViewBitmap(int viewId, Bitmap bitmap) {
         setBitmap(viewId, "setImageBitmap", bitmap);
+    }
+
+    /**
+     * Equivalent to calling AdapterView.setEmptyView
+     *
+     * @param viewId The id of the view on which to set the empty view
+     * @param emptyViewId The view id of the empty view
+     */
+    public void setEmptyView(int viewId, int emptyViewId) {
+        addAction(new SetEmptyView(viewId, emptyViewId));
     }
 
     /**
