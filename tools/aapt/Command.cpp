@@ -141,9 +141,9 @@ int doList(Bundle* bundle)
     if (bundle->getVerbose()) {
         printf("Archive:  %s\n", zipFileName);
         printf(
-            " Length   Method    Size  Ratio   Date   Time   CRC-32    Name\n");
+            " Length   Method    Size  Ratio   Offset      Date  Time  CRC-32    Name\n");
         printf(
-            "--------  ------  ------- -----   ----   ----   ------    ----\n");
+            "--------  ------  ------- -----  -------      ----  ----  ------    ----\n");
     }
 
     totalUncLen = totalCompLen = 0;
@@ -159,12 +159,13 @@ int doList(Bundle* bundle)
             strftime(dateBuf, sizeof(dateBuf), "%m-%d-%y %H:%M",
                 localtime(&when));
 
-            printf("%8ld  %-7.7s %7ld %3d%%  %s  %08lx  %s\n",
+            printf("%8ld  %-7.7s %7ld %3d%%  %8zd  %s  %08lx  %s\n",
                 (long) entry->getUncompressedLen(),
                 compressionName(entry->getCompressionMethod()),
                 (long) entry->getCompressedLen(),
                 calcPercent(entry->getUncompressedLen(),
                             entry->getCompressedLen()),
+                (size_t) entry->getLFHOffset(),
                 dateBuf,
                 entry->getCRC32(),
                 entry->getFileName());
