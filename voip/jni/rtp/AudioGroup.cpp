@@ -40,8 +40,6 @@
 #include <media/AudioTrack.h>
 #include <media/mediarecorder.h>
 
-#include <speex/speex_echo.h>
-
 #include "jni.h"
 #include "JNIHelp.h"
 
@@ -447,8 +445,6 @@ private:
     int mDeviceSocket;
     AudioTrack mTrack;
     AudioRecord mRecord;
-    
-    SpeexEchoState *mEchoState;
 
     bool networkLoop();
     bool deviceLoop();
@@ -510,7 +506,6 @@ AudioGroup::AudioGroup()
     mEventQueue = -1;
     mDtmfEvent = -1;
     mDeviceSocket = -1;
-    mEchoState = NULL;
     mNetworkThread = new NetworkThread(this);
     mDeviceThread = new DeviceThread(this);
 }
@@ -523,9 +518,6 @@ AudioGroup::~AudioGroup()
     mRecord.stop();
     close(mEventQueue);
     close(mDeviceSocket);
-    if (mEchoState) {
-        speex_echo_state_destroy(mEchoState);
-    }
     while (mChain) {
         AudioStream *next = mChain->mNext;
         delete mChain;
@@ -574,8 +566,7 @@ bool AudioGroup::set(int sampleRate, int sampleCount)
     }
     LOGD("latency: output %d, input %d", mTrack.latency(), mRecord.latency());
 
-    // Initialize echo canceller.
-    mEchoState = speex_echo_state_init(sampleCount, sampleRate);
+    // TODO: initialize echo canceler here.
 
     // Create device socket.
     int pair[2];
@@ -642,7 +633,6 @@ bool AudioGroup::setMode(int mode)
     if (mode == MUTED) {
         mRecord.stop();
     } else {
-        speex_echo_state_reset(mEchoState);
         mRecord.start();
     }
 
@@ -803,7 +793,7 @@ bool AudioGroup::deviceLoop()
 
             status_t status = mRecord.obtainBuffer(&buffer, 1);
             if (status == NO_ERROR) {
-                int count = ((int)buffer.frameCount < toRead) ?
+                int count = (buffer.frameCount < toRead) ?
                         buffer.frameCount : toRead;
                 memcpy(&input[mSampleCount - toRead], buffer.i8, count * 2);
                 toRead -= count;
@@ -827,9 +817,8 @@ bool AudioGroup::deviceLoop()
         if (mMode == NORMAL) {
             send(mDeviceSocket, input, sizeof(input), MSG_DONTWAIT);
         } else {
-            int16_t result[mSampleCount];
-            speex_echo_cancellation(mEchoState, input, output, result);
-            send(mDeviceSocket, result, sizeof(result), MSG_DONTWAIT);
+            // TODO: Echo canceller runs here.
+            send(mDeviceSocket, input, sizeof(input), MSG_DONTWAIT);
         }
     }
     return true;
