@@ -55,7 +55,8 @@ def main():
 
   # Paths relative to android_tree_root
   webkit_path = os.path.join("external", "webkit")
-  http_conf_path = os.path.join(webkit_path, "LayoutTests", "http", "conf")
+  layout_tests_path = os.path.join(webkit_path, "LayoutTests")
+  http_conf_path = os.path.join(layout_tests_path, "http", "conf")
 
   # Prepare the command to set ${APACHE_RUN_USER} and ${APACHE_RUN_GROUP}
   envvars_path = os.path.join("/etc", "apache2", "envvars")
@@ -67,7 +68,14 @@ def main():
   # Prepare the command to (re)start/stop the server with specified settings
   apache2_restart_cmd = "apache2 -k " + run_cmd
   directives  = " -c \"ServerRoot " + android_tree_root + "\""
-  directives += " -c \"DocumentRoot " + webkit_path + "\""
+
+  # We use http/tests as the document root as the HTTP tests use hardcoded
+  # resources at the server root. We then use aliases to make available the
+  # complete set of tests and the required scripts.
+  directives += " -c \"DocumentRoot " + os.path.join(layout_tests_path, "http", "tests/") + "\""
+  directives += " -c \"Alias /LayoutTests " + layout_tests_path + "\""
+  directives += " -c \"Alias /WebKitTools/DumpRenderTree/android " + \
+    os.path.join(webkit_path, "WebKitTools", "DumpRenderTree", "android") + "\""
 
   # This directive is commented out in apache2-debian-httpd.conf for some reason
   # However, it is useful to browse through tests in the browser, so it's added here.
