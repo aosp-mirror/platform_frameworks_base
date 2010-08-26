@@ -31,13 +31,13 @@ public class FsUtils {
     public static final String LOG_TAG = "FsUtils";
 
     public static void writeDataToStorage(File file, byte[] bytes, boolean append) {
-        Log.d(LOG_TAG + "::writeDataToStorage", file.getAbsolutePath());
+        Log.d(LOG_TAG, "writeDataToStorage(): " + file.getAbsolutePath());
         try {
             OutputStream outputStream = null;
             try {
                 file.getParentFile().mkdirs();
                 file.createNewFile();
-                Log.d(LOG_TAG + "::writeDataToStorage", "File created.");
+                Log.d(LOG_TAG, "writeDataToStorage(): File created.");
                 outputStream = new FileOutputStream(file, append);
                 outputStream.write(bytes);
             } finally {
@@ -46,13 +46,13 @@ public class FsUtils {
                 }
             }
         } catch (IOException e) {
-            Log.e(LOG_TAG + "::writeDataToStorage", e.getMessage());
+            Log.e(LOG_TAG, "file.getAbsolutePath=" + file.getAbsolutePath(), e);
         }
     }
 
     public static byte[] readDataFromStorage(File file) {
         if (!file.exists()) {
-            Log.d(LOG_TAG + "::readDataFromStorage", "File does not exist: "
+            Log.d(LOG_TAG, "readDataFromStorage(): File does not exist: "
                     + file.getAbsolutePath());
             return null;
         }
@@ -70,7 +70,7 @@ public class FsUtils {
                 }
             }
         } catch (IOException e) {
-            Log.e(LOG_TAG + "::readDataFromStorage", e.getMessage());
+            Log.e(LOG_TAG, "file.getAbsolutePath=" + file.getAbsolutePath(), e);
         }
 
         return bytes;

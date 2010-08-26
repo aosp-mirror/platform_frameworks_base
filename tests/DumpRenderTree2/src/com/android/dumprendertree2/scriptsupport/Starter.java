@@ -66,7 +66,7 @@ public class Starter extends ActivityInstrumentationTestCase2<TestsListActivity>
                 try {
                     this.wait();
                 } catch (InterruptedException e) {
-                    Log.e(LOG_TAG + "::startLayoutTests", e.getMessage());
+                    Log.e(LOG_TAG, "startLayoutTests()", e);
                 }
             }
         }
