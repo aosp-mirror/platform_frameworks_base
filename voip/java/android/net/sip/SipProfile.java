@@ -47,6 +47,7 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
     private boolean mSendKeepAlive = false;
     private boolean mAutoRegistration = true;
     private boolean mAllowOutgoingCall = false;
+    private int mCallingUid = -1;
 
     /** @hide */
     public static final Parcelable.Creator<SipProfile> CREATOR =
@@ -293,6 +294,7 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
         mSendKeepAlive = (in.readInt() == 0) ? false : true;
         mAutoRegistration = (in.readInt() == 0) ? false : true;
         mAllowOutgoingCall = (in.readInt() == 0) ? false : true;
+        mCallingUid = in.readInt();
     }
 
     /** @hide */
@@ -306,6 +308,7 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
         out.writeInt(mSendKeepAlive ? 1 : 0);
         out.writeInt(mAutoRegistration ? 1 : 0);
         out.writeInt(mAllowOutgoingCall ? 1 : 0);
+        out.writeInt(mCallingUid);
     }
 
     /** @hide */
@@ -436,5 +439,21 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
      */
     public boolean isOutgoingCallAllowed() {
         return mAllowOutgoingCall;
+    }
+
+    /**
+     * Sets the calling process's Uid in the sip service.
+     * @hide
+     */
+    public void setCallingUid(int uid) {
+        mCallingUid = uid;
+    }
+
+    /**
+     * Gets the calling process's Uid in the sip settings.
+     * @hide
+     */
+    public int getCallingUid() {
+        return mCallingUid;
     }
 }

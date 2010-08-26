@@ -32,6 +32,7 @@ import android.net.sip.SipProfile;
 import android.net.sip.SipSessionAdapter;
 import android.net.sip.SipSessionState;
 import android.net.wifi.WifiManager;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -97,6 +98,7 @@ public final class SipService extends ISipService.Stub {
     }
 
     public void open(SipProfile localProfile) {
+        localProfile.setCallingUid(Binder.getCallingUid());
         if (localProfile.getAutoRegistration()) {
             openToReceiveCalls(localProfile);
         } else {
@@ -119,6 +121,7 @@ public final class SipService extends ISipService.Stub {
 
     public synchronized void open3(SipProfile localProfile,
             String incomingCallBroadcastAction, ISipSessionListener listener) {
+        localProfile.setCallingUid(Binder.getCallingUid());
         if (TextUtils.isEmpty(incomingCallBroadcastAction)) {
             throw new RuntimeException(
                     "empty broadcast action for incoming call");
@@ -165,6 +168,7 @@ public final class SipService extends ISipService.Stub {
 
     public synchronized ISipSession createSession(SipProfile localProfile,
             ISipSessionListener listener) {
+        localProfile.setCallingUid(Binder.getCallingUid());
         if (!mConnected) return null;
         try {
             SipSessionGroupExt group = createGroup(localProfile);
@@ -362,16 +366,7 @@ public final class SipService extends ISipService.Stub {
 
         private SipProfile duplicate(SipProfile p) {
             try {
-                return new SipProfile.Builder(p.getUserName(), p.getSipDomain())
-                        .setProfileName(p.getProfileName())
-                        .setPassword("*")
-                        .setPort(p.getPort())
-                        .setProtocol(p.getProtocol())
-                        .setOutboundProxy(p.getProxyAddress())
-                        .setSendKeepAlive(p.getSendKeepAlive())
-                        .setAutoRegistration(p.getAutoRegistration())
-                        .setDisplayName(p.getDisplayName())
-                        .build();
+                return new SipProfile.Builder(p).setPassword("*").build();
             } catch (Exception e) {
                 Log.wtf(TAG, "duplicate()", e);
                 throw new RuntimeException("duplicate profile", e);
