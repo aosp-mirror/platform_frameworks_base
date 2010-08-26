@@ -29,6 +29,8 @@
 #include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/MediaErrors.h>
 
+#define USE_TCP_INTERLEAVED     0
+
 namespace android {
 
 struct MyHandler : public AHandler {
@@ -54,6 +56,9 @@ struct MyHandler : public AHandler {
         mLooper->registerHandler(this);
         mLooper->registerHandler(mConn);
         (1 ? mNetLooper : mLooper)->registerHandler(mRTPConn);
+
+        sp<AMessage> notify = new AMessage('biny', id());
+        mConn->observeBinaryData(notify);
 
         sp<AMessage> reply = new AMessage('conn', id());
         mConn->connect(mSessionURL.c_str(), reply);
@@ -91,6 +96,8 @@ struct MyHandler : public AHandler {
 
                     sp<AMessage> reply = new AMessage('desc', id());
                     mConn->sendRequest(request.c_str(), reply);
+                } else {
+                    (new AMessage('disc', id()))->post();
                 }
                 break;
             }
@@ -183,8 +190,10 @@ struct MyHandler : public AHandler {
 
                 if (result != OK) {
                     if (track) {
-                        close(track->mRTPSocket);
-                        close(track->mRTCPSocket);
+                        if (!track->mUsingInterleavedTCP) {
+                            close(track->mRTPSocket);
+                            close(track->mRTCPSocket);
+                        }
 
                         mTracks.removeItemsAt(trackIndex);
                     }
@@ -216,7 +225,7 @@ struct MyHandler : public AHandler {
                     mRTPConn->addStream(
                             track->mRTPSocket, track->mRTCPSocket,
                             mSessionDesc, index,
-                            notify);
+                            notify, track->mUsingInterleavedTCP);
 
                     mSetupTracksSuccessful = true;
                 }
@@ -263,6 +272,9 @@ struct MyHandler : public AHandler {
                     mDoneMsg->setInt32("result", OK);
                     mDoneMsg->post();
                     mDoneMsg = NULL;
+
+                    sp<AMessage> timeout = new AMessage('tiou', id());
+                    timeout->post(10000000ll);
                 } else {
                     sp<AMessage> reply = new AMessage('disc', id());
                     mConn->disconnect(reply);
@@ -451,6 +463,29 @@ struct MyHandler : public AHandler {
                 break;
             }
 
+            case 'biny':
+            {
+                sp<RefBase> obj;
+                CHECK(msg->findObject("buffer", &obj));
+                sp<ABuffer> buffer = static_cast<ABuffer *>(obj.get());
+
+                int32_t index;
+                CHECK(buffer->meta()->findInt32("index", &index));
+
+                mRTPConn->injectPacket(index, buffer);
+                break;
+            }
+
+            case 'tiou':
+            {
+                if (mFirstAccessUnit) {
+                    LOG(WARNING) << "Never received any data, disconnecting.";
+
+                }
+                (new AMessage('abor', id()))->post();
+                break;
+            }
+
             default:
                 TRESPASS();
                 break;
@@ -485,6 +520,7 @@ private:
     struct TrackInfo {
         int mRTPSocket;
         int mRTCPSocket;
+        bool mUsingInterleavedTCP;
 
         sp<APacketSource> mPacketSource;
     };
@@ -515,19 +551,33 @@ private:
         mTracks.push(TrackInfo());
         TrackInfo *info = &mTracks.editItemAt(mTracks.size() - 1);
         info->mPacketSource = source;
-
-        unsigned rtpPort;
-        ARTPConnection::MakePortPair(
-                &info->mRTPSocket, &info->mRTCPSocket, &rtpPort);
+        info->mUsingInterleavedTCP = false;
 
         AString request = "SETUP ";
         request.append(trackURL);
         request.append(" RTSP/1.0\r\n");
 
+#if USE_TCP_INTERLEAVED
+        size_t interleaveIndex = 2 * (mTracks.size() - 1);
+        info->mUsingInterleavedTCP = true;
+        info->mRTPSocket = interleaveIndex;
+        info->mRTCPSocket = interleaveIndex + 1;
+
+        request.append("Transport: RTP/AVP/TCP;interleaved=");
+        request.append(interleaveIndex);
+        request.append("-");
+        request.append(interleaveIndex + 1);
+#else
+        unsigned rtpPort;
+        ARTPConnection::MakePortPair(
+                &info->mRTPSocket, &info->mRTCPSocket, &rtpPort);
+
         request.append("Transport: RTP/AVP/UDP;unicast;client_port=");
         request.append(rtpPort);
         request.append("-");
         request.append(rtpPort + 1);
+#endif
+
         request.append("\r\n");
 
         if (index > 1) {

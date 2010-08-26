@@ -19,6 +19,7 @@
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
+#include <media/stagefright/MediaErrors.h>
 
 #include <arpa/inet.h>
 #include <fcntl.h>
@@ -67,6 +68,12 @@ void ARTSPConnection::sendRequest(
     msg->post();
 }
 
+void ARTSPConnection::observeBinaryData(const sp<AMessage> &reply) {
+    sp<AMessage> msg = new AMessage(kWhatObserveBinaryData, id());
+    msg->setMessage("reply", reply);
+    msg->post();
+}
+
 void ARTSPConnection::onMessageReceived(const sp<AMessage> &msg) {
     switch (msg->what()) {
         case kWhatConnect:
@@ -88,6 +95,12 @@ void ARTSPConnection::onMessageReceived(const sp<AMessage> &msg) {
         case kWhatReceiveResponse:
             onReceiveResponse();
             break;
+
+        case kWhatObserveBinaryData:
+        {
+            CHECK(msg->findMessage("reply", &mObserveBinaryMessage));
+            break;
+        }
 
         default:
             TRESPASS();
@@ -396,22 +409,35 @@ void ARTSPConnection::postReceiveReponseEvent() {
     mReceiveResponseEventPending = true;
 }
 
-bool ARTSPConnection::receiveLine(AString *line) {
-    line->clear();
-
-    bool sawCR = false;
-    for (;;) {
-        char c;
-        ssize_t n = recv(mSocket, &c, 1, 0);
+status_t ARTSPConnection::receive(void *data, size_t size) {
+    size_t offset = 0;
+    while (offset < size) {
+        ssize_t n = recv(mSocket, (uint8_t *)data + offset, size - offset, 0);
         if (n == 0) {
             // Server closed the connection.
-            return false;
+            return ERROR_IO;
         } else if (n < 0) {
             if (errno == EINTR) {
                 continue;
             }
 
             TRESPASS();
+        }
+
+        offset += (size_t)n;
+    }
+
+    return OK;
+}
+
+bool ARTSPConnection::receiveLine(AString *line) {
+    line->clear();
+
+    bool sawCR = false;
+    for (;;) {
+        char c;
+        if (receive(&c, 1) != OK) {
+            return false;
         }
 
         if (sawCR && c == '\n') {
@@ -421,16 +447,58 @@ bool ARTSPConnection::receiveLine(AString *line) {
 
         line->append(&c, 1);
 
+        if (c == '$' && line->size() == 1) {
+            // Special-case for interleaved binary data.
+            return true;
+        }
+
         sawCR = (c == '\r');
     }
 }
 
-bool ARTSPConnection::receiveRTSPReponse() {
-    sp<ARTSPResponse> response = new ARTSPResponse;
+sp<ABuffer> ARTSPConnection::receiveBinaryData() {
+    uint8_t x[3];
+    if (receive(x, 3) != OK) {
+        return NULL;
+    }
 
-    if (!receiveLine(&response->mStatusLine)) {
+    sp<ABuffer> buffer = new ABuffer((x[1] << 8) | x[2]);
+    if (receive(buffer->data(), buffer->size()) != OK) {
+        return NULL;
+    }
+
+    buffer->meta()->setInt32("index", (int32_t)x[0]);
+
+    return buffer;
+}
+
+bool ARTSPConnection::receiveRTSPReponse() {
+    AString statusLine;
+
+    if (!receiveLine(&statusLine)) {
         return false;
     }
+
+    if (statusLine == "$") {
+        sp<ABuffer> buffer = receiveBinaryData();
+
+        if (buffer == NULL) {
+            return false;
+        }
+
+        if (mObserveBinaryMessage != NULL) {
+            sp<AMessage> notify = mObserveBinaryMessage->dup();
+            notify->setObject("buffer", buffer);
+            notify->post();
+        } else {
+            LOG(WARNING) << "received binary data, but no one cares.";
+        }
+
+        return true;
+    }
+
+    sp<ARTSPResponse> response = new ARTSPResponse;
+    response->mStatusLine = statusLine;
 
     LOG(INFO) << "status: " << response->mStatusLine;
 
