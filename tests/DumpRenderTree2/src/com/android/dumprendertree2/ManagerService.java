@@ -88,7 +88,7 @@ public class ManagerService extends Service {
                     break;
 
                 case MSG_PROCESS_ACTUAL_RESULTS:
-                    Log.d(LOG_TAG + ".mIncomingHandler", msg.getData().getString("relativePath"));
+                    Log.d(LOG_TAG,"mIncomingHandler: " + msg.getData().getString("relativePath"));
                     onActualResultsObtained(msg.getData());
                     break;
 
@@ -151,11 +151,13 @@ public class ManagerService extends Service {
         AbstractResult results =
                 AbstractResult.TestType.valueOf(bundle.getString("type")).createResult(bundle);
 
+        Log.i(LOG_TAG, "onActualResultObtained: " + results.getRelativePath());
         handleResults(results);
     }
 
     private void ensureNextTestSetup(String nextTest, int index) {
         if (nextTest == null) {
+            Log.w(LOG_TAG, "ensureNextTestSetup(): nextTest=null");
             return;
         }
 
@@ -172,8 +174,8 @@ public class ManagerService extends Service {
     private void onTestCrashed() {
         handleResults(new CrashedDummyResult(mCurrentlyRunningTest));
 
-        Log.w(LOG_TAG + "::onTestCrashed", mCurrentlyRunningTest +
-                "(" + mCurrentlyRunningTestIndex + ")");
+        Log.w(LOG_TAG, "onTestCrashed(): " + mCurrentlyRunningTest +
+                " (" + mCurrentlyRunningTestIndex + ")");
 
         Intent intent = new Intent(this, TestsListActivity.class);
         intent.setAction(Intent.ACTION_REBOOT);

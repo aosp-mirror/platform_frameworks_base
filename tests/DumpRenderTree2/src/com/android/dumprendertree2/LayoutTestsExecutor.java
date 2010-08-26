@@ -112,7 +112,7 @@ public class LayoutTestsExecutor extends Activity {
     private boolean mDumpDatabaseCallbacks;
     private boolean mIsGeolocationPermissionSet;
     private boolean mGeolocationPermission;
-    private Map mPendingGeolocationPermissionCallbacks;
+    private Map<GeolocationPermissions.Callback, String> mPendingGeolocationPermissionCallbacks;
 
     private EventSender mEventSender = new EventSender();
 
@@ -338,7 +338,7 @@ public class LayoutTestsExecutor extends Activity {
             serviceMsg.setData(bundle);
             mManagerServiceMessenger.send(serviceMsg);
         } catch (RemoteException e) {
-            Log.e(LOG_TAG + "::startTests", e.getMessage());
+            Log.e(LOG_TAG, "mCurrentTestRelativePath=" + mCurrentTestRelativePath, e);
         }
 
         runNextTest();
@@ -369,6 +369,7 @@ public class LayoutTestsExecutor extends Activity {
     private void onTestTimedOut() {
         assert mCurrentState.isRunningState() : "mCurrentState = " + mCurrentState.name();
 
+        Log.w(LOG_TAG, "onTestTimedOut(): " + mCurrentTestRelativePath);
         mCurrentTestTimedOut = true;
 
         /**
@@ -383,6 +384,7 @@ public class LayoutTestsExecutor extends Activity {
     private void onTestFinished() {
         assert mCurrentState.isRunningState() : "mCurrentState = " + mCurrentState.name();
 
+        Log.i(LOG_TAG, "onTestFinished(): " + mCurrentTestRelativePath);
         obtainActualResultsFromWebView();
     }
 
@@ -406,6 +408,7 @@ public class LayoutTestsExecutor extends Activity {
         assert mCurrentState == CurrentState.OBTAINING_RESULT
                 : "mCurrentState = " + mCurrentState.name();
 
+        Log.i(LOG_TAG, "onActualResultsObtained(): " + mCurrentTestRelativePath);
         mCurrentState = CurrentState.IDLE;
 
         mResultHandler.removeMessages(MSG_TEST_TIMED_OUT);
@@ -436,7 +439,7 @@ public class LayoutTestsExecutor extends Activity {
             serviceMsg.setData(bundle);
             mManagerServiceMessenger.send(serviceMsg);
         } catch (RemoteException e) {
-            Log.e(LOG_TAG + "::reportResultToService", e.getMessage());
+            Log.e(LOG_TAG, "mCurrentTestRelativePath=" + mCurrentTestRelativePath, e);
         }
     }
 
@@ -455,7 +458,7 @@ public class LayoutTestsExecutor extends Activity {
                     Message.obtain(null, ManagerService.MSG_ALL_TESTS_FINISHED);
             mManagerServiceMessenger.send(serviceMsg);
         } catch (RemoteException e) {
-            Log.e(LOG_TAG + "::onAllTestsFinished", e.getMessage());
+            Log.e(LOG_TAG, "mCurrentTestRelativePath=" + mCurrentTestRelativePath, e);
         }
 
         unbindService(mServiceConnection);
@@ -529,11 +532,11 @@ public class LayoutTestsExecutor extends Activity {
                     mGeolocationPermission = msg.arg1 == 1;
 
                     if (mPendingGeolocationPermissionCallbacks != null) {
-                        Iterator iter = mPendingGeolocationPermissionCallbacks.keySet().iterator();
+                        Iterator<GeolocationPermissions.Callback> iter =
+                                mPendingGeolocationPermissionCallbacks.keySet().iterator();
                         while (iter.hasNext()) {
-                            GeolocationPermissions.Callback callback =
-                                    (GeolocationPermissions.Callback) iter.next();
-                            String origin = (String) mPendingGeolocationPermissionCallbacks.get(callback);
+                            GeolocationPermissions.Callback callback = iter.next();
+                            String origin = mPendingGeolocationPermissionCallbacks.get(callback);
                             callback.invoke(origin, mGeolocationPermission, false);
                         }
                         mPendingGeolocationPermissionCallbacks = null;
@@ -541,7 +544,7 @@ public class LayoutTestsExecutor extends Activity {
                     break;
 
                 default:
-                    Log.w(LOG_TAG + "::handleMessage", "Message code does not exist: " + msg.what);
+                    assert false : "msg.what=" + msg.what;
                     break;
             }
         }
@@ -555,41 +558,42 @@ public class LayoutTestsExecutor extends Activity {
     }
 
     public void waitUntilDone() {
-        Log.w(LOG_TAG + "::waitUntilDone", "called");
+        Log.i(LOG_TAG, mCurrentTestRelativePath + ": waitUntilDone() called");
         mLayoutTestControllerHandler.sendEmptyMessage(MSG_WAIT_UNTIL_DONE);
     }
 
     public void notifyDone() {
-        Log.w(LOG_TAG + "::notifyDone", "called");
+        Log.i(LOG_TAG, mCurrentTestRelativePath + ": notifyDone() called");
         mLayoutTestControllerHandler.sendEmptyMessage(MSG_NOTIFY_DONE);
     }
 
     public void dumpAsText(boolean enablePixelTest) {
-        Log.w(LOG_TAG + "::dumpAsText(" + enablePixelTest + ")", "called");
+        Log.i(LOG_TAG, mCurrentTestRelativePath + ": dumpAsText(" + enablePixelTest + ") called");
         /** TODO: Implement */
         if (enablePixelTest) {
-            Log.w(LOG_TAG + "::dumpAsText", "enablePixelTest not implemented, switching to false");
+            Log.w(LOG_TAG, "enablePixelTest not implemented, switching to false");
         }
         mLayoutTestControllerHandler.sendEmptyMessage(MSG_DUMP_AS_TEXT);
     }
 
     public void dumpChildFramesAsText() {
-        Log.w(LOG_TAG + "::dumpChildFramesAsText", "called");
+        Log.i(LOG_TAG, mCurrentTestRelativePath + ": dumpChildFramesAsText() called");
         mLayoutTestControllerHandler.sendEmptyMessage(MSG_DUMP_CHILD_FRAMES_AS_TEXT);
     }
 
     public void setCanOpenWindows() {
-        Log.w(LOG_TAG + "::setCanOpenWindows", "called");
+        Log.i(LOG_TAG, mCurrentTestRelativePath + ": setCanOpenWindows() called");
         mLayoutTestControllerHandler.sendEmptyMessage(MSG_SET_CAN_OPEN_WINDOWS);
     }
 
     public void dumpDatabaseCallbacks() {
-        Log.w(LOG_TAG + "::dumpDatabaseCallbacks:", "called");
+        Log.i(LOG_TAG, mCurrentTestRelativePath + ": dumpDatabaseCallbacks() called");
         mLayoutTestControllerHandler.sendEmptyMessage(MSG_DUMP_DATABASE_CALLBACKS);
     }
 
     public void setGeolocationPermission(boolean allow) {
-        Log.w(LOG_TAG + "::setGeolocationPermission", "called");
+        Log.i(LOG_TAG, mCurrentTestRelativePath + ": setGeolocationPermission(" + allow +
+                ") called");
         Message msg = mLayoutTestControllerHandler.obtainMessage(MSG_SET_GEOLOCATION_PERMISSION);
         msg.arg1 = allow ? 1 : 0;
         msg.sendToTarget();
@@ -597,6 +601,9 @@ public class LayoutTestsExecutor extends Activity {
 
     public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,
             boolean canProvideBeta, double beta, boolean canProvideGamma, double gamma) {
+        Log.i(LOG_TAG, mCurrentTestRelativePath + ": setMockDeviceOrientation(" + canProvideAlpha +
+                ", " + alpha + ", " + canProvideBeta + ", " + beta + ", " + canProvideGamma +
+                ", " + gamma + ")");
         mCurrentWebView.setMockDeviceOrientation(canProvideAlpha, alpha, canProvideBeta, beta,
                 canProvideGamma, gamma);
     }
