@@ -736,7 +736,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     public void connectNetwork(WifiConfiguration wifiConfig) {
-        sendMessage(obtainMessage(CMD_CONNECT_NETWORK, wifiConfig));
+        /* arg1 is used to indicate netId, force a netId value of -1 when
+         * we are passing a configuration since the default value of
+         * 0 is a valid netId
+         */
+        sendMessage(obtainMessage(CMD_CONNECT_NETWORK, -1, 0, wifiConfig));
     }
 
     public void saveNetwork(WifiConfiguration wifiConfig) {
@@ -1469,16 +1473,13 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     private void enableAllNetworks() {
-        if (mEnableAllNetworks) {
-            mEnableAllNetworks = false;
-            for (WifiConfiguration config : mConfiguredNetworks) {
-                if(config != null && config.status == Status.DISABLED) {
-                    WifiNative.enableNetworkCommand(config.networkId, false);
-                }
+        for (WifiConfiguration config : mConfiguredNetworks) {
+            if(config != null && config.status == Status.DISABLED) {
+                WifiNative.enableNetworkCommand(config.networkId, false);
             }
-            WifiNative.saveConfigCommand();
-            updateConfigAndSendChangeBroadcast();
         }
+        WifiNative.saveConfigCommand();
+        updateConfigAndSendChangeBroadcast();
     }
 
     private int addOrUpdateNetworkNative(WifiConfiguration config) {
@@ -2404,7 +2405,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
                     mWifiInfo.setMacAddress(WifiNative.getMacAddressCommand());
 
-                    updateConfigAndSendChangeBroadcast();
+                    updateConfiguredNetworks();
+                    enableAllNetworks();
 
                     //TODO: initialize and fix multicast filtering
                     //mWM.initializeMulticastFiltering();
@@ -2875,15 +2877,25 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     addOrUpdateNetworkNative(config);
                     WifiNative.saveConfigCommand();
 
-                    // Connect to network by disabling others.
+                    /* We connect to a specific network by first enabling that network
+                     * and disabling all other networks in the supplicant. Disabling a
+                     * connected network will cause a disconnection from the network.
+                     * A reconnectCommand() will then initiate a connection to the enabled
+                     * network.
+                     */
                     WifiNative.enableNetworkCommand(netId, true);
-                    WifiNative.reconnectCommand();
+                    /* Save a flag to indicate that we need to enable all
+                     * networks after supplicant indicates a network
+                     * state change event
+                     */
                     mEnableAllNetworks = true;
+                    WifiNative.reconnectCommand();
                     /* update the configured networks but not send a
                      * broadcast to avoid a fetch from settings
                      * during this temporary disabling of networks
                      */
                     updateConfiguredNetworks();
+                    transitionTo(mDisconnectingState);
                     break;
                 case SCAN_RESULTS_EVENT:
                     /* Set the scan setting back to "connect" mode */
@@ -2899,16 +2911,13 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     mWifiInfo.setBSSID(mLastBssid = stateChangeResult.BSSID);
                     mWifiInfo.setNetworkId(stateChangeResult.networkId);
                     mLastNetworkId = stateChangeResult.networkId;
-                    enableAllNetworks();
                     /* send event to CM & network change broadcast */
                     setDetailedState(DetailedState.OBTAINING_IPADDR);
                     sendNetworkStateChangeBroadcast(mLastBssid);
-
                     transitionTo(mConnectingState);
                     break;
                 case NETWORK_DISCONNECTION_EVENT:
                     Log.d(TAG,"Network connection lost");
-                    enableAllNetworks();
                     handleNetworkDisconnect();
                     transitionTo(mDisconnectedState);
                     break;
@@ -3057,6 +3066,13 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                   WifiNative.disconnectCommand();
                   transitionTo(mDisconnectingState);
                   break;
+                  /* Ignore connection to same network */
+              case CMD_CONNECT_NETWORK:
+                  int netId = message.arg1;
+                  if (mWifiInfo.getNetworkId() == netId) {
+                      break;
+                  }
+                  return NOT_HANDLED;
                   /* Ignore */
               case NETWORK_CONNECTION_EVENT:
                   break;
@@ -3127,6 +3143,13 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         deferMessage(message);
                     }
                     break;
+                    /* Ignore connection to same network */
+                case CMD_CONNECT_NETWORK:
+                    int netId = message.arg1;
+                    if (mWifiInfo.getNetworkId() == netId) {
+                        break;
+                    }
+                    return NOT_HANDLED;
                     /* Ignore */
                 case NETWORK_CONNECTION_EVENT:
                     break;
@@ -3161,6 +3184,13 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             }
             EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
+        }
+        @Override
+        public void exit() {
+            if (mEnableAllNetworks) {
+                mEnableAllNetworks = false;
+                enableAllNetworks();
+            }
         }
     }
 
