@@ -7174,6 +7174,38 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return (((long) start) << 32) | end;
     }
 
+    private void selectCurrentWord() {
+        // In case selection mode is started after an orientation change or after a select all,
+        // use the current selection instead of creating one
+        if (hasSelection()) {
+            return;
+        }
+
+        int selectionStart, selectionEnd;
+
+        // selectionModifierCursorController is not null at that point
+        SelectionModifierCursorController selectionModifierCursorController =
+            ((SelectionModifierCursorController) mSelectionModifierCursorController);
+        int minOffset = selectionModifierCursorController.getMinTouchOffset();
+        int maxOffset = selectionModifierCursorController.getMaxTouchOffset();
+
+        long wordLimits = getWordLimitsAt(minOffset);
+        if (wordLimits >= 0) {
+            selectionStart = (int) (wordLimits >>> 32);
+        } else {
+            selectionStart = Math.max(minOffset - 5, 0);
+        }
+
+        wordLimits = getWordLimitsAt(maxOffset);
+        if (wordLimits >= 0) {
+            selectionEnd = (int) (wordLimits & 0x00000000FFFFFFFFL);
+        } else {
+            selectionEnd = Math.min(maxOffset + 5, mText.length());
+        }
+
+        Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
+    }
+
     @Override
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
         if (!isShown()) {
@@ -7468,37 +7500,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else {
                 return false;
             }
-        }
-
-        private void selectCurrentWord() {
-            // In case selection mode is started after an orientation change, use the current
-            // selection instead of creating one
-            if (hasSelection()) {
-                return;
-            }
-
-            int selectionStart, selectionEnd;
-
-            SelectionModifierCursorController selectionModifierCursorController =
-                ((SelectionModifierCursorController) mSelectionModifierCursorController);
-            int minOffset = selectionModifierCursorController.getMinTouchOffset();
-            int maxOffset = selectionModifierCursorController.getMaxTouchOffset();
-
-            long wordLimits = getWordLimitsAt(minOffset);
-            if (wordLimits >= 0) {
-                selectionStart = (int) (wordLimits >>> 32);
-            } else {
-                selectionStart = Math.max(minOffset - 5, 0);
-            }
-
-            wordLimits = getWordLimitsAt(maxOffset);
-            if (wordLimits >= 0) {
-                selectionEnd = (int) (wordLimits & 0x00000000FFFFFFFFL);
-            } else {
-                selectionEnd = Math.min(maxOffset + 5, mText.length());
-            }
-
-            Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
         }
 
         @Override
