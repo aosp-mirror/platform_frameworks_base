@@ -16,16 +16,23 @@
 
 package android.bluetooth;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import android.app.Instrumentation;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Environment;
 import android.test.InstrumentationTestCase;
 import android.util.Log;
 
 public class BluetoothStressTest extends InstrumentationTestCase {
-    private static final String TAG = "BluetoothEnablerStressTest";
+    private static final String TAG = "BluetoothStressTest";
+    private static final String OUTPUT_FILE = "BluetoothStressTestOutput.txt";
 
     /**
      * Timeout for {@link BluetoothAdapter#disable()} in ms.
@@ -67,13 +74,11 @@ public class BluetoothStressTest extends InstrumentationTestCase {
      */
     private static final int POLL_TIME = 100;
 
-    private static final int ENABLE_ITERATIONS = 100;
-    private static final int DISCOVERABLE_ITERATIONS = 1000;
-    private static final int SCAN_ITERATIONS = 1000;
-
     private Context mContext;
 
     private Instrumentation mInstrumentation;
+
+    private BufferedWriter mOutputWriter;
 
     private class BluetoothReceiver extends BroadcastReceiver {
         private int mFiredFlags = 0;
@@ -144,6 +149,14 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         mInstrumentation = getInstrumentation();
         mContext = mInstrumentation.getTargetContext();
 
+        try {
+            mOutputWriter = new BufferedWriter(new FileWriter(new File(
+                    Environment.getExternalStorageDirectory(), OUTPUT_FILE), true));
+        } catch (IOException e) {
+            Log.w(TAG, "Test output file could not be opened", e);
+            mOutputWriter = null;
+        }
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
@@ -157,24 +170,34 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         super.tearDown();
 
         mContext.unregisterReceiver(mReceiver);
+
+        if (mOutputWriter != null) {
+            try {
+                mOutputWriter.close();
+            } catch (IOException e) {
+                Log.w(TAG, "Test output file could not be closed", e);
+            }
+        }
     }
 
-    public void testEnableDisable() {
+    public void testEnable() {
+        int iterations = BluetoothTestRunner.sEnableIterations;
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
 
-        for (int i = 0; i < ENABLE_ITERATIONS; i++) {
-            Log.i(TAG, "Enable iteration " + (i + 1) + " of " + ENABLE_ITERATIONS);
+        for (int i = 0; i < iterations; i++) {
+            writeOutput("enable iteration " + (i + 1) + " of " + iterations);
             enable(adapter);
             disable(adapter);
         }
     }
 
     public void testDiscoverable() {
+        int iterations = BluetoothTestRunner.sDiscoverableIterations;
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         enable(adapter);
 
-        for (int i = 0; i < DISCOVERABLE_ITERATIONS; i++) {
-            Log.i(TAG, "Discoverable iteration " + (i + 1) + " of " + DISCOVERABLE_ITERATIONS);
+        for (int i = 0; i < iterations; i++) {
+            writeOutput("discoverable iteration " + (i + 1) + " of " + iterations);
             discoverable(adapter);
             undiscoverable(adapter);
         }
@@ -183,11 +206,12 @@ public class BluetoothStressTest extends InstrumentationTestCase {
     }
 
     public void testScan() {
+        int iterations = BluetoothTestRunner.sScanIterations;
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         enable(adapter);
 
-        for (int i = 0; i < SCAN_ITERATIONS; i++) {
-            Log.i(TAG, "Scan iteration " + (i + 1) + " of " + SCAN_ITERATIONS);
+        for (int i = 0; i < iterations; i++) {
+            writeOutput("scan iteration " + (i + 1) + " of " + iterations);
             startScan(adapter);
             stopScan(adapter);
         }
@@ -217,7 +241,7 @@ public class BluetoothStressTest extends InstrumentationTestCase {
                 mask = 0; // Don't check for received intents since we might have missed them.
                 break;
             default:
-                fail("disable() invalid state: " + state);
+                fail("disable() invalid state: state=" + state);
         }
 
         long s = System.currentTimeMillis();
@@ -227,6 +251,8 @@ public class BluetoothStressTest extends InstrumentationTestCase {
                 assertFalse(adapter.isEnabled());
                 if ((mReceiver.getFiredFlags() & mask) == mask) {
                     mReceiver.resetFiredFlags();
+                    writeOutput(String.format("disable() completed in %d ms",
+                            (System.currentTimeMillis() - s)));
                     return;
                 }
             } else {
@@ -238,9 +264,8 @@ public class BluetoothStressTest extends InstrumentationTestCase {
 
         int firedFlags = mReceiver.getFiredFlags();
         mReceiver.resetFiredFlags();
-        fail("disable() timeout: " +
-                "state=" + state + " (expected " + BluetoothAdapter.STATE_OFF + ") " +
-                "flags=" + firedFlags + " (expected " + mask + ")");
+        fail(String.format("disable() timeout: state=%d (expected %d), flags=0x%x (expected 0x%x)",
+                state, BluetoothAdapter.STATE_OFF, firedFlags, mask));
     }
 
     private void enable(BluetoothAdapter adapter) {
@@ -272,6 +297,8 @@ public class BluetoothStressTest extends InstrumentationTestCase {
                 assertTrue(adapter.isEnabled());
                 if ((mReceiver.getFiredFlags() & mask) == mask) {
                     mReceiver.resetFiredFlags();
+                    writeOutput(String.format("enable() completed in %d ms",
+                            (System.currentTimeMillis() - s)));
                     return;
                 }
             } else {
@@ -283,9 +310,8 @@ public class BluetoothStressTest extends InstrumentationTestCase {
 
         int firedFlags = mReceiver.getFiredFlags();
         mReceiver.resetFiredFlags();
-        fail("enable() timeout: " +
-                "state=" + state + " (expected " + BluetoothAdapter.STATE_OFF + ") " +
-                "flags=" + firedFlags + " (expected " + mask + ")");
+        fail(String.format("enable() timeout: state=%d (expected %d), flags=0x%x (expected 0x%x)",
+                state, BluetoothAdapter.STATE_ON, firedFlags, mask));
     }
 
     private void discoverable(BluetoothAdapter adapter) {
@@ -310,6 +336,8 @@ public class BluetoothStressTest extends InstrumentationTestCase {
             if (scanMode == BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
                 if ((mReceiver.getFiredFlags() & mask) == mask) {
                     mReceiver.resetFiredFlags();
+                    writeOutput(String.format("discoverable() completed in %d ms",
+                            (System.currentTimeMillis() - s)));
                     return;
                 }
             } else {
@@ -320,10 +348,9 @@ public class BluetoothStressTest extends InstrumentationTestCase {
 
         int firedFlags = mReceiver.getFiredFlags();
         mReceiver.resetFiredFlags();
-        fail("discoverable() timeout: " +
-                "scanMode=" + scanMode + " (expected " +
-                BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE + ") " +
-                "flags=" + firedFlags + " (expected " + mask + ")");
+        fail(String.format("discoverable() timeout: scanMode=%d (expected %d), flags=0x%x "
+                + "(expected 0x%x)", scanMode, BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE,
+                firedFlags, mask));
     }
 
     private void undiscoverable(BluetoothAdapter adapter) {
@@ -348,6 +375,8 @@ public class BluetoothStressTest extends InstrumentationTestCase {
             if (scanMode == BluetoothAdapter.SCAN_MODE_CONNECTABLE) {
                 if ((mReceiver.getFiredFlags() & mask) == mask) {
                     mReceiver.resetFiredFlags();
+                    writeOutput(String.format("undiscoverable() completed in %d ms",
+                            (System.currentTimeMillis() - s)));
                     return;
                 }
             } else {
@@ -358,10 +387,9 @@ public class BluetoothStressTest extends InstrumentationTestCase {
 
         int firedFlags = mReceiver.getFiredFlags();
         mReceiver.resetFiredFlags();
-        fail("undiscoverable() timeout: " +
-                "scanMode=" + scanMode + " (expected " +
-                BluetoothAdapter.SCAN_MODE_CONNECTABLE + ") " +
-                "flags=" + firedFlags + " (expected " + mask + ")");
+        fail(String.format("undiscoverable() timeout: scanMode=%d (expected %d), flags=0x%x "
+                + "(expected 0x%x)", scanMode, BluetoothAdapter.SCAN_MODE_CONNECTABLE, firedFlags,
+                mask));
     }
 
     private void startScan(BluetoothAdapter adapter) {
@@ -382,6 +410,8 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         while (System.currentTimeMillis() - s < START_DISCOVERY_TIMEOUT) {
             if (adapter.isDiscovering() && ((mReceiver.getFiredFlags() & mask) == mask)) {
                 mReceiver.resetFiredFlags();
+                writeOutput(String.format("startScan() completed in %d ms",
+                        (System.currentTimeMillis() - s)));
                 return;
             }
             sleep(POLL_TIME);
@@ -389,9 +419,8 @@ public class BluetoothStressTest extends InstrumentationTestCase {
 
         int firedFlags = mReceiver.getFiredFlags();
         mReceiver.resetFiredFlags();
-        fail("startScan() timeout: " +
-                "isDiscovering=" + adapter.isDiscovering() + " " +
-                "flags=" + firedFlags + " (expected " + mask + ")");
+        fail(String.format("startScan() timeout: isDiscovering=%b, flags=0x%x (expected 0x%x)",
+                adapter.isDiscovering(), firedFlags, mask));
     }
 
     private void stopScan(BluetoothAdapter adapter) {
@@ -414,6 +443,8 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         while (System.currentTimeMillis() - s < CANCEL_DISCOVERY_TIMEOUT) {
             if (!adapter.isDiscovering() && ((mReceiver.getFiredFlags() & mask) == mask)) {
                 mReceiver.resetFiredFlags();
+                writeOutput(String.format("stopScan() completed in %d ms",
+                        (System.currentTimeMillis() - s)));
                 return;
             }
             sleep(POLL_TIME);
@@ -421,9 +452,22 @@ public class BluetoothStressTest extends InstrumentationTestCase {
 
         int firedFlags = mReceiver.getFiredFlags();
         mReceiver.resetFiredFlags();
-        fail("stopScan() timeout: " +
-                "isDiscovering=" + adapter.isDiscovering() + " " +
-                "flags=" + firedFlags + " (expected " + mask + ")");
+        fail(String.format("stopScan() timeout: isDiscovering=%b, flags=0x%x (expected 0x%x)",
+                adapter.isDiscovering(), firedFlags, mask));
+
+    }
+
+    private void writeOutput(String s) {
+        if (mOutputWriter == null) {
+            return;
+        }
+        try {
+            Log.i(TAG, s);
+            mOutputWriter.write(s + "\n");
+            mOutputWriter.flush();
+        } catch (IOException e) {
+            Log.w(TAG, "Could not write to output file", e);
+        }
     }
 
     private void sleep(long time) {
