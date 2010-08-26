@@ -669,6 +669,7 @@ public class Animator<T> extends Animatable {
             setCurrentPlayTime(getCurrentPlayTime());
         }
         mPlayingState = STOPPED;
+        mStartedDelay = false;
         sPendingAnimations.add(this);
         if (sAnimationHandler == null) {
             sAnimationHandler = new AnimationHandler();

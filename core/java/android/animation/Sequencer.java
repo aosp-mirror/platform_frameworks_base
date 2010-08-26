@@ -233,6 +233,10 @@ public final class Sequencer extends Animatable {
     @Override
     public void end() {
         mCanceled = true;
+        if (mSortedNodes.size() != mNodes.size()) {
+            // hasn't been started yet - sort the nodes now, then end them
+            sortNodes();
+        }
         if (mSortedNodes.size() > 0) {
             for (Node node : mSortedNodes) {
                 node.animation.end();
