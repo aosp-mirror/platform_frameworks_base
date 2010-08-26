@@ -57,6 +57,8 @@ struct ARTPConnection::StreamInfo {
 
     int32_t mNumRTCPPacketsReceived;
     struct sockaddr_in mRemoteRTCPAddr;
+
+    bool mIsInjected;
 };
 
 ARTPConnection::ARTPConnection(uint32_t flags)
@@ -72,13 +74,15 @@ void ARTPConnection::addStream(
         int rtpSocket, int rtcpSocket,
         const sp<ASessionDescription> &sessionDesc,
         size_t index,
-        const sp<AMessage> &notify) {
+        const sp<AMessage> &notify,
+        bool injected) {
     sp<AMessage> msg = new AMessage(kWhatAddStream, id());
     msg->setInt32("rtp-socket", rtpSocket);
     msg->setInt32("rtcp-socket", rtcpSocket);
     msg->setObject("session-desc", sessionDesc);
     msg->setSize("index", index);
     msg->setMessage("notify", notify);
+    msg->setInt32("injected", injected);
     msg->post();
 }
 
@@ -154,6 +158,12 @@ void ARTPConnection::onMessageReceived(const sp<AMessage> &msg) {
             break;
         }
 
+        case kWhatInjectPacket:
+        {
+            onInjectPacket(msg);
+            break;
+        }
+
         default:
         {
             TRESPASS();
@@ -172,6 +182,11 @@ void ARTPConnection::onAddStream(const sp<AMessage> &msg) {
     CHECK(msg->findInt32("rtcp-socket", &s));
     info->mRTCPSocket = s;
 
+    int32_t injected;
+    CHECK(msg->findInt32("injected", &injected));
+
+    info->mIsInjected = injected;
+
     sp<RefBase> obj;
     CHECK(msg->findObject("session-desc", &obj));
     info->mSessionDesc = static_cast<ASessionDescription *>(obj.get());
@@ -182,7 +197,9 @@ void ARTPConnection::onAddStream(const sp<AMessage> &msg) {
     info->mNumRTCPPacketsReceived = 0;
     memset(&info->mRemoteRTCPAddr, 0, sizeof(info->mRemoteRTCPAddr));
 
-    postPollEvent();
+    if (!injected) {
+        postPollEvent();
+    }
 }
 
 void ARTPConnection::onRemoveStream(const sp<AMessage> &msg) {
@@ -231,6 +248,10 @@ void ARTPConnection::onPollStreams() {
     int maxSocket = -1;
     for (List<StreamInfo>::iterator it = mStreams.begin();
          it != mStreams.end(); ++it) {
+        if ((*it).mIsInjected) {
+            continue;
+        }
+
         FD_SET(it->mRTPSocket, &rs);
         FD_SET(it->mRTCPSocket, &rs);
 
@@ -248,6 +269,10 @@ void ARTPConnection::onPollStreams() {
     if (res > 0) {
         for (List<StreamInfo>::iterator it = mStreams.begin();
              it != mStreams.end(); ++it) {
+            if ((*it).mIsInjected) {
+                continue;
+            }
+
             if (FD_ISSET(it->mRTPSocket, &rs)) {
                 receive(&*it, true);
             }
@@ -301,6 +326,8 @@ void ARTPConnection::onPollStreams() {
 }
 
 status_t ARTPConnection::receive(StreamInfo *s, bool receiveRTP) {
+    CHECK(!s->mIsInjected);
+
     sp<ABuffer> buffer = new ABuffer(65536);
 
     socklen_t remoteAddrLen =
@@ -557,6 +584,43 @@ sp<ARTPSource> ARTPConnection::findSource(StreamInfo *info, uint32_t srcId) {
     }
 
     return source;
+}
+
+void ARTPConnection::injectPacket(int index, const sp<ABuffer> &buffer) {
+    sp<AMessage> msg = new AMessage(kWhatInjectPacket, id());
+    msg->setInt32("index", index);
+    msg->setObject("buffer", buffer);
+    msg->post();
+}
+
+void ARTPConnection::onInjectPacket(const sp<AMessage> &msg) {
+    int32_t index;
+    CHECK(msg->findInt32("index", &index));
+
+    sp<RefBase> obj;
+    CHECK(msg->findObject("buffer", &obj));
+
+    sp<ABuffer> buffer = static_cast<ABuffer *>(obj.get());
+
+    List<StreamInfo>::iterator it = mStreams.begin();
+    while (it != mStreams.end()
+           && it->mRTPSocket != index && it->mRTCPSocket != index) {
+        ++it;
+    }
+
+    if (it == mStreams.end()) {
+        TRESPASS();
+    }
+
+    StreamInfo *s = &*it;
+
+    status_t err;
+    if (it->mRTPSocket == index) {
+        err = parseRTP(s, buffer);
+    } else {
+        ++s->mNumRTCPPacketsReceived;
+        err = parseRTCP(s, buffer);
+    }
 }
 
 }  // namespace android

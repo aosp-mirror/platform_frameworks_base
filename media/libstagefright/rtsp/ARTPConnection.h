@@ -38,9 +38,12 @@ struct ARTPConnection : public AHandler {
     void addStream(
             int rtpSocket, int rtcpSocket,
             const sp<ASessionDescription> &sessionDesc, size_t index,
-            const sp<AMessage> &notify);
+            const sp<AMessage> &notify,
+            bool injected);
 
     void removeStream(int rtpSocket, int rtcpSocket);
+
+    void injectPacket(int index, const sp<ABuffer> &buffer);
 
     // Creates a pair of UDP datagram sockets bound to adjacent ports
     // (the rtpSocket is bound to an even port, the rtcpSocket to the
@@ -57,6 +60,7 @@ private:
         kWhatAddStream,
         kWhatRemoveStream,
         kWhatPollStreams,
+        kWhatInjectPacket,
     };
 
     static const int64_t kSelectTimeoutUs;
@@ -72,6 +76,7 @@ private:
     void onAddStream(const sp<AMessage> &msg);
     void onRemoveStream(const sp<AMessage> &msg);
     void onPollStreams();
+    void onInjectPacket(const sp<AMessage> &msg);
     void onSendReceiverReports();
 
     status_t receive(StreamInfo *info, bool receiveRTP);
