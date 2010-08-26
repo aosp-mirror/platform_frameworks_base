@@ -475,8 +475,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mContext.getContentResolver(),
                 Settings.Secure.ENABLED_INPUT_METHODS);
         Slog.i(TAG, "Enabled input methods: " + enabledStr);
-        if (enabledStr == null) {
-            Slog.i(TAG, "Enabled input methods has not been set, enabling all");
+        final String defaultIme = Settings.Secure.getString(mContext
+                .getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
+        if (enabledStr == null || TextUtils.isEmpty(defaultIme)) {
+            Slog.i(TAG, "Enabled input methods or default IME has not been set, enabling all");
             InputMethodInfo defIm = null;
             StringBuilder sb = new StringBuilder(256);
             final int N = mMethodList.size();
@@ -981,7 +983,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     void setInputMethodLocked(String id) {
         InputMethodInfo info = mMethodMap.get(id);
         if (info == null) {
-            throw new IllegalArgumentException("Unknown id: " + mCurMethodId);
+            throw new IllegalArgumentException("Unknown id: " + id);
         }
 
         if (id.equals(mCurMethodId)) {
@@ -1479,7 +1481,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         String defaultIme = Settings.Secure.getString(mContext
                 .getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
-        if (!map.containsKey(defaultIme)) {
+        if (!TextUtils.isEmpty(defaultIme) && !map.containsKey(defaultIme)) {
             if (chooseNewDefaultIMELocked()) {
                 updateFromSettingsLocked();
             }
