@@ -112,8 +112,6 @@ public class Notification implements Parcelable
      * An intent to launch instead of posting the notification to the status bar. Only for use with
      * extremely high-priority notifications demanding the user's attention, such as an incoming
      * call (handled in the core Android Phone app with a full-screen Activity).
-     * Use with {@link #FLAG_HIGH_PRIORITY} to ensure that this notification will reach the user
-     * even when other notifications are suppressed.
      */
     public PendingIntent fullScreenIntent;
 
@@ -272,14 +270,6 @@ public class Notification implements Parcelable
      * will normally be set for you by {@link Service#startForeground}.
      */
     public static final int FLAG_FOREGROUND_SERVICE = 0x00000040;
-
-    /**
-     * Bit to be bitwise-ored into the {@link #flags} field that should be set if this notification
-     * represents a high-priority event that may be shown to the user even if notifications are
-     * otherwise unavailable (that is, when the status bar is hidden). This flag is ideally used
-     * in conjunction with {@link #fullScreenIntent}.
-     */
-    public static final int FLAG_HIGH_PRIORITY = 0x00000080;
 
     public int flags;
 
@@ -549,9 +539,6 @@ public class Notification implements Parcelable
         sb.append(Integer.toHexString(this.defaults));
         sb.append(",flags=0x");
         sb.append(Integer.toHexString(this.flags));
-        if ((this.flags & FLAG_HIGH_PRIORITY) != 0) {
-            sb.append("!!!1!one!");
-        }
         sb.append(")");
         return sb.toString();
     }

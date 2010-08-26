@@ -76,17 +76,7 @@ public class StatusBarTest extends TestActivity
                 win.setAttributes(winParams);
             }
         },
-        new Test("Immersive: Enter") {
-            public void run() {
-                setImmersive(true);
-            }
-        },
-        new Test("Immersive: Exit") {
-            public void run() {
-                setImmersive(false);
-            }
-        },
-        new Test("Priority notification") {
+        new Test("fullScreenIntent") {
             public void run() {
                 Notification not = new Notification(StatusBarTest.this,
                                 R.drawable.stat_sys_phone,
@@ -96,9 +86,8 @@ public class StatusBarTest extends TestActivity
                                 "(888) 555-5038",
                                 null
                                 );
-                not.flags |= Notification.FLAG_HIGH_PRIORITY;
                 Intent fullScreenIntent = new Intent(StatusBarTest.this, TestAlertActivity.class);
-                int id = (int)System.currentTimeMillis(); // XXX HAX
+                int id = (int)System.currentTimeMillis();
                 fullScreenIntent.putExtra("id", id);
                 not.fullScreenIntent = PendingIntent.getActivity(
                     StatusBarTest.this,
