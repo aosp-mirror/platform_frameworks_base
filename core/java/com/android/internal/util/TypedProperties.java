@@ -412,7 +412,7 @@ public class TypedProperties extends HashMap<String, Object> {
      */
 
     /**
-     * An unchecked exception that is thrown if a {@code get&lt;TYPE&gt;()} method
+     * An unchecked exception that is thrown if a {@code get<TYPE>()} method
      * is used to retrieve a parameter whose type does not match the method name.
      */
     public static class TypeException extends IllegalArgumentException {
