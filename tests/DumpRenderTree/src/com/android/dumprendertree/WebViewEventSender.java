@@ -16,14 +16,12 @@
 
 package com.android.dumprendertree;
 
-import android.os.Handler;
 import android.os.SystemClock;
 import android.util.*;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.webkit.WebView;
 
-import java.lang.InterruptedException;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -33,7 +31,7 @@ public class WebViewEventSender implements EventSender {
 	
     WebViewEventSender(WebView webView) {
         mWebView = webView;
-        mTouchPoints = new Vector();
+        mTouchPoints = new Vector<TouchPoint>();
     }
 	
 	public void resetMouse() {
@@ -82,47 +80,23 @@ public class WebViewEventSender implements EventSender {
 		mouseUp();
 	}
 
-	public void mouseDown() {
-          /*  KeyEvent event = new KeyEvent(
-                KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_CENTER);
-            mWebView.onKeyDown(event.getKeyCode(), event); */
-	}
+    public void mouseDown() {
+        long ts = SystemClock.uptimeMillis();
+        MotionEvent event = MotionEvent.obtain(ts, ts, MotionEvent.ACTION_DOWN, mouseX, mouseY, 0);
+        mWebView.onTouchEvent(event);
+    }
 
-	public void mouseMoveTo(int X, int Y) {
-		if (X > mouseX) {
-                    KeyEvent event = new KeyEvent(
-                        KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT);
-                    mWebView.onKeyDown(event.getKeyCode(), event);
-                    mWebView.onKeyUp(event.getKeyCode(), event);
-		} else if ( X < mouseX ) {
-                    KeyEvent event = new KeyEvent(
-                        KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_LEFT);
-                    mWebView.onKeyDown(event.getKeyCode(), event);
-                    mWebView.onKeyUp(event.getKeyCode(), event);
-		}
-		if (Y > mouseY) {
-                    KeyEvent event = new KeyEvent(
-                        KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_DOWN);
-                    mWebView.onKeyDown(event.getKeyCode(), event);
-                    mWebView.onKeyUp(event.getKeyCode(), event);
-		} else if (Y < mouseY ) {
-                    KeyEvent event = new KeyEvent(
-                        KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_UP);
-                    mWebView.onKeyDown(event.getKeyCode(), event);
-                    mWebView.onKeyUp(event.getKeyCode(), event);
-		}
-		mouseX= X;
-		mouseY= Y;
-	
-	}
+    public void mouseMoveTo(int X, int Y) {
+        mouseX= X;
+        mouseY= Y;
+    }
 
-	public void mouseUp() {
-        /*    KeyEvent event = new KeyEvent(
-                KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER);
-            mWebView.onKeyDown(event.getKeyCode(), event);*/
+     public void mouseUp() {
+        long ts = SystemClock.uptimeMillis();
+        MotionEvent event = MotionEvent.obtain(ts, ts, MotionEvent.ACTION_UP, mouseX, mouseY, 0);
+        mWebView.onTouchEvent(event);
+    }
 
-	}
-	
 	// Assumes lowercase chars, case needs to be
 	// handled by calling function.
 	static int keyMapper(char c) {
@@ -365,7 +339,7 @@ public class WebViewEventSender implements EventSender {
             mX = x;
             mY = y;
         }
-    };
+    }
 
     private Vector<TouchPoint> mTouchPoints;
     private int mTouchMetaState;

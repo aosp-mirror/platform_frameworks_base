@@ -43,7 +43,7 @@ import java.util.UUID;
  */
 public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<MediaFrameworkTest> {
     private String TAG = "MediaVirtualizerTest";
-    private final static int MIN_ENERGY_RATIO_2 = 4;
+    private final static int MIN_ENERGY_RATIO_2 = 3;
     private final static short TEST_STRENGTH = 500;
 
     private Virtualizer mVirtualizer = null;
@@ -224,7 +224,7 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
             int energy200 = probe.capture(200);
             int energy1000 = probe.capture(1000);
             // verify that the energy ration between low and high frequencies is at least
-            // four times higher with virtualizer on.
+            // MIN_ENERGY_RATIO_2 times higher with virtualizer on.
             // NOTE: this is what is observed with current virtualizer implementation and the test
             // audio file but is not the primary effect of the virtualizer. A better way would
             // be to have a stereo PCM capture and check that a strongly paned input is centered
@@ -263,52 +263,6 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
     //-----------------------------------------------------------------
     // private methods
     //----------------------------------
-
-    private class EnergyProbe {
-        Visualizer mVisualizer = null;
-        private byte[] mFft = new byte[1024];
-
-        public EnergyProbe(int session) {
-            mVisualizer = new Visualizer(session);
-            mVisualizer.setCaptureSize(1024);
-        }
-
-        public int capture(int freq) throws InterruptedException {
-            int energy = 0;
-            int count = 0;
-            if (mVisualizer != null) {
-                mVisualizer.setEnabled(true);
-                for (int i = 0; i < 10; i++) {
-                    if (mVisualizer.getFft(mFft) == Visualizer.SUCCESS) {
-                        // TODO: check speex FFT as it seems to return only the number of points
-                        // correspondong to valid part of the spectrum (< Fs).
-                        // e.g., if the number of points is 1024, it covers the frequency range
-                        // 0 to 22050 instead of 0 to 44100 as expected from an FFT.
-                        int bin = freq / (22050 / 1024);
-                        int tmp = 0;
-                        for (int j = bin-2; j < bin+3; j++) {
-                            tmp += (int)mFft[j] * (int)mFft[j];
-                        }
-                        energy += tmp/5;
-                        count++;
-                    }
-                    Thread.sleep(50);
-                }
-                mVisualizer.setEnabled(false);
-            }
-            if (count == 0) {
-                return 0;
-            }
-            return energy/count;
-        }
-
-        public void release() {
-            if (mVisualizer != null) {
-                mVisualizer.release();
-                mVisualizer = null;
-            }
-        }
-    }
 
     private void getVirtualizer(int session) {
          if (mVirtualizer == null || session != mSession) {

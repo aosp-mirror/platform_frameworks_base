@@ -43,7 +43,7 @@ import java.util.UUID;
  */
 public class MediaBassBoostTest extends ActivityInstrumentationTestCase2<MediaFrameworkTest> {
     private String TAG = "MediaBassBoostTest";
-    private final static int MIN_ENERGY_RATIO_2 = 4;
+    private final static int MIN_ENERGY_RATIO_2 = 3;
     private final static short TEST_STRENGTH = 500;
 
     private BassBoost mBassBoost = null;
@@ -258,52 +258,6 @@ public class MediaBassBoostTest extends ActivityInstrumentationTestCase2<MediaFr
     //-----------------------------------------------------------------
     // private methods
     //----------------------------------
-
-    private class EnergyProbe {
-        Visualizer mVisualizer = null;
-        private byte[] mFft = new byte[1024];
-
-        public EnergyProbe(int session) {
-            mVisualizer = new Visualizer(session);
-            mVisualizer.setCaptureSize(1024);
-        }
-
-        public int capture(int freq) throws InterruptedException {
-            int energy = 0;
-            int count = 0;
-            if (mVisualizer != null) {
-                mVisualizer.setEnabled(true);
-                for (int i = 0; i < 10; i++) {
-                    if (mVisualizer.getFft(mFft) == Visualizer.SUCCESS) {
-                        // TODO: check speex FFT as it seems to return only the number of points
-                        // correspondong to valid part of the spectrum (< Fs).
-                        // e.g., if the number of points is 1024, it covers the frequency range
-                        // 0 to 22050 instead of 0 to 44100 as expected from an FFT.
-                        int bin = freq / (22050 / 1024);
-                        int tmp = 0;
-                        for (int j = bin-2; j < bin+3; j++) {
-                            tmp += (int)mFft[j] * (int)mFft[j];
-                        }
-                        energy += tmp/5;
-                        count++;
-                    }
-                    Thread.sleep(50);
-                }
-                mVisualizer.setEnabled(false);
-            }
-            if (count == 0) {
-                return 0;
-            }
-            return energy/count;
-        }
-
-        public void release() {
-            if (mVisualizer != null) {
-                mVisualizer.release();
-                mVisualizer = null;
-            }
-        }
-    }
 
     private void getBassBoost(int session) {
          if (mBassBoost == null || session != mSession) {
