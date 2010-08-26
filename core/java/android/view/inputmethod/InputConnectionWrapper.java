@@ -50,6 +50,10 @@ public class InputConnectionWrapper implements InputConnection {
         return mTarget.getTextAfterCursor(n, flags);
     }
 
+    public CharSequence getSelectedText(int flags) {
+        return mTarget.getSelectedText(flags);
+    }
+
     public int getCursorCapsMode(int reqModes) {
         return mTarget.getCursorCapsMode(reqModes);
     }
@@ -65,6 +69,10 @@ public class InputConnectionWrapper implements InputConnection {
 
     public boolean setComposingText(CharSequence text, int newCursorPosition) {
         return mTarget.setComposingText(text, newCursorPosition);
+    }
+
+    public boolean setComposingRegion(int start, int end) {
+        return mTarget.setComposingRegion(start, end);
     }
 
     public boolean finishComposingText() {
