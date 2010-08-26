@@ -691,8 +691,8 @@ public final class CallManager {
      * Stop the playing DTMF tone. Ignored if there is no playing DTMF
      * tone or no active call.
      */
-    public void stopDtmf(Phone phone) {
-        phone.stopDtmf();
+    public void stopDtmf() {
+        if (hasActiveFgCall()) getFgPhone().stopDtmf();
     }
 
     /**
@@ -709,7 +709,7 @@ public final class CallManager {
      * @param onComplete is the callback message when the action is processed by BP
      *
      */
-    public boolean sendBurstDtmf(Phone phone, String dtmfString, int on, int off, Message onComplete) {
+    public boolean sendBurstDtmf(String dtmfString, int on, int off, Message onComplete) {
         if (hasActiveFgCall()) {
             getActiveFgCall().getPhone().sendBurstDtmf(dtmfString, on, off, onComplete);
             return true;
