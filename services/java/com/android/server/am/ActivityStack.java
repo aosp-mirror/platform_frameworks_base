@@ -2327,12 +2327,12 @@ public class ActivityStack {
         if (grantedUriPermissions != null && callingUid > 0) {
             for (int i=0; i<grantedUriPermissions.length; i++) {
                 mService.grantUriPermissionLocked(callingUid, r.packageName,
-                        grantedUriPermissions[i], grantedMode, r);
+                        grantedUriPermissions[i], grantedMode, r.getUriPermissionsLocked());
             }
         }
 
         mService.grantUriPermissionFromIntentLocked(callingUid, r.packageName,
-                intent, r);
+                intent, r.getUriPermissionsLocked());
 
         if (newTask) {
             EventLog.writeEvent(EventLogTags.AM_CREATE_TASK, r.task.taskId);
@@ -2557,7 +2557,7 @@ public class ActivityStack {
 
         if (callingUid > 0) {
             mService.grantUriPermissionFromIntentLocked(callingUid, r.packageName,
-                    data, r);
+                    data, r.getUriPermissionsLocked());
         }
 
         if (DEBUG_RESULTS) Slog.v(TAG, "Send activity result to " + r
@@ -2885,7 +2885,7 @@ public class ActivityStack {
                     + " res=" + resultCode + " data=" + resultData);
             if (r.info.applicationInfo.uid > 0) {
                 mService.grantUriPermissionFromIntentLocked(r.info.applicationInfo.uid,
-                        r.packageName, resultData, r);
+                        r.packageName, resultData, r.getUriPermissionsLocked());
             }
             resultTo.addResultLocked(r, r.resultWho, r.requestCode, resultCode,
                                      resultData);
