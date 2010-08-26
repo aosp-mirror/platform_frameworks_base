@@ -75,7 +75,7 @@ class TextLine {
             }
         }
         tl = new TextLine();
-        Log.e("TLINE", "new: " + tl);
+        Log.v("TLINE", "new: " + tl);
         return tl;
     }
 

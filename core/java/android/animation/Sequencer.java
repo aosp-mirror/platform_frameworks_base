@@ -241,6 +241,21 @@ public final class Sequencer extends Animatable {
     }
 
     /**
+     * Returns true if any of the child animations of this Sequencer have been started and have not
+     * yet ended.
+     * @return Whether this Sequencer has been started and has not yet ended.
+     */
+    @Override
+    public boolean isRunning() {
+        for (Node node : mNodes) {
+            if (node.animation.isRunning()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * {@inheritDoc}
      *
      * <p>Starting this <code>Sequencer</code> will, in turn, start the animations for which
@@ -467,14 +482,10 @@ public final class Sequencer extends Animatable {
         public void onAnimationEnd(Animatable animation) {
             animation.removeListener(this);
             mPlayingSet.remove(animation);
-            Node animNode = mSequencer.mNodeMap.get(animation);
-            animNode.done = true;
             ArrayList<Node> sortedNodes = mSequencer.mSortedNodes;
-            int numNodes = sortedNodes.size();
-            int nodeIndex = sortedNodes.indexOf(animNode);
             boolean allDone = true;
-            for (int i = nodeIndex + 1; i < numNodes; ++i) {
-                if (!sortedNodes.get(i).done) {
+            for (Node node : sortedNodes) {
+                if (node.animation.isRunning()) {
                     allDone = false;
                     break;
                 }
@@ -558,7 +569,6 @@ public final class Sequencer extends Animatable {
                         }
                     }
                 }
-                node.done = false; // also reset done flag
             }
         }
     }
@@ -624,13 +634,6 @@ public final class Sequencer extends Animatable {
          * dependency when it is a root node.
          */
         public ArrayList<Node> nodeDependents = null;
-
-        /**
-         * Flag indicating whether the animation in this node is finished. This flag
-         * is used by Sequencer to check, as each animation ends, whether all child animations
-         * are done and it's time to send out an end event for the entire Sequencer.
-         */
-        public boolean done = false;
 
         /**
          * Constructs the Node with the animation that it encapsulates. A Node has no
