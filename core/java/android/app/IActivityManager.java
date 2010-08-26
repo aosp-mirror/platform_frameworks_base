@@ -317,6 +317,12 @@ public interface IActivityManager extends IInterface {
     
     public void crashApplication(int uid, int initialPid, String packageName,
             String message) throws RemoteException;
+    
+    public IBinder newUriPermissionOwner(String name) throws RemoteException;
+    public void grantUriPermissionFromOwner(IBinder owner, int fromUid, String targetPkg,
+            Uri uri, int mode) throws RemoteException;
+    public void revokeUriPermissionFromOwner(IBinder owner, Uri uri,
+            int mode) throws RemoteException;
 
     // Cause the specified process to dump the specified heap.
     public boolean dumpHeap(String process, boolean managed, String path,
@@ -528,5 +534,8 @@ public interface IActivityManager extends IInterface {
     int SET_IMMERSIVE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+111;
     int IS_TOP_ACTIVITY_IMMERSIVE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+112;
     int CRASH_APPLICATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+113;
-    int DUMP_HEAP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+114;
+    int NEW_URI_PERMISSION_OWNER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+114;
+    int GRANT_URI_PERMISSION_FROM_OWNER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+115;
+    int REVOKE_URI_PERMISSION_FROM_OWNER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+116;
+    int DUMP_HEAP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+117;
 }

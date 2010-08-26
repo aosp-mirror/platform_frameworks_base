@@ -1248,8 +1248,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         
         case IS_USER_A_MONKEY_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
-            reply.writeInt(isUserAMonkey() ? 1 : 0);
+            boolean areThey = isUserAMonkey();
             reply.writeNoException();
+            reply.writeInt(areThey ? 1 : 0);
             return true;
         }
         
@@ -1263,8 +1264,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case IS_IMMERSIVE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
-            reply.writeInt(isImmersive(token) ? 1 : 0);
+            boolean isit = isImmersive(token);
             reply.writeNoException();
+            reply.writeInt(isit ? 1 : 0);
             return true;
         }
 
@@ -1279,8 +1281,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         
         case IS_TOP_ACTIVITY_IMMERSIVE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
-            reply.writeInt(isTopActivityImmersive() ? 1 : 0);
+            boolean isit = isTopActivityImmersive();
             reply.writeNoException();
+            reply.writeInt(isit ? 1 : 0);
             return true;
         }
 
@@ -1291,6 +1294,40 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             String packageName = data.readString();
             String message = data.readString();
             crashApplication(uid, initialPid, packageName, message);
+            reply.writeNoException();
+            return true;
+        }
+        
+        case NEW_URI_PERMISSION_OWNER_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            String name = data.readString();
+            IBinder perm = newUriPermissionOwner(name);
+            reply.writeNoException();
+            reply.writeStrongBinder(perm);
+            return true;
+        }
+
+        case GRANT_URI_PERMISSION_FROM_OWNER_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder owner = data.readStrongBinder();
+            int fromUid = data.readInt();
+            String targetPkg = data.readString();
+            Uri uri = Uri.CREATOR.createFromParcel(data);
+            int mode = data.readInt();
+            grantUriPermissionFromOwner(owner, fromUid, targetPkg, uri, mode);
+            reply.writeNoException();
+            return true;
+        }
+
+        case REVOKE_URI_PERMISSION_FROM_OWNER_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder owner = data.readStrongBinder();
+            Uri uri = null;
+            if (data.readInt() != 0) {
+                Uri.CREATOR.createFromParcel(data);
+            }
+            int mode = data.readInt();
+            revokeUriPermissionFromOwner(owner, uri, mode);
             reply.writeNoException();
             return true;
         }
@@ -2854,8 +2891,8 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
         mRemote.transact(IS_IMMERSIVE_TRANSACTION, data, reply, 0);
-        boolean res = reply.readInt() == 1;
         reply.readException();
+        boolean res = reply.readInt() == 1;
         data.recycle();
         reply.recycle();
         return res;
@@ -2867,8 +2904,8 @@ class ActivityManagerProxy implements IActivityManager
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         mRemote.transact(IS_TOP_ACTIVITY_IMMERSIVE_TRANSACTION, data, reply, 0);
-        boolean res = reply.readInt() == 1;
         reply.readException();
+        boolean res = reply.readInt() == 1;
         data.recycle();
         reply.recycle();
         return res;
@@ -2884,6 +2921,55 @@ class ActivityManagerProxy implements IActivityManager
         data.writeString(packageName);
         data.writeString(message);
         mRemote.transact(CRASH_APPLICATION_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    public IBinder newUriPermissionOwner(String name)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(name);
+        mRemote.transact(NEW_URI_PERMISSION_OWNER_TRANSACTION, data, reply, 0);
+        reply.readException();
+        IBinder res = reply.readStrongBinder();
+        data.recycle();
+        reply.recycle();
+        return res;
+    }
+
+    public void grantUriPermissionFromOwner(IBinder owner, int fromUid, String targetPkg,
+            Uri uri, int mode) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(owner);
+        data.writeInt(fromUid);
+        data.writeString(targetPkg);
+        uri.writeToParcel(data, 0);
+        data.writeInt(mode);
+        mRemote.transact(GRANT_URI_PERMISSION_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    public void revokeUriPermissionFromOwner(IBinder owner, Uri uri,
+            int mode) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(owner);
+        if (uri != null) {
+            data.writeInt(1);
+            uri.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
+        data.writeInt(mode);
+        mRemote.transact(REVOKE_URI_PERMISSION_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
@@ -2910,6 +2996,6 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         return res;
     }
-
+    
     private IBinder mRemote;
 }
