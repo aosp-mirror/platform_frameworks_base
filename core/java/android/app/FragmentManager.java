@@ -511,6 +511,11 @@ final class FragmentManagerImpl implements FragmentManager {
                     moveToState(f, newState, transit, transitStyle);
                 }
             }
+
+            if (mNeedMenuInvalidate && mActivity != null) {
+                mActivity.invalidateOptionsMenu();
+                mNeedMenuInvalidate = false;
+            }
         }
     }
     
@@ -800,9 +805,7 @@ final class FragmentManagerImpl implements FragmentManager {
             enqueueAction(new Runnable() {
                 public void run() {
                     if (DEBUG) Log.v(TAG, "Popping back stack state: " + bss);
-                    bss.popFromBackStack();
-                    moveToState(mCurState, reverseTransit(bss.getTransition()),
-                            bss.getTransitionStyle(), true);
+                    bss.popFromBackStack(true);
                 }
             });
         } else {
@@ -848,11 +851,11 @@ final class FragmentManagerImpl implements FragmentManager {
             }
             enqueueAction(new Runnable() {
                 public void run() {
-                    for (int i=0; i<states.size(); i++) {
+                    final int LAST = states.size()-1;
+                    for (int i=0; i<=LAST; i++) {
                         if (DEBUG) Log.v(TAG, "Popping back stack state: " + states.get(i));
-                        states.get(i).popFromBackStack();
+                        states.get(i).popFromBackStack(i == LAST);
                     }
-                    moveToState(mCurState, true);
                 }
             });
         }

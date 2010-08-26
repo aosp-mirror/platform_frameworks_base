@@ -410,17 +410,13 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
         
         mManager.moveToState(mManager.mCurState, mTransition,
                 mTransitionStyle, true);
-        if (mManager.mNeedMenuInvalidate && mManager.mActivity != null) {
-            mManager.mActivity.invalidateOptionsMenu();
-            mManager.mNeedMenuInvalidate = false;
-        }
         
         if (mAddToBackStack) {
             mManager.addBackStackState(this);
         }
     }
     
-    public void popFromBackStack() {
+    public void popFromBackStack(boolean doStateMove) {
         if (FragmentManagerImpl.DEBUG) Log.v(TAG, "popFromBackStack: " + this);
 
         bumpBackStackNesting(-1);
@@ -472,11 +468,9 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
             op = op.prev;
         }
         
-        mManager.moveToState(mManager.mCurState,
-                FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle, true);
-        if (mManager.mNeedMenuInvalidate && mManager.mActivity != null) {
-            mManager.mActivity.invalidateOptionsMenu();
-            mManager.mNeedMenuInvalidate = false;
+        if (doStateMove) {
+            mManager.moveToState(mManager.mCurState,
+                    FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle, true);
         }
 
         if (mIndex >= 0) {
