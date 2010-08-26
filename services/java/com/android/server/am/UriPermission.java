@@ -22,13 +22,14 @@ import android.net.Uri;
 import java.io.PrintWriter;
 import java.util.HashSet;
 
-interface UriPermissionOwner {
-    void addReadPermission(UriPermission perm);
-    void addWritePermission(UriPermission perm);
-    void removeReadPermission(UriPermission perm);
-    void removeWritePermission(UriPermission perm);
-}
-
+/**
+ * Description of a permission granted to an app to access a particular URI.
+ *
+ * CTS tests for this functionality can be run with "runtest cts-appsecurity".
+ *
+ * Test cases are at cts/tests/appsecurity-tests/test-apps/UsePermissionDiffCert
+ *      /src/com/android/cts/usespermissiondiffcertapp/AccessPermissionWithDiffSigTest.java
+ */
 class UriPermission {
     final int uid;
     final Uri uri;

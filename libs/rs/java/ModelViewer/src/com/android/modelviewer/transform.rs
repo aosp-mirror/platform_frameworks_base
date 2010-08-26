@@ -52,8 +52,8 @@ void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32
     //rsDebug("Transform data", (int)data);
     //rsDebug("Entering parent", (int)parent);
 
-    rs_matrix4x4 *localMat = (rs_matrix4x4*)&data->localMat_Row0;
-    rs_matrix4x4 *globalMat = (rs_matrix4x4*)&data->globalMat_Row0;
+    rs_matrix4x4 *localMat = &data->localMat;
+    rs_matrix4x4 *globalMat = &data->globalMat;
 
     ParentData toChild;
     toChild.changed = 0;

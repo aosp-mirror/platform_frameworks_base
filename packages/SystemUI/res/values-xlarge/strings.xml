@@ -20,4 +20,58 @@
     <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. -->
     <string name="status_bar_clear_all_button">Clear all</string>
+
+    <!-- System panel ("Quick Settings") -->
+
+    <!-- Text to display underneath the graphical battery meter. Should
+         include the word for "battery" and a place for the percentage charge
+         available. [CHAR LIMIT=20] -->
+    <string name="system_panel_battery_meter_format">
+        Battery: <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g>
+    </string>
+
+    <!-- Text to display underneath the graphical signal strength meter when
+         no connection is available. [CHAR LIMIT=20] -->
+    <string name="system_panel_signal_meter_disconnected">
+        no internet connection
+    </string>
+
+    <!-- Text to display underneath the graphical signal strength meter when
+         it is displaying information about a connected, named Wi-Fi network.
+         Should include the word for "Wi-Fi" and a placeholder for the
+         wireless network's SSID. [CHAR LIMIT=20] -->
+    <string name="system_panel_signal_meter_wifi_ssid_format">
+        Wi-Fi: <xliff:g id="ssid">%s</xliff:g>
+    </string>
+
+    <!-- Text to display underneath the graphical signal strength meter when
+         it is displaying Wi-Fi status and Wi-Fi is connected to a network
+         whose SSID is not available.
+         [CHAR LIMIT=20] -->
+    <string name="system_panel_signal_meter_wifi_nossid">
+        Wi-Fi: connected
+    </string>
+
+    <!-- Text to display underneath the graphical signal strength meter when
+         it is displaying Wi-Fi status and Wi-Fi is in the process of
+         connecting to a network.  [CHAR LIMIT=20] -->
+    <string name="system_panel_signal_meter_wifi_connecting">
+        Wi-Fi: connecting…
+    </string>
+ 
+    <!-- Text to display underneath the graphical signal strength meter when
+         it is displaying mobile data (3G) status and a network connection is
+         available.
+         [CHAR LIMIT=20] -->
+    <string name="system_panel_signal_meter_data_connected">
+        Mobile data: connected
+    </string>
+
+    <!-- Text to display underneath the graphical signal strength meter when
+         it is displaying mobile data (3G) status and a network connection is
+         unavailable.
+         [CHAR LIMIT=20] -->
+    <string name="system_panel_signal_meter_data_connecting">
+        Mobile data: connecting…
+    </string>
 </resources>

@@ -54,16 +54,20 @@ public class Element extends BaseObj {
         UNSIGNED_5_5_5_1 (14, 2),
         UNSIGNED_4_4_4_4 (15, 2),
 
-        RS_ELEMENT (16, 4),
-        RS_TYPE (17, 4),
-        RS_ALLOCATION (18, 4),
-        RS_SAMPLER (19, 4),
-        RS_SCRIPT (20, 4),
-        RS_MESH (21, 4),
-        RS_PROGRAM_FRAGMENT (22, 4),
-        RS_PROGRAM_VERTEX (23, 4),
-        RS_PROGRAM_RASTER (24, 4),
-        RS_PROGRAM_STORE (25, 4);
+        MATRIX_4X4 (16, 64),
+        MATRIX_3X3 (17, 36),
+        MATRIX_2X2 (18, 16),
+
+        RS_ELEMENT (1000, 4),
+        RS_TYPE (1001, 4),
+        RS_ALLOCATION (1002, 4),
+        RS_SAMPLER (1003, 4),
+        RS_SCRIPT (1004, 4),
+        RS_MESH (1005, 4),
+        RS_PROGRAM_FRAGMENT (1006, 4),
+        RS_PROGRAM_VERTEX (1007, 4),
+        RS_PROGRAM_RASTER (1008, 4),
+        RS_PROGRAM_STORE (1009, 4);
 
         int mID;
         int mSize;
@@ -285,6 +289,29 @@ public class Element extends BaseObj {
         return rs.mElement_UCHAR_4;
     }
 
+    public static Element MATRIX_4X4(RenderScript rs) {
+        if(rs.mElement_MATRIX_4X4 == null) {
+            rs.mElement_MATRIX_4X4 = createUser(rs, DataType.MATRIX_4X4);
+        }
+        return rs.mElement_MATRIX_4X4;
+    }
+    public static Element MATRIX4X4(RenderScript rs) {
+        return MATRIX_4X4(rs);
+    }
+
+    public static Element MATRIX_3X3(RenderScript rs) {
+        if(rs.mElement_MATRIX_3X3 == null) {
+            rs.mElement_MATRIX_3X3 = createUser(rs, DataType.MATRIX_3X3);
+        }
+        return rs.mElement_MATRIX_4X4;
+    }
+
+    public static Element MATRIX_2X2(RenderScript rs) {
+        if(rs.mElement_MATRIX_2X2 == null) {
+            rs.mElement_MATRIX_2X2 = createUser(rs, DataType.MATRIX_2X2);
+        }
+        return rs.mElement_MATRIX_2X2;
+    }
 
     Element(int id, RenderScript rs, Element[] e, String[] n) {
         super(id, rs);

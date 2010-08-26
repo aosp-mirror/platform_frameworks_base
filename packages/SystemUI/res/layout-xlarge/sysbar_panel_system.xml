@@ -92,8 +92,10 @@
             android:layout_alignParentLeft="true"
             >
             <ImageView android:id="@+id/battery_meter"
-                android:layout_width="wrap_content"
+                android:layout_width="96dip"
                 android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:scaleType="centerCrop"
                 android:src="@drawable/battery"
                 />
 
@@ -129,8 +131,10 @@
             android:layout_alignParentRight="true"
             >
             <ImageView android:id="@+id/signal_meter"
-                android:layout_width="wrap_content"
+                android:layout_width="96dip"
                 android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:scaleType="centerCrop"
                 android:src="@drawable/signal"
                 />
 

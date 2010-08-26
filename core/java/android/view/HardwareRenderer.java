@@ -53,8 +53,10 @@ public abstract class HardwareRenderer {
 
     /**
      * Destroys the hardware rendering context.
+     * 
+     * @param full If true, destroys all associated resources.
      */
-    abstract void destroy();
+    abstract void destroy(boolean full);
 
     /**
      * Initializes the hardware renderer for the specified surface.
@@ -187,7 +189,7 @@ public abstract class HardwareRenderer {
         }
 
         /**
-         * Checks for OpenGL errors. If an error has occured, {@link #destroy()}
+         * Checks for OpenGL errors. If an error has occured, {@link #destroy(boolean)}
          * is invoked and the requested flag is turned off. The error code is
          * also logged as a warning.
          */
@@ -197,7 +199,7 @@ public abstract class HardwareRenderer {
                 if (error != EGL10.EGL_SUCCESS) {
                     // something bad has happened revert to
                     // normal rendering.
-                    destroy();
+                    destroy(true);
                     if (error != EGL11.EGL_CONTEXT_LOST) {
                         // we'll try again if it was context lost
                         setRequested(false);
@@ -217,13 +219,12 @@ public abstract class HardwareRenderer {
                 if (mGl != null) {
                     int err = sEgl.eglGetError();
                     if (err != EGL10.EGL_SUCCESS) {
-                        destroy();
+                        destroy(true);
                         setRequested(false);
                     } else {
-                        if (mCanvas != null) {
-                            destroyCanvas();
+                        if (mCanvas == null) {
+                            mCanvas = createCanvas();
                         }
-                        mCanvas = createCanvas();
                         if (mCanvas != null) {
                             setEnabled(true);
                         } else {
@@ -235,11 +236,6 @@ public abstract class HardwareRenderer {
                 }
             }
             return false;
-        }
-
-        private void destroyCanvas() {
-            mCanvas.destroy();
-            mCanvas = null;
         }
 
         abstract GLES20Canvas createCanvas();
@@ -341,15 +337,15 @@ public abstract class HardwareRenderer {
         }
         
         @Override
-        void destroy() {
+        void destroy(boolean full) {
+            if (full && mCanvas != null) {
+                mCanvas.destroy();
+                mCanvas = null;
+            }
+            
             if (!isEnabled() || mDestroyed) return;
 
             mDestroyed = true;
-
-            checkCurrent();
-            // Destroy the Canvas first in case it needs to use a GL context
-            // to perform its cleanup.
-            destroyCanvas();
 
             sEgl.eglMakeCurrent(sEglDisplay, EGL10.EGL_NO_SURFACE,
                     EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
@@ -357,12 +353,6 @@ public abstract class HardwareRenderer {
 
             mEglSurface = null;
             mGl = null;
-
-            // mEgl.eglDestroyContext(mEglDisplay, mEglContext);
-            // mEglContext = null;            
-            // mEgl.eglTerminate(mEglDisplay);
-            // mEgl = null;
-            // mEglDisplay = null;
 
             setEnabled(false);
         }

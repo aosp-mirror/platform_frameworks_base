@@ -4798,6 +4798,8 @@ public class WindowManagerService extends IWindowManager.Stub
         Parcel data = null;
         Parcel reply = null;
 
+        BufferedWriter out = null;
+
         // Any uncaught exception will crash the system process
         try {
             // Find the hashcode of the window
@@ -4835,6 +4837,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
             reply.readException();
 
+            if (!client.isOutputShutdown()) {
+                out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+                out.write("DONE\n");
+                out.flush();
+            }
+
         } catch (Exception e) {
             Slog.w(TAG, "Could not send command " + command + " with parameters " + parameters, e);
             success = false;
@@ -4844,6 +4852,13 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (reply != null) {
                 reply.recycle();
+            }
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+
+                }
             }
         }
 

@@ -101,8 +101,8 @@
         </LinearLayout>
 
         <include layout="@layout/status_bar_center"
-            android:layout_width="100dip"
-            android:layout_height="wrap_content"
+            android:layout_width="160dip"
+            android:layout_height="match_parent"
             android:layout_centerInParent="true"
             />
 

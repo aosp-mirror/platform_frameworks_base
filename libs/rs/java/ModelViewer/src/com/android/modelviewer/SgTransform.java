@@ -82,15 +82,8 @@ public class SgTransform {
 
     void setData() {
 
-        mTransformData.globalMat_Row0 = new Float4(1, 0, 0, 0);
-        mTransformData.globalMat_Row1 = new Float4(0, 1, 0, 0);
-        mTransformData.globalMat_Row2 = new Float4(0, 0, 1, 0);
-        mTransformData.globalMat_Row3 = new Float4(0, 0, 0, 1);
-
-        mTransformData.localMat_Row0 = new Float4(1, 0, 0, 0);
-        mTransformData.localMat_Row1 = new Float4(0, 1, 0, 0);
-        mTransformData.localMat_Row2 = new Float4(0, 0, 1, 0);
-        mTransformData.localMat_Row3 = new Float4(0, 0, 0, 1);
+        mTransformData.globalMat = new Matrix4f();
+        mTransformData.localMat = new Matrix4f();
 
         mTransformData.transforms0 = mTransforms[0];
         mTransformData.transforms1 = mTransforms[1];

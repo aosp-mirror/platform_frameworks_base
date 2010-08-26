@@ -311,9 +311,12 @@ public final class Mtp
         // Object properties we support
         public static final int PROPERTY_STORAGE_ID = 0xDC01;
         public static final int PROPERTY_OBJECT_FORMAT = 0xDC02;
+        public static final int PROPERTY_PROTECTION_STATUS = 0xDC03;
         public static final int PROPERTY_OBJECT_SIZE = 0xDC04;
         public static final int PROPERTY_OBJECT_FILE_NAME = 0xDC07;
+        public static final int PROPERTY_DATE_MODIFIED = 0xDC09;
         public static final int PROPERTY_PARENT_OBJECT = 0xDC0B;
+        public static final int PROPERTY_PERSISTENT_UID = 0xDC41;
 
         /**
          * Object is not protected. It may be modified and deleted, and its properties

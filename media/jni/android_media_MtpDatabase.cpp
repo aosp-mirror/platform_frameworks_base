@@ -29,6 +29,7 @@
 
 #include "MtpDatabase.h"
 #include "MtpDataPacket.h"
+#include "MtpProperty.h"
 #include "MtpUtils.h"
 #include "mtp.h"
 
@@ -45,6 +46,7 @@ static jmethodID method_getSupportedCaptureFormats;
 static jmethodID method_getSupportedObjectProperties;
 static jmethodID method_getSupportedDeviceProperties;
 static jmethodID method_getObjectProperty;
+static jmethodID method_setObjectProperty;
 static jmethodID method_getObjectInfo;
 static jmethodID method_getObjectFilePath;
 static jmethodID method_deleteFile;
@@ -98,9 +100,21 @@ public:
     virtual MtpObjectPropertyList*  getSupportedObjectProperties(MtpObjectFormat format);
     virtual MtpDevicePropertyList*  getSupportedDeviceProperties();
 
-    virtual MtpResponseCode         getObjectProperty(MtpObjectHandle handle,
+    virtual MtpResponseCode         getObjectPropertyValue(MtpObjectHandle handle,
                                             MtpObjectProperty property,
                                             MtpDataPacket& packet);
+
+    virtual MtpResponseCode         setObjectPropertyValue(MtpObjectHandle handle,
+                                            MtpObjectProperty property,
+                                            MtpDataPacket& packet);
+
+    virtual MtpResponseCode         getDevicePropertyValue(MtpDeviceProperty property,
+                                            MtpDataPacket& packet);
+
+    virtual MtpResponseCode         setDevicePropertyValue(MtpDeviceProperty property,
+                                            MtpDataPacket& packet);
+
+    virtual MtpResponseCode         resetDeviceProperty(MtpDeviceProperty property);
 
     virtual MtpResponseCode         getObjectInfo(MtpObjectHandle handle,
                                             MtpDataPacket& packet);
@@ -116,6 +130,11 @@ public:
 
     virtual MtpResponseCode         setObjectReferences(MtpObjectHandle handle,
                                             MtpObjectHandleList* references);
+
+    virtual MtpProperty*            getObjectPropertyDesc(MtpObjectProperty property,
+                                            MtpObjectFormat format);
+
+    virtual MtpProperty*            getDevicePropertyDesc(MtpDeviceProperty property);
 };
 
 // ----------------------------------------------------------------------------
@@ -292,7 +311,7 @@ MtpDevicePropertyList* MyMtpDatabase::getSupportedDeviceProperties() {
     return list;
 }
 
-MtpResponseCode MyMtpDatabase::getObjectProperty(MtpObjectHandle handle,
+MtpResponseCode MyMtpDatabase::getObjectPropertyValue(MtpObjectHandle handle,
                                             MtpObjectProperty property,
                                             MtpDataPacket& packet) {
     int         type;
@@ -309,6 +328,15 @@ MtpResponseCode MyMtpDatabase::getObjectProperty(MtpObjectHandle handle,
     jlong* longValues = env->GetLongArrayElements(mLongBuffer, 0);
     jlong longValue = longValues[0];
     env->ReleaseLongArrayElements(mLongBuffer, longValues, 0);
+
+    // special case MTP_PROPERTY_DATE_MODIFIED, which is a string to MTP
+    // but stored internally as a uint64
+    if (property == MTP_PROPERTY_DATE_MODIFIED) {
+        char    date[20];
+        formatDateTime(longValue, date, sizeof(date));
+        packet.putString(date);
+        return MTP_RESPONSE_OK;
+    }
 
     switch (type) {
         case MTP_TYPE_INT8:
@@ -335,6 +363,12 @@ MtpResponseCode MyMtpDatabase::getObjectProperty(MtpObjectHandle handle,
         case MTP_TYPE_UINT64:
             packet.putUInt64(longValue);
             break;
+        case MTP_TYPE_INT128:
+            packet.putInt128(longValue);
+            break;
+        case MTP_TYPE_UINT128:
+            packet.putInt128(longValue);
+            break;
         case MTP_TYPE_STR:
         {
             jchar* str = env->GetCharArrayElements(mStringBuffer, 0);
@@ -349,6 +383,26 @@ MtpResponseCode MyMtpDatabase::getObjectProperty(MtpObjectHandle handle,
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MyMtpDatabase::setObjectPropertyValue(MtpObjectHandle handle,
+                                            MtpObjectProperty property,
+                                            MtpDataPacket& packet) {
+    return -1;
+}
+
+MtpResponseCode MyMtpDatabase::getDevicePropertyValue(MtpDeviceProperty property,
+                                            MtpDataPacket& packet) {
+    return -1;
+}
+
+MtpResponseCode MyMtpDatabase::setDevicePropertyValue(MtpDeviceProperty property,
+                                            MtpDataPacket& packet) {
+    return -1;
+}
+
+MtpResponseCode MyMtpDatabase::resetDeviceProperty(MtpDeviceProperty property) {
+    return -1;
 }
 
 MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
@@ -372,9 +426,10 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
     uint64_t modified = longValues[1];
     env->ReleaseLongArrayElements(mLongBuffer, longValues, 0);
 
-    int associationType = (format == MTP_FORMAT_ASSOCIATION ?
-                            MTP_ASSOCIATION_TYPE_GENERIC_FOLDER :
-                            MTP_ASSOCIATION_TYPE_UNDEFINED);
+//    int associationType = (format == MTP_FORMAT_ASSOCIATION ?
+//                            MTP_ASSOCIATION_TYPE_GENERIC_FOLDER :
+//                            MTP_ASSOCIATION_TYPE_UNDEFINED);
+    int associationType = MTP_ASSOCIATION_TYPE_UNDEFINED;
 
     packet.putUInt32(storageID);
     packet.putUInt16(format);
@@ -495,6 +550,37 @@ MtpResponseCode MyMtpDatabase::setObjectReferences(MtpObjectHandle handle,
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return result;
+}
+
+MtpProperty* MyMtpDatabase::getObjectPropertyDesc(MtpObjectProperty property,
+                                            MtpObjectFormat format) {
+    MtpProperty* result = NULL;
+    switch (property) {
+        case MTP_PROPERTY_OBJECT_FORMAT:
+        case MTP_PROPERTY_PROTECTION_STATUS:
+            result = new MtpProperty(property, MTP_TYPE_UINT16);
+            break;
+        case MTP_PROPERTY_STORAGE_ID:
+        case MTP_PROPERTY_PARENT_OBJECT:
+            result = new MtpProperty(property, MTP_TYPE_UINT32);
+            break;
+        case MTP_PROPERTY_OBJECT_SIZE:
+            result = new MtpProperty(property, MTP_TYPE_UINT64);
+            break;
+        case MTP_PROPERTY_PERSISTENT_UID:
+            result = new MtpProperty(property, MTP_TYPE_UINT128);
+            break;
+        case MTP_PROPERTY_OBJECT_FILE_NAME:
+        case MTP_PROPERTY_DATE_MODIFIED:
+            result = new MtpProperty(property, MTP_TYPE_STR);
+            break;
+    }
+
+    return result;
+}
+
+MtpProperty* MyMtpDatabase::getDevicePropertyDesc(MtpDeviceProperty property) {
+    return NULL;
 }
 
 #endif // HAVE_ANDROID_OS

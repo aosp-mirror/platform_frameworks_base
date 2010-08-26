@@ -66,14 +66,6 @@ public class MtpDatabase {
 
     private final MediaScanner mMediaScanner;
 
-    // MTP property codes
-    private static final int MTP_PROPERTY_STORAGE_ID = 0xDC01;
-    private static final int MTP_PROPERTY_OBJECT_FORMAT = 0xDC02;
-    private static final int MTP_PROPERTY_OBJECT_SIZE = 0xDC04;
-    private static final int MTP_PROPERTY_OBJECT_FILE_NAME = 0xDC07;
-    private static final int MTP_PROPERTY_DATE_MODIFIED = 0xDC09;
-    private static final int MTP_PROPERTY_PARENT_OBJECT = 0xDC0B;
-
     // MTP response codes
     private static final int MTP_RESPONSE_OK = 0x2001;
     private static final int MTP_RESPONSE_GENERAL_ERROR = 0x2002;
@@ -271,25 +263,36 @@ public class MtpDatabase {
         boolean isString = false;
 
         switch (property) {
-            case MTP_PROPERTY_STORAGE_ID:
+            case Mtp.Object.PROPERTY_STORAGE_ID:
                 outIntValue[0] = mStorageID;
                 return MTP_RESPONSE_OK;
-            case MTP_PROPERTY_OBJECT_FORMAT:
+            case Mtp.Object.PROPERTY_OBJECT_FORMAT:
                 column = MtpObjects.ObjectColumns.FORMAT;
                 break;
-            case MTP_PROPERTY_OBJECT_SIZE:
+            case Mtp.Object.PROPERTY_PROTECTION_STATUS:
+                // protection status is always 0
+                outIntValue[0] = 0;
+                return MTP_RESPONSE_OK;
+            case Mtp.Object.PROPERTY_OBJECT_SIZE:
                 column = MtpObjects.ObjectColumns.SIZE;
                 break;
-            case MTP_PROPERTY_OBJECT_FILE_NAME:
+            case Mtp.Object.PROPERTY_OBJECT_FILE_NAME:
                 column = MtpObjects.ObjectColumns.DATA;
                 isString = true;
                 break;
-            case MTP_PROPERTY_DATE_MODIFIED:
+            case Mtp.Object.PROPERTY_DATE_MODIFIED:
                 column = MtpObjects.ObjectColumns.DATE_MODIFIED;
                 break;
-            case MTP_PROPERTY_PARENT_OBJECT:
+            case Mtp.Object.PROPERTY_PARENT_OBJECT:
                 column = MtpObjects.ObjectColumns.PARENT;
                 break;
+            case Mtp.Object.PROPERTY_PERSISTENT_UID:
+                // PUID is concatenation of storageID and object handle
+                long puid = mStorageID;
+                puid <<= 32;
+                puid += handle;
+                outIntValue[0] = puid;
+                return MTP_RESPONSE_OK;
             default:
                 return MTP_RESPONSE_OBJECT_PROP_NOT_SUPPORTED;
         }
@@ -305,7 +308,7 @@ public class MtpDatabase {
                     String value = c.getString(1);
                     int start = 0;
 
-                    if (property == MTP_PROPERTY_OBJECT_FILE_NAME) {
+                    if (property == Mtp.Object.PROPERTY_OBJECT_FILE_NAME) {
                         // extract name from full path
                         int lastSlash = value.lastIndexOf('/');
                         if (lastSlash >= 0) {

@@ -461,26 +461,33 @@ void AwesomePlayer::onBufferingUpdate() {
         return;
     }
 
+    bool eos;
+    size_t cachedDataRemaining = mCachedSource->approxDataRemaining(&eos);
+
     size_t lowWatermark = 400000;
     size_t highWatermark = 1000000;
 
-    off_t size;
-    if (mDurationUs >= 0 && mCachedSource->getSize(&size) == OK) {
-        int64_t bitrate = size * 8000000ll / mDurationUs;  // in bits/sec
+    if (eos) {
+        notifyListener_l(MEDIA_BUFFERING_UPDATE, 100);
+    } else {
+        off_t size;
+        if (mDurationUs >= 0 && mCachedSource->getSize(&size) == OK) {
+            int64_t bitrate = size * 8000000ll / mDurationUs;  // in bits/sec
 
-        size_t cachedSize = mCachedSource->cachedSize();
-        int64_t cachedDurationUs = cachedSize * 8000000ll / bitrate;
+            size_t cachedSize = mCachedSource->cachedSize();
+            int64_t cachedDurationUs = cachedSize * 8000000ll / bitrate;
 
-        double percentage = (double)cachedDurationUs / mDurationUs;
+            int percentage = 100.0 * (double)cachedDurationUs / mDurationUs;
+            if (percentage > 100) {
+                percentage = 100;
+            }
 
-        notifyListener_l(MEDIA_BUFFERING_UPDATE, percentage * 100.0);
+            notifyListener_l(MEDIA_BUFFERING_UPDATE, percentage);
 
-        lowWatermark = 2 * bitrate / 8;  // 2 secs
-        highWatermark = 10 * bitrate / 8;  // 10 secs
+            lowWatermark = 2 * bitrate / 8;  // 2 secs
+            highWatermark = 10 * bitrate / 8;  // 10 secs
+        }
     }
-
-    bool eos;
-    size_t cachedDataRemaining = mCachedSource->approxDataRemaining(&eos);
 
     if ((mFlags & PLAYING) && !eos && (cachedDataRemaining < lowWatermark)) {
         LOGI("cache is running low (< %d) , pausing.", lowWatermark);
