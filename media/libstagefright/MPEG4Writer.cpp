@@ -1569,9 +1569,9 @@ status_t MPEG4Writer::Track::threadEntry() {
                 // The idea here is to avoid having two or more samples with the
                 // same timestamp in the output file.
                 if (mTimeScale >= 1000000LL) {
-                    timestampUs += 1;
+                    timestampUs = lastTimestampUs + 1;
                 } else {
-                    timestampUs += (1000000LL + (mTimeScale >> 1)) / mTimeScale;
+                    timestampUs = lastTimestampUs + (1000000LL + (mTimeScale >> 1)) / mTimeScale;
                 }
 #endif
             }

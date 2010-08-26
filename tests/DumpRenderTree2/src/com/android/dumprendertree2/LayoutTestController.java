@@ -56,7 +56,7 @@ public class LayoutTestController {
     }
 
     public void clearAllDatabases() {
-        Log.w(LOG_TAG + "::clearAllDatabases", "called");
+        Log.i(LOG_TAG, "clearAllDatabases() called");
         WebStorage.getInstance().deleteAllData();
     }
 
@@ -70,7 +70,7 @@ public class LayoutTestController {
 
     public void setDatabaseQuota(long quota) {
         /** TODO: Reset this before every test! */
-        Log.w(LOG_TAG + "::setDatabaseQuota", "called with: " + quota);
+        Log.i(LOG_TAG, "setDatabaseQuota() called with: " + quota);
         WebStorage.getInstance().setQuotaForOrigin(Uri.fromFile(new File("")).toString(),
                 quota);
     }
@@ -80,13 +80,13 @@ public class LayoutTestController {
     }
 
     public void setMockGeolocationPosition(double latitude, double longitude, double accuracy) {
-        Log.w(LOG_TAG + "::setMockGeolocationPosition", "latitude: " + latitude +
-                " longitude: " + longitude + " accuracy: " + accuracy);
+        Log.i(LOG_TAG, "setMockGeolocationPosition(): " + "latitude=" + latitude +
+                " longitude=" + longitude + " accuracy=" + accuracy);
         MockGeolocation.getInstance().setPosition(latitude, longitude, accuracy);
     }
 
     public void setMockGeolocationError(int code, String message) {
-        Log.w(LOG_TAG + "::setMockGeolocationError", "code: " + code + " message: " + message);
+        Log.i(LOG_TAG, "setMockGeolocationError(): " + "code=" + code + " message=" + message);
         MockGeolocation.getInstance().setError(code, message);
     }
 
@@ -94,6 +94,9 @@ public class LayoutTestController {
             boolean canProvideBeta, double beta, boolean canProvideGamma, double gamma) {
         // Configuration is in WebKit, so stay on WebCore thread, but go via LayoutTestsExecutor
         // as we need access to the Webview.
+        Log.i(LOG_TAG, "setMockDeviceOrientation(" + canProvideAlpha +
+                ", " + alpha + ", " + canProvideBeta + ", " + beta + ", " + canProvideGamma +
+                ", " + gamma + ")");
         mLayoutTestsExecutor.setMockDeviceOrientation(
                 canProvideAlpha, alpha, canProvideBeta, beta, canProvideGamma, gamma);
     }

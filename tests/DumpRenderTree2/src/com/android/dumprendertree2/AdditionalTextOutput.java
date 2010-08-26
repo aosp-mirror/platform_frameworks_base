@@ -63,7 +63,8 @@ public class AdditionalTextOutput {
                 port = url.getPort();
             }
         } catch (MalformedURLException e) {
-            Log.e(LOG_TAG + "::appendDatabaseCallback", e.getMessage());
+            Log.e(LOG_TAG, "urlString=" + urlString + " databaseIdentifier=" + databaseIdentifier,
+                    e);
         }
 
         output.append("UI DELEGATE DATABASE CALLBACK: ");

@@ -33,7 +33,7 @@ def main():
   else:
     run_cmd = sys.argv[1]
 
-  #Setup logging class
+  # Setup logging class
   logging.basicConfig(level=logging.INFO, format='%(message)s')
 
   if not run_cmd in ("start", "stop", "restart"):
@@ -41,55 +41,69 @@ def main():
     logging.info("Usage: python run_apache2.py start|stop|restart")
     return
 
-  #Create /tmp/WebKit if it doesn't exist. This is needed for various files used by apache2
+  # Create /tmp/WebKit if it doesn't exist. This is needed for various files used by apache2
   tmp_WebKit = os.path.join("/tmp", "WebKit")
   if not os.path.exists(tmp_WebKit):
     os.mkdir(tmp_WebKit)
 
-  #Get the path to android tree root based on the script location.
-  #Basically we go 5 levels up
+  # Get the path to android tree root based on the script location.
+  # Basically we go 5 levels up
   parent = os.pardir
   script_location = os.path.abspath(os.path.dirname(sys.argv[0]))
   android_tree_root = os.path.join(script_location, parent, parent, parent, parent, parent)
   android_tree_root = os.path.normpath(android_tree_root)
 
-  #Prepare the command to set ${APACHE_RUN_USER} and ${APACHE_RUN_GROUP}
+  # Paths relative to android_tree_root
+  webkit_path = os.path.join("external", "webkit")
+  layout_tests_path = os.path.join(webkit_path, "LayoutTests")
+  http_conf_path = os.path.join(layout_tests_path, "http", "conf")
+
+  # Prepare the command to set ${APACHE_RUN_USER} and ${APACHE_RUN_GROUP}
   envvars_path = os.path.join("/etc", "apache2", "envvars")
   export_envvars_cmd = "source " + envvars_path
 
   error_log_path = os.path.join(tmp_WebKit, "apache2-error.log")
+  custom_log_path = os.path.join(tmp_WebKit, "apache2-access.log")
 
-  #Prepare the command to (re)start/stop the server with specified settings
+  # Prepare the command to (re)start/stop the server with specified settings
   apache2_restart_cmd = "apache2 -k " + run_cmd
   directives  = " -c \"ServerRoot " + android_tree_root + "\""
-  directives += " -c \"DocumentRoot " + os.path.join("external", "webkit") + "\""
 
-  #This directive is commented out in apache2-debian-httpd.conf for some reason
-  #However, it is useful to browse through tests in the browser, so it's added here.
-  #One thing to note is that because of problems with mod_dir and port numbers, mod_dir
-  #is turned off. That means that there _must_ be a trailing slash at the end of URL
-  #for auto indexes to work correctly.
+  # We use http/tests as the document root as the HTTP tests use hardcoded
+  # resources at the server root. We then use aliases to make available the
+  # complete set of tests and the required scripts.
+  directives += " -c \"DocumentRoot " + os.path.join(layout_tests_path, "http", "tests/") + "\""
+  directives += " -c \"Alias /LayoutTests " + layout_tests_path + "\""
+  directives += " -c \"Alias /WebKitTools/DumpRenderTree/android " + \
+    os.path.join(webkit_path, "WebKitTools", "DumpRenderTree", "android") + "\""
+
+  # This directive is commented out in apache2-debian-httpd.conf for some reason
+  # However, it is useful to browse through tests in the browser, so it's added here.
+  # One thing to note is that because of problems with mod_dir and port numbers, mod_dir
+  # is turned off. That means that there _must_ be a trailing slash at the end of URL
+  # for auto indexes to work correctly.
   directives += " -c \"LoadModule autoindex_module /usr/lib/apache2/modules/mod_autoindex.so\""
 
   directives += " -c \"ErrorLog " + error_log_path +"\""
-  directives += " -c \"SSLCertificateFile " + os.path.join ("external", "webkit", "LayoutTests",
-    "http", "conf", "webkit-httpd.pem") + "\""
+  directives += " -c \"CustomLog " + custom_log_path + " combined\""
+  directives += " -c \"SSLCertificateFile " + os.path.join(http_conf_path, "webkit-httpd.pem") + \
+    "\""
   directives += " -c \"User ${APACHE_RUN_USER}\""
   directives += " -c \"Group ${APACHE_RUN_GROUP}\""
   directives += " -C \"TypesConfig " + os.path.join("/etc", "mime.types") + "\""
-  conf_file_cmd = " -f " + os.path.join(android_tree_root, "external", "webkit", "LayoutTests",
-    "http", "conf", "apache2-debian-httpd.conf")
+  conf_file_cmd = " -f " + \
+    os.path.join(android_tree_root, http_conf_path, "apache2-debian-httpd.conf")
 
-  #Try to execute the commands
+  # Try to execute the commands
   logging.info("Will " + run_cmd + " apache2 server.")
   cmd = export_envvars_cmd + " && " + apache2_restart_cmd + directives + conf_file_cmd
   p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   (out, err) = p.communicate()
 
-  #Output the stdout from the command to console
+  # Output the stdout from the command to console
   logging.info(out)
 
-  #Report any errors
+  # Report any errors
   if p.returncode != 0:
     logging.info("!! ERRORS:")
 

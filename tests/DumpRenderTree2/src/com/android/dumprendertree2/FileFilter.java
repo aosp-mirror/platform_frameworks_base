@@ -124,9 +124,10 @@ public class FileFilter {
                 }
             }
         } catch (FileNotFoundException e) {
-            Log.w(LOG_TAG + "::reloadConfiguration", "File not found: " + txt_exp.getPath());
+            Log.w(LOG_TAG, "mRootDirPath=" + mRootDirPath + ": File not found: " +
+                    txt_exp.getPath(), e);
         } catch (IOException e) {
-            Log.e(LOG_TAG + "::reloadConfiguration", "IOException: " + e.getMessage());
+            Log.e(LOG_TAG, "mRootDirPath=" + mRootDirPath, e);
         }
     }
 

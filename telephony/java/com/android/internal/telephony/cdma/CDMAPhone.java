@@ -224,6 +224,7 @@ public class CDMAPhone extends PhoneBase {
             mCM.unregisterForNVReady(this); //EVENT_NV_READY
             mSST.unregisterForNetworkAttach(this); //EVENT_REGISTERED_TO_NETWORK
             mCM.unSetOnSuppServiceNotification(this);
+            removeCallbacks(mExitEcmRunnable);
 
             mPendingMmis.clear();
 
@@ -256,6 +257,7 @@ public class CDMAPhone extends PhoneBase {
             this.mSST = null;
             this.mEriManager = null;
             this.mCcatService = null;
+            this.mExitEcmRunnable = null;
     }
 
     protected void finalize() {
