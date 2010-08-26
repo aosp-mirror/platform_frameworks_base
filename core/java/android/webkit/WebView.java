@@ -5163,6 +5163,9 @@ public class WebView extends AbsoluteLayout
                             if (mSelectingText) {
                                 // tapping on selection or controls does nothing
                                 if (!nativeHitSelection(contentX, contentY)) {
+                                    if (mMapTrackballToArrowKeys) { // gmail
+                                        copySelection();
+                                    }
                                     selectionDone();
                                 }
                                 break;
