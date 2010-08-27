@@ -355,7 +355,7 @@ framework_docs_LOCAL_JAVA_LIBRARIES := \
 			framework \
 
 framework_docs_LOCAL_MODULE_CLASS := JAVA_LIBRARIES
-framework_docs_LOCAL_DROIDDOC_HTML_DIR := $(LOCAL_PATH)/docs/html $(OUT_DOCS)/gen
+framework_docs_LOCAL_DROIDDOC_HTML_DIR := docs/html
 # The since flag (-since N.xml API_LEVEL) is used to add API Level information
 # to the reference documentation. Must be in order of oldest to newest.
 framework_docs_LOCAL_DROIDDOC_OPTIONS := \
@@ -522,7 +522,6 @@ $(static_doc_index_redirect): \
 
 $(full_target): $(static_doc_index_redirect)
 $(full_target): $(framework_built)
-$(full_target): monkeyruner-docs-target
 
 # ==== docs for the web (on the google app engine server) =======================
 include $(CLEAR_VARS)
@@ -552,7 +551,6 @@ include $(BUILD_DROIDDOC)
 
 # explicitly specify that online-sdk depends on framework-res and any generated docs
 $(full_target): framework-res-package-target
-$(full_target): monkeyruner-docs-target
 
 # ==== docs that have all of the stuff that's @hidden =======================
 include $(CLEAR_VARS)
