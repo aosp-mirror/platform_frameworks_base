@@ -4304,7 +4304,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     return 0;
                 }
                 break;
-                
+
+                // Has to be done on key down (and not on key up) to correctly be intercepted.
             case KeyEvent.KEYCODE_BACK:
                 if (mIsInTextSelectionMode) {
                     stopTextSelectionMode();
@@ -4464,6 +4465,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                     return super.onKeyUp(keyCode, event);
                 }
+                break;
         }
 
         if (mInput != null)
@@ -7330,7 +7332,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // Context menu entries
     private static final int ID_SELECT_ALL = android.R.id.selectAll;
     private static final int ID_START_SELECTING_TEXT = android.R.id.startSelectingText;
-    private static final int ID_STOP_SELECTING_TEXT = android.R.id.stopSelectingText;
     private static final int ID_CUT = android.R.id.cut;
     private static final int ID_COPY = android.R.id.copy;
     private static final int ID_PASTE = android.R.id.paste;
@@ -7375,10 +7376,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             case ID_START_SELECTING_TEXT:
                 startTextSelectionMode();
-                return true;
-
-            case ID_STOP_SELECTING_TEXT:
-                stopTextSelectionMode();
                 return true;
 
             case ID_CUT:                
