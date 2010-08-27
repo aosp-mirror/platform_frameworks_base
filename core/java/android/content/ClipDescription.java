@@ -23,7 +23,7 @@ import android.text.TextUtils;
 import java.util.ArrayList;
 
 /**
- * Meta-data describing the contents of a {@link #ClipData}.  Provides enough
+ * Meta-data describing the contents of a {@link ClipData}.  Provides enough
  * information to know if you can handle the ClipData, but not the data
  * itself.
  */
