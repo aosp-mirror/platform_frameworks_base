@@ -2749,6 +2749,7 @@ public final class ContactsContract {
      * <li>{@link CommonDataKinds.Website Website.CONTENT_ITEM_TYPE}</li>
      * <li>{@link CommonDataKinds.Event Event.CONTENT_ITEM_TYPE}</li>
      * <li>{@link CommonDataKinds.Relation Relation.CONTENT_ITEM_TYPE}</li>
+     * <li>{@link CommonDataKinds.SipAddress SipAddress.CONTENT_ITEM_TYPE}</li>
      * </ul>
      * </p>
      * </td>
@@ -5303,6 +5304,52 @@ public final class ContactsContract {
              * <P>Type: TEXT</P>
              */
             public static final String URL = DATA;
+        }
+
+        /**
+         * <p>
+         * A data kind representing a SIP address for the contact.
+         * </p>
+         * <p>
+         * You can use all columns defined for {@link ContactsContract.Data} as
+         * well as the following aliases.
+         * </p>
+         * <h2>Column aliases</h2>
+         * <table class="jd-sumtable">
+         * <tr>
+         * <th>Type</th>
+         * <th>Alias</th><th colspan='2'>Data column</th>
+         * </tr>
+         * <tr>
+         * <td>String</td>
+         * <td>{@link #SIP_ADDRESS}</td>
+         * <td>{@link #DATA1}</td>
+         * <td></td>
+         * </tr>
+         * </table>
+         */
+        public static final class SipAddress implements DataColumnsWithJoins {
+            // TODO: Ultimately this class will probably implement
+            // CommonColumns too (in addition to DataColumnsWithJoins)
+            // since it may make sense to have multiple SIP addresses with
+            // different types+labels, just like with phone numbers.
+            //
+            // But that can be extended in the future without breaking any
+            // public API, so let's keep this class ultra-simple for now.
+
+            /**
+             * This utility class cannot be instantiated
+             */
+            private SipAddress() {}
+
+            /** MIME type used when storing this in data table. */
+            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/sip_address";
+
+            /**
+             * The SIP address.
+             * <P>Type: TEXT</P>
+             */
+            public static final String SIP_ADDRESS = DATA1;
         }
     }
 
