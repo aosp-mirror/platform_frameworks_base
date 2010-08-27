@@ -4303,6 +4303,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (shouldAdvanceFocusOnEnter()) {
                     return 0;
                 }
+                break;
+                
+            case KeyEvent.KEYCODE_BACK:
+                if (mIsInTextSelectionMode) {
+                    stopTextSelectionMode();
+                    return -1;
+                }
+                break;
         }
 
         if (mInput != null) {
@@ -6623,9 +6631,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 end = mPrevEnd;
             } else {
                 if ((mPrevStart != mPrevEnd) && (start == end)) {
-                    if ((start >= mPrevStart) && (start <= mPrevEnd)) {
+                    if ((start >= mPrevStart) && (start < mPrevEnd)) {
                         // Tapping inside the selection does nothing
                         Selection.setSelection((Spannable) mText, mPrevStart, mPrevEnd);
+                        showContextMenu();
                         return;
                     } else {
                         // Tapping outside stops selection mode, if any
@@ -7226,9 +7235,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                      setAlphabeticShortcut('v');
             }
 
-            menu.add(0, ID_STOP_SELECTING_TEXT, 0, com.android.internal.R.string.stopSelectingText).
-                 setOnMenuItemClickListener(handler);
-            
             added = true;
         } else {
             /*
@@ -7277,10 +7283,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
             
-            if (canPaste()) {
+            // Paste location is too imprecise. Only allow on empty text fields.
+            if (canPaste() && textIsOnlySpaces()) {
                 menu.add(0, ID_PASTE, 0, com.android.internal.R.string.paste).
                      setOnMenuItemClickListener(handler).
                      setAlphabeticShortcut('v');
+                added = true;
             }
 
             if (isInputMethodTarget()) {
@@ -7302,6 +7310,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (added) {
             menu.setHeaderTitle(com.android.internal.R.string.editTextMenuTitle);
         }
+    }
+
+    private boolean textIsOnlySpaces() {
+        final int length = mTransformed.length();
+        for (int i=0; i<length; i++) {
+            final char c = mTransformed.charAt(i);
+            final int type = Character.getType(c);
+            if (type != Character.SPACE_SEPARATOR)
+                return false;
+        }
+        return true;
     }
 
     /**
@@ -7742,6 +7761,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private boolean mStartIsDragged = false;
         // Starting time of the fade timer
         private long mFadeOutTimerStart;
+        // Used to detect a tap (vs drag) on the controller
+        private long mOnDownTimerStart;
         // The cursor controller images
         private final Handle mStartHandle, mEndHandle;
         // Offset between finger hot point on active cursor controller and actual cursor
@@ -7889,9 +7910,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                     mOffsetX = (bounds.left + bounds.right) / 2.0f - x;
                                     mOffsetY = draggedHandle.mHotSpotVerticalPosition - y;
 
+                                    mOnDownTimerStart = event.getEventTime();
                                     ((ArrowKeyMovementMethod)mMovement).setCursorController(this);
                                 }
                             }
+                        }
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+                        int time = (int) (event.getEventTime() - mOnDownTimerStart);
+
+                        if (time <= ViewConfiguration.getTapTimeout()) {
+                            // A tap on the controller (not a drag) opens the contextual Copy menu
+                            showContextMenu();
                         }
                         break;
 

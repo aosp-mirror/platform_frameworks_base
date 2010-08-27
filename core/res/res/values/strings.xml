@@ -1856,9 +1856,6 @@
     <!-- Item on EditText context menu. This action is used to start selecting text in the edit field. -->
     <string name="selectText">Select word</string>
 
-    <!-- Item on EditText context menu. This action is used to stop selecting text in the edit field. -->
-    <string name="stopSelectingText">Stop selecting text</string>
-
     <!-- Item on EditText context menu.  This action is used to cut selected the text into the clipboard.  -->
     <string name="cut">Cut</string>
 
