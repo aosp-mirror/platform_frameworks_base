@@ -101,8 +101,8 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y) {
             nPenX, nPenY - height, 0, u1, v1);
 }
 
-void Font::drawCachedGlyph(CachedGlyphInfo *glyph, int x, int y,
-        uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH) {
+void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
+        uint8_t* bitmap, uint32_t bitmapW, uint32_t bitmapH) {
     int nPenX = x + glyph->mBitmapLeft;
     int nPenY = y + glyph->mBitmapTop;
 
@@ -116,7 +116,7 @@ void Font::drawCachedGlyph(CachedGlyphInfo *glyph, int x, int y,
     int32_t bX = 0, bY = 0;
     for (cacheX = glyph->mStartX, bX = nPenX; cacheX < endX; cacheX++, bX++) {
         for (cacheY = glyph->mStartY, bY = nPenY; cacheY < endY; cacheY++, bY++) {
-            if (bX < 0 || bY < 0 || bX >= (int32_t)bitmapW || bY >= (int32_t)bitmapH) {
+            if (bX < 0 || bY < 0 || bX >= (int32_t) bitmapW || bY >= (int32_t) bitmapH) {
                 LOGE("Skipping invalid index");
                 continue;
             }
@@ -286,6 +286,7 @@ Font* Font::create(FontRenderer* state, uint32_t fontId, float fontSize) {
 FontRenderer::FontRenderer() {
     LOGD("Creating FontRenderer");
 
+    mGammaTable = NULL;
     mInitialized = false;
     mMaxNumberOfQuads = 1024;
     mCurrentQuadIndex = 0;
@@ -405,7 +406,7 @@ bool FontRenderer::cacheBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint3
     for (cacheX = startX, bX = 0; cacheX < endX; cacheX++, bX++) {
         for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY++) {
             uint8_t tempCol = bitmapBuffer[bY * stride + bX];
-            cacheBuffer[cacheY * cacheWidth + cacheX] = tempCol;
+            cacheBuffer[cacheY * cacheWidth + cacheX] = mGammaTable[tempCol];
         }
     }
 

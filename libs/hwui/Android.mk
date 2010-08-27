@@ -6,6 +6,7 @@ include $(CLEAR_VARS)
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SRC_FILES:= \
 		FontRenderer.cpp \
+		GammaFontRenderer.cpp \
 		GradientCache.cpp \
 		LayerCache.cpp \
 		Matrix.cpp \
