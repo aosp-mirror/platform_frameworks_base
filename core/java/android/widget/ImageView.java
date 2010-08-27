@@ -260,9 +260,15 @@ public class ImageView extends View {
 
     /**
      * Sets a drawable as the content of this ImageView.
-     * 
+     *
+     * <p class="note">This does Bitmap reading and decoding on the UI
+     * thread, which can cause a latency hiccup.  If that's a concern,
+     * consider using {@link #setImageDrawable} or
+     * {@link #setImageBitmap} and
+     * {@link android.graphics.BitmapFactory} instead.</p>
+     *
      * @param resId the resource identifier of the the drawable
-     * 
+     *
      * @attr ref android.R.styleable#ImageView_src
      */
     @android.view.RemotableViewMethod
@@ -279,7 +285,13 @@ public class ImageView extends View {
 
     /**
      * Sets the content of this ImageView to the specified Uri.
-     * 
+     *
+     * <p class="note">This does Bitmap reading and decoding on the UI
+     * thread, which can cause a latency hiccup.  If that's a concern,
+     * consider using {@link #setImageDrawable} or
+     * {@link #setImageBitmap} and
+     * {@link android.graphics.BitmapFactory} instead.</p>
+     *
      * @param uri The Uri of an image
      */
     @android.view.RemotableViewMethod
