@@ -394,7 +394,8 @@ public class Animator<T> extends Animatable {
                         for (int i = 0; i < count; ++i) {
                             Animator anim = pendingCopy.get(i);
                             // If the animation has a startDelay, place it on the delayed list
-                            if (anim.mStartDelay == 0) {
+                            if (anim.mStartDelay == 0 || anim.mPlayingState == ENDED ||
+                                    anim.mPlayingState == CANCELED) {
                                 anim.startAnimation();
                             } else {
                                 sDelayedAnims.add(anim);
@@ -700,14 +701,14 @@ public class Animator<T> extends Animatable {
 
     @Override
     public void end() {
-        if (!sAnimations.contains(this) &&
-                (Thread.currentThread() == Looper.getMainLooper().getThread())) {
-            // Special case if the animation has not yet started. Set the end value.
-            long endTime = mDuration;
-            if (mRepeatCount > 0) {
-                endTime += mRepeatCount * mDuration;
+        if (!sAnimations.contains(this) && !sPendingAnimations.contains(this)) {
+            // Special case if the animation has not yet started; get it ready for ending
+            mStartedDelay = false;
+            sPendingAnimations.add(this);
+            if (sAnimationHandler == null) {
+                sAnimationHandler = new AnimationHandler();
             }
-            setCurrentPlayTime(endTime);
+            sAnimationHandler.sendEmptyMessage(ANIMATION_START);
         }
         // Just set the ENDED flag - this causes the animation to end the next time a frame
         // is processed.
@@ -716,7 +717,8 @@ public class Animator<T> extends Animatable {
 
     @Override
     public boolean isRunning() {
-        return mPlayingState == RUNNING;
+        // ENDED or CANCELED indicate that it has been ended or canceled, but not processed yet
+        return (mPlayingState == RUNNING || mPlayingState == ENDED || mPlayingState == CANCELED);
     }
 
     /**
@@ -862,6 +864,7 @@ public class Animator<T> extends Animatable {
             // Fall through to set done flag
         case CANCELED:
             done = true;
+            mPlayingState = STOPPED;
             break;
         }
 
