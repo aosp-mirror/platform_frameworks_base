@@ -10,7 +10,7 @@ LOCAL_SRC_FILES:=                         \
         AudioSource.cpp                   \
         AwesomePlayer.cpp                 \
         CameraSource.cpp                  \
-        CameraSourceTimeLapse.cpp                  \
+        CameraSourceTimeLapse.cpp         \
         DataSource.cpp                    \
         ESDS.cpp                          \
         FileSource.cpp                    \
@@ -24,6 +24,7 @@ LOCAL_SRC_FILES:=                         \
         MediaDefs.cpp                     \
         MediaExtractor.cpp                \
         MediaSource.cpp                   \
+        MediaSourceSplitter.cpp           \
         MetaData.cpp                      \
         NuCachedSource2.cpp               \
         NuHTTPDataSource.cpp              \

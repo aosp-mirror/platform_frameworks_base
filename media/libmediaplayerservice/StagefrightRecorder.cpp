@@ -25,6 +25,7 @@
 #include <media/stagefright/AMRWriter.h>
 #include <media/stagefright/CameraSource.h>
 #include <media/stagefright/CameraSourceTimeLapse.h>
+#include <media/stagefright/MediaSourceSplitter.h>
 #include <media/stagefright/MPEG4Writer.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
@@ -46,8 +47,8 @@
 namespace android {
 
 StagefrightRecorder::StagefrightRecorder()
-    : mWriter(NULL),
-      mOutputFd(-1) {
+    : mWriter(NULL), mWriterAux(NULL),
+      mOutputFd(-1), mOutputFdAux(-1) {
 
     LOGV("Constructor");
     reset();
@@ -231,6 +232,24 @@ status_t StagefrightRecorder::setOutputFile(int fd, int64_t offset, int64_t leng
         ::close(mOutputFd);
     }
     mOutputFd = dup(fd);
+
+    return OK;
+}
+
+status_t StagefrightRecorder::setOutputFileAuxiliary(int fd) {
+    LOGV("setOutputFileAuxiliary: %d", fd);
+
+    if (fd < 0) {
+        LOGE("Invalid file descriptor: %d", fd);
+        return -EBADF;
+    }
+
+    mCaptureAuxVideo = true;
+
+    if (mOutputFdAux >= 0) {
+        ::close(mOutputFdAux);
+    }
+    mOutputFdAux = dup(fd);
 
     return OK;
 }
@@ -842,7 +861,14 @@ status_t StagefrightRecorder::startRTPRecording() {
     if (mAudioSource != AUDIO_SOURCE_LIST_END) {
         source = createAudioSource();
     } else {
-        status_t err = setupVideoEncoder(&source);
+
+        sp<CameraSource> cameraSource;
+        status_t err = setupCameraSource(&cameraSource);
+        if (err != OK) {
+            return err;
+        }
+
+        err = setupVideoEncoder(cameraSource, mVideoBitRate, &source);
         if (err != OK) {
             return err;
         }
@@ -906,7 +932,7 @@ void StagefrightRecorder::clipVideoFrameWidth() {
     }
 }
 
-status_t StagefrightRecorder::setupCameraSource() {
+status_t StagefrightRecorder::setupCamera() {
     if (!mCaptureTimeLapse) {
         // Dont clip for time lapse capture as encoder will have enough
         // time to encode because of slow capture rate of time lapse.
@@ -989,20 +1015,27 @@ void StagefrightRecorder::clipVideoFrameHeight() {
     }
 }
 
-status_t StagefrightRecorder::setupVideoEncoder(sp<MediaSource> *source) {
-    source->clear();
-
-    status_t err = setupCameraSource();
+status_t StagefrightRecorder::setupCameraSource(sp<CameraSource> *cameraSource) {
+    status_t err = setupCamera();
     if (err != OK) return err;
 
-    sp<CameraSource> cameraSource = (mCaptureTimeLapse) ?
+    *cameraSource = (mCaptureTimeLapse) ?
         CameraSourceTimeLapse::CreateFromCamera(mCamera, mUseStillCameraForTimeLapse,
                 mTimeBetweenTimeLapseFrameCaptureUs, mVideoWidth, mVideoHeight, mFrameRate):
         CameraSource::CreateFromCamera(mCamera);
-    CHECK(cameraSource != NULL);
+    CHECK(*cameraSource != NULL);
+
+    return OK;
+}
+
+status_t StagefrightRecorder::setupVideoEncoder(
+        sp<MediaSource> cameraSource,
+        int32_t videoBitRate,
+        sp<MediaSource> *source) {
+    source->clear();
 
     sp<MetaData> enc_meta = new MetaData;
-    enc_meta->setInt32(kKeyBitRate, mVideoBitRate);
+    enc_meta->setInt32(kKeyBitRate, videoBitRate);
     enc_meta->setInt32(kKeySampleRate, mFrameRate);
 
     switch (mVideoEncoder) {
@@ -1087,51 +1120,128 @@ status_t StagefrightRecorder::setupAudioEncoder(const sp<MediaWriter>& writer) {
     return OK;
 }
 
-status_t StagefrightRecorder::startMPEG4Recording() {
-    int32_t totalBitRate = 0;
+status_t StagefrightRecorder::setupMPEG4Recording(
+        bool useSplitCameraSource,
+        int outputFd, int32_t audioBitRate, int32_t videoBitRate,
+        int32_t *totalBitRate,
+        sp<MediaWriter> *mediaWriter) {
+    mediaWriter->clear();
+    *totalBitRate = 0;
     status_t err = OK;
-    sp<MediaWriter> writer = new MPEG4Writer(dup(mOutputFd));
+    sp<MediaWriter> writer = new MPEG4Writer(dup(outputFd));
 
     // Add audio source first if it exists
     if (!mCaptureTimeLapse && (mAudioSource != AUDIO_SOURCE_LIST_END)) {
         err = setupAudioEncoder(writer);
         if (err != OK) return err;
-        totalBitRate += mAudioBitRate;
+        *totalBitRate += audioBitRate;
     }
     if (mVideoSource == VIDEO_SOURCE_DEFAULT
             || mVideoSource == VIDEO_SOURCE_CAMERA) {
+
+        sp<MediaSource> cameraMediaSource;
+        if (useSplitCameraSource) {
+            LOGV("Using Split camera source");
+            cameraMediaSource = mCameraSourceSplitter->createClient();
+        } else {
+            sp<CameraSource> cameraSource;
+            err = setupCameraSource(&cameraSource);
+            cameraMediaSource = cameraSource;
+        }
+        if (err != OK) {
+            return err;
+        }
+
         sp<MediaSource> encoder;
-        err = setupVideoEncoder(&encoder);
-        if (err != OK) return err;
+        err = setupVideoEncoder(cameraMediaSource, videoBitRate, &encoder);
+        if (err != OK) {
+            return err;
+        }
+
         writer->addSource(encoder);
-        totalBitRate += mVideoBitRate;
+        *totalBitRate += videoBitRate;
     }
 
     if (mInterleaveDurationUs > 0) {
         reinterpret_cast<MPEG4Writer *>(writer.get())->
             setInterleaveDuration(mInterleaveDurationUs);
     }
-
     if (mMaxFileDurationUs != 0) {
         writer->setMaxFileDuration(mMaxFileDurationUs);
     }
     if (mMaxFileSizeBytes != 0) {
         writer->setMaxFileSize(mMaxFileSizeBytes);
     }
-    sp<MetaData> meta = new MetaData;
-    meta->setInt64(kKeyTime, systemTime() / 1000);
-    meta->setInt32(kKeyFileType, mOutputFormat);
-    meta->setInt32(kKeyBitRate, totalBitRate);
-    meta->setInt32(kKey64BitFileOffset, mUse64BitFileOffset);
+
+    writer->setListener(mListener);
+    *mediaWriter = writer;
+    return OK;
+}
+
+void StagefrightRecorder::setupMPEG4MetaData(int64_t startTimeUs, int32_t totalBitRate,
+        sp<MetaData> *meta) {
+    (*meta)->setInt64(kKeyTime, startTimeUs);
+    (*meta)->setInt32(kKeyFileType, mOutputFormat);
+    (*meta)->setInt32(kKeyBitRate, totalBitRate);
+    (*meta)->setInt32(kKey64BitFileOffset, mUse64BitFileOffset);
     if (mMovieTimeScale > 0) {
-        meta->setInt32(kKeyTimeScale, mMovieTimeScale);
+        (*meta)->setInt32(kKeyTimeScale, mMovieTimeScale);
     }
     if (mTrackEveryTimeDurationUs > 0) {
-        meta->setInt64(kKeyTrackTimeStatus, mTrackEveryTimeDurationUs);
+        (*meta)->setInt64(kKeyTrackTimeStatus, mTrackEveryTimeDurationUs);
     }
-    writer->setListener(mListener);
-    mWriter = writer;
-    return mWriter->start(meta.get());
+}
+
+status_t StagefrightRecorder::startMPEG4Recording() {
+    if (mCaptureAuxVideo) {
+        LOGV("Creating MediaSourceSplitter");
+        sp<CameraSource> cameraSource;
+        status_t err = setupCameraSource(&cameraSource);
+        if (err != OK) {
+            return err;
+        }
+        mCameraSourceSplitter = new MediaSourceSplitter(cameraSource);
+    } else {
+        mCameraSourceSplitter = NULL;
+    }
+
+    int32_t totalBitRate;
+    status_t err = setupMPEG4Recording(mCaptureAuxVideo,
+            mOutputFd, mAudioBitRate, mVideoBitRate, &totalBitRate, &mWriter);
+    if (err != OK) {
+        return err;
+    }
+
+    int64_t startTimeUs = systemTime() / 1000;
+    sp<MetaData> meta = new MetaData;
+    setupMPEG4MetaData(startTimeUs, totalBitRate, &meta);
+
+    err = mWriter->start(meta.get());
+    if (err != OK) {
+        return err;
+    }
+
+    if (mCaptureAuxVideo) {
+        CHECK(mOutputFdAux >= 0);
+        if (mWriterAux != NULL) {
+            LOGE("Auxiliary File writer is not avaialble");
+            return UNKNOWN_ERROR;
+        }
+
+        int32_t totalBitrateAux;
+        err = setupMPEG4Recording(mCaptureAuxVideo,
+                mOutputFdAux, mAudioBitRateAux, mVideoBitRateAux, &totalBitrateAux, &mWriterAux);
+        if (err != OK) {
+            return err;
+        }
+
+        sp<MetaData> metaAux = new MetaData;
+        setupMPEG4MetaData(startTimeUs, totalBitrateAux, &metaAux);
+
+        return mWriterAux->start(metaAux.get());
+    }
+
+    return OK;
 }
 
 status_t StagefrightRecorder::pause() {
@@ -1140,12 +1250,28 @@ status_t StagefrightRecorder::pause() {
         return UNKNOWN_ERROR;
     }
     mWriter->pause();
+
+    if (mCaptureAuxVideo) {
+        if (mWriterAux == NULL) {
+            return UNKNOWN_ERROR;
+        }
+        mWriterAux->pause();
+    }
+
     return OK;
 }
 
 status_t StagefrightRecorder::stop() {
     LOGV("stop");
     status_t err = OK;
+
+    if (mCaptureAuxVideo) {
+        if (mWriterAux != NULL) {
+            mWriterAux->stop();
+            mWriterAux.clear();
+        }
+    }
+
     if (mWriter != NULL) {
         err = mWriter->stop();
         mWriter.clear();
@@ -1167,6 +1293,13 @@ status_t StagefrightRecorder::stop() {
     if (mOutputFd >= 0) {
         ::close(mOutputFd);
         mOutputFd = -1;
+    }
+
+    if (mCaptureAuxVideo) {
+        if (mOutputFdAux >= 0) {
+            ::close(mOutputFdAux);
+            mOutputFdAux = -1;
+        }
     }
 
     return err;
@@ -1195,9 +1328,11 @@ status_t StagefrightRecorder::reset() {
     mVideoHeight   = 144;
     mFrameRate     = 20;
     mVideoBitRate  = 192000;
+    mVideoBitRateAux = 20000000;
     mSampleRate    = 8000;
     mAudioChannels = 1;
     mAudioBitRate  = 12200;
+    mAudioBitRateAux  = 12200;
     mInterleaveDurationUs = 0;
     mIFramesIntervalSec = 1;
     mAudioSourceNode = 0;
@@ -1214,9 +1349,12 @@ status_t StagefrightRecorder::reset() {
     mCaptureTimeLapse = false;
     mUseStillCameraForTimeLapse = true;
     mTimeBetweenTimeLapseFrameCaptureUs = -1;
+    mCaptureAuxVideo = false;
+    mCameraSourceSplitter = NULL;
     mEncoderProfiles = MediaProfiles::getInstance();
 
     mOutputFd = -1;
+    mOutputFdAux = -1;
     mFlags = 0;
 
     return OK;
@@ -1254,6 +1392,8 @@ status_t StagefrightRecorder::dump(
     snprintf(buffer, SIZE, "   Recorder: %p\n", this);
     snprintf(buffer, SIZE, "   Output file (fd %d):\n", mOutputFd);
     result.append(buffer);
+    snprintf(buffer, SIZE, "   Output file Auxiliary (fd %d):\n", mOutputFdAux);
+    result.append(buffer);
     snprintf(buffer, SIZE, "     File format: %d\n", mOutputFormat);
     result.append(buffer);
     snprintf(buffer, SIZE, "     Max file size (bytes): %lld\n", mMaxFileSizeBytes);
@@ -1273,6 +1413,8 @@ status_t StagefrightRecorder::dump(
     snprintf(buffer, SIZE, "     Encoder: %d\n", mAudioEncoder);
     result.append(buffer);
     snprintf(buffer, SIZE, "     Bit rate (bps): %d\n", mAudioBitRate);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Bit rate auxiliary (bps): %d\n", mAudioBitRateAux);
     result.append(buffer);
     snprintf(buffer, SIZE, "     Sampling rate (hz): %d\n", mSampleRate);
     result.append(buffer);
@@ -1301,6 +1443,8 @@ status_t StagefrightRecorder::dump(
     snprintf(buffer, SIZE, "     Frame rate (fps): %d\n", mFrameRate);
     result.append(buffer);
     snprintf(buffer, SIZE, "     Bit rate (bps): %d\n", mVideoBitRate);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Bit rate Auxiliary (bps): %d\n", mVideoBitRateAux);
     result.append(buffer);
     ::write(fd, result.string(), result.size());
     return OK;
