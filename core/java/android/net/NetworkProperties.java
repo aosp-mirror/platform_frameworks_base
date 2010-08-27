@@ -99,19 +99,20 @@ public class NetworkProperties implements Parcelable {
         return 0;
     }
 
+    @Override
     public synchronized String toString() {
         String ifaceName = (mIface == null ? "" : "InterfaceName: " + mIface.getName() + " ");
 
         String ip = "IpAddresses: [";
-        for (InetAddress addr : mAddresses) ip +=  addr.toString() + ",";
+        for (InetAddress addr : mAddresses) ip +=  addr.getHostAddress() + ",";
         ip += "] ";
 
         String dns = "DnsAddresses: [";
-        for (InetAddress addr : mDnses) dns += addr.toString() + ",";
+        for (InetAddress addr : mDnses) dns += addr.getHostAddress() + ",";
         dns += "] ";
 
         String proxy = (mHttpProxy == null ? "" : "HttpProxy: " + mHttpProxy.toString() + " ");
-        String gateway = (mGateway == null ? "" : "Gateway: " + mGateway.toString() + " ");
+        String gateway = (mGateway == null ? "" : "Gateway: " + mGateway.getHostAddress() + " ");
 
         return ifaceName + ip + gateway + dns + proxy;
     }

@@ -21,10 +21,16 @@ import com.android.internal.telephony.gsm.ApnSetting;
 import com.android.internal.util.HierarchicalState;
 import com.android.internal.util.HierarchicalStateMachine;
 
+import android.net.NetworkProperties;
 import android.os.AsyncResult;
 import android.os.Message;
 import android.os.SystemProperties;
 import android.util.EventLog;
+
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 
 /**
  * {@hide}
@@ -255,10 +261,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     protected int mTag;
     protected PhoneBase phone;
     protected int cid;
-    protected String interfaceName;
-    protected String ipAddress;
-    protected String gatewayAddress;
-    protected String[] dnsServers;
+    protected NetworkProperties mNetworkProperties = new NetworkProperties();
     protected long createTime;
     protected long lastFailTime;
     protected FailCause lastFailCause;
@@ -283,8 +286,6 @@ public abstract class DataConnection extends HierarchicalStateMachine {
         if (DBG) log("DataConnection constructor E");
         this.phone = phone;
         this.cid = -1;
-        this.dnsServers = new String[2];
-
         clearSettings();
 
         setDbg(false);
@@ -377,11 +378,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
         this.lastFailTime = -1;
         this.lastFailCause = FailCause.NONE;
 
-        interfaceName = null;
-        ipAddress = null;
-        gatewayAddress = null;
-        dnsServers[0] = null;
-        dnsServers[1] = null;
+        mNetworkProperties.clear();
     }
 
     /**
@@ -416,37 +413,65 @@ public abstract class DataConnection extends HierarchicalStateMachine {
 //            for (int i = 0; i < response.length; i++) {
 //                log("  response[" + i + "]='" + response[i] + "'");
 //            }
+
+            // Start with clean network properties and if we have
+            // a failure we'll clear again at the bottom of this code.
+            mNetworkProperties.clear();
             if (response.length >= 2) {
                 cid = Integer.parseInt(response[0]);
-                interfaceName = response[1];
+                String interfaceName = response[1];
+                result = SetupResult.SUCCESS;
 
-                String prefix = "net." + interfaceName + ".";
-                gatewayAddress = SystemProperties.get(prefix + "gw");
-                dnsServers[0] = SystemProperties.get(prefix + "dns1");
-                dnsServers[1] = SystemProperties.get(prefix + "dns2");
+                try {
+                    String prefix = "net." + interfaceName + ".";
 
-                if (response.length > 2) {
-                    ipAddress = response[2];
+                    mNetworkProperties.setInterface(NetworkInterface.getByName(interfaceName));
 
-                    if (isDnsOk(dnsServers)) {
-                        result = SetupResult.SUCCESS;
-                    } else {
-                        result = SetupResult.ERR_BadDns;
+                    // TODO: Get gateway and dns via RIL interface not property?
+                    String gatewayAddress = SystemProperties.get(prefix + "gw");
+                    mNetworkProperties.setGateway(InetAddress.getByName(gatewayAddress));
+
+                    if (response.length > 2) {
+                        String ipAddress = response[2];
+                        mNetworkProperties.addAddress(InetAddress.getByName(ipAddress));
+
+                        // TODO: Get gateway and dns via RIL interface not property?
+                        String dnsServers[] = new String[2];
+                        dnsServers[0] = SystemProperties.get(prefix + "dns1");
+                        dnsServers[1] = SystemProperties.get(prefix + "dns2");
+                        if (isDnsOk(dnsServers)) {
+                            mNetworkProperties.addDns(InetAddress.getByName(dnsServers[0]));
+                            mNetworkProperties.addDns(InetAddress.getByName(dnsServers[1]));
+                        } else {
+                            result = SetupResult.ERR_BadDns;
+                        }
                     }
-                } else {
-                    result = SetupResult.SUCCESS;
+                } catch (UnknownHostException e1) {
+                    log("onSetupCompleted: UnknowHostException " + e1);
+                    e1.printStackTrace();
+                    result = SetupResult.ERR_Other;
+                } catch (SocketException e2) {
+                    log("onSetupCompleted: SocketException " + e2);
+                    e2.printStackTrace();
+                    result = SetupResult.ERR_Other;
                 }
             } else {
+                log("onSetupCompleted: error; expected number of responses >= 2 was " +
+                        response.length);
                 result = SetupResult.ERR_Other;
+            }
+
+            // An error occurred so clear properties
+            if (result != SetupResult.SUCCESS) {
+                log("onSetupCompleted with an error clearing NetworkProperties");
+                mNetworkProperties.clear();
             }
         }
 
         if (DBG) {
             log("DataConnection setup result='" + result + "' on cid=" + cid);
             if (result == SetupResult.SUCCESS) {
-                log("interface=" + interfaceName + " ipAddress=" + ipAddress
-                        + " gateway=" + gatewayAddress + " DNS1=" + dnsServers[0]
-                        + " DNS2=" + dnsServers[1]);
+                log("NetworkProperties: " + mNetworkProperties.toString());
             }
         }
         return result;
@@ -610,7 +635,16 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                             break;
                         case ERR_BadDns:
                             // Connection succeeded but DNS info is bad so disconnect
-                            EventLog.writeEvent(EventLogTags.PDP_BAD_DNS_ADDRESS, dnsServers[0]);
+                            StringBuilder dnsAddressesSb = new StringBuilder();
+                            for (InetAddress addr : mNetworkProperties.getDnses()) {
+                                if (dnsAddressesSb.length() != 0) dnsAddressesSb.append(" ");
+                                dnsAddressesSb.append(addr.toString());
+                            }
+                            if (dnsAddressesSb.length() == 0) {
+                                dnsAddressesSb.append("no-dns-addresses");
+                            }
+                            EventLog.writeEvent(EventLogTags.PDP_BAD_DNS_ADDRESS,
+                                    dnsAddressesSb.toString());
                             tearDownData(cp);
                             transitionTo(mDisconnectingBadDnsState);
                             break;
@@ -877,31 +911,10 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     }
 
     /**
-     * @return the interface name as a string.
+     * @return the connections NetworkProperties
      */
-    public String getInterface() {
-        return interfaceName;
-    }
-
-    /**
-     * @return the ip address as a string.
-     */
-    public String getIpAddress() {
-        return ipAddress;
-    }
-
-    /**
-     * @return the gateway address as a string.
-     */
-    public String getGatewayAddress() {
-        return gatewayAddress;
-    }
-
-    /**
-     * @return an array of associated DNS addresses.
-     */
-    public String[] getDnsServers() {
-        return dnsServers;
+    public NetworkProperties getNetworkProperties() {
+        return mNetworkProperties;
     }
 
     /**
