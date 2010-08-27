@@ -16,8 +16,6 @@
 
 package com.android.internal.view;
 
-import com.android.internal.view.IInputContext;
-
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -38,6 +36,7 @@ public class InputConnectionWrapper implements InputConnection {
         public boolean mHaveValue;
         public CharSequence mTextBeforeCursor;
         public CharSequence mTextAfterCursor;
+        public CharSequence mSelectedText;
         public ExtractedText mExtractedText;
         public int mCursorCapsMode;
         
@@ -110,6 +109,19 @@ public class InputConnectionWrapper implements InputConnection {
                 } else {
                     Log.i(TAG, "Got out-of-sequence callback " + seq + " (expected " + mSeq
                             + ") in setTextAfterCursor, ignoring.");
+                }
+            }
+        }
+
+        public void setSelectedText(CharSequence selectedText, int seq) {
+            synchronized (this) {
+                if (seq == mSeq) {
+                    mSelectedText = selectedText;
+                    mHaveValue = true;
+                    notifyAll();
+                } else {
+                    Log.i(TAG, "Got out-of-sequence callback " + seq + " (expected " + mSeq
+                            + ") in setSelectedText, ignoring.");
                 }
             }
         }
@@ -203,6 +215,24 @@ public class InputConnectionWrapper implements InputConnection {
         return value;
     }
     
+    public CharSequence getSelectedText(int flags) {
+        CharSequence value = null;
+        try {
+            InputContextCallback callback = InputContextCallback.getInstance();
+            mIInputContext.getSelectedText(flags, callback.mSeq, callback);
+            synchronized (callback) {
+                callback.waitForResultLocked();
+                if (callback.mHaveValue) {
+                    value = callback.mSelectedText;
+                }
+            }
+            callback.dispose();
+        } catch (RemoteException e) {
+            return null;
+        }
+        return value;
+    }
+
     public int getCursorCapsMode(int reqModes) {
         int value = 0;
         try {
@@ -283,7 +313,16 @@ public class InputConnectionWrapper implements InputConnection {
             return false;
         }
     }
-    
+
+    public boolean setComposingRegion(int start, int end) {
+        try {
+            mIInputContext.setComposingRegion(start, end);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
     public boolean setComposingText(CharSequence text, int newCursorPosition) {
         try {
             mIInputContext.setComposingText(text, newCursorPosition);
