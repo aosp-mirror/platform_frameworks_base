@@ -755,7 +755,6 @@ public final class ContactsContract {
      * 'family name', 'given name' 'middle name'.  The CJK tradition is
      * 'family name' 'middle name' 'given name', with Japanese favoring a space between
      * the names and Chinese omitting the space.
-     * @hide
      */
     public interface FullNameStyle {
         public static final int UNDEFINED = 0;
@@ -774,7 +773,6 @@ public final class ContactsContract {
 
     /**
      * Constants for various styles of capturing the pronunciation of a person's name.
-     * @hide
      */
     public interface PhoneticNameStyle {
         public static final int UNDEFINED = 0;
@@ -800,8 +798,6 @@ public final class ContactsContract {
     /**
      * Types of data used to produce the display name for a contact. Listed in the order
      * of increasing priority.
-     *
-     * @hide
      */
     public interface DisplayNameSources {
         public static final int UNDEFINED = 0;
@@ -817,15 +813,12 @@ public final class ContactsContract {
      *
      * @see Contacts
      * @see RawContacts
-     * @hide
      */
     protected interface ContactNameColumns {
 
         /**
          * The kind of data that is used as the display name for the contact, such as
-         * structured name or email address.  See DisplayNameSources.
-         *
-         * TODO: convert DisplayNameSources to a link after it is un-hidden
+         * structured name or email address.  See {@link DisplayNameSources}.
          */
         public static final String DISPLAY_NAME_SOURCE = "display_name_source";
 
@@ -873,9 +866,7 @@ public final class ContactsContract {
 
         /**
          * The phonetic alphabet used to represent the {@link #PHONETIC_NAME}.  See
-         * PhoneticNameStyle.
-         *
-         * TODO: convert PhoneticNameStyle to a link after it is un-hidden
+         * {@link PhoneticNameStyle}.
          */
         public static final String PHONETIC_NAME_STYLE = "phonetic_name_style";
 
@@ -885,13 +876,10 @@ public final class ContactsContract {
          * {@link #PHONETIC_NAME_STYLE}.
          * </p>
          * <p>
-         * The value may be set manually by the user.
-         * This capability is is of interest only in countries
-         * with commonly used phonetic
-         * alphabets, such as Japan and Korea.  See PhoneticNameStyle.
+         * The value may be set manually by the user. This capability is of
+         * interest only in countries with commonly used phonetic alphabets,
+         * such as Japan and Korea. See {@link PhoneticNameStyle}.
          * </p>
-         *
-         * TODO: convert PhoneticNameStyle to a link after it is un-hidden
          */
         public static final String PHONETIC_NAME = "phonetic_name";
 
@@ -1374,8 +1362,6 @@ public final class ContactsContract {
          * against the cost of transferring large amounts of denormalized data
          * from the Provider.
          * </p>
-         *
-         * @hide
          */
         public static final class Entity implements BaseColumns, ContactsColumns,
                 ContactNameColumns, RawContactsColumns, BaseSyncColumns, SyncColumns, DataColumns,
