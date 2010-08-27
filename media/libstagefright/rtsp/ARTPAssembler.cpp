@@ -35,18 +35,6 @@ ARTPAssembler::ARTPAssembler()
     : mFirstFailureTimeUs(-1) {
 }
 
-void ARTPAssembler::PropagateTimes(
-        const sp<ABuffer> &from, const sp<ABuffer> &to) {
-    uint32_t rtpTime;
-    CHECK(from->meta()->findInt32("rtp-time", (int32_t *)&rtpTime));
-
-    uint64_t ntpTime = 0;
-    CHECK(from->meta()->findInt64("ntp-time", (int64_t *)&ntpTime));
-
-    to->meta()->setInt32("rtp-time", rtpTime);
-    to->meta()->setInt64("ntp-time", ntpTime);
-}
-
 void ARTPAssembler::onPacketReceived(const sp<ARTPSource> &source) {
     AssemblyStatus status;
     for (;;) {
@@ -73,6 +61,21 @@ void ARTPAssembler::onPacketReceived(const sp<ARTPSource> &source) {
             }
         }
     }
+}
+
+// static
+void ARTPAssembler::CopyTimes(const sp<ABuffer> &to, const sp<ABuffer> &from) {
+    uint64_t ntpTime;
+    CHECK(from->meta()->findInt64("ntp-time", (int64_t *)&ntpTime));
+
+    uint32_t rtpTime;
+    CHECK(from->meta()->findInt32("rtp-time", (int32_t *)&rtpTime));
+
+    to->meta()->setInt64("ntp-time", ntpTime);
+    to->meta()->setInt32("rtp-time", rtpTime);
+
+    // Copy the seq number.
+    to->setInt32Data(from->int32Data());
 }
 
 }  // namespace android

@@ -138,4 +138,9 @@ void ARTSPController::onMessageReceived(const sp<AMessage> &msg) {
     }
 }
 
+int64_t ARTSPController::getNormalPlayTimeUs() {
+    CHECK(mHandler != NULL);
+    return mHandler->getNormalPlayTimeUs();
+}
+
 }  // namespace android
