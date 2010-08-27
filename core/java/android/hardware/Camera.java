@@ -1504,7 +1504,7 @@ public class Camera {
 
         /**
          * Sets the maximum and maximum preview fps. This controls the rate of
-         * preview frames received in {@link #PreviewCallback}. The minimum and
+         * preview frames received in {@link PreviewCallback}. The minimum and
          * maximum preview fps must be one of the elements from {@link
          * #getSupportedPreviewFpsRange}.
          *
