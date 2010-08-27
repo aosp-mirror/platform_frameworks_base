@@ -353,6 +353,15 @@ uint32_t OMXCodec::getComponentQuirks(const char *componentName) {
         quirks |= kRequiresLoadedToIdleAfterAllocation;
         quirks |= kRequiresAllocateBufferOnInputPorts;
         quirks |= kRequiresAllocateBufferOnOutputPorts;
+        if (!strncmp(componentName, "OMX.qcom.video.encoder.avc", 26)) {
+
+            // The AVC encoder advertises the size of output buffers
+            // based on the input video resolution and assumes
+            // the worst/least compression ratio is 0.5. It is found that
+            // sometimes, the output buffer size is larger than
+            // size advertised by the encoder.
+            quirks |= kRequiresLargerEncoderOutputBuffer;
+        }
     }
     if (!strncmp(componentName, "OMX.qcom.7x30.video.encoder.", 28)) {
     }
@@ -906,6 +915,10 @@ void OMXCodec::setVideoInputFormat(
     video_def->nBitrate = bitRate;  // Q16 format
     video_def->eCompressionFormat = compressionFormat;
     video_def->eColorFormat = OMX_COLOR_FormatUnused;
+    if (mQuirks & kRequiresLargerEncoderOutputBuffer) {
+        // Increases the output buffer size
+        def.nBufferSize = ((def.nBufferSize * 3) >> 1);
+    }
 
     err = mOMX->setParameter(
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
