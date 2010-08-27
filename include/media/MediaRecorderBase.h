@@ -40,6 +40,7 @@ struct MediaRecorderBase {
     virtual status_t setPreviewSurface(const sp<Surface>& surface) = 0;
     virtual status_t setOutputFile(const char *path) = 0;
     virtual status_t setOutputFile(int fd, int64_t offset, int64_t length) = 0;
+    virtual status_t setOutputFileAuxiliary(int fd) {return INVALID_OPERATION;}
     virtual status_t setParameters(const String8& params) = 0;
     virtual status_t setListener(const sp<IMediaRecorderClient>& listener) = 0;
     virtual status_t prepare() = 0;
