@@ -116,9 +116,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.Map.Entry;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 class ReceiverRestrictedContext extends ContextWrapper {
     ReceiverRestrictedContext(Context base) {
@@ -167,8 +170,8 @@ class ContextImpl extends Context {
     private static ThrottleManager sThrottleManager;
     private static WifiManager sWifiManager;
     private static LocationManager sLocationManager;
-    private static final HashMap<File, SharedPreferencesImpl> sSharedPrefs =
-            new HashMap<File, SharedPreferencesImpl>();
+    private static final HashMap<String, SharedPreferencesImpl> sSharedPrefs =
+            new HashMap<String, SharedPreferencesImpl>();
 
     private AudioManager mAudioManager;
     /*package*/ LoadedApk mPackageInfo;
@@ -332,15 +335,14 @@ class ContextImpl extends Context {
     @Override
     public SharedPreferences getSharedPreferences(String name, int mode) {
         SharedPreferencesImpl sp;
-        File f = getSharedPrefsFile(name);
         synchronized (sSharedPrefs) {
-            sp = sSharedPrefs.get(f);
+            sp = sSharedPrefs.get(name);
             if (sp != null && !sp.hasFileChanged()) {
                 //Log.i(TAG, "Returning existing prefs " + name + ": " + sp);
                 return sp;
             }
         }
-
+        File f = getSharedPrefsFile(name);
         FileInputStream str = null;
         File backup = makeBackupFile(f);
         if (backup.exists()) {
@@ -373,10 +375,10 @@ class ContextImpl extends Context {
                 //Log.i(TAG, "Updating existing prefs " + name + " " + sp + ": " + map);
                 sp.replace(map);
             } else {
-                sp = sSharedPrefs.get(f);
+                sp = sSharedPrefs.get(name);
                 if (sp == null) {
                     sp = new SharedPreferencesImpl(f, mode, map);
-                    sSharedPrefs.put(f, sp);
+                    sSharedPrefs.put(name, sp);
                 }
             }
             return sp;
@@ -2696,10 +2698,12 @@ class ContextImpl extends Context {
         private final File mFile;
         private final File mBackupFile;
         private final int mMode;
-        private Map mMap;
-        private final FileStatus mFileStatus = new FileStatus();
-        private long mTimestamp;
 
+        private Map<String, Object> mMap;  // guarded by 'this'
+        private long mTimestamp;  // guarded by 'this'
+        private int mDiskWritesInFlight = 0;  // guarded by 'this'
+
+        private final Object mWritingToDiskLock = new Object();
         private static final Object mContent = new Object();
         private WeakHashMap<OnSharedPreferenceChangeListener, Object> mListeners;
 
@@ -2708,19 +2712,21 @@ class ContextImpl extends Context {
             mFile = file;
             mBackupFile = makeBackupFile(file);
             mMode = mode;
-            mMap = initialContents != null ? initialContents : new HashMap();
-            if (FileUtils.getFileStatus(file.getPath(), mFileStatus)) {
-                mTimestamp = mFileStatus.mtime;
+            mMap = initialContents != null ? initialContents : new HashMap<String, Object>();
+            FileStatus stat = new FileStatus();
+            if (FileUtils.getFileStatus(file.getPath(), stat)) {
+                mTimestamp = stat.mtime;
             }
             mListeners = new WeakHashMap<OnSharedPreferenceChangeListener, Object>();
         }
 
         public boolean hasFileChanged() {
+            FileStatus stat = new FileStatus();
+            if (!FileUtils.getFileStatus(mFile.getPath(), stat)) {
+                return true;
+            }
             synchronized (this) {
-                if (!FileUtils.getFileStatus(mFile.getPath(), mFileStatus)) {
-                    return true;
-                }
-                return mTimestamp != mFileStatus.mtime;
+                return mTimestamp != stat.mtime;
             }
         }
 
@@ -2747,7 +2753,7 @@ class ContextImpl extends Context {
         public Map<String, ?> getAll() {
             synchronized(this) {
                 //noinspection unchecked
-                return new HashMap(mMap);
+                return new HashMap<String, Object>(mMap);
             }
         }
 
@@ -2766,7 +2772,7 @@ class ContextImpl extends Context {
         }
         public long getLong(String key, long defValue) {
             synchronized (this) {
-                Long v = (Long) mMap.get(key);
+                Long v = (Long)mMap.get(key);
                 return v != null ? v : defValue;
             }
         }
@@ -2789,9 +2795,30 @@ class ContextImpl extends Context {
             }
         }
 
+        public Editor edit() {
+            return new EditorImpl();
+        }
+
+        // Return value from EditorImpl#commitToMemory()
+        private static class MemoryCommitResult {
+            public boolean changesMade;  // any keys different?
+            public List<String> keysModified;  // may be null
+            public Set<OnSharedPreferenceChangeListener> listeners;  // may be null
+            public Map<?, ?> mapToWriteToDisk;
+            public final CountDownLatch writtenToDiskLatch = new CountDownLatch(1);
+            public volatile boolean writeToDiskResult = false;
+
+            public void setDiskWriteResult(boolean result) {
+                writeToDiskResult = result;
+                writtenToDiskLatch.countDown();
+            }
+        }
+
         public final class EditorImpl implements Editor {
             private final Map<String, Object> mModified = Maps.newHashMap();
             private boolean mClear = false;
+
+            private AtomicBoolean mCommitInFlight = new AtomicBoolean(false);
 
             public Editor putString(String key, String value) {
                 synchronized (this) {
@@ -2839,30 +2866,67 @@ class ContextImpl extends Context {
             }
 
             public void startCommit() {
-                // TODO: implement
-                commit();
+                if (!mCommitInFlight.compareAndSet(false, true)) {
+                    throw new IllegalStateException("can't call startCommit() twice");
+                }
+
+                final MemoryCommitResult mcr = commitToMemory();
+                final Runnable awaitCommit = new Runnable() {
+                        public void run() {
+                            try {
+                                mcr.writtenToDiskLatch.await();
+                            } catch (InterruptedException ignored) {
+                            }
+                        }
+                    };
+
+                QueuedWork.add(awaitCommit);
+
+                Runnable postWriteRunnable = new Runnable() {
+                        public void run() {
+                            awaitCommit.run();
+                            mCommitInFlight.set(false);
+                            QueuedWork.remove(awaitCommit);
+                        }
+                    };
+
+                SharedPreferencesImpl.this.enqueueDiskWrite(mcr, postWriteRunnable);
+
+                // Okay to notify the listeners before it's hit disk
+                // because the listeners should always get the same
+                // SharedPreferences instance back, which has the
+                // changes reflected in memory.
+                notifyListeners(mcr);
             }
 
-            public boolean commit() {
-                boolean returnValue;
-
-                boolean hasListeners;
-                boolean changesMade = false;
-                List<String> keysModified = null;
-                Set<OnSharedPreferenceChangeListener> listeners = null;
-
+            // Returns true if any changes were made
+            private MemoryCommitResult commitToMemory() {
+                MemoryCommitResult mcr = new MemoryCommitResult();
                 synchronized (SharedPreferencesImpl.this) {
-                    hasListeners = mListeners.size() > 0;
+                    // We optimistically don't make a deep copy until
+                    // a memory commit comes in when we're already
+                    // writing to disk.
+                    if (mDiskWritesInFlight > 0) {
+                        // We can't modify our mMap as a currently
+                        // in-flight write owns it.  Clone it before
+                        // modifying it.
+                        // noinspection unchecked
+                        mMap = new HashMap<String, Object>(mMap);
+                    }
+                    mcr.mapToWriteToDisk = mMap;
+                    mDiskWritesInFlight++;
+
+                    boolean hasListeners = mListeners.size() > 0;
                     if (hasListeners) {
-                        keysModified = new ArrayList<String>();
-                        listeners =
-                                new HashSet<OnSharedPreferenceChangeListener>(mListeners.keySet());
+                        mcr.keysModified = new ArrayList<String>();
+                        mcr.listeners =
+                            new HashSet<OnSharedPreferenceChangeListener>(mListeners.keySet());
                     }
 
                     synchronized (this) {
                         if (mClear) {
                             if (!mMap.isEmpty()) {
-                                changesMade = true;
+                                mcr.changesMade = true;
                                 mMap.clear();
                             }
                             mClear = false;
@@ -2872,53 +2936,122 @@ class ContextImpl extends Context {
                             String k = e.getKey();
                             Object v = e.getValue();
                             if (v == this) {  // magic value for a removal mutation
-                                if (mMap.containsKey(k)) {
-                                    mMap.remove(k);
-                                    changesMade = true;
+                                if (!mMap.containsKey(k)) {
+                                    continue;
                                 }
+                                mMap.remove(k);
                             } else {
                                 boolean isSame = false;
                                 if (mMap.containsKey(k)) {
                                     Object existingValue = mMap.get(k);
-                                    isSame = existingValue != null && existingValue.equals(v);
+                                    if (existingValue != null && existingValue.equals(v)) {
+                                        continue;
+                                    }
                                 }
-                                if (!isSame) {
-                                    mMap.put(k, v);
-                                    changesMade = true;
-                                }
+                                mMap.put(k, v);
                             }
 
+                            mcr.changesMade = true;
                             if (hasListeners) {
-                                keysModified.add(k);
+                                mcr.keysModified.add(k);
                             }
                         }
 
                         mModified.clear();
                     }
-
-                    returnValue = writeFileLocked(changesMade);
                 }
+                return mcr;
+            }
 
-                if (hasListeners) {
-                    for (int i = keysModified.size() - 1; i >= 0; i--) {
-                        final String key = keysModified.get(i);
-                        for (OnSharedPreferenceChangeListener listener : listeners) {
+            public boolean commit() {
+                MemoryCommitResult mcr = commitToMemory();
+                SharedPreferencesImpl.this.enqueueDiskWrite(
+                    mcr, null /* sync write on this thread okay */);
+                try {
+                    mcr.writtenToDiskLatch.await();
+                } catch (InterruptedException e) {
+                    return false;
+                }
+                notifyListeners(mcr);
+                return mcr.writeToDiskResult;
+            }
+
+            private void notifyListeners(final MemoryCommitResult mcr) {
+                if (mcr.listeners == null || mcr.keysModified == null ||
+                    mcr.keysModified.size() == 0) {
+                    return;
+                }
+                if (Looper.myLooper() == Looper.getMainLooper()) {
+                    for (int i = mcr.keysModified.size() - 1; i >= 0; i--) {
+                        final String key = mcr.keysModified.get(i);
+                        for (OnSharedPreferenceChangeListener listener : mcr.listeners) {
                             if (listener != null) {
                                 listener.onSharedPreferenceChanged(SharedPreferencesImpl.this, key);
                             }
                         }
                     }
+                } else {
+                    // Run this function on the main thread.
+                    ActivityThread.sMainThreadHandler.post(new Runnable() {
+                            public void run() {
+                                notifyListeners(mcr);
+                            }
+                        });
                 }
-
-                return returnValue;
             }
         }
 
-        public Editor edit() {
-            return new EditorImpl();
+        /**
+         * Enqueue an already-committed-to-memory result to be written
+         * to disk.
+         *
+         * They will be written to disk one-at-a-time in the order
+         * that they're enqueued.
+         *
+         * @param postWriteRunnable if non-null, we're being called
+         *   from startCommit() and this is the runnable to run after
+         *   the write proceeds.  if null (from a regular commit()),
+         *   then we're allowed to do this disk write on the main
+         *   thread (which in addition to reducing allocations and
+         *   creating a background thread, this has the advantage that
+         *   we catch them in userdebug StrictMode reports to convert
+         *   them where possible to startCommit...)
+         */
+        private void enqueueDiskWrite(final MemoryCommitResult mcr,
+                                      final Runnable postWriteRunnable) {
+            final Runnable writeToDiskRunnable = new Runnable() {
+                    public void run() {
+                        synchronized (mWritingToDiskLock) {
+                            writeToFile(mcr);
+                        }
+                        synchronized (SharedPreferencesImpl.this) {
+                            mDiskWritesInFlight--;
+                        }
+                        if (postWriteRunnable != null) {
+                            postWriteRunnable.run();
+                        }
+                    }
+                };
+
+            final boolean isFromSyncCommit = (postWriteRunnable == null);
+
+            // Typical #commit() path with fewer allocations, doing a write on
+            // the current thread.
+            if (isFromSyncCommit) {
+                boolean wasEmpty = false;
+                synchronized (SharedPreferencesImpl.this) {
+                    wasEmpty = mDiskWritesInFlight == 1;
+                }
+                if (wasEmpty) {
+                    writeToDiskRunnable.run();
+                    return;
+                }
+            }
+
+            QueuedWork.singleThreadExecutor().execute(writeToDiskRunnable);
         }
 
-        private FileOutputStream createFileOutputStream(File file) {
+        private static FileOutputStream createFileOutputStream(File file) {
             FileOutputStream str = null;
             try {
                 str = new FileOutputStream(file);
@@ -2941,21 +3074,24 @@ class ContextImpl extends Context {
             return str;
         }
 
-        private boolean writeFileLocked(boolean changesMade) {
+        // Note: must hold mWritingToDiskLock
+        private void writeToFile(MemoryCommitResult mcr) {
             // Rename the current file so it may be used as a backup during the next read
             if (mFile.exists()) {
-                if (!changesMade) {
+                if (!mcr.changesMade) {
                     // If the file already exists, but no changes were
                     // made to the underlying map, it's wasteful to
                     // re-write the file.  Return as if we wrote it
                     // out.
-                    return true;
+                    mcr.setDiskWriteResult(true);
+                    return;
                 }
                 if (!mBackupFile.exists()) {
                     if (!mFile.renameTo(mBackupFile)) {
                         Log.e(TAG, "Couldn't rename file " + mFile
                                 + " to backup file " + mBackupFile);
-                        return false;
+                        mcr.setDiskWriteResult(false);
+                        return;
                     }
                 } else {
                     mFile.delete();
@@ -2968,22 +3104,26 @@ class ContextImpl extends Context {
             try {
                 FileOutputStream str = createFileOutputStream(mFile);
                 if (str == null) {
-                    return false;
+                    mcr.setDiskWriteResult(false);
+                    return;
                 }
-                XmlUtils.writeMapXml(mMap, str);
+                XmlUtils.writeMapXml(mcr.mapToWriteToDisk, str);
                 str.close();
                 setFilePermissionsFromMode(mFile.getPath(), mMode, 0);
-                if (FileUtils.getFileStatus(mFile.getPath(), mFileStatus)) {
-                    mTimestamp = mFileStatus.mtime;
+                FileStatus stat = new FileStatus();
+                if (FileUtils.getFileStatus(mFile.getPath(), stat)) {
+                    synchronized (this) {
+                        mTimestamp = stat.mtime;
+                    }
                 }
-
                 // Writing was successful, delete the backup file if there is one.
                 mBackupFile.delete();
-                return true;
+                mcr.setDiskWriteResult(true);
+                return;
             } catch (XmlPullParserException e) {
-                Log.w(TAG, "writeFileLocked: Got exception:", e);
+                Log.w(TAG, "writeToFile: Got exception:", e);
             } catch (IOException e) {
-                Log.w(TAG, "writeFileLocked: Got exception:", e);
+                Log.w(TAG, "writeToFile: Got exception:", e);
             }
             // Clean up an unsuccessfully written file
             if (mFile.exists()) {
@@ -2991,7 +3131,7 @@ class ContextImpl extends Context {
                     Log.e(TAG, "Couldn't clean up partially-written file " + mFile);
                 }
             }
-            return false;
+            mcr.setDiskWriteResult(false);
         }
     }
 }
