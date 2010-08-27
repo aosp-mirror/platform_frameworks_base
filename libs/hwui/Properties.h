@@ -35,6 +35,11 @@
 #define PROPERTY_TEXT_CACHE_WIDTH "ro.hwui.text_cache_width"
 #define PROPERTY_TEXT_CACHE_HEIGHT "ro.hwui.text_cache_height"
 
+// Gamma (>= 1.0, <= 10.0)
+#define PROPERTY_TEXT_GAMMA "ro.text_gamma"
+#define PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD "ro.text_gamma.black_threshold"
+#define PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD "ro.text_gamma.white_threshold"
+
 // Converts a number of mega-bytes into bytes
 #define MB(s) s * 1024 * 1024
 
@@ -44,5 +49,9 @@
 #define DEFAULT_PATCH_CACHE_SIZE 100
 #define DEFAULT_GRADIENT_CACHE_SIZE 0.5f
 #define DEFAULT_DROP_SHADOW_CACHE_SIZE 2.0f
+
+#define DEFAULT_TEXT_GAMMA 1.4f
+#define DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD 64
+#define DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD 192
 
 #endif // ANDROID_UI_PROPERTIES_H

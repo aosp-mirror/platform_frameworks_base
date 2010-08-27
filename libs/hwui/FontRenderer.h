@@ -124,6 +124,10 @@ public:
     void init();
     void deinit();
 
+    void setGammaTable(const uint8_t* gammaTable) {
+        mGammaTable = gammaTable;
+    }
+
     void setFont(SkPaint* paint, uint32_t fontId, float fontSize);
     void renderText(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
             uint32_t len, int numGlyphs, int x, int y);
@@ -156,6 +160,8 @@ public:
 
 protected:
     friend class Font;
+
+    const uint8_t* mGammaTable;
 
     struct CacheTextureLine {
         uint16_t mMaxHeight;

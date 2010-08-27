@@ -25,7 +25,7 @@
 #include "LayerCache.h"
 #include "GradientCache.h"
 #include "PatchCache.h"
-#include "FontRenderer.h"
+#include "GammaFontRenderer.h"
 #include "ProgramCache.h"
 #include "PathCache.h"
 #include "TextDropShadowCache.h"
@@ -42,7 +42,6 @@ struct CacheLogger {
 class Caches: public Singleton<Caches> {
     Caches(): Singleton<Caches>(), blend(false), lastSrcMode(GL_ZERO),
             lastDstMode(GL_ZERO), currentProgram(NULL) {
-        dropShadowCache.setFontRenderer(fontRenderer);
     }
 
     friend class Singleton<Caches>;
@@ -62,7 +61,7 @@ public:
     PathCache pathCache;
     PatchCache patchCache;
     TextDropShadowCache dropShadowCache;
-    FontRenderer fontRenderer;
+    GammaFontRenderer fontRenderer;
 }; // class Caches
 
 }; // namespace uirenderer

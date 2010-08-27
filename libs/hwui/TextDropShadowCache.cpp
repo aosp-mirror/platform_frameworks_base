@@ -17,6 +17,7 @@
 #define LOG_TAG "OpenGLRenderer"
 
 #include "TextDropShadowCache.h"
+#include "Properties.h"
 
 namespace android {
 namespace uirenderer {
