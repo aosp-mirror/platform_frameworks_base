@@ -480,9 +480,8 @@ struct MyHandler : public AHandler {
             {
                 if (mFirstAccessUnit) {
                     LOG(WARNING) << "Never received any data, disconnecting.";
-
+                    (new AMessage('abor', id()))->post();
                 }
-                (new AMessage('abor', id()))->post();
                 break;
             }
 
