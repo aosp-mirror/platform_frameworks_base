@@ -273,17 +273,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_SUPPORTS_XLARGE_SCREENS = 1<<19;
     
     /**
-     * Value for {@link #flags}: set to <code>true</code> if the application
-     * has reported that it is heavy-weight, and thus can not participate in
-     * the normal application lifecycle.
-     * 
-     * <p>Comes from the
-     * {@link android.R.styleable#AndroidManifestApplication_heavyWeight android:heavyWeight}
-     * attribute of the &lt;application&gt; tag.
-     */
-    public static final int FLAG_HEAVY_WEIGHT = 1<<20;
-    
-    /**
      * Value for {@link #flags}: this is true if the application has set
      * its android:neverEncrypt to true, false otherwise. It is used to specify
      * that this package specifically "opts-out" of a secured file system solution,
@@ -308,6 +297,19 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@hide}
      */
     public static final int FLAG_NATIVE_DEBUGGABLE = 1<<28;
+
+    /**
+     * Value for {@link #flags}: set to <code>true</code> if the application
+     * has reported that it is heavy-weight, and thus can not participate in
+     * the normal application lifecycle.
+     *
+     * <p>Comes from the
+     * {@link android.R.styleable#AndroidManifestApplication_heavyWeight android:heavyWeight}
+     * attribute of the &lt;application&gt; tag.
+     *
+     * {@hide}
+     */
+    public static final int CANT_SAVE_STATE = 1<<27;
 
     /**
      * Flags associated with the application.  Any combination of
