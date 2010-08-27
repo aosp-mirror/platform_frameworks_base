@@ -42,6 +42,7 @@ import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -158,6 +159,8 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     private HeaderAdapter mAdapter;
 
+    private FrameLayout mListFooter;
+
     private View mPrefsContainer;
 
     private boolean mSinglePane;
@@ -189,6 +192,10 @@ public abstract class PreferenceActivity extends ListActivity implements
                 case MSG_BUILD_HEADERS:
                     onBuildHeaders(mHeaders);
                     mAdapter.notifyDataSetChanged();
+                    Header header = onGetNewHeader();
+                    if (header != null && header.fragment != null) {
+                        switchToHeader(header.fragment, header.fragmentArguments);
+                    }
                     break;
             }
         }
@@ -287,6 +294,11 @@ public abstract class PreferenceActivity extends ListActivity implements
          * instantiated.
          */
         public Bundle fragmentArguments;
+
+        /**
+         * Intent to launch when the preference is selected.
+         */
+        public Intent intent;
     }
 
     @Override
@@ -295,6 +307,7 @@ public abstract class PreferenceActivity extends ListActivity implements
 
         setContentView(com.android.internal.R.layout.preference_list_content);
 
+        mListFooter = (FrameLayout)findViewById(com.android.internal.R.id.list_footer);
         mPrefsContainer = findViewById(com.android.internal.R.id.prefs);
         boolean hidingHeaders = onIsHidingHeaders();
         mSinglePane = hidingHeaders || !onIsMultiPane();
@@ -446,6 +459,16 @@ public abstract class PreferenceActivity extends ListActivity implements
     }
 
     /**
+     * Called after the header list has been updated ({@link #onBuildHeaders}
+     * has been called and returned due to {@link #invalidateHeaders()}) to
+     * specify the header that should now be selected.  The default implementation
+     * returns null to keep whatever header is currently selected.
+     */
+    public Header onGetNewHeader() {
+        return null;
+    }
+
+    /**
      * Called when the activity needs its list of headers build.  By
      * implementing this and adding at least one item to the list, you
      * will cause the activity to run in its modern fragment mode.  Note
@@ -498,7 +521,7 @@ public abstract class PreferenceActivity extends ListActivity implements
 
             Bundle curBundle = null;
 
-            int outerDepth = parser.getDepth();
+            final int outerDepth = parser.getDepth();
             while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
                    && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
                 if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
@@ -524,7 +547,27 @@ public abstract class PreferenceActivity extends ListActivity implements
                     if (curBundle == null) {
                         curBundle = new Bundle();
                     }
-                    getResources().parseBundleExtras(parser, curBundle);
+
+                    final int innerDepth = parser.getDepth();
+                    while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
+                           && (type != XmlPullParser.END_TAG || parser.getDepth() > innerDepth)) {
+                        if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                            continue;
+                        }
+
+                        String innerNodeName = parser.getName();
+                        if (innerNodeName.equals("extra")) {
+                            getResources().parseBundleExtra("extra", attrs, curBundle);
+                            XmlUtils.skipCurrentTag(parser);
+
+                        } else if (innerNodeName.equals("intent")) {
+                            header.intent = Intent.parseIntent(getResources(), parser, attrs);
+
+                        } else {
+                            XmlUtils.skipCurrentTag(parser);
+                        }
+                    }
+
                     if (curBundle.size() > 0) {
                         header.fragmentArguments = curBundle;
                         curBundle = null;
@@ -544,6 +587,16 @@ public abstract class PreferenceActivity extends ListActivity implements
             if (parser != null) parser.close();
         }
 
+    }
+
+    /**
+     * Set a footer that should be shown at the bottom of the header list.
+     */
+    public void setListFooter(View view) {
+        mListFooter.removeAllViews();
+        mListFooter.addView(view, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT));
     }
 
     @Override
@@ -633,10 +686,14 @@ public abstract class PreferenceActivity extends ListActivity implements
      * @param position The header's position in the list.
      */
     public void onHeaderClick(Header header, int position) {
-        if (mSinglePane) {
-            startWithFragment(header.fragment, header.fragmentArguments);
-        } else {
-            switchToHeader(header.fragment, header.fragmentArguments);
+        if (header.fragment != null) {
+            if (mSinglePane) {
+                startWithFragment(header.fragment, header.fragmentArguments);
+            } else {
+                switchToHeader(header.fragment, header.fragmentArguments);
+            }
+        } else if (header.intent != null) {
+            startActivity(header.intent);
         }
     }
 
