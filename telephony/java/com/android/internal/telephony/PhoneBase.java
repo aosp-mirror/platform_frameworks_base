@@ -36,10 +36,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.R;
-import com.android.internal.telephony.gsm.GsmDataConnection;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 
-import java.util.List;
 import java.util.Locale;
 
 
@@ -932,24 +930,8 @@ public abstract class PhoneBase extends Handler implements Phone {
          logUnexpectedCdmaMethodCall("unsetOnEcbModeExitResponse");
      }
 
-    public String getInterfaceName(String apnType) {
-        return mDataConnection.getInterfaceName(apnType);
-    }
-
-    public String getIpAddress(String apnType) {
-        return mDataConnection.getIpAddress(apnType);
-    }
-
     public boolean isDataConnectivityEnabled() {
         return mDataConnection.getDataEnabled();
-    }
-
-    public String getGateway(String apnType) {
-        return mDataConnection.getGateway(apnType);
-    }
-
-    public String[] getDnsServers(String apnType) {
-        return mDataConnection.getDnsServers(apnType);
     }
 
     public String[] getActiveApnTypes() {

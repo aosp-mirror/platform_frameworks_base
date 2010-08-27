@@ -27,17 +27,14 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.NetworkProperties;
 import android.net.ProxyProperties;
 import android.net.TrafficStats;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.AsyncResult;
 import android.os.Message;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -61,7 +58,6 @@ import com.android.internal.telephony.DataConnection.FailCause;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
@@ -612,42 +608,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         return true;
     }
 
-    protected String getInterfaceName(String apnType) {
-        if (mActivePdp != null &&
-                (apnType == null ||
-                (mActiveApn != null && mActiveApn.canHandleType(apnType)))) {
-            return mActivePdp.getInterface();
-        }
-        return null;
-    }
-
-    protected String getIpAddress(String apnType) {
-        if (mActivePdp != null &&
-                (apnType == null ||
-                (mActiveApn != null && mActiveApn.canHandleType(apnType)))) {
-            return mActivePdp.getIpAddress();
-        }
-        return null;
-    }
-
-    public String getGateway(String apnType) {
-        if (mActivePdp != null &&
-                (apnType == null ||
-                (mActiveApn != null && mActiveApn.canHandleType(apnType)))) {
-            return mActivePdp.getGatewayAddress();
-        }
-        return null;
-    }
-
-    protected String[] getDnsServers(String apnType) {
-        if (mActivePdp != null &&
-                (apnType == null ||
-                (mActiveApn != null && mActiveApn.canHandleType(apnType)))) {
-            return mActivePdp.getDnsServers();
-        }
-        return null;
-    }
-
     private boolean
     pdpStatesHasCID (ArrayList<DataCallState> states, int cid) {
         for (int i = 0, s = states.size() ; i < s ; i++) {
@@ -1138,7 +1098,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
 
         if (ar.exception == null) {
-            mNetworkProperties = makeNetworkProperties(mActivePdp);
+            mNetworkProperties = getNetworkProperties(mActivePdp);
 
             ApnSetting apn = mActivePdp.getApn();
             if (apn.proxy != null && apn.proxy.length() != 0) {

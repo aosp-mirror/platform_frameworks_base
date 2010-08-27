@@ -17,11 +17,9 @@
 package com.android.internal.telephony;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.NetworkProperties;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.telephony.CellLocation;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
@@ -29,7 +27,6 @@ import android.telephony.SignalStrength;
 
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.gsm.NetworkInfo;
-import com.android.internal.telephony.gsm.GsmDataConnection;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 
 import java.util.List;
@@ -1380,29 +1377,6 @@ public interface Phone {
      * Report on whether data connectivity is allowed.
      */
     boolean isDataConnectivityPossible();
-
-    /**
-     * Returns the name of the network interface used by the specified APN type.
-     */
-    String getInterfaceName(String apnType);
-
-    /**
-     * Returns the IP address of the network interface used by the specified
-     * APN type.
-     */
-    String getIpAddress(String apnType);
-
-    /**
-     * Returns the gateway for the network interface used by the specified APN
-     * type.
-     */
-    String getGateway(String apnType);
-
-    /**
-     * Returns the DNS servers for the network interface used by the specified
-     * APN type.
-     */
-    public String[] getDnsServers(String apnType);
 
     /**
      * Retrieves the unique device ID, e.g., IMEI for GSM phones and MEID for CDMA phones.

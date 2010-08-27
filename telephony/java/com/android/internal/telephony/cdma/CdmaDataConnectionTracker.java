@@ -23,14 +23,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.TrafficStats;
 import android.net.wifi.WifiManager;
 import android.os.AsyncResult;
 import android.os.Message;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -50,10 +48,7 @@ import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.EventLogTags;
 import com.android.internal.telephony.gsm.ApnSetting;
 import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.RetryManager;
-import com.android.internal.telephony.ServiceStateTracker;
 
-import java.net.NetworkInterface;
 import java.util.ArrayList;
 
 /**
@@ -737,7 +732,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         }
 
         if (ar.exception == null) {
-            mNetworkProperties = makeNetworkProperties(mActiveDataConnection);
+            mNetworkProperties = getNetworkProperties(mActiveDataConnection);
 
             // everything is setup
             notifyDefaultData(reason);
@@ -965,34 +960,6 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             // TODO: Do we need to do anything?
             Log.i(LOG_TAG, "onDataStateChanged: not connected, state=" + state + " ignoring");
         }
-    }
-
-    protected String getInterfaceName(String apnType) {
-        if (mActiveDataConnection != null) {
-            return mActiveDataConnection.getInterface();
-        }
-        return null;
-    }
-
-    protected String getIpAddress(String apnType) {
-        if (mActiveDataConnection != null) {
-            return mActiveDataConnection.getIpAddress();
-        }
-        return null;
-    }
-
-    protected String getGateway(String apnType) {
-        if (mActiveDataConnection != null) {
-            return mActiveDataConnection.getGatewayAddress();
-        }
-        return null;
-    }
-
-    protected String[] getDnsServers(String apnType) {
-        if (mActiveDataConnection != null) {
-            return mActiveDataConnection.getDnsServers();
-        }
-        return null;
     }
 
     public ArrayList<DataConnection> getAllDataConnections() {
