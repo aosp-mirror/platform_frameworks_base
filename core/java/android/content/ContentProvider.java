@@ -767,32 +767,6 @@ public abstract class ContentProvider implements ComponentCallbacks {
     }
 
     /**
-     * Helper to compare two MIME types, where one may be a pattern.
-     * @param concreteType A fully-specified MIME type.
-     * @param desiredType A desired MIME type that may be a pattern such as *\/*.
-     * @return Returns true if the two MIME types match.
-     */
-    public static boolean compareMimeTypes(String concreteType, String desiredType) {
-        final int typeLength = desiredType.length();
-        if (typeLength == 3 && desiredType.equals("*/*")) {
-            return true;
-        }
-
-        final int slashpos = desiredType.indexOf('/');
-        if (slashpos > 0) {
-            if (typeLength == slashpos+2 && desiredType.charAt(slashpos+1) == '*') {
-                if (desiredType.regionMatches(0, concreteType, 0, slashpos+1)) {
-                    return true;
-                }
-            } else if (desiredType.equals(concreteType)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Called by a client to determine the types of data streams that this
      * content provider supports for the given URI.  The default implementation
      * returns null, meaning no types.  If your content provider stores data
@@ -809,7 +783,7 @@ public abstract class ContentProvider implements ComponentCallbacks {
      *
      * @see #getType(Uri)
      * @see #openTypedAssetFile(Uri, String, Bundle)
-     * @see #compareMimeTypes(String, String)
+     * @see ClipDescription#compareMimeTypes(String, String)
      */
     public String[] getStreamTypes(Uri uri, String mimeTypeFilter) {
         return null;
@@ -825,7 +799,7 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * result of {@link #getType(Uri)} and, if the match, simple calls
      * {@link #openAssetFile(Uri, String)}.
      *
-     * <p>See {@link ClippedData} for examples of the use and implementation
+     * <p>See {@link ClipData} for examples of the use and implementation
      * of this method.
      *
      * @param uri The data in the content provider being queried.
@@ -848,7 +822,7 @@ public abstract class ContentProvider implements ComponentCallbacks {
      *
      * @see #getStreamTypes(Uri, String)
      * @see #openAssetFile(Uri, String)
-     * @see #compareMimeTypes(String, String)
+     * @see ClipDescription#compareMimeTypes(String, String)
      */
     public AssetFileDescriptor openTypedAssetFile(Uri uri, String mimeTypeFilter, Bundle opts)
             throws FileNotFoundException {
@@ -857,7 +831,7 @@ public abstract class ContentProvider implements ComponentCallbacks {
             return openAssetFile(uri, "r");
         }
         String baseType = getType(uri);
-        if (baseType != null && compareMimeTypes(baseType, mimeTypeFilter)) {
+        if (baseType != null && ClipDescription.compareMimeTypes(baseType, mimeTypeFilter)) {
             // Use old untyped open call if this provider has a type for this
             // URI and it matches the request.
             return openAssetFile(uri, "r");

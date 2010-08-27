@@ -22,7 +22,7 @@ import com.android.internal.widget.EditableInputConnection;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.ClipboardManager;
-import android.content.ClippedData;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -7330,17 +7330,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 URLSpan[] urls = ((Spanned) mText).getSpans(min, max, URLSpan.class);
                 if (urls.length >= 1) {
-                    ClippedData clip = null;
+                    ClipData clip = null;
                     for (int i=0; i<urls.length; i++) {
                         Uri uri = Uri.parse(urls[0].getURL());
-                        ClippedData.Item item = new ClippedData.Item(uri);
                         if (clip == null) {
-                            clip = new ClippedData(null, null, item);
+                            clip = ClipData.newRawUri(null, null, uri);
                         } else {
-                            clip.addItem(item);
+                            clip.addItem(new ClipData.Item(uri));
                         }
                     }
-                    clipboard.setPrimaryClip(clip);
+                    if (clip != null) {
+                        clipboard.setPrimaryClip(clip);
+                    }
                 }
                 return true;
 
@@ -7536,7 +7537,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             switch (item.getItemId()) {
                 case ID_PASTE:
-                    ClippedData clip = clipboard.getPrimaryClip();
+                    ClipData clip = clipboard.getPrimaryClip();
                     if (clip != null) {
                         boolean didfirst = false;
                         for (int i=0; i<clip.getItemCount(); i++) {
@@ -7557,15 +7558,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     return true;
 
                 case ID_CUT:
-                    clipboard.setPrimaryClip(new ClippedData(null, null,
-                            new ClippedData.Item(mTransformed.subSequence(min, max))));
+                    clipboard.setPrimaryClip(ClipData.newPlainText(null, null,
+                            mTransformed.subSequence(min, max)));
                     ((Editable) mText).delete(min, max);
                     stopSelectionActionMode();
                     return true;
 
                 case ID_COPY:
-                    clipboard.setPrimaryClip(new ClippedData(null, null,
-                            new ClippedData.Item(mTransformed.subSequence(min, max))));
+                    clipboard.setPrimaryClip(ClipData.newPlainText(null, null,
+                            mTransformed.subSequence(min, max)));
                     stopSelectionActionMode();
                     return true;
             }

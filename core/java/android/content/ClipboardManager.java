@@ -37,7 +37,7 @@ import java.util.ArrayList;
  * <p>
  * The ClipboardManager API itself is very simple: it consists of methods
  * to atomically get and set the current primary clipboard data.  That data
- * is expressed as a {@link ClippedData} object, which defines the protocol
+ * is expressed as a {@link ClipData} object, which defines the protocol
  * for data exchange between applications.
  *
  * @see android.content.Context#getSystemService
@@ -96,7 +96,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      *
      * @param clip The clipped data item to set.
      */
-    public void setPrimaryClip(ClippedData clip) {
+    public void setPrimaryClip(ClipData clip) {
         try {
             getService().setPrimaryClip(clip);
         } catch (RemoteException e) {
@@ -106,9 +106,21 @@ public class ClipboardManager extends android.text.ClipboardManager {
     /**
      * Returns the current primary clip on the clipboard.
      */
-    public ClippedData getPrimaryClip() {
+    public ClipData getPrimaryClip() {
         try {
             return getService().getPrimaryClip();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns a description of the current primary clip on the clipboard
+     * but not a copy of its data.
+     */
+    public ClipDescription getPrimaryClipDescription() {
+        try {
+            return getService().getPrimaryClipDescription();
         } catch (RemoteException e) {
             return null;
         }
@@ -156,7 +168,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      * the primary clip and tries to coerce it to a string.
      */
     public CharSequence getText() {
-        ClippedData clip = getPrimaryClip();
+        ClipData clip = getPrimaryClip();
         if (clip != null && clip.getItemCount() > 0) {
             return clip.getItem(0).coerceToText(mContext);
         }
@@ -164,12 +176,12 @@ public class ClipboardManager extends android.text.ClipboardManager {
     }
 
     /**
-     * @deprecated Use {@link #setPrimaryClip(ClippedData)} instead.  This
+     * @deprecated Use {@link #setPrimaryClip(ClipData)} instead.  This
      * creates a ClippedItem holding the given text and sets it as the
      * primary clip.  It has no label or icon.
      */
     public void setText(CharSequence text) {
-        setPrimaryClip(new ClippedData(null, null, new ClippedData.Item(text)));
+        setPrimaryClip(ClipData.newPlainText(null, null, text));
     }
 
     /**

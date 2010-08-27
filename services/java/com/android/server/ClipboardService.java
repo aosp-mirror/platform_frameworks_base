@@ -16,7 +16,8 @@
 
 package com.android.server;
 
-import android.content.ClippedData;
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.IClipboard;
 import android.content.IOnPrimaryClipChangedListener;
 import android.content.Context;
@@ -27,7 +28,7 @@ import android.os.RemoteException;
  * Implementation of the clipboard for copy and paste.
  */
 public class ClipboardService extends IClipboard.Stub {
-    private ClippedData mPrimaryClip;
+    private ClipData mPrimaryClip;
     private final RemoteCallbackList<IOnPrimaryClipChangedListener> mPrimaryClipListeners
             = new RemoteCallbackList<IOnPrimaryClipChangedListener>();
 
@@ -36,7 +37,7 @@ public class ClipboardService extends IClipboard.Stub {
      */
     public ClipboardService(Context context) { }
 
-    public void setPrimaryClip(ClippedData clip) {
+    public void setPrimaryClip(ClipData clip) {
         synchronized (this) {
             if (clip != null && clip.getItemCount() <= 0) {
                 throw new IllegalArgumentException("No items");
@@ -56,9 +57,15 @@ public class ClipboardService extends IClipboard.Stub {
         }
     }
     
-    public ClippedData getPrimaryClip() {
+    public ClipData getPrimaryClip() {
         synchronized (this) {
             return mPrimaryClip;
+        }
+    }
+
+    public ClipDescription getPrimaryClipDescription() {
+        synchronized (this) {
+            return new ClipDescription(mPrimaryClip);
         }
     }
 
