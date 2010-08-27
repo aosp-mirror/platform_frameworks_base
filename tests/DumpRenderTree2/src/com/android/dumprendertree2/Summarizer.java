@@ -21,8 +21,13 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
 import android.util.DisplayMetrics;
+import android.util.Log;
+
+import com.android.dumprendertree2.forwarder.ForwarderManager;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -369,6 +374,9 @@ public class Summarizer {
                 html.append(result.getDiffAsHtml());
                 html.append("<a href=\"#\" onClick=\"toggleDisplay('" + id + "');");
                 html.append("return false;\">Hide</a>");
+                html.append(" | ");
+                html.append("<a href=\"" + getViewSourceUrl(relativePath).toString() + "\"");
+                html.append(" target=\"_blank\">Show source</a>");
                 html.append("</div>");
             }
 
@@ -382,10 +390,25 @@ public class Summarizer {
         html.append("<h2>Passed [" + resultsList.size() + "]</h2>");
         for (String result : resultsList) {
             html.append("<h3>");
+            html.append("<a href=\"" + getViewSourceUrl(result).toString() + "\"");
+            html.append(" target=\"_blank\">");
             html.append("<span class=\"sqr\">&#x25a0; </span>");
             html.append("<span class=\"path\">" + result + "</span>");
+            html.append("</a>");
             html.append("</h3>");
             html.append("<div class=\"space\"></div>");
         }
+    }
+
+    private static final URL getViewSourceUrl(String relativePath) {
+        URL url = null;
+        try {
+            url = new URL("http", "localhost", ForwarderManager.HTTP_PORT,
+                    "/WebKitTools/DumpRenderTree/android/view_source.php?src=" +
+                    relativePath);
+        } catch (MalformedURLException e) {
+            assert false : "relativePath=" + relativePath;
+        }
+        return url;
     }
 }
