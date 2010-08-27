@@ -191,12 +191,6 @@ int32_t SharedBufferBase::getIdentity() const
     return stack.identity;
 }
 
-size_t SharedBufferBase::getFrontBuffer() const
-{
-    SharedBufferStack& stack( *mSharedStack );
-    return size_t( stack.head );
-}
-
 String8 SharedBufferBase::dump(char const* prefix) const
 {
     const size_t SIZE = 1024;
@@ -278,6 +272,16 @@ SharedBufferClient::QueueUpdate::QueueUpdate(SharedBufferBase* sbb)
 }
 ssize_t SharedBufferClient::QueueUpdate::operator()() {
     android_atomic_inc(&stack.queued);
+    return NO_ERROR;
+}
+
+SharedBufferClient::DequeueUpdate::DequeueUpdate(SharedBufferBase* sbb)
+    : UpdateBase(sbb) {
+}
+ssize_t SharedBufferClient::DequeueUpdate::operator()() {
+    if (android_atomic_dec(&stack.available) == 0) {
+        LOGW("dequeue probably called from multiple threads!");
+    }
     return NO_ERROR;
 }
 
@@ -388,12 +392,8 @@ ssize_t SharedBufferClient::dequeue()
     if (err != NO_ERROR)
         return ssize_t(err);
 
-    // NOTE: 'stack.available' is part of the conditions, however
-    // decrementing it, never changes any conditions, so we don't need
-    // to do this as part of an update.
-    if (android_atomic_dec(&stack.available) == 0) {
-        LOGW("dequeue probably called from multiple threads!");
-    }
+    DequeueUpdate update(this);
+    updateCondition( update );
 
     undoDequeueTail = tail;
     int dequeued = stack.index[tail];
