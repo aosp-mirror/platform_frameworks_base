@@ -41,6 +41,8 @@ struct ARTSPController : public MediaExtractor {
     virtual sp<MetaData> getTrackMetaData(
             size_t index, uint32_t flags);
 
+    int64_t getNormalPlayTimeUs();
+
     void onMessageReceived(const sp<AMessage> &msg);
 
 protected:
