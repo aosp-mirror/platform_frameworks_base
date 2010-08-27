@@ -40,11 +40,10 @@ struct ARTPAssembler : public RefBase {
     virtual void onByeReceived() = 0;
 
 protected:
-    static void PropagateTimes(
-        const sp<ABuffer> &from, const sp<ABuffer> &to);
-
     virtual AssemblyStatus assembleMore(const sp<ARTPSource> &source) = 0;
     virtual void packetLost() = 0;
+
+    static void CopyTimes(const sp<ABuffer> &to, const sp<ABuffer> &from);
 
 private:
     int64_t mFirstFailureTimeUs;

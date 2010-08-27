@@ -402,15 +402,40 @@ sp<ABuffer> MakeMPEG4VideoCodecSpecificData(
     return csd;
 }
 
+static bool GetClockRate(const AString &desc, uint32_t *clockRate) {
+    ssize_t slashPos = desc.find("/");
+    if (slashPos < 0) {
+        return false;
+    }
+
+    const char *s = desc.c_str() + slashPos + 1;
+
+    char *end;
+    unsigned long x = strtoul(s, &end, 10);
+
+    if (end == s || (*end != '\0' && *end != '/')) {
+        return false;
+    }
+
+    *clockRate = x;
+
+    return true;
+}
+
 APacketSource::APacketSource(
         const sp<ASessionDescription> &sessionDesc, size_t index)
     : mInitCheck(NO_INIT),
       mFormat(new MetaData),
-      mEOSResult(OK) {
+      mEOSResult(OK),
+      mRTPTimeBase(0),
+      mNormalPlayTimeBaseUs(0),
+      mLastNormalPlayTimeUs(0) {
     unsigned long PT;
     AString desc;
     AString params;
     sessionDesc->getFormatType(index, &PT, &desc, &params);
+
+    CHECK(GetClockRate(desc, &mClockRate));
 
     int64_t durationUs;
     if (sessionDesc->getDurationUs(&durationUs)) {
@@ -571,6 +596,8 @@ status_t APacketSource::read(
     if (!mBuffers.empty()) {
         const sp<ABuffer> buffer = *mBuffers.begin();
 
+        updateNormalPlayTime_l(buffer);
+
         MediaBuffer *mediaBuffer = new MediaBuffer(buffer->size());
 
         int64_t timeUs;
@@ -586,6 +613,16 @@ status_t APacketSource::read(
     }
 
     return mEOSResult;
+}
+
+void APacketSource::updateNormalPlayTime_l(const sp<ABuffer> &buffer) {
+    uint32_t rtpTime;
+    CHECK(buffer->meta()->findInt32("rtp-time", (int32_t *)&rtpTime));
+
+    mLastNormalPlayTimeUs =
+        (((double)rtpTime - (double)mRTPTimeBase) / mClockRate)
+            * 1000000ll
+            + mNormalPlayTimeBaseUs;
 }
 
 void APacketSource::queueAccessUnit(const sp<ABuffer> &buffer) {
@@ -611,6 +648,19 @@ void APacketSource::signalEOS(status_t result) {
 void APacketSource::flushQueue() {
     Mutex::Autolock autoLock(mLock);
     mBuffers.clear();
+}
+
+int64_t APacketSource::getNormalPlayTimeUs() {
+    Mutex::Autolock autoLock(mLock);
+    return mLastNormalPlayTimeUs;
+}
+
+void APacketSource::setNormalPlayTimeMapping(
+        uint32_t rtpTime, int64_t normalPlayTimeUs) {
+    Mutex::Autolock autoLock(mLock);
+
+    mRTPTimeBase = rtpTime;
+    mNormalPlayTimeBaseUs = normalPlayTimeUs;
 }
 
 }  // namespace android
