@@ -779,7 +779,7 @@ Use the {@link android.net.Uri Uri} methods to help determine what is being
 requested.  Here is the general format for each type:</p></li>
 
 <ul>
-<li><p>For a single record:&nbsp;&nbsp;&nbsp; {@code vnd.android.cursor.item/vnd.<em>yourcompanyname.contenttype</em}</p> 
+<li><p>For a single record:&nbsp;&nbsp;&nbsp; {@code vnd.android.cursor.item/vnd.<em>yourcompanyname.contenttype</em>}</p>
 
 <p>For example, a request for train record 122, like this URI,</p>
 <p style="margin-left: 2em">{@code content://com.example.transportationprovider/trains/122}</p>
