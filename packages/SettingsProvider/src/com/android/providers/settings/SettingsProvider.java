@@ -311,7 +311,7 @@ public class SettingsProvider extends ContentProvider {
                     cache.setFullyMatchesDisk(false);
                     Log.d(TAG, "row count exceeds max cache entries for table " + table);
                 }
-                Log.d(TAG, "cache for settings table '" + table + "' fullycached=" +
+                Log.d(TAG, "cache for settings table '" + table + "' rows=" + rows + "; fullycached=" +
                       cache.fullyMatchesDisk());
             }
         } finally {
@@ -598,7 +598,7 @@ public class SettingsProvider extends ContentProvider {
         int count = db.delete(args.table, args.where, args.args);
         sKnownMutationsInFlight.decrementAndGet();
         if (count > 0) {
-            SettingsCache.wipe(args.table);  // before we notify
+            SettingsCache.invalidate(args.table);  // before we notify
             sendNotify(url);
         }
         startAsyncCachePopulation();
@@ -616,10 +616,10 @@ public class SettingsProvider extends ContentProvider {
 
         sKnownMutationsInFlight.incrementAndGet();
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        sKnownMutationsInFlight.decrementAndGet();
         int count = db.update(args.table, initialValues, args.where, args.args);
+        sKnownMutationsInFlight.decrementAndGet();
         if (count > 0) {
-            SettingsCache.wipe(args.table);  // before we notify
+            SettingsCache.invalidate(args.table);  // before we notify
             sendNotify(url);
         }
         startAsyncCachePopulation();
@@ -828,14 +828,14 @@ public class SettingsProvider extends ContentProvider {
          * Used for wiping a whole cache on deletes when we're not
          * sure what exactly was deleted or changed.
          */
-        public static void wipe(String tableName) {
+        public static void invalidate(String tableName) {
             SettingsCache cache = SettingsCache.forTable(tableName);
             if (cache == null) {
                 return;
             }
             synchronized (cache) {
                 cache.clear();
-                cache.mCacheFullyMatchesDisk = true;
+                cache.mCacheFullyMatchesDisk = false;
             }
         }
 
