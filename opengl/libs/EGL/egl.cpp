@@ -59,6 +59,7 @@ static char const * const gExtensionString  =
         "EGL_KHR_image "
         "EGL_KHR_image_base "
         "EGL_KHR_image_pixmap "
+        "EGL_KHR_gl_texture_2D_image "
         "EGL_ANDROID_image_native_buffer "
         "EGL_ANDROID_swap_rectangle "
         ;
