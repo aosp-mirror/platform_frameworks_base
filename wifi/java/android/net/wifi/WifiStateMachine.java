@@ -1201,33 +1201,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             return;
         }
         // TODO - fix this for v6
-        try {
-            mNetworkProperties.addAddress(InetAddress.getByAddress(
-                    NetworkUtils.v4IntToArray(mDhcpInfo.ipAddress)));
-        } catch (UnknownHostException e) {
-            Log.e(TAG, "Exception setting IpAddress using " + mDhcpInfo + ", e=" + e);
-        }
-
-        try {
-            mNetworkProperties.setGateway(InetAddress.getByAddress(NetworkUtils.v4IntToArray(
-                    mDhcpInfo.gateway)));
-        } catch (UnknownHostException e) {
-            Log.e(TAG, "Exception setting Gateway using " + mDhcpInfo + ", e=" + e);
-        }
-
-        try {
-            mNetworkProperties.addDns(InetAddress.getByAddress(
-                    NetworkUtils.v4IntToArray(mDhcpInfo.dns1)));
-        } catch (UnknownHostException e) {
-            Log.e(TAG, "Exception setting Dns1 using " + mDhcpInfo + ", e=" + e);
-        }
-        try {
-            mNetworkProperties.addDns(InetAddress.getByAddress(
-                    NetworkUtils.v4IntToArray(mDhcpInfo.dns2)));
-
-        } catch (UnknownHostException e) {
-            Log.e(TAG, "Exception setting Dns2 using " + mDhcpInfo + ", e=" + e);
-        }
+        mNetworkProperties.addAddress(NetworkUtils.intToInetAddress(mDhcpInfo.ipAddress));
+        mNetworkProperties.setGateway(NetworkUtils.intToInetAddress(mDhcpInfo.gateway));
+        mNetworkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns1));
+        mNetworkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns2));
         // TODO - add proxy info
     }
 

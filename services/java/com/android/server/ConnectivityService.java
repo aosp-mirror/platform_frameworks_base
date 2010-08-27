@@ -28,6 +28,7 @@ import android.net.MobileDataStateTracker;
 import android.net.NetworkInfo;
 import android.net.NetworkProperties;
 import android.net.NetworkStateTracker;
+import android.net.NetworkUtils;
 import android.net.wifi.WifiStateTracker;
 import android.net.NetworkUtils;
 import android.os.Binder;
@@ -57,6 +58,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * @hide
@@ -745,6 +748,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     /**
+     * @deprecated use requestRouteToHostAddress instead
+     *
      * Ensure that a network route exists to deliver traffic to the specified
      * host via the specified network interface.
      * @param networkType the type of the network over which traffic to the
@@ -755,6 +760,25 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * @return {@code true} on success, {@code false} on failure
      */
     public boolean requestRouteToHost(int networkType, int hostAddress) {
+        InetAddress inetAddress = NetworkUtils.intToInetAddress(hostAddress);
+
+        if (inetAddress == null) {
+            return false;
+        }
+
+        return requestRouteToHostAddress(networkType, inetAddress.getAddress());
+    }
+
+    /**
+     * Ensure that a network route exists to deliver traffic to the specified
+     * host via the specified network interface.
+     * @param networkType the type of the network over which traffic to the
+     * specified host is to be routed
+     * @param hostAddress the IP address of the host to which the route is
+     * desired
+     * @return {@code true} on success, {@code false} on failure
+     */
+    public boolean requestRouteToHostAddress(int networkType, byte[] hostAddress) {
         enforceChangePermission();
         if (!ConnectivityManager.isNetworkTypeValid(networkType)) {
             return false;
@@ -764,12 +788,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (tracker == null || !tracker.getNetworkInfo().isConnected() ||
                 tracker.isTeardownRequested()) {
             if (DBG) {
-                Slog.d(TAG, "requestRouteToHost on down network (" + networkType + ") - dropped");
+                Slog.d(TAG, "requestRouteToHostAddress on down network " +
+                           "(" + networkType + ") - dropped");
             }
             return false;
         }
         try {
-            InetAddress addr = InetAddress.getByAddress(NetworkUtils.v4IntToArray(hostAddress));
+            InetAddress addr = InetAddress.getByAddress(hostAddress);
             return addHostRoute(tracker, addr);
         } catch (UnknownHostException e) {}
         return false;
@@ -796,7 +821,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             Slog.d(TAG, "Requested host route to " + hostAddress + "(" + interfaceName + ")");
         }
         if (interfaceName != null) {
-            return NetworkUtils.addHostRoute(interfaceName, hostAddress) == 0;
+            return NetworkUtils.addHostRoute(interfaceName, hostAddress, null);
         } else {
             if (DBG) Slog.e(TAG, "addHostRoute failed due to null interface name");
             return false;
@@ -1245,7 +1270,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             Collection<InetAddress> dnsList = p.getDnses();
             for (InetAddress dns : dnsList) {
                 if (DBG) Slog.d(TAG, "  adding " + dns);
-                NetworkUtils.addHostRoute(interfaceName, dns);
+                NetworkUtils.addHostRoute(interfaceName, dns, null);
             }
             nt.privateDnsRouteSet(true);
         }
@@ -1276,7 +1301,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         InetAddress defaultGatewayAddr = p.getGateway();
 
         if ((interfaceName != null) && (defaultGatewayAddr != null )) {
-            if ((NetworkUtils.setDefaultRoute(interfaceName, defaultGatewayAddr) >= 0) && DBG) {
+            if (!NetworkUtils.addDefaultRoute(interfaceName, defaultGatewayAddr) && DBG) {
                 NetworkInfo networkInfo = nt.getNetworkInfo();
                 Slog.d(TAG, "addDefaultRoute for " + networkInfo.getTypeName() +
                         " (" + interfaceName + "), GatewayAddr=" + defaultGatewayAddr);
