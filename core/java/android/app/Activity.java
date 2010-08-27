@@ -1236,6 +1236,7 @@ public class Activity extends ContextThemeWrapper
      */
     protected void onPause() {
         mCalled = true;
+        QueuedWork.waitToFinish();
     }
 
     /**

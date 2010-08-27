@@ -41,7 +41,9 @@ public interface SharedPreferences {
         /**
          * Called when a shared preference is changed, added, or removed. This
          * may be called even if a preference is set to its existing value.
-         * 
+         *
+         * <p>This callback will be run on your main thread.
+         *
          * @param sharedPreferences The {@link SharedPreferences} that received
          *            the change.
          * @param key The key of the preference that was changed, added, or
@@ -199,9 +201,6 @@ public interface SharedPreferences {
          * <p>If you call this from an {@link android.app.Activity},
          * the base class will wait for any async commits to finish in
          * its {@link android.app.Activity#onPause}.</p>
-         *
-         * @return Returns true if the new values were successfully written
-         * to persistent storage.
          */
         void startCommit();
     }
