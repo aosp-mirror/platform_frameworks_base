@@ -291,14 +291,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_FORWARD_LOCK = 1<<29;
 
     /**
-     * Value for {@link #flags}: Set to true if the application is
-     * native-debuggable, i.e. embeds a gdbserver binary in its .apk
-     *
-     * {@hide}
-     */
-    public static final int FLAG_NATIVE_DEBUGGABLE = 1<<28;
-
-    /**
      * Value for {@link #flags}: set to <code>true</code> if the application
      * has reported that it is heavy-weight, and thus can not participate in
      * the normal application lifecycle.
@@ -359,7 +351,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * data.
      */
     public String dataDir;
-    
+
+    /**
+     * Full path to the directory where native JNI libraries are stored.
+     * 
+     * {@hide}
+     */
+    public String nativeLibraryDir;
+
     /**
      * The kernel user-ID that has been assigned to this application;
      * currently this is not a unique ID (multiple applications can have
@@ -452,6 +451,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         flags = orig.flags;
         sourceDir = orig.sourceDir;
         publicSourceDir = orig.publicSourceDir;
+        nativeLibraryDir = orig.nativeLibraryDir;
         resourceDirs = orig.resourceDirs;
         sharedLibraryFiles = orig.sharedLibraryFiles;
         dataDir = orig.dataDir;
@@ -483,6 +483,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(flags);
         dest.writeString(sourceDir);
         dest.writeString(publicSourceDir);
+        dest.writeString(nativeLibraryDir);
         dest.writeStringArray(resourceDirs);
         dest.writeStringArray(sharedLibraryFiles);
         dest.writeString(dataDir);
@@ -514,6 +515,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         flags = source.readInt();
         sourceDir = source.readString();
         publicSourceDir = source.readString();
+        nativeLibraryDir = source.readString();
         resourceDirs = source.readStringArray();
         sharedLibraryFiles = source.readStringArray();
         dataDir = source.readString();

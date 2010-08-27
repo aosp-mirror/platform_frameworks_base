@@ -358,6 +358,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 assertTrue((info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
                 assertEquals(srcPath, drmInstallPath);
                 assertEquals(publicSrcPath, appInstallPath);
+                assertTrue(info.nativeLibraryDir.startsWith(dataDir.getPath()));
             } else {
                 assertFalse((info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
                 int rLoc = getInstallLoc(flags, expInstallLocation, pkgLen);
@@ -365,10 +366,12 @@ public class PackageManagerTests extends AndroidTestCase {
                     assertEquals(srcPath, appInstallPath);
                     assertEquals(publicSrcPath, appInstallPath);
                     assertFalse((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
+                    assertTrue(info.nativeLibraryDir.startsWith(dataDir.getPath()));
                 } else if (rLoc == INSTALL_LOC_SD){
                     assertTrue((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
                     assertTrue(srcPath.startsWith(SECURE_CONTAINERS_PREFIX));
                     assertTrue(publicSrcPath.startsWith(SECURE_CONTAINERS_PREFIX));
+                    assertTrue(info.nativeLibraryDir.startsWith(SECURE_CONTAINERS_PREFIX));
                 } else {
                     // TODO handle error. Install should have failed.
                 }
