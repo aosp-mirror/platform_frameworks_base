@@ -92,7 +92,7 @@ import java.util.ArrayList;
  * <p>For example, the implementation of {@link Item#coerceToText Item.coerceToText}
  * itself uses this to try to retrieve a URI clip as a stream of text:
  *
- * {@sample frameworks/base/core/java/android/content/ClippedData.java coerceToText}
+ * {@sample frameworks/base/core/java/android/content/ClipData.java coerceToText}
  *
  * <a name="ImplementingCopy"></a>
  * <h3>Implementing Copy or Drag</h3>
