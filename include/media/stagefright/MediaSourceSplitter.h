@@ -115,23 +115,23 @@ private:
     // Functions used by Client to implement the MediaSource interface.
 
     // If the real source has not been started yet by any client, starts it.
-    status_t start(int client_id, MetaData *params);
+    status_t start(int clientId, MetaData *params);
 
     // Stops the real source after all clients have called stop().
-    status_t stop(int client_id);
+    status_t stop(int clientId);
 
     // returns the real source's getFormat().
-    sp<MetaData> getFormat(int client_id);
+    sp<MetaData> getFormat(int clientId);
 
     // If the client's desired buffer has already been read into
     // mLastReadMediaBuffer, points the buffer to that. Otherwise if it is the
     // master client, reads the buffer from source or else waits for the master
     // client to read the buffer and uses that.
-    status_t read(int client_id,
+    status_t read(int clientId,
             MediaBuffer **buffer, const MediaSource::ReadOptions *options = NULL);
 
     // Not implemented right now.
-    status_t pause(int client_id);
+    status_t pause(int clientId);
 
     // Function which reads a buffer from the real source into
     // mLastReadMediaBuffer
@@ -140,11 +140,11 @@ private:
     // Waits until read from the real source has been completed.
     // _lock means that the function should be called when the thread has already
     // obtained the lock for the mutex mLock.
-    void waitForReadFromSource_lock(int32_t client_id);
+    void waitForReadFromSource_lock(int32_t clientId);
 
     // Waits until all clients have read the current buffer in
     // mLastReadCompleted.
-    void waitForAllClientsLastRead_lock(int32_t client_id);
+    void waitForAllClientsLastRead_lock(int32_t clientId);
 
     // Each client calls this after it completes its read(). Once all clients
     // have called this for the current buffer, the function calls
@@ -163,7 +163,7 @@ private:
     public:
         // Constructor stores reference to the parent MediaSourceSplitter and it
         // client id.
-        Client(sp<MediaSourceSplitter> splitter, int32_t client_id);
+        Client(sp<MediaSourceSplitter> splitter, int32_t clientId);
 
         // MediaSource interface
         virtual status_t start(MetaData *params = NULL);
@@ -182,7 +182,7 @@ private:
         sp<MediaSourceSplitter> mSplitter;
 
         // Id of this client.
-        int32_t mClient_id;
+        int32_t mClientId;
     };
 
     friend class Client;
