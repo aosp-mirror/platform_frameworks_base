@@ -18,6 +18,7 @@ package android.net.sip;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -69,22 +70,36 @@ public class SipManager {
     private ISipService mSipService;
 
     /**
-     * Creates a manager instance and initializes the background SIP service.
-     * Will be removed once the SIP service is integrated into framework.
+     * Gets a manager instance. Returns null if SIP API is not supported.
      *
-     * @param context context to start the SIP service
-     * @return the manager instance
+     * @param context application context for checking if SIP API is supported
+     * @return the manager instance or null if SIP API is not supported
      */
-    public static SipManager getInstance(final Context context) {
-        final SipManager manager = new SipManager();
-        manager.createSipService(context);
-        return manager;
+    public static SipManager getInstance(Context context) {
+        return (isApiSupported(context) ? new SipManager() : null);
+    }
+
+    /**
+     * Returns true if the SIP API is supported by the system.
+     */
+    public static boolean isApiSupported(Context context) {
+        return context.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_SIP);
+    }
+
+    /**
+     * Returns true if the system supports SIP-based VoIP.
+     */
+    public static boolean isVoipSupported(Context context) {
+        return context.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_SIP_VOIP) && isApiSupported(context);
     }
 
     private SipManager() {
+        createSipService();
     }
 
-    private void createSipService(Context context) {
+    private void createSipService() {
         if (mSipService != null) return;
         IBinder b = ServiceManager.getService(Context.SIP_SERVICE);
         mSipService = ISipService.Stub.asInterface(b);
