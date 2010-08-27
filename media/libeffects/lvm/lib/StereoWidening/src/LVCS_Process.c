@@ -15,14 +15,6 @@
  * limitations under the License.
  */
 
-/************************************************************************************
-
-     $Author: beq07716 $
-     $Revision: 1001 $
-     $Date: 2010-06-28 13:23:02 +0200 (Mon, 28 Jun 2010) $
-
-*************************************************************************************/
-
 
 /************************************************************************************/
 /*                                                                                  */
@@ -213,10 +205,80 @@ LVCS_ReturnStatus_en LVCS_Process(LVCS_Handle_t             hInstance,
                                - (((LVM_INT32)pInstance->VolCorrect.CompMin  * (Current1)) >> 15)
                                + (((LVM_INT32)pInstance->VolCorrect.CompFull * (Current1)) >> 15) );
 
-            NonLinComp_D16(Gain,                    /* Compressor gain setting */
-                           pOutData,
-                           pOutData,
-                           (LVM_INT32)(2*NumSamples));
+            if(NumSamples < LVCS_COMPGAINFRAME)
+            {
+                NonLinComp_D16(Gain,                    /* Compressor gain setting */
+                    pOutData,
+                    pOutData,
+                    (LVM_INT32)(2*NumSamples));
+            }
+            else
+            {
+                LVM_INT16  GainStep;
+                LVM_INT16  FinalGain;
+                LVM_INT16  SampleToProcess = NumSamples;
+                LVM_INT16  *pOutPtr;
+
+                /* Large changes in Gain can cause clicks in output
+                   Split data into small blocks and use interpolated gain values */
+
+                GainStep = (LVM_INT16)(((Gain-pInstance->CompressGain) * LVCS_COMPGAINFRAME)/NumSamples);
+
+                if((GainStep ==0)&&(pInstance->CompressGain < Gain))
+                {
+                    GainStep=1;
+                }
+                else
+                {
+                    if((GainStep ==0)&&(pInstance->CompressGain > Gain))
+                    {
+                        GainStep=-1;
+                    }
+                }
+
+                FinalGain = Gain;
+                Gain = pInstance->CompressGain;
+                pOutPtr = pOutData;
+
+                while(SampleToProcess > 0)
+                {
+                    Gain = (LVM_INT16)(Gain + GainStep);
+                    if((GainStep > 0)&& (FinalGain <= Gain))
+                    {
+                        Gain = FinalGain;
+                        GainStep =0;
+                    }
+
+                    if((GainStep < 0)&& (FinalGain > Gain))
+                    {
+                        Gain = FinalGain;
+                        GainStep =0;
+                    }
+
+                    if(SampleToProcess > LVCS_COMPGAINFRAME)
+                    {
+                        NonLinComp_D16(Gain,                    /* Compressor gain setting */
+                            pOutPtr,
+                            pOutPtr,
+                            (LVM_INT32)(2*LVCS_COMPGAINFRAME));
+                        pOutPtr +=(2*LVCS_COMPGAINFRAME);
+                        SampleToProcess = (LVM_INT16)(SampleToProcess-LVCS_COMPGAINFRAME);
+                    }
+                    else
+                    {
+                        NonLinComp_D16(Gain,                    /* Compressor gain setting */
+                            pOutPtr,
+                            pOutPtr,
+                            (LVM_INT32)(2*SampleToProcess));
+
+                        SampleToProcess = 0;
+                    }
+
+                }
+            }
+
+            /* Store gain value*/
+            pInstance->CompressGain = Gain;
         }
 
 

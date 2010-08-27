@@ -26,9 +26,15 @@
 extern "C" {
 #endif
 
-#define FIVEBAND_NUMBANDS       5
-#define MAX_NUM_BANDS           5
-#define MAX_CALL_SIZE           256
+#define FIVEBAND_NUMBANDS          5
+#define MAX_NUM_BANDS              5
+#define MAX_CALL_SIZE              256
+#define LVM_MAX_SESSIONS           32
+#define BASS_BOOST_CUP_LOAD_ARM9E  150    // Expressed in 0.1 MIPS
+#define VIRTUALIZER_CUP_LOAD_ARM9E 120    // Expressed in 0.1 MIPS
+#define EQUALIZER_CUP_LOAD_ARM9E   220    // Expressed in 0.1 MIPS
+#define VOLUME_CUP_LOAD_ARM9E      0      // Expressed in 0.1 MIPS
+#define BUNDLE_MEM_USAGE           25     // Expressed in kB
 //#define LVM_PCM
 
 #ifndef OPENSL_ES_H_
@@ -67,6 +73,7 @@ struct BundledEffectContext{
     bool                            bVirtualizerTempDisabled; /* Flag for effect to be re-enabled */
     int                             NumberEffectsEnabled;     /* Effects in this session */
     int                             NumberEffectsCalled;      /* Effects called so far */
+    bool                            firstVolume;              /* No smoothing on first Vol change */
     // Saved parameters for each effect */
     // Bass Boost
     int                             BassStrengthSaved;        /* Conversion between Get/Set */

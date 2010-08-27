@@ -15,15 +15,6 @@
  * limitations under the License.
  */
 
-/************************************************************************/
-/*                                                                      */
-/*     Project::                                                        */
-/*     $Author: beq07716 $*/
-/*     $Revision: 839 $*/
-/*     $Date: 2010-06-16 14:15:52 +0200 (Wed, 16 Jun 2010) $*/
-/*                                                                      */
-/************************************************************************/
-
 #include "LVM_Types.h"
 #include "LVM_Macros.h"
 #include "LVC_Mixer_Private.h"

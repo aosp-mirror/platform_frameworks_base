@@ -27,13 +27,6 @@
 #include <EffectReverb.h>
 #include <LVREV.h>
 
-#define MAX_NUM_BANDS           5
-#define MAX_CALL_SIZE           256
-#define LVREV_MAX_T60           7000
-#define LVREV_MAX_REVERB_LEVEL  2000
-
-//#define LVM_PCM
-
 // effect_interface_t interface implementation for reverb
 extern "C" const struct effect_interface_s gReverbInterface;
 
@@ -86,8 +79,8 @@ const effect_descriptor_t gAuxEnvReverbDescriptor = {
         { 0x4a387fc0, 0x8ab3, 0x11df, 0x8bad, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
         EFFECT_API_VERSION,
         EFFECT_FLAG_TYPE_AUXILIARY,
-        0, // TODO
-        1,
+        LVREV_CUP_LOAD_ARM9E,
+        LVREV_MEM_USAGE,
         "Auxiliary Environmental Reverb",
         "NXP Software Ltd.",
 };
@@ -98,8 +91,8 @@ static const effect_descriptor_t gInsertEnvReverbDescriptor = {
         {0xc7a511a0, 0xa3bb, 0x11df, 0x860e, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
         EFFECT_API_VERSION,
         EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_FIRST,
-        0, // TODO
-        1,
+        LVREV_CUP_LOAD_ARM9E,
+        LVREV_MEM_USAGE,
         "Insert Environmental Reverb",
         "NXP Software Ltd.",
 };
@@ -110,8 +103,8 @@ static const effect_descriptor_t gAuxPresetReverbDescriptor = {
         {0xf29a1400, 0xa3bb, 0x11df, 0x8ddc, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
         EFFECT_API_VERSION,
         EFFECT_FLAG_TYPE_AUXILIARY,
-        0, // TODO
-        1,
+        LVREV_CUP_LOAD_ARM9E,
+        LVREV_MEM_USAGE,
         "Auxiliary Preset Reverb",
         "NXP Software Ltd.",
 };
@@ -122,8 +115,8 @@ static const effect_descriptor_t gInsertPresetReverbDescriptor = {
         {0x172cdf00, 0xa3bc, 0x11df, 0xa72f, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
         EFFECT_API_VERSION,
         EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_FIRST,
-        0, // TODO
-        1,
+        LVREV_CUP_LOAD_ARM9E,
+        LVREV_MEM_USAGE,
         "Insert Preset Reverb",
         "NXP Software Ltd.",
 };
@@ -153,6 +146,8 @@ struct ReverbContext{
     FILE                            *PcmOutPtr;
     #endif
     LVM_Fs_en                       SampleRate;
+    LVM_INT32                       *InFrames32;
+    LVM_INT32                       *OutFrames32;
     bool                            auxiliary;
     bool                            preset;
     uint16_t                        curPreset;
@@ -267,6 +262,11 @@ extern "C" int EffectCreate(effect_uuid_t       *uuid,
     }
     #endif
 
+
+    // Allocate memory for reverb process (*2 is for STEREO)
+    pContext->InFrames32  = (LVM_INT32 *)malloc(LVREV_MAX_FRAME_SIZE * sizeof(LVM_INT32) * 2);
+    pContext->OutFrames32 = (LVM_INT32 *)malloc(LVREV_MAX_FRAME_SIZE * sizeof(LVM_INT32) * 2);
+
     LOGV("\tEffectCreate %p, size %d", pContext, sizeof(ReverbContext));
     LOGV("\tEffectCreate end\n");
     return 0;
@@ -285,6 +285,8 @@ extern "C" int EffectRelease(effect_interface_t interface){
     fclose(pContext->PcmInPtr);
     fclose(pContext->PcmOutPtr);
     #endif
+    free(pContext->InFrames32);
+    free(pContext->OutFrames32);
     Reverb_free(pContext);
     delete pContext;
     return 0;
@@ -389,9 +391,6 @@ int process( LVM_INT16     *pIn,
 
     LVM_INT16               samplesPerFrame = 0;
     LVREV_ReturnStatus_en   LvmStatus = LVREV_SUCCESS;              /* Function call status */
-
-    LVM_INT32 *InFrames32;
-    LVM_INT32 *OutFrames32;
     LVM_INT16 *OutFrames16;
 
 
@@ -405,12 +404,11 @@ int process( LVM_INT16     *pIn,
         return -EINVAL;
     }
 
-    InFrames32  = (LVM_INT32 *)malloc(frameCount * sizeof(LVM_INT32) * 2);
-    OutFrames32 = (LVM_INT32 *)malloc(frameCount * sizeof(LVM_INT32) * 2);
-    OutFrames16 = (LVM_INT16 *)OutFrames32;
+
+    OutFrames16 = (LVM_INT16 *)pContext->OutFrames32;
 
     // Check for NULL pointers
-    if((InFrames32 == NULL)||(OutFrames32 == NULL)){
+    if((pContext->InFrames32 == NULL)||(pContext->OutFrames32 == NULL)){
         LOGV("\tLVREV_ERROR : process failed to allocate memory for temporary buffers ");
         return -EINVAL;
     }
@@ -425,13 +423,13 @@ int process( LVM_INT16     *pIn,
     }
     // Convert to Input 32 bits
     for(int i=0; i<frameCount*samplesPerFrame; i++){
-        InFrames32[i] = (LVM_INT32)pIn[i]<<8;
+        pContext->InFrames32[i] = (LVM_INT32)pIn[i]<<8;
     }
 
      // If the input was MONO, convert to STEREO
     if(pContext->config.inputCfg.channels == CHANNEL_MONO){
         //LOGV("\tConverting Output from MONO to STEREO");
-        MonoTo2I_32(InFrames32, InFrames32, frameCount);
+        MonoTo2I_32(pContext->InFrames32, pContext->InFrames32, frameCount);
     }
 
     //LOGV("\tProcess, frames: %d, InFormat: %d(MONO=%d), OutFormat: %d(STEREO=%d)",
@@ -439,18 +437,18 @@ int process( LVM_INT16     *pIn,
     //pContext->config.outputCfg.channels, CHANNEL_STEREO);
 
     if (pContext->preset && pContext->curPreset == REVERB_PRESET_NONE) {
-        memset(OutFrames32, 0, frameCount * sizeof(LVM_INT32) * 2);
+        memset(pContext->OutFrames32, 0, frameCount * sizeof(LVM_INT32) * 2);
     } else {
     /* Process the samples */
     LvmStatus = LVREV_Process(pContext->hInstance,      /* Instance handle */
-                              InFrames32,               /* Input buffer */
-                              OutFrames32,              /* Output buffer */
+                              pContext->InFrames32,     /* Input buffer */
+                              pContext->OutFrames32,    /* Output buffer */
                               frameCount);              /* Number of samples to read */
     }
 
     if (!pContext->auxiliary) {
         for (int i=0; i<frameCount*2; i++){
-            OutFrames32[i] += InFrames32[i];
+            pContext->OutFrames32[i] += pContext->InFrames32[i];
         }
     }
 
@@ -459,7 +457,7 @@ int process( LVM_INT16     *pIn,
 
     // Convert to 16 bits
     for(int i=0; i<frameCount*2; i++){  // Always stereo
-        OutFrames16[i] = clamp16(OutFrames32[i]>>8);
+        OutFrames16[i] = clamp16(pContext->OutFrames32[i]>>8);
     }
 
     #ifdef LVM_PCM
@@ -477,9 +475,6 @@ int process( LVM_INT16     *pIn,
         //LOGV("\tBuffer access is WRITE");
         memcpy(pOut, OutFrames16, frameCount*sizeof(LVM_INT16)*2); // 2 is for stereo output
     }
-
-    free(InFrames32);
-    free(OutFrames32);
 
     return 0;
 }    /* end process */
@@ -689,8 +684,8 @@ int Reverb_init(ReverbContext *pContext){
             MemTab.Region[i].pBaseAddress = malloc(MemTab.Region[i].Size);
 
             if (MemTab.Region[i].pBaseAddress == LVM_NULL){
-                LOGV("\tLVREV_ERROR :Reverb_init CreateInstance Failed to allocate %ld bytes for region %u\n",
-                        MemTab.Region[i].Size, i );
+                LOGV("\tLVREV_ERROR :Reverb_init CreateInstance Failed to allocate %ld "
+                        "bytes for region %u\n", MemTab.Region[i].Size, i );
                 bMallocFailure = LVM_TRUE;
             }else{
                 LOGV("\tReverb_init CreateInstance allocate %ld bytes for region %u at %p\n",
@@ -705,11 +700,12 @@ int Reverb_init(ReverbContext *pContext){
     if(bMallocFailure == LVM_TRUE){
         for (int i=0; i<LVM_NR_MEMORY_REGIONS; i++){
             if (MemTab.Region[i].pBaseAddress == LVM_NULL){
-                LOGV("\tLVM_ERROR :Reverb_init CreateInstance Failed to allocate %ld bytes for region %u"
-                     " - Not freeing\n", MemTab.Region[i].Size, i );
+                LOGV("\tLVM_ERROR :Reverb_init CreateInstance Failed to allocate %ld bytes "
+                        "for region %u - Not freeing\n", MemTab.Region[i].Size, i );
             }else{
-                LOGV("\tLVM_ERROR :Reverb_init CreateInstance Failed: but allocated %ld bytes for region %u "
-                       "at %p- free\n", MemTab.Region[i].Size, i, MemTab.Region[i].pBaseAddress);
+                LOGV("\tLVM_ERROR :Reverb_init CreateInstance Failed: but allocated %ld bytes "
+                        "for region %u at %p- free\n",
+                        MemTab.Region[i].Size, i, MemTab.Region[i].pBaseAddress);
                 free(MemTab.Region[i].pBaseAddress);
             }
         }
@@ -753,7 +749,7 @@ int Reverb_init(ReverbContext *pContext){
     pContext->SavedHfLevel      = 0;
     pContext->bEnabled          = LVM_FALSE;
     pContext->SavedDecayTime    = params.T60;
-    pContext->SavedDecayHfRatio = params.Damping*10;
+    pContext->SavedDecayHfRatio = params.Damping*20;
     pContext->SavedDensity      = params.RoomSize*10;
     pContext->SavedDiffusion    = params.Density*10;
     pContext->SavedReverbLevel  = -6000;
@@ -1195,7 +1191,7 @@ void ReverbSetDecayHfRatio(ReverbContext *pContext, int16_t ratio){
     //LOGV("\tReverbSetDecayHfRatio Succesfully returned from LVM_GetControlParameters\n");
     //LOGV("\tReverbSetDecayHfRatio() just Got -> %d\n", ActiveParams.Damping);
 
-    ActiveParams.Damping = (LVM_INT16)(ratio/10);
+    ActiveParams.Damping = (LVM_INT16)(ratio/20);
 
     /* Activate the initial settings */
     LvmStatus = LVREV_SetControlParameters(pContext->hInstance, &ActiveParams);
@@ -1230,7 +1226,7 @@ int32_t ReverbGetDecayHfRatio(ReverbContext *pContext){
     //LOGV("\tReverbGetDecayHfRatio Succesfully returned from LVM_GetControlParameters\n");
     //LOGV("\tReverbGetDecayHfRatio() just Got -> %d\n", ActiveParams.Damping);
 
-    if(ActiveParams.Damping != (LVM_INT16)(pContext->SavedDecayHfRatio / 10)){
+    if(ActiveParams.Damping != (LVM_INT16)(pContext->SavedDecayHfRatio / 20)){
         LOGV("\tLVM_ERROR : ReverbGetDecayHfRatio() has wrong level -> %d %d\n",
          ActiveParams.Damping, pContext->SavedDecayHfRatio);
     }
