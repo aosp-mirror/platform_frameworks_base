@@ -1250,7 +1250,7 @@
   <eat-comment />
   <public type="attr" name="logo" id="0x010102be" />
   <public type="attr" name="xlargeScreens" id="0x010102bf" />
-  <public type="attr" name="heavyWeight" id="0x010102c0" />
+  <public type="attr" name="cantSaveState" id="0x010102c0" />
   <public type="attr" name="immersive" id="0x010102c1" />
   <public-padding type="attr" name="kraken_resource_pad" end="0x01010300" />
 

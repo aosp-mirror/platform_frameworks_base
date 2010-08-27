@@ -749,15 +749,17 @@
         <attr name="restoreNeedsApplication" />
         <attr name="restoreAnyVersion" />
         <attr name="neverEncrypt" />
-        <!-- Declare that this is a heavy-weight application.  This kind of
-             application is not able to save and restore its state on demand,
-             so can not participate in the normal activity lifecycle.  It will
+        <!-- Declare that this applicationn can't participate in the normal
+             state save/restore mechanism.  Since it is not able to save and
+             restore its state on demand,
+             it can not participate in the normal activity lifecycle.  It will
              not be killed while in the background; the user must explicitly
              quit it.  Only one such app can be running at a time; if the user
-             tries to launch a second heavy-weight app, they will be prompted
-             to quit the first before doing so.  While a heavy-weight
-             application is running, the user will be informed of this. -->
-        <attr name="heavyWeight" format="boolean" />
+             tries to launch a second such app, they will be prompted
+             to quit the first before doing so.  While the
+             application is running, the user will be informed of this.
+             @hide -->
+        <attr name="cantSaveState" format="boolean" />
     </declare-styleable>
     
     <!-- The <code>permission</code> tag declares a security permission that can be
