@@ -178,12 +178,8 @@ ARTPAssembler::AssemblyStatus AAMRAssembler::addPacket(
         }
     }
 
-    uint64_t ntpTime;
-    CHECK(buffer->meta()->findInt64(
-                "ntp-time", (int64_t *)&ntpTime));
-
     sp<ABuffer> accessUnit = new ABuffer(totalSize);
-    accessUnit->meta()->setInt64("ntp-time", ntpTime);
+    CopyTimes(accessUnit, buffer);
 
     size_t dstOffset = 0;
     for (size_t i = 0; i < tableOfContents.size(); ++i) {
