@@ -1224,7 +1224,6 @@ public class Camera {
          * The array index of minimum preview fps for use with {@link
          * #getPreviewFpsRange(int[])} or {@link
          * #getSupportedPreviewFpsRange()}.
-         * @hide
          */
         public static final int PREVIEW_FPS_MIN_INDEX = 0;
 
@@ -1232,7 +1231,6 @@ public class Camera {
          * The array index of maximum preview fps for use with {@link
          * #getPreviewFpsRange(int[])} or {@link
          * #getSupportedPreviewFpsRange()}.
-         * @hide
          */
         public static final int PREVIEW_FPS_MAX_INDEX = 1;
 
@@ -1471,7 +1469,9 @@ public class Camera {
          * target frame rate. The actual frame rate depends on the driver.
          *
          * @param fps the frame rate (frames per second)
+         * @deprecated replaced by {@link #setPreviewFpsRange(int,int)}
          */
+        @Deprecated
         public void setPreviewFrameRate(int fps) {
             set(KEY_PREVIEW_FRAME_RATE, fps);
         }
@@ -1482,7 +1482,9 @@ public class Camera {
          * depends on the driver.
          *
          * @return the frame rate setting (frames per second)
+         * @deprecated replaced by {@link #getPreviewFpsRange(int[])}
          */
+        @Deprecated
         public int getPreviewFrameRate() {
             return getInt(KEY_PREVIEW_FRAME_RATE);
         }
@@ -1492,7 +1494,9 @@ public class Camera {
          *
          * @return a list of supported preview frame rates. null if preview
          *         frame rate setting is not supported.
+         * @deprecated replaced by {@link #getSupportedPreviewFpsRange()}
          */
+        @Deprecated
         public List<Integer> getSupportedPreviewFrameRates() {
             String str = get(KEY_PREVIEW_FRAME_RATE + SUPPORTED_VALUES_SUFFIX);
             return splitInt(str);
@@ -1509,7 +1513,6 @@ public class Camera {
          * @throws RuntimeException if fps range is invalid.
          * @see #setPreviewCallbackWithBuffer(Camera.PreviewCallback)
          * @see #getSupportedPreviewFpsRange()
-         * @hide
          */
         public void setPreviewFpsRange(int min, int max) {
             set(KEY_PREVIEW_FPS_RANGE, "" + min + "," + max);
@@ -1523,12 +1526,11 @@ public class Camera {
          * @see #PREVIEW_FPS_MIN_INDEX
          * @see #PREVIEW_FPS_MAX_INDEX
          * @see #getSupportedPreviewFpsRange()
-         * @hide
          */
         public void getPreviewFpsRange(int[] range) {
             if (range == null || range.length != 2) {
                 throw new IllegalArgumentException(
-                        "range must be an float array with two elements.");
+                        "range must be an array with two elements.");
             }
             splitInt(get(KEY_PREVIEW_FPS_RANGE), range);
         }
@@ -1549,7 +1551,6 @@ public class Camera {
          *         minimum fps).
          * @see #PREVIEW_FPS_MIN_INDEX
          * @see #PREVIEW_FPS_MAX_INDEX
-         * @hide
          */
         public List<int[]> getSupportedPreviewFpsRange() {
             String str = get(KEY_PREVIEW_FPS_RANGE + SUPPORTED_VALUES_SUFFIX);
