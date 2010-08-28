@@ -1,0 +1,80 @@
+page.title=Testing
+@jd:body
+<p>
+    The Android development environment includes an integrated testing framework that helps you
+    test all aspects of your application.
+</p>
+<h4>Fundamentals</h4>
+<p>
+    To start learning how to use the framework to create tests for your applications, please
+    read the topic <a href="{@docRoot}guide/topics/testing/testing_android.html">
+    Testing Fundamentals</a>.
+</p>
+<h4>Concepts</h4>
+<ul>
+    <li>
+        Testing Tools describes the Eclipse with ADT and command-line tools you use to test
+        Android applications.
+    </li>
+    <li>
+        What to Test is an overview of the types of testing you should do. It focuses on testing
+        system-wide aspects of Android that can affect every component in your application.
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/testing/activity_testing.html">
+        Activity Testing</a> focuses on testing activities. It describes how instrumentation allows
+        you to control activities outside the normal application lifecycle. It also lists
+        activity-specific features you should test, and it provides tips for testing Android
+        user interfaces.
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/testing/contentprovider_testing.html">
+        Content Provider Testing</a> focuses on testing content providers. It describes the
+        mock system objects you can use, provides tips for designing providers so that they
+        can be tested, and lists provider-specific features you should test.
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/testing/service_testing.html">
+        Service Testing</a> focuses on testing services. It also lists service-specific features
+        you should test.
+    </li>
+</ul>
+<h4>Procedures</h4>
+<ul>
+    <li>
+        The topic <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">
+        Testing in Eclipse, with ADT</a> describes how to create and run tests in Eclipse with ADT.
+    </li>
+    <li>
+        The topic <a href="{@docRoot}guide/developing/testing/testing_otheride.html">
+        Testing in other IDEs</a> describes how to create and run tests with command-line tools.
+    </li>
+</ul>
+<h4>Tutorials</h4>
+<ul>
+    <li>
+        The <a href="{@docRoot}resources/tutorials/testing/helloandroid_test.html">
+        Hello, Testing</a> tutorial introduces basic testing concepts and procedures.
+    </li>
+    <li>
+        For a more advanced tutorial, try
+        <a href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity Testing</a>,
+        which guides you through a more complex testing scenario.
+    </li>
+</ul>
+<h4>Samples</h4>
+<ul>
+    <li>
+        <a href="{@docRoot}resources/samples/NotePadTest.html">Note Pad Provider
+        Test</a> is a test package for the
+        <a href="{@docRoot}resources/samples/NotePad.html">Note Pad</a> sample
+        application. It provides a simple example of unit testing
+        a {@link android.content.ContentProvider}.
+    </li>
+    <li>
+        The <a href="{@docRoot}resources/samples/AlarmServiceTest.html">Alarm Service Test</a>
+        is a test package for the <a href="{@docRoot}resources/samples/Alarm.html">Alarm</a>
+        sample application. It provides a simple example of unit
+        testing a {@link android.app.Service}.
+    </li>
+</ul>

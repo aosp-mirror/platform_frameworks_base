@@ -1,28 +1,23 @@
 page.title=Testing In Eclipse, with ADT
 @jd:body
-
 <div id="qv-wrapper">
-  <div id="qv">
-  <h2>In this document</h2>
-  <ol>
-    <li><a href="#CreateTestProjectEclipse">Creating a Test Project</a></li>
-    <li><a href="#CreateTestAppEclipse">Creating a Test Application</a></li>
-    <li><a href="#RunTestEclipse">Running Tests</a></li>
-  </ol>
-  </div>
+    <div id="qv">
+        <h2>In this document</h2>
+            <ol>
+                <li><a href="#CreateTestProjectEclipse">Creating a Test Project</a></li>
+                <li><a href="#CreateTestAppEclipse">Creating a Test Package</a></li>
+                <li><a href="#RunTestEclipse">Running Tests</a></li>
+            </ol>
+    </div>
 </div>
 <p>
-  This topic explains how create and run tests of Android applications in Eclipse with ADT.
-
-  with the basic processes for creating and running applications with ADT, as described in
-  <a href="{@docRoot}guide/developing/eclipse-adt.html">Developing In Eclipse, with ADT</a>.
-
-  Before you read this topic, you should read about how to create a Android application with the
-  basic processes for creating and running applications with ADT, as described in
-  <a href="{@docRoot}guide/developing/eclipse-adt.html">Developing In Eclipse, with ADT</a>.
-  You may also want to read
-  <a href="{@docRoot}guide/topics/testing/testing_android.html">Testing and Instrumentation</a>,
-  which provides an overview of the Android testing framework.
+    This topic explains how create and run tests of Android applications in Eclipse with ADT.
+    Before you read this topic, you should read about how to create a Android application with the
+    basic processes for creating and running applications with ADT, as described in
+    <a href="{@docRoot}guide/developing/eclipse-adt.html">Developing In Eclipse, with ADT</a>.
+    You may also want to read
+    <a href="{@docRoot}guide/topics/testing/testing_android.html">Testing Fundamentals</a>,
+    which provides an overview of the Android testing framework.
 </p>
 <p>
     ADT provides several features that help you set up and manage your testing environment
@@ -32,20 +27,20 @@ page.title=Testing In Eclipse, with ADT
         <li>
             It lets you quickly create a test project and link it to the application under test.
             When it creates the test project, it automatically inserts the necessary
-            <code>&lt;instrumentation&gt;</code> element in the test application's manifest file.
+            <code>&lt;instrumentation&gt;</code> element in the test package's manifest file.
         </li>
         <li>
             It lets you quickly import the classes of the application under test, so that your
             tests can inspect them.
         </li>
         <li>
-            It lets you create run configurations for your test application and include in
+            It lets you create run configurations for your test package and include in
             them flags that are passed to the Android testing framework.
         </li>
         <li>
-            It lets you run your test application without leaving Eclipse. ADT builds both the
-            application under test and the test application automatically, installs them if
-            necessary to your device or emulator, runs the test application, and displays the
+            It lets you run your test package without leaving Eclipse. ADT builds both the
+            application under test and the test package automatically, installs them if
+            necessary to your device or emulator, runs the test package, and displays the
             results in a separate window in Eclipse.
         </li>
     </ul>
@@ -55,305 +50,396 @@ page.title=Testing In Eclipse, with ADT
     <a href="{@docRoot}guide/developing/testing/testing_otheride.html">Testing in Other IDEs</a>.
 </p>
 <h2 id="CreateTestProjectEclipse">Creating a Test Project</h2>
-  <p>
+<p>
     To set up a test environment for your Android application, you must first create a separate
-    application project that holds the test code. The new project follows the directory structure
+    project that holds the test code. The new project follows the directory structure
     used for any Android application. It includes the same types of content and files, such as
-    source code, resources, a manifest file, and so forth. The test application you
+    source code, resources, a manifest file, and so forth. The test package you
     create is connected to the application under test by an
     <a href="{@docRoot}guide/topics/manifest/instrumentation-element.html">
     <code>&lt;instrumentation&gt;</code></a> element in its manifest file.
-  </p>
-  <p>
-    The <strong>New Android Test Project</strong> dialog makes it easy for you to generate a
-    new test project that has the proper structure, including the
-    <code>&lt;instrumentation&gt;</code> element in the manifest file. You can use the New Android
-    Test Project dialog to generate the test project at any time. The dialog appears just after you
-    create a new Android main application project, but you can also run it to create a test project
-    for a project that you created previously.
-  </p>
+</p>
 <p>
-  To create a test project in Eclipse with ADT:
+    The <em>New Android Test Project</em> dialog makes it easy for you to generate a
+    new test project that has the proper structure, including the
+    <code>&lt;instrumentation&gt;</code> element in the manifest file. You can use the New
+    Android Test Project dialog to generate the test project at any time. The dialog appears
+    just after you create a new Android main application project, but you can also run it to
+    create a test project for a project that you created previously.
+</p>
+<p>
+    To create a test project in Eclipse with ADT:
 </p>
 <ol>
-  <li>
-    In Eclipse, select <strong>File &gt; New &gt; Other</strong>. This
-    opens the Select a Wizard dialog.
-  </li>
-  <li>
-    In the dialog, in the Wizards drop-down list,
-    find the entry for Android, then click the toggle to the left. Select
-    Android Test Project, then at the bottom
-    of the dialog click Next. The New Android Test Project wizard appears.
-  </li>
-  <li>
-    Enter a project name. You may use any name, but you may want to
-    associate the name with the project name for your Application. One
-    way to do this is to take the Application's project name, append the
-    string "Test" to it, and then use this as the test case project name.
-  </li>
-  <li>
-    In the Test Target panel, set
-    An Existing Android Project, click
-    Browse, then select your Android application from
-    the list. You now see that the wizard has completed the Test
-    Target Package, Application Name, and
-    Package Name fields for you (the latter two are in
-    the Properties panel).
-  </li>
-  <li>
-    In the Build Target panel, select the Android SDK
-    platform that you will use to test your application. Make this the same as the
-    build target of the application under test.
-  </li>
-  <li>
-    Click Finish to complete the wizard. If
-    Finish is disabled, look
-    for error messages at the top of the wizard dialog, and then fix
-    any problems.
-  </li>
+    <li>
+        In Eclipse, select <strong>File &gt; New &gt; Other</strong>. This opens the <em>Select a
+        Wizard</em> dialog.
+    </li>
+    <li>
+        In the dialog, in the <em>Wizards</em> drop-down list, find the entry for Android, then
+        click the toggle to the left. Select <strong>Android Test Project</strong>, then at the
+        bottom of the dialog click <strong>Next</strong>. The <em>New Android Test Project</em>
+        wizard appears.
+    </li>
+    <li>
+        Next to <em>Test Project Name</em>, enter a name for the project. You may use any name,
+        but you may want to associate the name with the project name for the application under test.
+        One way to do this is to take the application's project name, append the string "Test" to
+        it, and then use this as the test package project name.
+        <p>
+            The name becomes part of the suggested project path, but you can change this in the
+            next step.
+        </p>
+    </li>
+    <li>
+        In the <em>Content</em> panel, examine the suggested path to the project.
+        If <em>Use default location</em> is set, then the wizard will suggest a path that is
+        a concatenation of the workspace path and the project name you entered. For example,
+        if your workspace path is <code>/usr/local/workspace</code> and your project name is
+        <code>MyTestApp</code>, then the wizard will suggest
+        <code>/usr/local/workspace/MyTestApp</code>. To enter your own
+        choice for a path, unselect <em>Use default location</em>, then enter or browse to the
+        path where you want your project.
+        <p>
+            To learn more about choosing the location of test projects, please read
+            <a href="{@docRoot}guide/topics/testing/testing_android.html#TestProjectPaths">
+            Testing Fundamentals</a>.
+        </p>
+    </li>
+    <li>
+        In the Test Target panel, set An Existing Android Project, click Browse, then select your
+        Android application from the list. You now see that the wizard has completed the Test
+        Target Package, Application Name, and Package Name fields for you (the latter two are in
+        the Properties panel).
+    </li>
+    <li>
+        In the Build Target panel, select the Android SDK platform that the application under test
+        uses.
+    </li>
+    <li>
+        Click Finish to complete the wizard. If Finish is disabled, look for error messages at the
+        top of the wizard dialog, and then fix any problems.
+    </li>
+</ol>
+<h2 id="CreateTestAppEclipse">Creating a Test Package</h2>
+<p>
+    Once you have created a test project, you populate it with a test package. This package does not
+    require an Activity, although you can define one if you wish. Although your test package can
+    combine Activity classes, test case classes, or ordinary classes, your main test case
+    should extend one of the Android test case classes or JUnit classes, because these provide the
+    best testing features.
+</p>
+<p>
+    Test packages do not need to have an Android GUI. When you run the package in
+    Eclipse with ADT, its results appear in the JUnit view. Running tests and seeing the results is
+    described in more detail in the section <a href="#RunTestEclipse">Running Tests</a>.
+</p>
+
+<p>
+    To create a test package, start with one of Android's test case classes defined in
+    {@link android.test android.test}. These extend the JUnit
+    {@link junit.framework.TestCase TestCase} class. The Android test classes for Activity objects
+    also provide instrumentation for testing an Activity. To learn more about test case
+    classes, please read the topic <a href="{@docRoot}guide/topics/testing/testing_android.html">
+    Testing Fundamentals</a>.
+</p>
+<p>
+    Before you create your test package, you choose the Java package identifier you want to use
+    for your test case classes and the Android package name you want to use. To learn more
+    about this, please read
+    <a href="{@docRoot}guide/topics/testing/testing_android.html#PackageNames">
+    Testing Fundamentals</a>.
+</p>
+<p>
+    To add a test case class to your project:
+</p>
+<ol>
+    <li>
+        In the <em>Project Explorer</em> tab, open your test project, then open the <em>src</em>
+        folder.
+    </li>
+    <li>
+        Find the Java package identifier set by the projection creation wizard. If you haven't
+        added classes yet, this node won't have any children, and its icon will not be filled in.
+        If you want to change the identifier value, right-click the identifier and select
+        <strong>Refactor</strong> &gt; <strong>Rename</strong>, then enter the new name.
+    </li>
+    <li>
+        When you are ready, right-click the Java package identifier again and select
+        <strong>New</strong> &gt; <strong>Class</strong>. This displays the <em>New Java Class</em>
+        dialog, with the <em>Source folder</em> and <em>Package</em> values already set.
+    </li>
+    <li>
+        In the <em>Name</em> field, enter a name for the test case class. One way to choose a
+        class name is to append the string "Test" to the class of the component you are testing.
+        For example, if you are testing the class MyAppActivity, your test case class
+        name would be MyAppActivityTest. Leave the modifiers set to <em>public</em>.
+    </li>
+    <li>
+        In the <em>Superclass</em> field, enter the name of the Android test case class you
+        are extending. You can also browse the available classes.
+    </li>
+    <li>
+        In <em>Which method stubs would you like to create?</em>, unset all the options, then
+        click <strong>Finish</strong>. You will set up the constructor manually.
+    </li>
+    <li>
+        Your new class appears in a new Java editor pane.
+    </li>
 </ol>
 <p>
-
-</p>
-<h2 id="CreateTestAppEclipse">Creating a Test Application</h2>
-<p>
-  Once you have created a test project, you populate it with a test
-  Android application. This application does not require an {@link android.app.Activity Activity},
-  although you can define one if you wish. Although your test application can
-  combine Activities, Android test class extensions, JUnit extensions, or
-  ordinary classes, you should extend one of the Android test classes or JUnit classes,
-  because these provide the best testing features.
+    You now have to ensure that the constructor is set up correctly. Create a constructor for your
+    class that has no arguments; this is required by JUnit. As the first statement in this
+    constructor, add a call to the base class' constructor. Each base test case class has its
+    own constructor signature. Refer to the class documentation in the documentation for
+    {@link android.test} for more information.
 </p>
 <p>
-  Test applications do not have an Android GUI. Instead, when you run the application in
-  Eclipse with ADT, its results appear in the JUnit view. If you run
-  your tests with {@link android.test.InstrumentationTestRunner InstrumentationTestRunner} (or a related test runner),
-  then it will run all the methods in each class. You can modify this behavior
-  by using the {@link junit.framework.TestSuite TestSuite} class.
-</p>
-
-<p>
-  To create a test application, start with one of Android's test classes in the Java package {@link android.test android.test}.
-  These extend the JUnit {@link junit.framework.TestCase TestCase} class. With a few exceptions, the Android test classes
-  also provide instrumentation for testing.
-</p>
-<p>
-  For test classes that extend {@link junit.framework.TestCase TestCase}, you probably want to override
-  the <code>setUp()</code> and <code>tearDown()</code> methods:
+    To control your test environment, you will want to override the <code>setUp()</code> and
+    <code>tearDown()</code> methods:
 </p>
 <ul>
-  <li>
-    <code>setUp()</code>: This method is invoked before any of the test methods in the class.
-      Use it to set up the environment for the test. You can use <code>setUp()</code>
-      to instantiate a new <code>Intent</code> object with the action <code>ACTION_MAIN</code>. You can
-      then use this intent to start the Activity under test.
-      <p class="note"><strong>Note:</strong> If you override this method, call
-        <code>super.setUp()</code> as the first statement in your code.
-      </p>
-  </li>
-  <li>
-    <code>tearDown()</code>: This method is invoked after all the test methods in the class. Use
-    it to do garbage collection and re-setting before moving on to the next set of tests.
-    <p class="note"><strong>Note:</strong> If you override this method, you must call
-    <code>super.tearDown()</code> as the <em>last</em> statement in your code.</p>
-  </li>
+    <li>
+        <code>setUp()</code>: This method is invoked before any of the test methods in the class.
+        Use it to set up the environment for the test (the test fixture. You can use
+        <code>setUp()</code> to instantiate a new Intent with the action <code>ACTION_MAIN</code>.
+        You can then use this intent to start the Activity under test.
+    </li>
+    <li>
+        <code>tearDown()</code>: This method is invoked after all the test methods in the class. Use
+        it to do garbage collection and to reset the test fixture.
+    </li>
 </ul>
 <p>
-  Another useful convention is to add the method <code>testPreConditions()</code> to your test
-  class. Use this method to test that the application under test is initialized correctly. If this
-  test fails, you know that that the initial conditions were in error. When this happens, further test
-  results are suspect, regardless of whether or not the tests succeeded.
+    Another useful convention is to add the method <code>testPreconditions()</code> to your test
+    class. Use this method to test that the application under test is initialized correctly. If this
+    test fails, you know that that the initial conditions were in error. When this happens, further
+    test results are suspect, regardless of whether or not the tests succeeded.
 </p>
 <p>
-  The Resources tab contains an <a href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity Testing</a>
-  tutorial with more information about creating test classes and methods.
+    The Resources tab contains an
+    <a href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity Testing</a>
+    tutorial with more information about creating test classes and methods.
 </p>
 <h2 id="RunTestEclipse">Running Tests</h2>
-<div class="sidebox-wrapper">
-    <div class="sidebox">
-        <h2>Running tests from the command line</h2>
-            <p>
-                If you've created your tests in Eclipse, you can still run your tests and test
-                suites by using command-line tools included with the Android SDK. You may want to
-                do this, for example, if you have a large number of tests to run, if you have a
-                large test case, or if you want a fine level of control over which tests are run at
-                a particular time.
-            </p>
-            <p>
-                To run tests created in Eclipse with ADT with command-line tools, you must first
-                install additional files into the test project using the <code>android</code> tool's
-                "create test-project" option. To see how to do this, read the section
-                <a href="{@docRoot}guide/developing/testing/testing_otheride.html#CreateProject">
-                Creating a test project</a> in the topic
-                <a href="{@docRoot}guide/developing/testing/testing_otheride.html">Testing in Other
-                IDEs</a>.
-            </p>
+    <div class="sidebox-wrapper">
+        <div class="sidebox">
+            <h2>Running tests from the command line</h2>
+                <p>
+                    If you've created your tests in Eclipse, you can still run your tests and test
+                    suites by using command-line tools included with the Android SDK. You may want
+                    to do this, for example, if you have a large number of tests to run, if you
+                    have a large test case, or if you want a fine level of control over which
+                    tests are run at a particular time.
+                </p>
+                <p>
+                    To run tests created in Eclipse with ADT with command-line tools, you must first
+                    install additional files into the test project using the <code>android</code>
+                    tool's "create test-project" option. To see how to do this, read
+                   <a href="{@docRoot}guide/developing/testing/testing_otheride.html#CreateProject">
+                    Testing in Other IDEs</a>.
+                </p>
+        </div>
     </div>
-</div>
 <p>
-  When you run a test application in Eclipse with ADT, the output appears in
-  an Eclipse view panel. You can run the entire test application, one class, or one
-  method of a class. To do this, Eclipse runs the <code>adb</code> command for running a test application, and
-  displays the output, so there is no difference between running tests inside Eclipse and running them from the command line.
+    When you run a test package in Eclipse with ADT, the output appears in the Eclipse JUnit view.
+    You can run the entire test package or one test case class. To do run tests, Eclipse runs the
+    <code>adb</code> command for running a test package, and displays the output, so there is no
+    difference between running tests inside Eclipse and running them from the command line.
 </p>
 <p>
-    As with any other application, to run a test application in Eclipse with ADT you must either attach a device to your
-    computer or use the Android emulator. If you use the emulator, you must have an Android Virtual Device (AVD) that uses
-    the same target
+    As with any other package, to run a test package in Eclipse with ADT you must either attach a
+    device to your computer or use the Android emulator. If you use the emulator, you must have an
+    Android Virtual Device (AVD) that uses the same target as the test package.
 </p>
 <p>
-  To run a test in Eclipse, you have two choices:</p>
-<ol>
-  <li>
-  Run a test just as you run an application, by selecting
-  <strong>Run As... &gt; Android JUnit Test</strong> from the project's context menu or
-  from the main menu's <strong>Run</strong> item.
-  </li>
-  <li>
-  Create an Eclipse run configuration for your test project. This is useful if you want multiple test suites, each consisting of selected tests from the project. To run
-  a test suite, you run the test configuration.
-  <p>
-    Creating and running test configurations is described in the next section.
-  </p>
-  </li>
-</ol>
-<p>To create and run a test suite using a run configuration:</p>
-<ol>
-  <li>
-    In the Package Explorer, select the test
-    project, then from the main menu, select
-    <strong>Run &gt; Run Configurations...</strong>. The
-    Run Configurations dialog appears.
-  </li>
-  <li>
-    In the left-hand pane, find the
-    Android JUnit Test entry.
-    In the right-hand pane, click the Test tab.
-    The Name: text box
-    shows the name of your project. The
-    Test class: dropdown box shows one your project's classes
-    test classes in your project.
-  </li>
-  <li>
-    To run one test class, click  Run a single test, then enter your project
-    name in the Project: text box and the class name in the
-    Test class: text box.
-    <p>
-        To run all the test classes,
-        click Run all tests in the selected project or package,
-        then enter the project or package name in the text box.
-    </p>
- </li>
-  <li>
-    Now click the Target tab.
-    <ul>
-        <li>
-            Optional: If you are using the emulator, click
-            Automatic, then in the Android Virtual Device (AVD)
-            selection table, select an existing AVD.
-        </li>
-        <li>
-            In the Emulator Launch Parameters pane, set the
-            Android emulator flags you want to use. These are documented in the topic
-            <a href="{@docRoot}guide/developing/tools/emulator.html#startup-options">Emulator Startup Options</a>.
-        </li>
-    </ul>
-  <li>
-    Click the Common tab. In the
-    Save As pane, click Local to save
-    this run configuration locally, or click Shared to
-    save it to another project.
-  </li>
-  <li>
-    Optional: Add the configuration to the Run toolbar and the <strong>Favorites</strong>
-    menu: in the Display in Favorites pane
-    click the checkbox next to Run.
-  </li>
-  <li>
-    Optional: To add this configuration to the <strong>Debug</strong> menu and toolbar, click
-    the checkbox next to Debug.
-  </li>
-  <li>
-    To save your settings, click Close.<br/>
-    <p class="note"><strong>Note:</strong> Although you can run the test immediately by
-    clicking Run, you should save the test first and then
-    run it by selecting it from the Eclipse standard toolbar.</p>
-  </li>
-  <li>
-    On the Eclipse standard toolbar, click the down arrow next to the
-    green Run arrow. This displays a menu of saved Run and Debug
-    configurations.
-  </li>
-  <li>
-    Select the test run configuration you just created.
-  </li>
-  <li>
-    The progress of your test appears in the Console view.
-    You should see the following messages, among others:
-    <ul>
-      <li>
-        <code>Performing Android.test.InstrumentationTestRunner JUnit launch</code><br>
-        The class name that proceeds "JUnit" depends on the Android instrumentation
-        class you have chosen.
-      </li>
-      <li>
-        If you are using an emulator and you have not yet started it, then you will see
-        the message:
+    To run a test in Eclipse, you have two choices:</p>
+<ul>
+    <li>
+        Run a test just as you run an application, by selecting
+        <strong>Run As... &gt; Android JUnit Test</strong> from the project's context menu or
+        from the main menu's <strong>Run</strong> item.
+    </li>
+    <li>
+        Create an Eclipse run configuration for your test project. This is useful if you want
+        multiple test suites, each consisting of selected tests from the project. To run
+        a test suite, you run the test configuration.
         <p>
-          <code>Automatic Target Mode: launching new emulator with compatible
-          AVD <em>avdname</em></code><br>(where <em>avdname</em> is the name of
-          the AVD you are using.)
+            Creating and running test configurations is described in the next section.
         </p>
-      </li>
-      <li>
-        If you have not already installed your test application, then you will see
-        the message:
+    </li>
+</ul>
+<p>
+    To create and run a test suite using a run configuration:
+</p>
+<ol>
+    <li>
+        In the Package Explorer, select the test project, then from the main menu, select
+        <strong>Run &gt; Run Configurations...</strong>. The Run Configurations dialog appears.
+    </li>
+    <li>
+        In the left-hand pane, find the Android JUnit Test entry. In the right-hand pane, click the
+        Test tab. The Name: text box shows the name of your project. The Test class: dropdown box
+        shows one of the test classes in your project.
+    </li>
+    <li>
+        To run one test class, click  Run a single test, then enter your project name in the
+        Project: text box and the class name in the Test class: text box.
         <p>
-          <code>Uploading <em>testclass</em>.apk onto device '<em>device-id</em>'</code><br>
-          where <em>testclass</em> is the name of your unit test class and <em>device-id</em>
-          is the name and port for your test device or emulator, followed by the message <code>Installing <em>testclass</em>.apk</code>
+            To run all the test classes, click Run all tests in the selected project or package,
+            then enter the project or package name in the text box.
         </p>
-      </li>
-      <li>
-       <code>Launching instrumentation Android.test.InstrumentationTestRunner on device <em>device-id</em></code>.<br>
-       This indicates that Android's Instrumentation system is now testing your code. Again, the
-       instrumentation class name depends on the Android instrumentation class you have chosen.
-      </li>
-      <li>
-       <code>Test run complete</code>.<br> When you see this, your unit tests have finished.
-      </li>
-    </ul>
+    </li>
+    <li>
+        Now click the Target tab.
+        <ul>
+            <li>
+                Optional: If you are using the emulator, click Automatic, then in the Android
+                Virtual Device (AVD) selection table, select an existing AVD.
+            </li>
+            <li>
+                In the Emulator Launch Parameters pane, set the Android emulator flags you want to
+                use. These are documented in the topic
+                <a href="{@docRoot}guide/developing/tools/emulator.html#startup-options">
+                Android Emulator</a>.
+            </li>
+        </ul>
+    <li>
+        Click the Common tab. In the Save As pane, click Local to save this run configuration
+        locally, or click Shared to save it to another project.
+    </li>
+    <li>
+        Optional: Add the configuration to the Run toolbar and the <strong>Favorites</strong>
+        menu: in the Display in Favorites pane click the checkbox next to Run.
+    </li>
+    <li>
+        Optional: To add this configuration to the <strong>Debug</strong> menu and toolbar, click
+        the checkbox next to Debug.
+    </li>
+    <li>
+        To save your settings, click Close.<br/>
+        <p class="note"><strong>Note:</strong>
+            Although you can run the test immediately by clicking Run, you should save the test
+            first and then run it by selecting it from the Eclipse standard toolbar.
+        </p>
+    </li>
+    <li>
+        On the Eclipse standard toolbar, click the down arrow next to the green Run arrow. This
+        displays a menu of saved Run and Debug configurations.
+    </li>
+    <li>
+        Select the test run configuration you just created. The test starts.
+    </li>
 </ol>
 <p>
-        The test results appear in the JUnit view. This is divided into an upper summary pane,
-        and a lower stack trace pane.
+    The progress of your test appears in the Console view as a series of messages. Each message is
+    preceded by a timestamp and the Android package name to which it applies.
+    In the following description of these messages, <code><em>devicename</em></code> is the name of
+    the device or emulator you are using to run the test, and <code><em>port</em></code> is the
+    port number for the device. The name and port number are in the format used by the
+    <code><a href="{@docRoot}guide/developing/tools/adb.html#devicestatus">adb devices</a></code>
+    command. Also, <code><em>testpackage</em></code> is the name of the test package you are
+    running, and <em>app_package</em> is the label for the application under test.
+</p>
+<ul>
+    <li>
+        If you are using an emulator and you have not yet started it, then Eclipse
+        first starts the emulator. When this is complete, you see
+        the message:
+        <p>
+            <code>HOME is up on device '<em>devicename</em>-<em>port</em>'</code>
+        </p>
+    </li>
+    <li>
+        If you have not already installed your test package, then you see
+        the message:
+        <p>
+            <code>Uploading <em>testpackage</em> onto device '<em>devicename</em>-<em>port</em>'
+            </code>
+        </p>
+        <p>
+            then the message <code>Installing <em>testpackage</em></code>.
+        </p>
+        <p>
+            and finally the message <code>Success!</code>
+        </p>
+    </li>
+    <li>
+        Next, if you have not yet installed the application under test to the device or
+        emulator, you see the message
+        <p>
+        <code>Project dependency found, installing: <em>app_package</em></code>
+        </p>
+        <p>
+            then the message <code>Uploading <em>app_name</em>.apk</code> onto device
+            '<em>devicename</em>-<em>port</em>'
+        </p>
+        <p>
+            then the message <code>Installing <em>app_name</em>.apk</code>
+        </p>
+        <p>
+            and finally the message <code>Success!</code>
+        </p>
+    </li>
+    <li>
+        Next, you see the message
+        <code>Launching instrumentation <em>instrumentation_class</em> on device
+        <em>devicename</em>-<em>port</em></code>
+        <p>
+            <code>instrumentation_class</code> is the fully-qualified class name of the
+            instrumentation test runner you have specified (usually
+            {@link android.test.InstrumentationTestRunner}.
+        </p>
+    </li>
+    <li>
+        Next, as {@link android.test.InstrumentationTestRunner} builds a list of tests to run,
+        you see the message
+        <p>
+            <code>Collecting test information</code>
+        </p>
+        <p>
+            followed by
+        </p>
+        <p>
+            <code>Sending test information to Eclipse</code>
+        </p>
+    </li>
+    <li>
+        Finally, you see the message <code>Running tests</code>, which indicates that your tests
+        are running. At this point, you should start seeing the test results in the JUnit view.
+        When the tests are finished, you see the console message <code>Test run complete</code>.
+        This indicates that your tests are finished.
+    </li>
+</ul>
+<p>
+    The test results appear in the JUnit view. This is divided into an upper summary pane,
+    and a lower stack trace pane.
 </p>
 <p>
-        The upper pane contains test information. In the pane's header, you see the following
-        information:
+    The upper pane contains test information. In the pane's header, you see the following
+    information:
 </p>
-    <ul>
-        <li>
-           Total time elapsed for the test application (labeled Finished after <em>x</em> seconds).
-        </li>
-        <li>
-           Number of runs (Runs:) - the number of tests in the entire test class.
-        </li>
-        <li>
-           Number of errors (Errors:) - the number of program errors and exceptions encountered
-           during the test run.
-        </li>
-        <li>
-           Number of failures (Failures:) - the number of test failures encountered during the test
-           run. This is the number of assertion failures. A test can fail even if the program does
-           not encounter an error.
-        </li>
-        <li>
-           A progress bar. The progress bar extends from left to right as the tests run. If all the
-           tests succeed, the bar remains green. If a test fails, the bar turns from green to red.
-        </li>
-    </ul>
+<ul>
+    <li>
+        Total time elapsed for the test package (labeled Finished after <em>x</em> seconds).
+    </li>
+    <li>
+        Number of runs (Runs:) - the number of tests in the entire test class.
+    </li>
+    <li>
+        Number of errors (Errors:) - the number of program errors and exceptions encountered
+        during the test run.
+    </li>
+    <li>
+        Number of failures (Failures:) - the number of test failures encountered during the test
+        run. This is the number of assertion failures. A test can fail even if the program does
+        not encounter an error.
+    </li>
+    <li>
+        A progress bar. The progress bar extends from left to right as the tests run. If all the
+        tests succeed, the bar remains green. If a test fails, the bar turns from green to red.
+    </li>
+</ul>
 <p>
     The body of the upper pane contains the details of the test run. For each test case class
     that was run, you see a line with the class name. To look at the results for the individual
