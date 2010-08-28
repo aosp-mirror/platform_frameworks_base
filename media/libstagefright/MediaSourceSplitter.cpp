@@ -48,113 +48,118 @@ sp<MediaSource> MediaSourceSplitter::createClient() {
     return client;
 }
 
-status_t MediaSourceSplitter::start(int client_id, MetaData *params) {
+status_t MediaSourceSplitter::start(int clientId, MetaData *params) {
     Mutex::Autolock autoLock(mLock);
 
-    LOGV("start client (%d)", client_id);
-    if (mClientsStarted[client_id]) {
+    LOGV("start client (%d)", clientId);
+    if (mClientsStarted[clientId]) {
         return OK;
     }
 
     mNumberOfClientsStarted++;
 
     if (!mSourceStarted) {
-        LOGV("Starting real source from client (%d)", client_id);
+        LOGV("Starting real source from client (%d)", clientId);
         status_t err = mSource->start(params);
 
         if (err == OK) {
             mSourceStarted = true;
-            mClientsStarted.editItemAt(client_id) = true;
-            mClientsDesiredReadBit.editItemAt(client_id) = !mCurrentReadBit;
+            mClientsStarted.editItemAt(clientId) = true;
+            mClientsDesiredReadBit.editItemAt(clientId) = !mCurrentReadBit;
         }
 
         return err;
     } else {
-        mClientsStarted.editItemAt(client_id) = true;
+        mClientsStarted.editItemAt(clientId) = true;
         if (mLastReadCompleted) {
             // Last read was completed. So join in the threads for the next read.
-            mClientsDesiredReadBit.editItemAt(client_id) = !mCurrentReadBit;
+            mClientsDesiredReadBit.editItemAt(clientId) = !mCurrentReadBit;
         } else {
             // Last read is ongoing. So join in the threads for the current read.
-            mClientsDesiredReadBit.editItemAt(client_id) = mCurrentReadBit;
+            mClientsDesiredReadBit.editItemAt(clientId) = mCurrentReadBit;
         }
         return OK;
     }
 }
 
-status_t MediaSourceSplitter::stop(int client_id) {
+status_t MediaSourceSplitter::stop(int clientId) {
     Mutex::Autolock autoLock(mLock);
 
-    LOGV("stop client (%d)", client_id);
-    CHECK(client_id >= 0 && client_id < mNumberOfClients);
-    CHECK(mClientsStarted[client_id]);
+    LOGV("stop client (%d)", clientId);
+    CHECK(clientId >= 0 && clientId < mNumberOfClients);
+    CHECK(mClientsStarted[clientId]);
 
     if (--mNumberOfClientsStarted == 0) {
-        LOGV("Stopping real source from client (%d)", client_id);
+        LOGV("Stopping real source from client (%d)", clientId);
         status_t err = mSource->stop();
         mSourceStarted = false;
-        mClientsStarted.editItemAt(client_id) = false;
+        mClientsStarted.editItemAt(clientId) = false;
         return err;
     } else {
-        mClientsStarted.editItemAt(client_id) = false;
-        if (!mLastReadCompleted) {
-            // Other threads may be waiting for all the reads to complete.
-            // Signal that the read has been aborted.
+        mClientsStarted.editItemAt(clientId) = false;
+        if (!mLastReadCompleted && (mClientsDesiredReadBit[clientId] == mCurrentReadBit)) {
+            // !mLastReadCompleted implies that buffer has been read from source, but all
+            // clients haven't read it.
+            // mClientsDesiredReadBit[clientId] == mCurrentReadBit implies that this
+            // client would have wanted to read from this buffer. (i.e. it has not yet
+            // called read() for the current read buffer.)
+            // Since other threads may be waiting for all the clients' reads to complete,
+            // signal that this read has been aborted.
             signalReadComplete_lock(true);
         }
         return OK;
     }
 }
 
-sp<MetaData> MediaSourceSplitter::getFormat(int client_id) {
+sp<MetaData> MediaSourceSplitter::getFormat(int clientId) {
     Mutex::Autolock autoLock(mLock);
 
-    LOGV("getFormat client (%d)", client_id);
+    LOGV("getFormat client (%d)", clientId);
     return mSource->getFormat();
 }
 
-status_t MediaSourceSplitter::read(int client_id,
+status_t MediaSourceSplitter::read(int clientId,
         MediaBuffer **buffer, const MediaSource::ReadOptions *options) {
     Mutex::Autolock autoLock(mLock);
 
-    CHECK(client_id >= 0 && client_id < mNumberOfClients);
+    CHECK(clientId >= 0 && clientId < mNumberOfClients);
 
-    LOGV("read client (%d)", client_id);
+    LOGV("read client (%d)", clientId);
     *buffer = NULL;
 
-    if (!mClientsStarted[client_id]) {
+    if (!mClientsStarted[clientId]) {
         return OK;
     }
 
-    if (mCurrentReadBit != mClientsDesiredReadBit[client_id]) {
+    if (mCurrentReadBit != mClientsDesiredReadBit[clientId]) {
         // Desired buffer has not been read from source yet.
 
-        // If the current client is the special client with client_id = 0
+        // If the current client is the special client with clientId = 0
         // then read from source, else wait until the client 0 has finished
         // reading from source.
-        if (client_id == 0) {
+        if (clientId == 0) {
             // Wait for all client's last read to complete first so as to not
             // corrupt the buffer at mLastReadMediaBuffer.
-            waitForAllClientsLastRead_lock(client_id);
+            waitForAllClientsLastRead_lock(clientId);
 
             readFromSource_lock(options);
             *buffer = mLastReadMediaBuffer;
         } else {
-            waitForReadFromSource_lock(client_id);
+            waitForReadFromSource_lock(clientId);
 
             *buffer = mLastReadMediaBuffer;
             (*buffer)->add_ref();
         }
-        CHECK(mCurrentReadBit == mClientsDesiredReadBit[client_id]);
+        CHECK(mCurrentReadBit == mClientsDesiredReadBit[clientId]);
     } else {
         // Desired buffer has already been read from source. Use the cached data.
-        CHECK(client_id != 0);
+        CHECK(clientId != 0);
 
         *buffer = mLastReadMediaBuffer;
         (*buffer)->add_ref();
     }
 
-    mClientsDesiredReadBit.editItemAt(client_id) = !mClientsDesiredReadBit[client_id];
+    mClientsDesiredReadBit.editItemAt(clientId) = !mClientsDesiredReadBit[clientId];
     signalReadComplete_lock(false);
 
     return mLastReadStatus;
@@ -168,11 +173,11 @@ void MediaSourceSplitter::readFromSource_lock(const MediaSource::ReadOptions *op
     mReadFromSourceCondition.broadcast();
 }
 
-void MediaSourceSplitter::waitForReadFromSource_lock(int32_t client_id) {
+void MediaSourceSplitter::waitForReadFromSource_lock(int32_t clientId) {
     mReadFromSourceCondition.wait(mLock);
 }
 
-void MediaSourceSplitter::waitForAllClientsLastRead_lock(int32_t client_id) {
+void MediaSourceSplitter::waitForAllClientsLastRead_lock(int32_t clientId) {
     if (mLastReadCompleted) {
         return;
     }
@@ -192,7 +197,7 @@ void MediaSourceSplitter::signalReadComplete_lock(bool readAborted) {
     }
 }
 
-status_t MediaSourceSplitter::pause(int client_id) {
+status_t MediaSourceSplitter::pause(int clientId) {
     return ERROR_UNSUPPORTED;
 }
 
@@ -200,30 +205,30 @@ status_t MediaSourceSplitter::pause(int client_id) {
 
 MediaSourceSplitter::Client::Client(
         sp<MediaSourceSplitter> splitter,
-        int32_t client_id) {
+        int32_t clientId) {
     mSplitter = splitter;
-    mClient_id = client_id;
+    mClientId = clientId;
 }
 
 status_t MediaSourceSplitter::Client::start(MetaData *params) {
-    return mSplitter->start(mClient_id, params);
+    return mSplitter->start(mClientId, params);
 }
 
 status_t MediaSourceSplitter::Client::stop() {
-    return mSplitter->stop(mClient_id);
+    return mSplitter->stop(mClientId);
 }
 
 sp<MetaData> MediaSourceSplitter::Client::getFormat() {
-    return mSplitter->getFormat(mClient_id);
+    return mSplitter->getFormat(mClientId);
 }
 
 status_t MediaSourceSplitter::Client::read(
         MediaBuffer **buffer, const ReadOptions *options) {
-    return mSplitter->read(mClient_id, buffer, options);
+    return mSplitter->read(mClientId, buffer, options);
 }
 
 status_t MediaSourceSplitter::Client::pause() {
-    return mSplitter->pause(mClient_id);
+    return mSplitter->pause(mClientId);
 }
 
 }  // namespace android
