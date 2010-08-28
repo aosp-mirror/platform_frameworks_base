@@ -78,7 +78,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             mPopup = new DialogPopup();
             break;
         }
-        
+
         case MODE_DROPDOWN: {
             final int hintResource = a.getResourceId(
                     com.android.internal.R.styleable.Spinner_popupPromptView, 0);
@@ -144,7 +144,6 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         
         if (mPopup != null && mPopup.isShowing()) {
             mPopup.dismiss();
-            mPopup = null;
         }
     }
 
@@ -316,7 +315,6 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     public void onClick(DialogInterface dialog, int which) {
         setSelection(which);
         dialog.dismiss();
-        mPopup = null;
     }
 
     /**
@@ -542,7 +540,8 @@ public class Spinner extends AbsSpinner implements OnClickListener {
                 mHintView.setText(hintText);
             }
         }
-        
+
+        @Override
         public void show() {
             if (mHintView == null) {
                 final TextView textView = (TextView) LayoutInflater.from(getContext()).inflate(
