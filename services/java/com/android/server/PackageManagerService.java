@@ -18,6 +18,7 @@ package com.android.server;
 
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
+import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
@@ -112,6 +113,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -187,6 +189,8 @@ class PackageManagerService extends IPackageManager.Stub {
     static final ComponentName DEFAULT_CONTAINER_COMPONENT = new ComponentName(
             "com.android.defcontainer",
             "com.android.defcontainer.DefaultContainerService");
+
+    private static final String LIB_DIR_NAME = "lib";
 
     static final String mTempContainerPrefix = "smdl2tmp";
 
@@ -673,13 +677,6 @@ class PackageManagerService extends IPackageManager.Stub {
             return false;
         }
         if ((flags & PackageManager.INSTALL_EXTERNAL) != 0) {
-            return true;
-        }
-        return false;
-    }
-
-    static boolean isFwdLocked(int flags) {
-        if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) {
             return true;
         }
         return false;
@@ -1497,6 +1494,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 ps.pkg.applicationInfo.publicSourceDir = ps.resourcePathString;
                 ps.pkg.applicationInfo.sourceDir = ps.codePathString;
                 ps.pkg.applicationInfo.dataDir = getDataPathForPackage(ps.pkg).getPath();
+                ps.pkg.applicationInfo.nativeLibraryDir = ps.nativeLibraryPathString;
                 ps.pkg.mSetEnabled = ps.enabled;
             }
             return generatePackageInfo(ps.pkg, flags);
@@ -2376,8 +2374,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 PackageParser.Package p = i.next();
                 if (p.applicationInfo != null
                         && (p.applicationInfo.flags&ApplicationInfo.FLAG_PERSISTENT) != 0
-                        && (!mSafeMode || (p.applicationInfo.flags
-                                &ApplicationInfo.FLAG_SYSTEM) != 0)) {
+                        && (!mSafeMode || isSystemApp(p))) {
                     finalList.add(PackageParser.generateApplicationInfo(p, flags));
                 }
             }
@@ -2621,9 +2618,9 @@ class PackageManagerService extends IPackageManager.Stub {
                             + "reverting from " + ps.codePathString
                             + ": new version " + pkg.mVersionCode
                             + " better than installed " + ps.versionCode);
-                    InstallArgs args = new FileInstallArgs(ps.codePathString, ps.resourcePathString);
+                    InstallArgs args = new FileInstallArgs(ps.codePathString,
+                            ps.resourcePathString, ps.nativeLibraryPathString);
                     args.cleanUpResourcesLI();
-                    removeNativeBinariesLI(pkg);
                     mSettings.enableSystemPackageLP(ps.name);
                 }
             }
@@ -2663,8 +2660,8 @@ class PackageManagerService extends IPackageManager.Stub {
         return scanPackageLI(pkg, parseFlags, scanMode | SCAN_UPDATE_SIGNATURE);
     }
 
-    private static void setApplicationInfoPaths(PackageParser.Package pkg,
-            String destCodePath, String destResPath) {
+    private static void setApplicationInfoPaths(PackageParser.Package pkg, String destCodePath,
+            String destResPath) {
         pkg.mPath = pkg.mScanPath = destCodePath;
         pkg.applicationInfo.sourceDir = destCodePath;
         pkg.applicationInfo.publicSourceDir = destResPath;
@@ -3146,10 +3143,10 @@ class PackageManagerService extends IPackageManager.Stub {
             if (dataPath.exists()) {
                 mOutPermissions[1] = 0;
                 FileUtils.getPermissions(dataPath.getPath(), mOutPermissions);
-                if (mOutPermissions[1] == pkg.applicationInfo.uid
-                        || !Process.supportsProcesses()) {
-                    pkg.applicationInfo.dataDir = dataPath.getPath();
-                } else {
+
+                // If we have mismatched owners for the data path, we have a
+                // problem (unless we're running in the simulator.)
+                if (mOutPermissions[1] != pkg.applicationInfo.uid && Process.supportsProcesses()) {
                     boolean recovered = false;
                     if ((parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0) {
                         // If this is a system app, we can at least delete its
@@ -3186,6 +3183,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         pkg.applicationInfo.dataDir = "/mismatched_uid/settings_"
                             + pkg.applicationInfo.uid + "/fs_"
                             + mOutPermissions[1];
+                        pkg.applicationInfo.nativeLibraryDir = pkg.applicationInfo.dataDir;
                         String msg = "Package " + pkg.packageName
                                 + " has mismatched uid: "
                                 + mOutPermissions[1] + " on disk, "
@@ -3229,32 +3227,38 @@ class PackageManagerService extends IPackageManager.Stub {
                     pkg.applicationInfo.dataDir = null;
                 }
             }
-            
+
+            /*
+             * Set the data dir to the default "/data/data/<package name>/lib"
+             * if we got here without anyone telling us different (e.g., apps
+             * stored on SD card have their native libraries stored in the ASEC
+             * container with the APK).
+             */
+            if (pkg.applicationInfo.nativeLibraryDir == null && pkg.applicationInfo.dataDir != null) {
+                pkg.applicationInfo.nativeLibraryDir = new File(dataPath, LIB_DIR_NAME).getPath();
+            }
+
             pkgSetting.uidError = uidError;
         }
 
-        // Perform shared library installation and dex validation and
-        // optimization, if this is not a system app.
+        // If we're running in the simulator, we don't need to unpack anything.
         if (mInstaller != null) {
             String path = scanFile.getPath();
-            if (scanFileNewer) {
-                // Note: We don't want to unpack the native binaries for
-                //       system applications, unless they have been updated
-                //       (the binaries are already under /system/lib).
-                //
-                //       In other words, we're going to unpack the binaries
-                //       only for non-system apps and system app upgrades.
-                //
-                int flags = pkg.applicationInfo.flags;
-                if ((flags & ApplicationInfo.FLAG_SYSTEM) == 0 ||
-                    (flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
-                    Log.i(TAG, path + " changed; unpacking");
-                    int err = cachePackageSharedLibsLI(pkg, scanFile);
-                    if (err != PackageManager.INSTALL_SUCCEEDED) {
-                        mLastScanError = err;
-                        return null;
-                    }
-                }
+            /* Note: We don't want to unpack the native binaries for
+             *        system applications, unless they have been updated
+             *        (the binaries are already under /system/lib).
+             *        Also, don't unpack libs for apps on the external card
+             *        since they should have their libraries in the ASEC
+             *        container already.
+             *
+             *        In other words, we're going to unpack the binaries
+             *        only for non-system apps and system app upgrades.
+             */
+            if ((!isSystemApp(pkg) || isUpdatedSystemApp(pkg)) && !isExternal(pkg)) {
+                Log.i(TAG, path + " changed; unpacking");
+                File sharedLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
+                sharedLibraryDir.mkdir();
+                NativeLibraryHelper.copyNativeBinariesLI(scanFile, sharedLibraryDir);
             }
             pkg.mScanPath = path;
 
@@ -3517,6 +3521,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 a.info.sourceDir = pkg.applicationInfo.sourceDir;
                 a.info.publicSourceDir = pkg.applicationInfo.publicSourceDir;
                 a.info.dataDir = pkg.applicationInfo.dataDir;
+                a.info.nativeLibraryDir = pkg.applicationInfo.nativeLibraryDir;
                 mInstrumentation.put(a.getComponentName(), a);
                 if ((parseFlags&PackageParser.PARSE_CHATTY) != 0) {
                     if (r == null) {
@@ -3557,266 +3562,30 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    // The following constants are returned by cachePackageSharedLibsForAbiLI
-    // to indicate if native shared libraries were found in the package.
-    // Values are:
-    //    PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES => native libraries found and installed
-    //    PACKAGE_INSTALL_NATIVE_NO_LIBRARIES     => no native libraries in package
-    //    PACKAGE_INSTALL_NATIVE_ABI_MISMATCH     => native libraries for another ABI found
-    //                                        in package (and not installed)
-    //
-    private static final int PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES = 0;
-    private static final int PACKAGE_INSTALL_NATIVE_NO_LIBRARIES = 1;
-    private static final int PACKAGE_INSTALL_NATIVE_ABI_MISMATCH = 2;
-
     // Return the path of the directory that will contain the native binaries
     // of a given installed package. This is relative to the data path.
     //
-    private static File getNativeBinaryDirForPackage(PackageParser.Package pkg) {
-        return new File(pkg.applicationInfo.dataDir + "/lib");
+    private File getNativeBinaryDirForPackage(PackageParser.Package pkg) {
+        final String nativeLibraryDir = pkg.applicationInfo.nativeLibraryDir;
+        if (nativeLibraryDir != null) {
+            return new File(nativeLibraryDir);
+        } else {
+            // Fall back for old packages
+            return new File(pkg.applicationInfo.dataDir, LIB_DIR_NAME);
+        }
     }
 
-    // Find all files of the form lib/<cpuAbi>/lib<name>.so in the .apk
-    // and automatically copy them to /data/data/<appname>/lib if present.
-    //
-    // NOTE: this method may throw an IOException if the library cannot
-    // be copied to its final destination, e.g. if there isn't enough
-    // room left on the data partition, or a ZipException if the package
-    // file is malformed.
-    //
-    private int cachePackageSharedLibsForAbiLI(PackageParser.Package pkg,
-        File scanFile, String cpuAbi) throws IOException, ZipException {
-        File sharedLibraryDir = getNativeBinaryDirForPackage(pkg);
-        final String apkLib = "lib/";
-        final int apkLibLen = apkLib.length();
-        final int cpuAbiLen = cpuAbi.length();
-        final String libPrefix = "lib";
-        final int libPrefixLen = libPrefix.length();
-        final String libSuffix = ".so";
-        final int libSuffixLen = libSuffix.length();
-        boolean hasNativeLibraries = false;
-        boolean installedNativeLibraries = false;
-
-        // the minimum length of a valid native shared library of the form
-        // lib/<something>/lib<name>.so.
-        final int minEntryLen  = apkLibLen + 2 + libPrefixLen + 1 + libSuffixLen;
-
-        ZipFile zipFile = new ZipFile(scanFile);
-        Enumeration<ZipEntry> entries =
-            (Enumeration<ZipEntry>) zipFile.entries();
-
-        while (entries.hasMoreElements()) {
-            ZipEntry entry = entries.nextElement();
-            // skip directories
-            if (entry.isDirectory()) {
-                continue;
-            }
-            String entryName = entry.getName();
-
-            // check that the entry looks like lib/<something>/lib<name>.so
-            // here, but don't check the ABI just yet.
-            //
-            // - must be sufficiently long
-            // - must end with libSuffix, i.e. ".so"
-            // - must start with apkLib, i.e. "lib/"
-            if (entryName.length() < minEntryLen ||
-                !entryName.endsWith(libSuffix) ||
-                !entryName.startsWith(apkLib) ) {
-                continue;
-            }
-
-            // file name must start with libPrefix, i.e. "lib"
-            int lastSlash = entryName.lastIndexOf('/');
-
-            if (lastSlash < 0 ||
-                !entryName.regionMatches(lastSlash+1, libPrefix, 0, libPrefixLen) ) {
-                continue;
-            }
-
-            hasNativeLibraries = true;
-
-            // check the cpuAbi now, between lib/ and /lib<name>.so
-            //
-            if (lastSlash != apkLibLen + cpuAbiLen ||
-                !entryName.regionMatches(apkLibLen, cpuAbi, 0, cpuAbiLen) )
-                continue;
-
-            // extract the library file name, ensure it doesn't contain
-            // weird characters. we're guaranteed here that it doesn't contain
-            // a directory separator though.
-            String libFileName = entryName.substring(lastSlash+1);
-            if (!FileUtils.isFilenameSafe(new File(libFileName))) {
-                continue;
-            }
-
-            installedNativeLibraries = true;
-
-            // Always extract the shared library
-            String sharedLibraryFilePath = sharedLibraryDir.getPath() +
-                File.separator + libFileName;
-            File sharedLibraryFile = new File(sharedLibraryFilePath);
-
-            if (Config.LOGD) {
-                Log.d(TAG, "Caching shared lib " + entry.getName());
-            }
-            if (mInstaller == null) {
-                sharedLibraryDir.mkdir();
-            }
-            cacheNativeBinaryLI(pkg, zipFile, entry, sharedLibraryDir,
-                    sharedLibraryFile);
-        }
-        if (!hasNativeLibraries)
-            return PACKAGE_INSTALL_NATIVE_NO_LIBRARIES;
-
-        if (!installedNativeLibraries)
-            return PACKAGE_INSTALL_NATIVE_ABI_MISMATCH;
-
-        return PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES;
-    }
-
-    // Find the gdbserver executable program in a package at
-    // lib/<cpuAbi>/gdbserver and copy it to /data/data/<name>/lib/gdbserver
-    //
-    // Returns PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES on success,
-    // or PACKAGE_INSTALL_NATIVE_NO_LIBRARIES otherwise.
-    //
-    private int cachePackageGdbServerLI(PackageParser.Package pkg,
-        File scanFile, String cpuAbi) throws IOException, ZipException {
-        File installGdbServerDir = getNativeBinaryDirForPackage(pkg);
-        final String GDBSERVER = "gdbserver";
-        final String apkGdbServerPath = "lib/" + cpuAbi + "/" + GDBSERVER;
-
-        ZipFile zipFile = new ZipFile(scanFile);
-        Enumeration<ZipEntry> entries =
-            (Enumeration<ZipEntry>) zipFile.entries();
-
-        while (entries.hasMoreElements()) {
-            ZipEntry entry = entries.nextElement();
-            // skip directories
-            if (entry.isDirectory()) {
-                continue;
-            }
-            String entryName = entry.getName();
-
-            if (!entryName.equals(apkGdbServerPath)) {
-                continue;
-            }
-
-            String installGdbServerPath = installGdbServerDir.getPath() +
-                "/" + GDBSERVER;
-            File installGdbServerFile = new File(installGdbServerPath);
-
-            if (Config.LOGD) {
-                Log.d(TAG, "Caching gdbserver " + entry.getName());
-            }
-            if (mInstaller == null) {
-                installGdbServerDir.mkdir();
-            }
-            cacheNativeBinaryLI(pkg, zipFile, entry, installGdbServerDir,
-                    installGdbServerFile);
-
-            return PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES;
-        }
-        return PACKAGE_INSTALL_NATIVE_NO_LIBRARIES;
-    }
-
-    // extract shared libraries stored in the APK as lib/<cpuAbi>/lib<name>.so
-    // and copy them to /data/data/<appname>/lib.
-    //
-    // This function will first try the main CPU ABI defined by Build.CPU_ABI
-    // (which corresponds to ro.product.cpu.abi), and also try an alternate
-    // one if ro.product.cpu.abi2 is defined.
-    //
-    private int cachePackageSharedLibsLI(PackageParser.Package pkg, File scanFile) {
-        // Remove all native binaries from a directory. This is used when upgrading
-        // a package: in case the new .apk doesn't contain a native binary that was
-        // in the old one (and thus installed), we need to remove it from
-        // /data/data/<appname>/lib
-        //
-        // The simplest way to do that is to remove all files in this directory,
-        // since it is owned by "system", applications are not supposed to write
-        // anything there.
-        removeNativeBinariesLI(pkg);
-
-        String cpuAbi = Build.CPU_ABI;
-        try {
-            int result = cachePackageSharedLibsForAbiLI(pkg, scanFile, cpuAbi);
-
-            // some architectures are capable of supporting several CPU ABIs
-            // for example, 'armeabi-v7a' also supports 'armeabi' native code
-            // this is indicated by the definition of the ro.product.cpu.abi2
-            // system property.
-            //
-            // only scan the package twice in case of ABI mismatch
-            if (result == PACKAGE_INSTALL_NATIVE_ABI_MISMATCH) {
-                final String cpuAbi2 = SystemProperties.get("ro.product.cpu.abi2",null);
-                if (cpuAbi2 != null) {
-                    result = cachePackageSharedLibsForAbiLI(pkg, scanFile, cpuAbi2);
-                }
-
-                if (result == PACKAGE_INSTALL_NATIVE_ABI_MISMATCH) {
-                    Slog.w(TAG,"Native ABI mismatch from package file");
-                    return PackageManager.INSTALL_FAILED_INVALID_APK;
-                }
-
-                if (result == PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES) {
-                    cpuAbi = cpuAbi2;
-                }
-            }
-
-            // for debuggable packages, also extract gdbserver from lib/<abi>
-            // into /data/data/<appname>/lib too.
-            if (result == PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES &&
-                (pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-                int result2 = cachePackageGdbServerLI(pkg, scanFile, cpuAbi);
-                if (result2 == PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES) {
-                    pkg.applicationInfo.flags |= ApplicationInfo.FLAG_NATIVE_DEBUGGABLE;
-                }
-            }
-        } catch (ZipException e) {
-            Slog.w(TAG, "Failed to extract data from package file", e);
-            return PackageManager.INSTALL_FAILED_INVALID_APK;
-        } catch (IOException e) {
-            Slog.w(TAG, "Failed to cache package shared libs", e);
-            return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-        }
-        return PackageManager.INSTALL_SUCCEEDED;
-    }
-
-    private void cacheNativeBinaryLI(PackageParser.Package pkg,
-            ZipFile zipFile, ZipEntry entry,
-            File binaryDir,
-            File binaryFile) throws IOException {
-        InputStream inputStream = zipFile.getInputStream(entry);
-        try {
-            File tempFile = File.createTempFile("tmp", "tmp", binaryDir);
-            String tempFilePath = tempFile.getPath();
-            // XXX package manager can't change owner, so the executable files for
-            // now need to be left as world readable and owned by the system.
-            if (! FileUtils.copyToFile(inputStream, tempFile) ||
-                ! tempFile.setLastModified(entry.getTime()) ||
-                FileUtils.setPermissions(tempFilePath,
-                        FileUtils.S_IRUSR|FileUtils.S_IWUSR|FileUtils.S_IRGRP
-                        |FileUtils.S_IXUSR|FileUtils.S_IXGRP|FileUtils.S_IXOTH
-                        |FileUtils.S_IROTH, -1, -1) != 0 ||
-                ! tempFile.renameTo(binaryFile)) {
-                // Failed to properly write file.
-                tempFile.delete();
-                throw new IOException("Couldn't create cached binary "
-                        + binaryFile + " in " + binaryDir);
-            }
-        } finally {
-            inputStream.close();
-        }
+    // Convenience call for removeNativeBinariesLI(File)
+    private void removeNativeBinariesLI(PackageParser.Package pkg) {
+        File nativeLibraryDir = getNativeBinaryDirForPackage(pkg);
+        removeNativeBinariesLI(nativeLibraryDir);
     }
 
     // Remove the native binaries of a given package. This simply
     // gets rid of the files in the 'lib' sub-directory.
-    private void removeNativeBinariesLI(PackageParser.Package pkg) {
-        File binaryDir = getNativeBinaryDirForPackage(pkg);
-
+    public void removeNativeBinariesLI(File binaryDir) {
         if (DEBUG_NATIVE) {
-            Slog.w(TAG,"Deleting native binaries from: " + binaryDir.getPath());
+            Slog.w(TAG, "Deleting native binaries from: " + binaryDir.getPath());
         }
 
         // Just remove any file in the directory. Since the directory
@@ -3824,15 +3593,14 @@ class PackageManagerService extends IPackageManager.Stub {
         // to have written anything there.
         //
         if (binaryDir.exists()) {
-            File[]  binaries = binaryDir.listFiles();
+            File[] binaries = binaryDir.listFiles();
             if (binaries != null) {
-                for (int nn=0; nn < binaries.length; nn++) {
+                for (int nn = 0; nn < binaries.length; nn++) {
                     if (DEBUG_NATIVE) {
-                        Slog.d(TAG,"    Deleting " + binaries[nn].getName());
+                        Slog.d(TAG, "    Deleting " + binaries[nn].getName());
                     }
                     if (!binaries[nn].delete()) {
-                        Slog.w(TAG,"Could not delete native binary: " +
-                                binaries[nn].getPath());
+                        Slog.w(TAG, "Could not delete native binary: " + binaries[nn].getPath());
                     }
                 }
             }
@@ -4144,11 +3912,10 @@ class PackageManagerService extends IPackageManager.Stub {
                             || (checkSignaturesLP(mPlatformPackage.mSignatures, pkg.mSignatures)
                                     == PackageManager.SIGNATURE_MATCH);
                     if (bp.protectionLevel == PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM) {
-                        if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0) {
+                        if (isSystemApp(pkg)) {
                             // For updated system applications, the signatureOrSystem permission
                             // is granted only if it had been defined by the original application.
-                            if ((pkg.applicationInfo.flags
-                                    & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)  != 0) {
+                            if (isUpdatedSystemApp(pkg)) {
                                 PackageSetting sysPs = mSettings.getDisabledSystemPkg(pkg.packageName);
                                 if(sysPs.grantedPermissions.contains(perm)) {
                                     allowed = true;
@@ -4936,7 +4703,7 @@ class PackageManagerService extends IPackageManager.Stub {
                                 // App explictly prefers external. Let policy decide
                             } else {
                                 // Prefer previous location
-                                if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0) {
+                                if (isExternal(pkg)) {
                                     return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
                                 }
                                 return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
@@ -5048,16 +4815,16 @@ class PackageManagerService extends IPackageManager.Stub {
         final InstallArgs srcArgs;
         final InstallArgs targetArgs;
         int mRet;
-        MoveParams(InstallArgs srcArgs,
-                IPackageMoveObserver observer,
-                int flags, String packageName) {
+
+        MoveParams(InstallArgs srcArgs, IPackageMoveObserver observer, int flags,
+                String packageName, String dataDir) {
             this.srcArgs = srcArgs;
             this.observer = observer;
             this.flags = flags;
             this.packageName = packageName;
             if (srcArgs != null) {
                 Uri packageUri = Uri.fromFile(new File(srcArgs.getCodePath()));
-                targetArgs = createInstallArgs(packageUri, flags, packageName);
+                targetArgs = createInstallArgs(packageUri, flags, packageName, dataDir);
             } else {
                 targetArgs = null;
             }
@@ -5113,21 +4880,22 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private InstallArgs createInstallArgs(int flags, String fullCodePath, String fullResourcePath) {
+    private InstallArgs createInstallArgs(int flags, String fullCodePath, String fullResourcePath,
+            String nativeLibraryPath) {
         if (installOnSd(flags)) {
-            return new SdInstallArgs(fullCodePath, fullResourcePath);
+            return new SdInstallArgs(fullCodePath, fullResourcePath, nativeLibraryPath);
         } else {
-            return new FileInstallArgs(fullCodePath, fullResourcePath);
+            return new FileInstallArgs(fullCodePath, fullResourcePath, nativeLibraryPath);
         }
     }
 
-    private InstallArgs createInstallArgs(Uri packageURI, int flags,
-            String pkgName) {
+    // Used by package mover
+    private InstallArgs createInstallArgs(Uri packageURI, int flags, String pkgName, String dataDir) {
         if (installOnSd(flags)) {
             String cid = getNextCodePath(null, pkgName, "/" + SdInstallArgs.RES_FILE_NAME);
             return new SdInstallArgs(packageURI, cid);
         } else {
-            return new FileInstallArgs(packageURI, pkgName);
+            return new FileInstallArgs(packageURI, pkgName, dataDir);
         }
     }
 
@@ -5154,6 +4922,7 @@ class PackageManagerService extends IPackageManager.Stub {
         abstract int doPostInstall(int status);
         abstract String getCodePath();
         abstract String getResourcePath();
+        abstract String getNativeLibraryPath();
         // Need installer lock especially for dex file removal.
         abstract void cleanUpResourcesLI();
         abstract boolean doPostDeleteLI(boolean delete);
@@ -5164,6 +4933,7 @@ class PackageManagerService extends IPackageManager.Stub {
         File installDir;
         String codeFileName;
         String resourceFileName;
+        String libraryPath;
         boolean created = false;
 
         FileInstallArgs(InstallParams params) {
@@ -5171,21 +4941,22 @@ class PackageManagerService extends IPackageManager.Stub {
                     params.flags, params.installerPackageName);
         }
 
-        FileInstallArgs(String fullCodePath, String fullResourcePath) {
+        FileInstallArgs(String fullCodePath, String fullResourcePath, String nativeLibraryPath) {
             super(null, null, 0, null);
             File codeFile = new File(fullCodePath);
             installDir = codeFile.getParentFile();
             codeFileName = fullCodePath;
             resourceFileName = fullResourcePath;
+            libraryPath = nativeLibraryPath;
         }
 
-        FileInstallArgs(Uri packageURI, String pkgName) {
+        FileInstallArgs(Uri packageURI, String pkgName, String dataDir) {
             super(packageURI, null, 0, null);
-            boolean fwdLocked = isFwdLocked(flags);
-            installDir = fwdLocked ? mDrmAppPrivateInstallDir : mAppInstallDir;
+            installDir = isFwdLocked() ? mDrmAppPrivateInstallDir : mAppInstallDir;
             String apkName = getNextCodePath(null, pkgName, ".apk");
             codeFileName = new File(installDir, apkName + ".apk").getPath();
             resourceFileName = getResourcePathFromCodePath();
+            libraryPath = new File(dataDir, LIB_DIR_NAME).getPath();
         }
 
         boolean  checkFreeStorage(IMediaContainerService imcs) throws RemoteException {
@@ -5197,8 +4968,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         void createCopyFile() {
-            boolean fwdLocked = isFwdLocked(flags);
-            installDir = fwdLocked ? mDrmAppPrivateInstallDir : mAppInstallDir;
+            installDir = isFwdLocked() ? mDrmAppPrivateInstallDir : mAppInstallDir;
             codeFileName = createTempPackageFile(installDir).getPath();
             resourceFileName = getResourcePathFromCodePath();
             created = true;
@@ -5226,8 +4996,7 @@ class PackageManagerService extends IPackageManager.Stub {
             }
             ParcelFileDescriptor out = null;
             try {
-            out = ParcelFileDescriptor.open(codeFile,
-                    ParcelFileDescriptor.MODE_READ_WRITE);
+                out = ParcelFileDescriptor.open(codeFile, ParcelFileDescriptor.MODE_READ_WRITE);
             } catch (FileNotFoundException e) {
                 Slog.e(TAG, "Failed to create file descritpor for : " + codeFileName);
                 return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
@@ -5241,6 +5010,11 @@ class PackageManagerService extends IPackageManager.Stub {
             } finally {
                 try { if (out != null) out.close(); } catch (IOException e) {}
             }
+
+            if (!temp) {
+                NativeLibraryHelper.copyNativeBinariesLI(codeFile, new File(libraryPath));
+            }
+
             return ret;
         }
 
@@ -5296,6 +5070,11 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
+        @Override
+        String getNativeLibraryPath() {
+            return libraryPath;
+        }
+
         private boolean cleanUp() {
             boolean ret = true;
             String sourceDir = getCodePath();
@@ -5332,11 +5111,14 @@ class PackageManagerService extends IPackageManager.Stub {
                     // we don't consider this to be a failure of the core package deletion
                 }
             }
+            if (libraryPath != null) {
+                removeNativeBinariesLI(new File(libraryPath));
+            }
         }
 
         private boolean setPermissions() {
             // TODO Do this in a more elegant way later on. for now just a hack
-            if (!isFwdLocked(flags)) {
+            if (!isFwdLocked()) {
                 final int filePermissions =
                     FileUtils.S_IRUSR|FileUtils.S_IWUSR|FileUtils.S_IRGRP
                     |FileUtils.S_IROTH;
@@ -5354,35 +5136,42 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         boolean doPostDeleteLI(boolean delete) {
+            // XXX err, shouldn't we respect the delete flag?
             cleanUpResourcesLI();
             return true;
+        }
+
+        private boolean isFwdLocked() {
+            return (flags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
         }
     }
 
     class SdInstallArgs extends InstallArgs {
-        String cid;
-        String cachePath;
         static final String RES_FILE_NAME = "pkg.apk";
+
+        String cid;
+        String packagePath;
+        String libraryPath;
 
         SdInstallArgs(InstallParams params) {
             super(params.packageURI, params.observer,
                     params.flags, params.installerPackageName);
         }
 
-        SdInstallArgs(String fullCodePath, String fullResourcePath) {
+        SdInstallArgs(String fullCodePath, String fullResourcePath, String nativeLibraryPath) {
             super(null, null, PackageManager.INSTALL_EXTERNAL, null);
             // Extract cid from fullCodePath
             int eidx = fullCodePath.lastIndexOf("/");
             String subStr1 = fullCodePath.substring(0, eidx);
             int sidx = subStr1.lastIndexOf("/");
             cid = subStr1.substring(sidx+1, eidx);
-            cachePath = subStr1;
+            setCachePath(subStr1);
         }
 
         SdInstallArgs(String cid) {
             super(null, null, PackageManager.INSTALL_EXTERNAL, null);
             this.cid = cid;
-            cachePath = PackageHelper.getSdDir(cid);
+            setCachePath(PackageHelper.getSdDir(cid));
         }
 
         SdInstallArgs(Uri packageURI, String cid) {
@@ -5402,21 +5191,30 @@ class PackageManagerService extends IPackageManager.Stub {
             if (temp) {
                 createCopyFile();
             }
-            cachePath = imcs.copyResourceToContainer(
+            String newCachePath = imcs.copyResourceToContainer(
                     packageURI, cid,
                     getEncryptKey(), RES_FILE_NAME);
-            return (cachePath == null) ? PackageManager.INSTALL_FAILED_CONTAINER_ERROR :
-                PackageManager.INSTALL_SUCCEEDED;
+            if (newCachePath != null) {
+                setCachePath(newCachePath);
+                return PackageManager.INSTALL_SUCCEEDED;
+            } else {
+                return PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
+            }
         }
 
         @Override
         String getCodePath() {
-            return cachePath + "/" + RES_FILE_NAME;
+            return packagePath;
         }
 
         @Override
         String getResourcePath() {
-            return cachePath + "/" + RES_FILE_NAME;
+            return packagePath;
+        }
+
+        @Override
+        String getNativeLibraryPath() {
+            return libraryPath;
         }
 
         int doPreInstall(int status) {
@@ -5426,8 +5224,11 @@ class PackageManagerService extends IPackageManager.Stub {
             } else {
                 boolean mounted = PackageHelper.isContainerMounted(cid);
                 if (!mounted) {
-                    cachePath = PackageHelper.mountSdDir(cid, getEncryptKey(), Process.SYSTEM_UID);
-                    if (cachePath == null) {
+                    String newCachePath = PackageHelper.mountSdDir(cid, getEncryptKey(),
+                            Process.SYSTEM_UID);
+                    if (newCachePath != null) {
+                        setCachePath(newCachePath);
+                    } else {
                         return PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
                     }
                 }
@@ -5473,11 +5274,17 @@ class PackageManagerService extends IPackageManager.Stub {
                 return false;
             }
             Log.i(TAG, "Succesfully renamed " + cid +
-                    " at path: " + cachePath + " to " + newCacheId +
+                    " to " + newCacheId +
                     " at new path: " + newCachePath);
             cid = newCacheId;
-            cachePath = newCachePath;
+            setCachePath(newCachePath);
             return true;
+        }
+
+        private void setCachePath(String newCachePath) {
+            File cachePath = new File(newCachePath);
+            libraryPath = new File(cachePath, LIB_DIR_NAME).getPath();
+            packagePath = new File(cachePath, RES_FILE_NAME).getPath();
         }
 
         int doPostInstall(int status) {
@@ -5695,7 +5502,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 return;
             }
         }
-        boolean sysPkg = ((oldPackage.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
+        boolean sysPkg = (isSystemApp(oldPackage));
         if (sysPkg) {
             replaceSystemPackageLI(oldPackage, pkg, parseFlags, scanMode, installerPackageName, res);
         } else {
@@ -5855,7 +5662,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         !ps.codePathString.equals(oldPkgSetting.codePathString)) {
                     int installFlags = 0;
                     res.removedInfo.args = createInstallArgs(0, oldPkgSetting.codePathString,
-                            oldPkgSetting.resourcePathString);
+                            oldPkgSetting.resourcePathString, oldPkgSetting.nativeLibraryPathString);
                 }
             }
         }
@@ -6006,6 +5813,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         // Set application objects path explicitly after the rename
         setApplicationInfoPaths(pkg, args.getCodePath(), args.getResourcePath());
+        pkg.applicationInfo.nativeLibraryDir = args.getNativeLibraryPath();
         if (replace) {
             replacePackageLI(pkg, parseFlags, scanMode,
                     installerPackageName, res);
@@ -6020,8 +5828,7 @@ class PackageManagerService extends IPackageManager.Stub {
         int retCode = 0;
         // TODO Gross hack but fix later. Ideally move this to be a post installation
         // check after alloting uid.
-        if ((newPackage.applicationInfo.flags
-                & ApplicationInfo.FLAG_FORWARD_LOCK) != 0) {
+        if (isForwardLocked(newPackage)) {
             File destResourceFile = new File(newPackage.applicationInfo.publicSourceDir);
             try {
                 extractPublicFiles(newPackage, destResourceFile);
@@ -6056,12 +5863,20 @@ class PackageManagerService extends IPackageManager.Stub {
         return PackageManager.INSTALL_SUCCEEDED;
     }
 
-    private boolean isForwardLocked(PackageParser.Package pkg) {
-        return  ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
+    private static boolean isForwardLocked(PackageParser.Package pkg) {
+        return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0;
     }
 
-    private boolean isExternal(PackageParser.Package pkg) {
-        return  ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
+    private static boolean isExternal(PackageParser.Package pkg) {
+        return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
+    }
+
+    private static boolean isSystemApp(PackageParser.Package pkg) {
+        return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    private static boolean isUpdatedSystemApp(PackageParser.Package pkg) {
+        return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
     }
 
     private void extractPublicFiles(PackageParser.Package newPackage,
@@ -6291,7 +6106,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     // we don't consider this to be a failure of the core package deletion
                 }
             } else {
-                //for emulator
+                // for simulator
                 PackageParser.Package pkg = mPackages.get(packageName);
                 File dataDir = new File(pkg.applicationInfo.dataDir);
                 dataDir.delete();
@@ -6374,7 +6189,7 @@ class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             // Reinstate the old system package
             mSettings.enableSystemPackageLP(p.packageName);
-            // Remove any native libraries.
+            // Remove any native libraries. XXX needed?
             removeNativeBinariesLI(p);
         }
         // Install the system package
@@ -6410,12 +6225,10 @@ class PackageManagerService extends IPackageManager.Stub {
         // Delete application code and resources
         if (deleteCodeAndResources) {
             // TODO can pick up from PackageSettings as well
-            int installFlags = ((p.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE)!=0) ?
-                    PackageManager.INSTALL_EXTERNAL : 0;
-            installFlags |= ((p.applicationInfo.flags & ApplicationInfo.FLAG_FORWARD_LOCK)!=0) ?
-                    PackageManager.INSTALL_FORWARD_LOCK : 0;
-            outInfo.args = createInstallArgs(installFlags,
-                    applicationInfo.sourceDir, applicationInfo.publicSourceDir);
+            int installFlags = isExternal(p) ? PackageManager.INSTALL_EXTERNAL : 0;
+            installFlags |= isForwardLocked(p) ? PackageManager.INSTALL_FORWARD_LOCK : 0;
+            outInfo.args = createInstallArgs(installFlags, applicationInfo.sourceDir,
+                    applicationInfo.publicSourceDir, applicationInfo.nativeLibraryDir);
         }
         return true;
     }
@@ -6460,7 +6273,7 @@ class PackageManagerService extends IPackageManager.Stub {
             return false;
         }
         boolean ret = false;
-        if ( (p.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+        if (isSystemApp(p)) {
             Log.i(TAG, "Removing system package:"+p.packageName);
             // When an updated system application is deleted we delete the existing resources as well and
             // fall back to existing code in system partition
@@ -7160,10 +6973,14 @@ class PackageManagerService extends IPackageManager.Stub {
                     pw.print("    pkg="); pw.println(ps.pkg);
                     pw.print("    codePath="); pw.println(ps.codePathString);
                     pw.print("    resourcePath="); pw.println(ps.resourcePathString);
+                    pw.print("    nativeLibraryPath="); pw.println(ps.nativeLibraryPathString);
                     pw.print("    obbPath="); pw.println(ps.obbPathString);
                     if (ps.pkg != null) {
                         pw.print("    dataDir="); pw.println(ps.pkg.applicationInfo.dataDir);
                         pw.print("    targetSdk="); pw.println(ps.pkg.applicationInfo.targetSdkVersion);
+                        if (ps.pkg.mOperationPending) {
+                            pw.println("    mOperationPending=true");
+                        }
                         pw.print("    supportsScreens=[");
                         boolean first = true;
                         if ((ps.pkg.applicationInfo.flags &
@@ -7211,9 +7028,6 @@ class PackageManagerService extends IPackageManager.Stub {
                     pw.print("    pkgFlags=0x"); pw.print(Integer.toHexString(ps.pkgFlags));
                             pw.print(" installStatus="); pw.print(ps.installStatus);
                             pw.print(" enabled="); pw.println(ps.enabled);
-                    if (ps.pkg.mOperationPending) {
-                        pw.println("    mOperationPending=true");
-                    }
                     if (ps.disabledComponents.size() > 0) {
                         pw.println("    disabledComponents:");
                         for (String s : ps.disabledComponents) {
@@ -7730,6 +7544,7 @@ class PackageManagerService extends IPackageManager.Stub {
         String codePathString;
         File resourcePath;
         String resourcePathString;
+        String nativeLibraryPathString;
         String obbPathString;
         private long timeStamp;
         private String timeStampString = "0";
@@ -7769,7 +7584,7 @@ class PackageManagerService extends IPackageManager.Stub {
             this.resourcePathString = resourcePath.toString();
             this.versionCode = pVersionCode;
         }
-        
+
         public void setInstallerPackageName(String packageName) {
             installerPackageName = packageName;
         }
@@ -8282,8 +8097,8 @@ class PackageManagerService extends IPackageManager.Stub {
         private void insertPackageSettingLP(PackageSetting p, PackageParser.Package pkg) {
             p.pkg = pkg;
             pkg.mSetEnabled = p.enabled;
-            String codePath = pkg.applicationInfo.sourceDir;
-            String resourcePath = pkg.applicationInfo.publicSourceDir;
+            final String codePath = pkg.applicationInfo.sourceDir;
+            final String resourcePath = pkg.applicationInfo.publicSourceDir;
             // Update code path if needed
             if (!codePath.equalsIgnoreCase(p.codePathString)) {
                 Slog.w(TAG, "Code path for pkg : " + p.pkg.packageName +
@@ -8297,6 +8112,12 @@ class PackageManagerService extends IPackageManager.Stub {
                         " changing from " + p.resourcePathString + " to " + resourcePath);
                 p.resourcePath = new File(resourcePath);
                 p.resourcePathString = resourcePath;
+            }
+            // Update the native library path if needed
+            final String nativeLibraryPath = pkg.applicationInfo.nativeLibraryDir;
+            if (nativeLibraryPath != null
+                    && !nativeLibraryPath.equalsIgnoreCase(p.nativeLibraryPathString)) {
+                p.nativeLibraryPathString = nativeLibraryPath;
             }
             // Update version code if needed
              if (pkg.mVersionCode != p.versionCode) {
@@ -8595,7 +8416,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     StringBuilder sb = new StringBuilder();
                     for (PackageSetting pkg : mPackages.values()) {
                         ApplicationInfo ai = pkg.pkg.applicationInfo;
-                        String  dataPath = ai.dataDir;
+                        String dataPath = ai.dataDir;
                         boolean isDebug  = (ai.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
 
                         // Avoid any application that has a space in its path
@@ -8668,6 +8489,9 @@ class PackageManagerService extends IPackageManager.Stub {
             if (!pkg.resourcePathString.equals(pkg.codePathString)) {
                 serializer.attribute(null, "resourcePath", pkg.resourcePathString);
             }
+            if (pkg.nativeLibraryPathString != null) {
+                serializer.attribute(null, "nativeLibraryPath", pkg.nativeLibraryPathString);
+            }
             if (pkg.sharedUser == null) {
                 serializer.attribute(null, "userId",
                         Integer.toString(pkg.userId));
@@ -8706,6 +8530,9 @@ class PackageManagerService extends IPackageManager.Stub {
             serializer.attribute(null, "codePath", pkg.codePathString);
             if (!pkg.resourcePathString.equals(pkg.codePathString)) {
                 serializer.attribute(null, "resourcePath", pkg.resourcePathString);
+            }
+            if (pkg.nativeLibraryPathString != null) {
+                serializer.attribute(null, "nativeLibraryPath", pkg.nativeLibraryPathString);
             }
             serializer.attribute(null, "flags",
                     Integer.toString(pkg.pkgFlags));
@@ -9111,6 +8938,7 @@ class PackageManagerService extends IPackageManager.Stub {
             String sharedIdStr = null;
             String codePathStr = null;
             String resourcePathStr = null;
+            String nativeLibraryPathStr = null;
             String obbPathStr = null;
             String systemStr = null;
             String installerPackageName = null;
@@ -9129,6 +8957,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 sharedIdStr = parser.getAttributeValue(null, "sharedUserId");
                 codePathStr = parser.getAttributeValue(null, "codePath");
                 resourcePathStr = parser.getAttributeValue(null, "resourcePath");
+                nativeLibraryPathStr = parser.getAttributeValue(null, "nativeLibraryPath");
                 obbPathStr = parser.getAttributeValue(null, "obbPath");
                 version = parser.getAttributeValue(null, "version");
                 if (version != null) {
@@ -9227,6 +9056,7 @@ class PackageManagerService extends IPackageManager.Stub {
             if (packageSetting != null) {
                 packageSetting.uidError = "true".equals(uidError);
                 packageSetting.installerPackageName = installerPackageName;
+                packageSetting.nativeLibraryPathString = nativeLibraryPathStr;
                 packageSetting.obbPathString = obbPathStr;
                 final String enabledStr = parser.getAttributeValue(null, "enabled");
                 if (enabledStr != null) {
@@ -9894,12 +9724,10 @@ class PackageManagerService extends IPackageManager.Stub {
                returnCode =  PackageManager.MOVE_FAILED_DOESNT_EXIST;
            } else {
                // Disable moving fwd locked apps and system packages
-               if (pkg.applicationInfo != null &&
-                       (pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+               if (pkg.applicationInfo != null && isSystemApp(pkg)) {
                    Slog.w(TAG, "Cannot move system application");
                    returnCode = PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
-               } else if (pkg.applicationInfo != null &&
-                       (pkg.applicationInfo.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0) {
+               } else if (pkg.applicationInfo != null && isForwardLocked(pkg)) {
                    Slog.w(TAG, "Cannot move forward locked app.");
                    returnCode = PackageManager.MOVE_FAILED_FORWARD_LOCKED;
                } else if (pkg.mOperationPending) {
@@ -9914,8 +9742,8 @@ class PackageManagerService extends IPackageManager.Stub {
                    } else {
                        newFlags = (flags & PackageManager.MOVE_EXTERNAL_MEDIA) != 0 ?
                                PackageManager.INSTALL_EXTERNAL : PackageManager.INSTALL_INTERNAL;
-                       currFlags = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0 ?
-                               PackageManager.INSTALL_EXTERNAL : PackageManager.INSTALL_INTERNAL;
+                       currFlags = isExternal(pkg) ? PackageManager.INSTALL_EXTERNAL
+                               : PackageManager.INSTALL_INTERNAL;
                        if (newFlags == currFlags) {
                            Slog.w(TAG, "No move required. Trying to move to same location");
                            returnCode = PackageManager.MOVE_FAILED_INVALID_LOCATION;
@@ -9927,13 +9755,13 @@ class PackageManagerService extends IPackageManager.Stub {
                }
            }
            if (returnCode != PackageManager.MOVE_SUCCEEDED) {
-               processPendingMove(new MoveParams(null, observer, 0, packageName), returnCode);
+                processPendingMove(new MoveParams(null, observer, 0, packageName, null), returnCode);
            } else {
                Message msg = mHandler.obtainMessage(INIT_COPY);
                InstallArgs srcArgs = createInstallArgs(currFlags, pkg.applicationInfo.sourceDir,
-                       pkg.applicationInfo.publicSourceDir);
-               MoveParams mp = new MoveParams(srcArgs, observer, newFlags,
-                       packageName);
+                        pkg.applicationInfo.publicSourceDir, pkg.applicationInfo.nativeLibraryDir);
+               MoveParams mp = new MoveParams(srcArgs, observer, newFlags, packageName,
+                        pkg.applicationInfo.dataDir);
                msg.obj = mp;
                mHandler.sendMessage(msg);
            }
@@ -9951,7 +9779,7 @@ class PackageManagerService extends IPackageManager.Stub {
                    ArrayList<String> pkgList = null;
                    synchronized (mPackages) {
                        PackageParser.Package pkg = mPackages.get(mp.packageName);
-                       if (pkg == null ) {
+                       if (pkg == null) {
                            Slog.w(TAG, " Package " + mp.packageName +
                            " doesn't exist. Aborting move");
                            returnCode = PackageManager.MOVE_FAILED_DOESNT_EXIST;
@@ -9984,9 +9812,10 @@ class PackageManagerService extends IPackageManager.Stub {
                                    " Aborting move and returning error");
                                    returnCode = PackageManager.MOVE_FAILED_INTERNAL_ERROR;
                                } else {
-                                   String oldCodePath = pkg.mPath;
-                                   String newCodePath = mp.targetArgs.getCodePath();
-                                   String newResPath = mp.targetArgs.getResourcePath();
+                                   final String oldCodePath = pkg.mPath;
+                                   final String newCodePath = mp.targetArgs.getCodePath();
+                                   final String newResPath = mp.targetArgs.getResourcePath();
+                                   final String newNativePath = mp.targetArgs.getNativeLibraryPath();
                                    pkg.mPath = newCodePath;
                                    // Move dex files around
                                    if (moveDexFilesLI(pkg)
@@ -9999,6 +9828,7 @@ class PackageManagerService extends IPackageManager.Stub {
                                        pkg.mScanPath = newCodePath;
                                        pkg.applicationInfo.sourceDir = newCodePath;
                                        pkg.applicationInfo.publicSourceDir = newResPath;
+                                       pkg.applicationInfo.nativeLibraryDir = newNativePath;
                                        PackageSetting ps = (PackageSetting) pkg.mExtras;
                                        ps.codePath = new File(pkg.applicationInfo.sourceDir);
                                        ps.codePathString = ps.codePath.getPath();

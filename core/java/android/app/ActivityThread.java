@@ -3226,6 +3226,7 @@ public final class ActivityThread {
             instrApp.sourceDir = ii.sourceDir;
             instrApp.publicSourceDir = ii.publicSourceDir;
             instrApp.dataDir = ii.dataDir;
+            instrApp.nativeLibraryDir = ii.nativeLibraryDir;
             LoadedApk pi = getPackageInfo(instrApp,
                     appContext.getClassLoader(), false, true);
             ContextImpl instrContext = new ContextImpl();
