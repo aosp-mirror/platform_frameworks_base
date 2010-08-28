@@ -311,10 +311,6 @@ public interface IActivityManager extends IInterface {
     
     public void finishHeavyWeightApp() throws RemoteException;
 
-    public void setImmersive(IBinder token, boolean immersive) throws RemoteException;
-    public boolean isImmersive(IBinder token) throws RemoteException;
-    public boolean isTopActivityImmersive() throws RemoteException;
-    
     public void crashApplication(int uid, int initialPid, String packageName,
             String message) throws RemoteException;
     

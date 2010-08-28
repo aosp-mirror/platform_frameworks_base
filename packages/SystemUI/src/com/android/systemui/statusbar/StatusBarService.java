@@ -91,11 +91,6 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
 
     private static final int MSG_ANIMATE = 1000;
     private static final int MSG_ANIMATE_REVEAL = 1001;
-    private static final int MSG_SHOW_INTRUDER = 1002;
-    private static final int MSG_HIDE_INTRUDER = 1003;
-
-    // will likely move to a resource or other tunable param at some point
-    private static final int INTRUDER_ALERT_DECAY_MS = 10000;
 
     StatusBarPolicy mIconPolicy;
 
@@ -247,9 +242,6 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
         // we're never destroyed
     }
 
-    // for immersive activities
-    private View mIntruderAlertView;
-
     /**
      * Nobody binds to us.
      */
@@ -269,10 +261,6 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
         ExpandedView expanded = (ExpandedView)View.inflate(context,
                 R.layout.status_bar_expanded, null);
         expanded.mService = this;
-
-        mIntruderAlertView = View.inflate(context, R.layout.intruder_alert, null);
-        mIntruderAlertView.setVisibility(View.GONE);
-        mIntruderAlertView.setClickable(true);
 
         StatusBarView sb = (StatusBarView)View.inflate(context, R.layout.status_bar, null);
         sb.mService = this;
@@ -354,23 +342,6 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
         // TODO lp.windowAnimations = R.style.Animation_StatusBar;
 
         WindowManagerImpl.getDefault().addView(view, lp);
-
-        lp = new WindowManager.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                    | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
-                PixelFormat.TRANSLUCENT);
-        lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
-        lp.y += height * 1.5; // FIXME
-        lp.setTitle("IntruderAlert");
-        lp.windowAnimations = com.android.internal.R.style.Animation_StatusBar_IntruderAlert;
-
-        WindowManagerImpl.getDefault().addView(mIntruderAlertView, lp);
     }
 
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
@@ -395,55 +366,23 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
     }
 
     public void addNotification(IBinder key, StatusBarNotification notification) {
-        StatusBarIconView iconView = addNotificationViews(key, notification);
-        if (iconView == null) return;
-
-        boolean immersive = false;
-        try {
-            immersive = ActivityManagerNative.getDefault().isTopActivityImmersive();
-            Slog.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
-        } catch (RemoteException ex) {
-        }
-        if (immersive) {
-            if ((notification.notification.flags & Notification.FLAG_HIGH_PRIORITY) != 0) {
-                Slog.d(TAG, "Presenting high-priority notification in immersive activity");
-                // @@@ special new transient ticker mode
-                // 1. Populate mIntruderAlertView
-
-                ImageView alertIcon = (ImageView) mIntruderAlertView.findViewById(R.id.alertIcon);
-                TextView alertText = (TextView) mIntruderAlertView.findViewById(R.id.alertText);
-                alertIcon.setImageDrawable(StatusBarIconView.getIcon(
-                    alertIcon.getContext(),
-                    iconView.getStatusBarIcon()));
-                alertText.setText(notification.notification.tickerText);
-
-                View button = mIntruderAlertView.findViewById(R.id.intruder_alert_content);
-                button.setOnClickListener(
-                    new Launcher(notification.notification.contentIntent,
-                        notification.pkg, notification.tag, notification.id));
-
-                // 2. Animate mIntruderAlertView in
-                mHandler.sendEmptyMessage(MSG_SHOW_INTRUDER);
-
-                // 3. Set alarm to age the notification off (TODO)
-                mHandler.removeMessages(MSG_HIDE_INTRUDER);
-                mHandler.sendEmptyMessageDelayed(MSG_HIDE_INTRUDER, INTRUDER_ALERT_DECAY_MS);
-            }
-        } else if (notification.notification.fullScreenIntent != null) {
-            // not immersive & a full-screen alert should be shown
-            Slog.d(TAG, "Notification has fullScreenIntent and activity is not immersive;"
-                    + " sending fullScreenIntent");
+        boolean shouldTick = true;
+        if (notification.notification.fullScreenIntent != null) {
+            shouldTick = false;
+            Slog.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
             try {
                 notification.notification.fullScreenIntent.send();
             } catch (PendingIntent.CanceledException e) {
             }
-        } else {
-            // usual case: status bar visible & not immersive
+        } 
 
-            // show the ticker
+        StatusBarIconView iconView = addNotificationViews(key, notification);
+        if (iconView == null) return;
+
+        if (shouldTick) {
             tick(notification);
         }
-
+        
         // Recalculate the position of the sliding windows and the titles.
         setAreThereNotifications();
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
@@ -720,12 +659,6 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
                     break;
                 case MSG_ANIMATE_REVEAL:
                     doRevealAnimation();
-                    break;
-                case MSG_SHOW_INTRUDER:
-                    setIntruderAlertVisibility(true);
-                    break;
-                case MSG_HIDE_INTRUDER:
-                    setIntruderAlertVisibility(false);
                     break;
             }
         }
@@ -1109,9 +1042,6 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
 
             // close the shade if it was open
             animateCollapse();
-
-            // If this click was on the intruder alert, hide that instead
-            mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
         }
     }
 
@@ -1547,10 +1477,6 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
             }
         }
     };
-
-    private void setIntruderAlertVisibility(boolean vis) {
-        mIntruderAlertView.setVisibility(vis ? View.VISIBLE : View.GONE);
-    }
 
     /**
      * Reload some of our resources when the configuration changes.
