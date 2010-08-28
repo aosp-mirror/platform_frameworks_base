@@ -703,8 +703,8 @@
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"Alles selecteren"</string>
-    <string name="selectText" msgid="3889149123626888637">"Tekst selecteren"</string>
-    <string name="stopSelectingText" msgid="4157931463872320996">"Stoppen met tekst selecteren"</string>
+    <!-- no translation found for selectText (4862359311088898878) -->
+    <skip />
     <string name="cut" msgid="3092569408438626261">"Knippen"</string>
     <string name="copy" msgid="2681946229533511987">"Kopiëren"</string>
     <string name="paste" msgid="5629880836805036433">"Plakken"</string>
