@@ -859,18 +859,22 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     private void updateProvidersLocked() {
+        boolean changesMade = false;
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             LocationProviderInterface p = mProviders.get(i);
             boolean isEnabled = p.isEnabled();
             String name = p.getName();
             boolean shouldBeEnabled = isAllowedBySettingsLocked(name);
-
             if (isEnabled && !shouldBeEnabled) {
                 updateProviderListenersLocked(name, false);
+                changesMade = true;
             } else if (!isEnabled && shouldBeEnabled) {
                 updateProviderListenersLocked(name, true);
+                changesMade = true;
             }
-
+        }
+        if (changesMade) {
+            mContext.sendBroadcast(new Intent(LocationManager.PROVIDERS_CHANGED_ACTION));
         }
     }
 

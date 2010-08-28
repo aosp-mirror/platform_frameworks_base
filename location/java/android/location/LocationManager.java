@@ -127,6 +127,13 @@ public class LocationManager {
         "android.location.GPS_ENABLED_CHANGE";
 
     /**
+     * Broadcast intent action when the configured location providers
+     * change.
+     */
+    public static final String PROVIDERS_CHANGED_ACTION =
+        "android.location.PROVIDERS_CHANGED";
+
+    /**
      * Broadcast intent action indicating that the GPS has either started or
      * stopped receiving GPS fixes. An intent extra provides this state as a
      * boolean, where {@code true} means that the GPS is actively receiving fixes.
