@@ -295,8 +295,8 @@ MediaRecorderClient::MediaRecorderClient(const sp<MediaPlayerService>& service, 
     mPid = pid;
 
     char value[PROPERTY_VALUE_MAX];
-    if (property_get("media.stagefright.enable-record", value, NULL)
-        && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
+    if (!property_get("media.stagefright.enable-record", value, NULL)
+        || !strcmp(value, "1") || !strcasecmp(value, "true")) {
         mRecorder = new StagefrightRecorder;
     } else
 #ifndef NO_OPENCORE
