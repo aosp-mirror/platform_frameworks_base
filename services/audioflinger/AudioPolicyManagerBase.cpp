@@ -133,7 +133,7 @@ status_t AudioPolicyManagerBase::setDeviceConnectionState(AudioSystem::audio_dev
         // request routing change if necessary
         uint32_t newDevice = getNewDevice(mHardwareOutput, false);
 #ifdef WITH_A2DP
-        checkOutputForAllStrategies(newDevice);
+        checkOutputForAllStrategies();
         // A2DP outputs must be closed after checkOutputForAllStrategies() is executed
         if (state == AudioSystem::DEVICE_STATE_UNAVAILABLE && AudioSystem::isA2dpDevice(device)) {
             closeA2dpOutputs();
@@ -274,7 +274,7 @@ void AudioPolicyManagerBase::setPhoneState(int state)
     // check for device and output changes triggered by new phone state
     newDevice = getNewDevice(mHardwareOutput, false);
 #ifdef WITH_A2DP
-    checkOutputForAllStrategies(newDevice);
+    checkOutputForAllStrategies();
     // suspend A2DP output if a SCO device is present.
     if (mA2dpOutput != 0 && mScoDeviceAddress != "") {
         if (oldState == AudioSystem::MODE_NORMAL) {
@@ -386,13 +386,28 @@ void AudioPolicyManagerBase::setForceUse(AudioSystem::force_use usage, AudioSyst
     // check for device and output changes triggered by new phone state
     uint32_t newDevice = getNewDevice(mHardwareOutput, false);
 #ifdef WITH_A2DP
-    checkOutputForAllStrategies(newDevice);
+    checkOutputForAllStrategies();
 #endif
     updateDeviceForStrategy();
     setOutputDevice(mHardwareOutput, newDevice);
     if (forceVolumeReeval) {
         applyStreamVolumes(mHardwareOutput, newDevice);
     }
+
+    audio_io_handle_t activeInput = getActiveInput();
+    if (activeInput != 0) {
+        AudioInputDescriptor *inputDesc = mInputs.valueFor(activeInput);
+        newDevice = getDeviceForInputSource(inputDesc->mInputSource);
+        if (newDevice != inputDesc->mDevice) {
+            LOGV("setForceUse() changing device from %x to %x for input %d",
+                    inputDesc->mDevice, newDevice, activeInput);
+            inputDesc->mDevice = newDevice;
+            AudioParameter param = AudioParameter();
+            param.addInt(String8(AudioParameter::keyRouting), (int)newDevice);
+            mpClientInterface->setParameters(activeInput, param.toString());
+        }
+    }
+
 }
 
 AudioSystem::forced_config AudioPolicyManagerBase::getForceUse(AudioSystem::force_use usage)
@@ -1382,7 +1397,7 @@ void AudioPolicyManagerBase::closeA2dpOutputs()
     }
 }
 
-void AudioPolicyManagerBase::checkOutputForStrategy(routing_strategy strategy, uint32_t &newDevice)
+void AudioPolicyManagerBase::checkOutputForStrategy(routing_strategy strategy)
 {
     uint32_t prevDevice = getDeviceForStrategy(strategy);
     uint32_t curDevice = getDeviceForStrategy(strategy, false);
@@ -1400,12 +1415,6 @@ void AudioPolicyManagerBase::checkOutputForStrategy(routing_strategy strategy, u
         } else {
             LOGV("checkOutputForStrategy() moving strategy %d from a2dp", strategy);
             srcOutput = mA2dpOutput;
-        }
-
-        // do not change newDevice if it was already set before this call by a previous call to
-        // getNewDevice() or checkOutputForStrategy() for a strategy with higher priority
-        if (newDevice == 0 && mOutputs.valueFor(mHardwareOutput)->isUsedByStrategy(strategy)) {
-            newDevice = getDeviceForStrategy(strategy, false);
         }
     }
     if (a2dpIsUsed && !a2dpWasUsed) {
@@ -1441,15 +1450,12 @@ void AudioPolicyManagerBase::checkOutputForStrategy(routing_strategy strategy, u
     }
 }
 
-void AudioPolicyManagerBase::checkOutputForAllStrategies(uint32_t &newDevice)
+void AudioPolicyManagerBase::checkOutputForAllStrategies()
 {
-    // Check strategies in order of priority so that once newDevice is set
-    // for a given strategy it is not modified by subsequent calls to
-    // checkOutputForStrategy()
-    checkOutputForStrategy(STRATEGY_PHONE, newDevice);
-    checkOutputForStrategy(STRATEGY_SONIFICATION, newDevice);
-    checkOutputForStrategy(STRATEGY_MEDIA, newDevice);
-    checkOutputForStrategy(STRATEGY_DTMF, newDevice);
+    checkOutputForStrategy(STRATEGY_PHONE);
+    checkOutputForStrategy(STRATEGY_SONIFICATION);
+    checkOutputForStrategy(STRATEGY_MEDIA);
+    checkOutputForStrategy(STRATEGY_DTMF);
 }
 
 #endif
