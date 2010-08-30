@@ -97,7 +97,11 @@ public final class MtpCursor extends AbstractWindowedCursor {
 
     @Override
     protected void finalize() {
-        native_finalize();
+        try {
+            native_finalize();
+        } finally {
+            super.finalize();
+        }
     }
 
     @Override
