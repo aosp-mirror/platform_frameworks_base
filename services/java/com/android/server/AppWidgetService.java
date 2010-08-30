@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.ResolveInfo;
@@ -1099,7 +1100,7 @@ class AppWidgetService extends IAppWidgetService.Stub
                 if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                     added = true;
-                } if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
+                } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                     added = false;
                 } else  {
@@ -1160,7 +1161,9 @@ class AppWidgetService extends IAppWidgetService.Stub
         for (int i=0; i<N; i++) {
             ResolveInfo ri = broadcastReceivers.get(i);
             ActivityInfo ai = ri.activityInfo;
-            
+            if ((ai.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0) {
+                continue;
+            }
             if (pkgName.equals(ai.packageName)) {
                 addProviderLocked(ri);
             }
@@ -1179,6 +1182,9 @@ class AppWidgetService extends IAppWidgetService.Stub
         for (int i=0; i<N; i++) {
             ResolveInfo ri = broadcastReceivers.get(i);
             ActivityInfo ai = ri.activityInfo;
+            if ((ai.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0) {
+                continue;
+            }
             if (pkgName.equals(ai.packageName)) {
                 ComponentName component = new ComponentName(ai.packageName, ai.name);
                 Provider p = lookupProviderLocked(component);

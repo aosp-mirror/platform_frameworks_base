@@ -49,7 +49,17 @@ protected:
     virtual ~AudioSource();
 
 private:
-    enum { kMaxBufferSize = 2048 };
+    enum {
+        kMaxBufferSize = 2048,
+
+        // After the initial mute, we raise the volume linearly
+        // over kAutoRampDurationUs.
+        kAutoRampDurationUs = 300000,
+
+        // This is the initial mute duration to suppress
+        // the video recording signal tone
+        kAutoRampStartUs = 700000,
+      };
 
     AudioRecord *mRecord;
     status_t mInitCheck;
@@ -66,6 +76,12 @@ private:
     MediaBufferGroup *mGroup;
 
     void trackMaxAmplitude(int16_t *data, int nSamples);
+
+    // This is used to raise the volume from mute to the
+    // actual level linearly.
+    void rampVolume(
+        int32_t startFrame, int32_t rampDurationFrames,
+        uint8_t *data,   size_t bytes);
 
     AudioSource(const AudioSource &);
     AudioSource &operator=(const AudioSource &);

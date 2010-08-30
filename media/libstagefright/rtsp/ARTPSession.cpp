@@ -83,7 +83,8 @@ status_t ARTPSession::setup(const sp<ASessionDescription> &desc) {
         sp<AMessage> notify = new AMessage(kWhatAccessUnitComplete, id());
         notify->setSize("track-index", mTracks.size() - 1);
 
-        mRTPConn->addStream(rtpSocket, rtcpSocket, mDesc, i, notify);
+        mRTPConn->addStream(
+                rtpSocket, rtcpSocket, mDesc, i, notify, false /* injected */);
 
         info->mPacketSource = source;
     }

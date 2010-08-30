@@ -508,8 +508,8 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
         }
 
         if (get4LE(lfhBuf) != kLFHSignature) {
-            LOGW("didn't find signature at start of lfh, offset=%ld\n",
-                localHdrOffset);
+            LOGW("didn't find signature at start of lfh, offset=%ld (got 0x%08lx, expected 0x%08x)\n",
+                localHdrOffset, get4LE(lfhBuf), kLFHSignature);
             return false;
         }
 

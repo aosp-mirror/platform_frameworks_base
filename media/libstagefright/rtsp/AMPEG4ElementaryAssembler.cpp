@@ -101,10 +101,6 @@ void AMPEG4ElementaryAssembler::submitAccessUnit() {
     LOG(VERBOSE) << "Access unit complete (" << mPackets.size() << " nal units)";
 #endif
 
-    uint64_t ntpTime;
-    CHECK((*mPackets.begin())->meta()->findInt64(
-                "ntp-time", (int64_t *)&ntpTime));
-
     size_t totalSize = 0;
     for (List<sp<ABuffer> >::iterator it = mPackets.begin();
          it != mPackets.end(); ++it) {
@@ -120,7 +116,7 @@ void AMPEG4ElementaryAssembler::submitAccessUnit() {
         offset += nal->size();
     }
 
-    accessUnit->meta()->setInt64("ntp-time", ntpTime);
+    CopyTimes(accessUnit, *mPackets.begin());
 
 #if 0
     printf(mAccessUnitDamaged ? "X" : ".");

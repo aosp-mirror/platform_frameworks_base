@@ -19,6 +19,7 @@ package android.app;
 import dalvik.system.PathClassLoader;
 
 import java.util.HashMap;
+import java.util.Map;
 
 class ApplicationLoaders
 {
@@ -27,8 +28,7 @@ class ApplicationLoaders
         return gApplicationLoaders;
     }
 
-    public ClassLoader getClassLoader(String zip, String appDataDir,
-            ClassLoader parent)
+    public ClassLoader getClassLoader(String zip, String libPath, ClassLoader parent)
     {
         /*
          * This is the parent we use if they pass "null" in.  In theory
@@ -49,13 +49,13 @@ class ApplicationLoaders
              * new ClassLoader for the zip archive.
              */
             if (parent == baseParent) {
-                ClassLoader loader = (ClassLoader)mLoaders.get(zip);
+                ClassLoader loader = mLoaders.get(zip);
                 if (loader != null) {
                     return loader;
                 }
     
                 PathClassLoader pathClassloader =
-                    new PathClassLoader(zip, appDataDir + "/lib", parent);
+                    new PathClassLoader(zip, libPath, parent);
                 
                 mLoaders.put(zip, pathClassloader);
                 return pathClassloader;
@@ -65,7 +65,7 @@ class ApplicationLoaders
         }
     }
 
-    private final HashMap mLoaders = new HashMap();
+    private final Map<String, ClassLoader> mLoaders = new HashMap<String, ClassLoader>();
 
     private static final ApplicationLoaders gApplicationLoaders
         = new ApplicationLoaders();

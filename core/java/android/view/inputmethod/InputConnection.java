@@ -80,6 +80,21 @@ public interface InputConnection {
     public CharSequence getTextAfterCursor(int n, int flags);
 
     /**
+     * Gets the selected text, if any.
+     *
+     * <p>This method may fail if either the input connection has become
+     * invalid (such as its process crashing) or the client is taking too
+     * long to respond with the text (it is given a couple of seconds to return).
+     * In either case, a null is returned.
+     *
+     * @param flags Supplies additional options controlling how the text is
+     * returned.  May be either 0 or {@link #GET_TEXT_WITH_STYLES}.
+     * @return Returns the text that is currently selected, if any, or null if
+     * no text is selected.
+     */
+    public CharSequence getSelectedText(int flags);
+
+    /**
      * Retrieve the current capitalization mode in effect at the current
      * cursor position in the text.  See
      * {@link android.text.TextUtils#getCapsMode TextUtils.getCapsMode} for
@@ -160,6 +175,18 @@ public interface InputConnection {
      * valid.
      */
     public boolean setComposingText(CharSequence text, int newCursorPosition);
+
+    /**
+     * Mark a certain region of text as composing text. Any composing text set
+     * previously will be removed automatically. The default style for composing
+     * text is used.
+     *
+     * @param start the position in the text at which the composing region begins
+     * @param end the position in the text at which the composing region ends
+     * @return Returns true on success, false if the input connection is no longer
+     * valid.
+     */
+    public boolean setComposingRegion(int start, int end);
 
     /**
      * Have the text editor finish whatever composing text is currently

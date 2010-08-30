@@ -1601,15 +1601,17 @@ public class PackageParser {
             ai.enabled = sa.getBoolean(
                     com.android.internal.R.styleable.AndroidManifestApplication_enabled, true);
             
-            if (sa.getBoolean(
-                    com.android.internal.R.styleable.AndroidManifestApplication_heavyWeight,
-                    false)) {
-                ai.flags |= ApplicationInfo.FLAG_HEAVY_WEIGHT;
-                
-                // A heavy-weight application can not be in a custom process.
-                // We can do direct compare because we intern all strings.
-                if (ai.processName != null && ai.processName != ai.packageName) {
-                    outError[0] = "Heavy-weight applications can not use custom processes";
+            if (false) {
+                if (sa.getBoolean(
+                        com.android.internal.R.styleable.AndroidManifestApplication_cantSaveState,
+                        false)) {
+                    ai.flags |= ApplicationInfo.CANT_SAVE_STATE;
+
+                    // A heavy-weight application can not be in a custom process.
+                    // We can do direct compare because we intern all strings.
+                    if (ai.processName != null && ai.processName != ai.packageName) {
+                        outError[0] = "cantSaveState applications can not use custom processes";
+                    }
                 }
             }
         }
@@ -1881,12 +1883,6 @@ public class PackageParser {
             a.info.flags |= ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS;
         }
 
-        if (sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestActivity_immersive,
-                false)) {
-            a.info.flags |= ActivityInfo.FLAG_IMMERSIVE;
-        }
-
         if (!receiver) {
             a.info.launchMode = sa.getInt(
                     com.android.internal.R.styleable.AndroidManifestActivity_launchMode,
@@ -1907,7 +1903,7 @@ public class PackageParser {
 
         sa.recycle();
 
-        if (receiver && (owner.applicationInfo.flags&ApplicationInfo.FLAG_HEAVY_WEIGHT) != 0) {
+        if (receiver && (owner.applicationInfo.flags&ApplicationInfo.CANT_SAVE_STATE) != 0) {
             // A heavy-weight application can not have receives in its main process
             // We can do direct compare because we intern all strings.
             if (a.info.processName == owner.packageName) {
@@ -2197,7 +2193,7 @@ public class PackageParser {
 
         sa.recycle();
 
-        if ((owner.applicationInfo.flags&ApplicationInfo.FLAG_HEAVY_WEIGHT) != 0) {
+        if ((owner.applicationInfo.flags&ApplicationInfo.CANT_SAVE_STATE) != 0) {
             // A heavy-weight application can not have providers in its main process
             // We can do direct compare because we intern all strings.
             if (p.info.processName == owner.packageName) {
@@ -2438,7 +2434,7 @@ public class PackageParser {
 
         sa.recycle();
 
-        if ((owner.applicationInfo.flags&ApplicationInfo.FLAG_HEAVY_WEIGHT) != 0) {
+        if ((owner.applicationInfo.flags&ApplicationInfo.CANT_SAVE_STATE) != 0) {
             // A heavy-weight application can not have services in its main process
             // We can do direct compare because we intern all strings.
             if (s.info.processName == owner.packageName) {

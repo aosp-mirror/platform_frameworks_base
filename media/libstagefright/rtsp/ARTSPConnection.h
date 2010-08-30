@@ -40,6 +40,8 @@ struct ARTSPConnection : public AHandler {
 
     void sendRequest(const char *request, const sp<AMessage> &reply);
 
+    void observeBinaryData(const sp<AMessage> &reply);
+
 protected:
     virtual ~ARTSPConnection();
     virtual void onMessageReceived(const sp<AMessage> &msg);
@@ -57,6 +59,7 @@ private:
         kWhatCompleteConnection = 'comc',
         kWhatSendRequest        = 'sreq',
         kWhatReceiveResponse    = 'rres',
+        kWhatObserveBinaryData  = 'obin',
     };
 
     static const int64_t kSelectTimeoutUs;
@@ -69,6 +72,8 @@ private:
 
     KeyedVector<int32_t, sp<AMessage> > mPendingRequests;
 
+    sp<AMessage> mObserveBinaryMessage;
+
     void onConnect(const sp<AMessage> &msg);
     void onDisconnect(const sp<AMessage> &msg);
     void onCompleteConnection(const sp<AMessage> &msg);
@@ -80,7 +85,9 @@ private:
 
     // Return false iff something went unrecoverably wrong.
     bool receiveRTSPReponse();
+    status_t receive(void *data, size_t size);
     bool receiveLine(AString *line);
+    sp<ABuffer> receiveBinaryData();
     bool notifyResponseListener(const sp<ARTSPResponse> &response);
 
     static bool ParseURL(

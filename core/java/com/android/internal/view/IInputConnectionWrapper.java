@@ -31,9 +31,10 @@ import java.lang.ref.WeakReference;
 
 public class IInputConnectionWrapper extends IInputContext.Stub {
     static final String TAG = "IInputConnectionWrapper";
-    
+
     private static final int DO_GET_TEXT_AFTER_CURSOR = 10;
     private static final int DO_GET_TEXT_BEFORE_CURSOR = 20;
+    private static final int DO_GET_SELECTED_TEXT = 25;
     private static final int DO_GET_CURSOR_CAPS_MODE = 30;
     private static final int DO_GET_EXTRACTED_TEXT = 40;
     private static final int DO_COMMIT_TEXT = 50;
@@ -42,6 +43,7 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_PERFORM_EDITOR_ACTION = 58;
     private static final int DO_PERFORM_CONTEXT_MENU_ACTION = 59;
     private static final int DO_SET_COMPOSING_TEXT = 60;
+    private static final int DO_SET_COMPOSING_REGION = 63;
     private static final int DO_FINISH_COMPOSING_TEXT = 65;
     private static final int DO_SEND_KEY_EVENT = 70;
     private static final int DO_DELETE_SURROUNDING_TEXT = 80;
@@ -50,7 +52,7 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_REPORT_FULLSCREEN_MODE = 100;
     private static final int DO_PERFORM_PRIVATE_COMMAND = 120;
     private static final int DO_CLEAR_META_KEY_STATES = 130;
-        
+
     private WeakReference<InputConnection> mInputConnection;
 
     private Looper mMainLooper;
@@ -92,6 +94,10 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
         dispatchMessage(obtainMessageIISC(DO_GET_TEXT_BEFORE_CURSOR, length, flags, seq, callback));
     }
 
+    public void getSelectedText(int flags, int seq, IInputContextCallback callback) {
+        dispatchMessage(obtainMessageISC(DO_GET_SELECTED_TEXT, flags, seq, callback));
+    }
+
     public void getCursorCapsMode(int reqModes, int seq, IInputContextCallback callback) {
         dispatchMessage(obtainMessageISC(DO_GET_CURSOR_CAPS_MODE, reqModes, seq, callback));
     }
@@ -122,6 +128,10 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
         dispatchMessage(obtainMessageII(DO_PERFORM_CONTEXT_MENU_ACTION, id, 0));
     }
     
+    public void setComposingRegion(int start, int end) {
+        dispatchMessage(obtainMessageII(DO_SET_COMPOSING_REGION, start, end));
+    }
+
     public void setComposingText(CharSequence text, int newCursorPosition) {
         dispatchMessage(obtainMessageIO(DO_SET_COMPOSING_TEXT, newCursorPosition, text));
     }
@@ -203,6 +213,22 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
                             msg.arg1, msg.arg2), args.seq);
                 } catch (RemoteException e) {
                     Log.w(TAG, "Got RemoteException calling setTextBeforeCursor", e);
+                }
+                return;
+            }
+            case DO_GET_SELECTED_TEXT: {
+                SomeArgs args = (SomeArgs)msg.obj;
+                try {
+                    InputConnection ic = mInputConnection.get();
+                    if (ic == null || !isActive()) {
+                        Log.w(TAG, "getSelectedText on inactive InputConnection");
+                        args.callback.setSelectedText(null, args.seq);
+                        return;
+                    }
+                    args.callback.setSelectedText(ic.getSelectedText(
+                            msg.arg1), args.seq);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Got RemoteException calling setSelectedText", e);
                 }
                 return;
             }
@@ -290,6 +316,15 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
                     return;
                 }
                 ic.setComposingText((CharSequence)msg.obj, msg.arg1);
+                return;
+            }
+            case DO_SET_COMPOSING_REGION: {
+                InputConnection ic = mInputConnection.get();
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "setComposingRegion on inactive InputConnection");
+                    return;
+                }
+                ic.setComposingRegion(msg.arg1, msg.arg2);
                 return;
             }
             case DO_FINISH_COMPOSING_TEXT: {

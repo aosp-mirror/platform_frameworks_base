@@ -5161,10 +5161,10 @@ public class WebView extends AbsoluteLayout
                             }
                         } else {
                             if (mSelectingText) {
-                                // tapping on selection or controls does nothing
-                                if (!nativeHitSelection(contentX, contentY)) {
-                                    selectionDone();
+                                if (nativeHitSelection(contentX, contentY)) {
+                                    copySelection();
                                 }
+                                selectionDone();
                                 break;
                             }
                             if (mTouchMode == TOUCH_INIT_MODE) {

@@ -1261,32 +1261,6 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case IS_IMMERSIVE_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            IBinder token = data.readStrongBinder();
-            boolean isit = isImmersive(token);
-            reply.writeNoException();
-            reply.writeInt(isit ? 1 : 0);
-            return true;
-        }
-
-        case SET_IMMERSIVE_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            IBinder token = data.readStrongBinder();
-            boolean imm = data.readInt() == 1;
-            setImmersive(token, imm);
-            reply.writeNoException();
-            return true;
-        }
-        
-        case IS_TOP_ACTIVITY_IMMERSIVE_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            boolean isit = isTopActivityImmersive();
-            reply.writeNoException();
-            reply.writeInt(isit ? 1 : 0);
-            return true;
-        }
-
         case CRASH_APPLICATION_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int uid = data.readInt();
@@ -2858,46 +2832,6 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
     
-    public void setImmersive(IBinder token, boolean immersive)
-            throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeStrongBinder(token);
-        data.writeInt(immersive ? 1 : 0);
-        mRemote.transact(SET_IMMERSIVE_TRANSACTION, data, reply, 0);
-        reply.readException();
-        data.recycle();
-        reply.recycle();
-    }
-
-    public boolean isImmersive(IBinder token)
-            throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeStrongBinder(token);
-        mRemote.transact(IS_IMMERSIVE_TRANSACTION, data, reply, 0);
-        reply.readException();
-        boolean res = reply.readInt() == 1;
-        data.recycle();
-        reply.recycle();
-        return res;
-    }
-
-    public boolean isTopActivityImmersive()
-            throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        mRemote.transact(IS_TOP_ACTIVITY_IMMERSIVE_TRANSACTION, data, reply, 0);
-        reply.readException();
-        boolean res = reply.readInt() == 1;
-        data.recycle();
-        reply.recycle();
-        return res;
-    }
-
     public void crashApplication(int uid, int initialPid, String packageName,
             String message) throws RemoteException {
         Parcel data = Parcel.obtain();

@@ -84,9 +84,14 @@ public class BaseInputConnection implements InputConnection {
             }
         }
     }
-    
+
     public static void setComposingSpans(Spannable text) {
-        final Object[] sps = text.getSpans(0, text.length(), Object.class);
+        setComposingSpans(text, 0, text.length());
+    }
+
+    /** @hide */
+    public static void setComposingSpans(Spannable text, int start, int end) {
+        final Object[] sps = text.getSpans(start, end, Object.class);
         if (sps != null) {
             for (int i=sps.length-1; i>=0; i--) {
                 final Object o = sps[i];
@@ -94,18 +99,19 @@ public class BaseInputConnection implements InputConnection {
                     text.removeSpan(o);
                     continue;
                 }
+
                 final int fl = text.getSpanFlags(o);
                 if ((fl&(Spanned.SPAN_COMPOSING|Spanned.SPAN_POINT_MARK_MASK)) 
                         != (Spanned.SPAN_COMPOSING|Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)) {
                     text.setSpan(o, text.getSpanStart(o), text.getSpanEnd(o),
-                            (fl&Spanned.SPAN_POINT_MARK_MASK)
+                            (fl & ~Spanned.SPAN_POINT_MARK_MASK)
                                     | Spanned.SPAN_COMPOSING
                                     | Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
             }
         }
-        
-        text.setSpan(COMPOSING, 0, text.length(),
+
+        text.setSpan(COMPOSING, start, end,
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE | Spanned.SPAN_COMPOSING);
     }
     
@@ -312,6 +318,31 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
+     * The default implementation returns the text currently selected, or null if none is
+     * selected.
+     */
+    public CharSequence getSelectedText(int flags) {
+        final Editable content = getEditable();
+        if (content == null) return null;
+
+        int a = Selection.getSelectionStart(content);
+        int b = Selection.getSelectionEnd(content);
+
+        if (a > b) {
+            int tmp = a;
+            a = b;
+            b = tmp;
+        }
+
+        if (a == b) return null;
+
+        if ((flags&GET_TEXT_WITH_STYLES) != 0) {
+            return content.subSequence(a, b);
+        }
+        return TextUtils.substring(content, a, b);
+    }
+
+    /**
      * The default implementation returns the given amount of text from the
      * current cursor position in the buffer.
      */
@@ -382,6 +413,38 @@ public class BaseInputConnection implements InputConnection {
     public boolean setComposingText(CharSequence text, int newCursorPosition) {
         if (DEBUG) Log.v(TAG, "setComposingText " + text);
         replaceText(text, newCursorPosition, true);
+        return true;
+    }
+
+    public boolean setComposingRegion(int start, int end) {
+        final Editable content = getEditable();
+        if (content != null) {
+            beginBatchEdit();
+            removeComposingSpans(content);
+            int a = start;
+            int b = end;
+            if (a > b) {
+                int tmp = a;
+                a = b;
+                b = tmp;
+            }
+            if (a < 0) a = 0;
+            if (b > content.length()) b = content.length();
+
+            ensureDefaultComposingSpans();
+            if (mDefaultComposingSpans != null) {
+                for (int i = 0; i < mDefaultComposingSpans.length; ++i) {
+                    content.setSpan(mDefaultComposingSpans[i], a, b,
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE | Spanned.SPAN_COMPOSING);
+                }
+            }
+
+            content.setSpan(COMPOSING, a, b,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE | Spanned.SPAN_COMPOSING);
+
+            endBatchEdit();
+            sendCurrentText();
+        }
         return true;
     }
 
@@ -479,7 +542,32 @@ public class BaseInputConnection implements InputConnection {
             content.clear();
         }
     }
-    
+
+    private void ensureDefaultComposingSpans() {
+        if (mDefaultComposingSpans == null) {
+            Context context;
+            if (mTargetView != null) {
+                context = mTargetView.getContext();
+            } else if (mIMM.mServedView != null) {
+                context = mIMM.mServedView.getContext();
+            } else {
+                context = null;
+            }
+            if (context != null) {
+                TypedArray ta = context.getTheme()
+                        .obtainStyledAttributes(new int[] {
+                                com.android.internal.R.attr.candidatesTextStyleSpans
+                        });
+                CharSequence style = ta.getText(0);
+                ta.recycle();
+                if (style != null && style instanceof Spanned) {
+                    mDefaultComposingSpans = ((Spanned)style).getSpans(
+                            0, style.length(), Object.class);
+                }
+            }
+        }
+    }
+
     private void replaceText(CharSequence text, int newCursorPosition,
             boolean composing) {
         final Editable content = getEditable();
@@ -520,32 +608,11 @@ public class BaseInputConnection implements InputConnection {
             if (!(text instanceof Spannable)) {
                 sp = new SpannableStringBuilder(text);
                 text = sp;
-                if (mDefaultComposingSpans == null) {
-                    Context context;
-                    if (mTargetView != null) {
-                        context = mTargetView.getContext();
-                    } else if (mIMM.mServedView != null) {
-                        context = mIMM.mServedView.getContext();
-                    } else {
-                        context = null;
-                    }
-                    if (context != null) {
-                        TypedArray ta = context.getTheme()
-                                .obtainStyledAttributes(new int[] {
-                                        com.android.internal.R.attr.candidatesTextStyleSpans
-                                });
-                        CharSequence style = ta.getText(0);
-                        ta.recycle();
-                        if (style != null && style instanceof Spanned) {
-                            mDefaultComposingSpans = ((Spanned)style).getSpans(
-                                    0, style.length(), Object.class);
-                        }
-                    }
-                }
+                ensureDefaultComposingSpans();
                 if (mDefaultComposingSpans != null) {
                     for (int i = 0; i < mDefaultComposingSpans.length; ++i) {
                         sp.setSpan(mDefaultComposingSpans[i], 0, sp.length(),
-                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE | Spanned.SPAN_COMPOSING);
                     }
                 }
             } else {

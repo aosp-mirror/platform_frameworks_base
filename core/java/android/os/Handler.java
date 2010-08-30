@@ -563,13 +563,13 @@ public class Handler {
             return mMessenger;
         }
     }
-    
+
     private final class MessengerImpl extends IMessenger.Stub {
         public void send(Message msg) {
             Handler.this.sendMessage(msg);
         }
     }
-    
+
     private final Message getPostMessage(Runnable r) {
         Message m = Message.obtain();
         m.callback = r;
