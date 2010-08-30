@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.net.DhcpInfo;
 import android.os.Parcelable;
 import android.os.Parcel;
 
@@ -294,6 +295,22 @@ public class WifiConfiguration implements Parcelable {
      */
     public BitSet allowedGroupCiphers;
 
+    /**
+     * @hide
+     */
+    public enum IpAssignment {
+        STATIC,
+        DHCP,
+        UNASSIGNED
+    }
+    /**
+     * @hide
+     */
+    public IpAssignment ipAssignment;
+    /**
+     * @hide
+     */
+    public DhcpInfo ipConfig;
 
     public WifiConfiguration() {
         networkId = -1;
@@ -312,6 +329,8 @@ public class WifiConfiguration implements Parcelable {
         for (EnterpriseField field : enterpriseFields) {
             field.setValue(null);
         }
+        ipAssignment = IpAssignment.UNASSIGNED;
+        ipConfig = new DhcpInfo();
     }
 
     public String toString() {
@@ -393,6 +412,11 @@ public class WifiConfiguration implements Parcelable {
             if (value != null) sbuf.append(value);
         }
         sbuf.append('\n');
+        if (ipAssignment == IpAssignment.STATIC) {
+            sbuf.append(" ").append("Static IP configuration:").append('\n');
+            sbuf.append(" ").append(ipConfig);
+        }
+        sbuf.append('\n');
         return sbuf.toString();
     }
 
@@ -461,6 +485,8 @@ public class WifiConfiguration implements Parcelable {
         for (int i = 0; i < enterpriseFields.length; i++) {
             config.enterpriseFields[i].setValue(enterpriseFields[i].value());
         }
+        config.ipAssignment = ipAssignment;
+        config.ipConfig = new DhcpInfo(ipConfig);
         return config;
     }
 
@@ -486,6 +512,14 @@ public class WifiConfiguration implements Parcelable {
         for (EnterpriseField field : enterpriseFields) {
             dest.writeString(field.value());
         }
+        dest.writeString(ipAssignment.name());
+        dest.writeInt(ipConfig.ipAddress);
+        dest.writeInt(ipConfig.netmask);
+        dest.writeInt(ipConfig.gateway);
+        dest.writeInt(ipConfig.dns1);
+        dest.writeInt(ipConfig.dns2);
+        dest.writeInt(ipConfig.serverAddress);
+        dest.writeInt(ipConfig.leaseDuration);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -512,6 +546,15 @@ public class WifiConfiguration implements Parcelable {
                 for (EnterpriseField field : config.enterpriseFields) {
                     field.setValue(in.readString());
                 }
+
+                config.ipAssignment = IpAssignment.valueOf(in.readString());
+                config.ipConfig.ipAddress = in.readInt();
+                config.ipConfig.netmask = in.readInt();
+                config.ipConfig.gateway = in.readInt();
+                config.ipConfig.dns1 = in.readInt();
+                config.ipConfig.dns2 = in.readInt();
+                config.ipConfig.serverAddress = in.readInt();
+                config.ipConfig.leaseDuration = in.readInt();
                 return config;
             }
 
