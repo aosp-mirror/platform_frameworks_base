@@ -160,7 +160,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
             if (intent.getAction().equals(TelephonyIntents.
                     ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
                 String apnType = intent.getStringExtra(Phone.DATA_APN_TYPE_KEY);
-
                 if (!TextUtils.equals(apnType, mApnType)) {
                     return;
                 }
@@ -169,9 +168,8 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                 String reason = intent.getStringExtra(Phone.STATE_CHANGE_REASON_KEY);
                 String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
 
-                boolean unavailable = intent.getBooleanExtra(Phone.NETWORK_UNAVAILABLE_KEY,
-                        false);
-                mNetworkInfo.setIsAvailable(!unavailable);
+                mNetworkInfo.setIsAvailable(!intent.getBooleanExtra(Phone.NETWORK_UNAVAILABLE_KEY,
+                        false));
 
                 if (DBG) Log.d(TAG, mApnType + " Received state= " + state + ", old= " +
                         mMobileDataState + ", reason= " +
@@ -267,24 +265,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
      * Report whether data connectivity is possible.
      */
     public boolean isAvailable() {
-        getPhoneService(false);
-
-        /*
-         * If the phone process has crashed in the past, we'll get a
-         * RemoteException and need to re-reference the service.
-         */
-        for (int retry = 0; retry < 2; retry++) {
-            if (mPhoneService == null) break;
-
-            try {
-                return mPhoneService.isDataConnectivityPossible();
-            } catch (RemoteException e) {
-                // First-time failed, get the phone service again
-                if (retry == 0) getPhoneService(true);
-            }
-        }
-
-        return false;
+        return mNetworkInfo.isAvailable();
     }
 
     /**
