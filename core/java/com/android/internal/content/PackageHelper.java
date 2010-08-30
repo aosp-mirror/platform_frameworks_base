@@ -56,22 +56,22 @@ public class PackageHelper {
         return null;
     }
 
-    public static String createSdDir(File tmpPackageFile, String cid,
+    public static String createSdDir(long sizeBytes, String cid,
             String sdEncKey, int uid) {
         // Create mount point via MountService
         IMountService mountService = getMountService();
-        long len = tmpPackageFile.length();
-        int mbLen = (int) (len >> 20);
-        if ((len - (mbLen * 1024 * 1024)) > 0) {
-            mbLen++;
+        int sizeMb = (int) (sizeBytes >> 20);
+        if ((sizeBytes - (sizeMb * 1024 * 1024)) > 0) {
+            sizeMb++;
         }
         // Add buffer size
-        mbLen++;
-        if (localLOGV) Log.i(TAG, "Size of container " + mbLen + " MB " + len + " bytes");
+        sizeMb++;
+        if (localLOGV)
+            Log.i(TAG, "Size of container " + sizeMb + " MB " + sizeBytes + " bytes");
 
         try {
             int rc = mountService.createSecureContainer(
-                    cid, mbLen, "fat", sdEncKey, uid);
+                    cid, sizeMb, "fat", sdEncKey, uid);
             if (rc != StorageResultCode.OperationSucceeded) {
                 Log.e(TAG, "Failed to create secure container " + cid);
                 return null;

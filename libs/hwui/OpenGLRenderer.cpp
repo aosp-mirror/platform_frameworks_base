@@ -544,10 +544,12 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
     const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
 
-    mCaches.fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
+    FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer(paint);
+    fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
             paint->getTextSize());
     if (mHasShadow) {
         glActiveTexture(gTextureUnits[0]);
+        mCaches.dropShadowCache.setFontRenderer(fontRenderer);
         const ShadowTexture* shadow = mCaches.dropShadowCache.get(paint, text, bytesCount,
                 count, mShadowRadius);
         const AutoTexture autoCleanup(shadow);
@@ -562,11 +564,11 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     GLuint textureUnit = 0;
     glActiveTexture(gTextureUnits[textureUnit]);
 
-    setupTextureAlpha8(mCaches.fontRenderer.getTexture(), 0, 0, textureUnit, x, y, r, g, b, a,
+    setupTextureAlpha8(fontRenderer.getTexture(), 0, 0, textureUnit, x, y, r, g, b, a,
             mode, false, true);
 
     const Rect& clip = mSnapshot->getLocalClip();
-    mCaches.fontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y);
+    fontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));

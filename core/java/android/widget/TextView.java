@@ -22,7 +22,7 @@ import com.android.internal.widget.EditableInputConnection;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.ClipboardManager;
-import android.content.ClippedData;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -7113,14 +7113,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return -1;
         }
 
-        int end = offset;
+        int len = mText.length();
+        int end = Math.min(offset, len);
 
         if (end < 0) {
             return -1;
         }
 
         int start = end;
-        int len = mText.length();
 
         for (; start > 0; start--) {
             char c = mTransformed.charAt(start - 1);
@@ -7172,6 +7172,38 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         // Two ints packed in a long
         return (((long) start) << 32) | end;
+    }
+
+    private void selectCurrentWord() {
+        // In case selection mode is started after an orientation change or after a select all,
+        // use the current selection instead of creating one
+        if (hasSelection()) {
+            return;
+        }
+
+        int selectionStart, selectionEnd;
+
+        // selectionModifierCursorController is not null at that point
+        SelectionModifierCursorController selectionModifierCursorController =
+            ((SelectionModifierCursorController) mSelectionModifierCursorController);
+        int minOffset = selectionModifierCursorController.getMinTouchOffset();
+        int maxOffset = selectionModifierCursorController.getMaxTouchOffset();
+
+        long wordLimits = getWordLimitsAt(minOffset);
+        if (wordLimits >= 0) {
+            selectionStart = (int) (wordLimits >>> 32);
+        } else {
+            selectionStart = Math.max(minOffset - 5, 0);
+        }
+
+        wordLimits = getWordLimitsAt(maxOffset);
+        if (wordLimits >= 0) {
+            selectionEnd = (int) (wordLimits & 0x00000000FFFFFFFFL);
+        } else {
+            selectionEnd = Math.min(maxOffset + 5, mText.length());
+        }
+
+        Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
     }
 
     @Override
@@ -7298,17 +7330,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 URLSpan[] urls = ((Spanned) mText).getSpans(min, max, URLSpan.class);
                 if (urls.length >= 1) {
-                    ClippedData clip = null;
+                    ClipData clip = null;
                     for (int i=0; i<urls.length; i++) {
                         Uri uri = Uri.parse(urls[0].getURL());
-                        ClippedData.Item item = new ClippedData.Item(uri);
                         if (clip == null) {
-                            clip = new ClippedData(null, null, item);
+                            clip = ClipData.newRawUri(null, null, uri);
                         } else {
-                            clip.addItem(item);
+                            clip.addItem(new ClipData.Item(uri));
                         }
                     }
-                    clipboard.setPrimaryClip(clip);
+                    if (clip != null) {
+                        clipboard.setPrimaryClip(clip);
+                    }
                 }
                 return true;
 
@@ -7470,37 +7503,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        private void selectCurrentWord() {
-            // In case selection mode is started after an orientation change, use the current
-            // selection instead of creating one
-            if (hasSelection()) {
-                return;
-            }
-
-            int selectionStart, selectionEnd;
-
-            SelectionModifierCursorController selectionModifierCursorController =
-                ((SelectionModifierCursorController) mSelectionModifierCursorController);
-            int minOffset = selectionModifierCursorController.getMinTouchOffset();
-            int maxOffset = selectionModifierCursorController.getMaxTouchOffset();
-
-            long wordLimits = getWordLimitsAt(minOffset);
-            if (wordLimits >= 0) {
-                selectionStart = (int) (wordLimits >>> 32);
-            } else {
-                selectionStart = Math.max(minOffset - 5, 0);
-            }
-
-            wordLimits = getWordLimitsAt(maxOffset);
-            if (wordLimits >= 0) {
-                selectionEnd = (int) (wordLimits & 0x00000000FFFFFFFFL);
-            } else {
-                selectionEnd = Math.min(maxOffset + 5, mText.length());
-            }
-
-            Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
-        }
-
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
             return true;
@@ -7535,7 +7537,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             switch (item.getItemId()) {
                 case ID_PASTE:
-                    ClippedData clip = clipboard.getPrimaryClip();
+                    ClipData clip = clipboard.getPrimaryClip();
                     if (clip != null) {
                         boolean didfirst = false;
                         for (int i=0; i<clip.getItemCount(); i++) {
@@ -7556,15 +7558,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     return true;
 
                 case ID_CUT:
-                    clipboard.setPrimaryClip(new ClippedData(null, null,
-                            new ClippedData.Item(mTransformed.subSequence(min, max))));
+                    clipboard.setPrimaryClip(ClipData.newPlainText(null, null,
+                            mTransformed.subSequence(min, max)));
                     ((Editable) mText).delete(min, max);
                     stopSelectionActionMode();
                     return true;
 
                 case ID_COPY:
-                    clipboard.setPrimaryClip(new ClippedData(null, null,
-                            new ClippedData.Item(mTransformed.subSequence(min, max))));
+                    clipboard.setPrimaryClip(ClipData.newPlainText(null, null,
+                            mTransformed.subSequence(min, max)));
                     stopSelectionActionMode();
                     return true;
             }

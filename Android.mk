@@ -523,7 +523,6 @@ $(static_doc_index_redirect): \
 $(full_target): $(static_doc_index_redirect)
 $(full_target): $(framework_built)
 
-
 # ==== docs for the web (on the google app engine server) =======================
 include $(CLEAR_VARS)
 
@@ -550,7 +549,7 @@ LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
 
 include $(BUILD_DROIDDOC)
 
-# explicitly specify that online-sdk depends on framework-res.
+# explicitly specify that online-sdk depends on framework-res and any generated docs
 $(full_target): framework-res-package-target
 
 # ==== docs that have all of the stuff that's @hidden =======================

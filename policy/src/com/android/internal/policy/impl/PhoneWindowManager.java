@@ -46,6 +46,7 @@ import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.provider.Settings;
 
+import com.android.internal.R;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.ITelephony;
@@ -289,6 +290,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Nothing to see here, move along...
     int mFancyRotationAnimation;
+    
+    // Enable 3D recents based on config settings.
+    private Boolean mUse3dRecents;
 
     ShortcutManager mShortcutManager;
     PowerManager.WakeLock mBroadcastWakeLock;
@@ -491,6 +495,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * Create (if necessary) and launch the recent apps dialog
      */
     void showRecentAppsDialog() {
+        // We can't initialize this in init() since the configuration hasn't been loaded yet.
+        if (mUse3dRecents == null) {
+            mUse3dRecents = mContext.getResources().getBoolean(R.bool.config_enableRecentApps3D);
+        }
+        
+        // Use 3d Recents dialog
+        if (mUse3dRecents) {
+            try {
+                Intent intent = new Intent();
+                intent.setClassName("com.android.systemui", 
+                        "com.android.systemui.statusbar.RecentApplicationsActivity");
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK 
+                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                mContext.startActivity(intent);
+                return;
+            } catch (ActivityNotFoundException e) {
+                Log.e(TAG, "Failed to launch RecentAppsIntent", e);
+            }
+        }
+
+        // Fallback to dialog if we fail to launch the above.
         if (mRecentAppsDialog == null) {
             mRecentAppsDialog = new RecentApplicationsDialog(mContext);
         }
@@ -522,6 +547,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDeskDockIntent.addCategory(Intent.CATEGORY_DESK_DOCK);
         mDeskDockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mBroadcastWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "PhoneWindowManager.mBroadcastWakeLock");

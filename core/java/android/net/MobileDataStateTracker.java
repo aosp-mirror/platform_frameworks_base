@@ -16,6 +16,8 @@
 
 package android.net;
 
+import java.net.InetAddress;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;

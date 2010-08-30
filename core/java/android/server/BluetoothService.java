@@ -2138,7 +2138,7 @@ public class BluetoothService extends IBluetooth.Stub {
                         mContext.getSharedPreferences(SHARED_PREFERENCES_NAME,
                                 mContext.MODE_PRIVATE).edit();
                     editor.putBoolean(SHARED_PREFERENCE_DOCK_ADDRESS + mDockAddress, true);
-                    editor.commit();
+                    editor.startCommit();
                 }
             }
         }

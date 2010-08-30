@@ -117,7 +117,7 @@ import java.util.Set;
  * <pre>&lt;uses-permission android:name="android.permission.INTERNET" /></pre>
  *
  * <p>This must be a child of the <a
- * href="{@docRoot}guide/topics/manifest/manifest-element.html">{@code &lt;manifest&gt;}</a>
+ * href="{@docRoot}guide/topics/manifest/manifest-element.html">{@code <manifest>}</a>
  * element.</p>
  *
  * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-webview.html">Web View
@@ -140,7 +140,7 @@ import java.util.Set;
  * </pre>
  * <p>See {@link android.content.Intent} for more information.</p>
  *
- * <p>To provide a WebView in your own Activity, include a {@code &lt;WebView&gt;} in your layout,
+ * <p>To provide a WebView in your own Activity, include a {@code <WebView>} in your layout,
  * or set the entire Activity window as a WebView during {@link
  * android.app.Activity#onCreate(Bundle) onCreate()}:</p>
  * <pre class="prettyprint">
@@ -287,7 +287,7 @@ import java.util.Set;
  * low density screens scale down. This is also the default behavior.</li>
  * <li>{@code low-dpi} - Use ldpi as the target dpi. Medium and high density screens scale up
  * as appropriate.</li>
- * <li><em>{@code &lt;value&gt;}</em> - Specify a dpi value to use as the target dpi (accepted
+ * <li><em>{@code <value>}</em> - Specify a dpi value to use as the target dpi (accepted
  * values are 70-400).</li>
  * </ul>
  * <p>Here's an example meta tag to specify the target density:</p>

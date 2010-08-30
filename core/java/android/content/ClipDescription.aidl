@@ -16,4 +16,4 @@
 
 package android.content;
 
-parcelable ClippedData;
+parcelable ClipDescription;

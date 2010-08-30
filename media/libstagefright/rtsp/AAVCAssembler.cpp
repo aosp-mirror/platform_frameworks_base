@@ -155,7 +155,7 @@ bool AAVCAssembler::addSingleTimeAggregationPacket(const sp<ABuffer> &buffer) {
         sp<ABuffer> unit = new ABuffer(nalSize);
         memcpy(unit->data(), &data[2], nalSize);
 
-        PropagateTimes(buffer, unit);
+        CopyTimes(unit, buffer);
 
         addSingleNALUnit(unit);
 
@@ -287,7 +287,7 @@ ARTPAssembler::AssemblyStatus AAVCAssembler::addFragmentedNALUnit(
     ++totalSize;
 
     sp<ABuffer> unit = new ABuffer(totalSize);
-    PropagateTimes(buffer, unit);
+    CopyTimes(unit, *queue->begin());
 
     unit->data()[0] = (nri << 5) | nalType;
 
@@ -325,10 +325,6 @@ void AAVCAssembler::submitAccessUnit() {
     LOG(VERBOSE) << "Access unit complete (" << mNALUnits.size() << " nal units)";
 #endif
 
-    uint64_t ntpTime;
-    CHECK((*mNALUnits.begin())->meta()->findInt64(
-                "ntp-time", (int64_t *)&ntpTime));
-
     size_t totalSize = 0;
     for (List<sp<ABuffer> >::iterator it = mNALUnits.begin();
          it != mNALUnits.end(); ++it) {
@@ -347,7 +343,7 @@ void AAVCAssembler::submitAccessUnit() {
         offset += nal->size();
     }
 
-    accessUnit->meta()->setInt64("ntp-time", ntpTime);
+    CopyTimes(accessUnit, *mNALUnits.begin());
 
 #if 0
     printf(mAccessUnitDamaged ? "X" : ".");

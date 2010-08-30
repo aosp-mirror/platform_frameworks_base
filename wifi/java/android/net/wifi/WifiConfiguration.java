@@ -216,7 +216,7 @@ public class WifiConfiguration implements Parcelable {
     /**
      * The network's SSID. Can either be an ASCII string,
      * which must be enclosed in double quotation marks
-     * (e.g., {@code &quot;MyNetwork&quot;}, or a string of
+     * (e.g., {@code "MyNetwork"}, or a string of
      * hex digits,which are not enclosed in quotes
      * (e.g., {@code 01a243f405}).
      */
@@ -239,7 +239,7 @@ public class WifiConfiguration implements Parcelable {
     public String preSharedKey;
     /**
      * Up to four WEP keys. Either an ASCII string enclosed in double
-     * quotation marks (e.g., {@code &quot;abcdef&quot;} or a string
+     * quotation marks (e.g., {@code "abcdef"} or a string
      * of hex digits (e.g., {@code 0102030405}).
      * <p/>
      * When the value of one of these keys is read, the actual key is

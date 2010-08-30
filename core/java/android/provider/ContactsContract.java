@@ -755,7 +755,6 @@ public final class ContactsContract {
      * 'family name', 'given name' 'middle name'.  The CJK tradition is
      * 'family name' 'middle name' 'given name', with Japanese favoring a space between
      * the names and Chinese omitting the space.
-     * @hide
      */
     public interface FullNameStyle {
         public static final int UNDEFINED = 0;
@@ -774,7 +773,6 @@ public final class ContactsContract {
 
     /**
      * Constants for various styles of capturing the pronunciation of a person's name.
-     * @hide
      */
     public interface PhoneticNameStyle {
         public static final int UNDEFINED = 0;
@@ -800,8 +798,6 @@ public final class ContactsContract {
     /**
      * Types of data used to produce the display name for a contact. Listed in the order
      * of increasing priority.
-     *
-     * @hide
      */
     public interface DisplayNameSources {
         public static final int UNDEFINED = 0;
@@ -817,15 +813,12 @@ public final class ContactsContract {
      *
      * @see Contacts
      * @see RawContacts
-     * @hide
      */
     protected interface ContactNameColumns {
 
         /**
          * The kind of data that is used as the display name for the contact, such as
-         * structured name or email address.  See DisplayNameSources.
-         *
-         * TODO: convert DisplayNameSources to a link after it is un-hidden
+         * structured name or email address.  See {@link DisplayNameSources}.
          */
         public static final String DISPLAY_NAME_SOURCE = "display_name_source";
 
@@ -873,9 +866,7 @@ public final class ContactsContract {
 
         /**
          * The phonetic alphabet used to represent the {@link #PHONETIC_NAME}.  See
-         * PhoneticNameStyle.
-         *
-         * TODO: convert PhoneticNameStyle to a link after it is un-hidden
+         * {@link PhoneticNameStyle}.
          */
         public static final String PHONETIC_NAME_STYLE = "phonetic_name_style";
 
@@ -885,13 +876,10 @@ public final class ContactsContract {
          * {@link #PHONETIC_NAME_STYLE}.
          * </p>
          * <p>
-         * The value may be set manually by the user.
-         * This capability is is of interest only in countries
-         * with commonly used phonetic
-         * alphabets, such as Japan and Korea.  See PhoneticNameStyle.
+         * The value may be set manually by the user. This capability is of
+         * interest only in countries with commonly used phonetic alphabets,
+         * such as Japan and Korea. See {@link PhoneticNameStyle}.
          * </p>
-         *
-         * TODO: convert PhoneticNameStyle to a link after it is un-hidden
          */
         public static final String PHONETIC_NAME = "phonetic_name";
 
@@ -1374,8 +1362,6 @@ public final class ContactsContract {
          * against the cost of transferring large amounts of denormalized data
          * from the Provider.
          * </p>
-         *
-         * @hide
          */
         public static final class Entity implements BaseColumns, ContactsColumns,
                 ContactNameColumns, RawContactsColumns, BaseSyncColumns, SyncColumns, DataColumns,
@@ -2763,6 +2749,7 @@ public final class ContactsContract {
      * <li>{@link CommonDataKinds.Website Website.CONTENT_ITEM_TYPE}</li>
      * <li>{@link CommonDataKinds.Event Event.CONTENT_ITEM_TYPE}</li>
      * <li>{@link CommonDataKinds.Relation Relation.CONTENT_ITEM_TYPE}</li>
+     * <li>{@link CommonDataKinds.SipAddress SipAddress.CONTENT_ITEM_TYPE}</li>
      * </ul>
      * </p>
      * </td>
@@ -5317,6 +5304,52 @@ public final class ContactsContract {
              * <P>Type: TEXT</P>
              */
             public static final String URL = DATA;
+        }
+
+        /**
+         * <p>
+         * A data kind representing a SIP address for the contact.
+         * </p>
+         * <p>
+         * You can use all columns defined for {@link ContactsContract.Data} as
+         * well as the following aliases.
+         * </p>
+         * <h2>Column aliases</h2>
+         * <table class="jd-sumtable">
+         * <tr>
+         * <th>Type</th>
+         * <th>Alias</th><th colspan='2'>Data column</th>
+         * </tr>
+         * <tr>
+         * <td>String</td>
+         * <td>{@link #SIP_ADDRESS}</td>
+         * <td>{@link #DATA1}</td>
+         * <td></td>
+         * </tr>
+         * </table>
+         */
+        public static final class SipAddress implements DataColumnsWithJoins {
+            // TODO: Ultimately this class will probably implement
+            // CommonColumns too (in addition to DataColumnsWithJoins)
+            // since it may make sense to have multiple SIP addresses with
+            // different types+labels, just like with phone numbers.
+            //
+            // But that can be extended in the future without breaking any
+            // public API, so let's keep this class ultra-simple for now.
+
+            /**
+             * This utility class cannot be instantiated
+             */
+            private SipAddress() {}
+
+            /** MIME type used when storing this in data table. */
+            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/sip_address";
+
+            /**
+             * The SIP address.
+             * <P>Type: TEXT</P>
+             */
+            public static final String SIP_ADDRESS = DATA1;
         }
     }
 

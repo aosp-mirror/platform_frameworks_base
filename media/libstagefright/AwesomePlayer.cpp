@@ -199,7 +199,6 @@ AwesomePlayer::AwesomePlayer()
       mExtractorFlags(0),
       mLastVideoBuffer(NULL),
       mVideoBuffer(NULL),
-      mRTSPTimeOffset(0),
       mSuspensionState(NULL) {
     CHECK_EQ(mClient.connect(), OK);
 
@@ -759,7 +758,10 @@ status_t AwesomePlayer::getDuration(int64_t *durationUs) {
 }
 
 status_t AwesomePlayer::getPosition(int64_t *positionUs) {
-    if (mSeeking) {
+    if (mRTSPController != NULL) {
+        *positionUs = mRTSPController->getNormalPlayTimeUs();
+    }
+    else if (mSeeking) {
         *positionUs = mSeekTimeUs;
     } else if (mVideoSource != NULL) {
         Mutex::Autolock autoLock(mMiscStateLock);
@@ -768,10 +770,6 @@ status_t AwesomePlayer::getPosition(int64_t *positionUs) {
         *positionUs = mAudioPlayer->getMediaTimeUs();
     } else {
         *positionUs = 0;
-    }
-
-    if (mRTSPController != NULL) {
-        *positionUs += mRTSPTimeOffset;
     }
 
     return OK;
@@ -790,13 +788,10 @@ status_t AwesomePlayer::seekTo(int64_t timeUs) {
 
 status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
     if (mRTSPController != NULL) {
-        pause_l();
         mRTSPController->seek(timeUs);
-        play_l();
 
         notifyListener_l(MEDIA_SEEK_COMPLETE);
         mSeekNotificationSent = true;
-        mRTSPTimeOffset = timeUs;
         return OK;
     }
 

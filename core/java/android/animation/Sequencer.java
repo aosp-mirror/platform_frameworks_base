@@ -233,6 +233,16 @@ public final class Sequencer extends Animatable {
     @Override
     public void end() {
         mCanceled = true;
+        if (mSortedNodes.size() != mNodes.size()) {
+            // hasn't been started yet - sort the nodes now, then end them
+            sortNodes();
+            for (Node node : mSortedNodes) {
+                if (mSequenceListener == null) {
+                    mSequenceListener = new SequencerAnimatableListener(this);
+                }
+                node.animation.addListener(mSequenceListener);
+            }
+        }
         if (mSortedNodes.size() > 0) {
             for (Node node : mSortedNodes) {
                 node.animation.end();
@@ -482,10 +492,12 @@ public final class Sequencer extends Animatable {
         public void onAnimationEnd(Animatable animation) {
             animation.removeListener(this);
             mPlayingSet.remove(animation);
+            Node animNode = mSequencer.mNodeMap.get(animation);
+            animNode.done = true;
             ArrayList<Node> sortedNodes = mSequencer.mSortedNodes;
             boolean allDone = true;
             for (Node node : sortedNodes) {
-                if (node.animation.isRunning()) {
+                if (!node.done) {
                     allDone = false;
                     break;
                 }
@@ -569,6 +581,7 @@ public final class Sequencer extends Animatable {
                         }
                     }
                 }
+                node.done = false;
             }
         }
     }
@@ -634,6 +647,13 @@ public final class Sequencer extends Animatable {
          * dependency when it is a root node.
          */
         public ArrayList<Node> nodeDependents = null;
+
+        /**
+         * Flag indicating whether the animation in this node is finished. This flag
+         * is used by Sequencer to check, as each animation ends, whether all child animations
+         * are done and it's time to send out an end event for the entire Sequencer.
+         */
+        public boolean done = false;
 
         /**
          * Constructs the Node with the animation that it encapsulates. A Node has no

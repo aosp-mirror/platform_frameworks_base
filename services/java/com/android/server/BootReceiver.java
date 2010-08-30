@@ -165,7 +165,9 @@ public class BootReceiver extends BroadcastReceiver {
         if (prefs != null) {
             long lastTime = prefs.getLong(filename, 0);
             if (lastTime == fileTime) return;  // Already logged this particular file
-            prefs.edit().putLong(filename, fileTime).commit();
+            // TODO: move all these SharedPreferences Editor commits
+            // outside this function to the end of logBootEvents
+            prefs.edit().putLong(filename, fileTime).startCommit();
         }
 
         Slog.i(TAG, "Copying " + filename + " to DropBox (" + tag + ")");

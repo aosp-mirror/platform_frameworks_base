@@ -504,7 +504,7 @@ public class ActivityStack {
                     r.info, r.icicle, results, newIntents, !andResume,
                     mService.isNextTransitionForward());
             
-            if ((app.info.flags&ApplicationInfo.FLAG_HEAVY_WEIGHT) != 0) {
+            if ((app.info.flags&ApplicationInfo.CANT_SAVE_STATE) != 0) {
                 // This may be a heavy-weight process!  Note that the package
                 // manager will ensure that only activity can run in the main
                 // process of the .apk, which is the only thing that will be
@@ -2404,7 +2404,7 @@ public class ActivityStack {
             final long origId = Binder.clearCallingIdentity();
             
             if (mMainStack && aInfo != null &&
-                    (aInfo.applicationInfo.flags&ApplicationInfo.FLAG_HEAVY_WEIGHT) != 0) {
+                    (aInfo.applicationInfo.flags&ApplicationInfo.CANT_SAVE_STATE) != 0) {
                 // This may be a heavy-weight process!  Check to see if we already
                 // have another, different heavy-weight process running.
                 if (aInfo.processName.equals(aInfo.applicationInfo.packageName)) {

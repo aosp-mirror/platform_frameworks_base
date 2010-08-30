@@ -688,6 +688,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         }
 
         mAdapter = adapter;
+        checkFocus();
 
         if (mAdapter != null) {
             mDataSetObserver = new AdapterDataSetObserver();

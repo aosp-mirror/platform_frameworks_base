@@ -45,6 +45,11 @@ struct APacketSource : public MediaSource {
 
     void flushQueue();
 
+    int64_t getNormalPlayTimeUs();
+
+    void setNormalPlayTimeMapping(
+            uint32_t rtpTime, int64_t normalPlayTimeUs);
+
 protected:
     virtual ~APacketSource();
 
@@ -57,6 +62,15 @@ private:
     sp<MetaData> mFormat;
     List<sp<ABuffer> > mBuffers;
     status_t mEOSResult;
+
+    uint32_t mClockRate;
+
+    uint32_t mRTPTimeBase;
+    int64_t mNormalPlayTimeBaseUs;
+
+    int64_t mLastNormalPlayTimeUs;
+
+    void updateNormalPlayTime_l(const sp<ABuffer> &buffer);
 
     DISALLOW_EVIL_CONSTRUCTORS(APacketSource);
 };

@@ -16,7 +16,8 @@
 
 package android.content;
 
-import android.content.ClippedData;
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.IOnPrimaryClipChangedListener;
 
 /**
@@ -25,8 +26,9 @@ import android.content.IOnPrimaryClipChangedListener;
  * {@hide}
  */
 interface IClipboard {
-    void setPrimaryClip(in ClippedData clip);
-    ClippedData getPrimaryClip();
+    void setPrimaryClip(in ClipData clip);
+    ClipData getPrimaryClip();
+    ClipDescription getPrimaryClipDescription();
     boolean hasPrimaryClip();
     void addPrimaryClipChangedListener(in IOnPrimaryClipChangedListener listener);
     void removePrimaryClipChangedListener(in IOnPrimaryClipChangedListener listener);

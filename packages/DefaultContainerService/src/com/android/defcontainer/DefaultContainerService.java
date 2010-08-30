@@ -17,7 +17,9 @@
 package com.android.defcontainer;
 
 import com.android.internal.app.IMediaContainerService;
+import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
+
 import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
@@ -37,6 +39,7 @@ import android.os.StatFs;
 import android.app.IntentService;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pair;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,6 +47,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
 import android.os.FileUtils;
 import android.provider.Settings;
@@ -58,6 +66,8 @@ import android.provider.Settings;
 public class DefaultContainerService extends IntentService {
     private static final String TAG = "DefContainer";
     private static final boolean localLOGV = true;
+
+    private static final String LIB_DIR_NAME = "lib";
 
     private IMediaContainerService.Stub mBinder = new IMediaContainerService.Stub() {
         /*
@@ -194,18 +204,51 @@ public class DefaultContainerService extends IntentService {
             Log.w(TAG, "Make sure sdcard is mounted.");
             return null;
         }
-        // Create new container at newCachePath
+
+        // The .apk file
         String codePath = packageURI.getPath();
         File codeFile = new File(codePath);
-        String newCachePath = null;
+
+        // Calculate size of container needed to hold base APK.
+        long sizeBytes = codeFile.length();
+
+        // Check all the native files that need to be copied and add that to the container size.
+        ZipFile zipFile;
+        List<Pair<ZipEntry, String>> nativeFiles;
+        try {
+            zipFile = new ZipFile(codeFile);
+
+            nativeFiles = new LinkedList<Pair<ZipEntry, String>>();
+
+            NativeLibraryHelper.listPackageNativeBinariesLI(zipFile, nativeFiles);
+
+            final int N = nativeFiles.size();
+            for (int i = 0; i < N; i++) {
+                final Pair<ZipEntry, String> entry = nativeFiles.get(i);
+
+                /*
+                 * Note that PackageHelper.createSdDir adds a 1MB padding on
+                 * our claimed size, so we don't have to worry about block
+                 * alignment here.
+                 */
+                sizeBytes += entry.first.getSize();
+            }
+        } catch (ZipException e) {
+            Log.w(TAG, "Failed to extract data from package file", e);
+            return null;
+        } catch (IOException e) {
+            Log.w(TAG, "Failed to cache package shared libs", e);
+            return null;
+        }
+
         // Create new container
-        if ((newCachePath = PackageHelper.createSdDir(codeFile,
-                newCid, key, Process.myUid())) == null) {
+        String newCachePath = null;
+        if ((newCachePath = PackageHelper.createSdDir(sizeBytes, newCid, key, Process.myUid())) == null) {
             Log.e(TAG, "Failed to create container " + newCid);
             return null;
         }
-        if (localLOGV) Log.i(TAG, "Created container for " + newCid
-                + " at path : " + newCachePath);
+        if (localLOGV)
+            Log.i(TAG, "Created container for " + newCid + " at path : " + newCachePath);
         File resFile = new File(newCachePath, resFileName);
         if (!FileUtils.copyFile(new File(codePath), resFile)) {
             Log.e(TAG, "Failed to copy " + codePath + " to " + resFile);
@@ -213,6 +256,32 @@ public class DefaultContainerService extends IntentService {
             PackageHelper.destroySdDir(newCid);
             return null;
         }
+
+        try {
+            File sharedLibraryDir = new File(newCachePath, LIB_DIR_NAME);
+            sharedLibraryDir.mkdir();
+
+            final int N = nativeFiles.size();
+            for (int i = 0; i < N; i++) {
+                final Pair<ZipEntry, String> entry = nativeFiles.get(i);
+
+                InputStream is = zipFile.getInputStream(entry.first);
+                try {
+                    File destFile = new File(sharedLibraryDir, entry.second);
+                    if (!FileUtils.copyToFile(is, destFile)) {
+                        throw new IOException("Couldn't copy native binary "
+                                + entry.first.getName() + " to " + entry.second);
+                    }
+                } finally {
+                    is.close();
+                }
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Couldn't copy native file to container", e);
+            PackageHelper.destroySdDir(newCid);
+            return null;
+        }
+
         if (localLOGV) Log.i(TAG, "Copied " + codePath + " to " + resFile);
         if (!PackageHelper.finalizeSdDir(newCid)) {
             Log.e(TAG, "Failed to finalize " + newCid + " at path " + newCachePath);

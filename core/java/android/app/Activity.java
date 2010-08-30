@@ -23,6 +23,7 @@ import android.content.ComponentCallbacks;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -1235,6 +1236,7 @@ public class Activity extends ContextThemeWrapper
      */
     protected void onPause() {
         mCalled = true;
+        QueuedWork.waitToFinish();
     }
 
     /**
@@ -1650,7 +1652,10 @@ public class Activity extends ContextThemeWrapper
      * @see ContentResolver#query(android.net.Uri , String[], String, String[], String)
      * @see #startManagingCursor
      * @hide
+     *
+     * @deprecated Use {@link CursorLoader} instead.
      */
+    @Deprecated
     public final Cursor managedQuery(Uri uri, String[] projection, String selection,
             String sortOrder) {
         Cursor c = getContentResolver().query(uri, projection, selection, null, sortOrder);
@@ -1681,7 +1686,10 @@ public class Activity extends ContextThemeWrapper
      * 
      * @see ContentResolver#query(android.net.Uri , String[], String, String[], String)
      * @see #startManagingCursor
+     *
+     * @deprecated Use {@link CursorLoader} instead.
      */
+    @Deprecated
     public final Cursor managedQuery(Uri uri, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) {
         Cursor c = getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
@@ -1707,7 +1715,10 @@ public class Activity extends ContextThemeWrapper
      * 
      * @see #managedQuery(android.net.Uri , String[], String, String[], String)
      * @see #stopManagingCursor
+     *
+     * @deprecated Use {@link CursorLoader} instead.
      */
+    @Deprecated
     public void startManagingCursor(Cursor c) {
         synchronized (mManagedCursors) {
             mManagedCursors.add(new ManagedCursor(c));
@@ -1722,7 +1733,10 @@ public class Activity extends ContextThemeWrapper
      * @param c The Cursor that was being managed.
      * 
      * @see #startManagingCursor
+     *
+     * @deprecated Use {@link CursorLoader} instead.
      */
+    @Deprecated
     public void stopManagingCursor(Cursor c) {
         synchronized (mManagedCursors) {
             final int N = mManagedCursors.size();
@@ -4087,6 +4101,7 @@ public class Activity extends ContextThemeWrapper
      * {@link #setImmersive}.
      *
      * @see android.content.pm.ActivityInfo#FLAG_IMMERSIVE
+     * @hide
      */
     public boolean isImmersive() {
         try {
@@ -4109,6 +4124,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @see #isImmersive
      * @see android.content.pm.ActivityInfo#FLAG_IMMERSIVE
+     * @hide
      */
     public void setImmersive(boolean i) {
         try {

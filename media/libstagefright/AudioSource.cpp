@@ -40,6 +40,7 @@ AudioSource::AudioSource(
       mGroup(NULL) {
 
     LOGV("sampleRate: %d, channels: %d", sampleRate, channels);
+    CHECK(channels == 1 || channels == 2);
     uint32_t flags = AudioRecord::RECORD_AGC_ENABLE |
                      AudioRecord::RECORD_NS_ENABLE  |
                      AudioRecord::RECORD_IIR_ENABLE;
@@ -158,6 +159,38 @@ static int skipFrame(int64_t timestampUs,
 
 }
 
+void AudioSource::rampVolume(
+        int32_t startFrame, int32_t rampDurationFrames,
+        uint8_t *data,   size_t bytes) {
+
+    const int32_t kShift = 14;
+    int32_t fixedMultiplier = (startFrame << kShift) / rampDurationFrames;
+    const int32_t nChannels = mRecord->channelCount();
+    int32_t stopFrame = startFrame + bytes / sizeof(int16_t);
+    int16_t *frame = (int16_t *) data;
+    if (stopFrame > rampDurationFrames) {
+        stopFrame = rampDurationFrames;
+    }
+
+    while (startFrame < stopFrame) {
+        if (nChannels == 1) {  // mono
+            frame[0] = (frame[0] * fixedMultiplier) >> kShift;
+            ++frame;
+            ++startFrame;
+        } else {               // stereo
+            frame[0] = (frame[0] * fixedMultiplier) >> kShift;
+            frame[1] = (frame[1] * fixedMultiplier) >> kShift;
+            frame += 2;
+            startFrame += 2;
+        }
+
+        // Update the multiplier every 4 frames
+        if ((startFrame & 3) == 0) {
+            fixedMultiplier = (startFrame << kShift) / rampDurationFrames;
+        }
+    }
+}
+
 status_t AudioSource::read(
         MediaBuffer **out, const ReadOptions *options) {
     *out = NULL;
@@ -242,6 +275,19 @@ status_t AudioSource::read(
             continue;
         }
 
+        if (mPrevSampleTimeUs - mStartTimeUs < kAutoRampStartUs) {
+            // Mute the initial video recording signal
+            memset((uint8_t *) buffer->data(), 0, n);
+        } else if (mPrevSampleTimeUs - mStartTimeUs < kAutoRampStartUs + kAutoRampDurationUs) {
+            int32_t autoRampDurationFrames =
+                    (kAutoRampDurationUs * sampleRate + 500000LL) / 1000000LL;
+
+            int32_t autoRampStartFrames =
+                    (kAutoRampStartUs * sampleRate + 500000LL) / 1000000LL;
+
+            int32_t nFrames = numFramesRecorded - autoRampStartFrames;
+            rampVolume(nFrames, autoRampDurationFrames, (uint8_t *) buffer->data(), n);
+        }
         if (mTrackMaxAmplitude) {
             trackMaxAmplitude((int16_t *) buffer->data(), n >> 1);
         }

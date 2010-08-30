@@ -72,6 +72,7 @@ final class LoadedApk {
     private final String mResDir;
     private final String[] mSharedLibraries;
     private final String mDataDir;
+    private final String mLibDir;
     private final File mDataDirFile;
     private final ClassLoader mBaseClassLoader;
     private final boolean mSecurityViolation;
@@ -108,6 +109,7 @@ final class LoadedApk {
         mSharedLibraries = aInfo.sharedLibraryFiles;
         mDataDir = aInfo.dataDir;
         mDataDirFile = mDataDir != null ? new File(mDataDir) : null;
+        mLibDir = aInfo.nativeLibraryDir;
         mBaseClassLoader = baseLoader;
         mSecurityViolation = securityViolation;
         mIncludeCode = includeCode;
@@ -140,6 +142,7 @@ final class LoadedApk {
         mSharedLibraries = null;
         mDataDir = null;
         mDataDirFile = null;
+        mLibDir = null;
         mBaseClassLoader = null;
         mSecurityViolation = false;
         mIncludeCode = true;
@@ -279,11 +282,12 @@ final class LoadedApk {
                  * create the class loader.
                  */
 
-                if (ActivityThread.localLOGV) Slog.v(ActivityThread.TAG, "Class path: " + zip);
+                if (ActivityThread.localLOGV)
+                    Slog.v(ActivityThread.TAG, "Class path: " + zip + ", JNI path: " + mLibDir);
 
                 mClassLoader =
                     ApplicationLoaders.getDefault().getClassLoader(
-                        zip, mDataDir, mBaseClassLoader);
+                        zip, mLibDir, mBaseClassLoader);
                 initializeJavaContextClassLoader();
             } else {
                 if (mBaseClassLoader == null) {

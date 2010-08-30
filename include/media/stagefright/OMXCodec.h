@@ -102,6 +102,7 @@ private:
         kInputBufferSizesAreBogus             = 512,
         kSupportsMultipleFramesPerInputBuffer = 1024,
         kAvoidMemcopyInputRecordingFrames     = 2048,
+        kRequiresLargerEncoderOutputBuffer    = 4096,
     };
 
     struct BufferInfo {

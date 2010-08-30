@@ -151,7 +151,6 @@ public:
     ~SharedBufferBase();
     status_t getStatus() const;
     int32_t getIdentity() const;
-    size_t getFrontBuffer() const;
     String8 dump(char const* prefix) const;
 
 protected:
@@ -223,6 +222,11 @@ private:
 
     struct QueueUpdate : public UpdateBase {
         inline QueueUpdate(SharedBufferBase* sbb);
+        inline ssize_t operator()();
+    };
+
+    struct DequeueUpdate : public UpdateBase {
+        inline DequeueUpdate(SharedBufferBase* sbb);
         inline ssize_t operator()();
     };
 

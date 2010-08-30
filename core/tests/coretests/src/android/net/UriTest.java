@@ -24,6 +24,9 @@ import junit.framework.TestCase;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 public class UriTest extends TestCase {
 
@@ -52,20 +55,20 @@ public class UriTest extends TestCase {
 
     private void parcelAndUnparcel(Uri u) {
         Parcel p = Parcel.obtain();
-	try {
-		Uri.writeToParcel(p, u);
-		p.setDataPosition(0);
-		assertEquals(u, Uri.CREATOR.createFromParcel(p));
+        try {
+            Uri.writeToParcel(p, u);
+            p.setDataPosition(0);
+            assertEquals(u, Uri.CREATOR.createFromParcel(p));
 
-		p.setDataPosition(0);
-		u = u.buildUpon().build();        
-		Uri.writeToParcel(p, u);
-		p.setDataPosition(0);
-		assertEquals(u, Uri.CREATOR.createFromParcel(p));
-	}
-	finally {
-		p.recycle();
-	}
+            p.setDataPosition(0);
+            u = u.buildUpon().build();
+            Uri.writeToParcel(p, u);
+            p.setDataPosition(0);
+            assertEquals(u, Uri.CREATOR.createFromParcel(p));
+        }
+        finally {
+            p.recycle();
+        }
     }
 
     @SmallTest
@@ -602,5 +605,123 @@ public class UriTest extends TestCase {
         assertEquals("", uri.getQueryParameter("a"));
         assertEquals("", uri.getQueryParameter("b"));
         assertEquals("", uri.getQueryParameter("c"));
+    }
+
+    public void testGetQueryParameterEmptyKey() {
+        Uri uri = Uri.parse("http://www.google.com/?=b");
+        assertEquals("b", uri.getQueryParameter(""));
+    }
+
+    public void testGetQueryParameterEmptyKey2() {
+      Uri uri = Uri.parse("http://www.google.com/?a=b&&c=d");
+      assertEquals("", uri.getQueryParameter(""));
+    }
+
+    public void testGetQueryParameterEmptyKey3() {
+      Uri uri = Uri.parse("http://www.google.com?");
+      assertEquals("", uri.getQueryParameter(""));
+    }
+
+    public void testGetQueryParameterEmptyKey4() {
+      Uri uri = Uri.parse("http://www.google.com?a=b&");
+      assertEquals("", uri.getQueryParameter(""));
+    }
+
+    public void testGetQueryParametersEmptyKey() {
+        Uri uri = Uri.parse("http://www.google.com/?=b&");
+        List<String> values = uri.getQueryParameters("");
+        assertEquals(2, values.size());
+        assertEquals("b", values.get(0));
+        assertEquals("", values.get(1));
+    }
+
+    public void testGetQueryParametersEmptyKey2() {
+        Uri uri = Uri.parse("http://www.google.com?");
+        List<String> values = uri.getQueryParameters("");
+        assertEquals(1, values.size());
+        assertEquals("", values.get(0));
+    }
+
+    public void testGetQueryParametersEmptyKey3() {
+      Uri uri = Uri.parse("http://www.google.com/?a=b&&c=d");
+      List<String> values = uri.getQueryParameters("");
+      assertEquals(1, values.size());
+      assertEquals("", values.get(0));
+    }
+
+    public void testGetQueryParameterNames() {
+        Uri uri = Uri.parse("http://test?a=1");
+        Set<String> names = uri.getQueryParameterNames();
+        assertEquals(1, names.size());
+        assertEquals("a", names.iterator().next());
+    }
+
+    public void testGetQueryParameterNamesEmptyKey() {
+        Uri uri = Uri.parse("http://www.google.com/?a=x&&c=z");
+        Set<String> names = uri.getQueryParameterNames();
+        Iterator<String> iter = names.iterator();
+        assertEquals(3, names.size());
+        assertEquals("a", iter.next());
+        assertEquals("", iter.next());
+        assertEquals("c", iter.next());
+    }
+
+    public void testGetQueryParameterNamesEmptyKey2() {
+        Uri uri = Uri.parse("http://www.google.com/?a=x&=d&c=z");
+        Set<String> names = uri.getQueryParameterNames();
+        Iterator<String> iter = names.iterator();
+        assertEquals(3, names.size());
+        assertEquals("a", iter.next());
+        assertEquals("", iter.next());
+        assertEquals("c", iter.next());
+    }
+
+    public void testGetQueryParameterNamesEmptyValues() {
+        Uri uri = Uri.parse("http://www.google.com/?a=foo&b=&c=");
+        Set<String> names = uri.getQueryParameterNames();
+        Iterator<String> iter = names.iterator();
+        assertEquals(3, names.size());
+        assertEquals("a", iter.next());
+        assertEquals("b", iter.next());
+        assertEquals("c", iter.next());
+    }
+
+    public void testGetQueryParameterNamesEdgeCases() {
+        Uri uri = Uri.parse("http://foo?a=bar&b=bar&c=&&d=baz&e&f&g=buzz&&&a&b=bar&h");
+        Set<String> names = uri.getQueryParameterNames();
+        Iterator<String> iter = names.iterator();
+        assertEquals(9, names.size());
+        assertEquals("a", iter.next());
+        assertEquals("b", iter.next());
+        assertEquals("c", iter.next());
+        assertEquals("", iter.next());
+        assertEquals("d", iter.next());
+        assertEquals("e", iter.next());
+        assertEquals("f", iter.next());
+        assertEquals("g", iter.next());
+        assertEquals("h", iter.next());
+    }
+
+    public void testGetQueryParameterNamesEscapedKeys() {
+        Uri uri = Uri.parse("http://www.google.com/?a%20b=foo&c%20d=");
+        Set<String> names = uri.getQueryParameterNames();
+        assertEquals(2, names.size());
+        Iterator<String> iter = names.iterator();
+        assertEquals("a b", iter.next());
+        assertEquals("c d", iter.next());
+    }
+
+    public void testGetQueryParameterEscapedKeys() {
+        Uri uri = Uri.parse("http://www.google.com/?a%20b=foo&c%20d=");
+        String value = uri.getQueryParameter("a b");
+        assertEquals("foo", value);
+    }
+    
+    public void testClearQueryParameters() {
+        Uri uri = Uri.parse("http://www.google.com/?a=x&b=y&c=z").buildUpon()
+            .clearQuery().appendQueryParameter("foo", "bar").build();
+        Set<String> names = uri.getQueryParameterNames();
+        assertEquals(1, names.size());
+        assertEquals("foo", names.iterator().next());
     }
 }

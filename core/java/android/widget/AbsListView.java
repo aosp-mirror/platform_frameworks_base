@@ -3072,7 +3072,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
 
             // Estimate how many screens we should travel
-            final float screenTravelCount = viewTravelCount / childCount;
+            final float screenTravelCount = (float) viewTravelCount / childCount;
             mScrollDuration = (int) (SCROLL_DURATION / screenTravelCount);
             mLastSeenPos = INVALID_POSITION;
             post(this);
