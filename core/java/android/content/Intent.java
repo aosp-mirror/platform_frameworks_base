@@ -534,6 +534,7 @@ import java.util.Set;
  *     <li> {@link #CATEGORY_CAR_DOCK}
  *     <li> {@link #CATEGORY_DESK_DOCK}
  *     <li> {@link #CATEGORY_CAR_MODE}
+ *     <li> {@link #CATEGORY_APP_MARKET}
  * </ul>
  *
  * <h3>Standard Extra Data</h3>
@@ -1985,6 +1986,11 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_EMBED = "android.intent.category.EMBED";
+    /**
+     * This activity allows the user to browse and download new applications.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_APP_MARKET = "android.intent.category.APP_MARKET";
     /**
      * This activity may be exercised by the monkey or other automated test tools.
      */
