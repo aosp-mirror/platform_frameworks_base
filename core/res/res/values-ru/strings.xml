@@ -703,8 +703,8 @@
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"Выбрать все"</string>
-    <string name="selectText" msgid="3889149123626888637">"Выбрать текст"</string>
-    <string name="stopSelectingText" msgid="4157931463872320996">"Остановить выделение текста"</string>
+    <!-- no translation found for selectText (4862359311088898878) -->
+    <skip />
     <string name="cut" msgid="3092569408438626261">"Вырезать"</string>
     <string name="copy" msgid="2681946229533511987">"Копировать"</string>
     <string name="paste" msgid="5629880836805036433">"Вставить"</string>
@@ -782,11 +782,11 @@
     <string name="perms_hide" msgid="7283915391320676226"><b>"Скрыть"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Показать все"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"Запоминающее устройство USB"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"устройство USB подключено"</string>
+    <string name="usb_storage_title" msgid="5901459041398751495">"USB-подключение установлено"</string>
     <string name="usb_storage_message" msgid="4796759646167247178">"Телефон подключен к компьютеру через порт USB. Нажмите кнопку ниже, если необходимо копировать файлы с компьютера на SD-карту устройства Android (или наоборот)."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Включить USB-накопитель"</string>
     <string name="usb_storage_error_message" msgid="2534784751603345363">"При использовании SD-карты как USB-накопителя возникла неполадка."</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"устройство USB подключено"</string>
+    <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB-подключение установлено"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Выберите копирование файлов на компьютер или с компьютера."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Выключить USB-накопитель"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Выберите, чтобы выключить USB-накопитель."</string>
