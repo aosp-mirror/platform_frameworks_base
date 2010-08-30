@@ -16,7 +16,7 @@
 
 package com.android.internal.telephony;
 
-import android.net.NetworkProperties;
+import android.net.LinkProperties;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -110,9 +110,9 @@ public class SipPhoneNotifier implements PhoneNotifier {
         // use apnType as the key to which connection we're talking about.
         // pass apnType back up to fetch particular for this one.
         TelephonyManager telephony = TelephonyManager.getDefault();
-        NetworkProperties networkProperties = null;
+        LinkProperties linkProperties = null;
         if (state == Phone.DataState.CONNECTED) {
-            networkProperties = sender.getNetworkProperties(apnType);
+            linkProperties = sender.getLinkProperties(apnType);
         }
         try {
             mRegistry.notifyDataConnection(
@@ -120,7 +120,7 @@ public class SipPhoneNotifier implements PhoneNotifier {
                     sender.isDataConnectivityPossible(), reason,
                     sender.getActiveApn(),
                     apnType,
-                    networkProperties,
+                    linkProperties,
                     ((telephony!=null) ? telephony.getNetworkType() :
                     TelephonyManager.NETWORK_TYPE_UNKNOWN));
         } catch (RemoteException ex) {

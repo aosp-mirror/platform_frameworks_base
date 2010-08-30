@@ -1098,7 +1098,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
 
         if (ar.exception == null) {
-            mNetworkProperties = getNetworkProperties(mActivePdp);
+            mLinkProperties = getLinkProperties(mActivePdp);
 
             ApnSetting apn = mActivePdp.getApn();
             if (apn.proxy != null && apn.proxy.length() != 0) {
@@ -1106,7 +1106,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     ProxyProperties proxy = new ProxyProperties();
                     proxy.setAddress(InetAddress.getByName(apn.proxy));
                     proxy.setPort(Integer.parseInt(apn.port));
-                    mNetworkProperties.setHttpProxy(proxy);
+                    mLinkProperties.setHttpProxy(proxy);
                 } catch (UnknownHostException e) {
                     Log.e(LOG_TAG, "UnknownHostException making ProxyProperties: " + e);
                 } catch (SecurityException e) {

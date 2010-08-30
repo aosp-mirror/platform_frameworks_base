@@ -307,19 +307,19 @@ public class WifiManager {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String CONFIG_CHANGED_ACTION = "android.net.wifi.CONFIG_CHANGED";
     /**
-     * The lookup key for a {@link android.net.NetworkProperties} object associated with the
+     * The lookup key for a {@link android.net.LinkProperties} object associated with the
      * Wi-Fi network. Retrieve with
      * {@link android.content.Intent#getParcelableExtra(String)}.
      * @hide
      */
-    public static final String EXTRA_NETWORK_PROPERTIES = "networkProperties";
+    public static final String EXTRA_LINK_PROPERTIES = "linkProperties";
 
     /**
      * The network IDs of the configured networks could have changed.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String NETWORK_IDS_CHANGED_ACTION = "android.net.wifi.NETWORK_IDS_CHANGED";
-    
+
     /**
      * Activity Action: Pick a Wi-Fi network to connect to.
      * <p>Input: Nothing.

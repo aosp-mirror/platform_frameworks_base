@@ -26,7 +26,7 @@ import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.MobileDataStateTracker;
 import android.net.NetworkInfo;
-import android.net.NetworkProperties;
+import android.net.LinkProperties;
 import android.net.NetworkStateTracker;
 import android.net.NetworkUtils;
 import android.net.wifi.WifiStateTracker;
@@ -756,7 +756,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * specified host is to be routed
      * @param hostAddress the IP address of the host to which the route is
      * desired
-     * todo - deprecate (only v4!)
      * @return {@code true} on success, {@code false} on failure
      */
     public boolean requestRouteToHost(int networkType, int hostAddress) {
@@ -813,7 +812,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             return false;
         }
 
-        NetworkProperties p = nt.getNetworkProperties();
+        LinkProperties p = nt.getLinkProperties();
         if (p == null) return false;
         String interfaceName = p.getInterfaceName();
 
@@ -1258,7 +1257,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void addPrivateDnsRoutes(NetworkStateTracker nt) {
         boolean privateDnsRouteSet = nt.isPrivateDnsRouteSet();
-        NetworkProperties p = nt.getNetworkProperties();
+        LinkProperties p = nt.getLinkProperties();
         if (p == null) return;
         String interfaceName = p.getInterfaceName();
 
@@ -1279,7 +1278,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private void removePrivateDnsRoutes(NetworkStateTracker nt) {
         // TODO - we should do this explicitly but the NetUtils api doesnt
         // support this yet - must remove all.  No worse than before
-        NetworkProperties p = nt.getNetworkProperties();
+        LinkProperties p = nt.getLinkProperties();
         if (p == null) return;
         String interfaceName = p.getInterfaceName();
         boolean privateDnsRouteSet = nt.isPrivateDnsRouteSet();
@@ -1295,7 +1294,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
 
     private void addDefaultRoute(NetworkStateTracker nt) {
-        NetworkProperties p = nt.getNetworkProperties();
+        LinkProperties p = nt.getLinkProperties();
         if (p == null) return;
         String interfaceName = p.getInterfaceName();
         InetAddress defaultGatewayAddr = p.getGateway();
@@ -1311,7 +1310,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
 
     public void removeDefaultRoute(NetworkStateTracker nt) {
-        NetworkProperties p = nt.getNetworkProperties();
+        LinkProperties p = nt.getLinkProperties();
         if (p == null) return;
         String interfaceName = p.getInterfaceName();
 
@@ -1410,7 +1409,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             NetworkStateTracker nt = mNetTrackers[i];
             if (nt.getNetworkInfo().isConnected() &&
                     !nt.isTeardownRequested()) {
-                NetworkProperties p = nt.getNetworkProperties();
+                LinkProperties p = nt.getLinkProperties();
                 if (p == null) continue;
                 List pids = mNetRequestersPids[i];
                 for (int j=0; j<pids.size(); j++) {
@@ -1465,7 +1464,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // add default net's dns entries
         NetworkStateTracker nt = mNetTrackers[netType];
         if (nt != null && nt.getNetworkInfo().isConnected() && !nt.isTeardownRequested()) {
-            NetworkProperties p = nt.getNetworkProperties();
+            LinkProperties p = nt.getLinkProperties();
             if (p == null) return;
             Collection<InetAddress> dnses = p.getDnses();
             if (mNetAttributes[netType].isDefault()) {

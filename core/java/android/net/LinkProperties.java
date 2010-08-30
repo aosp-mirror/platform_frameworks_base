@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.net.ProxyProperties;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.util.Log;
@@ -26,14 +27,14 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
- * Describes the properties of a network interface or single address
- * of an interface.
+ * Describes the properties of a network link.
  * TODO - consider adding optional fields like Apn and ApnType
  * @hide
  */
-public class NetworkProperties implements Parcelable {
+public class LinkProperties implements Parcelable {
 
     private NetworkInterface mIface;
     private Collection<InetAddress> mAddresses;
@@ -41,49 +42,58 @@ public class NetworkProperties implements Parcelable {
     private InetAddress mGateway;
     private ProxyProperties mHttpProxy;
 
-    public NetworkProperties() {
+    public LinkProperties() {
         clear();
     }
 
-    public synchronized void setInterface(NetworkInterface iface) {
+    // copy constructor instead of clone
+    public LinkProperties(LinkProperties source) {
+        mIface = source.getInterface();
+        mAddresses = source.getAddresses();
+        mDnses = source.getDnses();
+        mGateway = source.getGateway();
+        mHttpProxy = new ProxyProperties(source.getHttpProxy());
+    }
+
+    public void setInterface(NetworkInterface iface) {
         mIface = iface;
     }
-    public synchronized NetworkInterface getInterface() {
+    public NetworkInterface getInterface() {
         return mIface;
     }
-    public synchronized String getInterfaceName() {
+    public String getInterfaceName() {
         return (mIface == null ? null : mIface.getName());
     }
 
-    public synchronized void addAddress(InetAddress address) {
+    public void addAddress(InetAddress address) {
         mAddresses.add(address);
     }
-    public synchronized Collection<InetAddress> getAddresses() {
-        return mAddresses;
+    public Collection<InetAddress> getAddresses() {
+        return Collections.unmodifiableCollection(mAddresses);
     }
 
-    public synchronized void addDns(InetAddress dns) {
+    public void addDns(InetAddress dns) {
         mDnses.add(dns);
     }
-    public synchronized Collection<InetAddress> getDnses() {
-        return mDnses;
+    public Collection<InetAddress> getDnses() {
+        return Collections.unmodifiableCollection(mDnses);
     }
 
-    public synchronized void setGateway(InetAddress gateway) {
+    public void setGateway(InetAddress gateway) {
         mGateway = gateway;
     }
-    public synchronized InetAddress getGateway() {
+    public InetAddress getGateway() {
         return mGateway;
     }
 
-    public synchronized void setHttpProxy(ProxyProperties proxy) {
+    public void setHttpProxy(ProxyProperties proxy) {
         mHttpProxy = proxy;
     }
-    public synchronized ProxyProperties getHttpProxy() {
+    public ProxyProperties getHttpProxy() {
         return mHttpProxy;
     }
 
-    public synchronized void clear() {
+    public void clear() {
         mIface = null;
         mAddresses = new ArrayList<InetAddress>();
         mDnses = new ArrayList<InetAddress>();
@@ -100,7 +110,7 @@ public class NetworkProperties implements Parcelable {
     }
 
     @Override
-    public synchronized String toString() {
+    public String toString() {
         String ifaceName = (mIface == null ? "" : "InterfaceName: " + mIface.getName() + " ");
 
         String ip = "IpAddresses: [";
@@ -121,7 +131,7 @@ public class NetworkProperties implements Parcelable {
      * Implement the Parcelable interface.
      * @hide
      */
-    public synchronized void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(getInterfaceName());
         dest.writeInt(mAddresses.size());
         //TODO: explore an easy alternative to preserve hostname
@@ -151,10 +161,10 @@ public class NetworkProperties implements Parcelable {
      * Implement the Parcelable interface.
      * @hide
      */
-    public static final Creator<NetworkProperties> CREATOR =
-        new Creator<NetworkProperties>() {
-            public NetworkProperties createFromParcel(Parcel in) {
-                NetworkProperties netProp = new NetworkProperties();
+    public static final Creator<LinkProperties> CREATOR =
+        new Creator<LinkProperties>() {
+            public LinkProperties createFromParcel(Parcel in) {
+                LinkProperties netProp = new LinkProperties();
                 String iface = in.readString();
                 if (iface != null) {
                     try {
@@ -186,8 +196,8 @@ public class NetworkProperties implements Parcelable {
                 return netProp;
             }
 
-            public NetworkProperties[] newArray(int size) {
-                return new NetworkProperties[size];
+            public LinkProperties[] newArray(int size) {
+                return new LinkProperties[size];
             }
         };
 }

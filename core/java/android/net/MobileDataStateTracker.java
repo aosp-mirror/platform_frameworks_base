@@ -16,8 +16,6 @@
 
 package android.net;
 
-import java.net.InetAddress;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -32,7 +30,7 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.TelephonyIntents;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkInfo;
-import android.net.NetworkProperties;
+import android.net.LinkProperties;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.text.TextUtils;
@@ -58,7 +56,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     private boolean mTeardownRequested = false;
     private Handler mTarget;
     private Context mContext;
-    private NetworkProperties mNetworkProperties;
+    private LinkProperties mLinkProperties;
     private boolean mPrivateDnsRouteSet = false;
     private int mDefaultGatewayAddr = 0;
     private boolean mDefaultRouteSet = false;
@@ -213,8 +211,8 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                                             + e);
                                 }
                             }
-                            if (doReset && mNetworkProperties != null) {
-                                String iface = mNetworkProperties.getInterfaceName();
+                            if (doReset && mLinkProperties != null) {
+                                String iface = mLinkProperties.getInterfaceName();
                                 if (iface != null) NetworkUtils.resetConnections(iface);
                             }
                             // TODO - check this
@@ -233,11 +231,11 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                             setDetailedState(DetailedState.SUSPENDED, reason, apnName);
                             break;
                         case CONNECTED:
-                            mNetworkProperties = intent.getParcelableExtra(
-                                    Phone.DATA_NETWORK_PROPERTIES_KEY);
-                            if (mNetworkProperties == null) {
+                            mLinkProperties = intent.getParcelableExtra(
+                                    Phone.DATA_LINK_PROPERTIES_KEY);
+                            if (mLinkProperties == null) {
                                 Log.d(TAG,
-                                        "CONNECTED event did not supply network properties.");
+                                        "CONNECTED event did not supply link properties.");
                             }
                             setDetailedState(DetailedState.CONNECTED, reason, apnName);
                             break;
@@ -563,7 +561,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         }
     }
 
-    public NetworkProperties getNetworkProperties() {
-        return mNetworkProperties;
+    public LinkProperties getLinkProperties() {
+        return new LinkProperties(mLinkProperties);
     }
 }

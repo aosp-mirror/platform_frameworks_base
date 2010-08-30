@@ -19,7 +19,7 @@ package com.android.internal.telephony.sip;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.NetworkProperties;
+import android.net.LinkProperties;
 import android.net.Uri;
 import android.os.AsyncResult;
 import android.os.Handler;
@@ -540,7 +540,7 @@ abstract class SipPhoneBase extends PhoneBase {
     }
 
     //@Override
-    public NetworkProperties getNetworkProperties(String apnType) {
+    public LinkProperties getLinkProperties(String apnType) {
         // FIXME: what's this for SIP?
         return null;
     }
