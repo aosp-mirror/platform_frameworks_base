@@ -131,7 +131,7 @@ public final class DrmStore
      * Utility function for inserting a file stream into the DRM content provider.
      *
      * @param cr The content resolver to use
-     * @param fileStream The FileInputStream to insert
+     * @param fis The FileInputStream to insert
      * @param title The title for the content (or null)
      * @return uri to the DRM record or null
      */
