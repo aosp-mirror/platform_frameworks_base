@@ -25,7 +25,6 @@ import android.os.RemoteException;
 import android.provider.MediaStore.Audio;
 import android.provider.MediaStore.MediaColumns;
 import android.provider.MediaStore.MtpObjects;
-import android.provider.Mtp;
 import android.util.Log;
 
 /**
@@ -65,12 +64,6 @@ public class MtpDatabase {
                                             + MtpObjects.ObjectColumns.FORMAT + "=?";
 
     private final MediaScanner mMediaScanner;
-
-    // MTP response codes
-    private static final int MTP_RESPONSE_OK = 0x2001;
-    private static final int MTP_RESPONSE_GENERAL_ERROR = 0x2002;
-    private static final int MTP_RESPONSE_INVALID_OBJECT_HANDLE = 0x2009;
-    private static final int MTP_RESPONSE_OBJECT_PROP_NOT_SUPPORTED = 0xA80A;
 
     static {
         System.loadLibrary("media_jni");
@@ -121,7 +114,7 @@ public class MtpDatabase {
         if (succeeded) {
             // handle abstract playlists separately
             // they do not exist in the file system so don't use the media scanner here
-            if (format == Mtp.Object.FORMAT_ABSTRACT_AV_PLAYLIST) {
+            if (format == MtpConstants.FORMAT_ABSTRACT_AV_PLAYLIST) {
                 // Strip Windows Media Player file extension
                 if (path.endsWith(".pla")) {
                     path = path.substring(0, path.length() - 4);
@@ -218,25 +211,25 @@ public class MtpDatabase {
 
     private int[] getSupportedPlaybackFormats() {
         return new int[] {
-            Mtp.Object.FORMAT_ASSOCIATION,
-            Mtp.Object.FORMAT_MP3,
-            Mtp.Object.FORMAT_MPEG,
-            Mtp.Object.FORMAT_EXIF_JPEG,
-            Mtp.Object.FORMAT_TIFF_EP,
-            Mtp.Object.FORMAT_GIF,
-            Mtp.Object.FORMAT_JFIF,
-            Mtp.Object.FORMAT_PNG,
-            Mtp.Object.FORMAT_TIFF,
-            Mtp.Object.FORMAT_WMA,
-            Mtp.Object.FORMAT_OGG,
-            Mtp.Object.FORMAT_AAC,
-            Mtp.Object.FORMAT_MP4_CONTAINER,
-            Mtp.Object.FORMAT_MP2,
-            Mtp.Object.FORMAT_3GP_CONTAINER,
-            Mtp.Object.FORMAT_ABSTRACT_AV_PLAYLIST,
-            Mtp.Object.FORMAT_WPL_PLAYLIST,
-            Mtp.Object.FORMAT_M3U_PLAYLIST,
-            Mtp.Object.FORMAT_PLS_PLAYLIST,
+            MtpConstants.FORMAT_ASSOCIATION,
+            MtpConstants.FORMAT_MP3,
+            MtpConstants.FORMAT_MPEG,
+            MtpConstants.FORMAT_EXIF_JPEG,
+            MtpConstants.FORMAT_TIFF_EP,
+            MtpConstants.FORMAT_GIF,
+            MtpConstants.FORMAT_JFIF,
+            MtpConstants.FORMAT_PNG,
+            MtpConstants.FORMAT_TIFF,
+            MtpConstants.FORMAT_WMA,
+            MtpConstants.FORMAT_OGG,
+            MtpConstants.FORMAT_AAC,
+            MtpConstants.FORMAT_MP4_CONTAINER,
+            MtpConstants.FORMAT_MP2,
+            MtpConstants.FORMAT_3GP_CONTAINER,
+            MtpConstants.FORMAT_ABSTRACT_AV_PLAYLIST,
+            MtpConstants.FORMAT_WPL_PLAYLIST,
+            MtpConstants.FORMAT_M3U_PLAYLIST,
+            MtpConstants.FORMAT_PLS_PLAYLIST,
         };
     }
 
@@ -247,11 +240,11 @@ public class MtpDatabase {
 
     private int[] getSupportedObjectProperties(int handle) {
         return new int[] {
-            Mtp.Object.PROPERTY_STORAGE_ID,
-            Mtp.Object.PROPERTY_OBJECT_FORMAT,
-            Mtp.Object.PROPERTY_OBJECT_SIZE,
-            Mtp.Object.PROPERTY_OBJECT_FILE_NAME,
-            Mtp.Object.PROPERTY_PARENT_OBJECT,
+            MtpConstants.PROPERTY_STORAGE_ID,
+            MtpConstants.PROPERTY_OBJECT_FORMAT,
+            MtpConstants.PROPERTY_OBJECT_SIZE,
+            MtpConstants.PROPERTY_OBJECT_FILE_NAME,
+            MtpConstants.PROPERTY_PARENT_OBJECT,
         };
     }
 
@@ -267,38 +260,38 @@ public class MtpDatabase {
         boolean isString = false;
 
         switch (property) {
-            case Mtp.Object.PROPERTY_STORAGE_ID:
+            case MtpConstants.PROPERTY_STORAGE_ID:
                 outIntValue[0] = mStorageID;
-                return MTP_RESPONSE_OK;
-            case Mtp.Object.PROPERTY_OBJECT_FORMAT:
+                return MtpConstants.RESPONSE_OK;
+            case MtpConstants.PROPERTY_OBJECT_FORMAT:
                 column = MtpObjects.ObjectColumns.FORMAT;
                 break;
-            case Mtp.Object.PROPERTY_PROTECTION_STATUS:
+            case MtpConstants.PROPERTY_PROTECTION_STATUS:
                 // protection status is always 0
                 outIntValue[0] = 0;
-                return MTP_RESPONSE_OK;
-            case Mtp.Object.PROPERTY_OBJECT_SIZE:
+                return MtpConstants.RESPONSE_OK;
+            case MtpConstants.PROPERTY_OBJECT_SIZE:
                 column = MtpObjects.ObjectColumns.SIZE;
                 break;
-            case Mtp.Object.PROPERTY_OBJECT_FILE_NAME:
+            case MtpConstants.PROPERTY_OBJECT_FILE_NAME:
                 column = MtpObjects.ObjectColumns.DATA;
                 isString = true;
                 break;
-            case Mtp.Object.PROPERTY_DATE_MODIFIED:
+            case MtpConstants.PROPERTY_DATE_MODIFIED:
                 column = MtpObjects.ObjectColumns.DATE_MODIFIED;
                 break;
-            case Mtp.Object.PROPERTY_PARENT_OBJECT:
+            case MtpConstants.PROPERTY_PARENT_OBJECT:
                 column = MtpObjects.ObjectColumns.PARENT;
                 break;
-            case Mtp.Object.PROPERTY_PERSISTENT_UID:
+            case MtpConstants.PROPERTY_PERSISTENT_UID:
                 // PUID is concatenation of storageID and object handle
                 long puid = mStorageID;
                 puid <<= 32;
                 puid += handle;
                 outIntValue[0] = puid;
-                return MTP_RESPONSE_OK;
+                return MtpConstants.RESPONSE_OK;
             default:
-                return MTP_RESPONSE_OBJECT_PROP_NOT_SUPPORTED;
+                return MtpConstants.RESPONSE_OBJECT_PROP_NOT_SUPPORTED;
         }
 
         Cursor c = null;
@@ -312,7 +305,7 @@ public class MtpDatabase {
                     String value = c.getString(1);
                     int start = 0;
 
-                    if (property == Mtp.Object.PROPERTY_OBJECT_FILE_NAME) {
+                    if (property == MtpConstants.PROPERTY_OBJECT_FILE_NAME) {
                         // extract name from full path
                         int lastSlash = value.lastIndexOf('/');
                         if (lastSlash >= 0) {
@@ -328,17 +321,17 @@ public class MtpDatabase {
                 } else {
                     outIntValue[0] = c.getLong(1);
                 }
-                return MTP_RESPONSE_OK;
+                return MtpConstants.RESPONSE_OK;
             }
         } catch (Exception e) {
-            return MTP_RESPONSE_GENERAL_ERROR;
+            return MtpConstants.RESPONSE_GENERAL_ERROR;
         } finally {
             if (c != null) {
                 c.close();
             }
         }
         // query failed if we get here
-        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
+        return MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE;
     }
 
     private boolean getObjectInfo(int handle, int[] outStorageFormatParent,
@@ -389,13 +382,13 @@ public class MtpDatabase {
                 path.getChars(0, path.length(), outFilePath, 0);
                 outFilePath[path.length()] = 0;
                 outFileLength[0] = c.getLong(2);
-                return MTP_RESPONSE_OK;
+                return MtpConstants.RESPONSE_OK;
             } else {
-                return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
+                return MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE;
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in getObjectFilePath", e);
-            return MTP_RESPONSE_GENERAL_ERROR;
+            return MtpConstants.RESPONSE_GENERAL_ERROR;
         } finally {
             if (c != null) {
                 c.close();
@@ -408,13 +401,13 @@ public class MtpDatabase {
         Uri uri = MtpObjects.getContentUri(mVolumeName, handle);
         try {
             if (mMediaProvider.delete(uri, null, null) == 1) {
-                return MTP_RESPONSE_OK;
+                return MtpConstants.RESPONSE_OK;
             } else {
-                return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
+                return MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE;
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in deleteFile", e);
-            return MTP_RESPONSE_GENERAL_ERROR;
+            return MtpConstants.RESPONSE_GENERAL_ERROR;
         }
     }
 
@@ -457,12 +450,12 @@ public class MtpDatabase {
         }
         try {
             if (count == mMediaProvider.bulkInsert(uri, valuesList)) {
-                return MTP_RESPONSE_OK;
+                return MtpConstants.RESPONSE_OK;
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in setObjectReferences", e);
         }
-        return MTP_RESPONSE_GENERAL_ERROR;
+        return MtpConstants.RESPONSE_GENERAL_ERROR;
     }
 
     // used by the JNI code
