@@ -89,7 +89,6 @@ public class MtpDatabase {
     protected void finalize() throws Throwable {
         try {
             native_finalize();
-            mDevicePropDb.close();
         } finally {
             super.finalize();
         }
