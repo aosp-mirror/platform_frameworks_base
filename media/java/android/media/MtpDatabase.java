@@ -86,8 +86,13 @@ public class MtpDatabase {
     }
 
     @Override
-    protected void finalize() {
-        native_finalize();
+    protected void finalize() throws Throwable {
+        try {
+            native_finalize();
+            mDevicePropDb.close();
+        } finally {
+            super.finalize();
+        }
     }
 
     private int beginSendObject(String path, int format, int parent,
