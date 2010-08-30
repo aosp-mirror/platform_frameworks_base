@@ -21,9 +21,9 @@ import java.util.List;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -59,7 +59,9 @@ public class PluginManager {
      */
     public static final String PLUGIN_PERMISSION = "android.webkit.permission.PLUGIN";
 
-    private static final String LOGTAG = "webkit";
+    private static final String LOGTAG = "PluginManager";
+
+    private static final String PLUGIN_SYSTEM_LIB = "/system/lib/plugins/";
 
     private static final String PLUGIN_TYPE = "type";
     private static final String TYPE_NATIVE = "native";
@@ -111,9 +113,8 @@ public class PluginManager {
 
         ArrayList<String> directories = new ArrayList<String>();
         PackageManager pm = mContext.getPackageManager();
-        List<ResolveInfo> plugins = pm.queryIntentServices(new Intent(
-                PLUGIN_ACTION), PackageManager.GET_SERVICES
-                | PackageManager.GET_META_DATA);
+        List<ResolveInfo> plugins = pm.queryIntentServices(new Intent(PLUGIN_ACTION),
+                PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
 
         synchronized(mPackageInfoCache) {
 
@@ -143,10 +144,19 @@ public class PluginManager {
                     continue;
                 }
 
-                // check if their is a conflict in the lib directory names
+                /*
+                 * find the location of the plugin's shared library. The default
+                 * is to assume the app is either a user installed app or an
+                 * updated system app. In both of these cases the library is
+                 * stored in the app's data directory.
+                 */
                 String directory = pkgInfo.applicationInfo.dataDir + "/lib";
-                if (directories.contains(directory)) {
-                    continue;
+                final int appFlags = pkgInfo.applicationInfo.flags;
+                final int updatedSystemFlags = ApplicationInfo.FLAG_SYSTEM |
+                                               ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
+                // preloaded system app with no user updates
+                if ((appFlags & updatedSystemFlags) == ApplicationInfo.FLAG_SYSTEM) {
+                    directory = PLUGIN_SYSTEM_LIB + pkgInfo.packageName;
                 }
 
                 // check if the plugin has the required permissions and
@@ -264,7 +274,7 @@ public class PluginManager {
         // must be synchronized to ensure the consistency of the cache
         synchronized(mPackageInfoCache) {
             for (PackageInfo pkgInfo : mPackageInfoCache) {
-                if (pluginLib.startsWith(pkgInfo.applicationInfo.dataDir)) {
+                if (pluginLib.contains(pkgInfo.packageName)) {
                     return pkgInfo.packageName;
                 }
             }
