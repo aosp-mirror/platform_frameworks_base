@@ -26,10 +26,13 @@
 #include <ui/InputReader.h>
 
 #include <stddef.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
 #include <limits.h>
 #include <math.h>
+
+#define INDENT "  "
 
 namespace android {
 
@@ -50,6 +53,14 @@ inline static void swap(T& a, T& b) {
     T temp = a;
     a = b;
     b = temp;
+}
+
+inline static float avg(float x, float y) {
+    return (x + y) / 2;
+}
+
+inline static float pythag(float x, float y) {
+    return sqrtf(x * x + y * y);
 }
 
 
@@ -116,6 +127,64 @@ static inline bool sourcesMatchMask(uint32_t sources, uint32_t sourceMask) {
 }
 
 
+// --- InputDeviceCalibration ---
+
+InputDeviceCalibration::InputDeviceCalibration() {
+}
+
+void InputDeviceCalibration::clear() {
+    mProperties.clear();
+}
+
+void InputDeviceCalibration::addProperty(const String8& key, const String8& value) {
+    mProperties.add(key, value);
+}
+
+bool InputDeviceCalibration::tryGetProperty(const String8& key, String8& outValue) const {
+    ssize_t index = mProperties.indexOfKey(key);
+    if (index < 0) {
+        return false;
+    }
+
+    outValue = mProperties.valueAt(index);
+    return true;
+}
+
+bool InputDeviceCalibration::tryGetProperty(const String8& key, int32_t& outValue) const {
+    String8 stringValue;
+    if (! tryGetProperty(key, stringValue) || stringValue.length() == 0) {
+        return false;
+    }
+
+    char* end;
+    int value = strtol(stringValue.string(), & end, 10);
+    if (*end != '\0') {
+        LOGW("Input device calibration key '%s' has invalid value '%s'.  Expected an integer.",
+                key.string(), stringValue.string());
+        return false;
+    }
+    outValue = value;
+    return true;
+}
+
+bool InputDeviceCalibration::tryGetProperty(const String8& key, float& outValue) const {
+    String8 stringValue;
+    if (! tryGetProperty(key, stringValue) || stringValue.length() == 0) {
+        return false;
+    }
+
+    char* end;
+    float value = strtof(stringValue.string(), & end);
+    if (*end != '\0') {
+        LOGW("Input device calibration key '%s' has invalid value '%s'.  Expected a float.",
+                key.string(), stringValue.string());
+        return false;
+    }
+    outValue = value;
+    return true;
+}
+
+
 // --- InputReader ---
 
 InputReader::InputReader(const sp<EventHubInterface>& eventHub,
@@ -167,8 +236,17 @@ void InputReader::addDevice(nsecs_t when, int32_t deviceId) {
     String8 name = mEventHub->getDeviceName(deviceId);
     uint32_t classes = mEventHub->getDeviceClasses(deviceId);
 
+    // Write a log message about the added device as a heading for subsequent log messages.
+    LOGI("Device added: id=0x%x, name=%s", deviceId, name.string());
+
     InputDevice* device = createDevice(deviceId, name, classes);
     device->configure();
+
+    if (device->isIgnored()) {
+        LOGI(INDENT "Sources: none (device is ignored)");
+    } else {
+        LOGI(INDENT "Sources: 0x%08x", device->getSources());
+    }
 
     bool added = false;
     { // acquire device registry writer lock
@@ -185,14 +263,6 @@ void InputReader::addDevice(nsecs_t when, int32_t deviceId) {
         LOGW("Ignoring spurious device added event for deviceId %d.", deviceId);
         delete device;
         return;
-    }
-
-    if (device->isIgnored()) {
-        LOGI("Device added: id=0x%x, name=%s (ignored non-input device)",
-                deviceId, name.string());
-    } else {
-        LOGI("Device added: id=0x%x, name=%s, sources=%08x",
-                deviceId, name.string(), device->getSources());
     }
 
     handleConfigurationChanged(when);
@@ -217,8 +287,7 @@ void InputReader::removeDevice(nsecs_t when, int32_t deviceId) {
         return;
     }
 
-    device->reset();
-
+    // Write a log message about the removed device as a heading for subsequent log messages.
     if (device->isIgnored()) {
         LOGI("Device removed: id=0x%x, name=%s (ignored non-input device)",
                 device->getId(), device->getName().string());
@@ -226,6 +295,8 @@ void InputReader::removeDevice(nsecs_t when, int32_t deviceId) {
         LOGI("Device removed: id=0x%x, name=%s, sources=%08x",
                 device->getId(), device->getName().string(), device->getSources());
     }
+
+    device->reset();
 
     delete device;
 
@@ -537,6 +608,10 @@ void InputDevice::addMapper(InputMapper* mapper) {
 }
 
 void InputDevice::configure() {
+    if (! isIgnored()) {
+        mContext->getPolicy()->getInputDeviceCalibration(mName, mCalibration);
+    }
+
     mSources = 0;
 
     size_t numMappers = mMappers.size();
@@ -1121,13 +1196,35 @@ void TouchInputMapper::populateDeviceInfo(InputDeviceInfo* info) {
 
         info->addMotionRange(AINPUT_MOTION_RANGE_X, mLocked.orientedRanges.x);
         info->addMotionRange(AINPUT_MOTION_RANGE_Y, mLocked.orientedRanges.y);
-        info->addMotionRange(AINPUT_MOTION_RANGE_PRESSURE, mLocked.orientedRanges.pressure);
-        info->addMotionRange(AINPUT_MOTION_RANGE_SIZE, mLocked.orientedRanges.size);
-        info->addMotionRange(AINPUT_MOTION_RANGE_TOUCH_MAJOR, mLocked.orientedRanges.touchMajor);
-        info->addMotionRange(AINPUT_MOTION_RANGE_TOUCH_MINOR, mLocked.orientedRanges.touchMinor);
-        info->addMotionRange(AINPUT_MOTION_RANGE_TOOL_MAJOR, mLocked.orientedRanges.toolMajor);
-        info->addMotionRange(AINPUT_MOTION_RANGE_TOOL_MINOR, mLocked.orientedRanges.toolMinor);
-        info->addMotionRange(AINPUT_MOTION_RANGE_ORIENTATION, mLocked.orientedRanges.orientation);
+
+        if (mLocked.orientedRanges.havePressure) {
+            info->addMotionRange(AINPUT_MOTION_RANGE_PRESSURE,
+                    mLocked.orientedRanges.pressure);
+        }
+
+        if (mLocked.orientedRanges.haveSize) {
+            info->addMotionRange(AINPUT_MOTION_RANGE_SIZE,
+                    mLocked.orientedRanges.size);
+        }
+
+        if (mLocked.orientedRanges.haveTouchArea) {
+            info->addMotionRange(AINPUT_MOTION_RANGE_TOUCH_MAJOR,
+                    mLocked.orientedRanges.touchMajor);
+            info->addMotionRange(AINPUT_MOTION_RANGE_TOUCH_MINOR,
+                    mLocked.orientedRanges.touchMinor);
+        }
+
+        if (mLocked.orientedRanges.haveToolArea) {
+            info->addMotionRange(AINPUT_MOTION_RANGE_TOOL_MAJOR,
+                    mLocked.orientedRanges.toolMajor);
+            info->addMotionRange(AINPUT_MOTION_RANGE_TOOL_MINOR,
+                    mLocked.orientedRanges.toolMinor);
+        }
+
+        if (mLocked.orientedRanges.haveOrientation) {
+            info->addMotionRange(AINPUT_MOTION_RANGE_ORIENTATION,
+                    mLocked.orientedRanges.orientation);
+        }
     } // release lock
 }
 
@@ -1144,77 +1241,72 @@ void TouchInputMapper::initializeLocked() {
     mJumpyTouchFilter.jumpyPointsDropped = 0;
 
     mLocked.currentVirtualKey.down = false;
+
+    mLocked.orientedRanges.havePressure = false;
+    mLocked.orientedRanges.haveSize = false;
+    mLocked.orientedRanges.haveTouchArea = false;
+    mLocked.orientedRanges.haveToolArea = false;
+    mLocked.orientedRanges.haveOrientation = false;
+}
+
+static void logAxisInfo(RawAbsoluteAxisInfo axis, const char* name) {
+    if (axis.valid) {
+        LOGI(INDENT "Raw %s axis: min=%d, max=%d, flat=%d, fuzz=%d",
+                name, axis.minValue, axis.maxValue, axis.flat, axis.fuzz);
+    } else {
+        LOGI(INDENT "Raw %s axis: unknown range", name);
+    }
 }
 
 void TouchInputMapper::configure() {
     InputMapper::configure();
 
     // Configure basic parameters.
-    mParameters.useBadTouchFilter = getPolicy()->filterTouchEvents();
-    mParameters.useAveragingTouchFilter = getPolicy()->filterTouchEvents();
-    mParameters.useJumpyTouchFilter = getPolicy()->filterJumpyTouchEvents();
+    configureParameters();
 
     // Configure absolute axis information.
-    configureAxes();
+    configureRawAxes();
+    logRawAxes();
+
+    // Prepare input device calibration.
+    parseCalibration();
+    resolveCalibration();
+    logCalibration();
 
     { // acquire lock
         AutoMutex _l(mLock);
 
-        // Configure pressure factors.
-        if (mAxes.pressure.valid) {
-            mLocked.pressureOrigin = mAxes.pressure.minValue;
-            mLocked.pressureScale = 1.0f / mAxes.pressure.getRange();
-        } else {
-            mLocked.pressureOrigin = 0;
-            mLocked.pressureScale = 1.0f;
-        }
-
-        mLocked.orientedRanges.pressure.min = 0.0f;
-        mLocked.orientedRanges.pressure.max = 1.0f;
-        mLocked.orientedRanges.pressure.flat = 0.0f;
-        mLocked.orientedRanges.pressure.fuzz = mLocked.pressureScale;
-
-        // Configure size factors.
-        if (mAxes.size.valid) {
-            mLocked.sizeOrigin = mAxes.size.minValue;
-            mLocked.sizeScale = 1.0f / mAxes.size.getRange();
-        } else {
-            mLocked.sizeOrigin = 0;
-            mLocked.sizeScale = 1.0f;
-        }
-
-        mLocked.orientedRanges.size.min = 0.0f;
-        mLocked.orientedRanges.size.max = 1.0f;
-        mLocked.orientedRanges.size.flat = 0.0f;
-        mLocked.orientedRanges.size.fuzz = mLocked.sizeScale;
-
-        // Configure orientation factors.
-        if (mAxes.orientation.valid && mAxes.orientation.maxValue > 0) {
-            mLocked.orientationScale = float(M_PI_2) / mAxes.orientation.maxValue;
-        } else {
-            mLocked.orientationScale = 0.0f;
-        }
-
-        mLocked.orientedRanges.orientation.min = - M_PI_2;
-        mLocked.orientedRanges.orientation.max = M_PI_2;
-        mLocked.orientedRanges.orientation.flat = 0;
-        mLocked.orientedRanges.orientation.fuzz = mLocked.orientationScale;
-
-        // Configure surface dimensions and orientation.
+         // Configure surface dimensions and orientation.
         configureSurfaceLocked();
     } // release lock
 }
 
-void TouchInputMapper::configureAxes() {
-    mAxes.x.valid = false;
-    mAxes.y.valid = false;
-    mAxes.pressure.valid = false;
-    mAxes.size.valid = false;
-    mAxes.touchMajor.valid = false;
-    mAxes.touchMinor.valid = false;
-    mAxes.toolMajor.valid = false;
-    mAxes.toolMinor.valid = false;
-    mAxes.orientation.valid = false;
+void TouchInputMapper::configureParameters() {
+    mParameters.useBadTouchFilter = getPolicy()->filterTouchEvents();
+    mParameters.useAveragingTouchFilter = getPolicy()->filterTouchEvents();
+    mParameters.useJumpyTouchFilter = getPolicy()->filterJumpyTouchEvents();
+}
+
+void TouchInputMapper::configureRawAxes() {
+    mRawAxes.x.clear();
+    mRawAxes.y.clear();
+    mRawAxes.pressure.clear();
+    mRawAxes.touchMajor.clear();
+    mRawAxes.touchMinor.clear();
+    mRawAxes.toolMajor.clear();
+    mRawAxes.toolMinor.clear();
+    mRawAxes.orientation.clear();
+}
+
+void TouchInputMapper::logRawAxes() {
+    logAxisInfo(mRawAxes.x, "x");
+    logAxisInfo(mRawAxes.y, "y");
+    logAxisInfo(mRawAxes.pressure, "pressure");
+    logAxisInfo(mRawAxes.touchMajor, "touchMajor");
+    logAxisInfo(mRawAxes.touchMinor, "touchMinor");
+    logAxisInfo(mRawAxes.toolMajor, "toolMajor");
+    logAxisInfo(mRawAxes.toolMinor, "toolMinor");
+    logAxisInfo(mRawAxes.orientation, "orientation");
 }
 
 bool TouchInputMapper::configureSurfaceLocked() {
@@ -1228,8 +1320,8 @@ bool TouchInputMapper::configureSurfaceLocked() {
         }
     } else {
         orientation = InputReaderPolicyInterface::ROTATION_0;
-        width = mAxes.x.getRange();
-        height = mAxes.y.getRange();
+        width = mRawAxes.x.getRange();
+        height = mRawAxes.y.getRange();
     }
 
     bool orientationChanged = mLocked.surfaceOrientation != orientation;
@@ -1239,24 +1331,24 @@ bool TouchInputMapper::configureSurfaceLocked() {
 
     bool sizeChanged = mLocked.surfaceWidth != width || mLocked.surfaceHeight != height;
     if (sizeChanged) {
+        LOGI("Device configured: id=0x%x, name=%s (display size was changed)",
+                getDeviceId(), getDeviceName().string());
+
         mLocked.surfaceWidth = width;
         mLocked.surfaceHeight = height;
 
-        // Compute size-dependent translation and scaling factors and place virtual keys.
-        if (mAxes.x.valid && mAxes.y.valid) {
-            mLocked.xOrigin = mAxes.x.minValue;
-            mLocked.yOrigin = mAxes.y.minValue;
-
-            LOGI("Device configured: id=0x%x, name=%s (display size was changed)",
-                    getDeviceId(), getDeviceName().string());
-
-            mLocked.xScale = float(width) / mAxes.x.getRange();
-            mLocked.yScale = float(height) / mAxes.y.getRange();
+        // Configure X and Y factors.
+        if (mRawAxes.x.valid && mRawAxes.y.valid) {
+            mLocked.xOrigin = mRawAxes.x.minValue;
+            mLocked.yOrigin = mRawAxes.y.minValue;
+            mLocked.xScale = float(width) / mRawAxes.x.getRange();
+            mLocked.yScale = float(height) / mRawAxes.y.getRange();
             mLocked.xPrecision = 1.0f / mLocked.xScale;
             mLocked.yPrecision = 1.0f / mLocked.yScale;
 
             configureVirtualKeysLocked();
         } else {
+            LOGW(INDENT "Touch device did not report support for X or Y axis!");
             mLocked.xOrigin = 0;
             mLocked.yOrigin = 0;
             mLocked.xScale = 1.0f;
@@ -1265,22 +1357,112 @@ bool TouchInputMapper::configureSurfaceLocked() {
             mLocked.yPrecision = 1.0f;
         }
 
-        // Configure touch and tool area ranges.
-        float diagonal = sqrt(float(width * width + height * height));
-        float diagonalFuzz = sqrt(mLocked.xScale * mLocked.xScale
-                + mLocked.yScale * mLocked.yScale);
+        // Scale factor for terms that are not oriented in a particular axis.
+        // If the pixels are square then xScale == yScale otherwise we fake it
+        // by choosing an average.
+        mLocked.geometricScale = avg(mLocked.xScale, mLocked.yScale);
 
-        InputDeviceInfo::MotionRange area;
-        area.min = 0.0f;
-        area.max = diagonal;
-        area.flat = 0.0f;
-        area.fuzz = diagonalFuzz;
+        // Size of diagonal axis.
+        float diagonalSize = pythag(width, height);
 
-        mLocked.orientedRanges.touchMajor = area;
-        mLocked.orientedRanges.touchMinor = area;
+        // TouchMajor and TouchMinor factors.
+        if (mCalibration.touchAreaCalibration != Calibration::TOUCH_AREA_CALIBRATION_NONE) {
+            mLocked.orientedRanges.haveTouchArea = true;
+            mLocked.orientedRanges.touchMajor.min = 0;
+            mLocked.orientedRanges.touchMajor.max = diagonalSize;
+            mLocked.orientedRanges.touchMajor.flat = 0;
+            mLocked.orientedRanges.touchMajor.fuzz = 0;
+            mLocked.orientedRanges.touchMinor = mLocked.orientedRanges.touchMajor;
+        }
 
-        mLocked.orientedRanges.toolMajor = area;
-        mLocked.orientedRanges.toolMinor = area;
+        // ToolMajor and ToolMinor factors.
+        if (mCalibration.toolAreaCalibration != Calibration::TOOL_AREA_CALIBRATION_NONE) {
+            mLocked.toolAreaLinearScale = 0;
+            mLocked.toolAreaLinearBias = 0;
+            if (mCalibration.toolAreaCalibration == Calibration::TOOL_AREA_CALIBRATION_LINEAR) {
+                if (mCalibration.haveToolAreaLinearScale) {
+                    mLocked.toolAreaLinearScale = mCalibration.toolAreaLinearScale;
+                } else if (mRawAxes.toolMajor.valid && mRawAxes.toolMajor.maxValue != 0) {
+                    mLocked.toolAreaLinearScale = float(min(width, height))
+                            / mRawAxes.toolMajor.maxValue;
+                }
+
+                if (mCalibration.haveToolAreaLinearBias) {
+                    mLocked.toolAreaLinearBias = mCalibration.toolAreaLinearBias;
+                }
+            }
+
+            mLocked.orientedRanges.haveToolArea = true;
+            mLocked.orientedRanges.toolMajor.min = 0;
+            mLocked.orientedRanges.toolMajor.max = diagonalSize;
+            mLocked.orientedRanges.toolMajor.flat = 0;
+            mLocked.orientedRanges.toolMajor.fuzz = 0;
+            mLocked.orientedRanges.toolMinor = mLocked.orientedRanges.toolMajor;
+        }
+
+        // Pressure factors.
+        if (mCalibration.pressureCalibration != Calibration::PRESSURE_CALIBRATION_NONE) {
+            RawAbsoluteAxisInfo rawPressureAxis;
+            switch (mCalibration.pressureSource) {
+            case Calibration::PRESSURE_SOURCE_PRESSURE:
+                rawPressureAxis = mRawAxes.pressure;
+                break;
+            case Calibration::PRESSURE_SOURCE_TOUCH:
+                rawPressureAxis = mRawAxes.touchMajor;
+                break;
+            default:
+                rawPressureAxis.clear();
+            }
+
+            mLocked.pressureScale = 0;
+            if (mCalibration.pressureCalibration == Calibration::PRESSURE_CALIBRATION_PHYSICAL
+                    || mCalibration.pressureCalibration
+                            == Calibration::PRESSURE_CALIBRATION_AMPLITUDE) {
+                if (mCalibration.havePressureScale) {
+                    mLocked.pressureScale = mCalibration.pressureScale;
+                } else if (rawPressureAxis.valid && rawPressureAxis.maxValue != 0) {
+                    mLocked.pressureScale = 1.0f / rawPressureAxis.maxValue;
+                }
+            }
+
+            mLocked.orientedRanges.havePressure = true;
+            mLocked.orientedRanges.pressure.min = 0;
+            mLocked.orientedRanges.pressure.max = 1.0;
+            mLocked.orientedRanges.pressure.flat = 0;
+            mLocked.orientedRanges.pressure.fuzz = 0;
+        }
+
+        // Size factors.
+        if (mCalibration.sizeCalibration != Calibration::SIZE_CALIBRATION_NONE) {
+            mLocked.sizeScale = 0;
+            if (mCalibration.sizeCalibration == Calibration::SIZE_CALIBRATION_NORMALIZED) {
+                if (mRawAxes.toolMajor.valid && mRawAxes.toolMajor.maxValue != 0) {
+                    mLocked.sizeScale = 1.0f / mRawAxes.toolMajor.maxValue;
+                }
+            }
+
+            mLocked.orientedRanges.haveSize = true;
+            mLocked.orientedRanges.size.min = 0;
+            mLocked.orientedRanges.size.max = 1.0;
+            mLocked.orientedRanges.size.flat = 0;
+            mLocked.orientedRanges.size.fuzz = 0;
+        }
+
+        // Orientation
+        if (mCalibration.orientationCalibration != Calibration::ORIENTATION_CALIBRATION_NONE) {
+            mLocked.orientationScale = 0;
+            if (mCalibration.orientationCalibration
+                    == Calibration::ORIENTATION_CALIBRATION_INTERPOLATED) {
+                if (mRawAxes.orientation.valid && mRawAxes.orientation.maxValue != 0) {
+                    mLocked.orientationScale = float(M_PI_2) / mRawAxes.orientation.maxValue;
+                }
+            }
+
+            mLocked.orientedRanges.orientation.min = - M_PI_2;
+            mLocked.orientedRanges.orientation.max = M_PI_2;
+            mLocked.orientedRanges.orientation.flat = 0;
+            mLocked.orientedRanges.orientation.fuzz = 0;
+        }
     }
 
     if (orientationChanged || sizeChanged) {
@@ -1322,10 +1504,10 @@ bool TouchInputMapper::configureSurfaceLocked() {
 }
 
 void TouchInputMapper::configureVirtualKeysLocked() {
-    assert(mAxes.x.valid && mAxes.y.valid);
+    assert(mRawAxes.x.valid && mRawAxes.y.valid);
 
     // Note: getVirtualKeyDefinitions is non-reentrant so we can continue holding the lock.
-    Vector<InputReaderPolicyInterface::VirtualKeyDefinition> virtualKeyDefinitions;
+    Vector<VirtualKeyDefinition> virtualKeyDefinitions;
     getPolicy()->getVirtualKeyDefinitions(getDeviceName(), virtualKeyDefinitions);
 
     mLocked.virtualKeys.clear();
@@ -1336,13 +1518,13 @@ void TouchInputMapper::configureVirtualKeysLocked() {
 
     mLocked.virtualKeys.setCapacity(virtualKeyDefinitions.size());
 
-    int32_t touchScreenLeft = mAxes.x.minValue;
-    int32_t touchScreenTop = mAxes.y.minValue;
-    int32_t touchScreenWidth = mAxes.x.getRange();
-    int32_t touchScreenHeight = mAxes.y.getRange();
+    int32_t touchScreenLeft = mRawAxes.x.minValue;
+    int32_t touchScreenTop = mRawAxes.y.minValue;
+    int32_t touchScreenWidth = mRawAxes.x.getRange();
+    int32_t touchScreenHeight = mRawAxes.y.getRange();
 
     for (size_t i = 0; i < virtualKeyDefinitions.size(); i++) {
-        const InputReaderPolicyInterface::VirtualKeyDefinition& virtualKeyDefinition =
+        const VirtualKeyDefinition& virtualKeyDefinition =
                 virtualKeyDefinitions[i];
 
         mLocked.virtualKeys.add();
@@ -1353,7 +1535,8 @@ void TouchInputMapper::configureVirtualKeysLocked() {
         uint32_t flags;
         if (getEventHub()->scancodeToKeycode(getDeviceId(), virtualKey.scanCode,
                 & keyCode, & flags)) {
-            LOGW("  VirtualKey %d: could not obtain key code, ignoring", virtualKey.scanCode);
+            LOGW(INDENT "VirtualKey %d: could not obtain key code, ignoring",
+                    virtualKey.scanCode);
             mLocked.virtualKeys.pop(); // drop the key
             continue;
         }
@@ -1374,9 +1557,313 @@ void TouchInputMapper::configureVirtualKeysLocked() {
         virtualKey.hitBottom = (virtualKeyDefinition.centerY + halfHeight)
                 * touchScreenHeight / mLocked.surfaceHeight + touchScreenTop;
 
-        LOGI("  VirtualKey %d: keyCode=%d hitLeft=%d hitRight=%d hitTop=%d hitBottom=%d",
+        LOGI(INDENT "VirtualKey %d: keyCode=%d hitLeft=%d hitRight=%d hitTop=%d hitBottom=%d",
                 virtualKey.scanCode, virtualKey.keyCode,
                 virtualKey.hitLeft, virtualKey.hitRight, virtualKey.hitTop, virtualKey.hitBottom);
+    }
+}
+
+void TouchInputMapper::parseCalibration() {
+    const InputDeviceCalibration& in = getDevice()->getCalibration();
+    Calibration& out = mCalibration;
+
+    // Touch Area
+    out.touchAreaCalibration = Calibration::TOUCH_AREA_CALIBRATION_DEFAULT;
+    String8 touchAreaCalibrationString;
+    if (in.tryGetProperty(String8("touch.touchArea.calibration"), touchAreaCalibrationString)) {
+        if (touchAreaCalibrationString == "none") {
+            out.touchAreaCalibration = Calibration::TOUCH_AREA_CALIBRATION_NONE;
+        } else if (touchAreaCalibrationString == "geometric") {
+            out.touchAreaCalibration = Calibration::TOUCH_AREA_CALIBRATION_GEOMETRIC;
+        } else if (touchAreaCalibrationString == "pressure") {
+            out.touchAreaCalibration = Calibration::TOUCH_AREA_CALIBRATION_PRESSURE;
+        } else if (touchAreaCalibrationString != "default") {
+            LOGW("Invalid value for touch.touchArea.calibration: '%s'",
+                    touchAreaCalibrationString.string());
+        }
+    }
+
+    // Tool Area
+    out.toolAreaCalibration = Calibration::TOOL_AREA_CALIBRATION_DEFAULT;
+    String8 toolAreaCalibrationString;
+    if (in.tryGetProperty(String8("tool.toolArea.calibration"), toolAreaCalibrationString)) {
+        if (toolAreaCalibrationString == "none") {
+            out.toolAreaCalibration = Calibration::TOOL_AREA_CALIBRATION_NONE;
+        } else if (toolAreaCalibrationString == "geometric") {
+            out.toolAreaCalibration = Calibration::TOOL_AREA_CALIBRATION_GEOMETRIC;
+        } else if (toolAreaCalibrationString == "linear") {
+            out.toolAreaCalibration = Calibration::TOOL_AREA_CALIBRATION_LINEAR;
+        } else if (toolAreaCalibrationString != "default") {
+            LOGW("Invalid value for tool.toolArea.calibration: '%s'",
+                    toolAreaCalibrationString.string());
+        }
+    }
+
+    out.haveToolAreaLinearScale = in.tryGetProperty(String8("touch.toolArea.linearScale"),
+            out.toolAreaLinearScale);
+    out.haveToolAreaLinearBias = in.tryGetProperty(String8("touch.toolArea.linearBias"),
+            out.toolAreaLinearBias);
+    out.haveToolAreaIsSummed = in.tryGetProperty(String8("touch.toolArea.isSummed"),
+            out.toolAreaIsSummed);
+
+    // Pressure
+    out.pressureCalibration = Calibration::PRESSURE_CALIBRATION_DEFAULT;
+    String8 pressureCalibrationString;
+    if (in.tryGetProperty(String8("tool.pressure.calibration"), pressureCalibrationString)) {
+        if (pressureCalibrationString == "none") {
+            out.pressureCalibration = Calibration::PRESSURE_CALIBRATION_NONE;
+        } else if (pressureCalibrationString == "physical") {
+            out.pressureCalibration = Calibration::PRESSURE_CALIBRATION_PHYSICAL;
+        } else if (pressureCalibrationString == "amplitude") {
+            out.pressureCalibration = Calibration::PRESSURE_CALIBRATION_AMPLITUDE;
+        } else if (pressureCalibrationString != "default") {
+            LOGW("Invalid value for tool.pressure.calibration: '%s'",
+                    pressureCalibrationString.string());
+        }
+    }
+
+    out.pressureSource = Calibration::PRESSURE_SOURCE_DEFAULT;
+    String8 pressureSourceString;
+    if (in.tryGetProperty(String8("touch.pressure.source"), pressureSourceString)) {
+        if (pressureSourceString == "pressure") {
+            out.pressureSource = Calibration::PRESSURE_SOURCE_PRESSURE;
+        } else if (pressureSourceString == "touch") {
+            out.pressureSource = Calibration::PRESSURE_SOURCE_TOUCH;
+        } else if (pressureSourceString != "default") {
+            LOGW("Invalid value for touch.pressure.source: '%s'",
+                    pressureSourceString.string());
+        }
+    }
+
+    out.havePressureScale = in.tryGetProperty(String8("touch.pressure.scale"),
+            out.pressureScale);
+
+    // Size
+    out.sizeCalibration = Calibration::SIZE_CALIBRATION_DEFAULT;
+    String8 sizeCalibrationString;
+    if (in.tryGetProperty(String8("tool.size.calibration"), sizeCalibrationString)) {
+        if (sizeCalibrationString == "none") {
+            out.sizeCalibration = Calibration::SIZE_CALIBRATION_NONE;
+        } else if (sizeCalibrationString == "normalized") {
+            out.sizeCalibration = Calibration::SIZE_CALIBRATION_NORMALIZED;
+        } else if (sizeCalibrationString != "default") {
+            LOGW("Invalid value for tool.size.calibration: '%s'",
+                    sizeCalibrationString.string());
+        }
+    }
+
+    // Orientation
+    out.orientationCalibration = Calibration::ORIENTATION_CALIBRATION_DEFAULT;
+    String8 orientationCalibrationString;
+    if (in.tryGetProperty(String8("tool.orientation.calibration"), orientationCalibrationString)) {
+        if (orientationCalibrationString == "none") {
+            out.orientationCalibration = Calibration::ORIENTATION_CALIBRATION_NONE;
+        } else if (orientationCalibrationString == "interpolated") {
+            out.orientationCalibration = Calibration::ORIENTATION_CALIBRATION_INTERPOLATED;
+        } else if (orientationCalibrationString != "default") {
+            LOGW("Invalid value for tool.orientation.calibration: '%s'",
+                    orientationCalibrationString.string());
+        }
+    }
+}
+
+void TouchInputMapper::resolveCalibration() {
+    // Pressure
+    switch (mCalibration.pressureSource) {
+    case Calibration::PRESSURE_SOURCE_DEFAULT:
+        if (mRawAxes.pressure.valid) {
+            mCalibration.pressureSource = Calibration::PRESSURE_SOURCE_PRESSURE;
+        } else if (mRawAxes.touchMajor.valid) {
+            mCalibration.pressureSource = Calibration::PRESSURE_SOURCE_TOUCH;
+        }
+        break;
+
+    case Calibration::PRESSURE_SOURCE_PRESSURE:
+        if (! mRawAxes.pressure.valid) {
+            LOGW("Calibration property touch.pressure.source is 'pressure' but "
+                    "the pressure axis is not available.");
+        }
+        break;
+
+    case Calibration::PRESSURE_SOURCE_TOUCH:
+        if (! mRawAxes.touchMajor.valid) {
+            LOGW("Calibration property touch.pressure.source is 'touch' but "
+                    "the touchMajor axis is not available.");
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    switch (mCalibration.pressureCalibration) {
+    case Calibration::PRESSURE_CALIBRATION_DEFAULT:
+        if (mCalibration.pressureSource != Calibration::PRESSURE_SOURCE_DEFAULT) {
+            mCalibration.pressureCalibration = Calibration::PRESSURE_CALIBRATION_AMPLITUDE;
+        } else {
+            mCalibration.pressureCalibration = Calibration::PRESSURE_CALIBRATION_NONE;
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    // Tool Area
+    switch (mCalibration.toolAreaCalibration) {
+    case Calibration::TOOL_AREA_CALIBRATION_DEFAULT:
+        if (mRawAxes.toolMajor.valid) {
+            mCalibration.toolAreaCalibration = Calibration::TOOL_AREA_CALIBRATION_LINEAR;
+        } else {
+            mCalibration.toolAreaCalibration = Calibration::TOOL_AREA_CALIBRATION_NONE;
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    // Touch Area
+    switch (mCalibration.touchAreaCalibration) {
+    case Calibration::TOUCH_AREA_CALIBRATION_DEFAULT:
+        if (mCalibration.pressureCalibration != Calibration::PRESSURE_CALIBRATION_NONE
+                && mCalibration.toolAreaCalibration != Calibration::TOOL_AREA_CALIBRATION_NONE) {
+            mCalibration.touchAreaCalibration = Calibration::TOUCH_AREA_CALIBRATION_PRESSURE;
+        } else {
+            mCalibration.touchAreaCalibration = Calibration::TOUCH_AREA_CALIBRATION_NONE;
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    // Size
+    switch (mCalibration.sizeCalibration) {
+    case Calibration::SIZE_CALIBRATION_DEFAULT:
+        if (mRawAxes.toolMajor.valid) {
+            mCalibration.sizeCalibration = Calibration::SIZE_CALIBRATION_NORMALIZED;
+        } else {
+            mCalibration.sizeCalibration = Calibration::SIZE_CALIBRATION_NONE;
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    // Orientation
+    switch (mCalibration.orientationCalibration) {
+    case Calibration::ORIENTATION_CALIBRATION_DEFAULT:
+        if (mRawAxes.orientation.valid) {
+            mCalibration.orientationCalibration = Calibration::ORIENTATION_CALIBRATION_INTERPOLATED;
+        } else {
+            mCalibration.orientationCalibration = Calibration::ORIENTATION_CALIBRATION_NONE;
+        }
+        break;
+
+    default:
+        break;
+    }
+}
+
+void TouchInputMapper::logCalibration() {
+    // Touch Area
+    switch (mCalibration.touchAreaCalibration) {
+    case Calibration::TOUCH_AREA_CALIBRATION_NONE:
+        LOGI(INDENT "  touch.touchArea.calibration: none");
+        break;
+    case Calibration::TOUCH_AREA_CALIBRATION_GEOMETRIC:
+        LOGI(INDENT "  touch.touchArea.calibration: geometric");
+        break;
+    case Calibration::TOUCH_AREA_CALIBRATION_PRESSURE:
+        LOGI(INDENT "  touch.touchArea.calibration: pressure");
+        break;
+    default:
+        assert(false);
+    }
+
+    // Tool Area
+    switch (mCalibration.toolAreaCalibration) {
+    case Calibration::TOOL_AREA_CALIBRATION_NONE:
+        LOGI(INDENT "  touch.toolArea.calibration: none");
+        break;
+    case Calibration::TOOL_AREA_CALIBRATION_GEOMETRIC:
+        LOGI(INDENT "  touch.toolArea.calibration: geometric");
+        break;
+    case Calibration::TOOL_AREA_CALIBRATION_LINEAR:
+        LOGI(INDENT "  touch.toolArea.calibration: linear");
+        break;
+    default:
+        assert(false);
+    }
+
+    if (mCalibration.haveToolAreaLinearScale) {
+        LOGI(INDENT "  touch.toolArea.linearScale: %f", mCalibration.toolAreaLinearScale);
+    }
+
+    if (mCalibration.haveToolAreaLinearBias) {
+        LOGI(INDENT "  touch.toolArea.linearBias: %f", mCalibration.toolAreaLinearBias);
+    }
+
+    if (mCalibration.haveToolAreaIsSummed) {
+        LOGI(INDENT "  touch.toolArea.isSummed: %d", mCalibration.toolAreaIsSummed);
+    }
+
+    // Pressure
+    switch (mCalibration.pressureCalibration) {
+    case Calibration::PRESSURE_CALIBRATION_NONE:
+        LOGI(INDENT "  touch.pressure.calibration: none");
+        break;
+    case Calibration::PRESSURE_CALIBRATION_PHYSICAL:
+        LOGI(INDENT "  touch.pressure.calibration: physical");
+        break;
+    case Calibration::PRESSURE_CALIBRATION_AMPLITUDE:
+        LOGI(INDENT "  touch.pressure.calibration: amplitude");
+        break;
+    default:
+        assert(false);
+    }
+
+    switch (mCalibration.pressureSource) {
+    case Calibration::PRESSURE_SOURCE_PRESSURE:
+        LOGI(INDENT "  touch.pressure.source: pressure");
+        break;
+    case Calibration::PRESSURE_SOURCE_TOUCH:
+        LOGI(INDENT "  touch.pressure.source: touch");
+        break;
+    case Calibration::PRESSURE_SOURCE_DEFAULT:
+        break;
+    default:
+        assert(false);
+    }
+
+    if (mCalibration.havePressureScale) {
+        LOGI(INDENT "  touch.pressure.scale: %f", mCalibration.pressureScale);
+    }
+
+    // Size
+    switch (mCalibration.sizeCalibration) {
+    case Calibration::SIZE_CALIBRATION_NONE:
+        LOGI(INDENT "  touch.size.calibration: none");
+        break;
+    case Calibration::SIZE_CALIBRATION_NORMALIZED:
+        LOGI(INDENT "  touch.size.calibration: normalized");
+        break;
+    default:
+        assert(false);
+    }
+
+    // Orientation
+    switch (mCalibration.orientationCalibration) {
+    case Calibration::ORIENTATION_CALIBRATION_NONE:
+        LOGI(INDENT "  touch.orientation.calibration: none");
+        break;
+    case Calibration::ORIENTATION_CALIBRATION_INTERPOLATED:
+        LOGI(INDENT "  touch.orientation.calibration: interpolated");
+        break;
+    default:
+        assert(false);
     }
 }
 
@@ -1584,13 +2071,14 @@ void TouchInputMapper::dispatchTouches(nsecs_t when, uint32_t policyFlags) {
         // The dispatcher takes care of batching moves so we don't have to deal with that here.
         int32_t motionEventAction = AMOTION_EVENT_ACTION_MOVE;
         dispatchTouch(when, policyFlags, & mCurrentTouch,
-                currentIdBits, -1, motionEventAction);
+                currentIdBits, -1, currentPointerCount, motionEventAction);
     } else {
         // There may be pointers going up and pointers going down at the same time when pointer
         // ids are reported by the device driver.
         BitSet32 upIdBits(lastIdBits.value & ~ currentIdBits.value);
         BitSet32 downIdBits(currentIdBits.value & ~ lastIdBits.value);
         BitSet32 activeIdBits(lastIdBits.value);
+        uint32_t pointerCount = lastPointerCount;
 
         while (! upIdBits.isEmpty()) {
             uint32_t upId = upIdBits.firstMarkedBit();
@@ -1606,7 +2094,8 @@ void TouchInputMapper::dispatchTouches(nsecs_t when, uint32_t policyFlags) {
             }
 
             dispatchTouch(when, policyFlags, & mLastTouch,
-                    oldActiveIdBits, upId, motionEventAction);
+                    oldActiveIdBits, upId, pointerCount, motionEventAction);
+            pointerCount -= 1;
         }
 
         while (! downIdBits.isEmpty()) {
@@ -1623,16 +2112,16 @@ void TouchInputMapper::dispatchTouches(nsecs_t when, uint32_t policyFlags) {
                 motionEventAction = AMOTION_EVENT_ACTION_POINTER_DOWN;
             }
 
+            pointerCount += 1;
             dispatchTouch(when, policyFlags, & mCurrentTouch,
-                    activeIdBits, downId, motionEventAction);
+                    activeIdBits, downId, pointerCount, motionEventAction);
         }
     }
 }
 
 void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
-        TouchData* touch, BitSet32 idBits, uint32_t changedId,
+        TouchData* touch, BitSet32 idBits, uint32_t changedId, uint32_t pointerCount,
         int32_t motionEventAction) {
-    uint32_t pointerCount = 0;
     int32_t pointerIds[MAX_POINTERS];
     PointerCoords pointerCoords[MAX_POINTERS];
     int32_t motionEventEdgeFlags = 0;
@@ -1643,36 +2132,130 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
 
         // Walk through the the active pointers and map touch screen coordinates (TouchData) into
         // display coordinates (PointerCoords) and adjust for display orientation.
-        while (! idBits.isEmpty()) {
+        for (uint32_t outIndex = 0; ! idBits.isEmpty(); outIndex++) {
             uint32_t id = idBits.firstMarkedBit();
             idBits.clearBit(id);
-            uint32_t index = touch->idToIndex[id];
+            uint32_t inIndex = touch->idToIndex[id];
 
-            float x = float(touch->pointers[index].x - mLocked.xOrigin) * mLocked.xScale;
-            float y = float(touch->pointers[index].y - mLocked.yOrigin) * mLocked.yScale;
-            float pressure = float(touch->pointers[index].pressure - mLocked.pressureOrigin)
-                    * mLocked.pressureScale;
-            float size = float(touch->pointers[index].size - mLocked.sizeOrigin)
-                    * mLocked.sizeScale;
+            const PointerData& in = touch->pointers[inIndex];
 
-            float orientation = float(touch->pointers[index].orientation)
-                    * mLocked.orientationScale;
+            // X and Y
+            float x = float(in.x - mLocked.xOrigin) * mLocked.xScale;
+            float y = float(in.y - mLocked.yOrigin) * mLocked.yScale;
 
-            float touchMajor, touchMinor, toolMajor, toolMinor;
-            if (abs(orientation) <= M_PI_4) {
-                // Nominally vertical orientation: scale major axis by Y, and scale minor axis by X.
-                touchMajor = float(touch->pointers[index].touchMajor) * mLocked.yScale;
-                touchMinor = float(touch->pointers[index].touchMinor) * mLocked.xScale;
-                toolMajor = float(touch->pointers[index].toolMajor) * mLocked.yScale;
-                toolMinor = float(touch->pointers[index].toolMinor) * mLocked.xScale;
-            } else {
-                // Nominally horizontal orientation: scale major axis by X, and scale minor axis by Y.
-                touchMajor = float(touch->pointers[index].touchMajor) * mLocked.xScale;
-                touchMinor = float(touch->pointers[index].touchMinor) * mLocked.yScale;
-                toolMajor = float(touch->pointers[index].toolMajor) * mLocked.xScale;
-                toolMinor = float(touch->pointers[index].toolMinor) * mLocked.yScale;
+            // ToolMajor and ToolMinor
+            float toolMajor, toolMinor;
+            switch (mCalibration.toolAreaCalibration) {
+            case Calibration::TOOL_AREA_CALIBRATION_GEOMETRIC:
+                toolMajor = in.toolMajor * mLocked.geometricScale;
+                if (mRawAxes.toolMinor.valid) {
+                    toolMinor = in.toolMinor * mLocked.geometricScale;
+                } else {
+                    toolMinor = toolMajor;
+                }
+                break;
+            case Calibration::TOOL_AREA_CALIBRATION_LINEAR:
+                toolMajor = in.toolMajor != 0
+                        ? in.toolMajor * mLocked.toolAreaLinearScale + mLocked.toolAreaLinearBias
+                        : 0;
+                if (mRawAxes.toolMinor.valid) {
+                    toolMinor = in.toolMinor != 0
+                            ? in.toolMinor * mLocked.toolAreaLinearScale
+                                    + mLocked.toolAreaLinearBias
+                            : 0;
+                } else {
+                    toolMinor = toolMajor;
+                }
+                break;
+            default:
+                toolMajor = 0;
+                toolMinor = 0;
+                break;
             }
 
+            if (mCalibration.haveToolAreaIsSummed && mCalibration.toolAreaIsSummed) {
+                toolMajor /= pointerCount;
+                toolMinor /= pointerCount;
+            }
+
+            // Pressure
+            float rawPressure;
+            switch (mCalibration.pressureSource) {
+            case Calibration::PRESSURE_SOURCE_PRESSURE:
+                rawPressure = in.pressure;
+                break;
+            case Calibration::PRESSURE_SOURCE_TOUCH:
+                rawPressure = in.touchMajor;
+                break;
+            default:
+                rawPressure = 0;
+            }
+
+            float pressure;
+            switch (mCalibration.pressureCalibration) {
+            case Calibration::PRESSURE_CALIBRATION_PHYSICAL:
+            case Calibration::PRESSURE_CALIBRATION_AMPLITUDE:
+                pressure = rawPressure * mLocked.pressureScale;
+                break;
+            default:
+                pressure = 1;
+                break;
+            }
+
+            // TouchMajor and TouchMinor
+            float touchMajor, touchMinor;
+            switch (mCalibration.touchAreaCalibration) {
+            case Calibration::TOUCH_AREA_CALIBRATION_GEOMETRIC:
+                touchMajor = in.touchMajor * mLocked.geometricScale;
+                if (mRawAxes.touchMinor.valid) {
+                    touchMinor = in.touchMinor * mLocked.geometricScale;
+                } else {
+                    touchMinor = touchMajor;
+                }
+                break;
+            case Calibration::TOUCH_AREA_CALIBRATION_PRESSURE:
+                touchMajor = toolMajor * pressure;
+                touchMinor = toolMinor * pressure;
+                break;
+            default:
+                touchMajor = 0;
+                touchMinor = 0;
+                break;
+            }
+
+            if (touchMajor > toolMajor) {
+                touchMajor = toolMajor;
+            }
+            if (touchMinor > toolMinor) {
+                touchMinor = toolMinor;
+            }
+
+            // Size
+            float size;
+            switch (mCalibration.sizeCalibration) {
+            case Calibration::SIZE_CALIBRATION_NORMALIZED: {
+                float rawSize = mRawAxes.toolMinor.valid
+                        ? avg(in.toolMajor, in.toolMinor)
+                        : in.toolMajor;
+                size = rawSize * mLocked.sizeScale;
+                break;
+            }
+            default:
+                size = 0;
+                break;
+            }
+
+            // Orientation
+            float orientation;
+            switch (mCalibration.orientationCalibration) {
+            case Calibration::ORIENTATION_CALIBRATION_INTERPOLATED:
+                orientation = in.orientation * mLocked.orientationScale;
+                break;
+            default:
+                orientation = 0;
+            }
+
+            // Adjust coords for orientation.
             switch (mLocked.surfaceOrientation) {
             case InputReaderPolicyInterface::ROTATION_90: {
                 float xTemp = x;
@@ -1702,23 +2285,23 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
             }
             }
 
-            pointerIds[pointerCount] = int32_t(id);
+            // Write output coords.
+            PointerCoords& out = pointerCoords[outIndex];
+            out.x = x;
+            out.y = y;
+            out.pressure = pressure;
+            out.size = size;
+            out.touchMajor = touchMajor;
+            out.touchMinor = touchMinor;
+            out.toolMajor = toolMajor;
+            out.toolMinor = toolMinor;
+            out.orientation = orientation;
 
-            pointerCoords[pointerCount].x = x;
-            pointerCoords[pointerCount].y = y;
-            pointerCoords[pointerCount].pressure = pressure;
-            pointerCoords[pointerCount].size = size;
-            pointerCoords[pointerCount].touchMajor = touchMajor;
-            pointerCoords[pointerCount].touchMinor = touchMinor;
-            pointerCoords[pointerCount].toolMajor = toolMajor;
-            pointerCoords[pointerCount].toolMinor = toolMinor;
-            pointerCoords[pointerCount].orientation = orientation;
+            pointerIds[outIndex] = int32_t(id);
 
             if (id == changedId) {
-                motionEventAction |= pointerCount << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+                motionEventAction |= outIndex << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
             }
-
-            pointerCount += 1;
         }
 
         // Check edge flags by looking only at the first pointer since the flags are
@@ -1747,9 +2330,9 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
 }
 
 bool TouchInputMapper::isPointInsideSurfaceLocked(int32_t x, int32_t y) {
-    if (mAxes.x.valid && mAxes.y.valid) {
-        return x >= mAxes.x.minValue && x <= mAxes.x.maxValue
-                && y >= mAxes.y.minValue && y <= mAxes.y.maxValue;
+    if (mRawAxes.x.valid && mRawAxes.y.valid) {
+        return x >= mRawAxes.x.minValue && x <= mRawAxes.x.maxValue
+                && y >= mRawAxes.y.minValue && y <= mRawAxes.y.maxValue;
     }
     return true;
 }
@@ -1960,7 +2543,7 @@ void TouchInputMapper::calculatePointerIds() {
  * then drop it. */
 bool TouchInputMapper::applyBadTouchFilter() {
     // This hack requires valid axis parameters.
-    if (! mAxes.y.valid) {
+    if (! mRawAxes.y.valid) {
         return false;
     }
 
@@ -1982,7 +2565,7 @@ bool TouchInputMapper::applyBadTouchFilter() {
     // the long size of the screen to be bad.  This was a magic value
     // determined by looking at the maximum distance it is feasible
     // to actually move in one sample.
-    int32_t maxDeltaY = mAxes.y.getRange() * 7 / 16;
+    int32_t maxDeltaY = mRawAxes.y.getRange() * 7 / 16;
 
     // XXX The original code in InputDevice.java included commented out
     //     code for testing the X axis.  Note that when we drop a point
@@ -2044,7 +2627,7 @@ bool TouchInputMapper::applyBadTouchFilter() {
  */
 bool TouchInputMapper::applyJumpyTouchFilter() {
     // This hack requires valid axis parameters.
-    if (! mAxes.y.valid) {
+    if (! mRawAxes.y.valid) {
         return false;
     }
 
@@ -2104,7 +2687,7 @@ bool TouchInputMapper::applyJumpyTouchFilter() {
     }
 
     if (mJumpyTouchFilter.jumpyPointsDropped < JUMPY_DROP_LIMIT) {
-        int jumpyEpsilon = mAxes.y.getRange() / JUMPY_EPSILON_DIVISOR;
+        int jumpyEpsilon = mRawAxes.y.getRange() / JUMPY_EPSILON_DIVISOR;
 
         // We only replace the single worst jumpy point as characterized by pointer distance
         // in a single axis.
@@ -2209,7 +2792,18 @@ void TouchInputMapper::applyAveragingTouchFilter() {
         uint32_t id = mCurrentTouch.pointers[currentIndex].id;
         int32_t x = mCurrentTouch.pointers[currentIndex].x;
         int32_t y = mCurrentTouch.pointers[currentIndex].y;
-        int32_t pressure = mCurrentTouch.pointers[currentIndex].pressure;
+        int32_t pressure;
+        switch (mCalibration.pressureSource) {
+        case Calibration::PRESSURE_SOURCE_PRESSURE:
+            pressure = mCurrentTouch.pointers[currentIndex].pressure;
+            break;
+        case Calibration::PRESSURE_SOURCE_TOUCH:
+            pressure = mCurrentTouch.pointers[currentIndex].touchMajor;
+            break;
+        default:
+            pressure = 1;
+            break;
+        }
 
         if (mLastTouch.idBits.hasBit(id)) {
             // Pointer was down before and is still down now.
@@ -2274,17 +2868,19 @@ void TouchInputMapper::applyAveragingTouchFilter() {
                     }
                 }
 
-                averagedX /= totalPressure;
-                averagedY /= totalPressure;
+                if (totalPressure != 0) {
+                    averagedX /= totalPressure;
+                    averagedY /= totalPressure;
 
 #if DEBUG_HACKS
-                LOGD("AveragingTouchFilter: Pointer id %d - "
-                        "totalPressure=%d, averagedX=%d, averagedY=%d", id, totalPressure,
-                        averagedX, averagedY);
+                    LOGD("AveragingTouchFilter: Pointer id %d - "
+                            "totalPressure=%d, averagedX=%d, averagedY=%d", id, totalPressure,
+                            averagedX, averagedY);
 #endif
 
-                mCurrentTouch.pointers[currentIndex].x = averagedX;
-                mCurrentTouch.pointers[currentIndex].y = averagedY;
+                    mCurrentTouch.pointers[currentIndex].x = averagedX;
+                    mCurrentTouch.pointers[currentIndex].y = averagedY;
+                }
             } else {
 #if DEBUG_HACKS
                 LOGD("AveragingTouchFilter: Pointer id %d - Exceeded max distance", id);
@@ -2382,8 +2978,8 @@ void SingleTouchInputMapper::initialize() {
     mDown = false;
     mX = 0;
     mY = 0;
-    mPressure = 1; // default to 1 for devices that don't report pressure
-    mSize = 0; // default to 0 for devices that don't report size
+    mPressure = 0; // default to 0 for devices that don't report pressure
+    mToolWidth = 0; // default to 0 for devices that don't report tool width
 }
 
 void SingleTouchInputMapper::reset() {
@@ -2460,7 +3056,7 @@ void SingleTouchInputMapper::sync(nsecs_t when) {
     }
 
     if (fields & Accumulator::FIELD_ABS_TOOL_WIDTH) {
-        mSize = mAccumulator.absToolWidth;
+        mToolWidth = mAccumulator.absToolWidth;
     }
 
     mCurrentTouch.clear();
@@ -2471,11 +3067,10 @@ void SingleTouchInputMapper::sync(nsecs_t when) {
         mCurrentTouch.pointers[0].x = mX;
         mCurrentTouch.pointers[0].y = mY;
         mCurrentTouch.pointers[0].pressure = mPressure;
-        mCurrentTouch.pointers[0].size = mSize;
-        mCurrentTouch.pointers[0].touchMajor = mSize;
-        mCurrentTouch.pointers[0].touchMinor = mSize;
-        mCurrentTouch.pointers[0].toolMajor = mSize;
-        mCurrentTouch.pointers[0].toolMinor = mSize;
+        mCurrentTouch.pointers[0].touchMajor = 0;
+        mCurrentTouch.pointers[0].touchMinor = 0;
+        mCurrentTouch.pointers[0].toolMajor = mToolWidth;
+        mCurrentTouch.pointers[0].toolMinor = mToolWidth;
         mCurrentTouch.pointers[0].orientation = 0;
         mCurrentTouch.idToIndex[0] = 0;
         mCurrentTouch.idBits.markBit(0);
@@ -2486,20 +3081,13 @@ void SingleTouchInputMapper::sync(nsecs_t when) {
     mAccumulator.clear();
 }
 
-void SingleTouchInputMapper::configureAxes() {
-    TouchInputMapper::configureAxes();
+void SingleTouchInputMapper::configureRawAxes() {
+    TouchInputMapper::configureRawAxes();
 
-    // The axes are aliased to take into account the manner in which they are presented
-    // as part of the TouchData during the sync.
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_X, & mAxes.x);
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_Y, & mAxes.y);
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_PRESSURE, & mAxes.pressure);
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_TOOL_WIDTH, & mAxes.size);
-
-    mAxes.touchMajor = mAxes.size;
-    mAxes.touchMinor = mAxes.size;
-    mAxes.toolMajor = mAxes.size;
-    mAxes.toolMinor = mAxes.size;
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_X, & mRawAxes.x);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_Y, & mRawAxes.y);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_PRESSURE, & mRawAxes.pressure);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_TOOL_WIDTH, & mRawAxes.toolMajor);
 }
 
 
@@ -2562,6 +3150,10 @@ void MultiTouchInputMapper::process(const RawEvent* rawEvent) {
             pointer->fields |= Accumulator::FIELD_ABS_MT_TRACKING_ID;
             pointer->absMTTrackingId = rawEvent->value;
             break;
+        case ABS_MT_PRESSURE:
+            pointer->fields |= Accumulator::FIELD_ABS_MT_PRESSURE;
+            pointer->absMTPressure = rawEvent->value;
+            break;
         }
         break;
     }
@@ -2596,8 +3188,7 @@ void MultiTouchInputMapper::process(const RawEvent* rawEvent) {
 
 void MultiTouchInputMapper::sync(nsecs_t when) {
     static const uint32_t REQUIRED_FIELDS =
-            Accumulator::FIELD_ABS_MT_POSITION_X
-            | Accumulator::FIELD_ABS_MT_POSITION_Y;
+            Accumulator::FIELD_ABS_MT_POSITION_X | Accumulator::FIELD_ABS_MT_POSITION_Y;
 
     uint32_t inCount = mAccumulator.pointerCount;
     uint32_t outCount = 0;
@@ -2619,60 +3210,59 @@ void MultiTouchInputMapper::sync(nsecs_t when) {
         outPointer.x = inPointer.absMTPositionX;
         outPointer.y = inPointer.absMTPositionY;
 
-        if (fields & Accumulator::FIELD_ABS_MT_TOUCH_MAJOR) {
-            int32_t value = inPointer.absMTTouchMajor;
-            if (value <= 0) {
-                // Some devices send sync packets with X / Y but with a 0 touch major to indicate
+        if (fields & Accumulator::FIELD_ABS_MT_PRESSURE) {
+            if (inPointer.absMTPressure <= 0) {
+                // Some devices send sync packets with X / Y but with a 0 presure to indicate
                 // a pointer up.  Drop this finger.
+                continue;
+            }
+            outPointer.pressure = inPointer.absMTPressure;
+        } else {
+            // Default pressure to 0 if absent.
+            outPointer.pressure = 0;
+        }
+
+        if (fields & Accumulator::FIELD_ABS_MT_TOUCH_MAJOR) {
+            if (inPointer.absMTTouchMajor <= 0) {
+                // Some devices send sync packets with X / Y but with a 0 touch major to indicate
+                // a pointer going up.  Drop this finger.
                 continue;
             }
             outPointer.touchMajor = inPointer.absMTTouchMajor;
         } else {
+            // Default touch area to 0 if absent.
             outPointer.touchMajor = 0;
         }
 
         if (fields & Accumulator::FIELD_ABS_MT_TOUCH_MINOR) {
             outPointer.touchMinor = inPointer.absMTTouchMinor;
         } else {
+            // Assume touch area is circular.
             outPointer.touchMinor = outPointer.touchMajor;
         }
 
         if (fields & Accumulator::FIELD_ABS_MT_WIDTH_MAJOR) {
             outPointer.toolMajor = inPointer.absMTWidthMajor;
         } else {
-            outPointer.toolMajor = outPointer.touchMajor;
+            // Default tool area to 0 if absent.
+            outPointer.toolMajor = 0;
         }
 
         if (fields & Accumulator::FIELD_ABS_MT_WIDTH_MINOR) {
             outPointer.toolMinor = inPointer.absMTWidthMinor;
         } else {
+            // Assume tool area is circular.
             outPointer.toolMinor = outPointer.toolMajor;
         }
 
         if (fields & Accumulator::FIELD_ABS_MT_ORIENTATION) {
             outPointer.orientation = inPointer.absMTOrientation;
         } else {
+            // Default orientation to vertical if absent.
             outPointer.orientation = 0;
         }
 
-        if (fields & Accumulator::FIELD_ABS_MT_PRESSURE) {
-            outPointer.pressure = inPointer.absMTPressure;
-        } else {
-            // Derive an approximation of pressure.
-            // FIXME Traditionally we have just passed a normalized value based on
-            //       ABS_MT_TOUCH_MAJOR as an estimate of pressure but the result is not
-            //       very meaningful, particularly on large displays.  We should probably let
-            //       pressure = touch_major / tool_major but it is unclear whether that will
-            //       break applications.
-            outPointer.pressure = outPointer.touchMajor;
-        }
-
-        // Size is an alias for a normalized tool width.
-        // FIXME Normalized tool width doesn't actually make much sense since it literally
-        //       means the approaching contact major axis is divided by its full range as
-        //       reported by the driver.  On a large display this could produce very small values.
-        outPointer.size = outPointer.toolMajor;
-
+        // Assign pointer id using tracking id if available.
         if (havePointerIds) {
             if (fields & Accumulator::FIELD_ABS_MT_TRACKING_ID) {
                 uint32_t id = uint32_t(inPointer.absMTTrackingId);
@@ -2705,33 +3295,17 @@ void MultiTouchInputMapper::sync(nsecs_t when) {
     mAccumulator.clear();
 }
 
-void MultiTouchInputMapper::configureAxes() {
-    TouchInputMapper::configureAxes();
+void MultiTouchInputMapper::configureRawAxes() {
+    TouchInputMapper::configureRawAxes();
 
-    // The axes are aliased to take into account the manner in which they are presented
-    // as part of the TouchData during the sync.
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_POSITION_X, & mAxes.x);
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_POSITION_Y, & mAxes.y);
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_TOUCH_MAJOR, & mAxes.touchMajor);
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_TOUCH_MINOR, & mAxes.touchMinor);
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_WIDTH_MAJOR, & mAxes.toolMajor);
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_WIDTH_MINOR, & mAxes.toolMinor);
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_ORIENTATION, & mAxes.orientation);
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_PRESSURE, & mAxes.pressure);
-
-    if (! mAxes.touchMinor.valid) {
-        mAxes.touchMinor = mAxes.touchMajor;
-    }
-
-    if (! mAxes.toolMinor.valid) {
-        mAxes.toolMinor = mAxes.toolMajor;
-    }
-
-    if (! mAxes.pressure.valid) {
-        mAxes.pressure = mAxes.touchMajor;
-    }
-
-    mAxes.size = mAxes.toolMajor;
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_POSITION_X, & mRawAxes.x);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_POSITION_Y, & mRawAxes.y);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_TOUCH_MAJOR, & mRawAxes.touchMajor);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_TOUCH_MINOR, & mRawAxes.touchMinor);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_WIDTH_MAJOR, & mRawAxes.toolMajor);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_WIDTH_MINOR, & mRawAxes.toolMinor);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_ORIENTATION, & mRawAxes.orientation);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_PRESSURE, & mRawAxes.pressure);
 }
 
 

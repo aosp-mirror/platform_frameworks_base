@@ -4392,6 +4392,14 @@ public class WindowManagerService extends IWindowManager.Stub
         return mInputManager.monitorInput(inputChannelName);
     }
 
+    public InputDevice getInputDevice(int deviceId) {
+        return mInputManager.getInputDevice(deviceId);
+    }
+
+    public int[] getInputDeviceIds() {
+        return mInputManager.getInputDeviceIds();
+    }
+
     public void enableScreenAfterBoot() {
         synchronized(mWindowMap) {
             if (mSystemBooted) {
