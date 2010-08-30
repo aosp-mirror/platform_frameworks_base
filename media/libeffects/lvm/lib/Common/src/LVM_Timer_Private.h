@@ -15,15 +15,6 @@
  * limitations under the License.
  */
 
-/************************************************************************/
-/*                                                                      */
-/*     Project::   My Project                                           */
-/*     $Author: beq07716 $*/
-/*     $Revision: 1000 $*/
-/*     $Date: 2010-06-28 13:08:20 +0200 (Mon, 28 Jun 2010) $*/
-/*                                                                      */
-/************************************************************************/
-
 #ifndef LVM_TIMER_PRIVATE_H
 #define LVM_TIMER_PRIVATE_H
 
