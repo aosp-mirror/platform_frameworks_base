@@ -28,7 +28,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import android.os.RemoteException;
+// import android.os.RemoteException; // apparently not used
 import android.os.ServiceManager;
 import android.util.AndroidException;
 import android.view.IWindowManager;
@@ -619,6 +619,11 @@ public class Am {
                 "        -e <NAME> <VALUE>: set argument <NAME> to <VALUE>\n" +
                 "        -p <FILE>: write profiling data to <FILE>\n" +
                 "        -w: wait for instrumentation to finish before returning\n" +
+                "\n" +
+                "    run a test package against an application: am instrument [flags] <TEST_PACKAGE>/<RUNNER_CLASS>\n" +
+                "        -e <testrunner_flag> <testrunner_value> [,<testrunner_value>]\n" +
+                "        -w wait for the test to finish (required)\n" +
+                "        -r use with -e perf true to generate raw output for performance measurements\n" +
                 "\n" +
                 "    start profiling: am profile <PROCESS> start <FILE>\n" +
                 "    stop profiling: am profile <PROCESS> stop\n" +
