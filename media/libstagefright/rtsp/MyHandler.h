@@ -76,7 +76,7 @@ struct MyHandler : public AHandler {
           mFirstAccessUnitNTP(0),
           mNumAccessUnitsReceived(0),
           mCheckPending(false) {
-
+        mNetLooper->setName("rtsp net");
         mNetLooper->start(false /* runOnCallingThread */,
                           false /* canCallJava */,
                           PRIORITY_HIGHEST);
@@ -389,7 +389,7 @@ struct MyHandler : public AHandler {
                 }
 
                 mNumAccessUnitsReceived = 0;
-                msg->post(500000);
+                msg->post(1000000);
                 break;
             }
 
@@ -400,7 +400,7 @@ struct MyHandler : public AHandler {
                 if (!mCheckPending) {
                     mCheckPending = true;
                     sp<AMessage> check = new AMessage('chek', id());
-                    check->post(500000);
+                    check->post(1000000);
                 }
 
                 size_t trackIndex;

@@ -19,6 +19,7 @@
 #define A_LOOPER_H_
 
 #include <media/stagefright/foundation/ABase.h>
+#include <media/stagefright/foundation/AString.h>
 #include <utils/Errors.h>
 #include <utils/KeyedVector.h>
 #include <utils/List.h>
@@ -35,6 +36,9 @@ struct ALooper : public RefBase {
     typedef int32_t handler_id;
 
     ALooper();
+
+    // Takes effect in a subsequent call to start().
+    void setName(const char *name);
 
     handler_id registerHandler(const sp<AHandler> &handler);
     void unregisterHandler(handler_id handlerID);
@@ -62,6 +66,8 @@ private:
 
     Mutex mLock;
     Condition mQueueChangedCondition;
+
+    AString mName;
 
     List<Event> mEventQueue;
 
