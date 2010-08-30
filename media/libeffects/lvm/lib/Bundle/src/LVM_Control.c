@@ -15,14 +15,6 @@
  * limitations under the License.
  */
 
-/****************************************************************************************
-
-     $Author: nxp007753 $
-     $Revision: 1331 $
-     $Date: 2010-07-27 12:26:23 +0200 (Tue, 27 Jul 2010) $
-
-*****************************************************************************************/
-
 
 /****************************************************************************************/
 /*                                                                                      */
@@ -201,7 +193,6 @@ LVM_ReturnStatus_en LVM_SetControlParameters(LVM_Handle_t           hInstance,
     * the copy to NewParams then one frame may have mixed parameters, some old and some new.
     */
     pInstance->ControlPending = LVM_TRUE;
-    pInstance->NoSmoothVolume = LVM_FALSE;
 
     return(LVM_SUCCESS);
 }
@@ -830,6 +821,7 @@ LVM_ReturnStatus_en LVM_ApplyNewSettings(LVM_Handle_t   hInstance)
     /*
      * Update the parameters and clear the flag
      */
+    pInstance->NoSmoothVolume = LVM_FALSE;
     pInstance->Params =  LocalParams;
 
 
