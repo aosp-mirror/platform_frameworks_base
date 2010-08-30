@@ -81,6 +81,7 @@ public final class SIMFileHandler extends IccFileHandler implements IccConstants
         case EF_SPN_CPHS:
         case EF_SPN_SHORT_CPHS:
         case EF_INFO_CPHS:
+        case EF_CSP_CPHS:
             return MF_SIM + DF_GSM;
 
         case EF_PBR:
