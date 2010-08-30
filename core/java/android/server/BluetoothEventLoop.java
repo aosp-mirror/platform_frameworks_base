@@ -404,7 +404,13 @@ class BluetoothEventLoop {
             mBluetoothService.sendUuidIntent(address);
         } else if (name.equals("Paired")) {
             if (propValues[1].equals("true")) {
-                mBluetoothService.getBondState().setBondState(address, BluetoothDevice.BOND_BONDED);
+                // If locally initiated pairing, we will
+                // not go to BOND_BONDED state until we have received a
+                // successful return value in onCreatePairedDeviceResult
+                if (null == mBluetoothService.getBondState().getPendingOutgoingBonding()) {
+                    mBluetoothService.getBondState().setBondState(address,
+                            BluetoothDevice.BOND_BONDED);
+                }
             } else {
                 mBluetoothService.getBondState().setBondState(address,
                         BluetoothDevice.BOND_NONE);
