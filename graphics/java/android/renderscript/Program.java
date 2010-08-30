@@ -17,6 +17,11 @@
 package android.renderscript;
 
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+
+import android.content.res.Resources;
 import android.util.Config;
 import android.util.Log;
 
@@ -92,6 +97,44 @@ public class Program extends BaseObj {
 
         public BaseProgramBuilder setShader(String s) {
             mShader = s;
+            return this;
+        }
+
+        public BaseProgramBuilder setShader(Resources resources, int resourceID) {
+            byte[] str;
+            int strLength;
+            InputStream is = resources.openRawResource(resourceID);
+            try {
+                try {
+                    str = new byte[1024];
+                    strLength = 0;
+                    while(true) {
+                        int bytesLeft = str.length - strLength;
+                        if (bytesLeft == 0) {
+                            byte[] buf2 = new byte[str.length * 2];
+                            System.arraycopy(str, 0, buf2, 0, str.length);
+                            str = buf2;
+                            bytesLeft = str.length - strLength;
+                        }
+                        int bytesRead = is.read(str, strLength, bytesLeft);
+                        if (bytesRead <= 0) {
+                            break;
+                        }
+                        strLength += bytesRead;
+                    }
+                } finally {
+                    is.close();
+                }
+            } catch(IOException e) {
+                throw new Resources.NotFoundException();
+            }
+
+            try {
+                mShader = new String(str, 0, strLength, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                Log.e("Renderscript shader creation", "Could not decode shader string");
+            }
+
             return this;
         }
 
