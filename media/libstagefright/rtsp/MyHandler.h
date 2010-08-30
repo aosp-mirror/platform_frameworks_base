@@ -33,6 +33,14 @@
 
 #define USE_TCP_INTERLEAVED     0
 
+// If no access units are received within 3 secs, assume that the rtp
+// stream has ended and signal end of stream.
+static int64_t kAccessUnitTimeoutUs = 3000000ll;
+
+// If no access units arrive for the first 10 secs after starting the
+// stream, assume none ever will and signal EOS or switch transports.
+static int64_t kStartupTimeoutUs = 10000000ll;
+
 namespace android {
 
 static bool GetAttribute(const char *s, const char *key, AString *value) {
@@ -322,7 +330,7 @@ struct MyHandler : public AHandler {
                     mDoneMsg = NULL;
 
                     sp<AMessage> timeout = new AMessage('tiou', id());
-                    timeout->post(10000000ll);
+                    timeout->post(kStartupTimeoutUs);
                 } else {
                     sp<AMessage> reply = new AMessage('disc', id());
                     mConn->disconnect(reply);
@@ -389,7 +397,7 @@ struct MyHandler : public AHandler {
                 }
 
                 mNumAccessUnitsReceived = 0;
-                msg->post(1000000);
+                msg->post(kAccessUnitTimeoutUs);
                 break;
             }
 
@@ -400,7 +408,7 @@ struct MyHandler : public AHandler {
                 if (!mCheckPending) {
                     mCheckPending = true;
                     sp<AMessage> check = new AMessage('chek', id());
-                    check->post(1000000);
+                    check->post(kAccessUnitTimeoutUs);
                 }
 
                 size_t trackIndex;
