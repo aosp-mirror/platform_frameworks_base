@@ -233,7 +233,7 @@ public final class Pm {
             for (int i=0; i<rawList.length; i++) {
                 list.add(rawList[i]);
             }
-                    
+
 
             // Sort by name
             Collections.sort(list, new Comparator<FeatureInfo>() {
@@ -909,6 +909,9 @@ public final class Pm {
         System.err.println("The list instrumentation command prints all instrumentations,");
         System.err.println("or only those that target a specified package.  Options:");
         System.err.println("  -f: see their associated file.");
+        System.err.println("(Use this command to list all test packages, or use <TARGET-PACKAGE> ");
+        System.err.println(" to list the test packages for a particular application. The -f ");
+        System.err.println(" option lists the .apk file for the test package.)");
         System.err.println("");
         System.err.println("The list features command prints all features of the system.");
         System.err.println("");
