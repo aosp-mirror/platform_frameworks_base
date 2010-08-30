@@ -31,6 +31,7 @@ ARTPWriter::ARTPWriter(int fd)
       mReflector(new AHandlerReflector<ARTPWriter>(this)) {
     CHECK_GE(fd, 0);
 
+    mLooper->setName("rtp writer");
     mLooper->registerHandler(mReflector);
     mLooper->start();
 
