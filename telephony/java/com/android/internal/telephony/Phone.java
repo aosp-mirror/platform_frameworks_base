@@ -1710,4 +1710,15 @@ public interface Phone {
     void unsetOnEcbModeExitResponse(Handler h);
 
 
+    /**
+     * TODO: Adding a function for each property is not good.
+     * A fucntion of type getPhoneProp(propType) where propType is an
+     * enum of GSM+CDMA+LTE props would be a better approach.
+     *
+     * Get "Restriction of menu options for manual PLMN selection" bit
+     * status from EF_CSP data, this belongs to "Value Added Services Group".
+     * @return true if this bit is set or EF_CSP data is unavailable,
+     * false otherwise
+     */
+    boolean isCspPlmnEnabled();
 }
