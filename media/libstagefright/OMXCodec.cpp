@@ -1811,7 +1811,9 @@ void OMXCodec::onEvent(OMX_EVENTTYPE event, OMX_U32 data1, OMX_U32 data2) {
 
         case OMX_EventPortSettingsChanged:
         {
-            onPortSettingsChanged(data1);
+            if (data2 == 0 || data2 == OMX_IndexParamPortDefinition) {
+                onPortSettingsChanged(data1);
+            }
             break;
         }
 
