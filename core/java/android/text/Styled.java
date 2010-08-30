@@ -203,9 +203,10 @@ public class Styled
 			}
 		}
 	
+        int result;
         if (replacement == null) {
             workPaint.getFontMetricsInt(fmi);
-            workPaint.getTextWidths(text, start, end, widths);
+            result = workPaint.getTextWidths(text, start, end, widths);
         } else {
             int wid = replacement.getSize(workPaint, text, start, end, fmi);
 
@@ -214,8 +215,9 @@ public class Styled
                 for (int i = start + 1; i < end; i++)
                     widths[i - start] = 0;
             }
+            result = end - start;
         }
-        return end - start;
+        return result;
     }
 
     /**
