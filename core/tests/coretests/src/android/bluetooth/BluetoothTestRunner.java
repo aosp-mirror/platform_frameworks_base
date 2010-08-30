@@ -26,8 +26,8 @@ public class BluetoothTestRunner extends InstrumentationTestRunner {
     public static int sEnableIterations = 100;
     public static int sDiscoverableIterations = 1000;
     public static int sScanIterations = 1000;
-    public static int sConnectHeadsetIterations = 1000;
-    public static int sConnectA2dpIterations = 1000;
+    public static int sConnectHeadsetIterations = 100;
+    public static int sConnectA2dpIterations = 100;
 
     public static String sHeadsetAddress = "";
     public static String sA2dpAddress = "";
