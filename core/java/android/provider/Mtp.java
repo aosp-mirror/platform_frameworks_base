@@ -34,6 +34,14 @@ public final class Mtp
     private static final String CONTENT_AUTHORITY_SLASH = "content://" + AUTHORITY + "/";
     private static final String CONTENT_AUTHORITY_DEVICE_SLASH = "content://" + AUTHORITY + "/device/";
 
+
+   /**
+     * Broadcast Action:  A broadcast to indicate the end of an MTP session with the host.
+     * This broadcast is only sent if MTP activity has modified the media database during the
+     * most recent MTP session
+     */
+    public static final String ACTION_MTP_SESSION_END = "android.provider.action.MTP_SESSION_END";
+
     /**
      * Contains list of all MTP/PTP devices
      */

@@ -185,6 +185,9 @@ void MtpServer::run() {
             LOGV("skipping response\n");
         }
     }
+
+    if (mSessionOpen)
+        mDatabase->sessionEnded();
 }
 
 void MtpServer::sendObjectAdded(MtpObjectHandle handle) {
@@ -346,6 +349,9 @@ MtpResponseCode MtpServer::doOpenSession() {
     }
     mSessionID = mRequest.getParameter(1);
     mSessionOpen = true;
+
+    mDatabase->sessionStarted();
+
     return MTP_RESPONSE_OK;
 }
 
@@ -354,6 +360,7 @@ MtpResponseCode MtpServer::doCloseSession() {
         return MTP_RESPONSE_SESSION_NOT_OPEN;
     mSessionID = 0;
     mSessionOpen = false;
+    mDatabase->sessionEnded();
     return MTP_RESPONSE_OK;
 }
 

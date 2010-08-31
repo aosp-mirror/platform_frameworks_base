@@ -52,6 +52,9 @@ static jmethodID method_getObjectFilePath;
 static jmethodID method_deleteFile;
 static jmethodID method_getObjectReferences;
 static jmethodID method_setObjectReferences;
+static jmethodID method_sessionStarted;
+static jmethodID method_sessionEnded;
+
 static jfieldID field_context;
 
 MtpDatabase* getMtpDatabase(JNIEnv *env, jobject database) {
@@ -135,6 +138,10 @@ public:
                                             MtpObjectFormat format);
 
     virtual MtpProperty*            getDevicePropertyDesc(MtpDeviceProperty property);
+
+    virtual void                    sessionStarted();
+
+    virtual void                    sessionEnded();
 };
 
 // ----------------------------------------------------------------------------
@@ -583,6 +590,18 @@ MtpProperty* MyMtpDatabase::getDevicePropertyDesc(MtpDeviceProperty property) {
     return NULL;
 }
 
+void MyMtpDatabase::sessionStarted() {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    env->CallVoidMethod(mDatabase, method_sessionStarted);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+}
+
+void MyMtpDatabase::sessionEnded() {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    env->CallVoidMethod(mDatabase, method_sessionEnded);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+}
+
 #endif // HAVE_ANDROID_OS
 
 // ----------------------------------------------------------------------------
@@ -701,6 +720,17 @@ int register_android_media_MtpDatabase(JNIEnv *env)
         LOGE("Can't find setObjectReferences");
         return -1;
     }
+    method_sessionStarted = env->GetMethodID(clazz, "sessionStarted", "()V");
+    if (method_sessionStarted == NULL) {
+        LOGE("Can't find sessionStarted");
+        return -1;
+    }
+    method_sessionEnded = env->GetMethodID(clazz, "sessionEnded", "()V");
+    if (method_sessionEnded == NULL) {
+        LOGE("Can't find sessionEnded");
+        return -1;
+    }
+
     field_context = env->GetFieldID(clazz, "mNativeContext", "I");
     if (field_context == NULL) {
         LOGE("Can't find MtpDatabase.mNativeContext");
