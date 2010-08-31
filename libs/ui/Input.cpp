@@ -210,21 +210,4 @@ void InputDeviceInfo::addMotionRange(int32_t rangeType, const MotionRange& range
     mMotionRanges.add(rangeType, range);
 }
 
-// class InputDeviceProxy
-
-InputDeviceProxy::InputDeviceProxy() {
-}
-
-InputDeviceProxy::~InputDeviceProxy() {
-}
-
-void InputDeviceProxy::getDeviceIds(Vector<int32_t>& outIds) {
-    // TODO use Binder
-}
-
-sp<InputDeviceProxy> InputDeviceProxy::getDevice(int32_t id) {
-    // TODO use Binder
-    return NULL;
-}
-
 } // namespace android
