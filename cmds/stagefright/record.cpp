@@ -32,9 +32,15 @@
 
 using namespace android;
 
+static const int32_t kFramerate = 24;  // fps
+static const int32_t kIFramesIntervalSec = 1;
+static const int32_t kVideoBitRate = 512 * 1024;
+static const int32_t kAudioBitRate = 12200;
+static const int32_t kColorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
+static const int64_t kDurationUs = 10000000LL;  // 10 seconds
+
 #if 1
 class DummySource : public MediaSource {
-    static const int32_t kFramerate = 24;  // fps
 
 public:
     DummySource(int width, int height)
@@ -176,6 +182,12 @@ int main(int argc, char **argv) {
     enc_meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_AVC);
     enc_meta->setInt32(kKeyWidth, width);
     enc_meta->setInt32(kKeyHeight, height);
+    enc_meta->setInt32(kKeySampleRate, kFramerate);
+    enc_meta->setInt32(kKeyBitRate, kVideoBitRate);
+    enc_meta->setInt32(kKeyStride, width);
+    enc_meta->setInt32(kKeySliceHeight, height);
+    enc_meta->setInt32(kKeyIFramesInterval, kIFramesIntervalSec);
+    enc_meta->setInt32(kKeyColorFormat, kColorFormat);
 
     sp<MediaSource> encoder =
         OMXCodec::Create(
@@ -184,8 +196,10 @@ int main(int argc, char **argv) {
 #if 1
     sp<MPEG4Writer> writer = new MPEG4Writer("/sdcard/output.mp4");
     writer->addSource(encoder);
+    writer->setMaxFileDuration(kDurationUs);
     writer->start();
     while (!writer->reachedEOS()) {
+        fprintf(stderr, ".");
         usleep(100000);
     }
     writer->stop();
@@ -194,6 +208,8 @@ int main(int argc, char **argv) {
 
     MediaBuffer *buffer;
     while (encoder->read(&buffer) == OK) {
+        printf(".");
+        fflush(stdout);
         int32_t isSync;
         if (!buffer->meta_data()->findInt32(kKeyIsSyncFrame, &isSync)) {
             isSync = false;
@@ -209,6 +225,7 @@ int main(int argc, char **argv) {
     encoder->stop();
 #endif
 
+    printf("$\n");
     client.disconnect();
 #endif
 
@@ -267,6 +284,7 @@ int main(int argc, char **argv) {
     encMeta->setInt32(kKeySampleRate, kSampleRate);
     encMeta->setInt32(kKeyChannelCount, kNumChannels);
     encMeta->setInt32(kKeyMaxInputSize, 8192);
+    encMeta->setInt32(kKeyBitRate, kAudioBitRate);
 
     sp<MediaSource> encoder =
         OMXCodec::Create(client.interface(), encMeta, true, audioSource);
