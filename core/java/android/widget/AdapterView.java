@@ -808,7 +808,6 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
             mNextSelectedPosition = INVALID_POSITION;
             mNextSelectedRowId = INVALID_ROW_ID;
             mNeedSync = false;
-            checkSelectionChanged();
 
             checkFocus();
             requestLayout();
@@ -819,13 +818,21 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         }
     }
 
-    private class SelectionNotifier extends Handler implements Runnable {
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        removeCallbacks(mSelectionNotifier);
+    }
+
+    private class SelectionNotifier implements Runnable {
         public void run() {
             if (mDataChanged) {
                 // Data has changed between when this SelectionNotifier
                 // was posted and now. We need to wait until the AdapterView
                 // has been synched to the new data.
-                post(this);
+                if (getAdapter() != null) {
+                    post(this);
+                }
             } else {
                 fireOnSelected();
             }
@@ -842,7 +849,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
                 if (mSelectionNotifier == null) {
                     mSelectionNotifier = new SelectionNotifier();
                 }
-                mSelectionNotifier.post(mSelectionNotifier);
+                post(mSelectionNotifier);
             } else {
                 fireOnSelected();
             }
