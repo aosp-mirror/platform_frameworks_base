@@ -871,8 +871,7 @@
     <string name="tethered_notification_message" msgid="3067108323903048927">"Yapılandırmak için dokunun"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Geri"</string>
     <string name="next_button_label" msgid="1080555104677992408">"İleri"</string>
-    <!-- no translation found for skip_button_label (1275362299471631819) -->
-    <skip />
+    <string name="skip_button_label" msgid="1275362299471631819">"Atla"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Yüksek düzeyde mobil veri kullanımı"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Mobil veri kullanımı hakkında daha fazla bilgi edinmek için dokunun"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Mobil veri limiti aşıldı"</string>

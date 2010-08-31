@@ -1392,8 +1392,10 @@ public class PackageManagerTests extends AndroidTestCase {
                 assertNotNull(info);
                 if ((moveFlags & PackageManager.MOVE_INTERNAL) != 0) {
                     assertTrue((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == 0);
+                    assertTrue(info.nativeLibraryDir.startsWith(info.dataDir));
                 } else if ((moveFlags & PackageManager.MOVE_EXTERNAL_MEDIA) != 0){
                     assertTrue((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
+                    assertTrue(info.nativeLibraryDir.startsWith(SECURE_CONTAINERS_PREFIX));
                 }
             }
         } catch (NameNotFoundException e) {

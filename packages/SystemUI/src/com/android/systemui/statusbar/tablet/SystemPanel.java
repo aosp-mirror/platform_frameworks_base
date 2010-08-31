@@ -78,7 +78,7 @@ import com.android.systemui.R;
 public class SystemPanel extends LinearLayout {
     private static final String TAG = "SystemPanel";
     private static final boolean DEBUG = TabletStatusBarService.DEBUG;
-    private static final boolean DEBUG_SIGNAL = true;
+    private static final boolean DEBUG_SIGNAL = false;
 
     private static final int MINIMUM_BACKLIGHT = android.os.Power.BRIGHTNESS_DIM + 5;
     private static final int MAXIMUM_BACKLIGHT = android.os.Power.BRIGHTNESS_ON;

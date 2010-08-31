@@ -15,14 +15,6 @@
  * limitations under the License.
  */
 
-/************************************************************************************
-
-     $Author: nxp007753 $
-     $Revision: 1331 $
-     $Date: 2010-07-27 12:26:23 +0200 (Tue, 27 Jul 2010) $
-
-*************************************************************************************/
-
 /************************************************************************************/
 /*                                                                                  */
 /*  Includes                                                                        */
@@ -126,6 +118,8 @@ LVCS_ReturnStatus_en LVCS_Control(LVCS_Handle_t      hInstance,
         Offset = (LVM_INT16)(pParams->SpeakerType + pParams->SourceFormat*(1+LVCS_EX_HEADPHONES));
 
         pInstance->VolCorrect = pLVCS_VolCorrectTable[Offset];
+
+        pInstance->CompressGain = pInstance->VolCorrect.CompMin;
 
         LVC_Mixer_Init(&pInstance->BypassMix.Mixer_Instance.MixerStream[0],0,0);
 

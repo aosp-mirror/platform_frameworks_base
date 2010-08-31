@@ -732,7 +732,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         }
 
         if (ar.exception == null) {
-            mNetworkProperties = getNetworkProperties(mActiveDataConnection);
+            mLinkProperties = getLinkProperties(mActiveDataConnection);
 
             // everything is setup
             notifyDefaultData(reason);

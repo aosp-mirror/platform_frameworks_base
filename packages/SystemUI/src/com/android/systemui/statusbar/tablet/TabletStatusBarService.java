@@ -22,6 +22,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.StatusBarManager;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -493,6 +494,15 @@ public class TabletStatusBarService extends StatusBarService {
             : H.MSG_CLOSE_SYSTEM_PANEL;
         mHandler.removeMessages(msg);
         mHandler.sendEmptyMessage(msg);
+    }
+
+    public void recentButtonClicked(View v) {
+        if (DEBUG) Slog.d(TAG, "clicked recent apps");
+        Intent intent = new Intent();
+        intent.setClass(this, RecentApplicationsActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        startActivity(intent);
     }
 
     /**

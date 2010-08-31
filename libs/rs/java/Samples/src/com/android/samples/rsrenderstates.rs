@@ -17,6 +17,7 @@
 #pragma rs java_package_name(com.android.samples)
 
 #include "rs_graphics.rsh"
+#include "shader_def.rsh"
 
 rs_program_vertex gProgVertex;
 rs_program_fragment gProgFragmentColor;
@@ -51,6 +52,15 @@ rs_sampler gNearestClamp;
 rs_program_raster gCullBack;
 rs_program_raster gCullFront;
 
+// Custom vertex shader compunents
+VertexShaderConstants *gVSConstants;
+FragentShaderConstants *gFSConstants;
+// Export these out to easily set the inputs to shader
+VertexShaderInputs *gVSInputs;
+// Custom shaders we use for lighting
+rs_program_vertex gProgVertexCustom;
+rs_program_fragment gProgFragmentCustom;
+
 #pragma rs export_var(gProgVertex, gProgFragmentColor, gProgFragmentTexture)
 #pragma rs export_var(gProgStoreBlendNoneDepth, gProgStoreBlendNone, gProgStoreBlendAlpha, gProgStoreBlendAdd)
 #pragma rs export_var(gTexOpaque, gTexTorus, gTexTransparent)
@@ -58,6 +68,7 @@ rs_program_raster gCullFront;
 #pragma rs export_var(gFontSans, gFontSerif, gFontSerifBold, gFontSerifItalic, gFontSerifBoldItalic, gFontMono)
 #pragma rs export_var(gLinearClamp, gLinearWrap, gMipLinearWrap, gNearestClamp)
 #pragma rs export_var(gCullBack, gCullFront)
+#pragma rs export_var(gVSConstants, gFSConstants, gVSInputs, gProgVertexCustom, gProgFragmentCustom)
 
 //What we are showing
 #pragma rs export_var(gDisplayMode)
@@ -274,7 +285,7 @@ void displayTextureSamplers() {
 
 float gTorusRotation = 0;
 
-void displayCullingSamplers() {
+void displayCullingSamples() {
     rsgBindProgramVertex(gProgVertex);
     // Setup the projectioni matrix with 60 degree field of view
     rs_matrix4x4 proj;
@@ -315,6 +326,94 @@ void displayCullingSamplers() {
     rsgDrawText("Displaying mesh front/back face culling", 10, rsgGetHeight() - 10);
 }
 
+float gLight0Rotation = 0;
+float gLight1Rotation = 0;
+
+void setupCustomShaderLights() {
+    float4 light0Pos = {-5.0f, 5.0f, -10.0f, 1.0f};
+    float4 light1Pos = {2.0f, 5.0f, 15.0f, 1.0f};
+    float3 light0DiffCol = {0.9f, 0.7f, 0.7f};
+    float3 light0SpecCol = {0.9f, 0.8f, 0.8f};
+    float3 light1DiffCol = {0.7f, 0.7f, 0.9f};
+    float3 light1SpecCol = {0.8f, 0.8f, 0.9f};
+
+    gLight0Rotation += 150.0f * rsGetDt();
+    if(gLight0Rotation > 360.0f) {
+        gLight0Rotation -= 360.0f;
+    }
+    gLight1Rotation -= 50.0f * rsGetDt();
+    if(gLight1Rotation > 360.0f) {
+        gLight1Rotation -= 360.0f;
+    }
+
+    rs_matrix4x4 l0Mat;
+    rsMatrixLoadRotate(&l0Mat, gLight0Rotation, 1.0f, 0.0f, 0.0f);
+    light0Pos = rsMatrixMultiply(&l0Mat, light0Pos);
+    rs_matrix4x4 l1Mat;
+    rsMatrixLoadRotate(&l1Mat, gLight1Rotation, 0.0f, 0.0f, 1.0f);
+    light1Pos = rsMatrixMultiply(&l1Mat, light1Pos);
+
+    // Set light 0 properties
+    gVSConstants->light0_Posision.x = light0Pos.x;
+    gVSConstants->light0_Posision.y = light0Pos.y;
+    gVSConstants->light0_Posision.z = light0Pos.z;
+    gVSConstants->light0_Diffuse = 1.0f;
+    gVSConstants->light0_Specular = 0.5f;
+    gVSConstants->light0_CosinePower = 70.0f;
+    // Set light 1 properties
+    gVSConstants->light1_Posision.x = light1Pos.x;
+    gVSConstants->light1_Posision.y = light1Pos.y;
+    gVSConstants->light1_Posision.z = light1Pos.z;
+    gVSConstants->light1_Diffuse = 1.0f;
+    gVSConstants->light1_Specular = 0.7f;
+    gVSConstants->light1_CosinePower = 50.0f;
+
+    // Update fragmetn shader constants
+    // Set light 0 colors
+    gFSConstants->light0_DiffuseColor = light0DiffCol;
+    gFSConstants->light0_SpecularColor = light0SpecCol;
+    // Set light 1 colors
+    gFSConstants->light1_DiffuseColor = light1DiffCol;
+    gFSConstants->light1_SpecularColor = light1SpecCol;
+}
+
+void displayCustomShaderSamples() {
+
+    // Update vertex shader constants
+    // Load model matrix
+    // Aplly a rotation to our mesh
+    gTorusRotation += 50.0f * rsGetDt();
+    if(gTorusRotation > 360.0f) {
+        gTorusRotation -= 360.0f;
+    }
+
+    // Position our model on the screen
+    rsMatrixLoadTranslate(&gVSConstants->model, 0.0f, 0.0f, -10.0f);
+    rsMatrixRotate(&gVSConstants->model, gTorusRotation, 1.0f, 0.0f, 0.0f);
+    setupCustomShaderLights();
+
+    rsgBindProgramVertex(gProgVertexCustom);
+    // Setup the projectioni matrix with 60 degree field of view
+    rs_matrix4x4 proj;
+    float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
+    rsMatrixLoadPerspective(&proj, 30.0f, aspect, 0.1f, 100.0f);
+    rsgProgramVertexLoadProjectionMatrix(&proj);
+
+    // Fragment shader with texture
+    rsgBindProgramStore(gProgStoreBlendNoneDepth);
+    rsgBindProgramFragment(gProgFragmentCustom);
+    rsgBindSampler(gProgFragmentCustom, 0, gLinearClamp);
+    rsgBindTexture(gProgFragmentCustom, 0, gTexTorus);
+
+    // Use back face culling
+    rsgBindProgramRaster(gCullBack);
+    rsgDrawMesh(gTorusMesh);
+
+    rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
+    rsgBindFont(gFontMono);
+    rsgDrawText("Custom shader sample", 10, rsgGetHeight() - 10);
+}
+
 int root(int launchID) {
 
     rsgClearColor(0.2f, 0.2f, 0.2f, 0.0f);
@@ -337,7 +436,10 @@ int root(int launchID) {
         displayTextureSamplers();
         break;
     case 5:
-        displayCullingSamplers();
+        displayCullingSamples();
+        break;
+    case 6:
+        displayCustomShaderSamples();
         break;
     }
 

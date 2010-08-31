@@ -21,7 +21,7 @@ import com.android.internal.telephony.gsm.ApnSetting;
 import com.android.internal.util.HierarchicalState;
 import com.android.internal.util.HierarchicalStateMachine;
 
-import android.net.NetworkProperties;
+import android.net.LinkProperties;
 import android.os.AsyncResult;
 import android.os.Message;
 import android.os.SystemProperties;
@@ -261,7 +261,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     protected int mTag;
     protected PhoneBase phone;
     protected int cid;
-    protected NetworkProperties mNetworkProperties = new NetworkProperties();
+    protected LinkProperties mLinkProperties = new LinkProperties();
     protected long createTime;
     protected long lastFailTime;
     protected FailCause lastFailCause;
@@ -378,7 +378,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
         this.lastFailTime = -1;
         this.lastFailCause = FailCause.NONE;
 
-        mNetworkProperties.clear();
+        mLinkProperties = new LinkProperties();
     }
 
     /**
@@ -416,7 +416,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
 
             // Start with clean network properties and if we have
             // a failure we'll clear again at the bottom of this code.
-            mNetworkProperties.clear();
+            LinkProperties linkProperties = new LinkProperties();
             if (response.length >= 2) {
                 cid = Integer.parseInt(response[0]);
                 String interfaceName = response[1];
@@ -425,23 +425,23 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                 try {
                     String prefix = "net." + interfaceName + ".";
 
-                    mNetworkProperties.setInterface(NetworkInterface.getByName(interfaceName));
+                    linkProperties.setInterface(NetworkInterface.getByName(interfaceName));
 
                     // TODO: Get gateway and dns via RIL interface not property?
                     String gatewayAddress = SystemProperties.get(prefix + "gw");
-                    mNetworkProperties.setGateway(InetAddress.getByName(gatewayAddress));
+                    linkProperties.setGateway(InetAddress.getByName(gatewayAddress));
 
                     if (response.length > 2) {
                         String ipAddress = response[2];
-                        mNetworkProperties.addAddress(InetAddress.getByName(ipAddress));
+                        linkProperties.addAddress(InetAddress.getByName(ipAddress));
 
                         // TODO: Get gateway and dns via RIL interface not property?
                         String dnsServers[] = new String[2];
                         dnsServers[0] = SystemProperties.get(prefix + "dns1");
                         dnsServers[1] = SystemProperties.get(prefix + "dns2");
                         if (isDnsOk(dnsServers)) {
-                            mNetworkProperties.addDns(InetAddress.getByName(dnsServers[0]));
-                            mNetworkProperties.addDns(InetAddress.getByName(dnsServers[1]));
+                            linkProperties.addDns(InetAddress.getByName(dnsServers[0]));
+                            linkProperties.addDns(InetAddress.getByName(dnsServers[1]));
                         } else {
                             result = SetupResult.ERR_BadDns;
                         }
@@ -463,15 +463,16 @@ public abstract class DataConnection extends HierarchicalStateMachine {
 
             // An error occurred so clear properties
             if (result != SetupResult.SUCCESS) {
-                log("onSetupCompleted with an error clearing NetworkProperties");
-                mNetworkProperties.clear();
+                log("onSetupCompleted with an error clearing LinkProperties");
+                linkProperties.clear();
             }
+            mLinkProperties = linkProperties;
         }
 
         if (DBG) {
             log("DataConnection setup result='" + result + "' on cid=" + cid);
             if (result == SetupResult.SUCCESS) {
-                log("NetworkProperties: " + mNetworkProperties.toString());
+                log("LinkProperties: " + mLinkProperties.toString());
             }
         }
         return result;
@@ -636,7 +637,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                         case ERR_BadDns:
                             // Connection succeeded but DNS info is bad so disconnect
                             StringBuilder dnsAddressesSb = new StringBuilder();
-                            for (InetAddress addr : mNetworkProperties.getDnses()) {
+                            for (InetAddress addr : mLinkProperties.getDnses()) {
                                 if (dnsAddressesSb.length() != 0) dnsAddressesSb.append(" ");
                                 dnsAddressesSb.append(addr.toString());
                             }
@@ -911,10 +912,10 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     }
 
     /**
-     * @return the connections NetworkProperties
+     * @return the connections LinkProperties
      */
-    public NetworkProperties getNetworkProperties() {
-        return mNetworkProperties;
+    public LinkProperties getLinkProperties() {
+        return new LinkProperties(mLinkProperties);
     }
 
     /**

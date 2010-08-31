@@ -20,10 +20,6 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.SpannableStringBuilder;
 import android.telephony.PhoneNumberUtils;
-import android.telephony.TelephonyManager;
-import android.content.Context;
-
-import junit.framework.TestCase;
 
 public class PhoneNumberUtilsTest extends AndroidTestCase {
 
@@ -527,4 +523,16 @@ public class PhoneNumberUtilsTest extends AndroidTestCase {
         assertEquals("+16502910000", PhoneNumberUtils.normalizeNumber("+1 650 2910000"));
     }
 
+    @SmallTest
+    public void testFormatDailabeNumber() {
+        // Using the phoneNumberE164's country code
+        assertEquals("(650) 291-0000",
+                PhoneNumberUtils.formatNumber("6502910000", "+16502910000", "CN"));
+        // The phoneNumberE164 is null
+        assertEquals("(650) 291-0000", PhoneNumberUtils.formatNumber("6502910000", null, "US"));
+        // The given number has a country code.
+        assertEquals("+1 650-291-0000", PhoneNumberUtils.formatNumber("+16502910000", null, "CN"));
+        // The given number was formatted.
+        assertEquals("650-291-0000", PhoneNumberUtils.formatNumber("650-291-0000", null, "US"));
+    }
 }

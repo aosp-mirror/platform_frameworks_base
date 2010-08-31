@@ -1026,7 +1026,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 TAG, "Laying out " + host + " to (" +
                 host.mMeasuredWidth + ", " + host.mMeasuredHeight + ")");
             long startTime = 0L;
-            if (Config.DEBUG && ViewDebug.profileLayout) {
+            if (ViewDebug.profileLayout) {
                 startTime = SystemClock.elapsedRealtime();
             }
             host.layout(0, 0, host.mMeasuredWidth, host.mMeasuredHeight);
@@ -1039,7 +1039,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 }
             }
 
-            if (Config.DEBUG && ViewDebug.profileLayout) {
+            if (ViewDebug.profileLayout) {
                 EventLog.writeEvent(60001, SystemClock.elapsedRealtime() - startTime);
             }
 
@@ -1339,7 +1339,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                         //canvas.drawARGB(255, 255, 0, 0);
                     }
 
-                    if (Config.DEBUG && ViewDebug.profileDrawing) {
+                    if (ViewDebug.profileDrawing) {
                         startTime = SystemClock.elapsedRealtime();
                     }
 
@@ -1382,7 +1382,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                         mView.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_DRAWING);
                     }
 
-                    if (SHOW_FPS || Config.DEBUG && ViewDebug.showFps) {
+                    if (SHOW_FPS || ViewDebug.showFps) {
                         int now = (int)SystemClock.elapsedRealtime();
                         if (sDrawTime != 0) {
                             nativeShowFPS(canvas, now - sDrawTime);
@@ -1390,7 +1390,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                         sDrawTime = now;
                     }
 
-                    if (Config.DEBUG && ViewDebug.profileDrawing) {
+                    if (ViewDebug.profileDrawing) {
                         EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
                     }
                 }

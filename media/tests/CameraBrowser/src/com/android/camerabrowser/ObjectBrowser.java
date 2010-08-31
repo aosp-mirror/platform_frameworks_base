@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MtpConstants;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Mtp;
@@ -100,7 +101,7 @@ public class ObjectBrowser extends ListActivity {
             format = c.getLong(FORMAT_COLUMN);
             Log.d(TAG, "rowId: " + rowId + " name: " + name + " format: " + format);
         }
-        if (format == Mtp.Object.FORMAT_JFIF) {
+        if (format == MtpConstants.FORMAT_JFIF) {
             Intent intent = new Intent(this, ObjectViewer.class);
             intent.putExtra("device", mDeviceID);
             intent.putExtra("storage", mStorageID);

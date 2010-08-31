@@ -43,7 +43,7 @@ import android.net.DhcpInfo;
 import android.net.NetworkUtils;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo.DetailedState;
-import android.net.NetworkProperties;
+import android.net.LinkProperties;
 import android.net.wifi.WifiConfiguration.Status;
 import android.os.Binder;
 import android.os.Message;
@@ -143,7 +143,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * Observes the static IP address settings.
      */
     private SettingsObserver mSettingsObserver;
-    private NetworkProperties mNetworkProperties;
+    private LinkProperties mLinkProperties;
 
     // Held during driver load and unload
     private static PowerManager.WakeLock sWakeLock;
@@ -421,10 +421,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         mSupplicantStateTracker = new SupplicantStateTracker(context, getHandler());
 
         mBluetoothHeadset = new BluetoothHeadset(mContext, null);
-        mNetworkProperties = new NetworkProperties();
+        mLinkProperties = new LinkProperties();
 
         mNetworkInfo.setIsAvailable(false);
-        mNetworkProperties.clear();
+        mLinkProperties.clear();
         mLastBssid = null;
         mLastNetworkId = -1;
         mLastSignalLevel = -1;
@@ -899,7 +899,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         StringBuffer sb = new StringBuffer();
         String LS = System.getProperty("line.separator");
         sb.append("current HSM state: ").append(getCurrentState().getName()).append(LS);
-        sb.append("mNetworkProperties ").append(mNetworkProperties).append(LS);
+        sb.append("mLinkProperties ").append(mLinkProperties).append(LS);
         sb.append("mWifiInfo ").append(mWifiInfo).append(LS);
         sb.append("mDhcpInfo ").append(mDhcpInfo).append(LS);
         sb.append("mNetworkInfo ").append(mNetworkInfo).append(LS);
@@ -1189,9 +1189,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         return null;
     }
 
-    private void configureNetworkProperties() {
+    private void configureLinkProperties() {
         try {
-            mNetworkProperties.setInterface(NetworkInterface.getByName(mInterfaceName));
+            mLinkProperties.setInterface(NetworkInterface.getByName(mInterfaceName));
         } catch (SocketException e) {
             Log.e(TAG, "SocketException creating NetworkInterface from " + mInterfaceName +
                     ". e=" + e);
@@ -1201,10 +1201,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             return;
         }
         // TODO - fix this for v6
-        mNetworkProperties.addAddress(NetworkUtils.intToInetAddress(mDhcpInfo.ipAddress));
-        mNetworkProperties.setGateway(NetworkUtils.intToInetAddress(mDhcpInfo.gateway));
-        mNetworkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns1));
-        mNetworkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns2));
+        mLinkProperties.addAddress(NetworkUtils.intToInetAddress(mDhcpInfo.ipAddress));
+        mLinkProperties.setGateway(NetworkUtils.intToInetAddress(mDhcpInfo.gateway));
+        mLinkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns1));
+        mLinkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns2));
         // TODO - add proxy info
     }
 
@@ -1381,7 +1381,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
                 | Intent.FLAG_RECEIVER_REPLACE_PENDING);
         intent.putExtra(WifiManager.EXTRA_NETWORK_INFO, mNetworkInfo);
-        intent.putExtra(WifiManager.EXTRA_NETWORK_PROPERTIES, mNetworkProperties);
+        intent.putExtra(WifiManager.EXTRA_LINK_PROPERTIES, mLinkProperties);
         if (bssid != null)
             intent.putExtra(WifiManager.EXTRA_BSSID, bssid);
         mContext.sendStickyBroadcast(intent);
@@ -1390,7 +1390,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private void sendConfigChangeBroadcast() {
         if (!ActivityManagerNative.isSystemReady()) return;
         Intent intent = new Intent(WifiManager.CONFIG_CHANGED_ACTION);
-        intent.putExtra(WifiManager.EXTRA_NETWORK_PROPERTIES, mNetworkProperties);
+        intent.putExtra(WifiManager.EXTRA_LINK_PROPERTIES, mLinkProperties);
         mContext.sendBroadcast(intent);
     }
 
@@ -1945,7 +1945,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         mWifiInfo.setNetworkId(-1);
 
         /* Clear network properties */
-        mNetworkProperties.clear();
+        mLinkProperties.clear();
 
         mLastBssid= null;
         mLastNetworkId = -1;
@@ -3036,7 +3036,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                   mLastSignalLevel = -1; // force update of signal strength
                   mWifiInfo.setIpAddress(mDhcpInfo.ipAddress);
                   Log.d(TAG, "IP configuration: " + mDhcpInfo);
-                  configureNetworkProperties();
+                  configureLinkProperties();
                   setDetailedState(DetailedState.CONNECTED);
                   sendNetworkStateChangeBroadcast(mLastBssid);
                   //TODO: we could also detect an IP config change

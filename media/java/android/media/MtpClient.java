@@ -41,8 +41,12 @@ public class MtpClient {
     }
 
     @Override
-    protected void finalize() {
-        native_finalize();
+    protected void finalize() throws Throwable {
+        try {
+            native_finalize();
+        } finally {
+            super.finalize();
+        }
     }
 
     public boolean start() {

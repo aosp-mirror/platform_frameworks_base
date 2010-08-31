@@ -19,7 +19,7 @@ package com.android.server;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.NetworkProperties;
+import android.net.LinkProperties;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -92,7 +92,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private ArrayList<String> mConnectedApns;
 
-    private NetworkProperties mDataConnectionProperties;
+    private LinkProperties mDataConnectionProperties;
 
     private Bundle mCellLocation = new Bundle();
 
@@ -355,7 +355,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyDataConnection(int state, boolean isDataConnectivityPossible,
-            String reason, String apn, String apnType, NetworkProperties networkProperties,
+            String reason, String apn, String apnType, LinkProperties linkProperties,
             int networkType) {
         if (!checkNotifyPermission("notifyDataConnection()" )) {
             return;
@@ -383,7 +383,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mDataConnectionPossible = isDataConnectivityPossible;
             mDataConnectionReason = reason;
             mDataConnectionApn = apn;
-            mDataConnectionProperties = networkProperties;
+            mDataConnectionProperties = linkProperties;
             if (mDataConnectionNetworkType != networkType) {
                 mDataConnectionNetworkType = networkType;
                 modified = true;
@@ -403,7 +403,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
         }
         broadcastDataConnectionStateChanged(state, isDataConnectivityPossible, reason, apn,
-                apnType, networkProperties);
+                apnType, linkProperties);
     }
 
     public void notifyDataConnectionFailed(String reason, String apnType) {
@@ -564,7 +564,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private void broadcastDataConnectionStateChanged(int state,
             boolean isDataConnectivityPossible,
-            String reason, String apn, String apnType, NetworkProperties networkProperties) {
+            String reason, String apn, String apnType, LinkProperties linkProperties) {
         // Note: not reporting to the battery stats service here, because the
         // status bar takes care of that after taking into account all of the
         // required info.
@@ -577,9 +577,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (reason != null) {
             intent.putExtra(Phone.STATE_CHANGE_REASON_KEY, reason);
         }
-        if (networkProperties != null) {
-            intent.putExtra(Phone.DATA_NETWORK_PROPERTIES_KEY, networkProperties);
-            NetworkInterface iface = networkProperties.getInterface();
+        if (linkProperties != null) {
+            intent.putExtra(Phone.DATA_LINK_PROPERTIES_KEY, linkProperties);
+            NetworkInterface iface = linkProperties.getInterface();
             if (iface != null) {
                 intent.putExtra(Phone.DATA_IFACE_NAME_KEY, iface.getName());
             }

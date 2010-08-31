@@ -65,6 +65,13 @@ public class RsRenderStatesRS {
     private ProgramVertex mProgVertex;
     private ProgramVertex.MatrixAllocation mPVA;
 
+    // Custom shaders
+    private ProgramVertex mProgVertexCustom;
+    private ProgramVertex.MatrixAllocation mPVACustom;
+    private ProgramFragment mProgFragmentCustom;
+    private ScriptField_VertexShaderConstants_s mVSConst;
+    private ScriptField_FragentShaderConstants_s mFSConst;
+
     private ProgramRaster mCullBack;
     private ProgramRaster mCullFront;
 
@@ -178,6 +185,42 @@ public class RsRenderStatesRS {
         mScript.set_gProgVertex(mProgVertex);
     }
 
+    private void initCustomShaders() {
+        mVSConst = new ScriptField_VertexShaderConstants_s(mRS, 1);
+        mFSConst = new ScriptField_FragentShaderConstants_s(mRS, 1);
+
+        mScript.bind_gVSConstants(mVSConst);
+        mScript.bind_gFSConstants(mFSConst);
+
+        // Initialize the shader builder
+        ProgramVertex.ShaderBuilder pvbCustom = new ProgramVertex.ShaderBuilder(mRS);
+        // Specify the resource that contains the shader string
+        pvbCustom.setShader(mRes, R.raw.shaderv);
+        // Use a script field to spcify the input layout
+        pvbCustom.addInput(ScriptField_VertexShaderInputs_s.createElement(mRS));
+        // Define the constant input layout
+        pvbCustom.addConstant(mVSConst.getAllocation().getType());
+        mProgVertexCustom = pvbCustom.create();
+        // Bind the source of constant data
+        mProgVertexCustom.bindConstants(mVSConst.getAllocation(), 1);
+        mPVACustom = new ProgramVertex.MatrixAllocation(mRS);
+        mProgVertexCustom.bindAllocation(mPVACustom);
+
+        ProgramFragment.ShaderBuilder pfbCustom = new ProgramFragment.ShaderBuilder(mRS);
+        // Specify the resource that contains the shader string
+        pfbCustom.setShader(mRes, R.raw.shaderf);
+        //Tell the builder how many textures we have
+        pfbCustom.setTextureCount(1);
+        // Define the constant input layout
+        pfbCustom.addConstant(mFSConst.getAllocation().getType());
+        mProgFragmentCustom = pfbCustom.create();
+        // Bind the source of constant data
+        mProgFragmentCustom.bindConstants(mFSConst.getAllocation(), 1);
+
+        mScript.set_gProgVertexCustom(mProgVertexCustom);
+        mScript.set_gProgFragmentCustom(mProgFragmentCustom);
+    }
+
     private Allocation loadTextureRGB(int id) {
         final Allocation allocation = Allocation.createFromBitmapResource(mRS, mRes,
                 id, Element.RGB_565(mRS), true);
@@ -274,6 +317,7 @@ public class RsRenderStatesRS {
         loadImages();
         initMesh();
         initProgramRaster();
+        initCustomShaders();
 
         mRS.contextBindRootScript(mScript);
     }

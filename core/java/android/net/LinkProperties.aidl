@@ -18,5 +18,5 @@
 
 package android.net;
 
-parcelable NetworkProperties;
+parcelable LinkProperties;
 

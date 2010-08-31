@@ -17,7 +17,7 @@
 package com.android.internal.telephony;
 
 import android.app.PendingIntent;
-import android.net.NetworkProperties;
+import android.net.LinkProperties;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
@@ -192,8 +192,8 @@ public abstract class DataConnectionTracker extends Handler {
     /** indication of our availability (preconditions to trysetupData are met) **/
     protected boolean mAvailability = false;
 
-    /** all our network properties (dns, gateway, ip, etc) */
-    protected NetworkProperties mNetworkProperties;
+    /** all our link properties (dns, gateway, ip, etc) */
+    protected LinkProperties mLinkProperties;
 
     /**
      * Default constructor
@@ -420,10 +420,10 @@ public abstract class DataConnectionTracker extends Handler {
 
     protected abstract void setState(State s);
 
-    protected NetworkProperties getNetworkProperties(String apnType) {
+    protected LinkProperties getLinkProperties(String apnType) {
         int id = apnTypeToId(apnType);
         if (isApnIdEnabled(id)) {
-            return mNetworkProperties;
+            return new LinkProperties(mLinkProperties);
         } else {
             return null;
         }
@@ -673,7 +673,7 @@ public abstract class DataConnectionTracker extends Handler {
         }
     }
 
-    protected NetworkProperties getNetworkProperties(DataConnection connection) {
-        return connection.getNetworkProperties();
+    protected LinkProperties getLinkProperties(DataConnection connection) {
+        return connection.getLinkProperties();
     }
 }

@@ -263,6 +263,10 @@ void ARTPConnection::onPollStreams() {
         }
     }
 
+    if (maxSocket == -1) {
+        return;
+    }
+
     int res = select(maxSocket + 1, &rs, NULL, NULL, &tv);
     CHECK_GE(res, 0);
 
@@ -291,6 +295,10 @@ void ARTPConnection::onPollStreams() {
         for (List<StreamInfo>::iterator it = mStreams.begin();
              it != mStreams.end(); ++it) {
             StreamInfo *s = &*it;
+
+            if (s->mIsInjected) {
+                continue;
+            }
 
             if (s->mNumRTCPPacketsReceived == 0) {
                 // We have never received any RTCP packets on this stream,

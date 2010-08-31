@@ -91,9 +91,9 @@ public interface NetworkStateTracker {
     public NetworkInfo getNetworkInfo();
 
     /**
-     * Fetch NetworkProperties for the network
+     * Fetch LinkProperties for the network
      */
-    public NetworkProperties getNetworkProperties();
+    public LinkProperties getLinkProperties();
 
     /**
      * Return the system properties name associated with the tcp buffer sizes

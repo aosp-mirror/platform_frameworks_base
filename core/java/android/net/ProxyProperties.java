@@ -36,24 +36,31 @@ public class ProxyProperties implements Parcelable {
     public ProxyProperties() {
     }
 
-    public synchronized InetAddress getAddress() {
+    // copy constructor instead of clone
+    public ProxyProperties(ProxyProperties source) {
+        mProxy = source.getAddress();
+        mPort = source.getPort();
+        mExclusionList = new String(source.getExclusionList());
+    }
+
+    public InetAddress getAddress() {
         return mProxy;
     }
-    public synchronized void setAddress(InetAddress proxy) {
+    public void setAddress(InetAddress proxy) {
         mProxy = proxy;
     }
 
-    public synchronized int getPort() {
+    public int getPort() {
         return mPort;
     }
-    public synchronized void setPort(int port) {
+    public void setPort(int port) {
         mPort = port;
     }
 
-    public synchronized String getExclusionList() {
+    public String getExclusionList() {
         return mExclusionList;
     }
-    public synchronized void setExclusionList(String exclusionList) {
+    public void setExclusionList(String exclusionList) {
         mExclusionList = exclusionList;
     }
 
@@ -77,7 +84,7 @@ public class ProxyProperties implements Parcelable {
      * Implement the Parcelable interface.
      * @hide
      */
-    public synchronized void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(Parcel dest, int flags) {
         if (mProxy != null) {
             dest.writeByte((byte)1);
             dest.writeString(mProxy.getHostName());

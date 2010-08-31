@@ -20,15 +20,6 @@
 
 #define DC_D16_STEP     0x200;
 
-/************************************************************************/
-/*                                                                      */
-/*     Project::                                                        */
-/*     $Author: beq07716 $*/
-/*     $Revision: 1000 $*/
-/*     $Date: 2010-06-28 13:08:20 +0200 (Mon, 28 Jun 2010) $*/
-/*                                                                      */
-/************************************************************************/
-
 
 /* The internal state variables are implemented in a (for the user)  hidden structure */
 /* In this (private) file, the internal structure is declared fro private use.*/

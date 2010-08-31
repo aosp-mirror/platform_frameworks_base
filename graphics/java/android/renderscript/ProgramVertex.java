@@ -107,14 +107,10 @@ public class ProgramVertex extends Program {
         public Allocation mAlloc;
 
         public MatrixAllocation(RenderScript rs) {
-            mModel = new Matrix4f();
-            mProjection = new Matrix4f();
-            mTexture = new Matrix4f();
-
             mAlloc = Allocation.createSized(rs, Element.createUser(rs, Element.DataType.FLOAT_32), 48);
-            mAlloc.subData1D(MODELVIEW_OFFSET, 16, mModel.mMat);
-            mAlloc.subData1D(PROJECTION_OFFSET, 16, mProjection.mMat);
-            mAlloc.subData1D(TEXTURE_OFFSET, 16, mTexture.mMat);
+            loadModelview(new Matrix4f());
+            loadProjection(new Matrix4f());
+            loadTexture(new Matrix4f());
         }
 
         public void destroy() {

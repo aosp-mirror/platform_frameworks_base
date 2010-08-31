@@ -1,4 +1,5 @@
 -keep class com.android.systemui.statusbar.tablet.TabletStatusBarService {
   public void notificationIconsClicked(android.view.View);
   public void systemInfoClicked(android.view.View);
+  public void recentButtonClicked(android.view.View);
 }

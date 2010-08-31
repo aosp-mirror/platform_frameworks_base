@@ -1263,6 +1263,7 @@ status_t AwesomePlayer::finishSetDataSource_l() {
     } else if (!strncmp("rtsp://gtalk/", mUri.string(), 13)) {
         if (mLooper == NULL) {
             mLooper = new ALooper;
+            mLooper->setName("gtalk rtp");
             mLooper->start(
                     false /* runOnCallingThread */,
                     false /* canCallJava */,
@@ -1374,6 +1375,7 @@ status_t AwesomePlayer::finishSetDataSource_l() {
     } else if (!strncasecmp("rtsp://", mUri.string(), 7)) {
         if (mLooper == NULL) {
             mLooper = new ALooper;
+            mLooper->setName("rtsp");
             mLooper->start();
         }
         mRTSPController = new ARTSPController(mLooper);

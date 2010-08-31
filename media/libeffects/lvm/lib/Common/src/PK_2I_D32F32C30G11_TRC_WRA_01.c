@@ -15,15 +15,6 @@
  * limitations under the License.
  */
 
-/************************************************************************/
-/*                                                                      */
-/*     Project::                                                        */
-/*     $Author: beq07716 $*/
-/*     $Revision: 1000 $*/
-/*     $Date: 2010-06-28 13:08:20 +0200 (Mon, 28 Jun 2010) $*/
-/*                                                                      */
-/************************************************************************/
-
 #include "BIQUAD.h"
 #include "PK_2I_D32F32CllGss_TRC_WRA_01_Private.h"
 #include "LVM_Macros.h"
