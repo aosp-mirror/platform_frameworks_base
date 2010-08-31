@@ -1031,6 +1031,57 @@ class BrowserFrame extends Handler {
         return mContext.getResources().getDisplayMetrics().density;
     }
 
+    /**
+     * Called by JNI when the native HTTP stack gets an authentication request.
+     *
+     * We delegate the request to CallbackProxy, and route its response to
+     * {@link #nativeAuthenticationProceed(int, String, String)} or
+     * {@link #nativeAuthenticationCancel(int)}.
+     */
+    private void didReceiveAuthenticationChallenge(
+            final int handle, String host, String realm, final boolean useCachedCredentials) {
+
+        HttpAuthHandler handler = new HttpAuthHandler() {
+
+            private static final int AUTH_PROCEED = 1;
+            private static final int AUTH_CANCEL = 2;
+
+            @Override
+            public boolean useHttpAuthUsernamePassword() {
+                return useCachedCredentials;
+            }
+
+            @Override
+            public void proceed(String username, String password) {
+                Message msg = obtainMessage(AUTH_PROCEED);
+                msg.getData().putString("username", username);
+                msg.getData().putString("password", password);
+                sendMessage(msg);
+            }
+
+            @Override
+            public void cancel() {
+                sendMessage(obtainMessage(AUTH_CANCEL));
+            }
+
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case AUTH_PROCEED:
+                        String username = msg.getData().getString("username");
+                        String password = msg.getData().getString("password");
+                        nativeAuthenticationProceed(handle, username, password);
+                        break;
+
+                    case AUTH_CANCEL:
+                        nativeAuthenticationCancel(handle);
+                        break;
+                }
+            }
+        };
+        mCallbackProxy.onReceivedHttpAuthRequest(handler, host, realm);
+    }
+
     //==========================================================================
     // native functions
     //==========================================================================
@@ -1147,4 +1198,7 @@ class BrowserFrame extends Handler {
     private native String nativeSaveWebArchive(String basename, boolean autoname);
 
     private native void nativeOrientationChanged(int orientation);
+
+    private native void nativeAuthenticationProceed(int handle, String username, String password);
+    private native void nativeAuthenticationCancel(int handle);
 }
