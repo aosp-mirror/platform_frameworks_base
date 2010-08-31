@@ -331,10 +331,10 @@ void ProgramVertexState::updateSize(Context *rsc)
 {
     Matrix m;
     m.loadOrtho(0,rsc->getWidth(), rsc->getHeight(),0, -1,1);
-    mDefaultAlloc->subData(RS_PROGRAM_VERTEX_PROJECTION_OFFSET, 16, &m.m[0], 16*4);
+    mDefaultAlloc->subData(rsc, RS_PROGRAM_VERTEX_PROJECTION_OFFSET, 16, &m.m[0], 16*4);
 
     m.loadIdentity();
-    mDefaultAlloc->subData(RS_PROGRAM_VERTEX_MODELVIEW_OFFSET, 16, &m.m[0], 16*4);
+    mDefaultAlloc->subData(rsc, RS_PROGRAM_VERTEX_MODELVIEW_OFFSET, 16, &m.m[0], 16*4);
 }
 
 void ProgramVertexState::deinit(Context *rsc)

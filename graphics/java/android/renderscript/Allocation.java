@@ -90,7 +90,7 @@ public class Allocation extends BaseObj {
         subData1D(0, mType.getElementCount(), d);
     }
 
-    public void subData(int off, FieldPacker fp) {
+    public void subData(int xoff, FieldPacker fp) {
         int eSize = mType.mElement.getSizeBytes();
         final byte[] data = fp.getData();
 
@@ -99,8 +99,28 @@ public class Allocation extends BaseObj {
             throw new IllegalArgumentException("Field packer length " + data.length +
                                                " not divisible by element size " + eSize + ".");
         }
-        data1DChecks(off, count, data.length, data.length);
-        mRS.nAllocationSubData1D(mID, off, count, data, data.length);
+        data1DChecks(xoff, count, data.length, data.length);
+        mRS.nAllocationSubData1D(mID, xoff, count, data, data.length);
+    }
+
+
+    public void subElementData(int xoff, int component_number, FieldPacker fp) {
+        if (component_number >= mType.mElement.mElements.length) {
+            throw new IllegalArgumentException("Component_number " + component_number + " out of range.");
+        }
+        if(xoff < 0) {
+            throw new IllegalArgumentException("Offset must be >= 0.");
+        }
+
+        final byte[] data = fp.getData();
+        int eSize = mType.mElement.mElements[component_number].getSizeBytes();
+
+        if (data.length != eSize) {
+            throw new IllegalArgumentException("Field packer sizelength " + data.length +
+                                               " does not match component size " + eSize + ".");
+        }
+
+        mRS.nAllocationSubElementData1D(mID, xoff, component_number, data, data.length);
     }
 
     private void data1DChecks(int off, int count, int len, int dataSize) {

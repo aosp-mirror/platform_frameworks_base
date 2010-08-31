@@ -649,6 +649,17 @@ nAllocationSubData1D_f(JNIEnv *_env, jobject _this, RsContext con, jint alloc, j
 }
 
 static void
+//    native void rsnAllocationSubElementData1D(int con, int id, int xoff, int compIdx, byte[] d, int sizeBytes);
+nAllocationSubElementData1D(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jint offset, jint compIdx, jbyteArray data, int sizeBytes)
+{
+    jint len = _env->GetArrayLength(data);
+    LOG_API("nAllocationSubElementData1D, con(%p), alloc(%p), offset(%i), comp(%i), len(%i), sizeBytes(%i)", con, (RsAllocation)alloc, offset, compIdx, len, sizeBytes);
+    jbyte *ptr = _env->GetByteArrayElements(data, NULL);
+    rsAllocation1DSubElementData(con, (RsAllocation)alloc, offset, ptr, compIdx, sizeBytes);
+    _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
+}
+
+static void
 nAllocationSubData2D_i(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jint xoff, jint yoff, jint w, jint h, jintArray data, int sizeBytes)
 {
     jint len = _env->GetArrayLength(data);
@@ -1401,6 +1412,7 @@ static JNINativeMethod methods[] = {
 {"rsnAllocationSubData1D",           "(IIII[SI)V",                            (void*)nAllocationSubData1D_s },
 {"rsnAllocationSubData1D",           "(IIII[BI)V",                            (void*)nAllocationSubData1D_b },
 {"rsnAllocationSubData1D",           "(IIII[FI)V",                            (void*)nAllocationSubData1D_f },
+{"rsnAllocationSubElementData1D",    "(IIII[BI)V",                            (void*)nAllocationSubElementData1D },
 {"rsnAllocationSubData2D",           "(IIIIII[II)V",                          (void*)nAllocationSubData2D_i },
 {"rsnAllocationSubData2D",           "(IIIIII[FI)V",                          (void*)nAllocationSubData2D_f },
 {"rsnAllocationRead",                "(II[I)V",                               (void*)nAllocationRead_i },
