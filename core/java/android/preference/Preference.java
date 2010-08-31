@@ -1195,7 +1195,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
 
     private void tryCommit(SharedPreferences.Editor editor) {
         if (mPreferenceManager.shouldCommit()) {
-            editor.startCommit();
+            editor.apply();
         }
     }
     
