@@ -106,15 +106,6 @@
             android:layout_centerInParent="true"
             />
 
-        <com.android.systemui.statusbar.KeyButtonView android:id="@+id/back"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_toLeftOf="@+id/menu"
-            android:paddingLeft="4dip"
-            android:paddingRight="4dip"
-            android:src="@drawable/status_bar_back"
-            systemui:keyCode="4"
-            />
         <com.android.systemui.statusbar.KeyButtonView android:id="@+id/menu"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -136,11 +127,20 @@
         <com.android.systemui.statusbar.KeyButtonView android:id="@+id/home"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:paddingLeft="4dip"
+            android:paddingRight="4dip"
+            android:layout_toLeftOf="@+id/back"
+            android:src="@drawable/status_bar_home"
+            systemui:keyCode="3"
+            />
+        <com.android.systemui.statusbar.KeyButtonView android:id="@+id/back"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:paddingLeft="4dip"
             android:paddingRight="4dip"
-            android:src="@drawable/status_bar_home"
-            systemui:keyCode="3"
+            android:src="@drawable/status_bar_back"
+            systemui:keyCode="4"
             />
 </RelativeLayout>
 

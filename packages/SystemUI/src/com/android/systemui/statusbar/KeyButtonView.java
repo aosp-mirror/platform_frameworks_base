@@ -25,10 +25,12 @@ import android.os.SystemClock;
 import android.os.ServiceManager;
 import android.util.AttributeSet;
 import android.util.Slog;
+import android.view.HapticFeedbackConstants;
 import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 import android.widget.ImageView;
 import android.widget.RemoteViews.RemoteView;
 
@@ -37,9 +39,22 @@ import com.android.systemui.R;
 public class KeyButtonView extends ImageView {
     IWindowManager mWindowManager;
     long mDownTime;
-    boolean mSending;
+    boolean mSending, mLongPressed;
     int mCode;
     int mRepeat;
+    Runnable mCheckLongPress = new Runnable() {
+        public void run() {
+            Slog.d("KeyButtonView", "longpress");
+            if (isPressed()) {
+                mLongPressed = true;
+                mRepeat++;
+                sendEvent(KeyEvent.ACTION_DOWN,
+                        KeyEvent.FLAG_FROM_SYSTEM
+                        | KeyEvent.FLAG_VIRTUAL_HARD_KEY
+                        | KeyEvent.FLAG_LONG_PRESS);
+            }
+        }
+    };
 
     public KeyButtonView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -69,12 +84,16 @@ public class KeyButtonView extends ImageView {
 
         switch (action) {
             case MotionEvent.ACTION_DOWN:
+                Slog.d("KeyButtonView", "press");
                 mDownTime = SystemClock.uptimeMillis();
                 mRepeat = 0;
                 mSending = true;
+                mLongPressed = false;
                 sendEvent(KeyEvent.ACTION_DOWN,
-                        KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_SOFT_KEYBOARD, mDownTime);
+                        KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY, mDownTime);
                 setPressed(true);
+                removeCallbacks(mCheckLongPress);
+                postDelayed(mCheckLongPress, ViewConfiguration.getLongPressTimeout());
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (mSending) {
@@ -83,19 +102,21 @@ public class KeyButtonView extends ImageView {
                     if (x < 0 || x >= getWidth() || y < 0 || y >= getHeight()) {
                         mSending = false;
                         sendEvent(KeyEvent.ACTION_UP,
-                                KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_SOFT_KEYBOARD
+                                KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY
                                         | KeyEvent.FLAG_CANCELED);
                         setPressed(false);
+                        removeCallbacks(mCheckLongPress);
                     }
                 }
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                if (mSending) {
+                setPressed(false);
+                if (mSending && !mLongPressed) {
                     mSending = false;
                     sendEvent(KeyEvent.ACTION_UP,
-                            KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_SOFT_KEYBOARD);
-                    setPressed(false);
+                            KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY);
+                    removeCallbacks(mCheckLongPress);
                 }
                 break;
         }
