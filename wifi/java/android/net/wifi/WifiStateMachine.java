@@ -127,7 +127,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private int mReconnectCount = 0;
     private boolean mIsScanMode = false;
     private boolean mConfigChanged = false;
-    private List<WifiConfiguration> mConfiguredNetworks = new ArrayList<WifiConfiguration>();
 
     /**
      * Instance of the bluetooth headset helper. This needs to be created
@@ -154,10 +153,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private WifiInfo mWifiInfo;
     private NetworkInfo mNetworkInfo;
     private SupplicantStateTracker mSupplicantStateTracker;
-    /* Tracks the highest priority of configured networks */
-    private int mLastPriority = -1;
-    /* Tracks if all networks need to be enabled */
+    /* Connection to a specific network involves disabling all networks,
+     * this flag tracks if networks need to be re-enabled */
     private boolean mEnableAllNetworks = false;
+
 
     // Event log tags (must be in sync with event-log-tags)
     private static final int EVENTLOG_WIFI_STATE_CHANGED        = 50021;
@@ -664,14 +663,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     public List<WifiConfiguration> syncGetConfiguredNetworks() {
-        List<WifiConfiguration> networks = new ArrayList<WifiConfiguration>();
-        synchronized (mConfiguredNetworks) {
-            Iterator<WifiConfiguration> iterator = mConfiguredNetworks.iterator();
-            while(iterator.hasNext()) {
-                networks.add(iterator.next().clone());
-            }
-        }
-        return networks;
+        return WifiConfigStore.getConfiguredNetworks();
     }
 
     /**
@@ -907,7 +899,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         sb.append("mLastSignalLevel ").append(mLastSignalLevel).append(LS);
         sb.append("mLastBssid ").append(mLastBssid).append(LS);
         sb.append("mLastNetworkId ").append(mLastNetworkId).append(LS);
-        sb.append("mLastPriority ").append(mLastPriority).append(LS);
         sb.append("mEnableAllNetworks ").append(mEnableAllNetworks).append(LS);
         sb.append("mEnableRssiPolling ").append(mEnableRssiPolling).append(LS);
         sb.append("mPasswordKeyMayBeIncorrect ").append(mPasswordKeyMayBeIncorrect).append(LS);
@@ -917,11 +908,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         sb.append("mConfigChanged ").append(mConfigChanged).append(LS).append(LS);
         sb.append("Supplicant status").append(LS)
                 .append(WifiNative.statusCommand()).append(LS).append(LS);
-        sb.append("mConfigChanged ").append(mConfigChanged).append(LS);
-        sb.append("Configured networks ").append(LS);
-        for (WifiConfiguration conf : mConfiguredNetworks) {
-            sb.append(conf).append(LS);
-        }
+
+        sb.append(WifiConfigStore.dump());
         return sb.toString();
     }
 
@@ -1407,13 +1395,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         mContext.sendStickyBroadcast(intent);
     }
 
-    private void updateConfigAndSendChangeBroadcast() {
-        updateConfiguredNetworks();
-        if (!ActivityManagerNative.isSystemReady()) return;
-        Intent intent = new Intent(WifiManager.SUPPLICANT_CONFIG_CHANGED_ACTION);
-        mContext.sendBroadcast(intent);
-    }
-
     private void sendSupplicantConnectionChangedBroadcast(boolean connected) {
         if (!ActivityManagerNative.isSystemReady()) return;
 
@@ -1432,448 +1413,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         if (state != mNetworkInfo.getDetailedState()) {
             mNetworkInfo.setDetailedState(state, null, null);
         }
-    }
-
-    private static String removeDoubleQuotes(String string) {
-      if (string.length() <= 2) return "";
-      return string.substring(1, string.length() - 1);
-    }
-
-    private static String convertToQuotedString(String string) {
-        return "\"" + string + "\"";
-    }
-
-    private static String makeString(BitSet set, String[] strings) {
-        StringBuffer buf = new StringBuffer();
-        int nextSetBit = -1;
-
-        /* Make sure all set bits are in [0, strings.length) to avoid
-         * going out of bounds on strings.  (Shouldn't happen, but...) */
-        set = set.get(0, strings.length);
-
-        while ((nextSetBit = set.nextSetBit(nextSetBit + 1)) != -1) {
-            buf.append(strings[nextSetBit].replace('_', '-')).append(' ');
-        }
-
-        // remove trailing space
-        if (set.cardinality() > 0) {
-            buf.setLength(buf.length() - 1);
-        }
-
-        return buf.toString();
-    }
-
-    private static int lookupString(String string, String[] strings) {
-        int size = strings.length;
-
-        string = string.replace('-', '_');
-
-        for (int i = 0; i < size; i++)
-            if (string.equals(strings[i]))
-                return i;
-
-        // if we ever get here, we should probably add the
-        // value to WifiConfiguration to reflect that it's
-        // supported by the WPA supplicant
-        Log.w(TAG, "Failed to look-up a string: " + string);
-
-        return -1;
-    }
-
-    private void enableAllNetworks() {
-        for (WifiConfiguration config : mConfiguredNetworks) {
-            if(config != null && config.status == Status.DISABLED) {
-                WifiNative.enableNetworkCommand(config.networkId, false);
-            }
-        }
-        WifiNative.saveConfigCommand();
-        updateConfigAndSendChangeBroadcast();
-    }
-
-    private int addOrUpdateNetworkNative(WifiConfiguration config) {
-        /*
-         * If the supplied networkId is -1, we create a new empty
-         * network configuration. Otherwise, the networkId should
-         * refer to an existing configuration.
-         */
-        int netId = config.networkId;
-        boolean newNetwork = netId == -1;
-        // networkId of -1 means we want to create a new network
-
-        if (newNetwork) {
-            netId = WifiNative.addNetworkCommand();
-            if (netId < 0) {
-                Log.e(TAG, "Failed to add a network!");
-                return -1;
-          }
-        }
-
-        setVariables: {
-
-            if (config.SSID != null &&
-                    !WifiNative.setNetworkVariableCommand(
-                        netId,
-                        WifiConfiguration.ssidVarName,
-                        config.SSID)) {
-                Log.d(TAG, "failed to set SSID: "+config.SSID);
-                break setVariables;
-            }
-
-            if (config.BSSID != null &&
-                    !WifiNative.setNetworkVariableCommand(
-                        netId,
-                        WifiConfiguration.bssidVarName,
-                        config.BSSID)) {
-                Log.d(TAG, "failed to set BSSID: "+config.BSSID);
-                break setVariables;
-            }
-
-            String allowedKeyManagementString =
-                makeString(config.allowedKeyManagement, WifiConfiguration.KeyMgmt.strings);
-            if (config.allowedKeyManagement.cardinality() != 0 &&
-                    !WifiNative.setNetworkVariableCommand(
-                        netId,
-                        WifiConfiguration.KeyMgmt.varName,
-                        allowedKeyManagementString)) {
-                Log.d(TAG, "failed to set key_mgmt: "+
-                        allowedKeyManagementString);
-                break setVariables;
-            }
-
-            String allowedProtocolsString =
-                makeString(config.allowedProtocols, WifiConfiguration.Protocol.strings);
-            if (config.allowedProtocols.cardinality() != 0 &&
-                    !WifiNative.setNetworkVariableCommand(
-                        netId,
-                        WifiConfiguration.Protocol.varName,
-                        allowedProtocolsString)) {
-                Log.d(TAG, "failed to set proto: "+
-                        allowedProtocolsString);
-                break setVariables;
-            }
-
-            String allowedAuthAlgorithmsString =
-                makeString(config.allowedAuthAlgorithms, WifiConfiguration.AuthAlgorithm.strings);
-            if (config.allowedAuthAlgorithms.cardinality() != 0 &&
-                    !WifiNative.setNetworkVariableCommand(
-                        netId,
-                        WifiConfiguration.AuthAlgorithm.varName,
-                        allowedAuthAlgorithmsString)) {
-                Log.d(TAG, "failed to set auth_alg: "+
-                        allowedAuthAlgorithmsString);
-                break setVariables;
-            }
-
-            String allowedPairwiseCiphersString =
-                    makeString(config.allowedPairwiseCiphers,
-                    WifiConfiguration.PairwiseCipher.strings);
-            if (config.allowedPairwiseCiphers.cardinality() != 0 &&
-                    !WifiNative.setNetworkVariableCommand(
-                        netId,
-                        WifiConfiguration.PairwiseCipher.varName,
-                        allowedPairwiseCiphersString)) {
-                Log.d(TAG, "failed to set pairwise: "+
-                        allowedPairwiseCiphersString);
-                break setVariables;
-            }
-
-            String allowedGroupCiphersString =
-                makeString(config.allowedGroupCiphers, WifiConfiguration.GroupCipher.strings);
-            if (config.allowedGroupCiphers.cardinality() != 0 &&
-                    !WifiNative.setNetworkVariableCommand(
-                        netId,
-                        WifiConfiguration.GroupCipher.varName,
-                        allowedGroupCiphersString)) {
-                Log.d(TAG, "failed to set group: "+
-                        allowedGroupCiphersString);
-                break setVariables;
-            }
-
-            // Prevent client screw-up by passing in a WifiConfiguration we gave it
-            // by preventing "*" as a key.
-            if (config.preSharedKey != null && !config.preSharedKey.equals("*") &&
-                    !WifiNative.setNetworkVariableCommand(
-                        netId,
-                        WifiConfiguration.pskVarName,
-                        config.preSharedKey)) {
-                Log.d(TAG, "failed to set psk: "+config.preSharedKey);
-                break setVariables;
-            }
-
-            boolean hasSetKey = false;
-            if (config.wepKeys != null) {
-                for (int i = 0; i < config.wepKeys.length; i++) {
-                    // Prevent client screw-up by passing in a WifiConfiguration we gave it
-                    // by preventing "*" as a key.
-                    if (config.wepKeys[i] != null && !config.wepKeys[i].equals("*")) {
-                        if (!WifiNative.setNetworkVariableCommand(
-                                    netId,
-                                    WifiConfiguration.wepKeyVarNames[i],
-                                    config.wepKeys[i])) {
-                            Log.d(TAG,
-                                    "failed to set wep_key"+i+": " +
-                                    config.wepKeys[i]);
-                            break setVariables;
-                        }
-                        hasSetKey = true;
-                    }
-                }
-            }
-
-            if (hasSetKey) {
-                if (!WifiNative.setNetworkVariableCommand(
-                            netId,
-                            WifiConfiguration.wepTxKeyIdxVarName,
-                            Integer.toString(config.wepTxKeyIndex))) {
-                    Log.d(TAG,
-                            "failed to set wep_tx_keyidx: "+
-                            config.wepTxKeyIndex);
-                    break setVariables;
-                }
-            }
-
-            if (!WifiNative.setNetworkVariableCommand(
-                        netId,
-                        WifiConfiguration.priorityVarName,
-                        Integer.toString(config.priority))) {
-                Log.d(TAG, config.SSID + ": failed to set priority: "
-                        +config.priority);
-                break setVariables;
-            }
-
-            if (config.hiddenSSID && !WifiNative.setNetworkVariableCommand(
-                        netId,
-                        WifiConfiguration.hiddenSSIDVarName,
-                        Integer.toString(config.hiddenSSID ? 1 : 0))) {
-                Log.d(TAG, config.SSID + ": failed to set hiddenSSID: "+
-                        config.hiddenSSID);
-                break setVariables;
-            }
-
-            for (WifiConfiguration.EnterpriseField field
-                    : config.enterpriseFields) {
-                String varName = field.varName();
-                String value = field.value();
-                if (value != null) {
-                    if (field != config.eap) {
-                        value = (value.length() == 0) ? "NULL" : convertToQuotedString(value);
-                    }
-                    if (!WifiNative.setNetworkVariableCommand(
-                                netId,
-                                varName,
-                                value)) {
-                        Log.d(TAG, config.SSID + ": failed to set " + varName +
-                                ": " + value);
-                        break setVariables;
-                    }
-                }
-            }
-            return netId;
-        }
-
-        if (newNetwork) {
-            WifiNative.removeNetworkCommand(netId);
-            Log.d(TAG,
-                    "Failed to set a network variable, removed network: "
-                    + netId);
-        }
-
-        return -1;
-    }
-
-    private void updateConfiguredNetworks() {
-        String listStr = WifiNative.listNetworksCommand();
-        mLastPriority = 0;
-
-        synchronized (mConfiguredNetworks) {
-            mConfiguredNetworks.clear();
-
-            if (listStr == null)
-                return;
-
-            String[] lines = listStr.split("\n");
-            // Skip the first line, which is a header
-            for (int i = 1; i < lines.length; i++) {
-                String[] result = lines[i].split("\t");
-                // network-id | ssid | bssid | flags
-                WifiConfiguration config = new WifiConfiguration();
-                try {
-                    config.networkId = Integer.parseInt(result[0]);
-                } catch(NumberFormatException e) {
-                    continue;
-                }
-                if (result.length > 3) {
-                    if (result[3].indexOf("[CURRENT]") != -1)
-                        config.status = WifiConfiguration.Status.CURRENT;
-                    else if (result[3].indexOf("[DISABLED]") != -1)
-                        config.status = WifiConfiguration.Status.DISABLED;
-                    else
-                        config.status = WifiConfiguration.Status.ENABLED;
-                } else {
-                    config.status = WifiConfiguration.Status.ENABLED;
-                }
-                readNetworkVariables(config);
-                if (config.priority > mLastPriority) {
-                    mLastPriority = config.priority;
-                }
-                mConfiguredNetworks.add(config);
-            }
-        }
-    }
-
-
-    /**
-     * Read the variables from the supplicant daemon that are needed to
-     * fill in the WifiConfiguration object.
-     *
-     * @param config the {@link WifiConfiguration} object to be filled in.
-     */
-    private void readNetworkVariables(WifiConfiguration config) {
-
-        int netId = config.networkId;
-        if (netId < 0)
-            return;
-
-        /*
-         * TODO: maybe should have a native method that takes an array of
-         * variable names and returns an array of values. But we'd still
-         * be doing a round trip to the supplicant daemon for each variable.
-         */
-        String value;
-
-        value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.ssidVarName);
-        if (!TextUtils.isEmpty(value)) {
-            config.SSID = removeDoubleQuotes(value);
-        } else {
-            config.SSID = null;
-        }
-
-        value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.bssidVarName);
-        if (!TextUtils.isEmpty(value)) {
-            config.BSSID = value;
-        } else {
-            config.BSSID = null;
-        }
-
-        value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.priorityVarName);
-        config.priority = -1;
-        if (!TextUtils.isEmpty(value)) {
-            try {
-                config.priority = Integer.parseInt(value);
-            } catch (NumberFormatException ignore) {
-            }
-        }
-
-        value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.hiddenSSIDVarName);
-        config.hiddenSSID = false;
-        if (!TextUtils.isEmpty(value)) {
-            try {
-                config.hiddenSSID = Integer.parseInt(value) != 0;
-            } catch (NumberFormatException ignore) {
-            }
-        }
-
-        value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.wepTxKeyIdxVarName);
-        config.wepTxKeyIndex = -1;
-        if (!TextUtils.isEmpty(value)) {
-            try {
-                config.wepTxKeyIndex = Integer.parseInt(value);
-            } catch (NumberFormatException ignore) {
-            }
-        }
-
-        for (int i = 0; i < 4; i++) {
-            value = WifiNative.getNetworkVariableCommand(netId,
-                    WifiConfiguration.wepKeyVarNames[i]);
-            if (!TextUtils.isEmpty(value)) {
-                config.wepKeys[i] = value;
-            } else {
-                config.wepKeys[i] = null;
-            }
-        }
-
-        value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.pskVarName);
-        if (!TextUtils.isEmpty(value)) {
-            config.preSharedKey = value;
-        } else {
-            config.preSharedKey = null;
-        }
-
-        value = WifiNative.getNetworkVariableCommand(config.networkId,
-                WifiConfiguration.Protocol.varName);
-        if (!TextUtils.isEmpty(value)) {
-            String vals[] = value.split(" ");
-            for (String val : vals) {
-                int index =
-                    lookupString(val, WifiConfiguration.Protocol.strings);
-                if (0 <= index) {
-                    config.allowedProtocols.set(index);
-                }
-            }
-        }
-
-        value = WifiNative.getNetworkVariableCommand(config.networkId,
-                WifiConfiguration.KeyMgmt.varName);
-        if (!TextUtils.isEmpty(value)) {
-            String vals[] = value.split(" ");
-            for (String val : vals) {
-                int index =
-                    lookupString(val, WifiConfiguration.KeyMgmt.strings);
-                if (0 <= index) {
-                    config.allowedKeyManagement.set(index);
-                }
-            }
-        }
-
-        value = WifiNative.getNetworkVariableCommand(config.networkId,
-                WifiConfiguration.AuthAlgorithm.varName);
-        if (!TextUtils.isEmpty(value)) {
-            String vals[] = value.split(" ");
-            for (String val : vals) {
-                int index =
-                    lookupString(val, WifiConfiguration.AuthAlgorithm.strings);
-                if (0 <= index) {
-                    config.allowedAuthAlgorithms.set(index);
-                }
-            }
-        }
-
-        value = WifiNative.getNetworkVariableCommand(config.networkId,
-                WifiConfiguration.PairwiseCipher.varName);
-        if (!TextUtils.isEmpty(value)) {
-            String vals[] = value.split(" ");
-            for (String val : vals) {
-                int index =
-                    lookupString(val, WifiConfiguration.PairwiseCipher.strings);
-                if (0 <= index) {
-                    config.allowedPairwiseCiphers.set(index);
-                }
-            }
-        }
-
-        value = WifiNative.getNetworkVariableCommand(config.networkId,
-                WifiConfiguration.GroupCipher.varName);
-        if (!TextUtils.isEmpty(value)) {
-            String vals[] = value.split(" ");
-            for (String val : vals) {
-                int index =
-                    lookupString(val, WifiConfiguration.GroupCipher.strings);
-                if (0 <= index) {
-                    config.allowedGroupCiphers.set(index);
-                }
-            }
-        }
-
-        for (WifiConfiguration.EnterpriseField field :
-                config.enterpriseFields) {
-            value = WifiNative.getNetworkVariableCommand(netId,
-                    field.varName());
-            if (!TextUtils.isEmpty(value)) {
-                if (field != config.eap) value = removeDoubleQuotes(value);
-                field.setValue(value);
-            }
-        }
-
     }
 
     /**
@@ -2413,8 +1952,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
                     mWifiInfo.setMacAddress(WifiNative.getMacAddressCommand());
 
-                    updateConfiguredNetworks();
-                    enableAllNetworks();
+                    WifiConfigStore.initialize(mContext);
 
                     //TODO: initialize and fix multicast filtering
                     //mWM.initializeMulticastFiltering();
@@ -2513,33 +2051,29 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
                     syncParams = (SyncParams) message.obj;
                     config = (WifiConfiguration) syncParams.mParameter;
-                    syncParams.mSyncReturn.intValue = addOrUpdateNetworkNative(config);
-                    updateConfigAndSendChangeBroadcast();
+                    syncParams.mSyncReturn.intValue = WifiConfigStore.addOrUpdateNetwork(config);
                     notifyOnMsgObject(message);
                     break;
                 case CMD_REMOVE_NETWORK:
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
                     syncParams = (SyncParams) message.obj;
-                    syncParams.mSyncReturn.boolValue = WifiNative.removeNetworkCommand(
-                            message.arg1);
-                    updateConfigAndSendChangeBroadcast();
+                    syncParams.mSyncReturn.boolValue = WifiConfigStore.removeNetwork(
+                                message.arg1);
                     notifyOnMsgObject(message);
                     break;
                 case CMD_ENABLE_NETWORK:
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
                     syncParams = (SyncParams) message.obj;
                     EnableNetParams enableNetParams = (EnableNetParams) syncParams.mParameter;
-                    syncParams.mSyncReturn.boolValue = WifiNative.enableNetworkCommand(
+                    syncParams.mSyncReturn.boolValue = WifiConfigStore.enableNetwork(
                             enableNetParams.netId, enableNetParams.disableOthers);
-                    updateConfigAndSendChangeBroadcast();
                     notifyOnMsgObject(message);
                     break;
                 case CMD_DISABLE_NETWORK:
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
                     syncParams = (SyncParams) message.obj;
-                    syncParams.mSyncReturn.boolValue = WifiNative.disableNetworkCommand(
+                    syncParams.mSyncReturn.boolValue = WifiConfigStore.disableNetwork(
                             message.arg1);
-                    updateConfigAndSendChangeBroadcast();
                     notifyOnMsgObject(message);
                     break;
                 case CMD_BLACKLIST_NETWORK:
@@ -2551,7 +2085,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     break;
                 case CMD_SAVE_CONFIG:
                     syncParams = (SyncParams) message.obj;
-                    syncParams.mSyncReturn.boolValue = WifiNative.saveConfigCommand();
+                    syncParams.mSyncReturn.boolValue = WifiConfigStore.saveConfig();
                     notifyOnMsgObject(message);
                     // Inform the backup manager about a data change
                     IBackupManager ibm = IBackupManager.Stub.asInterface(
@@ -2580,18 +2114,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     break;
                 case CMD_SAVE_NETWORK:
                     config = (WifiConfiguration) message.obj;
-                    int netId = addOrUpdateNetworkNative(config);
-                    /* enable a new network */
-                    if (config.networkId < 0) {
-                        WifiNative.enableNetworkCommand(netId, false);
-                    }
-                    WifiNative.saveConfigCommand();
-                    updateConfigAndSendChangeBroadcast();
+                    WifiConfigStore.saveNetwork(config);
                     break;
                 case CMD_FORGET_NETWORK:
-                    WifiNative.removeNetworkCommand(message.arg1);
-                    WifiNative.saveConfigCommand();
-                    updateConfigAndSendChangeBroadcast();
+                    WifiConfigStore.forgetNetwork(message.arg1);
                     break;
                 default:
                     return NOT_HANDLED;
@@ -2863,46 +2389,29 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_CONNECT_NETWORK:
                     int netId = message.arg1;
                     WifiConfiguration config = (WifiConfiguration) message.obj;
-                    if (config != null) {
-                        netId = addOrUpdateNetworkNative(config);
-                    }
-                    // Reset the priority of each network at start or if it goes too high.
-                    if (mLastPriority == -1 || mLastPriority > 1000000) {
-                        for (WifiConfiguration conf : mConfiguredNetworks) {
-                            if (conf.networkId != -1) {
-                                conf.priority = 0;
-                                addOrUpdateNetworkNative(conf);
-                            }
-                        }
-                        mLastPriority = 0;
-                    }
 
-                    // Set to the highest priority and save the configuration.
-                    config = new WifiConfiguration();
-                    config.networkId = netId;
-                    config.priority = ++mLastPriority;
-
-                    addOrUpdateNetworkNative(config);
-                    WifiNative.saveConfigCommand();
-
-                    /* We connect to a specific network by first enabling that network
-                     * and disabling all other networks in the supplicant. Disabling a
-                     * connected network will cause a disconnection from the network.
-                     * A reconnectCommand() will then initiate a connection to the enabled
-                     * network.
+                    /* We connect to a specific network by issuing a select
+                     * to the WifiConfigStore. This enables the network,
+                     * while disabling all other networks in the supplicant.
+                     * Disabling a connected network will cause a disconnection
+                     * from the network. A reconnectCommand() will then initiate
+                     * a connection to the enabled network.
                      */
-                    WifiNative.enableNetworkCommand(netId, true);
+                    if (config != null) {
+                        WifiConfigStore.selectNetwork(config);
+                    } else {
+                        WifiConfigStore.selectNetwork(netId);
+                    }
+
                     /* Save a flag to indicate that we need to enable all
                      * networks after supplicant indicates a network
                      * state change event
                      */
                     mEnableAllNetworks = true;
+
                     WifiNative.reconnectCommand();
-                    /* update the configured networks but not send a
-                     * broadcast to avoid a fetch from settings
-                     * during this temporary disabling of networks
-                     */
-                    updateConfiguredNetworks();
+
+                    /* Expect a disconnection from the old connection */
                     transitionTo(mDisconnectingState);
                     break;
                 case SCAN_RESULTS_EVENT:
@@ -3059,8 +2568,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                   if (++mReconnectCount > getMaxDhcpRetries()) {
                           Log.e(TAG, "Failed " +
                                   mReconnectCount + " times, Disabling " + mLastNetworkId);
-                      WifiNative.disableNetworkCommand(mLastNetworkId);
-                      updateConfigAndSendChangeBroadcast();
+                      WifiConfigStore.disableNetwork(mLastNetworkId);
                   }
 
                   /* DHCP times out after about 30 seconds, we do a
@@ -3197,7 +2705,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         public void exit() {
             if (mEnableAllNetworks) {
                 mEnableAllNetworks = false;
-                enableAllNetworks();
+                WifiConfigStore.enableAllNetworks();
             }
         }
     }
@@ -3491,10 +2999,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                  if (mPasswordKeyMayBeIncorrect) {
                      Log.d(TAG, "Failed to authenticate, disabling network " +
                              mWifiInfo.getNetworkId());
-                     WifiNative.disableNetworkCommand(mWifiInfo.getNetworkId());
+                     WifiConfigStore.disableNetwork(mWifiInfo.getNetworkId());
                      mPasswordKeyMayBeIncorrect = false;
                      sendSupplicantStateChangedBroadcast(stateChangeResult, true);
-                     updateConfigAndSendChangeBroadcast();
                  }
                  else {
                      sendSupplicantStateChangedBroadcast(stateChangeResult, false);
@@ -3553,8 +3060,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                      mLoopDetectCount++;
                  }
                  if (mLoopDetectCount > MAX_SUPPLICANT_LOOP_ITERATIONS) {
-                     WifiNative.disableNetworkCommand(stateChangeResult.networkId);
-                     updateConfigAndSendChangeBroadcast();
+                     WifiConfigStore.disableNetwork(stateChangeResult.networkId);
                      mLoopDetectCount = 0;
                  }
 
