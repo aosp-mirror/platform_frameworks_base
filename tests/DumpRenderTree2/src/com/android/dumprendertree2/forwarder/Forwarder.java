@@ -47,12 +47,6 @@ public class Forwarder extends Thread {
     @Override
     public void start() {
         Log.i(LOG_TAG, "start(): Starting fowarder on port: " + mPort);
-        synchronized (this) {
-            if (mIsRunning) {
-                Log.w(LOG_TAG, "start(): Forwarder on port: " + mPort + " already running! NOOP.");
-                return;
-            }
-        }
 
         try {
             mServerSocket = new ServerSocket(mPort);
@@ -82,7 +76,7 @@ public class Forwarder extends Thread {
                             mPort);
                 } catch (IOException e) {
                     /** This most likely means that mServerSocket is already closed */
-                    Log.w(LOG_TAG + "mPort=" + mPort, e);
+                    Log.w(LOG_TAG, "mPort=" + mPort, e);
                     return;
                 }
 
@@ -107,12 +101,6 @@ public class Forwarder extends Thread {
     }
 
     public void finish() {
-        synchronized (this) {
-            if (!mIsRunning) {
-                return;
-            }
-        }
-
         try {
             mServerSocket.close();
         } catch (IOException e) {
