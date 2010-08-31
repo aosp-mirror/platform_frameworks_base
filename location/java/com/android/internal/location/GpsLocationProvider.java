@@ -216,6 +216,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // true if we started navigation
     private boolean mStarted;
 
+    // true if XTRA is supported
+    private boolean mSupportsXtra;
+
     // for calculating time to first fix
     private long mFixRequestTime = 0;
     // time to first fix for most recent session
@@ -659,6 +662,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         mEnabled = native_init();
 
         if (mEnabled) {
+            mSupportsXtra = native_supports_xtra();
             if (mSuplServerHost != null) {
                 native_set_agps_server(AGPS_TYPE_SUPL, mSuplServerHost, mSuplServerPort);
             }
@@ -860,7 +864,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
             return true;
         }
         if ("force_xtra_injection".equals(command)) {
-            if (native_supports_xtra()) {
+            if (mSupportsXtra) {
                 xtraDownloadRequest();
                 return true;
             }
@@ -1383,7 +1387,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     handleInjectNtpTime();
                     break;
                 case DOWNLOAD_XTRA_DATA:
-                    if (native_supports_xtra()) {
+                    if (mSupportsXtra) {
                         handleDownloadXtraData();
                     }
                     break;
