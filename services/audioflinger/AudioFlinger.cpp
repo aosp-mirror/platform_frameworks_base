@@ -1781,6 +1781,14 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
                 if (chain != 0 && chain->setVolume_l(&vl, &vr)) {
                     // Do not ramp volume is volume is controlled by effect
                     param = AudioMixer::VOLUME;
+                    track->mHasVolumeController = true;
+                } else {
+                    // force no volume ramp when volume controller was just disabled or removed
+                    // from effect chain to avoid volume spike
+                    if (track->mHasVolumeController) {
+                        param = AudioMixer::VOLUME;
+                    }
+                    track->mHasVolumeController = false;
                 }
 
                 // Convert volumes from 8.24 to 4.12 format
@@ -2901,7 +2909,8 @@ AudioFlinger::PlaybackThread::Track::Track(
             const sp<IMemory>& sharedBuffer,
             int sessionId)
     :   TrackBase(thread, client, sampleRate, format, channelCount, frameCount, 0, sharedBuffer, sessionId),
-    mMute(false), mSharedBuffer(sharedBuffer), mName(-1), mMainBuffer(NULL), mAuxBuffer(NULL), mAuxEffectId(0)
+    mMute(false), mSharedBuffer(sharedBuffer), mName(-1), mMainBuffer(NULL), mAuxBuffer(NULL),
+    mAuxEffectId(0), mHasVolumeController(false)
 {
     if (mCblk != NULL) {
         sp<ThreadBase> baseThread = thread.promote();
@@ -5371,7 +5380,7 @@ void AudioFlinger::EffectModule::process()
         return;
     }
 
-    if (mState == ACTIVE || mState == STOPPING || mState == STOPPED || mState == RESTART) {
+    if (isProcessEnabled()) {
         // do 32 bit to 16 bit conversion for auxiliary effect input buffer
         if ((mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
             AudioMixer::ditherAndClamp(mConfig.inputCfg.buffer.s32,
@@ -5600,6 +5609,8 @@ status_t AudioFlinger::EffectModule::setEnabled(bool enabled)
 
         // going from enabled to disabled
         case RESTART:
+            mState = STOPPED;
+            break;
         case STARTING:
             mState = IDLE;
             break;
@@ -5632,6 +5643,21 @@ bool AudioFlinger::EffectModule::isEnabled()
     }
 }
 
+bool AudioFlinger::EffectModule::isProcessEnabled()
+{
+    switch (mState) {
+    case RESTART:
+    case ACTIVE:
+    case STOPPING:
+    case STOPPED:
+        return true;
+    case IDLE:
+    case STARTING:
+    default:
+        return false;
+    }
+}
+
 status_t AudioFlinger::EffectModule::setVolume(uint32_t *left, uint32_t *right, bool controller)
 {
     Mutex::Autolock _l(mLock);
@@ -5639,7 +5665,7 @@ status_t AudioFlinger::EffectModule::setVolume(uint32_t *left, uint32_t *right, 
 
     // Send volume indication if EFFECT_FLAG_VOLUME_IND is set and read back altered volume
     // if controller flag is set (Note that controller == TRUE => EFFECT_FLAG_VOLUME_CTRL set)
-    if ((mState >= ACTIVE) &&
+    if (isProcessEnabled() &&
             ((mDescriptor.flags & EFFECT_FLAG_VOLUME_MASK) == EFFECT_FLAG_VOLUME_CTRL ||
             (mDescriptor.flags & EFFECT_FLAG_VOLUME_MASK) == EFFECT_FLAG_VOLUME_IND)) {
         status_t cmdStatus;
@@ -6288,7 +6314,7 @@ bool AudioFlinger::EffectChain::setVolume_l(uint32_t *left, uint32_t *right)
 
     // first update volume controller
     for (size_t i = size; i > 0; i--) {
-        if ((mEffects[i - 1]->state() >= EffectModule::ACTIVE) &&
+        if (mEffects[i - 1]->isProcessEnabled() &&
             (mEffects[i - 1]->desc().flags & EFFECT_FLAG_VOLUME_MASK) == EFFECT_FLAG_VOLUME_CTRL) {
             ctrlIdx = i - 1;
             hasControl = true;
@@ -6304,9 +6330,6 @@ bool AudioFlinger::EffectChain::setVolume_l(uint32_t *left, uint32_t *right)
         return hasControl;
     }
 
-    if (mVolumeCtrlIdx != -1) {
-        hasControl = true;
-    }
     mVolumeCtrlIdx = ctrlIdx;
     mLeftVolume = newLeft;
     mRightVolume = newRight;
