@@ -466,29 +466,6 @@ private:
     KeyedVector<int32_t, MotionRange> mMotionRanges;
 };
 
-/*
- * Provides remote access to information about an input device.
- *
- * Note: This is essentially a wrapper for Binder calls into the Window Manager Service.
- */
-class InputDeviceProxy : public RefBase, public AInputDevice {
-protected:
-    InputDeviceProxy();
-    virtual ~InputDeviceProxy();
-
-public:
-    static void getDeviceIds(Vector<int32_t>& outIds);
-
-    static sp<InputDeviceProxy> getDevice(int32_t id);
-
-    inline const InputDeviceInfo* getInfo() { return & mInfo; }
-
-    // TODO add hasKeys, keymap, etc...
-
-private:
-    InputDeviceInfo mInfo;
-};
-
 
 } // namespace android
 
