@@ -109,6 +109,7 @@ public class ExtractEditText extends EditText {
     /**
      * We are always considered to be an input method target.
      */
+    @Override
     public boolean isInputMethodTarget() {
         return true;
     }
@@ -125,7 +126,7 @@ public class ExtractEditText extends EditText {
      * highlight and cursor will be displayed.
      */
     @Override public boolean hasWindowFocus() {
-        return this.isEnabled() ? true : false;
+        return this.isEnabled();
     }
 
     /**
@@ -133,7 +134,7 @@ public class ExtractEditText extends EditText {
      * highlight and cursor will be displayed.
      */
     @Override public boolean isFocused() {
-        return this.isEnabled() ? true : false;
+        return this.isEnabled();
     }
 
     /**
@@ -141,6 +142,6 @@ public class ExtractEditText extends EditText {
      * highlight and cursor will be displayed.
      */
     @Override public boolean hasFocus() {
-        return this.isEnabled() ? true : false;
+        return this.isEnabled();
     }
 }
