@@ -270,6 +270,7 @@ protected:
 
         IPCThreadState* thread_state = IPCThreadState::self();
         const int strict_policy_before = thread_state->getStrictModePolicy();
+        thread_state->setLastTransactionBinderFlags(flags);
 
         //printf("Transact from %p to Java code sending: ", this);
         //data.print();

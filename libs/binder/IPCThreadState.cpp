@@ -377,6 +377,16 @@ int32_t IPCThreadState::getStrictModePolicy() const
     return mStrictModePolicy;
 }
 
+void IPCThreadState::setLastTransactionBinderFlags(int32_t flags)
+{
+    mLastTransactionBinderFlags = flags;
+}
+
+int32_t IPCThreadState::getLastTransactionBinderFlags() const
+{
+    return mLastTransactionBinderFlags;
+}
+
 void IPCThreadState::restoreCallingIdentity(int64_t token)
 {
     mCallingUid = (int)(token>>32);
@@ -598,8 +608,10 @@ status_t IPCThreadState::clearDeathNotification(int32_t handle, BpBinder* proxy)
 }
 
 IPCThreadState::IPCThreadState()
-    : mProcess(ProcessState::self()), mMyThreadId(androidGetTid()),
-      mStrictModePolicy(0)
+    : mProcess(ProcessState::self()),
+      mMyThreadId(androidGetTid()),
+      mStrictModePolicy(0),
+      mLastTransactionBinderFlags(0)
 {
     pthread_setspecific(gTLS, this);
     clearCaller();
@@ -983,11 +995,11 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
             }
             if (tr.target.ptr) {
                 sp<BBinder> b((BBinder*)tr.cookie);
-                const status_t error = b->transact(tr.code, buffer, &reply, 0);
+                const status_t error = b->transact(tr.code, buffer, &reply, tr.flags);
                 if (error < NO_ERROR) reply.setError(error);
-                
+
             } else {
-                const status_t error = the_context_object->transact(tr.code, buffer, &reply, 0);
+                const status_t error = the_context_object->transact(tr.code, buffer, &reply, tr.flags);
                 if (error < NO_ERROR) reply.setError(error);
             }
             
