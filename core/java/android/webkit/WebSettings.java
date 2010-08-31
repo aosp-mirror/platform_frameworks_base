@@ -182,6 +182,7 @@ public class WebSettings {
     private boolean         mShrinksStandaloneImagesToFit = false;
     private long            mMaximumDecodedImageSize = 0; // 0 means default
     private boolean         mPrivateBrowsingEnabled = false;
+    private boolean         mSyntheticLinksEnabled = true;
     // HTML5 API flags
     private boolean         mAppCacheEnabled = false;
     private boolean         mDatabaseEnabled = false;
@@ -1497,6 +1498,13 @@ public class WebSettings {
     /* package */ synchronized void setPrivateBrowsingEnabled(boolean flag) {
         if (mPrivateBrowsingEnabled != flag) {
             mPrivateBrowsingEnabled = flag;
+            postSync();
+        }
+    }
+
+    synchronized void setSyntheticLinksEnabled(boolean flag) {
+        if (mSyntheticLinksEnabled != flag) {
+            mSyntheticLinksEnabled = flag;
             postSync();
         }
     }
