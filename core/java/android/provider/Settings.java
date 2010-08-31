@@ -1686,6 +1686,12 @@ public final class Settings {
         public static final String UNLOCK_SOUND = "unlock_sound";
 
         /**
+         * True if we should appear as a PTP device instead of MTP.
+         * @hide
+         */
+        public static final String USE_PTP_INTERFACE = "use_ptp_interface";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          * @hide
@@ -1745,7 +1751,8 @@ public final class Settings {
             DOCK_SOUNDS_ENABLED,
             LOCKSCREEN_SOUNDS_ENABLED,
             SHOW_WEB_SUGGESTIONS,
-            NOTIFICATION_LIGHT_PULSE
+            NOTIFICATION_LIGHT_PULSE,
+            USE_PTP_INTERFACE,
         };
 
         // Settings moved to Settings.Secure

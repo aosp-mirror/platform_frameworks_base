@@ -59,6 +59,10 @@ public class MtpServer {
         native_send_object_removed(handle);
     }
 
+    public void setPtpMode(boolean usePtp) {
+        native_set_ptp_mode(usePtp);
+    }
+
     // used by the JNI code
     private int mNativeContext;
 
@@ -68,4 +72,5 @@ public class MtpServer {
     private native final void native_stop();
     private native final void native_send_object_added(int handle);
     private native final void native_send_object_removed(int handle);
+    private native final void native_set_ptp_mode(boolean usePtp);
 }
