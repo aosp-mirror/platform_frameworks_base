@@ -15,11 +15,6 @@
  * limitations under the License.
  */
 
-/*                                                                                                          */
-/*     $Author: beq07716 $*/
-/*     $Revision: 1000 $*/
-/*     $Date: 2010-06-28 13:08:20 +0200 (Mon, 28 Jun 2010) $*/
-/*                                                                                                          */
 /*-------------------------------------------------------------------------*/
 #include "BIQUAD.h"
 #include "BQ_2I_D32F32Cll_TRC_WRA_01_Private.h"

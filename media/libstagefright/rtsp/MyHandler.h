@@ -31,7 +31,13 @@
 #include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/MediaErrors.h>
 
-#define USE_TCP_INTERLEAVED     0
+// If no access units are received within 3 secs, assume that the rtp
+// stream has ended and signal end of stream.
+static int64_t kAccessUnitTimeoutUs = 3000000ll;
+
+// If no access units arrive for the first 10 secs after starting the
+// stream, assume none ever will and signal EOS or switch transports.
+static int64_t kStartupTimeoutUs = 10000000ll;
 
 namespace android {
 
@@ -75,8 +81,9 @@ struct MyHandler : public AHandler {
           mFirstAccessUnit(true),
           mFirstAccessUnitNTP(0),
           mNumAccessUnitsReceived(0),
-          mCheckPending(false) {
-
+          mCheckPending(false),
+          mTryTCPInterleaving(false) {
+        mNetLooper->setName("rtsp net");
         mNetLooper->start(false /* runOnCallingThread */,
                           false /* canCallJava */,
                           PRIORITY_HIGHEST);
@@ -150,7 +157,13 @@ struct MyHandler : public AHandler {
 
             case 'disc':
             {
-                (new AMessage('quit', id()))->post();
+                int32_t reconnect;
+                if (msg->findInt32("reconnect", &reconnect) && reconnect) {
+                    sp<AMessage> reply = new AMessage('conn', id());
+                    mConn->connect(mSessionURL.c_str(), reply);
+                } else {
+                    (new AMessage('quit', id()))->post();
+                }
                 break;
             }
 
@@ -317,12 +330,8 @@ struct MyHandler : public AHandler {
 
                     parsePlayResponse(response);
 
-                    mDoneMsg->setInt32("result", OK);
-                    mDoneMsg->post();
-                    mDoneMsg = NULL;
-
                     sp<AMessage> timeout = new AMessage('tiou', id());
-                    timeout->post(10000000ll);
+                    timeout->post(kStartupTimeoutUs);
                 } else {
                     sp<AMessage> reply = new AMessage('disc', id());
                     mConn->disconnect(reply);
@@ -334,11 +343,25 @@ struct MyHandler : public AHandler {
             case 'abor':
             {
                 for (size_t i = 0; i < mTracks.size(); ++i) {
-                    mTracks.editItemAt(i).mPacketSource->signalEOS(
-                            ERROR_END_OF_STREAM);
+                    TrackInfo *info = &mTracks.editItemAt(i);
+
+                    info->mPacketSource->signalEOS(ERROR_END_OF_STREAM);
+
+                    if (!info->mUsingInterleavedTCP) {
+                        mRTPConn->removeStream(info->mRTPSocket, info->mRTCPSocket);
+
+                        close(info->mRTPSocket);
+                        close(info->mRTCPSocket);
+                    }
                 }
+                mTracks.clear();
 
                 sp<AMessage> reply = new AMessage('tear', id());
+
+                int32_t reconnect;
+                if (msg->findInt32("reconnect", &reconnect) && reconnect) {
+                    reply->setInt32("reconnect", true);
+                }
 
                 AString request;
                 request = "TEARDOWN ";
@@ -366,6 +389,12 @@ struct MyHandler : public AHandler {
                      << result << " (" << strerror(-result) << ")";
 
                 sp<AMessage> reply = new AMessage('disc', id());
+
+                int32_t reconnect;
+                if (msg->findInt32("reconnect", &reconnect) && reconnect) {
+                    reply->setInt32("reconnect", true);
+                }
+
                 mConn->disconnect(reply);
                 break;
             }
@@ -389,7 +418,7 @@ struct MyHandler : public AHandler {
                 }
 
                 mNumAccessUnitsReceived = 0;
-                msg->post(500000);
+                msg->post(kAccessUnitTimeoutUs);
                 break;
             }
 
@@ -400,11 +429,16 @@ struct MyHandler : public AHandler {
                 if (!mCheckPending) {
                     mCheckPending = true;
                     sp<AMessage> check = new AMessage('chek', id());
-                    check->post(500000);
+                    check->post(kAccessUnitTimeoutUs);
                 }
 
                 size_t trackIndex;
                 CHECK(msg->findSize("track-index", &trackIndex));
+
+                if (trackIndex >= mTracks.size()) {
+                    LOG(ERROR) << "late packets ignored.";
+                    break;
+                }
 
                 TrackInfo *track = &mTracks.editItemAt(trackIndex);
 
@@ -449,6 +483,10 @@ struct MyHandler : public AHandler {
                 }
 
                 if (mFirstAccessUnit) {
+                    mDoneMsg->setInt32("result", OK);
+                    mDoneMsg->post();
+                    mDoneMsg = NULL;
+
                     mFirstAccessUnit = false;
                     mFirstAccessUnitNTP = ntpTime;
                 }
@@ -575,8 +613,19 @@ struct MyHandler : public AHandler {
             case 'tiou':
             {
                 if (mFirstAccessUnit) {
-                    LOG(WARNING) << "Never received any data, disconnecting.";
-                    (new AMessage('abor', id()))->post();
+                    if (mTryTCPInterleaving) {
+                        LOG(WARNING) << "Never received any data, disconnecting.";
+                        (new AMessage('abor', id()))->post();
+                    } else {
+                        LOG(WARNING)
+                            << "Never received any data, switching transports.";
+
+                        mTryTCPInterleaving = true;
+
+                        sp<AMessage> msg = new AMessage('abor', id());
+                        msg->setInt32("reconnect", true);
+                        msg->post();
+                    }
                 }
                 break;
             }
@@ -697,6 +746,7 @@ private:
     uint64_t mFirstAccessUnitNTP;
     int64_t mNumAccessUnitsReceived;
     bool mCheckPending;
+    bool mTryTCPInterleaving;
 
     struct TrackInfo {
         AString mURL;
@@ -715,6 +765,7 @@ private:
     void setupTrack(size_t index) {
         sp<APacketSource> source =
             new APacketSource(mSessionDesc, index);
+
         if (source->initCheck() != OK) {
             LOG(WARNING) << "Unsupported format. Ignoring track #"
                          << index << ".";
@@ -746,26 +797,26 @@ private:
         request.append(trackURL);
         request.append(" RTSP/1.0\r\n");
 
-#if USE_TCP_INTERLEAVED
-        size_t interleaveIndex = 2 * (mTracks.size() - 1);
-        info->mUsingInterleavedTCP = true;
-        info->mRTPSocket = interleaveIndex;
-        info->mRTCPSocket = interleaveIndex + 1;
+        if (mTryTCPInterleaving) {
+            size_t interleaveIndex = 2 * (mTracks.size() - 1);
+            info->mUsingInterleavedTCP = true;
+            info->mRTPSocket = interleaveIndex;
+            info->mRTCPSocket = interleaveIndex + 1;
 
-        request.append("Transport: RTP/AVP/TCP;interleaved=");
-        request.append(interleaveIndex);
-        request.append("-");
-        request.append(interleaveIndex + 1);
-#else
-        unsigned rtpPort;
-        ARTPConnection::MakePortPair(
-                &info->mRTPSocket, &info->mRTCPSocket, &rtpPort);
+            request.append("Transport: RTP/AVP/TCP;interleaved=");
+            request.append(interleaveIndex);
+            request.append("-");
+            request.append(interleaveIndex + 1);
+        } else {
+            unsigned rtpPort;
+            ARTPConnection::MakePortPair(
+                    &info->mRTPSocket, &info->mRTCPSocket, &rtpPort);
 
-        request.append("Transport: RTP/AVP/UDP;unicast;client_port=");
-        request.append(rtpPort);
-        request.append("-");
-        request.append(rtpPort + 1);
-#endif
+            request.append("Transport: RTP/AVP/UDP;unicast;client_port=");
+            request.append(rtpPort);
+            request.append("-");
+            request.append(rtpPort + 1);
+        }
 
         request.append("\r\n");
 

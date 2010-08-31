@@ -405,12 +405,15 @@ void InputDispatcher::processMotionLockedInterruptible(
         sampleCount += 1;
     }
     for (uint32_t i = 0; i < entry->pointerCount; i++) {
-        LOGD("  Pointer %d: id=%d, x=%f, y=%f, pressure=%f, size=%f",
+        LOGD("  Pointer %d: id=%d, x=%f, y=%f, pressure=%f, size=%f, "
+                "touchMajor=%f, touchMinor=%d, toolMajor=%f, toolMinor=%f, "
+                "orientation=%f",
                 i, entry->pointerIds[i],
-                sample->pointerCoords[i].x,
-                sample->pointerCoords[i].y,
-                sample->pointerCoords[i].pressure,
-                sample->pointerCoords[i].size);
+                sample->pointerCoords[i].x, sample->pointerCoords[i].y,
+                sample->pointerCoords[i].pressure, sample->pointerCoords[i].size,
+                sample->pointerCoords[i].touchMajor, sample->pointerCoords[i].touchMinor,
+                sample->pointerCoords[i].toolMajor, sample->pointerCoords[i].toolMinor,
+                sample->pointerCoords[i].orientation);
     }
 
     // Keep in mind that due to batching, it is possible for the number of samples actually
@@ -1080,9 +1083,14 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t 
             eventTime, deviceId, source, policyFlags, action, metaState, edgeFlags,
             xPrecision, yPrecision, downTime);
     for (uint32_t i = 0; i < pointerCount; i++) {
-        LOGD("  Pointer %d: id=%d, x=%f, y=%f, pressure=%f, size=%f",
+        LOGD("  Pointer %d: id=%d, x=%f, y=%f, pressure=%f, size=%f, "
+                "touchMajor=%f, touchMinor=%d, toolMajor=%f, toolMinor=%f, "
+                "orientation=%f",
                 i, pointerIds[i], pointerCoords[i].x, pointerCoords[i].y,
-                pointerCoords[i].pressure, pointerCoords[i].size);
+                pointerCoords[i].pressure, pointerCoords[i].size,
+                pointerCoords[i].touchMajor, pointerCoords[i].touchMinor,
+                pointerCoords[i].toolMajor, pointerCoords[i].toolMinor,
+                pointerCoords[i].orientation);
     }
 #endif
 

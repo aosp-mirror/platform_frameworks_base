@@ -15,14 +15,6 @@
  * limitations under the License.
  */
 
-/************************************************************************************
-
-     $Author: beq06068 $
-     $Revision: 1307 $
-     $Date: 2010-07-22 17:41:25 +0200 (Thu, 22 Jul 2010) $
-
-*************************************************************************************/
-
 /************************************************************************************/
 /*                                                                                  */
 /*  Header file for the private layer interface of concert sound.                   */
@@ -65,6 +57,7 @@ extern "C" {
 #define LVCS_REVERBSWITCH           0x0002      /* Reverberation enable control */
 #define LVCS_EQUALISERSWITCH        0x0004      /* Equaliser enable control */
 #define LVCS_BYPASSMIXSWITCH        0x0008      /* Bypass mixer enable control */
+#define LVCS_COMPGAINFRAME          64          /* Compressor gain update interval */
 
 /* Memory */
 #define LVCS_SCRATCHBUFFERS              6      /* Number of buffers required for inplace processing */
@@ -120,6 +113,7 @@ typedef struct
     LVCS_OutputDevice_en    OutputDevice;       /* Selected output device type */
     LVCS_VolCorrect_t       VolCorrect;         /* Volume correction settings */
     LVM_INT16               TransitionGain;     /* Transition gain */
+    LVM_INT16               CompressGain;       /* Last used compressor gain*/
 
     /* Sub-block configurations */
     LVCS_StereoEnhancer_t   StereoEnhancer;     /* Stereo enhancer configuration */

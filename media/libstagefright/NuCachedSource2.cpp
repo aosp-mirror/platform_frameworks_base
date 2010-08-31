@@ -180,6 +180,7 @@ NuCachedSource2::NuCachedSource2(const sp<DataSource> &source)
       mLastAccessPos(0),
       mFetching(true),
       mLastFetchTimeUs(-1) {
+    mLooper->setName("NuCachedSource2");
     mLooper->registerHandler(mReflector);
     mLooper->start();
 

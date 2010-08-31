@@ -9833,6 +9833,7 @@ class PackageManagerService extends IPackageManager.Stub {
                                        ps.codePathString = ps.codePath.getPath();
                                        ps.resourcePath = new File(pkg.applicationInfo.publicSourceDir);
                                        ps.resourcePathString = ps.resourcePath.getPath();
+                                       ps.nativeLibraryPathString = newNativePath;
                                        // Set the application info flag correctly.
                                        if ((mp.flags & PackageManager.INSTALL_EXTERNAL) != 0) {
                                            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_EXTERNAL_STORAGE;

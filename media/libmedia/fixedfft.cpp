@@ -26,7 +26,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#ifdef __ARM_ARCH__
+#ifdef __arm__
 #include <machine/cpu-features.h>
 #endif
 

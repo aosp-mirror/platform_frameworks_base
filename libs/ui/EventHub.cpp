@@ -139,11 +139,7 @@ uint32_t EventHub::getDeviceClasses(int32_t deviceId) const
 
 status_t EventHub::getAbsoluteAxisInfo(int32_t deviceId, int axis,
         RawAbsoluteAxisInfo* outAxisInfo) const {
-    outAxisInfo->valid = false;
-    outAxisInfo->minValue = 0;
-    outAxisInfo->maxValue = 0;
-    outAxisInfo->flat = 0;
-    outAxisInfo->fuzz = 0;
+    outAxisInfo->clear();
 
     AutoMutex _l(mLock);
     device_t* device = getDevice(deviceId);
@@ -709,8 +705,7 @@ int EventHub::open_device(const char *deviceName)
     LOGV("Getting absolute controllers...");
     if (ioctl(fd, EVIOCGBIT(EV_ABS, sizeof(abs_bitmask)), abs_bitmask) >= 0) {
         // Is this a new modern multi-touch driver?
-        if (test_bit(ABS_MT_TOUCH_MAJOR, abs_bitmask)
-                && test_bit(ABS_MT_POSITION_X, abs_bitmask)
+        if (test_bit(ABS_MT_POSITION_X, abs_bitmask)
                 && test_bit(ABS_MT_POSITION_Y, abs_bitmask)) {
             device->classes |= INPUT_DEVICE_CLASS_TOUCHSCREEN | INPUT_DEVICE_CLASS_TOUCHSCREEN_MT;
 

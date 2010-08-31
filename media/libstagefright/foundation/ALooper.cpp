@@ -65,6 +65,10 @@ ALooper::~ALooper() {
     stop();
 }
 
+void ALooper::setName(const char *name) {
+    mName = name;
+}
+
 ALooper::handler_id ALooper::registerHandler(const sp<AHandler> &handler) {
     return gLooperRoster.registerHandler(this, handler);
 }
@@ -100,7 +104,8 @@ status_t ALooper::start(
 
     mThread = new LooperThread(this, canCallJava);
 
-    status_t err = mThread->run("ALooper", priority);
+    status_t err = mThread->run(
+            mName.empty() ? "ALooper" : mName.c_str(), priority);
     if (err != OK) {
         mThread.clear();
     }

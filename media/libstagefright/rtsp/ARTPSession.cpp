@@ -167,6 +167,7 @@ void ARTPSession::onMessageReceived(const sp<AMessage> &msg) {
 #endif
 
             accessUnit->meta()->setInt64("ntp-time", ntpTime);
+            accessUnit->meta()->setInt64("timeUs", 0);
 
 #if 0
             int32_t damaged;

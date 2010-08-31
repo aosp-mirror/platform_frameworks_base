@@ -993,7 +993,6 @@ public class Camera {
         private static final String KEY_ZOOM_SUPPORTED = "zoom-supported";
         private static final String KEY_SMOOTH_ZOOM_SUPPORTED = "smooth-zoom-supported";
         private static final String KEY_FOCUS_DISTANCES = "focus-distances";
-        private static final String KEY_METERING_MODE = "metering-mode";
 
         // Parameter key suffix for supported values.
         private static final String SUPPORTED_VALUES_SUFFIX = "-values";
@@ -1201,24 +1200,6 @@ public class Camera {
          * {@link #getFocusDistances(float[])}.
          */
         public static final int FOCUS_DISTANCE_FAR_INDEX = 2;
-
-        /**
-         * The camera determines the exposure by giving more weight to the
-         * central part of the scene.
-         */
-        public static final String METERING_MODE_CENTER_WEIGHTED = "center-weighted";
-
-        /**
-         * The camera determines the exposure by averaging the entire scene,
-         * giving no weighting to any particular area.
-         */
-        public static final String METERING_MODE_FRAME_AVERAGE = "frame-average";
-
-        /**
-         * The camera determines the exposure by a very small area of the scene,
-         * typically the center.
-         */
-        public static final String METERING_MODE_SPOT = "spot";
 
         /**
          * The array index of minimum preview fps for use with {@link
@@ -2261,42 +2242,6 @@ public class Camera {
                         "output must be an float array with three elements.");
             }
             splitFloat(get(KEY_FOCUS_DISTANCES), output);
-        }
-
-        /**
-         * Gets the supported metering modes.
-         *
-         * @return a list of supported metering modes. null if metering mode
-         *         setting is not supported.
-         * @see #getMeteringMode()
-         */
-        public List<String> getSupportedMeteringModes() {
-            String str = get(KEY_METERING_MODE + SUPPORTED_VALUES_SUFFIX);
-            return split(str);
-        }
-
-        /**
-         * Gets the current metering mode, which affects how camera determines
-         * exposure.
-         *
-         * @return current metering mode. If the camera does not support
-         *         metering setting, this should return null.
-         * @see #METERING_MODE_CENTER_WEIGHTED
-         * @see #METERING_MODE_FRAME_AVERAGE
-         * @see #METERING_MODE_SPOT
-         */
-        public String getMeteringMode() {
-            return get(KEY_METERING_MODE);
-        }
-
-        /**
-         * Sets the metering mode.
-         *
-         * @param value metering mode.
-         * @see #getMeteringMode()
-         */
-        public void setMeteringMode(String value) {
-            set(KEY_METERING_MODE, value);
         }
 
         // Splits a comma delimited string to an ArrayList of String.

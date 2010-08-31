@@ -1251,6 +1251,10 @@
   <public type="attr" name="logo" id="0x010102be" />
   <public type="attr" name="xlargeScreens" id="0x010102bf" />
   <public type="attr" name="immersive" id="0x010102c0" />
+  <public type="attr" name="overscrollMode" id="0x010102c1" />
+  <public type="attr" name="overscrollHeader" id="0x010102c2" />
+  <public type="attr" name="overscrollFooter" id="0x010102c3" />
+
   <public-padding type="attr" name="kraken_resource_pad" end="0x01010300" />
   
   <public-padding type="id" name="kraken_resource_pad" end="0x01020040" />
@@ -1262,7 +1266,8 @@
   <public type="drawable" name="presence_video_online" id="0x010800ae" />
   <public type="drawable" name="presence_audio_away" id="0x010800af" />
   <public type="drawable" name="presence_audio_busy" id="0x010800b0" />
-  <public type="drawable" name="presence_audio_online" id="0x010800b1" />  
+  <public type="drawable" name="presence_audio_online" id="0x010800b1" />
+
   <public-padding type="drawable" name="kraken_resource_pad" end="0x01080100" />
   
   <public-padding type="style" name="kraken_resource_pad" end="0x01030090" />
