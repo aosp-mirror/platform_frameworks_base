@@ -55,7 +55,9 @@ class GLES20Canvas extends Canvas {
     private final Rect mClipBounds = new Rect();
 
     private DrawFilter mFilter;
-    
+
+    private boolean mContextLocked;
+
     ///////////////////////////////////////////////////////////////////////////
     // JNI
     ///////////////////////////////////////////////////////////////////////////
@@ -148,6 +150,27 @@ class GLES20Canvas extends Canvas {
     }
     
     private native void nPrepare(int renderer);
+
+    @Override
+    public boolean acquireContext() {
+        if (!mContextLocked) {
+            nAcquireContext(mRenderer);
+            mContextLocked = true;
+        }
+        return mContextLocked;
+    }
+
+    private native void nAcquireContext(int renderer);
+
+    @Override
+    public void releaseContext() {
+        if (mContextLocked) {
+            nReleaseContext(mRenderer);
+            mContextLocked = false;
+        }
+    }
+
+    private native void nReleaseContext(int renderer);
 
     ///////////////////////////////////////////////////////////////////////////
     // Clipping

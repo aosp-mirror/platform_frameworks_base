@@ -58,6 +58,8 @@ public:
 
     void setViewport(int width, int height);
     void prepare();
+    void acquireContext();
+    void releaseContext();
 
     int getSaveCount() const;
     int save(int flags);
