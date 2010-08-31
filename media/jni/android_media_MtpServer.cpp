@@ -22,7 +22,10 @@
 #include <limits.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
 #include <utils/threads.h>
+
+#include <linux/usb/f_mtp.h>
 
 #include "jni.h"
 #include "JNIHelp.h"
@@ -56,34 +59,54 @@ private:
     MtpServer*      mServer;
     String8         mStoragePath;
     jobject         mJavaServer;
+    int             mFd;
 
 public:
     MtpThread(MtpDatabase* database, const char* storagePath, jobject javaServer)
-        : mDatabase(database),
+        :   mDatabase(database),
             mServer(NULL),
             mStoragePath(storagePath),
-            mJavaServer(javaServer)
+            mJavaServer(javaServer),
+            mFd(-1)
     {
     }
 
+    void setPtpMode(bool usePtp) {
+        sMutex.lock();
+        if (mFd >= 0) {
+            ioctl(mFd, MTP_SET_INTERFACE_MODE,
+                    (usePtp ? MTP_INTERFACE_MODE_PTP : MTP_INTERFACE_MODE_MTP));
+        } else {
+            int fd = open("/dev/mtp_usb", O_RDWR);
+            if (fd >= 0) {
+                ioctl(fd, MTP_SET_INTERFACE_MODE,
+                        (usePtp ? MTP_INTERFACE_MODE_PTP : MTP_INTERFACE_MODE_MTP));
+                close(fd);
+            }
+        }
+        sMutex.unlock();
+    }
+
     virtual bool threadLoop() {
-        int fd = open("/dev/mtp_usb", O_RDWR);
-        printf("open returned %d\n", fd);
-        if (fd < 0) {
+        sMutex.lock();
+        mFd = open("/dev/mtp_usb", O_RDWR);
+        printf("open returned %d\n", mFd);
+        if (mFd < 0) {
             LOGE("could not open MTP driver\n");
+            sMutex.unlock();
             return false;
         }
 
-        sMutex.lock();
-        mServer = new MtpServer(fd, mDatabase, AID_SDCARD_RW, 0664, 0775);
+        mServer = new MtpServer(mFd, mDatabase, AID_SDCARD_RW, 0664, 0775);
         mServer->addStorage(mStoragePath);
         sMutex.unlock();
 
         LOGD("MtpThread mServer->run");
         mServer->run();
-        close(fd);
 
         sMutex.lock();
+        close(mFd);
+        mFd = -1;
         delete mServer;
         mServer = NULL;
 
@@ -184,6 +207,17 @@ android_media_MtpServer_send_object_removed(JNIEnv *env, jobject thiz, jint hand
 #endif
 }
 
+static void
+android_media_MtpServer_set_ptp_mode(JNIEnv *env, jobject thiz, jboolean usePtp)
+{
+#ifdef HAVE_ANDROID_OS
+    LOGD("set_ptp_mode\n");
+    MtpThread *thread = (MtpThread *)env->GetIntField(thiz, field_context);
+    if (thread)
+        thread->setPtpMode(usePtp);
+ #endif
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -194,6 +228,7 @@ static JNINativeMethod gMethods[] = {
     {"native_stop",                 "()V",  (void *)android_media_MtpServer_stop},
     {"native_send_object_added",    "(I)V", (void *)android_media_MtpServer_send_object_added},
     {"native_send_object_removed",  "(I)V", (void *)android_media_MtpServer_send_object_removed},
+    {"native_set_ptp_mode",         "(Z)V", (void *)android_media_MtpServer_set_ptp_mode},
 };
 
 static const char* const kClassPathName = "android/media/MtpServer";

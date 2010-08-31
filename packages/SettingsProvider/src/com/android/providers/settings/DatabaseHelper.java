@@ -1047,6 +1047,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     
             loadBooleanSetting(stmt, Settings.System.VIBRATE_IN_SILENT,
                     R.bool.def_vibrate_in_silent);
+
+            loadBooleanSetting(stmt, Settings.System.USE_PTP_INTERFACE,
+                    R.bool.def_use_ptp_interface);
         } finally {
             if (stmt != null) stmt.close();
         }

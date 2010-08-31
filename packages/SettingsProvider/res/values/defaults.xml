@@ -72,4 +72,6 @@
 
     <!-- Default for Settings.System.VIBRATE_IN_SILENT -->
     <bool name="def_vibrate_in_silent">true</bool>
+
+    <bool name="def_use_ptp_interface">false</bool>
 </resources>
