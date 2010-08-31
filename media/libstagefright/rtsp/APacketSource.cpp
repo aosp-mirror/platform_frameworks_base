@@ -247,6 +247,65 @@ sp<ABuffer> MakeAACCodecSpecificData(const char *params) {
     return csd;
 }
 
+// From mpeg4-generic configuration data.
+sp<ABuffer> MakeAACCodecSpecificData2(const char *params) {
+    AString val;
+    unsigned long objectType;
+    if (GetAttribute(params, "objectType", &val)) {
+        const char *s = val.c_str();
+        char *end;
+        objectType = strtoul(s, &end, 10);
+        CHECK(end > s && *end == '\0');
+    } else {
+        objectType = 0x40;  // Audio ISO/IEC 14496-3
+    }
+
+    CHECK(GetAttribute(params, "config", &val));
+
+    sp<ABuffer> config = decodeHex(val);
+    CHECK(config != NULL);
+
+    // Make sure size fits into a single byte and doesn't have to
+    // be encoded.
+    CHECK_LT(20 + config->size(), 128u);
+
+    const uint8_t *data = config->data();
+
+    static const uint8_t kStaticESDS[] = {
+        0x03, 22,
+        0x00, 0x00,     // ES_ID
+        0x00,           // streamDependenceFlag, URL_Flag, OCRstreamFlag
+
+        0x04, 17,
+        0x40,                       // Audio ISO/IEC 14496-3
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+
+        0x05, 2,
+        // AudioSpecificInfo follows
+    };
+
+    sp<ABuffer> csd = new ABuffer(sizeof(kStaticESDS) + config->size());
+    uint8_t *dst = csd->data();
+    *dst++ = 0x03;
+    *dst++ = 20 + config->size();
+    *dst++ = 0x00;  // ES_ID
+    *dst++ = 0x00;
+    *dst++ = 0x00;  // streamDependenceFlag, URL_Flag, OCRstreamFlag
+    *dst++ = 0x04;
+    *dst++ = 15 + config->size();
+    *dst++ = objectType;
+    for (int i = 0; i < 12; ++i) { *dst++ = 0x00; }
+    *dst++ = 0x05;
+    *dst++ = config->size();
+    memcpy(dst, config->data(), config->size());
+
+    // hexdump(csd->data(), csd->size());
+
+    return csd;
+}
+
 static size_t GetSizeWidth(size_t x) {
     size_t n = 1;
     while (x > 127) {
@@ -560,6 +619,30 @@ APacketSource::APacketSource(
 
         mFormat->setInt32(kKeyWidth, width);
         mFormat->setInt32(kKeyHeight, height);
+    } else if (!strncmp(desc.c_str(), "mpeg4-generic/", 14)) {
+        AString val;
+        if (!GetAttribute(params.c_str(), "mode", &val)
+                || (strcasecmp(val.c_str(), "AAC-lbr")
+                    && strcasecmp(val.c_str(), "AAC-hbr"))) {
+            mInitCheck = ERROR_UNSUPPORTED;
+            return;
+        }
+
+        mFormat->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AAC);
+
+        int32_t sampleRate, numChannels;
+        ASessionDescription::ParseFormatDesc(
+                desc.c_str(), &sampleRate, &numChannels);
+
+        mFormat->setInt32(kKeySampleRate, sampleRate);
+        mFormat->setInt32(kKeyChannelCount, numChannels);
+
+        sp<ABuffer> codecSpecificData =
+            MakeAACCodecSpecificData2(params.c_str());
+
+        mFormat->setData(
+                kKeyESDS, 0,
+                codecSpecificData->data(), codecSpecificData->size());
     } else {
         mInitCheck = ERROR_UNSUPPORTED;
     }

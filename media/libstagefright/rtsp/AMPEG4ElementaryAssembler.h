@@ -20,6 +20,8 @@
 
 #include "ARTPAssembler.h"
 
+#include <media/stagefright/foundation/AString.h>
+
 #include <utils/List.h>
 #include <utils/RefBase.h>
 
@@ -29,7 +31,9 @@ struct ABuffer;
 struct AMessage;
 
 struct AMPEG4ElementaryAssembler : public ARTPAssembler {
-    AMPEG4ElementaryAssembler(const sp<AMessage> &notify);
+    AMPEG4ElementaryAssembler(
+            const sp<AMessage> &notify, const AString &desc,
+            const AString &params);
 
 protected:
     virtual ~AMPEG4ElementaryAssembler();
@@ -40,6 +44,18 @@ protected:
 
 private:
     sp<AMessage> mNotifyMsg;
+    bool mIsGeneric;
+    AString mParams;
+
+    unsigned mSizeLength;
+    unsigned mIndexLength;
+    unsigned mIndexDeltaLength;
+    unsigned mCTSDeltaLength;
+    unsigned mDTSDeltaLength;
+    bool mRandomAccessIndication;
+    unsigned mStreamStateIndication;
+    unsigned mAuxiliaryDataSizeLength;
+    bool mHasAUHeader;
 
     uint32_t mAccessUnitRTPTime;
     bool mNextExpectedSeqNoValid;
