@@ -124,7 +124,6 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 class ReceiverRestrictedContext extends ContextWrapper {
     ReceiverRestrictedContext(Context base) {
@@ -2821,8 +2820,6 @@ class ContextImpl extends Context {
             private final Map<String, Object> mModified = Maps.newHashMap();
             private boolean mClear = false;
 
-            private AtomicBoolean mCommitInFlight = new AtomicBoolean(false);
-
             public Editor putString(String key, String value) {
                 synchronized (this) {
                     mModified.put(key, value);
@@ -2868,11 +2865,7 @@ class ContextImpl extends Context {
                 }
             }
 
-            public void startCommit() {
-                if (!mCommitInFlight.compareAndSet(false, true)) {
-                    throw new IllegalStateException("can't call startCommit() twice");
-                }
-
+            public void apply() {
                 final MemoryCommitResult mcr = commitToMemory();
                 final Runnable awaitCommit = new Runnable() {
                         public void run() {
@@ -2888,7 +2881,6 @@ class ContextImpl extends Context {
                 Runnable postWriteRunnable = new Runnable() {
                         public void run() {
                             awaitCommit.run();
-                            mCommitInFlight.set(false);
                             QueuedWork.remove(awaitCommit);
                         }
                     };
@@ -3012,13 +3004,13 @@ class ContextImpl extends Context {
          * that they're enqueued.
          *
          * @param postWriteRunnable if non-null, we're being called
-         *   from startCommit() and this is the runnable to run after
+         *   from apply() and this is the runnable to run after
          *   the write proceeds.  if null (from a regular commit()),
          *   then we're allowed to do this disk write on the main
          *   thread (which in addition to reducing allocations and
          *   creating a background thread, this has the advantage that
          *   we catch them in userdebug StrictMode reports to convert
-         *   them where possible to startCommit...)
+         *   them where possible to apply() ...)
          */
         private void enqueueDiskWrite(final MemoryCommitResult mcr,
                                       final Runnable postWriteRunnable) {
