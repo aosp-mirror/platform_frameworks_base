@@ -453,6 +453,10 @@ public:
     inline void setKeyboardType(int32_t keyboardType) { mKeyboardType = keyboardType; }
     inline int32_t getKeyboardType() const { return mKeyboardType; }
 
+    inline const KeyedVector<int32_t, MotionRange> getMotionRanges() const {
+        return mMotionRanges;
+    }
+
 private:
     int32_t mId;
     String8 mName;

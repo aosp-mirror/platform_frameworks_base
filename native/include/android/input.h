@@ -718,8 +718,6 @@ int32_t AInputDevice_getKeyboardType(AInputDevice* device);
 int32_t AInputDevice_getMotionRange(AInputDevice* device, int32_t rangeType,
         float* outMin, float* outMax, float* outFlat, float* outFuzz);
 
-//TODO hasKey, keymap stuff, etc...
-
 #ifdef __cplusplus
 }
 #endif

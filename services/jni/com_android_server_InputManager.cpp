@@ -138,6 +138,7 @@ static struct {
     jmethodID filterTouchEvents;
     jmethodID filterJumpyTouchEvents;
     jmethodID getVirtualKeyDefinitions;
+    jmethodID getInputDeviceCalibration;
     jmethodID getExcludedDeviceNames;
     jmethodID getMaxEventsPerSecond;
 } gCallbacksClassInfo;
@@ -151,6 +152,13 @@ static struct {
     jfieldID width;
     jfieldID height;
 } gVirtualKeyDefinitionClassInfo;
+
+static struct {
+    jclass clazz;
+
+    jfieldID keys;
+    jfieldID values;
+} gInputDeviceCalibrationClassInfo;
 
 static struct {
     jclass clazz;
@@ -188,6 +196,19 @@ static struct {
 static struct {
     jclass clazz;
 } gMotionEventClassInfo;
+
+static struct {
+    jclass clazz;
+
+    jmethodID ctor;
+    jmethodID addMotionRange;
+
+    jfieldID mId;
+    jfieldID mName;
+    jfieldID mSources;
+    jfieldID mKeyboardType;
+    jfieldID mMotionRanges;
+} gInputDeviceClassInfo;
 
 // ----------------------------------------------------------------------------
 
@@ -235,7 +256,9 @@ public:
     virtual bool filterTouchEvents();
     virtual bool filterJumpyTouchEvents();
     virtual void getVirtualKeyDefinitions(const String8& deviceName,
-            Vector<InputReaderPolicyInterface::VirtualKeyDefinition>& outVirtualKeyDefinitions);
+            Vector<VirtualKeyDefinition>& outVirtualKeyDefinitions);
+    virtual void getInputDeviceCalibration(const String8& deviceName,
+            InputDeviceCalibration& outCalibration);
     virtual void getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames);
 
     /* --- InputDispatcherPolicyInterface implementation --- */
@@ -761,7 +784,9 @@ bool NativeInputManager::filterJumpyTouchEvents() {
 }
 
 void NativeInputManager::getVirtualKeyDefinitions(const String8& deviceName,
-        Vector<InputReaderPolicyInterface::VirtualKeyDefinition>& outVirtualKeyDefinitions) {
+        Vector<VirtualKeyDefinition>& outVirtualKeyDefinitions) {
+    outVirtualKeyDefinitions.clear();
+
     JNIEnv* env = jniEnv();
 
     jstring deviceNameStr = env->NewStringUTF(deviceName.string());
@@ -793,7 +818,51 @@ void NativeInputManager::getVirtualKeyDefinitions(const String8& deviceName,
     }
 }
 
+void NativeInputManager::getInputDeviceCalibration(const String8& deviceName,
+        InputDeviceCalibration& outCalibration) {
+    outCalibration.clear();
+
+    JNIEnv* env = jniEnv();
+
+    jstring deviceNameStr = env->NewStringUTF(deviceName.string());
+    if (! checkAndClearExceptionFromCallback(env, "getInputDeviceCalibration")) {
+        jobject result = env->CallObjectMethod(mCallbacksObj,
+                gCallbacksClassInfo.getInputDeviceCalibration, deviceNameStr);
+        if (! checkAndClearExceptionFromCallback(env, "getInputDeviceCalibration") && result) {
+            jobjectArray keys = jobjectArray(env->GetObjectField(result,
+                    gInputDeviceCalibrationClassInfo.keys));
+            jobjectArray values = jobjectArray(env->GetObjectField(result,
+                    gInputDeviceCalibrationClassInfo.values));
+
+            jsize length = env->GetArrayLength(keys);
+            for (jsize i = 0; i < length; i++) {
+                jstring keyStr = jstring(env->GetObjectArrayElement(keys, i));
+                jstring valueStr = jstring(env->GetObjectArrayElement(values, i));
+
+                const char* keyChars = env->GetStringUTFChars(keyStr, NULL);
+                String8 key(keyChars);
+                env->ReleaseStringUTFChars(keyStr, keyChars);
+
+                const char* valueChars = env->GetStringUTFChars(valueStr, NULL);
+                String8 value(valueChars);
+                env->ReleaseStringUTFChars(valueStr, valueChars);
+
+                outCalibration.addProperty(key, value);
+
+                env->DeleteLocalRef(keyStr);
+                env->DeleteLocalRef(valueStr);
+            }
+            env->DeleteLocalRef(keys);
+            env->DeleteLocalRef(values);
+            env->DeleteLocalRef(result);
+        }
+        env->DeleteLocalRef(deviceNameStr);
+    }
+}
+
 void NativeInputManager::getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames) {
+    outExcludedDeviceNames.clear();
+
     JNIEnv* env = jniEnv();
 
     jobjectArray result = jobjectArray(env->CallObjectMethod(mCallbacksObj,
@@ -2199,6 +2268,66 @@ static void android_server_InputManager_nativePreemptInputDispatch(JNIEnv* env,
     gNativeInputManager->preemptInputDispatch();
 }
 
+static jobject android_server_InputManager_nativeGetInputDevice(JNIEnv* env,
+        jclass clazz, jint deviceId) {
+    if (checkInputManagerUnitialized(env)) {
+        return NULL;
+    }
+
+    InputDeviceInfo deviceInfo;
+    status_t status = gNativeInputManager->getInputManager()->getInputDeviceInfo(
+            deviceId, & deviceInfo);
+    if (status) {
+        return NULL;
+    }
+
+    jobject deviceObj = env->NewObject(gInputDeviceClassInfo.clazz, gInputDeviceClassInfo.ctor);
+    if (! deviceObj) {
+        return NULL;
+    }
+
+    jstring deviceNameObj = env->NewStringUTF(deviceInfo.getName().string());
+    if (! deviceNameObj) {
+        return NULL;
+    }
+
+    env->SetIntField(deviceObj, gInputDeviceClassInfo.mId, deviceInfo.getId());
+    env->SetObjectField(deviceObj, gInputDeviceClassInfo.mName, deviceNameObj);
+    env->SetIntField(deviceObj, gInputDeviceClassInfo.mSources, deviceInfo.getSources());
+    env->SetIntField(deviceObj, gInputDeviceClassInfo.mKeyboardType, deviceInfo.getKeyboardType());
+
+    const KeyedVector<int, InputDeviceInfo::MotionRange>& ranges = deviceInfo.getMotionRanges();
+    for (size_t i = 0; i < ranges.size(); i++) {
+        int rangeType = ranges.keyAt(i);
+        const InputDeviceInfo::MotionRange& range = ranges.valueAt(i);
+        env->CallVoidMethod(deviceObj, gInputDeviceClassInfo.addMotionRange,
+                rangeType, range.min, range.max, range.flat, range.fuzz);
+        if (env->ExceptionCheck()) {
+            return NULL;
+        }
+    }
+
+    return deviceObj;
+}
+
+static jintArray android_server_InputManager_nativeGetInputDeviceIds(JNIEnv* env,
+        jclass clazz) {
+    if (checkInputManagerUnitialized(env)) {
+        return NULL;
+    }
+
+    Vector<int> deviceIds;
+    gNativeInputManager->getInputManager()->getInputDeviceIds(deviceIds);
+
+    jintArray deviceIdsObj = env->NewIntArray(deviceIds.size());
+    if (! deviceIdsObj) {
+        return NULL;
+    }
+
+    env->SetIntArrayRegion(deviceIdsObj, 0, deviceIds.size(), deviceIds.array());
+    return deviceIdsObj;
+}
+
 static jstring android_server_InputManager_nativeDump(JNIEnv* env, jclass clazz) {
     if (checkInputManagerUnitialized(env)) {
         return NULL;
@@ -2242,6 +2371,10 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) android_server_InputManager_nativeSetInputDispatchMode },
     { "nativePreemptInputDispatch", "()V",
             (void*) android_server_InputManager_nativePreemptInputDispatch },
+    { "nativeGetInputDevice", "(I)Landroid/view/InputDevice;",
+            (void*) android_server_InputManager_nativeGetInputDevice },
+    { "nativeGetInputDeviceIds", "()[I",
+            (void*) android_server_InputManager_nativeGetInputDeviceIds },
     { "nativeDump", "()Ljava/lang/String;",
             (void*) android_server_InputManager_nativeDump },
 };
@@ -2311,6 +2444,10 @@ int register_android_server_InputManager(JNIEnv* env) {
             "getVirtualKeyDefinitions",
             "(Ljava/lang/String;)[Lcom/android/server/InputManager$VirtualKeyDefinition;");
 
+    GET_METHOD_ID(gCallbacksClassInfo.getInputDeviceCalibration, gCallbacksClassInfo.clazz,
+            "getInputDeviceCalibration",
+            "(Ljava/lang/String;)Lcom/android/server/InputManager$InputDeviceCalibration;");
+
     GET_METHOD_ID(gCallbacksClassInfo.getExcludedDeviceNames, gCallbacksClassInfo.clazz,
             "getExcludedDeviceNames", "()[Ljava/lang/String;");
 
@@ -2336,6 +2473,17 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_FIELD_ID(gVirtualKeyDefinitionClassInfo.height, gVirtualKeyDefinitionClassInfo.clazz,
             "height", "I");
+
+    // InputDeviceCalibration
+
+    FIND_CLASS(gInputDeviceCalibrationClassInfo.clazz,
+            "com/android/server/InputManager$InputDeviceCalibration");
+
+    GET_FIELD_ID(gInputDeviceCalibrationClassInfo.keys, gInputDeviceCalibrationClassInfo.clazz,
+            "keys", "[Ljava/lang/String;");
+
+    GET_FIELD_ID(gInputDeviceCalibrationClassInfo.values, gInputDeviceCalibrationClassInfo.clazz,
+            "values", "[Ljava/lang/String;");
 
     // InputWindow
 
@@ -2407,9 +2555,34 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     FIND_CLASS(gKeyEventClassInfo.clazz, "android/view/KeyEvent");
 
-    // MotionEVent
+    // MotionEvent
 
     FIND_CLASS(gMotionEventClassInfo.clazz, "android/view/MotionEvent");
+
+    // InputDevice
+
+    FIND_CLASS(gInputDeviceClassInfo.clazz, "android/view/InputDevice");
+
+    GET_METHOD_ID(gInputDeviceClassInfo.ctor, gInputDeviceClassInfo.clazz,
+            "<init>", "()V");
+
+    GET_METHOD_ID(gInputDeviceClassInfo.addMotionRange, gInputDeviceClassInfo.clazz,
+            "addMotionRange", "(IFFFF)V");
+
+    GET_FIELD_ID(gInputDeviceClassInfo.mId, gInputDeviceClassInfo.clazz,
+            "mId", "I");
+
+    GET_FIELD_ID(gInputDeviceClassInfo.mName, gInputDeviceClassInfo.clazz,
+            "mName", "Ljava/lang/String;");
+
+    GET_FIELD_ID(gInputDeviceClassInfo.mSources, gInputDeviceClassInfo.clazz,
+            "mSources", "I");
+
+    GET_FIELD_ID(gInputDeviceClassInfo.mKeyboardType, gInputDeviceClassInfo.clazz,
+            "mKeyboardType", "I");
+
+    GET_FIELD_ID(gInputDeviceClassInfo.mMotionRanges, gInputDeviceClassInfo.clazz,
+            "mMotionRanges", "[Landroid/view/InputDevice$MotionRange;");
 
     return 0;
 }

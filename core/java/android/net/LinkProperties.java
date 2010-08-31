@@ -48,11 +48,13 @@ public class LinkProperties implements Parcelable {
 
     // copy constructor instead of clone
     public LinkProperties(LinkProperties source) {
-        mIface = source.getInterface();
-        mAddresses = source.getAddresses();
-        mDnses = source.getDnses();
-        mGateway = source.getGateway();
-        mHttpProxy = new ProxyProperties(source.getHttpProxy());
+        if (source != null) {
+            mIface = source.getInterface();
+            mAddresses = source.getAddresses();
+            mDnses = source.getDnses();
+            mGateway = source.getGateway();
+            mHttpProxy = new ProxyProperties(source.getHttpProxy());
+        }
     }
 
     public void setInterface(NetworkInterface iface) {

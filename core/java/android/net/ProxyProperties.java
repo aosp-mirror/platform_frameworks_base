@@ -38,9 +38,11 @@ public class ProxyProperties implements Parcelable {
 
     // copy constructor instead of clone
     public ProxyProperties(ProxyProperties source) {
-        mProxy = source.getAddress();
-        mPort = source.getPort();
-        mExclusionList = new String(source.getExclusionList());
+        if (source != null) {
+            mProxy = source.getAddress();
+            mPort = source.getPort();
+            mExclusionList = new String(source.getExclusionList());
+        }
     }
 
     public InetAddress getAddress() {

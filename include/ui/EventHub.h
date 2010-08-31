@@ -82,6 +82,14 @@ struct RawAbsoluteAxisInfo {
     int32_t fuzz;      // error tolerance, eg. fuzz == 4 means value is +/- 4 due to noise
 
     inline int32_t getRange() { return maxValue - minValue; }
+
+    inline void clear() {
+        valid = false;
+        minValue = 0;
+        maxValue = 0;
+        flat = 0;
+        fuzz = 0;
+    }
 };
 
 /*

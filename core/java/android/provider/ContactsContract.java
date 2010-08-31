@@ -3301,6 +3301,14 @@ public final class ContactsContract {
          * <P>Type: TEXT</P>
          */
         public static final String LABEL = "label";
+
+        /**
+         * The phone number's E164 representation.
+         * <P>Type: TEXT</P>
+         *
+         * @hide
+         */
+        public static final String NORMALIZED_NUMBER = "normalized_number";
     }
 
     /**
@@ -4151,6 +4159,14 @@ public final class ContactsContract {
              * <P>Type: TEXT</P>
              */
             public static final String NUMBER = DATA;
+
+            /**
+             * The phone number's E164 representation.
+             * <P>Type: TEXT</P>
+             *
+             * @hide
+             */
+            public static final String NORMALIZED_NUMBER = DATA4;
 
             /**
              * @deprecated use {@link #getTypeLabel(Resources, int, CharSequence)} instead.
