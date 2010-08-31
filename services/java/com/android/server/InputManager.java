@@ -30,6 +30,7 @@ import android.os.SystemProperties;
 import android.util.Slog;
 import android.util.Xml;
 import android.view.InputChannel;
+import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -45,6 +46,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Properties;
 
 /*
  * Wraps the C++ InputManager and provides its callbacks.
@@ -82,6 +84,8 @@ public class InputManager {
     private static native void nativeSetInputDispatchMode(boolean enabled, boolean frozen);
     private static native void nativeSetFocusedApplication(InputApplication application);
     private static native void nativePreemptInputDispatch();
+    private static native InputDevice nativeGetInputDevice(int deviceId);
+    private static native int[] nativeGetInputDeviceIds();
     private static native String nativeDump();
     
     // Input event injection constants defined in InputDispatcher.h.
@@ -302,6 +306,23 @@ public class InputManager {
         return nativeInjectInputEvent(event, injectorPid, injectorUid, syncMode, timeoutMillis);
     }
     
+    /**
+     * Gets information about the input device with the specified id.
+     * @param id The device id.
+     * @return The input device or null if not found.
+     */
+    public InputDevice getInputDevice(int deviceId) {
+        return nativeGetInputDevice(deviceId);
+    }
+    
+    /**
+     * Gets the ids of all input devices in the system.
+     * @return The input device ids.
+     */
+    public int[] getInputDeviceIds() {
+        return nativeGetInputDeviceIds();
+    }
+    
     public void setInputWindows(InputWindow[] windows) {
         nativeSetInputWindows(windows);
     }
@@ -335,6 +356,11 @@ public class InputManager {
         public int height;
     }
     
+    private static final class InputDeviceCalibration {
+        public String[] keys;
+        public String[] values;
+    }
+    
     /*
      * Callbacks from native.
      */
@@ -343,6 +369,7 @@ public class InputManager {
         
         private static final boolean DEBUG_VIRTUAL_KEYS = false;
         private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
+        private static final String CALIBRATION_DIR_PATH = "usr/idc/";
         
         @SuppressWarnings("unused")
         public void virtualKeyDownFeedback() {
@@ -438,8 +465,8 @@ public class InputManager {
                     final int N = it.length-6;
                     for (int i=0; i<=N; i+=6) {
                         if (!"0x01".equals(it[i])) {
-                            Slog.w(TAG, "Unknown virtual key type at elem #" + i
-                                    + ": " + it[i]);
+                            Slog.w(TAG, "Unknown virtual key type at elem #"
+                                    + i + ": " + it[i] + " for device " + deviceName);
                             continue;
                         }
                         try {
@@ -455,19 +482,44 @@ public class InputManager {
                                     + key.height);
                             keys.add(key);
                         } catch (NumberFormatException e) {
-                            Slog.w(TAG, "Bad number at region " + i + " in: "
-                                    + str, e);
+                            Slog.w(TAG, "Bad number in virtual key definition at region "
+                                    + i + " in: " + str + " for device " + deviceName, e);
                         }
                     }
                 }
                 br.close();
             } catch (FileNotFoundException e) {
-                Slog.i(TAG, "No virtual keys found");
+                Slog.i(TAG, "No virtual keys found for device " + deviceName + ".");
             } catch (IOException e) {
-                Slog.w(TAG, "Error reading virtual keys", e);
+                Slog.w(TAG, "Error reading virtual keys for device " + deviceName + ".", e);
             }
             
             return keys.toArray(new VirtualKeyDefinition[keys.size()]);
+        }
+        
+        @SuppressWarnings("unused")
+        public InputDeviceCalibration getInputDeviceCalibration(String deviceName) {
+            // Calibration is specified as a sequence of colon-delimited key value pairs.
+            Properties properties = new Properties();
+            File calibrationFile = new File(Environment.getRootDirectory(),
+                    CALIBRATION_DIR_PATH + deviceName + ".idc");
+            if (calibrationFile.exists()) {
+                try {
+                    properties.load(new FileInputStream(calibrationFile));
+                } catch (IOException ex) {
+                    Slog.w(TAG, "Error reading input device calibration properties for device "
+                            + deviceName + " from " + calibrationFile + ".", ex);
+                }
+            } else {
+                Slog.i(TAG, "No input device calibration properties found for device "
+                        + deviceName + ".");
+                return null;
+            }
+            
+            InputDeviceCalibration calibration = new InputDeviceCalibration();
+            calibration.keys = properties.keySet().toArray(new String[properties.size()]);
+            calibration.values = properties.values().toArray(new String[properties.size()]);
+            return calibration;
         }
         
         @SuppressWarnings("unused")
