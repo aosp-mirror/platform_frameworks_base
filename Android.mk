@@ -471,6 +471,33 @@ $(full_target): $(framework_built)
 $(INTERNAL_PLATFORM_API_FILE): $(full_target)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE))
 
+# ====  check javadoc comments but don't generate docs ========
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
+LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
+LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
+LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
+LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
+LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
+
+LOCAL_MODULE := doc-comment-check
+
+LOCAL_DROIDDOC_OPTIONS:=\
+		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
+		-parsecomments
+
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
+LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
+
+include $(BUILD_DROIDDOC)
+
+# $(gen), i.e. framework.aidl, is also needed while building against the current stub.
+$(full_target): $(framework_built) $(gen)
+
+droidcore: doc-comment-check-docs
+
 # ====  static html in the sdk ==================================
 include $(CLEAR_VARS)
 

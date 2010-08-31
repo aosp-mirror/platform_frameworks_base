@@ -362,7 +362,6 @@ status_t ARTPConnection::receive(StreamInfo *s, bool receiveRTP) {
     if (receiveRTP) {
         err = parseRTP(s, buffer);
     } else {
-        ++s->mNumRTCPPacketsReceived;
         err = parseRTCP(s, buffer);
     }
 
@@ -456,6 +455,12 @@ status_t ARTPConnection::parseRTP(StreamInfo *s, const sp<ABuffer> &buffer) {
 }
 
 status_t ARTPConnection::parseRTCP(StreamInfo *s, const sp<ABuffer> &buffer) {
+    if (s->mNumRTCPPacketsReceived++ == 0) {
+        sp<AMessage> notify = s->mNotifyMsg->dup();
+        notify->setInt32("first-rtcp", true);
+        notify->post();
+    }
+
     const uint8_t *data = buffer->data();
     size_t size = buffer->size();
 
@@ -626,7 +631,6 @@ void ARTPConnection::onInjectPacket(const sp<AMessage> &msg) {
     if (it->mRTPSocket == index) {
         err = parseRTP(s, buffer);
     } else {
-        ++s->mNumRTCPPacketsReceived;
         err = parseRTCP(s, buffer);
     }
 }
