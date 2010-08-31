@@ -514,6 +514,7 @@ private:
             int16_t             *mMainBuffer;
             int32_t             *mAuxBuffer;
             int                 mAuxEffectId;
+            bool                mHasVolumeController;
         };  // end of Track
 
 
@@ -965,6 +966,7 @@ private:
         }
         status_t    setEnabled(bool enabled);
         bool isEnabled();
+        bool isProcessEnabled();
 
         void        setInBuffer(int16_t *buffer) { mConfig.inputCfg.buffer.s16 = buffer; }
         int16_t     *inBuffer() { return mConfig.inputCfg.buffer.s16; }
