@@ -73,6 +73,8 @@ rs_program_fragment gProgFragmentCustom;
 //What we are showing
 #pragma rs export_var(gDisplayMode)
 
+float gDt = 0;
+
 void init() {
 }
 
@@ -300,7 +302,7 @@ void displayCullingSamples() {
     rsgBindTexture(gProgFragmentTexture, 0, gTexTorus);
 
     // Aplly a rotation to our mesh
-    gTorusRotation += 50.0f * rsGetDt();
+    gTorusRotation += 50.0f * gDt;
     if(gTorusRotation > 360.0f) {
         gTorusRotation -= 360.0f;
     }
@@ -333,15 +335,15 @@ void setupCustomShaderLights() {
     float4 light0Pos = {-5.0f, 5.0f, -10.0f, 1.0f};
     float4 light1Pos = {2.0f, 5.0f, 15.0f, 1.0f};
     float3 light0DiffCol = {0.9f, 0.7f, 0.7f};
-    float3 light0SpecCol = {0.9f, 0.8f, 0.8f};
-    float3 light1DiffCol = {0.7f, 0.7f, 0.9f};
-    float3 light1SpecCol = {0.8f, 0.8f, 0.9f};
+    float3 light0SpecCol = {0.9f, 0.6f, 0.6f};
+    float3 light1DiffCol = {0.5f, 0.5f, 0.9f};
+    float3 light1SpecCol = {0.5f, 0.5f, 0.9f};
 
-    gLight0Rotation += 150.0f * rsGetDt();
+    gLight0Rotation += 50.0f * gDt;
     if(gLight0Rotation > 360.0f) {
         gLight0Rotation -= 360.0f;
     }
-    gLight1Rotation -= 50.0f * rsGetDt();
+    gLight1Rotation -= 50.0f * gDt;
     if(gLight1Rotation > 360.0f) {
         gLight1Rotation -= 360.0f;
     }
@@ -359,7 +361,7 @@ void setupCustomShaderLights() {
     gVSConstants->light0_Posision.z = light0Pos.z;
     gVSConstants->light0_Diffuse = 1.0f;
     gVSConstants->light0_Specular = 0.5f;
-    gVSConstants->light0_CosinePower = 70.0f;
+    gVSConstants->light0_CosinePower = 40.0f;
     // Set light 1 properties
     gVSConstants->light1_Posision.x = light1Pos.x;
     gVSConstants->light1_Posision.y = light1Pos.y;
@@ -382,7 +384,7 @@ void displayCustomShaderSamples() {
     // Update vertex shader constants
     // Load model matrix
     // Aplly a rotation to our mesh
-    gTorusRotation += 50.0f * rsGetDt();
+    gTorusRotation += 50.0f * gDt;
     if(gTorusRotation > 360.0f) {
         gTorusRotation -= 360.0f;
     }
@@ -390,6 +392,7 @@ void displayCustomShaderSamples() {
     // Position our model on the screen
     rsMatrixLoadTranslate(&gVSConstants->model, 0.0f, 0.0f, -10.0f);
     rsMatrixRotate(&gVSConstants->model, gTorusRotation, 1.0f, 0.0f, 0.0f);
+    rsMatrixRotate(&gVSConstants->model, gTorusRotation, 0.0f, 0.0f, 1.0f);
     setupCustomShaderLights();
 
     rsgBindProgramVertex(gProgVertexCustom);
@@ -415,6 +418,8 @@ void displayCustomShaderSamples() {
 }
 
 int root(int launchID) {
+
+    gDt = rsGetDt();
 
     rsgClearColor(0.2f, 0.2f, 0.2f, 0.0f);
     rsgClearDepth(1.0f);

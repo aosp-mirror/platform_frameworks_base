@@ -134,43 +134,7 @@ void ProgramVertex::createShader()
         mShader.append(mUniformNames[0]);
         mShader.append(";\n");
 
-        for (uint32_t ct=0; ct < mConstantCount; ct++) {
-            const Element *e = mConstantTypes[ct]->getElement();
-            for (uint32_t field=0; field < e->getFieldCount(); field++) {
-                const Element *f = e->getField(field);
-                const char *fn = e->getFieldName(field);
-
-                if (fn[0] == '#') {
-                    continue;
-                }
-
-                // Cannot be complex
-                rsAssert(!f->getFieldCount());
-                if(f->getType() == RS_TYPE_MATRIX_4X4) {
-                    mShader.append("uniform mat4 UNI_");
-                }
-                else if(f->getType() == RS_TYPE_MATRIX_3X3) {
-                    mShader.append("uniform mat3 UNI_");
-                }
-                else if(f->getType() == RS_TYPE_MATRIX_2X2) {
-                    mShader.append("uniform mat2 UNI_");
-                }
-                else {
-                    switch(f->getComponent().getVectorSize()) {
-                    case 1: mShader.append("uniform float UNI_"); break;
-                    case 2: mShader.append("uniform vec2 UNI_"); break;
-                    case 3: mShader.append("uniform vec3 UNI_"); break;
-                    case 4: mShader.append("uniform vec4 UNI_"); break;
-                    default:
-                        rsAssert(0);
-                    }
-                }
-
-                mShader.append(fn);
-                mShader.append(";\n");
-            }
-        }
-
+        appendUserConstants();
 
         for (uint32_t ct=0; ct < mInputCount; ct++) {
             const Element *e = mInputElements[ct].get();
@@ -248,65 +212,7 @@ void ProgramVertex::setupGL2(const Context *rsc, ProgramVertexState *state, Shad
     }
 
     rsc->checkError("ProgramVertex::setupGL2 begin uniforms");
-    uint32_t uidx = 1;
-    for (uint32_t ct=0; ct < mConstantCount; ct++) {
-        Allocation *alloc = mConstants[ct+1].get();
-        if (!alloc) {
-            continue;
-        }
-
-        const uint8_t *data = static_cast<const uint8_t *>(alloc->getPtr());
-        const Element *e = mConstantTypes[ct]->getElement();
-        for (uint32_t field=0; field < e->getFieldCount(); field++) {
-            const Element *f = e->getField(field);
-            uint32_t offset = e->getFieldOffsetBytes(field);
-            int32_t slot = sc->vtxUniformSlot(uidx);
-            const char *fieldName = e->getFieldName(field);
-
-            const float *fd = reinterpret_cast<const float *>(&data[offset]);
-
-            // If this field is padding, skip it
-            if(fieldName[0] == '#') {
-                continue;
-            }
-
-            //LOGE("Uniform  slot=%i, offset=%i, constant=%i, field=%i, uidx=%i, name=%s", slot, offset, ct, field, uidx, fieldName);
-            if (slot >= 0) {
-                if(f->getType() == RS_TYPE_MATRIX_4X4) {
-                    glUniformMatrix4fv(slot, 1, GL_FALSE, fd);
-                }
-                else if(f->getType() == RS_TYPE_MATRIX_3X3) {
-                    glUniformMatrix3fv(slot, 1, GL_FALSE, fd);
-                }
-                else if(f->getType() == RS_TYPE_MATRIX_2X2) {
-                    glUniformMatrix2fv(slot, 1, GL_FALSE, fd);
-                }
-                else {
-                    switch(f->getComponent().getVectorSize()) {
-                    case 1:
-                        //LOGE("Uniform 1 = %f", fd[0]);
-                        glUniform1fv(slot, 1, fd);
-                        break;
-                    case 2:
-                        //LOGE("Uniform 2 = %f %f", fd[0], fd[1]);
-                        glUniform2fv(slot, 1, fd);
-                        break;
-                    case 3:
-                        //LOGE("Uniform 3 = %f %f %f", fd[0], fd[1], fd[2]);
-                        glUniform3fv(slot, 1, fd);
-                        break;
-                    case 4:
-                        //LOGE("Uniform 4 = %f %f %f %f", fd[0], fd[1], fd[2], fd[3]);
-                        glUniform4fv(slot, 1, fd);
-                        break;
-                    default:
-                        rsAssert(0);
-                    }
-                }
-            }
-            uidx ++;
-        }
-    }
+    setupUserConstants(sc, false);
 
     state->mLast.set(this);
     rsc->checkError("ProgramVertex::setupGL2");
@@ -355,24 +261,6 @@ void ProgramVertex::transformToScreen(const Context *rsc, float *v4out, const fl
                      (Matrix *)&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET]);
     mvp.vectorMultiply(v4out, v3in);
 }
-
-void ProgramVertex::initAddUserElement(const Element *e, String8 *names, uint32_t *count, const char *prefix)
-{
-    rsAssert(e->getFieldCount());
-    for (uint32_t ct=0; ct < e->getFieldCount(); ct++) {
-        const Element *ce = e->getField(ct);
-        if (ce->getFieldCount()) {
-            initAddUserElement(ce, names, count, prefix);
-        }
-        else if(e->getFieldName(ct)[0] != '#') {
-            String8 tmp(prefix);
-            tmp.append(e->getFieldName(ct));
-            names[*count].setTo(tmp.string());
-            (*count)++;
-        }
-    }
-}
-
 
 void ProgramVertex::init(Context *rsc)
 {
