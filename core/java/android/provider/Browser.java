@@ -648,8 +648,7 @@ public class Browser {
      */
     public static class SearchColumns implements BaseColumns {
         /**
-         * Not used.
-         * @deprecated
+         * @deprecated Not used.
          */
         @Deprecated
         public static final String URL = "url";
