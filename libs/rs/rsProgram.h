@@ -72,6 +72,11 @@ protected:
     uint32_t mConstantCount;
     bool mIsValid;
 
+    // Applies to vertex and fragment shaders only
+    void appendUserConstants();
+    void setupUserConstants(ShaderCache *sc, bool isFragment);
+    void initAddUserElement(const Element *e, String8 *names, uint32_t *count, const char *prefix);
+
     ObjectBaseRef<Allocation> mConstants[MAX_UNIFORMS];
 
     mutable bool mDirty;
