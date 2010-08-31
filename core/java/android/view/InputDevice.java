@@ -16,6 +16,12 @@
 
 package android.view;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.util.Log;
+
 /**
  * Describes the capabilities of a particular input device.
  * <p>
@@ -32,11 +38,13 @@ package android.view;
  * the appropriate interpretation.
  * </p>
  */
-public final class InputDevice {
+public final class InputDevice implements Parcelable {
     private int mId;
     private String mName;
     private int mSources;
     private int mKeyboardType;
+    
+    private MotionRange[] mMotionRanges;
     
     /**
      * A mask for input source classes.
@@ -246,6 +254,8 @@ public final class InputDevice {
      */
     public static final int MOTION_RANGE_ORIENTATION = 8;
     
+    private static final int MOTION_RANGE_LAST = MOTION_RANGE_ORIENTATION;
+    
     /**
      * There is no keyboard.
      */
@@ -261,6 +271,11 @@ public final class InputDevice {
      * The keyboard supports a complement of alphabetic keys.
      */
     public static final int KEYBOARD_TYPE_ALPHABETIC = 2;
+    
+    // Called by native code.
+    private InputDevice() {
+        mMotionRanges = new MotionRange[MOTION_RANGE_LAST + 1];
+    }
 
     /**
      * Gets information about the input device with the specified id.
@@ -268,8 +283,35 @@ public final class InputDevice {
      * @return The input device or null if not found.
      */
     public static InputDevice getDevice(int id) {
-        // TODO
-        return null;
+        IWindowManager wm = IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
+        try {
+            return wm.getInputDevice(id);
+        } catch (RemoteException ex) {
+            throw new RuntimeException(
+                    "Could not get input device information from Window Manager.", ex);
+        }
+    }
+    
+    /**
+     * Gets the ids of all input devices in the system.
+     * @return The input device ids.
+     */
+    public static int[] getDeviceIds() {
+        IWindowManager wm = IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
+        try {
+            return wm.getInputDeviceIds();
+        } catch (RemoteException ex) {
+            throw new RuntimeException(
+                    "Could not get input device ids from Window Manager.", ex);
+        }
+    }
+    
+    /**
+     * Gets the input device id.
+     * @return The input device id.
+     */
+    public int getId() {
+        return mId;
     }
     
     /**
@@ -307,23 +349,23 @@ public final class InputDevice {
     /**
      * Gets information about the range of values for a particular {@link MotionEvent}
      * coordinate.
-     * @param range The motion range constant.
+     * @param rangeType The motion range constant.
      * @return The range of values, or null if the requested coordinate is not
      * supported by the device.
      */
-    public MotionRange getMotionRange(int range) {
-        // TODO
-        return null;
+    public MotionRange getMotionRange(int rangeType) {
+        if (rangeType < 0 || rangeType > MOTION_RANGE_LAST) {
+            throw new IllegalArgumentException("Requested range is out of bounds.");
+        }
+        
+        return mMotionRanges[rangeType];
     }
     
-    /**
-     * Returns true if the device supports a particular button or key.
-     * @param keyCode The key code.
-     * @return True if the device supports the key.
-     */
-    public boolean hasKey(int keyCode) {
-        // TODO
-        return false;
+    private void addMotionRange(int rangeType, float min, float max, float flat, float fuzz) {
+        if (rangeType >= 0 && rangeType <= MOTION_RANGE_LAST) {
+            MotionRange range = new MotionRange(min, max, flat, fuzz);
+            mMotionRanges[rangeType] = range;
+        }
     }
     
     /**
@@ -331,13 +373,24 @@ public final class InputDevice {
      * coordinate.
      */
     public static final class MotionRange {
+        private float mMin;
+        private float mMax;
+        private float mFlat;
+        private float mFuzz;
+        
+        private MotionRange(float min, float max, float flat, float fuzz) {
+            mMin = min;
+            mMax = max;
+            mFlat = flat;
+            mFuzz = fuzz;
+        }
+        
         /**
          * Gets the minimum value for the coordinate.
          * @return The minimum value.
          */
         public float getMin() {
-            // TODO
-            return 0;
+            return mMin;
         }
         
         /**
@@ -345,8 +398,7 @@ public final class InputDevice {
          * @return The minimum value.
          */
         public float getMax() {
-            // TODO
-            return 0;
+            return mMax;
         }
         
         /**
@@ -354,8 +406,7 @@ public final class InputDevice {
          * @return The range of values.
          */
         public float getRange() {
-            // TODO
-            return 0;
+            return mMax - mMin;
         }
         
         /**
@@ -365,8 +416,7 @@ public final class InputDevice {
          * @return The extent of the center flat position.
          */
         public float getFlat() {
-            // TODO
-            return 0;
+            return mFlat;
         }
         
         /**
@@ -376,8 +426,127 @@ public final class InputDevice {
          * @return The error tolerance.
          */
         public float getFuzz() {
-            // TODO
-            return 0;
+            return mFuzz;
+        }
+    }
+    
+    public static final Parcelable.Creator<InputDevice> CREATOR
+            = new Parcelable.Creator<InputDevice>() {
+        public InputDevice createFromParcel(Parcel in) {
+            InputDevice result = new InputDevice();
+            result.readFromParcel(in);
+            return result;
+        }
+        
+        public InputDevice[] newArray(int size) {
+            return new InputDevice[size];
+        }
+    };
+    
+    private void readFromParcel(Parcel in) {
+        mId = in.readInt();
+        mName = in.readString();
+        mSources = in.readInt();
+        mKeyboardType = in.readInt();
+        
+        for (;;) {
+            int rangeType = in.readInt();
+            if (rangeType < 0) {
+                break;
+            }
+            
+            addMotionRange(rangeType,
+                    in.readFloat(), in.readFloat(), in.readFloat(), in.readFloat());
+        }
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeInt(mId);
+        out.writeString(mName);
+        out.writeInt(mSources);
+        out.writeInt(mKeyboardType);
+        
+        for (int i = 0; i <= MOTION_RANGE_LAST; i++) {
+            MotionRange range = mMotionRanges[i];
+            if (range != null) {
+                out.writeInt(i);
+                out.writeFloat(range.mMin);
+                out.writeFloat(range.mMax);
+                out.writeFloat(range.mFlat);
+                out.writeFloat(range.mFuzz);
+            }
+        }
+        out.writeInt(-1);
+    }
+    
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder description = new StringBuilder();
+        description.append("Input Device ").append(mId).append(": ").append(mName).append("\n");
+        
+        description.append("  Keyboard Type: ");
+        switch (mKeyboardType) {
+            case KEYBOARD_TYPE_NONE:
+                description.append("none");
+                break;
+            case KEYBOARD_TYPE_NON_ALPHABETIC:
+                description.append("non-alphabetic");
+                break;
+            case KEYBOARD_TYPE_ALPHABETIC:
+                description.append("alphabetic");
+                break;
+        }
+        description.append("\n");
+        
+        description.append("  Sources:");
+        appendSourceDescriptionIfApplicable(description, SOURCE_KEYBOARD, "keyboard");
+        appendSourceDescriptionIfApplicable(description, SOURCE_DPAD, "dpad");
+        appendSourceDescriptionIfApplicable(description, SOURCE_GAMEPAD, "gamepad");
+        appendSourceDescriptionIfApplicable(description, SOURCE_TOUCHSCREEN, "touchscreen");
+        appendSourceDescriptionIfApplicable(description, SOURCE_MOUSE, "mouse");
+        appendSourceDescriptionIfApplicable(description, SOURCE_TRACKBALL, "trackball");
+        appendSourceDescriptionIfApplicable(description, SOURCE_TOUCHPAD, "touchpad");
+        appendSourceDescriptionIfApplicable(description, SOURCE_JOYSTICK_LEFT, "joystick_left");
+        appendSourceDescriptionIfApplicable(description, SOURCE_JOYSTICK_RIGHT, "joystick_right");
+        description.append("\n");
+        
+        appendRangeDescriptionIfApplicable(description, MOTION_RANGE_X, "x");
+        appendRangeDescriptionIfApplicable(description, MOTION_RANGE_Y, "y");
+        appendRangeDescriptionIfApplicable(description, MOTION_RANGE_PRESSURE, "pressure");
+        appendRangeDescriptionIfApplicable(description, MOTION_RANGE_SIZE, "size");
+        appendRangeDescriptionIfApplicable(description, MOTION_RANGE_TOUCH_MAJOR, "touchMajor");
+        appendRangeDescriptionIfApplicable(description, MOTION_RANGE_TOUCH_MINOR, "touchMinor");
+        appendRangeDescriptionIfApplicable(description, MOTION_RANGE_TOOL_MAJOR, "toolMajor");
+        appendRangeDescriptionIfApplicable(description, MOTION_RANGE_TOOL_MINOR, "toolMinor");
+        appendRangeDescriptionIfApplicable(description, MOTION_RANGE_ORIENTATION, "orientation");
+        
+        return description.toString();
+    }
+    
+    private void appendSourceDescriptionIfApplicable(StringBuilder description, int source,
+            String sourceName) {
+        if ((mSources & source) == source) {
+            description.append(" ");
+            description.append(sourceName);
+        }
+    }
+    
+    private void appendRangeDescriptionIfApplicable(StringBuilder description,
+            int rangeType, String rangeName) {
+        MotionRange range = mMotionRanges[rangeType];
+        if (range != null) {
+            description.append("  Range[").append(rangeName);
+            description.append("]: min=").append(range.mMin);
+            description.append(" max=").append(range.mMax);
+            description.append(" flat=").append(range.mFlat);
+            description.append(" fuzz=").append(range.mFuzz);
+            description.append("\n");
         }
     }
 }

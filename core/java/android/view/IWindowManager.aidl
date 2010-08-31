@@ -29,6 +29,7 @@ import android.view.KeyEvent;
 import android.view.InputEvent;
 import android.view.MotionEvent;
 import android.view.InputChannel;
+import android.view.InputDevice;
 
 /**
  * System private interface to the window manager.
@@ -124,6 +125,10 @@ interface IWindowManager
     
     // Report whether the hardware supports the given keys; returns true if successful
     boolean hasKeys(in int[] keycodes, inout boolean[] keyExists);
+    
+    // Get input device information.
+    InputDevice getInputDevice(int deviceId);
+    int[] getInputDeviceIds();
     
     // For testing
     void setInTouchMode(boolean showFocus);

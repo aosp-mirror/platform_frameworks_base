@@ -35,6 +35,34 @@ namespace android {
 class InputDevice;
 class InputMapper;
 
+/* Describes a virtual key. */
+struct VirtualKeyDefinition {
+    int32_t scanCode;
+
+    // configured position data, specified in display coords
+    int32_t centerX;
+    int32_t centerY;
+    int32_t width;
+    int32_t height;
+};
+
+
+/* Specifies input device calibration settings. */
+class InputDeviceCalibration {
+public:
+    InputDeviceCalibration();
+
+    void clear();
+    void addProperty(const String8& key, const String8& value);
+
+    bool tryGetProperty(const String8& key, String8& outValue) const;
+    bool tryGetProperty(const String8& key, int32_t& outValue) const;
+    bool tryGetProperty(const String8& key, float& outValue) const;
+
+private:
+    KeyedVector<String8, String8> mProperties;
+};
+
 
 /*
  * Input reader policy interface.
@@ -71,17 +99,6 @@ public:
         // The input dispatcher should perform special filtering in preparation for
         // a pending app switch.
         ACTION_APP_SWITCH_COMING = 0x00000002,
-    };
-
-    /* Describes a virtual key. */
-    struct VirtualKeyDefinition {
-        int32_t scanCode;
-
-        // configured position data, specified in display coords
-        int32_t centerX;
-        int32_t centerY;
-        int32_t width;
-        int32_t height;
     };
 
     /* Gets information about the display with the specified id.
@@ -134,6 +151,10 @@ public:
     /* Gets the configured virtual key definitions for an input device. */
     virtual void getVirtualKeyDefinitions(const String8& deviceName,
             Vector<VirtualKeyDefinition>& outVirtualKeyDefinitions) = 0;
+
+    /* Gets the calibration for an input device. */
+    virtual void getInputDeviceCalibration(const String8& deviceName,
+            InputDeviceCalibration& outCalibration) = 0;
 
     /* Gets the excluded device names for the platform. */
     virtual void getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames) = 0;
@@ -327,6 +348,10 @@ public:
 
     int32_t getMetaState();
 
+    inline const InputDeviceCalibration& getCalibration() {
+        return mCalibration;
+    }
+
 private:
     InputReaderContext* mContext;
     int32_t mId;
@@ -338,6 +363,8 @@ private:
 
     typedef int32_t (InputMapper::*GetStateFunc)(uint32_t sourceMask, int32_t code);
     int32_t getState(uint32_t sourceMask, int32_t code, GetStateFunc getStateFunc);
+
+    InputDeviceCalibration mCalibration;
 };
 
 
@@ -538,12 +565,12 @@ protected:
         }
     };
 
+    // Raw data for a single pointer.
     struct PointerData {
         uint32_t id;
         int32_t x;
         int32_t y;
         int32_t pressure;
-        int32_t size;
         int32_t touchMajor;
         int32_t touchMinor;
         int32_t toolMajor;
@@ -551,6 +578,7 @@ protected:
         int32_t orientation;
     };
 
+    // Raw data for a collection of pointers including a pointer id mapping table.
     struct TouchData {
         uint32_t pointerCount;
         PointerData pointers[MAX_POINTERS];
@@ -584,18 +612,82 @@ protected:
         bool useAveragingTouchFilter;
     } mParameters;
 
-    // Raw axis information.
-    struct Axes {
+    // Immutable calibration parameters in parsed form.
+    struct Calibration {
+        // Touch Area
+        enum TouchAreaCalibration {
+            TOUCH_AREA_CALIBRATION_DEFAULT,
+            TOUCH_AREA_CALIBRATION_NONE,
+            TOUCH_AREA_CALIBRATION_GEOMETRIC,
+            TOUCH_AREA_CALIBRATION_PRESSURE,
+        };
+
+        TouchAreaCalibration touchAreaCalibration;
+
+        // Tool Area
+        enum ToolAreaCalibration {
+            TOOL_AREA_CALIBRATION_DEFAULT,
+            TOOL_AREA_CALIBRATION_NONE,
+            TOOL_AREA_CALIBRATION_GEOMETRIC,
+            TOOL_AREA_CALIBRATION_LINEAR,
+        };
+
+        ToolAreaCalibration toolAreaCalibration;
+        bool haveToolAreaLinearScale;
+        float toolAreaLinearScale;
+        bool haveToolAreaLinearBias;
+        float toolAreaLinearBias;
+        bool haveToolAreaIsSummed;
+        int32_t toolAreaIsSummed;
+
+        // Pressure
+        enum PressureCalibration {
+            PRESSURE_CALIBRATION_DEFAULT,
+            PRESSURE_CALIBRATION_NONE,
+            PRESSURE_CALIBRATION_PHYSICAL,
+            PRESSURE_CALIBRATION_AMPLITUDE,
+        };
+        enum PressureSource {
+            PRESSURE_SOURCE_DEFAULT,
+            PRESSURE_SOURCE_PRESSURE,
+            PRESSURE_SOURCE_TOUCH,
+        };
+
+        PressureCalibration pressureCalibration;
+        PressureSource pressureSource;
+        bool havePressureScale;
+        float pressureScale;
+
+        // Size
+        enum SizeCalibration {
+            SIZE_CALIBRATION_DEFAULT,
+            SIZE_CALIBRATION_NONE,
+            SIZE_CALIBRATION_NORMALIZED,
+        };
+
+        SizeCalibration sizeCalibration;
+
+        // Orientation
+        enum OrientationCalibration {
+            ORIENTATION_CALIBRATION_DEFAULT,
+            ORIENTATION_CALIBRATION_NONE,
+            ORIENTATION_CALIBRATION_INTERPOLATED,
+        };
+
+        OrientationCalibration orientationCalibration;
+    } mCalibration;
+
+    // Raw axis information from the driver.
+    struct RawAxes {
         RawAbsoluteAxisInfo x;
         RawAbsoluteAxisInfo y;
         RawAbsoluteAxisInfo pressure;
-        RawAbsoluteAxisInfo size;
         RawAbsoluteAxisInfo touchMajor;
         RawAbsoluteAxisInfo touchMinor;
         RawAbsoluteAxisInfo toolMajor;
         RawAbsoluteAxisInfo toolMinor;
         RawAbsoluteAxisInfo orientation;
-    } mAxes;
+    } mRawAxes;
 
     // Current and previous touch sample data.
     TouchData mCurrentTouch;
@@ -620,10 +712,13 @@ protected:
         float yScale;
         float yPrecision;
 
-        int32_t pressureOrigin;
+        float geometricScale;
+
+        float toolAreaLinearScale;
+        float toolAreaLinearBias;
+
         float pressureScale;
 
-        int32_t sizeOrigin;
         float sizeScale;
 
         float orientationScale;
@@ -632,12 +727,22 @@ protected:
         struct OrientedRanges {
             InputDeviceInfo::MotionRange x;
             InputDeviceInfo::MotionRange y;
+
+            bool havePressure;
             InputDeviceInfo::MotionRange pressure;
+
+            bool haveSize;
             InputDeviceInfo::MotionRange size;
+
+            bool haveTouchArea;
             InputDeviceInfo::MotionRange touchMajor;
             InputDeviceInfo::MotionRange touchMinor;
+
+            bool haveToolArea;
             InputDeviceInfo::MotionRange toolMajor;
             InputDeviceInfo::MotionRange toolMinor;
+
+            bool haveOrientation;
             InputDeviceInfo::MotionRange orientation;
         } orientedRanges;
 
@@ -653,9 +758,14 @@ protected:
         } currentVirtualKey;
     } mLocked;
 
-    virtual void configureAxes();
+    virtual void configureParameters();
+    virtual void configureRawAxes();
+    virtual void logRawAxes();
     virtual bool configureSurfaceLocked();
     virtual void configureVirtualKeysLocked();
+    virtual void parseCalibration();
+    virtual void resolveCalibration();
+    virtual void logCalibration();
 
     enum TouchResult {
         // Dispatch the touch normally.
@@ -713,7 +823,8 @@ private:
     TouchResult consumeOffScreenTouches(nsecs_t when, uint32_t policyFlags);
     void dispatchTouches(nsecs_t when, uint32_t policyFlags);
     void dispatchTouch(nsecs_t when, uint32_t policyFlags, TouchData* touch,
-            BitSet32 idBits, uint32_t changedId, int32_t motionEventAction);
+            BitSet32 idBits, uint32_t changedId, uint32_t pointerCount,
+            int32_t motionEventAction);
 
     void applyPolicyAndDispatchVirtualKey(nsecs_t when, uint32_t policyFlags,
             int32_t keyEventAction, int32_t keyEventFlags,
@@ -738,7 +849,7 @@ public:
     virtual void process(const RawEvent* rawEvent);
 
 protected:
-    virtual void configureAxes();
+    virtual void configureRawAxes();
 
 private:
     struct Accumulator {
@@ -767,7 +878,7 @@ private:
     int32_t mX;
     int32_t mY;
     int32_t mPressure;
-    int32_t mSize;
+    int32_t mToolWidth;
 
     void initialize();
 
@@ -784,7 +895,7 @@ public:
     virtual void process(const RawEvent* rawEvent);
 
 protected:
-    virtual void configureAxes();
+    virtual void configureRawAxes();
 
 private:
     struct Accumulator {
