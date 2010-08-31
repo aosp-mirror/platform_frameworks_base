@@ -20,7 +20,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.util.Log;
 
 /**
  * Describes the capabilities of a particular input device.
@@ -60,7 +59,7 @@ public final class InputDevice implements Parcelable {
      * 
      * A {@link KeyEvent} should be interpreted as a button or key press.
      * 
-     * Use {@link #hasKey} to query whether the device supports a particular button or key.
+     * Use {@link #getKeyCharacterMap} to query the device's button and key mappings.
      */
     public static final int SOURCE_CLASS_BUTTON = 0x00000001;
     
