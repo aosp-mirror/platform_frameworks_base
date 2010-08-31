@@ -1551,7 +1551,52 @@ public class Canvas {
         drawPicture(picture);
         restore();
     }
-    
+
+    /**
+     * <p>Acquires the Canvas context. After invoking this method, the Canvas
+     * context  can be modified by the caller. For instance, if you acquire
+     * the context of an OpenGL Canvas you can reset the GL viewport, scissor,
+     * etc.</p>
+     * 
+     * <p>A call to {@link #acquireContext()} should aways be followed by
+     * a call to {@link #releaseContext()}, preferrably using a try block:</p>
+     * 
+     * <pre>
+     * try {
+     *     if (canvas.acquireContext()) {
+     *         // Use the canvas and/or its context
+     *     }
+     * } finally {
+     *     canvas.releaseContext();
+     * }
+     * </pre>
+     * 
+     * <p>Acquiring the context can be an expensive operation and should not
+     * be done unless absolutely necessary.</p>
+     * 
+     * <p>Applications should never invoke this method directly.</p>
+     * 
+     * @return True if the context could be acquired successfully, false
+     *         otherwise (if the context is already acquired for instance.)
+     * 
+     * @see #releaseContext() 
+     * 
+     * @hide
+     */
+    public boolean acquireContext() {
+        return false;
+    }
+
+    /**
+     * <p>Release the context acquired with {@link #acquireContext()}.</p>
+     * 
+     * @see #acquireContext() 
+     * 
+     * @hide
+     */
+    public void releaseContext() {
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
