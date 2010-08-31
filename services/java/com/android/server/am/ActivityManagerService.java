@@ -1355,7 +1355,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             synchronized (mActivityManagerService.mProcessStatsThread) {
-                pw.print(mActivityManagerService.mProcessStats.printCurrentState());
+                pw.print(mActivityManagerService.mProcessStats.printCurrentLoad());
+                pw.print(mActivityManagerService.mProcessStats.printCurrentState(
+                        SystemClock.uptimeMillis()));
             }
         }
     }
@@ -2644,10 +2646,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * @param clearTraces causes the dump file to be erased prior to the new
      *    traces being written, if true; when false, the new traces will be
      *    appended to any existing file content.
-     * @param pids of dalvik VM processes to dump stack traces for
+     * @param firstPids of dalvik VM processes to dump stack traces for first
+     * @param lastPids of dalvik VM processes to dump stack traces for last
      * @return file containing stack traces, or null if no dump file is configured
      */
-    public static File dumpStackTraces(boolean clearTraces, ArrayList<Integer> pids) {
+    public static File dumpStackTraces(boolean clearTraces, ArrayList<Integer> firstPids,
+            ProcessStats processStats, SparseArray<Boolean> lastPids) {
         String tracesPath = SystemProperties.get("dalvik.vm.stack-trace-file", null);
         if (tracesPath == null || tracesPath.length() == 0) {
             return null;
@@ -2675,25 +2679,69 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         try {
             observer.startWatching();
-            int num = pids.size();
-            for (int i = 0; i < num; i++) {
-                synchronized (observer) {
-                    Process.sendSignal(pids.get(i), Process.SIGNAL_QUIT);
-                    observer.wait(200);  // Wait for write-close, give up after 200msec
+
+            // First collect all of the stacks of the most important pids.
+            try {
+                int num = firstPids.size();
+                for (int i = 0; i < num; i++) {
+                    synchronized (observer) {
+                        Process.sendSignal(firstPids.get(i), Process.SIGNAL_QUIT);
+                        observer.wait(200);  // Wait for write-close, give up after 200msec
+                    }
+                }
+            } catch (InterruptedException e) {
+                Log.wtf(TAG, e);
+            }
+
+            // Next measure CPU usage.
+            if (processStats != null) {
+                processStats.init();
+                System.gc();
+                processStats.update();
+                try {
+                    synchronized (processStats) {
+                        processStats.wait(500); // measure over 1/2 second.
+                    }
+                } catch (InterruptedException e) {
+                }
+                processStats.update();
+
+                // We'll take the stack crawls of just the top apps using CPU.
+                final int N = processStats.countWorkingStats();
+                int numProcs = 0;
+                for (int i=0; i<N && numProcs<5; i++) {
+                    ProcessStats.Stats stats = processStats.getWorkingStats(i);
+                    if (lastPids.indexOfKey(stats.pid) >= 0) {
+                        numProcs++;
+                        try {
+                            synchronized (observer) {
+                                Process.sendSignal(stats.pid, Process.SIGNAL_QUIT);
+                                observer.wait(200);  // Wait for write-close, give up after 200msec
+                            }
+                        } catch (InterruptedException e) {
+                            Log.wtf(TAG, e);
+                        }
+
+                    }
                 }
             }
-        } catch (InterruptedException e) {
-            Log.wtf(TAG, e);
+
+            return tracesFile;
+
         } finally {
             observer.stopWatching();
         }
-
-        return tracesFile;
     }
 
     final void appNotResponding(ProcessRecord app, ActivityRecord activity,
             ActivityRecord parent, final String annotation) {
-        ArrayList<Integer> pids = new ArrayList<Integer>(20);
+        ArrayList<Integer> firstPids = new ArrayList<Integer>(5);
+        SparseArray<Boolean> lastPids = new SparseArray<Boolean>(20);
+
+        long anrTime = SystemClock.uptimeMillis();
+        if (MONITOR_CPU_USAGE) {
+            updateCpuStatsNow();
+        }
         
         synchronized (this) {
             // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
@@ -2717,24 +2765,32 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     annotation);
 
             // Dump thread traces as quickly as we can, starting with "interesting" processes.
-            pids.add(app.pid);
+            firstPids.add(app.pid);
     
             int parentPid = app.pid;
             if (parent != null && parent.app != null && parent.app.pid > 0) parentPid = parent.app.pid;
-            if (parentPid != app.pid) pids.add(parentPid);
+            if (parentPid != app.pid) firstPids.add(parentPid);
     
-            if (MY_PID != app.pid && MY_PID != parentPid) pids.add(MY_PID);
+            if (MY_PID != app.pid && MY_PID != parentPid) firstPids.add(MY_PID);
 
             for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
                 ProcessRecord r = mLruProcesses.get(i);
                 if (r != null && r.thread != null) {
                     int pid = r.pid;
-                    if (pid > 0 && pid != app.pid && pid != parentPid && pid != MY_PID) pids.add(pid);
+                    if (pid > 0 && pid != app.pid && pid != parentPid && pid != MY_PID) {
+                        if (r.persistent) {
+                            firstPids.add(pid);
+                        } else {
+                            lastPids.put(pid, Boolean.TRUE);
+                        }
+                    }
                 }
             }
         }
 
-        File tracesFile = dumpStackTraces(true, pids);
+        final ProcessStats processStats = new ProcessStats(true);
+
+        File tracesFile = dumpStackTraces(true, firstPids, processStats, lastPids);
 
         // Log the ANR to the main log.
         StringBuilder info = mStringBuilder;
@@ -2755,10 +2811,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (MONITOR_CPU_USAGE) {
             updateCpuStatsNow();
             synchronized (mProcessStatsThread) {
-                cpuInfo = mProcessStats.printCurrentState();
+                cpuInfo = mProcessStats.printCurrentState(anrTime);
             }
+            info.append(processStats.printCurrentLoad());
             info.append(cpuInfo);
         }
+
+        info.append(processStats.printCurrentState(anrTime));
 
         Slog.e(TAG, info.toString());
         if (tracesFile == null) {
