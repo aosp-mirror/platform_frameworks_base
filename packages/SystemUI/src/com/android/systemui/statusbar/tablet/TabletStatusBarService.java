@@ -58,6 +58,8 @@ public class TabletStatusBarService extends StatusBarService {
     public static final boolean DEBUG = false;
     public static final String TAG = "TabletStatusBar";
 
+    private static final int MAX_IMAGE_LEVEL = 10000;
+
 
 
     int mIconSize;
@@ -78,6 +80,7 @@ public class TabletStatusBarService extends StatusBarService {
 
     ImageView mBatteryMeter;
     ImageView mSignalMeter;
+    ImageView mSignalIcon;
 
     NotificationIconArea.IconLayout mIconLayout;
 
@@ -90,15 +93,12 @@ public class TabletStatusBarService extends StatusBarService {
     int mDisabled = 0;
 
     protected void addPanelWindows() {
-        mNotificationPanel = View.inflate(this, R.layout.sysbar_panel_notifications, null);
-        mSystemPanel = (SystemPanel) View.inflate(this, R.layout.sysbar_panel_system, null);
-
-        mNotificationPanel.setVisibility(View.GONE);
-        mSystemPanel.setVisibility(View.GONE);
-
         final Resources res = getResources();
         final int barHeight= res.getDimensionPixelSize(
             com.android.internal.R.dimen.status_bar_height);
+
+        mNotificationPanel = View.inflate(this, R.layout.sysbar_panel_notifications, null);
+        mNotificationPanel.setVisibility(View.GONE);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 400, // ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -116,8 +116,11 @@ public class TabletStatusBarService extends StatusBarService {
 
         WindowManagerImpl.getDefault().addView(mNotificationPanel, lp);
 
+        mSystemPanel = (SystemPanel) View.inflate(this, R.layout.sysbar_panel_system, null);
+        mSystemPanel.setVisibility(View.GONE);
+
         lp = new WindowManager.LayoutParams(
-                500, // ViewGroup.LayoutParams.WRAP_CONTENT,
+                800,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
@@ -158,6 +161,7 @@ public class TabletStatusBarService extends StatusBarService {
         // System info (center)
         mBatteryMeter = (ImageView) sb.findViewById(R.id.battery);
         mSignalMeter = (ImageView) sb.findViewById(R.id.signal);
+        mSignalIcon = (ImageView) sb.findViewById(R.id.signal_icon);
 
         // Add the windows
         addPanelWindows();
@@ -209,18 +213,23 @@ public class TabletStatusBarService extends StatusBarService {
     
     public void setBatteryMeter(int level, boolean plugged) {
         if (DEBUG) Slog.d(TAG, "battery=" + level + (plugged ? " - plugged" : " - unplugged"));
-        mBatteryMeter.setImageResource(plugged ? R.drawable.battery_charging : R.drawable.battery);
-        mBatteryMeter.setImageLevel(level);
+        mBatteryMeter.setImageResource(R.drawable.sysbar_batterymini);
+        // adjust percent to permyriad for ClipDrawable's sake
+        mBatteryMeter.setImageLevel(level * (MAX_IMAGE_LEVEL / 100));
     }
 
     public void setSignalMeter(int level, boolean isWifi) {
         if (DEBUG) Slog.d(TAG, "signal=" + level);
         if (level < 0) {
-            mSignalMeter.setImageResource(isWifi ? R.drawable.wifi_scan : R.drawable.signal_scan);
+            mSignalMeter.setImageDrawable(null);
             mSignalMeter.setImageLevel(0);
+            mSignalIcon.setImageDrawable(null);
         } else {
-            mSignalMeter.setImageResource(isWifi ? R.drawable.wifi : R.drawable.signal);
-            mSignalMeter.setImageLevel(level);
+            mSignalMeter.setImageResource(R.drawable.sysbar_wifimini);
+            // adjust to permyriad
+            mSignalMeter.setImageLevel(level * (MAX_IMAGE_LEVEL / 100));
+            mSignalIcon.setImageResource(isWifi ? R.drawable.ic_sysbar_wifi_mini 
+                                                : R.drawable.ic_sysbar_wifi_mini); // XXX
         }
     }
 
@@ -711,3 +720,5 @@ public class TabletStatusBarService extends StatusBarService {
         return true;
     }
 }
+
+

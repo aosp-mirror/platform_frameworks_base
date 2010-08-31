@@ -20,6 +20,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.StatusBarManager;
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -28,6 +29,7 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.net.NetworkInfo;
 import android.net.wifi.SupplicantState;
@@ -84,7 +86,6 @@ public class SystemPanel extends LinearLayout {
     private static final int MAXIMUM_BACKLIGHT = android.os.Power.BRIGHTNESS_ON;
     private static final int DEFAULT_BACKLIGHT = (int) (android.os.Power.BRIGHTNESS_ON * 0.4f);
 
-
     private TabletStatusBarService mBar;
     private boolean mAirplaneMode;
 
@@ -92,6 +93,8 @@ public class SystemPanel extends LinearLayout {
     private ImageButton mSoundButton;
     private ImageButton mOrientationButton;
     private ImageButton mAirplaneButton;
+    private ImageButton mGpsButton;
+    private ImageButton mBluetoothButton;
 
     private ImageView mBatteryMeter;
     private ImageView mSignalMeter;
@@ -102,6 +105,7 @@ public class SystemPanel extends LinearLayout {
     private final AudioManager mAudioManager;
     private final WifiManager mWifiManager;
     private final TelephonyManager mPhone;
+    private final BluetoothAdapter mBluetoothAdapter;
 
     // state trackers for telephony code
     IccCard.State mSimState = IccCard.State.READY;
@@ -123,7 +127,7 @@ public class SystemPanel extends LinearLayout {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
-                mSoundButton.setAlpha(getSilentMode() ? 0x7F : 0xFF);
+                refreshSound();
             } else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
                 updateBattery(intent);
             } else if (action.equals(WifiManager.RSSI_CHANGED_ACTION)
@@ -133,6 +137,8 @@ public class SystemPanel extends LinearLayout {
                 updateWifiState(intent);
             } else if (action.equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
                 updateSimState(intent);
+            } else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+                refreshBluetooth();
             }
         }
     };
@@ -295,7 +301,7 @@ public class SystemPanel extends LinearLayout {
             mWifiConnected = detailedState == NetworkInfo.DetailedState.CONNECTED;
         } else if (action.equals(WifiManager.RSSI_CHANGED_ACTION)) {
             final int newRssi = intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200);
-            int newSignalLevel = WifiManager.calculateSignalLevel(newRssi, 6) * 20;
+            int newSignalLevel = WifiManager.calculateSignalLevel(newRssi, 101);
             mWifiLevel = mWifiConnected ? newSignalLevel : 0;
         }
 
@@ -351,7 +357,7 @@ public class SystemPanel extends LinearLayout {
             level = 0;
         }
 
-        mSignalMeter.setImageResource(mWifiConnected ? R.drawable.wifi : R.drawable.signal);
+        mSignalMeter.setImageResource(R.drawable.sysbar_signal);
         mSignalMeter.setImageLevel(level);
         mSignalText.setText(text);
 
@@ -367,7 +373,7 @@ public class SystemPanel extends LinearLayout {
         final int level = intent.getIntExtra("level", 0);
         final boolean plugged = intent.getIntExtra("plugged", 0) != 0;
 
-        mBatteryMeter.setImageResource(plugged ? R.drawable.battery_charging : R.drawable.battery);
+        mBatteryMeter.setImageResource(R.drawable.sysbar_battery);
         mBatteryMeter.setImageLevel(level);
         mBatteryText.setText(getContext()
                 .getString(R.string.system_panel_battery_meter_format, level));
@@ -401,6 +407,9 @@ public class SystemPanel extends LinearLayout {
 
         // mobile data 
         mPhone = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+
+        // Bluetooth
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
     public void onAttachedToWindow() {
@@ -445,6 +454,22 @@ public class SystemPanel extends LinearLayout {
             }
         });
 
+        mGpsButton = (ImageButton)findViewById(R.id.gps);
+        mGpsButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                toggleGps();
+                refreshGps();
+            }
+        });
+
+        mBluetoothButton = (ImageButton)findViewById(R.id.bluetooth);
+        mBluetoothButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                toggleBluetooth();
+                refreshBluetooth();
+            }
+        });
+
         // register for broadcasts
         IntentFilter filter = new IntentFilter();
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
@@ -454,19 +479,22 @@ public class SystemPanel extends LinearLayout {
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         getContext().registerReceiver(mReceiver, filter);
         
         mBatteryMeter = (ImageView)findViewById(R.id.battery_meter);
-        mBatteryMeter.setImageResource(R.drawable.battery);
+        mBatteryMeter.setImageResource(R.drawable.sysbar_battery);
         mBatteryMeter.setImageLevel(0);
         mSignalMeter = (ImageView)findViewById(R.id.signal_meter);
-        mBatteryMeter.setImageResource(R.drawable.signal);
+        mBatteryMeter.setImageResource(R.drawable.sysbar_signal);
         mBatteryMeter.setImageLevel(0);
 
         mBatteryText = (TextView)findViewById(R.id.battery_info);
         mSignalText = (TextView)findViewById(R.id.signal_info);
 
         refreshSignalMeters();
+        refreshBluetooth();
+        refreshGps();
     }
 
     public void onDetachedFromWindow() {
@@ -492,7 +520,8 @@ public class SystemPanel extends LinearLayout {
 //    }
 
     private void rotateBrightness() {
-        int alpha = 0xFF;
+        int icon = R.drawable.ic_sysbar_brightness;
+        int bg = R.drawable.sysbar_toggle_bg_on;
         Context context = getContext();
         try {
             IPowerManager power = IPowerManager.Stub.asInterface(
@@ -513,18 +542,16 @@ public class SystemPanel extends LinearLayout {
                 // Technically, not a toggle...
                 if (brightnessMode == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC) {
                     brightness = MINIMUM_BACKLIGHT;
+                    icon = R.drawable.ic_sysbar_brightness_low;
                     brightnessMode = Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL;
-                    alpha = 0x40;
                 } else if (brightness < DEFAULT_BACKLIGHT) {
                     brightness = DEFAULT_BACKLIGHT;
-                    alpha = 0xC0;
                 } else if (brightness < MAXIMUM_BACKLIGHT) {
                     brightness = MAXIMUM_BACKLIGHT;
-                    alpha = 0xFF;
                 } else {
                     brightnessMode = Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC;
                     brightness = MINIMUM_BACKLIGHT;
-                    alpha = 0x60;
+                    icon = R.drawable.ic_sysbar_brightness_auto;
                 }
 
                 if (context.getResources().getBoolean(
@@ -546,7 +573,8 @@ public class SystemPanel extends LinearLayout {
         } catch (Settings.SettingNotFoundException e) {
         }
 
-        mBrightnessButton.setAlpha(alpha);
+        mBrightnessButton.setImageResource(icon);
+        mBrightnessButton.setBackgroundResource(bg);
     }
 
     PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
@@ -558,7 +586,12 @@ public class SystemPanel extends LinearLayout {
             mServiceState = serviceState;
             mAirplaneMode = serviceState.getState() == ServiceState.STATE_POWER_OFF;
             if (mAirplaneButton != null) {
-                mAirplaneButton.setAlpha(mAirplaneMode ? 0xFF : 0x7F);
+                mAirplaneButton.setImageResource(mAirplaneMode 
+                                                 ? R.drawable.ic_sysbar_airplane_on
+                                                 : R.drawable.ic_sysbar_airplane_off);
+                mAirplaneButton.setBackgroundResource(mAirplaneMode 
+                                                 ? R.drawable.sysbar_toggle_bg_on
+                                                 : R.drawable.sysbar_toggle_bg_off);
             }
             updateDataState();
         }
@@ -621,4 +654,51 @@ public class SystemPanel extends LinearLayout {
         }
     }
 
+    void refreshSound() {
+        boolean silent = getSilentMode();
+        mSoundButton.setImageResource(!silent 
+                                         ? R.drawable.ic_sysbar_sound_on
+                                         : R.drawable.ic_sysbar_sound_off);
+        mSoundButton.setBackgroundResource(!silent 
+                                         ? R.drawable.sysbar_toggle_bg_on
+                                         : R.drawable.sysbar_toggle_bg_off);
+    }
+
+    void toggleBluetooth() {
+        if (mBluetoothAdapter == null) return;
+        if (mBluetoothAdapter.isEnabled()) {
+            mBluetoothAdapter.disable();
+        } else {
+            mBluetoothAdapter.enable();
+        }
+    }
+
+    void refreshBluetooth() {
+        boolean on = mBluetoothAdapter != null && mBluetoothAdapter.isEnabled();
+        mBluetoothButton.setImageResource(on ? R.drawable.ic_sysbar_bluetooth_on
+                                             : R.drawable.ic_sysbar_bluetooth_off);
+        mBluetoothButton.setBackgroundResource(on
+                                         ? R.drawable.sysbar_toggle_bg_on
+                                         : R.drawable.sysbar_toggle_bg_off);
+    }
+
+    private boolean isGpsEnabled() {
+        ContentResolver res = mContext.getContentResolver();
+        return Settings.Secure.isLocationProviderEnabled(
+                                res, LocationManager.GPS_PROVIDER);
+    }
+
+    private void toggleGps() {
+        Settings.Secure.setLocationProviderEnabled(mContext.getContentResolver(),
+                LocationManager.GPS_PROVIDER, !isGpsEnabled());
+    }
+
+    private void refreshGps() {
+        boolean on = isGpsEnabled();
+        mGpsButton.setImageResource(on ? R.drawable.ic_sysbar_gps_on
+                                       : R.drawable.ic_sysbar_gps_off);
+        mGpsButton.setBackgroundResource(on
+                                         ? R.drawable.sysbar_toggle_bg_on
+                                         : R.drawable.sysbar_toggle_bg_off);
+    }
 }
