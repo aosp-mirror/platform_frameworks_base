@@ -1048,7 +1048,11 @@ public class WebSettings {
     }
 
     /**
-     * TODO: need to add @Deprecated
+     * Set a custom path to plugins used by the WebView. This method is
+     * obsolete since each plugin is now loaded from its own package.
+     * @param pluginsPath String path to the directory containing plugins.
+     * @deprecated This method is no longer used as plugins are loaded from
+     * their own APK via the system's package manager.
      */
     public synchronized void setPluginsPath(String pluginsPath) {
     }
@@ -1219,7 +1223,11 @@ public class WebSettings {
     }
 
     /**
-     * TODO: need to add @Deprecated
+     * Returns the directory that contains the plugin libraries. This method is
+     * obsolete since each plugin is now loaded from its own package.
+     * @return An empty string.
+     * @deprecated This method is no longer used as plugins are loaded from
+     * their own APK via the system's package manager.
      */
     public synchronized String getPluginsPath() {
         return "";
