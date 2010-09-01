@@ -49,14 +49,8 @@ struct OMXNodeInstance {
     status_t getConfig(OMX_INDEXTYPE index, void *params, size_t size);
     status_t setConfig(OMX_INDEXTYPE index, const void *params, size_t size);
 
-    status_t enableGraphicBuffers(OMX_U32 portIndex, OMX_BOOL enable);
-
     status_t useBuffer(
             OMX_U32 portIndex, const sp<IMemory> &params,
-            OMX::buffer_id *buffer);
-
-    status_t useGraphicBuffer(
-            OMX_U32 portIndex, const sp<GraphicBuffer> &graphicBuffer,
             OMX::buffer_id *buffer);
 
     status_t allocateBuffer(
@@ -131,3 +125,4 @@ private:
 }  // namespace android
 
 #endif  // OMX_NODE_INSTANCE_H_
+

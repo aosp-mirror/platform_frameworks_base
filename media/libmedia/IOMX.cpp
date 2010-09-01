@@ -21,9 +21,7 @@ enum {
     SET_PARAMETER,
     GET_CONFIG,
     SET_CONFIG,
-    ENABLE_GRAPHIC_BUFFERS,
     USE_BUFFER,
-    USE_GRAPHIC_BUFFER,
     ALLOC_BUFFER,
     ALLOC_BUFFER_WITH_BACKUP,
     FREE_BUFFER,
@@ -218,19 +216,6 @@ public:
         return reply.readInt32();
     }
 
-    virtual status_t enableGraphicBuffers(
-            node_id node, OMX_U32 port_index, OMX_BOOL enable) {
-        Parcel data, reply;
-        data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
-        data.writeIntPtr((intptr_t)node);
-        data.writeInt32(port_index);
-        data.writeInt32((uint32_t)enable);
-        remote()->transact(ENABLE_GRAPHIC_BUFFERS, data, &reply);
-
-        status_t err = reply.readInt32();
-        return err;
-    }
-
     virtual status_t useBuffer(
             node_id node, OMX_U32 port_index, const sp<IMemory> &params,
             buffer_id *buffer) {
@@ -240,29 +225,6 @@ public:
         data.writeInt32(port_index);
         data.writeStrongBinder(params->asBinder());
         remote()->transact(USE_BUFFER, data, &reply);
-
-        status_t err = reply.readInt32();
-        if (err != OK) {
-            *buffer = 0;
-
-            return err;
-        }
-
-        *buffer = (void*)reply.readIntPtr();
-
-        return err;
-    }
-
-
-    virtual status_t useGraphicBuffer(
-            node_id node, OMX_U32 port_index,
-            const sp<GraphicBuffer> &graphicBuffer, buffer_id *buffer) {
-        Parcel data, reply;
-        data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
-        data.writeIntPtr((intptr_t)node);
-        data.writeInt32(port_index);
-        data.write(*graphicBuffer);
-        remote()->transact(USE_GRAPHIC_BUFFER, data, &reply);
 
         status_t err = reply.readInt32();
         if (err != OK) {
@@ -579,20 +541,6 @@ status_t BnOMX::onTransact(
             return NO_ERROR;
         }
 
-        case ENABLE_GRAPHIC_BUFFERS:
-        {
-            CHECK_INTERFACE(IOMX, data, reply);
-
-            node_id node = (void*)data.readIntPtr();
-            OMX_U32 port_index = data.readInt32();
-            OMX_BOOL enable = (OMX_BOOL)data.readInt32();
-
-            status_t err = enableGraphicBuffers(node, port_index, enable);
-            reply->writeInt32(err);
-
-            return NO_ERROR;
-        }
-
         case USE_BUFFER:
         {
             CHECK_INTERFACE(IOMX, data, reply);
@@ -604,27 +552,6 @@ status_t BnOMX::onTransact(
 
             buffer_id buffer;
             status_t err = useBuffer(node, port_index, params, &buffer);
-            reply->writeInt32(err);
-
-            if (err == OK) {
-                reply->writeIntPtr((intptr_t)buffer);
-            }
-
-            return NO_ERROR;
-        }
-
-        case USE_GRAPHIC_BUFFER:
-        {
-            CHECK_INTERFACE(IOMX, data, reply);
-
-            node_id node = (void*)data.readIntPtr();
-            OMX_U32 port_index = data.readInt32();
-            sp<GraphicBuffer> graphicBuffer = new GraphicBuffer();
-            data.read(*graphicBuffer);
-
-            buffer_id buffer;
-            status_t err = useGraphicBuffer(
-                    node, port_index, graphicBuffer, &buffer);
             reply->writeInt32(err);
 
             if (err == OK) {

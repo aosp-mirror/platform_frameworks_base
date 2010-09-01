@@ -24,7 +24,6 @@
 #include <OMX_Component.h>
 
 #include <binder/IMemory.h>
-#include <media/stagefright/HardwareAPI.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaErrors.h>
 
@@ -38,11 +37,6 @@ struct BufferMeta {
 
     BufferMeta(size_t size)
         : mSize(size),
-          mIsBackup(false) {
-    }
-
-    BufferMeta(const sp<GraphicBuffer> &graphicBuffer)
-        : mGraphicBuffer(graphicBuffer),
           mIsBackup(false) {
     }
 
@@ -67,7 +61,6 @@ struct BufferMeta {
     }
 
 private:
-    sp<GraphicBuffer> mGraphicBuffer;
     sp<IMemory> mMem;
     size_t mSize;
     bool mIsBackup;
@@ -247,38 +240,6 @@ status_t OMXNodeInstance::setConfig(
     return StatusFromOMXError(err);
 }
 
-status_t OMXNodeInstance::enableGraphicBuffers(
-        OMX_U32 portIndex, OMX_BOOL enable) {
-    Mutex::Autolock autoLock(mLock);
-
-    OMX_INDEXTYPE index;
-    OMX_ERRORTYPE err = OMX_GetExtensionIndex(
-            mHandle,
-            const_cast<OMX_STRING>("OMX.google.android.index.enableAndroidNativeBuffers"),
-            &index);
-
-    if (err != OMX_ErrorNone) {
-        LOGE("OMX_GetExtensionIndex failed");
-
-        return StatusFromOMXError(err);
-    }
-
-    EnableAndroidNativeBuffersParams params = {
-        portIndex, enable,
-    };
-
-    err = OMX_SetParameter(mHandle, index, &params);
-
-    if (err != OMX_ErrorNone) {
-        LOGE("OMX_EnableAndroidNativeBuffers failed with error %d (0x%08x)",
-                err, err);
-
-        return UNKNOWN_ERROR;
-    }
-
-    return OK;
-}
-
 status_t OMXNodeInstance::useBuffer(
         OMX_U32 portIndex, const sp<IMemory> &params,
         OMX::buffer_id *buffer) {
@@ -304,54 +265,6 @@ status_t OMXNodeInstance::useBuffer(
     }
 
     CHECK_EQ(header->pAppPrivate, buffer_meta);
-
-    *buffer = header;
-
-    addActiveBuffer(portIndex, *buffer);
-
-    return OK;
-}
-
-status_t OMXNodeInstance::useGraphicBuffer(
-        OMX_U32 portIndex, const sp<GraphicBuffer>& graphicBuffer,
-        OMX::buffer_id *buffer) {
-    Mutex::Autolock autoLock(mLock);
-
-    OMX_INDEXTYPE index;
-    OMX_ERRORTYPE err = OMX_GetExtensionIndex(
-            mHandle,
-            const_cast<OMX_STRING>("OMX.google.android.index.useAndroidNativeBuffer"),
-            &index);
-
-    if (err != OMX_ErrorNone) {
-        LOGE("OMX_GetExtensionIndex failed");
-
-        return StatusFromOMXError(err);
-    }
-
-    BufferMeta *bufferMeta = new BufferMeta(graphicBuffer);
-
-    OMX_BUFFERHEADERTYPE *header;
-
-    UseAndroidNativeBufferParams params = {
-        &header, portIndex, bufferMeta, graphicBuffer,
-    };
-
-    err = OMX_SetParameter(mHandle, index, &params);
-
-    if (err != OMX_ErrorNone) {
-        LOGE("OMX_UseAndroidNativeBuffer failed with error %d (0x%08x)", err,
-                err);
-
-        delete bufferMeta;
-        bufferMeta = NULL;
-
-        *buffer = 0;
-
-        return UNKNOWN_ERROR;
-    }
-
-    CHECK_EQ(header->pAppPrivate, bufferMeta);
 
     *buffer = header;
 
@@ -585,3 +498,4 @@ void OMXNodeInstance::freeActiveBuffers() {
 }
 
 }  // namespace android
+
