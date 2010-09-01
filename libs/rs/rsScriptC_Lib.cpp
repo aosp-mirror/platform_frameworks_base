@@ -356,6 +356,11 @@ int SC_getAllocation(const void *ptr)
     return (int)alloc;
 }
 
+void SC_allocationMarkDirty(RsAllocation a)
+{
+    Allocation *alloc = static_cast<Allocation *>(a);
+    alloc->sendDirty();
+}
 
 void SC_ForEach(RsScript vs,
                 RsAllocation vin,
@@ -421,6 +426,8 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z11rsSetObjectP13rs_allocation13rs_allocation", (void *)&SC_setObject },
     { "_Z13rsClearObjectP13rs_allocation", (void *)&SC_clearObject },
     { "_Z10rsIsObject13rs_allocation", (void *)&SC_isObject },
+
+    { "_Z21rsAllocationMarkDirty13rs_allocation", (void *)&SC_allocationMarkDirty },
 
 
     // Debug

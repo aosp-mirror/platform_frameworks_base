@@ -107,6 +107,10 @@ extern bool __attribute__((overloadable))
 extern rs_allocation __attribute__((overloadable))
     rsGetAllocation(const void *);
 
+// Mark the allocation dirty and notify those using it
+extern void __attribute__((overloadable))
+    rsAllocationMarkDirty(rs_allocation);
+
 // Return the dimensions associated with an allocation.
 extern uint32_t __attribute__((overloadable))
     rsAllocationGetDimX(rs_allocation);
