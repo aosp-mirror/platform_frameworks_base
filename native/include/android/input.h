@@ -662,62 +662,6 @@ int32_t AInputQueue_preDispatchEvent(AInputQueue* queue, AInputEvent* event);
  */
 void AInputQueue_finishEvent(AInputQueue* queue, AInputEvent* event, int handled);
 
-/*
- * Input devices.
- *
- * These functions provide a mechanism for querying the set of available input devices
- * and their characteristics and capabilities.
- */
-struct AInputDevice;
-typedef struct AInputDevice AInputDevice;
-
-/*
- * Populates the supplied array with the ids of all input devices in the system.
- * Sets nActual to the actual number of devices.
- * Returns zero if enumeration was successful.
- * Returns non-zero if the actual number of devices is greater than nMax, in which case the
- * client should call the method again with a larger id buffer.
- */
-int32_t AInputDevice_getDeviceIds(int32_t* idBuf, size_t nMax, size_t* nActual);
-
-/*
- * Acquires a device by id.
- * Returns NULL if the device was not found.
- *
- * Note: The returned object must be freed using AInputDevice_release when no longer needed.
- */
-AInputDevice* AInputDevice_acquire(int32_t deviceId);
-
-/*
- * Releases a device previously acquired by AInputDevice_acquire.
- * If device is NULL, this function does nothing.
- */
-void AInputDevice_release(AInputDevice* device);
-
-/*
- * Gets the name of an input device.
- *
- * Note: The caller should copy the name into a private buffer since the returned pointer
- * will become invalid when the device object is released.
- */
-const char* AInputDevice_getName(AInputDevice* device);
-
-/*
- * Gets the combination of input sources provided by the input device.
- */
-uint32_t AInputDevice_getSources(AInputDevice* device);
-
-/*
- * Gets the keyboard type.
- */
-int32_t AInputDevice_getKeyboardType(AInputDevice* device);
-
-/* Gets the minimum value, maximum value, flat position and error tolerance for a
- * particular motion coodinate.
- * Returns zero if the device supports the specified motion range. */
-int32_t AInputDevice_getMotionRange(AInputDevice* device, int32_t rangeType,
-        float* outMin, float* outMax, float* outFlat, float* outFuzz);
-
 #ifdef __cplusplus
 }
 #endif

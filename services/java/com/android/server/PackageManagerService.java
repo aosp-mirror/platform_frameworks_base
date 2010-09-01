@@ -1615,6 +1615,18 @@ class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
+    public ProviderInfo getProviderInfo(ComponentName component, int flags) {
+        synchronized (mPackages) {
+            PackageParser.Provider p = mProvidersByComponent.get(component);
+            if (Config.LOGV) Log.v(
+                TAG, "getProviderInfo " + component + ": " + p);
+            if (p != null && mSettings.isEnabledLP(p.info, flags)) {
+                return PackageParser.generateProviderInfo(p, flags);
+            }
+        }
+        return null;
+    }
+
     public String[] getSystemSharedLibraryNames() {
         Set<String> libSet;
         synchronized (mPackages) {
