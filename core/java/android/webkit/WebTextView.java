@@ -153,11 +153,13 @@ import java.util.ArrayList;
             return true;
         }
         Spannable text = (Spannable) getText();
-        int oldLength = text.length();
+        int oldStart = Selection.getSelectionStart(text);
+        int oldEnd = Selection.getSelectionEnd(text);
         // Normally the delete key's dom events are sent via onTextChanged.
-        // However, if the length is zero, the text did not change, so we
-        // go ahead and pass the key down immediately.
-        if (KeyEvent.KEYCODE_DEL == keyCode && 0 == oldLength) {
+        // However, if the cursor is at the beginning of the field, which
+        // includes the case where it has zero length, then the text is not
+        // changed, so send the events immediately.
+        if (KeyEvent.KEYCODE_DEL == keyCode && oldStart == 0 && oldEnd == 0) {
             sendDomEvent(event);
             return true;
         }
@@ -197,9 +199,8 @@ import java.util.ArrayList;
         if (getLayout() == null) {
             measure(mWidthSpec, mHeightSpec);
         }
-        int oldStart = Selection.getSelectionStart(text);
-        int oldEnd = Selection.getSelectionEnd(text);
 
+        int oldLength = text.length();
         boolean maxedOut = mMaxLength != -1 && oldLength == mMaxLength;
         // If we are at max length, and there is a selection rather than a
         // cursor, we need to store the text to compare later, since the key
