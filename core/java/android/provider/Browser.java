@@ -209,7 +209,10 @@ public class Browser {
         send.putExtra(Intent.EXTRA_TEXT, stringToSend);
 
         try {
-            c.startActivity(Intent.createChooser(send, chooserDialogTitle));
+            Intent i = Intent.createChooser(send, chooserDialogTitle);
+            // In case this is called from outside an Activity
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            c.startActivity(i);
         } catch(android.content.ActivityNotFoundException ex) {
             // if no app handles it, do nothing
         }
