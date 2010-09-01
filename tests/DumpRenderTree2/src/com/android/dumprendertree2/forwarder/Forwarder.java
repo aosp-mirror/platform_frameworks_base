@@ -92,11 +92,34 @@ public class Forwarder extends Thread {
                     continue;
                 }
 
-                ConnectionHandler forwarder = new ConnectionHandler(localSocket, remoteSocket);
-                mConnectionHandlers.add(forwarder);
-                forwarder.start();
+                final ConnectionHandler connectionHandler =
+                        new ConnectionHandler(localSocket, remoteSocket);
 
+                /**
+                 * We have to close the sockets after the ConnectionHandler finishes, so we
+                 * don't get "Too may open files" exception. We also remove the ConnectionHandler
+                 * from the collection to avoid memory issues.
+                 * */
+                ConnectionHandler.OnFinishedCallback callback =
+                        new ConnectionHandler.OnFinishedCallback() {
+                    @Override
+                    public void onFinished() {
+                        removeConncetionHandler(connectionHandler);
+                    }
+                };
+                connectionHandler.registerOnConnectionHandlerFinishedCallback(callback);
+
+                mConnectionHandlers.add(connectionHandler);
+                connectionHandler.start();
             }
+        }
+    }
+
+    private synchronized void removeConncetionHandler(ConnectionHandler connectionHandler) {
+        if (mConnectionHandlers.remove(connectionHandler)) {
+            Log.d(LOG_TAG, "removeConnectionHandler(): removed");
+        } else {
+            Log.d(LOG_TAG, "removeConnectionHandler(): not in the collection");
         }
     }
 
