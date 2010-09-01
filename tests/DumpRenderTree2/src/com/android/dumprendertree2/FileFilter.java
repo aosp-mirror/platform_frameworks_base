@@ -18,11 +18,18 @@ package com.android.dumprendertree2;
 
 import android.util.Log;
 
+import com.android.dumprendertree2.forwarder.ForwarderManager;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -38,6 +45,9 @@ public class FileFilter {
     private static final String TEST_EXPECTATIONS_TXT_PATH =
             "platform/android/test_expectations.txt";
 
+    private static final String HTTP_TESTS_PATH = "http/tests/";
+    private static final String SSL_PATH = "ssl/";
+
     private static final String TOKEN_SKIP = "SKIP";
     private static final String TOKEN_IGNORE_RESULT = "IGNORE_RESULT";
     private static final String TOKEN_SLOW = "SLOW";
@@ -52,7 +62,7 @@ public class FileFilter {
         /** It may or may not contain a trailing slash */
         this.mRootDirPath = rootDirPath;
 
-        reloadConfiguration();
+        loadTestExpectations();
     }
 
     private static final String trimTrailingSlashIfPresent(String path) {
@@ -60,74 +70,89 @@ public class FileFilter {
         return file.getPath();
     }
 
-    public void reloadConfiguration() {
-        File txt_exp = new File(mRootDirPath, TEST_EXPECTATIONS_TXT_PATH);
-
-        BufferedReader bufferedReader;
+    public void loadTestExpectations() {
+        URL url = null;
         try {
-            bufferedReader =
-                    new BufferedReader(new FileReader(txt_exp));
+            url = new URL(ForwarderManager.getHostSchemePort(false) + "LayoutTests/" +
+                    TEST_EXPECTATIONS_TXT_PATH);
+        } catch (MalformedURLException e) {
+            assert false;
+        }
 
-            String line;
-            String entry;
-            String[] parts;
-            String path;
-            Set<String> tokens;
-            Boolean skipped;
-            while (true) {
-                line = bufferedReader.readLine();
-                if (line == null) {
-                    break;
+        try {
+            InputStream inputStream = null;
+            BufferedReader bufferedReader = null;
+            try {
+                bufferedReader = new BufferedReader(new StringReader(new String(
+                        FsUtils.readDataFromUrl(url))));
+
+                String line;
+                String entry;
+                String[] parts;
+                String path;
+                Set<String> tokens;
+                Boolean skipped;
+                while (true) {
+                    line = bufferedReader.readLine();
+                    if (line == null) {
+                        break;
+                    }
+
+                    /** Remove the comment and trim */
+                    entry = line.split("//", 2)[0].trim();
+
+                    /** Omit empty lines, advance to next line */
+                    if (entry.isEmpty()) {
+                        continue;
+                    }
+
+                    /** Split on whitespace into path part and the rest */
+                    parts = entry.split("\\s", 2);
+
+                    /** At this point parts.length >= 1 */
+                    if (parts.length == 1) {
+                        Log.w(LOG_TAG + "::reloadConfiguration",
+                                "There are no options specified for the test!");
+                        continue;
+                    }
+
+                    path = trimTrailingSlashIfPresent(parts[0]);
+
+                    /** Split on whitespace */
+                    tokens = new HashSet<String>(Arrays.asList(parts[1].split("\\s", 0)));
+
+                    /** Chose the right collections to add to */
+                    skipped = false;
+                    if (tokens.contains(TOKEN_SKIP)) {
+                        mSkipList.add(path);
+                        skipped = true;
+                    }
+
+                    /** If test is on skip list we ignore any further options */
+                    if (skipped) {
+                        continue;
+                    }
+
+                    if (tokens.contains(TOKEN_IGNORE_RESULT)) {
+                        mIgnoreResultList.add(path);
+                    }
+
+                    if (tokens.contains(TOKEN_SLOW)) {
+                        mSlowList.add(path);
+                    }
                 }
-
-                /** Remove the comment and trim */
-                entry = line.split("//", 2)[0].trim();
-
-                /** Omit empty lines, advance to next line */
-                if (entry.isEmpty()) {
-                    continue;
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
                 }
-
-                /** Split on whitespace into path part and the rest */
-                parts = entry.split("\\s", 2);
-
-                /** At this point parts.length >= 1 */
-                if (parts.length == 1) {
-                    Log.w(LOG_TAG + "::reloadConfiguration",
-                            "There are no options specified for the test!");
-                    continue;
-                }
-
-                path = trimTrailingSlashIfPresent(parts[0]);
-
-                /** Split on whitespace */
-                tokens = new HashSet<String>(Arrays.asList(parts[1].split("\\s", 0)));
-
-                /** Chose the right collections to add to */
-                skipped = false;
-                if (tokens.contains(TOKEN_SKIP)) {
-                    mSkipList.add(path);
-                    skipped = true;
-                }
-
-                /** If test is on skip list we ignore any further options */
-                if (skipped) {
-                    continue;
-                }
-
-                if (tokens.contains(TOKEN_IGNORE_RESULT)) {
-                    mIgnoreResultList.add(path);
-                }
-
-                if (tokens.contains(TOKEN_SLOW)) {
-                    mSlowList.add(path);
+                if (bufferedReader != null) {
+                    bufferedReader.close();
                 }
             }
         } catch (FileNotFoundException e) {
-            Log.w(LOG_TAG, "mRootDirPath=" + mRootDirPath + ": File not found: " +
-                    txt_exp.getPath(), e);
+            Log.w(LOG_TAG, "reloadConfiguration(): File not found: " + e.getMessage());
         } catch (IOException e) {
-            Log.e(LOG_TAG, "mRootDirPath=" + mRootDirPath, e);
+            Log.e(LOG_TAG, "url=" + url, e);
         }
     }
 
@@ -234,6 +259,37 @@ public class FileFilter {
      */
     public static boolean isTestFile(String testName) {
         return testName.endsWith(".html") || testName.endsWith(".xhtml");
+    }
+
+    /**
+     * Return a URL of the test on the server.
+     *
+     * @param relativePath
+     * @return a URL of the test on the server
+     */
+    public static URL getUrl(String relativePath) {
+        String urlBase = ForwarderManager.getHostSchemePort(false);
+
+        /**
+         * URL is formed differently for HTTP vs non-HTTP tests, because HTTP tests
+         * expect different document root. See run_apache2.py and .conf file for details
+         */
+        if (relativePath.startsWith(HTTP_TESTS_PATH)) {
+            relativePath = relativePath.substring(HTTP_TESTS_PATH.length());
+            if (relativePath.startsWith(SSL_PATH)) {
+                urlBase = ForwarderManager.getHostSchemePort(true);
+            }
+        } else {
+            relativePath = "LayoutTests/" + relativePath;
+        }
+
+        try {
+            return new URL(urlBase + relativePath);
+        } catch (MalformedURLException e) {
+            Log.e(LOG_TAG, "Malformed URL!", e);
+        }
+
+        return null;
     }
 
     /**

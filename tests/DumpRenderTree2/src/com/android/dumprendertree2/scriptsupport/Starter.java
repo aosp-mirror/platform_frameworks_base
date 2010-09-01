@@ -21,6 +21,7 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 
 import com.android.dumprendertree2.TestsListActivity;
+import com.android.dumprendertree2.forwarder.ForwarderManager;
 
 /**
  * A class which provides methods that can be invoked by a script running on the host machine to
@@ -44,6 +45,8 @@ public class Starter extends ActivityInstrumentationTestCase2<TestsListActivity>
     public void startLayoutTests() {
         ScriptTestRunner runner = (ScriptTestRunner)getInstrumentation();
         String relativePath = runner.getTestsRelativePath();
+
+        ForwarderManager.getForwarderManager().start();
 
         Intent intent = new Intent();
         intent.setClassName("com.android.dumprendertree2", "TestsListActivity");
@@ -70,5 +73,7 @@ public class Starter extends ActivityInstrumentationTestCase2<TestsListActivity>
                 }
             }
         }
+
+        ForwarderManager.getForwarderManager().stop();
     }
 }
