@@ -523,7 +523,7 @@ public class OverScroller {
         // If the velocity is smaller than this value, no bounce is triggered
         // when the edge limits are reached (would result in a zero pixels
         // displacement anyway).
-        private static final float MINIMUM_VELOCITY_FOR_BOUNCE = 140.0f;
+        private static final float MINIMUM_VELOCITY_FOR_BOUNCE = Float.MAX_VALUE;//140.0f;
 
         // Proportion of the velocity that is preserved when the edge is reached.
         private static final float DEFAULT_BOUNCE_COEFFICIENT = 0.16f;

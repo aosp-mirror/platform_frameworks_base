@@ -213,7 +213,7 @@ public class EdgeGlow {
         final int glowHeight = mGlow.getIntrinsicHeight();
 
         mGlow.setAlpha((int) (Math.max(0, Math.min(mGlowAlpha, 1)) * 255));
-        mGlow.setBounds(0, 0, mWidth, (int) (glowHeight * mGlowScaleY));
+        mGlow.setBounds(0, 0, mWidth, (int) (glowHeight * mGlowScaleY * 0.5f));
         mGlow.draw(canvas);
 
         mEdge.setAlpha((int) (Math.max(0, Math.min(mEdgeAlpha, 1)) * 255));
