@@ -39,9 +39,6 @@ import android.util.Log;
 import android.util.Slog;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -113,8 +110,6 @@ public class Watchdog extends Thread {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MONITOR: {
-                    long now = SystemClock.uptimeMillis();
-
                     // See if we should force a reboot.
                     int rebootInterval = mReqRebootInterval >= 0
                             ? mReqRebootInterval : Settings.Secure.getInt(
@@ -418,9 +413,9 @@ public class Watchdog extends Thread {
                 if (!waitedHalf) {
                     // We've waited half the deadlock-detection interval.  Pull a stack
                     // trace and wait another half.
-                    ArrayList pids = new ArrayList();
+                    ArrayList<Integer> pids = new ArrayList<Integer>();
                     pids.add(Process.myPid());
-                    File stack = ActivityManagerService.dumpStackTraces(true, pids);
+                    ActivityManagerService.dumpStackTraces(true, pids, null, null);
                     waitedHalf = true;
                     continue;
                 }
@@ -430,15 +425,16 @@ public class Watchdog extends Thread {
             // First collect stack traces from all threads of the system process.
             // Then kill this process so that the system will restart.
 
-            String name = (mCurrentMonitor != null) ? mCurrentMonitor.getClass().getName() : "null";
+            String name = (mCurrentMonitor != null) ?
+                    mCurrentMonitor.getClass().getName() : "null";
             EventLog.writeEvent(EventLogTags.WATCHDOG, name);
 
-            ArrayList pids = new ArrayList();
+            ArrayList<Integer> pids = new ArrayList<Integer>();
             pids.add(Process.myPid());
             if (mPhonePid > 0) pids.add(mPhonePid);
             // Pass !waitedHalf so that just in case we somehow wind up here without having
             // dumped the halfway stacks, we properly re-initialize the trace file.
-            File stack = ActivityManagerService.dumpStackTraces(!waitedHalf, pids);
+            File stack = ActivityManagerService.dumpStackTraces(!waitedHalf, pids, null, null);
 
             // Give some extra time to make sure the stack traces get written.
             // The system's been hanging for a minute, another second or two won't hurt much.
