@@ -1,10 +1,6 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-ifneq ($(BUILD_WITHOUT_PV),true)
-include external/opencore/Config.mk
-endif
-
 LOCAL_SRC_FILES:= \
     android_media_MediaPlayer.cpp \
     android_media_MediaRecorder.cpp \
@@ -26,14 +22,6 @@ LOCAL_SHARED_LIBRARIES := \
     libsurfaceflinger_client \
     libstagefright \
     libcamera_client
-
-ifneq ($(BUILD_WITHOUT_PV),true)
-
-LOCAL_SHARED_LIBRARIES += \
-    libopencore_player
-else
-    LOCAL_CFLAGS += -DNO_OPENCORE
-endif
 
 LOCAL_STATIC_LIBRARIES :=
 
