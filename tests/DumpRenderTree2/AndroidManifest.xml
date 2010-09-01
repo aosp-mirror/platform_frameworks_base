@@ -35,7 +35,8 @@ limitations under the License.
              It can lead to some weird behaviour in the future. -->
         <activity android:name=".TestsListActivity"
                   android:label="Tests' list activity"
-                  android:launchMode="singleTask">
+                  android:launchMode="singleTask"
+                  android:configChanges="orientation">
         </activity>
 
         <activity android:name=".LayoutTestsExecutor"

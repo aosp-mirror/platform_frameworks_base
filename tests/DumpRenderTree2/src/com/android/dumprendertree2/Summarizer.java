@@ -27,6 +27,7 @@ import com.android.dumprendertree2.forwarder.ForwarderManager;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -198,6 +199,11 @@ public class Summarizer {
     public Summarizer(FileFilter fileFilter, String resultsRootDirPath) {
         mFileFilter = fileFilter;
         mResultsRootDirPath = resultsRootDirPath;
+    }
+
+    public static URI getDetailsUri() {
+        return new File(ManagerService.RESULTS_ROOT_DIR_PATH + File.separator +
+                HTML_DETAILS_RELATIVE_PATH).toURI();
     }
 
     public void appendTest(AbstractResult result) {
