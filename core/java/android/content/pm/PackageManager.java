@@ -705,6 +705,14 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device can communicate using Near-Field
+     * Communications (NFC).
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_NFC = "android.hardware.nfc";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device includes a magnetometer (compass).
      */
     @SdkConstant(SdkConstantType.FEATURE)
