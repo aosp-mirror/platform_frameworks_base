@@ -70,9 +70,6 @@ static void _nInit(JNIEnv *_env, jclass _this)
 
     jclass bitmapClass = _env->FindClass("android/graphics/Bitmap");
     gNativeBitmapID = _env->GetFieldID(bitmapClass, "mNativeBitmap", "I");
-
-    jclass typeClass = _env->FindClass("android/renderscript/Type");
-    gTypeNativeCache = _env->GetFieldID(typeClass, "mNativeCache", "I");
 }
 
 static void nInitElements(JNIEnv *_env, jobject _this, jint a8, jint rgba4444, jint rgba8888, jint rgb565)
@@ -360,124 +357,6 @@ nTypeGetNativeData(JNIEnv *_env, jobject _this, RsContext con, jint id, jintArra
     }
 }
 
-static void * SF_LoadInt(JNIEnv *_env, jobject _obj, jfieldID _field, void *buffer)
-{
-    ((int32_t *)buffer)[0] = _env->GetIntField(_obj, _field);
-    return ((uint8_t *)buffer) + 4;
-}
-
-static void * SF_LoadShort(JNIEnv *_env, jobject _obj, jfieldID _field, void *buffer)
-{
-    ((int16_t *)buffer)[0] = _env->GetShortField(_obj, _field);
-    return ((uint8_t *)buffer) + 2;
-}
-
-static void * SF_LoadByte(JNIEnv *_env, jobject _obj, jfieldID _field, void *buffer)
-{
-    ((int8_t *)buffer)[0] = _env->GetByteField(_obj, _field);
-    return ((uint8_t *)buffer) + 1;
-}
-
-static void * SF_LoadFloat(JNIEnv *_env, jobject _obj, jfieldID _field, void *buffer)
-{
-    ((float *)buffer)[0] = _env->GetFloatField(_obj, _field);
-    return ((uint8_t *)buffer) + 4;
-}
-
-static void * SF_SaveInt(JNIEnv *_env, jobject _obj, jfieldID _field, void *buffer)
-{
-    _env->SetIntField(_obj, _field, ((int32_t *)buffer)[0]);
-    return ((uint8_t *)buffer) + 4;
-}
-
-static void * SF_SaveShort(JNIEnv *_env, jobject _obj, jfieldID _field, void *buffer)
-{
-    _env->SetShortField(_obj, _field, ((int16_t *)buffer)[0]);
-    return ((uint8_t *)buffer) + 2;
-}
-
-static void * SF_SaveByte(JNIEnv *_env, jobject _obj, jfieldID _field, void *buffer)
-{
-    _env->SetByteField(_obj, _field, ((int8_t *)buffer)[0]);
-    return ((uint8_t *)buffer) + 1;
-}
-
-static void * SF_SaveFloat(JNIEnv *_env, jobject _obj, jfieldID _field, void *buffer)
-{
-    _env->SetFloatField(_obj, _field, ((float *)buffer)[0]);
-    return ((uint8_t *)buffer) + 4;
-}
-
-struct TypeFieldCache {
-    jfieldID field;
-    int bits;
-    void * (*ptr)(JNIEnv *, jobject, jfieldID, void *buffer);
-    void * (*readPtr)(JNIEnv *, jobject, jfieldID, void *buffer);
-};
-
-struct TypeCache {
-    int fieldCount;
-    int size;
-    TypeFieldCache fields[1];
-};
-
-//{"nTypeFinalDestroy",              "(Landroid/renderscript/Type;)V",       (void*)nTypeFinalDestroy },
-static void
-nTypeFinalDestroy(JNIEnv *_env, jobject _this, RsContext con, jobject _type)
-{
-    TypeCache *tc = (TypeCache *)_env->GetIntField(_type, gTypeNativeCache);
-    free(tc);
-}
-
-// native void nTypeSetupFields(Type t, int[] types, int[] bits, Field[] IDs);
-static void
-nTypeSetupFields(JNIEnv *_env, jobject _this, RsContext con, jobject _type, jintArray _types, jintArray _bits, jobjectArray _IDs)
-{
-    int fieldCount = _env->GetArrayLength(_types);
-    size_t structSize = sizeof(TypeCache) + (sizeof(TypeFieldCache) * (fieldCount-1));
-    TypeCache *tc = (TypeCache *)malloc(structSize);
-    memset(tc, 0, structSize);
-
-    TypeFieldCache *tfc = &tc->fields[0];
-    tc->fieldCount = fieldCount;
-    _env->SetIntField(_type, gTypeNativeCache, (jint)tc);
-
-    jint *fType = _env->GetIntArrayElements(_types, NULL);
-    jint *fBits = _env->GetIntArrayElements(_bits, NULL);
-    for (int ct=0; ct < fieldCount; ct++) {
-        jobject field = _env->GetObjectArrayElement(_IDs, ct);
-        tfc[ct].field = _env->FromReflectedField(field);
-        tfc[ct].bits = fBits[ct];
-
-        switch(fType[ct]) {
-        case RS_TYPE_FLOAT_32:
-            tfc[ct].ptr = SF_LoadFloat;
-            tfc[ct].readPtr = SF_SaveFloat;
-            break;
-        case RS_TYPE_UNSIGNED_32:
-        case RS_TYPE_SIGNED_32:
-            tfc[ct].ptr = SF_LoadInt;
-            tfc[ct].readPtr = SF_SaveInt;
-            break;
-        case RS_TYPE_UNSIGNED_16:
-        case RS_TYPE_SIGNED_16:
-            tfc[ct].ptr = SF_LoadShort;
-            tfc[ct].readPtr = SF_SaveShort;
-            break;
-        case RS_TYPE_UNSIGNED_8:
-        case RS_TYPE_SIGNED_8:
-            tfc[ct].ptr = SF_LoadByte;
-            tfc[ct].readPtr = SF_SaveByte;
-            break;
-        }
-        tc->size += 4;
-    }
-
-    _env->ReleaseIntArrayElements(_types, fType, JNI_ABORT);
-    _env->ReleaseIntArrayElements(_bits, fBits, JNI_ABORT);
-}
-
-
 // -----------------------------------
 
 static jint
@@ -697,45 +576,6 @@ nAllocationRead_f(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jfloat
     jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
     rsAllocationRead(con, (RsAllocation)alloc, ptr);
     _env->ReleaseFloatArrayElements(data, ptr, 0);
-}
-
-
-//{"nAllocationDataFromObject",      "(ILandroid/renderscript/Type;Ljava/lang/Object;)V",   (void*)nAllocationDataFromObject },
-static void
-nAllocationSubDataFromObject(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jobject _type, jint offset, jobject _o)
-{
-    LOG_API("nAllocationDataFromObject con(%p), alloc(%p)", con, (RsAllocation)alloc);
-
-    const TypeCache *tc = (TypeCache *)_env->GetIntField(_type, gTypeNativeCache);
-
-    void * bufAlloc = malloc(tc->size);
-    void * buf = bufAlloc;
-    for (int ct=0; ct < tc->fieldCount; ct++) {
-        const TypeFieldCache *tfc = &tc->fields[ct];
-        buf = tfc->ptr(_env, _o, tfc->field, buf);
-    }
-    rsAllocation1DSubData(con, (RsAllocation)alloc, offset, 1, bufAlloc, tc->size);
-    free(bufAlloc);
-}
-
-static void
-nAllocationSubReadFromObject(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jobject _type, jint offset, jobject _o)
-{
-    LOG_API("nAllocationReadFromObject con(%p), alloc(%p)", con, (RsAllocation)alloc);
-
-    assert(offset == 0);
-
-    const TypeCache *tc = (TypeCache *)_env->GetIntField(_type, gTypeNativeCache);
-
-    void * bufAlloc = malloc(tc->size);
-    void * buf = bufAlloc;
-    rsAllocationRead(con, (RsAllocation)alloc, bufAlloc);
-
-    for (int ct=0; ct < tc->fieldCount; ct++) {
-        const TypeFieldCache *tfc = &tc->fields[ct];
-        buf = tfc->readPtr(_env, _o, tfc->field, buf);
-    }
-    free(bufAlloc);
 }
 
 static jint
@@ -1397,8 +1237,6 @@ static JNINativeMethod methods[] = {
 {"rsnTypeBegin",                     "(II)V",                                 (void*)nTypeBegin },
 {"rsnTypeAdd",                       "(III)V",                                (void*)nTypeAdd },
 {"rsnTypeCreate",                    "(I)I",                                  (void*)nTypeCreate },
-{"rsnTypeFinalDestroy",              "(ILandroid/renderscript/Type;)V",       (void*)nTypeFinalDestroy },
-{"rsnTypeSetupFields",               "(ILandroid/renderscript/Type;[I[I[Ljava/lang/reflect/Field;)V", (void*)nTypeSetupFields },
 {"rsnTypeGetNativeData",             "(II[I)V",                                (void*)nTypeGetNativeData },
 
 {"rsnAllocationCreateTyped",         "(II)I",                                 (void*)nAllocationCreateTyped },
@@ -1417,8 +1255,6 @@ static JNINativeMethod methods[] = {
 {"rsnAllocationSubData2D",           "(IIIIII[FI)V",                          (void*)nAllocationSubData2D_f },
 {"rsnAllocationRead",                "(II[I)V",                               (void*)nAllocationRead_i },
 {"rsnAllocationRead",                "(II[F)V",                               (void*)nAllocationRead_f },
-{"rsnAllocationSubDataFromObject",   "(IILandroid/renderscript/Type;ILjava/lang/Object;)V",   (void*)nAllocationSubDataFromObject },
-{"rsnAllocationSubReadFromObject",   "(IILandroid/renderscript/Type;ILjava/lang/Object;)V",   (void*)nAllocationSubReadFromObject },
 {"rsnAllocationGetType",             "(II)I",                                 (void*)nAllocationGetType},
 
 {"rsnAdapter1DBindAllocation",       "(III)V",                                (void*)nAdapter1DBindAllocation },
