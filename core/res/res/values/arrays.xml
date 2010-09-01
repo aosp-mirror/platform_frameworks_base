@@ -117,4 +117,16 @@
         <item>3</item>
     </integer-array>
 
+    <!-- Used in LocalePicker -->
+    <string-array translatable="false" name="special_locale_codes">
+        <item>zh_CN</item>
+        <item>zh_TW</item>
+    </string-array>
+
+    <!-- Used in LocalePicker -->
+    <string-array translatable="false" name="special_locale_names">
+        <item>中文 (简体)</item>
+        <item>中文 (繁體)</item>
+    </string-array>
+
 </resources>
