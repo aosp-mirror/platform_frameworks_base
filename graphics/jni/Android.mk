@@ -13,14 +13,13 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
         libandroid_runtime \
-        libacc \
         libnativehelper \
         libRS \
         libcutils \
         libskia \
         libutils \
         libui \
-        libsurfaceflinger_client 
+        libsurfaceflinger_client
 
 LOCAL_STATIC_LIBRARIES :=
 
