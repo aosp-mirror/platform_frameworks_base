@@ -232,6 +232,10 @@ public class RenderScript {
     synchronized void nAllocationSubData1D(int id, int off, int count, byte[] d, int sizeBytes) {
         rsnAllocationSubData1D(mContext, id, off, count, d, sizeBytes);
     }
+    native void rsnAllocationSubElementData1D(int con, int id, int xoff, int compIdx, byte[] d, int sizeBytes);
+    synchronized void nAllocationSubElementData1D(int id, int xoff, int compIdx, byte[] d, int sizeBytes) {
+        rsnAllocationSubElementData1D(mContext, id, xoff, compIdx, d, sizeBytes);
+    }
     native void rsnAllocationSubData1D(int con, int id, int off, int count, float[] d, int sizeBytes);
     synchronized void nAllocationSubData1D(int id, int off, int count, float[] d, int sizeBytes) {
         rsnAllocationSubData1D(mContext, id, off, count, d, sizeBytes);

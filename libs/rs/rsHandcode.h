@@ -96,3 +96,26 @@ static inline void rsHCAPI_Allocation1DSubData (RsContext rsc, RsAllocation va, 
 
 }
 
+static inline void rsHCAPI_Allocation1DSubElementData (RsContext rsc, RsAllocation va, uint32_t x, const void * data, uint32_t comp_offset, uint32_t sizeBytes)
+{
+    ThreadIO *io = &((Context *)rsc)->mIO;
+    uint32_t size = sizeof(RS_CMD_Allocation1DSubElementData);
+    if (sizeBytes < DATA_SYNC_SIZE) {
+        size += (sizeBytes + 3) & ~3;
+    }
+    RS_CMD_Allocation1DSubElementData *cmd = static_cast<RS_CMD_Allocation1DSubElementData *>(io->mToCore.reserve(size));
+    cmd->va = va;
+    cmd->x = x;
+    cmd->data = data;
+    cmd->comp_offset = comp_offset;
+    cmd->bytes = sizeBytes;
+    if (sizeBytes < DATA_SYNC_SIZE) {
+        cmd->data = (void *)(cmd+1);
+        memcpy(cmd+1, data, sizeBytes);
+        io->mToCore.commit(RS_CMD_ID_Allocation1DSubElementData, size);
+    } else {
+        io->mToCore.commitSync(RS_CMD_ID_Allocation1DSubElementData, size);
+    }
+
+}
+

@@ -230,7 +230,7 @@ void Allocation::uploadCheck(const Context *rsc)
 }
 
 
-void Allocation::data(const void *data, uint32_t sizeBytes)
+void Allocation::data(Context *rsc, const void *data, uint32_t sizeBytes)
 {
     uint32_t size = mType->getSizeBytes();
     if (size != sizeBytes) {
@@ -253,7 +253,7 @@ void Allocation::read(void *data)
     memcpy(data, mPtr, mType->getSizeBytes());
 }
 
-void Allocation::subData(uint32_t xoff, uint32_t count, const void *data, uint32_t sizeBytes)
+void Allocation::subData(Context *rsc, uint32_t xoff, uint32_t count, const void *data, uint32_t sizeBytes)
 {
     uint32_t eSize = mType->getElementSizeBytes();
     uint8_t * ptr = static_cast<uint8_t *>(mPtr);
@@ -276,7 +276,7 @@ void Allocation::subData(uint32_t xoff, uint32_t count, const void *data, uint32
     mUploadDefered = true;
 }
 
-void Allocation::subData(uint32_t xoff, uint32_t yoff,
+void Allocation::subData(Context *rsc, uint32_t xoff, uint32_t yoff,
              uint32_t w, uint32_t h, const void *data, uint32_t sizeBytes)
 {
     uint32_t eSize = mType->getElementSizeBytes();
@@ -306,9 +306,91 @@ void Allocation::subData(uint32_t xoff, uint32_t yoff,
     mUploadDefered = true;
 }
 
-void Allocation::subData(uint32_t xoff, uint32_t yoff, uint32_t zoff,
+void Allocation::subData(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t zoff,
              uint32_t w, uint32_t h, uint32_t d, const void *data, uint32_t sizeBytes)
 {
+}
+
+void Allocation::subElementData(Context *rsc, uint32_t x, const void *data,
+                                uint32_t cIdx, uint32_t sizeBytes)
+{
+    uint32_t eSize = mType->getElementSizeBytes();
+    uint8_t * ptr = static_cast<uint8_t *>(mPtr);
+    ptr += eSize * x;
+
+    if (cIdx >= mType->getElement()->getFieldCount()) {
+        LOGE("Error Allocation::subElementData component %i out of range.", cIdx);
+        rsc->setError(RS_ERROR_BAD_VALUE, "subElementData component out of range.");
+        return;
+    }
+
+    if (x >= mType->getDimX()) {
+        LOGE("Error Allocation::subElementData X offset %i out of range.", x);
+        rsc->setError(RS_ERROR_BAD_VALUE, "subElementData X offset out of range.");
+        return;
+    }
+
+    const Element * e = mType->getElement()->getField(cIdx);
+    ptr += mType->getElement()->getFieldOffsetBytes(cIdx);
+
+    if (sizeBytes != e->getSizeBytes()) {
+        LOGE("Error Allocation::subElementData data size %i does not match field size %i.", sizeBytes, e->getSizeBytes());
+        rsc->setError(RS_ERROR_BAD_VALUE, "subElementData bad size.");
+        return;
+    }
+
+    if (e->getHasReferences()) {
+        e->incRefs(data);
+        e->decRefs(ptr);
+    }
+
+    memcpy(ptr, data, sizeBytes);
+    sendDirty();
+    mUploadDefered = true;
+}
+
+void Allocation::subElementData(Context *rsc, uint32_t x, uint32_t y,
+                                const void *data, uint32_t cIdx, uint32_t sizeBytes)
+{
+    uint32_t eSize = mType->getElementSizeBytes();
+    uint8_t * ptr = static_cast<uint8_t *>(mPtr);
+    ptr += eSize * (x + y * mType->getDimX());
+
+    if (x >= mType->getDimX()) {
+        LOGE("Error Allocation::subElementData X offset %i out of range.", x);
+        rsc->setError(RS_ERROR_BAD_VALUE, "subElementData X offset out of range.");
+        return;
+    }
+
+    if (y >= mType->getDimY()) {
+        LOGE("Error Allocation::subElementData X offset %i out of range.", x);
+        rsc->setError(RS_ERROR_BAD_VALUE, "subElementData X offset out of range.");
+        return;
+    }
+
+    if (cIdx >= mType->getElement()->getFieldCount()) {
+        LOGE("Error Allocation::subElementData component %i out of range.", cIdx);
+        rsc->setError(RS_ERROR_BAD_VALUE, "subElementData component out of range.");
+        return;
+    }
+
+    const Element * e = mType->getElement()->getField(cIdx);
+    ptr += mType->getElement()->getFieldOffsetBytes(cIdx);
+
+    if (sizeBytes != e->getSizeBytes()) {
+        LOGE("Error Allocation::subElementData data size %i does not match field size %i.", sizeBytes, e->getSizeBytes());
+        rsc->setError(RS_ERROR_BAD_VALUE, "subElementData bad size.");
+        return;
+    }
+
+    if (e->getHasReferences()) {
+        e->incRefs(data);
+        e->decRefs(ptr);
+    }
+
+    memcpy(ptr, data, sizeBytes);
+    sendDirty();
+    mUploadDefered = true;
 }
 
 void Allocation::addProgramToDirty(const Program *p)
@@ -394,7 +476,7 @@ Allocation *Allocation::createFromStream(Context *rsc, IStream *stream)
     alloc->setName(name.string(), name.size());
 
     // Read in all of our allocation data
-    alloc->data(stream->getPtr() + stream->getPos(), dataSize);
+    alloc->data(rsc, stream->getPtr() + stream->getPos(), dataSize);
     stream->reset(stream->getPos() + dataSize);
 
     return alloc;
@@ -662,16 +744,19 @@ RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h
     }
 
     ElementConverter_t cvt = pickConverter(dst, src);
-    cvt(texAlloc->getPtr(), data, w * h);
-
-    if (genMips) {
-        Adapter2D adapt(rsc, texAlloc);
-        Adapter2D adapt2(rsc, texAlloc);
-        for(uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
-            adapt.setLOD(lod);
-            adapt2.setLOD(lod + 1);
-            mip(adapt2, adapt);
+    if (cvt) {
+        cvt(texAlloc->getPtr(), data, w * h);
+        if (genMips) {
+            Adapter2D adapt(rsc, texAlloc);
+            Adapter2D adapt2(rsc, texAlloc);
+            for(uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
+                adapt.setLOD(lod);
+                adapt2.setLOD(lod + 1);
+                mip(adapt2, adapt);
+            }
         }
+    } else {
+        rsc->setError(RS_ERROR_BAD_VALUE, "Unsupported bitmap format");
     }
 
     return texAlloc;
@@ -708,19 +793,31 @@ RsAllocation rsi_AllocationCreateFromBitmapBoxed(Context *rsc, uint32_t w, uint3
 void rsi_AllocationData(Context *rsc, RsAllocation va, const void *data, uint32_t sizeBytes)
 {
     Allocation *a = static_cast<Allocation *>(va);
-    a->data(data, sizeBytes);
+    a->data(rsc, data, sizeBytes);
 }
 
 void rsi_Allocation1DSubData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t count, const void *data, uint32_t sizeBytes)
 {
     Allocation *a = static_cast<Allocation *>(va);
-    a->subData(xoff, count, data, sizeBytes);
+    a->subData(rsc, xoff, count, data, sizeBytes);
+}
+
+void rsi_Allocation2DSubElementData(Context *rsc, RsAllocation va, uint32_t x, uint32_t y, const void *data, uint32_t eoff, uint32_t sizeBytes)
+{
+    Allocation *a = static_cast<Allocation *>(va);
+    a->subElementData(rsc, x, y, data, eoff, sizeBytes);
+}
+
+void rsi_Allocation1DSubElementData(Context *rsc, RsAllocation va, uint32_t x, const void *data, uint32_t eoff, uint32_t sizeBytes)
+{
+    Allocation *a = static_cast<Allocation *>(va);
+    a->subElementData(rsc, x, data, eoff, sizeBytes);
 }
 
 void rsi_Allocation2DSubData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t yoff, uint32_t w, uint32_t h, const void *data, uint32_t sizeBytes)
 {
     Allocation *a = static_cast<Allocation *>(va);
-    a->subData(xoff, yoff, w, h, data, sizeBytes);
+    a->subData(rsc, xoff, yoff, w, h, data, sizeBytes);
 }
 
 void rsi_AllocationRead(Context *rsc, RsAllocation va, void *data)

@@ -184,6 +184,16 @@ Allocation1DSubData {
 	togglePlay
 	}
 
+Allocation1DSubElementData {
+	param RsAllocation va
+	param uint32_t x
+	param const void *data
+	param uint32_t comp_offset
+	param uint32_t bytes
+	handcodeApi
+	togglePlay
+	}
+
 Allocation2DSubData {
 	param RsAllocation va
 	param uint32_t xoff
@@ -191,6 +201,15 @@ Allocation2DSubData {
 	param uint32_t w
 	param uint32_t h
 	param const void *data
+	param uint32_t bytes
+	}
+
+Allocation2DSubElementData {
+	param RsAllocation va
+	param uint32_t x
+	param uint32_t y
+	param const void *data
+	param uint32_t element_offset
 	param uint32_t bytes
 	}
 
