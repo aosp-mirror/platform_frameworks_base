@@ -336,11 +336,6 @@ CameraService::Client::~Client() {
     int callingPid = getCallingPid();
     LOG1("Client::~Client E (pid %d, this %p)", callingPid, this);
 
-    // Clean up the ANativeWindow
-    if (mSurface != 0) {
-        setPreviewDisplay(0);
-    }
-
     // set mClientPid to let disconnet() tear down the hardware
     mClientPid = callingPid;
     disconnect();
