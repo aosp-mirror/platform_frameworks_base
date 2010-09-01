@@ -121,6 +121,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private int mNetTransitionWakeLockSerialNumber;
     private int mNetTransitionWakeLockTimeout;
 
+    private InetAddress mDefaultDns;
+
     private static class NetworkAttributes {
         /**
          * Class for holding settings read from resources.
@@ -207,6 +209,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (id != null && id.length() > 0) {
             String name = new String("android_").concat(id);
             SystemProperties.set("net.hostname", name);
+        }
+
+        // read our default dns server ip
+        String dns = Settings.Secure.getString(context.getContentResolver(),
+                Settings.Secure.DEFAULT_DNS_SERVER);
+        if (dns == null || dns.length() == 0) {
+            dns = context.getResources().getString(
+                    com.android.internal.R.string.config_default_dns_server);
+        }
+        try {
+            mDefaultDns = InetAddress.getByName(dns);
+        } catch (UnknownHostException e) {
+            Slog.e(TAG, "Error setting defaultDns using " + dns);
         }
 
         mContext = context;
@@ -1468,12 +1483,20 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             Collection<InetAddress> dnses = p.getDnses();
             if (mNetAttributes[netType].isDefault()) {
                 int j = 1;
-                for (InetAddress dns : dnses) {
+                if (dnses.size() == 0 && mDefaultDns != null) {
                     if (DBG) {
-                        Slog.d(TAG, "adding dns " + dns + " for " +
-                                nt.getNetworkInfo().getTypeName());
+                        Slog.d(TAG, "no dns provided - using " + mDefaultDns.getHostAddress());
                     }
-                    SystemProperties.set("net.dns" + j++, dns.getHostAddress());
+                    SystemProperties.set("net.dns1", mDefaultDns.getHostAddress());
+                    j++;
+                } else {
+                    for (InetAddress dns : dnses) {
+                        if (DBG) {
+                            Slog.d(TAG, "adding dns " + dns + " for " +
+                                    nt.getNetworkInfo().getTypeName());
+                        }
+                        SystemProperties.set("net.dns" + j++, dns.getHostAddress());
+                    }
                 }
                 for (int k=j ; k<mNumDnsEntries; k++) {
                     if (DBG) Slog.d(TAG, "erasing net.dns" + k);

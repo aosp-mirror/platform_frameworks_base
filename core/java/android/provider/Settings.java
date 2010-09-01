@@ -2385,6 +2385,12 @@ public final class Settings {
         public static final String SET_GLOBAL_HTTP_PROXY = "set_global_http_proxy";
 
         /**
+         * Setting for default DNS in case nobody suggests one
+         * @hide
+         */
+        public static final String DEFAULT_DNS_SERVER = "default_dns_server";
+
+        /**
          * Whether the package installer should allow installation of apps downloaded from
          * sources other than the Android Market (vending machine).
          *
