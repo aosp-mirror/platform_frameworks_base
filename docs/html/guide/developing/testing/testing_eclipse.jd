@@ -304,6 +304,7 @@ page.title=Testing In Eclipse, with ADT
                 Android Emulator</a>.
             </li>
         </ul>
+    </li>
     <li>
         Click the Common tab. In the Save As pane, click Local to save this run configuration
         locally, or click Shared to save it to another project.
@@ -333,13 +334,33 @@ page.title=Testing In Eclipse, with ADT
 </ol>
 <p>
     The progress of your test appears in the Console view as a series of messages. Each message is
-    preceded by a timestamp and the Android package name to which it applies.
+    preceded by a timestamp and the <code>.apk</code> filename to which it applies. For example,
+    this message appears when you run a test to the emulator, and the emulator is not yet started:
+</p>
+<div class="sidebox-wrapper">
+    <div class="sidebox">
+        <h2>Message Examples</h2>
+        <p>
+            The examples shown in this section come from the
+            <a href="{@docRoot}resources/samples/SpinnerTest/index.html">SpinnerTest</a>
+            sample test package, which tests the
+            <a href="{@docRoot}resources/samples/Spinner/index.html">Spinner</a>
+            sample application. This test package is also featured in the
+            <a href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity Testing</a>
+            tutorial.
+        </p>
+    </div>
+</div>
+<pre>
+    [<em>yyyy-mm-dd hh:mm:ss</em> - <em>testfile</em>] Waiting for HOME ('android.process.acore') to be launched...
+</pre>
+<p>
     In the following description of these messages, <code><em>devicename</em></code> is the name of
     the device or emulator you are using to run the test, and <code><em>port</em></code> is the
     port number for the device. The name and port number are in the format used by the
     <code><a href="{@docRoot}guide/developing/tools/adb.html#devicestatus">adb devices</a></code>
-    command. Also, <code><em>testpackage</em></code> is the name of the test package you are
-    running, and <em>app_package</em> is the label for the application under test.
+    command. Also, <code><em>testfile</em></code> is the <code>.apk</code> filename of the test
+    package you are running, and <em>appfile</em> is the filename of the application under test.
 </p>
 <ul>
     <li>
@@ -354,33 +375,57 @@ page.title=Testing In Eclipse, with ADT
         If you have not already installed your test package, then you see
         the message:
         <p>
-            <code>Uploading <em>testpackage</em> onto device '<em>devicename</em>-<em>port</em>'
+            <code>Uploading <em>testfile</em> onto device '<em>devicename</em>-<em>port</em>'
             </code>
         </p>
         <p>
-            then the message <code>Installing <em>testpackage</em></code>.
+            then the message <code>Installing <em>testfile</em></code>.
         </p>
         <p>
             and finally the message <code>Success!</code>
         </p>
     </li>
+</ul>
+<p>
+    The following lines are an example of this message sequence:
+</p>
+<code>
+[2010-07-01 12:44:40 - MyTest] HOME is up on device 'emulator-5554'<br>
+[2010-07-01 12:44:40 - MyTest] Uploading MyTest.apk onto device 'emulator-5554'<br>
+[2010-07-01 12:44:40 - MyTest] Installing MyTest.apk...<br>
+[2010-07-01 12:44:49 - MyTest] Success!<br>
+</code>
+<br>
+<ul>
     <li>
         Next, if you have not yet installed the application under test to the device or
         emulator, you see the message
         <p>
-        <code>Project dependency found, installing: <em>app_package</em></code>
+        <code>Project dependency found, installing: <em>appfile</em></code>
         </p>
         <p>
-            then the message <code>Uploading <em>app_name</em>.apk</code> onto device
+            then the message <code>Uploading <em>appfile</em></code> onto device
             '<em>devicename</em>-<em>port</em>'
         </p>
         <p>
-            then the message <code>Installing <em>app_name</em>.apk</code>
+            then the message <code>Installing <em>appfile</em></code>
         </p>
         <p>
             and finally the message <code>Success!</code>
         </p>
     </li>
+</ul>
+<p>
+    The following lines are an example of this message sequence:
+</p>
+<code>
+[2010-07-01 12:44:49 - MyTest] Project dependency found, installing: MyApp<br>
+[2010-07-01 12:44:49 - MyApp] Uploading MyApp.apk onto device 'emulator-5554'<br>
+[2010-07-01 12:44:49 - MyApp] Installing MyApp.apk...<br>
+[2010-07-01 12:44:54 - MyApp] Success!<br>
+</code>
+<br>
+<ul>
     <li>
         Next, you see the message
         <code>Launching instrumentation <em>instrumentation_class</em> on device
@@ -411,6 +456,17 @@ page.title=Testing In Eclipse, with ADT
         This indicates that your tests are finished.
     </li>
 </ul>
+<p>
+    The following lines are an example of this message sequence:
+</p>
+<code>
+[2010-01-01 12:45:02 - MyTest] Launching instrumentation android.test.InstrumentationTestRunner on device emulator-5554<br>
+[2010-01-01 12:45:02 - MyTest] Collecting test information<br>
+[2010-01-01 12:45:02 - MyTest] Sending test information to Eclipse<br>
+[2010-01-01 12:45:02 - MyTest] Running tests...<br>
+[2010-01-01 12:45:22 - MyTest] Test run complete<br>
+</code>
+<br>
 <p>
     The test results appear in the JUnit view. This is divided into an upper summary pane,
     and a lower stack trace pane.
@@ -449,8 +505,30 @@ page.title=Testing In Eclipse, with ADT
     pane and moves the focus to the first line of the test method.
 </p>
 <p>
+    The results of a successful test are shown in
+    <a href="#TestResults">Figure 1. Messages for a successful test</a>:
+</p>
+<a href="{@docRoot}images/testing/eclipse_test_results.png">
+    <img src="{@docRoot}images/testing/eclipse_test_results.png"
+         alt="Messages for a successful test" height="327px" id="TestResults"/>
+</a>
+<p class="img-caption">
+    <strong>Figure 1.</strong> Messages for a successful test
+</p>
+<p>
     The lower pane is for stack traces. If you highlight a failed test in the upper pane, the
     lower pane contains a stack trace for the test. If a line corresponds to a point in your
     test code, you can double-click it to display the code in an editor view pane, with the
     line highlighted. For a successful test, the lower pane is empty.
+</p>
+<p>
+    The results of a failed test are shown in
+    <a href="#FailedTestResults">Figure 2. Messages for a test failure</a>
+</p>
+<a href="{@docRoot}images/testing/eclipse_test_run_failure.png">
+    <img src="{@docRoot}images/testing/eclipse_test_run_failure.png"
+         alt="Messages for a test failure" height="372px" id="TestRun"/>
+</a>
+<p class="img-caption">
+    <strong>Figure 2.</strong> Messages for a test failure
 </p>
