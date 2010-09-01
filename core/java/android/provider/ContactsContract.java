@@ -139,6 +139,12 @@ public final class ContactsContract {
     public static final String DIRECTORY_PARAM_KEY = "directory";
 
     /**
+     * A query parameter that limits the number of results returned. The
+     * parameter value should be an integer.
+     */
+    public static final String LIMIT_PARAM_KEY = "limit";
+
+    /**
      * @hide
      */
     public static final class Preferences {
