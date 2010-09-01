@@ -938,7 +938,7 @@ public class WebView extends AbsoluteLayout
                         return;
                     }
 
-                    if (sGoogleApps.contains(packageName)) {
+                    if (sGoogleApps.contains(packageName) && mWebViewCore != null) {
                         if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
                             mWebViewCore.sendMessage(EventHub.ADD_PACKAGE_NAME, packageName);
                         } else {
@@ -975,7 +975,9 @@ public class WebView extends AbsoluteLayout
             // Executes on the UI thread
             @Override
             protected void onPostExecute(Set<String> installedPackages) {
-                mWebViewCore.sendMessage(EventHub.ADD_PACKAGE_NAMES, installedPackages);
+                if (mWebViewCore != null) {
+                    mWebViewCore.sendMessage(EventHub.ADD_PACKAGE_NAMES, installedPackages);
+                }
             }
         };
         task.execute();
