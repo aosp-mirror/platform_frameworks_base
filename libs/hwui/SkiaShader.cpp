@@ -167,12 +167,12 @@ void SkiaLinearGradientShader::setupProgram(Program* program, const mat4& modelV
         shaderMatrix.mapPoint(start.left, start.top);
         shaderMatrix.mapPoint(start.right, start.bottom);
     }
-    snapshot.transform.mapRect(start);
+    snapshot.transform->mapRect(start);
 
     const float gradientX = start.right - start.left;
     const float gradientY = start.bottom - start.top;
 
-    mat4 screenSpace(snapshot.transform);
+    mat4 screenSpace(*snapshot.transform);
     screenSpace.multiply(modelView);
 
     // Uniforms

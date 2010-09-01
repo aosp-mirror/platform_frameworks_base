@@ -22,6 +22,7 @@
 
 #include <utils/RefBase.h>
 
+#include <SkCanvas.h>
 #include <SkRegion.h>
 
 #include "Layer.h"
@@ -42,27 +43,40 @@ namespace uirenderer {
  */
 class Snapshot: public LightRefBase<Snapshot> {
 public:
-    Snapshot(): invisible(false), flags(0), previous(NULL), layer(NULL), fbo(0) { }
+    Snapshot(): invisible(false), flags(0), previous(NULL), layer(NULL), fbo(0) {
+        transform = &mTransformRoot;
+        clipRect = &mClipRectRoot;
+    }
 
     /**
-     * Copies the specified snapshot. Only the transform and clip rectangle
-     * are copied. The layer information is set to 0 and the transform is
-     * assumed to be dirty. The specified snapshot is stored as the previous
-     * snapshot.
+     * Copies the specified snapshot/ The specified snapshot is stored as
+     * the previous snapshot.
      */
-    Snapshot(const sp<Snapshot>& s):
+    Snapshot(const sp<Snapshot>& s, int saveFlags):
             height(s->height),
-            transform(s->transform),
-            clipRect(s->clipRect),
             invisible(s->invisible),
             flags(0),
             previous(s),
             layer(NULL),
             fbo(s->fbo),
             viewport(s->viewport) {
+        if (saveFlags & SkCanvas::kMatrix_SaveFlag) {
+            mTransformRoot.load(*s->transform);
+            transform = &mTransformRoot;
+        } else {
+            transform = s->transform;
+        }
+
+        if (saveFlags & SkCanvas::kClip_SaveFlag) {
+            mClipRectRoot.set(*s->clipRect);
+            clipRect = &mClipRectRoot;
+        } else {
+            clipRect = s->clipRect;
+        }
+
         if ((s->flags & Snapshot::kFlagClipSet) &&
                 !(s->flags & Snapshot::kFlagDirtyLocalClip)) {
-            localClip.set(s->localClip);
+            mLocalClip.set(s->mLocalClip);
         } else {
             flags |= Snapshot::kFlagDirtyLocalClip;
         }
@@ -99,23 +113,23 @@ public:
         bool clipped = false;
 
         Rect r(left, top, right, bottom);
-        transform.mapRect(r);
+        transform->mapRect(r);
 
         switch (op) {
             case SkRegion::kDifference_Op:
                 break;
             case SkRegion::kIntersect_Op:
-                clipped = clipRect.intersect(r);
+                clipped = clipRect->intersect(r);
                 break;
             case SkRegion::kUnion_Op:
-                clipped = clipRect.unionWith(r);
+                clipped = clipRect->unionWith(r);
                 break;
             case SkRegion::kXOR_Op:
                 break;
             case SkRegion::kReverseDifference_Op:
                 break;
             case SkRegion::kReplace_Op:
-                clipRect.set(r);
+                clipRect->set(r);
                 clipped = true;
                 break;
         }
@@ -131,39 +145,40 @@ public:
      * Sets the current clip.
      */
     void setClip(float left, float top, float right, float bottom) {
-        clipRect.set(left, top, right, bottom);
+        clipRect->set(left, top, right, bottom);
         flags |= Snapshot::kFlagClipSet | Snapshot::kFlagDirtyLocalClip;
     }
 
     const Rect& getLocalClip() {
         if (flags & Snapshot::kFlagDirtyLocalClip) {
             mat4 inverse;
-            inverse.loadInverse(transform);
+            inverse.loadInverse(*transform);
 
-            localClip.set(clipRect);
-            inverse.mapRect(localClip);
+            mLocalClip.set(*clipRect);
+            inverse.mapRect(mLocalClip);
 
             flags &= ~Snapshot::kFlagDirtyLocalClip;
         }
-        return localClip;
+        return mLocalClip;
+    }
+
+    // TODO: Temporary
+    void resetTransform(float x, float y, float z) {
+        transform = &mTransformRoot;
+        transform->loadTranslate(x, y, z);
+    }
+
+    // TODO: Temporary
+    void resetClip(float left, float top, float right, float bottom) {
+        clipRect = &mClipRectRoot;
+        clipRect->set(left, top, right, bottom);
+        flags |= Snapshot::kFlagClipSet | Snapshot::kFlagDirtyLocalClip;
     }
 
     /**
      * Height of the framebuffer the snapshot is rendering into.
      */
     int height;
-
-    /**
-     * Local transformation. Holds the current translation, scale and
-     * rotation values.
-     */
-    mat4 transform;
-
-    /**
-     * Current clip region. The clip is stored in canvas-space coordinates,
-     * (screen-space coordinates in the regular case.)
-     */
-    Rect clipRect;
 
     /**
      * If true, the layer won't be rendered.
@@ -196,8 +211,22 @@ public:
      */
     mat4 orthoMatrix;
 
+    /**
+     * Local transformation. Holds the current translation, scale and
+     * rotation values.
+     */
+    mat4* transform;
+
+    /**
+     * Current clip region. The clip is stored in canvas-space coordinates,
+     * (screen-space coordinates in the regular case.)
+     */
+    Rect* clipRect;
+
 private:
-    Rect localClip;
+    mat4 mTransformRoot;
+    Rect mClipRectRoot;
+    Rect mLocalClip;
 
 }; // class Snapshot
 
