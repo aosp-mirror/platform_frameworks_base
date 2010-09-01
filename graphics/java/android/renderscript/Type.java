@@ -33,7 +33,6 @@ public class Type extends BaseObj {
     int mElementCount;
     Element mElement;
 
-    private int mNativeCache;
     Class mJavaClass;
 
     public Element getElement() {
@@ -98,14 +97,9 @@ public class Type extends BaseObj {
 
     Type(int id, RenderScript rs) {
         super(id, rs);
-        mNativeCache = 0;
     }
 
     protected void finalize() throws Throwable {
-        if(mNativeCache != 0) {
-            mRS.nTypeFinalDestroy(this);
-            mNativeCache = 0;
-        }
         super.finalize();
     }
 
