@@ -2603,7 +2603,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         // First check if this is a system package that may involve an update
         if (updatedPkg != null && (parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0) {
-            if (!ps.codePath.equals(scanFile)) {
+            if (ps != null && !ps.codePath.equals(scanFile)) {
                 // The path has changed from what was last scanned...  check the
                 // version of the new path against what we have stored to determine
                 // what to do.
