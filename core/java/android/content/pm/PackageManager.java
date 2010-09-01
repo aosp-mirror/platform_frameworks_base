@@ -996,9 +996,9 @@ public abstract class PackageManager {
      * <p>Throws {@link NameNotFoundException} if an activity with the given
      * class name can not be found on the system.
      *
-     * @param className The full name (i.e.
-     *                  com.google.apps.contacts.ContactsList) of an Activity
-     *                  class.
+     * @param component The full component name (i.e.
+     * com.google.apps.contacts/com.google.apps.contacts.ContactsList) of an Activity
+     * class.
      * @param flags Additional option flags. Use any combination of 
      * {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
      * to modify the data (in ApplicationInfo) returned.
@@ -1009,7 +1009,7 @@ public abstract class PackageManager {
      * @see #GET_META_DATA
      * @see #GET_SHARED_LIBRARY_FILES
      */
-    public abstract ActivityInfo getActivityInfo(ComponentName className,
+    public abstract ActivityInfo getActivityInfo(ComponentName component,
             int flags) throws NameNotFoundException;
 
     /**
@@ -1019,9 +1019,9 @@ public abstract class PackageManager {
      * <p>Throws {@link NameNotFoundException} if a receiver with the given
      * class name can not be found on the system.
      *
-     * @param className The full name (i.e.
-     *                  com.google.apps.contacts.CalendarAlarm) of a Receiver
-     *                  class.
+     * @param component The full component name (i.e.
+     * com.google.apps.calendar/com.google.apps.calendar.CalendarAlarm) of a Receiver
+     * class.
      * @param flags Additional option flags.  Use any combination of 
      * {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
      * to modify the data returned.
@@ -1032,7 +1032,7 @@ public abstract class PackageManager {
      * @see #GET_META_DATA
      * @see #GET_SHARED_LIBRARY_FILES
      */
-    public abstract ActivityInfo getReceiverInfo(ComponentName className,
+    public abstract ActivityInfo getReceiverInfo(ComponentName component,
             int flags) throws NameNotFoundException;
 
     /**
@@ -1042,9 +1042,9 @@ public abstract class PackageManager {
      * <p>Throws {@link NameNotFoundException} if a service with the given
      * class name can not be found on the system.
      *
-     * @param className The full name (i.e.
-     *                  com.google.apps.media.BackgroundPlayback) of a Service
-     *                  class.
+     * @param component The full component name (i.e.
+     * com.google.apps.media/com.google.apps.media.BackgroundPlayback) of a Service
+     * class.
      * @param flags Additional option flags.  Use any combination of 
      * {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
      * to modify the data returned.
@@ -1054,7 +1054,29 @@ public abstract class PackageManager {
      * @see #GET_META_DATA
      * @see #GET_SHARED_LIBRARY_FILES
      */
-    public abstract ServiceInfo getServiceInfo(ComponentName className,
+    public abstract ServiceInfo getServiceInfo(ComponentName component,
+            int flags) throws NameNotFoundException;
+
+    /**
+     * Retrieve all of the information we know about a particular content
+     * provider class.
+     *
+     * <p>Throws {@link NameNotFoundException} if a provider with the given
+     * class name can not be found on the system.
+     *
+     * @param component The full component name (i.e.
+     * com.google.providers.media/com.google.providers.media.MediaProvider) of a
+     * ContentProvider class.
+     * @param flags Additional option flags.  Use any combination of
+     * {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
+     * to modify the data returned.
+     *
+     * @return ProviderInfo containing information about the service.
+     *
+     * @see #GET_META_DATA
+     * @see #GET_SHARED_LIBRARY_FILES
+     */
+    public abstract ProviderInfo getProviderInfo(ComponentName component,
             int flags) throws NameNotFoundException;
 
     /**

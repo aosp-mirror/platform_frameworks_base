@@ -1869,6 +1869,21 @@ class ContextImpl extends Context {
         }
 
         @Override
+        public ProviderInfo getProviderInfo(ComponentName className, int flags)
+            throws NameNotFoundException {
+            try {
+                ProviderInfo pi = mPM.getProviderInfo(className, flags);
+                if (pi != null) {
+                    return pi;
+                }
+            } catch (RemoteException e) {
+                throw new RuntimeException("Package manager has died", e);
+            }
+
+            throw new NameNotFoundException(className.toString());
+        }
+
+        @Override
         public String[] getSystemSharedLibraryNames() {
              try {
                  return mPM.getSystemSharedLibraryNames();
