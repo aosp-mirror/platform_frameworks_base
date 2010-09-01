@@ -6181,18 +6181,15 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         // Delete the updated package
         outInfo.isRemovedPackageSystemUpdate = true;
-        boolean deleteCodeAndResources = false;
-        if (ps.versionCode <  p.mVersionCode) {
+        final boolean deleteCodeAndResources;
+        if (ps.versionCode < p.mVersionCode) {
             // Delete code and resources for downgrades
             deleteCodeAndResources = true;
-            if ((flags & PackageManager.DONT_DELETE_DATA) == 0) {
-                flags &= ~PackageManager.DONT_DELETE_DATA;
-            }
+            flags &= ~PackageManager.DONT_DELETE_DATA;
         } else {
             // Preserve data by setting flag
-            if ((flags & PackageManager.DONT_DELETE_DATA) == 0) {
-                flags |= PackageManager.DONT_DELETE_DATA;
-            }
+            deleteCodeAndResources = false;
+            flags |= PackageManager.DONT_DELETE_DATA;
         }
         boolean ret = deleteInstalledPackageLI(p, deleteCodeAndResources, flags, outInfo);
         if (!ret) {
