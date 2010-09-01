@@ -78,6 +78,8 @@ private:
             unsigned PTS_DTS_flags, uint64_t PTS, uint64_t DTS,
             const uint8_t *data, size_t size);
 
+    void extractAACFrames(const sp<ABuffer> &buffer);
+
     DISALLOW_EVIL_CONSTRUCTORS(Stream);
 };
 
@@ -226,7 +228,7 @@ sp<MediaSource> ATSParser::Program::getSource(SourceType type) {
 ATSParser::Stream::Stream(unsigned elementaryPID, unsigned streamType)
     : mElementaryPID(elementaryPID),
       mStreamType(streamType),
-      mBuffer(new ABuffer(65536)),
+      mBuffer(new ABuffer(128 * 1024)),
       mPayloadStarted(false) {
     mBuffer->setRange(0, 0);
 }
@@ -662,7 +664,7 @@ static sp<ABuffer> FindMPEG2ADTSConfig(
     csd->data()[sizeof(kStaticESDS) + 1] =
         ((sampling_freq_index << 7) & 0x80) | (channel_configuration << 3);
 
-    hexdump(csd->data(), csd->size());
+    // hexdump(csd->data(), csd->size());
     return csd;
 }
 
@@ -727,11 +729,74 @@ void ATSParser::Stream::onPayloadData(
     buffer->meta()->setInt64("time", (PTS * 100) / 9);
 
     if (mStreamType == 0x0f) {
-        // WHY???
-        buffer->setRange(7, buffer->size() - 7);
+        extractAACFrames(buffer);
     }
 
     mSource->queueAccessUnit(buffer);
+}
+
+// Disassemble one or more ADTS frames into their constituent parts and
+// leave only the concatenated raw_data_blocks in the buffer.
+void ATSParser::Stream::extractAACFrames(const sp<ABuffer> &buffer) {
+    size_t dstOffset = 0;
+
+    size_t offset = 0;
+    while (offset < buffer->size()) {
+        CHECK_LE(offset + 7, buffer->size());
+
+        ABitReader bits(buffer->data() + offset, buffer->size() - offset);
+
+        // adts_fixed_header
+
+        CHECK_EQ(bits.getBits(12), 0xfffu);
+        bits.skipBits(3);  // ID, layer
+        bool protection_absent = bits.getBits(1) != 0;
+
+        // profile_ObjectType, sampling_frequency_index, private_bits,
+        // channel_configuration, original_copy, home
+        bits.skipBits(12);
+
+        // adts_variable_header
+
+        // copyright_identification_bit, copyright_identification_start
+        bits.skipBits(2);
+
+        unsigned aac_frame_length = bits.getBits(13);
+
+        bits.skipBits(11);  // adts_buffer_fullness
+
+        unsigned number_of_raw_data_blocks_in_frame = bits.getBits(2);
+
+        if (number_of_raw_data_blocks_in_frame == 0) {
+            size_t scan = offset + aac_frame_length;
+
+            offset += 7;
+            if (!protection_absent) {
+                offset += 2;
+            }
+
+            CHECK_LE(scan, buffer->size());
+
+            LOG(VERBOSE)
+                << "found aac raw data block at ["
+                << StringPrintf("0x%08x", offset)
+                << " ; "
+                << StringPrintf("0x%08x", scan)
+                << ")";
+
+            memmove(&buffer->data()[dstOffset], &buffer->data()[offset],
+                    scan - offset);
+
+            dstOffset += scan - offset;
+            offset = scan;
+        } else {
+            // To be implemented.
+            TRESPASS();
+        }
+    }
+    CHECK_EQ(offset, buffer->size());
+
+    buffer->setRange(buffer->offset(), dstOffset);
 }
 
 sp<MediaSource> ATSParser::Stream::getSource(SourceType type) {
