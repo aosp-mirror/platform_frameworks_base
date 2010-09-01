@@ -457,6 +457,33 @@ void AwesomePlayer::onBufferingUpdate() {
     }
     mBufferingEventPending = false;
 
+    int kLowWaterMarkSecs = 2;
+    int kHighWaterMarkSecs = 10;
+
+    if (mRTSPController != NULL) {
+        bool eos;
+        int64_t queueDurationUs = mRTSPController->getQueueDurationUs(&eos);
+
+        LOGV("queueDurationUs = %.2f secs", queueDurationUs / 1E6);
+
+        if ((mFlags & PLAYING) && !eos
+                && (queueDurationUs < kLowWaterMarkSecs * 1000000ll)) {
+            LOGI("rtsp cache is running low, pausing.");
+            mFlags |= CACHE_UNDERRUN;
+            pause_l();
+            notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_START);
+        } else if ((mFlags & CACHE_UNDERRUN)
+                && (eos || queueDurationUs > kHighWaterMarkSecs * 1000000ll)) {
+            LOGI("rtsp cache has filled up, resuming.");
+            mFlags &= ~CACHE_UNDERRUN;
+            play_l();
+            notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_END);
+        }
+
+        postBufferingEvent_l();
+        return;
+    }
+
     if (mCachedSource == NULL) {
         return;
     }
@@ -484,8 +511,8 @@ void AwesomePlayer::onBufferingUpdate() {
 
             notifyListener_l(MEDIA_BUFFERING_UPDATE, percentage);
 
-            lowWatermark = 2 * bitrate / 8;  // 2 secs
-            highWatermark = 10 * bitrate / 8;  // 10 secs
+            lowWatermark = kLowWaterMarkSecs * bitrate / 8;
+            highWatermark = kHighWaterMarkSecs * bitrate / 8;
         }
     }
 
