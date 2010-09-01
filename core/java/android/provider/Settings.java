@@ -1692,6 +1692,41 @@ public final class Settings {
         public static final String USE_PTP_INTERFACE = "use_ptp_interface";
 
         /**
+         * Receive incoming SIP calls?
+         * 0 = no
+         * 1 = yes
+         * @hide
+         */
+        public static final String SIP_RECEIVE_CALLS = "sip_receive_calls";
+
+        /**
+         * Call Preference String.
+         * "SIP_ALWAYS" : Always use SIP with network access
+         * "SIP_ADDRESS_ONLY" : Only if destination is a SIP address
+         * "SIP_ASK_ME_EACH_TIME" : Always ask me each time
+         * @hide
+         */
+        public static final String SIP_CALL_OPTIONS = "sip_call_options";
+
+        /**
+         * One of the sip call options: Always use SIP with network access.
+         * @hide
+         */
+        public static final String SIP_ALWAYS = "SIP_ALWAYS";
+
+        /**
+         * One of the sip call options: Only if destination is a SIP address.
+         * @hide
+         */
+        public static final String SIP_ADDRESS_ONLY = "SIP_ADDRESS_ONLY";
+
+        /**
+         * One of the sip call options: Always ask me each time.
+         * @hide
+         */
+        public static final String SIP_ASK_ME_EACH_TIME = "SIP_ASK_ME_EACH_TIME";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          * @hide
@@ -1753,6 +1788,8 @@ public final class Settings {
             SHOW_WEB_SUGGESTIONS,
             NOTIFICATION_LIGHT_PULSE,
             USE_PTP_INTERFACE,
+            SIP_CALL_OPTIONS,
+            SIP_RECEIVE_CALLS
         };
 
         // Settings moved to Settings.Secure
