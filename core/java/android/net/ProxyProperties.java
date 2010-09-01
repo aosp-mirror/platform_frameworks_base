@@ -75,8 +75,12 @@ public class ProxyProperties implements Parcelable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(mProxy.getHostAddress()).append(":").append(mPort)
-          .append(" xl=").append(mExclusionList);
+        if (mProxy != null) {
+            sb.append(mProxy.getHostAddress()).append(":").append(mPort);
+            if (mExclusionList != null) {
+                    sb.append(" xl=").append(mExclusionList);
+            }
+        }
         return sb.toString();
     }
 
