@@ -127,7 +127,8 @@ void OpenGLRenderer::setViewport(int width, int height) {
 }
 
 void OpenGLRenderer::prepare() {
-    mSnapshot = new Snapshot(mFirstSnapshot);
+    mSnapshot = new Snapshot(mFirstSnapshot,
+            SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     mSaveCount = 1;
 
     glViewport(0, 0, mWidth, mHeight);
@@ -175,7 +176,7 @@ int OpenGLRenderer::getSaveCount() const {
 }
 
 int OpenGLRenderer::save(int flags) {
-    return saveSnapshot();
+    return saveSnapshot(flags);
 }
 
 void OpenGLRenderer::restore() {
@@ -192,8 +193,8 @@ void OpenGLRenderer::restoreToCount(int saveCount) {
     }
 }
 
-int OpenGLRenderer::saveSnapshot() {
-    mSnapshot = new Snapshot(mSnapshot);
+int OpenGLRenderer::saveSnapshot(int flags) {
+    mSnapshot = new Snapshot(mSnapshot, flags);
     return mSaveCount++;
 }
 
@@ -231,7 +232,7 @@ bool OpenGLRenderer::restoreSnapshot() {
 
 int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
         const SkPaint* p, int flags) {
-    int count = saveSnapshot();
+    int count = saveSnapshot(flags);
 
     int alpha = 255;
     SkXfermode::Mode mode;
@@ -258,13 +259,13 @@ int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
 
 int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bottom,
         int alpha, int flags) {
-    int count = saveSnapshot();
-    if (alpha > 0 && !mSnapshot->invisible) {
-        createLayer(mSnapshot, left, top, right, bottom, alpha, SkXfermode::kSrcOver_Mode, flags);
+    if (alpha == 0xff) {
+        return saveLayer(left, top, right, bottom, NULL, flags);
     } else {
-        mSnapshot->invisible = true;
+        SkPaint paint;
+        paint.setAlpha(alpha);
+        return saveLayer(left, top, right, bottom, &paint, flags);
     }
-    return count;
 }
 
 bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
@@ -272,8 +273,12 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     LAYER_LOGD("Requesting layer %fx%f", right - left, bottom - top);
     LAYER_LOGD("Layer cache size = %d", mCaches.layerCache.getSize());
 
+    Rect bounds(left, top, right, bottom);
+    // TODO: Apply transformations and treat layers in screen coordinates
+    // mSnapshot->transform->mapRect(bounds);
+
     GLuint previousFbo = snapshot->previous.get() ? snapshot->previous->fbo : 0;
-    LayerSize size(right - left, bottom - top);
+    LayerSize size(bounds.getWidth(), bounds.getHeight());
 
     Layer* layer = mCaches.layerCache.get(size, previousFbo);
     if (!layer) {
@@ -290,24 +295,26 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
     layer->mode = mode;
     layer->alpha = alpha / 255.0f;
-    layer->layer.set(left, top, right, bottom);
+    layer->layer.set(bounds);
 
     // Save the layer in the snapshot
     snapshot->flags |= Snapshot::kFlagIsLayer;
     snapshot->layer = layer;
     snapshot->fbo = layer->fbo;
-    snapshot->transform.loadTranslate(-left, -top, 0.0f);
-    snapshot->setClip(0.0f, 0.0f, right - left, bottom - top);
-    snapshot->viewport.set(0.0f, 0.0f, right - left, bottom - top);
-    snapshot->height = bottom - top;
+    // TODO: Temporary until real layer support is implemented
+    snapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
+    // TODO: Temporary until real layer support is implemented
+    snapshot->resetClip(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
+    snapshot->viewport.set(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
+    snapshot->height = bounds.getHeight();
     snapshot->flags |= Snapshot::kFlagDirtyOrtho;
     snapshot->orthoMatrix.load(mOrthoMatrix);
 
     setScissorFromClip();
 
     // Change the ortho projection
-    glViewport(0, 0, right - left, bottom - top);
-    mOrthoMatrix.loadOrtho(0.0f, right - left, bottom - top, 0.0f, -1.0f, 1.0f);
+    glViewport(0, 0, bounds.getWidth(), bounds.getHeight());
+    mOrthoMatrix.loadOrtho(0.0f, bounds.getWidth(), bounds.getHeight(), 0.0f, -1.0f, 1.0f);
 
     return true;
 }
@@ -323,8 +330,8 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     glBindFramebuffer(GL_FRAMEBUFFER, previous->fbo);
 
     // Restore the clip from the previous snapshot
-    const Rect& clip = previous->clipRect;
-    glScissor(clip.left, mHeight - clip.bottom, clip.getWidth(), clip.getHeight());
+    const Rect& clip = *previous->clipRect;
+    glScissor(clip.left, previous->height - clip.bottom, clip.getWidth(), clip.getHeight());
 
     Layer* layer = current->layer;
     const Rect& rect = layer->layer;
@@ -355,28 +362,28 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::translate(float dx, float dy) {
-    mSnapshot->transform.translate(dx, dy, 0.0f);
+    mSnapshot->transform->translate(dx, dy, 0.0f);
 }
 
 void OpenGLRenderer::rotate(float degrees) {
-    mSnapshot->transform.rotate(degrees, 0.0f, 0.0f, 1.0f);
+    mSnapshot->transform->rotate(degrees, 0.0f, 0.0f, 1.0f);
 }
 
 void OpenGLRenderer::scale(float sx, float sy) {
-    mSnapshot->transform.scale(sx, sy, 1.0f);
+    mSnapshot->transform->scale(sx, sy, 1.0f);
 }
 
 void OpenGLRenderer::setMatrix(SkMatrix* matrix) {
-    mSnapshot->transform.load(*matrix);
+    mSnapshot->transform->load(*matrix);
 }
 
 void OpenGLRenderer::getMatrix(SkMatrix* matrix) {
-    mSnapshot->transform.copyTo(*matrix);
+    mSnapshot->transform->copyTo(*matrix);
 }
 
 void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
     mat4 m(*matrix);
-    mSnapshot->transform.multiply(m);
+    mSnapshot->transform->multiply(m);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -384,7 +391,7 @@ void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::setScissorFromClip() {
-    const Rect& clip = mSnapshot->clipRect;
+    const Rect& clip = *mSnapshot->clipRect;
     glScissor(clip.left, mSnapshot->height - clip.bottom, clip.getWidth(), clip.getHeight());
 }
 
@@ -396,8 +403,8 @@ bool OpenGLRenderer::quickReject(float left, float top, float right, float botto
     if (mSnapshot->invisible) return true;
 
     Rect r(left, top, right, bottom);
-    mSnapshot->transform.mapRect(r);
-    return !mSnapshot->clipRect.intersects(r);
+    mSnapshot->transform->mapRect(r);
+    return !mSnapshot->clipRect->intersects(r);
 }
 
 bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {
@@ -405,7 +412,7 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom, 
     if (clipped) {
         setScissorFromClip();
     }
-    return !mSnapshot->clipRect.isEmpty();
+    return !mSnapshot->clipRect->isEmpty();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -501,7 +508,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
     if (mSnapshot->invisible) return;
-    const Rect& clip = mSnapshot->clipRect;
+    const Rect& clip = *mSnapshot->clipRect;
     drawColorRect(clip.left, clip.top, clip.right, clip.bottom, color, mode, true);
 }
 
@@ -538,7 +545,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     float scaleX = paint->getTextScaleX();
     bool applyScaleX = scaleX < 0.9999f || scaleX > 1.0001f;
     if (applyScaleX) {
-        save(0);
+        save(SkCanvas::kMatrix_SaveFlag);
         translate(x - (x * scaleX), 0.0f);
         scale(scaleX, 1.0f);
     }
@@ -747,7 +754,7 @@ void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t
      } else {
          mModelView.loadIdentity();
      }
-     mCaches.currentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+     mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
      glUniform4f(mCaches.currentProgram->color, r, g, b, a);
 
      textureUnit++;
@@ -852,7 +859,7 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
     if (!ignoreTransform) {
-        mCaches.currentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+        mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
     } else {
         mat4 identity;
         mCaches.currentProgram->set(mOrthoMatrix, mModelView, identity);
@@ -900,7 +907,7 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     mModelView.scale(right - left, bottom - top, 1.0f);
 
     useProgram(mCaches.programCache.get(description));
-    mCaches.currentProgram->set(mOrthoMatrix, mModelView, mSnapshot->transform);
+    mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
 
     chooseBlending(blend || alpha < 1.0f, mode);
 

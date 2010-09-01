@@ -320,7 +320,7 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public int save() {
-        return nSave(mRenderer, 0);
+        return nSave(mRenderer, Canvas.CLIP_SAVE_FLAG | Canvas.MATRIX_SAVE_FLAG);
     }
     
     @Override
