@@ -35,6 +35,9 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -205,11 +208,7 @@ public class DirListActivity extends ListActivity {
                     showDir(item.getRelativePath());
                 } else {
                     /** Run the test */
-                    Intent intent = new Intent();
-                    intent.setClass(DirListActivity.this, TestsListActivity.class);
-                    intent.setAction(Intent.ACTION_RUN);
-                    intent.putExtra(TestsListActivity.EXTRA_TEST_PATH, item.getRelativePath());
-                    startActivity(intent);
+                    runAllTestsUnder(item.getRelativePath());
                 }
             }
         });
@@ -234,6 +233,32 @@ public class DirListActivity extends ListActivity {
 
         /** All the paths are relative to test root dir where possible */
         showDir("");
+    }
+
+    private void runAllTestsUnder(String relativePath) {
+        Intent intent = new Intent();
+        intent.setClass(DirListActivity.this, TestsListActivity.class);
+        intent.setAction(Intent.ACTION_RUN);
+        intent.putExtra(TestsListActivity.EXTRA_TEST_PATH, relativePath);
+        startActivity(intent);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.gui_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.run_all:
+                runAllTestsUnder(mCurrentDirPath);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -278,13 +303,7 @@ public class DirListActivity extends ListActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         removeDialog(DIALOG_RUN_ABORT_DIR);
-                        /** Run the tests */
-                        Intent intent = new Intent();
-                        intent.setClass(DirListActivity.this, TestsListActivity.class);
-                        intent.setAction(Intent.ACTION_RUN);
-                        intent.putExtra(TestsListActivity.EXTRA_TEST_PATH,
-                                args.getString("relativePath"));
-                        startActivity(intent);
+                        runAllTestsUnder(args.getString("relativePath"));
                     }
                 });
 
