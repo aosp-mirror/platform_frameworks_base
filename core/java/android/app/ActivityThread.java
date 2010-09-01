@@ -850,10 +850,6 @@ public final class ActivityThread {
     }
 
     private final class H extends Handler {
-        private H() {
-            SamplingProfiler.getInstance().setEventThread(mLooper.getThread());
-        }
-
         public static final int LAUNCH_ACTIVITY         = 100;
         public static final int PAUSE_ACTIVITY          = 101;
         public static final int PAUSE_ACTIVITY_FINISHING= 102;
