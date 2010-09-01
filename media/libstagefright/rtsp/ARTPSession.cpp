@@ -125,6 +125,14 @@ void ARTPSession::onMessageReceived(const sp<AMessage> &msg) {
     switch (msg->what()) {
         case kWhatAccessUnitComplete:
         {
+            int32_t firstRTCP;
+            if (msg->findInt32("first-rtcp", &firstRTCP)) {
+                // There won't be an access unit here, it's just a notification
+                // that the data communication worked since we got the first
+                // rtcp packet.
+                break;
+            }
+
             size_t trackIndex;
             CHECK(msg->findSize("track-index", &trackIndex));
 
