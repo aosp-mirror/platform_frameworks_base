@@ -19,12 +19,14 @@ package android.media;
 import android.content.Context;
 import android.content.ContentValues;
 import android.content.IContentProvider;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.provider.MediaStore.Audio;
 import android.provider.MediaStore.MediaColumns;
 import android.provider.MediaStore.MtpObjects;
+import android.provider.Mtp;
 import android.util.Log;
 
 /**
@@ -34,9 +36,13 @@ public class MtpDatabase {
 
     private static final String TAG = "MtpDatabase";
 
+    private final Context mContext;
     private final IContentProvider mMediaProvider;
     private final String mVolumeName;
     private final Uri mObjectsUri;
+
+    // true if the database has been modified in the current MTP session
+    private boolean mDatabaseModified;
 
     // FIXME - this should be passed in via the constructor
     private final int mStorageID = 0x00010001;
@@ -72,6 +78,7 @@ public class MtpDatabase {
     public MtpDatabase(Context context, String volumeName) {
         native_setup();
 
+        mContext = context;
         mMediaProvider = context.getContentResolver().acquireProvider("media");
         mVolumeName = volumeName;
         mObjectsUri = MtpObjects.getContentUri(volumeName);
@@ -89,6 +96,7 @@ public class MtpDatabase {
 
     private int beginSendObject(String path, int format, int parent,
                          int storage, long size, long modified) {
+        mDatabaseModified = true;
         ContentValues values = new ContentValues();
         values.put(MtpObjects.ObjectColumns.DATA, path);
         values.put(MtpObjects.ObjectColumns.FORMAT, format);
@@ -398,6 +406,7 @@ public class MtpDatabase {
 
     private int deleteFile(int handle) {
         Log.d(TAG, "deleteFile: " + handle);
+        mDatabaseModified = true;
         Uri uri = MtpObjects.getContentUri(mVolumeName, handle);
         try {
             if (mMediaProvider.delete(uri, null, null) == 1) {
@@ -440,6 +449,7 @@ public class MtpDatabase {
     }
 
     private int setObjectReferences(int handle, int[] references) {
+        mDatabaseModified = true;
         Uri uri = MtpObjects.getReferencesUri(mVolumeName, handle);
         int count = references.length;
         ContentValues[] valuesList = new ContentValues[count];
@@ -456,6 +466,20 @@ public class MtpDatabase {
             Log.e(TAG, "RemoteException in setObjectReferences", e);
         }
         return MtpConstants.RESPONSE_GENERAL_ERROR;
+    }
+
+    private void sessionStarted() {
+        Log.d(TAG, "sessionStarted");
+        mDatabaseModified = false;
+    }
+
+    private void sessionEnded() {
+        Log.d(TAG, "sessionEnded");
+        if (mDatabaseModified) {
+            Log.d(TAG, "sending ACTION_MTP_SESSION_END");
+            mContext.sendBroadcast(new Intent(Mtp.ACTION_MTP_SESSION_END));
+            mDatabaseModified = false;
+        }
     }
 
     // used by the JNI code

@@ -678,6 +678,13 @@ status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
                 bundle->getMaxSdkVersion());
     }
 
+    if (bundle->getDebugMode()) {
+        sp<XMLNode> application = root->getChildElement(String16(), String16("application"));
+        if (application != NULL) {
+            addTagAttribute(application, RESOURCES_ANDROID_NAMESPACE, "debuggable", "true");
+        }
+    }
+
     // Deal with manifest package name overrides
     const char* manifestPackageNameOverride = bundle->getManifestPackageNameOverride();
     if (manifestPackageNameOverride != NULL) {

@@ -464,7 +464,16 @@ bool Parcel::enforceInterface(const String16& interface,
     if (threadState == NULL) {
         threadState = IPCThreadState::self();
     }
-    threadState->setStrictModePolicy(strictPolicy);
+    if ((threadState->getLastTransactionBinderFlags() &
+         IBinder::FLAG_ONEWAY) != 0) {
+      // For one-way calls, the callee is running entirely
+      // disconnected from the caller, so disable StrictMode entirely.
+      // Not only does disk/network usage not impact the caller, but
+      // there's no way to commuicate back any violations anyway.
+      threadState->setStrictModePolicy(0);
+    } else {
+      threadState->setStrictModePolicy(strictPolicy);
+    }
     const String16 str(readString16());
     if (str == interface) {
         return true;

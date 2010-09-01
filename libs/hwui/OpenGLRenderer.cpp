@@ -143,6 +143,29 @@ void OpenGLRenderer::prepare() {
     mSnapshot->setClip(0.0f, 0.0f, mWidth, mHeight);
 }
 
+void OpenGLRenderer::acquireContext() {
+    if (mCaches.currentProgram) {
+        if (mCaches.currentProgram->isInUse()) {
+            mCaches.currentProgram->remove();
+            mCaches.currentProgram = NULL;
+        }
+    }
+}
+
+void OpenGLRenderer::releaseContext() {
+    glViewport(0, 0, mSnapshot->viewport.getWidth(), mSnapshot->viewport.getHeight());
+
+    glEnable(GL_SCISSOR_TEST);
+    setScissorFromClip();
+
+    if (mCaches.blend) {
+        glEnable(GL_BLEND);
+        glBlendFunc(mCaches.lastSrcMode, mCaches.lastDstMode);
+    } else {
+        glDisable(GL_BLEND);
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // State management
 ///////////////////////////////////////////////////////////////////////////////

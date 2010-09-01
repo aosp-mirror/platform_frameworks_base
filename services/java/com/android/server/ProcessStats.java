@@ -39,7 +39,7 @@ public class ProcessStats {
     
     private static final int[] PROCESS_STATS_FORMAT = new int[] {
         PROC_SPACE_TERM,
-        PROC_SPACE_TERM,
+        PROC_SPACE_TERM|PROC_PARENS,
         PROC_SPACE_TERM,
         PROC_SPACE_TERM,
         PROC_SPACE_TERM,
@@ -75,16 +75,21 @@ public class ProcessStats {
         PROC_SPACE_TERM,
         PROC_SPACE_TERM,
         PROC_SPACE_TERM,
+        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 9: minor faults
         PROC_SPACE_TERM,
-        PROC_SPACE_TERM,
-        PROC_SPACE_TERM,
+        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 11: major faults
         PROC_SPACE_TERM,
         PROC_SPACE_TERM|PROC_OUT_LONG,                  // 13: utime
         PROC_SPACE_TERM|PROC_OUT_LONG                   // 14: stime
     };
 
-    private final String[] mProcessFullStatsStringData = new String[3];
-    private final long[] mProcessFullStatsData = new long[3];
+    static final int PROCESS_FULL_STAT_MINOR_FAULTS = 1;
+    static final int PROCESS_FULL_STAT_MAJOR_FAULTS = 2;
+    static final int PROCESS_FULL_STAT_UTIME = 3;
+    static final int PROCESS_FULL_STAT_STIME = 4;
+
+    private final String[] mProcessFullStatsStringData = new String[5];
+    private final long[] mProcessFullStatsData = new long[5];
 
     private static final int[] SYSTEM_CPU_FORMAT = new int[] {
         PROC_SPACE_TERM|PROC_COMBINE,
@@ -116,6 +121,9 @@ public class ProcessStats {
     private long mCurrentSampleTime;
     private long mLastSampleTime;
     
+    private long mCurrentSampleRealTime;
+    private long mLastSampleRealTime;
+
     private long mBaseUserTime;
     private long mBaseSystemTime;
     private long mBaseIoWaitTime;
@@ -167,6 +175,9 @@ public class ProcessStats {
         public String name;
         int nameWidth;
 
+        public long base_uptime;
+        public long rel_uptime;
+
         public long base_utime;
         public long base_stime;
         public int rel_utime;
@@ -178,6 +189,7 @@ public class ProcessStats {
         public int rel_majfaults;
         
         public boolean active;
+        public boolean working;
         public boolean added;
         public boolean removed;
         
@@ -211,8 +223,7 @@ public class ProcessStats {
 
     private final static Comparator<Stats> sLoadComparator = new Comparator<Stats>() {
         public final int
-        compare(Stats sta, Stats stb)
-        {
+        compare(Stats sta, Stats stb) {
             int ta = sta.rel_utime + sta.rel_stime;
             int tb = stb.rel_utime + stb.rel_stime;
             if (ta != tb) {
@@ -241,31 +252,17 @@ public class ProcessStats {
     }
     
     public void init() {
+        if (DEBUG) Slog.v(TAG, "Init: " + this);
         mFirst = true;
         update();
     }
     
     public void update() {
+        if (DEBUG) Slog.v(TAG, "Update: " + this);
         mLastSampleTime = mCurrentSampleTime;
         mCurrentSampleTime = SystemClock.uptimeMillis();
-        
-        final float[] loadAverages = mLoadAverageData;
-        if (Process.readProcFile("/proc/loadavg", LOAD_AVERAGE_FORMAT,
-                null, null, loadAverages)) {
-            float load1 = loadAverages[0];
-            float load5 = loadAverages[1];
-            float load15 = loadAverages[2];
-            if (load1 != mLoad1 || load5 != mLoad5 || load15 != mLoad15) {
-                mLoad1 = load1;
-                mLoad5 = load5;
-                mLoad15 = load15;
-                onLoadChanged(load1, load5, load15);
-            }
-        }
-
-        mCurPids = collectStats("/proc", -1, mFirst, mCurPids,
-                mProcStats, mWorkingProcs);
-        mFirst = false;
+        mLastSampleRealTime = mCurrentSampleRealTime;
+        mCurrentSampleRealTime = SystemClock.elapsedRealtime();
         
         final long[] sysCpu = mSystemCpuData;
         if (Process.readProcFile("/proc/stat", SYSTEM_CPU_FORMAT,
@@ -288,7 +285,7 @@ public class ProcessStats {
             mRelSoftIrqTime = (int)(softirqtime - mBaseSoftIrqTime);
             mRelIdleTime = (int)(idletime - mBaseIdleTime);
 
-            if (false) {
+            if (DEBUG) {
                 Slog.i("Load", "Total U:" + sysCpu[0] + " N:" + sysCpu[1]
                       + " S:" + sysCpu[2] + " I:" + sysCpu[3]
                       + " W:" + sysCpu[4] + " Q:" + sysCpu[5]
@@ -305,16 +302,32 @@ public class ProcessStats {
             mBaseIdleTime = idletime;
         }
 
+        mCurPids = collectStats("/proc", -1, mFirst, mCurPids, mProcStats);
+
+        final float[] loadAverages = mLoadAverageData;
+        if (Process.readProcFile("/proc/loadavg", LOAD_AVERAGE_FORMAT,
+                null, null, loadAverages)) {
+            float load1 = loadAverages[0];
+            float load5 = loadAverages[1];
+            float load15 = loadAverages[2];
+            if (load1 != mLoad1 || load5 != mLoad5 || load15 != mLoad15) {
+                mLoad1 = load1;
+                mLoad5 = load5;
+                mLoad15 = load15;
+                onLoadChanged(load1, load5, load15);
+            }
+        }
+
+        if (DEBUG) Slog.i(TAG, "*** TIME TO COLLECT STATS: "
+                + (SystemClock.uptimeMillis()-mCurrentSampleTime));
+
         mWorkingProcsSorted = false;
         mFirst = false;
     }    
     
     private int[] collectStats(String statsFile, int parentPid, boolean first,
-            int[] curPids, ArrayList<Stats> allProcs,
-            ArrayList<Stats> workingProcs) {
+            int[] curPids, ArrayList<Stats> allProcs) {
         
-        workingProcs.clear();
-
         int[] pids = Process.getPids(statsFile, curPids);
         int NP = (pids == null) ? 0 : pids.length;
         int NS = allProcs.size();
@@ -330,8 +343,13 @@ public class ProcessStats {
             if (st != null && st.pid == pid) {
                 // Update an existing process...
                 st.added = false;
+                st.working = false;
                 curStatsIndex++;
-                if (localLOGV) Slog.v(TAG, "Existing pid " + pid + ": " + st);
+                if (DEBUG) Slog.v(TAG, "Existing "
+                        + (parentPid < 0 ? "process" : "thread")
+                        + " pid " + pid + ": " + st);
+
+                final long uptime = SystemClock.uptimeMillis();
 
                 final long[] procStats = mProcessStatsData;
                 if (!Process.readProcFile(st.statFile.toString(),
@@ -363,11 +381,18 @@ public class ProcessStats {
                     getName(st, st.cmdlineFile);
                     if (st.threadStats != null) {
                         mCurThreadPids = collectStats(st.threadsDir, pid, false,
-                                mCurThreadPids, st.threadStats,
-                                st.workingThreads);
+                                mCurThreadPids, st.threadStats);
                     }
                 }
 
+                if (DEBUG) Slog.v("Load", "Stats changed " + st.name + " pid=" + st.pid
+                        + " utime=" + utime + "-" + st.base_utime
+                        + " stime=" + stime + "-" + st.base_stime
+                        + " minfaults=" + minfaults + "-" + st.base_minfaults
+                        + " majfaults=" + majfaults + "-" + st.base_majfaults);
+
+                st.rel_uptime = uptime - st.base_uptime;
+                st.base_uptime = uptime;
                 st.rel_utime = (int)(utime - st.base_utime);
                 st.rel_stime = (int)(stime - st.base_stime);
                 st.base_utime = utime;
@@ -376,10 +401,7 @@ public class ProcessStats {
                 st.rel_majfaults = (int)(majfaults - st.base_majfaults);
                 st.base_minfaults = minfaults;
                 st.base_majfaults = majfaults;
-                //Slog.i("Load", "Stats changed " + name + " pid=" + st.pid
-                //      + " name=" + st.name + " utime=" + utime
-                //      + " stime=" + stime);
-                workingProcs.add(st);
+                st.working = true;
                 continue;
             }
             
@@ -389,18 +411,21 @@ public class ProcessStats {
                 allProcs.add(curStatsIndex, st);
                 curStatsIndex++;
                 NS++;
-                if (localLOGV) Slog.v(TAG, "New pid " + pid + ": " + st);
+                if (DEBUG) Slog.v(TAG, "New "
+                        + (parentPid < 0 ? "process" : "thread")
+                        + " pid " + pid + ": " + st);
 
                 final String[] procStatsString = mProcessFullStatsStringData;
                 final long[] procStats = mProcessFullStatsData;
+                st.base_uptime = SystemClock.uptimeMillis();
                 if (Process.readProcFile(st.statFile.toString(),
                         PROCESS_FULL_STATS_FORMAT, procStatsString,
                         procStats, null)) {
-                    st.baseName = parentPid < 0
-                            ? procStatsString[0] : Integer.toString(pid);
-                    st.base_utime = 0; //procStats[1];
-                    st.base_stime = 0; //procStats[2];
-                    st.base_minfaults = st.base_majfaults = 0;
+                    st.baseName = procStatsString[0];
+                    st.base_minfaults = procStats[PROCESS_FULL_STAT_MINOR_FAULTS];
+                    st.base_majfaults = procStats[PROCESS_FULL_STAT_MAJOR_FAULTS];
+                    st.base_utime = procStats[PROCESS_FULL_STAT_UTIME];
+                    st.base_stime = procStats[PROCESS_FULL_STAT_STIME];
                 } else {
                     st.baseName = "<unknown>";
                     st.base_utime = st.base_stime = 0;
@@ -409,24 +434,26 @@ public class ProcessStats {
 
                 if (parentPid < 0) {
                     getName(st, st.cmdlineFile);
+                    if (st.threadStats != null) {
+                        mCurThreadPids = collectStats(st.threadsDir, pid, true,
+                                mCurThreadPids, st.threadStats);
+                    }
                 } else {
                     st.name = st.baseName;
                     st.nameWidth = onMeasureProcessName(st.name);
-                    if (st.threadStats != null) {
-                        mCurThreadPids = collectStats(st.threadsDir, pid, true,
-                                mCurThreadPids, st.threadStats,
-                                st.workingThreads);
-                    }
                 }
+
+                if (DEBUG) Slog.v("Load", "Stats added " + st.name + " pid=" + st.pid
+                        + " utime=" + st.base_utime + " stime=" + st.base_stime
+                        + " minfaults=" + st.base_minfaults + " majfaults=" + st.base_majfaults);
                 
-                //Slog.i("Load", "New process: " + st.pid + " " + st.name);
                 st.rel_utime = 0;
                 st.rel_stime = 0;
                 st.rel_minfaults = 0;
                 st.rel_majfaults = 0;
                 st.added = true;
                 if (!first) {
-                    workingProcs.add(st);
+                    st.working = true;
                 }
                 continue;
             }
@@ -437,10 +464,12 @@ public class ProcessStats {
             st.rel_minfaults = 0;
             st.rel_majfaults = 0;
             st.removed = true;
-            workingProcs.add(st);
+            st.working = true;
             allProcs.remove(curStatsIndex);
             NS--;
-            if (localLOGV) Slog.v(TAG, "Removed pid " + st.pid + ": " + st);
+            if (DEBUG) Slog.v(TAG, "Removed "
+                    + (parentPid < 0 ? "process" : "thread")
+                    + " pid " + pid + ": " + st);
             // Decrement the loop counter so that we process the current pid
             // again the next time through the loop.
             i--;
@@ -455,7 +484,7 @@ public class ProcessStats {
             st.rel_minfaults = 0;
             st.rel_majfaults = 0;
             st.removed = true;
-            workingProcs.add(st);
+            st.working = true;
             allProcs.remove(curStatsIndex);
             NS--;
             if (localLOGV) Slog.v(TAG, "Removed pid " + st.pid + ": " + st);
@@ -569,11 +598,34 @@ public class ProcessStats {
                 / (mRelUserTime+mRelSystemTime+mRelIrqTime+mRelIdleTime);
     }
     
-    final public int countWorkingStats() {
+    final void buildWorkingProcs() {
         if (!mWorkingProcsSorted) {
+            mWorkingProcs.clear();
+            final int N = mProcStats.size();
+            for (int i=0; i<N; i++) {
+                Stats stats = mProcStats.get(i);
+                if (stats.working) {
+                    mWorkingProcs.add(stats);
+                    if (stats.threadStats != null && stats.threadStats.size() > 1) {
+                        stats.workingThreads.clear();
+                        final int M = stats.threadStats.size();
+                        for (int j=0; j<M; j++) {
+                            Stats tstats = stats.threadStats.get(j);
+                            if (tstats.working) {
+                                stats.workingThreads.add(tstats);
+                            }
+                        }
+                        Collections.sort(stats.workingThreads, sLoadComparator);
+                    }
+                }
+            }
             Collections.sort(mWorkingProcs, sLoadComparator);
             mWorkingProcsSorted = true;
         }
+    }
+
+    final public int countWorkingStats() {
+        buildWorkingProcs();
         return mWorkingProcs.size();
     }
 
@@ -581,12 +633,7 @@ public class ProcessStats {
         return mWorkingProcs.get(index);
     }
     
-    final public String printCurrentState() {
-        if (!mWorkingProcsSorted) {
-            Collections.sort(mWorkingProcs, sLoadComparator);
-            mWorkingProcsSorted = true;
-        }
-        
+    final public String printCurrentLoad() {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         pw.print("Load: ");
@@ -595,67 +642,111 @@ public class ProcessStats {
         pw.print(mLoad5);
         pw.print(" / ");
         pw.println(mLoad15);
+        return sw.toString();
+    }
+
+    final public String printCurrentState(long now) {
+        buildWorkingProcs();
         
-        long now = SystemClock.uptimeMillis();
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
         
         pw.print("CPU usage from ");
-        pw.print(now-mLastSampleTime);
-        pw.print("ms to ");
-        pw.print(now-mCurrentSampleTime);
-        pw.println("ms ago:");
+        if (now > mLastSampleTime) {
+            pw.print(now-mLastSampleTime);
+            pw.print("ms to ");
+            pw.print(now-mCurrentSampleTime);
+            pw.print("ms ago");
+        } else {
+            pw.print(mLastSampleTime-now);
+            pw.print("ms to ");
+            pw.print(mCurrentSampleTime-now);
+            pw.print("ms later");
+        }
+
+        long sampleTime = mCurrentSampleTime - mLastSampleTime;
+        long sampleRealTime = mCurrentSampleRealTime - mLastSampleRealTime;
+        long percAwake = (sampleTime*100) / sampleRealTime;
+        if (percAwake != 100) {
+            pw.print(" with ");
+            pw.print(percAwake);
+            pw.print("% awake");
+        }
+        pw.println(":");
         
         final int totalTime = mRelUserTime + mRelSystemTime + mRelIoWaitTime
                 + mRelIrqTime + mRelSoftIrqTime + mRelIdleTime;
         
+        if (DEBUG) Slog.i(TAG, "totalTime " + totalTime + " over sample time "
+                + (mCurrentSampleTime-mLastSampleTime));
+
         int N = mWorkingProcs.size();
         for (int i=0; i<N; i++) {
             Stats st = mWorkingProcs.get(i);
             printProcessCPU(pw, st.added ? " +" : (st.removed ? " -": "  "),
-                    st.name, totalTime, st.rel_utime, st.rel_stime, 0, 0, 0,
-                    st.rel_minfaults, st.rel_majfaults);
+                    st.pid, st.name, (int)(st.rel_uptime+5)/10,
+                    st.rel_utime, st.rel_stime, 0, 0, 0, st.rel_minfaults, st.rel_majfaults);
             if (!st.removed && st.workingThreads != null) {
                 int M = st.workingThreads.size();
                 for (int j=0; j<M; j++) {
                     Stats tst = st.workingThreads.get(j);
                     printProcessCPU(pw,
                             tst.added ? "   +" : (tst.removed ? "   -": "    "),
-                            tst.name, totalTime, tst.rel_utime, tst.rel_stime,
-                            0, 0, 0, 0, 0);
+                            tst.pid, tst.name, (int)(st.rel_uptime+5)/10,
+                            tst.rel_utime, tst.rel_stime, 0, 0, 0, 0, 0);
                 }
             }
         }
         
-        printProcessCPU(pw, "", "TOTAL", totalTime, mRelUserTime, mRelSystemTime,
+        printProcessCPU(pw, "", -1, "TOTAL", totalTime, mRelUserTime, mRelSystemTime,
                 mRelIoWaitTime, mRelIrqTime, mRelSoftIrqTime, 0, 0);
         
         return sw.toString();
     }
     
-    private void printProcessCPU(PrintWriter pw, String prefix, String label, int totalTime, 
-            int user, int system, int iowait, int irq, int softIrq, int minFaults, int majFaults) {
+    private void printRatio(PrintWriter pw, long numerator, long denominator) {
+        long thousands = (numerator*1000)/denominator;
+        long hundreds = thousands/10;
+        pw.print(hundreds);
+        if (hundreds < 10) {
+            long remainder = thousands - (hundreds*10);
+            if (remainder != 0) {
+                pw.print('.');
+                pw.print(remainder);
+            }
+        }
+    }
+
+    private void printProcessCPU(PrintWriter pw, String prefix, int pid, String label,
+            int totalTime, int user, int system, int iowait, int irq, int softIrq,
+            int minFaults, int majFaults) {
         pw.print(prefix);
+        if (totalTime == 0) totalTime = 1;
+        printRatio(pw, user+system+iowait+irq+softIrq, totalTime);
+        pw.print("% ");
+        if (pid >= 0) {
+            pw.print(pid);
+            pw.print("/");
+        }
         pw.print(label);
         pw.print(": ");
-        if (totalTime == 0) totalTime = 1;
-        pw.print(((user+system+iowait+irq+softIrq)*100)/totalTime);
-        pw.print("% = ");
-        pw.print((user*100)/totalTime);
+        printRatio(pw, user, totalTime);
         pw.print("% user + ");
-        pw.print((system*100)/totalTime);
+        printRatio(pw, system, totalTime);
         pw.print("% kernel");
         if (iowait > 0) {
             pw.print(" + ");
-            pw.print((iowait*100)/totalTime);
+            printRatio(pw, iowait, totalTime);
             pw.print("% iowait");
         }
         if (irq > 0) {
             pw.print(" + ");
-            pw.print((irq*100)/totalTime);
+            printRatio(pw, irq, totalTime);
             pw.print("% irq");
         }
         if (softIrq > 0) {
             pw.print(" + ");
-            pw.print((softIrq*100)/totalTime);
+            printRatio(pw, softIrq, totalTime);
             pw.print("% softirq");
         }
         if (minFaults > 0 || majFaults > 0) {
@@ -696,8 +787,8 @@ public class ProcessStats {
     }
 
     private void getName(Stats st, String cmdlineFile) {
-        String newName = st.baseName;
-        if (st.baseName == null || st.baseName.equals("app_process")) {
+        String newName = st.name;
+        if (st.name == null || st.name.equals("app_process")) {
             String cmdName = readFile(cmdlineFile, '\0');
             if (cmdName != null && cmdName.length() > 1) {
                 newName = cmdName;
@@ -705,6 +796,9 @@ public class ProcessStats {
                 if (i > 0 && i < newName.length()-1) {
                     newName = newName.substring(i+1);
                 }
+            }
+            if (newName == null) {
+                newName = st.baseName;
             }
         }
         if (st.name == null || !newName.equals(st.name)) {

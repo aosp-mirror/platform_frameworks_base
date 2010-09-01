@@ -41,13 +41,17 @@ public class ProxyProperties implements Parcelable {
         if (source != null) {
             mProxy = source.getAddress();
             mPort = source.getPort();
-            mExclusionList = new String(source.getExclusionList());
+            String exclusionList = source.getExclusionList();
+            if (exclusionList != null) {
+                mExclusionList = new String(exclusionList);
+            }
         }
     }
 
     public InetAddress getAddress() {
         return mProxy;
     }
+
     public void setAddress(InetAddress proxy) {
         mProxy = proxy;
     }
@@ -55,6 +59,7 @@ public class ProxyProperties implements Parcelable {
     public int getPort() {
         return mPort;
     }
+
     public void setPort(int port) {
         mPort = port;
     }
@@ -62,6 +67,7 @@ public class ProxyProperties implements Parcelable {
     public String getExclusionList() {
         return mExclusionList;
     }
+
     public void setExclusionList(String exclusionList) {
         mExclusionList = exclusionList;
     }
@@ -121,5 +127,4 @@ public class ProxyProperties implements Parcelable {
                 return new ProxyProperties[size];
             }
         };
-
-};
+}

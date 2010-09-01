@@ -72,6 +72,9 @@ public class MediaRecorder
 
     private String mPath;
     private FileDescriptor mFd;
+    private boolean mPrepareAuxiliaryFile = false;
+    private String mPathAux;
+    private FileDescriptor mFdAux;
     private EventHandler mEventHandler;
     private OnErrorListener mOnErrorListener;
     private OnInfoListener mOnInfoListener;
@@ -480,6 +483,38 @@ public class MediaRecorder
     }
 
     /**
+     * Pass in the file descriptor of the auxiliary file to be written. Call this after
+     * setOutputFormat() but before prepare().
+     *
+     * @param fd an open file descriptor to be written into.
+     * @throws IllegalStateException if it is called before
+     * setOutputFormat() or after prepare()
+     * @hide
+     */
+    public void setAuxiliaryOutputFile(FileDescriptor fd) throws IllegalStateException
+    {
+        mPrepareAuxiliaryFile = true;
+        mPathAux = null;
+        mFdAux = fd;
+    }
+
+    /**
+     * Sets the path of the auxiliary output file to be produced. Call this after
+     * setOutputFormat() but before prepare().
+     *
+     * @param path The pathname to use.
+     * @throws IllegalStateException if it is called before
+     * setOutputFormat() or after prepare()
+     * @hide
+     */
+    public void setAuxiliaryOutputFile(String path) throws IllegalStateException
+    {
+        mPrepareAuxiliaryFile = true;
+        mFdAux = null;
+        mPathAux = path;
+    }
+
+    /**
      * Pass in the file descriptor of the file to be written. Call this after
      * setOutputFormat() but before prepare().
      *
@@ -510,6 +545,8 @@ public class MediaRecorder
     // native implementation
     private native void _setOutputFile(FileDescriptor fd, long offset, long length)
         throws IllegalStateException, IOException;
+    private native void _setOutputFileAux(FileDescriptor fd)
+        throws IllegalStateException, IOException;
     private native void _prepare() throws IllegalStateException, IOException;
 
     /**
@@ -535,6 +572,22 @@ public class MediaRecorder
         } else {
             throw new IOException("No valid output file");
         }
+
+        if (mPrepareAuxiliaryFile) {
+            if (mPathAux != null) {
+                FileOutputStream fos = new FileOutputStream(mPathAux);
+                try {
+                    _setOutputFileAux(fos.getFD());
+                } finally {
+                    fos.close();
+                }
+            } else if (mFdAux != null) {
+                _setOutputFileAux(mFdAux);
+            } else {
+                throw new IOException("No valid output file");
+            }
+        }
+
         _prepare();
     }
 

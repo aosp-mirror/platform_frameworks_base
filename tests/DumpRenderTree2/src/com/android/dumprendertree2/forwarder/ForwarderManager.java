@@ -16,6 +16,10 @@
 
 package com.android.dumprendertree2.forwarder;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import android.util.Log;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,6 +29,8 @@ import java.util.Set;
  * It uses a singleton pattern and is thread safe.
  */
 public class ForwarderManager {
+    private static final String LOG_TAG = "ForwarderManager";
+
     /**
      * The IP address of the server serving the tests.
      */
@@ -37,14 +43,44 @@ public class ForwarderManager {
     public static final int HTTP_PORT = 8080;
     public static final int HTTPS_PORT = 8443;
 
+    public static final String HOST = "localhost";
+
     private static ForwarderManager forwarderManager;
 
-    private Set<Forwarder> mServers;
+    private Set<Forwarder> mForwarders;
+    private boolean mIsStarted;
 
     private ForwarderManager() {
-        mServers = new HashSet<Forwarder>(2);
-        mServers.add(new Forwarder(HTTP_PORT, HOST_IP));
-        mServers.add(new Forwarder(HTTPS_PORT, HOST_IP));
+        mForwarders = new HashSet<Forwarder>(2);
+        mForwarders.add(new Forwarder(HTTP_PORT, HOST_IP));
+        mForwarders.add(new Forwarder(HTTPS_PORT, HOST_IP));
+    }
+
+    /**
+     * Returns the main part of the URL with the trailing slash
+     *
+     * @param isHttps
+     * @return
+     */
+    public static final String getHostSchemePort(boolean isHttps) {
+        int port;
+        String protocol;
+        if (isHttps) {
+            protocol = "https";
+            port = HTTPS_PORT;
+        } else {
+            protocol = "http";
+            port = HTTP_PORT;
+        }
+
+        URL url = null;
+        try {
+            url = new URL(protocol, HOST, port, "/");
+        } catch (MalformedURLException e) {
+            assert false : "isHttps=" + isHttps;
+        }
+
+        return url.toString();
     }
 
     public static synchronized ForwarderManager getForwarderManager() {
@@ -60,14 +96,30 @@ public class ForwarderManager {
     }
 
     public synchronized void start() {
-        for (Forwarder server : mServers) {
-            server.start();
+        if (mIsStarted) {
+            Log.w(LOG_TAG, "start(): ForwarderManager already running! NOOP.");
+            return;
         }
+
+        for (Forwarder forwarder : mForwarders) {
+            forwarder.start();
+        }
+
+        mIsStarted = true;
+        Log.i(LOG_TAG, "ForwarderManager started.");
     }
 
     public synchronized void stop() {
-        for (Forwarder server : mServers) {
-            server.finish();
+        if (!mIsStarted) {
+            Log.w(LOG_TAG, "stop(): ForwarderManager already stopped! NOOP.");
+            return;
         }
+
+        for (Forwarder forwarder : mForwarders) {
+            forwarder.finish();
+        }
+
+        mIsStarted = false;
+        Log.i(LOG_TAG, "ForwarderManager stopped.");
     }
 }

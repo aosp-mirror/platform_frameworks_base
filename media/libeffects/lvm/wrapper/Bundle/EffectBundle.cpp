@@ -258,16 +258,24 @@ extern "C" int EffectCreate(effect_uuid_t       *uuid,
         pContext->pBundledContext->firstVolume              = LVM_TRUE;
 
         #ifdef LVM_PCM
-        pContext->pBundledContext->PcmInPtr  = NULL;
-        pContext->pBundledContext->PcmOutPtr = NULL;
 
-        pContext->pBundledContext->PcmInPtr  = fopen("/data/tmp/bundle_pcm_in.pcm", "w");
-        pContext->pBundledContext->PcmOutPtr = fopen("/data/tmp/bundle_pcm_out.pcm", "w");
-
-        if((pContext->pBundledContext->PcmInPtr  == NULL)||
-           (pContext->pBundledContext->PcmOutPtr == NULL)){
+        char fileName[256];
+        snprintf(fileName, 256, "/data/tmp/bundle_%p_pcm_in.pcm", pContext->pBundledContext);
+        pContext->pBundledContext->PcmInPtr = fopen(fileName, "w");
+        if (pContext->pBundledContext->PcmInPtr == NULL) {
+            LOGV("cannot open %s", fileName);
            return -EINVAL;
         }
+
+        snprintf(fileName, 256, "/data/tmp/bundle_%p_pcm_out.pcm", pContext->pBundledContext);
+        pContext->pBundledContext->PcmOutPtr = fopen(fileName, "w");
+        if (pContext->pBundledContext->PcmOutPtr == NULL) {
+            LOGV("cannot open %s", fileName);
+            fclose(pContext->pBundledContext->PcmInPtr);
+           pContext->pBundledContext->PcmInPtr = NULL;
+           return -EINVAL;
+        }
+
         #endif
 
         /* Saved strength is used to return the exact strength that was used in the set to the get
@@ -375,8 +383,14 @@ extern "C" int EffectRelease(effect_interface_t interface){
     (GlobalSessionMemory[pContext->pBundledContext->SessionNo].bVirtualizerInstantiated==LVM_FALSE))
     {
         #ifdef LVM_PCM
-        fclose(pContext->pBundledContext->PcmInPtr);
-        fclose(pContext->pBundledContext->PcmOutPtr);
+        if (pContext->pBundledContext->PcmInPtr != NULL) {
+            fclose(pContext->pBundledContext->PcmInPtr);
+            pContext->pBundledContext->PcmInPtr = NULL;
+        }
+        if (pContext->pBundledContext->PcmOutPtr != NULL) {
+            fclose(pContext->pBundledContext->PcmOutPtr);
+            pContext->pBundledContext->PcmOutPtr = NULL;
+        }
         #endif
 
         LvmSessionsActive--;

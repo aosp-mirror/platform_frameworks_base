@@ -59,12 +59,10 @@ public class ConnectionHandler {
             int length;
             while (true) {
                 try {
-                    synchronized (this) {
-                        if ((length = is.read(buffer)) <= 0) {
-                            break;
-                        }
-                        os.write(buffer, 0, length);
+                    if ((length = is.read(buffer)) <= 0) {
+                        break;
                     }
+                    os.write(buffer, 0, length);
                 } catch (IOException e) {
                     /** This exception means one of the streams is closed */
                     Log.v(LOG_TAG, this.toString(), e);
@@ -100,17 +98,25 @@ public class ConnectionHandler {
     }
 
     private void shutdown(Socket socket) {
-        try {
-            synchronized (mFromToPipe) {
-                synchronized (mToFromPipe) {
-                    /** This will stop the while loop in the run method */
+        synchronized (mFromToPipe) {
+            synchronized (mToFromPipe) {
+                /** This will stop the while loop in the run method */
+                try {
                     socket.shutdownInput();
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "mFromToPipe=" + mFromToPipe + " mToFromPipe=" + mToFromPipe, e);
+                }
+                try {
                     socket.shutdownOutput();
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "mFromToPipe=" + mFromToPipe + " mToFromPipe=" + mToFromPipe, e);
+                }
+                try {
                     socket.close();
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "mFromToPipe=" + mFromToPipe + " mToFromPipe=" + mToFromPipe, e);
                 }
             }
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "mFromToPipe=" + mFromToPipe + " mToFromPipe=" + mToFromPipe, e);
         }
     }
 }

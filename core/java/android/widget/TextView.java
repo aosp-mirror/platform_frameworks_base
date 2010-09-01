@@ -715,10 +715,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         BufferType bufferType = BufferType.EDITABLE;
 
-        if ((inputType&(EditorInfo.TYPE_MASK_CLASS
-                |EditorInfo.TYPE_MASK_VARIATION))
-                == (EditorInfo.TYPE_CLASS_TEXT
-                        |EditorInfo.TYPE_TEXT_VARIATION_PASSWORD)) {
+        if ((inputType & (EditorInfo.TYPE_MASK_CLASS | EditorInfo.TYPE_MASK_VARIATION))
+                == (EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD)) {
             password = true;
         }
 
@@ -806,6 +804,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         } else if (editable) {
             mInput = TextKeyListener.getInstance();
             mInputType = EditorInfo.TYPE_CLASS_TEXT;
+            if (!singleLine) {
+                mInputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
+            }
         } else {
             mInput = null;
 
@@ -2991,8 +2992,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final int cls = type & EditorInfo.TYPE_MASK_CLASS;
         KeyListener input;
         if (cls == EditorInfo.TYPE_CLASS_TEXT) {
-            boolean autotext = (type & EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT)
-                    != 0;
+            boolean autotext = (type & EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT) != 0;
             TextKeyListener.Capitalize cap;
             if ((type & EditorInfo.TYPE_TEXT_FLAG_CAP_CHARACTERS) != 0) {
                 cap = TextKeyListener.Capitalize.CHARACTERS;

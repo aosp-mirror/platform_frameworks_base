@@ -93,6 +93,10 @@ public:
                                             MtpObjectFormat format) = 0;
 
     virtual MtpProperty*            getDevicePropertyDesc(MtpDeviceProperty property) = 0;
+
+    virtual void                    sessionStarted() = 0;
+
+    virtual void                    sessionEnded() = 0;
 };
 
 }; // namespace android

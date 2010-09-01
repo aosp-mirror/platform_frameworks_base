@@ -127,6 +127,12 @@ public class MockPackageManager extends PackageManager {
     }
 
     @Override
+    public ProviderInfo getProviderInfo(ComponentName className, int flags)
+    throws NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<PackageInfo> getInstalledPackages(int flags) {
         throw new UnsupportedOperationException();
     }

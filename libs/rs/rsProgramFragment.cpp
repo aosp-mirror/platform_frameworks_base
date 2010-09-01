@@ -71,7 +71,7 @@ ProgramFragment::ProgramFragment(Context *rsc, const uint32_t * params,
         mConstantColorUniformIndex = mUniformCount;
         mUniformNames[mUniformCount++].setTo("uni_Color");
     //}
-    createShader();
+    init(rsc);
 }
 
 ProgramFragment::ProgramFragment(Context *rsc, const char * shaderText,
@@ -93,9 +93,9 @@ ProgramFragment::ProgramFragment(Context *rsc, const char * shaderText,
     mUniformNames[0].setTo("uni_Tex0");
     mUniformNames[1].setTo("uni_Tex1");
 
-    createShader();
-
     mTextureEnableMask = (1 << mTextureCount) -1;
+
+    init(rsc);
 }
 
 
@@ -133,6 +133,9 @@ void ProgramFragment::setupGL2(const Context *rsc, ProgramFragmentState *state, 
         glUniform4fv(sc->fragUniformSlot(mConstantColorUniformIndex), 1, mConstantColor);
         rsc->checkError("ProgramFragment::color setup");
     }
+
+    rsc->checkError("ProgramFragment::setupGL2 begin uniforms");
+    setupUserConstants(sc, true);
 
     for (uint32_t ct=0; ct < MAX_TEXTURE; ct++) {
         glActiveTexture(GL_TEXTURE0 + ct);
@@ -179,7 +182,7 @@ void ProgramFragment::createShader()
             sprintf(buf, "uniform sampler2D uni_Tex%i;\n", ct);
             mShader.append(buf);
         }
-
+        appendUserConstants();
         mShader.append(mUserShader);
     } else {
         uint32_t mask = mTextureEnableMask;
@@ -272,6 +275,13 @@ void ProgramFragment::createShader()
 
 void ProgramFragment::init(Context *rsc)
 {
+    if (mUserShader.size() > 0) {
+        for (uint32_t ct=0; ct < mConstantCount; ct++) {
+            initAddUserElement(mConstantTypes[ct]->getElement(), mUniformNames, &mUniformCount, "UNI_");
+        }
+    }
+
+    createShader();
 }
 
 void ProgramFragment::serialize(OStream *stream) const
@@ -304,7 +314,6 @@ void ProgramFragmentState::init(Context *rsc)
     };
     ProgramFragment *pf = new ProgramFragment(rsc, tmp, 6);
     mDefault.set(pf);
-    pf->init(rsc);
 }
 
 void ProgramFragmentState::deinit(Context *rsc)

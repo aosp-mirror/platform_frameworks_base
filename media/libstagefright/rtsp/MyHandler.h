@@ -82,7 +82,8 @@ struct MyHandler : public AHandler {
           mFirstAccessUnitNTP(0),
           mNumAccessUnitsReceived(0),
           mCheckPending(false),
-          mTryTCPInterleaving(false) {
+          mTryTCPInterleaving(false),
+          mReceivedFirstRTCPPacket(false) {
         mNetLooper->setName("rtsp net");
         mNetLooper->start(false /* runOnCallingThread */,
                           false /* canCallJava */,
@@ -199,31 +200,35 @@ struct MyHandler : public AHandler {
                         break;
                     }
 
-                    CHECK_EQ(response->mStatusCode, 200u);
-
-                    mSessionDesc = new ASessionDescription;
-
-                    mSessionDesc->setTo(
-                            response->mContent->data(),
-                            response->mContent->size());
-
-                    CHECK(mSessionDesc->isValid());
-
-                    ssize_t i = response->mHeaders.indexOfKey("content-base");
-                    if (i >= 0) {
-                        mBaseURL = response->mHeaders.valueAt(i);
+                    if (response->mStatusCode != 200) {
+                        result = UNKNOWN_ERROR;
                     } else {
-                        i = response->mHeaders.indexOfKey("content-location");
+                        mSessionDesc = new ASessionDescription;
+
+                        mSessionDesc->setTo(
+                                response->mContent->data(),
+                                response->mContent->size());
+
+                        CHECK(mSessionDesc->isValid());
+
+                        ssize_t i = response->mHeaders.indexOfKey("content-base");
                         if (i >= 0) {
                             mBaseURL = response->mHeaders.valueAt(i);
                         } else {
-                            mBaseURL = mSessionURL;
+                            i = response->mHeaders.indexOfKey("content-location");
+                            if (i >= 0) {
+                                mBaseURL = response->mHeaders.valueAt(i);
+                            } else {
+                                mBaseURL = mSessionURL;
+                            }
                         }
-                    }
 
-                    CHECK_GT(mSessionDesc->countTracks(), 1u);
-                    setupTrack(1);
-                } else {
+                        CHECK_GT(mSessionDesc->countTracks(), 1u);
+                        setupTrack(1);
+                    }
+                }
+
+                if (result != OK) {
                     sp<AMessage> reply = new AMessage('disc', id());
                     mConn->disconnect(reply);
                 }
@@ -247,6 +252,39 @@ struct MyHandler : public AHandler {
                 LOG(INFO) << "SETUP(" << index << ") completed with result "
                      << result << " (" << strerror(-result) << ")";
 
+                if (result == OK) {
+                    CHECK(track != NULL);
+
+                    sp<RefBase> obj;
+                    CHECK(msg->findObject("response", &obj));
+                    sp<ARTSPResponse> response =
+                        static_cast<ARTSPResponse *>(obj.get());
+
+                    if (response->mStatusCode != 200) {
+                        result = UNKNOWN_ERROR;
+                    } else {
+                        ssize_t i = response->mHeaders.indexOfKey("session");
+                        CHECK_GE(i, 0);
+
+                        mSessionID = response->mHeaders.valueAt(i);
+                        i = mSessionID.find(";");
+                        if (i >= 0) {
+                            // Remove options, i.e. ";timeout=90"
+                            mSessionID.erase(i, mSessionID.size() - i);
+                        }
+
+                        sp<AMessage> notify = new AMessage('accu', id());
+                        notify->setSize("track-index", trackIndex);
+
+                        mRTPConn->addStream(
+                                track->mRTPSocket, track->mRTCPSocket,
+                                mSessionDesc, index,
+                                notify, track->mUsingInterleavedTCP);
+
+                        mSetupTracksSuccessful = true;
+                    }
+                }
+
                 if (result != OK) {
                     if (track) {
                         if (!track->mUsingInterleavedTCP) {
@@ -256,37 +294,6 @@ struct MyHandler : public AHandler {
 
                         mTracks.removeItemsAt(trackIndex);
                     }
-                } else {
-                    CHECK(track != NULL);
-
-                    sp<RefBase> obj;
-                    CHECK(msg->findObject("response", &obj));
-                    sp<ARTSPResponse> response =
-                        static_cast<ARTSPResponse *>(obj.get());
-
-                    CHECK_EQ(response->mStatusCode, 200u);
-
-                    ssize_t i = response->mHeaders.indexOfKey("session");
-                    CHECK_GE(i, 0);
-
-                    if (index == 1) {
-                        mSessionID = response->mHeaders.valueAt(i);
-                        i = mSessionID.find(";");
-                        if (i >= 0) {
-                            // Remove options, i.e. ";timeout=90"
-                            mSessionID.erase(i, mSessionID.size() - i);
-                        }
-                    }
-
-                    sp<AMessage> notify = new AMessage('accu', id());
-                    notify->setSize("track-index", trackIndex);
-
-                    mRTPConn->addStream(
-                            track->mRTPSocket, track->mRTCPSocket,
-                            mSessionDesc, index,
-                            notify, track->mUsingInterleavedTCP);
-
-                    mSetupTracksSuccessful = true;
                 }
 
                 ++index;
@@ -355,6 +362,12 @@ struct MyHandler : public AHandler {
                     }
                 }
                 mTracks.clear();
+                mSetupTracksSuccessful = false;
+                mSeekPending = false;
+                mFirstAccessUnit = true;
+                mFirstAccessUnitNTP = 0;
+                mNumAccessUnitsReceived = 0;
+                mReceivedFirstRTCPPacket = false;
 
                 sp<AMessage> reply = new AMessage('tear', id());
 
@@ -424,6 +437,12 @@ struct MyHandler : public AHandler {
 
             case 'accu':
             {
+                int32_t firstRTCP;
+                if (msg->findInt32("first-rtcp", &firstRTCP)) {
+                    mReceivedFirstRTCPPacket = true;
+                    break;
+                }
+
                 ++mNumAccessUnitsReceived;
 
                 if (!mCheckPending) {
@@ -612,7 +631,7 @@ struct MyHandler : public AHandler {
 
             case 'tiou':
             {
-                if (mFirstAccessUnit) {
+                if (!mReceivedFirstRTCPPacket) {
                     if (mTryTCPInterleaving) {
                         LOG(WARNING) << "Never received any data, disconnecting.";
                         (new AMessage('abor', id()))->post();
@@ -747,6 +766,7 @@ private:
     int64_t mNumAccessUnitsReceived;
     bool mCheckPending;
     bool mTryTCPInterleaving;
+    bool mReceivedFirstRTCPPacket;
 
     struct TrackInfo {
         AString mURL;
