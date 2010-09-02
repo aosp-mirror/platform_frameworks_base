@@ -2885,7 +2885,8 @@ public class ActivityStack {
                     + " res=" + resultCode + " data=" + resultData);
             if (r.info.applicationInfo.uid > 0) {
                 mService.grantUriPermissionFromIntentLocked(r.info.applicationInfo.uid,
-                        r.packageName, resultData, r.getUriPermissionsLocked());
+                        resultTo.packageName, resultData, 
+                        resultTo.getUriPermissionsLocked());
             }
             resultTo.addResultLocked(r, r.resultWho, r.requestCode, resultCode,
                                      resultData);
