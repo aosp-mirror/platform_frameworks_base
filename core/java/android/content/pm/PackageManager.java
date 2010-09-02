@@ -713,6 +713,21 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes an accelerometer.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_ACCELEROMETER = "android.hardware.sensor.accelerometer";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes a barometer (air
+     * pressure sensor.)
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_BAROMETER = "android.hardware.sensor.barometer";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device includes a magnetometer (compass).
      */
     @SdkConstant(SdkConstantType.FEATURE)
@@ -720,10 +735,10 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: The device includes an accelerometer.
+     * {@link #hasSystemFeature}: The device includes a gyroscope.
      */
     @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_SENSOR_ACCELEROMETER = "android.hardware.sensor.accelerometer";
+    public static final String FEATURE_SENSOR_GYROSCOPE = "android.hardware.sensor.gyroscope";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
