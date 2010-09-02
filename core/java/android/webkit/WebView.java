@@ -1041,7 +1041,7 @@ public class WebView extends AbsoluteLayout
         if (mode != OVERSCROLL_NEVER) {
             if (mEdgeGlowTop == null) {
                 final Resources res = getContext().getResources();
-                final Drawable edge = res.getDrawable(R.drawable.edge_light);
+                final Drawable edge = res.getDrawable(R.drawable.overscroll_edge);
                 final Drawable glow = res.getDrawable(R.drawable.overscroll_glow);
                 mEdgeGlowTop = new EdgeGlow(edge, glow);
                 mEdgeGlowBottom = new EdgeGlow(edge, glow);
@@ -2567,11 +2567,6 @@ public class WebView extends AbsoluteLayout
             mInOverScrollMode = true;
         }
 
-        if ((clampedX && maxX > 0) || clampedY) {
-            // Hitting a scroll barrier breaks velocity; don't fling further.
-            mVelocityTracker.clear();
-            mLastVelocity = 0;
-        }
         super.scrollTo(scrollX, scrollY);
     }
 
@@ -3469,8 +3464,8 @@ public class WebView extends AbsoluteLayout
     }
 
     @Override
-    protected void dispatchDraw(Canvas canvas) {
-        super.dispatchDraw(canvas);
+    public void draw(Canvas canvas) {
+        super.draw(canvas);
         if (mEdgeGlowTop != null && drawEdgeGlows(canvas)) {
             invalidate();
         }
@@ -3492,7 +3487,7 @@ public class WebView extends AbsoluteLayout
         if (!mEdgeGlowTop.isFinished()) {
             final int restoreCount = canvas.save();
 
-            canvas.translate(-width / 2 + scrollX, scrollY);
+            canvas.translate(-width / 2 + scrollX, Math.min(0, scrollY));
             mEdgeGlowTop.setSize(width * 2, height);
             invalidateForGlow |= mEdgeGlowTop.draw(canvas);
             canvas.restoreToCount(restoreCount);
@@ -3500,7 +3495,7 @@ public class WebView extends AbsoluteLayout
         if (!mEdgeGlowBottom.isFinished()) {
             final int restoreCount = canvas.save();
 
-            canvas.translate(-width / 2 - scrollX, scrollY + height);
+            canvas.translate(-width / 2 + scrollX, Math.max(computeMaxScrollY(), scrollY) + height);
             canvas.rotate(180, width, 0);
             mEdgeGlowBottom.setSize(width * 2, height);
             invalidateForGlow |= mEdgeGlowBottom.draw(canvas);
@@ -3510,7 +3505,7 @@ public class WebView extends AbsoluteLayout
             final int restoreCount = canvas.save();
 
             canvas.rotate(270);
-            canvas.translate(-height * 1.5f - scrollY, scrollX);
+            canvas.translate(-height * 1.5f - scrollY, Math.min(0, scrollX));
             mEdgeGlowLeft.setSize(height * 2, width);
             invalidateForGlow |= mEdgeGlowLeft.draw(canvas);
             canvas.restoreToCount(restoreCount);
@@ -3519,7 +3514,8 @@ public class WebView extends AbsoluteLayout
             final int restoreCount = canvas.save();
 
             canvas.rotate(90);
-            canvas.translate(-height / 2 + scrollY, -scrollX - width);
+            canvas.translate(-height / 2 + scrollY,
+                    -(Math.max(computeMaxScrollX(), scrollX) + width));
             mEdgeGlowRight.setSize(height * 2, width);
             invalidateForGlow |= mEdgeGlowRight.draw(canvas);
             canvas.restoreToCount(restoreCount);
@@ -5977,6 +5973,24 @@ public class WebView extends AbsoluteLayout
                     + " maxX=" + maxX + " maxY=" + maxY
                     + " mScrollX=" + mScrollX + " mScrollY=" + mScrollY);
         }
+
+        // Allow sloppy flings without overscrolling at the edges.
+        if ((mScrollX == 0 || mScrollX == maxX) && Math.abs(vx) < Math.abs(vy)) {
+            vx = 0;
+        }
+        if ((mScrollY == 0 || mScrollY == maxY) && Math.abs(vy) < Math.abs(vx)) {
+            vy = 0;
+        }
+
+        if (mOverscrollDistance < mOverflingDistance) {
+            if (mScrollX == -mOverscrollDistance || mScrollX == maxX + mOverscrollDistance) {
+                vx = 0;
+            }
+            if (mScrollY == -mOverscrollDistance || mScrollY == maxY + mOverscrollDistance) {
+                vy = 0;
+            }
+        }
+
         mLastVelX = vx;
         mLastVelY = vy;
         mLastVelocity = (float) Math.hypot(vx, vy);
