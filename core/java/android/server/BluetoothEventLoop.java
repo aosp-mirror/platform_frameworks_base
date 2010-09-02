@@ -760,6 +760,16 @@ class BluetoothEventLoop {
         }
     }
 
+    private void onNetworkDeviceDisconnected(String address) {
+        BluetoothDevice device = mAdapter.getRemoteDevice(address);
+        mBluetoothService.handlePanDeviceStateChange(device, BluetoothPan.STATE_DISCONNECTED);
+    }
+
+    private void onNetworkDeviceConnected(String address, int destUuid) {
+        BluetoothDevice device = mAdapter.getRemoteDevice(address);
+        mBluetoothService.handlePanDeviceStateChange(device, BluetoothPan.STATE_CONNECTED);
+    }
+
     private void onRestartRequired() {
         if (mBluetoothService.isEnabled()) {
             Log.e(TAG, "*** A serious error occured (did bluetoothd crash?) - " +

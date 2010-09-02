@@ -50,6 +50,8 @@ static jmethodID method_onDeviceDisappeared;
 static jmethodID method_onDeviceCreated;
 static jmethodID method_onDeviceRemoved;
 static jmethodID method_onDeviceDisconnectRequested;
+static jmethodID method_onNetworkDeviceDisconnected;
+static jmethodID method_onNetworkDeviceConnected;
 
 static jmethodID method_onCreatePairedDeviceResult;
 static jmethodID method_onCreateDeviceResult;
@@ -100,6 +102,10 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
     method_onDeviceRemoved = env->GetMethodID(clazz, "onDeviceRemoved", "(Ljava/lang/String;)V");
     method_onDeviceDisconnectRequested = env->GetMethodID(clazz, "onDeviceDisconnectRequested",
                                                         "(Ljava/lang/String;)V");
+    method_onNetworkDeviceConnected = env->GetMethodID(clazz, "onNetworkDeviceConnected",
+                                                              "(Ljava/lang/String;I)V");
+    method_onNetworkDeviceDisconnected = env->GetMethodID(clazz, "onNetworkDeviceDisconnected",
+                                                              "(Ljava/lang/String;)V");
 
     method_onCreatePairedDeviceResult = env->GetMethodID(clazz, "onCreatePairedDeviceResult",
                                                          "(Ljava/lang/String;I)V");
@@ -247,6 +253,13 @@ static jboolean setUpEventLoop(native_data_t *nat) {
         }
         dbus_bus_add_match(nat->conn,
                 "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".Network'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+            return JNI_FALSE;
+        }
+        dbus_bus_add_match(nat->conn,
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".NetworkServer'",
                 &err);
         if (dbus_error_is_set(&err)) {
             LOG_AND_FREE_DBUS_ERROR(&err);
@@ -409,13 +422,31 @@ static void tearDownEventLoop(native_data_t *nat) {
         dbus_connection_unregister_object_path(nat->conn, agent_path);
 
         dbus_bus_remove_match(nat->conn,
-                "type='signal',interface='org.bluez.AudioSink'",
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".AudioSink'",
                 &err);
         if (dbus_error_is_set(&err)) {
             LOG_AND_FREE_DBUS_ERROR(&err);
         }
         dbus_bus_remove_match(nat->conn,
-                "type='signal',interface='org.bluez.audio.Device'",
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".Device'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+        }
+        dbus_bus_remove_match(nat->conn,
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".Input'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+        }
+        dbus_bus_remove_match(nat->conn,
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".Network'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+        }
+        dbus_bus_remove_match(nat->conn,
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".NetworkServer'",
                 &err);
         if (dbus_error_is_set(&err)) {
             LOG_AND_FREE_DBUS_ERROR(&err);
@@ -912,7 +943,39 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
            LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
        }
        goto success;
-   }
+    } else if (dbus_message_is_signal(msg,
+                                     "org.bluez.NetworkServer",
+                                     "DeviceDisconnected")) {
+       char *c_address;
+       if (dbus_message_get_args(msg, &err,
+                                  DBUS_TYPE_STRING, &c_address,
+                                  DBUS_TYPE_INVALID)) {
+           env->CallVoidMethod(nat->me,
+                               method_onNetworkDeviceDisconnected,
+                               env->NewStringUTF(c_address));
+       } else {
+           LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
+       }
+       goto success;
+    } else if (dbus_message_is_signal(msg,
+                                     "org.bluez.NetworkServer",
+                                     "DeviceConnected")) {
+       char *c_address;
+       uint16_t uuid;
+
+       if (dbus_message_get_args(msg, &err,
+                                  DBUS_TYPE_STRING, &c_address,
+                                  DBUS_TYPE_UINT16, &uuid,
+                                  DBUS_TYPE_INVALID)) {
+           env->CallVoidMethod(nat->me,
+                               method_onNetworkDeviceConnected,
+                               env->NewStringUTF(c_address),
+                               uuid);
+       } else {
+           LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
+       }
+       goto success;
+    }
 
     ret = a2dp_event_filter(msg, env);
     env->PopLocalFrame(NULL);
