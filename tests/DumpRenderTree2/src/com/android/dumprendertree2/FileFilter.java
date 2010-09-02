@@ -48,11 +48,11 @@ public class FileFilter {
     private static final String HTTP_TESTS_PATH = "http/tests/";
     private static final String SSL_PATH = "ssl/";
 
-    private static final String TOKEN_SKIP = "SKIP";
+    private static final String TOKEN_CRASH = "CRASH";
     private static final String TOKEN_FAIL = "FAIL";
     private static final String TOKEN_SLOW = "SLOW";
 
-    private final Set<String> mSkipList = new HashSet<String>();
+    private final Set<String> mCrashList = new HashSet<String>();
     private final Set<String> mFailList = new HashSet<String>();
     private final Set<String> mSlowList = new HashSet<String>();
 
@@ -121,8 +121,8 @@ public class FileFilter {
                     tokens = new HashSet<String>(Arrays.asList(parts[1].split("\\s", 0)));
 
                     /** Chose the right collections to add to */
-                    if (tokens.contains(TOKEN_SKIP)) {
-                        mSkipList.add(path);
+                    if (tokens.contains(TOKEN_CRASH)) {
+                        mCrashList.add(path);
 
                         /** If test is on skip list we ignore any further options */
                         continue;
@@ -151,7 +151,7 @@ public class FileFilter {
     }
 
     /**
-     * Checks if test is supposed to be skipped.
+     * Checks if test is expected to crash.
      *
      * <p>
      * Path given should relative within LayoutTests folder, e.g. fast/dom/foo.html
@@ -160,9 +160,9 @@ public class FileFilter {
      *            - a relative path within LayoutTests folder
      * @return if the test is supposed to be skipped
      */
-    public boolean isSkip(String testPath) {
+    public boolean isCrash(String testPath) {
         for (String prefix : getPrefixes(testPath)) {
-            if (mSkipList.contains(prefix)) {
+            if (mCrashList.contains(prefix)) {
                 return true;
             }
         }
