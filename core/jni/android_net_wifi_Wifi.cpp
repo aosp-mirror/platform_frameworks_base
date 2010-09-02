@@ -411,6 +411,30 @@ static jint android_net_wifi_getPowerModeCommand(JNIEnv* env, jobject clazz)
     return (jint)power;
 }
 
+static jboolean android_net_wifi_setBandCommand(JNIEnv* env, jobject clazz, jint band)
+{
+    char cmdstr[25];
+
+    int numWritten = snprintf(cmdstr, sizeof(cmdstr), "DRIVER SETBAND %d", band);
+    int cmdTooLong = numWritten >= (int)sizeof(cmdstr);
+
+    return (jboolean)!cmdTooLong && doBooleanCommand(cmdstr, "OK");
+}
+
+static jint android_net_wifi_getBandCommand(JNIEnv* env, jobject clazz)
+{
+    char reply[25];
+    int band;
+
+    if (doCommand("DRIVER GETBAND", reply, sizeof(reply)) != 0) {
+        return (jint)-1;
+    }
+    // reply comes back in the form "Band X" where X is the
+    // number we're interested in.
+    sscanf(reply, "%*s %u", &band);
+    return (jint)band;
+}
+
 static jboolean android_net_wifi_setNumAllowedChannelsCommand(JNIEnv* env, jobject clazz, jint numChannels)
 {
     char cmdstr[256];
@@ -561,6 +585,8 @@ static JNINativeMethod gWifiMethods[] = {
     { "stopPacketFiltering", "()Z", (void*) android_net_wifi_stopPacketFiltering },
     { "setPowerModeCommand", "(I)Z", (void*) android_net_wifi_setPowerModeCommand },
     { "getPowerModeCommand", "()I", (void*) android_net_wifi_getPowerModeCommand },
+    { "setBandCommand", "(I)Z", (void*) android_net_wifi_setBandCommand},
+    { "getBandCommand", "()I", (void*) android_net_wifi_getBandCommand},
     { "setNumAllowedChannelsCommand", "(I)Z", (void*) android_net_wifi_setNumAllowedChannelsCommand },
     { "getNumAllowedChannelsCommand", "()I", (void*) android_net_wifi_getNumAllowedChannelsCommand },
     { "setBluetoothCoexistenceModeCommand", "(I)Z",
