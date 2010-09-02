@@ -173,9 +173,9 @@ public final class BluetoothPan {
         Log.d(TAG, msg);
     }
 
-    public void setBluetoothTethering(boolean value, String uuid, String bridge) {
+    public void setBluetoothTethering(boolean value) {
         try {
-            mService.setBluetoothTethering(value, uuid, bridge);
+            mService.setBluetoothTethering(value);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }

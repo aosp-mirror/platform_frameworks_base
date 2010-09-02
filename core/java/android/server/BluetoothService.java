@@ -352,7 +352,7 @@ public class BluetoothService extends IBluetooth.Stub {
         }
         setBluetoothState(BluetoothAdapter.STATE_TURNING_OFF);
         mHandler.removeMessages(MESSAGE_REGISTER_SDP_RECORDS);
-        setBluetoothTethering(false, BluetoothPan.NAP_ROLE, BluetoothPan.NAP_BRIDGE);
+        setBluetoothTetheringNative(false, BluetoothPan.NAP_ROLE, BluetoothPan.NAP_BRIDGE);
 
         // Allow 3 seconds for profiles to gracefully disconnect
         // TODO: Introduce a callback mechanism so that each profile can notify
@@ -576,8 +576,12 @@ public class BluetoothService extends IBluetooth.Stub {
                 mBondState.readAutoPairingData();
                 mBondState.loadBondState();
                 initProfileState();
+
+                //Register SDP records.
                 mHandler.sendMessageDelayed(
                         mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 1, -1), 3000);
+                setBluetoothTetheringNative(true, BluetoothPan.NAP_ROLE, BluetoothPan.NAP_BRIDGE);
+
 
                 // Log bluetooth on to battery stats.
                 long ident = Binder.clearCallingIdentity();
@@ -1258,14 +1262,12 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private BroadcastReceiver mTetheringReceiver = null;
 
-    public synchronized void setBluetoothTethering(boolean value, 
-            final String uuid, final String bridge) {
-        mTetheringOn = value;
+    public synchronized void setBluetoothTethering(boolean value) {
         if (!value) {
             disconnectPan();
         }
 
-        if (getBluetoothState() != BluetoothAdapter.STATE_ON && mTetheringOn) {
+        if (getBluetoothState() != BluetoothAdapter.STATE_ON && value) {
             IntentFilter filter = new IntentFilter();
             filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
             mTetheringReceiver = new BroadcastReceiver() {
@@ -1273,14 +1275,14 @@ public class BluetoothService extends IBluetooth.Stub {
                 public synchronized void onReceive(Context context, Intent intent) {
                     if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.STATE_OFF)
                             == BluetoothAdapter.STATE_ON) {
-                        setBluetoothTethering(true, uuid, bridge);
+                        mTetheringOn = true;
                         mContext.unregisterReceiver(mTetheringReceiver);
                     }
                 }
             };
             mContext.registerReceiver(mTetheringReceiver, filter);
         } else {
-            setBluetoothTetheringNative(value, uuid, bridge);
+            mTetheringOn = value;
         }
     }
 
