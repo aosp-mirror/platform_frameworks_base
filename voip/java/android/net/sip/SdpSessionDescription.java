@@ -186,8 +186,8 @@ public class SdpSessionDescription extends SessionDescription {
             }
         }
 
-        public SdpSessionDescription build() {
-            return mSdp;
+        public String build() {
+            return mSdp.toString();
         }
     }
 
