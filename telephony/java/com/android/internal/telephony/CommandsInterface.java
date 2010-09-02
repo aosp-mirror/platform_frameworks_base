@@ -1350,11 +1350,15 @@ public interface CommandsInterface {
      *            the password for APN, or NULL
      * @param authType
      *            the PAP / CHAP auth type. Values is one of SETUP_DATA_AUTH_*
+     * @param protocol
+     *            one of the PDP_type values in TS 27.007 section 10.1.1.
+     *            For example, "IP", "IPV6", "IPV4V6", or "PPP".
      * @param result
      *            Callback message
      */
-    public void setupDataCall(String radioTechnology, String profile, String apn,
-            String user, String password, String authType, Message result);
+    public void setupDataCall(String radioTechnology, String profile,
+            String apn, String user, String password, String authType,
+            String protocol, Message result);
 
     /**
      * Deactivate packet data connection
