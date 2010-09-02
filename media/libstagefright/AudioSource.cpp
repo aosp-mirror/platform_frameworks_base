@@ -72,6 +72,10 @@ status_t AudioSource::start(MetaData *params) {
         return UNKNOWN_ERROR;
     }
 
+    if (mInitCheck != OK) {
+        return NO_INIT;
+    }
+
     char value[PROPERTY_VALUE_MAX];
     if (property_get("media.stagefright.record-stats", value, NULL)
         && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
@@ -102,6 +106,10 @@ status_t AudioSource::stop() {
         return UNKNOWN_ERROR;
     }
 
+    if (mInitCheck != OK) {
+        return NO_INIT;
+    }
+
     mRecord->stop();
 
     delete mGroup;
@@ -118,6 +126,10 @@ status_t AudioSource::stop() {
 }
 
 sp<MetaData> AudioSource::getFormat() {
+    if (mInitCheck != OK) {
+        return 0;
+    }
+
     sp<MetaData> meta = new MetaData;
     meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
     meta->setInt32(kKeySampleRate, mRecord->getSampleRate());
@@ -193,6 +205,11 @@ void AudioSource::rampVolume(
 
 status_t AudioSource::read(
         MediaBuffer **out, const ReadOptions *options) {
+
+    if (mInitCheck != OK) {
+        return NO_INIT;
+    }
+
     *out = NULL;
 
     MediaBuffer *buffer;
@@ -294,10 +311,6 @@ status_t AudioSource::read(
 
         buffer->meta_data()->setInt64(kKeyTime, mPrevSampleTimeUs);
         CHECK(timestampUs > mPrevSampleTimeUs);
-        if (mTotalLostFrames == 0) {
-            CHECK_EQ(mPrevSampleTimeUs,
-                mStartTimeUs + (1000000LL * numFramesRecorded) / sampleRate);
-        }
         mPrevSampleTimeUs = timestampUs;
         LOGV("initial delay: %lld, sample rate: %d, timestamp: %lld",
                 mStartTimeUs, sampleRate, timestampUs);
