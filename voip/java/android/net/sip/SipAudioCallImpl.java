@@ -28,14 +28,6 @@ import android.net.rtp.AudioCodec;
 import android.net.rtp.AudioGroup;
 import android.net.rtp.AudioStream;
 import android.net.rtp.RtpStream;
-import android.net.sip.ISipSession;
-import android.net.sip.SdpSessionDescription;
-import android.net.sip.SessionDescription;
-import android.net.sip.SipAudioCall;
-import android.net.sip.SipManager;
-import android.net.sip.SipProfile;
-import android.net.sip.SipSessionAdapter;
-import android.net.sip.SipSessionState;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.Vibrator;
@@ -196,7 +188,7 @@ public class SipAudioCallImpl extends SipSessionAdapter
 
     @Override
     public synchronized void onRinging(ISipSession session,
-            SipProfile peerProfile, byte[] sessionDescription) {
+            SipProfile peerProfile, String sessionDescription) {
         try {
             if ((mSipSession == null) || !mInCall
                     || !session.getCallId().equals(mSipSession.getCallId())) {
@@ -218,7 +210,7 @@ public class SipAudioCallImpl extends SipSessionAdapter
         }
     }
 
-    private synchronized void establishCall(byte[] sessionDescription) {
+    private synchronized void establishCall(String sessionDescription) {
         stopRingbackTone();
         stopRinging();
         try {
@@ -234,7 +226,7 @@ public class SipAudioCallImpl extends SipSessionAdapter
 
     @Override
     public void onCallEstablished(ISipSession session,
-            byte[] sessionDescription) {
+            String sessionDescription) {
         establishCall(sessionDescription);
         Listener listener = mListener;
         if (listener != null) {
@@ -312,10 +304,10 @@ public class SipAudioCallImpl extends SipSessionAdapter
     }
 
     public synchronized void attachCall(ISipSession session,
-            SdpSessionDescription sdp) throws SipException {
+            String sessionDescription) throws SipException {
         mSipSession = session;
-        mPeerSd = sdp;
         try {
+            mPeerSd = new SdpSessionDescription(sessionDescription);
             session.setListener(this);
         } catch (Throwable e) {
             Log.e(TAG, "attachCall()", e);
@@ -390,12 +382,12 @@ public class SipAudioCallImpl extends SipSessionAdapter
         if (audioGroup != null) audioGroup.setMode(AudioGroup.MODE_NORMAL);
     }
 
-    private SessionDescription createOfferSessionDescription() {
+    private String createOfferSessionDescription() {
         AudioCodec[] codecs = AudioCodec.getSystemSupportedCodecs();
         return createSdpBuilder(true, convert(codecs)).build();
     }
 
-    private SessionDescription createAnswerSessionDescription() {
+    private String createAnswerSessionDescription() {
         try {
             // choose an acceptable media from mPeerSd to answer
             SdpSessionDescription.AudioCodec codec = getCodec(mPeerSd);
@@ -412,7 +404,7 @@ public class SipAudioCallImpl extends SipSessionAdapter
         }
     }
 
-    private SessionDescription createHoldSessionDescription() {
+    private String createHoldSessionDescription() {
         try {
             return createSdpBuilder(false, mCodec)
                     .addMediaAttribute(AUDIO, "sendonly", (String) null)
@@ -422,7 +414,7 @@ public class SipAudioCallImpl extends SipSessionAdapter
         }
     }
 
-    private SessionDescription createContinueSessionDescription() {
+    private String createContinueSessionDescription() {
         return createSdpBuilder(true, mCodec).build();
     }
 

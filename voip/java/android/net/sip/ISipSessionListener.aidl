@@ -39,7 +39,7 @@ interface ISipSessionListener {
      * @param sessionDescription the caller's session description
      */
     void onRinging(in ISipSession session, in SipProfile caller,
-            in byte[] sessionDescription);
+            String sessionDescription);
 
     /**
      * Called when a RINGING response is received for the INVITE request sent
@@ -55,7 +55,7 @@ interface ISipSessionListener {
      * @param sessionDescription the peer's session description
      */
     void onCallEstablished(in ISipSession session,
-            in byte[] sessionDescription);
+            String sessionDescription);
 
     /**
      * Called when the session is terminated.
