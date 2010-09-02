@@ -168,9 +168,9 @@ public interface SipAudioCall {
      * Attaches an incoming call to this call object.
      *
      * @param session the session that receives the incoming call
-     * @param sdp the session description of the incoming call
+     * @param sessionDescription the session description of the incoming call
      */
-    void attachCall(ISipSession session, SdpSessionDescription sdp)
+    void attachCall(ISipSession session, String sessionDescription)
             throws SipException;
 
     /** Ends a call. */
