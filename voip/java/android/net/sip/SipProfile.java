@@ -46,8 +46,7 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
     private String mProfileName;
     private boolean mSendKeepAlive = false;
     private boolean mAutoRegistration = true;
-    private boolean mAllowOutgoingCall = false;
-    private int mCallingUid = -1;
+    private transient int mCallingUid = 0;
 
     /** @hide */
     public static final Parcelable.Creator<SipProfile> CREATOR =
@@ -245,18 +244,6 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
         }
 
         /**
-         * Sets the allow-outgoing-call flag.
-         *
-         * @param flag true if allowing to make outgoing call on the profile;
-         *      false otherwise
-         * @return this builder object
-         */
-        public Builder setOutgoingCallAllowed(boolean flag) {
-            mProfile.mAllowOutgoingCall = flag;
-            return this;
-        }
-
-        /**
          * Builds and returns the SIP profile object.
          *
          * @return the profile object created
@@ -293,7 +280,6 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
         mProfileName = in.readString();
         mSendKeepAlive = (in.readInt() == 0) ? false : true;
         mAutoRegistration = (in.readInt() == 0) ? false : true;
-        mAllowOutgoingCall = (in.readInt() == 0) ? false : true;
         mCallingUid = in.readInt();
     }
 
@@ -307,7 +293,6 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
         out.writeString(mProfileName);
         out.writeInt(mSendKeepAlive ? 1 : 0);
         out.writeInt(mAutoRegistration ? 1 : 0);
-        out.writeInt(mAllowOutgoingCall ? 1 : 0);
         out.writeInt(mCallingUid);
     }
 
@@ -432,13 +417,6 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
      */
     public boolean getAutoRegistration() {
         return mAutoRegistration;
-    }
-
-    /**
-     * Returns true if allowing to make outgoing calls on this profile.
-     */
-    public boolean isOutgoingCallAllowed() {
-        return mAllowOutgoingCall;
     }
 
     /**
