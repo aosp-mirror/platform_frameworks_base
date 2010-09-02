@@ -1054,6 +1054,7 @@ public class WebSettings {
      * @deprecated This method is no longer used as plugins are loaded from
      * their own APK via the system's package manager.
      */
+    @Deprecated
     public synchronized void setPluginsPath(String pluginsPath) {
     }
 
@@ -1229,6 +1230,7 @@ public class WebSettings {
      * @deprecated This method is no longer used as plugins are loaded from
      * their own APK via the system's package manager.
      */
+    @Deprecated
     public synchronized String getPluginsPath() {
         return "";
     }
