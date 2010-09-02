@@ -120,7 +120,7 @@ MtpProperty::~MtpProperty() {
     delete[] mEnumValues;
 }
 
-void MtpProperty::read(MtpDataPacket& packet, bool deviceProp) {
+void MtpProperty::read(MtpDataPacket& packet) {
 
     mCode = packet.getUInt16();
     mType = packet.getUInt16();
@@ -141,7 +141,7 @@ void MtpProperty::read(MtpDataPacket& packet, bool deviceProp) {
             break;
         default:
             readValue(packet, mDefaultValue);
-            if (deviceProp)
+            if (isDeviceProperty())
                 readValue(packet, mCurrentValue);
     }
     mGroupCode = packet.getUInt32();
@@ -159,7 +159,6 @@ void MtpProperty::read(MtpDataPacket& packet, bool deviceProp) {
     }
 }
 
-// FIXME - only works for object properties
 void MtpProperty::write(MtpDataPacket& packet) {
     packet.putUInt16(mCode);
     packet.putUInt16(mType);

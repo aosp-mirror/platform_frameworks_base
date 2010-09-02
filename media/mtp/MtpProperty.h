@@ -65,16 +65,22 @@ public:
 
     inline MtpPropertyCode getPropertyCode() const { return mCode; }
 
-    void                read(MtpDataPacket& packet, bool deviceProp);
+    void                read(MtpDataPacket& packet);
     void                write(MtpDataPacket& packet);
 
     void                print();
+
+    inline bool         isDeviceProperty() const {
+                            return (   ((mCode & 0xF000) == 0x5000)
+                                    || ((mCode & 0xF800) == 0xD000));
+                        }
 
 private:
     void                readValue(MtpDataPacket& packet, MtpPropertyValue& value);
     void                writeValue(MtpDataPacket& packet, MtpPropertyValue& value);
     MtpPropertyValue*   readArrayValues(MtpDataPacket& packet, int& length);
-    void                writeArrayValues(MtpDataPacket& packet, MtpPropertyValue* values, int length);
+    void                writeArrayValues(MtpDataPacket& packet,
+                                            MtpPropertyValue* values, int length);
 };
 
 }; // namespace android
