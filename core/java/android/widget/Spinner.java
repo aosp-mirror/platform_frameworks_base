@@ -53,25 +53,93 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      */
     public static final int MODE_DROPDOWN = 1;
     
+    /**
+     * Use the theme-supplied value to select the dropdown mode.
+     */
+    private static final int MODE_THEME = -1;
+    
     private SpinnerPopup mPopup;
     private DropDownAdapter mTempAdapter;
-    
+
+    /**
+     * Construct a new spinner with the given context's theme.
+     *
+     * @param context The Context the view is running in, through which it can
+     *        access the current theme, resources, etc.
+     */
     public Spinner(Context context) {
         this(context, null);
     }
 
+    /**
+     * Construct a new spinner with the given context's theme and the supplied
+     * mode of displaying choices. <code>mode</code> may be one of
+     * {@link #MODE_DIALOG} or {@link #MODE_DROPDOWN}.
+     *
+     * @param context The Context the view is running in, through which it can
+     *        access the current theme, resources, etc.
+     * @param mode Constant describing how the user will select choices from the spinner.
+     * 
+     * @see #MODE_DIALOG
+     * @see #MODE_DROPDOWN
+     */
+    public Spinner(Context context, int mode) {
+        this(context, null, com.android.internal.R.attr.spinnerStyle, mode);
+    }
+
+    /**
+     * Construct a new spinner with the given context's theme and the supplied attribute set.
+     *
+     * @param context The Context the view is running in, through which it can
+     *        access the current theme, resources, etc.
+     * @param attrs The attributes of the XML tag that is inflating the view.
+     */
     public Spinner(Context context, AttributeSet attrs) {
         this(context, attrs, com.android.internal.R.attr.spinnerStyle);
     }
 
+    /**
+     * Construct a new spinner with the given context's theme, the supplied attribute set,
+     * and default style.
+     *
+     * @param context The Context the view is running in, through which it can
+     *        access the current theme, resources, etc.
+     * @param attrs The attributes of the XML tag that is inflating the view.
+     * @param defStyle The default style to apply to this view. If 0, no style
+     *        will be applied (beyond what is included in the theme). This may
+     *        either be an attribute resource, whose value will be retrieved
+     *        from the current theme, or an explicit style resource.
+     */
     public Spinner(Context context, AttributeSet attrs, int defStyle) {
+        this(context, attrs, defStyle, MODE_THEME);
+    }
+
+    /**
+     * Construct a new spinner with the given context's theme, the supplied attribute set,
+     * and default style. <code>mode</code> may be one of {@link #MODE_DIALOG} or
+     * {@link #MODE_DROPDOWN} and determines how the user will select choices from the spinner.
+     *
+     * @param context The Context the view is running in, through which it can
+     *        access the current theme, resources, etc.
+     * @param attrs The attributes of the XML tag that is inflating the view.
+     * @param defStyle The default style to apply to this view. If 0, no style
+     *        will be applied (beyond what is included in the theme). This may
+     *        either be an attribute resource, whose value will be retrieved
+     *        from the current theme, or an explicit style resource.
+     * @param mode Constant describing how the user will select choices from the spinner.
+     * 
+     * @see #MODE_DIALOG
+     * @see #MODE_DROPDOWN
+     */
+    public Spinner(Context context, AttributeSet attrs, int defStyle, int mode) {
         super(context, attrs, defStyle);
 
         TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.Spinner, defStyle, 0);
-        
-        final int mode = a.getInt(com.android.internal.R.styleable.Spinner_spinnerMode,
-                MODE_DIALOG);
+
+        if (mode == MODE_THEME) {
+            mode = a.getInt(com.android.internal.R.styleable.Spinner_spinnerMode, MODE_DIALOG);
+        }
         
         switch (mode) {
         case MODE_DIALOG: {
