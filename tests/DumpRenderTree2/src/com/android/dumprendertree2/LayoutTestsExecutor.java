@@ -29,6 +29,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
@@ -44,6 +45,7 @@ import android.webkit.GeolocationPermissions;
 import android.webkit.WebStorage.QuotaUpdater;
 
 import java.io.File;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -255,6 +257,32 @@ public class LayoutTestsExecutor extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        /**
+         * It detects the crash by catching all the uncaught exceptions. However, we
+         * still have to kill the process, because after catching the exception the
+         * activity remains in a strange state, where intents don't revive it.
+         * However, we send the message to the service to speed up the rebooting
+         * (we don't have to wait for time-out to kick in).
+         */
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread thread, Throwable e) {
+                Log.w(LOG_TAG,
+                        "onTestCrashed(): " + mCurrentTestRelativePath + " thread=" + thread, e);
+
+                try {
+                    Message serviceMsg =
+                            Message.obtain(null, ManagerService.MSG_CURRENT_TEST_CRASHED);
+
+                    mManagerServiceMessenger.send(serviceMsg);
+                } catch (RemoteException e2) {
+                    Log.e(LOG_TAG, "mCurrentTestRelativePath=" + mCurrentTestRelativePath, e2);
+                }
+
+                Process.killProcess(Process.myPid());
+            }
+        });
 
         requestWindowFeature(Window.FEATURE_PROGRESS);
 
