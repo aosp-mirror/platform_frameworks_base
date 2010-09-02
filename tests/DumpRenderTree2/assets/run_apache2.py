@@ -92,7 +92,8 @@ def main():
     "\""
   directives += " -c \"User ${APACHE_RUN_USER}\""
   directives += " -c \"Group ${APACHE_RUN_GROUP}\""
-  directives += " -C \"TypesConfig " + os.path.join("/etc", "mime.types") + "\""
+  directives += " -C \"TypesConfig " + \
+    os.path.join(android_tree_root, http_conf_path, "mime.types") + "\""
   conf_file_cmd = " -f " + \
     os.path.join(android_tree_root, http_conf_path, "apache2-debian-httpd.conf")
 
