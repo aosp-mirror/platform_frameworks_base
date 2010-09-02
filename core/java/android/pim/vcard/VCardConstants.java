@@ -21,6 +21,7 @@ package android.pim.vcard;
 public class VCardConstants {
     public static final String VERSION_V21 = "2.1";
     public static final String VERSION_V30 = "3.0";
+    public static final String VERSION_V40 = "4.0";
 
     // The property names valid both in vCard 2.1 and 3.0.
     public static final String PROPERTY_BEGIN = "BEGIN";
@@ -38,25 +39,30 @@ public class VCardConstants {
     public static final String PROPERTY_PHOTO = "PHOTO";
     public static final String PROPERTY_LOGO = "LOGO";
     public static final String PROPERTY_URL = "URL";
-    public static final String PROPERTY_BDAY = "BDAY";  // Birthday
+    public static final String PROPERTY_BDAY = "BDAY";  // Birthday (3.0, 4.0)
+    public static final String PROPERTY_BIRTH = "BIRTH";  // Place of birth (4.0)
+    public static final String PROPERTY_ANNIVERSARY = "ANNIVERSARY";  // Date of marriage (4.0)
+    public static final String PROPERTY_NAME = "NAME";  // (3.0, 4,0)
+    public static final String PROPERTY_NICKNAME = "NICKNAME";  // (3.0, 4.0)
+    public static final String PROPERTY_SORT_STRING = "SORT-STRING";  // (3.0, 4.0)
     public static final String PROPERTY_END = "END";
 
-    // Valid property names not supported (not appropriately handled) by our vCard importer now.
+    // Valid property names not supported (not appropriately handled) by our importer.
+    // TODO: Should be removed from the view of memory efficiency?
     public static final String PROPERTY_REV = "REV";
-    public static final String PROPERTY_AGENT = "AGENT";
+    public static final String PROPERTY_AGENT = "AGENT";  // (3.0)
+    public static final String PROPERTY_DDAY = "DDAY";  // Date of death (4.0)
+    public static final String PROPERTY_DEATH = "DEATH";  // Place of death (4.0)
 
     // Available in vCard 3.0. Shoud not use when composing vCard 2.1 file.
-    public static final String PROPERTY_NAME = "NAME";
-    public static final String PROPERTY_NICKNAME = "NICKNAME";
-    public static final String PROPERTY_SORT_STRING = "SORT-STRING";
     
     // De-fact property values expressing phonetic names.
     public static final String PROPERTY_X_PHONETIC_FIRST_NAME = "X-PHONETIC-FIRST-NAME";
     public static final String PROPERTY_X_PHONETIC_MIDDLE_NAME = "X-PHONETIC-MIDDLE-NAME";
     public static final String PROPERTY_X_PHONETIC_LAST_NAME = "X-PHONETIC-LAST-NAME";
 
-    // Properties both ContactsStruct in Eclair and de-fact vCard extensions
-    // shown in http://en.wikipedia.org/wiki/VCard support are defined here.
+    // Properties both ContactsStruct and de-fact vCard extensions
+    // Shown in http://en.wikipedia.org/wiki/VCard support are defined here.
     public static final String PROPERTY_X_AIM = "X-AIM";
     public static final String PROPERTY_X_MSN = "X-MSN";
     public static final String PROPERTY_X_YAHOO = "X-YAHOO";
@@ -89,6 +95,9 @@ public class VCardConstants {
     public static final String PARAM_TYPE_VOICE = "VOICE";
     public static final String PARAM_TYPE_INTERNET = "INTERNET";
 
+    public static final String PARAM_CHARSET = "CHARSET";
+    public static final String PARAM_ENCODING = "ENCODING";
+
     // Abbreviation of "prefered" according to vCard 2.1 specification.
     // We interpret this value as "primary" property during import/export.
     //
@@ -109,6 +118,12 @@ public class VCardConstants {
     public static final String PARAM_TYPE_BBS = "BBS";
     public static final String PARAM_TYPE_VIDEO = "VIDEO";
 
+    public static final String PARAM_ENCODING_7BIT = "7BIT";
+    public static final String PARAM_ENCODING_8BIT = "8BIT";
+    public static final String PARAM_ENCODING_QP = "QUOTED-PRINTABLE";
+    public static final String PARAM_ENCODING_BASE64 = "BASE64";  // Available in vCard 2.1
+    public static final String PARAM_ENCODING_B = "B";  // Available in vCard 3.0
+
     // TYPE parameters for Phones, which are not formally valid in vCard (at least 2.1).
     // These types are basically encoded to "X-" parameters when composing vCard.
     // Parser passes these when "X-" is added to the parameter or not.
@@ -126,13 +141,14 @@ public class VCardConstants {
     public static final String PARAM_ADR_TYPE_DOM = "DOM";
     public static final String PARAM_ADR_TYPE_INTL = "INTL";
 
+    public static final String PARAM_LANGUAGE = "LANGUAGE";
+
+    // SORT-AS parameter introduced in vCard 4.0 (as of rev.13)
+    public static final String PARAM_SORT_AS = "SORT-AS";
+
     // TYPE parameters not officially valid but used in some vCard exporter.
     // Do not use in composer side.
     public static final String PARAM_EXTRA_TYPE_COMPANY = "COMPANY";
-
-    // DoCoMo specific type parameter. Used with "SOUND" property, which is alternate of SORT-STRING in
-    // vCard 3.0.
-    public static final String PARAM_TYPE_X_IRMC_N = "X-IRMC-N";
 
     public interface ImportOnly {
         public static final String PROPERTY_X_NICKNAME = "X-NICKNAME";
@@ -142,7 +158,14 @@ public class VCardConstants {
         public static final String PROPERTY_X_GOOGLE_TALK_WITH_SPACE = "X-GOOGLE TALK";
     }
 
-    /* package */ static final int MAX_DATA_COLUMN = 15;
+    //// Mainly for package constants.
+
+    // DoCoMo specific type parameter. Used with "SOUND" property, which is alternate of
+    // SORT-STRING invCard 3.0.
+    /* package */ static final String PARAM_TYPE_X_IRMC_N = "X-IRMC-N";
+
+    // Used in unit test.
+    public static final int MAX_DATA_COLUMN = 15;
 
     /* package */ static final int MAX_CHARACTER_NUMS_QP = 76;
     static final int MAX_CHARACTER_NUMS_BASE64_V30 = 75;

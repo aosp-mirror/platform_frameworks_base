@@ -13,17 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.pim.vcard;
+package android.pim.vcard.test_utils;
 
 import android.content.ContentValues;
-import android.pim.vcard.VCardConfig;
 import android.pim.vcard.VCardEntry;
 import android.pim.vcard.VCardEntryCommitter;
 import android.pim.vcard.VCardEntryConstructor;
 import android.pim.vcard.VCardEntryHandler;
 import android.pim.vcard.VCardParser;
-import android.pim.vcard.VCardParser_V21;
-import android.pim.vcard.VCardParser_V30;
+import android.pim.vcard.VCardUtils;
 import android.pim.vcard.exception.VCardException;
 import android.provider.ContactsContract.Data;
 import android.test.AndroidTestCase;
@@ -31,7 +29,7 @@ import android.test.AndroidTestCase;
 import java.io.IOException;
 import java.io.InputStream;
 
-/* package */ class ContentValuesVerifierElem {
+public class ContentValuesVerifierElem {
     private final AndroidTestCase mTestCase;
     private final ImportTestResolver mResolver;
     private final VCardEntryHandler mHandler;
@@ -49,20 +47,14 @@ import java.io.InputStream;
         return new ContentValuesBuilder(contentValues);
     }
 
-    public void verify(int resId, int vCardType)
+    public void verify(int resId, int vcardType)
             throws IOException, VCardException {
-        verify(mTestCase.getContext().getResources().openRawResource(resId), vCardType);
+        verify(mTestCase.getContext().getResources().openRawResource(resId), vcardType);
     }
 
-    public void verify(InputStream is, int vCardType) throws IOException, VCardException {
-        final VCardParser vCardParser;
-        if (VCardConfig.isV30(vCardType)) {
-            vCardParser = new VCardParser_V30(true);  // use StrictParsing
-        } else {
-            vCardParser = new VCardParser_V21();
-        }
-        VCardEntryConstructor builder =
-                new VCardEntryConstructor(null, null, false, vCardType, null);
+    public void verify(InputStream is, int vcardType) throws IOException, VCardException {
+        final VCardParser vCardParser = VCardUtils.getAppropriateParser(vcardType);
+        final VCardEntryConstructor builder = new VCardEntryConstructor(vcardType, null);
         builder.addEntryHandler(mHandler);
         try {
             vCardParser.parse(is, builder);

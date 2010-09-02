@@ -13,39 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.pim.vcard;
+package android.pim.vcard.test_utils;
 
 import android.content.Context;
 import android.pim.vcard.VCardComposer;
+import android.test.AndroidTestCase;
 
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
 
-class LineVerifier implements VCardComposer.OneEntryHandler {
-    private final TestCase mTestCase;
+public class LineVerifier implements VCardComposer.OneEntryHandler {
+    private final AndroidTestCase mAndroidTestCase;
     private final ArrayList<LineVerifierElem> mLineVerifierElemList;
     private int mVCardType;
     private int index;
 
-    public LineVerifier(TestCase testCase, int vcardType) {
-        mTestCase = testCase;
+    public LineVerifier(AndroidTestCase androidTestCase, int vcardType) {
+        mAndroidTestCase = androidTestCase;
         mLineVerifierElemList = new ArrayList<LineVerifierElem>();
         mVCardType = vcardType;
     }
 
     public LineVerifierElem addLineVerifierElem() {
-        LineVerifierElem lineVerifier = new LineVerifierElem(mTestCase, mVCardType);
+        LineVerifierElem lineVerifier = new LineVerifierElem(mAndroidTestCase, mVCardType);
         mLineVerifierElemList.add(lineVerifier);
         return lineVerifier;
     }
 
     public void verify(String vcard) {
         if (index >= mLineVerifierElemList.size()) {
-            mTestCase.fail("Insufficient number of LineVerifier (" + index + ")");
+            TestCase.fail("Insufficient number of LineVerifier (" + index + ")");
         }
 
-        LineVerifierElem lineVerifier = mLineVerifierElemList.get(index);
+        final LineVerifierElem lineVerifier = mLineVerifierElemList.get(index);
         lineVerifier.verify(vcard);
 
         index++;
