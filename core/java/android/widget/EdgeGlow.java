@@ -18,7 +18,6 @@ package android.widget;
 
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -29,8 +28,6 @@ import android.view.animation.Interpolator;
  */
 public class EdgeGlow {
     private static final String TAG = "EdgeGlow";
-
-    private static final boolean DEBUG = false;
 
     // Time it will take the effect to fully recede in ms
     private static final int RECEDE_TIME = 1000;
@@ -46,7 +43,10 @@ public class EdgeGlow {
     private static final float HELD_GLOW_ALPHA = 0.5f;
     private static final float HELD_GLOW_SCALE_Y = 0.5f;
 
+    private static final float MAX_GLOW_HEIGHT = 0.33f;
+
     private static final float PULL_GLOW_BEGIN = 0.5f;
+    private static final float PULL_EDGE_BEGIN = 0.6f;
 
     // Minimum velocity that will be absorbed
     private static final int MIN_VELOCITY = 750;
@@ -103,6 +103,10 @@ public class EdgeGlow {
         return mState == STATE_IDLE;
     }
 
+    public void finish() {
+        mState = STATE_IDLE;
+    }
+
     /**
      * Call when the object is pulled by the user.
      * @param deltaDistance Change in distance since the last call
@@ -123,7 +127,7 @@ public class EdgeGlow {
         mPullDistance += deltaDistance;
         float distance = Math.abs(mPullDistance);
 
-        mEdgeAlpha = mEdgeAlphaStart = Math.max(HELD_EDGE_ALPHA, Math.min(distance, 1.f));
+        mEdgeAlpha = mEdgeAlphaStart = Math.max(PULL_EDGE_BEGIN, Math.min(distance, 1.f));
         mEdgeScaleY = mEdgeScaleYStart = Math.max(HELD_EDGE_SCALE_Y, Math.min(distance, 2.f));
 
         mGlowAlpha = mGlowAlphaStart = Math.max(0.5f,
@@ -142,8 +146,6 @@ public class EdgeGlow {
         mEdgeScaleYFinish = mEdgeScaleY;
         mGlowAlphaFinish = mGlowAlpha;
         mGlowScaleYFinish = mGlowScaleY;
-
-        if (DEBUG) Log.d(TAG, "onPull(" + distance + ", " + deltaDistance + ")");
     }
 
     /**
@@ -155,7 +157,6 @@ public class EdgeGlow {
         if (mState != STATE_PULL && mState != STATE_PULL_DECAY) {
             return;
         }
-        if (DEBUG) Log.d(TAG, "onRelease");
 
         mState = STATE_RECEDE;
         mEdgeAlphaStart = mEdgeAlpha;
@@ -178,7 +179,6 @@ public class EdgeGlow {
      */
     public void onAbsorb(int velocity) {
         mState = STATE_ABSORB;
-        if (DEBUG) Log.d(TAG, "onAbsorb uncooked velocity: " + velocity);
         velocity = Math.max(MIN_VELOCITY, Math.abs(velocity));
 
         mStartTime = AnimationUtils.currentAnimationTimeMillis();
@@ -193,8 +193,6 @@ public class EdgeGlow {
         mEdgeScaleYFinish = 1.f;
         mGlowAlphaFinish = 1.f;
         mGlowScaleYFinish = Math.min(velocity * 0.001f, 1);
-
-        if (DEBUG) Log.d(TAG, "onAbsorb(" + velocity + "): duration " + mDuration);
     }
 
     /**
@@ -212,8 +210,11 @@ public class EdgeGlow {
         final int edgeHeight = mEdge.getIntrinsicHeight();
         final int glowHeight = mGlow.getIntrinsicHeight();
 
+        final float distScale = (float) mHeight / mWidth;
+
         mGlow.setAlpha((int) (Math.max(0, Math.min(mGlowAlpha, 1)) * 255));
-        mGlow.setBounds(0, 0, mWidth, (int) (glowHeight * mGlowScaleY * 0.5f));
+        mGlow.setBounds(0, 0, mWidth, (int) Math.min(glowHeight * mGlowScaleY * distScale * 0.6f,
+                mHeight * MAX_GLOW_HEIGHT));
         mGlow.draw(canvas);
 
         mEdge.setAlpha((int) (Math.max(0, Math.min(mEdgeAlpha, 1)) * 255));
@@ -222,8 +223,6 @@ public class EdgeGlow {
                 mWidth,
                 (int) (edgeHeight * mEdgeScaleY));
         mEdge.draw(canvas);
-        if (DEBUG) Log.d(TAG, "draw() glow(" + mGlowAlpha + ", " + mGlowScaleY + ") edge(" + mEdgeAlpha +
-                ", " + mEdgeScaleY + ")");
 
         return mState != STATE_IDLE;
     }
@@ -255,7 +254,6 @@ public class EdgeGlow {
                     mEdgeScaleYFinish = 0.1f;
                     mGlowAlphaFinish = 0.f;
                     mGlowScaleYFinish = mGlowScaleY;
-                    if (DEBUG) Log.d(TAG, "STATE_ABSORB => STATE_RECEDE");
                     break;
                 case STATE_PULL:
                     mState = STATE_PULL_DECAY;
@@ -271,14 +269,12 @@ public class EdgeGlow {
                     mEdgeScaleYFinish = Math.min(mEdgeScaleYStart, HELD_EDGE_SCALE_Y);
                     mGlowAlphaFinish = Math.min(mGlowAlphaStart, HELD_GLOW_ALPHA);
                     mGlowScaleYFinish = Math.min(mGlowScaleY, HELD_GLOW_SCALE_Y);
-                    if (DEBUG) Log.d(TAG, "STATE_PULL => STATE_PULL_DECAY");
                     break;
                 case STATE_PULL_DECAY:
                     // Do nothing; wait for release
                     break;
                 case STATE_RECEDE:
                     mState = STATE_IDLE;
-                    if (DEBUG) Log.d(TAG, "STATE_RECEDE => STATE_IDLE");
                     break;
             }
         }

@@ -507,6 +507,20 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private EdgeGlow mEdgeGlowBottom;
 
     /**
+     * An estimate of how many pixels are between the top of the list and
+     * the top of the first position in the adapter, based on the last time
+     * we saw it. Used to hint where to draw edge glows.
+     */
+    private int mFirstPositionDistanceGuess;
+
+    /**
+     * An estimate of how many pixels are between the bottom of the list and
+     * the bottom of the last position in the adapter, based on the last time
+     * we saw it. Used to hint where to draw edge glows.
+     */
+    private int mLastPositionDistanceGuess;
+
+    /**
      * Interface definition for a callback to be invoked when the list or grid
      * has been scrolled.
      */
@@ -632,7 +646,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (mode != OVERSCROLL_NEVER) {
             if (mEdgeGlowTop == null) {
                 final Resources res = getContext().getResources();
-                final Drawable edge = res.getDrawable(R.drawable.edge_light);
+                final Drawable edge = res.getDrawable(R.drawable.overscroll_edge);
                 final Drawable glow = res.getDrawable(R.drawable.overscroll_glow);
                 mEdgeGlowTop = new EdgeGlow(edge, glow);
                 mEdgeGlowBottom = new EdgeGlow(edge, glow);
@@ -1684,6 +1698,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mFlingRunnable.endFling();
                 if (mScrollY != 0) {
                     mScrollY = 0;
+                    finishGlows();
                     invalidate();
                 }
             }
@@ -2041,6 +2056,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
                 if (mScrollY != 0) {
                     mScrollY = 0;
+                    finishGlows();
                     invalidate();
                 }
             }
@@ -2518,7 +2534,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 final int restoreCount = canvas.save();
                 final int width = getWidth();
 
-                canvas.translate(-width / 2, scrollY);
+                canvas.translate(-width / 2, Math.min(0, scrollY + mFirstPositionDistanceGuess));
                 mEdgeGlowTop.setSize(width * 2, getHeight());
                 if (mEdgeGlowTop.draw(canvas)) {
                     invalidate();
@@ -2530,7 +2546,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 final int width = getWidth();
                 final int height = getHeight();
 
-                canvas.translate(-width / 2, scrollY + height);
+                canvas.translate(-width / 2,
+                        Math.max(height, scrollY + mLastPositionDistanceGuess));
                 canvas.rotate(180, width, 0);
                 mEdgeGlowBottom.setSize(width * 2, height);
                 if (mEdgeGlowBottom.draw(canvas)) {
@@ -3222,6 +3239,18 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         final int firstPosition = mFirstPosition;
+
+        // Update our guesses for where the first and last views are
+        if (firstPosition == 0) {
+            mFirstPositionDistanceGuess = firstTop - mListPadding.top;
+        } else {
+            mFirstPositionDistanceGuess += incrementalDeltaY;
+        }
+        if (firstPosition + childCount == mItemCount) {
+            mLastPositionDistanceGuess = lastBottom + mListPadding.bottom;
+        } else {
+            mLastPositionDistanceGuess += incrementalDeltaY;
+        }
 
         if (firstPosition == 0 && firstTop >= listPadding.top && incrementalDeltaY >= 0) {
             // Don't need to move views down if the top of the first position
@@ -4165,6 +4194,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         return result;
+    }
+
+    private void finishGlows() {
+        if (mEdgeGlowTop != null) {
+            mEdgeGlowTop.finish();
+            mEdgeGlowBottom.finish();
+        }
     }
 
     /**
