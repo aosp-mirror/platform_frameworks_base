@@ -320,6 +320,13 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private static final int SCAN_ACTIVE = 1;
     private static final int SCAN_PASSIVE = 2;
 
+    /* Auto allows 802.11A/B/G operation */
+    private static final int BAND_AUTO = 0;
+    /* 5GHz allows 802.11A operation */
+    private static final int BAND_5G = 1;
+    /* 2.4GHz allows 802.11B/G operation */
+    private static final int BAND_2G = 2;
+
     /**
      * The maximum number of times we will retry a connection to an access point
      * for which we have failed in acquiring an IP address from DHCP. A value of
@@ -2179,6 +2186,14 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
             /* Initialize channel count */
             setNumAllowedChannels();
+            /*
+             * STOPSHIP
+             * TODO: We are having 11A issues that Broadcom is looking
+             * to resolve, this is a temporary fix to allow only 11B/G
+             * and help improve GoogleGuest connectivity
+             * We also need to add the UI for band control
+             */
+            WifiNative.setBandCommand(BAND_2G);
 
             if (mIsScanMode) {
                 WifiNative.setScanResultHandlingCommand(SCAN_ONLY_MODE);
