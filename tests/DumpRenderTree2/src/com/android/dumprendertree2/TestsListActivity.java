@@ -19,10 +19,14 @@ package com.android.dumprendertree2;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.Gravity;
 import android.view.Window;
+import android.webkit.WebView;
+import android.widget.Toast;
 
 import com.android.dumprendertree2.scriptsupport.OnEverythingFinishedCallback;
 
@@ -124,11 +128,36 @@ public class TestsListActivity extends Activity {
     }
 
     private void onEverythingFinishedIntent(Intent intent) {
-        /** TODO: Show some kind of summary to the user */
+        Toast toast = Toast.makeText(this,
+                "All tests finished.\nPress back key to return to the tests' list.",
+                Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.CENTER, -40, 0);
+        toast.show();
+
+        /** Show the details to the user */
+        WebView webView = new WebView(this);
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setBuiltInZoomControls(true);
+        webView.getSettings().setEnableSmoothTransition(true);
+        /** This enables double-tap to zoom */
+        webView.getSettings().setUseWideViewPort(true);
+
+        setContentView(webView);
+        webView.loadUrl(Summarizer.getDetailsUri().toString());
+
         mEverythingFinished = true;
         if (mOnEverythingFinishedCallback != null) {
             mOnEverythingFinishedCallback.onFinished();
         }
+    }
+
+    /**
+     * This, together with android:configChanges="orientation" in manifest file, prevents
+     * the activity from restarting on orientation change.
+     */
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
     }
 
     @Override
