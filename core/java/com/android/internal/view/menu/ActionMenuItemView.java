@@ -75,6 +75,13 @@ public class ActionMenuItemView extends FrameLayout
         setEnabled(itemData.isEnabled());
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        mImageButton.setEnabled(enabled);
+        mTextButton.setEnabled(enabled);
+    }
+
     public void onClick(View v) {
         if (mItemInvoker != null) {
             mItemInvoker.invokeItem(mItemData);
