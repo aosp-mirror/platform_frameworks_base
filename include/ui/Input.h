@@ -78,6 +78,11 @@ enum {
 
     POLICY_FLAG_RAW_MASK = 0x0000ffff,
 
+    /* These flags are set by the input dispatcher. */
+
+    // Indicates that the input event was injected.
+    POLICY_FLAG_INJECTED = 0x01000000,
+
     /* These flags are set by the input reader policy as it intercepts each event. */
 
     // Indicates that the screen was off when the event was received and the event
@@ -225,6 +230,8 @@ public:
 
     inline int32_t getAction() const { return mAction; }
 
+    inline int32_t getFlags() const { return mFlags; }
+
     inline int32_t getEdgeFlags() const { return mEdgeFlags; }
 
     inline int32_t getMetaState() const { return mMetaState; }
@@ -343,6 +350,7 @@ public:
             int32_t deviceId,
             int32_t source,
             int32_t action,
+            int32_t flags,
             int32_t edgeFlags,
             int32_t metaState,
             float xOffset,
@@ -370,6 +378,7 @@ public:
 
 private:
     int32_t mAction;
+    int32_t mFlags;
     int32_t mEdgeFlags;
     int32_t mMetaState;
     float mXOffset;

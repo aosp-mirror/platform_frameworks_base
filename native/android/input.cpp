@@ -84,6 +84,10 @@ int32_t AMotionEvent_getAction(const AInputEvent* motion_event) {
     return static_cast<const MotionEvent*>(motion_event)->getAction();
 }
 
+int32_t AMotionEvent_getFlags(const AInputEvent* motion_event) {
+    return static_cast<const MotionEvent*>(motion_event)->getFlags();
+}
+
 int32_t AMotionEvent_getMetaState(const AInputEvent* motion_event) {
     return static_cast<const MotionEvent*>(motion_event)->getMetaState();
 }

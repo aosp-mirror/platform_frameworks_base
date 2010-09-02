@@ -74,6 +74,8 @@ public interface WindowManagerPolicy {
     public final static int FLAG_MENU = 0x00000040;
     public final static int FLAG_LAUNCHER = 0x00000080;
 
+    public final static int FLAG_INJECTED = 0x01000000;
+
     public final static int FLAG_WOKE_HERE = 0x10000000;
     public final static int FLAG_BRIGHT_HERE = 0x20000000;
 

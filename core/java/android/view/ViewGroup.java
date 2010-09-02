@@ -822,6 +822,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (!onFilterTouchEventForSecurity(ev)) {
+            return false;
+        }
+
         final int action = ev.getAction();
         final float xf = ev.getX();
         final float yf = ev.getY();

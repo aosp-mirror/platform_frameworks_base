@@ -1254,6 +1254,7 @@
   <public type="attr" name="overscrollMode" id="0x010102c1" />
   <public type="attr" name="overscrollHeader" id="0x010102c2" />
   <public type="attr" name="overscrollFooter" id="0x010102c3" />
+  <public type="attr" name="filterTouchesWhenObscured" id="0x010102c4" />
 
   <public-padding type="attr" name="kraken_resource_pad" end="0x01010300" />
   

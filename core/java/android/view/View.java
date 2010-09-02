@@ -542,6 +542,28 @@ import java.util.WeakHashMap;
  * take care of redrawing the appropriate views until the animation completes.
  * </p>
  *
+ * <a name="Security"></a>
+ * <h3>Security</h3>
+ * <p>
+ * Sometimes it is essential that an application be able to verify that an action
+ * is being performed with the full knowledge and consent of the user, such as
+ * granting a permission request, making a purchase or clicking on an advertisement.
+ * Unfortunately, a malicious application could try to spoof the user into
+ * performing these actions, unaware, by concealing the intended purpose of the view.
+ * As a remedy, the framework offers a touch filtering mechanism that can be used to
+ * improve the security of views that provide access to sensitive functionality.
+ * </p><p>
+ * To enable touch filtering, call {@link #setFilterTouchesWhenObscured} or set the
+ * andoird:filterTouchesWhenObscured attribute to true.  When enabled, the framework
+ * will discard touches that are received whenever the view's window is obscured by
+ * another visible window.  As a result, the view will not receive touches whenever a
+ * toast, dialog or other window appears above the view's window.
+ * </p><p>
+ * For more fine-grained control over security, consider overriding the
+ * {@link #onFilterTouchEventForSecurity} method to implement your own security policy.
+ * See also {@link MotionEvent#FLAG_WINDOW_IS_OBSCURED}.
+ * </p>
+ *
  * @attr ref android.R.styleable#View_background
  * @attr ref android.R.styleable#View_clickable
  * @attr ref android.R.styleable#View_contentDescription
@@ -550,6 +572,7 @@ import java.util.WeakHashMap;
  * @attr ref android.R.styleable#View_id
  * @attr ref android.R.styleable#View_fadingEdge
  * @attr ref android.R.styleable#View_fadingEdgeLength
+ * @attr ref android.R.styleable#View_filterTouchesWhenObscured
  * @attr ref android.R.styleable#View_fitsSystemWindows
  * @attr ref android.R.styleable#View_isScrollContainer
  * @attr ref android.R.styleable#View_focusable
@@ -711,7 +734,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     static final int SCROLLBARS_MASK = 0x00000300;
 
-    // note 0x00000400 and 0x00000800 are now available for next flags...
+    /**
+     * Indicates that the view should filter touches when its window is obscured.
+     * Refer to the class comments for more information about this security feature.
+     * {@hide}
+     */
+    static final int FILTER_TOUCHES_WHEN_OBSCURED = 0x00000400;
+
+    // note flag value 0x00000800 is now available for next flags...
 
     /**
      * <p>This view doesn't show fading edges.</p>
@@ -2052,6 +2082,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                         viewFlagMasks |= KEEP_SCREEN_ON;
                     }
                     break;
+                case R.styleable.View_filterTouchesWhenObscured:
+                    if (a.getBoolean(attr, false)) {
+                        viewFlagValues |= FILTER_TOUCHES_WHEN_OBSCURED;
+                        viewFlagMasks |= FILTER_TOUCHES_WHEN_OBSCURED;
+                    }
+                    break;
                 case R.styleable.View_nextFocusLeft:
                     mNextFocusLeftId = a.getResourceId(attr, View.NO_ID);
                     break;
@@ -3389,6 +3425,35 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         setFlags(enabled ? 0 : SAVE_DISABLED, SAVE_DISABLED_MASK);
     }
 
+    /**
+     * Gets whether the framework should discard touches when the view's
+     * window is obscured by another visible window.
+     * Refer to the {@link View} security documentation for more details.
+     *
+     * @return True if touch filtering is enabled.
+     *
+     * @see #setFilterTouchesWhenObscured(boolean)
+     * @attr ref android.R.styleable#View_filterTouchesWhenObscured
+     */
+    @ViewDebug.ExportedProperty
+    public boolean getFilterTouchesWhenObscured() {
+        return (mViewFlags & FILTER_TOUCHES_WHEN_OBSCURED) != 0;
+    }
+
+    /**
+     * Sets whether the framework should discard touches when the view's
+     * window is obscured by another visible window.
+     * Refer to the {@link View} security documentation for more details.
+     *
+     * @param enabled True if touch filtering should be enabled.
+     *
+     * @see #getFilterTouchesWhenObscured
+     * @attr ref android.R.styleable#View_filterTouchesWhenObscured
+     */
+    public void setFilterTouchesWhenObscured(boolean enabled) {
+        setFlags(enabled ? 0 : FILTER_TOUCHES_WHEN_OBSCURED,
+                FILTER_TOUCHES_WHEN_OBSCURED);
+    }
 
     /**
      * Returns whether this View is able to take focus.
@@ -3808,11 +3873,32 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return True if the event was handled by the view, false otherwise.
      */
     public boolean dispatchTouchEvent(MotionEvent event) {
+        if (!onFilterTouchEventForSecurity(event)) {
+            return false;
+        }
+
         if (mOnTouchListener != null && (mViewFlags & ENABLED_MASK) == ENABLED &&
                 mOnTouchListener.onTouch(this, event)) {
             return true;
         }
         return onTouchEvent(event);
+    }
+
+    /**
+     * Filter the touch event to apply security policies.
+     *
+     * @param event The motion event to be filtered.
+     * @return True if the event should be dispatched, false if the event should be dropped.
+     * 
+     * @see #getFilterTouchesWhenObscured
+     */
+    public boolean onFilterTouchEventForSecurity(MotionEvent event) {
+        if ((mViewFlags & FILTER_TOUCHES_WHEN_OBSCURED) != 0
+                && (event.getFlags() & MotionEvent.FLAG_WINDOW_IS_OBSCURED) != 0) {
+            // Window is obscured, drop this touch.
+            return false;
+        }
+        return true;
     }
 
     /**
