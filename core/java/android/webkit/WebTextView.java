@@ -594,8 +594,10 @@ import java.util.ArrayList;
      */
     /* package */ void remove() {
         // hide the soft keyboard when the edit text is out of focus
-        InputMethodManager.getInstance(mContext).hideSoftInputFromWindow(
-                getWindowToken(), 0);
+        InputMethodManager imm = InputMethodManager.getInstance(mContext);
+        if (imm.isActive(this)) {
+            imm.hideSoftInputFromWindow(getWindowToken(), 0);
+        }
         mWebView.removeView(this);
         mWebView.requestFocus();
     }
