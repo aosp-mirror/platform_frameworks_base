@@ -784,20 +784,6 @@
         applications can use this to erase or modify your contact data.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_writeOwnerData">write owner data</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeOwnerData">Allows an application to modify the
-        phone owner data stored on your phone. Malicious
-        applications can use this to erase or modify owner data.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_readOwnerData">read owner data</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readOwnerData">Allows an application read the
-        phone owner data stored on your phone. Malicious
-        applications can use this to read phone owner data.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCalendar">read calendar events</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readCalendar">Allows an application to read all

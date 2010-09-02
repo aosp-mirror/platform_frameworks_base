@@ -193,20 +193,6 @@
         android:label="@string/permlab_writeContacts"
         android:description="@string/permdesc_writeContacts" />
 
-    <!-- Allows an application to read the owner's data. -->
-    <permission android:name="android.permission.READ_OWNER_DATA"
-        android:permissionGroup="android.permission-group.PERSONAL_INFO"
-        android:protectionLevel="dangerous"
-        android:label="@string/permlab_readOwnerData"
-        android:description="@string/permdesc_readOwnerData" />
-
-    <!-- Allows an application to write (but not read) the owner's data. -->
-    <permission android:name="android.permission.WRITE_OWNER_DATA"
-        android:permissionGroup="android.permission-group.PERSONAL_INFO"
-        android:protectionLevel="dangerous"
-        android:label="@string/permlab_writeOwnerData"
-        android:description="@string/permdesc_writeOwnerData" />
-
     <!-- Allows an application to read the user's calendar data. -->
     <permission android:name="android.permission.READ_CALENDAR"
         android:permissionGroup="android.permission-group.PERSONAL_INFO"
@@ -634,7 +620,10 @@
         android:label="@string/permlab_setAnimationScale"
         android:description="@string/permdesc_setAnimationScale" />
 
-    <!-- Allow an application to make its activities persistent. -->
+    <!-- @deprecated This functionality will be removed in the future; please do
+         not use.
+
+         Allow an application to make its activities persistent. -->
     <permission android:name="android.permission.PERSISTENT_ACTIVITY"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="dangerous"
@@ -776,7 +765,7 @@
     <!-- Allows applications to disable the keyguard -->
     <permission android:name="android.permission.DISABLE_KEYGUARD"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="normal"
+        android:protectionLevel="dangerous"
         android:description="@string/permdesc_disableKeyguard"
         android:label="@string/permlab_disableKeyguard" />
 
