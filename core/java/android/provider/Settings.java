@@ -2421,6 +2421,14 @@ public final class Settings {
             "lock_pattern_tactile_feedback_enabled";
 
         /**
+         * This preference allows the device to be locked given time after screen goes off,
+         * subject to current DeviceAdmin policy limits.
+         * @hide
+         */
+        public static final String LOCK_SCREEN_LOCK_AFTER_TIMEOUT = "lock_screen_lock_after_timeout";
+
+
+        /**
          * Whether assisted GPS should be enabled or not.
          * @hide
          */
