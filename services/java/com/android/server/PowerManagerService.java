@@ -219,6 +219,8 @@ class PowerManagerService extends IPowerManager.Stub
     private float mLightSensorValue = -1;
     private boolean mProxIgnoredBecauseScreenTurnedOff = false;
     private int mHighestLightSensorValue = -1;
+    private boolean mLightSensorPendingDecrease = false;
+    private boolean mLightSensorPendingIncrease = false;
     private float mLightSensorPendingValue = -1;
     private int mLightSensorScreenBrightness = -1;
     private int mLightSensorButtonBrightness = -1;
@@ -1141,6 +1143,8 @@ class PowerManagerService extends IPowerManager.Stub
             pw.println("  mLightSensorEnabled=" + mLightSensorEnabled);
             pw.println("  mLightSensorValue=" + mLightSensorValue
                     + " mLightSensorPendingValue=" + mLightSensorPendingValue);
+            pw.println("  mLightSensorPendingDecrease=" + mLightSensorPendingDecrease
+                    + " mLightSensorPendingIncrease=" + mLightSensorPendingIncrease);
             pw.println("  mLightSensorScreenBrightness=" + mLightSensorScreenBrightness
                     + " mLightSensorButtonBrightness=" + mLightSensorButtonBrightness
                     + " mLightSensorKeyboardBrightness=" + mLightSensorKeyboardBrightness);
@@ -1742,6 +1746,8 @@ class PowerManagerService extends IPowerManager.Stub
                 } else {
                     // cancel light sensor task
                     mHandler.removeCallbacks(mAutoBrightnessTask);
+                    mLightSensorPendingDecrease = false;
+                    mLightSensorPendingIncrease = false;
                     mScreenOffTime = SystemClock.elapsedRealtime();
                     long identity = Binder.clearCallingIdentity();
                     try {
@@ -2325,9 +2331,10 @@ class PowerManagerService extends IPowerManager.Stub
     private Runnable mAutoBrightnessTask = new Runnable() {
         public void run() {
             synchronized (mLocks) {
-                int value = (int)mLightSensorPendingValue;
-                if (value >= 0) {
-                    mLightSensorPendingValue = -1;
+                if (mLightSensorPendingDecrease || mLightSensorPendingIncrease) {
+                    int value = (int)mLightSensorPendingValue;
+                    mLightSensorPendingDecrease = false;
+                    mLightSensorPendingIncrease = false;
                     lightSensorChangedLocked(value);
                 }
             }
@@ -2981,19 +2988,29 @@ class PowerManagerService extends IPowerManager.Stub
                 if (mDebugLightSensor) {
                     Slog.d(TAG, "onSensorChanged: light value: " + value);
                 }
-                mHandler.removeCallbacks(mAutoBrightnessTask);
-                if (mLightSensorValue != value) {
-                    if (mLightSensorValue == -1 ||
-                            milliseconds < mLastScreenOnTime + mLightSensorWarmupTime) {
-                        // process the value immediately if screen has just turned on
-                        lightSensorChangedLocked(value);
-                    } else {
-                        // delay processing to debounce the sensor
-                        mLightSensorPendingValue = value;
-                        mHandler.postDelayed(mAutoBrightnessTask, LIGHT_SENSOR_DELAY);
-                    }
+                if (mLightSensorValue == -1 ||
+                        milliseconds < mLastScreenOnTime + mLightSensorWarmupTime) {
+                    // process the value immediately if screen has just turned on
+                    mHandler.removeCallbacks(mAutoBrightnessTask);
+                    mLightSensorPendingDecrease = false;
+                    mLightSensorPendingIncrease = false;
+                    lightSensorChangedLocked(value);
                 } else {
-                    mLightSensorPendingValue = -1;
+                    if ((value > mLightSensorValue && mLightSensorPendingDecrease) ||
+                            (value < mLightSensorValue && mLightSensorPendingIncrease) ||
+                            (value == mLightSensorValue) ||
+                            (!mLightSensorPendingDecrease && !mLightSensorPendingIncrease)) {
+                        // delay processing to debounce the sensor
+                        mHandler.removeCallbacks(mAutoBrightnessTask);
+                        mLightSensorPendingDecrease = (value < mLightSensorValue);
+                        mLightSensorPendingIncrease = (value > mLightSensorValue);
+                        if (mLightSensorPendingDecrease || mLightSensorPendingIncrease) {
+                            mLightSensorPendingValue = value;
+                            mHandler.postDelayed(mAutoBrightnessTask, LIGHT_SENSOR_DELAY);
+                        }
+                    } else {
+                        mLightSensorPendingValue = value;
+                    }
                 }
             }
         }
