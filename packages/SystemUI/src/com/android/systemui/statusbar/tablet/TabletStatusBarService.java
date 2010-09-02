@@ -33,6 +33,8 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -81,6 +83,9 @@ public class TabletStatusBarService extends StatusBarService {
     ImageView mBatteryMeter;
     ImageView mSignalMeter;
     ImageView mSignalIcon;
+
+    View mBarContents;
+    View mCurtains;
 
     NotificationIconArea.IconLayout mIconLayout;
 
@@ -149,6 +154,19 @@ public class TabletStatusBarService extends StatusBarService {
 
         final View sb = View.inflate(this, R.layout.status_bar, null);
         mStatusBarView = sb;
+
+        mBarContents = sb.findViewById(R.id.bar_contents);
+        mCurtains = sb.findViewById(R.id.lights_out);
+        View systemInfo = sb.findViewById(R.id.systemInfo);
+        View.OnLongClickListener toggle = new View.OnLongClickListener() {
+            public boolean onLongClick(View v) {
+                toggleLightsOut(v);
+                return true;
+            }
+        };
+        
+        systemInfo.setOnLongClickListener(toggle);
+        mCurtains.setOnLongClickListener(toggle);
 
         // the more notifications icon
         mNotificationIconArea = (NotificationIconArea)sb.findViewById(R.id.notificationIcons);
@@ -718,6 +736,28 @@ public class TabletStatusBarService extends StatusBarService {
         entry.expanded = expanded;
 
         return true;
+    }
+
+    protected void setLightsOut(boolean out) {
+        if (out) {
+            mCurtains.setAnimation(AnimationUtils.loadAnimation((Context)this,
+                        R.anim.lights_out_in));
+            mCurtains.setVisibility(View.VISIBLE);
+            mBarContents.setAnimation(AnimationUtils.loadAnimation((Context)this,
+                        R.anim.status_bar_out));
+            mBarContents.setVisibility(View.GONE);
+        } else {
+            mCurtains.setAnimation(AnimationUtils.loadAnimation((Context)this,
+                        R.anim.lights_out_out));
+            mCurtains.setVisibility(View.GONE);
+            mBarContents.setAnimation(AnimationUtils.loadAnimation((Context)this,
+                        R.anim.status_bar_in));
+            mBarContents.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public void toggleLightsOut(View v) {
+        setLightsOut(mCurtains.getVisibility() != View.VISIBLE);
     }
 }
 

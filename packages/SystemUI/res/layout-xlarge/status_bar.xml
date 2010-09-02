@@ -19,13 +19,16 @@
 -->
 
 <!--    android:background="@drawable/status_bar_closed_default_background" -->
-<RelativeLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:background="@drawable/status_bar_background"
-    android:focusable="true"
-    android:descendantFocusability="afterDescendants"
     >
+    <RelativeLayout
+        android:id="@+id/bar_contents"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
 
         <com.android.systemui.statusbar.tablet.NotificationIconArea
             android:id="@+id/notificationIcons"
@@ -144,5 +147,19 @@
             android:background="@drawable/ic_sysbar_icon_bg"
             systemui:keyCode="4"
             />
-</RelativeLayout>
+    </RelativeLayout>
+
+    <!-- It's curtains for you. -->
+    <ImageView
+        android:id="@+id/lights_out"
+        android:src="@drawable/ic_sysbar_lightsout"
+        android:gravity="center"
+        android:background="#FF000000"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"
+        android:clickable="true"
+        android:onClick="toggleLightsOut"
+        />
+</FrameLayout>
 
