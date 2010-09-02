@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.pim.vcard;
+package android.pim.vcard.test_utils;
 
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
@@ -34,8 +34,8 @@ import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.CommonDataKinds.Website;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
+import android.test.AndroidTestCase;
 import android.test.mock.MockContentProvider;
-import android.test.mock.MockContentResolver;
 import android.text.TextUtils;
 
 import junit.framework.TestCase;
@@ -51,38 +51,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-/* package */ class ImportTestResolver extends MockContentResolver {
-    final ImportTestProvider mProvider;
-
-    public ImportTestResolver(TestCase testCase) {
-        mProvider = new ImportTestProvider(testCase);
-    }
-
-    @Override
-    public ContentProviderResult[] applyBatch(String authority,
-            ArrayList<ContentProviderOperation> operations) {
-        equalsString(authority, RawContacts.CONTENT_URI.toString());
-        return mProvider.applyBatch(operations);
-    }
-
-    public void addExpectedContentValues(ContentValues expectedContentValues) {
-        mProvider.addExpectedContentValues(expectedContentValues);
-    }
-
-    public void verify() {
-        mProvider.verify();
-    }
-
-    private static boolean equalsString(String a, String b) {
-        if (a == null || a.length() == 0) {
-            return b == null || b.length() == 0;
-        } else {
-            return a.equals(b);
-        }
-    }
-}
-
-/* package */ class ImportTestProvider extends MockContentProvider {
+public class ImportTestProvider extends MockContentProvider {
     private static final Set<String> sKnownMimeTypeSet =
         new HashSet<String>(Arrays.asList(StructuredName.CONTENT_ITEM_TYPE,
                 Nickname.CONTENT_ITEM_TYPE, Phone.CONTENT_ITEM_TYPE,
@@ -95,10 +64,7 @@ import java.util.TreeMap;
 
     final Map<String, Collection<ContentValues>> mMimeTypeToExpectedContentValues;
 
-    private final TestCase mTestCase;
-
-    public ImportTestProvider(TestCase testCase) {
-        mTestCase = testCase;
+    public ImportTestProvider(AndroidTestCase androidTestCase) {
         mMimeTypeToExpectedContentValues =
             new HashMap<String, Collection<ContentValues>>();
         for (String acceptanbleMimeType : sKnownMimeTypeSet) {
@@ -113,7 +79,7 @@ import java.util.TreeMap;
     public void addExpectedContentValues(ContentValues expectedContentValues) {
         final String mimeType = expectedContentValues.getAsString(Data.MIMETYPE);
         if (!sKnownMimeTypeSet.contains(mimeType)) {
-            mTestCase.fail(String.format(
+            TestCase.fail(String.format(
                     "Unknow MimeType %s in the test code. Test code should be broken.",
                     mimeType));
         }
@@ -127,7 +93,7 @@ import java.util.TreeMap;
     public ContentProviderResult[] applyBatch(
             ArrayList<ContentProviderOperation> operations) {
         if (operations == null) {
-            mTestCase.fail("There is no operation.");
+            TestCase.fail("There is no operation.");
         }
 
         final int size = operations.size();
@@ -148,12 +114,12 @@ import java.util.TreeMap;
                     fakeResultArray, i);
             final Uri uri = operation.getUri();
             if (uri.equals(RawContacts.CONTENT_URI)) {
-                mTestCase.assertNull(actualContentValues.get(RawContacts.ACCOUNT_NAME));
-                mTestCase.assertNull(actualContentValues.get(RawContacts.ACCOUNT_TYPE));
+                TestCase.assertNull(actualContentValues.get(RawContacts.ACCOUNT_NAME));
+                TestCase.assertNull(actualContentValues.get(RawContacts.ACCOUNT_TYPE));
             } else if (uri.equals(Data.CONTENT_URI)) {
                 final String mimeType = actualContentValues.getAsString(Data.MIMETYPE);
                 if (!sKnownMimeTypeSet.contains(mimeType)) {
-                    mTestCase.fail(String.format(
+                    TestCase.fail(String.format(
                             "Unknown MimeType %s. Probably added after developing this test",
                             mimeType));
                 }
@@ -185,7 +151,7 @@ import java.util.TreeMap;
                 final Collection<ContentValues> contentValuesCollection =
                     mMimeTypeToExpectedContentValues.get(mimeType);
                 if (contentValuesCollection.isEmpty()) {
-                    mTestCase.fail("ContentValues for MimeType " + mimeType
+                    TestCase.fail("ContentValues for MimeType " + mimeType
                             + " is not expected at all (" + actualContentValues + ")");
                 }
                 boolean checked = false;
@@ -197,23 +163,25 @@ import java.util.TreeMap;
                             + convertToEasilyReadableString(actualContentValues));*/
                     if (equalsForContentValues(expectedContentValues,
                             actualContentValues)) {
-                        mTestCase.assertTrue(contentValuesCollection.remove(expectedContentValues));
+                        TestCase.assertTrue(contentValuesCollection.remove(expectedContentValues));
                         checked = true;
                         break;
                     }
                 }
                 if (!checked) {
                     final StringBuilder builder = new StringBuilder();
+                    builder.append("\n");
                     builder.append("Unexpected: ");
                     builder.append(convertToEasilyReadableString(actualContentValues));
-                    builder.append("\nExpected: ");
+                    builder.append("\n");
+                    builder.append("Expected  : ");
                     for (ContentValues expectedContentValues : contentValuesCollection) {
                         builder.append(convertToEasilyReadableString(expectedContentValues));
                     }
-                    mTestCase.fail(builder.toString());
+                    TestCase.fail(builder.toString());
                 }
             } else {
-                mTestCase.fail("Unexpected Uri has come: " + uri);
+                TestCase.fail("Unexpected Uri has come: " + uri);
             }
         }  // for (int i = 0; i < size; i++) {
         return fakeResultArray;
@@ -232,7 +200,7 @@ import java.util.TreeMap;
             final String failMsg =
                 "There is(are) remaining expected ContentValues instance(s): \n"
                     + builder.toString();
-            mTestCase.fail(failMsg);
+            TestCase.fail(failMsg);
         }
     }
 
@@ -252,7 +220,7 @@ import java.util.TreeMap;
             if (Data.MIMETYPE.equals(key)) {
                 mimeTypeValue = valueString;
             } else {
-                mTestCase.assertNotNull(key);
+                TestCase.assertNotNull(key);
                 sortedMap.put(key, valueString);
             }
         }
@@ -273,7 +241,7 @@ import java.util.TreeMap;
     }
 
     private static boolean equalsForContentValues(
-            ContentValues expected, ContentValues actual) {
+            final ContentValues expected, final ContentValues actual) {
         if (expected == actual) {
             return true;
         } else if (expected == null || actual == null || expected.size() != actual.size()) {
@@ -286,13 +254,19 @@ import java.util.TreeMap;
             if (!actual.containsKey(key)) {
                 return false;
             }
+            // Type mismatch usuall happens as importer doesn't care the type of each value.
+            // For example, variable type might be Integer when importing the type of TEL,
+            // while variable type would be String when importing the type of RELATION.
+            final Object actualValue = actual.get(key);
             if (value instanceof byte[]) {
-                Object actualValue = actual.get(key);
                 if (!Arrays.equals((byte[])value, (byte[])actualValue)) {
+                    byte[] e = (byte[])value;
+                    byte[] a = (byte[])actualValue;
                     return false;
                 }
-            } else if (!value.equals(actual.get(key))) {
-                    return false;
+            } else if (!value.equals(actualValue) &&
+                    !value.toString().equals(actualValue.toString())) {
+                return false;
             }
         }
         return true;

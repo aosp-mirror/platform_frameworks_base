@@ -13,17 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.pim.vcard;
+package android.pim.vcard.test_utils;
 
 import android.content.ContentValues;
-import android.pim.vcard.VCardInterpreter;
 import android.pim.vcard.VCardConfig;
+import android.pim.vcard.VCardInterpreter;
+import android.pim.vcard.VCardUtils;
+import android.util.Base64;
 import android.util.CharsetUtils;
 import android.util.Log;
-
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.net.QuotedPrintableCodec;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -32,34 +30,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Store the parse result to custom datastruct: VNode, PropertyNode
+ * <p>
+ * The class storing the parse result to custom datastruct:
+ * {@link VNode}, and {@link PropertyNode}.
  * Maybe several vcard instance, so use vNodeList to store.
- * VNode: standy by a vcard instance.
- * PropertyNode: standy by a property line of a card.
- *
- * Previously used in main vCard handling code but now exists only for testing.
+ * </p>
+ * <p>
+ * This is called VNode, not VCardNode, since it was used for expressing vCalendar (iCal).
+ * </p>
  */
 public class VNodeBuilder implements VCardInterpreter {
     static private String LOG_TAG = "VNodeBuilder"; 
     
-    /**
-     * If there's no other information available, this class uses this charset for encoding
-     * byte arrays.
-     */
-    static public String TARGET_CHARSET = "UTF-8"; 
-    
-    /** type=VNode */
     public List<VNode> vNodeList = new ArrayList<VNode>();
     private int mNodeListPos = 0;
     private VNode mCurrentVNode;
     private PropertyNode mCurrentPropNode;
     private String mCurrentParamType;
-    
+
     /**
      * The charset using which VParser parses the text.
      */
     private String mSourceCharset;
-    
+
     /**
      * The charset with which byte array is encoded to String.
      */
@@ -68,27 +61,15 @@ public class VNodeBuilder implements VCardInterpreter {
     private boolean mStrictLineBreakParsing;
     
     public VNodeBuilder() {
-        this(VCardConfig.DEFAULT_CHARSET, TARGET_CHARSET, false);
+        this(VCardConfig.DEFAULT_IMPORT_CHARSET, false);
     }
 
-    public VNodeBuilder(String charset, boolean strictLineBreakParsing) {
-        this(null, charset, strictLineBreakParsing);
-    }
-    
-    /**
-     * @hide sourceCharset is temporal. 
-     */
-    public VNodeBuilder(String sourceCharset, String targetCharset,
-            boolean strictLineBreakParsing) {
-        if (sourceCharset != null) {
-            mSourceCharset = sourceCharset;
-        } else {
-            mSourceCharset = VCardConfig.DEFAULT_CHARSET;
-        }
+    public VNodeBuilder(String targetCharset, boolean strictLineBreakParsing) {
+        mSourceCharset = VCardConfig.DEFAULT_INTERMEDIATE_CHARSET;
         if (targetCharset != null) {
             mTargetCharset = targetCharset;
         } else {
-            mTargetCharset = TARGET_CHARSET;
+            mTargetCharset = VCardConfig.DEFAULT_IMPORT_CHARSET;
         }
         mStrictLineBreakParsing = strictLineBreakParsing;
     }
@@ -149,7 +130,6 @@ public class VNodeBuilder implements VCardInterpreter {
         mCurrentPropNode.propName = name;
     }
 
-    // Used only in VCard.
     public void propertyGroup(String group) {
         mCurrentPropNode.propGroupSet.add(group);
     }
@@ -159,6 +139,12 @@ public class VNodeBuilder implements VCardInterpreter {
     }
 
     public void propertyParamValue(String value) {
+        if (!VCardUtils.containsOnlyAlphaDigitHyphen(value)) {
+            value = VCardUtils.convertStringCharset(value,
+                    VCardConfig.DEFAULT_INTERMEDIATE_CHARSET,
+                    VCardConfig.DEFAULT_IMPORT_CHARSET);
+        }
+
         if (mCurrentParamType == null ||
                 mCurrentParamType.equalsIgnoreCase("TYPE")) {
             mCurrentPropNode.paramMap_TYPE.add(value);
@@ -192,71 +178,11 @@ public class VNodeBuilder implements VCardInterpreter {
             encoding = encoding.toUpperCase();
             if (encoding.equals("BASE64") || encoding.equals("B")) {
                 // Assume BASE64 is used only when the number of values is 1.
-                mCurrentPropNode.propValue_bytes =
-                    Base64.decodeBase64(value.getBytes());
+                mCurrentPropNode.propValue_bytes = Base64.decode(value.getBytes(), Base64.NO_WRAP);
                 return value;
             } else if (encoding.equals("QUOTED-PRINTABLE")) {
-                String quotedPrintable = value
-                .replaceAll("= ", " ").replaceAll("=\t", "\t");
-                String[] lines;
-                if (mStrictLineBreakParsing) {
-                    lines = quotedPrintable.split("\r\n");
-                } else {
-                    StringBuilder builder = new StringBuilder();
-                    int length = quotedPrintable.length();
-                    ArrayList<String> list = new ArrayList<String>();
-                    for (int i = 0; i < length; i++) {
-                        char ch = quotedPrintable.charAt(i);
-                        if (ch == '\n') {
-                            list.add(builder.toString());
-                            builder = new StringBuilder();
-                        } else if (ch == '\r') {
-                            list.add(builder.toString());
-                            builder = new StringBuilder();
-                            if (i < length - 1) {
-                                char nextCh = quotedPrintable.charAt(i + 1);
-                                if (nextCh == '\n') {
-                                    i++;
-                                }
-                            }
-                        } else {
-                            builder.append(ch);
-                        }
-                    }
-                    String finalLine = builder.toString();
-                    if (finalLine.length() > 0) {
-                        list.add(finalLine);
-                    }
-                    lines = list.toArray(new String[0]);
-                }
-                StringBuilder builder = new StringBuilder();
-                for (String line : lines) {
-                    if (line.endsWith("=")) {
-                        line = line.substring(0, line.length() - 1);
-                    }
-                    builder.append(line);
-                }
-                byte[] bytes;
-                try {
-                    bytes = builder.toString().getBytes(mSourceCharset);
-                } catch (UnsupportedEncodingException e1) {
-                    Log.e(LOG_TAG, "Failed to encode: charset=" + mSourceCharset);
-                    bytes = builder.toString().getBytes();
-                }
-                
-                try {
-                    bytes = QuotedPrintableCodec.decodeQuotedPrintable(bytes);
-                } catch (DecoderException e) {
-                    Log.e(LOG_TAG, "Failed to decode quoted-printable: " + e);
-                    return "";
-                }
-
-                try {
-                    return new String(bytes, targetCharset);
-                } catch (UnsupportedEncodingException e) {
-                    Log.e(LOG_TAG, "Failed to encode: charset=" + targetCharset);
-                    return new String(bytes);
-                }
+                return VCardUtils.parseQuotedPrintable(
+                        value, mStrictLineBreakParsing, mSourceCharset, targetCharset);
             }
             // Unknown encoding. Fall back to default.
         }
@@ -309,6 +235,6 @@ public class VNodeBuilder implements VCardInterpreter {
     }
     
     public String getResult(){
-        return null;
+        throw new RuntimeException("Not supported");
     }
 }

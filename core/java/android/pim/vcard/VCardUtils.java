@@ -16,13 +16,21 @@
 package android.pim.vcard;
 
 import android.content.ContentProviderOperation;
+import android.pim.vcard.exception.VCardException;
 import android.provider.ContactsContract.CommonDataKinds.Im;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.Data;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
+import android.util.Log;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.QuotedPrintableCodec;
+
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,6 +44,8 @@ import java.util.Set;
  * Utilities for VCard handling codes.
  */
 public class VCardUtils {
+    private static final String LOG_TAG = "VCardUtils";
+
     // Note that not all types are included in this map/set, since, for example, TYPE_HOME_FAX is
     // converted to two parameter Strings. These only contain some minor fields valid in both
     // vCard and current (as of 2009-08-07) Contacts structure. 
@@ -185,8 +195,7 @@ public class VCardUtils {
         // For backward compatibility.
         // Detail: Until Donut, there isn't TYPE_MOBILE for email while there is now.
         //         To support mobile type at that time, this custom label had been used.
-        return (android.provider.Contacts.ContactMethodsColumns.MOBILE_EMAIL_TYPE_NAME.equals(label)
-                || sMobilePhoneLabelSet.contains(label));
+        return ("_AUTO_CELL".equals(label) || sMobilePhoneLabelSet.contains(label));
     }
 
     public static boolean isValidInV21ButUnknownToContactsPhoteType(final String label) {
@@ -240,10 +249,13 @@ public class VCardUtils {
     }
 
     /**
+     * <p>
      * Inserts postal data into the builder object.
-     * 
+     * </p>
+     * <p>
      * Note that the data structure of ContactsContract is different from that defined in vCard.
      * So some conversion may be performed in this method.
+     * </p>
      */
     public static void insertStructuredPostalDataUsingContactsStruct(int vcardType,
             final ContentProviderOperation.Builder builder,
@@ -319,18 +331,33 @@ public class VCardUtils {
         return builder.toString();
     }
 
+    /**
+     * Splits the given value into pieces using the delimiter ';' inside it.
+     *
+     * Escaped characters in those values are automatically unescaped into original form.
+     */
     public static List<String> constructListFromValue(final String value,
-            final boolean isV30) {
+            final int vcardType) {
         final List<String> list = new ArrayList<String>();
         StringBuilder builder = new StringBuilder();
-        int length = value.length();
+        final int length = value.length();
         for (int i = 0; i < length; i++) {
             char ch = value.charAt(i);
             if (ch == '\\' && i < length - 1) {
                 char nextCh = value.charAt(i + 1);
-                final String unescapedString =
-                    (isV30 ? VCardParser_V30.unescapeCharacter(nextCh) :
-                        VCardParser_V21.unescapeCharacter(nextCh));
+                final String unescapedString;
+                if (VCardConfig.isVersion40(vcardType)) {
+                    unescapedString = VCardParserImpl_V40.unescapeCharacter(nextCh);
+                } else if (VCardConfig.isVersion30(vcardType)) {
+                    unescapedString = VCardParserImpl_V30.unescapeCharacter(nextCh);
+                } else {
+                    if (!VCardConfig.isVersion21(vcardType)) {
+                        // Unknown vCard type
+                        Log.w(LOG_TAG, "Unknown vCard type");
+                    }
+                    unescapedString = VCardParserImpl_V21.unescapeCharacter(nextCh);
+                }
+
                 if (unescapedString != null) {
                     builder.append(unescapedString);
                     i++;
@@ -371,9 +398,13 @@ public class VCardUtils {
     }
 
     /**
+     * <p>
      * This is useful when checking the string should be encoded into quoted-printable
      * or not, which is required by vCard 2.1.
+     * </p>
+     * <p>
      * See the definition of "7bit" in vCard 2.1 spec for more information.
+     * </p>
      */
     public static boolean containsOnlyNonCrLfPrintableAscii(final String...values) {
         if (values == null) {
@@ -407,13 +438,16 @@ public class VCardUtils {
         new HashSet<Character>(Arrays.asList('[', ']', '=', ':', '.', ',', ' '));
 
     /**
+     * <p>
      * This is useful since vCard 3.0 often requires the ("X-") properties and groups
      * should contain only alphabets, digits, and hyphen.
-     * 
+     * </p>
+     * <p> 
      * Note: It is already known some devices (wrongly) outputs properties with characters
      *       which should not be in the field. One example is "X-GOOGLE TALK". We accept
      *       such kind of input but must never output it unless the target is very specific
-     *       to the device which is able to parse the malformed input. 
+     *       to the device which is able to parse the malformed input.
+     * </p>
      */
     public static boolean containsOnlyAlphaDigitHyphen(final String...values) {
         if (values == null) {
@@ -451,14 +485,39 @@ public class VCardUtils {
         return true;
     }
 
+    public static boolean containsOnlyWhiteSpaces(final String...values) {
+        if (values == null) {
+            return true;
+        }
+        return containsOnlyWhiteSpaces(Arrays.asList(values));
+    }
+
+    public static boolean containsOnlyWhiteSpaces(final Collection<String> values) {
+        if (values == null) {
+            return true;
+        }
+        for (final String str : values) {
+            if (TextUtils.isEmpty(str)) {
+                continue;
+            }
+            final int length = str.length();
+            for (int i = 0; i < length; i = str.offsetByCodePoints(i, 1)) {
+                if (!Character.isWhitespace(str.codePointAt(i))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     /**
-     * <P>
+     * <p>
      * Returns true when the given String is categorized as "word" specified in vCard spec 2.1.
-     * </P>
-     * <P>
-     * vCard 2.1 specifies:<BR />
+     * </p>
+     * <p>
+     * vCard 2.1 specifies:<br />
      * word = &lt;any printable 7bit us-ascii except []=:., &gt;
-     * </P>
+     * </p>
      */
     public static boolean isV21Word(final String value) {
         if (TextUtils.isEmpty(value)) {
@@ -477,6 +536,14 @@ public class VCardUtils {
         return true;
     }
 
+    private static final int[] sEscapeIndicatorsV30 = new int[]{
+        ':', ';', ',', ' '
+    };
+
+    private static final int[] sEscapeIndicatorsV40 = new int[]{
+        ';', ':'
+    };
+
     /**
      * <P>
      * Returns String available as parameter value in vCard 3.0.
@@ -487,10 +554,18 @@ public class VCardUtils {
      * This method checks whether the given String can be used without quotes.
      * </P>
      * <P>
-     * Note: We remove DQUOTE silently for now.
+     * Note: We remove DQUOTE inside the given value silently for now.
      * </P>
      */
-    public static String toStringAvailableAsV30ParameValue(String value) {
+    public static String toStringAsV30ParamValue(String value) {
+        return toStringAsParamValue(value, sEscapeIndicatorsV30);
+    }
+
+    public static String toStringAsV40ParamValue(String value) {
+        return toStringAsParamValue(value, sEscapeIndicatorsV40);
+    }
+
+    private static String toStringAsParamValue(String value, final int[] escapeIndicators) {
         if (TextUtils.isEmpty(value)) {
             value = "";
         }
@@ -506,12 +581,19 @@ public class VCardUtils {
                 continue;
             }
             builder.appendCodePoint(codePoint);
-            if (codePoint == ':' || codePoint == ',' || codePoint == ' ') {
-                needQuote = true;
+            for (int indicator : escapeIndicators) {
+                if (codePoint == indicator) {
+                    needQuote = true;
+                    break;
+                }
             }
         }
+
         final String result = builder.toString();
-        return ((needQuote || result.isEmpty()) ? ('"' + result + '"') : result);
+        return ((result.isEmpty() || VCardUtils.containsOnlyWhiteSpaces(result))
+                ? ""
+                : (needQuote ? ('"' + result + '"')
+                : result));
     }
 
     public static String toHalfWidthString(final String orgString) {
@@ -576,6 +658,138 @@ public class VCardUtils {
         }
         return true;
     }
+
+    //// The methods bellow may be used by unit test.
+
+    /**
+     * Unquotes given Quoted-Printable value. value must not be null.
+     */
+    public static String parseQuotedPrintable(
+            final String value, boolean strictLineBreaking,
+            String sourceCharset, String targetCharset) {
+        // "= " -> " ", "=\t" -> "\t".
+        // Previous code had done this replacement. Keep on the safe side.
+        final String quotedPrintable;
+        {
+            final StringBuilder builder = new StringBuilder();
+            final int length = value.length();
+            for (int i = 0; i < length; i++) {
+                char ch = value.charAt(i);
+                if (ch == '=' && i < length - 1) {
+                    char nextCh = value.charAt(i + 1);
+                    if (nextCh == ' ' || nextCh == '\t') {
+                        builder.append(nextCh);
+                        i++;
+                        continue;
+                    }
+                }
+                builder.append(ch);
+            }
+            quotedPrintable = builder.toString();
+        }
+
+        String[] lines;
+        if (strictLineBreaking) {
+            lines = quotedPrintable.split("\r\n");
+        } else {
+            StringBuilder builder = new StringBuilder();
+            final int length = quotedPrintable.length();
+            ArrayList<String> list = new ArrayList<String>();
+            for (int i = 0; i < length; i++) {
+                char ch = quotedPrintable.charAt(i);
+                if (ch == '\n') {
+                    list.add(builder.toString());
+                    builder = new StringBuilder();
+                } else if (ch == '\r') {
+                    list.add(builder.toString());
+                    builder = new StringBuilder();
+                    if (i < length - 1) {
+                        char nextCh = quotedPrintable.charAt(i + 1);
+                        if (nextCh == '\n') {
+                            i++;
+                        }
+                    }
+                } else {
+                    builder.append(ch);
+                }
+            }
+            final String lastLine = builder.toString();
+            if (lastLine.length() > 0) {
+                list.add(lastLine);
+            }
+            lines = list.toArray(new String[0]);
+        }
+
+        final StringBuilder builder = new StringBuilder();
+        for (String line : lines) {
+            if (line.endsWith("=")) {
+                line = line.substring(0, line.length() - 1);
+            }
+            builder.append(line);
+        }
+
+        final String rawString = builder.toString();
+        if (TextUtils.isEmpty(rawString)) {
+            Log.w(LOG_TAG, "Given raw string is empty.");
+        }
+
+        byte[] rawBytes = null;
+        try {
+            rawBytes = rawString.getBytes(sourceCharset); 
+        } catch (UnsupportedEncodingException e) {
+            Log.w(LOG_TAG, "Failed to decode: " + sourceCharset);
+            rawBytes = rawString.getBytes();
+        }
+
+        byte[] decodedBytes = null;
+        try {
+            decodedBytes = QuotedPrintableCodec.decodeQuotedPrintable(rawBytes);
+        } catch (DecoderException e) {
+            Log.e(LOG_TAG, "DecoderException is thrown.");
+            decodedBytes = rawBytes;
+        }
+
+        try {
+            return new String(decodedBytes, targetCharset);
+        } catch (UnsupportedEncodingException e) {
+            Log.e(LOG_TAG, "Failed to encode: charset=" + targetCharset);
+            return new String(decodedBytes);
+        }
+    }
+
+    public static final VCardParser getAppropriateParser(int vcardType)
+            throws VCardException {
+        if (VCardConfig.isVersion21(vcardType)) {
+            return new VCardParser_V21();
+        } else if (VCardConfig.isVersion30(vcardType)) {
+            return new VCardParser_V30();
+        } else if (VCardConfig.isVersion40(vcardType)) {
+            return new VCardParser_V40();
+        } else {
+            throw new VCardException("Version is not specified");
+        }
+    }
+
+    public static final String convertStringCharset(
+            String originalString, String sourceCharset, String targetCharset) {
+        if (sourceCharset.equalsIgnoreCase(targetCharset)) {
+            return originalString;
+        }
+        final Charset charset = Charset.forName(sourceCharset);
+        final ByteBuffer byteBuffer = charset.encode(originalString);
+        // byteBuffer.array() "may" return byte array which is larger than
+        // byteBuffer.remaining(). Here, we keep on the safe side.
+        final byte[] bytes = new byte[byteBuffer.remaining()];
+        byteBuffer.get(bytes);
+        try {
+            return new String(bytes, targetCharset);
+        } catch (UnsupportedEncodingException e) {
+            Log.e(LOG_TAG, "Failed to encode: charset=" + targetCharset);
+            return null;
+        }
+    }
+
+    // TODO: utilities for vCard 4.0: datetime, timestamp, integer, float, and boolean
 
     private VCardUtils() {
     }

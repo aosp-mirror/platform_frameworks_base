@@ -20,7 +20,6 @@ import gov.nist.javax.sip.SipStackExt;
 import gov.nist.javax.sip.clientauthutils.AccountManager;
 import gov.nist.javax.sip.clientauthutils.AuthenticationHelper;
 
-import android.net.sip.SessionDescription;
 import android.net.sip.SipProfile;
 import android.util.Log;
 
@@ -243,7 +242,7 @@ class SipHelper {
     }
 
     public ClientTransaction sendInvite(SipProfile caller, SipProfile callee,
-            SessionDescription sessionDescription, String tag)
+            String sessionDescription, String tag)
             throws SipException {
         try {
             FromHeader fromHeader = createFromHeader(caller, tag);
@@ -259,9 +258,9 @@ class SipHelper {
                     toHeader, viaHeaders, maxForwards);
 
             request.addHeader(createContactHeader(caller));
-            request.setContent(sessionDescription.getContent(),
+            request.setContent(sessionDescription,
                     mHeaderFactory.createContentTypeHeader(
-                            "application", sessionDescription.getType()));
+                            "application", "sdp"));
 
             ClientTransaction clientTransaction =
                     mSipProvider.getNewClientTransaction(request);
@@ -273,12 +272,12 @@ class SipHelper {
     }
 
     public ClientTransaction sendReinvite(Dialog dialog,
-            SessionDescription sessionDescription) throws SipException {
+            String sessionDescription) throws SipException {
         try {
             Request request = dialog.createRequest(Request.INVITE);
-            request.setContent(sessionDescription.getContent(),
+            request.setContent(sessionDescription,
                     mHeaderFactory.createContentTypeHeader(
-                            "application", sessionDescription.getType()));
+                            "application", "sdp"));
 
             ClientTransaction clientTransaction =
                     mSipProvider.getNewClientTransaction(request);
@@ -326,7 +325,7 @@ class SipHelper {
      * @param event the INVITE request event
      */
     public ServerTransaction sendInviteOk(RequestEvent event,
-            SipProfile localProfile, SessionDescription sessionDescription,
+            SipProfile localProfile, String sessionDescription,
             ServerTransaction inviteTransaction)
             throws SipException {
         try {
@@ -334,9 +333,9 @@ class SipHelper {
             Response response = mMessageFactory.createResponse(Response.OK,
                     request);
             response.addHeader(createContactHeader(localProfile));
-            response.setContent(sessionDescription.getContent(),
+            response.setContent(sessionDescription,
                     mHeaderFactory.createContentTypeHeader(
-                            "application", sessionDescription.getType()));
+                            "application", "sdp"));
 
             if (inviteTransaction == null) {
                 inviteTransaction = getServerTransaction(event);
