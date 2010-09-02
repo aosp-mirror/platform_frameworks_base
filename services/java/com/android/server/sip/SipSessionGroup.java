@@ -20,6 +20,7 @@ import gov.nist.javax.sip.clientauthutils.AccountManager;
 import gov.nist.javax.sip.clientauthutils.UserCredentials;
 import gov.nist.javax.sip.header.SIPHeaderNames;
 import gov.nist.javax.sip.header.WWWAuthenticate;
+import gov.nist.javax.sip.message.SIPMessage;
 
 import android.net.sip.ISipSession;
 import android.net.sip.ISipSessionListener;
@@ -31,6 +32,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.DatagramSocket;
 import java.text.ParseException;
 import java.util.Collection;
@@ -284,6 +286,22 @@ class SipSessionGroup implements SipListener {
         }
     }
 
+    private String extractContent(Message message) {
+        // Currently we do not support secure MIME bodies.
+        byte[] bytes = message.getRawContent();
+        if (bytes != null) {
+            try {
+                if (message instanceof SIPMessage) {
+                    return ((SIPMessage) message).getMessageContent();
+                } else {
+                    return new String(bytes, "UTF-8");
+                }
+            } catch (UnsupportedEncodingException e) {
+            }
+        }
+        return null;
+    }
+
     private class SipSessionCallReceiverImpl extends SipSessionImpl {
         public SipSessionCallReceiverImpl(ISipSessionListener listener) {
             super(listener);
@@ -302,7 +320,7 @@ class SipSessionGroup implements SipListener {
                 newSession.mPeerProfile = createPeerProfile(event.getRequest());
                 newSession.mState = SipSessionState.INCOMING_CALL;
                 newSession.mPeerSessionDescription =
-                        event.getRequest().getRawContent();
+                        extractContent(event.getRequest());
                 addSipSession(newSession);
                 mProxy.onRinging(newSession, newSession.mPeerProfile,
                         newSession.mPeerSessionDescription);
@@ -321,7 +339,7 @@ class SipSessionGroup implements SipListener {
         Dialog mDialog;
         ServerTransaction mServerTransaction;
         ClientTransaction mClientTransaction;
-        byte[] mPeerSessionDescription;
+        String mPeerSessionDescription;
         boolean mInCall;
         boolean mReRegisterFlag = false;
 
@@ -401,12 +419,12 @@ class SipSessionGroup implements SipListener {
         }
 
         public void makeCall(SipProfile peerProfile,
-                SessionDescription sessionDescription) {
+                String sessionDescription) {
             doCommandAsync(
                     new MakeCallCommand(peerProfile, sessionDescription));
         }
 
-        public void answerCall(SessionDescription sessionDescription) {
+        public void answerCall(String sessionDescription) {
             try {
                 processCommand(
                         new MakeCallCommand(mPeerProfile, sessionDescription));
@@ -419,7 +437,7 @@ class SipSessionGroup implements SipListener {
             doCommandAsync(END_CALL);
         }
 
-        public void changeCall(SessionDescription sessionDescription) {
+        public void changeCall(String sessionDescription) {
             doCommandAsync(
                     new MakeCallCommand(mPeerProfile, sessionDescription));
         }
@@ -726,10 +744,9 @@ class SipSessionGroup implements SipListener {
             if (evt instanceof MakeCallCommand) {
                 MakeCallCommand cmd = (MakeCallCommand) evt;
                 mPeerProfile = cmd.getPeerProfile();
-                SessionDescription sessionDescription =
-                        cmd.getSessionDescription();
                 mClientTransaction = mSipHelper.sendInvite(mLocalProfile,
-                        mPeerProfile, sessionDescription, generateTag());
+                        mPeerProfile, cmd.getSessionDescription(),
+                        generateTag());
                 mDialog = mClientTransaction.getDialog();
                 addSipSession(this);
                 mState = SipSessionState.OUTGOING_CALL;
@@ -811,7 +828,7 @@ class SipSessionGroup implements SipListener {
                     return true;
                 case Response.OK:
                     mSipHelper.sendInviteAck(event, mDialog);
-                    mPeerSessionDescription = response.getRawContent();
+                    mPeerSessionDescription = extractContent(response);
                     establishCall();
                     return true;
                 case Response.PROXY_AUTHENTICATION_REQUIRED:
@@ -897,7 +914,7 @@ class SipSessionGroup implements SipListener {
                 // got Re-INVITE
                 RequestEvent event = mInviteReceived = (RequestEvent) evt;
                 mState = SipSessionState.INCOMING_CALL;
-                mPeerSessionDescription = event.getRequest().getRawContent();
+                mPeerSessionDescription = extractContent(event.getRequest());
                 mServerTransaction = null;
                 mProxy.onRinging(this, mPeerProfile, mPeerSessionDescription);
                 return true;
@@ -1060,10 +1077,10 @@ class SipSessionGroup implements SipListener {
     }
 
     private class MakeCallCommand extends EventObject {
-        private SessionDescription mSessionDescription;
+        private String mSessionDescription;
 
         public MakeCallCommand(SipProfile peerProfile,
-                SessionDescription sessionDescription) {
+                String sessionDescription) {
             super(peerProfile);
             mSessionDescription = sessionDescription;
         }
@@ -1072,7 +1089,7 @@ class SipSessionGroup implements SipListener {
             return (SipProfile) getSource();
         }
 
-        public SessionDescription getSessionDescription() {
+        public String getSessionDescription() {
             return mSessionDescription;
         }
     }
