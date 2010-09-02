@@ -115,8 +115,7 @@ interface ISipSession {
      * @param sessionDescription the session description of this call
      * @see ISipSessionListener
      */
-    void makeCall(in SipProfile callee,
-            in SessionDescription sessionDescription);
+    void makeCall(in SipProfile callee, String sessionDescription);
 
     /**
      * Answers an incoming call with the specified session description. The
@@ -125,7 +124,7 @@ interface ISipSession {
      *
      * @param sessionDescription the session description to answer this call
      */
-    void answerCall(in SessionDescription sessionDescription);
+    void answerCall(String sessionDescription);
 
     /**
      * Ends an established call, terminates an outgoing call or rejects an
@@ -143,5 +142,5 @@ interface ISipSession {
      *
      * @param sessionDescription the new session description
      */
-    void changeCall(in SessionDescription sessionDescription);
+    void changeCall(String sessionDescription);
 }
