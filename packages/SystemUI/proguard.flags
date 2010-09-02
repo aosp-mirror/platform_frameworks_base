@@ -2,4 +2,5 @@
   public void notificationIconsClicked(android.view.View);
   public void systemInfoClicked(android.view.View);
   public void recentButtonClicked(android.view.View);
+  public void toggleLightsOut(android.view.View);
 }
