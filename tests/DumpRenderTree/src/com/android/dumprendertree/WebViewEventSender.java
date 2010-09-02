@@ -31,6 +31,7 @@ public class WebViewEventSender implements EventSender {
 	
     WebViewEventSender(WebView webView) {
         mWebView = webView;
+        mWebView.getSettings().setBuiltInZoomControls(true);
         mTouchPoints = new Vector<TouchPoint>();
     }
 	
@@ -170,70 +171,128 @@ public class WebViewEventSender implements EventSender {
 	}
 
     public void touchStart() {
-        // We only support single touch so examine the first touch point only.
-        // If multi touch is enabled in the future, we need to re-examine this to send
-        // all the touch points with the event.
-        TouchPoint tp = mTouchPoints.get(0);
-
-        if (tp == null) {
+        final int numPoints = mTouchPoints.size();
+        if (numPoints == 0) {
             return;
         }
 
-        tp.setDownTime(SystemClock.uptimeMillis());
-        MotionEvent event = MotionEvent.obtain(tp.downTime(), tp.downTime(),
-                MotionEvent.ACTION_DOWN, tp.getX(), tp.getY(), mTouchMetaState);
+        int[] pointerIds = new int[numPoints];
+        MotionEvent.PointerCoords[] pointerCoords = new MotionEvent.PointerCoords[numPoints];
+        long downTime = SystemClock.uptimeMillis();
+
+        for (int i = 0; i < numPoints; ++i) {
+            pointerIds[i] = mTouchPoints.get(i).getId();
+            pointerCoords[i] = new MotionEvent.PointerCoords();
+            pointerCoords[i].x = mTouchPoints.get(i).getX();
+            pointerCoords[i].y = mTouchPoints.get(i).getY();
+            mTouchPoints.get(i).setDownTime(downTime);
+        }
+
+        MotionEvent event = MotionEvent.obtain(downTime, downTime,
+            MotionEvent.ACTION_DOWN, numPoints, pointerIds, pointerCoords,
+            mTouchMetaState, 1.0f, 1.0f, 0, 0, 0, 0);
+
         mWebView.onTouchEvent(event);
     }
 
     public void touchMove() {
-        TouchPoint tp = mTouchPoints.get(0);
-
-        if (tp == null) {
+        final int numPoints = mTouchPoints.size();
+        if (numPoints == 0) {
             return;
         }
 
-        if (!tp.hasMoved()) {
+        int[] pointerIds = new int[numPoints];
+        MotionEvent.PointerCoords[] pointerCoords = new MotionEvent.PointerCoords[numPoints];
+        int numMovedPoints = 0;
+        for (int i = 0; i < numPoints; ++i) {
+            TouchPoint tp = mTouchPoints.get(i);
+            if (tp.hasMoved()) {
+                pointerIds[numMovedPoints] = mTouchPoints.get(i).getId();
+                pointerCoords[i] = new MotionEvent.PointerCoords();
+                pointerCoords[numMovedPoints].x = mTouchPoints.get(i).getX();
+                pointerCoords[numMovedPoints].y = mTouchPoints.get(i).getY();
+                ++numMovedPoints;
+                tp.setMoved(false);
+            }
+        }
+
+        if (numMovedPoints == 0) {
             return;
         }
 
-        MotionEvent event = MotionEvent.obtain(tp.downTime(), SystemClock.uptimeMillis(),
-                MotionEvent.ACTION_MOVE, tp.getX(), tp.getY(), mTouchMetaState);
+        MotionEvent event = MotionEvent.obtain(mTouchPoints.get(0).downTime(),
+                SystemClock.uptimeMillis(), MotionEvent.ACTION_MOVE,
+                numMovedPoints, pointerIds, pointerCoords,
+                mTouchMetaState, 1.0f, 1.0f, 0, 0, 0, 0);
         mWebView.onTouchEvent(event);
-
-        tp.setMoved(false);
     }
 
     public void touchEnd() {
-        TouchPoint tp = mTouchPoints.get(0);
-
-        if (tp == null) {
+        final int numPoints = mTouchPoints.size();
+        if (numPoints == 0) {
             return;
         }
 
-        MotionEvent event = MotionEvent.obtain(tp.downTime(), SystemClock.uptimeMillis(),
-                MotionEvent.ACTION_UP, tp.getX(), tp.getY(), mTouchMetaState);
+        int[] pointerIds = new int[numPoints];
+        MotionEvent.PointerCoords[] pointerCoords = new MotionEvent.PointerCoords[numPoints];
+
+        for (int i = 0; i < numPoints; ++i) {
+            pointerIds[i] = mTouchPoints.get(i).getId();
+            pointerCoords[i] = new MotionEvent.PointerCoords();
+            pointerCoords[i].x = mTouchPoints.get(i).getX();
+            pointerCoords[i].y = mTouchPoints.get(i).getY();
+        }
+
+        MotionEvent event = MotionEvent.obtain(mTouchPoints.get(0).downTime(),
+                SystemClock.uptimeMillis(), MotionEvent.ACTION_UP,
+                numPoints, pointerIds, pointerCoords,
+                mTouchMetaState, 1.0f, 1.0f, 0, 0, 0, 0);
         mWebView.onTouchEvent(event);
 
-        if (tp.isReleased()) {
-            mTouchPoints.remove(0);
+        for (int i = numPoints - 1; i >= 0; --i) {  // remove released points.
+            TouchPoint tp = mTouchPoints.get(i);
+            if (tp.isReleased()) {
+              mTouchPoints.remove(i);
+            }
         }
     }
 
     public void touchCancel() {
-        TouchPoint tp = mTouchPoints.get(0);
-        if (tp == null) {
+        final int numPoints = mTouchPoints.size();
+        if (numPoints == 0) {
             return;
         }
 
-        if (tp.cancelled()) {
-            MotionEvent event = MotionEvent.obtain(tp.downTime(), SystemClock.uptimeMillis(),
-                    MotionEvent.ACTION_CANCEL, tp.getX(), tp.getY(), mTouchMetaState);
-            mWebView.onTouchEvent(event);
+        int[] pointerIds = new int[numPoints];
+        MotionEvent.PointerCoords[] pointerCoords = new MotionEvent.PointerCoords[numPoints];
+        long cancelTime = SystemClock.uptimeMillis();
+        int numCanceledPoints = 0;
+
+        for (int i = 0; i < numPoints; ++i) {
+            TouchPoint tp = mTouchPoints.get(i);
+            if (tp.cancelled()) {
+                pointerIds[numCanceledPoints] = mTouchPoints.get(i).getId();
+                pointerCoords[numCanceledPoints] = new MotionEvent.PointerCoords();
+                pointerCoords[numCanceledPoints].x = mTouchPoints.get(i).getX();
+                pointerCoords[numCanceledPoints].y = mTouchPoints.get(i).getY();
+                ++numCanceledPoints;
+            }
         }
+
+        if (numCanceledPoints == 0) {
+            return;
+        }
+
+        MotionEvent event = MotionEvent.obtain(mTouchPoints.get(0).downTime(),
+            SystemClock.uptimeMillis(), MotionEvent.ACTION_CANCEL,
+            numCanceledPoints, pointerIds, pointerCoords,
+            mTouchMetaState, 1.0f, 1.0f, 0, 0, 0, 0);
+
+        mWebView.onTouchEvent(event);
     }
 
     public void cancelTouchPoint(int id) {
-        TouchPoint tp = mTouchPoints.get(0);
+        TouchPoint tp = mTouchPoints.get(id);
         if (tp == null) {
             return;
         }
@@ -242,14 +301,19 @@ public class WebViewEventSender implements EventSender {
     }
 
     public void addTouchPoint(int x, int y) {
-        mTouchPoints.add(new TouchPoint(contentsToWindowX(x), contentsToWindowY(y)));
-        if (mTouchPoints.size() > 1) {
-            Log.w(LOGTAG, "Adding more than one touch point, but multi touch is not supported!");
+        final int numPoints = mTouchPoints.size();
+        int id;
+        if (numPoints == 0) {
+          id = 0;
+        } else {
+          id = mTouchPoints.get(numPoints - 1).getId() + 1;
         }
+
+        mTouchPoints.add(new TouchPoint(id, contentsToWindowX(x), contentsToWindowY(y)));
     }
 
-    public void updateTouchPoint(int id, int x, int y) {
-        TouchPoint tp = mTouchPoints.get(0);
+    public void updateTouchPoint(int i, int x, int y) {
+        TouchPoint tp = mTouchPoints.get(i);
         if (tp == null) {
             return;
         }
@@ -276,7 +340,7 @@ public class WebViewEventSender implements EventSender {
     }
 
     public void releaseTouchPoint(int id) {
-        TouchPoint tp = mTouchPoints.get(0);
+        TouchPoint tp = mTouchPoints.get(id);
         if (tp == null) {
             return;
         }
@@ -305,6 +369,7 @@ public class WebViewEventSender implements EventSender {
     private int mouseY;
 
     private class TouchPoint {
+        private int mId;
         private int mX;
         private int mY;
         private long mDownTime;
@@ -312,7 +377,8 @@ public class WebViewEventSender implements EventSender {
         private boolean mMoved;
         private boolean mCancelled;
 
-        public TouchPoint(int x, int y) {
+        public TouchPoint(int id, int x, int y) {
+            mId = id;
             mX = x;
             mY = y;
             mReleased = false;
@@ -332,6 +398,7 @@ public class WebViewEventSender implements EventSender {
         public void setMoved(boolean moved) { mMoved = moved; }
         public boolean hasMoved() { return mMoved; }
 
+        public int getId() { return mId; }
         public int getX() { return mX; }
         public int getY() { return mY; }
 

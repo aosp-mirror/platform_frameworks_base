@@ -457,6 +457,9 @@ public class WebView extends AbsoluteLayout
     // default is not set, the UI will continue handle them.
     private boolean mDeferTouchProcess;
 
+    // if true, multi-touch events will be passed to webkit directly before UI
+    private boolean mDeferMultitouch = false;
+
     // to avoid interfering with the current touch events, track them
     // separately. Currently no snapping or fling in the deferred process mode
     private int mDeferTouchMode = TOUCH_DONE_MODE;
@@ -4943,8 +4946,9 @@ public class WebView extends AbsoluteLayout
         }
 
         if (DebugFlags.WEB_VIEW) {
-            Log.v(LOGTAG, ev + " at " + ev.getEventTime() + " mTouchMode="
-                    + mTouchMode);
+            Log.v(LOGTAG, ev + " at " + ev.getEventTime()
+                + " mTouchMode=" + mTouchMode
+                + " numPointers=" + ev.getPointerCount());
         }
 
         int action = ev.getAction();
@@ -4991,16 +4995,18 @@ public class WebView extends AbsoluteLayout
             }
         }
 
-        // FIXME: we may consider to give WebKit an option to handle multi-touch
-        // events later.
+        // If the page disallows zoom, pass multi-pointer events to webkit.
+        if (ev.getPointerCount() > 1
+            && (mZoomManager.isZoomScaleFixed() || mDeferMultitouch)) {
+            if (DebugFlags.WEB_VIEW) {
+                Log.v(LOGTAG, "passing " + ev.getPointerCount() + " points to webkit");
+            }
+            passMultiTouchToWebKit(ev);
+            return true;
+        }
+
         if (mZoomManager.supportsMultiTouchZoom() && ev.getPointerCount() > 1 &&
                 mTouchMode != TOUCH_DRAG_LAYER_MODE && !skipScaleGesture) {
-
-            // if the page disallows zoom, skip multi-pointer action
-            if (!mZoomManager.supportsPanDuringZoom() && mZoomManager.isZoomScaleFixed()) {
-                return true;
-            }
-
             if (!detector.isInProgress() &&
                     ev.getActionMasked() != MotionEvent.ACTION_POINTER_DOWN) {
                 // Insert a fake pointer down event in order to start
@@ -5151,8 +5157,8 @@ public class WebView extends AbsoluteLayout
                     if (shouldForwardTouchEvent()) {
                         TouchEventData ted = new TouchEventData();
                         ted.mAction = action;
-                        ted.mX = contentX;
-                        ted.mY = contentY;
+                        ted.mPoints = new Point[1];
+                        ted.mPoints[0] = new Point(contentX, contentY);
                         ted.mMetaState = ev.getMetaState();
                         ted.mReprocess = mDeferTouchProcess;
                         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
@@ -5193,8 +5199,8 @@ public class WebView extends AbsoluteLayout
                         || eventTime - mLastSentTouchTime > mCurrentTouchInterval)) {
                     TouchEventData ted = new TouchEventData();
                     ted.mAction = action;
-                    ted.mX = contentX;
-                    ted.mY = contentY;
+                    ted.mPoints = new Point[1];
+                    ted.mPoints[0] = new Point(contentX, contentY);
                     ted.mMetaState = ev.getMetaState();
                     ted.mReprocess = mDeferTouchProcess;
                     mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
@@ -5382,8 +5388,8 @@ public class WebView extends AbsoluteLayout
                 if (shouldForwardTouchEvent()) {
                     TouchEventData ted = new TouchEventData();
                     ted.mAction = action;
-                    ted.mX = contentX;
-                    ted.mY = contentY;
+                    ted.mPoints = new Point[1];
+                    ted.mPoints[0] = new Point(contentX, contentY);
                     ted.mMetaState = ev.getMetaState();
                     ted.mReprocess = mDeferTouchProcess;
                     mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
@@ -5396,8 +5402,8 @@ public class WebView extends AbsoluteLayout
                         if (inFullScreenMode() || mDeferTouchProcess) {
                             TouchEventData ted = new TouchEventData();
                             ted.mAction = WebViewCore.ACTION_DOUBLETAP;
-                            ted.mX = contentX;
-                            ted.mY = contentY;
+                            ted.mPoints = new Point[1];
+                            ted.mPoints[0] = new Point(contentX, contentY);
                             ted.mMetaState = ev.getMetaState();
                             ted.mReprocess = mDeferTouchProcess;
                             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
@@ -5513,14 +5519,32 @@ public class WebView extends AbsoluteLayout
         return true;
     }
 
+    private void passMultiTouchToWebKit(MotionEvent ev) {
+        TouchEventData ted = new TouchEventData();
+        ted.mAction = ev.getAction() & MotionEvent.ACTION_MASK;
+        final int count = ev.getPointerCount();
+        ted.mPoints = new Point[count];
+        for (int c = 0; c < count; c++) {
+            int x = viewToContentX((int) ev.getX(c) + mScrollX);
+            int y = viewToContentY((int) ev.getY(c) + mScrollY);
+            ted.mPoints[c] = new Point(x, y);
+        }
+        ted.mMetaState = ev.getMetaState();
+        ted.mReprocess = mDeferTouchProcess;
+        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
+        cancelLongPress();
+        mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
+        mPreventDefault = PREVENT_DEFAULT_IGNORE;
+    }
+
     private void cancelWebCoreTouchEvent(int x, int y, boolean removeEvents) {
         if (shouldForwardTouchEvent()) {
             if (removeEvents) {
                 mWebViewCore.removeMessages(EventHub.TOUCH_EVENT);
             }
             TouchEventData ted = new TouchEventData();
-            ted.mX = x;
-            ted.mY = y;
+            ted.mPoints = new Point[1];
+            ted.mPoints[0] = new Point(x, y);
             ted.mAction = MotionEvent.ACTION_CANCEL;
             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
             mPreventDefault = PREVENT_DEFAULT_IGNORE;
@@ -6517,8 +6541,9 @@ public class WebView extends AbsoluteLayout
                     if (inFullScreenMode() || mDeferTouchProcess) {
                         TouchEventData ted = new TouchEventData();
                         ted.mAction = WebViewCore.ACTION_LONGPRESS;
-                        ted.mX = viewToContentX((int) mLastTouchX + mScrollX);
-                        ted.mY = viewToContentY((int) mLastTouchY + mScrollY);
+                        ted.mPoints = new Point[1];
+                        ted.mPoints[0] = new Point(viewToContentX((int) mLastTouchX + mScrollX),
+                                                   viewToContentY((int) mLastTouchY + mScrollY));
                         // metaState for long press is tricky. Should it be the
                         // state when the press started or when the press was
                         // released? Or some intermediary key state? For
@@ -6746,16 +6771,16 @@ public class WebView extends AbsoluteLayout
                         TouchEventData ted = (TouchEventData) msg.obj;
                         switch (ted.mAction) {
                             case MotionEvent.ACTION_DOWN:
-                                mLastDeferTouchX = contentToViewX(ted.mX)
+                                mLastDeferTouchX = contentToViewX(ted.mPoints[0].x)
                                         - mScrollX;
-                                mLastDeferTouchY = contentToViewY(ted.mY)
+                                mLastDeferTouchY = contentToViewY(ted.mPoints[0].y)
                                         - mScrollY;
                                 mDeferTouchMode = TOUCH_INIT_MODE;
                                 break;
                             case MotionEvent.ACTION_MOVE: {
                                 // no snapping in defer process
-                                int x = contentToViewX(ted.mX) - mScrollX;
-                                int y = contentToViewY(ted.mY) - mScrollY;
+                                int x = contentToViewX(ted.mPoints[0].x) - mScrollX;
+                                int y = contentToViewY(ted.mPoints[0].y) - mScrollY;
                                 if (mDeferTouchMode != TOUCH_DRAG_MODE) {
                                     mDeferTouchMode = TOUCH_DRAG_MODE;
                                     mLastDeferTouchX = x;
@@ -6784,8 +6809,8 @@ public class WebView extends AbsoluteLayout
                                 break;
                             case WebViewCore.ACTION_DOUBLETAP:
                                 // doDoubleTap() needs mLastTouchX/Y as anchor
-                                mLastTouchX = contentToViewX(ted.mX) - mScrollX;
-                                mLastTouchY = contentToViewY(ted.mY) - mScrollY;
+                                mLastTouchX = contentToViewX(ted.mPoints[0].x) - mScrollX;
+                                mLastTouchY = contentToViewY(ted.mPoints[0].y) - mScrollY;
                                 mZoomManager.handleDoubleTap(mLastTouchX, mLastTouchY);
                                 mDeferTouchMode = TOUCH_DONE_MODE;
                                 break;
@@ -7491,6 +7516,17 @@ public class WebView extends AbsoluteLayout
      */
     public void setTouchInterval(int interval) {
         mCurrentTouchInterval = interval;
+    }
+
+    /**
+     * Toggle whether multi touch events should be sent to webkit
+     * no matter if UI wants to handle it first.
+     *
+     * @hide This is only used by the webkit layout test.
+     */
+    public void setDeferMultiTouch(boolean value) {
+        mDeferMultitouch = value;
+        Log.v(LOGTAG, "set mDeferMultitouch to " + value);
     }
 
     /**

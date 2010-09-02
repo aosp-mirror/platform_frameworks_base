@@ -58,6 +58,7 @@ public class EventSenderImpl {
 
     public static class TouchPoint {
         WebView mWebView;
+        private int mId;
         private int mX;
         private int mY;
         private long mDownTime;
@@ -65,10 +66,15 @@ public class EventSenderImpl {
         private boolean mMoved = false;
         private boolean mCancelled = false;
 
-        public TouchPoint(WebView webView, int x, int y) {
+        public TouchPoint(WebView webView, int id, int x, int y) {
             mWebView = webView;
+            mId = id;
             mX = scaleX(x);
             mY = scaleY(y);
+        }
+
+        public int getId() {
+          return mId;
         }
 
         public int getX() {
@@ -215,38 +221,38 @@ public class EventSenderImpl {
                 /** TOUCH */
 
                 case MSG_ADD_TOUCH_POINT:
-                    getTouchPoints().add(new TouchPoint(mWebView,
-                            msg.arg1, msg.arg2));
-                    if (getTouchPoints().size() > 1) {
-                        Log.w(LOG_TAG + "::MSG_ADD_TOUCH_POINT", "Added more than one touch point");
+                    int numPoints = getTouchPoints().size();
+                    int id;
+                    if (numPoints == 0) {
+                        id = 0;
+                    } else {
+                        id = getTouchPoints().get(numPoints - 1).getId() + 1;
                     }
+                    getTouchPoints().add(new TouchPoint(mWebView, id,
+                            msg.arg1, msg.arg2));
                     break;
 
                 case MSG_TOUCH_START:
-                    /**
-                     * FIXME: At the moment we don't support multi-touch. Hence, we only examine
-                     * the first touch point. In future this method will need rewriting.
-                     */
                     if (getTouchPoints().isEmpty()) {
                         return;
                     }
-                    touchPoint = getTouchPoints().get(0);
-
-                    touchPoint.setDownTime(SystemClock.uptimeMillis());
-                    executeTouchEvent(touchPoint, MotionEvent.ACTION_DOWN);
+                    for (int i = 0; i < getTouchPoints().size(); ++i) {
+                        getTouchPoints().get(i).setDownTime(SystemClock.uptimeMillis());
+                    }
+                    executeTouchEvent(MotionEvent.ACTION_DOWN);
                     break;
 
                 case MSG_UPDATE_TOUCH_POINT:
                     bundle = (Bundle)msg.obj;
 
-                    int id = bundle.getInt("id");
-                    if (id >= getTouchPoints().size()) {
+                    int index = bundle.getInt("id");
+                    if (index >= getTouchPoints().size()) {
                         Log.w(LOG_TAG + "::MSG_UPDATE_TOUCH_POINT", "TouchPoint out of bounds: "
-                                + id);
+                                + index);
                         break;
                     }
 
-                    getTouchPoints().get(id).move(bundle.getInt("x"), bundle.getInt("y"));
+                    getTouchPoints().get(index).move(bundle.getInt("x"), bundle.getInt("y"));
                     break;
 
                 case MSG_TOUCH_MOVE:
@@ -257,13 +263,10 @@ public class EventSenderImpl {
                     if (getTouchPoints().isEmpty()) {
                         return;
                     }
-                    touchPoint = getTouchPoints().get(0);
-
-                    if (!touchPoint.hasMoved()) {
-                        return;
+                    executeTouchEvent(MotionEvent.ACTION_MOVE);
+                    for (int i = 0; i < getTouchPoints().size(); ++i) {
+                        getTouchPoints().get(i).resetHasMoved();
                     }
-                    executeTouchEvent(touchPoint, MotionEvent.ACTION_MOVE);
-                    touchPoint.resetHasMoved();
                     break;
 
                 case MSG_CANCEL_TOUCH_POINT:
@@ -284,11 +287,7 @@ public class EventSenderImpl {
                     if (getTouchPoints().isEmpty()) {
                         return;
                     }
-                    touchPoint = getTouchPoints().get(0);
-
-                    if (touchPoint.isCancelled()) {
-                        executeTouchEvent(touchPoint, MotionEvent.ACTION_CANCEL);
-                    }
+                    executeTouchEvent(MotionEvent.ACTION_CANCEL);
                     break;
 
                 case MSG_RELEASE_TOUCH_POINT:
@@ -309,12 +308,12 @@ public class EventSenderImpl {
                     if (getTouchPoints().isEmpty()) {
                         return;
                     }
-                    touchPoint = getTouchPoints().get(0);
-
-                    executeTouchEvent(touchPoint, MotionEvent.ACTION_UP);
-                    if (touchPoint.isReleased()) {
-                        getTouchPoints().remove(0);
-                        touchPoint = null;
+                    executeTouchEvent(MotionEvent.ACTION_UP);
+                    // remove released points.
+                    for (int i = getTouchPoints().size() - 1; i >= 0; --i) {
+                        if (getTouchPoints().get(i).isReleased()) {
+                            getTouchPoints().remove(i);
+                        }
                     }
                     break;
 
@@ -462,10 +461,48 @@ public class EventSenderImpl {
         return mTouchPoints;
     }
 
-    private void executeTouchEvent(TouchPoint touchPoint, int action) {
-        MotionEvent event =
-                MotionEvent.obtain(touchPoint.getDownTime(), SystemClock.uptimeMillis(),
-                action, touchPoint.getX(), touchPoint.getY(), mTouchMetaState);
+    private void executeTouchEvent(int action) {
+        int numPoints = getTouchPoints().size();
+        int[] pointerIds = new int[numPoints];
+        MotionEvent.PointerCoords[] pointerCoords = new MotionEvent.PointerCoords[numPoints];
+
+        for (int i = 0; i < numPoints; ++i) {
+            boolean isNeeded = false;
+            switch(action) {
+            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_UP:
+                isNeeded = true;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                isNeeded = getTouchPoints().get(i).hasMoved();
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                isNeeded = getTouchPoints().get(i).isCancelled();
+                break;
+            default:
+                Log.w(LOG_TAG + "::executeTouchEvent(),", "action not supported:" + action);
+                break;
+            }
+
+            numPoints = 0;
+            if (isNeeded) {
+                pointerIds[numPoints] = getTouchPoints().get(i).getId();
+                pointerCoords[numPoints] = new MotionEvent.PointerCoords();
+                pointerCoords[numPoints].x = getTouchPoints().get(i).getX();
+                pointerCoords[numPoints].y = getTouchPoints().get(i).getY();
+                ++numPoints;
+            }
+        }
+
+        if (numPoints == 0) {
+            return;
+        }
+
+        MotionEvent event = MotionEvent.obtain(mTouchPoints.get(0).getDownTime(),
+                SystemClock.uptimeMillis(), action,
+                numPoints, pointerIds, pointerCoords,
+                mTouchMetaState, 1.0f, 1.0f, 0, 0, 0, 0);
+
         mWebView.onTouchEvent(event);
     }
 
