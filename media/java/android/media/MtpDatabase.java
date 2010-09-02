@@ -21,6 +21,7 @@ import android.content.ContentValues;
 import android.content.IContentProvider;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.provider.MediaStore.Audio;
@@ -43,6 +44,10 @@ public class MtpDatabase {
 
     // true if the database has been modified in the current MTP session
     private boolean mDatabaseModified;
+
+    // database for writable MTP device properties
+    private SQLiteDatabase mDevicePropDb;
+    private static final int DEVICE_PROPERTIES_DATABASE_VERSION = 1;
 
     // FIXME - this should be passed in via the constructor
     private final int mStorageID = 0x00010001;
@@ -69,6 +74,9 @@ public class MtpDatabase {
     private static final String PARENT_FORMAT_WHERE = PARENT_WHERE + " AND "
                                             + MtpObjects.ObjectColumns.FORMAT + "=?";
 
+    private static final String[] DEVICE_PROPERTY_PROJECTION = new String[] { "_id", "value" };
+    private  static final String DEVICE_PROPERTY_WHERE = "code=?";
+
     private final MediaScanner mMediaScanner;
 
     static {
@@ -83,6 +91,7 @@ public class MtpDatabase {
         mVolumeName = volumeName;
         mObjectsUri = MtpObjects.getContentUri(volumeName);
         mMediaScanner = new MediaScanner(context);
+        openDevicePropertiesDatabase(context);
     }
 
     @Override
@@ -91,6 +100,22 @@ public class MtpDatabase {
             native_finalize();
         } finally {
             super.finalize();
+        }
+    }
+
+    private void openDevicePropertiesDatabase(Context context) {
+        mDevicePropDb = context.openOrCreateDatabase("device-properties", Context.MODE_PRIVATE, null);
+        int version = mDevicePropDb.getVersion();
+
+        // initialize if necessary
+        if (version != DEVICE_PROPERTIES_DATABASE_VERSION) {
+            mDevicePropDb.execSQL("CREATE TABLE properties (" +
+                    "_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "code INTEGER UNIQUE ON CONFLICT REPLACE," +
+                    "value TEXT" +
+                    ");");
+            mDevicePropDb.execSQL("CREATE INDEX property_index ON properties (code);");
+            mDevicePropDb.setVersion(DEVICE_PROPERTIES_DATABASE_VERSION);
         }
     }
 
@@ -257,8 +282,10 @@ public class MtpDatabase {
     }
 
     private int[] getSupportedDeviceProperties() {
-        // no device properties yet
-        return null;
+        return new int[] {
+            MtpConstants.DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER,
+            MtpConstants.DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME,
+        };
     }
 
     private int getObjectProperty(int handle, int property,
@@ -340,6 +367,68 @@ public class MtpDatabase {
         }
         // query failed if we get here
         return MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE;
+    }
+
+    private int setObjectProperty(int handle, int property,
+                            long intValue, String stringValue) {
+        Log.d(TAG, "setObjectProperty: " + property);
+        return MtpConstants.RESPONSE_OBJECT_PROP_NOT_SUPPORTED;
+    }
+
+    private int getDeviceProperty(int property, long[] outIntValue, char[] outStringValue) {
+        Log.d(TAG, "getDeviceProperty: " + property);
+
+        switch (property) {
+            case MtpConstants.DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER:
+            case MtpConstants.DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME:
+                // writable string properties kept in our device property database
+                Cursor c = null;
+                try {
+                    c = mDevicePropDb.query("properties", DEVICE_PROPERTY_PROJECTION,
+                        DEVICE_PROPERTY_WHERE, new String[] {  Integer.toString(property) },
+                        null, null, null);
+
+                    if (c != null && c.moveToNext()) {
+                        String value = c.getString(1);
+                        int length = value.length();
+                        if (length > 255) {
+                            length = 255;
+                        }
+                        value.getChars(0, length, outStringValue, 0);
+                        outStringValue[length] = 0;
+                    } else {
+                        outStringValue[0] = 0;
+                    }
+                    return MtpConstants.RESPONSE_OK;
+                } finally {
+                    if (c != null) {
+                        c.close();
+                    }
+                }
+        }
+
+        return MtpConstants.RESPONSE_DEVICE_PROP_NOT_SUPPORTED;
+    }
+
+    private int setDeviceProperty(int property, long intValue, String stringValue) {
+        Log.d(TAG, "setDeviceProperty: " + property + " : " + stringValue);
+
+        switch (property) {
+            case MtpConstants.DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER:
+            case MtpConstants.DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME:
+                // writable string properties kept in our device property database
+                try {
+                    ContentValues values = new ContentValues();
+                    values.put("code", property);
+                    values.put("value", stringValue);
+                    mDevicePropDb.insert("properties", "code", values);
+                    return MtpConstants.RESPONSE_OK;
+                } catch (Exception e) {
+                    return MtpConstants.RESPONSE_GENERAL_ERROR;
+                }
+        }
+
+        return MtpConstants.RESPONSE_DEVICE_PROP_NOT_SUPPORTED;
     }
 
     private boolean getObjectInfo(int handle, int[] outStorageFormatParent,

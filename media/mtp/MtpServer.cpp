@@ -55,7 +55,7 @@ static const MtpOperationCode kSupportedOperationCodes[] = {
 //    MTP_OPERATION_SELF_TEST,
 //    MTP_OPERATION_SET_OBJECT_PROTECTION,
 //    MTP_OPERATION_POWER_DOWN,
-//    MTP_OPERATION_GET_DEVICE_PROP_DESC,
+    MTP_OPERATION_GET_DEVICE_PROP_DESC,
     MTP_OPERATION_GET_DEVICE_PROP_VALUE,
     MTP_OPERATION_SET_DEVICE_PROP_VALUE,
     MTP_OPERATION_RESET_DEVICE_PROP_VALUE,
@@ -287,6 +287,9 @@ bool MtpServer::handleRequest() {
             break;
         case MTP_OPERATION_GET_OBJECT_PROP_DESC:
             response = doGetObjectPropDesc();
+            break;
+        case MTP_OPERATION_GET_DEVICE_PROP_DESC:
+            response = doGetDevicePropDesc();
             break;
         default:
             response = MTP_RESPONSE_OPERATION_NOT_SUPPORTED;
