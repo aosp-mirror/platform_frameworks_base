@@ -31,13 +31,12 @@ class Camera;
 
 class CameraSourceTimeLapse : public CameraSource {
 public:
-    static CameraSourceTimeLapse *Create(bool useStillCameraForTimeLapse,
+    static CameraSourceTimeLapse *Create(
         int64_t timeBetweenTimeLapseFrameCaptureUs,
         int32_t width, int32_t height,
         int32_t videoFrameRate);
 
     static CameraSourceTimeLapse *CreateFromCamera(const sp<Camera> &camera,
-        bool useStillCameraForTimeLapse,
         int64_t timeBetweenTimeLapseFrameCaptureUs,
         int32_t width, int32_t height,
         int32_t videoFrameRate);
@@ -87,7 +86,6 @@ private:
     bool mCameraIdle;
 
     CameraSourceTimeLapse(const sp<Camera> &camera,
-        bool useStillCameraForTimeLapse,
         int64_t timeBetweenTimeLapseFrameCaptureUs,
         int32_t width, int32_t height,
         int32_t videoFrameRate);
@@ -123,6 +121,11 @@ private:
     // Then it calls the base CameraSource::dataCallbackTimestamp()
     virtual void dataCallbackTimestamp(int64_t timestampUs, int32_t msgType,
             const sp<IMemory> &data);
+
+    // If the passed in size (width x height) is a supported preview size,
+    // the function sets the camera's preview size to it and returns true.
+    // Otherwise returns false.
+    bool trySettingPreviewSize(int32_t width, int32_t height);
 
     // The still camera may not support the demanded video width and height.
     // We look for the supported picture sizes from the still camera and
