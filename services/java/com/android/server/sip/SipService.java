@@ -53,8 +53,6 @@ import java.util.TimerTask;
 import java.util.TreeSet;
 import javax.sip.SipException;
 
-/**
- */
 public final class SipService extends ISipService.Stub {
     private static final String TAG = "SipService";
     private static final int EXPIRY_TIME = 3600;
@@ -78,7 +76,16 @@ public final class SipService extends ISipService.Stub {
 
     private ConnectivityReceiver mConnectivityReceiver;
 
-    public SipService(Context context) {
+    /**
+     * Creates a {@code SipService} instance. Returns null if SIP API is not
+     * supported.
+     */
+    public static SipService create(Context context) {
+        return (SipManager.isApiSupported(context) ? new SipService(context)
+                                                   : null);
+    }
+
+    private SipService(Context context) {
         Log.v(TAG, " service started!");
         mContext = context;
         mConnectivityReceiver = new ConnectivityReceiver();
