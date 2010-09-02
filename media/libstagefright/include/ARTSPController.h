@@ -42,6 +42,7 @@ struct ARTSPController : public MediaExtractor {
             size_t index, uint32_t flags);
 
     int64_t getNormalPlayTimeUs();
+    int64_t getQueueDurationUs(bool *eos);
 
     void onMessageReceived(const sp<AMessage> &msg);
 

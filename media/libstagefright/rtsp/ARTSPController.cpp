@@ -143,4 +143,26 @@ int64_t ARTSPController::getNormalPlayTimeUs() {
     return mHandler->getNormalPlayTimeUs();
 }
 
+int64_t ARTSPController::getQueueDurationUs(bool *eos) {
+    *eos = true;
+
+    int64_t minQueuedDurationUs = 0;
+    for (size_t i = 0; i < mHandler->countTracks(); ++i) {
+        sp<APacketSource> source = mHandler->getPacketSource(i);
+
+        bool newEOS;
+        int64_t queuedDurationUs = source->getQueueDurationUs(&newEOS);
+
+        if (!newEOS) {
+            *eos = false;
+        }
+
+        if (i == 0 || queuedDurationUs < minQueuedDurationUs) {
+            minQueuedDurationUs = queuedDurationUs;
+        }
+    }
+
+    return minQueuedDurationUs;
+}
+
 }  // namespace android

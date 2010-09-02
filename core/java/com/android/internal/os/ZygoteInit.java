@@ -575,12 +575,8 @@ public class ZygoteInit {
             EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_END,
                 SystemClock.uptimeMillis());
 
-            if (SamplingProfilerIntegration.isEnabled()) {
-                SamplingProfiler sp = SamplingProfiler.getInstance();
-                sp.pause();
-                SamplingProfilerIntegration.writeZygoteSnapshot();
-                sp.shutDown();
-            }
+            // Finish profiling the zygote initialization.
+            SamplingProfilerIntegration.writeZygoteSnapshot();
 
             // Do an initial gc to clean up after startup
             gc();

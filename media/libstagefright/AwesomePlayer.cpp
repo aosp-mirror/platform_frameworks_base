@@ -271,9 +271,13 @@ status_t AwesomePlayer::setDataSource_l(
 status_t AwesomePlayer::setDataSource(
         int fd, int64_t offset, int64_t length) {
 #if 0
+    // return setDataSource("httplive://qthttp.apple.com.edgesuite.net/1009qpeijrfn/sl.m3u8");
+    return setDataSource("httplive://qthttp.apple.com.edgesuite.net/1009qpeijrfn/0440.m3u8");
+    // return setDataSource("httplive://qthttp.apple.com.edgesuite.net/1009qpeijrfn/0640.m3u8");
+    // return setDataSource("httplive://qthttp.apple.com.edgesuite.net/1009qpeijrfn/1240_vod.m3u8");
     // return setDataSource("httplive://iphoned5.akamai.com.edgesuite.net/mhbarron/nasatv/nasatv_96.m3u8");
     // return setDataSource("httplive://iphoned5.akamai.com.edgesuite.net/mhbarron/nasatv/nasatv_1500.m3u8");
-    return setDataSource("httplive://iphone.video.hsn.com/iPhone_high.m3u8");
+    // return setDataSource("httplive://iphone.video.hsn.com/iPhone_high.m3u8");
     // return setDataSource("httplive://iphoned5.akamai.com.edgesuite.net/mhbarron/iphonewebcast/webcast090209_all/webcast090209_all.m3u8");
     // return setDataSource("httplive://qthttp.akamai.com.edgesuite.net/iphone_demo/Video_Content/usat/tt_062209_iphone/hi/prog_index.m3u8");
     // return setDataSource("httplive://qthttp.akamai.com.edgesuite.net/iphone_demo/Video_Content/usat/tt_googmaps/hi/prog_index.m3u8");
@@ -453,6 +457,33 @@ void AwesomePlayer::onBufferingUpdate() {
     }
     mBufferingEventPending = false;
 
+    int kLowWaterMarkSecs = 2;
+    int kHighWaterMarkSecs = 10;
+
+    if (mRTSPController != NULL) {
+        bool eos;
+        int64_t queueDurationUs = mRTSPController->getQueueDurationUs(&eos);
+
+        LOGV("queueDurationUs = %.2f secs", queueDurationUs / 1E6);
+
+        if ((mFlags & PLAYING) && !eos
+                && (queueDurationUs < kLowWaterMarkSecs * 1000000ll)) {
+            LOGI("rtsp cache is running low, pausing.");
+            mFlags |= CACHE_UNDERRUN;
+            pause_l();
+            notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_START);
+        } else if ((mFlags & CACHE_UNDERRUN)
+                && (eos || queueDurationUs > kHighWaterMarkSecs * 1000000ll)) {
+            LOGI("rtsp cache has filled up, resuming.");
+            mFlags &= ~CACHE_UNDERRUN;
+            play_l();
+            notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_END);
+        }
+
+        postBufferingEvent_l();
+        return;
+    }
+
     if (mCachedSource == NULL) {
         return;
     }
@@ -480,8 +511,8 @@ void AwesomePlayer::onBufferingUpdate() {
 
             notifyListener_l(MEDIA_BUFFERING_UPDATE, percentage);
 
-            lowWatermark = 2 * bitrate / 8;  // 2 secs
-            highWatermark = 10 * bitrate / 8;  // 10 secs
+            lowWatermark = kLowWaterMarkSecs * bitrate / 8;
+            highWatermark = kHighWaterMarkSecs * bitrate / 8;
         }
     }
 

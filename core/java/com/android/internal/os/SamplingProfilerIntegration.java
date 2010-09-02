@@ -18,10 +18,12 @@ package com.android.internal.os;
 
 import dalvik.system.SamplingProfiler;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -48,6 +50,8 @@ public class SamplingProfilerIntegration {
         }
     }
 
+    private static SamplingProfiler INSTANCE;
+
     /**
      * Is profiling enabled?
      */
@@ -59,8 +63,13 @@ public class SamplingProfilerIntegration {
      * Starts the profiler if profiling is enabled.
      */
     public static void start() {
-        if (!enabled) return;
-        SamplingProfiler.getInstance().start(10);
+        if (!enabled) {
+            return;
+        }
+        ThreadGroup group = Thread.currentThread().getThreadGroup();
+        SamplingProfiler.ThreadSet threadSet = SamplingProfiler.newThreadGroupTheadSet(group);
+        INSTANCE = new SamplingProfiler(4, threadSet);
+        INSTANCE.start(10);
     }
 
     /** Whether or not we've created the snapshots dir. */
@@ -73,7 +82,9 @@ public class SamplingProfilerIntegration {
      * Writes a snapshot to the SD card if profiling is enabled.
      */
     public static void writeSnapshot(final String name) {
-        if (!enabled) return;
+        if (!enabled) {
+            return;
+        }
 
         /*
          * If we're already writing a snapshot, don't bother enqueing another
@@ -109,18 +120,22 @@ public class SamplingProfilerIntegration {
      * Writes the zygote's snapshot to internal storage if profiling is enabled.
      */
     public static void writeZygoteSnapshot() {
-        if (!enabled) return;
+        if (!enabled) {
+            return;
+        }
 
         String dir = "/data/zygote/snapshots";
         new File(dir).mkdirs();
         writeSnapshot(dir, "zygote");
+        INSTANCE.shutdown();
+        INSTANCE = null;
     }
 
     private static void writeSnapshot(String dir, String name) {
-        byte[] snapshot = SamplingProfiler.getInstance().snapshot();
-        if (snapshot == null) {
+        if (!enabled) {
             return;
         }
+        INSTANCE.stop();
 
         /*
          * We use the current time as a unique ID. We can't use a counter
@@ -128,39 +143,40 @@ public class SamplingProfilerIntegration {
          * we capture two snapshots in rapid succession.
          */
         long start = System.currentTimeMillis();
-        String path = dir + "/" + name.replace(':', '.') + "-" +
+        String path = dir + "/" + name.replace(':', '.') + "-"
                 + System.currentTimeMillis() + ".snapshot";
-        try {
-            // Try to open the file a few times. The SD card may not be mounted.
-            FileOutputStream out;
-            int count = 0;
-            while (true) {
-                try {
-                    out = new FileOutputStream(path);
-                    break;
-                } catch (FileNotFoundException e) {
-                    if (++count > 3) {
-                        Log.e(TAG, "Could not open " + path + ".");
-                        return;
-                    }
 
-                    // Sleep for a bit and then try again.
-                    try {
-                        Thread.sleep(2500);
-                    } catch (InterruptedException e1) { /* ignore */ }
-                }
-            }
-
+        // Try to open the file a few times. The SD card may not be mounted.
+        PrintStream out;
+        int count = 0;
+        while (true) {
             try {
-                out.write(snapshot);
-            } finally {
-                out.close();
+                out = new PrintStream(new BufferedOutputStream(new FileOutputStream(path)));
+                break;
+            } catch (FileNotFoundException e) {
+                if (++count > 3) {
+                    Log.e(TAG, "Could not open " + path + ".");
+                    return;
+                }
+
+                // Sleep for a bit and then try again.
+                try {
+                    Thread.sleep(2500);
+                } catch (InterruptedException e1) { /* ignore */ }
             }
+        }
+
+        try {
+            INSTANCE.writeHprofData(out);
+        } finally {
+            out.close();
+        }
+        if (out.checkError()) {
+            Log.e(TAG, "Error writing snapshot.");
+        } else {
             long elapsed = System.currentTimeMillis() - start;
             Log.i(TAG, "Wrote snapshot for " + name
-                    + " in " + elapsed + "ms.");
-        } catch (IOException e) {
-            Log.e(TAG, "Error writing snapshot.", e);
+                  + " in " + elapsed + "ms.");
         }
     }
 }

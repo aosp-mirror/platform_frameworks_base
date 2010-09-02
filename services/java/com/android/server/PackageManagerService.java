@@ -2603,7 +2603,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         // First check if this is a system package that may involve an update
         if (updatedPkg != null && (parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0) {
-            if (!ps.codePath.equals(scanFile)) {
+            if (ps != null && !ps.codePath.equals(scanFile)) {
                 // The path has changed from what was last scanned...  check the
                 // version of the new path against what we have stored to determine
                 // what to do.
@@ -6181,18 +6181,15 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         // Delete the updated package
         outInfo.isRemovedPackageSystemUpdate = true;
-        boolean deleteCodeAndResources = false;
-        if (ps.versionCode <  p.mVersionCode) {
+        final boolean deleteCodeAndResources;
+        if (ps.versionCode < p.mVersionCode) {
             // Delete code and resources for downgrades
             deleteCodeAndResources = true;
-            if ((flags & PackageManager.DONT_DELETE_DATA) == 0) {
-                flags &= ~PackageManager.DONT_DELETE_DATA;
-            }
+            flags &= ~PackageManager.DONT_DELETE_DATA;
         } else {
             // Preserve data by setting flag
-            if ((flags & PackageManager.DONT_DELETE_DATA) == 0) {
-                flags |= PackageManager.DONT_DELETE_DATA;
-            }
+            deleteCodeAndResources = false;
+            flags |= PackageManager.DONT_DELETE_DATA;
         }
         boolean ret = deleteInstalledPackageLI(p, deleteCodeAndResources, flags, outInfo);
         if (!ret) {

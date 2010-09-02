@@ -746,4 +746,27 @@ void APacketSource::setNormalPlayTimeMapping(
     mNormalPlayTimeBaseUs = normalPlayTimeUs;
 }
 
+int64_t APacketSource::getQueueDurationUs(bool *eos) {
+    Mutex::Autolock autoLock(mLock);
+
+    *eos = (mEOSResult != OK);
+
+    if (mBuffers.size() < 2) {
+        return 0;
+    }
+
+    const sp<ABuffer> first = *mBuffers.begin();
+    const sp<ABuffer> last = *--mBuffers.end();
+
+    int64_t firstTimeUs;
+    CHECK(first->meta()->findInt64("timeUs", &firstTimeUs));
+
+    int64_t lastTimeUs;
+    CHECK(last->meta()->findInt64("timeUs", &lastTimeUs));
+
+    CHECK_GE(lastTimeUs, firstTimeUs);
+
+    return lastTimeUs - firstTimeUs;
+}
+
 }  // namespace android
