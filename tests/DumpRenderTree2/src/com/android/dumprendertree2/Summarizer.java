@@ -263,6 +263,7 @@ public class Summarizer {
         txt.append("Date: " + dateFormat.format(mDate) + "\n");
         txt.append("Build fingerprint: " + Build.FINGERPRINT + "\n");
         txt.append("WebKit version: " + getWebKitVersionFromUserAgentString() + "\n");
+        txt.append("WebKit revision: " + getWebKitRevision() + "\n");
 
         txt.append("TOTAL:   " + getTotalTestCount() + "\n");
         if (mCrashedTestsCount > 0) {
@@ -322,12 +323,36 @@ public class Summarizer {
         return "unknown";
     }
 
+    private String getWebKitRevision() {
+        URL url = null;
+        try {
+            url = new URL(ForwarderManager.getHostSchemePort(false) + "WEBKIT_MERGE_REVISION");
+        } catch (MalformedURLException e) {
+            assert false;
+        }
+
+        String webkitMergeRevisionFileContents = new String(FsUtils.readDataFromUrl(url));
+        Matcher matcher =
+            Pattern.compile("http://svn.webkit.org/repository/webkit/trunk@([0-9]+)").matcher(
+                    webkitMergeRevisionFileContents);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return "unknown";
+    }
+
     private void createTopSummaryTable(StringBuilder html) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         html.append("<h1>" + mTestsRelativePath + "</h1>");
         html.append("<h3>" + "Date: " + dateFormat.format(new Date()) + "</h3>");
         html.append("<h3>" + "Build fingerprint: " + Build.FINGERPRINT + "</h3>");
         html.append("<h3>" + "WebKit version: " + getWebKitVersionFromUserAgentString() + "</h3>");
+
+        String webkitRevision = getWebKitRevision();
+        html.append("<h3>" + "WebKit revision: ");
+        html.append("<a href=\"http://trac.webkit.org/browser/trunk?rev=" + webkitRevision +
+                "\" target=\"_blank\"><span class=\"path\">" + webkitRevision + "</span></a>");
+        html.append("</h3>");
 
         html.append("<table class=\"summary\">");
         createSummaryTableRow(html, "TOTAL", getTotalTestCount());
