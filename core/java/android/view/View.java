@@ -72,6 +72,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.WeakHashMap;
 
 /**
@@ -1837,6 +1838,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     protected OnFocusChangeListener mOnFocusChangeListener;
 
     /**
+     * Listeners for layout change events.
+     */
+    private ArrayList<OnLayoutChangeListener> mOnLayoutChangeListeners;
+
+    /**
      * Listener used to dispatch click events.
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
@@ -2492,6 +2498,39 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void setOnFocusChangeListener(OnFocusChangeListener l) {
         mOnFocusChangeListener = l;
+    }
+
+    /**
+     * Add a listener that will be called when the bounds of the view change due to
+     * layout processing.
+     *
+     * @param listener The listener that will be called when layout bounds change.
+     */
+    public void addOnLayoutChangeListener(OnLayoutChangeListener listener) {
+        if (mOnLayoutChangeListeners == null) {
+            mOnLayoutChangeListeners = new ArrayList<OnLayoutChangeListener>();
+        }
+        mOnLayoutChangeListeners.add(listener);
+    }
+
+    /**
+     * Remove a listener for layout changes.
+     *
+     * @param listener The listener for layout bounds change.
+     */
+    public void removeOnLayoutChangeListener(OnLayoutChangeListener listener) {
+        if (mOnLayoutChangeListeners == null) {
+            return;
+        }
+        mOnLayoutChangeListeners.remove(listener);
+    }
+
+    /**
+     * Gets the current list of listeners for layout changes.
+     * @return
+     */
+    public List<OnLayoutChangeListener> getOnLayoutChangeListeners() {
+        return mOnLayoutChangeListeners;
     }
 
     /**
@@ -4805,6 +4844,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Interface definition for a callback to be invoked when the layout bounds of a view
+     * changes due to layout processing.
+     */
+    public interface OnLayoutChangeListener {
+        /**
+         * Called when the focus state of a view has changed.
+         *
+         * @param v The view whose state has changed.
+         * @param left The new value of the view's left property.
+         * @param top The new value of the view's top property.
+         * @param right The new value of the view's right property.
+         * @param bottom The new value of the view's bottom property.
+         * @param oldLeft The previous value of the view's left property.
+         * @param oldTop The previous value of the view's top property.
+         * @param oldRight The previous value of the view's right property.
+         * @param oldBottom The previous value of the view's bottom property.
+         */
+        void onLayoutChange(View v, int left, int top, int right, int bottom,
+            int oldLeft, int oldTop, int oldRight, int oldBottom);
+    }
+
+    /**
      * This is called during layout when the size of this view has changed. If
      * you were just added to the view hierarchy, you're called with the old
      * values of 0.
@@ -5265,6 +5326,45 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Sets the top position of this view relative to its parent. This method is meant to be called
+     * by the layout system and should not generally be called otherwise, because the property
+     * may be changed at any time by the layout.
+     *
+     * @param top The top of this view, in pixels.
+     */
+    public final void setTop(int top) {
+        if (top != mTop) {
+            if (hasIdentityMatrix()) {
+                final ViewParent p = mParent;
+                if (p != null && mAttachInfo != null) {
+                    final Rect r = mAttachInfo.mTmpInvalRect;
+                    int minTop;
+                    int yLoc;
+                    if (top < mTop) {
+                        minTop = top;
+                        yLoc = top - mTop;
+                    } else {
+                        minTop = mTop;
+                        yLoc = 0;
+                    }
+                    r.set(0, yLoc, mRight - mLeft, mBottom - minTop);
+                    p.invalidateChild(this, r);
+                }
+            } else {
+                // Double-invalidation is necessary to capture view's old and new areas
+                invalidate();
+            }
+
+            mTop = top;
+
+            if (!mMatrixIsIdentity) {
+                mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+                invalidate();
+            }
+        }
+    }
+
+    /**
      * Bottom position of this view relative to its parent.
      *
      * @return The bottom of this view, in pixels.
@@ -5272,6 +5372,42 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     @ViewDebug.CapturedViewProperty
     public final int getBottom() {
         return mBottom;
+    }
+
+    /**
+     * Sets the bottom position of this view relative to its parent. This method is meant to be
+     * called by the layout system and should not generally be called otherwise, because the
+     * property may be changed at any time by the layout.
+     *
+     * @param bottom The bottom of this view, in pixels.
+     */
+    public final void setBottom(int bottom) {
+        if (bottom != mBottom) {
+            if (hasIdentityMatrix()) {
+                final ViewParent p = mParent;
+                if (p != null && mAttachInfo != null) {
+                    final Rect r = mAttachInfo.mTmpInvalRect;
+                    int maxBottom;
+                    if (bottom < mBottom) {
+                        maxBottom = mBottom;
+                    } else {
+                        maxBottom = bottom;
+                    }
+                    r.set(0, 0, mRight - mLeft, maxBottom - mTop);
+                    p.invalidateChild(this, r);
+                }
+            } else {
+                // Double-invalidation is necessary to capture view's old and new areas
+                invalidate();
+            }
+
+            mBottom = bottom;
+
+            if (!mMatrixIsIdentity) {
+                mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+                invalidate();
+            }
+        }
     }
 
     /**
@@ -5285,6 +5421,46 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Sets the left position of this view relative to its parent. This method is meant to be called
+     * by the layout system and should not generally be called otherwise, because the property
+     * may be changed at any time by the layout.
+     *
+     * @param left The bottom of this view, in pixels.
+     */
+    public final void setLeft(int left) {
+        if (left != mLeft) {
+            System.out.println("view " + this + " left = " + left);
+            if (hasIdentityMatrix()) {
+                final ViewParent p = mParent;
+                if (p != null && mAttachInfo != null) {
+                    final Rect r = mAttachInfo.mTmpInvalRect;
+                    int minLeft;
+                    int xLoc;
+                    if (left < mLeft) {
+                        minLeft = left;
+                        xLoc = left - mLeft;
+                    } else {
+                        minLeft = mLeft;
+                        xLoc = 0;
+                    }
+                    r.set(xLoc, 0, mRight - minLeft, mBottom - mTop);
+                    p.invalidateChild(this, r);
+                }
+            } else {
+                // Double-invalidation is necessary to capture view's old and new areas
+                invalidate();
+            }
+
+            mLeft = left;
+
+            if (!mMatrixIsIdentity) {
+                mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+                invalidate();
+            }
+        }
+    }
+
+    /**
      * Right position of this view relative to its parent.
      *
      * @return The right edge of this view, in pixels.
@@ -5292,6 +5468,42 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     @ViewDebug.CapturedViewProperty
     public final int getRight() {
         return mRight;
+    }
+
+    /**
+     * Sets the right position of this view relative to its parent. This method is meant to be called
+     * by the layout system and should not generally be called otherwise, because the property
+     * may be changed at any time by the layout.
+     *
+     * @param right The bottom of this view, in pixels.
+     */
+    public final void setRight(int right) {
+        if (right != mRight) {
+            if (hasIdentityMatrix()) {
+                final ViewParent p = mParent;
+                if (p != null && mAttachInfo != null) {
+                    final Rect r = mAttachInfo.mTmpInvalRect;
+                    int maxRight;
+                    if (right < mRight) {
+                        maxRight = mRight;
+                    } else {
+                        maxRight = right;
+                    }
+                    r.set(0, 0, maxRight - mLeft, mBottom - mTop);
+                    p.invalidateChild(this, r);
+                }
+            } else {
+                // Double-invalidation is necessary to capture view's old and new areas
+                invalidate();
+            }
+
+            mRight = right;
+
+            if (!mMatrixIsIdentity) {
+                mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+                invalidate();
+            }
+        }
     }
 
     /**
@@ -7741,7 +7953,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * Derived classes with children should override
      * onLayout. In that method, they should
-     * call layout on each of their their children.
+     * call layout on each of their children.
      *
      * @param l Left position, relative to parent
      * @param t Top position, relative to parent
@@ -7749,6 +7961,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param b Bottom position, relative to parent
      */
     public final void layout(int l, int t, int r, int b) {
+        int oldL = mLeft;
+        int oldT = mTop;
+        int oldB = mBottom;
+        int oldR = mRight;
         boolean changed = setFrame(l, t, r, b);
         if (changed || (mPrivateFlags & LAYOUT_REQUIRED) == LAYOUT_REQUIRED) {
             if (ViewDebug.TRACE_HIERARCHY) {
@@ -7757,6 +7973,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
             onLayout(changed, l, t, r, b);
             mPrivateFlags &= ~LAYOUT_REQUIRED;
+
+            if (mOnLayoutChangeListeners != null) {
+                ArrayList<OnLayoutChangeListener> listenersCopy =
+                        (ArrayList<OnLayoutChangeListener>) mOnLayoutChangeListeners.clone();
+                int numListeners = listenersCopy.size();
+                for (int i = 0; i < numListeners; ++i) {
+                    listenersCopy.get(i).onLayoutChange(this, l, r, t, b, oldL, oldT, oldR, oldB);
+                }
+            }
         }
         mPrivateFlags &= ~FORCE_LAYOUT;
     }
@@ -7767,7 +7992,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * Derived classes with children should override
      * this method and call layout on each of
-     * their their children.
+     * their children.
      * @param changed This is a new size or position for this view
      * @param left Left position, relative to parent
      * @param top Top position, relative to parent
