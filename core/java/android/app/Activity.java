@@ -1751,6 +1751,9 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * @deprecated This functionality will be removed in the future; please do
+     * not use.
+     *
      * Control whether this activity is required to be persistent.  By default
      * activities are not persistent; setting this to true will prevent the
      * system from stopping this activity or its process when running low on
@@ -1765,6 +1768,7 @@ public class Activity extends ContextThemeWrapper
      *                     persistent, true if so, false for the normal
      *                     behavior.
      */
+    @Deprecated
     public void setPersistent(boolean isPersistent) {
         if (mParent == null) {
             try {

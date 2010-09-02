@@ -177,14 +177,6 @@ public class RenderScript {
     synchronized int nTypeCreate() {
         return rsnTypeCreate(mContext);
     }
-    native void rsnTypeFinalDestroy(int con, Type t);
-    synchronized void nTypeFinalDestroy(Type t) {
-        rsnTypeFinalDestroy(mContext, t);
-    }
-    native void rsnTypeSetupFields(int con, Type t, int[] types, int[] bits, Field[] IDs);
-    synchronized void nTypeSetupFields(Type t, int[] types, int[] bits, Field[] IDs) {
-        rsnTypeSetupFields(mContext, t, types, bits, IDs);
-    }
     native void rsnTypeGetNativeData(int con, int id, int[] typeData);
     synchronized void nTypeGetNativeData(int id, int[] typeData) {
         rsnTypeGetNativeData(mContext, id, typeData);
@@ -256,14 +248,6 @@ public class RenderScript {
     native void rsnAllocationRead(int con, int id, float[] d);
     synchronized void nAllocationRead(int id, float[] d) {
         rsnAllocationRead(mContext, id, d);
-    }
-    native void rsnAllocationSubDataFromObject(int con, int id, Type t, int offset, Object o);
-    synchronized void nAllocationSubDataFromObject(int id, Type t, int offset, Object o) {
-        rsnAllocationSubDataFromObject(mContext, id, t, offset, o);
-    }
-    native void rsnAllocationSubReadFromObject(int con, int id, Type t, int offset, Object o);
-    synchronized void nAllocationSubReadFromObject(int id, Type t, int offset, Object o) {
-        rsnAllocationSubReadFromObject(mContext, id, t, offset, o);
     }
     native int  rsnAllocationGetType(int con, int id);
     synchronized int nAllocationGetType(int id) {

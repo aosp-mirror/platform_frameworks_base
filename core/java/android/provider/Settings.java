@@ -2385,6 +2385,12 @@ public final class Settings {
         public static final String SET_GLOBAL_HTTP_PROXY = "set_global_http_proxy";
 
         /**
+         * Setting for default DNS in case nobody suggests one
+         * @hide
+         */
+        public static final String DEFAULT_DNS_SERVER = "default_dns_server";
+
+        /**
          * Whether the package installer should allow installation of apps downloaded from
          * sources other than the Android Market (vending machine).
          *
@@ -2413,6 +2419,14 @@ public final class Settings {
          */
         public static final String LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED =
             "lock_pattern_tactile_feedback_enabled";
+
+        /**
+         * This preference allows the device to be locked given time after screen goes off,
+         * subject to current DeviceAdmin policy limits.
+         * @hide
+         */
+        public static final String LOCK_SCREEN_LOCK_AFTER_TIMEOUT = "lock_screen_lock_after_timeout";
+
 
         /**
          * Whether assisted GPS should be enabled or not.

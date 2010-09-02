@@ -16,16 +16,19 @@
 
 package com.android.internal.os;
 
-import android.content.pm.PackageInfo;
 import dalvik.system.SamplingProfiler;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import android.content.pm.PackageInfo;
 import android.util.Log;
 import android.os.*;
 
@@ -41,7 +44,7 @@ public class SamplingProfilerIntegration {
     private static final boolean enabled;
     private static final Executor snapshotWriter;
     private static final int samplingProfilerHz;
-    
+
     /** Whether or not we've created the snapshots dir. */
     private static boolean dirMade = false;
 
@@ -61,6 +64,8 @@ public class SamplingProfilerIntegration {
         }
     }
 
+    private static SamplingProfiler INSTANCE;
+
     /**
      * Is profiling enabled?
      */
@@ -72,15 +77,22 @@ public class SamplingProfilerIntegration {
      * Starts the profiler if profiling is enabled.
      */
     public static void start() {
-        if (!enabled) return;
-        SamplingProfiler.getInstance().start(samplingProfilerHz);
+        if (!enabled) {
+            return;
+        }
+        ThreadGroup group = Thread.currentThread().getThreadGroup();
+        SamplingProfiler.ThreadSet threadSet = SamplingProfiler.newThreadGroupTheadSet(group);
+        INSTANCE = new SamplingProfiler(4, threadSet);
+        INSTANCE.start(samplingProfilerHz);
     }
 
     /**
      * Writes a snapshot if profiling is enabled.
      */
     public static void writeSnapshot(final String processName, final PackageInfo packageInfo) {
-        if (!enabled) return;
+        if (!enabled) {
+            return;
+        }
 
         /*
          * If we're already writing a snapshot, don't bother enqueueing another
@@ -122,18 +134,22 @@ public class SamplingProfilerIntegration {
      * Writes the zygote's snapshot to internal storage if profiling is enabled.
      */
     public static void writeZygoteSnapshot() {
-        if (!enabled) return;
+        if (!enabled) {
+            return;
+        }
         writeSnapshot("zygote", null);
+        INSTANCE.shutdown();
+        INSTANCE = null;
     }
 
     /**
      * pass in PackageInfo to retrieve various values for snapshot header
      */
     private static void writeSnapshot(String dir, String processName, PackageInfo packageInfo) {
-        byte[] snapshot = SamplingProfiler.getInstance().snapshot();
-        if (snapshot == null) {
+        if (!enabled) {
             return;
         }
+        INSTANCE.stop();
 
         /*
          * We use the current time as a unique ID. We can't use a counter
@@ -143,21 +159,22 @@ public class SamplingProfilerIntegration {
         long start = System.currentTimeMillis();
         String name = processName.replaceAll(":", ".");
         String path = dir + "/" + name + "-" +System.currentTimeMillis() + ".snapshot";
-        FileOutputStream out = null;
+        PrintStream out = null;
         try {
-            out = new FileOutputStream(path);
-            generateSnapshotHeader(name, packageInfo, out);
-            out.write(snapshot);
+            out = new PrintStream(new BufferedOutputStream(new FileOutputStream(path)));
         } catch (IOException e) {
-            Log.e(TAG, "Error writing snapshot.", e);
+            Log.e(TAG, "Could not open " + path + ":" + e);
+            return;
+        }
+        try {
+            generateSnapshotHeader(name, packageInfo, out);
+            INSTANCE.writeHprofData(out);
         } finally {
-            try {
-                if(out != null) {
-                    out.close();
-                }
-            } catch (IOException ex) {
-                // let it go.
-            }
+            out.close();
+        }
+        if (out.checkError()) {
+            Log.e(TAG, "Error writing snapshot.");
+            return;
         }
         // set file readable to the world so that SamplingProfilerService
         // can put it to dropbox
@@ -179,16 +196,16 @@ public class SamplingProfilerIntegration {
      * <the actual snapshot content begins here...>
      */
     private static void generateSnapshotHeader(String processName, PackageInfo packageInfo,
-            FileOutputStream out) throws IOException {
+            PrintStream out) {
         // profiler version
-        out.write("Version: 1\n".getBytes());
-        out.write(("Process: " + processName + "\n").getBytes());
-        if(packageInfo != null) {
-            out.write(("Package: " + packageInfo.packageName + "\n").getBytes());
-            out.write(("Package-Version: " + packageInfo.versionCode + "\n").getBytes());
+        out.println("Version: 2");
+        out.println("Process: " + processName);
+        if (packageInfo != null) {
+            out.println("Package: " + packageInfo.packageName);
+            out.println("Package-Version: " + packageInfo.versionCode);
         }
-        out.write(("Build: " + Build.FINGERPRINT + "\n").getBytes());
+        out.println("Build: " + Build.FINGERPRINT);
         // single blank line means the end of snapshot header.
-        out.write("\n".getBytes());
+        out.println();
     }
 }

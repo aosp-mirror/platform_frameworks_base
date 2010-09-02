@@ -25,4 +25,6 @@ limitations under the License.
     <string name="dialog_progress_msg">Please wait...</string>
 
     <string name="runner_preloading_title">Preloading tests...</string>
+
+    <string name="run_all_tests">Run all tests in the current directory</string>
 </resources>

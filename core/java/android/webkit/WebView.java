@@ -938,7 +938,7 @@ public class WebView extends AbsoluteLayout
                         return;
                     }
 
-                    if (sGoogleApps.contains(packageName)) {
+                    if (sGoogleApps.contains(packageName) && mWebViewCore != null) {
                         if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
                             mWebViewCore.sendMessage(EventHub.ADD_PACKAGE_NAME, packageName);
                         } else {
@@ -975,7 +975,9 @@ public class WebView extends AbsoluteLayout
             // Executes on the UI thread
             @Override
             protected void onPostExecute(Set<String> installedPackages) {
-                mWebViewCore.sendMessage(EventHub.ADD_PACKAGE_NAMES, installedPackages);
+                if (mWebViewCore != null) {
+                    mWebViewCore.sendMessage(EventHub.ADD_PACKAGE_NAMES, installedPackages);
+                }
             }
         };
         task.execute();
@@ -1796,11 +1798,11 @@ public class WebView extends AbsoluteLayout
     /**
      * Returns true if private browsing is enabled in this WebView.
      */
-    public boolean isPrivateBrowsingEnabled () {
+    public boolean isPrivateBrowsingEnabled() {
         return getSettings().isPrivateBrowsingEnabled();
     }
 
-    private void startPrivateBrowsing () {
+    private void startPrivateBrowsing() {
         boolean wasPrivateBrowsingEnabled = isPrivateBrowsingEnabled();
 
         getSettings().setPrivateBrowsingEnabled(true);
@@ -1809,6 +1811,23 @@ public class WebView extends AbsoluteLayout
             loadUrl("browser:incognito");
         }
     }
+
+    /**
+     * Deletes any files that were created as a part of the last private
+     * browsing session and clears any internal state associated with that
+     * session. The consequences of calling this method while a private
+     * browsing session is active are unspecified.
+     * @param context The same context which was used to create the private
+     *                browsing WebView.
+     * @return True if the private browsing files were successfully deleted,
+     *         false otherwise.
+     * @hide pending API council approval.
+     */
+    public static boolean cleanupPrivateBrowsingFiles(Context context) {
+        return nativeCleanupPrivateBrowsingFiles(context.getFilesDir().getParent());
+    }
+
+    private static native boolean nativeCleanupPrivateBrowsingFiles(String dataDirectory);
 
     private boolean extendScroll(int y) {
         int finalY = mScroller.getFinalY();
@@ -2112,6 +2131,15 @@ public class WebView extends AbsoluteLayout
      * @hide
      */
     public void setEmbeddedTitleBar(View v) {
+        if (null == v) {
+            // If one of our callbacks is holding onto the titlebar to replace
+            // it when its ActionMode ends, remove it.
+            if (mSelectCallback != null) {
+                mSelectCallback.setTitleBar(null);
+            } else if (mFindCallback != null) {
+                mFindCallback.setTitleBar(null);
+            }
+        }
         if (mTitleBar == v) return;
         if (mTitleBar != null) {
             removeView(mTitleBar);
@@ -2677,18 +2705,49 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * @hide
+     * Start an ActionMode for finding text in this WebView.
+     * @param text If non-null, will be the initial text to search for.
+     *             Otherwise, the last String searched for in this WebView will
+     *             be used to start.
      */
-    public void setFindIsUp(boolean isUp) {
+    public void showFindDialog(String text) {
+        mFindCallback = new FindActionModeCallback(mContext);
+        setFindIsUp(true);
+        mFindCallback.setWebView(this);
+        View titleBar = mTitleBar;
+        // We do not want to show the embedded title bar during find or
+        // select, but keep track of it so that it can be replaced when the
+        // mode is exited.
+        setEmbeddedTitleBar(null);
+        mFindCallback.setTitleBar(titleBar);
+        startActionMode(mFindCallback);
+        if (text == null) {
+            text = mLastFind;
+        }
+        if (text != null) {
+            mFindCallback.setText(text);
+        }
+    }
+
+    /**
+     * Keep track of the find callback so that we can remove its titlebar if
+     * necessary.
+     */
+    private FindActionModeCallback mFindCallback;
+
+    /**
+     * Toggle whether the find dialog is showing, for both native and Java.
+     */
+    private void setFindIsUp(boolean isUp) {
         mFindIsUp = isUp;
         if (0 == mNativeClass) return; // client isn't initialized
         nativeSetFindIsUp(isUp);
     }
 
     /**
-     * @hide
+     * Return the index of the currently highlighted match.
      */
-    public int findIndex() {
+    int findIndex() {
         if (0 == mNativeClass) return -1;
         return nativeFindIndex();
     }
@@ -2697,8 +2756,8 @@ public class WebView extends AbsoluteLayout
     // or not we draw the highlights for matches.
     private boolean mFindIsUp;
 
-    // Keep track of the last string sent, so we can search again after an
-    // orientation change or the dismissal of the soft keyboard.
+    // Keep track of the last string sent, so we can search again when find is
+    // reopened.
     private String mLastFind;
 
     /**
@@ -2755,7 +2814,6 @@ public class WebView extends AbsoluteLayout
      * Clear the highlighting surrounding text matches created by findAll.
      */
     public void clearMatches() {
-        mLastFind = "";
         if (mNativeClass == 0)
             return;
         nativeSetFindIsEmpty();
@@ -2763,9 +2821,10 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * @hide
+     * Called when the find ActionMode ends.
      */
-    public void notifyFindDialogDismissed() {
+    void notifyFindDialogDismissed() {
+        mFindCallback = null;
         if (mWebViewCore == null) {
             return;
         }
@@ -3357,13 +3416,17 @@ public class WebView extends AbsoluteLayout
         setUpSelect();
         if (mNativeClass != 0 && nativeWordSelection(x, y)) {
             nativeSetExtendSelection();
-            WebChromeClient client = getWebChromeClient();
-            if (client != null) client.onSelectionStart(this);
             return true;
         }
-        notifySelectDialogDismissed();
+        selectionDone();
         return false;
     }
+
+    /**
+     * Keep track of the Callback so we can end its ActionMode or remove its
+     * titlebar.
+     */
+    private SelectActionModeCallback mSelectCallback;
 
     private boolean didUpdateTextViewBounds(boolean allowIntersect) {
         Rect contentBounds = nativeFocusCandidateNodeBounds();
@@ -4111,10 +4174,7 @@ public class WebView extends AbsoluteLayout
         return false;
     }
 
-    /**
-     * @hide pending API council approval.
-     */
-    public void setUpSelect() {
+    private void setUpSelect() {
         if (0 == mNativeClass) return; // client isn't initialized
         if (inFullScreenMode()) return;
         if (mSelectingText) return;
@@ -4135,6 +4195,15 @@ public class WebView extends AbsoluteLayout
             mSelectY = mScrollY + getViewHeightWithTitle() / 2;
         }
         nativeHideCursor();
+        mSelectCallback = new SelectActionModeCallback();
+        mSelectCallback.setWebView(this);
+        View titleBar = mTitleBar;
+        // We do not want to show the embedded title bar during find or
+        // select, but keep track of it so that it can be replaced when the
+        // mode is exited.
+        setEmbeddedTitleBar(null);
+        mSelectCallback.setTitleBar(titleBar);
+        startActionMode(mSelectCallback);
     }
 
     /**
@@ -4146,9 +4215,9 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * @hide pending API council approval.
+     * Select all of the text in this WebView.
      */
-    public void selectAll() {
+    void selectAll() {
         if (0 == mNativeClass) return; // client isn't initialized
         if (inFullScreenMode()) return;
         if (!mSelectingText) setUpSelect();
@@ -4159,36 +4228,24 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * @hide pending API council approval.
+     * Called when the selection has been removed.
      */
-    public boolean selectDialogIsUp() {
-        return mSelectingText;
-    }
-
-    /**
-     * @hide pending API council approval.
-     */
-    public void notifySelectDialogDismissed() {
-        mSelectingText = false;
-        WebViewCore.resumeUpdatePicture(mWebViewCore);
-    }
-
-    /**
-     * @hide pending API council approval.
-     */
-    public void selectionDone() {
+    void selectionDone() {
         if (mSelectingText) {
-            WebChromeClient client = getWebChromeClient();
-            if (client != null) client.onSelectionDone(this);
+            mSelectingText = false;
+            // finish is idempotent, so this is fine even if selectionDone was
+            // called by mSelectCallback.onDestroyActionMode
+            mSelectCallback.finish();
+            mSelectCallback = null;
+            WebViewCore.resumeUpdatePicture(mWebViewCore);
             invalidate(); // redraw without selection
-            notifySelectDialogDismissed();
         }
     }
 
     /**
-     * @hide pending API council approval.
+     * Copy the selection to the clipboard
      */
-    public boolean copySelection() {
+    boolean copySelection() {
         boolean copiedSomething = false;
         String selection = getSelection();
         if (selection != "") {
@@ -4208,9 +4265,9 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * @hide pending API council approval.
+     * Returns the currently highlighted text as a string.
      */
-    public String getSelection() {
+    String getSelection() {
         if (mNativeClass == 0) return "";
         return nativeGetSelection();
     }
@@ -6565,8 +6622,8 @@ public class WebView extends AbsoluteLayout
 
                 case FIND_AGAIN:
                     // Ignore if find has been dismissed.
-                    if (mFindIsUp) {
-                        findAll(mLastFind);
+                    if (mFindIsUp && mFindCallback != null) {
+                        mFindCallback.findAll();
                     }
                     break;
 

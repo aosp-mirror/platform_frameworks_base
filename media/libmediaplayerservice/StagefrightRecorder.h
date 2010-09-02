@@ -79,9 +79,10 @@ private:
     video_encoder mVideoEncoder;
     bool mUse64BitFileOffset;
     int32_t mVideoWidth, mVideoHeight;
+    int32_t mAuxVideoWidth, mAuxVideoHeight;
     int32_t mFrameRate;
-    int32_t mVideoBitRate, mVideoBitRateAux;
-    int32_t mAudioBitRate, mAudioBitRateAux;
+    int32_t mVideoBitRate, mAuxVideoBitRate;
+    int32_t mAudioBitRate;
     int32_t mAudioChannels;
     int32_t mSampleRate;
     int32_t mInterleaveDurationUs;
@@ -109,8 +110,10 @@ private:
     MediaProfiles *mEncoderProfiles;
 
     status_t setupMPEG4Recording(
-        bool useAuxiliaryCameraSource,
-        int outputFd, int32_t audioBitRate, int32_t videoBitRate,
+        bool useSplitCameraSource,
+        int outputFd,
+        int32_t videoWidth, int32_t videoHeight,
+        int32_t videoBitRate,
         int32_t *totalBitRate,
         sp<MediaWriter> *mediaWriter);
     void setupMPEG4MetaData(int64_t startTimeUs, int32_t totalBitRate,
@@ -137,6 +140,9 @@ private:
     status_t setParamTimeLapseEnable(int32_t timeLapseEnable);
     status_t setParamUseStillCameraForTimeLapse(int32_t useStillCamera);
     status_t setParamTimeBetweenTimeLapseFrameCapture(int64_t timeUs);
+    status_t setParamAuxVideoHeight(int32_t height);
+    status_t setParamAuxVideoWidth(int32_t width);
+    status_t setParamAuxVideoEncodingBitRate(int32_t bitRate);
     status_t setParamVideoEncodingBitRate(int32_t bitRate);
     status_t setParamVideoIFramesInterval(int32_t seconds);
     status_t setParamVideoEncoderProfile(int32_t profile);

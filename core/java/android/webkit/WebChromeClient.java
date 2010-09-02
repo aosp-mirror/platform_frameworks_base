@@ -324,23 +324,6 @@ public class WebChromeClient {
     }
 
     /**
-     * Tell the client that the selection has been initiated.
-     * @hide
-     */
-    public void onSelectionStart(WebView view) {
-        // By default we cancel the selection again, thus disabling
-        // text selection unless the chrome client supports it.
-        view.notifySelectDialogDismissed();
-    }
-
-    /**
-     * Tell the client that the selection has been copied or canceled.
-     * @hide
-     */
-    public void onSelectionDone(WebView view) {
-    }
-
-    /**
      * Tell the client that the page being viewed is web app capable,
      * i.e. has specified the fullscreen-web-app-capable meta tag.
      * @hide

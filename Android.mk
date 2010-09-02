@@ -474,6 +474,8 @@ LOCAL_DROIDDOC_OPTIONS:=\
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 
+LOCAL_UNINSTALLABLE_MODULE := true
+
 include $(BUILD_DROIDDOC)
 
 # $(gen), i.e. framework.aidl, is also needed while building against the current stub.
@@ -499,6 +501,8 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-parsecomments
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
+
+LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_DROIDDOC)
 

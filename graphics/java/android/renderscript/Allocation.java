@@ -162,7 +162,6 @@ public class Allocation extends BaseObj {
     }
 
 
-
     public void subData2D(int xoff, int yoff, int w, int h, int[] d) {
         mRS.validate();
         mRS.nAllocationSubData2D(mID, xoff, yoff, w, h, d, d.length * 4);
@@ -183,20 +182,6 @@ public class Allocation extends BaseObj {
         mRS.nAllocationRead(mID, d);
     }
 
-    public void data(Object o) {
-        mRS.validate();
-        mRS.nAllocationSubDataFromObject(mID, mType, 0, o);
-    }
-
-    public void read(Object o) {
-        mRS.validate();
-        mRS.nAllocationSubReadFromObject(mID, mType, 0, o);
-    }
-
-    public void subData(int offset, Object o) {
-        mRS.validate();
-        mRS.nAllocationSubDataFromObject(mID, mType, offset, o);
-    }
 
     public class Adapter1D extends BaseObj {
         Adapter1D(int id, RenderScript rs) {

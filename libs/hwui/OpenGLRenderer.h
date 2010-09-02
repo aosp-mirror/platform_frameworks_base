@@ -108,9 +108,11 @@ private:
      * The new snapshot is saved in mSnapshot and the previous snapshot
      * is linked from mSnapshot->previous.
      *
+     * @param flags The save flags; see SkCanvas for more information
+     *
      * @return The new save count. This value can be passed to #restoreToCount()
      */
-    int saveSnapshot();
+    int saveSnapshot(int flags);
 
     /**
      * Restores the current snapshot; mSnapshot becomes mSnapshot->previous.

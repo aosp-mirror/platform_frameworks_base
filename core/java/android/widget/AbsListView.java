@@ -16,12 +16,11 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
@@ -56,6 +55,8 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionWrapper;
 import android.view.inputmethod.InputMethodManager;
+
+import com.android.internal.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -4235,7 +4236,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     /**
      * When set to a non-zero value, the cache color hint indicates that this list is always drawn
-     * on top of a solid, single-color, opaque background
+     * on top of a solid, single-color, opaque background.
+     *
+     * Zero means that what's behind this object is translucent (non solid) or is not made of a
+     * single color. This hint will not affect any existing background drawable set on this view (
+     * typically set via {@link #setBackgroundDrawable(Drawable)}).
      *
      * @param color The background color
      */

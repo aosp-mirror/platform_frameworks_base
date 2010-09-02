@@ -38,7 +38,7 @@ public class ManagerService extends Service {
 
     private static final String LOG_TAG = "ManagerService";
 
-    private static final int MSG_TEST_CRASHED = 0;
+    private static final int MSG_CRASH_TIMEOUT_EXPIRED = 0;
 
     private static final int CRASH_TIMEOUT_MS = 20 * 1000;
 
@@ -72,6 +72,7 @@ public class ManagerService extends Service {
     static final int MSG_PROCESS_ACTUAL_RESULTS = 0;
     static final int MSG_ALL_TESTS_FINISHED = 1;
     static final int MSG_FIRST_TEST = 2;
+    static final int MSG_CURRENT_TEST_CRASHED = 3;
 
     /**
      * This handler is purely for IPC. It is used to create mMessenger
@@ -92,6 +93,11 @@ public class ManagerService extends Service {
                     onActualResultsObtained(msg.getData());
                     break;
 
+                case MSG_CURRENT_TEST_CRASHED:
+                    mCrashMessagesHandler.removeMessages(MSG_CRASH_TIMEOUT_EXPIRED);
+                    onTestCrashed();
+                    break;
+
                 case MSG_ALL_TESTS_FINISHED:
                     mSummarizer.setTestsRelativePath(mAllTestsRelativePath);
                     mSummarizer.summarize();
@@ -110,7 +116,7 @@ public class ManagerService extends Service {
     private Handler mCrashMessagesHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what == MSG_TEST_CRASHED) {
+            if (msg.what == MSG_CRASH_TIMEOUT_EXPIRED) {
                 onTestCrashed();
             }
         }
@@ -145,7 +151,7 @@ public class ManagerService extends Service {
     }
 
     private void onActualResultsObtained(Bundle bundle) {
-        mCrashMessagesHandler.removeMessages(MSG_TEST_CRASHED);
+        mCrashMessagesHandler.removeMessages(MSG_CRASH_TIMEOUT_EXPIRED);
         ensureNextTestSetup(bundle.getString("nextTest"), bundle.getInt("testIndex") + 1);
 
         AbstractResult results =
@@ -163,7 +169,7 @@ public class ManagerService extends Service {
 
         mCurrentlyRunningTest = nextTest;
         mCurrentlyRunningTestIndex = index;
-        mCrashMessagesHandler.sendEmptyMessageDelayed(MSG_TEST_CRASHED, CRASH_TIMEOUT_MS);
+        mCrashMessagesHandler.sendEmptyMessageDelayed(MSG_CRASH_TIMEOUT_EXPIRED, CRASH_TIMEOUT_MS);
     }
 
     /**

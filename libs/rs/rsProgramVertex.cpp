@@ -70,52 +70,7 @@ static void logMatrix(const char *txt, const float *f)
 
 void ProgramVertex::setupGL(const Context *rsc, ProgramVertexState *state)
 {
-    if ((state->mLast.get() == this) && !mDirty) {
-        return;
-    }
-    state->mLast.set(this);
-
-    const float *f = static_cast<const float *>(mConstants[0]->getPtr());
-
-    glMatrixMode(GL_TEXTURE);
-    if (mTextureMatrixEnable) {
-        glLoadMatrixf(&f[RS_PROGRAM_VERTEX_TEXTURE_OFFSET]);
-    } else {
-        glLoadIdentity();
-    }
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    if (mLightCount) {
-#ifndef ANDROID_RS_BUILD_FOR_HOST // GLES Only
-        int v = 0;
-        glEnable(GL_LIGHTING);
-
-        glLightModelxv(GL_LIGHT_MODEL_TWO_SIDE, &v);
-
-        for (uint32_t ct = 0; ct < mLightCount; ct++) {
-            const Light *l = mLights[ct].get();
-            glEnable(GL_LIGHT0 + ct);
-            l->setupGL(ct);
-        }
-        for (uint32_t ct = mLightCount; ct < MAX_LIGHTS; ct++) {
-            glDisable(GL_LIGHT0 + ct);
-        }
-#endif //ANDROID_RS_BUILD_FOR_HOST
-    } else {
-        glDisable(GL_LIGHTING);
-    }
-
-    if (!f) {
-        LOGE("Must bind constants to vertex program");
-    }
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadMatrixf(&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET]);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrixf(&f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET]);
-
-    mDirty = false;
+    assert(0);
 }
 
 void ProgramVertex::loadShader(Context *rsc) {

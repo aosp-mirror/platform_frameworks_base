@@ -784,20 +784,6 @@
         applications can use this to erase or modify your contact data.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_writeOwnerData">write owner data</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeOwnerData">Allows an application to modify the
-        phone owner data stored on your phone. Malicious
-        applications can use this to erase or modify owner data.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_readOwnerData">read owner data</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readOwnerData">Allows an application read the
-        phone owner data stored on your phone. Malicious
-        applications can use this to read phone owner data.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCalendar">read calendar events</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readCalendar">Allows an application to read all
@@ -2290,4 +2276,21 @@
     <!-- Shown when the users bandwidth is reduced because of excessive data use -->
     <string name="throttled_notification_title">Mobile data limit exceeded</string>
     <string name="throttled_notification_message">Touch to learn more about mobile data use</string>
+
+    <!-- Displayed on the Find dialog when there are no matches [CHAR LIMIT=NONE]-->
+    <string name="no_matches">No matches</string>
+
+    <!-- Find dialog hint text.  Also used in the menu item to open find on page [CHAR LIMIT=NONE] -->
+    <string name="find_on_page">Find on page</string>
+
+    <!-- Displayed on the Find dialog to display the index of the highlighted
+         match and total number of matches found in the current page. [CHAR LIMIT=NONE] -->
+    <plurals name="matches_found">
+        <!-- Case of one match -->
+        <item quantity="one">1 match</item>
+        <!-- Case of multiple total matches -->
+        <item quantity="other"><xliff:g id="index" example="2">%d</xliff:g> of <xliff:g id="total" example="137">%d</xliff:g></item>
+    </plurals>
+
+
 </resources>

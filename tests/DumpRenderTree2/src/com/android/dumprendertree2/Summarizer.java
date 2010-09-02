@@ -27,6 +27,7 @@ import com.android.dumprendertree2.forwarder.ForwarderManager;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -183,9 +184,10 @@ public class Summarizer {
     private static final String TXT_SUMMARY_RELATIVE_PATH = "summary.txt";
 
     private int mCrashedTestsCount = 0;
-    private List<AbstractResult> mFailedNotIgnoredTests = new ArrayList<AbstractResult>();
-    private List<AbstractResult> mIgnoredTests = new ArrayList<AbstractResult>();
-    private List<String> mPassedNotIgnoredTests = new ArrayList<String>();
+    private List<AbstractResult> mUnexpectedFailures = new ArrayList<AbstractResult>();
+    private List<AbstractResult> mExpectedFailures = new ArrayList<AbstractResult>();
+    private List<String> mExpectedPasses = new ArrayList<String>();
+    private List<String> mUnexpectedPasses = new ArrayList<String>();
 
     private FileFilter mFileFilter;
     private String mResultsRootDirPath;
@@ -199,6 +201,11 @@ public class Summarizer {
         mResultsRootDirPath = resultsRootDirPath;
     }
 
+    public static URI getDetailsUri() {
+        return new File(ManagerService.RESULTS_ROOT_DIR_PATH + File.separator +
+                HTML_DETAILS_RELATIVE_PATH).toURI();
+    }
+
     public void appendTest(AbstractResult result) {
         String relativePath = result.getRelativePath();
 
@@ -206,12 +213,18 @@ public class Summarizer {
             mCrashedTestsCount++;
         }
 
-        if (mFileFilter.isIgnoreRes(relativePath)) {
-            mIgnoredTests.add(result);
-        } else if (result.getResultCode() == AbstractResult.ResultCode.PASS) {
-            mPassedNotIgnoredTests.add(relativePath);
+        if (result.getResultCode() == AbstractResult.ResultCode.PASS) {
+            if (mFileFilter.isFail(relativePath)) {
+                mUnexpectedPasses.add(relativePath);
+            } else {
+                mExpectedPasses.add(relativePath);
+            }
         } else {
-            mFailedNotIgnoredTests.add(result);
+            if (mFileFilter.isFail(relativePath)) {
+                mExpectedFailures.add(result);
+            } else {
+                mUnexpectedFailures.add(result);
+            }
         }
     }
 
@@ -226,9 +239,9 @@ public class Summarizer {
 
     public void reset() {
         mCrashedTestsCount = 0;
-        mFailedNotIgnoredTests.clear();
-        mIgnoredTests.clear();
-        mPassedNotIgnoredTests.clear();
+        mUnexpectedFailures.clear();
+        mExpectedFailures.clear();
+        mExpectedPasses.clear();
         mDate = new Date();
     }
 
@@ -246,9 +259,10 @@ public class Summarizer {
             txt.append("CRASHED (total among all tests): " + mCrashedTestsCount + "\n");
             txt.append("-------------");
         }
-        txt.append("FAILED:  " + mFailedNotIgnoredTests.size() + "\n");
-        txt.append("IGNORED: " + mIgnoredTests.size() + "\n");
-        txt.append("PASSED:  " + mPassedNotIgnoredTests.size() + "\n");
+        txt.append("UNEXPECTED FAILURES: " + mUnexpectedFailures.size() + "\n");
+        txt.append("UNEXPECTED PASSES:   " + mUnexpectedPasses.size() + "\n");
+        txt.append("EXPECTED FAILURES:   " + mExpectedFailures.size() + "\n");
+        txt.append("EXPECTED PASSES:     " + mExpectedPasses.size() + "\n");
 
         FsUtils.writeDataToStorage(new File(mResultsRootDirPath, TXT_SUMMARY_RELATIVE_PATH),
                 txt.toString().getBytes(), false);
@@ -264,11 +278,13 @@ public class Summarizer {
 
         createTopSummaryTable(html);
 
-        createResultsListWithDiff(html, "Failed", mFailedNotIgnoredTests);
+        createResultsListWithDiff(html, "Unexpected failures", mUnexpectedFailures);
 
-        createResultsListWithDiff(html, "Ignored", mIgnoredTests);
+        createResultsListNoDiff(html, "Unexpected passes", mUnexpectedPasses);
 
-        createResultsListNoDiff(html, "Passed", mPassedNotIgnoredTests);
+        createResultsListWithDiff(html, "Expected failures", mExpectedFailures);
+
+        createResultsListNoDiff(html, "Expected passes", mExpectedPasses);
 
         html.append("</body></html>");
 
@@ -277,9 +293,10 @@ public class Summarizer {
     }
 
     private int getTotalTestCount() {
-        return mFailedNotIgnoredTests.size() +
-                mPassedNotIgnoredTests.size() +
-                mIgnoredTests.size();
+        return mUnexpectedFailures.size() +
+                mUnexpectedPasses.size() +
+                mExpectedPasses.size() +
+                mExpectedFailures.size();
     }
 
     private String getWebKitVersionFromUserAgentString() {
@@ -305,9 +322,10 @@ public class Summarizer {
         html.append("<table class=\"summary\">");
         createSummaryTableRow(html, "TOTAL", getTotalTestCount());
         createSummaryTableRow(html, "CRASHED", mCrashedTestsCount);
-        createSummaryTableRow(html, "FAILED", mFailedNotIgnoredTests.size());
-        createSummaryTableRow(html, "IGNORED", mIgnoredTests.size());
-        createSummaryTableRow(html, "PASSED", mPassedNotIgnoredTests.size());
+        createSummaryTableRow(html, "UNEXPECTED FAILURES", mUnexpectedFailures.size());
+        createSummaryTableRow(html, "UNEXPECTED PASSES", mUnexpectedPasses.size());
+        createSummaryTableRow(html, "EXPECTED FAILURES", mExpectedFailures.size());
+        createSummaryTableRow(html, "EXPECTED PASSES", mExpectedPasses.size());
         html.append("</table>");
     }
 
@@ -329,25 +347,21 @@ public class Summarizer {
         for (AbstractResult result : resultsList) {
             relativePath = result.getRelativePath();
             resultCode = result.getResultCode();
+            assert resultCode != AbstractResult.ResultCode.PASS : "resultCode=" + resultCode;
 
             html.append("<h3>");
 
-            if (resultCode == AbstractResult.ResultCode.PASS) {
-                html.append("<span class=\"sqr\">&#x25a0; </span>");
-                html.append("<span class=\"path\">" + relativePath + "</span>");
-            } else {
-                /**
-                 * Technically, two different paths could end up being the same, because
-                 * ':' is a valid  character in a path. However, it is probably not going
-                 * to cause any problems in this case
-                 */
-                id = relativePath.replace(File.separator, ":");
-                html.append("<a href=\"#\" onClick=\"toggleDisplay('" + id + "');");
-                html.append("return false;\">");
-                html.append("<span class=\"tri\" id=\"tri." + id + "\">&#x25b6; </span>");
-                html.append("<span class=\"path\">" + relativePath + "</span>");
-                html.append("</a>");
-            }
+            /**
+             * Technically, two different paths could end up being the same, because
+             * ':' is a valid  character in a path. However, it is probably not going
+             * to cause any problems in this case
+             */
+            id = relativePath.replace(File.separator, ":");
+            html.append("<a href=\"#\" onClick=\"toggleDisplay('" + id + "');");
+            html.append("return false;\">");
+            html.append("<span class=\"tri\" id=\"tri." + id + "\">&#x25b6; </span>");
+            html.append("<span class=\"path\">" + relativePath + "</span>");
+            html.append("</a>");
 
             html.append(" <span class=\"listItem " + resultCode.name() + "\">");
             html.append(resultCode.toString());
@@ -369,16 +383,14 @@ public class Summarizer {
 
             html.append("</h3>");
 
-            if (resultCode != AbstractResult.ResultCode.PASS) {
-                html.append("<div class=\"diff\" style=\"display: none;\" id=\"" + id + "\">");
-                html.append(result.getDiffAsHtml());
-                html.append("<a href=\"#\" onClick=\"toggleDisplay('" + id + "');");
-                html.append("return false;\">Hide</a>");
-                html.append(" | ");
-                html.append("<a href=\"" + getViewSourceUrl(relativePath).toString() + "\"");
-                html.append(" target=\"_blank\">Show source</a>");
-                html.append("</div>");
-            }
+            html.append("<div class=\"diff\" style=\"display: none;\" id=\"" + id + "\">");
+            html.append(result.getDiffAsHtml());
+            html.append("<a href=\"#\" onClick=\"toggleDisplay('" + id + "');");
+            html.append("return false;\">Hide</a>");
+            html.append(" | ");
+            html.append("<a href=\"" + getViewSourceUrl(relativePath).toString() + "\"");
+            html.append(" target=\"_blank\">Show source</a>");
+            html.append("</div>");
 
             html.append("<div class=\"space\"></div>");
         }
@@ -387,7 +399,7 @@ public class Summarizer {
     private void createResultsListNoDiff(StringBuilder html, String title,
             List<String> resultsList) {
         Collections.sort(resultsList);
-        html.append("<h2>Passed [" + resultsList.size() + "]</h2>");
+        html.append("<h2>" + title + "[" + resultsList.size() + "]</h2>");
         for (String result : resultsList) {
             html.append("<h3>");
             html.append("<a href=\"" + getViewSourceUrl(result).toString() + "\"");

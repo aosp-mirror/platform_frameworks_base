@@ -399,4 +399,6 @@
          device is data-only. -->
     <bool name="config_voice_capable">true</bool>
 
+    <!-- IP address of the dns server to use if nobody else suggests one -->
+    <string name="config_default_dns_server">8.8.8.8</string>
 </resources>

@@ -49,11 +49,11 @@ public class FileFilter {
     private static final String SSL_PATH = "ssl/";
 
     private static final String TOKEN_SKIP = "SKIP";
-    private static final String TOKEN_IGNORE_RESULT = "IGNORE_RESULT";
+    private static final String TOKEN_FAIL = "FAIL";
     private static final String TOKEN_SLOW = "SLOW";
 
     private final Set<String> mSkipList = new HashSet<String>();
-    private final Set<String> mIgnoreResultList = new HashSet<String>();
+    private final Set<String> mFailList = new HashSet<String>();
     private final Set<String> mSlowList = new HashSet<String>();
 
     private final String mRootDirPath;
@@ -91,7 +91,6 @@ public class FileFilter {
                 String[] parts;
                 String path;
                 Set<String> tokens;
-                Boolean skipped;
                 while (true) {
                     line = bufferedReader.readLine();
                     if (line == null) {
@@ -122,21 +121,16 @@ public class FileFilter {
                     tokens = new HashSet<String>(Arrays.asList(parts[1].split("\\s", 0)));
 
                     /** Chose the right collections to add to */
-                    skipped = false;
                     if (tokens.contains(TOKEN_SKIP)) {
                         mSkipList.add(path);
-                        skipped = true;
-                    }
 
-                    /** If test is on skip list we ignore any further options */
-                    if (skipped) {
+                        /** If test is on skip list we ignore any further options */
                         continue;
                     }
 
-                    if (tokens.contains(TOKEN_IGNORE_RESULT)) {
-                        mIgnoreResultList.add(path);
+                    if (tokens.contains(TOKEN_FAIL)) {
+                        mFailList.add(path);
                     }
-
                     if (tokens.contains(TOKEN_SLOW)) {
                         mSlowList.add(path);
                     }
@@ -177,18 +171,18 @@ public class FileFilter {
     }
 
     /**
-     * Checks if test result is supposed to be ignored.
+     * Checks if test result is supposed to be "failed".
      *
      * <p>
      * Path given should relative within LayoutTests folder, e.g. fast/dom/foo.html
      *
      * @param testPath
      *            - a relative path within LayoutTests folder
-     * @return if the test result is supposed to be ignored
+     * @return if the test result is supposed to be "failed"
      */
-    public boolean isIgnoreRes(String testPath) {
+    public boolean isFail(String testPath) {
         for (String prefix : getPrefixes(testPath)) {
-            if (mIgnoreResultList.contains(prefix)) {
+            if (mFailList.contains(prefix)) {
                 return true;
             }
         }

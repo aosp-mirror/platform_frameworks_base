@@ -91,11 +91,11 @@ struct Rect {
         set(r.left, r.top, r.right, r.bottom);
     }
 
-    float getWidth() const {
+    inline float getWidth() const {
         return right - left;
     }
 
-    float getHeight() const {
+    inline float getHeight() const {
         return bottom - top;
     }
 

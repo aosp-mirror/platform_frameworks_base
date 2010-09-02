@@ -18,7 +18,6 @@
 #include "rsScriptC.h"
 #include "rsMatrix.h"
 
-#include "acc/acc.h"
 #include "utils/Timers.h"
 
 #include <time.h>

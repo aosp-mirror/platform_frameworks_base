@@ -115,6 +115,8 @@ static void dumpstate() {
             "su", "root", "wpa_cli", "list_networks", NULL);
 
 #ifdef FWDUMP_bcm4329
+    run_command("DUMP WIFI STATUS", 20,
+            "su", "root", "dhdutil", "-i", "eth0", "dump", NULL);
     run_command("DUMP WIFI FIRMWARE LOG", 60,
             "su", "root", "dhdutil", "-i", "eth0", "upload", "/data/local/tmp/wlan_crash.dump", NULL);
 #endif
@@ -239,8 +241,18 @@ int main(int argc, char *argv[]) {
 
     /* switch to non-root user and group */
     gid_t groups[] = { AID_LOG, AID_SDCARD_RW, AID_MOUNT };
-    setgroups(sizeof(groups)/sizeof(groups[0]), groups);
-    setuid(AID_SHELL);
+    if (setgroups(sizeof(groups)/sizeof(groups[0]), groups) != 0) {
+        LOGE("Unable to setgroups, aborting: %s\n", strerror(errno));
+        return -1;
+    }
+    if (setgid(AID_SHELL) != 0) {
+        LOGE("Unable to setgid, aborting: %s\n", strerror(errno));
+        return -1;
+    }
+    if (setuid(AID_SHELL) != 0) {
+        LOGE("Unable to setuid, aborting: %s\n", strerror(errno));
+        return -1;
+    }
 
     char path[PATH_MAX], tmp_path[PATH_MAX];
     pid_t gzip_pid = -1;

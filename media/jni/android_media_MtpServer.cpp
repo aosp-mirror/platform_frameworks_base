@@ -25,7 +25,9 @@
 #include <sys/ioctl.h>
 #include <utils/threads.h>
 
+#ifdef HAVE_ANDROID_OS
 #include <linux/usb/f_mtp.h>
+#endif
 
 #include "jni.h"
 #include "JNIHelp.h"

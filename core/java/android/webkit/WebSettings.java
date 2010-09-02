@@ -182,6 +182,7 @@ public class WebSettings {
     private boolean         mShrinksStandaloneImagesToFit = false;
     private long            mMaximumDecodedImageSize = 0; // 0 means default
     private boolean         mPrivateBrowsingEnabled = false;
+    private boolean         mSyntheticLinksEnabled = true;
     // HTML5 API flags
     private boolean         mAppCacheEnabled = false;
     private boolean         mDatabaseEnabled = false;
@@ -1101,8 +1102,13 @@ public class WebSettings {
     }
 
     /**
-     * TODO: need to add @Deprecated
+     * Set a custom path to plugins used by the WebView. This method is
+     * obsolete since each plugin is now loaded from its own package.
+     * @param pluginsPath String path to the directory containing plugins.
+     * @deprecated This method is no longer used as plugins are loaded from
+     * their own APK via the system's package manager.
      */
+    @Deprecated
     public synchronized void setPluginsPath(String pluginsPath) {
     }
 
@@ -1285,8 +1291,13 @@ public class WebSettings {
     }
 
     /**
-     * TODO: need to add @Deprecated
+     * Returns the directory that contains the plugin libraries. This method is
+     * obsolete since each plugin is now loaded from its own package.
+     * @return An empty string.
+     * @deprecated This method is no longer used as plugins are loaded from
+     * their own APK via the system's package manager.
      */
+    @Deprecated
     public synchronized String getPluginsPath() {
         return "";
     }
@@ -1497,6 +1508,13 @@ public class WebSettings {
     /* package */ synchronized void setPrivateBrowsingEnabled(boolean flag) {
         if (mPrivateBrowsingEnabled != flag) {
             mPrivateBrowsingEnabled = flag;
+            postSync();
+        }
+    }
+
+    synchronized void setSyntheticLinksEnabled(boolean flag) {
+        if (mSyntheticLinksEnabled != flag) {
+            mSyntheticLinksEnabled = flag;
             postSync();
         }
     }
