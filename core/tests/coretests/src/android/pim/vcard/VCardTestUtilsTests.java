@@ -15,8 +15,9 @@
  */
 package android.pim.vcard;
 
-import com.android.internal.R;
+import com.android.frameworks.coretests.R;
 
+import android.pim.vcard.test_utils.VCardVerifier;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.test.AndroidTestCase;
 

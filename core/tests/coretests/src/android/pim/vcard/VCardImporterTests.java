@@ -15,10 +15,13 @@
  */
 package android.pim.vcard;
 
-import com.android.internal.R;
+import com.android.frameworks.coretests.R;
 
 import android.content.ContentValues;
 import android.pim.vcard.test_utils.PropertyNodesVerifierElem.TypeSet;
+import android.pim.vcard.test_utils.VCardTestsBase;
+import android.pim.vcard.test_utils.ContentValuesVerifier;
+import android.pim.vcard.test_utils.ContentValuesVerifierElem;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Event;
 import android.provider.ContactsContract.CommonDataKinds.Im;
