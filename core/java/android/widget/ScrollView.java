@@ -1374,7 +1374,7 @@ public class ScrollView extends FrameLayout {
         if (mode != OVERSCROLL_NEVER) {
             if (mEdgeGlowTop == null) {
                 final Resources res = getContext().getResources();
-                final Drawable edge = res.getDrawable(R.drawable.edge_light);
+                final Drawable edge = res.getDrawable(R.drawable.overscroll_edge);
                 final Drawable glow = res.getDrawable(R.drawable.overscroll_glow);
                 mEdgeGlowTop = new EdgeGlow(edge, glow);
                 mEdgeGlowBottom = new EdgeGlow(edge, glow);
@@ -1395,7 +1395,7 @@ public class ScrollView extends FrameLayout {
                 final int restoreCount = canvas.save();
                 final int width = getWidth();
 
-                canvas.translate(-width / 2, scrollY);
+                canvas.translate(-width / 2, Math.min(0, scrollY));
                 mEdgeGlowTop.setSize(width * 2, getHeight());
                 if (mEdgeGlowTop.draw(canvas)) {
                     invalidate();
@@ -1407,7 +1407,7 @@ public class ScrollView extends FrameLayout {
                 final int width = getWidth();
                 final int height = getHeight();
 
-                canvas.translate(-width / 2, scrollY + height);
+                canvas.translate(-width / 2, Math.max(getScrollRange(), scrollY) + height);
                 canvas.rotate(180, width, 0);
                 mEdgeGlowBottom.setSize(width * 2, height);
                 if (mEdgeGlowBottom.draw(canvas)) {
