@@ -57,7 +57,7 @@ void usage(void)
     fprintf(stderr,
         " %s p[ackage] [-d][-f][-m][-u][-v][-x][-z][-M AndroidManifest.xml] \\\n"
         "        [-0 extension [-0 extension ...]] [-g tolerance] [-j jarfile] \\\n"
-        "        [--min-sdk-version VAL] [--target-sdk-version VAL] \\\n"
+        "        [--debug-mode] [--min-sdk-version VAL] [--target-sdk-version VAL] \\\n"
         "        [--app-version VAL] [--app-version-name TEXT] [--custom-package VAL] \\\n"
         "        [--rename-manifest-package PACKAGE] \\\n"
         "        [--rename-instrumentation-target-package PACKAGE] \\\n"
@@ -123,6 +123,9 @@ void usage(void)
         "   -0  specifies an additional extension for which such files will not\n"
         "       be stored compressed in the .apk.  An empty string means to not\n"
         "       compress any files at all.\n"
+        "   --debug-mode\n"
+        "       inserts android:debuggable=\"true\" in to the application node of the\n"
+        "       manifest, making the application debuggable even on production devices.\n"
         "   --min-sdk-version\n"
         "       inserts android:minSdkVersion in to manifest.  If the version is 7 or\n"
         "       higher, the default encoding for resources will be in UTF-8.\n"
@@ -389,7 +392,9 @@ int main(int argc, char* const argv[])
                 }
                 break;
             case '-':
-                if (strcmp(cp, "-min-sdk-version") == 0) {
+                if (strcmp(cp, "-debug-mode") == 0) {
+                    bundle.setDebugMode(true);
+                } else if (strcmp(cp, "-min-sdk-version") == 0) {
                     argc--;
                     argv++;
                     if (!argc) {
