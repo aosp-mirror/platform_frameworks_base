@@ -22,6 +22,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
@@ -34,12 +35,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -730,11 +730,26 @@ public abstract class PreferenceActivity extends ListActivity implements
                 com.android.internal.R.id.prefs, f).commit();
     }
 
+    /**
+     * Start a new fragment.
+     *
+     * @param fragment The fragment to start
+     * @param push If true, the current fragment will be pushed onto the back stack.  If false,
+     * the current fragment will be replaced.
+     */
+    public void startPreferenceFragment(Fragment fragment, boolean push) {
+        FragmentTransaction transaction = getFragmentManager().openTransaction();
+        transaction.replace(com.android.internal.R.id.prefs, fragment);
+        if (push) {
+            transaction.addToBackStack(BACK_STACK_PREFS);
+        }
+        transaction.commit();
+    }
+
     @Override
     public boolean onPreferenceStartFragment(PreferenceFragment caller, Preference pref) {
         Fragment f = Fragment.instantiate(this, pref.getFragment(), pref.getExtras());
-        getFragmentManager().openTransaction().replace(com.android.internal.R.id.prefs, f)
-                .addToBackStack(BACK_STACK_PREFS).commit();
+        startPreferenceFragment(f, true);
         return true;
     }
 
