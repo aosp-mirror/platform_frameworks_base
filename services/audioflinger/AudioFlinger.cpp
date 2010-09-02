@@ -5992,12 +5992,14 @@ status_t AudioFlinger::EffectHandle::command(uint32_t cmdCode,
                                             p,
                                             &rsize,
                                             &reply);
-            if (ret == NO_ERROR) {
-                if (reply != NO_ERROR) {
-                    status = reply;
-                }
-            } else {
+            // stop at first error encountered
+            if (ret != NO_ERROR) {
                 status = ret;
+                *(int *)pReplyData = reply;
+                break;
+            } else if (reply != NO_ERROR) {
+                *(int *)pReplyData = reply;
+                break;
             }
             mCblk->serverIndex += size;
         }
@@ -6005,8 +6007,10 @@ status_t AudioFlinger::EffectHandle::command(uint32_t cmdCode,
         mCblk->clientIndex = 0;
         return status;
     } else if (cmdCode == EFFECT_CMD_ENABLE) {
+        *(int *)pReplyData = NO_ERROR;
         return enable();
     } else if (cmdCode == EFFECT_CMD_DISABLE) {
+        *(int *)pReplyData = NO_ERROR;
         return disable();
     }
 
