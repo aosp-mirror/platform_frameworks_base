@@ -260,6 +260,8 @@ public class VCardConfig {
 
     //// The followings are VCard types available from importer/exporter. ////
 
+    public static final int FLAG_REFRAIN_IMAGE_EXPORT = 0x00800000;
+
     /**
      * <p>
      * The type indicating nothing. Used by {@link VCardSourceDetector} when it
