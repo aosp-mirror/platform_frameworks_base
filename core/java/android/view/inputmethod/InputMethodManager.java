@@ -16,6 +16,10 @@
 
 package android.view.inputmethod;
 
+import com.android.internal.os.HandlerCaller;
+import com.android.internal.view.IInputConnectionWrapper;
+import com.android.internal.view.InputBindResult;
+
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -33,15 +37,6 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewRoot;
-
-import com.android.internal.os.HandlerCaller;
-import com.android.internal.view.IInputConnectionWrapper;
-import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethodCallback;
-import com.android.internal.view.IInputMethodClient;
-import com.android.internal.view.IInputMethodManager;
-import com.android.internal.view.IInputMethodSession;
-import com.android.internal.view.InputBindResult;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -384,6 +379,7 @@ public final class InputMethodManager {
             super(mainLooper, conn);
         }
 
+        @Override
         public boolean isActive() {
             return mActive;
         }
@@ -739,6 +735,7 @@ public final class InputMethodManager {
      * code you receive may be either {@link #RESULT_UNCHANGED_SHOWN},
      * {@link #RESULT_UNCHANGED_HIDDEN}, {@link #RESULT_SHOWN}, or
      * {@link #RESULT_HIDDEN}.
+     * @return false if a problem occurred, true otherwise.
      */
     public boolean showSoftInput(View view, int flags,
             ResultReceiver resultReceiver) {
