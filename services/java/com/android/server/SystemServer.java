@@ -431,8 +431,11 @@ class ServerThread extends Thread {
             }
 
             try {
-                Slog.i(TAG, "Sip Service");
-                ServiceManager.addService("sip", new SipService(context));
+                SipService sipService = SipService.create(context);
+                if (sipService != null) {
+                    Slog.i(TAG, "Sip Service");
+                    ServiceManager.addService("sip", sipService);
+                }
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting SIP Service", e);
             }
