@@ -105,7 +105,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private int mNumDnsEntries;
 
     private boolean mTestMode;
-    private static volatile ConnectivityService sServiceInstance;
+    private static ConnectivityService sServiceInstance;
 
     private Handler mHandler;
 
@@ -176,10 +176,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             Looper.loop();
         }
 
-        public static synchronized ConnectivityService getServiceInstance(Context context) {
-            if (sServiceInstance == null) {
-                ConnectivityThread thread = new ConnectivityThread(context);
-                thread.start();
+        public static ConnectivityService getServiceInstance(Context context) {
+            ConnectivityThread thread = new ConnectivityThread(context);
+            thread.start();
+
+            synchronized (thread) {
                 while (sServiceInstance == null) {
                     try {
                         // Wait until sServiceInstance has been initialized.
