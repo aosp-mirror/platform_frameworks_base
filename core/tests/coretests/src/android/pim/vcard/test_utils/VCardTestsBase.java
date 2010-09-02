@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package android.pim.vcard;
+package android.pim.vcard.test_utils;
 
 import android.content.ContentValues;
+import android.pim.vcard.VCardConfig;
 import android.test.AndroidTestCase;
 
 /**
@@ -24,8 +24,9 @@ import android.test.AndroidTestCase;
  * Please do not add each unit test here.
  */
 public class VCardTestsBase extends AndroidTestCase {
-    public static final int V21 = VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8;
-    public static final int V30 = VCardConfig.VCARD_TYPE_V30_GENERIC_UTF8;
+    public static final int V21 = VCardConfig.VCARD_TYPE_V21_GENERIC;
+    public static final int V30 = VCardConfig.VCARD_TYPE_V30_GENERIC;
+    public static final int V40 = VCardConfig.VCARD_TYPE_V40_GENERIC;
 
     // Do not modify these during tests.
     protected final ContentValues mContentValuesForQP;
@@ -41,6 +42,7 @@ public class VCardTestsBase extends AndroidTestCase {
 
     public VCardTestsBase() {
         super();
+        // Not using constants in vCard code since it may be wrong.
         mContentValuesForQP = new ContentValues();
         mContentValuesForQP.put("ENCODING", "QUOTED-PRINTABLE");
         mContentValuesForSJis = new ContentValues();

@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package android.pim.vcard;
+package android.pim.vcard.test_utils;
 
 import android.content.ContentValues;
 
@@ -22,7 +21,7 @@ import android.content.ContentValues;
  * ContentValues-like class which enables users to chain put() methods and restricts
  * the other methods.
  */
-/* package */ class ContentValuesBuilder {
+public class ContentValuesBuilder {
     private final ContentValues mContentValues;
 
     public ContentValuesBuilder(final ContentValues contentValues) {
@@ -34,6 +33,7 @@ import android.content.ContentValues;
         return this;
     }
 
+    /*
     public ContentValuesBuilder put(String key, Byte value) {
         mContentValues.put(key, value);
         return this;
@@ -42,13 +42,14 @@ import android.content.ContentValues;
     public ContentValuesBuilder put(String key, Short value) {
         mContentValues.put(key, value);
         return this;
-    }
+    }*/
 
     public ContentValuesBuilder put(String key, Integer value) {
         mContentValues.put(key, value);
         return this;
     }
 
+    /*
     public ContentValuesBuilder put(String key, Long value) {
         mContentValues.put(key, value);
         return this;
@@ -67,7 +68,7 @@ import android.content.ContentValues;
     public ContentValuesBuilder put(String key, Boolean value) {
         mContentValues.put(key, value);
         return this;
-    }
+    }*/
 
     public ContentValuesBuilder put(String key, byte[] value) {
         mContentValues.put(key, value);
