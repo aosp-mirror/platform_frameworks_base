@@ -1374,7 +1374,7 @@ public class HorizontalScrollView extends FrameLayout {
         if (mode != OVERSCROLL_NEVER) {
             if (mEdgeGlowLeft == null) {
                 final Resources res = getContext().getResources();
-                final Drawable edge = res.getDrawable(R.drawable.edge_light);
+                final Drawable edge = res.getDrawable(R.drawable.overscroll_edge);
                 final Drawable glow = res.getDrawable(R.drawable.overscroll_glow);
                 mEdgeGlowLeft = new EdgeGlow(edge, glow);
                 mEdgeGlowRight = new EdgeGlow(edge, glow);
@@ -1396,7 +1396,7 @@ public class HorizontalScrollView extends FrameLayout {
                 final int height = getHeight();
 
                 canvas.rotate(270);
-                canvas.translate(-height * 1.5f, scrollX);
+                canvas.translate(-height * 1.5f, Math.min(0, scrollX));
                 mEdgeGlowLeft.setSize(getHeight() * 2, getWidth());
                 if (mEdgeGlowLeft.draw(canvas)) {
                     invalidate();
@@ -1409,7 +1409,7 @@ public class HorizontalScrollView extends FrameLayout {
                 final int height = getHeight();
 
                 canvas.rotate(90);
-                canvas.translate(-height / 2, -scrollX - width);
+                canvas.translate(-height / 2, -(Math.max(getScrollRange(), scrollX) + width));
                 mEdgeGlowRight.setSize(height * 2, width);
                 if (mEdgeGlowRight.draw(canvas)) {
                     invalidate();

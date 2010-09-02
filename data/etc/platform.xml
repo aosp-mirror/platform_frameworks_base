@@ -90,8 +90,6 @@
     <assign-permission name="android.permission.CALL_PHONE" uid="shell" />
     <assign-permission name="android.permission.READ_CONTACTS" uid="shell" />
     <assign-permission name="android.permission.WRITE_CONTACTS" uid="shell" />
-    <assign-permission name="android.permission.READ_OWNER_DATA" uid="shell" />
-    <assign-permission name="android.permission.WRITE_OWNER_DATA" uid="shell" />
     <assign-permission name="android.permission.READ_CALENDAR" uid="shell" />
     <assign-permission name="android.permission.WRITE_CALENDAR" uid="shell" />
     <assign-permission name="android.permission.READ_USER_DICTIONARY" uid="shell" />
