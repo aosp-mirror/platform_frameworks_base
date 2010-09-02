@@ -65,7 +65,8 @@ public class Summarizer {
             "       font-size: 14px;" +
             "       color: black;" +
             "       text-decoration: none;" +
-            "       margin-bottom: 4px;}" +
+            "       margin-top: 4px;" +
+            "       margin-bottom: 2px;}" +
             "h3 a span.path {" +
             "       text-decoration: underline;}" +
             "h3 span.tri {" +
@@ -77,6 +78,15 @@ public class Summarizer {
             "       color: #8ee100;" +
             "       float: left;" +
             "       width: 20px;}" +
+            "span.source {" +
+            "       display: block;" +
+            "       font-size: 10px;" +
+            "       color: #888;" +
+            "       margin-left: 20px;" +
+            "       margin-bottom: 1px;}" +
+            "span.source a {" +
+            "       font-size: 10px;" +
+            "       color: #888;}" +
             "h3 img {" +
             "       width: 8px;" +
             "       margin-right: 4px;}" +
@@ -186,8 +196,8 @@ public class Summarizer {
     private int mCrashedTestsCount = 0;
     private List<AbstractResult> mUnexpectedFailures = new ArrayList<AbstractResult>();
     private List<AbstractResult> mExpectedFailures = new ArrayList<AbstractResult>();
-    private List<String> mExpectedPasses = new ArrayList<String>();
-    private List<String> mUnexpectedPasses = new ArrayList<String>();
+    private List<AbstractResult> mExpectedPasses = new ArrayList<AbstractResult>();
+    private List<AbstractResult> mUnexpectedPasses = new ArrayList<AbstractResult>();
 
     private FileFilter mFileFilter;
     private String mResultsRootDirPath;
@@ -215,9 +225,9 @@ public class Summarizer {
 
         if (result.getResultCode() == AbstractResult.ResultCode.PASS) {
             if (mFileFilter.isFail(relativePath)) {
-                mUnexpectedPasses.add(relativePath);
+                mUnexpectedPasses.add(result);
             } else {
-                mExpectedPasses.add(relativePath);
+                mExpectedPasses.add(result);
             }
         } else {
             if (mFileFilter.isFail(relativePath)) {
@@ -382,6 +392,7 @@ public class Summarizer {
             }
 
             html.append("</h3>");
+            appendExpectedResultsSources(result, html);
 
             html.append("<div class=\"diff\" style=\"display: none;\" id=\"" + id + "\">");
             html.append(result.getDiffAsHtml());
@@ -397,18 +408,41 @@ public class Summarizer {
     }
 
     private void createResultsListNoDiff(StringBuilder html, String title,
-            List<String> resultsList) {
+            List<AbstractResult> resultsList) {
         Collections.sort(resultsList);
-        html.append("<h2>" + title + "[" + resultsList.size() + "]</h2>");
-        for (String result : resultsList) {
+        html.append("<h2>" + title + " [" + resultsList.size() + "]</h2>");
+        for (AbstractResult result : resultsList) {
             html.append("<h3>");
-            html.append("<a href=\"" + getViewSourceUrl(result).toString() + "\"");
+            html.append("<a href=\"" + getViewSourceUrl(result.getRelativePath()).toString() +
+                    "\"");
             html.append(" target=\"_blank\">");
             html.append("<span class=\"sqr\">&#x25a0; </span>");
-            html.append("<span class=\"path\">" + result + "</span>");
+            html.append("<span class=\"path\">" + result.getRelativePath() + "</span>");
             html.append("</a>");
             html.append("</h3>");
+            appendExpectedResultsSources(result, html);
             html.append("<div class=\"space\"></div>");
+        }
+    }
+
+    private static final void appendExpectedResultsSources(AbstractResult result,
+            StringBuilder html) {
+        String textSource = result.getExpectedTextResultPath();
+        String imageSource = result.getExpectedImageResultPath();
+
+        if (textSource != null) {
+            html.append("<span class=\"source\">Expected textual result from: ");
+            html.append("<a href=\"" + ForwarderManager.getHostSchemePort(false) + "LayoutTests/" +
+                    textSource + "\"");
+            html.append(" target=\"_blank\">");
+            html.append(textSource + "</a></span>");
+        }
+        if (imageSource != null) {
+            html.append("<span class=\"source\">Expected image result from: ");
+            html.append("<a href=\"" + ForwarderManager.getHostSchemePort(false) + "LayoutTests/" +
+                    imageSource + "\"");
+            html.append(" target=\"_blank\">");
+            html.append(imageSource + "</a></span>");
         }
     }
 

@@ -92,7 +92,15 @@ public abstract class AbstractResult implements Comparable<AbstractResult> {
 
     public abstract void setExpectedImageResult(byte[] expectedResult);
 
+    public abstract void setExpectedImageResultPath(String relativePath);
+
+    public abstract String getExpectedImageResultPath();
+
     public abstract void setExpectedTextResult(String expectedResult);
+
+    public abstract void setExpectedTextResultPath(String relativePath);
+
+    public abstract String getExpectedTextResultPath();
 
     /**
      * Returns result's image data that can be written to the disk. It can be null

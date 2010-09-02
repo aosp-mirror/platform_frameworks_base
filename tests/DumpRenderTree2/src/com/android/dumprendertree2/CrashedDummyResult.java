@@ -22,6 +22,8 @@ import android.webkit.WebView;
 
 /**
  * A dummy class representing test that crashed.
+ *
+ * TODO: All the methods regarding expected results need implementing.
  */
 public class CrashedDummyResult extends AbstractResult {
     String mRelativePath;
@@ -80,6 +82,28 @@ public class CrashedDummyResult extends AbstractResult {
 
     @Override
     public void setExpectedTextResult(String expectedResult) {
+        /** TODO */
+    }
+
+    @Override
+    public String getExpectedImageResultPath() {
+        /** TODO */
+        return null;
+    }
+
+    @Override
+    public String getExpectedTextResultPath() {
+        /** TODO */
+        return null;
+    }
+
+    @Override
+    public void setExpectedImageResultPath(String relativePath) {
+        /** TODO */
+    }
+
+    @Override
+    public void setExpectedTextResultPath(String relativePath) {
         /** TODO */
     }
 }
