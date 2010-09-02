@@ -308,6 +308,8 @@ status_t AndroidRuntime::callMain(
     jclass clazz;
     jmethodID methodId;
 
+    LOGD("Calling main entry %s", className);
+
     env = getJNIEnv();
     if (env == NULL)
         return UNKNOWN_ERROR;
@@ -914,7 +916,8 @@ bail:
  */
 void AndroidRuntime::start(const char* className, const bool startSystemServer)
 {
-    LOGD("\n>>>>>>>>>>>>>> AndroidRuntime START <<<<<<<<<<<<<<\n");
+    LOGD("\n>>>>>> AndroidRuntime START %s <<<<<<\n",
+            className != NULL ? className : "(unknown)");
 
     char* slashClassName = NULL;
     char* cp;
@@ -1029,7 +1032,7 @@ void AndroidRuntime::start()
 
 void AndroidRuntime::onExit(int code)
 {
-    LOGI("AndroidRuntime onExit calling exit(%d)", code);
+    LOGV("AndroidRuntime onExit calling exit(%d)", code);
     exit(code);
 }
 
@@ -1334,7 +1337,7 @@ static const RegJNIRec gRegJNI[] = {
      */
     androidSetCreateThreadFunc((android_create_thread_fn) javaCreateThreadEtc);
 
-    LOGD("--- registering native functions ---\n");
+    LOGV("--- registering native functions ---\n");
 
     /*
      * Every "register" function calls one or more things that return
