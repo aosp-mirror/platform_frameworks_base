@@ -50,6 +50,8 @@ struct APacketSource : public MediaSource {
     void setNormalPlayTimeMapping(
             uint32_t rtpTime, int64_t normalPlayTimeUs);
 
+    int64_t getQueueDurationUs(bool *eos);
+
 protected:
     virtual ~APacketSource();
 
