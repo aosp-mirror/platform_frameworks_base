@@ -32,6 +32,10 @@ public class ConnectionHandler {
 
     private static final String LOG_TAG = "ConnectionHandler";
 
+    public static interface OnFinishedCallback {
+        public void onFinished();
+    }
+
     private class SocketPipeThread extends Thread {
 
         private Socket mInSocket, mOutSocket;
@@ -69,6 +73,9 @@ public class ConnectionHandler {
                     break;
                 }
             }
+
+            ConnectionHandler.this.stop();
+            mOnFinishedCallback.onFinished();
         }
 
         @Override
@@ -80,11 +87,17 @@ public class ConnectionHandler {
     private Socket mFromSocket, mToSocket;
     private SocketPipeThread mFromToPipe, mToFromPipe;
 
+    private OnFinishedCallback mOnFinishedCallback;
+
     public ConnectionHandler(Socket fromSocket, Socket toSocket) {
         mFromSocket = fromSocket;
         mToSocket = toSocket;
         mFromToPipe = new SocketPipeThread(mFromSocket, mToSocket);
         mToFromPipe = new SocketPipeThread(mToSocket, mFromSocket);
+    }
+
+    public void registerOnConnectionHandlerFinishedCallback(OnFinishedCallback callback) {
+        mOnFinishedCallback = callback;
     }
 
     public void start() {
@@ -102,17 +115,23 @@ public class ConnectionHandler {
             synchronized (mToFromPipe) {
                 /** This will stop the while loop in the run method */
                 try {
-                    socket.shutdownInput();
+                    if (!socket.isInputShutdown()) {
+                        socket.shutdownInput();
+                    }
                 } catch (IOException e) {
                     Log.e(LOG_TAG, "mFromToPipe=" + mFromToPipe + " mToFromPipe=" + mToFromPipe, e);
                 }
                 try {
-                    socket.shutdownOutput();
+                    if (!socket.isOutputShutdown()) {
+                        socket.shutdownOutput();
+                    }
                 } catch (IOException e) {
                     Log.e(LOG_TAG, "mFromToPipe=" + mFromToPipe + " mToFromPipe=" + mToFromPipe, e);
                 }
                 try {
-                    socket.close();
+                    if (!socket.isClosed()) {
+                        socket.close();
+                    }
                 } catch (IOException e) {
                     Log.e(LOG_TAG, "mFromToPipe=" + mFromToPipe + " mToFromPipe=" + mToFromPipe, e);
                 }
