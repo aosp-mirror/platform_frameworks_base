@@ -286,7 +286,7 @@ public abstract class PhoneBase extends Handler implements Phone {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
         SharedPreferences.Editor editor = sp.edit();
         editor.putBoolean(DNS_SERVER_CHECK_DISABLED_KEY, b);
-        editor.commit();
+        editor.apply();
     }
 
     /**
