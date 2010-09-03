@@ -144,6 +144,7 @@ private:
 
     inline size_t write(const void *ptr, size_t size, size_t nmemb, FILE* stream);
     bool exceedsFileSizeLimit();
+    bool use32BitFileOffset() const;
     bool exceedsFileDurationLimit();
     void trackProgressStatus(const Track* track, int64_t timeUs, status_t err = OK);
 
