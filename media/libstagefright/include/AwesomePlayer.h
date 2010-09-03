@@ -238,6 +238,9 @@ private:
     void onCheckAudioStatus();
     void onPrepareAsyncEvent();
     void abortPrepare(status_t err);
+    void finishAsyncPrepare_l();
+
+    bool getCachedDuration_l(int64_t *durationUs, bool *eos);
 
     status_t finishSetDataSource_l();
 
