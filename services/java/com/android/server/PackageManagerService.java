@@ -9383,17 +9383,18 @@ class PackageManagerService extends IPackageManager.Stub {
 
     // ------- apps on sdcard specific code -------
     static final boolean DEBUG_SD_INSTALL = false;
-    final private String mSdEncryptKey = "AppsOnSD";
-    final private String mSdEncryptAlg = "AES";
+    private static final String SD_ENCRYPTION_KEYSTORE_NAME = "AppsOnSD";
+    private static final String SD_ENCRYPTION_ALGORITHM = "AES";
+    static final int MAX_CONTAINERS = 250;
     private boolean mMediaMounted = false;
-    private static final int MAX_CONTAINERS = 250;
 
     private String getEncryptKey() {
         try {
-            String sdEncKey = SystemKeyStore.getInstance().retrieveKeyHexString(mSdEncryptKey);
+            String sdEncKey = SystemKeyStore.getInstance().retrieveKeyHexString(
+                    SD_ENCRYPTION_KEYSTORE_NAME);
             if (sdEncKey == null) {
-                sdEncKey = SystemKeyStore.getInstance().
-                        generateNewKeyHexString(128, mSdEncryptAlg, mSdEncryptKey);
+                sdEncKey = SystemKeyStore.getInstance().generateNewKeyHexString(128,
+                        SD_ENCRYPTION_ALGORITHM, SD_ENCRYPTION_KEYSTORE_NAME);
                 if (sdEncKey == null) {
                     Slog.e(TAG, "Failed to create encryption keys");
                     return null;
