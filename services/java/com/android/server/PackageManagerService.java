@@ -1997,7 +1997,11 @@ class PackageManagerService extends IPackageManager.Stub {
                     ActivityInfo ai = getActivityInfo(pa.mActivity, flags);
                     if (DEBUG_PREFERRED) {
                         Log.v(TAG, "Got preferred activity:");
-                        ai.dump(new LogPrinter(Log.INFO, TAG), "  ");
+                        if (ai != null) {
+                            ai.dump(new LogPrinter(Log.VERBOSE, TAG), "  ");
+                        } else {
+                            Log.v(TAG, "  null");
+                        }
                     }
                     if (ai != null) {
                         for (int j=0; j<N; j++) {
