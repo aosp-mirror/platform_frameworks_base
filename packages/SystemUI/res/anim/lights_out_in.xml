@@ -18,8 +18,9 @@
     >
     <translate android:fromYDelta="100%p" android:toYDelta="0"
         android:duration="@android:integer/config_mediumAnimTime" 
+        android:interpolator="@anim/hydraulic_brake_interpolator"
         />
     <alpha android:fromAlpha="0.0" android:toAlpha="1.0"
-        android:duration="@android:integer/config_mediumAnimTime" 
+        android:duration="@android:integer/config_longAnimTime" 
         />
 </set>
