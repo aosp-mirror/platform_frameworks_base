@@ -443,7 +443,7 @@ public class PreferenceManager {
             pm.setSharedPreferencesMode(sharedPreferencesMode);
             pm.inflateFromResource(context, resId, null);
 
-            defaultValueSp.edit().putBoolean(KEY_HAS_SET_DEFAULT_VALUES, true).commit();
+            defaultValueSp.edit().putBoolean(KEY_HAS_SET_DEFAULT_VALUES, true).apply();
         }
     }
     
@@ -481,7 +481,7 @@ public class PreferenceManager {
     
     private void setNoCommit(boolean noCommit) {
         if (!noCommit && mEditor != null) {
-            mEditor.commit();
+            mEditor.apply();
         }
         
         mNoCommit = noCommit;
