@@ -526,7 +526,7 @@ LVREV_ReturnStatus_en LVREV_ApplyNewSettings (LVREV_Instance_st     *pPrivate)
         (pPrivate->NewParams.OperatingMode == LVM_MODE_ON))
     {
         pPrivate->BypassMixer.Target2 = ((LVM_INT32)(pPrivate->NewParams.Level * 32767)/100)<<16;
-        pPrivate->BypassMixer.Target1 = LVREV_HEADROOM << 16;
+        pPrivate->BypassMixer.Target1 = 0x00000000;
         if ((pPrivate->NewParams.Level == 0) && (pPrivate->bFirstControl == LVM_FALSE))
         {
             pPrivate->BypassMixer.CallbackSet2 = LVM_TRUE;
@@ -542,7 +542,7 @@ LVREV_ReturnStatus_en LVREV_ApplyNewSettings (LVREV_Instance_st     *pPrivate)
         if(pPrivate->NewParams.OperatingMode == LVM_MODE_ON)
         {
             pPrivate->BypassMixer.Target2 = ((LVM_INT32)(pPrivate->NewParams.Level * 32767)/100)<<16;
-            pPrivate->BypassMixer.Target1 = LVREV_HEADROOM << 16;
+            pPrivate->BypassMixer.Target1 = 0x00000000;
 
             pPrivate->BypassMixer.CallbackSet2 = LVM_FALSE;
             OperatingMode                      = LVM_MODE_ON;
@@ -558,7 +558,7 @@ LVREV_ReturnStatus_en LVREV_ApplyNewSettings (LVREV_Instance_st     *pPrivate)
         else if (pPrivate->bFirstControl == LVM_FALSE)
         {
             pPrivate->BypassMixer.Target2 = 0x00000000;
-            pPrivate->BypassMixer.Target1 = 0x7FFFFFFF;
+            pPrivate->BypassMixer.Target1 = 0x00000000;
             pPrivate->BypassMixer.CallbackSet2 = LVM_TRUE;
             pPrivate->GainMixer.Target    = 0x03FFFFFF;
             OperatingMode = LVM_MODE_ON;
