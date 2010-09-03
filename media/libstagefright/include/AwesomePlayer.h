@@ -106,6 +106,7 @@ private:
         CACHE_UNDERRUN      = 128,
         AUDIO_AT_EOS        = 256,
         VIDEO_AT_EOS        = 512,
+        AUTO_LOOPING        = 1024,
     };
 
     mutable Mutex mLock;
