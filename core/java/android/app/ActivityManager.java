@@ -755,14 +755,17 @@ public class ActivityManager {
         public String pkgList[];
         
         /**
-         * Constant for {@link #flags}: this is a heavy-weight process,
-         * meaning it will not be killed while in the background.
+         * Constant for {@link #flags}: this is an app that is unable to
+         * correctly save its state when going to the background,
+         * so it can not be killed while in the background.
+         * @hide
          */
-        public static final int FLAG_HEAVY_WEIGHT = 1<<0;
+        public static final int FLAG_CANT_SAVE_STATE = 1<<0;
         
         /**
          * Flags of information.  May be any of
-         * {@link #FLAG_HEAVY_WEIGHT}.
+         * {@link #FLAG_CANT_SAVE_STATE}.
+         * @hide
          */
         public int flags;
         
