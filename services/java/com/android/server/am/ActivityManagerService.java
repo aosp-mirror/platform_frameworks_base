@@ -6801,7 +6801,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                 app.pid, app.getPackageList());
                     currApp.uid = app.info.uid;
                     if (mHeavyWeightProcess == app) {
-                        currApp.flags |= ActivityManager.RunningAppProcessInfo.FLAG_HEAVY_WEIGHT;
+                        currApp.flags |= ActivityManager.RunningAppProcessInfo.FLAG_CANT_SAVE_STATE;
                     }
                     int adj = app.curAdj;
                     if (adj >= EMPTY_APP_ADJ) {
