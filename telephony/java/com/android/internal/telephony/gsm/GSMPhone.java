@@ -809,7 +809,7 @@ public class GSMPhone extends PhoneBase {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
         SharedPreferences.Editor editor = sp.edit();
         editor.putString(VM_NUMBER, number);
-        editor.commit();
+        editor.apply();
         setVmSimImsi(getSubscriberId());
     }
 
@@ -832,7 +832,7 @@ public class GSMPhone extends PhoneBase {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
         SharedPreferences.Editor editor = sp.edit();
         editor.putString(VM_SIM_IMSI, imsi);
-        editor.commit();
+        editor.apply();
     }
 
     public String getVoiceMailAlphaTag() {
