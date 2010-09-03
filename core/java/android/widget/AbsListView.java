@@ -659,6 +659,18 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
+     * @return true if all list content currently fits within the view boundaries
+     */
+    private boolean contentFits() {
+        final int childCount = getChildCount();
+        if (childCount != mItemCount) {
+            return false;
+        }
+
+        return getChildAt(0).getTop() >= 0 && getChildAt(childCount - 1).getBottom() <= mBottom;
+    }
+
+    /**
      * Enables fast scrolling by letting the user quickly scroll through lists by
      * dragging the fast scroll thumb. The adapter attached to the list may want
      * to implement {@link SectionIndexer} if it wishes to display alphabet preview and
@@ -2221,8 +2233,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                 // Don't allow overfling if we're at the edge.
                                 mVelocityTracker.clear();
                             }
-                            mTouchMode = TOUCH_MODE_OVERSCROLL;
-                            if (mEdgeGlowTop != null) {
+
+                            final int overscrollMode = getOverscrollMode();
+                            if (overscrollMode == OVERSCROLL_ALWAYS ||
+                                    (overscrollMode == OVERSCROLL_IF_CONTENT_SCROLLS &&
+                                            !contentFits())) {
+                                mTouchMode = TOUCH_MODE_OVERSCROLL;
                                 if (rawDeltaY > 0) {
                                     mEdgeGlowTop.onPull((float) overscroll / getHeight());
                                 } else if (rawDeltaY < 0) {
@@ -2275,7 +2291,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     } else {
                         overscrollBy(0, -incrementalDeltaY, 0, mScrollY, 0, 0,
                                 0, mOverscrollDistance, true);
-                        if (mEdgeGlowTop != null) {
+                        final int overscrollMode = getOverscrollMode();
+                        if (overscrollMode == OVERSCROLL_ALWAYS ||
+                                (overscrollMode == OVERSCROLL_IF_CONTENT_SCROLLS &&
+                                        !contentFits())) {
                             if (rawDeltaY > 0) {
                                 mEdgeGlowTop.onPull((float) -incrementalDeltaY / getHeight());
                             } else if (rawDeltaY < 0) {
@@ -2757,8 +2776,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         void edgeReached(int delta) {
             mScroller.notifyVerticalEdgeReached(mScrollY, 0, mOverflingDistance);
-            mTouchMode = TOUCH_MODE_OVERFLING;
-            if (mEdgeGlowTop != null) {
+            final int overscrollMode = getOverscrollMode();
+            if (overscrollMode == OVERSCROLL_ALWAYS ||
+                    (overscrollMode == OVERSCROLL_IF_CONTENT_SCROLLS && !contentFits())) {
+                mTouchMode = TOUCH_MODE_OVERFLING;
                 final int vel = (int) mScroller.getCurrVelocity();
                 if (delta > 0) {
                     mEdgeGlowTop.onAbsorb(vel);

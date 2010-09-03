@@ -533,11 +533,15 @@ public class ScrollView extends FrameLayout {
                     }
                     onScrollChanged(mScrollX, mScrollY, oldX, oldY);
 
-                    final int pulledToY = oldY + deltaY;
-                    if (pulledToY < 0) {
-                        mEdgeGlowTop.onPull((float) deltaY / getHeight());
-                    } else if (pulledToY > range) {
-                        mEdgeGlowBottom.onPull((float) deltaY / getHeight());
+                    final int overscrollMode = getOverscrollMode();
+                    if (overscrollMode == OVERSCROLL_ALWAYS ||
+                            (overscrollMode == OVERSCROLL_IF_CONTENT_SCROLLS && range > 0)) {
+                        final int pulledToY = oldY + deltaY;
+                        if (pulledToY < 0) {
+                            mEdgeGlowTop.onPull((float) deltaY / getHeight());
+                        } else if (pulledToY > range) {
+                            mEdgeGlowBottom.onPull((float) deltaY / getHeight());
+                        }
                     }
                 }
                 break;
@@ -1090,10 +1094,14 @@ public class ScrollView extends FrameLayout {
                 onScrollChanged(mScrollX, mScrollY, oldX, oldY);
 
                 final int range = getScrollRange();
-                if (y < 0 && oldY >= 0) {
-                    mEdgeGlowTop.onAbsorb((int) mScroller.getCurrVelocity());
-                } else if (y > range && oldY <= range) {
-                    mEdgeGlowBottom.onAbsorb((int) mScroller.getCurrVelocity());
+                final int overscrollMode = getOverscrollMode();
+                if (overscrollMode == OVERSCROLL_ALWAYS ||
+                        (overscrollMode == OVERSCROLL_IF_CONTENT_SCROLLS && range > 0)) {
+                    if (y < 0 && oldY >= 0) {
+                        mEdgeGlowTop.onAbsorb((int) mScroller.getCurrVelocity());
+                    } else if (y > range && oldY <= range) {
+                        mEdgeGlowBottom.onAbsorb((int) mScroller.getCurrVelocity());
+                    }
                 }
             }
             awakenScrollBars();
