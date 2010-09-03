@@ -208,6 +208,8 @@ status_t AACEncoder::read(
     MediaBuffer *buffer;
     CHECK_EQ(mBufferGroup->acquire_buffer(&buffer), OK);
     uint8_t *outPtr = (uint8_t *)buffer->data();
+    bool readFromSource = false;
+    int64_t wallClockTimeUs = 0;
 
     if (mFrameCount == 0) {
         memcpy(outPtr, mAudioSpecificConfigData, 2);
@@ -238,9 +240,14 @@ status_t AACEncoder::read(
             CHECK_EQ(align, 0);
 
             int64_t timeUs;
+            CHECK(mInputBuffer->meta_data()->findInt64(kKeyDriftTime, &timeUs));
+            wallClockTimeUs = timeUs;
             if (mInputBuffer->meta_data()->findInt64(kKeyTime, &timeUs)) {
                 mAnchorTimeUs = timeUs;
             }
+            readFromSource = true;
+        } else {
+            readFromSource = false;
         }
         size_t copy =
             (kNumSamplesPerFrame - mNumInputSamples) * sizeof(int16_t);
@@ -288,9 +295,13 @@ status_t AACEncoder::read(
     CHECK(outputData.Length != 0);
     buffer->set_range(0, outputData.Length);
 
-    int64_t timestampUs = ((mFrameCount - 1) * 1000000LL * kNumSamplesPerFrame) / mSampleRate;
+    int64_t mediaTimeUs =
+        ((mFrameCount - 1) * 1000000LL * kNumSamplesPerFrame) / mSampleRate;
+    buffer->meta_data()->setInt64(kKeyTime, mAnchorTimeUs + mediaTimeUs);
+    if (readFromSource) {
+        buffer->meta_data()->setInt64(kKeyDriftTime, mediaTimeUs - wallClockTimeUs);
+    }
     ++mFrameCount;
-    buffer->meta_data()->setInt64(kKeyTime, timestampUs);
 
     *out = buffer;
     return OK;
