@@ -1066,7 +1066,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             closePendingStatements();
             releaseCustomFunctions();
             // close this database instance - regardless of its reference count value
-            dbclose();
+            closeDatabase();
             if (mConnectionPool != null) {
                 if (Log.isLoggable(TAG, Log.DEBUG)) {
                     assert mConnectionPool != null;
@@ -1075,7 +1075,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                 mConnectionPool.close();
             }
         } finally {
-            unlock();
+            unlock();            
         }
     }
 
@@ -1095,6 +1095,47 @@ public class SQLiteDatabase extends SQLiteClosable {
             SQLiteClosable program = entry.getKey();
             if (program != null) {
                 program.onAllReferencesReleasedFromContainer();
+            }
+        }
+    }
+
+    /**
+     * package level access for testing purposes
+     */
+    /* package */ void closeDatabase() throws SQLiteException {
+        try {
+            dbclose();
+        } catch (SQLiteUnfinalizedObjectsException e)  {
+            String msg = e.getMessage();
+            String[] tokens = msg.split(",", 2);
+            int stmtId = Integer.parseInt(tokens[0]);
+            // get extra info about this statement, if it is still to be released by closeClosable()
+            Iterator<Map.Entry<SQLiteClosable, Object>> iter = mPrograms.entrySet().iterator();
+            boolean found = false;
+            while (iter.hasNext()) {
+                Map.Entry<SQLiteClosable, Object> entry = iter.next();
+                SQLiteClosable program = entry.getKey();
+                if (program != null && program instanceof SQLiteProgram) {
+                        SQLiteCompiledSql compiledSql = ((SQLiteProgram)program).mCompiledSql;
+                        if (compiledSql.nStatement == stmtId) {
+                            msg = compiledSql.toString();
+                            found = true;
+                        }
+                }
+            }
+            if (!found) {
+                // the statement is already released by closeClosable(). is it waiting to be
+                // finalized?
+                if (mClosedStatementIds.contains(stmtId)) {
+                    Log.w(TAG, "this shouldn't happen. finalizing the statement now: ");
+                    closePendingStatements();
+                    // try to close the database again
+                    closeDatabase();
+                }
+            } else {
+                // the statement is not yet closed. most probably programming error in the app.
+                Log.w(TAG, "dbclose failed due to un-close()d SQL statements: " + msg);
+                throw e;
             }
         }
     }

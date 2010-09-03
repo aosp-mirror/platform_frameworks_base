@@ -144,6 +144,22 @@ import android.util.Log;
         }
     }
 
+    @Override public String toString() {
+        synchronized(this) {
+            StringBuilder buff = new StringBuilder();
+            buff.append(" nStatement=");
+            buff.append(nStatement);
+            buff.append(", db=");
+            buff.append(mDatabase.getPath());
+            buff.append(", db_connectionNum=");
+            buff.append(mDatabase.mConnectionNum);
+            buff.append(", sql=");
+            int len = mSqlStmt.length();
+            buff.append(mSqlStmt.substring(0, (len > 100) ? 100 : len));
+            return buff.toString();
+        }
+    }
+
     /**
      * Compiles SQL into a SQLite program.
      *

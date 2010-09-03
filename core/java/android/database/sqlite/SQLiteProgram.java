@@ -52,7 +52,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     /**
      * the SQLiteCompiledSql object for the given sql statement.
      */
-    private SQLiteCompiledSql mCompiledSql;
+    /* package */ SQLiteCompiledSql mCompiledSql;
 
     /**
      * SQLiteCompiledSql statement id is populated with the corresponding object from the above
