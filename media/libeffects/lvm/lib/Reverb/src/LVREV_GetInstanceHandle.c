@@ -238,8 +238,8 @@ LVREV_ReturnStatus_en LVREV_GetInstanceHandle(LVREV_Handle_t            *phInsta
     pLVREV_Private->BypassMixer.pGeneralPurpose1    = LVM_NULL;
     pLVREV_Private->BypassMixer.pCallBack1          = LVM_NULL;
     pLVREV_Private->BypassMixer.CallbackSet1        = LVM_FALSE;
-    pLVREV_Private->BypassMixer.Current1            = 0x7fffffff;
-    pLVREV_Private->BypassMixer.Target1             = 0x7fffffff;
+    pLVREV_Private->BypassMixer.Current1            = 0x00000000;
+    pLVREV_Private->BypassMixer.Target1             = 0x00000000;
 
     pLVREV_Private->RoomSizeInms                    = 100;  // 100 msec
 
