@@ -152,6 +152,7 @@ struct ReverbContext{
     bool                            preset;
     uint16_t                        curPreset;
     uint16_t                        nextPreset;
+    int                             SamplesToExitCount;
 };
 
 #define REVERB_DEFAULT_PRESET REVERB_PRESET_MEDIUMROOM
@@ -212,6 +213,7 @@ extern "C" int EffectCreate(effect_uuid_t       *uuid,
         desc = gDescriptors[i];
         if (memcmp(uuid, &desc->uuid, sizeof(effect_uuid_t))
                 == 0) {
+            LOGV("\tEffectCreate - UUID matched Reverb type %d, UUID = %x", i, desc->uuid.timeLow);
             break;
         }
     }
@@ -228,6 +230,9 @@ extern "C" int EffectCreate(effect_uuid_t       *uuid,
     pContext->auxiliary = false;
     if ((desc->flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY){
         pContext->auxiliary = true;
+        LOGV("\tEffectCreate - AUX");
+    }else{
+        LOGV("\tEffectCreate - INS");
     }
 
     pContext->preset = false;
@@ -236,6 +241,9 @@ extern "C" int EffectCreate(effect_uuid_t       *uuid,
         // force reloading preset at first call to process()
         pContext->curPreset = REVERB_PRESET_LAST + 1;
         pContext->nextPreset = REVERB_DEFAULT_PRESET;
+        LOGV("\tEffectCreate - PRESET");
+    }else{
+        LOGV("\tEffectCreate - ENVIRONMENTAL");
     }
 
     LOGV("\tEffectCreate - Calling Reverb_init");
@@ -389,21 +397,18 @@ int process( LVM_INT16     *pIn,
              int           frameCount,
              ReverbContext *pContext){
 
-    LVM_INT16               samplesPerFrame = 0;
+    LVM_INT16               samplesPerFrame = 1;
     LVREV_ReturnStatus_en   LvmStatus = LVREV_SUCCESS;              /* Function call status */
     LVM_INT16 *OutFrames16;
 
 
     // Check that the input is either mono or stereo
-    if(pContext->config.inputCfg.channels == CHANNEL_STEREO){
+    if (pContext->config.inputCfg.channels == CHANNEL_STEREO) {
         samplesPerFrame = 2;
-    } else if (pContext->config.inputCfg.channels == CHANNEL_MONO){
-        samplesPerFrame = 1;
-    } else {
+    } else if (pContext->config.inputCfg.channels != CHANNEL_MONO) {
         LOGV("\tLVREV_ERROR : process invalid PCM format");
         return -EINVAL;
     }
-
 
     OutFrames16 = (LVM_INT16 *)pContext->OutFrames32;
 
@@ -437,43 +442,49 @@ int process( LVM_INT16     *pIn,
     //pContext->config.outputCfg.channels, CHANNEL_STEREO);
 
     if (pContext->preset && pContext->curPreset == REVERB_PRESET_NONE) {
-        memset(pContext->OutFrames32, 0, frameCount * sizeof(LVM_INT32) * 2);
+        memset(pContext->OutFrames32, 0, frameCount * sizeof(LVM_INT32) * 2); //always stereo here
     } else {
-    /* Process the samples */
-    LvmStatus = LVREV_Process(pContext->hInstance,      /* Instance handle */
-                              pContext->InFrames32,     /* Input buffer */
-                              pContext->OutFrames32,    /* Output buffer */
-                              frameCount);              /* Number of samples to read */
-    }
-
-    if (!pContext->auxiliary) {
-        for (int i=0; i<frameCount*2; i++){
-            pContext->OutFrames32[i] += pContext->InFrames32[i];
+        if(pContext->bEnabled == LVM_FALSE && pContext->SamplesToExitCount > 0) {
+            memset(pContext->InFrames32,
+                   0,
+                   frameCount * sizeof(LVM_INT32) * 2); //always stereo here
         }
+
+        /* Process the samples */
+        LvmStatus = LVREV_Process(pContext->hInstance,      /* Instance handle */
+                                  pContext->InFrames32,     /* Input buffer */
+                                  pContext->OutFrames32,    /* Output buffer */
+                                  frameCount);              /* Number of samples to read */
     }
 
     LVM_ERROR_CHECK(LvmStatus, "LVREV_Process", "process")
     if(LvmStatus != LVREV_SUCCESS) return -EINVAL;
 
     // Convert to 16 bits
-    for(int i=0; i<frameCount*2; i++){  // Always stereo
-        OutFrames16[i] = clamp16(pContext->OutFrames32[i]>>8);
+    if (pContext->auxiliary) {
+        for (int i=0; i < frameCount*2; i++) { //always stereo here
+            OutFrames16[i] = clamp16(pContext->OutFrames32[i]>>8);
+        }
+    } else {
+        for (int i=0; i < frameCount*2; i++) { //always stereo here
+            OutFrames16[i] = clamp16((pContext->OutFrames32[i]>>8) + (LVM_INT32)pIn[i]);
+        }
     }
 
     #ifdef LVM_PCM
-    fwrite(OutFrames16, frameCount*sizeof(LVM_INT16)*samplesPerFrame, 1, pContext->PcmOutPtr);
+    fwrite(OutFrames16, frameCount*sizeof(LVM_INT16)*2, 1, pContext->PcmOutPtr);
     fflush(pContext->PcmOutPtr);
     #endif
 
     // Accumulate if required
     if (pContext->config.outputCfg.accessMode == EFFECT_BUFFER_ACCESS_ACCUMULATE){
         //LOGV("\tBuffer access is ACCUMULATE");
-        for (int i=0; i<frameCount*2; i++){
+        for (int i=0; i<frameCount*2; i++){ //always stereo here
             pOut[i] = clamp16((int32_t)pOut[i] + (int32_t)OutFrames16[i]);
         }
     }else{
         //LOGV("\tBuffer access is WRITE");
-        memcpy(pOut, OutFrames16, frameCount*sizeof(LVM_INT16)*2); // 2 is for stereo output
+        memcpy(pOut, OutFrames16, frameCount*sizeof(LVM_INT16)*2);
     }
 
     return 0;
@@ -559,6 +570,7 @@ int Reverb_configure(ReverbContext *pContext, effect_config_t *pConfig){
 
     //LOGV("\tReverb_configure calling memcpy");
     memcpy(&pContext->config, pConfig, sizeof(effect_config_t));
+
 
     switch (pConfig->inputCfg.samplingRate) {
     case 8000:
@@ -740,6 +752,8 @@ int Reverb_init(ReverbContext *pContext){
     params.Density        = 100;
     params.Damping        = 21;
     params.RoomSize       = 100;
+
+    pContext->SamplesToExitCount = (params.T60 * pContext->config.inputCfg.samplingRate)/1000;
 
     /* Saved strength is used to return the exact strength that was used in the set to the get
      * because we map the original strength range of 0:1000 to 1:15, and this will avoid
@@ -1082,7 +1096,8 @@ int16_t ReverbGetRoomLevel(ReverbContext *pContext){
 
     //LOGV("\tReverbGetRoomLevel, Level = %d, pContext->SavedRoomLevel = %d, "
     //     "pContext->SavedReverbLevel = %d, CombinedLevel = %d, level = %d",
-    //ActiveParams.Level, pContext->SavedRoomLevel, pContext->SavedReverbLevel, CombinedLevel, level);
+    //     ActiveParams.Level, pContext->SavedRoomLevel,
+    //     pContext->SavedReverbLevel, CombinedLevel, level);
 
     if(ActiveParams.Level != level){
         LOGV("\tLVM_ERROR : (ignore at start up) ReverbGetRoomLevel() has wrong level -> %d %d\n",
@@ -1129,6 +1144,8 @@ void ReverbSetDecayTime(ReverbContext *pContext, uint32_t time){
     LVM_ERROR_CHECK(LvmStatus, "LVREV_SetControlParameters", "ReverbSetDecayTime")
     //LOGV("\tReverbSetDecayTime() just Set -> %d\n", ActiveParams.T60);
 
+    pContext->SamplesToExitCount = (ActiveParams.T60 * pContext->config.inputCfg.samplingRate)/1000;
+    //LOGV("\tReverbSetDecayTime() just Set SamplesToExitCount-> %d\n",pContext->SamplesToExitCount);
     pContext->SavedDecayTime = time;
     //LOGV("\tReverbSetDecayTime end");
     return;
@@ -1769,8 +1786,12 @@ extern "C" int Reverb_process(effect_interface_t   self,
         return -EINVAL;
     }
     if (pContext->bEnabled == LVM_FALSE){
-        LOGV("\tReverb_process() ERROR Effect is not enabled");
-        return -ENODATA;
+        if( pContext->SamplesToExitCount > 0){
+            pContext->SamplesToExitCount -= outBuffer->frameCount;
+        }else{
+            LOGV("\tReverb_process() ERROR Effect is not enabled %d", pContext->SamplesToExitCount);
+            return -ENODATA;
+        }
     }
     //LOGV("\tReverb_process() Calling process with %d frames", outBuffer->frameCount);
     /* Process all the available frames, block processing is handled internalLY by the LVM bundle */
@@ -1791,6 +1812,9 @@ extern "C" int Reverb_command(effect_interface_t  self,
                               void                *pReplyData){
     android::ReverbContext * pContext = (android::ReverbContext *) self;
     int retsize;
+    LVREV_ControlParams_st    ActiveParams;              /* Current control Parameters */
+    LVREV_ReturnStatus_en     LvmStatus=LVREV_SUCCESS;     /* Function call status */
+
 
     if (pContext == NULL){
         LOGV("\tLVM_ERROR : Reverb_command ERROR pContext == NULL");
@@ -1917,6 +1941,12 @@ extern "C" int Reverb_command(effect_interface_t  self,
              }
             *(int *)pReplyData = 0;
             pContext->bEnabled = LVM_TRUE;
+            /* Get the current settings */
+            LvmStatus = LVREV_GetControlParameters(pContext->hInstance, &ActiveParams);
+            LVM_ERROR_CHECK(LvmStatus, "LVREV_GetControlParameters", "EFFECT_CMD_ENABLE")
+            pContext->SamplesToExitCount =
+                    (ActiveParams.T60 * pContext->config.inputCfg.samplingRate)/1000;
+            //LOGV("\tEFFECT_CMD_ENABLE SamplesToExitCount = %d", pContext->SamplesToExitCount);
             break;
         case EFFECT_CMD_DISABLE:
             //LOGV("\tReverb_command cmdCode Case: "
@@ -1939,8 +1969,8 @@ extern "C" int Reverb_command(effect_interface_t  self,
         case EFFECT_CMD_SET_DEVICE:
         case EFFECT_CMD_SET_VOLUME:
         case EFFECT_CMD_SET_AUDIO_MODE:
-            //LOGV("\tReverb_command cmdCode Case: "
-            //        "EFFECT_CMD_SET_DEVICE/EFFECT_CMD_SET_VOLUME/EFFECT_CMD_SET_AUDIO_MODE start");
+        //LOGV("\tReverb_command cmdCode Case: "
+        //        "EFFECT_CMD_SET_DEVICE/EFFECT_CMD_SET_VOLUME/EFFECT_CMD_SET_AUDIO_MODE start");
             break;
 
         default:
