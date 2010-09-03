@@ -65,6 +65,7 @@ import java.util.ArrayList;
  * @attr ref android.R.styleable#ViewGroup_alwaysDrawnWithCache
  * @attr ref android.R.styleable#ViewGroup_addStatesFromChildren
  * @attr ref android.R.styleable#ViewGroup_descendantFocusability
+ * @attr ref android.R.styleable#ViewGroup_animateLayoutChanges
  */
 public abstract class ViewGroup extends View implements ViewParent, ViewManager {
 
@@ -381,6 +382,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     break;
                 case R.styleable.ViewGroup_splitMotionEvents:
                     setMotionEventSplittingEnabled(a.getBoolean(attr, false));
+                    break;
+                case R.styleable.ViewGroup_animateLayoutChanges:
+                    boolean animateLayoutChanges = a.getBoolean(attr, false);
+                    if (animateLayoutChanges) {
+                        setLayoutTransition(new LayoutTransition());
+                    }
                     break;
             }
         }
@@ -2594,10 +2601,26 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @param transition The LayoutTransition object that will animated changes in layout. A value
      * of <code>null</code> means no transition will run on layout changes.
+     * @attr ref android.R.styleable#ViewGroup_animateLayoutChanges
      */
     public void setLayoutTransition(LayoutTransition transition) {
         mTransition = transition;
-        mTransition.addTransitionListener(mLayoutTransitionListener);
+        if (mTransition != null) {
+            mTransition.addTransitionListener(mLayoutTransitionListener);
+        }
+    }
+
+    /**
+     * Gets the LayoutTransition object for this ViewGroup. If the LayoutTransition object is
+     * not null, changes in layout which occur because of children being added to or removed from
+     * the ViewGroup will be animated according to the animations defined in that LayoutTransition
+     * object. By default, the transition object is null (so layout changes are not animated).
+     *
+     * @return LayoutTranstion The LayoutTransition object that will animated changes in layout.
+     * A value of <code>null</code> means no transition will run on layout changes.
+     */
+    public LayoutTransition getLayoutTransition() {
+        return mTransition;
     }
 
     private void removeViewsInternal(int start, int count) {
