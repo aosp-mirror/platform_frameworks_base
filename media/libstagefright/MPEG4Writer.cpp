@@ -1430,9 +1430,6 @@ status_t MPEG4Writer::Track::threadEntry() {
     int64_t previousPausedDurationUs = 0;
     int64_t timestampUs;
 
-    int64_t wallClockTimeUs = 0;
-    int64_t lastWallClockTimeUs = 0;
-
     sp<MetaData> meta_data;
     bool collectStats = collectStatisticalData();
 
@@ -1542,14 +1539,15 @@ status_t MPEG4Writer::Track::threadEntry() {
             // of neighboring samples. This in turn helps reduce the track header size,
             // especially, the number of entries in the "stts" box.
             if (mNumSamples > 1) {
-                int64_t durationUs = timestampUs + mOwner->getDriftTimeUs() - lastTimestampUs;
+                int64_t currDriftTimeUs = mOwner->getDriftTimeUs();
+                int64_t durationUs = timestampUs + currDriftTimeUs - lastTimestampUs;
                 int64_t diffUs = (durationUs > lastDurationUs)
                             ? durationUs - lastDurationUs
                             : lastDurationUs - durationUs;
                 if (diffUs <= 5000) {  // XXX: Magic number 5ms
                     timestampUs = lastTimestampUs + lastDurationUs;
                 } else {
-                    timestampUs += mOwner->getDriftTimeUs();
+                    timestampUs += currDriftTimeUs;
                 }
             }
         }
@@ -1557,12 +1555,6 @@ status_t MPEG4Writer::Track::threadEntry() {
         if (mNumSamples > 1) {
             if (timestampUs <= lastTimestampUs) {
                 LOGW("Frame arrives too late!");
-#if 0
-                // Drop the late frame.
-                copy->release();
-                copy = NULL;
-                continue;
-#else
                 // Don't drop the late frame, since dropping a frame may cause
                 // problems later during playback
 
@@ -1573,7 +1565,6 @@ status_t MPEG4Writer::Track::threadEntry() {
                 } else {
                     timestampUs = lastTimestampUs + (1000000LL + (mTimeScale >> 1)) / mTimeScale;
                 }
-#endif
             }
         }
 
@@ -1613,12 +1604,10 @@ status_t MPEG4Writer::Track::threadEntry() {
         lastDurationTicks = currDurationTicks;
         lastTimestampUs = timestampUs;
         if (mIsRealTimeRecording && mIsAudio) {
-            wallClockTimeUs = systemTime() / 1000;
-            int64_t wallClockDurationUs = wallClockTimeUs - lastWallClockTimeUs;
-            if (mNumSamples > 2) {
-                mOwner->addDriftTimeUs(lastDurationUs - wallClockDurationUs);
+            int64_t driftTimeUs = 0;
+            if (meta_data->findInt64(kKeyDriftTime, &driftTimeUs)) {
+                mOwner->setDriftTimeUs(driftTimeUs);
             }
-            lastWallClockTimeUs = wallClockTimeUs;
         }
 
         if (isSync != 0) {
@@ -1851,10 +1840,10 @@ void MPEG4Writer::Track::logStatisticalData(bool isAudio) {
     }
 }
 
-void MPEG4Writer::addDriftTimeUs(int64_t driftTimeUs) {
-    LOGV("addDriftTimeUs: %lld us", driftTimeUs);
+void MPEG4Writer::setDriftTimeUs(int64_t driftTimeUs) {
+    LOGV("setDriftTimeUs: %lld us", driftTimeUs);
     Mutex::Autolock autolock(mLock);
-    mDriftTimeUs += driftTimeUs;
+    mDriftTimeUs = driftTimeUs;
 }
 
 int64_t MPEG4Writer::getDriftTimeUs() {

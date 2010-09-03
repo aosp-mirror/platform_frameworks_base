@@ -84,6 +84,7 @@ status_t AudioSource::start(MetaData *params) {
 
     mTrackMaxAmplitude = false;
     mMaxAmplitude = 0;
+    mInitialReadTimeUs = 0;
     mStartTimeUs = 0;
     int64_t startTimeUs;
     if (params && params->findInt64(kKeyTime, &startTimeUs)) {
@@ -210,6 +211,7 @@ status_t AudioSource::read(
         return NO_INIT;
     }
 
+    int64_t readTimeUs = systemTime() / 1000;
     *out = NULL;
 
     MediaBuffer *buffer;
@@ -223,9 +225,10 @@ status_t AudioSource::read(
 
 
         if (numFramesRecorded == 0 && mPrevSampleTimeUs == 0) {
+            mInitialReadTimeUs = readTimeUs;
             // Initial delay
             if (mStartTimeUs > 0) {
-                mStartTimeUs = systemTime() / 1000 - mStartTimeUs;
+                mStartTimeUs = readTimeUs - mStartTimeUs;
             } else {
                 // Assume latency is constant.
                 mStartTimeUs += mRecord->latency() * 1000;
@@ -271,7 +274,10 @@ status_t AudioSource::read(
             }
             memset(buffer->data(), 0, numLostBytes);
             buffer->set_range(0, numLostBytes);
-            buffer->meta_data()->setInt64(kKeyTime, mPrevSampleTimeUs);
+            if (numFramesRecorded == 0) {
+                buffer->meta_data()->setInt64(kKeyTime, mStartTimeUs);
+            }
+            buffer->meta_data()->setInt64(kKeyDriftTime, readTimeUs - mInitialReadTimeUs);
             mPrevSampleTimeUs = timestampUs;
             *out = buffer;
             return OK;
@@ -309,7 +315,10 @@ status_t AudioSource::read(
             trackMaxAmplitude((int16_t *) buffer->data(), n >> 1);
         }
 
-        buffer->meta_data()->setInt64(kKeyTime, mPrevSampleTimeUs);
+        if (numFramesRecorded == 0) {
+            buffer->meta_data()->setInt64(kKeyTime, mStartTimeUs);
+        }
+        buffer->meta_data()->setInt64(kKeyDriftTime, readTimeUs - mInitialReadTimeUs);
         CHECK(timestampUs > mPrevSampleTimeUs);
         mPrevSampleTimeUs = timestampUs;
         LOGV("initial delay: %lld, sample rate: %d, timestamp: %lld",

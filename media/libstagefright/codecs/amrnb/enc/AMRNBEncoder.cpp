@@ -147,6 +147,8 @@ status_t AMRNBEncoder::read(
     int64_t seekTimeUs;
     ReadOptions::SeekMode mode;
     CHECK(options == NULL || !options->getSeekTo(&seekTimeUs, &mode));
+    bool readFromSource = false;
+    int64_t wallClockTimeUs = 0;
 
     while (mNumInputSamples < kNumSamplesPerFrame) {
         if (mInputBuffer == NULL) {
@@ -166,12 +168,16 @@ status_t AMRNBEncoder::read(
 
             size_t align = mInputBuffer->range_length() % sizeof(int16_t);
             CHECK_EQ(align, 0);
+            readFromSource = true;
 
             int64_t timeUs;
+            CHECK(mInputBuffer->meta_data()->findInt64(kKeyDriftTime, &timeUs));
+            wallClockTimeUs = timeUs;
             if (mInputBuffer->meta_data()->findInt64(kKeyTime, &timeUs)) {
                 mAnchorTimeUs = timeUs;
-                mNumFramesOutput = 0;
             }
+        } else {
+            readFromSource = false;
         }
 
         size_t copy =
@@ -217,8 +223,14 @@ status_t AMRNBEncoder::read(
     buffer->set_range(0, res);
 
     // Each frame of 160 samples is 20ms long.
+    int64_t mediaTimeUs = mNumFramesOutput * 20000LL;
     buffer->meta_data()->setInt64(
-            kKeyTime, mAnchorTimeUs + mNumFramesOutput * 20000);
+            kKeyTime, mAnchorTimeUs + mediaTimeUs);
+
+    if (readFromSource) {
+        buffer->meta_data()->setInt64(kKeyDriftTime,
+            mediaTimeUs - wallClockTimeUs);
+    }
 
     ++mNumFramesOutput;
 

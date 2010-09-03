@@ -198,6 +198,8 @@ status_t AMRWBEncoder::read(
     int64_t seekTimeUs;
     ReadOptions::SeekMode mode;
     CHECK(options == NULL || !options->getSeekTo(&seekTimeUs, &mode));
+    bool readFromSource = false;
+    int64_t wallClockTimeUs = 0;
 
     while (mNumInputSamples < kNumSamplesPerFrame) {
         if (mInputBuffer == NULL) {
@@ -219,9 +221,14 @@ status_t AMRWBEncoder::read(
             CHECK_EQ(align, 0);
 
             int64_t timeUs;
+            CHECK(mInputBuffer->meta_data()->findInt64(kKeyDriftTime, &timeUs));
+            wallClockTimeUs = timeUs;
             if (mInputBuffer->meta_data()->findInt64(kKeyTime, &timeUs)) {
                 mAnchorTimeUs = timeUs;
             }
+            readFromSource = true;
+        } else {
+            readFromSource = false;
         }
 
         size_t copy =
@@ -276,10 +283,11 @@ status_t AMRWBEncoder::read(
     buffer->set_range(0, outputData.Length);
     ++mNumFramesOutput;
 
-    // XXX: fix timestamp calculation
-    int64_t timestampUs = mNumFramesOutput * 20000LL;
-
-    buffer->meta_data()->setInt64(kKeyTime, timestampUs);
+    int64_t mediaTimeUs = mNumFramesOutput * 20000LL;
+    buffer->meta_data()->setInt64(kKeyTime, mAnchorTimeUs + mediaTimeUs);
+    if (readFromSource) {
+        buffer->meta_data()->setInt64(kKeyDriftTime, mediaTimeUs - wallClockTimeUs);
+    }
 
     *out = buffer;
     return OK;
