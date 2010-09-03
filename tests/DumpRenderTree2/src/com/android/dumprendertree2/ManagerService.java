@@ -128,6 +128,13 @@ public class ManagerService extends Service {
     private String mCurrentlyRunningTest;
     private int mCurrentlyRunningTestIndex;
 
+    /**
+     * These are implementation details of getExpectedResultPath() used to reduce the number
+     * of requests required to the host server.
+     */
+    private String mLastExpectedResultPathRequested;
+    private String mLastExpectedResultPathFetched;
+
     private String mAllTestsRelativePath;
 
     @Override
@@ -194,7 +201,9 @@ public class ManagerService extends Service {
     private void handleResults(AbstractResult results) {
         String relativePath = results.getRelativePath();
         results.setExpectedTextResult(getExpectedTextResult(relativePath));
+        results.setExpectedTextResultPath(getExpectedTextResultPath(relativePath));
         results.setExpectedImageResult(getExpectedImageResult(relativePath));
+        results.setExpectedImageResultPath(getExpectedImageResultPath(relativePath));
 
         dumpActualTextResult(results);
         dumpActualImageResult(results);
@@ -227,7 +236,7 @@ public class ManagerService extends Service {
                 actualImageResult, false);
     }
 
-    public static String getExpectedTextResult(String relativePath) {
+    public String getExpectedTextResult(String relativePath) {
         byte[] result = getExpectedResult(relativePath, TEXT_RESULT_EXTENSION);
         if (result != null) {
             return new String(result);
@@ -235,13 +244,14 @@ public class ManagerService extends Service {
         return null;
     }
 
-    public static byte[] getExpectedImageResult(String relativePath) {
+    public byte[] getExpectedImageResult(String relativePath) {
         return getExpectedResult(relativePath, IMAGE_RESULT_EXTENSION);
     }
 
-    private static byte[] getExpectedResult(String relativePath, String extension) {
+    private byte[] getExpectedResult(String relativePath, String extension) {
         String originalRelativePath =
                 FileFilter.setPathEnding(relativePath, "-expected." + extension);
+        mLastExpectedResultPathRequested = originalRelativePath;
 
         byte[] bytes = null;
         List<String> locations = EXPECTED_RESULT_LOCATION_RELATIVE_DIR_PREFIXES;
@@ -252,6 +262,25 @@ public class ManagerService extends Service {
             bytes = FsUtils.readDataFromUrl(FileFilter.getUrl(relativePath));
         }
 
+        mLastExpectedResultPathFetched = relativePath;
         return bytes;
+    }
+
+    private String getExpectedTextResultPath(String relativePath) {
+        return getExpectedResultPath(relativePath, TEXT_RESULT_EXTENSION);
+    }
+
+    private String getExpectedImageResultPath(String relativePath) {
+        return getExpectedResultPath(relativePath, IMAGE_RESULT_EXTENSION);
+    }
+
+    private String getExpectedResultPath(String relativePath, String extension) {
+        String originalRelativePath =
+            FileFilter.setPathEnding(relativePath, "-expected." + extension);
+        if (!originalRelativePath.equals(mLastExpectedResultPathRequested)) {
+            getExpectedResult(relativePath, extension);
+        }
+
+        return mLastExpectedResultPathFetched;
     }
 }

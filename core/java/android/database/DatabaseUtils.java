@@ -769,8 +769,8 @@ public class DatabaseUtils {
      */
     public static void cursorStringToContentValuesIfPresent(Cursor cursor, ContentValues values,
             String column) {
-        final int index = cursor.getColumnIndexOrThrow(column);
-        if (!cursor.isNull(index)) {
+        final int index = cursor.getColumnIndex(column);
+        if (index != -1 && !cursor.isNull(index)) {
             values.put(column, cursor.getString(index));
         }
     }
@@ -785,8 +785,8 @@ public class DatabaseUtils {
      */
     public static void cursorLongToContentValuesIfPresent(Cursor cursor, ContentValues values,
             String column) {
-        final int index = cursor.getColumnIndexOrThrow(column);
-        if (!cursor.isNull(index)) {
+        final int index = cursor.getColumnIndex(column);
+        if (index != -1 && !cursor.isNull(index)) {
             values.put(column, cursor.getLong(index));
         }
     }
@@ -801,8 +801,8 @@ public class DatabaseUtils {
      */
     public static void cursorShortToContentValuesIfPresent(Cursor cursor, ContentValues values,
             String column) {
-        final int index = cursor.getColumnIndexOrThrow(column);
-        if (!cursor.isNull(index)) {
+        final int index = cursor.getColumnIndex(column);
+        if (index != -1 && !cursor.isNull(index)) {
             values.put(column, cursor.getShort(index));
         }
     }
@@ -817,8 +817,8 @@ public class DatabaseUtils {
      */
     public static void cursorIntToContentValuesIfPresent(Cursor cursor, ContentValues values,
             String column) {
-        final int index = cursor.getColumnIndexOrThrow(column);
-        if (!cursor.isNull(index)) {
+        final int index = cursor.getColumnIndex(column);
+        if (index != -1 && !cursor.isNull(index)) {
             values.put(column, cursor.getInt(index));
         }
     }
@@ -833,8 +833,8 @@ public class DatabaseUtils {
      */
     public static void cursorFloatToContentValuesIfPresent(Cursor cursor, ContentValues values,
             String column) {
-        final int index = cursor.getColumnIndexOrThrow(column);
-        if (!cursor.isNull(index)) {
+        final int index = cursor.getColumnIndex(column);
+        if (index != -1 && !cursor.isNull(index)) {
             values.put(column, cursor.getFloat(index));
         }
     }
@@ -849,8 +849,8 @@ public class DatabaseUtils {
      */
     public static void cursorDoubleToContentValuesIfPresent(Cursor cursor, ContentValues values,
             String column) {
-        final int index = cursor.getColumnIndexOrThrow(column);
-        if (!cursor.isNull(index)) {
+        final int index = cursor.getColumnIndex(column);
+        if (index != -1 && !cursor.isNull(index)) {
             values.put(column, cursor.getDouble(index));
         }
     }

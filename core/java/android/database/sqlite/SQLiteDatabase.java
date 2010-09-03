@@ -39,7 +39,6 @@ import dalvik.system.BlockGuard;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -273,7 +272,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * invoked.
      *
      * this cache has an upper limit of mMaxSqlCacheSize (settable by calling the method
-     * (@link setMaxSqlCacheSize(int)}).
+     * (@link #setMaxSqlCacheSize(int)}).
      */
     // default statement-cache size per database connection ( = instance of this class)
     private int mMaxSqlCacheSize = 25;
@@ -903,8 +902,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     public interface CursorFactory {
         /**
          * See
-         * {@link SQLiteCursor#SQLiteCursor(SQLiteDatabase, SQLiteCursorDriver,
-         * String, SQLiteQuery)}.
+         * {@link SQLiteCursor#SQLiteCursor(SQLiteCursorDriver, String, SQLiteQuery)}.
          */
         public Cursor newCursor(SQLiteDatabase db,
                 SQLiteCursorDriver masterQuery, String editTable,
@@ -2080,7 +2078,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                  */
                 if (++mCacheFullWarnings == MAX_WARNINGS_ON_CACHESIZE_CONDITION) {
                     Log.w(TAG, "Reached MAX size for compiled-sql statement cache for database " +
-                            getPath() + ". Consider increasing cachesize.");
+                            getPath() + ". Use setMaxSqlCacheSize() to increase cachesize. ");
                 }
             } 
             /* add the given SQLiteCompiledSql compiledStatement to cache.
@@ -2142,7 +2140,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      *
      * @param cacheSize the size of the cache. can be (0 to {@link #MAX_SQL_CACHE_SIZE})
      * @throws IllegalStateException if input cacheSize > {@link #MAX_SQL_CACHE_SIZE} or
-     * > the value set with previous setMaxSqlCacheSize() call.
+     * the value set with previous setMaxSqlCacheSize() call.
      */
     public synchronized void setMaxSqlCacheSize(int cacheSize) {
         if (cacheSize > MAX_SQL_CACHE_SIZE || cacheSize < 0) {
@@ -2342,10 +2340,12 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     /* package */ SQLiteDatabase getDbConnection(String sql) {
         verifyDbIsOpen();
-        // this method should always be called with main database connection handle
-        // NEVER with pooled database connection handle
+        // this method should always be called with main database connection handle.
+        // the only time when it is called with pooled database connection handle is
+        // corruption occurs while trying to open a pooled database connection handle.
+        // in that case, simply return 'this' handle
         if (isPooledConnection()) {
-            throw new IllegalStateException("incorrect database connection handle");
+            return this;
         }
 
         // use the current connection handle if
@@ -2504,12 +2504,18 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public boolean isDatabaseIntegrityOk() {
         verifyDbIsOpen();
-        ArrayList<Pair<String, String>> attachedDbs = getAttachedDbs();
-        if (attachedDbs == null) {
-            throw new IllegalStateException("databaselist for: " + getPath() + " couldn't " +
-                    "be retrieved. probably because the database is closed");
+        ArrayList<Pair<String, String>> attachedDbs = null;
+        try {
+            attachedDbs = getAttachedDbs();
+            if (attachedDbs == null) {
+                throw new IllegalStateException("databaselist for: " + getPath() + " couldn't " +
+                        "be retrieved. probably because the database is closed");
+            }
+        } catch (SQLiteException e) {
+            // can't get attachedDb list. do integrity check on the main database
+            attachedDbs = new ArrayList<Pair<String, String>>();
+            attachedDbs.add(new Pair<String, String>("main", this.mPath));
         }
-        boolean isDatabaseCorrupt = false;
         for (int i = 0; i < attachedDbs.size(); i++) {
             Pair<String, String> p = attachedDbs.get(i);
             SQLiteStatement prog = null;
@@ -2518,14 +2524,14 @@ public class SQLiteDatabase extends SQLiteClosable {
                 String rslt = prog.simpleQueryForString();
                 if (!rslt.equalsIgnoreCase("ok")) {
                     // integrity_checker failed on main or attached databases
-                    isDatabaseCorrupt = true;
                     Log.e(TAG, "PRAGMA integrity_check on " + p.second + " returned: " + rslt);
+                    return false;
                 }
             } finally {
                 if (prog != null) prog.close();
             }
         }
-        return isDatabaseCorrupt;
+        return true;
     }
 
     /**

@@ -27,7 +27,6 @@
     </style>
 
     <style name="TextAppearance.StatusBar.Icon">
-        <item name="android:textStyle">bold</item>
     </style>
     <style name="TextAppearance.StatusBar.EventContent">
         <item name="android:textColor">?android:attr/textColorPrimary</item>

@@ -89,9 +89,9 @@ public:
     void incRefs(const void *ptr, size_t ct) const;
     void decRefs(const void *ptr, size_t ct) const;
 
-protected:
     void sendDirty() const;
 
+protected:
     ObjectBaseRef<const Type> mType;
     void * mPtr;
 

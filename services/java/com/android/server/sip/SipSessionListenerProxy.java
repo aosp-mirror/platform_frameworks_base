@@ -56,7 +56,7 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
     }
 
     public void onRinging(final ISipSession session, final SipProfile caller,
-            final byte[] sessionDescription) {
+            final String sessionDescription) {
         if (mListener == null) return;
         proxy(new Runnable() {
             public void run() {
@@ -83,7 +83,7 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
     }
 
     public void onCallEstablished(final ISipSession session,
-            final byte[] sessionDescription) {
+            final String sessionDescription) {
         if (mListener == null) return;
         proxy(new Runnable() {
             public void run() {

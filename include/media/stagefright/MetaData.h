@@ -48,6 +48,7 @@ enum {
     kKeyTime              = 'time',  // int64_t (usecs)
     kKeyNTPTime           = 'ntpT',  // uint64_t (ntp-timestamp)
     kKeyTargetTime        = 'tarT',  // int64_t (usecs)
+    kKeyDriftTime         = 'dftT',  // int64_t (usecs)
     kKeyDuration          = 'dura',  // int64_t (usecs)
     kKeyColorFormat       = 'colf',
     kKeyPlatformPrivate   = 'priv',  // pointer
@@ -78,6 +79,7 @@ enum {
 
     // Set this key to enable authoring files in 64-bit offset
     kKey64BitFileOffset   = 'fobt',  // int32_t (bool)
+    kKey2ByteNalLength    = '2NAL',  // int32_t (bool)
 
     // Identify the file output format for authoring
     // Please see <media/mediarecorder.h> for the supported

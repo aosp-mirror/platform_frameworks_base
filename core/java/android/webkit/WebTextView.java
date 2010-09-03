@@ -110,6 +110,11 @@ import java.util.ArrayList;
     // FIXME: This can be replaced with TextView.NO_FILTERS if that
     // is made public/protected.
     private static final InputFilter[] NO_FILTERS = new InputFilter[0];
+    // For keeping track of the fact that the delete key was pressed, so
+    // we can simply pass a delete key instead of calling deleteSelection.
+    private boolean mGotDelete;
+    private int mDelSelStart;
+    private int mDelSelEnd;
 
     /**
      * Create a new WebTextView.
@@ -159,9 +164,16 @@ import java.util.ArrayList;
         // However, if the cursor is at the beginning of the field, which
         // includes the case where it has zero length, then the text is not
         // changed, so send the events immediately.
-        if (KeyEvent.KEYCODE_DEL == keyCode && oldStart == 0 && oldEnd == 0) {
-            sendDomEvent(event);
-            return true;
+        if (KeyEvent.KEYCODE_DEL == keyCode) {
+            if (oldStart == 0 && oldEnd == 0) {
+                sendDomEvent(event);
+                return true;
+            }
+            if (down) {
+                mGotDelete = true;
+                mDelSelStart = oldStart;
+                mDelSelEnd = oldEnd;
+            }
         }
 
         if ((mSingle && KeyEvent.KEYCODE_ENTER == keyCode)) {
@@ -412,17 +424,38 @@ import java.util.ArrayList;
         mPreChange = postChange;
         if (0 == count) {
             if (before > 0) {
+                // For this and all changes to the text, update our cache
+                updateCachedTextfield();
+                if (mGotDelete) {
+                    mGotDelete = false;
+                    int oldEnd = start + before;
+                    if (mDelSelEnd == oldEnd
+                            && (mDelSelStart == start
+                            || (mDelSelStart == oldEnd && before == 1))) {
+                        // If the selection is set up properly before the
+                        // delete, send the DOM events.
+                        sendDomEvent(new KeyEvent(KeyEvent.ACTION_DOWN,
+                                KeyEvent.KEYCODE_DEL));
+                        sendDomEvent(new KeyEvent(KeyEvent.ACTION_UP,
+                                KeyEvent.KEYCODE_DEL));
+                        return;
+                    }
+                }
                 // This was simply a delete or a cut, so just delete the
                 // selection.
                 mWebView.deleteSelection(start, start + before);
-                // For this and all changes to the text, update our cache
-                updateCachedTextfield();
             }
+            mGotDelete = false;
             // before should never be negative, so whether it was a cut
             // (handled above), or before is 0, in which case nothing has
             // changed, we should return.
             return;
         }
+        // Ensure that this flag gets cleared, since with autocorrect on, a
+        // delete key press may have a more complex result than deleting one
+        // character or the existing selection, so it will not get cleared
+        // above.
+        mGotDelete = false;
         // Find the last character being replaced.  If it can be represented by
         // events, we will pass them to native (after replacing the beginning
         // of the changed text), so we can see javascript events.
@@ -594,8 +627,10 @@ import java.util.ArrayList;
      */
     /* package */ void remove() {
         // hide the soft keyboard when the edit text is out of focus
-        InputMethodManager.getInstance(mContext).hideSoftInputFromWindow(
-                getWindowToken(), 0);
+        InputMethodManager imm = InputMethodManager.getInstance(mContext);
+        if (imm.isActive(this)) {
+            imm.hideSoftInputFromWindow(getWindowToken(), 0);
+        }
         mWebView.removeView(this);
         mWebView.requestFocus();
     }

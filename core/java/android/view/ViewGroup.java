@@ -35,7 +35,6 @@ import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.ViewGroup.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -43,7 +42,6 @@ import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * <p>
@@ -1970,6 +1968,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         } else if ((child.mPrivateFlags & ALPHA_SET) == ALPHA_SET) {
             child.onSetAlpha(255);
+            child.mPrivateFlags &= ~ALPHA_SET;
         }
 
         if ((flags & FLAG_CLIP_CHILDREN) == FLAG_CLIP_CHILDREN) {
@@ -4190,16 +4189,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return mTargets.get(id);
         }
 
-        public int indexOfId(int id) {
-            return mTargets.indexOfKey(id);
-        }
-
         public int indexOfTarget(View target) {
             return mTargets.indexOfValue(target);
-        }
-
-        public int idAt(int index) {
-            return mTargets.keyAt(index);
         }
 
         public View targetAt(int index) {
@@ -4222,17 +4213,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 return mUniqueTargets[firstIndex];
             }
             return null;
-        }
-
-        public boolean hasTarget(View target) {
-            final TargetInfo[] unique = mUniqueTargets;
-            final int uniqueCount = mUniqueTargetCount;
-            for (int i = 0; i < uniqueCount; i++) {
-                if (unique[i].view == target) {
-                    return true;
-                }
-            }
-            return false;
         }
 
         public boolean isEmpty() {
@@ -4384,11 +4364,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         (newActionIndex << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
             }
 
-            MotionEvent result = MotionEvent.obtain(downTime, ev.getEventTime(),
+            return MotionEvent.obtain(downTime, ev.getEventTime(),
                     action, pointerCount, mPointerIds, mPointerCoords, ev.getMetaState(),
                     ev.getXPrecision(), ev.getYPrecision(), ev.getDeviceId(), ev.getEdgeFlags(),
                     ev.getSource());
-            return result;
         }
 
         static class TargetInfo {

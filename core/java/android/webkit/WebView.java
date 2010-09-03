@@ -3701,8 +3701,10 @@ public class WebView extends AbsoluteLayout
     private void hideSoftKeyboard() {
         InputMethodManager imm = (InputMethodManager)
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-
-        imm.hideSoftInputFromWindow(this.getWindowToken(), 0);
+        if (imm.isActive(this)
+                || (inEditingMode() && imm.isActive(mWebTextView))) {
+            imm.hideSoftInputFromWindow(this.getWindowToken(), 0);
+        }
     }
 
     /*

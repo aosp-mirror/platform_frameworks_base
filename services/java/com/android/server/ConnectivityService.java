@@ -33,6 +33,7 @@ import android.net.wifi.WifiStateTracker;
 import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -158,51 +159,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
     RadioAttributes[] mRadioAttributes;
 
-    private static class ConnectivityThread extends Thread {
-        private Context mContext;
-
-        private ConnectivityThread(Context context) {
-            super("ConnectivityThread");
-            mContext = context;
+    public static synchronized ConnectivityService getInstance(Context context) {
+        if (sServiceInstance == null) {
+            sServiceInstance = new ConnectivityService(context);
         }
-
-        @Override
-        public void run() {
-            Looper.prepare();
-            synchronized (this) {
-                sServiceInstance = new ConnectivityService(mContext);
-                notifyAll();
-            }
-            Looper.loop();
-        }
-
-        public static ConnectivityService getServiceInstance(Context context) {
-            ConnectivityThread thread = new ConnectivityThread(context);
-            thread.start();
-
-            synchronized (thread) {
-                while (sServiceInstance == null) {
-                    try {
-                        // Wait until sServiceInstance has been initialized.
-                        thread.wait();
-                    } catch (InterruptedException ignore) {
-                        Slog.e(TAG,
-                            "Unexpected InterruptedException while waiting"+
-                            " for ConnectivityService thread");
-                    }
-                }
-            }
-
-            return sServiceInstance;
-        }
-    }
-
-    public static ConnectivityService getInstance(Context context) {
-        return ConnectivityThread.getServiceInstance(context);
+        return sServiceInstance;
     }
 
     private ConnectivityService(Context context) {
         if (DBG) Slog.v(TAG, "ConnectivityService starting up");
+
+        HandlerThread handlerThread = new HandlerThread("ConnectivityServiceThread");
+        handlerThread.start();
+        mHandler = new MyHandler(handlerThread.getLooper());
 
         // setup our unique device name
         String id = Settings.Secure.getString(context.getContentResolver(),
@@ -234,7 +203,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         mNetTrackers = new NetworkStateTracker[
                 ConnectivityManager.MAX_NETWORK_TYPE+1];
-        mHandler = new MyHandler();
 
         mNetworkPreference = getPersistedNetworkPreference();
 
@@ -1580,6 +1548,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     // must be stateless - things change under us.
     private class MyHandler extends Handler {
+        public MyHandler(Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             NetworkInfo info;

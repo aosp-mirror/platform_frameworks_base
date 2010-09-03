@@ -18,7 +18,7 @@
 <RelativeLayout android:id="@+id/systemInfo"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
-    android:layout_width="160dip"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_centerInParent="true"
     android:clickable="true"
@@ -38,17 +38,35 @@
         />
     <ImageView
         android:id="@+id/battery"
-        android:layout_width="48dip"
-        android:layout_height="48dip"
+        android:layout_width="64dip"
+        android:layout_height="16dip"
         android:layout_toLeftOf="@id/clock"
-        android:src="@drawable/battery"
+        android:layout_centerInParent="true"
+        android:background="@drawable/sysbar_minimeter_bg" 
         />
     <ImageView
         android:id="@+id/signal"
-        android:layout_width="48dip"
-        android:layout_height="48dip"
+        android:layout_width="64dip"
+        android:layout_height="16dip"
         android:layout_toRightOf="@id/clock"
-        android:src="@drawable/signal"
+        android:layout_centerInParent="true"
+        android:background="@drawable/sysbar_minimeter_bg" 
+        />
+    <ImageView
+        android:id="@+id/battery_icon"
+        android:layout_height="30dip"
+        android:layout_width="30dip"
+        android:layout_toLeftOf="@id/battery"
+        android:layout_centerInParent="true"
+        android:src="@drawable/ic_sysbar_battery_mini"
+        />
+    <ImageView
+        android:id="@+id/signal_icon"
+        android:layout_height="30dip"
+        android:layout_width="30dip"
+        android:layout_toRightOf="@id/signal"
+        android:layout_centerInParent="true"
+        android:src="@drawable/ic_sysbar_wifi_mini"
         />
 </RelativeLayout>
 

@@ -369,6 +369,7 @@ void setupCustomShaderLights() {
     gVSConstants->light1_Diffuse = 1.0f;
     gVSConstants->light1_Specular = 0.7f;
     gVSConstants->light1_CosinePower = 50.0f;
+    rsAllocationMarkDirty(rsGetAllocation(gVSConstants));
 
     // Update fragmetn shader constants
     // Set light 0 colors
@@ -377,6 +378,7 @@ void setupCustomShaderLights() {
     // Set light 1 colors
     gFSConstants->light1_DiffuseColor = light1DiffCol;
     gFSConstants->light1_SpecularColor = light1SpecCol;
+    rsAllocationMarkDirty(rsGetAllocation(gFSConstants));
 }
 
 void displayCustomShaderSamples() {

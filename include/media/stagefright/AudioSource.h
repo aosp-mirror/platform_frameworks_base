@@ -72,6 +72,7 @@ private:
     int64_t mPrevSampleTimeUs;
     int64_t mTotalLostFrames;
     int64_t mPrevLostBytes;
+    int64_t mInitialReadTimeUs;
 
     MediaBufferGroup *mGroup;
 

@@ -36,6 +36,7 @@ public class TextResult extends AbstractResult {
     private static final int MSG_DOCUMENT_AS_TEXT = 0;
 
     private String mExpectedResult;
+    private String mExpectedResultPath;
     private String mActualResult;
     private String mRelativePath;
     private ResultCode mResultCode;
@@ -69,6 +70,7 @@ public class TextResult extends AbstractResult {
      */
     public TextResult(Bundle bundle) {
         mExpectedResult = bundle.getString("expectedTextualResult");
+        mExpectedResultPath = bundle.getString("expectedTextualResultPath");
         mActualResult = bundle.getString("actualTextualResult");
         setAdditionalTextOutputString(bundle.getString("additionalTextOutputString"));
         mRelativePath = bundle.getString("relativePath");
@@ -113,6 +115,27 @@ public class TextResult extends AbstractResult {
     @Override
     public void setExpectedImageResult(byte[] expectedResult) {
         /** This method is not applicable to this type of result */
+    }
+
+    @Override
+    public void setExpectedImageResultPath(String relativePath) {
+        /** This method is not applicable to this type of result */
+    }
+
+    @Override
+    public String getExpectedImageResultPath() {
+        /** This method is not applicable to this type of result */
+        return null;
+    }
+
+    @Override
+    public void setExpectedTextResultPath(String relativePath) {
+        mExpectedResultPath = relativePath;
+    }
+
+    @Override
+    public String getExpectedTextResultPath() {
+        return mExpectedResultPath;
     }
 
     @Override
@@ -212,6 +235,7 @@ public class TextResult extends AbstractResult {
     public Bundle getBundle() {
         Bundle bundle = new Bundle();
         bundle.putString("expectedTextualResult", mExpectedResult);
+        bundle.putString("expectedTextualResultPath", mExpectedResultPath);
         bundle.putString("actualTextualResult", getActualTextResult());
         bundle.putString("additionalTextOutputString", getAdditionalTextOutputString());
         bundle.putString("relativePath", mRelativePath);

@@ -58,7 +58,6 @@ import android.util.PoolableManager;
 import android.util.Pools;
 import android.util.SparseArray;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
@@ -5251,6 +5250,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void setAlpha(float alpha) {
         mAlpha = alpha;
+        onSetAlpha((int) (alpha * 255));
         invalidate();
     }
 
@@ -5536,15 +5536,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     final Rect r = mAttachInfo.mTmpInvalRect;
                     int minLeft;
                     int maxRight;
-                    int xLoc;
                     if (offset < 0) {
                         minLeft = mLeft + offset;
                         maxRight = mRight;
-                        xLoc = offset;
                     } else {
                         minLeft = mLeft;
                         maxRight = mRight + offset;
-                        xLoc = 0;
                     }
                     r.set(0, 0, maxRight - minLeft, mBottom - mTop);
                     p.invalidateChild(this, r);

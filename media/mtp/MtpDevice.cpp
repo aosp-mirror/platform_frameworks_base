@@ -342,7 +342,7 @@ MtpProperty* MtpDevice::getDevicePropDesc(MtpDeviceProperty code) {
     MtpResponseCode ret = readResponse();
     if (ret == MTP_RESPONSE_OK) {
         MtpProperty* property = new MtpProperty;
-        property->read(mData, true);
+        property->read(mData);
         return property;
     }
     return NULL;

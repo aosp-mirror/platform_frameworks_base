@@ -644,7 +644,8 @@ class BluetoothEventLoop {
              } else {
                  Log.i(TAG, "Rejecting incoming HID connection from " + address);
              }
-        } else if (BluetoothUuid.isBnep(uuid) || BluetoothUuid.isNap(uuid)){
+        } else if (BluetoothUuid.isBnep(uuid) || BluetoothUuid.isNap(uuid) &&
+                mBluetoothService.isTetheringOn()){
             authorized = true;
         } else {
             Log.i(TAG, "Rejecting incoming " + deviceUuid + " connection from " + address);
@@ -758,6 +759,16 @@ class BluetoothEventLoop {
                 BluetoothPan.STATE_DISCONNECTED;
             mBluetoothService.handlePanDeviceStateChange(device, newState);
         }
+    }
+
+    private void onNetworkDeviceDisconnected(String address) {
+        BluetoothDevice device = mAdapter.getRemoteDevice(address);
+        mBluetoothService.handlePanDeviceStateChange(device, BluetoothPan.STATE_DISCONNECTED);
+    }
+
+    private void onNetworkDeviceConnected(String address, int destUuid) {
+        BluetoothDevice device = mAdapter.getRemoteDevice(address);
+        mBluetoothService.handlePanDeviceStateChange(device, BluetoothPan.STATE_CONNECTED);
     }
 
     private void onRestartRequired() {

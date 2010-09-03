@@ -1267,10 +1267,10 @@ public final class ContactsContract {
         }
 
         /**
-         * Mark a contact as having been contacted.  This updates the
-         * {@link #TIMES_CONTACTED} and {@link #LAST_TIME_CONTACTED} for the
-         * contact, plus the corresponding values of any associated raw
-         * contacts.
+         * Mark a contact as having been contacted. Updates two fields:
+         * {@link #TIMES_CONTACTED} and {@link #LAST_TIME_CONTACTED}. The
+         * TIMES_CONTACTED field is incremented by 1 and the LAST_TIME_CONTACTED
+         * field is populated with the current system time.
          *
          * @param resolver the ContentResolver to use
          * @param contactId the person who was contacted
@@ -1332,7 +1332,8 @@ public final class ContactsContract {
 
         /**
          * A sub-directory of a single contact that contains all of the constituent raw contact
-         * {@link ContactsContract.Data} rows.
+         * {@link ContactsContract.Data} rows.  This directory can be used either
+         * with a {@link #CONTENT_URI} or {@link #CONTENT_LOOKUP_URI}.
          */
         public static final class Data implements BaseColumns, DataColumns {
             /**
@@ -1423,9 +1424,13 @@ public final class ContactsContract {
          * </pre>
          *
          * </p>
+         * <p>
+         * This directory can be used either with a {@link #CONTENT_URI} or
+         * {@link #CONTENT_LOOKUP_URI}.
+         * </p>
          */
-        // TODO: add ContactOptionsColumns, ContactStatusColumns
-        public static final class AggregationSuggestions implements BaseColumns, ContactsColumns {
+        public static final class AggregationSuggestions implements BaseColumns, ContactsColumns,
+                ContactOptionsColumns, ContactStatusColumns {
             /**
              * No public constructor since this is a utility class
              */
@@ -1572,9 +1577,12 @@ public final class ContactsContract {
          * <p>You should also consider using the convenience method
          * {@link ContactsContract.Contacts#openContactPhotoInputStream(ContentResolver, Uri)}
          * </p>
+         * <p>
+         * This directory can be used either with a {@link #CONTENT_URI} or
+         * {@link #CONTENT_LOOKUP_URI}.
+         * </p>
          */
-        // TODO: change DataColumns to DataColumnsWithJoins
-        public static final class Photo implements BaseColumns, DataColumns {
+        public static final class Photo implements BaseColumns, DataColumnsWithJoins {
             /**
              * no public constructor since this is a utility class
              */
@@ -1598,7 +1606,10 @@ public final class ContactsContract {
          * Opens an InputStream for the contacts's default photo and returns the
          * photo as a byte stream. If there is not photo null will be returned.
          *
-         * @param contactUri the contact whose photo should be used
+         * @param contactUri the contact whose photo should be used. This can be used with
+         * either a {@link #CONTENT_URI} or a {@link #CONTENT_LOOKUP_URI} URI.
+         * </p>
+
          * @return an InputStream of the photo, or null if no photo is present
          */
         public static InputStream openContactPhotoInputStream(ContentResolver cr, Uri contactUri) {
@@ -2078,10 +2089,10 @@ public final class ContactsContract {
         public static final int AGGREGATION_MODE_DEFAULT = 0;
 
         /**
-         * Do not use.
-         *
-         * TODO: deprecate in favor of {@link #AGGREGATION_MODE_DEFAULT}
+         * Aggregation mode: aggregate at the time the raw contact is inserted/updated.
+         * @deprecated Aggregation is synchronous, this historic value is a no-op
          */
+        @Deprecated
         public static final int AGGREGATION_MODE_IMMEDIATE = 1;
 
         /**
@@ -2149,9 +2160,7 @@ public final class ContactsContract {
         /**
          * A sub-directory of a single raw contact that contains all of its
          * {@link ContactsContract.Data} rows. To access this directory
-         * append {@link Data#CONTENT_DIRECTORY} to the contact URI.
-         *
-         * TODO: deprecate in favor of {@link RawContacts.Entity}.
+         * append {@link Data#CONTENT_DIRECTORY} to the raw contact URI.
          */
         public static final class Data implements BaseColumns, DataColumns {
             /**
@@ -2170,7 +2179,7 @@ public final class ContactsContract {
          * <p>
          * A sub-directory of a single raw contact that contains all of its
          * {@link ContactsContract.Data} rows. To access this directory append
-         * {@link #CONTENT_DIRECTORY} to the contact URI. See
+         * {@link RawContacts.Entity#CONTENT_DIRECTORY} to the raw contact URI. See
          * {@link RawContactsEntity} for a stand-alone table containing the same
          * data.
          * </p>
@@ -2182,10 +2191,10 @@ public final class ContactsContract {
          * null.
          * </p>
          * <p>
-         * Entity reads all
-         * data for a raw contact in one transaction, to guarantee
-         * consistency.
-         * </p>
+         * Using Entity should be preferred to using two separate queries:
+         * RawContacts followed by Data. The reason is that Entity reads all
+         * data for a raw contact in one transaction, so there is no possibility
+         * of the data changing between the two queries.
          */
         public static final class Entity implements BaseColumns, DataColumns {
             /**
@@ -4256,7 +4265,7 @@ public final class ContactsContract {
          * </tr>
          * <tr>
          * <td>String</td>
-         * <td>{@link #DATA}</td>
+         * <td>{@link #ADDRESS}</td>
          * <td>{@link #DATA1}</td>
          * <td>Email address itself.</td>
          * </tr>

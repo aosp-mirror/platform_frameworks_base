@@ -77,11 +77,11 @@ public class BrowserContract {
         public static final String FOLDER_NAME_BOOKMARKS = "google_chrome_bookmarks";
         public static final String FOLDER_NAME_BOOKMARKS_BAR = "bookmark_bar";
         public static final String FOLDER_NAME_OTHER_BOOKMARKS = "other_bookmarks";
-        
+
         /** The client unique ID for an item */
         public static final String CLIENT_UNIQUE = BaseSyncColumns.SYNC4;
     }
-    
+
     /**
      * Columns that appear when each row of a table belongs to a specific
      * account, including sync information that an account may need.
@@ -120,6 +120,20 @@ public class BrowserContract {
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String DIRTY = "dirty";
+
+        /**
+         * The time that this row was created on its originating client (msecs
+         * since the epoch).
+         * <P>Type: INTEGER</P>
+         */
+        public static final String DATE_CREATED = "created";
+
+        /**
+         * The time that this row was last modified by a client (msecs since the epoch).
+         * <P>Type: INTEGER</P>
+         */
+        public static final String DATE_MODIFIED = "modified";
+
     }
 
     interface BookmarkColumns {

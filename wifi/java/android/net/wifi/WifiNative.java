@@ -111,6 +111,10 @@ public class WifiNative {
 
     public native static boolean setPowerModeCommand(int mode);
 
+    public native static int getBandCommand();
+
+    public native static boolean setBandCommand(int band);
+
     public native static int getPowerModeCommand();
 
     public native static boolean setNumAllowedChannelsCommand(int numChannels);

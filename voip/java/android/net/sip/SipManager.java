@@ -83,16 +83,22 @@ public class SipManager {
      * Returns true if the SIP API is supported by the system.
      */
     public static boolean isApiSupported(Context context) {
+        return true;
+        /* 
         return context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_SIP);
+         */
     }
 
     /**
      * Returns true if the system supports SIP-based VoIP.
      */
     public static boolean isVoipSupported(Context context) {
+        return true;
+        /* 
         return context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_SIP_VOIP) && isApiSupported(context);
+         */
     }
 
     private SipManager() {
@@ -298,21 +304,19 @@ public class SipManager {
             throw new SipException("Call ID missing in incoming call intent");
         }
 
-        byte[] offerSd = getOfferSessionDescription(incomingCallIntent);
+        String offerSd = getOfferSessionDescription(incomingCallIntent);
         if (offerSd == null) {
             throw new SipException("Session description missing in incoming "
                     + "call intent");
         }
 
         try {
-            SdpSessionDescription sdp = new SdpSessionDescription(offerSd);
-
             ISipSession session = mSipService.getPendingSession(callId);
             if (session == null) return null;
             SipAudioCall call = new SipAudioCallImpl(
                     context, session.getLocalProfile());
             call.setRingtoneEnabled(ringtoneEnabled);
-            call.attachCall(session, sdp);
+            call.attachCall(session, offerSd);
             call.setListener(listener);
             return call;
         } catch (Throwable t) {
@@ -329,7 +333,7 @@ public class SipManager {
     public static boolean isIncomingCallIntent(Intent intent) {
         if (intent == null) return false;
         String callId = getCallId(intent);
-        byte[] offerSd = getOfferSessionDescription(intent);
+        String offerSd = getOfferSessionDescription(intent);
         return ((callId != null) && (offerSd != null));
     }
 
@@ -351,8 +355,8 @@ public class SipManager {
      * @return the offer session description or null if the intent does not
      *      have it
      */
-    public static byte[] getOfferSessionDescription(Intent incomingCallIntent) {
-        return incomingCallIntent.getByteArrayExtra(OFFER_SD_KEY);
+    public static String getOfferSessionDescription(Intent incomingCallIntent) {
+        return incomingCallIntent.getStringExtra(OFFER_SD_KEY);
     }
 
     /**
@@ -365,7 +369,7 @@ public class SipManager {
      * @hide
      */
     public static Intent createIncomingCallBroadcast(String action,
-            String callId, byte[] sessionDescription) {
+            String callId, String sessionDescription) {
         Intent intent = new Intent(action);
         intent.putExtra(CALL_ID_KEY, callId);
         intent.putExtra(OFFER_SD_KEY, sessionDescription);

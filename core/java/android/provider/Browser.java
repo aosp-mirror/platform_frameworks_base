@@ -27,6 +27,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.BrowserContract.Bookmarks;
 import android.provider.BrowserContract.History;
+import android.provider.BrowserContract.Searches;
 import android.util.Log;
 import android.webkit.WebIconDatabase;
 
@@ -525,29 +526,11 @@ public class Browser {
      * @param search    The string to add to the searches database.
      */
     public static final void addSearchUrl(ContentResolver cr, String search) {
-        long now = System.currentTimeMillis();
-        Cursor c = null;
-        try {
-            c = cr.query(
-                SEARCHES_URI,
-                SEARCHES_PROJECTION,
-                SEARCHES_WHERE_CLAUSE,
-                new String [] { search },
-                null);
-            ContentValues map = new ContentValues();
-            map.put(SearchColumns.SEARCH, search);
-            map.put(SearchColumns.DATE, now);
-            /* We should only get one answer that is exactly the same. */
-            if (c.moveToFirst()) {
-                cr.update(SEARCHES_URI, map, "_id = " + c.getInt(0), null);
-            } else {
-                cr.insert(SEARCHES_URI, map);
-            }
-        } catch (IllegalStateException e) {
-            Log.e(LOGTAG, "addSearchUrl", e);
-        } finally {
-            if (c != null) c.close();
-        }
+        // The content provider will take care of updating existing searches instead of duplicating
+        ContentValues values = new ContentValues();
+        values.put(Searches.SEARCH, search);
+        values.put(Searches.DATE, System.currentTimeMillis());
+        cr.insert(Searches.CONTENT_URI, values);
     }
 
     /**
@@ -559,7 +542,7 @@ public class Browser {
         // FIXME: Should this clear the urls to which these searches lead?
         // (i.e. remove google.com/query= blah blah blah)
         try {
-            cr.delete(SEARCHES_URI, null, null);
+            cr.delete(Searches.CONTENT_URI, null, null);
         } catch (IllegalStateException e) {
             Log.e(LOGTAG, "clearSearches", e);
         }
@@ -578,8 +561,7 @@ public class Browser {
      */
     public static final void requestAllIcons(ContentResolver cr, String where,
             WebIconDatabase.IconListener listener) {
-        WebIconDatabase.getInstance()
-                .bulkRequestIconForPageUrl(cr, where, listener);
+        WebIconDatabase.getInstance().bulkRequestIconForPageUrl(cr, where, listener);
     }
 
     /**

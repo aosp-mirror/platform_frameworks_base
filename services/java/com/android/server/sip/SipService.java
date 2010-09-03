@@ -53,6 +53,9 @@ import java.util.TimerTask;
 import java.util.TreeSet;
 import javax.sip.SipException;
 
+/**
+ * @hide
+ */
 public final class SipService extends ISipService.Stub {
     private static final String TAG = "SipService";
     private static final int EXPIRY_TIME = 3600;
@@ -442,7 +445,7 @@ public final class SipService extends ISipService.Stub {
 
         @Override
         public void onRinging(ISipSession session, SipProfile caller,
-                byte[] sessionDescription) {
+                String sessionDescription) {
             synchronized (SipService.this) {
                 try {
                     if (!isRegistered()) {

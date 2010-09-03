@@ -62,6 +62,7 @@ private:
     class Track;
 
     FILE *mFile;
+    bool mUse4ByteNalLength;
     bool mUse32BitOffset;
     bool mPaused;
     bool mStarted;
@@ -132,8 +133,12 @@ private:
     // Adjust other track media clock (presumably wall clock)
     // based on audio track media clock with the drift time.
     int64_t mDriftTimeUs;
-    void addDriftTimeUs(int64_t driftTimeUs);
+    void setDriftTimeUs(int64_t driftTimeUs);
     int64_t getDriftTimeUs();
+
+    // Return whether the nal length is 4 bytes or 2 bytes
+    // Only makes sense for H.264/AVC
+    bool useNalLengthFour();
 
     void lock();
     void unlock();
@@ -144,6 +149,7 @@ private:
 
     inline size_t write(const void *ptr, size_t size, size_t nmemb, FILE* stream);
     bool exceedsFileSizeLimit();
+    bool use32BitFileOffset() const;
     bool exceedsFileDurationLimit();
     void trackProgressStatus(const Track* track, int64_t timeUs, status_t err = OK);
 

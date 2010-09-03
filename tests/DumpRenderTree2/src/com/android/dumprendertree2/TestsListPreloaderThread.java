@@ -99,11 +99,14 @@ public class TestsListPreloaderThread extends Thread {
                     false, false)) {
                 itemName = new File(testRelativePath).getName();
                 if (FileFilter.isTestFile(itemName)) {
-                    if (!mFileFilter.isSkip(testRelativePath)) {
+                    /** We chose to skip all the tests that are expected to crash. */
+                    if (!mFileFilter.isCrash(testRelativePath)) {
                         mTestsList.add(testRelativePath);
                     } else {
-                        //mSummarizer.addSkippedTest(relativePath);
-                        /** TODO: Summarizer is now in service - figure out how to send the info */
+                        /**
+                         * TODO: Summarizer is now in service - figure out how to send the info.
+                         * Previously: mSummarizer.addSkippedTest(relativePath);
+                         */
                     }
                 }
             }

@@ -76,6 +76,8 @@ def main():
   directives += " -c \"Alias /LayoutTests " + layout_tests_path + "\""
   directives += " -c \"Alias /WebKitTools/DumpRenderTree/android " + \
     os.path.join(webkit_path, "WebKitTools", "DumpRenderTree", "android") + "\""
+  directives += " -c \"Alias /WEBKIT_MERGE_REVISION " + \
+    os.path.join(webkit_path, "WEBKIT_MERGE_REVISION") + "\""
 
   # This directive is commented out in apache2-debian-httpd.conf for some reason
   # However, it is useful to browse through tests in the browser, so it's added here.
@@ -90,7 +92,8 @@ def main():
     "\""
   directives += " -c \"User ${APACHE_RUN_USER}\""
   directives += " -c \"Group ${APACHE_RUN_GROUP}\""
-  directives += " -C \"TypesConfig " + os.path.join("/etc", "mime.types") + "\""
+  directives += " -C \"TypesConfig " + \
+    os.path.join(android_tree_root, http_conf_path, "mime.types") + "\""
   conf_file_cmd = " -f " + \
     os.path.join(android_tree_root, http_conf_path, "apache2-debian-httpd.conf")
 

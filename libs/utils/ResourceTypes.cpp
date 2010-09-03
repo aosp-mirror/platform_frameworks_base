@@ -1946,8 +1946,8 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
         ssize_t offset = getEntry(package, t, e, &mParams, &type, &entry, &typeClass);
         if (offset <= 0) {
             if (offset < 0) {
-                LOGW("Failure getting entry for 0x%08x (t=%d e=%d) in package %d: 0x%08x\n",
-                        resID, t, e, (int)ip, (int)offset);
+                LOGW("Failure getting entry for 0x%08x (t=%d e=%d) in package %zd (error %d)\n",
+                        resID, t, e, ip, (int)offset);
                 return offset;
             }
             continue;

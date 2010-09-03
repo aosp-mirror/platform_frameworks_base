@@ -26,14 +26,14 @@ public class SipSessionAdapter extends ISipSessionListener.Stub {
     }
 
     public void onRinging(ISipSession session, SipProfile caller,
-            byte[] sessionDescription) {
+            String sessionDescription) {
     }
 
     public void onRingingBack(ISipSession session) {
     }
 
-    public void onCallEstablished(
-            ISipSession session, byte[] sessionDescription) {
+    public void onCallEstablished(ISipSession session,
+            String sessionDescription) {
     }
 
     public void onCallEnded(ISipSession session) {
