@@ -23,7 +23,7 @@
         android:maxLevel="100"
         android:gravity="left">
     <level-list>
-        <item android:maxLevel="15"  android:drawable="@drawable/sysbar_batterymini_red" />
-        <item android:maxLevel="101" android:drawable="@drawable/sysbar_batterymini_100" />
+        <item android:maxLevel="1500"  android:drawable="@drawable/sysbar_batterymini_red" />
+        <item android:maxLevel="10000" android:drawable="@drawable/sysbar_batterymini_100" />
     </level-list>
 </clip>

@@ -21,5 +21,5 @@
 <clip xmlns:android="http://schemas.android.com/apk/res/android"
         android:clipOrientation="horizontal"
         android:gravity="right"
-        android:maxLevel="100"
+        android:maxLevel="10000"
         android:drawable="@drawable/sysbar_signalmini_100" />
