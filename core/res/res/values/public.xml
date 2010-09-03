@@ -1324,11 +1324,11 @@
   <public type="attr" name="imeSubtypeMode" />
   <public type="attr" name="imeSubtypeExtraValue" />
   <public type="attr" name="splitMotionEvents" />
+  <public type="attr" name="listChoiceBackgroundIndicator" />
+  <public type="attr" name="spinnerMode" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
-
-  <public type="attr" name="listChoiceBackgroundIndicator" id="0x01010330" />
 
   <public type="id" name="home" />
   <!-- Context menu ID for the "Select text..." menu item to switch to text
