@@ -706,7 +706,8 @@ public class ListPopupWindow {
             if (mItemClickListener != null) {
                 final DropDownListView list = mDropDownList;
                 final View child = list.getChildAt(position - list.getFirstVisiblePosition());
-                mItemClickListener.onItemClick(list, child, position, child.getId());
+                final ListAdapter adapter = list.getAdapter();
+                mItemClickListener.onItemClick(list, child, position, adapter.getItemId(position));
             }
             return true;
         }
