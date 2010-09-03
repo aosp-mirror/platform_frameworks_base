@@ -617,8 +617,6 @@ public class Activity extends ContextThemeWrapper
     /** Start of user-defined activity results. */
     public static final int RESULT_FIRST_USER   = 1;
 
-    private static long sInstanceCount = 0;
-
     private static final String WINDOW_HIERARCHY_TAG = "android:viewHierarchyState";
     private static final String FRAGMENTS_TAG = "android:fragments";
     private static final String SAVED_DIALOG_IDS_KEY = "android:savedDialogIds";
@@ -708,23 +706,6 @@ public class Activity extends ContextThemeWrapper
 
     private Thread mUiThread;
     final Handler mHandler = new Handler();
-
-    // Used for debug only
-    /*
-    public Activity() {
-        ++sInstanceCount;
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        --sInstanceCount;
-    }
-    */
-
-    public static long getInstanceCount() {
-        return sInstanceCount;
-    }
 
     /** Return the intent that started this activity. */
     public Intent getIntent() {

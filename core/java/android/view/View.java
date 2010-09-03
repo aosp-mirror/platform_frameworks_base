@@ -1955,9 +1955,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     private int mTouchSlop;
 
-    // Used for debug only
-    static long sInstanceCount = 0;
-
     /**
      * Simple constructor to use when creating a view from code.
      *
@@ -1968,8 +1965,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         mContext = context;
         mResources = context != null ? context.getResources() : null;
         mViewFlags = SOUND_EFFECTS_ENABLED | HAPTIC_FEEDBACK_ENABLED;
-        // Used for debug only
-        //++sInstanceCount;
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
     }
 
@@ -2285,15 +2280,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     View() {
     }
-
-    // Used for debug only
-    /*
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        --sInstanceCount;
-    }
-    */
 
     /**
      * <p>

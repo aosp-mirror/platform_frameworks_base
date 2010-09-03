@@ -214,22 +214,7 @@ class ContextImpl extends Context {
     private File mExternalFilesDir;
     private File mExternalCacheDir;
 
-    private static long sInstanceCount = 0;
-
     private static final String[] EMPTY_FILE_LIST = {};
-
-    // For debug only
-    /*
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        --sInstanceCount;
-    }
-    */
-
-    public static long getInstanceCount() {
-        return sInstanceCount;
-    }
 
     @Override
     public AssetManager getAssets() {
@@ -1510,8 +1495,6 @@ class ContextImpl extends Context {
     }
 
     ContextImpl() {
-        // For debug only
-        //++sInstanceCount;
         mOuterContext = this;
     }
 
@@ -1522,7 +1505,6 @@ class ContextImpl extends Context {
      * @param context Existing application context.
      */
     public ContextImpl(ContextImpl context) {
-        ++sInstanceCount;
         mPackageInfo = context.mPackageInfo;
         mResources = context.mResources;
         mMainThread = context.mMainThread;

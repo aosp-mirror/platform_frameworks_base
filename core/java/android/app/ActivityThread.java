@@ -76,6 +76,7 @@ import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SamplingProfilerIntegration;
 
+import dalvik.system.VMDebug;
 import org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
 
 import java.io.File;
@@ -687,8 +688,8 @@ public final class ActivityThread {
             long dalvikAllocated = dalvikMax - dalvikFree;
             long viewInstanceCount = ViewDebug.getViewInstanceCount();
             long viewRootInstanceCount = ViewDebug.getViewRootInstanceCount();
-            long appContextInstanceCount = ContextImpl.getInstanceCount();
-            long activityInstanceCount = Activity.getInstanceCount();
+            long appContextInstanceCount = VMDebug.countInstancesOfClass(ContextImpl.class);
+            long activityInstanceCount = VMDebug.countInstancesOfClass(Activity.class);
             int globalAssetCount = AssetManager.getGlobalAssetCount();
             int globalAssetManagerCount = AssetManager.getGlobalAssetManagerCount();
             int binderLocalObjectCount = Debug.getBinderLocalObjectCount();
