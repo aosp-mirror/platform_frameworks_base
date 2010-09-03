@@ -199,7 +199,7 @@ status_t AMRWBEncoder::read(
     ReadOptions::SeekMode mode;
     CHECK(options == NULL || !options->getSeekTo(&seekTimeUs, &mode));
     bool readFromSource = false;
-    int64_t wallClockTimeUs = 0;
+    int64_t wallClockTimeUs = -1;
 
     while (mNumInputSamples < kNumSamplesPerFrame) {
         if (mInputBuffer == NULL) {
@@ -221,8 +221,9 @@ status_t AMRWBEncoder::read(
             CHECK_EQ(align, 0);
 
             int64_t timeUs;
-            CHECK(mInputBuffer->meta_data()->findInt64(kKeyDriftTime, &timeUs));
-            wallClockTimeUs = timeUs;
+            if (mInputBuffer->meta_data()->findInt64(kKeyDriftTime, &timeUs)) {
+                wallClockTimeUs = timeUs;
+            }
             if (mInputBuffer->meta_data()->findInt64(kKeyTime, &timeUs)) {
                 mAnchorTimeUs = timeUs;
             }
@@ -285,7 +286,7 @@ status_t AMRWBEncoder::read(
 
     int64_t mediaTimeUs = mNumFramesOutput * 20000LL;
     buffer->meta_data()->setInt64(kKeyTime, mAnchorTimeUs + mediaTimeUs);
-    if (readFromSource) {
+    if (readFromSource && wallClockTimeUs != -1) {
         buffer->meta_data()->setInt64(kKeyDriftTime, mediaTimeUs - wallClockTimeUs);
     }
 
