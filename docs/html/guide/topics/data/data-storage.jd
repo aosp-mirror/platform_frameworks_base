@@ -115,7 +115,7 @@ public class Calc extends Activity {
     public static final String PREFS_NAME = "MyPrefsFile";
 
     &#64;Override
-    protected void onCreate(Bundle state){         
+    protected void onCreate(Bundle state){
        super.onCreate(state);
        . . .
 
@@ -374,7 +374,7 @@ android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase) onCreate()} me
 can execute a SQLite command to create tables in the database. For example:</p>
 
 <pre>
-public class MyDbOpenHelper extends SQLiteOpenHelper {
+public class DictionaryOpenHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 2;
     private static final String DICTIONARY_TABLE_NAME = "dictionary";
