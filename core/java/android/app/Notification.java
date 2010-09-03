@@ -109,11 +109,17 @@ public class Notification implements Parcelable
     public PendingIntent deleteIntent;
 
     /**
-     * An intent to launch instead of posting the notification to the status bar. Only for use with
-     * extremely high-priority notifications demanding the user's attention, such as an incoming
+     * An intent to launch instead of posting the notification to the status bar.
+     * Only for use with extremely high-priority notifications demanding the user's
+     * <strong>immediate</strong>attention, such as an incoming phone call or
+     * alarm clock that the user has explicitly set to a particular time.
      * call (handled in the core Android Phone app with a full-screen Activity).
-     * Use with {@link #FLAG_HIGH_PRIORITY} to ensure that this notification will reach the user
-     * even when other notifications are suppressed.
+     * If this facility is used for something else, please give the user an option
+     * to turn it off and use a normal notification, as this can be extremely
+     * disruptive.
+     * 
+     * <p>Use with {@link #FLAG_HIGH_PRIORITY} to ensure that this notification
+     * will reach the user even when other notifications are suppressed.
      */
     public PendingIntent fullScreenIntent;
 
