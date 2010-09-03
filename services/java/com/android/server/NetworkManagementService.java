@@ -55,6 +55,8 @@ class NetworkManagementService extends INetworkManagementService.Stub {
 
     private static final String TAG = "NetworkManagmentService";
 
+    private static final String NETD_TAG = "NetdConnector";
+
     class NetdResponseCode {
         public static final int InterfaceListResult       = 110;
         public static final int TetherInterfaceListResult = 111;
@@ -101,8 +103,8 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         }
 
         mConnector = new NativeDaemonConnector(
-                new NetdCallbackReceiver(), "netd", 10, "NetdConnector");
-        Thread thread = new Thread(mConnector, NativeDaemonConnector.class.getName());
+                new NetdCallbackReceiver(), "netd", 10, NETD_TAG);
+        Thread thread = new Thread(mConnector, NETD_TAG);
         thread.start();
     }
 
