@@ -92,6 +92,8 @@ enum {
 
     kKeyNotRealTime       = 'ntrt',  // bool (int32_t)
 
+    // Ogg files can be tagged to be automatically looping...
+    kKeyAutoLoop          = 'autL',  // bool (int32_t)
 };
 
 enum {

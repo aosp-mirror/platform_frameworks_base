@@ -330,6 +330,13 @@ status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
         } else if (!haveAudio && !strncasecmp(mime, "audio/", 6)) {
             setAudioSource(extractor->getTrack(i));
             haveAudio = true;
+
+            sp<MetaData> fileMeta = extractor->getMetaData();
+            int32_t loop;
+            if (fileMeta != NULL
+                    && fileMeta->findInt32(kKeyAutoLoop, &loop) && loop != 0) {
+                mFlags |= AUTO_LOOPING;
+            }
         }
 
         if (haveAudio && haveVideo) {
@@ -587,7 +594,7 @@ void AwesomePlayer::onStreamDone() {
         return;
     }
 
-    if (mFlags & LOOPING) {
+    if (mFlags & (LOOPING | AUTO_LOOPING)) {
         seekTo_l(0);
 
         if (mVideoSource != NULL) {
@@ -1560,7 +1567,7 @@ status_t AwesomePlayer::suspend() {
     state->mUriHeaders = mUriHeaders;
     state->mFileSource = mFileSource;
 
-    state->mFlags = mFlags & (PLAYING | LOOPING | AT_EOS);
+    state->mFlags = mFlags & (PLAYING | AUTO_LOOPING | LOOPING | AT_EOS);
     getPosition(&state->mPositionUs);
 
     if (mLastVideoBuffer) {
@@ -1621,7 +1628,7 @@ status_t AwesomePlayer::resume() {
 
     seekTo_l(state->mPositionUs);
 
-    mFlags = state->mFlags & (LOOPING | AT_EOS);
+    mFlags = state->mFlags & (AUTO_LOOPING | LOOPING | AT_EOS);
 
     if (state->mLastVideoFrame && mISurface != NULL) {
         mVideoRenderer =
