@@ -1412,7 +1412,7 @@ public class CDMAPhone extends PhoneBase {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
         SharedPreferences.Editor editor = sp.edit();
         editor.putString(VM_NUMBER_CDMA, number);
-        editor.commit();
+        editor.apply();
     }
 
     /**
