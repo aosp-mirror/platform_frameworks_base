@@ -853,6 +853,15 @@ int doDump(Bundle* bundle)
                                     error.string());
                             goto bail;
                         }
+                    } else if (tag == "uses-package") {
+                        String8 name = getAttribute(tree, NAME_ATTR, &error);
+                        if (name != "" && error == "") {
+                            printf("uses-package:'%s'\n", name.string());
+                        } else {
+                            fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n",
+                                    error.string());
+                                goto bail;
+                        }
                     } else if (tag == "original-package") {
                         String8 name = getAttribute(tree, NAME_ATTR, &error);
                         if (name != "" && error == "") {
