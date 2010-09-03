@@ -105,10 +105,9 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         mTarget = target;
         mContext = context;
 
-        IntentFilter filter =
-                new IntentFilter(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED);
-        filter.addAction(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
 
         mContext.registerReceiver(new MobileDataStateReceiver(), filter);
         mMobileDataState = Phone.DataState.DISCONNECTED;
@@ -192,7 +191,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                                     ConnectivityManager.TYPE_MOBILE);
                                 if (mConnectivityManager == null) {
                                     IBinder b = ServiceManager.getService(
-                                            mContext.CONNECTIVITY_SERVICE);
+                                            Context.CONNECTIVITY_SERVICE);
                                     mConnectivityManager = IConnectivityManager.Stub.asInterface(b);
                                 }
                                 try {
@@ -251,7 +250,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                         " broadcast" + reason == null ? "" : "(" + reason + ")");
                 setDetailedState(DetailedState.FAILED, reason, apnName);
             }
-            TelephonyManager tm = TelephonyManager.getDefault();
         }
     }
 
@@ -266,15 +264,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
      */
     public boolean isAvailable() {
         return mNetworkInfo.isAvailable();
-    }
-
-    /**
-     * {@inheritDoc}
-     * The mobile data network subtype indicates what generation network technology is in effect,
-     * e.g., GPRS, EDGE, UMTS, etc.
-     */
-    public int getNetworkSubtype() {
-        return TelephonyManager.getDefault().getNetworkType();
     }
 
     /**
@@ -338,16 +327,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
      * change from the previous state, send a notification to
      * any listeners.
      * @param state the new @{code DetailedState}
-     */
-    private void setDetailedState(NetworkInfo.DetailedState state) {
-        setDetailedState(state, null, null);
-    }
-
-    /**
-     * Record the detailed state of a network, and if it is a
-     * change from the previous state, send a notification to
-     * any listeners.
-     * @param state the new @{code DetailedState}
      * @param reason a {@code String} indicating a reason for the state change,
      * if one was supplied. May be {@code null}.
      * @param extraInfo optional {@code String} providing extra information about the state change
@@ -370,10 +349,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
             Message msg = mTarget.obtainMessage(EVENT_STATE_CHANGED, mNetworkInfo);
             msg.sendToTarget();
         }
-    }
-
-    private void setDetailedStateInternal(NetworkInfo.DetailedState state) {
-        mNetworkInfo.setDetailedState(state, null, null);
     }
 
     public void setTeardownRequested(boolean isRequested) {
