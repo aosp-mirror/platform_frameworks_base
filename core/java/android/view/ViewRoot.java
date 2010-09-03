@@ -464,7 +464,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         // Only enable hardware acceleration if we are not in the system process
         // The window manager creates ViewRoots to display animated preview windows
         // of launching apps and we don't want those to be hardware accelerated
-        if (Process.myUid() != Process.SYSTEM_UID) {
+        if (!HardwareRenderer.sRendererDisabled) {
             // Try to enable hardware acceleration if requested
             if (attrs != null &&
                     (attrs.flags & WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0) {

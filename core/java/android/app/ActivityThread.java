@@ -63,6 +63,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
+import android.view.HardwareRenderer;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewManager;
@@ -3632,6 +3633,7 @@ public final class ActivityThread {
     }
 
     public static final ActivityThread systemMain() {
+        HardwareRenderer.disable();
         ActivityThread thread = new ActivityThread();
         thread.attach(true);
         return thread;
