@@ -592,6 +592,7 @@ void MyVorbisExtractor::parseFileMetaData() {
         { "DATE", kKeyDate },
         { "LYRICIST", kKeyWriter },
         { "METADATA_BLOCK_PICTURE", kKeyAlbumArt },
+        { "ANDROID_LOOP", kKeyAutoLoop },
     };
 
     for (int i = 0; i < mVc.comments; ++i) {
@@ -605,12 +606,15 @@ void MyVorbisExtractor::parseFileMetaData() {
                     extractAlbumArt(
                             &comment[tagLen + 1],
                             mVc.comment_lengths[i] - tagLen - 1);
+                } else if (kMap[j].mKey == kKeyAutoLoop) {
+                    if (!strcasecmp(&comment[tagLen + 1], "true")) {
+                        mFileMeta->setInt32(kKeyAutoLoop, true);
+                    }
                 } else {
                     mFileMeta->setCString(kMap[j].mKey, &comment[tagLen + 1]);
                 }
             }
         }
-
     }
 
 #if 0
