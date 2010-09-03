@@ -62,6 +62,7 @@ private:
     class Track;
 
     FILE *mFile;
+    bool mUse4ByteNalLength;
     bool mUse32BitOffset;
     bool mPaused;
     bool mStarted;
@@ -134,6 +135,10 @@ private:
     int64_t mDriftTimeUs;
     void setDriftTimeUs(int64_t driftTimeUs);
     int64_t getDriftTimeUs();
+
+    // Return whether the nal length is 4 bytes or 2 bytes
+    // Only makes sense for H.264/AVC
+    bool useNalLengthFour();
 
     void lock();
     void unlock();
