@@ -38,10 +38,19 @@
     <!-- devices with a front facing camera must include
          android.hardware.camera.front.xml -->
     <!-- devices with WiFi must also include android.hardware.wifi.xml -->
-    <!-- devices with limited/gestural multitouch must also include
-         android.hardware.touchscreen.multitouch.xml -->
-    <!-- devices with full multitouch must also include
-         android.hardware.touchscreen.multitouch.distinct.xml -->
+    <!-- devices that support multitouch must include the most appropriate one
+         of these files:
+
+         If only partial (non-independent) pointers are supported:
+         android.hardware.touchscreen.multitouch.xml
+
+         If up to 4 independently tracked pointers are supported:
+         include android.hardware.touchscreen.multitouch.distinct.xml
+
+         If 5 or more independently tracked pointers are supported:
+         include android.hardware.touchscreen.multitouch.jazzhand.xml
+
+         ONLY ONE of the above should be included. -->
     <!-- devices with an ambient light sensor must also include
          android.hardware.sensor.light.xml -->
     <!-- devices with a proximity sensor must also include

@@ -816,6 +816,15 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device's touch screen is capable of
+     * tracking a full hand of fingers fully independently -- that is, 5 or
+     * more simultaneous independent pointers.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TOUCHSCREEN_MULTITOUCH_JAZZHAND = "android.hardware.touchscreen.multitouch.jazzhand";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports live wallpapers.
      */
     @SdkConstant(SdkConstantType.FEATURE)
