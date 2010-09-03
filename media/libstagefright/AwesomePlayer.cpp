@@ -50,6 +50,9 @@
 
 namespace android {
 
+static int64_t kLowWaterMarkUs = 2000000ll;  // 2secs
+static int64_t kHighWaterMarkUs = 10000000ll;  // 10secs
+
 struct AwesomeEvent : public TimedEventQueue::Event {
     AwesomeEvent(
             AwesomePlayer *player,
@@ -450,6 +453,25 @@ void AwesomePlayer::notifyListener_l(int msg, int ext1, int ext2) {
     }
 }
 
+// Returns true iff cached duration is available/applicable.
+bool AwesomePlayer::getCachedDuration_l(int64_t *durationUs, bool *eos) {
+    off_t totalSize;
+
+    if (mRTSPController != NULL) {
+        *durationUs = mRTSPController->getQueueDurationUs(eos);
+        return true;
+    } else if (mCachedSource != NULL && mDurationUs >= 0
+            && mCachedSource->getSize(&totalSize) == OK) {
+        int64_t bitrate = totalSize * 8000000ll / mDurationUs;  // in bits/sec
+
+        size_t cachedDataRemaining = mCachedSource->approxDataRemaining(eos);
+        *durationUs = cachedDataRemaining * 8000000ll / bitrate;
+        return true;
+    }
+
+    return false;
+}
+
 void AwesomePlayer::onBufferingUpdate() {
     Mutex::Autolock autoLock(mLock);
     if (!mBufferingEventPending) {
@@ -457,76 +479,80 @@ void AwesomePlayer::onBufferingUpdate() {
     }
     mBufferingEventPending = false;
 
-    int kLowWaterMarkSecs = 2;
-    int kHighWaterMarkSecs = 10;
-
-    if (mRTSPController != NULL) {
+    if (mCachedSource != NULL) {
         bool eos;
-        int64_t queueDurationUs = mRTSPController->getQueueDurationUs(&eos);
+        size_t cachedDataRemaining = mCachedSource->approxDataRemaining(&eos);
 
-        LOGV("queueDurationUs = %.2f secs", queueDurationUs / 1E6);
+        if (eos) {
+            notifyListener_l(MEDIA_BUFFERING_UPDATE, 100);
+        } else {
+            off_t size;
+            if (mDurationUs >= 0 && mCachedSource->getSize(&size) == OK) {
+                int64_t bitrate = size * 8000000ll / mDurationUs;  // in bits/sec
 
+                size_t cachedSize = mCachedSource->cachedSize();
+                int64_t cachedDurationUs = cachedSize * 8000000ll / bitrate;
+
+                int percentage = 100.0 * (double)cachedDurationUs / mDurationUs;
+                if (percentage > 100) {
+                    percentage = 100;
+                }
+
+                notifyListener_l(MEDIA_BUFFERING_UPDATE, percentage);
+            } else {
+                // We don't know the bitrate of the stream, use absolute size
+                // limits to maintain the cache.
+
+                const size_t kLowWaterMarkBytes = 400000;
+                const size_t kHighWaterMarkBytes = 1000000;
+
+                if ((mFlags & PLAYING) && !eos
+                        && (cachedDataRemaining < kLowWaterMarkBytes)) {
+                    LOGI("cache is running low (< %d) , pausing.",
+                         kLowWaterMarkBytes);
+                    mFlags |= CACHE_UNDERRUN;
+                    pause_l();
+                    notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_START);
+                } else if (eos || cachedDataRemaining > kHighWaterMarkBytes) {
+                    if (mFlags & CACHE_UNDERRUN) {
+                        LOGI("cache has filled up (> %d), resuming.",
+                             kHighWaterMarkBytes);
+                        mFlags &= ~CACHE_UNDERRUN;
+                        play_l();
+                        notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_END);
+                    } else if (mFlags & PREPARING) {
+                        LOGV("cache has filled up (> %d), prepare is done",
+                             kHighWaterMarkBytes);
+                        finishAsyncPrepare_l();
+                    }
+                }
+            }
+        }
+    }
+
+    int64_t cachedDurationUs;
+    bool eos;
+    if (getCachedDuration_l(&cachedDurationUs, &eos)) {
         if ((mFlags & PLAYING) && !eos
-                && (queueDurationUs < kLowWaterMarkSecs * 1000000ll)) {
-            LOGI("rtsp cache is running low, pausing.");
+                && (cachedDurationUs < kLowWaterMarkUs)) {
+            LOGI("cache is running low (%.2f secs) , pausing.",
+                 cachedDurationUs / 1E6);
             mFlags |= CACHE_UNDERRUN;
             pause_l();
             notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_START);
-        } else if ((mFlags & CACHE_UNDERRUN)
-                && (eos || queueDurationUs > kHighWaterMarkSecs * 1000000ll)) {
-            LOGI("rtsp cache has filled up, resuming.");
-            mFlags &= ~CACHE_UNDERRUN;
-            play_l();
-            notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_END);
-        }
-
-        postBufferingEvent_l();
-        return;
-    }
-
-    if (mCachedSource == NULL) {
-        return;
-    }
-
-    bool eos;
-    size_t cachedDataRemaining = mCachedSource->approxDataRemaining(&eos);
-
-    size_t lowWatermark = 400000;
-    size_t highWatermark = 1000000;
-
-    if (eos) {
-        notifyListener_l(MEDIA_BUFFERING_UPDATE, 100);
-    } else {
-        off_t size;
-        if (mDurationUs >= 0 && mCachedSource->getSize(&size) == OK) {
-            int64_t bitrate = size * 8000000ll / mDurationUs;  // in bits/sec
-
-            size_t cachedSize = mCachedSource->cachedSize();
-            int64_t cachedDurationUs = cachedSize * 8000000ll / bitrate;
-
-            int percentage = 100.0 * (double)cachedDurationUs / mDurationUs;
-            if (percentage > 100) {
-                percentage = 100;
+        } else if (eos || cachedDurationUs > kHighWaterMarkUs) {
+            if (mFlags & CACHE_UNDERRUN) {
+                LOGI("cache has filled up (%.2f secs), resuming.",
+                     cachedDurationUs / 1E6);
+                mFlags &= ~CACHE_UNDERRUN;
+                play_l();
+                notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_END);
+            } else if (mFlags & PREPARING) {
+                LOGV("cache has filled up (%.2f secs), prepare is done",
+                     cachedDurationUs / 1E6);
+                finishAsyncPrepare_l();
             }
-
-            notifyListener_l(MEDIA_BUFFERING_UPDATE, percentage);
-
-            lowWatermark = kLowWaterMarkSecs * bitrate / 8;
-            highWatermark = kHighWaterMarkSecs * bitrate / 8;
         }
-    }
-
-    if ((mFlags & PLAYING) && !eos && (cachedDataRemaining < lowWatermark)) {
-        LOGI("cache is running low (< %d) , pausing.", lowWatermark);
-        mFlags |= CACHE_UNDERRUN;
-        pause_l();
-        notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_START);
-    } else if ((mFlags & CACHE_UNDERRUN)
-            && (eos || cachedDataRemaining > highWatermark)) {
-        LOGI("cache has filled up (> %d), resuming.", highWatermark);
-        mFlags &= ~CACHE_UNDERRUN;
-        play_l();
-        notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_END);
     }
 
     postBufferingEvent_l();
@@ -1437,45 +1463,49 @@ bool AwesomePlayer::ContinuePreparation(void *cookie) {
 }
 
 void AwesomePlayer::onPrepareAsyncEvent() {
-    {
-        Mutex::Autolock autoLock(mLock);
+    Mutex::Autolock autoLock(mLock);
 
-        if (mFlags & PREPARE_CANCELLED) {
-            LOGI("prepare was cancelled before doing anything");
-            abortPrepare(UNKNOWN_ERROR);
+    if (mFlags & PREPARE_CANCELLED) {
+        LOGI("prepare was cancelled before doing anything");
+        abortPrepare(UNKNOWN_ERROR);
+        return;
+    }
+
+    if (mUri.size() > 0) {
+        status_t err = finishSetDataSource_l();
+
+        if (err != OK) {
+            abortPrepare(err);
             return;
-        }
-
-        if (mUri.size() > 0) {
-            status_t err = finishSetDataSource_l();
-
-            if (err != OK) {
-                abortPrepare(err);
-                return;
-            }
-        }
-
-        if (mVideoTrack != NULL && mVideoSource == NULL) {
-            status_t err = initVideoDecoder();
-
-            if (err != OK) {
-                abortPrepare(err);
-                return;
-            }
-        }
-
-        if (mAudioTrack != NULL && mAudioSource == NULL) {
-            status_t err = initAudioDecoder();
-
-            if (err != OK) {
-                abortPrepare(err);
-                return;
-            }
         }
     }
 
-    Mutex::Autolock autoLock(mLock);
+    if (mVideoTrack != NULL && mVideoSource == NULL) {
+        status_t err = initVideoDecoder();
 
+        if (err != OK) {
+            abortPrepare(err);
+            return;
+        }
+    }
+
+    if (mAudioTrack != NULL && mAudioSource == NULL) {
+        status_t err = initAudioDecoder();
+
+        if (err != OK) {
+            abortPrepare(err);
+            return;
+        }
+    }
+
+    if (mCachedSource != NULL || mRTSPController != NULL) {
+        postBufferingEvent_l();
+    } else {
+        finishAsyncPrepare_l();
+    }
+}
+
+void AwesomePlayer::finishAsyncPrepare_l() {
     if (mIsAsyncPrepare) {
         if (mVideoWidth < 0 || mVideoHeight < 0) {
             notifyListener_l(MEDIA_SET_VIDEO_SIZE, 0, 0);
@@ -1491,8 +1521,6 @@ void AwesomePlayer::onPrepareAsyncEvent() {
     mFlags |= PREPARED;
     mAsyncPrepareEvent = NULL;
     mPreparedCondition.broadcast();
-
-    postBufferingEvent_l();
 }
 
 status_t AwesomePlayer::suspend() {
