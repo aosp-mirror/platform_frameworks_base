@@ -132,7 +132,7 @@ private:
     // Adjust other track media clock (presumably wall clock)
     // based on audio track media clock with the drift time.
     int64_t mDriftTimeUs;
-    void addDriftTimeUs(int64_t driftTimeUs);
+    void setDriftTimeUs(int64_t driftTimeUs);
     int64_t getDriftTimeUs();
 
     void lock();
