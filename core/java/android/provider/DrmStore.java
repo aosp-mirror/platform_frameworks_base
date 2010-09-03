@@ -143,11 +143,11 @@ public final class DrmStore
             DrmRawContent content = new DrmRawContent(fis, (int) fis.available(),
                     DrmRawContent.DRM_MIMETYPE_MESSAGE_STRING);
             String mimeType = content.getContentType();
+            long size = fis.getChannel().size();
 
             DrmRightsManager manager = manager = DrmRightsManager.getInstance();
             DrmRights rights = manager.queryRights(content);
             InputStream stream = content.getContentInputStream(rights);
-            long size = stream.available();
 
             Uri contentUri = null;
             if (mimeType.startsWith("audio/")) {
