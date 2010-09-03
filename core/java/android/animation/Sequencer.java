@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -96,6 +97,16 @@ public final class Sequencer extends Animatable {
      */
     boolean mCanceled = false;
 
+    // The amount of time in ms to delay starting the animation after start() is called
+    private long mStartDelay = 0;
+
+
+    // How long the child animations should last in ms. The default value is negative, which
+    // simply means that there is no duration set on the Sequencer. When a real duration is
+    // set, it is passed along to the child animations.
+    private long mDuration = -1;
+
+
     /**
      * Sets up this Sequencer to play all of the supplied animations at the same time.
      *
@@ -153,6 +164,7 @@ public final class Sequencer extends Animatable {
      *
      * @param target The object being animated
      */
+    @Override
     public void setTarget(Object target) {
         for (Node node : mNodes) {
             Animatable animation = node.animation;
@@ -161,6 +173,19 @@ public final class Sequencer extends Animatable {
             } else if (animation instanceof PropertyAnimator) {
                 ((PropertyAnimator)animation).setTarget(target);
             }
+        }
+    }
+
+    /**
+     * Sets the Interpolator for all current {@link #getChildAnimations() child animations}
+     * of this Sequencer.
+     *
+     * @param interpolator the interpolator to be used by each child animation of this Sequencer
+     */
+    @Override
+    public void setInterpolator(Interpolator interpolator) {
+        for (Node node : mNodes) {
+            node.animation.setInterpolator(interpolator);
         }
     }
 
@@ -266,6 +291,62 @@ public final class Sequencer extends Animatable {
     }
 
     /**
+     * The amount of time, in milliseconds, to delay starting the animation after
+     * {@link #start()} is called.
+     *
+     * @return the number of milliseconds to delay running the animation
+     */
+    @Override
+    public long getStartDelay() {
+        return mStartDelay;
+    }
+
+    /**
+     * The amount of time, in milliseconds, to delay starting the animation after
+     * {@link #start()} is called.
+
+     * @param startDelay The amount of the delay, in milliseconds
+     */
+    @Override
+    public void setStartDelay(long startDelay) {
+        mStartDelay = startDelay;
+    }
+
+    /**
+     * Gets the length of each of the child animations of this Sequencer. This value may
+     * be less than 0, which indicates that no duration has been set on this Sequencer
+     * and each of the child animations will use their own duration.
+     *
+     * @return The length of the animation, in milliseconds, of each of the child
+     * animations of this Sequencer.
+     */
+    @Override
+    public long getDuration() {
+        return mDuration;
+    }
+
+    /**
+     * Sets the length of each of the current child animations of this Sequencer. By default,
+     * each child animation will use its own duration. If the duration is set on the Sequencer,
+     * then each child animation inherits this duration.
+     *
+     * @param duration The length of the animation, in milliseconds, of each of the child
+     * animations of this Sequencer.
+     */
+    @Override
+    public void setDuration(long duration) {
+        if (duration < 0) {
+            throw new IllegalArgumentException("duration must be a value of zero or greater");
+        }
+        for (Node node : mNodes) {
+            // TODO: don't set the duration of the timing-only nodes created by Sequencer to
+            // insert "play-after" delays
+            node.animation.setDuration(duration);
+        }
+        mDuration = duration;
+    }
+
+    /**
      * {@inheritDoc}
      *
      * <p>Starting this <code>Sequencer</code> will, in turn, start the animations for which
@@ -285,7 +366,7 @@ public final class Sequencer extends Animatable {
         // start the animations in the loop directly because we first need to set up
         // dependencies on all of the nodes. For example, we don't want to start an animation
         // when some other animation also wants to start when the first animation begins.
-        ArrayList<Node> nodesToStart = new ArrayList<Node>();
+        final ArrayList<Node> nodesToStart = new ArrayList<Node>();
         for (Node node : mSortedNodes) {
             if (mSequenceListener == null) {
                 mSequenceListener = new SequencerAnimatableListener(this);
@@ -302,9 +383,22 @@ public final class Sequencer extends Animatable {
             node.animation.addListener(mSequenceListener);
         }
         // Now that all dependencies are set up, start the animations that should be started.
-        for (Node node : nodesToStart) {
-            node.animation.start();
-            mPlayingSet.add(node.animation);
+        if (mStartDelay <= 0) {
+            for (Node node : nodesToStart) {
+                node.animation.start();
+                mPlayingSet.add(node.animation);
+            }
+        } else {
+            // TODO: Need to cancel out of the delay appropriately
+            Animator delayAnim = new Animator(mStartDelay, 0f, 1f);
+            delayAnim.addListener(new AnimatableListenerAdapter() {
+                public void onAnimationEnd(Animatable anim) {
+                    for (Node node : nodesToStart) {
+                        node.animation.start();
+                        mPlayingSet.add(node.animation);
+                    }
+                }
+            });
         }
         if (mListeners != null) {
             ArrayList<AnimatableListener> tmpListeners =
@@ -316,7 +410,7 @@ public final class Sequencer extends Animatable {
     }
 
     @Override
-    public Sequencer clone() throws CloneNotSupportedException {
+    public Sequencer clone() {
         final Sequencer anim = (Sequencer) super.clone();
         /*
          * The basic clone() operation copies all items. This doesn't work very well for
@@ -688,10 +782,14 @@ public final class Sequencer extends Animatable {
         }
 
         @Override
-        public Node clone() throws CloneNotSupportedException {
-            Node node = (Node) super.clone();
-            node.animation = (Animatable) animation.clone();
-            return node;
+        public Node clone() {
+            try {
+                Node node = (Node) super.clone();
+                node.animation = (Animatable) animation.clone();
+                return node;
+            } catch (CloneNotSupportedException e) {
+               throw new AssertionError();
+            }
         }
     }
 

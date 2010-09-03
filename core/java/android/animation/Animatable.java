@@ -16,6 +16,8 @@
 
 package android.animation;
 
+import android.view.animation.Interpolator;
+
 import java.util.ArrayList;
 
 /**
@@ -56,6 +58,46 @@ public abstract class Animatable implements Cloneable {
     public void end() {
     }
 
+    /**
+     * The amount of time, in milliseconds, to delay starting the animation after
+     * {@link #start()} is called.
+     *
+     * @return the number of milliseconds to delay running the animation
+     */
+    public abstract long getStartDelay();
+
+    /**
+     * The amount of time, in milliseconds, to delay starting the animation after
+     * {@link #start()} is called.
+
+     * @param startDelay The amount of the delay, in milliseconds
+     */
+    public abstract void setStartDelay(long startDelay);
+
+
+    /**
+     * Sets the length of the animation.
+     *
+     * @param duration The length of the animation, in milliseconds.
+     */
+    public abstract void setDuration(long duration);
+
+    /**
+     * Gets the length of the animation.
+     *
+     * @return The length of the animation, in milliseconds.
+     */
+    public abstract long getDuration();
+
+    /**
+     * The time interpolator used in calculating the elapsed fraction of this animation. The
+     * interpolator determines whether the animation runs with linear or non-linear motion,
+     * such as acceleration and deceleration. The default value is
+     * {@link android.view.animation.AccelerateDecelerateInterpolator}
+     *
+     * @param value the interpolator to be used by this animation
+     */
+    public abstract void setInterpolator(Interpolator value);
 
     /**
      * Returns whether this Animatable is currently running (having been started and not yet ended).
@@ -115,17 +157,56 @@ public abstract class Animatable implements Cloneable {
     }
 
     @Override
-    public Animatable clone() throws CloneNotSupportedException {
-        final Animatable anim = (Animatable) super.clone();
-        if (mListeners != null) {
-            ArrayList<AnimatableListener> oldListeners = mListeners;
-            anim.mListeners = new ArrayList<AnimatableListener>();
-            int numListeners = oldListeners.size();
-            for (int i = 0; i < numListeners; ++i) {
-                anim.mListeners.add(oldListeners.get(i));
+    public Animatable clone() {
+        try {
+            final Animatable anim = (Animatable) super.clone();
+            if (mListeners != null) {
+                ArrayList<AnimatableListener> oldListeners = mListeners;
+                anim.mListeners = new ArrayList<AnimatableListener>();
+                int numListeners = oldListeners.size();
+                for (int i = 0; i < numListeners; ++i) {
+                    anim.mListeners.add(oldListeners.get(i));
+                }
             }
+            return anim;
+        } catch (CloneNotSupportedException e) {
+           throw new AssertionError();
         }
-        return anim;
+    }
+
+    /**
+     * This method tells the object to use appropriate information to extract
+     * starting values for the animation. For example, a Sequencer object will pass
+     * this call to its child objects to tell them to set up the values. A
+     * PropertyAnimator object will use the information it has about its target object
+     * and PropertyValuesHolder objects to get the start values for its properties.
+     * An Animator object will ignore the request since it does not have enough
+     * information (such as a target object) to gather these values.
+     */
+    public void setupStartValues() {
+    }
+
+    /**
+     * This method tells the object to use appropriate information to extract
+     * ending values for the animation. For example, a Sequencer object will pass
+     * this call to its child objects to tell them to set up the values. A
+     * PropertyAnimator object will use the information it has about its target object
+     * and PropertyValuesHolder objects to get the start values for its properties.
+     * An Animator object will ignore the request since it does not have enough
+     * information (such as a target object) to gather these values.
+     */
+    public void setupEndValues() {
+    }
+
+    /**
+     * Sets the target object whose property will be animated by this animation. Not all subclasses
+     * operate on target objects (for example, {@link android.animation.Animator}, but this method
+     * is on the superclass for the convenience of dealing generically with those subclasses
+     * that do handle targets.
+     *
+     * @param target The object being animated
+     */
+    public void setTarget(Object target) {
     }
 
     /**

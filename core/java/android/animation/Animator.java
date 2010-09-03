@@ -145,10 +145,10 @@ public class Animator<T> extends Animatable {
     private static final ArrayList<Animator> sReadyAnims = new ArrayList<Animator>();
 
     /**
-     * Flag that denotes whether the animation is set up and ready to go. Used by seek() to
+     * Flag that denotes whether the animation is set up and ready to go. Used to
      * set up animation that has not yet been started.
      */
-    private boolean mInitialized = false;
+    boolean mInitialized = false;
 
     //
     // Backing variables
@@ -243,6 +243,14 @@ public class Animator<T> extends Animatable {
         }
     }
 
+    /**
+     * Sets the values, per property, being animated between. This function is called internally
+     * by the constructors of Animator that take a list of values. But an Animator can
+     * be constructed without values and this method can be called to set the values manually
+     * instead.
+     *
+     * @param values The set of values, per property, being animated between.
+     */
     public void setValues(PropertyValuesHolder... values) {
         int numValues = values.length;
         mValues = values;
@@ -251,6 +259,18 @@ public class Animator<T> extends Animatable {
             PropertyValuesHolder valuesHolder = (PropertyValuesHolder) values[i];
             mValuesMap.put(valuesHolder.getPropertyName(), valuesHolder);
         }
+    }
+
+    /**
+     * Returns the values that this Animator animates between. These values are stored in
+     * PropertyValuesHolder objects, even if the Animator was created with a simple list
+     * of value objects instead.
+     *
+     * @return PropertyValuesHolder[] An array of PropertyValuesHolder objects which hold the
+     * values, per property, that define the animation.
+     */
+    public PropertyValuesHolder[] getValues() {
+        return mValues;
     }
 
     /**
@@ -286,12 +306,14 @@ public class Animator<T> extends Animatable {
      *  that internal mechanisms for the animation are set up correctly.</p>
      */
     void initAnimation() {
-        int numValues = mValues.length;
-        for (int i = 0; i < numValues; ++i) {
-            mValues[i].init();
+        if (!mInitialized) {
+            int numValues = mValues.length;
+            for (int i = 0; i < numValues; ++i) {
+                mValues[i].init();
+            }
+            mCurrentIteration = 0;
+            mInitialized = true;
         }
-        mCurrentIteration = 0;
-        mInitialized = true;
     }
 
 
@@ -324,9 +346,7 @@ public class Animator<T> extends Animatable {
      * @param playTime The time, in milliseconds, to which the animation is advanced or rewound.
      */
     public void setCurrentPlayTime(long playTime) {
-        if (!mInitialized) {
-            initAnimation();
-        }
+        initAnimation();
         long currentTime = AnimationUtils.currentAnimationTimeMillis();
         if (mPlayingState != RUNNING) {
             mSeekTime = playTime;
@@ -619,6 +639,7 @@ public class Animator<T> extends Animatable {
      *
      * @param value the interpolator to be used by this animation
      */
+    @Override
     public void setInterpolator(Interpolator value) {
         if (value != null) {
             mInterpolator = value;
@@ -783,6 +804,10 @@ public class Animator<T> extends Animatable {
      * should be added to the set of active animations.
      */
     private boolean delayedAnimationFrame(long currentTime) {
+        if (mPlayingState == CANCELED || mPlayingState == ENDED) {
+            // end the delay, process an animation frame to actually cancel it
+            return true;
+        }
         if (!mStartedDelay) {
             mStartedDelay = true;
             mDelayStartTime = currentTime;
@@ -898,7 +923,7 @@ public class Animator<T> extends Animatable {
     }
 
     @Override
-    public Animator clone() throws CloneNotSupportedException {
+    public Animator clone() {
         final Animator anim = (Animator) super.clone();
         if (mUpdateListeners != null) {
             ArrayList<AnimatorUpdateListener> oldListeners = mUpdateListeners;
@@ -919,7 +944,7 @@ public class Animator<T> extends Animatable {
             int numValues = oldValues.length;
             anim.mValues = new PropertyValuesHolder[numValues];
             for (int i = 0; i < numValues; ++i) {
-                anim.mValues[i] = oldValues[i];
+                anim.mValues[i] = oldValues[i].clone();
             }
             anim.mValuesMap = new HashMap<String, PropertyValuesHolder>(numValues);
             for (int i = 0; i < numValues; ++i) {

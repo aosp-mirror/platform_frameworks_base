@@ -26,28 +26,28 @@ import android.animation.Animatable.AnimatableListener;
 public abstract class AnimatableListenerAdapter implements AnimatableListener {
 
     /**
-     * @{inheritdoc}
+     * {@inheritdoc}
      */
     @Override
     public void onAnimationCancel(Animatable animation) {
     }
 
     /**
-     * @{inheritdoc}
+     * {@inheritdoc}
      */
     @Override
     public void onAnimationEnd(Animatable animation) {
     }
 
     /**
-     * @{inheritdoc}
+     * {@inheritdoc}
      */
     @Override
     public void onAnimationRepeat(Animatable animation) {
     }
 
     /**
-     * @{inheritdoc}
+     * {@inheritdoc}
      */
     @Override
     public void onAnimationStart(Animatable animation) {

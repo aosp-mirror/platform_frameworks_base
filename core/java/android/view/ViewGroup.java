@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.animation.LayoutTransition;
 import com.android.internal.R;
 
 import android.content.Context;
@@ -66,6 +67,7 @@ import java.util.ArrayList;
  * @attr ref android.R.styleable#ViewGroup_descendantFocusability
  */
 public abstract class ViewGroup extends View implements ViewParent, ViewManager {
+
     private static final boolean DBG = false;
 
     /**
@@ -297,6 +299,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     // Used to draw cached views
     private final Paint mCachePaint = new Paint();
+
+    // Used to animate add/remove changes in layout
+    private LayoutTransition mTransition;
+
+    // The set of views that are currently being transitioned. This list is used to track views
+    // being removed that should not actually be removed from the parent yet because they are
+    // being animated.
+    private ArrayList<View> mTransitioningViews;
 
     public ViewGroup(Context context) {
         super(context);
@@ -2327,6 +2337,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     "You must call removeView() on the child's parent first.");
         }
 
+        if (mTransition != null) {
+            mTransition.childAdd(this, child);
+        }
+
         if (!checkLayoutParams(params)) {
             params = generateLayoutParams(params);
         }
@@ -2404,7 +2418,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     // This method also sets the child's mParent to null
     private void removeFromArray(int index) {
         final View[] children = mChildren;
-        children[index].mParent = null;
+        if (!(mTransitioningViews != null && mTransitioningViews.contains(children[index]))) {
+            children[index].mParent = null;
+        }
         final int count = mChildrenCount;
         if (index == count - 1) {
             children[--mChildrenCount] = null;
@@ -2539,13 +2555,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     private void removeViewInternal(int index, View view) {
+
+        if (mTransition != null) {
+            mTransition.childRemove(this, view);
+        }
+
         boolean clearChildFocus = false;
         if (view == mFocused) {
             view.clearFocusForRemoval();
             clearChildFocus = true;
         }
 
-        if (view.getAnimation() != null) {
+        if (view.getAnimation() != null ||
+                (mTransitioningViews != null && mTransitioningViews.contains(view))) {
             addDisappearingView(view);
         } else if (view.mAttachInfo != null) {
            view.dispatchDetachedFromWindow();
@@ -2564,6 +2586,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    /**
+     * Sets the LayoutTransition object for this ViewGroup. If the LayoutTransition object is
+     * not null, changes in layout which occur because of children being added to or removed from
+     * the ViewGroup will be animated according to the animations defined in that LayoutTransition
+     * object. By default, the transition object is null (so layout changes are not animated).
+     *
+     * @param transition The LayoutTransition object that will animated changes in layout. A value
+     * of <code>null</code> means no transition will run on layout changes.
+     */
+    public void setLayoutTransition(LayoutTransition transition) {
+        mTransition = transition;
+        mTransition.addTransitionListener(mLayoutTransitionListener);
+    }
+
     private void removeViewsInternal(int start, int count) {
         final OnHierarchyChangeListener onHierarchyChangeListener = mOnHierarchyChangeListener;
         final boolean notifyListener = onHierarchyChangeListener != null;
@@ -2577,12 +2613,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         for (int i = start; i < end; i++) {
             final View view = children[i];
 
+            if (mTransition != null) {
+                mTransition.childRemove(this, view);
+            }
+
             if (view == focused) {
                 view.clearFocusForRemoval();
                 clearChildFocus = view;
             }
 
-            if (view.getAnimation() != null) {
+            if (view.getAnimation() != null ||
+                (mTransitioningViews != null && mTransitioningViews.contains(view))) {
                 addDisappearingView(view);
             } else if (detach) {
                view.dispatchDetachedFromWindow();
@@ -2641,12 +2682,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         for (int i = count - 1; i >= 0; i--) {
             final View view = children[i];
 
+            if (mTransition != null) {
+                mTransition.childRemove(this, view);
+            }
+
             if (view == focused) {
                 view.clearFocusForRemoval();
                 clearChildFocus = view;
             }
 
-            if (view.getAnimation() != null) {
+            if (view.getAnimation() != null ||
+                    (mTransitioningViews != null && mTransitioningViews.contains(view))) {
                 addDisappearingView(view);
             } else if (detach) {
                view.dispatchDetachedFromWindow();
@@ -2679,11 +2725,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #detachViewFromParent(int)
      */
     protected void removeDetachedView(View child, boolean animate) {
+        if (mTransition != null) {
+            mTransition.childRemove(this, child);
+        }
+
         if (child == mFocused) {
             child.clearFocus();
         }
 
-        if (animate && child.getAnimation() != null) {
+        if ((animate && child.getAnimation() != null) ||
+                (mTransitioningViews != null && mTransitioningViews.contains(child))) {
             addDisappearingView(child);
         } else if (child.mAttachInfo != null) {
             child.dispatchDetachedFromWindow();
@@ -3657,6 +3708,41 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             mGroupFlags |= FLAG_INVALIDATE_REQUIRED;
         }
     }
+
+    private LayoutTransition.TransitionListener mLayoutTransitionListener =
+            new LayoutTransition.TransitionListener() {
+        @Override
+        public void startTransition(LayoutTransition transition, ViewGroup container,
+                View view, int transitionType) {
+            // We only care about disappearing items, since we need special logic to keep
+            // those items visible after they've been 'removed'
+            if (transitionType == LayoutTransition.DISAPPEARING) {
+                if (mTransitioningViews == null) {
+                    mTransitioningViews = new ArrayList<View>();
+                }
+                mTransitioningViews.add(view);
+            }
+        }
+
+        @Override
+        public void endTransition(LayoutTransition transition, ViewGroup container,
+                View view, int transitionType) {
+            if (transitionType == LayoutTransition.DISAPPEARING && mTransitioningViews != null) {
+                mTransitioningViews.remove(view);
+                final ArrayList<View> disappearingChildren = mDisappearingChildren;
+                if (disappearingChildren != null && disappearingChildren.contains(view)) {
+                    disappearingChildren.remove(view);
+                    if (view.mAttachInfo != null) {
+                        view.dispatchDetachedFromWindow();
+                    }
+                    if (view.mParent != null) {
+                        view.mParent = null;
+                    }
+                    mGroupFlags |= FLAG_INVALIDATE_REQUIRED;
+                }
+            }
+        }
+    };
 
     /**
      * {@inheritDoc}
