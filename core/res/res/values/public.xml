@@ -1343,6 +1343,7 @@
   <public type="attr" name="closeButtonStyle" />
   <public type="attr" name="titleTextStyle" />
   <public type="attr" name="subtitleTextStyle" />
+  <public type="attr" name="iconifiedByDefault" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
