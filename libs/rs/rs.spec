@@ -80,6 +80,7 @@ ElementCreate2 {
 	param const RsElement * elements
 	param const char ** names
 	param const size_t * nameLengths
+	param const uint32_t * arraySize
 	ret RsElement
 	}
 

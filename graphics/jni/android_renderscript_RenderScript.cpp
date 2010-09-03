@@ -253,12 +253,13 @@ nElementCreate(JNIEnv *_env, jobject _this, RsContext con, jint type, jint kind,
 }
 
 static jint
-nElementCreate2(JNIEnv *_env, jobject _this, RsContext con, jintArray _ids, jobjectArray _names)
+nElementCreate2(JNIEnv *_env, jobject _this, RsContext con, jintArray _ids, jobjectArray _names, jintArray _arraySizes)
 {
     int fieldCount = _env->GetArrayLength(_ids);
     LOG_API("nElementCreate2, con(%p)", con);
 
     jint *ids = _env->GetIntArrayElements(_ids, NULL);
+    jint *arraySizes = _env->GetIntArrayElements(_arraySizes, NULL);
     const char ** nameArray = (const char **)calloc(fieldCount, sizeof(char *));
     size_t* sizeArray = (size_t*)calloc(fieldCount, sizeof(size_t));
 
@@ -267,12 +268,13 @@ nElementCreate2(JNIEnv *_env, jobject _this, RsContext con, jintArray _ids, jobj
         nameArray[ct] = _env->GetStringUTFChars(s, NULL);
         sizeArray[ct] = _env->GetStringUTFLength(s);
     }
-    jint id = (jint)rsElementCreate2(con, fieldCount, (RsElement *)ids, nameArray, sizeArray);
+    jint id = (jint)rsElementCreate2(con, fieldCount, (RsElement *)ids, nameArray, sizeArray, (const uint32_t *)arraySizes);
     for (int ct=0; ct < fieldCount; ct++) {
         jstring s = (jstring)_env->GetObjectArrayElement(_names, ct);
         _env->ReleaseStringUTFChars(s, nameArray[ct]);
     }
     _env->ReleaseIntArrayElements(_ids, ids, JNI_ABORT);
+    _env->ReleaseIntArrayElements(_arraySizes, arraySizes, JNI_ABORT);
     free(nameArray);
     free(sizeArray);
     return (jint)id;
@@ -1230,7 +1232,7 @@ static JNINativeMethod methods[] = {
 {"rsnFontCreateFromFile",            "(ILjava/lang/String;II)I",             (void*)nFontCreateFromFile },
 
 {"rsnElementCreate",                 "(IIIZI)I",                              (void*)nElementCreate },
-{"rsnElementCreate2",                "(I[I[Ljava/lang/String;)I",             (void*)nElementCreate2 },
+{"rsnElementCreate2",                "(I[I[Ljava/lang/String;[I)I",           (void*)nElementCreate2 },
 {"rsnElementGetNativeData",          "(II[I)V",                               (void*)nElementGetNativeData },
 {"rsnElementGetSubElements",         "(II[I[Ljava/lang/String;)V",           (void*)nElementGetSubElements },
 
