@@ -99,6 +99,7 @@ class BatteryService extends Binder {
     private int mBatteryTemperature;
     private String mBatteryTechnology;
     private boolean mBatteryLevelCritical;
+    private boolean mInvalidCharger;
 
     private int mLastBatteryStatus;
     private int mLastBatteryHealth;
@@ -107,6 +108,7 @@ class BatteryService extends Binder {
     private int mLastBatteryVoltage;
     private int mLastBatteryTemperature;
     private boolean mLastBatteryLevelCritical;
+    private boolean mLastInvalidCharger;
 
     private int mLowBatteryWarningLevel;
     private int mLowBatteryCloseWarningLevel;
@@ -128,7 +130,12 @@ class BatteryService extends Binder {
         mLowBatteryCloseWarningLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lowBatteryCloseWarningLevel);
 
-        mUEventObserver.startObserving("SUBSYSTEM=power_supply");
+        mPowerSupplyObserver.startObserving("SUBSYSTEM=power_supply");
+
+        // watch for invalid charger messages if the invalid_charger switch exists
+        if (new File("/sys/devices/virtual/switch/invalid_charger/state").exists()) {
+            mInvalidChargerObserver.startObserving("DEVPATH=/devices/virtual/switch/invalid_charger");
+        }
 
         // set initial status
         update();
@@ -162,10 +169,21 @@ class BatteryService extends Binder {
         return mPlugType;
     }
 
-    private UEventObserver mUEventObserver = new UEventObserver() {
+    private UEventObserver mPowerSupplyObserver = new UEventObserver() {
         @Override
         public void onUEvent(UEventObserver.UEvent event) {
             update();
+        }
+    };
+
+    private UEventObserver mInvalidChargerObserver = new UEventObserver() {
+        @Override
+        public void onUEvent(UEventObserver.UEvent event) {
+            boolean invalidCharger = "1".equals(event.get("SWITCH_STATE"));
+            if (mInvalidCharger != invalidCharger) {
+                mInvalidCharger = invalidCharger;
+                update();
+            }
         }
     };
 
@@ -237,7 +255,8 @@ class BatteryService extends Binder {
                 mBatteryLevel != mLastBatteryLevel ||
                 mPlugType != mLastPlugType ||
                 mBatteryVoltage != mLastBatteryVoltage ||
-                mBatteryTemperature != mLastBatteryTemperature) {
+                mBatteryTemperature != mLastBatteryTemperature ||
+                mInvalidCharger != mLastInvalidCharger) {
 
             if (mPlugType != mLastPlugType) {
                 if (mLastPlugType == BATTERY_PLUGGED_NONE) {
@@ -334,6 +353,7 @@ class BatteryService extends Binder {
             mLastBatteryVoltage = mBatteryVoltage;
             mLastBatteryTemperature = mBatteryTemperature;
             mLastBatteryLevelCritical = mBatteryLevelCritical;
+            mLastInvalidCharger = mInvalidCharger;
         }
     }
 
@@ -355,6 +375,7 @@ class BatteryService extends Binder {
         intent.putExtra(BatteryManager.EXTRA_VOLTAGE, mBatteryVoltage);
         intent.putExtra(BatteryManager.EXTRA_TEMPERATURE, mBatteryTemperature);
         intent.putExtra(BatteryManager.EXTRA_TECHNOLOGY, mBatteryTechnology);
+        intent.putExtra(BatteryManager.EXTRA_INVALID_CHARGER, mInvalidCharger);
 
         if (false) {
             Slog.d(TAG, "updateBattery level:" + mBatteryLevel +
@@ -364,7 +385,7 @@ class BatteryService extends Binder {
                     " temperature: " + mBatteryTemperature +
                     " technology: " + mBatteryTechnology +
                     " AC powered:" + mAcOnline + " USB powered:" + mUsbOnline +
-                    " icon:" + icon );
+                    " icon:" + icon  + " invalid charger:" + mInvalidCharger);
         }
 
         ActivityManagerNative.broadcastStickyIntent(intent, null);
