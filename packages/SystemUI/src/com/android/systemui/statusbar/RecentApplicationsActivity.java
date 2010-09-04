@@ -17,13 +17,12 @@
 
 package com.android.systemui.statusbar;
 
+import com.android.ex.carousel.CarouselView;
+import com.android.ex.carousel.CarouselRS.CarouselCallback;
 import com.android.internal.R;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.android.internal.widget.CarouselView;
-import com.android.internal.widget.CarouselRS.CarouselCallback;
 
 import android.app.Activity;
 import android.app.ActivityManager;
