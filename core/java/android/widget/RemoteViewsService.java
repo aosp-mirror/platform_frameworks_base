@@ -89,7 +89,9 @@ public abstract class RemoteViewsService extends Service {
             return mFactory.getCount();
         }
         public RemoteViews getViewAt(int position) {
-            return mFactory.getViewAt(position);
+            RemoteViews rv = mFactory.getViewAt(position);
+            rv.setIsWidgetCollectionChild(true);
+            return rv;
         }
         public RemoteViews getLoadingView() {
             return mFactory.getLoadingView();
