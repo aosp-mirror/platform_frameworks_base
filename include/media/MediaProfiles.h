@@ -25,7 +25,18 @@ namespace android {
 
 enum camcorder_quality {
     CAMCORDER_QUALITY_LOW  = 0,
-    CAMCORDER_QUALITY_HIGH = 1
+    CAMCORDER_QUALITY_HIGH = 1,
+    CAMCORDER_QUALITY_QCIF = 2,
+    CAMCORDER_QUALITY_480P = 3,
+    CAMCORDER_QUALITY_720P = 4,
+    CAMCORDER_QUALITY_1080P = 5,
+
+    CAMCORDER_QUALITY_TIME_LAPSE_LOW  = 1000,
+    CAMCORDER_QUALITY_TIME_LAPSE_HIGH = 1001,
+    CAMCORDER_QUALITY_TIME_LAPSE_QCIF = 1002,
+    CAMCORDER_QUALITY_TIME_LAPSE_480P = 1003,
+    CAMCORDER_QUALITY_TIME_LAPSE_720P = 1004,
+    CAMCORDER_QUALITY_TIME_LAPSE_1080P = 1005
 };
 
 enum video_decoder {
@@ -283,6 +294,8 @@ private:
     static MediaProfiles* createDefaultInstance();
     static CamcorderProfile *createDefaultCamcorderLowProfile();
     static CamcorderProfile *createDefaultCamcorderHighProfile();
+    static CamcorderProfile *createDefaultCamcorderTimeLapseLowProfile();
+    static CamcorderProfile *createDefaultCamcorderTimeLapseHighProfile();
     static void createDefaultCamcorderProfiles(MediaProfiles *profiles);
     static void createDefaultVideoEncoders(MediaProfiles *profiles);
     static void createDefaultAudioEncoders(MediaProfiles *profiles);
