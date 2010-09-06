@@ -34,7 +34,6 @@ public class Forwarder extends Thread {
     private int mPort;
     private String mRemoteMachineIpAddress;
 
-    private Boolean mIsRunning = false;
     private ServerSocket mServerSocket;
 
     private Set<ConnectionHandler> mConnectionHandlers = new HashSet<ConnectionHandler>();
@@ -55,71 +54,70 @@ public class Forwarder extends Thread {
             return;
         }
 
-        mIsRunning = true;
         super.start();
     }
 
     @Override
     public void run() {
         while (true) {
-            synchronized (this) {
-                if (!mIsRunning) {
-                    return;
-                }
-
-                /** These sockets will be closed when Forwarder.stop() is called */
-                Socket localSocket;
-                Socket remoteSocket;
-                try {
-                    localSocket = mServerSocket.accept();
-                    remoteSocket = AdbUtils.getSocketToRemoteMachine(mRemoteMachineIpAddress,
-                            mPort);
-                } catch (IOException e) {
-                    /** This most likely means that mServerSocket is already closed */
-                    Log.w(LOG_TAG, "mPort=" + mPort, e);
-                    return;
-                }
-
-                if (remoteSocket == null) {
-                    try {
-                        localSocket.close();
-                    } catch (IOException e) {
-                        Log.e(LOG_TAG, "mPort=" + mPort, e);
-                    }
-
-                    Log.e(LOG_TAG, "run(): mPort= " + mPort + " Failed to start forwarding from " +
-                            localSocket);
-                    continue;
-                }
-
-                final ConnectionHandler connectionHandler =
-                        new ConnectionHandler(localSocket, remoteSocket);
-
-                /**
-                 * We have to close the sockets after the ConnectionHandler finishes, so we
-                 * don't get "Too may open files" exception. We also remove the ConnectionHandler
-                 * from the collection to avoid memory issues.
-                 * */
-                ConnectionHandler.OnFinishedCallback callback =
-                        new ConnectionHandler.OnFinishedCallback() {
-                    @Override
-                    public void onFinished() {
-                        removeConncetionHandler(connectionHandler);
-                    }
-                };
-                connectionHandler.registerOnConnectionHandlerFinishedCallback(callback);
-
-                mConnectionHandlers.add(connectionHandler);
-                connectionHandler.start();
+            /** These sockets will be closed when Forwarder.stop() is called */
+            Socket localSocket;
+            Socket remoteSocket;
+            try {
+                localSocket = mServerSocket.accept();
+                remoteSocket = AdbUtils.getSocketToRemoteMachine(mRemoteMachineIpAddress,
+                        mPort);
+            } catch (IOException e) {
+                /** This most likely means that mServerSocket is already closed */
+                Log.w(LOG_TAG, "mPort=" + mPort, e);
+                break;
             }
-        }
-    }
 
-    private synchronized void removeConncetionHandler(ConnectionHandler connectionHandler) {
-        if (mConnectionHandlers.remove(connectionHandler)) {
-            Log.d(LOG_TAG, "removeConnectionHandler(): removed");
-        } else {
-            Log.d(LOG_TAG, "removeConnectionHandler(): not in the collection");
+            if (remoteSocket == null) {
+                try {
+                    localSocket.close();
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "mPort=" + mPort, e);
+                }
+
+                Log.e(LOG_TAG, "run(): mPort= " + mPort + " Failed to start forwarding from " +
+                        localSocket);
+                continue;
+            }
+
+            final ConnectionHandler connectionHandler =
+                    new ConnectionHandler(localSocket, remoteSocket);
+
+            /**
+             * We have to close the sockets after the ConnectionHandler finishes, so we
+             * don't get "Too may open files" exception. We also remove the ConnectionHandler
+             * from the collection to avoid memory issues.
+             * */
+            ConnectionHandler.OnFinishedCallback callback =
+                    new ConnectionHandler.OnFinishedCallback() {
+                @Override
+                public void onFinished() {
+                    synchronized (this) {
+                        if (mConnectionHandlers.remove(connectionHandler)) {
+                            Log.d(LOG_TAG, "removeConnectionHandler(): removed");
+                        } else {
+                            assert false : "removeConnectionHandler(): not in the collection";
+                        }
+                    }
+                }
+            };
+            connectionHandler.registerOnConnectionHandlerFinishedCallback(callback);
+
+            synchronized (this) {
+                mConnectionHandlers.add(connectionHandler);
+            }
+            connectionHandler.start();
+        }
+
+        synchronized (this) {
+            for (ConnectionHandler connectionHandler : mConnectionHandlers) {
+                connectionHandler.stop();
+            }
         }
     }
 
@@ -129,14 +127,5 @@ public class Forwarder extends Thread {
         } catch (IOException e) {
             Log.e(LOG_TAG, "mPort=" + mPort, e);
         }
-
-        synchronized (this) {
-            mIsRunning = false;
-        }
-
-        for (ConnectionHandler connectionHandler : mConnectionHandlers) {
-            connectionHandler.stop();
-        }
-        mConnectionHandlers.clear();
     }
 }

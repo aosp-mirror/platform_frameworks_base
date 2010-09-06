@@ -56,6 +56,7 @@ public class ConnectionHandler {
                 }
             } catch (IOException e) {
                 Log.w(LOG_TAG, this.toString(), e);
+                finish();
                 return;
             }
 
@@ -74,8 +75,17 @@ public class ConnectionHandler {
                 }
             }
 
-            ConnectionHandler.this.stop();
-            mOnFinishedCallback.onFinished();
+            finish();
+        }
+
+        private void finish() {
+            synchronized (mThreadsRunning) {
+                mThreadsRunning--;
+                if (mThreadsRunning == 0) {
+                    ConnectionHandler.this.stop();
+                    mOnFinishedCallback.onFinished();
+                }
+            }
         }
 
         @Override
@@ -83,6 +93,8 @@ public class ConnectionHandler {
             return "SocketPipeThread:\n" + mInSocket + "\n=>\n" + mOutSocket;
         }
     }
+
+    private Integer mThreadsRunning;
 
     private Socket mFromSocket, mToSocket;
     private SocketPipeThread mFromToPipe, mToFromPipe;
@@ -101,6 +113,8 @@ public class ConnectionHandler {
     }
 
     public void start() {
+        /** We have 2 threads running, one for each pipe, that we start here. */
+        mThreadsRunning = 2;
         mFromToPipe.start();
         mToFromPipe.start();
     }
