@@ -42,7 +42,7 @@ interface IWifiManager
 
     boolean pingSupplicant();
 
-    boolean startScan(boolean forceActive);
+    void startScan(boolean forceActive);
 
     List<ScanResult> getScanResults();
 
