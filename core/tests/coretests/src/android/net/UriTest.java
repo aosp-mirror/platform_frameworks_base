@@ -286,6 +286,13 @@ public class UriTest extends TestCase {
     }
 
     @SmallTest
+    public void testHostWithTrailingDot() {
+        Uri uri = Uri.parse("http://google.com./b/c/g");
+        assertEquals("google.com.", uri.getHost());
+        assertEquals("/b/c/g", uri.getPath());
+    }
+
+    @SmallTest
     public void testSchemeOnly() {
         Uri uri = Uri.parse("empty:");
         assertEquals("empty", uri.getScheme());
