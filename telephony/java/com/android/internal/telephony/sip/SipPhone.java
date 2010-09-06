@@ -115,7 +115,7 @@ public class SipPhone extends SipPhoneBase {
     }
 
     public boolean equals(SipPhone phone) {
-        return getSipUri().equals(phone.getSipUri()));
+        return getSipUri().equals(phone.getSipUri());
     }
 
     public boolean canTake(Object incomingCall) {
