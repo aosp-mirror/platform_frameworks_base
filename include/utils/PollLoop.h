@@ -111,12 +111,18 @@ public:
      * This method can be called on any thread.
      * This method may block briefly if it needs to wake the poll loop.
      */
-    void setCallback(int fd, int events, Callback callback, void* data = NULL);
+    void setCallback(int fd, int ident, int events, Callback callback, void* data = NULL);
 
+    /**
+     * Convenience for above setCallback when ident is not used.  In this case
+     * the ident is set to POLL_CALLBACK.
+     */
+    void setCallback(int fd, int events, Callback callback, void* data = NULL);
+    
     /**
      * Like setCallback(), but for the NDK callback function.
      */
-    void setLooperCallback(int fd, int events, ALooper_callbackFunc* callback,
+    void setLooperCallback(int fd, int ident, int events, ALooper_callbackFunc* callback,
             void* data);
     
     /**
@@ -153,11 +159,13 @@ private:
     struct RequestedCallback {
         Callback callback;
         ALooper_callbackFunc* looperCallback;
+        int ident;
         void* data;
     };
 
     struct PendingCallback {
         int fd;
+        int ident;
         int events;
         Callback callback;
         ALooper_callbackFunc* looperCallback;
@@ -185,7 +193,7 @@ private:
     void openWakePipe();
     void closeWakePipe();
 
-    void setCallbackCommon(int fd, int events, Callback callback,
+    void setCallbackCommon(int fd, int ident, int events, Callback callback,
             ALooper_callbackFunc* looperCallback, void* data);
     ssize_t getRequestIndexLocked(int fd);
     void wakeAndLock();
