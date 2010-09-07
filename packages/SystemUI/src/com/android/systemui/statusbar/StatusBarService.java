@@ -46,6 +46,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.util.Log;
 import android.view.Display;
@@ -462,7 +463,11 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
         }
 
         // Restart the ticker if it's still running
-        tick(notification);
+        if (notification.notification.tickerText != null
+                && !TextUtils.equals(notification.notification.tickerText,
+                    oldEntry.notification.notification.tickerText)) {
+            tick(notification);
+        }
 
         // Recalculate the position of the sliding windows and the titles.
         setAreThereNotifications();
