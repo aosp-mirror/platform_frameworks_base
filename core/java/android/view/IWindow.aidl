@@ -17,10 +17,13 @@
 
 package android.view;
 
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
@@ -64,4 +67,9 @@ oneway interface IWindow {
     
     void dispatchWallpaperCommand(String action, int x, int y,
             int z, in Bundle extras, boolean sync);
+
+    /**
+     * Drag/drop events
+     */
+     void dispatchDragEvent(in DragEvent event);
 }

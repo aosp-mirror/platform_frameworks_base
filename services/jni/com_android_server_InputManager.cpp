@@ -1289,6 +1289,7 @@ static void android_server_InputManager_nativeGetInputConfiguration(JNIEnv* env,
 static jboolean android_server_InputManager_nativeTransferTouchFocus(JNIEnv* env,
         jclass clazz, jobject fromChannelObj, jobject toChannelObj) {
     if (checkInputManagerUnitialized(env)) {
+        LOGD("input manager uninitialized; bailing");
         return false;
     }
 
@@ -1298,6 +1299,7 @@ static jboolean android_server_InputManager_nativeTransferTouchFocus(JNIEnv* env
             android_view_InputChannel_getInputChannel(env, toChannelObj);
 
     if (fromChannel == NULL || toChannel == NULL) {
+        LOGD("bailing because from=%p to=%p", fromChannel, toChannel);
         return false;
     }
 

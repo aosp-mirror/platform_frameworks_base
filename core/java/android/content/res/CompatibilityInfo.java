@@ -18,6 +18,7 @@ package android.content.res;
 
 import android.content.pm.ApplicationInfo;
 import android.graphics.Canvas;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.util.DisplayMetrics;
@@ -360,6 +361,17 @@ public class CompatibilityInfo {
          */
         public void translateRectInScreenToAppWindow(Rect rect) {
             rect.scale(applicationInvertedScale);
+        }
+
+        /**
+         * Translate a Point in screen coordinates into the app window's coordinates.
+         */
+        public void translatePointInScreenToAppWindow(PointF point) {
+            final float scale = applicationInvertedScale;
+            if (scale != 1.0f) {
+                point.x *= scale;
+                point.y *= scale;
+            }
         }
 
         /**

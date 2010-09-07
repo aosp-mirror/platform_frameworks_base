@@ -16,11 +16,14 @@
 
 package com.android.internal.view;
 
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.view.DragEvent;
 import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.KeyEvent;
@@ -66,7 +69,10 @@ public class BaseIWindow extends IWindow.Stub {
             }
         }
     }
-    
+
+    public void dispatchDragEvent(DragEvent event) {
+    }
+
     public void dispatchWallpaperCommand(String action, int x, int y,
             int z, Bundle extras, boolean sync) {
         if (sync) {

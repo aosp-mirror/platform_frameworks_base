@@ -19,6 +19,8 @@ package android.view;
 import android.animation.LayoutTransition;
 import com.android.internal.R;
 
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -26,6 +28,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
@@ -33,6 +36,7 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Animation;
@@ -68,6 +72,7 @@ import java.util.ArrayList;
 public abstract class ViewGroup extends View implements ViewParent, ViewManager {
 
     private static final boolean DBG = false;
+    private static final String TAG = "ViewGroup";
 
     /**
      * Views which have been hidden or removed which need to be animated on
@@ -104,6 +109,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * invalidation area when the application is autoscaled.
      */
     private Transformation mInvalidationTransformation;
+
+    // View currently under an ongoing drag
+    private View mCurrentDragView;
+
+    // Does this group have a child that can accept the current drag payload?
+    private boolean mChildAcceptsDrag;
+
+    // Used during drag dispatch
+    private final PointF mLocalPoint = new PointF();
 
     // Layout animation
     private LayoutAnimationController mLayoutAnimationController;
@@ -811,6 +825,136 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             addInArray(child, mChildrenCount);
             child.mParent = this;
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * !!! TODO: write real docs
+     */
+    @Override
+    public boolean dispatchDragEvent(DragEvent event) {
+        boolean retval = false;
+        final float tx = event.mX;
+        final float ty = event.mY;
+
+        // !!! BUGCHECK: If we have a ViewGroup, we must necessarily have a ViewRoot,
+        // so we don't need to check getRootView() for null here?
+        ViewRoot root = (ViewRoot)(getRootView().getParent());
+
+        // Dispatch down the view hierarchy
+        switch (event.mAction) {
+        case DragEvent.ACTION_DRAG_STARTED: {
+            // clear state to recalculate which views we drag over
+            root.setDragFocus(event, null);
+
+            // Now dispatch down to our children, caching the responses
+            mChildAcceptsDrag = false;
+            final int count = mChildrenCount;
+            final View[] children = mChildren;
+            for (int i = 0; i < count; i++) {
+                final boolean handled = children[i].dispatchDragEvent(event);
+                children[i].mCanAcceptDrop = handled;
+                if (handled) {
+                    mChildAcceptsDrag = true;
+                }
+            }
+
+            // Return HANDLED if one of our children can accept the drag
+            if (mChildAcceptsDrag) {
+                retval = true;
+            }
+        } break;
+
+        case DragEvent.ACTION_DRAG_ENDED: {
+            // Notify all of our children that the drag is over
+            final int count = mChildrenCount;
+            final View[] children = mChildren;
+            for (int i = 0; i < count; i++) {
+                children[i].dispatchDragEvent(event);
+            }
+            // We consider drag-ended to have been handled if one of our children
+            // had offered to handle the drag.
+            if (mChildAcceptsDrag) {
+                retval = true;
+            }
+        } break;
+
+        case DragEvent.ACTION_DRAG_LOCATION: {
+            // Find the [possibly new] drag target
+            final View target = findFrontmostDroppableChildAt(event.mX, event.mY, mLocalPoint);
+
+            // If we've changed apparent drag target, tell the view root which view
+            // we're over now.  This will in turn send out DRAG_ENTERED / DRAG_EXITED
+            // notifications as appropriate.
+            if (mCurrentDragView != target) {
+                root.setDragFocus(event, target);
+                mCurrentDragView = target;
+            }
+            
+            // Dispatch the actual drag location notice, localized into its coordinates
+            if (target != null) {
+                event.mX = mLocalPoint.x;
+                event.mY = mLocalPoint.y;
+
+                retval = target.dispatchDragEvent(event);
+
+                event.mX = tx;
+                event.mY = ty;
+            }
+        } break;
+
+        case DragEvent.ACTION_DROP: {
+            if (View.DEBUG_DRAG) Slog.d(TAG, "Drop event: " + event);
+            View target = findFrontmostDroppableChildAt(event.mX, event.mY, mLocalPoint);
+            if (target != null) {
+                event.mX = mLocalPoint.x;
+                event.mY = mLocalPoint.y;
+                retval = target.dispatchDragEvent(event);
+                event.mX = tx;
+                event.mY = ty;
+            }
+        } break;
+        }
+
+        // If none of our children could handle the event, try here
+        if (!retval) {
+            retval = onDragEvent(event);
+        }
+        return retval;
+    }
+
+    // Find the frontmost child view that lies under the given point, and calculate
+    // the position within its own local coordinate system.
+    View findFrontmostDroppableChildAt(float x, float y, PointF outLocalPoint) {
+        final float scrolledX = x + mScrollX;
+        final float scrolledY = y + mScrollY;
+        final int count = mChildrenCount;
+        final View[] children = mChildren;
+        for (int i = count - 1; i >= 0; i--) {
+            final View child = children[i];
+            if (child.mCanAcceptDrop == false) {
+                continue;
+            }
+
+            float localX = scrolledX - child.mLeft;
+            float localY = scrolledY - child.mTop;
+            if (!child.hasIdentityMatrix() && mAttachInfo != null) {
+                // non-identity matrix: transform the point into the view's coordinates
+                final float[] localXY = mAttachInfo.mTmpTransformLocation;
+                localXY[0] = localX;
+                localXY[1] = localY;
+                child.getInverseMatrix().mapPoints(localXY);
+                localX = localXY[0];
+                localY = localXY[1];
+            }
+            if (localX >= 0 && localY >= 0 && localX < (child.mRight - child.mLeft) &&
+                    localY < (child.mBottom - child.mTop)) {
+                outLocalPoint.set(localX, localY);
+                return child;
+            }
+        }
+        return null;
     }
 
     /**

@@ -89,6 +89,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVE
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_DRAG;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_PHONE;
@@ -152,8 +153,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // responsible for power management when displayed.
     static final int KEYGUARD_LAYER = 14;
     static final int KEYGUARD_DIALOG_LAYER = 15;
+    // the drag layer: input for drag-and-drop is associated with this window,
+    // which sits above all other focusable windows
+    static final int DRAG_LAYER = 16;
     // things in here CAN NOT take focus, but are shown on top of everything else.
-    static final int SYSTEM_OVERLAY_LAYER = 16;
+    static final int SYSTEM_OVERLAY_LAYER = 17;
 
     static final int APPLICATION_MEDIA_SUBLAYER = -2;
     static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
@@ -839,6 +843,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return TOAST_LAYER;
         case TYPE_WALLPAPER:
             return WALLPAPER_LAYER;
+        case TYPE_DRAG:
+            return DRAG_LAYER;
         }
         Log.e(TAG, "Unknown window type: " + type);
         return APPLICATION_LAYER;
