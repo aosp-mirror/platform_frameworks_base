@@ -69,7 +69,7 @@ public:
     /* Destroys the consumer and releases its input channel. */
     ~AInputQueue();
 
-    void attachLooper(ALooper* looper, ALooper_callbackFunc* callback, void* data);
+    void attachLooper(ALooper* looper, int ident, ALooper_callbackFunc* callback, void* data);
 
     void detachLooper();
 

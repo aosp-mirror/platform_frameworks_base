@@ -72,9 +72,9 @@ void ALooper_release(ALooper* looper) {
     static_cast<PollLoop*>(looper)->decStrong((void*)ALooper_acquire);
 }
 
-void ALooper_addFd(ALooper* looper, int fd, int events,
+void ALooper_addFd(ALooper* looper, int fd, int ident, int events,
         ALooper_callbackFunc* callback, void* data) {
-    static_cast<PollLoop*>(looper)->setLooperCallback(fd, events, callback, data);
+    static_cast<PollLoop*>(looper)->setLooperCallback(fd, ident, events, callback, data);
 }
 
 int32_t ALooper_removeFd(ALooper* looper, int fd) {
