@@ -3343,11 +3343,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        public class Pid {
-            long mWakeSum;
-            long mWakeStart;
-        }
-
         /**
          * Retrieve the statistics object for a particular process, creating
          * if needed.
@@ -3362,6 +3357,10 @@ public final class BatteryStatsImpl extends BatteryStats {
             return ps;
         }
 
+        public SparseArray<? extends Pid> getPidStats() {
+            return mPids;
+        }
+        
         public Pid getPidStatsLocked(int pid) {
             Pid p = mPids.get(pid);
             if (p == null) {
@@ -3583,6 +3582,11 @@ public final class BatteryStatsImpl extends BatteryStats {
     @Override
     public HistoryItem getHistory() {
         return mHistory;
+    }
+    
+    @Override
+    public long getHistoryBaseTime() {
+        return mHistoryBaseTime;
     }
     
     @Override
