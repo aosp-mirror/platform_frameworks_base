@@ -119,24 +119,21 @@ public class ViewDebug {
      *
      * @hide
      */
-    @Debug.DebugProperty
-    public static boolean profileDrawing = false;
+    public static final boolean DEBUG_PROFILE_DRAWING = false;
 
     /**
      * Profiles layout times in the events log.
      *
      * @hide
      */
-    @Debug.DebugProperty
-    public static boolean profileLayout = false;
+    public static final boolean DEBUG_PROFILE_LAYOUT = false;
 
     /**
      * Profiles real fps (times between draws) and displays the result.
      *
      * @hide
      */
-    @Debug.DebugProperty
-    public static boolean showFps = false;
+    public static final boolean DEBUG_SHOW_FPS = false;
 
     /**
      * <p>Enables or disables views consistency check. Even when this property is enabled,
