@@ -326,15 +326,14 @@ public class Summarizer {
     private String getWebKitRevision() {
         URL url = null;
         try {
-            url = new URL(ForwarderManager.getHostSchemePort(false) + "WEBKIT_MERGE_REVISION");
+            url = new URL(ForwarderManager.getHostSchemePort(false) + "ThirdPartyProject.prop");
         } catch (MalformedURLException e) {
             assert false;
         }
 
-        String webkitMergeRevisionFileContents = new String(FsUtils.readDataFromUrl(url));
-        Matcher matcher =
-            Pattern.compile("http://svn.webkit.org/repository/webkit/trunk@([0-9]+)").matcher(
-                    webkitMergeRevisionFileContents);
+        String thirdPartyProjectContents = new String(FsUtils.readDataFromUrl(url));
+        Matcher matcher = Pattern.compile("^version=([0-9]+)", Pattern.MULTILINE).matcher(
+                thirdPartyProjectContents);
         if (matcher.find()) {
             return matcher.group(1);
         }
