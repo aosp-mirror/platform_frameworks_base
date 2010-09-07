@@ -1629,6 +1629,9 @@
     <!-- Toast for double-tap -->
     <string name="double_tap_toast">Tip: double-tap to zoom in and out.</string>
 
+    <!-- Text to show in the auto complete drop down list on a text view when the browser can auto fill the entire form -->
+    <string name="autofill_this_form">AutoFill this form</string>
+
     <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to do this. -->
     <string name="permlab_readHistoryBookmarks">read Browser\'s history and bookmarks</string>
