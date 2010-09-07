@@ -71,6 +71,10 @@ int root(int launchID) {
     rsgClearDepth(1.0f);
 
     rsgBindProgramVertex(gPVBackground);
+    rs_matrix4x4 proj;
+    float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
+    rsMatrixLoadPerspective(&proj, 30.0f, aspect, 0.1f, 100.0f);
+    rsgProgramVertexLoadProjectionMatrix(&proj);
 
     rsgBindProgramFragment(gPFBackground);
     rsgBindProgramStore(gPFSBackground);

@@ -79,7 +79,7 @@ public class SimpleModelRS {
             mRotation += 360;
         }
 
-        mScript.set_gRotate(-(float)mRotation);
+        mScript.set_gRotate((float)mRotation);
 
         mLastX = x;
         mLastY = y;
@@ -101,7 +101,7 @@ public class SimpleModelRS {
         bs.setMin(Sampler.Value.LINEAR);
         bs.setMag(Sampler.Value.LINEAR);
         bs.setWrapS(Sampler.Value.CLAMP);
-        bs.setWrapT(Sampler.Value.WRAP);
+        bs.setWrapT(Sampler.Value.CLAMP);
         mSampler = bs.create();
 
         ProgramFragment.Builder b = new ProgramFragment.Builder(mRS);
@@ -119,7 +119,6 @@ public class SimpleModelRS {
 
         mPVA = new ProgramVertex.MatrixAllocation(mRS);
         mPVBackground.bindAllocation(mPVA);
-        mPVA.setupProjectionNormalized(mWidth, mHeight);
 
         mScript.set_gPVBackground(mPVBackground);
     }
