@@ -281,6 +281,7 @@ pid_t androidGetTid()
 #endif
 }
 
+#if defined(HAVE_PTHREADS)
 static pthread_once_t gDoSchedulingGroupOnce = PTHREAD_ONCE_INIT;
 static bool gDoSchedulingGroup = true;
 
@@ -294,6 +295,7 @@ static void checkDoSchedulingGroup(void) {
         }
     }
 }
+#endif
 
 int androidSetThreadSchedulingGroup(pid_t tid, int grp)
 {
