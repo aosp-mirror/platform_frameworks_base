@@ -1965,7 +1965,7 @@ public class WebView extends AbsoluteLayout
     public void clearView() {
         mContentWidth = 0;
         mContentHeight = 0;
-        if (mNativeClass != 0) nativeSetBaseLayer(0);
+        setBaseLayer(0, null);
         mWebViewCore.sendMessage(EventHub.CLEAR_CONTENT);
     }
 
@@ -3619,6 +3619,17 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    void setBaseLayer(int layer, Rect invalRect) {
+        if (mNativeClass == 0)
+            return;
+        if (invalRect == null) {
+            Rect rect = new Rect(0, 0, mContentWidth, mContentHeight);
+            nativeSetBaseLayer(layer, rect);
+        } else {
+            nativeSetBaseLayer(layer, invalRect);
+        }
+    }
+
     private void onZoomAnimationStart() {
         // If it is in password mode, turn it off so it does not draw misplaced.
         if (inEditingMode() && nativeFocusCandidateIsPassword()) {
@@ -3719,17 +3730,32 @@ public class WebView extends AbsoluteLayout
         } else if (drawCursorRing) {
             extras = DRAW_EXTRAS_CURSOR_RING;
         }
-        DrawFilter df = null;
-        if (mZoomManager.isZoomAnimating() || UIAnimationsRunning) {
-            df = mZoomFilter;
-        } else if (animateScroll) {
-            df = mScrollFilter;
-        }
-        canvas.setDrawFilter(df);
-        int content = nativeDraw(canvas, color, extras, true);
-        canvas.setDrawFilter(null);
-        if (content != 0) {
-            mWebViewCore.sendMessage(EventHub.SPLIT_PICTURE_SET, content, 0);
+
+        if (canvas.isHardwareAccelerated()) {
+            try {
+                if (canvas.acquireContext()) {
+                      Rect rect = new Rect(getLeft(), getTop(), getRight(),
+                                           getBottom() - getVisibleTitleHeight());
+                      if (nativeDrawGL(rect, getScale(), extras)) {
+                          invalidate();
+                      }
+                }
+            } finally {
+                canvas.releaseContext();
+            }
+        } else {
+            DrawFilter df = null;
+            if (mZoomManager.isZoomAnimating() || UIAnimationsRunning) {
+                df = mZoomFilter;
+            } else if (animateScroll) {
+                df = mScrollFilter;
+            }
+            canvas.setDrawFilter(df);
+            int content = nativeDraw(canvas, color, extras, true);
+            canvas.setDrawFilter(null);
+            if (content != 0) {
+                mWebViewCore.sendMessage(EventHub.SPLIT_PICTURE_SET, content, 0);
+            }
         }
 
         if (extras == DRAW_EXTRAS_CURSOR_RING) {
@@ -6621,7 +6647,7 @@ public class WebView extends AbsoluteLayout
                 case NEW_PICTURE_MSG_ID: {
                     // called for new content
                     final WebViewCore.DrawData draw = (WebViewCore.DrawData) msg.obj;
-                    nativeSetBaseLayer(draw.mBaseLayer);
+                    setBaseLayer(draw.mBaseLayer, draw.mInvalRegion.getBounds());
                     final Point viewSize = draw.mViewPoint;
                     WebViewCore.ViewState viewState = draw.mViewState;
                     boolean isPictureAfterFirstLayout = viewState != null;
@@ -7603,6 +7629,7 @@ public class WebView extends AbsoluteLayout
             boolean splitIfNeeded);
     private native void     nativeDumpDisplayTree(String urlOrNull);
     private native boolean  nativeEvaluateLayersAnimations();
+    private native boolean  nativeDrawGL(Rect rect, float scale, int extras);
     private native void     nativeExtendSelection(int x, int y);
     private native int      nativeFindAll(String findLower, String findUpper);
     private native void     nativeFindNext(boolean forward);
@@ -7664,7 +7691,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetFindIsEmpty();
     private native void     nativeSetFindIsUp(boolean isUp);
     private native void     nativeSetHeightCanMeasure(boolean measure);
-    private native void     nativeSetBaseLayer(int layer);
+    private native void     nativeSetBaseLayer(int layer, Rect invalRect);
     private native void     nativeShowCursorTimed();
     private native void     nativeReplaceBaseContent(int content);
     private native void     nativeCopyBaseContentToPicture(Picture pict);
