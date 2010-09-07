@@ -19,6 +19,7 @@ package com.android.server.sip;
 import android.net.sip.ISipSession;
 import android.net.sip.ISipSessionListener;
 import android.net.sip.SipProfile;
+import android.os.DeadObjectException;
 import android.util.Log;
 
 /** Class to help safely run a callback in a different thread. */
@@ -49,7 +50,7 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
                 try {
                     mListener.onCalling(session);
                 } catch (Throwable t) {
-                    Log.w(TAG, "onCalling()", t);
+                    handle(t, "onCalling()");
                 }
             }
         });
@@ -63,7 +64,7 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
                 try {
                     mListener.onRinging(session, caller, sessionDescription);
                 } catch (Throwable t) {
-                    Log.w(TAG, "onRinging()", t);
+                    handle(t, "onRinging()");
                 }
             }
         });
@@ -76,7 +77,7 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
                 try {
                     mListener.onRingingBack(session);
                 } catch (Throwable t) {
-                    Log.w(TAG, "onRingingBack()", t);
+                    handle(t, "onRingingBack()");
                 }
             }
         });
@@ -90,7 +91,7 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
                 try {
                     mListener.onCallEstablished(session, sessionDescription);
                 } catch (Throwable t) {
-                    Log.w(TAG, "onCallEstablished()", t);
+                    handle(t, "onCallEstablished()");
                 }
             }
         });
@@ -103,7 +104,7 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
                 try {
                     mListener.onCallEnded(session);
                 } catch (Throwable t) {
-                    Log.w(TAG, "onCallEnded()", t);
+                    handle(t, "onCallEnded()");
                 }
             }
         });
@@ -116,7 +117,7 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
                 try {
                     mListener.onCallBusy(session);
                 } catch (Throwable t) {
-                    Log.w(TAG, "onCallBusy()", t);
+                    handle(t, "onCallBusy()");
                 }
             }
         });
@@ -130,7 +131,7 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
                 try {
                     mListener.onCallChangeFailed(session, className, message);
                 } catch (Throwable t) {
-                    Log.w(TAG, "onCallChangeFailed()", t);
+                    handle(t, "onCallChangeFailed()");
                 }
             }
         });
@@ -144,7 +145,7 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
                 try {
                     mListener.onError(session, className, message);
                 } catch (Throwable t) {
-                    Log.w(TAG, "onError()", t);
+                    handle(t, "onError()");
                 }
             }
         });
@@ -157,7 +158,7 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
                 try {
                     mListener.onRegistering(session);
                 } catch (Throwable t) {
-                    Log.w(TAG, "onRegistering()", t);
+                    handle(t, "onRegistering()");
                 }
             }
         });
@@ -171,7 +172,7 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
                 try {
                     mListener.onRegistrationDone(session, duration);
                 } catch (Throwable t) {
-                    Log.w(TAG, "onRegistrationDone()", t);
+                    handle(t, "onRegistrationDone()");
                 }
             }
         });
@@ -185,7 +186,7 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
                 try {
                     mListener.onRegistrationFailed(session, className, message);
                 } catch (Throwable t) {
-                    Log.w(TAG, "onRegistrationFailed()", t);
+                    handle(t, "onRegistrationFailed()");
                 }
             }
         });
@@ -198,9 +199,19 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
                 try {
                     mListener.onRegistrationTimeout(session);
                 } catch (Throwable t) {
-                    Log.w(TAG, "onRegistrationTimeout()", t);
+                    handle(t, "onRegistrationTimeout()");
                 }
             }
         });
+    }
+
+    private void handle(Throwable t, String message) {
+        if (t instanceof DeadObjectException) {
+            mListener = null;
+            // This creates race but it's harmless. Just don't log the error
+            // when it happens.
+        } else if (mListener != null) {
+            Log.w(TAG, message, t);
+        }
     }
 }
