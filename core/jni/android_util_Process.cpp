@@ -261,8 +261,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
             continue;
         }
      
-        if (set_sched_policy(t_pid, (grp == ANDROID_TGROUP_BG_NONINTERACT) ?
-                                            SP_BACKGROUND : SP_FOREGROUND)) {
+        if (androidSetThreadSchedulingGroup(t_pid, grp) != NO_ERROR) {
             signalExceptionForGroupError(env, clazz, errno);
             break;
         }
