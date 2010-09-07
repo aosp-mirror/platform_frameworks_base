@@ -1008,7 +1008,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 TAG, "Laying out " + host + " to (" +
                 host.mMeasuredWidth + ", " + host.mMeasuredHeight + ")");
             long startTime = 0L;
-            if (ViewDebug.profileLayout) {
+            if (ViewDebug.DEBUG_PROFILE_LAYOUT) {
                 startTime = SystemClock.elapsedRealtime();
             }
             host.layout(0, 0, host.mMeasuredWidth, host.mMeasuredHeight);
@@ -1021,7 +1021,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 }
             }
 
-            if (ViewDebug.profileLayout) {
+            if (ViewDebug.DEBUG_PROFILE_LAYOUT) {
                 EventLog.writeEvent(60001, SystemClock.elapsedRealtime() - startTime);
             }
 
@@ -1321,7 +1321,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                         //canvas.drawARGB(255, 255, 0, 0);
                     }
 
-                    if (ViewDebug.profileDrawing) {
+                    if (ViewDebug.DEBUG_PROFILE_DRAWING) {
                         startTime = SystemClock.elapsedRealtime();
                     }
 
@@ -1364,7 +1364,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                         mView.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_DRAWING);
                     }
 
-                    if (SHOW_FPS || ViewDebug.showFps) {
+                    if (SHOW_FPS || ViewDebug.DEBUG_SHOW_FPS) {
                         int now = (int)SystemClock.elapsedRealtime();
                         if (sDrawTime != 0) {
                             nativeShowFPS(canvas, now - sDrawTime);
@@ -1372,7 +1372,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                         sDrawTime = now;
                     }
 
-                    if (ViewDebug.profileDrawing) {
+                    if (ViewDebug.DEBUG_PROFILE_DRAWING) {
                         EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
                     }
                 }

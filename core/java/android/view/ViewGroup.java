@@ -32,8 +32,6 @@ import android.graphics.Region;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.AttributeSet;
-import android.util.Config;
-import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.accessibility.AccessibilityEvent;
@@ -2019,9 +2017,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             } else if  ((flags & FLAG_ALPHA_LOWER_THAN_ONE) == FLAG_ALPHA_LOWER_THAN_ONE) {
                 cachePaint.setAlpha(255);
                 mGroupFlags &= ~FLAG_ALPHA_LOWER_THAN_ONE;
-            }
-            if (Config.DEBUG && ViewDebug.profileDrawing) {
-                EventLog.writeEvent(60003, hashCode());
             }
             canvas.drawBitmap(cache, 0.0f, 0.0f, cachePaint);
         }
