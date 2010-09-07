@@ -136,7 +136,7 @@ int delete_cache(const char *pkgname, int encrypted_fs_flag)
 /* TODO(oam): depending on use case (ecryptfs or dmcrypt)
  * change implementation
  */
-static int disk_free()
+static int64_t disk_free()
 {
     struct statfs sfs;
     if (statfs(PKG_DIR_PREFIX, &sfs) == 0) {
@@ -154,18 +154,18 @@ static int disk_free()
  * also require that apps constantly modify file metadata even
  * when just reading from the cache, which is pretty awful.
  */
-int free_cache(int free_size)
+int free_cache(int64_t free_size)
 {
     const char *name;
     int dfd, subfd;
     DIR *d;
     struct dirent *de;
-    int avail;
+    int64_t avail;
 
     avail = disk_free();
     if (avail < 0) return -1;
 
-    LOGI("free_cache(%d) avail %d\n", free_size, avail);
+    LOGI("free_cache(%" PRId64 ") avail %" PRId64 "\n", free_size, avail);
     if (avail >= free_size) return 0;
 
     /* First try encrypted dir */
@@ -327,10 +327,10 @@ int protect(char *pkgname, gid_t gid)
     return 0;
 }
 
-static int stat_size(struct stat *s)
+static int64_t stat_size(struct stat *s)
 {
-    int blksize = s->st_blksize;
-    int size = s->st_size;
+    int64_t blksize = s->st_blksize;
+    int64_t size = s->st_size;
 
     if (blksize) {
             /* round up to filesystem block size */
@@ -340,9 +340,9 @@ static int stat_size(struct stat *s)
     return size;
 }
 
-static int calculate_dir_size(int dfd)
+static int64_t calculate_dir_size(int dfd)
 {
-    int size = 0;
+    int64_t size = 0;
     struct stat s;
     DIR *d;
     struct dirent *de;
@@ -378,7 +378,7 @@ static int calculate_dir_size(int dfd)
 
 int get_size(const char *pkgname, const char *apkpath,
              const char *fwdlock_apkpath,
-             int *_codesize, int *_datasize, int *_cachesize, int encrypted_fs_flag)
+             int64_t *_codesize, int64_t *_datasize, int64_t *_cachesize, int encrypted_fs_flag)
 {
     DIR *d;
     int dfd;
@@ -386,9 +386,9 @@ int get_size(const char *pkgname, const char *apkpath,
     struct stat s;
     char path[PKG_PATH_MAX];
 
-    int codesize = 0;
-    int datasize = 0;
-    int cachesize = 0;
+    int64_t codesize = 0;
+    int64_t datasize = 0;
+    int64_t cachesize = 0;
 
         /* count the source apk as code -- but only if it's not
          * on the /system partition and its not on the sdcard.
@@ -445,7 +445,7 @@ int get_size(const char *pkgname, const char *apkpath,
             }
             subfd = openat(dfd, name, O_RDONLY | O_DIRECTORY);
             if (subfd >= 0) {
-                int size = calculate_dir_size(subfd);
+                int64_t size = calculate_dir_size(subfd);
                 if (!strcmp(name,"lib")) {
                     codesize += size;
                 } else if(!strcmp(name,"cache")) {
