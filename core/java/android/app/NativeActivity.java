@@ -3,8 +3,6 @@ package android.app;
 import com.android.internal.view.IInputMethodCallback;
 import com.android.internal.view.IInputMethodSession;
 
-import dalvik.system.PathClassLoader;
-
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -168,14 +166,11 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
             // If the application does not have (Java) code, then no ClassLoader
             // has been set up for it.  We will need to do our own search for
             // the native code.
-            path = ai.applicationInfo.dataDir + "/lib/" + System.mapLibraryName(libname);
-            if (!(new File(path)).exists()) {
-                path = null;
+            File libraryFile = new File(ai.applicationInfo.nativeLibraryDir,
+                    System.mapLibraryName(libname));
+            if (libraryFile.exists()) {
+                path = libraryFile.getPath();
             }
-        }
-        
-        if (path == null) {
-            path = ((PathClassLoader)getClassLoader()).findLibrary(libname);
         }
         
         if (path == null) {
