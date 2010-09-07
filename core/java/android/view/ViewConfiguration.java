@@ -143,7 +143,7 @@ public class ViewConfiguration {
     /**
      * Max distance to overscroll for edge effects
      */
-    private static final int OVERSCROLL_DISTANCE = 2;
+    private static final int OVERSCROLL_DISTANCE = 0;
 
     /**
      * Max distance to overfling for edge effects

@@ -109,6 +109,10 @@ final class NativeDaemonConnector implements Runnable {
                 int count = inputStream.read(buffer, start, BUFFER_SIZE - start);
                 if (count < 0) break;
 
+                // Add our starting point to the count and reset the start.
+                count += start;
+                start = 0;
+
                 for (int i = 0; i < count; i++) {
                     if (buffer[i] == 0) {
                         String event = new String(buffer, start, i - start);
@@ -140,6 +144,9 @@ final class NativeDaemonConnector implements Runnable {
                         start = i + 1;
                     }
                 }
+
+                // We should end at the amount we read. If not, compact then
+                // buffer and read again.
                 if (start != count) {
                     final int remaining = BUFFER_SIZE - start;
                     System.arraycopy(buffer, start, buffer, 0, remaining);

@@ -538,11 +538,15 @@ public class HorizontalScrollView extends FrameLayout {
                     }
                     onScrollChanged(mScrollX, mScrollY, oldX, oldY);
 
-                    final int pulledToX = oldX + deltaX;
-                    if (pulledToX < 0) {
-                        mEdgeGlowLeft.onPull((float) deltaX / getWidth());
-                    } else if (pulledToX > range) {
-                        mEdgeGlowRight.onPull((float) deltaX / getWidth());
+                    final int overscrollMode = getOverscrollMode();
+                    if (overscrollMode == OVERSCROLL_ALWAYS ||
+                            (overscrollMode == OVERSCROLL_IF_CONTENT_SCROLLS && range > 0)) {
+                        final int pulledToX = oldX + deltaX;
+                        if (pulledToX < 0) {
+                            mEdgeGlowLeft.onPull((float) deltaX / getWidth());
+                        } else if (pulledToX > range) {
+                            mEdgeGlowRight.onPull((float) deltaX / getWidth());
+                        }
                     }
                 }
                 break;
@@ -1091,10 +1095,14 @@ public class HorizontalScrollView extends FrameLayout {
                 onScrollChanged(mScrollX, mScrollY, oldX, oldY);
 
                 final int range = getScrollRange();
-                if (x < 0 && oldX >= 0) {
-                    mEdgeGlowLeft.onAbsorb((int) mScroller.getCurrVelocity());
-                } else if (x > range && oldX <= range) {
-                    mEdgeGlowRight.onAbsorb((int) mScroller.getCurrVelocity());
+                final int overscrollMode = getOverscrollMode();
+                if (overscrollMode == OVERSCROLL_ALWAYS ||
+                        (overscrollMode == OVERSCROLL_IF_CONTENT_SCROLLS && range > 0)) {
+                    if (x < 0 && oldX >= 0) {
+                        mEdgeGlowLeft.onAbsorb((int) mScroller.getCurrVelocity());
+                    } else if (x > range && oldX <= range) {
+                        mEdgeGlowRight.onAbsorb((int) mScroller.getCurrVelocity());
+                    }
                 }
             }
             awakenScrollBars();

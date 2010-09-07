@@ -84,14 +84,14 @@ public class SensorEvent {
      * sensor itself (<b>Fs</b>) using the relation:
      * </p>
      * 
-     * <b><center>Ad = - ·Fs / mass</center></b>
+     * <b><center>Ad = - &#8721;Fs / mass</center></b>
      * 
      * <p>
      * In particular, the force of gravity is always influencing the measured
      * acceleration:
      * </p>
      * 
-     * <b><center>Ad = -g - ·F / mass</center></b>
+     * <b><center>Ad = -g - &#8721;F / mass</center></b>
      * 
      * <p>
      * For this reason, when the device is sitting on a table (and obviously not
