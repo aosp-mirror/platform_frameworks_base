@@ -21,6 +21,7 @@
 #include <utils/Log.h>
 
 #include <cutils/sched_policy.h>
+#include <cutils/properties.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,7 +58,7 @@ using namespace android;
 // ----------------------------------------------------------------------------
 
 /*
- * Create and run a new thead.
+ * Create and run a new thread.
  *
  * We create it "detached", so it cleans up after itself.
  */
@@ -280,6 +281,20 @@ pid_t androidGetTid()
 #endif
 }
 
+static pthread_once_t gDoSchedulingGroupOnce = PTHREAD_ONCE_INIT;
+static bool gDoSchedulingGroup = true;
+
+static void checkDoSchedulingGroup(void) {
+    char buf[PROPERTY_VALUE_MAX];
+    int len = property_get("debug.sys.noschedgroups", buf, "");
+    if (len > 0) {
+        int temp;
+        if (sscanf(buf, "%d", &temp) == 1) {
+            gDoSchedulingGroup = temp == 0;
+        }
+    }
+}
+
 int androidSetThreadSchedulingGroup(pid_t tid, int grp)
 {
     if (grp > ANDROID_TGROUP_MAX || grp < 0) { 
@@ -287,9 +302,12 @@ int androidSetThreadSchedulingGroup(pid_t tid, int grp)
     }
 
 #if defined(HAVE_PTHREADS)
-    if (set_sched_policy(tid, (grp == ANDROID_TGROUP_BG_NONINTERACT) ?
-                                      SP_BACKGROUND : SP_FOREGROUND)) {
-        return PERMISSION_DENIED;
+    pthread_once(&gDoSchedulingGroupOnce, checkDoSchedulingGroup);
+    if (gDoSchedulingGroup) {
+        if (set_sched_policy(tid, (grp == ANDROID_TGROUP_BG_NONINTERACT) ?
+                                          SP_BACKGROUND : SP_FOREGROUND)) {
+            return PERMISSION_DENIED;
+        }
     }
 #endif
     
@@ -303,10 +321,13 @@ int androidSetThreadPriority(pid_t tid, int pri)
 #if defined(HAVE_PTHREADS)
     int lasterr = 0;
 
-    if (pri >= ANDROID_PRIORITY_BACKGROUND) {
-        rc = set_sched_policy(tid, SP_BACKGROUND);
-    } else if (getpriority(PRIO_PROCESS, tid) >= ANDROID_PRIORITY_BACKGROUND) {
-        rc = set_sched_policy(tid, SP_FOREGROUND);
+    pthread_once(&gDoSchedulingGroupOnce, checkDoSchedulingGroup);
+    if (gDoSchedulingGroup) {
+        if (pri >= ANDROID_PRIORITY_BACKGROUND) {
+            rc = set_sched_policy(tid, SP_BACKGROUND);
+        } else if (getpriority(PRIO_PROCESS, tid) >= ANDROID_PRIORITY_BACKGROUND) {
+            rc = set_sched_policy(tid, SP_FOREGROUND);
+        }
     }
 
     if (rc) {
