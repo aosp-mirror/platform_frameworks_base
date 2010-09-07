@@ -89,8 +89,6 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
      */
     static final int MAX_TRACKBALL_DELAY = 250;
 
-    static long sInstanceCount = 0;
-
     static IWindowSession sWindowSession;
 
     static final Object mStaticInit = new Object();
@@ -234,9 +232,6 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             }
         }
 
-        // For debug only
-        //++sInstanceCount;
-
         // Initialize the statics when this class is first instantiated. This is
         // done here instead of in the static block because Zygote does not
         // allow the spawning of threads.
@@ -261,19 +256,6 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         mAttachInfo = new View.AttachInfo(sWindowSession, mWindow, this, this);
         mViewConfiguration = ViewConfiguration.get(context);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
-    }
-
-    // For debug only
-    /*
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        --sInstanceCount;
-    }
-    */
-
-    public static long getInstanceCount() {
-        return sInstanceCount;
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -464,7 +446,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         // Only enable hardware acceleration if we are not in the system process
         // The window manager creates ViewRoots to display animated preview windows
         // of launching apps and we don't want those to be hardware accelerated
-        if (Process.myUid() != Process.SYSTEM_UID) {
+        if (!HardwareRenderer.sRendererDisabled) {
             // Try to enable hardware acceleration if requested
             if (attrs != null &&
                     (attrs.flags & WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0) {

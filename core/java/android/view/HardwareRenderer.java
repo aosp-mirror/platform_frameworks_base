@@ -37,8 +37,25 @@ import javax.microedition.khronos.opengles.GL;
 public abstract class HardwareRenderer {
     private static final String LOG_TAG = "HardwareRenderer";
 
+    /**
+     * A process can set this flag to false to prevent the use of hardware
+     * rendering.
+     * 
+     * @hide
+     */
+    public static boolean sRendererDisabled = false;
+
     private boolean mEnabled;
     private boolean mRequested = true;
+
+    /**
+     * Indicates that the current process cannot use hardware rendering.
+     * 
+     * @hide
+     */
+    public static void disable() {
+        sRendererDisabled = true;
+    }
 
     /**
      * Indicates whether hardware acceleration is available under any form for
@@ -377,7 +394,6 @@ public abstract class HardwareRenderer {
          * @param glVersion
          */
         EglConfigChooser getConfigChooser(int glVersion) {
-            // TODO: Check for mTranslucent here, which means at least 2 EGL contexts
             return new ComponentSizeChooser(glVersion, 8, 8, 8, 8, 0, 0);
         }
 
@@ -546,7 +562,6 @@ public abstract class HardwareRenderer {
 
         @Override
         GLES20Canvas createCanvas() {
-            // TODO: Pass mTranslucent instead of true
             return mGlCanvas = new GLES20Canvas(mGl, true);
         }
 

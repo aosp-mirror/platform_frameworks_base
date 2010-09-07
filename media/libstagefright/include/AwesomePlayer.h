@@ -107,6 +107,7 @@ private:
         CACHE_UNDERRUN      = 128,
         AUDIO_AT_EOS        = 256,
         VIDEO_AT_EOS        = 512,
+        AUTO_LOOPING        = 1024,
     };
 
     mutable Mutex mLock;
@@ -241,6 +242,9 @@ private:
     void onCheckAudioStatus();
     void onPrepareAsyncEvent();
     void abortPrepare(status_t err);
+    void finishAsyncPrepare_l();
+
+    bool getCachedDuration_l(int64_t *durationUs, bool *eos);
 
     status_t finishSetDataSource_l();
 

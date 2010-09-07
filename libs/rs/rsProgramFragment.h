@@ -57,6 +57,7 @@ protected:
 
     float mConstantColor[4];
     int32_t mConstantColorUniformIndex;
+    int32_t mTextureUniformIndexStart;
 };
 
 class ProgramFragmentState

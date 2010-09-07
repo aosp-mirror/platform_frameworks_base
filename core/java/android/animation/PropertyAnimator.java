@@ -168,10 +168,14 @@ public final class PropertyAnimator<T> extends Animator<T> {
      */
     @Override
     void initAnimation() {
-        super.initAnimation();
-        int numValues = mValues.length;
-        for (int i = 0; i < numValues; ++i) {
-            mValues[i].setupSetterAndGetter(mTarget);
+        if (!mInitialized) {
+            // mValueType may change due to setter/getter setup; do this before calling super.init(),
+            // which uses mValueType to set up the default type evaluator.
+            int numValues = mValues.length;
+            for (int i = 0; i < numValues; ++i) {
+                mValues[i].setupSetterAndGetter(mTarget);
+            }
+            super.initAnimation();
         }
     }
 
@@ -190,8 +194,27 @@ public final class PropertyAnimator<T> extends Animator<T> {
      *
      * @param target The object being animated
      */
+    @Override
     public void setTarget(Object target) {
         mTarget = target;
+    }
+
+    @Override
+    public void setupStartValues() {
+        initAnimation();
+        int numValues = mValues.length;
+        for (int i = 0; i < numValues; ++i) {
+            mValues[i].setupStartValue(mTarget);
+        }
+    }
+
+    @Override
+    public void setupEndValues() {
+        initAnimation();
+        int numValues = mValues.length;
+        for (int i = 0; i < numValues; ++i) {
+            mValues[i].setupEndValue(mTarget);
+        }
     }
 
     /**
@@ -216,7 +239,7 @@ public final class PropertyAnimator<T> extends Animator<T> {
     }
 
     @Override
-    public PropertyAnimator clone() throws CloneNotSupportedException {
+    public PropertyAnimator clone() {
         final PropertyAnimator anim = (PropertyAnimator) super.clone();
         return anim;
     }

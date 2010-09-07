@@ -25,8 +25,12 @@ import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
+ * This class holds information about a property and the values that that property
+ * should take on during an animation. PropertyValuesHolder objects can be used to create
+ * animations with Animator or PropertyAnimator that operate on several different properties
+ * in parallel.
  */
-public class PropertyValuesHolder<T> {
+public class PropertyValuesHolder<T> implements Cloneable {
 
     /**
      * The name of the property associated with the values. This need not be a real property,
@@ -192,7 +196,7 @@ public class PropertyValuesHolder<T> {
             }
         } else {
             if (numKeyframes == 1) {
-                keyframes[0] = new Keyframe(0f, null);
+                keyframes[0] = new Keyframe(0f, (Object) null);
                 keyframes[1] = new Keyframe(1f, values[0]);
             } else {
                 keyframes[0] = new Keyframe(0f, values[0]);
@@ -256,6 +260,8 @@ public class PropertyValuesHolder<T> {
                 args[0] = typeVariant;
                 try {
                     returnVal = targetClass.getMethod(methodName, args);
+                    // change the value type to suit
+                    mValueType = typeVariant;
                     return returnVal;
                 } catch (NoSuchMethodException e) {
                     // Swallow the error and keep trying other variants
@@ -356,6 +362,63 @@ public class PropertyValuesHolder<T> {
     }
 
     /**
+     * Utility function to set the value stored in a particular Keyframe. The value used is
+     * whatever the value is for the property name specified in the keyframe on the target object.
+     *
+     * @param target The target object from which the current value should be extracted.
+     * @param kf The keyframe which holds the property name and value.
+     */
+    private void setupValue(Object target, Keyframe kf) {
+        try {
+            if (mGetter == null) {
+                Class targetClass = target.getClass();
+                setupGetter(targetClass);
+            }
+            kf.setValue((T) mGetter.invoke(target));
+        } catch (InvocationTargetException e) {
+            Log.e("PropertyValuesHolder", e.toString());
+        } catch (IllegalAccessException e) {
+            Log.e("PropertyValuesHolder", e.toString());
+        }
+    }
+
+    /**
+     * This function is called by PropertyAnimator when setting the start values for an animation.
+     * The start values are set according to the current values in the target object. The
+     * property whose value is extracted is whatever is specified by the propertyName of this
+     * PropertyValuesHolder object.
+     *
+     * @param target The object which holds the start values that should be set.
+     */
+    void setupStartValue(Object target) {
+        setupValue(target, mKeyframeSet.mKeyframes.get(0));
+    }
+
+    /**
+     * This function is called by PropertyAnimator when setting the end values for an animation.
+     * The end values are set according to the current values in the target object. The
+     * property whose value is extracted is whatever is specified by the propertyName of this
+     * PropertyValuesHolder object.
+     *
+     * @param target The object which holds the start values that should be set.
+     */
+    void setupEndValue(Object target) {
+        setupValue(target, mKeyframeSet.mKeyframes.get(mKeyframeSet.mKeyframes.size() - 1));
+    }
+
+    @Override
+    public PropertyValuesHolder clone() {
+        ArrayList<Keyframe> keyframes = mKeyframeSet.mKeyframes;
+        int numKeyframes = mKeyframeSet.mKeyframes.size();
+        Keyframe[] newKeyframes = new Keyframe[numKeyframes];
+        for (int i = 0; i < numKeyframes; ++i) {
+            newKeyframes[i] = keyframes.get(i).clone();
+        }
+        PropertyValuesHolder pvhClone = new PropertyValuesHolder(mPropertyName,
+                (Object[]) newKeyframes);
+        return pvhClone;
+    }
+    /**
      * Internal function to set the value on the target object, using the setter set up
      * earlier on this PropertyValuesHolder object. This function is called by PropertyAnimator
      * to handle turning the value calculated by Animator into a value set on the object
@@ -381,8 +444,9 @@ public class PropertyValuesHolder<T> {
      */
     void init() {
         if (mEvaluator == null) {
-            mEvaluator = (mValueType == int.class) ? sIntEvaluator :
-                (mValueType == double.class) ? sDoubleEvaluator : sFloatEvaluator;
+            mEvaluator = (mValueType == int.class || mValueType == Integer.class) ? sIntEvaluator :
+                (mValueType == double.class || mValueType == Double.class) ? sDoubleEvaluator :
+                        sFloatEvaluator;
         }
     }
 

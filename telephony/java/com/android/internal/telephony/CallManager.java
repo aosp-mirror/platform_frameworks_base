@@ -1108,14 +1108,21 @@ public final class CallManager {
      */
 
     /**
-     * @return list of ringing calls
+     * @return list of all ringing calls
      */
     public ArrayList<Call> getRingingCalls() {
         return mRingingCalls;
     }
 
     /**
-     * @return list of background calls
+     * @return list of all foreground calls
+     */
+    public ArrayList<Call> getForegroundCalls() {
+        return mForegroundCalls;
+    }
+
+    /**
+     * @return list of all background calls
      */
     public ArrayList<Call> getBackgroundCalls() {
         return mBackgroundCalls;

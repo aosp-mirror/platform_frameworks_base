@@ -45,11 +45,11 @@
         android:text="@android:string/no_recent_tasks"
         android:visibility="gone"/>
 
-    <com.android.internal.widget.CarouselView
+    <com.android.systemui.statusbar.RecentApplicationsCarouselView
         android:id="@+id/carousel"
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1">
-    </com.android.internal.widget.CarouselView>
+    </com.android.systemui.statusbar.RecentApplicationsCarouselView>
 
 </LinearLayout>

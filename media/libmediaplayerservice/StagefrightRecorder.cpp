@@ -507,19 +507,6 @@ status_t StagefrightRecorder::setParamTimeLapseEnable(int32_t timeLapseEnable) {
     return OK;
 }
 
-status_t StagefrightRecorder::setParamUseStillCameraForTimeLapse(int32_t useStillCamera) {
-    LOGV("setParamUseStillCameraForTimeLapse: %d", useStillCamera);
-
-    if(useStillCamera == 0) {
-        mUseStillCameraForTimeLapse= false;
-    } else if (useStillCamera == 1) {
-        mUseStillCameraForTimeLapse= true;
-    } else {
-        return BAD_VALUE;
-    }
-    return OK;
-}
-
 status_t StagefrightRecorder::setParamTimeBetweenTimeLapseFrameCapture(int64_t timeUs) {
     LOGV("setParamTimeBetweenTimeLapseFrameCapture: %lld us", timeUs);
 
@@ -656,11 +643,6 @@ status_t StagefrightRecorder::setParameter(
         int32_t timeLapseEnable;
         if (safe_strtoi32(value.string(), &timeLapseEnable)) {
             return setParamTimeLapseEnable(timeLapseEnable);
-        }
-    } else if (key == "use-still-camera-for-time-lapse") {
-        int32_t useStillCamera;
-        if (safe_strtoi32(value.string(), &useStillCamera)) {
-            return setParamUseStillCameraForTimeLapse(useStillCamera);
         }
     } else if (key == "time-between-time-lapse-frame-capture") {
         int64_t timeBetweenTimeLapseFrameCaptureMs;
@@ -1008,10 +990,10 @@ status_t StagefrightRecorder::setupCamera() {
     // Set the actual video recording frame size
     CameraParameters params(mCamera->getParameters());
 
-    // dont change the preview size when using still camera for time lapse
+    // dont change the preview size because time lapse may be using still camera
     // as mVideoWidth, mVideoHeight may correspond to HD resolution not
     // supported by the video camera.
-    if (!(mCaptureTimeLapse && mUseStillCameraForTimeLapse)) {
+    if (!mCaptureTimeLapse) {
         params.setPreviewSize(mVideoWidth, mVideoHeight);
     }
 
@@ -1027,7 +1009,7 @@ status_t StagefrightRecorder::setupCamera() {
     // Check on video frame size
     int frameWidth = 0, frameHeight = 0;
     newCameraParams.getPreviewSize(&frameWidth, &frameHeight);
-    if (!(mCaptureTimeLapse && mUseStillCameraForTimeLapse) &&
+    if (!mCaptureTimeLapse &&
         (frameWidth  < 0 || frameWidth  != mVideoWidth ||
         frameHeight < 0 || frameHeight != mVideoHeight)) {
         LOGE("Failed to set the video frame size to %dx%d",
@@ -1072,7 +1054,7 @@ status_t StagefrightRecorder::setupCameraSource(sp<CameraSource> *cameraSource) 
     if (err != OK) return err;
 
     *cameraSource = (mCaptureTimeLapse) ?
-        CameraSourceTimeLapse::CreateFromCamera(mCamera, mUseStillCameraForTimeLapse,
+        CameraSourceTimeLapse::CreateFromCamera(mCamera,
                 mTimeBetweenTimeLapseFrameCaptureUs, mVideoWidth, mVideoHeight, mFrameRate):
         CameraSource::CreateFromCamera(mCamera);
     CHECK(*cameraSource != NULL);
@@ -1418,7 +1400,6 @@ status_t StagefrightRecorder::reset() {
     mMaxFileSizeBytes = 0;
     mTrackEveryTimeDurationUs = 0;
     mCaptureTimeLapse = false;
-    mUseStillCameraForTimeLapse = true;
     mTimeBetweenTimeLapseFrameCaptureUs = -1;
     mCaptureAuxVideo = false;
     mCameraSourceSplitter = NULL;

@@ -47,7 +47,7 @@ public final class URLUtil {
         String retVal = inUrl;
         WebAddress webAddress;
 
-        Log.v(LOGTAG, "guessURL before queueRequest: " + inUrl);
+        if (DebugFlags.URL_UTIL) Log.v(LOGTAG, "guessURL before queueRequest: " + inUrl);
 
         if (inUrl.length() == 0) return inUrl;
         if (inUrl.startsWith("about:")) return inUrl;

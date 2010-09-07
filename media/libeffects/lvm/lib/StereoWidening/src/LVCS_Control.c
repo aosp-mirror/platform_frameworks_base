@@ -202,7 +202,9 @@ LVCS_ReturnStatus_en LVCS_Control(LVCS_Handle_t      hInstance,
         /* Set the reverb delay timeout */
         if(pInstance->bInOperatingModeTransition != LVM_TRUE){
             pInstance->bTimerDone = LVM_FALSE;
-            pInstance->TimerParams.TimeInMs = (LVM_INT16)(((pInstance->Reverberation.DelaySize << 2)/pInstance->TimerParams.SamplingRate) + 1);
+            pInstance->TimerParams.TimeInMs =
+            (LVM_INT16)(((pInstance->Reverberation.DelaySize << 2)
+            /pInstance->TimerParams.SamplingRate) + 1);
             LVM_Timer_Init ( &pInstance->TimerInstance,
                              &pInstance->TimerParams);
         }

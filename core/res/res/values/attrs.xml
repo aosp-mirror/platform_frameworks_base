@@ -1403,6 +1403,11 @@
          of its subclasses.  Also see {@link #ViewGroup_Layout} for
          attributes that this class processes in its children. -->
     <declare-styleable name="ViewGroup">
+        <!-- Defines whether changes in layout (caused by adding and removing items) should
+             cause a LayoutTransition to run. When this flag is set to true, a default
+             LayoutTransition object will be set on the ViewGroup container and default
+             animations will run when these layout changes occur.-->
+        <attr name="animateLayoutChanges" format="boolean" />
         <!-- Defines whether a child is limited to draw inside of its bounds or not.
              This is useful with animations that scale the size of the children to more
              than 100% for instance. In such a case, this property should be set to false

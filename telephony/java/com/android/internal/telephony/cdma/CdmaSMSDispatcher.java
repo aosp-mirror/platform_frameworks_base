@@ -129,7 +129,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
                     mPhone.getContext());
             SharedPreferences.Editor editor = sp.edit();
             editor.putInt(CDMAPhone.VM_COUNT_CDMA, voicemailCount);
-            editor.commit();
+            editor.apply();
             ((CDMAPhone) mPhone).updateMessageWaitingIndicator(voicemailCount);
             handled = true;
         } else if (((SmsEnvelope.TELESERVICE_WMT == teleService) ||

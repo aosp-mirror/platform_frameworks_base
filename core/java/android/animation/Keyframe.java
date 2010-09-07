@@ -26,7 +26,7 @@ import android.view.animation.Interpolator;
  * next keyframe. Each keyframe also holds an option {@link android.view.animation.Interpolator}
  * object, which defines the time interpolation over the intervalue preceding the keyframe.
  */
-public class Keyframe {
+public class Keyframe implements Cloneable {
     /**
      * The time at which mValue will hold true.
      */
@@ -81,7 +81,55 @@ public class Keyframe {
      * this keyframe.
      */
     public Keyframe(float fraction, Object value) {
-        this(fraction, value, Object.class);
+        this(fraction, value, (value != null) ? value.getClass() : Object.class);
+    }
+
+    /**
+     * Constructs a Keyframe object with the given time and float value. The time defines the
+     * time, as a proportion of an overall animation's duration, at which the value will hold true
+     * for the animation. The value for the animation between keyframes will be calculated as
+     * an interpolation between the values at those keyframes.
+     *
+     * @param fraction The time, expressed as a value between 0 and 1, representing the fraction
+     * of time elapsed of the overall animation duration.
+     * @param value The value that the object will animate to as the animation time approaches
+     * the time in this keyframe, and the the value animated from as the time passes the time in
+     * this keyframe.
+     */
+    public Keyframe(float fraction, Float value) {
+        this(fraction, value, Float.class);
+    }
+
+    /**
+     * Constructs a Keyframe object with the given time and integer value. The time defines the
+     * time, as a proportion of an overall animation's duration, at which the value will hold true
+     * for the animation. The value for the animation between keyframes will be calculated as
+     * an interpolation between the values at those keyframes.
+     *
+     * @param fraction The time, expressed as a value between 0 and 1, representing the fraction
+     * of time elapsed of the overall animation duration.
+     * @param value The value that the object will animate to as the animation time approaches
+     * the time in this keyframe, and the the value animated from as the time passes the time in
+     * this keyframe.
+     */
+    public Keyframe(float fraction, Integer value) {
+        this(fraction, value, Integer.class);
+    }
+
+    /**
+     * Constructs a Keyframe object with the given time and double value. The time defines the
+     * time, as a proportion of an overall animation's duration, at which the value will hold true
+     * for the animation. The value for the animation between keyframes will be calculated as
+     * an interpolation between the values at those keyframes.
+     *
+     * @param fraction The time, expressed as a value between 0 and 1, representing the fraction
+     * of time elapsed of the overall animation duration.
+     * @param value The value that the object will animate to as the animation time approaches
+     * the time in this keyframe, and the the value animated from as the time passes the time in
+     * this keyframe.
+     */
+    public Keyframe(float fraction, Double value) {
+        this(fraction, value, Double.class);
     }
 
     /**
@@ -199,5 +247,12 @@ public class Keyframe {
      */
     public Class getType() {
         return mValueType;
+    }
+
+    @Override
+    public Keyframe clone() {
+        Keyframe kfClone = new Keyframe(mFraction, mValue, mValueType);
+        kfClone.setInterpolator(mInterpolator);
+        return kfClone;
     }
 }

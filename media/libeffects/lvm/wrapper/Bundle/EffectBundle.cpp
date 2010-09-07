@@ -275,7 +275,6 @@ extern "C" int EffectCreate(effect_uuid_t       *uuid,
            pContext->pBundledContext->PcmInPtr = NULL;
            return -EINVAL;
         }
-
         #endif
 
         /* Saved strength is used to return the exact strength that was used in the set to the get
@@ -565,9 +564,6 @@ int LvmBundle_init(EffectContext *pContext){
     params.SpeakerType            = LVM_HEADPHONES;
 
     pContext->pBundledContext->SampleRate = LVM_FS_44100;
-    pContext->pBundledContext->SamplesToExitCountEq   = 44100*2*2; // 2 secs Stereo
-    pContext->pBundledContext->SamplesToExitCountBb   = 44100*2*2; // 2 secs Stereo
-    pContext->pBundledContext->SamplesToExitCountVirt = 44100*2*2; // 2 secs Stereo
 
     /* Concert Sound parameters */
     params.VirtualizerOperatingMode   = LVM_MODE_OFF;
@@ -2431,7 +2427,7 @@ extern "C" int Effect_process(effect_interface_t     self,
         if(pContext->pBundledContext->SamplesToExitCountBb > 0){
             status2Sec = -ENODATA;
             pContext->pBundledContext->SamplesToExitCountBb -= outBuffer->frameCount * 2; // STEREO
-            //LOGV("\tEffect_process: Waiting for 2 secs to turn off BASS_BOOST, %d samples left",
+            //LOGV("\tEffect_process: Waiting to turn off BASS_BOOST, %d samples left",
             //    pContext->pBundledContext->SamplesToExitCountBb);
         } else {
         status = -ENODATA;
@@ -2897,11 +2893,11 @@ extern "C" int Effect_command(effect_interface_t  self,
             pContext->pBundledContext->NumberEffectsEnabled++;
             android::LvmEffect_enable(pContext);
             pContext->pBundledContext->SamplesToExitCountEq =
-                 (LVM_INT32)(pContext->pBundledContext->SamplesPerSecond*1); // 0.1 secs Stereo
+                 (LVM_INT32)(pContext->pBundledContext->SamplesPerSecond*0.1); // 0.1 secs Stereo
             pContext->pBundledContext->SamplesToExitCountBb =
-                 (LVM_INT32)(pContext->pBundledContext->SamplesPerSecond*6); // 2 secs Stereo
+                 (LVM_INT32)(pContext->pBundledContext->SamplesPerSecond*0.1); // 0.1 secs Stereo
             pContext->pBundledContext->SamplesToExitCountVirt =
-                 (LVM_INT32)(pContext->pBundledContext->SamplesPerSecond*1); // 2 secs Stereo
+                 (LVM_INT32)(pContext->pBundledContext->SamplesPerSecond*0.1); // 0.1 secs Stereo
             LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_ENABLE Samples to Exit = %d",
                 pContext->pBundledContext->SamplesToExitCountBb);
             //LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_ENABLE NumberEffectsEnabled = %d",

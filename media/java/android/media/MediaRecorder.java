@@ -299,11 +299,58 @@ public class MediaRecorder
             int timeBetweenTimeLapseFrameCaptureMs, int encoderLevel) {
         setParameter(String.format("time-lapse-enable=%d",
                     (enableTimeLapse) ? 1 : 0));
-        setParameter(String.format("use-still-camera-for-time-lapse=%d",
-                    (useStillCameraForTimeLapse) ? 1 : 0));
         setParameter(String.format("time-between-time-lapse-frame-capture=%d",
                     timeBetweenTimeLapseFrameCaptureMs));
         setVideoEncoderLevel(encoderLevel);
+    }
+
+    /**
+     * Enables time lapse capture and sets its parameters. This method should
+     * be called after setProfile().
+     *
+     * @param timeBetweenTimeLapseFrameCaptureMs time between two captures of time lapse frames.
+     * @hide
+     */
+    public void enableTimeLapse(int timeBetweenTimeLapseFrameCaptureMs) {
+        setParameter(String.format("time-lapse-enable=1"));
+        setParameter(String.format("time-between-time-lapse-frame-capture=%d",
+                    timeBetweenTimeLapseFrameCaptureMs));
+    }
+
+    /**
+     * Sets filename and parameters for auxiliary time lapse video.
+     *
+     * @param fd an open file descriptor to be written into.
+     * @param videoFrameWidth width of the auxiliary video.
+     * @param videoFrameHeight height of the auxiliary video.
+     * @param videoBitRate bit rate of the auxiliary video
+     * @hide
+     * */
+    public void setAuxVideoParameters(FileDescriptor fd,
+            int videoFrameWidth, int videoFrameHeight,
+            int videoBitRate) {
+        setAuxiliaryOutputFile(fd);
+        setParameter(String.format("video-aux-param-width=%d", videoFrameWidth));
+        setParameter(String.format("video-aux-param-height=%d", videoFrameHeight));
+        setParameter(String.format("video-aux-param-encoding-bitrate=%d", videoBitRate));
+    }
+
+    /**
+     * Sets filename and parameters for auxiliary time lapse video.
+     *
+     * @param path The pathname to use for the auxiliary video.
+     * @param videoFrameWidth width of the auxiliary video.
+     * @param videoFrameHeight height of the auxiliary video.
+     * @param videoBitRate bit rate of the auxiliary video
+     * @hide
+     * */
+    public void setAuxVideoParameters(String path,
+            int videoFrameWidth, int videoFrameHeight,
+            int videoBitRate) {
+        setAuxiliaryOutputFile(path);
+        setParameter(String.format("video-aux-param-width=%d", videoFrameWidth));
+        setParameter(String.format("video-aux-param-height=%d", videoFrameHeight));
+        setParameter(String.format("video-aux-param-encoding-bitrate=%d", videoBitRate));
     }
 
     /**
@@ -489,9 +536,8 @@ public class MediaRecorder
      * @param fd an open file descriptor to be written into.
      * @throws IllegalStateException if it is called before
      * setOutputFormat() or after prepare()
-     * @hide
      */
-    public void setAuxiliaryOutputFile(FileDescriptor fd) throws IllegalStateException
+    private void setAuxiliaryOutputFile(FileDescriptor fd) throws IllegalStateException
     {
         mPrepareAuxiliaryFile = true;
         mPathAux = null;
@@ -505,9 +551,8 @@ public class MediaRecorder
      * @param path The pathname to use.
      * @throws IllegalStateException if it is called before
      * setOutputFormat() or after prepare()
-     * @hide
      */
-    public void setAuxiliaryOutputFile(String path) throws IllegalStateException
+    private void setAuxiliaryOutputFile(String path) throws IllegalStateException
     {
         mPrepareAuxiliaryFile = true;
         mFdAux = null;

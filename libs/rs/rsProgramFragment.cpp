@@ -62,15 +62,6 @@ ProgramFragment::ProgramFragment(Context *rsc, const uint32_t * params,
         mTextureEnableMask |= 2;
     }
 
-    mUniformCount = 0;
-    mUniformNames[mUniformCount++].setTo("uni_Tex0");
-    mUniformNames[mUniformCount++].setTo("uni_Tex1");
-
-    mConstantColorUniformIndex = -1;
-    //if (!mVaryingColor) {
-        mConstantColorUniformIndex = mUniformCount;
-        mUniformNames[mUniformCount++].setTo("uni_Color");
-    //}
     init(rsc);
 }
 
@@ -88,10 +79,6 @@ ProgramFragment::ProgramFragment(Context *rsc, const char * shaderText,
     mConstantColor[3] = 1.f;
 
     LOGE("Custom FP");
-
-    mUniformCount = 2;
-    mUniformNames[0].setTo("uni_Tex0");
-    mUniformNames[1].setTo("uni_Tex1");
 
     mTextureEnableMask = (1 << mTextureCount) -1;
 
@@ -156,7 +143,7 @@ void ProgramFragment::setupGL2(const Context *rsc, ProgramFragmentState *state, 
             rsc->checkError("ProgramFragment::setupGL2 tex env");
         }
 
-        glUniform1i(sc->fragUniformSlot(ct), ct);
+        glUniform1i(sc->fragUniformSlot(mTextureUniformIndexStart + ct), ct);
         rsc->checkError("ProgramFragment::setupGL2 uniforms");
     }
 
@@ -177,12 +164,12 @@ void ProgramFragment::createShader()
     mShader.append("uniform vec4 uni_Color;\n");
 
     if (mUserShader.length() > 1) {
+        appendUserConstants();
         for (uint32_t ct=0; ct < mTextureCount; ct++) {
             char buf[256];
             sprintf(buf, "uniform sampler2D uni_Tex%i;\n", ct);
             mShader.append(buf);
         }
-        appendUserConstants();
         mShader.append(mUserShader);
     } else {
         uint32_t mask = mTextureEnableMask;
@@ -275,11 +262,20 @@ void ProgramFragment::createShader()
 
 void ProgramFragment::init(Context *rsc)
 {
+    mUniformCount = 0;
+    //if (!mVaryingColor) {
+        mConstantColorUniformIndex = mUniformCount;
+        mUniformNames[mUniformCount++].setTo("uni_Color");
+    //}
+
     if (mUserShader.size() > 0) {
         for (uint32_t ct=0; ct < mConstantCount; ct++) {
             initAddUserElement(mConstantTypes[ct]->getElement(), mUniformNames, &mUniformCount, "UNI_");
         }
     }
+    mTextureUniformIndexStart = mUniformCount;
+    mUniformNames[mUniformCount++].setTo("uni_Tex0");
+    mUniformNames[mUniformCount++].setTo("uni_Tex1");
 
     createShader();
 }

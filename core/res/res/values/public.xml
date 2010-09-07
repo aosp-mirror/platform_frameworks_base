@@ -1326,6 +1326,7 @@
   <public type="attr" name="splitMotionEvents" />
   <public type="attr" name="listChoiceBackgroundIndicator" />
   <public type="attr" name="spinnerMode" />
+  <public type="attr" name="animateLayoutChanges" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
@@ -1359,4 +1360,5 @@
   <public type="layout" name="simple_selectable_list_item" id="0x01090022" />
 
   <public type="string" name="selectTextMode" id="0x01040030" />
+
 </resources>
