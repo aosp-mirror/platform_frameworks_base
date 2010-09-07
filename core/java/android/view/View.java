@@ -7738,7 +7738,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         saveCount = canvas.getSaveCount();
 
         int solidColor = getSolidColor();
-        if (solidColor == 0) {
+        // TODO: Temporarily disable fading edges with hardware acceleration
+        if (solidColor == 0 && !canvas.isHardwareAccelerated()) {
             final int flags = Canvas.HAS_ALPHA_LAYER_SAVE_FLAG;
 
             if (drawTop) {
