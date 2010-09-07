@@ -236,6 +236,7 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
                         trigger = true;
                         createUri = Uri.fromParts("tel", (String)cookie, null);
 
+                        //$FALL-THROUGH$
                     case TOKEN_PHONE_LOOKUP: {
                         if (cursor != null && cursor.moveToFirst()) {
                             long contactId = cursor.getLong(PHONE_ID_COLUMN_INDEX);
@@ -249,12 +250,14 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
                         trigger = true;
                         createUri = Uri.fromParts("mailto", (String)cookie, null);
 
+                        //$FALL-THROUGH$
                     case TOKEN_EMAIL_LOOKUP: {
                         if (cursor != null && cursor.moveToFirst()) {
                             long contactId = cursor.getLong(EMAIL_ID_COLUMN_INDEX);
                             String lookupKey = cursor.getString(EMAIL_LOOKUP_STRING_COLUMN_INDEX);
                             lookupUri = Contacts.getLookupUri(contactId, lookupKey);
                         }
+                        break;
                     }
 
                     case TOKEN_CONTACT_LOOKUP_AND_TRIGGER: {
