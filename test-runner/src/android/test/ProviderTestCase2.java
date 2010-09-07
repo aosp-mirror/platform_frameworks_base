@@ -74,7 +74,7 @@ public abstract class ProviderTestCase2<T extends ContentProvider> extends Andro
     private IsolatedContext mProviderContext;
     private MockContentResolver mResolver;
 
-       private class MockContext2 extends MockContext {
+    private class MockContext2 extends MockContext {
 
         @Override
         public Resources getResources() {
@@ -86,6 +86,11 @@ public abstract class ProviderTestCase2<T extends ContentProvider> extends Andro
             // name the directory so the directory will be separated from
             // one created through the regular Context
             return getContext().getDir("mockcontext2_" + name, mode);
+        }
+
+        @Override
+        public Context getApplicationContext() {
+            return this;
         }
     }
     /**
