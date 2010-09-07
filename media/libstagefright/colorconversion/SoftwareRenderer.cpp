@@ -106,7 +106,12 @@ static inline size_t ALIGN(size_t x, size_t alignment) {
 void SoftwareRenderer::render(
         const void *data, size_t size, void *platformPrivate) {
     android_native_buffer_t *buf;
-    CHECK_EQ(0, mSurface->dequeueBuffer(mSurface.get(), &buf));
+    int err;
+    if ((err = mSurface->dequeueBuffer(mSurface.get(), &buf)) != 0) {
+        LOGW("Surface::dequeueBuffer returned error %d", err);
+        return;
+    }
+
     CHECK_EQ(0, mSurface->lockBuffer(mSurface.get(), buf));
 
     GraphicBufferMapper &mapper = GraphicBufferMapper::get();
@@ -186,7 +191,9 @@ void SoftwareRenderer::render(
 
     CHECK_EQ(0, mapper.unlock(buf->handle));
 
-    CHECK_EQ(0, mSurface->queueBuffer(mSurface.get(), buf));
+    if ((err = mSurface->queueBuffer(mSurface.get(), buf)) != 0) {
+        LOGW("Surface::queueBuffer returned error %d", err);
+    }
     buf = NULL;
 }
 
