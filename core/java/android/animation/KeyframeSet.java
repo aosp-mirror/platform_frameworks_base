@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import android.view.animation.Interpolator;
 
 /**
- * This class holds a collection of Keyframe objects and is called by Animator to calculate
+ * This class holds a collection of Keyframe objects and is called by ValueAnimator to calculate
  * values between those keyframes for a given animation. The class internal to the animation
  * package because it is an implementation detail of how Keyframes are stored and used.
  */

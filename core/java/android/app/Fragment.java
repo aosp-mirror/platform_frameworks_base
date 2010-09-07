@@ -16,7 +16,7 @@
 
 package android.app;
 
-import android.animation.Animatable;
+import android.animation.Animator;
 import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.Intent;
@@ -26,7 +26,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AndroidRuntimeException;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -755,7 +754,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     /**
      * Called when a fragment loads an animation.
      */
-    public Animatable onCreateAnimatable(int transit, boolean enter, int nextAnim) {
+    public Animator onCreateAnimator(int transit, boolean enter, int nextAnim) {
         return null;
     }
     

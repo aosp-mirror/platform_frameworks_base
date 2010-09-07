@@ -16,13 +16,9 @@
 
 package com.android.systemui.statusbar.tablet;
 
-import android.animation.Animator;
 import android.app.ActivityManagerNative;
-import android.app.Notification;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.app.StatusBarManager;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -33,7 +29,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -41,7 +36,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
@@ -50,7 +44,6 @@ import android.widget.TextSwitcher;
 import android.widget.TextView;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.statusbar.StatusBarNotification;
 
 import com.android.systemui.statusbar.*;

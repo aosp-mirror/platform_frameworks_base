@@ -35,7 +35,7 @@ import java.io.IOException;
 public class AnimationUtils {
 
     /**
-     * These flags are used when parsing Sequencer objects
+     * These flags are used when parsing AnimatorSet objects
      */
     private static final int TOGETHER = 0;
     private static final int SEQUENTIALLY = 1;
