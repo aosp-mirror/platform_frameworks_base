@@ -66,7 +66,7 @@ public:
     static const Element * create(Context *rsc, RsDataType dt, RsDataKind dk,
                             bool isNorm, uint32_t vecSize);
     static const Element * create(Context *rsc, size_t count, const Element **,
-                            const char **, const size_t * lengths);
+                            const char **, const size_t * lengths, const uint32_t *asin);
 
     void incRefs(const void *) const;
     void decRefs(const void *) const;
@@ -80,6 +80,7 @@ protected:
         String8 name;
         ObjectBaseRef<const Element> e;
         uint32_t offsetBits;
+        uint32_t arraySize;
     } ElementField_t;
     ElementField_t *mFields;
     size_t mFieldCount;

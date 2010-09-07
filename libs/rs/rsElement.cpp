@@ -65,7 +65,7 @@ size_t Element::getSizeBits() const
 
     size_t total = 0;
     for (size_t ct=0; ct < mFieldCount; ct++) {
-        total += mFields[ct].e->mBits;
+        total += mFields[ct].e->mBits * mFields[ct].arraySize;;
     }
     return total;
 }
@@ -95,6 +95,7 @@ void Element::serialize(OStream *stream) const
     stream->addU32(mFieldCount);
     for(uint32_t ct = 0; ct < mFieldCount; ct++) {
         stream->addString(&mFields[ct].name);
+        stream->addU32(mFields[ct].arraySize);
         mFields[ct].e->serialize(stream);
     }
 }
@@ -122,6 +123,7 @@ Element *Element::createFromStream(Context *rsc, IStream *stream)
         elem->mFields = new ElementField_t [elem->mFieldCount];
         for(uint32_t ct = 0; ct < elem->mFieldCount; ct ++) {
             stream->loadString(&elem->mFields[ct].name);
+            elem->mFields[ct].arraySize = stream->loadU32();
             Element *fieldElem = Element::createFromStream(rsc, stream);
             elem->mFields[ct].e.set(fieldElem);
             elem->mFields[ct].offsetBits = offset;
@@ -155,7 +157,8 @@ Element *Element::createFromStream(Context *rsc, IStream *stream)
             for (uint32_t i=0; i < elem->mFieldCount; i++) {
                 if ((ee->mFields[i].e.get() != elem->mFields[i].e.get()) ||
                     (ee->mFields[i].name.length() != elem->mFields[i].name.length()) ||
-                    (ee->mFields[i].name != elem->mFields[i].name)) {
+                    (ee->mFields[i].name != elem->mFields[i].name) ||
+                    (ee->mFields[i].arraySize != elem->mFields[i].arraySize)) {
                     match = false;
                     break;
                 }
@@ -200,7 +203,7 @@ const Element * Element::create(Context *rsc, RsDataType dt, RsDataKind dk,
 }
 
 const Element * Element::create(Context *rsc, size_t count, const Element **ein,
-                            const char **nin, const size_t * lengths)
+                            const char **nin, const size_t * lengths, const uint32_t *asin)
 {
     // Look for an existing match.
     for (uint32_t ct=0; ct < rsc->mStateElement.mElements.size(); ct++) {
@@ -210,7 +213,8 @@ const Element * Element::create(Context *rsc, size_t count, const Element **ein,
             for (uint32_t i=0; i < count; i++) {
                 if ((ee->mFields[i].e.get() != ein[i]) ||
                     (ee->mFields[i].name.length() != lengths[i]) ||
-                    (ee->mFields[i].name != nin[i])) {
+                    (ee->mFields[i].name != nin[i]) ||
+                    (ee->mFields[i].arraySize != asin[i])) {
                     match = false;
                     break;
                 }
@@ -230,6 +234,7 @@ const Element * Element::create(Context *rsc, size_t count, const Element **ein,
         e->mFields[ct].e.set(ein[ct]);
         e->mFields[ct].name.setTo(nin[ct], lengths[ct]);
         e->mFields[ct].offsetBits = bits;
+        e->mFields[ct].arraySize = asin[ct];
         bits += ein[ct]->getSizeBits();
 
         if (ein[ct]->mHasReference) {
@@ -274,7 +279,11 @@ void Element::incRefs(const void *ptr) const
     const uint8_t *p = static_cast<const uint8_t *>(ptr);
     for (uint32_t i=0; i < mFieldCount; i++) {
         if (mFields[i].e->mHasReference) {
-            mFields[i].e->incRefs(&p[mFields[i].offsetBits >> 3]);
+            p = &p[mFields[i].offsetBits >> 3];
+            for (uint32_t ct=0; ct < mFields[i].arraySize; ct++) {
+                mFields[i].e->incRefs(p);
+                p += mFields[i].e->getSizeBytes();
+            }
         }
     }
 }
@@ -293,7 +302,11 @@ void Element::decRefs(const void *ptr) const
     const uint8_t *p = static_cast<const uint8_t *>(ptr);
     for (uint32_t i=0; i < mFieldCount; i++) {
         if (mFields[i].e->mHasReference) {
-            mFields[i].e->decRefs(&p[mFields[i].offsetBits >> 3]);
+            p = &p[mFields[i].offsetBits >> 3];
+            for (uint32_t ct=0; ct < mFields[i].arraySize; ct++) {
+                mFields[i].e->decRefs(p);
+                p += mFields[i].e->getSizeBytes();
+            }
         }
     }
 }
@@ -331,10 +344,11 @@ RsElement rsi_ElementCreate2(Context *rsc,
                              size_t count,
                              const RsElement * ein,
                              const char ** names,
-                             const size_t * nameLengths)
+                             const size_t * nameLengths,
+                             const uint32_t * arraySizes)
 {
     //LOGE("rsi_ElementCreate2 %i", count);
-    const Element *e = Element::create(rsc, count, (const Element **)ein, names, nameLengths);
+    const Element *e = Element::create(rsc, count, (const Element **)ein, names, nameLengths, arraySizes);
     e->incUserRef();
     return (RsElement)e;
 }

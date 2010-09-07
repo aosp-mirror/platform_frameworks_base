@@ -27,6 +27,7 @@ public class Element extends BaseObj {
     int mSize;
     Element[] mElements;
     String[] mElementNames;
+    int[] mArraySizes;
 
     DataType mType;
     DataKind mKind;
@@ -313,11 +314,12 @@ public class Element extends BaseObj {
         return rs.mElement_MATRIX_2X2;
     }
 
-    Element(int id, RenderScript rs, Element[] e, String[] n) {
+    Element(int id, RenderScript rs, Element[] e, String[] n, int[] as) {
         super(id, rs);
         mSize = 0;
         mElements = e;
         mElementNames = n;
+        mArraySizes = as;
         for (int ct = 0; ct < mElements.length; ct++ ) {
             mSize += mElements[ct].mSize;
         }
@@ -441,6 +443,7 @@ public class Element extends BaseObj {
         RenderScript mRS;
         Element[] mElements;
         String[] mElementNames;
+        int[] mArraySizes;
         int mCount;
 
         public Builder(RenderScript rs) {
@@ -448,35 +451,49 @@ public class Element extends BaseObj {
             mCount = 0;
             mElements = new Element[8];
             mElementNames = new String[8];
+            mArraySizes = new int[8];
         }
 
-        public void add(Element element, String name) {
+        public void add(Element element, String name, int arraySize) {
+            if (arraySize < 1) {
+                throw new IllegalArgumentException("Array size cannot be less than 1.");
+            }
             if(mCount == mElements.length) {
                 Element[] e = new Element[mCount + 8];
                 String[] s = new String[mCount + 8];
+                int[] as = new int[mCount + 8];
                 System.arraycopy(mElements, 0, e, 0, mCount);
                 System.arraycopy(mElementNames, 0, s, 0, mCount);
+                System.arraycopy(mArraySizes, 0, as, 0, mCount);
                 mElements = e;
                 mElementNames = s;
+                mArraySizes = as;
             }
             mElements[mCount] = element;
             mElementNames[mCount] = name;
+            mArraySizes[mCount] = arraySize;
             mCount++;
+        }
+
+        public void add(Element element, String name) {
+            add(element, name, 1);
         }
 
         public Element create() {
             mRS.validate();
             Element[] ein = new Element[mCount];
             String[] sin = new String[mCount];
+            int[] asin = new int[mCount];
             java.lang.System.arraycopy(mElements, 0, ein, 0, mCount);
             java.lang.System.arraycopy(mElementNames, 0, sin, 0, mCount);
+            java.lang.System.arraycopy(mArraySizes, 0, asin, 0, mCount);
 
             int[] ids = new int[ein.length];
             for (int ct = 0; ct < ein.length; ct++ ) {
                 ids[ct] = ein[ct].mID;
             }
-            int id = mRS.nElementCreate2(ids, sin);
-            return new Element(id, mRS, ein, sin);
+            int id = mRS.nElementCreate2(ids, sin, asin);
+            return new Element(id, mRS, ein, sin, asin);
         }
     }
 
