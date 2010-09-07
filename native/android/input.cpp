@@ -246,8 +246,8 @@ float AMotionEvent_getHistoricalOrientation(AInputEvent* motion_event, size_t po
 
 
 void AInputQueue_attachLooper(AInputQueue* queue, ALooper* looper,
-        ALooper_callbackFunc* callback, void* data) {
-    queue->attachLooper(looper, callback, data);
+        int ident, ALooper_callbackFunc* callback, void* data) {
+    queue->attachLooper(looper, ident, callback, data);
 }
 
 void AInputQueue_detachLooper(AInputQueue* queue) {

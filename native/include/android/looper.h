@@ -111,7 +111,7 @@ enum {
  *
  * Returns ALOPER_POLL_ERROR if an error occurred.
  *
- * Returns a value >= 0 containing a file descriptor if it has data
+ * Returns a value >= 0 containing an identifier if its file descriptor has data
  * and it has no callback function (requiring the caller here to handle it).
  * In this (and only this) case outEvents and outData will contain the poll
  * events and data associated with the fd.
@@ -145,10 +145,12 @@ void ALooper_release(ALooper* looper);
  * descriptor was previously added, it is replaced.
  *
  * "fd" is the file descriptor to be added.
+ * "ident" is an identifier for this event, which is returned from
+ * ALooper_pollOnce().  Must be >= 0, or ALOOPER_POLL_CALLBACK if
+ * providing a non-NULL callback.
  * "events" are the poll events to wake up on.  Typically this is POLLIN.
  * "callback" is the function to call when there is an event on the file
  * descriptor.
- * "id" is an identifier to associated with this file descriptor, or 0.
  * "data" is a private data pointer to supply to the callback.
  *
  * There are two main uses of this function:
@@ -156,13 +158,13 @@ void ALooper_release(ALooper* looper);
  * (1) If "callback" is non-NULL, then
  * this function will be called when there is data on the file descriptor.  It
  * should execute any events it has pending, appropriately reading from the
- * file descriptor.
+ * file descriptor.  The 'ident' is ignored in this case.
  *
- * (2) If "callback" is NULL, the fd will be returned by ALooper_pollOnce
- * when it has data available, requiring the caller to take care of processing
- * it.
+ * (2) If "callback" is NULL, the 'ident' will be returned by ALooper_pollOnce
+ * when its file descriptor has data available, requiring the caller to take
+ * care of processing it.
  */
-void ALooper_addFd(ALooper* looper, int fd, int events,
+void ALooper_addFd(ALooper* looper, int fd, int ident, int events,
         ALooper_callbackFunc* callback, void* data);
 
 /**

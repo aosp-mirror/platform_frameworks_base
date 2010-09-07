@@ -127,12 +127,13 @@ AInputQueue::~AInputQueue() {
     close(mDispatchKeyWrite);
 }
 
-void AInputQueue::attachLooper(ALooper* looper, ALooper_callbackFunc* callback, void* data) {
+void AInputQueue::attachLooper(ALooper* looper, int ident,
+        ALooper_callbackFunc* callback, void* data) {
     mPollLoop = static_cast<android::PollLoop*>(looper);
     mPollLoop->setLooperCallback(mConsumer.getChannel()->getReceivePipeFd(),
-            POLLIN, callback, data);
+            ident, POLLIN, callback, data);
     mPollLoop->setLooperCallback(mDispatchKeyRead,
-            POLLIN, callback, data);
+            ident, POLLIN, callback, data);
 }
 
 void AInputQueue::detachLooper() {
