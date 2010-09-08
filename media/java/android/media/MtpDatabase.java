@@ -244,25 +244,8 @@ public class MtpDatabase {
 
     private int[] getSupportedPlaybackFormats() {
         return new int[] {
-            MtpConstants.FORMAT_ASSOCIATION,
-            MtpConstants.FORMAT_MP3,
-            MtpConstants.FORMAT_MPEG,
-            MtpConstants.FORMAT_EXIF_JPEG,
-            MtpConstants.FORMAT_TIFF_EP,
-            MtpConstants.FORMAT_GIF,
-            MtpConstants.FORMAT_JFIF,
-            MtpConstants.FORMAT_PNG,
-            MtpConstants.FORMAT_TIFF,
-            MtpConstants.FORMAT_WMA,
-            MtpConstants.FORMAT_OGG,
-            MtpConstants.FORMAT_AAC,
-            MtpConstants.FORMAT_MP4_CONTAINER,
-            MtpConstants.FORMAT_MP2,
-            MtpConstants.FORMAT_3GP_CONTAINER,
-            MtpConstants.FORMAT_ABSTRACT_AV_PLAYLIST,
-            MtpConstants.FORMAT_WPL_PLAYLIST,
-            MtpConstants.FORMAT_M3U_PLAYLIST,
-            MtpConstants.FORMAT_PLS_PLAYLIST,
+            // allow transfering arbitrary files
+            MtpConstants.FORMAT_UNDEFINED,
         };
     }
 
