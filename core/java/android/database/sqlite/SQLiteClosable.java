@@ -30,6 +30,7 @@ public abstract class SQLiteClosable {
 
     public void acquireReference() {
         synchronized(mLock) {
+            checkRefCount();
             if (mReferenceCount <= 0) {
                 throw new IllegalStateException(
                         "attempt to re-open an already-closed object: " + getObjInfo());
@@ -40,6 +41,7 @@ public abstract class SQLiteClosable {
 
     public void releaseReference() {
         synchronized(mLock) {
+            checkRefCount();
             mReferenceCount--;
             if (mReferenceCount == 0) {
                 onAllReferencesReleased();
@@ -49,6 +51,7 @@ public abstract class SQLiteClosable {
 
     public void releaseReferenceFromContainer() {
         synchronized(mLock) {
+            checkRefCount();
             mReferenceCount--;
             if (mReferenceCount == 0) {
                 onAllReferencesReleasedFromContainer();
@@ -63,8 +66,7 @@ public abstract class SQLiteClosable {
         if (this instanceof SQLiteDatabase) {
             buff.append("database = ");
             buff.append(((SQLiteDatabase)this).getPath());
-        } else if (this instanceof SQLiteProgram || this instanceof SQLiteStatement ||
-                this instanceof SQLiteQuery) {
+        } else if (this instanceof SQLiteProgram) {
             buff.append("mSql = ");
             buff.append(((SQLiteProgram)this).mSql);
         } else if (this instanceof CursorWindow) {
@@ -73,5 +75,14 @@ public abstract class SQLiteClosable {
         }
         buff.append(") ");
         return buff.toString();
+    }
+
+    private void checkRefCount() {
+        if (SQLiteDebug.DEBUG_ACTIVE_CURSOR_FINALIZATION) {
+            if (mReferenceCount > 1000) {
+                throw new IllegalStateException("refcount: " + mReferenceCount + ", " +
+                        getObjInfo());
+            }
+        }
     }
 }

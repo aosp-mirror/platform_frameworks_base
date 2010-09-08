@@ -285,6 +285,7 @@ public class UriTest extends TestCase {
         assertEquals("d", uri.getQueryParameter("c"));
     }
 
+    // http://b/2337042
     @SmallTest
     public void testHostWithTrailingDot() {
         Uri uri = Uri.parse("http://google.com./b/c/g");

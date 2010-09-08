@@ -7298,9 +7298,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if (ViewDebug.TRACE_HIERARCHY) {
                 ViewDebug.trace(this, ViewDebug.HierarchyTraceType.BUILD_CACHE);
             }
-            if (Config.DEBUG && ViewDebug.profileDrawing) {
-                EventLog.writeEvent(60002, hashCode());
-            }
 
             int width = mRight - mLeft;
             int height = mBottom - mTop;
@@ -7738,7 +7735,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         saveCount = canvas.getSaveCount();
 
         int solidColor = getSolidColor();
-        if (solidColor == 0) {
+        // TODO: Temporarily disable fading edges with hardware acceleration
+        if (solidColor == 0 && !canvas.isHardwareAccelerated()) {
             final int flags = Canvas.HAS_ALPHA_LAYER_SAVE_FLAG;
 
             if (drawTop) {
@@ -7946,6 +7944,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param r Right position, relative to parent
      * @param b Bottom position, relative to parent
      */
+    @SuppressWarnings({"unchecked"})
     public final void layout(int l, int t, int r, int b) {
         int oldL = mLeft;
         int oldT = mTop;
@@ -10127,11 +10126,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          * Temporary for use in computing hit areas with transformed views
          */
         final RectF mTmpTransformRect = new RectF();
-
-        /**
-         * Temporary for use in computing invalidation areas with transformed views
-         */
-        final float[] mTmpTransformBounds = new float[8];
 
         /**
          * Temporary list for use in collecting focusable descendents of a view.

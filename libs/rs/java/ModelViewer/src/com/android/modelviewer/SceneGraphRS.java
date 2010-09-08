@@ -105,7 +105,7 @@ public class SceneGraphRS {
         bs.setMin(Sampler.Value.LINEAR);
         bs.setMag(Sampler.Value.LINEAR);
         bs.setWrapS(Sampler.Value.CLAMP);
-        bs.setWrapT(Sampler.Value.WRAP);
+        bs.setWrapT(Sampler.Value.CLAMP);
         mSampler = bs.create();
 
         ProgramFragment.Builder b = new ProgramFragment.Builder(mRS);
@@ -123,7 +123,6 @@ public class SceneGraphRS {
 
         mPVA = new ProgramVertex.MatrixAllocation(mRS);
         mPVBackground.bindAllocation(mPVA);
-        mPVA.setupProjectionNormalized(mWidth, mHeight);
 
         mScript.set_gPVBackground(mPVBackground);
     }
@@ -159,14 +158,14 @@ public class SceneGraphRS {
         mGroup1.addChild(mRobot1);
         mGroup1.addChild(mRobot2);
 
-        mGroup1.setTransform(0, new Float4(0.0f, 0.0f, 5.0f, 0.0f), TransformType.TRANSLATE);
+        mGroup1.setTransform(0, new Float4(0.0f, 0.0f, -15.0f, 0.0f), TransformType.TRANSLATE);
         mGroup1.setTransform(1, new Float4(0.0f, 1.0f, 0.0f, 15.0f), TransformType.ROTATE);
 
-        mRobot1.setTransform(0, new Float4(-2.0f, -0.5f, 0.0f, 0.0f), TransformType.TRANSLATE);
+        mRobot1.setTransform(0, new Float4(-3.0f, -0.5f, 0.0f, 0.0f), TransformType.TRANSLATE);
         mRobot1.setTransform(1, new Float4(0.0f, 1.0f, 0.0f, 20.0f), TransformType.ROTATE);
         mRobot1.setTransform(2, new Float4(0.2f, 0.2f, 0.2f, 0.0f), TransformType.SCALE);
 
-        mRobot2.setTransform(0, new Float4(2.0f, 0.0f, 0.0f, 0.0f), TransformType.TRANSLATE);
+        mRobot2.setTransform(0, new Float4(3.0f, 0.0f, 0.0f, 0.0f), TransformType.TRANSLATE);
         mRobot2.setTransform(1, new Float4(0.0f, 1.0f, 0.0f, -20.0f), TransformType.ROTATE);
         mRobot2.setTransform(2, new Float4(0.3f, 0.3f, 0.3f, 0.0f), TransformType.SCALE);
     }

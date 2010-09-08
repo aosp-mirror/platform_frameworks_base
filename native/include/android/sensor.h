@@ -166,7 +166,7 @@ ASensor const* ASensorManager_getDefaultSensor(ASensorManager* manager, int type
  * Creates a new sensor event queue and associate it with a looper.
  */
 ASensorEventQueue* ASensorManager_createEventQueue(ASensorManager* manager,
-        ALooper* looper, ALooper_callbackFunc* callback, void* data);
+        ALooper* looper, int ident, ALooper_callbackFunc* callback, void* data);
 
 /*
  * Destroys the event queue and free all resources associated to it.

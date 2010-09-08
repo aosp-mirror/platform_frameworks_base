@@ -41,6 +41,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -87,6 +88,7 @@ public class ActionBarView extends ViewGroup {
     private TextView mTitleView;
     private TextView mSubtitleView;
     private Spinner mSpinner;
+    private HorizontalScrollView mTabScrollView;
     private LinearLayout mTabLayout;
     private View mCustomNavView;
     
@@ -118,6 +120,8 @@ public class ActionBarView extends ViewGroup {
     };
 
     private OnClickListener mHomeClickListener = null;
+
+    private OnClickListener mTabClickListener = null;
 
     public ActionBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -346,8 +350,9 @@ public class ActionBarView extends ViewGroup {
                 break;
             case ActionBar.NAVIGATION_MODE_TABS:
                 if (mTabLayout != null) {
-                    removeView(mTabLayout);
+                    removeView(mTabScrollView);
                     mTabLayout = null;
+                    mTabScrollView = null;
                 }
             }
             
@@ -365,8 +370,10 @@ public class ActionBarView extends ViewGroup {
                 addView(mCustomNavView);
                 break;
             case ActionBar.NAVIGATION_MODE_TABS:
+                mTabScrollView = new HorizontalScrollView(getContext());
                 mTabLayout = new LinearLayout(getContext());
-                addView(mTabLayout);
+                mTabScrollView.addView(mTabLayout);
+                addView(mTabScrollView);
                 break;
             }
             mNavigationMode = mode;
@@ -401,20 +408,24 @@ public class ActionBarView extends ViewGroup {
     private TabView createTabView(ActionBar.Tab tab) {
         final TabView tabView = new TabView(getContext(), tab);
         tabView.setFocusable(true);
-        tabView.setOnClickListener(new TabClickListener());
+
+        if (mTabClickListener == null) {
+            mTabClickListener = new TabClickListener();
+        }
+        tabView.setOnClickListener(mTabClickListener);
         return tabView;
     }
 
     public void addTab(ActionBar.Tab tab) {
         final boolean isFirst = mTabLayout.getChildCount() == 0;
-        final TabView tabView = createTabView(tab);
+        View tabView = createTabView(tab);
         mTabLayout.addView(tabView);
         if (isFirst) {
             tabView.setSelected(true);
         }
     }
 
-    public void insertTab(ActionBar.Tab tab, int position) {
+    public void addTab(ActionBar.Tab tab, int position) {
         final boolean isFirst = mTabLayout.getChildCount() == 0;
         final TabView tabView = createTabView(tab);
         mTabLayout.addView(tabView, position);
@@ -595,8 +606,8 @@ public class ActionBarView extends ViewGroup {
             }
             break;
         case ActionBar.NAVIGATION_MODE_TABS:
-            if (mTabLayout != null) {
-                mTabLayout.measure(
+            if (mTabScrollView != null) {
+                mTabScrollView.measure(
                         MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
                         MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
             }
@@ -663,8 +674,8 @@ public class ActionBarView extends ViewGroup {
             }
             break;
         case ActionBar.NAVIGATION_MODE_TABS:
-            if (mTabLayout != null) {
-                x += positionChild(mTabLayout, x, y, contentHeight) + mSpacing;
+            if (mTabScrollView != null) {
+                x += positionChild(mTabScrollView, x, y, contentHeight) + mSpacing;
             }
         }
 
@@ -703,31 +714,36 @@ public class ActionBarView extends ViewGroup {
             super(context);
             mTab = tab;
 
-            // TODO Style tabs based on the theme
+            final View custom = tab.getCustomView();
+            if (custom != null) {
+                addView(custom);
+            } else {
+                // TODO Style tabs based on the theme
 
-            final Drawable icon = tab.getIcon();
-            final CharSequence text = tab.getText();
+                final Drawable icon = tab.getIcon();
+                final CharSequence text = tab.getText();
 
-            if (icon != null) {
-                ImageView iconView = new ImageView(context);
-                iconView.setImageDrawable(icon);
-                LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
-                        LayoutParams.WRAP_CONTENT);
-                lp.gravity = Gravity.CENTER_VERTICAL;
-                iconView.setLayoutParams(lp);
-                addView(iconView);
-            }
+                if (icon != null) {
+                    ImageView iconView = new ImageView(context);
+                    iconView.setImageDrawable(icon);
+                    LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+                            LayoutParams.WRAP_CONTENT);
+                    lp.gravity = Gravity.CENTER_VERTICAL;
+                    iconView.setLayoutParams(lp);
+                    addView(iconView);
+                }
 
-            if (text != null) {
-                TextView textView = new TextView(context);
-                textView.setText(text);
-                textView.setSingleLine();
-                textView.setEllipsize(TruncateAt.END);
-                LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
-                        LayoutParams.WRAP_CONTENT);
-                lp.gravity = Gravity.CENTER_VERTICAL;
-                textView.setLayoutParams(lp);
-                addView(textView);
+                if (text != null) {
+                    TextView textView = new TextView(context);
+                    textView.setText(text);
+                    textView.setSingleLine();
+                    textView.setEllipsize(TruncateAt.END);
+                    LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+                            LayoutParams.WRAP_CONTENT);
+                    lp.gravity = Gravity.CENTER_VERTICAL;
+                    textView.setLayoutParams(lp);
+                    addView(textView);
+                }
             }
 
             setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,

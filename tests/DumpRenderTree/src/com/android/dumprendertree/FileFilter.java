@@ -81,8 +81,10 @@ public class FileFilter {
         // http://b/issue?id=2889595
         "ietestcenter/Javascript/15.4.4.15-3-29.html", // hangs the layout tests
         // http://b/issue?id=2889596
-        "ietestcenter/Javascript/15.4.4.15-3-8.html" // hangs the layout tests
+        "ietestcenter/Javascript/15.4.4.15-3-8.html", // hangs the layout tests
         // http://b/issue?id=2889598
+        "http/tests/xmlhttprequest/simple-cross-origin-progress-events.html", // runs webcore into bad state
+        // http://b/2982500
     };
 
     static void fillIgnoreResultList() {

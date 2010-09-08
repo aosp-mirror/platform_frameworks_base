@@ -1265,7 +1265,13 @@
   <public type="drawable" name="presence_audio_online" id="0x010800b1" />
   <public-padding type="drawable" name="kraken_resource_pad" end="0x01080100" />
 
+  <public type="style" name="TextAppearance.StatusBar.Title" id="0x01030065" />
+  <public type="style" name="TextAppearance.StatusBar.Icon" id="0x01030066" />
+  <public type="style" name="TextAppearance.StatusBar.EventContent" id="0x01030067" />
+  <public type="style" name="TextAppearance.StatusBar.EventContent.Title" id="0x01030068" />
+
   <public-padding type="style" name="kraken_resource_pad" end="0x01030090" />
+
   <public-padding type="string" name="kraken_resource_pad" end="0x01040020" />
   <public-padding type="integer" name="kraken_resource_pad" end="0x010e0010" />
   <public-padding type="layout" name="kraken_resource_pad" end="0x01090020" />

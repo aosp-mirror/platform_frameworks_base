@@ -31,6 +31,7 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
@@ -126,6 +127,13 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * or have hard boundaries at the beginning and end
      */
     boolean mShouldLoop = true;
+
+    /**
+     * The width and height of some child, used as a size reference in-case our
+     * dimensions are unspecified by the parent.
+     */
+    int mReferenceChildWidth = -1;
+    int mReferenceChildHeight = -1;
 
     /**
      * TODO: Animation stuff is still in flux, waiting on the new framework to settle a bit.
@@ -414,7 +422,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                         FrameLayout fl = new FrameLayout(mContext);
                         fl.addView(newView);
                         mActiveViews[index] = fl;
-                        addViewInLayout(fl, -1, createOrReuseLayoutParams(fl));
+                        addChild(fl);
                         applyTransformForChildAtIndex(fl, newRelativeIndex);
                         animateViewForTransition(-1, newRelativeIndex, fl);
                     }
@@ -451,6 +459,64 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         }
     }
 
+    private void addChild(View child) {
+        addViewInLayout(child, -1, createOrReuseLayoutParams(child));
+
+        // This code is used to obtain a reference width and height of a child in case we need
+        // to decide our own size. TODO: Do we want to update the size of the child that we're
+        // using for reference size? If so, when?
+        if (mReferenceChildWidth == -1 || mReferenceChildHeight == -1) {
+            int measureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+            child.measure(measureSpec, measureSpec);
+            mReferenceChildWidth = child.getMeasuredWidth();
+            mReferenceChildHeight = child.getMeasuredHeight();
+        }
+    }
+
+    private void measureChildren() {
+        final int count = getChildCount();
+        final int childWidth = mMeasuredWidth - mPaddingLeft - mPaddingRight;
+        final int childHeight = mMeasuredHeight - mPaddingTop - mPaddingBottom;
+
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            child.measure(MeasureSpec.makeMeasureSpec(childWidth, MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(childHeight, MeasureSpec.EXACTLY));
+        }
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int widthSpecSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightSpecSize = MeasureSpec.getSize(heightMeasureSpec);
+        final int widthSpecMode = MeasureSpec.getMode(widthMeasureSpec);
+        final int heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
+
+        boolean haveChildRefSize = (mReferenceChildWidth != -1 && mReferenceChildHeight != -1);
+
+        // We need to deal with the case where our parent hasn't told us how
+        // big we should be. In this case we try to use the desired size of the first
+        // child added.
+        if (heightSpecMode == MeasureSpec.UNSPECIFIED) {
+            heightSpecSize = haveChildRefSize ? mReferenceChildHeight + mPaddingTop +
+                    mPaddingBottom : 0;
+        } else if (heightSpecMode == MeasureSpec.AT_MOST) {
+            heightSpecSize = haveChildRefSize ? Math.min(mReferenceChildHeight + mPaddingTop +
+                    mPaddingBottom, heightSpecSize) : 0;
+        }
+
+        if (widthSpecMode == MeasureSpec.UNSPECIFIED) {
+            widthSpecSize = haveChildRefSize ? mReferenceChildWidth + mPaddingLeft +
+                    mPaddingRight : 0;
+        } else if (heightSpecMode == MeasureSpec.AT_MOST) {
+            widthSpecSize = haveChildRefSize ? Math.min(mReferenceChildWidth + mPaddingLeft +
+                    mPaddingRight, widthSpecSize) : 0;
+        }
+
+        setMeasuredDimension(widthSpecSize, heightSpecSize);
+        measureChildren();
+    }
+
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         boolean dataChanged = mDataChanged;
@@ -472,8 +538,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
             int childRight = mPaddingLeft + child.getMeasuredWidth();
             int childBottom = mPaddingTop + child.getMeasuredHeight();
 
-            child.layout(mPaddingLeft, mPaddingTop,
-                    childRight, childBottom);
+            child.layout(mPaddingLeft, mPaddingTop, childRight, childBottom);
         }
         mDataChanged = false;
     }
@@ -536,31 +601,6 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         // set mWhichChild
         mWhichChild = ss.whichChild;
         setDisplayedChild(mWhichChild);
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int count = getChildCount();
-
-        int widthSpecSize = MeasureSpec.getSize(widthMeasureSpec);
-        int heightSpecSize = MeasureSpec.getSize(heightMeasureSpec);
-
-        for (int i = 0; i < count; i++) {
-            final View child = getChildAt(i);
-
-            final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-
-            lp.width = widthSpecSize - mPaddingLeft - mPaddingRight;
-            lp.height = heightSpecSize - mPaddingTop - mPaddingBottom;
-
-            int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(lp.width,
-                    MeasureSpec.EXACTLY);
-            int childheightMeasureSpec = MeasureSpec.makeMeasureSpec(lp.height,
-                    MeasureSpec.EXACTLY);
-
-            child.measure(childWidthMeasureSpec, childheightMeasureSpec);
-        }
-        setMeasuredDimension(widthSpecSize, heightSpecSize);
     }
 
     /**

@@ -46,6 +46,10 @@ int root(int launchID) {
     rsgClearDepth(1.0f);
 
     rsgBindProgramVertex(gPVBackground);
+    rs_matrix4x4 proj;
+    float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
+    rsMatrixLoadPerspective(&proj, 30.0f, aspect, 0.1f, 100.0f);
+    rsgProgramVertexLoadProjectionMatrix(&proj);
 
     rsgBindProgramFragment(gPFBackground);
     rsgBindProgramStore(gPFSBackground);
@@ -54,9 +58,9 @@ int root(int launchID) {
     rs_matrix4x4 matrix;
     rsMatrixLoadIdentity(&matrix);
     // Position our model on the screen
-    rsMatrixTranslate(&matrix, 0.0f, -0.3f, 1.2f);
+    rsMatrixTranslate(&matrix, 0.0f, -0.3f, -10.0f);
     rsMatrixScale(&matrix, 0.2f, 0.2f, 0.2f);
-    rsMatrixRotate(&matrix, -25.0f, 1.0f, 0.0f, 0.0f);
+    rsMatrixRotate(&matrix, 25.0f, 1.0f, 0.0f, 0.0f);
     rsMatrixRotate(&matrix, gRotate, 0.0f, 1.0f, 0.0f);
     rsgProgramVertexLoadModelMatrix(&matrix);
 

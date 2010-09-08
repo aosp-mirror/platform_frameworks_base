@@ -152,9 +152,9 @@ public class RenderScript {
     synchronized int nElementCreate(int type, int kind, boolean norm, int vecSize) {
         return rsnElementCreate(mContext, type, kind, norm, vecSize);
     }
-    native int  rsnElementCreate2(int con, int[] elements, String[] names);
-    synchronized int nElementCreate2(int[] elements, String[] names) {
-        return rsnElementCreate2(mContext, elements, names);
+    native int  rsnElementCreate2(int con, int[] elements, String[] names, int[] arraySizes);
+    synchronized int nElementCreate2(int[] elements, String[] names, int[] arraySizes) {
+        return rsnElementCreate2(mContext, elements, names, arraySizes);
     }
     native void rsnElementGetNativeData(int con, int id, int[] elementData);
     synchronized void nElementGetNativeData(int id, int[] elementData) {

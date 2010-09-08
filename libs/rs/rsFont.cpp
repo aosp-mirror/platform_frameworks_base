@@ -488,8 +488,9 @@ void FontState::initVertexArrayBuffers()
     size_t lengths[2];
     lengths[0] = posName.size();
     lengths[1] = texName.size();
+    uint32_t arraySizes[2] = {1, 1};
 
-    const Element *vertexDataElem = Element::create(mRSC, 2, elemArray, nameArray, lengths);
+    const Element *vertexDataElem = Element::create(mRSC, 2, elemArray, nameArray, lengths, arraySizes);
 
     Type *vertexDataType = new Type(mRSC);
     vertexDataType->setDimX(mMaxNumberOfQuads * 4);

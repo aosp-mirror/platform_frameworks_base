@@ -323,54 +323,54 @@ class ContextImpl extends Context {
     @Override
     public SharedPreferences getSharedPreferences(String name, int mode) {
         SharedPreferencesImpl sp;
+        File prefsFile;
+        boolean needInitialLoad = false;
         synchronized (sSharedPrefs) {
             sp = sSharedPrefs.get(name);
-            if (sp != null && !sp.hasFileChanged()) {
-                //Log.i(TAG, "Returning existing prefs " + name + ": " + sp);
+            if (sp != null && !sp.hasFileChangedUnexpectedly()) {
                 return sp;
             }
-        }
-        File f = getSharedPrefsFile(name);
-        FileInputStream str = null;
-        File backup = makeBackupFile(f);
-        if (backup.exists()) {
-            f.delete();
-            backup.renameTo(f);
-        }
-
-        // Debugging
-        if (f.exists() && !f.canRead()) {
-            Log.w(TAG, "Attempt to read preferences file " + f + " without permission");
-        }
-
-        Map map = null;
-        if (f.exists() && f.canRead()) {
-            try {
-                str = new FileInputStream(f);
-                map = XmlUtils.readMapXml(str);
-                str.close();
-            } catch (org.xmlpull.v1.XmlPullParserException e) {
-                Log.w(TAG, "getSharedPreferences", e);
-            } catch (FileNotFoundException e) {
-                Log.w(TAG, "getSharedPreferences", e);
-            } catch (IOException e) {
-                Log.w(TAG, "getSharedPreferences", e);
+            prefsFile = getSharedPrefsFile(name);
+            if (sp == null) {
+                sp = new SharedPreferencesImpl(prefsFile, mode, null);
+                sSharedPrefs.put(name, sp);
+                needInitialLoad = true;
             }
         }
 
-        synchronized (sSharedPrefs) {
-            if (sp != null) {
-                //Log.i(TAG, "Updating existing prefs " + name + " " + sp + ": " + map);
-                sp.replace(map);
-            } else {
-                sp = sSharedPrefs.get(name);
-                if (sp == null) {
-                    sp = new SharedPreferencesImpl(f, mode, map);
-                    sSharedPrefs.put(name, sp);
+        synchronized (sp) {
+            if (needInitialLoad && sp.isLoaded()) {
+                // lost the race to load; another thread handled it
+                return sp;
+            }
+            File backup = makeBackupFile(prefsFile);
+            if (backup.exists()) {
+                prefsFile.delete();
+                backup.renameTo(prefsFile);
+            }
+
+            // Debugging
+            if (prefsFile.exists() && !prefsFile.canRead()) {
+                Log.w(TAG, "Attempt to read preferences file " + prefsFile + " without permission");
+            }
+
+            Map map = null;
+            if (prefsFile.exists() && prefsFile.canRead()) {
+                try {
+                    FileInputStream str = new FileInputStream(prefsFile);
+                    map = XmlUtils.readMapXml(str);
+                    str.close();
+                } catch (org.xmlpull.v1.XmlPullParserException e) {
+                    Log.w(TAG, "getSharedPreferences", e);
+                } catch (FileNotFoundException e) {
+                    Log.w(TAG, "getSharedPreferences", e);
+                } catch (IOException e) {
+                    Log.w(TAG, "getSharedPreferences", e);
                 }
             }
-            return sp;
+            sp.replace(map);
         }
+        return sp;
     }
 
     private File getPreferencesDir() {
@@ -2718,6 +2718,10 @@ class ContextImpl extends Context {
 
     private static final class SharedPreferencesImpl implements SharedPreferences {
 
+        // Lock ordering rules:
+        //  - acquire SharedPreferencesImpl.this before EditorImpl.this
+        //  - acquire mWritingToDiskLock before EditorImpl.this
+
         private final File mFile;
         private final File mBackupFile;
         private final int mMode;
@@ -2725,6 +2729,7 @@ class ContextImpl extends Context {
         private Map<String, Object> mMap;  // guarded by 'this'
         private long mTimestamp;  // guarded by 'this'
         private int mDiskWritesInFlight = 0;  // guarded by 'this'
+        private boolean mLoaded = false;  // guarded by 'this'
 
         private final Object mWritingToDiskLock = new Object();
         private static final Object mContent = new Object();
@@ -2735,6 +2740,7 @@ class ContextImpl extends Context {
             mFile = file;
             mBackupFile = makeBackupFile(file);
             mMode = mode;
+            mLoaded = initialContents != null;
             mMap = initialContents != null ? initialContents : new HashMap<String, Object>();
             FileStatus stat = new FileStatus();
             if (FileUtils.getFileStatus(file.getPath(), stat)) {
@@ -2743,7 +2749,23 @@ class ContextImpl extends Context {
             mListeners = new WeakHashMap<OnSharedPreferenceChangeListener, Object>();
         }
 
-        public boolean hasFileChanged() {
+        // Has this SharedPreferences ever had values assigned to it?
+        boolean isLoaded() {
+            synchronized (this) {
+                return mLoaded;
+            }
+        }
+
+        // Has the file changed out from under us?  i.e. writes that
+        // we didn't instigate.
+        public boolean hasFileChangedUnexpectedly() {
+            synchronized (this) {
+                if (mDiskWritesInFlight > 0) {
+                    // If we know we caused it, it's not unexpected.
+                    Log.d(TAG, "disk write in flight, not unexpected.");
+                    return false;
+                }
+            }
             FileStatus stat = new FileStatus();
             if (!FileUtils.getFileStatus(mFile.getPath(), stat)) {
                 return true;
@@ -2754,8 +2776,9 @@ class ContextImpl extends Context {
         }
 
         public void replace(Map newContents) {
-            if (newContents != null) {
-                synchronized (this) {
+            synchronized (this) {
+                mLoaded = true;
+                if (newContents != null) {
                     mMap = newContents;
                 }
             }
