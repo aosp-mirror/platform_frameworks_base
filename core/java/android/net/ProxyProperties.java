@@ -21,6 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 /**
@@ -29,8 +30,7 @@ import java.net.UnknownHostException;
  */
 public class ProxyProperties implements Parcelable {
 
-    private InetAddress mProxy;
-    private int mPort;
+    private InetSocketAddress mProxy;
     private String mExclusionList;
 
     public ProxyProperties() {
@@ -39,8 +39,7 @@ public class ProxyProperties implements Parcelable {
     // copy constructor instead of clone
     public ProxyProperties(ProxyProperties source) {
         if (source != null) {
-            mProxy = source.getAddress();
-            mPort = source.getPort();
+            mProxy = source.getSocketAddress();
             String exclusionList = source.getExclusionList();
             if (exclusionList != null) {
                 mExclusionList = new String(exclusionList);
@@ -48,20 +47,12 @@ public class ProxyProperties implements Parcelable {
         }
     }
 
-    public InetAddress getAddress() {
+    public InetSocketAddress getSocketAddress() {
         return mProxy;
     }
 
-    public void setAddress(InetAddress proxy) {
+    public void setSocketAddress(InetSocketAddress proxy) {
         mProxy = proxy;
-    }
-
-    public int getPort() {
-        return mPort;
-    }
-
-    public void setPort(int port) {
-        mPort = port;
     }
 
     public String getExclusionList() {
@@ -76,7 +67,7 @@ public class ProxyProperties implements Parcelable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         if (mProxy != null) {
-            sb.append(mProxy.getHostAddress()).append(":").append(mPort);
+            sb.append(mProxy.toString());
             if (mExclusionList != null) {
                     sb.append(" xl=").append(mExclusionList);
             }
@@ -98,13 +89,15 @@ public class ProxyProperties implements Parcelable {
      */
     public void writeToParcel(Parcel dest, int flags) {
         if (mProxy != null) {
-            dest.writeByte((byte)1);
-            dest.writeString(mProxy.getHostName());
-            dest.writeByteArray(mProxy.getAddress());
+            InetAddress addr = mProxy.getAddress();
+            if (addr != null) {
+                dest.writeByte((byte)1);
+                dest.writeByteArray(addr.getAddress());
+                dest.writeInt(mProxy.getPort());
+            }
         } else {
             dest.writeByte((byte)0);
         }
-        dest.writeInt(mPort);
         dest.writeString(mExclusionList);
     }
 
@@ -118,11 +111,10 @@ public class ProxyProperties implements Parcelable {
                 ProxyProperties proxyProperties = new ProxyProperties();
                 if (in.readByte() == 1) {
                     try {
-                        proxyProperties.setAddress(InetAddress.getByAddress(in.readString(),
-                                in.createByteArray()));
-                    } catch (UnknownHostException e) {}
+                        InetAddress addr = InetAddress.getByAddress(in.createByteArray());
+                        proxyProperties.setSocketAddress(new InetSocketAddress(addr, in.readInt()));
+                    } catch (UnknownHostException e) { }
                 }
-                proxyProperties.setPort(in.readInt());
                 proxyProperties.setExclusionList(in.readString());
                 return proxyProperties;
             }

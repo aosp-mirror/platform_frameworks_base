@@ -46,6 +46,8 @@ public final class Proxy {
     // Set to true to enable extra debugging.
     private static final boolean DEBUG = false;
 
+    // Used to notify an app that's caching the default connection proxy
+    // that either the default connection or its proxy has changed
     public static final String PROXY_CHANGE_ACTION =
         "android.intent.action.PROXY_CHANGE";
 
@@ -74,9 +76,10 @@ public final class Proxy {
         EXCLLIST_PATTERN = Pattern.compile(EXCLLIST_REGEXP);
     }
 
+    // useful because it holds the processed exclusion list - don't want to reparse it each time
     private static class ProxySpec {
         String[] exclusionList = null;
-        InetSocketAddress proxyAddress = null;
+        InetSocketAddress address = null;
         public ProxySpec() { };
     }
 
@@ -151,7 +154,7 @@ public final class Proxy {
                     retval = java.net.Proxy.NO_PROXY;
                 } else {
                     retval =
-                        new java.net.Proxy(java.net.Proxy.Type.HTTP, sGlobalProxySpec.proxyAddress);
+                        new java.net.Proxy(java.net.Proxy.Type.HTTP, sGlobalProxySpec.address);
                 }
             } else {
                 // If network is WiFi, return no proxy.
@@ -187,7 +190,7 @@ public final class Proxy {
                 parseGlobalProxyInfoReadLocked(ctx);
             }
             if (sGlobalProxySpec != null) {
-                InetSocketAddress sa = sGlobalProxySpec.proxyAddress;
+                InetSocketAddress sa = sGlobalProxySpec.address;
                 return sa.getHostName();
             }
             return getDefaultHost();
@@ -210,7 +213,7 @@ public final class Proxy {
                 parseGlobalProxyInfoReadLocked(ctx);
             }
             if (sGlobalProxySpec != null) {
-                InetSocketAddress sa = sGlobalProxySpec.proxyAddress;
+                InetSocketAddress sa = sGlobalProxySpec.address;
                 return sa.getPort();
             }
             return getDefaultPort();
@@ -389,7 +392,7 @@ public final class Proxy {
         int port = parsePort(proxyHost);
         if (proxyHost != null) {
             sGlobalProxySpec = new ProxySpec();
-            sGlobalProxySpec.proxyAddress = new InetSocketAddress(host, port);
+            sGlobalProxySpec.address= new InetSocketAddress(host, port);
             if ((exclusionListSpec != null) && (exclusionListSpec.length() != 0)) {
                 String[] exclusionListEntries = exclusionListSpec.toLowerCase().split(",");
                 String[] processedEntries = new String[exclusionListEntries.length];
