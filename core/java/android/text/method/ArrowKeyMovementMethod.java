@@ -34,7 +34,7 @@ public class ArrowKeyMovementMethod implements MovementMethod {
      * An optional controller for the cursor.
      * Use {@link #setCursorController(CursorController)} to set this field.
      */
-    protected CursorController mCursorController;
+    private CursorController mCursorController;
 
     private boolean isCap(Spannable buffer) {
         return ((MetaKeyKeyListener.getMetaState(buffer, KeyEvent.META_SHIFT_ON) == 1) ||
@@ -302,7 +302,17 @@ public class ArrowKeyMovementMethod implements MovementMethod {
     /**
      * Defines the cursor controller.
      *
-     * When set, this object can be used to handle events, that can be translated in cursor updates.
+     * When set, this object can be used to handle touch events, that can be translated into cursor
+     * updates.
+     *
+     * {@link MotionEvent#ACTION_MOVE} events will call back the 
+     * {@link CursorController#updatePosition(int, int)} controller's method, passing the current
+     * finger coordinates (offset by {@link CursorController#getOffsetX()} and
+     * {@link CursorController#getOffsetY()}) as parameters. 
+     *
+     * When the gesture is finished (on a {@link MotionEvent#ACTION_UP} or
+     * {@link MotionEvent#ACTION_CANCEL} event), the controller is reset to null.
+     *
      * @param cursorController A cursor controller implementation
      */
     public void setCursorController(CursorController cursorController) {
