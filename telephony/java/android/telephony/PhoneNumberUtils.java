@@ -141,7 +141,7 @@ public class PhoneNumberUtils
         Uri uri = intent.getData();
         String scheme = uri.getScheme();
 
-        if (scheme.equals("tel")) {
+        if (scheme.equals("tel") || scheme.equals("sip")) {
             return uri.getSchemeSpecificPart();
         }
 
