@@ -169,8 +169,8 @@ static jmethodID gBitmap_allocBufferMethodID;
 static jclass   gBitmapConfig_class;
 static jfieldID gBitmapConfig_nativeInstanceID;
 
-static jclass   gBitmapRegionDecoder_class;
-static jmethodID gBitmapRegionDecoder_constructorMethodID;
+static jclass   gLargeBitmap_class;
+static jmethodID gLargeBitmap_constructorMethodID;
 
 static jclass   gCanvas_class;
 static jfieldID gCanvas_nativeInstanceID;
@@ -377,18 +377,17 @@ jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, bool isMutable,
     }
     return obj;
 }
-
-jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap)
+jobject GraphicsJNI::createLargeBitmap(JNIEnv* env, SkLargeBitmap* bitmap)
 {
     SkASSERT(bitmap != NULL);
 
-    jobject obj = env->AllocObject(gBitmapRegionDecoder_class);
+    jobject obj = env->AllocObject(gLargeBitmap_class);
     if (hasException(env)) {
         obj = NULL;
         return obj;
     }
     if (obj) {
-        env->CallVoidMethod(obj, gBitmapRegionDecoder_constructorMethodID, (jint)bitmap);
+        env->CallVoidMethod(obj, gLargeBitmap_constructorMethodID, (jint)bitmap);
         if (hasException(env)) {
             obj = NULL;
         }
@@ -614,8 +613,8 @@ int register_android_graphics_Graphics(JNIEnv* env)
     gBitmap_constructorMethodID = env->GetMethodID(gBitmap_class, "<init>",
                                             "(IZ[BI)V");
 
-    gBitmapRegionDecoder_class = make_globalref(env, "android/graphics/BitmapRegionDecoder");
-    gBitmapRegionDecoder_constructorMethodID = env->GetMethodID(gBitmapRegionDecoder_class, "<init>", "(I)V");
+    gLargeBitmap_class = make_globalref(env, "android/graphics/LargeBitmap");
+    gLargeBitmap_constructorMethodID = env->GetMethodID(gLargeBitmap_class, "<init>", "(I)V");
 
     gBitmapConfig_class = make_globalref(env, "android/graphics/Bitmap$Config");
     gBitmapConfig_nativeInstanceID = getFieldIDCheck(env, gBitmapConfig_class,
@@ -655,3 +654,4 @@ int register_android_graphics_Graphics(JNIEnv* env)
 
     return 0;
 }
+
