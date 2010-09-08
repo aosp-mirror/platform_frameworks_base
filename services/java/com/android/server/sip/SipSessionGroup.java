@@ -123,6 +123,7 @@ class SipSessionGroup implements SipListener {
         properties.setProperty("javax.sip.STACK_NAME", getStackName());
         String outboundProxy = myself.getProxyAddress();
         if (!TextUtils.isEmpty(outboundProxy)) {
+            Log.v(TAG, "outboundProxy is " + outboundProxy);
             properties.setProperty("javax.sip.OUTBOUND_PROXY", outboundProxy
                     + ":" + myself.getPort() + "/" + myself.getProtocol());
         }
