@@ -520,6 +520,10 @@ public class LayoutTransition {
         staggerDelay = 0;
 
         final ViewTreeObserver observer = parent.getViewTreeObserver(); // used for later cleanup
+        if (!observer.isAlive()) {
+            // If the observer's not in a good state, skip the transition
+            return;
+        }
         int numChildren = parent.getChildCount();
 
         for (int i = 0; i < numChildren; ++i) {
@@ -607,7 +611,7 @@ public class LayoutTransition {
         // layout listeners.
         observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             public boolean onPreDraw() {
-                observer.removeOnPreDrawListener(this);
+                parent.getViewTreeObserver().removeOnPreDrawListener(this);
                 int numChildren = parent.getChildCount();
                 for (int i = 0; i < numChildren; ++i) {
                     final View child = parent.getChildAt(i);
