@@ -1751,24 +1751,28 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             p.println("  mSystemReady=" + mSystemReady + " mScreenOn=" + mScreenOn);
         }
 
+        p.println(" ");
         if (client != null) {
-            p.println(" ");
             pw.flush();
             try {
                 client.client.asBinder().dump(fd, args);
             } catch (RemoteException e) {
                 p.println("Input method client dead: " + e);
             }
+        } else {
+            p.println("No input method client.");
         }
 
+        p.println(" ");
         if (method != null) {
-            p.println(" ");
             pw.flush();
             try {
                 method.asBinder().dump(fd, args);
             } catch (RemoteException e) {
                 p.println("Input method service dead: " + e);
             }
+        } else {
+            p.println("No input method service.");
         }
     }
 }

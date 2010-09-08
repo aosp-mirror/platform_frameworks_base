@@ -72,52 +72,12 @@ status_t InputManager::stop() {
     return OK;
 }
 
-status_t InputManager::registerInputChannel(const sp<InputChannel>& inputChannel) {
-    return mDispatcher->registerInputChannel(inputChannel);
+sp<InputReaderInterface> InputManager::getReader() {
+    return mReader;
 }
 
-status_t InputManager::unregisterInputChannel(const sp<InputChannel>& inputChannel) {
-    return mDispatcher->unregisterInputChannel(inputChannel);
-}
-
-int32_t InputManager::injectInputEvent(const InputEvent* event,
-        int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis) {
-    return mDispatcher->injectInputEvent(event, injectorPid, injectorUid, syncMode, timeoutMillis);
-}
-
-void InputManager::preemptInputDispatch() {
-    mDispatcher->preemptInputDispatch();
-}
-
-void InputManager::getInputConfiguration(InputConfiguration* outConfiguration) {
-    mReader->getInputConfiguration(outConfiguration);
-}
-
-status_t InputManager::getInputDeviceInfo(int32_t deviceId, InputDeviceInfo* outDeviceInfo) {
-    return mReader->getInputDeviceInfo(deviceId, outDeviceInfo);
-}
-
-void InputManager::getInputDeviceIds(Vector<int32_t>& outDeviceIds) {
-    mReader->getInputDeviceIds(outDeviceIds);
-}
-
-int32_t InputManager::getScanCodeState(int32_t deviceId, uint32_t sourceMask,
-        int32_t scanCode) {
-    return mReader->getScanCodeState(deviceId, sourceMask, scanCode);
-}
-
-int32_t InputManager::getKeyCodeState(int32_t deviceId, uint32_t sourceMask,
-        int32_t keyCode) {
-    return mReader->getKeyCodeState(deviceId, sourceMask, keyCode);
-}
-
-int32_t InputManager::getSwitchState(int32_t deviceId, uint32_t sourceMask, int32_t sw) {
-    return mReader->getSwitchState(deviceId, sourceMask, sw);
-}
-
-bool InputManager::hasKeys(int32_t deviceId, uint32_t sourceMask,
-        size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags) {
-    return mReader->hasKeys(deviceId, sourceMask, numCodes, keyCodes, outFlags);
+sp<InputDispatcherInterface> InputManager::getDispatcher() {
+    return mDispatcher;
 }
 
 } // namespace android
