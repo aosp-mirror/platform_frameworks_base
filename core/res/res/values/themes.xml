@@ -199,6 +199,9 @@
         <item name="quickContactBadgeStyleSmallWindowSmall">@android:style/Widget.QuickContactBadgeSmall.WindowSmall</item>
         <item name="quickContactBadgeStyleSmallWindowMedium">@android:style/Widget.QuickContactBadgeSmall.WindowMedium</item>
         <item name="quickContactBadgeStyleSmallWindowLarge">@android:style/Widget.QuickContactBadgeSmall.WindowLarge</item>
+        <item name="actionBarTabStyle">@style/Widget.ActionBarView_TabView</item>
+        <item name="actionBarTabBarStyle">@style/Widget.ActionBarView_TabBar</item>
+        <item name="actionBarTabTextStyle">@style/Widget.ActionBarView_TabText</item>
         
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.PreferenceScreen</item>

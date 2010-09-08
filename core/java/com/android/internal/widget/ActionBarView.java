@@ -371,7 +371,8 @@ public class ActionBarView extends ViewGroup {
                 break;
             case ActionBar.NAVIGATION_MODE_TABS:
                 mTabScrollView = new HorizontalScrollView(getContext());
-                mTabLayout = new LinearLayout(getContext());
+                mTabLayout = new LinearLayout(getContext(), null,
+                        com.android.internal.R.attr.actionBarTabBarStyle);
                 mTabScrollView.addView(mTabLayout);
                 addView(mTabScrollView);
                 break;
@@ -609,7 +610,7 @@ public class ActionBarView extends ViewGroup {
             if (mTabScrollView != null) {
                 mTabScrollView.measure(
                         MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
-                        MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
+                        MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
             }
             break;
         }
@@ -711,7 +712,7 @@ public class ActionBarView extends ViewGroup {
         private ActionBar.Tab mTab;
 
         public TabView(Context context, ActionBar.Tab tab) {
-            super(context);
+            super(context, null, com.android.internal.R.attr.actionBarTabStyle);
             mTab = tab;
 
             final View custom = tab.getCustomView();
@@ -734,7 +735,8 @@ public class ActionBarView extends ViewGroup {
                 }
 
                 if (text != null) {
-                    TextView textView = new TextView(context);
+                    TextView textView = new TextView(context, null,
+                            com.android.internal.R.attr.actionBarTabTextStyle);
                     textView.setText(text);
                     textView.setSingleLine();
                     textView.setEllipsize(TruncateAt.END);
