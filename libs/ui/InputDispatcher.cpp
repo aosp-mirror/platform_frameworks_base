@@ -392,9 +392,11 @@ void InputDispatcher::processKeyRepeatLockedInterruptible(
 void InputDispatcher::processMotionLockedInterruptible(
         nsecs_t currentTime, MotionEntry* entry) {
 #if DEBUG_OUTBOUND_EVENT_DETAILS
-    LOGD("processMotion - eventTime=%lld, deviceId=0x%x, source=0x%x, policyFlags=0x%x, action=0x%x, "
+    LOGD("processMotion - eventTime=%lld, deviceId=0x%x, source=0x%x, policyFlags=0x%x, "
+            "action=0x%x, flags=0x%x, "
             "metaState=0x%x, edgeFlags=0x%x, xPrecision=%f, yPrecision=%f, downTime=%lld",
-            entry->eventTime, entry->deviceId, entry->source, entry->policyFlags, entry->action,
+            entry->eventTime, entry->deviceId, entry->source, entry->policyFlags,
+            entry->action, entry->flags,
             entry->metaState, entry->edgeFlags, entry->xPrecision, entry->yPrecision,
             entry->downTime);
 
@@ -406,7 +408,7 @@ void InputDispatcher::processMotionLockedInterruptible(
     }
     for (uint32_t i = 0; i < entry->pointerCount; i++) {
         LOGD("  Pointer %d: id=%d, x=%f, y=%f, pressure=%f, size=%f, "
-                "touchMajor=%f, touchMinor=%d, toolMajor=%f, toolMinor=%f, "
+                "touchMajor=%f, touchMinor=%f, toolMajor=%f, toolMinor=%f, "
                 "orientation=%f",
                 i, entry->pointerIds[i],
                 sample->pointerCoords[i].x, sample->pointerCoords[i].y,
@@ -465,7 +467,7 @@ void InputDispatcher::identifyInputTargetsAndDispatchMotionLockedInterruptible(
     mCurrentInputTargetsValid = false;
     mLock.unlock();
 
-    mReusableMotionEvent.initialize(entry->deviceId, entry->source, entry->action,
+    mReusableMotionEvent.initialize(entry->deviceId, entry->source, entry->action, entry->flags,
             entry->edgeFlags, entry->metaState,
             0, 0, entry->xPrecision, entry->yPrecision,
             entry->downTime, entry->eventTime, entry->pointerCount, entry->pointerIds,
@@ -698,11 +700,15 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
 
         // Apply target flags.
         int32_t action = motionEntry->action;
+        int32_t flags = motionEntry->flags;
         if (dispatchEntry->targetFlags & InputTarget::FLAG_OUTSIDE) {
             action = AMOTION_EVENT_ACTION_OUTSIDE;
         }
         if (dispatchEntry->targetFlags & InputTarget::FLAG_CANCEL) {
             action = AMOTION_EVENT_ACTION_CANCEL;
+        }
+        if (dispatchEntry->targetFlags & InputTarget::FLAG_WINDOW_IS_OBSCURED) {
+            flags |= AMOTION_EVENT_FLAG_WINDOW_IS_OBSCURED;
         }
 
         // If headMotionSample is non-NULL, then it points to the first new sample that we
@@ -726,7 +732,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
 
         // Publish the motion event and the first motion sample.
         status = connection->inputPublisher.publishMotionEvent(motionEntry->deviceId,
-                motionEntry->source, action, motionEntry->edgeFlags, motionEntry->metaState,
+                motionEntry->source, action, flags, motionEntry->edgeFlags, motionEntry->metaState,
                 xOffset, yOffset,
                 motionEntry->xPrecision, motionEntry->yPrecision,
                 motionEntry->downTime, firstMotionSample->eventTime,
@@ -1073,18 +1079,18 @@ void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t sou
 }
 
 void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t source,
-        uint32_t policyFlags, int32_t action, int32_t metaState, int32_t edgeFlags,
+        uint32_t policyFlags, int32_t action, int32_t flags, int32_t metaState, int32_t edgeFlags,
         uint32_t pointerCount, const int32_t* pointerIds, const PointerCoords* pointerCoords,
         float xPrecision, float yPrecision, nsecs_t downTime) {
 #if DEBUG_INBOUND_EVENT_DETAILS
     LOGD("notifyMotion - eventTime=%lld, deviceId=0x%x, source=0x%x, policyFlags=0x%x, "
-            "action=0x%x, metaState=0x%x, edgeFlags=0x%x, xPrecision=%f, yPrecision=%f, "
-            "downTime=%lld",
-            eventTime, deviceId, source, policyFlags, action, metaState, edgeFlags,
+            "action=0x%x, flags=0x%x, metaState=0x%x, edgeFlags=0x%x, "
+            "xPrecision=%f, yPrecision=%f, downTime=%lld",
+            eventTime, deviceId, source, policyFlags, action, flags, metaState, edgeFlags,
             xPrecision, yPrecision, downTime);
     for (uint32_t i = 0; i < pointerCount; i++) {
         LOGD("  Pointer %d: id=%d, x=%f, y=%f, pressure=%f, size=%f, "
-                "touchMajor=%f, touchMinor=%d, toolMajor=%f, toolMinor=%f, "
+                "touchMajor=%f, touchMinor=%f, toolMajor=%f, toolMinor=%f, "
                 "orientation=%f",
                 i, pointerIds[i], pointerCoords[i].x, pointerCoords[i].y,
                 pointerCoords[i].pressure, pointerCoords[i].size,
@@ -1209,7 +1215,7 @@ NoBatchingOrStreaming:;
 
         // Just enqueue a new motion event.
         MotionEntry* newEntry = mAllocator.obtainMotionEntry(eventTime,
-                deviceId, source, policyFlags, action, metaState, edgeFlags,
+                deviceId, source, policyFlags, action, flags, metaState, edgeFlags,
                 xPrecision, yPrecision, downTime,
                 pointerCount, pointerIds, pointerCoords);
 
@@ -1359,7 +1365,7 @@ InputDispatcher::EventEntry* InputDispatcher::createEntryFromInputEventLocked(
     switch (event->getType()) {
     case AINPUT_EVENT_TYPE_KEY: {
         const KeyEvent* keyEvent = static_cast<const KeyEvent*>(event);
-        uint32_t policyFlags = 0; // XXX consider adding a policy flag to track injected events
+        uint32_t policyFlags = POLICY_FLAG_INJECTED;
 
         KeyEntry* keyEntry = mAllocator.obtainKeyEntry(keyEvent->getEventTime(),
                 keyEvent->getDeviceId(), keyEvent->getSource(), policyFlags,
@@ -1371,7 +1377,7 @@ InputDispatcher::EventEntry* InputDispatcher::createEntryFromInputEventLocked(
 
     case AINPUT_EVENT_TYPE_MOTION: {
         const MotionEvent* motionEvent = static_cast<const MotionEvent*>(event);
-        uint32_t policyFlags = 0; // XXX consider adding a policy flag to track injected events
+        uint32_t policyFlags = POLICY_FLAG_INJECTED;
 
         const nsecs_t* sampleEventTimes = motionEvent->getSampleEventTimes();
         const PointerCoords* samplePointerCoords = motionEvent->getSamplePointerCoords();
@@ -1379,7 +1385,8 @@ InputDispatcher::EventEntry* InputDispatcher::createEntryFromInputEventLocked(
 
         MotionEntry* motionEntry = mAllocator.obtainMotionEntry(*sampleEventTimes,
                 motionEvent->getDeviceId(), motionEvent->getSource(), policyFlags,
-                motionEvent->getAction(), motionEvent->getMetaState(), motionEvent->getEdgeFlags(),
+                motionEvent->getAction(), motionEvent->getFlags(),
+                motionEvent->getMetaState(), motionEvent->getEdgeFlags(),
                 motionEvent->getXPrecision(), motionEvent->getYPrecision(),
                 motionEvent->getDownTime(), uint32_t(pointerCount),
                 motionEvent->getPointerIds(), samplePointerCoords);
@@ -1664,7 +1671,7 @@ InputDispatcher::KeyEntry* InputDispatcher::Allocator::obtainKeyEntry(nsecs_t ev
 }
 
 InputDispatcher::MotionEntry* InputDispatcher::Allocator::obtainMotionEntry(nsecs_t eventTime,
-        int32_t deviceId, int32_t source, uint32_t policyFlags, int32_t action,
+        int32_t deviceId, int32_t source, uint32_t policyFlags, int32_t action, int32_t flags,
         int32_t metaState, int32_t edgeFlags, float xPrecision, float yPrecision,
         nsecs_t downTime, uint32_t pointerCount,
         const int32_t* pointerIds, const PointerCoords* pointerCoords) {
@@ -1676,6 +1683,7 @@ InputDispatcher::MotionEntry* InputDispatcher::Allocator::obtainMotionEntry(nsec
     entry->source = source;
     entry->policyFlags = policyFlags;
     entry->action = action;
+    entry->flags = flags;
     entry->metaState = metaState;
     entry->edgeFlags = edgeFlags;
     entry->xPrecision = xPrecision;

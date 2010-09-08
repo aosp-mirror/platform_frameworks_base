@@ -1274,6 +1274,12 @@
              be saved. -->
         <attr name="saveEnabled" format="boolean" />
 
+        <!-- Specifies whether to filter touches when the view's window is obscured by
+             another visible window.  When set to true, the view will not receive touches
+             whenever a toast, dialog or other window appears above the view's window.
+             Refer to the {@link android.view.View} security documentation for more details. -->
+        <attr name="filterTouchesWhenObscured" format="boolean" />
+
         <!-- Defines the quality of translucent drawing caches. This property is used
              only when the drawing cache is enabled and translucent. The default value is auto. -->
         <attr name="drawingCacheQuality">
