@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar;
+package com.android.systemui.recent;
 
 import android.content.Context;
 import android.util.AttributeSet;

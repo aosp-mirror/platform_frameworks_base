@@ -29,7 +29,7 @@
                 android:excludeFromRecents="true">
         </activity>
 
-        <activity android:name=".statusbar.RecentApplicationsActivity"
+        <activity android:name=".recent.RecentApplicationsActivity"
             android:theme="@android:style/Theme.NoTitleBar"
             android:excludeFromRecents="true"
             android:exported="true">
