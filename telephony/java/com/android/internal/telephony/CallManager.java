@@ -466,6 +466,33 @@ public final class CallManager {
     }
 
     /**
+     * Hangup foreground call and resume the specific background call
+     *
+     * Note: this is noop if there is no foreground call or the heldCall is null
+     *
+     * @param heldCall to become foreground
+     * @throws CallStateException
+     */
+    public void hangupForegroundResumeBackground(Call heldCall) throws CallStateException {
+        Phone foregroundPhone = null;
+        Phone backgroundPhone = null;
+
+        if (hasActiveFgCall()) {
+            foregroundPhone = getFgPhone();
+            if (heldCall != null) {
+                backgroundPhone = heldCall.getPhone();
+                if (foregroundPhone == backgroundPhone) {
+                    getActiveFgCall().hangup();
+                } else {
+                // the call to be hangup and resumed belongs to different phones
+                    getActiveFgCall().hangup();
+                    switchHoldingAndActive(heldCall);
+                }
+            }
+        }
+    }
+
+    /**
      * Whether or not the phone can conference in the current phone
      * state--that is, one call holding and one call active.
      * @return true if the phone can conference; false otherwise.
