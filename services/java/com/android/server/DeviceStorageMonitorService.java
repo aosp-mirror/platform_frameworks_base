@@ -69,10 +69,12 @@ class DeviceStorageMonitorService extends Binder {
     private static final int DEFAULT_FREE_STORAGE_LOG_INTERVAL_IN_MINUTES = 12*60; //in minutes
     private static final long DEFAULT_DISK_FREE_CHANGE_REPORTING_THRESHOLD = 2 * 1024 * 1024; // 2MB
     private static final long DEFAULT_CHECK_INTERVAL = MONITOR_INTERVAL*60*1000;
+    private static final int DEFAULT_FULL_THRESHOLD_BYTES = 1024*1024; // 1MB
     private long mFreeMem;  // on /data
     private long mLastReportedFreeMem;
     private long mLastReportedFreeMemTime;
     private boolean mLowMemFlag=false;
+    private boolean mMemFullFlag=false;
     private Context mContext;
     private ContentResolver mContentResolver;
     private long mTotalMemory;  // on /data
@@ -87,9 +89,13 @@ class DeviceStorageMonitorService extends Binder {
     private boolean mClearingCache;
     private Intent mStorageLowIntent;
     private Intent mStorageOkIntent;
+    private Intent mStorageFullIntent;
+    private Intent mStorageNotFullIntent;
     private CachePackageDataObserver mClearCacheObserver;
     private static final int _TRUE = 1;
     private static final int _FALSE = 0;
+    private long mMemLowThreshold;
+    private int mMemFullThreshold;
 
     /**
      * This string is used for ServiceManager access to this class.
@@ -103,7 +109,7 @@ class DeviceStorageMonitorService extends Binder {
     Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            //dont handle an invalid message
+            //don't handle an invalid message
             if (msg.what != DEVICE_MEMORY_WHAT) {
                 Slog.e(TAG, "Will not process invalid message");
                 return;
@@ -184,7 +190,7 @@ class DeviceStorageMonitorService extends Binder {
         try {
             if (localLOGV) Slog.i(TAG, "Clearing cache");
             IPackageManager.Stub.asInterface(ServiceManager.getService("package")).
-                    freeStorageAndNotify(getMemThreshold(), mClearCacheObserver);
+                    freeStorageAndNotify(mMemLowThreshold, mClearCacheObserver);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to get handle for PackageManger Exception: "+e);
             mClearingCache = false;
@@ -209,8 +215,7 @@ class DeviceStorageMonitorService extends Binder {
             if (localLOGV)  Slog.v(TAG, "freeMemory="+mFreeMem);
 
             //post intent to NotificationManager to display icon if necessary
-            long memThreshold = getMemThreshold();
-            if (mFreeMem < memThreshold) {
+            if (mFreeMem < mMemLowThreshold) {
                 if (!mLowMemFlag) {
                     if (checkCache) {
                         // See if clearing cache helps
@@ -233,6 +238,17 @@ class DeviceStorageMonitorService extends Binder {
                     Slog.i(TAG, "Memory available. Cancelling notification");
                     cancelNotification();
                     mLowMemFlag = false;
+                }
+            }
+            if (mFreeMem < mMemFullThreshold) {
+                if (!mMemFullFlag) {
+                    sendFullNotification();
+                    mMemFullFlag = true;
+                }
+            } else {
+                if (mMemFullFlag) {
+                    cancelFullNotification();
+                    mMemFullFlag = false;
                 }
             }
         }
@@ -264,6 +280,20 @@ class DeviceStorageMonitorService extends Binder {
         return mTotalMemory*value;
     }
 
+    /*
+     * just query settings to retrieve the memory full threshold.
+     * Preferred this over using a ContentObserver since Settings.Secure caches the value
+     * any way
+     */
+    private int getMemFullThreshold() {
+        int value = Settings.Secure.getInt(
+                              mContentResolver,
+                              Settings.Secure.SYS_STORAGE_FULL_THRESHOLD_BYTES,
+                              DEFAULT_FULL_THRESHOLD_BYTES);
+        if(localLOGV) Slog.v(TAG, "Full Threshold Bytes="+value);
+        return value;
+    }
+
     /**
     * Constructor to run service. initializes the disk space threshold value
     * and posts an empty message to kickstart the process.
@@ -283,6 +313,13 @@ class DeviceStorageMonitorService extends Binder {
         mStorageLowIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         mStorageOkIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_OK);
         mStorageOkIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        mStorageFullIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_FULL);
+        mStorageFullIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        mStorageNotFullIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_NOT_FULL);
+        mStorageNotFullIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        // cache storage thresholds
+        mMemLowThreshold = getMemThreshold();
+        mMemFullThreshold = getMemFullThreshold();
         checkMemory(true);
     }
 
@@ -330,6 +367,23 @@ class DeviceStorageMonitorService extends Binder {
 
         mContext.removeStickyBroadcast(mStorageLowIntent);
         mContext.sendBroadcast(mStorageOkIntent);
+    }
+
+    /**
+     * Send a notification when storage is full.
+     */
+    private final void sendFullNotification() {
+        if(localLOGV) Slog.i(TAG, "Sending memory full notification");
+        mContext.sendStickyBroadcast(mStorageFullIntent);
+    }
+
+    /**
+     * Cancels memory full notification and sends "not full" intent.
+     */
+    private final void cancelFullNotification() {
+        if(localLOGV) Slog.i(TAG, "Canceling memory full notification");
+        mContext.removeStickyBroadcast(mStorageFullIntent);
+        mContext.sendBroadcast(mStorageNotFullIntent);
     }
 
     public void updateMemory() {

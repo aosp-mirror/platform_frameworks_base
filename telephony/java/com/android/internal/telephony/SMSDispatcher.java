@@ -32,9 +32,11 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 import android.os.AsyncResult;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.StatFs;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
 import android.provider.Settings;
@@ -240,11 +242,9 @@ public abstract class SMSDispatcher extends Handler {
 
         // Register for device storage intents.  Use these to notify the RIL
         // that storage for SMS is or is not available.
-        // TODO: Revisit this for a later release.  Storage reporting should
-        // rely more on application indication.
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_DEVICE_STORAGE_LOW);
-        filter.addAction(Intent.ACTION_DEVICE_STORAGE_OK);
+        filter.addAction(Intent.ACTION_DEVICE_STORAGE_FULL);
+        filter.addAction(Intent.ACTION_DEVICE_STORAGE_NOT_FULL);
         mContext.registerReceiver(mResultReceiver, filter);
     }
 
@@ -679,7 +679,7 @@ public abstract class SMSDispatcher extends Handler {
      *  the extra "errorCode" containing a radio technology specific value,
      *  generally only useful for troubleshooting.<br>
      *  The per-application based SMS control checks sentIntent. If sentIntent
-     *  is NULL the caller will be checked against all unknown applicaitons,
+     *  is NULL the caller will be checked against all unknown applications,
      *  which cause smaller number of SMS to be sent in checking period.
      * @param deliveryIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is delivered to the recipient.  The
@@ -732,7 +732,7 @@ public abstract class SMSDispatcher extends Handler {
      *   <code>RESULT_ERROR_RADIO_OFF</code>
      *   <code>RESULT_ERROR_NULL_PDU</code>.
      *  The per-application based SMS control checks sentIntent. If sentIntent
-     *  is NULL the caller will be checked against all unknown applicaitons,
+     *  is NULL the caller will be checked against all unknown applications,
      *  which cause smaller number of SMS to be sent in checking period.
      * @param deliveryIntents if not null, an <code>ArrayList</code> of
      *   <code>PendingIntent</code>s (one for each message part) that is
@@ -748,7 +748,7 @@ public abstract class SMSDispatcher extends Handler {
      * Send a SMS
      *
      * @param smsc the SMSC to send the message through, or NULL for the
-     *  defatult SMSC
+     *  default SMSC
      * @param pdu the raw PDU to send
      * @param sentIntent if not NULL this <code>Intent</code> is
      *  broadcast when the message is successfully sent, or failed.
@@ -758,7 +758,7 @@ public abstract class SMSDispatcher extends Handler {
      *  <code>RESULT_ERROR_RADIO_OFF</code>
      *  <code>RESULT_ERROR_NULL_PDU</code>.
      *  The per-application based SMS control checks sentIntent. If sentIntent
-     *  is NULL the caller will be checked against all unknown applicaitons,
+     *  is NULL the caller will be checked against all unknown applications,
      *  which cause smaller number of SMS to be sent in checking period.
      * @param deliveryIntent if not NULL this <code>Intent</code> is
      *  broadcast when the message is delivered to the recipient.  The
@@ -965,10 +965,10 @@ public abstract class SMSDispatcher extends Handler {
     private BroadcastReceiver mResultReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_LOW)) {
+            if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_FULL)) {
                 mStorageAvailable = false;
                 mCm.reportSmsMemoryStatus(false, obtainMessage(EVENT_REPORT_MEMORY_STATUS_DONE));
-            } else if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_OK)) {
+            } else if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_NOT_FULL)) {
                 mStorageAvailable = true;
                 mCm.reportSmsMemoryStatus(true, obtainMessage(EVENT_REPORT_MEMORY_STATUS_DONE));
             } else {

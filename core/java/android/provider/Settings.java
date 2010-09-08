@@ -2961,31 +2961,31 @@ public final class Settings {
         public static final String WTF_IS_FATAL = "wtf_is_fatal";
 
         /**
-         * Maximum age of entries kept by {@link android.os.IDropBox}.
+         * Maximum age of entries kept by {@link com.android.internal.os.IDropBoxManagerService}.
          * @hide
          */
         public static final String DROPBOX_AGE_SECONDS =
                 "dropbox_age_seconds";
         /**
-         * Maximum number of entry files which {@link android.os.IDropBox} will keep around.
+         * Maximum number of entry files which {@link com.android.internal.os.IDropBoxManagerService} will keep around.
          * @hide
          */
         public static final String DROPBOX_MAX_FILES =
                 "dropbox_max_files";
         /**
-         * Maximum amount of disk space used by {@link android.os.IDropBox} no matter what.
+         * Maximum amount of disk space used by {@link com.android.internal.os.IDropBoxManagerService} no matter what.
          * @hide
          */
         public static final String DROPBOX_QUOTA_KB =
                 "dropbox_quota_kb";
         /**
-         * Percent of free disk (excluding reserve) which {@link android.os.IDropBox} will use.
+         * Percent of free disk (excluding reserve) which {@link com.android.internal.os.IDropBoxManagerService} will use.
          * @hide
          */
         public static final String DROPBOX_QUOTA_PERCENT =
                 "dropbox_quota_percent";
         /**
-         * Percent of total disk which {@link android.os.IDropBox} will never dip into.
+         * Percent of total disk which {@link com.android.internal.os.IDropBoxManagerService} will never dip into.
          * @hide
          */
         public static final String DROPBOX_RESERVE_PERCENT =
@@ -3043,6 +3043,15 @@ public final class Settings {
          */
         public static final String SYS_STORAGE_THRESHOLD_PERCENTAGE =
                 "sys_storage_threshold_percentage";
+
+        /**
+         * Minimum bytes of free storage on the device before the data
+         * partition is considered full. By default, 1 MB is reserved
+         * to avoid system-wide SQLite disk full exceptions.
+         * @hide
+         */
+        public static final String SYS_STORAGE_FULL_THRESHOLD_BYTES =
+                "sys_storage_full_threshold_bytes";
 
         /**
          * The interval in milliseconds after which Wi-Fi is considered idle.
