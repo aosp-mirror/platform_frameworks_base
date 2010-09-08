@@ -57,7 +57,7 @@ public abstract class IccSmsInterfaceManager extends ISms.Stub {
      * @param destPort the port to deliver the message to
      * @param data the body of the message to send
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
-     *  broadcast when the message is sucessfully sent, or failed.
+     *  broadcast when the message is successfully sent, or failed.
      *  The result code will be <code>Activity.RESULT_OK<code> for success,
      *  or one of these errors:<br>
      *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
@@ -67,7 +67,7 @@ public abstract class IccSmsInterfaceManager extends ISms.Stub {
      *  the extra "errorCode" containing a radio technology specific value,
      *  generally only useful for troubleshooting.<br>
      *  The per-application based SMS control checks sentIntent. If sentIntent
-     *  is NULL the caller will be checked against all unknown applicaitons,
+     *  is NULL the caller will be checked against all unknown applications,
      *  which cause smaller number of SMS to be sent in checking period.
      * @param deliveryIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is delivered to the recipient.  The
@@ -94,7 +94,7 @@ public abstract class IccSmsInterfaceManager extends ISms.Stub {
      *  the current default SMSC
      * @param text the body of the message to send
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
-     *  broadcast when the message is sucessfully sent, or failed.
+     *  broadcast when the message is successfully sent, or failed.
      *  The result code will be <code>Activity.RESULT_OK<code> for success,
      *  or one of these errors:<br>
      *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
@@ -140,7 +140,7 @@ public abstract class IccSmsInterfaceManager extends ISms.Stub {
      *   <code>RESULT_ERROR_RADIO_OFF</code>
      *   <code>RESULT_ERROR_NULL_PDU</code>.
      *  The per-application based SMS control checks sentIntent. If sentIntent
-     *  is NULL the caller will be checked against all unknown applicaitons,
+     *  is NULL the caller will be checked against all unknown applications,
      *  which cause smaller number of SMS to be sent in checking period.
      * @param deliveryIntents if not null, an <code>ArrayList</code> of
      *   <code>PendingIntent</code>s (one for each message part) that is
