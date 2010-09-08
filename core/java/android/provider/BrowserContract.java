@@ -47,6 +47,12 @@ public class BrowserContract {
     public static final String CALLER_IS_SYNCADAPTER = "caller_is_syncadapter";
 
     /**
+     * A parameter for use when querying any table that allows specifying a limit on the number
+     * of rows returned.
+     */
+    public static final String PARAM_LIMIT = "limit";
+
+    /**
      * Generic columns for use by sync adapters. The specific functions of
      * these columns are private to the sync adapter. Other clients of the API
      * should not attempt to either read or write these columns.
@@ -122,21 +128,13 @@ public class BrowserContract {
         public static final String DIRTY = "dirty";
 
         /**
-         * The time that this row was created on its originating client (msecs
-         * since the epoch).
-         * <P>Type: INTEGER</P>
-         */
-        public static final String DATE_CREATED = "created";
-
-        /**
          * The time that this row was last modified by a client (msecs since the epoch).
          * <P>Type: INTEGER</P>
          */
         public static final String DATE_MODIFIED = "modified";
-
     }
 
-    interface BookmarkColumns {
+    interface CommonColumns {
         /**
          * The unique ID for a row.
          * <P>Type: INTEGER (long)</P>
@@ -155,6 +153,15 @@ public class BrowserContract {
          */
         public static final String TITLE = "title";
 
+        /**
+         * The time that this row was created on its originating client (msecs
+         * since the epoch).
+         * <P>Type: INTEGER</P>
+         */
+        public static final String DATE_CREATED = "created";
+    }
+
+    interface ImageColumns {
         /**
          * The favicon of the bookmark, may be NULL.
          * Must decode via {@link BitmapFactory#decodeByteArray}.
@@ -178,10 +185,26 @@ public class BrowserContract {
         public static final String TOUCH_ICON = "touch_icon";
     }
 
+    interface HistoryColumns {
+        /**
+         * The date the item was last visited, in milliseconds since the epoch.
+         * <p>Type: INTEGER (date in milliseconds since January 1, 1970)</p>
+         */
+        public static final String DATE_LAST_VISITED = "date";
+
+        /**
+         * The number of times the item has been visited.
+         * <p>Type: INTEGER</p>
+         */
+        public static final String VISITS = "visits";
+
+        public static final String USER_ENTERED = "user_entered";
+    }
+
     /**
      * The bookmarks table, which holds the user's browser bookmarks.
      */
-    public static final class Bookmarks implements BookmarkColumns, SyncColumns {
+    public static final class Bookmarks implements CommonColumns, ImageColumns, SyncColumns {
         /**
          * This utility class cannot be instantiated.
          */
@@ -197,6 +220,16 @@ public class BrowserContract {
          */
         public static final Uri CONTENT_URI_DEFAULT_FOLDER =
                 Uri.withAppendedPath(CONTENT_URI, "folder");
+
+        /**
+         * Query parameter used to specify an account name
+         */
+        public static final String PARAM_ACCOUNT_NAME = "acct_name";
+
+        /**
+         * Query parameter used to specify an account type
+         */
+        public static final String PARAM_ACCOUNT_TYPE = "acct_type";
 
         /**
          * Builds a URI that points to a specific folder.
@@ -237,6 +270,12 @@ public class BrowserContract {
         public static final String PARENT = "parent";
 
         /**
+         * The source ID for an item's parent. Read-only.
+         * @see #PARENT
+         */
+        public static final String PARENT_SOURCE_ID = "parent_source";
+
+        /**
          * The position of the bookmark in relation to it's siblings that share the same
          * {@link #PARENT}. May be negative.
          * <P>Type: INTEGER</P>
@@ -251,6 +290,14 @@ public class BrowserContract {
         public static final String INSERT_AFTER = "insert_after";
 
         /**
+         * The source ID for the item that the bookmark should be inserted after. Read-only.
+         * May be negative.
+         * <P>Type: INTEGER</P>
+         * @see #INSERT_AFTER
+         */
+        public static final String INSERT_AFTER_SOURCE_ID = "insert_after_source";
+
+        /**
          * A flag to indicate if an item has been deleted. Queries will not return deleted
          * entries unless you add the {@link #QUERY_PARAMETER_SHOW_DELETED} query paramter
          * to the URI when performing your query.
@@ -261,9 +308,34 @@ public class BrowserContract {
     }
 
     /**
+     * Read-only table that lists all the accounts that are used to provide bookmarks.
+     */
+    public static final class Accounts {
+        /**
+         * Directory under {@link Bookmarks#CONTENT_URI}
+         */
+        public static final Uri CONTENT_URI =
+                AUTHORITY_URI.buildUpon().appendPath("accounts").build();
+
+        /**
+         * The name of the account instance to which this row belongs, which when paired with
+         * {@link #ACCOUNT_TYPE} identifies a specific account.
+         * <P>Type: TEXT</P>
+         */
+        public static final String ACCOUNT_NAME = "account_name";
+
+        /**
+         * The type of account to which this row belongs, which when paired with
+         * {@link #ACCOUNT_NAME} identifies a specific account.
+         * <P>Type: TEXT</P>
+         */
+        public static final String ACCOUNT_TYPE = "account_type";
+    }
+
+    /**
      * The history table, which holds the browsing history.
      */
-    public static final class History implements BookmarkColumns {
+    public static final class History implements CommonColumns, HistoryColumns, ImageColumns {
         /**
          * This utility class cannot be instantiated.
          */
@@ -283,26 +355,6 @@ public class BrowserContract {
          * The MIME type of a {@link #CONTENT_URI} of a single browser history item.
          */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/browser-history";
-
-        /**
-         * The date the item was last visited, in milliseconds since the epoch.
-         * <p>Type: INTEGER (date in milliseconds since January 1, 1970)</p>
-         */
-        public static final String DATE_LAST_VISITED = "date";
-
-        /**
-         * The date the item created, in milliseconds since the epoch.
-         * <p>Type: NUMBER (date in milliseconds since January 1, 1970)</p>
-         */
-        public static final String DATE_CREATED = "created";
-
-        /**
-         * The number of times the item has been visited.
-         * <p>Type: INTEGER</p>
-         */
-        public static final String VISITS = "visits";
-
-        public static final String USER_ENTERED = "user_entered";
     }
 
     /**
@@ -395,5 +447,50 @@ public class BrowserContract {
         public static ContentProviderOperation newSetOperation(Account account, byte[] data) {
             return SyncStateContract.Helpers.newSetOperation(CONTENT_URI, account, data);
         }
+    }
+
+    /**
+     * Stores images for URLs. Only support query() and update().
+     * @hide
+     */
+    public static final class Images implements ImageColumns {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private Images() {}
+
+        /**
+         * The content:// style URI for this table
+         */
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "images");
+
+        /**
+         * The URL the images came from.
+         * <P>Type: TEXT (URL)</P>
+         */
+        public static final String URL = "url_key";
+    }
+
+    /**
+     * A combined view of bookmarks and history. All bookmarks in all folders are included and
+     * no folders are included.
+     */
+    public static final class Combined implements CommonColumns, HistoryColumns, ImageColumns {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private Combined() {}
+
+        /**
+         * The content:// style URI for this table
+         */
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "combined");
+
+        /**
+         * Flag indicating that an item is a bookmark. A value of 1 indicates a bookmark, a value
+         * of 0 indicates a history item.
+         * <p>Type: INTEGER (boolean)</p>
+         */
+        public static final String IS_BOOKMARK = "bookmark";
     }
 }
