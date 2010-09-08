@@ -2,7 +2,6 @@
 
 #include "jni.h"
 #include "GraphicsJNI.h"
-#include "NIOBuffer.h"
 #include "SkPicture.h"
 #include "SkRegion.h"
 #include <android_runtime/AndroidRuntime.h>
@@ -649,8 +648,6 @@ int register_android_graphics_Graphics(JNIEnv* env)
                         env->GetMethodID(c, "trackExternalAllocation", "(J)Z");
     gVMRuntime_trackExternalFreeMethodID =
                             env->GetMethodID(c, "trackExternalFree", "(J)V");
-
-    NIOBuffer::RegisterJNI(env);
 
     return 0;
 }
