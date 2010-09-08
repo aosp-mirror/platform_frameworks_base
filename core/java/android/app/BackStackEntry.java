@@ -490,4 +490,8 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
     public int getTransitionStyle() {
         return mTransitionStyle;
     }
+
+    public boolean isEmpty() {
+        return mNumOp == 0;
+    }
 }

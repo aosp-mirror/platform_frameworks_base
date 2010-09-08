@@ -85,6 +85,12 @@ public interface FragmentTransaction {
      * @return Returns the same FragmentTransaction instance.
      */
     public FragmentTransaction show(Fragment fragment);
+
+    /**
+     * @return <code>true</code> if this transaction contains no operations,
+     *         <code>false</code> otherwise.
+     */
+    public boolean isEmpty();
     
     /**
      * Bit mask that is set for all enter transitions.

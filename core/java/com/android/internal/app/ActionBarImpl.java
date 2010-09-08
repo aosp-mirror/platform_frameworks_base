@@ -122,17 +122,6 @@ public class ActionBarImpl extends ActionBar {
     }
 
     @Override
-    public void setStandardNavigationMode(int titleResId, int subtitleResId) {
-        setStandardNavigationMode(mContext.getString(titleResId),
-                mContext.getString(subtitleResId));
-    }
-
-    @Override
-    public void setStandardNavigationMode(int titleResId) {
-        setStandardNavigationMode(mContext.getString(titleResId));
-    }
-
-    @Override
     public void setTitle(int resId) {
         setTitle(mContext.getString(resId));
     }
@@ -169,19 +158,6 @@ public class ActionBarImpl extends ActionBar {
         mActionView.setCallback(null);
     }
 
-    public void setStandardNavigationMode(CharSequence title) {
-        cleanupTabs();
-        setStandardNavigationMode(title, null);
-    }
-
-    public void setStandardNavigationMode(CharSequence title, CharSequence subtitle) {
-        cleanupTabs();
-        mActionView.setNavigationMode(NAVIGATION_MODE_STANDARD);
-        mActionView.setTitle(title);
-        mActionView.setSubtitle(subtitle);
-        mActionView.setCallback(null);
-    }
-
     public void setSelectedNavigationItem(int position) {
         switch (mActionView.getNavigationMode()) {
         case NAVIGATION_MODE_TABS:
@@ -211,17 +187,7 @@ public class ActionBarImpl extends ActionBar {
         if (mSelectedTab != null) {
             selectTab(null);
         }
-        if (!mTabs.isEmpty()) {
-            if (mTabSwitchMode == TAB_SWITCH_SHOW_HIDE) {
-                final FragmentTransaction trans = mActivity.openFragmentTransaction();
-                final int tabCount = mTabs.size();
-                for (int i = 0; i < tabCount; i++) {
-                    trans.remove(mTabs.get(i).getFragment());
-                }
-                trans.commit();
-            }
-            mTabs.clear();
-        }
+        mTabs.clear();
     }
 
     public void setTitle(CharSequence title) {
@@ -295,31 +261,23 @@ public class ActionBarImpl extends ActionBar {
     private void configureTab(Tab tab, int position) {
         final TabImpl tabi = (TabImpl) tab;
         final boolean isFirstTab = mTabs.isEmpty();
-        final FragmentTransaction trans = mActivity.openFragmentTransaction();
-        final Fragment frag = tabi.getFragment();
+        final ActionBar.TabListener callback = tabi.getCallback();
+
+        if (callback == null) {
+            throw new IllegalStateException("Action Bar Tab must have a Callback");
+        }
 
         tabi.setPosition(position);
         mTabs.add(position, tabi);
 
-        if (mTabSwitchMode == TAB_SWITCH_SHOW_HIDE) {
-            if (!frag.isAdded()) {
-                trans.add(mTabContainerViewId, frag);
-            }
-        }
-
         if (isFirstTab) {
-            if (mTabSwitchMode == TAB_SWITCH_SHOW_HIDE) {
-                trans.show(frag);
-            } else if (mTabSwitchMode == TAB_SWITCH_ADD_REMOVE) {
-                trans.add(mTabContainerViewId, frag);
-            }
+            final FragmentTransaction trans = mActivity.getFragmentManager().openTransaction();
             mSelectedTab = tabi;
-        } else {
-            if (mTabSwitchMode == TAB_SWITCH_SHOW_HIDE) {
-                trans.hide(frag);
+            callback.onTabSelected(tab, trans);
+            if (!trans.isEmpty()) {
+                trans.commit();
             }
         }
-        trans.commit();
     }
 
     @Override
@@ -329,8 +287,8 @@ public class ActionBarImpl extends ActionBar {
     }
 
     @Override
-    public void insertTab(Tab tab, int position) {
-        mActionView.insertTab(tab, position);
+    public void addTab(Tab tab, int position) {
+        mActionView.addTab(tab, position);
         configureTab(tab, position);
     }
 
@@ -367,35 +325,29 @@ public class ActionBarImpl extends ActionBar {
     }
 
     @Override
-    public void setTabNavigationMode(int containerViewId) {
-        mTabContainerViewId = containerViewId;
-        setTabNavigationMode();
-    }
-
-    @Override
     public void selectTab(Tab tab) {
         if (mSelectedTab == tab) {
             return;
         }
 
         mActionView.setTabSelected(tab != null ? tab.getPosition() : Tab.INVALID_POSITION);
-        final FragmentTransaction trans = mActivity.openFragmentTransaction();
+        final FragmentTransaction trans = mActivity.getFragmentManager().openTransaction();
         if (mSelectedTab != null) {
-            if (mTabSwitchMode == TAB_SWITCH_SHOW_HIDE) {
-                trans.hide(mSelectedTab.getFragment());
-            } else if (mTabSwitchMode == TAB_SWITCH_ADD_REMOVE) {
-                trans.remove(mSelectedTab.getFragment());
-            }
-        }
-        if (tab != null) {
-            if (mTabSwitchMode == TAB_SWITCH_SHOW_HIDE) {
-                trans.show(tab.getFragment());
-            } else if (mTabSwitchMode == TAB_SWITCH_ADD_REMOVE) {
-                trans.add(mTabContainerViewId, tab.getFragment());
-            }
+            mSelectedTab.getCallback().onTabUnselected(mSelectedTab, trans);
         }
         mSelectedTab = (TabImpl) tab;
-        trans.commit();
+        if (mSelectedTab != null) {
+            mSelectedTab.getCallback().onTabSelected(mSelectedTab, trans);
+        }
+
+        if (!trans.isEmpty()) {
+            trans.commit();
+        }
+    }
+
+    @Override
+    public Tab getSelectedTab() {
+        return mSelectedTab;
     }
 
     @Override
@@ -542,14 +494,40 @@ public class ActionBarImpl extends ActionBar {
      * @hide
      */
     public class TabImpl extends ActionBar.Tab {
-        private Fragment mFragment;
+        private ActionBar.TabListener mCallback;
+        private Object mTag;
         private Drawable mIcon;
         private CharSequence mText;
         private int mPosition;
+        private View mCustomView;
 
         @Override
-        public Fragment getFragment() {
-            return mFragment;
+        public Object getTag() {
+            return mTag;
+        }
+
+        @Override
+        public void setTag(Object tag) {
+            mTag = tag;
+        }
+
+        public ActionBar.TabListener getCallback() {
+            return mCallback;
+        }
+
+        @Override
+        public void setTabListener(ActionBar.TabListener callback) {
+            mCallback = callback;
+        }
+
+        @Override
+        public View getCustomView() {
+            return mCustomView;
+        }
+
+        @Override
+        public void setCustomView(View view) {
+            mCustomView = view;
         }
 
         @Override
@@ -569,11 +547,6 @@ public class ActionBarImpl extends ActionBar {
         @Override
         public CharSequence getText() {
             return mText;
-        }
-
-        @Override
-        public void setFragment(Fragment fragment) {
-            mFragment = fragment;
         }
 
         @Override
