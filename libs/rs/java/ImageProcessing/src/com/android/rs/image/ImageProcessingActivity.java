@@ -42,8 +42,8 @@ public class ImageProcessingActivity extends Activity
     private Bitmap mBitmapOut;
     private Bitmap mBitmapScratch;
     private ScriptC_Threshold mScript;
-    private ScriptC_Vertical_blur mScriptVBlur;
-    private ScriptC_Horizontal_blur mScriptHBlur;
+    private ScriptC_VerticalBlur mScriptVBlur;
+    private ScriptC_HorizontalBlur mScriptHBlur;
     private int mRadius = 0;
     private SeekBar mRadiusSeekBar;
 
@@ -380,8 +380,8 @@ public class ImageProcessingActivity extends Activity
         mScratchPixelsAllocation1 = Allocation.createTyped(mRS, tb.create());
         mScratchPixelsAllocation2 = Allocation.createTyped(mRS, tb.create());
 
-        mScriptVBlur = new ScriptC_Vertical_blur(mRS, getResources(), R.raw.vertical_blur, false);
-        mScriptHBlur = new ScriptC_Horizontal_blur(mRS, getResources(), R.raw.horizontal_blur, false);
+        mScriptVBlur = new ScriptC_VerticalBlur(mRS, getResources(), R.raw.verticalblur, false);
+        mScriptHBlur = new ScriptC_HorizontalBlur(mRS, getResources(), R.raw.horizontalblur, false);
 
         mScript = new ScriptC_Threshold(mRS, getResources(), R.raw.threshold, false);
         mScript.set_width(mBitmapIn.getWidth());
