@@ -1586,8 +1586,10 @@ public abstract class BatteryStats implements Parcelable {
                         sb.append(prefix); sb.append("      CPU: ");
                                 formatTime(sb, userTime); sb.append("usr + ");
                                 formatTime(sb, systemTime); sb.append("krn\n");
-                        sb.append(prefix); sb.append("      "); sb.append(starts);
-                                sb.append(" proc starts");
+                        if (starts != 0) {
+                            sb.append(prefix); sb.append("      "); sb.append(starts);
+                                    sb.append(" proc starts");
+                        }
                         pw.println(sb.toString());
                         for (int e=0; e<numExcessive; e++) {
                             Uid.Proc.ExcessiveWake ew = ps.getExcessiveWake(e);
