@@ -26,7 +26,7 @@ import android.net.Uri;
 import android.os.RemoteException;
 import android.provider.MediaStore.Audio;
 import android.provider.MediaStore.MediaColumns;
-import android.provider.MediaStore.MtpObjects;
+import android.provider.MediaStore.Files;
 import android.provider.Mtp;
 import android.util.Log;
 
@@ -53,26 +53,26 @@ public class MtpDatabase {
     private final int mStorageID = 0x00010001;
 
     private static final String[] ID_PROJECTION = new String[] {
-            MtpObjects.ObjectColumns._ID, // 0
+            Files.FileColumns._ID, // 0
     };
     private static final String[] PATH_SIZE_PROJECTION = new String[] {
-            MtpObjects.ObjectColumns._ID, // 0
-            MtpObjects.ObjectColumns.DATA, // 1
-            MtpObjects.ObjectColumns.SIZE, // 2
+            Files.FileColumns._ID, // 0
+            Files.FileColumns.DATA, // 1
+            Files.FileColumns.SIZE, // 2
     };
     private static final String[] OBJECT_INFO_PROJECTION = new String[] {
-            MtpObjects.ObjectColumns._ID, // 0
-            MtpObjects.ObjectColumns.DATA, // 1
-            MtpObjects.ObjectColumns.FORMAT, // 2
-            MtpObjects.ObjectColumns.PARENT, // 3
-            MtpObjects.ObjectColumns.SIZE, // 4
-            MtpObjects.ObjectColumns.DATE_MODIFIED, // 5
+            Files.FileColumns._ID, // 0
+            Files.FileColumns.DATA, // 1
+            Files.FileColumns.FORMAT, // 2
+            Files.FileColumns.PARENT, // 3
+            Files.FileColumns.SIZE, // 4
+            Files.FileColumns.DATE_MODIFIED, // 5
     };
-    private static final String ID_WHERE = MtpObjects.ObjectColumns._ID + "=?";
-    private static final String PATH_WHERE = MtpObjects.ObjectColumns.DATA + "=?";
-    private static final String PARENT_WHERE = MtpObjects.ObjectColumns.PARENT + "=?";
+    private static final String ID_WHERE = Files.FileColumns._ID + "=?";
+    private static final String PATH_WHERE = Files.FileColumns.DATA + "=?";
+    private static final String PARENT_WHERE = Files.FileColumns.PARENT + "=?";
     private static final String PARENT_FORMAT_WHERE = PARENT_WHERE + " AND "
-                                            + MtpObjects.ObjectColumns.FORMAT + "=?";
+                                            + Files.FileColumns.FORMAT + "=?";
 
     private static final String[] DEVICE_PROPERTY_PROJECTION = new String[] { "_id", "value" };
     private  static final String DEVICE_PROPERTY_WHERE = "code=?";
@@ -89,7 +89,7 @@ public class MtpDatabase {
         mContext = context;
         mMediaProvider = context.getContentResolver().acquireProvider("media");
         mVolumeName = volumeName;
-        mObjectsUri = MtpObjects.getContentUri(volumeName);
+        mObjectsUri = Files.getContentUri(volumeName);
         mMediaScanner = new MediaScanner(context);
         openDevicePropertiesDatabase(context);
     }
@@ -123,12 +123,12 @@ public class MtpDatabase {
                          int storage, long size, long modified) {
         mDatabaseModified = true;
         ContentValues values = new ContentValues();
-        values.put(MtpObjects.ObjectColumns.DATA, path);
-        values.put(MtpObjects.ObjectColumns.FORMAT, format);
-        values.put(MtpObjects.ObjectColumns.PARENT, parent);
+        values.put(Files.FileColumns.DATA, path);
+        values.put(Files.FileColumns.FORMAT, format);
+        values.put(Files.FileColumns.PARENT, parent);
         // storage is ignored for now
-        values.put(MtpObjects.ObjectColumns.SIZE, size);
-        values.put(MtpObjects.ObjectColumns.DATE_MODIFIED, modified);
+        values.put(Files.FileColumns.SIZE, size);
+        values.put(Files.FileColumns.DATE_MODIFIED, modified);
 
         try {
             Uri uri = mMediaProvider.insert(mObjectsUri, values);
@@ -299,24 +299,24 @@ public class MtpDatabase {
                 outIntValue[0] = mStorageID;
                 return MtpConstants.RESPONSE_OK;
             case MtpConstants.PROPERTY_OBJECT_FORMAT:
-                column = MtpObjects.ObjectColumns.FORMAT;
+                column = Files.FileColumns.FORMAT;
                 break;
             case MtpConstants.PROPERTY_PROTECTION_STATUS:
                 // protection status is always 0
                 outIntValue[0] = 0;
                 return MtpConstants.RESPONSE_OK;
             case MtpConstants.PROPERTY_OBJECT_SIZE:
-                column = MtpObjects.ObjectColumns.SIZE;
+                column = Files.FileColumns.SIZE;
                 break;
             case MtpConstants.PROPERTY_OBJECT_FILE_NAME:
-                column = MtpObjects.ObjectColumns.DATA;
+                column = Files.FileColumns.DATA;
                 isString = true;
                 break;
             case MtpConstants.PROPERTY_DATE_MODIFIED:
-                column = MtpObjects.ObjectColumns.DATE_MODIFIED;
+                column = Files.FileColumns.DATE_MODIFIED;
                 break;
             case MtpConstants.PROPERTY_PARENT_OBJECT:
-                column = MtpObjects.ObjectColumns.PARENT;
+                column = Files.FileColumns.PARENT;
                 break;
             case MtpConstants.PROPERTY_PERSISTENT_UID:
                 // PUID is concatenation of storageID and object handle
@@ -333,7 +333,7 @@ public class MtpDatabase {
         try {
             // for now we are only reading properties from the "objects" table
             c = mMediaProvider.query(mObjectsUri,
-                            new String [] { MtpObjects.ObjectColumns._ID, column },
+                            new String [] { Files.FileColumns._ID, column },
                             ID_WHERE, new String[] { Integer.toString(handle) }, null);
             if (c != null && c.moveToNext()) {
                 if (isString) {
@@ -496,7 +496,7 @@ public class MtpDatabase {
     private int deleteFile(int handle) {
         Log.d(TAG, "deleteFile: " + handle);
         mDatabaseModified = true;
-        Uri uri = MtpObjects.getContentUri(mVolumeName, handle);
+        Uri uri = Files.getContentUri(mVolumeName, handle);
         try {
             if (mMediaProvider.delete(uri, null, null) == 1) {
                 return MtpConstants.RESPONSE_OK;
@@ -511,7 +511,7 @@ public class MtpDatabase {
 
     private int[] getObjectReferences(int handle) {
         Log.d(TAG, "getObjectReferences for: " + handle);
-        Uri uri = MtpObjects.getReferencesUri(mVolumeName, handle);
+        Uri uri = Files.getReferencesUri(mVolumeName, handle);
         Cursor c = null;
         try {
             c = mMediaProvider.query(uri, ID_PROJECTION, null, null, null);
@@ -539,12 +539,12 @@ public class MtpDatabase {
 
     private int setObjectReferences(int handle, int[] references) {
         mDatabaseModified = true;
-        Uri uri = MtpObjects.getReferencesUri(mVolumeName, handle);
+        Uri uri = Files.getReferencesUri(mVolumeName, handle);
         int count = references.length;
         ContentValues[] valuesList = new ContentValues[count];
         for (int i = 0; i < count; i++) {
             ContentValues values = new ContentValues();
-            values.put(MtpObjects.ObjectColumns._ID, references[i]);
+            values.put(Files.FileColumns._ID, references[i]);
             valuesList[i] = values;
         }
         try {
