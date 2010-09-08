@@ -123,6 +123,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  *     <li>The task can be executed only once (an exception will be thrown if
  *     a second execution is attempted.)</li>
  * </ul>
+ *
+ * <h2>Memory observability</h2>
+ * <p>AsyncTask guarantees that all callback calls are synchronized in such a way that the following
+ * operations are safe without explicit synchronizations.</p>
+ * <ul>
+ *     <li>Set member fields in the constructor or {@link #onPreExecute}, and refer to them
+ *     in {@link #doInBackground}.
+ *     <li>Set member fields in {@link #doInBackground}, and refer to them in
+ *     {@link #onProgressUpdate} and {@link #onPostExecute}.
+ * </ul>
  */
 public abstract class AsyncTask<Params, Progress, Result> {
     private static final String LOG_TAG = "AsyncTask";
