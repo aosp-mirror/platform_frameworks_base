@@ -95,6 +95,7 @@ void PollLoop::openWakePipe() {
     RequestedCallback requestedCallback;
     requestedCallback.callback = NULL;
     requestedCallback.looperCallback = NULL;
+    requestedCallback.ident = 0;
     requestedCallback.data = NULL;
     mRequestedCallbacks.insertAt(requestedCallback, 0);
 }
@@ -116,7 +117,7 @@ int32_t PollLoop::pollOnce(int timeoutMillis, int* outEvents, void** outData) {
         mPendingFdsPos++;
         if (outEvents != NULL) *outEvents = pending.events;
         if (outData != NULL) *outData = pending.data;
-        return pending.fd;
+        return pending.ident;
     }
     
     mLock.lock();
@@ -182,6 +183,7 @@ int32_t PollLoop::pollOnce(int timeoutMillis, int* outEvents, void** outData) {
             const RequestedCallback& requestedCallback = mRequestedCallbacks.itemAt(i);
             PendingCallback pending;
             pending.fd = requestedFd.fd;
+            pending.ident = requestedCallback.ident;
             pending.events = revents;
             pending.callback = requestedCallback.callback;
             pending.looperCallback = requestedCallback.looperCallback;
@@ -191,7 +193,7 @@ int32_t PollLoop::pollOnce(int timeoutMillis, int* outEvents, void** outData) {
                 mPendingCallbacks.push(pending);
             } else if (pending.fd != mWakeReadPipeFd) {
                 if (result == POLL_CALLBACK) {
-                    result = pending.fd;
+                    result = pending.ident;
                     if (outEvents != NULL) *outEvents = pending.events;
                     if (outData != NULL) *outData = pending.data;
                 } else {
@@ -268,16 +270,20 @@ bool PollLoop::getAllowNonCallbacks() const {
     return mAllowNonCallbacks;
 }
 
+void PollLoop::setCallback(int fd, int ident, int events, Callback callback, void* data) {
+    setCallbackCommon(fd, ident, events, callback, NULL, data);
+}
+
 void PollLoop::setCallback(int fd, int events, Callback callback, void* data) {
-    setCallbackCommon(fd, events, callback, NULL, data);
+    setCallbackCommon(fd, POLL_CALLBACK, events, callback, NULL, data);
 }
 
-void PollLoop::setLooperCallback(int fd, int events, ALooper_callbackFunc* callback,
+void PollLoop::setLooperCallback(int fd, int ident, int events, ALooper_callbackFunc* callback,
         void* data) {
-    setCallbackCommon(fd, events, NULL, callback, data);
+    setCallbackCommon(fd, ident, events, NULL, callback, data);
 }
 
-void PollLoop::setCallbackCommon(int fd, int events, Callback callback,
+void PollLoop::setCallbackCommon(int fd, int ident, int events, Callback callback,
         ALooper_callbackFunc* looperCallback, void* data) {
 
 #if DEBUG_CALLBACKS
@@ -305,6 +311,7 @@ void PollLoop::setCallbackCommon(int fd, int events, Callback callback,
     RequestedCallback requestedCallback;
     requestedCallback.callback = callback;
     requestedCallback.looperCallback = looperCallback;
+    requestedCallback.ident = ident;
     requestedCallback.data = data;
 
     ssize_t index = getRequestIndexLocked(fd);
