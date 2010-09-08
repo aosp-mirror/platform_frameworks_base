@@ -143,11 +143,7 @@ void GenerationCache<K, V>::put(K key, V value) {
     }
 
     ssize_t index = mCache.indexOfKey(key);
-    if (index >= 0) {
-        sp<Entry<K, V> > entry = mCache.valueAt(index);
-        detachFromCache(entry);
-        addToCache(entry, key, value);
-    } else {
+    if (index < 0) {
         sp<Entry<K, V> > entry = new Entry<K, V>;
         addToCache(entry, key, value);
     }
