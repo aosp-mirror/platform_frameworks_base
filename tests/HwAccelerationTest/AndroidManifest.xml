@@ -31,6 +31,16 @@
         </activity>
         
         <activity
+                android:name="ResizeActivity"
+                android:label="_Resize"
+                android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <activity
                 android:name="TextGammaActivity"
                 android:label="_Gamma"
                 android:theme="@android:style/Theme.Translucent.NoTitleBar">

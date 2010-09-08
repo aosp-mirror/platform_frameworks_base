@@ -946,8 +946,8 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                     mSurfaceHolder.mSurfaceLock.unlock();
                 }
             }
-            
-            if (hwIntialized) {
+
+            if (hwIntialized || (windowShouldResize && mHwRenderer != null)) {
                 mHwRenderer.setup(mWidth, mHeight);
             }
 
