@@ -191,10 +191,12 @@ layout parameters for the View that are appropriate for the ViewGroup in which i
 <p>Every ViewGroup class implements a nested class that extends {@link
 android.view.ViewGroup.LayoutParams}. This subclass
 contains property types that define the size and position for each child view, as
-appropriate for the view group. As you can see in the figure below, the parent
+appropriate for the view group. As you can see in figure 1, the parent
 view group defines layout parameters for each child view (including the child view group).</p>
 
 <img src="{@docRoot}images/layoutparams.png" alt="" height="300" align="center"/>
+<p class="img-caption"><strong>Figure 1.</strong> Visualization of a view hierarchy with layout
+parameters associated with each view.</p>
 
 <p>Note that every LayoutParams subclass has its own syntax for setting
 values. Each child element must define LayoutParams that are appropriate for its parent, 

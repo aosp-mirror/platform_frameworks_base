@@ -71,6 +71,9 @@
           <li><a href="<?cs var:toroot ?>guide/topics/ui/menus.html">
                <span class="en">Creating Menus</span>
               </a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/ui/actionbar.html">
+               <span class="en">Using the Action Bar</span>
+              </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/dialogs.html">
                 <span class="en">Creating Dialogs</span>
               </a></li>

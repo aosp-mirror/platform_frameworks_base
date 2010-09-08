@@ -22,20 +22,32 @@ parent.link=index.html
       </li>
       <li><a href="#CustomDialog">Creating a Custom Dialog</a></li>
     </ol>
-    
+
     <h2>Key classes</h2>
     <ol>
       <li>{@link android.app.Dialog}</li>
+      <li>{@link android.app.AlertDialog}</li>
+      <li>{@link android.app.DialogFragment}</li>
+    </ol>
+
+    <h2>Related tutorials</h2>
+    <ol>
+      <li><a href="{@docRoot}resources/tutorials/views/hello-datepicker.html">Hello
+DatePicker</a></li>
+      <li><a href="{@docRoot}resources/tutorials/views/hello-timepicker.html">Hello
+TimePicker</a></li>
     </ol>
   </div>
 </div>
 
 <p>A dialog is usually a small window that appears in front of the current Activity.
-The underlying Activity loses focus and the dialog accepts all user interaction. 
-Dialogs are normally used
-for notifications and short activities that directly relate to the application in progress.</p>
+The underlying Activity loses focus and the dialog accepts all user interaction. Dialogs are
+normally used for notifications that should interupt the user and to perform short tasks that
+directly relate to the application in progress (such as a progress bar or a login prompt).</p>
 
-<p>The Android API supports the following types of {@link android.app.Dialog} objects:</p>
+<p>The {@link android.app.Dialog} class is the base class for creating dialogs. However, you
+typically should not instantiate a {@link android.app.Dialog} directly. Instead, you should use one
+of the following subclasses:</p>
 <dl>
   <dt>{@link android.app.AlertDialog}</dt>
   <dd>A dialog that can manage zero, one, two, or three buttons, and/or a list of
