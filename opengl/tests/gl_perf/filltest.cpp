@@ -33,65 +33,19 @@ using namespace android;
 
 #include "fill_common.cpp"
 
-static void doSingleTest(uint32_t w, uint32_t h,
-                         bool useVarColor,
-                         int texCount,
-                         bool modulateFirstTex,
-                         int extraMath,
-                         int tex0, int tex1) {
-    char *pgmTxt = genShader(useVarColor, texCount, modulateFirstTex, extraMath);
-    int pgm = createProgram(gVertexShader, pgmTxt);
-    if (!pgm) {
-        printf("error running test\n");
-        return;
-    }
-    int loc = glGetUniformLocation(pgm, "u_tex0");
-    if (loc >= 0) glUniform1i(loc, 0);
-    loc = glGetUniformLocation(pgm, "u_tex1");
-    if (loc >= 0) glUniform1i(loc, 1);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, tex0);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, tex1);
-    glActiveTexture(GL_TEXTURE0);
-
-    char str2[1024];
-
-    glBlendFunc(GL_ONE, GL_ONE);
-    glDisable(GL_BLEND);
-    //sprintf(str2, "%i, %i, %i, %i, %i, 0",
-            //useVarColor, texCount, modulateFirstTex, extraMath, tex0);
-    //doLoop(true, pgm, w, h, str2);
-    //doLoop(false, pgm, w, h, str2);
-
-    glEnable(GL_BLEND);
-    sprintf(str2, "%i, %i, %i, %i, %i, 1",
-            useVarColor, texCount, modulateFirstTex, extraMath, tex0);
-    doLoop(true, pgm, w, h, str2);
-    doLoop(false, pgm, w, h, str2);
-}
 
 bool doTest(uint32_t w, uint32_t h) {
+    gWidth = w;
+    gHeight = h;
     setupVA();
     genTextures();
 
     printf("\nvarColor, texCount, modulate, extraMath, texSize, blend, Mpps, DC60\n");
 
-    for (int texCount = 0; texCount < 2; texCount++) {
-        for (int extraMath = 0; extraMath < 5; extraMath++) {
-
-            doSingleTest(w, h, false, texCount, false, extraMath, 1, 1);
-            doSingleTest(w, h, true, texCount, false, extraMath, 1, 1);
-            if (texCount) {
-                doSingleTest(w, h, false, texCount, true, extraMath, 1, 1);
-                doSingleTest(w, h, true, texCount, true, extraMath, 1, 1);
-
-                doSingleTest(w, h, false, texCount, false, extraMath, 2, 2);
-                doSingleTest(w, h, true, texCount, false, extraMath, 2, 2);
-                doSingleTest(w, h, false, texCount, true, extraMath, 2, 2);
-                doSingleTest(w, h, true, texCount, true, extraMath, 2, 2);
-            }
+    for (uint32_t num = 0; num < gFragmentTestCount; num++) {
+        doSingleTest(num, 2);
+        if (gFragmentTests[num]->texCount) {
+            doSingleTest(num, 1);
         }
     }
 
