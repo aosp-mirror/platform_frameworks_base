@@ -497,7 +497,7 @@ static jboolean android_net_wifi_setSuspendOptimizationsCommand(JNIEnv* env, job
 {
     char cmdstr[25];
 
-    snprintf(cmdstr, sizeof(cmdstr), "DRIVER SETSUSPEND %d", enabled ? 0 : 1);
+    snprintf(cmdstr, sizeof(cmdstr), "DRIVER SETSUSPENDOPT %d", enabled ? 0 : 1);
     return doBooleanCommand(cmdstr, "OK");
 }
 
