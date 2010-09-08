@@ -15,11 +15,12 @@
  */
 
 
-package com.android.systemui.statusbar;
+package com.android.systemui.recent;
+
+import com.android.systemui.R;
 
 import com.android.ex.carousel.CarouselView;
 import com.android.ex.carousel.CarouselRS.CarouselCallback;
-import com.android.internal.R;
 
 import java.util.ArrayList;
 import java.util.List;

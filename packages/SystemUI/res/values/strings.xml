@@ -54,4 +54,17 @@
     <!-- Name of the button that links to the Settings app. [MAXCHARS=NONE] -->
     <string name="system_panel_settings_button">Settings</string>
 
+
+    <!-- Recent Tasks dialog: title
+     TODO: this should move to SystemUI.apk, but the code for the old 
+            recent dialog is still in the framework
+     -->
+    <string name="recent_tasks_title">Recent</string>
+    <!-- Recent Tasks dialog: message when there are no recent applications
+     TODO: this should move to SystemUI.apk, but the code for the old 
+            recent dialog is still in the framework
+     -->
+    <string name="recent_tasks_empty">No recent applications.</string>
+
+    
 </resources>

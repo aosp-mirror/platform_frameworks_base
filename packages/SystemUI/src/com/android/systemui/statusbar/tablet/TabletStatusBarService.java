@@ -47,6 +47,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
 
 import com.android.systemui.statusbar.*;
+import com.android.systemui.recent.RecentApplicationsActivity;
 import com.android.systemui.R;
 
 public class TabletStatusBarService extends StatusBarService {

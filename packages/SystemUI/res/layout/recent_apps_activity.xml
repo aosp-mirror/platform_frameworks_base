@@ -32,7 +32,7 @@
         android:textColor="#80FFFFFF"
         android:textStyle="bold"
         android:singleLine="true"
-        android:text="@android:string/recent_tasks_title"
+        android:text="@string/recent_tasks_title"
         android:visibility="gone"/>
 
     <!-- This is only intended to be visible when carousel is invisible -->
@@ -42,14 +42,14 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="@android:string/no_recent_tasks"
+        android:text="@string/recent_tasks_empty"
         android:visibility="gone"/>
 
-    <com.android.systemui.statusbar.RecentApplicationsCarouselView
+    <com.android.systemui.recent.RecentApplicationsCarouselView
         android:id="@+id/carousel"
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1">
-    </com.android.systemui.statusbar.RecentApplicationsCarouselView>
+    </com.android.systemui.recent.RecentApplicationsCarouselView>
 
 </LinearLayout>
