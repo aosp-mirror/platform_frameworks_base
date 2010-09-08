@@ -123,72 +123,6 @@ public abstract class ActionBar {
     public abstract int getSelectedNavigationItem();
 
     /**
-     * Set the action bar into standard navigation mode, supplying a title and subtitle.
-     * 
-     * Standard navigation mode is default. The title is automatically set to the
-     * name of your Activity. Subtitles are displayed underneath the title, usually
-     * in a smaller font or otherwise less prominently than the title. Subtitles are
-     * good for extended descriptions of activity state.
-     *
-     * @param title The action bar's title. null is treated as an empty string.
-     * @param subtitle The action bar's subtitle. null will remove the subtitle entirely.
-     *
-     * @see #setStandardNavigationMode()
-     * @see #setStandardNavigationMode(CharSequence)
-     * @see #setStandardNavigationMode(int)
-     * @see #setStandardNavigationMode(int, int)
-     */
-    public abstract void setStandardNavigationMode(CharSequence title, CharSequence subtitle);
-
-    /**
-     * Set the action bar into standard navigation mode, supplying a title and subtitle.
-     * 
-     * Standard navigation mode is default. The title is automatically set to the
-     * name of your Activity. Subtitles are displayed underneath the title, usually
-     * in a smaller font or otherwise less prominently than the title. Subtitles are
-     * good for extended descriptions of activity state.
-     *
-     * @param titleResId Resource ID of a title string
-     * @param subtitleResId Resource ID of a subtitle string
-     *
-     * @see #setStandardNavigationMode()
-     * @see #setStandardNavigationMode(CharSequence)
-     * @see #setStandardNavigationMode(CharSequence, CharSequence)
-     * @see #setStandardNavigationMode(int)
-     */
-    public abstract void setStandardNavigationMode(int titleResId, int subtitleResId);
-
-    /**
-     * Set the action bar into standard navigation mode, supplying a title and subtitle.
-     * 
-     * Standard navigation mode is default. The title is automatically set to the
-     * name of your Activity on startup if an action bar is present.
-     *
-     * @param title The action bar's title. null is treated as an empty string.
-     *
-     * @see #setStandardNavigationMode()
-     * @see #setStandardNavigationMode(CharSequence, CharSequence)
-     * @see #setStandardNavigationMode(int)
-     * @see #setStandardNavigationMode(int, int)
-     */
-    public abstract void setStandardNavigationMode(CharSequence title);
-
-    /**
-     * Set the action bar into standard navigation mode, supplying a title and subtitle.
-     * 
-     * Standard navigation mode is default. The title is automatically set to the
-     * name of your Activity on startup if an action bar is present.
-     *
-     * @param titleResId Resource ID of a title string
-     *
-     * @see #setStandardNavigationMode()
-     * @see #setStandardNavigationMode(CharSequence)
-     * @see #setStandardNavigationMode(CharSequence, CharSequence)
-     * @see #setStandardNavigationMode(int, int)
-     */
-    public abstract void setStandardNavigationMode(int titleResId);
-
-    /**
      * Set the action bar into standard navigation mode, using the currently set title
      * and/or subtitle.
      *
@@ -324,18 +258,6 @@ public abstract class ActionBar {
     public abstract void setTabNavigationMode();
 
     /**
-     * Set the action bar into tabbed navigation mode.
-     *
-     * @param containerViewId Id of the container view where tab content fragments should appear.
-     *
-     * @see #addTab(Tab)
-     * @see #insertTab(Tab, int)
-     * @see #removeTab(Tab)
-     * @see #removeTabAt(int)
-     */
-    public abstract void setTabNavigationMode(int containerViewId);
-
-    /**
      * Create and return a new {@link Tab}.
      * This tab will not be included in the action bar until it is added.
      *
@@ -354,13 +276,13 @@ public abstract class ActionBar {
     public abstract void addTab(Tab tab);
 
     /**
-     * Insert a tab for use in tabbed navigation mode. The tab will be inserted at
+     * Add a tab for use in tabbed navigation mode. The tab will be inserted at
      * <code>position</code>.
      *
      * @param tab The tab to add
      * @param position The new position of the tab
      */
-    public abstract void insertTab(Tab tab, int position);
+    public abstract void addTab(Tab tab, int position);
 
     /**
      * Remove a tab from the action bar.
@@ -382,6 +304,14 @@ public abstract class ActionBar {
      * @param tab Tab to select
      */
     public abstract void selectTab(Tab tab);
+
+    /**
+     * Returns the currently selected tab if in tabbed navigation mode and there is at least
+     * one tab present.
+     *
+     * @return The currently selected tab or null
+     */
+    public abstract Tab getSelectedTab();
 
     /**
      * Retrieve the current height of the ActionBar.
@@ -477,22 +407,68 @@ public abstract class ActionBar {
         public abstract void setText(CharSequence text);
 
         /**
-         * Returns the fragment that will be shown when this tab is selected.
+         * Set a custom view to be used for this tab. This overrides values set by
+         * {@link #setText(CharSequence)} and {@link #setIcon(Drawable)}.
          *
-         * @return Fragment associated with this tab
+         * @param view Custom view to be used as a tab.
          */
-        public abstract Fragment getFragment();
+        public abstract void setCustomView(View view);
 
         /**
-         * Set the fragment that will be shown when this tab is selected.
+         * Retrieve a previously set custom view for this tab.
          *
-         * @param fragment Fragment to associate with this tab
+         * @return The custom view set by {@link #setCustomView(View)}.
          */
-        public abstract void setFragment(Fragment fragment);
+        public abstract View getCustomView();
+
+        /**
+         * Give this Tab an arbitrary object to hold for later use.
+         *
+         * @param obj Object to store
+         */
+        public abstract void setTag(Object obj);
+
+        /**
+         * @return This Tab's tag object.
+         */
+        public abstract Object getTag();
+
+        /**
+         * Set the {@link TabListener} that will handle switching to and from this tab.
+         * All tabs must have a TabListener set before being added to the ActionBar.
+         *
+         * @param listener Listener to handle tab selection events
+         */
+        public abstract void setTabListener(TabListener listener);
 
         /**
          * Select this tab. Only valid if the tab has been added to the action bar.
          */
         public abstract void select();
+    }
+
+    /**
+     * Callback interface invoked when a tab is focused, unfocused, added, or removed.
+     */
+    public interface TabListener {
+        /**
+         * Called when a tab enters the selected state.
+         *
+         * @param tab The tab that was selected
+         * @param ft A {@link FragmentTransaction} for queuing fragment operations to execute
+         *        during a tab switch. The previous tab's unselect and this tab's select will be
+         *        executed in a single transaction.
+         */
+        public void onTabSelected(Tab tab, FragmentTransaction ft);
+
+        /**
+         * Called when a tab exits the selected state.
+         *
+         * @param tab The tab that was unselected
+         * @param ft A {@link FragmentTransaction} for queuing fragment operations to execute
+         *        during a tab switch. This tab's unselect and the newly selected tab's select
+         *        will be executed in a single transaction.
+         */
+        public void onTabUnselected(Tab tab, FragmentTransaction ft);
     }
 }
