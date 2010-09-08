@@ -18,12 +18,10 @@ package android.widget;
 
 import java.util.ArrayList;
 
-import android.animation.PropertyAnimator;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
@@ -220,13 +218,13 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * @param view The view that is being animated
      */
     void animateViewForTransition(int fromIndex, int toIndex, View view) {
-        PropertyAnimator pa;
+        ObjectAnimator pa;
         if (fromIndex == -1) {
             view.setAlpha(0.0f);
-            pa = new PropertyAnimator(400, view, "alpha", 0.0f, 1.0f);
+            pa = new ObjectAnimator(400, view, "alpha", 0.0f, 1.0f);
             pa.start();
         } else if (toIndex == -1) {
-            pa = new PropertyAnimator(400, view, "alpha", 1.0f, 0.0f);
+            pa = new ObjectAnimator(400, view, "alpha", 1.0f, 0.0f);
             pa.start();
         }
     }

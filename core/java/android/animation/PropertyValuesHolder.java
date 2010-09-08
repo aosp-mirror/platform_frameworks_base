@@ -27,31 +27,31 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * This class holds information about a property and the values that that property
  * should take on during an animation. PropertyValuesHolder objects can be used to create
- * animations with Animator or PropertyAnimator that operate on several different properties
+ * animations with ValueAnimator or ObjectAnimator that operate on several different properties
  * in parallel.
  */
 public class PropertyValuesHolder<T> implements Cloneable {
 
     /**
      * The name of the property associated with the values. This need not be a real property,
-     * unless this object is being used with PropertyAnimator. But this is the name by which
-     * aniamted values are looked up with getAnimatedValue(String) in Animator.
+     * unless this object is being used with ObjectAnimator. But this is the name by which
+     * aniamted values are looked up with getAnimatedValue(String) in ValueAnimator.
      */
     private String mPropertyName;
 
     /**
-     * The setter function, if needed. PropertyAnimator hands off this functionality to
+     * The setter function, if needed. ObjectAnimator hands off this functionality to
      * PropertyValuesHolder, since it holds all of the per-property information. This
      * property can be manually set via setSetter(). Otherwise, it is automatically
-     * derived when the animation starts in setupSetterAndGetter() if using PropertyAnimator.
+     * derived when the animation starts in setupSetterAndGetter() if using ObjectAnimator.
      */
     private Method mSetter = null;
 
     /**
-     * The getter function, if needed. PropertyAnimator hands off this functionality to
+     * The getter function, if needed. ObjectAnimator hands off this functionality to
      * PropertyValuesHolder, since it holds all of the per-property information. This
      * property can be manually set via setSetter(). Otherwise, it is automatically
-     * derived when the animation starts in setupSetterAndGetter() if using PropertyAnimator.
+     * derived when the animation starts in setupSetterAndGetter() if using ObjectAnimator.
      * The getter is only derived and used if one of the values is null.
      */
     private Method mGetter = null;
@@ -112,16 +112,16 @@ public class PropertyValuesHolder<T> implements Cloneable {
 
     /**
      * The value most recently calculated by calculateValue(). This is set during
-     * that function and might be retrieved later either by Animator.animatedValue() or
-     * by the property-setting logic in PropertyAnimator.animatedValue().
+     * that function and might be retrieved later either by ValueAnimator.animatedValue() or
+     * by the property-setting logic in ObjectAnimator.animatedValue().
      */
     private Object mAnimatedValue;
 
     /**
      * Constructs a PropertyValuesHolder object with just a set of values. This constructor
-     * is typically not used when animating objects with PropertyAnimator, because that
+     * is typically not used when animating objects with ObjectAnimator, because that
      * object needs distinct and meaningful property names. Simpler animations of one
-     * set of values using Animator may use this constructor, however, because no
+     * set of values using ValueAnimator may use this constructor, however, because no
      * distinguishing name is needed.
      * @param values The set of values to animate between. If there is only one value, it
      * is assumed to be the final value being animated to, and the initial value will be
@@ -141,14 +141,14 @@ public class PropertyValuesHolder<T> implements Cloneable {
      * on the object. Also, if any value is null, the value will be filled in when the animation
      * starts in the same way. This mechanism of automatically getting null values only works
      * if the PropertyValuesHolder object is used in conjunction
-     * {@link android.animation.PropertyAnimator}, and with a getter function either
+     * {@link ObjectAnimator}, and with a getter function either
      * derived automatically from <code>propertyName</code> or set explicitly via
      * {@link #setGetter(java.lang.reflect.Method)}, since otherwise PropertyValuesHolder has
      * no way of determining what the value should be.
      * @param propertyName The name of the property associated with this set of values. This
-     * can be the actual property name to be used when using a PropertyAnimator object, or
+     * can be the actual property name to be used when using a ObjectAnimator object, or
      * just a name used to get animated values, such as if this object is used with an
-     * Animator object.
+     * ValueAnimator object.
      * @param values The set of values to animate between.
      */
     public PropertyValuesHolder(String propertyName, T... values) {
@@ -163,7 +163,7 @@ public class PropertyValuesHolder<T> implements Cloneable {
      * on the object. Also, if any value is null, the value will be filled in when the animation
      * starts in the same way. This mechanism of automatically getting null values only works
      * if the PropertyValuesHolder object is used in conjunction
-     * {@link android.animation.PropertyAnimator}, and with a getter function either
+     * {@link ObjectAnimator}, and with a getter function either
      * derived automatically from <code>propertyName</code> or set explicitly via
      * {@link #setGetter(java.lang.reflect.Method)}, since otherwise PropertyValuesHolder has
      * no way of determining what the value should be.
@@ -331,7 +331,7 @@ public class PropertyValuesHolder<T> implements Cloneable {
     }
 
     /**
-     * Internal function (called from PropertyAnimator) to set up the setter and getter
+     * Internal function (called from ObjectAnimator) to set up the setter and getter
      * prior to running the animation. If the setter has not been manually set for this
      * object, it will be derived automatically given the property name, target object, and
      * types of values supplied. If no getter has been set, it will be supplied iff any of the
@@ -383,7 +383,7 @@ public class PropertyValuesHolder<T> implements Cloneable {
     }
 
     /**
-     * This function is called by PropertyAnimator when setting the start values for an animation.
+     * This function is called by ObjectAnimator when setting the start values for an animation.
      * The start values are set according to the current values in the target object. The
      * property whose value is extracted is whatever is specified by the propertyName of this
      * PropertyValuesHolder object.
@@ -395,7 +395,7 @@ public class PropertyValuesHolder<T> implements Cloneable {
     }
 
     /**
-     * This function is called by PropertyAnimator when setting the end values for an animation.
+     * This function is called by ObjectAnimator when setting the end values for an animation.
      * The end values are set according to the current values in the target object. The
      * property whose value is extracted is whatever is specified by the propertyName of this
      * PropertyValuesHolder object.
@@ -420,8 +420,8 @@ public class PropertyValuesHolder<T> implements Cloneable {
     }
     /**
      * Internal function to set the value on the target object, using the setter set up
-     * earlier on this PropertyValuesHolder object. This function is called by PropertyAnimator
-     * to handle turning the value calculated by Animator into a value set on the object
+     * earlier on this PropertyValuesHolder object. This function is called by ObjectAnimator
+     * to handle turning the value calculated by ValueAnimator into a value set on the object
      * according to the name of the property.
      * @param target The target object on which the value is set
      */
@@ -439,7 +439,7 @@ public class PropertyValuesHolder<T> implements Cloneable {
     }
 
     /**
-     * Internal function, called by Animator, to set up the TypeEvaluator that will be used
+     * Internal function, called by ValueAnimator, to set up the TypeEvaluator that will be used
      * to calculate animated values.
      */
     void init() {
@@ -466,7 +466,7 @@ public class PropertyValuesHolder<T> implements Cloneable {
 
     /**
      * Function used to calculate the value according to the evaluator set up for
-     * this PropertyValuesHolder object. This function is called by Animator.animateValue().
+     * this PropertyValuesHolder object. This function is called by ValueAnimator.animateValue().
      *
      * @param fraction The elapsed, interpolated fraction of the animation.
      * @return The calculated value at this point in the animation.
@@ -483,7 +483,7 @@ public class PropertyValuesHolder<T> implements Cloneable {
      * approach is more direct, and is especially useful when a function must be called that does
      * not correspond to the convention of <code>setName()</code>. For example, if a function
      * called <code>offset()</code> is to be called with the animated values, there is no way
-     * to tell <code>PropertyAnimator</code> how to call that function simply through a property
+     * to tell <code>ObjectAnimator</code> how to call that function simply through a property
      * name, so a setter method should be supplied instead.
      *
      * <p>Note that the setter function must take the same parameter type as the
@@ -511,7 +511,7 @@ public class PropertyValuesHolder<T> implements Cloneable {
      * approach is more direct, and is especially useful when a function must be called that does
      * not correspond to the convention of <code>setName()</code>. For example, if a function
      * called <code>offset()</code> is to be called to get an initial value, there is no way
-     * to tell <code>PropertyAnimator</code> how to call that function simply through a property
+     * to tell <code>ObjectAnimator</code> how to call that function simply through a property
      * name, so a getter method should be supplied instead.
      *
      * <p>Note that the getter method is only called whether supplied here or derived
@@ -569,7 +569,7 @@ public class PropertyValuesHolder<T> implements Cloneable {
     }
 
     /**
-     * Internal function, called by Animator and PropertyAnimator, to retrieve the value
+     * Internal function, called by ValueAnimator and ObjectAnimator, to retrieve the value
      * most recently calculated in calculateValue().
      * @return
      */

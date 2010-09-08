@@ -32,8 +32,8 @@ import java.util.List;
  * transitions for a layout container, create a LayoutTransition object and set it on any
  * ViewGroup by calling {@link ViewGroup#setLayoutTransition(LayoutTransition)}. This will cause
  * default animations to run whenever items are added to or removed from that container. To specify
- * custom animations, use the {@link LayoutTransition#setAnimatable(int, Animatable)
- * setAnimatable()} method.
+ * custom animations, use the {@link LayoutTransition#setAnimator(int, Animator)
+ * setAnimator()} method.
  *
  * <p>One of the core concepts of these transition animations is that there are two core
  * changes that cause the transition and four different animations that run because of
@@ -61,7 +61,7 @@ import java.util.List;
  * CHANGE_APPEARING animation animates <code>left</code>, <code>top</code>, <code>right</code>,
  * and <code>bottom</code>. Values for these properties are updated with the pre- and post-layout
  * values when the transition begins. Custom animations will be similarly populated with
- * the target and values being animated, assuming they use PropertyAnimator objects with
+ * the target and values being animated, assuming they use ObjectAnimator objects with
  * property names that are known on the target object.</p>
  */
 public class LayoutTransition {
@@ -93,21 +93,21 @@ public class LayoutTransition {
     /**
      * These variables hold the animations that are currently used to run the transition effects.
      * These animations are set to defaults, but can be changed to custom animations by
-     * calls to setAnimatable().
+     * calls to setAnimator().
      */
-    private Animatable mDisappearingAnim = null;
-    private Animatable mAppearingAnim = null;
-    private Animatable mChangingAppearingAnim = null;
-    private Animatable mChangingDisappearingAnim = null;
+    private Animator mDisappearingAnim = null;
+    private Animator mAppearingAnim = null;
+    private Animator mChangingAppearingAnim = null;
+    private Animator mChangingDisappearingAnim = null;
 
     /**
      * These are the default animations, defined in the constructor, that will be used
      * unless the user specifies custom animations.
      */
-    private static PropertyAnimator defaultChangeIn;
-    private static PropertyAnimator defaultChangeOut;
-    private static PropertyAnimator defaultFadeIn;
-    private static PropertyAnimator defaultFadeOut;
+    private static ObjectAnimator defaultChangeIn;
+    private static ObjectAnimator defaultChangeOut;
+    private static ObjectAnimator defaultFadeIn;
+    private static ObjectAnimator defaultFadeOut;
 
     /**
      * The default duration used by all animations.
@@ -154,7 +154,7 @@ public class LayoutTransition {
      * we cache all of the current animations in this map for possible cancellation on
      * another layout event.
      */
-    private HashMap<View, Animatable> currentAnimations = new HashMap<View, Animatable>();
+    private HashMap<View, Animator> currentAnimations = new HashMap<View, Animator>();
 
     /**
      * This hashmap is used to track the listeners that have been added to the children of
@@ -194,7 +194,7 @@ public class LayoutTransition {
             PropertyValuesHolder<Integer> pvhTop = new PropertyValuesHolder<Integer>("top", 0, 1);
             PropertyValuesHolder<Integer> pvhRight = new PropertyValuesHolder<Integer>("right", 0, 1);
             PropertyValuesHolder<Integer> pvhBottom = new PropertyValuesHolder<Integer>("bottom", 0, 1);
-            defaultChangeIn = new PropertyAnimator<PropertyValuesHolder>(DEFAULT_DURATION, this,
+            defaultChangeIn = new ObjectAnimator<PropertyValuesHolder>(DEFAULT_DURATION, this,
                     pvhLeft, pvhTop, pvhRight, pvhBottom);
             defaultChangeIn.setStartDelay(mChangingAppearingDelay);
             defaultChangeIn.setInterpolator(mChangingAppearingInterpolator);
@@ -202,11 +202,11 @@ public class LayoutTransition {
             defaultChangeOut.setStartDelay(mChangingDisappearingDelay);
             defaultChangeOut.setInterpolator(mChangingDisappearingInterpolator);
             defaultFadeIn =
-                    new PropertyAnimator<Float>(DEFAULT_DURATION, this, "alpha", 0f, 1f);
+                    new ObjectAnimator<Float>(DEFAULT_DURATION, this, "alpha", 0f, 1f);
             defaultFadeIn.setStartDelay(mAppearingDelay);
             defaultFadeIn.setInterpolator(mAppearingInterpolator);
             defaultFadeOut =
-                    new PropertyAnimator<Float>(DEFAULT_DURATION, this, "alpha", 1f, 0f);
+                    new ObjectAnimator<Float>(DEFAULT_DURATION, this, "alpha", 1f, 0f);
             defaultFadeOut.setStartDelay(mDisappearingDelay);
             defaultFadeOut.setInterpolator(mDisappearingInterpolator);
         }
@@ -240,7 +240,7 @@ public class LayoutTransition {
      * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose start
      * delay is being set.
      * @param delay The length of time, in milliseconds, to delay before starting the animation.
-     * @see android.animation.Animatable#setStartDelay(long)
+     * @see Animator#setStartDelay(long)
      */
     public void setStartDelay(int transitionType, long delay) {
         switch (transitionType) {
@@ -268,7 +268,7 @@ public class LayoutTransition {
      * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose start
      * delay is returned.
      * @return long The start delay of the specified animation.
-     * @see android.animation.Animatable#getStartDelay()
+     * @see Animator#getStartDelay()
      */
     public long getStartDelay(int transitionType) {
         switch (transitionType) {
@@ -294,7 +294,7 @@ public class LayoutTransition {
      * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
      * duration is being set.
      * @param duration The length of time, in milliseconds, that the specified animation should run.
-     * @see android.animation.Animatable#setDuration(long)
+     * @see Animator#setDuration(long)
      */
     public void setDuration(int transitionType, long duration) {
         switch (transitionType) {
@@ -322,7 +322,7 @@ public class LayoutTransition {
      * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
      * duration is returned.
      * @return long The duration of the specified animation.
-     * @see android.animation.Animatable#getDuration()
+     * @see Animator#getDuration()
      */
     public long getDuration(int transitionType) {
         switch (transitionType) {
@@ -387,7 +387,7 @@ public class LayoutTransition {
      * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
      * duration is being set.
      * @param interpolator The interpolator that the specified animation should use.
-     * @see android.animation.Animatable#setInterpolator(android.view.animation.Interpolator)
+     * @see Animator#setInterpolator(android.view.animation.Interpolator)
      */
     public void setInterpolator(int transitionType, Interpolator interpolator) {
         switch (transitionType) {
@@ -415,7 +415,7 @@ public class LayoutTransition {
      * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
      * duration is being set.
      * @return Interpolator The interpolator that the specified animation uses.
-     * @see android.animation.Animatable#setInterpolator(android.view.animation.Interpolator)
+     * @see Animator#setInterpolator(android.view.animation.Interpolator)
      */
     public Interpolator getInterpolator(int transitionType) {
         switch (transitionType) {
@@ -434,11 +434,11 @@ public class LayoutTransition {
 
     /**
      * Sets the animation used during one of the transition types that may run. Any
-     * Animatable object can be used, but to be most useful in the context of layout
-     * transitions, the animation should either be a PropertyAnimator or a Sequencer
-     * of animations including PropertyAnimators. Also, these PropertyAnimator objects
+     * Animator object can be used, but to be most useful in the context of layout
+     * transitions, the animation should either be a ObjectAnimator or a AnimatorSet
+     * of animations including PropertyAnimators. Also, these ObjectAnimator objects
      * should be able to get and set values on their target objects automatically. For
-     * example, a PropertyAnimator that animates the property "left" is able to set and get the
+     * example, a ObjectAnimator that animates the property "left" is able to set and get the
      * <code>left</code> property from the View objects being animated by the layout
      * transition. The transition works by setting target objects and properties
      * dynamically, according to the pre- and post-layoout values of those objects, so
@@ -454,26 +454,26 @@ public class LayoutTransition {
      * object (presumably 1) as its starting and ending value when the animation begins.
      * Animations which need to use values at the beginning and end that may not match the
      * values queried when the transition begins may need to use a different mechanism
-     * than a standard PropertyAnimator object.</p>
+     * than a standard ObjectAnimator object.</p>
      *
      * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
      * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
      * duration is being set.
-     * @param animatable The animation being assigned.
+     * @param animator The animation being assigned.
      */
-    public void setAnimatable(int transitionType, Animatable animatable) {
+    public void setAnimator(int transitionType, Animator animator) {
         switch (transitionType) {
             case CHANGE_APPEARING:
-                mChangingAppearingAnim = (animatable != null) ? animatable : defaultChangeIn;
+                mChangingAppearingAnim = (animator != null) ? animator : defaultChangeIn;
                 break;
             case CHANGE_DISAPPEARING:
-                mChangingDisappearingAnim = (animatable != null) ? animatable : defaultChangeOut;
+                mChangingDisappearingAnim = (animator != null) ? animator : defaultChangeOut;
                 break;
             case APPEARING:
-                mAppearingAnim = (animatable != null) ? animatable : defaultFadeIn;
+                mAppearingAnim = (animator != null) ? animator : defaultFadeIn;
                 break;
             case DISAPPEARING:
-                mDisappearingAnim = (animatable != null) ? animatable : defaultFadeOut;
+                mDisappearingAnim = (animator != null) ? animator : defaultFadeOut;
                 break;
         }
     }
@@ -484,10 +484,10 @@ public class LayoutTransition {
      * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
      * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
      * duration is being set.
-     * @return Animatable The animation being used for the given transition type.
-     * @see #setAnimatable(int, Animatable)
+     * @return Animator The animation being used for the given transition type.
+     * @see #setAnimator(int, Animator)
      */
-    public Animatable getAnimatable(int transitionType) {
+    public Animator getAnimator(int transitionType) {
         switch (transitionType) {
             case CHANGE_APPEARING:
                 return mChangingAppearingAnim;
@@ -529,21 +529,21 @@ public class LayoutTransition {
             if (child != newView) {
 
                 // If there's an animation running on this view already, cancel it
-                Animatable currentAnimation = currentAnimations.get(child);
+                Animator currentAnimation = currentAnimations.get(child);
                 if (currentAnimation != null) {
                     currentAnimation.cancel();
                     currentAnimations.remove(child);
                 }
 
                 // Make a copy of the appropriate animation
-                final Animatable anim = (changeReason == APPEARING) ?
+                final Animator anim = (changeReason == APPEARING) ?
                         mChangingAppearingAnim.clone() :
                         mChangingDisappearingAnim.clone();
 
                 // Set the target object for the animation
                 anim.setTarget(child);
 
-                // A PropertyAnimator (or Sequencer of them) can extract start values from
+                // A ObjectAnimator (or AnimatorSet of them) can extract start values from
                 // its target object
                 anim.setupStartValues();
 
@@ -574,20 +574,20 @@ public class LayoutTransition {
                         anim.setDuration(duration);
 
                         // Remove the animation from the cache when it ends
-                        anim.addListener(new AnimatableListenerAdapter() {
+                        anim.addListener(new AnimatorListenerAdapter() {
                             private boolean canceled = false;
-                            public void onAnimationCancel(Animatable animatable) {
+                            public void onAnimationCancel(Animator animator) {
                                 // we remove canceled animations immediately, not here
                                 canceled = true;
                             }
-                            public void onAnimationEnd(Animatable animatable) {
+                            public void onAnimationEnd(Animator animator) {
                                 if (!canceled) {
                                     currentAnimations.remove(child);
                                 }
                             }
                         });
-                        if (anim instanceof PropertyAnimator) {
-                            ((PropertyAnimator) anim).setCurrentPlayTime(0);
+                        if (anim instanceof ObjectAnimator) {
+                            ((ObjectAnimator) anim).setCurrentPlayTime(0);
                         }
                         anim.start();
 
@@ -626,15 +626,15 @@ public class LayoutTransition {
      * @param child The View being added to the ViewGroup.
      */
     private void runAppearingTransition(final ViewGroup parent, final View child) {
-        Animatable anim = mAppearingAnim.clone();
+        Animator anim = mAppearingAnim.clone();
         anim.setTarget(child);
         anim.setStartDelay(mAppearingDelay);
         anim.setDuration(mAppearingDuration);
-        if (anim instanceof PropertyAnimator) {
-            ((PropertyAnimator) anim).setCurrentPlayTime(0);
+        if (anim instanceof ObjectAnimator) {
+            ((ObjectAnimator) anim).setCurrentPlayTime(0);
         }
         if (mListeners != null) {
-            anim.addListener(new AnimatableListenerAdapter() {
+            anim.addListener(new AnimatorListenerAdapter() {
                 public void onAnimationEnd() {
                     for (TransitionListener listener : mListeners) {
                         listener.endTransition(LayoutTransition.this, parent, child, APPEARING);
@@ -652,12 +652,12 @@ public class LayoutTransition {
      * @param child The View being removed from the ViewGroup.
      */
     private void runDisappearingTransition(final ViewGroup parent, final View child) {
-        Animatable anim = mDisappearingAnim.clone();
+        Animator anim = mDisappearingAnim.clone();
         anim.setStartDelay(mDisappearingDelay);
         anim.setDuration(mDisappearingDuration);
         anim.setTarget(child);
         if (mListeners != null) {
-            anim.addListener(new AnimatableListenerAdapter() {
+            anim.addListener(new AnimatorListenerAdapter() {
                 public void onAnimationEnd() {
                     for (TransitionListener listener : mListeners) {
                         listener.endTransition(LayoutTransition.this, parent, child, DISAPPEARING);
@@ -665,8 +665,8 @@ public class LayoutTransition {
                 }
             });
         }
-        if (anim instanceof PropertyAnimator) {
-            ((PropertyAnimator) anim).setCurrentPlayTime(0);
+        if (anim instanceof ObjectAnimator) {
+            ((ObjectAnimator) anim).setCurrentPlayTime(0);
         }
         anim.start();
     }

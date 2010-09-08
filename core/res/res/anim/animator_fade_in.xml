@@ -17,7 +17,7 @@
 */
 -->
 
-<property xmlns:android="http://schemas.android.com/apk/res/android"
+<objectAnimator xmlns:android="http://schemas.android.com/apk/res/android"
     android:interpolator="@anim/accelerate_interpolator"
     android:valueFrom="0"
     android:valueTo="1"
