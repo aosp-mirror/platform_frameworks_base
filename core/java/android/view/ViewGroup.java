@@ -868,12 +868,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (!onFilterTouchEventForSecurity(ev)) {
+            return false;
+        }
+
         if ((mGroupFlags & FLAG_SPLIT_MOTION_EVENTS) == FLAG_SPLIT_MOTION_EVENTS) {
             if (mSplitMotionTargets == null) {
                 mSplitMotionTargets = new SplitMotionTargets();
             }
             return dispatchSplitTouchEvent(ev);
-        }
+	}
 
         final int action = ev.getAction();
         final float xf = ev.getX();
@@ -4471,7 +4475,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return MotionEvent.obtain(downTime, ev.getEventTime(),
                     action, pointerCount, mPointerIds, mPointerCoords, ev.getMetaState(),
                     ev.getXPrecision(), ev.getYPrecision(), ev.getDeviceId(), ev.getEdgeFlags(),
-                    ev.getSource());
+                    ev.getSource(), ev.getFlags());
         }
 
         static class TargetInfo {

@@ -46,6 +46,7 @@ static struct {
     jfieldID mYPrecision;
     jfieldID mEdgeFlags;
     jfieldID mMetaState;
+    jfieldID mFlags;
     jfieldID mNumPointers;
     jfieldID mNumSamples;
     jfieldID mPointerIdentifiers;
@@ -91,6 +92,8 @@ jobject android_view_MotionEvent_fromNative(JNIEnv* env, const MotionEvent* even
             event->getEdgeFlags());
     env->SetIntField(eventObj, gMotionEventClassInfo.mMetaState,
             event->getMetaState());
+    env->SetIntField(eventObj, gMotionEventClassInfo.mFlags,
+            event->getFlags());
     env->SetIntField(eventObj, gMotionEventClassInfo.mNumPointers,
             numPointers);
     env->SetIntField(eventObj, gMotionEventClassInfo.mNumSamples,
@@ -162,6 +165,7 @@ void android_view_MotionEvent_toNative(JNIEnv* env, jobject eventObj,
     jfloat yPrecision = env->GetFloatField(eventObj, gMotionEventClassInfo.mYPrecision);
     jint edgeFlags = env->GetIntField(eventObj, gMotionEventClassInfo.mEdgeFlags);
     jint metaState = env->GetIntField(eventObj, gMotionEventClassInfo.mMetaState);
+    jint flags = env->GetIntField(eventObj, gMotionEventClassInfo.mFlags);
     jint numPointers = env->GetIntField(eventObj, gMotionEventClassInfo.mNumPointers);
     jint numSamples = env->GetIntField(eventObj, gMotionEventClassInfo.mNumSamples);
     jintArray pointerIdentifierArray = jintArray(env->GetObjectField(eventObj,
@@ -196,7 +200,7 @@ void android_view_MotionEvent_toNative(JNIEnv* env, jobject eventObj,
         samplePointerCoords[j].orientation = *(srcDataSamples++);
     }
 
-    event->initialize(deviceId, source, action, edgeFlags, metaState,
+    event->initialize(deviceId, source, action, flags, edgeFlags, metaState,
             xOffset, yOffset, xPrecision, yPrecision, downTimeNano, sampleEventTime,
             numPointers, pointerIdentifiers, samplePointerCoords);
 
@@ -281,6 +285,8 @@ int register_android_view_MotionEvent(JNIEnv* env) {
             "mEdgeFlags", "I");
     GET_FIELD_ID(gMotionEventClassInfo.mMetaState, gMotionEventClassInfo.clazz,
             "mMetaState", "I");
+    GET_FIELD_ID(gMotionEventClassInfo.mFlags, gMotionEventClassInfo.clazz,
+            "mFlags", "I");
     GET_FIELD_ID(gMotionEventClassInfo.mNumPointers, gMotionEventClassInfo.clazz,
             "mNumPointers", "I");
     GET_FIELD_ID(gMotionEventClassInfo.mNumSamples, gMotionEventClassInfo.clazz,
