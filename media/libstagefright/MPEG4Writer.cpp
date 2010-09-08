@@ -346,9 +346,10 @@ status_t MPEG4Writer::start(MetaData *param) {
         // If file size is set to be larger than the 32 bit file
         // size limit, treat it as an error.
         if (mMaxFileSizeLimitBytes > kMax32BitFileSize) {
-            LOGE("32-bit file size limit too big: %lld bytes",
-                mMaxFileSizeLimitBytes);
-            return UNKNOWN_ERROR;
+            LOGW("32-bi file size limit (%lld bytes) too big. "
+                 "It is changed to %lld bytes",
+                mMaxFileSizeLimitBytes, kMax32BitFileSize);
+            mMaxFileSizeLimitBytes = kMax32BitFileSize;
         }
     }
 
