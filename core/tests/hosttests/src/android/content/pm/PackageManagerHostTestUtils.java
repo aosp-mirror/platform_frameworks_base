@@ -37,9 +37,7 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.lang.Runtime;
 import java.lang.Process;
-import java.util.Hashtable;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -119,14 +117,7 @@ public class PackageManagerHostTestUtils extends Assert {
 
     /**
      * Helper method to run tests and return the listener that collected the results.
-     *
-     * For the optional params, pass null to use the default values.
-
      * @param pkgName Android application package for tests
-     * @param className (optional) The class containing the method to test
-     * @param methodName (optional) The method in the class of which to test
-     * @param runnerName (optional) The name of the TestRunner of the test on the device to be run
-     * @param params (optional) Any additional parameters to pass into the Test Runner
      * @return the {@link CollectingTestRunListener}
      * @throws TimeoutException in case of a timeout on the connection.
      * @throws AdbCommandRejectedException if adb rejects the command
@@ -134,44 +125,13 @@ public class PackageManagerHostTestUtils extends Assert {
      * a period longer than the max time to output.
      * @throws IOException if connection to device was lost.
      */
-    private CollectingTestRunListener doRunTests(String pkgName, String className, String
-            methodName, String runnerName, Map<String, String> params) throws IOException, 
-            TimeoutException, AdbCommandRejectedException, ShellCommandUnresponsiveException {
-
-        RemoteAndroidTestRunner testRunner = new RemoteAndroidTestRunner(pkgName, runnerName,
-                mDevice);
-
-        if (className != null && methodName != null) {
-            testRunner.setMethodName(className, methodName);
-        }
-
-        // Add in any additional args to pass into the test
-        if (params != null) {
-            for (Entry<String, String> argPair : params.entrySet()) {
-                testRunner.addInstrumentationArg(argPair.getKey(), argPair.getValue());
-            }
-        }
-
+    private CollectingTestRunListener doRunTests(String pkgName) throws IOException,
+    TimeoutException, AdbCommandRejectedException, ShellCommandUnresponsiveException {
+        RemoteAndroidTestRunner testRunner = new RemoteAndroidTestRunner(
+                pkgName, mDevice);
         CollectingTestRunListener listener = new CollectingTestRunListener();
         testRunner.run(listener);
         return listener;
-    }
-
-    /**
-     * Runs the specified packages tests, and returns whether all tests passed or not.
-     *
-     * @param pkgName Android application package for tests
-     * @param className The class containing the method to test
-     * @param methodName The method in the class of which to test
-     * @param runnerName The name of the TestRunner of the test on the device to be run
-     * @param params Any additional parameters to pass into the Test Runner
-     * @return true if test passed, false otherwise.
-     */
-    public boolean runDeviceTestsDidAllTestsPass(String pkgName, String className,
-            String methodName, String runnerName, Map<String, String> params) throws IOException {
-        CollectingTestRunListener listener = doRunTests(pkgName, className, methodName,
-                runnerName, params);
-        return listener.didAllTestsPass();
     }
 
     /**
@@ -185,9 +145,9 @@ public class PackageManagerHostTestUtils extends Assert {
      * a period longer than the max time to output.
      * @throws IOException if connection to device was lost.
      */
-    public boolean runDeviceTestsDidAllTestsPass(String pkgName) throws IOException, 
+    public boolean runDeviceTestsDidAllTestsPass(String pkgName) throws IOException,
             TimeoutException, AdbCommandRejectedException, ShellCommandUnresponsiveException {
-        CollectingTestRunListener listener = doRunTests(pkgName, null, null, null, null);
+        CollectingTestRunListener listener = doRunTests(pkgName);
         return listener.didAllTestsPass();
     }
 
@@ -571,7 +531,7 @@ public class PackageManagerHostTestUtils extends Assert {
     }
 
     // For collecting results from running device tests
-    public static class CollectingTestRunListener implements ITestRunListener {
+    private static class CollectingTestRunListener implements ITestRunListener {
 
         private boolean mAllTestsPassed = true;
         private String mTestRunErrorMessage = null;
