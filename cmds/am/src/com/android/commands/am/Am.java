@@ -28,7 +28,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-// import android.os.RemoteException; // apparently not used
 import android.os.ServiceManager;
 import android.util.AndroidException;
 import android.view.IWindowManager;
@@ -142,10 +141,30 @@ public class Am {
                 String value = nextArgRequired();
                 intent.putExtra(key, Integer.valueOf(value));
                 hasIntentInfo = true;
+            } else if (opt.equals("--eia")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                String[] strings = value.split(",");
+                int[] list = new int[strings.length];
+                for (int i = 0; i < strings.length; i++) {
+                    list[i] = Integer.valueOf(strings[i]);
+                }
+                intent.putExtra(key, list);
+                hasIntentInfo = true;
             } else if (opt.equals("--el")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
                 intent.putExtra(key, Long.valueOf(value));
+                hasIntentInfo = true;
+            } else if (opt.equals("--ela")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                String[] strings = value.split(",");
+                long[] list = new long[strings.length];
+                for (int i = 0; i < strings.length; i++) {
+                    list[i] = Long.valueOf(strings[i]);
+                }
+                intent.putExtra(key, list);
                 hasIntentInfo = true;
             } else if (opt.equals("--ez")) {
                 String key = nextArgRequired();
@@ -638,6 +657,8 @@ public class Am {
                 "        [--ez <EXTRA_KEY> <EXTRA_BOOLEAN_VALUE> ...]\n" +
                 "        [--ei <EXTRA_KEY> <EXTRA_INT_VALUE> ...]\n" +
                 "        [--el <EXTRA_KEY> <EXTRA_LONG_VALUE> ...]\n" +
+                "        [--eia <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]\n" +
+                "        [--ela <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]\n" +
                 "        [-n <COMPONENT>] [-f <FLAGS>]\n" +
                 "        [--grant-read-uri-permission] [--grant-write-uri-permission]\n" +
                 "        [--debug-log-resolution]\n" +
