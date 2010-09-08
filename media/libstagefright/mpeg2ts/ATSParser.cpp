@@ -49,6 +49,8 @@ struct ATSParser::Program : public RefBase {
             unsigned pid, unsigned payload_unit_start_indicator,
             ABitReader *br);
 
+    void signalDiscontinuity();
+
     sp<MediaSource> getSource(SourceType type);
 
 private:
@@ -66,6 +68,8 @@ struct ATSParser::Stream : public RefBase {
     void parse(
             unsigned payload_unit_start_indicator,
             ABitReader *br);
+
+    void signalDiscontinuity();
 
     sp<MediaSource> getSource(SourceType type);
 
@@ -122,6 +126,12 @@ bool ATSParser::Program::parsePID(
             payload_unit_start_indicator, br);
 
     return true;
+}
+
+void ATSParser::Program::signalDiscontinuity() {
+    for (size_t i = 0; i < mStreams.size(); ++i) {
+        mStreams.editValueAt(i)->signalDiscontinuity();
+    }
 }
 
 void ATSParser::Program::parseProgramMap(ABitReader *br) {
@@ -269,6 +279,19 @@ void ATSParser::Stream::parse(
 
     memcpy(mBuffer->data() + mBuffer->size(), br->data(), payloadSizeBits / 8);
     mBuffer->setRange(0, mBuffer->size() + payloadSizeBits / 8);
+}
+
+void ATSParser::Stream::signalDiscontinuity() {
+    LOGV("Stream discontinuity");
+    mPayloadStarted = false;
+    mBuffer->setRange(0, 0);
+
+    mQueue.clear();
+
+    if (mStreamType == 0x1b && mSource != NULL) {
+        // Don't signal discontinuities on audio streams.
+        mSource->queueDiscontinuity();
+    }
 }
 
 void ATSParser::Stream::parsePES(ABitReader *br) {
@@ -459,7 +482,10 @@ void ATSParser::Stream::onPayloadData(
                 mSource = new AnotherPacketSource(meta);
                 mSource->queueAccessUnit(accessUnit);
             }
-        } else {
+        } else if (mQueue.getFormat() != NULL) {
+            // After a discontinuity we invalidate the queue's format
+            // and won't enqueue any access units to the source until
+            // the queue has reestablished the new format.
             mSource->queueAccessUnit(accessUnit);
         }
     }
@@ -487,6 +513,12 @@ void ATSParser::feedTSPacket(const void *data, size_t size) {
 
     ABitReader br((const uint8_t *)data, kTSPacketSize);
     parseTS(&br);
+}
+
+void ATSParser::signalDiscontinuity() {
+    for (size_t i = 0; i < mPrograms.size(); ++i) {
+        mPrograms.editItemAt(i)->signalDiscontinuity();
+    }
 }
 
 void ATSParser::parseProgramAssociationTable(ABitReader *br) {
