@@ -18,6 +18,7 @@ package android.inputmethodservice;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.ContextMenu;
 import android.view.inputmethod.ExtractedText;
 import android.widget.EditText;
 
@@ -28,6 +29,7 @@ import android.widget.EditText;
 public class ExtractEditText extends EditText {
     private InputMethodService mIME;
     private int mSettingExtractedText;
+    private boolean mContextMenuShouldBeHandledBySuper = false;
     
     public ExtractEditText(Context context) {
         super(context, null);
@@ -97,12 +99,19 @@ public class ExtractEditText extends EditText {
         return false;
     }
     
+    @Override
+    protected void onCreateContextMenu(ContextMenu menu) {
+        super.onCreateContextMenu(menu);
+        mContextMenuShouldBeHandledBySuper = true;
+    }
+
     @Override public boolean onTextContextMenuItem(int id) {
-        if (mIME != null) {
+        if (mIME != null && !mContextMenuShouldBeHandledBySuper) {
             if (mIME.onExtractTextContextMenuItem(id)) {
                 return true;
             }
         }
+        mContextMenuShouldBeHandledBySuper = false;
         return super.onTextContextMenuItem(id);
     }
     
