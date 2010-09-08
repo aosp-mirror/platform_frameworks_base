@@ -17,7 +17,7 @@
 #include "rsContext.h"
 #include "rsScriptC.h"
 #include "rsMatrix.h"
-#include "../../../external/llvm/libbcc/include/bcc/bcc.h"
+#include "../../compile/libbcc/include/bcc/bcc.h"
 #include "utils/Timers.h"
 
 #include <GLES/gl.h>
