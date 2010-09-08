@@ -668,7 +668,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     while (true) {
                         String packageName = in.readUTF();
                         Slog.i(TAG, "    + " + packageName);
-                        dataChanged(packageName);
+                        dataChangedImpl(packageName);
                     }
                 } catch (EOFException e) {
                     // no more data; we're done
@@ -740,7 +740,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 int uid = mBackupParticipants.keyAt(i);
                 HashSet<ApplicationInfo> participants = mBackupParticipants.valueAt(i);
                 for (ApplicationInfo app: participants) {
-                    dataChanged(app.packageName);
+                    dataChangedImpl(app.packageName);
                 }
             }
         }
@@ -896,7 +896,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (!mEverStoredApps.contains(pkg.packageName)) {
                     if (DEBUG) Slog.i(TAG, "New app " + pkg.packageName
                             + " never backed up; scheduling");
-                    dataChanged(pkg.packageName);
+                    dataChangedImpl(pkg.packageName);
                 }
             }
         }
@@ -1327,7 +1327,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (status != BackupConstants.TRANSPORT_OK) {
                     Slog.w(TAG, "Backup pass unsuccessful, restaging");
                     for (BackupRequest req : mQueue) {
-                        dataChanged(req.appInfo.packageName);
+                        dataChangedImpl(req.appInfo.packageName);
                     }
 
                     // We also want to reset the backup schedule based on whatever
@@ -1997,25 +1997,66 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
+    private void dataChangedImpl(String packageName) {
+        HashSet<ApplicationInfo> targets = dataChangedTargets(packageName);
+        dataChangedImpl(packageName, targets);
+    }
 
-    // ----- IBackupManager binder interface -----
-
-    public void dataChanged(String packageName) {
+    private void dataChangedImpl(String packageName, HashSet<ApplicationInfo> targets) {
         // Record that we need a backup pass for the caller.  Since multiple callers
         // may share a uid, we need to note all candidates within that uid and schedule
         // a backup pass for each of them.
         EventLog.writeEvent(EventLogTags.BACKUP_DATA_CHANGED, packageName);
 
+        if (targets == null) {
+            Slog.w(TAG, "dataChanged but no participant pkg='" + packageName + "'"
+                   + " uid=" + Binder.getCallingUid());
+            return;
+        }
+
+        synchronized (mQueueLock) {
+            // Note that this client has made data changes that need to be backed up
+            for (ApplicationInfo app : targets) {
+                // validate the caller-supplied package name against the known set of
+                // packages associated with this uid
+                if (app.packageName.equals(packageName)) {
+                    // Add the caller to the set of pending backups.  If there is
+                    // one already there, then overwrite it, but no harm done.
+                    BackupRequest req = new BackupRequest(app, false);
+                    if (mPendingBackups.put(app, req) == null) {
+                        // Journal this request in case of crash.  The put()
+                        // operation returned null when this package was not already
+                        // in the set; we want to avoid touching the disk redundantly.
+                        writeToJournalLocked(packageName);
+
+                        if (DEBUG) {
+                            int numKeys = mPendingBackups.size();
+                            Slog.d(TAG, "Now awaiting backup for " + numKeys + " participants:");
+                            for (BackupRequest b : mPendingBackups.values()) {
+                                Slog.d(TAG, "    + " + b + " agent=" + b.appInfo.backupAgentName);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Note: packageName is currently unused, but may be in the future
+    private HashSet<ApplicationInfo> dataChangedTargets(String packageName) {
         // If the caller does not hold the BACKUP permission, it can only request a
         // backup of its own data.
-        HashSet<ApplicationInfo> targets;
         if ((mContext.checkPermission(android.Manifest.permission.BACKUP, Binder.getCallingPid(),
                 Binder.getCallingUid())) == PackageManager.PERMISSION_DENIED) {
-            targets = mBackupParticipants.get(Binder.getCallingUid());
-        } else {
-            // a caller with full permission can ask to back up any participating app
-            // !!! TODO: allow backup of ANY app?
-            targets = new HashSet<ApplicationInfo>();
+            synchronized (mBackupParticipants) {
+                return mBackupParticipants.get(Binder.getCallingUid());
+            }
+        }
+
+        // a caller with full permission can ask to back up any participating app
+        // !!! TODO: allow backup of ANY app?
+        HashSet<ApplicationInfo> targets = new HashSet<ApplicationInfo>();
+        synchronized (mBackupParticipants) {
             int N = mBackupParticipants.size();
             for (int i = 0; i < N; i++) {
                 HashSet<ApplicationInfo> s = mBackupParticipants.valueAt(i);
@@ -2024,37 +2065,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
             }
         }
-        if (targets != null) {
-            synchronized (mQueueLock) {
-                // Note that this client has made data changes that need to be backed up
-                for (ApplicationInfo app : targets) {
-                    // validate the caller-supplied package name against the known set of
-                    // packages associated with this uid
-                    if (app.packageName.equals(packageName)) {
-                        // Add the caller to the set of pending backups.  If there is
-                        // one already there, then overwrite it, but no harm done.
-                        BackupRequest req = new BackupRequest(app, false);
-                        if (mPendingBackups.put(app, req) == null) {
-                            // Journal this request in case of crash.  The put()
-                            // operation returned null when this package was not already
-                            // in the set; we want to avoid touching the disk redundantly.
-                            writeToJournalLocked(packageName);
-
-                            if (DEBUG) {
-                                int numKeys = mPendingBackups.size();
-                                Slog.d(TAG, "Now awaiting backup for " + numKeys + " participants:");
-                                for (BackupRequest b : mPendingBackups.values()) {
-                                    Slog.d(TAG, "    + " + b + " agent=" + b.appInfo.backupAgentName);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            Slog.w(TAG, "dataChanged but no participant pkg='" + packageName + "'"
-                    + " uid=" + Binder.getCallingUid());
-        }
+        return targets;
     }
 
     private void writeToJournalLocked(String str) {
@@ -2070,6 +2081,23 @@ class BackupManagerService extends IBackupManager.Stub {
         } finally {
             try { if (out != null) out.close(); } catch (IOException e) {}
         }
+    }
+
+    // ----- IBackupManager binder interface -----
+
+    public void dataChanged(final String packageName) {
+        final HashSet<ApplicationInfo> targets = dataChangedTargets(packageName);
+        if (targets == null) {
+            Slog.w(TAG, "dataChanged but no participant pkg='" + packageName + "'"
+                   + " uid=" + Binder.getCallingUid());
+            return;
+        }
+
+        mBackupHandler.post(new Runnable() {
+                public void run() {
+                    dataChangedImpl(packageName, targets);
+                }
+            });
     }
 
     // Clear the given package's backup data from the current transport
