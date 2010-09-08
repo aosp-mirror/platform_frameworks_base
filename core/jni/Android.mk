@@ -96,7 +96,6 @@ LOCAL_SRC_FILES:= \
 	android/graphics/MaskFilter.cpp \
 	android/graphics/Matrix.cpp \
 	android/graphics/Movie.cpp \
-	android/graphics/NIOBuffer.cpp \
 	android/graphics/NinePatch.cpp \
 	android/graphics/NinePatchImpl.cpp \
 	android/graphics/Paint.cpp \

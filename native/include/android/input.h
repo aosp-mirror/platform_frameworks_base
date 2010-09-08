@@ -247,6 +247,22 @@ enum {
 };
 
 /*
+ * Motion event flags.
+ */
+enum {
+    /* This flag indicates that the window that received this motion event is partly
+     * or wholly obscured by another visible window above it.  This flag is set to true
+     * even if the event did not directly pass through the obscured area.
+     * A security sensitive application can check this flag to identify situations in which
+     * a malicious application may have covered up part of its content for the purpose
+     * of misleading the user or hijacking touches.  An appropriate response might be
+     * to drop the suspect touches or to take additional precautions to confirm the user's
+     * actual intent.
+     */
+    AMOTION_EVENT_FLAG_WINDOW_IS_OBSCURED = 0x1,
+};
+
+/*
  * Motion event edge touch flags.
  */
 enum {
@@ -394,6 +410,9 @@ int64_t AKeyEvent_getEventTime(const AInputEvent* key_event);
 
 /* Get the combined motion event action code and pointer index. */
 int32_t AMotionEvent_getAction(const AInputEvent* motion_event);
+
+/* Get the motion event flags. */
+int32_t AMotionEvent_getFlags(const AInputEvent* motion_event);
 
 /* Get the state of any meta / modifier keys that were in effect when the
  * event was generated. */

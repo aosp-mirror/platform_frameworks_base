@@ -16,8 +16,8 @@
 
 package android.widget;
 
-import android.animation.PropertyAnimator;
 import android.animation.PropertyValuesHolder;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BlurMaskFilter;
@@ -166,7 +166,7 @@ public class StackView extends AdapterViewAnimator {
             }
             view.setVisibility(VISIBLE);
 
-            PropertyAnimator<Float> fadeIn = new PropertyAnimator<Float>(DEFAULT_ANIMATION_DURATION,
+            ObjectAnimator<Float> fadeIn = new ObjectAnimator<Float>(DEFAULT_ANIMATION_DURATION,
                     view, "alpha", view.getAlpha(), 1.0f);
             fadeIn.start();
         } else if (fromIndex == mNumActiveViews - 1 && toIndex == mNumActiveViews - 2) {
@@ -181,7 +181,7 @@ public class StackView extends AdapterViewAnimator {
                     new PropertyValuesHolder<Float>("YProgress", 0.0f);
             PropertyValuesHolder<Float> slideInX =
                     new PropertyValuesHolder<Float>("XProgress", 0.0f);
-            PropertyAnimator pa = new PropertyAnimator(duration, animationSlider,
+            ObjectAnimator pa = new ObjectAnimator(duration, animationSlider,
                     slideInX, slideInY);
             pa.setInterpolator(new LinearInterpolator());
             pa.start();
@@ -196,7 +196,7 @@ public class StackView extends AdapterViewAnimator {
                     new PropertyValuesHolder<Float>("YProgress", 1.0f);
             PropertyValuesHolder<Float> slideOutX =
                     new PropertyValuesHolder<Float>("XProgress", 0.0f);
-            PropertyAnimator pa = new PropertyAnimator(duration, animationSlider,
+            ObjectAnimator pa = new ObjectAnimator(duration, animationSlider,
                    slideOutX, slideOutY);
             pa.setInterpolator(new LinearInterpolator());
             pa.start();
@@ -208,7 +208,7 @@ public class StackView extends AdapterViewAnimator {
             lp.setVerticalOffset(-mViewHeight);
         } else if (toIndex == -1) {
             // Fade item out
-            PropertyAnimator<Float> fadeOut = new PropertyAnimator<Float>
+            ObjectAnimator<Float> fadeOut = new ObjectAnimator<Float>
                     (DEFAULT_ANIMATION_DURATION, view, "alpha", view.getAlpha(), 0.0f);
             fadeOut.start();
         }
@@ -234,7 +234,7 @@ public class StackView extends AdapterViewAnimator {
 
             PropertyValuesHolder<Float> translationY =
                     new PropertyValuesHolder<Float>("translationY", transY);
-            PropertyAnimator pa = new PropertyAnimator(100, view, scaleX, scaleY, translationY);
+            ObjectAnimator pa = new ObjectAnimator(100, view, scaleX, scaleY, translationY);
             pa.start();
         }
     }
@@ -510,7 +510,7 @@ public class StackView extends AdapterViewAnimator {
                     new PropertyValuesHolder<Float>("YProgress", finalYProgress);
             PropertyValuesHolder<Float> snapBackX =
                     new PropertyValuesHolder<Float>("XProgress", 0.0f);
-            PropertyAnimator pa = new PropertyAnimator(duration, animationSlider,
+            ObjectAnimator pa = new ObjectAnimator(duration, animationSlider,
                     snapBackX, snapBackY);
             pa.setInterpolator(new LinearInterpolator());
             pa.start();
@@ -529,7 +529,7 @@ public class StackView extends AdapterViewAnimator {
                     new PropertyValuesHolder<Float>("YProgress", finalYProgress);
             PropertyValuesHolder<Float> snapBackX =
                     new PropertyValuesHolder<Float>("XProgress", 0.0f);
-            PropertyAnimator pa = new PropertyAnimator(duration, animationSlider,
+            ObjectAnimator pa = new ObjectAnimator(duration, animationSlider,
                     snapBackX, snapBackY);
             pa.start();
         }
@@ -870,7 +870,7 @@ public class StackView extends AdapterViewAnimator {
 
         private Rect invalidateRect = new Rect();
         private RectF invalidateRectf = new RectF();
-        // This is public so that PropertyAnimator can access it
+        // This is public so that ObjectAnimator can access it
         public void setVerticalOffset(int newVerticalOffset) {
             int offsetDelta = newVerticalOffset - verticalOffset;
             verticalOffset = newVerticalOffset;

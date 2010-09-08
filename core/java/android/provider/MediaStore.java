@@ -260,31 +260,31 @@ public final class MediaStore {
      * Media provider interface used by MTP implementation.
      * @hide
      */
-    public static final class MtpObjects {
+    public static final class Files {
 
         public static Uri getContentUri(String volumeName) {
             return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
-                    "/object");
+                    "/file");
         }
 
         public static final Uri getContentUri(String volumeName,
-                long objectId) {
+                long fileId) {
             return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
-                    + "/object/" + objectId);
+                    + "/file/" + fileId);
         }
 
         // used for MTP GetObjectReferences and SetObjectReferences
         public static final Uri getReferencesUri(String volumeName,
-                long objectId) {
+                long fileId) {
             return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
-                    + "/object/" + objectId + "/references");
+                    + "/file/" + fileId + "/references");
         }
 
         /**
          * Fields for master table for all media files.
          * Table also contains MediaColumns._ID, DATA, SIZE and DATE_MODIFIED.
          */
-        public interface ObjectColumns extends MediaColumns {
+        public interface FileColumns extends MediaColumns {
             /**
              * The MTP format code of the file
              * <P>Type: INTEGER</P>
@@ -298,14 +298,14 @@ public final class MediaStore {
             public static final String PARENT = "parent";
 
             /**
-             * Identifier for the media table containing the object.
+             * Identifier for the media table containing the file.
              * Used internally by MediaProvider
              * <P>Type: INTEGER</P>
              */
             public static final String MEDIA_TABLE = "media_table";
 
             /**
-             * The ID of the object in its media table.
+             * The ID of the file in its media table.
              * <P>Type: INTEGER</P>
              */
             public static final String MEDIA_ID = "media_id";

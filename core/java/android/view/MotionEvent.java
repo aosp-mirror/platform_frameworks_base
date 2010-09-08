@@ -30,6 +30,7 @@ import android.os.SystemClock;
  */
 public final class MotionEvent extends InputEvent implements Parcelable {
     private static final long MS_PER_NS = 1000000;
+    private static final boolean TRACK_RECYCLED_LOCATION = false;
     
     /**
      * Bit mask of the parts of the action code that are the action itself.
@@ -155,7 +156,17 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     @Deprecated
     public static final int ACTION_POINTER_ID_SHIFT = 8;
     
-    private static final boolean TRACK_RECYCLED_LOCATION = false;
+    /**
+     * This flag indicates that the window that received this motion event is partly
+     * or wholly obscured by another visible window above it.  This flag is set to true
+     * even if the event did not directly pass through the obscured area.
+     * A security sensitive application can check this flag to identify situations in which
+     * a malicious application may have covered up part of its content for the purpose
+     * of misleading the user or hijacking touches.  An appropriate response might be
+     * to drop the suspect touches or to take additional precautions to confirm the user's
+     * actual intent.
+     */
+    public static final int FLAG_WINDOW_IS_OBSCURED = 0x1;
 
     /**
      * Flag indicating the motion event intersected the top edge of the screen.
@@ -251,6 +262,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     private float mYPrecision;
     private int mEdgeFlags;
     private int mMetaState;
+    private int mFlags;
     
     private int mNumPointers;
     private int mNumSamples;
@@ -338,20 +350,22 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @param deviceId The id for the device that this event came from.  An id of
      * zero indicates that the event didn't come from a physical device; other
      * numbers are arbitrary and you shouldn't depend on the values.
-     * @param edgeFlags A bitfield indicating which edges, if any, where touched by this
+     * @param edgeFlags A bitfield indicating which edges, if any, were touched by this
      * MotionEvent.
      * @param source The source of this event.
+     * @param flags The motion event flags.
      */
     static public MotionEvent obtain(long downTime, long eventTime,
             int action, int pointers, int[] pointerIds, PointerCoords[] pointerCoords,
             int metaState, float xPrecision, float yPrecision, int deviceId,
-            int edgeFlags, int source) {
+            int edgeFlags, int source, int flags) {
         MotionEvent ev = obtain(pointers, 1);
         ev.mDeviceId = deviceId;
         ev.mSource = source;
         ev.mEdgeFlags = edgeFlags;
         ev.mDownTimeNano = downTime * MS_PER_NS;
         ev.mAction = action;
+        ev.mFlags = flags;
         ev.mMetaState = metaState;
         ev.mXOffset = 0;
         ev.mYOffset = 0;
@@ -401,7 +415,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @param deviceId The id for the device that this event came from.  An id of
      * zero indicates that the event didn't come from a physical device; other
      * numbers are arbitrary and you shouldn't depend on the values.
-     * @param edgeFlags A bitfield indicating which edges, if any, where touched by this
+     * @param edgeFlags A bitfield indicating which edges, if any, were touched by this
      * MotionEvent.
      */
     static public MotionEvent obtain(long downTime, long eventTime, int action,
@@ -413,6 +427,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         ev.mEdgeFlags = edgeFlags;
         ev.mDownTimeNano = downTime * MS_PER_NS;
         ev.mAction = action;
+        ev.mFlags = 0;
         ev.mMetaState = metaState;
         ev.mXOffset = 0;
         ev.mYOffset = 0;
@@ -462,7 +477,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @param deviceId The id for the device that this event came from.  An id of
      * zero indicates that the event didn't come from a physical device; other
      * numbers are arbitrary and you shouldn't depend on the values.
-     * @param edgeFlags A bitfield indicating which edges, if any, where touched by this
+     * @param edgeFlags A bitfield indicating which edges, if any, were touched by this
      * MotionEvent.
      * 
      * @deprecated Use {@link #obtain(long, long, int, float, float, float, float, int, float, float, int, int)}
@@ -509,6 +524,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         ev.mEdgeFlags = o.mEdgeFlags;
         ev.mDownTimeNano = o.mDownTimeNano;
         ev.mAction = o.mAction;
+        ev.mFlags = o.mFlags;
         ev.mMetaState = o.mMetaState;
         ev.mXOffset = o.mXOffset;
         ev.mYOffset = o.mYOffset;
@@ -540,6 +556,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         ev.mEdgeFlags = o.mEdgeFlags;
         ev.mDownTimeNano = o.mDownTimeNano;
         ev.mAction = o.mAction;
+        o.mFlags = o.mFlags;
         ev.mMetaState = o.mMetaState;
         ev.mXOffset = o.mXOffset;
         ev.mYOffset = o.mYOffset;
@@ -648,6 +665,15 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      */
     public final int getActionIndex() {
         return (mAction & ACTION_POINTER_INDEX_MASK) >> ACTION_POINTER_INDEX_SHIFT;
+    }
+
+    /**
+     * Gets the motion event flags.
+     *
+     * @see #FLAG_WINDOW_IS_OBSCURED
+     */
+    public final int getFlags() {
+        return mFlags;
     }
 
     /**
@@ -1285,7 +1311,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
 
     /**
-     * Sets the bitfield indicating which edges, if any, where touched by this
+     * Sets the bitfield indicating which edges, if any, were touched by this
      * MotionEvent.
      *
      * @see #getEdgeFlags()
@@ -1480,6 +1506,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         ev.mYPrecision = in.readFloat();
         ev.mEdgeFlags = in.readInt();
         ev.mMetaState = in.readInt();
+        ev.mFlags = in.readInt();
         
         final int[] pointerIdentifiers = ev.mPointerIdentifiers;
         for (int i = 0; i < NP; i++) {
@@ -1521,6 +1548,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         out.writeFloat(mYPrecision);
         out.writeInt(mEdgeFlags);
         out.writeInt(mMetaState);
+        out.writeInt(mFlags);
         
         final int[] pointerIdentifiers = mPointerIdentifiers;
         for (int i = 0; i < NP; i++) {

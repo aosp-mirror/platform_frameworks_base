@@ -20,7 +20,7 @@ import android.view.animation.Interpolator;
 
 /**
  * This class holds a time/value pair for an animation. The Keyframe class is used
- * by {@link Animator} to define the values that the animation target will have over the course
+ * by {@link ValueAnimator} to define the values that the animation target will have over the course
  * of the animation. As the time proceeds from one keyframe to the other, the value of the
  * target object will animate between the value at the previous keyframe and the value at the
  * next keyframe. Each keyframe also holds an option {@link android.view.animation.Interpolator}
@@ -59,7 +59,7 @@ public class Keyframe implements Cloneable {
      * the time in this keyframe, and the the value animated from as the time passes the time in
      * this keyframe.
      * @param valueType The type of the <code>value</code> object. This is used by the
-     * {@link #getValue()} functionm, which is queried by {@link Animator} to determine
+     * {@link #getValue()} functionm, which is queried by {@link ValueAnimator} to determine
      * the type of {@link TypeEvaluator} to use to interpolate between values.
      */
     private Keyframe(float fraction, Object value, Class valueType) {
@@ -239,7 +239,7 @@ public class Keyframe implements Cloneable {
     }
 
     /**
-     * Gets the type of keyframe. This information is used by Animator to determine the type of
+     * Gets the type of keyframe. This information is used by ValueAnimator to determine the type of
      * {@link TypeEvaluator} to use when calculating values between keyframes. The type is based
      * on the type of Keyframe created.
      *

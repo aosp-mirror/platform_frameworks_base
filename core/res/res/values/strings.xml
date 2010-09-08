@@ -283,9 +283,15 @@
     <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the phone, there will be a confirmation dialog.  This is the message. -->
     <string name="shutdown_confirm">Your phone will shut down.</string>
 
-    <!-- Recent Tasks dialog: title -->
+    <!-- Recent Tasks dialog: title
+     TODO: this should move to SystemUI.apk, but the code for the old 
+            recent dialog is still in the framework
+     -->
     <string name="recent_tasks_title">Recent</string>
-    <!-- Recent Tasks dialog: message when there are no recent applications -->
+    <!-- Recent Tasks dialog: message when there are no recent applications
+     TODO: this should move to SystemUI.apk, but the code for the old 
+            recent dialog is still in the framework
+     -->
     <string name="no_recent_tasks">No recent applications.</string>
 
     <!-- Title of the Global Actions Dialog -->

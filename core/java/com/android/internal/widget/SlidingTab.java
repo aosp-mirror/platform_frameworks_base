@@ -416,7 +416,7 @@ public class SlidingTab extends ViewGroup {
         }
 
         /**
-         * Start animating the slider. Note we need two animations since an Animator
+         * Start animating the slider. Note we need two animations since an ValueAnimator
          * keeps internal state of the invalidation region which is just the view being animated.
          *
          * @param anim1

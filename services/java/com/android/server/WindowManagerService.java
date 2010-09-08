@@ -5208,6 +5208,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 final Rect frame = child.mFrame;
                 inputWindow.frameLeft = frame.left;
                 inputWindow.frameTop = frame.top;
+                inputWindow.frameRight = frame.right;
+                inputWindow.frameBottom = frame.bottom;
+                
+                final Rect visibleFrame = child.mVisibleFrame;
+                inputWindow.visibleFrameLeft = visibleFrame.left;
+                inputWindow.visibleFrameTop = visibleFrame.top;
+                inputWindow.visibleFrameRight = visibleFrame.right;
+                inputWindow.visibleFrameBottom = visibleFrame.bottom;
                 
                 switch (child.mTouchableInsets) {
                     default:

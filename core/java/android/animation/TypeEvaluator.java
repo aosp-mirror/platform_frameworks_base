@@ -17,12 +17,12 @@
 package android.animation;
 
 /**
- * Interface for use with the {@link Animator#setEvaluator(TypeEvaluator)} function. Evaluators
+ * Interface for use with the {@link ValueAnimator#setEvaluator(TypeEvaluator)} function. Evaluators
  * allow developers to create animations on arbitrary property types, by allowing them to supply
  * custom evaulators for types that are not automatically understood and used by the animation
  * system.
  *
- * @see Animator#setEvaluator(TypeEvaluator)
+ * @see ValueAnimator#setEvaluator(TypeEvaluator)
  */
 public interface TypeEvaluator {
 
