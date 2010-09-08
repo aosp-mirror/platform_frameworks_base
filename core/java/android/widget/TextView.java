@@ -5822,7 +5822,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Return true iff there is a selection inside this text view.
      */
     public boolean hasSelection() {
-        return getSelectionStart() != getSelectionEnd();
+        final int selectionStart = getSelectionStart();
+        final int selectionEnd = getSelectionEnd();
+
+        return selectionStart >= 0 && selectionStart != selectionEnd;
     }
 
     /**
@@ -7010,7 +7013,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return false;
         }
 
-        if (mText.length() > 0 && getSelectionStart() >= 0) {
+        if (mText.length() > 0 && hasSelection()) {
             if (mText instanceof Editable && mInput != null) {
                 return true;
             }
@@ -7024,7 +7027,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return false;
         }
 
-        if (mText.length() > 0 && getSelectionStart() >= 0) {
+        if (mText.length() > 0 && hasSelection()) {
             return true;
         }
 
@@ -7145,6 +7148,49 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int minOffset = selectionModifierCursorController.getMinTouchOffset();
         int maxOffset = selectionModifierCursorController.getMaxTouchOffset();
 
+        if (minOffset == maxOffset) {
+            int offset = Math.max(0, Math.min(minOffset, mTransformed.length()));
+
+            // Tolerance, number of charaters around tapped position
+            final int range = 1;
+            final int max = mTransformed.length() - 1;
+
+            // 'Smart' word selection: detect position between words
+            for (int i = -range; i <= range; i++) {
+                int index = offset + i;
+                if (index >= 0 && index <= max) {
+                    if (Character.isSpaceChar(mTransformed.charAt(index))) {
+                        // Select current space
+                        selectionStart = index;
+                        selectionEnd = selectionStart + 1;
+
+                        // Extend selection to maximum space range
+                        while (selectionStart > 0 &&
+                                Character.isSpaceChar(mTransformed.charAt(selectionStart - 1))) {
+                            selectionStart--;
+                        }
+                        while (selectionEnd < max &&
+                                Character.isSpaceChar(mTransformed.charAt(selectionEnd))) {
+                            selectionEnd++;
+                        }
+
+                        Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
+                        return;
+                    }
+                }
+            }
+
+            // 'Smart' word selection: detect position at beginning or end of text.
+            if (offset <= range) {
+                Selection.setSelection((Spannable) mText, 0, 0);
+                return;
+            }
+            if (offset >= (max - range)) {
+                Selection.setSelection((Spannable) mText, max + 1, max + 1);
+                return;
+            }
+        }
+
         long wordLimits = getWordLimitsAt(minOffset);
         if (wordLimits >= 0) {
             selectionStart = (int) (wordLimits >>> 32);
@@ -7225,21 +7271,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 menu.add(0, ID_CUT, 0, com.android.internal.R.string.cut).
                      setOnMenuItemClickListener(handler).
                      setAlphabeticShortcut('x');
+                added = true;
             }
 
             if (canCopy()) {
                 menu.add(0, ID_COPY, 0, com.android.internal.R.string.copy).
                      setOnMenuItemClickListener(handler).
                      setAlphabeticShortcut('c');
+                added = true;
             }
 
             if (canPaste()) {
                 menu.add(0, ID_PASTE, 0, com.android.internal.R.string.paste).
                      setOnMenuItemClickListener(handler).
                      setAlphabeticShortcut('v');
+                added = true;
             }
-
-            added = true;
         } else {
             /*
             if (!isFocused()) {
@@ -7318,11 +7365,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private boolean textIsOnlySpaces() {
         final int length = mTransformed.length();
-        for (int i=0; i<length; i++) {
-            final char c = mTransformed.charAt(i);
-            final int type = Character.getType(c);
-            if (type != Character.SPACE_SEPARATOR)
+        for (int i = 0; i < length; i++) {
+            if (!Character.isSpaceChar(mTransformed.charAt(i))) {
                 return false;
+            }
         }
         return true;
     }
@@ -7355,7 +7401,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Called when a context menu option for the text view is selected.  Currently
      * this will be one of: {@link android.R.id#selectAll},
-     * {@link android.R.id#startSelectingText}, {@link android.R.id#stopSelectingText},
+     * {@link android.R.id#startSelectingText},
      * {@link android.R.id#cut}, {@link android.R.id#copy},
      * {@link android.R.id#paste}, {@link android.R.id#copyUrl},
      * or {@link android.R.id#switchInputMethod}.
@@ -7399,7 +7445,37 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case ID_PASTE:
                 CharSequence paste = clip.getText();
 
-                if (paste != null) {
+                if (paste != null && paste.length() > 0) {
+                    // Paste adds/removes spaces before or after insertion as needed.
+
+                    if (Character.isSpaceChar(paste.charAt(0))) {
+                        if (min > 0 && Character.isSpaceChar(mTransformed.charAt(min - 1))) {
+                            // Two spaces at beginning of paste: remove one
+                            ((Editable) mText).replace(min - 1, min, "");
+                            min = min - 1;
+                            max = max - 1;
+                        }
+                    } else {
+                        if (min > 0 && !Character.isSpaceChar(mTransformed.charAt(min - 1))) {
+                            // No space at beginning of paste: add one
+                            ((Editable) mText).replace(min, min, " ");
+                            min = min + 1;
+                            max = max + 1;
+                        }
+                    }
+
+                    if (Character.isSpaceChar(paste.charAt(paste.length() - 1))) {
+                        if (max < mText.length() && Character.isSpaceChar(mTransformed.charAt(max))) {
+                            // Two spaces at end of paste: remove one
+                            ((Editable) mText).replace(max, max + 1, "");
+                        }
+                    } else {
+                        if (max < mText.length() && !Character.isSpaceChar(mTransformed.charAt(max))) {
+                            // No space at end of paste: add one
+                            ((Editable) mText).replace(max, max, " ");
+                        }
+                    }
+
                     Selection.setSelection((Spannable) mText, max);
                     ((Editable) mText).replace(min, max, paste);
                     stopTextSelectionMode();
