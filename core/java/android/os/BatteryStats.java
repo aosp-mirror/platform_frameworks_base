@@ -216,6 +216,11 @@ public abstract class BatteryStats implements Parcelable {
         public abstract Map<Integer, ? extends Sensor> getSensorStats();
 
         /**
+         * Returns a mapping containing active process data.
+         */
+        public abstract SparseArray<? extends Pid> getPidStats();
+        
+        /**
          * Returns a mapping containing process statistics.
          *
          * @return a Map from Strings to Uid.Proc objects.
@@ -284,6 +289,11 @@ public abstract class BatteryStats implements Parcelable {
             public abstract int getHandle();
             
             public abstract Timer getSensorTime();
+        }
+
+        public class Pid {
+            public long mWakeSum;
+            public long mWakeStart;
         }
 
         /**
@@ -519,6 +529,11 @@ public abstract class BatteryStats implements Parcelable {
      * Return the current history of battery state changes.
      */
     public abstract HistoryItem getHistory();
+    
+    /**
+     * Return the base time offset for the battery history.
+     */
+    public abstract long getHistoryBaseTime();
     
     /**
      * Returns the number of times the device has been started.
@@ -1673,6 +1688,7 @@ public abstract class BatteryStats implements Parcelable {
         HistoryItem rec = getHistory();
         if (rec != null) {
             pw.println("Battery History:");
+            long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
             int oldState = 0;
             int oldStatus = -1;
             int oldHealth = -1;
@@ -1681,7 +1697,7 @@ public abstract class BatteryStats implements Parcelable {
             int oldVolt = -1;
             while (rec != null) {
                 pw.print("  ");
-                pw.print(rec.time);
+                TimeUtils.formatDuration(rec.time-now, pw, TimeUtils.HUNDRED_DAY_FIELD_LEN);
                 pw.print(" ");
                 if (rec.cmd == HistoryItem.CMD_START) {
                     pw.println(" START");
@@ -1784,6 +1800,35 @@ public abstract class BatteryStats implements Parcelable {
                 oldState = rec.states;
                 rec = rec.next;
             }
+            pw.println("");
+        }
+        
+        SparseArray<? extends Uid> uidStats = getUidStats();
+        final int NU = uidStats.size();
+        boolean didPid = false;
+        long nowRealtime = SystemClock.elapsedRealtime();
+        StringBuilder sb = new StringBuilder(64);
+        for (int i=0; i<NU; i++) {
+            Uid uid = uidStats.valueAt(i);
+            SparseArray<? extends Uid.Pid> pids = uid.getPidStats();
+            if (pids != null) {
+                for (int j=0; j<pids.size(); j++) {
+                    Uid.Pid pid = pids.valueAt(j);
+                    if (!didPid) {
+                        pw.println("Per-PID Stats:");
+                        didPid = true;
+                    }
+                    long time = pid.mWakeSum + (pid.mWakeStart != 0
+                            ? (nowRealtime - pid.mWakeStart) : 0);
+                    pw.print("  PID "); pw.print(pids.keyAt(j));
+                            pw.print(" wake time: ");
+                            TimeUtils.formatDuration(time, pw);
+                            pw.println("");
+                }
+            }
+        }
+        if (didPid) {
+            pw.println("");
         }
         
         pw.println("Statistics since last charge:");

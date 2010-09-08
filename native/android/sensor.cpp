@@ -60,12 +60,12 @@ ASensor const* ASensorManager_getDefaultSensor(ASensorManager* manager, int type
 }
 
 ASensorEventQueue* ASensorManager_createEventQueue(ASensorManager* manager,
-        ALooper* looper, ALooper_callbackFunc* callback, void* data)
+        ALooper* looper, int ident, ALooper_callbackFunc* callback, void* data)
 {
     sp<SensorEventQueue> queue =
             static_cast<SensorManager*>(manager)->createEventQueue();
     if (queue != 0) {
-        ALooper_addFd(looper, queue->getFd(), POLLIN, callback, data);
+        ALooper_addFd(looper, queue->getFd(), ident, POLLIN, callback, data);
         queue->looper = looper;
         queue->incStrong(manager);
     }

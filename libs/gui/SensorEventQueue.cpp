@@ -86,7 +86,7 @@ sp<PollLoop> SensorEventQueue::getPollLoop() const
     Mutex::Autolock _l(mLock);
     if (mPollLoop == 0) {
         mPollLoop = new PollLoop(true);
-        mPollLoop->setCallback(getFd(), POLLIN, NULL, NULL);
+        mPollLoop->setCallback(getFd(), getFd(), POLLIN, NULL, NULL);
     }
     return mPollLoop;
 }

@@ -60,7 +60,7 @@ static int do_rename(char **arg, char reply[REPLY_MAX])
 
 static int do_free_cache(char **arg, char reply[REPLY_MAX]) /* TODO int:free_size */
 {
-    return free_cache(atoi(arg[0])); /* free_size */
+    return free_cache((int64_t)atoll(arg[0])); /* free_size */
 }
 
 static int do_rm_cache(char **arg, char reply[REPLY_MAX])
@@ -75,15 +75,19 @@ static int do_protect(char **arg, char reply[REPLY_MAX])
 
 static int do_get_size(char **arg, char reply[REPLY_MAX])
 {
-    int codesize = 0;
-    int datasize = 0;
-    int cachesize = 0;
+    int64_t codesize = 0;
+    int64_t datasize = 0;
+    int64_t cachesize = 0;
     int res = 0;
 
         /* pkgdir, apkpath */
     res = get_size(arg[0], arg[1], arg[2], &codesize, &datasize, &cachesize, atoi(arg[3]));
 
-    sprintf(reply,"%d %d %d", codesize, datasize, cachesize);
+    /*
+     * Each int64_t can take up 22 characters printed out. Make sure it
+     * doesn't go over REPLY_MAX in the future.
+     */
+    snprintf(reply, REPLY_MAX, "%" PRId64 " %" PRId64 " %" PRId64, codesize, datasize, cachesize);
     return res;
 }
 
