@@ -10,6 +10,7 @@
 #include "SkUtils.h"
 #include "CreateJavaOutputStreamAdaptor.h"
 #include "AutoDecodeCancel.h"
+#include "Utils.h"
 
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Asset.h>
@@ -98,57 +99,6 @@ public:
     }
 };
 
-class AssetStreamAdaptor : public SkStream {
-public:
-    AssetStreamAdaptor(Asset* a) : fAsset(a) {}
-    
-    virtual bool rewind() {
-        off_t pos = fAsset->seek(0, SEEK_SET);
-        if (pos == (off_t)-1) {
-            SkDebugf("----- fAsset->seek(rewind) failed\n");
-            return false;
-        }
-        return true;
-    }
-    
-    virtual size_t read(void* buffer, size_t size) {
-        ssize_t amount;
-        
-        if (NULL == buffer) {
-            if (0 == size) {  // caller is asking us for our total length
-                return fAsset->getLength();
-            }
-            // asset->seek returns new total offset
-            // we want to return amount that was skipped
-
-            off_t oldOffset = fAsset->seek(0, SEEK_CUR);
-            if (-1 == oldOffset) {
-                SkDebugf("---- fAsset->seek(oldOffset) failed\n");
-                return 0;
-            }
-            off_t newOffset = fAsset->seek(size, SEEK_CUR);
-            if (-1 == newOffset) {
-                SkDebugf("---- fAsset->seek(%d) failed\n", size);
-                return 0;
-            }
-            amount = newOffset - oldOffset;
-        } else {
-            amount = fAsset->read(buffer, size);
-            if (amount <= 0) {
-                SkDebugf("---- fAsset->read(%d) returned %d\n", size, amount);
-            }
-        }
-        
-        if (amount < 0) {
-            amount = 0;
-        }
-        return amount;
-    }
-    
-private:
-    Asset*  fAsset;
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 
 static inline int32_t validOrNeg1(bool isValid, int32_t value) {
@@ -200,12 +150,6 @@ static bool optionsReportSizeToVM(JNIEnv* env, jobject options) {
             !env->GetBooleanField(options, gOptions_nativeAllocFieldID);
 }
 
-static jobject nullObjectReturn(const char msg[]) {
-    if (msg) {
-        SkDebugf("--- %s\n", msg);
-    }
-    return NULL;
-}
 
 static SkPixelRef* installPixelRef(SkBitmap* bitmap, SkStream* stream,
                                    int sampleSize, bool ditherImage) {
@@ -376,23 +320,6 @@ static ssize_t getFDSize(int fd) {
     return size;
 }
 
-/** Restore the file descriptor's offset in our destructor
- */
-class AutoFDSeek {
-public:
-    AutoFDSeek(int fd) : fFD(fd) {
-        fCurr = ::lseek(fd, 0, SEEK_CUR);
-    }
-    ~AutoFDSeek() {
-        if (fCurr >= 0) {
-            ::lseek(fFD, fCurr, SEEK_SET);
-        }
-    }
-private:
-    int     fFD;
-    off_t   fCurr;
-};
-
 static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz,
                                           jobject fileDescriptor,
                                           jobject padding,
@@ -559,107 +486,6 @@ static void nativeSetDefaultConfig(JNIEnv* env, jobject, int nativeConfig) {
     }
 }
 
-static jobject doBuildTileIndex(JNIEnv* env, SkStream* stream, bool isShareable) {
-    SkImageDecoder* decoder = SkImageDecoder::Factory(stream);
-    int width, height;
-    if (NULL == decoder) {
-        doThrowIOE(env, "Image format not supported");
-        return nullObjectReturn("SkImageDecoder::Factory returned null");
-    }
-
-    JavaPixelAllocator *javaAllocator = new JavaPixelAllocator(env, true);
-    decoder->setAllocator(javaAllocator);
-    JavaMemoryUsageReporter *javaMemoryReporter = new JavaMemoryUsageReporter(env);
-    decoder->setReporter(javaMemoryReporter);
-    javaAllocator->unref();
-    javaMemoryReporter->unref();
-
-    if (!decoder->buildTileIndex(stream, &width, &height, isShareable)) {
-        char msg[1024];
-        snprintf(msg, 1023, "Image failed to decode using %s decoder", decoder->getFormatName());
-        doThrowIOE(env, msg);
-        return nullObjectReturn("decoder->buildTileIndex returned false");
-    }
-
-    SkLargeBitmap *bm = new SkLargeBitmap(decoder, width, height);
-
-    return GraphicsJNI::createLargeBitmap(env, bm);
-}
-
-static jobject nativeCreateLargeBitmapFromByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
-                                     int offset, int length, jboolean isShareable) {
-    AutoJavaByteArray ar(env, byteArray);
-    SkStream* stream = new SkMemoryStream(ar.ptr() + offset, length, false);
-    SkAutoUnref aur(stream);
-    if (isShareable) {
-        aur.detach();
-    }
-    return doBuildTileIndex(env, stream, isShareable);
-}
-
-static jobject nativeCreateLargeBitmapFromFileDescriptor(JNIEnv* env, jobject clazz,
-                                          jobject fileDescriptor, jboolean isShareable) {
-    NPE_CHECK_RETURN_ZERO(env, fileDescriptor);
-
-    jint descriptor = env->GetIntField(fileDescriptor,
-                                       gFileDescriptor_descriptor);
-    bool weOwnTheFD = false;
-
-    if (isShareable) {
-        int newFD = ::dup(descriptor);
-        if (-1 != newFD) {
-            weOwnTheFD = true;
-            descriptor = newFD;
-        }
-    }
-
-    SkFDStream* stream = new SkFDStream(descriptor, weOwnTheFD);
-    SkAutoUnref aur(stream);
-    if (!stream->isValid()) {
-        return NULL;
-    }
-
-    if (isShareable) {
-        aur.detach();
-    }
-
-    /* Restore our offset when we leave, so we can be called more than once
-       with the same descriptor. This is only required if we didn't dup the
-       file descriptor, but it is OK to do it all the time.
-    */
-    AutoFDSeek as(descriptor);
-
-    return doBuildTileIndex(env, stream, isShareable);
-}
-
-static jobject nativeCreateLargeBitmapFromStream(JNIEnv* env, jobject clazz,
-                                  jobject is,       // InputStream
-                                  jbyteArray storage, // byte[]
-                                  jboolean isShareable) {
-    jobject largeBitmap = NULL;
-    SkStream* stream = CreateJavaInputStreamAdaptor(env, is, storage, 1024);
-
-    if (stream) {
-        // for now we don't allow shareable with java inputstreams
-        largeBitmap = doBuildTileIndex(env, stream, false);
-        stream->unref();
-    }
-    return largeBitmap;
-}
-
-static jobject nativeCreateLargeBitmapFromAsset(JNIEnv* env, jobject clazz,
-                                 jint native_asset, // Asset
-                                 jboolean isShareable) {
-    SkStream* stream;
-    Asset* asset = reinterpret_cast<Asset*>(native_asset);
-    stream = new AssetStreamAdaptor(asset);
-    SkAutoUnref aur(stream);
-    if (isShareable) {
-        aur.detach();
-    }
-    return doBuildTileIndex(env, stream, isShareable);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 static JNINativeMethod gMethods[] = {
@@ -689,26 +515,6 @@ static JNINativeMethod gMethods[] = {
     },
 
     {   "nativeSetDefaultConfig", "(I)V", (void*)nativeSetDefaultConfig },
-
-    {   "nativeCreateLargeBitmap",
-        "([BIIZ)Landroid/graphics/LargeBitmap;",
-        (void*)nativeCreateLargeBitmapFromByteArray
-    },
-
-    {   "nativeCreateLargeBitmap",
-        "(Ljava/io/InputStream;[BZ)Landroid/graphics/LargeBitmap;",
-        (void*)nativeCreateLargeBitmapFromStream
-    },
-
-    {   "nativeCreateLargeBitmap",
-        "(Ljava/io/FileDescriptor;Z)Landroid/graphics/LargeBitmap;",
-        (void*)nativeCreateLargeBitmapFromFileDescriptor
-    },
-
-    {   "nativeCreateLargeBitmap",
-        "(IZ)Landroid/graphics/LargeBitmap;",
-        (void*)nativeCreateLargeBitmapFromAsset
-    },
 };
 
 static JNINativeMethod gOptionsMethods[] = {

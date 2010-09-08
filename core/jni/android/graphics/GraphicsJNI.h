@@ -4,7 +4,7 @@
 #include "SkPoint.h"
 #include "SkRect.h"
 #include "SkBitmap.h"
-#include "../images/SkLargeBitmap.h"
+#include "../images/SkBitmapRegionDecoder.h"
 #include "../images/SkImageDecoder.h"
 #include <jni.h>
 
@@ -56,7 +56,7 @@ public:
     
     static jobject createRegion(JNIEnv* env, SkRegion* region);
 
-    static jobject createLargeBitmap(JNIEnv* env, SkLargeBitmap* bitmap);
+    static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);
 
     /** Set a pixelref for the bitmap (needs setConfig to already be called)
         Returns true on success. If it returns false, then it failed, and the
@@ -181,4 +181,3 @@ void doThrowIOE(JNIEnv* env, const char* msg = NULL);   // IO Exception
     do { if (NULL == (object)) { doThrowNPE(env); return; } } while (0)
 
 #endif
-
