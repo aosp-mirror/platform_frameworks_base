@@ -86,6 +86,8 @@ private:
     uint32_t mSize;
     uint32_t mMaxSize;
     GLint mMaxTextureSize;
+
+    mutable Mutex mLock;
 }; // class TextureCache
 
 }; // namespace uirenderer

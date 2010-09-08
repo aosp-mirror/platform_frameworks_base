@@ -17,6 +17,8 @@
 #ifndef ANDROID_UI_PATCH_CACHE_H
 #define ANDROID_UI_PATCH_CACHE_H
 
+#include <utils/ResourceTypes.h>
+
 #include "Patch.h"
 #include "GenerationCache.h"
 

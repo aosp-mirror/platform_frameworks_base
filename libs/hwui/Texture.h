@@ -28,6 +28,7 @@ namespace uirenderer {
 struct Texture {
     Texture() {
         cleanup = false;
+        bitmapSize = 0;
     }
 
     /**
@@ -54,6 +55,10 @@ struct Texture {
      * Indicates whether this texture should be cleaned up after use.
      */
     bool cleanup;
+    /**
+     * Optional, size of the original bitmap.
+     */
+    uint32_t bitmapSize;
 }; // struct Texture
 
 class AutoTexture {
