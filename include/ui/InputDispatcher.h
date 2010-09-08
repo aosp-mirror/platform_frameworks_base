@@ -147,8 +147,11 @@ public:
     /* Notifies the system that an input channel recovered from ANR. */
     virtual void notifyInputChannelRecoveredFromANR(const sp<InputChannel>& inputChannel) = 0;
 
-    /* Gets the key repeat timeout or -1 if automatic key repeating is disabled. */
+    /* Gets the key repeat initial timeout or -1 if automatic key repeating is disabled. */
     virtual nsecs_t getKeyRepeatTimeout() = 0;
+
+    /* Gets the key repeat inter-key delay. */
+    virtual nsecs_t getKeyRepeatDelay() = 0;
 
     /* Waits for key event input targets to become available.
      * If the event is being injected, injectorPid and injectorUid should specify the
