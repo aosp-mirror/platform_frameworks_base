@@ -130,10 +130,6 @@ public abstract class SQLiteProgram extends SQLiteClosable {
             // make sure it is acquired by me.
             mCompiledSql.acquire();
             mDatabase.addToCompiledQueries(mSql, mCompiledSql);
-            if (SQLiteDebug.DEBUG_ACTIVE_CURSOR_FINALIZATION) {
-                Log.v(TAG, "Created DbObj (id#" + mCompiledSql.nStatement +
-                        ") for sql: " + mSql);
-            }
         } else {
             // it is already in compiled-sql cache.
             // try to acquire the object.
@@ -144,12 +140,6 @@ public abstract class SQLiteProgram extends SQLiteClosable {
                 // CompiledSql object. create a new one.
                 // finalize it when I am done with it in "this" object.
                 mCompiledSql = new SQLiteCompiledSql(mDatabase, mSql);
-                if (SQLiteDebug.DEBUG_ACTIVE_CURSOR_FINALIZATION) {
-                    Log.v(TAG, "** possible bug ** Created NEW DbObj (id#" +
-                            mCompiledSql.nStatement +
-                            ") because the previously created DbObj (id#" + last +
-                            ") was not released for sql:" + mSql);
-                }
                 // since it is not in the cache, no need to acquire() it.
             }
         }

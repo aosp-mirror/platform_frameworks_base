@@ -92,9 +92,6 @@ import android.util.Log;
         // Note that native_finalize() checks to make sure that nStatement is
         // non-null before destroying it.
         if (nStatement != 0) {
-            if (SQLiteDebug.DEBUG_ACTIVE_CURSOR_FINALIZATION) {
-                Log.v(TAG, "closed and deallocated DbObj (id#" + nStatement +")");
-            }
             mDatabase.finalizeStatementLater(nStatement);
             nStatement = 0;
         }
@@ -109,16 +106,10 @@ import android.util.Log;
             return false;
         }
         mInUse = true;
-        if (SQLiteDebug.DEBUG_ACTIVE_CURSOR_FINALIZATION) {
-            Log.v(TAG, "Acquired DbObj (id#" + nStatement + ") from DB cache");
-        }
         return true;
     }
 
     /* package */ synchronized void release() {
-        if (SQLiteDebug.DEBUG_ACTIVE_CURSOR_FINALIZATION) {
-            Log.v(TAG, "Released DbObj (id#" + nStatement + ") back to DB cache");
-        }
         mInUse = false;
     }
 
