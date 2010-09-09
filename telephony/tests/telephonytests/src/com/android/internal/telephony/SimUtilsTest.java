@@ -28,7 +28,7 @@ public class SimUtilsTest extends TestCase {
     public void testBasic() throws Exception {
         byte[] data, data2;
 
-        /* 
+        /*
          * bcdToString()
          */
 
@@ -40,8 +40,12 @@ public class SimUtilsTest extends TestCase {
         assertEquals("0126045001448486", IccUtils.bcdToString(data, 1, data.length - 2));
 
         // Stops on invalid BCD value
-        data = IccUtils.hexStringToBytes("98F062400510444868f2");
+        data = IccUtils.hexStringToBytes("98E062400510444868f2");
         assertEquals("890", IccUtils.bcdToString(data, 0, data.length));
+
+        // skip the high nibble 'F' since some PLMNs have it
+        data = IccUtils.hexStringToBytes("98F062400510444868f2");
+        assertEquals("890260450014484862", IccUtils.bcdToString(data, 0, data.length));
 
         /*
          * gsmBcdByteToInt()
