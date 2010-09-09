@@ -62,6 +62,15 @@ public abstract class NetworkStateTracker extends Handler {
     public static final int EVENT_ROAMING_CHANGED = 5;
     public static final int EVENT_NETWORK_SUBTYPE_CHANGED = 6;
     public static final int EVENT_RESTORE_DEFAULT_NETWORK = 7;
+    /**
+     * arg1: network type
+     * arg2: condition (0 bad, 100 good)
+     */
+    public static final int EVENT_INET_CONDITION_CHANGE = 8;
+    /**
+     * arg1: network type
+     */
+    public static final int EVENT_INET_CONDITION_HOLD_END = 9;
 
     public NetworkStateTracker(Context context,
             Handler target,
