@@ -75,8 +75,8 @@
       </li>
     </ul>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r6</a>
-      </li>
+      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r7</a>
+      <span class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>sdk/win-usb.html">USB Driver for
       Windows, r3</a>
       </li>
@@ -94,7 +94,7 @@
       <span style="display:none" class="zh-TW"></span>
       </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/eclipse-adt.html">ADT 0.9.7
+      <li><a href="<?cs var:toroot ?>sdk/eclipse-adt.html">ADT 0.9.8
       <span style="display:none" class="de"></span>
       <span style="display:none" class="es"></span>
       <span style="display:none" class="fr"></span>
@@ -102,7 +102,7 @@
       <span style="display:none" class="ja"></span>
       <span style="display:none" class="zh-CN"></span>
       <span style="display:none" class="zh-TW"></span></a>
-      </li>
+      <span class="new">new!</span></li>
     </ul>
   </li>
   <li>
