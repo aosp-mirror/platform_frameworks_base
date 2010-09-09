@@ -1637,7 +1637,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     FeatureUser u = (FeatureUser)msg.obj;
                     u.expire();
                     break;
-<<<<<<< HEAD:services/java/com/android/server/ConnectivityService.java
                 case NetworkStateTracker.EVENT_CLEAR_NET_TRANSITION_WAKELOCK:
                     String causedBy = null;
                     synchronized (ConnectivityService.this) {
@@ -1651,7 +1650,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         Slog.d(TAG, "NetTransition Wakelock for " +
                                 causedBy + " released by timeout");
                     }
-=======
+                    break;
                 case NetworkStateTracker.EVENT_INET_CONDITION_CHANGE:
                     if (DBG) {
                         Slog.d(TAG, "Inet connectivity change, net=" +
@@ -1715,7 +1714,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     }
                     mDefaultInetConditionPublished = mDefaultInetCondition;
                     sendConnectedBroadcast(networkInfo);
->>>>>>> ec52c98d:services/java/com/android/server/ConnectivityService.java
                     break;
             }
         }
