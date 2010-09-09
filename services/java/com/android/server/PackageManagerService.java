@@ -9408,7 +9408,12 @@ class PackageManagerService extends IPackageManager.Stub {
         } catch (NoSuchAlgorithmException nsae) {
             Slog.e(TAG, "Failed to create encryption keys with exception: " + nsae);
             return null;
+        } catch (IOException ioe) {
+            Slog.e(TAG, "Failed to retrieve encryption keys with exception: "
+                      + ioe);
+            return null;
         }
+
     }
 
     /* package */ static String getTempContainerId() {
