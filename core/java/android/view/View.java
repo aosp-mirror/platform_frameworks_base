@@ -5094,20 +5094,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 }
             }
             mMatrix.reset();
-            mMatrix.setTranslate(mTranslationX, mTranslationY);
-            mMatrix.preRotate(mRotation, mPivotX, mPivotY);
-            mMatrix.preScale(mScaleX, mScaleY, mPivotX, mPivotY);
-            if (nonzero(mRotationX) || nonzero(mRotationY)) {
+            if (!nonzero(mRotationX) && !nonzero(mRotationY)) {
+                mMatrix.setTranslate(mTranslationX, mTranslationY);
+                mMatrix.preRotate(mRotation, mPivotX, mPivotY);
+                mMatrix.preScale(mScaleX, mScaleY, mPivotX, mPivotY);
+            } else {
                 if (mCamera == null) {
                     mCamera = new Camera();
                     matrix3D = new Matrix();
                 }
                 mCamera.save();
+                mMatrix.preScale(mScaleX, mScaleY, mPivotX, mPivotY);
                 mCamera.rotateX(mRotationX);
                 mCamera.rotateY(mRotationY);
+                mCamera.rotateZ(-mRotation);
                 mCamera.getMatrix(matrix3D);
                 matrix3D.preTranslate(-mPivotX, -mPivotY);
-                matrix3D.postTranslate(mPivotX, mPivotY);
+                matrix3D.postTranslate(mPivotX + mTranslationX, mPivotY + mTranslationY);
                 mMatrix.postConcat(matrix3D);
                 mCamera.restore();
             }
@@ -5148,7 +5151,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Sets the degrees that the view is rotated around the pivot point.
+     * Sets the degrees that the view is rotated around the pivot point. Increasing values
+     * result in clockwise rotation.
      *
      * @param rotation The degrees of rotation.
      * @see #getPivotX()
@@ -5177,7 +5181,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Sets the degrees that the view is rotated around the vertical axis through pivot point.
+     * Sets the degrees that the view is rotated around the vertical axis through the pivot point.
+     * Increasing values result in counter-clockwise rotation from the viewpoint of looking
+     * down the y axis.
      *
      * @param rotationY The degrees of Y rotation.
      * @see #getPivotX()
@@ -5206,7 +5212,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Sets the degrees that the view is rotated around the horizontal axis through pivot point.
+     * Sets the degrees that the view is rotated around the horizontal axis through the pivot point.
+     * Increasing values result in clockwise rotation from the viewpoint of looking down the
+     * x axis.
      *
      * @param rotationX The degrees of X rotation.
      * @see #getPivotX()
