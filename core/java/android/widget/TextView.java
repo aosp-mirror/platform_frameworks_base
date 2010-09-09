@@ -6557,6 +6557,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (!mFrozenWithFocus || (selStart < 0 || selEnd < 0)) {
                 // Has to be done before onTakeFocus, which can be overloaded.
                 if (mLastTouchOffset >= 0) {
+                    // Can happen when a TextView is displayed after its content has been deleted.
+                    mLastTouchOffset = Math.min(mLastTouchOffset, mText.length());
                     Selection.setSelection((Spannable) mText, mLastTouchOffset);
                 }
 
@@ -6573,7 +6575,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // ExtractEditText clears focus, which gives focus to the ExtractEditText.
                 // This special case ensure that we keep current selection in that case.
                 // It would be better to know why the DecorView does not have focus at that time.
-                if (((this instanceof ExtractEditText) || mSelectionMoved) && selStart >= 0 && selEnd >= 0) {
+                if (((this instanceof ExtractEditText) || mSelectionMoved) &&
+                        selStart >= 0 && selEnd >= 0) {
                     /*
                      * Someone intentionally set the selection, so let them
                      * do whatever it is that they wanted to do instead of
