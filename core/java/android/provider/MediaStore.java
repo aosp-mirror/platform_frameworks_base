@@ -75,6 +75,22 @@ public final class MediaStore {
     public static final String INTENT_ACTION_MEDIA_SEARCH = "android.intent.action.MEDIA_SEARCH";
 
     /**
+     * An intent to perform a search for music media and automatically play content from the
+     * result when possible. This can be fired, for example, by the result of a voice recognition
+     * command to listen to music.
+     * <p>
+     * Contains the {@link android.app.SearchManager#QUERY} extra, which is a string
+     * that can contain any type of unstructured music search, like the name of an artist,
+     * an album, a song, a genre, or any combination of these.
+     * <p>
+     * Because this intent includes an open-ended unstructured search string, it makes the most
+     * sense for apps that can support large-scale search of music, such as services connected
+     * to an online database of music which can be streamed and played on the device.
+     */
+    public static final String INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH =
+            "android.media.action.MEDIA_PLAY_FROM_SEARCH";
+    
+    /**
      * The name of the Intent-extra used to define the artist
      */
     public static final String EXTRA_MEDIA_ARTIST = "android.intent.extra.artist";
