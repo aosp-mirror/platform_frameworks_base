@@ -61,6 +61,8 @@ static jmethodID method_onRequestPasskey;
 static jmethodID method_onRequestPasskeyConfirmation;
 static jmethodID method_onRequestPairingConsent;
 static jmethodID method_onDisplayPasskey;
+static jmethodID method_onRequestOobData;
+static jmethodID method_onAgentOutOfBandDataAvailable;
 static jmethodID method_onAgentAuthorize;
 static jmethodID method_onAgentCancel;
 
@@ -105,6 +107,8 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
 
     method_onAgentAuthorize = env->GetMethodID(clazz, "onAgentAuthorize",
                                                "(Ljava/lang/String;Ljava/lang/String;)Z");
+    method_onAgentOutOfBandDataAvailable = env->GetMethodID(clazz, "onAgentOutOfBandDataAvailable",
+                                               "(Ljava/lang/String;)Z");
     method_onAgentCancel = env->GetMethodID(clazz, "onAgentCancel", "()V");
     method_onRequestPinCode = env->GetMethodID(clazz, "onRequestPinCode",
                                                "(Ljava/lang/String;I)V");
@@ -116,6 +120,8 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
                                                "(Ljava/lang/String;I)V");
     method_onDisplayPasskey = env->GetMethodID(clazz, "onDisplayPasskey",
                                                "(Ljava/lang/String;II)V");
+    method_onRequestOobData = env->GetMethodID(clazz, "onRequestOobData",
+                                               "(Ljava/lang/String;I)V");
 
     field_mNativeData = env->GetFieldID(clazz, "mNativeData", "I");
 #endif
@@ -305,6 +311,7 @@ static int register_agent(native_data_t *nat,
 {
     DBusMessage *msg, *reply;
     DBusError err;
+    bool oob = TRUE;
 
     if (!dbus_connection_register_object_path(nat->conn, agent_path,
             &agent_vtable, nat)) {
@@ -326,6 +333,7 @@ static int register_agent(native_data_t *nat,
     }
     dbus_message_append_args(msg, DBUS_TYPE_OBJECT_PATH, &agent_path,
                              DBUS_TYPE_STRING, &capabilities,
+                             DBUS_TYPE_BOOLEAN, &oob,
                              DBUS_TYPE_INVALID);
 
     dbus_error_init(&err);
@@ -934,6 +942,43 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
         }
         goto success;
     } else if (dbus_message_is_method_call(msg,
+            "org.bluez.Agent", "OutOfBandAvailable")) {
+        char *object_path;
+        if (!dbus_message_get_args(msg, NULL,
+                                   DBUS_TYPE_OBJECT_PATH, &object_path,
+                                   DBUS_TYPE_INVALID)) {
+            LOGE("%s: Invalid arguments for OutOfBandData available() method", __FUNCTION__);
+            goto failure;
+        }
+
+        LOGV("... object_path = %s", object_path);
+
+        bool available =
+            env->CallBooleanMethod(nat->me, method_onAgentOutOfBandDataAvailable,
+                env->NewStringUTF(object_path));
+
+
+        // reply
+        if (available) {
+            DBusMessage *reply = dbus_message_new_method_return(msg);
+            if (!reply) {
+                LOGE("%s: Cannot create message reply\n", __FUNCTION__);
+                goto failure;
+            }
+            dbus_connection_send(nat->conn, reply, NULL);
+            dbus_message_unref(reply);
+        } else {
+            DBusMessage *reply = dbus_message_new_error(msg,
+                    "org.bluez.Error.DoesNotExist", "OutofBand data not available");
+            if (!reply) {
+                LOGE("%s: Cannot create message reply\n", __FUNCTION__);
+                goto failure;
+            }
+            dbus_connection_send(nat->conn, reply, NULL);
+            dbus_message_unref(reply);
+        }
+        goto success;
+    } else if (dbus_message_is_method_call(msg,
             "org.bluez.Agent", "RequestPinCode")) {
         char *object_path;
         if (!dbus_message_get_args(msg, NULL,
@@ -960,6 +1005,21 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
 
         dbus_message_ref(msg);  // increment refcount because we pass to java
         env->CallVoidMethod(nat->me, method_onRequestPasskey,
+                                       env->NewStringUTF(object_path),
+                                       int(msg));
+        goto success;
+    } else if (dbus_message_is_method_call(msg,
+            "org.bluez.Agent", "RequestOobData")) {
+        char *object_path;
+        if (!dbus_message_get_args(msg, NULL,
+                                   DBUS_TYPE_OBJECT_PATH, &object_path,
+                                   DBUS_TYPE_INVALID)) {
+            LOGE("%s: Invalid arguments for RequestOobData() method", __FUNCTION__);
+            goto failure;
+        }
+
+        dbus_message_ref(msg);  // increment refcount because we pass to java
+        env->CallVoidMethod(nat->me, method_onRequestOobData,
                                        env->NewStringUTF(object_path),
                                        int(msg));
         goto success;

@@ -325,7 +325,9 @@ public final class BluetoothDevice implements Parcelable {
     /** The user will be prompted to enter the passkey displayed on remote device
      * @hide */
     public static final int PAIRING_VARIANT_DISPLAY_PASSKEY = 4;
-
+    /** The user will be prompted to accept or deny the OOB pairing request
+     * @hide */
+    public static final int PAIRING_VARIANT_OOB_CONSENT = 5;
     /**
      * Used as an extra field in {@link #ACTION_UUID} intents,
      * Contains the {@link android.os.ParcelUuid}s of the remote device which
@@ -461,6 +463,52 @@ public final class BluetoothDevice implements Parcelable {
             return sService.createBond(mAddress);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
+    }
+
+    /**
+     * Start the bonding (pairing) process with the remote device using the
+     * Out Of Band mechanism.
+     *
+     * <p>This is an asynchronous call, it will return immediately. Register
+     * for {@link #ACTION_BOND_STATE_CHANGED} intents to be notified when
+     * the bonding process completes, and its result.
+     *
+     * <p>Android system services will handle the necessary user interactions
+     * to confirm and complete the bonding process.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
+     *
+     * @param hash - Simple Secure pairing hash
+     * @param randomizer - The random key obtained using OOB
+     * @return false on immediate error, true if bonding will begin
+     *
+     * @hide
+     */
+    public boolean createBondOutOfBand(byte[] hash, byte[] randomizer) {
+        try {
+            return sService.createBondOutOfBand(mAddress, hash, randomizer);
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return false;
+    }
+
+    /**
+     * Set the Out Of Band data for a remote device to be used later
+     * in the pairing mechanism. Users can obtain this data through other
+     * trusted channels
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
+     *
+     * @param hash Simple Secure pairing hash
+     * @param randomizer The random key obtained using OOB
+     * @return false on error; true otherwise
+     *
+     * @hide
+     */
+    public boolean setDeviceOutOfBandData(byte[] hash, byte[] randomizer) {
+      try {
+        return sService.setDeviceOutOfBandData(mAddress, hash, randomizer);
+      } catch (RemoteException e) {Log.e(TAG, "", e);}
+      return false;
     }
 
     /**
@@ -614,6 +662,14 @@ public final class BluetoothDevice implements Parcelable {
             return sService.setPairingConfirmation(mAddress, confirm);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
+    }
+
+    /** @hide */
+    public boolean setRemoteOutOfBandData() {
+        try {
+          return sService.setRemoteOutOfBandData(mAddress);
+      } catch (RemoteException e) {Log.e(TAG, "", e);}
+      return false;
     }
 
     /** @hide */
