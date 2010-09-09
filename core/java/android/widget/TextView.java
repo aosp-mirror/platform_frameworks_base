@@ -5819,18 +5819,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void convertFromViewportToContentCoordinates(Rect r) {
-        int paddingTop = getExtendedPaddingTop();
+        final int horizontalOffset = viewportToContentHorizontalOffset();
+        r.left += horizontalOffset;
+        r.right += horizontalOffset;
+
+        final int verticalOffset = viewportToContentVerticalOffset();
+        r.top += verticalOffset;
+        r.bottom += verticalOffset;
+    }
+
+    private int viewportToContentHorizontalOffset() {
+        return getCompoundPaddingLeft() - mScrollX;
+    }
+
+    private int viewportToContentVerticalOffset() {
+        int offset = getExtendedPaddingTop() - mScrollY;
         if ((mGravity & Gravity.VERTICAL_GRAVITY_MASK) != Gravity.TOP) {
-            paddingTop += getVerticalOffset(false);
+            offset += getVerticalOffset(false);
         }
-        r.top += paddingTop;
-        r.bottom += paddingTop;
-
-        int paddingLeft = getCompoundPaddingLeft();
-        r.left += paddingLeft;
-        r.right += paddingLeft;
-
-        r.offset(-mScrollX, -mScrollY);
+        return offset;
     }
 
     @Override
@@ -7736,9 +7743,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             bounds.right = bounds.left + drawableWidth;
             bounds.bottom = bounds.top + drawableHeight;
 
-            int boundTopBefore = bounds.top;
             convertFromViewportToContentCoordinates(bounds);
-            mHotSpotVerticalPosition += bounds.top - boundTopBefore;
             mDrawable.setBounds(bounds);
             postInvalidate();
         }
@@ -7881,6 +7886,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             final Rect bounds = mHandle.mDrawable.getBounds();
                             mOffsetX = (bounds.left + bounds.right) / 2.0f - x;
                             mOffsetY = mHandle.mHotSpotVerticalPosition - y;
+
+                            mOffsetX += viewportToContentHorizontalOffset();
+                            mOffsetY += viewportToContentVerticalOffset();
 
                             mOnDownTimerStart = event.getEventTime();
                         }
@@ -8068,6 +8076,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                     final Rect bounds = draggedHandle.mDrawable.getBounds();
                                     mOffsetX = (bounds.left + bounds.right) / 2.0f - x;
                                     mOffsetY = draggedHandle.mHotSpotVerticalPosition - y;
+
+                                    mOffsetX += viewportToContentHorizontalOffset();
+                                    mOffsetY += viewportToContentVerticalOffset();
 
                                     ((ArrowKeyMovementMethod)mMovement).setCursorController(this);
                                 }
