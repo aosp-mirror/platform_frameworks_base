@@ -133,6 +133,7 @@ void OpenGLRenderer::prepare() {
 
     glViewport(0, 0, mWidth, mHeight);
 
+    glDisable(GL_DITHER);
     glDisable(GL_SCISSOR_TEST);
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
