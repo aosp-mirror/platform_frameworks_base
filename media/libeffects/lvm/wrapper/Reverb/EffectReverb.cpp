@@ -1133,7 +1133,7 @@ void ReverbSetDecayTime(ReverbContext *pContext, uint32_t time){
     //LOGV("\tReverbSetDecayTime() just Got -> %d\n", ActiveParams.T60);
 
     if (time <= LVREV_MAX_T60) {
-        ActiveParams.T60 = time;
+        ActiveParams.T60 = (LVM_UINT16)time;
     }
     else {
         ActiveParams.T60 = LVREV_MAX_T60;
@@ -1146,7 +1146,7 @@ void ReverbSetDecayTime(ReverbContext *pContext, uint32_t time){
 
     pContext->SamplesToExitCount = (ActiveParams.T60 * pContext->config.inputCfg.samplingRate)/1000;
     //LOGV("\tReverbSetDecayTime() just Set SamplesToExitCount-> %d\n",pContext->SamplesToExitCount);
-    pContext->SavedDecayTime = time;
+    pContext->SavedDecayTime = (int16_t)time;
     //LOGV("\tReverbSetDecayTime end");
     return;
 }
@@ -1162,7 +1162,7 @@ void ReverbSetDecayTime(ReverbContext *pContext, uint32_t time){
 //
 //----------------------------------------------------------------------------
 
-int32_t ReverbGetDecayTime(ReverbContext *pContext){
+uint32_t ReverbGetDecayTime(ReverbContext *pContext){
     //LOGV("\tReverbGetDecayTime start");
 
     LVREV_ControlParams_st    ActiveParams;              /* Current control Parameters */
@@ -1181,7 +1181,7 @@ int32_t ReverbGetDecayTime(ReverbContext *pContext){
     }
 
     //LOGV("\tReverbGetDecayTime end");
-    return ActiveParams.T60;
+    return (uint32_t)ActiveParams.T60;
 }
 
 //----------------------------------------------------------------------------
@@ -1606,7 +1606,7 @@ int Reverb_getParameter(ReverbContext *pContext,
             //        *(int16_t *)pValue);
             break;
         case REVERB_PARAM_DECAY_TIME:
-            *(int32_t *)pValue = ReverbGetDecayTime(pContext);
+            *(uint32_t *)pValue = ReverbGetDecayTime(pContext);
 
             //LOGV("\tReverb_getParameter() REVERB_PARAM_DECAY_TIME Value is %d",
             //        *(int32_t *)pValue);
@@ -1671,6 +1671,7 @@ int Reverb_getParameter(ReverbContext *pContext,
 int Reverb_setParameter (ReverbContext *pContext, void *pParam, void *pValue){
     int status = 0;
     int16_t level;
+    int16_t ratio;
     uint32_t time;
     t_reverb_settings *pProperties;
     int32_t *pParamTemp = (int32_t *)pParam;
@@ -1688,6 +1689,7 @@ int Reverb_setParameter (ReverbContext *pContext, void *pParam, void *pValue){
             return -EINVAL;
         }
         pContext->nextPreset = preset;
+        return 0;
     }
 
     switch (param){
@@ -1724,10 +1726,10 @@ int Reverb_setParameter (ReverbContext *pContext, void *pParam, void *pValue){
             //LOGV("\tReverb_setParameter() Called ReverbSetDecayTime");
            break;
         case REVERB_PARAM_DECAY_HF_RATIO:
-            time = *(int16_t *)pValue;
-            //LOGV("\tReverb_setParameter() REVERB_PARAM_DECAY_HF_RATIO value is %d", time);
+            ratio = *(int16_t *)pValue;
+            //LOGV("\tReverb_setParameter() REVERB_PARAM_DECAY_HF_RATIO value is %d", ratio);
             //LOGV("\tReverb_setParameter() Calling ReverbSetDecayHfRatio");
-            ReverbSetDecayHfRatio(pContext, time);
+            ReverbSetDecayHfRatio(pContext, ratio);
             //LOGV("\tReverb_setParameter() Called ReverbSetDecayHfRatio");
             break;
          case REVERB_PARAM_REVERB_LEVEL:
@@ -1738,17 +1740,17 @@ int Reverb_setParameter (ReverbContext *pContext, void *pParam, void *pValue){
             //LOGV("\tReverb_setParameter() Called ReverbSetReverbLevel");
            break;
         case REVERB_PARAM_DIFFUSION:
-            time = *(int16_t *)pValue;
-            //LOGV("\tReverb_setParameter() REVERB_PARAM_DECAY_DIFFUSION value is %d", time);
+            ratio = *(int16_t *)pValue;
+            //LOGV("\tReverb_setParameter() REVERB_PARAM_DECAY_DIFFUSION value is %d", ratio);
             //LOGV("\tReverb_setParameter() Calling ReverbSetDiffusion");
-            ReverbSetDiffusion(pContext, time);
+            ReverbSetDiffusion(pContext, ratio);
             //LOGV("\tReverb_setParameter() Called ReverbSetDiffusion");
             break;
         case REVERB_PARAM_DENSITY:
-            time = *(int16_t *)pValue;
-            //LOGV("\tReverb_setParameter() REVERB_PARAM_DECAY_DENSITY value is %d", time);
+            ratio = *(int16_t *)pValue;
+            //LOGV("\tReverb_setParameter() REVERB_PARAM_DECAY_DENSITY value is %d", ratio);
             //LOGV("\tReverb_setParameter() Calling ReverbSetDensity");
-            ReverbSetDensity(pContext, time);
+            ReverbSetDensity(pContext, ratio);
             //LOGV("\tReverb_setParameter() Called ReverbSetDensity");
             break;
            break;
