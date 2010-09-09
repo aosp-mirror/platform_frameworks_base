@@ -26,17 +26,33 @@
 namespace android {
 namespace uirenderer {
 
+///////////////////////////////////////////////////////////////////////////////
+// Defines
+///////////////////////////////////////////////////////////////////////////////
+
+// Debug
+#define DEBUG_EXTENSIONS 0
+
+// Debug
+#if DEBUG_EXTENSIONS
+    #define EXT_LOGD(...) LOGD(__VA_ARGS__)
+#else
+    #define EXT_LOGD(...)
+#endif
+
 class Extensions {
 public:
     Extensions() {
         const char* buffer = (const char*) glGetString(GL_EXTENSIONS);
         const char* current = buffer;
         const char* head = current;
+        EXT_LOGD("Available GL extensions:");
         do {
             head = strchr(current, ' ');
             String8 s(current, head ? head - current : strlen(current));
             if (s.length()) {
                 mExtensionList.add(s);
+                EXT_LOGD("  %s", s.string());
             }
             current = head + 1;
         } while (head);
@@ -44,6 +60,7 @@ public:
         mHasNPot = hasExtension("GL_OES_texture_npot");
         mHasDrawPath = hasExtension("GL_NV_draw_path");
         mHasCoverageSample = hasExtension("GL_NV_coverage_sample");
+        mHasFramebufferFetch = hasExtension("GL_NV_shader_framebuffer_fetch");
 
         mExtensions = buffer;
     }
@@ -51,6 +68,7 @@ public:
     inline bool hasNPot() const { return mHasNPot; }
     inline bool hasDrawPath() const { return mHasDrawPath; }
     inline bool hasCoverageSample() const { return mHasCoverageSample; }
+    inline bool hasFramebufferFetch() const { return mHasFramebufferFetch; }
 
     bool hasExtension(const char* extension) const {
         const String8 s(extension);
@@ -69,6 +87,7 @@ private:
     bool mHasNPot;
     bool mHasDrawPath;
     bool mHasCoverageSample;
+    bool mHasFramebufferFetch;
 }; // class Extensions
 
 }; // namespace uirenderer

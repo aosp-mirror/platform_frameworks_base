@@ -240,10 +240,14 @@ int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
 
     if (p) {
         alpha = p->getAlpha();
-        const bool isMode = SkXfermode::IsMode(p->getXfermode(), &mode);
-        if (!isMode) {
-            // Assume SRC_OVER
-            mode = SkXfermode::kSrcOver_Mode;
+        if (!mExtensions.hasFramebufferFetch()) {
+            const bool isMode = SkXfermode::IsMode(p->getXfermode(), &mode);
+            if (!isMode) {
+                // Assume SRC_OVER
+                mode = SkXfermode::kSrcOver_Mode;
+            }
+        } else {
+            mode = getXfermode(p->getXfermode());
         }
     } else {
         mode = SkXfermode::kSrcOver_Mode;
@@ -519,11 +523,14 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
     }
 
     SkXfermode::Mode mode;
-
-    const bool isMode = SkXfermode::IsMode(p->getXfermode(), &mode);
-    if (!isMode) {
-        // Assume SRC_OVER
-        mode = SkXfermode::kSrcOver_Mode;
+    if (!mExtensions.hasFramebufferFetch()) {
+        const bool isMode = SkXfermode::IsMode(p->getXfermode(), &mode);
+        if (!isMode) {
+            // Assume SRC_OVER
+            mode = SkXfermode::kSrcOver_Mode;
+        }
+    } else {
+        mode = getXfermode(p->getXfermode());
     }
 
     // Skia draws using the color's alpha channel if < 255
@@ -731,11 +738,12 @@ void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t
          }
      }
 
+     // Setup the blending mode
+     chooseBlending(true, mode, description);
+
      // Build and use the appropriate shader
      useProgram(mCaches.programCache.get(description));
 
-     // Setup the blending mode
-     chooseBlending(true, mode);
      bindTexture(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, textureUnit);
      glUniform1i(mCaches.currentProgram->getUniform("sampler"), textureUnit);
 
@@ -837,9 +845,6 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
 
     GLuint textureUnit = 0;
 
-    // Setup the blending mode
-    chooseBlending(alpha < 255 || (mShader && mShader->blend()), mode);
-
     // Describe the required shaders
     ProgramDescription description;
     if (mShader) {
@@ -848,6 +853,9 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     if (mColorFilter) {
         mColorFilter->describe(description, mExtensions);
     }
+
+    // Setup the blending mode
+    chooseBlending(alpha < 255 || (mShader && mShader->blend()), mode, description);
 
     // Build and use the appropriate shader
     useProgram(mCaches.programCache.get(description));
@@ -907,10 +915,10 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
 
+    chooseBlending(blend || alpha < 1.0f, mode, description);
+
     useProgram(mCaches.programCache.get(description));
     mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
-
-    chooseBlending(blend || alpha < 1.0f, mode);
 
     // Texture
     bindTexture(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, 0);
@@ -939,23 +947,35 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     glDisableVertexAttribArray(texCoordsSlot);
 }
 
-void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode, bool isPremultiplied) {
+void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode,
+        ProgramDescription& description) {
     blend = blend || mode != SkXfermode::kSrcOver_Mode;
     if (blend) {
-        if (!mCaches.blend) {
-            glEnable(GL_BLEND);
-        }
+        if (mode < SkXfermode::kPlus_Mode) {
+            if (!mCaches.blend) {
+                glEnable(GL_BLEND);
+            }
 
-        GLenum sourceMode = gBlends[mode].src;
-        GLenum destMode = gBlends[mode].dst;
-        if (!isPremultiplied && sourceMode == GL_ONE) {
-            sourceMode = GL_SRC_ALPHA;
-        }
+            GLenum sourceMode = gBlends[mode].src;
+            GLenum destMode = gBlends[mode].dst;
 
-        if (sourceMode != mCaches.lastSrcMode || destMode != mCaches.lastDstMode) {
-            glBlendFunc(sourceMode, destMode);
-            mCaches.lastSrcMode = sourceMode;
-            mCaches.lastDstMode = destMode;
+            if (sourceMode != mCaches.lastSrcMode || destMode != mCaches.lastDstMode) {
+                glBlendFunc(sourceMode, destMode);
+                mCaches.lastSrcMode = sourceMode;
+                mCaches.lastDstMode = destMode;
+            }
+        } else {
+            // These blend modes are not supported by OpenGL directly and have
+            // to be implemented using shaders. Since the shader will perform
+            // the blending, turn blending off here
+            if (mExtensions.hasFramebufferFetch()) {
+                description.framebufferMode = mode;
+            }
+
+            if (mCaches.blend) {
+                glDisable(GL_BLEND);
+            }
+            blend = false;
         }
     } else if (mCaches.blend) {
         glDisable(GL_BLEND);
@@ -983,10 +1003,14 @@ void OpenGLRenderer::resetDrawTextureTexCoords(float u1, float v1, float u2, flo
 
 void OpenGLRenderer::getAlphaAndMode(const SkPaint* paint, int* alpha, SkXfermode::Mode* mode) {
     if (paint) {
-        const bool isMode = SkXfermode::IsMode(paint->getXfermode(), mode);
-        if (!isMode) {
-            // Assume SRC_OVER
-            *mode = SkXfermode::kSrcOver_Mode;
+        if (!mExtensions.hasFramebufferFetch()) {
+            const bool isMode = SkXfermode::IsMode(paint->getXfermode(), mode);
+            if (!isMode) {
+                // Assume SRC_OVER
+                *mode = SkXfermode::kSrcOver_Mode;
+            }
+        } else {
+            *mode = getXfermode(paint->getXfermode());
         }
 
         // Skia draws using the color's alpha channel if < 255
@@ -1000,6 +1024,13 @@ void OpenGLRenderer::getAlphaAndMode(const SkPaint* paint, int* alpha, SkXfermod
         *mode = SkXfermode::kSrcOver_Mode;
         *alpha = 255;
     }
+}
+
+SkXfermode::Mode OpenGLRenderer::getXfermode(SkXfermode* mode) {
+    if (mode == NULL) {
+        return SkXfermode::kSrcOver_Mode;
+    }
+    return mode->fMode;
 }
 
 void OpenGLRenderer::bindTexture(GLuint texture, GLenum wrapS, GLenum wrapT, GLuint textureUnit) {
