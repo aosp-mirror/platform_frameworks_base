@@ -124,12 +124,12 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
     }
 
     public void onCallChangeFailed(final ISipSession session,
-            final String className, final String message) {
+            final String errorCode, final String message) {
         if (mListener == null) return;
         proxy(new Runnable() {
             public void run() {
                 try {
-                    mListener.onCallChangeFailed(session, className, message);
+                    mListener.onCallChangeFailed(session, errorCode, message);
                 } catch (Throwable t) {
                     handle(t, "onCallChangeFailed()");
                 }
@@ -137,13 +137,13 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
         });
     }
 
-    public void onError(final ISipSession session, final String className,
+    public void onError(final ISipSession session, final String errorCode,
             final String message) {
         if (mListener == null) return;
         proxy(new Runnable() {
             public void run() {
                 try {
-                    mListener.onError(session, className, message);
+                    mListener.onError(session, errorCode, message);
                 } catch (Throwable t) {
                     handle(t, "onError()");
                 }
@@ -179,12 +179,12 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
     }
 
     public void onRegistrationFailed(final ISipSession session,
-            final String className, final String message) {
+            final String errorCode, final String message) {
         if (mListener == null) return;
         proxy(new Runnable() {
             public void run() {
                 try {
-                    mListener.onRegistrationFailed(session, className, message);
+                    mListener.onRegistrationFailed(session, errorCode, message);
                 } catch (Throwable t) {
                     handle(t, "onRegistrationFailed()");
                 }
