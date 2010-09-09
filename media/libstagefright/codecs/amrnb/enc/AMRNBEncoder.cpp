@@ -174,7 +174,7 @@ status_t AMRNBEncoder::read(
             if (mInputBuffer->meta_data()->findInt64(kKeyDriftTime, &timeUs)) {
                 wallClockTimeUs = timeUs;
             }
-            if (mInputBuffer->meta_data()->findInt64(kKeyTime, &timeUs)) {
+            if (mInputBuffer->meta_data()->findInt64(kKeyAnchorTime, &timeUs)) {
                 mAnchorTimeUs = timeUs;
             }
         } else {
