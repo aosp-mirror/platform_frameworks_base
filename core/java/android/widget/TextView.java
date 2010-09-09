@@ -6689,6 +6689,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (start == end) {
             if (start >= prevStart && start < prevEnd) {
+                // Restore previous selection
+                Selection.setSelection((Spannable)mText, prevStart, prevEnd);
                 // Tapping inside the selection displays the cut/copy/paste context menu.
                 showContextMenu();
                 return;
