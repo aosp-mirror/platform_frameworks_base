@@ -584,7 +584,7 @@ public class ConnectivityManager
         }
     }
 
-    /*
+    /**
      * @param networkType The type of network you want to report on
      * @param percentage The quality of the connection 0 is bad, 100 is good
      * {@hide}
