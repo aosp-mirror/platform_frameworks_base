@@ -78,4 +78,6 @@ interface IConnectivityManager
     String[] getTetherableBluetoothRegexs();
 
     void requestNetworkTransitionWakelock(in String forWhom);
+
+    void reportInetCondition(int networkType, int percentage);
 }

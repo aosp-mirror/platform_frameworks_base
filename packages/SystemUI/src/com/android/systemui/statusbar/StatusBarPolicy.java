@@ -36,6 +36,7 @@ import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
+import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
@@ -90,6 +91,8 @@ public class StatusBarPolicy {
     private static final int AM_PM_STYLE_GONE    = 2;
 
     private static final int AM_PM_STYLE = AM_PM_STYLE_GONE;
+
+    private static final int INET_CONDITION_THRESHOLD = 50;
 
     private final Context mContext;
     private final StatusBarManager mService;
@@ -232,42 +235,62 @@ public class StatusBarPolicy {
     };
 
     //***** Data connection icons
-    private int[] mDataIconList = sDataNetType_g;
+    private int[] mDataIconList = sDataNetType_g[0];
     //GSM/UMTS
-    private static final int[] sDataNetType_g = new int[] {
-            R.drawable.stat_sys_data_connected_g,
-            R.drawable.stat_sys_data_in_g,
-            R.drawable.stat_sys_data_out_g,
-            R.drawable.stat_sys_data_inandout_g,
+    private static final int[][] sDataNetType_g = {
+            { R.drawable.stat_sys_data_connected_g,
+              R.drawable.stat_sys_data_in_g,
+              R.drawable.stat_sys_data_out_g,
+              R.drawable.stat_sys_data_inandout_g },
+            { R.drawable.stat_sys_roaming_cdma_0,
+              R.drawable.stat_sys_roaming_cdma_0,
+              R.drawable.stat_sys_roaming_cdma_0,
+              R.drawable.stat_sys_roaming_cdma_0 }
         };
-    private static final int[] sDataNetType_3g = new int[] {
-            R.drawable.stat_sys_data_connected_3g,
-            R.drawable.stat_sys_data_in_3g,
-            R.drawable.stat_sys_data_out_3g,
-            R.drawable.stat_sys_data_inandout_3g,
+    private static final int[][] sDataNetType_3g = {
+            { R.drawable.stat_sys_data_connected_3g,
+              R.drawable.stat_sys_data_in_3g,
+              R.drawable.stat_sys_data_out_3g,
+              R.drawable.stat_sys_data_inandout_3g },
+            { R.drawable.stat_sys_roaming_cdma_0,
+              R.drawable.stat_sys_roaming_cdma_0,
+              R.drawable.stat_sys_roaming_cdma_0,
+              R.drawable.stat_sys_roaming_cdma_0 }
         };
-    private static final int[] sDataNetType_e = new int[] {
-            R.drawable.stat_sys_data_connected_e,
-            R.drawable.stat_sys_data_in_e,
-            R.drawable.stat_sys_data_out_e,
-            R.drawable.stat_sys_data_inandout_e,
+    private static final int[][] sDataNetType_e = {
+            { R.drawable.stat_sys_data_connected_e,
+              R.drawable.stat_sys_data_in_e,
+              R.drawable.stat_sys_data_out_e,
+              R.drawable.stat_sys_data_inandout_e },
+            { R.drawable.stat_sys_roaming_cdma_0,
+              R.drawable.stat_sys_roaming_cdma_0,
+              R.drawable.stat_sys_roaming_cdma_0,
+              R.drawable.stat_sys_roaming_cdma_0 }
         };
     //3.5G
-    private static final int[] sDataNetType_h = new int[] {
-            R.drawable.stat_sys_data_connected_h,
-            R.drawable.stat_sys_data_in_h,
-            R.drawable.stat_sys_data_out_h,
-            R.drawable.stat_sys_data_inandout_h,
+    private static final int[][] sDataNetType_h = {
+            { R.drawable.stat_sys_data_connected_h,
+              R.drawable.stat_sys_data_in_h,
+              R.drawable.stat_sys_data_out_h,
+              R.drawable.stat_sys_data_inandout_h },
+            { R.drawable.stat_sys_roaming_cdma_0,
+              R.drawable.stat_sys_roaming_cdma_0,
+              R.drawable.stat_sys_roaming_cdma_0,
+              R.drawable.stat_sys_roaming_cdma_0 }
     };
 
     //CDMA
     // Use 3G icons for EVDO data and 1x icons for 1XRTT data
-    private static final int[] sDataNetType_1x = new int[] {
-        R.drawable.stat_sys_data_connected_1x,
-        R.drawable.stat_sys_data_in_1x,
-        R.drawable.stat_sys_data_out_1x,
-        R.drawable.stat_sys_data_inandout_1x,
-    };
+    private static final int[][] sDataNetType_1x = {
+            { R.drawable.stat_sys_data_connected_1x,
+              R.drawable.stat_sys_data_in_1x,
+              R.drawable.stat_sys_data_out_1x,
+              R.drawable.stat_sys_data_inandout_1x },
+            { R.drawable.stat_sys_roaming_cdma_0,
+              R.drawable.stat_sys_roaming_cdma_0,
+              R.drawable.stat_sys_roaming_cdma_0,
+              R.drawable.stat_sys_roaming_cdma_0 }
+            };
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
     // to get broadcasts that it *is* there.
@@ -292,17 +315,22 @@ public class StatusBarPolicy {
     private boolean mBluetoothEnabled;
 
     // wifi
-    private static final int[] sWifiSignalImages = new int[] {
-            R.drawable.stat_sys_wifi_signal_1,
-            R.drawable.stat_sys_wifi_signal_2,
-            R.drawable.stat_sys_wifi_signal_3,
-            R.drawable.stat_sys_wifi_signal_4,
+    private static final int[][] sWifiSignalImages = {
+            { R.drawable.stat_sys_wifi_signal_1,
+              R.drawable.stat_sys_wifi_signal_2,
+              R.drawable.stat_sys_wifi_signal_3,
+              R.drawable.stat_sys_wifi_signal_4 },
+            { R.drawable.stat_sys_data_in_e,
+              R.drawable.stat_sys_data_in_e,
+              R.drawable.stat_sys_data_in_e,
+              R.drawable.stat_sys_data_in_e }
         };
     private static final int sWifiTemporarilyNotConnectedImage =
             R.drawable.stat_sys_wifi_signal_0;
 
     private int mLastWifiSignalLevel = -1;
     private boolean mIsWifiConnected = false;
+    private int mLastWifiInetConnectivityState = 0;
 
     // sync state
     // If sync is active the SyncActive icon is displayed. If sync is not active but
@@ -353,6 +381,10 @@ public class StatusBarPolicy {
             else if (action.equals(TtyIntent.TTY_ENABLED_CHANGE_ACTION)) {
                 updateTTY(intent);
             }
+            else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+                // TODO - stop using other means to get wifi/mobile info
+                updateConnectivity(intent);
+            }
         }
     };
 
@@ -389,7 +421,7 @@ public class StatusBarPolicy {
         mService.setIconVisibility("data_connection", false);
 
         // wifi
-        mService.setIcon("wifi", sWifiSignalImages[0], 0);
+        mService.setIcon("wifi", sWifiSignalImages[0][0], 0);
         mService.setIconVisibility("wifi", false);
         // wifi will get updated by the sticky intents
 
@@ -456,6 +488,7 @@ public class StatusBarPolicy {
         filter.addAction(LocationManager.GPS_FIX_CHANGE_ACTION);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(TtyIntent.TTY_ENABLED_CHANGE_ACTION);
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
 
         // load config to determine if to distinguish Hspa data icon
@@ -659,6 +692,50 @@ public class StatusBarPolicy {
         }
     }
 
+    private void updateConnectivity(Intent intent) {
+        NetworkInfo info = (NetworkInfo)(intent.getParcelableExtra(
+                ConnectivityManager.EXTRA_NETWORK_INFO));
+        int connectionStatus = intent.getIntExtra(ConnectivityManager.EXTRA_INET_CONDITION, 0);
+        Slog.d(TAG, "got CONNECTIVITY_ACTION - info=" + info + ", status = " + connectionStatus);
+        if (info.isConnected() == false) return;
+
+        switch (info.getType()) {
+        case ConnectivityManager.TYPE_MOBILE:
+            if (info.isConnected()) {
+                updateDataNetType(info.getSubtype(), connectionStatus);
+                updateDataIcon();
+            }
+            break;
+        case ConnectivityManager.TYPE_WIFI:
+            if (info.isConnected()) {
+                mIsWifiConnected = true;
+                mLastWifiInetConnectivityState =
+                        (connectionStatus > INET_CONDITION_THRESHOLD ? 1 : 0);
+                int iconId;
+                if (mLastWifiSignalLevel == -1) {
+                    iconId = sWifiSignalImages[mLastWifiInetConnectivityState][0];
+                } else {
+                    iconId = sWifiSignalImages[mLastWifiInetConnectivityState]
+                            [mLastWifiSignalLevel];
+                }
+
+                mService.setIcon("wifi", iconId, 0);
+                // Show the icon since wi-fi is connected
+                mService.setIconVisibility("wifi", true);
+            } else {
+                mLastWifiSignalLevel = -1;
+                mIsWifiConnected = false;
+                mLastWifiInetConnectivityState = 0;
+                int iconId = sWifiSignalImages[0][0];
+
+                mService.setIcon("wifi", iconId, 0);
+                // Hide the icon since we're not connected
+                mService.setIconVisibility("wifi", false);
+            }
+            break;
+        }
+    }
+
     private PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
         @Override
         public void onSignalStrengthsChanged(SignalStrength signalStrength) {
@@ -686,7 +763,7 @@ public class StatusBarPolicy {
         @Override
         public void onDataConnectionStateChanged(int state, int networkType) {
             mDataState = state;
-            updateDataNetType(networkType);
+            updateDataNetType(networkType, 0);
             updateDataIcon();
         }
 
@@ -848,37 +925,38 @@ public class StatusBarPolicy {
         return (levelEvdoDbm < levelEvdoSnr) ? levelEvdoDbm : levelEvdoSnr;
     }
 
-    private final void updateDataNetType(int net) {
+    private final void updateDataNetType(int net, int inetCondition) {
+        int connected = (inetCondition > INET_CONDITION_THRESHOLD ? 1 : 0);
         switch (net) {
         case TelephonyManager.NETWORK_TYPE_EDGE:
-            mDataIconList = sDataNetType_e;
+            mDataIconList = sDataNetType_e[connected];
             break;
         case TelephonyManager.NETWORK_TYPE_UMTS:
-            mDataIconList = sDataNetType_3g;
+            mDataIconList = sDataNetType_3g[connected];
             break;
         case TelephonyManager.NETWORK_TYPE_HSDPA:
         case TelephonyManager.NETWORK_TYPE_HSUPA:
         case TelephonyManager.NETWORK_TYPE_HSPA:
             if (mHspaDataDistinguishable) {
-                mDataIconList = sDataNetType_h;
+                mDataIconList = sDataNetType_h[connected];
             } else {
-                mDataIconList = sDataNetType_3g;
+                mDataIconList = sDataNetType_3g[connected];
             }
             break;
         case TelephonyManager.NETWORK_TYPE_CDMA:
             // display 1xRTT for IS95A/B
-            mDataIconList = this.sDataNetType_1x;
+            mDataIconList = sDataNetType_1x[connected];
             break;
         case TelephonyManager.NETWORK_TYPE_1xRTT:
-            mDataIconList = this.sDataNetType_1x;
+            mDataIconList = sDataNetType_1x[connected];
             break;
         case TelephonyManager.NETWORK_TYPE_EVDO_0: //fall through
         case TelephonyManager.NETWORK_TYPE_EVDO_A:
         case TelephonyManager.NETWORK_TYPE_EVDO_B:
-            mDataIconList = sDataNetType_3g;
+            mDataIconList = sDataNetType_3g[connected];
             break;
         default:
-            mDataIconList = sDataNetType_g;
+            mDataIconList = sDataNetType_g[connected];
         break;
         }
     }
@@ -1019,34 +1097,6 @@ public class StatusBarPolicy {
             if (!enabled) {
                 mService.setIconVisibility("wifi", false);
             }
-        } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
-
-            final NetworkInfo networkInfo = (NetworkInfo)
-                    intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-
-            int iconId;
-            if (networkInfo != null && networkInfo.isConnected()) {
-                mIsWifiConnected = true;
-                if (mLastWifiSignalLevel == -1) {
-                    iconId = sWifiSignalImages[0];
-                } else {
-                    iconId = sWifiSignalImages[mLastWifiSignalLevel];
-                }
-
-                mService.setIcon("wifi", iconId, 0);
-                // Show the icon since wi-fi is connected
-                mService.setIconVisibility("wifi", true);
-
-            } else {
-                mLastWifiSignalLevel = -1;
-                mIsWifiConnected = false;
-                iconId = sWifiSignalImages[0];
-
-                mService.setIcon("wifi", iconId, 0);
-                // Hide the icon since we're not connected
-                mService.setIconVisibility("wifi", false);
-            }
-
         } else if (action.equals(WifiManager.RSSI_CHANGED_ACTION)) {
             int iconId;
             final int newRssi = intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200);
@@ -1055,7 +1105,7 @@ public class StatusBarPolicy {
             if (newSignalLevel != mLastWifiSignalLevel) {
                 mLastWifiSignalLevel = newSignalLevel;
                 if (mIsWifiConnected) {
-                    iconId = sWifiSignalImages[newSignalLevel];
+                    iconId = sWifiSignalImages[mLastWifiInetConnectivityState][newSignalLevel];
                 } else {
                     iconId = sWifiTemporarilyNotConnectedImage;
                 }
