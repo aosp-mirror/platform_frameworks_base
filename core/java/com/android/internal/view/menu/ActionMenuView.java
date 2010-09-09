@@ -213,13 +213,11 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
     private class OverflowMenuButton extends ImageButton {
         public OverflowMenuButton(Context context) {
-            super(context, null, com.android.internal.R.attr.actionButtonStyle);
+            super(context, null, com.android.internal.R.attr.actionOverflowButtonStyle);
 
             final Resources res = context.getResources();
             setClickable(true);
             setFocusable(true);
-            setContentDescription(res.getString(com.android.internal.R.string.more_item_label));
-            setImageDrawable(res.getDrawable(com.android.internal.R.drawable.ic_menu_more));
             setVisibility(VISIBLE);
             setEnabled(true);
         }

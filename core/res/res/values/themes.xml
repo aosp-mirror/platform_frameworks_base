@@ -183,6 +183,7 @@
         <item name="dropDownSpinnerStyle">@android:style/Widget.Spinner.DropDown</item>
         <item name="actionDropDownStyle">@android:style/Widget.Spinner.DropDown</item>
         <item name="actionButtonStyle">@android:style/Widget.ActionButton</item>
+        <item name="actionOverflowButtonStyle">@android:style/Widget.ActionButton.Overflow</item>
         <item name="starStyle">@android:style/Widget.CompoundButton.Star</item>
         <item name="tabWidgetStyle">@android:style/Widget.TabWidget</item>
         <item name="textViewStyle">@android:style/Widget.TextView</item>

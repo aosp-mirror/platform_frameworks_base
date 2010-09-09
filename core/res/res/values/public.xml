@@ -1338,6 +1338,7 @@
   <public type="attr" name="actionBarTabStyle" />
   <public type="attr" name="actionBarTabBarStyle" />
   <public type="attr" name="actionBarTabTextStyle" />
+  <public type="attr" name="actionOverflowButtonStyle" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />

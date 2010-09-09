@@ -477,6 +477,7 @@
         <attr name="actionBarTabStyle" format="reference" />
         <attr name="actionBarTabBarStyle" format="reference" />
         <attr name="actionBarTabTextStyle" format="reference" />
+        <attr name="actionOverflowButtonStyle" format="reference" />
 
         <!-- =================== -->
         <!-- Action mode styles  -->
