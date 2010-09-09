@@ -1153,7 +1153,7 @@ void TrackballInputMapper::applyPolicyAndDispatch(nsecs_t when, int32_t motionEv
     int32_t pointerId = 0;
 
     getDispatcher()->notifyMotion(when, getDeviceId(), AINPUT_SOURCE_TRACKBALL, policyFlags,
-            motionEventAction, metaState, AMOTION_EVENT_EDGE_FLAG_NONE,
+            motionEventAction, 0, metaState, AMOTION_EVENT_EDGE_FLAG_NONE,
             1, & pointerId, pointerCoords, mXPrecision, mYPrecision, downTime);
 }
 
@@ -2324,7 +2324,7 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
     } // release lock
 
     getDispatcher()->notifyMotion(when, getDeviceId(), AINPUT_SOURCE_TOUCHSCREEN, policyFlags,
-            motionEventAction, getContext()->getGlobalMetaState(), motionEventEdgeFlags,
+            motionEventAction, 0, getContext()->getGlobalMetaState(), motionEventEdgeFlags,
             pointerCount, pointerIds, pointerCoords,
             xPrecision, yPrecision, mDownTime);
 }

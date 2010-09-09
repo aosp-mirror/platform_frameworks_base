@@ -41,7 +41,8 @@ public abstract class BaseSurfaceHolder implements SurfaceHolder {
 
     int mRequestedWidth = -1;
     int mRequestedHeight = -1;
-    int mRequestedFormat = PixelFormat.OPAQUE;
+    /** @hide */
+    protected int mRequestedFormat = PixelFormat.OPAQUE;
     int mRequestedType = -1;
 
     long mLastLockTime = 0;

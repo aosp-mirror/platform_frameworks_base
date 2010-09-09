@@ -48,16 +48,16 @@ typedef enum
 
 //t_reverb_settings is equal to SLEnvironmentalReverbSettings defined in OpenSL ES specification.
 typedef struct s_reverb_settings {
-    int16_t roomLevel;
-    int16_t roomHFLevel;
-    int32_t decayTime;
-    int16_t decayHFRatio;
-    int16_t reflectionsLevel;
-    int32_t reflectionsDelay;
-    int16_t reverbLevel;
-    int32_t reverbDelay;
-    int16_t diffusion;
-    int16_t density;
+    int16_t     roomLevel;
+    int16_t     roomHFLevel;
+    uint32_t    decayTime;
+    int16_t     decayHFRatio;
+    int16_t     reflectionsLevel;
+    uint32_t    reflectionsDelay;
+    int16_t     reverbLevel;
+    uint32_t    reverbDelay;
+    int16_t     diffusion;
+    int16_t     density;
 } __attribute__((packed)) t_reverb_settings;
 
 

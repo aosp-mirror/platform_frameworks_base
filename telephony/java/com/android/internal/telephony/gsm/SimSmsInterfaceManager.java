@@ -25,6 +25,7 @@ import android.util.Log;
 import com.android.internal.telephony.IccConstants;
 import com.android.internal.telephony.IccSmsInterfaceManager;
 import com.android.internal.telephony.IccUtils;
+import com.android.internal.telephony.SMSDispatcher;
 import com.android.internal.telephony.SmsRawData;
 
 import java.util.ArrayList;
@@ -78,9 +79,9 @@ public class SimSmsInterfaceManager extends IccSmsInterfaceManager {
         }
     };
 
-    public SimSmsInterfaceManager(GSMPhone phone) {
+    public SimSmsInterfaceManager(GSMPhone phone, SMSDispatcher dispatcher) {
         super(phone);
-        mDispatcher = new GsmSMSDispatcher(phone);
+        mDispatcher = dispatcher;
     }
 
     public void dispose() {

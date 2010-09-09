@@ -135,6 +135,7 @@ struct InputMessage {
 
         struct {
             int32_t action;
+            int32_t flags;
             int32_t metaState;
             int32_t edgeFlags;
             nsecs_t downTime;
@@ -218,6 +219,7 @@ public:
             int32_t deviceId,
             int32_t source,
             int32_t action,
+            int32_t flags,
             int32_t edgeFlags,
             int32_t metaState,
             float xOffset,

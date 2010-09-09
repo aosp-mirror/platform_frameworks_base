@@ -318,8 +318,8 @@ status_t InputPublisher::publishKeyEvent(
         nsecs_t downTime,
         nsecs_t eventTime) {
 #if DEBUG_TRANSPORT_ACTIONS
-    LOGD("channel '%s' publisher ~ publishKeyEvent: deviceId=%d, source=%d, "
-            "action=%d, flags=%d, keyCode=%d, scanCode=%d, metaState=%d, repeatCount=%d,"
+    LOGD("channel '%s' publisher ~ publishKeyEvent: deviceId=%d, source=0x%x, "
+            "action=0x%x, flags=0x%x, keyCode=%d, scanCode=%d, metaState=0x%x, repeatCount=%d,"
             "downTime=%lld, eventTime=%lld",
             mChannel->getName().string(),
             deviceId, source, action, flags, keyCode, scanCode, metaState, repeatCount,
@@ -346,6 +346,7 @@ status_t InputPublisher::publishMotionEvent(
         int32_t deviceId,
         int32_t source,
         int32_t action,
+        int32_t flags,
         int32_t edgeFlags,
         int32_t metaState,
         float xOffset,
@@ -358,12 +359,12 @@ status_t InputPublisher::publishMotionEvent(
         const int32_t* pointerIds,
         const PointerCoords* pointerCoords) {
 #if DEBUG_TRANSPORT_ACTIONS
-    LOGD("channel '%s' publisher ~ publishMotionEvent: deviceId=%d, source=%d, "
-            "action=%d, edgeFlags=%d, metaState=%d, xOffset=%f, yOffset=%f, "
+    LOGD("channel '%s' publisher ~ publishMotionEvent: deviceId=%d, source=0x%x, "
+            "action=0x%x, flags=0x%x, edgeFlags=0x%x, metaState=0x%x, xOffset=%f, yOffset=%f, "
             "xPrecision=%f, yPrecision=%f, downTime=%lld, eventTime=%lld, "
             "pointerCount=%d",
             mChannel->getName().string(),
-            deviceId, source, action, edgeFlags, metaState, xOffset, yOffset,
+            deviceId, source, action, flags, edgeFlags, metaState, xOffset, yOffset,
             xPrecision, yPrecision, downTime, eventTime, pointerCount);
 #endif
 
@@ -379,6 +380,7 @@ status_t InputPublisher::publishMotionEvent(
     }
 
     mSharedMessage->motion.action = action;
+    mSharedMessage->motion.flags = flags;
     mSharedMessage->motion.edgeFlags = edgeFlags;
     mSharedMessage->motion.metaState = metaState;
     mSharedMessage->motion.xOffset = xOffset;
@@ -664,6 +666,7 @@ void InputConsumer::populateMotionEvent(MotionEvent* motionEvent) const {
             mSharedMessage->deviceId,
             mSharedMessage->source,
             mSharedMessage->motion.action,
+            mSharedMessage->motion.flags,
             mSharedMessage->motion.edgeFlags,
             mSharedMessage->motion.metaState,
             mSharedMessage->motion.xOffset,

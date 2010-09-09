@@ -168,6 +168,12 @@ public class DateUtils
     public static final int FORMAT_CAP_NOON = 0x00400;
     public static final int FORMAT_NO_MIDNIGHT = 0x00800;
     public static final int FORMAT_CAP_MIDNIGHT = 0x01000;
+    /**
+     * @deprecated Use
+     * {@link #formatDateRange(Context, Formatter, long, long, int, String) formatDateRange}
+     * and pass in {@link Time#TIMEZONE_UTC Time.TIMEZONE_UTC} for the timeZone instead.
+     */
+    @Deprecated
     public static final int FORMAT_UTC = 0x02000;
     public static final int FORMAT_ABBREV_TIME = 0x04000;
     public static final int FORMAT_ABBREV_WEEKDAY = 0x08000;
@@ -946,18 +952,41 @@ public class DateUtils
      * {@link java.util.Formatter} instance and use the version of
      * {@link #formatDateRange(Context, long, long, int) formatDateRange}
      * that takes a {@link java.util.Formatter}.
-     * 
+     *
      * @param context the context is required only if the time is shown
      * @param startMillis the start time in UTC milliseconds
      * @param endMillis the end time in UTC milliseconds
      * @param flags a bit mask of options See
-     * {@link #formatDateRange(Context, long, long, int) formatDateRange}
+     * {@link #formatDateRange(Context, Formatter, long, long, int, String) formatDateRange}
      * @return a string containing the formatted date/time range.
      */
     public static String formatDateRange(Context context, long startMillis,
             long endMillis, int flags) {
         Formatter f = new Formatter(new StringBuilder(50), Locale.getDefault());
         return formatDateRange(context, f, startMillis, endMillis, flags).toString();
+    }
+
+    /**
+     * Formats a date or a time range according to the local conventions.
+     * <p>
+     * Note that this is a convenience method for formatting the date or
+     * time range in the local time zone. If you want to specify the time
+     * zone please use
+     * {@link #formatDateRange(Context, Formatter, long, long, int, String) formatDateRange}.
+     *
+     * @param context the context is required only if the time is shown
+     * @param formatter the Formatter used for formatting the date range.
+     * Note: be sure to call setLength(0) on StringBuilder passed to
+     * the Formatter constructor unless you want the results to accumulate.
+     * @param startMillis the start time in UTC milliseconds
+     * @param endMillis the end time in UTC milliseconds
+     * @param flags a bit mask of options See
+     * {@link #formatDateRange(Context, Formatter, long, long, int, String) formatDateRange}
+     * @return a string containing the formatted date/time range.
+     */
+    public static Formatter formatDateRange(Context context, Formatter formatter, long startMillis,
+            long endMillis, int flags) {
+        return formatDateRange(context, formatter, startMillis, endMillis, flags, null);
     }
 
     /**
@@ -1076,8 +1105,9 @@ public class DateUtils
      * FORMAT_24HOUR takes precedence.
      * 
      * <p>
-     * If FORMAT_UTC is set, then the UTC timezone is used for the start
-     * and end milliseconds.
+     * If FORMAT_UTC is set, then the UTC time zone is used for the start
+     * and end milliseconds unless a time zone is specified. If a time zone
+     * is specified it will be used regardless of the FORMAT_UTC flag.
      * 
      * <p>
      * If FORMAT_ABBREV_TIME is set and 12-hour time format is used, then the
@@ -1109,11 +1139,13 @@ public class DateUtils
      * @param startMillis the start time in UTC milliseconds
      * @param endMillis the end time in UTC milliseconds
      * @param flags a bit mask of options
-     *   
+     * @param timeZone the time zone to compute the string in. Use null for local
+     * or if the FORMAT_UTC flag is being used.
+     *  
      * @return the formatter with the formatted date/time range appended to the string buffer.
      */
     public static Formatter formatDateRange(Context context, Formatter formatter, long startMillis,
-            long endMillis, int flags) {
+            long endMillis, int flags, String timeZone) {
         Resources res = Resources.getSystem();
         boolean showTime = (flags & FORMAT_SHOW_TIME) != 0;
         boolean showWeekDay = (flags & FORMAT_SHOW_WEEKDAY) != 0;
@@ -1130,7 +1162,14 @@ public class DateUtils
         // computation below that'd otherwise be thrown out.
         boolean isInstant = (startMillis == endMillis);
 
-        Time startDate = useUTC ? new Time(Time.TIMEZONE_UTC) : new Time();
+        Time startDate;
+        if (timeZone != null) {
+            startDate = new Time(timeZone);
+        } else if (useUTC) {
+            startDate = new Time(Time.TIMEZONE_UTC);
+        } else {
+            startDate = new Time();
+        }
         startDate.set(startMillis);
 
         Time endDate;
@@ -1139,7 +1178,13 @@ public class DateUtils
             endDate = startDate;
             dayDistance = 0;
         } else {
-            endDate = useUTC ? new Time(Time.TIMEZONE_UTC) : new Time();
+            if (timeZone != null) {
+                endDate = new Time(timeZone);
+            } else if (useUTC) {
+                endDate = new Time(Time.TIMEZONE_UTC);
+            } else {
+                endDate = new Time();
+            }
             endDate.set(endMillis);
             int startJulianDay = Time.getJulianDay(startMillis, startDate.gmtoff);
             int endJulianDay = Time.getJulianDay(endMillis, endDate.gmtoff);

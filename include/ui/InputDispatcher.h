@@ -84,14 +84,22 @@ struct InputTarget {
          * current event is delivered to this target or a timeout occurs. */
         FLAG_SYNC = 0x01,
 
-        /* This flag indicates that a MotionEvent with ACTION_DOWN falls outside of the area of
-         * this target and so should instead be delivered as an ACTION_OUTSIDE to this target. */
+        /* This flag indicates that a MotionEvent with AMOTION_EVENT_ACTION_DOWN falls outside
+         * of the area of this target and so should instead be delivered as an
+         * AMOTION_EVENT_ACTION_OUTSIDE to this target. */
         FLAG_OUTSIDE = 0x02,
 
         /* This flag indicates that a KeyEvent or MotionEvent is being canceled.
-         * In the case of a key event, it should be delivered with KeyEvent.FLAG_CANCELED set.
-         * In the case of a motion event, it should be delivered as MotionEvent.ACTION_CANCEL. */
-        FLAG_CANCEL = 0x04
+         * In the case of a key event, it should be delivered with flag
+         * AKEY_EVENT_FLAG_CANCELED set.
+         * In the case of a motion event, it should be delivered with action
+         * AMOTION_EVENT_ACTION_CANCEL instead. */
+        FLAG_CANCEL = 0x04,
+
+        /* This flag indicates that the target of a MotionEvent is partly or wholly
+         * obscured by another visible window above it.  The motion event should be
+         * delivered with flag AMOTION_EVENT_FLAG_WINDOW_IS_OBSCURED. */
+        FLAG_WINDOW_IS_OBSCURED = 0x08,
     };
 
     // The input channel to be targeted.
@@ -139,8 +147,11 @@ public:
     /* Notifies the system that an input channel recovered from ANR. */
     virtual void notifyInputChannelRecoveredFromANR(const sp<InputChannel>& inputChannel) = 0;
 
-    /* Gets the key repeat timeout or -1 if automatic key repeating is disabled. */
+    /* Gets the key repeat initial timeout or -1 if automatic key repeating is disabled. */
     virtual nsecs_t getKeyRepeatTimeout() = 0;
+
+    /* Gets the key repeat inter-key delay. */
+    virtual nsecs_t getKeyRepeatDelay() = 0;
 
     /* Waits for key event input targets to become available.
      * If the event is being injected, injectorPid and injectorUid should specify the
@@ -193,7 +204,8 @@ public:
             uint32_t policyFlags, int32_t action, int32_t flags, int32_t keyCode,
             int32_t scanCode, int32_t metaState, nsecs_t downTime) = 0;
     virtual void notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t source,
-            uint32_t policyFlags, int32_t action, int32_t metaState, int32_t edgeFlags,
+            uint32_t policyFlags, int32_t action, int32_t flags,
+            int32_t metaState, int32_t edgeFlags,
             uint32_t pointerCount, const int32_t* pointerIds, const PointerCoords* pointerCoords,
             float xPrecision, float yPrecision, nsecs_t downTime) = 0;
 
@@ -257,7 +269,8 @@ public:
             uint32_t policyFlags, int32_t action, int32_t flags, int32_t keyCode,
             int32_t scanCode, int32_t metaState, nsecs_t downTime);
     virtual void notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t source,
-            uint32_t policyFlags, int32_t action, int32_t metaState, int32_t edgeFlags,
+            uint32_t policyFlags, int32_t action, int32_t flags,
+            int32_t metaState, int32_t edgeFlags,
             uint32_t pointerCount, const int32_t* pointerIds, const PointerCoords* pointerCoords,
             float xPrecision, float yPrecision, nsecs_t downTime);
 
@@ -327,6 +340,7 @@ private:
         int32_t source;
         uint32_t policyFlags;
         int32_t action;
+        int32_t flags;
         int32_t metaState;
         int32_t edgeFlags;
         float xPrecision;
@@ -458,7 +472,8 @@ private:
                 int32_t repeatCount, nsecs_t downTime);
         MotionEntry* obtainMotionEntry(nsecs_t eventTime,
                 int32_t deviceId, int32_t source, uint32_t policyFlags, int32_t action,
-                int32_t metaState, int32_t edgeFlags, float xPrecision, float yPrecision,
+                int32_t flags, int32_t metaState, int32_t edgeFlags,
+                float xPrecision, float yPrecision,
                 nsecs_t downTime, uint32_t pointerCount,
                 const int32_t* pointerIds, const PointerCoords* pointerCoords);
         DispatchEntry* obtainDispatchEntry(EventEntry* eventEntry);

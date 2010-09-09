@@ -169,6 +169,12 @@ static struct {
     jfieldID dispatchingTimeoutNanos;
     jfieldID frameLeft;
     jfieldID frameTop;
+    jfieldID frameRight;
+    jfieldID frameBottom;
+    jfieldID visibleFrameLeft;
+    jfieldID visibleFrameTop;
+    jfieldID visibleFrameRight;
+    jfieldID visibleFrameBottom;
     jfieldID touchableAreaLeft;
     jfieldID touchableAreaTop;
     jfieldID touchableAreaRight;
@@ -269,6 +275,7 @@ public:
             nsecs_t& outNewTimeout);
     virtual void notifyInputChannelRecoveredFromANR(const sp<InputChannel>& inputChannel);
     virtual nsecs_t getKeyRepeatTimeout();
+    virtual nsecs_t getKeyRepeatDelay();
     virtual int32_t waitForKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
             int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets);
     virtual int32_t waitForMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
@@ -283,6 +290,12 @@ private:
         nsecs_t dispatchingTimeout;
         int32_t frameLeft;
         int32_t frameTop;
+        int32_t frameRight;
+        int32_t frameBottom;
+        int32_t visibleFrameLeft;
+        int32_t visibleFrameTop;
+        int32_t visibleFrameRight;
+        int32_t visibleFrameBottom;
         int32_t touchableAreaLeft;
         int32_t touchableAreaTop;
         int32_t touchableAreaRight;
@@ -294,10 +307,8 @@ private:
         int32_t ownerPid;
         int32_t ownerUid;
 
-        inline bool touchableAreaContainsPoint(int32_t x, int32_t y) {
-            return x >= touchableAreaLeft && x <= touchableAreaRight
-                    && y >= touchableAreaTop && y <= touchableAreaBottom;
-        }
+        bool visibleFrameIntersects(const InputWindow* other) const;
+        bool touchableAreaContainsPoint(int32_t x, int32_t y) const;
     };
 
     struct InputApplication {
@@ -370,9 +381,13 @@ private:
     // Focus tracking for touch.
     bool mTouchDown;
     InputWindow* mTouchedWindow;                   // primary target for current down
+    bool mTouchedWindowIsObscured;                 // true if other windows may obscure the target
     Vector<InputWindow*> mTouchedWallpaperWindows; // wallpaper targets
-
-    Vector<InputWindow*> mTempTouchedOutsideWindows; // temporary outside touch targets
+    struct OutsideTarget {
+        InputWindow* window;
+        bool obscured;
+    };
+    Vector<OutsideTarget> mTempTouchedOutsideTargets; // temporary outside touch targets
     Vector<sp<InputChannel> > mTempTouchedWallpaperChannels; // temporary wallpaper targets
 
     // Focused application.
@@ -391,6 +406,7 @@ private:
     int32_t waitForTouchedWindowLd(MotionEvent* motionEvent, uint32_t policyFlags,
             int32_t injectorPid, int32_t injectorUid,
             Vector<InputTarget>& outTargets, InputWindow*& outTouchedWindow);
+    bool isWindowObscuredLocked(const InputWindow* window);
 
     void releaseTouchedWindowLd();
 
@@ -996,6 +1012,10 @@ nsecs_t NativeInputManager::getKeyRepeatTimeout() {
     }
 }
 
+nsecs_t NativeInputManager::getKeyRepeatDelay() {
+    return milliseconds_to_nanoseconds(50);
+}
+
 int32_t NativeInputManager::getMaxEventsPerSecond() {
     if (mMaxEventsPerSecond < 0) {
         JNIEnv* env = jniEnv();
@@ -1117,6 +1137,18 @@ bool NativeInputManager::populateWindow(JNIEnv* env, jobject windowObj,
                     gInputWindowClassInfo.frameLeft);
             jint frameTop = env->GetIntField(windowObj,
                     gInputWindowClassInfo.frameTop);
+            jint frameRight = env->GetIntField(windowObj,
+                    gInputWindowClassInfo.frameRight);
+            jint frameBottom = env->GetIntField(windowObj,
+                    gInputWindowClassInfo.frameBottom);
+            jint visibleFrameLeft = env->GetIntField(windowObj,
+                    gInputWindowClassInfo.visibleFrameLeft);
+            jint visibleFrameTop = env->GetIntField(windowObj,
+                    gInputWindowClassInfo.visibleFrameTop);
+            jint visibleFrameRight = env->GetIntField(windowObj,
+                    gInputWindowClassInfo.visibleFrameRight);
+            jint visibleFrameBottom = env->GetIntField(windowObj,
+                    gInputWindowClassInfo.visibleFrameBottom);
             jint touchableAreaLeft = env->GetIntField(windowObj,
                     gInputWindowClassInfo.touchableAreaLeft);
             jint touchableAreaTop = env->GetIntField(windowObj,
@@ -1144,6 +1176,12 @@ bool NativeInputManager::populateWindow(JNIEnv* env, jobject windowObj,
             outWindow.dispatchingTimeout = dispatchingTimeoutNanos;
             outWindow.frameLeft = frameLeft;
             outWindow.frameTop = frameTop;
+            outWindow.frameRight = frameRight;
+            outWindow.frameBottom = frameBottom;
+            outWindow.visibleFrameLeft = visibleFrameLeft;
+            outWindow.visibleFrameTop = visibleFrameTop;
+            outWindow.visibleFrameRight = visibleFrameRight;
+            outWindow.visibleFrameBottom = visibleFrameBottom;
             outWindow.touchableAreaLeft = touchableAreaLeft;
             outWindow.touchableAreaTop = touchableAreaTop;
             outWindow.touchableAreaRight = touchableAreaRight;
@@ -1417,11 +1455,12 @@ int32_t NativeInputManager::waitForTouchedWindowLd(MotionEvent* motionEvent, uin
             /* Case 1: ACTION_DOWN */
 
             InputWindow* newTouchedWindow = NULL;
-            mTempTouchedOutsideWindows.clear();
+            mTempTouchedOutsideTargets.clear();
 
             int32_t x = int32_t(motionEvent->getX(0));
             int32_t y = int32_t(motionEvent->getY(0));
             InputWindow* topErrorWindow = NULL;
+            bool obscured = false;
 
             // Traverse windows from front to back to find touched window and outside targets.
             size_t numWindows = mWindows.size();
@@ -1442,13 +1481,17 @@ int32_t NativeInputManager::waitForTouchedWindowLd(MotionEvent* motionEvent, uin
                         if (isTouchModal || window->touchableAreaContainsPoint(x, y)) {
                             if (! screenWasOff || flags & FLAG_TOUCHABLE_WHEN_WAKING) {
                                 newTouchedWindow = window;
+                                obscured = isWindowObscuredLocked(window);
                             }
                             break; // found touched window, exit window loop
                         }
                     }
 
                     if (flags & FLAG_WATCH_OUTSIDE_TOUCH) {
-                        mTempTouchedOutsideWindows.push(window);
+                        OutsideTarget outsideTarget;
+                        outsideTarget.window = window;
+                        outsideTarget.obscured = isWindowObscuredLocked(window);
+                        mTempTouchedOutsideTargets.push(outsideTarget);
                     }
                 }
             }
@@ -1501,6 +1544,7 @@ int32_t NativeInputManager::waitForTouchedWindowLd(MotionEvent* motionEvent, uin
             releaseTouchedWindowLd();
 
             mTouchedWindow = newTouchedWindow;
+            mTouchedWindowIsObscured = obscured;
 
             if (newTouchedWindow->hasWallpaper) {
                 mTouchedWallpaperWindows.appendVector(mWallpaperWindows);
@@ -1557,21 +1601,31 @@ int32_t NativeInputManager::waitForTouchedWindowLd(MotionEvent* motionEvent, uin
     if (injectionResult == INPUT_EVENT_INJECTION_SUCCEEDED) {
         size_t numWallpaperWindows = mTouchedWallpaperWindows.size();
         for (size_t i = 0; i < numWallpaperWindows; i++) {
-            addTarget(mTouchedWallpaperWindows[i], 0, 0, outTargets);
+            addTarget(mTouchedWallpaperWindows[i],
+                    InputTarget::FLAG_WINDOW_IS_OBSCURED, 0, outTargets);
         }
 
-        size_t numOutsideWindows = mTempTouchedOutsideWindows.size();
-        for (size_t i = 0; i < numOutsideWindows; i++) {
-            addTarget(mTempTouchedOutsideWindows[i], InputTarget::FLAG_OUTSIDE, 0, outTargets);
+        size_t numOutsideTargets = mTempTouchedOutsideTargets.size();
+        for (size_t i = 0; i < numOutsideTargets; i++) {
+            const OutsideTarget& outsideTarget = mTempTouchedOutsideTargets[i];
+            int32_t outsideTargetFlags = InputTarget::FLAG_OUTSIDE;
+            if (outsideTarget.obscured) {
+                outsideTargetFlags |= InputTarget::FLAG_WINDOW_IS_OBSCURED;
+            }
+            addTarget(outsideTarget.window, outsideTargetFlags, 0, outTargets);
         }
 
-        addTarget(mTouchedWindow, InputTarget::FLAG_SYNC,
+        int32_t targetFlags = InputTarget::FLAG_SYNC;
+        if (mTouchedWindowIsObscured) {
+            targetFlags |= InputTarget::FLAG_WINDOW_IS_OBSCURED;
+        }
+        addTarget(mTouchedWindow, targetFlags,
                 anrTimer.getTimeSpentWaitingForApplication(), outTargets);
         outTouchedWindow = mTouchedWindow;
     } else {
         outTouchedWindow = NULL;
     }
-    mTempTouchedOutsideWindows.clear();
+    mTempTouchedOutsideTargets.clear();
 
     // Check injection permission once and for all.
     if (injectionPermission == INJECTION_PERMISSION_UNKNOWN) {
@@ -1616,6 +1670,7 @@ int32_t NativeInputManager::waitForTouchedWindowLd(MotionEvent* motionEvent, uin
 
 void NativeInputManager::releaseTouchedWindowLd() {
     mTouchedWindow = NULL;
+    mTouchedWindowIsObscured = false;
     mTouchedWallpaperWindows.clear();
 }
 
@@ -1659,6 +1714,20 @@ bool NativeInputManager::checkInjectionPermission(const InputWindow* window,
     }
 
     return true;
+}
+
+bool NativeInputManager::isWindowObscuredLocked(const InputWindow* window) {
+    size_t numWindows = mWindows.size();
+    for (size_t i = 0; i < numWindows; i++) {
+        const InputWindow* other = & mWindows.itemAt(i);
+        if (other == window) {
+            break;
+        }
+        if (other->visible && window->visibleFrameIntersects(other)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 int32_t NativeInputManager::waitForKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
@@ -1935,12 +2004,17 @@ void NativeInputManager::dumpDispatchStateLd(String8& dump) {
     for (size_t i = 0; i < mWindows.size(); i++) {
         dump.appendFormat("  windows[%d]: '%s', paused=%d, hasFocus=%d, hasWallpaper=%d, "
                 "visible=%d, flags=0x%08x, type=0x%08x, "
-                "frame=[%d,%d], touchableArea=[%d,%d][%d,%d], "
+                "frame=[%d,%d][%d,%d], "
+                "visibleFrame=[%d,%d][%d,%d], "
+                "touchableArea=[%d,%d][%d,%d], "
                 "ownerPid=%d, ownerUid=%d, dispatchingTimeout=%0.3fms\n",
                 i, mWindows[i].inputChannel->getName().string(),
                 mWindows[i].paused, mWindows[i].hasFocus, mWindows[i].hasWallpaper,
                 mWindows[i].visible, mWindows[i].layoutParamsFlags, mWindows[i].layoutParamsType,
                 mWindows[i].frameLeft, mWindows[i].frameTop,
+                mWindows[i].frameRight, mWindows[i].frameBottom,
+                mWindows[i].visibleFrameLeft, mWindows[i].visibleFrameTop,
+                mWindows[i].visibleFrameRight, mWindows[i].visibleFrameBottom,
                 mWindows[i].touchableAreaLeft, mWindows[i].touchableAreaTop,
                 mWindows[i].touchableAreaRight, mWindows[i].touchableAreaBottom,
                 mWindows[i].ownerPid, mWindows[i].ownerUid,
@@ -1951,6 +2025,20 @@ void NativeInputManager::dumpDispatchStateLd(String8& dump) {
         dump.appendFormat("  monitoringChannel[%d]: '%s'\n",
                 i, mMonitoringChannels[i]->getName().string());
     }
+}
+
+// ----------------------------------------------------------------------------
+
+bool NativeInputManager::InputWindow::visibleFrameIntersects(const InputWindow* other) const {
+    return visibleFrameRight > other->visibleFrameLeft
+        && visibleFrameLeft < other->visibleFrameRight
+        && visibleFrameBottom > other->visibleFrameTop
+        && visibleFrameTop < other->visibleFrameBottom;
+}
+
+bool NativeInputManager::InputWindow::touchableAreaContainsPoint(int32_t x, int32_t y) const {
+    return x >= touchableAreaLeft && x <= touchableAreaRight
+            && y >= touchableAreaTop && y <= touchableAreaBottom;
 }
 
 // ----------------------------------------------------------------------------
@@ -2506,6 +2594,24 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_FIELD_ID(gInputWindowClassInfo.frameTop, gInputWindowClassInfo.clazz,
             "frameTop", "I");
+
+    GET_FIELD_ID(gInputWindowClassInfo.frameRight, gInputWindowClassInfo.clazz,
+            "frameRight", "I");
+
+    GET_FIELD_ID(gInputWindowClassInfo.frameBottom, gInputWindowClassInfo.clazz,
+            "frameBottom", "I");
+
+    GET_FIELD_ID(gInputWindowClassInfo.visibleFrameLeft, gInputWindowClassInfo.clazz,
+            "visibleFrameLeft", "I");
+
+    GET_FIELD_ID(gInputWindowClassInfo.visibleFrameTop, gInputWindowClassInfo.clazz,
+            "visibleFrameTop", "I");
+
+    GET_FIELD_ID(gInputWindowClassInfo.visibleFrameRight, gInputWindowClassInfo.clazz,
+            "visibleFrameRight", "I");
+
+    GET_FIELD_ID(gInputWindowClassInfo.visibleFrameBottom, gInputWindowClassInfo.clazz,
+            "visibleFrameBottom", "I");
 
     GET_FIELD_ID(gInputWindowClassInfo.touchableAreaLeft, gInputWindowClassInfo.clazz,
             "touchableAreaLeft", "I");
