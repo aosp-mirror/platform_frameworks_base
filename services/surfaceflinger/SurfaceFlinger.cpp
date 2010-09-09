@@ -885,8 +885,8 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
      */
     for (size_t i=0 ; i<count ; i++) {
         if (cur) {
-            if (!(cur[i].compositionType == HWC_FRAMEBUFFER) ||
-                    cur[i].flags & HWC_SKIP_LAYER) {
+            if ((cur[i].compositionType != HWC_FRAMEBUFFER) &&
+                !(cur[i].flags & HWC_SKIP_LAYER)) {
                 // skip layers handled by the HAL
                 continue;
             }
