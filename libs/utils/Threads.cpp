@@ -65,6 +65,20 @@ using namespace android;
 
 typedef void* (*android_pthread_entry)(void*);
 
+static pthread_once_t gDoSchedulingGroupOnce = PTHREAD_ONCE_INIT;
+static bool gDoSchedulingGroup = true;
+
+static void checkDoSchedulingGroup(void) {
+    char buf[PROPERTY_VALUE_MAX];
+    int len = property_get("debug.sys.noschedgroups", buf, "");
+    if (len > 0) {
+        int temp;
+        if (sscanf(buf, "%d", &temp) == 1) {
+            gDoSchedulingGroup = temp == 0;
+        }
+    }
+}
+
 struct thread_data_t {
     thread_func_t   entryFunction;
     void*           userData;
@@ -80,6 +94,15 @@ struct thread_data_t {
         char * name = t->threadName;
         delete t;
         setpriority(PRIO_PROCESS, 0, prio);
+        pthread_once(&gDoSchedulingGroupOnce, checkDoSchedulingGroup);
+        if (gDoSchedulingGroup) {
+            if (prio >= ANDROID_PRIORITY_BACKGROUND) {
+                set_sched_policy(androidGetTid(), SP_BACKGROUND);
+            } else {
+                set_sched_policy(androidGetTid(), SP_FOREGROUND);
+            }
+        }
+        
         if (name) {
 #if defined(HAVE_PRCTL)
             // Mac OS doesn't have this, and we build libutil for the host too
@@ -280,22 +303,6 @@ pid_t androidGetTid()
     return getpid();
 #endif
 }
-
-#if defined(HAVE_PTHREADS)
-static pthread_once_t gDoSchedulingGroupOnce = PTHREAD_ONCE_INIT;
-static bool gDoSchedulingGroup = true;
-
-static void checkDoSchedulingGroup(void) {
-    char buf[PROPERTY_VALUE_MAX];
-    int len = property_get("debug.sys.noschedgroups", buf, "");
-    if (len > 0) {
-        int temp;
-        if (sscanf(buf, "%d", &temp) == 1) {
-            gDoSchedulingGroup = temp == 0;
-        }
-    }
-}
-#endif
 
 int androidSetThreadSchedulingGroup(pid_t tid, int grp)
 {
