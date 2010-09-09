@@ -37,6 +37,11 @@ public:
         }
         return *instance;
     }
+
+    static bool hasInstance() {
+        Mutex::Autolock _l(sLock);
+        return sInstance != 0;
+    }
     
 protected:
     ~Singleton() { };

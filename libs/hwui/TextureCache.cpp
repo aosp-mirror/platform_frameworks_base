@@ -102,9 +102,10 @@ void TextureCache::operator()(SkBitmap*& bitmap, Texture*& texture) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Texture* TextureCache::get(SkBitmap* bitmap) {
-    Mutex::Autolock _l(mLock);
-
+    mLock.lock();
     Texture* texture = mCache.get(bitmap);
+    mLock.unlock();
+
     if (!texture) {
         if (bitmap->width() > mMaxTextureSize || bitmap->height() > mMaxTextureSize) {
             LOGW("Bitmap too large to be uploaded into a texture");
@@ -114,9 +115,11 @@ Texture* TextureCache::get(SkBitmap* bitmap) {
         const uint32_t size = bitmap->rowBytes() * bitmap->height();
         // Don't even try to cache a bitmap that's bigger than the cache
         if (size < mMaxSize) {
+            mLock.lock();
             while (mSize + size > mMaxSize) {
                 mCache.removeOldest();
             }
+            mLock.unlock();
         }
 
         texture = new Texture;
@@ -124,8 +127,10 @@ Texture* TextureCache::get(SkBitmap* bitmap) {
         generateTexture(bitmap, texture, false);
 
         if (size < mMaxSize) {
+            mLock.lock();
             mSize += size;
             mCache.put(bitmap, texture);
+            mLock.unlock();
         } else {
             texture->cleanup = true;
         }

@@ -21,6 +21,8 @@
 #include <SkCanvas.h>
 #include <SkRect.h>
 
+#include <utils/threads.h>
+
 #include "PathCache.h"
 #include "Properties.h"
 
@@ -51,6 +53,7 @@ PathCache::PathCache(uint32_t maxByteSize):
 }
 
 PathCache::~PathCache() {
+    Mutex::Autolock _l(mLock);
     mCache.clear();
 }
 
@@ -67,14 +70,17 @@ void PathCache::init() {
 ///////////////////////////////////////////////////////////////////////////////
 
 uint32_t PathCache::getSize() {
+    Mutex::Autolock _l(mLock);
     return mSize;
 }
 
 uint32_t PathCache::getMaxSize() {
+    Mutex::Autolock _l(mLock);
     return mMaxSize;
 }
 
 void PathCache::setMaxSize(uint32_t maxSize) {
+    Mutex::Autolock _l(mLock);
     mMaxSize = maxSize;
     while (mSize > mMaxSize) {
         mCache.removeOldest();
@@ -99,14 +105,30 @@ void PathCache::operator()(PathCacheEntry& path, PathTexture*& texture) {
 // Caching
 ///////////////////////////////////////////////////////////////////////////////
 
+void PathCache::remove(SkPath* path) {
+    Mutex::Autolock _l(mLock);
+    // TODO: Linear search...
+    for (uint32_t i = 0; i < mCache.size(); i++) {
+        if (mCache.getKeyAt(i).path == path) {
+            mCache.removeAt(i);
+            return;
+        }
+    }
+}
+
 PathTexture* PathCache::get(SkPath* path, SkPaint* paint) {
     PathCacheEntry entry(path, paint);
+
+    mLock.lock();
     PathTexture* texture = mCache.get(entry);
+    mLock.unlock();
 
     if (!texture) {
         texture = addTexture(entry, path, paint);
     } else if (path->getGenerationID() != texture->generation) {
+        mLock.lock();
         mCache.remove(entry);
+        mLock.unlock();
         texture = addTexture(entry, path, paint);
     }
 
@@ -132,9 +154,11 @@ PathTexture* PathCache::addTexture(const PathCacheEntry& entry,
     const uint32_t size = width * height;
     // Don't even try to cache a bitmap that's bigger than the cache
     if (size < mMaxSize) {
+        mLock.lock();
         while (mSize + size > mMaxSize) {
             mCache.removeOldest();
         }
+        mLock.unlock();
     }
 
     PathTexture* texture = new PathTexture;
@@ -157,8 +181,10 @@ PathTexture* PathCache::addTexture(const PathCacheEntry& entry,
     generateTexture(bitmap, texture);
 
     if (size < mMaxSize) {
+        mLock.lock();
         mSize += size;
         mCache.put(entry, texture);
+        mLock.unlock();
     } else {
         texture->cleanup = true;
     }
@@ -167,6 +193,7 @@ PathTexture* PathCache::addTexture(const PathCacheEntry& entry,
 }
 
 void PathCache::clear() {
+    Mutex::Autolock _l(mLock);
     mCache.clear();
 }
 

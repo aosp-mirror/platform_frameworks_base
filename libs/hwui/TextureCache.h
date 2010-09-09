@@ -87,6 +87,10 @@ private:
     uint32_t mMaxSize;
     GLint mMaxTextureSize;
 
+    /**
+     * Used to access mCache and mSize. All methods are accessed from a single
+     * thread except for remove().
+     */
     mutable Mutex mLock;
 }; // class TextureCache
 

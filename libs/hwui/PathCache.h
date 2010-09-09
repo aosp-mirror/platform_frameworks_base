@@ -114,6 +114,10 @@ public:
      * Clears the cache. This causes all textures to be deleted.
      */
     void clear();
+    /**
+     * Removes an entry.
+     */
+    void remove(SkPath* path);
 
     /**
      * Sets the maximum size of the cache in bytes.
@@ -143,6 +147,12 @@ private:
     uint32_t mSize;
     uint32_t mMaxSize;
     GLuint mMaxTextureSize;
+
+    /**
+     * Used to access mCache and mSize. All methods are accessed from a single
+     * thread except for remove().
+     */
+    mutable Mutex mLock;
 }; // class PathCache
 
 }; // namespace uirenderer

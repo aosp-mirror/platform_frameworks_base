@@ -61,6 +61,7 @@ public:
 
     bool contains(K key) const;
     V get(K key);
+    K getKeyAt(uint32_t index) const;
     void put(K key, V value);
     V remove(K key);
     V removeOldest();
@@ -119,6 +120,11 @@ void GenerationCache<K, V>::clear() {
 template<typename K, typename V>
 bool GenerationCache<K, V>::contains(K key) const {
     return mCache.indexOfKey(key) >= 0;
+}
+
+template<typename K, typename V>
+K GenerationCache<K, V>::getKeyAt(uint32_t index) const {
+    return mCache.keyAt(index);
 }
 
 template<typename K, typename V>
