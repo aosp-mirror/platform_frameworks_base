@@ -228,4 +228,24 @@ public class FsUtils {
 
         return new LinkedList<String>();
     }
+
+    public static void closeInputStream(InputStream inputStream) {
+        try {
+            if (inputStream != null) {
+                inputStream.close();
+            }
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Couldn't close stream!", e);
+        }
+    }
+
+    public static void closeOutputStream(OutputStream outputStream) {
+        try {
+            if (outputStream != null) {
+                outputStream.close();
+            }
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Couldn't close stream!", e);
+        }
+    }
 }

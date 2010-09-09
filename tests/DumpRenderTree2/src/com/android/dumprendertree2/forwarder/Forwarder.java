@@ -60,18 +60,17 @@ public class Forwarder extends Thread {
     @Override
     public void run() {
         while (true) {
-            /** These sockets will be closed when Forwarder.stop() is called */
             Socket localSocket;
             Socket remoteSocket;
             try {
                 localSocket = mServerSocket.accept();
-                remoteSocket = AdbUtils.getSocketToRemoteMachine(mRemoteMachineIpAddress,
-                        mPort);
             } catch (IOException e) {
                 /** This most likely means that mServerSocket is already closed */
                 Log.w(LOG_TAG, "mPort=" + mPort, e);
                 break;
             }
+
+            remoteSocket = AdbUtils.createSocket();
 
             if (remoteSocket == null) {
                 try {
@@ -86,7 +85,8 @@ public class Forwarder extends Thread {
             }
 
             final ConnectionHandler connectionHandler =
-                    new ConnectionHandler(localSocket, remoteSocket);
+                    new ConnectionHandler(mRemoteMachineIpAddress, mPort, localSocket,
+                            remoteSocket);
 
             /**
              * We have to close the sockets after the ConnectionHandler finishes, so we
@@ -98,9 +98,7 @@ public class Forwarder extends Thread {
                 @Override
                 public void onFinished() {
                     synchronized (this) {
-                        if (mConnectionHandlers.remove(connectionHandler)) {
-                            Log.d(LOG_TAG, "removeConnectionHandler(): removed");
-                        } else {
+                        if (!mConnectionHandlers.remove(connectionHandler)) {
                             assert false : "removeConnectionHandler(): not in the collection";
                         }
                     }
