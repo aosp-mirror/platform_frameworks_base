@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
+#include "fragment_shaders.cpp"
+
 FILE * fOut = NULL;
 void ptSwap();
+
+static char gCurrentTestName[1024];
+static uint32_t gWidth = 0;
+static uint32_t gHeight = 0;
 
 static void checkGlError(const char* op) {
     for (GLint error = glGetError(); error; error
@@ -112,20 +118,21 @@ void startTimer() {
     gTime = getTime();
 }
 
-void endTimer(const char *str, int w, int h, double dc, int count) {
+
+static void endTimer(int count) {
     uint64_t t2 = getTime();
     double delta = ((double)(t2 - gTime)) / 1000000000;
-    double pixels = dc * (w * h) * count;
+    double pixels = (gWidth * gHeight) * count;
     double mpps = pixels / delta / 1000000;
-    double dc60 = pixels / delta / (w * h) / 60;
+    double dc60 = ((double)count) / delta / 60;
 
     if (fOut) {
-        fprintf(fOut, "%s, %f, %f\r\n", str, mpps, dc60);
+        fprintf(fOut, "%s, %f, %f\r\n", gCurrentTestName, mpps, dc60);
         fflush(fOut);
     } else {
-        printf("%s, %f, %f\n", str, mpps, dc60);
+        printf("%s, %f, %f\n", gCurrentTestName, mpps, dc60);
     }
-    LOGI("%s, %f, %f\r\n", str, mpps, dc60);
+    LOGI("%s, %f, %f\r\n", gCurrentTestName, mpps, dc60);
 }
 
 
@@ -137,85 +144,16 @@ static const char gVertexShader[] =
     "varying vec4 v_color;\n"
     "varying vec2 v_tex0;\n"
     "varying vec2 v_tex1;\n"
+    "uniform vec2 u_texOff;\n"
 
     "void main() {\n"
     "    v_color = a_color;\n"
     "    v_tex0 = a_tex0;\n"
     "    v_tex1 = a_tex1;\n"
+    "    v_tex0.x += u_texOff.x;\n"
+    "    v_tex1.y += u_texOff.y;\n"
     "    gl_Position = a_pos;\n"
     "}\n";
-
-static const char gShaderPrefix[] =
-    "precision mediump float;\n"
-    "uniform vec4 u_color;\n"
-    "uniform vec4 u_0;\n"
-    "uniform vec4 u_1;\n"
-    "uniform vec4 u_2;\n"
-    "uniform vec4 u_3;\n"
-    "varying vec4 v_color;\n"
-    "varying vec2 v_tex0;\n"
-    "varying vec2 v_tex1;\n"
-    "uniform sampler2D u_tex0;\n"
-    "uniform sampler2D u_tex1;\n"
-    "void main() {\n";
-
-static const char gShaderPostfix[] =
-    "  gl_FragColor = c;\n"
-    "}\n";
-
-
-static char * append(char *d, const char *s) {
-    size_t len = strlen(s);
-    memcpy(d, s, len);
-    return d + len;
-}
-
-static char * genShader(
-    bool useVarColor,
-    int texCount,
-    bool modulateFirstTex,
-    int extraMath)
-{
-    char *str = (char *)calloc(16 * 1024, 1);
-    char *tmp = append(str, gShaderPrefix);
-
-    if (modulateFirstTex || !texCount) {
-        if (useVarColor) {
-            tmp = append(tmp, "  vec4 c = v_color;\n");
-        } else {
-            tmp = append(tmp, "  vec4 c = u_color;\n");
-        }
-    } else {
-        tmp = append(tmp, "  vec4 c = texture2D(u_tex0, v_tex0);\n");
-    }
-
-    if (modulateFirstTex && texCount) {
-        tmp = append(tmp, "  c *= texture2D(u_tex0, v_tex0);\n");
-    }
-    if (texCount > 1) {
-        tmp = append(tmp, "  c *= texture2D(u_tex1, v_tex1);\n");
-    }
-
-    if (extraMath > 0) {
-        tmp = append(tmp, "  c *= u_0;\n");
-    }
-    if (extraMath > 1) {
-        tmp = append(tmp, "  c += u_1;\n");
-    }
-    if (extraMath > 2) {
-        tmp = append(tmp, "  c *= u_2;\n");
-    }
-    if (extraMath > 3) {
-        tmp = append(tmp, "  c += u_3;\n");
-    }
-
-
-    tmp = append(tmp, gShaderPostfix);
-    tmp[0] = 0;
-
-    //printf("%s", str);
-    return str;
-}
 
 static void setupVA() {
     static const float vtx[] = {
@@ -231,8 +169,8 @@ static void setupVA() {
     static const float tex0[] = {
         0.0f,0.0f,
         1.0f,0.0f,
-        1.0f,1.0f,
-        0.0f,1.0f };
+        0.0f,1.0f,
+        1.0f,1.0f };
     static const float tex1[] = {
         1.0f,0.0f,
         1.0f,1.0f,
@@ -261,8 +199,8 @@ static void randUniform(int pgm, const char *var) {
     }
 }
 
-static void doLoop(bool clear, int pgm, uint32_t w, uint32_t h, const char *str) {
-    if (clear) {
+static void doLoop(bool warmup, int pgm, uint32_t passCount) {
+    if (warmup) {
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         ptSwap();
@@ -272,7 +210,10 @@ static void doLoop(bool clear, int pgm, uint32_t w, uint32_t h, const char *str)
 
     startTimer();
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    for (int ct=0; ct < 100; ct++) {
+    for (uint32_t ct=0; ct < passCount; ct++) {
+        int loc = glGetUniformLocation(pgm, "u_texOff");
+        glUniform2f(loc, ((float)ct) / passCount, ((float)ct) / 2.f / passCount);
+
         randUniform(pgm, "u_color");
         randUniform(pgm, "u_0");
         randUniform(pgm, "u_1");
@@ -282,14 +223,24 @@ static void doLoop(bool clear, int pgm, uint32_t w, uint32_t h, const char *str)
     }
     ptSwap();
     glFinish();
-    endTimer(str, w, h, 1, 100);
+    endTimer(passCount);
+}
+
+
+static uint32_t rgb(uint32_t r, uint32_t g, uint32_t b)
+{
+    uint32_t ret = 0xff000000;
+    ret |= r & 0xff;
+    ret |= (g & 0xff) << 8;
+    ret |= (b & 0xff) << 16;
+    return ret;
 }
 
 void genTextures() {
     uint32_t *m = (uint32_t *)malloc(1024*1024*4);
     for (int y=0; y < 1024; y++){
         for (int x=0; x < 1024; x++){
-            m[y*1024 + x] = 0xff0000ff | ((x & 0xff) << 8) | (y << 16);
+            m[y*1024 + x] = rgb(x, (((x+y) & 0xff) == 0x7f) * 0xff, y);
         }
     }
     glBindTexture(GL_TEXTURE_2D, 1);
@@ -301,7 +252,7 @@ void genTextures() {
 
     for (int y=0; y < 16; y++){
         for (int x=0; x < 16; x++){
-            m[y*16 + x] = 0xff0000ff | (x<<12) | (y<<20);
+            m[y*16 + x] = rgb(x << 4, (((x+y) & 0xf) == 0x7) * 0xff, y << 4);
         }
     }
     glBindTexture(GL_TEXTURE_2D, 2);
@@ -310,7 +261,38 @@ void genTextures() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
+    free(m);
 }
 
+static void doSingleTest(uint32_t pgmNum, int tex) {
+    const char *pgmTxt = gFragmentTests[pgmNum]->txt;
+    int pgm = createProgram(gVertexShader, pgmTxt);
+    if (!pgm) {
+        printf("error running test\n");
+        return;
+    }
+    int loc = glGetUniformLocation(pgm, "u_tex0");
+    if (loc >= 0) glUniform1i(loc, 0);
+    loc = glGetUniformLocation(pgm, "u_tex1");
+    if (loc >= 0) glUniform1i(loc, 1);
+
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glActiveTexture(GL_TEXTURE0);
+
+    glBlendFunc(GL_ONE, GL_ONE);
+    glDisable(GL_BLEND);
+    //sprintf(str2, "%i, %i, %i, %i, %i, 0",
+            //useVarColor, texCount, modulateFirstTex, extraMath, tex0);
+    //doLoop(true, pgm, w, h, str2);
+    //doLoop(false, pgm, w, h, str2);
+
+    glEnable(GL_BLEND);
+    sprintf(gCurrentTestName, "%s, %i, %i, 1", gFragmentTests[pgmNum]->name, pgmNum, tex);
+    doLoop(true, pgm, 100);
+    doLoop(false, pgm, 100);
+}
 
