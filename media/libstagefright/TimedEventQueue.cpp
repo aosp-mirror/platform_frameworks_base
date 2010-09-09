@@ -26,6 +26,8 @@
 
 #include "include/TimedEventQueue.h"
 
+#include <cutils/sched_policy.h>
+
 #include <sys/prctl.h>
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -209,6 +211,8 @@ void *TimedEventQueue::ThreadWrapper(void *me) {
 #endif
 
     setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_FOREGROUND);
+    set_sched_policy(androidGetTid(), SP_FOREGROUND);
+
     static_cast<TimedEventQueue *>(me)->threadEntry();
 
 #ifdef ANDROID_SIMULATOR
