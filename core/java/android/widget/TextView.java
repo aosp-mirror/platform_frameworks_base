@@ -4448,7 +4448,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         hideControllers();
-        
+
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 /*
@@ -5875,7 +5875,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Return true iff there is a selection inside this text view.
      */
     public boolean hasSelection() {
-        return getSelectionStart() != getSelectionEnd();
+        final int selectionStart = getSelectionStart();
+        final int selectionEnd = getSelectionEnd();
+
+        return selectionStart >= 0 && selectionStart != selectionEnd;
     }
 
     /**
@@ -6539,7 +6542,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mShowCursor = SystemClock.uptimeMillis();
 
         ensureEndedBatchEdit();
-        
+
         if (focused) {
             int selStart = getSelectionStart();
             int selEnd = getSelectionEnd();
@@ -7068,7 +7071,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return false;
         }
 
-        if (mText.length() > 0 && getSelectionStart() >= 0) {
+        if (mText.length() > 0 && hasSelection()) {
             if (mText instanceof Editable && mInput != null) {
                 return true;
             }
@@ -7082,7 +7085,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return false;
         }
 
-        if (mText.length() > 0 && getSelectionStart() >= 0) {
+        if (mText.length() > 0 && hasSelection()) {
             return true;
         }
 
@@ -7202,6 +7205,49 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             ((SelectionModifierCursorController) mSelectionModifierCursorController);
         int minOffset = selectionModifierCursorController.getMinTouchOffset();
         int maxOffset = selectionModifierCursorController.getMaxTouchOffset();
+
+        if (minOffset == maxOffset) {
+            int offset = Math.max(0, Math.min(minOffset, mTransformed.length()));
+
+            // Tolerance, number of charaters around tapped position
+            final int range = 1;
+            final int max = mTransformed.length() - 1;
+
+            // 'Smart' word selection: detect position between words
+            for (int i = -range; i <= range; i++) {
+                int index = offset + i;
+                if (index >= 0 && index <= max) {
+                    if (Character.isSpaceChar(mTransformed.charAt(index))) {
+                        // Select current space
+                        selectionStart = index;
+                        selectionEnd = selectionStart + 1;
+
+                        // Extend selection to maximum space range
+                        while (selectionStart > 0 &&
+                                Character.isSpaceChar(mTransformed.charAt(selectionStart - 1))) {
+                            selectionStart--;
+                        }
+                        while (selectionEnd < max &&
+                                Character.isSpaceChar(mTransformed.charAt(selectionEnd))) {
+                            selectionEnd++;
+                        }
+
+                        Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
+                        return;
+                    }
+                }
+            }
+
+            // 'Smart' word selection: detect position at beginning or end of text.
+            if (offset <= range) {
+                Selection.setSelection((Spannable) mText, 0, 0);
+                return;
+            }
+            if (offset >= (max - range)) {
+                Selection.setSelection((Spannable) mText, max + 1, max + 1);
+                return;
+            }
+        }
 
         long wordLimits = getWordLimitsAt(minOffset);
         if (wordLimits >= 0) {
