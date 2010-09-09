@@ -95,7 +95,61 @@ padding: .25em 1em;
 }
 </style>
 
+
+
+
 <div class="toggleable opened">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+ADT 0.9.8</a> <em>(August 2010)</em>
+  <div class="toggleme">
+
+
+</ul>
+</dd>
+
+<dl>
+
+<dt>Dependencies:</dt>
+
+<dd><p>ADT 0.9.8 is designed for use with SDK Tools r7 and later. Before 
+updating to ADT 0.9.8, we highly recommend that you use the Android SDK and
+AVD Manager to install SDK Tools r7 into your SDK.</p></dd>
+
+<dt>General notes:</dt>
+<dd>
+<ul>
+<li>Adds a new Action, "Rename Application Package", to the Android Tools
+contextual menu. The Action does a full application package refactoring.
+<li>Adds support for library projects that don't have a source folder
+called <code>src/</code>. There is now support for any number of source folders,
+with no name restriction. They can even be in subfolder such as
+<code>src/java</code>. If you are already working with library projects created
+in ADT 0.9.7, see <a 
+href="{@docRoot}guide/developing/eclipse-adt.html#libraryMigrating">Migrating
+library projects to ADT 0.9.8</a> for important information about moving
+to the new ADT environment.</li>
+<li>Adds support for library projects that depend on other library
+projects.</li>
+<li>Adds support for additional resource qualifiers:
+<code>car</code>/<code>desk</code>, <code>night</code>/<code>notnight</code> and
+<code>navexposed</code>/<code>navhidden</code>.</li>
+<li>Adds more device screen types in the layout editor. All screen
+resolution/density combinations listed in the <a 
+href="{@docRoot}guide/practices/screens_support.html#range">Supporting
+Multiple Screens</a> are now available.</li>
+<li>Fixes problems with handling of library project names that
+contain characters that are incompatible with the Eclipse path variable.
+Now properly sets up the link between the main project and the library
+project.</li>
+</ul>
+</dd>
+</dl>
+ </div>
+</div>
+
+
+<div class="toggleable closed">
   <a href="#" onclick="return toggleDiv(this)">
         <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
 ADT 0.9.7</a> <em>(May 2010)</em>
@@ -119,6 +173,7 @@ project support through the Ant build system.</p>
 </dl>
  </div>
 </div>
+
 
 <div class="toggleable closed">
   <a href="#" onclick="return toggleDiv(this)">
