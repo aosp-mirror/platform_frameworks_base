@@ -838,10 +838,6 @@ across all projects). </p>
 is because the library project is compiled by the main project to use the
 correct resource IDs.</p>
 
-<p><strong>One library project cannot reference another</strong></p>
-
-<p>A library cannot depend on another library.</p>
-
 <p><strong>A library project can include a JAR library</strong></p>
 
 <p>You can develop a library project that itself includes a JAR library. When
@@ -857,13 +853,6 @@ Google APIs Add-On). Note also that both the library project and the dependent
 application must declare the external library their manifest files, in a <a
 href="{@docRoot}guide/topics/manifest/uses-library-element.html"><code>&lt;uses-library&gt;</code></a>
 element. </p>
-
-<p><strong>Library project cannot include AIDL files</strong></p>
-
-<p>The tools do not support the use of <a
-href="{@docRoot}guide/developing/tools/aidl.html">AIDL</a> files in a library project.
-Any AIDL files used by an application must be stored in the application project
-itself.</p>
 
 <p><strong>Library project cannot include raw assets</strong></p>
 

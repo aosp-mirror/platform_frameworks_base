@@ -490,7 +490,7 @@ public final class SipService extends ISipService.Stub {
 
     private class KeepAliveProcess implements Runnable {
         private static final String TAG = "\\KEEPALIVE/";
-        private static final int INTERVAL = 15;
+        private static final int INTERVAL = 10;
         private SipSessionGroup.SipSessionImpl mSession;
 
         public KeepAliveProcess(SipSessionGroup.SipSessionImpl session) {

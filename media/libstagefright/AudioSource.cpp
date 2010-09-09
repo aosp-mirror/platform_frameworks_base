@@ -316,8 +316,10 @@ status_t AudioSource::read(
         }
 
         if (numFramesRecorded == 0) {
-            buffer->meta_data()->setInt64(kKeyTime, mStartTimeUs);
+            buffer->meta_data()->setInt64(kKeyAnchorTime, mStartTimeUs);
         }
+
+        buffer->meta_data()->setInt64(kKeyTime, mStartTimeUs + mPrevSampleTimeUs);
         buffer->meta_data()->setInt64(kKeyDriftTime, readTimeUs - mInitialReadTimeUs);
         CHECK(timestampUs > mPrevSampleTimeUs);
         mPrevSampleTimeUs = timestampUs;

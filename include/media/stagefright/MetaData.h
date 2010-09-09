@@ -49,6 +49,7 @@ enum {
     kKeyNTPTime           = 'ntpT',  // uint64_t (ntp-timestamp)
     kKeyTargetTime        = 'tarT',  // int64_t (usecs)
     kKeyDriftTime         = 'dftT',  // int64_t (usecs)
+    kKeyAnchorTime        = 'ancT',  // int64_t (usecs)
     kKeyDuration          = 'dura',  // int64_t (usecs)
     kKeyColorFormat       = 'colf',
     kKeyPlatformPrivate   = 'priv',  // pointer
