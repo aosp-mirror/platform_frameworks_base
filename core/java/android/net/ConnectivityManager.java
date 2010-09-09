@@ -105,6 +105,14 @@ public class ConnectivityManager
      * it with {@link android.content.Intent#getStringExtra(String)}.
      */
     public static final String EXTRA_EXTRA_INFO = "extraInfo";
+    /**
+     * The lookup key for an int that provides information about
+     * our connection to the internet at large.  0 indicates no connection,
+     * 100 indicates a great connection.  Retrieve it with
+     * {@link android.content.Intent@getIntExtra(String)}.
+     * {@hide}
+     */
+    public static final String EXTRA_INET_CONDITION = "inetCondition";
 
     /**
      * Broadcast Action: The setting for background data usage has changed
@@ -548,5 +556,17 @@ public class ConnectivityManager
         } catch (RemoteException e) {
             return TETHER_ERROR_SERVICE_UNAVAIL;
         }
-   }
+    }
+
+    /**
+     * @param networkType The type of network you want to report on
+     * @param percentage The quality of the connection 0 is bad, 100 is good
+     * {@hide}
+     */
+    public void reportInetCondition(int networkType, int percentage) {
+        try {
+            mService.reportInetCondition(networkType, percentage);
+        } catch (RemoteException e) {
+        }
+    }
 }
