@@ -37,10 +37,9 @@ public:
 
     virtual sp<MetaData> getMetaData();
 
-protected:
-    virtual ~MP3Extractor();
-
 private:
+    status_t mInitCheck;
+
     sp<DataSource> mDataSource;
     off_t mFirstFramePos;
     sp<MetaData> mMeta;
