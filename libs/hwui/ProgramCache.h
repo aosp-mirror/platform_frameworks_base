@@ -35,7 +35,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Debug
-#define DEBUG_PROGRAM_CACHE 0
+#define DEBUG_PROGRAM_CACHE 1
 
 // Debug
 #if DEBUG_PROGRAM_CACHE
@@ -61,6 +61,7 @@ namespace uirenderer {
 #define PROGRAM_MAX_XFERMODE 0x1f
 #define PROGRAM_XFERMODE_SHADER_SHIFT 26
 #define PROGRAM_XFERMODE_COLOR_OP_SHIFT 20
+#define PROGRAM_XFERMODE_FRAMEBUFFER_SHIFT 14
 
 #define PROGRAM_BITMAP_WRAPS_SHIFT 9
 #define PROGRAM_BITMAP_WRAPT_SHIFT 11
@@ -93,7 +94,8 @@ struct ProgramDescription {
         hasBitmap(false), isBitmapNpot(false), hasGradient(false),
         shadersMode(SkXfermode::kClear_Mode), isBitmapFirst(false),
         bitmapWrapS(GL_CLAMP_TO_EDGE), bitmapWrapT(GL_CLAMP_TO_EDGE),
-        colorOp(kColorNone), colorMode(SkXfermode::kClear_Mode) {
+        colorOp(kColorNone), colorMode(SkXfermode::kClear_Mode),
+        framebufferMode(SkXfermode::kClear_Mode) {
     }
 
     // Texturing
@@ -112,6 +114,10 @@ struct ProgramDescription {
     // Color operations
     int colorOp;
     SkXfermode::Mode colorMode;
+
+    // Framebuffer blending (requires Extensions.hasFramebufferFetch())
+    // Ignored for all values < SkXfermode::kPlus_Mode
+    SkXfermode::Mode framebufferMode;
 
     inline uint32_t getEnumForWrap(GLenum wrap) const {
         switch (wrap) {
@@ -156,6 +162,7 @@ struct ProgramDescription {
             case kColorNone:
                 break;
         }
+        key |= (framebufferMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_FRAMEBUFFER_SHIFT;
         return key;
     }
 }; // struct ProgramDescription

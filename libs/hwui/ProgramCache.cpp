@@ -66,6 +66,8 @@ const char* gVS_Footer =
 // Fragment shaders snippets
 ///////////////////////////////////////////////////////////////////////////////
 
+const char* gFS_Header_Extension_FramebufferFetch =
+        "#extension GL_NV_shader_framebuffer_fetch : enable\n\n";
 const char* gFS_Header =
         "precision mediump float;\n\n";
 const char* gFS_Uniforms_Color =
@@ -115,6 +117,8 @@ const char* gFS_Main_BitmapShader_Modulate =
         "    fragColor = bitmapColor * fragColor.a;\n";
 const char* gFS_Main_FragColor =
         "    gl_FragColor = fragColor;\n";
+const char* gFS_Main_FragColor_Blend =
+        "    gl_FragColor = blendFramebuffer(fragColor, gl_LastFragColor);\n";
 const char* gFS_Main_ApplyColorOp[4] = {
         // None
         "",
@@ -281,7 +285,14 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
 
 String8 ProgramCache::generateFragmentShader(const ProgramDescription& description) {
     // Set the default precision
-    String8 shader(gFS_Header);
+    String8 shader;
+
+    bool blendFramebuffer = description.framebufferMode >= SkXfermode::kPlus_Mode;
+    if (blendFramebuffer) {
+        shader.append(gFS_Header_Extension_FramebufferFetch);
+    }
+
+    shader.append(gFS_Header);
 
     // Varyings
     if (description.hasTexture) {
@@ -314,6 +325,9 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     }
     if (description.colorOp == ProgramDescription::kColorBlend) {
         generateBlend(shader, "blendColors", description.colorMode);
+    }
+    if (blendFramebuffer) {
+        generateBlend(shader, "blendFramebuffer", description.framebufferMode);
     }
     if (description.isBitmapNpot) {
         generateTextureWrap(shader, description.bitmapWrapS, description.bitmapWrapT);
@@ -359,7 +373,11 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         // Apply the color op if needed
         shader.append(gFS_Main_ApplyColorOp[description.colorOp]);
         // Output the fragment
-        shader.append(gFS_Main_FragColor);
+        if (!blendFramebuffer) {
+            shader.append(gFS_Main_FragColor);
+        } else {
+            shader.append(gFS_Main_FragColor_Blend);
+        }
     }
     // End the shader
     shader.append(gFS_Footer);

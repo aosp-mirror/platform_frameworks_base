@@ -322,7 +322,9 @@ private:
      * Enable or disable blending as necessary. This function sets the appropriate
      * blend function based on the specified xfermode.
      */
-    inline void chooseBlending(bool blend, SkXfermode::Mode mode, bool isPremultiplied = true);
+    inline void chooseBlending(bool blend, SkXfermode::Mode mode, ProgramDescription& description);
+
+    inline SkXfermode::Mode getXfermode(SkXfermode* mode);
 
     /**
      * Use the specified program with the current GL context. If the program is already
