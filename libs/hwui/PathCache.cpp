@@ -111,7 +111,6 @@ void PathCache::remove(SkPath* path) {
     for (uint32_t i = 0; i < mCache.size(); i++) {
         if (mCache.getKeyAt(i).path == path) {
             mCache.removeAt(i);
-            return;
         }
     }
 }
