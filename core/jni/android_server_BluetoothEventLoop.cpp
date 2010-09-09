@@ -388,7 +388,7 @@ static void tearDownEventLoop(native_data_t *nat) {
             LOG_AND_FREE_DBUS_ERROR(&err);
         }
         dbus_bus_remove_match(nat->conn,
-                "type='signal',interface='org.bluez.audio.Device'",
+                "type='signal',interface='org.bluez.Device'",
                 &err);
         if (dbus_error_is_set(&err)) {
             LOG_AND_FREE_DBUS_ERROR(&err);
