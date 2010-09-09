@@ -240,7 +240,7 @@ struct egl_image_t : public egl_object_t
         memset(images, 0, sizeof(images));
     }
     EGLDisplay dpy;
-    EGLConfig context;
+    EGLContext context;
     EGLImageKHR images[IMPL_NUM_IMPLEMENTATIONS];
 };
 
@@ -1770,7 +1770,7 @@ EGLBoolean eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR img)
          egl_connection_t* const cnx = &gEGLImpl[i];
          if (image->images[i] != EGL_NO_IMAGE_KHR) {
              if (cnx->dso) {
-                 if (cnx->egl.eglCreateImageKHR) {
+                 if (cnx->egl.eglDestroyImageKHR) {
                      if (cnx->egl.eglDestroyImageKHR(
                              dp->disp[i].dpy, image->images[i])) {
                          success = true;
