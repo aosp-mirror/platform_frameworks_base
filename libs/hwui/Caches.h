@@ -17,7 +17,9 @@
 #ifndef ANDROID_UI_CACHES_H
 #define ANDROID_UI_CACHES_H
 
-#define LOG_TAG "OpenGLRenderer"
+#ifndef LOG_TAG
+    #define LOG_TAG "OpenGLRenderer"
+#endif
 
 #include <utils/Singleton.h>
 

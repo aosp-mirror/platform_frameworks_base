@@ -254,7 +254,9 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, const SkBitmap* src,
 
 static void Bitmap_destructor(JNIEnv* env, jobject, SkBitmap* bitmap) {
 #ifdef USE_OPENGL_RENDERER
-    android::uirenderer::Caches::getInstance().textureCache.remove(bitmap);
+    if (android::uirenderer::Caches::hasInstance()) {
+        android::uirenderer::Caches::getInstance().textureCache.remove(bitmap);
+    }
 #endif
     delete bitmap;
 }

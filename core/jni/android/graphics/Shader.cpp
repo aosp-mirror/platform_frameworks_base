@@ -9,6 +9,7 @@
 #include "SkXfermode.h"
 
 #include <SkiaShader.h>
+#include <Caches.h>
 
 using namespace android::uirenderer;
 
@@ -52,6 +53,11 @@ static int Color_HSVToColor(JNIEnv* env, jobject, int alpha, jfloatArray hsvArra
 
 static void Shader_destructor(JNIEnv* env, jobject o, SkShader* shader, SkiaShader* skiaShader)
 {
+#ifdef USE_OPENGL_RENDERER
+    if (android::uirenderer::Caches::hasInstance()) {
+        android::uirenderer::Caches::getInstance().gradientCache.remove(shader);
+    }
+#endif
     delete skiaShader;
     shader->safeUnref();
 }
