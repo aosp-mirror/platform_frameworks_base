@@ -20,19 +20,35 @@ import android.util.Log;
 
 import com.android.dumprendertree2.forwarder.ForwarderManager;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.util.EntityUtils;
+
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -44,6 +60,29 @@ public class FsUtils {
 
     private static final String SCRIPT_URL = ForwarderManager.getHostSchemePort(false) +
             "WebKitTools/DumpRenderTree/android/get_layout_tests_dir_contents.php";
+
+    private static final int HTTP_TIMEOUT_MS = 5000;
+
+    private static HttpClient sHttpClient;
+
+    private static HttpClient getHttpClient() {
+        if (sHttpClient == null) {
+            HttpParams params = new BasicHttpParams();
+
+            SchemeRegistry schemeRegistry = new SchemeRegistry();
+            schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(),
+                    ForwarderManager.HTTP_PORT));
+            schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(),
+                    ForwarderManager.HTTPS_PORT));
+
+            ClientConnectionManager connectionManager = new ThreadSafeClientConnManager(params,
+                    schemeRegistry);
+            sHttpClient = new DefaultHttpClient(connectionManager, params);
+            HttpConnectionParams.setSoTimeout(sHttpClient.getParams(), HTTP_TIMEOUT_MS);
+            HttpConnectionParams.setConnectionTimeout(sHttpClient.getParams(), HTTP_TIMEOUT_MS);
+        }
+        return sHttpClient;
+    }
 
     public static void writeDataToStorage(File file, byte[] bytes, boolean append) {
         Log.d(LOG_TAG, "writeDataToStorage(): " + file.getAbsolutePath());
@@ -98,32 +137,34 @@ public class FsUtils {
             return null;
         }
 
+        HttpGet httpRequest = new HttpGet(url.toString());
+        ResponseHandler<byte[]> handler = new ResponseHandler<byte[]>() {
+            @Override
+            public byte[] handleResponse(HttpResponse response) throws IOException {
+                if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+                    return null;
+                }
+                HttpEntity entity = response.getEntity();
+                return (entity == null ? null : EntityUtils.toByteArray(entity));
+            }
+        };
+
         byte[] bytes = null;
         try {
-            InputStream inputStream = null;
-            ByteArrayOutputStream outputStream = null;
-            try {
-                URLConnection urlConnection = url.openConnection();
-                inputStream = urlConnection.getInputStream();
-                outputStream = new ByteArrayOutputStream();
-
-                byte[] buffer = new byte[4096];
-                int length;
-                while ((length = inputStream.read(buffer)) > 0) {
-                    outputStream.write(buffer, 0, length);
+            /**
+             * TODO: Not exactly sure why some requests hang indefinitely, but adding this
+             * timeout (in static getter for http client) in loop helps.
+             */
+            boolean timedOut;
+            do {
+                timedOut = false;
+                try {
+                    bytes = getHttpClient().execute(httpRequest, handler);
+                } catch (SocketTimeoutException e) {
+                    timedOut = true;
+                    Log.w(LOG_TAG, "Expected SocketTimeoutException: " + url, e);
                 }
-
-                bytes = outputStream.toByteArray();
-            } finally {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-                if (outputStream != null) {
-                    outputStream.close();
-                }
-            }
-        } catch (FileNotFoundException e) {
-            Log.w(LOG_TAG, "readDataFromUrl(): File not found: " + e.getMessage());
+            } while (timedOut);
         } catch (IOException e) {
             Log.e(LOG_TAG, "url=" + url, e);
         }
@@ -135,8 +176,6 @@ public class FsUtils {
             boolean mode) {
         String modeString = (mode ? "folders" : "files");
 
-        List<String> results = new LinkedList<String>();
-
         URL url = null;
         try {
             url = new URL(SCRIPT_URL +
@@ -146,34 +185,47 @@ public class FsUtils {
         } catch (MalformedURLException e) {
             Log.e(LOG_TAG, "path=" + dirRelativePath + " recurse=" + recurse + " mode=" +
                     modeString, e);
-            return results;
+            return new LinkedList<String>();
         }
+
+        HttpGet httpRequest = new HttpGet(url.toString());
+        ResponseHandler<LinkedList<String>> handler = new ResponseHandler<LinkedList<String>>() {
+            @Override
+            public LinkedList<String> handleResponse(HttpResponse response)
+                    throws IOException {
+                LinkedList<String> lines = new LinkedList<String>();
+
+                if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+                    return lines;
+                }
+                HttpEntity entity = response.getEntity();
+                if (entity == null) {
+                    return lines;
+                }
+
+                BufferedReader reader =
+                        new BufferedReader(new InputStreamReader(entity.getContent()));
+                String line;
+                try {
+                    while ((line = reader.readLine()) != null) {
+                        lines.add(line);
+                    }
+                } finally {
+                    if (reader != null) {
+                        reader.close();
+                    }
+                }
+
+                return lines;
+            }
+        };
 
         try {
-            InputStream inputStream = null;
-            BufferedReader bufferedReader = null;
-            try {
-                URLConnection urlConnection = url.openConnection();
-                inputStream = urlConnection.getInputStream();
-                bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String relativePath;
-                while ((relativePath = bufferedReader.readLine()) != null) {
-                    results.add(relativePath);
-                }
-            } finally {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-                if (bufferedReader != null) {
-                    bufferedReader.close();
-                }
-            }
+            return getHttpClient().execute(httpRequest, handler);
         } catch (IOException e) {
-            Log.e(LOG_TAG, "path=" + dirRelativePath + " recurse=" + recurse + " mode=" +
-                    modeString, e);
+            Log.e(LOG_TAG, "url=" + url, e);
         }
 
-        return results;
+        return new LinkedList<String>();
     }
 }
