@@ -137,7 +137,8 @@ import java.util.ArrayList;
     }
 
     public void setAutoFillable(int queryId) {
-        mAutoFillable = (queryId != FORM_NOT_AUTOFILLABLE);
+        mAutoFillable = mWebView.getSettings().getAutoFillEnabled()
+                && (queryId != FORM_NOT_AUTOFILLABLE);
         mQueryId = queryId;
     }
 
