@@ -446,28 +446,30 @@ public final class Bitmap implements Parcelable {
         Rect srcR = new Rect(x, y, x + width, y + height);
         RectF dstR = new RectF(0, 0, width, height);
 
+        final Config newConfig = source.getConfig() == Config.ARGB_8888 ?
+                Config.ARGB_8888 : Config.RGB_565;
+
         if (m == null || m.isIdentity()) {
-            bitmap = createBitmap(neww, newh,
-                    source.hasAlpha() ? Config.ARGB_8888 : Config.RGB_565);
+            bitmap = createBitmap(neww, newh, newConfig, source.hasAlpha());
             paint = null;   // not needed
         } else {
-            /*  the dst should have alpha if the src does, or if our matrix
-                doesn't preserve rectness
-            */
-            boolean hasAlpha = source.hasAlpha() || !m.rectStaysRect();
+            final boolean transformed = !m.rectStaysRect();
+
             RectF deviceR = new RectF();
             m.mapRect(deviceR, dstR);
+
             neww = Math.round(deviceR.width());
             newh = Math.round(deviceR.height());
-            bitmap = createBitmap(neww, newh, hasAlpha ? Config.ARGB_8888 : Config.RGB_565);
-            if (hasAlpha) {
-                bitmap.eraseColor(0);
-            }
+
+            bitmap = createBitmap(neww, newh, transformed ? Config.ARGB_8888 : newConfig,
+                    transformed || source.hasAlpha());
+
             canvas.translate(-deviceR.left, -deviceR.top);
             canvas.concat(m);
+
             paint = new Paint();
             paint.setFilterBitmap(filter);
-            if (!m.rectStaysRect()) {
+            if (transformed) {
                 paint.setAntiAlias(true);
             }
         }
@@ -492,8 +494,30 @@ public final class Bitmap implements Parcelable {
      * @throws IllegalArgumentException if the width or height are <= 0
      */
     public static Bitmap createBitmap(int width, int height, Config config) {
+        return createBitmap(width, height, config, true);
+    }
+
+    /**
+     * Returns a mutable bitmap with the specified width and height.  Its
+     * initial density is as per {@link #getDensity}.
+     *
+     * @param width    The width of the bitmap
+     * @param height   The height of the bitmap
+     * @param config   The bitmap config to create.
+     * @param hasAlpha If the bitmap is ARGB_8888 this flag can be used to mark the
+     *                 bitmap as opaque. Doing so will clear the bitmap in black
+     *                 instead of transparent.  
+     * 
+     * @throws IllegalArgumentException if the width or height are <= 0
+     */
+    private static Bitmap createBitmap(int width, int height, Config config, boolean hasAlpha) {
         Bitmap bm = nativeCreate(null, 0, width, width, height, config.nativeInt, true);
-        bm.eraseColor(0);    // start with black/transparent pixels
+        if (config == Config.ARGB_8888 && !hasAlpha) {
+            bm.eraseColor(0xff000000);
+            nativeSetHasAlpha(bm.mNativeBitmap, hasAlpha);
+        } else {
+            bm.eraseColor(0);
+        }
         return bm;
     }
 
@@ -1094,7 +1118,7 @@ public final class Bitmap implements Parcelable {
     private static native void nativePrepareToDraw(int nativeBitmap);
     private static native void nativeSetHasAlpha(int nBitmap, boolean hasAlpha);
     private static native boolean nativeSameAs(int nb0, int nb1);
-
+    
     /* package */ final int ni() {
         return mNativeBitmap;
     }
