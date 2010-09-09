@@ -83,7 +83,7 @@ public class BitmapFactory {
         /**
          * The pixel density to use for the bitmap.  This will always result
          * in the returned bitmap having a density set for it (see
-         * {@link Bitmap#setDensity(int) Bitmap.setDensity(int))}.  In addition,
+         * {@link Bitmap#setDensity(int) Bitmap.setDensity(int)}).  In addition,
          * if {@link #inScaled} is set (which it is by default} and this
          * density does not match {@link #inTargetDensity}, then the bitmap
          * will be scaled to the target density before being returned.
