@@ -29,7 +29,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.RemoteException;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,8 +43,7 @@ import com.android.internal.widget.IRemoteViewsFactory;
  */
 /** @hide */
 public class RemoteViewsAdapter extends BaseAdapter {
-
-    private static final String LOG_TAG = "RemoteViewsAdapter";
+    private static final String TAG = "RemoteViewsAdapter";
 
     private Context mContext;
     private Intent mIntent;
@@ -140,6 +139,8 @@ public class RemoteViewsAdapter extends BaseAdapter {
      * An internal cache of remote views.
      */
     private class RemoteViewsCache {
+        private static final String TAG = "RemoteViewsCache";
+
         private RemoteViewsInfo mViewCacheInfo;
         private RemoteViewsIndexInfo[] mViewCache;
         private int[] mTmpViewCacheLoadIndices;
@@ -249,7 +250,8 @@ public class RemoteViewsAdapter extends BaseAdapter {
 
         private final int getCacheIndex(int position) {
             // take the modulo of the position
-            return (mViewCache.length + (position % mViewCache.length)) % mViewCache.length;
+            final int cacheSize = mViewCache.length;
+            return (cacheSize + (position % cacheSize)) % cacheSize;
         }
 
         public void requestMetaData() {
@@ -278,8 +280,20 @@ public class RemoteViewsAdapter extends BaseAdapter {
                             mFirstViewHeight = -1;
                         }
                     }
-                } catch (RemoteException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    // print the error
+                    Log.e(TAG, "Error in requestMetaData(): " + e.getMessage());
+
+                    // reset any members after the failed call
+                    synchronized (mViewCacheInfo) {
+                        RemoteViewsInfo info = mViewCacheInfo;
+                        info.hasStableIds = false;
+                        info.viewTypeCount = 1;
+                        info.count = 0;
+                        mUserLoadingView = null;
+                        mFirstView = null;
+                        mFirstViewHeight = -1;
+                    }
                 }
             }
         }
@@ -297,11 +311,15 @@ public class RemoteViewsAdapter extends BaseAdapter {
             if (mServiceConnection.isConnected()) {
                 IRemoteViewsFactory factory = mServiceConnection.getRemoteViewsFactory();
                 try {
+                    // call back to the factory
                     factory.onDataSetChanged();
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
+                } catch (Exception e) {
+                    // print the error
+                    Log.e(TAG, "Error in updateNotifyDataSetChanged(): " + e.getMessage());
 
+                    // return early to prevent container from being notified (nothing has changed)
+                    return;
+                }
             }
 
             // re-request the new metadata (only after the notification to the factory)
@@ -327,8 +345,15 @@ public class RemoteViewsAdapter extends BaseAdapter {
                 try {
                     remoteView = factory.getViewAt(position);
                     itemId = factory.getItemId(position);
-                } catch (RemoteException e) {
+                } catch (Exception e) {
+                    // print the error
+                    Log.e(TAG, "Error in updateRemoteViewsInfo(" + position + "): " +
+                            e.getMessage());
                     e.printStackTrace();
+
+                    // return early to prevent additional work in re-centering the view cache, and
+                    // swapping from the loading view
+                    return;
                 }
 
                 synchronized (mViewCache) {
@@ -560,13 +585,6 @@ public class RemoteViewsAdapter extends BaseAdapter {
                         } else {
                             // otherwise, try and load the item
                             updateRemoteViewsInfo(index);
-
-                            // sleep for a bit to allow things to catch up after the load
-                            try {
-                                Thread.sleep(50);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
                         }
                     }
                 }
