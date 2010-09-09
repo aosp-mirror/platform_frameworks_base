@@ -102,6 +102,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private Context mContext;
     private int mNetworkPreference;
     private int mActiveDefaultNetwork = -1;
+    // 0 is full bad, 100 is full good
+    private int mDefaultInetCondition = 0;
+    private int mDefaultInetConditionPublished = 0;
+    private boolean mInetConditionChangeInFlight = false;
+    private int mDefaultConnectionSequence = 0;
 
     private int mNumDnsEntries;
 
@@ -1077,6 +1082,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             intent.putExtra(ConnectivityManager.EXTRA_EXTRA_INFO,
                     info.getExtraInfo());
         }
+        intent.putExtra(ConnectivityManager.EXTRA_INET_CONDITION, mDefaultInetConditionPublished);
         sendStickyBroadcast(intent);
     }
 
@@ -1203,6 +1209,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 }
             }
             mActiveDefaultNetwork = type;
+            // this will cause us to come up initially as unconnected and switching
+            // to connected after our normal pause unless somebody reports us as reall
+            // disconnected
+            mDefaultInetConditionPublished = 0;
+            mDefaultConnectionSequence++;
+            mInetConditionChangeInFlight = false;
+            // Don't do this - if we never sign in stay, grey
+            //reportNetworkCondition(mActiveDefaultNetwork, 100);
         }
         thisNet.setTeardownRequested(false);
         updateNetworkSettings(thisNet);
@@ -1623,6 +1637,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     FeatureUser u = (FeatureUser)msg.obj;
                     u.expire();
                     break;
+<<<<<<< HEAD:services/java/com/android/server/ConnectivityService.java
                 case NetworkStateTracker.EVENT_CLEAR_NET_TRANSITION_WAKELOCK:
                     String causedBy = null;
                     synchronized (ConnectivityService.this) {
@@ -1636,6 +1651,71 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         Slog.d(TAG, "NetTransition Wakelock for " +
                                 causedBy + " released by timeout");
                     }
+=======
+                case NetworkStateTracker.EVENT_INET_CONDITION_CHANGE:
+                    if (DBG) {
+                        Slog.d(TAG, "Inet connectivity change, net=" +
+                                msg.arg1 + ", condition=" + msg.arg2 +
+                                ",mActiveDefaultNetwork=" + mActiveDefaultNetwork);
+                    }
+                    if (mActiveDefaultNetwork == -1) {
+                        if (DBG) Slog.d(TAG, "no active default network - aborting");
+                        break;
+                    }
+                    if (mActiveDefaultNetwork != msg.arg1) {
+                        if (DBG) Slog.d(TAG, "given net not default - aborting");
+                        break;
+                    }
+                    mDefaultInetCondition = msg.arg2;
+                    int delay;
+                    if (mInetConditionChangeInFlight == false) {
+                        if (DBG) Slog.d(TAG, "starting a change hold");
+                        // setup a new hold to debounce this
+                        if (mDefaultInetCondition > 50) {
+                            delay = Settings.Secure.getInt(mContext.getContentResolver(),
+                                    Settings.Secure.INET_CONDITION_DEBOUNCE_UP_DELAY, 500);
+                        } else {
+                            delay = Settings.Secure.getInt(mContext.getContentResolver(),
+                                    Settings.Secure.INET_CONDITION_DEBOUNCE_DOWN_DELAY, 3000);
+                        }
+                        mInetConditionChangeInFlight = true;
+                        sendMessageDelayed(obtainMessage(
+                                NetworkStateTracker.EVENT_INET_CONDITION_HOLD_END,
+                                mActiveDefaultNetwork, mDefaultConnectionSequence), delay);
+                    } else {
+                        // we've set the new condition, when this hold ends that will get
+                        // picked up
+                        if (DBG) Slog.d(TAG, "currently in hold - not setting new end evt");
+                    }
+                    break;
+                case NetworkStateTracker.EVENT_INET_CONDITION_HOLD_END:
+                    if (DBG) {
+                        Slog.d(TAG, "Inet hold end, net=" + msg.arg1 +
+                                ", condition =" + mDefaultInetCondition +
+                                ", published condition =" + mDefaultInetConditionPublished);
+                    }
+                    mInetConditionChangeInFlight = false;
+
+                    if (mActiveDefaultNetwork == -1) {
+                        if (DBG) Slog.d(TAG, "no active default network - aborting");
+                        break;
+                    }
+                    if (mDefaultConnectionSequence != msg.arg2) {
+                        if (DBG) Slog.d(TAG, "event hold for obsolete network - aborting");
+                        break;
+                    }
+                    if (mDefaultInetConditionPublished == mDefaultInetCondition) {
+                        if (DBG) Slog.d(TAG, "no change in condition - aborting");
+                        break;
+                    }
+                    NetworkInfo networkInfo = mNetTrackers[mActiveDefaultNetwork].getNetworkInfo();
+                    if (networkInfo.isConnected() == false) {
+                        if (DBG) Slog.d(TAG, "default network not connected - aborting");
+                        break;
+                    }
+                    mDefaultInetConditionPublished = mDefaultInetCondition;
+                    sendConnectedBroadcast(networkInfo);
+>>>>>>> ec52c98d:services/java/com/android/server/ConnectivityService.java
                     break;
             }
         }
@@ -1747,5 +1827,16 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mNetTransitionWakeLockSerialNumber, 0),
                 mNetTransitionWakeLockTimeout);
         return;
+    }
+
+    // 100 percent is full good, 0 is full bad.
+    public void reportInetCondition(int networkType, int percentage) {
+        if (DBG) Slog.d(TAG, "reportNetworkCondition(" + networkType + ", " + percentage + ")");
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.STATUS_BAR,
+                "ConnectivityService");
+
+        mHandler.sendMessage(mHandler.obtainMessage(
+            NetworkStateTracker.EVENT_INET_CONDITION_CHANGE, networkType, percentage));
     }
 }
