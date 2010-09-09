@@ -588,7 +588,7 @@ bool AudioGroup::set(int sampleRate, int sampleCount)
     // Give device socket a reasonable timeout and buffer size.
     timeval tv;
     tv.tv_sec = 0;
-    tv.tv_usec = 1000 * sampleCount / sampleRate * 1000;
+    tv.tv_usec = 1000 * sampleCount / sampleRate * 500;
     if (setsockopt(pair[0], SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) ||
         setsockopt(pair[0], SOL_SOCKET, SO_RCVBUF, &output, sizeof(output)) ||
         setsockopt(pair[1], SOL_SOCKET, SO_SNDBUF, &output, sizeof(output))) {
@@ -793,7 +793,7 @@ bool AudioGroup::deviceLoop()
 
             status_t status = mRecord.obtainBuffer(&buffer, 1);
             if (status == NO_ERROR) {
-                int count = (buffer.frameCount < toRead) ?
+                int count = ((int)buffer.frameCount < toRead) ?
                         buffer.frameCount : toRead;
                 memcpy(&input[mSampleCount - toRead], buffer.i8, count * 2);
                 toRead -= count;
