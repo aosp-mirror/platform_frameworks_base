@@ -21,6 +21,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.os.ParcelFileDescriptor;
+import android.provider.BaseColumns;
 import android.provider.Downloads;
 
 import java.io.File;
@@ -48,7 +49,7 @@ public class DownloadManager {
      * An identifier for a particular download, unique across the system.  Clients use this ID to
      * make subsequent calls related to the download.
      */
-    public final static String COLUMN_ID = "id";
+    public final static String COLUMN_ID = BaseColumns._ID;
 
     /**
      * The client-supplied title for this download.  This will be displayed in system notifications.
@@ -441,8 +442,22 @@ public class DownloadManager {
      * This class may be used to filter download manager queries.
      */
     public static class Query {
-        private Long mId;
+        /**
+         * Constant for use with {@link #orderBy}
+         * @hide
+         */
+        public static final int ORDER_ASCENDING = 1;
+
+        /**
+         * Constant for use with {@link #orderBy}
+         * @hide
+         */
+        public static final int ORDER_DESCENDING = 2;
+
+        private Long mId = null;
         private Integer mStatusFlags = null;
+        private String mOrderByColumn = Downloads.COLUMN_LAST_MODIFICATION;
+        private int mOrderDirection = ORDER_DESCENDING;
 
         /**
          * Include only the download with the given ID.
@@ -460,6 +475,32 @@ public class DownloadManager {
          */
         public Query setFilterByStatus(int flags) {
             mStatusFlags = flags;
+            return this;
+        }
+
+        /**
+         * Change the sort order of the returned Cursor.
+         *
+         * @param column one of the COLUMN_* constants; currently, only
+         *         {@link #COLUMN_LAST_MODIFIED_TIMESTAMP} and {@link #COLUMN_TOTAL_SIZE_BYTES} are
+         *         supported.
+         * @param direction either {@link #ORDER_ASCENDING} or {@link #ORDER_DESCENDING}
+         * @return this object
+         * @hide
+         */
+        public Query orderBy(String column, int direction) {
+            if (direction != ORDER_ASCENDING && direction != ORDER_DESCENDING) {
+                throw new IllegalArgumentException("Invalid direction: " + direction);
+            }
+
+            if (column.equals(COLUMN_LAST_MODIFIED_TIMESTAMP)) {
+                mOrderByColumn = Downloads.COLUMN_LAST_MODIFICATION;
+            } else if (column.equals(COLUMN_TOTAL_SIZE_BYTES)) {
+                mOrderByColumn = Downloads.COLUMN_TOTAL_BYTES;
+            } else {
+                throw new IllegalArgumentException("Cannot order by " + column);
+            }
+            mOrderDirection = direction;
             return this;
         }
 
@@ -497,7 +538,10 @@ public class DownloadManager {
                 }
                 selection = joinStrings(" OR ", parts);
             }
-            String orderBy = Downloads.COLUMN_LAST_MODIFICATION + " DESC";
+
+            String orderDirection = (mOrderDirection == ORDER_ASCENDING ? "ASC" : "DESC");
+            String orderBy = mOrderByColumn + " " + orderDirection;
+
             return resolver.query(uri, projection, selection, null, orderBy);
         }
 
@@ -567,6 +611,9 @@ public class DownloadManager {
      */
     public Cursor query(Query query) {
         Cursor underlyingCursor = query.runQuery(mResolver, UNDERLYING_COLUMNS);
+        if (underlyingCursor == null) {
+            return null;
+        }
         return new CursorTranslator(underlyingCursor);
     }
 
@@ -608,7 +655,7 @@ public class DownloadManager {
         public int getColumnIndexOrThrow(String columnName) throws IllegalArgumentException {
             int index = getColumnIndex(columnName);
             if (index == -1) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("No such column: " + columnName);
             }
             return index;
         }
