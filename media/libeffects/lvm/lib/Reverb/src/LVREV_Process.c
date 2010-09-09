@@ -54,7 +54,8 @@ LVREV_ReturnStatus_en LVREV_Process(LVREV_Handle_t      hInstance,
    LVREV_Instance_st     *pLVREV_Private = (LVREV_Instance_st *)hInstance;
    LVM_INT32             *pInput  = (LVM_INT32 *)pInData;
    LVM_INT32             *pOutput = pOutData;
-   LVM_INT32             SamplesToProcess, RemainingSamples, format;
+   LVM_INT32             SamplesToProcess, RemainingSamples;
+   LVM_INT32             format = 1;
 
     /*
      * Check for error conditions
@@ -65,7 +66,6 @@ LVREV_ReturnStatus_en LVREV_Process(LVREV_Handle_t      hInstance,
     {
         return LVREV_NULLADDRESS;
     }
-
 
     /*
      * Apply the new controls settings if required
@@ -95,9 +95,31 @@ LVREV_ReturnStatus_en LVREV_Process(LVREV_Handle_t      hInstance,
         return LVREV_SUCCESS;
     }
 
+    /*
+     * If OFF copy and reformat the data as necessary
+     */
+    if (pLVREV_Private->CurrentParams.OperatingMode == LVM_MODE_OFF)
+    {
+        if(pInput != pOutput)
+        {
+            /*
+             * Copy the data to the output buffer, convert to stereo is required
+             */
+
+            if(pLVREV_Private->CurrentParams.SourceFormat == LVM_MONO){
+                MonoTo2I_32(pInput, pOutput, NumSamples);
+            } else {
+                Copy_16((LVM_INT16 *)pInput,
+                        (LVM_INT16 *)pOutput,
+                        (LVM_INT16)(NumSamples << 2)); // 32 bit data, stereo
+            }
+        }
+
+        return LVREV_SUCCESS;
+    }
+
     RemainingSamples = (LVM_INT32)NumSamples;
 
-    format = 1;
     if (pLVREV_Private->CurrentParams.SourceFormat != LVM_MONO)
     {
         format = 2;
@@ -106,51 +128,24 @@ LVREV_ReturnStatus_en LVREV_Process(LVREV_Handle_t      hInstance,
     while (RemainingSamples!=0)
     {
         /*
-         * If OFF copy and reformat the data as necessary
+         * Process the data
          */
-        if (pLVREV_Private->CurrentParams.OperatingMode == LVM_MODE_OFF)
+
+        if(RemainingSamples >  pLVREV_Private->MaxBlkLen)
         {
-            if((pInput != pOutput) || (pLVREV_Private->CurrentParams.SourceFormat == LVM_MONO))
-            {
-                /*
-                 * Copy the data to the output buffer
-                 */
-
-                if (pLVREV_Private->CurrentParams.SourceFormat != LVM_MONO)
-                {
-                    RemainingSamples = (RemainingSamples << 1);           /* Stereo data */
-                }
-
-                Copy_16((LVM_INT16 *)pInput,
-                        (LVM_INT16 *)pOutput,
-                        (LVM_INT16)(RemainingSamples << 1));
-            }
-
+            SamplesToProcess =  pLVREV_Private->MaxBlkLen;
+            RemainingSamples = (LVM_INT16)(RemainingSamples - SamplesToProcess);
+        }
+        else
+        {
+            SamplesToProcess = RemainingSamples;
             RemainingSamples = 0;
         }
 
-        /*
-         * Process the data
-         */
-        else
-        {
+        ReverbBlock(pInput, pOutput, pLVREV_Private, (LVM_UINT16)SamplesToProcess);
 
-            if(RemainingSamples >  pLVREV_Private->MaxBlkLen)
-            {
-                SamplesToProcess =  pLVREV_Private->MaxBlkLen;
-                RemainingSamples = (LVM_INT16)(RemainingSamples - SamplesToProcess);
-            }
-            else
-            {
-                SamplesToProcess = RemainingSamples;
-                RemainingSamples = 0;
-            }
-
-            ReverbBlock(pInput, pOutput, pLVREV_Private, (LVM_UINT16)SamplesToProcess);
-
-            pInput  = (LVM_INT32 *)(pInput +(SamplesToProcess*format));
-            pOutput = (LVM_INT32 *)(pOutput+(SamplesToProcess*format));
-        }
+        pInput  = (LVM_INT32 *)(pInput +(SamplesToProcess*format));
+        pOutput = (LVM_INT32 *)(pOutput+(SamplesToProcess*2));      // Always stereo output
     }
 
     return LVREV_SUCCESS;
@@ -420,26 +415,13 @@ void ReverbBlock(LVM_INT32 *pInput, LVM_INT32 *pOutput, LVREV_Instance_st *pPriv
                             pPrivate->pScratchDelayLine[1],
                             (LVM_INT16)NumSamples);
 
-             if(pPrivate->CurrentParams.SourceFormat != LVM_MONO)
-             {
-                JoinTo2i_32x32(pPrivate->pScratchDelayLine[0],
-                               pPrivate->pScratchDelayLine[1],
-                               pTemp,
-                               (LVM_INT16)NumSamples);
 
-             }
-             else
-             {
-                 Add2_Sat_32x32(pPrivate->pScratchDelayLine[1],
-                                pPrivate->pScratchDelayLine[0],
-                                (LVM_INT16)NumSamples);
+            JoinTo2i_32x32(pPrivate->pScratchDelayLine[0],
+                           pPrivate->pScratchDelayLine[1],
+                           pTemp,
+                           (LVM_INT16)NumSamples);
 
-                /*Apply 3-dB gain in-order to compensate for the gain change in stereo mode*/
-                Mult3s_32x16(pPrivate->pScratchDelayLine[0],
-                             LVREV_MIN3DB,
-                             pTemp,
-                             (LVM_INT16)NumSamples);
-             }
+
             break;
         case LVREV_DELAYLINES_2:
 
@@ -447,49 +429,25 @@ void ReverbBlock(LVM_INT32 *pInput, LVM_INT32 *pOutput, LVREV_Instance_st *pPriv
                       (LVM_INT16*)pScratch,
                       (LVM_INT16)(NumSamples << 1));
 
-
-
-             if(pPrivate->CurrentParams.SourceFormat != LVM_MONO)
-             {
-
-                Mac3s_Sat_32x16(pPrivate->pScratchDelayLine[0],
-                                -0x8000,
-                                pScratch,
-                                (LVM_INT16)NumSamples);
-             }
+            Mac3s_Sat_32x16(pPrivate->pScratchDelayLine[0],
+                            -0x8000,
+                            pScratch,
+                            (LVM_INT16)NumSamples);
 
              Add2_Sat_32x32(pPrivate->pScratchDelayLine[1],
                             pPrivate->pScratchDelayLine[0],
                             (LVM_INT16)NumSamples);
 
 
-             if(pPrivate->CurrentParams.SourceFormat != LVM_MONO)
-             {
-                 JoinTo2i_32x32(pPrivate->pScratchDelayLine[0],
-                                pScratch,
-                                pTemp,
-                                (LVM_INT16)NumSamples);
-             }
-             else
-             {
-                Copy_16(    (LVM_INT16*)pPrivate->pScratchDelayLine[0],
-                            (LVM_INT16*)pTemp,
-                            (LVM_INT16)(NumSamples << 1));
-
-             }
-            break;
-        case LVREV_DELAYLINES_1:
-            if(pPrivate->CurrentParams.SourceFormat != LVM_MONO)
-            {
-
-                MonoTo2I_32(pPrivate->pScratchDelayLine[0],
+             JoinTo2i_32x32(pPrivate->pScratchDelayLine[0],
+                            pScratch,
                             pTemp,
                             (LVM_INT16)NumSamples);
-            }
-            else
-            {
-                pTemp = pPrivate->pScratchDelayLine[0];
-            }
+            break;
+        case LVREV_DELAYLINES_1:
+            MonoTo2I_32(pPrivate->pScratchDelayLine[0],
+                        pTemp,
+                        (LVM_INT16)NumSamples);
             break;
         default:
             break;
@@ -499,30 +457,15 @@ void ReverbBlock(LVM_INT32 *pInput, LVM_INT32 *pOutput, LVREV_Instance_st *pPriv
     /*
      *  Dry/wet mixer
      */
-    if(pPrivate->CurrentParams.SourceFormat != LVM_MONO)
-    {
-        size = (LVM_INT16)(NumSamples << 1);
-    }
-    else
-    {
-        size = (LVM_INT16)NumSamples;
-    }
 
+    size = (LVM_INT16)(NumSamples << 1);
     MixSoft_2St_D32C31_SAT(&pPrivate->BypassMixer,
-                           pInput,
+                           pTemp,
                            pTemp,
                            pOutput,
                            size);
 
     /* Apply Gain*/
-    if(pPrivate->CurrentParams.SourceFormat != LVM_MONO)
-    {
-        size = (LVM_INT16)(NumSamples << 1);
-    }
-    else
-    {
-        size = (LVM_INT16)NumSamples;
-    }
 
     Shift_Sat_v32xv32 (LVREV_OUTPUTGAIN_SHIFT,
                        pOutput,
@@ -533,6 +476,7 @@ void ReverbBlock(LVM_INT32 *pInput, LVM_INT32 *pOutput, LVREV_Instance_st *pPriv
                            pOutput,
                            pOutput,
                            size);
+
     return;
 }
 

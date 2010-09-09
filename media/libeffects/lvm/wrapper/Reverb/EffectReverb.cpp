@@ -431,26 +431,15 @@ int process( LVM_INT16     *pIn,
         pContext->InFrames32[i] = (LVM_INT32)pIn[i]<<8;
     }
 
-     // If the input was MONO, convert to STEREO
-    if(pContext->config.inputCfg.channels == CHANNEL_MONO){
-        //LOGV("\tConverting Output from MONO to STEREO");
-        MonoTo2I_32(pContext->InFrames32, pContext->InFrames32, frameCount);
-    }
-
-    //LOGV("\tProcess, frames: %d, InFormat: %d(MONO=%d), OutFormat: %d(STEREO=%d)",
-    //frameCount, pContext->config.inputCfg.channels, CHANNEL_MONO,
-    //pContext->config.outputCfg.channels, CHANNEL_STEREO);
-
     if (pContext->preset && pContext->curPreset == REVERB_PRESET_NONE) {
         memset(pContext->OutFrames32, 0, frameCount * sizeof(LVM_INT32) * 2); //always stereo here
     } else {
         if(pContext->bEnabled == LVM_FALSE && pContext->SamplesToExitCount > 0) {
-            memset(pContext->InFrames32,
-                   0,
-                   frameCount * sizeof(LVM_INT32) * 2); //always stereo here
+            memset(pContext->InFrames32,0,frameCount * sizeof(LVM_INT32) * samplesPerFrame);
+            LOGV("\tZeroing %d samples per frame at the end of call", samplesPerFrame);
         }
 
-        /* Process the samples */
+        /* Process the samples, producing a stereo output */
         LvmStatus = LVREV_Process(pContext->hInstance,      /* Instance handle */
                                   pContext->InFrames32,     /* Input buffer */
                                   pContext->OutFrames32,    /* Output buffer */
@@ -677,7 +666,7 @@ int Reverb_init(ReverbContext *pContext){
 
     /* Set the capabilities */
     InstParams.MaxBlockSize  = MAX_CALL_SIZE;
-    InstParams.SourceFormat  = LVM_STEREO;
+    InstParams.SourceFormat  = LVM_STEREO;          // Max format, could be mono during process
     InstParams.NumDelays     = LVREV_DELAYLINES_4;
 
     /* Allocate memory, forcing alignment */
@@ -742,7 +731,12 @@ int Reverb_init(ReverbContext *pContext){
     /* General parameters */
     params.OperatingMode  = LVM_MODE_ON;
     params.SampleRate     = LVM_FS_44100;
-    params.SourceFormat   = LVM_STEREO;
+
+    if(pContext->config.inputCfg.channels == CHANNEL_MONO){
+        params.SourceFormat   = LVM_MONO;
+    } else {
+        params.SourceFormat   = LVM_STEREO;
+    }
 
     /* Reverb parameters */
     params.Level          = 0;
@@ -1790,8 +1784,9 @@ extern "C" int Reverb_process(effect_interface_t   self,
     if (pContext->bEnabled == LVM_FALSE){
         if( pContext->SamplesToExitCount > 0){
             pContext->SamplesToExitCount -= outBuffer->frameCount;
+            LOGV("\tReverb_process() Effect is being stopped %d", pContext->SamplesToExitCount);
         }else{
-            LOGV("\tReverb_process() ERROR Effect is not enabled %d", pContext->SamplesToExitCount);
+            LOGV("\tReverb_process() Effect is being stopped");
             return -ENODATA;
         }
     }
