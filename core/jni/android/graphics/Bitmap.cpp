@@ -12,6 +12,8 @@
 
 #include <jni.h>
 
+#include <Caches.h>
+
 #if 0
     #define TRACE_BITMAP(code)  code
 #else
@@ -251,6 +253,11 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, const SkBitmap* src,
 }
 
 static void Bitmap_destructor(JNIEnv* env, jobject, SkBitmap* bitmap) {
+#ifdef USE_OPENGL_RENDERER
+    if (android::uirenderer::Caches::hasInstance()) {
+        android::uirenderer::Caches::getInstance().textureCache.remove(bitmap);
+    }
+#endif
     delete bitmap;
 }
 

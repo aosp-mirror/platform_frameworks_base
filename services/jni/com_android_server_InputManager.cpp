@@ -275,6 +275,7 @@ public:
             nsecs_t& outNewTimeout);
     virtual void notifyInputChannelRecoveredFromANR(const sp<InputChannel>& inputChannel);
     virtual nsecs_t getKeyRepeatTimeout();
+    virtual nsecs_t getKeyRepeatDelay();
     virtual int32_t waitForKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
             int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets);
     virtual int32_t waitForMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
@@ -1009,6 +1010,10 @@ nsecs_t NativeInputManager::getKeyRepeatTimeout() {
         // TODO use ViewConfiguration.getLongPressTimeout()
         return milliseconds_to_nanoseconds(500);
     }
+}
+
+nsecs_t NativeInputManager::getKeyRepeatDelay() {
+    return milliseconds_to_nanoseconds(50);
 }
 
 int32_t NativeInputManager::getMaxEventsPerSecond() {

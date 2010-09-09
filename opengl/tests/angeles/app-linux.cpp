@@ -190,24 +190,33 @@ int main(int argc, char *argv[])
     }
 
     appInit();
+
+    struct timeval timeTemp;
+    int frameCount = 0;
+    gettimeofday(&timeTemp, NULL);
+    double totalTime = timeTemp.tv_usec/1000000.0 + timeTemp.tv_sec;
     
     while (gAppAlive)
     {
         struct timeval timeNow;
 
-        if (gAppAlive)
-        {
-            gettimeofday(&timeNow, NULL);
-            appRender(timeNow.tv_sec * 1000 + timeNow.tv_usec / 1000,
-                      sWindowWidth, sWindowHeight);
-            checkGLErrors();
-            eglSwapBuffers(sEglDisplay, sEglSurface);
-            checkEGLErrors();
-        }
+        gettimeofday(&timeNow, NULL);
+        appRender(timeNow.tv_sec * 1000 + timeNow.tv_usec / 1000,
+                sWindowWidth, sWindowHeight);
+        checkGLErrors();
+        eglSwapBuffers(sEglDisplay, sEglSurface);
+        checkEGLErrors();
+        frameCount++;
     }
+
+    gettimeofday(&timeTemp, NULL);
 
     appDeinit();
     deinitGraphics();
+
+    totalTime = (timeTemp.tv_usec/1000000.0 + timeTemp.tv_sec) - totalTime;
+    printf("totalTime=%f s, frameCount=%d, %.2f fps\n",
+            totalTime, frameCount, frameCount/totalTime);
 
     return EXIT_SUCCESS;
 }

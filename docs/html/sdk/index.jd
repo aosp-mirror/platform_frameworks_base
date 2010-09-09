@@ -1,17 +1,17 @@
 page.title=Android SDK
 sdk.redirect=0
 
-sdk.win_download=android-sdk_r06-windows.zip
-sdk.win_bytes=23293160
-sdk.win_checksum=7c7fcec3c6b5c7c3df6ae654b27effb5
+sdk.win_download=android-sdk_r07-windows.zip
+sdk.win_bytes=23669664
+sdk.win_checksum=69c40c2d2e408b623156934f9ae574f0
 
-sdk.mac_download=android-sdk_r06-mac_86.zip
-sdk.mac_bytes=19108077
-sdk.mac_checksum=c92abf66a82c7a3f2b8493ebe025dd22
+sdk.mac_download=android-sdk_r07-mac_x86.zip
+sdk.mac_bytes=19229546
+sdk.mac_checksum=0f330ed3ebb36786faf6dc72b8acf819
 
-sdk.linux_download=android-sdk_r06-linux_86.tgz
-sdk.linux_bytes=16971139
-sdk.linux_checksum=848371e4bf068dbb582b709f4e56d903
+sdk.linux_download=android-sdk_r07-linux_x86.tgz
+sdk.linux_bytes=17114517
+sdk.linux_checksum=e10c75da3d1aa147ddd4a5c58bfc3646
 
 @jd:body
 
@@ -50,7 +50,7 @@ for Eclipse</a>.</p>
 <p><strong>4. Add Android platforms and other components to your SDK</strong></p>
 
 <p>Use the Android SDK and AVD Manager, included in the SDK starter package, to
-add one or more Android platforms (for example, Android 1.6 or Android 2.0) and
+add one or more Android platforms (for example, Android 1.6 or Android 2.2) and
 other components to your SDK. If you aren't sure what to add, see <a
 href="installing.html#which">Which components do I need?</a></p>
 

@@ -473,6 +473,11 @@
         <eat-comment />
         <!-- Default amount of padding to use between action buttons. -->
         <attr name="actionButtonPadding" format="dimension" />
+        <!-- Default style for tabs within an action bar -->
+        <attr name="actionBarTabStyle" format="reference" />
+        <attr name="actionBarTabBarStyle" format="reference" />
+        <attr name="actionBarTabTextStyle" format="reference" />
+        <attr name="actionOverflowButtonStyle" format="reference" />
 
         <!-- =================== -->
         <!-- Action mode styles  -->

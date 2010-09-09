@@ -50,6 +50,8 @@
     <protected-broadcast android:name="android.intent.action.ACTION_SHUTDOWN" />
     <protected-broadcast android:name="android.intent.action.DEVICE_STORAGE_LOW" />
     <protected-broadcast android:name="android.intent.action.DEVICE_STORAGE_OK" />
+    <protected-broadcast android:name="android.intent.action.DEVICE_STORAGE_FULL" />
+    <protected-broadcast android:name="android.intent.action.DEVICE_STORAGE_NOT_FULL" />
     <protected-broadcast android:name="android.intent.action.NEW_OUTGOING_CALL" />
     <protected-broadcast android:name="android.intent.action.REBOOT" />
     <protected-broadcast android:name="android.intent.action.DOCK_EVENT" />

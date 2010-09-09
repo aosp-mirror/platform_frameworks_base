@@ -32,9 +32,11 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 import android.os.AsyncResult;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.StatFs;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
 import android.provider.Settings;
@@ -240,11 +242,9 @@ public abstract class SMSDispatcher extends Handler {
 
         // Register for device storage intents.  Use these to notify the RIL
         // that storage for SMS is or is not available.
-        // TODO: Revisit this for a later release.  Storage reporting should
-        // rely more on application indication.
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_DEVICE_STORAGE_LOW);
-        filter.addAction(Intent.ACTION_DEVICE_STORAGE_OK);
+        filter.addAction(Intent.ACTION_DEVICE_STORAGE_FULL);
+        filter.addAction(Intent.ACTION_DEVICE_STORAGE_NOT_FULL);
         mContext.registerReceiver(mResultReceiver, filter);
     }
 
@@ -966,10 +966,10 @@ public abstract class SMSDispatcher extends Handler {
     private BroadcastReceiver mResultReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_LOW)) {
+            if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_FULL)) {
                 mStorageAvailable = false;
                 mCm.reportSmsMemoryStatus(false, obtainMessage(EVENT_REPORT_MEMORY_STATUS_DONE));
-            } else if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_OK)) {
+            } else if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_NOT_FULL)) {
                 mStorageAvailable = true;
                 mCm.reportSmsMemoryStatus(true, obtainMessage(EVENT_REPORT_MEMORY_STATUS_DONE));
             } else {

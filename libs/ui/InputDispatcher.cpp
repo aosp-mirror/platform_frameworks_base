@@ -97,6 +97,7 @@ InputDispatcher::~InputDispatcher() {
 
 void InputDispatcher::dispatchOnce() {
     nsecs_t keyRepeatTimeout = mPolicy->getKeyRepeatTimeout();
+    nsecs_t keyRepeatDelay = mPolicy->getKeyRepeatDelay();
 
     bool skipPoll = false;
     nsecs_t currentTime;
@@ -146,7 +147,7 @@ void InputDispatcher::dispatchOnce() {
             if (mInboundQueue.isEmpty()) {
                 if (mKeyRepeatState.lastKeyEntry) {
                     if (currentTime >= mKeyRepeatState.nextRepeatTime) {
-                        processKeyRepeatLockedInterruptible(currentTime, keyRepeatTimeout);
+                        processKeyRepeatLockedInterruptible(currentTime, keyRepeatDelay);
                         skipPoll = true;
                     } else {
                         if (mKeyRepeatState.nextRepeatTime < nextWakeupTime) {
@@ -335,7 +336,7 @@ void InputDispatcher::processKeyLockedInterruptible(
 }
 
 void InputDispatcher::processKeyRepeatLockedInterruptible(
-        nsecs_t currentTime, nsecs_t keyRepeatTimeout) {
+        nsecs_t currentTime, nsecs_t keyRepeatDelay) {
     KeyEntry* entry = mKeyRepeatState.lastKeyEntry;
 
     // Search the inbound queue for a key up corresponding to this device.
@@ -352,7 +353,7 @@ void InputDispatcher::processKeyRepeatLockedInterruptible(
         }
     }
 
-    // Synthesize a key repeat after the repeat timeout expired.
+    // Synthesize a key repeat.
     // Reuse the repeated key entry if it is otherwise unreferenced.
     uint32_t policyFlags = entry->policyFlags & POLICY_FLAG_RAW_MASK;
     if (entry->refCount == 1) {
@@ -375,7 +376,7 @@ void InputDispatcher::processKeyRepeatLockedInterruptible(
         entry->flags |= AKEY_EVENT_FLAG_LONG_PRESS;
     }
 
-    mKeyRepeatState.nextRepeatTime = currentTime + keyRepeatTimeout;
+    mKeyRepeatState.nextRepeatTime = currentTime + keyRepeatDelay;
 
 #if DEBUG_OUTBOUND_EVENT_DETAILS
     LOGD("processKeyRepeat - eventTime=%lld, deviceId=0x%x, source=0x%x, policyFlags=0x%x, "

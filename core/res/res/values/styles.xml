@@ -885,12 +885,32 @@
         <item name="android:divider">@android:drawable/action_bar_divider</item>
         <item name="android:height">?android:attr/windowActionBarSize</item>
         <item name="android:paddingLeft">3dip</item>
-        <item name="android:paddingTop">3dip</item>
+        <item name="android:paddingTop">0dip</item>
         <item name="android:paddingRight">3dip</item>
-        <item name="android:paddingBottom">3dip</item>
+        <item name="android:paddingBottom">0dip</item>
     </style>
 
     <style name="Widget.ActionButton">
         <item name="android:background">@null</item>
+    </style>
+
+    <style name="Widget.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_menu_more</item>
+        <item name="android:contentDescription">@string/more_item_label</item>
+    </style>
+
+    <style name="Widget.ActionBarView_TabView">
+        <item name="android:background">@drawable/minitab_lt</item>
+        <item name="android:paddingLeft">4dip</item>
+        <item name="android:paddingRight">4dip</item>
+    </style>
+
+    <style name="Widget.ActionBarView_TabBar">
+    </style>
+
+    <style name="Widget.ActionBarView_TabText">
+        <item name="android:textAppearance">@style/TextAppearance.Widget.TextView.PopupMenu</item>
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="android:textSize">18sp</item>
     </style>
 </resources>

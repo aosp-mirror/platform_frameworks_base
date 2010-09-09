@@ -21,6 +21,8 @@
 #include <SkCanvas.h>
 #include <SkGradientShader.h>
 
+#include <utils/threads.h>
+
 #include "GradientCache.h"
 #include "Properties.h"
 
@@ -52,6 +54,7 @@ GradientCache::GradientCache(uint32_t maxByteSize):
 }
 
 GradientCache::~GradientCache() {
+    Mutex::Autolock _l(mLock);
     mCache.clear();
 }
 
@@ -60,14 +63,17 @@ GradientCache::~GradientCache() {
 ///////////////////////////////////////////////////////////////////////////////
 
 uint32_t GradientCache::getSize() {
+    Mutex::Autolock _l(mLock);
     return mSize;
 }
 
 uint32_t GradientCache::getMaxSize() {
+    Mutex::Autolock _l(mLock);
     return mMaxSize;
 }
 
 void GradientCache::setMaxSize(uint32_t maxSize) {
+    Mutex::Autolock _l(mLock);
     mMaxSize = maxSize;
     while (mSize > mMaxSize) {
         mCache.removeOldest();
@@ -79,6 +85,7 @@ void GradientCache::setMaxSize(uint32_t maxSize) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void GradientCache::operator()(SkShader*& shader, Texture*& texture) {
+    // Already locked here
     if (shader) {
         const uint32_t size = texture->width * texture->height * 4;
         mSize -= size;
@@ -95,14 +102,17 @@ void GradientCache::operator()(SkShader*& shader, Texture*& texture) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Texture* GradientCache::get(SkShader* shader) {
+    Mutex::Autolock _l(mLock);
     return mCache.get(shader);
 }
 
 void GradientCache::remove(SkShader* shader) {
+    Mutex::Autolock _l(mLock);
     mCache.remove(shader);
 }
 
 void GradientCache::clear() {
+    Mutex::Autolock _l(mLock);
     mCache.clear();
 }
 
@@ -128,17 +138,21 @@ Texture* GradientCache::addLinearGradient(SkShader* shader, float* bounds, uint3
 
     canvas.drawRectCoords(0.0f, 0.0f, bitmap.width(), 1.0f, p);
 
+    mLock.lock();
     // Asume the cache is always big enough
     const uint32_t size = bitmap.rowBytes() * bitmap.height();
     while (mSize + size > mMaxSize) {
         mCache.removeOldest();
     }
+    mLock.unlock();
 
     Texture* texture = new Texture;
     generateTexture(&bitmap, texture);
 
+    mLock.lock();
     mSize += size;
     mCache.put(shader, texture);
+    mLock.unlock();
 
     return texture;
 }

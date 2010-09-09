@@ -132,7 +132,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class ActivityManagerService extends ActivityManagerNative implements Watchdog.Monitor {
+public final class ActivityManagerService extends ActivityManagerNative
+        implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback {
     static final String TAG = "ActivityManager";
     static final boolean DEBUG = false;
     static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
@@ -751,6 +752,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     boolean mBooting = false;
     boolean mWaitingUpdate = false;
     boolean mDidUpdate = false;
+    boolean mOnBattery = false;
 
     Context mContext;
 
@@ -1382,8 +1384,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 systemDir, "batterystats.bin").toString());
         mBatteryStatsService.getActiveStatistics().readLocked();
         mBatteryStatsService.getActiveStatistics().writeLocked();
+        mOnBattery = mBatteryStatsService.getActiveStatistics().getIsOnBattery();
+        mBatteryStatsService.getActiveStatistics().setCallback(this);
         
-        mUsageStatsService = new UsageStatsService( new File(
+        mUsageStatsService = new UsageStatsService(new File(
                 systemDir, "usagestats").toString());
 
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version",
@@ -1496,25 +1500,36 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             synchronized(bstats) {
                 synchronized(mPidsSelfLocked) {
                     if (haveNewCpuStats) {
-                        if (mBatteryStatsService.isOnBattery()) {
+                        if (mOnBattery) {
+                            int perc = bstats.startAddingCpuLocked();
+                            int totalUTime = 0;
+                            int totalSTime = 0;
                             final int N = mProcessStats.countWorkingStats();
                             for (int i=0; i<N; i++) {
                                 ProcessStats.Stats st
                                         = mProcessStats.getWorkingStats(i);
                                 ProcessRecord pr = mPidsSelfLocked.get(st.pid);
+                                int otherUTime = (st.rel_utime*perc)/100;
+                                int otherSTime = (st.rel_stime*perc)/100;
+                                totalUTime += otherUTime;
+                                totalSTime += otherSTime;
                                 if (pr != null) {
                                     BatteryStatsImpl.Uid.Proc ps = pr.batteryStats;
-                                    ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
+                                    ps.addCpuTimeLocked(st.rel_utime-otherUTime,
+                                            st.rel_stime-otherSTime);
                                     ps.addSpeedStepTimes(cpuSpeedTimes);
                                 } else {
                                     BatteryStatsImpl.Uid.Proc ps =
                                             bstats.getProcessStatsLocked(st.name, st.pid);
                                     if (ps != null) {
-                                        ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
+                                        ps.addCpuTimeLocked(st.rel_utime-otherUTime,
+                                                st.rel_stime-otherSTime);
                                         ps.addSpeedStepTimes(cpuSpeedTimes);
                                     }
                                 }
                             }
+                            bstats.finishAddingCpuLocked(perc, totalUTime,
+                                    totalSTime, cpuSpeedTimes);
                         }
                     }
                 }
@@ -1527,6 +1542,23 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
     
+    @Override
+    public void batteryNeedsCpuUpdate() {
+        updateCpuStatsNow();
+    }
+
+    @Override
+    public void batteryPowerChanged(boolean onBattery) {
+        // When plugging in, update the CPU stats first before changing
+        // the plug state.
+        updateCpuStatsNow();
+        synchronized (this) {
+            synchronized(mPidsSelfLocked) {
+                mOnBattery = onBattery;
+            }
+        }
+    }
+
     /**
      * Initialize the application bind args. These are passed to each
      * process when the bindApplication() IPC is sent to the process. They're

@@ -18,6 +18,8 @@
 
 #include <GLES2/gl2.h>
 
+#include <utils/threads.h>
+
 #include "TextureCache.h"
 #include "Properties.h"
 
@@ -49,6 +51,7 @@ TextureCache::TextureCache(uint32_t maxByteSize):
 }
 
 TextureCache::~TextureCache() {
+    Mutex::Autolock _l(mLock);
     mCache.clear();
 }
 
@@ -64,14 +67,17 @@ void TextureCache::init() {
 ///////////////////////////////////////////////////////////////////////////////
 
 uint32_t TextureCache::getSize() {
+    Mutex::Autolock _l(mLock);
     return mSize;
 }
 
 uint32_t TextureCache::getMaxSize() {
+    Mutex::Autolock _l(mLock);
     return mMaxSize;
 }
 
 void TextureCache::setMaxSize(uint32_t maxSize) {
+    Mutex::Autolock _l(mLock);
     mMaxSize = maxSize;
     while (mSize > mMaxSize) {
         mCache.removeOldest();
@@ -83,12 +89,9 @@ void TextureCache::setMaxSize(uint32_t maxSize) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void TextureCache::operator()(SkBitmap*& bitmap, Texture*& texture) {
-    if (bitmap) {
-        const uint32_t size = bitmap->rowBytes() * bitmap->height();
-        mSize -= size;
-    }
-
+    // This will be called already locked
     if (texture) {
+        mSize -= texture->bitmapSize;
         glDeleteTextures(1, &texture->id);
         delete texture;
     }
@@ -99,7 +102,10 @@ void TextureCache::operator()(SkBitmap*& bitmap, Texture*& texture) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Texture* TextureCache::get(SkBitmap* bitmap) {
+    mLock.lock();
     Texture* texture = mCache.get(bitmap);
+    mLock.unlock();
+
     if (!texture) {
         if (bitmap->width() > mMaxTextureSize || bitmap->height() > mMaxTextureSize) {
             LOGW("Bitmap too large to be uploaded into a texture");
@@ -109,17 +115,22 @@ Texture* TextureCache::get(SkBitmap* bitmap) {
         const uint32_t size = bitmap->rowBytes() * bitmap->height();
         // Don't even try to cache a bitmap that's bigger than the cache
         if (size < mMaxSize) {
+            mLock.lock();
             while (mSize + size > mMaxSize) {
                 mCache.removeOldest();
             }
+            mLock.unlock();
         }
 
         texture = new Texture;
+        texture->bitmapSize = size;
         generateTexture(bitmap, texture, false);
 
         if (size < mMaxSize) {
+            mLock.lock();
             mSize += size;
             mCache.put(bitmap, texture);
+            mLock.unlock();
         } else {
             texture->cleanup = true;
         }
@@ -131,15 +142,18 @@ Texture* TextureCache::get(SkBitmap* bitmap) {
 }
 
 void TextureCache::remove(SkBitmap* bitmap) {
+    Mutex::Autolock _l(mLock);
     mCache.remove(bitmap);
 }
 
 void TextureCache::clear() {
+    Mutex::Autolock _l(mLock);
     mCache.clear();
 }
 
 void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool regenerate) {
     SkAutoLockPixels alp(*bitmap);
+
     if (!bitmap->readyToDraw()) {
         LOGE("Cannot generate texture from bitmap");
         return;
@@ -159,6 +173,7 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
     switch (bitmap->getConfig()) {
     case SkBitmap::kA8_Config:
         texture->blend = true;
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, bitmap->rowBytesAsPixels(), texture->height, 0,
                 GL_ALPHA, GL_UNSIGNED_BYTE, bitmap->getPixels());
         break;
@@ -175,6 +190,7 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
         texture->blend = !bitmap->isOpaque();
         break;
     default:
+        LOGW("Unsupported bitmap config");
         break;
     }
 

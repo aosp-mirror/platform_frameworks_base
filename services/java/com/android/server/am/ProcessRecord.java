@@ -131,6 +131,13 @@ class ProcessRecord {
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();
 
+        long wtime;
+        synchronized (batteryStats.getBatteryStats()) {
+            wtime = batteryStats.getBatteryStats().getProcessWakeTime(info.uid,
+                    pid, SystemClock.elapsedRealtime());
+        }
+        long timeUsed = wtime - lastWakeTime;
+
         if (info.className != null) {
             pw.print(prefix); pw.print("class="); pw.println(info.className);
         }
@@ -182,7 +189,9 @@ class ProcessRecord {
         pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
                 pw.print(" lruSeq="); pw.println(lruSeq);
         pw.print(prefix); pw.print("lastWakeTime="); pw.print(lastWakeTime);
-                pw.print(" lastRequestedGc=");
+                pw.print(" time used=");
+                TimeUtils.formatDuration(timeUsed, pw); pw.println("");
+        pw.print(prefix); pw.print("lastRequestedGc=");
                 TimeUtils.formatDuration(lastRequestedGc, now, pw);
                 pw.print(" lastLowMemory=");
                 TimeUtils.formatDuration(lastLowMemory, now, pw);

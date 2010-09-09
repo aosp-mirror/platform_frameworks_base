@@ -339,6 +339,25 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         return new ViewGroup.LayoutParams(0, 0);
     }
 
+    private void refreshChildren() {
+        for (int i = mCurrentWindowStart; i <= mCurrentWindowEnd; i++) {
+            int index = modulo(i, mNumActiveViews);
+
+            // get the fresh child from the adapter
+            View updatedChild = mAdapter.getView(i, null, this);
+
+            if (mActiveViews[index] != null) {
+                FrameLayout fl = (FrameLayout) mActiveViews[index];
+                // flush out the old child
+                fl.removeAllViewsInLayout();
+                // add the new child to the frame, if it exists
+                if (updatedChild != null) {
+                    fl.addView(updatedChild);
+                }
+            }
+        }
+    }
+
     void showOnly(int childIndex, boolean animate, boolean onLayout) {
         if (mAdapter == null) return;
 
@@ -414,16 +433,19 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                     // We've cleared a spot for the new view. Get it from the adapter, add it
                     // and apply any transform / animation
                     View newView = mAdapter.getView(i, null, this);
+
+                    // We wrap the new view in a FrameLayout so as to respect the contract
+                    // with the adapter, that is, that we don't modify this view directly
+                    FrameLayout fl = new FrameLayout(mContext);
+
+                    // If the view from the adapter is null, we still keep an empty frame in place
                     if (newView != null) {
-                        // We wrap the new view in a FrameLayout so as to respect the contract
-                        // with the adapter, that is, that we don't modify this view directly
-                        FrameLayout fl = new FrameLayout(mContext);
-                        fl.addView(newView);
-                        mActiveViews[index] = fl;
-                        addChild(fl);
-                        applyTransformForChildAtIndex(fl, newRelativeIndex);
-                        animateViewForTransition(-1, newRelativeIndex, fl);
+                       fl.addView(newView);
                     }
+                    mActiveViews[index] = fl;
+                    addChild(fl);
+                    applyTransformForChildAtIndex(fl, newRelativeIndex);
+                    animateViewForTransition(-1, newRelativeIndex, fl);
                 }
                 mActiveViews[index].bringToFront();
             }
@@ -523,10 +545,12 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
             // if the data changes, mWhichChild might be out of the bounds of the adapter
             // in this case, we reset mWhichChild to the beginning
-            if (mWhichChild >= mAdapter.getCount())
+            if (mWhichChild >= mAdapter.getCount()) {
                 mWhichChild = 0;
 
-            showOnly(mWhichChild, true, true);
+                showOnly(mWhichChild, true, true);
+            }
+            refreshChildren();
         }
 
         final int childCount = getChildCount();

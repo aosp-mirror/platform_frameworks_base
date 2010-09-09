@@ -58,6 +58,7 @@ import com.android.internal.telephony.DataConnection.FailCause;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
@@ -1104,8 +1105,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if (apn.proxy != null && apn.proxy.length() != 0) {
                 try {
                     ProxyProperties proxy = new ProxyProperties();
-                    proxy.setAddress(InetAddress.getByName(apn.proxy));
-                    proxy.setPort(Integer.parseInt(apn.port));
+                    proxy.setSocketAddress(new InetSocketAddress(InetAddress.getByName(apn.proxy),
+                            Integer.parseInt(apn.port)));
                     mLinkProperties.setHttpProxy(proxy);
                 } catch (UnknownHostException e) {
                     Log.e(LOG_TAG, "UnknownHostException making ProxyProperties: " + e);

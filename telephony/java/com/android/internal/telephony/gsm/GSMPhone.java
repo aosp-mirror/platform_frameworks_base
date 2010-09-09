@@ -117,10 +117,6 @@ public class GSMPhone extends PhoneBase {
     Thread debugPortThread;
     ServerSocket debugSocket;
 
-    private int mReportedRadioResets;
-    private int mReportedAttemptedConnects;
-    private int mReportedSuccessfulConnects;
-
     private String mImei;
     private String mImeiSv;
     private String mVmNumber;
@@ -151,7 +147,7 @@ public class GSMPhone extends PhoneBase {
         mSimCard = new SimCard(this);
         if (!unitTestMode) {
             mSimPhoneBookIntManager = new SimPhoneBookInterfaceManager(this);
-            mSimSmsIntManager = new SimSmsInterfaceManager(this);
+            mSimSmsIntManager = new SimSmsInterfaceManager(this, mSMS);
             mSubInfo = new PhoneSubInfo(this);
         }
         mStkService = CatService.getInstance(mCM, mSIMRecords, mContext,
