@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.util.HashSet;
 
 import coretestutils.http.MockResponse;
 import coretestutils.http.MockWebServer;
@@ -55,8 +56,13 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
     protected static String DOWNLOAD_10MB_FILENAME = "External10mb.apk";
     protected static long DOWNLOAD_10MB_FILESIZE = 10258741;
 
+    private static final String FILE_CONCURRENT_DOWNLOAD_FILE_PREFIX = "file";
+    private static final String FILE_CONCURRENT_DOWNLOAD_FILE_EXTENSION = ".bin";
+    protected static long CONCURRENT_DOWNLOAD_FILESIZE = 1000000;
+
     // Values to be obtained from TestRunner
     private String externalDownloadUriValue = null;
+    private String externalLargeDownloadUriValue = null;
 
     /**
      * {@inheritDoc }
@@ -65,12 +71,24 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
     public void setUp() throws Exception {
         super.setUp();
         DownloadManagerTestRunner mRunner = (DownloadManagerTestRunner)getInstrumentation();
-        externalDownloadUriValue = mRunner.externalDownloadUriValue;
+        externalDownloadUriValue = normalizeUri(mRunner.externalDownloadUriValue);
         assertNotNull(externalDownloadUriValue);
 
-        if (!externalDownloadUriValue.endsWith("/")) {
-            externalDownloadUriValue += "/";
+        externalLargeDownloadUriValue = normalizeUri(mRunner.externalDownloadUriValue);
+        assertNotNull(externalLargeDownloadUriValue);
+    }
+
+    /**
+     * Normalizes a uri to ensure it ends with a "/"
+     *
+     * @param uri The uri to normalize (or null)
+     * @return The normalized uri, or null if null was passed in
+     */
+    public String normalizeUri(String uri) {
+        if (uri != null && !uri.endsWith("/")) {
+            uri += "/";
         }
+        return uri;
     }
 
     /**
@@ -458,6 +476,39 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
                 mDownloadManager.remove(dlRequest);
             }
             downloadedFile.delete();
+        }
+    }
+
+    /**
+     * Tests 15 concurrent downloads of 1,000,000-byte files.
+     *
+     * @throws Exception if test failed
+     */
+    public void runDownloadMultipleSimultaneously() throws Exception {
+        final int TOTAL_DOWNLOADS = 15;
+        HashSet<Long> downloadIds = new HashSet<Long>(TOTAL_DOWNLOADS);
+        MultipleDownloadsCompletedReceiver receiver = registerNewMultipleDownloadsReceiver();
+
+        // Make sure there are no pending downloads currently going on
+        removeAllCurrentDownloads();
+
+        try {
+            for (int i = 0; i < TOTAL_DOWNLOADS; ++i) {
+                long dlRequest = -1;
+                String filename = FILE_CONCURRENT_DOWNLOAD_FILE_PREFIX + i
+                        + FILE_CONCURRENT_DOWNLOAD_FILE_EXTENSION;
+                Uri remoteUri = getExternalFileUri(filename);
+                Request request = new Request(remoteUri);
+                request.setTitle(filename);
+                dlRequest = mDownloadManager.enqueue(request);
+                assertTrue(dlRequest != -1);
+                downloadIds.add(dlRequest);
+            }
+
+            waitForDownloadsOrTimeout(DEFAULT_WAIT_POLL_TIME, 15 * 60 * 2000);  // wait 15 mins max
+            assertEquals(TOTAL_DOWNLOADS, receiver.numDownloadsCompleted());
+        } finally {
+            removeAllCurrentDownloads();
         }
     }
 }
