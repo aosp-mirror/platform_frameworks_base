@@ -459,7 +459,8 @@ private:
 
 MP3Extractor::MP3Extractor(
         const sp<DataSource> &source, const sp<AMessage> &meta)
-    : mDataSource(source),
+    : mInitCheck(NO_INIT),
+      mDataSource(source),
       mFirstFramePos(-1),
       mFixedHeader(0),
       mByteNumber(0) {
@@ -480,53 +481,54 @@ MP3Extractor::MP3Extractor(
         success = true;
     } else {
         success = Resync(mDataSource, 0, &pos, &header);
-        CHECK(success);
     }
 
-    if (success) {
-        mFirstFramePos = pos;
-        mFixedHeader = header;
+    if (!success) {
+        // mInitCheck will remain NO_INIT
+        return;
+    }
 
-        size_t frame_size;
-        int sample_rate;
-        int num_channels;
-        int bitrate;
-        get_mp3_frame_size(
-                header, &frame_size, &sample_rate, &num_channels, &bitrate);
+    mFirstFramePos = pos;
+    mFixedHeader = header;
 
-        mMeta = new MetaData;
+    size_t frame_size;
+    int sample_rate;
+    int num_channels;
+    int bitrate;
+    get_mp3_frame_size(
+            header, &frame_size, &sample_rate, &num_channels, &bitrate);
 
-        mMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_MPEG);
-        mMeta->setInt32(kKeySampleRate, sample_rate);
-        mMeta->setInt32(kKeyBitRate, bitrate * 1000);
-        mMeta->setInt32(kKeyChannelCount, num_channels);
+    mMeta = new MetaData;
 
-        int64_t duration;
-        parse_xing_header(
-                mDataSource, mFirstFramePos, NULL, &mByteNumber,
-                mTableOfContents, NULL, &duration);
-        if (duration > 0) {
-            mMeta->setInt64(kKeyDuration, duration);
-        } else {
-            off_t fileSize;
-            if (mDataSource->getSize(&fileSize) == OK) {
-                mMeta->setInt64(
-                        kKeyDuration,
-                        8000LL * (fileSize - mFirstFramePos) / bitrate);
-            }
+    mMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_MPEG);
+    mMeta->setInt32(kKeySampleRate, sample_rate);
+    mMeta->setInt32(kKeyBitRate, bitrate * 1000);
+    mMeta->setInt32(kKeyChannelCount, num_channels);
+
+    int64_t duration;
+    parse_xing_header(
+            mDataSource, mFirstFramePos, NULL, &mByteNumber,
+            mTableOfContents, NULL, &duration);
+    if (duration > 0) {
+        mMeta->setInt64(kKeyDuration, duration);
+    } else {
+        off_t fileSize;
+        if (mDataSource->getSize(&fileSize) == OK) {
+            mMeta->setInt64(
+                    kKeyDuration,
+                    8000LL * (fileSize - mFirstFramePos) / bitrate);
         }
     }
-}
 
-MP3Extractor::~MP3Extractor() {
+    mInitCheck = OK;
 }
 
 size_t MP3Extractor::countTracks() {
-    return (mFirstFramePos < 0) ? 0 : 1;
+    return mInitCheck != OK ? 0 : 1;
 }
 
 sp<MediaSource> MP3Extractor::getTrack(size_t index) {
-    if (mFirstFramePos < 0 || index != 0) {
+    if (mInitCheck != OK || index != 0) {
         return NULL;
     }
 
@@ -536,7 +538,7 @@ sp<MediaSource> MP3Extractor::getTrack(size_t index) {
 }
 
 sp<MetaData> MP3Extractor::getTrackMetaData(size_t index, uint32_t flags) {
-    if (mFirstFramePos < 0 || index != 0) {
+    if (mInitCheck != OK || index != 0) {
         return NULL;
     }
 
@@ -713,7 +715,7 @@ status_t MP3Source::read(
 sp<MetaData> MP3Extractor::getMetaData() {
     sp<MetaData> meta = new MetaData;
 
-    if (mFirstFramePos < 0) {
+    if (mInitCheck != OK) {
         return meta;
     }
 
