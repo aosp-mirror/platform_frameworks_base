@@ -87,6 +87,11 @@ status_t HWComposer::commit() const {
     return (status_t)err;
 }
 
+status_t HWComposer::release() const {
+    int err = mHwc->set(mHwc, NULL, NULL, NULL);
+    return (status_t)err;
+}
+
 size_t HWComposer::getNumLayers() const {
     return mList ? mList->numHwLayers : 0;
 }

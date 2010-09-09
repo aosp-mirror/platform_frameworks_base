@@ -292,6 +292,9 @@ void DisplayHardware::fini()
 void DisplayHardware::releaseScreen() const
 {
     DisplayHardwareBase::releaseScreen();
+    if (mHwc->initCheck() == NO_ERROR) {
+        mHwc->release();
+    }
 }
 
 void DisplayHardware::acquireScreen() const
