@@ -20,6 +20,8 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Process;
 
+import org.apache.harmony.luni.util.InputStreamHelper;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -108,26 +110,19 @@ public class SystemKeyStore {
         return keyFile;
     }
 
-    public String retrieveKeyHexString(String keyName) {
+    public String retrieveKeyHexString(String keyName) throws IOException {
         return toHexString(retrieveKey(keyName));
     }
 
-    public byte[] retrieveKey(String keyName) {
-
+    public byte[] retrieveKey(String keyName) throws IOException {
         File keyFile = getKeyFile(keyName);
+
         if (!keyFile.exists()) {
             return null;
         }
 
-        try {
-            FileInputStream fis = new FileInputStream(keyFile);
-            int keyLen = fis.available();
-            byte[] retKey = new byte[keyLen];
-            fis.read(retKey);
-            fis.close();
-            return retKey;
-        } catch (IOException ioe) { }
-        throw new IllegalArgumentException();
+        FileInputStream fis = new FileInputStream(keyFile);
+        return InputStreamHelper.readFullyAndClose(fis);
     }
 
     public void deleteKey(String keyName) {
