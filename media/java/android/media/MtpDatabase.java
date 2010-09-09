@@ -246,6 +246,8 @@ public class MtpDatabase {
         return new int[] {
             // allow transfering arbitrary files
             MtpConstants.FORMAT_UNDEFINED,
+            MtpConstants.FORMAT_ASSOCIATION,
+            MtpConstants.FORMAT_ABSTRACT_AV_PLAYLIST,
         };
     }
 
