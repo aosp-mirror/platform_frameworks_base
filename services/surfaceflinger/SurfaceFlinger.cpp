@@ -383,10 +383,10 @@ bool SurfaceFlinger::threadLoop()
         // inform the h/w that we're done compositing
         hw.compositionComplete();
 
-        // release the clients before we flip ('cause flip might block)
+        postFramebuffer();
+
         unlockClients();
 
-        postFramebuffer();
     } else {
         // pretend we did the post
         unlockClients();
