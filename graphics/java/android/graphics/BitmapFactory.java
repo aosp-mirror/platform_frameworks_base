@@ -628,12 +628,6 @@ public class BitmapFactory {
      */
     public static LargeBitmap createLargeBitmap(
             FileDescriptor fd, boolean isShareable) throws IOException {
-        if (MemoryFile.isMemoryFile(fd)) {
-            int mappedlength = MemoryFile.getSize(fd);
-            MemoryFile file = new MemoryFile(fd, mappedlength, "r");
-            InputStream is = file.getInputStream();
-            return createLargeBitmap(is, isShareable);
-        }
         return nativeCreateLargeBitmap(fd, isShareable);
     }
 
