@@ -496,7 +496,6 @@ LVREV_ReturnStatus_en LVREV_ApplyNewSettings (LVREV_Instance_st     *pPrivate)
      * Update the bypass mixer time constant
      */
     if((pPrivate->NewParams.SampleRate   != pPrivate->CurrentParams.SampleRate)   ||
-       (pPrivate->NewParams.SourceFormat != pPrivate->CurrentParams.SourceFormat) ||
        (pPrivate->bFirstControl          == LVM_TRUE))
     {
         LVM_UINT16   NumChannels = 1;                       /* Assume MONO format */
@@ -508,11 +507,7 @@ LVREV_ReturnStatus_en LVREV_ApplyNewSettings (LVREV_Instance_st     *pPrivate)
         pPrivate->FeedbackMixer[2].Alpha=Alpha;
         pPrivate->FeedbackMixer[3].Alpha=Alpha;
 
-        if (pPrivate->NewParams.SourceFormat != LVM_MONO)
-        {
-            /* Stereo or Mono-in-Stereo format data */
-            NumChannels = 2;
-        }
+        NumChannels = 2;                                    /* Always stereo output */
         pPrivate->BypassMixer.Alpha1 = (LVM_INT32)LVM_Mixer_TimeConstant(LVREV_BYPASSMIXER_TC, LVM_GetFsFromTable(pPrivate->NewParams.SampleRate), NumChannels);
         pPrivate->BypassMixer.Alpha2 = pPrivate->BypassMixer.Alpha1;
         pPrivate->GainMixer.Alpha    = pPrivate->BypassMixer.Alpha1;
