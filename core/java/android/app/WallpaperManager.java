@@ -235,8 +235,13 @@ public class WallpaperManager {
                     if (width <= 0 || height <= 0) {
                         // Degenerate case: no size requested, just load
                         // bitmap as-is.
-                        Bitmap bm = BitmapFactory.decodeFileDescriptor(
-                                fd.getFileDescriptor(), null, null);
+                        Bitmap bm = null;
+                        try {
+                            bm = BitmapFactory.decodeFileDescriptor(
+                                   fd.getFileDescriptor(), null, null);
+                        } catch (OutOfMemoryError e) {
+                            Log.w(TAG, "Can't decode file", e);
+                        }
                         try {
                             fd.close();
                         } catch (IOException e) {
@@ -277,7 +282,12 @@ public class WallpaperManager {
                     if (width <= 0 || height <= 0) {
                         // Degenerate case: no size requested, just load
                         // bitmap as-is.
-                        Bitmap bm = BitmapFactory.decodeStream(is, null, null);
+                        Bitmap bm = null;
+                        try {
+                            bm = BitmapFactory.decodeStream(is, null, null);
+                        } catch (OutOfMemoryError e) {
+                            Log.w(TAG, "Can't decode stream", e);
+                        }
                         try {
                             is.close();
                         } catch (IOException e) {
