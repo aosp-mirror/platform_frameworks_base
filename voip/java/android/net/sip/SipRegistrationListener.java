@@ -40,9 +40,9 @@ public interface SipRegistrationListener {
      * Called when the registration fails.
      *
      * @param localProfileUri the URI string of the SIP profile to register with
-     * @param errorClass name of the exception class
+     * @param errorCode error code defined in {@link SipErrorCode}
      * @param errorMessage error message
      */
-    void onRegistrationFailed(String localProfileUri, String errorClass,
+    void onRegistrationFailed(String localProfileUri, String errorCode,
             String errorMessage);
 }

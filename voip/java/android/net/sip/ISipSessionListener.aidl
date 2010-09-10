@@ -76,20 +76,20 @@ interface ISipSessionListener {
      * termination.
      *
      * @param session the session object that carries out the transaction
-     * @param errorClass name of the exception class
+     * @param errorCode error code defined in {@link SipErrorCode}
      * @param errorMessage error message
      */
-    void onError(in ISipSession session, String errorClass,
+    void onError(in ISipSession session, String errorCode,
             String errorMessage);
 
     /**
      * Called when an error occurs during session modification negotiation.
      *
      * @param session the session object that carries out the transaction
-     * @param errorClass name of the exception class
+     * @param errorCode error code defined in {@link SipErrorCode}
      * @param errorMessage error message
      */
-    void onCallChangeFailed(in ISipSession session, String errorClass,
+    void onCallChangeFailed(in ISipSession session, String errorCode,
             String errorMessage);
 
     /**
@@ -111,10 +111,10 @@ interface ISipSessionListener {
      * Called when the registration fails.
      *
      * @param session the session object that carries out the transaction
-     * @param errorClass name of the exception class
+     * @param errorCode error code defined in {@link SipErrorCode}
      * @param errorMessage error message
      */
-    void onRegistrationFailed(in ISipSession session, String errorClass,
+    void onRegistrationFailed(in ISipSession session, String errorCode,
             String errorMessage);
 
     /**

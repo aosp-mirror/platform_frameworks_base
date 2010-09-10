@@ -108,7 +108,8 @@ public class SipAudioCallImpl extends SipSessionAdapter
                 listener.onCalling(this);
                 break;
             default:
-                listener.onError(this, "wrong state to attach call: " + state);
+                listener.onError(this, SipErrorCode.CLIENT_ERROR.toString(),
+                        "wrong state to attach call: " + state);
             }
         } catch (Throwable t) {
             Log.e(TAG, "setListener()", t);
@@ -275,14 +276,13 @@ public class SipAudioCallImpl extends SipSessionAdapter
     }
 
     @Override
-    public void onCallChangeFailed(ISipSession session,
-            String className, String message) {
+    public void onCallChangeFailed(ISipSession session, String errorCode,
+            String message) {
         Log.d(TAG, "sip call change failed: " + message);
         Listener listener = mListener;
         if (listener != null) {
             try {
-                listener.onError(SipAudioCallImpl.this,
-                        className + ": " + message);
+                listener.onError(SipAudioCallImpl.this, errorCode, message);
             } catch (Throwable t) {
                 Log.e(TAG, "onCallBusy()", t);
             }
@@ -290,17 +290,16 @@ public class SipAudioCallImpl extends SipSessionAdapter
     }
 
     @Override
-    public void onError(ISipSession session, String className,
+    public void onError(ISipSession session, String errorCode,
             String message) {
-        Log.d(TAG, "sip session error: " + className + ": " + message);
+        Log.d(TAG, "sip session error: " + errorCode + ": " + message);
         synchronized (this) {
             if (!isInCall()) close(true);
         }
         Listener listener = mListener;
         if (listener != null) {
             try {
-                listener.onError(SipAudioCallImpl.this,
-                        className + ": " + message);
+                listener.onError(SipAudioCallImpl.this, errorCode, message);
             } catch (Throwable t) {
                 Log.e(TAG, "onError()", t);
             }
