@@ -85,4 +85,12 @@ class NumberPickerButton extends ImageButton {
             mNumberPicker.cancelDecrement();
         }
     }
+
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        if (!hasWindowFocus) {
+            cancelLongpress();
+        }
+    }
+
 }
