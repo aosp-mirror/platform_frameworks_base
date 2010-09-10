@@ -24,8 +24,13 @@ LOCAL_MODULE := libdrmpassthruplugin
 LOCAL_STATIC_LIBRARIES := libdrmframeworkcommon
 
 LOCAL_SHARED_LIBRARIES := \
-    libutils \
-    libdl
+    libutils
+
+ifeq ($(TARGET_SIMULATOR),true)
+ LOCAL_LDLIBS += -ldl
+else
+ LOCAL_SHARED_LIBRARIES += libdl
+endif
 
 LOCAL_PRELINK_MODULE := false
 
