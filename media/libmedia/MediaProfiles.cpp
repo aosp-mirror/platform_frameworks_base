@@ -62,6 +62,7 @@ const MediaProfiles::NameToTagMap MediaProfiles::sCamcorderQualityNameMap[] = {
     {"low", CAMCORDER_QUALITY_LOW},
     {"high", CAMCORDER_QUALITY_HIGH},
     {"qcif", CAMCORDER_QUALITY_QCIF},
+    {"cif", CAMCORDER_QUALITY_CIF},
     {"480p", CAMCORDER_QUALITY_480P},
     {"720p", CAMCORDER_QUALITY_720P},
     {"1080p", CAMCORDER_QUALITY_1080P},
@@ -69,6 +70,7 @@ const MediaProfiles::NameToTagMap MediaProfiles::sCamcorderQualityNameMap[] = {
     {"timelapselow",  CAMCORDER_QUALITY_TIME_LAPSE_LOW},
     {"timelapsehigh", CAMCORDER_QUALITY_TIME_LAPSE_HIGH},
     {"timelapseqcif", CAMCORDER_QUALITY_TIME_LAPSE_QCIF},
+    {"timelapsecif", CAMCORDER_QUALITY_TIME_LAPSE_CIF},
     {"timelapse480p", CAMCORDER_QUALITY_TIME_LAPSE_480P},
     {"timelapse720p", CAMCORDER_QUALITY_TIME_LAPSE_720P},
     {"timelapse1080p", CAMCORDER_QUALITY_TIME_LAPSE_1080P}
