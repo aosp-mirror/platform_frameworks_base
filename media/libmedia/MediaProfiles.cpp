@@ -715,13 +715,8 @@ Vector<audio_decoder> MediaProfiles::getAudioDecoders() const
     return decoders;  // copy out
 }
 
-int MediaProfiles::getCamcorderProfileParamByName(const char *name,
-                                                  int cameraId,
-                                                  camcorder_quality quality) const
+int MediaProfiles::getCamcorderProfileIndex(int cameraId, camcorder_quality quality) const
 {
-    LOGV("getCamcorderProfileParamByName: %s for camera %d, quality %d",
-         name, cameraId, quality);
-
     int index = -1;
     for (size_t i = 0, n = mCamcorderProfiles.size(); i < n; ++i) {
         if (mCamcorderProfiles[i]->mCameraId == cameraId &&
@@ -730,6 +725,17 @@ int MediaProfiles::getCamcorderProfileParamByName(const char *name,
             break;
         }
     }
+    return index;
+}
+
+int MediaProfiles::getCamcorderProfileParamByName(const char *name,
+                                                  int cameraId,
+                                                  camcorder_quality quality) const
+{
+    LOGV("getCamcorderProfileParamByName: %s for camera %d, quality %d",
+         name, cameraId, quality);
+
+    int index = getCamcorderProfileIndex(cameraId, quality);
     if (index == -1) {
         LOGE("The given camcorder profile camera %d quality %d is not found",
              cameraId, quality);
@@ -750,6 +756,11 @@ int MediaProfiles::getCamcorderProfileParamByName(const char *name,
 
     LOGE("The given camcorder profile param id %d name %s is not found", cameraId, name);
     return -1;
+}
+
+bool MediaProfiles::hasCamcorderProfile(int cameraId, camcorder_quality quality) const
+{
+    return (getCamcorderProfileIndex(cameraId, quality) != -1);
 }
 
 Vector<int> MediaProfiles::getImageEncodingQualityLevels(int cameraId) const
