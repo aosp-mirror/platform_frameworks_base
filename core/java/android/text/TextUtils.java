@@ -1651,7 +1651,36 @@ public class TextUtils {
 
         return mode;
     }
-    
+
+    /**
+     * Does a comma-delimited list 'delimitedString' contain a certain item?
+     * (without allocating memory)
+     *
+     * @hide
+     */
+    public static boolean delimitedStringContains(
+            String delimitedString, char delimiter, String item) {
+        if (isEmpty(delimitedString) || isEmpty(item)) {
+            return false;
+        }
+        int pos = -1;
+        int length = delimitedString.length();
+        while ((pos = delimitedString.indexOf(item, pos + 1)) != -1) {
+            if (pos > 0 && delimitedString.charAt(pos - 1) != delimiter) {
+                continue;
+            }
+            int expectedDelimiterPos = pos + item.length();
+            if (expectedDelimiterPos == length) {
+                // Match at end of string.
+                return true;
+            }
+            if (delimitedString.charAt(expectedDelimiterPos) == delimiter) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static Object sLock = new Object();
     private static char[] sTemp = null;
 }
