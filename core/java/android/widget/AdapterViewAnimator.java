@@ -42,7 +42,7 @@ import android.view.animation.AnimationUtils;
  * @attr ref android.R.styleable#AdapterViewAnimator_animateFirstView
  */
 public abstract class AdapterViewAnimator extends AdapterView<Adapter>
-        implements RemoteViewsAdapter.RemoteAdapterConnectionCallback{
+        implements RemoteViewsAdapter.RemoteAdapterConnectionCallback {
     private static final String TAG = "RemoteViewAnimator";
 
     /**
@@ -358,6 +358,17 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         }
     }
 
+    /**
+     * This method can be overridden so that subclasses can provide a custom frame in which their
+     * children can live. For example, StackView adds padding to its childrens' frames so as to
+     * accomodate for the highlight effect.
+     *
+     * @return The FrameLayout into which children can be placed.
+     */
+    FrameLayout getFrameForChild() {
+        return new FrameLayout(mContext);
+    }
+
     void showOnly(int childIndex, boolean animate, boolean onLayout) {
         if (mAdapter == null) return;
 
@@ -436,7 +447,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
                     // We wrap the new view in a FrameLayout so as to respect the contract
                     // with the adapter, that is, that we don't modify this view directly
-                    FrameLayout fl = new FrameLayout(mContext);
+                    FrameLayout fl = getFrameForChild();
 
                     // If the view from the adapter is null, we still keep an empty frame in place
                     if (newView != null) {
