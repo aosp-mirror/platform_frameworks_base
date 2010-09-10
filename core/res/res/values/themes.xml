@@ -122,9 +122,10 @@
         <!-- Panel attributes -->
         <item name="panelBackground">@android:drawable/menu_background</item>
         <item name="panelFullBackground">@android:drawable/menu_background_fill_parent_width</item>
-        <item name="panelColorBackground">#fff</item>
-        <item name="panelColorForeground">?android:attr/textColorPrimaryInverse</item>
-        <item name="panelTextAppearance">?android:attr/textAppearanceInverse</item>
+        <!-- These three attributes do not seems to be used by the framework. Declared public though -->
+        <item name="panelColorBackground">#000</item>
+        <item name="panelColorForeground">?android:attr/textColorPrimary</item>
+        <item name="panelTextAppearance">?android:attr/textAppearance</item>
 
         <!-- Scrollbar attributes -->
         <item name="scrollbarFadeDuration">250</item>
@@ -488,8 +489,8 @@
         <item name="android:itemTextAppearance">@android:style/TextAppearance.Widget.IconMenu.Item</item>
         <item name="android:itemBackground">@android:drawable/menu_selector</item>
         <item name="android:itemIconDisabledAlpha">?android:attr/disabledAlpha</item>
-        <item name="android:horizontalDivider">@android:drawable/divider_horizontal_bright</item>
-        <item name="android:verticalDivider">@android:drawable/divider_vertical_bright</item>
+        <item name="android:horizontalDivider">@android:drawable/divider_horizontal_dark</item>
+        <item name="android:verticalDivider">@android:drawable/divider_vertical_dark</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.OptionsPanel</item>
         <item name="android:moreIcon">@android:drawable/ic_menu_more</item>
         <item name="android:background">@null</item>
@@ -497,7 +498,7 @@
 
     <style name="Theme.ExpandedMenu">
         <!-- Menu/item attributes -->
-        <item name="android:itemTextAppearance">?android:attr/textAppearanceLargeInverse</item>
+        <item name="android:itemTextAppearance">?android:attr/textAppearanceLarge</item>
         <item name="android:listViewStyle">@android:style/Widget.ListView.Menu</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.OptionsPanel</item>
         <item name="android:background">@null</item>
