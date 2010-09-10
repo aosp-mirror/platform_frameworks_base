@@ -22,12 +22,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:singleLine="true"
-        android:ellipsize="end"
-        android:textAppearance="?android:attr/textAppearanceMediumInverse" />
+        android:ellipsize="end" />
     <TextView android:id="@+id/action_bar_subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:singleLine="true"
-        android:ellipsize="end"
-        android:textAppearance="?android:attr/textAppearanceSmallInverse" />
+        android:ellipsize="end" />
 </LinearLayout>

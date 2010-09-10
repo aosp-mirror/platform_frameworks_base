@@ -30,11 +30,12 @@ This is an optimized layout for a screen with the Action Bar enabled.
             android:id="@+id/action_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="?android:attr/windowActionBarStyle" />
+            style="?android:attr/actionBarStyle" />
         <com.android.internal.widget.ActionBarContextView
             android:id="@+id/action_context_bar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            style="?android:attr/actionModeStyle" />
     </ViewAnimator>
     <FrameLayout android:id="@android:id/content"
         android:layout_width="match_parent" 
@@ -45,6 +46,6 @@ This is an optimized layout for a screen with the Action Bar enabled.
     <LinearLayout android:id="@+id/lower_action_context_bar"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  style="?android:attr/windowActionBarStyle"
+                  style="?android:attr/actionBarStyle"
                   android:visibility="gone" />
 </LinearLayout>

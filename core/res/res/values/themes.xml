@@ -126,8 +126,6 @@
         <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
         <item name="windowActionBar">false</item>
         <item name="windowActionModeOverlay">false</item>
-        <item name="windowActionBarStyle">@android:style/ActionBar</item>
-        <item name="windowActionBarSize">50dip</item>
 
         <!-- Dialog attributes -->
         <item name="alertDialogStyle">@android:style/AlertDialog</item>
@@ -200,9 +198,6 @@
         <item name="quickContactBadgeStyleSmallWindowSmall">@android:style/Widget.QuickContactBadgeSmall.WindowSmall</item>
         <item name="quickContactBadgeStyleSmallWindowMedium">@android:style/Widget.QuickContactBadgeSmall.WindowMedium</item>
         <item name="quickContactBadgeStyleSmallWindowLarge">@android:style/Widget.QuickContactBadgeSmall.WindowLarge</item>
-        <item name="actionBarTabStyle">@style/Widget.ActionBarView_TabView</item>
-        <item name="actionBarTabBarStyle">@style/Widget.ActionBarView_TabBar</item>
-        <item name="actionBarTabTextStyle">@style/Widget.ActionBarView_TabText</item>
         
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.PreferenceScreen</item>
@@ -223,6 +218,12 @@
         <item name="actionButtonPadding">12dip</item>
         <item name="actionModeBackground">@android:drawable/action_bar_context_background</item>
         <item name="actionModeCloseDrawable">@android:drawable/ic_menu_close_clear_cancel</item>
+        <item name="actionBarTabStyle">@style/Widget.ActionBarView_TabView</item>
+        <item name="actionBarTabBarStyle">@style/Widget.ActionBarView_TabBar</item>
+        <item name="actionBarTabTextStyle">@style/Widget.ActionBarView_TabText</item>
+        <item name="actionModeStyle">@style/Widget.ActionMode</item>
+        <item name="actionBarStyle">@android:style/Widget.ActionBar</item>
+        <item name="actionBarSize">50dip</item>
     </style>
     
     <!-- Variant of the default (dark) theme with no title bar -->

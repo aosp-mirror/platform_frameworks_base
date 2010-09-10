@@ -37,7 +37,6 @@ import android.widget.TextView;
  */
 public class ActionBarContextView extends ViewGroup {
     private int mItemPadding;
-    private int mItemMargin;
     private int mActionSpacing;
     private int mContentHeight;
     
@@ -49,32 +48,36 @@ public class ActionBarContextView extends ViewGroup {
     private LinearLayout mTitleLayout;
     private TextView mTitleView;
     private TextView mSubtitleView;
-    private Drawable mCloseDrawable;
+    private int mCloseButtonStyle;
+    private int mTitleStyleRes;
+    private int mSubtitleStyleRes;
     private ActionMenuView mMenuView;
     
     public ActionBarContextView(Context context) {
-        this(context, null, 0);
+        this(context, null);
     }
     
     public ActionBarContextView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, com.android.internal.R.attr.actionModeStyle);
     }
     
     public ActionBarContextView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.Theme);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ActionMode, defStyle, 0);
         mItemPadding = a.getDimensionPixelOffset(
-                com.android.internal.R.styleable.Theme_actionButtonPadding, 0);
+                com.android.internal.R.styleable.ActionMode_itemPadding, 0);
         setBackgroundDrawable(a.getDrawable(
-                com.android.internal.R.styleable.Theme_actionModeBackground));
-        mCloseDrawable = a.getDrawable(
-                com.android.internal.R.styleable.Theme_actionModeCloseDrawable);
-        mItemMargin = mItemPadding / 2;
+                com.android.internal.R.styleable.ActionMode_background));
+        mCloseButtonStyle = a.getResourceId(
+                com.android.internal.R.styleable.ActionMode_closeButtonStyle, 0);
+        mTitleStyleRes = a.getResourceId(
+                com.android.internal.R.styleable.ActionMode_titleTextStyle, 0);
+        mSubtitleStyleRes = a.getResourceId(
+                com.android.internal.R.styleable.ActionMode_subtitleTextStyle, 0);
 
         mContentHeight = a.getLayoutDimension(
-                com.android.internal.R.styleable.Theme_windowActionBarSize, 0);
+                com.android.internal.R.styleable.ActionMode_height, 0);
         a.recycle();
     }
     
@@ -129,9 +132,15 @@ public class ActionBarContextView extends ViewGroup {
             mSubtitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_subtitle);
             if (mTitle != null) {
                 mTitleView.setText(mTitle);
+                if (mTitleStyleRes != 0) {
+                    mTitleView.setTextAppearance(mContext, mTitleStyleRes);
+                }
             }
             if (mSubtitle != null) {
                 mSubtitleView.setText(mSubtitle);
+                if (mSubtitleStyleRes != 0) {
+                    mSubtitleView.setTextAppearance(mContext, mSubtitleStyleRes);
+                }
                 mSubtitleView.setVisibility(VISIBLE);
             }
             addView(mTitleLayout);
@@ -147,9 +156,7 @@ public class ActionBarContextView extends ViewGroup {
 
     public void initForMode(final ActionMode mode) {
         if (mCloseButton == null) {
-            mCloseButton = new ImageButton(getContext());
-            mCloseButton.setImageDrawable(mCloseDrawable);
-            mCloseButton.setBackgroundDrawable(null);
+            mCloseButton = new ImageButton(getContext(), null, mCloseButtonStyle);
         }
         mCloseButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
