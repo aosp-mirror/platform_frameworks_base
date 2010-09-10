@@ -56,7 +56,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     private final SQLiteCursorDriver mDriver;
 
     /** The number of rows in the cursor */
-    private int mCount = NO_COUNT;
+    private volatile int mCount = NO_COUNT;
 
     /** A mapping of column names to column indices, to speed up lookups */
     private Map<String, Integer> mColumnNameMap;
@@ -138,13 +138,21 @@ public class SQLiteCursor extends AbstractWindowedCursor {
                 }
                 try {
                     int count = getQuery().fillWindow(cw, mMaxRead, mCount);
-                    // return -1 means not finished
+                    // return -1 means there is still more data to be retrieved from the resultset
                     if (count != 0) {
                         if (count == NO_COUNT){
                             mCount += mMaxRead;
+                            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                                Log.d(TAG, "received -1 from native_fill_window. read " +
+                                        mCount + " rows so far");
+                            }
                             sendMessage();
                         } else {                                
-                            mCount = count;
+                            mCount += count;
+                            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                                Log.d(TAG, "received all data from native_fill_window. read " +
+                                        mCount + " rows.");
+                            }
                             sendMessage();
                             break;
                         }
@@ -308,13 +316,23 @@ public class SQLiteCursor extends AbstractWindowedCursor {
                 }
         }
         mWindow.setStartPosition(startPos);
-        mCount = getQuery().fillWindow(mWindow, mInitialRead, 0);
-        // return -1 means not finished
-        if (mCount == NO_COUNT){
+        int count = getQuery().fillWindow(mWindow, mInitialRead, 0);
+        // return -1 means there is still more data to be retrieved from the resultset
+        if (count == NO_COUNT){
             mCount = startPos + mInitialRead;
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "received -1 from native_fill_window. read " + mCount + " rows so far");
+            }
             Thread t = new Thread(new QueryThread(mCursorState), "query thread");
             t.start();
-        } 
+        } else if (startPos == 0) { // native_fill_window returns count(*) only for startPos = 0
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "received count(*) from native_fill_window: " + count);
+            }
+            mCount = count;
+        } else if (mCount <= 0) {
+            throw new IllegalStateException("count should never be non-zero negative number");
+        }
     }
 
     private synchronized SQLiteQuery getQuery() {
@@ -503,5 +521,12 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         } finally {
             super.finalize();
         }
+    }
+
+    /**
+     * this is only for testing purposes.
+     */
+    /* package */ int getMCount() {
+        return mCount;
     }
 }
