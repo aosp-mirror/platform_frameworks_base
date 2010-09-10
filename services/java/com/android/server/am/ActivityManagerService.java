@@ -753,6 +753,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean mWaitingUpdate = false;
     boolean mDidUpdate = false;
     boolean mOnBattery = false;
+    boolean mLaunchWarningShown = false;
 
     Context mContext;
 
@@ -2907,6 +2908,30 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    final void showLaunchWarningLocked(final ActivityRecord cur, final ActivityRecord next) {
+        if (!mLaunchWarningShown) {
+            mLaunchWarningShown = true;
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (ActivityManagerService.this) {
+                        final Dialog d = new LaunchWarningWindow(mContext, cur, next);
+                        d.show();
+                        mHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                synchronized (ActivityManagerService.this) {
+                                    d.dismiss();
+                                    mLaunchWarningShown = false;
+                                }
+                            }
+                        }, 4000);
+                    }
+                }
+            });
+        }
+    }
+    
     final void decPersistentCountLocked(ProcessRecord app) {
         app.persistentActivities--;
         if (app.persistentActivities > 0) {

@@ -1951,6 +1951,12 @@
     <string name="report">Report</string>
     <!-- Button allowing the user to choose to wait for an application that is not responding to become responsive again. -->
     <string name="wait">Wait</string>
+    <!-- [CHAR LIMIT=25] Title of the alert when application launches on top of another. -->
+    <string name="launch_warning_title">Application redirected</string>
+    <!-- [CHAR LIMIT=50] Title of the alert when application launches on top of another. -->
+    <string name="launch_warning_replace"><xliff:g id="app_name">%1$s</xliff:g> is now running.</string>
+    <!-- [CHAR LIMIT=50] Title of the alert when application launches on top of another. -->
+    <string name="launch_warning_original"><xliff:g id="app_name">%1$s</xliff:g> was originally launched.</string>
 
     <!-- Text of the alert that is displayed when an application has violated StrictMode. -->
     <string name="smv_application">The application <xliff:g id="application">%1$s</xliff:g>
