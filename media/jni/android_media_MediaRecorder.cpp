@@ -437,7 +437,7 @@ android_media_MediaRecorder_native_setup(JNIEnv *env, jobject thiz, jobject weak
         return;
     }
     if (mr->initCheck() != NO_ERROR) {
-        jniThrowException(env, "java/lang/IOException", "Unable to initialize camera");
+        jniThrowException(env, "java/lang/RuntimeException", "Unable to initialize media recorder");
         return;
     }
 
