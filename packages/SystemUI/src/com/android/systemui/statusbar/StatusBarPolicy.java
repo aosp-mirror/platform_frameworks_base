@@ -242,30 +242,30 @@ public class StatusBarPolicy {
               R.drawable.stat_sys_data_in_g,
               R.drawable.stat_sys_data_out_g,
               R.drawable.stat_sys_data_inandout_g },
-            { R.drawable.stat_sys_roaming_cdma_0,
-              R.drawable.stat_sys_roaming_cdma_0,
-              R.drawable.stat_sys_roaming_cdma_0,
-              R.drawable.stat_sys_roaming_cdma_0 }
+            { R.drawable.stat_sys_data_fully_connected_g,
+              R.drawable.stat_sys_data_fully_in_g,
+              R.drawable.stat_sys_data_fully_out_g,
+              R.drawable.stat_sys_data_fully_inandout_g }
         };
     private static final int[][] sDataNetType_3g = {
             { R.drawable.stat_sys_data_connected_3g,
               R.drawable.stat_sys_data_in_3g,
               R.drawable.stat_sys_data_out_3g,
               R.drawable.stat_sys_data_inandout_3g },
-            { R.drawable.stat_sys_roaming_cdma_0,
-              R.drawable.stat_sys_roaming_cdma_0,
-              R.drawable.stat_sys_roaming_cdma_0,
-              R.drawable.stat_sys_roaming_cdma_0 }
+            { R.drawable.stat_sys_data_fully_connected_3g,
+              R.drawable.stat_sys_data_fully_in_3g,
+              R.drawable.stat_sys_data_fully_out_3g,
+              R.drawable.stat_sys_data_fully_inandout_3g }
         };
     private static final int[][] sDataNetType_e = {
             { R.drawable.stat_sys_data_connected_e,
               R.drawable.stat_sys_data_in_e,
               R.drawable.stat_sys_data_out_e,
               R.drawable.stat_sys_data_inandout_e },
-            { R.drawable.stat_sys_roaming_cdma_0,
-              R.drawable.stat_sys_roaming_cdma_0,
-              R.drawable.stat_sys_roaming_cdma_0,
-              R.drawable.stat_sys_roaming_cdma_0 }
+            { R.drawable.stat_sys_data_fully_connected_e,
+              R.drawable.stat_sys_data_fully_in_e,
+              R.drawable.stat_sys_data_fully_out_e,
+              R.drawable.stat_sys_data_fully_inandout_e }
         };
     //3.5G
     private static final int[][] sDataNetType_h = {
@@ -273,10 +273,10 @@ public class StatusBarPolicy {
               R.drawable.stat_sys_data_in_h,
               R.drawable.stat_sys_data_out_h,
               R.drawable.stat_sys_data_inandout_h },
-            { R.drawable.stat_sys_roaming_cdma_0,
-              R.drawable.stat_sys_roaming_cdma_0,
-              R.drawable.stat_sys_roaming_cdma_0,
-              R.drawable.stat_sys_roaming_cdma_0 }
+            { R.drawable.stat_sys_data_fully_connected_h,
+              R.drawable.stat_sys_data_fully_in_h,
+              R.drawable.stat_sys_data_fully_out_h,
+              R.drawable.stat_sys_data_fully_inandout_h }
     };
 
     //CDMA
@@ -286,10 +286,10 @@ public class StatusBarPolicy {
               R.drawable.stat_sys_data_in_1x,
               R.drawable.stat_sys_data_out_1x,
               R.drawable.stat_sys_data_inandout_1x },
-            { R.drawable.stat_sys_roaming_cdma_0,
-              R.drawable.stat_sys_roaming_cdma_0,
-              R.drawable.stat_sys_roaming_cdma_0,
-              R.drawable.stat_sys_roaming_cdma_0 }
+            { R.drawable.stat_sys_data_fully_connected_1x,
+              R.drawable.stat_sys_data_fully_in_1x,
+              R.drawable.stat_sys_data_fully_out_1x,
+              R.drawable.stat_sys_data_fully_inandout_1x }
             };
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
@@ -320,10 +320,10 @@ public class StatusBarPolicy {
               R.drawable.stat_sys_wifi_signal_2,
               R.drawable.stat_sys_wifi_signal_3,
               R.drawable.stat_sys_wifi_signal_4 },
-            { R.drawable.stat_sys_data_in_e,
-              R.drawable.stat_sys_data_in_e,
-              R.drawable.stat_sys_data_in_e,
-              R.drawable.stat_sys_data_in_e }
+            { R.drawable.stat_sys_wifi_signal_1_fully,
+              R.drawable.stat_sys_wifi_signal_2_fully,
+              R.drawable.stat_sys_wifi_signal_3_fully,
+              R.drawable.stat_sys_wifi_signal_4_fully }
         };
     private static final int sWifiTemporarilyNotConnectedImage =
             R.drawable.stat_sys_wifi_signal_0;
