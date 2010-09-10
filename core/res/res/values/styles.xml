@@ -443,14 +443,8 @@
         <item name="android:background">@android:drawable/btn_default</item>
     </style>
 
-    <style name="Widget.AutoCompleteTextView">
-        <item name="android:focusable">true</item>
-        <item name="android:focusableInTouchMode">true</item>
-        <item name="android:clickable">true</item>
-        <item name="android:background">@android:drawable/edit_text</item>
+    <style name="Widget.AutoCompleteTextView" parent="Widget.EditText">
         <item name="android:completionHintView">@android:layout/simple_dropdown_hint</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceMediumInverse</item>
-        <item name="android:gravity">center_vertical</item>
         <item name="android:completionThreshold">2</item>
         <item name="android:dropDownSelector">@android:drawable/list_selector_background</item>
         <item name="android:popupBackground">@android:drawable/spinner_dropdown_background</item>

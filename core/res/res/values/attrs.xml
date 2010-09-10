@@ -4094,4 +4094,9 @@
         <attr name="closeButtonStyle" format="reference" />
     </declare-styleable>
 
+    <declare-styleable name="SearchView">
+        <!-- The default state of the SearchView. If true, it will be iconified when not in
+             use and expanded when clicked. -->
+        <attr name="iconifiedByDefault" format="boolean"/>
+    </declare-styleable>
 </resources>
