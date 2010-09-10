@@ -529,7 +529,7 @@
         <item name="android:fadingEdge">vertical</item>
         <item name="listSelector">@android:drawable/menu_selector</item>
         <!-- Light background for the list in menus, so the divider for bright themes -->
-        <item name="android:divider">@android:drawable/divider_horizontal_bright</item>
+        <item name="android:divider">@android:drawable/divider_horizontal_dark</item>
     </style>
 
     <style name="Widget.GridView" parent="Widget.AbsListView">
@@ -700,7 +700,7 @@
     </style>
 
     <style name="TextAppearance.Widget.IconMenu.Item" parent="TextAppearance.Small">
-        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColor">?textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Widget.EditText">
