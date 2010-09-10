@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.net.rtp.AudioGroup;
 import android.net.rtp.AudioStream;
 import android.net.sip.SipAudioCall;
+import android.net.sip.SipErrorCode;
 import android.net.sip.SipManager;
 import android.net.sip.SipProfile;
 import android.net.sip.SipSessionState;
@@ -636,16 +637,15 @@ public class SipPhone extends SipPhoneBase {
             }
 
             @Override
-            protected void onError(String errorMessage) {
-                Log.w(LOG_TAG, "SIP error: " + errorMessage);
+            protected void onError(DisconnectCause cause) {
+                Log.w(LOG_TAG, "SIP error: " + cause);
                 if (mSipAudioCall.isInCall()) {
                     // Don't end the call when in call.
                     // TODO: how to deliver the error to PhoneApp
                     return;
                 }
 
-                // FIXME: specify error
-                onCallEnded(DisconnectCause.ERROR_UNSPECIFIED);
+                onCallEnded(cause);
             }
         };
 
@@ -806,7 +806,7 @@ public class SipPhone extends SipPhoneBase {
 
     private abstract class SipAudioCallAdapter extends SipAudioCall.Adapter {
         protected abstract void onCallEnded(Connection.DisconnectCause cause);
-        protected abstract void onError(String errorMessage);
+        protected abstract void onError(Connection.DisconnectCause cause);
 
         @Override
         public void onCallEnded(SipAudioCall call) {
@@ -819,8 +819,24 @@ public class SipPhone extends SipPhoneBase {
         }
 
         @Override
-        public void onError(SipAudioCall call, String errorMessage) {
-            onError(errorMessage);
+        public void onError(SipAudioCall call, String errorCode,
+                String errorMessage) {
+            switch (Enum.valueOf(SipErrorCode.class, errorCode)) {
+                case INVALID_REMOTE_URI:
+                    onError(Connection.DisconnectCause.INVALID_NUMBER);
+                    break;
+                case TIME_OUT:
+                    onError(Connection.DisconnectCause.CONGESTION);
+                    break;
+                case INVALID_CREDENTIALS:
+                    onError(Connection.DisconnectCause.INVALID_CREDENTIALS);
+                    break;
+                case SOCKET_ERROR:
+                case SERVER_ERROR:
+                case CLIENT_ERROR:
+                default:
+                    onError(Connection.DisconnectCause.ERROR_UNSPECIFIED);
+            }
         }
     }
 }
