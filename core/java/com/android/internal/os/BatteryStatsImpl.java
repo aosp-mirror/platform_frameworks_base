@@ -3633,7 +3633,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             if (pid >= 0 && type == WAKE_TYPE_PARTIAL) {
                 Pid p = getPidStatsLocked(pid);
-                p.mWakeStart = SystemClock.elapsedRealtime();
+                if (p.mWakeStart == 0) {
+                    p.mWakeStart = SystemClock.elapsedRealtime();
+                }
             }
         }
 
@@ -3644,7 +3646,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             if (pid >= 0 && type == WAKE_TYPE_PARTIAL) {
                 Pid p = mPids.get(pid);
-                if (p != null) {
+                if (p != null && p.mWakeStart != 0) {
                     p.mWakeSum += SystemClock.elapsedRealtime() - p.mWakeStart;
                     p.mWakeStart = 0;
                 }
