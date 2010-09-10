@@ -34,8 +34,6 @@ import java.util.List;
  * {@hide}
  */
 public class MediaFile {
-    // comma separated list of all file extensions supported by the media scanner
-    public final static String sFileExtensions;
 
     // Audio file types
     public static final int FILE_TYPE_MP3     = 1;
@@ -191,52 +189,63 @@ public class MediaFile {
         addFileType("M3U", FILE_TYPE_M3U, "audio/x-mpegurl", MtpConstants.FORMAT_M3U_PLAYLIST);
         addFileType("PLS", FILE_TYPE_PLS, "audio/x-scpls", MtpConstants.FORMAT_PLS_PLAYLIST);
         addFileType("WPL", FILE_TYPE_WPL, "application/vnd.ms-wpl", MtpConstants.FORMAT_WPL_PLAYLIST);
-
-        // compute file extensions list for native Media Scanner
-        StringBuilder builder = new StringBuilder();
-        Iterator<String> iterator = sFileTypeMap.keySet().iterator();
-        
-        while (iterator.hasNext()) {
-            if (builder.length() > 0) {
-                builder.append(',');
-            }
-            builder.append(iterator.next());
-        } 
-        sFileExtensions = builder.toString();
     }
-    
+
     public static boolean isAudioFileType(int fileType) {
         return ((fileType >= FIRST_AUDIO_FILE_TYPE &&
                 fileType <= LAST_AUDIO_FILE_TYPE) ||
                 (fileType >= FIRST_MIDI_FILE_TYPE &&
                 fileType <= LAST_MIDI_FILE_TYPE));
     }
-    
+
     public static boolean isVideoFileType(int fileType) {
         return (fileType >= FIRST_VIDEO_FILE_TYPE &&
                 fileType <= LAST_VIDEO_FILE_TYPE);
     }
-    
+
     public static boolean isImageFileType(int fileType) {
         return (fileType >= FIRST_IMAGE_FILE_TYPE &&
                 fileType <= LAST_IMAGE_FILE_TYPE);
     }
-    
+
     public static boolean isPlayListFileType(int fileType) {
         return (fileType >= FIRST_PLAYLIST_FILE_TYPE &&
                 fileType <= LAST_PLAYLIST_FILE_TYPE);
     }
-    
+
     public static MediaFileType getFileType(String path) {
         int lastDot = path.lastIndexOf(".");
         if (lastDot < 0)
             return null;
         return sFileTypeMap.get(path.substring(lastDot + 1).toUpperCase());
     }
-    
+
+    // generates a title based on file name
+    public static String getFileTitle(String path) {
+        // extract file name after last slash
+        int lastSlash = path.lastIndexOf('/');
+        if (lastSlash >= 0) {
+            lastSlash++;
+            if (lastSlash < path.length()) {
+                path = path.substring(lastSlash);
+            }
+        }
+        // truncate the file extension (if any)
+        int lastDot = path.lastIndexOf('.');
+        if (lastDot > 0) {
+            path = path.substring(0, lastDot);
+        }
+        return path;
+    }
+
     public static int getFileTypeForMimeType(String mimeType) {
         Integer value = sMimeTypeMap.get(mimeType);
         return (value == null ? 0 : value.intValue());
+    }
+
+    public static String getMimeTypeForFile(String path) {
+        MediaFileType mediaFileType = getFileType(path);
+        return (mediaFileType == null ? null : mediaFileType.mimeType);
     }
 
     public static int getFormatCode(String fileName, String mimeType) {
