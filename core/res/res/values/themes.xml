@@ -521,5 +521,12 @@
         <item name="android:windowAnimationStyle">@android:style/Animation.RecentApplications</item>
         <item name="android:textColor">@android:color/secondary_text_nofocus</item>
     </style>
+
+    <!-- Default theme for window that looks like a toast. -->
+    <style name="Theme.Toast" parent="@android:style/Theme.Dialog">
+        <item name="android:windowBackground">@android:drawable/toast_frame</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Toast</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
     
 </resources>
