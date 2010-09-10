@@ -173,7 +173,7 @@ public class CamcorderProfile
      * @see #get(int, int)
      */
     public static CamcorderProfile get(int quality) {
-        return get(0, quality);
+        return get(android.hardware.Camera.CAMERA_ID_DEFAULT, quality);
     }
 
     /**
@@ -203,6 +203,27 @@ public class CamcorderProfile
             throw new IllegalArgumentException(errMessage);
         }
         return native_get_camcorder_profile(cameraId, quality);
+    }
+
+    /**
+     * Returns true if camcorder profile exists for the default camera at
+     * the given quality level.
+     * @param quality the target quality level for the camcorder profile
+     * @hide
+     */
+    public static boolean hasProfile(int quality) {
+        return hasProfile(android.hardware.Camera.CAMERA_ID_DEFAULT, quality);
+    }
+
+    /**
+     * Returns true if camcorder profile exists for the given camera at
+     * the given quality level.
+     * @param cameraId the id for the camera
+     * @param quality the target quality level for the camcorder profile
+     * @hide
+     */
+    public static boolean hasProfile(int cameraId, int quality) {
+        return native_has_camcorder_profile(cameraId, quality);
     }
 
     static {
@@ -241,5 +262,7 @@ public class CamcorderProfile
     // Methods implemented by JNI
     private static native final void native_init();
     private static native final CamcorderProfile native_get_camcorder_profile(
+            int cameraId, int quality);
+    private static native final boolean native_has_camcorder_profile(
             int cameraId, int quality);
 }

@@ -79,6 +79,12 @@ public:
                                        camcorder_quality quality) const;
 
     /**
+     * Returns true if a profile for the given camera at the given quality exists,
+     * or false if not.
+     */
+    bool hasCamcorderProfile(int cameraId, camcorder_quality quality) const;
+
+    /**
      * Returns the output file formats supported.
      */
     Vector<output_format> getOutputFileFormats() const;
@@ -262,6 +268,8 @@ private:
         int mCameraId;
         Vector<int> mLevels;
     };
+
+    int getCamcorderProfileIndex(int cameraId, camcorder_quality quality) const;
 
     // Debug
     static void logVideoCodec(const VideoCodec& codec);
