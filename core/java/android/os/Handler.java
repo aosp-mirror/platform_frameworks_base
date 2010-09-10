@@ -58,7 +58,7 @@ import java.lang.reflect.Modifier;
  * they create.  You can create your own threads, and communicate back with
  * the main application thread through a Handler.  This is done by calling
  * the same <em>post</em> or <em>sendMessage</em> methods as before, but from
- * your new thread.  The given Runnable or Message will than be scheduled
+ * your new thread.  The given Runnable or Message will then be scheduled
  * in the Handler's message queue and processed when appropriate.
  */
 public class Handler {
