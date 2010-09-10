@@ -288,10 +288,6 @@
     <string name="permdesc_readContacts" msgid="3371591512896545975">"Consente la lettura da parte di un\'applicazione di tutti i dati (gli indirizzi) di contatto memorizzati sul telefono. Le applicazioni dannose possono sfruttare questa possibilità per inviare i dati ad altre persone."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"scrittura dati di contatto"</string>
     <string name="permdesc_writeContacts" msgid="3924383579108183601">"Consente a un\'applicazione di modificare i dati (gli indirizzi) di contatto memorizzati sul telefono. Le applicazioni dannose possono sfruttare questa possibilità per cancellare o modificare i dati di contatto."</string>
-    <string name="permlab_writeOwnerData" msgid="4892555913849295393">"scrittura dati proprietario"</string>
-    <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Consente a un\'applicazione di modificare i dati del proprietario del telefono memorizzati sul telefono. Le applicazioni dannose possono sfruttare questa possibilità per cancellare o modificare tali dati."</string>
-    <string name="permlab_readOwnerData" msgid="6668525984731523563">"lettura dati proprietario"</string>
-    <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Consente a un\'applicazione di leggere i dati del proprietario del telefono memorizzati sul telefono. Le applicazioni dannose possono sfruttare questa possibilità per leggere tali dati."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"leggere eventi di calendario"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Consente la lettura da parte di un\'applicazione di tutti gli eventi di calendario memorizzati sul telefono. Le applicazioni dannose possono sfruttare questa possibilità per inviare i tuoi eventi di calendario ad altre persone."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"aggiungere o modificare eventi di calendario e inviare email agli invitati"</string>
@@ -443,8 +439,8 @@
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Cellulare"</item>
-    <item msgid="7897544654242874543">"Ufficio"</item>
-    <item msgid="1103601433382158155">"Fax ufficio"</item>
+    <item msgid="7897544654242874543">"Lavoro"</item>
+    <item msgid="1103601433382158155">"Fax lavoro"</item>
     <item msgid="1735177144948329370">"Fax casa"</item>
     <item msgid="603878674477207394">"Cercapersone"</item>
     <item msgid="1650824275177931637">"Altro"</item>
@@ -452,24 +448,24 @@
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Casa"</item>
-    <item msgid="7084237356602625604">"Ufficio"</item>
+    <item msgid="7084237356602625604">"Lavoro"</item>
     <item msgid="1112044410659011023">"Altro"</item>
     <item msgid="2374913952870110618">"Personalizzato"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"Casa"</item>
-    <item msgid="5629153956045109251">"Ufficio"</item>
+    <item msgid="5629153956045109251">"Lavoro"</item>
     <item msgid="4966604264500343469">"Altro"</item>
     <item msgid="4932682847595299369">"Personalizzato"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"Casa"</item>
-    <item msgid="1359644565647383708">"Uffico"</item>
+    <item msgid="1359644565647383708">"Lavoro"</item>
     <item msgid="7868549401053615677">"Altro"</item>
     <item msgid="3145118944639869809">"Personalizzato"</item>
   </string-array>
   <string-array name="organizationTypes">
-    <item msgid="7546335612189115615">"Ufficio"</item>
+    <item msgid="7546335612189115615">"Lavoro"</item>
     <item msgid="4378074129049520373">"Altro"</item>
     <item msgid="3455047468583965104">"Personalizzato"</item>
   </string-array>
@@ -486,8 +482,8 @@
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Personalizzato"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"Casa"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Cellulare"</string>
-    <string name="phoneTypeWork" msgid="8863939667059911633">"Ufficio"</string>
-    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Fax ufficio"</string>
+    <string name="phoneTypeWork" msgid="8863939667059911633">"Lavoro"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Fax lavoro"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Fax casa"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Cercapersone"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Altro"</string>
@@ -501,7 +497,7 @@
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Telex"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Cellulare lavoro"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Cercapersone ufficio"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Cercapersone lavoro"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Assistente"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Compleanno"</string>
@@ -509,16 +505,16 @@
     <string name="eventTypeOther" msgid="5834288791948564594">"Evento"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Personalizzato"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Casa"</string>
-    <string name="emailTypeWork" msgid="3548058059601149973">"Ufficio"</string>
+    <string name="emailTypeWork" msgid="3548058059601149973">"Lavoro"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Altro"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Cellulare"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Personalizzato"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Casa"</string>
-    <string name="postalTypeWork" msgid="5268172772387694495">"Ufficio"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"Lavoro"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Altro"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Personalizzato"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"Casa"</string>
-    <string name="imTypeWork" msgid="1371489290242433090">"Ufficio"</string>
+    <string name="imTypeWork" msgid="1371489290242433090">"Lavoro"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Altro"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"Personalizzato"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
@@ -530,7 +526,7 @@
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
-    <string name="orgTypeWork" msgid="29268870505363872">"Ufficio"</string>
+    <string name="orgTypeWork" msgid="29268870505363872">"Lavoro"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Altro"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Personalizzato"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Inserisci il PIN"</string>
@@ -713,13 +709,10 @@
     <string name="copy" msgid="2681946229533511987">"Copia"</string>
     <string name="paste" msgid="5629880836805036433">"Incolla"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Copia URL"</string>
-    <!-- no translation found for selectTextMode (6738556348861347240) -->
-    <skip />
-    <!-- no translation found for textSelectionCABTitle (5236850394370820357) -->
-    <skip />
+    <string name="selectTextMode" msgid="6738556348861347240">"Seleziona testo..."</string>
+    <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selezione testo"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Metodo inserimento"</string>
-    <!-- no translation found for editTextMenuTitle (4909135564941815494) -->
-    <skip />
+    <string name="editTextMenuTitle" msgid="4909135564941815494">"Azioni testo"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Spazio in esaurimento"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"Spazio di archiviazione del telefono in esaurimento."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
@@ -746,6 +739,12 @@
     <string name="force_close" msgid="3653416315450806396">"Termina"</string>
     <string name="report" msgid="4060218260984795706">"Segnala"</string>
     <string name="wait" msgid="7147118217226317732">"Attendi"</string>
+    <!-- no translation found for launch_warning_title (8323761616052121936) -->
+    <skip />
+    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
+    <skip />
+    <!-- no translation found for launch_warning_original (188102023021668683) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"L\'applicazione <xliff:g id="APPLICATION">%1$s</xliff:g> (processo <xliff:g id="PROCESS">%2$s</xliff:g>) ha violato la norma StrictMode autoimposta."</string>
     <string name="smv_process" msgid="5120397012047462446">"Il processo <xliff:g id="PROCESS">%1$s</xliff:g> ha violato la norma StrictMode autoimposta."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> in esecuzione"</string>
@@ -876,4 +875,10 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Tocca per informazioni sull\'utilizzo dati cell."</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Limite dati cell. superato"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Tocca per informazioni sull\'utilizzo dati cell."</string>
+    <!-- no translation found for no_matches (8129421908915840737) -->
+    <skip />
+    <!-- no translation found for find_on_page (1946799233822820384) -->
+    <skip />
+    <!-- no translation found for matches_found:one (8167147081136579439) -->
+    <!-- no translation found for matches_found:other (4641872797067609177) -->
 </resources>

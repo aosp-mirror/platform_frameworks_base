@@ -288,10 +288,6 @@
     <string name="permdesc_readContacts" msgid="3371591512896545975">"允许应用程序读取您手机上存储的所有联系人（地址）数据。恶意应用程序可借此将您的数据发送给其他人。"</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"写入联系数据"</string>
     <string name="permdesc_writeContacts" msgid="3924383579108183601">"允许应用程序修改您手机上存储的联系人（地址）数据。恶意应用程序可借此清除或修改您的联系人数据。"</string>
-    <string name="permlab_writeOwnerData" msgid="4892555913849295393">"写入所有者数据"</string>
-    <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"允许应用程序修改您手机上存储的手机所有者数据。恶意应用程序可借此清除或修改所有者数据。"</string>
-    <string name="permlab_readOwnerData" msgid="6668525984731523563">"读取所有者数据"</string>
-    <string name="permdesc_readOwnerData" msgid="3088486383128434507">"允许应用程序读取您手机上存储的手机所有者数据。恶意应用程序可借此读取手机所有者数据。"</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"读取日历活动"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"允许应用程序读取您手机上存储的所有日历活动。恶意应用程序可借此将您的日历活动发送给其他人。"</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"添加或修改日历活动以及向邀请对象发送电子邮件"</string>
@@ -713,13 +709,10 @@
     <string name="copy" msgid="2681946229533511987">"复制"</string>
     <string name="paste" msgid="5629880836805036433">"粘贴"</string>
     <string name="copyUrl" msgid="2538211579596067402">"复制网址"</string>
-    <!-- no translation found for selectTextMode (6738556348861347240) -->
-    <skip />
-    <!-- no translation found for textSelectionCABTitle (5236850394370820357) -->
-    <skip />
+    <string name="selectTextMode" msgid="6738556348861347240">"选择文字..."</string>
+    <string name="textSelectionCABTitle" msgid="5236850394370820357">"文字选择"</string>
     <string name="inputMethod" msgid="1653630062304567879">"输入法"</string>
-    <!-- no translation found for editTextMenuTitle (4909135564941815494) -->
-    <skip />
+    <string name="editTextMenuTitle" msgid="4909135564941815494">"文字操作"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"存储空间不足"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"手机内存空间所剩不多了。"</string>
     <string name="ok" msgid="5970060430562524910">"确定"</string>
@@ -746,6 +739,12 @@
     <string name="force_close" msgid="3653416315450806396">"强行关闭"</string>
     <string name="report" msgid="4060218260984795706">"报告"</string>
     <string name="wait" msgid="7147118217226317732">"等待"</string>
+    <!-- no translation found for launch_warning_title (8323761616052121936) -->
+    <skip />
+    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
+    <skip />
+    <!-- no translation found for launch_warning_original (188102023021668683) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"应用程序<xliff:g id="APPLICATION">%1$s</xliff:g>（<xliff:g id="PROCESS">%2$s</xliff:g> 进程）违反了自我强制执行的严格模式 (StrictMode) 政策。"</string>
     <string name="smv_process" msgid="5120397012047462446">"进程 <xliff:g id="PROCESS">%1$s</xliff:g> 违反了自我强制执行的严格模式 (StrictMode) 政策。"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g>正在运行"</string>
@@ -876,4 +875,10 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"轻触以了解有关手机流量详情"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"已超出手机数据上限"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"轻触以了解有关手机流量详情"</string>
+    <!-- no translation found for no_matches (8129421908915840737) -->
+    <skip />
+    <!-- no translation found for find_on_page (1946799233822820384) -->
+    <skip />
+    <!-- no translation found for matches_found:one (8167147081136579439) -->
+    <!-- no translation found for matches_found:other (4641872797067609177) -->
 </resources>

@@ -288,10 +288,6 @@
     <string name="permdesc_readContacts" msgid="3371591512896545975">"Umožňuje aplikaci načíst všechna data kontaktů (adresy) uložená ve vašem telefonu. Škodlivé aplikace poté mohou dalším lidem odeslat vaše data."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"zápis dat kontaktů"</string>
     <string name="permdesc_writeContacts" msgid="3924383579108183601">"Umožňuje aplikaci změnit kontaktní údaje (adresu) uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit kontaktní údaje."</string>
-    <string name="permlab_writeOwnerData" msgid="4892555913849295393">"zápis informací o vlastníkovi"</string>
-    <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Umožňuje aplikaci změnit informace o vlastníkovi telefonu uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit informace o vlastníkovi."</string>
-    <string name="permlab_readOwnerData" msgid="6668525984731523563">"čtení informací o vlastníkovi"</string>
-    <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Umožňuje aplikaci číst informace o vlastníkovi telefonu uložená v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení načíst informace o vlastníkovi."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"Čtení událostí v kalendáři"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Umožňuje aplikaci načíst všechny události kalendáře uložené ve vašem telefonu. Škodlivé aplikace poté mohou dalším lidem odeslat události z vašeho kalendáře."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"Přidávání nebo úprava událostí v kalendáři a odesílání e-mailů hostům"</string>
@@ -713,13 +709,10 @@
     <string name="copy" msgid="2681946229533511987">"Kopírovat"</string>
     <string name="paste" msgid="5629880836805036433">"Vložit"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Kopírovat adresu URL"</string>
-    <!-- no translation found for selectTextMode (6738556348861347240) -->
-    <skip />
-    <!-- no translation found for textSelectionCABTitle (5236850394370820357) -->
-    <skip />
+    <string name="selectTextMode" msgid="6738556348861347240">"Vybrat text..."</string>
+    <string name="textSelectionCABTitle" msgid="5236850394370820357">"Výběr textu"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Metoda zadávání dat"</string>
-    <!-- no translation found for editTextMenuTitle (4909135564941815494) -->
-    <skip />
+    <string name="editTextMenuTitle" msgid="4909135564941815494">"Operace s textem"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Málo paměti"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"V telefonu zbývá málo místa pro ukládání dat."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
@@ -746,6 +739,12 @@
     <string name="force_close" msgid="3653416315450806396">"Ukončit aplikaci"</string>
     <string name="report" msgid="4060218260984795706">"Nahlásit"</string>
     <string name="wait" msgid="7147118217226317732">"Počkat"</string>
+    <!-- no translation found for launch_warning_title (8323761616052121936) -->
+    <skip />
+    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
+    <skip />
+    <!-- no translation found for launch_warning_original (188102023021668683) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"Aplikace <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) porušila své vlastní vynucené zásady StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> porušil své vlastní vynucené zásady StrictMode."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Běží aplikace <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -876,4 +875,10 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Dotykem zobrazíte další informace o využití mobilních dat"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Byl překročen limit mobilních dat"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Dotykem zobrazíte další informace o využití mobilních dat"</string>
+    <!-- no translation found for no_matches (8129421908915840737) -->
+    <skip />
+    <!-- no translation found for find_on_page (1946799233822820384) -->
+    <skip />
+    <!-- no translation found for matches_found:one (8167147081136579439) -->
+    <!-- no translation found for matches_found:other (4641872797067609177) -->
 </resources>
