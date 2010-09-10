@@ -1376,13 +1376,13 @@ public final class BatteryStatsImpl extends BatteryStats {
                 for (int i=0; i<N; i++) {
                     StopwatchTimer st = mPartialTimers.get(i);
                     if (st.mInList) {
-                        int myUTime = utime/num;
-                        int mySTime = stime/num;
-                        utime -= myUTime;
-                        stime -= mySTime;
-                        num--;
                         Uid uid = st.mUid;
                         if (uid != null && uid.mUid != Process.SYSTEM_UID) {
+                            int myUTime = utime/num;
+                            int mySTime = stime/num;
+                            utime -= myUTime;
+                            stime -= mySTime;
+                            num--;
                             Uid.Proc proc = uid.getProcessStatsLocked("*wakelock*");
                             proc.addCpuTimeLocked(myUTime, mySTime);
                             proc.addSpeedStepTimes(cpuSpeedTimes);
