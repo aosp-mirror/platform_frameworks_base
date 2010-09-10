@@ -284,7 +284,7 @@ public final class CacheManager {
     // only called from WebCore Thread
     // make sure to call startCacheTransaction/endCacheTransaction in pair
     /**
-     * @deprecated
+     * @deprecated Always returns false.
      */
     @Deprecated
     public static boolean startCacheTransaction() {
@@ -294,7 +294,7 @@ public final class CacheManager {
     // only called from WebCore Thread
     // make sure to call startCacheTransaction/endCacheTransaction in pair
     /**
-     * @deprecated
+     * @deprecated Always returns false.
      */
     @Deprecated
     public static boolean endCacheTransaction() {
