@@ -288,10 +288,6 @@
     <string name="permdesc_readContacts" msgid="3371591512896545975">"Позволяет приложению считывать все данные контактов (адресов), сохраненные в памяти телефона. Вредоносные приложения могут использовать эту возможность для передачи данных посторонним лицам."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"перезаписывать данные контакта"</string>
     <string name="permdesc_writeContacts" msgid="3924383579108183601">"Позволяет приложению изменять данные (адрес) контакта, сохраненные в памяти телефона. Вредоносные приложения могут использовать эту возможность для удаления или изменения данных контакта."</string>
-    <string name="permlab_writeOwnerData" msgid="4892555913849295393">"перезаписывать данные о владельце"</string>
-    <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Позволяет приложению изменять сведения о владельце, сохраненные на телефоне. Вредоносные приложения могут использовать эту возможность для удаления или изменения данных владельца."</string>
-    <string name="permlab_readOwnerData" msgid="6668525984731523563">"считывать данные о владельце"</string>
-    <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Позволяет приложению считывать сведения о владельце, сохраненные в памяти телефона. Вредоносные приложения могут использовать эту возможность для считывания данных владельца."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"считывать мероприятия в календаре"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Позволяет приложению считывать все события календаря, сохраненные на телефоне. Вредоносные приложения могут использовать эту возможность для передачи ваших событий календаря посторонним лицам."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"добавлять и изменять мероприятия в календаре и отправлять письма гостям"</string>
@@ -736,6 +732,12 @@
     <string name="force_close" msgid="3653416315450806396">"Закрыть"</string>
     <string name="report" msgid="4060218260984795706">"Отчет"</string>
     <string name="wait" msgid="7147118217226317732">"Подождать"</string>
+    <!-- no translation found for launch_warning_title (8323761616052121936) -->
+    <skip />
+    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
+    <skip />
+    <!-- no translation found for launch_warning_original (188102023021668683) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"Приложение <xliff:g id="APPLICATION">%1$s</xliff:g> (процесс <xliff:g id="PROCESS">%2$s</xliff:g>) нарушило собственную политику StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Процесс <xliff:g id="PROCESS">%1$s</xliff:g> нарушил собственную политику StrictMode."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Приложение <xliff:g id="APP">%1$s</xliff:g> запущено"</string>

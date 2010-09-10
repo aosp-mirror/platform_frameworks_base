@@ -288,10 +288,6 @@
     <string name="permdesc_readContacts" msgid="3371591512896545975">"Permet à une application de lire toutes les données des contacts (adresses) enregistrées sur votre téléphone. Des applications malveillantes peuvent utiliser cette fonctionnalité pour envoyer vos données à d\'autres personnes."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"Édition des données d\'un contact"</string>
     <string name="permdesc_writeContacts" msgid="3924383579108183601">"Permet à une application de modifier toutes les données de contact (adresses) enregistrées sur le téléphone. Des applications malveillantes peuvent utiliser cette fonctionnalité pour effacer ou modifier vos données de contact."</string>
-    <string name="permlab_writeOwnerData" msgid="4892555913849295393">"Édition les données du propriétaire"</string>
-    <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Permet à une application de modifier les données du propriétaire du téléphone enregistrées sur votre appareil. Des applications malveillantes peuvent utiliser cette fonctionnalité pour effacer ou modifier ces données."</string>
-    <string name="permlab_readOwnerData" msgid="6668525984731523563">"Lecture des données du propriétaire"</string>
-    <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Permet à une application de lire les données du propriétaire du téléphone enregistrées sur votre appareil. Des applications malveillantes peuvent utiliser cette fonctionnalité pour lire ces données."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"lire des événements de l\'agenda"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Permet à une application de lire tous les événements de l\'agenda enregistrés sur votre téléphone. Des applications malveillantes peuvent utiliser cette fonctionnalité pour envoyer les événements de votre agenda à d\'autres personnes."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"ajouter ou modifier des événements d\'agenda et envoyer des e-mails aux invités"</string>
@@ -736,6 +732,12 @@
     <string name="force_close" msgid="3653416315450806396">"Forcer la fermeture"</string>
     <string name="report" msgid="4060218260984795706">"Rapport"</string>
     <string name="wait" msgid="7147118217226317732">"Attendre"</string>
+    <!-- no translation found for launch_warning_title (8323761616052121936) -->
+    <skip />
+    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
+    <skip />
+    <!-- no translation found for launch_warning_original (188102023021668683) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"L\'application <xliff:g id="APPLICATION">%1$s</xliff:g> (processus <xliff:g id="PROCESS">%2$s</xliff:g>) a enfreint ses propres règles du mode strict."</string>
     <string name="smv_process" msgid="5120397012047462446">"Le processus <xliff:g id="PROCESS">%1$s</xliff:g> a enfreint ses propres règles du mode strict."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> en cours d\'exécution"</string>

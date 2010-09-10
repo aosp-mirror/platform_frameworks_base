@@ -288,10 +288,6 @@
     <string name="permdesc_readContacts" msgid="3371591512896545975">"Hiermee kan een toepassing alle contactgegevens (adresgegevens) zien die op uw telefoon zijn opgeslagen. Schadelijke toepassingen kunnen hiervan gebruik maken om uw gegevens te verzenden naar andere personen."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"contactgegevens schrijven"</string>
     <string name="permdesc_writeContacts" msgid="3924383579108183601">"Hiermee kan een toepassing de op uw telefoon opgeslagen contactgegevens (adresgegevens) wijzigen. Schadelijke toepassingen kunnen hiermee uw contactgegevens verwijderen of wijzigen."</string>
-    <string name="permlab_writeOwnerData" msgid="4892555913849295393">"gegevens eigenaar schrijven"</string>
-    <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Hiermee kan een toepassing de op uw telefoon opgeslagen gegevens van de eigenaar wijzigen. Schadelijke toepassingen kunnen hiermee gegevens van de eigenaar verwijderen of wijzigen."</string>
-    <string name="permlab_readOwnerData" msgid="6668525984731523563">"gegevens eigenaar lezen"</string>
-    <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Hiermee kan een toepassing de op uw telefoon opgeslagen gegevens van de eigenaar lezen. Schadelijke toepassingen kunnen hiermee gegevens van de eigenaar lezen."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"agendagebeurtenissen lezen"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Hiermee kan een toepassing alle agendagebeurtenissen lezen die zijn opgeslagen op uw telefoon. Schadelijke toepassingen kunnen hiervan gebruik maken om uw agendagebeurtenissen te verzenden naar andere personen."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"agendagebeurtenissen toevoegen of aanpassen en e-mail verzenden naar gasten"</string>
@@ -736,6 +732,12 @@
     <string name="force_close" msgid="3653416315450806396">"Nu sluiten"</string>
     <string name="report" msgid="4060218260984795706">"Rapport"</string>
     <string name="wait" msgid="7147118217226317732">"Wachten"</string>
+    <!-- no translation found for launch_warning_title (8323761616052121936) -->
+    <skip />
+    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
+    <skip />
+    <!-- no translation found for launch_warning_original (188102023021668683) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"De toepassing <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) heeft het zelf afgedwongen StrictMode-beleid geschonden."</string>
     <string name="smv_process" msgid="5120397012047462446">"Het proces <xliff:g id="PROCESS">%1$s</xliff:g> heeft het zelf afgedwongen StrictMode-beleid geschonden."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> wordt uitgevoerd"</string>

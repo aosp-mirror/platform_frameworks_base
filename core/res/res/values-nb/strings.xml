@@ -288,10 +288,6 @@
     <string name="permdesc_readContacts" msgid="3371591512896545975">"Lar applikasjonen lese all kontakt- og adresseinformasjon lagret på telefonen. Ondsinnede applikasjoner kan bruke dette til å sende personlige data til andre."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"skrive kontaktinformasjon"</string>
     <string name="permdesc_writeContacts" msgid="3924383579108183601">"Lar applikasjonen endre kontakt- og adresseinformasjon lagret på telefonen. Ondsinnede applikasjoner kan bruke dette til å redigere eller endre kontaktinformasjonen."</string>
-    <string name="permlab_writeOwnerData" msgid="4892555913849295393">"skrive eierinformasjon"</string>
-    <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Lar applikasjonen endre dataene om telefoneieren. Ondsinnede applikasjoner kan bruke dette til å slette eller redigere telefonens eierdata."</string>
-    <string name="permlab_readOwnerData" msgid="6668525984731523563">"lese eierinformasjon"</string>
-    <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Lar applikasjonen lese dataene om telefoneieren. Ondsinnede applikasjoner kan bruke dette til å lese telefonens eierdata."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"les kalenderaktiviteter"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Lar applikasjonen lese alle kalenderhendelser lagret på telefonen. Ondsinnede applikasjoner kan bruke dette til å sende kalenderhendelser til andre."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"legg til eller endre kalenderaktiviteter og send e-postmelding til gjestene"</string>
@@ -736,6 +732,12 @@
     <string name="force_close" msgid="3653416315450806396">"Tving avslutning"</string>
     <string name="report" msgid="4060218260984795706">"Rapportér"</string>
     <string name="wait" msgid="7147118217226317732">"Vent"</string>
+    <!-- no translation found for launch_warning_title (8323761616052121936) -->
+    <skip />
+    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
+    <skip />
+    <!-- no translation found for launch_warning_original (188102023021668683) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"Programmet <xliff:g id="APPLICATION">%1$s</xliff:g> (prosessen <xliff:g id="PROCESS">%2$s</xliff:g>) har brutt de selvpålagte StrictMode-retningslinjene."</string>
     <string name="smv_process" msgid="5120397012047462446">"Prosessen<xliff:g id="PROCESS">%1$s</xliff:g> har brutt de selvpålagte StrictMode-retningslinjene."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> kjører"</string>
