@@ -6592,13 +6592,19 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Utility function for addErrorToDropBox and handleStrictModeViolation's logging
      * to append various headers to the dropbox log text.
      */
-    private static void appendDropBoxProcessHeaders(ProcessRecord process, StringBuilder sb) {
-        if (process == null || process.pid == MY_PID) {
-            sb.append("Process: system_server\n");
-        } else {
-            sb.append("Process: ").append(process.processName).append("\n");
-        }
-        if (process != null) {
+    private void appendDropBoxProcessHeaders(ProcessRecord process, StringBuilder sb) {
+        // Note: ProcessRecord 'process' is guarded by the service
+        // instance.  (notably process.pkgList, which could otherwise change
+        // concurrently during execution of this method)
+        synchronized (this) {
+            if (process == null || process.pid == MY_PID) {
+                sb.append("Process: system_server\n");
+            } else {
+                sb.append("Process: ").append(process.processName).append("\n");
+            }
+            if (process == null) {
+                return;
+            }
             int flags = process.info.flags;
             IPackageManager pm = AppGlobals.getPackageManager();
             sb.append("Flags: 0x").append(Integer.toString(flags, 16)).append("\n");
