@@ -18,8 +18,7 @@ package android.app;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.os.Handler;
@@ -363,11 +362,7 @@ final class FragmentManagerImpl implements FragmentManager {
                                     Animator anim = loadAnimator(f, transit, true,
                                             transitionStyle);
                                     if (anim != null) {
-                                        if (anim instanceof AnimatorSet) {
-                                            ((AnimatorSet)anim).setTarget(f.mView);
-                                        } else if (anim instanceof ObjectAnimator) {
-                                            ((ObjectAnimator)anim).setTarget(f.mView);
-                                        }
+                                        anim.setTarget(f.mView);
                                         anim.start();
                                     }
                                     container.addView(f.mView);
@@ -447,17 +442,24 @@ final class FragmentManagerImpl implements FragmentManager {
                                     + " did not call through to super.onDestroyedView()");
                         }
                         if (f.mView != null && f.mContainer != null) {
+                            Animator anim = null;
                             if (mCurState > Fragment.INITIALIZING) {
-                                Animator anim = loadAnimator(f, transit, true,
+                                anim = loadAnimator(f, transit, false,
                                         transitionStyle);
-                                if (anim != null) {
-                                    if (anim instanceof AnimatorSet) {
-                                        ((AnimatorSet)anim).setTarget(f.mView);
-                                    } else if (anim instanceof ObjectAnimator) {
-                                        ((ObjectAnimator)anim).setTarget(f.mView);
+                            }
+                            if (anim != null) {
+                                final ViewGroup container = f.mContainer;
+                                final View view = f.mView;
+                                container.startViewTransition(view);
+                                anim.addListener(new AnimatorListenerAdapter() {
+                                    @Override
+                                    public void onAnimationEnd(Animator anim) {
+                                        container.endViewTransition(view);
                                     }
-                                    anim.start();
-                                }
+                                });
+                                anim.setTarget(f.mView);
+                                anim.start();
+
                             }
                             f.mContainer.removeView(f.mView);
                         }
@@ -591,11 +593,7 @@ final class FragmentManagerImpl implements FragmentManager {
                 Animator anim = loadAnimator(fragment, transition, true,
                         transitionStyle);
                 if (anim != null) {
-                    if (anim instanceof AnimatorSet) {
-                        ((AnimatorSet)anim).setTarget(fragment.mView);
-                    } else if (anim instanceof ObjectAnimator) {
-                        ((ObjectAnimator)anim).setTarget(fragment.mView);
-                    }
+                    anim.setTarget(fragment.mView);
                     anim.start();
                 }
                 fragment.mView.setVisibility(View.GONE);
@@ -615,11 +613,7 @@ final class FragmentManagerImpl implements FragmentManager {
                 Animator anim = loadAnimator(fragment, transition, true,
                         transitionStyle);
                 if (anim != null) {
-                    if (anim instanceof AnimatorSet) {
-                        ((AnimatorSet)anim).setTarget(fragment.mView);
-                    } else if (anim instanceof ObjectAnimator) {
-                        ((ObjectAnimator)anim).setTarget(fragment.mView);
-                    }
+                    anim.setTarget(fragment.mView);
                     anim.start();
                 }
                 fragment.mView.setVisibility(View.VISIBLE);
