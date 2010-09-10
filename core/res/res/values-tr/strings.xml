@@ -288,10 +288,6 @@
     <string name="permdesc_readContacts" msgid="3371591512896545975">"Uygulamaların telefonunuzda depolanan tüm kişi (adres) verilerini okumasına izin verir. Kötü amaçlı uygulamalar bu işlevi verilerinizi başkalarına göndermek için kullanabilir."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"kişi verileri yaz"</string>
     <string name="permdesc_writeContacts" msgid="3924383579108183601">"Uygulamaların telefonunuzda depolanan kişi (adres) verilerini değiştirmesine izin verir. Kötü amaçlı uygulamalar bu işlevi kişi verilerinizi silmek veya değiştirmek için kullanabilir."</string>
-    <string name="permlab_writeOwnerData" msgid="4892555913849295393">"sahip verilerini yaz"</string>
-    <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Uygulamaların telefonunuzda depolanan telefon sahibi verilerini değiştirmesine izin verir. Kötü amaçlı uygulamalar bu işlevi kullanıcı verilerini silmek veya değiştirmek için kullanabilir."</string>
-    <string name="permlab_readOwnerData" msgid="6668525984731523563">"sahip verilerini oku"</string>
-    <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Uygulamaların telefonunuzda depolanan telefon sahibi verilerini okumasına izin verir. Kötü amaçlı uygulamalar bunu telefon sahibi verilerini okumak için kullanabilir."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"takvim etkinliklerini oku"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Uygulamaların telefonunuzda depolanan takvim etkinliklerinin tümünü okumasına izin verir. Kötü amaçlı uygulamalar bunu, takvim etkinliklerinizi başkalarına göndermek için kullanabilir."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"takvim etkinlikleri ekle veya değiştir ve konuklara e-posta gönder"</string>
@@ -736,6 +732,12 @@
     <string name="force_close" msgid="3653416315450806396">"Kapanmaya zorla"</string>
     <string name="report" msgid="4060218260984795706">"Rapor"</string>
     <string name="wait" msgid="7147118217226317732">"Bekle"</string>
+    <!-- no translation found for launch_warning_title (8323761616052121936) -->
+    <skip />
+    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
+    <skip />
+    <!-- no translation found for launch_warning_original (188102023021668683) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"<xliff:g id="APPLICATION">%1$s</xliff:g> uygulaması (<xliff:g id="PROCESS">%2$s</xliff:g> işlemi) kendiliğinden uyguladığı StrictMode politikasını ihlal etti."</string>
     <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> işlemi kendiliğinden uyguladığı StrictMode politikasını ihlal etti."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> çalışıyor"</string>

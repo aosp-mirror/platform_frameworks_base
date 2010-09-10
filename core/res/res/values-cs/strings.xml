@@ -288,10 +288,6 @@
     <string name="permdesc_readContacts" msgid="3371591512896545975">"Umožňuje aplikaci načíst všechna data kontaktů (adresy) uložená ve vašem telefonu. Škodlivé aplikace poté mohou dalším lidem odeslat vaše data."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"zápis dat kontaktů"</string>
     <string name="permdesc_writeContacts" msgid="3924383579108183601">"Umožňuje aplikaci změnit kontaktní údaje (adresu) uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit kontaktní údaje."</string>
-    <string name="permlab_writeOwnerData" msgid="4892555913849295393">"zápis informací o vlastníkovi"</string>
-    <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Umožňuje aplikaci změnit informace o vlastníkovi telefonu uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit informace o vlastníkovi."</string>
-    <string name="permlab_readOwnerData" msgid="6668525984731523563">"čtení informací o vlastníkovi"</string>
-    <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Umožňuje aplikaci číst informace o vlastníkovi telefonu uložená v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení načíst informace o vlastníkovi."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"Čtení událostí v kalendáři"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Umožňuje aplikaci načíst všechny události kalendáře uložené ve vašem telefonu. Škodlivé aplikace poté mohou dalším lidem odeslat události z vašeho kalendáře."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"Přidávání nebo úprava událostí v kalendáři a odesílání e-mailů hostům"</string>
@@ -736,6 +732,12 @@
     <string name="force_close" msgid="3653416315450806396">"Ukončit aplikaci"</string>
     <string name="report" msgid="4060218260984795706">"Nahlásit"</string>
     <string name="wait" msgid="7147118217226317732">"Počkat"</string>
+    <!-- no translation found for launch_warning_title (8323761616052121936) -->
+    <skip />
+    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
+    <skip />
+    <!-- no translation found for launch_warning_original (188102023021668683) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"Aplikace <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) porušila své vlastní vynucené zásady StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> porušil své vlastní vynucené zásady StrictMode."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Běží aplikace <xliff:g id="APP">%1$s</xliff:g>"</string>
