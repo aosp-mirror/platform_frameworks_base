@@ -38,4 +38,6 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_MODULE:= libdrmframeworkcommon
 
+LOCAL_MODULE_TAGS := optional
+
 include $(BUILD_STATIC_LIBRARY)

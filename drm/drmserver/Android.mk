@@ -41,4 +41,6 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_MODULE:= drmserver
 
+LOCAL_MODULE_TAGS := optional
+
 include $(BUILD_EXECUTABLE)
