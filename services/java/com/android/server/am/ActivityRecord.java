@@ -34,6 +34,7 @@ import android.os.SystemClock;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
+import android.util.TimeUtils;
 import android.view.IApplicationToken;
 
 import java.io.PrintWriter;
@@ -68,7 +69,8 @@ class ActivityRecord extends IApplicationToken.Stub {
     int icon;               // resource identifier of activity's icon.
     int theme;              // resource identifier of activity's theme.
     TaskRecord task;        // the task this is in.
-    long startTime;         // when we starting launching this activity
+    long launchTime;        // when we starting launching this activity
+    long startTime;         // last time this activity was started
     long cpuTimeAtResume;   // the cpu time of host process at the time of resuming activity
     Configuration configuration; // configuration activity was last running in
     ActivityRecord resultTo; // who started this entry, so will get our reply
@@ -165,6 +167,11 @@ class ActivityRecord extends IApplicationToken.Stub {
                 pw.print(" frozenBeforeDestroy="); pw.print(frozenBeforeDestroy);
                 pw.print(" thumbnailNeeded="); pw.print(thumbnailNeeded);
                 pw.print(" idle="); pw.println(idle);
+        if (launchTime != 0 || startTime != 0) {
+            pw.print(prefix); pw.print("launchTime=");
+                    TimeUtils.formatDuration(launchTime, pw); pw.print(" startTime=");
+                    TimeUtils.formatDuration(startTime, pw); pw.println("");
+        }
         if (waitingVisible || nowVisible) {
             pw.print(prefix); pw.print("waitingVisible="); pw.print(waitingVisible);
                     pw.print(" nowVisible="); pw.println(nowVisible);
@@ -417,9 +424,9 @@ class ActivityRecord extends IApplicationToken.Stub {
     
     public void windowsVisible() {
         synchronized(service) {
-            if (startTime != 0) {
+            if (launchTime != 0) {
                 final long curTime = SystemClock.uptimeMillis();
-                final long thisTime = curTime - startTime;
+                final long thisTime = curTime - launchTime;
                 final long totalTime = stack.mInitialStartTime != 0
                         ? (curTime - stack.mInitialStartTime) : thisTime;
                 if (ActivityManagerService.SHOW_ACTIVITY_START_TIME) {
@@ -428,22 +435,24 @@ class ActivityRecord extends IApplicationToken.Stub {
                             thisTime, totalTime);
                     StringBuilder sb = service.mStringBuilder;
                     sb.setLength(0);
-                    sb.append("Displayed activity ");
+                    sb.append("Displayed ");
                     sb.append(shortComponentName);
                     sb.append(": ");
-                    sb.append(thisTime);
-                    sb.append(" ms (total ");
+                    TimeUtils.formatDuration(thisTime, sb);
+                    sb.append(" (total ");
+                    TimeUtils.formatDuration(totalTime, sb);
                     sb.append(totalTime);
-                    sb.append(" ms)");
+                    sb.append(")");
                     Log.i(ActivityManagerService.TAG, sb.toString());
                 }
                 stack.reportActivityLaunchedLocked(false, this, thisTime, totalTime);
                 if (totalTime > 0) {
                     service.mUsageStatsService.noteLaunchTime(realActivity, (int)totalTime);
                 }
-                startTime = 0;
+                launchTime = 0;
                 stack.mInitialStartTime = 0;
             }
+            startTime = 0;
             stack.reportActivityVisibleLocked(this);
             if (ActivityManagerService.DEBUG_SWITCH) Log.v(
                     ActivityManagerService.TAG, "windowsVisible(): " + this);
