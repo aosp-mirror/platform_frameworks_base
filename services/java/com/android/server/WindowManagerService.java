@@ -23,6 +23,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
@@ -7038,6 +7039,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         frame.right >= mCompatibleScreenFrame.right &&
                         frame.bottom >= mCompatibleScreenFrame.bottom;
             } else {
+                if ((mAttrs.flags & FLAG_FULLSCREEN) != 0) {
+                    return true;
+                }
                 return frame.left <= 0 && frame.top <= 0
                         && frame.right >= screenWidth
                         && frame.bottom >= screenHeight;

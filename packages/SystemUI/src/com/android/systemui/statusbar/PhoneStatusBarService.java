@@ -1011,6 +1011,15 @@ public class PhoneStatusBarService extends StatusBarService {
         return false;
     }
 
+    public void setLightsOn(boolean on) {
+        if (!on) {
+            // All we do for "lights out" mode on a phone is hide the status bar,
+            // which the window manager does.  But we do need to hide the windowshade
+            // on our own.
+            animateCollapse();
+        }
+    }
+
     private class Launcher implements View.OnClickListener {
         private PendingIntent mIntent;
         private String mPkg;

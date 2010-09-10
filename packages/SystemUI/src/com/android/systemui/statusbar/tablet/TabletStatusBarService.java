@@ -56,8 +56,6 @@ public class TabletStatusBarService extends StatusBarService {
 
     private static final int MAX_IMAGE_LEVEL = 10000;
 
-
-
     int mIconSize;
 
     H mHandler = new H();
@@ -491,6 +489,14 @@ public class TabletStatusBarService extends StatusBarService {
         mHandler.sendEmptyMessage(H.MSG_CLOSE_NOTIFICATION_PANEL);
         mHandler.removeMessages(H.MSG_CLOSE_SYSTEM_PANEL);
         mHandler.sendEmptyMessage(H.MSG_CLOSE_SYSTEM_PANEL);
+    }
+
+    public void setLightsOn(boolean on) {
+        //Slog.d(TAG, "setLightsOn on=" + on);
+        if (!on) {
+            animateCollapse();
+        }
+        // TODO: implement lights out mode
     }
 
     public void notificationIconsClicked(View v) {

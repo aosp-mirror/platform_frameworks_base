@@ -72,11 +72,15 @@ public abstract class StatusBarService extends Service implements CommandQueue.C
         mCommandQueue = new CommandQueue(this, iconList);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+        boolean[] lightsOn = new boolean[1];
         try {
-            mBarService.registerStatusBar(mCommandQueue, iconList, notificationKeys, notifications);
+            mBarService.registerStatusBar(mCommandQueue, iconList, notificationKeys, notifications,
+                    lightsOn);
         } catch (RemoteException ex) {
             // If the system process isn't there we're doomed anyway.
         }
+
+        setLightsOn(lightsOn[0]);
 
         // Set up the initial icon state
         int N = iconList.size();

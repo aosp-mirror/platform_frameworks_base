@@ -60,20 +60,19 @@ public class StatusBarTest extends TestActivity
     }
 
     private Test[] mTests = new Test[] {
-        new Test("Hide") {
+        new Test("Hide (FLAG_FULLSCREEN)") {
             public void run() {
                 Window win = getWindow();
-                WindowManager.LayoutParams winParams = win.getAttributes();
-                winParams.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
-                win.setAttributes(winParams);
+                win.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                        WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                Log.d(TAG, "flags=" + Integer.toHexString(win.getAttributes().flags));
             }
         },
-        new Test("Show") {
+        new Test("Show (~FLAG_FULLSCREEN)") {
             public void run() {
                 Window win = getWindow();
-                WindowManager.LayoutParams winParams = win.getAttributes();
-                winParams.flags &= ~WindowManager.LayoutParams.FLAG_FULLSCREEN;
-                win.setAttributes(winParams);
+                win.setFlags(0, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                Log.d(TAG, "flags=" + Integer.toHexString(win.getAttributes().flags));
             }
         },
         new Test("Immersive: Enter") {

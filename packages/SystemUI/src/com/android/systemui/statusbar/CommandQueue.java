@@ -52,6 +52,8 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int OP_EXPAND = 1;
     private static final int OP_COLLAPSE = 2;
 
+    private static final int MSG_SET_LIGHTS_ON = 0x00070000;
+
     private StatusBarIconList mList;
     private Callbacks mCallbacks;
     private Handler mHandler = new H();
@@ -75,6 +77,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void disable(int state);
         public void animateExpand();
         public void animateCollapse();
+        public void setLightsOn(boolean on);
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -143,6 +146,13 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    public void setLightsOn(boolean on) {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_SET_LIGHTS_ON);
+            mHandler.obtainMessage(MSG_SET_LIGHTS_ON, on ? 1 : 0, 0, null).sendToTarget();
+        }
+    }
+
     private final class H extends Handler {
         public void handleMessage(Message msg) {
             final int what = msg.what & MSG_MASK;
@@ -194,6 +204,10 @@ public class CommandQueue extends IStatusBar.Stub {
                     } else {
                         mCallbacks.animateCollapse();
                     }
+                    break;
+                case MSG_SET_LIGHTS_ON:
+                    mCallbacks.setLightsOn(msg.arg1 != 0);
+                    break;
             }
         }
     }

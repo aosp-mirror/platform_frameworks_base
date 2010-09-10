@@ -68,6 +68,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     ArrayList<DisableRecord> mDisableRecords = new ArrayList<DisableRecord>();
     int mDisabled = 0;
 
+    Object mLock = new Object();
+    // We usually call it lights out mode, but double negatives are annoying
+    boolean mLightsOn = true;
+
     private class DisableRecord implements IBinder.DeathRecipient {
         String pkg;
         int what;
@@ -242,6 +246,30 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
+    public void setActiveWindowIsFullscreen(boolean fullscreen) {
+        // We could get away with a separate permission here, but STATUS_BAR is
+        // signatureOrSystem which is probably good enough.  There is no public API
+        // for this, so the question is a security issue, not an API compatibility issue.
+        enforceStatusBar();
+
+        final boolean lightsOn = !fullscreen;
+        synchronized (mLock) {
+            if (mLightsOn != lightsOn) {
+                mLightsOn = lightsOn;
+                mHandler.post(new Runnable() {
+                        public void run() {
+                            if (mBar != null) {
+                                try {
+                                    mBar.setLightsOn(lightsOn);
+                                } catch (RemoteException ex) {
+                                }
+                            }
+                        }
+                    });
+            }
+        }
+    }
+
     private void enforceStatusBar() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR,
                 "StatusBarManagerService");
@@ -262,7 +290,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // Callbacks from the status bar service.
     // ================================================================================
     public void registerStatusBar(IStatusBar bar, StatusBarIconList iconList,
-            List<IBinder> notificationKeys, List<StatusBarNotification> notifications) {
+            List<IBinder> notificationKeys, List<StatusBarNotification> notifications,
+            boolean lightsOn[]) {
         enforceStatusBarService();
 
         Slog.i(TAG, "registerStatusBar bar=" + bar);
@@ -275,6 +304,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub
                 notificationKeys.add(e.getKey());
                 notifications.add(e.getValue());
             }
+        }
+        synchronized (mLock) {
+            lightsOn[0] = mLightsOn;
         }
     }
 
