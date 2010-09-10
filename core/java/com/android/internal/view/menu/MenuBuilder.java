@@ -78,12 +78,15 @@ public class MenuBuilder implements Menu {
     private static final String VIEWS_TAG = "android:views";
 
     // Order must be the same order as the TYPE_*
+    // Special values:
+    // 0: Use the system default theme
+    // -1: Use the app's own theme
     static final int THEME_RES_FOR_TYPE[] = new int[] {
         com.android.internal.R.style.Theme_IconMenu,
         com.android.internal.R.style.Theme_ExpandedMenu,
         0,
-        0,
-        0,
+        -1,
+        -1,
     };
     
     // Order must be the same order as the TYPE_*
@@ -220,8 +223,9 @@ public class MenuBuilder implements Menu {
         LayoutInflater getInflater() {
             // Create an inflater that uses the given theme for the Views it inflates
             if (mInflater == null) {
-                Context wrappedContext = new ContextThemeWrapper(mContext,
-                        THEME_RES_FOR_TYPE[mMenuType]); 
+                int themeResForType = THEME_RES_FOR_TYPE[mMenuType];
+                Context wrappedContext = themeResForType < 0 ? mContext :
+                        new ContextThemeWrapper(mContext, themeResForType);
                 mInflater = (LayoutInflater) wrappedContext
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             }
