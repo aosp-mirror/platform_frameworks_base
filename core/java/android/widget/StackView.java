@@ -215,27 +215,39 @@ public class StackView extends AdapterViewAnimator {
 
         // Implement the faked perspective
         if (toIndex != -1) {
-            float maxPerpectiveShift = mViewHeight * PERSPECTIVE_SHIFT_FACTOR;
-            int index = toIndex;
+            transformViewAtIndex(toIndex, view);
+        }
+    }
 
-            if (toIndex == mNumActiveViews -1) index--;
+    private void transformViewAtIndex(int index, View view) {
+        float maxPerpectiveShift = mViewHeight * PERSPECTIVE_SHIFT_FACTOR;
 
-            float r = (index * 1.0f) / (mNumActiveViews - 2);
+        if (index == mNumActiveViews -1) index--;
 
-            float scale = 1 - PERSPECTIVE_SCALE_FACTOR * (1 - r);
-            PropertyValuesHolder<Float> scaleX = new PropertyValuesHolder<Float>("scaleX", scale);
-            PropertyValuesHolder<Float> scaleY = new PropertyValuesHolder<Float>("scaleY", scale);
+        float r = (index * 1.0f) / (mNumActiveViews - 2);
 
-            r = (float) Math.pow(r, 2);
+        float scale = 1 - PERSPECTIVE_SCALE_FACTOR * (1 - r);
+        PropertyValuesHolder<Float> scaleX = new PropertyValuesHolder<Float>("scaleX", scale);
+        PropertyValuesHolder<Float> scaleY = new PropertyValuesHolder<Float>("scaleY", scale);
 
-            int stackDirection = (mStackMode == ITEMS_SLIDE_UP) ? 1 : -1;
-            float transY = -stackDirection * r * maxPerpectiveShift +
-                    stackDirection * (1 - scale) * (mViewHeight / 2.0f);
+        r = (float) Math.pow(r, 2);
 
-            PropertyValuesHolder<Float> translationY =
-                    new PropertyValuesHolder<Float>("translationY", transY);
-            ObjectAnimator pa = new ObjectAnimator(100, view, scaleX, scaleY, translationY);
-            pa.start();
+        int stackDirection = (mStackMode == ITEMS_SLIDE_UP) ? 1 : -1;
+        float transY = -stackDirection * r * maxPerpectiveShift +
+                stackDirection * (1 - scale) * (mViewHeight / 2.0f);
+
+        PropertyValuesHolder<Float> translationY =
+                new PropertyValuesHolder<Float>("translationY", transY);
+        ObjectAnimator pa = new ObjectAnimator(100, view, scaleX, scaleY, translationY);
+        pa.start();
+    }
+
+    private void updateChildTransforms() {
+        for (int i = 0; i < mNumActiveViews - 1; i++) {
+            View v = getViewAtRelativeIndex(i);
+            if (v != null) {
+                transformViewAtIndex(i, v);
+            }
         }
     }
 
@@ -271,6 +283,7 @@ public class StackView extends AdapterViewAnimator {
     private void onLayout() {
         if (!mFirstLayoutHappened) {
             mViewHeight = Math.round(SLIDE_UP_RATIO * getMeasuredHeight());
+            updateChildTransforms();
             mSwipeThreshold = Math.round(SWIPE_THRESHOLD_RATIO * mViewHeight);
             mFirstLayoutHappened = true;
         }
