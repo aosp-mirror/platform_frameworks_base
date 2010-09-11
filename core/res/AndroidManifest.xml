@@ -930,7 +930,7 @@
     <permission android:name="android.permission.UPDATE_DEVICE_STATS"
         android:label="@string/permlab_batteryStats"
         android:description="@string/permdesc_batteryStats"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows an application to open windows that are for use by parts
          of the system user interface.  Not for use by third party apps. -->

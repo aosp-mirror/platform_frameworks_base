@@ -45,6 +45,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.text.format.Time;
@@ -126,8 +127,8 @@ public class SyncManager implements OnAccountsUpdateListener {
 
     private static final int INITIALIZATION_UNBIND_DELAY_MS = 5000;
 
-    private static final String SYNC_WAKE_LOCK = "SyncManagerSyncWakeLock";
-    private static final String HANDLE_SYNC_ALARM_WAKE_LOCK = "SyncManagerHandleSyncAlarmWakeLock";
+    private static final String SYNC_WAKE_LOCK = "*sync*";
+    private static final String HANDLE_SYNC_ALARM_WAKE_LOCK = "SyncManagerHandleSyncAlarm";
 
     private Context mContext;
 
@@ -1695,6 +1696,7 @@ public class SyncManager implements OnAccountsUpdateListener {
                 Log.v(TAG, "runStateIdle: setting mActiveSyncContext to " + mActiveSyncContext);
             }
             mSyncStorageEngine.setActiveSync(mActiveSyncContext);
+            mSyncWakeLock.setWorkSource(new WorkSource(syncAdapterInfo.uid));
             if (!activeSyncContext.bindToSyncAdapter(syncAdapterInfo)) {
                 Log.e(TAG, "Bind attempt failed to " + syncAdapterInfo);
                 mActiveSyncContext.close();

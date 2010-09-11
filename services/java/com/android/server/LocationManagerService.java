@@ -52,6 +52,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
@@ -156,6 +157,12 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
      */
     private final HashMap<String,ArrayList<UpdateRecord>> mRecordsByProvider =
         new HashMap<String,ArrayList<UpdateRecord>>();
+
+    /**
+     * Temporary filled in when computing min time for a provider.  Access is
+     * protected by global lock mLock.
+     */
+    private final WorkSource mTmpWorkSource = new WorkSource();
 
     // Proximity listeners
     private Receiver mProximityReceiver = null;
@@ -912,7 +919,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         if (enabled) {
             p.enable();
             if (listeners > 0) {
-                p.setMinTime(getMinTimeLocked(provider));
+                p.setMinTime(getMinTimeLocked(provider), mTmpWorkSource);
                 p.enableLocationTracking(true);
             }
         } else {
@@ -924,9 +931,21 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     private long getMinTimeLocked(String provider) {
         long minTime = Long.MAX_VALUE;
         ArrayList<UpdateRecord> records = mRecordsByProvider.get(provider);
+        mTmpWorkSource.clear();
         if (records != null) {
             for (int i=records.size()-1; i>=0; i--) {
-                minTime = Math.min(minTime, records.get(i).mMinTime);
+                UpdateRecord ur = records.get(i);
+                long curTime = ur.mMinTime;
+                if (curTime < minTime) {
+                    minTime = curTime;
+                }
+            }
+            long inclTime = (minTime*3)/2;
+            for (int i=records.size()-1; i>=0; i--) {
+                UpdateRecord ur = records.get(i);
+                if (ur.mMinTime <= inclTime) {
+                    mTmpWorkSource.add(ur.mUid);
+                }
             }
         }
         return minTime;
@@ -1124,7 +1143,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             boolean isProviderEnabled = isAllowedBySettingsLocked(provider);
             if (isProviderEnabled) {
                 long minTimeForProvider = getMinTimeLocked(provider);
-                p.setMinTime(minTimeForProvider);
+                p.setMinTime(minTimeForProvider, mTmpWorkSource);
                 // try requesting single shot if singleShot is true, and fall back to
                 // regular location tracking if requestSingleShotFix() is not supported
                 if (!singleShot || !p.requestSingleShotFix()) {
@@ -1222,7 +1241,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 LocationProviderInterface p = mProvidersByName.get(provider);
                 if (p != null) {
                     if (hasOtherListener) {
-                        p.setMinTime(getMinTimeLocked(provider));
+                        p.setMinTime(getMinTimeLocked(provider), mTmpWorkSource);
                     } else {
                         p.enableLocationTracking(false);
                     }

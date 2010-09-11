@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import com.android.internal.os.BatteryStatsImpl;
 
+import android.os.WorkSource;
 import android.telephony.SignalStrength;
 
 interface IBatteryStats {
@@ -32,6 +33,9 @@ interface IBatteryStats {
     /* DO NOT CHANGE the position of noteStopSensor without updating
        SensorService.cpp */
     void noteStopSensor(int uid, int sensor);
+
+    void noteStartWakelockFromSource(in WorkSource ws, int pid, String name, int type);
+    void noteStopWakelockFromSource(in WorkSource ws, int pid, String name, int type);
 
     void noteStartGps(int uid);
     void noteStopGps(int uid);
@@ -57,6 +61,12 @@ interface IBatteryStats {
     void noteScanWifiLockReleased(int uid);
     void noteWifiMulticastEnabled(int uid);
     void noteWifiMulticastDisabled(int uid);
+    void noteFullWifiLockAcquiredFromSource(in WorkSource ws);
+    void noteFullWifiLockReleasedFromSource(in WorkSource ws);
+    void noteScanWifiLockAcquiredFromSource(in WorkSource ws);
+    void noteScanWifiLockReleasedFromSource(in WorkSource ws);
+    void noteWifiMulticastEnabledFromSource(in WorkSource ws);
+    void noteWifiMulticastDisabledFromSource(in WorkSource ws);
     void setBatteryState(int status, int health, int plugType, int level, int temp, int volt);
     long getAwakeTimeBattery();
     long getAwakeTimePlugged();
