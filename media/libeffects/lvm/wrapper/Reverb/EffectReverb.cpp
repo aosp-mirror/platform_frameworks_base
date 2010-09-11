@@ -59,17 +59,17 @@ const static t_reverb_settings sReverbPresets[] = {
         // REVERB_PRESET_NONE: values are unused
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         // REVERB_PRESET_SMALLROOM
-        {-1000, -600, 1100, 830, -400, 5, 500, 10, 1000, 1000},
+        {-400, -600, 1100, 830, -400, 5, 500, 10, 1000, 1000},
         // REVERB_PRESET_MEDIUMROOM
-        {-1000, -600, 1300, 830, -1000, 20, -200, 20, 1000, 1000},
+        {-400, -600, 1300, 830, -1000, 20, -200, 20, 1000, 1000},
         // REVERB_PRESET_LARGEROOM
-        {-1000, -600, 1500, 830, -1600, 5, -1000, 40, 1000, 1000},
+        {-400, -600, 1500, 830, -1600, 5, -1000, 40, 1000, 1000},
         // REVERB_PRESET_MEDIUMHALL
-        {-1000, -600, 1800, 700, -1300, 15, -800, 30, 1000, 1000},
+        {-400, -600, 1800, 700, -1300, 15, -800, 30, 1000, 1000},
         // REVERB_PRESET_LARGEHALL
-        {-1000, -600, 1800, 700, -2000, 30, -1400, 60, 1000, 1000},
+        {-400, -600, 1800, 700, -2000, 30, -1400, 60, 1000, 1000},
         // REVERB_PRESET_PLATE
-        {-1000, -200, 1300, 900, 0, 2, 0, 10, 1000, 750},
+        {-400, -200, 1300, 900, 0, 2, 0, 10, 1000, 750},
 };
 
 
@@ -90,7 +90,7 @@ static const effect_descriptor_t gInsertEnvReverbDescriptor = {
         {0xc2e5d5f0, 0x94bd, 0x4763, 0x9cac, {0x4e, 0x23, 0x4d, 0x06, 0x83, 0x9e}},
         {0xc7a511a0, 0xa3bb, 0x11df, 0x860e, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
         EFFECT_API_VERSION,
-        EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_FIRST,
+        EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_FIRST | EFFECT_FLAG_VOLUME_CTRL,
         LVREV_CUP_LOAD_ARM9E,
         LVREV_MEM_USAGE,
         "Insert Environmental Reverb",
@@ -114,7 +114,7 @@ static const effect_descriptor_t gInsertPresetReverbDescriptor = {
         {0x47382d60, 0xddd8, 0x11db, 0xbf3a, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
         {0x172cdf00, 0xa3bc, 0x11df, 0xa72f, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
         EFFECT_API_VERSION,
-        EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_FIRST,
+        EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_FIRST | EFFECT_FLAG_VOLUME_CTRL,
         LVREV_CUP_LOAD_ARM9E,
         LVREV_MEM_USAGE,
         "Insert Preset Reverb",
@@ -153,9 +153,24 @@ struct ReverbContext{
     uint16_t                        curPreset;
     uint16_t                        nextPreset;
     int                             SamplesToExitCount;
+    LVM_INT16                       leftVolume;
+    LVM_INT16                       rightVolume;
+    LVM_INT16                       prevLeftVolume;
+    LVM_INT16                       prevRightVolume;
+    int                             volumeMode;
+};
+
+enum {
+    REVERB_VOLUME_OFF,
+    REVERB_VOLUME_FLAT,
+    REVERB_VOLUME_RAMP,
 };
 
 #define REVERB_DEFAULT_PRESET REVERB_PRESET_MEDIUMROOM
+
+
+#define REVERB_SEND_LEVEL   (0x0C00) // 0.75 in 4.12 format
+#define REVERB_UNIT_VOLUME  (0x1000) // 1.0 in 4.12 format
 
 //--- local function prototypes
 int  Reverb_init            (ReverbContext *pContext);
@@ -426,9 +441,20 @@ int process( LVM_INT16     *pIn,
     if (pContext->preset && pContext->nextPreset != pContext->curPreset) {
         Reverb_LoadPreset(pContext);
     }
+
+
+
     // Convert to Input 32 bits
-    for(int i=0; i<frameCount*samplesPerFrame; i++){
-        pContext->InFrames32[i] = (LVM_INT32)pIn[i]<<8;
+    if (pContext->auxiliary) {
+        for(int i=0; i<frameCount*samplesPerFrame; i++){
+            pContext->InFrames32[i] = (LVM_INT32)pIn[i]<<8;
+        }
+    } else {
+        // insert reverb input is always stereo
+        for (int i = 0; i < frameCount; i++) {
+            pContext->InFrames32[2*i] = (pIn[2*i] * REVERB_SEND_LEVEL) >> 4; // <<8 + >>12
+            pContext->InFrames32[2*i+1] = (pIn[2*i+1] * REVERB_SEND_LEVEL) >> 4; // <<8 + >>12
+        }
     }
 
     if (pContext->preset && pContext->curPreset == REVERB_PRESET_NONE) {
@@ -457,6 +483,42 @@ int process( LVM_INT16     *pIn,
     } else {
         for (int i=0; i < frameCount*2; i++) { //always stereo here
             OutFrames16[i] = clamp16((pContext->OutFrames32[i]>>8) + (LVM_INT32)pIn[i]);
+        }
+
+        // apply volume with ramp if needed
+        if ((pContext->leftVolume != pContext->prevLeftVolume ||
+                pContext->rightVolume != pContext->prevRightVolume) &&
+                pContext->volumeMode == REVERB_VOLUME_RAMP) {
+            LVM_INT32 vl = (LVM_INT32)pContext->prevLeftVolume << 16;
+            LVM_INT32 incl = (((LVM_INT32)pContext->leftVolume << 16) - vl) / frameCount;
+            LVM_INT32 vr = (LVM_INT32)pContext->prevRightVolume << 16;
+            LVM_INT32 incr = (((LVM_INT32)pContext->rightVolume << 16) - vr) / frameCount;
+
+            for (int i = 0; i < frameCount; i++) {
+                OutFrames16[2*i] =
+                        clamp16((LVM_INT32)((vl >> 16) * OutFrames16[2*i]) >> 12);
+                OutFrames16[2*i+1] =
+                        clamp16((LVM_INT32)((vr >> 16) * OutFrames16[2*i+1]) >> 12);
+
+                vl += incl;
+                vr += incr;
+            }
+
+            pContext->prevLeftVolume = pContext->leftVolume;
+            pContext->prevRightVolume = pContext->rightVolume;
+        } else if (pContext->volumeMode != REVERB_VOLUME_OFF) {
+            if (pContext->leftVolume != REVERB_UNIT_VOLUME ||
+                pContext->rightVolume != REVERB_UNIT_VOLUME) {
+                for (int i = 0; i < frameCount; i++) {
+                    OutFrames16[2*i] =
+                            clamp16((LVM_INT32)(pContext->leftVolume * OutFrames16[2*i]) >> 12);
+                    OutFrames16[2*i+1] =
+                            clamp16((LVM_INT32)(pContext->rightVolume * OutFrames16[2*i+1]) >> 12);
+                }
+            }
+            pContext->prevLeftVolume = pContext->leftVolume;
+            pContext->prevRightVolume = pContext->rightVolume;
+            pContext->volumeMode = REVERB_VOLUME_RAMP;
         }
     }
 
@@ -657,6 +719,12 @@ int Reverb_init(ReverbContext *pContext){
     pContext->config.outputCfg.bufferProvider.releaseBuffer = NULL;
     pContext->config.outputCfg.bufferProvider.cookie        = NULL;
     pContext->config.outputCfg.mask                         = EFFECT_CONFIG_ALL;
+
+    pContext->leftVolume = REVERB_UNIT_VOLUME;
+    pContext->rightVolume = REVERB_UNIT_VOLUME;
+    pContext->prevLeftVolume = REVERB_UNIT_VOLUME;
+    pContext->prevRightVolume = REVERB_UNIT_VOLUME;
+    pContext->volumeMode = REVERB_VOLUME_FLAT;
 
     LVREV_ReturnStatus_en     LvmStatus=LVREV_SUCCESS;        /* Function call status */
     LVREV_ControlParams_st    params;                         /* Control Parameters */
@@ -1781,21 +1849,20 @@ extern "C" int Reverb_process(effect_interface_t   self,
         LOGV("\tLVM_ERROR : Reverb_process() ERROR NULL INPUT POINTER OR FRAME COUNT IS WRONG");
         return -EINVAL;
     }
-    if (pContext->bEnabled == LVM_FALSE){
-        if( pContext->SamplesToExitCount > 0){
-            pContext->SamplesToExitCount -= outBuffer->frameCount;
-            LOGV("\tReverb_process() Effect is being stopped %d", pContext->SamplesToExitCount);
-        }else{
-            LOGV("\tReverb_process() Effect is being stopped");
-            return -ENODATA;
-        }
-    }
     //LOGV("\tReverb_process() Calling process with %d frames", outBuffer->frameCount);
     /* Process all the available frames, block processing is handled internalLY by the LVM bundle */
     status = process(    (LVM_INT16 *)inBuffer->raw,
                          (LVM_INT16 *)outBuffer->raw,
                                       outBuffer->frameCount,
                                       pContext);
+
+    if (pContext->bEnabled == LVM_FALSE) {
+        if (pContext->SamplesToExitCount > 0) {
+            pContext->SamplesToExitCount -= outBuffer->frameCount;
+        } else {
+            status = -ENODATA;
+        }
+    }
 
     return status;
 }   /* end Reverb_process */
@@ -1943,6 +2010,8 @@ extern "C" int Reverb_command(effect_interface_t  self,
             LVM_ERROR_CHECK(LvmStatus, "LVREV_GetControlParameters", "EFFECT_CMD_ENABLE")
             pContext->SamplesToExitCount =
                     (ActiveParams.T60 * pContext->config.inputCfg.samplingRate)/1000;
+            // force no volume ramp for first buffer processed after enabling the effect
+            pContext->volumeMode = android::REVERB_VOLUME_FLAT;
             //LOGV("\tEFFECT_CMD_ENABLE SamplesToExitCount = %d", pContext->SamplesToExitCount);
             break;
         case EFFECT_CMD_DISABLE:
@@ -1963,8 +2032,34 @@ extern "C" int Reverb_command(effect_interface_t  self,
             pContext->bEnabled = LVM_FALSE;
             break;
 
-        case EFFECT_CMD_SET_DEVICE:
         case EFFECT_CMD_SET_VOLUME:
+            if (pCmdData == NULL ||
+                cmdSize != 2 * sizeof(uint32_t)) {
+                LOGV("\tLVM_ERROR : Reverb_command cmdCode Case: "
+                        "EFFECT_CMD_SET_VOLUME: ERROR");
+                return -EINVAL;
+            }
+
+
+            if (pReplyData != NULL) { // we have volume control
+                pContext->leftVolume = (LVM_INT16)((*(uint32_t *)pCmdData + (1 << 11)) >> 12);
+                pContext->rightVolume = (LVM_INT16)((*((uint32_t *)pCmdData + 1) + (1 << 11)) >> 12);
+                *(uint32_t *)pReplyData = (1 << 24);
+                *((uint32_t *)pReplyData + 1) = (1 << 24);
+                if (pContext->volumeMode == android::REVERB_VOLUME_OFF) {
+                    // force no volume ramp for first buffer processed after getting volume control
+                    pContext->volumeMode = android::REVERB_VOLUME_FLAT;
+                }
+            } else { // we don't have volume control
+                pContext->leftVolume = REVERB_UNIT_VOLUME;
+                pContext->rightVolume = REVERB_UNIT_VOLUME;
+                pContext->volumeMode = android::REVERB_VOLUME_OFF;
+            }
+            LOGV("EFFECT_CMD_SET_VOLUME left %d, right %d mode %d",
+                    pContext->leftVolume, pContext->rightVolume,  pContext->volumeMode);
+            break;
+
+        case EFFECT_CMD_SET_DEVICE:
         case EFFECT_CMD_SET_AUDIO_MODE:
         //LOGV("\tReverb_command cmdCode Case: "
         //        "EFFECT_CMD_SET_DEVICE/EFFECT_CMD_SET_VOLUME/EFFECT_CMD_SET_AUDIO_MODE start");
