@@ -82,6 +82,17 @@ public class MediaFile {
     public static final int FILE_TYPE_WPL     = 43;
     private static final int FIRST_PLAYLIST_FILE_TYPE = FILE_TYPE_M3U;
     private static final int LAST_PLAYLIST_FILE_TYPE = FILE_TYPE_WPL;
+
+    // Other popular file types
+    public static final int FILE_TYPE_TEXT          = 100;
+    public static final int FILE_TYPE_HTML          = 101;
+    public static final int FILE_TYPE_PDF           = 102;
+    public static final int FILE_TYPE_XML           = 103;
+    public static final int FILE_TYPE_MS_WORD       = 104;
+    public static final int FILE_TYPE_MS_EXCEL      = 105;
+    public static final int FILE_TYPE_MS_POWERPOINT = 106;
+    public static final int FILE_TYPE_FLAC          = 107;
+    public static final int FILE_TYPE_ZIP           = 108;
     
     static class MediaFileType {
     
@@ -130,16 +141,6 @@ public class MediaFile {
         return false;
     }
 
-    private static boolean isWMVEnabled() {
-        List<VideoDecoder> decoders = DecoderCapabilities.getVideoDecoders();
-        for (VideoDecoder decoder: decoders) {
-            if (decoder == VideoDecoder.VIDEO_DECODER_WMV) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     static {
         addFileType("MP3", FILE_TYPE_MP3, "audio/mpeg", MtpConstants.FORMAT_MP3);
         addFileType("M4A", FILE_TYPE_M4A, "audio/mp4", MtpConstants.FORMAT_MPEG);
@@ -174,10 +175,8 @@ public class MediaFile {
         addFileType("WEBM", FILE_TYPE_MKV, "video/x-matroska");
         addFileType("TS", FILE_TYPE_MP2TS, "video/mp2ts");
 
-        if (isWMVEnabled()) {
-            addFileType("WMV", FILE_TYPE_WMV, "video/x-ms-wmv", MtpConstants.FORMAT_WMV);
-            addFileType("ASF", FILE_TYPE_ASF, "video/x-ms-asf");
-        }
+        addFileType("WMV", FILE_TYPE_WMV, "video/x-ms-wmv", MtpConstants.FORMAT_WMV);
+        addFileType("ASF", FILE_TYPE_ASF, "video/x-ms-asf");
 
         addFileType("JPG", FILE_TYPE_JPEG, "image/jpeg", MtpConstants.FORMAT_EXIF_JPEG);
         addFileType("JPEG", FILE_TYPE_JPEG, "image/jpeg", MtpConstants.FORMAT_EXIF_JPEG);
@@ -189,6 +188,16 @@ public class MediaFile {
         addFileType("M3U", FILE_TYPE_M3U, "audio/x-mpegurl", MtpConstants.FORMAT_M3U_PLAYLIST);
         addFileType("PLS", FILE_TYPE_PLS, "audio/x-scpls", MtpConstants.FORMAT_PLS_PLAYLIST);
         addFileType("WPL", FILE_TYPE_WPL, "application/vnd.ms-wpl", MtpConstants.FORMAT_WPL_PLAYLIST);
+
+        addFileType("TXT", FILE_TYPE_TEXT, "text/plain", MtpConstants.FORMAT_TEXT);
+        addFileType("HTM", FILE_TYPE_HTML, "text/html", MtpConstants.FORMAT_HTML);
+        addFileType("HTML", FILE_TYPE_HTML, "text/html", MtpConstants.FORMAT_HTML);
+        addFileType("PDF", FILE_TYPE_PDF, "application/pdf");
+        addFileType("DOC", FILE_TYPE_MS_WORD, "application/msword", MtpConstants.FORMAT_MS_WORD_DOCUMENT);
+        addFileType("XLS", FILE_TYPE_MS_EXCEL, "application/vnd.ms-excel", MtpConstants.FORMAT_MS_EXCEL_SPREADSHEET);
+        addFileType("PPT", FILE_TYPE_MS_POWERPOINT, "application/mspowerpoint", MtpConstants.FORMAT_MS_POWERPOINT_PRESENTATION);
+        addFileType("FLAC", FILE_TYPE_FLAC, "audio/flac", MtpConstants.FORMAT_FLAC);
+        addFileType("ZIP", FILE_TYPE_ZIP, "application/zip");
     }
 
     public static boolean isAudioFileType(int fileType) {
