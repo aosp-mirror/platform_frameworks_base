@@ -166,9 +166,11 @@ private:
      * @param color The rectangle's ARGB color, defined as a packed 32 bits word
      * @param mode The Skia xfermode to use
      * @param ignoreTransform True if the current transform should be ignored
+     * @paran ignoreBlending True if the blending is set by the caller
      */
     void drawColorRect(float left, float top, float right, float bottom,
-    		int color, SkXfermode::Mode mode, bool ignoreTransform = false);
+    		int color, SkXfermode::Mode mode, bool ignoreTransform = false,
+    		bool ignoreBlending = false);
 
     /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
@@ -216,10 +218,13 @@ private:
      * @param texCoords The texture coordinates of each vertex
      * @param indices The indices of the vertices, can be NULL
      * @param elementsCount The number of elements in the mesh, required by indices
+     * @param swapSrcDst Whether or not the src and dst blending operations should be swapped
+     * @param ignoreTransform True if the current transform should be ignored
      */
     void drawTextureMesh(float left, float top, float right, float bottom, GLuint texture,
             float alpha, SkXfermode::Mode mode, bool blend,
-            GLvoid* vertices, GLvoid* texCoords, GLvoid* indices, GLsizei elementsCount = 0);
+            GLvoid* vertices, GLvoid* texCoords, GLvoid* indices, GLsizei elementsCount = 0,
+            bool swapSrcDst = false, bool ignoreTransform = false);
 
     /**
      * Prepares the renderer to draw the specified shadow.
@@ -322,8 +327,13 @@ private:
      * Enable or disable blending as necessary. This function sets the appropriate
      * blend function based on the specified xfermode.
      */
-    inline void chooseBlending(bool blend, SkXfermode::Mode mode, ProgramDescription& description);
+    inline void chooseBlending(bool blend, SkXfermode::Mode mode, ProgramDescription& description,
+            bool swapSrcDst = false);
 
+    /**
+     * Safely retrieves the mode from the specified xfermode. If the specified
+     * xfermode is null, the mode is assumed to be SkXfermode::kSrcOver_Mode.
+     */
     inline SkXfermode::Mode getXfermode(SkXfermode* mode);
 
     /**

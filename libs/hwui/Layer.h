@@ -63,28 +63,19 @@ struct LayerSize {
  */
 struct Layer {
     /**
-     * Coordinates of the layer corresponding to this snapshot.
-     * Only set when the flag kFlagIsLayer is set.
+     * Coordinates of the layer.
      */
     Rect layer;
     /**
      * Name of the texture used to render the layer.
-     * Only set when the flag kFlagIsLayer is set.
      */
     GLuint texture;
     /**
-     * Name of the FBO used to render the layer.
-     * Only set when the flag kFlagIsLayer is set.
-     */
-    GLuint fbo;
-    /**
      * Opacity of the layer.
-     * Only set when the flag kFlagIsLayer is set.
      */
-    float alpha;
+    int alpha;
     /**
      * Blending mode of the layer.
-     * Only set when the flag kFlagIsLayer is set.
      */
     SkXfermode::Mode mode;
     /**

@@ -119,6 +119,8 @@ const char* gFS_Main_FragColor =
         "    gl_FragColor = fragColor;\n";
 const char* gFS_Main_FragColor_Blend =
         "    gl_FragColor = blendFramebuffer(fragColor, gl_LastFragColor);\n";
+const char* gFS_Main_FragColor_Blend_Swap =
+        "    gl_FragColor = blendFramebuffer(gl_LastFragColor, fragColor);\n";
 const char* gFS_Main_ApplyColorOp[4] = {
         // None
         "",
@@ -376,7 +378,8 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         if (!blendFramebuffer) {
             shader.append(gFS_Main_FragColor);
         } else {
-            shader.append(gFS_Main_FragColor_Blend);
+            shader.append(!description.swapSrcDst ?
+                    gFS_Main_FragColor_Blend : gFS_Main_FragColor_Blend_Swap);
         }
     }
     // End the shader

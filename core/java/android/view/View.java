@@ -16,9 +16,6 @@
 
 package android.view;
 
-import com.android.internal.R;
-import com.android.internal.view.menu.MenuBuilder;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -49,8 +46,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
-import android.util.Config;
-import android.util.EventLog;
 import android.util.Log;
 import android.util.Pool;
 import android.util.Poolable;
@@ -67,6 +62,8 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ScrollBarDrawable;
+import com.android.internal.R;
+import com.android.internal.view.menu.MenuBuilder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -4022,12 +4019,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public boolean dispatchKeyEvent(KeyEvent event) {
         // If any attached key listener a first crack at the event.
-        //noinspection SimplifiableIfStatement
 
+        //noinspection SimplifiableIfStatement,deprecation
         if (android.util.Config.LOGV) {
             captureViewInfo("captureViewKeyEvent", this);
         }
 
+        //noinspection SimplifiableIfStatement
         if (mOnKeyListener != null && (mViewFlags & ENABLED_MASK) == ENABLED
                 && mOnKeyListener.onKey(this, event.getKeyCode(), event)) {
             return true;
@@ -4059,6 +4057,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             return false;
         }
 
+        //noinspection SimplifiableIfStatement
         if (mOnTouchListener != null && (mViewFlags & ENABLED_MASK) == ENABLED &&
                 mOnTouchListener.onTouch(this, event)) {
             return true;
@@ -4075,6 +4074,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #getFilterTouchesWhenObscured
      */
     public boolean onFilterTouchEventForSecurity(MotionEvent event) {
+        //noinspection RedundantIfStatement
         if ((mViewFlags & FILTER_TOUCHES_WHEN_OBSCURED) != 0
                 && (event.getFlags() & MotionEvent.FLAG_WINDOW_IS_OBSCURED) != 0) {
             // Window is obscured, drop this touch.
@@ -7829,8 +7829,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         saveCount = canvas.getSaveCount();
 
         int solidColor = getSolidColor();
-        // TODO: Temporarily disable fading edges with hardware acceleration
-        if (solidColor == 0 && !canvas.isHardwareAccelerated()) {
+        if (solidColor == 0) {
             final int flags = Canvas.HAS_ALPHA_LAYER_SAVE_FLAG;
 
             if (drawTop) {
@@ -9577,6 +9576,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (mAttachInfo == null) {
             return false;
         }
+        //noinspection SimplifiableIfStatement
         if ((flags & HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING) == 0
                 && !isHapticFeedbackEnabled()) {
             return false;
