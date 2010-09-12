@@ -166,6 +166,11 @@ class ZoomManager {
 
     // whether support multi-touch
     private boolean mSupportMultiTouch;
+    
+    /**
+     * True if we have a touch panel capable of detecting smooth pan/scale at the same time
+     */
+    private boolean mAllowPanAndScale;
 
     // use the framework's ScaleGestureDetector to handle multi-touch
     private ScaleGestureDetector mScaleDetector;
@@ -599,10 +604,12 @@ class ZoomManager {
         // check the preconditions
         assert mWebView.getSettings() != null;
 
-        WebSettings settings = mWebView.getSettings();
-        mSupportMultiTouch = context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH)
+        final WebSettings settings = mWebView.getSettings();
+        final PackageManager pm = context.getPackageManager();
+        mSupportMultiTouch = pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH)
                 && settings.supportZoom() && settings.getBuiltInZoomControls();
+        mAllowPanAndScale = pm.hasSystemFeature(
+                PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT);
         if (mSupportMultiTouch && (mScaleDetector == null)) {
             mScaleDetector = new ScaleGestureDetector(context, new ScaleDetectorListener());
         } else if (!mSupportMultiTouch && (mScaleDetector != null)) {
@@ -612,6 +619,10 @@ class ZoomManager {
 
     public boolean supportsMultiTouchZoom() {
         return mSupportMultiTouch;
+    }
+
+    public boolean supportsPanDuringZoom() {
+        return mAllowPanAndScale;
     }
 
     /**
