@@ -463,6 +463,11 @@ public class WebView extends AbsoluteLayout
     private static final int TOUCH_DONE_MODE = 7;
     private static final int TOUCH_PINCH_DRAG = 8;
 
+    /**
+     * True if we have a touch panel capable of detecting smooth pan/scale at the same time
+     */
+    private boolean mAllowPanAndScale;
+
     // Whether to forward the touch events to WebCore
     private boolean mForwardTouchEvents = false;
 
@@ -976,9 +981,11 @@ public class WebView extends AbsoluteLayout
 
     void updateMultiTouchSupport(Context context) {
         WebSettings settings = getSettings();
-        mSupportMultiTouch = context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH)
+        final PackageManager pm = context.getPackageManager();
+        mSupportMultiTouch = pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH)
                 && settings.supportZoom() && settings.getBuiltInZoomControls();
+        mAllowPanAndScale = pm.hasSystemFeature(
+                PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT);
         if (mSupportMultiTouch && (mScaleDetector == null)) {
             mScaleDetector = new ScaleGestureDetector(context,
                     new ScaleDetectorListener());
@@ -5018,11 +5025,13 @@ public class WebView extends AbsoluteLayout
         // FIXME: we may consider to give WebKit an option to handle multi-touch
         // events later.
         if (mSupportMultiTouch && ev.getPointerCount() > 1) {
-            if (mMinZoomScale < mMaxZoomScale) {
+            if (mAllowPanAndScale || mMinZoomScale < mMaxZoomScale) {
                 mScaleDetector.onTouchEvent(ev);
                 if (mScaleDetector.isInProgress()) {
                     mLastTouchTime = eventTime;
-                    return true;
+                    if (!mAllowPanAndScale) {
+                        return true;
+                    }
                 }
                 x = mScaleDetector.getFocusX();
                 y = mScaleDetector.getFocusY();
@@ -5224,15 +5233,21 @@ public class WebView extends AbsoluteLayout
                         mLastTouchTime = eventTime;
                         break;
                     }
-                    // if it starts nearly horizontal or vertical, enforce it
-                    int ax = Math.abs(deltaX);
-                    int ay = Math.abs(deltaY);
-                    if (ax > MAX_SLOPE_FOR_DIAG * ay) {
-                        mSnapScrollMode = SNAP_X;
-                        mSnapPositive = deltaX > 0;
-                    } else if (ay > MAX_SLOPE_FOR_DIAG * ax) {
-                        mSnapScrollMode = SNAP_Y;
-                        mSnapPositive = deltaY > 0;
+
+                    // Only lock dragging to one axis if we don't have a scale in progress.
+                    // Scaling implies free-roaming movement. Note we'll only ever get here
+                    // if mAllowPanAndScale is true.
+                    if (mScaleDetector != null && !mScaleDetector.isInProgress()) {
+                        // if it starts nearly horizontal or vertical, enforce it
+                        int ax = Math.abs(deltaX);
+                        int ay = Math.abs(deltaY);
+                        if (ax > MAX_SLOPE_FOR_DIAG * ay) {
+                            mSnapScrollMode = SNAP_X;
+                            mSnapPositive = deltaX > 0;
+                        } else if (ay > MAX_SLOPE_FOR_DIAG * ax) {
+                            mSnapScrollMode = SNAP_Y;
+                            mSnapPositive = deltaY > 0;
+                        }
                     }
 
                     mTouchMode = TOUCH_DRAG_MODE;
