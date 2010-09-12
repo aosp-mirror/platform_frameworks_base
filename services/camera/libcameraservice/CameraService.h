@@ -138,6 +138,9 @@ private:
         status_t                startPreviewMode();
         status_t                startRecordingMode();
 
+        // internal function used by sendCommand to enable/disable shutter sound.
+        status_t                enableShutterSound(bool enable);
+
         // these are static callback functions
         static void             notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2, void* user);
         static void             dataCallback(int32_t msgType, const sp<IMemory>& dataPtr, void* user);
@@ -171,6 +174,7 @@ private:
         int                             mOverlayH;
         int                             mPreviewCallbackFlag;
         int                             mOrientation;
+        bool                            mPlayShutterSound;
 
         // Ensures atomicity among the public methods
         mutable Mutex                   mLock;

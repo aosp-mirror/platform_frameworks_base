@@ -26,6 +26,7 @@
 #include <binder/MemoryBase.h>
 #include <binder/MemoryHeapBase.h>
 #include <cutils/atomic.h>
+#include <cutils/properties.h>
 #include <hardware/hardware.h>
 #include <media/AudioSystem.h>
 #include <media/mediaplayer.h>
@@ -319,6 +320,7 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
     // Callback is disabled by default
     mPreviewCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
     mOrientation = 0;
+    mPlayShutterSound = true;
     cameraService->setCameraBusy(cameraId);
     cameraService->loadSound();
     LOG1("Client::Client X (pid %d)", callingPid);
@@ -769,6 +771,35 @@ String8 CameraService::Client::getParameters() const {
     return params;
 }
 
+// enable shutter sound
+status_t CameraService::Client::enableShutterSound(bool enable) {
+    LOG1("enableShutterSound (pid %d)", getCallingPid());
+
+    status_t result = checkPidAndHardware();
+    if (result != NO_ERROR) return result;
+
+    if (enable) {
+        mPlayShutterSound = true;
+        return OK;
+    }
+
+    // Disabling shutter sound may not be allowed. In that case only
+    // allow the mediaserver process to disable the sound.
+    char value[PROPERTY_VALUE_MAX];
+    property_get("ro.camera.sound.forced", value, "0");
+    if (strcmp(value, "0") != 0) {
+        // Disabling shutter sound is not allowed. Deny if the current
+        // process is not mediaserver.
+        if (getCallingPid() != getpid()) {
+            LOGE("Failed to disable shutter sound. Permission denied (pid %d)", getCallingPid());
+            return PERMISSION_DENIED;
+        }
+    }
+
+    mPlayShutterSound = false;
+    return OK;
+}
+
 status_t CameraService::Client::sendCommand(int32_t cmd, int32_t arg1, int32_t arg2) {
     LOG1("sendCommand (pid %d)", getCallingPid());
     Mutex::Autolock lock(mLock);
@@ -792,6 +823,18 @@ status_t CameraService::Client::sendCommand(int32_t cmd, int32_t arg1, int32_t a
                 break;
             case 270:
                 mOrientation = ISurface::BufferHeap::ROT_270;
+                break;
+            default:
+                return BAD_VALUE;
+        }
+        return OK;
+    } else if (cmd == CAMERA_CMD_ENABLE_SHUTTER_SOUND) {
+        switch (arg1) {
+            case 0:
+                enableShutterSound(false);
+                break;
+            case 1:
+                enableShutterSound(true);
                 break;
             default:
                 return BAD_VALUE;
@@ -957,7 +1000,9 @@ void CameraService::Client::dataCallbackTimestamp(nsecs_t timestamp,
 // "size" is the width and height of yuv picture for registerBuffer.
 // If it is NULL, use the picture size from parameters.
 void CameraService::Client::handleShutter(image_rect_type *size) {
-    mCameraService->playSound(SOUND_SHUTTER);
+    if (mPlayShutterSound) {
+        mCameraService->playSound(SOUND_SHUTTER);
+    }
 
     sp<ICameraClient> c = mCameraClient;
     if (c != 0) {
