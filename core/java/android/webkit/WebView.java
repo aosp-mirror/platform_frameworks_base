@@ -4872,6 +4872,7 @@ public class WebView extends AbsoluteLayout
             if (detector.isInProgress()) {
                 mLastTouchTime = eventTime;
                 cancelLongPress();
+                mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
                 if (!mZoomManager.supportsPanDuringZoom()) {
                     return true;
                 }
