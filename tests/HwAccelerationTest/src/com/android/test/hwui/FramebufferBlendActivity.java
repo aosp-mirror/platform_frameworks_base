@@ -15,7 +15,7 @@
  */
 
 
-package com.google.android.test.hwui;
+package com.android.test.hwui;
 
 import android.app.Activity;
 import android.content.Context;

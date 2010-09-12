@@ -15,7 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.android.test.hwui">
+    package="com.android.test.hwui">
 
     <application
         android:label="HwUi"
@@ -70,6 +70,15 @@
             </intent-filter>
         </activity>
 
+        <activity
+                android:name="NewLayersActivity"
+                android:label="_NewLayers">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
         <activity
                 android:name="XfermodeActivity"
                 android:label="_Xfermodes"
@@ -159,6 +168,15 @@
         <activity
                 android:name="ListActivity"
                 android:label="_List">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name="TransparentListActivity"
+                android:label="_TransparentList">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

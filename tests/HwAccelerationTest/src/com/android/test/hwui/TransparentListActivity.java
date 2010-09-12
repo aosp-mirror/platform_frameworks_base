@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.test.hwui;
+package com.android.test.hwui;
 
 import android.app.Activity;
 import android.content.Context;
@@ -30,7 +30,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 @SuppressWarnings({"UnusedDeclaration"})
-public class ListActivity extends Activity {
+public class TransparentListActivity extends Activity {
     private static final String[] DATA_LIST = {
             "Afghanistan", "Albania", "Algeria", "American Samoa", "Andorra",
             "Angola", "Anguilla", "Antarctica", "Antigua and Barbuda", "Argentina",
@@ -78,12 +78,15 @@ public class ListActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        getWindow().setBackgroundDrawable(getResources().getDrawable(R.drawable.default_wallpaper));
         setContentView(R.layout.list_activity);
 
         ListAdapter adapter = new SimpleListAdapter(this);
 
         ListView list = (ListView) findViewById(R.id.list);
         list.setAdapter(adapter);
+        list.setCacheColorHint(0);
         
         registerForContextMenu(list);
     }

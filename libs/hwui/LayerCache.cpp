@@ -87,7 +87,6 @@ void LayerCache::deleteLayer(Layer* layer) {
     if (layer) {
         mSize -= layer->layer.getWidth() * layer->layer.getHeight() * 4;
 
-        glDeleteFramebuffers(1, &layer->fbo);
         glDeleteTextures(1, &layer->texture);
         delete layer;
     }
@@ -99,7 +98,7 @@ void LayerCache::clear() {
     mCache.setOnEntryRemovedListener(NULL);
 }
 
-Layer* LayerCache::get(LayerSize& size, GLuint previousFbo) {
+Layer* LayerCache::get(LayerSize& size) {
     Layer* layer = mCache.remove(size);
     if (layer) {
         LAYER_LOGD("Reusing layer");
@@ -110,10 +109,6 @@ Layer* LayerCache::get(LayerSize& size, GLuint previousFbo) {
 
         layer = new Layer;
         layer->blend = true;
-
-        // Generate the FBO and attach the texture
-        glGenFramebuffers(1, &layer->fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, layer->fbo);
 
         // Generate the texture in which the FBO will draw
         glGenTextures(1, &layer->texture);
@@ -128,23 +123,6 @@ Layer* LayerCache::get(LayerSize& size, GLuint previousFbo) {
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.width, size.height, 0,
                 GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-
-        // Bind texture to FBO
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                layer->texture, 0);
-
-        GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-        if (status != GL_FRAMEBUFFER_COMPLETE) {
-            LOGE("Framebuffer incomplete (GL error code 0x%x)", status);
-
-            glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
-
-            glDeleteFramebuffers(1, &layer->fbo);
-            glDeleteTextures(1, &layer->texture);
-            delete layer;
-
-            return NULL;
-        }
     }
 
     return layer;

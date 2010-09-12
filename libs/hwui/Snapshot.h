@@ -43,7 +43,7 @@ namespace uirenderer {
  */
 class Snapshot: public LightRefBase<Snapshot> {
 public:
-    Snapshot(): invisible(false), flags(0), previous(NULL), layer(NULL), fbo(0) {
+    Snapshot(): flags(0), previous(NULL), layer(NULL) {
         transform = &mTransformRoot;
         clipRect = &mClipRectRoot;
     }
@@ -53,13 +53,7 @@ public:
      * the previous snapshot.
      */
     Snapshot(const sp<Snapshot>& s, int saveFlags):
-            height(s->height),
-            invisible(s->invisible),
-            flags(0),
-            previous(s),
-            layer(NULL),
-            fbo(s->fbo),
-            viewport(s->viewport) {
+            flags(0), previous(s), layer(NULL) {
         if (saveFlags & SkCanvas::kMatrix_SaveFlag) {
             mTransformRoot.load(*s->transform);
             transform = &mTransformRoot;
@@ -97,23 +91,30 @@ public:
          */
         kFlagIsLayer = 0x2,
         /**
-         * Indicates that this snapshot has changed the ortho matrix.
-         */
-        kFlagDirtyOrtho = 0x4,
-        /**
          * Indicates that the local clip should be recomputed.
          */
-        kFlagDirtyLocalClip = 0x8,
+        kFlagDirtyLocalClip = 0x4,
     };
 
     /**
-     * Intersects the current clip with the new clip rectangle.
+     * Modifies the current clip with the new clip rectangle and
+     * the specified operation. The specified rectangle is transformed
+     * by this snapshot's trasnformation.
      */
-    bool clip(float left, float top, float right, float bottom, SkRegion::Op op) {
-        bool clipped = false;
-
+    bool clip(float left, float top, float right, float bottom,
+            SkRegion::Op op = SkRegion::kIntersect_Op) {
         Rect r(left, top, right, bottom);
         transform->mapRect(r);
+        return clipTransformed(r, op);
+    }
+
+    /**
+     * Modifies the current clip with the new clip rectangle and
+     * the specified operation. The specified rectangle is considered
+     * already transformed.
+     */
+    bool clipTransformed(const Rect& r, SkRegion::Op op = SkRegion::kIntersect_Op) {
+        bool clipped = false;
 
         switch (op) {
             case SkRegion::kDifference_Op:
@@ -162,29 +163,6 @@ public:
         return mLocalClip;
     }
 
-    // TODO: Temporary
-    void resetTransform(float x, float y, float z) {
-        transform = &mTransformRoot;
-        transform->loadTranslate(x, y, z);
-    }
-
-    // TODO: Temporary
-    void resetClip(float left, float top, float right, float bottom) {
-        clipRect = &mClipRectRoot;
-        clipRect->set(left, top, right, bottom);
-        flags |= Snapshot::kFlagClipSet | Snapshot::kFlagDirtyLocalClip;
-    }
-
-    /**
-     * Height of the framebuffer the snapshot is rendering into.
-     */
-    int height;
-
-    /**
-     * If true, the layer won't be rendered.
-     */
-    bool invisible;
-
     /**
      * Dirty flags.
      */
@@ -199,17 +177,6 @@ public:
      * Only set when the flag kFlagIsLayer is set.
      */
     Layer* layer;
-    GLuint fbo;
-
-    /**
-     * Current viewport.
-     */
-    Rect viewport;
-
-    /**
-     * Contains the previous ortho matrix.
-     */
-    mat4 orthoMatrix;
 
     /**
      * Local transformation. Holds the current translation, scale and

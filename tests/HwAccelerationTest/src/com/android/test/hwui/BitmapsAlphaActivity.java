@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.test.hwui;
+package com.android.test.hwui;
 
 import android.app.Activity;
 import android.content.Context;
@@ -22,56 +22,61 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.FrameLayout;
 
 @SuppressWarnings({"UnusedDeclaration"})
-public class BitmapsRectActivity extends Activity {
+public class BitmapsAlphaActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final BitmapsView view = new BitmapsView(this);
-        setContentView(view);
+        final FrameLayout layout = new FrameLayout(this);
+        layout.addView(view, new FrameLayout.LayoutParams(480, 800, Gravity.CENTER));
+        setContentView(layout);
     }
 
     static class BitmapsView extends View {
         private Paint mBitmapPaint;
         private final Bitmap mBitmap1;
         private final Bitmap mBitmap2;
-        private final Rect mSrcRect;
-        private final RectF mDstRect;
-        private final RectF mDstRect2;
+        private Bitmap mBitmap3;
 
         BitmapsView(Context c) {
             super(c);
 
+            Log.d("OpenGLRenderer", "Loading sunset1, default options");
             mBitmap1 = BitmapFactory.decodeResource(c.getResources(), R.drawable.sunset1);
+            Log.d("OpenGLRenderer", "Loading sunset2, default options");
             mBitmap2 = BitmapFactory.decodeResource(c.getResources(), R.drawable.sunset2);
+            Log.d("OpenGLRenderer", "Loading sunset3, forcing ARGB-8888");
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            mBitmap3 = BitmapFactory.decodeResource(c.getResources(), R.drawable.sunset3, opts);
+            Log.d("OpenGLRenderer", "    has bitmap alpha? " + mBitmap3.hasAlpha());
 
             mBitmapPaint = new Paint();
-            mBitmapPaint.setFilterBitmap(true);
-
-            final float fourth = mBitmap1.getWidth() / 4.0f;
-            final float half = mBitmap1.getHeight() / 2.0f;
-            mSrcRect = new Rect((int) fourth, (int) (half - half / 2.0f),
-                    (int) (fourth + fourth), (int) (half + half / 2.0f));
-            mDstRect = new RectF(fourth, half - half / 2.0f, fourth + fourth, half + half / 2.0f);
-            mDstRect2 = new RectF(fourth, half - half / 2.0f,
-                    (fourth + fourth) * 3.0f, (half + half / 2.0f) * 3.0f);
         }
 
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
+            
+            Log.d("OpenGLRenderer", "================= Draw");
 
             canvas.translate(120.0f, 50.0f);
-            canvas.drawBitmap(mBitmap1, mSrcRect, mDstRect, mBitmapPaint);
+            canvas.drawBitmap(mBitmap1, 0.0f, 0.0f, mBitmapPaint);
 
             canvas.translate(0.0f, mBitmap1.getHeight());
-            canvas.translate(-100.0f, 25.0f);
-            canvas.drawBitmap(mBitmap1, mSrcRect, mDstRect2, mBitmapPaint);
+            canvas.translate(0.0f, 25.0f);
+            canvas.drawBitmap(mBitmap2, 0.0f, 0.0f, null);
+            
+            canvas.translate(0.0f, mBitmap2.getHeight());
+            canvas.translate(0.0f, 25.0f);
+            canvas.drawBitmap(mBitmap3, 0.0f, 0.0f, null);
         }
     }
 }

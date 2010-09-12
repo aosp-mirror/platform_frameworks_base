@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.test.hwui;
+package com.android.test.hwui;
 
 import android.app.Activity;
 import android.content.Context;
@@ -23,15 +23,19 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.ComposeShader;
+import android.graphics.LightingColorFilter;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.Shader;
 import android.os.Bundle;
 import android.view.View;
 
 @SuppressWarnings({"UnusedDeclaration"})
-public class ShadersActivity extends Activity {
+public class MoreShadersActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,8 +44,6 @@ public class ShadersActivity extends Activity {
     }
 
     static class ShadersView extends View {
-        private BitmapShader mRepeatShader;
-        private BitmapShader mTranslatedShader;
         private BitmapShader mScaledShader;
         private int mTexWidth;
         private int mTexHeight;
@@ -49,8 +51,12 @@ public class ShadersActivity extends Activity {
         private float mDrawWidth;
         private float mDrawHeight;
         private LinearGradient mHorGradient;
-        private LinearGradient mDiagGradient;
         private LinearGradient mVertGradient;
+        private ComposeShader mComposeShader;
+        private ComposeShader mCompose2Shader;
+        private Paint mLargePaint;
+        private BitmapShader mScaled2Shader;
+        private ColorFilter mColorFilter;
 
         ShadersView(Context c) {
             super(c);
@@ -61,70 +67,73 @@ public class ShadersActivity extends Activity {
             mDrawWidth = mTexWidth * 2.2f;
             mDrawHeight = mTexHeight * 1.2f;
 
-            mRepeatShader = new BitmapShader(texture, Shader.TileMode.REPEAT,
-                    Shader.TileMode.REPEAT);
-
-            mTranslatedShader = new BitmapShader(texture, Shader.TileMode.REPEAT,
-                    Shader.TileMode.REPEAT);
-            Matrix m1 = new Matrix();
-            m1.setTranslate(mTexWidth / 2.0f, mTexHeight / 2.0f);
-            m1.postRotate(45, 0, 0);
-            mTranslatedShader.setLocalMatrix(m1);
-            
             mScaledShader = new BitmapShader(texture, Shader.TileMode.MIRROR,
                     Shader.TileMode.MIRROR);
             Matrix m2 = new Matrix();
             m2.setScale(0.5f, 0.5f);
             mScaledShader.setLocalMatrix(m2);
+            
+            mScaled2Shader = new BitmapShader(texture, Shader.TileMode.MIRROR,
+                    Shader.TileMode.MIRROR);
+            Matrix m3 = new Matrix();
+            m3.setScale(0.1f, 0.1f);
+            mScaled2Shader.setLocalMatrix(m3);
 
             mHorGradient = new LinearGradient(0.0f, 0.0f, mDrawWidth, 0.0f,
-                    Color.RED, Color.GREEN, Shader.TileMode.CLAMP);
-            
-            mDiagGradient = new LinearGradient(0.0f, 0.0f, mDrawWidth / 1.5f, mDrawHeight,
-                    Color.BLUE, Color.MAGENTA, Shader.TileMode.CLAMP);
+                    Color.RED, 0x7f00ff00, Shader.TileMode.CLAMP);
             
             mVertGradient = new LinearGradient(0.0f, 0.0f, 0.0f, mDrawHeight / 2.0f,
                     Color.YELLOW, Color.MAGENTA, Shader.TileMode.MIRROR);
 
+            mComposeShader = new ComposeShader(mScaledShader, mHorGradient,
+                    PorterDuff.Mode.SRC_OVER);
+            mCompose2Shader = new ComposeShader(mHorGradient, mScaledShader,
+                    PorterDuff.Mode.SRC_OUT);
+
+            mColorFilter = new LightingColorFilter(0x0060ffff, 0x00101030);
+ 
+            mLargePaint = new Paint();
+            mLargePaint.setAntiAlias(true);
+            mLargePaint.setTextSize(36.0f);
+            mLargePaint.setColor(0xff000000);
+            
             mPaint = new Paint();
         }
 
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-            //canvas.drawRGB(255, 255, 255);
+            canvas.drawRGB(255, 255, 255);
 
-            // Bitmap shaders
             canvas.save();
             canvas.translate(40.0f, 40.0f);
 
-            mPaint.setShader(mRepeatShader);
+            mPaint.setShader(mComposeShader);
             canvas.drawRect(0.0f, 0.0f, mDrawWidth, mDrawHeight, mPaint);
             
             canvas.translate(0.0f, 40.0f + mDrawHeight);
-            mPaint.setShader(mTranslatedShader);
-            canvas.drawRect(0.0f, 0.0f, mDrawWidth, mDrawHeight, mPaint);
-
-            canvas.translate(0.0f, 40.0f + mDrawHeight);
-            mPaint.setShader(mScaledShader);
+            mPaint.setShader(mCompose2Shader);
             canvas.drawRect(0.0f, 0.0f, mDrawWidth, mDrawHeight, mPaint);
 
             canvas.restore();
 
-            // Gradients
             canvas.save();
             canvas.translate(40.0f + mDrawWidth + 40.0f, 40.0f);
 
-            mPaint.setShader(mHorGradient);
-            canvas.drawRect(0.0f, 0.0f, mDrawWidth, mDrawHeight, mPaint);
+            mLargePaint.setShader(mHorGradient);
+            canvas.drawText("OpenGL rendering", 0.0f, 20.0f, mLargePaint);
+            
+            mLargePaint.setShader(mScaled2Shader);
+            canvas.drawText("OpenGL rendering", 0.0f, 60.0f, mLargePaint);
+            
+            mLargePaint.setShader(mCompose2Shader);
+            mLargePaint.setColorFilter(mColorFilter);
+            canvas.drawText("OpenGL rendering", 0.0f, 100.0f, mLargePaint);
+            mLargePaint.setColorFilter(null);
             
             canvas.translate(0.0f, 40.0f + mDrawHeight);
-            mPaint.setShader(mDiagGradient);
-            canvas.drawRect(0.0f, 0.0f, mDrawWidth, mDrawHeight, mPaint);
-
-            canvas.translate(0.0f, 40.0f + mDrawHeight);
-            mPaint.setShader(mVertGradient);
-            canvas.drawRect(0.0f, 0.0f, mDrawWidth, mDrawHeight, mPaint);
+            mLargePaint.setShader(mVertGradient);
+            canvas.drawText("OpenGL rendering", 0.0f, 20.0f, mLargePaint);
             
             canvas.restore();
         }

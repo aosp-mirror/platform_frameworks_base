@@ -14,27 +14,17 @@
  * limitations under the License.
  */
 
-package com.google.android.test.hwui;
+package com.android.test.hwui;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.widget.EditText;
-import android.widget.FrameLayout;
 
 @SuppressWarnings({"UnusedDeclaration"})
-public class SimplePathsActivity extends Activity {
+public class ResizeActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        FrameLayout layout = new FrameLayout(this);
-        EditText text = new EditText(this);
-        layout.addView(text, new FrameLayout.LayoutParams(600, 350, Gravity.CENTER));
-        text.setText("This is an example of an EditText widget \n" +
-                "using simple paths to create the selection.");
-        //text.setSelection(0, text.getText().length());
-
-        setContentView(layout);
+        
+        setContentView(R.layout.form);
     }
 }
