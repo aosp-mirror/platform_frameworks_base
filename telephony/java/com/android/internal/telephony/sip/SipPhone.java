@@ -826,7 +826,8 @@ public class SipPhone extends SipPhoneBase {
                     onError(Connection.DisconnectCause.INVALID_NUMBER);
                     break;
                 case TIME_OUT:
-                    onError(Connection.DisconnectCause.CONGESTION);
+                case TRANSACTION_TERMINTED:
+                    onError(Connection.DisconnectCause.TIMED_OUT);
                     break;
                 case INVALID_CREDENTIALS:
                     onError(Connection.DisconnectCause.INVALID_CREDENTIALS);
