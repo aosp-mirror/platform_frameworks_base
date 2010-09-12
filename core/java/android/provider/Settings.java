@@ -3525,13 +3525,7 @@ public final class Settings {
          */
         public static final boolean isLocationProviderEnabled(ContentResolver cr, String provider) {
             String allowedProviders = Settings.Secure.getString(cr, LOCATION_PROVIDERS_ALLOWED);
-            if (allowedProviders != null) {
-                return (allowedProviders.equals(provider) ||
-                        allowedProviders.contains("," + provider + ",") ||
-                        allowedProviders.startsWith(provider + ",") ||
-                        allowedProviders.endsWith("," + provider));
-            }
-            return false;
+            return TextUtils.delimitedStringContains(allowedProviders, ',', provider);
         }
 
         /**
