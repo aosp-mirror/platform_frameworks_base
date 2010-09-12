@@ -43,4 +43,5 @@ interface IStatusBarService
             int uid, int initialPid, String message);
     void onClearAllNotifications();
     void onNotificationClear(String pkg, String tag, int id);
+    void setLightsOn(boolean on);
 }
