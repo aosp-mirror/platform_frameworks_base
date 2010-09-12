@@ -858,7 +858,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      * {@link #onActivityCreated(Bundle)}.
      *
      * <p>This corresponds to {@link Activity#onSaveInstanceState(Bundle)
-     * Activity.onnSaveInstanceState(Bundle)} and most of the discussion there
+     * Activity.onSaveInstanceState(Bundle)} and most of the discussion there
      * applies here as well.  Note however: <em>this method may be called
      * at any time before {@link #onDestroy()}</em>.  There are many situations
      * where a fragment may be mostly torn down (such as when placed on the
