@@ -29,6 +29,7 @@
 
 #include <utils/RefBase.h>
 #include <utils/ResourceTypes.h>
+#include <utils/Vector.h>
 
 #include "Extensions.h"
 #include "Matrix.h"
@@ -154,6 +155,12 @@ private:
      */
     bool createLayer(sp<Snapshot> snapshot, float left, float top, float right, float bottom,
             int alpha, SkXfermode::Mode mode, int flags);
+
+    /**
+     * Clears all the regions corresponding to the current list of layers.
+     * This method MUST be invoked before any drawing operation.
+     */
+    void clearLayerRegions();
 
     /**
      * Draws a colored rectangle with the specified color. The specified coordinates
@@ -385,6 +392,10 @@ private:
 
     // Various caches
     Caches& mCaches;
+
+    // List of rectangles to clear due to calls to saveLayer()
+    Vector<Rect*> mLayers;
+
 }; // class OpenGLRenderer
 
 }; // namespace uirenderer

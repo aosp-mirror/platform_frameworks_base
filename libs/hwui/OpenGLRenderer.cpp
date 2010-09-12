@@ -309,17 +309,12 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
             bounds.getWidth(), bounds.getHeight(), 0);
 
-    // Clear the framebuffer where the layer will draw
-    glScissor(bounds.left, mHeight - bounds.bottom, bounds.getWidth(), bounds.getHeight());
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
     if (flags & SkCanvas::kClipToLayer_SaveFlag) {
-        mSnapshot->clipTransformed(bounds);
+        if (mSnapshot->clipTransformed(bounds)) setScissorFromClip();
     }
 
-    // Restore the initial clip
-    setScissorFromClip();
+    // Enqueue the buffer coordinates to clear the corresponding region later
+    mLayers.push(new Rect(bounds));
 
     return true;
 }
@@ -369,6 +364,26 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
 
         delete layer;
     }
+}
+
+void OpenGLRenderer::clearLayerRegions() {
+    if (mLayers.size() == 0) return;
+
+    for (uint32_t i = 0; i < mLayers.size(); i++) {
+        Rect* bounds = mLayers.itemAt(i);
+
+        // Clear the framebuffer where the layer will draw
+        glScissor(bounds->left, mHeight - bounds->bottom,
+                bounds->getWidth(), bounds->getHeight());
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        delete bounds;
+    }
+    mLayers.clear();
+
+    // Restore the clip
+    setScissorFromClip();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -612,6 +627,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
             mode, false, true);
 
     const Rect& clip = mSnapshot->getLocalClip();
+    clearLayerRegions();
     fontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -650,6 +666,8 @@ void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
     const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
 
     setupTextureAlpha8(texture, textureUnit, x, y, r, g, b, a, mode, true, true);
+
+    clearLayerRegions();
 
     // Draw the mesh
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
@@ -836,6 +854,8 @@ void OpenGLRenderer::drawTextDecorations(const char* text, int bytesCount, float
 
 void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom,
         int color, SkXfermode::Mode mode, bool ignoreTransform, bool ignoreBlending) {
+    clearLayerRegions();
+
     // If a shader is set, preserve only the alpha
     if (mShader) {
         color |= 0x00ffffff;
@@ -914,6 +934,8 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
         GLuint texture, float alpha, SkXfermode::Mode mode, bool blend,
         GLvoid* vertices, GLvoid* texCoords, GLvoid* indices, GLsizei elementsCount,
         bool swapSrcDst, bool ignoreTransform) {
+    clearLayerRegions();
+
     ProgramDescription description;
     description.hasTexture = true;
     if (mColorFilter) {
