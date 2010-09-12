@@ -3598,40 +3598,6 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    // Convenience call for removeNativeBinariesLI(File)
-    private void removeNativeBinariesLI(PackageParser.Package pkg) {
-        File nativeLibraryDir = getNativeBinaryDirForPackage(pkg);
-        removeNativeBinariesLI(nativeLibraryDir);
-    }
-
-    // Remove the native binaries of a given package. This simply
-    // gets rid of the files in the 'lib' sub-directory.
-    public void removeNativeBinariesLI(File binaryDir) {
-        if (DEBUG_NATIVE) {
-            Slog.w(TAG, "Deleting native binaries from: " + binaryDir.getPath());
-        }
-
-        // Just remove any file in the directory. Since the directory
-        // is owned by the 'system' UID, the application is not supposed
-        // to have written anything there.
-        //
-        if (binaryDir.exists()) {
-            File[] binaries = binaryDir.listFiles();
-            if (binaries != null) {
-                for (int nn = 0; nn < binaries.length; nn++) {
-                    if (DEBUG_NATIVE) {
-                        Slog.d(TAG, "    Deleting " + binaries[nn].getName());
-                    }
-                    if (!binaries[nn].delete()) {
-                        Slog.w(TAG, "Could not delete native binary: " + binaries[nn].getPath());
-                    }
-                }
-            }
-            // Do not delete 'lib' directory itself, or this will prevent
-            // installation of future updates.
-        }
-    }
-
     void removePackageLI(PackageParser.Package pkg, boolean chatty) {
         if (chatty && Config.LOGD) Log.d(
             TAG, "Removing package " + pkg.applicationInfo.packageName );
@@ -5135,7 +5101,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if (libraryPath != null) {
-                removeNativeBinariesLI(new File(libraryPath));
+                NativeLibraryHelper.removeNativeBinariesLI(libraryPath);
             }
         }
 
@@ -6209,8 +6175,8 @@ class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             // Reinstate the old system package
             mSettings.enableSystemPackageLP(p.packageName);
-            // Remove any native libraries. XXX needed?
-            removeNativeBinariesLI(p);
+            // Remove any native libraries from the upgraded package.
+            NativeLibraryHelper.removeNativeBinariesLI(p.applicationInfo.nativeLibraryDir);
         }
         // Install the system package
         PackageParser.Package newPkg = scanPackageLI(ps.codePath,
