@@ -43,7 +43,6 @@ LOCAL_C_INCLUDES += \
 # Set the following flag to enable the decryption passthru flow
 #LOCAL_CFLAGS += -DENABLE_PASSTHRU_DECRYPTION
 
-PRODUCT_COPY_FILES += \
-    $(TARGET_OUT_SHARED_LIBRARIES)/libdrmpassthruplugin.so:system/lib/drm/plugins/native/libdrmpassthruplugin.so
+LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
