@@ -1340,7 +1340,7 @@
   <public type="attr" name="actionBarTabTextStyle" />
   <public type="attr" name="actionOverflowButtonStyle" />
   <public type="attr" name="itemPadding" />
-  <public type="attr" name="closeButtonStyle" />
+  <public type="attr" name="actionModeCloseButtonStyle" />
   <public type="attr" name="titleTextStyle" />
   <public type="attr" name="subtitleTextStyle" />
   <public type="attr" name="iconifiedByDefault" />

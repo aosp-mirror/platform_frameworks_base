@@ -469,7 +469,6 @@
         <attr name="actionBarTabBarStyle" format="reference" />
         <attr name="actionBarTabTextStyle" format="reference" />
         <attr name="actionOverflowButtonStyle" format="reference" />
-        <attr name="actionModeStyle" format="reference" />
         <!-- Reference to a style for the Action Bar -->
         <attr name="actionBarStyle" format="reference" />
         <!-- Size of the Action Bar, including the contextual
@@ -483,6 +482,8 @@
         <!-- Action mode styles  -->
         <!-- =================== -->
         <eat-comment />
+        <attr name="actionModeStyle" format="reference" />
+        <attr name="actionModeCloseButtonStyle" format="reference" />
         <!-- Background drawable to use for action mode UI -->
         <attr name="actionModeBackground" format="reference" />
         <!-- Drawable to use for the close action mode button -->
@@ -4090,8 +4091,6 @@
         <attr name="height" />
         <!-- Specifies a padding to use between elements on the bar. -->
         <attr name="itemPadding" format="dimension" />
-        <!-- Specifies a style for the mode's close button. -->
-        <attr name="closeButtonStyle" format="reference" />
     </declare-styleable>
 
     <declare-styleable name="SearchView">

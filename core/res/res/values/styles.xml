@@ -890,7 +890,6 @@
         <item name="android:background">?android:attr/actionModeBackground</item>
         <item name="android:height">?android:attr/actionBarSize</item>
         <item name="android:itemPadding">?android:attr/actionButtonPadding</item>
-        <item name="android:closeButtonStyle">@android:style/Widget.ActionButton.CloseMode</item>
         <item name="android:titleTextStyle">@android:style/TextAppearance.Widget.ActionMode.Title</item>
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Widget.ActionMode.Subtitle</item>
     </style>
