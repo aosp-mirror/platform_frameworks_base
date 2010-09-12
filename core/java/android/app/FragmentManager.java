@@ -192,6 +192,7 @@ final class FragmentManagerImpl implements FragmentManager {
     Activity mActivity;
     
     boolean mNeedMenuInvalidate;
+    boolean mStateSaved;
     
     // Temporary vars for state save and restore.
     Bundle mStateBundle = null;
@@ -484,6 +485,7 @@ final class FragmentManagerImpl implements FragmentManager {
                             throw new SuperNotCalledException("Fragment " + f
                                     + " did not call through to super.onDetach()");
                         }
+                        f.mImmediateActivity = null;
                         f.mActivity = null;
                     }
             }
@@ -678,6 +680,10 @@ final class FragmentManagerImpl implements FragmentManager {
     }
     
     public void enqueueAction(Runnable action) {
+        if (mStateSaved) {
+            throw new IllegalStateException(
+                    "Can not perform this action after onSaveInstanceState");
+        }
         synchronized (this) {
             if (mPendingActions == null) {
                 mPendingActions = new ArrayList<Runnable>();
@@ -888,6 +894,8 @@ final class FragmentManagerImpl implements FragmentManager {
     }
     
     Parcelable saveAllState() {
+        mStateSaved = true;
+
         if (mActive == null || mActive.size() <= 0) {
             return null;
         }
@@ -1029,6 +1037,22 @@ final class FragmentManagerImpl implements FragmentManager {
             }
         }
         
+        // Update the target of all retained fragments.
+        if (nonConfig != null) {
+            for (int i=0; i<nonConfig.size(); i++) {
+                Fragment f = nonConfig.get(i);
+                if (f.mTarget != null) {
+                    if (f.mTarget.mIndex < mActive.size()) {
+                        f.mTarget = mActive.get(f.mTarget.mIndex);
+                    } else {
+                        Log.w(TAG, "Re-attaching retained fragment " + f
+                                + " target no longer exists: " + f.mTarget);
+                        f.mTarget = null;
+                    }
+                }
+            }
+        }
+
         // Build the list of currently added fragments.
         if (fms.mAdded != null) {
             mAdded = new ArrayList<Fragment>(fms.mAdded.length);
@@ -1070,18 +1094,22 @@ final class FragmentManagerImpl implements FragmentManager {
     }
     
     public void dispatchCreate() {
+        mStateSaved = false;
         moveToState(Fragment.CREATED, false);
     }
     
     public void dispatchActivityCreated() {
+        mStateSaved = false;
         moveToState(Fragment.ACTIVITY_CREATED, false);
     }
     
     public void dispatchStart() {
+        mStateSaved = false;
         moveToState(Fragment.STARTED, false);
     }
     
     public void dispatchResume() {
+        mStateSaved = false;
         moveToState(Fragment.RESUMED, false);
     }
     
