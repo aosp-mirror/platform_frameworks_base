@@ -150,15 +150,12 @@ public class TabletStatusBarService extends StatusBarService {
         mBarContents = sb.findViewById(R.id.bar_contents);
         mCurtains = sb.findViewById(R.id.lights_out);
         View systemInfo = sb.findViewById(R.id.systemInfo);
-        View.OnLongClickListener toggle = new View.OnLongClickListener() {
-            public boolean onLongClick(View v) {
-                toggleLightsOut(v);
-                return true;
-            }
-        };
-        
-        systemInfo.setOnLongClickListener(toggle);
-        mCurtains.setOnLongClickListener(toggle);
+
+        systemInfo.setOnLongClickListener(new SetLightsOnListener(false));
+
+        SetLightsOnListener on = new SetLightsOnListener(true);
+        mCurtains.setOnClickListener(on);
+        mCurtains.setOnLongClickListener(on);
 
         // the more notifications icon
         mNotificationIconArea = (NotificationIconArea)sb.findViewById(R.id.notificationIcons);
@@ -492,11 +489,22 @@ public class TabletStatusBarService extends StatusBarService {
     }
 
     public void setLightsOn(boolean on) {
-        //Slog.d(TAG, "setLightsOn on=" + on);
-        if (!on) {
+        if (on) {
+            mCurtains.setAnimation(AnimationUtils.loadAnimation((Context)this,
+                        R.anim.lights_out_out));
+            mCurtains.setVisibility(View.GONE);
+            mBarContents.setAnimation(AnimationUtils.loadAnimation((Context)this,
+                        R.anim.status_bar_in));
+            mBarContents.setVisibility(View.VISIBLE);
+        } else {
             animateCollapse();
+            mCurtains.setAnimation(AnimationUtils.loadAnimation((Context)this,
+                        R.anim.lights_out_in));
+            mCurtains.setVisibility(View.VISIBLE);
+            mBarContents.setAnimation(AnimationUtils.loadAnimation((Context)this,
+                        R.anim.status_bar_out));
+            mBarContents.setVisibility(View.GONE);
         }
-        // TODO: implement lights out mode
     }
 
     public void notificationIconsClicked(View v) {
@@ -738,26 +746,31 @@ public class TabletStatusBarService extends StatusBarService {
         return true;
     }
 
-    protected void setLightsOut(boolean out) {
-        if (out) {
-            mCurtains.setAnimation(AnimationUtils.loadAnimation((Context)this,
-                        R.anim.lights_out_in));
-            mCurtains.setVisibility(View.VISIBLE);
-            mBarContents.setAnimation(AnimationUtils.loadAnimation((Context)this,
-                        R.anim.status_bar_out));
-            mBarContents.setVisibility(View.GONE);
-        } else {
-            mCurtains.setAnimation(AnimationUtils.loadAnimation((Context)this,
-                        R.anim.lights_out_out));
-            mCurtains.setVisibility(View.GONE);
-            mBarContents.setAnimation(AnimationUtils.loadAnimation((Context)this,
-                        R.anim.status_bar_in));
-            mBarContents.setVisibility(View.VISIBLE);
-        }
-    }
+    public class SetLightsOnListener implements View.OnLongClickListener,
+           View.OnClickListener {
+        private boolean mOn;
 
-    public void toggleLightsOut(View v) {
-        setLightsOut(mCurtains.getVisibility() != View.VISIBLE);
+        SetLightsOnListener(boolean on) {
+            mOn = on;
+        }
+
+        public void onClick(View v) {
+            try {
+                mBarService.setLightsOn(mOn);
+            } catch (RemoteException ex) {
+                // system process
+            }
+        }
+
+        public boolean onLongClick(View v) {
+            try {
+                mBarService.setLightsOn(mOn);
+            } catch (RemoteException ex) {
+                // system process
+            }
+            return true;
+        }
+
     }
 }
 
