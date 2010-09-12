@@ -266,7 +266,7 @@ public class FocusFinder {
 
 
     /**
-     * Do the "beams" w.r.t the given direcition's axos of rect1 and rect2 overlap?
+     * Do the "beams" w.r.t the given direcition's axis of rect1 and rect2 overlap?
      * @param direction the direction (up, down, left, right)
      * @param rect1 The first rectangle
      * @param rect2 The second rectangle
