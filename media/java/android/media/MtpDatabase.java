@@ -170,7 +170,7 @@ public class MtpDatabase {
                     Log.e(TAG, "RemoteException in endSendObject", e);
                 }
             } else {
-                Uri uri = mMediaScanner.scanMtpFile(path, mVolumeName, handle, format);
+                mMediaScanner.scanMtpFile(path, mVolumeName, handle, format);
             }
         } else {
             deleteFile(handle);

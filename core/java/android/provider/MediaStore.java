@@ -339,6 +339,18 @@ public final class MediaStore {
              */
             public static final String MEDIA_ID = "media_id";
         }
+
+        /**
+         * The MIME type of the file
+         * <P>Type: TEXT</P>
+         */
+        public static final String MIME_TYPE = "mime_type";
+
+        /**
+         * The title of the content
+         * <P>Type: TEXT</P>
+         */
+        public static final String TITLE = "title";
     }
 
     /**
