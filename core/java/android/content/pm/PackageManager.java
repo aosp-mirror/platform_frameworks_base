@@ -192,37 +192,43 @@ public abstract class PackageManager {
 
     /**
      * Signature check result: this is returned by {@link #checkSignatures}
-     * if the two packages have a matching signature.
+     * if all signatures on the two packages match.
      */
     public static final int SIGNATURE_MATCH = 0;
 
     /**
      * Signature check result: this is returned by {@link #checkSignatures}
      * if neither of the two packages is signed.
+     *
+     * @deprecated It is not possible to install unsigned packages.
      */
     public static final int SIGNATURE_NEITHER_SIGNED = 1;
 
     /**
      * Signature check result: this is returned by {@link #checkSignatures}
-     * if the first package is not signed, but the second is.
+     * if the first package is not signed but the second is.
+     *
+     * @deprecated It is not possible to install unsigned packages.
      */
     public static final int SIGNATURE_FIRST_NOT_SIGNED = -1;
 
     /**
      * Signature check result: this is returned by {@link #checkSignatures}
-     * if the second package is not signed, but the first is.
+     * if the second package is not signed but the first is.
+     *
+     * @deprecated It is not possible to install unsigned packages.
      */
     public static final int SIGNATURE_SECOND_NOT_SIGNED = -2;
 
     /**
      * Signature check result: this is returned by {@link #checkSignatures}
-     * if both packages are signed but there is no matching signature.
+     * if not all signatures on both packages match.
      */
     public static final int SIGNATURE_NO_MATCH = -3;
 
     /**
      * Signature check result: this is returned by {@link #checkSignatures}
-     * if either of the given package names are not valid.
+     * if either of the packages are not valid.
      */
     public static final int SIGNATURE_UNKNOWN_PACKAGE = -4;
 
@@ -1245,20 +1251,14 @@ public abstract class PackageManager {
      *
      * @param pkg1 First package name whose signature will be compared.
      * @param pkg2 Second package name whose signature will be compared.
-     * @return Returns an integer indicating whether there is a matching
-     * signature: the value is >= 0 if there is a match (or neither package
-     * is signed), or < 0 if there is not a match.  The match result can be
-     * further distinguished with the success (>= 0) constants
-     * {@link #SIGNATURE_MATCH}, {@link #SIGNATURE_NEITHER_SIGNED}; or
-     * failure (< 0) constants {@link #SIGNATURE_FIRST_NOT_SIGNED},
-     * {@link #SIGNATURE_SECOND_NOT_SIGNED}, {@link #SIGNATURE_NO_MATCH},
-     * or {@link #SIGNATURE_UNKNOWN_PACKAGE}.
+     *
+     * @return Returns an integer indicating whether all signatures on the
+     * two packages match. The value is >= 0 ({@link #SIGNATURE_MATCH}) if
+     * all signatures match or < 0 if there is not a match ({@link
+     * #SIGNATURE_NO_MATCH} or {@link #SIGNATURE_UNKNOWN_PACKAGE}).
      *
      * @see #checkSignatures(int, int)
      * @see #SIGNATURE_MATCH
-     * @see #SIGNATURE_NEITHER_SIGNED
-     * @see #SIGNATURE_FIRST_NOT_SIGNED
-     * @see #SIGNATURE_SECOND_NOT_SIGNED
      * @see #SIGNATURE_NO_MATCH
      * @see #SIGNATURE_UNKNOWN_PACKAGE
      */
@@ -1273,20 +1273,14 @@ public abstract class PackageManager {
      *
      * @param uid1 First UID whose signature will be compared.
      * @param uid2 Second UID whose signature will be compared.
-     * @return Returns an integer indicating whether there is a matching
-     * signature: the value is >= 0 if there is a match (or neither package
-     * is signed), or < 0 if there is not a match.  The match result can be
-     * further distinguished with the success (>= 0) constants
-     * {@link #SIGNATURE_MATCH}, {@link #SIGNATURE_NEITHER_SIGNED}; or
-     * failure (< 0) constants {@link #SIGNATURE_FIRST_NOT_SIGNED},
-     * {@link #SIGNATURE_SECOND_NOT_SIGNED}, {@link #SIGNATURE_NO_MATCH},
-     * or {@link #SIGNATURE_UNKNOWN_PACKAGE}.
      *
-     * @see #checkSignatures(int, int)
+     * @return Returns an integer indicating whether all signatures on the
+     * two packages match. The value is >= 0 ({@link #SIGNATURE_MATCH}) if
+     * all signatures match or < 0 if there is not a match ({@link
+     * #SIGNATURE_NO_MATCH} or {@link #SIGNATURE_UNKNOWN_PACKAGE}).
+     *
+     * @see #checkSignatures(String, String)
      * @see #SIGNATURE_MATCH
-     * @see #SIGNATURE_NEITHER_SIGNED
-     * @see #SIGNATURE_FIRST_NOT_SIGNED
-     * @see #SIGNATURE_SECOND_NOT_SIGNED
      * @see #SIGNATURE_NO_MATCH
      * @see #SIGNATURE_UNKNOWN_PACKAGE
      */
