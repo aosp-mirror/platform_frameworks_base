@@ -7690,6 +7690,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * <p>Indicates whether this view is attached to an hardware accelerated
+     * window or not.</p>
+     * 
+     * <p>Even if this method returns true, it does not mean that every call
+     * to {@link #draw(android.graphics.Canvas)} will be made with an hardware
+     * accelerated {@link android.graphics.Canvas}. For instance, if this view
+     * is drawn onto an offscren {@link android.graphics.Bitmap} and its
+     * window is hardware accelerated,
+     * {@link android.graphics.Canvas#isHardwareAccelerated()} will likely
+     * return false, and this method will return true.</p>
+     * 
+     * @return True if the view is attached to a window and the window is
+     *         hardware accelerated; false in any other case.
+     */
+    public boolean isHardwareAccelerated() {
+        return mAttachInfo != null && mAttachInfo.mHardwareAccelerated;
+    }
+    
+    /**
      * Manually render this view (and all of its children) to the given Canvas.
      * The view must have already done a full layout before this function is
      * called.  When implementing a view, do not override this method; instead,
@@ -10057,6 +10076,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         IBinder mPanelParentWindowToken;
         Surface mSurface;
 
+        boolean mHardwareAccelerated;        
+        
         /**
          * Scale factor used by the compatibility mode
          */

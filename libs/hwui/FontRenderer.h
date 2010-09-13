@@ -94,6 +94,9 @@ protected:
         // Values below contain a glyph's origin in the bitmap
         int32_t mBitmapLeft;
         int32_t mBitmapTop;
+        // Auto-kerning
+        SkFixed mLsbDelta;
+        SkFixed mRsbDelta;
     };
 
     Font(FontRenderer* state, uint32_t fontId, float fontSize);
