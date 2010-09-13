@@ -29,6 +29,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.WorkSource;
 import android.util.Log;
 
 import com.android.internal.location.DummyLocationProvider;
@@ -52,6 +53,7 @@ public class LocationProviderProxy implements LocationProviderInterface {
     private boolean mLocationTracking = false;
     private boolean mEnabled = false;
     private long mMinTime = -1;
+    private WorkSource mMinTimeSource = new WorkSource();
     private int mNetworkState;
     private NetworkInfo mNetworkInfo;
 
@@ -122,7 +124,7 @@ public class LocationProviderProxy implements LocationProviderInterface {
                     provider.enableLocationTracking(true);
                 }
                 if (mMinTime >= 0) {
-                    provider.setMinTime(mMinTime);
+                    provider.setMinTime(mMinTime, mMinTimeSource);
                 }
                 if (mNetworkInfo != null) {
                     provider.updateNetworkState(mNetworkState, mNetworkInfo);
@@ -318,6 +320,7 @@ public class LocationProviderProxy implements LocationProviderInterface {
         mLocationTracking = enable;
         if (!enable) {
             mMinTime = -1;
+            mMinTimeSource.clear();
         }
         ILocationProvider provider;
         synchronized (mServiceConnection) {
@@ -339,15 +342,16 @@ public class LocationProviderProxy implements LocationProviderInterface {
         return mMinTime;
     }
 
-    public void setMinTime(long minTime) {
-       mMinTime = minTime;
+    public void setMinTime(long minTime, WorkSource ws) {
+        mMinTime = minTime;
+        mMinTimeSource.set(ws);
         ILocationProvider provider;
         synchronized (mServiceConnection) {
             provider = mProvider;
         }
         if (provider != null) {
             try {
-                provider.setMinTime(minTime);
+                provider.setMinTime(minTime, ws);
             } catch (RemoteException e) {
             }
         }

@@ -23,6 +23,7 @@ import android.location.LocationProvider;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.os.WorkSource;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 
@@ -201,7 +202,7 @@ public class MockProvider implements LocationProviderInterface {
         return false;
     }
 
-    public void setMinTime(long minTime) {
+    public void setMinTime(long minTime, WorkSource ws) {
     }
 
     public void updateNetworkState(int state, NetworkInfo info) {

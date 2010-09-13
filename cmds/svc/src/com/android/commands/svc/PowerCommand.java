@@ -64,7 +64,7 @@ public class PowerCommand extends Svc.Command {
                             = IPowerManager.Stub.asInterface(ServiceManager.getService(Context.POWER_SERVICE));
                     try {
                         IBinder lock = new Binder();
-                        pm.acquireWakeLock(PowerManager.FULL_WAKE_LOCK, lock, "svc power");
+                        pm.acquireWakeLock(PowerManager.FULL_WAKE_LOCK, lock, "svc power", null);
                         pm.setStayOnSetting(val);
                         pm.releaseWakeLock(lock, 0);
                     }

@@ -54,6 +54,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Slog;
@@ -504,7 +505,7 @@ class BackupManagerService extends IBackupManager.Stub {
         parseLeftoverJournals();
 
         // Power management
-        mWakelock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "backup");
+        mWakelock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*");
 
         // Start the backup passes going
         setBackupEnabled(areEnabled);
@@ -1363,6 +1364,7 @@ class BackupManagerService extends IBackupManager.Stub {
                         ? IApplicationThread.BACKUP_MODE_FULL
                         : IApplicationThread.BACKUP_MODE_INCREMENTAL;
                 try {
+                    mWakelock.setWorkSource(new WorkSource(request.appInfo.uid));
                     agent = bindToAgentSynchronous(request.appInfo, mode);
                     if (agent != null) {
                         int result = processOneBackup(request, agent, transport);
@@ -1377,6 +1379,8 @@ class BackupManagerService extends IBackupManager.Stub {
                     } catch (RemoteException e) {}
                 }
             }
+
+            mWakelock.setWorkSource(null);
 
             return BackupConstants.TRANSPORT_OK;
         }

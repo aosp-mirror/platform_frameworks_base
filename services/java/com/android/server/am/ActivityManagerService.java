@@ -5988,12 +5988,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                             finisher = new IIntentReceiver.Stub() {
                                 public void performReceive(Intent intent, int resultCode,
                                         String data, Bundle extras, boolean ordered,
-                                        boolean sticky)
-                                        throws RemoteException {
-                                    synchronized (ActivityManagerService.this) {
-                                        mDidUpdate = true;
-                                    }
-                                    systemReady(goingCallback);
+                                        boolean sticky) {
+                                    // The raw IIntentReceiver interface is called
+                                    // with the AM lock held, so redispatch to
+                                    // execute our code without the lock.
+                                    mHandler.post(new Runnable() {
+                                        public void run() {
+                                            synchronized (ActivityManagerService.this) {
+                                                mDidUpdate = true;
+                                            }
+                                            systemReady(goingCallback);
+                                        }
+                                    });
                                 }
                             };
                         }

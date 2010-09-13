@@ -50,6 +50,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.WorkSource;
 import android.provider.Settings.SettingNotFoundException;
 import android.provider.Settings;
 import android.util.EventLog;
@@ -310,7 +311,7 @@ class PowerManagerService extends IPowerManager.Stub
                 long ident = Binder.clearCallingIdentity();
                 try {
                     PowerManagerService.this.acquireWakeLockLocked(mFlags, mToken,
-                            MY_UID, MY_PID, mTag);
+                            MY_UID, MY_PID, mTag, null);
                     mHeld = true;
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -607,6 +608,7 @@ class PowerManagerService extends IPowerManager.Stub
         final int uid;
         final int pid;
         final int monitorType;
+        WorkSource ws;
         boolean activated = true;
         int minState;
     }
@@ -630,35 +632,74 @@ class PowerManagerService extends IPowerManager.Stub
                 || n == PowerManager.SCREEN_DIM_WAKE_LOCK;
     }
 
-    public void acquireWakeLock(int flags, IBinder lock, String tag) {
+    void enforceWakeSourcePermission(int uid, int pid) {
+        if (uid == Process.myUid()) {
+            return;
+        }
+        mContext.enforcePermission(android.Manifest.permission.UPDATE_DEVICE_STATS,
+                pid, uid, null);
+    }
+
+    public void acquireWakeLock(int flags, IBinder lock, String tag, WorkSource ws) {
         int uid = Binder.getCallingUid();
         int pid = Binder.getCallingPid();
         if (uid != Process.myUid()) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
         }
+        if (ws != null) {
+            enforceWakeSourcePermission(uid, pid);
+        }
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mLocks) {
-                acquireWakeLockLocked(flags, lock, uid, pid, tag);
+                acquireWakeLockLocked(flags, lock, uid, pid, tag, ws);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    public void acquireWakeLockLocked(int flags, IBinder lock, int uid, int pid, String tag) {
-        int acquireUid = -1;
-        int acquirePid = -1;
-        String acquireName = null;
-        int acquireType = -1;
+    void noteStartWakeLocked(WakeLock wl, WorkSource ws) {
+        try {
+            if (ws != null) {
+                mBatteryStats.noteStartWakelockFromSource(ws, wl.pid, wl.tag,
+                        wl.monitorType);
+            } else {
+                mBatteryStats.noteStartWakelock(wl.uid, wl.pid, wl.tag, wl.monitorType);
+            }
+        } catch (RemoteException e) {
+            // Ignore
+        }
+    }
 
+    void noteStopWakeLocked(WakeLock wl, WorkSource ws) {
+        try {
+            if (ws != null) {
+                mBatteryStats.noteStopWakelockFromSource(ws, wl.pid, wl.tag,
+                        wl.monitorType);
+            } else {
+                mBatteryStats.noteStopWakelock(wl.uid, wl.pid, wl.tag, wl.monitorType);
+            }
+        } catch (RemoteException e) {
+            // Ignore
+        }
+    }
+
+    public void acquireWakeLockLocked(int flags, IBinder lock, int uid, int pid, String tag,
+            WorkSource ws) {
         if (mSpew) {
             Slog.d(TAG, "acquireWakeLock flags=0x" + Integer.toHexString(flags) + " tag=" + tag);
+        }
+
+        if (ws != null && ws.size() == 0) {
+            ws = null;
         }
 
         int index = mLocks.getIndex(lock);
         WakeLock wl;
         boolean newlock;
+        boolean diffsource;
+        WorkSource oldsource;
         if (index < 0) {
             wl = new WakeLock(flags, lock, tag, uid, pid);
             switch (wl.flags & LOCK_MASK)
@@ -687,10 +728,31 @@ class PowerManagerService extends IPowerManager.Stub
                     return;
             }
             mLocks.addLock(wl);
+            if (ws != null) {
+                wl.ws = new WorkSource(ws);
+            }
             newlock = true;
+            diffsource = false;
+            oldsource = null;
         } else {
             wl = mLocks.get(index);
             newlock = false;
+            oldsource = wl.ws;
+            if (oldsource != null) {
+                if (ws == null) {
+                    wl.ws = null;
+                    diffsource = true;
+                } else {
+                    diffsource = oldsource.diff(ws);
+                }
+            } else if (ws != null) {
+                diffsource = true;
+            } else {
+                diffsource = false;
+            }
+            if (diffsource) {
+                wl.ws = new WorkSource(ws);
+            }
         }
         if (isScreenLock(flags)) {
             // if this causes a wakeup, we reactivate all of the locks and
@@ -731,19 +793,41 @@ class PowerManagerService extends IPowerManager.Stub
                 enableProximityLockLocked();
             }
         }
-        if (newlock) {
-            acquireUid = wl.uid;
-            acquirePid = wl.pid;
-            acquireName = wl.tag;
-            acquireType = wl.monitorType;
-        }
 
-        if (acquireType >= 0) {
-            try {
-                mBatteryStats.noteStartWakelock(acquireUid, acquirePid, acquireName, acquireType);
-            } catch (RemoteException e) {
-                // Ignore
+        if (diffsource) {
+            // If the lock sources have changed, need to first release the
+            // old ones.
+            noteStopWakeLocked(wl, oldsource);
+        }
+        if (newlock || diffsource) {
+            noteStartWakeLocked(wl, ws);
+        }
+    }
+
+    public void updateWakeLockWorkSource(IBinder lock, WorkSource ws) {
+        int uid = Binder.getCallingUid();
+        int pid = Binder.getCallingPid();
+        if (ws != null && ws.size() == 0) {
+            ws = null;
+        }
+        if (ws != null) {
+            enforceWakeSourcePermission(uid, pid);
+        }
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLocks) {
+                int index = mLocks.getIndex(lock);
+                if (index < 0) {
+                    throw new IllegalArgumentException("Wake lock not active");
+                }
+                WakeLock wl = mLocks.get(index);
+                WorkSource oldsource = wl.ws;
+                wl.ws = ws != null ? new WorkSource(ws) : null;
+                noteStopWakeLocked(wl, oldsource);
+                noteStartWakeLocked(wl, ws);
             }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -759,11 +843,6 @@ class PowerManagerService extends IPowerManager.Stub
     }
 
     private void releaseWakeLockLocked(IBinder lock, int flags, boolean death) {
-        int releaseUid;
-        int releasePid;
-        String releaseName;
-        int releaseType;
-
         WakeLock wl = mLocks.removeLock(lock);
         if (wl == null) {
             return;
@@ -804,17 +883,11 @@ class PowerManagerService extends IPowerManager.Stub
         }
         // Unlink the lock from the binder.
         wl.binder.unlinkToDeath(wl, 0);
-        releaseUid = wl.uid;
-        releasePid = wl.pid;
-        releaseName = wl.tag;
-        releaseType = wl.monitorType;
 
-        if (releaseType >= 0) {
+        if (wl.monitorType >= 0) {
             long origId = Binder.clearCallingIdentity();
             try {
-                mBatteryStats.noteStopWakelock(releaseUid, releasePid, releaseName, releaseType);
-            } catch (RemoteException e) {
-                // Ignore
+                noteStopWakeLocked(wl, wl.ws);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }

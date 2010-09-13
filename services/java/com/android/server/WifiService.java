@@ -63,6 +63,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.Slog;
 import android.text.TextUtils;
@@ -2036,8 +2037,8 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     private class WifiLock extends DeathRecipient {
-        WifiLock(int lockMode, String tag, IBinder binder) {
-            super(lockMode, tag, binder);
+        WifiLock(int lockMode, String tag, IBinder binder, WorkSource ws) {
+            super(lockMode, tag, binder, ws);
         }
 
         public void binderDied() {
@@ -2111,7 +2112,15 @@ public class WifiService extends IWifiManager.Stub {
         }
     }
 
-    public boolean acquireWifiLock(IBinder binder, int lockMode, String tag) {
+    void enforceWakeSourcePermission(int uid, int pid) {
+        if (uid == Process.myUid()) {
+            return;
+        }
+        mContext.enforcePermission(android.Manifest.permission.UPDATE_DEVICE_STATS,
+                pid, uid, null);
+    }
+
+    public boolean acquireWifiLock(IBinder binder, int lockMode, String tag, WorkSource ws) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
         if (lockMode != WifiManager.WIFI_MODE_FULL &&
                 lockMode != WifiManager.WIFI_MODE_SCAN_ONLY &&
@@ -2120,9 +2129,48 @@ public class WifiService extends IWifiManager.Stub {
             if (DBG) throw new IllegalArgumentException("lockMode=" + lockMode);
             return false;
         }
-        WifiLock wifiLock = new WifiLock(lockMode, tag, binder);
+        if (ws != null) {
+            enforceWakeSourcePermission(Binder.getCallingUid(), Binder.getCallingPid());
+        }
+        if (ws != null && ws.size() == 0) {
+            ws = null;
+        }
+        if (ws == null) {
+            ws = new WorkSource(Binder.getCallingUid());
+        }
+        WifiLock wifiLock = new WifiLock(lockMode, tag, binder, ws);
         synchronized (mLocks) {
             return acquireWifiLockLocked(wifiLock);
+        }
+    }
+
+    private void noteAcquireWifiLock(WifiLock wifiLock) throws RemoteException {
+        switch(wifiLock.mMode) {
+            case WifiManager.WIFI_MODE_FULL:
+                mBatteryStats.noteFullWifiLockAcquiredFromSource(wifiLock.mWorkSource);
+                break;
+            case WifiManager.WIFI_MODE_FULL_HIGH_PERF:
+                /* Treat high power as a full lock for battery stats */
+                mBatteryStats.noteFullWifiLockAcquiredFromSource(wifiLock.mWorkSource);
+                break;
+            case WifiManager.WIFI_MODE_SCAN_ONLY:
+                mBatteryStats.noteScanWifiLockAcquiredFromSource(wifiLock.mWorkSource);
+                break;
+        }
+    }
+
+    private void noteReleaseWifiLock(WifiLock wifiLock) throws RemoteException {
+        switch(wifiLock.mMode) {
+            case WifiManager.WIFI_MODE_FULL:
+                mBatteryStats.noteFullWifiLockReleasedFromSource(wifiLock.mWorkSource);
+                break;
+            case WifiManager.WIFI_MODE_FULL_HIGH_PERF:
+                /* Treat high power as a full lock for battery stats */
+                mBatteryStats.noteFullWifiLockReleasedFromSource(wifiLock.mWorkSource);
+                break;
+            case WifiManager.WIFI_MODE_SCAN_ONLY:
+                mBatteryStats.noteScanWifiLockReleasedFromSource(wifiLock.mWorkSource);
+                break;
         }
     }
 
@@ -2131,23 +2179,18 @@ public class WifiService extends IWifiManager.Stub {
 
         mLocks.addLock(wifiLock);
 
-        int uid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
         try {
+            noteAcquireWifiLock(wifiLock);
             switch(wifiLock.mMode) {
             case WifiManager.WIFI_MODE_FULL:
                 ++mFullLocksAcquired;
-                mBatteryStats.noteFullWifiLockAcquired(uid);
                 break;
             case WifiManager.WIFI_MODE_FULL_HIGH_PERF:
                 ++mFullHighPerfLocksAcquired;
-                /* Treat high power as a full lock for battery stats */
-                mBatteryStats.noteFullWifiLockAcquired(uid);
                 break;
-
             case WifiManager.WIFI_MODE_SCAN_ONLY:
                 ++mScanLocksAcquired;
-                mBatteryStats.noteScanWifiLockAcquired(uid);
                 break;
             }
         } catch (RemoteException e) {
@@ -2157,6 +2200,33 @@ public class WifiService extends IWifiManager.Stub {
 
         updateWifiState();
         return true;
+    }
+
+    public void updateWifiLockWorkSource(IBinder lock, WorkSource ws) {
+        int uid = Binder.getCallingUid();
+        int pid = Binder.getCallingPid();
+        if (ws != null && ws.size() == 0) {
+            ws = null;
+        }
+        if (ws != null) {
+            enforceWakeSourcePermission(uid, pid);
+        }
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLocks) {
+                int index = mLocks.findLockByBinder(lock);
+                if (index < 0) {
+                    throw new IllegalArgumentException("Wifi lock not active");
+                }
+                WifiLock wl = mLocks.mList.get(index);
+                noteReleaseWifiLock(wl);
+                wl.mWorkSource = ws != null ? new WorkSource(ws) : new WorkSource(uid);
+                noteAcquireWifiLock(wl);
+            }
+        } catch (RemoteException e) {
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     public boolean releaseWifiLock(IBinder lock) {
@@ -2176,21 +2246,18 @@ public class WifiService extends IWifiManager.Stub {
         hadLock = (wifiLock != null);
 
         if (hadLock) {
-            int uid = Binder.getCallingUid();
             long ident = Binder.clearCallingIdentity();
             try {
+                noteAcquireWifiLock(wifiLock);
                 switch(wifiLock.mMode) {
                     case WifiManager.WIFI_MODE_FULL:
                         ++mFullLocksReleased;
-                        mBatteryStats.noteFullWifiLockReleased(uid);
                         break;
                     case WifiManager.WIFI_MODE_FULL_HIGH_PERF:
                         ++mFullHighPerfLocksReleased;
-                        mBatteryStats.noteFullWifiLockReleased(uid);
                         break;
                     case WifiManager.WIFI_MODE_SCAN_ONLY:
                         ++mScanLocksReleased;
-                        mBatteryStats.noteScanWifiLockReleased(uid);
                         break;
                 }
             } catch (RemoteException e) {
@@ -2208,12 +2275,14 @@ public class WifiService extends IWifiManager.Stub {
         String mTag;
         int mMode;
         IBinder mBinder;
+        WorkSource mWorkSource;
 
-        DeathRecipient(int mode, String tag, IBinder binder) {
+        DeathRecipient(int mode, String tag, IBinder binder, WorkSource ws) {
             super();
             mTag = tag;
             mMode = mode;
             mBinder = binder;
+            mWorkSource = ws;
             try {
                 mBinder.linkToDeath(this, 0);
             } catch (RemoteException e) {
@@ -2228,7 +2297,7 @@ public class WifiService extends IWifiManager.Stub {
 
     private class Multicaster extends DeathRecipient {
         Multicaster(String tag, IBinder binder) {
-            super(Binder.getCallingUid(), tag, binder);
+            super(Binder.getCallingUid(), tag, binder, null);
         }
 
         public void binderDied() {
