@@ -24,6 +24,7 @@ import android.net.rtp.AudioGroup;
 import android.net.rtp.AudioStream;
 import android.net.sip.SipAudioCall;
 import android.net.sip.SipErrorCode;
+import android.net.sip.SipException;
 import android.net.sip.SipManager;
 import android.net.sip.SipProfile;
 import android.net.sip.SipSessionState;
@@ -66,8 +67,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.sip.SipException;
 
 /**
  * {@hide}
