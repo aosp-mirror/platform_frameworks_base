@@ -292,6 +292,11 @@ String8::~String8()
     SharedBuffer::bufferFromData(mString)->release();
 }
 
+void String8::clear() {
+    SharedBuffer::bufferFromData(mString)->release();
+    mString = getEmptyString();
+}
+
 void String8::setTo(const String8& other)
 {
     SharedBuffer::bufferFromData(other.mString)->acquire();

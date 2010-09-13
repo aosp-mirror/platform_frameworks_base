@@ -187,6 +187,9 @@ public:
     virtual bool markSupportedKeyCodes(int32_t deviceId, size_t numCodes, const int32_t* keyCodes,
             uint8_t* outFlags) const = 0;
 
+    virtual bool hasLed(int32_t deviceId, int32_t led) const = 0;
+    virtual void setLedState(int32_t deviceId, int32_t led, bool on) = 0;
+
     virtual void dump(String8& dump) = 0;
 };
 
@@ -198,9 +201,9 @@ public:
     status_t errorCheck() const;
 
     virtual uint32_t getDeviceClasses(int32_t deviceId) const;
-    
+
     virtual String8 getDeviceName(int32_t deviceId) const;
-    
+
     virtual status_t getAbsoluteAxisInfo(int32_t deviceId, int axis,
             RawAbsoluteAxisInfo* outAxisInfo) const;
 
@@ -217,6 +220,9 @@ public:
             const int32_t* keyCodes, uint8_t* outFlags) const;
 
     virtual bool getEvent(RawEvent* outEvent);
+
+    virtual bool hasLed(int32_t deviceId, int32_t led) const;
+    virtual void setLedState(int32_t deviceId, int32_t led, bool on);
 
     virtual void dump(String8& dump);
 
@@ -240,7 +246,10 @@ private:
         uint32_t        classes;
         uint8_t*        keyBitmask;
         KeyLayoutMap*   layoutMap;
-        String8         keylayoutFilename;
+        String8         keyMapName;
+        bool            defaultKeyMap;
+        String8         keyLayoutFilename;
+        String8         keyCharacterMapFilename;
         int             fd;
         device_t*       next;
         
@@ -250,12 +259,18 @@ private:
 
     device_t* getDeviceLocked(int32_t deviceId) const;
     bool hasKeycodeLocked(device_t* device, int keycode) const;
-    
+
     int32_t getScanCodeStateLocked(device_t* device, int32_t scanCode) const;
     int32_t getKeyCodeStateLocked(device_t* device, int32_t keyCode) const;
     int32_t getSwitchStateLocked(device_t* device, int32_t sw) const;
     bool markSupportedKeyCodesLocked(device_t* device, size_t numCodes,
             const int32_t* keyCodes, uint8_t* outFlags) const;
+
+    void configureKeyMap(device_t* device);
+    bool probeKeyMap(device_t* device, const String8& keyMapName, bool defaultKeyMap);
+    void selectKeyMap(device_t* device, const String8& keyMapName, bool defaultKeyMap);
+    void setKeyboardProperties(device_t* device, bool firstKeyboard);
+    void clearKeyboardProperties(device_t* device, bool firstKeyboard);
 
     // Protect all internal state.
     mutable Mutex   mLock;

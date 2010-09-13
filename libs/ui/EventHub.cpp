@@ -94,7 +94,7 @@ static inline const char* toString(bool value) {
 
 EventHub::device_t::device_t(int32_t _id, const char* _path, const char* name)
     : id(_id), path(_path), name(name), classes(0)
-    , keyBitmask(NULL), layoutMap(new KeyLayoutMap()), fd(-1), next(NULL) {
+    , keyBitmask(NULL), layoutMap(new KeyLayoutMap()), defaultKeyMap(false), fd(-1), next(NULL) {
 }
 
 EventHub::device_t::~device_t() {
@@ -103,7 +103,7 @@ EventHub::device_t::~device_t() {
 }
 
 EventHub::EventHub(void)
-    : mError(NO_INIT), mHaveFirstKeyboard(false), mFirstKeyboardId(0)
+    : mError(NO_INIT), mHaveFirstKeyboard(false), mFirstKeyboardId(-1)
     , mDevicesById(0), mNumDevicesById(0)
     , mOpeningDevices(0), mClosingDevices(0)
     , mDevices(0), mFDs(0), mFDCount(0), mOpened(false), mNeedToSendFinishedDeviceScan(false)
@@ -323,6 +323,39 @@ void EventHub::addExcludedDevice(const char* deviceName)
 
     String8 name(deviceName);
     mExcludedDevices.push_back(name);
+}
+
+bool EventHub::hasLed(int32_t deviceId, int32_t led) const {
+    AutoMutex _l(mLock);
+    device_t* device = getDeviceLocked(deviceId);
+    if (device) {
+        uint8_t bitmask[sizeof_bit_array(LED_MAX + 1)];
+        memset(bitmask, 0, sizeof(bitmask));
+        if (ioctl(device->fd, EVIOCGBIT(EV_LED, sizeof(bitmask)), bitmask) >= 0) {
+            if (test_bit(led, bitmask)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void EventHub::setLedState(int32_t deviceId, int32_t led, bool on) {
+    AutoMutex _l(mLock);
+    device_t* device = getDeviceLocked(deviceId);
+    if (device) {
+        struct input_event ev;
+        ev.time.tv_sec = 0;
+        ev.time.tv_usec = 0;
+        ev.type = EV_LED;
+        ev.code = led;
+        ev.value = on ? 1 : 0;
+
+        ssize_t nWrite;
+        do {
+            nWrite = write(device->fd, &ev, sizeof(struct input_event));
+        } while (nWrite == -1 && errno == EINTR);
+    }
 }
 
 EventHub::device_t* EventHub::getDeviceLocked(int32_t deviceId) const
@@ -760,54 +793,42 @@ int EventHub::openDevice(const char *deviceName) {
 #endif
 
     if ((device->classes & INPUT_DEVICE_CLASS_KEYBOARD) != 0) {
-        char tmpfn[sizeof(name)];
-        char keylayoutFilename[300];
-
         // a more descriptive name
         device->name = name;
 
-        // replace all the spaces with underscores
-        strcpy(tmpfn, name);
-        for (char *p = strchr(tmpfn, ' '); p && *p; p = strchr(tmpfn, ' '))
-            *p = '_';
+        // Configure the keymap for the device.
+        configureKeyMap(device);
 
-        // find the .kl file we need for this device
-        const char* root = getenv("ANDROID_ROOT");
-        snprintf(keylayoutFilename, sizeof(keylayoutFilename),
-                 "%s/usr/keylayout/%s.kl", root, tmpfn);
-        bool defaultKeymap = false;
-        if (access(keylayoutFilename, R_OK)) {
-            snprintf(keylayoutFilename, sizeof(keylayoutFilename),
-                     "%s/usr/keylayout/%s", root, "qwerty.kl");
-            defaultKeymap = true;
-        }
-        status_t status = device->layoutMap->load(keylayoutFilename);
-        if (status) {
-            LOGE("Error %d loading key layout.", status);
-        }
-
-        // tell the world about the devname (the descriptive name)
-        if (!mHaveFirstKeyboard && !defaultKeymap && strstr(name, "-keypad")) {
+        // Tell the world about the devname (the descriptive name)
+        if (!mHaveFirstKeyboard && !device->defaultKeyMap && strstr(name, "-keypad")) {
             // the built-in keyboard has a well-known device ID of 0,
             // this device better not go away.
             mHaveFirstKeyboard = true;
             mFirstKeyboardId = device->id;
-            property_set("hw.keyboards.0.devname", name);
+            setKeyboardProperties(device, true);
         } else {
             // ensure mFirstKeyboardId is set to -something-.
-            if (mFirstKeyboardId == 0) {
+            if (mFirstKeyboardId == -1) {
                 mFirstKeyboardId = device->id;
+                setKeyboardProperties(device, true);
             }
         }
-        char propName[100];
-        sprintf(propName, "hw.keyboards.%u.devname", device->id);
-        property_set(propName, name);
+        setKeyboardProperties(device, false);
+
+        // Load the keylayout.
+        if (!device->keyLayoutFilename.isEmpty()) {
+            status_t status = device->layoutMap->load(device->keyLayoutFilename);
+            if (status) {
+                LOGE("Error %d loading key layout file '%s'.", status,
+                        device->keyLayoutFilename.string());
+            }
+        }
 
         // 'Q' key support = cheap test of whether this is an alpha-capable kbd
         if (hasKeycodeLocked(device, AKEYCODE_Q)) {
             device->classes |= INPUT_DEVICE_CLASS_ALPHAKEY;
         }
-        
+
         // See if this device has a DPAD.
         if (hasKeycodeLocked(device, AKEYCODE_DPAD_UP) &&
                 hasKeycodeLocked(device, AKEYCODE_DPAD_DOWN) &&
@@ -816,7 +837,7 @@ int EventHub::openDevice(const char *deviceName) {
                 hasKeycodeLocked(device, AKEYCODE_DPAD_CENTER)) {
             device->classes |= INPUT_DEVICE_CLASS_DPAD;
         }
-        
+
         // See if this device has a gamepad.
         for (size_t i = 0; i < sizeof(GAMEPAD_KEYCODES); i++) {
             if (hasKeycodeLocked(device, GAMEPAD_KEYCODES[i])) {
@@ -825,8 +846,9 @@ int EventHub::openDevice(const char *deviceName) {
             }
         }
 
-        LOGI("New keyboard: device->id=0x%x devname='%s' propName='%s' keylayout='%s'\n",
-                device->id, name, propName, keylayoutFilename);
+        LOGI("New keyboard: device->id=0x%x devname='%s' keylayout='%s' keycharactermap='%s'\n",
+                device->id, name,
+                device->keyLayoutFilename.string(), device->keyCharacterMapFilename.string());
     }
 
     // If the device isn't recognized as something we handle, don't monitor it.
@@ -850,6 +872,109 @@ int EventHub::openDevice(const char *deviceName) {
 
     mFDCount++;
     return 0;
+}
+
+void EventHub::configureKeyMap(device_t* device) {
+    // As an initial key map name, try using the device name.
+    String8 keyMapName(device->name);
+    char* p = keyMapName.lockBuffer(keyMapName.size());
+    while (*p) {
+        if (*p == ' ') *p = '_';
+        p++;
+    }
+    keyMapName.unlockBuffer();
+
+    if (probeKeyMap(device, keyMapName, false)) return;
+
+    // TODO Consider allowing the user to configure a specific key map somehow.
+
+    // Try the Generic key map.
+    // TODO Apply some additional heuristics here to figure out what kind of
+    //      generic key map to use (US English, etc.).
+    keyMapName.setTo("Generic");
+    if (probeKeyMap(device, keyMapName, true)) return;
+
+    // Fall back on the old style catchall qwerty key map.
+    keyMapName.setTo("qwerty");
+    if (probeKeyMap(device, keyMapName, true)) return;
+
+    // Give up!
+    keyMapName.setTo("unknown");
+    selectKeyMap(device, keyMapName, true);
+    LOGE("Could not determine key map for device '%s'.", device->name.string());
+}
+
+bool EventHub::probeKeyMap(device_t* device, const String8& keyMapName, bool defaultKeyMap) {
+    const char* root = getenv("ANDROID_ROOT");
+
+    // TODO Consider also looking somewhere in a writeable partition like /data for a
+    //      custom keymap supplied by the user for this device.
+    bool haveKeyLayout = !device->keyLayoutFilename.isEmpty();
+    if (!haveKeyLayout) {
+        device->keyLayoutFilename.setTo(root);
+        device->keyLayoutFilename.append("/usr/keylayout/");
+        device->keyLayoutFilename.append(keyMapName);
+        device->keyLayoutFilename.append(".kl");
+        if (access(device->keyLayoutFilename.string(), R_OK)) {
+            device->keyLayoutFilename.clear();
+        } else {
+            haveKeyLayout = true;
+        }
+    }
+
+    bool haveKeyCharacterMap = !device->keyCharacterMapFilename.isEmpty();
+    if (!haveKeyCharacterMap) {
+        device->keyCharacterMapFilename.setTo(root);
+        device->keyCharacterMapFilename.append("/usr/keychars/");
+        device->keyCharacterMapFilename.append(keyMapName);
+        device->keyCharacterMapFilename.append(".kcm.bin");
+        if (access(device->keyCharacterMapFilename.string(), R_OK)) {
+            device->keyCharacterMapFilename.clear();
+        } else {
+            haveKeyCharacterMap = true;
+        }
+    }
+
+    if (haveKeyLayout || haveKeyCharacterMap) {
+        selectKeyMap(device, keyMapName, defaultKeyMap);
+    }
+    return haveKeyLayout && haveKeyCharacterMap;
+}
+
+void EventHub::selectKeyMap(device_t* device,
+        const String8& keyMapName, bool defaultKeyMap) {
+    if (device->keyMapName.isEmpty()) {
+        device->keyMapName.setTo(keyMapName);
+        device->defaultKeyMap = defaultKeyMap;
+    }
+}
+
+void EventHub::setKeyboardProperties(device_t* device, bool firstKeyboard) {
+    int32_t id = firstKeyboard ? 0 : device->id;
+
+    char propName[100];
+    sprintf(propName, "hw.keyboards.%u.devname", id);
+    property_set(propName, device->name.string());
+    sprintf(propName, "hw.keyboards.%u.keymap", id);
+    property_set(propName, device->keyMapName.string());
+    sprintf(propName, "hw.keyboards.%u.klfile", id);
+    property_set(propName, device->keyLayoutFilename.string());
+    sprintf(propName, "hw.keyboards.%u.kcmfile", id);
+    property_set(propName, device->keyCharacterMapFilename.string());
+}
+
+void EventHub::clearKeyboardProperties(device_t* device, bool firstKeyboard) {
+    int32_t id = firstKeyboard ? 0 : device->id;
+
+    char propName[100];
+    sprintf(propName, "hw.keyboards.%u.devname", id);
+    property_set(propName, "");
+    sprintf(propName, "hw.keyboards.%u.keymap", id);
+    property_set(propName, "");
+    sprintf(propName, "hw.keyboards.%u.klfile", id);
+    property_set(propName, "");
+    sprintf(propName, "hw.keyboards.%u.kcmfile", id);
+    property_set(propName, "");
 }
 
 bool EventHub::hasKeycodeLocked(device_t* device, int keycode) const
@@ -909,13 +1034,10 @@ int EventHub::closeDevice(const char *deviceName) {
             if (device->id == mFirstKeyboardId) {
                 LOGW("built-in keyboard device %s (id=%d) is closing! the apps will not like this",
                         device->path.string(), mFirstKeyboardId);
-                mFirstKeyboardId = 0;
-                property_set("hw.keyboards.0.devname", NULL);
+                mFirstKeyboardId = -1;
+                clearKeyboardProperties(device, true);
             }
-            // clear the property
-            char propName[100];
-            sprintf(propName, "hw.keyboards.%u.devname", device->id);
-            property_set(propName, NULL);
+            clearKeyboardProperties(device, false);
             return 0;
         }
     }
@@ -1014,7 +1136,11 @@ void EventHub::dump(String8& dump) {
                 }
                 dump.appendFormat(INDENT3 "Classes: 0x%08x\n", device->classes);
                 dump.appendFormat(INDENT3 "Path: %s\n", device->path.string());
-                dump.appendFormat(INDENT3 "KeyLayoutFile: %s\n", device->keylayoutFilename.string());
+                dump.appendFormat(INDENT3 "KeyMapName: %s\n", device->keyMapName.string());
+                dump.appendFormat(INDENT3 "KeyLayoutFilename: %s\n",
+                        device->keyLayoutFilename.string());
+                dump.appendFormat(INDENT3 "KeyCharacterMapFilename: %s\n",
+                        device->keyCharacterMapFilename.string());
             }
         }
     } // release lock

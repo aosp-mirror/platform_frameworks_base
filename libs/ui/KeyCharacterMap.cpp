@@ -156,26 +156,38 @@ KeyCharacterMap::find_key(int keycode)
 KeyCharacterMap*
 KeyCharacterMap::load(int id)
 {
-    KeyCharacterMap* rv = NULL;
+    KeyCharacterMap* map;
     char path[PATH_MAX];
     char propName[100];
     char dev[PROPERTY_VALUE_MAX];
-    char tmpfn[PROPERTY_VALUE_MAX];
+    char fn[PROPERTY_VALUE_MAX];
     int err;
+
+    // Check whether the EventHub has set a key character map filename for us already.
+    sprintf(propName, "hw.keyboards.%u.kcmfile", id);
+    err = property_get(propName, fn, "");
+    if (err > 0) {
+        map = try_file(fn);
+        if (map) {
+            return map;
+        }
+        LOGW("Error loading keycharmap file '%s'. %s='%s'", path, propName, fn);
+    }
+
+    // Try using the device name.
     const char* root = getenv("ANDROID_ROOT");
 
     sprintf(propName, "hw.keyboards.%u.devname", id);
     err = property_get(propName, dev, "");
     if (err > 0) {
         // replace all the spaces with underscores
-        strcpy(tmpfn, dev);
-        for (char *p = strchr(tmpfn, ' '); p && *p; p = strchr(tmpfn, ' '))
+        strcpy(fn, dev);
+        for (char *p = strchr(fn, ' '); p && *p; p = strchr(p + 1, ' '))
             *p = '_';
-        snprintf(path, sizeof(path), "%s/usr/keychars/%s.kcm.bin", root, tmpfn);
-        //LOGD("load: dev='%s' path='%s'\n", dev, path);
-        rv = try_file(path);
-        if (rv != NULL) {
-            return rv;
+        snprintf(path, sizeof(path), "%s/usr/keychars/%s.kcm.bin", root, fn);
+        map = try_file(path);
+        if (map) {
+            return map;
         }
         LOGW("Error loading keycharmap file '%s'. %s='%s'", path, propName, dev);
     } else {
@@ -183,14 +195,14 @@ KeyCharacterMap::load(int id)
     }
 
     snprintf(path, sizeof(path), "%s/usr/keychars/qwerty.kcm.bin", root);
-    rv = try_file(path);
-    if (rv == NULL) {
-        LOGE("Can't find any keycharmaps (also tried %s)", path);
-        return NULL;
+    map = try_file(path);
+    if (map) {
+        LOGW("Using default keymap: %s", path);
+        return map;
     }
-    LOGW("Using default keymap: %s", path);
 
-    return rv;
+    LOGE("Can't find any keycharmaps (also tried %s)", path);
+    return NULL;
 }
 
 KeyCharacterMap*

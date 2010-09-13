@@ -135,6 +135,59 @@ static const KeycodeLabel KEYCODES[] = {
     { "BUTTON_START", 108 },
     { "BUTTON_SELECT", 109 },
     { "BUTTON_MODE", 110 },
+    { "ESCAPE", 111 },
+    { "FORWARD_DEL", 112 },
+    { "CTRL_LEFT", 113 },
+    { "CTRL_RIGHT", 114 },
+    { "CAPS_LOCK", 115 },
+    { "SCROLL_LOCK", 116 },
+    { "META_LEFT", 117 },
+    { "META_RIGHT", 118 },
+    { "FUNCTION", 119 },
+    { "SYSRQ", 120 },
+    { "BREAK", 121 },
+    { "MOVE_HOME", 122 },
+    { "MOVE_END", 123 },
+    { "INSERT", 124 },
+    { "FORWARD", 125 },
+    { "MEDIA_PLAY", 126 },
+    { "MEDIA_PAUSE", 127 },
+    { "MEDIA_CLOSE", 128 },
+    { "MEDIA_EJECT", 129 },
+    { "MEDIA_RECORD", 130 },
+    { "F1", 131 },
+    { "F2", 132 },
+    { "F3", 133 },
+    { "F4", 134 },
+    { "F5", 135 },
+    { "F6", 136 },
+    { "F7", 137 },
+    { "F8", 138 },
+    { "F9", 139 },
+    { "F10", 140 },
+    { "F11", 141 },
+    { "F12", 142 },
+    { "NUM_LOCK", 143 },
+    { "NUMPAD_0", 144 },
+    { "NUMPAD_1", 145 },
+    { "NUMPAD_2", 146 },
+    { "NUMPAD_3", 147 },
+    { "NUMPAD_4", 148 },
+    { "NUMPAD_5", 149 },
+    { "NUMPAD_6", 150 },
+    { "NUMPAD_7", 151 },
+    { "NUMPAD_8", 152 },
+    { "NUMPAD_9", 153 },
+    { "NUMPAD_DIVIDE", 154 },
+    { "NUMPAD_MULTIPLY", 155 },
+    { "NUMPAD_SUBTRACT", 156 },
+    { "NUMPAD_ADD", 157 },
+    { "NUMPAD_DOT", 158 },
+    { "NUMPAD_COMMA", 159 },
+    { "NUMPAD_ENTER", 160 },
+    { "NUMPAD_EQUALS", 161 },
+    { "NUMPAD_LEFT_PAREN", 162 },
+    { "NUMPAD_RIGHT_PAREN", 163 },
 
     // NOTE: If you add a new keycode here you must also add it to several other files.
     //       Refer to frameworks/base/core/java/android/view/KeyEvent.java for the full list.
@@ -142,7 +195,7 @@ static const KeycodeLabel KEYCODES[] = {
     { NULL, 0 }
 };
 
-// See also policy flags in Input.h.
+// NOTE: If you edit these flags, also edit policy flags in Input.h.
 static const KeycodeLabel FLAGS[] = {
     { "WAKE", 0x00000001 },
     { "WAKE_DROPPED", 0x00000002 },
@@ -153,6 +206,7 @@ static const KeycodeLabel FLAGS[] = {
     { "MENU", 0x00000040 },
     { "LAUNCHER", 0x00000080 },
     { "VIRTUAL", 0x00000100 },
+    { "FUNCTION", 0x00000200 },
     { NULL, 0 }
 };
 

@@ -144,7 +144,7 @@ public class Touch {
                 if (ds[0].mFarEnough) {
                     ds[0].mUsed = true;
                     boolean cap = (MetaKeyKeyListener.getMetaState(buffer,
-                                   KeyEvent.META_SHIFT_ON) == 1) ||
+                                   MetaKeyKeyListener.META_SHIFT_ON) == 1) ||
                                    (MetaKeyKeyListener.getMetaState(buffer,
                                     MetaKeyKeyListener.META_SELECTING) != 0);
                     float dx;

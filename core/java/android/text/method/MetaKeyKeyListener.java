@@ -16,9 +16,12 @@
 
 package android.text.method;
 
+import android.text.Editable;
+import android.text.NoCopySpan;
+import android.text.Spannable;
+import android.text.Spanned;
 import android.view.KeyEvent;
 import android.view.View;
-import android.text.*;
 
 /**
  * This base class encapsulates the behavior for handling the meta keys
@@ -28,38 +31,58 @@ import android.text.*;
  */
 
 public abstract class MetaKeyKeyListener {
+    /**
+     * Flag that indicates that the SHIFT key is on.
+     * Value equals {@link KeyEvent#META_SHIFT_ON}.
+     */
     public static final int META_SHIFT_ON = KeyEvent.META_SHIFT_ON;
+    /**
+     * Flag that indicates that the ALT key is on.
+     * Value equals {@link KeyEvent#META_ALT_ON}.
+     */
     public static final int META_ALT_ON = KeyEvent.META_ALT_ON;
+    /**
+     * Flag that indicates that the SYM key is on.
+     * Value equals {@link KeyEvent#META_SYM_ON}.
+     */
     public static final int META_SYM_ON = KeyEvent.META_SYM_ON;
-
-    private static final int LOCKED_SHIFT = 8;
     
-    public static final int META_CAP_LOCKED = KeyEvent.META_SHIFT_ON << LOCKED_SHIFT;
-    public static final int META_ALT_LOCKED = KeyEvent.META_ALT_ON << LOCKED_SHIFT;
-    public static final int META_SYM_LOCKED = KeyEvent.META_SYM_ON << LOCKED_SHIFT;
+    /**
+     * Flag that indicates that the SHIFT key is locked in CAPS mode.
+     */
+    public static final int META_CAP_LOCKED = KeyEvent.META_CAP_LOCKED;
+    /**
+     * Flag that indicates that the ALT key is locked.
+     */
+    public static final int META_ALT_LOCKED = KeyEvent.META_ALT_LOCKED;
+    /**
+     * Flag that indicates that the SYM key is locked.
+     */
+    public static final int META_SYM_LOCKED = KeyEvent.META_SYM_LOCKED;
 
     /**
      * @hide pending API review
      */
-    public static final int META_SELECTING = 1 << 16;
+    public static final int META_SELECTING = KeyEvent.META_SELECTING;
 
-    private static final int USED_SHIFT = 24;
-    
-    private static final long META_CAP_USED = ((long)KeyEvent.META_SHIFT_ON) << USED_SHIFT;
-    private static final long META_ALT_USED = ((long)KeyEvent.META_ALT_ON) << USED_SHIFT;
-    private static final long META_SYM_USED = ((long)KeyEvent.META_SYM_ON) << USED_SHIFT;
+    private static final int META_SHIFT_ON_AND_LOCKED = META_SHIFT_ON | META_CAP_LOCKED;
+    private static final int META_ALT_ON_AND_LOCKED = META_ALT_ON | META_ALT_LOCKED;
+    private static final int META_SYM_ON_AND_LOCKED = META_SYM_ON | META_SYM_LOCKED;
 
-    private static final int PRESSED_SHIFT = 32;
+    // These bits are privately used by the meta key key listener.
+    // They are deliberately assigned values outside of the representable range of an 'int'
+    // so as not to conflict with any meta key states publicly defined by KeyEvent.
+    private static final long META_CAP_USED = 1L << 32;
+    private static final long META_ALT_USED = 1L << 33;
+    private static final long META_SYM_USED = 1L << 34;
     
-    private static final long META_CAP_PRESSED = ((long)KeyEvent.META_SHIFT_ON) << PRESSED_SHIFT;
-    private static final long META_ALT_PRESSED = ((long)KeyEvent.META_ALT_ON) << PRESSED_SHIFT;
-    private static final long META_SYM_PRESSED = ((long)KeyEvent.META_SYM_ON) << PRESSED_SHIFT;
-
-    private static final int RELEASED_SHIFT = 40;
+    private static final long META_CAP_PRESSED = 1L << 40;
+    private static final long META_ALT_PRESSED = 1L << 41;
+    private static final long META_SYM_PRESSED = 1L << 42;
     
-    private static final long META_CAP_RELEASED = ((long)KeyEvent.META_SHIFT_ON) << RELEASED_SHIFT;
-    private static final long META_ALT_RELEASED = ((long)KeyEvent.META_ALT_ON) << RELEASED_SHIFT;
-    private static final long META_SYM_RELEASED = ((long)KeyEvent.META_SYM_ON) << RELEASED_SHIFT;
+    private static final long META_CAP_RELEASED = 1L << 48;
+    private static final long META_ALT_RELEASED = 1L << 49;
+    private static final long META_SYM_RELEASED = 1L << 50;
 
     private static final long META_SHIFT_MASK = META_SHIFT_ON
             | META_CAP_LOCKED | META_CAP_USED
@@ -306,15 +329,14 @@ public abstract class MetaKeyKeyListener {
      * (arrow keys, for example) and you handle a key.
      */
     public static long resetLockedMeta(long state) {
-        state = resetLock(state, META_SHIFT_ON, META_SHIFT_MASK);
-        state = resetLock(state, META_ALT_ON, META_ALT_MASK);
-        state = resetLock(state, META_SYM_ON, META_SYM_MASK);
-        return state;
-    }
-
-    private static long resetLock(long state, int what, long mask) {
-        if ((state&(((long)what)<<LOCKED_SHIFT)) != 0) {
-            state &= ~mask;
+        if ((state & META_CAP_LOCKED) != 0) {
+            state &= ~META_SHIFT_MASK;
+        }
+        if ((state & META_ALT_LOCKED) != 0) {
+            state &= ~META_ALT_MASK;
+        }
+        if ((state & META_SYM_LOCKED) != 0) {
+            state &= ~META_SYM_MASK;
         }
         return state;
     }
@@ -332,9 +354,27 @@ public abstract class MetaKeyKeyListener {
      *         or locked meta key.
      */
     public static final int getMetaState(long state) {
-        return getActive(state, META_SHIFT_ON, META_SHIFT_ON, META_CAP_LOCKED) |
-               getActive(state, META_ALT_ON, META_ALT_ON, META_ALT_LOCKED) |
-               getActive(state, META_SYM_ON, META_SYM_ON, META_SYM_LOCKED);
+        int result = 0;
+
+        if ((state & META_CAP_LOCKED) != 0) {
+            result |= META_CAP_LOCKED;
+        } else if ((state & META_SHIFT_ON) != 0) {
+            result |= META_SHIFT_ON;
+        }
+
+        if ((state & META_ALT_LOCKED) != 0) {
+            result |= META_ALT_LOCKED;
+        } else if ((state & META_ALT_ON) != 0) {
+            result |= META_ALT_ON;
+        }
+
+        if ((state & META_SYM_LOCKED) != 0) {
+            result |= META_SYM_LOCKED;
+        } else if ((state & META_SYM_ON) != 0) {
+            result |= META_SYM_ON;
+        }
+
+        return result;
     }
 
     /**
@@ -348,26 +388,22 @@ public abstract class MetaKeyKeyListener {
     public static final int getMetaState(long state, int meta) {
         switch (meta) {
             case META_SHIFT_ON:
-                return getActive(state, meta, 1, 2);
+                if ((state & META_CAP_LOCKED) != 0) return 2;
+                if ((state & META_SHIFT_ON) != 0) return 1;
+                return 0;
 
             case META_ALT_ON:
-                return getActive(state, meta, 1, 2);
+                if ((state & META_ALT_LOCKED) != 0) return 2;
+                if ((state & META_ALT_ON) != 0) return 1;
+                return 0;
 
             case META_SYM_ON:
-                return getActive(state, meta, 1, 2);
+                if ((state & META_SYM_LOCKED) != 0) return 2;
+                if ((state & META_SYM_ON) != 0) return 1;
+                return 0;
 
             default:
                 return 0;
-        }
-    }
-
-    private static int getActive(long state, int meta, int on, int lock) {
-        if ((state&(meta<<LOCKED_SHIFT)) != 0) {
-            return lock;
-        } else if ((state&meta) != 0) {
-            return on;
-        } else {
-            return 0;
         }
     }
 
@@ -378,17 +414,23 @@ public abstract class MetaKeyKeyListener {
      * the current state, returns the new state.
      */
     public static long adjustMetaAfterKeypress(long state) {
-        state = adjust(state, META_SHIFT_ON, META_SHIFT_MASK);
-        state = adjust(state, META_ALT_ON, META_ALT_MASK);
-        state = adjust(state, META_SYM_ON, META_SYM_MASK);
-        return state;
-    }
+        if ((state & META_CAP_PRESSED) != 0) {
+            state = (state & ~META_SHIFT_MASK) | META_SHIFT_ON | META_CAP_USED;
+        } else if ((state & META_CAP_RELEASED) != 0) {
+            state &= ~META_SHIFT_MASK;
+        }
 
-    private static long adjust(long state, int what, long mask) {
-        if ((state&(((long)what)<<PRESSED_SHIFT)) != 0)
-            return (state&~mask) | what | ((long)what)<<USED_SHIFT;
-        else if ((state&(((long)what)<<RELEASED_SHIFT)) != 0)
-            return state & ~mask;
+        if ((state & META_ALT_PRESSED) != 0) {
+            state = (state & ~META_ALT_MASK) | META_ALT_ON | META_ALT_USED;
+        } else if ((state & META_ALT_RELEASED) != 0) {
+            state &= ~META_ALT_MASK;
+        }
+
+        if ((state & META_SYM_PRESSED) != 0) {
+            state = (state & ~META_SYM_MASK) | META_SYM_ON | META_SYM_USED;
+        } else if ((state & META_SYM_RELEASED) != 0) {
+            state &= ~META_SYM_MASK;
+        }
         return state;
     }
 
@@ -397,32 +439,36 @@ public abstract class MetaKeyKeyListener {
      */
     public static long handleKeyDown(long state, int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
-            return press(state, META_SHIFT_ON, META_SHIFT_MASK);
+            return press(state, META_SHIFT_ON, META_SHIFT_MASK,
+                    META_CAP_LOCKED, META_CAP_PRESSED, META_CAP_RELEASED, META_CAP_USED);
         }
 
         if (keyCode == KeyEvent.KEYCODE_ALT_LEFT || keyCode == KeyEvent.KEYCODE_ALT_RIGHT
                 || keyCode == KeyEvent.KEYCODE_NUM) {
-            return press(state, META_ALT_ON, META_ALT_MASK);
+            return press(state, META_ALT_ON, META_ALT_MASK,
+                    META_ALT_LOCKED, META_ALT_PRESSED, META_ALT_RELEASED, META_ALT_USED);
         }
 
         if (keyCode == KeyEvent.KEYCODE_SYM) {
-            return press(state, META_SYM_ON, META_SYM_MASK);
+            return press(state, META_SYM_ON, META_SYM_MASK,
+                    META_SYM_LOCKED, META_SYM_PRESSED, META_SYM_RELEASED, META_SYM_USED);
         }
-
         return state;
     }
 
-    private static long press(long state, int what, long mask) {
-        if ((state&(((long)what)<<PRESSED_SHIFT)) != 0)
-            ; // repeat before use
-        else if ((state&(((long)what)<<RELEASED_SHIFT)) != 0)
-            state = (state&~mask) | what | (((long)what) << LOCKED_SHIFT);
-        else if ((state&(((long)what)<<USED_SHIFT)) != 0)
-            ; // repeat after use
-        else if ((state&(((long)what)<<LOCKED_SHIFT)) != 0)
-            state = state&~mask;
-        else
-            state = state | what | (((long)what)<<PRESSED_SHIFT);
+    private static long press(long state, int what, long mask,
+            long locked, long pressed, long released, long used) {
+        if ((state & pressed) != 0) {
+            // repeat before use
+        } else if ((state & released) != 0) {
+            state = (state &~ mask) | what | locked;
+        } else if ((state & used) != 0) {
+            // repeat after use
+        } else if ((state & locked) != 0) {
+            state &= ~mask;
+        } else {
+            state |= what | pressed;
+        }
         return state;
     }
 
@@ -431,39 +477,52 @@ public abstract class MetaKeyKeyListener {
      */
     public static long handleKeyUp(long state, int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
-            return release(state, META_SHIFT_ON, META_SHIFT_MASK);
+            return release(state, META_SHIFT_ON, META_SHIFT_MASK,
+                    META_CAP_PRESSED, META_CAP_RELEASED, META_CAP_USED);
         }
 
         if (keyCode == KeyEvent.KEYCODE_ALT_LEFT || keyCode == KeyEvent.KEYCODE_ALT_RIGHT
                 || keyCode == KeyEvent.KEYCODE_NUM) {
-            return release(state, META_ALT_ON, META_ALT_MASK);
+            return release(state, META_ALT_ON, META_ALT_MASK,
+                    META_ALT_PRESSED, META_ALT_RELEASED, META_ALT_USED);
         }
 
         if (keyCode == KeyEvent.KEYCODE_SYM) {
-            return release(state, META_SYM_ON, META_SYM_MASK);
+            return release(state, META_SYM_ON, META_SYM_MASK,
+                    META_SYM_PRESSED, META_SYM_RELEASED, META_SYM_USED);
         }
-
         return state;
     }
 
-    private static long release(long state, int what, long mask) {
-        if ((state&(((long)what)<<USED_SHIFT)) != 0)
-            state = state&~mask;
-        else if ((state&(((long)what)<<PRESSED_SHIFT)) != 0)
-            state = state | what | (((long)what)<<RELEASED_SHIFT);
+    private static long release(long state, int what, long mask,
+            long pressed, long released, long used) {
+        if ((state & used) != 0) {
+            state &= ~mask;
+        } else if ((state & pressed) != 0) {
+            state |= what | released;
+        }
         return state;
     }
 
+    /**
+     * Clears the state of the specified meta key if it is locked.
+     * @param state the meta key state
+     * @param which meta keys to clear, may be a combination of {@link #META_SHIFT_ON},
+     * {@link #META_ALT_ON} or {@link #META_SYM_ON}.
+     */
     public long clearMetaKeyState(long state, int which) {
-        if ((which&META_SHIFT_ON) != 0)
-            state = resetLock(state, META_SHIFT_ON, META_SHIFT_MASK);
-        if ((which&META_ALT_ON) != 0)
-            state = resetLock(state, META_ALT_ON, META_ALT_MASK);
-        if ((which&META_SYM_ON) != 0)
-            state = resetLock(state, META_SYM_ON, META_SYM_MASK);
+        if ((which & META_SHIFT_ON_AND_LOCKED) == META_SHIFT_ON_AND_LOCKED) {
+            state &= ~META_SHIFT_MASK;
+        }
+        if ((which & META_ALT_ON_AND_LOCKED) == META_ALT_ON_AND_LOCKED) {
+            state &= ~META_ALT_MASK;
+        }
+        if ((which & META_SYM_ON_AND_LOCKED) == META_SYM_ON_AND_LOCKED) {
+            state &= ~META_SYM_MASK;
+        }
         return state;
     }
-    
+
     /**
      * The meta key has been pressed but has not yet been used.
      */

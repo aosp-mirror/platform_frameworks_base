@@ -70,31 +70,14 @@ static inline const char* toString(bool value) {
     return value ? "true" : "false";
 }
 
-
-int32_t updateMetaState(int32_t keyCode, bool down, int32_t oldMetaState) {
-    int32_t mask;
-    switch (keyCode) {
-    case AKEYCODE_ALT_LEFT:
-        mask = AMETA_ALT_LEFT_ON;
-        break;
-    case AKEYCODE_ALT_RIGHT:
-        mask = AMETA_ALT_RIGHT_ON;
-        break;
-    case AKEYCODE_SHIFT_LEFT:
-        mask = AMETA_SHIFT_LEFT_ON;
-        break;
-    case AKEYCODE_SHIFT_RIGHT:
-        mask = AMETA_SHIFT_RIGHT_ON;
-        break;
-    case AKEYCODE_SYM:
-        mask = AMETA_SYM_ON;
-        break;
-    default:
-        return oldMetaState;
+int32_t setEphemeralMetaState(int32_t mask, bool down, int32_t oldMetaState) {
+    int32_t newMetaState;
+    if (down) {
+        newMetaState = oldMetaState | mask;
+    } else {
+        newMetaState = oldMetaState &
+                ~(mask | AMETA_ALT_ON | AMETA_SHIFT_ON | AMETA_CTRL_ON | AMETA_META_ON);
     }
-
-    int32_t newMetaState = down ? oldMetaState | mask : oldMetaState & ~ mask
-            & ~ (AMETA_ALT_ON | AMETA_SHIFT_ON);
 
     if (newMetaState & (AMETA_ALT_LEFT_ON | AMETA_ALT_RIGHT_ON)) {
         newMetaState |= AMETA_ALT_ON;
@@ -104,7 +87,56 @@ int32_t updateMetaState(int32_t keyCode, bool down, int32_t oldMetaState) {
         newMetaState |= AMETA_SHIFT_ON;
     }
 
+    if (newMetaState & (AMETA_CTRL_LEFT_ON | AMETA_CTRL_RIGHT_ON)) {
+        newMetaState |= AMETA_CTRL_ON;
+    }
+
+    if (newMetaState & (AMETA_META_LEFT_ON | AMETA_META_RIGHT_ON)) {
+        newMetaState |= AMETA_META_ON;
+    }
     return newMetaState;
+}
+
+int32_t toggleLockedMetaState(int32_t mask, bool down, int32_t oldMetaState) {
+    if (down) {
+        return oldMetaState;
+    } else {
+        return oldMetaState ^ mask;
+    }
+}
+
+int32_t updateMetaState(int32_t keyCode, bool down, int32_t oldMetaState) {
+    int32_t mask;
+    switch (keyCode) {
+    case AKEYCODE_ALT_LEFT:
+        return setEphemeralMetaState(AMETA_ALT_LEFT_ON, down, oldMetaState);
+    case AKEYCODE_ALT_RIGHT:
+        return setEphemeralMetaState(AMETA_ALT_RIGHT_ON, down, oldMetaState);
+    case AKEYCODE_SHIFT_LEFT:
+        return setEphemeralMetaState(AMETA_SHIFT_LEFT_ON, down, oldMetaState);
+    case AKEYCODE_SHIFT_RIGHT:
+        return setEphemeralMetaState(AMETA_SHIFT_RIGHT_ON, down, oldMetaState);
+    case AKEYCODE_SYM:
+        return setEphemeralMetaState(AMETA_SYM_ON, down, oldMetaState);
+    case AKEYCODE_FUNCTION:
+        return setEphemeralMetaState(AMETA_FUNCTION_ON, down, oldMetaState);
+    case AKEYCODE_CTRL_LEFT:
+        return setEphemeralMetaState(AMETA_CTRL_LEFT_ON, down, oldMetaState);
+    case AKEYCODE_CTRL_RIGHT:
+        return setEphemeralMetaState(AMETA_CTRL_RIGHT_ON, down, oldMetaState);
+    case AKEYCODE_META_LEFT:
+        return setEphemeralMetaState(AMETA_META_LEFT_ON, down, oldMetaState);
+    case AKEYCODE_META_RIGHT:
+        return setEphemeralMetaState(AMETA_META_RIGHT_ON, down, oldMetaState);
+    case AKEYCODE_CAPS_LOCK:
+        return toggleLockedMetaState(AMETA_CAPS_LOCK_LATCHED, down, oldMetaState);
+    case AKEYCODE_NUM_LOCK:
+        return toggleLockedMetaState(AMETA_NUM_LOCK_LATCHED, down, oldMetaState);
+    case AKEYCODE_SCROLL_LOCK:
+        return toggleLockedMetaState(AMETA_SCROLL_LOCK_LATCHED, down, oldMetaState);
+    default:
+        return oldMetaState;
+    }
 }
 
 static const int32_t keyCodeRotationMap[][4] = {
@@ -842,6 +874,17 @@ KeyboardInputMapper::~KeyboardInputMapper() {
 void KeyboardInputMapper::initializeLocked() {
     mLocked.metaState = AMETA_NONE;
     mLocked.downTime = 0;
+
+    initializeLedStateLocked(mLocked.capsLockLedState, LED_CAPSL);
+    initializeLedStateLocked(mLocked.numLockLedState, LED_NUML);
+    initializeLedStateLocked(mLocked.scrollLockLedState, LED_SCROLLL);
+
+    updateLedStateLocked(true);
+}
+
+void KeyboardInputMapper::initializeLedStateLocked(LockedState::LedState& ledState, int32_t led) {
+    ledState.avail = getEventHub()->hasLed(getDeviceId(), led);
+    ledState.on = false;
 }
 
 uint32_t KeyboardInputMapper::getSources() {
@@ -966,6 +1009,7 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
         if (oldMetaState != newMetaState) {
             mLocked.metaState = newMetaState;
             metaStateChanged = true;
+            updateLedStateLocked(false);
         }
 
         downTime = mLocked.downTime;
@@ -975,6 +1019,9 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
         getContext()->updateGlobalMetaState();
     }
 
+    if (policyFlags & POLICY_FLAG_FUNCTION) {
+        newMetaState |= AMETA_FUNCTION_ON;
+    }
     getDispatcher()->notifyKey(when, getDeviceId(), AINPUT_SOURCE_KEYBOARD, policyFlags,
             down ? AKEY_EVENT_ACTION_DOWN : AKEY_EVENT_ACTION_UP,
             AKEY_EVENT_FLAG_FROM_SYSTEM, keyCode, scanCode, newMetaState, downTime);
@@ -1008,6 +1055,26 @@ int32_t KeyboardInputMapper::getMetaState() {
         AutoMutex _l(mLock);
         return mLocked.metaState;
     } // release lock
+}
+
+void KeyboardInputMapper::updateLedStateLocked(bool reset) {
+    updateLedStateForModifierLocked(mLocked.capsLockLedState, LED_CAPSL,
+            AMETA_CAPS_LOCK_LATCHED, reset);
+    updateLedStateForModifierLocked(mLocked.numLockLedState, LED_NUML,
+            AMETA_NUM_LOCK_LATCHED, reset);
+    updateLedStateForModifierLocked(mLocked.scrollLockLedState, LED_SCROLLL,
+            AMETA_SCROLL_LOCK_LATCHED, reset);
+}
+
+void KeyboardInputMapper::updateLedStateForModifierLocked(LockedState::LedState& ledState,
+        int32_t led, int32_t modifier, bool reset) {
+    if (ledState.avail) {
+        bool desiredState = (mLocked.metaState & modifier) != 0;
+        if (ledState.on != desiredState) {
+            getEventHub()->setLedState(getDeviceId(), led, desiredState);
+            ledState.on = desiredState;
+        }
+    }
 }
 
 

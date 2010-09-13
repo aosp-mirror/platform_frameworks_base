@@ -1145,12 +1145,9 @@ public abstract class Layout {
         float h2 = isLevelBoundary(point) ?
                     getSecondaryHorizontal(point) - 0.5f : h1;
 
-        int caps = TextKeyListener.getMetaState(editingBuffer,
-                                                KeyEvent.META_SHIFT_ON) |
-                   TextKeyListener.getMetaState(editingBuffer,
-                                                TextKeyListener.META_SELECTING);
-        int fn = TextKeyListener.getMetaState(editingBuffer,
-                                              KeyEvent.META_ALT_ON);
+        int caps = TextKeyListener.getMetaState(editingBuffer, TextKeyListener.META_SHIFT_ON) |
+                   TextKeyListener.getMetaState(editingBuffer, TextKeyListener.META_SELECTING);
+        int fn = TextKeyListener.getMetaState(editingBuffer, TextKeyListener.META_ALT_ON);
         int dist = 0;
 
         if (caps != 0 || fn != 0) {

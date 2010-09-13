@@ -419,9 +419,18 @@ private:
         Vector<KeyDown> keyDowns; // keys that are down
         int32_t metaState;
         nsecs_t downTime; // time of most recent key down
+
+        struct LedState {
+            bool avail; // led is available
+            bool on;    // we think the led is currently on
+        };
+        LedState capsLockLedState;
+        LedState numLockLedState;
+        LedState scrollLockLedState;
     } mLocked;
 
     void initializeLocked();
+    void initializeLedStateLocked(LockedState::LedState& ledState, int32_t led);
 
     bool isKeyboardOrGamepadKey(int32_t scanCode);
 
@@ -429,6 +438,10 @@ private:
             uint32_t policyFlags);
 
     ssize_t findKeyDownLocked(int32_t scanCode);
+
+    void updateLedStateLocked(bool reset);
+    void updateLedStateForModifierLocked(LockedState::LedState& ledState, int32_t led,
+            int32_t modifier, bool reset);
 };
 
 
