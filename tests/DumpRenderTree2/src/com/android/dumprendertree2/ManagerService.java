@@ -44,9 +44,7 @@ public class ManagerService extends Service {
 
     /** TODO: make it a setting */
     static final String RESULTS_ROOT_DIR_PATH =
-            Environment.getExternalStorageDirectory() +
-            File.separator + "android" +
-            File.separator + "LayoutTests-results";
+            Environment.getExternalStorageDirectory() + File.separator + "layout-test-results";
 
     /** TODO: Make it a setting */
     private static final List<String> EXPECTED_RESULT_LOCATION_RELATIVE_DIR_PREFIXES =

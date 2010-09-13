@@ -17,7 +17,7 @@ import webbrowser
 import tempfile
 
 #TODO: These should not be hardcoded
-RESULTS_ABSOLUTE_PATH = "/sdcard/android/LayoutTests-results/"
+RESULTS_ABSOLUTE_PATH = "/sdcard/layout-test-results/"
 DETAILS_HTML = "details.html"
 SUMMARY_TXT = "summary.txt"
 
