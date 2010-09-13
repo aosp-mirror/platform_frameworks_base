@@ -21,6 +21,7 @@
 #include <media/EffectBassBoostApi.h>
 #include <media/EffectVirtualizerApi.h>
 #include <LVM.h>
+#include <limits.h>
 
 #if __cplusplus
 extern "C" {
@@ -30,6 +31,7 @@ extern "C" {
 #define MAX_NUM_BANDS              5
 #define MAX_CALL_SIZE              256
 #define LVM_MAX_SESSIONS           32
+#define LVM_UNUSED_SESSION         INT_MAX
 #define BASS_BOOST_CUP_LOAD_ARM9E  150    // Expressed in 0.1 MIPS
 #define VIRTUALIZER_CUP_LOAD_ARM9E 120    // Expressed in 0.1 MIPS
 #define EQUALIZER_CUP_LOAD_ARM9E   220    // Expressed in 0.1 MIPS
