@@ -3026,7 +3026,8 @@ class PackageManagerService extends IPackageManager.Stub {
             // Just create the setting, don't add it yet. For already existing packages
             // the PkgSetting exists already and doesn't have to be created.
             pkgSetting = mSettings.getPackageLP(pkg, origPackage, realName, suid, destCodeFile,
-                            destResourceFile, pkg.applicationInfo.flags, true, false);
+                    destResourceFile, pkg.applicationInfo.nativeLibraryDir,
+                    pkg.applicationInfo.flags, true, false);
             if (pkgSetting == null) {
                 Slog.w(TAG, "Creating application package " + pkg.packageName + " failed");
                 mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
@@ -3244,14 +3245,21 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
+            pkg.applicationInfo.nativeLibraryDir = pkgSetting.nativeLibraryPathString;
+
             /*
              * Set the data dir to the default "/data/data/<package name>/lib"
              * if we got here without anyone telling us different (e.g., apps
              * stored on SD card have their native libraries stored in the ASEC
              * container with the APK).
+             *
+             * This happens during an upgrade from a package settings file that
+             * doesn't have a native library path attribute at all.
              */
-            if (pkg.applicationInfo.nativeLibraryDir == null && pkg.applicationInfo.dataDir != null) {
-                pkg.applicationInfo.nativeLibraryDir = new File(dataPath, LIB_DIR_NAME).getPath();
+            if (pkgSetting.nativeLibraryPathString == null && pkg.applicationInfo.dataDir != null) {
+                final String nativeLibraryPath = new File(dataPath, LIB_DIR_NAME).getPath();
+                pkg.applicationInfo.nativeLibraryDir = nativeLibraryPath;
+                pkgSetting.nativeLibraryPathString = nativeLibraryPath;
             }
 
             pkgSetting.uidError = uidError;
@@ -3273,7 +3281,6 @@ class PackageManagerService extends IPackageManager.Stub {
             if ((!isSystemApp(pkg) || isUpdatedSystemApp(pkg)) && !isExternal(pkg)) {
                 Log.i(TAG, path + " changed; unpacking");
                 File sharedLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
-                sharedLibraryDir.mkdir();
                 NativeLibraryHelper.copyNativeBinariesLI(scanFile, sharedLibraryDir);
             }
             pkg.mScanPath = path;
@@ -3588,40 +3595,6 @@ class PackageManagerService extends IPackageManager.Stub {
         } else {
             // Fall back for old packages
             return new File(pkg.applicationInfo.dataDir, LIB_DIR_NAME);
-        }
-    }
-
-    // Convenience call for removeNativeBinariesLI(File)
-    private void removeNativeBinariesLI(PackageParser.Package pkg) {
-        File nativeLibraryDir = getNativeBinaryDirForPackage(pkg);
-        removeNativeBinariesLI(nativeLibraryDir);
-    }
-
-    // Remove the native binaries of a given package. This simply
-    // gets rid of the files in the 'lib' sub-directory.
-    public void removeNativeBinariesLI(File binaryDir) {
-        if (DEBUG_NATIVE) {
-            Slog.w(TAG, "Deleting native binaries from: " + binaryDir.getPath());
-        }
-
-        // Just remove any file in the directory. Since the directory
-        // is owned by the 'system' UID, the application is not supposed
-        // to have written anything there.
-        //
-        if (binaryDir.exists()) {
-            File[] binaries = binaryDir.listFiles();
-            if (binaries != null) {
-                for (int nn = 0; nn < binaries.length; nn++) {
-                    if (DEBUG_NATIVE) {
-                        Slog.d(TAG, "    Deleting " + binaries[nn].getName());
-                    }
-                    if (!binaries[nn].delete()) {
-                        Slog.w(TAG, "Could not delete native binary: " + binaries[nn].getPath());
-                    }
-                }
-            }
-            // Do not delete 'lib' directory itself, or this will prevent
-            // installation of future updates.
         }
     }
 
@@ -5128,7 +5101,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if (libraryPath != null) {
-                removeNativeBinariesLI(new File(libraryPath));
+                NativeLibraryHelper.removeNativeBinariesLI(libraryPath);
             }
         }
 
@@ -6202,8 +6175,8 @@ class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             // Reinstate the old system package
             mSettings.enableSystemPackageLP(p.packageName);
-            // Remove any native libraries. XXX needed?
-            removeNativeBinariesLI(p);
+            // Remove any native libraries from the upgraded package.
+            NativeLibraryHelper.removeNativeBinariesLI(p.applicationInfo.nativeLibraryDir);
         }
         // Install the system package
         PackageParser.Package newPkg = scanPackageLI(ps.codePath,
@@ -7583,18 +7556,20 @@ class PackageManagerService extends IPackageManager.Stub {
         String installerPackageName;
 
         PackageSettingBase(String name, String realName, File codePath, File resourcePath,
-                int pVersionCode, int pkgFlags) {
+                String nativeLibraryPathString, int pVersionCode, int pkgFlags) {
             super(pkgFlags);
             this.name = name;
             this.realName = realName;
-            init(codePath, resourcePath, pVersionCode);
+            init(codePath, resourcePath, nativeLibraryPathString, pVersionCode);
         }
 
-        void init(File codePath, File resourcePath, int pVersionCode) {
+        void init(File codePath, File resourcePath, String nativeLibraryPathString,
+                int pVersionCode) {
             this.codePath = codePath;
             this.codePathString = codePath.toString();
             this.resourcePath = resourcePath;
             this.resourcePathString = resourcePath.toString();
+            this.nativeLibraryPathString = nativeLibraryPathString;
             this.versionCode = pVersionCode;
         }
 
@@ -7687,8 +7662,9 @@ class PackageManagerService extends IPackageManager.Stub {
         SharedUserSetting sharedUser;
 
         PackageSetting(String name, String realName, File codePath, File resourcePath,
-                int pVersionCode, int pkgFlags) {
-            super(name, realName, codePath, resourcePath, pVersionCode, pkgFlags);
+                String nativeLibraryPathString, int pVersionCode, int pkgFlags) {
+            super(name, realName, codePath, resourcePath, nativeLibraryPathString, pVersionCode,
+                    pkgFlags);
         }
 
         @Override
@@ -7800,8 +7776,9 @@ class PackageManagerService extends IPackageManager.Stub {
             final int sharedId;
 
             PendingPackage(String name, String realName, File codePath, File resourcePath,
-                    int sharedId, int pVersionCode, int pkgFlags) {
-                super(name, realName, codePath, resourcePath, pVersionCode, pkgFlags);
+                    String nativeLibraryPathString, int sharedId, int pVersionCode, int pkgFlags) {
+                super(name, realName, codePath, resourcePath, nativeLibraryPathString,
+                        pVersionCode, pkgFlags);
                 this.sharedId = sharedId;
             }
         }
@@ -7830,10 +7807,10 @@ class PackageManagerService extends IPackageManager.Stub {
 
         PackageSetting getPackageLP(PackageParser.Package pkg, PackageSetting origPackage,
                 String realName, SharedUserSetting sharedUser, File codePath, File resourcePath,
-                int pkgFlags, boolean create, boolean add) {
+                String nativeLibraryPathString, int pkgFlags, boolean create, boolean add) {
             final String name = pkg.packageName;
             PackageSetting p = getPackageLP(name, origPackage, realName, sharedUser, codePath,
-                    resourcePath, pkg.mVersionCode, pkgFlags, create, add);
+                    resourcePath, nativeLibraryPathString, pkg.mVersionCode, pkgFlags, create, add);
             return p;
         }
 
@@ -7929,14 +7906,14 @@ class PackageManagerService extends IPackageManager.Stub {
             if((p.pkg != null) && (p.pkg.applicationInfo != null)) {
                 p.pkg.applicationInfo.flags &= ~ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
             }
-            PackageSetting ret = addPackageLP(name, p.realName, p.codePath,
-                    p.resourcePath, p.userId, p.versionCode, p.pkgFlags);
+            PackageSetting ret = addPackageLP(name, p.realName, p.codePath, p.resourcePath,
+                    p.nativeLibraryPathString, p.userId, p.versionCode, p.pkgFlags);
             mDisabledSysPackages.remove(name);
             return ret;
         }
 
-        PackageSetting addPackageLP(String name, String realName, File codePath,
-                File resourcePath, int uid, int vc, int pkgFlags) {
+        PackageSetting addPackageLP(String name, String realName, File codePath, File resourcePath,
+                String nativeLibraryPathString, int uid, int vc, int pkgFlags) {
             PackageSetting p = mPackages.get(name);
             if (p != null) {
                 if (p.userId == uid) {
@@ -7946,7 +7923,8 @@ class PackageManagerService extends IPackageManager.Stub {
                         "Adding duplicate package, keeping first: " + name);
                 return null;
             }
-            p = new PackageSetting(name, realName, codePath, resourcePath, vc, pkgFlags);
+            p = new PackageSetting(name, realName, codePath, resourcePath, nativeLibraryPathString,
+                    vc, pkgFlags);
             p.userId = uid;
             if (addUserIdLP(uid, p, name)) {
                 mPackages.put(name, p);
@@ -8001,7 +7979,7 @@ class PackageManagerService extends IPackageManager.Stub {
         
         private PackageSetting getPackageLP(String name, PackageSetting origPackage,
                 String realName, SharedUserSetting sharedUser, File codePath, File resourcePath,
-                int vc, int pkgFlags, boolean create, boolean add) {
+                String nativeLibraryPathString, int vc, int pkgFlags, boolean create, boolean add) {
             PackageSetting p = mPackages.get(name);
             if (p != null) {
                 if (!p.codePath.equals(codePath)) {
@@ -8044,8 +8022,8 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
                 if (origPackage != null) {
                     // We are consuming the data from an existing package.
-                    p = new PackageSetting(origPackage.name, name, codePath,
-                            resourcePath, vc, pkgFlags);
+                    p = new PackageSetting(origPackage.name, name, codePath, resourcePath,
+                            nativeLibraryPathString, vc, pkgFlags);
                     if (DEBUG_UPGRADE) Log.v(TAG, "Package " + name
                             + " is adopting original package " + origPackage.name);
                     // Note that we will retain the new package's signature so
@@ -8061,7 +8039,8 @@ class PackageManagerService extends IPackageManager.Stub {
                     // Update new package state.
                     p.setTimeStamp(codePath.lastModified());
                 } else {
-                    p = new PackageSetting(name, realName, codePath, resourcePath, vc, pkgFlags);
+                    p = new PackageSetting(name, realName, codePath, resourcePath,
+                            nativeLibraryPathString, vc, pkgFlags);
                     p.setTimeStamp(codePath.lastModified());
                     p.sharedUser = sharedUser;
                     if (sharedUser != null) {
@@ -8782,8 +8761,8 @@ class PackageManagerService extends IPackageManager.Stub {
                 Object idObj = getUserIdLP(pp.sharedId);
                 if (idObj != null && idObj instanceof SharedUserSetting) {
                     PackageSetting p = getPackageLP(pp.name, null, pp.realName,
-                            (SharedUserSetting)idObj, pp.codePath, pp.resourcePath,
-                            pp.versionCode, pp.pkgFlags, true, true);
+                            (SharedUserSetting) idObj, pp.codePath, pp.resourcePath,
+                            pp.nativeLibraryPathString, pp.versionCode, pp.pkgFlags, true, true);
                     if (p == null) {
                         Slog.w(TAG, "Unable to create application package for "
                                 + pp.name);
@@ -8888,6 +8867,7 @@ class PackageManagerService extends IPackageManager.Stub {
             String realName = parser.getAttributeValue(null, "realName");
             String codePathStr = parser.getAttributeValue(null, "codePath");
             String resourcePathStr = parser.getAttributeValue(null, "resourcePath");
+            String nativeLibraryPathStr = parser.getAttributeValue(null, "nativeLibraryPath");
             if (resourcePathStr == null) {
                 resourcePathStr = codePathStr;
             }
@@ -8902,9 +8882,8 @@ class PackageManagerService extends IPackageManager.Stub {
 
             int pkgFlags = 0;
             pkgFlags |= ApplicationInfo.FLAG_SYSTEM;
-            PackageSetting ps = new PackageSetting(name, realName,
-                    new File(codePathStr),
-                    new File(resourcePathStr), versionCode, pkgFlags);
+            PackageSetting ps = new PackageSetting(name, realName, new File(codePathStr),
+                    new File(resourcePathStr), nativeLibraryPathStr, versionCode, pkgFlags);
             String timeStampStr = parser.getAttributeValue(null, "ts");
             if (timeStampStr != null) {
                 try {
@@ -9023,9 +9002,9 @@ class PackageManagerService extends IPackageManager.Stub {
                             "Error in package manager settings: <package> has no codePath at "
                             + parser.getPositionDescription());
                 } else if (userId > 0) {
-                    packageSetting = addPackageLP(name.intern(), realName,
-                            new File(codePathStr), new File(resourcePathStr),
-                            userId, versionCode, pkgFlags);
+                    packageSetting = addPackageLP(name.intern(), realName, new File(codePathStr),
+                            new File(resourcePathStr), nativeLibraryPathStr, userId, versionCode,
+                            pkgFlags);
                     if (DEBUG_SETTINGS) Log.i(TAG, "Reading package " + name
                             + ": userId=" + userId + " pkg=" + packageSetting);
                     if (packageSetting == null) {
@@ -9042,7 +9021,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     if (userId > 0) {
                         packageSetting = new PendingPackage(name.intern(), realName,
                                 new File(codePathStr), new File(resourcePathStr),
-                                userId, versionCode, pkgFlags);
+                                nativeLibraryPathStr, userId, versionCode, pkgFlags);
                         packageSetting.setTimeStamp(timeStamp, timeStampStr);
                         mPendingPackages.add((PendingPackage) packageSetting);
                         if (DEBUG_SETTINGS) Log.i(TAG, "Reading package " + name
