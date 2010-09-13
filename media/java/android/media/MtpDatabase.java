@@ -478,12 +478,26 @@ public class MtpDatabase {
         }
     }
 
+    private int deleteRecursive(int handle) throws RemoteException {
+        int[] children = getObjectList(0 /* storageID */, 0 /* format */, handle);
+        Uri uri = Files.getMtpObjectsUri(mVolumeName, handle);
+        // delete parent first, to avoid potential infinite recursion
+        int count = mMediaProvider.delete(uri, null, null);
+        if (count == 1) {
+            if (children != null) {
+                for (int i = 0; i < children.length; i++) {
+                    count += deleteRecursive(children[i]);
+                }
+            }
+        }
+        return count;
+    }
+
     private int deleteFile(int handle) {
         Log.d(TAG, "deleteFile: " + handle);
         mDatabaseModified = true;
-        Uri uri = Files.getMtpObjectsUri(mVolumeName, handle);
         try {
-            if (mMediaProvider.delete(uri, null, null) == 1) {
+            if (deleteRecursive(handle) > 0) {
                 return MtpConstants.RESPONSE_OK;
             } else {
                 return MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE;
