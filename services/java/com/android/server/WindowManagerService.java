@@ -5089,8 +5089,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         
         /* Notifies the window manager about an input channel that is not responding.
-         * The method can either cause dispatching to be aborted by returning -2 or
-         * return a new timeout in nanoseconds.
+         * Returns a new timeout to continue waiting in nanoseconds, or 0 to abort dispatch.
          * 
          * Called by the InputManager.
          */
@@ -5099,7 +5098,7 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mWindowMap) {
                 WindowState windowState = getWindowStateForInputChannelLocked(inputChannel);
                 if (windowState == null) {
-                    return -2; // irrelevant, abort dispatching (-2)
+                    return 0; // window is unknown, abort dispatching
                 }
                 
                 Slog.i(TAG, "Input event dispatching timed out sending to "
@@ -5122,8 +5121,7 @@ public class WindowManagerService extends IWindowManager.Stub
         
         /* Notifies the window manager about an application that is not responding
          * in general rather than with respect to a particular input channel.
-         * The method can either cause dispatching to be aborted by returning -2 or
-         * return a new timeout in nanoseconds.
+         * Returns a new timeout to continue waiting in nanoseconds, or 0 to abort dispatch.
          * 
          * Called by the InputManager.
          */
@@ -5149,7 +5147,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 } catch (RemoteException ex) {
                 }
             }
-            return -2; // abort dispatching
+            return 0; // abort dispatching
         }
         
         private WindowState getWindowStateForInputChannel(InputChannel inputChannel) {
@@ -5261,15 +5259,6 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mWindowMap) {
                 mPolicy.performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
             }
-        }
-        
-        /* Notifies that an app switch key (BACK / HOME) has just been pressed.
-         * This essentially starts a .5 second timeout for the application to process
-         * subsequent input events while waiting for the app switch to occur.  If it takes longer
-         * than this, the pending events will be dropped.
-         */
-        public void notifyAppSwitchComing() {
-            // TODO Not implemented yet.  Should go in the native side.
         }
         
         /* Notifies that the lid switch changed state. */

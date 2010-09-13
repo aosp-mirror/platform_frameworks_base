@@ -30,6 +30,7 @@
 
 #include <stddef.h>
 #include <unistd.h>
+#include <limits.h>
 
 
 namespace android {
@@ -108,12 +109,131 @@ struct InputTarget {
     // Flags for the input target.
     int32_t flags;
 
-    // The timeout for event delivery to this target in nanoseconds.  Or -1 if none.
+    // The timeout for event delivery to this target in nanoseconds, or -1 to wait indefinitely.
     nsecs_t timeout;
+
+    // The time already spent waiting for this target in nanoseconds, or 0 if none.
+    nsecs_t timeSpentWaitingForApplication;
 
     // The x and y offset to add to a MotionEvent as it is delivered.
     // (ignored for KeyEvents)
     float xOffset, yOffset;
+};
+
+
+/*
+ * An input window describes the bounds of a window that can receive input.
+ */
+struct InputWindow {
+    // Window flags from WindowManager.LayoutParams
+    enum {
+        FLAG_ALLOW_LOCK_WHILE_SCREEN_ON     = 0x00000001,
+        FLAG_DIM_BEHIND        = 0x00000002,
+        FLAG_BLUR_BEHIND        = 0x00000004,
+        FLAG_NOT_FOCUSABLE      = 0x00000008,
+        FLAG_NOT_TOUCHABLE      = 0x00000010,
+        FLAG_NOT_TOUCH_MODAL    = 0x00000020,
+        FLAG_TOUCHABLE_WHEN_WAKING = 0x00000040,
+        FLAG_KEEP_SCREEN_ON     = 0x00000080,
+        FLAG_LAYOUT_IN_SCREEN   = 0x00000100,
+        FLAG_LAYOUT_NO_LIMITS   = 0x00000200,
+        FLAG_FULLSCREEN      = 0x00000400,
+        FLAG_FORCE_NOT_FULLSCREEN   = 0x00000800,
+        FLAG_DITHER             = 0x00001000,
+        FLAG_SECURE             = 0x00002000,
+        FLAG_SCALED             = 0x00004000,
+        FLAG_IGNORE_CHEEK_PRESSES    = 0x00008000,
+        FLAG_LAYOUT_INSET_DECOR = 0x00010000,
+        FLAG_ALT_FOCUSABLE_IM = 0x00020000,
+        FLAG_WATCH_OUTSIDE_TOUCH = 0x00040000,
+        FLAG_SHOW_WHEN_LOCKED = 0x00080000,
+        FLAG_SHOW_WALLPAPER = 0x00100000,
+        FLAG_TURN_SCREEN_ON = 0x00200000,
+        FLAG_DISMISS_KEYGUARD = 0x00400000,
+        FLAG_IMMERSIVE = 0x00800000,
+        FLAG_KEEP_SURFACE_WHILE_ANIMATING = 0x10000000,
+        FLAG_COMPATIBLE_WINDOW = 0x20000000,
+        FLAG_SYSTEM_ERROR = 0x40000000,
+    };
+
+    // Window types from WindowManager.LayoutParams
+    enum {
+        FIRST_APPLICATION_WINDOW = 1,
+        TYPE_BASE_APPLICATION   = 1,
+        TYPE_APPLICATION        = 2,
+        TYPE_APPLICATION_STARTING = 3,
+        LAST_APPLICATION_WINDOW = 99,
+        FIRST_SUB_WINDOW        = 1000,
+        TYPE_APPLICATION_PANEL  = FIRST_SUB_WINDOW,
+        TYPE_APPLICATION_MEDIA  = FIRST_SUB_WINDOW+1,
+        TYPE_APPLICATION_SUB_PANEL = FIRST_SUB_WINDOW+2,
+        TYPE_APPLICATION_ATTACHED_DIALOG = FIRST_SUB_WINDOW+3,
+        TYPE_APPLICATION_MEDIA_OVERLAY  = FIRST_SUB_WINDOW+4,
+        LAST_SUB_WINDOW         = 1999,
+        FIRST_SYSTEM_WINDOW     = 2000,
+        TYPE_STATUS_BAR         = FIRST_SYSTEM_WINDOW,
+        TYPE_SEARCH_BAR         = FIRST_SYSTEM_WINDOW+1,
+        TYPE_PHONE              = FIRST_SYSTEM_WINDOW+2,
+        TYPE_SYSTEM_ALERT       = FIRST_SYSTEM_WINDOW+3,
+        TYPE_KEYGUARD           = FIRST_SYSTEM_WINDOW+4,
+        TYPE_TOAST              = FIRST_SYSTEM_WINDOW+5,
+        TYPE_SYSTEM_OVERLAY     = FIRST_SYSTEM_WINDOW+6,
+        TYPE_PRIORITY_PHONE     = FIRST_SYSTEM_WINDOW+7,
+        TYPE_SYSTEM_DIALOG      = FIRST_SYSTEM_WINDOW+8,
+        TYPE_KEYGUARD_DIALOG    = FIRST_SYSTEM_WINDOW+9,
+        TYPE_SYSTEM_ERROR       = FIRST_SYSTEM_WINDOW+10,
+        TYPE_INPUT_METHOD       = FIRST_SYSTEM_WINDOW+11,
+        TYPE_INPUT_METHOD_DIALOG= FIRST_SYSTEM_WINDOW+12,
+        TYPE_WALLPAPER          = FIRST_SYSTEM_WINDOW+13,
+        TYPE_STATUS_BAR_PANEL   = FIRST_SYSTEM_WINDOW+14,
+        LAST_SYSTEM_WINDOW      = 2999,
+    };
+
+    sp<InputChannel> inputChannel;
+    int32_t layoutParamsFlags;
+    int32_t layoutParamsType;
+    nsecs_t dispatchingTimeout;
+    int32_t frameLeft;
+    int32_t frameTop;
+    int32_t frameRight;
+    int32_t frameBottom;
+    int32_t visibleFrameLeft;
+    int32_t visibleFrameTop;
+    int32_t visibleFrameRight;
+    int32_t visibleFrameBottom;
+    int32_t touchableAreaLeft;
+    int32_t touchableAreaTop;
+    int32_t touchableAreaRight;
+    int32_t touchableAreaBottom;
+    bool visible;
+    bool hasFocus;
+    bool hasWallpaper;
+    bool paused;
+    int32_t ownerPid;
+    int32_t ownerUid;
+
+    bool visibleFrameIntersects(const InputWindow* other) const;
+    bool touchableAreaContainsPoint(int32_t x, int32_t y) const;
+};
+
+
+/*
+ * A private handle type used by the input manager to track the window.
+ */
+class InputApplicationHandle : public RefBase {
+protected:
+    InputApplicationHandle() { }
+    virtual ~InputApplicationHandle() { }
+};
+
+
+/*
+ * An input application describes properties of an application that can receive input.
+ */
+struct InputApplication {
+    String8 name;
+    nsecs_t dispatchingTimeout;
+    sp<InputApplicationHandle> handle;
 };
 
 
@@ -135,14 +255,16 @@ public:
     /* Notifies the system that a configuration change has occurred. */
     virtual void notifyConfigurationChanged(nsecs_t when) = 0;
 
+    /* Notifies the system that an application is not responding.
+     * Returns a new timeout to continue waiting, or 0 to abort dispatch. */
+    virtual nsecs_t notifyANR(const sp<InputApplicationHandle>& inputApplicationHandle) = 0;
+
     /* Notifies the system that an input channel is unrecoverably broken. */
     virtual void notifyInputChannelBroken(const sp<InputChannel>& inputChannel) = 0;
 
     /* Notifies the system that an input channel is not responding.
-     * Returns true and a new timeout value if the dispatcher should keep waiting.
-     * Otherwise returns false. */
-    virtual bool notifyInputChannelANR(const sp<InputChannel>& inputChannel,
-            nsecs_t& outNewTimeout) = 0;
+     * Returns a new timeout to continue waiting, or 0 to abort dispatch. */
+    virtual nsecs_t notifyInputChannelANR(const sp<InputChannel>& inputChannel) = 0;
 
     /* Notifies the system that an input channel recovered from ANR. */
     virtual void notifyInputChannelRecoveredFromANR(const sp<InputChannel>& inputChannel) = 0;
@@ -153,29 +275,27 @@ public:
     /* Gets the key repeat inter-key delay. */
     virtual nsecs_t getKeyRepeatDelay() = 0;
 
-    /* Waits for key event input targets to become available.
-     * If the event is being injected, injectorPid and injectorUid should specify the
-     * process id and used id of the injecting application, otherwise they should both
-     * be -1.
-     * Returns one of the INPUT_EVENT_INJECTION_XXX constants. */
-    virtual int32_t waitForKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
-            int32_t injectorPid, int32_t injectorUid,
-            Vector<InputTarget>& outTargets) = 0;
-
-    /* Waits for motion event targets to become available.
-     * If the event is being injected, injectorPid and injectorUid should specify the
-     * process id and used id of the injecting application, otherwise they should both
-     * be -1.
-     * Returns one of the INPUT_EVENT_INJECTION_XXX constants. */
-    virtual int32_t waitForMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
-            int32_t injectorPid, int32_t injectorUid,
-            Vector<InputTarget>& outTargets) = 0;
-
     /* Gets the maximum suggested event delivery rate per second.
      * This value is used to throttle motion event movement actions on a per-device
      * basis.  It is not intended to be a hard limit.
      */
     virtual int32_t getMaxEventsPerSecond() = 0;
+
+    /* Allows the policy a chance to intercept a key before dispatching. */
+    virtual bool interceptKeyBeforeDispatching(const sp<InputChannel>& inputChannel,
+            const KeyEvent* keyEvent, uint32_t policyFlags) = 0;
+
+    /* Poke user activity for an event dispatched to a window. */
+    virtual void pokeUserActivity(nsecs_t eventTime, int32_t windowType, int32_t eventType) = 0;
+
+    /* Checks whether a given application pid/uid has permission to inject input events
+     * into other applications.
+     *
+     * This method is special in that its implementation promises to be non-reentrant and
+     * is safe to call while holding other locks.  (Most other methods make no such guarantees!)
+     */
+    virtual bool checkInjectEventsPermissionNonReentrant(
+            int32_t injectorPid, int32_t injectorUid) = 0;
 };
 
 
@@ -187,6 +307,11 @@ protected:
     virtual ~InputDispatcherInterface() { }
 
 public:
+    /* Dumps the state of the input dispatcher.
+     *
+     * This method may be called on any thread (usually by the input manager). */
+    virtual void dump(String8& dump) = 0;
+
     /* Runs a single iteration of the dispatch loop.
      * Nominally processes one queued event, a timeout, or a response from an input consumer.
      *
@@ -199,7 +324,6 @@ public:
      * These methods should only be called on the input reader thread.
      */
     virtual void notifyConfigurationChanged(nsecs_t eventTime) = 0;
-    virtual void notifyAppSwitchComing(nsecs_t eventTime) = 0;
     virtual void notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t source,
             uint32_t policyFlags, int32_t action, int32_t flags, int32_t keyCode,
             int32_t scanCode, int32_t metaState, nsecs_t downTime) = 0;
@@ -219,6 +343,24 @@ public:
     virtual int32_t injectInputEvent(const InputEvent* event,
             int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis) = 0;
 
+    /* Sets the list of input windows.
+     *
+     * This method may be called on any thread (usually by the input manager).
+     */
+    virtual void setInputWindows(const Vector<InputWindow>& inputWindows) = 0;
+
+    /* Sets the focused application.
+     *
+     * This method may be called on any thread (usually by the input manager).
+     */
+    virtual void setFocusedApplication(const InputApplication* inputApplication) = 0;
+
+    /* Sets the input dispatching mode.
+     *
+     * This method may be called on any thread (usually by the input manager).
+     */
+    virtual void setInputDispatchMode(bool enabled, bool frozen) = 0;
+
     /* Preempts input dispatch in progress by making pending synchronous
      * dispatches asynchronous instead.  This method is generally called during a focus
      * transition from one application to the next so as to enable the new application
@@ -230,10 +372,11 @@ public:
     virtual void preemptInputDispatch() = 0;
 
     /* Registers or unregister input channels that may be used as targets for input events.
+     * If monitor is true, the channel will receive a copy of all input events.
      *
      * These methods may be called on any thread (usually by the input manager).
      */
-    virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel) = 0;
+    virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel, bool monitor) = 0;
     virtual status_t unregisterInputChannel(const sp<InputChannel>& inputChannel) = 0;
 };
 
@@ -261,10 +404,11 @@ protected:
 public:
     explicit InputDispatcher(const sp<InputDispatcherPolicyInterface>& policy);
 
+    virtual void dump(String8& dump);
+
     virtual void dispatchOnce();
 
     virtual void notifyConfigurationChanged(nsecs_t eventTime);
-    virtual void notifyAppSwitchComing(nsecs_t eventTime);
     virtual void notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t source,
             uint32_t policyFlags, int32_t action, int32_t flags, int32_t keyCode,
             int32_t scanCode, int32_t metaState, nsecs_t downTime);
@@ -277,9 +421,12 @@ public:
     virtual int32_t injectInputEvent(const InputEvent* event,
             int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis);
 
+    virtual void setInputWindows(const Vector<InputWindow>& inputWindows);
+    virtual void setFocusedApplication(const InputApplication* inputApplication);
+    virtual void setInputDispatchMode(bool enabled, bool frozen);
     virtual void preemptInputDispatch();
 
-    virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel);
+    virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel, bool monitor);
     virtual status_t unregisterInputChannel(const sp<InputChannel>& inputChannel);
 
 private:
@@ -310,6 +457,8 @@ private:
         int32_t pendingSyncDispatches; // the number of synchronous dispatches in progress
 
         inline bool isInjected() { return injectorPid >= 0; }
+
+        void recycle();
     };
 
     struct ConfigurationChangedEntry : EventEntry {
@@ -326,6 +475,17 @@ private:
         int32_t metaState;
         int32_t repeatCount;
         nsecs_t downTime;
+
+        bool syntheticRepeat; // set to true for synthetic key repeats
+
+        enum InterceptKeyResult {
+            INTERCEPT_KEY_RESULT_UNKNOWN,
+            INTERCEPT_KEY_RESULT_SKIP,
+            INTERCEPT_KEY_RESULT_CONTINUE,
+        };
+        InterceptKeyResult interceptKeyResult; // set based on the interception result
+
+        void recycle();
     };
 
     struct MotionSample {
@@ -380,8 +540,12 @@ private:
         //   will be set to NULL.
         MotionSample* tailMotionSample;
 
-        inline bool isSyncTarget() {
+        inline bool isSyncTarget() const {
             return targetFlags & InputTarget::FLAG_SYNC;
+        }
+
+        inline void preemptSyncTarget() {
+            targetFlags &= ~ InputTarget::FLAG_SYNC;
         }
     };
 
@@ -413,37 +577,43 @@ private:
 
         // parameters for the command (usage varies by command)
         sp<Connection> connection;
+        nsecs_t eventTime;
+        KeyEntry* keyEntry;
+        sp<InputChannel> inputChannel;
+        sp<InputApplicationHandle> inputApplicationHandle;
+        int32_t windowType;
+        int32_t userActivityEventType;
     };
 
     // Generic queue implementation.
     template <typename T>
     struct Queue {
-        T head;
-        T tail;
+        T headSentinel;
+        T tailSentinel;
 
         inline Queue() {
-            head.prev = NULL;
-            head.next = & tail;
-            tail.prev = & head;
-            tail.next = NULL;
+            headSentinel.prev = NULL;
+            headSentinel.next = & tailSentinel;
+            tailSentinel.prev = & headSentinel;
+            tailSentinel.next = NULL;
         }
 
-        inline bool isEmpty() {
-            return head.next == & tail;
+        inline bool isEmpty() const {
+            return headSentinel.next == & tailSentinel;
         }
 
         inline void enqueueAtTail(T* entry) {
-            T* last = tail.prev;
+            T* last = tailSentinel.prev;
             last->next = entry;
             entry->prev = last;
-            entry->next = & tail;
-            tail.prev = entry;
+            entry->next = & tailSentinel;
+            tailSentinel.prev = entry;
         }
 
         inline void enqueueAtHead(T* entry) {
-            T* first = head.next;
-            head.next = entry;
-            entry->prev = & head;
+            T* first = headSentinel.next;
+            headSentinel.next = entry;
+            entry->prev = & headSentinel;
             entry->next = first;
             first->prev = entry;
         }
@@ -454,7 +624,7 @@ private:
         }
 
         inline T* dequeueAtHead() {
-            T* first = head.next;
+            T* first = headSentinel.next;
             dequeue(first);
             return first;
         }
@@ -476,7 +646,8 @@ private:
                 float xPrecision, float yPrecision,
                 nsecs_t downTime, uint32_t pointerCount,
                 const int32_t* pointerIds, const PointerCoords* pointerCoords);
-        DispatchEntry* obtainDispatchEntry(EventEntry* eventEntry);
+        DispatchEntry* obtainDispatchEntry(EventEntry* eventEntry,
+                int32_t targetFlags, float xOffset, float yOffset, nsecs_t timeout);
         CommandEntry* obtainCommandEntry(Command command);
 
         void releaseEventEntry(EventEntry* entry);
@@ -500,6 +671,85 @@ private:
         void initializeEventEntry(EventEntry* entry, int32_t type, nsecs_t eventTime);
     };
 
+    /* Tracks dispatched key and motion event state so that cancelation events can be
+     * synthesized when events are dropped. */
+    class InputState {
+    public:
+        // Specifies whether a given event will violate input state consistency.
+        enum Consistency {
+            // The event is consistent with the current input state.
+            CONSISTENT,
+            // The event is inconsistent with the current input state but applications
+            // will tolerate it.  eg. Down followed by another down.
+            TOLERABLE,
+            // The event is inconsistent with the current input state and will probably
+            // cause applications to crash.  eg. Up without prior down, move with
+            // unexpected number of pointers.
+            BROKEN
+        };
+
+        InputState();
+        ~InputState();
+
+        // Returns true if there is no state to be canceled.
+        bool isNeutral() const;
+
+        // Returns true if the input state believes it is out of sync.
+        bool isOutOfSync() const;
+
+        // Sets the input state to be out of sync if it is not neutral.
+        void setOutOfSync();
+
+        // Resets the input state out of sync flag.
+        void resetOutOfSync();
+
+        // Records tracking information for an event that has just been published.
+        // Returns whether the event is consistent with the current input state.
+        Consistency trackEvent(const EventEntry* entry);
+
+        // Records tracking information for a key event that has just been published.
+        // Returns whether the event is consistent with the current input state.
+        Consistency trackKey(const KeyEntry* entry);
+
+        // Records tracking information for a motion event that has just been published.
+        // Returns whether the event is consistent with the current input state.
+        Consistency trackMotion(const MotionEntry* entry);
+
+        // Synthesizes cancelation events for the current state.
+        void synthesizeCancelationEvents(Allocator* allocator,
+                Vector<EventEntry*>& outEvents) const;
+
+        // Clears the current state.
+        void clear();
+
+    private:
+        bool mIsOutOfSync;
+
+        struct KeyMemento {
+            int32_t deviceId;
+            int32_t source;
+            int32_t keyCode;
+            int32_t scanCode;
+            nsecs_t downTime;
+        };
+
+        struct MotionMemento {
+            int32_t deviceId;
+            int32_t source;
+            float xPrecision;
+            float yPrecision;
+            nsecs_t downTime;
+            uint32_t pointerCount;
+            int32_t pointerIds[MAX_POINTERS];
+            PointerCoords pointerCoords[MAX_POINTERS];
+
+            void setPointers(const MotionEntry* entry);
+        };
+
+        Vector<KeyMemento> mKeyMementos;
+        Vector<MotionMemento> mMotionMementos;
+    };
+
     /* Manages the dispatch state associated with a single input channel. */
     class Connection : public RefBase {
     protected:
@@ -520,6 +770,7 @@ private:
         Status status;
         sp<InputChannel> inputChannel;
         InputPublisher inputPublisher;
+        InputState inputState;
         Queue<DispatchEntry> outboundQueue;
         nsecs_t nextTimeoutTime; // next timeout time (LONG_LONG_MAX if none)
 
@@ -540,28 +791,34 @@ private:
         // Determine whether this connection has a pending synchronous dispatch target.
         // Since there can only ever be at most one such target at a time, if there is one,
         // it must be at the tail because nothing else can be enqueued after it.
-        inline bool hasPendingSyncTarget() {
-            return ! outboundQueue.isEmpty() && outboundQueue.tail.prev->isSyncTarget();
+        inline bool hasPendingSyncTarget() const {
+            return ! outboundQueue.isEmpty() && outboundQueue.tailSentinel.prev->isSyncTarget();
+        }
+
+        // Assuming there is a pending sync target, make it async.
+        inline void preemptSyncTarget() {
+            outboundQueue.tailSentinel.prev->preemptSyncTarget();
         }
 
         // Gets the time since the current event was originally obtained from the input driver.
-        inline double getEventLatencyMillis(nsecs_t currentTime) {
+        inline double getEventLatencyMillis(nsecs_t currentTime) const {
             return (currentTime - lastEventTime) / 1000000.0;
         }
 
         // Gets the time since the current event entered the outbound dispatch queue.
-        inline double getDispatchLatencyMillis(nsecs_t currentTime) {
+        inline double getDispatchLatencyMillis(nsecs_t currentTime) const {
             return (currentTime - lastDispatchTime) / 1000000.0;
         }
 
         // Gets the time since the current event ANR was declared, if applicable.
-        inline double getANRLatencyMillis(nsecs_t currentTime) {
+        inline double getANRLatencyMillis(nsecs_t currentTime) const {
             return (currentTime - lastANRTime) / 1000000.0;
         }
 
         status_t initialize();
 
         void setNextTimeoutTime(nsecs_t currentTime, nsecs_t timeout);
+        void resetTimeout(nsecs_t currentTime);
     };
 
     sp<InputDispatcherPolicyInterface> mPolicy;
@@ -571,8 +828,25 @@ private:
     Allocator mAllocator;
     sp<PollLoop> mPollLoop;
 
+    EventEntry* mPendingEvent;
     Queue<EventEntry> mInboundQueue;
     Queue<CommandEntry> mCommandQueue;
+
+    Vector<EventEntry*> mTempCancelationEvents;
+
+    void dispatchOnceInnerLocked(nsecs_t keyRepeatTimeout, nsecs_t keyRepeatDelay,
+            nsecs_t* nextWakeupTime);
+
+    // Enqueues an inbound event.  Returns true if mPollLoop->wake() should be called.
+    bool enqueueInboundEventLocked(EventEntry* entry);
+
+    // App switch latency optimization.
+    nsecs_t mAppSwitchDueTime;
+
+    static bool isAppSwitchKey(int32_t keyCode);
+    bool isAppSwitchPendingLocked();
+    bool detectPendingAppSwitchLocked(KeyEntry* inboundKeyEntry);
+    void resetPendingAppSwitchLocked(bool handled);
 
     // All registered connections mapped by receive pipe file descriptor.
     KeyedVector<int, sp<Connection> > mConnectionsByReceiveFd;
@@ -591,20 +865,15 @@ private:
     // the duration.
     Vector<Connection*> mTimedOutConnections;
 
-    // Preallocated key and motion event objects used only to ask the input dispatcher policy
-    // for the targets of an event that is to be dispatched.
-    KeyEvent mReusableKeyEvent;
-    MotionEvent mReusableMotionEvent;
+    // Input channels that will receive a copy of all input events.
+    Vector<sp<InputChannel> > mMonitoringChannels;
 
-    // The input targets that were most recently identified for dispatch.
-    // If there is a synchronous event dispatch in progress, the current input targets will
-    // remain unchanged until the dispatch has completed or been aborted.
-    Vector<InputTarget> mCurrentInputTargets;
-    bool mCurrentInputTargetsValid; // false while targets are being recomputed
+    // Preallocated key event object used for policy inquiries.
+    KeyEvent mReusableKeyEvent;
 
     // Event injection and synchronization.
     Condition mInjectionResultAvailableCondition;
-    EventEntry* createEntryFromInputEventLocked(const InputEvent* event);
+    EventEntry* createEntryFromInjectedInputEventLocked(const InputEvent* event);
     void setInjectionResultLocked(EventEntry* entry, int32_t injectionResult);
 
     Condition mInjectionSyncFinishedCondition;
@@ -622,35 +891,107 @@ private:
     } mThrottleState;
 
     // Key repeat tracking.
-    // XXX Move this up to the input reader instead.
     struct KeyRepeatState {
         KeyEntry* lastKeyEntry; // or null if no repeat
         nsecs_t nextRepeatTime;
     } mKeyRepeatState;
 
     void resetKeyRepeatLocked();
+    KeyEntry* synthesizeKeyRepeatLocked(nsecs_t currentTime, nsecs_t keyRepeatTimeout);
 
     // Deferred command processing.
     bool runCommandsLockedInterruptible();
     CommandEntry* postCommandLocked(Command command);
 
-    // Process events that have just been dequeued from the head of the input queue.
-    void processConfigurationChangedLockedInterruptible(
-            nsecs_t currentTime, ConfigurationChangedEntry* entry);
-    void processKeyLockedInterruptible(
-            nsecs_t currentTime, KeyEntry* entry, nsecs_t keyRepeatTimeout);
-    void processKeyRepeatLockedInterruptible(
-            nsecs_t currentTime, nsecs_t keyRepeatTimeout);
-    void processMotionLockedInterruptible(
-            nsecs_t currentTime, MotionEntry* entry);
+    // Inbound event processing.
+    void drainInboundQueueLocked();
+    void releasePendingEventLocked(bool wasDropped);
+    void releaseInboundEventLocked(EventEntry* entry, bool wasDropped);
+    bool isEventFromReliableSourceLocked(EventEntry* entry);
 
-    // Identify input targets for an event and dispatch to them.
-    void identifyInputTargetsAndDispatchKeyLockedInterruptible(
-            nsecs_t currentTime, KeyEntry* entry);
-    void identifyInputTargetsAndDispatchMotionLockedInterruptible(
-            nsecs_t currentTime, MotionEntry* entry);
+    // Dispatch state.
+    bool mDispatchEnabled;
+    bool mDispatchFrozen;
+    Vector<InputWindow> mWindows;
+    Vector<InputWindow*> mWallpaperWindows;
+
+    // Focus tracking for keys, trackball, etc.
+    InputWindow* mFocusedWindow;
+
+    // Focus tracking for touch.
+    bool mTouchDown;
+    InputWindow* mTouchedWindow;                   // primary target for current down
+    bool mTouchedWindowIsObscured;                 // true if other windows may obscure the target
+    Vector<InputWindow*> mTouchedWallpaperWindows; // wallpaper targets
+    struct OutsideTarget {
+        InputWindow* window;
+        bool obscured;
+    };
+    Vector<OutsideTarget> mTempTouchedOutsideTargets; // temporary outside touch targets
+    Vector<sp<InputChannel> > mTempTouchedWallpaperChannels; // temporary wallpaper targets
+
+    // Focused application.
+    InputApplication* mFocusedApplication;
+    InputApplication mFocusedApplicationStorage; // preallocated storage for mFocusedApplication
+    void releaseFocusedApplicationLocked();
+
+    // Dispatch inbound events.
+    bool dispatchConfigurationChangedLocked(
+            nsecs_t currentTime, ConfigurationChangedEntry* entry);
+    bool dispatchKeyLocked(
+            nsecs_t currentTime, KeyEntry* entry, nsecs_t keyRepeatTimeout,
+            nsecs_t* nextWakeupTime);
+    bool dispatchMotionLocked(
+            nsecs_t currentTime, MotionEntry* entry,
+            nsecs_t* nextWakeupTime);
     void dispatchEventToCurrentInputTargetsLocked(
             nsecs_t currentTime, EventEntry* entry, bool resumeWithAppendedMotionSample);
+
+    void logOutboundKeyDetailsLocked(const char* prefix, const KeyEntry* entry);
+    void logOutboundMotionDetailsLocked(const char* prefix, const MotionEntry* entry);
+
+    // The input targets that were most recently identified for dispatch.
+    // If there is a synchronous event dispatch in progress, the current input targets will
+    // remain unchanged until the dispatch has completed or been aborted.
+    bool mCurrentInputTargetsValid; // false while targets are being recomputed
+    Vector<InputTarget> mCurrentInputTargets;
+    int32_t mCurrentInputWindowType;
+    sp<InputChannel> mCurrentInputChannel;
+
+    enum InputTargetWaitCause {
+        INPUT_TARGET_WAIT_CAUSE_NONE,
+        INPUT_TARGET_WAIT_CAUSE_SYSTEM_NOT_READY,
+        INPUT_TARGET_WAIT_CAUSE_APPLICATION_NOT_READY,
+    };
+
+    InputTargetWaitCause mInputTargetWaitCause;
+    nsecs_t mInputTargetWaitStartTime;
+    nsecs_t mInputTargetWaitTimeoutTime;
+    bool mInputTargetWaitTimeoutExpired;
+
+    // Finding targets for input events.
+    void startFindingTargetsLocked();
+    void finishFindingTargetsLocked(const InputWindow* window);
+    int32_t handleTargetsNotReadyLocked(nsecs_t currentTime, const EventEntry* entry,
+            const InputApplication* application, const InputWindow* window,
+            nsecs_t* nextWakeupTime);
+    void resumeAfterTargetsNotReadyTimeoutLocked(nsecs_t newTimeout);
+    nsecs_t getTimeSpentWaitingForApplicationWhileFindingTargetsLocked(nsecs_t currentTime);
+    void resetANRTimeoutsLocked();
+
+    int32_t findFocusedWindowLocked(nsecs_t currentTime, const EventEntry* entry,
+            nsecs_t* nextWakeupTime, InputWindow** outWindow);
+    int32_t findTouchedWindowLocked(nsecs_t currentTime, const MotionEntry* entry,
+            nsecs_t* nextWakeupTime, InputWindow** outWindow);
+
+    void addWindowTargetLocked(const InputWindow* window, int32_t targetFlags,
+            nsecs_t timeSpentWaitingForApplication);
+    void addMonitoringTargetsLocked();
+    void pokeUserActivityLocked(nsecs_t eventTime, int32_t windowType, int32_t eventType);
+    bool checkInjectionPermission(const InputWindow* window,
+            int32_t injectorPid, int32_t injectorUid);
+    bool isWindowObscuredLocked(const InputWindow* window);
+    void releaseTouchedWindowLocked();
 
     // Manage the dispatch cycle for a single connection.
     // These methods are deliberately not Interruptible because doing all of the work
@@ -659,14 +1000,24 @@ private:
     void prepareDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
             EventEntry* eventEntry, const InputTarget* inputTarget,
             bool resumeWithAppendedMotionSample);
-    void startDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
+    void startDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
+            nsecs_t timeSpentWaitingForApplication);
     void finishDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
+    void startNextDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
     void timeoutDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
     void resumeAfterTimeoutDispatchCycleLocked(nsecs_t currentTime,
             const sp<Connection>& connection, nsecs_t newTimeout);
     void abortDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
             bool broken);
+    void drainOutboundQueueLocked(Connection* connection, DispatchEntry* firstDispatchEntryToDrain);
     static bool handleReceiveCallback(int receiveFd, int events, void* data);
+
+    // Preempting input dispatch.
+    bool preemptInputDispatchInnerLocked();
+
+    // Dump state.
+    void dumpDispatchStateLocked(String8& dump);
+    void logDispatchStateLocked();
 
     // Add or remove a connection to the mActiveConnections vector.
     void activateConnectionLocked(Connection* connection);
@@ -683,9 +1034,13 @@ private:
             nsecs_t currentTime, const sp<Connection>& connection);
 
     // Outbound policy interactions.
+    void doNotifyConfigurationChangedInterruptible(CommandEntry* commandEntry);
     void doNotifyInputChannelBrokenLockedInterruptible(CommandEntry* commandEntry);
     void doNotifyInputChannelANRLockedInterruptible(CommandEntry* commandEntry);
     void doNotifyInputChannelRecoveredFromANRLockedInterruptible(CommandEntry* commandEntry);
+    void doInterceptKeyBeforeDispatchingLockedInterruptible(CommandEntry* commandEntry);
+    void doPokeUserActivityLockedInterruptible(CommandEntry* commandEntry);
+    void doTargetsNotReadyTimeoutLockedInterruptible(CommandEntry* commandEntry);
 };
 
 /* Enqueues and dispatches input events, endlessly. */
@@ -702,4 +1057,4 @@ private:
 
 } // namespace android
 
-#endif // _UI_INPUT_DISPATCHER_PRIV_H
+#endif // _UI_INPUT_DISPATCHER_H

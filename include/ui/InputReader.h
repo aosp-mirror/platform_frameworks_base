@@ -95,10 +95,6 @@ public:
 
         // The input dispatcher should dispatch the input to the application.
         ACTION_DISPATCH = 0x00000001,
-
-        // The input dispatcher should perform special filtering in preparation for
-        // a pending app switch.
-        ACTION_APP_SWITCH_COMING = 0x00000002,
     };
 
     /* Gets information about the display with the specified id.
@@ -168,6 +164,11 @@ protected:
     virtual ~InputReaderInterface() { }
 
 public:
+    /* Dumps the state of the input reader.
+     *
+     * This method may be called on any thread (usually by the input manager). */
+    virtual void dump(String8& dump) = 0;
+
     /* Runs a single iteration of the processing loop.
      * Nominally reads and processes one incoming message from the EventHub.
      *
@@ -240,6 +241,8 @@ public:
             const sp<InputDispatcherInterface>& dispatcher);
     virtual ~InputReader();
 
+    virtual void dump(String8& dump);
+
     virtual void loopOnce();
 
     virtual void getInputConfiguration(InputConfiguration* outConfiguration);
@@ -305,6 +308,9 @@ private:
             GetStateFunc getStateFunc);
     bool markSupportedKeyCodes(int32_t deviceId, uint32_t sourceMask, size_t numCodes,
             const int32_t* keyCodes, uint8_t* outFlags);
+
+    // dump state
+    void dumpDeviceInfo(String8& dump);
 };
 
 
@@ -759,9 +765,11 @@ protected:
     } mLocked;
 
     virtual void configureParameters();
+    virtual void logParameters();
     virtual void configureRawAxes();
     virtual void logRawAxes();
     virtual bool configureSurfaceLocked();
+    virtual void logMotionRangesLocked();
     virtual void configureVirtualKeysLocked();
     virtual void parseCalibration();
     virtual void resolveCalibration();

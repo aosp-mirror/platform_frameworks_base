@@ -225,8 +225,8 @@ public class MessageQueue {
                 msg.next = prev.next;
                 prev.next = msg;
             }
-            nativeWake();
         }
+        nativeWake();
         return true;
     }
 

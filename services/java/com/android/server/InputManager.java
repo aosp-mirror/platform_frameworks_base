@@ -433,11 +433,6 @@ public class InputManager {
         }
         
         @SuppressWarnings("unused")
-        public void notifyAppSwitchComing() {
-            mWindowManagerService.mInputMonitor.notifyAppSwitchComing();
-        }
-        
-        @SuppressWarnings("unused")
         public boolean filterTouchEvents() {
             return mContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_filterTouchEvents);
