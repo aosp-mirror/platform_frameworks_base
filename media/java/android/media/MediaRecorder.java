@@ -277,11 +277,17 @@ public class MediaRecorder
         setVideoFrameRate(profile.videoFrameRate);
         setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
         setVideoEncodingBitRate(profile.videoBitRate);
-        setAudioEncodingBitRate(profile.audioBitRate);
-        setAudioChannels(profile.audioChannels);
-        setAudioSamplingRate(profile.audioSampleRate);
         setVideoEncoder(profile.videoCodec);
-        setAudioEncoder(profile.audioCodec);
+        if (profile.quality >= CamcorderProfile.QUALITY_TIME_LAPSE_LOW &&
+             profile.quality <= CamcorderProfile.QUALITY_TIME_LAPSE_1080P) {
+            // Enable time lapse. Also don't set audio for time lapse.
+            setParameter(String.format("time-lapse-enable=1"));
+        } else {
+            setAudioEncodingBitRate(profile.audioBitRate);
+            setAudioChannels(profile.audioChannels);
+            setAudioSamplingRate(profile.audioSampleRate);
+            setAudioEncoder(profile.audioCodec);
+        }
     }
 
     /**
@@ -305,16 +311,24 @@ public class MediaRecorder
     }
 
     /**
-     * Enables time lapse capture and sets its parameters. This method should
-     * be called after setProfile().
+     * Set video frame capture rate. This can be used to set a different video frame capture
+     * rate than the recorded video's playback rate. Currently this works only for time lapse mode.
      *
-     * @param timeBetweenTimeLapseFrameCaptureMs time between two captures of time lapse frames.
+     * @param fps Rate at which frames should be captured in frames per second.
+     * The fps can go as low as desired. However the fastest fps will be limited by the hardware.
+     * For resolutions that can be captured by the video camera, the fastest fps can be computed using
+     * {@link android.hardware.Camera.Parameters#getPreviewFpsRange(int[])}. For higher
+     * resolutions the fastest fps may be more restrictive.
+     * Note that the recorder cannot guarantee that frames will be captured at the
+     * given rate due to camera/encoder limitations. However it tries to be as close as
+     * possible.
      * @hide
      */
-    public void enableTimeLapse(int timeBetweenTimeLapseFrameCaptureMs) {
-        setParameter(String.format("time-lapse-enable=1"));
+    public void setCaptureRate(double fps) {
+        double timeBetweenFrameCapture = 1 / fps;
+        int timeBetweenFrameCaptureMs = (int) (1000 * timeBetweenFrameCapture);
         setParameter(String.format("time-between-time-lapse-frame-capture=%d",
-                    timeBetweenTimeLapseFrameCaptureMs));
+                    timeBetweenFrameCaptureMs));
     }
 
     /**
