@@ -4058,6 +4058,7 @@ public class Activity extends ContextThemeWrapper
             fragment.mFragmentId = id;
             fragment.mTag = tag;
             fragment.mImmediateActivity = this;
+            fragment.mFragmentManager = mFragments;
             // If this fragment is newly instantiated (either right now, or
             // from last saved state), then give it the attributes to
             // initialize itself.

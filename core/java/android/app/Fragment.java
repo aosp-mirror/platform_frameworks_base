@@ -94,6 +94,7 @@ final class FragmentState implements Parcelable {
         mInstance.mContainerId = mContainerId;
         mInstance.mTag = mTag;
         mInstance.mRetainInstance = mRetainInstance;
+        mInstance.mFragmentManager = activity.mFragments;
         
         return mInstance;
     }
@@ -318,6 +319,11 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     // Number of active back stack entries this fragment is in.
     int mBackStackNesting;
     
+    // The fragment manager we are associated with.  Set as soon as the
+    // fragment is used in a transaction; cleared after it has been removed
+    // from all transactions.
+    FragmentManager mFragmentManager;
+
     // Set as soon as a fragment is added to a transaction (or removed),
     // to be able to do validation.
     Activity mImmediateActivity;
@@ -578,10 +584,13 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     
     /**
      * Return the FragmentManager for interacting with fragments associated
-     * with this fragment's activity.
+     * with this fragment's activity.  Note that this will be non-null slightly
+     * before {@link #getActivity()}, in the time from when the fragment is
+     * placed in a {@link FragmentTransaction} until it is committed and
+     * attached to its activity.
      */
     final public FragmentManager getFragmentManager() {
-        return mActivity.mFragments;
+        return mFragmentManager;
     }
 
     /**
