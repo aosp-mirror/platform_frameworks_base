@@ -693,6 +693,7 @@ class BluetoothEventLoop {
             mAdapter.getRemoteDevice(address)) != null) {
             return true;
         }
+        return false;
     }
 
     private boolean isOtherSinkInNonDisconnectingState(String address) {
