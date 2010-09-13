@@ -288,6 +288,46 @@ done:
 #endif
 }
 
+static jbyteArray readAdapterOutOfBandDataNative(JNIEnv *env, jobject object) {
+    LOGV(__FUNCTION__);
+#ifdef HAVE_BLUETOOTH
+    native_data_t *nat = get_native_data(env, object);
+    DBusError err;
+    jbyte *hash, *randomizer;
+    jbyteArray byteArray = NULL;
+    int hash_len, r_len;
+    if (nat) {
+       DBusMessage *reply = dbus_func_args(env, nat->conn,
+                           get_adapter_path(env, object),
+                           DBUS_ADAPTER_IFACE, "ReadLocalOutOfBandData",
+                           DBUS_TYPE_INVALID);
+       if (!reply) return NULL;
+
+       dbus_error_init(&err);
+       if (dbus_message_get_args(reply, &err,
+                                DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE, &hash, &hash_len,
+                                DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE, &randomizer, &r_len,
+                                DBUS_TYPE_INVALID)) {
+          if (hash_len == 16 && r_len == 16) {
+               byteArray = env->NewByteArray(32);
+               if (byteArray) {
+                   env->SetByteArrayRegion(byteArray, 0, 16, hash);
+                   env->SetByteArrayRegion(byteArray, 16, 16, randomizer);
+               }
+           } else {
+               LOGE("readAdapterOutOfBandDataNative: Hash len = %d, R len = %d",
+                                                                  hash_len, r_len);
+           }
+       } else {
+          LOG_AND_FREE_DBUS_ERROR(&err);
+       }
+       dbus_message_unref(reply);
+       return byteArray;
+    }
+#endif
+    return NULL;
+}
+
 static jboolean createPairedDeviceNative(JNIEnv *env, jobject object,
                                          jstring address, jint timeout_ms) {
     LOGV(__FUNCTION__);
@@ -319,6 +359,41 @@ static jboolean createPairedDeviceNative(JNIEnv *env, jobject object,
         env->ReleaseStringUTFChars(address, c_address);
         return ret ? JNI_TRUE : JNI_FALSE;
 
+    }
+#endif
+    return JNI_FALSE;
+}
+
+static jboolean createPairedDeviceOutOfBandNative(JNIEnv *env, jobject object,
+                                                jstring address, jint timeout_ms) {
+    LOGV(__FUNCTION__);
+#ifdef HAVE_BLUETOOTH
+    native_data_t *nat = get_native_data(env, object);
+    jobject eventLoop = env->GetObjectField(object, field_mEventLoop);
+    struct event_loop_native_data_t *eventLoopNat =
+            get_EventLoop_native_data(env, eventLoop);
+
+    if (nat && eventLoopNat) {
+        const char *c_address = env->GetStringUTFChars(address, NULL);
+        LOGV("... address = %s", c_address);
+        char *context_address = (char *)calloc(BTADDR_SIZE, sizeof(char));
+        const char *capabilities = "DisplayYesNo";
+        const char *agent_path = "/android/bluetooth/remote_device_agent";
+
+        strlcpy(context_address, c_address, BTADDR_SIZE);  // for callback
+        bool ret = dbus_func_args_async(env, nat->conn, (int)timeout_ms,
+                                        onCreatePairedDeviceResult, // callback
+                                        context_address,
+                                        eventLoopNat,
+                                        get_adapter_path(env, object),
+                                        DBUS_ADAPTER_IFACE,
+                                        "CreatePairedDeviceOutOfBand",
+                                        DBUS_TYPE_STRING, &c_address,
+                                        DBUS_TYPE_OBJECT_PATH, &agent_path,
+                                        DBUS_TYPE_STRING, &capabilities,
+                                        DBUS_TYPE_INVALID);
+        env->ReleaseStringUTFChars(address, c_address);
+        return ret ? JNI_TRUE : JNI_FALSE;
     }
 #endif
     return JNI_FALSE;
@@ -480,6 +555,40 @@ static jboolean setPasskeyNative(JNIEnv *env, jobject object, jstring address,
 
         dbus_message_append_args(reply, DBUS_TYPE_UINT32, (uint32_t *)&passkey,
                                  DBUS_TYPE_INVALID);
+
+        dbus_connection_send(nat->conn, reply, NULL);
+        dbus_message_unref(msg);
+        dbus_message_unref(reply);
+        return JNI_TRUE;
+    }
+#endif
+    return JNI_FALSE;
+}
+
+static jboolean setRemoteOutOfBandDataNative(JNIEnv *env, jobject object, jstring address,
+                         jbyteArray hash, jbyteArray randomizer, int nativeData) {
+#ifdef HAVE_BLUETOOTH
+    LOGV(__FUNCTION__);
+    native_data_t *nat = get_native_data(env, object);
+    if (nat) {
+        DBusMessage *msg = (DBusMessage *)nativeData;
+        DBusMessage *reply = dbus_message_new_method_return(msg);
+        jbyte *h_ptr = env->GetByteArrayElements(hash, NULL);
+        jbyte *r_ptr = env->GetByteArrayElements(randomizer, NULL);
+        if (!reply) {
+            LOGE("%s: Cannot create message reply to return remote OOB data to "
+                 "D-Bus\n", __FUNCTION__);
+            dbus_message_unref(msg);
+            return JNI_FALSE;
+        }
+
+        dbus_message_append_args(reply,
+                                DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE, &h_ptr, 16,
+                                DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE, &r_ptr, 16,
+                                DBUS_TYPE_INVALID);
+
+        env->ReleaseByteArrayElements(hash, h_ptr, 0);
+        env->ReleaseByteArrayElements(randomizer, r_ptr, 0);
 
         dbus_connection_send(nat->conn, reply, NULL);
         dbus_message_unref(msg);
@@ -907,7 +1016,10 @@ static JNINativeMethod sMethods[] = {
     {"startDiscoveryNative", "()Z", (void*)startDiscoveryNative},
     {"stopDiscoveryNative", "()Z", (void *)stopDiscoveryNative},
 
+    {"readAdapterOutOfBandDataNative", "()[B", (void *)readAdapterOutOfBandDataNative},
     {"createPairedDeviceNative", "(Ljava/lang/String;I)Z", (void *)createPairedDeviceNative},
+    {"createPairedDeviceOutOfBandNative", "(Ljava/lang/String;I)Z",
+                                    (void *)createPairedDeviceOutOfBandNative},
     {"cancelDeviceCreationNative", "(Ljava/lang/String;)Z", (void *)cancelDeviceCreationNative},
     {"removeDeviceNative", "(Ljava/lang/String;)Z", (void *)removeDeviceNative},
     {"getDeviceServiceChannelNative", "(Ljava/lang/String;Ljava/lang/String;I)I",
@@ -916,6 +1028,7 @@ static JNINativeMethod sMethods[] = {
     {"setPairingConfirmationNative", "(Ljava/lang/String;ZI)Z",
             (void *)setPairingConfirmationNative},
     {"setPasskeyNative", "(Ljava/lang/String;II)Z", (void *)setPasskeyNative},
+    {"setRemoteOutOfBandDataNative", "(Ljava/lang/String;[B[BI)Z", (void *)setRemoteOutOfBandDataNative},
     {"setPinNative", "(Ljava/lang/String;Ljava/lang/String;I)Z", (void *)setPinNative},
     {"cancelPairingUserInputNative", "(Ljava/lang/String;I)Z",
             (void *)cancelPairingUserInputNative},
