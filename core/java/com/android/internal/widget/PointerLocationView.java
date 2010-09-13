@@ -84,6 +84,7 @@ public class PointerLocationView extends View {
     private boolean mCurDown;
     private int mCurNumPointers;
     private int mMaxNumPointers;
+    private int mActivePointerId;
     private final ArrayList<PointerState> mPointers = new ArrayList<PointerState>();
     
     private final VelocityTracker mVelocity;
@@ -123,6 +124,7 @@ public class PointerLocationView extends View {
         
         PointerState ps = new PointerState();
         mPointers.add(ps);
+        mActivePointerId = 0;
         
         mVelocity = VelocityTracker.obtain();
         
@@ -183,14 +185,15 @@ public class PointerLocationView extends View {
             final int NP = mPointers.size();
             
             // Labels
-            if (NP > 0) {
-                final PointerState ps = mPointers.get(0);
+            if (mActivePointerId >= 0) {
+                final PointerState ps = mPointers.get(mActivePointerId);
+                
                 canvas.drawRect(0, 0, itemW-1, bottom,mTextBackgroundPaint);
                 canvas.drawText(mText.clear()
                         .append("P: ").append(mCurNumPointers)
                         .append(" / ").append(mMaxNumPointers)
                         .toString(), 1, base, mTextPaint);
-                
+
                 final int N = ps.mTraceCount;
                 if ((mCurDown && ps.mCurDown) || N == 0) {
                     canvas.drawRect(itemW, 0, (itemW * 2) - 1, bottom, mTextBackgroundPaint);
@@ -355,6 +358,11 @@ public class PointerLocationView extends View {
                     NP++;
                 }
                 
+                if (mActivePointerId < 0 ||
+                        ! mPointers.get(mActivePointerId).mCurDown) {
+                    mActivePointerId = id;
+                }
+                
                 final PointerState ps = mPointers.get(id);
                 ps.mCurDown = true;
                 if (mPrintCoords) {
@@ -396,6 +404,7 @@ public class PointerLocationView extends View {
             }
             
             if (action == MotionEvent.ACTION_UP
+                    || action == MotionEvent.ACTION_CANCEL
                     || (action & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_UP) {
                 final int index = (action & MotionEvent.ACTION_POINTER_INDEX_MASK)
                         >> MotionEvent.ACTION_POINTER_INDEX_SHIFT; // will be 0 for UP
@@ -407,10 +416,14 @@ public class PointerLocationView extends View {
                     Log.i(TAG, mText.clear().append("Pointer ")
                             .append(id + 1).append(": UP").toString());
                 }
-
-                if (action == MotionEvent.ACTION_UP) {
+                
+                if (action == MotionEvent.ACTION_UP
+                        || action == MotionEvent.ACTION_CANCEL) {
                     mCurDown = false;
                 } else {
+                    if (mActivePointerId == id) {
+                        mActivePointerId = event.getPointerId(index == 0 ? 1 : 0);
+                    }
                     ps.addTrace(Float.NaN, Float.NaN);
                 }
             }
@@ -438,9 +451,9 @@ public class PointerLocationView extends View {
     
     // HACK
     // A quick and dirty string builder implementation optimized for GC.
-    // Using the basic StringBuilder implementation causes the application grind to a halt when
-    // more than a couple of pointers are down due to the number of temporary objects allocated
-    // while formatting strings for drawing or logging.
+    // Using String.format causes the application grind to a halt when
+    // more than a couple of pointers are down due to the number of
+    // temporary objects allocated while formatting strings for drawing or logging.
     private static final class FasterStringBuilder {
         private char[] mChars;
         private int mLength;
