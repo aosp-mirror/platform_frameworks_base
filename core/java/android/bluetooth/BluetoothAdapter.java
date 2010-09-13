@@ -26,8 +26,10 @@ import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+import android.util.Pair;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -861,6 +863,37 @@ public final class BluetoothAdapter {
             socket.mSocket.throwErrnoNative(errno);
         }
         return socket;
+    }
+
+    /**
+     * Read the local Out of Band Pairing Data
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     *
+     * @return Pair<byte[], byte[]> of Hash and Randomizer
+     *
+     * @hide
+     */
+    public Pair<byte[], byte[]> readOutOfBandData() {
+        if (getState() != STATE_ON) return null;
+        try {
+            byte[] hash = new byte[16];
+            byte[] randomizer = new byte[16];
+
+            byte[] ret = mService.readOutOfBandData();
+
+            if (ret  == null || ret.length != 32) return null;
+
+            hash = Arrays.copyOfRange(ret, 0, 16);
+            randomizer = Arrays.copyOfRange(ret, 16, 32);
+
+            if (DBG) {
+                Log.d(TAG, "readOutOfBandData:" + Arrays.toString(hash) +
+                  ":" + Arrays.toString(randomizer));
+            }
+            return new Pair<byte[], byte[]>(hash, randomizer);
+
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return null;
     }
 
     private Set<BluetoothDevice> toDeviceSet(String[] addresses) {

@@ -614,6 +614,17 @@ class BluetoothEventLoop {
         mWakeLock.release();
     }
 
+    private void onRequestOobData(String objectPath , int nativeData) {
+        String address = checkPairingRequestAndGetAddress(objectPath, nativeData);
+        if (address == null) return;
+
+        Intent intent = new Intent(BluetoothDevice.ACTION_PAIRING_REQUEST);
+        intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mAdapter.getRemoteDevice(address));
+        intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT,
+                BluetoothDevice.PAIRING_VARIANT_OOB_CONSENT);
+        mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
+    }
+
     private boolean onAgentAuthorize(String objectPath, String deviceUuid) {
         if (!mBluetoothService.isEnabled()) return false;
 
@@ -670,6 +681,18 @@ class BluetoothEventLoop {
             if (!device.getAddress().equals(address)) return true;
         }
         return false;
+    }
+
+    private boolean onAgentOutOfBandDataAvailable(String objectPath) {
+        if (!mBluetoothService.isEnabled()) return false;
+
+        String address = mBluetoothService.getAddressFromObjectPath(objectPath);
+        if (address == null) return false;
+
+        if (mBluetoothService.getDeviceOutOfBandData(
+            mAdapter.getRemoteDevice(address)) != null) {
+            return true;
+        }
     }
 
     private boolean isOtherSinkInNonDisconnectingState(String address) {
