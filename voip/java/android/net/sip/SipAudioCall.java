@@ -20,8 +20,6 @@ import android.net.rtp.AudioGroup;
 import android.net.rtp.AudioStream;
 import android.os.Message;
 
-import javax.sip.SipException;
-
 /**
  * Interface for making audio calls over SIP.
  * @hide

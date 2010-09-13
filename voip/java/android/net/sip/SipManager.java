@@ -25,7 +25,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 
 import java.text.ParseException;
-import javax.sip.SipException;
 
 /**
  * The class provides API for various SIP related tasks. Specifically, the API
@@ -501,15 +500,15 @@ public class SipManager {
         }
 
         @Override
-        public void onRegistrationFailed(ISipSession session, String className,
+        public void onRegistrationFailed(ISipSession session, String errorCode,
                 String message) {
-            mListener.onRegistrationFailed(getUri(session), className, message);
+            mListener.onRegistrationFailed(getUri(session), errorCode, message);
         }
 
         @Override
         public void onRegistrationTimeout(ISipSession session) {
             mListener.onRegistrationFailed(getUri(session),
-                    SipException.class.getName(), "registration timed out");
+                    SipErrorCode.TIME_OUT.toString(), "registration timed out");
         }
     }
 }
