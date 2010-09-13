@@ -17,6 +17,7 @@
 package android.net;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.CursorWrapper;
@@ -536,12 +537,12 @@ public class DownloadManager {
          * @param projection the projection to pass to ContentResolver.query()
          * @return the Cursor returned by ContentResolver.query()
          */
-        Cursor runQuery(ContentResolver resolver, String[] projection) {
-            Uri uri = Downloads.CONTENT_URI;
+        Cursor runQuery(ContentResolver resolver, String[] projection, Uri baseUri) {
+            Uri uri = baseUri;
             List<String> selectionParts = new ArrayList<String>();
 
             if (mId != null) {
-                uri = Uri.withAppendedPath(uri, mId.toString());
+                uri = ContentUris.withAppendedId(uri, mId);
             }
 
             if (mStatusFlags != null) {
@@ -597,6 +598,7 @@ public class DownloadManager {
 
     private ContentResolver mResolver;
     private String mPackageName;
+    private Uri mBaseUri = Downloads.Impl.CONTENT_URI;
 
     /**
      * @hide
@@ -604,6 +606,19 @@ public class DownloadManager {
     public DownloadManager(ContentResolver resolver, String packageName) {
         mResolver = resolver;
         mPackageName = packageName;
+    }
+
+    /**
+     * Makes this object access the download provider through /all_downloads URIs rather than
+     * /my_downloads URIs, for clients that have permission to do so.
+     * @hide
+     */
+    public void setAccessAllDownloads(boolean accessAllDownloads) {
+        if (accessAllDownloads) {
+            mBaseUri = Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI;
+        } else {
+            mBaseUri = Downloads.Impl.CONTENT_URI;
+        }
     }
 
     /**
@@ -642,11 +657,11 @@ public class DownloadManager {
      * COLUMN_* constants.
      */
     public Cursor query(Query query) {
-        Cursor underlyingCursor = query.runQuery(mResolver, UNDERLYING_COLUMNS);
+        Cursor underlyingCursor = query.runQuery(mResolver, UNDERLYING_COLUMNS, mBaseUri);
         if (underlyingCursor == null) {
             return null;
         }
-        return new CursorTranslator(underlyingCursor);
+        return new CursorTranslator(underlyingCursor, mBaseUri);
     }
 
     /**
@@ -690,9 +705,8 @@ public class DownloadManager {
     /**
      * Get the DownloadProvider URI for the download with the given ID.
      */
-    private Uri getDownloadUri(long id) {
-        Uri downloadUri = Uri.withAppendedPath(Downloads.CONTENT_URI, Long.toString(id));
-        return downloadUri;
+    Uri getDownloadUri(long id) {
+        return ContentUris.withAppendedId(mBaseUri, id);
     }
 
     /**
@@ -702,8 +716,11 @@ public class DownloadManager {
      * underlying data.
      */
     private static class CursorTranslator extends CursorWrapper {
-        public CursorTranslator(Cursor cursor) {
+        private Uri mBaseUri;
+
+        public CursorTranslator(Cursor cursor, Uri baseUri) {
             super(cursor);
+            mBaseUri = baseUri;
         }
 
         @Override
@@ -799,11 +816,24 @@ public class DownloadManager {
             }
 
             assert column.equals(COLUMN_LOCAL_URI);
-            String localUri = getUnderlyingString(Downloads._DATA);
+            return getLocalUri();
+        }
+
+        private String getLocalUri() {
+            String localUri = getUnderlyingString(Downloads.Impl._DATA);
             if (localUri == null) {
                 return null;
             }
-            return Uri.fromFile(new File(localUri)).toString();
+
+            long destinationType = getUnderlyingLong(Downloads.Impl.COLUMN_DESTINATION);
+            if (destinationType == Downloads.Impl.DESTINATION_FILE_URI) {
+                // return file URI for external download
+                return Uri.fromFile(new File(localUri)).toString();
+            }
+
+            // return content URI for cache download
+            long downloadId = getUnderlyingLong(Downloads.Impl._ID);
+            return ContentUris.withAppendedId(mBaseUri, downloadId).toString();
         }
 
         private long translateLong(String column) {
