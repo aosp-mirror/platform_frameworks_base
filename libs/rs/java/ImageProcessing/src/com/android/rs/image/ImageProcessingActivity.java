@@ -352,7 +352,7 @@ public class ImageProcessingActivity extends Activity
         mSaturationSeekBar.setProgress(50);
 
         mBenchmarkResult = (TextView) findViewById(R.id.benchmarkText);
-        mBenchmarkResult.setText("Benchmark no yet run");
+        mBenchmarkResult.setText("Benchmark not yet run");
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
