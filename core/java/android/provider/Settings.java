@@ -34,7 +34,10 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
-import android.os.*;
+import android.os.BatteryManager;
+import android.os.Bundle;
+import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.Config;
@@ -2527,6 +2530,60 @@ public final class Settings {
             "enabled_accessibility_services";
 
         /**
+         * If injection of accessibility enhancing JavaScript scripts
+         * is enabled.
+         * <p>
+         *   Note: Accessibility injecting scripts are served by the
+         *   Google infrastructure and enable users with disabilities to
+         *   efficiantly navigate in and explore web content.
+         * </p>
+         * <p>
+         *   This property represents a boolean value.
+         * </p>
+         * @hide
+         */
+        public static final String ACCESSIBILITY_SCRIPT_INJECTION =
+            "accessibility_script_injection";
+
+        /**
+         * Key bindings for navigation in built-in accessibility support for web content.
+         * <p>
+         *   Note: These key bindings are for the built-in accessibility navigation for
+         *   web content which is used as a fall back solution if JavaScript in a WebView
+         *   is not enabled or the user has not opted-in script injection from Google.
+         * </p>
+         * <p>
+         *   The bindings are separated by semi-colon. A binding is a mapping from
+         *   a key to a sequence of actions (for more details look at
+         *   android.webkit.AccessibilityInjector). A key is represented as the hexademical
+         *   string representation of an integer obtained from a meta state (optional) shifted
+         *   sixteen times left and bitwise ored with a key code. An action is represented
+         *   as a hexademical string representation of an integer where the first two digits
+         *   are navigation action index, the second, the third, and the fourth digit pairs
+         *   represent the action arguments. The separate actions in a binding are colon
+         *   separated. The key and the action sequence it maps to are separated by equals.
+         * </p>
+         * <p>
+         *   For example, the binding below maps the DPAD right button to traverse the
+         *   current navigation axis once without firing an accessibility event and to
+         *   perform the same traversal again but to fire an event:
+         *   <code>
+         *     0x16=0x01000100:0x01000101;
+         *   </code>
+         * </p>
+         * <p>
+         *   The goal of this binding is to enable dynamic rebinding of keys to
+         *   navigation actions for web content without requiring a framework change.
+         * </p>
+         * <p>
+         *   This property represents a string value.
+         * </p>
+         * @hide
+         */
+        public static final String ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS =
+            "accessibility_web_content_key_bindings";
+
+        /**
          * Setting to always use the default text-to-speech settings regardless
          * of the application settings.
          * 1 = override application settings,
@@ -3497,6 +3554,7 @@ public final class Settings {
             PARENTAL_CONTROL_REDIRECT_URL,
             USB_MASS_STORAGE_ENABLED,
             ACCESSIBILITY_ENABLED,
+            ACCESSIBILITY_SCRIPT_INJECTION,
             BACKUP_AUTO_RESTORE,
             ENABLED_ACCESSIBILITY_SERVICES,
             TTS_USE_DEFAULTS,
