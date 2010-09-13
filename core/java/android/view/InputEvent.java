@@ -23,7 +23,9 @@ import android.os.Parcelable;
  * Common base class for input events.
  */
 public abstract class InputEvent implements Parcelable {
+    /** @hide */
     protected int mDeviceId;
+    /** @hide */
     protected int mSource;
     
     /** @hide */
@@ -76,7 +78,7 @@ public abstract class InputEvent implements Parcelable {
         mSource = source;
     }
     
-    public final int describeContents() {
+    public int describeContents() {
         return 0;
     }
     
