@@ -1752,14 +1752,15 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
             }
 
             // compute volume for this track
-            int16_t left, right, aux;
+            uint32_t vl, vr, va;
             if (track->isMuted() || track->isPausing() ||
                 mStreamTypes[track->type()].mute) {
-                left = right = aux = 0;
+                vl = vr = va = 0;
                 if (track->isPausing()) {
                     track->setPaused();
                 }
             } else {
+
                 // read original volumes with volume control
                 float typeVolume = mStreamTypes[track->type()].volume;
 #ifdef LVMX
@@ -1774,35 +1775,36 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
                 }
 #endif
                 float v = masterVolume * typeVolume;
-                uint32_t vl = (uint32_t)(v * cblk->volume[0]) << 12;
-                uint32_t vr = (uint32_t)(v * cblk->volume[1]) << 12;
+                vl = (uint32_t)(v * cblk->volume[0]) << 12;
+                vr = (uint32_t)(v * cblk->volume[1]) << 12;
 
-                // Delegate volume control to effect in track effect chain if needed
-                if (chain != 0 && chain->setVolume_l(&vl, &vr)) {
-                    // Do not ramp volume is volume is controlled by effect
-                    param = AudioMixer::VOLUME;
-                    track->mHasVolumeController = true;
-                } else {
-                    // force no volume ramp when volume controller was just disabled or removed
-                    // from effect chain to avoid volume spike
-                    if (track->mHasVolumeController) {
-                        param = AudioMixer::VOLUME;
-                    }
-                    track->mHasVolumeController = false;
-                }
-
-                // Convert volumes from 8.24 to 4.12 format
-                uint32_t v_clamped = (vl + (1 << 11)) >> 12;
-                if (v_clamped > MAX_GAIN_INT) v_clamped = MAX_GAIN_INT;
-                left = int16_t(v_clamped);
-                v_clamped = (vr + (1 << 11)) >> 12;
-                if (v_clamped > MAX_GAIN_INT) v_clamped = MAX_GAIN_INT;
-                right = int16_t(v_clamped);
-
-                v_clamped = (uint32_t)(v * cblk->sendLevel);
-                if (v_clamped > MAX_GAIN_INT) v_clamped = MAX_GAIN_INT;
-                aux = int16_t(v_clamped);
+                va = (uint32_t)(v * cblk->sendLevel);
             }
+            // Delegate volume control to effect in track effect chain if needed
+            if (chain != 0 && chain->setVolume_l(&vl, &vr)) {
+                // Do not ramp volume if volume is controlled by effect
+                param = AudioMixer::VOLUME;
+                track->mHasVolumeController = true;
+            } else {
+                // force no volume ramp when volume controller was just disabled or removed
+                // from effect chain to avoid volume spike
+                if (track->mHasVolumeController) {
+                    param = AudioMixer::VOLUME;
+                }
+                track->mHasVolumeController = false;
+            }
+
+            // Convert volumes from 8.24 to 4.12 format
+            int16_t left, right, aux;
+            uint32_t v_clamped = (vl + (1 << 11)) >> 12;
+            if (v_clamped > MAX_GAIN_INT) v_clamped = MAX_GAIN_INT;
+            left = int16_t(v_clamped);
+            v_clamped = (vr + (1 << 11)) >> 12;
+            if (v_clamped > MAX_GAIN_INT) v_clamped = MAX_GAIN_INT;
+            right = int16_t(v_clamped);
+
+            if (va > MAX_GAIN_INT) va = MAX_GAIN_INT;
+            aux = int16_t(va);
 
 #ifdef LVMX
             if ( tracksConnectedChanged || stateChanged )
@@ -2283,7 +2285,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                         // only one effect chain can be present on DirectOutputThread, so if
                         // there is one, the track is connected to it
                         if (!effectChains.isEmpty()) {
-                            // Do not ramp volume is volume is controlled by effect
+                            // Do not ramp volume if volume is controlled by effect
                             if(effectChains[0]->setVolume_l(&vl, &vr)) {
                                 rampVolume = false;
                             }
@@ -4728,7 +4730,7 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
         // Session AudioSystem::SESSION_OUTPUT_STAGE is reserved for output stage effects
         // that can only be created by audio policy manager (running in same process)
         if (sessionId == AudioSystem::SESSION_OUTPUT_STAGE &&
-                getpid() != IPCThreadState::self()->getCallingPid()) {
+                getpid() != pid) {
             lStatus = INVALID_OPERATION;
             goto Exit;
         }
