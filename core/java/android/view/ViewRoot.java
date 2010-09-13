@@ -1256,6 +1256,11 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             dirty.setEmpty();
             return;
         }
+
+        if (fullRedrawNeeded) {
+            mAttachInfo.mIgnoreDirtyState = true;
+            dirty.union(0, 0, (int) (mWidth * appScale + 0.5f), (int) (mHeight * appScale + 0.5f));
+        }
         
         if (mHwRenderer != null && mHwRenderer.isEnabled()) {
             if (!dirty.isEmpty()) {
@@ -1268,11 +1273,6 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             }
 
             return;
-        }
-
-        if (fullRedrawNeeded) {
-            mAttachInfo.mIgnoreDirtyState = true;
-            dirty.union(0, 0, (int) (mWidth * appScale + 0.5f), (int) (mHeight * appScale + 0.5f));
         }
 
         if (DEBUG_ORIENTATION || DEBUG_DRAW) {
