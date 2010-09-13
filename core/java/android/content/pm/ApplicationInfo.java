@@ -355,8 +355,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
 
     /**
      * Full path to the directory where native JNI libraries are stored.
-     * 
-     * {@hide}
      */
     public String nativeLibraryDir;
 

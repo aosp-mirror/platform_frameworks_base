@@ -27,6 +27,7 @@ import android.net.NetworkInfo;
 import android.net.sip.ISipService;
 import android.net.sip.ISipSession;
 import android.net.sip.ISipSessionListener;
+import android.net.sip.SipErrorCode;
 import android.net.sip.SipManager;
 import android.net.sip.SipProfile;
 import android.net.sip.SipSessionAdapter;
@@ -528,6 +529,8 @@ public final class SipService extends ISipService.Stub {
         private int mBackoff = 1;
         private boolean mRegistered;
         private long mExpiryTime;
+        private SipErrorCode mErrorCode;
+        private String mErrorMessage;
 
         private String getAction() {
             return toString();
@@ -551,15 +554,25 @@ public final class SipService extends ISipService.Stub {
         }
 
         public void stop() {
+            stop(false);
+        }
+
+        private void stopButKeepStates() {
+            stop(true);
+        }
+
+        private void stop(boolean keepStates) {
             if (mSession == null) return;
-            if (mConnected) mSession.unregister();
+            if (mConnected && mRegistered) mSession.unregister();
             mTimer.cancel(this);
             if (mKeepAliveProcess != null) {
                 mKeepAliveProcess.stop();
                 mKeepAliveProcess = null;
             }
-            mSession = null;
-            mRegistered = false;
+            if (!keepStates) {
+                mSession = null;
+                mRegistered = false;
+            }
         }
 
         private boolean isStopped() {
@@ -568,20 +581,33 @@ public final class SipService extends ISipService.Stub {
 
         public void setListener(ISipSessionListener listener) {
             Log.v(TAG, "setListener(): " + listener);
-            mProxy.setListener(listener);
-            if (mSession == null) return;
+            synchronized (SipService.this) {
+                mProxy.setListener(listener);
+                if (mSession == null) return;
 
-            try {
-                if ((mSession != null) && SipSessionState.REGISTERING.equals(
-                        mSession.getState())) {
-                    mProxy.onRegistering(mSession);
-                } else if (mRegistered) {
-                    int duration = (int)
-                            (mExpiryTime - SystemClock.elapsedRealtime());
-                    mProxy.onRegistrationDone(mSession, duration);
+                try {
+                    SipSessionState state = (mSession == null)
+                            ? SipSessionState.READY_TO_CALL
+                            : Enum.valueOf(
+                                    SipSessionState.class, mSession.getState());
+                    if ((state == SipSessionState.REGISTERING)
+                            || (state == SipSessionState.DEREGISTERING)) {
+                        mProxy.onRegistering(mSession);
+                    } else if (mRegistered) {
+                        int duration = (int)
+                                (mExpiryTime - SystemClock.elapsedRealtime());
+                        mProxy.onRegistrationDone(mSession, duration);
+                    } else if (mErrorCode != null) {
+                        if (mErrorCode == SipErrorCode.TIME_OUT) {
+                            mProxy.onRegistrationTimeout(mSession);
+                        } else {
+                            mProxy.onRegistrationFailed(mSession,
+                                    mErrorCode.toString(), mErrorMessage);
+                        }
+                    }
+                } catch (Throwable t) {
+                    Log.w(TAG, "setListener(): " + t);
                 }
-            } catch (Throwable t) {
-                Log.w(TAG, "setListener(): " + t);
             }
         }
 
@@ -590,6 +616,8 @@ public final class SipService extends ISipService.Stub {
         }
 
         public void run() {
+            mErrorCode = null;
+            mErrorMessage = null;
             Log.v(TAG, "  ~~~ registering");
             synchronized (SipService.this) {
                 if (mConnected && !isStopped()) mSession.register(EXPIRY_TIME);
@@ -634,11 +662,7 @@ public final class SipService extends ISipService.Stub {
             synchronized (SipService.this) {
                 if (!isStopped() && (session != mSession)) return;
                 mRegistered = false;
-                try {
-                    mProxy.onRegistering(session);
-                } catch (Throwable t) {
-                    Log.w(TAG, "onRegistering()", t);
-                }
+                mProxy.onRegistering(session);
             }
         }
 
@@ -647,11 +671,9 @@ public final class SipService extends ISipService.Stub {
             Log.v(TAG, "onRegistrationDone(): " + session + ": " + mSession);
             synchronized (SipService.this) {
                 if (!isStopped() && (session != mSession)) return;
-                try {
-                    mProxy.onRegistrationDone(session, duration);
-                } catch (Throwable t) {
-                    Log.w(TAG, "onRegistrationDone()", t);
-                }
+
+                mProxy.onRegistrationDone(session, duration);
+
                 if (isStopped()) return;
 
                 if (duration > 0) {
@@ -687,19 +709,25 @@ public final class SipService extends ISipService.Stub {
         }
 
         @Override
-        public void onRegistrationFailed(ISipSession session, String className,
-                String message) {
+        public void onRegistrationFailed(ISipSession session,
+                String errorCodeString, String message) {
+            SipErrorCode errorCode =
+                    Enum.valueOf(SipErrorCode.class, errorCodeString);
             Log.v(TAG, "onRegistrationFailed(): " + session + ": " + mSession
-                    + ": " + className + ": " + message);
+                    + ": " + errorCode + ": " + message);
             synchronized (SipService.this) {
                 if (!isStopped() && (session != mSession)) return;
-                try {
-                    mProxy.onRegistrationFailed(session, className, message);
-                } catch (Throwable t) {
-                    Log.w(TAG, "onRegistrationFailed(): " + t);
-                }
+                mErrorCode = errorCode;
+                mErrorMessage = message;
+                mProxy.onRegistrationFailed(session, errorCode.toString(),
+                        message);
 
-                if (!isStopped()) onError();
+                if (errorCode == SipErrorCode.INVALID_CREDENTIALS) {
+                    Log.d(TAG, "   pause auto-registration");
+                    stopButKeepStates();
+                } else if (!isStopped()) {
+                    onError();
+                }
             }
         }
 
@@ -708,11 +736,8 @@ public final class SipService extends ISipService.Stub {
             Log.v(TAG, "onRegistrationTimeout(): " + session + ": " + mSession);
             synchronized (SipService.this) {
                 if (!isStopped() && (session != mSession)) return;
-                try {
-                    mProxy.onRegistrationTimeout(session);
-                } catch (Throwable t) {
-                    Log.w(TAG, "onRegistrationTimeout(): " + t);
-                }
+                mErrorCode = SipErrorCode.TIME_OUT;
+                mProxy.onRegistrationTimeout(session);
 
                 if (!isStopped()) {
                     mRegistered = false;

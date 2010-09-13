@@ -72,51 +72,11 @@ public:
     /* Stops the input manager threads and waits for them to exit. */
     virtual status_t stop() = 0;
 
-    /* Registers an input channel prior to using it as the target of an event. */
-    virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel) = 0;
+    /* Gets the input reader. */
+    virtual sp<InputReaderInterface> getReader() = 0;
 
-    /* Unregisters an input channel. */
-    virtual status_t unregisterInputChannel(const sp<InputChannel>& inputChannel) = 0;
-
-    /* Injects an input event and optionally waits for sync.
-     * The synchronization mode determines whether the method blocks while waiting for
-     * input injection to proceed.
-     * Returns one of the INPUT_EVENT_INJECTION_XXX constants.
-     */
-    virtual int32_t injectInputEvent(const InputEvent* event,
-            int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis) = 0;
-
-    /* Preempts input dispatch in progress by making pending synchronous
-     * dispatches asynchronous instead.  This method is generally called during a focus
-     * transition from one application to the next so as to enable the new application
-     * to start receiving input as soon as possible without having to wait for the
-     * old application to finish up.
-     */
-    virtual void preemptInputDispatch() = 0;
-
-    /* Gets input device configuration. */
-    virtual void getInputConfiguration(InputConfiguration* outConfiguration) = 0;
-
-    /* Gets information about the specified input device.
-     * Returns OK if the device information was obtained or NAME_NOT_FOUND if there
-     * was no such device.
-     */
-    virtual status_t getInputDeviceInfo(int32_t deviceId, InputDeviceInfo* outDeviceInfo) = 0;
-
-    /* Gets the list of all registered device ids. */
-    virtual void getInputDeviceIds(Vector<int32_t>& outDeviceIds) = 0;
-
-    /* Queries current input state. */
-    virtual int32_t getScanCodeState(int32_t deviceId, uint32_t sourceMask,
-            int32_t scanCode) = 0;
-    virtual int32_t getKeyCodeState(int32_t deviceId, uint32_t sourceMask,
-            int32_t keyCode) = 0;
-    virtual int32_t getSwitchState(int32_t deviceId, uint32_t sourceMask,
-            int32_t sw) = 0;
-
-    /* Determines whether physical keys exist for the given framework-domain key codes. */
-    virtual bool hasKeys(int32_t deviceId, uint32_t sourceMask,
-            size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags) = 0;
+    /* Gets the input dispatcher. */
+    virtual sp<InputDispatcherInterface> getDispatcher() = 0;
 };
 
 class InputManager : public InputManagerInterface {
@@ -137,25 +97,8 @@ public:
     virtual status_t start();
     virtual status_t stop();
 
-    virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel);
-    virtual status_t unregisterInputChannel(const sp<InputChannel>& inputChannel);
-
-    virtual int32_t injectInputEvent(const InputEvent* event,
-            int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis);
-
-    virtual void preemptInputDispatch();
-
-    virtual void getInputConfiguration(InputConfiguration* outConfiguration);
-    virtual status_t getInputDeviceInfo(int32_t deviceId, InputDeviceInfo* outDeviceInfo);
-    virtual void getInputDeviceIds(Vector<int32_t>& outDeviceIds);
-    virtual int32_t getScanCodeState(int32_t deviceId, uint32_t sourceMask,
-            int32_t scanCode);
-    virtual int32_t getKeyCodeState(int32_t deviceId, uint32_t sourceMask,
-            int32_t keyCode);
-    virtual int32_t getSwitchState(int32_t deviceId, uint32_t sourceMask,
-            int32_t sw);
-    virtual bool hasKeys(int32_t deviceId, uint32_t sourceMask,
-            size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags);
+    virtual sp<InputReaderInterface> getReader();
+    virtual sp<InputDispatcherInterface> getDispatcher();
 
 private:
     sp<InputReaderInterface> mReader;

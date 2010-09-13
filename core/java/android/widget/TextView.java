@@ -5761,18 +5761,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void convertFromViewportToContentCoordinates(Rect r) {
-        int paddingTop = getExtendedPaddingTop();
+        final int horizontalOffset = viewportToContentHorizontalOffset();
+        r.left += horizontalOffset;
+        r.right += horizontalOffset;
+
+        final int verticalOffset = viewportToContentVerticalOffset();
+        r.top += verticalOffset;
+        r.bottom += verticalOffset;
+    }
+
+    private int viewportToContentHorizontalOffset() {
+        return getCompoundPaddingLeft() - mScrollX;
+    }
+
+    private int viewportToContentVerticalOffset() {
+        int offset = getExtendedPaddingTop() - mScrollY;
         if ((mGravity & Gravity.VERTICAL_GRAVITY_MASK) != Gravity.TOP) {
-            paddingTop += getVerticalOffset(false);
+            offset += getVerticalOffset(false);
         }
-        r.top += paddingTop;
-        r.bottom += paddingTop;
-
-        int paddingLeft = getCompoundPaddingLeft();
-        r.left += paddingLeft;
-        r.right += paddingLeft;
-
-        r.offset(-mScrollX, -mScrollY);
+        return offset;
     }
 
     @Override
@@ -6492,6 +6499,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (!mFrozenWithFocus || (selStart < 0 || selEnd < 0)) {
                 // Has to be done before onTakeFocus, which can be overloaded.
                 if (mLastTouchOffset >= 0) {
+                    // Can happen when a TextView is displayed after its content has been deleted.
+                    mLastTouchOffset = Math.min(mLastTouchOffset, mText.length());
                     Selection.setSelection((Spannable) mText, mLastTouchOffset);
                 }
 
@@ -6508,7 +6517,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // ExtractEditText clears focus, which gives focus to the ExtractEditText.
                 // This special case ensure that we keep current selection in that case.
                 // It would be better to know why the DecorView does not have focus at that time.
-                if (((this instanceof ExtractEditText) || mSelectionMoved) && selStart >= 0 && selEnd >= 0) {
+                if (((this instanceof ExtractEditText) || mSelectionMoved) &&
+                        selStart >= 0 && selEnd >= 0) {
                     /*
                      * Someone intentionally set the selection, so let them
                      * do whatever it is that they wanted to do instead of
@@ -6621,6 +6631,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (start == end) {
             if (start >= prevStart && start < prevEnd) {
+                // Restore previous selection
+                Selection.setSelection((Spannable)mText, prevStart, prevEnd);
                 // Tapping inside the selection displays the cut/copy/paste context menu.
                 showContextMenu();
                 return;
@@ -7651,9 +7663,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             bounds.right = bounds.left + drawableWidth;
             bounds.bottom = bounds.top + drawableHeight;
 
-            int boundTopBefore = bounds.top;
             convertFromViewportToContentCoordinates(bounds);
-            mHotSpotVerticalPosition += bounds.top - boundTopBefore;
             mDrawable.setBounds(bounds);
             postInvalidate();
         }
@@ -7796,6 +7806,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             final Rect bounds = mHandle.mDrawable.getBounds();
                             mOffsetX = (bounds.left + bounds.right) / 2.0f - x;
                             mOffsetY = mHandle.mHotSpotVerticalPosition - y;
+
+                            mOffsetX += viewportToContentHorizontalOffset();
+                            mOffsetY += viewportToContentVerticalOffset();
 
                             mOnDownTimerStart = event.getEventTime();
                         }
@@ -7985,6 +7998,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                     final Rect bounds = draggedHandle.mDrawable.getBounds();
                                     mOffsetX = (bounds.left + bounds.right) / 2.0f - x;
                                     mOffsetY = draggedHandle.mHotSpotVerticalPosition - y;
+
+                                    mOffsetX += viewportToContentHorizontalOffset();
+                                    mOffsetY += viewportToContentVerticalOffset();
 
                                     mOnDownTimerStart = event.getEventTime();
                                     ((ArrowKeyMovementMethod)mMovement).setCursorController(this);

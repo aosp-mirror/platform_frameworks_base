@@ -3107,6 +3107,8 @@ public final class ActivityThread {
         /**
          * For system applications on userdebug/eng builds, log stack
          * traces of disk and network access to dropbox for analysis.
+         *
+         * Similar logic exists in SystemServer.java.
          */
         if ((data.appInfo.flags &
              (ApplicationInfo.FLAG_SYSTEM |

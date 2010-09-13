@@ -16,6 +16,7 @@
 #include <utils/ResourceTypes.h>
 #include <netinet/in.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 
 jclass gOptions_class;
 jfieldID gOptions_justBoundsFieldID;
@@ -559,7 +560,27 @@ static void nativeSetDefaultConfig(JNIEnv* env, jobject, int nativeConfig) {
     }
 }
 
-static jobject doBuildTileIndex(JNIEnv* env, SkStream* stream, bool isShareable) {
+static SkMemoryStream* buildSkMemoryStream(SkStream *stream) {
+    size_t bufferSize = 4096;
+    size_t streamLen = 0;
+    size_t len;
+    char* data = (char*)sk_malloc_throw(bufferSize);
+
+    while ((len = stream->read(data + streamLen,
+                    bufferSize - streamLen)) != 0) {
+        streamLen += len;
+        if (streamLen == bufferSize) {
+            bufferSize *= 2;
+            data = (char*)sk_realloc_throw(data, bufferSize);
+        }
+    }
+    data = (char*)sk_realloc_throw(data, streamLen);
+    SkMemoryStream* streamMem = new SkMemoryStream();
+    streamMem->setMemoryOwned(data, streamLen);
+    return streamMem;
+}
+
+static jobject doBuildTileIndex(JNIEnv* env, SkStream* stream) {
     SkImageDecoder* decoder = SkImageDecoder::Factory(stream);
     int width, height;
     if (NULL == decoder) {
@@ -574,9 +595,10 @@ static jobject doBuildTileIndex(JNIEnv* env, SkStream* stream, bool isShareable)
     javaAllocator->unref();
     javaMemoryReporter->unref();
 
-    if (!decoder->buildTileIndex(stream, &width, &height, isShareable)) {
-        char msg[1024];
-        snprintf(msg, 1023, "Image failed to decode using %s decoder", decoder->getFormatName());
+    if (!decoder->buildTileIndex(stream, &width, &height)) {
+        char msg[100];
+        snprintf(msg, sizeof(msg), "Image failed to decode using %s decoder",
+                decoder->getFormatName());
         doThrowIOE(env, msg);
         return nullObjectReturn("decoder->buildTileIndex returned false");
     }
@@ -588,13 +610,13 @@ static jobject doBuildTileIndex(JNIEnv* env, SkStream* stream, bool isShareable)
 
 static jobject nativeCreateLargeBitmapFromByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
                                      int offset, int length, jboolean isShareable) {
+    /*  If isShareable we could decide to just wrap the java array and
+        share it, but that means adding a globalref to the java array object
+        For now we just always copy the array's data if isShareable.
+     */
     AutoJavaByteArray ar(env, byteArray);
-    SkStream* stream = new SkMemoryStream(ar.ptr() + offset, length, false);
-    SkAutoUnref aur(stream);
-    if (isShareable) {
-        aur.detach();
-    }
-    return doBuildTileIndex(env, stream, isShareable);
+    SkStream* stream = new SkMemoryStream(ar.ptr() + offset, length, true);
+    return doBuildTileIndex(env, stream);
 }
 
 static jobject nativeCreateLargeBitmapFromFileDescriptor(JNIEnv* env, jobject clazz,
@@ -603,24 +625,31 @@ static jobject nativeCreateLargeBitmapFromFileDescriptor(JNIEnv* env, jobject cl
 
     jint descriptor = env->GetIntField(fileDescriptor,
                                        gFileDescriptor_descriptor);
-    bool weOwnTheFD = false;
+    SkStream *stream = NULL;
+    struct stat fdStat;
+    int newFD;
+    if (fstat(descriptor, &fdStat) == -1) {
+        doThrowIOE(env, "broken file descriptor");
+        return nullObjectReturn("fstat return -1");
+    }
 
-    if (isShareable) {
-        int newFD = ::dup(descriptor);
-        if (-1 != newFD) {
-            weOwnTheFD = true;
-            descriptor = newFD;
+    if (isShareable &&
+            S_ISREG(fdStat.st_mode) &&
+            (newFD = ::dup(descriptor)) != -1) {
+        SkFDStream* fdStream = new SkFDStream(newFD, true);
+        if (!fdStream->isValid()) {
+            fdStream->unref();
+            return NULL;
         }
-    }
-
-    SkFDStream* stream = new SkFDStream(descriptor, weOwnTheFD);
-    SkAutoUnref aur(stream);
-    if (!stream->isValid()) {
-        return NULL;
-    }
-
-    if (isShareable) {
-        aur.detach();
+        stream = fdStream;
+    } else {
+        SkFDStream* fdStream = new SkFDStream(descriptor, false);
+        if (!fdStream->isValid()) {
+            fdStream->unref();
+            return NULL;
+        }
+        stream = buildSkMemoryStream(fdStream);
+        fdStream->unref();
     }
 
     /* Restore our offset when we leave, so we can be called more than once
@@ -629,7 +658,7 @@ static jobject nativeCreateLargeBitmapFromFileDescriptor(JNIEnv* env, jobject cl
     */
     AutoFDSeek as(descriptor);
 
-    return doBuildTileIndex(env, stream, isShareable);
+    return doBuildTileIndex(env, stream);
 }
 
 static jobject nativeCreateLargeBitmapFromStream(JNIEnv* env, jobject clazz,
@@ -641,7 +670,8 @@ static jobject nativeCreateLargeBitmapFromStream(JNIEnv* env, jobject clazz,
 
     if (stream) {
         // for now we don't allow shareable with java inputstreams
-        largeBitmap = doBuildTileIndex(env, stream, false);
+        SkMemoryStream *mStream = buildSkMemoryStream(stream);
+        largeBitmap = doBuildTileIndex(env, mStream);
         stream->unref();
     }
     return largeBitmap;
@@ -650,14 +680,12 @@ static jobject nativeCreateLargeBitmapFromStream(JNIEnv* env, jobject clazz,
 static jobject nativeCreateLargeBitmapFromAsset(JNIEnv* env, jobject clazz,
                                  jint native_asset, // Asset
                                  jboolean isShareable) {
-    SkStream* stream;
+    SkStream* stream, *assStream;
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
-    stream = new AssetStreamAdaptor(asset);
-    SkAutoUnref aur(stream);
-    if (isShareable) {
-        aur.detach();
-    }
-    return doBuildTileIndex(env, stream, isShareable);
+    assStream = new AssetStreamAdaptor(asset);
+    stream = buildSkMemoryStream(assStream);
+    assStream->unref();
+    return doBuildTileIndex(env, stream);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

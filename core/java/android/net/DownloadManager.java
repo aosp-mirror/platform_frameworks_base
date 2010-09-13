@@ -21,6 +21,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.os.ParcelFileDescriptor;
+import android.provider.BaseColumns;
 import android.provider.Downloads;
 
 import java.io.File;
@@ -48,7 +49,7 @@ public class DownloadManager {
      * An identifier for a particular download, unique across the system.  Clients use this ID to
      * make subsequent calls related to the download.
      */
-    public final static String COLUMN_ID = "id";
+    public final static String COLUMN_ID = BaseColumns._ID;
 
     /**
      * The client-supplied title for this download.  This will be displayed in system notifications.
@@ -275,6 +276,7 @@ public class DownloadManager {
         private String mMediaType;
         private boolean mRoamingAllowed = true;
         private int mAllowedNetworkTypes = ~0; // default to all network types allowed
+        private boolean mIsVisibleInDownloadsUi = true;
 
         /**
          * @param uri the HTTP URI to download.
@@ -386,6 +388,17 @@ public class DownloadManager {
         }
 
         /**
+         * Set whether this download should be displayed in the system's Downloads UI. True by
+         * default.
+         * @param isVisible whether to display this download in the Downloads UI
+         * @return this object
+         */
+        public Request setVisibleInDownloadsUi(boolean isVisible) {
+            mIsVisibleInDownloadsUi = isVisible;
+            return this;
+        }
+
+        /**
          * @return ContentValues to be passed to DownloadProvider.insert()
          */
         ContentValues toContentValues(String packageName) {
@@ -417,6 +430,7 @@ public class DownloadManager {
 
             values.put(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES, mAllowedNetworkTypes);
             values.put(Downloads.Impl.COLUMN_ALLOW_ROAMING, mRoamingAllowed);
+            values.put(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, mIsVisibleInDownloadsUi);
 
             return values;
         }
@@ -441,8 +455,23 @@ public class DownloadManager {
      * This class may be used to filter download manager queries.
      */
     public static class Query {
-        private Long mId;
+        /**
+         * Constant for use with {@link #orderBy}
+         * @hide
+         */
+        public static final int ORDER_ASCENDING = 1;
+
+        /**
+         * Constant for use with {@link #orderBy}
+         * @hide
+         */
+        public static final int ORDER_DESCENDING = 2;
+
+        private Long mId = null;
         private Integer mStatusFlags = null;
+        private String mOrderByColumn = Downloads.COLUMN_LAST_MODIFICATION;
+        private int mOrderDirection = ORDER_DESCENDING;
+        private boolean mOnlyIncludeVisibleInDownloadsUi = false;
 
         /**
          * Include only the download with the given ID.
@@ -464,13 +493,52 @@ public class DownloadManager {
         }
 
         /**
+         * Controls whether this query includes downloads not visible in the system's Downloads UI.
+         * @param value if true, this query will only include downloads that should be displayed in
+         *            the system's Downloads UI; if false (the default), this query will include
+         *            both visible and invisible downloads.
+         * @return this object
+         * @hide
+         */
+        public Query setOnlyIncludeVisibleInDownloadsUi(boolean value) {
+            mOnlyIncludeVisibleInDownloadsUi = value;
+            return this;
+        }
+
+        /**
+         * Change the sort order of the returned Cursor.
+         *
+         * @param column one of the COLUMN_* constants; currently, only
+         *         {@link #COLUMN_LAST_MODIFIED_TIMESTAMP} and {@link #COLUMN_TOTAL_SIZE_BYTES} are
+         *         supported.
+         * @param direction either {@link #ORDER_ASCENDING} or {@link #ORDER_DESCENDING}
+         * @return this object
+         * @hide
+         */
+        public Query orderBy(String column, int direction) {
+            if (direction != ORDER_ASCENDING && direction != ORDER_DESCENDING) {
+                throw new IllegalArgumentException("Invalid direction: " + direction);
+            }
+
+            if (column.equals(COLUMN_LAST_MODIFIED_TIMESTAMP)) {
+                mOrderByColumn = Downloads.COLUMN_LAST_MODIFICATION;
+            } else if (column.equals(COLUMN_TOTAL_SIZE_BYTES)) {
+                mOrderByColumn = Downloads.COLUMN_TOTAL_BYTES;
+            } else {
+                throw new IllegalArgumentException("Cannot order by " + column);
+            }
+            mOrderDirection = direction;
+            return this;
+        }
+
+        /**
          * Run this query using the given ContentResolver.
          * @param projection the projection to pass to ContentResolver.query()
          * @return the Cursor returned by ContentResolver.query()
          */
         Cursor runQuery(ContentResolver resolver, String[] projection) {
             Uri uri = Downloads.CONTENT_URI;
-            String selection = null;
+            List<String> selectionParts = new ArrayList<String>();
 
             if (mId != null) {
                 uri = Uri.withAppendedPath(uri, mId.toString());
@@ -495,9 +563,17 @@ public class DownloadManager {
                     parts.add("(" + statusClause(">=", 400)
                               + " AND " + statusClause("<", 600) + ")");
                 }
-                selection = joinStrings(" OR ", parts);
+                selectionParts.add(joinStrings(" OR ", parts));
             }
-            String orderBy = Downloads.COLUMN_LAST_MODIFICATION + " DESC";
+
+            if (mOnlyIncludeVisibleInDownloadsUi) {
+                selectionParts.add(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI + " != '0'");
+            }
+
+            String selection = joinStrings(" AND ", selectionParts);
+            String orderDirection = (mOrderDirection == ORDER_ASCENDING ? "ASC" : "DESC");
+            String orderBy = mOrderByColumn + " " + orderDirection;
+
             return resolver.query(uri, projection, selection, null, orderBy);
         }
 
@@ -567,6 +643,9 @@ public class DownloadManager {
      */
     public Cursor query(Query query) {
         Cursor underlyingCursor = query.runQuery(mResolver, UNDERLYING_COLUMNS);
+        if (underlyingCursor == null) {
+            return null;
+        }
         return new CursorTranslator(underlyingCursor);
     }
 
@@ -578,6 +657,34 @@ public class DownloadManager {
      */
     public ParcelFileDescriptor openDownloadedFile(long id) throws FileNotFoundException {
         return mResolver.openFileDescriptor(getDownloadUri(id), "r");
+    }
+
+    /**
+     * Restart the given download, which must have already completed (successfully or not).  This
+     * method will only work when called from within the download manager's process.
+     * @param id the ID of the download
+     * @hide
+     */
+    public void restartDownload(long id) {
+        Cursor cursor = query(new Query().setFilterById(id));
+        try {
+            if (!cursor.moveToFirst()) {
+                throw new IllegalArgumentException("No download with id " + id);
+            }
+            int status = cursor.getInt(cursor.getColumnIndex(COLUMN_STATUS));
+            if (status != STATUS_SUCCESSFUL && status != STATUS_FAILED) {
+                throw new IllegalArgumentException("Cannot restart incomplete download: " + id);
+            }
+        } finally {
+            cursor.close();
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(Downloads.Impl.COLUMN_CURRENT_BYTES, 0);
+        values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, -1);
+        values.putNull(Downloads.Impl._DATA);
+        values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
+        mResolver.update(getDownloadUri(id), values, null, null);
     }
 
     /**
@@ -608,7 +715,7 @@ public class DownloadManager {
         public int getColumnIndexOrThrow(String columnName) throws IllegalArgumentException {
             int index = getColumnIndex(columnName);
             if (index == -1) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("No such column: " + columnName);
             }
             return index;
         }

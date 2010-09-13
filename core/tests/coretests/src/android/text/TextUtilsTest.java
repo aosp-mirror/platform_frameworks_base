@@ -349,6 +349,26 @@ public class TextUtilsTest extends TestCase {
         }
     }
 
+    @SmallTest
+    public void testDelimitedStringContains() {
+        assertFalse(TextUtils.delimitedStringContains("", ',', null));
+        assertFalse(TextUtils.delimitedStringContains(null, ',', ""));
+        // Whole match
+        assertTrue(TextUtils.delimitedStringContains("gps", ',', "gps"));
+        // At beginning.
+        assertTrue(TextUtils.delimitedStringContains("gps,gpsx,network,mock", ',', "gps"));
+        assertTrue(TextUtils.delimitedStringContains("gps,network,mock", ',', "gps"));
+        // In middle, both without, before & after a false match.
+        assertTrue(TextUtils.delimitedStringContains("network,gps,mock", ',', "gps"));
+        assertTrue(TextUtils.delimitedStringContains("network,gps,gpsx,mock", ',', "gps"));
+        assertTrue(TextUtils.delimitedStringContains("network,gpsx,gps,mock", ',', "gps"));
+        // At the end.
+        assertTrue(TextUtils.delimitedStringContains("network,mock,gps", ',', "gps"));
+        assertTrue(TextUtils.delimitedStringContains("network,mock,gpsx,gps", ',', "gps"));
+        // Not present (but with a false match)
+        assertFalse(TextUtils.delimitedStringContains("network,mock,gpsx", ',', "gps"));
+    }
+
     /**
      * CharSequence wrapper for testing the cases where text is copied into
      * a char array instead of working from a String or a Spanned.

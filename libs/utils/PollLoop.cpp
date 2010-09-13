@@ -119,7 +119,8 @@ int32_t PollLoop::pollOnce(int timeoutMillis, int* outEvents, void** outData) {
         if (outData != NULL) *outData = pending.data;
         return pending.ident;
     }
-    
+
+    // Wait for wakeAndLock() waiters to run then set mPolling to true.
     mLock.lock();
     while (mWaiters != 0) {
         mResume.wait(mLock);
@@ -127,6 +128,7 @@ int32_t PollLoop::pollOnce(int timeoutMillis, int* outEvents, void** outData) {
     mPolling = true;
     mLock.unlock();
 
+    // Poll.
     int32_t result;
     size_t requestedCount = mRequestedFds.size();
 
@@ -168,6 +170,7 @@ int32_t PollLoop::pollOnce(int timeoutMillis, int* outEvents, void** outData) {
     }
 #endif
 
+    // Process the poll results.
     mPendingCallbacks.clear();
     mPendingFds.clear();
     mPendingFdsPos = 0;
@@ -218,6 +221,7 @@ int32_t PollLoop::pollOnce(int timeoutMillis, int* outEvents, void** outData) {
     }
 
 Done:
+    // Set mPolling to false and wake up the wakeAndLock() waiters.
     mLock.lock();
     mPolling = false;
     if (mWaiters != 0) {
@@ -357,11 +361,13 @@ ssize_t PollLoop::getRequestIndexLocked(int fd) {
 
 void PollLoop::wakeAndLock() {
     mLock.lock();
+
     mWaiters += 1;
     while (mPolling) {
         wake();
         mAwake.wait(mLock);
     }
+
     mWaiters -= 1;
     if (mWaiters == 0) {
         mResume.signal();
