@@ -23,6 +23,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.WorkSource;
 
 import java.util.List;
 
@@ -1050,6 +1051,7 @@ public class WifiManager {
         int mLockType;
         private boolean mRefCounted;
         private boolean mHeld;
+        private WorkSource mWorkSource;
 
         private WifiLock(int lockType, String tag) {
             mTag = tag;
@@ -1075,7 +1077,7 @@ public class WifiManager {
             synchronized (mBinder) {
                 if (mRefCounted ? (++mRefCount > 0) : (!mHeld)) {
                     try {
-                        mService.acquireWifiLock(mBinder, mLockType, mTag);
+                        mService.acquireWifiLock(mBinder, mLockType, mTag, mWorkSource);
                         synchronized (WifiManager.this) {
                             if (mActiveLockCount >= MAX_ACTIVE_LOCKS) {
                                 mService.releaseWifiLock(mBinder);
@@ -1144,6 +1146,32 @@ public class WifiManager {
         public boolean isHeld() {
             synchronized (mBinder) {
                 return mHeld;
+            }
+        }
+
+        public void setWorkSource(WorkSource ws) {
+            synchronized (mBinder) {
+                if (ws != null && ws.size() == 0) {
+                    ws = null;
+                }
+                boolean changed = true;
+                if (ws == null) {
+                    mWorkSource = null;
+                } else if (mWorkSource == null) {
+                    changed = mWorkSource != null;
+                    mWorkSource = new WorkSource(ws);
+                } else {
+                    changed = mWorkSource.diff(ws);
+                    if (changed) {
+                        mWorkSource.set(ws);
+                    }
+                }
+                if (changed && mHeld) {
+                    try {
+                        mService.updateWifiLockWorkSource(mBinder, mWorkSource);
+                    } catch (RemoteException e) {
+                    }
+                }
             }
         }
 

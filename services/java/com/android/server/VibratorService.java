@@ -29,6 +29,7 @@ import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.Binder;
 import android.os.SystemClock;
+import android.os.WorkSource;
 import android.util.Slog;
 
 import java.util.LinkedList;
@@ -39,6 +40,7 @@ public class VibratorService extends IVibratorService.Stub {
 
     private final LinkedList<Vibration> mVibrations;
     private Vibration mCurrentVibration;
+    private final WorkSource mTmpWorkSource = new WorkSource();
 
     private class Vibration implements IBinder.DeathRecipient {
         private final IBinder mToken;
@@ -46,22 +48,24 @@ public class VibratorService extends IVibratorService.Stub {
         private final long    mStartTime;
         private final long[]  mPattern;
         private final int     mRepeat;
+        private final int     mUid;
 
-        Vibration(IBinder token, long millis) {
-            this(token, millis, null, 0);
+        Vibration(IBinder token, long millis, int uid) {
+            this(token, millis, null, 0, uid);
         }
 
-        Vibration(IBinder token, long[] pattern, int repeat) {
-            this(token, 0, pattern, repeat);
+        Vibration(IBinder token, long[] pattern, int repeat, int uid) {
+            this(token, 0, pattern, repeat, uid);
         }
 
         private Vibration(IBinder token, long millis, long[] pattern,
-                int repeat) {
+                int repeat, int uid) {
             mToken = token;
             mTimeout = millis;
             mStartTime = SystemClock.uptimeMillis();
             mPattern = pattern;
             mRepeat = repeat;
+            mUid = uid;
         }
 
         public void binderDied() {
@@ -98,7 +102,7 @@ public class VibratorService extends IVibratorService.Stub {
         mContext = context;
         PowerManager pm = (PowerManager)context.getSystemService(
                 Context.POWER_SERVICE);
-        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*vibrator*");
         mWakeLock.setReferenceCounted(true);
 
         mVibrations = new LinkedList<Vibration>();
@@ -113,6 +117,7 @@ public class VibratorService extends IVibratorService.Stub {
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires VIBRATE permission");
         }
+        int uid = Binder.getCallingUid();
         // We're running in the system server so we cannot crash. Check for a
         // timeout of 0 or negative. This will ensure that a vibration has
         // either a timeout of > 0 or a non-null pattern.
@@ -122,7 +127,7 @@ public class VibratorService extends IVibratorService.Stub {
             // longer than milliseconds.
             return;
         }
-        Vibration vib = new Vibration(token, milliseconds);
+        Vibration vib = new Vibration(token, milliseconds, uid);
         synchronized (mVibrations) {
             removeVibrationLocked(token);
             doCancelVibrateLocked();
@@ -146,6 +151,7 @@ public class VibratorService extends IVibratorService.Stub {
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires VIBRATE permission");
         }
+        int uid = Binder.getCallingUid();
         // so wakelock calls will succeed
         long identity = Binder.clearCallingIdentity();
         try {
@@ -165,7 +171,7 @@ public class VibratorService extends IVibratorService.Stub {
                 return;
             }
 
-            Vibration vib = new Vibration(token, pattern, repeat);
+            Vibration vib = new Vibration(token, pattern, repeat, uid);
             try {
                 token.linkToDeath(vib, 0);
             } catch (RemoteException e) {
@@ -280,6 +286,8 @@ public class VibratorService extends IVibratorService.Stub {
 
         VibrateThread(Vibration vib) {
             mVibration = vib;
+            mTmpWorkSource.set(vib.mUid);
+            mWakeLock.setWorkSource(mTmpWorkSource);
             mWakeLock.acquire();
         }
 

@@ -44,6 +44,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -736,7 +737,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         startNavigating(true);
     }
 
-    public void setMinTime(long minTime) {
+    public void setMinTime(long minTime, WorkSource ws) {
         if (DEBUG) Log.d(TAG, "setMinTime " + minTime);
         
         if (minTime >= 0) {
@@ -779,7 +780,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     public void addListener(int uid) {
         synchronized (mWakeLock) {
             mPendingListenerMessages++;
-           mWakeLock.acquire();
+            mWakeLock.acquire();
             Message m = Message.obtain(mHandler, ADD_LISTENER);
             m.arg1 = uid;
             mHandler.sendMessage(m);

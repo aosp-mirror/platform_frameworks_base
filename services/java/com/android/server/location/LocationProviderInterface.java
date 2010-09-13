@@ -20,6 +20,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.WorkSource;
 
 /**
  * Location Manager's interface for location providers.
@@ -47,7 +48,7 @@ public interface LocationProviderInterface {
     /* returns false if single shot is not supported */
     boolean requestSingleShotFix();
     String getInternalState();
-    void setMinTime(long minTime);
+    void setMinTime(long minTime, WorkSource ws);
     void updateNetworkState(int state, NetworkInfo info);
     void updateLocation(Location location);
     boolean sendExtraCommand(String command, Bundle extras);
