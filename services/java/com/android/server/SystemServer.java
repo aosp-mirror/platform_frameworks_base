@@ -101,6 +101,7 @@ class ServerThread extends Thread {
         UiModeManagerService uiMode = null;
         RecognitionManagerService recognition = null;
         ThrottleService throttle = null;
+        NetworkTimeUpdateService networkTimeUpdater = null;
 
         // Critical services...
         try {
@@ -441,6 +442,13 @@ class ServerThread extends Thread {
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting SIP Service", e);
             }
+
+            try {
+                Slog.i(TAG, "NetworkTimeUpdateService");
+                networkTimeUpdater = new NetworkTimeUpdateService(context);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting NetworkTimeUpdate service");
+            }
         }
 
         // make sure the ADB_ENABLED setting value matches the secure property value
@@ -502,6 +510,7 @@ class ServerThread extends Thread {
         final RecognitionManagerService recognitionF = recognition;
         final LocationManagerService locationF = location;
         final CountryDetectorService countryDetectorF = countryDetector;
+        final NetworkTimeUpdateService networkTimeUpdaterF = networkTimeUpdater;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -531,6 +540,7 @@ class ServerThread extends Thread {
                 if (locationF != null) locationF.systemReady();
                 if (countryDetectorF != null) countryDetectorF.systemReady();
                 if (throttleF != null) throttleF.systemReady();
+                if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemReady();
             }
         });
 
