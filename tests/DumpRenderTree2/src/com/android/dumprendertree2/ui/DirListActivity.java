@@ -77,8 +77,6 @@ public class DirListActivity extends ListActivity {
     /** This is a relative path! */
     private String mCurrentDirPath;
 
-    private FileFilter mFileFilter;
-
     /**
      * A thread responsible for loading the contents of the directory from sd card
      * and sending them via Message to main thread that then loads them into
@@ -187,7 +185,6 @@ public class DirListActivity extends ListActivity {
 
         ForwarderManager.getForwarderManager().start();
 
-        mFileFilter = new FileFilter();
         mListView = getListView();
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
