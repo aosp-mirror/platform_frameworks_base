@@ -288,10 +288,6 @@
     <string name="permdesc_readContacts" msgid="3371591512896545975">"Permite a uma aplicação ler todos os dados de contactos (endereços) armazenados no seu telefone. Algumas aplicações maliciosas podem utilizar este item para enviar os seus dados a outras pessoas."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"escrever dados de contacto"</string>
     <string name="permdesc_writeContacts" msgid="3924383579108183601">"Permite a uma aplicação modificar os dados de contacto (endereço) armazenados no seu telefone. Algumas aplicações maliciosas podem utilizar estes dados para apagar ou modificar os dados dos seus contactos."</string>
-    <string name="permlab_writeOwnerData" msgid="4892555913849295393">"escrever dados do proprietário"</string>
-    <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Permite a uma aplicação modificar os dados do proprietário do telefone armazenados no seu telefone. Algumas aplicações maliciosas podem utilizar este item para apagar ou modificar dados do proprietário."</string>
-    <string name="permlab_readOwnerData" msgid="6668525984731523563">"ler dados do proprietário"</string>
-    <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Permite a uma aplicação modificar os dados do proprietário do telefone armazenados no seu telefone. Algumas aplicações maliciosas podem utilizar este item para ler dados do proprietário do telefone."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"ler eventos da agenda"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Permite a uma aplicação ler todos os eventos do calendário armazenados no seu telefone. Algumas aplicações maliciosas podem utilizar este item para enviar os eventos do seu calendário a outras pessoas."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"adicionar ou alterar eventos da agenda e enviar e-mails para os convidados"</string>
@@ -713,13 +709,10 @@
     <string name="copy" msgid="2681946229533511987">"Copiar"</string>
     <string name="paste" msgid="5629880836805036433">"Colar"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Copiar URL"</string>
-    <!-- no translation found for selectTextMode (6738556348861347240) -->
-    <skip />
-    <!-- no translation found for textSelectionCABTitle (5236850394370820357) -->
-    <skip />
+    <string name="selectTextMode" msgid="6738556348861347240">"Seleccionar texto..."</string>
+    <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selecção de texto"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Método de entrada"</string>
-    <!-- no translation found for editTextMenuTitle (4909135564941815494) -->
-    <skip />
+    <string name="editTextMenuTitle" msgid="4909135564941815494">"Acções de texto"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Pouco espaço livre"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"O espaço de armazenamento do telefone está a ficar reduzido."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
@@ -746,6 +739,12 @@
     <string name="force_close" msgid="3653416315450806396">"Forçar fecho"</string>
     <string name="report" msgid="4060218260984795706">"Relatório"</string>
     <string name="wait" msgid="7147118217226317732">"Esperar"</string>
+    <!-- no translation found for launch_warning_title (8323761616052121936) -->
+    <skip />
+    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
+    <skip />
+    <!-- no translation found for launch_warning_original (188102023021668683) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"A aplicação <xliff:g id="APPLICATION">%1$s</xliff:g> (processo <xliff:g id="PROCESS">%2$s</xliff:g>) violou a política StrictMode auto-imposta."</string>
     <string name="smv_process" msgid="5120397012047462446">"O processo <xliff:g id="PROCESS">%1$s</xliff:g> violou a política StrictMode auto-imposta."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> em execução"</string>
@@ -876,4 +875,10 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Toque para saber mais sobre a utilização de dados móveis"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Limite de dados móveis excedido"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Toque para saber mais sobre a utilização de dados móveis"</string>
+    <!-- no translation found for no_matches (8129421908915840737) -->
+    <skip />
+    <!-- no translation found for find_on_page (1946799233822820384) -->
+    <skip />
+    <!-- no translation found for matches_found:one (8167147081136579439) -->
+    <!-- no translation found for matches_found:other (4641872797067609177) -->
 </resources>

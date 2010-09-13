@@ -288,10 +288,6 @@
     <string name="permdesc_readContacts" msgid="3371591512896545975">"Tillåter att ett program läser alla kontaktuppgifter (adresser) som har lagrats på din telefon. Skadliga program kan använda detta för att skicka dina data till andra personer."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"skriva kontaktuppgifter"</string>
     <string name="permdesc_writeContacts" msgid="3924383579108183601">"Tillåter att ett program ändrar kontaktuppgifter (adress) som har lagrats på din telefon. Skadliga program kan använda detta för att radera eller ändra kontaktuppgifter."</string>
-    <string name="permlab_writeOwnerData" msgid="4892555913849295393">"skriva ägarinformation"</string>
-    <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Tillåter att ett program ändrar information om telefonens ägare som har lagrats på din telefon. Skadliga program kan använda detta för att radera eller ändra ägaruppgifter."</string>
-    <string name="permlab_readOwnerData" msgid="6668525984731523563">"läsa information om ägare"</string>
-    <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Tillåter att ett program läser information om telefonens ägare som har lagrats på telefonen. Skadliga program kan använda detta för att läsa telefonens ägaruppgifter."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"läsa kalenderhändelser"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Tillåter att ett program läser alla händelser i kalendern som har lagrats på din telefon. Skadliga program kan använda detta för att skicka din kalender till andra personer."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"lägg till och ändra kalenderhändelser och skicka e-post till gäster"</string>
@@ -713,13 +709,10 @@
     <string name="copy" msgid="2681946229533511987">"Kopiera"</string>
     <string name="paste" msgid="5629880836805036433">"Klistra in"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Kopiera webbadress"</string>
-    <!-- no translation found for selectTextMode (6738556348861347240) -->
-    <skip />
-    <!-- no translation found for textSelectionCABTitle (5236850394370820357) -->
-    <skip />
+    <string name="selectTextMode" msgid="6738556348861347240">"Markera text..."</string>
+    <string name="textSelectionCABTitle" msgid="5236850394370820357">"Textmarkering"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Indatametod"</string>
-    <!-- no translation found for editTextMenuTitle (4909135564941815494) -->
-    <skip />
+    <string name="editTextMenuTitle" msgid="4909135564941815494">"Textåtgärder"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Dåligt med utrymme"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"Telefonens lagringsutrymme håller på att ta slut."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
@@ -746,6 +739,12 @@
     <string name="force_close" msgid="3653416315450806396">"Tvinga fram en stängning"</string>
     <string name="report" msgid="4060218260984795706">"Rapportera"</string>
     <string name="wait" msgid="7147118217226317732">"Vänta"</string>
+    <!-- no translation found for launch_warning_title (8323761616052121936) -->
+    <skip />
+    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
+    <skip />
+    <!-- no translation found for launch_warning_original (188102023021668683) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"Programmet <xliff:g id="APPLICATION">%1$s</xliff:g> (processen <xliff:g id="PROCESS">%2$s</xliff:g>) har brutit mot sin egen StrictMode-policy."</string>
     <string name="smv_process" msgid="5120397012047462446">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> har brutit mot sin egen StrictMode-policy."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> körs"</string>
@@ -876,4 +875,10 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Tryck om du vill veta mer om mobildataanvändning"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Gränsen för mobildata har överskridits"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Tryck om du vill veta mer om mobildataanvändning"</string>
+    <!-- no translation found for no_matches (8129421908915840737) -->
+    <skip />
+    <!-- no translation found for find_on_page (1946799233822820384) -->
+    <skip />
+    <!-- no translation found for matches_found:one (8167147081136579439) -->
+    <!-- no translation found for matches_found:other (4641872797067609177) -->
 </resources>

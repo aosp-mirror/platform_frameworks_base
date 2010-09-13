@@ -288,10 +288,6 @@
     <string name="permdesc_readContacts" msgid="3371591512896545975">"端末に保存した連絡先（アドレス）データの読み取りをアプリケーションに許可します。悪意のあるアプリケーションがデータを他人に送信する恐れがあります。"</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"連絡先データの書き込み"</string>
     <string name="permdesc_writeContacts" msgid="3924383579108183601">"端末に保存した連絡先（アドレス）データの変更をアプリケーションに許可します。悪意のあるアプリケーションが連絡先データを消去/変更する恐れがあります。"</string>
-    <string name="permlab_writeOwnerData" msgid="4892555913849295393">"所有者データの書き込み"</string>
-    <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"端末に保存した所有者のデータの変更をアプリケーションに許可します。悪意のあるアプリケーションが所有者のデータを消去/変更する恐れがあります。"</string>
-    <string name="permlab_readOwnerData" msgid="6668525984731523563">"所有者データの読み取り"</string>
-    <string name="permdesc_readOwnerData" msgid="3088486383128434507">"携帯電話に保存した所有者データの読み取りをアプリケーションに許可します。悪意のあるアプリケーションが所有者データを読み取る恐れがあります。"</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"カレンダーの予定の読み取り"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"端末に保存したカレンダーの予定の読み取りをアプリケーションに許可します。悪意のあるアプリケーションがカレンダーの予定を他人に送信する恐れがあります。"</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"カレンダーの予定の追加や変更を行い、ゲストにメールを送信する"</string>
@@ -713,13 +709,10 @@
     <string name="copy" msgid="2681946229533511987">"コピー"</string>
     <string name="paste" msgid="5629880836805036433">"貼り付け"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URLをコピー"</string>
-    <!-- no translation found for selectTextMode (6738556348861347240) -->
-    <skip />
-    <!-- no translation found for textSelectionCABTitle (5236850394370820357) -->
-    <skip />
+    <string name="selectTextMode" msgid="6738556348861347240">"テキストを選択..."</string>
+    <string name="textSelectionCABTitle" msgid="5236850394370820357">"テキスト選択"</string>
     <string name="inputMethod" msgid="1653630062304567879">"入力方法"</string>
-    <!-- no translation found for editTextMenuTitle (4909135564941815494) -->
-    <skip />
+    <string name="editTextMenuTitle" msgid="4909135564941815494">"テキスト操作"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"空き容量低下"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"携帯電話の空き容量が少なくなっています。"</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
@@ -746,6 +739,12 @@
     <string name="force_close" msgid="3653416315450806396">"強制終了"</string>
     <string name="report" msgid="4060218260984795706">"レポート"</string>
     <string name="wait" msgid="7147118217226317732">"待機"</string>
+    <!-- no translation found for launch_warning_title (8323761616052121936) -->
+    <skip />
+    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
+    <skip />
+    <!-- no translation found for launch_warning_original (188102023021668683) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"アプリケーション<xliff:g id="APPLICATION">%1$s</xliff:g>（プロセス<xliff:g id="PROCESS">%2$s</xliff:g>）でStrictModeポリシー違反がありました。"</string>
     <string name="smv_process" msgid="5120397012047462446">"プロセス<xliff:g id="PROCESS">%1$s</xliff:g>でStrictModeポリシー違反がありました。"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g>を実行中"</string>
@@ -876,4 +875,10 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"タップしてモバイルデータ利用の詳細を表示します"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"モバイルデータの制限を超えました"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"タップしてモバイルデータ利用の詳細を表示します"</string>
+    <!-- no translation found for no_matches (8129421908915840737) -->
+    <skip />
+    <!-- no translation found for find_on_page (1946799233822820384) -->
+    <skip />
+    <!-- no translation found for matches_found:one (8167147081136579439) -->
+    <!-- no translation found for matches_found:other (4641872797067609177) -->
 </resources>
