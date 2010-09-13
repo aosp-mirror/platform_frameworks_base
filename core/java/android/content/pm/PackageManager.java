@@ -199,24 +199,18 @@ public abstract class PackageManager {
     /**
      * Signature check result: this is returned by {@link #checkSignatures}
      * if neither of the two packages is signed.
-     *
-     * @deprecated It is not possible to install unsigned packages.
      */
     public static final int SIGNATURE_NEITHER_SIGNED = 1;
 
     /**
      * Signature check result: this is returned by {@link #checkSignatures}
      * if the first package is not signed but the second is.
-     *
-     * @deprecated It is not possible to install unsigned packages.
      */
     public static final int SIGNATURE_FIRST_NOT_SIGNED = -1;
 
     /**
      * Signature check result: this is returned by {@link #checkSignatures}
      * if the second package is not signed but the first is.
-     *
-     * @deprecated It is not possible to install unsigned packages.
      */
     public static final int SIGNATURE_SECOND_NOT_SIGNED = -2;
 
