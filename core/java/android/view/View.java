@@ -1582,7 +1582,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * {@link #OVERSCROLL_ALWAYS}, {@link #OVERSCROLL_IF_CONTENT_SCROLLS},
      * and {@link #OVERSCROLL_NEVER}.
      */
-    private int mOverscrollMode = OVERSCROLL_ALWAYS;
+    private int mOverscrollMode;
 
     /**
      * The parent this view is attached to.
@@ -1876,6 +1876,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         // Used for debug only
         //++sInstanceCount;
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        setOverscrollMode(OVERSCROLL_ALWAYS);
     }
 
     /**
