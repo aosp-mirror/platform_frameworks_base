@@ -718,7 +718,6 @@ public class StatusBarPolicy {
                     iconId = sWifiSignalImages[mLastWifiInetConnectivityState]
                             [mLastWifiSignalLevel];
                 }
-
                 mService.setIcon("wifi", iconId, 0);
                 // Show the icon since wi-fi is connected
                 mService.setIconVisibility("wifi", true);
@@ -1101,7 +1100,7 @@ public class StatusBarPolicy {
             int iconId;
             final int newRssi = intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200);
             int newSignalLevel = WifiManager.calculateSignalLevel(newRssi,
-                                                                  sWifiSignalImages.length);
+                                                                  sWifiSignalImages[0].length);
             if (newSignalLevel != mLastWifiSignalLevel) {
                 mLastWifiSignalLevel = newSignalLevel;
                 if (mIsWifiConnected) {
