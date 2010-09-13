@@ -65,6 +65,7 @@ namespace {
 int LvmInitFlag = LVM_FALSE;
 int LvmSessionsActive = 0;
 SessionContext GlobalSessionMemory[LVM_MAX_SESSIONS];
+
 int SessionIndex[LVM_MAX_SESSIONS];
 
 // NXP SW BassBoost UUID
@@ -199,11 +200,6 @@ extern "C" int EffectCreate(effect_uuid_t       *uuid,
         return -EINVAL;
     }
 
-    if(sessionId < 0){
-        LOGV("\tLVM_ERROR : EffectCreate sessionId is less than 0");
-        return -EINVAL;
-    }
-
     if(LvmInitFlag == LVM_FALSE){
         LvmInitFlag = LVM_TRUE;
         LOGV("\tEffectCreate - Initializing all global memory");
@@ -214,7 +210,7 @@ extern "C" int EffectCreate(effect_uuid_t       *uuid,
 
     // Find next available sessionNo
     for(i=0; i<LVM_MAX_SESSIONS; i++){
-        if((SessionIndex[i] == -1)||(SessionIndex[i] == sessionId)){
+        if((SessionIndex[i] == LVM_UNUSED_SESSION)||(SessionIndex[i] == sessionId)){
             sessionNo       = i;
             SessionIndex[i] = sessionId;
             LOGV("\tEffectCreate: Allocating SessionNo %d for SessionId %d\n", sessionNo,sessionId);
@@ -398,7 +394,7 @@ extern "C" int EffectRelease(effect_interface_t interface){
         // Clear the SessionIndex
         for(int i=0; i<LVM_MAX_SESSIONS; i++){
             if(SessionIndex[i] == pContext->pBundledContext->SessionId){
-                SessionIndex[i] = -1;
+                SessionIndex[i] = LVM_UNUSED_SESSION;
                 LOGV("\tEffectRelease: Clearing SessionIndex SessionNo %d for SessionId %d\n",
                         i, pContext->pBundledContext->SessionId);
                 break;
@@ -432,7 +428,7 @@ void LvmGlobalBundle_init(){
         GlobalSessionMemory[i].bVirtualizerInstantiated = LVM_FALSE;
         GlobalSessionMemory[i].pBundledContext          = LVM_NULL;
 
-        SessionIndex[i] = -1;
+        SessionIndex[i] = LVM_UNUSED_SESSION;
     }
     return;
 }
