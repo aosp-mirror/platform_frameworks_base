@@ -56,12 +56,7 @@ public class FileFilter {
     private final Set<String> mFailList = new HashSet<String>();
     private final Set<String> mSlowList = new HashSet<String>();
 
-    private final String mRootDirPath;
-
-    public FileFilter(String rootDirPath) {
-        /** It may or may not contain a trailing slash */
-        this.mRootDirPath = rootDirPath;
-
+    public FileFilter() {
         loadTestExpectations();
     }
 
@@ -284,37 +279,6 @@ public class FileFilter {
         }
 
         return null;
-    }
-
-    /**
-     * Return the path to the file relative to the tests root dir
-     *
-     * @param filePath
-     * @return
-     *      the path relative to the tests root dir
-     */
-    public String getRelativePath(String filePath) {
-        File rootDir = new File(mRootDirPath);
-        return filePath.replaceFirst(rootDir.getPath() + File.separator, "");
-    }
-
-    /**
-     * Return the path to the file relative to the tests root dir
-     *
-     * @param filePath
-     * @return
-     *      the path relative to the tests root dir
-     */
-    public String getRelativePath(File file) {
-        return getRelativePath(file.getAbsolutePath());
-    }
-
-    public File getAbsoluteFile(String relativePath) {
-        return new File(mRootDirPath, relativePath);
-    }
-
-    public String getAboslutePath(String relativePath) {
-        return getAbsoluteFile(relativePath).getAbsolutePath();
     }
 
     /**

@@ -43,12 +43,6 @@ public class ManagerService extends Service {
     private static final int CRASH_TIMEOUT_MS = 20 * 1000;
 
     /** TODO: make it a setting */
-    static final String TESTS_ROOT_DIR_PATH =
-            Environment.getExternalStorageDirectory() +
-            File.separator + "android" +
-            File.separator + "LayoutTests";
-
-    /** TODO: make it a setting */
     static final String RESULTS_ROOT_DIR_PATH =
             Environment.getExternalStorageDirectory() +
             File.separator + "android" +
@@ -141,7 +135,7 @@ public class ManagerService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        mFileFilter = new FileFilter(TESTS_ROOT_DIR_PATH);
+        mFileFilter = new FileFilter();
         mSummarizer = new Summarizer(mFileFilter, RESULTS_ROOT_DIR_PATH);
     }
 

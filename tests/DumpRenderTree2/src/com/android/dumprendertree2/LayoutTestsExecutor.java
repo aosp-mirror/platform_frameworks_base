@@ -73,12 +73,6 @@ public class LayoutTestsExecutor extends Activity {
         }
     }
 
-    /** TODO: make it a setting */
-    static final String TESTS_ROOT_DIR_PATH =
-            Environment.getExternalStorageDirectory() +
-            File.separator + "android" +
-            File.separator + "LayoutTests";
-
     private static final String LOG_TAG = "LayoutTestExecutor";
 
     public static final String EXTRA_TESTS_LIST = "TestsList";
