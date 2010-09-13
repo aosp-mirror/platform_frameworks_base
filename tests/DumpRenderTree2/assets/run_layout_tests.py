@@ -44,12 +44,14 @@ def main():
 
   # Download the txt summary to tmp folder
   summary_txt_tmp_path = os.path.join(tmpdir, SUMMARY_TXT)
-  cmd = "adb pull " + RESULTS_ABSOLUTE_PATH + SUMMARY_TXT + " " + summary_txt_tmp_path
+  cmd = "rm -f " + summary_txt_tmp_path + ";"
+  cmd += "adb pull " + RESULTS_ABSOLUTE_PATH + SUMMARY_TXT + " " + summary_txt_tmp_path
   subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
   # Download the html summary to tmp folder
   details_html_tmp_path = os.path.join(tmpdir, DETAILS_HTML)
-  cmd = "adb pull " + RESULTS_ABSOLUTE_PATH + DETAILS_HTML + " " + details_html_tmp_path
+  cmd = "rm -f " + details_html_tmp_path + ";"
+  cmd += "adb pull " + RESULTS_ABSOLUTE_PATH + DETAILS_HTML + " " + details_html_tmp_path
   subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
   # Print summary to console
