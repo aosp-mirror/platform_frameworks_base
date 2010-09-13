@@ -1344,6 +1344,8 @@
   <public type="attr" name="titleTextStyle" />
   <public type="attr" name="subtitleTextStyle" />
   <public type="attr" name="iconifiedByDefault" />
+  <public type="attr" name="actionLayout" />
+  <public type="attr" name="actionViewClass" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />

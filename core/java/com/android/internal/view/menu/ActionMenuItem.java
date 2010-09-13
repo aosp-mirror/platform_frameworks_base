@@ -19,9 +19,10 @@ package com.android.internal.view.menu;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
 import android.view.SubMenu;
-import android.view.ContextMenu.ContextMenuInfo;
+import android.view.View;
 
 /**
  * @hide
@@ -221,5 +222,13 @@ public class ActionMenuItem implements MenuItem {
     
     public void setShowAsAction(int show) {
         // Do nothing. ActionMenuItems always show as action buttons.
+    }
+
+    public MenuItem setActionView(View actionView) {
+        throw new UnsupportedOperationException();
+    }
+
+    public View getActionView() {
+        return null;
     }
 }

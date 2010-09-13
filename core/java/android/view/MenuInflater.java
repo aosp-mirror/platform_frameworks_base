@@ -16,8 +16,7 @@
 
 package android.view;
 
-import java.io.IOException;
-import java.lang.reflect.Method;
+import com.android.internal.view.menu.MenuItemImpl;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -29,7 +28,9 @@ import android.content.res.XmlResourceParser;
 import android.util.AttributeSet;
 import android.util.Xml;
 
-import com.android.internal.view.menu.MenuItemImpl;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 /**
  * This class is used to instantiate menu XML files into Menu objects.
@@ -52,6 +53,8 @@ public class MenuInflater {
 
     private static final int NO_ID = 0;
     
+    private static final Class<?>[] ACTION_VIEW_CONSTRUCTOR_SIGNATURE = new Class[]{Context.class};
+
     private Context mContext;
     
     /**
@@ -249,6 +252,9 @@ public class MenuInflater {
          * - -1: Safe sentinel for "no value".
          */
         private int itemShowAsAction;
+
+        private int itemActionViewLayout;
+        private String itemActionViewClassName;
         
         private String itemListenerMethodName;
         
@@ -325,6 +331,8 @@ public class MenuInflater {
             itemEnabled = a.getBoolean(com.android.internal.R.styleable.MenuItem_enabled, groupEnabled);
             itemShowAsAction = a.getInt(com.android.internal.R.styleable.MenuItem_showAsAction, -1);
             itemListenerMethodName = a.getString(com.android.internal.R.styleable.MenuItem_onClick);
+            itemActionViewLayout = a.getResourceId(com.android.internal.R.styleable.MenuItem_actionLayout, 0);
+            itemActionViewClassName = a.getString(com.android.internal.R.styleable.MenuItem_actionViewClass);
             
             a.recycle();
             
@@ -367,6 +375,19 @@ public class MenuInflater {
                 if (itemCheckable >= 2) {
                     impl.setExclusiveCheckable(true);
                 }
+            }
+
+            if (itemActionViewClassName != null) {
+                try {
+                    final Class<?> clazz = Class.forName(itemActionViewClassName);
+                    Constructor<?> c = clazz.getConstructor(ACTION_VIEW_CONSTRUCTOR_SIGNATURE);
+                    item.setActionView((View) c.newInstance(mContext));
+                } catch (Exception e) {
+                    throw new InflateException(e);
+                }
+            } else if (itemActionViewLayout > 0) {
+                final LayoutInflater inflater = LayoutInflater.from(mContext);
+                item.setActionView(inflater.inflate(itemActionViewLayout, null));
             }
         }
         

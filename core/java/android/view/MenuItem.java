@@ -405,6 +405,29 @@ public interface MenuItem {
      * {@link #SHOW_AS_ACTION_NEVER}. SHOW_AS_ACTION_NEVER is the default.
      * 
      * @see android.app.ActionBar
+     * @see #setActionView(View)
      */
     public void setShowAsAction(int actionEnum);
+
+    /**
+     * Set an action view for this menu item. An action view will be displayed in place
+     * of an automatically generated menu item element in the UI when this item is shown
+     * as an action within a parent.
+     *
+     * @param view View to use for presenting this item to the user.
+     * @return This Item so additional setters can be called.
+     *
+     * @see #setShowAsAction(int)
+     */
+    public MenuItem setActionView(View view);
+
+    /**
+     * Returns the currently set action view for this menu item.
+     *
+     * @return This item's action view
+     *
+     * @see #setActionView(View)
+     * @see #setShowAsAction(int)
+     */
+    public View getActionView();
 }
