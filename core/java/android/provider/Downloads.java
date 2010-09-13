@@ -880,6 +880,14 @@ public final class Downloads {
          */
         public static final String COLUMN_ALLOWED_NETWORK_TYPES = "allowed_network_types";
 
+        /**
+         * Whether or not this download should be displayed in the system's Downloads UI.  Defaults
+         * to true.
+         * <P>Type: INTEGER</P>
+         * <P>Owner can Init/Read</P>
+         */
+        public static final String COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI = "is_visible_in_downloads_ui";
+
         /*
          * Lists the destinations that an application can specify for a download.
          */
