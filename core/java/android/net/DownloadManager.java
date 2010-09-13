@@ -276,6 +276,7 @@ public class DownloadManager {
         private String mMediaType;
         private boolean mRoamingAllowed = true;
         private int mAllowedNetworkTypes = ~0; // default to all network types allowed
+        private boolean mIsVisibleInDownloadsUi = true;
 
         /**
          * @param uri the HTTP URI to download.
@@ -387,6 +388,17 @@ public class DownloadManager {
         }
 
         /**
+         * Set whether this download should be displayed in the system's Downloads UI. True by
+         * default.
+         * @param isVisible whether to display this download in the Downloads UI
+         * @return this object
+         */
+        public Request setVisibleInDownloadsUi(boolean isVisible) {
+            mIsVisibleInDownloadsUi = isVisible;
+            return this;
+        }
+
+        /**
          * @return ContentValues to be passed to DownloadProvider.insert()
          */
         ContentValues toContentValues(String packageName) {
@@ -418,6 +430,7 @@ public class DownloadManager {
 
             values.put(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES, mAllowedNetworkTypes);
             values.put(Downloads.Impl.COLUMN_ALLOW_ROAMING, mRoamingAllowed);
+            values.put(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, mIsVisibleInDownloadsUi);
 
             return values;
         }
@@ -458,6 +471,7 @@ public class DownloadManager {
         private Integer mStatusFlags = null;
         private String mOrderByColumn = Downloads.COLUMN_LAST_MODIFICATION;
         private int mOrderDirection = ORDER_DESCENDING;
+        private boolean mOnlyIncludeVisibleInDownloadsUi = false;
 
         /**
          * Include only the download with the given ID.
@@ -475,6 +489,19 @@ public class DownloadManager {
          */
         public Query setFilterByStatus(int flags) {
             mStatusFlags = flags;
+            return this;
+        }
+
+        /**
+         * Controls whether this query includes downloads not visible in the system's Downloads UI.
+         * @param value if true, this query will only include downloads that should be displayed in
+         *            the system's Downloads UI; if false (the default), this query will include
+         *            both visible and invisible downloads.
+         * @return this object
+         * @hide
+         */
+        public Query setOnlyIncludeVisibleInDownloadsUi(boolean value) {
+            mOnlyIncludeVisibleInDownloadsUi = value;
             return this;
         }
 
@@ -511,7 +538,7 @@ public class DownloadManager {
          */
         Cursor runQuery(ContentResolver resolver, String[] projection) {
             Uri uri = Downloads.CONTENT_URI;
-            String selection = null;
+            List<String> selectionParts = new ArrayList<String>();
 
             if (mId != null) {
                 uri = Uri.withAppendedPath(uri, mId.toString());
@@ -536,9 +563,14 @@ public class DownloadManager {
                     parts.add("(" + statusClause(">=", 400)
                               + " AND " + statusClause("<", 600) + ")");
                 }
-                selection = joinStrings(" OR ", parts);
+                selectionParts.add(joinStrings(" OR ", parts));
             }
 
+            if (mOnlyIncludeVisibleInDownloadsUi) {
+                selectionParts.add(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI + " != '0'");
+            }
+
+            String selection = joinStrings(" AND ", selectionParts);
             String orderDirection = (mOrderDirection == ORDER_ASCENDING ? "ASC" : "DESC");
             String orderBy = mOrderByColumn + " " + orderDirection;
 
@@ -625,6 +657,34 @@ public class DownloadManager {
      */
     public ParcelFileDescriptor openDownloadedFile(long id) throws FileNotFoundException {
         return mResolver.openFileDescriptor(getDownloadUri(id), "r");
+    }
+
+    /**
+     * Restart the given download, which must have already completed (successfully or not).  This
+     * method will only work when called from within the download manager's process.
+     * @param id the ID of the download
+     * @hide
+     */
+    public void restartDownload(long id) {
+        Cursor cursor = query(new Query().setFilterById(id));
+        try {
+            if (!cursor.moveToFirst()) {
+                throw new IllegalArgumentException("No download with id " + id);
+            }
+            int status = cursor.getInt(cursor.getColumnIndex(COLUMN_STATUS));
+            if (status != STATUS_SUCCESSFUL && status != STATUS_FAILED) {
+                throw new IllegalArgumentException("Cannot restart incomplete download: " + id);
+            }
+        } finally {
+            cursor.close();
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(Downloads.Impl.COLUMN_CURRENT_BYTES, 0);
+        values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, -1);
+        values.putNull(Downloads.Impl._DATA);
+        values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
+        mResolver.update(getDownloadUri(id), values, null, null);
     }
 
     /**
