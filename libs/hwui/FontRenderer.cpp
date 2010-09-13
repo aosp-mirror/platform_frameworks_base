@@ -166,7 +166,7 @@ void Font::measureUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t
     renderUTF(paint, text, start, len, numGlyphs, 0, 0, MEASURE, NULL, 0, 0, bounds);
 }
 
-#define SkAutoKern_AdjustF(prev, next)    (((next) - (prev) + 32) >> 6 << 16)
+#define SkAutoKern_AdjustF(prev, next) (((next) - (prev) + 32) >> 6 << 16)
 
 void Font::renderUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
         int numGlyphs, int x, int y, RenderMode mode, uint8_t *bitmap,
