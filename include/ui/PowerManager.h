@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_SERVER_POWER_MANAGER_SERVICE_H
-#define _ANDROID_SERVER_POWER_MANAGER_SERVICE_H
+#ifndef _UI_POWER_MANAGER_H
+#define _UI_POWER_MANAGER_H
 
-#include "JNIHelp.h"
-#include "jni.h"
-
-#include <ui/PowerManager.h>
 
 namespace android {
 
-extern bool android_server_PowerManagerService_isScreenOn();
-extern bool android_server_PowerManagerService_isScreenBright();
-extern void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType);
-extern void android_server_PowerManagerService_goToSleep(nsecs_t eventTime);
+enum {
+    POWER_MANAGER_OTHER_EVENT = 0,
+    POWER_MANAGER_CHEEK_EVENT = 1,
+    POWER_MANAGER_TOUCH_EVENT = 2, // touch events are TOUCH for 300ms, and then either
+                                   // up events or LONG_TOUCH events.
+    POWER_MANAGER_LONG_TOUCH_EVENT = 3,
+    POWER_MANAGER_TOUCH_UP_EVENT = 4,
+    POWER_MANAGER_BUTTON_EVENT = 5, // Button and trackball events.
+
+    POWER_MANAGER_LAST_EVENT = POWER_MANAGER_BUTTON_EVENT, // Last valid event code.
+};
 
 } // namespace android
 
-#endif // _ANDROID_SERVER_POWER_MANAGER_SERVICE_H
+#endif // _UI_POWER_MANAGER_H
