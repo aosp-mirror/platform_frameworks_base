@@ -36,52 +36,45 @@ public class AdbUtils {
     private static final int ADB_RESPONSE_SIZE = 4;
 
     /**
-     * Send an ADB command using existing socket connection
+     * Creates a new socket that can be configured to serve as a transparent proxy to a
+     * remote machine. This can be achieved by calling configureSocket()
      *
-     * The streams provided must be from a socket connected to adb already
+     * @return a socket that can be configured to link to remote machine
+     */
+    public static Socket createSocket() {
+        Socket socket = null;
+        try {
+            socket = new Socket(ADB_HOST, ADB_PORT);
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Creation failed.", e);
+        }
+        return socket;
+    }
+
+    /**
+     * Configures the connection to serve as a transparent proxy to a remote machine.
+     * The given streams must belong to a socket created by createSocket().
      *
-     * @param is input stream of the socket connection
-     * @param os output stream of the socket
-     * @param cmd the adb command to send
-     * @return if adb gave a success response
+     * @param inputStream inputStream of the socket we want to configure
+     * @param outputStream outputStream of the socket we want to configure
+     * @param remoteAddress address of the remote machine (as you would type in a browser
+     *      in a machine that the device is connected to via adb)
+     * @param remotePort port on which to connect
+     * @return if the configuration suceeded
      * @throws IOException
      */
-    private static boolean sendAdbCmd(InputStream is, OutputStream os, String cmd)
-            throws IOException {
-        byte[] buf = new byte[ADB_RESPONSE_SIZE];
-
+    public static boolean configureConnection(InputStream inputStream, OutputStream outputStream,
+            String remoteAddress, int remotePort) throws IOException {
+        String cmd = "tcp:" + remotePort + ":" + remoteAddress;
         cmd = String.format("%04X", cmd.length()) + cmd;
-        os.write(cmd.getBytes());
-        int read = is.read(buf);
+
+        byte[] buf = new byte[ADB_RESPONSE_SIZE];
+        outputStream.write(cmd.getBytes());
+        int read = inputStream.read(buf);
         if (read != ADB_RESPONSE_SIZE || !ADB_OK.equals(new String(buf))) {
             Log.w(LOG_TAG, "adb cmd faild.");
             return false;
         }
         return true;
-    }
-
-    /**
-     * Get a tcp socket connection to specified IP address and port proxied by adb
-     *
-     * The proxying is transparent, e.g. if a socket is returned, then it can be written to and
-     * read from as if it is directly connected to the target
-     *
-     * @param remoteAddress IP address of the host to connect to
-     * @param remotePort port of the host to connect to
-     * @return a valid Socket instance if successful, null otherwise
-     */
-    public static Socket getSocketToRemoteMachine(String remoteAddress, int remotePort) {
-        try {
-            Socket socket = new Socket(ADB_HOST, ADB_PORT);
-            String cmd = "tcp:" + remotePort + ":" + remoteAddress;
-            if (!sendAdbCmd(socket.getInputStream(), socket.getOutputStream(), cmd)) {
-                socket.close();
-                return null;
-            }
-            return socket;
-        } catch (IOException ioe) {
-            Log.w(LOG_TAG, "error creating adb socket", ioe);
-            return null;
-        }
     }
 }
