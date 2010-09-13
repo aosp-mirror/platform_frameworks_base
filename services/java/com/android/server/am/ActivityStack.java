@@ -1104,7 +1104,7 @@ public class ActivityStack {
         // Okay we are now going to start a switch, to 'next'.  We may first
         // have to pause the current activity, but this is an important point
         // where we have decided to go to 'next' so keep track of that.
-        if (mLastStartedActivity != null) {
+        if (mLastStartedActivity != null && !mLastStartedActivity.finishing) {
             long now = SystemClock.uptimeMillis();
             final boolean inTime = mLastStartedActivity.startTime != 0
                     && (mLastStartedActivity.startTime + START_WARN_TIME) >= now;
