@@ -1317,18 +1317,20 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN: {
-                AudioManager audioManager = (AudioManager) getContext().getSystemService(
-                        Context.AUDIO_SERVICE);
-                if (audioManager != null) {
-                    /*
-                     * Play a sound. This is done on key up since we don't want the
-                     * sound to play when a user holds down volume down to mute.
-                     */
-                    audioManager.adjustSuggestedStreamVolume(
-                            AudioManager.ADJUST_SAME,
-                            mVolumeControlStreamType,
-                            AudioManager.FLAG_PLAY_SOUND);
-                    mVolumeKeyUpTime = SystemClock.uptimeMillis();
+                if (!event.isCanceled()) {
+                    AudioManager audioManager = (AudioManager) getContext().getSystemService(
+                            Context.AUDIO_SERVICE);
+                    if (audioManager != null) {
+                        /*
+                         * Play a sound. This is done on key up since we don't want the
+                         * sound to play when a user holds down volume down to mute.
+                         */
+                        audioManager.adjustSuggestedStreamVolume(
+                                AudioManager.ADJUST_SAME,
+                                mVolumeControlStreamType,
+                                AudioManager.FLAG_PLAY_SOUND);
+                        mVolumeKeyUpTime = SystemClock.uptimeMillis();
+                    }
                 }
                 return true;
             }
