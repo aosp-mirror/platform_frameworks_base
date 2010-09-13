@@ -265,15 +265,12 @@ public class Summarizer {
         txt.append("WebKit version: " + getWebKitVersionFromUserAgentString() + "\n");
         txt.append("WebKit revision: " + getWebKitRevision() + "\n");
 
-        txt.append("TOTAL:   " + getTotalTestCount() + "\n");
-        if (mCrashedTestsCount > 0) {
-            txt.append("CRASHED (total among all tests): " + mCrashedTestsCount + "\n");
-            txt.append("-------------");
-        }
-        txt.append("UNEXPECTED FAILURES: " + mUnexpectedFailures.size() + "\n");
-        txt.append("UNEXPECTED PASSES:   " + mUnexpectedPasses.size() + "\n");
-        txt.append("EXPECTED FAILURES:   " + mExpectedFailures.size() + "\n");
-        txt.append("EXPECTED PASSES:     " + mExpectedPasses.size() + "\n");
+        txt.append("TOTAL:                     " + getTotalTestCount() + "\n");
+        txt.append("CRASHED (among all tests): " + mCrashedTestsCount + "\n");
+        txt.append("UNEXPECTED FAILURES:       " + mUnexpectedFailures.size() + "\n");
+        txt.append("UNEXPECTED PASSES:         " + mUnexpectedPasses.size() + "\n");
+        txt.append("EXPECTED FAILURES:         " + mExpectedFailures.size() + "\n");
+        txt.append("EXPECTED PASSES:           " + mExpectedPasses.size() + "\n");
 
         FsUtils.writeDataToStorage(new File(mResultsRootDirPath, TXT_SUMMARY_RELATIVE_PATH),
                 txt.toString().getBytes(), false);
@@ -355,7 +352,7 @@ public class Summarizer {
 
         html.append("<table class=\"summary\">");
         createSummaryTableRow(html, "TOTAL", getTotalTestCount());
-        createSummaryTableRow(html, "CRASHED", mCrashedTestsCount);
+        createSummaryTableRow(html, "CRASHED (among all tests)", mCrashedTestsCount);
         createSummaryTableRow(html, "UNEXPECTED FAILURES", mUnexpectedFailures.size());
         createSummaryTableRow(html, "UNEXPECTED PASSES", mUnexpectedPasses.size());
         createSummaryTableRow(html, "EXPECTED FAILURES", mExpectedFailures.size());
