@@ -686,6 +686,13 @@ public class ValueAnimator<T> extends Animator {
     private void start(boolean playBackwards) {
         mPlayingBackwards = playBackwards;
         if ((mStartDelay == 0) && (Thread.currentThread() == Looper.getMainLooper().getThread())) {
+            if (mListeners != null) {
+                ArrayList<AnimatorListener> tmpListeners =
+                        (ArrayList<AnimatorListener>) mListeners.clone();
+                for (AnimatorListener listener : tmpListeners) {
+                    listener.onAnimationStart(this);
+                }
+            }
             // This sets the initial value of the animation, prior to actually starting it running
             setCurrentPlayTime(getCurrentPlayTime());
         }
@@ -783,7 +790,9 @@ public class ValueAnimator<T> extends Animator {
     private void startAnimation() {
         initAnimation();
         sAnimations.add(this);
-        if (mListeners != null) {
+        if (mStartDelay > 0 && mListeners != null) {
+            // Listeners were already notified in start() if startDelay is 0; this is
+            // just for delayed animations
             ArrayList<AnimatorListener> tmpListeners =
                     (ArrayList<AnimatorListener>) mListeners.clone();
             for (AnimatorListener listener : tmpListeners) {

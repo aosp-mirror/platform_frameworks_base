@@ -80,6 +80,21 @@ static const Blender gBlends[] = {
         { SkXfermode::kXor_Mode,     GL_ONE_MINUS_DST_ALPHA,  GL_ONE_MINUS_SRC_ALPHA }
 };
 
+static const Blender gBlendsSwap[] = {
+        { SkXfermode::kClear_Mode,   GL_ZERO,                 GL_ZERO },
+        { SkXfermode::kSrc_Mode,     GL_ZERO,                 GL_ONE },
+        { SkXfermode::kDst_Mode,     GL_ONE,                  GL_ZERO },
+        { SkXfermode::kSrcOver_Mode, GL_ONE_MINUS_DST_ALPHA,  GL_ONE },
+        { SkXfermode::kDstOver_Mode, GL_ONE,                  GL_ONE_MINUS_SRC_ALPHA },
+        { SkXfermode::kSrcIn_Mode,   GL_ZERO,                 GL_SRC_ALPHA },
+        { SkXfermode::kDstIn_Mode,   GL_DST_ALPHA,            GL_ZERO },
+        { SkXfermode::kSrcOut_Mode,  GL_ZERO,                 GL_ONE_MINUS_SRC_ALPHA },
+        { SkXfermode::kDstOut_Mode,  GL_ONE_MINUS_DST_ALPHA,  GL_ZERO },
+        { SkXfermode::kSrcATop_Mode, GL_ONE_MINUS_DST_ALPHA,  GL_SRC_ALPHA },
+        { SkXfermode::kDstATop_Mode, GL_DST_ALPHA,            GL_ONE_MINUS_SRC_ALPHA },
+        { SkXfermode::kXor_Mode,     GL_ONE_MINUS_DST_ALPHA,  GL_ONE_MINUS_SRC_ALPHA }
+};
+
 static const GLenum gTextureUnits[] = {
         GL_TEXTURE0,
         GL_TEXTURE1,
@@ -122,8 +137,6 @@ void OpenGLRenderer::setViewport(int width, int height) {
 
     mWidth = width;
     mHeight = height;
-    mFirstSnapshot->height = height;
-    mFirstSnapshot->viewport.set(0, 0, width, height);
 }
 
 void OpenGLRenderer::prepare() {
@@ -133,6 +146,7 @@ void OpenGLRenderer::prepare() {
 
     glViewport(0, 0, mWidth, mHeight);
 
+    glDisable(GL_DITHER);
     glDisable(GL_SCISSOR_TEST);
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -154,14 +168,19 @@ void OpenGLRenderer::acquireContext() {
 }
 
 void OpenGLRenderer::releaseContext() {
-    glViewport(0, 0, mSnapshot->viewport.getWidth(), mSnapshot->viewport.getHeight());
+    glViewport(0, 0, mWidth, mHeight);
 
     glEnable(GL_SCISSOR_TEST);
     setScissorFromClip();
 
+    glDisable(GL_DITHER);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     if (mCaches.blend) {
         glEnable(GL_BLEND);
         glBlendFunc(mCaches.lastSrcMode, mCaches.lastDstMode);
+        glBlendEquation(GL_FUNC_ADD);
     } else {
         glDisable(GL_BLEND);
     }
@@ -201,16 +220,9 @@ int OpenGLRenderer::saveSnapshot(int flags) {
 bool OpenGLRenderer::restoreSnapshot() {
     bool restoreClip = mSnapshot->flags & Snapshot::kFlagClipSet;
     bool restoreLayer = mSnapshot->flags & Snapshot::kFlagIsLayer;
-    bool restoreOrtho = mSnapshot->flags & Snapshot::kFlagDirtyOrtho;
 
     sp<Snapshot> current = mSnapshot;
     sp<Snapshot> previous = mSnapshot->previous;
-
-    if (restoreOrtho) {
-        Rect& r = previous->viewport;
-        glViewport(r.left, r.top, r.right, r.bottom);
-        mOrthoMatrix.load(current->orthoMatrix);
-    }
 
     mSaveCount--;
     mSnapshot = previous;
@@ -239,20 +251,20 @@ int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
 
     if (p) {
         alpha = p->getAlpha();
-        const bool isMode = SkXfermode::IsMode(p->getXfermode(), &mode);
-        if (!isMode) {
-            // Assume SRC_OVER
-            mode = SkXfermode::kSrcOver_Mode;
+        if (!mExtensions.hasFramebufferFetch()) {
+            const bool isMode = SkXfermode::IsMode(p->getXfermode(), &mode);
+            if (!isMode) {
+                // Assume SRC_OVER
+                mode = SkXfermode::kSrcOver_Mode;
+            }
+        } else {
+            mode = getXfermode(p->getXfermode());
         }
     } else {
         mode = SkXfermode::kSrcOver_Mode;
     }
 
-    if (alpha > 0 && !mSnapshot->invisible) {
-        createLayer(mSnapshot, left, top, right, bottom, alpha, mode, flags);
-    } else {
-        mSnapshot->invisible = true;
-    }
+    createLayer(mSnapshot, left, top, right, bottom, alpha, mode, flags);
 
     return count;
 }
@@ -273,48 +285,36 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     LAYER_LOGD("Requesting layer %fx%f", right - left, bottom - top);
     LAYER_LOGD("Layer cache size = %d", mCaches.layerCache.getSize());
 
+    // Window coordinates of the layer
     Rect bounds(left, top, right, bottom);
-    // TODO: Apply transformations and treat layers in screen coordinates
-    // mSnapshot->transform->mapRect(bounds);
+    mSnapshot->transform->mapRect(bounds);
 
-    GLuint previousFbo = snapshot->previous.get() ? snapshot->previous->fbo : 0;
     LayerSize size(bounds.getWidth(), bounds.getHeight());
 
-    Layer* layer = mCaches.layerCache.get(size, previousFbo);
+    Layer* layer = mCaches.layerCache.get(size);
     if (!layer) {
         return false;
     }
 
-    glBindFramebuffer(GL_FRAMEBUFFER, layer->fbo);
-
-    // Clear the FBO
-    glDisable(GL_SCISSOR_TEST);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glEnable(GL_SCISSOR_TEST);
-
     layer->mode = mode;
-    layer->alpha = alpha / 255.0f;
+    layer->alpha = alpha;
     layer->layer.set(bounds);
 
     // Save the layer in the snapshot
     snapshot->flags |= Snapshot::kFlagIsLayer;
     snapshot->layer = layer;
-    snapshot->fbo = layer->fbo;
-    // TODO: Temporary until real layer support is implemented
-    snapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
-    // TODO: Temporary until real layer support is implemented
-    snapshot->resetClip(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
-    snapshot->viewport.set(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
-    snapshot->height = bounds.getHeight();
-    snapshot->flags |= Snapshot::kFlagDirtyOrtho;
-    snapshot->orthoMatrix.load(mOrthoMatrix);
 
-    setScissorFromClip();
+    // Copy the framebuffer into the layer
+    glBindTexture(GL_TEXTURE_2D, layer->texture);
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
+            bounds.getWidth(), bounds.getHeight(), 0);
 
-    // Change the ortho projection
-    glViewport(0, 0, bounds.getWidth(), bounds.getHeight());
-    mOrthoMatrix.loadOrtho(0.0f, bounds.getWidth(), bounds.getHeight(), 0.0f, -1.0f, 1.0f);
+    if (flags & SkCanvas::kClipToLayer_SaveFlag) {
+        if (mSnapshot->clipTransformed(bounds)) setScissorFromClip();
+    }
+
+    // Enqueue the buffer coordinates to clear the corresponding region later
+    mLayers.push(new Rect(bounds));
 
     return true;
 }
@@ -325,22 +325,32 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
         return;
     }
 
-    // Unbind current FBO and restore previous one
-    // Most of the time, previous->fbo will be 0 to bind the default buffer
-    glBindFramebuffer(GL_FRAMEBUFFER, previous->fbo);
-
     // Restore the clip from the previous snapshot
     const Rect& clip = *previous->clipRect;
-    glScissor(clip.left, previous->height - clip.bottom, clip.getWidth(), clip.getHeight());
+    glScissor(clip.left, mHeight - clip.bottom, clip.getWidth(), clip.getHeight());
 
     Layer* layer = current->layer;
     const Rect& rect = layer->layer;
 
-    // FBOs are already drawn with a top-left origin, don't flip the texture
+    if (layer->alpha < 255) {
+        glEnable(GL_BLEND);
+        glBlendFuncSeparate(GL_ZERO, GL_SRC_ALPHA, GL_DST_ALPHA, GL_ZERO);
+
+        drawColorRect(rect.left, rect.top, rect.right, rect.bottom,
+                layer->alpha << 24, SkXfermode::kSrcOver_Mode, true, true);
+
+        glBlendFunc(mCaches.lastSrcMode, mCaches.lastDstMode);
+        if (!mCaches.blend) {
+            glDisable(GL_BLEND);
+        }
+    }
+
+    // Layers are already drawn with a top-left origin, don't flip the texture
     resetDrawTextureTexCoords(0.0f, 1.0f, 1.0f, 0.0f);
 
-    drawTextureRect(rect.left, rect.top, rect.right, rect.bottom,
-            layer->texture, layer->alpha, layer->mode, layer->blend);
+    drawTextureMesh(rect.left, rect.top, rect.right, rect.bottom, layer->texture,
+            1.0f, layer->mode, layer->blend, &mMeshVertices[0].position[0],
+            &mMeshVertices[0].texture[0], NULL, 0, true, true);
 
     resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
 
@@ -350,11 +360,30 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     if (!mCaches.layerCache.put(size, layer)) {
         LAYER_LOGD("Deleting layer");
 
-        glDeleteFramebuffers(1, &layer->fbo);
         glDeleteTextures(1, &layer->texture);
 
         delete layer;
     }
+}
+
+void OpenGLRenderer::clearLayerRegions() {
+    if (mLayers.size() == 0) return;
+
+    for (uint32_t i = 0; i < mLayers.size(); i++) {
+        Rect* bounds = mLayers.itemAt(i);
+
+        // Clear the framebuffer where the layer will draw
+        glScissor(bounds->left, mHeight - bounds->bottom,
+                bounds->getWidth(), bounds->getHeight());
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        delete bounds;
+    }
+    mLayers.clear();
+
+    // Restore the clip
+    setScissorFromClip();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -392,7 +421,7 @@ void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
 
 void OpenGLRenderer::setScissorFromClip() {
     const Rect& clip = *mSnapshot->clipRect;
-    glScissor(clip.left, mSnapshot->height - clip.bottom, clip.getWidth(), clip.getHeight());
+    glScissor(clip.left, mHeight - clip.bottom, clip.getWidth(), clip.getHeight());
 }
 
 const Rect& OpenGLRenderer::getClipBounds() {
@@ -400,8 +429,6 @@ const Rect& OpenGLRenderer::getClipBounds() {
 }
 
 bool OpenGLRenderer::quickReject(float left, float top, float right, float bottom) {
-    if (mSnapshot->invisible) return true;
-
     Rect r(left, top, right, bottom);
     mSnapshot->transform->mapRect(r);
     return !mSnapshot->clipRect->intersects(r);
@@ -507,7 +534,6 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
 }
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
-    if (mSnapshot->invisible) return;
     const Rect& clip = *mSnapshot->clipRect;
     drawColorRect(clip.left, clip.top, clip.right, clip.bottom, color, mode, true);
 }
@@ -518,11 +544,14 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
     }
 
     SkXfermode::Mode mode;
-
-    const bool isMode = SkXfermode::IsMode(p->getXfermode(), &mode);
-    if (!isMode) {
-        // Assume SRC_OVER
-        mode = SkXfermode::kSrcOver_Mode;
+    if (!mExtensions.hasFramebufferFetch()) {
+        const bool isMode = SkXfermode::IsMode(p->getXfermode(), &mode);
+        if (!isMode) {
+            // Assume SRC_OVER
+            mode = SkXfermode::kSrcOver_Mode;
+        }
+    } else {
+        mode = getXfermode(p->getXfermode());
     }
 
     // Skia draws using the color's alpha channel if < 255
@@ -537,18 +566,10 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
 
 void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         float x, float y, SkPaint* paint) {
-    if (mSnapshot->invisible || text == NULL || count == 0 ||
-            (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
+    if (text == NULL || count == 0 || (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
         return;
     }
-
-    float scaleX = paint->getTextScaleX();
-    bool applyScaleX = scaleX < 0.9999f || scaleX > 1.0001f;
-    if (applyScaleX) {
-        save(SkCanvas::kMatrix_SaveFlag);
-        translate(x - (x * scaleX), 0.0f);
-        scale(scaleX, 1.0f);
-    }
+    paint->setAntiAlias(true);
 
     float length = -1.0f;
     switch (paint->getTextAlign()) {
@@ -598,21 +619,16 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
             mode, false, true);
 
     const Rect& clip = mSnapshot->getLocalClip();
+    clearLayerRegions();
     fontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));
 
     drawTextDecorations(text, bytesCount, length, x, y, paint);
-
-    if (applyScaleX) {
-        restore();
-    }
 }
 
 void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
-    if (mSnapshot->invisible) return;
-
     GLuint textureUnit = 0;
     glActiveTexture(gTextureUnits[textureUnit]);
 
@@ -638,6 +654,8 @@ void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
     const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
 
     setupTextureAlpha8(texture, textureUnit, x, y, r, g, b, a, mode, true, true);
+
+    clearLayerRegions();
 
     // Draw the mesh
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
@@ -730,11 +748,12 @@ void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t
          }
      }
 
+     // Setup the blending mode
+     chooseBlending(true, mode, description);
+
      // Build and use the appropriate shader
      useProgram(mCaches.programCache.get(description));
 
-     // Setup the blending mode
-     chooseBlending(true, mode);
      bindTexture(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, textureUnit);
      glUniform1i(mCaches.currentProgram->getUniform("sampler"), textureUnit);
 
@@ -769,6 +788,7 @@ void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t
      }
 }
 
+// Same values used by Skia
 #define kStdStrikeThru_Offset   (-6.0f / 21.0f)
 #define kStdUnderline_Offset    (1.0f / 9.0f)
 #define kStdUnderline_Thickness (1.0f / 18.0f)
@@ -821,7 +841,9 @@ void OpenGLRenderer::drawTextDecorations(const char* text, int bytesCount, float
 }
 
 void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom,
-        int color, SkXfermode::Mode mode, bool ignoreTransform) {
+        int color, SkXfermode::Mode mode, bool ignoreTransform, bool ignoreBlending) {
+    clearLayerRegions();
+
     // If a shader is set, preserve only the alpha
     if (mShader) {
         color |= 0x00ffffff;
@@ -836,9 +858,6 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
 
     GLuint textureUnit = 0;
 
-    // Setup the blending mode
-    chooseBlending(alpha < 255 || (mShader && mShader->blend()), mode);
-
     // Describe the required shaders
     ProgramDescription description;
     if (mShader) {
@@ -846,6 +865,11 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     }
     if (mColorFilter) {
         mColorFilter->describe(description, mExtensions);
+    }
+
+    if (!ignoreBlending) {
+        // Setup the blending mode
+        chooseBlending(alpha < 255 || (mShader && mShader->blend()), mode, description);
     }
 
     // Build and use the appropriate shader
@@ -896,7 +920,10 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
 
 void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float bottom,
         GLuint texture, float alpha, SkXfermode::Mode mode, bool blend,
-        GLvoid* vertices, GLvoid* texCoords, GLvoid* indices, GLsizei elementsCount) {
+        GLvoid* vertices, GLvoid* texCoords, GLvoid* indices, GLsizei elementsCount,
+        bool swapSrcDst, bool ignoreTransform) {
+    clearLayerRegions();
+
     ProgramDescription description;
     description.hasTexture = true;
     if (mColorFilter) {
@@ -906,10 +933,15 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
 
-    useProgram(mCaches.programCache.get(description));
-    mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
+    chooseBlending(blend || alpha < 1.0f, mode, description, swapSrcDst);
 
-    chooseBlending(blend || alpha < 1.0f, mode);
+    useProgram(mCaches.programCache.get(description));
+    if (!ignoreTransform) {
+        mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
+    } else {
+        mat4 m;
+        mCaches.currentProgram->set(mOrthoMatrix, mModelView, m);
+    }
 
     // Texture
     bindTexture(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, 0);
@@ -938,23 +970,36 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     glDisableVertexAttribArray(texCoordsSlot);
 }
 
-void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode, bool isPremultiplied) {
+void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode,
+        ProgramDescription& description, bool swapSrcDst) {
     blend = blend || mode != SkXfermode::kSrcOver_Mode;
     if (blend) {
-        if (!mCaches.blend) {
-            glEnable(GL_BLEND);
-        }
+        if (mode < SkXfermode::kPlus_Mode) {
+            if (!mCaches.blend) {
+                glEnable(GL_BLEND);
+            }
 
-        GLenum sourceMode = gBlends[mode].src;
-        GLenum destMode = gBlends[mode].dst;
-        if (!isPremultiplied && sourceMode == GL_ONE) {
-            sourceMode = GL_SRC_ALPHA;
-        }
+            GLenum sourceMode = swapSrcDst ? gBlendsSwap[mode].src : gBlends[mode].src;
+            GLenum destMode = swapSrcDst ? gBlendsSwap[mode].dst : gBlends[mode].dst;
 
-        if (sourceMode != mCaches.lastSrcMode || destMode != mCaches.lastDstMode) {
-            glBlendFunc(sourceMode, destMode);
-            mCaches.lastSrcMode = sourceMode;
-            mCaches.lastDstMode = destMode;
+            if (sourceMode != mCaches.lastSrcMode || destMode != mCaches.lastDstMode) {
+                glBlendFunc(sourceMode, destMode);
+                mCaches.lastSrcMode = sourceMode;
+                mCaches.lastDstMode = destMode;
+            }
+        } else {
+            // These blend modes are not supported by OpenGL directly and have
+            // to be implemented using shaders. Since the shader will perform
+            // the blending, turn blending off here
+            if (mExtensions.hasFramebufferFetch()) {
+                description.framebufferMode = mode;
+                description.swapSrcDst = swapSrcDst;
+            }
+
+            if (mCaches.blend) {
+                glDisable(GL_BLEND);
+            }
+            blend = false;
         }
     } else if (mCaches.blend) {
         glDisable(GL_BLEND);
@@ -982,10 +1027,14 @@ void OpenGLRenderer::resetDrawTextureTexCoords(float u1, float v1, float u2, flo
 
 void OpenGLRenderer::getAlphaAndMode(const SkPaint* paint, int* alpha, SkXfermode::Mode* mode) {
     if (paint) {
-        const bool isMode = SkXfermode::IsMode(paint->getXfermode(), mode);
-        if (!isMode) {
-            // Assume SRC_OVER
-            *mode = SkXfermode::kSrcOver_Mode;
+        if (!mExtensions.hasFramebufferFetch()) {
+            const bool isMode = SkXfermode::IsMode(paint->getXfermode(), mode);
+            if (!isMode) {
+                // Assume SRC_OVER
+                *mode = SkXfermode::kSrcOver_Mode;
+            }
+        } else {
+            *mode = getXfermode(paint->getXfermode());
         }
 
         // Skia draws using the color's alpha channel if < 255
@@ -999,6 +1048,13 @@ void OpenGLRenderer::getAlphaAndMode(const SkPaint* paint, int* alpha, SkXfermod
         *mode = SkXfermode::kSrcOver_Mode;
         *alpha = 255;
     }
+}
+
+SkXfermode::Mode OpenGLRenderer::getXfermode(SkXfermode* mode) {
+    if (mode == NULL) {
+        return SkXfermode::kSrcOver_Mode;
+    }
+    return mode->fMode;
 }
 
 void OpenGLRenderer::bindTexture(GLuint texture, GLenum wrapS, GLenum wrapT, GLuint textureUnit) {

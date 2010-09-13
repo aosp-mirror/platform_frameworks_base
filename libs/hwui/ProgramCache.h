@@ -44,6 +44,9 @@ namespace uirenderer {
     #define PROGRAM_LOGD(...)
 #endif
 
+/*
+ * IMPORTANT: All 32 bits are used, switch to a long.
+ */
 #define PROGRAM_KEY_TEXTURE 0x1
 #define PROGRAM_KEY_A8_TEXTURE 0x2
 #define PROGRAM_KEY_BITMAP 0x4
@@ -53,6 +56,7 @@ namespace uirenderer {
 #define PROGRAM_KEY_COLOR_LIGHTING 0x40
 #define PROGRAM_KEY_COLOR_BLEND 0x80
 #define PROGRAM_KEY_BITMAP_NPOT 0x100
+#define PROGRAM_KEY_SWAP_SRC_DST 0x2000
 
 #define PROGRAM_KEY_BITMAP_WRAPS_MASK 0x600
 #define PROGRAM_KEY_BITMAP_WRAPT_MASK 0x1800
@@ -61,6 +65,7 @@ namespace uirenderer {
 #define PROGRAM_MAX_XFERMODE 0x1f
 #define PROGRAM_XFERMODE_SHADER_SHIFT 26
 #define PROGRAM_XFERMODE_COLOR_OP_SHIFT 20
+#define PROGRAM_XFERMODE_FRAMEBUFFER_SHIFT 14
 
 #define PROGRAM_BITMAP_WRAPS_SHIFT 9
 #define PROGRAM_BITMAP_WRAPT_SHIFT 11
@@ -69,6 +74,9 @@ namespace uirenderer {
 // Types
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * IMPORTANT: All 32 bits are used, switch to a long.
+ */
 typedef uint32_t programid;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -93,7 +101,8 @@ struct ProgramDescription {
         hasBitmap(false), isBitmapNpot(false), hasGradient(false),
         shadersMode(SkXfermode::kClear_Mode), isBitmapFirst(false),
         bitmapWrapS(GL_CLAMP_TO_EDGE), bitmapWrapT(GL_CLAMP_TO_EDGE),
-        colorOp(kColorNone), colorMode(SkXfermode::kClear_Mode) {
+        colorOp(kColorNone), colorMode(SkXfermode::kClear_Mode),
+        framebufferMode(SkXfermode::kClear_Mode), swapSrcDst(false) {
     }
 
     // Texturing
@@ -112,6 +121,11 @@ struct ProgramDescription {
     // Color operations
     int colorOp;
     SkXfermode::Mode colorMode;
+
+    // Framebuffer blending (requires Extensions.hasFramebufferFetch())
+    // Ignored for all values < SkXfermode::kPlus_Mode
+    SkXfermode::Mode framebufferMode;
+    bool swapSrcDst;
 
     inline uint32_t getEnumForWrap(GLenum wrap) const {
         switch (wrap) {
@@ -156,6 +170,8 @@ struct ProgramDescription {
             case kColorNone:
                 break;
         }
+        key |= (framebufferMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_FRAMEBUFFER_SHIFT;
+        if (swapSrcDst) key |= PROGRAM_KEY_SWAP_SRC_DST;
         return key;
     }
 }; // struct ProgramDescription

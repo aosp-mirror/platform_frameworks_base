@@ -74,6 +74,7 @@ public final class CallManager {
     private static final int EVENT_ECM_TIMER_RESET = 115;
     private static final int EVENT_SUBSCRIPTION_INFO_READY = 116;
     private static final int EVENT_SUPP_SERVICE_FAILED = 117;
+    private static final int EVENT_SERVICE_STATE_CHANGED = 118;
 
     // Singleton instance
     private static final CallManager INSTANCE = new CallManager();
@@ -107,9 +108,6 @@ public final class CallManager {
     = new RegistrantList();
 
     protected final RegistrantList mDisconnectRegistrants
-    = new RegistrantList();
-
-    protected final RegistrantList mServiceStateRegistrants
     = new RegistrantList();
 
     protected final RegistrantList mMmiRegistrants
@@ -155,6 +153,9 @@ public final class CallManager {
     = new RegistrantList();
 
     protected final RegistrantList mSuppServiceFailedRegistrants
+    = new RegistrantList();
+
+    protected final RegistrantList mServiceStateChangedRegistrants
     = new RegistrantList();
 
     private CallManager() {
@@ -351,6 +352,7 @@ public final class CallManager {
         phone.registerForEcmTimerReset(mHandler, EVENT_ECM_TIMER_RESET, null);
         phone.registerForSubscriptionInfoReady(mHandler, EVENT_SUBSCRIPTION_INFO_READY, null);
         phone.registerForSuppServiceFailed(mHandler, EVENT_SUPP_SERVICE_FAILED, null);
+        phone.registerForServiceStateChanged(mHandler, EVENT_SERVICE_STATE_CHANGED, null);
     }
 
     private void unregisterForPhoneStates(Phone phone) {
@@ -372,6 +374,7 @@ public final class CallManager {
         phone.unregisterForEcmTimerReset(mHandler);
         phone.unregisterForSubscriptionInfoReady(mHandler);
         phone.unregisterForSuppServiceFailed(mHandler);
+        phone.unregisterForServiceStateChanged(mHandler);
     }
 
     /**
@@ -951,13 +954,17 @@ public final class CallManager {
      * Message.obj will contain an AsyncResult.
      * AsyncResult.result will be a ServiceState instance
      */
-    public void registerForServiceStateChanged(Handler h, int what, Object obj){}
+    public void registerForServiceStateChanged(Handler h, int what, Object obj){
+        mServiceStateChangedRegistrants.addUnique(h, what, obj);
+    }
 
     /**
      * Unregisters for ServiceStateChange notification.
      * Extraneous calls are tolerated silently
      */
-    public void unregisterForServiceStateChanged(Handler h){}
+    public void unregisterForServiceStateChanged(Handler h){
+        mServiceStateChangedRegistrants.remove(h);
+    }
 
     /**
      * Register for notifications when a supplementary service attempt fails.
@@ -1399,6 +1406,8 @@ public final class CallManager {
                 case EVENT_SUPP_SERVICE_FAILED:
                     mSuppServiceFailedRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
+                case EVENT_SERVICE_STATE_CHANGED:
+                    mServiceStateChangedRegistrants.notifyRegistrants((AsyncResult) msg.obj);
             }
         }
     };

@@ -94,6 +94,7 @@ final class FragmentState implements Parcelable {
         mInstance.mContainerId = mContainerId;
         mInstance.mTag = mTag;
         mInstance.mRetainInstance = mRetainInstance;
+        mInstance.mFragmentManager = activity.mFragments;
         
         return mInstance;
     }
@@ -318,6 +319,11 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     // Number of active back stack entries this fragment is in.
     int mBackStackNesting;
     
+    // The fragment manager we are associated with.  Set as soon as the
+    // fragment is used in a transaction; cleared after it has been removed
+    // from all transactions.
+    FragmentManager mFragmentManager;
+
     // Set as soon as a fragment is added to a transaction (or removed),
     // to be able to do validation.
     Activity mImmediateActivity;
@@ -578,10 +584,13 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     
     /**
      * Return the FragmentManager for interacting with fragments associated
-     * with this fragment's activity.
+     * with this fragment's activity.  Note that this will be non-null slightly
+     * before {@link #getActivity()}, in the time from when the fragment is
+     * placed in a {@link FragmentTransaction} until it is committed and
+     * attached to its activity.
      */
     final public FragmentManager getFragmentManager() {
-        return mActivity.mFragments;
+        return mFragmentManager;
     }
 
     /**
@@ -858,7 +867,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      * {@link #onActivityCreated(Bundle)}.
      *
      * <p>This corresponds to {@link Activity#onSaveInstanceState(Bundle)
-     * Activity.onnSaveInstanceState(Bundle)} and most of the discussion there
+     * Activity.onSaveInstanceState(Bundle)} and most of the discussion there
      * applies here as well.  Note however: <em>this method may be called
      * at any time before {@link #onDestroy()}</em>.  There are many situations
      * where a fragment may be mostly torn down (such as when placed on the

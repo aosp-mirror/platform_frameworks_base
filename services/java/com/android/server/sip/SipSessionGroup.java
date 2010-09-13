@@ -25,6 +25,7 @@ import gov.nist.javax.sip.message.SIPMessage;
 import android.net.sip.ISipSession;
 import android.net.sip.ISipSessionListener;
 import android.net.sip.SessionDescription;
+import android.net.sip.SipErrorCode;
 import android.net.sip.SipProfile;
 import android.net.sip.SipSessionAdapter;
 import android.net.sip.SipSessionState;
@@ -34,6 +35,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.DatagramSocket;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.EventObject;
@@ -60,6 +62,7 @@ import javax.sip.TimeoutEvent;
 import javax.sip.Transaction;
 import javax.sip.TransactionState;
 import javax.sip.TransactionTerminatedEvent;
+import javax.sip.TransactionUnavailableException;
 import javax.sip.address.Address;
 import javax.sip.address.SipURI;
 import javax.sip.header.CSeqHeader;
@@ -77,6 +80,7 @@ import javax.sip.message.Response;
 class SipSessionGroup implements SipListener {
     private static final String TAG = "SipSession";
     private static final String ANONYMOUS = "anonymous";
+    private static final String SERVER_ERROR_PREFIX = "Response: ";
     private static final int EXPIRY_TIME = 3600;
 
     private static final EventObject DEREGISTER = new EventObject("Deregister");
@@ -282,7 +286,7 @@ class SipSessionGroup implements SipListener {
                 Log.d(TAG, "event not processed: " + event);
             }
         } catch (Throwable e) {
-            Log.e(TAG, "event process error: " + event, e);
+            Log.w(TAG, "event process error: " + event, e);
             session.onError(e);
         }
     }
@@ -407,13 +411,8 @@ class SipSessionGroup implements SipListener {
                         try {
                             processCommand(command);
                         } catch (SipException e) {
-                            // TODO: find a better way to do this
-                            if ((command instanceof RegisterCommand)
-                                    || (command == DEREGISTER)) {
-                                onRegistrationFailed(e);
-                            } else {
-                                onError(e);
-                            }
+                            Log.w(TAG, "command error: " + command, e);
+                            onError(e);
                         }
                     }
             }).start();
@@ -475,7 +474,9 @@ class SipSessionGroup implements SipListener {
 
         private void processCommand(EventObject command) throws SipException {
             if (!process(command)) {
-                throw new SipException("wrong state to execute: " + command);
+                onError(SipErrorCode.IN_PROGRESS,
+                        "cannot initiate a new transaction to execute: "
+                        + command);
             }
         }
 
@@ -557,11 +558,8 @@ class SipSessionGroup implements SipListener {
                 if (evt instanceof TimeoutEvent) {
                     processTimeout((TimeoutEvent) evt);
                 } else {
-                    Log.d(TAG, "Transaction terminated:" + this);
-                    if (!SipSessionState.IN_CALL.equals(mState)) {
-                        removeSipSession(this);
-                    }
-                    return true;
+                    processTransactionTerminated(
+                            (TransactionTerminatedEvent) evt);
                 }
                 return true;
             } else if (evt instanceof DialogTerminatedEvent) {
@@ -580,6 +578,20 @@ class SipSessionGroup implements SipListener {
             }
         }
 
+        private void processTransactionTerminated(
+                TransactionTerminatedEvent event) {
+            switch (mState) {
+                case IN_CALL:
+                case READY_TO_CALL:
+                    Log.d(TAG, "Transaction terminated; do nothing");
+                    break;
+                default:
+                    Log.d(TAG, "Transaction terminated early: " + this);
+                    onError(SipErrorCode.TRANSACTION_TERMINTED,
+                            "transaction terminated");
+            }
+        }
+
         private void processTimeout(TimeoutEvent event) {
             Log.d(TAG, "processing Timeout..." + event);
             Transaction current = event.isServerTransaction()
@@ -595,25 +607,26 @@ class SipSessionGroup implements SipListener {
                 return;
             }
             switch (mState) {
-            case REGISTERING:
-            case DEREGISTERING:
-                reset();
-                mProxy.onRegistrationTimeout(this);
-                break;
-            case INCOMING_CALL:
-            case INCOMING_CALL_ANSWERING:
-            case OUTGOING_CALL_CANCELING:
-                endCallOnError(new SipException("timed out"));
-                break;
-            case PINGING:
-                reset();
-                mReRegisterFlag = true;
-                mState = SipSessionState.READY_TO_CALL;
-                break;
+                case REGISTERING:
+                case DEREGISTERING:
+                    reset();
+                    mProxy.onRegistrationTimeout(this);
+                    break;
+                case INCOMING_CALL:
+                case INCOMING_CALL_ANSWERING:
+                case OUTGOING_CALL:
+                case OUTGOING_CALL_CANCELING:
+                    onError(SipErrorCode.TIME_OUT, event.toString());
+                    break;
+                case PINGING:
+                    reset();
+                    mReRegisterFlag = true;
+                    mState = SipSessionState.READY_TO_CALL;
+                    break;
 
-            default:
-                // do nothing
-                break;
+                default:
+                    Log.d(TAG, "   do nothing");
+                    break;
             }
         }
 
@@ -660,7 +673,7 @@ class SipSessionGroup implements SipListener {
                 } else {
                     Log.w(TAG, "peer did not respect our rport request");
                 }
-                mState = SipSessionState.READY_TO_CALL;
+                reset();
                 return true;
             }
             return false;
@@ -682,7 +695,6 @@ class SipSessionGroup implements SipListener {
                 switch (statusCode) {
                 case Response.OK:
                     SipSessionState state = mState;
-                    reset();
                     onRegistrationDone((state == SipSessionState.REGISTERING)
                             ? getExpiryTime(((ResponseEvent) evt).getResponse())
                             : -1);
@@ -691,26 +703,36 @@ class SipSessionGroup implements SipListener {
                     return true;
                 case Response.UNAUTHORIZED:
                 case Response.PROXY_AUTHENTICATION_REQUIRED:
-                    String nonce = getNonceFromResponse(response);
-                    if (((nonce != null) && nonce.equals(mLastNonce)) ||
-                            (nonce == mLastNonce)) {
+                    if (!handleAuthentication(event)) {
                         Log.v(TAG, "Incorrect username/password");
-                        reset();
-                        onRegistrationFailed(createCallbackException(response));
-                    } else {
-                        mSipHelper.handleChallenge(event, getAccountManager());
-                        mLastNonce = nonce;
+                        onRegistrationFailed(SipErrorCode.INVALID_CREDENTIALS,
+                                "incorrect username or password");
                     }
                     return true;
                 default:
                     if (statusCode >= 500) {
-                        reset();
-                        onRegistrationFailed(createCallbackException(response));
+                        onRegistrationFailed(response);
                         return true;
                     }
                 }
             }
             return false;
+        }
+
+        private boolean handleAuthentication(ResponseEvent event)
+                throws SipException {
+            Response response = event.getResponse();
+            String nonce = getNonceFromResponse(response);
+            if (((nonce != null) && nonce.equals(mLastNonce)) ||
+                    (nonce == mLastNonce)) {
+                return false;
+            } else {
+                mClientTransaction = mSipHelper.handleChallenge(
+                        event, getAccountManager());
+                mDialog = mClientTransaction.getDialog();
+                mLastNonce = nonce;
+                return true;
+            }
         }
 
         private AccountManager getAccountManager() {
@@ -833,14 +855,12 @@ class SipSessionGroup implements SipListener {
                     establishCall();
                     return true;
                 case Response.PROXY_AUTHENTICATION_REQUIRED:
-                    mClientTransaction = mSipHelper.handleChallenge(
-                            (ResponseEvent) evt, getAccountManager());
-                    mDialog = mClientTransaction.getDialog();
-                    addSipSession(this);
-                    return true;
-                case Response.BUSY_HERE:
-                    reset();
-                    mProxy.onCallBusy(this);
+                    if (handleAuthentication(event)) {
+                        addSipSession(this);
+                    } else {
+                        endCallOnError(SipErrorCode.INVALID_CREDENTIALS,
+                                "incorrect username or password");
+                    }
                     return true;
                 case Response.REQUEST_PENDING:
                     // TODO:
@@ -849,7 +869,7 @@ class SipSessionGroup implements SipListener {
                 default:
                     if (statusCode >= 400) {
                         // error: an ack is sent automatically by the stack
-                        onError(createCallbackException(response));
+                        onError(response);
                         return true;
                     } else if (statusCode >= 300) {
                         // TODO: handle 3xx (redirect)
@@ -890,7 +910,7 @@ class SipSessionGroup implements SipListener {
                 }
 
                 if (statusCode >= 400) {
-                    onError(createCallbackException(response));
+                    onError(response);
                     return true;
                 }
             } else if (evt instanceof TransactionTerminatedEvent) {
@@ -933,9 +953,9 @@ class SipSessionGroup implements SipListener {
             return false;
         }
 
-        private Exception createCallbackException(Response response) {
-            return new SipException(String.format("Response: %s (%d)",
-                    response.getReasonPhrase(), response.getStatusCode()));
+        private String createErrorMessage(Response response) {
+            return String.format(SERVER_ERROR_PREFIX + "%s (%d)",
+                    response.getReasonPhrase(), response.getStatusCode());
         }
 
         private void establishCall() {
@@ -945,9 +965,15 @@ class SipSessionGroup implements SipListener {
         }
 
         private void fallbackToPreviousInCall(Throwable exception) {
+            exception = getRootCause(exception);
+            fallbackToPreviousInCall(getErrorCode(exception),
+                    exception.toString());
+        }
+
+        private void fallbackToPreviousInCall(SipErrorCode errorCode,
+                String message) {
             mState = SipSessionState.IN_CALL;
-            mProxy.onCallChangeFailed(this, exception.getClass().getName(),
-                    exception.getMessage());
+            mProxy.onCallChangeFailed(this, errorCode.toString(), message);
         }
 
         private void endCallNormally() {
@@ -955,27 +981,108 @@ class SipSessionGroup implements SipListener {
             mProxy.onCallEnded(this);
         }
 
-        private void endCallOnError(Throwable exception) {
+        private void endCallOnError(SipErrorCode errorCode, String message) {
             reset();
-            mProxy.onError(this, exception.getClass().getName(),
-                    exception.getMessage());
+            mProxy.onError(this, errorCode.toString(), message);
         }
 
+        private void endCallOnBusy() {
+            reset();
+            mProxy.onCallBusy(this);
+        }
+
+        private void onError(SipErrorCode errorCode, String message) {
+            switch (mState) {
+                case REGISTERING:
+                case DEREGISTERING:
+                    onRegistrationFailed(errorCode, message);
+                    break;
+                default:
+                    if (mInCall) {
+                        fallbackToPreviousInCall(errorCode, message);
+                    } else {
+                        endCallOnError(errorCode, message);
+                    }
+            }
+        }
+
+
         private void onError(Throwable exception) {
-            if (mInCall) {
-                fallbackToPreviousInCall(exception);
+            exception = getRootCause(exception);
+            onError(getErrorCode(exception), exception.toString());
+        }
+
+        private void onError(Response response) {
+            int statusCode = response.getStatusCode();
+            if (!mInCall && ((statusCode == Response.TEMPORARILY_UNAVAILABLE)
+                    || (statusCode == Response.BUSY_HERE))) {
+                endCallOnBusy();
             } else {
-                endCallOnError(exception);
+                onError(getErrorCode(statusCode), createErrorMessage(response));
+            }
+        }
+
+        private SipErrorCode getErrorCode(int responseStatusCode) {
+            switch (responseStatusCode) {
+                case Response.NOT_FOUND:
+                case Response.ADDRESS_INCOMPLETE:
+                    return SipErrorCode.INVALID_REMOTE_URI;
+                case Response.REQUEST_TIMEOUT:
+                    return SipErrorCode.TIME_OUT;
+                default:
+                    if (responseStatusCode < 500) {
+                        return SipErrorCode.CLIENT_ERROR;
+                    } else {
+                        return SipErrorCode.SERVER_ERROR;
+                    }
+            }
+        }
+
+        private Throwable getRootCause(Throwable exception) {
+            Throwable cause = exception.getCause();
+            while (cause != null) {
+                exception = cause;
+                cause = exception.getCause();
+            }
+            return exception;
+        }
+
+        private SipErrorCode getErrorCode(Throwable exception) {
+            String message = exception.getMessage();
+            if (exception instanceof UnknownHostException) {
+                return SipErrorCode.INVALID_REMOTE_URI;
+            } else if (exception instanceof IOException) {
+                return SipErrorCode.SOCKET_ERROR;
+            } else if (message.startsWith(SERVER_ERROR_PREFIX)) {
+                return SipErrorCode.SERVER_ERROR;
+            } else {
+                return SipErrorCode.CLIENT_ERROR;
             }
         }
 
         private void onRegistrationDone(int duration) {
+            reset();
             mProxy.onRegistrationDone(this, duration);
         }
 
+        private void onRegistrationFailed(SipErrorCode errorCode,
+                String message) {
+            reset();
+            mProxy.onRegistrationFailed(this, errorCode.toString(), message);
+        }
+
         private void onRegistrationFailed(Throwable exception) {
-            mProxy.onRegistrationFailed(this, exception.getClass().getName(),
-                    exception.getMessage());
+            reset();
+            exception = getRootCause(exception);
+            onRegistrationFailed(getErrorCode(exception),
+                    exception.toString());
+        }
+
+        private void onRegistrationFailed(Response response) {
+            reset();
+            int statusCode = response.getStatusCode();
+            onRegistrationFailed(getErrorCode(statusCode),
+                    createErrorMessage(response));
         }
     }
 

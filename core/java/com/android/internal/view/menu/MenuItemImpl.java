@@ -78,6 +78,8 @@ public final class MenuItemImpl implements MenuItem {
 
     private int mShowAsAction = SHOW_AS_ACTION_NEVER;
 
+    private View mActionView;
+
     /** Used for the icon resource ID if this item does not have an icon */
     static final int NO_ICON = 0;
 
@@ -665,5 +667,14 @@ public final class MenuItemImpl implements MenuItem {
     public void setShowAsAction(int actionEnum) {
         mShowAsAction = actionEnum;
         mMenu.onItemActionRequestChanged(this);
+    }
+
+    public MenuItem setActionView(View view) {
+        mActionView = view;
+        return this;
+    }
+
+    public View getActionView() {
+        return mActionView;
     }
 }

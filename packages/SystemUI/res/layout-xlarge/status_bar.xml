@@ -159,7 +159,6 @@
         android:layout_height="match_parent"
         android:visibility="invisible"
         android:clickable="true"
-        android:onClick="toggleLightsOut"
         />
 </FrameLayout>
 

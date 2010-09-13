@@ -102,6 +102,10 @@ public class ActivityStack {
     // 30 minutes.
     static final long ACTIVITY_INACTIVE_RESET_TIME = 1000*60*30;
     
+    // How long between activity launches that we consider safe to not warn
+    // the user about an unexpected activity being launched on top.
+    static final long START_WARN_TIME = 5*1000;
+    
     // Set to false to disable the preview that is shown while a new activity
     // is being started.
     static final boolean SHOW_APP_STARTING_PREVIEW = true;
@@ -211,6 +215,13 @@ public class ActivityStack {
      * Current activity that is resumed, or null if there is none.
      */
     ActivityRecord mResumedActivity = null;
+    
+    /**
+     * This is the last activity that has been started.  It is only used to
+     * identify when multiple activities are started at once so that the user
+     * can be warned they may not be in the activity they think they are.
+     */
+    ActivityRecord mLastStartedActivity = null;
     
     /**
      * Set when we know we are going to be calling updateConfiguration()
@@ -586,10 +597,10 @@ public class ActivityStack {
         ProcessRecord app = mService.getProcessRecordLocked(r.processName,
                 r.info.applicationInfo.uid);
         
-        if (r.startTime == 0) {
-            r.startTime = SystemClock.uptimeMillis();
+        if (r.launchTime == 0) {
+            r.launchTime = SystemClock.uptimeMillis();
             if (mInitialStartTime == 0) {
-                mInitialStartTime = r.startTime;
+                mInitialStartTime = r.launchTime;
             }
         } else if (mInitialStartTime == 0) {
             mInitialStartTime = SystemClock.uptimeMillis();
@@ -1090,6 +1101,31 @@ public class ActivityStack {
             return false;
         }
 
+        // Okay we are now going to start a switch, to 'next'.  We may first
+        // have to pause the current activity, but this is an important point
+        // where we have decided to go to 'next' so keep track of that.
+        if (mLastStartedActivity != null) {
+            long now = SystemClock.uptimeMillis();
+            final boolean inTime = mLastStartedActivity.startTime != 0
+                    && (mLastStartedActivity.startTime + START_WARN_TIME) >= now;
+            final int lastUid = mLastStartedActivity.info.applicationInfo.uid;
+            final int nextUid = next.info.applicationInfo.uid;
+            if (inTime && lastUid != nextUid
+                    && lastUid != next.launchedFromUid
+                    && mService.checkPermission(
+                            android.Manifest.permission.STOP_APP_SWITCHES,
+                            -1, next.launchedFromUid)
+                    != PackageManager.PERMISSION_GRANTED) {
+                mService.showLaunchWarningLocked(mLastStartedActivity, next);
+            } else {
+                next.startTime = now;
+                mLastStartedActivity = next;
+            }
+        } else {
+            next.startTime = SystemClock.uptimeMillis();
+            mLastStartedActivity = next;
+        }
+        
         // We need to start pausing the current activity so the top one
         // can be resumed...
         if (mResumedActivity != null) {
@@ -1314,7 +1350,6 @@ public class ActivityStack {
         
         if (!newTask) {
             // If starting in an existing task, find where that is...
-            ActivityRecord next = null;
             boolean startIt = true;
             for (int i = NH-1; i >= 0; i--) {
                 ActivityRecord p = (ActivityRecord)mHistory.get(i);
@@ -1342,14 +1377,13 @@ public class ActivityStack {
                 if (p.fullscreen) {
                     startIt = false;
                 }
-                next = p;
             }
         }
 
         // Place a new activity at top of stack, so it is next to interact
         // with the user.
         if (addPos < 0) {
-            addPos = mHistory.size();
+            addPos = NH;
         }
         
         // If we are not placing the new activity frontmost, we do not want

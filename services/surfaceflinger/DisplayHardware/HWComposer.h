@@ -48,6 +48,8 @@ public:
     // commits the list
     status_t commit() const;
 
+    // release hardware resources
+    status_t release() const;
 
     size_t getNumLayers() const;
     hwc_layer_t* getLayers() const;

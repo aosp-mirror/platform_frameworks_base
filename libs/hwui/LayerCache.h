@@ -62,10 +62,8 @@ public:
      * size of the cache goes down.
      *
      * @param size The dimensions of the desired layer
-     * @param previousFbo The name of the FBO to bind to if creating a new
-     *        layer fails
      */
-    Layer* get(LayerSize& size, GLuint previousFbo);
+    Layer* get(LayerSize& size);
     /**
      * Adds the layer to the cache. The layer will not be added if there is
      * not enough space available.

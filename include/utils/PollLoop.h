@@ -172,22 +172,36 @@ private:
         void* data;
     };
     
-    const bool mAllowNonCallbacks;
-    
+    const bool mAllowNonCallbacks; // immutable
+
+    int mWakeReadPipeFd;  // immutable
+    int mWakeWritePipeFd; // immutable
+
+    // The lock guards state used to track whether there is a poll() in progress and whether
+    // there are any other threads waiting in wakeAndLock().  The condition variables
+    // are used to transfer control among these threads such that all waiters are
+    // serviced before a new poll can begin.
+    // The wakeAndLock() method increments mWaiters, wakes the poll, blocks on mAwake
+    // until mPolling becomes false, then decrements mWaiters again.
+    // The poll() method blocks on mResume until mWaiters becomes 0, then sets
+    // mPolling to true, blocks until the poll completes, then resets mPolling to false
+    // and signals mResume if there are waiters.
     Mutex mLock;
-    bool mPolling;
-    uint32_t mWaiters;
-    Condition mAwake;
-    Condition mResume;
+    bool mPolling;      // guarded by mLock
+    uint32_t mWaiters;  // guarded by mLock
+    Condition mAwake;   // guarded by mLock
+    Condition mResume;  // guarded by mLock
 
-    int mWakeReadPipeFd;
-    int mWakeWritePipeFd;
-
+    // The next two vectors are only mutated when mPolling is false since they must
+    // not be changed while the poll() system call is in progress.  To mutate these
+    // vectors, the poll() must first be awoken then the lock acquired.
     Vector<struct pollfd> mRequestedFds;
     Vector<RequestedCallback> mRequestedCallbacks;
 
-    Vector<PendingCallback> mPendingCallbacks; // used privately by pollOnce
-    Vector<PendingCallback> mPendingFds;       // used privately by pollOnce
+    // This state is only used privately by pollOnce and does not require a lock since
+    // it runs on a single thread.
+    Vector<PendingCallback> mPendingCallbacks;
+    Vector<PendingCallback> mPendingFds;
     size_t mPendingFdsPos;
     
     void openWakePipe();

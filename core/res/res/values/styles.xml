@@ -443,14 +443,8 @@
         <item name="android:background">@android:drawable/btn_default</item>
     </style>
 
-    <style name="Widget.AutoCompleteTextView">
-        <item name="android:focusable">true</item>
-        <item name="android:focusableInTouchMode">true</item>
-        <item name="android:clickable">true</item>
-        <item name="android:background">@android:drawable/edit_text</item>
+    <style name="Widget.AutoCompleteTextView" parent="Widget.EditText">
         <item name="android:completionHintView">@android:layout/simple_dropdown_hint</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceMediumInverse</item>
-        <item name="android:gravity">center_vertical</item>
         <item name="android:completionThreshold">2</item>
         <item name="android:dropDownSelector">@android:drawable/list_selector_background</item>
         <item name="android:popupBackground">@android:drawable/spinner_dropdown_background</item>
@@ -529,7 +523,7 @@
         <item name="android:fadingEdge">vertical</item>
         <item name="listSelector">@android:drawable/menu_selector</item>
         <!-- Light background for the list in menus, so the divider for bright themes -->
-        <item name="android:divider">@android:drawable/divider_horizontal_bright</item>
+        <item name="android:divider">@android:drawable/divider_horizontal_dark</item>
     </style>
 
     <style name="Widget.GridView" parent="Widget.AbsListView">
@@ -700,7 +694,7 @@
     </style>
 
     <style name="TextAppearance.Widget.IconMenu.Item" parent="TextAppearance.Small">
-        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColor">?textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Widget.EditText">
@@ -879,15 +873,41 @@
         <item name="android:background">@android:drawable/bottom_bar</item>
     </style>
 
-    <style name="ActionBar">
+    <style name="Widget.ActionBar">
         <item name="android:background">@android:drawable/action_bar_background</item>
         <item name="android:displayOptions">useLogo</item>
         <item name="android:divider">@android:drawable/action_bar_divider</item>
-        <item name="android:height">?android:attr/windowActionBarSize</item>
+        <item name="android:height">?android:attr/actionBarSize</item>
         <item name="android:paddingLeft">3dip</item>
         <item name="android:paddingTop">0dip</item>
         <item name="android:paddingRight">3dip</item>
         <item name="android:paddingBottom">0dip</item>
+        <item name="android:titleTextStyle">@android:style/TextAppearance.Widget.ActionBar.Title</item>
+        <item name="android:subtitleTextStyle">@android:style/TextAppearance.Widget.ActionBar.Subtitle</item>
+    </style>
+
+    <style name="Widget.ActionMode">
+        <item name="android:background">?android:attr/actionModeBackground</item>
+        <item name="android:height">?android:attr/actionBarSize</item>
+        <item name="android:itemPadding">?android:attr/actionButtonPadding</item>
+        <item name="android:titleTextStyle">@android:style/TextAppearance.Widget.ActionMode.Title</item>
+        <item name="android:subtitleTextStyle">@android:style/TextAppearance.Widget.ActionMode.Subtitle</item>
+    </style>
+
+    <style name="TextAppearance.Widget.ActionBar.Title"
+           parent="@android:style/TextAppearance.Medium.Inverse">
+    </style>
+
+    <style name="TextAppearance.Widget.ActionBar.Subtitle"
+           parent="@android:style/TextAppearance.Small.Inverse">
+    </style>
+
+    <style name="TextAppearance.Widget.ActionMode.Title"
+           parent="@android:style/TextAppearance.Medium.Inverse">
+    </style>
+
+    <style name="TextAppearance.Widget.ActionMode.Subtitle"
+           parent="@android:style/TextAppearance.Small.Inverse">
     </style>
 
     <style name="Widget.ActionButton">
@@ -897,6 +917,10 @@
     <style name="Widget.ActionButton.Overflow">
         <item name="android:src">@drawable/ic_menu_more</item>
         <item name="android:contentDescription">@string/more_item_label</item>
+    </style>
+
+    <style name="Widget.ActionButton.CloseMode">
+        <item name="android:src">?android:attr/actionModeCloseDrawable</item>
     </style>
 
     <style name="Widget.ActionBarView_TabView">

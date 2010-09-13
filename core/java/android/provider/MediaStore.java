@@ -273,7 +273,9 @@ public final class MediaStore {
      }
 
     /**
-     * Media provider interface used by MTP implementation.
+     * Media provider table containing an index of all files in the storage.
+     * This can be used by applications to find all documents of a particular type
+     * and is also used internally by the device side MTP implementation.
      * @hide
      */
     public static final class Files {
@@ -289,11 +291,22 @@ public final class MediaStore {
                     + "/file/" + fileId);
         }
 
-        // used for MTP GetObjectReferences and SetObjectReferences
-        public static final Uri getReferencesUri(String volumeName,
+        public static Uri getMtpObjectsUri(String volumeName) {
+            return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
+                    "/object");
+        }
+
+        public static final Uri getMtpObjectsUri(String volumeName,
                 long fileId) {
             return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
-                    + "/file/" + fileId + "/references");
+                    + "/object/" + fileId);
+        }
+
+        // Used to implement the MTP GetObjectReferences and SetObjectReferences commands.
+        public static final Uri getMtpReferencesUri(String volumeName,
+                long fileId) {
+            return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
+                    + "/object/" + fileId + "/references");
         }
 
         /**
@@ -326,6 +339,18 @@ public final class MediaStore {
              */
             public static final String MEDIA_ID = "media_id";
         }
+
+        /**
+         * The MIME type of the file
+         * <P>Type: TEXT</P>
+         */
+        public static final String MIME_TYPE = "mime_type";
+
+        /**
+         * The title of the content
+         * <P>Type: TEXT</P>
+         */
+        public static final String TITLE = "title";
     }
 
     /**

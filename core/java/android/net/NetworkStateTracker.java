@@ -71,6 +71,18 @@ public interface NetworkStateTracker {
     public static final int EVENT_CLEAR_NET_TRANSITION_WAKELOCK = 7;
 
     /**
+     * msg.arg1 = network type
+     * msg.arg2 = condition (0 bad, 100 good)
+     */
+    public static final int EVENT_INET_CONDITION_CHANGE = 8;
+
+    /**
+     * msg.arg1 = network type
+     * msg.arg2 = default connection sequence number
+     */
+    public static final int EVENT_INET_CONDITION_HOLD_END = 9;
+
+    /**
      * -------------------------------------------------------------
      * Control Interface
      * -------------------------------------------------------------

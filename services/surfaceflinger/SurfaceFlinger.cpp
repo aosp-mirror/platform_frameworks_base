@@ -383,10 +383,10 @@ bool SurfaceFlinger::threadLoop()
         // inform the h/w that we're done compositing
         hw.compositionComplete();
 
-        // release the clients before we flip ('cause flip might block)
+        postFramebuffer();
+
         unlockClients();
 
-        postFramebuffer();
     } else {
         // pretend we did the post
         unlockClients();
@@ -885,8 +885,8 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
      */
     for (size_t i=0 ; i<count ; i++) {
         if (cur) {
-            if (!(cur[i].compositionType == HWC_FRAMEBUFFER) ||
-                    cur[i].flags & HWC_SKIP_LAYER) {
+            if ((cur[i].compositionType != HWC_FRAMEBUFFER) &&
+                !(cur[i].flags & HWC_SKIP_LAYER)) {
                 // skip layers handled by the HAL
                 continue;
             }

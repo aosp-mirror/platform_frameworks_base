@@ -731,6 +731,7 @@ final class WebViewCore {
     }
 
         static final String[] HandlerDebugString = {
+            "REVEAL_SELECTION", // 96
             "REQUEST_LABEL", // 97
             "UPDATE_FRAME_CACHE_IF_LOADING", // = 98
             "SCROLL_TEXT_INPUT", // = 99
@@ -786,6 +787,7 @@ final class WebViewCore {
 
     class EventHub {
         // Message Ids
+        static final int REVEAL_SELECTION = 96;
         static final int REQUEST_LABEL = 97;
         static final int UPDATE_FRAME_CACHE_IF_LOADING = 98;
         static final int SCROLL_TEXT_INPUT = 99;
@@ -907,6 +909,9 @@ final class WebViewCore {
          */
         private EventHub() {}
 
+        private static final int FIRST_PACKAGE_MSG_ID = REVEAL_SELECTION;
+        private static final int LAST_PACKAGE_MSG_ID = VALID_NODE_BOUNDS;
+
         /**
          * Transfer all messages to the newly created webcore thread handler.
          */
@@ -918,11 +923,11 @@ final class WebViewCore {
                 @Override
                 public void handleMessage(Message msg) {
                     if (DebugFlags.WEB_VIEW_CORE) {
-                        Log.v(LOGTAG, (msg.what < REQUEST_LABEL
-                                || msg.what
-                                > VALID_NODE_BOUNDS ? Integer.toString(msg.what)
+                        Log.v(LOGTAG, (msg.what < FIRST_PACKAGE_MSG_ID
+                                || msg.what > LAST_PACKAGE_MSG_ID
+                                ? Integer.toString(msg.what)
                                 : HandlerDebugString[msg.what
-                                        - REQUEST_LABEL])
+                                        - FIRST_PACKAGE_MSG_ID])
                                 + " arg1=" + msg.arg1 + " arg2=" + msg.arg2
                                 + " obj=" + msg.obj);
                     }
@@ -941,6 +946,10 @@ final class WebViewCore {
                                 mNativeClass = 0;
                                 mWebView = null;
                             }
+                            break;
+
+                        case REVEAL_SELECTION:
+                            nativeRevealSelection();
                             break;
 
                         case REQUEST_LABEL:
@@ -2306,6 +2315,7 @@ final class WebViewCore {
     }
 
     private native void nativeUpdateFrameCacheIfLoading();
+    private native void nativeRevealSelection();
     private native String nativeRequestLabel(int framePtr, int nodePtr);
     /**
      * Scroll the focused textfield to (xPercent, y) in document space

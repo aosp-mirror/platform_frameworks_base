@@ -29,6 +29,7 @@
 
 #include <utils/RefBase.h>
 #include <utils/ResourceTypes.h>
+#include <utils/Vector.h>
 
 #include "Extensions.h"
 #include "Matrix.h"
@@ -156,6 +157,12 @@ private:
             int alpha, SkXfermode::Mode mode, int flags);
 
     /**
+     * Clears all the regions corresponding to the current list of layers.
+     * This method MUST be invoked before any drawing operation.
+     */
+    void clearLayerRegions();
+
+    /**
      * Draws a colored rectangle with the specified color. The specified coordinates
      * are transformed by the current snapshot's transform matrix.
      *
@@ -166,9 +173,11 @@ private:
      * @param color The rectangle's ARGB color, defined as a packed 32 bits word
      * @param mode The Skia xfermode to use
      * @param ignoreTransform True if the current transform should be ignored
+     * @paran ignoreBlending True if the blending is set by the caller
      */
     void drawColorRect(float left, float top, float right, float bottom,
-    		int color, SkXfermode::Mode mode, bool ignoreTransform = false);
+    		int color, SkXfermode::Mode mode, bool ignoreTransform = false,
+    		bool ignoreBlending = false);
 
     /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
@@ -216,10 +225,13 @@ private:
      * @param texCoords The texture coordinates of each vertex
      * @param indices The indices of the vertices, can be NULL
      * @param elementsCount The number of elements in the mesh, required by indices
+     * @param swapSrcDst Whether or not the src and dst blending operations should be swapped
+     * @param ignoreTransform True if the current transform should be ignored
      */
     void drawTextureMesh(float left, float top, float right, float bottom, GLuint texture,
             float alpha, SkXfermode::Mode mode, bool blend,
-            GLvoid* vertices, GLvoid* texCoords, GLvoid* indices, GLsizei elementsCount = 0);
+            GLvoid* vertices, GLvoid* texCoords, GLvoid* indices, GLsizei elementsCount = 0,
+            bool swapSrcDst = false, bool ignoreTransform = false);
 
     /**
      * Prepares the renderer to draw the specified shadow.
@@ -322,7 +334,14 @@ private:
      * Enable or disable blending as necessary. This function sets the appropriate
      * blend function based on the specified xfermode.
      */
-    inline void chooseBlending(bool blend, SkXfermode::Mode mode, bool isPremultiplied = true);
+    inline void chooseBlending(bool blend, SkXfermode::Mode mode, ProgramDescription& description,
+            bool swapSrcDst = false);
+
+    /**
+     * Safely retrieves the mode from the specified xfermode. If the specified
+     * xfermode is null, the mode is assumed to be SkXfermode::kSrcOver_Mode.
+     */
+    inline SkXfermode::Mode getXfermode(SkXfermode* mode);
 
     /**
      * Use the specified program with the current GL context. If the program is already
@@ -373,6 +392,10 @@ private:
 
     // Various caches
     Caches& mCaches;
+
+    // List of rectangles to clear due to calls to saveLayer()
+    Vector<Rect*> mLayers;
+
 }; // class OpenGLRenderer
 
 }; // namespace uirenderer

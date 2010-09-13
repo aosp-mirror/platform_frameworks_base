@@ -25,7 +25,20 @@ namespace android {
 
 enum camcorder_quality {
     CAMCORDER_QUALITY_LOW  = 0,
-    CAMCORDER_QUALITY_HIGH = 1
+    CAMCORDER_QUALITY_HIGH = 1,
+    CAMCORDER_QUALITY_QCIF = 2,
+    CAMCORDER_QUALITY_CIF = 3,
+    CAMCORDER_QUALITY_480P = 4,
+    CAMCORDER_QUALITY_720P = 5,
+    CAMCORDER_QUALITY_1080P = 6,
+
+    CAMCORDER_QUALITY_TIME_LAPSE_LOW  = 1000,
+    CAMCORDER_QUALITY_TIME_LAPSE_HIGH = 1001,
+    CAMCORDER_QUALITY_TIME_LAPSE_QCIF = 1002,
+    CAMCORDER_QUALITY_TIME_LAPSE_CIF = 1003,
+    CAMCORDER_QUALITY_TIME_LAPSE_480P = 1004,
+    CAMCORDER_QUALITY_TIME_LAPSE_720P = 1005,
+    CAMCORDER_QUALITY_TIME_LAPSE_1080P = 1006
 };
 
 enum video_decoder {
@@ -66,6 +79,12 @@ public:
      */
     int getCamcorderProfileParamByName(const char *name, int cameraId,
                                        camcorder_quality quality) const;
+
+    /**
+     * Returns true if a profile for the given camera at the given quality exists,
+     * or false if not.
+     */
+    bool hasCamcorderProfile(int cameraId, camcorder_quality quality) const;
 
     /**
      * Returns the output file formats supported.
@@ -252,6 +271,8 @@ private:
         Vector<int> mLevels;
     };
 
+    int getCamcorderProfileIndex(int cameraId, camcorder_quality quality) const;
+
     // Debug
     static void logVideoCodec(const VideoCodec& codec);
     static void logAudioCodec(const AudioCodec& codec);
@@ -283,6 +304,8 @@ private:
     static MediaProfiles* createDefaultInstance();
     static CamcorderProfile *createDefaultCamcorderLowProfile();
     static CamcorderProfile *createDefaultCamcorderHighProfile();
+    static CamcorderProfile *createDefaultCamcorderTimeLapseLowProfile();
+    static CamcorderProfile *createDefaultCamcorderTimeLapseHighProfile();
     static void createDefaultCamcorderProfiles(MediaProfiles *profiles);
     static void createDefaultVideoEncoders(MediaProfiles *profiles);
     static void createDefaultAudioEncoders(MediaProfiles *profiles);

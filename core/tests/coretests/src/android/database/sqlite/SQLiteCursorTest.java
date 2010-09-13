@@ -16,11 +16,16 @@
 
 package android.database.sqlite;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Log;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 public class SQLiteCursorTest extends AndroidTestCase {
     private SQLiteDatabase mDatabase;
@@ -90,5 +95,100 @@ public class SQLiteCursorTest extends AndroidTestCase {
         assertEquals(mDatabase, db.mParentConnObj);
         assertTrue(mDatabase.mConnectionPool.getConnectionList().contains(db));
         assertTrue(db.isOpen());
+    }
+
+    @SmallTest
+    public void testFillWindow() {
+        // create schema
+        final String testTable = "testV";
+        mDatabase.beginTransaction();
+        mDatabase.execSQL("CREATE TABLE " + testTable + " (col1 int, desc text not null);");
+        mDatabase.setTransactionSuccessful();
+        mDatabase.endTransaction();
+
+        // populate the table with data
+        // create a big string that will almost fit a page but not quite.
+        // since sqlite wants to make sure each row is in a page, this string will allocate
+        // a new database page for each row.
+        StringBuilder buff = new StringBuilder();
+        for (int i = 0; i < 500; i++) {
+            buff.append(i % 10 + "");
+        }
+        ContentValues values = new ContentValues();
+        values.put("desc", buff.toString());
+
+        // insert more than 1MB of data in the table. this should ensure that the entire tabledata
+        // will need more than one CursorWindow
+        int N = 5000;
+        Set<Integer> rows = new HashSet<Integer>();
+        mDatabase.beginTransaction();
+        for (int j = 0; j < N; j++) {
+            values.put("col1", j);
+            mDatabase.insert(testTable, null, values);
+            rows.add(j); // store in a hashtable so we can verify the results from cursor later on
+        }
+        mDatabase.setTransactionSuccessful();
+        mDatabase.endTransaction();
+        assertEquals(N, rows.size());
+        Cursor c1 = mDatabase.rawQuery("select * from " + testTable, null);
+        assertEquals(N, c1.getCount());
+        c1.close();
+
+        // scroll through ALL data in the table using a cursor. should cause multiple calls to
+        // native_fill_window (and re-fills of the CursorWindow object)
+        Cursor c = mDatabase.query(testTable, new String[]{"col1", "desc"},
+                null, null, null, null, null);
+        int i = 0;
+        while (c.moveToNext()) {
+            int val = c.getInt(0);
+            assertTrue(rows.contains(val));
+            assertTrue(rows.remove(val));
+        }
+        // did I see all the rows in the table?
+        assertTrue(rows.isEmpty());
+
+        // change data and make sure the cursor picks up new data & count
+        rows = new HashSet<Integer>();
+        mDatabase.beginTransaction();
+        int M = N + 1000;
+        for (int j = 0; j < M; j++) {
+            rows.add(j);
+            if (j < N) {
+                continue;
+            }
+            values.put("col1", j);
+            mDatabase.insert(testTable, null, values);
+        }
+        mDatabase.setTransactionSuccessful();
+        mDatabase.endTransaction();
+        assertEquals(M, rows.size());
+        c.requery();
+        i = 0;
+        while (c.moveToNext()) {
+            int val = c.getInt(0);
+            assertTrue(rows.contains(val));
+            assertTrue(rows.remove(val));
+        }
+        // did I see all data from the modified table
+        assertTrue(rows.isEmpty());
+
+        // move cursor back to 1st row and scroll to about halfway in the result set
+        // and then delete 75% of data - and then do requery
+        c.moveToFirst();
+        int K = N / 2;
+        for (int p = 0; p < K && c.moveToNext(); p++) {
+            // nothing to do - just scrolling to about half-point in the resultset
+        }
+        mDatabase.beginTransaction();
+        mDatabase.delete(testTable, "col1 < ?", new String[]{ (3 * M / 4) + ""});
+        mDatabase.setTransactionSuccessful();
+        mDatabase.endTransaction();
+        c.requery();
+        assertEquals(M / 4, c.getCount());
+        while (c.moveToNext()) {
+            // just move the cursor to next row - to make sure it can go through the entire
+            // resultset without any problems
+        }
+        c.close();
     }
 }

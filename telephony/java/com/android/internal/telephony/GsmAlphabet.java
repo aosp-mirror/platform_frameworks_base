@@ -16,9 +16,13 @@
 
 package com.android.internal.telephony;
 
+import android.text.TextUtils;
 import android.util.SparseIntArray;
 
 import android.util.Log;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 /**
  * This class implements the character set mapping between
@@ -354,6 +358,32 @@ public class GsmAlphabet {
      */
     public static String
     gsm8BitUnpackedToString(byte[] data, int offset, int length) {
+        return gsm8BitUnpackedToString(data, offset, length, "");
+    }
+
+    /**
+     * Convert a GSM alphabet string that's stored in 8-bit unpacked
+     * format (as it often appears in SIM records) into a String
+     *
+     * Field may be padded with trailing 0xff's. The decode stops
+     * at the first 0xff encountered.
+     *
+     * Additionally, in some country(ex. Korea), there are non-ASCII or MBCS characters.
+     * If a character set is given, characters in data are treat as MBCS.
+     */
+    public static String
+    gsm8BitUnpackedToString(byte[] data, int offset, int length, String characterset) {
+        boolean isMbcs = false;
+        Charset charset = null;
+        ByteBuffer mbcsBuffer = null;
+
+        if (!TextUtils.isEmpty(characterset)
+                && !characterset.equalsIgnoreCase("us-ascii")
+                && Charset.isSupported(characterset)) {
+            isMbcs = true;
+            charset = Charset.forName(characterset);
+            mbcsBuffer = ByteBuffer.allocate(2);
+        }
         boolean prevWasEscape;
         StringBuilder ret = new StringBuilder(length);
 
@@ -379,7 +409,15 @@ public class GsmAlphabet {
                 if (prevWasEscape) {
                     ret.append((char)gsmExtendedToChar.get(c, ' '));
                 } else {
-                    ret.append((char)gsmToChar.get(c, ' '));
+                    if (!isMbcs || c < 0x80 || i + 1 >= offset + length) {
+                        ret.append((char)gsmToChar.get(c, ' '));
+                    } else {
+                        // isMbcs must be true. So both mbcsBuffer and charset are initialized.
+                        mbcsBuffer.clear();
+                        mbcsBuffer.put(data, i++, 2);
+                        mbcsBuffer.flip();
+                        ret.append(charset.decode(mbcsBuffer).toString());
+                    }
                 }
                 prevWasEscape = false;
             }

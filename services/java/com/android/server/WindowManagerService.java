@@ -23,6 +23,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
@@ -1481,6 +1482,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowState wb = localmWindows.get(foundI-1);
                 if (wb.mBaseLayer < maxLayer &&
                         wb.mAttachedWindow != foundW &&
+                        wb.mAttachedWindow != foundW.mAttachedWindow &&
                         (wb.mAttrs.type != TYPE_APPLICATION_STARTING ||
                                 wb.mToken != foundW.mToken)) {
                     // This window is not related to the previous one in any
@@ -5087,8 +5089,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         
         /* Notifies the window manager about an input channel that is not responding.
-         * The method can either cause dispatching to be aborted by returning -2 or
-         * return a new timeout in nanoseconds.
+         * Returns a new timeout to continue waiting in nanoseconds, or 0 to abort dispatch.
          * 
          * Called by the InputManager.
          */
@@ -5097,7 +5098,7 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mWindowMap) {
                 WindowState windowState = getWindowStateForInputChannelLocked(inputChannel);
                 if (windowState == null) {
-                    return -2; // irrelevant, abort dispatching (-2)
+                    return 0; // window is unknown, abort dispatching
                 }
                 
                 Slog.i(TAG, "Input event dispatching timed out sending to "
@@ -5120,8 +5121,7 @@ public class WindowManagerService extends IWindowManager.Stub
         
         /* Notifies the window manager about an application that is not responding
          * in general rather than with respect to a particular input channel.
-         * The method can either cause dispatching to be aborted by returning -2 or
-         * return a new timeout in nanoseconds.
+         * Returns a new timeout to continue waiting in nanoseconds, or 0 to abort dispatch.
          * 
          * Called by the InputManager.
          */
@@ -5147,7 +5147,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 } catch (RemoteException ex) {
                 }
             }
-            return -2; // abort dispatching
+            return 0; // abort dispatching
         }
         
         private WindowState getWindowStateForInputChannel(InputChannel inputChannel) {
@@ -5259,15 +5259,6 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mWindowMap) {
                 mPolicy.performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
             }
-        }
-        
-        /* Notifies that an app switch key (BACK / HOME) has just been pressed.
-         * This essentially starts a .5 second timeout for the application to process
-         * subsequent input events while waiting for the app switch to occur.  If it takes longer
-         * than this, the pending events will be dropped.
-         */
-        public void notifyAppSwitchComing() {
-            // TODO Not implemented yet.  Should go in the native side.
         }
         
         /* Notifies that the lid switch changed state. */
@@ -7037,6 +7028,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         frame.right >= mCompatibleScreenFrame.right &&
                         frame.bottom >= mCompatibleScreenFrame.bottom;
             } else {
+                if ((mAttrs.flags & FLAG_FULLSCREEN) != 0) {
+                    return true;
+                }
                 return frame.left <= 0 && frame.top <= 0
                         && frame.right >= screenWidth
                         && frame.bottom >= screenHeight;

@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -158,8 +159,13 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         
         for (int i = 0; i < itemCount; i++) {
             final MenuItemImpl itemData = itemsToShow.get(i);
-            addItemView((ActionMenuItemView) itemData.getItemView(MenuBuilder.TYPE_ACTION_BUTTON,
-                    this));
+            final View actionView = itemData.getActionView();
+            if (actionView != null) {
+                addView(actionView);
+            } else {
+                addItemView((ActionMenuItemView) itemData.getItemView(
+                        MenuBuilder.TYPE_ACTION_BUTTON, this));
+            }
         }
 
         if (reserveOverflow) {

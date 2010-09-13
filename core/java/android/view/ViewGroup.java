@@ -2603,6 +2603,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @attr ref android.R.styleable#ViewGroup_animateLayoutChanges
      */
     public void setLayoutTransition(LayoutTransition transition) {
+        if (mTransition != null) {
+            mTransition.removeTransitionListener(mLayoutTransitionListener);
+        }
         mTransition = transition;
         if (mTransition != null) {
             mTransition.addTransitionListener(mLayoutTransitionListener);
@@ -3731,6 +3734,54 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    /**
+     * This method tells the ViewGroup that the given View object, which should have this
+     * ViewGroup as its parent,
+     * should be kept around  (re-displayed when the ViewGroup draws its children) even if it
+     * is removed from its parent. This allows animations, such as those used by
+     * {@link android.app.Fragment} and {@link android.animation.LayoutTransition} to animate
+     * the removal of views. A call to this method should always be accompanied by a later call
+     * to {@link #endViewTransition(View)}, such as after an animation on the View has finished,
+     * so that the View finally gets removed.
+     *
+     * @param view The View object to be kept visible even if it gets removed from its parent.
+     */
+    public void startViewTransition(View view) {
+        if (view.mParent == this) {
+            if (mTransitioningViews == null) {
+                mTransitioningViews = new ArrayList<View>();
+            }
+            mTransitioningViews.add(view);
+        }
+    }
+
+    /**
+     * This method should always be called following an earlier call to
+     * {@link #startViewTransition(View)}. The given View is finally removed from its parent
+     * and will no longer be displayed. Note that this method does not perform the functionality
+     * of removing a view from its parent; it just discontinues the display of a View that
+     * has previously been removed.
+     *
+     * @return view The View object that has been removed but is being kept around in the visible
+     * hierarchy by an earlier call to {@link #startViewTransition(View)}.
+     */
+    public void endViewTransition(View view) {
+        if (mTransitioningViews != null) {
+            mTransitioningViews.remove(view);
+            final ArrayList<View> disappearingChildren = mDisappearingChildren;
+            if (disappearingChildren != null && disappearingChildren.contains(view)) {
+                disappearingChildren.remove(view);
+                if (view.mAttachInfo != null) {
+                    view.dispatchDetachedFromWindow();
+                }
+                if (view.mParent != null) {
+                    view.mParent = null;
+                }
+                mGroupFlags |= FLAG_INVALIDATE_REQUIRED;
+            }
+        }
+    }
+
     private LayoutTransition.TransitionListener mLayoutTransitionListener =
             new LayoutTransition.TransitionListener() {
         @Override
@@ -3739,10 +3790,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // We only care about disappearing items, since we need special logic to keep
             // those items visible after they've been 'removed'
             if (transitionType == LayoutTransition.DISAPPEARING) {
-                if (mTransitioningViews == null) {
-                    mTransitioningViews = new ArrayList<View>();
-                }
-                mTransitioningViews.add(view);
+                startViewTransition(view);
             }
         }
 
@@ -3750,18 +3798,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         public void endTransition(LayoutTransition transition, ViewGroup container,
                 View view, int transitionType) {
             if (transitionType == LayoutTransition.DISAPPEARING && mTransitioningViews != null) {
-                mTransitioningViews.remove(view);
-                final ArrayList<View> disappearingChildren = mDisappearingChildren;
-                if (disappearingChildren != null && disappearingChildren.contains(view)) {
-                    disappearingChildren.remove(view);
-                    if (view.mAttachInfo != null) {
-                        view.dispatchDetachedFromWindow();
-                    }
-                    if (view.mParent != null) {
-                        view.mParent = null;
-                    }
-                    mGroupFlags |= FLAG_INVALIDATE_REQUIRED;
-                }
+                endViewTransition(view);
             }
         }
     };

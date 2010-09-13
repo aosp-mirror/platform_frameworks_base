@@ -18,6 +18,8 @@ package com.android.dumprendertree2.forwarder;
 
 import android.util.Log;
 
+import com.android.dumprendertree2.FsUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,36 +40,25 @@ public class ConnectionHandler {
 
     private class SocketPipeThread extends Thread {
 
-        private Socket mInSocket, mOutSocket;
+        private InputStream mInputStream;
+        private OutputStream mOutputStream;
 
-        public SocketPipeThread(Socket inSocket, Socket outSocket) {
-            mInSocket = inSocket;
-            mOutSocket = outSocket;
+        public SocketPipeThread(InputStream inputStream, OutputStream outputStream) {
+            mInputStream = inputStream;
+            mOutputStream = outputStream;
+            setName("SocketPipeThread: " + getName());
         }
 
         @Override
         public void run() {
-            InputStream is;
-            OutputStream os;
-            try {
-                synchronized (this) {
-                    is = mInSocket.getInputStream();
-                    os = mOutSocket.getOutputStream();
-                }
-            } catch (IOException e) {
-                Log.w(LOG_TAG, this.toString(), e);
-                finish();
-                return;
-            }
-
             byte[] buffer = new byte[4096];
             int length;
             while (true) {
                 try {
-                    if ((length = is.read(buffer)) <= 0) {
+                    if ((length = mInputStream.read(buffer)) < 0) {
                         break;
                     }
-                    os.write(buffer, 0, length);
+                    mOutputStream.write(buffer, 0, length);
                 } catch (IOException e) {
                     /** This exception means one of the streams is closed */
                     Log.v(LOG_TAG, this.toString(), e);
@@ -75,10 +66,6 @@ public class ConnectionHandler {
                 }
             }
 
-            finish();
-        }
-
-        private void finish() {
             synchronized (mThreadsRunning) {
                 mThreadsRunning--;
                 if (mThreadsRunning == 0) {
@@ -90,7 +77,7 @@ public class ConnectionHandler {
 
         @Override
         public String toString() {
-            return "SocketPipeThread:\n" + mInSocket + "\n=>\n" + mOutSocket;
+            return getName();
         }
     }
 
@@ -98,18 +85,49 @@ public class ConnectionHandler {
 
     private Socket mFromSocket, mToSocket;
     private SocketPipeThread mFromToPipe, mToFromPipe;
+    private InputStream mFromSocketInputStream, mToSocketInputStream;
+    private OutputStream mFromSocketOutputStream, mToSocketOutputStream;
+
+    private int mPort;
+    private String mRemoteMachineIpAddress;
 
     private OnFinishedCallback mOnFinishedCallback;
 
-    public ConnectionHandler(Socket fromSocket, Socket toSocket) {
+    public ConnectionHandler(String remoteMachineIp, int port, Socket fromSocket, Socket toSocket) {
+        mRemoteMachineIpAddress = remoteMachineIp;
+        mPort = port;
+
         mFromSocket = fromSocket;
         mToSocket = toSocket;
-        mFromToPipe = new SocketPipeThread(mFromSocket, mToSocket);
-        mToFromPipe = new SocketPipeThread(mToSocket, mFromSocket);
+
+        try {
+            mFromSocketInputStream = mFromSocket.getInputStream();
+            mToSocketInputStream = mToSocket.getInputStream();
+            mFromSocketOutputStream = mFromSocket.getOutputStream();
+            mToSocketOutputStream = mToSocket.getOutputStream();
+            if (!AdbUtils.configureConnection(mToSocketInputStream, mToSocketOutputStream,
+                    mRemoteMachineIpAddress, mPort)) {
+                throw new IOException("Configuring socket failed!");
+            }
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Unable to start ConnectionHandler", e);
+            closeStreams();
+            return;
+        }
+
+        mFromToPipe = new SocketPipeThread(mFromSocketInputStream, mToSocketOutputStream);
+        mToFromPipe = new SocketPipeThread(mToSocketInputStream, mFromSocketOutputStream);
     }
 
     public void registerOnConnectionHandlerFinishedCallback(OnFinishedCallback callback) {
         mOnFinishedCallback = callback;
+    }
+
+    private void closeStreams() {
+        FsUtils.closeInputStream(mFromSocketInputStream);
+        FsUtils.closeInputStream(mToSocketInputStream);
+        FsUtils.closeOutputStream(mFromSocketOutputStream);
+        FsUtils.closeOutputStream(mToSocketOutputStream);
     }
 
     public void start() {

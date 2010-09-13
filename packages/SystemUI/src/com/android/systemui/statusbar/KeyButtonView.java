@@ -84,7 +84,7 @@ public class KeyButtonView extends ImageView {
 
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                Slog.d("KeyButtonView", "press");
+                //Slog.d("KeyButtonView", "press");
                 mDownTime = SystemClock.uptimeMillis();
                 mRepeat = 0;
                 mSending = true;
@@ -132,7 +132,7 @@ public class KeyButtonView extends ImageView {
         final KeyEvent ev = new KeyEvent(mDownTime, when, action, mCode, mRepeat,
                 0, 0, 0, flags, InputDevice.SOURCE_KEYBOARD);
         try {
-            Slog.d(StatusBarService.TAG, "injecting event " + ev);
+            //Slog.d(StatusBarService.TAG, "injecting event " + ev);
             mWindowManager.injectInputEventNoWait(ev);
         } catch (RemoteException ex) {
             // System process is dead

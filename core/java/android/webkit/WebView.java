@@ -3390,6 +3390,14 @@ public class WebView extends AbsoluteLayout
         // to windows overview, the WebView will be temporarily removed from the
         // view system. In that case, do nothing.
         if (getParent() == null) return false;
+
+        // A multi-finger gesture can look like a long press; make sure we don't take
+        // long press actions if we're scaling.
+        final ScaleGestureDetector detector = mZoomManager.getMultiTouchGestureDetector();
+        if (detector != null && detector.isInProgress()) {
+            return false;
+        }
+        
         if (mNativeClass != 0 && nativeCursorIsTextInput()) {
             // Send the click so that the textfield is in focus
             centerKeyPressOnTextField();
@@ -3674,10 +3682,10 @@ public class WebView extends AbsoluteLayout
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
         // bring it back to the reading level scale so that user can enter text
-        boolean zoom = mZoomManager.getScale() < mZoomManager.getReadingLevelScale();
+        boolean zoom = mZoomManager.getScale() < mZoomManager.getDefaultScale();
         if (zoom) {
             mZoomManager.setZoomCenter(mLastTouchX, mLastTouchY);
-            mZoomManager.setZoomScale(mZoomManager.getReadingLevelScale(), false);
+            mZoomManager.setZoomScale(mZoomManager.getDefaultScale(), false);
         }
         if (isTextView) {
             rebuildWebTextView();
@@ -3689,7 +3697,7 @@ public class WebView extends AbsoluteLayout
                 return;
             }
         }
-        // Used by plugins.
+        // Used by plugins and contentEditable.
         // Also used if the navigation cache is out of date, and
         // does not recognize that a textfield is in focus.  In that
         // case, use WebView as the targeted view.
@@ -3779,6 +3787,15 @@ public class WebView extends AbsoluteLayout
             }
         }
         mWebTextView.requestFocus();
+    }
+
+    /**
+     * Tell webkit to put the cursor on screen.
+     */
+    /* package */ void revealSelection() {
+        if (mWebViewCore != null) {
+            mWebViewCore.sendMessage(EventHub.REVEAL_SELECTION);
+        }
     }
 
     /**
@@ -4829,7 +4846,7 @@ public class WebView extends AbsoluteLayout
                 mTouchMode != TOUCH_DRAG_LAYER_MODE && !skipScaleGesture) {
 
             // if the page disallows zoom, skip multi-pointer action
-            if (mZoomManager.isZoomScaleFixed()) {
+            if (!mZoomManager.supportsPanDuringZoom() && mZoomManager.isZoomScaleFixed()) {
                 return true;
             }
 
@@ -4840,17 +4857,29 @@ public class WebView extends AbsoluteLayout
                 MotionEvent temp = MotionEvent.obtain(ev);
                 // Clear the original event and set it to
                 // ACTION_POINTER_DOWN.
-                temp.setAction(temp.getAction() &
-                        ~MotionEvent.ACTION_MASK |
-                        MotionEvent.ACTION_POINTER_DOWN);
-                detector.onTouchEvent(temp);
+                try {
+                    temp.setAction(temp.getAction() &
+                            ~MotionEvent.ACTION_MASK |
+                            MotionEvent.ACTION_POINTER_DOWN);
+                    detector.onTouchEvent(temp);
+                } finally {
+                    temp.recycle();
+                }
             }
 
             detector.onTouchEvent(ev);
 
             if (detector.isInProgress()) {
                 mLastTouchTime = eventTime;
-                return true;
+                cancelLongPress();
+                mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
+                if (!mZoomManager.supportsPanDuringZoom()) {
+                    return true;
+                }
+                mTouchMode = TOUCH_DRAG_MODE;
+                if (mVelocityTracker == null) {
+                    mVelocityTracker = VelocityTracker.obtain();
+                }
             }
 
             x = detector.getFocusX();
@@ -5064,15 +5093,21 @@ public class WebView extends AbsoluteLayout
                         mLastTouchTime = eventTime;
                         break;
                     }
-                    // if it starts nearly horizontal or vertical, enforce it
-                    int ax = Math.abs(deltaX);
-                    int ay = Math.abs(deltaY);
-                    if (ax > MAX_SLOPE_FOR_DIAG * ay) {
-                        mSnapScrollMode = SNAP_X;
-                        mSnapPositive = deltaX > 0;
-                    } else if (ay > MAX_SLOPE_FOR_DIAG * ax) {
-                        mSnapScrollMode = SNAP_Y;
-                        mSnapPositive = deltaY > 0;
+
+                    // Only lock dragging to one axis if we don't have a scale in progress.
+                    // Scaling implies free-roaming movement. Note this is only ever a question
+                    // if mZoomManager.supportsPanDuringZoom() is true.
+                    if (detector != null && !detector.isInProgress()) {
+                        // if it starts nearly horizontal or vertical, enforce it
+                        int ax = Math.abs(deltaX);
+                        int ay = Math.abs(deltaY);
+                        if (ax > MAX_SLOPE_FOR_DIAG * ay) {
+                            mSnapScrollMode = SNAP_X;
+                            mSnapPositive = deltaX > 0;
+                        } else if (ay > MAX_SLOPE_FOR_DIAG * ax) {
+                            mSnapScrollMode = SNAP_Y;
+                            mSnapPositive = deltaY > 0;
+                        }
                     }
 
                     mTouchMode = TOUCH_DRAG_MODE;

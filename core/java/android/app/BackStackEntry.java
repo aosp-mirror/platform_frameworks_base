@@ -205,6 +205,7 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
             throw new IllegalStateException("Fragment already added: " + fragment);
         }
         fragment.mImmediateActivity = mManager.mActivity;
+        fragment.mFragmentManager = mManager;
         
         if (tag != null) {
             if (fragment.mTag != null && !tag.equals(fragment.mTag)) {

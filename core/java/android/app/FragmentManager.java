@@ -18,8 +18,7 @@ package android.app;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.os.Handler;
@@ -193,6 +192,7 @@ final class FragmentManagerImpl implements FragmentManager {
     Activity mActivity;
     
     boolean mNeedMenuInvalidate;
+    boolean mStateSaved;
     
     // Temporary vars for state save and restore.
     Bundle mStateBundle = null;
@@ -363,11 +363,7 @@ final class FragmentManagerImpl implements FragmentManager {
                                     Animator anim = loadAnimator(f, transit, true,
                                             transitionStyle);
                                     if (anim != null) {
-                                        if (anim instanceof AnimatorSet) {
-                                            ((AnimatorSet)anim).setTarget(f.mView);
-                                        } else if (anim instanceof ObjectAnimator) {
-                                            ((ObjectAnimator)anim).setTarget(f.mView);
-                                        }
+                                        anim.setTarget(f.mView);
                                         anim.start();
                                     }
                                     container.addView(f.mView);
@@ -447,17 +443,24 @@ final class FragmentManagerImpl implements FragmentManager {
                                     + " did not call through to super.onDestroyedView()");
                         }
                         if (f.mView != null && f.mContainer != null) {
+                            Animator anim = null;
                             if (mCurState > Fragment.INITIALIZING) {
-                                Animator anim = loadAnimator(f, transit, true,
+                                anim = loadAnimator(f, transit, false,
                                         transitionStyle);
-                                if (anim != null) {
-                                    if (anim instanceof AnimatorSet) {
-                                        ((AnimatorSet)anim).setTarget(f.mView);
-                                    } else if (anim instanceof ObjectAnimator) {
-                                        ((ObjectAnimator)anim).setTarget(f.mView);
+                            }
+                            if (anim != null) {
+                                final ViewGroup container = f.mContainer;
+                                final View view = f.mView;
+                                container.startViewTransition(view);
+                                anim.addListener(new AnimatorListenerAdapter() {
+                                    @Override
+                                    public void onAnimationEnd(Animator anim) {
+                                        container.endViewTransition(view);
                                     }
-                                    anim.start();
-                                }
+                                });
+                                anim.setTarget(f.mView);
+                                anim.start();
+
                             }
                             f.mContainer.removeView(f.mView);
                         }
@@ -482,6 +485,7 @@ final class FragmentManagerImpl implements FragmentManager {
                             throw new SuperNotCalledException("Fragment " + f
                                     + " did not call through to super.onDetach()");
                         }
+                        f.mImmediateActivity = null;
                         f.mActivity = null;
                     }
             }
@@ -591,11 +595,7 @@ final class FragmentManagerImpl implements FragmentManager {
                 Animator anim = loadAnimator(fragment, transition, true,
                         transitionStyle);
                 if (anim != null) {
-                    if (anim instanceof AnimatorSet) {
-                        ((AnimatorSet)anim).setTarget(fragment.mView);
-                    } else if (anim instanceof ObjectAnimator) {
-                        ((ObjectAnimator)anim).setTarget(fragment.mView);
-                    }
+                    anim.setTarget(fragment.mView);
                     anim.start();
                 }
                 fragment.mView.setVisibility(View.GONE);
@@ -615,11 +615,7 @@ final class FragmentManagerImpl implements FragmentManager {
                 Animator anim = loadAnimator(fragment, transition, true,
                         transitionStyle);
                 if (anim != null) {
-                    if (anim instanceof AnimatorSet) {
-                        ((AnimatorSet)anim).setTarget(fragment.mView);
-                    } else if (anim instanceof ObjectAnimator) {
-                        ((ObjectAnimator)anim).setTarget(fragment.mView);
-                    }
+                    anim.setTarget(fragment.mView);
                     anim.start();
                 }
                 fragment.mView.setVisibility(View.VISIBLE);
@@ -684,6 +680,10 @@ final class FragmentManagerImpl implements FragmentManager {
     }
     
     public void enqueueAction(Runnable action) {
+        if (mStateSaved) {
+            throw new IllegalStateException(
+                    "Can not perform this action after onSaveInstanceState");
+        }
         synchronized (this) {
             if (mPendingActions == null) {
                 mPendingActions = new ArrayList<Runnable>();
@@ -894,6 +894,8 @@ final class FragmentManagerImpl implements FragmentManager {
     }
     
     Parcelable saveAllState() {
+        mStateSaved = true;
+
         if (mActive == null || mActive.size() <= 0) {
             return null;
         }
@@ -1035,6 +1037,22 @@ final class FragmentManagerImpl implements FragmentManager {
             }
         }
         
+        // Update the target of all retained fragments.
+        if (nonConfig != null) {
+            for (int i=0; i<nonConfig.size(); i++) {
+                Fragment f = nonConfig.get(i);
+                if (f.mTarget != null) {
+                    if (f.mTarget.mIndex < mActive.size()) {
+                        f.mTarget = mActive.get(f.mTarget.mIndex);
+                    } else {
+                        Log.w(TAG, "Re-attaching retained fragment " + f
+                                + " target no longer exists: " + f.mTarget);
+                        f.mTarget = null;
+                    }
+                }
+            }
+        }
+
         // Build the list of currently added fragments.
         if (fms.mAdded != null) {
             mAdded = new ArrayList<Fragment>(fms.mAdded.length);
@@ -1076,18 +1094,22 @@ final class FragmentManagerImpl implements FragmentManager {
     }
     
     public void dispatchCreate() {
+        mStateSaved = false;
         moveToState(Fragment.CREATED, false);
     }
     
     public void dispatchActivityCreated() {
+        mStateSaved = false;
         moveToState(Fragment.ACTIVITY_CREATED, false);
     }
     
     public void dispatchStart() {
+        mStateSaved = false;
         moveToState(Fragment.STARTED, false);
     }
     
     public void dispatchResume() {
+        mStateSaved = false;
         moveToState(Fragment.RESUMED, false);
     }
     

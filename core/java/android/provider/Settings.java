@@ -3471,6 +3471,21 @@ public final class Settings {
         public static final String DOWNLOAD_MAX_BYTES_OVER_MOBILE =
                 "download_manager_max_bytes_over_mobile";
 
+        /**
+         * ms during which to consume extra events related to Inet connection condition
+         * after a transtion to fully-connected
+         * @hide
+         */
+        public static final String INET_CONDITION_DEBOUNCE_UP_DELAY =
+                "inet_condition_debounce_up_delay";
+
+        /**
+         * ms during which to consume extra events related to Inet connection condtion
+         * after a transtion to partly-connected
+         * @hide
+         */
+        public static final String INET_CONDITION_DEBOUNCE_DOWN_DELAY =
+                "inet_condition_debounce_down_delay";
 
         /**
          * @hide
@@ -3510,13 +3525,7 @@ public final class Settings {
          */
         public static final boolean isLocationProviderEnabled(ContentResolver cr, String provider) {
             String allowedProviders = Settings.Secure.getString(cr, LOCATION_PROVIDERS_ALLOWED);
-            if (allowedProviders != null) {
-                return (allowedProviders.equals(provider) ||
-                        allowedProviders.contains("," + provider + ",") ||
-                        allowedProviders.startsWith(provider + ",") ||
-                        allowedProviders.endsWith("," + provider));
-            }
-            return false;
+            return TextUtils.delimitedStringContains(allowedProviders, ',', provider);
         }
 
         /**

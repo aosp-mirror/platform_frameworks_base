@@ -215,8 +215,8 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     }
 
     private void bind(int type, int index, Object value) {
-        mDatabase.verifyDbIsOpen();
         synchronized (this) {
+            mDatabase.verifyDbIsOpen();
             addToBindArgs(index, (type == Cursor.FIELD_TYPE_NULL) ? null : value);
             if (nStatement > 0) {
                 // bind only if the SQL statement is compiled
@@ -393,6 +393,10 @@ public abstract class SQLiteProgram extends SQLiteClosable {
                 bindString(i + 1, bindArgs[i]);
             }
         }
+    }
+
+    /* package */ synchronized final void setNativeHandle(int nHandle) {
+        this.nHandle = nHandle;
     }
 
     /**

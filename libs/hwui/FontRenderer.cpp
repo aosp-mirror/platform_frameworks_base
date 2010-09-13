@@ -166,6 +166,8 @@ void Font::measureUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t
     renderUTF(paint, text, start, len, numGlyphs, 0, 0, MEASURE, NULL, 0, 0, bounds);
 }
 
+#define SkAutoKern_AdjustF(prev, next)    (((next) - (prev) + 32) >> 6 << 16)
+
 void Font::renderUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
         int numGlyphs, int x, int y, RenderMode mode, uint8_t *bitmap,
         uint32_t bitmapW, uint32_t bitmapH,Rect *bounds) {
@@ -173,11 +175,15 @@ void Font::renderUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t 
         return;
     }
 
-    int penX = x, penY = y;
+    SkFixed penX = SkIntToFixed(x);
+    int penY = y;
     int glyphsLeft = 1;
     if (numGlyphs > 0) {
         glyphsLeft = numGlyphs;
     }
+
+    SkFixed prevRsbDelta = 0;
+    penX += SK_Fixed1 / 2;
 
     text += start;
 
@@ -190,23 +196,25 @@ void Font::renderUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t 
         }
 
         CachedGlyphInfo* cachedGlyph = getCachedUTFChar(paint, utfChar);
+        penX += SkAutoKern_AdjustF(prevRsbDelta, cachedGlyph->mLsbDelta);
+        prevRsbDelta = cachedGlyph->mRsbDelta;
 
         // If it's still not valid, we couldn't cache it, so we shouldn't draw garbage
         if (cachedGlyph->mIsValid) {
             switch(mode) {
             case FRAMEBUFFER:
-                drawCachedGlyph(cachedGlyph, penX, penY);
+                drawCachedGlyph(cachedGlyph, SkFixedFloor(penX), penY);
                 break;
             case BITMAP:
-                drawCachedGlyph(cachedGlyph, penX, penY, bitmap, bitmapW, bitmapH);
+                drawCachedGlyph(cachedGlyph, SkFixedFloor(penX), penY, bitmap, bitmapW, bitmapH);
                 break;
             case MEASURE:
-                measureCachedGlyph(cachedGlyph, penX, penY, bounds);
+                measureCachedGlyph(cachedGlyph, SkFixedFloor(penX), penY, bounds);
                 break;
             }
         }
 
-        penX += SkFixedFloor(cachedGlyph->mAdvanceX);
+        penX += cachedGlyph->mAdvanceX;
 
         // If we were given a specific number of glyphs, decrement
         if (numGlyphs > 0) {
@@ -220,6 +228,8 @@ void Font::updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyp
     glyph->mAdvanceY = skiaGlyph.fAdvanceY;
     glyph->mBitmapLeft = skiaGlyph.fLeft;
     glyph->mBitmapTop = skiaGlyph.fTop;
+    glyph->mLsbDelta = skiaGlyph.fLsbDelta;
+    glyph->mRsbDelta = skiaGlyph.fRsbDelta;
 
     uint32_t startX = 0;
     uint32_t startY = 0;
@@ -352,7 +362,7 @@ void FontRenderer::flushAllAndInvalidate() {
 
 bool FontRenderer::cacheBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_t* retOriginY) {
     // If the glyph is too tall, don't cache it
-    if (glyph.fWidth > mCacheLines[mCacheLines.size() - 1]->mMaxHeight) {
+    if (glyph.fHeight > mCacheLines[mCacheLines.size() - 1]->mMaxHeight) {
         LOGE("Font size to large to fit in cache. width, height = %i, %i",
                 (int) glyph.fWidth, (int) glyph.fHeight);
         return false;
@@ -616,7 +626,7 @@ void FontRenderer::setFont(SkPaint* paint, uint32_t fontId, float fontSize) {
     const float maxPrecacheFontSize = 40.0f;
     bool isNewFont = currentNumFonts != mActiveFonts.size();
 
-    if(isNewFont && fontSize <= maxPrecacheFontSize ){
+    if (isNewFont && fontSize <= maxPrecacheFontSize) {
         precacheLatin(paint);
     }
 }

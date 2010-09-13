@@ -89,7 +89,7 @@ public class MtpDatabase {
         mContext = context;
         mMediaProvider = context.getContentResolver().acquireProvider("media");
         mVolumeName = volumeName;
-        mObjectsUri = Files.getContentUri(volumeName);
+        mObjectsUri = Files.getMtpObjectsUri(volumeName);
         mMediaScanner = new MediaScanner(context);
         openDevicePropertiesDatabase(context);
     }
@@ -170,7 +170,7 @@ public class MtpDatabase {
                     Log.e(TAG, "RemoteException in endSendObject", e);
                 }
             } else {
-                Uri uri = mMediaScanner.scanMtpFile(path, mVolumeName, handle, format);
+                mMediaScanner.scanMtpFile(path, mVolumeName, handle, format);
             }
         } else {
             deleteFile(handle);
@@ -246,6 +246,8 @@ public class MtpDatabase {
         return new int[] {
             // allow transfering arbitrary files
             MtpConstants.FORMAT_UNDEFINED,
+            MtpConstants.FORMAT_ASSOCIATION,
+            MtpConstants.FORMAT_ABSTRACT_AV_PLAYLIST,
         };
     }
 
@@ -479,7 +481,7 @@ public class MtpDatabase {
     private int deleteFile(int handle) {
         Log.d(TAG, "deleteFile: " + handle);
         mDatabaseModified = true;
-        Uri uri = Files.getContentUri(mVolumeName, handle);
+        Uri uri = Files.getMtpObjectsUri(mVolumeName, handle);
         try {
             if (mMediaProvider.delete(uri, null, null) == 1) {
                 return MtpConstants.RESPONSE_OK;
@@ -494,7 +496,7 @@ public class MtpDatabase {
 
     private int[] getObjectReferences(int handle) {
         Log.d(TAG, "getObjectReferences for: " + handle);
-        Uri uri = Files.getReferencesUri(mVolumeName, handle);
+        Uri uri = Files.getMtpReferencesUri(mVolumeName, handle);
         Cursor c = null;
         try {
             c = mMediaProvider.query(uri, ID_PROJECTION, null, null, null);
@@ -522,7 +524,7 @@ public class MtpDatabase {
 
     private int setObjectReferences(int handle, int[] references) {
         mDatabaseModified = true;
-        Uri uri = Files.getReferencesUri(mVolumeName, handle);
+        Uri uri = Files.getMtpReferencesUri(mVolumeName, handle);
         int count = references.length;
         ContentValues[] valuesList = new ContentValues[count];
         for (int i = 0; i < count; i++) {

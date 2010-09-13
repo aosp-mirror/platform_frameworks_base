@@ -1150,10 +1150,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             // No try for permanent failure
             if (cause.isPermanentFail()) {
                 notifyNoData(cause);
-                if (!mRequestedApnType.equals(Phone.APN_TYPE_DEFAULT)) {
-                    notifyDataConnection(Phone.REASON_APN_FAILED);
-                    onEnableApn(apnTypeToId(mRequestedApnType), DISABLED);
-                }
+                notifyDataConnection(Phone.REASON_APN_FAILED);
+                onEnableApn(apnTypeToId(mRequestedApnType), DISABLED);
                 return;
             }
 

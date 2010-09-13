@@ -33,9 +33,11 @@ import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.database.ContentObserver;
 import android.media.AudioService;
+import android.os.Build;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
@@ -531,6 +533,17 @@ class ServerThread extends Thread {
                 if (throttleF != null) throttleF.systemReady();
             }
         });
+
+        // For debug builds, log event loop stalls to dropbox for analysis.
+        // Similar logic also appears in ActivityThread.java for system apps.
+        if (!"user".equals(Build.TYPE)) {
+            Slog.i(TAG, "Enabling StrictMode for system server.");
+            StrictMode.setThreadPolicy(
+                StrictMode.DISALLOW_DISK_WRITE |
+                StrictMode.DISALLOW_DISK_READ |
+                StrictMode.DISALLOW_NETWORK |
+                StrictMode.PENALTY_DROPBOX);
+        }
 
         Looper.loop();
         Slog.d(TAG, "System ServerThread is exiting!");

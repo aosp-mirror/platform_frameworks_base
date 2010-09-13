@@ -26,7 +26,6 @@ import android.net.sip.SipManager;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import javax.sip.SipException;
 
 abstract class SipCallBase extends Call {
     private static final int MAX_CONNECTIONS_PER_CALL = 5;

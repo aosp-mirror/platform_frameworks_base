@@ -205,7 +205,7 @@ public class SQLiteStatement extends SQLiteProgram
         // use the database connection obtained above
         mOrigDb = mDatabase;
         mDatabase = db;
-        nHandle = mDatabase.mNativeHandle;
+        setNativeHandle(mDatabase.mNativeHandle);
         if (rwFlag == WRITE) {
             BlockGuard.getThreadPolicy().onWriteToDisk();
         } else {
@@ -268,7 +268,7 @@ public class SQLiteStatement extends SQLiteProgram
         release();
         // restore the database connection handle to the original value
         mDatabase = mOrigDb;
-        nHandle = mDatabase.mNativeHandle;
+        setNativeHandle(mDatabase.mNativeHandle);
     }
 
     private final native int native_execute();

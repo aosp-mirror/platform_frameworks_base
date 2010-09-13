@@ -567,16 +567,10 @@ void CameraService::Client::setPreviewCallbackFlag(int callback_flag) {
     if (checkPidAndHardware() != NO_ERROR) return;
 
     mPreviewCallbackFlag = callback_flag;
-
-    // If we don't use overlay, we always need the preview frame for display.
-    // If we do use overlay, we only need the preview frame if the user
-    // wants the data.
-    if (mUseOverlay) {
-        if(mPreviewCallbackFlag & FRAME_CALLBACK_FLAG_ENABLE_MASK) {
-            enableMsgType(CAMERA_MSG_PREVIEW_FRAME);
-        } else {
-            disableMsgType(CAMERA_MSG_PREVIEW_FRAME);
-        }
+    if (mPreviewCallbackFlag & FRAME_CALLBACK_FLAG_ENABLE_MASK) {
+        enableMsgType(CAMERA_MSG_PREVIEW_FRAME);
+    } else {
+        disableMsgType(CAMERA_MSG_PREVIEW_FRAME);
     }
 }
 
@@ -636,7 +630,6 @@ status_t CameraService::Client::startPreviewMode() {
     } else {
         // XXX: Set the orientation of the ANativeWindow.
         mHardware->setPreviewWindow(mPreviewWindow);
-        enableMsgType(CAMERA_MSG_PREVIEW_FRAME);
         result = mHardware->startPreview();
     }
     return result;
@@ -1025,9 +1018,7 @@ void CameraService::Client::handlePreviewData(const sp<IMemory>& mem) {
         mPreviewCallbackFlag &= ~(FRAME_CALLBACK_FLAG_ONE_SHOT_MASK |
                                   FRAME_CALLBACK_FLAG_COPY_OUT_MASK |
                                   FRAME_CALLBACK_FLAG_ENABLE_MASK);
-        if (mUseOverlay) {
-            disableMsgType(CAMERA_MSG_PREVIEW_FRAME);
-        }
+        disableMsgType(CAMERA_MSG_PREVIEW_FRAME);
     }
 
     if (c != 0) {

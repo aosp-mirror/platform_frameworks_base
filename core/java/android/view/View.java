@@ -16,9 +16,6 @@
 
 package android.view;
 
-import com.android.internal.R;
-import com.android.internal.view.menu.MenuBuilder;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -49,8 +46,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
-import android.util.Config;
-import android.util.EventLog;
 import android.util.Log;
 import android.util.Pool;
 import android.util.Poolable;
@@ -67,6 +62,8 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ScrollBarDrawable;
+import com.android.internal.R;
+import com.android.internal.view.menu.MenuBuilder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -4022,12 +4019,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public boolean dispatchKeyEvent(KeyEvent event) {
         // If any attached key listener a first crack at the event.
-        //noinspection SimplifiableIfStatement
 
+        //noinspection SimplifiableIfStatement,deprecation
         if (android.util.Config.LOGV) {
             captureViewInfo("captureViewKeyEvent", this);
         }
 
+        //noinspection SimplifiableIfStatement
         if (mOnKeyListener != null && (mViewFlags & ENABLED_MASK) == ENABLED
                 && mOnKeyListener.onKey(this, event.getKeyCode(), event)) {
             return true;
@@ -4059,6 +4057,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             return false;
         }
 
+        //noinspection SimplifiableIfStatement
         if (mOnTouchListener != null && (mViewFlags & ENABLED_MASK) == ENABLED &&
                 mOnTouchListener.onTouch(this, event)) {
             return true;
@@ -4075,6 +4074,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #getFilterTouchesWhenObscured
      */
     public boolean onFilterTouchEventForSecurity(MotionEvent event) {
+        //noinspection RedundantIfStatement
         if ((mViewFlags & FILTER_TOUCHES_WHEN_OBSCURED) != 0
                 && (event.getFlags() & MotionEvent.FLAG_WINDOW_IS_OBSCURED) != 0) {
             // Window is obscured, drop this touch.
@@ -5094,20 +5094,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 }
             }
             mMatrix.reset();
-            mMatrix.setTranslate(mTranslationX, mTranslationY);
-            mMatrix.preRotate(mRotation, mPivotX, mPivotY);
-            mMatrix.preScale(mScaleX, mScaleY, mPivotX, mPivotY);
-            if (nonzero(mRotationX) || nonzero(mRotationY)) {
+            if (!nonzero(mRotationX) && !nonzero(mRotationY)) {
+                mMatrix.setTranslate(mTranslationX, mTranslationY);
+                mMatrix.preRotate(mRotation, mPivotX, mPivotY);
+                mMatrix.preScale(mScaleX, mScaleY, mPivotX, mPivotY);
+            } else {
                 if (mCamera == null) {
                     mCamera = new Camera();
                     matrix3D = new Matrix();
                 }
                 mCamera.save();
+                mMatrix.preScale(mScaleX, mScaleY, mPivotX, mPivotY);
                 mCamera.rotateX(mRotationX);
                 mCamera.rotateY(mRotationY);
+                mCamera.rotateZ(-mRotation);
                 mCamera.getMatrix(matrix3D);
                 matrix3D.preTranslate(-mPivotX, -mPivotY);
-                matrix3D.postTranslate(mPivotX, mPivotY);
+                matrix3D.postTranslate(mPivotX + mTranslationX, mPivotY + mTranslationY);
                 mMatrix.postConcat(matrix3D);
                 mCamera.restore();
             }
@@ -5148,7 +5151,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Sets the degrees that the view is rotated around the pivot point.
+     * Sets the degrees that the view is rotated around the pivot point. Increasing values
+     * result in clockwise rotation.
      *
      * @param rotation The degrees of rotation.
      * @see #getPivotX()
@@ -5177,7 +5181,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Sets the degrees that the view is rotated around the vertical axis through pivot point.
+     * Sets the degrees that the view is rotated around the vertical axis through the pivot point.
+     * Increasing values result in counter-clockwise rotation from the viewpoint of looking
+     * down the y axis.
      *
      * @param rotationY The degrees of Y rotation.
      * @see #getPivotX()
@@ -5206,7 +5212,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Sets the degrees that the view is rotated around the horizontal axis through pivot point.
+     * Sets the degrees that the view is rotated around the horizontal axis through the pivot point.
+     * Increasing values result in clockwise rotation from the viewpoint of looking down the
+     * x axis.
      *
      * @param rotationX The degrees of X rotation.
      * @see #getPivotX()
@@ -7682,6 +7690,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * <p>Indicates whether this view is attached to an hardware accelerated
+     * window or not.</p>
+     * 
+     * <p>Even if this method returns true, it does not mean that every call
+     * to {@link #draw(android.graphics.Canvas)} will be made with an hardware
+     * accelerated {@link android.graphics.Canvas}. For instance, if this view
+     * is drawn onto an offscren {@link android.graphics.Bitmap} and its
+     * window is hardware accelerated,
+     * {@link android.graphics.Canvas#isHardwareAccelerated()} will likely
+     * return false, and this method will return true.</p>
+     * 
+     * @return True if the view is attached to a window and the window is
+     *         hardware accelerated; false in any other case.
+     */
+    public boolean isHardwareAccelerated() {
+        return mAttachInfo != null && mAttachInfo.mHardwareAccelerated;
+    }
+    
+    /**
      * Manually render this view (and all of its children) to the given Canvas.
      * The view must have already done a full layout before this function is
      * called.  When implementing a view, do not override this method; instead,
@@ -7821,8 +7848,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         saveCount = canvas.getSaveCount();
 
         int solidColor = getSolidColor();
-        // TODO: Temporarily disable fading edges with hardware acceleration
-        if (solidColor == 0 && !canvas.isHardwareAccelerated()) {
+        if (solidColor == 0) {
             final int flags = Canvas.HAS_ALPHA_LAYER_SAVE_FLAG;
 
             if (drawTop) {
@@ -9569,6 +9595,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (mAttachInfo == null) {
             return false;
         }
+        //noinspection SimplifiableIfStatement
         if ((flags & HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING) == 0
                 && !isHapticFeedbackEnabled()) {
             return false;
@@ -10049,6 +10076,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         IBinder mPanelParentWindowToken;
         Surface mSurface;
 
+        boolean mHardwareAccelerated;        
+        
         /**
          * Scale factor used by the compatibility mode
          */

@@ -580,7 +580,7 @@ public class PackageManagerHostTestUtils extends Assert {
         private boolean mAllTestsPassed = true;
         private String mTestRunErrorMessage = null;
 
-        public void testEnded(TestIdentifier test) {
+        public void testEnded(TestIdentifier test, Map<String, String> metrics) {
             // ignore
         }
 

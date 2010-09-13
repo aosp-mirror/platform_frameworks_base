@@ -126,8 +126,6 @@
         <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
         <item name="windowActionBar">false</item>
         <item name="windowActionModeOverlay">false</item>
-        <item name="windowActionBarStyle">@android:style/ActionBar</item>
-        <item name="windowActionBarSize">50dip</item>
 
         <!-- Dialog attributes -->
         <item name="alertDialogStyle">@android:style/AlertDialog</item>
@@ -135,9 +133,10 @@
         <!-- Panel attributes -->
         <item name="panelBackground">@android:drawable/menu_background</item>
         <item name="panelFullBackground">@android:drawable/menu_background_fill_parent_width</item>
-        <item name="panelColorBackground">#fff</item>
-        <item name="panelColorForeground">?android:attr/textColorPrimaryInverse</item>
-        <item name="panelTextAppearance">?android:attr/textAppearanceInverse</item>
+        <!-- These three attributes do not seems to be used by the framework. Declared public though -->
+        <item name="panelColorBackground">#000</item>
+        <item name="panelColorForeground">?android:attr/textColorPrimary</item>
+        <item name="panelTextAppearance">?android:attr/textAppearance</item>
 
         <!-- Scrollbar attributes -->
         <item name="scrollbarFadeDuration">250</item>
@@ -181,9 +180,6 @@
         <item name="horizontalScrollViewStyle">@android:style/Widget.HorizontalScrollView</item>
         <item name="spinnerStyle">@android:style/Widget.Spinner</item>
         <item name="dropDownSpinnerStyle">@android:style/Widget.Spinner.DropDown</item>
-        <item name="actionDropDownStyle">@android:style/Widget.Spinner.DropDown</item>
-        <item name="actionButtonStyle">@android:style/Widget.ActionButton</item>
-        <item name="actionOverflowButtonStyle">@android:style/Widget.ActionButton.Overflow</item>
         <item name="starStyle">@android:style/Widget.CompoundButton.Star</item>
         <item name="tabWidgetStyle">@android:style/Widget.TabWidget</item>
         <item name="textViewStyle">@android:style/Widget.TextView</item>
@@ -200,9 +196,6 @@
         <item name="quickContactBadgeStyleSmallWindowSmall">@android:style/Widget.QuickContactBadgeSmall.WindowSmall</item>
         <item name="quickContactBadgeStyleSmallWindowMedium">@android:style/Widget.QuickContactBadgeSmall.WindowMedium</item>
         <item name="quickContactBadgeStyleSmallWindowLarge">@android:style/Widget.QuickContactBadgeSmall.WindowLarge</item>
-        <item name="actionBarTabStyle">@style/Widget.ActionBarView_TabView</item>
-        <item name="actionBarTabBarStyle">@style/Widget.ActionBarView_TabBar</item>
-        <item name="actionBarTabTextStyle">@style/Widget.ActionBarView_TabText</item>
         
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.PreferenceScreen</item>
@@ -220,9 +213,19 @@
         <item name="searchWidgetCorpusItemBackground">@android:color/search_widget_corpus_item_background</item>
 
         <!-- Action bar styles -->
+        <item name="actionDropDownStyle">@android:style/Widget.Spinner.DropDown</item>
+        <item name="actionButtonStyle">@android:style/Widget.ActionButton</item>
+        <item name="actionOverflowButtonStyle">@android:style/Widget.ActionButton.Overflow</item>
         <item name="actionButtonPadding">12dip</item>
         <item name="actionModeBackground">@android:drawable/action_bar_context_background</item>
         <item name="actionModeCloseDrawable">@android:drawable/ic_menu_close_clear_cancel</item>
+        <item name="actionBarTabStyle">@style/Widget.ActionBarView_TabView</item>
+        <item name="actionBarTabBarStyle">@style/Widget.ActionBarView_TabBar</item>
+        <item name="actionBarTabTextStyle">@style/Widget.ActionBarView_TabText</item>
+        <item name="actionModeStyle">@style/Widget.ActionMode</item>
+        <item name="actionModeCloseButtonStyle">@style/Widget.ActionButton.CloseMode</item>
+        <item name="actionBarStyle">@android:style/Widget.ActionBar</item>
+        <item name="actionBarSize">50dip</item>
     </style>
     
     <!-- Variant of the default (dark) theme with no title bar -->
@@ -532,8 +535,8 @@
         <item name="android:itemTextAppearance">@android:style/TextAppearance.Widget.IconMenu.Item</item>
         <item name="android:itemBackground">@android:drawable/menu_selector</item>
         <item name="android:itemIconDisabledAlpha">?android:attr/disabledAlpha</item>
-        <item name="android:horizontalDivider">@android:drawable/divider_horizontal_bright</item>
-        <item name="android:verticalDivider">@android:drawable/divider_vertical_bright</item>
+        <item name="android:horizontalDivider">@android:drawable/divider_horizontal_dark</item>
+        <item name="android:verticalDivider">@android:drawable/divider_vertical_dark</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.OptionsPanel</item>
         <item name="android:moreIcon">@android:drawable/ic_menu_more</item>
         <item name="android:background">@null</item>
@@ -541,7 +544,7 @@
 
     <style name="Theme.ExpandedMenu">
         <!-- Menu/item attributes -->
-        <item name="android:itemTextAppearance">?android:attr/textAppearanceLargeInverse</item>
+        <item name="android:itemTextAppearance">?android:attr/textAppearanceLarge</item>
         <item name="android:listViewStyle">@android:style/Widget.ListView.Menu</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.OptionsPanel</item>
         <item name="android:background">@null</item>
@@ -564,6 +567,13 @@
         <item name="windowBackground">@android:color/transparent</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.RecentApplications</item>
         <item name="android:textColor">@android:color/secondary_text_nofocus</item>
+    </style>
+
+    <!-- Default theme for window that looks like a toast. -->
+    <style name="Theme.Toast" parent="@android:style/Theme.Dialog">
+        <item name="android:windowBackground">@android:drawable/toast_frame</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Toast</item>
+        <item name="android:backgroundDimEnabled">false</item>
     </style>
 
     <!-- Default theme with an Action Bar. -->
@@ -601,7 +611,7 @@
         <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio_holo_light</item>
         <item name="listChoiceIndicatorMultiple">@android:drawable/btn_check_holo_light</item>
     </style>
-
+        
     <!-- Variant of the holographic (dark) theme with no action bar. -->
     <style name="Theme.Holo.NoActionBar">
         <item name="android:windowActionBar">false</item>
