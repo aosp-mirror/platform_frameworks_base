@@ -293,4 +293,34 @@ public class NativeLibraryHelper {
             inputStream.close();
         }
     }
+
+    // Remove the native binaries of a given package. This simply
+    // gets rid of the files in the 'lib' sub-directory.
+    public static void removeNativeBinariesLI(String nativeLibraryPath) {
+        if (DEBUG_NATIVE) {
+            Slog.w(TAG, "Deleting native binaries from: " + nativeLibraryPath);
+        }
+
+        /*
+         * Just remove any file in the directory. Since the directory is owned
+         * by the 'system' UID, the application is not supposed to have written
+         * anything there.
+         */
+        File binaryDir = new File(nativeLibraryPath);
+        if (binaryDir.exists()) {
+            File[] binaries = binaryDir.listFiles();
+            if (binaries != null) {
+                for (int nn = 0; nn < binaries.length; nn++) {
+                    if (DEBUG_NATIVE) {
+                        Slog.d(TAG, "    Deleting " + binaries[nn].getName());
+                    }
+                    if (!binaries[nn].delete()) {
+                        Slog.w(TAG, "Could not delete native binary: " + binaries[nn].getPath());
+                    }
+                }
+            }
+            // Do not delete 'lib' directory itself, or this will prevent
+            // installation of future updates.
+        }
+    }
 }
