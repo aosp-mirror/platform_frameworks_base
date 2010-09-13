@@ -31,6 +31,9 @@ public enum SipErrorCode {
     /** When server responds with an error. */
     SERVER_ERROR,
 
+    /** When transaction is terminated unexpectedly. */
+    TRANSACTION_TERMINTED,
+
     /** When some error occurs on the device, possibly due to a bug. */
     CLIENT_ERROR,
 
@@ -41,5 +44,8 @@ public enum SipErrorCode {
     INVALID_REMOTE_URI,
 
     /** When invalid credentials are provided. */
-    INVALID_CREDENTIALS;
+    INVALID_CREDENTIALS,
+
+    /** The client is in a transaction and cannot initiate a new one. */
+    IN_PROGRESS;
 }
