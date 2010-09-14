@@ -95,7 +95,7 @@ InputDispatcher::InputDispatcher(const sp<InputDispatcherPolicyInterface>& polic
     mFocusedApplication(NULL),
     mCurrentInputTargetsValid(false),
     mInputTargetWaitCause(INPUT_TARGET_WAIT_CAUSE_NONE) {
-    mPollLoop = new PollLoop(false);
+    mLooper = new Looper(false);
 
     mInboundQueue.headSentinel.refCount = -1;
     mInboundQueue.headSentinel.type = EventEntry::TYPE_SENTINEL;
@@ -156,7 +156,7 @@ void InputDispatcher::dispatchOnce() {
         timeoutMillis = 0;
     }
 
-    mPollLoop->pollOnce(timeoutMillis);
+    mLooper->pollOnce(timeoutMillis);
 }
 
 void InputDispatcher::dispatchOnceInnerLocked(nsecs_t keyRepeatTimeout,
@@ -1784,7 +1784,7 @@ void InputDispatcher::drainOutboundQueueLocked(Connection* connection,
     }
 }
 
-bool InputDispatcher::handleReceiveCallback(int receiveFd, int events, void* data) {
+int InputDispatcher::handleReceiveCallback(int receiveFd, int events, void* data) {
     InputDispatcher* d = static_cast<InputDispatcher*>(data);
 
     { // acquire lock
@@ -1794,24 +1794,24 @@ bool InputDispatcher::handleReceiveCallback(int receiveFd, int events, void* dat
         if (connectionIndex < 0) {
             LOGE("Received spurious receive callback for unknown input channel.  "
                     "fd=%d, events=0x%x", receiveFd, events);
-            return false; // remove the callback
+            return 0; // remove the callback
         }
 
         nsecs_t currentTime = now();
 
         sp<Connection> connection = d->mConnectionsByReceiveFd.valueAt(connectionIndex);
-        if (events & (POLLERR | POLLHUP | POLLNVAL)) {
+        if (events & (ALOOPER_EVENT_ERROR | ALOOPER_EVENT_HANGUP)) {
             LOGE("channel '%s' ~ Consumer closed input channel or an error occurred.  "
                     "events=0x%x", connection->getInputChannelName(), events);
             d->abortDispatchCycleLocked(currentTime, connection, true /*broken*/);
             d->runCommandsLockedInterruptible();
-            return false; // remove the callback
+            return 0; // remove the callback
         }
 
-        if (! (events & POLLIN)) {
+        if (! (events & ALOOPER_EVENT_INPUT)) {
             LOGW("channel '%s' ~ Received spurious callback for unhandled poll event.  "
                     "events=0x%x", connection->getInputChannelName(), events);
-            return true;
+            return 1;
         }
 
         status_t status = connection->inputPublisher.receiveFinishedSignal();
@@ -1820,12 +1820,12 @@ bool InputDispatcher::handleReceiveCallback(int receiveFd, int events, void* dat
                     connection->getInputChannelName(), status);
             d->abortDispatchCycleLocked(currentTime, connection, true /*broken*/);
             d->runCommandsLockedInterruptible();
-            return false; // remove the callback
+            return 0; // remove the callback
         }
 
         d->finishDispatchCycleLocked(currentTime, connection);
         d->runCommandsLockedInterruptible();
-        return true;
+        return 1;
     } // release lock
 }
 
@@ -1843,7 +1843,7 @@ void InputDispatcher::notifyConfigurationChanged(nsecs_t eventTime) {
     } // release lock
 
     if (needWake) {
-        mPollLoop->wake();
+        mLooper->wake();
     }
 }
 
@@ -1870,7 +1870,7 @@ void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t sou
     } // release lock
 
     if (needWake) {
-        mPollLoop->wake();
+        mLooper->wake();
     }
 }
 
@@ -2007,7 +2007,7 @@ NoBatchingOrStreaming:;
     } // release lock
 
     if (needWake) {
-        mPollLoop->wake();
+        mLooper->wake();
     }
 }
 
@@ -2043,7 +2043,7 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
     } // release lock
 
     if (needWake) {
-        mPollLoop->wake();
+        mLooper->wake();
     }
 
     int32_t injectionResult;
@@ -2294,7 +2294,7 @@ void InputDispatcher::setInputWindows(const Vector<InputWindow>& inputWindows) {
     } // release lock
 
     // Wake up poll loop since it may need to make new input dispatching choices.
-    mPollLoop->wake();
+    mLooper->wake();
 }
 
 void InputDispatcher::setFocusedApplication(const InputApplication* inputApplication) {
@@ -2317,7 +2317,7 @@ void InputDispatcher::setFocusedApplication(const InputApplication* inputApplica
     } // release lock
 
     // Wake up poll loop since it may need to make new input dispatching choices.
-    mPollLoop->wake();
+    mLooper->wake();
 }
 
 void InputDispatcher::releaseFocusedApplicationLocked() {
@@ -2355,7 +2355,7 @@ void InputDispatcher::setInputDispatchMode(bool enabled, bool frozen) {
 
     if (changed) {
         // Wake up poll loop since it may need to make new input dispatching choices.
-        mPollLoop->wake();
+        mLooper->wake();
     }
 }
 
@@ -2372,7 +2372,7 @@ void InputDispatcher::preemptInputDispatch() {
 
     if (preemptedOne) {
         // Wake up the poll loop so it can get a head start dispatching the next event.
-        mPollLoop->wake();
+        mLooper->wake();
     }
 }
 
@@ -2495,7 +2495,7 @@ status_t InputDispatcher::registerInputChannel(const sp<InputChannel>& inputChan
             mMonitoringChannels.push(inputChannel);
         }
 
-        mPollLoop->setCallback(receiveFd, POLLIN, handleReceiveCallback, this);
+        mLooper->addFd(receiveFd, 0, ALOOPER_EVENT_INPUT, handleReceiveCallback, this);
 
         runCommandsLockedInterruptible();
     } // release lock
@@ -2529,7 +2529,7 @@ status_t InputDispatcher::unregisterInputChannel(const sp<InputChannel>& inputCh
             }
         }
 
-        mPollLoop->removeCallback(inputChannel->getReceivePipeFd());
+        mLooper->removeFd(inputChannel->getReceivePipeFd());
 
         nsecs_t currentTime = now();
         abortDispatchCycleLocked(currentTime, connection, true /*broken*/);
@@ -2539,7 +2539,7 @@ status_t InputDispatcher::unregisterInputChannel(const sp<InputChannel>& inputCh
 
     // Wake the poll loop because removing the connection may have changed the current
     // synchronization state.
-    mPollLoop->wake();
+    mLooper->wake();
     return OK;
 }
 
