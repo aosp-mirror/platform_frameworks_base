@@ -1825,18 +1825,16 @@ public class SQLiteDatabase extends SQLiteClosable {
      *
      * @param sql the SQL statement to be executed. Multiple statements separated by semicolons are
      * not supported.
-     * @return the number of rows affected by this SQL statement execution, if this SQL statement
-     * caused data updates/deletes/inserts.
      * @throws SQLException If the SQL string is invalid for some reason
      */
-    public int execSQL(String sql) throws SQLException {
+    public void execSQL(String sql) throws SQLException {
         int stmtType = DatabaseUtils.getSqlStatementType(sql);
         if (stmtType == DatabaseUtils.STATEMENT_ATTACH) {
             disableWriteAheadLogging();
         }
         long timeStart = SystemClock.uptimeMillis();
         logTimeStat(mLastSqlStatement, timeStart, GET_LOCK_LOG_PREFIX);
-        int n = executeSql(sql, null);
+        executeSql(sql, null);
 
         // Log commit statements along with the most recently executed
         // SQL statement for disambiguation.
@@ -1845,7 +1843,6 @@ public class SQLiteDatabase extends SQLiteClosable {
         } else {
             logTimeStat(sql, timeStart, null);
         }
-        return n;
     }
 
     /**
@@ -1889,15 +1886,13 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @param sql the SQL statement to be executed. Multiple statements separated by semicolons are
      * not supported.
      * @param bindArgs only byte[], String, Long and Double are supported in bindArgs.
-     * @return the number of rows affected by this SQL statement execution, if this SQL statement
-     * caused data updates/deletes/inserts.
      * @throws SQLException If the SQL string is invalid for some reason
      */
-    public int execSQL(String sql, Object[] bindArgs) throws SQLException {
+    public void execSQL(String sql, Object[] bindArgs) throws SQLException {
         if (bindArgs == null) {
             throw new IllegalArgumentException("Empty bindArgs");
         }
-        return executeSql(sql, bindArgs);
+        executeSql(sql, bindArgs);
     }
 
     private int executeSql(String sql, Object[] bindArgs) throws SQLException {
