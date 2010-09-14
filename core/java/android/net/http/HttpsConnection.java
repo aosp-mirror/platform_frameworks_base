@@ -98,7 +98,8 @@ public class HttpsConnection extends Connection {
                 }
             };
 
-            sslContext.engineInit(null, trustManagers, null, cache, null);
+            sslContext.engineInit(null, trustManagers, null);
+            sslContext.engineGetClientSessionContext().setPersistentCache(cache);
 
             synchronized (HttpsConnection.class) {
                 mSslSocketFactory = sslContext.engineGetSocketFactory();
