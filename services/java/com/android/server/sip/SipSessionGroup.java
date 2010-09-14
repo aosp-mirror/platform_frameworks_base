@@ -1161,7 +1161,7 @@ class SipSessionGroup implements SipListener {
                     .setPort(uri.getPort())
                     .setDisplayName(address.getDisplayName())
                     .build();
-        } catch (InvalidArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw new SipException("createPeerProfile()", e);
         } catch (ParseException e) {
             throw new SipException("createPeerProfile()", e);
