@@ -56,6 +56,9 @@ public:
     status_t setUpdateRectangle(const Rect& updateRect);
     status_t compositionComplete();
     
+    // for debugging only
+    int getCurrentBufferIndex() const;
+
 private:
     friend class LightRefBase<FramebufferNativeWindow>;    
     ~FramebufferNativeWindow(); // this class cannot be overloaded
@@ -77,6 +80,7 @@ private:
     int32_t mNumBuffers;
     int32_t mNumFreeBuffers;
     int32_t mBufferHead;
+    int32_t mCurrentBufferIndex;
     bool mUpdateOnDemand;
 };
     
