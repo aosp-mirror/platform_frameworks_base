@@ -1825,16 +1825,18 @@ public class SQLiteDatabase extends SQLiteClosable {
      *
      * @param sql the SQL statement to be executed. Multiple statements separated by semicolons are
      * not supported.
+     * @return the number of rows affected by this SQL statement execution, if this SQL statement
+     * caused data updates/deletes/inserts.
      * @throws SQLException If the SQL string is invalid for some reason
      */
-    public void execSQL(String sql) throws SQLException {
+    public int execSQL(String sql) throws SQLException {
         int stmtType = DatabaseUtils.getSqlStatementType(sql);
         if (stmtType == DatabaseUtils.STATEMENT_ATTACH) {
             disableWriteAheadLogging();
         }
         long timeStart = SystemClock.uptimeMillis();
         logTimeStat(mLastSqlStatement, timeStart, GET_LOCK_LOG_PREFIX);
-        executeSql(sql, null);
+        int n = executeSql(sql, null);
 
         // Log commit statements along with the most recently executed
         // SQL statement for disambiguation.
@@ -1843,6 +1845,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         } else {
             logTimeStat(sql, timeStart, null);
         }
+        return n;
     }
 
     /**
@@ -1886,20 +1889,23 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @param sql the SQL statement to be executed. Multiple statements separated by semicolons are
      * not supported.
      * @param bindArgs only byte[], String, Long and Double are supported in bindArgs.
+     * @return the number of rows affected by this SQL statement execution, if this SQL statement
+     * caused data updates/deletes/inserts.
      * @throws SQLException If the SQL string is invalid for some reason
      */
-    public void execSQL(String sql, Object[] bindArgs) throws SQLException {
+    public int execSQL(String sql, Object[] bindArgs) throws SQLException {
         if (bindArgs == null) {
             throw new IllegalArgumentException("Empty bindArgs");
         }
-        executeSql(sql, bindArgs);
+        return executeSql(sql, bindArgs);
     }
 
-    private void executeSql(String sql, Object[] bindArgs) throws SQLException {
+    private int executeSql(String sql, Object[] bindArgs) throws SQLException {
         long timeStart = SystemClock.uptimeMillis();
+        int n;
         SQLiteStatement statement = new SQLiteStatement(this, sql, bindArgs);
         try {
-            statement.executeUpdateDelete();
+            n = statement.executeUpdateDelete();
         } catch (SQLiteDatabaseCorruptException e) {
             onCorruption();
             throw e;
@@ -1907,6 +1913,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             statement.close();
         }
         logTimeStat(sql, timeStart);
+        return n;
     }
 
     @Override
@@ -2183,14 +2190,16 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @throws IllegalStateException if input cacheSize > {@link #MAX_SQL_CACHE_SIZE} or
      * the value set with previous setMaxSqlCacheSize() call.
      */
-    public synchronized void setMaxSqlCacheSize(int cacheSize) {
-        if (cacheSize > MAX_SQL_CACHE_SIZE || cacheSize < 0) {
-            throw new IllegalStateException("expected value between 0 and " + MAX_SQL_CACHE_SIZE);
-        } else if (cacheSize < mMaxSqlCacheSize) {
-            throw new IllegalStateException("cannot set cacheSize to a value less than the value " +
-                    "set with previous setMaxSqlCacheSize() call.");
+    public void setMaxSqlCacheSize(int cacheSize) {
+        synchronized(this) {
+            if (cacheSize > MAX_SQL_CACHE_SIZE || cacheSize < 0) {
+                throw new IllegalStateException("expected value between 0 and " + MAX_SQL_CACHE_SIZE);
+            } else if (cacheSize < mMaxSqlCacheSize) {
+                throw new IllegalStateException("cannot set cacheSize to a value less than the value " +
+                        "set with previous setMaxSqlCacheSize() call.");
+            }
+            mMaxSqlCacheSize = cacheSize;
         }
-        mMaxSqlCacheSize = cacheSize;
     }
 
     /* package */ boolean isSqlInStatementCache(String sql) {
@@ -2352,17 +2361,19 @@ public class SQLiteDatabase extends SQLiteClosable {
      *
      * @param size the value the connection handle pool size should be set to.
      */
-    public synchronized void setConnectionPoolSize(int size) {
-        if (mConnectionPool == null) {
-            throw new IllegalStateException("connection pool not enabled");
+    public void setConnectionPoolSize(int size) {
+        synchronized(this) {
+            if (mConnectionPool == null) {
+                throw new IllegalStateException("connection pool not enabled");
+            }
+            int i = mConnectionPool.getMaxPoolSize();
+            if (size < i) {
+                throw new IllegalArgumentException(
+                        "cannot set max pool size to a value less than the current max value(=" +
+                        i + ")");
+            }
+            mConnectionPool.setMaxPoolSize(size);
         }
-        int i = mConnectionPool.getMaxPoolSize();
-        if (size < i) {
-            throw new IllegalArgumentException(
-                    "cannot set max pool size to a value less than the current max value(=" +
-                    i + ")");
-        }
-        mConnectionPool.setMaxPoolSize(size);
     }
 
     /* package */ SQLiteDatabase createPoolConnection(short connectionNum) {
