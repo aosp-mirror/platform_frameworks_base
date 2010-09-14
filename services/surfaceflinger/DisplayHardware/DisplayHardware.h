@@ -87,6 +87,9 @@ public:
         return Rect(mWidth, mHeight);
     }
 
+    // only for debugging
+    int getCurrentBufferIndex() const;
+
 private:
     void init(uint32_t displayIndex) __attribute__((noinline));
     void fini() __attribute__((noinline));
