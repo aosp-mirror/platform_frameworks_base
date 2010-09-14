@@ -29,10 +29,11 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Xml;
@@ -40,6 +41,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -112,7 +114,11 @@ public abstract class PreferenceActivity extends ListActivity implements
         PreferenceFragment.OnPreferenceStartFragmentCallback {
     private static final String TAG = "PreferenceActivity";
 
-    private static final String PREFERENCES_TAG = "android:preferences";
+    // Constants for state save/restore
+    private static final String HEADERS_TAG = ":android:headers";
+    private static final String CUR_HEADER_TAG = ":android:cur_header";
+    private static final String SINGLE_PANE_TAG = ":android:single_pane";
+    private static final String PREFERENCES_TAG = ":android:preferences";
 
     /**
      * When starting this activity, the invoking Intent can contain this extra
@@ -165,6 +171,8 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     private boolean mSinglePane;
 
+    private Header mCurHeader;
+
     // --- State for old mode when showing a single preference list
 
     private PreferenceManager mPreferenceManager;
@@ -186,17 +194,29 @@ public abstract class PreferenceActivity extends ListActivity implements
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_BIND_PREFERENCES:
+                case MSG_BIND_PREFERENCES: {
                     bindPreferences();
-                    break;
-                case MSG_BUILD_HEADERS:
+                } break;
+                case MSG_BUILD_HEADERS: {
+                    ArrayList<Header> oldHeaders = new ArrayList<Header>(mHeaders);
+                    mHeaders.clear();
                     onBuildHeaders(mHeaders);
                     mAdapter.notifyDataSetChanged();
                     Header header = onGetNewHeader();
                     if (header != null && header.fragment != null) {
-                        switchToHeader(header.fragment, header.fragmentArguments);
+                        Header mappedHeader = findBestMatchingHeader(header, oldHeaders);
+                        if (mappedHeader == null || mCurHeader != mappedHeader) {
+                            switchToHeader(header);
+                        }
+                    } else if (mCurHeader != null) {
+                        Header mappedHeader = findBestMatchingHeader(mCurHeader, mHeaders);
+                        if (mappedHeader != null) {
+                            setSelectedHeader(mappedHeader);
+                        } else {
+                            switchToHeader(null);
+                        }
                     }
-                    break;
+                } break;
             }
         }
     };
@@ -235,13 +255,7 @@ public abstract class PreferenceActivity extends ListActivity implements
 
             // All view fields must be updated every time, because the view may be recycled 
             Header header = getItem(position);
-            if (header.icon == null) {
-                holder.icon.setImageDrawable(null);
-                holder.icon.setImageResource(header.iconRes);
-            } else {
-                holder.icon.setImageResource(0);
-                holder.icon.setImageDrawable(header.icon);
-            }
+            holder.icon.setImageResource(header.iconRes);
             holder.title.setText(header.title);
             if (TextUtils.isEmpty(header.summary)) {
                 holder.summary.setVisibility(View.GONE);
@@ -255,9 +269,24 @@ public abstract class PreferenceActivity extends ListActivity implements
     }
 
     /**
+     * Default value for {@link Header#id Header.id} indicating that no
+     * identifier value is set.  All other values (including those below -1)
+     * are valid.
+     */
+    public static final long HEADER_ID_UNDEFINED = -1;
+    
+    /**
      * Description of a single Header item that the user can select.
      */
-    public static class Header {
+    public static final class Header implements Parcelable {
+        /**
+         * Identifier for this header, to correlate with a new list when
+         * it is updated.  The default value is
+         * {@link PreferenceActivity#HEADER_ID_UNDEFINED}, meaning no id.
+         * @attr ref android.R.styleable#PreferenceHeader_id
+         */
+        public long id = HEADER_ID_UNDEFINED;
+
         /**
          * Title of the header that is shown to the user.
          * @attr ref android.R.styleable#PreferenceHeader_title
@@ -277,12 +306,6 @@ public abstract class PreferenceActivity extends ListActivity implements
         public int iconRes;
 
         /**
-         * Optional icon drawable to show for this header.  (If this is non-null,
-         * the iconRes will be ignored.)
-         */
-        public Drawable icon;
-
-        /**
          * Full class name of the fragment to display when this header is
          * selected.
          * @attr ref android.R.styleable#PreferenceHeader_fragment
@@ -299,6 +322,62 @@ public abstract class PreferenceActivity extends ListActivity implements
          * Intent to launch when the preference is selected.
          */
         public Intent intent;
+
+        /**
+         * Optional additional data for use by subclasses of PreferenceActivity.
+         */
+        public Bundle extras;
+
+        public Header() {
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeLong(id);
+            TextUtils.writeToParcel(title, dest, flags);
+            TextUtils.writeToParcel(summary, dest, flags);
+            dest.writeInt(iconRes);
+            dest.writeString(fragment);
+            dest.writeBundle(fragmentArguments);
+            if (intent != null) {
+                dest.writeInt(1);
+                intent.writeToParcel(dest, flags);
+            } else {
+                dest.writeInt(0);
+            }
+            dest.writeBundle(extras);
+        }
+
+        public void readFromParcel(Parcel in) {
+            id = in.readLong();
+            title = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+            summary = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+            iconRes = in.readInt();
+            fragment = in.readString();
+            fragmentArguments = in.readBundle();
+            if (in.readInt() != 0) {
+                intent = Intent.CREATOR.createFromParcel(in);
+            }
+            extras = in.readBundle();
+        }
+
+        Header(Parcel in) {
+            readFromParcel(in);
+        }
+
+        public static final Creator<Header> CREATOR = new Creator<Header>() {
+            public Header createFromParcel(Parcel source) {
+                return new Header(source);
+            }
+            public Header[] newArray(int size) {
+                return new Header[size];
+            }
+        };
     }
 
     @Override
@@ -314,40 +393,66 @@ public abstract class PreferenceActivity extends ListActivity implements
         String initialFragment = getIntent().getStringExtra(EXTRA_SHOW_FRAGMENT);
         Bundle initialArguments = getIntent().getBundleExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS);
 
-        if (initialFragment != null && mSinglePane) {
-            // If we are just showing a fragment, we want to run in
-            // new fragment mode, but don't need to compute and show
-            // the headers.
-            getListView().setVisibility(View.GONE);
-            mPrefsContainer.setVisibility(View.VISIBLE);
-            switchToHeader(initialFragment, initialArguments);
+        if (savedInstanceState != null) {
+            // We are restarting from a previous saved state; used that to
+            // initialize, instead of starting fresh.
+            ArrayList<Header> headers = savedInstanceState.getParcelableArrayList(HEADERS_TAG);
+            if (headers != null) {
+                mHeaders.addAll(headers);
+                int curHeader = savedInstanceState.getInt(CUR_HEADER_TAG,
+                        (int)HEADER_ID_UNDEFINED);
+                if (curHeader >= 0 && curHeader < mHeaders.size()) {
+                    setSelectedHeader(mHeaders.get(curHeader));
+                }
+            }
+            mSinglePane = savedInstanceState.getBoolean(SINGLE_PANE_TAG);
 
         } else {
-            // We need to try to build the headers.
-            onBuildHeaders(mHeaders);
+            if (initialFragment != null && mSinglePane) {
+                // If we are just showing a fragment, we want to run in
+                // new fragment mode, but don't need to compute and show
+                // the headers.
+                switchToHeader(initialFragment, initialArguments);
 
-            // If there are headers, then at this point we need to show
-            // them and, depending on the screen, we may also show in-line
-            // the currently selected preference fragment.
-            if (mHeaders.size() > 0) {
-                mAdapter = new HeaderAdapter(this, mHeaders);
-                setListAdapter(mAdapter);
-                if (!mSinglePane) {
-                    mPrefsContainer.setVisibility(View.VISIBLE);
-                    if (initialFragment == null) {
-                        Header h = onGetInitialHeader();
-                        initialFragment = h.fragment;
-                        initialArguments = h.fragmentArguments;
+            } else {
+                // We need to try to build the headers.
+                onBuildHeaders(mHeaders);
+
+                // If there are headers, then at this point we need to show
+                // them and, depending on the screen, we may also show in-line
+                // the currently selected preference fragment.
+                if (mHeaders.size() > 0) {
+                    if (!mSinglePane) {
+                        if (initialFragment == null) {
+                            Header h = onGetInitialHeader();
+                            switchToHeader(h);
+                        } else {
+                            switchToHeader(initialFragment, initialArguments);
+                        }
                     }
-                    switchToHeader(initialFragment, initialArguments);
                 }
+            }
+        }
 
+        // The default configuration is to only show the list view.  Adjust
+        // visibility for other configurations.
+        if (initialFragment != null && mSinglePane) {
+            // Single pane, showing just a prefs fragment.
+            getListView().setVisibility(View.GONE);
+            mPrefsContainer.setVisibility(View.VISIBLE);
+        } else if (mHeaders.size() > 0) {
+            mAdapter = new HeaderAdapter(this, mHeaders);
+            setListAdapter(mAdapter);
+            if (!mSinglePane) {
+                // Multi-pane.
+                getListView().setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+                mPrefsContainer.setVisibility(View.VISIBLE);
+            }
+        } else {
             // If there are no headers, we are in the old "just show a screen
             // of preferences" mode.
-            } else {
-                mPreferenceManager = new PreferenceManager(this, FIRST_REQUEST_CODE);
-                mPreferenceManager.setOnPreferenceTreeClickListener(this);
-            }
+            mPreferenceManager = new PreferenceManager(this, FIRST_REQUEST_CODE);
+            mPreferenceManager.setOnPreferenceTreeClickListener(this);
         }
 
         getListView().setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
@@ -534,6 +639,9 @@ public abstract class PreferenceActivity extends ListActivity implements
 
                     TypedArray sa = getResources().obtainAttributes(attrs,
                             com.android.internal.R.styleable.PreferenceHeader);
+                    header.id = sa.getInt(
+                            com.android.internal.R.styleable.PreferenceHeader_id,
+                            (int)HEADER_ID_UNDEFINED);
                     header.title = sa.getText(
                             com.android.internal.R.styleable.PreferenceHeader_title);
                     header.summary = sa.getText(
@@ -621,6 +729,17 @@ public abstract class PreferenceActivity extends ListActivity implements
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
+        if (mHeaders.size() > 0) {
+            outState.putParcelableArrayList(HEADERS_TAG, mHeaders);
+            if (mCurHeader != null) {
+                int index = mHeaders.indexOf(mCurHeader);
+                if (index >= 0) {
+                    outState.putInt(CUR_HEADER_TAG, index);
+                }
+            }
+        }
+        outState.putBoolean(SINGLE_PANE_TAG, mSinglePane);
+
         if (mPreferenceManager != null) {
             final PreferenceScreen preferenceScreen = getPreferenceScreen();
             if (preferenceScreen != null) {
@@ -680,7 +799,7 @@ public abstract class PreferenceActivity extends ListActivity implements
     /**
      * Called when the user selects an item in the header list.  The default
      * implementation will call either {@link #startWithFragment(String, Bundle)}
-     * or {@link #switchToHeader(String, Bundle)} as appropriate.
+     * or {@link #switchToHeader(Header)} as appropriate.
      *
      * @param header The header that was selected.
      * @param position The header's position in the list.
@@ -690,7 +809,7 @@ public abstract class PreferenceActivity extends ListActivity implements
             if (mSinglePane) {
                 startWithFragment(header.fragment, header.fragmentArguments);
             } else {
-                switchToHeader(header.fragment, header.fragmentArguments);
+                switchToHeader(header);
             }
         } else if (header.intent != null) {
             startActivity(header.intent);
@@ -715,6 +834,16 @@ public abstract class PreferenceActivity extends ListActivity implements
         startActivity(intent);
     }
 
+    void setSelectedHeader(Header header) {
+        mCurHeader = header;
+        int index = mHeaders.indexOf(header);
+        if (index >= 0) {
+            getListView().setItemChecked(index, true);
+        } else {
+            getListView().clearChoices();
+        }
+    }
+
     /**
      * When in two-pane mode, switch the fragment pane to show the given
      * preference fragment.
@@ -723,11 +852,70 @@ public abstract class PreferenceActivity extends ListActivity implements
      * @param args Optional arguments to supply to the fragment.
      */
     public void switchToHeader(String fragmentName, Bundle args) {
+        setSelectedHeader(null);
+
         getFragmentManager().popBackStack(BACK_STACK_PREFS, POP_BACK_STACK_INCLUSIVE);
 
         Fragment f = Fragment.instantiate(this, fragmentName, args);
         getFragmentManager().openTransaction().replace(
                 com.android.internal.R.id.prefs, f).commit();
+    }
+
+    /**
+     * When in two-pane mode, switch to the fragment pane to show the given
+     * preference fragment.
+     *
+     * @param header The new header to display.
+     */
+    public void switchToHeader(Header header) {
+        switchToHeader(header.fragment, header.fragmentArguments);
+        mCurHeader = header;
+        setSelectedHeader(header);
+    }
+
+    Header findBestMatchingHeader(Header cur, ArrayList<Header> from) {
+        ArrayList<Header> matches = new ArrayList<Header>();
+        for (int j=0; j<from.size(); j++) {
+            Header oh = from.get(j);
+            if (cur == oh || (cur.id != HEADER_ID_UNDEFINED && cur.id == oh.id)) {
+                // Must be this one.
+                matches.clear();
+                matches.add(oh);
+                break;
+            }
+            if (cur.fragment != null) {
+                if (cur.fragment.equals(oh.fragment)) {
+                    matches.add(oh);
+                }
+            } else if (cur.intent != null) {
+                if (cur.intent.equals(oh.intent)) {
+                    matches.add(oh);
+                }
+            } else if (cur.title != null) {
+                if (cur.title.equals(oh.title)) {
+                    matches.add(oh);
+                }
+            }
+        }
+        final int NM = matches.size();
+        if (NM == 1) {
+            return matches.get(0);
+        } else if (NM > 1) {
+            for (int j=0; j<NM; j++) {
+                Header oh = matches.get(j);
+                if (cur.fragmentArguments != null &&
+                        cur.fragmentArguments.equals(oh.fragmentArguments)) {
+                    return oh;
+                }
+                if (cur.extras != null && cur.extras.equals(oh.extras)) {
+                    return oh;
+                }
+                if (cur.title != null && cur.title.equals(oh.title)) {
+                    return oh;
+                }
+            }
+        }
+        return null;
     }
 
     /**

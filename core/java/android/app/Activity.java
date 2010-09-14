@@ -4204,6 +4204,7 @@ public class Activity extends ContextThemeWrapper
     }
     
     final void performStart() {
+        mFragments.mStateSaved = false;
         mCalled = false;
         mFragments.execPendingActions();
         mInstrumentation.callActivityOnStart(this);
@@ -4221,6 +4222,8 @@ public class Activity extends ContextThemeWrapper
     }
     
     final void performRestart() {
+        mFragments.mStateSaved = false;
+
         synchronized (mManagedCursors) {
             final int N = mManagedCursors.size();
             for (int i=0; i<N; i++) {
@@ -4359,6 +4362,7 @@ public class Activity extends ContextThemeWrapper
         if (Config.LOGV) Log.v(
             TAG, "Dispatching result: who=" + who + ", reqCode=" + requestCode
             + ", resCode=" + resultCode + ", data=" + data);
+        mFragments.mStateSaved = false;
         if (who == null) {
             onActivityResult(requestCode, resultCode, data);
         } else {

@@ -55,6 +55,7 @@ import android.os.ServiceManager;
 import android.os.SystemService;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.internal.app.IBatteryStats;
 
@@ -144,6 +145,7 @@ public class BluetoothService extends IBluetooth.Stub {
     private BluetoothA2dpService mA2dpService;
     private final HashMap<BluetoothDevice, Integer> mInputDevices;
     private final HashMap<BluetoothDevice, Integer> mPanDevices;
+    private final HashMap<String, Pair<byte[], byte[]>> mDeviceOobData;
 
     private static String mDockAddress;
     private String mDockPin;
@@ -200,6 +202,7 @@ public class BluetoothService extends IBluetooth.Stub {
         mDeviceProperties = new HashMap<String, Map<String,String>>();
 
         mDeviceServiceChannelCache = new HashMap<String, Map<ParcelUuid, Integer>>();
+        mDeviceOobData = new HashMap<String, Pair<byte[], byte[]>>();
         mUuidIntentTracker = new ArrayList<String>();
         mUuidCallbackTracker = new HashMap<RemoteService, IBluetoothCallback>();
         mServiceRecordToPid = new HashMap<Integer, Integer>();
@@ -1155,7 +1158,7 @@ public class BluetoothService extends IBluetooth.Stub {
         mIsDiscovering = isDiscovering;
     }
 
-    public synchronized boolean createBond(String address) {
+    private boolean isBondingFeasible(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
         if (!isEnabledInternal()) return false;
@@ -1185,8 +1188,13 @@ public class BluetoothService extends IBluetooth.Stub {
                 return false;
             }
         }
+        return true;
+    }
 
-        if (!createPairedDeviceNative(address, 60000 /* 1 minute */)) {
+    public synchronized boolean createBond(String address) {
+        if (!isBondingFeasible(address)) return false;
+
+        if (!createPairedDeviceNative(address, 60000  /*1 minute*/ )) {
             return false;
         }
 
@@ -1194,6 +1202,51 @@ public class BluetoothService extends IBluetooth.Stub {
         mBondState.setBondState(address, BluetoothDevice.BOND_BONDING);
 
         return true;
+    }
+
+    public synchronized boolean createBondOutOfBand(String address, byte[] hash,
+                                                    byte[] randomizer) {
+        if (!isBondingFeasible(address)) return false;
+
+        if (!createPairedDeviceOutOfBandNative(address, 60000 /* 1 minute */)) {
+            return false;
+        }
+
+        setDeviceOutOfBandData(address, hash, randomizer);
+        mBondState.setPendingOutgoingBonding(address);
+        mBondState.setBondState(address, BluetoothDevice.BOND_BONDING);
+
+        return true;
+    }
+
+    public synchronized boolean setDeviceOutOfBandData(String address, byte[] hash,
+            byte[] randomizer) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
+        if (!isEnabledInternal()) return false;
+
+        Pair <byte[], byte[]> value = new Pair<byte[], byte[]>(hash, randomizer);
+
+        if (DBG) {
+            log("Setting out of band data for:" + address + ":" +
+              Arrays.toString(hash) + ":" + Arrays.toString(randomizer));
+        }
+
+        mDeviceOobData.put(address, value);
+        return true;
+    }
+
+    Pair<byte[], byte[]> getDeviceOutOfBandData(BluetoothDevice device) {
+        return mDeviceOobData.get(device.getAddress());
+    }
+
+
+    public synchronized byte[] readOutOfBandData() {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
+                                                "Need BLUETOOTH permission");
+        if (!isEnabledInternal()) return null;
+
+        return readAdapterOutOfBandDataNative();
     }
 
     public synchronized boolean cancelBondProcess(String address) {
@@ -1954,6 +2007,32 @@ public class BluetoothService extends IBluetooth.Stub {
         return setPairingConfirmationNative(address, confirm, data.intValue());
     }
 
+    public synchronized boolean setRemoteOutOfBandData(String address) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
+        if (!isEnabledInternal()) return false;
+        address = address.toUpperCase();
+        Integer data = mEventLoop.getPasskeyAgentRequestData().remove(address);
+        if (data == null) {
+            Log.w(TAG, "setRemoteOobData(" + address + ") called but no native data available, " +
+                  "ignoring. Maybe the PasskeyAgent Request was cancelled by the remote device" +
+                  " or by bluez.\n");
+            return false;
+        }
+
+        Pair<byte[], byte[]> val = mDeviceOobData.get(address);
+        byte[] hash, randomizer;
+        if (val == null) {
+            // TODO: check what should be passed in this case.
+            hash = new byte[16];
+            randomizer = new byte[16];
+        } else {
+            hash = val.first;
+            randomizer = val.second;
+        }
+        return setRemoteOutOfBandDataNative(address, hash, randomizer, data.intValue());
+    }
+
     public synchronized boolean cancelPairingUserInput(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
@@ -2487,6 +2566,9 @@ public class BluetoothService extends IBluetooth.Stub {
     private native boolean stopDiscoveryNative();
 
     private native boolean createPairedDeviceNative(String address, int timeout_ms);
+    private native boolean createPairedDeviceOutOfBandNative(String address, int timeout_ms);
+    private native byte[] readAdapterOutOfBandDataNative();
+
     private native boolean cancelDeviceCreationNative(String address);
     private native boolean removeDeviceNative(String objectPath);
     private native int getDeviceServiceChannelNative(String objectPath, String uuid,
@@ -2497,6 +2579,9 @@ public class BluetoothService extends IBluetooth.Stub {
     private native boolean setPasskeyNative(String address, int passkey, int nativeData);
     private native boolean setPairingConfirmationNative(String address, boolean confirm,
             int nativeData);
+    private native boolean setRemoteOutOfBandDataNative(String address, byte[] hash,
+                                                        byte[] randomizer, int nativeData);
+
     private native boolean setDevicePropertyBooleanNative(String objectPath, String key,
             int value);
     private native boolean createDeviceNative(String address);

@@ -47,6 +47,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.text.format.Time;
@@ -129,8 +130,8 @@ public class SyncManager implements OnAccountsUpdateListener {
 
     private static final int INITIALIZATION_UNBIND_DELAY_MS = 5000;
 
-    private static final String SYNC_WAKE_LOCK_PREFIX = "SyncWakeLock";
-    private static final String HANDLE_SYNC_ALARM_WAKE_LOCK = "SyncManagerHandleSyncAlarmWakeLock";
+    private static final String SYNC_WAKE_LOCK_PREFIX = "*sync*";
+    private static final String HANDLE_SYNC_ALARM_WAKE_LOCK = "SyncManagerHandleSyncAlarm";
 
     private Context mContext;
 
@@ -1735,6 +1736,7 @@ public class SyncManager implements OnAccountsUpdateListener {
             PowerManager.WakeLock oldWakeLock = mSyncWakeLock;
             try {
                 mSyncWakeLock = getSyncWakeLock(op.account.type, op.authority);
+				mSyncWakeLock.setWorkSource(new WorkSource(syncAdapterInfo.uid));
                 mSyncWakeLock.acquire();
             } finally {
                 if (oldWakeLock != null && oldWakeLock != mSyncWakeLock) {

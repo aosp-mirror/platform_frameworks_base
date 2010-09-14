@@ -21,6 +21,8 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.ScanResult;
 import android.net.DhcpInfo;
 
+import android.os.WorkSource;
+
 /**
  * Interface that allows controlling and querying Wi-Fi connectivity.
  *
@@ -66,7 +68,9 @@ interface IWifiManager
 
     DhcpInfo getDhcpInfo();
 
-    boolean acquireWifiLock(IBinder lock, int lockType, String tag);
+    boolean acquireWifiLock(IBinder lock, int lockType, String tag, in WorkSource ws);
+
+    void updateWifiLockWorkSource(IBinder lock, in WorkSource ws);
 
     boolean releaseWifiLock(IBinder lock);
 

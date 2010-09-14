@@ -176,8 +176,7 @@ private:
      * @paran ignoreBlending True if the blending is set by the caller
      */
     void drawColorRect(float left, float top, float right, float bottom,
-    		int color, SkXfermode::Mode mode, bool ignoreTransform = false,
-    		bool ignoreBlending = false);
+            int color, SkXfermode::Mode mode, bool ignoreTransform = false);
 
     /**
      * Draws a textured rectangle with the specified texture. The specified coordinates

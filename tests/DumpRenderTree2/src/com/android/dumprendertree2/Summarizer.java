@@ -201,9 +201,7 @@ public class Summarizer {
 
     private FileFilter mFileFilter;
     private String mResultsRootDirPath;
-
     private String mTestsRelativePath;
-
     private Date mDate;
 
     public Summarizer(FileFilter fileFilter, String resultsRootDirPath) {
@@ -243,8 +241,9 @@ public class Summarizer {
     }
 
     public void summarize() {
-        createHtmlDetails();
-        createTxtSummary();
+        String webKitRevision = getWebKitRevision();
+        createHtmlDetails(webKitRevision);
+        createTxtSummary(webKitRevision);
     }
 
     public void reset() {
@@ -255,7 +254,7 @@ public class Summarizer {
         mDate = new Date();
     }
 
-    private void createTxtSummary() {
+    private void createTxtSummary(String webKitRevision) {
         StringBuilder txt = new StringBuilder();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -263,7 +262,7 @@ public class Summarizer {
         txt.append("Date: " + dateFormat.format(mDate) + "\n");
         txt.append("Build fingerprint: " + Build.FINGERPRINT + "\n");
         txt.append("WebKit version: " + getWebKitVersionFromUserAgentString() + "\n");
-        txt.append("WebKit revision: " + getWebKitRevision() + "\n");
+        txt.append("WebKit revision: " + webKitRevision + "\n");
 
         txt.append("TOTAL:                     " + getTotalTestCount() + "\n");
         txt.append("CRASHED (among all tests): " + mCrashedTestsCount + "\n");
@@ -276,7 +275,7 @@ public class Summarizer {
                 txt.toString().getBytes(), false);
     }
 
-    private void createHtmlDetails() {
+    private void createHtmlDetails(String webKitRevision) {
         StringBuilder html = new StringBuilder();
 
         html.append("<html><head>");
@@ -284,7 +283,7 @@ public class Summarizer {
         html.append(SCRIPT);
         html.append("</head><body>");
 
-        createTopSummaryTable(html);
+        createTopSummaryTable(webKitRevision, html);
 
         createResultsListWithDiff(html, "Unexpected failures", mUnexpectedFailures);
 
@@ -337,17 +336,16 @@ public class Summarizer {
         return "unknown";
     }
 
-    private void createTopSummaryTable(StringBuilder html) {
+    private void createTopSummaryTable(String webKitRevision, StringBuilder html) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         html.append("<h1>" + mTestsRelativePath + "</h1>");
         html.append("<h3>" + "Date: " + dateFormat.format(new Date()) + "</h3>");
         html.append("<h3>" + "Build fingerprint: " + Build.FINGERPRINT + "</h3>");
         html.append("<h3>" + "WebKit version: " + getWebKitVersionFromUserAgentString() + "</h3>");
 
-        String webkitRevision = getWebKitRevision();
         html.append("<h3>" + "WebKit revision: ");
-        html.append("<a href=\"http://trac.webkit.org/browser/trunk?rev=" + webkitRevision +
-                "\" target=\"_blank\"><span class=\"path\">" + webkitRevision + "</span></a>");
+        html.append("<a href=\"http://trac.webkit.org/browser/trunk?rev=" + webKitRevision +
+                "\" target=\"_blank\"><span class=\"path\">" + webKitRevision + "</span></a>");
         html.append("</h3>");
 
         html.append("<table class=\"summary\">");

@@ -73,12 +73,6 @@ public class LayoutTestsExecutor extends Activity {
         }
     }
 
-    /** TODO: make it a setting */
-    static final String TESTS_ROOT_DIR_PATH =
-            Environment.getExternalStorageDirectory() +
-            File.separator + "android" +
-            File.separator + "LayoutTests";
-
     private static final String LOG_TAG = "LayoutTestExecutor";
 
     public static final String EXTRA_TESTS_LIST = "TestsList";
@@ -513,6 +507,11 @@ public class LayoutTestsExecutor extends Activity {
     private static final int MSG_SET_CAN_OPEN_WINDOWS = 4;
     private static final int MSG_DUMP_DATABASE_CALLBACKS = 5;
     private static final int MSG_SET_GEOLOCATION_PERMISSION = 6;
+    private static final int MSG_OVERRIDE_PREFERENCE = 7;
+
+    /** String constants for use with layoutTestController.overridePreference() */
+    private final String WEBKIT_OFFLINE_WEB_APPLICATION_CACHE_ENABLED =
+            "WebKitOfflineWebApplicationCacheEnabled";
 
     Handler mLayoutTestControllerHandler = new Handler() {
         @Override
@@ -576,6 +575,22 @@ public class LayoutTestsExecutor extends Activity {
                     }
                     break;
 
+                case MSG_OVERRIDE_PREFERENCE:
+                    /**
+                     * TODO: We should look up the correct WebView for the frame which
+                     * called the layoutTestController method. Currently, we just use the
+                     * WebView for the main frame. EventSender suffers from the same
+                     * problem.
+                     */
+                    if (msg.getData().getString("key").equals(
+                            WEBKIT_OFFLINE_WEB_APPLICATION_CACHE_ENABLED)) {
+                        mCurrentWebView.getSettings().setAppCacheEnabled(msg.getData().getBoolean(
+                                "value"));
+                    } else {
+                        Log.w(LOG_TAG, "MSG_OVERRIDE_PREFERENCE: unsupported preference!");
+                    }
+                    break;
+
                 default:
                     assert false : "msg.what=" + msg.what;
                     break;
@@ -629,6 +644,15 @@ public class LayoutTestsExecutor extends Activity {
                 ") called");
         Message msg = mLayoutTestControllerHandler.obtainMessage(MSG_SET_GEOLOCATION_PERMISSION);
         msg.arg1 = allow ? 1 : 0;
+        msg.sendToTarget();
+    }
+
+    public void overridePreference(String key, boolean value) {
+        Log.i(LOG_TAG, mCurrentTestRelativePath + ": overridePreference(" + key + ", " + value +
+        ") called");
+        Message msg = mLayoutTestControllerHandler.obtainMessage(MSG_OVERRIDE_PREFERENCE);
+        msg.getData().putString("key", key);
+        msg.getData().putBoolean("value", value);
         msg.sendToTarget();
     }
 

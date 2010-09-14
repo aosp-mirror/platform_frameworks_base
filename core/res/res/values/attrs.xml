@@ -3530,6 +3530,8 @@
     <!-- Attribute for a header describing the item shown in the top-level list
          from which the selects the set of preference to dig in to. -->
     <declare-styleable name="PreferenceHeader">
+        <!-- Identifier value for the header. -->
+        <attr name="id" />
         <!-- The title of the item that is shown to the user. -->
         <attr name="title" />
         <!-- The summary for the item. -->

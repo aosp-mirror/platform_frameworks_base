@@ -79,6 +79,10 @@ public class LayoutTestController {
         mLayoutTestsExecutor.setGeolocationPermission(allow);
     }
 
+    public void overridePreference(String key, boolean value) {
+        mLayoutTestsExecutor.overridePreference(key, value);
+    }
+
     public void setMockGeolocationPosition(double latitude, double longitude, double accuracy) {
         Log.i(LOG_TAG, "setMockGeolocationPosition(): " + "latitude=" + latitude +
                 " longitude=" + longitude + " accuracy=" + accuracy);

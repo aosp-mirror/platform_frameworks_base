@@ -144,7 +144,7 @@
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"El sonido está desactivado. Activar."</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"El sonido está activado. Desactivar."</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Modo avión"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Modo avión desactivado. Activar."</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Modo avión activado. Desactivar."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Modo avión desactivado. Activar."</string>
     <string name="safeMode" msgid="2788228061547930246">"Modo seguro"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
@@ -288,10 +288,6 @@
     <string name="permdesc_readContacts" msgid="3371591512896545975">"Permite que una aplicación lea todos los datos de contacto (direcciones) almacenados en el teléfono. Las aplicaciones malintencionadas pueden utilizar este permiso para enviar tus datos a otras personas."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"escribir datos de contacto"</string>
     <string name="permdesc_writeContacts" msgid="3924383579108183601">"Permite que una aplicación modifique los datos de contacto (direcciones) almacenados en el teléfono. Las aplicaciones malintencionadas pueden utilizar este permiso para borrar o modificar tus datos de contacto."</string>
-    <string name="permlab_writeOwnerData" msgid="4892555913849295393">"escribir datos de propietario"</string>
-    <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Permite que una aplicación modifique los datos del propietario del teléfono almacenados en el teléfono. Las aplicaciones malintencionadas pueden utilizar este permiso para borrar o modificar los datos del propietario."</string>
-    <string name="permlab_readOwnerData" msgid="6668525984731523563">"leer datos del propietario"</string>
-    <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Permite que una aplicación lea los datos del propietario del teléfono almacenados en el teléfono. Las aplicaciones malintencionadas pueden utilizar este permiso para leer los datos del propietario del teléfono."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"leer eventos de calendario"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Permite que una aplicación lea todos los eventos de calendario almacenados en el teléfono. Las aplicaciones malintencionadas pueden utilizar este permiso para enviar tus eventos de calendario a otras personas."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"añadir o modificar eventos de calendario y enviar mensajes de correo electrónico a los invitados"</string>
@@ -713,13 +709,10 @@
     <string name="copy" msgid="2681946229533511987">"Copiar"</string>
     <string name="paste" msgid="5629880836805036433">"Pegar"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Copiar URL"</string>
-    <!-- no translation found for selectTextMode (6738556348861347240) -->
-    <skip />
-    <!-- no translation found for textSelectionCABTitle (5236850394370820357) -->
-    <skip />
+    <string name="selectTextMode" msgid="6738556348861347240">"Seleccionar texto..."</string>
+    <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selección de texto"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Método de introducción de texto"</string>
-    <!-- no translation found for editTextMenuTitle (4909135564941815494) -->
-    <skip />
+    <string name="editTextMenuTitle" msgid="4909135564941815494">"Acciones de texto"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Poco espacio"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"Se está agotando el espacio de almacenamiento del teléfono."</string>
     <string name="ok" msgid="5970060430562524910">"Aceptar"</string>
@@ -746,6 +739,12 @@
     <string name="force_close" msgid="3653416315450806396">"Forzar cierre"</string>
     <string name="report" msgid="4060218260984795706">"Informe"</string>
     <string name="wait" msgid="7147118217226317732">"Esperar"</string>
+    <!-- no translation found for launch_warning_title (8323761616052121936) -->
+    <skip />
+    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
+    <skip />
+    <!-- no translation found for launch_warning_original (188102023021668683) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> (proceso <xliff:g id="PROCESS">%2$s</xliff:g>) ha infringido su política StrictMode autoaplicable."</string>
     <string name="smv_process" msgid="5120397012047462446">"El proceso <xliff:g id="PROCESS">%1$s</xliff:g> ha infringido su política StrictMode autoaplicable."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> en ejecución"</string>
@@ -876,4 +875,10 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Más información sobre uso de datos"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Límite datos superado"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Más información sobre uso de datos"</string>
+    <!-- no translation found for no_matches (8129421908915840737) -->
+    <skip />
+    <!-- no translation found for find_on_page (1946799233822820384) -->
+    <skip />
+    <!-- no translation found for matches_found:one (8167147081136579439) -->
+    <!-- no translation found for matches_found:other (4641872797067609177) -->
 </resources>

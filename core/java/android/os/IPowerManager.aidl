@@ -17,10 +17,13 @@
 
 package android.os;
 
+import android.os.WorkSource;
+
 /** @hide */
 interface IPowerManager
 {
-    void acquireWakeLock(int flags, IBinder lock, String tag);
+    void acquireWakeLock(int flags, IBinder lock, String tag, in WorkSource ws);
+    void updateWakeLockWorkSource(IBinder lock, in WorkSource ws);
     void goToSleep(long time);
     void goToSleepWithReason(long time, int reason);
     void releaseWakeLock(IBinder lock, int flags);

@@ -56,10 +56,6 @@ import java.util.List;
 public class DirListActivity extends ListActivity {
 
     private static final String LOG_TAG = "DirListActivity";
-    private static final String ROOT_DIR_PATH =
-            Environment.getExternalStorageDirectory() +
-            File.separator + "android" +
-            File.separator + "LayoutTests";
 
     /** TODO: This is just a guess - think of a better way to achieve it */
     private static final int MEAN_TITLE_CHAR_SIZE = 13;
@@ -80,13 +76,6 @@ public class DirListActivity extends ListActivity {
 
     /** This is a relative path! */
     private String mCurrentDirPath;
-
-    /**
-     * TODO: This should not be a constant, but rather be configurable from somewhere.
-     */
-    private String mRootDirPath = ROOT_DIR_PATH;
-
-    private FileFilter mFileFilter;
 
     /**
      * A thread responsible for loading the contents of the directory from sd card
@@ -196,7 +185,6 @@ public class DirListActivity extends ListActivity {
 
         ForwarderManager.getForwarderManager().start();
 
-        mFileFilter = new FileFilter(ROOT_DIR_PATH);
         mListView = getListView();
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

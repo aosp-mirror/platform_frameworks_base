@@ -116,6 +116,11 @@ public:
     bool clipTransformed(const Rect& r, SkRegion::Op op = SkRegion::kIntersect_Op) {
         bool clipped = false;
 
+        // NOTE: The unimplemented operations require support for regions
+        // Supporting regions would require using a stencil buffer instead
+        // of the scissor. The stencil buffer itself is not too expensive
+        // (memory cost excluded) but on fillrate limited devices, managing
+        // the stencil might have a negative impact on the framerate.
         switch (op) {
             case SkRegion::kDifference_Op:
                 break;

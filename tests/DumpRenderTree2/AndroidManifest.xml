@@ -40,6 +40,7 @@ limitations under the License.
         </activity>
 
         <activity android:name=".LayoutTestsExecutor"
+                  android:theme="@style/WhiteBackground"
                   android:label="Layout tests' executor"
                   android:process=":executor">
         </activity>

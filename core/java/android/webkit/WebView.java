@@ -49,6 +49,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.text.Selection;
 import android.text.Spannable;
@@ -101,6 +102,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <p>A View that displays web pages. This class is the basis upon which you
@@ -535,6 +538,10 @@ public class WebView extends AbsoluteLayout
     // JavaScript or ones for which no accessibility script exists
     private AccessibilityInjector mAccessibilityInjector;
 
+    // flag indicating if accessibility script is injected so we
+    // know to handle Shift and arrows natively first
+    private boolean mAccessibilityScriptInjected;
+
     // the color used to highlight the touch rectangles
     private static final int mHightlightColor = 0x33000000;
     // the round corner for the highlight path
@@ -694,6 +701,11 @@ public class WebView extends AbsoluteLayout
     private int mHorizontalScrollBarMode = SCROLLBAR_AUTO;
     private int mVerticalScrollBarMode = SCROLLBAR_AUTO;
 
+    // constants for determining script injection strategy
+    private static final int ACCESSIBILITY_SCRIPT_INJECTION_UNDEFINED = -1;
+    private static final int ACCESSIBILITY_SCRIPT_INJECTION_OPTED_OUT = 0;
+    private static final int ACCESSIBILITY_SCRIPT_INJECTION_PROVIDED = 1;
+
     // the alias via which accessibility JavaScript interface is exposed
     private static final String ALIAS_ACCESSIBILITY_JS_INTERFACE = "accessibility";
 
@@ -706,6 +718,14 @@ public class WebView extends AbsoluteLayout
         "    chooser.src = 'https://ssl.gstatic.com/accessibility/javascript/android/AndroidScriptChooser.user.js';" +
         "    document.getElementsByTagName('head')[0].appendChild(chooser);" +
         "  })();";
+
+    // Regular expression that matches the "axs" URL parameter.
+    // The value of 0 means the accessibility script is opted out
+    // The value of 1 means the accessibility script is already injected
+    private static final String PATTERN_MATCH_AXS_URL_PARAMETER = "(\\?axs=(0|1))|(&axs=(0|1))";
+
+    // variable to cache the above pattern in case accessibility is enabled.
+    private Pattern mMatchAxsUrlParameterPattern;
 
     // Used to match key downs and key ups
     private boolean mGotKeyDown;
@@ -2947,6 +2967,23 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Called by CallbackProxy when the page starts loading.
+     * @param url The URL of the page which has started loading.
+     */
+    /* package */ void onPageStarted(String url) {
+        // every time we start a new page, we want to reset the
+        // WebView certificate:  if the new site is secure, we
+        // will reload it and get a new certificate set;
+        // if the new site is not secure, the certificate must be
+        // null, and that will be the case
+        setCertificate(null);
+
+        // reset the flag since we set to true in if need after
+        // loading is see onPageFinished(Url)
+        mAccessibilityScriptInjected = false;
+    }
+
+    /**
      * Called by CallbackProxy when the page finishes loading.
      * @param url The URL of the page which has finished loading.
      */
@@ -2971,20 +3008,90 @@ public class WebView extends AbsoluteLayout
      * is enabled. If JavaScript is enabled we try to inject a URL specific script.
      * If no URL specific script is found or JavaScript is disabled we fallback to
      * the default {@link AccessibilityInjector} implementation.
+     * </p>
+     * If the URL has the "axs" paramter set to 1 it has already done the
+     * script injection so we do nothing. If the parameter is set to 0
+     * the URL opts out accessibility script injection so we fall back to
+     * the default {@link AccessibilityInjector}.
+     * </p>
+     * Note: If the user has not opted-in the accessibility script injection no scripts
+     * are injected rather the default {@link AccessibilityInjector} implementation
+     * is used.
      *
      * @param url The URL loaded by this {@link WebView}.
      */
     private void injectAccessibilityForUrl(String url) {
-        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-            if (getSettings().getJavaScriptEnabled()) {
-                loadUrl(ACCESSIBILITY_SCRIPT_CHOOSER_JAVASCRIPT);
-            } else if (mAccessibilityInjector == null) {
-                mAccessibilityInjector = new AccessibilityInjector(this);
-            }
-        } else {
+        AccessibilityManager accessibilityManager = AccessibilityManager.getInstance(mContext);
+
+        if (!accessibilityManager.isEnabled()) {
             // it is possible that accessibility was turned off between reloads
+            ensureAccessibilityScriptInjectorInstance(false);
+            return;
+        }
+
+        if (!getSettings().getJavaScriptEnabled()) {
+            // no JS so we fallback to the basic buil-in support
+            ensureAccessibilityScriptInjectorInstance(true);
+            return;
+        }
+
+        // check the URL "axs" parameter to choose appropriate action
+        int axsParameterValue = getAxsUrlParameterValue(url);
+        if (axsParameterValue == ACCESSIBILITY_SCRIPT_INJECTION_UNDEFINED) {
+            boolean onDeviceScriptInjectionEnabled = (Settings.Secure.getInt(mContext
+                    .getContentResolver(), Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION, 0) == 1);
+            if (onDeviceScriptInjectionEnabled) {
+                ensureAccessibilityScriptInjectorInstance(false);
+                // neither script injected nor script injection opted out => we inject
+                loadUrl(ACCESSIBILITY_SCRIPT_CHOOSER_JAVASCRIPT);
+                // TODO: Set this flag after successfull script injection. Maybe upon injection
+                // the chooser should update the meta tag and we check it to declare success
+                mAccessibilityScriptInjected = true;
+            } else {
+                // injection disabled so we fallback to the basic built-in support
+                ensureAccessibilityScriptInjectorInstance(true);
+            }
+        } else if (axsParameterValue == ACCESSIBILITY_SCRIPT_INJECTION_OPTED_OUT) {
+            // injection opted out so we fallback to the basic buil-in support
+            ensureAccessibilityScriptInjectorInstance(true);
+        } else if (axsParameterValue == ACCESSIBILITY_SCRIPT_INJECTION_PROVIDED) {
+            ensureAccessibilityScriptInjectorInstance(false);
+            // the URL provides accessibility but we still need to add our generic script
+            loadUrl(ACCESSIBILITY_SCRIPT_CHOOSER_JAVASCRIPT);
+        } else {
+            Log.e(LOGTAG, "Unknown URL value for the \"axs\" URL parameter: " + axsParameterValue);
+        }
+    }
+
+    /**
+     * Ensures the instance of the {@link AccessibilityInjector} to be present ot not.
+     *
+     * @param present True to ensure an insance, false to ensure no instance.
+     */
+    private void ensureAccessibilityScriptInjectorInstance(boolean present) {
+        if (present && mAccessibilityInjector == null) {
+            mAccessibilityInjector = new AccessibilityInjector(this);
+        } else {
             mAccessibilityInjector = null;
         }
+    }
+
+    /**
+     * Gets the "axs" URL parameter value.
+     *
+     * @param url A url to fetch the paramter from.
+     * @return The parameter value if such, -1 otherwise.
+     */
+    private int getAxsUrlParameterValue(String url) {
+        if (mMatchAxsUrlParameterPattern == null) {
+            mMatchAxsUrlParameterPattern = Pattern.compile(PATTERN_MATCH_AXS_URL_PARAMETER);
+        }
+        Matcher matcher = mMatchAxsUrlParameterPattern.matcher(url);
+        if (matcher.find()) {
+            String keyValuePair = url.substring(matcher.start(), matcher.end());
+            return Integer.parseInt(keyValuePair.split("=")[1]);
+        }
+        return -1;
     }
 
     /**
@@ -3964,7 +4071,7 @@ public class WebView extends AbsoluteLayout
 
         if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
-            if (nativePageShouldHandleShiftAndArrows()) {
+            if (pageShouldHandleShiftAndArrows()) {
                 mShiftIsPressed = true;
             } else if (!nativeCursorWantsKeyEvents() && !mSelectingText) {
                 setUpSelect();
@@ -3984,7 +4091,7 @@ public class WebView extends AbsoluteLayout
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
                 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
             switchOutDrawHistory();
-            if (nativePageShouldHandleShiftAndArrows()) {
+            if (pageShouldHandleShiftAndArrows()) {
                 letPageHandleNavKey(keyCode, event.getEventTime(), true);
                 return true;
             }
@@ -4118,7 +4225,7 @@ public class WebView extends AbsoluteLayout
 
         if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
-            if (nativePageShouldHandleShiftAndArrows()) {
+            if (pageShouldHandleShiftAndArrows()) {
                 mShiftIsPressed = false;
             } else if (copySelection()) {
                 selectionDone();
@@ -4128,7 +4235,7 @@ public class WebView extends AbsoluteLayout
 
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
                 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
-            if (nativePageShouldHandleShiftAndArrows()) {
+            if (pageShouldHandleShiftAndArrows()) {
                 letPageHandleNavKey(keyCode, event.getEventTime(), false);
                 return true;
             }
@@ -5550,7 +5657,8 @@ public class WebView extends AbsoluteLayout
             }
             return false; // let common code in onKeyUp at it
         }
-        if (mMapTrackballToArrowKeys && mShiftIsPressed == false) {
+        if ((mMapTrackballToArrowKeys && mShiftIsPressed == false) ||
+                (mAccessibilityInjector != null || mAccessibilityScriptInjected)) {
             if (DebugFlags.WEB_VIEW) Log.v(LOGTAG, "onTrackballEvent gmail quit");
             return false;
         }
@@ -7285,6 +7393,16 @@ public class WebView extends AbsoluteLayout
         requestRectangleOnScreen(viewCursorRingBounds);
         mUserScroll = true;
         return keyHandled;
+    }
+
+    /**
+     * @return If the page should receive Shift and arrows.
+     */
+    private boolean pageShouldHandleShiftAndArrows() {
+        // TODO: Maybe the injected script should announce its presence in
+        // the page meta-tag so the nativePageShouldHandleShiftAndArrows
+        // will check that as one of the conditions it looks for
+        return (nativePageShouldHandleShiftAndArrows() || mAccessibilityScriptInjected);
     }
 
     /**

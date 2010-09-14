@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.WorkSource;
 import android.util.Log;
 
 /**
@@ -106,8 +107,8 @@ public abstract class LocationProvider {
             LocationProvider.this.onEnableLocationTracking(enable);
         }
 
-        public void setMinTime(long minTime) {
-            LocationProvider.this.onSetMinTime(minTime);
+        public void setMinTime(long minTime, WorkSource ws) {
+            LocationProvider.this.onSetMinTime(minTime, ws);
         }
 
         public void updateNetworkState(int state, NetworkInfo info) {
@@ -123,11 +124,11 @@ public abstract class LocationProvider {
         }
 
         public void addListener(int uid) {
-            LocationProvider.this.onAddListener(uid);
+            LocationProvider.this.onAddListener(uid, new WorkSource(uid));
         }
 
         public void removeListener(int uid) {
-            LocationProvider.this.onRemoveListener(uid);
+            LocationProvider.this.onRemoveListener(uid, new WorkSource(uid));
         }
     };
 
@@ -303,8 +304,9 @@ public abstract class LocationProvider {
      * the frequency of updates to match the requested frequency.
      *
      * @param minTime the smallest minTime value over all listeners for this provider.
+     * @param ws the source this work is coming from.
      */
-    public abstract void onSetMinTime(long minTime);
+    public abstract void onSetMinTime(long minTime, WorkSource ws);
 
     /**
      * Updates the network state for the given provider. This function must
@@ -340,14 +342,16 @@ public abstract class LocationProvider {
      * Notifies the location provider when a new client is listening for locations.
      *
      * @param uid user ID of the new client.
+     * @param ws a WorkSource representation of the client.
      */
-    public abstract void onAddListener(int uid);
+    public abstract void onAddListener(int uid, WorkSource ws);
 
     /**
      * Notifies the location provider when a client is no longer listening for locations.
      *
      * @param uid user ID of the client no longer listening.
+     * @param ws a WorkSource representation of the client.
      */
-    public abstract void onRemoveListener(int uid);
+    public abstract void onRemoveListener(int uid, WorkSource ws);
 }
 

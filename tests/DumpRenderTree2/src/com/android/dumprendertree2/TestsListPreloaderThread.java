@@ -29,12 +29,6 @@ public class TestsListPreloaderThread extends Thread {
 
     private static final String LOG_TAG = "TestsListPreloaderThread";
 
-    /** TODO: make it a setting */
-    private static final String TESTS_ROOT_DIR_PATH =
-            Environment.getExternalStorageDirectory() +
-            File.separator + "android" +
-            File.separator + "LayoutTests";
-
     /** A list containing relative paths of tests to run */
     private ArrayList<String> mTestsList = new ArrayList<String>();
 
@@ -55,7 +49,7 @@ public class TestsListPreloaderThread extends Thread {
      * @param doneMsg
      */
     public TestsListPreloaderThread(String path, Message doneMsg) {
-        mFileFilter = new FileFilter(TESTS_ROOT_DIR_PATH);
+        mFileFilter = new FileFilter();
         mRelativePath = path;
         mDoneMsg = doneMsg;
     }

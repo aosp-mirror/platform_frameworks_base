@@ -43,16 +43,8 @@ public class ManagerService extends Service {
     private static final int CRASH_TIMEOUT_MS = 20 * 1000;
 
     /** TODO: make it a setting */
-    static final String TESTS_ROOT_DIR_PATH =
-            Environment.getExternalStorageDirectory() +
-            File.separator + "android" +
-            File.separator + "LayoutTests";
-
-    /** TODO: make it a setting */
     static final String RESULTS_ROOT_DIR_PATH =
-            Environment.getExternalStorageDirectory() +
-            File.separator + "android" +
-            File.separator + "LayoutTests-results";
+            Environment.getExternalStorageDirectory() + File.separator + "layout-test-results";
 
     /** TODO: Make it a setting */
     private static final List<String> EXPECTED_RESULT_LOCATION_RELATIVE_DIR_PREFIXES =
@@ -141,7 +133,7 @@ public class ManagerService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        mFileFilter = new FileFilter(TESTS_ROOT_DIR_PATH);
+        mFileFilter = new FileFilter();
         mSummarizer = new Summarizer(mFileFilter, RESULTS_ROOT_DIR_PATH);
     }
 

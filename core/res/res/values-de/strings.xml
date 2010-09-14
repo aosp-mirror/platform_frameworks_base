@@ -288,10 +288,6 @@
     <string name="permdesc_readContacts" msgid="3371591512896545975">"Ermöglicht einer Anwendung, alle auf Ihrem Telefon gespeicherten Kontaktdaten (Adressen) zu lesen. Schädliche Anwendungen können so Ihre Daten an andere Personen senden."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"Kontaktdaten schreiben"</string>
     <string name="permdesc_writeContacts" msgid="3924383579108183601">"Ermöglicht einer Anwendung, die auf Ihrem Telefon gespeicherten Kontaktdaten (Adressen) zu ändern. Schädliche Anwendungen können so Ihre Kontaktdaten löschen oder verändern."</string>
-    <string name="permlab_writeOwnerData" msgid="4892555913849295393">"Eigentümerdaten schreiben"</string>
-    <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Ermöglicht einer Anwendung, die auf Ihrem Telefon gespeicherten Eigentümerdaten zu ändern. Schädliche Anwendungen können so Eigentümerdaten löschen oder verändern."</string>
-    <string name="permlab_readOwnerData" msgid="6668525984731523563">"Eigentümerdaten lesen"</string>
-    <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Ermöglicht einer Anwendung, die auf Ihrem Telefon gespeicherten Eigentümerdaten zu lesen. Schädliche Anwendungen können so Eigentümerdaten lesen."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"Kalendereinträge lesen"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Ermöglicht einer Anwendung, alle auf Ihrem Telefon gespeicherten Kalenderereignisse zu lesen. Schädliche Anwendungen können so Ihre Kalenderereignisse an andere Personen senden."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"Kalendereinträge hinzufügen oder ändern und E-Mails an Gäste senden"</string>
@@ -713,13 +709,10 @@
     <string name="copy" msgid="2681946229533511987">"Kopieren"</string>
     <string name="paste" msgid="5629880836805036433">"Einfügen"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL kopieren"</string>
-    <!-- no translation found for selectTextMode (6738556348861347240) -->
-    <skip />
-    <!-- no translation found for textSelectionCABTitle (5236850394370820357) -->
-    <skip />
+    <string name="selectTextMode" msgid="6738556348861347240">"Text auswählen..."</string>
+    <string name="textSelectionCABTitle" msgid="5236850394370820357">"Textauswahl"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Eingabemethode"</string>
-    <!-- no translation found for editTextMenuTitle (4909135564941815494) -->
-    <skip />
+    <string name="editTextMenuTitle" msgid="4909135564941815494">"Textaktionen"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Geringer Speicher"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"Kaum noch freier Telefonspeicher verfügbar."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
@@ -746,6 +739,12 @@
     <string name="force_close" msgid="3653416315450806396">"Schließen erzwingen"</string>
     <string name="report" msgid="4060218260984795706">"Bericht"</string>
     <string name="wait" msgid="7147118217226317732">"Warten"</string>
+    <!-- no translation found for launch_warning_title (8323761616052121936) -->
+    <skip />
+    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
+    <skip />
+    <!-- no translation found for launch_warning_original (188102023021668683) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"Die Anwendung <xliff:g id="APPLICATION">%1$s</xliff:g> (Prozess <xliff:g id="PROCESS">%2$s</xliff:g>) hat gegen ihre selbsterzwungene StrictMode-Richtlinie verstoßen."</string>
     <string name="smv_process" msgid="5120397012047462446">"Der Prozess <xliff:g id="PROCESS">%1$s</xliff:g> hat gegen seine selbsterzwungene StrictMode-Richtlinie verstoßen."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> läuft"</string>
@@ -876,4 +875,10 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Weitere Informationen über die Mobildatennutzung durch Berühren aufrufen"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Mobildatenlimit überschritten"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Weitere Informationen über die Mobildatennutzung durch Berühren aufrufen"</string>
+    <!-- no translation found for no_matches (8129421908915840737) -->
+    <skip />
+    <!-- no translation found for find_on_page (1946799233822820384) -->
+    <skip />
+    <!-- no translation found for matches_found:one (8167147081136579439) -->
+    <!-- no translation found for matches_found:other (4641872797067609177) -->
 </resources>

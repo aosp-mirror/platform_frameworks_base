@@ -45,12 +45,15 @@ interface IBluetooth
     boolean startDiscovery();
     boolean cancelDiscovery();
     boolean isDiscovering();
+    byte[] readOutOfBandData();
 
     boolean createBond(in String address);
+    boolean createBondOutOfBand(in String address, in byte[] hash, in byte[] randomizer);
     boolean cancelBondProcess(in String address);
     boolean removeBond(in String address);
     String[] listBonds();
     int getBondState(in String address);
+    boolean setDeviceOutOfBandData(in String address, in byte[] hash, in byte[] randomizer);
 
     String getRemoteName(in String address);
     int getRemoteClass(in String address);
@@ -61,6 +64,7 @@ interface IBluetooth
     boolean setPin(in String address, in byte[] pin);
     boolean setPasskey(in String address, int passkey);
     boolean setPairingConfirmation(in String address, boolean confirm);
+    boolean setRemoteOutOfBandData(in String addres);
     boolean cancelPairingUserInput(in String address);
 
     boolean setTrust(in String address, in boolean value);
