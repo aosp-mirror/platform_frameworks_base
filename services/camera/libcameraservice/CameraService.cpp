@@ -840,6 +840,8 @@ status_t CameraService::Client::sendCommand(int32_t cmd, int32_t arg1, int32_t a
                 return BAD_VALUE;
         }
         return OK;
+    } else if (cmd == CAMERA_CMD_PLAY_RECORDING_SOUND) {
+        mCameraService->playSound(SOUND_RECORDING);
     }
 
     return mHardware->sendCommand(cmd, arg1, arg2);
