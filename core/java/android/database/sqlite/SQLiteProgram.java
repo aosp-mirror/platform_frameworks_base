@@ -110,6 +110,42 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         }
     }
 
+    private void compileSql() {
+        // only cache CRUD statements
+        if (mStatementType != DatabaseUtils.STATEMENT_SELECT &&
+                mStatementType != DatabaseUtils.STATEMENT_UPDATE) {
+            mCompiledSql = new SQLiteCompiledSql(mDatabase, mSql);
+            nStatement = mCompiledSql.nStatement;
+            // since it is not in the cache, no need to acquire() it.
+            return;
+        }
+
+        mCompiledSql = mDatabase.getCompiledStatementForSql(mSql);
+        if (mCompiledSql == null) {
+            // create a new compiled-sql obj
+            mCompiledSql = new SQLiteCompiledSql(mDatabase, mSql);
+
+            // add it to the cache of compiled-sqls
+            // but before adding it and thus making it available for anyone else to use it,
+            // make sure it is acquired by me.
+            mCompiledSql.acquire();
+            mDatabase.addToCompiledQueries(mSql, mCompiledSql);
+        } else {
+            // it is already in compiled-sql cache.
+            // try to acquire the object.
+            if (!mCompiledSql.acquire()) {
+                int last = mCompiledSql.nStatement;
+                // the SQLiteCompiledSql in cache is in use by some other SQLiteProgram object.
+                // we can't have two different SQLiteProgam objects can't share the same
+                // CompiledSql object. create a new one.
+                // finalize it when I am done with it in "this" object.
+                mCompiledSql = new SQLiteCompiledSql(mDatabase, mSql);
+                // since it is not in the cache, no need to acquire() it.
+            }
+        }
+        nStatement = mCompiledSql.nStatement;
+    }
+
     @Override
     protected void onAllReferencesReleased() {
         release();
@@ -127,7 +163,16 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         if (mCompiledSql == null) {
             return;
         }
-        mCompiledSql.release(mStatementType);
+        synchronized(mDatabase.mCompiledQueries) {
+            if (!mDatabase.mCompiledQueries.containsValue(mCompiledSql)) {
+                // it is NOT in compiled-sql cache. i.e., responsibility of
+                // releasing this statement is on me.
+                mCompiledSql.releaseSqlStatement();
+            } else {
+                // it is in compiled-sql cache. reset its CompiledSql#mInUse flag
+                mCompiledSql.release();
+            }
+        }
         mCompiledSql = null;
         nStatement = 0;
     }
@@ -288,9 +333,6 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         synchronized (this) {
             mBindArgs = null;
             if (nHandle == 0 || !mDatabase.isOpen()) {
-                if (mCompiledSql != null) {
-                    mCompiledSql.setState(SQLiteCompiledSql.NSTATE_CLOSE_NOOP);
-                }
                 return;
             }
             releaseReference();
@@ -307,8 +349,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     /* package */ synchronized void compileAndbindAllArgs() {
         if (nStatement == 0) {
             // SQL statement is not compiled yet. compile it now.
-            mCompiledSql = SQLiteCompiledSql.get(mDatabase, mSql, mStatementType);
-            nStatement = mCompiledSql.nStatement;
+            compileSql();
         }
         if (mBindArgs == null) {
             return;

@@ -53,12 +53,6 @@ public class SQLiteStatementTest extends AndroidTestCase {
      * Start 2 threads to repeatedly execute the above SQL statement.
      * Even though 2 threads are executing the same SQL, they each should get their own copy of
      * prepared SQL statement id and there SHOULD NOT be an error from sqlite or android.
-     *<p>
-     * This method will produce a lot of the following warnings:
-     *  Possible bug: Either using the same SQL in 2 threads at the same time, or
-     *  previous instance of this SQL statement was never close()d.
-     * That is expected behavior.
-     *
      * @throws InterruptedException thrown if the test threads started by this test are interrupted
      */
     @LargeTest
