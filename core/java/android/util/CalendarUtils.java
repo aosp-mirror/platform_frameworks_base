@@ -45,6 +45,10 @@ public class CalendarUtils {
      * values.
      */
     public static class TimeZoneUtils {
+        private static final String[] TIMEZONE_TYPE_ARGS = { CalendarCache.TIMEZONE_KEY_TYPE };
+        private static final String[] TIMEZONE_INSTANCES_ARGS =
+                { CalendarCache.TIMEZONE_KEY_INSTANCES };
+
         private static StringBuilder mSB = new StringBuilder(50);
         private static Formatter mF = new Formatter(mSB, Locale.getDefault());
         private volatile static boolean mFirstTZRequest = true;
@@ -213,19 +217,17 @@ public class CalendarUtils {
                 }
 
                 // Write the use home tz setting
-                String[] selArgs = new String[] { CalendarCache.TIMEZONE_KEY_TYPE };
                 values.put(CalendarCache.VALUE, mUseHomeTZ ? CalendarCache.TIMEZONE_TYPE_HOME
                         : CalendarCache.TIMEZONE_TYPE_AUTO);
                 mHandler.startUpdate(mToken, null, CalendarCache.URI, values, CalendarCache.WHERE,
-                        selArgs);
+                        TIMEZONE_TYPE_ARGS);
 
                 // If using a home tz write it to the db
                 if (mUseHomeTZ) {
-                    selArgs[0] = CalendarCache.TIMEZONE_KEY_INSTANCES;
-                    values.clear();
-                    values.put(CalendarCache.VALUE, mHomeTZ);
-                    mHandler.startUpdate(
-                            mToken, null, CalendarCache.URI, values, CalendarCache.WHERE, selArgs);
+                    ContentValues values2 = new ContentValues();
+                    values2.put(CalendarCache.VALUE, mHomeTZ);
+                    mHandler.startUpdate(mToken, null, CalendarCache.URI, values2,
+                            CalendarCache.WHERE, TIMEZONE_INSTANCES_ARGS);
                 }
             }
         }
@@ -269,6 +271,27 @@ public class CalendarUtils {
                 }
             }
             return mUseHomeTZ ? mHomeTZ : Time.getCurrentTimezone();
+        }
+
+        /**
+         * Forces a query of the database to check for changes to the time zone.
+         * This should be called if another app may have modified the db. If a
+         * query is already in progress the callback will be added to the list
+         * of callbacks to be called when it returns.
+         *
+         * @param context The calling activity
+         * @param callback The runnable that should execute if a query returns
+         *            new values
+         */
+        public void forceDBRequery(Context context, Runnable callback) {
+            synchronized (mTZCallbacks){
+                if (mTZQueryInProgress) {
+                    mTZCallbacks.add(callback);
+                    return;
+                }
+                mFirstTZRequest = true;
+                getTimeZone(context, callback);
+            }
         }
     }
 
