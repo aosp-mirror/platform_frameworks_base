@@ -79,8 +79,6 @@ public:
     ObjectBaseRef<ProgramVertex> mDefault;
     ObjectBaseRef<ProgramVertex> mLast;
     ObjectBaseRef<Allocation> mDefaultAlloc;
-
-    ObjectBaseRef<Type> mAllocType;
 };
 
 

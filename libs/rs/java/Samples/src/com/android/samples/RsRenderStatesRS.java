@@ -67,7 +67,6 @@ public class RsRenderStatesRS {
 
     // Custom shaders
     private ProgramVertex mProgVertexCustom;
-    private ProgramVertex.MatrixAllocation mPVACustom;
     private ProgramFragment mProgFragmentCustom;
     private ScriptField_VertexShaderConstants_s mVSConst;
     private ScriptField_FragentShaderConstants_s mFSConst;
@@ -202,9 +201,7 @@ public class RsRenderStatesRS {
         pvbCustom.addConstant(mVSConst.getAllocation().getType());
         mProgVertexCustom = pvbCustom.create();
         // Bind the source of constant data
-        mProgVertexCustom.bindConstants(mVSConst.getAllocation(), 1);
-        mPVACustom = new ProgramVertex.MatrixAllocation(mRS);
-        mProgVertexCustom.bindAllocation(mPVACustom);
+        mProgVertexCustom.bindConstants(mVSConst.getAllocation(), 0);
 
         ProgramFragment.ShaderBuilder pfbCustom = new ProgramFragment.ShaderBuilder(mRS);
         // Specify the resource that contains the shader string
@@ -215,7 +212,7 @@ public class RsRenderStatesRS {
         pfbCustom.addConstant(mFSConst.getAllocation().getType());
         mProgFragmentCustom = pfbCustom.create();
         // Bind the source of constant data
-        mProgFragmentCustom.bindConstants(mFSConst.getAllocation(), 1);
+        mProgFragmentCustom.bindConstants(mFSConst.getAllocation(), 0);
 
         mScript.set_gProgVertexCustom(mProgVertexCustom);
         mScript.set_gProgFragmentCustom(mProgFragmentCustom);

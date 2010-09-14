@@ -92,10 +92,14 @@ ProgramFragment::~ProgramFragment()
 
 void ProgramFragment::setConstantColor(float r, float g, float b, float a)
 {
+    if(isUserProgram()) {
+        return;
+    }
     mConstantColor[0] = r;
     mConstantColor[1] = g;
     mConstantColor[2] = b;
     mConstantColor[3] = a;
+    memcpy(mConstants[0]->getPtr(), mConstantColor, 4*sizeof(float));
     mDirty = true;
 }
 
@@ -113,13 +117,6 @@ void ProgramFragment::setupGL2(const Context *rsc, ProgramFragmentState *state, 
     state->mLast.set(this);
 
     rsc->checkError("ProgramFragment::setupGL2 start");
-
-    if (!mVaryingColor &&
-        (sc->fragUniformSlot(mConstantColorUniformIndex) >= 0)) {
-        //LOGE("mConstantColorUniformIndex %i %i", mConstantColorUniformIndex, sc->fragUniformSlot(mConstantColorUniformIndex));
-        glUniform4fv(sc->fragUniformSlot(mConstantColorUniformIndex), 1, mConstantColor);
-        rsc->checkError("ProgramFragment::color setup");
-    }
 
     rsc->checkError("ProgramFragment::setupGL2 begin uniforms");
     setupUserConstants(sc, true);
@@ -158,124 +155,32 @@ void ProgramFragment::loadShader(Context *rsc) {
 
 void ProgramFragment::createShader()
 {
-    mShader.setTo("precision mediump float;\n");
-    mShader.append("varying lowp vec4 varColor;\n");
-    mShader.append("varying vec4 varTex0;\n");
-    mShader.append("uniform vec4 uni_Color;\n");
-
     if (mUserShader.length() > 1) {
+        mShader.append("precision mediump float;\n");
         appendUserConstants();
         for (uint32_t ct=0; ct < mTextureCount; ct++) {
             char buf[256];
-            sprintf(buf, "uniform sampler2D uni_Tex%i;\n", ct);
+            sprintf(buf, "uniform sampler2D UNI_Tex%i;\n", ct);
             mShader.append(buf);
         }
         mShader.append(mUserShader);
     } else {
-        uint32_t mask = mTextureEnableMask;
-        uint32_t texNum = 0;
-        while (mask) {
-            if (mask & 1) {
-                char buf[64];
-                mShader.append("uniform sampler2D uni_Tex");
-                sprintf(buf, "%i", texNum);
-                mShader.append(buf);
-                mShader.append(";\n");
-            }
-            mask >>= 1;
-            texNum++;
-        }
-
-
-        mShader.append("void main() {\n");
-        if (mVaryingColor) {
-            mShader.append("  lowp vec4 col = varColor;\n");
-        } else {
-            mShader.append("  lowp vec4 col = uni_Color;\n");
-        }
-
-        if (mTextureEnableMask) {
-            if (mPointSpriteEnable) {
-                mShader.append("  vec2 t0 = gl_PointCoord;\n");
-            } else {
-                mShader.append("  vec2 t0 = varTex0.xy;\n");
-            }
-        }
-
-        mask = mTextureEnableMask;
-        texNum = 0;
-        while (mask) {
-            if (mask & 1) {
-                switch(mEnvModes[texNum]) {
-                case RS_TEX_ENV_MODE_NONE:
-                    rsAssert(0);
-                    break;
-                case RS_TEX_ENV_MODE_REPLACE:
-                    switch(mTextureFormats[texNum]) {
-                    case 1:
-                        mShader.append("  col.a = texture2D(uni_Tex0, t0).a;\n");
-                        break;
-                    case 2:
-                        mShader.append("  col.rgba = texture2D(uni_Tex0, t0).rgba;\n");
-                        break;
-                    case 3:
-                        mShader.append("  col.rgb = texture2D(uni_Tex0, t0).rgb;\n");
-                        break;
-                    case 4:
-                        mShader.append("  col.rgba = texture2D(uni_Tex0, t0).rgba;\n");
-                        break;
-                    }
-                    break;
-                case RS_TEX_ENV_MODE_MODULATE:
-                    switch(mTextureFormats[texNum]) {
-                    case 1:
-                        mShader.append("  col.a *= texture2D(uni_Tex0, t0).a;\n");
-                        break;
-                    case 2:
-                        mShader.append("  col.rgba *= texture2D(uni_Tex0, t0).rgba;\n");
-                        break;
-                    case 3:
-                        mShader.append("  col.rgb *= texture2D(uni_Tex0, t0).rgb;\n");
-                        break;
-                    case 4:
-                        mShader.append("  col.rgba *= texture2D(uni_Tex0, t0).rgba;\n");
-                        break;
-                    }
-                    break;
-                case RS_TEX_ENV_MODE_DECAL:
-                    mShader.append("  col = texture2D(uni_Tex0, t0);\n");
-                    break;
-                }
-
-            }
-            mask >>= 1;
-            texNum++;
-        }
-
-        //mShader.append("  col.a = 1.0;\n");
-        //mShader.append("  col.r = 0.5;\n");
-
-        mShader.append("  gl_FragColor = col;\n");
-        mShader.append("}\n");
+        LOGE("ProgramFragment::createShader cannot create program, shader code not defined");
+        rsAssert(0);
     }
 }
 
 void ProgramFragment::init(Context *rsc)
 {
     mUniformCount = 0;
-    //if (!mVaryingColor) {
-        mConstantColorUniformIndex = mUniformCount;
-        mUniformNames[mUniformCount++].setTo("uni_Color");
-    //}
-
     if (mUserShader.size() > 0) {
         for (uint32_t ct=0; ct < mConstantCount; ct++) {
             initAddUserElement(mConstantTypes[ct]->getElement(), mUniformNames, &mUniformCount, "UNI_");
         }
     }
     mTextureUniformIndexStart = mUniformCount;
-    mUniformNames[mUniformCount++].setTo("uni_Tex0");
-    mUniformNames[mUniformCount++].setTo("uni_Tex1");
+    mUniformNames[mUniformCount++].setTo("UNI_Tex0");
+    mUniformNames[mUniformCount++].setTo("UNI_Tex1");
 
     createShader();
 }
@@ -303,12 +208,36 @@ ProgramFragmentState::~ProgramFragmentState()
 
 void ProgramFragmentState::init(Context *rsc)
 {
-    uint32_t tmp[] = {
-        RS_TEX_ENV_MODE_NONE, 0,
-        RS_TEX_ENV_MODE_NONE, 0,
-        0, 0
-    };
-    ProgramFragment *pf = new ProgramFragment(rsc, tmp, 6);
+    String8 shaderString(RS_SHADER_INTERNAL);
+    shaderString.append("varying lowp vec4 varColor;\n");
+    shaderString.append("varying vec4 varTex0;\n");
+    shaderString.append("void main() {\n");
+    shaderString.append("  lowp vec4 col = UNI_Color;\n");
+    shaderString.append("  gl_FragColor = col;\n");
+    shaderString.append("}\n");
+
+    const Element *colorElem = Element::create(rsc, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 4);
+    rsc->mStateElement.elementBuilderBegin();
+    rsc->mStateElement.elementBuilderAdd(colorElem, "Color", 1);
+    const Element *constInput = rsc->mStateElement.elementBuilderCreate(rsc);
+
+    Type *inputType = new Type(rsc);
+    inputType->setElement(constInput);
+    inputType->setDimX(1);
+    inputType->compute();
+
+    uint32_t tmp[4];
+    tmp[0] = RS_PROGRAM_PARAM_CONSTANT;
+    tmp[1] = (uint32_t)inputType;
+    tmp[2] = RS_PROGRAM_PARAM_TEXTURE_COUNT;
+    tmp[3] = 0;
+
+    Allocation *constAlloc = new Allocation(rsc, inputType);
+    ProgramFragment *pf = new ProgramFragment(rsc, shaderString.string(),
+                                              shaderString.length(), tmp, 4);
+    pf->bindAllocation(constAlloc, 0);
+    pf->setConstantColor(1.0f, 1.0f, 1.0f, 1.0f);
+
     mDefault.set(pf);
 }
 

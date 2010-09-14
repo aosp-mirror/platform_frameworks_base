@@ -62,9 +62,9 @@ public class ProgramFragment extends Program {
         }
     }
 
-    public static class Builder {
+    public static class Builder extends ShaderBuilder {
         public static final int MAX_TEXTURE = 2;
-        RenderScript mRS;
+        int mNumTextures;
         boolean mPointSpriteEnable;
         boolean mVaryingColorEnable;
 
@@ -101,7 +101,72 @@ public class ProgramFragment extends Program {
         }
         Slot[] mSlots;
 
+        private void buildShaderString() {
+            mShader  = "//rs_shader_internal\n";
+            mShader += "varying lowp vec4 varColor;\n";
+            mShader += "varying vec4 varTex0;\n";
+
+            mShader += "void main() {\n";
+            if (mVaryingColorEnable) {
+                mShader += "  lowp vec4 col = varColor;\n";
+            } else {
+                mShader += "  lowp vec4 col = UNI_Color;\n";
+            }
+
+            if (mNumTextures != 0) {
+                if (mPointSpriteEnable) {
+                    mShader += "  vec2 t0 = gl_PointCoord;\n";
+                } else {
+                    mShader += "  vec2 t0 = varTex0.xy;\n";
+                }
+            }
+
+            for(int i = 0; i < mNumTextures; i ++) {
+                switch(mSlots[i].env) {
+                case REPLACE:
+                    switch (mSlots[i].format) {
+                    case ALPHA:
+                        mShader += "  col.a = texture2D(UNI_Tex0, t0).a;\n";
+                        break;
+                    case LUMINANCE_ALPHA:
+                        mShader += "  col.rgba = texture2D(UNI_Tex0, t0).rgba;\n";
+                        break;
+                    case RGB:
+                        mShader += "  col.rgb = texture2D(UNI_Tex0, t0).rgb;\n";
+                        break;
+                    case RGBA:
+                        mShader += "  col.rgba = texture2D(UNI_Tex0, t0).rgba;\n";
+                        break;
+                    }
+                    break;
+                case MODULATE:
+                    switch (mSlots[i].format) {
+                    case ALPHA:
+                        mShader += "  col.a *= texture2D(UNI_Tex0, t0).a;\n";
+                        break;
+                    case LUMINANCE_ALPHA:
+                        mShader += "  col.rgba *= texture2D(UNI_Tex0, t0).rgba;\n";
+                        break;
+                    case RGB:
+                        mShader += "  col.rgb *= texture2D(UNI_Tex0, t0).rgb;\n";
+                        break;
+                    case RGBA:
+                        mShader += "  col.rgba *= texture2D(UNI_Tex0, t0).rgba;\n";
+                        break;
+                    }
+                    break;
+                case DECAL:
+                    mShader += "  col = texture2D(UNI_Tex0, t0);\n";
+                    break;
+                }
+            }
+
+            mShader += "  gl_FragColor = col;\n";
+            mShader += "}\n";
+        }
+
         public Builder(RenderScript rs) {
+            super(rs);
             mRS = rs;
             mSlots = new Slot[MAX_TEXTURE];
             mPointSpriteEnable = false;
@@ -126,22 +191,35 @@ public class ProgramFragment extends Program {
             return this;
         }
 
+        @Override
         public ProgramFragment create() {
-            mRS.validate();
-            int[] tmp = new int[MAX_TEXTURE * 2 + 2];
-            if (mSlots[0] != null) {
-                tmp[0] = mSlots[0].env.mID;
-                tmp[1] = mSlots[0].format.mID;
+            mNumTextures = 0;
+            for(int i = 0; i < MAX_TEXTURE; i ++) {
+                if(mSlots[i] != null) {
+                    mNumTextures ++;
+                }
             }
-            if (mSlots[1] != null) {
-                tmp[2] = mSlots[1].env.mID;
-                tmp[3] = mSlots[1].format.mID;
+            buildShaderString();
+            Type constType = null;
+            if (!mVaryingColorEnable) {
+                Element.Builder b = new Element.Builder(mRS);
+                b.add(Element.F32_4(mRS), "Color");
+                Type.Builder typeBuilder = new Type.Builder(mRS, b.create());
+                typeBuilder.add(Dimension.X, 1);
+                constType = typeBuilder.create();
+                addConstant(constType);
             }
-            tmp[4] = mPointSpriteEnable ? 1 : 0;
-            tmp[5] = mVaryingColorEnable ? 1 : 0;
-            int id = mRS.nProgramFragmentCreate(tmp);
-            ProgramFragment pf = new ProgramFragment(id, mRS);
+            setTextureCount(mNumTextures);
+
+            ProgramFragment pf = super.create();
             pf.mTextureCount = MAX_TEXTURE;
+            if (!mVaryingColorEnable) {
+                Allocation constantData = Allocation.createTyped(mRS,constType);
+                float[] data = new float[4];
+                data[0] = data[1] = data[2] = data[3] = 1.0f;
+                constantData.data(data);
+                pf.bindConstants(constantData, 0);
+            }
             return pf;
         }
     }

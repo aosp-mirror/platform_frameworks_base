@@ -18,6 +18,7 @@
 
 typedef struct VertexShaderConstants_s {
     rs_matrix4x4 model;
+    rs_matrix4x4 proj;
     float3 light0_Posision;
     float light0_Diffuse;
     float light0_Specular;
@@ -27,7 +28,6 @@ typedef struct VertexShaderConstants_s {
     float light1_Diffuse;
     float light1_Specular;
     float light1_CosinePower;
-
 } VertexShaderConstants;
 
 typedef struct FragentShaderConstants_s {
@@ -42,6 +42,6 @@ typedef struct FragentShaderConstants_s {
 typedef struct VertexShaderInputs_s {
     float4 position;
     float3 normal;
-    float4 texture0;
+    float2 texture0;
 } VertexShaderInputs;
 
