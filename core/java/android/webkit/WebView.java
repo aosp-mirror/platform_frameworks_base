@@ -3788,7 +3788,7 @@ public class WebView extends AbsoluteLayout
         InputMethodManager imm = (InputMethodManager)
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
-        // bring it back to the reading level scale so that user can enter text
+        // bring it back to the default level scale so that user can enter text
         boolean zoom = mZoomManager.getScale() < mZoomManager.getDefaultScale();
         if (zoom) {
             mZoomManager.setZoomCenter(mLastTouchX, mLastTouchY);
