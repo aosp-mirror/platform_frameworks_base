@@ -404,6 +404,7 @@ public final class SipService extends ISipService.Stub {
 
         public void onConnectivityChanged(boolean connected)
                 throws SipException {
+            mSipGroup.onConnectivityChanged();
             if (connected) {
                 resetGroup(mLocalIp);
                 if (mOpened) openToReceiveCalls();
