@@ -16,7 +16,6 @@
 
 package android.database.sqlite;
 
-import android.database.DatabaseUtils;
 import android.util.Log;
 
 /**
@@ -25,19 +24,19 @@ import android.util.Log;
  * and it is released in one of the 2 following ways
  * 1. when {@link SQLiteDatabase} object is closed.
  * 2. if this is not cached in {@link SQLiteDatabase}, {@link android.database.Cursor#close()}
- * releases this obj.
+ * releaases this obj.
  */
 /* package */ class SQLiteCompiledSql {
 
     private static final String TAG = "SQLiteCompiledSql";
 
     /** The database this program is compiled against. */
-    /* package */ final SQLiteDatabase mDatabase;
+    /* package */ SQLiteDatabase mDatabase;
 
     /**
      * Native linkage, do not modify. This comes from the database.
      */
-    /* package */ final int nHandle;
+    /* package */ int nHandle = 0;
 
     /**
      * Native linkage, do not modify. When non-0 this holds a reference to a valid
@@ -47,53 +46,52 @@ import android.util.Log;
      */
     /* package */ int nStatement = 0;
 
-    /** the following 3 members are for debugging purposes */
-    private final String mSqlStmt;
-    private final Throwable mStackTrace;
-    private int nState = 0;
-    /** values the above member can take */
-    private static final int NSTATE_CACHEABLE = 64;
-    private static final int NSTATE_IN_CACHE = 32;
-    private static final int NSTATE_INUSE = 16;
-    private static final int NSTATE_INUSE_RESETMASK = 0x0f;
-    /* package */ static final int NSTATE_CLOSE_NOOP = 1;
-    private static final int NSTATE_EVICTED_FROM_CACHE = 2;
-    /* package */ static final int NSTATE_CACHE_DEALLOC = 4;
-    private static final int NSTATE_IN_FINALIZER_Q = 8;
+    /** the following are for debugging purposes */
+    private String mSqlStmt = null;
+    private Throwable mStackTrace = null;
 
-    private SQLiteCompiledSql(SQLiteDatabase db, String sql) {
-        db.verifyDbIsOpen();
-        db.verifyLockOwner();
+    /** when in cache and is in use, this member is set */
+    private boolean mInUse = false;
+
+    /* package */ SQLiteCompiledSql(SQLiteDatabase db, String sql) {
+        if (!db.isOpen()) {
+            throw new IllegalStateException("database " + db.getPath() + " already closed");
+        }
         mDatabase = db;
         mSqlStmt = sql;
         mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
-        nHandle = db.mNativeHandle;
-        native_compile(sql);
+        this.nHandle = db.mNativeHandle;
+        compile(sql, true);
     }
 
-    /* package */ static SQLiteCompiledSql get(SQLiteDatabase db, String sql, int type) {
-        // only CRUD statements are cached.
-        if (type != DatabaseUtils.STATEMENT_SELECT && type != DatabaseUtils.STATEMENT_UPDATE) {
-            return new SQLiteCompiledSql(db, sql);
+    /**
+     * Compiles the given SQL into a SQLite byte code program using sqlite3_prepare_v2(). If
+     * this method has been called previously without a call to close and forCompilation is set
+     * to false the previous compilation will be used. Setting forceCompilation to true will
+     * always re-compile the program and should be done if you pass differing SQL strings to this
+     * method.
+     *
+     * <P>Note: this method acquires the database lock.</P>
+     *
+     * @param sql the SQL string to compile
+     * @param forceCompilation forces the SQL to be recompiled in the event that there is an
+     *  existing compiled SQL program already around
+     */
+    private void compile(String sql, boolean forceCompilation) {
+        mDatabase.verifyLockOwner();
+        // Only compile if we don't have a valid statement already or the caller has
+        // explicitly requested a recompile.
+        if (forceCompilation) {
+            // Note that the native_compile() takes care of destroying any previously
+            // existing programs before it compiles.
+            native_compile(sql);
         }
-        // the given SQL statement is cacheable.
-        SQLiteCompiledSql stmt = db.mCache.getCompiledStatementForSql(sql);
-        if (stmt != null) {
-            return stmt;
-        }
-        // either the entry doesn't exist in cache or the one in cache is currently in use.
-        // try to add it to cache and let cache worry about what copy to keep
-        stmt = new SQLiteCompiledSql(db, sql);
-        stmt.nState |= NSTATE_CACHEABLE |
-                ((db.mCache.addToCompiledQueries(sql, stmt)) ? NSTATE_IN_CACHE : 0);
-        return stmt;
     }
 
-    /* package */ synchronized void releaseFromDatabase() {
+    /* package */ void releaseSqlStatement() {
         // Note that native_finalize() checks to make sure that nStatement is
         // non-null before destroying it.
         if (nStatement != 0) {
-            nState |= NSTATE_IN_FINALIZER_Q;
             mDatabase.finalizeStatementLater(nStatement);
             nStatement = 0;
         }
@@ -103,47 +101,20 @@ import android.util.Log;
      * returns true if acquire() succeeds. false otherwise.
      */
     /* package */ synchronized boolean acquire() {
-        if ((nState & NSTATE_INUSE) > 0 ) {
-            // this object is already in use
+        if (mInUse) {
+            // someone already has acquired it.
             return false;
         }
-        nState |= NSTATE_INUSE;
+        mInUse = true;
         return true;
     }
 
-    /* package */ synchronized void free() {
-        nState &= NSTATE_INUSE_RESETMASK;
+    /* package */ synchronized void release() {
+        mInUse = false;
     }
 
-    /* package */ void release(int type) {
-        if (type != DatabaseUtils.STATEMENT_SELECT && type != DatabaseUtils.STATEMENT_UPDATE) {
-            // it is not cached. release its memory from the database.
-            releaseFromDatabase();
-            return;
-        }
-        // if in cache, reset its in-use flag
-        if (!mDatabase.mCache.releaseBackToCache(this)) {
-            // not in cache. release its memory from the database.
-            releaseFromDatabase();
-        }
-    }
-
-    /* package */ synchronized void releaseIfNotInUse() {
-        nState |= NSTATE_EVICTED_FROM_CACHE;
-        // if it is not in use, release its memory from the database
-        if ((nState & NSTATE_INUSE) == 0) {
-            releaseFromDatabase();
-        }
-    }
-
-    // only for testing purposes
     /* package */ synchronized boolean isInUse() {
-        return (nState & NSTATE_INUSE) > 0;
-    }
-
-    /* package */ synchronized SQLiteCompiledSql setState(int val) {
-        nState = nState & val;
-        return this; // for chaining
+        return mInUse;
     }
 
     /**
@@ -154,18 +125,11 @@ import android.util.Log;
         try {
             if (nStatement == 0) return;
             // finalizer should NEVER get called
-            // but if the database itself is not closed and is GC'ed, then
-            // all sub-objects attached to the database could end up getting GC'ed too.
-            // in that case, don't print any warning.
-            if ((nState & NSTATE_INUSE) == 0) {
-                // no need to print warning
-            } else {
-                int len = mSqlStmt.length();
-                Log.w(TAG, "Releasing SQL statement in finalizer. " +
-                        "Could be due to close() not being called on the cursor or on the database. " +
-                        toString(), mStackTrace);
-            }
-            releaseFromDatabase();
+            int len = mSqlStmt.length();
+            Log.w(TAG, "Releasing statement in a finalizer. Please ensure " +
+                    "that you explicitly call close() on your cursor: " +
+                    mSqlStmt.substring(0, (len > 100) ? 100 : len), mStackTrace);
+            releaseSqlStatement();
         } finally {
             super.finalize();
         }
@@ -176,27 +140,6 @@ import android.util.Log;
             StringBuilder buff = new StringBuilder();
             buff.append(" nStatement=");
             buff.append(nStatement);
-            if ((nState & NSTATE_CACHEABLE) > 0) {
-                buff.append(",cacheable");
-            }
-            if ((nState & NSTATE_IN_CACHE) > 0) {
-                buff.append(",cached");
-            }
-            if ((nState & NSTATE_INUSE) > 0) {
-                buff.append(",in_use");
-            }
-            if ((nState & NSTATE_CLOSE_NOOP) > 0) {
-                buff.append(",no_op_close");
-            }
-            if ((nState & NSTATE_EVICTED_FROM_CACHE) > 0) {
-                buff.append(",evicted_from_cache");
-            }
-            if ((nState & NSTATE_CACHE_DEALLOC) > 0) {
-                buff.append(",dealloc_cache");
-            }
-            if ((nState & NSTATE_IN_FINALIZER_Q) > 0) {
-                buff.append(",in dbFInalizerQ");
-            }
             buff.append(", db=");
             buff.append(mDatabase.getPath());
             buff.append(", db_connectionNum=");

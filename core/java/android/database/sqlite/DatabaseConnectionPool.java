@@ -99,7 +99,7 @@ import java.util.Random;
                         poolObj = mPool.get(0);
                     } else {
                         for (int i = 0; i < mMaxPoolSize; i++) {
-                            if (mPool.get(i).mDb.mCache.isSqlInStatementCache(sql)) {
+                            if (mPool.get(i).mDb.isSqlInStatementCache(sql)) {
                                 poolObj = mPool.get(i);
                                 break;
                             }
@@ -125,8 +125,7 @@ import java.util.Random;
                 // there are free connections available. pick one
                 // preferably a connection caching the pre-compiled statement of the given SQL
                 for (int i = 0; i < poolSize; i++) {
-                    if (mPool.get(i).isFree() &&
-                            mPool.get(i).mDb.mCache.isSqlInStatementCache(sql)) {
+                    if (mPool.get(i).isFree() && mPool.get(i).mDb.isSqlInStatementCache(sql)) {
                         poolObj = mPool.get(i);
                         break;
                     }
