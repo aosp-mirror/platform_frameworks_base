@@ -1380,11 +1380,21 @@ public final class InputMethodManager {
             }
         }
     }
-    
+
     public void showInputMethodPicker() {
         synchronized (mH) {
             try {
                 mService.showInputMethodPickerFromClient(mClient);
+            } catch (RemoteException e) {
+                Log.w(TAG, "IME died: " + mCurId, e);
+            }
+        }
+    }
+
+    public void showInputMethodSubtypePicker() {
+        synchronized (mH) {
+            try {
+                mService.showInputMethodSubtypePickerFromClient(mClient);
             } catch (RemoteException e) {
                 Log.w(TAG, "IME died: " + mCurId, e);
             }

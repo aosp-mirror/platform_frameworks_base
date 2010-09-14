@@ -2356,6 +2356,13 @@ public final class Settings {
         public static final String DEFAULT_INPUT_METHOD = "default_input_method";
 
         /**
+         * Setting to record the input method subtype used by default, holding the ID
+         * of the desired method.
+         */
+        public static final String SELECTED_INPUT_METHOD_SUBTYPE =
+                "selected_input_method_subtype";
+
+        /**
          * Whether the device has been provisioned (0 = false, 1 = true)
          */
         public static final String DEVICE_PROVISIONED = "device_provisioned";

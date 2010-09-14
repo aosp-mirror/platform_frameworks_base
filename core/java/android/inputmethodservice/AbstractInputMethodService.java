@@ -177,6 +177,7 @@ public abstract class AbstractInputMethodService extends Service
      * Implement this to handle {@link android.os.Binder#dump Binder.dump()}
      * calls on your input method.
      */
+    @Override
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
     }
 

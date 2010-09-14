@@ -52,6 +52,7 @@ import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -270,7 +271,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
     final Insets mTmpInsets = new Insets();
     final int[] mTmpLocation = new int[2];
-    
+
     final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer =
             new ViewTreeObserver.OnComputeInternalInsetsListener() {
         public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo info) {
@@ -394,8 +395,12 @@ public class InputMethodService extends AbstractInputMethodService {
                                 : InputMethodManager.RESULT_UNCHANGED_HIDDEN), null);
             }
         }
+
+        public void changeInputMethodSubtype(InputMethodSubtype subtype) {
+            onCurrentInputMethodSubtypeChanged(subtype);
+        }
     }
-    
+
     /**
      * Concrete implementation of
      * {@link AbstractInputMethodService.AbstractInputMethodSessionImpl} that provides
@@ -541,6 +546,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * will typically call it in your constructor with the resource ID
      * of your custom theme.
      */
+    @Override
     public void setTheme(int theme) {
         if (mWindow != null) {
             throw new IllegalStateException("Must be called before onCreate()");
@@ -558,7 +564,7 @@ public class InputMethodService extends AbstractInputMethodService {
         initViews();
         mWindow.getWindow().setLayout(MATCH_PARENT, WRAP_CONTENT);
     }
-    
+
     /**
      * This is a hook that subclasses can use to perform initialization of
      * their interface.  It is called for you prior to any of your UI objects
@@ -567,14 +573,14 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public void onInitializeInterface() {
     }
-    
+
     void initialize() {
         if (!mInitialized) {
             mInitialized = true;
             onInitializeInterface();
         }
     }
-    
+
     void initViews() {
         mInitialized = false;
         mWindowCreated = false;
@@ -610,7 +616,7 @@ public class InputMethodService extends AbstractInputMethodService {
         mCandidatesFrame.setVisibility(mCandidatesVisibility);
         mInputFrame.setVisibility(View.GONE);
     }
-    
+
     @Override public void onDestroy() {
         super.onDestroy();
         mRootView.getViewTreeObserver().removeOnComputeInternalInsetsListener(
@@ -677,6 +683,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * Implement to return our standard {@link InputMethodImpl}.  Subclasses
      * can override to provide their own customized version.
      */
+    @Override
     public AbstractInputMethodImpl onCreateInputMethodInterface() {
         return new InputMethodImpl();
     }
@@ -685,6 +692,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * Implement to return our standard {@link InputMethodSessionImpl}.  Subclasses
      * can override to provide their own customized version.
      */
+    @Override
     public AbstractInputMethodSessionImpl onCreateInputMethodSessionInterface() {
         return new InputMethodSessionImpl();
     }
@@ -1656,6 +1664,7 @@ public class InputMethodService extends AbstractInputMethodService {
         return doMovementKey(keyCode, event, MOVEMENT_UP);
     }
 
+    @Override
     public boolean onTrackballEvent(MotionEvent event) {
         return false;
     }
@@ -1694,7 +1703,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 dy = count;
                 break;
         }
-        onExtractedCursorMovement(dx, dy);       
+        onExtractedCursorMovement(dx, dy);
     }
     
     boolean doMovementKey(int keyCode, KeyEvent event, int count) {
@@ -2064,7 +2073,24 @@ public class InputMethodService extends AbstractInputMethodService {
             }
         }
     }
-    
+
+    // TODO: Handle the subtype change event
+    /**
+     * Called when the subtype was changed.
+     * @param newSubtype the subtype which is being changed to.
+     */
+    protected void onCurrentInputMethodSubtypeChanged(InputMethodSubtype newSubtype) {
+        if (DEBUG) {
+            int nameResId = newSubtype.getNameResId();
+            int modeResId = newSubtype.getModeResId();
+            String output = "changeInputMethodSubtype:"
+                + (nameResId == 0 ? "<none>" : getString(nameResId)) + ","
+                + (modeResId == 0 ? "<none>" : getString(modeResId)) + ","
+                + newSubtype.getLocale() + "," + newSubtype.getExtraValue();
+            Log.v(TAG, "--- " + output);
+        }
+    }
+
     /**
      * Performs a dump of the InputMethodService's internal state.  Override
      * to add your own information to the dump.
