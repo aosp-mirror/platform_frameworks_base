@@ -37,7 +37,6 @@ import dalvik.system.BlockGuard;
 @SuppressWarnings("deprecation")
 public class SQLiteStatement extends SQLiteProgram
 {
-
     private static final String TAG = "SQLiteStatement";
 
     private static final boolean READ = true;
@@ -45,9 +44,9 @@ public class SQLiteStatement extends SQLiteProgram
 
     private SQLiteDatabase mOrigDb;
     private int mState;
-    /** possible value for {@link #mState}. indicates that a transaction is started.} */
+    /** possible value for {@link #mState}. indicates that a transaction is started. */
     private static final int TRANS_STARTED = 1;
-    /** possible value for {@link #mState}. indicates that a lock is acquired.} */
+    /** possible value for {@link #mState}. indicates that a lock is acquired. */
     private static final int LOCK_ACQUIRED = 2;
 
     /**
@@ -81,8 +80,8 @@ public class SQLiteStatement extends SQLiteProgram
      */
     public int executeUpdateDelete() {
         synchronized(this) {
-            long timeStart = acquireAndLock(WRITE);
             try {
+                long timeStart = acquireAndLock(WRITE);
                 int numChanges = native_execute();
                 mDatabase.logTimeStat(mSql, timeStart);
                 return numChanges;
@@ -103,8 +102,8 @@ public class SQLiteStatement extends SQLiteProgram
      */
     public long executeInsert() {
         synchronized(this) {
-            long timeStart = acquireAndLock(WRITE);
             try {
+                long timeStart = acquireAndLock(WRITE);
                 long lastInsertedRowId = native_executeInsert();
                 mDatabase.logTimeStat(mSql, timeStart);
                 return lastInsertedRowId;
@@ -124,8 +123,8 @@ public class SQLiteStatement extends SQLiteProgram
      */
     public long simpleQueryForLong() {
         synchronized(this) {
-            long timeStart = acquireAndLock(READ);
             try {
+                long timeStart = acquireAndLock(READ);
                 long retValue = native_1x1_long();
                 mDatabase.logTimeStat(mSql, timeStart);
                 return retValue;
@@ -145,8 +144,8 @@ public class SQLiteStatement extends SQLiteProgram
      */
     public String simpleQueryForString() {
         synchronized(this) {
-            long timeStart = acquireAndLock(READ);
             try {
+                long timeStart = acquireAndLock(READ);
                 String retValue = native_1x1_string();
                 mDatabase.logTimeStat(mSql, timeStart);
                 return retValue;
@@ -166,8 +165,8 @@ public class SQLiteStatement extends SQLiteProgram
      */
     public ParcelFileDescriptor simpleQueryForBlobFileDescriptor() {
         synchronized(this) {
-            long timeStart = acquireAndLock(READ);
             try {
+                long timeStart = acquireAndLock(READ);
                 ParcelFileDescriptor retValue = native_1x1_blob_ashmem();
                 mDatabase.logTimeStat(mSql, timeStart);
                 return retValue;
