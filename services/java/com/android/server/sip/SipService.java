@@ -771,6 +771,23 @@ public final class SipService extends ISipService.Stub {
                             b.get(ConnectivityManager.EXTRA_NETWORK_INFO);
                     String type = netInfo.getTypeName();
                     NetworkInfo.State state = netInfo.getState();
+
+                    NetworkInfo activeNetInfo = getActiveNetworkInfo();
+                    if (activeNetInfo != null) {
+                        Log.v(TAG, "active network: " + activeNetInfo.getTypeName()
+                                + ((activeNetInfo.getState() == NetworkInfo.State.CONNECTED)
+                                        ? " CONNECTED" : " DISCONNECTED"));
+                    } else {
+                        Log.v(TAG, "active network: null");
+                    }
+                    if ((state == NetworkInfo.State.CONNECTED)
+                            && (activeNetInfo != null)
+                            && (activeNetInfo.getType() != netInfo.getType())) {
+                        Log.d(TAG, "ignore connect event: " + type
+                                + ", active: " + activeNetInfo.getTypeName());
+                        return;
+                    }
+
                     if (state == NetworkInfo.State.CONNECTED) {
                         Log.v(TAG, "Connectivity alert: CONNECTED " + type);
                         onChanged(type, true);
@@ -783,6 +800,12 @@ public final class SipService extends ISipService.Stub {
                     }
                 }
             }
+        }
+
+        private NetworkInfo getActiveNetworkInfo() {
+            ConnectivityManager cm = (ConnectivityManager)
+                    mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            return cm.getActiveNetworkInfo();
         }
 
         private void onChanged(String type, boolean connected) {
