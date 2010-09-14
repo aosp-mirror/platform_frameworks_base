@@ -82,6 +82,11 @@ enum {
     CAMERA_CMD_START_SMOOTH_ZOOM     = 1,
     CAMERA_CMD_STOP_SMOOTH_ZOOM      = 2,
     CAMERA_CMD_SET_DISPLAY_ORIENTATION = 3,
+
+    // cmdType to disable/enable shutter sound.
+    // In sendCommand passing arg1 = 0 will disable,
+    // while passing arg1 = 1 will enable the shutter sound.
+    CAMERA_CMD_ENABLE_SHUTTER_SOUND = 4,
 };
 
 // camera fatal errors
