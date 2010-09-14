@@ -21,9 +21,9 @@
 
 namespace android {
 
-class PollLoop;
+class Looper;
 
-extern sp<PollLoop> android_os_MessageQueue_getPollLoop(JNIEnv* env, jobject messageQueueObj);
+extern sp<Looper> android_os_MessageQueue_getLooper(JNIEnv* env, jobject messageQueueObj);
 
 } // namespace android
 

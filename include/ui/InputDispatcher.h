@@ -25,7 +25,7 @@
 #include <utils/Timers.h>
 #include <utils/RefBase.h>
 #include <utils/String8.h>
-#include <utils/PollLoop.h>
+#include <utils/Looper.h>
 #include <utils/Pool.h>
 
 #include <stddef.h>
@@ -826,7 +826,7 @@ private:
     Mutex mLock;
 
     Allocator mAllocator;
-    sp<PollLoop> mPollLoop;
+    sp<Looper> mLooper;
 
     EventEntry* mPendingEvent;
     Queue<EventEntry> mInboundQueue;
@@ -837,7 +837,7 @@ private:
     void dispatchOnceInnerLocked(nsecs_t keyRepeatTimeout, nsecs_t keyRepeatDelay,
             nsecs_t* nextWakeupTime);
 
-    // Enqueues an inbound event.  Returns true if mPollLoop->wake() should be called.
+    // Enqueues an inbound event.  Returns true if mLooper->wake() should be called.
     bool enqueueInboundEventLocked(EventEntry* entry);
 
     // App switch latency optimization.
@@ -1010,7 +1010,7 @@ private:
     void abortDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
             bool broken);
     void drainOutboundQueueLocked(Connection* connection, DispatchEntry* firstDispatchEntryToDrain);
-    static bool handleReceiveCallback(int receiveFd, int events, void* data);
+    static int handleReceiveCallback(int receiveFd, int events, void* data);
 
     // Preempting input dispatch.
     bool preemptInputDispatchInnerLocked();

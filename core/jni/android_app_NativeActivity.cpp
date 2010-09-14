@@ -28,7 +28,7 @@
 #include <surfaceflinger/Surface.h>
 #include <ui/egl/android_natives.h>
 #include <ui/InputTransport.h>
-#include <utils/PollLoop.h>
+#include <utils/Looper.h>
 
 #include "JNIHelp.h"
 #include "android_os_MessageQueue.h"
@@ -128,17 +128,17 @@ AInputQueue::~AInputQueue() {
 }
 
 void AInputQueue::attachLooper(ALooper* looper, int ident,
-        ALooper_callbackFunc* callback, void* data) {
-    mPollLoop = static_cast<android::PollLoop*>(looper);
-    mPollLoop->setLooperCallback(mConsumer.getChannel()->getReceivePipeFd(),
-            ident, POLLIN, callback, data);
-    mPollLoop->setLooperCallback(mDispatchKeyRead,
-            ident, POLLIN, callback, data);
+        ALooper_callbackFunc callback, void* data) {
+    mLooper = static_cast<android::Looper*>(looper);
+    mLooper->addFd(mConsumer.getChannel()->getReceivePipeFd(),
+            ident, ALOOPER_EVENT_INPUT, callback, data);
+    mLooper->addFd(mDispatchKeyRead,
+            ident, ALOOPER_EVENT_INPUT, callback, data);
 }
 
 void AInputQueue::detachLooper() {
-    mPollLoop->removeCallback(mConsumer.getChannel()->getReceivePipeFd());
-    mPollLoop->removeCallback(mDispatchKeyRead);
+    mLooper->removeFd(mConsumer.getChannel()->getReceivePipeFd());
+    mLooper->removeFd(mDispatchKeyRead);
 }
 
 int32_t AInputQueue::hasEvents() {
@@ -440,8 +440,8 @@ struct NativeCode : public ANativeActivity {
         if (env != NULL && clazz != NULL) {
             env->DeleteGlobalRef(clazz);
         }
-        if (pollLoop != NULL && mainWorkRead >= 0) {
-            pollLoop->removeCallback(mainWorkRead);
+        if (looper != NULL && mainWorkRead >= 0) {
+            looper->removeFd(mainWorkRead);
         }
         if (nativeInputQueue != NULL) {
             nativeInputQueue->mWorkWrite = -1;
@@ -509,7 +509,7 @@ struct NativeCode : public ANativeActivity {
     // These are used to wake up the main thread to process work.
     int mainWorkRead;
     int mainWorkWrite;
-    sp<PollLoop> pollLoop;
+    sp<Looper> looper;
 };
 
 void android_NativeActivity_setWindowFormat(
@@ -541,15 +541,15 @@ void android_NativeActivity_hideSoftInput(
 /*
  * Callback for handling native events on the application's main thread.
  */
-static bool mainWorkCallback(int fd, int events, void* data) {
+static int mainWorkCallback(int fd, int events, void* data) {
     NativeCode* code = (NativeCode*)data;
     if ((events & POLLIN) == 0) {
-        return true;
+        return 1;
     }
     
     ActivityWork work;
     if (!read_work(code->mainWorkRead, &work)) {
-        return true;
+        return 1;
     }
 
     LOG_TRACE("mainWorkCallback: cmd=%d", work.cmd);
@@ -593,7 +593,7 @@ static bool mainWorkCallback(int fd, int events, void* data) {
             break;
     }
     
-    return true;
+    return 1;
 }
 
 // ------------------------------------------------------------------------
@@ -621,9 +621,9 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jobject messageQ
             return 0;
         }
         
-        code->pollLoop = android_os_MessageQueue_getPollLoop(env, messageQueue);
-        if (code->pollLoop == NULL) {
-            LOGW("Unable to retrieve MessageQueue's PollLoop");
+        code->looper = android_os_MessageQueue_getLooper(env, messageQueue);
+        if (code->looper == NULL) {
+            LOGW("Unable to retrieve MessageQueue's Looper");
             delete code;
             return 0;
         }
@@ -642,7 +642,7 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jobject messageQ
         result = fcntl(code->mainWorkWrite, F_SETFL, O_NONBLOCK);
         SLOGW_IF(result != 0, "Could not make main work write pipe "
                 "non-blocking: %s", strerror(errno));
-        code->pollLoop->setCallback(code->mainWorkRead, POLLIN, mainWorkCallback, code);
+        code->looper->addFd(code->mainWorkRead, 0, ALOOPER_EVENT_INPUT, mainWorkCallback, code);
         
         code->ANativeActivity::callbacks = &code->callbacks;
         if (env->GetJavaVM(&code->vm) < 0) {

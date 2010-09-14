@@ -86,7 +86,7 @@ LOCAL_SRC_FILES:= \
 	$(commonSources) \
 	BackupData.cpp \
 	BackupHelpers.cpp \
-	PollLoop.cpp
+	Looper.cpp
 
 ifeq ($(TARGET_OS),linux)
 LOCAL_LDLIBS += -lrt -ldl
