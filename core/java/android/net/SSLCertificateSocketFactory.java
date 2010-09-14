@@ -49,7 +49,6 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.harmony.xnet.provider.jsse.OpenSSLContextImpl;
 import org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
 import org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache;
-import org.apache.harmony.xnet.provider.jsse.SSLParameters;
 
 /**
  * SSLSocketFactory implementation with several extra features:
