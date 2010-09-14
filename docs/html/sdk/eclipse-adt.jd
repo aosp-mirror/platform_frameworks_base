@@ -428,7 +428,7 @@ environment. </p>
 
 <h3 id="preparing">Configuring the ADT Plugin</h3>
 
-<p>Once you've successfully downnloaded ADT as described above, the next step
+<p>Once you've successfully downloaded ADT as described above, the next step
 is to modify your ADT preferences in Eclipse to point to the Android SDK directory:</p>
 
 <ol>
