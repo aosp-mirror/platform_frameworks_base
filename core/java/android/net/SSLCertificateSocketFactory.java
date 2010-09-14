@@ -211,7 +211,8 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     private SSLSocketFactory makeSocketFactory(TrustManager[] trustManagers) {
         try {
             OpenSSLContextImpl sslContext = new OpenSSLContextImpl();
-            sslContext.engineInit(null, trustManagers, null, mSessionCache, null);
+            sslContext.engineInit(null, trustManagers, null);
+            sslContext.engineGetClientSessionContext().setPersistentCache(mSessionCache);
             return sslContext.engineGetSocketFactory();
         } catch (KeyManagementException e) {
             Log.wtf(TAG, e);
