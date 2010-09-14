@@ -645,7 +645,7 @@ typedef struct AInputQueue AInputQueue;
  * ALooper_addFd() for information on the ident, callback, and data params.
  */
 void AInputQueue_attachLooper(AInputQueue* queue, ALooper* looper,
-        int ident, ALooper_callbackFunc* callback, void* data);
+        int ident, ALooper_callbackFunc callback, void* data);
 
 /*
  * Remove the input queue from the looper it is currently attached to.

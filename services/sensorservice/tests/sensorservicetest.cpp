@@ -18,11 +18,11 @@
 #include <gui/Sensor.h>
 #include <gui/SensorManager.h>
 #include <gui/SensorEventQueue.h>
-#include <utils/PollLoop.h>
+#include <utils/Looper.h>
 
 using namespace android;
 
-bool receiver(int fd, int events, void* data)
+int receiver(int fd, int events, void* data)
 {
     sp<SensorEventQueue> q((SensorEventQueue*)data);
     ssize_t n;
@@ -41,7 +41,7 @@ bool receiver(int fd, int events, void* data)
     if (n<0 && n != -EAGAIN) {
         printf("error reading events (%s)\n", strerror(-n));
     }
-    return true;
+    return 1;
 }
 
 
@@ -51,7 +51,7 @@ int main(int argc, char** argv)
 
     Sensor const* const* list;
     ssize_t count = mgr.getSensorList(&list);
-    printf("numSensors=%d\n", count);
+    printf("numSensors=%d\n", int(count));
 
     sp<SensorEventQueue> q = mgr.createEventQueue();
     printf("queue=%p\n", q.get());
@@ -63,13 +63,16 @@ int main(int argc, char** argv)
 
     q->setEventRate(accelerometer, ms2ns(10));
 
-    sp<PollLoop> loop = new PollLoop(false);
-    loop->setCallback(q->getFd(), POLLIN, receiver, q.get());
+    sp<Looper> loop = new Looper(false);
+    loop->addFd(q->getFd(), 0, ALOOPER_EVENT_INPUT, receiver, q.get());
 
     do {
         //printf("about to poll...\n");
-        int32_t ret = loop->pollOnce(-1, 0, 0);
+        int32_t ret = loop->pollOnce(-1);
         switch (ret) {
+            case ALOOPER_POLL_WAKE:
+                //("ALOOPER_POLL_WAKE\n");
+                break;
             case ALOOPER_POLL_CALLBACK:
                 //("ALOOPER_POLL_CALLBACK\n");
                 break;

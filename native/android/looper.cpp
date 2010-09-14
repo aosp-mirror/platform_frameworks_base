@@ -18,65 +18,56 @@
 #include <utils/Log.h>
 
 #include <android/looper.h>
-#include <utils/PollLoop.h>
+#include <utils/Looper.h>
 
-using android::PollLoop;
+using android::Looper;
 using android::sp;
 
 ALooper* ALooper_forThread() {
-    return PollLoop::getForThread().get();
+    return Looper::getForThread().get();
 }
 
-ALooper* ALooper_prepare(int32_t opts) {
-    bool allowFds = (opts&ALOOPER_PREPARE_ALLOW_NON_CALLBACKS) != 0;
-    sp<PollLoop> loop = PollLoop::getForThread();
-    if (loop == NULL) {
-        loop = new PollLoop(allowFds);
-        PollLoop::setForThread(loop);
-    }
-    if (loop->getAllowNonCallbacks() != allowFds) {
-        LOGW("ALooper_prepare again with different ALOOPER_PREPARE_ALLOW_NON_CALLBACKS");
-    }
-    return loop.get();
-}
-
-int32_t ALooper_pollOnce(int timeoutMillis, int* outEvents, void** outData) {
-    sp<PollLoop> loop = PollLoop::getForThread();
-    if (loop == NULL) {
-        LOGW("ALooper_pollOnce: No looper for this thread!");
-        return -1;
-    }
-    return loop->pollOnce(timeoutMillis, outEvents, outData);
-}
-
-int32_t ALooper_pollAll(int timeoutMillis, int* outEvents, void** outData) {
-    sp<PollLoop> loop = PollLoop::getForThread();
-    if (loop == NULL) {
-        LOGW("ALooper_pollOnce: No looper for this thread!");
-        return -1;
-    }
-    
-    int32_t result;
-    while ((result = loop->pollOnce(timeoutMillis, outEvents, outData)) == ALOOPER_POLL_CALLBACK) {
-        ;
-    }
-    
-    return result;
+ALooper* ALooper_prepare(int opts) {
+    return Looper::prepare(opts).get();
 }
 
 void ALooper_acquire(ALooper* looper) {
-    static_cast<PollLoop*>(looper)->incStrong((void*)ALooper_acquire);
+    static_cast<Looper*>(looper)->incStrong((void*)ALooper_acquire);
 }
 
 void ALooper_release(ALooper* looper) {
-    static_cast<PollLoop*>(looper)->decStrong((void*)ALooper_acquire);
+    static_cast<Looper*>(looper)->decStrong((void*)ALooper_acquire);
 }
 
-void ALooper_addFd(ALooper* looper, int fd, int ident, int events,
-        ALooper_callbackFunc* callback, void* data) {
-    static_cast<PollLoop*>(looper)->setLooperCallback(fd, ident, events, callback, data);
+int ALooper_pollOnce(int timeoutMillis, int* outFd, int* outEvents, void** outData) {
+    sp<Looper> looper = Looper::getForThread();
+    if (looper == NULL) {
+        LOGE("ALooper_pollOnce: No looper for this thread!");
+        return ALOOPER_POLL_ERROR;
+    }
+
+    return looper->pollOnce(timeoutMillis, outFd, outEvents, outData);
 }
 
-int32_t ALooper_removeFd(ALooper* looper, int fd) {
-    return static_cast<PollLoop*>(looper)->removeCallback(fd) ? 1 : 0;
+int ALooper_pollAll(int timeoutMillis, int* outFd, int* outEvents, void** outData) {
+    sp<Looper> looper = Looper::getForThread();
+    if (looper == NULL) {
+        LOGE("ALooper_pollAll: No looper for this thread!");
+        return ALOOPER_POLL_ERROR;
+    }
+    
+    return looper->pollAll(timeoutMillis, outFd, outEvents, outData);
+}
+
+void ALooper_wake(ALooper* looper) {
+    static_cast<Looper*>(looper)->wake();
+}
+
+int ALooper_addFd(ALooper* looper, int fd, int ident, int events,
+        ALooper_callbackFunc callback, void* data) {
+    return static_cast<Looper*>(looper)->addFd(fd, ident, events, callback, data);
+}
+
+int ALooper_removeFd(ALooper* looper, int fd) {
+    return static_cast<Looper*>(looper)->removeFd(fd);
 }
