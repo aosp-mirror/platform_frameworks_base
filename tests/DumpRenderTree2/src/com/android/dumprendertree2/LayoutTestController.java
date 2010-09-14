@@ -64,6 +64,11 @@ public class LayoutTestController {
         mLayoutTestsExecutor.overridePreference(key, value);
     }
 
+    public void setAppCacheMaximumSize(long size) {
+        Log.i(LOG_TAG, "setAppCacheMaximumSize() called with: " + size);
+        WebStorage.getInstance().setAppCacheMaximumSize(size);
+    }
+
     public void setCanOpenWindows() {
         mLayoutTestsExecutor.setCanOpenWindows();
     }
