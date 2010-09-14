@@ -2546,7 +2546,7 @@ class PackageManagerService extends IPackageManager.Stub {
         if (GET_CERTIFICATES) {
             if (ps != null
                     && ps.codePath.equals(srcFile)
-                    && ps.getTimeStamp() == srcFile.lastModified()) {
+                    && ps.timeStamp == srcFile.lastModified()) {
                 if (ps.signatures.mSignatures != null
                         && ps.signatures.mSignatures.length != 0) {
                     // Optimization: reuse the existing cached certificates
@@ -3139,7 +3139,7 @@ class PackageManagerService extends IPackageManager.Stub {
         
         long scanFileTime = scanFile.lastModified();
         final boolean forceDex = (scanMode&SCAN_FORCE_DEX) != 0;
-        final boolean scanFileNewer = forceDex || scanFileTime != pkgSetting.getTimeStamp();
+        final boolean scanFileNewer = forceDex || scanFileTime != pkgSetting.timeStamp;
         pkg.applicationInfo.processName = fixProcessName(
                 pkg.applicationInfo.packageName,
                 pkg.applicationInfo.processName,
@@ -7007,7 +7007,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         }
                     }
                     pw.println("]");
-                    pw.print("    timeStamp="); pw.println(ps.getTimeStampStr());
+                    pw.print("    timeStamp="); pw.println(String.valueOf(ps.timeStamp));
                     pw.print("    signatures="); pw.println(ps.signatures);
                     pw.print("    permissionsFixed="); pw.print(ps.permissionsFixed);
                             pw.print(" haveGids="); pw.println(ps.haveGids);
@@ -7532,8 +7532,7 @@ class PackageManagerService extends IPackageManager.Stub {
         String resourcePathString;
         String nativeLibraryPathString;
         String obbPathString;
-        private long timeStamp;
-        private String timeStampString = "0";
+        long timeStamp;
         int versionCode;
 
         boolean uidError;
@@ -7590,23 +7589,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         public void setTimeStamp(long newStamp) {
-            if (newStamp != timeStamp) {
-                timeStamp = newStamp;
-                timeStampString = Long.toString(newStamp);
-            }
-        }
-
-        public void setTimeStamp(long newStamp, String newStampStr) {
             timeStamp = newStamp;
-            timeStampString = newStampStr;
-        }
-
-        public long getTimeStamp() {
-            return timeStamp;
-        }
-
-        public String getTimeStampStr() {
-            return timeStampString;
         }
 
         public void copyFrom(PackageSettingBase base) {
@@ -7614,7 +7597,6 @@ class PackageManagerService extends IPackageManager.Stub {
             gids = base.gids;
 
             timeStamp = base.timeStamp;
-            timeStampString = base.timeStampString;
             signatures = base.signatures;
             permissionsFixed = base.permissionsFixed;
             haveGids = base.haveGids;
@@ -8476,7 +8458,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 serializer.attribute(null, "realName", pkg.realName);
             }
             serializer.attribute(null, "codePath", pkg.codePathString);
-            serializer.attribute(null, "ts", pkg.getTimeStampStr());
+            serializer.attribute(null, "ts", String.valueOf(pkg.timeStamp));
             serializer.attribute(null, "version", String.valueOf(pkg.versionCode));
             if (!pkg.resourcePathString.equals(pkg.codePathString)) {
                 serializer.attribute(null, "resourcePath", pkg.resourcePathString);
@@ -8528,7 +8510,7 @@ class PackageManagerService extends IPackageManager.Stub {
             }
             serializer.attribute(null, "flags",
                     Integer.toString(pkg.pkgFlags));
-            serializer.attribute(null, "ts", pkg.getTimeStampStr());
+            serializer.attribute(null, "ts", String.valueOf(pkg.timeStamp));
             serializer.attribute(null, "version", String.valueOf(pkg.versionCode));
             if (pkg.sharedUser == null) {
                 serializer.attribute(null, "userId",
@@ -8888,7 +8870,7 @@ class PackageManagerService extends IPackageManager.Stub {
             if (timeStampStr != null) {
                 try {
                     long timeStamp = Long.parseLong(timeStampStr);
-                    ps.setTimeStamp(timeStamp, timeStampStr);
+                    ps.setTimeStamp(timeStamp);
                 } catch (NumberFormatException e) {
                 }
             }
@@ -8936,7 +8918,6 @@ class PackageManagerService extends IPackageManager.Stub {
             String installerPackageName = null;
             String uidError = null;
             int pkgFlags = 0;
-            String timeStampStr;
             long timeStamp = 0;
             PackageSettingBase packageSetting = null;
             String version = null;
@@ -8977,7 +8958,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         pkgFlags |= ApplicationInfo.FLAG_SYSTEM;
                     }
                 }
-                timeStampStr = parser.getAttributeValue(null, "ts");
+                final String timeStampStr = parser.getAttributeValue(null, "ts");
                 if (timeStampStr != null) {
                     try {
                         timeStamp = Long.parseLong(timeStampStr);
@@ -9013,7 +8994,7 @@ class PackageManagerService extends IPackageManager.Stub {
                                 + " while parsing settings at "
                                 + parser.getPositionDescription());
                     } else {
-                        packageSetting.setTimeStamp(timeStamp, timeStampStr);
+                        packageSetting.setTimeStamp(timeStamp);
                     }
                 } else if (sharedIdStr != null) {
                     userId = sharedIdStr != null
@@ -9022,7 +9003,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         packageSetting = new PendingPackage(name.intern(), realName,
                                 new File(codePathStr), new File(resourcePathStr),
                                 nativeLibraryPathStr, userId, versionCode, pkgFlags);
-                        packageSetting.setTimeStamp(timeStamp, timeStampStr);
+                        packageSetting.setTimeStamp(timeStamp);
                         mPendingPackages.add((PendingPackage) packageSetting);
                         if (DEBUG_SETTINGS) Log.i(TAG, "Reading package " + name
                                 + ": sharedUserId=" + userId + " pkg="
