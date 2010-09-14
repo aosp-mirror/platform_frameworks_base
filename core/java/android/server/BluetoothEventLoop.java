@@ -463,9 +463,14 @@ class BluetoothEventLoop {
         }
         BluetoothDevice device = mAdapter.getRemoteDevice(address);
         if (name.equals("Connected")) {
-            int state = propValues[1].equals("true") ? BluetoothInputDevice.STATE_CONNECTED :
-                BluetoothInputDevice.STATE_DISCONNECTED;
-            mBluetoothService.handlePanDeviceStateChange(device, state);
+            if (propValues[1].equals("false")) {
+                mBluetoothService.handlePanDeviceStateChange(device,
+                                          BluetoothInputDevice.STATE_DISCONNECTED);
+            }
+        } else if (name.equals("Interface")) {
+            String iface = propValues[1];
+            mBluetoothService.handlePanDeviceStateChange(device, iface,
+                                            BluetoothInputDevice.STATE_CONNECTED);
         }
     }
 
@@ -662,7 +667,7 @@ class BluetoothEventLoop {
                  Log.i(TAG, "Rejecting incoming HID connection from " + address);
              }
         } else if (BluetoothUuid.isBnep(uuid) || BluetoothUuid.isNap(uuid) &&
-                mBluetoothService.isTetheringOn()){
+                mBluetoothService.allowIncomingTethering()){
             authorized = true;
         } else {
             Log.i(TAG, "Rejecting incoming " + deviceUuid + " connection from " + address);
@@ -796,9 +801,9 @@ class BluetoothEventLoop {
         mBluetoothService.handlePanDeviceStateChange(device, BluetoothPan.STATE_DISCONNECTED);
     }
 
-    private void onNetworkDeviceConnected(String address, int destUuid) {
+    private void onNetworkDeviceConnected(String address, String iface, int destUuid) {
         BluetoothDevice device = mAdapter.getRemoteDevice(address);
-        mBluetoothService.handlePanDeviceStateChange(device, BluetoothPan.STATE_CONNECTED);
+        mBluetoothService.handlePanDeviceStateChange(device, iface, BluetoothPan.STATE_CONNECTED);
     }
 
     private void onRestartRequired() {
