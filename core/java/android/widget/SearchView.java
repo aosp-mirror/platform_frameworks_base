@@ -57,6 +57,7 @@ public class SearchView extends LinearLayout {
     private OnCloseListener mOnCloseListener;
 
     private boolean mIconifiedByDefault;
+    private boolean mIconified;
     private CursorAdapter mSuggestionsAdapter;
     private View mSearchButton;
     private View mSubmitButton;
@@ -139,8 +140,6 @@ public class SearchView extends LinearLayout {
         mQueryTextView.setOnItemClickListener(mOnItemClickListener);
         mQueryTextView.setOnItemSelectedListener(mOnItemSelectedListener);
 
-        mSubmitButtonEnabled = false;
-
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SearchView, 0, 0);
         setIconifiedByDefault(a.getBoolean(R.styleable.SearchView_iconifiedByDefault, true));
         a.recycle();
@@ -175,6 +174,15 @@ public class SearchView extends LinearLayout {
     }
 
     /**
+     * Sets a listener to inform when the user closes the SearchView.
+     *
+     * @param listener the listener to call when the user closes the SearchView.
+     */
+    public void setOnCloseListener(OnCloseListener listener) {
+        mOnCloseListener = listener;
+    }
+
+    /**
      * Sets a query string in the text field and optionally submits the query as well.
      *
      * @param query the query string. This replaces any query text already present in the
@@ -205,17 +213,51 @@ public class SearchView extends LinearLayout {
      * Sets the default or resting state of the search field. If true, a single search icon is
      * shown by default and expands to show the text field and other buttons when pressed. Also,
      * if the default state is iconified, then it collapses to that state when the close button
-     * is pressed.
+     * is pressed. Changes to this property will take effect immediately.
      *
-     * @param iconified
+     * <p>The default value is false.</p>
+     *
+     * @param iconified whether the search field should be iconified by default
      */
     public void setIconifiedByDefault(boolean iconified) {
         mIconifiedByDefault = iconified;
         updateViewsVisibility(iconified);
     }
 
+    /**
+     * Returns the default iconified state of the search field.
+     * @return
+     */
     public boolean isIconfiedByDefault() {
         return mIconifiedByDefault;
+    }
+
+    /**
+     * Iconifies or expands the SearchView. Any query text is cleared when iconified. This is
+     * a temporary state and does not override the default iconified state set by
+     * {@link #setIconifiedByDefault(boolean)}. If the default state is iconified, then
+     * a false here will only be valid until the user closes the field. And if the default
+     * state is expanded, then a true here will only clear the text field and not close it.
+     *
+     * @param iconify a true value will collapse the SearchView to an icon, while a false will
+     * expand it.
+     */
+    public void setIconified(boolean iconify) {
+        if (iconify) {
+            onCloseClicked();
+        } else {
+            onSearchClicked();
+        }
+    }
+
+    /**
+     * Returns the current iconified state of the SearchView.
+     *
+     * @return true if the SearchView is currently iconified, false if the search field is
+     * fully visible.
+     */
+    public boolean isIconified() {
+        return mIconified;
     }
 
     /**
@@ -263,11 +305,12 @@ public class SearchView extends LinearLayout {
         return mSuggestionsAdapter;
     }
 
-    private void updateViewsVisibility(boolean collapsed) {
+    private void updateViewsVisibility(final boolean collapsed) {
+        mIconified = collapsed;
         // Visibility of views that are visible when collapsed
-        int visCollapsed = collapsed? VISIBLE : GONE;
+        final int visCollapsed = collapsed ? VISIBLE : GONE;
         // Visibility of views that are visible when expanded
-        int visExpanded = collapsed? GONE : VISIBLE;
+        final int visExpanded = collapsed ? GONE : VISIBLE;
 
         mSearchButton.setVisibility(visCollapsed);
         mSubmitButton.setVisibility(mSubmitButtonEnabled ? visExpanded : GONE);
@@ -322,7 +365,8 @@ public class SearchView extends LinearLayout {
         // entered query with the action key
         SearchableInfo.ActionKeyInfo actionKey = mSearchable.findActionKey(keyCode);
         if ((actionKey != null) && (actionKey.getQueryActionMsg() != null)) {
-            launchQuerySearch(keyCode, actionKey.getQueryActionMsg(), mQueryTextView.getText().toString());
+            launchQuerySearch(keyCode, actionKey.getQueryActionMsg(), mQueryTextView.getText()
+                    .toString());
             return true;
         }
 
