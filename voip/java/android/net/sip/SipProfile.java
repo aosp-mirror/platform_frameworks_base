@@ -61,7 +61,7 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
             };
 
     /**
-     * Class to help create a {@link SipProfile}.
+     * Class to help create a {@code SipProfile}.
      */
     public static class Builder {
         private AddressFactory mAddressFactory;
@@ -120,8 +120,8 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
          *
          * @param username username of the SIP account
          * @param serverDomain the SIP server domain; if the network address
-         *      is different from the domain, use
-         *      {@link #setOutboundProxy(String)} to set server address
+         *      is different from the domain, use {@link #setOutboundProxy} to
+         *      set server address
          * @throws ParseException if the parameters are not valid
          */
         public Builder(String username, String serverDomain)
@@ -309,6 +309,7 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
      * Gets the SIP URI of this profile.
      *
      * @return the SIP URI of this profile
+     * @hide
      */
     public SipURI getUri() {
         return (SipURI) mAddress.getURI();
@@ -327,6 +328,7 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
      * Gets the SIP address of this profile.
      *
      * @return the SIP address of this profile
+     * @hide
      */
     public Address getSipAddress() {
         return mAddress;

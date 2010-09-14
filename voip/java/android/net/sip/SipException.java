@@ -17,6 +17,7 @@
 package android.net.sip;
 
 /**
+ * General SIP-related exception class.
  * @hide
  */
 public class SipException extends Exception {
