@@ -943,6 +943,80 @@ public final class Calendar {
     }
 
     /**
+     * CalendarCache stores some settings for calendar including the current
+     * time zone for the app. These settings are stored using a key/value
+     * scheme.
+     */
+    public interface CalendarCacheColumns {
+        /**
+         * The key for the setting. Keys are defined in CalendarChache in the
+         * Calendar provider.
+         * TODO Add keys to this file
+         */
+        public static final String KEY = "key";
+
+        /**
+         * The value of the given setting.
+         */
+        public static final String VALUE = "value";
+    }
+
+    public static class CalendarCache implements CalendarCacheColumns {
+        /**
+         * The URI to use for retrieving the properties from the Calendar db.
+         */
+        public static final Uri URI =
+                Uri.parse("content://" + AUTHORITY + "/properties");
+        public static final String[] POJECTION = { KEY, VALUE };
+
+        /**
+         * If updating a property, this must be provided as the selection. All
+         * other selections will fail. For queries this field can be omitted to
+         * retrieve all properties or used to query a single property. Valid
+         * keys include {@link #TIMEZONE_KEY_TYPE},
+         * {@link #TIMEZONE_KEY_INSTANCES}, and
+         * {@link #TIMEZONE_KEY_INSTANCES_PREVIOUS}, though the last one can
+         * only be read, not written.
+         */
+        public static final String WHERE = "key=?";
+
+        /**
+         * They key for updating the use of auto/home time zones in Calendar.
+         * Valid values are {@link #TIMEZONE_TYPE_AUTO} or
+         * {@link #TIMEZONE_TYPE_HOME}.
+         */
+        public static final String TIMEZONE_KEY_TYPE = "timezoneType";
+
+        /**
+         * The key for updating the time zone used by the provider when it
+         * generates the instances table. This should only be written if the
+         * type is set to {@link #TIMEZONE_TYPE_HOME}. A valid time zone id
+         * should be written to this field.
+         */
+        public static final String TIMEZONE_KEY_INSTANCES = "timezoneInstances";
+
+        /**
+         * The key for reading the last time zone set by the user. This should
+         * only be read by apps and it will be automatically updated whenever
+         * {@link #TIMEZONE_KEY_INSTANCES} is updated with
+         * {@link #TIMEZONE_TYPE_HOME} set.
+         */
+        public static final String TIMEZONE_KEY_INSTANCES_PREVIOUS = "timezoneInstancesPrevious";
+
+        /**
+         * The value to write to {@link #TIMEZONE_KEY_TYPE} if the provider
+         * should stay in sync with the device's time zone.
+         */
+        public static final String TIMEZONE_TYPE_AUTO = "auto";
+
+        /**
+         * The value to write to {@link #TIMEZONE_KEY_TYPE} if the provider
+         * should use a fixed time zone set by the user.
+         */
+        public static final String TIMEZONE_TYPE_HOME = "home";
+    }
+
+    /**
      * A few Calendar globals are needed in the CalendarProvider for expanding
      * the Instances table and these are all stored in the first (and only)
      * row of the CalendarMetaData table.
