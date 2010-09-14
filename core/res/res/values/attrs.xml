@@ -127,6 +127,12 @@
         <!-- Text color, typeface, size, and style for the text inside of a button. -->
         <attr name="textAppearanceButton" format="reference" />
 
+        <!-- Text color, typeface, size, and style for the text inside of a popup menu. -->
+        <attr name="textAppearanceLargePopupMenu" format="reference" />
+
+        <!-- Text color, typeface, size, and style for small text inside of a popup menu. -->
+        <attr name="textAppearanceSmallPopupMenu" format="reference" />
+
         <!-- EditText text foreground color. -->
         <attr name="editTextColor" format="reference|color" />
         <!-- EditText background drawable. -->
@@ -460,6 +466,10 @@
         <attr name="quickContactBadgeStyleSmallWindowMedium" format="reference" />
         <!-- Default quickcontact badge style with large quickcontact window. -->
         <attr name="quickContactBadgeStyleSmallWindowLarge" format="reference" />
+        <!-- Default ListPopupWindow style. -->
+        <attr name="listPopupWindowStyle" format="reference" />
+        <!-- Default PopupMenu style. -->
+        <attr name="popupMenuStyle" format="reference" />
 
         <!-- =================== -->
         <!-- Action bar styles   -->

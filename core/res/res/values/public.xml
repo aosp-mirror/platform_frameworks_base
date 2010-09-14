@@ -1348,6 +1348,10 @@
   <public type="attr" name="actionViewClass" />
   <public type="attr" name="activatedBackgroundIndicator" />
   <public type="attr" name="state_activated" />
+  <public type="attr" name="listPopupWindowStyle" />
+  <public type="attr" name="popupMenuStyle" />
+  <public type="attr" name="textAppearanceLargePopupMenu" />
+  <public type="attr" name="textAppearanceSmallPopupMenu" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
@@ -1379,6 +1383,13 @@
   <public type="style" name="Theme.Holo.NoActionBar.Fullscreen" />
   <public type="style" name="Theme.Light.Holo.NoActionBar" />
   <public type="style" name="Theme.Light.Holo.NoActionBar.Fullscreen" />
+
+  <public type="style" name="Widget.ListPopupWindow" />
+  <public type="style" name="Widget.PopupMenu" />
+  <public type="style" name="Widget.ActionButton.Overflow" />
+  <public type="style" name="Widget.ActionButton.CloseMode" />
+  <public type="style" name="TextAppearance.Widget.PopupMenu.Large" />
+  <public type="style" name="TextAppearance.Widget.PopupMenu.Small" />
 
   <public type="string" name="selectTextMode" />
 

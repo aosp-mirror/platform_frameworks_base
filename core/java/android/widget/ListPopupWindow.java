@@ -163,7 +163,7 @@ public class ListPopupWindow {
      * @param attrs Attributes from inflating parent views used to style the popup.
      */
     public ListPopupWindow(Context context, AttributeSet attrs) {
-        this(context, attrs, 0, 0);
+        this(context, attrs, com.android.internal.R.attr.listPopupWindowStyle, 0);
     }
 
     /**
