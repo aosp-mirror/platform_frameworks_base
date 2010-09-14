@@ -727,9 +727,10 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
+    // Called by SystemBackupAgent after files are restored to disk.
     void settingsRestored() {
         if (DEBUG) Slog.v(TAG, "settingsRestored");
-        
+
         boolean success = false;
         synchronized (mLock) {
             loadSettingsLocked();
@@ -766,7 +767,10 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             mName = "";
             WALLPAPER_FILE.delete();
         }
-        saveSettingsLocked();
+
+        synchronized (mLock) {
+            saveSettingsLocked();
+        }
     }
 
     boolean restoreNamedResourceLocked() {
