@@ -39,6 +39,7 @@ public class NewLayersActivity extends Activity {
             super(c);
 
             mLayerPaint = new Paint();
+            mLayerPaint.setAlpha(127);
             mRectPaint = new Paint();
             mRectPaint.setAntiAlias(true);
             mRectPaint.setTextSize(24.0f);
@@ -47,28 +48,21 @@ public class NewLayersActivity extends Activity {
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-            
             canvas.drawRGB(128, 255, 128);
+
+            canvas.save();
+
             canvas.translate(140.0f, 100.0f);
-            
-            mLayerPaint.setAlpha(127);
-            int count = canvas.saveLayer(0.0f, 0.0f, 200.0f, 100.0f, mLayerPaint,
-                    Canvas.ALL_SAVE_FLAG);
-
-            mRectPaint.setColor(0x7fff0000);
-            canvas.drawRect(-20.0f, -20.0f, 220.0f, 120.0f, mRectPaint);
-
-            mRectPaint.setColor(0xff000000);
-            canvas.drawText("This is a very long string to overlap between layers and framebuffer",
-                    -100.0f, 50.0f, mRectPaint);
-            
-            canvas.restoreToCount(count);
+            drawStuff(canvas, Canvas.ALL_SAVE_FLAG);
 
             canvas.translate(0.0f, 200.0f);
+            drawStuff(canvas, Canvas.HAS_ALPHA_LAYER_SAVE_FLAG);
             
-            mLayerPaint.setAlpha(127);
-            count = canvas.saveLayer(0.0f, 0.0f, 200.0f, 100.0f, mLayerPaint,
-                    Canvas.HAS_ALPHA_LAYER_SAVE_FLAG);
+            canvas.restore();
+        }
+
+        private void drawStuff(Canvas canvas, int saveFlags) {
+            int count = canvas.saveLayer(0.0f, 0.0f, 200.0f, 100.0f, mLayerPaint, saveFlags);
 
             mRectPaint.setColor(0x7fff0000);
             canvas.drawRect(-20.0f, -20.0f, 220.0f, 120.0f, mRectPaint);
@@ -76,7 +70,7 @@ public class NewLayersActivity extends Activity {
             mRectPaint.setColor(0xff000000);
             canvas.drawText("This is a very long string to overlap between layers and framebuffer",
                     -100.0f, 50.0f, mRectPaint);
-            
+
             canvas.restoreToCount(count);
         }
     }

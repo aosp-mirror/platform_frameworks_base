@@ -289,8 +289,11 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     Rect bounds(left, top, right, bottom);
     mSnapshot->transform->mapRect(bounds);
 
-    LayerSize size(bounds.getWidth(), bounds.getHeight());
+    // Layers only make sense if they are in the framebuffer's bounds
+    bounds.intersect(*mSnapshot->clipRect);
+    if (bounds.isEmpty()) return;
 
+    LayerSize size(bounds.getWidth(), bounds.getHeight());
     Layer* layer = mCaches.layerCache.get(size);
     if (!layer) {
         return false;
@@ -525,6 +528,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
     Patch* mesh = mCaches.patchCache.get(patch);
     mesh->updateVertices(bitmap, left, top, right, bottom,
             &patch->xDivs[0], &patch->yDivs[0], patch->numXDivs, patch->numYDivs);
+    mesh->dump();
 
     // Specify right and bottom as +1.0f from left/top to prevent scaling since the
     // patch mesh already defines the final size
