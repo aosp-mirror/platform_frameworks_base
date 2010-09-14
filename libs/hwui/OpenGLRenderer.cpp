@@ -280,6 +280,7 @@ int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bot
     }
 }
 
+
 bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         float right, float bottom, int alpha, SkXfermode::Mode mode,int flags) {
     LAYER_LOGD("Requesting layer %fx%f", right - left, bottom - top);
@@ -291,7 +292,7 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
     // Layers only make sense if they are in the framebuffer's bounds
     bounds.intersect(*mSnapshot->clipRect);
-    if (bounds.isEmpty()) return;
+    if (bounds.isEmpty()) return false;
 
     LayerSize size(bounds.getWidth(), bounds.getHeight());
     Layer* layer = mCaches.layerCache.get(size);
