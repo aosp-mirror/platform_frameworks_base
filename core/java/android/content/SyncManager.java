@@ -1696,16 +1696,17 @@ public class SyncManager implements OnAccountsUpdateListener {
                 Log.v(TAG, "runStateIdle: setting mActiveSyncContext to " + mActiveSyncContext);
             }
             mSyncStorageEngine.setActiveSync(mActiveSyncContext);
-            mSyncWakeLock.setWorkSource(new WorkSource(syncAdapterInfo.uid));
             if (!activeSyncContext.bindToSyncAdapter(syncAdapterInfo)) {
                 Log.e(TAG, "Bind attempt failed to " + syncAdapterInfo);
                 mActiveSyncContext.close();
                 mActiveSyncContext = null;
                 mSyncStorageEngine.setActiveSync(mActiveSyncContext);
+                mSyncWakeLock.setWorkSource(null);
                 runStateIdle();
                 return;
             }
 
+            mSyncWakeLock.setWorkSource(new WorkSource(syncAdapterInfo.uid));
             mSyncWakeLock.acquire();
             // no need to schedule an alarm, as that will be done by our caller.
 
