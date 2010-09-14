@@ -258,7 +258,7 @@ public class Summarizer {
         StringBuilder txt = new StringBuilder();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        txt.append(mTestsRelativePath + "\n");
+        txt.append("Path: " + mTestsRelativePath + "\n");
         txt.append("Date: " + dateFormat.format(mDate) + "\n");
         txt.append("Build fingerprint: " + Build.FINGERPRINT + "\n");
         txt.append("WebKit version: " + getWebKitVersionFromUserAgentString() + "\n");
@@ -338,7 +338,8 @@ public class Summarizer {
 
     private void createTopSummaryTable(String webKitRevision, StringBuilder html) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        html.append("<h1>" + mTestsRelativePath + "</h1>");
+        html.append("<h1>" + "Layout tests' results for: " +
+                (mTestsRelativePath.equals("") ? "all tests" : mTestsRelativePath) + "</h1>");
         html.append("<h3>" + "Date: " + dateFormat.format(new Date()) + "</h3>");
         html.append("<h3>" + "Build fingerprint: " + Build.FINGERPRINT + "</h3>");
         html.append("<h3>" + "WebKit version: " + getWebKitVersionFromUserAgentString() + "</h3>");
