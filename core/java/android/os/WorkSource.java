@@ -190,7 +190,7 @@ public class WorkSource implements Parcelable {
         for (int i2=0; i2<N2 && i1<N1; i2++) {
             if (uids2[i2] == uids1[i1]) {
                 N1--;
-                if (i1 < N1) System.arraycopy(uids1, i1, uids1, i1-1, N1-i1);
+                if (i1 < N1) System.arraycopy(uids1, i1+1, uids1, i1, N1-i1);
             }
             while (i1 < N1 && uids2[i2] > uids1[i1]) {
                 i1++;
