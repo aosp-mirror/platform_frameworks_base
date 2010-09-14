@@ -89,15 +89,27 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private static final String USB_NEAR_IFACE_ADDR      = "192.168.42.129";
     private static final String USB_NETMASK              = "255.255.255.0";
 
-    // FYI - the default wifi is 192.168.43.1 and 255.255.255.0
+    // USB is  192.168.42.1 and 255.255.255.0
+    // Wifi is 192.168.43.1 and 255.255.255.0
+    // BT is limited to max default of 5 connections. 192.168.44.1 to 192.168.48.1
+    // with 255.255.255.0
 
     private String[] mDhcpRange;
     private static final String DHCP_DEFAULT_RANGE1_START = "192.168.42.2";
     private static final String DHCP_DEFAULT_RANGE1_STOP  = "192.168.42.254";
     private static final String DHCP_DEFAULT_RANGE2_START = "192.168.43.2";
     private static final String DHCP_DEFAULT_RANGE2_STOP  = "192.168.43.254";
-    private static final String DHCP_DEFAULT_RANGE3_START = "192.168.44.9";
+    private static final String DHCP_DEFAULT_RANGE3_START = "192.168.44.2";
     private static final String DHCP_DEFAULT_RANGE3_STOP  = "192.168.44.254";
+    private static final String DHCP_DEFAULT_RANGE4_START = "192.168.45.2";
+    private static final String DHCP_DEFAULT_RANGE4_STOP  = "192.168.45.254";
+    private static final String DHCP_DEFAULT_RANGE5_START = "192.168.46.2";
+    private static final String DHCP_DEFAULT_RANGE5_STOP  = "192.168.46.254";
+    private static final String DHCP_DEFAULT_RANGE6_START = "192.168.47.2";
+    private static final String DHCP_DEFAULT_RANGE6_STOP  = "192.168.47.254";
+    private static final String DHCP_DEFAULT_RANGE7_START = "192.168.48.2";
+    private static final String DHCP_DEFAULT_RANGE7_STOP  = "192.168.48.254";
+
 
     private String[] mDnsServers;
     private static final String DNS_DEFAULT_SERVER1 = "8.8.8.8";
@@ -165,13 +177,21 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         mDhcpRange = context.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_dhcp_range);
         if ((mDhcpRange.length == 0) || (mDhcpRange.length % 2 ==1)) {
-            mDhcpRange = new String[6];
+            mDhcpRange = new String[14];
             mDhcpRange[0] = DHCP_DEFAULT_RANGE1_START;
             mDhcpRange[1] = DHCP_DEFAULT_RANGE1_STOP;
             mDhcpRange[2] = DHCP_DEFAULT_RANGE2_START;
             mDhcpRange[3] = DHCP_DEFAULT_RANGE2_STOP;
             mDhcpRange[4] = DHCP_DEFAULT_RANGE3_START;
             mDhcpRange[5] = DHCP_DEFAULT_RANGE3_STOP;
+            mDhcpRange[6] = DHCP_DEFAULT_RANGE4_START;
+            mDhcpRange[7] = DHCP_DEFAULT_RANGE4_STOP;
+            mDhcpRange[8] = DHCP_DEFAULT_RANGE5_START;
+            mDhcpRange[9] = DHCP_DEFAULT_RANGE5_STOP;
+            mDhcpRange[10] = DHCP_DEFAULT_RANGE6_START;
+            mDhcpRange[11] = DHCP_DEFAULT_RANGE6_STOP;
+            mDhcpRange[12] = DHCP_DEFAULT_RANGE7_START;
+            mDhcpRange[13] = DHCP_DEFAULT_RANGE7_STOP;
         }
         mDunRequired = false; // resample when we turn on
 

@@ -42,6 +42,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Resources.NotFoundException;
 import android.net.ConnectivityManager;
 import android.net.InterfaceConfiguration;
 import android.os.Binder;
@@ -114,7 +115,10 @@ public class BluetoothService extends IBluetooth.Stub {
     private static final int MESSAGE_DISCOVERABLE_TIMEOUT = 4;
 
     private ArrayList<String> mBluetoothIfaceAddresses;
-    private static final String BLUETOOTH_NEAR_IFACE_ADDR_PREFIX= "192.168.44.";
+    private int mMaxPanDevices;
+
+    private static final String BLUETOOTH_IFACE_ADDR_START= "192.168.44.1";
+    private static final int BLUETOOTH_MAX_PAN_CONNECTIONS = 5;
     private static final String BLUETOOTH_NETMASK        = "255.255.255.0";
 
     // The timeout used to sent the UUIDs Intent
@@ -144,8 +148,9 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private BluetoothA2dpService mA2dpService;
     private final HashMap<BluetoothDevice, Integer> mInputDevices;
-    private final HashMap<BluetoothDevice, Integer> mPanDevices;
+    private final HashMap<BluetoothDevice, Pair<Integer, String>> mPanDevices;
     private final HashMap<String, Pair<byte[], byte[]>> mDeviceOobData;
+
 
     private static String mDockAddress;
     private String mDockPin;
@@ -211,10 +216,12 @@ public class BluetoothService extends IBluetooth.Stub {
         mHfpProfileState = new BluetoothProfileState(mContext, BluetoothProfileState.HFP);
         mHidProfileState = new BluetoothProfileState(mContext, BluetoothProfileState.HID);
 
-        // Can tether to up to 7 devices
-        mBluetoothIfaceAddresses = new ArrayList<String>(BluetoothPan.MAX_CONNECTIONS);
-        for (int i=1; i <= BluetoothPan.MAX_CONNECTIONS; i++) {
-            mBluetoothIfaceAddresses.add(BLUETOOTH_NEAR_IFACE_ADDR_PREFIX + i);
+        mBluetoothIfaceAddresses = new ArrayList<String>();
+        try {
+            mMaxPanDevices = context.getResources().getInteger(
+                            com.android.internal.R.integer.config_max_pan_devices);
+        } catch (NotFoundException e) {
+            mMaxPanDevices = BLUETOOTH_MAX_PAN_CONNECTIONS;
         }
 
         mHfpProfileState.start();
@@ -227,7 +234,7 @@ public class BluetoothService extends IBluetooth.Stub {
         filter.addAction(Intent.ACTION_DOCK_EVENT);
         mContext.registerReceiver(mReceiver, filter);
         mInputDevices = new HashMap<BluetoothDevice, Integer>();
-        mPanDevices = new HashMap<BluetoothDevice, Integer>();
+        mPanDevices = new HashMap<BluetoothDevice, Pair<Integer, String>>();
     }
 
     public static synchronized String readDockBluetoothAddress() {
@@ -1313,6 +1320,12 @@ public class BluetoothService extends IBluetooth.Stub {
         return mTetheringOn;
     }
 
+    /*package*/ synchronized boolean allowIncomingTethering() {
+        if (isTetheringOn() && getConnectedPanDevices().length < mMaxPanDevices)
+            return true;
+        return false;
+    }
+
     private BroadcastReceiver mTetheringReceiver = null;
 
     public synchronized void setBluetoothTethering(boolean value) {
@@ -1342,10 +1355,11 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized int getPanDeviceState(BluetoothDevice device) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
 
-        if (mPanDevices.get(device) == null) {
+        Pair<Integer, String> panDevice = mPanDevices.get(device);
+        if (panDevice == null) {
             return BluetoothPan.STATE_DISCONNECTED;
         }
-        return mPanDevices.get(device);
+        return panDevice.first;
     }
 
     public synchronized boolean connectPanDevice(BluetoothDevice device) {
@@ -1359,8 +1373,8 @@ public class BluetoothService extends IBluetooth.Stub {
         }
 
         int connectedCount = 0;
-        for (BluetoothDevice BTdevice: mPanDevices.keySet()) {
-            if (getPanDeviceState(BTdevice) == BluetoothPan.STATE_CONNECTED) {
+        for (BluetoothDevice panDevice: mPanDevices.keySet()) {
+            if (getPanDeviceState(panDevice) == BluetoothPan.STATE_CONNECTED) {
                 connectedCount ++;
             }
         }
@@ -1419,20 +1433,32 @@ public class BluetoothService extends IBluetooth.Stub {
         return disconnectPanDeviceNative(objectPath);
     }
 
-    /*package*/ void handlePanDeviceStateChange(BluetoothDevice device, int state) {
+    /*package*/ synchronized void handlePanDeviceStateChange(BluetoothDevice device,
+                                                             String iface,
+                                                             int state) {
         int prevState;
+        String ifaceAddr = null;
+
         if (mPanDevices.get(device) == null) {
             prevState = BluetoothPan.STATE_DISCONNECTED;
         } else {
-            prevState = mPanDevices.get(device);
+            prevState = mPanDevices.get(device).first;
+            ifaceAddr = mPanDevices.get(device).second;
         }
         if (prevState == state) return;
 
-        mPanDevices.put(device, state);
-
         if (state == BluetoothPan.STATE_CONNECTED) {
-            updateTetherState(true);
+            ifaceAddr = enableTethering(iface);
+            if (ifaceAddr == null) Log.e(TAG, "Error seting up tether interface");
+        } else if (state == BluetoothPan.STATE_DISCONNECTED) {
+            if (ifaceAddr != null) {
+                mBluetoothIfaceAddresses.remove(ifaceAddr);
+                ifaceAddr = null;
+            }
         }
+
+        Pair<Integer, String> value = new Pair<Integer, String>(state, ifaceAddr);
+        mPanDevices.put(device, value);
 
         Intent intent = new Intent(BluetoothPan.ACTION_PAN_STATE_CHANGED);
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
@@ -1441,12 +1467,35 @@ public class BluetoothService extends IBluetooth.Stub {
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
 
         if (DBG) log("Pan Device state : device: " + device + " State:" + prevState + "->" + state);
-
     }
 
-    // configured when we start tethering and unconfig'd on error or conclusion
-    private boolean updateTetherState(boolean enabled) {
-        Log.d(TAG, "configureBluetoothIface(" + enabled + ")");
+    /*package*/ synchronized void handlePanDeviceStateChange(BluetoothDevice device,
+                                                             int state) {
+        handlePanDeviceStateChange(device, null, state);
+    }
+
+    private String createNewTetheringAddressLocked() {
+        if (getConnectedPanDevices().length == mMaxPanDevices) {
+            log("Max PAN device connections reached");
+            return null;
+        }
+        String address = BLUETOOTH_IFACE_ADDR_START;
+        while (true) {
+            if (mBluetoothIfaceAddresses.contains(address)) {
+                String[] addr = address.split("\\.");
+                Integer newIp = Integer.parseInt(addr[2]) + 1;
+                address = address.replace(addr[2], newIp.toString());
+            } else {
+                break;
+            }
+        }
+        mBluetoothIfaceAddresses.add(address);
+        return address;
+    }
+
+    // configured when we start tethering
+    private synchronized String enableTethering(String iface) {
+        log("updateTetherState:" + iface);
 
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
         INetworkManagementService service = INetworkManagementService.Stub.asInterface(b);
@@ -1455,64 +1504,58 @@ public class BluetoothService extends IBluetooth.Stub {
         String[] bluetoothRegexs = cm.getTetherableBluetoothRegexs();
 
         // bring toggle the interfaces
-        String[] ifaces = new String[0];
+        String[] currentIfaces = new String[0];
         try {
-            ifaces = service.listInterfaces();
+            currentIfaces = service.listInterfaces();
         } catch (Exception e) {
             Log.e(TAG, "Error listing Interfaces :" + e);
-            return false;
+            return null;
         }
 
-        ArrayList<String> ifaceAddresses = (ArrayList<String>) mBluetoothIfaceAddresses.clone();
-        for (String iface : ifaces) {
-            for (String regex : bluetoothRegexs) {
-                if (iface.matches(regex)) {
-                    InterfaceConfiguration ifcg = null;
-                    try {
-                        ifcg = service.getInterfaceConfig(iface);
-                        if (ifcg != null) {
-                            if (enabled) {
-                                String[] addr = BLUETOOTH_NETMASK.split("\\.");
-                                ifcg.netmask = (Integer.parseInt(addr[0]) << 24) +
-                                        (Integer.parseInt(addr[1]) << 16) +
-                                        (Integer.parseInt(addr[2]) << 8) +
-                                        (Integer.parseInt(addr[3]));
-                                if (ifcg.ipAddr == 0 && !ifaceAddresses.isEmpty()) {
-                                    addr = ifaceAddresses.remove(0).split("\\.");
-                                    ifcg.ipAddr = (Integer.parseInt(addr[0]) << 24) +
-                                            (Integer.parseInt(addr[1]) << 16) +
-                                            (Integer.parseInt(addr[2]) << 8) +
-                                            (Integer.parseInt(addr[3]));
-                                } else {
-                                    String IfaceAddress =
-                                            String.valueOf(ifcg.ipAddr >>> 24) + "." +
-                                            String.valueOf((ifcg.ipAddr & 0x00FF0000) >>> 16) + "." +
-                                            String.valueOf((ifcg.ipAddr & 0x0000FF00) >>> 8) + "." +
-                                            String.valueOf(ifcg.ipAddr & 0x000000FF);
-                                    ifaceAddresses.remove(IfaceAddress);
-                                }
-                                ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
-                            } else {
-                                ifcg.interfaceFlags = ifcg.interfaceFlags.replace("up", "down");
-                            }
-                            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("running", "");
-                            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("  "," ");
-                            service.setInterfaceConfig(iface, ifcg);
-                            if (enabled) {
-                                if (cm.tether(iface) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
-                                    Log.e(TAG, "Error tethering "+ifaces);
-                                }
-                            }
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error configuring interface " + iface + ", :" + e);
-                        return false;
-                    }
-                }
+        boolean found = false;
+        for (String currIface: currentIfaces) {
+            if (currIface.equals(iface)) {
+                found = true;
+                break;
             }
         }
 
-        return true;
+        if (!found) return null;
+
+        String address = createNewTetheringAddressLocked();
+        if (address == null) return null;
+
+        InterfaceConfiguration ifcg = null;
+        try {
+            ifcg = service.getInterfaceConfig(iface);
+            if (ifcg != null) {
+                String[] addr = BLUETOOTH_NETMASK.split("\\.");
+                ifcg.netmask = (Integer.parseInt(addr[0]) << 24) +
+                        (Integer.parseInt(addr[1]) << 16) +
+                        (Integer.parseInt(addr[2]) << 8) +
+                        (Integer.parseInt(addr[3]));
+                if (ifcg.ipAddr == 0) {
+                    addr = address.split("\\.");
+
+                    ifcg.ipAddr = (Integer.parseInt(addr[0]) << 24) +
+                            (Integer.parseInt(addr[1]) << 16) +
+                            (Integer.parseInt(addr[2]) << 8) +
+                            (Integer.parseInt(addr[3]));
+                    ifcg.interfaceFlags =
+                        ifcg.interfaceFlags.replace("down", "up");
+                }
+                ifcg.interfaceFlags = ifcg.interfaceFlags.replace("running", "");
+                ifcg.interfaceFlags = ifcg.interfaceFlags.replace("  "," ");
+                service.setInterfaceConfig(iface, ifcg);
+                if (cm.tether(iface) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
+                    Log.e(TAG, "Error tethering "+iface);
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error configuring interface " + iface + ", :" + e);
+            return null;
+        }
+        return address;
     }
 
     public synchronized boolean connectInputDevice(BluetoothDevice device) {
