@@ -99,8 +99,17 @@ public:
     ElementState();
     ~ElementState();
 
+    void elementBuilderBegin();
+    void elementBuilderAdd(const Element *e, const char *nameStr, uint32_t arraySize);
+    const Element *elementBuilderCreate(Context *rsc);
+
     // Cache of all existing elements.
     Vector<Element *> mElements;
+private:
+    Vector<const Element *> mBuilderElements;
+    Vector<const char*> mBuilderNameStrings;
+    Vector<size_t> mBuilderNameLengths;
+    Vector<uint32_t> mBuilderArrays;
 };
 
 

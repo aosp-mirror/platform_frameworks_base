@@ -79,15 +79,7 @@ void ProgramVertex::loadShader(Context *rsc) {
 
 void ProgramVertex::createShader()
 {
-    mShader.setTo("");
-
-    mShader.append("varying vec4 varColor;\n");
-    mShader.append("varying vec4 varTex0;\n");
-
     if (mUserShader.length() > 1) {
-        mShader.append("uniform mat4 ");
-        mShader.append(mUniformNames[0]);
-        mShader.append(";\n");
 
         appendUserConstants();
 
@@ -118,28 +110,8 @@ void ProgramVertex::createShader()
         }
         mShader.append(mUserShader);
     } else {
-        mShader.append("attribute vec4 ATTRIB_position;\n");
-        mShader.append("attribute vec4 ATTRIB_color;\n");
-        mShader.append("attribute vec3 ATTRIB_normal;\n");
-        mShader.append("attribute vec4 ATTRIB_texture0;\n");
-
-        for (uint32_t ct=0; ct < mUniformCount; ct++) {
-            mShader.append("uniform mat4 ");
-            mShader.append(mUniformNames[ct]);
-            mShader.append(";\n");
-        }
-
-        mShader.append("void main() {\n");
-        mShader.append("  gl_Position = UNI_MVP * ATTRIB_position;\n");
-        mShader.append("  gl_PointSize = 1.0;\n");
-
-        mShader.append("  varColor = ATTRIB_color;\n");
-        if (mTextureMatrixEnable) {
-            mShader.append("  varTex0 = UNI_TexMatrix * ATTRIB_texture0;\n");
-        } else {
-            mShader.append("  varTex0 = ATTRIB_texture0;\n");
-        }
-        mShader.append("}\n");
+        LOGE("ProgramFragment::createShader cannot create program, shader code not defined");
+        rsAssert(0);
     }
 }
 
@@ -152,18 +124,16 @@ void ProgramVertex::setupGL2(const Context *rsc, ProgramVertexState *state, Shad
 
     rsc->checkError("ProgramVertex::setupGL2 start");
 
-    const float *f = static_cast<const float *>(mConstants[0]->getPtr());
-
-    Matrix mvp;
-    mvp.load(&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET]);
-    Matrix t;
-    t.load(&f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET]);
-    mvp.multiply(&t);
-
-    glUniformMatrix4fv(sc->vtxUniformSlot(0), 1, GL_FALSE, mvp.m);
-    if (mTextureMatrixEnable) {
-        glUniformMatrix4fv(sc->vtxUniformSlot(1), 1, GL_FALSE,
-                           &f[RS_PROGRAM_VERTEX_TEXTURE_OFFSET]);
+    if(!isUserProgram()) {
+        float *f = static_cast<float *>(mConstants[0]->getPtr());
+        Matrix mvp;
+        mvp.load(&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET]);
+        Matrix t;
+        t.load(&f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET]);
+        mvp.multiply(&t);
+        for(uint32_t i = 0; i < 16; i ++) {
+            f[RS_PROGRAM_VERTEX_MVP_OFFSET + i] = mvp.m[i];
+        }
     }
 
     rsc->checkError("ProgramVertex::setupGL2 begin uniforms");
@@ -183,6 +153,9 @@ void ProgramVertex::addLight(const Light *l)
 
 void ProgramVertex::setProjectionMatrix(const rsc_Matrix *m) const
 {
+    if(isUserProgram()) {
+        return;
+    }
     float *f = static_cast<float *>(mConstants[0]->getPtr());
     memcpy(&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET], m, sizeof(rsc_Matrix));
     mDirty = true;
@@ -190,6 +163,9 @@ void ProgramVertex::setProjectionMatrix(const rsc_Matrix *m) const
 
 void ProgramVertex::setModelviewMatrix(const rsc_Matrix *m) const
 {
+    if(isUserProgram()) {
+        return;
+    }
     float *f = static_cast<float *>(mConstants[0]->getPtr());
     memcpy(&f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET], m, sizeof(rsc_Matrix));
     mDirty = true;
@@ -197,6 +173,9 @@ void ProgramVertex::setModelviewMatrix(const rsc_Matrix *m) const
 
 void ProgramVertex::setTextureMatrix(const rsc_Matrix *m) const
 {
+    if(isUserProgram()) {
+        return;
+    }
     float *f = static_cast<float *>(mConstants[0]->getPtr());
     memcpy(&f[RS_PROGRAM_VERTEX_TEXTURE_OFFSET], m, sizeof(rsc_Matrix));
     mDirty = true;
@@ -204,12 +183,18 @@ void ProgramVertex::setTextureMatrix(const rsc_Matrix *m) const
 
 void ProgramVertex::getProjectionMatrix(rsc_Matrix *m) const
 {
+    if(isUserProgram()) {
+        return;
+    }
     float *f = static_cast<float *>(mConstants[0]->getPtr());
     memcpy(m, &f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET], sizeof(rsc_Matrix));
 }
 
 void ProgramVertex::transformToScreen(const Context *rsc, float *v4out, const float *v3in) const
 {
+    if(isUserProgram()) {
+        return;
+    }
     float *f = static_cast<float *>(mConstants[0]->getPtr());
     Matrix mvp;
     mvp.loadMultiply((Matrix *)&f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET],
@@ -225,17 +210,11 @@ void ProgramVertex::init(Context *rsc)
             initAddUserElement(mInputElements[ct].get(), mAttribNames, &mAttribCount, "ATTRIB_");
         }
 
-        mUniformCount = 1;
-        mUniformNames[0].setTo("UNI_MVP");
+        mUniformCount = 0;
         for (uint32_t ct=0; ct < mConstantCount; ct++) {
             initAddUserElement(mConstantTypes[ct]->getElement(), mUniformNames, &mUniformCount, "UNI_");
         }
-    } else {
-        mUniformCount = 2;
-        mUniformNames[0].setTo("UNI_MVP");
-        mUniformNames[1].setTo("UNI_TexMatrix");
     }
-
     createShader();
 }
 
@@ -262,41 +241,78 @@ ProgramVertexState::~ProgramVertexState()
 
 void ProgramVertexState::init(Context *rsc)
 {
-#ifndef ANDROID_RS_BUILD_FOR_HOST
-    RsElement e = (RsElement) Element::create(rsc, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 1);
+    const Element *matrixElem = Element::create(rsc, RS_TYPE_MATRIX_4X4, RS_KIND_USER, false, 1);
+    const Element *f3Elem = Element::create(rsc, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 3);
+    const Element *f4Elem = Element::create(rsc, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 4);
 
-    rsi_TypeBegin(rsc, e);
-    rsi_TypeAdd(rsc, RS_DIMENSION_X, 48);
-    mAllocType.set((Type *)rsi_TypeCreate(rsc));
+    rsc->mStateElement.elementBuilderBegin();
+    rsc->mStateElement.elementBuilderAdd(matrixElem, "MV", 1);
+    rsc->mStateElement.elementBuilderAdd(matrixElem, "P", 1);
+    rsc->mStateElement.elementBuilderAdd(matrixElem, "TexMatrix", 1);
+    rsc->mStateElement.elementBuilderAdd(matrixElem, "MVP", 1);
+    const Element *constInput = rsc->mStateElement.elementBuilderCreate(rsc);
 
-    ProgramVertex *pv = new ProgramVertex(rsc, false);
-    Allocation *alloc = (Allocation *)rsi_AllocationCreateTyped(rsc, mAllocType.get());
+    rsc->mStateElement.elementBuilderBegin();
+    rsc->mStateElement.elementBuilderAdd(f4Elem, "position", 1);
+    rsc->mStateElement.elementBuilderAdd(f4Elem, "color", 1);
+    rsc->mStateElement.elementBuilderAdd(f3Elem, "normal", 1);
+    rsc->mStateElement.elementBuilderAdd(f4Elem, "texture0", 1);
+    const Element *attrElem = rsc->mStateElement.elementBuilderCreate(rsc);
+
+    Type *inputType = new Type(rsc);
+    inputType->setElement(constInput);
+    inputType->setDimX(1);
+    inputType->compute();
+
+    String8 shaderString(RS_SHADER_INTERNAL);
+    shaderString.append("varying vec4 varColor;\n");
+    shaderString.append("varying vec4 varTex0;\n");
+    shaderString.append("void main() {\n");
+    shaderString.append("  gl_Position = UNI_MVP * ATTRIB_position;\n");
+    shaderString.append("  gl_PointSize = 1.0;\n");
+    shaderString.append("  varColor = ATTRIB_color;\n");
+    shaderString.append("  varTex0 = ATTRIB_texture0;\n");
+    shaderString.append("}\n");
+
+    uint32_t tmp[6];
+    tmp[0] = RS_PROGRAM_PARAM_CONSTANT;
+    tmp[1] = (uint32_t)inputType;
+    tmp[2] = RS_PROGRAM_PARAM_INPUT;
+    tmp[3] = (uint32_t)attrElem;
+    tmp[4] = RS_PROGRAM_PARAM_TEXTURE_COUNT;
+    tmp[5] = 0;
+
+    ProgramVertex *pv = new ProgramVertex(rsc, shaderString.string(),
+                                          shaderString.length(), tmp, 6);
+    Allocation *alloc = new Allocation(rsc, inputType);
+    pv->bindAllocation(alloc, 0);
 
     mDefaultAlloc.set(alloc);
     mDefault.set(pv);
-    pv->init(rsc);
     pv->bindAllocation(alloc, 0);
 
     updateSize(rsc);
-#endif //ANDROID_RS_BUILD_FOR_HOST
 
 }
 
 void ProgramVertexState::updateSize(Context *rsc)
 {
+    float *f = static_cast<float *>(mDefaultAlloc->getPtr());
+
     Matrix m;
     m.loadOrtho(0,rsc->getWidth(), rsc->getHeight(),0, -1,1);
-    mDefaultAlloc->subData(rsc, RS_PROGRAM_VERTEX_PROJECTION_OFFSET, 16, &m.m[0], 16*4);
+    memcpy(&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET], m.m, sizeof(m));
+    memcpy(&f[RS_PROGRAM_VERTEX_MVP_OFFSET], m.m, sizeof(m));
 
     m.loadIdentity();
-    mDefaultAlloc->subData(rsc, RS_PROGRAM_VERTEX_MODELVIEW_OFFSET, 16, &m.m[0], 16*4);
+    memcpy(&f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET], m.m, sizeof(m));
+    memcpy(&f[RS_PROGRAM_VERTEX_TEXTURE_OFFSET], m.m, sizeof(m));
 }
 
 void ProgramVertexState::deinit(Context *rsc)
 {
     mDefaultAlloc.clear();
     mDefault.clear();
-    mAllocType.clear();
     mLast.clear();
 }
 

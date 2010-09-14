@@ -395,14 +395,12 @@ void displayCustomShaderSamples() {
     rsMatrixLoadTranslate(&gVSConstants->model, 0.0f, 0.0f, -10.0f);
     rsMatrixRotate(&gVSConstants->model, gTorusRotation, 1.0f, 0.0f, 0.0f);
     rsMatrixRotate(&gVSConstants->model, gTorusRotation, 0.0f, 0.0f, 1.0f);
+    // Setup the projectioni matrix
+    float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
+    rsMatrixLoadPerspective(&gVSConstants->proj, 30.0f, aspect, 0.1f, 100.0f);
     setupCustomShaderLights();
 
     rsgBindProgramVertex(gProgVertexCustom);
-    // Setup the projectioni matrix with 60 degree field of view
-    rs_matrix4x4 proj;
-    float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
-    rsMatrixLoadPerspective(&proj, 30.0f, aspect, 0.1f, 100.0f);
-    rsgProgramVertexLoadProjectionMatrix(&proj);
 
     // Fragment shader with texture
     rsgBindProgramStore(gProgStoreBlendNoneDepth);
@@ -416,7 +414,7 @@ void displayCustomShaderSamples() {
 
     rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
     rsgBindFont(gFontMono);
-    rsgDrawText("Custom shader sample", 10, rsgGetHeight() - 10);
+    //rsgDrawText("Custom shader sample", 10, rsgGetHeight() - 10);
 }
 
 int root(int launchID) {

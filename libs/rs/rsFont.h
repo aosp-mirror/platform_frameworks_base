@@ -171,6 +171,7 @@ protected:
     Vector<Font*> mActiveFonts;
 
     // Render state for the font
+    ObjectBaseRef<Allocation> mFontShaderFConstant;
     ObjectBaseRef<ProgramFragment> mFontShaderF;
     ObjectBaseRef<Sampler> mFontSampler;
     ObjectBaseRef<ProgramStore> mFontProgramStore;

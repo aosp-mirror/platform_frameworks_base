@@ -387,14 +387,34 @@ bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *r
 
 void FontState::initRenderState()
 {
-    uint32_t tmp[] = {
-        RS_TEX_ENV_MODE_REPLACE, 1,
-        RS_TEX_ENV_MODE_NONE, 0,
-        0, 0
-    };
-    ProgramFragment *pf = new ProgramFragment(mRSC, tmp, 6);
+    String8 shaderString("varying vec4 varTex0;\n");
+    shaderString.append("void main() {\n");
+    shaderString.append("  lowp vec4 col = UNI_Color;\n");
+    shaderString.append("  col.a = texture2D(UNI_Tex0, varTex0.xy).a;\n");
+    shaderString.append("  gl_FragColor = col;\n");
+    shaderString.append("}\n");
+
+    const Element *colorElem = Element::create(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 4);
+    mRSC->mStateElement.elementBuilderBegin();
+    mRSC->mStateElement.elementBuilderAdd(colorElem, "Color", 1);
+    const Element *constInput = mRSC->mStateElement.elementBuilderCreate(mRSC);
+
+    Type *inputType = new Type(mRSC);
+    inputType->setElement(constInput);
+    inputType->setDimX(1);
+    inputType->compute();
+
+    uint32_t tmp[4];
+    tmp[0] = RS_PROGRAM_PARAM_CONSTANT;
+    tmp[1] = (uint32_t)inputType;
+    tmp[2] = RS_PROGRAM_PARAM_TEXTURE_COUNT;
+    tmp[3] = 1;
+
+    mFontShaderFConstant.set(new Allocation(mRSC, inputType));
+    ProgramFragment *pf = new ProgramFragment(mRSC, shaderString.string(),
+                                              shaderString.length(), tmp, 4);
     mFontShaderF.set(pf);
-    mFontShaderF->init(mRSC);
+    mFontShaderF->bindAllocation(mFontShaderFConstant.get(), 0);
 
     Sampler *sampler = new Sampler(mRSC, RS_SAMPLER_NEAREST, RS_SAMPLER_NEAREST,
                                       RS_SAMPLER_CLAMP, RS_SAMPLER_CLAMP, RS_SAMPLER_CLAMP);
@@ -539,7 +559,7 @@ void FontState::issueDrawCommand() {
     mRSC->setFragmentStore(mFontProgramStore.get());
 
     if(mFontColorDirty) {
-        mFontShaderF->setConstantColor(mFontColor[0], mFontColor[1], mFontColor[2], mFontColor[3]);
+        mFontShaderFConstant->data(mRSC, &mFontColor, 4*sizeof(float));
         mFontColorDirty = false;
     }
 

@@ -2,24 +2,12 @@ varying float light0_Diffuse;
 varying float light0_Specular;
 varying float light1_Diffuse;
 varying float light1_Specular;
-
-/*
-rs_matrix4x4 model;
- float3 light0_Posision;
- float light0_Diffuse;
- float light0_Specular;
- float light0_CosinePower;
-
- float3 light1_Posision;
- float light1_Diffuse;
- float light1_Specular;
- float light1_CosinePower;
-*/
+varying vec2 varTex0;
 
 // This is where actual shader code begins
 void main() {
    vec4 worldPos = UNI_model * ATTRIB_position;
-   gl_Position = UNI_MVP * worldPos;
+   gl_Position = UNI_proj * worldPos;
 
    mat3 model3 = mat3(UNI_model[0].xyz, UNI_model[1].xyz, UNI_model[2].xyz);
    vec3 worldNorm = model3 * ATTRIB_normal;
