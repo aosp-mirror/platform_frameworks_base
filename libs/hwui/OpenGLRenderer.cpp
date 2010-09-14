@@ -280,7 +280,49 @@ int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bot
     }
 }
 
-
+/**
+ * Layers are viewed by Skia are slightly different than layers in image editing
+ * programs (for instance.) When a layer is created, previously created layers
+ * and the frame buffer still receive every drawing command. For instance, if a
+ * layer is created and a shape intersecting the bounds of the layers and the
+ * framebuffer is draw, the shape will be drawn on both (unless the layer was
+ * created with the SkCanvas::kClipToLayer_SaveFlag flag.)
+ *
+ * A way to implement layers is to create an FBO for each layer, backed by an RGBA
+ * texture. Unfortunately, this is inefficient as it requires every primitive to
+ * be drawn n + 1 times, where n is the number of active layers. In practice this
+ * means, for every primitive:
+ *   - Switch active frame buffer
+ *   - Change viewport, clip and projection matrix
+ *   - Issue the drawing
+ *
+ * Switching rendering target n + 1 times per drawn primitive is extremely costly.
+ * To avoid this, layers are implemented in a different way here.
+ *
+ * This implementation relies on the frame buffer being at least RGBA 8888. When
+ * a layer is created, only a texture is created, not an FBO. The content of the
+ * frame buffer contained within the layer's bounds is copied into this texture
+ * using glCopyTexImage2D(). The layer's region is then cleared in the frame
+ * buffer and drawing continues as normal. This technique therefore treats the
+ * frame buffer as a scratch buffer for the layers.
+ *
+ * To compose the layers back onto the frame buffer, each layer texture
+ * (containing the original frame buffer data) is drawn as a simple quad over
+ * the frame buffer. The trick is that the quad is set as the composition
+ * destination in the blending equation, and the frame buffer becomes the source
+ * of the composition.
+ *
+ * Drawing layers with an alpha value requires an extra step before composition.
+ * An empty quad is drawn over the layer's region in the frame buffer. This quad
+ * is drawn with the rgba color (0,0,0,alpha). The alpha value offered by the
+ * quad is used to multiply the colors in the frame buffer. This is achieved by
+ * changing the GL blend functions for the GL_FUNC_ADD blend equation to
+ * GL_ZERO, GL_SRC_ALPHA.
+ *
+ * Because glCopyTexImage2D() can be slow, an alternative implementation might
+ * be use to draw a single clipped layer. The implementation described above
+ * is correct in every case.
+ */
 bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         float right, float bottom, int alpha, SkXfermode::Mode mode,int flags) {
     LAYER_LOGD("Requesting layer %fx%f", right - left, bottom - top);
@@ -323,6 +365,9 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     return true;
 }
 
+/**
+ * Read the documentation of createLayer() before doing anything in this method.
+ */
 void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     if (!current->layer) {
         LOGE("Attempting to compose a layer that does not exist");
@@ -337,16 +382,8 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     const Rect& rect = layer->layer;
 
     if (layer->alpha < 255) {
-        glEnable(GL_BLEND);
-        glBlendFuncSeparate(GL_ZERO, GL_SRC_ALPHA, GL_DST_ALPHA, GL_ZERO);
-
         drawColorRect(rect.left, rect.top, rect.right, rect.bottom,
-                layer->alpha << 24, SkXfermode::kSrcOver_Mode, true, true);
-
-        glBlendFunc(mCaches.lastSrcMode, mCaches.lastDstMode);
-        if (!mCaches.blend) {
-            glDisable(GL_BLEND);
-        }
+                layer->alpha << 24, SkXfermode::kDstIn_Mode, true);
     }
 
     // Layers are already drawn with a top-left origin, don't flip the texture
@@ -846,7 +883,7 @@ void OpenGLRenderer::drawTextDecorations(const char* text, int bytesCount, float
 }
 
 void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom,
-        int color, SkXfermode::Mode mode, bool ignoreTransform, bool ignoreBlending) {
+        int color, SkXfermode::Mode mode, bool ignoreTransform) {
     clearLayerRegions();
 
     // If a shader is set, preserve only the alpha
@@ -872,10 +909,8 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
         mColorFilter->describe(description, mExtensions);
     }
 
-    if (!ignoreBlending) {
-        // Setup the blending mode
-        chooseBlending(alpha < 255 || (mShader && mShader->blend()), mode, description);
-    }
+    // Setup the blending mode
+    chooseBlending(alpha < 255 || (mShader && mShader->blend()), mode, description);
 
     // Build and use the appropriate shader
     useProgram(mCaches.programCache.get(description));
