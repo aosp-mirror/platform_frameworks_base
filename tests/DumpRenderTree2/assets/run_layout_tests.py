@@ -3,29 +3,30 @@
 """Run layout tests on the device.
 
   It runs the specified tests on the device, downloads the summaries to the temporary directory
-  and opens html details in the default browser.
+  and optionally shows the detailed results the host's default browser.
 
   Usage:
-    run_layout_tests.py PATH
+    run_layout_tests.py --show-results-in-browser test-relative-path
 """
 
-import sys
-import os
-import subprocess
 import logging
-import webbrowser
+import optparse
+import os
+import sys
+import subprocess
 import tempfile
+import webbrowser
 
 #TODO: These should not be hardcoded
 RESULTS_ABSOLUTE_PATH = "/sdcard/layout-test-results/"
 DETAILS_HTML = "details.html"
 SUMMARY_TXT = "summary.txt"
 
-def main():
-  if len(sys.argv) > 1:
-    path = sys.argv[1]
+def main(options, args):
+  if args:
+    path = " ".join(args);
   else:
-    path = ""
+    path = "";
 
   logging.basicConfig(level=logging.INFO, format='%(message)s')
 
@@ -61,7 +62,12 @@ def main():
   logging.info("")
 
   # Open the browser with summary
-  webbrowser.open(details_html_tmp_path)
+  if options.show_results_in_browser != "false":
+    webbrowser.open(details_html_tmp_path)
 
 if __name__ == "__main__":
-  main();
+  option_parser = optparse.OptionParser(usage="Usage: %prog [options] test-relative-path")
+  option_parser.add_option("", "--show-results-in-browser", default="true",
+                           help="Show the results the host's default web browser, default=true")
+  options, args = option_parser.parse_args();
+  main(options, args);
