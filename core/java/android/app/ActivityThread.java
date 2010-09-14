@@ -3107,18 +3107,11 @@ public final class ActivityThread {
         /**
          * For system applications on userdebug/eng builds, log stack
          * traces of disk and network access to dropbox for analysis.
-         *
-         * Similar logic exists in SystemServer.java.
          */
         if ((data.appInfo.flags &
              (ApplicationInfo.FLAG_SYSTEM |
-              ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0 &&
-            !"user".equals(Build.TYPE)) {
-            StrictMode.setThreadPolicy(
-                StrictMode.DISALLOW_DISK_WRITE |
-                StrictMode.DISALLOW_DISK_READ |
-                StrictMode.DISALLOW_NETWORK |
-                StrictMode.PENALTY_DROPBOX);
+              ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0) {
+            StrictMode.conditionallyEnableDebugLogging();
         }
 
         /**
