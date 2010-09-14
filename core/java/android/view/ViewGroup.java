@@ -877,7 +877,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 mSplitMotionTargets = new SplitMotionTargets();
             }
             return dispatchSplitTouchEvent(ev);
-	}
+        }
 
         final int action = ev.getAction();
         final float xf = ev.getX();
@@ -1222,13 +1222,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     uniqueTargetCount--;
                 }
 
-                final boolean childHandled = target.dispatchTouchEvent(targetEvent);
-                handled |= childHandled;
-                if (!childHandled) {
-                    // Child doesn't want these events anymore, but we're still dispatching
-                    // other split events to children.
-                    targets.removeView(target);
-                }
+                handled |= target.dispatchTouchEvent(targetEvent);
             } finally {
                 targetEvent.recycle();
             }
