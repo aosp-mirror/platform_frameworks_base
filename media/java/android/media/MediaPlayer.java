@@ -1210,7 +1210,6 @@ public class MediaPlayer
      * effect which can be applied on any sound source that directs a certain amount of its
      * energy to this effect. This amount is defined by setAuxEffectSendLevel().
      * {@see #setAuxEffectSendLevel(float)}.
-     // TODO when AudioEffect is unhidden
      * <p>After creating an auxiliary effect (e.g. {@link android.media.EnvironmentalReverb}),
      * retrieve its ID with {@link android.media.AudioEffect#getId()} and use it when calling
      * this method to attach the player to the effect.
