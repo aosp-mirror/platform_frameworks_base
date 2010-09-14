@@ -80,6 +80,9 @@ static const Blender gBlends[] = {
         { SkXfermode::kXor_Mode,     GL_ONE_MINUS_DST_ALPHA,  GL_ONE_MINUS_SRC_ALPHA }
 };
 
+// This array contains the swapped version of each SkXfermode. For instance
+// this array's SrcOver blending mode is actually DstOver. You can refer to
+// createLayer() for more information on the purpose of this array.
 static const Blender gBlendsSwap[] = {
         { SkXfermode::kClear_Mode,   GL_ZERO,                 GL_ZERO },
         { SkXfermode::kSrc_Mode,     GL_ZERO,                 GL_ONE },
@@ -302,7 +305,7 @@ int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bot
  * This implementation relies on the frame buffer being at least RGBA 8888. When
  * a layer is created, only a texture is created, not an FBO. The content of the
  * frame buffer contained within the layer's bounds is copied into this texture
- * using glCopyTexImage2D(). The layer's region is then cleared in the frame
+ * using glCopyTexImage2D(). The layer's region is then cleared(1) in the frame
  * buffer and drawing continues as normal. This technique therefore treats the
  * frame buffer as a scratch buffer for the layers.
  *
@@ -322,6 +325,11 @@ int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bot
  * Because glCopyTexImage2D() can be slow, an alternative implementation might
  * be use to draw a single clipped layer. The implementation described above
  * is correct in every case.
+ *
+ * (1) The frame buffer is actually not cleared right away. To allow the GPU
+ *     to potentially optimize series of calls to glCopyTexImage2D, the frame
+ *     buffer is left untouched until the first drawing operation. Only when
+ *     something actually gets drawn are the layers regions cleared.
  */
 bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         float right, float bottom, int alpha, SkXfermode::Mode mode,int flags) {
