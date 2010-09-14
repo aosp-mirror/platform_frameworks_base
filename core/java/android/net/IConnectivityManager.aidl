@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.os.IBinder;
 
@@ -35,6 +36,10 @@ interface IConnectivityManager
     NetworkInfo getNetworkInfo(int networkType);
 
     NetworkInfo[] getAllNetworkInfo();
+
+    LinkProperties getActiveLinkProperties();
+
+    LinkProperties getLinkProperties(int networkType);
 
     boolean setRadios(boolean onOff);
 
