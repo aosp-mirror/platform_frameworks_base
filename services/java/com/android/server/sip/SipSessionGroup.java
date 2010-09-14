@@ -19,6 +19,7 @@ package com.android.server.sip;
 import gov.nist.javax.sip.clientauthutils.AccountManager;
 import gov.nist.javax.sip.clientauthutils.UserCredentials;
 import gov.nist.javax.sip.header.SIPHeaderNames;
+import gov.nist.javax.sip.header.ProxyAuthenticate;
 import gov.nist.javax.sip.header.WWWAuthenticate;
 import gov.nist.javax.sip.message.SIPMessage;
 
@@ -731,7 +732,8 @@ class SipSessionGroup implements SipListener {
             Response response = event.getResponse();
             String nonce = getNonceFromResponse(response);
             if (((nonce != null) && nonce.equals(mLastNonce)) ||
-                    (nonce == mLastNonce)) {
+                    (nonce == null)) {
+                mLastNonce = nonce;
                 return false;
             } else {
                 mClientTransaction = mSipHelper.handleChallenge(
@@ -764,9 +766,12 @@ class SipSessionGroup implements SipListener {
         }
 
         private String getNonceFromResponse(Response response) {
-            WWWAuthenticate authHeader = (WWWAuthenticate)(response.getHeader(
-                    SIPHeaderNames.WWW_AUTHENTICATE));
-            return (authHeader == null) ? null : authHeader.getNonce();
+            WWWAuthenticate wwwAuth = (WWWAuthenticate)response.getHeader(
+                    SIPHeaderNames.WWW_AUTHENTICATE);
+            if (wwwAuth != null) return wwwAuth.getNonce();
+            ProxyAuthenticate proxyAuth = (ProxyAuthenticate)response.getHeader(
+                    SIPHeaderNames.PROXY_AUTHENTICATE);
+            return (proxyAuth == null) ? null : proxyAuth.getNonce();
         }
 
         private boolean readyForCall(EventObject evt) throws SipException {
