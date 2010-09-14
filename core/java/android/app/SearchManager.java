@@ -395,6 +395,14 @@ public class SearchManager
     public final static String CONTEXT_IS_VOICE = "android.search.CONTEXT_IS_VOICE";
 
     /**
+     * This means that the voice icon should not be shown at all, because the
+     * current search engine does not support voice search.
+     * @hide
+     */
+    public final static String DISABLE_VOICE_SEARCH
+            = "android.search.DISABLE_VOICE_SEARCH";
+
+    /**
      * Reference to the shared system search service.
      */
     private static ISearchManager mService;
