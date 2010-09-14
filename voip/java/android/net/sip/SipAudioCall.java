@@ -88,10 +88,11 @@ public interface SipAudioCall {
          * Called when an error occurs.
          *
          * @param call the call object that carries out the audio call
-         * @param errorCode error code defined in {@link SipErrorCode}
+         * @param errorCode error code of this error
          * @param errorMessage error message
          */
-        void onError(SipAudioCall call, String errorCode, String errorMessage);
+        void onError(SipAudioCall call, SipErrorCode errorCode,
+                String errorMessage);
     }
 
     /**
@@ -125,7 +126,7 @@ public interface SipAudioCall {
         public void onCallHeld(SipAudioCall call) {
             onChanged(call);
         }
-        public void onError(SipAudioCall call, String errorCode,
+        public void onError(SipAudioCall call, SipErrorCode errorCode,
                 String errorMessage) {
             onChanged(call);
         }
