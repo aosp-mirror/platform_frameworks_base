@@ -167,11 +167,15 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
          *
          * @param port port number of the server
          * @return this builder object
-         * @throws InvalidArgumentException if the port number is out of range
+         * @throws IllegalArgumentException if the port number is out of range
          */
-        public Builder setPort(int port) throws InvalidArgumentException {
-            mUri.setPort(port);
-            return this;
+        public Builder setPort(int port) throws IllegalArgumentException {
+            try {
+                mUri.setPort(port);
+                return this;
+            } catch (InvalidArgumentException e) {
+                throw new IllegalArgumentException(e);
+            }
         }
 
         /**
@@ -180,16 +184,16 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
          *
          * @param protocol the protocol string
          * @return this builder object
-         * @throws InvalidArgumentException if the protocol is not recognized
+         * @throws IllegalArgumentException if the protocol is not recognized
          */
         public Builder setProtocol(String protocol)
-                throws InvalidArgumentException {
+                throws IllegalArgumentException {
             if (protocol == null) {
                 throw new NullPointerException("protocol cannot be null");
             }
             protocol = protocol.toUpperCase();
             if (!protocol.equals("UDP") && !protocol.equals("TCP")) {
-                throw new InvalidArgumentException(
+                throw new IllegalArgumentException(
                         "unsupported protocol: " + protocol);
             }
             mProfile.mProtocol = protocol;

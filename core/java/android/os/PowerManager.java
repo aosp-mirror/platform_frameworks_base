@@ -209,6 +209,7 @@ public class PowerManager
         int mCount = 0;
         boolean mRefCounted = true;
         boolean mHeld = false;
+        WorkSource mWorkSource;
 
         WakeLock(int flags, String tag)
         {
@@ -247,7 +248,7 @@ public class PowerManager
             synchronized (mToken) {
                 if (!mRefCounted || mCount++ == 0) {
                     try {
-                        mService.acquireWakeLock(mFlags, mToken, mTag);
+                        mService.acquireWakeLock(mFlags, mToken, mTag, mWorkSource);
                     } catch (RemoteException e) {
                     }
                     mHeld = true;
@@ -310,6 +311,32 @@ public class PowerManager
         {
             synchronized (mToken) {
                 return mHeld;
+            }
+        }
+
+        public void setWorkSource(WorkSource ws) {
+            synchronized (mToken) {
+                if (ws != null && ws.size() == 0) {
+                    ws = null;
+                }
+                boolean changed = true;
+                if (ws == null) {
+                    mWorkSource = null;
+                } else if (mWorkSource == null) {
+                    changed = mWorkSource != null;
+                    mWorkSource = new WorkSource(ws);
+                } else {
+                    changed = mWorkSource.diff(ws);
+                    if (changed) {
+                        mWorkSource.set(ws);
+                    }
+                }
+                if (changed && mHeld) {
+                    try {
+                        mService.updateWakeLockWorkSource(mToken, mWorkSource);
+                    } catch (RemoteException e) {
+                    }
+                }
             }
         }
 

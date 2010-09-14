@@ -23,6 +23,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.ServiceManager;
+import android.os.WorkSource;
 import android.telephony.SignalStrength;
 import android.util.Slog;
 
@@ -104,6 +105,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteStopWakeLocked(uid, pid, name, type);
+        }
+    }
+
+    public void noteStartWakelockFromSource(WorkSource ws, int pid, String name, int type) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteStartWakeFromSourceLocked(ws, pid, name, type);
+        }
+    }
+
+    public void noteStopWakelockFromSource(WorkSource ws, int pid, String name, int type) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteStopWakeFromSourceLocked(ws, pid, name, type);
         }
     }
 
@@ -314,6 +329,48 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteWifiMulticastDisabledLocked(uid);
+        }
+    }
+
+    public void noteFullWifiLockAcquiredFromSource(WorkSource ws) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteFullWifiLockAcquiredFromSourceLocked(ws);
+        }
+    }
+
+    public void noteFullWifiLockReleasedFromSource(WorkSource ws) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteFullWifiLockReleasedFromSourceLocked(ws);
+        }
+    }
+
+    public void noteScanWifiLockAcquiredFromSource(WorkSource ws) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteScanWifiLockAcquiredFromSourceLocked(ws);
+        }
+    }
+
+    public void noteScanWifiLockReleasedFromSource(WorkSource ws) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteScanWifiLockReleasedFromSourceLocked(ws);
+        }
+    }
+
+    public void noteWifiMulticastEnabledFromSource(WorkSource ws) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiMulticastEnabledFromSourceLocked(ws);
+        }
+    }
+
+    public void noteWifiMulticastDisabledFromSource(WorkSource ws) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiMulticastDisabledFromSourceLocked(ws);
         }
     }
 

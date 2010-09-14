@@ -635,9 +635,9 @@ public class SipPhone extends SipPhoneBase {
             @Override
             protected void onError(DisconnectCause cause) {
                 Log.w(LOG_TAG, "SIP error: " + cause);
-                if (mSipAudioCall.isInCall()) {
-                    // Don't end the call when in call.
-                    // TODO: how to deliver the error to PhoneApp
+                if (mSipAudioCall.isInCall()
+                        && (cause != DisconnectCause.LOST_SIGNAL)) {
+                    // Don't end the call when in a call.
                     return;
                 }
 
@@ -819,15 +819,18 @@ public class SipPhone extends SipPhoneBase {
         }
 
         @Override
-        public void onError(SipAudioCall call, String errorCode,
+        public void onError(SipAudioCall call, SipErrorCode errorCode,
                 String errorMessage) {
-            switch (Enum.valueOf(SipErrorCode.class, errorCode)) {
+            switch (errorCode) {
                 case INVALID_REMOTE_URI:
                     onError(Connection.DisconnectCause.INVALID_NUMBER);
                     break;
                 case TIME_OUT:
                 case TRANSACTION_TERMINTED:
                     onError(Connection.DisconnectCause.TIMED_OUT);
+                    break;
+                case DATA_CONNECTION_LOST:
+                    onError(Connection.DisconnectCause.LOST_SIGNAL);
                     break;
                 case INVALID_CREDENTIALS:
                     onError(Connection.DisconnectCause.INVALID_CREDENTIALS);

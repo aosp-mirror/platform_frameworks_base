@@ -47,5 +47,8 @@ public enum SipErrorCode {
     INVALID_CREDENTIALS,
 
     /** The client is in a transaction and cannot initiate a new one. */
-    IN_PROGRESS;
+    IN_PROGRESS,
+
+    /** When data connection is lost. */
+    DATA_CONNECTION_LOST;
 }

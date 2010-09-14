@@ -404,6 +404,7 @@ public abstract class BatteryStats implements Parcelable {
         
         public static final byte CMD_UPDATE = 0;
         public static final byte CMD_START = 1;
+        public static final byte CMD_OVERFLOW = 2;
         
         public byte cmd;
         
@@ -1703,6 +1704,8 @@ public abstract class BatteryStats implements Parcelable {
                 pw.print(" ");
                 if (rec.cmd == HistoryItem.CMD_START) {
                     pw.println(" START");
+                } else if (rec.cmd == HistoryItem.CMD_OVERFLOW) {
+                    pw.println(" *OVERFLOW*");
                 } else {
                     if (rec.batteryLevel < 10) pw.print("00");
                     else if (rec.batteryLevel < 100) pw.print("0");

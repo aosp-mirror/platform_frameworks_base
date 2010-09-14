@@ -29,6 +29,7 @@ import android.os.ParcelFormatException;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.SystemClock;
+import android.os.WorkSource;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
@@ -68,12 +69,12 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int VERSION = 50;
 
     // Maximum number of items we will record in the history.
-    private static final int MAX_HISTORY_ITEMS = 1000;
+    private static final int MAX_HISTORY_ITEMS = 2000;
     
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
     // in to one common name.
-    private static final int MAX_WAKELOCKS_PER_UID = 20;
+    private static final int MAX_WAKELOCKS_PER_UID = 30;
     
     private static final String BATCHED_WAKELOCK_NAME = "*overflow*";
     
@@ -1171,7 +1172,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         // If the current time is basically the same as the last time,
         // just collapse into one record.
         if (mHistoryEnd != null && mHistoryEnd.cmd == HistoryItem.CMD_UPDATE
-                && (mHistoryBaseTime+curTime) < (mHistoryEnd.time+100)) {
+                && (mHistoryBaseTime+curTime) < (mHistoryEnd.time+500)) {
             // If the current is the same as the one before, then we no
             // longer need the entry.
             if (mHistoryLastEnd != null && mHistoryLastEnd.cmd == HistoryItem.CMD_UPDATE
@@ -1185,6 +1186,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mHistoryEnd.setTo(mHistoryEnd.time, HistoryItem.CMD_UPDATE, mHistoryCur);
             }
             return;
+        }
+
+        if (mNumHistoryItems == MAX_HISTORY_ITEMS) {
+            addHistoryRecordLocked(curTime, HistoryItem.CMD_OVERFLOW);
         }
 
         if (mNumHistoryItems >= MAX_HISTORY_ITEMS) {
@@ -1324,6 +1329,20 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mHandler.sendMessageDelayed(m, DELAY_UPDATE_WAKELOCKS);
             }
             getUidStatsLocked(uid).noteStopWakeLocked(pid, name, type);
+        }
+    }
+
+    public void noteStartWakeFromSourceLocked(WorkSource ws, int pid, String name, int type) {
+        int N = ws.size();
+        for (int i=0; i<N; i++) {
+            noteStartWakeLocked(ws.get(i), pid, name, type);
+        }
+    }
+
+    public void noteStopWakeFromSourceLocked(WorkSource ws, int pid, String name, int type) {
+        int N = ws.size();
+        for (int i=0; i<N; i++) {
+            noteStopWakeLocked(ws.get(i), pid, name, type);
         }
     }
 
@@ -1945,6 +1964,48 @@ public final class BatteryStatsImpl extends BatteryStats {
             addHistoryRecordLocked(SystemClock.elapsedRealtime());
         }
         getUidStatsLocked(uid).noteWifiMulticastDisabledLocked();
+    }
+
+    public void noteFullWifiLockAcquiredFromSourceLocked(WorkSource ws) {
+        int N = ws.size();
+        for (int i=0; i<N; i++) {
+            noteFullWifiLockAcquiredLocked(ws.get(i));
+        }
+    }
+
+    public void noteFullWifiLockReleasedFromSourceLocked(WorkSource ws) {
+        int N = ws.size();
+        for (int i=0; i<N; i++) {
+            noteFullWifiLockReleasedLocked(ws.get(i));
+        }
+    }
+
+    public void noteScanWifiLockAcquiredFromSourceLocked(WorkSource ws) {
+        int N = ws.size();
+        for (int i=0; i<N; i++) {
+            noteScanWifiLockAcquiredLocked(ws.get(i));
+        }
+    }
+
+    public void noteScanWifiLockReleasedFromSourceLocked(WorkSource ws) {
+        int N = ws.size();
+        for (int i=0; i<N; i++) {
+            noteScanWifiLockReleasedLocked(ws.get(i));
+        }
+    }
+
+    public void noteWifiMulticastEnabledFromSourceLocked(WorkSource ws) {
+        int N = ws.size();
+        for (int i=0; i<N; i++) {
+            noteWifiMulticastEnabledLocked(ws.get(i));
+        }
+    }
+
+    public void noteWifiMulticastDisabledFromSourceLocked(WorkSource ws) {
+        int N = ws.size();
+        for (int i=0; i<N; i++) {
+            noteWifiMulticastDisabledLocked(ws.get(i));
+        }
     }
 
     @Override public long getScreenOnTime(long batteryRealtime, int which) {
