@@ -104,6 +104,14 @@ public class BluetoothService extends IBluetooth.Stub {
     private static final int MESSAGE_FINISH_DISABLE = 2;
     private static final int MESSAGE_UUID_INTENT = 3;
     private static final int MESSAGE_DISCOVERABLE_TIMEOUT = 4;
+    private static final int MESSAGE_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY = 5;
+
+    // The time (in millisecs) to delay the pairing attempt after the first
+    // auto pairing attempt fails. We use an exponential delay with
+    // INIT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY as the initial value and
+    // MAX_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY as the max value.
+    private static final long INIT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY = 3000;
+    private static final long MAX_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY = 12000;
 
     // The timeout used to sent the UUIDs Intent
     // This timeout should be greater than the page timeout
@@ -502,6 +510,13 @@ public class BluetoothService extends IBluetooth.Stub {
                     setScanMode(BluetoothAdapter.SCAN_MODE_CONNECTABLE, -1);
                 }
                 break;
+            case MESSAGE_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY:
+                address = (String)msg.obj;
+                if (address != null) {
+                    createBond(address);
+                    return;
+                }
+                break;
             }
         }
     };
@@ -591,8 +606,68 @@ public class BluetoothService extends IBluetooth.Stub {
         Binder.restoreCallingIdentity(origCallerIdentityToken);
     }
 
-    /* package */ BondState getBondState() {
-        return mBondState;
+    /*package*/ synchronized boolean attemptAutoPair(String address) {
+        if (!mBondState.hasAutoPairingFailed(address) &&
+                !mBondState.isAutoPairingBlacklisted(address)) {
+            mBondState.attempt(address);
+            setPin(address, BluetoothDevice.convertPinToBytes("0000"));
+            return true;
+        }
+        return false;
+    }
+
+    /*package*/ synchronized void onCreatePairedDeviceResult(String address, int result) {
+        if (result == BluetoothDevice.BOND_SUCCESS) {
+            setBondState(address, BluetoothDevice.BOND_BONDED);
+            if (mBondState.isAutoPairingAttemptsInProgress(address)) {
+                mBondState.clearPinAttempts(address);
+            }
+        } else if (result == BluetoothDevice.UNBOND_REASON_AUTH_FAILED &&
+                mBondState.getAttempt(address) == 1) {
+            mBondState.addAutoPairingFailure(address);
+            pairingAttempt(address, result);
+        } else if (result == BluetoothDevice.UNBOND_REASON_REMOTE_DEVICE_DOWN &&
+              mBondState.isAutoPairingAttemptsInProgress(address)) {
+            pairingAttempt(address, result);
+        } else {
+            setBondState(address, BluetoothDevice.BOND_NONE, result);
+            if (mBondState.isAutoPairingAttemptsInProgress(address)) {
+                mBondState.clearPinAttempts(address);
+            }
+        }
+    }
+
+    /*package*/ synchronized String getPendingOutgoingBonding() {
+        return mBondState.getPendingOutgoingBonding();
+    }
+
+    private void pairingAttempt(String address, int result) {
+        // This happens when our initial guess of "0000" as the pass key
+        // fails. Try to create the bond again and display the pin dialog
+        // to the user. Use back-off while posting the delayed
+        // message. The initial value is
+        // INIT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY and the max value is
+        // MAX_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY. If the max value is
+        // reached, display an error to the user.
+        int attempt = mBondState.getAttempt(address);
+        if (attempt * INIT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY >
+                    MAX_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY) {
+            mBondState.clearPinAttempts(address);
+            setBondState(address, BluetoothDevice.BOND_NONE, result);
+            return;
+        }
+
+        Message message = mHandler.obtainMessage(MESSAGE_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY);
+        message.obj = address;
+        boolean postResult =  mHandler.sendMessageDelayed(message,
+                                        attempt * INIT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY);
+        if (!postResult) {
+            mBondState.clearPinAttempts(address);
+            setBondState(address,
+                    BluetoothDevice.BOND_NONE, result);
+            return;
+        }
+        mBondState.attempt(address);
     }
 
     /** local cache of bonding state.
@@ -1259,12 +1334,25 @@ public class BluetoothService extends IBluetooth.Stub {
         return mBondState.listInState(BluetoothDevice.BOND_BONDED);
     }
 
+    /*package*/ synchronized String[] listInState(int state) {
+      return mBondState.listInState(state);
+    }
+
     public synchronized int getBondState(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return BluetoothDevice.ERROR;
         }
         return mBondState.getBondState(address.toUpperCase());
+    }
+
+    /*package*/ synchronized boolean setBondState(String address, int state) {
+        return setBondState(address, state, 0);
+    }
+
+    /*package*/ synchronized boolean setBondState(String address, int state, int reason) {
+        mBondState.setBondState(address.toUpperCase(), state);
+        return true;
     }
 
     public synchronized boolean isBluetoothDock(String address) {
