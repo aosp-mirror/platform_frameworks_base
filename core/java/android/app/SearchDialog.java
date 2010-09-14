@@ -588,7 +588,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      */
     private void updateVoiceButton(boolean empty) {
         int visibility = View.GONE;
-        if (mSearchable.getVoiceSearchEnabled() && empty) {
+        if ((mAppSearchData == null || !mAppSearchData.getBoolean(
+                SearchManager.DISABLE_VOICE_SEARCH, false))
+                && mSearchable.getVoiceSearchEnabled() && empty) {
             Intent testIntent = null;
             if (mSearchable.getVoiceSearchLaunchWebSearch()) {
                 testIntent = mVoiceWebSearchIntent;
