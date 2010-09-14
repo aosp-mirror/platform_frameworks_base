@@ -129,7 +129,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
 
     private static final int CORE_POOL_SIZE = 5;
     private static final int MAXIMUM_POOL_SIZE = 128;
-    private static final int KEEP_ALIVE = 10;
+    private static final int KEEP_ALIVE = 1;
 
     private static final BlockingQueue<Runnable> sWorkQueue =
             new LinkedBlockingQueue<Runnable>(10);
