@@ -45,8 +45,8 @@ class UriPermission {
         uri = _uri;
     }
     
-    void clearModes(int modeFlags) {
-        if ((modeFlags&Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0) {
+    void clearModes(int modeFlagsToClear) {
+        if ((modeFlagsToClear&Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0) {
             globalModeFlags &= ~Intent.FLAG_GRANT_READ_URI_PERMISSION;
             modeFlags &= ~Intent.FLAG_GRANT_READ_URI_PERMISSION;
             if (readOwners.size() > 0) {
@@ -56,7 +56,7 @@ class UriPermission {
                 readOwners.clear();
             }
         }
-        if ((modeFlags&Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0) {
+        if ((modeFlagsToClear&Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0) {
             globalModeFlags &= ~Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
             modeFlags &= ~Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
             if (readOwners.size() > 0) {
