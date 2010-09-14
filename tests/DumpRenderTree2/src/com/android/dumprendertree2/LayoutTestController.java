@@ -35,12 +35,9 @@ public class LayoutTestController {
         mLayoutTestsExecutor = layoutTestsExecutor;
     }
 
-    public void waitUntilDone() {
-        mLayoutTestsExecutor.waitUntilDone();
-    }
-
-    public void notifyDone() {
-        mLayoutTestsExecutor.notifyDone();
+    public void clearAllDatabases() {
+        Log.i(LOG_TAG, "clearAllDatabases() called");
+        WebStorage.getInstance().deleteAllData();
     }
 
     public void dumpAsText() {
@@ -55,17 +52,20 @@ public class LayoutTestController {
         mLayoutTestsExecutor.dumpChildFramesAsText();
     }
 
-    public void clearAllDatabases() {
-        Log.i(LOG_TAG, "clearAllDatabases() called");
-        WebStorage.getInstance().deleteAllData();
+    public void dumpDatabaseCallbacks() {
+        mLayoutTestsExecutor.dumpDatabaseCallbacks();
+    }
+
+    public void notifyDone() {
+        mLayoutTestsExecutor.notifyDone();
+    }
+
+    public void overridePreference(String key, boolean value) {
+        mLayoutTestsExecutor.overridePreference(key, value);
     }
 
     public void setCanOpenWindows() {
         mLayoutTestsExecutor.setCanOpenWindows();
-    }
-
-    public void dumpDatabaseCallbacks() {
-        mLayoutTestsExecutor.dumpDatabaseCallbacks();
     }
 
     public void setDatabaseQuota(long quota) {
@@ -79,21 +79,6 @@ public class LayoutTestController {
         mLayoutTestsExecutor.setGeolocationPermission(allow);
     }
 
-    public void overridePreference(String key, boolean value) {
-        mLayoutTestsExecutor.overridePreference(key, value);
-    }
-
-    public void setMockGeolocationPosition(double latitude, double longitude, double accuracy) {
-        Log.i(LOG_TAG, "setMockGeolocationPosition(): " + "latitude=" + latitude +
-                " longitude=" + longitude + " accuracy=" + accuracy);
-        MockGeolocation.getInstance().setPosition(latitude, longitude, accuracy);
-    }
-
-    public void setMockGeolocationError(int code, String message) {
-        Log.i(LOG_TAG, "setMockGeolocationError(): " + "code=" + code + " message=" + message);
-        MockGeolocation.getInstance().setError(code, message);
-    }
-
     public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,
             boolean canProvideBeta, double beta, boolean canProvideGamma, double gamma) {
         // Configuration is in WebKit, so stay on WebCore thread, but go via LayoutTestsExecutor
@@ -103,5 +88,20 @@ public class LayoutTestController {
                 ", " + gamma + ")");
         mLayoutTestsExecutor.setMockDeviceOrientation(
                 canProvideAlpha, alpha, canProvideBeta, beta, canProvideGamma, gamma);
+    }
+
+    public void setMockGeolocationError(int code, String message) {
+        Log.i(LOG_TAG, "setMockGeolocationError(): " + "code=" + code + " message=" + message);
+        MockGeolocation.getInstance().setError(code, message);
+    }
+
+    public void setMockGeolocationPosition(double latitude, double longitude, double accuracy) {
+        Log.i(LOG_TAG, "setMockGeolocationPosition(): " + "latitude=" + latitude +
+                " longitude=" + longitude + " accuracy=" + accuracy);
+        MockGeolocation.getInstance().setPosition(latitude, longitude, accuracy);
+    }
+
+    public void waitUntilDone() {
+        mLayoutTestsExecutor.waitUntilDone();
     }
 }
