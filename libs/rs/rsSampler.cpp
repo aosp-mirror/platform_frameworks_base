@@ -67,25 +67,29 @@ void Sampler::setupGL(const Context *rsc, bool npot)
         GL_LINEAR_MIPMAP_LINEAR, //RS_SAMPLER_LINEAR_MIP_LINEAR,
         GL_REPEAT, //RS_SAMPLER_WRAP,
         GL_CLAMP_TO_EDGE, //RS_SAMPLER_CLAMP
-
     };
 
-    bool forceNonMip = false;
-    if (!rsc->ext_OES_texture_npot() && npot) {
-        forceNonMip = true;
-    }
+    GLenum transNP[] = {
+        GL_NEAREST, //RS_SAMPLER_NEAREST,
+        GL_LINEAR, //RS_SAMPLER_LINEAR,
+        GL_LINEAR, //RS_SAMPLER_LINEAR_MIP_LINEAR,
+        GL_CLAMP_TO_EDGE, //RS_SAMPLER_WRAP,
+        GL_CLAMP_TO_EDGE, //RS_SAMPLER_CLAMP
+    };
 
-    if ((mMinFilter == RS_SAMPLER_LINEAR_MIP_LINEAR) && forceNonMip) {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (!rsc->ext_OES_texture_npot() && npot) {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, transNP[mMinFilter]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, transNP[mMagFilter]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, transNP[mWrapS]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, transNP[mWrapT]);
     } else {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, trans[mMinFilter]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, trans[mMagFilter]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, trans[mWrapS]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, trans[mWrapT]);
     }
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, trans[mMagFilter]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, trans[mWrapS]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, trans[mWrapT]);
 
-
-    rsc->checkError("ProgramFragment::setupGL2 tex env");
+    rsc->checkError("Sampler::setupGL2 tex env");
 }
 
 void Sampler::bindToContext(SamplerState *ss, uint32_t slot)
@@ -103,7 +107,7 @@ void Sampler::unbindFromContext(SamplerState *ss)
 
 void Sampler::serialize(OStream *stream) const
 {
-    
+
 }
 
 Sampler *Sampler::createFromStream(Context *rsc, IStream *stream)
