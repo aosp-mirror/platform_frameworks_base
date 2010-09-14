@@ -1714,7 +1714,6 @@ public class SyncManager implements OnAccountsUpdateListener {
                 Log.v(TAG, "runStateIdle: setting mActiveSyncContext to " + mActiveSyncContext);
             }
             mSyncStorageEngine.setActiveSync(mActiveSyncContext);
-            mSyncWakeLock.setWorkSource(new WorkSource(syncAdapterInfo.uid));
             if (!activeSyncContext.bindToSyncAdapter(syncAdapterInfo)) {
                 Log.e(TAG, "Bind attempt failed to " + syncAdapterInfo);
                 mActiveSyncContext.close();
@@ -1737,6 +1736,7 @@ public class SyncManager implements OnAccountsUpdateListener {
             PowerManager.WakeLock oldWakeLock = mSyncWakeLock;
             try {
                 mSyncWakeLock = getSyncWakeLock(op.account.type, op.authority);
+				mSyncWakeLock.setWorkSource(new WorkSource(syncAdapterInfo.uid));
                 mSyncWakeLock.acquire();
             } finally {
                 if (oldWakeLock != null && oldWakeLock != mSyncWakeLock) {
