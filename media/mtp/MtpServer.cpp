@@ -21,6 +21,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <sys/stat.h>
+#include <dirent.h>
 
 #include <cutils/properties.h>
 
@@ -686,21 +688,77 @@ done:
     return result;
 }
 
+static void deleteRecursive(const char* path) {
+    char pathbuf[PATH_MAX];
+    int pathLength = strlen(path);
+    if (pathLength >= sizeof(pathbuf) - 1) {
+        LOGE("path too long: %s\n", path);
+    }
+    strcpy(pathbuf, path);
+    if (pathbuf[pathLength - 1] != '/') {
+        pathbuf[pathLength++] = '/';
+    }
+    char* fileSpot = pathbuf + pathLength;
+    int pathRemaining = sizeof(pathbuf) - pathLength - 1;
+
+    DIR* dir = opendir(path);
+    if (!dir) {
+        LOGE("opendir %s failed: %s", path, strerror(errno));
+        return;
+    }
+
+    struct dirent* entry;
+    while ((entry = readdir(dir))) {
+        const char* name = entry->d_name;
+
+        // ignore "." and ".."
+        if (name[0] == '.' && (name[1] == 0 || (name[1] == '.' && name[2] == 0))) {
+            continue;
+        }
+
+        int nameLength = strlen(name);
+        if (nameLength > pathRemaining) {
+            LOGE("path %s/%s too long\n", path, name);
+            continue;
+        }
+        strcpy(fileSpot, name);
+
+        int type = entry->d_type;
+        if (entry->d_type == DT_DIR) {
+            deleteRecursive(pathbuf);
+            rmdir(pathbuf);
+        } else {
+            unlink(pathbuf);
+        }
+    }
+}
+
+static void deletePath(const char* path) {
+    struct stat statbuf;
+    if (stat(path, &statbuf) == 0) {
+        if (S_ISDIR(statbuf.st_mode)) {
+            deleteRecursive(path);
+            rmdir(path);
+        } else {
+            unlink(path);
+        }
+    } else {
+        LOGE("deletePath stat failed for %s: %s", path, strerror(errno));
+    }
+}
+
 MtpResponseCode MtpServer::doDeleteObject() {
     MtpObjectHandle handle = mRequest.getParameter(1);
-    MtpObjectFormat format = mRequest.getParameter(1);
+    MtpObjectFormat format = mRequest.getParameter(2);
     // FIXME - support deleting all objects if handle is 0xFFFFFFFF
     // FIXME - implement deleting objects by format
-    // FIXME - handle non-empty directories
 
     MtpString filePath;
     int64_t fileLength;
     int result = mDatabase->getObjectFilePath(handle, filePath, fileLength);
     if (result == MTP_RESPONSE_OK) {
         LOGV("deleting %s", (const char *)filePath);
-        // one of these should work
-        rmdir((const char *)filePath);
-        unlink((const char *)filePath);
+        deletePath((const char *)filePath);
         return mDatabase->deleteFile(handle);
     } else {
         return result;
