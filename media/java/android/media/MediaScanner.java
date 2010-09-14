@@ -110,15 +110,28 @@ public class MediaScanner
 
     private final static String TAG = "MediaScanner";
 
-    private static final String[] PRESCAN_PROJECTION = new String[] {
+    private static final String[] FILES_PRESCAN_PROJECTION = new String[] {
             Files.FileColumns._ID, // 0
             Files.FileColumns.DATA, // 1
-            Files.FileColumns.DATE_MODIFIED, // 2
+            Files.FileColumns.FORMAT, // 2
+            Files.FileColumns.DATE_MODIFIED, // 3
     };
 
-    private static final int PRESCAN_ID_COLUMN_INDEX = 0;
-    private static final int PRESCAN_PATH_COLUMN_INDEX = 1;
-    private static final int PRESCAN_DATE_MODIFIED_COLUMN_INDEX = 2;
+    private static final int FILES_PRESCAN_ID_COLUMN_INDEX = 0;
+    private static final int FILES_PRESCAN_PATH_COLUMN_INDEX = 1;
+    private static final int FILES_PRESCAN_FORMAT_COLUMN_INDEX = 2;
+    private static final int FILES_PRESCAN_DATE_MODIFIED_COLUMN_INDEX = 3;
+
+    private static final String[] MEDIA_PRESCAN_PROJECTION = new String[] {
+            MediaStore.MediaColumns._ID, // 0
+            MediaStore.MediaColumns.DATA, // 1
+            MediaStore.MediaColumns.DATE_MODIFIED, // 2
+    };
+
+    private static final int MEDIA_PRESCAN_ID_COLUMN_INDEX = 0;
+    private static final int MEDIA_PRESCAN_PATH_COLUMN_INDEX = 1;
+    private static final int MEDIA_PRESCAN_DATE_MODIFIED_COLUMN_INDEX = 2;
+
 
     private static final String[] PLAYLIST_MEMBERS_PROJECTION = new String[] {
             Audio.Playlists.Members.PLAYLIST_ID, // 0
@@ -316,14 +329,16 @@ public class MediaScanner
         long mRowId;
         String mPath;
         long mLastModified;
+        int mFormat;
         boolean mSeenInFileSystem;
         boolean mLastModifiedChanged;
 
-        FileCacheEntry(Uri tableUri, long rowId, String path, long lastModified) {
+        FileCacheEntry(Uri tableUri, long rowId, String path, long lastModified, int format) {
             mTableUri = tableUri;
             mRowId = rowId;
             mPath = path;
             mLastModified = lastModified;
+            mFormat = format;
             mSeenInFileSystem = false;
             mLastModifiedChanged = false;
         }
@@ -444,7 +459,7 @@ public class MediaScanner
                 } else {
                     tableUri = mFilesUri;
                 }
-                entry = new FileCacheEntry(tableUri, 0, path, 0);
+                entry = new FileCacheEntry(tableUri, 0, path, 0, 0);
                 mFileCache.put(key, entry);
             }
             entry.mSeenInFileSystem = true;
@@ -884,13 +899,15 @@ public class MediaScanner
             if (prescanFiles) {
                 // First read existing files from the files table
 
-                c = mMediaProvider.query(mFilesUri, PRESCAN_PROJECTION, where, selectionArgs, null);
+                c = mMediaProvider.query(mFilesUri, FILES_PRESCAN_PROJECTION,
+                        where, selectionArgs, null);
 
                 if (c != null) {
                     while (c.moveToNext()) {
-                        long rowId = c.getLong(PRESCAN_ID_COLUMN_INDEX);
-                        String path = c.getString(PRESCAN_PATH_COLUMN_INDEX);
-                        long lastModified = c.getLong(PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
+                        long rowId = c.getLong(FILES_PRESCAN_ID_COLUMN_INDEX);
+                        String path = c.getString(FILES_PRESCAN_PATH_COLUMN_INDEX);
+                        int format = c.getInt(FILES_PRESCAN_FORMAT_COLUMN_INDEX);
+                        long lastModified = c.getLong(FILES_PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
 
                         // Only consider entries with absolute path names.
                         // This allows storing URIs in the database without the
@@ -902,7 +919,7 @@ public class MediaScanner
                             }
 
                             FileCacheEntry entry = new FileCacheEntry(mFilesUri, rowId, path,
-                                    lastModified);
+                                    lastModified, format);
                             mFileCache.put(key, entry);
                         }
                     }
@@ -912,12 +929,13 @@ public class MediaScanner
             }
 
             // Read existing files from the audio table and update FileCacheEntry
-            c = mMediaProvider.query(mAudioUri, PRESCAN_PROJECTION, where, selectionArgs, null);
+            c = mMediaProvider.query(mAudioUri, MEDIA_PRESCAN_PROJECTION,
+                    where, selectionArgs, null);
             if (c != null) {
                 while (c.moveToNext()) {
-                    long rowId = c.getLong(PRESCAN_ID_COLUMN_INDEX);
-                    String path = c.getString(PRESCAN_PATH_COLUMN_INDEX);
-                    long lastModified = c.getLong(PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
+                    long rowId = c.getLong(MEDIA_PRESCAN_ID_COLUMN_INDEX);
+                    String path = c.getString(MEDIA_PRESCAN_PATH_COLUMN_INDEX);
+                    long lastModified = c.getLong(MEDIA_PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
 
                     // Only consider entries with absolute path names.
                     // This allows storing URIs in the database without the
@@ -930,7 +948,7 @@ public class MediaScanner
                         FileCacheEntry entry = mFileCache.get(path);
                         if (entry == null) {
                             mFileCache.put(key, new FileCacheEntry(mAudioUri, rowId, path,
-                                    lastModified));
+                                    lastModified, 0));
                         } else {
                             // update the entry
                             entry.mTableUri = mAudioUri;
@@ -943,12 +961,13 @@ public class MediaScanner
             }
 
             // Read existing files from the video table and update FileCacheEntry
-            c = mMediaProvider.query(mVideoUri, PRESCAN_PROJECTION, where, selectionArgs, null);
+            c = mMediaProvider.query(mVideoUri, MEDIA_PRESCAN_PROJECTION,
+                    where, selectionArgs, null);
             if (c != null) {
                 while (c.moveToNext()) {
-                    long rowId = c.getLong(PRESCAN_ID_COLUMN_INDEX);
-                    String path = c.getString(PRESCAN_PATH_COLUMN_INDEX);
-                    long lastModified = c.getLong(PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
+                    long rowId = c.getLong(MEDIA_PRESCAN_ID_COLUMN_INDEX);
+                    String path = c.getString(MEDIA_PRESCAN_PATH_COLUMN_INDEX);
+                    long lastModified = c.getLong(MEDIA_PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
 
                     // Only consider entries with absolute path names.
                     // This allows storing URIs in the database without the
@@ -961,7 +980,7 @@ public class MediaScanner
                         FileCacheEntry entry = mFileCache.get(path);
                         if (entry == null) {
                             mFileCache.put(key, new FileCacheEntry(mVideoUri, rowId, path,
-                                    lastModified));
+                                    lastModified, 0));
                         } else {
                             // update the entry
                             entry.mTableUri = mVideoUri;
@@ -974,12 +993,13 @@ public class MediaScanner
             }
 
             // Read existing files from the video table and update FileCacheEntry
-            c = mMediaProvider.query(mImagesUri, PRESCAN_PROJECTION, where, selectionArgs, null);
+            c = mMediaProvider.query(mImagesUri, MEDIA_PRESCAN_PROJECTION,
+                    where, selectionArgs, null);
             if (c != null) {
                 while (c.moveToNext()) {
-                    long rowId = c.getLong(PRESCAN_ID_COLUMN_INDEX);
-                    String path = c.getString(PRESCAN_PATH_COLUMN_INDEX);
-                    long lastModified = c.getLong(PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
+                    long rowId = c.getLong(MEDIA_PRESCAN_ID_COLUMN_INDEX);
+                    String path = c.getString(MEDIA_PRESCAN_PATH_COLUMN_INDEX);
+                    long lastModified = c.getLong(MEDIA_PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
 
                     // Only consider entries with absolute path names.
                     // This allows storing URIs in the database without the
@@ -992,7 +1012,7 @@ public class MediaScanner
                         FileCacheEntry entry = mFileCache.get(path);
                         if (entry == null) {
                             mFileCache.put(key, new FileCacheEntry(mImagesUri, rowId, path,
-                                    lastModified));
+                                    lastModified, 0));
                         } else {
                             // update the entry
                             entry.mTableUri = mImagesUri;
@@ -1006,13 +1026,13 @@ public class MediaScanner
 
             if (mProcessPlaylists) {
                 // Read existing files from the playlists table and update FileCacheEntry
-                c = mMediaProvider.query(mPlaylistsUri, PRESCAN_PROJECTION, where,
-                                            selectionArgs, null);
+                c = mMediaProvider.query(mPlaylistsUri, MEDIA_PRESCAN_PROJECTION,
+                        where, selectionArgs, null);
                 if (c != null) {
                     while (c.moveToNext()) {
-                        long rowId = c.getLong(PRESCAN_ID_COLUMN_INDEX);
-                        String path = c.getString(PRESCAN_PATH_COLUMN_INDEX);
-                        long lastModified = c.getLong(PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
+                        long rowId = c.getLong(MEDIA_PRESCAN_ID_COLUMN_INDEX);
+                        String path = c.getString(MEDIA_PRESCAN_PATH_COLUMN_INDEX);
+                        long lastModified = c.getLong(MEDIA_PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
 
                         // Only consider entries with absolute path names.
                         // This allows storing URIs in the database without the
@@ -1025,7 +1045,7 @@ public class MediaScanner
                             FileCacheEntry entry = mFileCache.get(path);
                             if (entry == null) {
                                 mFileCache.put(key, new FileCacheEntry(mPlaylistsUri, rowId, path,
-                                        lastModified));
+                                        lastModified, 0));
                             } else {
                                 // update the entry
                                 entry.mTableUri = mPlaylistsUri;
@@ -1109,12 +1129,14 @@ public class MediaScanner
             // remove database entries for files that no longer exist.
             boolean fileMissing = false;
 
-            if (!entry.mSeenInFileSystem) {
-                if (inScanDirectory(path, directories)) {
+            if (!entry.mSeenInFileSystem && !MtpConstants.isAbstractObject(entry.mFormat)) {
+                if (entry.mFormat != MtpConstants.FORMAT_ASSOCIATION &&
+                        inScanDirectory(path, directories)) {
                     // we didn't see this file in the scan directory.
                     fileMissing = true;
                 } else {
-                    // the file is outside of our scan directory,
+                    // the file actually a directory or other abstract object
+                    // or is outside of our scan directory,
                     // so we need to check for file existence here.
                     File testFile = new File(path);
                     if (!testFile.exists()) {
@@ -1134,9 +1156,11 @@ public class MediaScanner
                     ContentValues values = new ContentValues();
                     values.put(MediaStore.Audio.Playlists.DATA, "");
                     values.put(MediaStore.Audio.Playlists.DATE_MODIFIED, 0);
-                    mMediaProvider.update(ContentUris.withAppendedId(mPlaylistsUri, entry.mRowId), values, null, null);
+                    mMediaProvider.update(ContentUris.withAppendedId(mPlaylistsUri, entry.mRowId),
+                            values, null, null);
                 } else {
-                    mMediaProvider.delete(ContentUris.withAppendedId(mFilesUri, entry.mRowId), null, null);
+                    mMediaProvider.delete(ContentUris.withAppendedId(mFilesUri, entry.mRowId),
+                            null, null);
                     iterator.remove();
                 }
             }
