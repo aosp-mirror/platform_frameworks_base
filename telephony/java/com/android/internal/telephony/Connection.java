@@ -39,6 +39,7 @@ public abstract class Connection {
         CONGESTION,                     /* outgoing call to congested network */
         MMI,                            /* not presently used; dial() returns null */
         INVALID_NUMBER,                 /* invalid dial string */
+        NUMBER_UNREACHABLE,             /* cannot reach the peer */
         INVALID_CREDENTIALS,            /* invalid credentials */
         TIMED_OUT,                      /* client timed out */
         LOST_SIGNAL,
