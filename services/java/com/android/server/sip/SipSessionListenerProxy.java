@@ -40,7 +40,7 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
         // One thread for each calling back.
         // Note: Guarantee ordering if the issue becomes important. Currently,
         // the chance of handling two callback events at a time is none.
-        new Thread(runnable).start();
+        new Thread(runnable, "SipSessionCallbackThread").start();
     }
 
     public void onCalling(final ISipSession session) {
