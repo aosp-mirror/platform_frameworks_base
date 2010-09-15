@@ -818,9 +818,9 @@ public class SipPhone extends SipPhoneBase {
         }
 
         @Override
-        public void onError(SipAudioCall call, String errorCode,
+        public void onError(SipAudioCall call, SipErrorCode errorCode,
                 String errorMessage) {
-            switch (Enum.valueOf(SipErrorCode.class, errorCode)) {
+            switch (errorCode) {
                 case INVALID_REMOTE_URI:
                     onError(Connection.DisconnectCause.INVALID_NUMBER);
                     break;
