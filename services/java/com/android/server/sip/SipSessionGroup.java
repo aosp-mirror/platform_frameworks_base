@@ -153,6 +153,13 @@ class SipSessionGroup implements SipListener {
         mSessionMap.clear();
     }
 
+    synchronized void onConnectivityChanged() {
+        for (SipSessionImpl s : mSessionMap.values()) {
+            s.onError(SipErrorCode.DATA_CONNECTION_LOST,
+                    "data connection lost");
+        }
+    }
+
     public SipProfile getLocalProfile() {
         return mLocalProfile;
     }
@@ -210,10 +217,10 @@ class SipSessionGroup implements SipListener {
 
     private synchronized SipSessionImpl getSipSession(EventObject event) {
         String key = SipHelper.getCallId(event);
-        Log.d(TAG, " sesssion key from event: " + key);
-        Log.d(TAG, " active sessions:");
+        Log.d(TAG, "sesssion key from event: " + key);
+        Log.d(TAG, "active sessions:");
         for (String k : mSessionMap.keySet()) {
-            Log.d(TAG, "   .....  '" + k + "': " + mSessionMap.get(k));
+            Log.d(TAG, " ..." + k + ": " + mSessionMap.get(k));
         }
         SipSessionImpl session = mSessionMap.get(key);
         return ((session != null) ? session : mCallReceiverSession);
@@ -222,7 +229,7 @@ class SipSessionGroup implements SipListener {
     private synchronized void addSipSession(SipSessionImpl newSession) {
         removeSipSession(newSession);
         String key = newSession.getCallId();
-        Log.d(TAG, " +++++  add a session with key:  '" + key + "'");
+        Log.d(TAG, "+++  add a session with key:  '" + key + "'");
         mSessionMap.put(key, newSession);
         for (String k : mSessionMap.keySet()) {
             Log.d(TAG, "   .....  " + k + ": " + mSessionMap.get(k));
@@ -998,7 +1005,8 @@ class SipSessionGroup implements SipListener {
                     onRegistrationFailed(errorCode, message);
                     break;
                 default:
-                    if (mInCall) {
+                    if ((errorCode != SipErrorCode.DATA_CONNECTION_LOST)
+                            && mInCall) {
                         fallbackToPreviousInCall(errorCode, message);
                     } else {
                         endCallOnError(errorCode, message);
