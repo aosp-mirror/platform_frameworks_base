@@ -96,8 +96,8 @@ public interface SipAudioCall {
     }
 
     /**
-     * The adapter class for {@link SipAudioCall#Listener}. The default
-     * implementation of all callback methods is no-op.
+     * The adapter class for {@link Listener}. The default implementation of
+     * all callback methods is no-op.
      */
     public class Adapter implements Listener {
         protected void onChanged(SipAudioCall call) {
@@ -134,7 +134,7 @@ public interface SipAudioCall {
 
     /**
      * Sets the listener to listen to the audio call events. The method calls
-     * {@link #setListener(Listener, false)}.
+     * {@code setListener(listener, false)}.
      *
      * @param listener to listen to the audio call events of this object
      * @see #setListener(Listener, boolean)
@@ -178,8 +178,8 @@ public interface SipAudioCall {
     void endCall() throws SipException;
 
     /**
-     * Puts a call on hold.  When succeeds,
-     * {@link #Listener#onCallHeld(SipAudioCall)} is called.
+     * Puts a call on hold.  When succeeds, {@link Listener#onCallHeld} is
+     * called.
      */
     void holdCall() throws SipException;
 
@@ -188,7 +188,7 @@ public interface SipAudioCall {
 
     /**
      * Continues a call that's on hold. When succeeds,
-     * {@link #Listener#onCallEstablished(SipAudioCall)} is called.
+     * {@link Listener#onCallEstablished} is called.
      */
     void continueCall() throws SipException;
 
