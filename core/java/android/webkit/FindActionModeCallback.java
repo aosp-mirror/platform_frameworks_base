@@ -44,6 +44,7 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
     private boolean mMatchesFound;
     private int mNumberOfMatches;
     private View mTitleBar;
+    private ActionMode mActionMode;
 
     FindActionModeCallback(Context context) {
         mCustomView = LayoutInflater.from(context).inflate(
@@ -62,6 +63,10 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
     }
 
     void setTitleBar(View v) { mTitleBar = v; }
+
+    void finish() {
+        mActionMode.finish();
+    }
 
     /*
      * Place text in the text field so it can be searched for.  Need to press
@@ -156,6 +161,7 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         mode.setCustomView(mCustomView);
         mode.getMenuInflater().inflate(com.android.internal.R.menu.webview_find,
                 menu);
+        mActionMode = mode;
         Editable edit = mEditText.getText();
         Selection.setSelection(edit, edit.length());
         mMatches.setVisibility(View.GONE);
