@@ -206,11 +206,11 @@ public class CalendarUtils {
 
                 // Update the db
                 ContentValues values = new ContentValues();
-                if (mHandler == null) {
-                    mHandler = new AsyncTZHandler(context.getContentResolver());
+                if (mHandler != null) {
+                    mHandler.cancelOperation(mToken);
                 }
 
-                mHandler.cancelOperation(mToken);
+                mHandler = new AsyncTZHandler(context.getContentResolver());
 
                 // skip 0 so query can use it
                 if (++mToken == 0) {
