@@ -110,6 +110,7 @@ public class CalendarUtils {
                             }
                         }
                     }
+                    cursor.close();
                     if (writePrefs) {
                         SharedPreferences prefs = getSharedPreferences((Context)cookie, mPrefsName);
                         // Write the prefs
