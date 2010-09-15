@@ -48,7 +48,8 @@ import java.text.ParseException;
  * <li>process SIP events directly with a {@link SipSession} created by
  *      {@link #createSipSession}.</li>
  * </ul>
- * @hide
+ * {@code SipManager} can only be instantiated if SIP API is supported by the
+ * device. (See {@link #isApiSupported}).
  */
 public class SipManager {
     /**
@@ -58,10 +59,17 @@ public class SipManager {
      */
     public static final int INCOMING_CALL_RESULT_CODE = 101;
 
-    /** Part of the incoming call intent. */
+    /**
+     * Key to retrieve the call ID from an incoming call intent.
+     * @see #open(SipProfile, PendingIntent, SipRegistrationListener)
+     */
     public static final String EXTRA_CALL_ID = "android:sipCallID";
 
-    /** Part of the incoming call intent. */
+    /**
+     * Key to retrieve the offered session description from an incoming call
+     * intent.
+     * @see #open(SipProfile, PendingIntent, SipRegistrationListener)
+     */
     public static final String EXTRA_OFFER_SD = "android:sipOfferSD";
 
     /**
@@ -178,7 +186,11 @@ public class SipManager {
      * make subsequent calls through {@link #makeAudioCall}. If the
      * auto-registration option is enabled in the profile, the SIP service
      * will register the profile to the corresponding SIP provider periodically
-     * in order to receive calls from the provider.
+     * in order to receive calls from the provider. When the SIP service
+     * receives a new call, it will send out an intent with the provided action
+     * string. The intent contains a call ID extra and an offer session
+     * description string extra. Use {@link #getCallId} and
+     * {@link #getOfferSessionDescription} to retrieve those extras.
      *
      * @param localProfile the SIP profile to receive incoming calls for
      * @param incomingCallPendingIntent When an incoming call is received, the
@@ -194,6 +206,9 @@ public class SipManager {
      * @throws NullPointerException if {@code incomingCallPendingIntent} is null
      * @throws SipException if the profile contains incorrect settings or
      *      calling the SIP service results in an error
+     * @see #isIncomingCallIntent
+     * @see #getCallId
+     * @see #getOfferSessionDescription
      */
     public void open(SipProfile localProfile,
             PendingIntent incomingCallPendingIntent,
@@ -291,7 +306,8 @@ public class SipManager {
      * @param peerProfile the SIP profile to make the call to
      * @param listener to listen to the call events from {@link SipAudioCall};
      *      can be null
-     * @param timeout the timeout value in seconds
+     * @param timeout the timeout value in seconds. Default value (defined by
+     *        SIP protocol) is used if {@code timeout} is zero or negative.
      * @return a {@link SipAudioCall} object
      * @throws SipException if calling the SIP service results in an error
      * @see SipAudioCall.Listener.onError
@@ -321,7 +337,8 @@ public class SipManager {
      * @param peerProfileUri URI of the SIP profile to make the call to
      * @param listener to listen to the call events from {@link SipAudioCall};
      *      can be null
-     * @param timeout the timeout value in seconds
+     * @param timeout the timeout value in seconds. Default value (defined by
+     *        SIP protocol) is used if {@code timeout} is zero or negative.
      * @return a {@link SipAudioCall} object
      * @throws SipException if calling the SIP service results in an error
      * @see SipAudioCall.Listener.onError
@@ -489,7 +506,7 @@ public class SipManager {
     }
 
     /**
-     * Gets the {@link ISipSession} that handles the incoming call. For audio
+     * Gets the {@link SipSession} that handles the incoming call. For audio
      * calls, consider to use {@link SipAudioCall} to handle the incoming call.
      * See {@link #takeAudioCall}. Note that the method may be called only once
      * for the same intent. For subsequent calls on the same intent, the method
@@ -498,11 +515,12 @@ public class SipManager {
      * @param incomingCallIntent the incoming call broadcast intent
      * @return the session object that handles the incoming call
      */
-    public ISipSession getSessionFor(Intent incomingCallIntent)
+    public SipSession getSessionFor(Intent incomingCallIntent)
             throws SipException {
         try {
             String callId = getCallId(incomingCallIntent);
-            return mSipService.getPendingSession(callId);
+            ISipSession s = mSipService.getPendingSession(callId);
+            return new SipSession(s);
         } catch (RemoteException e) {
             throw new SipException("getSessionFor()", e);
         }
@@ -514,8 +532,8 @@ public class SipManager {
     }
 
     /**
-     * Creates a {@link ISipSession} with the specified profile. Use other
-     * methods, if applicable, instead of interacting with {@link ISipSession}
+     * Creates a {@link SipSession} with the specified profile. Use other
+     * methods, if applicable, instead of interacting with {@link SipSession}
      * directly.
      *
      * @param localProfile the SIP profile the session is associated with
