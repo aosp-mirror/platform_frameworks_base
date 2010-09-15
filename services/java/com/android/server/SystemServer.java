@@ -518,14 +518,8 @@ class ServerThread extends Thread {
         });
 
         // For debug builds, log event loop stalls to dropbox for analysis.
-        // Similar logic also appears in ActivityThread.java for system apps.
-        if (!"user".equals(Build.TYPE)) {
-            Slog.i(TAG, "Enabling StrictMode for system server.");
-            StrictMode.setThreadPolicy(
-                StrictMode.DISALLOW_DISK_WRITE |
-                StrictMode.DISALLOW_DISK_READ |
-                StrictMode.DISALLOW_NETWORK |
-                StrictMode.PENALTY_DROPBOX);
+        if (StrictMode.conditionallyEnableDebugLogging()) {
+            Slog.i(TAG, "Enabled StrictMode for system server main thread.");
         }
 
         Looper.loop();

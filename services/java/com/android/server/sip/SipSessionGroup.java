@@ -712,9 +712,15 @@ class SipSessionGroup implements SipListener {
                 case Response.UNAUTHORIZED:
                 case Response.PROXY_AUTHENTICATION_REQUIRED:
                     if (!handleAuthentication(event)) {
-                        Log.v(TAG, "Incorrect username/password");
-                        onRegistrationFailed(SipErrorCode.INVALID_CREDENTIALS,
-                                "incorrect username or password");
+                        if (mLastNonce == null) {
+                            onRegistrationFailed(SipErrorCode.SERVER_ERROR,
+                                    "server does not provide challenge");
+                        } else {
+                            Log.v(TAG, "Incorrect username/password");
+                            onRegistrationFailed(
+                                    SipErrorCode.INVALID_CREDENTIALS,
+                                    "incorrect username or password");
+                        }
                     }
                     return true;
                 default:
@@ -869,6 +875,9 @@ class SipSessionGroup implements SipListener {
                 case Response.PROXY_AUTHENTICATION_REQUIRED:
                     if (handleAuthentication(event)) {
                         addSipSession(this);
+                    } else if (mLastNonce == null) {
+                        endCallOnError(SipErrorCode.SERVER_ERROR,
+                                "server does not provide challenge");
                     } else {
                         endCallOnError(SipErrorCode.INVALID_CREDENTIALS,
                                 "incorrect username or password");
@@ -1027,8 +1036,7 @@ class SipSessionGroup implements SipListener {
 
         private void onError(Response response) {
             int statusCode = response.getStatusCode();
-            if (!mInCall && ((statusCode == Response.TEMPORARILY_UNAVAILABLE)
-                    || (statusCode == Response.BUSY_HERE))) {
+            if (!mInCall && (statusCode == Response.BUSY_HERE)) {
                 endCallOnBusy();
             } else {
                 onError(getErrorCode(statusCode), createErrorMessage(response));
@@ -1037,11 +1045,22 @@ class SipSessionGroup implements SipListener {
 
         private SipErrorCode getErrorCode(int responseStatusCode) {
             switch (responseStatusCode) {
+                case Response.TEMPORARILY_UNAVAILABLE:
+                case Response.FORBIDDEN:
+                case Response.GONE:
                 case Response.NOT_FOUND:
+                case Response.NOT_ACCEPTABLE:
+                case Response.NOT_ACCEPTABLE_HERE:
+                    return SipErrorCode.PEER_NOT_REACHABLE;
+
+                case Response.REQUEST_URI_TOO_LONG:
                 case Response.ADDRESS_INCOMPLETE:
+                case Response.AMBIGUOUS:
                     return SipErrorCode.INVALID_REMOTE_URI;
+
                 case Response.REQUEST_TIMEOUT:
                     return SipErrorCode.TIME_OUT;
+
                 default:
                     if (responseStatusCode < 500) {
                         return SipErrorCode.CLIENT_ERROR;

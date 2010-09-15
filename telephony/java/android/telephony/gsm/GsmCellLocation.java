@@ -60,8 +60,10 @@ public class GsmCellLocation extends CellLocation {
     }
 
     /**
+     * On a UMTS network, returns the primary scrambling code of the serving
+     * cell.
+     *
      * @return primary scrambling code for UMTS, -1 if unknown or GSM
-     * @hide
      */
     public int getPsc() {
         return mPsc;

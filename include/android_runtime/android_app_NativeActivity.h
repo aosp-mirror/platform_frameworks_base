@@ -18,6 +18,7 @@
 #define _ANDROID_APP_NATIVEACTIVITY_H
 
 #include <ui/InputTransport.h>
+#include <utils/Looper.h>
 
 #include <android/native_activity.h>
 
@@ -69,7 +70,7 @@ public:
     /* Destroys the consumer and releases its input channel. */
     ~AInputQueue();
 
-    void attachLooper(ALooper* looper, int ident, ALooper_callbackFunc* callback, void* data);
+    void attachLooper(ALooper* looper, int ident, ALooper_callbackFunc callback, void* data);
 
     void detachLooper();
 
@@ -103,7 +104,7 @@ private:
     void wakeupDispatch();
 
     android::InputConsumer mConsumer;
-    android::sp<android::PollLoop> mPollLoop;
+    android::sp<android::Looper> mLooper;
 
     int mDispatchKeyRead;
     int mDispatchKeyWrite;

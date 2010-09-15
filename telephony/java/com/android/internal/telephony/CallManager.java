@@ -24,6 +24,7 @@ import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RegistrantList;
+import android.os.Registrant;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.util.Log;
@@ -75,6 +76,7 @@ public final class CallManager {
     private static final int EVENT_SUBSCRIPTION_INFO_READY = 116;
     private static final int EVENT_SUPP_SERVICE_FAILED = 117;
     private static final int EVENT_SERVICE_STATE_CHANGED = 118;
+    private static final int EVENT_POST_DIAL_CHARACTER = 119;
 
     // Singleton instance
     private static final CallManager INSTANCE = new CallManager();
@@ -156,6 +158,9 @@ public final class CallManager {
     = new RegistrantList();
 
     protected final RegistrantList mServiceStateChangedRegistrants
+    = new RegistrantList();
+
+    protected final RegistrantList mPostDialCharacterRegistrants
     = new RegistrantList();
 
     private CallManager() {
@@ -334,6 +339,7 @@ public final class CallManager {
     }
 
     private void registerForPhoneStates(Phone phone) {
+        // for common events supported by all phones
         phone.registerForPreciseCallStateChanged(mHandler, EVENT_PRECISE_CALL_STATE_CHANGED, null);
         phone.registerForDisconnect(mHandler, EVENT_DISCONNECT, null);
         phone.registerForNewRingingConnection(mHandler, EVENT_NEW_RINGING_CONNECTION, null);
@@ -342,20 +348,31 @@ public final class CallManager {
         phone.registerForRingbackTone(mHandler, EVENT_RINGBACK_TONE, null);
         phone.registerForInCallVoicePrivacyOn(mHandler, EVENT_IN_CALL_VOICE_PRIVACY_ON, null);
         phone.registerForInCallVoicePrivacyOff(mHandler, EVENT_IN_CALL_VOICE_PRIVACY_OFF, null);
-        phone.registerForCallWaiting(mHandler, EVENT_CALL_WAITING, null);
         phone.registerForDisplayInfo(mHandler, EVENT_DISPLAY_INFO, null);
         phone.registerForSignalInfo(mHandler, EVENT_SIGNAL_INFO, null);
-        phone.registerForCdmaOtaStatusChange(mHandler, EVENT_CDMA_OTA_STATUS_CHANGE, null);
         phone.registerForResendIncallMute(mHandler, EVENT_RESEND_INCALL_MUTE, null);
         phone.registerForMmiInitiate(mHandler, EVENT_MMI_INITIATE, null);
         phone.registerForMmiComplete(mHandler, EVENT_MMI_COMPLETE, null);
-        phone.registerForEcmTimerReset(mHandler, EVENT_ECM_TIMER_RESET, null);
-        phone.registerForSubscriptionInfoReady(mHandler, EVENT_SUBSCRIPTION_INFO_READY, null);
         phone.registerForSuppServiceFailed(mHandler, EVENT_SUPP_SERVICE_FAILED, null);
         phone.registerForServiceStateChanged(mHandler, EVENT_SERVICE_STATE_CHANGED, null);
+
+        // for events supported only by GSM and CDMA phone
+        if (phone.getPhoneType() == Phone.PHONE_TYPE_GSM ||
+                phone.getPhoneType() == Phone.PHONE_TYPE_CDMA) {
+            phone.setOnPostDialCharacter(mHandler, EVENT_POST_DIAL_CHARACTER, null);
+        }
+
+        // for events supported only by CDMA phone
+        if (phone.getPhoneType() == Phone.PHONE_TYPE_CDMA ){
+            phone.registerForCdmaOtaStatusChange(mHandler, EVENT_CDMA_OTA_STATUS_CHANGE, null);
+            phone.registerForSubscriptionInfoReady(mHandler, EVENT_SUBSCRIPTION_INFO_READY, null);
+            phone.registerForCallWaiting(mHandler, EVENT_CALL_WAITING, null);
+            phone.registerForEcmTimerReset(mHandler, EVENT_ECM_TIMER_RESET, null);
+        }
     }
 
     private void unregisterForPhoneStates(Phone phone) {
+        //  for common events supported by all phones
         phone.unregisterForPreciseCallStateChanged(mHandler);
         phone.unregisterForDisconnect(mHandler);
         phone.unregisterForNewRingingConnection(mHandler);
@@ -364,17 +381,27 @@ public final class CallManager {
         phone.unregisterForRingbackTone(mHandler);
         phone.unregisterForInCallVoicePrivacyOn(mHandler);
         phone.unregisterForInCallVoicePrivacyOff(mHandler);
-        phone.unregisterForCallWaiting(mHandler);
         phone.unregisterForDisplayInfo(mHandler);
         phone.unregisterForSignalInfo(mHandler);
-        phone.unregisterForCdmaOtaStatusChange(mHandler);
         phone.unregisterForResendIncallMute(mHandler);
         phone.unregisterForMmiInitiate(mHandler);
         phone.unregisterForMmiComplete(mHandler);
-        phone.unregisterForEcmTimerReset(mHandler);
-        phone.unregisterForSubscriptionInfoReady(mHandler);
         phone.unregisterForSuppServiceFailed(mHandler);
         phone.unregisterForServiceStateChanged(mHandler);
+
+        // for events supported only by GSM and CDMA phone
+        if (phone.getPhoneType() == Phone.PHONE_TYPE_GSM ||
+                phone.getPhoneType() == Phone.PHONE_TYPE_CDMA) {
+            phone.setOnPostDialCharacter(null, EVENT_POST_DIAL_CHARACTER, null);
+        }
+
+        // for events supported only by CDMA phone
+        if (phone.getPhoneType() == Phone.PHONE_TYPE_CDMA ){
+            phone.unregisterForCdmaOtaStatusChange(mHandler);
+            phone.unregisterForSubscriptionInfoReady(mHandler);
+            phone.unregisterForCallWaiting(mHandler);
+            phone.unregisterForEcmTimerReset(mHandler);
+        }
     }
 
     /**
@@ -1132,6 +1159,46 @@ public final class CallManager {
         mSubscriptionInfoReadyRegistrants.remove(h);
     }
 
+    /**
+     * Sets an event to be fired when the telephony system processes
+     * a post-dial character on an outgoing call.<p>
+     *
+     * Messages of type <code>what</code> will be sent to <code>h</code>.
+     * The <code>obj</code> field of these Message's will be instances of
+     * <code>AsyncResult</code>. <code>Message.obj.result</code> will be
+     * a Connection object.<p>
+     *
+     * Message.arg1 will be the post dial character being processed,
+     * or 0 ('\0') if end of string.<p>
+     *
+     * If Connection.getPostDialState() == WAIT,
+     * the application must call
+     * {@link com.android.internal.telephony.Connection#proceedAfterWaitChar()
+     * Connection.proceedAfterWaitChar()} or
+     * {@link com.android.internal.telephony.Connection#cancelPostDial()
+     * Connection.cancelPostDial()}
+     * for the telephony system to continue playing the post-dial
+     * DTMF sequence.<p>
+     *
+     * If Connection.getPostDialState() == WILD,
+     * the application must call
+     * {@link com.android.internal.telephony.Connection#proceedAfterWildChar
+     * Connection.proceedAfterWildChar()}
+     * or
+     * {@link com.android.internal.telephony.Connection#cancelPostDial()
+     * Connection.cancelPostDial()}
+     * for the telephony system to continue playing the
+     * post-dial DTMF sequence.<p>
+     *
+     */
+    public void registerForPostDialCharacter(Handler h, int what, Object obj){
+        mPostDialCharacterRegistrants.addUnique(h, what, obj);
+    }
+
+    public void unregisterForPostDialCharacter(Handler h){
+        mPostDialCharacterRegistrants.remove(h);
+    }
+
     /* APIs to access foregroudCalls, backgroudCalls, and ringingCalls
      * 1. APIs to access list of calls
      * 2. APIs to check if any active call, which has connection other than
@@ -1144,22 +1211,22 @@ public final class CallManager {
     /**
      * @return list of all ringing calls
      */
-    public ArrayList<Call> getRingingCalls() {
-        return mRingingCalls;
+    public List<Call> getRingingCalls() {
+        return Collections.unmodifiableList(mRingingCalls);
     }
 
     /**
      * @return list of all foreground calls
      */
-    public ArrayList<Call> getForegroundCalls() {
-        return mForegroundCalls;
+    public List<Call> getForegroundCalls() {
+        return Collections.unmodifiableList(mForegroundCalls);
     }
 
     /**
      * @return list of all background calls
      */
-    public ArrayList<Call> getBackgroundCalls() {
-        return mBackgroundCalls;
+    public List<Call> getBackgroundCalls() {
+        return Collections.unmodifiableList(mBackgroundCalls);
     }
 
     /**
@@ -1269,7 +1336,7 @@ public final class CallManager {
 
     /**
      * @return the connections of active foreground call
-     * return null if there is no active foreground call
+     * return empty list if there is no active foreground call
      */
     public List<Connection> getFgCallConnections() {
         Call fgCall = getActiveFgCall();
@@ -1408,6 +1475,18 @@ public final class CallManager {
                     break;
                 case EVENT_SERVICE_STATE_CHANGED:
                     mServiceStateChangedRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    break;
+                case EVENT_POST_DIAL_CHARACTER:
+                    // we need send the character that is being processed in msg.arg1
+                    // so can't use notifyRegistrants()
+                    for(int i=0; i < mPostDialCharacterRegistrants.size(); i++) {
+                        Message notifyMsg;
+                        notifyMsg = ((Registrant)mPostDialCharacterRegistrants.get(i)).messageForRegistrant();
+                        notifyMsg.obj = msg.obj;
+                        notifyMsg.arg1 = msg.arg1;
+                        notifyMsg.sendToTarget();
+                    }
+                    break;
             }
         }
     };

@@ -19,7 +19,7 @@ package android.net.http;
 
 import com.android.internal.net.DomainNameValidator;
 
-import org.apache.harmony.xnet.provider.jsse.SSLParameters;
+import org.apache.harmony.xnet.provider.jsse.SSLParametersImpl;
 
 import java.io.IOException;
 
@@ -191,7 +191,7 @@ class CertificateChainValidator {
         // report back to the user.
         //
         try {
-            SSLParameters.getDefaultTrustManager().checkServerTrusted(
+            SSLParametersImpl.getDefaultTrustManager().checkServerTrusted(
                 newServerCertificates, "RSA");
 
             // no errors!!!

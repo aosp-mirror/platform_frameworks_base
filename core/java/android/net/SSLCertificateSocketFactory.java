@@ -49,7 +49,6 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.harmony.xnet.provider.jsse.OpenSSLContextImpl;
 import org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
 import org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache;
-import org.apache.harmony.xnet.provider.jsse.SSLParameters;
 
 /**
  * SSLSocketFactory implementation with several extra features:
@@ -211,7 +210,8 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     private SSLSocketFactory makeSocketFactory(TrustManager[] trustManagers) {
         try {
             OpenSSLContextImpl sslContext = new OpenSSLContextImpl();
-            sslContext.engineInit(null, trustManagers, null, mSessionCache, null);
+            sslContext.engineInit(null, trustManagers, null);
+            sslContext.engineGetClientSessionContext().setPersistentCache(mSessionCache);
             return sslContext.engineGetSocketFactory();
         } catch (KeyManagementException e) {
             Log.wtf(TAG, e);
