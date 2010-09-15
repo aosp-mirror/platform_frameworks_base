@@ -18,7 +18,7 @@
 
 #include "JNIHelp.h"
 
-#include <utils/PollLoop.h>
+#include <utils/Looper.h>
 #include <utils/Log.h>
 #include "android_os_MessageQueue.h"
 
@@ -39,22 +39,22 @@ public:
     NativeMessageQueue();
     ~NativeMessageQueue();
 
-    inline sp<PollLoop> getPollLoop() { return mPollLoop; }
+    inline sp<Looper> getLooper() { return mLooper; }
 
     bool pollOnce(int timeoutMillis);
     void wake();
 
 private:
-    sp<PollLoop> mPollLoop;
+    sp<Looper> mLooper;
 };
 
 // ----------------------------------------------------------------------------
 
 NativeMessageQueue::NativeMessageQueue() {
-    mPollLoop = PollLoop::getForThread();
-    if (mPollLoop == NULL) {
-        mPollLoop = new PollLoop(false);
-        PollLoop::setForThread(mPollLoop);
+    mLooper = Looper::getForThread();
+    if (mLooper == NULL) {
+        mLooper = new Looper(false);
+        Looper::setForThread(mLooper);
     }
 }
 
@@ -62,11 +62,11 @@ NativeMessageQueue::~NativeMessageQueue() {
 }
 
 bool NativeMessageQueue::pollOnce(int timeoutMillis) {
-    return mPollLoop->pollOnce(timeoutMillis) != PollLoop::POLL_TIMEOUT;
+    return mLooper->pollOnce(timeoutMillis) != ALOOPER_POLL_TIMEOUT;
 }
 
 void NativeMessageQueue::wake() {
-    mPollLoop->wake();
+    mLooper->wake();
 }
 
 // ----------------------------------------------------------------------------
@@ -83,10 +83,10 @@ static void android_os_MessageQueue_setNativeMessageQueue(JNIEnv* env, jobject m
              reinterpret_cast<jint>(nativeMessageQueue));
 }
 
-sp<PollLoop> android_os_MessageQueue_getPollLoop(JNIEnv* env, jobject messageQueueObj) {
+sp<Looper> android_os_MessageQueue_getLooper(JNIEnv* env, jobject messageQueueObj) {
     NativeMessageQueue* nativeMessageQueue =
             android_os_MessageQueue_getNativeMessageQueue(env, messageQueueObj);
-    return nativeMessageQueue != NULL ? nativeMessageQueue->getPollLoop() : NULL;
+    return nativeMessageQueue != NULL ? nativeMessageQueue->getLooper() : NULL;
 }
 
 static void android_os_MessageQueue_nativeInit(JNIEnv* env, jobject obj) {

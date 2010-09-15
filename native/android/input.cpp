@@ -20,7 +20,7 @@
 #include <android/input.h>
 #include <ui/Input.h>
 #include <ui/InputTransport.h>
-#include <utils/PollLoop.h>
+#include <utils/Looper.h>
 #include <utils/RefBase.h>
 #include <utils/Vector.h>
 
@@ -250,7 +250,7 @@ float AMotionEvent_getHistoricalOrientation(AInputEvent* motion_event, size_t po
 
 
 void AInputQueue_attachLooper(AInputQueue* queue, ALooper* looper,
-        int ident, ALooper_callbackFunc* callback, void* data) {
+        int ident, ALooper_callbackFunc callback, void* data) {
     queue->attachLooper(looper, ident, callback, data);
 }
 

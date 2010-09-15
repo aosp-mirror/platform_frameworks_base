@@ -33,7 +33,6 @@
 #include <semaphore.h>
 #include <ui/Input.h>
 #include <utils/Errors.h>
-#include <utils/PollLoop.h>
 #include <utils/Timers.h>
 #include <utils/RefBase.h>
 #include <utils/String8.h>

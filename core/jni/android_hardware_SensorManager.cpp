@@ -60,7 +60,7 @@ sensors_module_get_next_sensor(JNIEnv *env, jobject clazz, jobject sensor, jint 
 
     Sensor const* const* sensorList;
     size_t count = mgr.getSensorList(&sensorList);
-    if (next >= count)
+    if (size_t(next) >= count)
         return -1;
     
     Sensor const* const list = sensorList[next];
@@ -78,7 +78,7 @@ sensors_module_get_next_sensor(JNIEnv *env, jobject clazz, jobject sensor, jint 
     env->SetIntField(sensor, sensorOffsets.minDelay,     list->getMinDelay());
     
     next++;
-    return next<count ? next : 0;
+    return size_t(next) < count ? next : 0;
 }
 
 //----------------------------------------------------------------------------
