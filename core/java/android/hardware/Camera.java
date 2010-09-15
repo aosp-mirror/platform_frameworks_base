@@ -154,14 +154,21 @@ public class Camera {
      * Information about a camera
      */
     public static class CameraInfo {
+        /**
+         * The facing of the camera is opposite to that of the screen.
+         */
         public static final int CAMERA_FACING_BACK = 0;
+
+        /**
+         * The facing of the camera is the same as that of the screen.
+         */
         public static final int CAMERA_FACING_FRONT = 1;
 
         /**
          * The direction that the camera faces to. It should be
          * CAMERA_FACING_BACK or CAMERA_FACING_FRONT.
          */
-        public int mFacing;
+        public int facing;
 
         /**
          * The orientation of the camera image. The value is the angle that the
@@ -175,7 +182,7 @@ public class Camera {
          *
          * @see #setDisplayOrientation(int)
          */
-        public int mOrientation;
+        public int orientation;
     };
 
     /**
@@ -210,12 +217,14 @@ public class Camera {
 
     /**
      * The id for the default camera.
+     * @see #open(int)
      */
     public static int CAMERA_ID_DEFAULT = 0;
 
     /**
      * Equivalent to Camera.open(Camera.CAMERA_ID_DEFAULT).
      * Creates a new Camera object to access the default camera.
+     * @see #open(int)
      */
     public static Camera open() {
         return new Camera(CAMERA_ID_DEFAULT);
@@ -787,7 +796,7 @@ public class Camera {
      *         case Surface.ROTATION_270: degrees = 270; break;
      *     }
      *
-     *     int result = (info.mOrientation - degrees + 360) % 360;
+     *     int result = (info.orientation - degrees + 360) % 360;
      *     camera.setDisplayOrientation(result);
      * }
      * </pre>
