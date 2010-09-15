@@ -86,7 +86,7 @@ void GLExtensions::initWithGLStrings(
         mHaveNpot = true;
     }
 
-    if (hasExtension("GL_OES_texture_external")) {
+    if (hasExtension("GL_OES_EGL_image_external")) {
         mHaveTextureExternal = true;
     } else if (strstr(mRenderer.string(), "Adreno")) {
         // hack for Adreno 200
