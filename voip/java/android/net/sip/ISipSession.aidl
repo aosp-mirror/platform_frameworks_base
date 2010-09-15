@@ -17,7 +17,6 @@
 package android.net.sip;
 
 import android.net.sip.ISipSessionListener;
-import android.net.sip.SessionDescription;
 import android.net.sip.SipProfile;
 
 /**

@@ -502,13 +502,14 @@ public class SipManager {
         @Override
         public void onRegistrationFailed(ISipSession session, String errorCode,
                 String message) {
-            mListener.onRegistrationFailed(getUri(session), errorCode, message);
+            mListener.onRegistrationFailed(getUri(session),
+                    Enum.valueOf(SipErrorCode.class, errorCode), message);
         }
 
         @Override
         public void onRegistrationTimeout(ISipSession session) {
             mListener.onRegistrationFailed(getUri(session),
-                    SipErrorCode.TIME_OUT.toString(), "registration timed out");
+                    SipErrorCode.TIME_OUT, "registration timed out");
         }
     }
 }
