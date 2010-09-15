@@ -660,28 +660,38 @@ class PowerManagerService extends IPowerManager.Stub
     }
 
     void noteStartWakeLocked(WakeLock wl, WorkSource ws) {
-        try {
-            if (ws != null) {
-                mBatteryStats.noteStartWakelockFromSource(ws, wl.pid, wl.tag,
-                        wl.monitorType);
-            } else {
-                mBatteryStats.noteStartWakelock(wl.uid, wl.pid, wl.tag, wl.monitorType);
+        if (wl.monitorType >= 0) {
+            long origId = Binder.clearCallingIdentity();
+            try {
+                if (ws != null) {
+                    mBatteryStats.noteStartWakelockFromSource(ws, wl.pid, wl.tag,
+                            wl.monitorType);
+                } else {
+                    mBatteryStats.noteStartWakelock(wl.uid, wl.pid, wl.tag, wl.monitorType);
+                }
+            } catch (RemoteException e) {
+                // Ignore
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
-        } catch (RemoteException e) {
-            // Ignore
         }
     }
 
     void noteStopWakeLocked(WakeLock wl, WorkSource ws) {
-        try {
-            if (ws != null) {
-                mBatteryStats.noteStopWakelockFromSource(ws, wl.pid, wl.tag,
-                        wl.monitorType);
-            } else {
-                mBatteryStats.noteStopWakelock(wl.uid, wl.pid, wl.tag, wl.monitorType);
+        if (wl.monitorType >= 0) {
+            long origId = Binder.clearCallingIdentity();
+            try {
+                if (ws != null) {
+                    mBatteryStats.noteStopWakelockFromSource(ws, wl.pid, wl.tag,
+                            wl.monitorType);
+                } else {
+                    mBatteryStats.noteStopWakelock(wl.uid, wl.pid, wl.tag, wl.monitorType);
+                }
+            } catch (RemoteException e) {
+                // Ignore
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
-        } catch (RemoteException e) {
-            // Ignore
         }
     }
 
@@ -813,21 +823,16 @@ class PowerManagerService extends IPowerManager.Stub
         if (ws != null) {
             enforceWakeSourcePermission(uid, pid);
         }
-        long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (mLocks) {
-                int index = mLocks.getIndex(lock);
-                if (index < 0) {
-                    throw new IllegalArgumentException("Wake lock not active");
-                }
-                WakeLock wl = mLocks.get(index);
-                WorkSource oldsource = wl.ws;
-                wl.ws = ws != null ? new WorkSource(ws) : null;
-                noteStopWakeLocked(wl, oldsource);
-                noteStartWakeLocked(wl, ws);
+        synchronized (mLocks) {
+            int index = mLocks.getIndex(lock);
+            if (index < 0) {
+                throw new IllegalArgumentException("Wake lock not active");
             }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
+            WakeLock wl = mLocks.get(index);
+            WorkSource oldsource = wl.ws;
+            wl.ws = ws != null ? new WorkSource(ws) : null;
+            noteStopWakeLocked(wl, oldsource);
+            noteStartWakeLocked(wl, ws);
         }
     }
 
@@ -884,14 +889,7 @@ class PowerManagerService extends IPowerManager.Stub
         // Unlink the lock from the binder.
         wl.binder.unlinkToDeath(wl, 0);
 
-        if (wl.monitorType >= 0) {
-            long origId = Binder.clearCallingIdentity();
-            try {
-                noteStopWakeLocked(wl, wl.ws);
-            } finally {
-                Binder.restoreCallingIdentity(origId);
-            }
-        }
+        noteStopWakeLocked(wl, wl.ws);
     }
 
     private class PokeLock implements IBinder.DeathRecipient
