@@ -28,25 +28,22 @@ import java.text.ParseException;
 
 /**
  * The class provides API for various SIP related tasks. Specifically, the API
- * allows the application to:
+ * allows an application to:
  * <ul>
  * <li>register a {@link SipProfile} to have the background SIP service listen
  *      to incoming calls and broadcast them with registered command string. See
  *      {@link #open(SipProfile, String, SipRegistrationListener)},
- *      {@link #open(SipProfile)}, {@link #close(String)},
- *      {@link #isOpened(String)} and {@link isRegistered(String)}. It also
- *      facilitates handling of the incoming call broadcast intent. See
- *      {@link #isIncomingCallIntent(Intent)}, {@link #getCallId(Intent)},
- *      {@link #getOfferSessionDescription(Intent)} and
- *      {@link #takeAudioCall(Context, Intent, SipAudioCall.Listener)}.</li>
+ *      {@link #open(SipProfile)}, {@link #close}, {@link #isOpened} and
+ *      {@link #isRegistered}. It also facilitates handling of the incoming call
+ *      broadcast intent. See
+ *      {@link #isIncomingCallIntent}, {@link #getCallId},
+ *      {@link #getOfferSessionDescription} and {@link #takeAudioCall}.</li>
  * <li>make/take SIP-based audio calls. See
- *      {@link #makeAudioCall(Context, SipProfile, SipProfile, SipAudioCall.Listener)}
- *      and {@link #takeAudioCall(Context, Intent, SipAudioCall.Listener}.</li>
+ *      {@link #makeAudioCall} and {@link #takeAudioCall}.</li>
  * <li>register/unregister with a SIP service provider. See
- *      {@link #register(SipProfile, int, ISipSessionListener)} and
- *      {@link #unregister(SipProfile, ISipSessionListener)}.</li>
+ *      {@link #register} and {@link #unregister}.</li>
  * <li>process SIP events directly with a {@link ISipSession} created by
- *      {@link createSipSession(SipProfile, ISipSessionListener)}.</li>
+ *      {@link #createSipSession}.</li>
  * </ul>
  * @hide
  */
@@ -113,8 +110,7 @@ public class SipManager {
     /**
      * Opens the profile for making calls and/or receiving calls. Subsequent
      * SIP calls can be made through the default phone UI. The caller may also
-     * make subsequent calls through
-     * {@link #makeAudioCall(Context, String, String, SipAudioCall.Listener)}.
+     * make subsequent calls through {@link #makeAudioCall}.
      * If the receiving-call option is enabled in the profile, the SIP service
      * will register the profile to the corresponding server periodically in
      * order to receive calls from the server.
@@ -134,8 +130,7 @@ public class SipManager {
     /**
      * Opens the profile for making calls and/or receiving calls. Subsequent
      * SIP calls can be made through the default phone UI. The caller may also
-     * make subsequent calls through
-     * {@link #makeAudioCall(Context, String, String, SipAudioCall.Listener)}.
+     * make subsequent calls through {@link #makeAudioCall}.
      * If the receiving-call option is enabled in the profile, the SIP service
      * will register the profile to the corresponding server periodically in
      * order to receive calls from the server.
@@ -160,9 +155,7 @@ public class SipManager {
 
     /**
      * Sets the listener to listen to registration events. No effect if the
-     * profile has not been opened to receive calls
-     * (see {@link #open(SipProfile, String, SipRegistrationListener)} and
-     * {@link #open(SipProfile)}).
+     * profile has not been opened to receive calls (see {@link #open}).
      *
      * @param localProfileUri the URI of the profile
      * @param listener to listen to registration events; can be null
@@ -283,7 +276,7 @@ public class SipManager {
     /**
      * Creates a {@link SipAudioCall} to take an incoming call. Before the call
      * is returned, the listener will receive a
-     * {@link SipAudioCall#Listener.onRinging(SipAudioCall, SipProfile)}
+     * {@link SipAudioCall.Listener#onRinging}
      * callback.
      *
      * @param context context to create a {@link SipAudioCall} object
@@ -377,12 +370,11 @@ public class SipManager {
 
     /**
      * Registers the profile to the corresponding server for receiving calls.
-     * {@link #open(SipProfile, String, SipRegistrationListener)} is still
-     * needed to be called at least once in order for the SIP service to
-     * broadcast an intent when an incoming call is received.
+     * {@link #open} is still needed to be called at least once in order for
+     * the SIP service to broadcast an intent when an incoming call is received.
      *
      * @param localProfile the SIP profile to register with
-     * @param expiryTime registration expiration time (in second)
+     * @param expiryTime registration expiration time (in seconds)
      * @param listener to listen to the registration events
      * @throws SipException if calling the SIP service results in an error
      */
@@ -419,9 +411,9 @@ public class SipManager {
     /**
      * Gets the {@link ISipSession} that handles the incoming call. For audio
      * calls, consider to use {@link SipAudioCall} to handle the incoming call.
-     * See {@link #takeAudioCall(Context, Intent, SipAudioCall.Listener)}.
-     * Note that the method may be called only once for the same intent. For
-     * subsequent calls on the same intent, the method returns null.
+     * See {@link #takeAudioCall}. Note that the method may be called only once
+     * for the same intent. For subsequent calls on the same intent, the method
+     * returns null.
      *
      * @param incomingCallIntent the incoming call broadcast intent
      * @return the session object that handles the incoming call
