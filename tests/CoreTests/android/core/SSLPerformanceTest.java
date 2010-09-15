@@ -211,17 +211,17 @@ public class SSLPerformanceTest extends AndroidTestCase {
         deleteDirectory();
 
         OpenSSLContextImpl sslContext = new OpenSSLContextImpl();
-        sslContext.engineInit(null, null, null,
-                FileClientSessionCache.usingDirectory(getCacheDirectory()),
-                null);
+        sslContext.engineInit(null, null, null);
+        sslContext.engineGetClientSessionContext().setPersistentCache(
+                FileClientSessionCache.usingDirectory(getCacheDirectory()));
 
         // Make sure www.google.com is in the cache.
         getVerisignDotCom(sslContext);
 
         // Re-initialize so we hit the file cache.
-        sslContext.engineInit(null, null, null,
-                FileClientSessionCache.usingDirectory(getCacheDirectory()),
-                null);
+        sslContext.engineInit(null, null, null);
+        sslContext.engineGetClientSessionContext().setPersistentCache(
+                FileClientSessionCache.usingDirectory(getCacheDirectory()));
 
         Stopwatch stopwatch = new Stopwatch();
 

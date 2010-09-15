@@ -911,7 +911,8 @@ public class SSLSocketTest extends TestCase {
 
         // Cache size = 2.
         FakeClientSessionCache fakeCache = new FakeClientSessionCache();
-        context.engineInit(null, null, null, fakeCache, null);
+        context.engineInit(null, null, null);
+        context.engineGetClientSessionContext().setPersistentCache(fakeCache);
         SSLSocketFactory socketFactory = context.engineGetSocketFactory();
         context.engineGetClientSessionContext().setSessionCacheSize(2);
         makeRequests(socketFactory);
@@ -933,7 +934,8 @@ public class SSLSocketTest extends TestCase {
 
         // Cache size = 3.
         fakeCache = new FakeClientSessionCache();
-        context.engineInit(null, null, null, fakeCache, null);
+        context.engineInit(null, null, null);
+        context.engineGetClientSessionContext().setPersistentCache(fakeCache);
         socketFactory = context.engineGetSocketFactory();
         context.engineGetClientSessionContext().setSessionCacheSize(3);
         makeRequests(socketFactory);
@@ -952,7 +954,8 @@ public class SSLSocketTest extends TestCase {
 
         // Cache size = 4.
         fakeCache = new FakeClientSessionCache();
-        context.engineInit(null, null, null, fakeCache, null);
+        context.engineInit(null, null, null);
+        context.engineGetClientSessionContext().setPersistentCache(fakeCache);
         socketFactory = context.engineGetSocketFactory();
         context.engineGetClientSessionContext().setSessionCacheSize(4);
         makeRequests(socketFactory);
@@ -1010,7 +1013,8 @@ public class SSLSocketTest extends TestCase {
         try {
             ClientSessionCacheProxy cacheProxy
                     = new ClientSessionCacheProxy(fileCache);
-            context.engineInit(null, null, null, cacheProxy, null);
+            context.engineInit(null, null, null);
+            context.engineGetClientSessionContext().setPersistentCache(cacheProxy);
             SSLSocketFactory socketFactory = context.engineGetSocketFactory();
             context.engineGetClientSessionContext().setSessionCacheSize(1);
             makeRequests(socketFactory);
@@ -1033,7 +1037,8 @@ public class SSLSocketTest extends TestCase {
             // Try again now that file-based cache is populated.
             fileCache = FileClientSessionCache.usingDirectory(cacheDir);
             cacheProxy = new ClientSessionCacheProxy(fileCache);
-            context.engineInit(null, null, null, cacheProxy, null);
+            context.engineInit(null, null, null);
+            context.engineGetClientSessionContext().setPersistentCache(cacheProxy);
             socketFactory = context.engineGetSocketFactory();
             context.engineGetClientSessionContext().setSessionCacheSize(1);
             makeRequests(socketFactory);
