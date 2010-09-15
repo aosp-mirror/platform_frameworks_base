@@ -68,7 +68,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private SearchableInfo mSearchable;
     private Context mProviderContext;
     private WeakHashMap<String, Drawable.ConstantState> mOutsideDrawablesCache;
-    private SparseArray<Drawable.ConstantState> mBackgroundsCache;
     private boolean mClosed = false;
 
     // URL color
@@ -80,7 +79,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private int mText2UrlCol;
     private int mIconName1Col;
     private int mIconName2Col;
-    private int mBackgroundColorCol;
 
     static final int NONE = -1;
 
@@ -109,7 +107,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         mProviderContext = mSearchable.getProviderContext(mContext, activityContext);
 
         mOutsideDrawablesCache = outsideDrawablesCache;
-        mBackgroundsCache = new SparseArray<Drawable.ConstantState>();
 
         mStartSpinnerRunnable = new Runnable() {
                 public void run() {
@@ -243,8 +240,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
                 mText2UrlCol = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_2_URL);
                 mIconName1Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_1);
                 mIconName2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_2);
-                mBackgroundColorCol =
-                        c.getColumnIndex(SearchManager.SUGGEST_COLUMN_BACKGROUND_COLOR);
             }
         } catch (Exception e) {
             Log.e(LOG_TAG, "error changing cursor and caching columns", e);
@@ -282,13 +277,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         ChildViewCache views = (ChildViewCache) view.getTag();
-
-        int backgroundColor = 0;
-        if (mBackgroundColorCol != -1) {
-            backgroundColor = cursor.getInt(mBackgroundColorCol);
-        }
-        Drawable background = getItemBackground(backgroundColor);
-        view.setBackgroundDrawable(background);
 
         if (views.mText1 != null) {
             String text1 = getStringOrNull(cursor, mText1Col);
@@ -340,33 +328,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
                 0, url.length(),
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         return text;
-    }
-
-    /**
-     * Gets a drawable with no color when selected or pressed, and the given color when
-     * neither selected nor pressed.
-     *
-     * @return A drawable, or {@code null} if the given color is transparent.
-     */
-    private Drawable getItemBackground(int backgroundColor) {
-        if (backgroundColor == 0) {
-            return null;
-        } else {
-            Drawable.ConstantState cachedBg = mBackgroundsCache.get(backgroundColor);
-            if (cachedBg != null) {
-                if (DBG) Log.d(LOG_TAG, "Background cache hit for color " + backgroundColor);
-                return cachedBg.newDrawable(mProviderContext.getResources());
-            }
-            if (DBG) Log.d(LOG_TAG, "Creating new background for color " + backgroundColor);
-            ColorDrawable transparent = new ColorDrawable(0);
-            ColorDrawable background = new ColorDrawable(backgroundColor);
-            StateListDrawable newBg = new StateListDrawable();
-            newBg.addState(new int[]{android.R.attr.state_selected}, transparent);
-            newBg.addState(new int[]{android.R.attr.state_pressed}, transparent);
-            newBg.addState(new int[]{}, background);
-            mBackgroundsCache.put(backgroundColor, newBg.getConstantState());
-            return newBg;
-        }
     }
 
     private void setViewText(TextView v, CharSequence text) {
@@ -601,21 +562,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
      * @return A non-null drawable.
      */
     private Drawable getDefaultIcon1(Cursor cursor) {
-        // First check the component that the suggestion is originally from
-        String c = getColumnString(cursor, SearchManager.SUGGEST_COLUMN_INTENT_COMPONENT_NAME);
-        if (c != null) {
-            ComponentName component = ComponentName.unflattenFromString(c);
-            if (component != null) {
-                Drawable drawable = getActivityIconWithCache(component);
-                if (drawable != null) {
-                    return drawable;
-                }
-            } else {
-                Log.w(LOG_TAG, "Bad component name: " + c);
-            }
-        }
-
-        // Then check the component that gave us the suggestion
+        // Check the component that gave us the suggestion
         Drawable drawable = getActivityIconWithCache(mSearchable.getSearchActivity());
         if (drawable != null) {
             return drawable;

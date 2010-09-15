@@ -45,6 +45,7 @@ import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -56,19 +57,23 @@ import java.util.WeakHashMap;
  *
  * @hide
  */
-class SuggestionsAdapter extends ResourceCursorAdapter {
+class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListener {
 
     private static final boolean DBG = false;
     private static final String LOG_TAG = "SuggestionsAdapter";
     private static final int QUERY_LIMIT = 50;
+
+    static final int REFINE_NONE = 0;
+    static final int REFINE_BY_ENTRY = 1;
+    static final int REFINE_ALL = 2;
 
     private SearchManager mSearchManager;
     private SearchView mSearchView;
     private SearchableInfo mSearchable;
     private Context mProviderContext;
     private WeakHashMap<String, Drawable.ConstantState> mOutsideDrawablesCache;
-    private SparseArray<Drawable.ConstantState> mBackgroundsCache;
     private boolean mClosed = false;
+    private int mQueryRefinement = REFINE_BY_ENTRY;
 
     // URL color
     private ColorStateList mUrlColor;
@@ -79,7 +84,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private int mText2UrlCol;
     private int mIconName1Col;
     private int mIconName2Col;
-    private int mBackgroundColorCol;
+    private int mFlagsCol;
 
     static final int NONE = -1;
 
@@ -102,14 +107,12 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         mSearchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
         mSearchView = searchView;
         mSearchable = searchable;
-
         // set up provider resources (gives us icons, etc.)
         Context activityContext = mSearchable.getActivityContext(mContext);
         mProviderContext = mSearchable.getProviderContext(mContext, activityContext);
 
         mOutsideDrawablesCache = outsideDrawablesCache;
-        mBackgroundsCache = new SparseArray<Drawable.ConstantState>();
-
+        
         mStartSpinnerRunnable = new Runnable() {
                 public void run() {
                 // mSearchView.setWorking(true); // TODO:
@@ -135,6 +138,27 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
                 return delay;
             }
         });
+    }
+
+    /**
+     * Enables query refinement for all suggestions. This means that an additional icon
+     * will be shown for each entry. When clicked, the suggested text on that line will be
+     * copied to the query text field.
+     * <p>
+     *
+     * @param refine which queries to refine. Possible values are {@link #REFINE_NONE},
+     * {@link #REFINE_BY_ENTRY}, and {@link #REFINE_ALL}.
+     */
+    public void setQueryRefinement(int refineWhat) {
+        mQueryRefinement = refineWhat;
+    }
+
+    /**
+     * Returns the current query refinement preference.
+     * @return value of query refinement preference
+     */
+    public int getQueryRefinement() {
+        return mQueryRefinement;
     }
 
     /**
@@ -242,8 +266,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
                 mText2UrlCol = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_2_URL);
                 mIconName1Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_1);
                 mIconName2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_2);
-                mBackgroundColorCol =
-                        c.getColumnIndex(SearchManager.SUGGEST_COLUMN_BACKGROUND_COLOR);
+                mFlagsCol = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_FLAGS);
             }
         } catch (Exception e) {
             Log.e(LOG_TAG, "error changing cursor and caching columns", e);
@@ -269,12 +292,14 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         public final TextView mText2;
         public final ImageView mIcon1;
         public final ImageView mIcon2;
+        public final ImageView mIconRefine;
 
         public ChildViewCache(View v) {
             mText1 = (TextView) v.findViewById(com.android.internal.R.id.text1);
             mText2 = (TextView) v.findViewById(com.android.internal.R.id.text2);
             mIcon1 = (ImageView) v.findViewById(com.android.internal.R.id.icon1);
             mIcon2 = (ImageView) v.findViewById(com.android.internal.R.id.icon2);
+            mIconRefine = (ImageView) v.findViewById(com.android.internal.R.id.edit_query);
         }
     }
 
@@ -282,13 +307,10 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         ChildViewCache views = (ChildViewCache) view.getTag();
 
-        int backgroundColor = 0;
-        if (mBackgroundColorCol != -1) {
-            backgroundColor = cursor.getInt(mBackgroundColorCol);
+        int flags = 0;
+        if (mFlagsCol != -1) {
+            flags = cursor.getInt(mFlagsCol);
         }
-        Drawable background = getItemBackground(backgroundColor);
-        view.setBackgroundDrawable(background);
-
         if (views.mText1 != null) {
             String text1 = getStringOrNull(cursor, mText1Col);
             setViewText(views.mText1, text1);
@@ -301,7 +323,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             } else {
                 text2 = getStringOrNull(cursor, mText2Col);
             }
-            
+
             // If no second line of text is indicated, allow the first line of text
             // to be up to two lines if it wants to be.
             if (TextUtils.isEmpty(text2)) {
@@ -324,6 +346,22 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         if (views.mIcon2 != null) {
             setViewDrawable(views.mIcon2, getIcon2(cursor));
         }
+        if (mQueryRefinement == REFINE_ALL
+                || (mQueryRefinement == REFINE_BY_ENTRY
+                        && (flags & SearchManager.FLAG_QUERY_REFINEMENT) != 0)) {
+            views.mIconRefine.setVisibility(View.VISIBLE);
+            views.mIconRefine.setTag(views.mText1.getText());
+            views.mIconRefine.setOnClickListener(this);
+        } else {
+            views.mIconRefine.setVisibility(View.GONE);
+        }
+    }
+
+    public void onClick(View v) {
+        Object tag = v.getTag();
+        if (tag instanceof CharSequence) {
+            mSearchView.onQueryRefine((CharSequence) tag);
+        }
     }
 
     private CharSequence formatUrl(CharSequence url) {
@@ -339,33 +377,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
                 0, url.length(),
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         return text;
-    }
-
-    /**
-     * Gets a drawable with no color when selected or pressed, and the given color when
-     * neither selected nor pressed.
-     *
-     * @return A drawable, or {@code null} if the given color is transparent.
-     */
-    private Drawable getItemBackground(int backgroundColor) {
-        if (backgroundColor == 0) {
-            return null;
-        } else {
-            Drawable.ConstantState cachedBg = mBackgroundsCache.get(backgroundColor);
-            if (cachedBg != null) {
-                if (DBG) Log.d(LOG_TAG, "Background cache hit for color " + backgroundColor);
-                return cachedBg.newDrawable(mProviderContext.getResources());
-            }
-            if (DBG) Log.d(LOG_TAG, "Creating new background for color " + backgroundColor);
-            ColorDrawable transparent = new ColorDrawable(0);
-            ColorDrawable background = new ColorDrawable(backgroundColor);
-            StateListDrawable newBg = new StateListDrawable();
-            newBg.addState(new int[]{android.R.attr.state_selected}, transparent);
-            newBg.addState(new int[]{android.R.attr.state_pressed}, transparent);
-            newBg.addState(new int[]{}, background);
-            mBackgroundsCache.put(backgroundColor, newBg.getConstantState());
-            return newBg;
-        }
     }
 
     private void setViewText(TextView v, CharSequence text) {
@@ -600,21 +611,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
      * @return A non-null drawable.
      */
     private Drawable getDefaultIcon1(Cursor cursor) {
-        // First check the component that the suggestion is originally from
-        String c = getColumnString(cursor, SearchManager.SUGGEST_COLUMN_INTENT_COMPONENT_NAME);
-        if (c != null) {
-            ComponentName component = ComponentName.unflattenFromString(c);
-            if (component != null) {
-                Drawable drawable = getActivityIconWithCache(component);
-                if (drawable != null) {
-                    return drawable;
-                }
-            } else {
-                Log.w(LOG_TAG, "Bad component name: " + c);
-            }
-        }
-
-        // Then check the component that gave us the suggestion
+        // Check the component that gave us the suggestion
         Drawable drawable = getActivityIconWithCache(mSearchable.getSearchActivity());
         if (drawable != null) {
             return drawable;
