@@ -293,11 +293,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                     return false;
                 }
                 // cache is full. eldest will be removed.
-                SQLiteCompiledSql entry = eldest.getValue();
-                if (!entry.isInUse()) {
-                    // this {@link SQLiteCompiledSql} is not in use. release it.
-                    entry.releaseSqlStatement();
-                }
+                eldest.getValue().releaseIfNotInUse();
                 // return true, so that this entry is removed automatically by the caller.
                 return true;
             }
@@ -308,8 +304,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * SQL statement & schema.
      */
     public static final int MAX_SQL_CACHE_SIZE = 100;
-    private int mCacheFullWarnings;
-    private static final int MAX_WARNINGS_ON_CACHESIZE_CONDITION = 1;
+    private boolean mCacheFullWarning;
 
     /** maintain stats about number of cache hits and misses */
     private int mNumCacheHits;
@@ -2092,12 +2087,6 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
     }
 
-    /*
-     * ============================================================================
-     *
-     *       The following methods deal with compiled-sql cache
-     * ============================================================================
-     */
     /**
      * Adds the given SQL and its compiled-statement-id-returned-by-sqlite to the
      * cache of compiledQueries attached to 'this'.
@@ -2113,26 +2102,21 @@ public class SQLiteDatabase extends SQLiteClosable {
                 return;
             }
 
-            if (mCompiledQueries.size() == mMaxSqlCacheSize) {
+            if (!isCacheFullWarningLogged() && mCompiledQueries.size() == mMaxSqlCacheSize) {
                 /*
                  * cache size of {@link #mMaxSqlCacheSize} is not enough for this app.
                  * log a warning.
                  * chances are it is NOT using ? for bindargs - or cachesize is too small.
                  */
-                if (++mCacheFullWarnings == MAX_WARNINGS_ON_CACHESIZE_CONDITION) {
-                    Log.w(TAG, "Reached MAX size for compiled-sql statement cache for database " +
-                            getPath() + ". Use setMaxSqlCacheSize() to increase cachesize. ");
-                }
+                Log.w(TAG, "Reached MAX size for compiled-sql statement cache for database " +
+                        getPath() + ". Use setMaxSqlCacheSize() to increase cachesize. ");
+                setCacheFullWarningLogged();
             } 
             /* add the given SQLiteCompiledSql compiledStatement to cache.
              * no need to worry about the cache size - because {@link #mCompiledQueries}
              * self-limits its size to {@link #mMaxSqlCacheSize}.
              */
             mCompiledQueries.put(sql, compiledStatement);
-            if (SQLiteDebug.DEBUG_SQL_CACHE) {
-                Log.v(TAG, "|adding_sql_to_cache|" + getPath() + "|" +
-                        mCompiledQueries.size() + "|" + sql);
-            }
         }
     }
 
@@ -2150,24 +2134,13 @@ public class SQLiteDatabase extends SQLiteClosable {
      * From the compiledQueries cache, returns the compiled-statement-id for the given SQL.
      * Returns null, if not found in the cache.
      */
-    /* package */ SQLiteCompiledSql getCompiledStatementForSql(String sql) {
-        SQLiteCompiledSql compiledStatement = null;
-        boolean cacheHit;
-        synchronized(mCompiledQueries) {
-            cacheHit = (compiledStatement = mCompiledQueries.get(sql)) != null;
-        }
-        if (cacheHit) {
-            mNumCacheHits++;
-        } else {
+    /* package */ synchronized SQLiteCompiledSql getCompiledStatementForSql(String sql) {
+        SQLiteCompiledSql compiledStatement = mCompiledQueries.get(sql);
+        if (compiledStatement == null) {
             mNumCacheMisses++;
+            return null;
         }
-
-        if (SQLiteDebug.DEBUG_SQL_CACHE) {
-            Log.v(TAG, "|cache_stats|" +
-                    getPath() + "|" + mCompiledQueries.size() +
-                    "|" + mNumCacheHits + "|" + mNumCacheMisses +
-                    "|" + cacheHit + "|" + sql);
-        }
+        mNumCacheHits++;
         return compiledStatement;
     }
 
@@ -2201,6 +2174,26 @@ public class SQLiteDatabase extends SQLiteClosable {
         synchronized (mCompiledQueries) {
             return mCompiledQueries.containsKey(sql);
         }
+    }
+
+    private synchronized boolean isCacheFullWarningLogged() {
+        return mCacheFullWarning;
+    }
+
+    private synchronized void setCacheFullWarningLogged() {
+        mCacheFullWarning = true;
+    }
+
+    private synchronized int getCacheHitNum() {
+        return mNumCacheHits;
+    }
+
+    private synchronized int getCacheMissNum() {
+        return mNumCacheMisses;
+    }
+
+    private synchronized int getCachesize() {
+        return mCompiledQueries.size();
     }
 
     /* package */ void finalizeStatementLater(int id) {
@@ -2484,16 +2477,16 @@ public class SQLiteDatabase extends SQLiteClosable {
                         }
                         if (pageCount > 0) {
                             dbStatsList.add(new DbStats(dbName, pageCount, db.getPageSize(),
-                                    lookasideUsed, db.mNumCacheHits, db.mNumCacheMisses,
-                                    db.mCompiledQueries.size()));
+                                    lookasideUsed, db.getCacheHitNum(), db.getCacheMissNum(),
+                                    db.getCachesize()));
                         }
                     }
                     // if there are pooled connections, return the cache stats for them also.
                     if (db.mConnectionPool != null) {
                         for (SQLiteDatabase pDb : db.mConnectionPool.getConnectionList()) {
                             dbStatsList.add(new DbStats("(pooled # " + pDb.mConnectionNum + ") "
-                                    + lastnode, 0, 0, 0, pDb.mNumCacheHits, pDb.mNumCacheMisses,
-                                    pDb.mCompiledQueries.size()));
+                                    + lastnode, 0, 0, 0, pDb.getCacheHitNum(),
+                                    pDb.getCacheMissNum(), pDb.getCachesize()));
                         }
                     }
                 } catch (SQLiteException e) {

@@ -31,12 +31,12 @@ import android.util.Log;
     private static final String TAG = "SQLiteCompiledSql";
 
     /** The database this program is compiled against. */
-    /* package */ SQLiteDatabase mDatabase;
+    /* package */ final SQLiteDatabase mDatabase;
 
     /**
      * Native linkage, do not modify. This comes from the database.
      */
-    /* package */ int nHandle = 0;
+    /* package */ final int nHandle;
 
     /**
      * Native linkage, do not modify. When non-0 this holds a reference to a valid
@@ -54,38 +54,13 @@ import android.util.Log;
     private boolean mInUse = false;
 
     /* package */ SQLiteCompiledSql(SQLiteDatabase db, String sql) {
-        if (!db.isOpen()) {
-            throw new IllegalStateException("database " + db.getPath() + " already closed");
-        }
+        db.verifyDbIsOpen();
+        db.verifyLockOwner();
         mDatabase = db;
         mSqlStmt = sql;
         mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
-        this.nHandle = db.mNativeHandle;
-        compile(sql, true);
-    }
-
-    /**
-     * Compiles the given SQL into a SQLite byte code program using sqlite3_prepare_v2(). If
-     * this method has been called previously without a call to close and forCompilation is set
-     * to false the previous compilation will be used. Setting forceCompilation to true will
-     * always re-compile the program and should be done if you pass differing SQL strings to this
-     * method.
-     *
-     * <P>Note: this method acquires the database lock.</P>
-     *
-     * @param sql the SQL string to compile
-     * @param forceCompilation forces the SQL to be recompiled in the event that there is an
-     *  existing compiled SQL program already around
-     */
-    private void compile(String sql, boolean forceCompilation) {
-        mDatabase.verifyLockOwner();
-        // Only compile if we don't have a valid statement already or the caller has
-        // explicitly requested a recompile.
-        if (forceCompilation) {
-            // Note that the native_compile() takes care of destroying any previously
-            // existing programs before it compiles.
-            native_compile(sql);
-        }
+        nHandle = db.mNativeHandle;
+        native_compile(sql);
     }
 
     /* package */ void releaseSqlStatement() {
@@ -102,7 +77,7 @@ import android.util.Log;
      */
     /* package */ synchronized boolean acquire() {
         if (mInUse) {
-            // someone already has acquired it.
+            // it is already in use.
             return false;
         }
         mInUse = true;
@@ -117,6 +92,13 @@ import android.util.Log;
         return mInUse;
     }
 
+    /* package */ synchronized void releaseIfNotInUse() {
+        // if it is not in use, release its memory from the database
+        if (!isInUse()) {
+            releaseSqlStatement();
+        }
+    }
+
     /**
      * Make sure that the native resource is cleaned up.
      */
@@ -125,10 +107,15 @@ import android.util.Log;
         try {
             if (nStatement == 0) return;
             // finalizer should NEVER get called
-            int len = mSqlStmt.length();
-            Log.w(TAG, "Releasing statement in a finalizer. Please ensure " +
-                    "that you explicitly call close() on your cursor: " +
-                    mSqlStmt.substring(0, (len > 100) ? 100 : len), mStackTrace);
+            // but if the database itself is not closed and is GC'ed, then
+            // all sub-objects attached to the database could end up getting GC'ed too.
+            // in that case, don't print any warning.
+            if (!mInUse) {
+                int len = mSqlStmt.length();
+                Log.w(TAG, "Releasing statement in a finalizer. Please ensure " +
+                        "that you explicitly call close() on your cursor: " +
+                        mSqlStmt.substring(0, (len > 100) ? 100 : len), mStackTrace);
+            }
             releaseSqlStatement();
         } finally {
             super.finalize();
@@ -140,6 +127,8 @@ import android.util.Log;
             StringBuilder buff = new StringBuilder();
             buff.append(" nStatement=");
             buff.append(nStatement);
+            buff.append(", mInUse=");
+            buff.append(mInUse);
             buff.append(", db=");
             buff.append(mDatabase.getPath());
             buff.append(", db_connectionNum=");
