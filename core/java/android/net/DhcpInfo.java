@@ -37,6 +37,19 @@ public class DhcpInfo implements Parcelable {
         super();
     }
 
+    /** copy constructor {@hide} */
+    public DhcpInfo(DhcpInfo source) {
+        if (source != null) {
+            ipAddress = source.ipAddress;
+            gateway = source.gateway;
+            netmask = source.netmask;
+            dns1 = source.dns1;
+            dns2 = source.dns2;
+            serverAddress = source.serverAddress;
+            leaseDuration = source.leaseDuration;
+        }
+    }
+
     public String toString() {
         StringBuffer str = new StringBuffer();
 

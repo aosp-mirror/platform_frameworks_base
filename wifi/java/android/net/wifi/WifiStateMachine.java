@@ -123,10 +123,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private int mLastNetworkId;
     private boolean mEnableRssiPolling = false;
     private boolean mPasswordKeyMayBeIncorrect = false;
-    private boolean mUseStaticIp = false;
     private int mReconnectCount = 0;
     private boolean mIsScanMode = false;
-    private boolean mConfigChanged = false;
 
     /**
      * Instance of the bluetooth headset helper. This needs to be created
@@ -138,10 +136,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
     private BluetoothA2dp mBluetoothA2dp;
 
-    /**
-     * Observes the static IP address settings.
-     */
-    private SettingsObserver mSettingsObserver;
     private LinkProperties mLinkProperties;
 
     // Held during driver load and unload
@@ -447,8 +441,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 }
         };
 
-        mSettingsObserver = new SettingsObserver(new Handler());
-
         PowerManager powerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
         sWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
@@ -596,7 +588,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     public DhcpInfo syncGetDhcpInfo() {
-        return mDhcpInfo;
+        synchronized (mDhcpInfo) {
+            return new DhcpInfo(mDhcpInfo);
+        }
     }
 
     /**
@@ -909,10 +903,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         sb.append("mEnableAllNetworks ").append(mEnableAllNetworks).append(LS);
         sb.append("mEnableRssiPolling ").append(mEnableRssiPolling).append(LS);
         sb.append("mPasswordKeyMayBeIncorrect ").append(mPasswordKeyMayBeIncorrect).append(LS);
-        sb.append("mUseStaticIp ").append(mUseStaticIp).append(LS);
         sb.append("mReconnectCount ").append(mReconnectCount).append(LS);
         sb.append("mIsScanMode ").append(mIsScanMode).append(LS);
-        sb.append("mConfigChanged ").append(mConfigChanged).append(LS).append(LS);
         sb.append("Supplicant status").append(LS)
                 .append(WifiNative.statusCommand()).append(LS).append(LS);
 
@@ -1196,138 +1188,19 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             return;
         }
         // TODO - fix this for v6
-        mLinkProperties.addAddress(NetworkUtils.intToInetAddress(mDhcpInfo.ipAddress));
-        mLinkProperties.setGateway(NetworkUtils.intToInetAddress(mDhcpInfo.gateway));
-        mLinkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns1));
-        mLinkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns2));
+        synchronized (mDhcpInfo) {
+            mLinkProperties.addAddress(NetworkUtils.intToInetAddress(mDhcpInfo.ipAddress));
+            mLinkProperties.setGateway(NetworkUtils.intToInetAddress(mDhcpInfo.gateway));
+            mLinkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns1));
+            mLinkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns2));
+        }
         // TODO - add proxy info
-    }
-
-
-    private void checkUseStaticIp() {
-        mUseStaticIp = false;
-        final ContentResolver cr = mContext.getContentResolver();
-        try {
-            if (Settings.System.getInt(cr, Settings.System.WIFI_USE_STATIC_IP) == 0) {
-                return;
-            }
-        } catch (Settings.SettingNotFoundException e) {
-            return;
-        }
-
-        try {
-            String addr = Settings.System.getString(cr, Settings.System.WIFI_STATIC_IP);
-            if (addr != null) {
-                mDhcpInfo.ipAddress = stringToIpAddr(addr);
-            } else {
-                return;
-            }
-            addr = Settings.System.getString(cr, Settings.System.WIFI_STATIC_GATEWAY);
-            if (addr != null) {
-                mDhcpInfo.gateway = stringToIpAddr(addr);
-            } else {
-                return;
-            }
-            addr = Settings.System.getString(cr, Settings.System.WIFI_STATIC_NETMASK);
-            if (addr != null) {
-                mDhcpInfo.netmask = stringToIpAddr(addr);
-            } else {
-                return;
-            }
-            addr = Settings.System.getString(cr, Settings.System.WIFI_STATIC_DNS1);
-            if (addr != null) {
-                mDhcpInfo.dns1 = stringToIpAddr(addr);
-            } else {
-                return;
-            }
-            addr = Settings.System.getString(cr, Settings.System.WIFI_STATIC_DNS2);
-            if (addr != null) {
-                mDhcpInfo.dns2 = stringToIpAddr(addr);
-            } else {
-                mDhcpInfo.dns2 = 0;
-            }
-        } catch (UnknownHostException e) {
-            return;
-        }
-        mUseStaticIp = true;
-    }
-
-    private static int stringToIpAddr(String addrString) throws UnknownHostException {
-        try {
-            String[] parts = addrString.split("\\.");
-            if (parts.length != 4) {
-                throw new UnknownHostException(addrString);
-            }
-
-            int a = Integer.parseInt(parts[0])      ;
-            int b = Integer.parseInt(parts[1]) <<  8;
-            int c = Integer.parseInt(parts[2]) << 16;
-            int d = Integer.parseInt(parts[3]) << 24;
-
-            return a | b | c | d;
-        } catch (NumberFormatException ex) {
-            throw new UnknownHostException(addrString);
-        }
     }
 
     private int getMaxDhcpRetries() {
         return Settings.Secure.getInt(mContext.getContentResolver(),
                                       Settings.Secure.WIFI_MAX_DHCP_RETRY_COUNT,
                                       DEFAULT_MAX_DHCP_RETRIES);
-    }
-
-    private class SettingsObserver extends ContentObserver {
-        public SettingsObserver(Handler handler) {
-            super(handler);
-            ContentResolver cr = mContext.getContentResolver();
-            cr.registerContentObserver(Settings.System.getUriFor(
-                Settings.System.WIFI_USE_STATIC_IP), false, this);
-            cr.registerContentObserver(Settings.System.getUriFor(
-                Settings.System.WIFI_STATIC_IP), false, this);
-            cr.registerContentObserver(Settings.System.getUriFor(
-                Settings.System.WIFI_STATIC_GATEWAY), false, this);
-            cr.registerContentObserver(Settings.System.getUriFor(
-                Settings.System.WIFI_STATIC_NETMASK), false, this);
-            cr.registerContentObserver(Settings.System.getUriFor(
-                Settings.System.WIFI_STATIC_DNS1), false, this);
-            cr.registerContentObserver(Settings.System.getUriFor(
-                Settings.System.WIFI_STATIC_DNS2), false, this);
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            super.onChange(selfChange);
-
-            boolean wasStaticIp = mUseStaticIp;
-            int oIp, oGw, oMsk, oDns1, oDns2;
-            oIp = oGw = oMsk = oDns1 = oDns2 = 0;
-            if (wasStaticIp) {
-                oIp = mDhcpInfo.ipAddress;
-                oGw = mDhcpInfo.gateway;
-                oMsk = mDhcpInfo.netmask;
-                oDns1 = mDhcpInfo.dns1;
-                oDns2 = mDhcpInfo.dns2;
-            }
-            checkUseStaticIp();
-
-            if (mWifiInfo.getSupplicantState() == SupplicantState.UNINITIALIZED) {
-                return;
-            }
-
-            boolean changed =
-                (wasStaticIp != mUseStaticIp) ||
-                    (wasStaticIp && (
-                        oIp   != mDhcpInfo.ipAddress ||
-                        oGw   != mDhcpInfo.gateway ||
-                        oMsk  != mDhcpInfo.netmask ||
-                        oDns1 != mDhcpInfo.dns1 ||
-                        oDns2 != mDhcpInfo.dns2));
-
-            if (changed) {
-                sendMessage(CMD_RECONFIGURE_IP);
-                mConfigChanged = true;
-            }
-        }
     }
 
     /**
@@ -1382,6 +1255,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         mContext.sendStickyBroadcast(intent);
     }
 
+    /* TODO: Unused for now, will be used when ip change on connected network is handled */
     private void sendConfigChangeBroadcast() {
         if (!ActivityManagerNative.isSystemReady()) return;
         Intent intent = new Intent(WifiManager.CONFIG_CHANGED_ACTION);
@@ -1969,7 +1843,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     }
                     checkIsBluetoothPlaying();
 
-                    checkUseStaticIp();
                     sendSupplicantConnectionChangedBroadcast(true);
                     transitionTo(mDriverSupReadyState);
                     break;
@@ -2477,8 +2350,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     class ConnectingState extends HierarchicalState {
-        boolean modifiedBluetoothCoexistenceMode;
-        int powerMode;
+        boolean mModifiedBluetoothCoexistenceMode;
+        int mPowerMode;
+        boolean mUseStaticIp;
         Thread mDhcpThread;
 
         @Override
@@ -2486,11 +2360,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             if (DBG) Log.d(TAG, getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
+            mUseStaticIp = WifiConfigStore.isUsingStaticIp(mLastNetworkId);
             if (!mUseStaticIp) {
-
                 mDhcpThread = null;
-                modifiedBluetoothCoexistenceMode = false;
-                powerMode = DRIVER_POWER_MODE_AUTO;
+                mModifiedBluetoothCoexistenceMode = false;
+                mPowerMode = DRIVER_POWER_MODE_AUTO;
 
                 if (shouldDisableCoexistenceMode()) {
                     /*
@@ -2509,28 +2383,32 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                      * are currently connected to a headset, since disabling
                      * coexistence would interrupt that connection.
                      */
-                    modifiedBluetoothCoexistenceMode = true;
+                    mModifiedBluetoothCoexistenceMode = true;
 
                     // Disable the coexistence mode
                     WifiNative.setBluetoothCoexistenceModeCommand(
                             WifiNative.BLUETOOTH_COEXISTENCE_MODE_DISABLED);
                 }
 
-                powerMode =  WifiNative.getPowerModeCommand();
-                if (powerMode < 0) {
+                mPowerMode =  WifiNative.getPowerModeCommand();
+                if (mPowerMode < 0) {
                   // Handle the case where supplicant driver does not support
                   // getPowerModeCommand.
-                    powerMode = DRIVER_POWER_MODE_AUTO;
+                    mPowerMode = DRIVER_POWER_MODE_AUTO;
                 }
-                if (powerMode != DRIVER_POWER_MODE_ACTIVE) {
+                if (mPowerMode != DRIVER_POWER_MODE_ACTIVE) {
                     WifiNative.setPowerModeCommand(DRIVER_POWER_MODE_ACTIVE);
                 }
 
                 Log.d(TAG, "DHCP request started");
                 mDhcpThread = new Thread(new Runnable() {
                     public void run() {
-                        if (NetworkUtils.runDhcp(mInterfaceName, mDhcpInfo)) {
+                        DhcpInfo dhcpInfo = new DhcpInfo();
+                        if (NetworkUtils.runDhcp(mInterfaceName, dhcpInfo)) {
                             Log.d(TAG, "DHCP request succeeded");
+                            synchronized (mDhcpInfo) {
+                                mDhcpInfo = dhcpInfo;
+                            }
                             sendMessage(CMD_IP_CONFIG_SUCCESS);
                         } else {
                             Log.d(TAG, "DHCP request failed: " +
@@ -2541,8 +2419,12 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 });
                 mDhcpThread.start();
             } else {
-                if (NetworkUtils.configureInterface(mInterfaceName, mDhcpInfo)) {
+                DhcpInfo dhcpInfo = WifiConfigStore.getIpConfiguration(mLastNetworkId);
+                if (NetworkUtils.configureInterface(mInterfaceName, dhcpInfo)) {
                     Log.v(TAG, "Static IP configuration succeeded");
+                    synchronized (mDhcpInfo) {
+                        mDhcpInfo = dhcpInfo;
+                    }
                     sendMessage(CMD_IP_CONFIG_SUCCESS);
                 } else {
                     Log.v(TAG, "Static IP configuration failed");
@@ -2558,18 +2440,15 @@ public class WifiStateMachine extends HierarchicalStateMachine {
               case CMD_IP_CONFIG_SUCCESS:
                   mReconnectCount = 0;
                   mLastSignalLevel = -1; // force update of signal strength
-                  mWifiInfo.setIpAddress(mDhcpInfo.ipAddress);
-                  Log.d(TAG, "IP configuration: " + mDhcpInfo);
+                  synchronized (mDhcpInfo) {
+                      mWifiInfo.setIpAddress(mDhcpInfo.ipAddress);
+                      Log.d(TAG, "IP configuration: " + mDhcpInfo);
+                  }
                   configureLinkProperties();
                   setDetailedState(DetailedState.CONNECTED);
                   sendNetworkStateChangeBroadcast(mLastBssid);
-                  //TODO: we could also detect an IP config change
-                  // from a DHCP renewal and send out a config change
-                  // broadcast
-                  if (mConfigChanged) {
-                      sendConfigChangeBroadcast();
-                      mConfigChanged = false;
-                  }
+                  //TODO: The framework is not detecting a DHCP renewal and a possible
+                  //IP change. we should detect this and send out a config change broadcast
                   transitionTo(mConnectedState);
                   break;
               case CMD_IP_CONFIG_FAILURE:
@@ -2631,11 +2510,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
       public void exit() {
           /* reset power state & bluetooth coexistence if on DHCP */
           if (!mUseStaticIp) {
-              if (powerMode != DRIVER_POWER_MODE_ACTIVE) {
-                  WifiNative.setPowerModeCommand(powerMode);
+              if (mPowerMode != DRIVER_POWER_MODE_ACTIVE) {
+                  WifiNative.setPowerModeCommand(mPowerMode);
               }
 
-              if (modifiedBluetoothCoexistenceMode) {
+              if (mModifiedBluetoothCoexistenceMode) {
                   // Set the coexistence mode back to its default value
                   WifiNative.setBluetoothCoexistenceModeCommand(
                           WifiNative.BLUETOOTH_COEXISTENCE_MODE_SENSE);

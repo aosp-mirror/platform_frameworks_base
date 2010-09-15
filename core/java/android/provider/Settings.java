@@ -1128,6 +1128,7 @@ public final class Settings {
          */
         public static final int WIFI_SLEEP_POLICY_NEVER = 2;
 
+        //TODO: deprecate static IP constants
         /**
          * Whether to use static IP and other static network attributes.
          * <p>
