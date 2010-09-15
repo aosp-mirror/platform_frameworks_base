@@ -2,8 +2,6 @@ page.title=Android 2.0, Release 1
 sdk.platform.version=2.0
 sdk.platform.apiLevel=5
 sdk.platform.majorMinor=major
-sdk.platform.releaseDate=October 2009
-sdk.platform.deployableDate=November 2009
 
 @jd:body
 
@@ -38,7 +36,7 @@ sdk.platform.deployableDate=November 2009
 <em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
 
 <p>Android {@sdkPlatformVersion} is a {@sdkPlatformMajorMinor} platform release
-deployable to Android-powered handsets starting in {@sdkPlatformDeployableDate}.
+deployable to Android-powered handsets starting in November 2009.
 The release includes new features for users and developers, as well as changes
 in the Android framework API. </p>
 
