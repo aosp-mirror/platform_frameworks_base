@@ -32,6 +32,7 @@
 #include <ui/DisplayInfo.h>
 #include <ui/GraphicBuffer.h>
 #include <ui/GraphicBufferMapper.h>
+#include <ui/GraphicLog.h>
 #include <ui/Rect.h>
 
 #include <surfaceflinger/Surface.h>
@@ -578,7 +579,13 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
     if (err != NO_ERROR)
         return err;
 
+    GraphicLog& logger(GraphicLog::getInstance());
+    logger.log(GraphicLog::SF_APP_DEQUEUE_BEFORE, mIdentity, -1);
+
     ssize_t bufIdx = mSharedBufferClient->dequeue();
+
+    logger.log(GraphicLog::SF_APP_DEQUEUE_AFTER, mIdentity, bufIdx);
+
     if (bufIdx < 0) {
         LOGE("error dequeuing a buffer (%s)", strerror(bufIdx));
         return bufIdx;
@@ -627,13 +634,20 @@ int Surface::lockBuffer(android_native_buffer_t* buffer)
         return err;
 
     int32_t bufIdx = getBufferIndex(GraphicBuffer::getSelf(buffer));
+
+    GraphicLog& logger(GraphicLog::getInstance());
+    logger.log(GraphicLog::SF_APP_LOCK_BEFORE, mIdentity, bufIdx);
+
     err = mSharedBufferClient->lock(bufIdx);
+
+    logger.log(GraphicLog::SF_APP_LOCK_AFTER, mIdentity, bufIdx);
+
     LOGE_IF(err, "error locking buffer %d (%s)", bufIdx, strerror(-err));
     return err;
 }
 
 int Surface::queueBuffer(android_native_buffer_t* buffer)
-{   
+{
     status_t err = validate();
     if (err != NO_ERROR)
         return err;
@@ -643,6 +657,9 @@ int Surface::queueBuffer(android_native_buffer_t* buffer)
     }
     
     int32_t bufIdx = getBufferIndex(GraphicBuffer::getSelf(buffer));
+
+    GraphicLog::getInstance().log(GraphicLog::SF_APP_QUEUE, mIdentity, bufIdx);
+
     mSharedBufferClient->setTransform(bufIdx, mNextBufferTransform);
     mSharedBufferClient->setCrop(bufIdx, mNextBufferCrop);
     mSharedBufferClient->setDirtyRegion(bufIdx, mDirtyRegion);
