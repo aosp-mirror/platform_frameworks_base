@@ -832,6 +832,15 @@ class MountService extends IMountService.Stub
         if (!getVolumeState(path).equals(Environment.MEDIA_MOUNTED)) {
             return VoldResponseCode.OpFailedVolNotMounted;
         }
+
+        /*
+         * Force a GC to make sure AssetManagers in other threads of the
+         * system_server are cleaned up. We have to do this since AssetManager
+         * instances are kept as a WeakReference and it's possible we have files
+         * open on the external storage.
+         */
+        Runtime.getRuntime().gc();
+
         // Redundant probably. But no harm in updating state again.
         mPms.updateExternalMediaStatus(false, false);
         try {
@@ -1290,6 +1299,14 @@ class MountService extends IMountService.Stub
         waitForReady();
         warnOnNotMounted();
 
+        /*
+         * Force a GC to make sure AssetManagers in other threads of the
+         * system_server are cleaned up. We have to do this since AssetManager
+         * instances are kept as a WeakReference and it's possible we have files
+         * open on the external storage.
+         */
+        Runtime.getRuntime().gc();
+
         int rc = StorageResultCode.OperationSucceeded;
         try {
             mConnector.doCommand(String.format("asec destroy %s%s", id, (force ? " force" : "")));
@@ -1353,6 +1370,14 @@ class MountService extends IMountService.Stub
                 return StorageResultCode.OperationFailedStorageNotMounted;
             }
          }
+
+        /*
+         * Force a GC to make sure AssetManagers in other threads of the
+         * system_server are cleaned up. We have to do this since AssetManager
+         * instances are kept as a WeakReference and it's possible we have files
+         * open on the external storage.
+         */
+        Runtime.getRuntime().gc();
 
         int rc = StorageResultCode.OperationSucceeded;
         String cmd = String.format("asec unmount %s%s", id, (force ? " force" : ""));
