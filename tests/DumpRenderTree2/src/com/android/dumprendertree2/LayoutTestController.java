@@ -106,6 +106,10 @@ public class LayoutTestController {
         MockGeolocation.getInstance().setPosition(latitude, longitude, accuracy);
     }
 
+    public void setXSSAuditorEnabled(boolean flag) {
+        mLayoutTestsExecutor.setXSSAuditorEnabled(flag);
+    }
+
     public void waitUntilDone() {
         mLayoutTestsExecutor.waitUntilDone();
     }

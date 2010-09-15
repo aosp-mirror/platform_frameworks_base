@@ -508,6 +508,7 @@ public class LayoutTestsExecutor extends Activity {
     private static final int MSG_DUMP_DATABASE_CALLBACKS = 5;
     private static final int MSG_SET_GEOLOCATION_PERMISSION = 6;
     private static final int MSG_OVERRIDE_PREFERENCE = 7;
+    private static final int MSG_SET_XSS_AUDITOR_ENABLED = 8;
 
     /** String constants for use with layoutTestController.overridePreference() */
     private final String WEBKIT_OFFLINE_WEB_APPLICATION_CACHE_ENABLED =
@@ -585,6 +586,10 @@ public class LayoutTestsExecutor extends Activity {
                     }
                     break;
 
+                case MSG_SET_XSS_AUDITOR_ENABLED:
+                    mCurrentWebView.getSettings().setXSSAuditorEnabled(msg.arg1 == 1);
+                    break;
+
                 case MSG_WAIT_UNTIL_DONE:
                     mCurrentState = CurrentState.WAITING_FOR_ASYNCHRONOUS_TEST;
                     break;
@@ -656,6 +661,13 @@ public class LayoutTestsExecutor extends Activity {
                 ", " + gamma + ")");
         mCurrentWebView.setMockDeviceOrientation(canProvideAlpha, alpha, canProvideBeta, beta,
                 canProvideGamma, gamma);
+    }
+
+    public void setXSSAuditorEnabled(boolean flag) {
+        Log.i(LOG_TAG, mCurrentTestRelativePath + ": setXSSAuditorEnabled(" + flag + ") called");
+        Message msg = mLayoutTestControllerHandler.obtainMessage(MSG_SET_XSS_AUDITOR_ENABLED);
+        msg.arg1 = flag ? 1 : 0;
+        msg.sendToTarget();
     }
 
     public void waitUntilDone() {
