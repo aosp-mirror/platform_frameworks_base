@@ -43,6 +43,9 @@ public enum SipErrorCode {
     /** When the remote URI is not valid. */
     INVALID_REMOTE_URI,
 
+    /** When the peer is not reachable. */
+    PEER_NOT_REACHABLE,
+
     /** When invalid credentials are provided. */
     INVALID_CREDENTIALS,
 
