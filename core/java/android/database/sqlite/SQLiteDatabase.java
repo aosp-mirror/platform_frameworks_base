@@ -2185,25 +2185,6 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @throws IllegalStateException if input cacheSize > {@link #MAX_SQL_CACHE_SIZE} or
      * the value set with previous setMaxSqlCacheSize() call.
      */
-<<<<<<< HEAD:core/java/android/database/sqlite/SQLiteDatabase.java
-    public synchronized void setMaxSqlCacheSize(int cacheSize) {
-        if (cacheSize > MAX_SQL_CACHE_SIZE || cacheSize < 0) {
-            throw new IllegalStateException("expected value between 0 and " + MAX_SQL_CACHE_SIZE);
-        } else if (cacheSize < mMaxSqlCacheSize) {
-            throw new IllegalStateException("cannot set cacheSize to a value less than the value " +
-                    "set with previous setMaxSqlCacheSize() call.");
-        }
-        mMaxSqlCacheSize = cacheSize;
-    }
-
-    /* package */ boolean isSqlInStatementCache(String sql) {
-        synchronized (mCompiledQueries) {
-            return mCompiledQueries.containsKey(sql);
-        }
-|||||||
-    public void setMaxSqlCacheSize(int cacheSize) {
-        mCache.setMaxSqlCacheSize(cacheSize);
-=======
     public void setMaxSqlCacheSize(int cacheSize) {
         synchronized(this) {
             if (cacheSize > MAX_SQL_CACHE_SIZE || cacheSize < 0) {
@@ -2220,7 +2201,6 @@ public class SQLiteDatabase extends SQLiteClosable {
         synchronized (mCompiledQueries) {
             return mCompiledQueries.containsKey(sql);
         }
->>>>>>> master:core/java/android/database/sqlite/SQLiteDatabase.java
     }
 
     /* package */ void finalizeStatementLater(int id) {
@@ -2376,17 +2356,19 @@ public class SQLiteDatabase extends SQLiteClosable {
      *
      * @param size the value the connection handle pool size should be set to.
      */
-    public synchronized void setConnectionPoolSize(int size) {
-        if (mConnectionPool == null) {
-            throw new IllegalStateException("connection pool not enabled");
+    public void setConnectionPoolSize(int size) {
+        synchronized(this) {
+            if (mConnectionPool == null) {
+                throw new IllegalStateException("connection pool not enabled");
+            }
+            int i = mConnectionPool.getMaxPoolSize();
+            if (size < i) {
+                throw new IllegalArgumentException(
+                        "cannot set max pool size to a value less than the current max value(=" +
+                        i + ")");
+            }
+            mConnectionPool.setMaxPoolSize(size);
         }
-        int i = mConnectionPool.getMaxPoolSize();
-        if (size < i) {
-            throw new IllegalArgumentException(
-                    "cannot set max pool size to a value less than the current max value(=" +
-                    i + ")");
-        }
-        mConnectionPool.setMaxPoolSize(size);
     }
 
     /* package */ SQLiteDatabase createPoolConnection(short connectionNum) {
