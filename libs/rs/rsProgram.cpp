@@ -46,6 +46,7 @@ Program::Program(Context *rsc) : ObjectBase(rsc)
     mOutputCount = 0;
     mConstantCount = 0;
     mIsValid = false;
+    mIsInternal = false;
 }
 
 Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
@@ -96,6 +97,14 @@ Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
         if (params[ct] == RS_PROGRAM_PARAM_CONSTANT) {
             mConstantTypes[constant++].set(reinterpret_cast<Type *>(params[ct+1]));
         }
+    }
+    mIsInternal = false;
+    uint32_t internalTokenLen = strlen(RS_SHADER_INTERNAL);
+    if(shaderLength > internalTokenLen &&
+       strncmp(RS_SHADER_INTERNAL, shaderText, internalTokenLen) == 0) {
+        mIsInternal = true;
+        shaderText += internalTokenLen;
+        shaderLength -= internalTokenLen;
     }
     mUserShader.setTo(shaderText, shaderLength);
 }
@@ -281,9 +290,9 @@ void Program::appendUserConstants() {
 }
 
 void Program::setupUserConstants(ShaderCache *sc, bool isFragment) {
-    uint32_t uidx = 1;
+    uint32_t uidx = 0;
     for (uint32_t ct=0; ct < mConstantCount; ct++) {
-        Allocation *alloc = mConstants[ct+1].get();
+        Allocation *alloc = mConstants[ct].get();
         if (!alloc) {
             continue;
         }
@@ -313,6 +322,9 @@ void Program::setupUserConstants(ShaderCache *sc, bool isFragment) {
             if (slot >= 0) {
                 if(f->getType() == RS_TYPE_MATRIX_4X4) {
                     glUniformMatrix4fv(slot, 1, GL_FALSE, fd);
+                    /*for(int i = 0; i < 4; i++) {
+                        LOGE("Mat = %f %f %f %f", fd[i*4 + 0], fd[i*4 + 1], fd[i*4 + 2], fd[i*4 + 3]);
+                    }*/
                 }
                 else if(f->getType() == RS_TYPE_MATRIX_3X3) {
                     glUniformMatrix3fv(slot, 1, GL_FALSE, fd);

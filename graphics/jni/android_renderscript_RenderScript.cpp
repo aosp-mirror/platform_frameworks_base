@@ -784,14 +784,14 @@ nScriptBindAllocation(JNIEnv *_env, jobject _this, RsContext con, jint script, j
 static void
 nScriptSetVarI(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slot, jint val)
 {
-    LOG_API("nScriptSetVarI, con(%p), s(%p), slot(%i), val(%i), b(%f), a(%f)", con, (void *)script, slot, val);
+    LOG_API("nScriptSetVarI, con(%p), s(%p), slot(%i), val(%i)", con, (void *)script, slot, val);
     rsScriptSetVarI(con, (RsScript)script, slot, val);
 }
 
 static void
 nScriptSetVarF(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slot, float val)
 {
-    LOG_API("nScriptSetVarI, con(%p), s(%p), slot(%i), val(%i), b(%f), a(%f)", con, (void *)script, slot, val);
+    LOG_API("nScriptSetVarI, con(%p), s(%p), slot(%i), val(%f)", con, (void *)script, slot, val);
     rsScriptSetVarF(con, (RsScript)script, slot, val);
 }
 

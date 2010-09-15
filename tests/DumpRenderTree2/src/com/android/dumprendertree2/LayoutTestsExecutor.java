@@ -508,6 +508,7 @@ public class LayoutTestsExecutor extends Activity {
     private static final int MSG_DUMP_DATABASE_CALLBACKS = 5;
     private static final int MSG_SET_GEOLOCATION_PERMISSION = 6;
     private static final int MSG_OVERRIDE_PREFERENCE = 7;
+    private static final int MSG_SET_XSS_AUDITOR_ENABLED = 8;
 
     /** String constants for use with layoutTestController.overridePreference() */
     private final String WEBKIT_OFFLINE_WEB_APPLICATION_CACHE_ENABLED =
@@ -519,24 +520,12 @@ public class LayoutTestsExecutor extends Activity {
             assert mCurrentState.isRunningState() : "mCurrentState = " + mCurrentState.name();
 
             switch (msg.what) {
-                case MSG_WAIT_UNTIL_DONE:
-                    mCurrentState = CurrentState.WAITING_FOR_ASYNCHRONOUS_TEST;
-                    break;
-
-                case MSG_NOTIFY_DONE:
-                    if (mCurrentState == CurrentState.WAITING_FOR_ASYNCHRONOUS_TEST) {
-                        onTestFinished();
-                    }
-                    break;
-
                 case MSG_DUMP_AS_TEXT:
                     if (mCurrentResult == null) {
                         mCurrentResult = new TextResult(mCurrentTestRelativePath);
                     }
-
                     assert mCurrentResult instanceof TextResult
                             : "mCurrentResult instanceof" + mCurrentResult.getClass().getName();
-
                     break;
 
                 case MSG_DUMP_CHILD_FRAMES_AS_TEXT:
@@ -551,27 +540,13 @@ public class LayoutTestsExecutor extends Activity {
                     ((TextResult)mCurrentResult).setDumpChildFramesAsText(true);
                     break;
 
-                case MSG_SET_CAN_OPEN_WINDOWS:
-                    mCanOpenWindows = true;
-                    break;
-
                 case MSG_DUMP_DATABASE_CALLBACKS:
                     mDumpDatabaseCallbacks = true;
                     break;
 
-                case MSG_SET_GEOLOCATION_PERMISSION:
-                    mIsGeolocationPermissionSet = true;
-                    mGeolocationPermission = msg.arg1 == 1;
-
-                    if (mPendingGeolocationPermissionCallbacks != null) {
-                        Iterator<GeolocationPermissions.Callback> iter =
-                                mPendingGeolocationPermissionCallbacks.keySet().iterator();
-                        while (iter.hasNext()) {
-                            GeolocationPermissions.Callback callback = iter.next();
-                            String origin = mPendingGeolocationPermissionCallbacks.get(callback);
-                            callback.invoke(origin, mGeolocationPermission, false);
-                        }
-                        mPendingGeolocationPermissionCallbacks = null;
+                case MSG_NOTIFY_DONE:
+                    if (mCurrentState == CurrentState.WAITING_FOR_ASYNCHRONOUS_TEST) {
+                        onTestFinished();
                     }
                     break;
 
@@ -591,6 +566,34 @@ public class LayoutTestsExecutor extends Activity {
                     }
                     break;
 
+                case MSG_SET_CAN_OPEN_WINDOWS:
+                    mCanOpenWindows = true;
+                    break;
+
+                case MSG_SET_GEOLOCATION_PERMISSION:
+                    mIsGeolocationPermissionSet = true;
+                    mGeolocationPermission = msg.arg1 == 1;
+
+                    if (mPendingGeolocationPermissionCallbacks != null) {
+                        Iterator<GeolocationPermissions.Callback> iter =
+                                mPendingGeolocationPermissionCallbacks.keySet().iterator();
+                        while (iter.hasNext()) {
+                            GeolocationPermissions.Callback callback = iter.next();
+                            String origin = mPendingGeolocationPermissionCallbacks.get(callback);
+                            callback.invoke(origin, mGeolocationPermission, false);
+                        }
+                        mPendingGeolocationPermissionCallbacks = null;
+                    }
+                    break;
+
+                case MSG_SET_XSS_AUDITOR_ENABLED:
+                    mCurrentWebView.getSettings().setXSSAuditorEnabled(msg.arg1 == 1);
+                    break;
+
+                case MSG_WAIT_UNTIL_DONE:
+                    mCurrentState = CurrentState.WAITING_FOR_ASYNCHRONOUS_TEST;
+                    break;
+
                 default:
                     assert false : "msg.what=" + msg.what;
                     break;
@@ -603,16 +606,6 @@ public class LayoutTestsExecutor extends Activity {
         mDumpDatabaseCallbacks = false;
         mIsGeolocationPermissionSet = false;
         mPendingGeolocationPermissionCallbacks = null;
-    }
-
-    public void waitUntilDone() {
-        Log.i(LOG_TAG, mCurrentTestRelativePath + ": waitUntilDone() called");
-        mLayoutTestControllerHandler.sendEmptyMessage(MSG_WAIT_UNTIL_DONE);
-    }
-
-    public void notifyDone() {
-        Log.i(LOG_TAG, mCurrentTestRelativePath + ": notifyDone() called");
-        mLayoutTestControllerHandler.sendEmptyMessage(MSG_NOTIFY_DONE);
     }
 
     public void dumpAsText(boolean enablePixelTest) {
@@ -629,22 +622,14 @@ public class LayoutTestsExecutor extends Activity {
         mLayoutTestControllerHandler.sendEmptyMessage(MSG_DUMP_CHILD_FRAMES_AS_TEXT);
     }
 
-    public void setCanOpenWindows() {
-        Log.i(LOG_TAG, mCurrentTestRelativePath + ": setCanOpenWindows() called");
-        mLayoutTestControllerHandler.sendEmptyMessage(MSG_SET_CAN_OPEN_WINDOWS);
-    }
-
     public void dumpDatabaseCallbacks() {
         Log.i(LOG_TAG, mCurrentTestRelativePath + ": dumpDatabaseCallbacks() called");
         mLayoutTestControllerHandler.sendEmptyMessage(MSG_DUMP_DATABASE_CALLBACKS);
     }
 
-    public void setGeolocationPermission(boolean allow) {
-        Log.i(LOG_TAG, mCurrentTestRelativePath + ": setGeolocationPermission(" + allow +
-                ") called");
-        Message msg = mLayoutTestControllerHandler.obtainMessage(MSG_SET_GEOLOCATION_PERMISSION);
-        msg.arg1 = allow ? 1 : 0;
-        msg.sendToTarget();
+    public void notifyDone() {
+        Log.i(LOG_TAG, mCurrentTestRelativePath + ": notifyDone() called");
+        mLayoutTestControllerHandler.sendEmptyMessage(MSG_NOTIFY_DONE);
     }
 
     public void overridePreference(String key, boolean value) {
@@ -656,6 +641,19 @@ public class LayoutTestsExecutor extends Activity {
         msg.sendToTarget();
     }
 
+    public void setCanOpenWindows() {
+        Log.i(LOG_TAG, mCurrentTestRelativePath + ": setCanOpenWindows() called");
+        mLayoutTestControllerHandler.sendEmptyMessage(MSG_SET_CAN_OPEN_WINDOWS);
+    }
+
+    public void setGeolocationPermission(boolean allow) {
+        Log.i(LOG_TAG, mCurrentTestRelativePath + ": setGeolocationPermission(" + allow +
+                ") called");
+        Message msg = mLayoutTestControllerHandler.obtainMessage(MSG_SET_GEOLOCATION_PERMISSION);
+        msg.arg1 = allow ? 1 : 0;
+        msg.sendToTarget();
+    }
+
     public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,
             boolean canProvideBeta, double beta, boolean canProvideGamma, double gamma) {
         Log.i(LOG_TAG, mCurrentTestRelativePath + ": setMockDeviceOrientation(" + canProvideAlpha +
@@ -663,5 +661,17 @@ public class LayoutTestsExecutor extends Activity {
                 ", " + gamma + ")");
         mCurrentWebView.setMockDeviceOrientation(canProvideAlpha, alpha, canProvideBeta, beta,
                 canProvideGamma, gamma);
+    }
+
+    public void setXSSAuditorEnabled(boolean flag) {
+        Log.i(LOG_TAG, mCurrentTestRelativePath + ": setXSSAuditorEnabled(" + flag + ") called");
+        Message msg = mLayoutTestControllerHandler.obtainMessage(MSG_SET_XSS_AUDITOR_ENABLED);
+        msg.arg1 = flag ? 1 : 0;
+        msg.sendToTarget();
+    }
+
+    public void waitUntilDone() {
+        Log.i(LOG_TAG, mCurrentTestRelativePath + ": waitUntilDone() called");
+        mLayoutTestControllerHandler.sendEmptyMessage(MSG_WAIT_UNTIL_DONE);
     }
 }

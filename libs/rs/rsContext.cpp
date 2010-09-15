@@ -88,7 +88,7 @@ void Context::initEGL(bool useGL2)
     configAttribsPtr[0] = EGL_NONE;
     rsAssert(configAttribsPtr < (configAttribs + (sizeof(configAttribs) / sizeof(EGLint))));
 
-    LOGV("initEGL start");
+    LOGV("%p initEGL start", this);
     mEGL.mDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     checkEglError("eglGetDisplay");
 
@@ -97,7 +97,7 @@ void Context::initEGL(bool useGL2)
 
     status_t err = EGLUtils::selectConfigForNativeWindow(mEGL.mDisplay, configAttribs, mWndSurface, &mEGL.mConfig);
     if (err) {
-       LOGE("couldn't find an EGLConfig matching the screen format\n");
+       LOGE("%p, couldn't find an EGLConfig matching the screen format\n", this);
     }
     //eglChooseConfig(mEGL.mDisplay, configAttribs, &mEGL.mConfig, 1, &mEGL.mNumConfigs);
 
@@ -109,14 +109,14 @@ void Context::initEGL(bool useGL2)
     }
     checkEglError("eglCreateContext");
     if (mEGL.mContext == EGL_NO_CONTEXT) {
-        LOGE("eglCreateContext returned EGL_NO_CONTEXT");
+        LOGE("%p, eglCreateContext returned EGL_NO_CONTEXT", this);
     }
     gGLContextCount++;
 }
 
 void Context::deinitEGL()
 {
-    LOGV("deinitEGL");
+    LOGV("%p, deinitEGL", this);
     setSurface(0, 0, NULL);
     eglDestroyContext(mEGL.mDisplay, mEGL.mContext);
     checkEglError("eglDestroyContext");
@@ -150,7 +150,7 @@ void Context::checkError(const char *msg) const
 {
     GLenum err = glGetError();
     if (err != GL_NO_ERROR) {
-        LOGE("GL Error, 0x%x, from %s", err, msg);
+        LOGE("%p, GL Error, 0x%x, from %s", this, err, msg);
     }
 }
 
@@ -348,7 +348,7 @@ void * Context::threadProc(void *vrsc)
          }
      }
 
-     LOGV("RS Thread exiting");
+     LOGV("%p, RS Thread exiting", rsc);
      if (rsc->mIsGraphicsContext) {
          rsc->mRaster.clear();
          rsc->mFragment.clear();
@@ -370,7 +370,7 @@ void * Context::threadProc(void *vrsc)
          pthread_mutex_unlock(&gInitMutex);
      }
 
-     LOGV("RS Thread exited");
+     LOGV("%p, RS Thread exited", rsc);
      return NULL;
 }
 

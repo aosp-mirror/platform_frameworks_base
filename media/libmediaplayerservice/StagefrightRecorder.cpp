@@ -1193,8 +1193,6 @@ status_t StagefrightRecorder::setupMPEG4Recording(
         }
         if ((videoWidth != mVideoWidth) || (videoHeight != mVideoHeight)) {
             // Use downsampling from the original source.
-            CHECK(videoWidth <= mVideoWidth);
-            CHECK(videoHeight <= mVideoHeight);
             cameraMediaSource =
                 new VideoSourceDownSampler(cameraMediaSource, videoWidth, videoHeight);
         }
@@ -1244,6 +1242,10 @@ void StagefrightRecorder::setupMPEG4MetaData(int64_t startTimeUs, int32_t totalB
 
 status_t StagefrightRecorder::startMPEG4Recording() {
     if (mCaptureAuxVideo) {
+        if (!mCaptureTimeLapse) {
+            LOGE("Auxiliary video can be captured only in time lapse mode");
+            return UNKNOWN_ERROR;
+        }
         LOGV("Creating MediaSourceSplitter");
         sp<CameraSource> cameraSource;
         status_t err = setupCameraSource(&cameraSource);
@@ -1276,6 +1278,12 @@ status_t StagefrightRecorder::startMPEG4Recording() {
         CHECK(mOutputFdAux >= 0);
         if (mWriterAux != NULL) {
             LOGE("Auxiliary File writer is not avaialble");
+            return UNKNOWN_ERROR;
+        }
+        if ((mAuxVideoWidth > mVideoWidth) || (mAuxVideoHeight > mVideoHeight) ||
+                ((mAuxVideoWidth == mVideoWidth) && mAuxVideoHeight == mVideoHeight)) {
+            LOGE("Auxiliary video size (%d x %d) same or larger than the main video size (%d x %d)",
+                    mAuxVideoWidth, mAuxVideoHeight, mVideoWidth, mVideoHeight);
             return UNKNOWN_ERROR;
         }
 

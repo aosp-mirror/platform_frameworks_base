@@ -40,7 +40,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * threads should perform its own synchronization when using the SQLiteCursor.
  */
 public class SQLiteCursor extends AbstractWindowedCursor {
-    static final String TAG = "Cursor";
+    static final String TAG = "SQLiteCursor";
     static final int NO_COUNT = -1;
 
     /** The name of the table to edit */

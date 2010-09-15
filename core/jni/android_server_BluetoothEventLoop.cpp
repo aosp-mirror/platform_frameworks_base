@@ -105,7 +105,7 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
     method_onDeviceDisconnectRequested = env->GetMethodID(clazz, "onDeviceDisconnectRequested",
                                                         "(Ljava/lang/String;)V");
     method_onNetworkDeviceConnected = env->GetMethodID(clazz, "onNetworkDeviceConnected",
-                                                              "(Ljava/lang/String;I)V");
+                                                     "(Ljava/lang/String;Ljava/lang/String;I)V");
     method_onNetworkDeviceDisconnected = env->GetMethodID(clazz, "onNetworkDeviceDisconnected",
                                                               "(Ljava/lang/String;)V");
 
@@ -969,15 +969,18 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
                                      "org.bluez.NetworkServer",
                                      "DeviceConnected")) {
        char *c_address;
+       char *c_iface;
        uint16_t uuid;
 
        if (dbus_message_get_args(msg, &err,
                                   DBUS_TYPE_STRING, &c_address,
+                                  DBUS_TYPE_STRING, &c_iface,
                                   DBUS_TYPE_UINT16, &uuid,
                                   DBUS_TYPE_INVALID)) {
            env->CallVoidMethod(nat->me,
                                method_onNetworkDeviceConnected,
                                env->NewStringUTF(c_address),
+                               env->NewStringUTF(c_iface),
                                uuid);
        } else {
            LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);

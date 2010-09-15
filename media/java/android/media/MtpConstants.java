@@ -138,6 +138,28 @@ public final class MtpConstants {
     public static final int FORMAT_ABSTRACT_CONTACT = 0xBB81;
     public static final int FORMAT_VCARD_2 = 0xBB82;
 
+    public static boolean isAbstractObject(int format) {
+        switch (format) {
+            case FORMAT_ABSTRACT_MULTIMEDIA_ALBUM:
+            case FORMAT_ABSTRACT_IMAGE_ALBUM:
+            case FORMAT_ABSTRACT_AUDIO_ALBUM:
+            case FORMAT_ABSTRACT_VIDEO_ALBUM:
+            case FORMAT_ABSTRACT_AV_PLAYLIST:
+            case FORMAT_ABSTRACT_CONTACT_GROUP:
+            case FORMAT_ABSTRACT_MESSAGE_FOLDER:
+            case FORMAT_ABSTRACT_CHAPTERED_PRODUCTION:
+            case FORMAT_ABSTRACT_AUDIO_PLAYLIST:
+            case FORMAT_ABSTRACT_VIDEO_PLAYLIST:
+            case FORMAT_ABSTRACT_MEDIACAST:
+            case FORMAT_ABSTRACT_DOCUMENT:
+            case FORMAT_ABSTRACT_MESSSAGE:
+            case FORMAT_ABSTRACT_CONTACT:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     // MTP object properties
     public static final int PROPERTY_STORAGE_ID = 0xDC01;
     public static final int PROPERTY_OBJECT_FORMAT = 0xDC02;

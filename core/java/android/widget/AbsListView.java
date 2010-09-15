@@ -16,11 +16,12 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
@@ -55,8 +56,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionWrapper;
 import android.view.inputmethod.InputMethodManager;
-
-import com.android.internal.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -3074,8 +3073,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
             // Estimate how many screens we should travel
             final float screenTravelCount = (float) viewTravelCount / childCount;
-            mScrollDuration = (int) (SCROLL_DURATION / screenTravelCount);
+            mScrollDuration = screenTravelCount < 1 ? (int) (screenTravelCount * SCROLL_DURATION) :
+                    (int) (SCROLL_DURATION / screenTravelCount);
             mLastSeenPos = INVALID_POSITION;
+
             post(this);
         }
 
@@ -3213,9 +3214,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
 
             case MOVE_OFFSET: {
-                final int childCount = getChildCount();
+                if (mLastSeenPos == firstPos) {
+                    // No new views, let things keep going.
+                    post(this);
+                    return;
+                }
 
                 mLastSeenPos = firstPos;
+
+                final int childCount = getChildCount();
                 final int position = mTargetPos;
                 final int lastPos = firstPos + childCount - 1;
 
@@ -3228,7 +3235,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 } else {
                     // On-screen, just scroll.
                     final int targetTop = getChildAt(position - firstPos).getTop();
-                    smoothScrollBy(targetTop - mOffsetFromTop, mScrollDuration);
+                    final int distance = targetTop - mOffsetFromTop;
+                    smoothScrollBy(distance,
+                            (int) (mScrollDuration * ((float) distance / getHeight())));
                 }
                 break;
             }

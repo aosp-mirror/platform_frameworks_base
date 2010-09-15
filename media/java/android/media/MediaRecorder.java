@@ -291,26 +291,6 @@ public class MediaRecorder
     }
 
     /**
-     * Enables/Disables time lapse capture and sets its parameters. This method should
-     * be called after setProfile().
-     *
-     * @param enableTimeLapse Pass true to enable time lapse capture, false to disable it.
-     * @param useStillCameraForTimeLapse Pass true to use still camera for capturing time lapse
-     * frames, false to use the video camera.
-     * @param timeBetweenTimeLapseFrameCaptureMs time between two captures of time lapse frames.
-     * @param encoderLevel the video encoder level.
-     */
-    public void setTimeLapseParameters(boolean enableTimeLapse,
-            boolean useStillCameraForTimeLapse,
-            int timeBetweenTimeLapseFrameCaptureMs, int encoderLevel) {
-        setParameter(String.format("time-lapse-enable=%d",
-                    (enableTimeLapse) ? 1 : 0));
-        setParameter(String.format("time-between-time-lapse-frame-capture=%d",
-                    timeBetweenTimeLapseFrameCaptureMs));
-        setVideoEncoderLevel(encoderLevel);
-    }
-
-    /**
      * Set video frame capture rate. This can be used to set a different video frame capture
      * rate than the recorded video's playback rate. Currently this works only for time lapse mode.
      *
@@ -322,49 +302,12 @@ public class MediaRecorder
      * Note that the recorder cannot guarantee that frames will be captured at the
      * given rate due to camera/encoder limitations. However it tries to be as close as
      * possible.
-     * @hide
      */
     public void setCaptureRate(double fps) {
         double timeBetweenFrameCapture = 1 / fps;
         int timeBetweenFrameCaptureMs = (int) (1000 * timeBetweenFrameCapture);
         setParameter(String.format("time-between-time-lapse-frame-capture=%d",
                     timeBetweenFrameCaptureMs));
-    }
-
-    /**
-     * Sets filename and parameters for auxiliary time lapse video.
-     *
-     * @param fd an open file descriptor to be written into.
-     * @param videoFrameWidth width of the auxiliary video.
-     * @param videoFrameHeight height of the auxiliary video.
-     * @param videoBitRate bit rate of the auxiliary video
-     * @hide
-     * */
-    public void setAuxVideoParameters(FileDescriptor fd,
-            int videoFrameWidth, int videoFrameHeight,
-            int videoBitRate) {
-        setAuxiliaryOutputFile(fd);
-        setParameter(String.format("video-aux-param-width=%d", videoFrameWidth));
-        setParameter(String.format("video-aux-param-height=%d", videoFrameHeight));
-        setParameter(String.format("video-aux-param-encoding-bitrate=%d", videoBitRate));
-    }
-
-    /**
-     * Sets filename and parameters for auxiliary time lapse video.
-     *
-     * @param path The pathname to use for the auxiliary video.
-     * @param videoFrameWidth width of the auxiliary video.
-     * @param videoFrameHeight height of the auxiliary video.
-     * @param videoBitRate bit rate of the auxiliary video
-     * @hide
-     * */
-    public void setAuxVideoParameters(String path,
-            int videoFrameWidth, int videoFrameHeight,
-            int videoBitRate) {
-        setAuxiliaryOutputFile(path);
-        setParameter(String.format("video-aux-param-width=%d", videoFrameWidth));
-        setParameter(String.format("video-aux-param-height=%d", videoFrameHeight));
-        setParameter(String.format("video-aux-param-encoding-bitrate=%d", videoBitRate));
     }
 
     /**
@@ -544,33 +487,84 @@ public class MediaRecorder
     }
 
     /**
-     * Pass in the file descriptor of the auxiliary file to be written. Call this after
-     * setOutputFormat() but before prepare().
+     * Sets the auxiliary time lapse video's resolution and bitrate.
+     *
+     * The auxiliary video's resolution and bitrate are determined by the CamcorderProfile
+     * quality level {@link android.media.CamcorderProfile#QUALITY_HIGH}.
+     */
+    private void setAuxVideoParameters() {
+        CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+        setParameter(String.format("video-aux-param-width=%d", profile.videoFrameWidth));
+        setParameter(String.format("video-aux-param-height=%d", profile.videoFrameHeight));
+        setParameter(String.format("video-aux-param-encoding-bitrate=%d", profile.videoBitRate));
+    }
+
+    /**
+     * Pass in the file descriptor for the auxiliary time lapse video. Call this before
+     * prepare().
+     *
+     * Sets file descriptor and parameters for auxiliary time lapse video. Time lapse mode
+     * can capture video (using the still camera) at resolutions higher than that can be
+     * played back on the device. This function or
+     * {@link #setAuxiliaryOutputFile(String)} enable capture of a smaller video in
+     * parallel with the main time lapse video, which can be used to play back on the
+     * device. The smaller video is created by downsampling the main video. This call is
+     * optional and does not have to be called if parallel capture of a downsampled video
+     * is not desired.
+     *
+     * Note that while the main video resolution and bitrate is determined from the
+     * CamcorderProfile in {@link #setProfile(CamcorderProfile)}, the auxiliary video's
+     * resolution and bitrate are determined by the CamcorderProfile quality level
+     * {@link android.media.CamcorderProfile#QUALITY_HIGH}. All other encoding parameters
+     * remain the same for the main video and the auxiliary video.
+     *
+     * E.g. if the device supports the time lapse profile quality level
+     * {@link android.media.CamcorderProfile#QUALITY_TIME_LAPSE_1080P} but can playback at
+     * most 480p, the application might want to capture an auxiliary video of resolution
+     * 480p using this call.
      *
      * @param fd an open file descriptor to be written into.
-     * @throws IllegalStateException if it is called before
-     * setOutputFormat() or after prepare()
      */
-    private void setAuxiliaryOutputFile(FileDescriptor fd) throws IllegalStateException
+    public void setAuxiliaryOutputFile(FileDescriptor fd)
     {
         mPrepareAuxiliaryFile = true;
         mPathAux = null;
         mFdAux = fd;
+        setAuxVideoParameters();
     }
 
     /**
-     * Sets the path of the auxiliary output file to be produced. Call this after
-     * setOutputFormat() but before prepare().
+     * Pass in the file path for the auxiliary time lapse video. Call this before
+     * prepare().
+     *
+     * Sets file path and parameters for auxiliary time lapse video. Time lapse mode can
+     * capture video (using the still camera) at resolutions higher than that can be
+     * played back on the device. This function or
+     * {@link #setAuxiliaryOutputFile(FileDescriptor)} enable capture of a smaller
+     * video in parallel with the main time lapse video, which can be used to play back on
+     * the device. The smaller video is created by downsampling the main video. This call
+     * is optional and does not have to be called if parallel capture of a downsampled
+     * video is not desired.
+     *
+     * Note that while the main video resolution and bitrate is determined from the
+     * CamcorderProfile in {@link #setProfile(CamcorderProfile)}, the auxiliary video's
+     * resolution and bitrate are determined by the CamcorderProfile quality level
+     * {@link android.media.CamcorderProfile#QUALITY_HIGH}. All other encoding parameters
+     * remain the same for the main video and the auxiliary video.
+     *
+     * E.g. if the device supports the time lapse profile quality level
+     * {@link android.media.CamcorderProfile#QUALITY_TIME_LAPSE_1080P} but can playback at
+     * most 480p, the application might want to capture an auxiliary video of resolution
+     * 480p using this call.
      *
      * @param path The pathname to use.
-     * @throws IllegalStateException if it is called before
-     * setOutputFormat() or after prepare()
      */
-    private void setAuxiliaryOutputFile(String path) throws IllegalStateException
+    public void setAuxiliaryOutputFile(String path)
     {
         mPrepareAuxiliaryFile = true;
         mFdAux = null;
         mPathAux = path;
+        setAuxVideoParameters();
     }
 
     /**

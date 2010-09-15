@@ -32,6 +32,10 @@ def main(options, args):
 
   tmpdir = tempfile.gettempdir()
 
+  # Restart the server
+  cmd = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "run_apache2.py") + " restart"
+  os.system(cmd);
+
   # Run the tests in path
   cmd = "adb shell am instrument "
   cmd += "-e class com.android.dumprendertree2.scriptsupport.Starter#startLayoutTests "

@@ -1895,11 +1895,12 @@ public class SQLiteDatabase extends SQLiteClosable {
         executeSql(sql, bindArgs);
     }
 
-    private void executeSql(String sql, Object[] bindArgs) throws SQLException {
+    private int executeSql(String sql, Object[] bindArgs) throws SQLException {
         long timeStart = SystemClock.uptimeMillis();
+        int n;
         SQLiteStatement statement = new SQLiteStatement(this, sql, bindArgs);
         try {
-            statement.executeUpdateDelete();
+            n = statement.executeUpdateDelete();
         } catch (SQLiteDatabaseCorruptException e) {
             onCorruption();
             throw e;
@@ -1907,6 +1908,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             statement.close();
         }
         logTimeStat(sql, timeStart);
+        return n;
     }
 
     @Override
@@ -2183,6 +2185,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @throws IllegalStateException if input cacheSize > {@link #MAX_SQL_CACHE_SIZE} or
      * the value set with previous setMaxSqlCacheSize() call.
      */
+<<<<<<< HEAD:core/java/android/database/sqlite/SQLiteDatabase.java
     public synchronized void setMaxSqlCacheSize(int cacheSize) {
         if (cacheSize > MAX_SQL_CACHE_SIZE || cacheSize < 0) {
             throw new IllegalStateException("expected value between 0 and " + MAX_SQL_CACHE_SIZE);
@@ -2197,6 +2200,27 @@ public class SQLiteDatabase extends SQLiteClosable {
         synchronized (mCompiledQueries) {
             return mCompiledQueries.containsKey(sql);
         }
+|||||||
+    public void setMaxSqlCacheSize(int cacheSize) {
+        mCache.setMaxSqlCacheSize(cacheSize);
+=======
+    public void setMaxSqlCacheSize(int cacheSize) {
+        synchronized(this) {
+            if (cacheSize > MAX_SQL_CACHE_SIZE || cacheSize < 0) {
+                throw new IllegalStateException("expected value between 0 and " + MAX_SQL_CACHE_SIZE);
+            } else if (cacheSize < mMaxSqlCacheSize) {
+                throw new IllegalStateException("cannot set cacheSize to a value less than the value " +
+                        "set with previous setMaxSqlCacheSize() call.");
+            }
+            mMaxSqlCacheSize = cacheSize;
+        }
+    }
+
+    /* package */ boolean isSqlInStatementCache(String sql) {
+        synchronized (mCompiledQueries) {
+            return mCompiledQueries.containsKey(sql);
+        }
+>>>>>>> master:core/java/android/database/sqlite/SQLiteDatabase.java
     }
 
     /* package */ void finalizeStatementLater(int id) {
