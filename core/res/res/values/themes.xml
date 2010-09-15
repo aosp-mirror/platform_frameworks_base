@@ -97,6 +97,8 @@
 
         <item name="listChoiceBackgroundIndicator">@android:drawable/list_selected_background</item>
 
+        <item name="activatedBackgroundIndicator">@android:drawable/activated_background</item>
+
         <item name="expandableListPreferredItemPaddingLeft">40dip</item>
         <item name="expandableListPreferredChildPaddingLeft">
                 ?android:attr/expandableListPreferredItemPaddingLeft</item>
@@ -271,6 +273,8 @@
         
         <item name="editTextColor">?android:attr/textColorPrimary</item>
         <item name="listChoiceBackgroundIndicator">@android:drawable/list_selected_background_light</item>
+
+        <item name="activatedBackgroundIndicator">@android:drawable/activated_background_light</item>
 
         <item name="popupWindowStyle">@android:style/Widget.PopupWindow</item>
         

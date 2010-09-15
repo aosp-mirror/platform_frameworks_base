@@ -1346,6 +1346,8 @@
   <public type="attr" name="iconifiedByDefault" />
   <public type="attr" name="actionLayout" />
   <public type="attr" name="actionViewClass" />
+  <public type="attr" name="activatedBackgroundIndicator" />
+  <public type="attr" name="state_activated" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
@@ -1354,12 +1356,6 @@
   <!-- Context menu ID for the "Select text..." menu item to switch to text
        selection context mode in text views. -->
   <public type="id" name="selectTextMode" />
-  
-  <public type="style" name="Theme.WithActionBar" />
-  <public type="style" name="Widget.Spinner.DropDown" />
-  <public type="style" name="Widget.ActionButton" />
-  <public type="style" name="Theme.Dialog.NoFrame" />
-  <public type="style" name="Theme.NoTitleBar.OverlayActionModes" />
 
   <!-- Standard content view for a {@link android.app.ListFragment}.
        If you are implementing a subclass of ListFragment with your
@@ -1368,6 +1364,15 @@
        the base class. -->
   <public type="layout" name="list_content" />
 
+  <!-- A simple ListView item layout which can contain text and support (single or multiple) item selection. -->
+  <public type="layout" name="simple_selectable_list_item" />
+
+  <public type="style" name="Theme.WithActionBar" />
+  <public type="style" name="Widget.Spinner.DropDown" />
+  <public type="style" name="Widget.ActionButton" />
+  <public type="style" name="Theme.Dialog.NoFrame" />
+  <public type="style" name="Theme.NoTitleBar.OverlayActionModes" />
+
   <public type="style" name="Theme.Holo" />
   <public type="style" name="Theme.Light.Holo" />
   <public type="style" name="Theme.Holo.NoActionBar" />
@@ -1375,9 +1380,6 @@
   <public type="style" name="Theme.Light.Holo.NoActionBar" />
   <public type="style" name="Theme.Light.Holo.NoActionBar.Fullscreen" />
 
-  <!-- A simple ListView item layout which can contain text and support (single or multiple) item selection. -->
-  <public type="layout" name="simple_selectable_list_item" id="0x01090022" />
-
-  <public type="string" name="selectTextMode" id="0x01040030" />
+  <public type="string" name="selectTextMode" />
 
 </resources>
