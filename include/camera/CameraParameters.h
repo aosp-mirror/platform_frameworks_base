@@ -354,7 +354,10 @@ public:
     // for barcode reading.
     static const char SCENE_MODE_BARCODE[];
 
-    // Formats for setPreviewFormat and setPictureFormat.
+    // Pixel color formats for KEY_PREVIEW_FORMAT, KEY_PICTURE_FORMAT,
+    // and KEY_VIDEO_FRAME_FORMAT
+    // Planar variant of the YUV420 color format
+    static const char PIXEL_FORMAT_YUV420P[];
     static const char PIXEL_FORMAT_YUV422SP[];
     static const char PIXEL_FORMAT_YUV420SP[]; // NV21
     static const char PIXEL_FORMAT_YUV422I[]; // YUY2
