@@ -201,6 +201,25 @@ public final class StrictMode {
     }
 
     /**
+     * Enable DropBox logging for debug phone builds.
+     *
+     * @hide
+     */
+    public static boolean conditionallyEnableDebugLogging() {
+        // For debug builds, log event loop stalls to dropbox for analysis.
+        // Similar logic also appears in ActivityThread.java for system apps.
+        if ("user".equals(Build.TYPE)) {
+            return false;
+        }
+        StrictMode.setThreadPolicy(
+            StrictMode.DISALLOW_DISK_WRITE |
+            StrictMode.DISALLOW_DISK_READ |
+            StrictMode.DISALLOW_NETWORK |
+            StrictMode.PENALTY_DROPBOX);
+        return true;
+    }
+
+    /**
      * Parses the BlockGuard policy mask out from the Exception's
      * getMessage() String value.  Kinda gross, but least
      * invasive.  :/
