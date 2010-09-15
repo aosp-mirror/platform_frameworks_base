@@ -202,6 +202,10 @@ void CameraSourceTimeLapse::startCameraRecording() {
         mCamera->setParameters(params.flatten());
         mCameraIdle = true;
 
+        // disable shutter sound and play the recording sound.
+        mCamera->sendCommand(CAMERA_CMD_ENABLE_SHUTTER_SOUND, 0, 0);
+        mCamera->sendCommand(CAMERA_CMD_PLAY_RECORDING_SOUND, 0, 0);
+
         // create a thread which takes pictures in a loop
         pthread_attr_t attr;
         pthread_attr_init(&attr);
@@ -219,6 +223,9 @@ void CameraSourceTimeLapse::stopCameraRecording() {
     if (mUseStillCameraForTimeLapse) {
         void *dummy;
         pthread_join(mThreadTimeLapse, &dummy);
+
+        // play the recording sound and restart preview.
+        mCamera->sendCommand(CAMERA_CMD_PLAY_RECORDING_SOUND, 0, 0);
         CHECK_EQ(OK, mCamera->startPreview());
     } else {
         mCamera->stopRecording();
