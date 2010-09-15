@@ -712,9 +712,15 @@ class SipSessionGroup implements SipListener {
                 case Response.UNAUTHORIZED:
                 case Response.PROXY_AUTHENTICATION_REQUIRED:
                     if (!handleAuthentication(event)) {
-                        Log.v(TAG, "Incorrect username/password");
-                        onRegistrationFailed(SipErrorCode.INVALID_CREDENTIALS,
-                                "incorrect username or password");
+                        if (mLastNonce == null) {
+                            onRegistrationFailed(SipErrorCode.SERVER_ERROR,
+                                    "server does not provide challenge");
+                        } else {
+                            Log.v(TAG, "Incorrect username/password");
+                            onRegistrationFailed(
+                                    SipErrorCode.INVALID_CREDENTIALS,
+                                    "incorrect username or password");
+                        }
                     }
                     return true;
                 default:
@@ -869,6 +875,9 @@ class SipSessionGroup implements SipListener {
                 case Response.PROXY_AUTHENTICATION_REQUIRED:
                     if (handleAuthentication(event)) {
                         addSipSession(this);
+                    } else if (mLastNonce == null) {
+                        endCallOnError(SipErrorCode.SERVER_ERROR,
+                                "server does not provide challenge");
                     } else {
                         endCallOnError(SipErrorCode.INVALID_CREDENTIALS,
                                 "incorrect username or password");
