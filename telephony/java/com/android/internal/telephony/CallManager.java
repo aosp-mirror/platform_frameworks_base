@@ -1144,22 +1144,22 @@ public final class CallManager {
     /**
      * @return list of all ringing calls
      */
-    public ArrayList<Call> getRingingCalls() {
-        return mRingingCalls;
+    public List<Call> getRingingCalls() {
+        return Collections.unmodifiableList(mRingingCalls);
     }
 
     /**
      * @return list of all foreground calls
      */
-    public ArrayList<Call> getForegroundCalls() {
-        return mForegroundCalls;
+    public List<Call> getForegroundCalls() {
+        return Collections.unmodifiableList(mForegroundCalls);
     }
 
     /**
      * @return list of all background calls
      */
-    public ArrayList<Call> getBackgroundCalls() {
-        return mBackgroundCalls;
+    public List<Call> getBackgroundCalls() {
+        return Collections.unmodifiableList(mBackgroundCalls);
     }
 
     /**
@@ -1269,7 +1269,7 @@ public final class CallManager {
 
     /**
      * @return the connections of active foreground call
-     * return null if there is no active foreground call
+     * return empty list if there is no active foreground call
      */
     public List<Connection> getFgCallConnections() {
         Call fgCall = getActiveFgCall();

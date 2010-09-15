@@ -76,6 +76,9 @@ public class SipAudioCallImpl extends SipSessionAdapter
 
     private SipProfile mPendingCallRequest;
 
+    private SipErrorCode mErrorCode;
+    private String mErrorMessage;
+
     public SipAudioCallImpl(Context context, SipProfile localProfile) {
         mContext = context;
         mLocalProfile = localProfile;
@@ -88,23 +91,33 @@ public class SipAudioCallImpl extends SipSessionAdapter
     public void setListener(SipAudioCall.Listener listener,
             boolean callbackImmediately) {
         mListener = listener;
-        if ((listener == null) || !callbackImmediately) return;
         try {
-            SipSessionState state = getState();
-            switch (state) {
-            case READY_TO_CALL:
-                listener.onReadyToCall(this);
-                break;
-            case INCOMING_CALL:
-                listener.onRinging(this, getPeerProfile(mSipSession));
-                startRinging();
-                break;
-            case OUTGOING_CALL:
-                listener.onCalling(this);
-                break;
-            default:
-                listener.onError(this, SipErrorCode.CLIENT_ERROR.toString(),
-                        "wrong state to attach call: " + state);
+            if ((listener == null) || !callbackImmediately) {
+                // do nothing
+            } else if (mErrorCode != null) {
+                listener.onError(this, mErrorCode, mErrorMessage);
+            } else if (mInCall) {
+                if (mHold) {
+                    listener.onCallHeld(this);
+                } else {
+                    listener.onCallEstablished(this);
+                }
+            } else {
+                SipSessionState state = getState();
+                switch (state) {
+                    case READY_TO_CALL:
+                        listener.onReadyToCall(this);
+                        break;
+                    case INCOMING_CALL:
+                        listener.onRinging(this, getPeerProfile(mSipSession));
+                        break;
+                    case OUTGOING_CALL:
+                        listener.onCalling(this);
+                        break;
+                    case OUTGOING_CALL_RING_BACK:
+                        listener.onRingingBack(this);
+                        break;
+                }
             }
         } catch (Throwable t) {
             Log.e(TAG, "setListener()", t);
@@ -131,6 +144,8 @@ public class SipAudioCallImpl extends SipSessionAdapter
         mInCall = false;
         mHold = false;
         mSessionId = -1L;
+        mErrorCode = null;
+        mErrorMessage = null;
     }
 
     public synchronized SipProfile getLocalProfile() {
@@ -165,7 +180,7 @@ public class SipAudioCallImpl extends SipSessionAdapter
         Listener listener = mListener;
         if (listener != null) {
             try {
-                listener.onCalling(SipAudioCallImpl.this);
+                listener.onCalling(this);
             } catch (Throwable t) {
                 Log.e(TAG, "onCalling()", t);
             }
@@ -179,7 +194,7 @@ public class SipAudioCallImpl extends SipSessionAdapter
         Listener listener = mListener;
         if (listener != null) {
             try {
-                listener.onRingingBack(SipAudioCallImpl.this);
+                listener.onRingingBack(this);
             } catch (Throwable t) {
                 Log.e(TAG, "onRingingBack()", t);
             }
@@ -232,9 +247,9 @@ public class SipAudioCallImpl extends SipSessionAdapter
         if (listener != null) {
             try {
                 if (mHold) {
-                    listener.onCallHeld(SipAudioCallImpl.this);
+                    listener.onCallHeld(this);
                 } else {
-                    listener.onCallEstablished(SipAudioCallImpl.this);
+                    listener.onCallEstablished(this);
                 }
             } catch (Throwable t) {
                 Log.e(TAG, "onCallEstablished()", t);
@@ -249,7 +264,7 @@ public class SipAudioCallImpl extends SipSessionAdapter
         Listener listener = mListener;
         if (listener != null) {
             try {
-                listener.onCallEnded(SipAudioCallImpl.this);
+                listener.onCallEnded(this);
             } catch (Throwable t) {
                 Log.e(TAG, "onCallEnded()", t);
             }
@@ -263,21 +278,27 @@ public class SipAudioCallImpl extends SipSessionAdapter
         Listener listener = mListener;
         if (listener != null) {
             try {
-                listener.onCallBusy(SipAudioCallImpl.this);
+                listener.onCallBusy(this);
             } catch (Throwable t) {
                 Log.e(TAG, "onCallBusy()", t);
             }
         }
+    }
+
+    private SipErrorCode getErrorCode(String errorCode) {
+        return Enum.valueOf(SipErrorCode.class, errorCode);
     }
 
     @Override
     public void onCallChangeFailed(ISipSession session, String errorCode,
             String message) {
         Log.d(TAG, "sip call change failed: " + message);
+        mErrorCode = getErrorCode(errorCode);
+        mErrorMessage = message;
         Listener listener = mListener;
         if (listener != null) {
             try {
-                listener.onError(SipAudioCallImpl.this, errorCode, message);
+                listener.onError(this, mErrorCode, message);
             } catch (Throwable t) {
                 Log.e(TAG, "onCallBusy()", t);
             }
@@ -285,16 +306,21 @@ public class SipAudioCallImpl extends SipSessionAdapter
     }
 
     @Override
-    public void onError(ISipSession session, String errorCode,
+    public void onError(ISipSession session, String errorCodeString,
             String message) {
-        Log.d(TAG, "sip session error: " + errorCode + ": " + message);
+        Log.d(TAG, "sip session error: " + errorCodeString + ": " + message);
+        SipErrorCode errorCode = mErrorCode = getErrorCode(errorCodeString);
+        mErrorMessage = message;
         synchronized (this) {
-            if (!isInCall()) close(true);
+            if ((mErrorCode == SipErrorCode.DATA_CONNECTION_LOST)
+                    || !isInCall()) {
+                close(true);
+            }
         }
         Listener listener = mListener;
         if (listener != null) {
             try {
-                listener.onError(SipAudioCallImpl.this, errorCode, message);
+                listener.onError(this, errorCode, message);
             } catch (Throwable t) {
                 Log.e(TAG, "onError()", t);
             }
@@ -307,6 +333,8 @@ public class SipAudioCallImpl extends SipSessionAdapter
         try {
             mPeerSd = new SdpSessionDescription(sessionDescription);
             session.setListener(this);
+
+            if (getState() == SipSessionState.INCOMING_CALL) startRinging();
         } catch (Throwable e) {
             Log.e(TAG, "attachCall()", e);
             throwSipException(e);

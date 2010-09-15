@@ -19,6 +19,7 @@ package com.android.server.sip;
 import gov.nist.javax.sip.clientauthutils.AccountManager;
 import gov.nist.javax.sip.clientauthutils.UserCredentials;
 import gov.nist.javax.sip.header.SIPHeaderNames;
+import gov.nist.javax.sip.header.ProxyAuthenticate;
 import gov.nist.javax.sip.header.WWWAuthenticate;
 import gov.nist.javax.sip.message.SIPMessage;
 
@@ -153,6 +154,13 @@ class SipSessionGroup implements SipListener {
         mSessionMap.clear();
     }
 
+    synchronized void onConnectivityChanged() {
+        for (SipSessionImpl s : mSessionMap.values()) {
+            s.onError(SipErrorCode.DATA_CONNECTION_LOST,
+                    "data connection lost");
+        }
+    }
+
     public SipProfile getLocalProfile() {
         return mLocalProfile;
     }
@@ -210,10 +218,10 @@ class SipSessionGroup implements SipListener {
 
     private synchronized SipSessionImpl getSipSession(EventObject event) {
         String key = SipHelper.getCallId(event);
-        Log.d(TAG, " sesssion key from event: " + key);
-        Log.d(TAG, " active sessions:");
+        Log.d(TAG, "sesssion key from event: " + key);
+        Log.d(TAG, "active sessions:");
         for (String k : mSessionMap.keySet()) {
-            Log.d(TAG, "   .....  '" + k + "': " + mSessionMap.get(k));
+            Log.d(TAG, " ..." + k + ": " + mSessionMap.get(k));
         }
         SipSessionImpl session = mSessionMap.get(key);
         return ((session != null) ? session : mCallReceiverSession);
@@ -222,7 +230,7 @@ class SipSessionGroup implements SipListener {
     private synchronized void addSipSession(SipSessionImpl newSession) {
         removeSipSession(newSession);
         String key = newSession.getCallId();
-        Log.d(TAG, " +++++  add a session with key:  '" + key + "'");
+        Log.d(TAG, "+++  add a session with key:  '" + key + "'");
         mSessionMap.put(key, newSession);
         for (String k : mSessionMap.keySet()) {
             Log.d(TAG, "   .....  " + k + ": " + mSessionMap.get(k));
@@ -724,7 +732,8 @@ class SipSessionGroup implements SipListener {
             Response response = event.getResponse();
             String nonce = getNonceFromResponse(response);
             if (((nonce != null) && nonce.equals(mLastNonce)) ||
-                    (nonce == mLastNonce)) {
+                    (nonce == null)) {
+                mLastNonce = nonce;
                 return false;
             } else {
                 mClientTransaction = mSipHelper.handleChallenge(
@@ -757,9 +766,12 @@ class SipSessionGroup implements SipListener {
         }
 
         private String getNonceFromResponse(Response response) {
-            WWWAuthenticate authHeader = (WWWAuthenticate)(response.getHeader(
-                    SIPHeaderNames.WWW_AUTHENTICATE));
-            return (authHeader == null) ? null : authHeader.getNonce();
+            WWWAuthenticate wwwAuth = (WWWAuthenticate)response.getHeader(
+                    SIPHeaderNames.WWW_AUTHENTICATE);
+            if (wwwAuth != null) return wwwAuth.getNonce();
+            ProxyAuthenticate proxyAuth = (ProxyAuthenticate)response.getHeader(
+                    SIPHeaderNames.PROXY_AUTHENTICATE);
+            return (proxyAuth == null) ? null : proxyAuth.getNonce();
         }
 
         private boolean readyForCall(EventObject evt) throws SipException {
@@ -998,7 +1010,8 @@ class SipSessionGroup implements SipListener {
                     onRegistrationFailed(errorCode, message);
                     break;
                 default:
-                    if (mInCall) {
+                    if ((errorCode != SipErrorCode.DATA_CONNECTION_LOST)
+                            && mInCall) {
                         fallbackToPreviousInCall(errorCode, message);
                     } else {
                         endCallOnError(errorCode, message);
@@ -1148,7 +1161,7 @@ class SipSessionGroup implements SipListener {
                     .setPort(uri.getPort())
                     .setDisplayName(address.getDisplayName())
                     .build();
-        } catch (InvalidArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw new SipException("createPeerProfile()", e);
         } catch (ParseException e) {
             throw new SipException("createPeerProfile()", e);
