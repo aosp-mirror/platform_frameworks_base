@@ -210,6 +210,7 @@ status_t CameraSource::start(MetaData *meta) {
 }
 
 void CameraSource::stopCameraRecording() {
+    mCamera->setListener(NULL);
     mCamera->stopRecording();
 }
 
@@ -220,7 +221,6 @@ status_t CameraSource::stop() {
     mFrameAvailableCondition.signal();
 
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
-    mCamera->setListener(NULL);
     stopCameraRecording();
     releaseQueuedFrames();
     while (!mFramesBeingEncoded.empty()) {

@@ -43,6 +43,16 @@ public:
 
     virtual ~CameraSourceTimeLapse();
 
+    // If the frame capture interval is large, read will block for a long time.
+    // Due to the way the mediaRecorder framework works, a stop() call from
+    // mediaRecorder waits until the read returns, causing a long wait for
+    // stop() to return. To avoid this, we can make read() return a copy of the
+    // last read frame with the same time stamp frequently. This keeps the
+    // read() call from blocking too long. Calling this function quickly
+    // captures another frame, keeps its copy, and enables this mode of read()
+    // returning quickly.
+    void startQuickReadReturns();
+
 private:
     // If true, will use still camera takePicture() for time lapse frames
     // If false, will use the videocamera frames instead.
@@ -82,13 +92,58 @@ private:
     // to know if current frame needs to be skipped.
     bool mSkipCurrentFrame;
 
+    // Lock for accessing mCameraIdle
+    Mutex mCameraIdleLock;
+
+    // Condition variable to wait on if camera is is not yet idle. Once the
+    // camera gets idle, this variable will be signalled.
+    Condition mCameraIdleCondition;
+
     // True if camera is in preview mode and ready for takePicture().
-    bool mCameraIdle;
+    // False after a call to takePicture() but before the final compressed
+    // data callback has been called and preview has been restarted.
+    volatile bool mCameraIdle;
+
+    // True if stop() is waiting for camera to get idle, i.e. for the last
+    // takePicture() to complete. This is needed so that dataCallbackTimestamp()
+    // can return immediately.
+    volatile bool mStopWaitingForIdleCamera;
+
+    // Lock for accessing quick stop variables.
+    Mutex mQuickStopLock;
+
+    // Condition variable to wake up still picture thread.
+    Condition mTakePictureCondition;
+
+    // mQuickStop is set to true if we use quick read() returns, otherwise it is set
+    // to false. Once in this mode read() return a copy of the last read frame
+    // with the same time stamp. See startQuickReadReturns().
+    volatile bool mQuickStop;
+
+    // Forces the next frame passed to dataCallbackTimestamp() to be read
+    // as a time lapse frame. Used by startQuickReadReturns() so that the next
+    // frame wakes up any blocking read.
+    volatile bool mForceRead;
+
+    // Stores a copy of the MediaBuffer read in the last read() call after
+    // mQuickStop was true.
+    MediaBuffer* mLastReadBufferCopy;
+
+    // Status code for last read.
+    status_t mLastReadStatus;
 
     CameraSourceTimeLapse(const sp<Camera> &camera,
         int64_t timeBetweenTimeLapseFrameCaptureUs,
         int32_t width, int32_t height,
         int32_t videoFrameRate);
+
+    // Wrapper over CameraSource::signalBufferReturned() to implement quick stop.
+    // It only handles the case when mLastReadBufferCopy is signalled. Otherwise
+    // it calls the base class' function.
+    virtual void signalBufferReturned(MediaBuffer* buffer);
+
+    // Wrapper over CameraSource::read() to implement quick stop.
+    virtual status_t read(MediaBuffer **buffer, const ReadOptions *options = NULL);
 
     // For still camera case starts a thread which calls camera's takePicture()
     // in a loop. For video camera case, just starts the camera's video recording.
@@ -121,6 +176,10 @@ private:
     // Then it calls the base CameraSource::dataCallbackTimestamp()
     virtual void dataCallbackTimestamp(int64_t timestampUs, int32_t msgType,
             const sp<IMemory> &data);
+
+    // Convenience function to fill mLastReadBufferCopy from the just read
+    // buffer.
+    void fillLastReadBufferCopy(MediaBuffer& sourceBuffer);
 
     // If the passed in size (width x height) is a supported preview size,
     // the function sets the camera's preview size to it and returns true.

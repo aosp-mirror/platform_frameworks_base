@@ -1053,10 +1053,13 @@ status_t StagefrightRecorder::setupCameraSource(sp<CameraSource> *cameraSource) 
     status_t err = setupCamera();
     if (err != OK) return err;
 
-    *cameraSource = (mCaptureTimeLapse) ?
-        CameraSourceTimeLapse::CreateFromCamera(mCamera,
-                mTimeBetweenTimeLapseFrameCaptureUs, mVideoWidth, mVideoHeight, mFrameRate):
-        CameraSource::CreateFromCamera(mCamera);
+    if (mCaptureTimeLapse) {
+        mCameraSourceTimeLapse = CameraSourceTimeLapse::CreateFromCamera(mCamera,
+                mTimeBetweenTimeLapseFrameCaptureUs, mVideoWidth, mVideoHeight, mFrameRate);
+        *cameraSource = mCameraSourceTimeLapse;
+    } else {
+        *cameraSource = CameraSource::CreateFromCamera(mCamera);
+    }
     CHECK(*cameraSource != NULL);
 
     return OK;
@@ -1325,6 +1328,11 @@ status_t StagefrightRecorder::stop() {
     LOGV("stop");
     status_t err = OK;
 
+    if (mCaptureTimeLapse && mCameraSourceTimeLapse != NULL) {
+        mCameraSourceTimeLapse->startQuickReadReturns();
+        mCameraSourceTimeLapse = NULL;
+    }
+
     if (mCaptureAuxVideo) {
         if (mWriterAux != NULL) {
             mWriterAux->stop();
@@ -1411,6 +1419,7 @@ status_t StagefrightRecorder::reset() {
     mTimeBetweenTimeLapseFrameCaptureUs = -1;
     mCaptureAuxVideo = false;
     mCameraSourceSplitter = NULL;
+    mCameraSourceTimeLapse = NULL;
     mEncoderProfiles = MediaProfiles::getInstance();
 
     mOutputFd = -1;

@@ -25,6 +25,7 @@ namespace android {
 
 class Camera;
 class CameraSource;
+class CameraSourceTimeLapse;
 class MediaSourceSplitter;
 struct MediaSource;
 struct MediaWriter;
@@ -101,6 +102,7 @@ private:
     int64_t mTimeBetweenTimeLapseFrameCaptureUs;
     bool mCaptureAuxVideo;
     sp<MediaSourceSplitter> mCameraSourceSplitter;
+    sp<CameraSourceTimeLapse> mCameraSourceTimeLapse;
 
     String8 mParams;
     int mOutputFd, mOutputFdAux;
