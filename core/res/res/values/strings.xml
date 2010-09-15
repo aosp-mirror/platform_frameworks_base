@@ -704,12 +704,12 @@
     <string name="permdesc_movePackage">Allows an application to move application resources from internal to external media and vice versa.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_readLogs">read system log files</string>
+    <string name="permlab_readLogs">read sensitive log data</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readLogs">Allows an application to read from the
         system\'s various log files.  This allows it to discover general
-        information about what you are doing with the phone, but they should
-        not contain any personal or private information.</string>
+        information about what you are doing with the phone, potentially
+        including personal or private information.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_diagnostic">read/write to resources owned by diag</string>
