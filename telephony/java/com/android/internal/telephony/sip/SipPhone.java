@@ -606,6 +606,7 @@ public class SipPhone extends SipPhoneBase {
                 }
                 synchronized (SipPhone.class) {
                     setState(Call.State.DISCONNECTED);
+                    mSipAudioCall.close();
                     mOwner.onConnectionEnded(SipConnection.this);
                     Log.v(LOG_TAG, "-------- connection ended: "
                             + mPeer.getUriString() + ": "
@@ -822,6 +823,9 @@ public class SipPhone extends SipPhoneBase {
         public void onError(SipAudioCall call, SipErrorCode errorCode,
                 String errorMessage) {
             switch (errorCode) {
+                case PEER_NOT_REACHABLE:
+                    onError(Connection.DisconnectCause.NUMBER_UNREACHABLE);
+                    break;
                 case INVALID_REMOTE_URI:
                     onError(Connection.DisconnectCause.INVALID_NUMBER);
                     break;
@@ -839,6 +843,7 @@ public class SipPhone extends SipPhoneBase {
                 case SERVER_ERROR:
                 case CLIENT_ERROR:
                 default:
+                    Log.w(LOG_TAG, "error: " + errorCode + ": " + errorMessage);
                     onError(Connection.DisconnectCause.ERROR_UNSPECIFIED);
             }
         }
