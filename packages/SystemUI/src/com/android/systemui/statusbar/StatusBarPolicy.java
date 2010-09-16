@@ -120,19 +120,29 @@ public class StatusBarPolicy {
 
     //***** Signal strength icons
     //GSM/UMTS
-    private static final int[] sSignalImages = new int[] {
-        R.drawable.stat_sys_signal_0,
-        R.drawable.stat_sys_signal_1,
-        R.drawable.stat_sys_signal_2,
-        R.drawable.stat_sys_signal_3,
-        R.drawable.stat_sys_signal_4
+    private static final int[][] sSignalImages = {
+        { R.drawable.stat_sys_signal_0,
+          R.drawable.stat_sys_signal_1,
+          R.drawable.stat_sys_signal_2,
+          R.drawable.stat_sys_signal_3,
+          R.drawable.stat_sys_signal_4 },
+        { R.drawable.stat_sys_signal_0_fully,
+          R.drawable.stat_sys_signal_1_fully,
+          R.drawable.stat_sys_signal_2_fully,
+          R.drawable.stat_sys_signal_3_fully,
+          R.drawable.stat_sys_signal_4_fully }
     };
-    private static final int[] sSignalImages_r = new int[] {
-        R.drawable.stat_sys_r_signal_0,
-        R.drawable.stat_sys_r_signal_1,
-        R.drawable.stat_sys_r_signal_2,
-        R.drawable.stat_sys_r_signal_3,
-        R.drawable.stat_sys_r_signal_4
+    private static final int[][] sSignalImages_r = {
+        { R.drawable.stat_sys_r_signal_0,
+          R.drawable.stat_sys_r_signal_1,
+          R.drawable.stat_sys_r_signal_2,
+          R.drawable.stat_sys_r_signal_3,
+          R.drawable.stat_sys_r_signal_4 },
+        { R.drawable.stat_sys_r_signal_0_fully,
+          R.drawable.stat_sys_r_signal_1_fully,
+          R.drawable.stat_sys_r_signal_2_fully,
+          R.drawable.stat_sys_r_signal_3_fully,
+          R.drawable.stat_sys_r_signal_4_fully }
     };
     private static final int[] sRoamingIndicatorImages_cdma = new int[] {
         R.drawable.stat_sys_roaming_cdma_0, //Standard Roaming Indicator
@@ -330,7 +340,9 @@ public class StatusBarPolicy {
 
     private int mLastWifiSignalLevel = -1;
     private boolean mIsWifiConnected = false;
-    private int mLastWifiInetConnectivityState = 0;
+
+    // state of inet connection - 0 not connected, 100 connected
+    private int mInetCondition = 0;
 
     // sync state
     // If sync is active the SyncActive icon is displayed. If sync is not active but
@@ -381,7 +393,8 @@ public class StatusBarPolicy {
             else if (action.equals(TtyIntent.TTY_ENABLED_CHANGE_ACTION)) {
                 updateTTY(intent);
             }
-            else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+            else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION) ||
+                     action.equals(ConnectivityManager.INET_CONDITION_ACTION)) {
                 // TODO - stop using other means to get wifi/mobile info
                 updateConnectivity(intent);
             }
@@ -489,6 +502,7 @@ public class StatusBarPolicy {
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(TtyIntent.TTY_ENABLED_CHANGE_ACTION);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
 
         // load config to determine if to distinguish Hspa data icon
@@ -704,19 +718,19 @@ public class StatusBarPolicy {
             if (info.isConnected()) {
                 updateDataNetType(info.getSubtype(), connectionStatus);
                 updateDataIcon();
+                updateSignalStrength(); // apply any change in connectionStatus
             }
             break;
         case ConnectivityManager.TYPE_WIFI:
             if (info.isConnected()) {
                 mIsWifiConnected = true;
-                mLastWifiInetConnectivityState =
+                mInetCondition =
                         (connectionStatus > INET_CONDITION_THRESHOLD ? 1 : 0);
                 int iconId;
                 if (mLastWifiSignalLevel == -1) {
-                    iconId = sWifiSignalImages[mLastWifiInetConnectivityState][0];
+                    iconId = sWifiSignalImages[mInetCondition][0];
                 } else {
-                    iconId = sWifiSignalImages[mLastWifiInetConnectivityState]
-                            [mLastWifiSignalLevel];
+                    iconId = sWifiSignalImages[mInetCondition][mLastWifiSignalLevel];
                 }
                 mService.setIcon("wifi", iconId, 0);
                 // Show the icon since wi-fi is connected
@@ -724,13 +738,14 @@ public class StatusBarPolicy {
             } else {
                 mLastWifiSignalLevel = -1;
                 mIsWifiConnected = false;
-                mLastWifiInetConnectivityState = 0;
+                mInetCondition = 0;
                 int iconId = sWifiSignalImages[0][0];
 
                 mService.setIcon("wifi", iconId, 0);
                 // Hide the icon since we're not connected
                 mService.setIconVisibility("wifi", false);
             }
+            updateSignalStrength(); // apply any change in mInetCondition
             break;
         }
     }
@@ -764,6 +779,7 @@ public class StatusBarPolicy {
             mDataState = state;
             updateDataNetType(networkType, 0);
             updateDataIcon();
+            updateSignalStrength(); // apply the change in connection status
         }
 
         @Override
@@ -858,12 +874,12 @@ public class StatusBarPolicy {
 
             // Though mPhone is a Manager, this call is not an IPC
             if (mPhone.isNetworkRoaming()) {
-                iconList = sSignalImages_r;
+                iconList = sSignalImages_r[mInetCondition];
             } else {
-                iconList = sSignalImages;
+                iconList = sSignalImages[mInetCondition];
             }
         } else {
-            iconList = this.sSignalImages;
+            iconList = sSignalImages[mInetCondition];
 
             // If 3G(EV) and 1x network are available than 3G should be
             // displayed, displayed RSSI should be from the EV side.
@@ -925,37 +941,37 @@ public class StatusBarPolicy {
     }
 
     private final void updateDataNetType(int net, int inetCondition) {
-        int connected = (inetCondition > INET_CONDITION_THRESHOLD ? 1 : 0);
+        mInetCondition = (inetCondition > INET_CONDITION_THRESHOLD ? 1 : 0);
         switch (net) {
         case TelephonyManager.NETWORK_TYPE_EDGE:
-            mDataIconList = sDataNetType_e[connected];
+            mDataIconList = sDataNetType_e[mInetCondition];
             break;
         case TelephonyManager.NETWORK_TYPE_UMTS:
-            mDataIconList = sDataNetType_3g[connected];
+            mDataIconList = sDataNetType_3g[mInetCondition];
             break;
         case TelephonyManager.NETWORK_TYPE_HSDPA:
         case TelephonyManager.NETWORK_TYPE_HSUPA:
         case TelephonyManager.NETWORK_TYPE_HSPA:
             if (mHspaDataDistinguishable) {
-                mDataIconList = sDataNetType_h[connected];
+                mDataIconList = sDataNetType_h[mInetCondition];
             } else {
-                mDataIconList = sDataNetType_3g[connected];
+                mDataIconList = sDataNetType_3g[mInetCondition];
             }
             break;
         case TelephonyManager.NETWORK_TYPE_CDMA:
             // display 1xRTT for IS95A/B
-            mDataIconList = sDataNetType_1x[connected];
+            mDataIconList = sDataNetType_1x[mInetCondition];
             break;
         case TelephonyManager.NETWORK_TYPE_1xRTT:
-            mDataIconList = sDataNetType_1x[connected];
+            mDataIconList = sDataNetType_1x[mInetCondition];
             break;
         case TelephonyManager.NETWORK_TYPE_EVDO_0: //fall through
         case TelephonyManager.NETWORK_TYPE_EVDO_A:
         case TelephonyManager.NETWORK_TYPE_EVDO_B:
-            mDataIconList = sDataNetType_3g[connected];
+            mDataIconList = sDataNetType_3g[mInetCondition];
             break;
         default:
-            mDataIconList = sDataNetType_g[connected];
+            mDataIconList = sDataNetType_g[mInetCondition];
         break;
         }
     }
@@ -1104,7 +1120,7 @@ public class StatusBarPolicy {
             if (newSignalLevel != mLastWifiSignalLevel) {
                 mLastWifiSignalLevel = newSignalLevel;
                 if (mIsWifiConnected) {
-                    iconId = sWifiSignalImages[mLastWifiInetConnectivityState][newSignalLevel];
+                    iconId = sWifiSignalImages[mInetCondition][newSignalLevel];
                 } else {
                     iconId = sWifiTemporarilyNotConnectedImage;
                 }
