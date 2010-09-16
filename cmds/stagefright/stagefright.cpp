@@ -60,7 +60,7 @@ static int64_t getNowUs() {
     return (int64_t)tv.tv_usec + tv.tv_sec * 1000000ll;
 }
 
-static void playSource(OMXClient *client, const sp<MediaSource> &source) {
+static void playSource(OMXClient *client, sp<MediaSource> &source) {
     sp<MetaData> meta = source->getFormat();
 
     const char *mime;
@@ -80,6 +80,8 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
             return;
         }
     }
+
+    source.clear();
 
     status_t err = rawSource->start();
 
