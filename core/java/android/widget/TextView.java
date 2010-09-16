@@ -3873,10 +3873,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mCurrentAlpha = alpha;
             final Drawables dr = mDrawables;
             if (dr != null) {
-                if (dr.mDrawableLeft != null) dr.mDrawableLeft.setAlpha(alpha);
-                if (dr.mDrawableTop != null) dr.mDrawableTop.setAlpha(alpha);
-                if (dr.mDrawableRight != null) dr.mDrawableRight.setAlpha(alpha);
-                if (dr.mDrawableBottom != null) dr.mDrawableBottom.setAlpha(alpha);
+                if (dr.mDrawableLeft != null) dr.mDrawableLeft.mutate().setAlpha(alpha);
+                if (dr.mDrawableTop != null) dr.mDrawableTop.mutate().setAlpha(alpha);
+                if (dr.mDrawableRight != null) dr.mDrawableRight.mutate().setAlpha(alpha);
+                if (dr.mDrawableBottom != null) dr.mDrawableBottom.mutate().setAlpha(alpha);
             }
             return true;
         }
