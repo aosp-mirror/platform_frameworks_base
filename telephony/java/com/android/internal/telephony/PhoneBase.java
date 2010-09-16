@@ -21,6 +21,7 @@ import android.app.IActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.SharedPreferences;
+import android.net.LinkCapabilities;
 import android.net.LinkProperties;
 import android.net.wifi.WifiManager;
 import android.os.AsyncResult;
@@ -940,6 +941,10 @@ public abstract class PhoneBase extends Handler implements Phone {
 
     public LinkProperties getLinkProperties(String apnType) {
         return mDataConnection.getLinkProperties(apnType);
+    }
+
+    public LinkCapabilities getLinkCapabilities(String apnType) {
+        return mDataConnection.getLinkCapabilities(apnType);
     }
 
     public String getActiveApn() {

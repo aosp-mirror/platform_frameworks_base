@@ -732,7 +732,9 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         }
 
         if (ar.exception == null) {
+            // TODO: We should clear LinkProperties/Capabilities when torn down or disconnected
             mLinkProperties = getLinkProperties(mActiveDataConnection);
+            mLinkCapabilities = getLinkCapabilities(mActiveDataConnection);
 
             // everything is setup
             notifyDefaultData(reason);

@@ -19,6 +19,7 @@ package com.android.server;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.LinkCapabilities;
 import android.net.LinkProperties;
 import android.os.Binder;
 import android.os.Bundle;
@@ -92,7 +93,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private ArrayList<String> mConnectedApns;
 
-    private LinkProperties mDataConnectionProperties;
+    private LinkProperties mDataConnectionLinkProperties;
+
+    private LinkCapabilities mDataConnectionLinkCapabilities;
 
     private Bundle mCellLocation = new Bundle();
 
@@ -356,7 +359,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     public void notifyDataConnection(int state, boolean isDataConnectivityPossible,
             String reason, String apn, String apnType, LinkProperties linkProperties,
-            int networkType) {
+            LinkCapabilities linkCapabilities, int networkType) {
         if (!checkNotifyPermission("notifyDataConnection()" )) {
             return;
         }
@@ -382,8 +385,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
             mDataConnectionPossible = isDataConnectivityPossible;
             mDataConnectionReason = reason;
-            mDataConnectionApn = apn;
-            mDataConnectionProperties = linkProperties;
+            mDataConnectionLinkProperties = linkProperties;
+            mDataConnectionLinkCapabilities = linkCapabilities;
             if (mDataConnectionNetworkType != networkType) {
                 mDataConnectionNetworkType = networkType;
                 modified = true;
@@ -403,7 +406,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
         }
         broadcastDataConnectionStateChanged(state, isDataConnectivityPossible, reason, apn,
-                apnType, linkProperties);
+                apnType, linkProperties, linkCapabilities);
     }
 
     public void notifyDataConnectionFailed(String reason, String apnType) {
@@ -490,7 +493,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("  mDataConnectionPossible=" + mDataConnectionPossible);
             pw.println("  mDataConnectionReason=" + mDataConnectionReason);
             pw.println("  mDataConnectionApn=" + mDataConnectionApn);
-            pw.println("  mDataConnectionProperties=" + mDataConnectionProperties);
+            pw.println("  mDataConnectionLinkProperties=" + mDataConnectionLinkProperties);
+            pw.println("  mDataConnectionLinkCapabilities=" + mDataConnectionLinkCapabilities);
             pw.println("  mCellLocation=" + mCellLocation);
             pw.println("registrations: count=" + recordCount);
             for (Record r : mRecords) {
@@ -564,7 +568,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private void broadcastDataConnectionStateChanged(int state,
             boolean isDataConnectivityPossible,
-            String reason, String apn, String apnType, LinkProperties linkProperties) {
+            String reason, String apn, String apnType, LinkProperties linkProperties,
+            LinkCapabilities linkCapabilities) {
         // Note: not reporting to the battery stats service here, because the
         // status bar takes care of that after taking into account all of the
         // required info.
@@ -583,6 +588,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             if (iface != null) {
                 intent.putExtra(Phone.DATA_IFACE_NAME_KEY, iface.getName());
             }
+        }
+        if (linkCapabilities != null) {
+            intent.putExtra(Phone.DATA_LINK_CAPABILITIES_KEY, linkCapabilities);
         }
         intent.putExtra(Phone.DATA_APN_KEY, apn);
         intent.putExtra(Phone.DATA_APN_TYPE_KEY, apnType);

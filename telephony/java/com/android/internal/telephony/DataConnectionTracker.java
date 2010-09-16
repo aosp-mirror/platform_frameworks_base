@@ -17,6 +17,7 @@
 package com.android.internal.telephony;
 
 import android.app.PendingIntent;
+import android.net.LinkCapabilities;
 import android.net.LinkProperties;
 import android.os.AsyncResult;
 import android.os.Handler;
@@ -192,8 +193,11 @@ public abstract class DataConnectionTracker extends Handler {
     /** indication of our availability (preconditions to trysetupData are met) **/
     protected boolean mAvailability = false;
 
-    /** all our link properties (dns, gateway, ip, etc) */
-    protected LinkProperties mLinkProperties;
+    /** The link properties (dns, gateway, ip, etc) */
+    protected LinkProperties mLinkProperties = new LinkProperties();
+
+    /** The link capabilities */
+    protected LinkCapabilities mLinkCapabilities = new LinkCapabilities();
 
     /**
      * Default constructor
@@ -425,8 +429,38 @@ public abstract class DataConnectionTracker extends Handler {
         if (isApnIdEnabled(id)) {
             return new LinkProperties(mLinkProperties);
         } else {
-            return null;
+            return new LinkProperties();
         }
+    }
+
+    protected LinkCapabilities getLinkCapabilities(String apnType) {
+        int id = apnTypeToId(apnType);
+        if (isApnIdEnabled(id)) {
+            return new LinkCapabilities(mLinkCapabilities);
+        } else {
+            return new LinkCapabilities();
+        }
+    }
+
+    /**
+     * Return the LinkProperties for the connection.
+     *
+     * @param connection
+     * @return a copy of the LinkProperties, is never null.
+     */
+    protected LinkProperties getLinkProperties(DataConnection connection) {
+        return connection.getLinkProperties();
+    }
+
+    /**
+     * A capability is an Integer/String pair, the capabilities
+     * are defined in the class LinkSocket#Key.
+     *
+     * @param connection
+     * @return a copy of this connections capabilities, may be empty but never null.
+     */
+    protected LinkCapabilities getLinkCapabilities(DataConnection connection) {
+        return connection.getLinkCapabilities();
     }
 
     // tell all active apns of the current condition
@@ -671,9 +705,5 @@ public abstract class DataConnectionTracker extends Handler {
                 onCleanUpConnection(true, Phone.REASON_DATA_DISABLED);
             }
         }
-    }
-
-    protected LinkProperties getLinkProperties(DataConnection connection) {
-        return connection.getLinkProperties();
     }
 }

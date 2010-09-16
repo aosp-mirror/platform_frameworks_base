@@ -57,6 +57,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     private Handler mTarget;
     private Context mContext;
     private LinkProperties mLinkProperties;
+    private LinkCapabilities mLinkCapabilities;
     private boolean mPrivateDnsRouteSet = false;
     private int mDefaultGatewayAddr = 0;
     private boolean mDefaultRouteSet = false;
@@ -231,8 +232,14 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                             mLinkProperties = intent.getParcelableExtra(
                                     Phone.DATA_LINK_PROPERTIES_KEY);
                             if (mLinkProperties == null) {
-                                Log.d(TAG,
-                                        "CONNECTED event did not supply link properties.");
+                                Log.d(TAG, "CONNECTED event did not supply link properties.");
+                                mLinkProperties = new LinkProperties();
+                            }
+                            mLinkCapabilities = intent.getParcelableExtra(
+                                    Phone.DATA_LINK_CAPABILITIES_KEY);
+                            if (mLinkCapabilities == null) {
+                                Log.d(TAG, "CONNECTED event did not supply link capabilities.");
+                                mLinkCapabilities = new LinkCapabilities();
                             }
                             setDetailedState(DetailedState.CONNECTED, reason, apnName);
                             break;
@@ -517,7 +524,17 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         }
     }
 
+    /**
+     * @see android.net.NetworkStateTracker#getLinkProperties()
+     */
     public LinkProperties getLinkProperties() {
         return new LinkProperties(mLinkProperties);
+    }
+
+    /**
+     * @see android.net.NetworkStateTracker#getLinkCapabilities()
+     */
+    public LinkCapabilities getLinkCapabilities() {
+        return new LinkCapabilities(mLinkCapabilities);
     }
 }

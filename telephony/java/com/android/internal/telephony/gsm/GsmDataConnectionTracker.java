@@ -1099,7 +1099,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
 
         if (ar.exception == null) {
+            // TODO: We should clear LinkProperties/Capabilities when torn down or disconnected
             mLinkProperties = getLinkProperties(mActivePdp);
+            mLinkCapabilities = getLinkCapabilities(mActivePdp);
 
             ApnSetting apn = mActivePdp.getApn();
             if (apn.proxy != null && apn.proxy.length() != 0) {

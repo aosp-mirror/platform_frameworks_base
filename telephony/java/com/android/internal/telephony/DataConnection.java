@@ -21,6 +21,7 @@ import com.android.internal.telephony.gsm.ApnSetting;
 import com.android.internal.util.HierarchicalState;
 import com.android.internal.util.HierarchicalStateMachine;
 
+import android.net.LinkCapabilities;
 import android.net.LinkProperties;
 import android.os.AsyncResult;
 import android.os.Message;
@@ -31,6 +32,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 
 /**
  * {@hide}
@@ -262,6 +264,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     protected PhoneBase phone;
     protected int cid;
     protected LinkProperties mLinkProperties = new LinkProperties();
+    protected LinkCapabilities mCapabilities = new LinkCapabilities();
     protected long createTime;
     protected long lastFailTime;
     protected FailCause lastFailCause;
@@ -912,10 +915,22 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     }
 
     /**
-     * @return the connections LinkProperties
+     * Return the LinkProperties for the connection.
+     *
+     * @return a copy of the LinkProperties, is never null.
      */
     public LinkProperties getLinkProperties() {
         return new LinkProperties(mLinkProperties);
+    }
+
+    /**
+     * A capability is an Integer/String pair, the capabilities
+     * are defined in the class LinkSocket#Key.
+     *
+     * @return a copy of this connections capabilities, may be empty but never null.
+     */
+    public LinkCapabilities getLinkCapabilities() {
+        return new LinkCapabilities(mCapabilities);
     }
 
     /**

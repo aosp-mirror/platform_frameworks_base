@@ -17,6 +17,7 @@
 package com.android.internal.telephony;
 
 import android.content.Context;
+import android.net.LinkCapabilities;
 import android.net.LinkProperties;
 import android.os.Handler;
 import android.os.Message;
@@ -102,6 +103,7 @@ public interface Phone {
     static final String DATA_APN_TYPE_KEY = "apnType";
     static final String DATA_APN_KEY = "apn";
     static final String DATA_LINK_PROPERTIES_KEY = "linkProperties";
+    static final String DATA_LINK_CAPABILITIES_KEY = "linkCapabilities";
 
     static final String DATA_IFACE_NAME_KEY = "iface";
     static final String NETWORK_UNAVAILABLE_KEY = "networkUnvailable";
@@ -324,6 +326,11 @@ public interface Phone {
      * Return the LinkProperties for the named apn or null if not available
      */
     LinkProperties getLinkProperties(String apnType);
+
+    /**
+     * Return the LinkCapabilities
+     */
+    LinkCapabilities getLinkCapabilities(String apnType);
 
     /**
      * Get current signal strength. No change notification available on this
