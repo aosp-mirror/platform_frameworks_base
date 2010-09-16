@@ -408,10 +408,15 @@ status_t NativeInputManager::unregisterInputChannel(JNIEnv* env,
 
 jobject NativeInputManager::getInputChannelObjLocal(JNIEnv* env,
         const sp<InputChannel>& inputChannel) {
+    InputChannel* inputChannelPtr = inputChannel.get();
+    if (! inputChannelPtr) {
+        return NULL;
+    }
+
     {
         AutoMutex _l(mInputChannelRegistryLock);
 
-        ssize_t index = mInputChannelObjWeakTable.indexOfKey(inputChannel.get());
+        ssize_t index = mInputChannelObjWeakTable.indexOfKey(inputChannelPtr);
         if (index < 0) {
             return NULL;
         }
@@ -718,13 +723,7 @@ nsecs_t NativeInputManager::notifyANR(const sp<InputApplicationHandle>& inputApp
         tokenObjLocal = NULL;
     }
 
-    jobject inputChannelObjLocal;
-    if (inputChannel.get()) {
-        inputChannelObjLocal = getInputChannelObjLocal(env, inputChannel);
-    } else {
-        inputChannelObjLocal = NULL;
-    }
-
+    jobject inputChannelObjLocal = getInputChannelObjLocal(env, inputChannel);
     jlong newTimeout = env->CallLongMethod(mCallbacksObj,
                 gCallbacksClassInfo.notifyANR, tokenObjLocal, inputChannelObjLocal);
     if (checkAndClearExceptionFromCallback(env, "notifyANR")) {
@@ -957,23 +956,17 @@ bool NativeInputManager::interceptKeyBeforeDispatching(const sp<InputChannel>& i
 
     JNIEnv* env = jniEnv();
 
+    // Note: inputChannel may be null.
     jobject inputChannelObj = getInputChannelObjLocal(env, inputChannel);
-    if (inputChannelObj) {
-        jboolean consumed = env->CallBooleanMethod(mCallbacksObj,
-                gCallbacksClassInfo.interceptKeyBeforeDispatching,
-                inputChannelObj, keyEvent->getAction(), keyEvent->getFlags(),
-                keyEvent->getKeyCode(), keyEvent->getMetaState(),
-                keyEvent->getRepeatCount(), policyFlags);
-        bool error = checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatching");
+    jboolean consumed = env->CallBooleanMethod(mCallbacksObj,
+            gCallbacksClassInfo.interceptKeyBeforeDispatching,
+            inputChannelObj, keyEvent->getAction(), keyEvent->getFlags(),
+            keyEvent->getKeyCode(), keyEvent->getMetaState(),
+            keyEvent->getRepeatCount(), policyFlags);
+    bool error = checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatching");
 
-        env->DeleteLocalRef(inputChannelObj);
-
-        return consumed && ! error;
-    } else {
-        LOGW("Could not apply key dispatch policy because input channel '%s' is "
-                "no longer valid.", inputChannel->getName().string());
-        return false;
-    }
+    env->DeleteLocalRef(inputChannelObj);
+    return consumed && ! error;
 }
 
 void NativeInputManager::pokeUserActivity(nsecs_t eventTime, int32_t windowType, int32_t eventType) {
