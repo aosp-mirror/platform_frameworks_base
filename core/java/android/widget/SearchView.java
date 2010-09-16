@@ -66,6 +66,7 @@ public class SearchView extends LinearLayout {
     private AutoCompleteTextView mQueryTextView;
     private boolean mSubmitButtonEnabled;
     private CharSequence mQueryHint;
+    private boolean mQueryRefinement;
 
     private SearchableInfo mSearchable;
 
@@ -282,7 +283,34 @@ public class SearchView extends LinearLayout {
         return mSubmitButtonEnabled;
     }
 
-    public interface FilterableListAdapter extends ListAdapter, Filterable {
+    /**
+     * Specifies if a query refinement button should be displayed alongside each suggestion
+     * or if it should depend on the flags set in the individual items retrieved from the
+     * suggestions provider. Clicking on the query refinement button will replace the text
+     * in the query text field with the text from the suggestion. This flag only takes effect
+     * if a SearchableInfo has been specified with {@link #setSearchableInfo(SearchableInfo)}
+     * and not when using a custom adapter.
+     *
+     * @param enable true if all items should have a query refinement button, false if only
+     * those items that have a query refinement flag set should have the button.
+     *
+     * @see SearchManager#SUGGEST_COLUMN_FLAGS
+     * @see SearchManager#FLAG_QUERY_REFINEMENT
+     */
+    public void setQueryRefinementEnabled(boolean enable) {
+        mQueryRefinement = enable;
+        if (mSuggestionsAdapter instanceof SuggestionsAdapter) {
+            ((SuggestionsAdapter) mSuggestionsAdapter).setQueryRefinement(
+                    enable ? SuggestionsAdapter.REFINE_ALL : SuggestionsAdapter.REFINE_BY_ENTRY);
+        }
+    }
+
+    /**
+     * Returns whether query refinement is enabled for all items or only specific ones.
+     * @return true if enabled for all items, false otherwise.
+     */
+    public boolean isQueryRefinementEnabled() {
+        return mQueryRefinement;
     }
 
     /**
@@ -331,6 +359,14 @@ public class SearchView extends LinearLayout {
                 imm.hideSoftInputFromWindow(getWindowToken(), 0);
             }
         }
+    }
+
+    /**
+     * Called by the SuggestionsAdapter
+     * @hide
+     */
+    /* package */void onQueryRefine(CharSequence queryText) {
+        setQuery(queryText);
     }
 
     private final OnClickListener mOnClickListener = new OnClickListener() {
@@ -403,6 +439,9 @@ public class SearchView extends LinearLayout {
             mSuggestionsAdapter = new SuggestionsAdapter(getContext(),
                     this, mSearchable, mOutsideDrawablesCache);
             mQueryTextView.setAdapter(mSuggestionsAdapter);
+            ((SuggestionsAdapter) mSuggestionsAdapter).setQueryRefinement(
+                    mQueryRefinement ? SuggestionsAdapter.REFINE_ALL
+                    : SuggestionsAdapter.REFINE_BY_ENTRY);
         }
     }
 
@@ -555,12 +594,14 @@ public class SearchView extends LinearLayout {
      * Sets the text in the query box, without updating the suggestions.
      */
     private void setQuery(CharSequence query) {
-        mQueryTextView.setText(query, false);
+        mQueryTextView.setText(query, true);
+        // Move the cursor to the end
+        mQueryTextView.setSelection(TextUtils.isEmpty(query) ? 0 : query.length());
     }
 
     private void launchQuerySearch(int actionKey, String actionMsg, String query) {
         String action = Intent.ACTION_SEARCH;
-        Intent intent = createIntent(action, null, null, query, null, actionKey, actionMsg);
+        Intent intent = createIntent(action, null, null, query, actionKey, actionMsg);
         getContext().startActivity(intent);
     }
 
@@ -571,7 +612,6 @@ public class SearchView extends LinearLayout {
      * @param data Intent data, or <code>null</code>.
      * @param extraData Data for {@link SearchManager#EXTRA_DATA_KEY} or <code>null</code>.
      * @param query Intent query, or <code>null</code>.
-     * @param componentName Data for {@link SearchManager#COMPONENT_NAME_KEY} or <code>null</code>.
      * @param actionKey The key code of the action key that was pressed,
      *        or {@link KeyEvent#KEYCODE_UNKNOWN} if none.
      * @param actionMsg The message for the action key that was pressed,
@@ -581,7 +621,7 @@ public class SearchView extends LinearLayout {
      * @return The intent.
      */
     private Intent createIntent(String action, Uri data, String extraData, String query,
-            String componentName, int actionKey, String actionMsg) {
+            int actionKey, String actionMsg) {
         // Now build the Intent
         Intent intent = new Intent(action);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -624,11 +664,6 @@ public class SearchView extends LinearLayout {
             // use specific action if supplied, or default action if supplied, or fixed default
             String action = getColumnString(c, SearchManager.SUGGEST_COLUMN_INTENT_ACTION);
 
-            // some items are display only, or have effect via the cursor respond click reporting.
-            if (SearchManager.INTENT_ACTION_NONE.equals(action)) {
-                return null;
-            }
-
             if (action == null) {
                 action = mSearchable.getSuggestIntentAction();
             }
@@ -650,14 +685,10 @@ public class SearchView extends LinearLayout {
             }
             Uri dataUri = (data == null) ? null : Uri.parse(data);
 
-            String componentName = getColumnString(
-                    c, SearchManager.SUGGEST_COLUMN_INTENT_COMPONENT_NAME);
-
             String query = getColumnString(c, SearchManager.SUGGEST_COLUMN_QUERY);
             String extraData = getColumnString(c, SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA);
 
-            return createIntent(action, dataUri, extraData, query, componentName, actionKey,
-                    actionMsg);
+            return createIntent(action, dataUri, extraData, query, actionKey, actionMsg);
         } catch (RuntimeException e ) {
             int rowNum;
             try {                       // be really paranoid now

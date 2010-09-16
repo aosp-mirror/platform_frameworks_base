@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import com.android.internal.R;
+
 import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
@@ -30,8 +32,6 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.android.internal.R;
-
 import java.text.Collator;
 import java.util.Arrays;
 import java.util.Locale;
@@ -42,13 +42,14 @@ public class LocalePicker extends ListFragment {
 
     public static interface LocaleSelectionListener {
         // You can add any argument if you really need it...
-        public void onLocaleSelected();
+        public void onLocaleSelected(Locale locale);
     }
 
     Loc[] mLocales;
     String[] mSpecialLocaleCodes;
     String[] mSpecialLocaleNames;
 
+    private Locale mNewLocale;
 
     LocaleSelectionListener mListener;  // default to null
 
@@ -181,14 +182,29 @@ public class LocalePicker extends ListFragment {
         getListView().requestFocus();
     }
 
+    /**
+     * Each listener needs to call {@link #updateLocale(Locale)} to actually change the locale.
+     *
+     * We don't call {@link #updateLocale(Locale)} automatically, as it halt the system for
+     * a moment and some callers won't want it.
+     */
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
+        if (mListener != null) {
+            mListener.onLocaleSelected(mLocales[position].locale);
+        }
+    }
+
+    /**
+     * Requests the system to update the system locale. Note that the system looks halted
+     * for a while during the Locale migration, so the caller need to take care of it.
+     */
+    public static void updateLocale(Locale locale) {
         try {
             IActivityManager am = ActivityManagerNative.getDefault();
             Configuration config = am.getConfiguration();
 
-            Loc loc = mLocales[position];
-            config.locale = loc.locale;
+            config.locale = locale;
 
             // indicate this isn't some passing default - the user wants this remembered
             config.userSetLocale = true;
@@ -198,10 +214,6 @@ public class LocalePicker extends ListFragment {
             BackupManager.dataChanged("com.android.providers.settings");
         } catch (RemoteException e) {
             // Intentionally left blank
-        }
-
-        if (mListener != null) {
-            mListener.onLocaleSelected();
         }
     }
 }

@@ -9,6 +9,7 @@ LOCAL_SRC_FILES:= \
 	GraphicBuffer.cpp \
 	GraphicBufferAllocator.cpp \
 	GraphicBufferMapper.cpp \
+	GraphicLog.cpp \
 	KeyLayoutMap.cpp \
 	KeyCharacterMap.cpp \
 	Input.cpp \

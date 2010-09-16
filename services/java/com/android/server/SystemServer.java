@@ -101,6 +101,7 @@ class ServerThread extends Thread {
         UiModeManagerService uiMode = null;
         RecognitionManagerService recognition = null;
         ThrottleService throttle = null;
+        NetworkTimeUpdateService networkTimeUpdater = null;
 
         // Critical services...
         try {
@@ -441,6 +442,13 @@ class ServerThread extends Thread {
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting SIP Service", e);
             }
+
+            try {
+                Slog.i(TAG, "NetworkTimeUpdateService");
+                networkTimeUpdater = new NetworkTimeUpdateService(context);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting NetworkTimeUpdate service");
+            }
         }
 
         // make sure the ADB_ENABLED setting value matches the secure property value
@@ -502,6 +510,7 @@ class ServerThread extends Thread {
         final RecognitionManagerService recognitionF = recognition;
         final LocationManagerService locationF = location;
         final CountryDetectorService countryDetectorF = countryDetector;
+        final NetworkTimeUpdateService networkTimeUpdaterF = networkTimeUpdater;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -531,18 +540,13 @@ class ServerThread extends Thread {
                 if (locationF != null) locationF.systemReady();
                 if (countryDetectorF != null) countryDetectorF.systemReady();
                 if (throttleF != null) throttleF.systemReady();
+                if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemReady();
             }
         });
 
         // For debug builds, log event loop stalls to dropbox for analysis.
-        // Similar logic also appears in ActivityThread.java for system apps.
-        if (!"user".equals(Build.TYPE)) {
-            Slog.i(TAG, "Enabling StrictMode for system server.");
-            StrictMode.setThreadPolicy(
-                StrictMode.DISALLOW_DISK_WRITE |
-                StrictMode.DISALLOW_DISK_READ |
-                StrictMode.DISALLOW_NETWORK |
-                StrictMode.PENALTY_DROPBOX);
+        if (StrictMode.conditionallyEnableDebugLogging()) {
+            Slog.i(TAG, "Enabled StrictMode for system server main thread.");
         }
 
         Looper.loop();

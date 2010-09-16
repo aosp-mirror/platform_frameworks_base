@@ -29,7 +29,7 @@
 
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
-#include <utils/PollLoop.h>
+#include <utils/Looper.h>
 #include <utils/KeyedVector.h>
 #include <utils/threads.h>
 #include <ui/InputTransport.h>
@@ -77,7 +77,7 @@ private:
         };
 
         Connection(uint16_t id,
-                const sp<InputChannel>& inputChannel, const sp<PollLoop>& pollLoop);
+                const sp<InputChannel>& inputChannel, const sp<Looper>& looper);
 
         inline const char* getInputChannelName() const { return inputChannel->getName().string(); }
 
@@ -88,7 +88,7 @@ private:
 
         sp<InputChannel> inputChannel;
         InputConsumer inputConsumer;
-        sp<PollLoop> pollLoop;
+        sp<Looper> looper;
         jobject inputHandlerObjGlobal;
         PreallocatedInputEventFactory inputEventFactory;
 
@@ -110,7 +110,7 @@ private:
     static void handleInputChannelDisposed(JNIEnv* env,
             jobject inputChannelObj, const sp<InputChannel>& inputChannel, void* data);
 
-    static bool handleReceiveCallback(int receiveFd, int events, void* data);
+    static int handleReceiveCallback(int receiveFd, int events, void* data);
 
     static jlong generateFinishedToken(int32_t receiveFd,
             uint16_t connectionId, uint16_t messageSeqNum);
@@ -141,7 +141,7 @@ status_t NativeInputQueue::registerInputChannel(JNIEnv* env, jobject inputChanne
     LOGD("channel '%s' - Registered", inputChannel->getName().string());
 #endif
 
-    sp<PollLoop> pollLoop = android_os_MessageQueue_getPollLoop(env, messageQueueObj);
+    sp<Looper> looper = android_os_MessageQueue_getLooper(env, messageQueueObj);
 
     { // acquire lock
         AutoMutex _l(mLock);
@@ -153,7 +153,7 @@ status_t NativeInputQueue::registerInputChannel(JNIEnv* env, jobject inputChanne
         }
 
         uint16_t connectionId = mNextConnectionId++;
-        sp<Connection> connection = new Connection(connectionId, inputChannel, pollLoop);
+        sp<Connection> connection = new Connection(connectionId, inputChannel, looper);
         status_t result = connection->inputConsumer.initialize();
         if (result) {
             LOGW("Failed to initialize input consumer for input channel '%s', status=%d",
@@ -166,7 +166,7 @@ status_t NativeInputQueue::registerInputChannel(JNIEnv* env, jobject inputChanne
         int32_t receiveFd = inputChannel->getReceivePipeFd();
         mConnectionsByReceiveFd.add(receiveFd, connection);
 
-        pollLoop->setCallback(receiveFd, POLLIN, handleReceiveCallback, this);
+        looper->addFd(receiveFd, 0, ALOOPER_EVENT_INPUT, handleReceiveCallback, this);
     } // release lock
 
     android_view_InputChannel_setDisposeCallback(env, inputChannelObj,
@@ -201,7 +201,7 @@ status_t NativeInputQueue::unregisterInputChannel(JNIEnv* env, jobject inputChan
 
         connection->status = Connection::STATUS_ZOMBIE;
 
-        connection->pollLoop->removeCallback(inputChannel->getReceivePipeFd());
+        connection->looper->removeFd(inputChannel->getReceivePipeFd());
 
         env->DeleteGlobalRef(connection->inputHandlerObjGlobal);
         connection->inputHandlerObjGlobal = NULL;
@@ -293,7 +293,7 @@ void NativeInputQueue::handleInputChannelDisposed(JNIEnv* env,
     q->unregisterInputChannel(env, inputChannelObj);
 }
 
-bool NativeInputQueue::handleReceiveCallback(int receiveFd, int events, void* data) {
+int NativeInputQueue::handleReceiveCallback(int receiveFd, int events, void* data) {
     NativeInputQueue* q = static_cast<NativeInputQueue*>(data);
     JNIEnv* env = AndroidRuntime::getJNIEnv();
 
@@ -308,33 +308,33 @@ bool NativeInputQueue::handleReceiveCallback(int receiveFd, int events, void* da
         if (connectionIndex < 0) {
             LOGE("Received spurious receive callback for unknown input channel.  "
                     "fd=%d, events=0x%x", receiveFd, events);
-            return false; // remove the callback
+            return 0; // remove the callback
         }
 
         connection = q->mConnectionsByReceiveFd.valueAt(connectionIndex);
-        if (events & (POLLERR | POLLHUP | POLLNVAL)) {
+        if (events & (ALOOPER_EVENT_ERROR | ALOOPER_EVENT_HANGUP)) {
             LOGE("channel '%s' ~ Publisher closed input channel or an error occurred.  "
                     "events=0x%x", connection->getInputChannelName(), events);
-            return false; // remove the callback
+            return 0; // remove the callback
         }
 
-        if (! (events & POLLIN)) {
+        if (! (events & ALOOPER_EVENT_INPUT)) {
             LOGW("channel '%s' ~ Received spurious callback for unhandled poll event.  "
                     "events=0x%x", connection->getInputChannelName(), events);
-            return true;
+            return 1;
         }
 
         status_t status = connection->inputConsumer.receiveDispatchSignal();
         if (status) {
             LOGE("channel '%s' ~ Failed to receive dispatch signal.  status=%d",
                     connection->getInputChannelName(), status);
-            return false; // remove the callback
+            return 0; // remove the callback
         }
 
         if (connection->messageInProgress) {
             LOGW("channel '%s' ~ Publisher sent spurious dispatch signal.",
                     connection->getInputChannelName());
-            return true;
+            return 1;
         }
 
         status = connection->inputConsumer.consume(& connection->inputEventFactory, & inputEvent);
@@ -342,7 +342,7 @@ bool NativeInputQueue::handleReceiveCallback(int receiveFd, int events, void* da
             LOGW("channel '%s' ~ Failed to consume input event.  status=%d",
                     connection->getInputChannelName(), status);
             connection->inputConsumer.sendFinishedSignal();
-            return true;
+            return 1;
         }
 
         connection->messageInProgress = true;
@@ -394,7 +394,7 @@ bool NativeInputQueue::handleReceiveCallback(int receiveFd, int events, void* da
                 connection->getInputChannelName());
         env->DeleteLocalRef(inputHandlerObjLocal);
         q->finished(env, finishedToken, false);
-        return true;
+        return 1;
     }
 
 #if DEBUG_DISPATCH_CYCLE
@@ -417,7 +417,7 @@ bool NativeInputQueue::handleReceiveCallback(int receiveFd, int events, void* da
 
     env->DeleteLocalRef(inputEventObj);
     env->DeleteLocalRef(inputHandlerObjLocal);
-    return true;
+    return 1;
 }
 
 jlong NativeInputQueue::generateFinishedToken(int32_t receiveFd, uint16_t connectionId,
@@ -435,9 +435,9 @@ void NativeInputQueue::parseFinishedToken(jlong finishedToken,
 // ----------------------------------------------------------------------------
 
 NativeInputQueue::Connection::Connection(uint16_t id,
-        const sp<InputChannel>& inputChannel, const sp<PollLoop>& pollLoop) :
+        const sp<InputChannel>& inputChannel, const sp<Looper>& looper) :
     id(id), status(STATUS_NORMAL), inputChannel(inputChannel), inputConsumer(inputChannel),
-    pollLoop(pollLoop), inputHandlerObjGlobal(NULL),
+    looper(looper), inputHandlerObjGlobal(NULL),
     messageSeqNum(0), messageInProgress(false) {
 }
 

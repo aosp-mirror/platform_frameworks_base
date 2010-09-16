@@ -21,7 +21,7 @@
 
 #include <utils/Errors.h>
 #include <utils/RefBase.h>
-#include <utils/PollLoop.h>
+#include <utils/Looper.h>
 
 #include <gui/Sensor.h>
 #include <gui/SensorChannel.h>
@@ -81,28 +81,28 @@ ssize_t SensorEventQueue::read(ASensorEvent* events, size_t numEvents)
     return size;
 }
 
-sp<PollLoop> SensorEventQueue::getPollLoop() const
+sp<Looper> SensorEventQueue::getLooper() const
 {
     Mutex::Autolock _l(mLock);
-    if (mPollLoop == 0) {
-        mPollLoop = new PollLoop(true);
-        mPollLoop->setCallback(getFd(), getFd(), POLLIN, NULL, NULL);
+    if (mLooper == 0) {
+        mLooper = new Looper(true);
+        mLooper->addFd(getFd(), getFd(), ALOOPER_EVENT_INPUT, NULL, NULL);
     }
-    return mPollLoop;
+    return mLooper;
 }
 
 status_t SensorEventQueue::waitForEvent() const
 {
     const int fd = getFd();
-    sp<PollLoop> pollLoop(getPollLoop());
-    int32_t result = pollLoop->pollOnce(-1, NULL, NULL);
-    return (result == fd) ? NO_ERROR : -1;
+    sp<Looper> looper(getLooper());
+    int32_t result = looper->pollOnce(-1);
+    return (result == fd) ? status_t(NO_ERROR) : status_t(-1);
 }
 
 status_t SensorEventQueue::wake() const
 {
-    sp<PollLoop> pollLoop(getPollLoop());
-    pollLoop->wake();
+    sp<Looper> looper(getLooper());
+    looper->wake();
     return NO_ERROR;
 }
 

@@ -18,10 +18,10 @@ package android.net.sip;
 
 /**
  * Defines error code returned in
- * {@link SipRegistrationListener#onRegistrationFailed(String, String, String)},
- * {@link ISipSessionListener#onError(ISipSession, String, String)},
- * {@link ISipSessionListener#onCallChangeFailed(ISipSession, String, String)} and
- * {@link ISipSessionListener#onRegistrationFailed(ISipSession, String, String)}.
+ * {@link SipRegistrationListener#onRegistrationFailed},
+ * {@link ISipSessionListener#onError},
+ * {@link ISipSessionListener#onCallChangeFailed} and
+ * {@link ISipSessionListener#onRegistrationFailed}.
  * @hide
  */
 public enum SipErrorCode {
@@ -42,6 +42,9 @@ public enum SipErrorCode {
 
     /** When the remote URI is not valid. */
     INVALID_REMOTE_URI,
+
+    /** When the peer is not reachable. */
+    PEER_NOT_REACHABLE,
 
     /** When invalid credentials are provided. */
     INVALID_CREDENTIALS,

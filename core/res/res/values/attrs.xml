@@ -127,6 +127,12 @@
         <!-- Text color, typeface, size, and style for the text inside of a button. -->
         <attr name="textAppearanceButton" format="reference" />
 
+        <!-- Text color, typeface, size, and style for the text inside of a popup menu. -->
+        <attr name="textAppearanceLargePopupMenu" format="reference" />
+
+        <!-- Text color, typeface, size, and style for small text inside of a popup menu. -->
+        <attr name="textAppearanceSmallPopupMenu" format="reference" />
+
         <!-- EditText text foreground color. -->
         <attr name="editTextColor" format="reference|color" />
         <!-- EditText background drawable. -->
@@ -150,6 +156,9 @@
 
         <!-- Drawable used as a background for selected list items. -->
         <attr name="listChoiceBackgroundIndicator" format="reference" />
+
+        <!-- Drawable used as a background for activated items. -->
+        <attr name="activatedBackgroundIndicator" format="reference" />
 
         <!-- ============= -->
         <!-- Button styles -->
@@ -457,6 +466,10 @@
         <attr name="quickContactBadgeStyleSmallWindowMedium" format="reference" />
         <!-- Default quickcontact badge style with large quickcontact window. -->
         <attr name="quickContactBadgeStyleSmallWindowLarge" format="reference" />
+        <!-- Default ListPopupWindow style. -->
+        <attr name="listPopupWindowStyle" format="reference" />
+        <!-- Default PopupMenu style. -->
+        <attr name="popupMenuStyle" format="reference" />
 
         <!-- =================== -->
         <!-- Action bar styles   -->
@@ -3104,6 +3117,7 @@
          <li>"state_last"
          <li>"state_only"
          <li>"state_pressed"
+         <li>"state_activated"
          <li>"state_error"
          <li>"state_circle"
          <li>"state_rect"
@@ -3111,23 +3125,35 @@
          <li>"state_move"
          </ul>  -->
     <declare-styleable name="DrawableStates">
-        <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view has input focus. -->
         <attr name="state_focused" format="boolean" />
-        <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view's window has input focus. -->
         <attr name="state_window_focused" format="boolean" />
-        <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view is enabled. -->
         <attr name="state_enabled" format="boolean" />
-        <!--  State identifier indicating that the object <var>may</var> display a check mark.
-              See {@link R.attr#state_checked} for the identifier that indicates whether it is
-              actually checked. -->
+        <!-- State identifier indicating that the object <var>may</var> display a check mark.
+             See {@link R.attr#state_checked} for the identifier that indicates whether it is
+             actually checked. -->
         <attr name="state_checkable" format="boolean"/>
-        <!--  State identifier indicating that the object is currently checked.  See
-              {@link R.attr#state_checkable} for an additional identifier that can indicate if
-              any object may ever display a check, regardless of whether state_checked is
-              currently set. -->
+        <!-- State identifier indicating that the object is currently checked.  See
+             {@link R.attr#state_checkable} for an additional identifier that can indicate if
+             any object may ever display a check, regardless of whether state_checked is
+             currently set. -->
         <attr name="state_checked" format="boolean"/>
-        <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view (or one of its parents) is currently selected. -->
         <attr name="state_selected" format="boolean" />
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when the user is pressing down in a view. -->
+        <attr name="state_pressed" format="boolean" />
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view or its parent has been "activated" meaning the user has currently
+             marked it as being of interest.  This is an alternative representation of
+             state_checked for when the state should be propagated down the view hierarchy. -->
+        <attr name="state_activated" format="boolean" />
         <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
         <attr name="state_active" format="boolean" />
         <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
@@ -3138,8 +3164,6 @@
         <attr name="state_middle" format="boolean" />
         <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
         <attr name="state_last" format="boolean" />
-        <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
-        <attr name="state_pressed" format="boolean" />
     </declare-styleable>
     <declare-styleable name="ViewDrawableStates">
         <attr name="state_pressed" />
@@ -3147,6 +3171,7 @@
         <attr name="state_selected" />
         <attr name="state_window_focused" />
         <attr name="state_enabled" />
+        <attr name="state_activated" />
     </declare-styleable>
     <!-- State array representing a menu item that is currently checked. -->
     <declare-styleable name="MenuItemCheckedState">

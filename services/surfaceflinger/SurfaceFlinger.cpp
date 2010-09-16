@@ -38,6 +38,7 @@
 #include <utils/StopWatch.h>
 
 #include <ui/GraphicBufferAllocator.h>
+#include <ui/GraphicLog.h>
 #include <ui/PixelFormat.h>
 
 #include <pixelflinger/pixelflinger.h>
@@ -378,15 +379,24 @@ bool SurfaceFlinger::threadLoop()
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     if (LIKELY(hw.canDraw() && !isFrozen())) {
         // repaint the framebuffer (if needed)
+
+        const int index = hw.getCurrentBufferIndex();
+        GraphicLog& logger(GraphicLog::getInstance());
+
+        logger.log(GraphicLog::SF_REPAINT, index);
         handleRepaint();
 
         // inform the h/w that we're done compositing
+        logger.log(GraphicLog::SF_COMPOSITION_COMPLETE, index);
         hw.compositionComplete();
 
+        logger.log(GraphicLog::SF_SWAP_BUFFERS, index);
         postFramebuffer();
 
+        logger.log(GraphicLog::SF_UNLOCK_CLIENTS, index);
         unlockClients();
 
+        logger.log(GraphicLog::SF_REPAINT_DONE, index);
     } else {
         // pretend we did the post
         unlockClients();
@@ -1560,8 +1570,7 @@ status_t SurfaceFlinger::onTransact(
         int n;
         switch (code) {
             case 1000: // SHOW_CPU, NOT SUPPORTED ANYMORE
-                return NO_ERROR;
-            case 1001:  // SHOW_FPS, NOT SUPPORTED ANYMORE
+            case 1001: // SHOW_FPS, NOT SUPPORTED ANYMORE
                 return NO_ERROR;
             case 1002:  // SHOW_UPDATES
                 n = data.readInt32();
@@ -1580,6 +1589,11 @@ status_t SurfaceFlinger::onTransact(
             }
             case 1005:{ // force transaction
                 setTransactionFlags(eTransactionNeeded|eTraversalNeeded);
+                return NO_ERROR;
+            }
+            case 1006:{ // enable/disable GraphicLog
+                int enabled = data.readInt32();
+                GraphicLog::getInstance().setEnabled(enabled);
                 return NO_ERROR;
             }
             case 1007: // set mFreezeCount

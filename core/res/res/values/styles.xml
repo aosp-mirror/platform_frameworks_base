@@ -937,4 +937,32 @@
         <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
         <item name="android:textSize">18sp</item>
     </style>
+
+    <style name="Widget.ListPopupWindow">
+        <item name="android:dropDownSelector">@android:drawable/list_selector_background</item>
+        <item name="android:popupBackground">@android:drawable/spinner_dropdown_background</item>
+        <item name="android:dropDownVerticalOffset">-10dip</item>
+        <item name="android:dropDownHorizontalOffset">0dip</item>
+        <item name="android:dropDownWidth">wrap_content</item>        
+    </style>
+
+    <style name="Widget.PopupMenu" parent="Widget.ListPopupWindow">
+    </style>
+
+    <style name="TextAppearance.Widget.PopupMenu">
+        <item name="android:textColor">@android:color/primary_text_light</item>
+        <item name="android:textColorHint">@android:color/hint_foreground_light</item>
+        <item name="android:textColorHighlight">@android:color/highlighted_text_light</item>
+        <item name="android:textColorLink">@android:color/link_text_light</item>
+    </style>
+
+    <style name="TextAppearance.Widget.PopupMenu.Large">
+        <item name="android:textSize">22sp</item>
+    </style>
+
+    <style name="TextAppearance.Widget.PopupMenu.Small">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@android:color/secondary_text_light</item>
+    </style>
+
 </resources>

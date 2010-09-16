@@ -986,7 +986,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see android.graphics.drawable.Drawable
      * @see #getDrawableState()
      */
-    protected static final int[] EMPTY_STATE_SET = {};
+    protected static final int[] EMPTY_STATE_SET;
     /**
      * Indicates the view is enabled. States are used with
      * {@link android.graphics.drawable.Drawable} to change the drawing of the
@@ -995,7 +995,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see android.graphics.drawable.Drawable
      * @see #getDrawableState()
      */
-    protected static final int[] ENABLED_STATE_SET = {R.attr.state_enabled};
+    protected static final int[] ENABLED_STATE_SET;
     /**
      * Indicates the view is focused. States are used with
      * {@link android.graphics.drawable.Drawable} to change the drawing of the
@@ -1004,7 +1004,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see android.graphics.drawable.Drawable
      * @see #getDrawableState()
      */
-    protected static final int[] FOCUSED_STATE_SET = {R.attr.state_focused};
+    protected static final int[] FOCUSED_STATE_SET;
     /**
      * Indicates the view is selected. States are used with
      * {@link android.graphics.drawable.Drawable} to change the drawing of the
@@ -1013,7 +1013,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see android.graphics.drawable.Drawable
      * @see #getDrawableState()
      */
-    protected static final int[] SELECTED_STATE_SET = {R.attr.state_selected};
+    protected static final int[] SELECTED_STATE_SET;
     /**
      * Indicates the view is pressed. States are used with
      * {@link android.graphics.drawable.Drawable} to change the drawing of the
@@ -1023,7 +1023,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #getDrawableState()
      * @hide
      */
-    protected static final int[] PRESSED_STATE_SET = {R.attr.state_pressed};
+    protected static final int[] PRESSED_STATE_SET;
     /**
      * Indicates the view's window has focus. States are used with
      * {@link android.graphics.drawable.Drawable} to change the drawing of the
@@ -1032,8 +1032,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see android.graphics.drawable.Drawable
      * @see #getDrawableState()
      */
-    protected static final int[] WINDOW_FOCUSED_STATE_SET =
-            {R.attr.state_window_focused};
+    protected static final int[] WINDOW_FOCUSED_STATE_SET;
     // Doubles
     /**
      * Indicates the view is enabled and has the focus.
@@ -1041,48 +1040,42 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #ENABLED_STATE_SET
      * @see #FOCUSED_STATE_SET
      */
-    protected static final int[] ENABLED_FOCUSED_STATE_SET =
-            stateSetUnion(ENABLED_STATE_SET, FOCUSED_STATE_SET);
+    protected static final int[] ENABLED_FOCUSED_STATE_SET;
     /**
      * Indicates the view is enabled and selected.
      *
      * @see #ENABLED_STATE_SET
      * @see #SELECTED_STATE_SET
      */
-    protected static final int[] ENABLED_SELECTED_STATE_SET =
-            stateSetUnion(ENABLED_STATE_SET, SELECTED_STATE_SET);
+    protected static final int[] ENABLED_SELECTED_STATE_SET;
     /**
      * Indicates the view is enabled and that its window has focus.
      *
      * @see #ENABLED_STATE_SET
      * @see #WINDOW_FOCUSED_STATE_SET
      */
-    protected static final int[] ENABLED_WINDOW_FOCUSED_STATE_SET =
-            stateSetUnion(ENABLED_STATE_SET, WINDOW_FOCUSED_STATE_SET);
+    protected static final int[] ENABLED_WINDOW_FOCUSED_STATE_SET;
     /**
      * Indicates the view is focused and selected.
      *
      * @see #FOCUSED_STATE_SET
      * @see #SELECTED_STATE_SET
      */
-    protected static final int[] FOCUSED_SELECTED_STATE_SET =
-            stateSetUnion(FOCUSED_STATE_SET, SELECTED_STATE_SET);
+    protected static final int[] FOCUSED_SELECTED_STATE_SET;
     /**
      * Indicates the view has the focus and that its window has the focus.
      *
      * @see #FOCUSED_STATE_SET
      * @see #WINDOW_FOCUSED_STATE_SET
      */
-    protected static final int[] FOCUSED_WINDOW_FOCUSED_STATE_SET =
-            stateSetUnion(FOCUSED_STATE_SET, WINDOW_FOCUSED_STATE_SET);
+    protected static final int[] FOCUSED_WINDOW_FOCUSED_STATE_SET;
     /**
      * Indicates the view is selected and that its window has the focus.
      *
      * @see #SELECTED_STATE_SET
      * @see #WINDOW_FOCUSED_STATE_SET
      */
-    protected static final int[] SELECTED_WINDOW_FOCUSED_STATE_SET =
-            stateSetUnion(SELECTED_STATE_SET, WINDOW_FOCUSED_STATE_SET);
+    protected static final int[] SELECTED_WINDOW_FOCUSED_STATE_SET;
     // Triples
     /**
      * Indicates the view is enabled, focused and selected.
@@ -1091,8 +1084,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #FOCUSED_STATE_SET
      * @see #SELECTED_STATE_SET
      */
-    protected static final int[] ENABLED_FOCUSED_SELECTED_STATE_SET =
-            stateSetUnion(ENABLED_FOCUSED_STATE_SET, SELECTED_STATE_SET);
+    protected static final int[] ENABLED_FOCUSED_SELECTED_STATE_SET;
     /**
      * Indicates the view is enabled, focused and its window has the focus.
      *
@@ -1100,8 +1092,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #FOCUSED_STATE_SET
      * @see #WINDOW_FOCUSED_STATE_SET
      */
-    protected static final int[] ENABLED_FOCUSED_WINDOW_FOCUSED_STATE_SET =
-            stateSetUnion(ENABLED_FOCUSED_STATE_SET, WINDOW_FOCUSED_STATE_SET);
+    protected static final int[] ENABLED_FOCUSED_WINDOW_FOCUSED_STATE_SET;
     /**
      * Indicates the view is enabled, selected and its window has the focus.
      *
@@ -1109,8 +1100,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #SELECTED_STATE_SET
      * @see #WINDOW_FOCUSED_STATE_SET
      */
-    protected static final int[] ENABLED_SELECTED_WINDOW_FOCUSED_STATE_SET =
-            stateSetUnion(ENABLED_SELECTED_STATE_SET, WINDOW_FOCUSED_STATE_SET);
+    protected static final int[] ENABLED_SELECTED_WINDOW_FOCUSED_STATE_SET;
     /**
      * Indicates the view is focused, selected and its window has the focus.
      *
@@ -1118,8 +1108,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #SELECTED_STATE_SET
      * @see #WINDOW_FOCUSED_STATE_SET
      */
-    protected static final int[] FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET =
-            stateSetUnion(FOCUSED_SELECTED_STATE_SET, WINDOW_FOCUSED_STATE_SET);
+    protected static final int[] FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET;
     /**
      * Indicates the view is enabled, focused, selected and its window
      * has the focus.
@@ -1129,28 +1118,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #SELECTED_STATE_SET
      * @see #WINDOW_FOCUSED_STATE_SET
      */
-    protected static final int[] ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET =
-            stateSetUnion(ENABLED_FOCUSED_SELECTED_STATE_SET,
-                          WINDOW_FOCUSED_STATE_SET);
-
+    protected static final int[] ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET;
     /**
      * Indicates the view is pressed and its window has the focus.
      *
      * @see #PRESSED_STATE_SET
      * @see #WINDOW_FOCUSED_STATE_SET
      */
-    protected static final int[] PRESSED_WINDOW_FOCUSED_STATE_SET =
-            stateSetUnion(PRESSED_STATE_SET, WINDOW_FOCUSED_STATE_SET);
-
+    protected static final int[] PRESSED_WINDOW_FOCUSED_STATE_SET;
     /**
      * Indicates the view is pressed and selected.
      *
      * @see #PRESSED_STATE_SET
      * @see #SELECTED_STATE_SET
      */
-    protected static final int[] PRESSED_SELECTED_STATE_SET =
-            stateSetUnion(PRESSED_STATE_SET, SELECTED_STATE_SET);
-
+    protected static final int[] PRESSED_SELECTED_STATE_SET;
     /**
      * Indicates the view is pressed, selected and its window has the focus.
      *
@@ -1158,18 +1140,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #SELECTED_STATE_SET
      * @see #WINDOW_FOCUSED_STATE_SET
      */
-    protected static final int[] PRESSED_SELECTED_WINDOW_FOCUSED_STATE_SET =
-            stateSetUnion(PRESSED_SELECTED_STATE_SET, WINDOW_FOCUSED_STATE_SET);
-
+    protected static final int[] PRESSED_SELECTED_WINDOW_FOCUSED_STATE_SET;
     /**
      * Indicates the view is pressed and focused.
      *
      * @see #PRESSED_STATE_SET
      * @see #FOCUSED_STATE_SET
      */
-    protected static final int[] PRESSED_FOCUSED_STATE_SET =
-            stateSetUnion(PRESSED_STATE_SET, FOCUSED_STATE_SET);
-
+    protected static final int[] PRESSED_FOCUSED_STATE_SET;
     /**
      * Indicates the view is pressed, focused and its window has the focus.
      *
@@ -1177,9 +1155,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #FOCUSED_STATE_SET
      * @see #WINDOW_FOCUSED_STATE_SET
      */
-    protected static final int[] PRESSED_FOCUSED_WINDOW_FOCUSED_STATE_SET =
-            stateSetUnion(PRESSED_FOCUSED_STATE_SET, WINDOW_FOCUSED_STATE_SET);
-
+    protected static final int[] PRESSED_FOCUSED_WINDOW_FOCUSED_STATE_SET;
     /**
      * Indicates the view is pressed, focused and selected.
      *
@@ -1187,9 +1163,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #SELECTED_STATE_SET
      * @see #FOCUSED_STATE_SET
      */
-    protected static final int[] PRESSED_FOCUSED_SELECTED_STATE_SET =
-            stateSetUnion(PRESSED_FOCUSED_STATE_SET, SELECTED_STATE_SET);
-
+    protected static final int[] PRESSED_FOCUSED_SELECTED_STATE_SET;
     /**
      * Indicates the view is pressed, focused, selected and its window has the focus.
      *
@@ -1198,18 +1172,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #SELECTED_STATE_SET
      * @see #WINDOW_FOCUSED_STATE_SET
      */
-    protected static final int[] PRESSED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET =
-            stateSetUnion(PRESSED_FOCUSED_SELECTED_STATE_SET, WINDOW_FOCUSED_STATE_SET);
-
+    protected static final int[] PRESSED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET;
     /**
      * Indicates the view is pressed and enabled.
      *
      * @see #PRESSED_STATE_SET
      * @see #ENABLED_STATE_SET
      */
-    protected static final int[] PRESSED_ENABLED_STATE_SET =
-            stateSetUnion(PRESSED_STATE_SET, ENABLED_STATE_SET);
-
+    protected static final int[] PRESSED_ENABLED_STATE_SET;
     /**
      * Indicates the view is pressed, enabled and its window has the focus.
      *
@@ -1217,9 +1187,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #ENABLED_STATE_SET
      * @see #WINDOW_FOCUSED_STATE_SET
      */
-    protected static final int[] PRESSED_ENABLED_WINDOW_FOCUSED_STATE_SET =
-            stateSetUnion(PRESSED_ENABLED_STATE_SET, WINDOW_FOCUSED_STATE_SET);
-
+    protected static final int[] PRESSED_ENABLED_WINDOW_FOCUSED_STATE_SET;
     /**
      * Indicates the view is pressed, enabled and selected.
      *
@@ -1227,9 +1195,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #ENABLED_STATE_SET
      * @see #SELECTED_STATE_SET
      */
-    protected static final int[] PRESSED_ENABLED_SELECTED_STATE_SET =
-            stateSetUnion(PRESSED_ENABLED_STATE_SET, SELECTED_STATE_SET);
-
+    protected static final int[] PRESSED_ENABLED_SELECTED_STATE_SET;
     /**
      * Indicates the view is pressed, enabled, selected and its window has the
      * focus.
@@ -1239,9 +1205,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #SELECTED_STATE_SET
      * @see #WINDOW_FOCUSED_STATE_SET
      */
-    protected static final int[] PRESSED_ENABLED_SELECTED_WINDOW_FOCUSED_STATE_SET =
-            stateSetUnion(PRESSED_ENABLED_SELECTED_STATE_SET, WINDOW_FOCUSED_STATE_SET);
-
+    protected static final int[] PRESSED_ENABLED_SELECTED_WINDOW_FOCUSED_STATE_SET;
     /**
      * Indicates the view is pressed, enabled and focused.
      *
@@ -1249,9 +1213,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #ENABLED_STATE_SET
      * @see #FOCUSED_STATE_SET
      */
-    protected static final int[] PRESSED_ENABLED_FOCUSED_STATE_SET =
-            stateSetUnion(PRESSED_ENABLED_STATE_SET, FOCUSED_STATE_SET);
-
+    protected static final int[] PRESSED_ENABLED_FOCUSED_STATE_SET;
     /**
      * Indicates the view is pressed, enabled, focused and its window has the
      * focus.
@@ -1261,9 +1223,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #FOCUSED_STATE_SET
      * @see #WINDOW_FOCUSED_STATE_SET
      */
-    protected static final int[] PRESSED_ENABLED_FOCUSED_WINDOW_FOCUSED_STATE_SET =
-            stateSetUnion(PRESSED_ENABLED_FOCUSED_STATE_SET, WINDOW_FOCUSED_STATE_SET);
-
+    protected static final int[] PRESSED_ENABLED_FOCUSED_WINDOW_FOCUSED_STATE_SET;
     /**
      * Indicates the view is pressed, enabled, focused and selected.
      *
@@ -1272,9 +1232,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #SELECTED_STATE_SET
      * @see #FOCUSED_STATE_SET
      */
-    protected static final int[] PRESSED_ENABLED_FOCUSED_SELECTED_STATE_SET =
-            stateSetUnion(PRESSED_ENABLED_FOCUSED_STATE_SET, SELECTED_STATE_SET);
-
+    protected static final int[] PRESSED_ENABLED_FOCUSED_SELECTED_STATE_SET;
     /**
      * Indicates the view is pressed, enabled, focused, selected and its window
      * has the focus.
@@ -1285,46 +1243,136 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #FOCUSED_STATE_SET
      * @see #WINDOW_FOCUSED_STATE_SET
      */
-    protected static final int[] PRESSED_ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET =
-            stateSetUnion(PRESSED_ENABLED_FOCUSED_SELECTED_STATE_SET, WINDOW_FOCUSED_STATE_SET);
+    protected static final int[] PRESSED_ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET;
 
     /**
      * The order here is very important to {@link #getDrawableState()}
      */
-    private static final int[][] VIEW_STATE_SETS = {
-        EMPTY_STATE_SET,                                           // 0 0 0 0 0
-        WINDOW_FOCUSED_STATE_SET,                                  // 0 0 0 0 1
-        SELECTED_STATE_SET,                                        // 0 0 0 1 0
-        SELECTED_WINDOW_FOCUSED_STATE_SET,                         // 0 0 0 1 1
-        FOCUSED_STATE_SET,                                         // 0 0 1 0 0
-        FOCUSED_WINDOW_FOCUSED_STATE_SET,                          // 0 0 1 0 1
-        FOCUSED_SELECTED_STATE_SET,                                // 0 0 1 1 0
-        FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET,                 // 0 0 1 1 1
-        ENABLED_STATE_SET,                                         // 0 1 0 0 0
-        ENABLED_WINDOW_FOCUSED_STATE_SET,                          // 0 1 0 0 1
-        ENABLED_SELECTED_STATE_SET,                                // 0 1 0 1 0
-        ENABLED_SELECTED_WINDOW_FOCUSED_STATE_SET,                 // 0 1 0 1 1
-        ENABLED_FOCUSED_STATE_SET,                                 // 0 1 1 0 0
-        ENABLED_FOCUSED_WINDOW_FOCUSED_STATE_SET,                  // 0 1 1 0 1
-        ENABLED_FOCUSED_SELECTED_STATE_SET,                        // 0 1 1 1 0
-        ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET,         // 0 1 1 1 1
-        PRESSED_STATE_SET,                                         // 1 0 0 0 0
-        PRESSED_WINDOW_FOCUSED_STATE_SET,                          // 1 0 0 0 1
-        PRESSED_SELECTED_STATE_SET,                                // 1 0 0 1 0
-        PRESSED_SELECTED_WINDOW_FOCUSED_STATE_SET,                 // 1 0 0 1 1
-        PRESSED_FOCUSED_STATE_SET,                                 // 1 0 1 0 0
-        PRESSED_FOCUSED_WINDOW_FOCUSED_STATE_SET,                  // 1 0 1 0 1
-        PRESSED_FOCUSED_SELECTED_STATE_SET,                        // 1 0 1 1 0
-        PRESSED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET,         // 1 0 1 1 1
-        PRESSED_ENABLED_STATE_SET,                                 // 1 1 0 0 0
-        PRESSED_ENABLED_WINDOW_FOCUSED_STATE_SET,                  // 1 1 0 0 1
-        PRESSED_ENABLED_SELECTED_STATE_SET,                        // 1 1 0 1 0
-        PRESSED_ENABLED_SELECTED_WINDOW_FOCUSED_STATE_SET,         // 1 1 0 1 1
-        PRESSED_ENABLED_FOCUSED_STATE_SET,                         // 1 1 1 0 0
-        PRESSED_ENABLED_FOCUSED_WINDOW_FOCUSED_STATE_SET,          // 1 1 1 0 1
-        PRESSED_ENABLED_FOCUSED_SELECTED_STATE_SET,                // 1 1 1 1 0
-        PRESSED_ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET, // 1 1 1 1 1
+    private static final int[][] VIEW_STATE_SETS;
+
+    static final int VIEW_STATE_WINDOW_FOCUSED = 1<<0;
+    static final int VIEW_STATE_SELECTED = 1<<1;
+    static final int VIEW_STATE_FOCUSED = 1<<2;
+    static final int VIEW_STATE_ENABLED = 1<<3;
+    static final int VIEW_STATE_PRESSED = 1<<4;
+    static final int VIEW_STATE_ACTIVATED = 1<<5;
+
+    static final int[] VIEW_STATE_IDS = new int[] {
+        R.attr.state_window_focused,    VIEW_STATE_WINDOW_FOCUSED,
+        R.attr.state_selected,          VIEW_STATE_SELECTED,
+        R.attr.state_focused,           VIEW_STATE_FOCUSED,
+        R.attr.state_enabled,           VIEW_STATE_ENABLED,
+        R.attr.state_pressed,           VIEW_STATE_PRESSED,
+        R.attr.state_activated,         VIEW_STATE_ACTIVATED,
     };
+
+    static {
+        int[] orderedIds = new int[VIEW_STATE_IDS.length];
+        for (int i=0; i<R.styleable.ViewDrawableStates.length; i++) {
+            int viewState = R.styleable.ViewDrawableStates[i];
+            for (int j=0; j<VIEW_STATE_IDS.length; j+=2) {
+                if (VIEW_STATE_IDS[j] == viewState) {
+                    orderedIds[i*2] = viewState;
+                    orderedIds[i*2+1] = VIEW_STATE_IDS[j+1];
+                }
+            }
+        }
+        final int NUM_BITS = VIEW_STATE_IDS.length/2;
+        VIEW_STATE_SETS = new int[1<<NUM_BITS][];
+        for (int i=0; i<VIEW_STATE_SETS.length; i++) {
+            int numBits = Integer.bitCount(i);
+            int[] set = new int[numBits];
+            int pos = 0;
+            for (int j=0; j<orderedIds.length; j+=2) {
+                if ((i&orderedIds[j+1]) != 0) {
+                    if (false) {
+                        Log.i("View", "Index #" + i + " @ ordered #" + j
+                                + " resid=0x" + Integer.toHexString(orderedIds[j])
+                                + " mask " + orderedIds[j+1]);
+                    }
+                    set[pos++] = orderedIds[j];
+                }
+            }
+            VIEW_STATE_SETS[i] = set;
+        }
+
+        EMPTY_STATE_SET = VIEW_STATE_SETS[0];
+        WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[VIEW_STATE_WINDOW_FOCUSED];
+        SELECTED_STATE_SET = VIEW_STATE_SETS[VIEW_STATE_SELECTED];
+        SELECTED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_SELECTED];
+        FOCUSED_STATE_SET = VIEW_STATE_SETS[VIEW_STATE_FOCUSED];
+        FOCUSED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_FOCUSED];
+        FOCUSED_SELECTED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_SELECTED | VIEW_STATE_FOCUSED];
+        FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_SELECTED
+                | VIEW_STATE_FOCUSED];
+        ENABLED_STATE_SET = VIEW_STATE_SETS[VIEW_STATE_ENABLED];
+        ENABLED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_ENABLED];
+        ENABLED_SELECTED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_SELECTED | VIEW_STATE_ENABLED];
+        ENABLED_SELECTED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_SELECTED
+                | VIEW_STATE_ENABLED];
+        ENABLED_FOCUSED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_FOCUSED | VIEW_STATE_ENABLED];
+        ENABLED_FOCUSED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_FOCUSED
+                | VIEW_STATE_ENABLED];
+        ENABLED_FOCUSED_SELECTED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_SELECTED | VIEW_STATE_FOCUSED
+                | VIEW_STATE_ENABLED];
+        ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_SELECTED
+                | VIEW_STATE_FOCUSED| VIEW_STATE_ENABLED];
+
+        PRESSED_STATE_SET = VIEW_STATE_SETS[VIEW_STATE_PRESSED];
+        PRESSED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_PRESSED];
+        PRESSED_SELECTED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_SELECTED | VIEW_STATE_PRESSED];
+        PRESSED_SELECTED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_SELECTED
+                | VIEW_STATE_PRESSED];
+        PRESSED_FOCUSED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_FOCUSED | VIEW_STATE_PRESSED];
+        PRESSED_FOCUSED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_FOCUSED
+                | VIEW_STATE_PRESSED];
+        PRESSED_FOCUSED_SELECTED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_SELECTED | VIEW_STATE_FOCUSED
+                | VIEW_STATE_PRESSED];
+        PRESSED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_SELECTED
+                | VIEW_STATE_FOCUSED | VIEW_STATE_PRESSED];
+        PRESSED_ENABLED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_ENABLED | VIEW_STATE_PRESSED];
+        PRESSED_ENABLED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_ENABLED
+                | VIEW_STATE_PRESSED];
+        PRESSED_ENABLED_SELECTED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_SELECTED | VIEW_STATE_ENABLED
+                | VIEW_STATE_PRESSED];
+        PRESSED_ENABLED_SELECTED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_SELECTED
+                | VIEW_STATE_ENABLED | VIEW_STATE_PRESSED];
+        PRESSED_ENABLED_FOCUSED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_FOCUSED | VIEW_STATE_ENABLED
+                | VIEW_STATE_PRESSED];
+        PRESSED_ENABLED_FOCUSED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_FOCUSED
+                | VIEW_STATE_ENABLED | VIEW_STATE_PRESSED];
+        PRESSED_ENABLED_FOCUSED_SELECTED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_SELECTED | VIEW_STATE_FOCUSED
+                | VIEW_STATE_ENABLED | VIEW_STATE_PRESSED];
+        PRESSED_ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
+                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_SELECTED
+                | VIEW_STATE_FOCUSED| VIEW_STATE_ENABLED
+                | VIEW_STATE_PRESSED];
+    }
 
     /**
      * Used by views that contain lists of items. This state indicates that
@@ -1571,6 +1619,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @hide
      */
     private static final int PIVOT_EXPLICITLY_SET = 0x10000000;
+
+    /** {@hide} */
+    static final int ACTIVATED                    = 0x20000000;
 
     /**
      * The parent this view is attached to.
@@ -8343,18 +8394,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         int privateFlags = mPrivateFlags;
 
-        int viewStateIndex = (((privateFlags & PRESSED) != 0) ? 1 : 0);
-
-        viewStateIndex = (viewStateIndex << 1)
-                + (((mViewFlags & ENABLED_MASK) == ENABLED) ? 1 : 0);
-
-        viewStateIndex = (viewStateIndex << 1) + (isFocused() ? 1 : 0);
-
-        viewStateIndex = (viewStateIndex << 1)
-                + (((privateFlags & SELECTED) != 0) ? 1 : 0);
-
-        final boolean hasWindowFocus = hasWindowFocus();
-        viewStateIndex = (viewStateIndex << 1) + (hasWindowFocus ? 1 : 0);
+        int viewStateIndex = 0;
+        if ((privateFlags & PRESSED) != 0) viewStateIndex |= VIEW_STATE_PRESSED;
+        if ((mViewFlags & ENABLED_MASK) == ENABLED) viewStateIndex |= VIEW_STATE_ENABLED;
+        if (isFocused()) viewStateIndex |= VIEW_STATE_FOCUSED;
+        if ((privateFlags & SELECTED) != 0) viewStateIndex |= VIEW_STATE_PRESSED;
+        if (hasWindowFocus()) viewStateIndex |= VIEW_STATE_WINDOW_FOCUSED;
+        if ((privateFlags & ACTIVATED) != 0) viewStateIndex |= VIEW_STATE_ACTIVATED;
 
         drawableState = VIEW_STATE_SETS[viewStateIndex];
 
@@ -8366,7 +8412,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     + " en=" + ((mViewFlags & ENABLED_MASK) == ENABLED)
                     + " fo=" + hasFocus()
                     + " sl=" + ((privateFlags & SELECTED) != 0)
-                    + " wf=" + hasWindowFocus
+                    + " wf=" + hasWindowFocus()
                     + ": " + Arrays.toString(drawableState));
         }
 
@@ -8677,6 +8723,48 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     @ViewDebug.ExportedProperty
     public boolean isSelected() {
         return (mPrivateFlags & SELECTED) != 0;
+    }
+
+    /**
+     * Changes the activated state of this view. A view can be activated or not.
+     * Note that activation is not the same as selection.  Selection is
+     * a transient property, representing the view (hierarchy) the user is
+     * currently interacting with.  Activation is a longer-term state that the
+     * user can move views in and out of.  For example, in a list view with
+     * single or multiple selection enabled, the views in the current selection
+     * set are activated.  (Um, yeah, we are deeply sorry about the terminology
+     * here.)  The activated state is propagated down to children of the view it
+     * is set on.
+     *
+     * @param activated true if the view must be activated, false otherwise
+     */
+    public void setActivated(boolean activated) {
+        if (((mPrivateFlags & ACTIVATED) != 0) != activated) {
+            mPrivateFlags = (mPrivateFlags & ~ACTIVATED) | (activated ? ACTIVATED : 0);
+            invalidate();
+            refreshDrawableState();
+            dispatchSetSelected(activated);
+        }
+    }
+
+    /**
+     * Dispatch setActivated to all of this View's children.
+     *
+     * @see #setActivated(boolean)
+     *
+     * @param activated The new activated state
+     */
+    protected void dispatchSetActivated(boolean activated) {
+    }
+
+    /**
+     * Indicates the activation state of this view.
+     *
+     * @return true if the view is activated, false otherwise
+     */
+    @ViewDebug.ExportedProperty
+    public boolean isActivated() {
+        return (mPrivateFlags & ACTIVATED) != 0;
     }
 
     /**

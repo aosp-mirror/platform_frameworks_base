@@ -14,12 +14,12 @@
      limitations under the License.
 -->
 
-<!-- Layout for a preference category item, containing an icon and label. -->
+<!-- Layout of a header item in PreferenceActivity. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+android:id/widget_frame"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
+    android:background="?android:attr/activatedBackgroundIndicator"
     android:gravity="center_vertical"
     android:paddingRight="?android:attr/scrollbarSize">
 

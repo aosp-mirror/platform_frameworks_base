@@ -209,22 +209,24 @@ struct MyHandler : public AHandler {
                                 response->mContent->data(),
                                 response->mContent->size());
 
-                        CHECK(mSessionDesc->isValid());
-
-                        ssize_t i = response->mHeaders.indexOfKey("content-base");
-                        if (i >= 0) {
-                            mBaseURL = response->mHeaders.valueAt(i);
+                        if (!mSessionDesc->isValid()) {
+                            result = ERROR_MALFORMED;
                         } else {
-                            i = response->mHeaders.indexOfKey("content-location");
+                            ssize_t i = response->mHeaders.indexOfKey("content-base");
                             if (i >= 0) {
                                 mBaseURL = response->mHeaders.valueAt(i);
                             } else {
-                                mBaseURL = mSessionURL;
+                                i = response->mHeaders.indexOfKey("content-location");
+                                if (i >= 0) {
+                                    mBaseURL = response->mHeaders.valueAt(i);
+                                } else {
+                                    mBaseURL = mSessionURL;
+                                }
                             }
-                        }
 
-                        CHECK_GT(mSessionDesc->countTracks(), 1u);
-                        setupTrack(1);
+                            CHECK_GT(mSessionDesc->countTracks(), 1u);
+                            setupTrack(1);
+                        }
                     }
                 }
 
@@ -333,13 +335,17 @@ struct MyHandler : public AHandler {
                     sp<ARTSPResponse> response =
                         static_cast<ARTSPResponse *>(obj.get());
 
-                    CHECK_EQ(response->mStatusCode, 200u);
+                    if (response->mStatusCode != 200) {
+                        result = UNKNOWN_ERROR;
+                    } else {
+                        parsePlayResponse(response);
 
-                    parsePlayResponse(response);
+                        sp<AMessage> timeout = new AMessage('tiou', id());
+                        timeout->post(kStartupTimeoutUs);
+                    }
+                }
 
-                    sp<AMessage> timeout = new AMessage('tiou', id());
-                    timeout->post(kStartupTimeoutUs);
-                } else {
+                if (result != OK) {
                     sp<AMessage> reply = new AMessage('disc', id());
                     mConn->disconnect(reply);
                 }
@@ -477,6 +483,11 @@ struct MyHandler : public AHandler {
 
                 uint32_t seqNum = (uint32_t)accessUnit->int32Data();
 
+                if (mSeekPending) {
+                    LOG(INFO) << "we're seeking, dropping stale packet.";
+                    break;
+                }
+
                 if (seqNum < track->mFirstSeqNumInSegment) {
                     LOG(INFO) << "dropping stale access-unit "
                               << "(" << seqNum << " < "
@@ -600,18 +611,26 @@ struct MyHandler : public AHandler {
                 LOG(INFO) << "PLAY completed with result "
                      << result << " (" << strerror(-result) << ")";
 
-                CHECK_EQ(result, (status_t)OK);
+                if (result == OK) {
+                    sp<RefBase> obj;
+                    CHECK(msg->findObject("response", &obj));
+                    sp<ARTSPResponse> response =
+                        static_cast<ARTSPResponse *>(obj.get());
 
-                sp<RefBase> obj;
-                CHECK(msg->findObject("response", &obj));
-                sp<ARTSPResponse> response =
-                    static_cast<ARTSPResponse *>(obj.get());
+                    if (response->mStatusCode != 200) {
+                        result = UNKNOWN_ERROR;
+                    } else {
+                        parsePlayResponse(response);
 
-                CHECK_EQ(response->mStatusCode, 200u);
+                        LOG(INFO) << "seek completed.";
+                    }
+                }
 
-                parsePlayResponse(response);
+                if (result != OK) {
+                    LOG(ERROR) << "seek failed, aborting.";
+                    (new AMessage('abor', id()))->post();
+                }
 
-                LOG(INFO) << "seek completed.";
                 mSeekPending = false;
                 break;
             }

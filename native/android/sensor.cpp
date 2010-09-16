@@ -21,7 +21,7 @@
 #include <android/sensor.h>
 
 #include <utils/RefBase.h>
-#include <utils/PollLoop.h>
+#include <utils/Looper.h>
 #include <utils/Timers.h>
 
 #include <gui/Sensor.h>
@@ -60,12 +60,12 @@ ASensor const* ASensorManager_getDefaultSensor(ASensorManager* manager, int type
 }
 
 ASensorEventQueue* ASensorManager_createEventQueue(ASensorManager* manager,
-        ALooper* looper, int ident, ALooper_callbackFunc* callback, void* data)
+        ALooper* looper, int ident, ALooper_callbackFunc callback, void* data)
 {
     sp<SensorEventQueue> queue =
             static_cast<SensorManager*>(manager)->createEventQueue();
     if (queue != 0) {
-        ALooper_addFd(looper, queue->getFd(), ident, POLLIN, callback, data);
+        ALooper_addFd(looper, queue->getFd(), ident, ALOOPER_EVENT_INPUT, callback, data);
         queue->looper = looper;
         queue->incStrong(manager);
     }

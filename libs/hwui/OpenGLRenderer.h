@@ -229,7 +229,7 @@ private:
      */
     void drawTextureMesh(float left, float top, float right, float bottom, GLuint texture,
             float alpha, SkXfermode::Mode mode, bool blend,
-            GLvoid* vertices, GLvoid* texCoords, GLvoid* indices, GLsizei elementsCount = 0,
+            GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
             bool swapSrcDst = false, bool ignoreTransform = false);
 
     /**

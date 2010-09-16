@@ -16,16 +16,12 @@
 
 package android.app;
 
-import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -40,7 +36,7 @@ import java.util.List;
 
 /**
  * This class provides access to the system search services.
- * 
+ *
  * <p>In practice, you won't interact with this class directly, as search
  * services are provided through methods in {@link android.app.Activity Activity}
  * and the {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH}
@@ -56,7 +52,7 @@ import java.util.List;
  * href="{@docRoot}guide/topics/search/index.html">Search</a></strong>.</p>
  * </div>
  */
-public class SearchManager 
+public class SearchManager
         implements DialogInterface.OnDismissListener, DialogInterface.OnCancelListener
 {
 
@@ -65,20 +61,20 @@ public class SearchManager
 
     /**
      * This is a shortcut definition for the default menu key to use for invoking search.
-     * 
+     *
      * See Menu.Item.setAlphabeticShortcut() for more information.
      */
     public final static char MENU_KEY = 's';
 
     /**
      * This is a shortcut definition for the default menu key to use for invoking search.
-     * 
+     *
      * See Menu.Item.setAlphabeticShortcut() for more information.
      */
     public final static int MENU_KEYCODE = KeyEvent.KEYCODE_S;
 
     /**
-     * Intent extra data key: Use this key with 
+     * Intent extra data key: Use this key with
      * {@link android.content.Intent#getStringExtra
      *  content.Intent.getStringExtra()}
      * to obtain the query string from Intent.ACTION_SEARCH.
@@ -103,7 +99,7 @@ public class SearchManager
      * Intent extra data key: Use this key with Intent.ACTION_SEARCH and
      * {@link android.content.Intent#getBundleExtra
      *  content.Intent.getBundleExtra()}
-     * to obtain any additional app-specific data that was inserted by the 
+     * to obtain any additional app-specific data that was inserted by the
      * activity that launched the search.
      */
     public final static String APP_DATA = "app_data";
@@ -127,7 +123,7 @@ public class SearchManager
      * file.
      */
     public final static String ACTION_KEY = "action_key";
-    
+
     /**
      * Intent extra data key: This key will be used for the extra populated by the
      * {@link #SUGGEST_COLUMN_INTENT_EXTRA_DATA} column.
@@ -153,11 +149,19 @@ public class SearchManager
      * Intent extra data key: Use this key with Intent.ACTION_SEARCH and
      * {@link android.content.Intent#getStringExtra content.Intent.getStringExtra()}
      * to obtain the action message that was defined for a particular search action key and/or
-     * suggestion.  It will be null if the search was launched by typing "enter", touched the the 
-     * "GO" button, or other means not involving any action key. 
+     * suggestion.  It will be null if the search was launched by typing "enter", touched the the
+     * "GO" button, or other means not involving any action key.
      */
     public final static String ACTION_MSG = "action_msg";
-    
+
+    /**
+     * Flag to specify that the entry can be used for query refinement, i.e., the query text
+     * in the search field can be replaced with the text in this entry, when a query refinement
+     * icon is clicked. The suggestion list should show such a clickable icon beside the entry.
+     * <p>Use this flag as a bit-field for {@link #SUGGEST_COLUMN_FLAGS}.
+     */
+    public final static int FLAG_QUERY_REFINEMENT = 1 << 0;
+
     /**
      * Uri path for queried suggestions data.  This is the path that the search manager
      * will use when querying your content provider for suggestions data based on user input
@@ -182,12 +186,12 @@ public class SearchManager
      * @see #SUGGEST_COLUMN_SHORTCUT_ID
      */
     public final static String SUGGEST_URI_PATH_SHORTCUT = "search_suggest_shortcut";
-    
+
     /**
      * MIME type for shortcut validation.  You'll use this in your suggestions content provider
      * in the getType() function.
      */
-    public final static String SHORTCUT_MIME_TYPE = 
+    public final static String SHORTCUT_MIME_TYPE =
             "vnd.android.cursor.item/vnd.android.search.suggest";
 
     /**
@@ -195,7 +199,7 @@ public class SearchManager
      */
     public final static String SUGGEST_COLUMN_FORMAT = "suggest_format";
     /**
-     * Column name for suggestions cursor.  <i>Required.</i>  This is the primary line of text that 
+     * Column name for suggestions cursor.  <i>Required.</i>  This is the primary line of text that
      * will be presented to the user as the suggestion.
      */
     public final static String SUGGEST_COLUMN_TEXT_1 = "suggest_text_1";
@@ -227,8 +231,8 @@ public class SearchManager
      * <li>file ({@link android.content.ContentResolver#SCHEME_FILE})</li>
      * </ul>
      *
-     * See {@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String)} 
-     * for more information on these schemes. 
+     * See {@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String)}
+     * for more information on these schemes.
      */
     public final static String SUGGEST_COLUMN_ICON_1 = "suggest_icon_1";
     /**
@@ -243,8 +247,8 @@ public class SearchManager
      * <li>file ({@link android.content.ContentResolver#SCHEME_FILE})</li>
      * </ul>
      *
-     * See {@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String)} 
-     * for more information on these schemes. 
+     * See {@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String)}
+     * for more information on these schemes.
      */
     public final static String SUGGEST_COLUMN_ICON_2 = "suggest_icon_2";
     /**
@@ -276,12 +280,6 @@ public class SearchManager
      */
     public final static String SUGGEST_COLUMN_INTENT_EXTRA_DATA = "suggest_intent_extra_data";
     /**
-     * TODO: Remove
-     *
-     * @hide
-     */
-    public final static String SUGGEST_COLUMN_INTENT_COMPONENT_NAME = "suggest_intent_component";
-    /**
      * Column name for suggestions cursor.  <i>Optional.</i>  If this column exists <i>and</i>
      * this element exists at the given row, then "/" and this value will be appended to the data
      * field in the Intent.  This should only be used if the data field has already been set to an
@@ -289,8 +287,8 @@ public class SearchManager
      */
     public final static String SUGGEST_COLUMN_INTENT_DATA_ID = "suggest_intent_data_id";
     /**
-     * Column name for suggestions cursor.  <i>Required if action is 
-     * {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH}, optional otherwise.</i>  If this 
+     * Column name for suggestions cursor.  <i>Required if action is
+     * {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH}, optional otherwise.</i>  If this
      * column exists <i>and</i> this element exists at the given row, this is the data that will be
      * used when forming the suggestion's query.
      */
@@ -307,21 +305,21 @@ public class SearchManager
     public final static String SUGGEST_COLUMN_SHORTCUT_ID = "suggest_shortcut_id";
 
     /**
-     * Column name for suggestions cursor. <i>Optional.</i>  This column is used to specify the
-     * cursor item's background color if it needs a non-default background color. A non-zero value
-     * indicates a valid background color to override the default.
-     *
-     * @hide For internal use, not part of the public API.
-     */
-    public final static String SUGGEST_COLUMN_BACKGROUND_COLOR = "suggest_background_color";
-    
-    /**
      * Column name for suggestions cursor. <i>Optional.</i> This column is used to specify
      * that a spinner should be shown in lieu of an icon2 while the shortcut of this suggestion
      * is being refreshed.
      */
     public final static String SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING =
             "suggest_spinner_while_refreshing";
+
+    /**
+     * Column name for suggestions cursor. <i>Optional.</i> This column is used to specify
+     * additional flags per item. Multiple flags can be specified.
+     * <p>
+     * Must be one of {@link #FLAG_QUERY_REFINEMENT} or 0 to indicate no flags.
+     * </p>
+     */
+    public final static String SUGGEST_COLUMN_FLAGS = "suggest_flags";
 
     /**
      * Column value for suggestion column {@link #SUGGEST_COLUMN_SHORTCUT_ID} when a suggestion
@@ -343,16 +341,16 @@ public class SearchManager
      * {@link #EXTRA_SELECT_QUERY},
      * {@link #APP_DATA}.
      */
-    public final static String INTENT_ACTION_GLOBAL_SEARCH 
+    public final static String INTENT_ACTION_GLOBAL_SEARCH
             = "android.search.action.GLOBAL_SEARCH";
-    
+
     /**
      * Intent action for starting the global search settings activity.
      * The global search provider should handle this intent.
      */
-    public final static String INTENT_ACTION_SEARCH_SETTINGS 
+    public final static String INTENT_ACTION_SEARCH_SETTINGS
             = "android.search.action.SEARCH_SETTINGS";
-    
+
     /**
      * Intent action for starting a web search provider's settings activity.
      * Web search providers should handle this intent if they have provider-specific
@@ -368,7 +366,7 @@ public class SearchManager
      */
     public final static String INTENT_ACTION_SEARCHABLES_CHANGED
             = "android.search.action.SEARCHABLES_CHANGED";
-    
+
     /**
      * Intent action broadcasted to inform that the search settings have changed in some way.
      * Either searchables have been enabled or disabled, or a different web search provider
@@ -376,14 +374,6 @@ public class SearchManager
      */
     public final static String INTENT_ACTION_SEARCH_SETTINGS_CHANGED
             = "android.search.action.SETTINGS_CHANGED";
-
-    /**
-     * If a suggestion has this value in {@link #SUGGEST_COLUMN_INTENT_ACTION},
-     * the search dialog will take no action.
-     *
-     * @hide
-     */
-    public final static String INTENT_ACTION_NONE = "android.search.action.ZILCH";
 
     /**
      * This means that context is voice, and therefore the SearchDialog should
@@ -413,7 +403,7 @@ public class SearchManager
      * The package associated with this seach manager.
      */
     private String mAssociatedPackage;
-    
+
     // package private since they are used by the inner class SearchManagerCallback
     /* package */ final Handler mHandler;
     /* package */ OnDismissListener mDismissListener = null;
@@ -427,15 +417,15 @@ public class SearchManager
         mService = ISearchManager.Stub.asInterface(
                 ServiceManager.getService(Context.SEARCH_SERVICE));
     }
-    
+
     /**
      * Launch search UI.
      *
      * <p>The search manager will open a search widget in an overlapping
-     * window, and the underlying activity may be obscured.  The search 
+     * window, and the underlying activity may be obscured.  The search
      * entry state will remain in effect until one of the following events:
      * <ul>
-     * <li>The user completes the search.  In most cases this will launch 
+     * <li>The user completes the search.  In most cases this will launch
      * a search intent.</li>
      * <li>The user uses the back, home, or other keys to exit the search.</li>
      * <li>The application calls the {@link #stopSearch}
@@ -443,8 +433,8 @@ public class SearchManager
      * activity from which it was launched.</li>
      *
      * <p>Most applications will <i>not</i> use this interface to invoke search.
-     * The primary method for invoking search is to call 
-     * {@link android.app.Activity#onSearchRequested Activity.onSearchRequested()} or 
+     * The primary method for invoking search is to call
+     * {@link android.app.Activity#onSearchRequested Activity.onSearchRequested()} or
      * {@link android.app.Activity#startSearch Activity.startSearch()}.
      *
      * @param initialQuery A search string can be pre-entered here, but this
@@ -456,19 +446,19 @@ public class SearchManager
      * and the user would expect to be able to keep typing.  <i>This parameter is only meaningful
      * if initialQuery is a non-empty string.</i>
      * @param launchActivity The ComponentName of the activity that has launched this search.
-     * @param appSearchData An application can insert application-specific 
-     * context here, in order to improve quality or specificity of its own 
+     * @param appSearchData An application can insert application-specific
+     * context here, in order to improve quality or specificity of its own
      * searches.  This data will be returned with SEARCH intent(s).  Null if
      * no extra data is required.
      * @param globalSearch If false, this will only launch the search that has been specifically
-     * defined by the application (which is usually defined as a local search).  If no default 
+     * defined by the application (which is usually defined as a local search).  If no default
      * search is defined in the current application or activity, global search will be launched.
      * If true, this will always launch a platform-global (e.g. web-based) search instead.
-     * 
+     *
      * @see android.app.Activity#onSearchRequested
      * @see #stopSearch
      */
-    public void startSearch(String initialQuery, 
+    public void startSearch(String initialQuery,
                             boolean selectInitialQuery,
                             ComponentName launchActivity,
                             Bundle appSearchData,
@@ -595,7 +585,7 @@ public class SearchManager
      * <p>Typically the user will terminate the search UI by launching a
      * search or by canceling.  This function allows the underlying application
      * or activity to cancel the search prematurely (for any reason).
-     * 
+     *
      * <p>This function can be safely called at any time (even if no search is active.)
      *
      * @see #startSearch
@@ -607,12 +597,12 @@ public class SearchManager
     }
 
     /**
-     * Determine if the Search UI is currently displayed.  
-     * 
+     * Determine if the Search UI is currently displayed.
+     *
      * This is provided primarily for application test purposes.
      *
      * @return Returns true if the search UI is currently displayed.
-     * 
+     *
      * @hide
      */
     public boolean isVisible() {
@@ -631,7 +621,7 @@ public class SearchManager
          */
         public void onDismiss();
     }
-    
+
     /**
      * See {@link SearchManager#setOnCancelListener} for configuring your activity to monitor
      * search UI state.
@@ -647,7 +637,7 @@ public class SearchManager
 
     /**
      * Set or clear the callback that will be invoked whenever the search UI is dismissed.
-     * 
+     *
      * @param listener The {@link OnDismissListener} to use, or null.
      */
     public void setOnDismissListener(final OnDismissListener listener) {
@@ -656,7 +646,7 @@ public class SearchManager
 
     /**
      * Set or clear the callback that will be invoked whenever the search UI is canceled.
-     * 
+     *
      * @param listener The {@link OnCancelListener} to use, or null.
      */
     public void setOnCancelListener(OnCancelListener listener) {
@@ -767,10 +757,10 @@ public class SearchManager
         // finally, make the query
         return mContext.getContentResolver().query(uri, null, selection, selArgs, null);
     }
-     
+
     /**
      * Returns a list of the searchable activities that can be included in global search.
-     * 
+     *
      * @return a list containing searchable information for all searchable activities
      *         that have the <code>android:includeInGlobalSearch</code> attribute set
      *         in their searchable meta-data.

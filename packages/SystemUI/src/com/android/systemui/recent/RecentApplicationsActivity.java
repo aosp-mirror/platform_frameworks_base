@@ -163,6 +163,18 @@ public class RecentApplicationsActivity extends Activity {
                 });
             }
         }
+
+        public void onInvalidateDetailTexture(int n) {
+
+        }
+
+        public void onRequestDetailTexture(int n) {
+
+        }
+
+        public void onReportFirstCardPosition(int n) {
+
+        }
     };
 
     private final IThumbnailReceiver mThumbnailReceiver = new IThumbnailReceiver.Stub() {

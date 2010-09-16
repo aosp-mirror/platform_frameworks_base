@@ -77,6 +77,9 @@
         <item name="textCheckMark">@android:drawable/indicator_check_mark_dark</item>
         <item name="textCheckMarkInverse">@android:drawable/indicator_check_mark_light</item>
 
+        <item name="textAppearanceLargePopupMenu">@android:style/TextAppearance.Widget.PopupMenu.Large</item>
+        <item name="textAppearanceSmallPopupMenu">@android:style/TextAppearance.Widget.PopupMenu.Small</item>
+
         <!-- Button styles -->
         <item name="buttonStyle">@android:style/Widget.Button</item>
 
@@ -96,6 +99,8 @@
         <item name="listChoiceIndicatorMultiple">@android:drawable/btn_check</item>
 
         <item name="listChoiceBackgroundIndicator">@android:drawable/list_selected_background</item>
+
+        <item name="activatedBackgroundIndicator">@android:drawable/activated_background</item>
 
         <item name="expandableListPreferredItemPaddingLeft">40dip</item>
         <item name="expandableListPreferredChildPaddingLeft">
@@ -196,6 +201,8 @@
         <item name="quickContactBadgeStyleSmallWindowSmall">@android:style/Widget.QuickContactBadgeSmall.WindowSmall</item>
         <item name="quickContactBadgeStyleSmallWindowMedium">@android:style/Widget.QuickContactBadgeSmall.WindowMedium</item>
         <item name="quickContactBadgeStyleSmallWindowLarge">@android:style/Widget.QuickContactBadgeSmall.WindowLarge</item>
+        <item name="listPopupWindowStyle">@android:style/Widget.ListPopupWindow</item>
+        <item name="popupMenuStyle">@android:style/Widget.PopupMenu</item>
         
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.PreferenceScreen</item>
@@ -271,6 +278,8 @@
         
         <item name="editTextColor">?android:attr/textColorPrimary</item>
         <item name="listChoiceBackgroundIndicator">@android:drawable/list_selected_background_light</item>
+
+        <item name="activatedBackgroundIndicator">@android:drawable/activated_background_light</item>
 
         <item name="popupWindowStyle">@android:style/Widget.PopupWindow</item>
         
@@ -596,6 +605,7 @@
         <item name="editTextBackground">@android:drawable/edit_text_holo_dark</item>
         <item name="editTextColor">?android:attr/textColorPrimary</item>
         <item name="android:windowActionBar">true</item>
+        <item name="android:spinnerStyle">?android:attr/dropDownSpinnerStyle</item>
         <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio_holo_dark</item>
         <item name="listChoiceIndicatorMultiple">@android:drawable/btn_check_holo_dark</item>
     </style>
@@ -608,6 +618,7 @@
     <style name="Theme.Light.Holo">
         <item name="editTextBackground">@android:drawable/edit_text_holo_light</item>
         <item name="android:windowActionBar">true</item>
+        <item name="android:spinnerStyle">?android:attr/dropDownSpinnerStyle</item>
         <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio_holo_light</item>
         <item name="listChoiceIndicatorMultiple">@android:drawable/btn_check_holo_light</item>
     </style>

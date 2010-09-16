@@ -24,18 +24,13 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Environment;
-import android.os.LocalPowerManager;
-import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.util.Slog;
 import android.util.Xml;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.Surface;
-import android.view.WindowManagerPolicy;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -83,7 +78,6 @@ public class InputManager {
     private static native void nativeSetInputWindows(InputWindow[] windows);
     private static native void nativeSetInputDispatchMode(boolean enabled, boolean frozen);
     private static native void nativeSetFocusedApplication(InputApplication application);
-    private static native void nativePreemptInputDispatch();
     private static native InputDevice nativeGetInputDevice(int deviceId);
     private static native int[] nativeGetInputDeviceIds();
     private static native String nativeDump();
@@ -331,10 +325,6 @@ public class InputManager {
         nativeSetFocusedApplication(application);
     }
     
-    public void preemptInputDispatch() {
-        nativePreemptInputDispatch();
-    }
-    
     public void setInputDispatchMode(boolean enabled, boolean frozen) {
         nativeSetInputDispatchMode(enabled, frozen);
     }
@@ -395,20 +385,10 @@ public class InputManager {
         public void notifyInputChannelBroken(InputChannel inputChannel) {
             mWindowManagerService.mInputMonitor.notifyInputChannelBroken(inputChannel);
         }
-
-        @SuppressWarnings("unused")
-        public long notifyInputChannelANR(InputChannel inputChannel) {
-            return mWindowManagerService.mInputMonitor.notifyInputChannelANR(inputChannel);
-        }
-
-        @SuppressWarnings("unused")
-        public void notifyInputChannelRecoveredFromANR(InputChannel inputChannel) {
-            mWindowManagerService.mInputMonitor.notifyInputChannelRecoveredFromANR(inputChannel);
-        }
         
         @SuppressWarnings("unused")
-        public long notifyANR(Object token) {
-            return mWindowManagerService.mInputMonitor.notifyANR(token);
+        public long notifyANR(Object token, InputChannel inputChannel) {
+            return mWindowManagerService.mInputMonitor.notifyANR(token, inputChannel);
         }
         
         @SuppressWarnings("unused")

@@ -529,7 +529,7 @@ status_t SensorService::SensorEventConnection::sendEvents(
     LOGE_IF(size<0, "dropping %d events on the floor (%s)",
             count, strerror(-size));
 
-    return size < 0 ? size : NO_ERROR;
+    return size < 0 ? status_t(size) : status_t(NO_ERROR);
 }
 
 sp<SensorChannel> SensorService::SensorEventConnection::getSensorChannel() const

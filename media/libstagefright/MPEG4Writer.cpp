@@ -1675,9 +1675,9 @@ status_t MPEG4Writer::Track::threadEntry() {
 
     }
 
-    if (mSampleSizes.empty()) {
-        err = ERROR_MALFORMED;
-    } else if (OK != checkCodecSpecificData()) {
+    if (mSampleSizes.empty() ||                      // no samples written
+        (!mIsAudio && mNumStssTableEntries == 0) ||  // no sync frames for video
+        (OK != checkCodecSpecificData())) {          // no codec specific data
         err = ERROR_MALFORMED;
     }
     mOwner->trackProgressStatus(this, -1, err);
@@ -1794,13 +1794,13 @@ status_t MPEG4Writer::Track::checkCodecSpecificData() const {
         !strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mime)) {
         if (!mCodecSpecificData ||
             mCodecSpecificDataSize <= 0) {
-            // Missing codec specific data
+            LOGE("Missing codec specific data");
             return ERROR_MALFORMED;
         }
     } else {
         if (mCodecSpecificData ||
             mCodecSpecificDataSize > 0) {
-            // Unexepected codec specific data found
+            LOGE("Unexepected codec specific data found");
             return ERROR_MALFORMED;
         }
     }

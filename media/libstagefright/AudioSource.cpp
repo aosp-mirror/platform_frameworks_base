@@ -256,6 +256,8 @@ status_t AudioSource::read(
             if (numLostBytes > kMaxBufferSize) {
                 mPrevLostBytes = numLostBytes - kMaxBufferSize;
                 numLostBytes = kMaxBufferSize;
+            } else {
+                mPrevLostBytes = 0;
             }
 
             CHECK_EQ(numLostBytes & 1, 0);
@@ -275,8 +277,9 @@ status_t AudioSource::read(
             memset(buffer->data(), 0, numLostBytes);
             buffer->set_range(0, numLostBytes);
             if (numFramesRecorded == 0) {
-                buffer->meta_data()->setInt64(kKeyTime, mStartTimeUs);
+                buffer->meta_data()->setInt64(kKeyAnchorTime, mStartTimeUs);
             }
+            buffer->meta_data()->setInt64(kKeyTime, mStartTimeUs + mPrevSampleTimeUs);
             buffer->meta_data()->setInt64(kKeyDriftTime, readTimeUs - mInitialReadTimeUs);
             mPrevSampleTimeUs = timestampUs;
             *out = buffer;

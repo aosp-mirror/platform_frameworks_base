@@ -104,7 +104,7 @@ public class MenuBuilder implements Menu {
         com.android.internal.R.layout.list_menu_item_layout,
         com.android.internal.R.layout.list_menu_item_layout,
         com.android.internal.R.layout.action_menu_item_layout,
-        com.android.internal.R.layout.list_menu_item_layout,
+        com.android.internal.R.layout.popup_menu_item_layout,
     };
 
     private static final int[]  sCategoryToOrder = new int[] {

@@ -72,9 +72,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
     }
 
     public void show() {
-        // TODO Use a style from the theme here
-        mPopup = new ListPopupWindow(mContext, null, 0,
-                com.android.internal.R.style.Widget_Spinner);
+        mPopup = new ListPopupWindow(mContext, null, com.android.internal.R.attr.popupMenuStyle);
         mPopup.setOnItemClickListener(this);
         mPopup.setOnDismissListener(mDismissListener);
 

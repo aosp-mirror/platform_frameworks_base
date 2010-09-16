@@ -1264,12 +1264,35 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Remove Find or Select ActionModes, if active.
+     */
+    private void clearActionModes() {
+        if (mSelectCallback != null) {
+            mSelectCallback.finish();
+        }
+        if (mFindCallback != null) {
+            mFindCallback.finish();
+        }
+    }
+
+    /**
+     * Called to clear state when moving from one page to another, or changing
+     * in some other way that makes elements associated with the current page
+     * (such as WebTextView or ActionModes) no longer relevant.
+     */
+    private void clearHelpers() {
+        clearTextEntry();
+        clearActionModes();
+    }
+
+    /**
      * Destroy the internal state of the WebView. This method should be called
      * after the WebView has been removed from the view system. No other
      * methods may be called on a WebView after destroy.
      */
     public void destroy() {
-        clearTextEntry();
+        clearHelpers();
+
         if (mWebViewCore != null) {
             // Set the handlers to null before destroying WebViewCore so no
             // more messages will be posted.
@@ -1588,7 +1611,7 @@ public class WebView extends AbsoluteLayout
         arg.mUrl = url;
         arg.mExtraHeaders = extraHeaders;
         mWebViewCore.sendMessage(EventHub.LOAD_URL, arg);
-        clearTextEntry();
+        clearHelpers();
     }
 
     /**
@@ -1617,7 +1640,7 @@ public class WebView extends AbsoluteLayout
             arg.mUrl = url;
             arg.mPostData = postData;
             mWebViewCore.sendMessage(EventHub.POST_URL, arg);
-            clearTextEntry();
+            clearHelpers();
         } else {
             loadUrl(url);
         }
@@ -1673,7 +1696,7 @@ public class WebView extends AbsoluteLayout
         arg.mEncoding = encoding;
         arg.mHistoryUrl = historyUrl;
         mWebViewCore.sendMessage(EventHub.LOAD_DATA, arg);
-        clearTextEntry();
+        clearHelpers();
     }
 
     /**
@@ -1729,7 +1752,7 @@ public class WebView extends AbsoluteLayout
      * Reload the current url.
      */
     public void reload() {
-        clearTextEntry();
+        clearHelpers();
         switchOutDrawHistory();
         mWebViewCore.sendMessage(EventHub.RELOAD);
     }
@@ -1809,7 +1832,7 @@ public class WebView extends AbsoluteLayout
 
     private void goBackOrForward(int steps, boolean ignoreSnapshot) {
         if (steps != 0) {
-            clearTextEntry();
+            clearHelpers();
             mWebViewCore.sendMessage(EventHub.GO_BACK_FORWARD, steps,
                     ignoreSnapshot ? 1 : 0);
         }
@@ -1986,7 +2009,7 @@ public class WebView extends AbsoluteLayout
             Log.w(LOGTAG, "This WebView doesn't support zoom.");
             return;
         }
-        clearTextEntry();
+        clearHelpers();
         mZoomManager.invokeZoomPicker();
     }
 
@@ -2156,7 +2179,8 @@ public class WebView extends AbsoluteLayout
             // it when its ActionMode ends, remove it.
             if (mSelectCallback != null) {
                 mSelectCallback.setTitleBar(null);
-            } else if (mFindCallback != null) {
+            }
+            if (mFindCallback != null) {
                 mFindCallback.setTitleBar(null);
             }
         }
@@ -4406,7 +4430,7 @@ public class WebView extends AbsoluteLayout
 
     @Override
     protected void onDetachedFromWindow() {
-        clearTextEntry();
+        clearHelpers();
         mZoomManager.dismissZoomPicker();
         if (hasWindowFocus()) setActive(false);
         super.onDetachedFromWindow();

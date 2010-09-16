@@ -29,8 +29,9 @@
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/Utils.h>
 
-#include "vpx_codec/vpx_decoder.h"
-#include "vp8/vp8dx.h"
+#include "vpx/vpx_decoder.h"
+#include "vpx/vpx_codec.h"
+#include "vpx/vp8dx.h"
 
 namespace android {
 
@@ -82,9 +83,10 @@ status_t VPXDecoder::start(MetaData *) {
     }
 
     mCtx = new vpx_codec_ctx_t;
-    if (vpx_codec_dec_init(
-                (vpx_codec_ctx_t *)mCtx, &vpx_codec_vp8_dx_algo, NULL, 0)) {
-        LOGE("on2 decoder failed to initialize.");
+    vpx_codec_err_t vpx_err;
+    if ((vpx_err = vpx_codec_dec_init(
+                (vpx_codec_ctx_t *)mCtx, &vpx_codec_vp8_dx_algo, NULL, 0))) {
+        LOGE("on2 decoder failed to initialize. (%d)", vpx_err);
 
         mSource->stop();
 

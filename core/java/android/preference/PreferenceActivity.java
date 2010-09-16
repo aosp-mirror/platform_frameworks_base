@@ -241,7 +241,7 @@ public abstract class PreferenceActivity extends ListActivity implements
             View view;
 
             if (convertView == null) {
-                view = mInflater.inflate(com.android.internal.R.layout.preference_list_item,
+                view = mInflater.inflate(com.android.internal.R.layout.preference_header_item,
                         parent, false);
                 holder = new HeaderViewHolder();
                 holder.icon = (ImageView) view.findViewById(com.android.internal.R.id.icon);
@@ -446,6 +446,9 @@ public abstract class PreferenceActivity extends ListActivity implements
             if (!mSinglePane) {
                 // Multi-pane.
                 getListView().setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+                if (mCurHeader != null) {
+                    setSelectedHeader(mCurHeader);
+                }
                 mPrefsContainer.setVisibility(View.VISIBLE);
             }
         } else {

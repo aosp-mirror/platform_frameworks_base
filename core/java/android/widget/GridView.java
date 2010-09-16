@@ -1341,6 +1341,9 @@ public class GridView extends AbsListView {
         if (mChoiceMode != CHOICE_MODE_NONE && mCheckStates != null) {
             if (child instanceof Checkable) {
                 ((Checkable) child).setChecked(mCheckStates.get(position));
+            } else if (getContext().getApplicationInfo().targetSdkVersion
+                    >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+                child.setActivated(mCheckStates.get(position));
             }
         }
 

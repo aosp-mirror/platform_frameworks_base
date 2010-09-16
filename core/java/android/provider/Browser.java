@@ -469,7 +469,7 @@ public class Browser {
                     iconDb.releaseIconForPageUrl(cursor.getString(0));
                 } while (cursor.moveToNext());
 
-                cr.delete(BOOKMARKS_URI, whereClause, null);
+                cr.delete(History.CONTENT_URI, whereClause, null);
             }
         } catch (IllegalStateException e) {
             Log.e(LOGTAG, "deleteHistoryWhere", e);

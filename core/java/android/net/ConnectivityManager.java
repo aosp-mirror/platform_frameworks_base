@@ -126,6 +126,17 @@ public class ConnectivityManager
     public static final String ACTION_BACKGROUND_DATA_SETTING_CHANGED =
             "android.net.conn.BACKGROUND_DATA_SETTING_CHANGED";
 
+
+    /**
+     * Broadcast Action: The network connection may not be good
+     * uses {@code ConnectivityManager.EXTRA_INET_CONDITION} and
+     * {@code ConnectivityManager.EXTRA_NETWORK_INFO} to specify
+     * the network and it's condition.
+     * @hide
+     */
+    public static final String INET_CONDITION_ACTION =
+            "android.net.conn.INET_CONDITION_ACTION";
+
     /**
      * Broadcast Action: A tetherable connection has come or gone
      * TODO - finish the doc

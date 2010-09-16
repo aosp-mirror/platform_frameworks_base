@@ -42,7 +42,7 @@ namespace android {
 
 class ISensorEventConnection;
 class Sensor;
-class PollLoop;
+class Looper;
 
 // ----------------------------------------------------------------------------
 
@@ -69,11 +69,11 @@ public:
     status_t disableSensor(int32_t handle) const;
 
 private:
-    sp<PollLoop> getPollLoop() const;
+    sp<Looper> getLooper() const;
     sp<ISensorEventConnection> mSensorEventConnection;
     sp<SensorChannel> mSensorChannel;
     mutable Mutex mLock;
-    mutable sp<PollLoop> mPollLoop;
+    mutable sp<Looper> mLooper;
 };
 
 // ----------------------------------------------------------------------------

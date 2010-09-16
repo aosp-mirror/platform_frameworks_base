@@ -95,7 +95,7 @@ InputDispatcher::InputDispatcher(const sp<InputDispatcherPolicyInterface>& polic
     mFocusedApplication(NULL),
     mCurrentInputTargetsValid(false),
     mInputTargetWaitCause(INPUT_TARGET_WAIT_CAUSE_NONE) {
-    mPollLoop = new PollLoop(false);
+    mLooper = new Looper(false);
 
     mInboundQueue.headSentinel.refCount = -1;
     mInboundQueue.headSentinel.type = EventEntry::TYPE_SENTINEL;
@@ -156,7 +156,7 @@ void InputDispatcher::dispatchOnce() {
         timeoutMillis = 0;
     }
 
-    mPollLoop->pollOnce(timeoutMillis);
+    mLooper->pollOnce(timeoutMillis);
 }
 
 void InputDispatcher::dispatchOnceInnerLocked(nsecs_t keyRepeatTimeout,
@@ -194,42 +194,6 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t keyRepeatTimeout,
     bool isAppSwitchDue = mAppSwitchDueTime <= currentTime;
     if (mAppSwitchDueTime < *nextWakeupTime) {
         *nextWakeupTime = mAppSwitchDueTime;
-    }
-
-    // Detect and process timeouts for all connections and determine if there are any
-    // synchronous event dispatches pending.  This step is entirely non-interruptible.
-    bool havePendingSyncTarget = false;
-    size_t activeConnectionCount = mActiveConnections.size();
-    for (size_t i = 0; i < activeConnectionCount; i++) {
-        Connection* connection = mActiveConnections.itemAt(i);
-
-        if (connection->hasPendingSyncTarget()) {
-            if (isAppSwitchDue) {
-                connection->preemptSyncTarget();
-            } else {
-                havePendingSyncTarget = true;
-            }
-        }
-
-        nsecs_t connectionTimeoutTime  = connection->nextTimeoutTime;
-        if (connectionTimeoutTime <= currentTime) {
-            mTimedOutConnections.add(connection);
-        } else if (connectionTimeoutTime < *nextWakeupTime) {
-            *nextWakeupTime = connectionTimeoutTime;
-        }
-    }
-
-    size_t timedOutConnectionCount = mTimedOutConnections.size();
-    for (size_t i = 0; i < timedOutConnectionCount; i++) {
-        Connection* connection = mTimedOutConnections.itemAt(i);
-        timeoutDispatchCycleLocked(currentTime, connection);
-        *nextWakeupTime = LONG_LONG_MIN; // force next poll to wake up immediately
-    }
-    mTimedOutConnections.clear();
-
-    // If we have a pending synchronous target, skip dispatch.
-    if (havePendingSyncTarget) {
-        return;
     }
 
     // Ready to start a new event.
@@ -557,7 +521,7 @@ bool InputDispatcher::dispatchKeyLocked(
         }
 
         entry->dispatchInProgress = true;
-        startFindingTargetsLocked();
+        startFindingTargetsLocked(); // resets mCurrentInputTargetsValid
     }
 
     // Identify targets.
@@ -618,7 +582,7 @@ bool InputDispatcher::dispatchMotionLocked(
         logOutboundMotionDetailsLocked("dispatchMotion - ", entry);
 
         entry->dispatchInProgress = true;
-        startFindingTargetsLocked();
+        startFindingTargetsLocked(); // resets mCurrentInputTargetsValid
     }
 
     bool isPointerEvent = entry->source & AINPUT_SOURCE_CLASS_POINTER;
@@ -728,7 +692,7 @@ void InputDispatcher::dispatchEventToCurrentInputTargetsLocked(nsecs_t currentTi
     for (size_t i = 0; i < mCurrentInputTargets.size(); i++) {
         const InputTarget& inputTarget = mCurrentInputTargets.itemAt(i);
 
-        ssize_t connectionIndex = getConnectionIndex(inputTarget.inputChannel);
+        ssize_t connectionIndex = getConnectionIndexLocked(inputTarget.inputChannel);
         if (connectionIndex >= 0) {
             sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
             prepareDispatchCycleLocked(currentTime, connection, eventEntry, & inputTarget,
@@ -770,9 +734,8 @@ int32_t InputDispatcher::handleTargetsNotReadyLocked(nsecs_t currentTime,
     } else {
         if (mInputTargetWaitCause != INPUT_TARGET_WAIT_CAUSE_APPLICATION_NOT_READY) {
 #if DEBUG_FOCUS
-            LOGD("Waiting for application to become ready for input: name=%s, window=%s",
-                    application ? application->name.string() : "<unknown>",
-                    window ? window->inputChannel->getName().string() : "<unknown>");
+            LOGD("Waiting for application to become ready for input: %s",
+                    getApplicationWindowLabelLocked(application, window).string());
 #endif
             nsecs_t timeout = window ? window->dispatchingTimeout :
                 application ? application->dispatchingTimeout : DEFAULT_INPUT_DISPATCHING_TIMEOUT;
@@ -789,21 +752,7 @@ int32_t InputDispatcher::handleTargetsNotReadyLocked(nsecs_t currentTime,
     }
 
     if (currentTime >= mInputTargetWaitTimeoutTime) {
-        LOGI("Application is not ready for input: name=%s, window=%s,"
-                "%01.1fms since event, %01.1fms since wait started",
-                application ? application->name.string() : "<unknown>",
-                window ? window->inputChannel->getName().string() : "<unknown>",
-                (currentTime - entry->eventTime) / 1000000.0,
-                (currentTime - mInputTargetWaitStartTime) / 1000000.0);
-
-        CommandEntry* commandEntry = postCommandLocked(
-                & InputDispatcher::doTargetsNotReadyTimeoutLockedInterruptible);
-        if (application) {
-            commandEntry->inputApplicationHandle = application->handle;
-        }
-        if (window) {
-            commandEntry->inputChannel = window->inputChannel;
-        }
+        onANRLocked(currentTime, application, window, entry->eventTime, mInputTargetWaitStartTime);
 
         // Force poll loop to wake up immediately on next iteration once we get the
         // ANR response back from the policy.
@@ -818,17 +767,25 @@ int32_t InputDispatcher::handleTargetsNotReadyLocked(nsecs_t currentTime,
     }
 }
 
-void InputDispatcher::resumeAfterTargetsNotReadyTimeoutLocked(nsecs_t newTimeout) {
+void InputDispatcher::resumeAfterTargetsNotReadyTimeoutLocked(nsecs_t newTimeout,
+        const sp<InputChannel>& inputChannel) {
     if (newTimeout > 0) {
         // Extend the timeout.
         mInputTargetWaitTimeoutTime = now() + newTimeout;
     } else {
         // Give up.
         mInputTargetWaitTimeoutExpired = true;
+
+        // Input state will not be realistic.  Mark it out of sync.
+        ssize_t connectionIndex = getConnectionIndexLocked(inputChannel);
+        if (connectionIndex >= 0) {
+            sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
+            connection->inputState.setOutOfSync();
+        }
     }
 }
 
-nsecs_t InputDispatcher::getTimeSpentWaitingForApplicationWhileFindingTargetsLocked(
+nsecs_t InputDispatcher::getTimeSpentWaitingForApplicationLocked(
         nsecs_t currentTime) {
     if (mInputTargetWaitCause == INPUT_TARGET_WAIT_CAUSE_APPLICATION_NOT_READY) {
         return currentTime - mInputTargetWaitStartTime;
@@ -840,13 +797,6 @@ void InputDispatcher::resetANRTimeoutsLocked() {
 #if DEBUG_FOCUS
         LOGD("Resetting ANR timeouts.");
 #endif
-
-    // Reset timeouts for all active connections.
-    nsecs_t currentTime = now();
-    for (size_t i = 0; i < mActiveConnections.size(); i++) {
-        Connection* connection = mActiveConnections[i];
-        connection->resetTimeout(currentTime);
-    }
 
     // Reset input target wait timeout.
     mInputTargetWaitCause = INPUT_TARGET_WAIT_CAUSE_NONE;
@@ -865,8 +815,8 @@ int32_t InputDispatcher::findFocusedWindowLocked(nsecs_t currentTime, const Even
         if (mFocusedApplication) {
 #if DEBUG_FOCUS
             LOGD("Waiting because there is no focused window but there is a "
-                    "focused application that may eventually add a window: '%s'.",
-                    mFocusedApplication->name.string());
+                    "focused application that may eventually add a window: %s.",
+                    getApplicationWindowLabelLocked(mFocusedApplication, NULL).string());
 #endif
             injectionResult = handleTargetsNotReadyLocked(currentTime, entry,
                     mFocusedApplication, NULL, nextWakeupTime);
@@ -894,19 +844,31 @@ int32_t InputDispatcher::findFocusedWindowLocked(nsecs_t currentTime, const Even
         goto Unresponsive;
     }
 
+    // If the currently focused window is still working on previous events then keep waiting.
+    if (! isWindowFinishedWithPreviousInputLocked(mFocusedWindow)) {
+#if DEBUG_FOCUS
+        LOGD("Waiting because focused window still processing previous input.");
+#endif
+        injectionResult = handleTargetsNotReadyLocked(currentTime, entry,
+                mFocusedApplication, mFocusedWindow, nextWakeupTime);
+        goto Unresponsive;
+    }
+
     // Success!  Output targets.
     injectionResult = INPUT_EVENT_INJECTION_SUCCEEDED;
     *outWindow = mFocusedWindow;
-    addWindowTargetLocked(mFocusedWindow, InputTarget::FLAG_SYNC,
-            getTimeSpentWaitingForApplicationWhileFindingTargetsLocked(currentTime));
+    addWindowTargetLocked(mFocusedWindow, InputTarget::FLAG_FOREGROUND);
 
     // Done.
 Failed:
 Unresponsive:
+    nsecs_t timeSpentWaitingForApplication = getTimeSpentWaitingForApplicationLocked(currentTime);
+    updateDispatchStatisticsLocked(currentTime, entry,
+            injectionResult, timeSpentWaitingForApplication);
 #if DEBUG_FOCUS
-    LOGD("findFocusedWindow finished: injectionResult=%d",
-            injectionResult);
-    logDispatchStateLocked();
+    LOGD("findFocusedWindow finished: injectionResult=%d, "
+            "timeSpendWaitingForApplication=%0.1fms",
+            injectionResult, timeSpentWaitingForApplication / 1000000.0);
 #endif
     return injectionResult;
 }
@@ -1018,8 +980,8 @@ int32_t InputDispatcher::findTouchedWindowLocked(nsecs_t currentTime, const Moti
             if (mFocusedApplication) {
 #if DEBUG_FOCUS
                 LOGD("Waiting because there is no touched window but there is a "
-                        "focused application that may eventually add a new window: '%s'.",
-                        mFocusedApplication->name.string());
+                        "focused application that may eventually add a new window: %s.",
+                        getApplicationWindowLabelLocked(mFocusedApplication, NULL).string());
 #endif
                 injectionResult = handleTargetsNotReadyLocked(currentTime, entry,
                         mFocusedApplication, NULL, nextWakeupTime);
@@ -1044,6 +1006,17 @@ int32_t InputDispatcher::findTouchedWindowLocked(nsecs_t currentTime, const Moti
         if (newTouchedWindow->paused) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
             LOGD("Waiting because touched window is paused.");
+#endif
+            injectionResult = handleTargetsNotReadyLocked(currentTime, entry,
+                    NULL, newTouchedWindow, nextWakeupTime);
+            injectionPermission = INJECTION_PERMISSION_GRANTED;
+            goto Unresponsive;
+        }
+
+        // If the touched window is still working on previous events then keep waiting.
+        if (! isWindowFinishedWithPreviousInputLocked(newTouchedWindow)) {
+#if DEBUG_FOCUS
+            LOGD("Waiting because touched window still processing previous input.");
 #endif
             injectionResult = handleTargetsNotReadyLocked(currentTime, entry,
                     NULL, newTouchedWindow, nextWakeupTime);
@@ -1098,6 +1071,17 @@ int32_t InputDispatcher::findTouchedWindowLocked(nsecs_t currentTime, const Moti
             injectionPermission = INJECTION_PERMISSION_GRANTED;
             goto Unresponsive;
         }
+
+        // If the touched window is still working on previous events then keep waiting.
+        if (! isWindowFinishedWithPreviousInputLocked(mTouchedWindow)) {
+#if DEBUG_FOCUS
+            LOGD("Waiting because touched window still processing previous input.");
+#endif
+            injectionResult = handleTargetsNotReadyLocked(currentTime, entry,
+                    NULL, mTouchedWindow, nextWakeupTime);
+            injectionPermission = INJECTION_PERMISSION_GRANTED;
+            goto Unresponsive;
+        }
     }
 
     // Success!  Output targets.
@@ -1108,7 +1092,7 @@ int32_t InputDispatcher::findTouchedWindowLocked(nsecs_t currentTime, const Moti
         size_t numWallpaperWindows = mTouchedWallpaperWindows.size();
         for (size_t i = 0; i < numWallpaperWindows; i++) {
             addWindowTargetLocked(mTouchedWallpaperWindows[i],
-                    InputTarget::FLAG_WINDOW_IS_OBSCURED, 0);
+                    InputTarget::FLAG_WINDOW_IS_OBSCURED);
         }
 
         size_t numOutsideTargets = mTempTouchedOutsideTargets.size();
@@ -1118,16 +1102,15 @@ int32_t InputDispatcher::findTouchedWindowLocked(nsecs_t currentTime, const Moti
             if (outsideTarget.obscured) {
                 outsideTargetFlags |= InputTarget::FLAG_WINDOW_IS_OBSCURED;
             }
-            addWindowTargetLocked(outsideTarget.window, outsideTargetFlags, 0);
+            addWindowTargetLocked(outsideTarget.window, outsideTargetFlags);
         }
         mTempTouchedOutsideTargets.clear();
 
-        int32_t targetFlags = InputTarget::FLAG_SYNC;
+        int32_t targetFlags = InputTarget::FLAG_FOREGROUND;
         if (mTouchedWindowIsObscured) {
             targetFlags |= InputTarget::FLAG_WINDOW_IS_OBSCURED;
         }
-        addWindowTargetLocked(mTouchedWindow, targetFlags,
-                getTimeSpentWaitingForApplicationWhileFindingTargetsLocked(currentTime));
+        addWindowTargetLocked(mTouchedWindow, targetFlags);
         *outWindow = mTouchedWindow;
     }
 
@@ -1166,10 +1149,13 @@ Failed:
     }
 
 Unresponsive:
+    nsecs_t timeSpentWaitingForApplication = getTimeSpentWaitingForApplicationLocked(currentTime);
+    updateDispatchStatisticsLocked(currentTime, entry,
+            injectionResult, timeSpentWaitingForApplication);
 #if DEBUG_FOCUS
-    LOGD("findTouchedWindow finished: injectionResult=%d, injectionPermission=%d",
-            injectionResult, injectionPermission);
-    logDispatchStateLocked();
+    LOGD("findTouchedWindow finished: injectionResult=%d, injectionPermission=%d,"
+            "timeSpendWaitingForApplication=%0.1fms",
+            injectionResult, injectionPermission, timeSpentWaitingForApplication / 1000000.0);
 #endif
     return injectionResult;
 }
@@ -1180,15 +1166,12 @@ void InputDispatcher::releaseTouchedWindowLocked() {
     mTouchedWallpaperWindows.clear();
 }
 
-void InputDispatcher::addWindowTargetLocked(const InputWindow* window, int32_t targetFlags,
-        nsecs_t timeSpentWaitingForApplication) {
+void InputDispatcher::addWindowTargetLocked(const InputWindow* window, int32_t targetFlags) {
     mCurrentInputTargets.push();
 
     InputTarget& target = mCurrentInputTargets.editTop();
     target.inputChannel = window->inputChannel;
     target.flags = targetFlags;
-    target.timeout = window->dispatchingTimeout;
-    target.timeSpentWaitingForApplication = timeSpentWaitingForApplication;
     target.xOffset = - window->frameLeft;
     target.yOffset = - window->frameTop;
 }
@@ -1200,8 +1183,6 @@ void InputDispatcher::addMonitoringTargetsLocked() {
         InputTarget& target = mCurrentInputTargets.editTop();
         target.inputChannel = mMonitoringChannels[i];
         target.flags = 0;
-        target.timeout = -1;
-        target.timeSpentWaitingForApplication = 0;
         target.xOffset = 0;
         target.yOffset = 0;
     }
@@ -1241,6 +1222,34 @@ bool InputDispatcher::isWindowObscuredLocked(const InputWindow* window) {
     return false;
 }
 
+bool InputDispatcher::isWindowFinishedWithPreviousInputLocked(const InputWindow* window) {
+    ssize_t connectionIndex = getConnectionIndexLocked(window->inputChannel);
+    if (connectionIndex >= 0) {
+        sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
+        return connection->outboundQueue.isEmpty();
+    } else {
+        return true;
+    }
+}
+
+String8 InputDispatcher::getApplicationWindowLabelLocked(const InputApplication* application,
+        const InputWindow* window) {
+    if (application) {
+        if (window) {
+            String8 label(application->name);
+            label.append(" - ");
+            label.append(window->name);
+            return label;
+        } else {
+            return application->name;
+        }
+    } else if (window) {
+        return window->name;
+    } else {
+        return String8("<unknown application or window>");
+    }
+}
+
 void InputDispatcher::pokeUserActivityLocked(nsecs_t eventTime,
         int32_t windowType, int32_t eventType) {
     CommandEntry* commandEntry = postCommandLocked(
@@ -1254,25 +1263,18 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
         const sp<Connection>& connection, EventEntry* eventEntry, const InputTarget* inputTarget,
         bool resumeWithAppendedMotionSample) {
 #if DEBUG_DISPATCH_CYCLE
-    LOGD("channel '%s' ~ prepareDispatchCycle - flags=%d, timeout=%lldns, "
+    LOGD("channel '%s' ~ prepareDispatchCycle - flags=%d, "
             "xOffset=%f, yOffset=%f, resumeWithAppendedMotionSample=%s",
-            connection->getInputChannelName(), inputTarget->flags, inputTarget->timeout,
+            connection->getInputChannelName(), inputTarget->flags,
             inputTarget->xOffset, inputTarget->yOffset,
             toString(resumeWithAppendedMotionSample));
 #endif
 
     // Skip this event if the connection status is not normal.
-    // We don't want to enqueue additional outbound events if the connection is broken or
-    // not responding.
+    // We don't want to enqueue additional outbound events if the connection is broken.
     if (connection->status != Connection::STATUS_NORMAL) {
         LOGW("channel '%s' ~ Dropping event because the channel status is %s",
                 connection->getInputChannelName(), connection->getStatusLabel());
-
-        // If the connection is not responding but the user is poking the application anyways,
-        // retrigger the original timeout.
-        if (connection->status == Connection::STATUS_NOT_RESPONDING) {
-            timeoutDispatchCycleLocked(currentTime, connection);
-        }
         return;
     }
 
@@ -1379,7 +1381,7 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
 
                 DispatchEntry* cancelationDispatchEntry =
                         mAllocator.obtainDispatchEntry(cancelationEventEntry,
-                        0, inputTarget->xOffset, inputTarget->yOffset, inputTarget->timeout);
+                        0, inputTarget->xOffset, inputTarget->yOffset); // increments ref
                 connection->outboundQueue.enqueueAtTail(cancelationDispatchEntry);
 
                 mAllocator.releaseEventEntry(cancelationEventEntry);
@@ -1390,10 +1392,9 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
     // This is a new event.
     // Enqueue a new dispatch entry onto the outbound queue for this connection.
     DispatchEntry* dispatchEntry = mAllocator.obtainDispatchEntry(eventEntry, // increments ref
-            inputTarget->flags, inputTarget->xOffset, inputTarget->yOffset,
-            inputTarget->timeout);
-    if (dispatchEntry->isSyncTarget()) {
-        eventEntry->pendingSyncDispatches += 1;
+            inputTarget->flags, inputTarget->xOffset, inputTarget->yOffset);
+    if (dispatchEntry->hasForegroundTarget()) {
+        eventEntry->pendingForegroundDispatches += 1;
     }
 
     // Handle the case where we could not stream a new motion sample because the consumer has
@@ -1416,13 +1417,12 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
     // If the outbound queue was previously empty, start the dispatch cycle going.
     if (wasEmpty) {
         activateConnectionLocked(connection.get());
-        startDispatchCycleLocked(currentTime, connection,
-                inputTarget->timeSpentWaitingForApplication);
+        startDispatchCycleLocked(currentTime, connection);
     }
 }
 
 void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
-        const sp<Connection>& connection, nsecs_t timeSpentWaitingForApplication) {
+        const sp<Connection>& connection) {
 #if DEBUG_DISPATCH_CYCLE
     LOGD("channel '%s' ~ startDispatchCycle",
             connection->getInputChannelName());
@@ -1588,9 +1588,6 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
     connection->lastEventTime = dispatchEntry->eventEntry->eventTime;
     connection->lastDispatchTime = currentTime;
 
-    nsecs_t timeout = dispatchEntry->timeout - timeSpentWaitingForApplication;
-    connection->setNextTimeoutTime(currentTime, timeout);
-
     // Notify other system components.
     onDispatchCycleStartedLocked(currentTime, connection);
 }
@@ -1610,21 +1607,8 @@ void InputDispatcher::finishDispatchCycleLocked(nsecs_t currentTime,
         return;
     }
 
-    // Clear the pending timeout.
-    connection->nextTimeoutTime = LONG_LONG_MAX;
-
-    if (connection->status == Connection::STATUS_NOT_RESPONDING) {
-        // Recovering from an ANR.
-        connection->status = Connection::STATUS_NORMAL;
-
-        // Notify other system components.
-        onDispatchCycleFinishedLocked(currentTime, connection, true /*recoveredFromANR*/);
-    } else {
-        // Normal finish.  Not much to do here.
-
-        // Notify other system components.
-        onDispatchCycleFinishedLocked(currentTime, connection, false /*recoveredFromANR*/);
-    }
+    // Notify other system components.
+    onDispatchCycleFinishedLocked(currentTime, connection);
 
     // Reset the publisher since the event has been consumed.
     // We do this now so that the publisher can release some of its internal resources
@@ -1653,86 +1637,26 @@ void InputDispatcher::startNextDispatchCycleLocked(nsecs_t currentTime,
                 dispatchEntry->inProgress = false;
                 dispatchEntry->headMotionSample = dispatchEntry->tailMotionSample;
                 dispatchEntry->tailMotionSample = NULL;
-                startDispatchCycleLocked(currentTime, connection, 0);
+                startDispatchCycleLocked(currentTime, connection);
                 return;
             }
             // Finished.
             connection->outboundQueue.dequeueAtHead();
-            if (dispatchEntry->isSyncTarget()) {
-                decrementPendingSyncDispatchesLocked(dispatchEntry->eventEntry);
+            if (dispatchEntry->hasForegroundTarget()) {
+                decrementPendingForegroundDispatchesLocked(dispatchEntry->eventEntry);
             }
             mAllocator.releaseDispatchEntry(dispatchEntry);
         } else {
             // If the head is not in progress, then we must have already dequeued the in
-            // progress event, which means we actually aborted it (due to ANR).
+            // progress event, which means we actually aborted it.
             // So just start the next event for this connection.
-            startDispatchCycleLocked(currentTime, connection, 0);
+            startDispatchCycleLocked(currentTime, connection);
             return;
         }
     }
 
     // Outbound queue is empty, deactivate the connection.
     deactivateConnectionLocked(connection.get());
-}
-
-void InputDispatcher::timeoutDispatchCycleLocked(nsecs_t currentTime,
-        const sp<Connection>& connection) {
-#if DEBUG_DISPATCH_CYCLE
-    LOGD("channel '%s' ~ timeoutDispatchCycle",
-            connection->getInputChannelName());
-#endif
-
-    if (connection->status == Connection::STATUS_NORMAL) {
-        // Enter the not responding state.
-        connection->status = Connection::STATUS_NOT_RESPONDING;
-        connection->lastANRTime = currentTime;
-    } else if (connection->status != Connection::STATUS_NOT_RESPONDING) {
-        // Connection is broken or dead.
-        return;
-    }
-
-    // Notify other system components.
-    // This enqueues a command which will eventually call resumeAfterTimeoutDispatchCycleLocked.
-    onDispatchCycleANRLocked(currentTime, connection);
-}
-
-void InputDispatcher::resumeAfterTimeoutDispatchCycleLocked(nsecs_t currentTime,
-        const sp<Connection>& connection, nsecs_t newTimeout) {
-#if DEBUG_DISPATCH_CYCLE
-    LOGD("channel '%s' ~ resumeAfterTimeoutDispatchCycleLocked - newTimeout=%lld",
-            connection->getInputChannelName(), newTimeout);
-#endif
-
-    if (connection->status != Connection::STATUS_NOT_RESPONDING) {
-        return;
-    }
-
-    if (newTimeout > 0) {
-        // The system has decided to give the application some more time.
-        // Keep waiting synchronously and resume normal dispatch.
-        connection->status = Connection::STATUS_NORMAL;
-        connection->setNextTimeoutTime(currentTime, newTimeout);
-    } else {
-        // The system is about to throw up an ANR dialog and has requested that we abort dispatch.
-        // Reset the timeout.
-        connection->nextTimeoutTime = LONG_LONG_MAX;
-
-        // Input state will no longer be realistic.
-        connection->inputState.setOutOfSync();
-
-        if (! connection->outboundQueue.isEmpty()) {
-            // Make the current pending dispatch asynchronous (if it isn't already) so that
-            // subsequent events can be delivered to the ANR dialog or to another application.
-            DispatchEntry* currentDispatchEntry = connection->outboundQueue.headSentinel.next;
-            currentDispatchEntry->preemptSyncTarget();
-
-            // Drain all but the first entry in the outbound queue.  We keep the first entry
-            // since that is the one that dispatch is stuck on.  We throw away the others
-            // so that we don't spam the application with stale messages if it eventually
-            // wakes up and recovers from the ANR.
-            drainOutboundQueueLocked(connection.get(), currentDispatchEntry->next);
-        }
-    }
 }
 
 void InputDispatcher::abortDispatchCycleLocked(nsecs_t currentTime,
@@ -1742,20 +1666,16 @@ void InputDispatcher::abortDispatchCycleLocked(nsecs_t currentTime,
             connection->getInputChannelName(), toString(broken));
 #endif
 
-    // Clear the pending timeout.
-    connection->nextTimeoutTime = LONG_LONG_MAX;
-
     // Input state will no longer be realistic.
     connection->inputState.setOutOfSync();
 
     // Clear the outbound queue.
-    drainOutboundQueueLocked(connection.get(), connection->outboundQueue.headSentinel.next);
+    drainOutboundQueueLocked(connection.get());
 
     // Handle the case where the connection appears to be unrecoverably broken.
     // Ignore already broken or zombie connections.
     if (broken) {
-        if (connection->status == Connection::STATUS_NORMAL
-                || connection->status == Connection::STATUS_NOT_RESPONDING) {
+        if (connection->status == Connection::STATUS_NORMAL) {
             connection->status = Connection::STATUS_BROKEN;
 
             // Notify other system components.
@@ -1764,27 +1684,19 @@ void InputDispatcher::abortDispatchCycleLocked(nsecs_t currentTime,
     }
 }
 
-void InputDispatcher::drainOutboundQueueLocked(Connection* connection,
-        DispatchEntry* firstDispatchEntryToDrain) {
-    for (DispatchEntry* dispatchEntry = firstDispatchEntryToDrain;
-            dispatchEntry != & connection->outboundQueue.tailSentinel;) {
-        DispatchEntry* next = dispatchEntry->next;
-        connection->outboundQueue.dequeue(dispatchEntry);
-
-        if (dispatchEntry->isSyncTarget()) {
-            decrementPendingSyncDispatchesLocked(dispatchEntry->eventEntry);
+void InputDispatcher::drainOutboundQueueLocked(Connection* connection) {
+    while (! connection->outboundQueue.isEmpty()) {
+        DispatchEntry* dispatchEntry = connection->outboundQueue.dequeueAtHead();
+        if (dispatchEntry->hasForegroundTarget()) {
+            decrementPendingForegroundDispatchesLocked(dispatchEntry->eventEntry);
         }
         mAllocator.releaseDispatchEntry(dispatchEntry);
-
-        dispatchEntry = next;
     }
 
-    if (connection->outboundQueue.isEmpty()) {
-        deactivateConnectionLocked(connection);
-    }
+    deactivateConnectionLocked(connection);
 }
 
-bool InputDispatcher::handleReceiveCallback(int receiveFd, int events, void* data) {
+int InputDispatcher::handleReceiveCallback(int receiveFd, int events, void* data) {
     InputDispatcher* d = static_cast<InputDispatcher*>(data);
 
     { // acquire lock
@@ -1794,24 +1706,24 @@ bool InputDispatcher::handleReceiveCallback(int receiveFd, int events, void* dat
         if (connectionIndex < 0) {
             LOGE("Received spurious receive callback for unknown input channel.  "
                     "fd=%d, events=0x%x", receiveFd, events);
-            return false; // remove the callback
+            return 0; // remove the callback
         }
 
         nsecs_t currentTime = now();
 
         sp<Connection> connection = d->mConnectionsByReceiveFd.valueAt(connectionIndex);
-        if (events & (POLLERR | POLLHUP | POLLNVAL)) {
+        if (events & (ALOOPER_EVENT_ERROR | ALOOPER_EVENT_HANGUP)) {
             LOGE("channel '%s' ~ Consumer closed input channel or an error occurred.  "
                     "events=0x%x", connection->getInputChannelName(), events);
             d->abortDispatchCycleLocked(currentTime, connection, true /*broken*/);
             d->runCommandsLockedInterruptible();
-            return false; // remove the callback
+            return 0; // remove the callback
         }
 
-        if (! (events & POLLIN)) {
+        if (! (events & ALOOPER_EVENT_INPUT)) {
             LOGW("channel '%s' ~ Received spurious callback for unhandled poll event.  "
                     "events=0x%x", connection->getInputChannelName(), events);
-            return true;
+            return 1;
         }
 
         status_t status = connection->inputPublisher.receiveFinishedSignal();
@@ -1820,12 +1732,12 @@ bool InputDispatcher::handleReceiveCallback(int receiveFd, int events, void* dat
                     connection->getInputChannelName(), status);
             d->abortDispatchCycleLocked(currentTime, connection, true /*broken*/);
             d->runCommandsLockedInterruptible();
-            return false; // remove the callback
+            return 0; // remove the callback
         }
 
         d->finishDispatchCycleLocked(currentTime, connection);
         d->runCommandsLockedInterruptible();
-        return true;
+        return 1;
     } // release lock
 }
 
@@ -1843,7 +1755,7 @@ void InputDispatcher::notifyConfigurationChanged(nsecs_t eventTime) {
     } // release lock
 
     if (needWake) {
-        mPollLoop->wake();
+        mLooper->wake();
     }
 }
 
@@ -1870,7 +1782,7 @@ void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t sou
     } // release lock
 
     if (needWake) {
-        mPollLoop->wake();
+        mLooper->wake();
     }
 }
 
@@ -1941,56 +1853,63 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t 
             // STREAMING CASE
             //
             // There is no pending motion event (of any kind) for this device in the inbound queue.
-            // Search the outbound queues for a synchronously dispatched motion event for this
-            // device.  If found, then we append the new sample to that event and then try to
-            // push it out to all current targets.  It is possible that some targets will already
-            // have consumed the motion event.  This case is automatically handled by the
-            // logic in prepareDispatchCycleLocked by tracking where resumption takes place.
-            //
-            // The reason we look for a synchronously dispatched motion event is because we
-            // want to be sure that no other motion events have been dispatched since the move.
-            // It's also convenient because it means that the input targets are still valid.
-            // This code could be improved to support streaming of asynchronously dispatched
-            // motion events (which might be significantly more efficient) but it may become
-            // a little more complicated as a result.
-            //
-            // Note: This code crucially depends on the invariant that an outbound queue always
-            //       contains at most one synchronous event and it is always last (but it might
-            //       not be first!).
+            // Search the outbound queue for the current foreground targets to find a dispatched
+            // motion event that is still in progress.  If found, then, appen the new sample to
+            // that event and push it out to all current targets.  The logic in
+            // prepareDispatchCycleLocked takes care of the case where some targets may
+            // already have consumed the motion event by starting a new dispatch cycle if needed.
             if (mCurrentInputTargetsValid) {
-                for (size_t i = 0; i < mActiveConnections.size(); i++) {
-                    Connection* connection = mActiveConnections.itemAt(i);
-                    if (! connection->outboundQueue.isEmpty()) {
-                        DispatchEntry* dispatchEntry = connection->outboundQueue.tailSentinel.prev;
-                        if (dispatchEntry->isSyncTarget()) {
-                            if (dispatchEntry->eventEntry->type != EventEntry::TYPE_MOTION) {
-                                goto NoBatchingOrStreaming;
-                            }
-
-                            MotionEntry* syncedMotionEntry = static_cast<MotionEntry*>(
-                                    dispatchEntry->eventEntry);
-                            if (syncedMotionEntry->action != AMOTION_EVENT_ACTION_MOVE
-                                    || syncedMotionEntry->deviceId != deviceId
-                                    || syncedMotionEntry->pointerCount != pointerCount
-                                    || syncedMotionEntry->isInjected()) {
-                                goto NoBatchingOrStreaming;
-                            }
-
-                            // Found synced move entry.  Append sample and resume dispatch.
-                            mAllocator.appendMotionSample(syncedMotionEntry, eventTime,
-                                    pointerCoords);
-    #if DEBUG_BATCHING
-                            LOGD("Appended motion sample onto batch for most recent synchronously "
-                                    "dispatched motion event for this device in the outbound queues.");
-    #endif
-                            nsecs_t currentTime = now();
-                            dispatchEventToCurrentInputTargetsLocked(currentTime, syncedMotionEntry,
-                                    true /*resumeWithAppendedMotionSample*/);
-
-                            runCommandsLockedInterruptible();
-                            return; // done!
-                        }
+                for (size_t i = 0; i < mCurrentInputTargets.size(); i++) {
+                    const InputTarget& inputTarget = mCurrentInputTargets[i];
+                    if ((inputTarget.flags & InputTarget::FLAG_FOREGROUND) == 0) {
+                        // Skip non-foreground targets.  We only want to stream if there is at
+                        // least one foreground target whose dispatch is still in progress.
+                        continue;
                     }
+
+                    ssize_t connectionIndex = getConnectionIndexLocked(inputTarget.inputChannel);
+                    if (connectionIndex < 0) {
+                        // Connection must no longer be valid.
+                        continue;
+                    }
+
+                    sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
+                    if (connection->outboundQueue.isEmpty()) {
+                        // This foreground target has an empty outbound queue.
+                        continue;
+                    }
+
+                    DispatchEntry* dispatchEntry = connection->outboundQueue.headSentinel.next;
+                    if (! dispatchEntry->inProgress
+                            || dispatchEntry->eventEntry->type != EventEntry::TYPE_MOTION) {
+                        // No motion event is being dispatched.
+                        continue;
+                    }
+
+                    MotionEntry* motionEntry = static_cast<MotionEntry*>(
+                            dispatchEntry->eventEntry);
+                    if (motionEntry->action != AMOTION_EVENT_ACTION_MOVE
+                            || motionEntry->deviceId != deviceId
+                            || motionEntry->pointerCount != pointerCount
+                            || motionEntry->isInjected()) {
+                        // The motion event is not compatible with this move.
+                        continue;
+                    }
+
+                    // Hurray!  This foreground target is currently dispatching a move event
+                    // that we can stream onto.  Append the motion sample and resume dispatch.
+                    mAllocator.appendMotionSample(motionEntry, eventTime, pointerCoords);
+#if DEBUG_BATCHING
+                    LOGD("Appended motion sample onto batch for most recently dispatched "
+                            "motion event for this device in the outbound queues.  "
+                            "Attempting to stream the motion sample.");
+#endif
+                    nsecs_t currentTime = now();
+                    dispatchEventToCurrentInputTargetsLocked(currentTime, motionEntry,
+                            true /*resumeWithAppendedMotionSample*/);
+
+                    runCommandsLockedInterruptible();
+                    return; // done!
                 }
             }
 
@@ -2007,7 +1926,7 @@ NoBatchingOrStreaming:;
     } // release lock
 
     if (needWake) {
-        mPollLoop->wake();
+        mLooper->wake();
     }
 }
 
@@ -2043,7 +1962,7 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
     } // release lock
 
     if (needWake) {
-        mPollLoop->wake();
+        mLooper->wake();
     }
 
     int32_t injectionResult;
@@ -2074,15 +1993,15 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
 
             if (injectionResult == INPUT_EVENT_INJECTION_SUCCEEDED
                     && syncMode == INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISHED) {
-                while (injectedEntry->pendingSyncDispatches != 0) {
+                while (injectedEntry->pendingForegroundDispatches != 0) {
 #if DEBUG_INJECTION
-                    LOGD("injectInputEvent - Waiting for %d pending synchronous dispatches.",
-                            injectedEntry->pendingSyncDispatches);
+                    LOGD("injectInputEvent - Waiting for %d pending foreground dispatches.",
+                            injectedEntry->pendingForegroundDispatches);
 #endif
                     nsecs_t remainingTimeout = endTime - now();
                     if (remainingTimeout <= 0) {
 #if DEBUG_INJECTION
-                    LOGD("injectInputEvent - Timed out waiting for pending synchronous "
+                    LOGD("injectInputEvent - Timed out waiting for pending foreground "
                             "dispatches to finish.");
 #endif
                         injectionResult = INPUT_EVENT_INJECTION_TIMED_OUT;
@@ -2137,10 +2056,10 @@ void InputDispatcher::setInjectionResultLocked(EventEntry* entry, int32_t inject
     }
 }
 
-void InputDispatcher::decrementPendingSyncDispatchesLocked(EventEntry* entry) {
-    entry->pendingSyncDispatches -= 1;
+void InputDispatcher::decrementPendingForegroundDispatchesLocked(EventEntry* entry) {
+    entry->pendingForegroundDispatches -= 1;
 
-    if (entry->isInjected() && entry->pendingSyncDispatches == 0) {
+    if (entry->isInjected() && entry->pendingForegroundDispatches == 0) {
         mInjectionSyncFinishedCondition.broadcast();
     }
 }
@@ -2238,6 +2157,10 @@ void InputDispatcher::setInputWindows(const Vector<InputWindow>& inputWindows) {
     { // acquire lock
         AutoMutex _l(mLock);
 
+        sp<InputChannel> oldFocusedWindowChannel = mFocusedWindow
+                ? mFocusedWindow->inputChannel : NULL;
+        int32_t oldFocusedWindowLayer = mFocusedWindow ? mFocusedWindow->layer : -1;
+
         sp<InputChannel> touchedWindowChannel;
         if (mTouchedWindow) {
             touchedWindowChannel = mTouchedWindow->inputChannel;
@@ -2250,8 +2173,6 @@ void InputDispatcher::setInputWindows(const Vector<InputWindow>& inputWindows) {
             }
             mTouchedWallpaperWindows.clear();
         }
-
-        bool hadFocusedWindow = mFocusedWindow != NULL;
 
         mFocusedWindow = NULL;
         mWallpaperWindows.clear();
@@ -2283,9 +2204,36 @@ void InputDispatcher::setInputWindows(const Vector<InputWindow>& inputWindows) {
 
         mTempTouchedWallpaperChannels.clear();
 
-        if ((hadFocusedWindow && ! mFocusedWindow)
-                || (mFocusedWindow && ! mFocusedWindow->visible)) {
-            preemptInputDispatchInnerLocked();
+        bool preempt = false;
+        if (mFocusedWindow
+                && mFocusedWindow->inputChannel != oldFocusedWindowChannel
+                && mFocusedWindow->canReceiveKeys) {
+            // If the new input focus is an error window or appears above the current
+            // input focus, drop the current touched window so that we can start
+            // delivering events to the new input focus as soon as possible.
+            if (mFocusedWindow->layoutParamsFlags & InputWindow::FLAG_SYSTEM_ERROR) {
+#if DEBUG_FOCUS
+                LOGD("Preempting: New SYSTEM_ERROR window; resetting state");
+#endif
+                preempt = true;
+            } else if (oldFocusedWindowChannel.get() != NULL
+                    && mFocusedWindow->layer > oldFocusedWindowLayer) {
+#if DEBUG_FOCUS
+                LOGD("Preempting: Transferring focus to new window at higher layer: "
+                        "old win layer=%d, new win layer=%d",
+                        oldFocusedWindowLayer, mFocusedWindow->layer);
+#endif
+                preempt = true;
+            }
+        }
+        if (mTouchedWindow && ! mTouchedWindow->visible) {
+#if DEBUG_FOCUS
+            LOGD("Preempting: Touched window became invisible.");
+#endif
+            preempt = true;
+        }
+        if (preempt) {
+            releaseTouchedWindowLocked();
         }
 
 #if DEBUG_FOCUS
@@ -2294,7 +2242,7 @@ void InputDispatcher::setInputWindows(const Vector<InputWindow>& inputWindows) {
     } // release lock
 
     // Wake up poll loop since it may need to make new input dispatching choices.
-    mPollLoop->wake();
+    mLooper->wake();
 }
 
 void InputDispatcher::setFocusedApplication(const InputApplication* inputApplication) {
@@ -2317,7 +2265,7 @@ void InputDispatcher::setFocusedApplication(const InputApplication* inputApplica
     } // release lock
 
     // Wake up poll loop since it may need to make new input dispatching choices.
-    mPollLoop->wake();
+    mLooper->wake();
 }
 
 void InputDispatcher::releaseFocusedApplicationLocked() {
@@ -2355,41 +2303,8 @@ void InputDispatcher::setInputDispatchMode(bool enabled, bool frozen) {
 
     if (changed) {
         // Wake up poll loop since it may need to make new input dispatching choices.
-        mPollLoop->wake();
+        mLooper->wake();
     }
-}
-
-void InputDispatcher::preemptInputDispatch() {
-#if DEBUG_FOCUS
-    LOGD("preemptInputDispatch");
-#endif
-
-    bool preemptedOne;
-    { // acquire lock
-        AutoMutex _l(mLock);
-        preemptedOne = preemptInputDispatchInnerLocked();
-    } // release lock
-
-    if (preemptedOne) {
-        // Wake up the poll loop so it can get a head start dispatching the next event.
-        mPollLoop->wake();
-    }
-}
-
-bool InputDispatcher::preemptInputDispatchInnerLocked() {
-    bool preemptedOne = false;
-    for (size_t i = 0; i < mActiveConnections.size(); i++) {
-        Connection* connection = mActiveConnections[i];
-        if (connection->hasPendingSyncTarget()) {
-#if DEBUG_DISPATCH_CYCLE
-            LOGD("channel '%s' ~ Preempted pending synchronous dispatch",
-                    connection->getInputChannelName());
-#endif
-            connection->preemptSyncTarget();
-            preemptedOne = true;
-        }
-    }
-    return preemptedOne;
 }
 
 void InputDispatcher::logDispatchStateLocked() {
@@ -2447,12 +2362,14 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
                 i, channel->getName().string());
     }
 
+    dump.appendFormat("  inboundQueue: length=%u", mInboundQueue.count());
+
     for (size_t i = 0; i < mActiveConnections.size(); i++) {
         const Connection* connection = mActiveConnections[i];
-        dump.appendFormat("  activeConnection[%d]: '%s', status=%s, hasPendingSyncTarget=%s, "
+        dump.appendFormat("  activeConnection[%d]: '%s', status=%s, outboundQueueLength=%u"
                 "inputState.isNeutral=%s, inputState.isOutOfSync=%s\n",
                 i, connection->getInputChannelName(), connection->getStatusLabel(),
-                toString(connection->hasPendingSyncTarget()),
+                connection->outboundQueue.count(),
                 toString(connection->inputState.isNeutral()),
                 toString(connection->inputState.isOutOfSync()));
     }
@@ -2474,7 +2391,7 @@ status_t InputDispatcher::registerInputChannel(const sp<InputChannel>& inputChan
     { // acquire lock
         AutoMutex _l(mLock);
 
-        if (getConnectionIndex(inputChannel) >= 0) {
+        if (getConnectionIndexLocked(inputChannel) >= 0) {
             LOGW("Attempted to register already registered input channel '%s'",
                     inputChannel->getName().string());
             return BAD_VALUE;
@@ -2495,7 +2412,7 @@ status_t InputDispatcher::registerInputChannel(const sp<InputChannel>& inputChan
             mMonitoringChannels.push(inputChannel);
         }
 
-        mPollLoop->setCallback(receiveFd, POLLIN, handleReceiveCallback, this);
+        mLooper->addFd(receiveFd, 0, ALOOPER_EVENT_INPUT, handleReceiveCallback, this);
 
         runCommandsLockedInterruptible();
     } // release lock
@@ -2510,7 +2427,7 @@ status_t InputDispatcher::unregisterInputChannel(const sp<InputChannel>& inputCh
     { // acquire lock
         AutoMutex _l(mLock);
 
-        ssize_t connectionIndex = getConnectionIndex(inputChannel);
+        ssize_t connectionIndex = getConnectionIndexLocked(inputChannel);
         if (connectionIndex < 0) {
             LOGW("Attempted to unregister already unregistered input channel '%s'",
                     inputChannel->getName().string());
@@ -2529,7 +2446,7 @@ status_t InputDispatcher::unregisterInputChannel(const sp<InputChannel>& inputCh
             }
         }
 
-        mPollLoop->removeCallback(inputChannel->getReceivePipeFd());
+        mLooper->removeFd(inputChannel->getReceivePipeFd());
 
         nsecs_t currentTime = now();
         abortDispatchCycleLocked(currentTime, connection, true /*broken*/);
@@ -2539,11 +2456,11 @@ status_t InputDispatcher::unregisterInputChannel(const sp<InputChannel>& inputCh
 
     // Wake the poll loop because removing the connection may have changed the current
     // synchronization state.
-    mPollLoop->wake();
+    mLooper->wake();
     return OK;
 }
 
-ssize_t InputDispatcher::getConnectionIndex(const sp<InputChannel>& inputChannel) {
+ssize_t InputDispatcher::getConnectionIndexLocked(const sp<InputChannel>& inputChannel) {
     ssize_t connectionIndex = mConnectionsByReceiveFd.indexOfKey(inputChannel->getReceivePipeFd());
     if (connectionIndex >= 0) {
         sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
@@ -2578,31 +2495,7 @@ void InputDispatcher::onDispatchCycleStartedLocked(
 }
 
 void InputDispatcher::onDispatchCycleFinishedLocked(
-        nsecs_t currentTime, const sp<Connection>& connection, bool recoveredFromANR) {
-    if (recoveredFromANR) {
-        LOGI("channel '%s' ~ Recovered from ANR.  %01.1fms since event, "
-                "%01.1fms since dispatch, %01.1fms since ANR",
-                connection->getInputChannelName(),
-                connection->getEventLatencyMillis(currentTime),
-                connection->getDispatchLatencyMillis(currentTime),
-                connection->getANRLatencyMillis(currentTime));
-
-        CommandEntry* commandEntry = postCommandLocked(
-                & InputDispatcher::doNotifyInputChannelRecoveredFromANRLockedInterruptible);
-        commandEntry->connection = connection;
-    }
-}
-
-void InputDispatcher::onDispatchCycleANRLocked(
         nsecs_t currentTime, const sp<Connection>& connection) {
-    LOGI("channel '%s' ~ Not responding!  %01.1fms since event, %01.1fms since dispatch",
-            connection->getInputChannelName(),
-            connection->getEventLatencyMillis(currentTime),
-            connection->getDispatchLatencyMillis(currentTime));
-
-    CommandEntry* commandEntry = postCommandLocked(
-            & InputDispatcher::doNotifyInputChannelANRLockedInterruptible);
-    commandEntry->connection = connection;
 }
 
 void InputDispatcher::onDispatchCycleBrokenLocked(
@@ -2613,6 +2506,25 @@ void InputDispatcher::onDispatchCycleBrokenLocked(
     CommandEntry* commandEntry = postCommandLocked(
             & InputDispatcher::doNotifyInputChannelBrokenLockedInterruptible);
     commandEntry->connection = connection;
+}
+
+void InputDispatcher::onANRLocked(
+        nsecs_t currentTime, const InputApplication* application, const InputWindow* window,
+        nsecs_t eventTime, nsecs_t waitStartTime) {
+    LOGI("Application is not responding: %s.  "
+            "%01.1fms since event, %01.1fms since wait started",
+            getApplicationWindowLabelLocked(application, window).string(),
+            (currentTime - eventTime) / 1000000.0,
+            (currentTime - waitStartTime) / 1000000.0);
+
+    CommandEntry* commandEntry = postCommandLocked(
+            & InputDispatcher::doNotifyANRLockedInterruptible);
+    if (application) {
+        commandEntry->inputApplicationHandle = application->handle;
+    }
+    if (window) {
+        commandEntry->inputChannel = window->inputChannel;
+    }
 }
 
 void InputDispatcher::doNotifyConfigurationChangedInterruptible(
@@ -2637,33 +2549,16 @@ void InputDispatcher::doNotifyInputChannelBrokenLockedInterruptible(
     }
 }
 
-void InputDispatcher::doNotifyInputChannelANRLockedInterruptible(
+void InputDispatcher::doNotifyANRLockedInterruptible(
         CommandEntry* commandEntry) {
-    sp<Connection> connection = commandEntry->connection;
+    mLock.unlock();
 
-    if (connection->status != Connection::STATUS_ZOMBIE) {
-        mLock.unlock();
+    nsecs_t newTimeout = mPolicy->notifyANR(
+            commandEntry->inputApplicationHandle, commandEntry->inputChannel);
 
-        nsecs_t newTimeout = mPolicy->notifyInputChannelANR(connection->inputChannel);
+    mLock.lock();
 
-        mLock.lock();
-
-        nsecs_t currentTime = now();
-        resumeAfterTimeoutDispatchCycleLocked(currentTime, connection, newTimeout);
-    }
-}
-
-void InputDispatcher::doNotifyInputChannelRecoveredFromANRLockedInterruptible(
-        CommandEntry* commandEntry) {
-    sp<Connection> connection = commandEntry->connection;
-
-    if (connection->status != Connection::STATUS_ZOMBIE) {
-        mLock.unlock();
-
-        mPolicy->notifyInputChannelRecoveredFromANR(connection->inputChannel);
-
-        mLock.lock();
-    }
+    resumeAfterTargetsNotReadyTimeoutLocked(newTimeout, commandEntry->inputChannel);
 }
 
 void InputDispatcher::doInterceptKeyBeforeDispatchingLockedInterruptible(
@@ -2695,26 +2590,25 @@ void InputDispatcher::doPokeUserActivityLockedInterruptible(CommandEntry* comman
     mLock.lock();
 }
 
-void InputDispatcher::doTargetsNotReadyTimeoutLockedInterruptible(
-        CommandEntry* commandEntry) {
-    mLock.unlock();
-
-    nsecs_t newTimeout;
-    if (commandEntry->inputChannel.get()) {
-        newTimeout = mPolicy->notifyInputChannelANR(commandEntry->inputChannel);
-    } else if (commandEntry->inputApplicationHandle.get()) {
-        newTimeout = mPolicy->notifyANR(commandEntry->inputApplicationHandle);
-    } else {
-        newTimeout = 0;
-    }
-
-    mLock.lock();
-
-    resumeAfterTargetsNotReadyTimeoutLocked(newTimeout);
+void InputDispatcher::updateDispatchStatisticsLocked(nsecs_t currentTime, const EventEntry* entry,
+        int32_t injectionResult, nsecs_t timeSpentWaitingForApplication) {
+    // TODO Write some statistics about how long we spend waiting.
 }
 
 void InputDispatcher::dump(String8& dump) {
     dumpDispatchStateLocked(dump);
+}
+
+
+// --- InputDispatcher::Queue ---
+
+template <typename T>
+uint32_t InputDispatcher::Queue<T>::count() const {
+    uint32_t result = 0;
+    for (const T* entry = headSentinel.next; entry != & tailSentinel; entry = entry->next) {
+        result += 1;
+    }
+    return result;
 }
 
 
@@ -2733,7 +2627,7 @@ void InputDispatcher::Allocator::initializeEventEntry(EventEntry* entry, int32_t
     entry->injectionIsAsync = false;
     entry->injectorPid = -1;
     entry->injectorUid = -1;
-    entry->pendingSyncDispatches = 0;
+    entry->pendingForegroundDispatches = 0;
 }
 
 InputDispatcher::ConfigurationChangedEntry*
@@ -2797,14 +2691,13 @@ InputDispatcher::MotionEntry* InputDispatcher::Allocator::obtainMotionEntry(nsec
 
 InputDispatcher::DispatchEntry* InputDispatcher::Allocator::obtainDispatchEntry(
         EventEntry* eventEntry,
-        int32_t targetFlags, float xOffset, float yOffset, nsecs_t timeout) {
+        int32_t targetFlags, float xOffset, float yOffset) {
     DispatchEntry* entry = mDispatchEntryPool.alloc();
     entry->eventEntry = eventEntry;
     eventEntry->refCount += 1;
     entry->targetFlags = targetFlags;
     entry->xOffset = xOffset;
     entry->yOffset = yOffset;
-    entry->timeout = timeout;
     entry->inProgress = false;
     entry->headMotionSample = NULL;
     entry->tailMotionSample = NULL;
@@ -2896,7 +2789,7 @@ void InputDispatcher::Allocator::appendMotionSample(MotionEntry* motionEntry,
 void InputDispatcher::EventEntry::recycle() {
     injectionResult = INPUT_EVENT_INJECTION_PENDING;
     dispatchInProgress = false;
-    pendingSyncDispatches = 0;
+    pendingForegroundDispatches = 0;
 }
 
 
@@ -3106,9 +2999,7 @@ void InputDispatcher::InputState::clear() {
 
 InputDispatcher::Connection::Connection(const sp<InputChannel>& inputChannel) :
         status(STATUS_NORMAL), inputChannel(inputChannel), inputPublisher(inputChannel),
-        nextTimeoutTime(LONG_LONG_MAX),
-        lastEventTime(LONG_LONG_MAX), lastDispatchTime(LONG_LONG_MAX),
-        lastANRTime(LONG_LONG_MAX) {
+        lastEventTime(LONG_LONG_MAX), lastDispatchTime(LONG_LONG_MAX) {
 }
 
 InputDispatcher::Connection::~Connection() {
@@ -3118,18 +3009,6 @@ status_t InputDispatcher::Connection::initialize() {
     return inputPublisher.initialize();
 }
 
-void InputDispatcher::Connection::setNextTimeoutTime(nsecs_t currentTime, nsecs_t timeout) {
-    nextTimeoutTime = (timeout >= 0) ? currentTime + timeout : LONG_LONG_MAX;
-}
-
-void InputDispatcher::Connection::resetTimeout(nsecs_t currentTime) {
-    if (outboundQueue.isEmpty()) {
-        nextTimeoutTime = LONG_LONG_MAX;
-    } else {
-        setNextTimeoutTime(currentTime, outboundQueue.headSentinel.next->timeout);
-    }
-}
-
 const char* InputDispatcher::Connection::getStatusLabel() const {
     switch (status) {
     case STATUS_NORMAL:
@@ -3137,9 +3016,6 @@ const char* InputDispatcher::Connection::getStatusLabel() const {
 
     case STATUS_BROKEN:
         return "BROKEN";
-
-    case STATUS_NOT_RESPONDING:
-        return "NOT_RESPONDING";
 
     case STATUS_ZOMBIE:
         return "ZOMBIE";
