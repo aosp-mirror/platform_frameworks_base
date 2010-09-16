@@ -37,6 +37,7 @@ LOCAL_SRC_FILES:=                         \
         ShoutcastSource.cpp               \
         StagefrightMediaScanner.cpp       \
         StagefrightMetadataRetriever.cpp  \
+        ThreadedSource.cpp                \
         ThrottledSource.cpp               \
         TimeSource.cpp                    \
         TimedEventQueue.cpp               \

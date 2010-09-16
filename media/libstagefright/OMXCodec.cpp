@@ -52,6 +52,8 @@
 #include <OMX_Audio.h>
 #include <OMX_Component.h>
 
+#include "include/ThreadedSource.h"
+
 namespace android {
 
 static const int OMX_QCOM_COLOR_FormatYVU420SemiPlanar = 0x7FA30C00;
@@ -134,6 +136,10 @@ static sp<MediaSource> InstantiateSoftwareCodec(
     for (size_t i = 0;
          i < sizeof(kFactoryInfo) / sizeof(kFactoryInfo[0]); ++i) {
         if (!strcmp(name, kFactoryInfo[i].name)) {
+            if (!strcmp(name, "VPXDecoder")) {
+                return new ThreadedSource(
+                        (*kFactoryInfo[i].CreateFunc)(source));
+            }
             return (*kFactoryInfo[i].CreateFunc)(source);
         }
     }
