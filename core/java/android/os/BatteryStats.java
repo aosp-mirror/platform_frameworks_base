@@ -56,9 +56,9 @@ public abstract class BatteryStats implements Parcelable {
     public static final int SENSOR = 3;
     
     /**
-     * A constant indicating a a wifi turn on timer
+     * A constant indicating a a wifi running timer
      */
-    public static final int WIFI_TURNED_ON = 4;
+    public static final int WIFI_RUNNING = 4;
     
     /**
      * A constant indicating a full wifi lock timer
@@ -249,8 +249,8 @@ public abstract class BatteryStats implements Parcelable {
          */
         public abstract long getTcpBytesSent(int which);
         
-        public abstract void noteWifiTurnedOnLocked();
-        public abstract void noteWifiTurnedOffLocked();
+        public abstract void noteWifiRunningLocked();
+        public abstract void noteWifiStoppedLocked();
         public abstract void noteFullWifiLockAcquiredLocked();
         public abstract void noteFullWifiLockReleasedLocked();
         public abstract void noteScanWifiLockAcquiredLocked();
@@ -261,7 +261,7 @@ public abstract class BatteryStats implements Parcelable {
         public abstract void noteAudioTurnedOffLocked();
         public abstract void noteVideoTurnedOnLocked();
         public abstract void noteVideoTurnedOffLocked();
-        public abstract long getWifiTurnedOnTime(long batteryRealtime, int which);
+        public abstract long getWifiRunningTime(long batteryRealtime, int which);
         public abstract long getFullWifiLockTime(long batteryRealtime, int which);
         public abstract long getScanWifiLockTime(long batteryRealtime, int which);
         public abstract long getWifiMulticastTime(long batteryRealtime,
@@ -701,7 +701,7 @@ public abstract class BatteryStats implements Parcelable {
      *
      * {@hide}
      */
-    public abstract long getWifiRunningTime(long batteryRealtime, int which);
+    public abstract long getGlobalWifiRunningTime(long batteryRealtime, int which);
 
     /**
      * Returns the time in microseconds that bluetooth has been on while the device was
@@ -977,7 +977,7 @@ public abstract class BatteryStats implements Parcelable {
         final long screenOnTime = getScreenOnTime(batteryRealtime, which);
         final long phoneOnTime = getPhoneOnTime(batteryRealtime, which);
         final long wifiOnTime = getWifiOnTime(batteryRealtime, which);
-        final long wifiRunningTime = getWifiRunningTime(batteryRealtime, which);
+        final long wifiRunningTime = getGlobalWifiRunningTime(batteryRealtime, which);
         final long bluetoothOnTime = getBluetoothOnTime(batteryRealtime, which);
        
         StringBuilder sb = new StringBuilder(128);
@@ -1091,14 +1091,14 @@ public abstract class BatteryStats implements Parcelable {
             long tx = u.getTcpBytesSent(which);
             long fullWifiLockOnTime = u.getFullWifiLockTime(batteryRealtime, which);
             long scanWifiLockOnTime = u.getScanWifiLockTime(batteryRealtime, which);
-            long wifiTurnedOnTime = u.getWifiTurnedOnTime(batteryRealtime, which);
+            long uidWifiRunningTime = u.getWifiRunningTime(batteryRealtime, which);
             
             if (rx > 0 || tx > 0) dumpLine(pw, uid, category, NETWORK_DATA, rx, tx);
             
             if (fullWifiLockOnTime != 0 || scanWifiLockOnTime != 0
-                    || wifiTurnedOnTime != 0) {
+                    || uidWifiRunningTime != 0) {
                 dumpLine(pw, uid, category, WIFI_LOCK_DATA, 
-                        fullWifiLockOnTime, scanWifiLockOnTime, wifiTurnedOnTime);
+                        fullWifiLockOnTime, scanWifiLockOnTime, uidWifiRunningTime);
             }
 
             if (u.hasUserActivity()) {
@@ -1240,7 +1240,7 @@ public abstract class BatteryStats implements Parcelable {
         
         final long screenOnTime = getScreenOnTime(batteryRealtime, which);
         final long phoneOnTime = getPhoneOnTime(batteryRealtime, which);
-        final long wifiRunningTime = getWifiRunningTime(batteryRealtime, which);
+        final long wifiRunningTime = getGlobalWifiRunningTime(batteryRealtime, which);
         final long wifiOnTime = getWifiOnTime(batteryRealtime, which);
         final long bluetoothOnTime = getBluetoothOnTime(batteryRealtime, which);
         sb.setLength(0);
@@ -1449,7 +1449,7 @@ public abstract class BatteryStats implements Parcelable {
             long tcpSent = u.getTcpBytesSent(which);
             long fullWifiLockOnTime = u.getFullWifiLockTime(batteryRealtime, which);
             long scanWifiLockOnTime = u.getScanWifiLockTime(batteryRealtime, which);
-            long wifiTurnedOnTime = u.getWifiTurnedOnTime(batteryRealtime, which);
+            long uidWifiRunningTime = u.getWifiRunningTime(batteryRealtime, which);
             
             if (tcpReceived != 0 || tcpSent != 0) {
                 pw.print(prefix); pw.print("    Network: ");
@@ -1480,11 +1480,11 @@ public abstract class BatteryStats implements Parcelable {
             }
             
             if (fullWifiLockOnTime != 0 || scanWifiLockOnTime != 0
-                    || wifiTurnedOnTime != 0) {
+                    || uidWifiRunningTime != 0) {
                 sb.setLength(0);
-                sb.append(prefix); sb.append("    Turned Wifi On: "); 
-                        formatTimeMs(sb, wifiTurnedOnTime / 1000); 
-                        sb.append("("); sb.append(formatRatioLocked(wifiTurnedOnTime, 
+                sb.append(prefix); sb.append("    Wifi Running: ");
+                        formatTimeMs(sb, uidWifiRunningTime / 1000);
+                        sb.append("("); sb.append(formatRatioLocked(uidWifiRunningTime,
                                 whichBatteryRealtime)); sb.append(")\n");
                 sb.append(prefix); sb.append("    Full Wifi Lock: "); 
                         formatTimeMs(sb, fullWifiLockOnTime / 1000); 
