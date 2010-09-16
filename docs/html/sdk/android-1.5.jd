@@ -2,8 +2,6 @@ page.title=Android 1.5 Platform
 sdk.platform.version=1.5
 sdk.platform.apiLevel=3
 sdk.platform.majorMinor=major
-sdk.platform.releaseDate=April 2009
-sdk.platform.deployableDate=May 2009
 
 @jd:body
 
@@ -43,7 +41,7 @@ Differences Report &raquo;</a> </li>
 <em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
 
 <p>Android {@sdkPlatformVersion} is a {@sdkPlatformMajorMinor} platform release
-deployable to Android-powered handsets starting in {@sdkPlatformDeployableDate}.
+deployable to Android-powered handsets starting in May 2009.
 The release includes new features for users and developers, as well as changes
 in the Android framework API. </p>
 
