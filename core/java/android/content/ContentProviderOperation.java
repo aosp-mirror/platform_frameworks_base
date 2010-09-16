@@ -272,13 +272,14 @@ public class ContentProviderOperation implements Parcelable {
      * The ContentValues back references are represented as a ContentValues object where the
      * key refers to a column and the value is an index of the back reference whose
      * valued should be associated with the column.
+     * <p>
+     * This is intended to be a private method but it is exposed for
+     * unit testing purposes
      * @param backRefs an array of previous results
      * @param numBackRefs the number of valid previous results in backRefs
      * @return the ContentValues that should be used in this operation application after
      * expansion of back references. This can be called if either mValues or mValuesBackReferences
      * is null
-     * @VisibleForTesting this is intended to be a private method but it is exposed for
-     * unit testing purposes
      */
     public ContentValues resolveValueBackReferences(
             ContentProviderResult[] backRefs, int numBackRefs) {
@@ -308,13 +309,14 @@ public class ContentProviderOperation implements Parcelable {
      * the key is an index into the selection argument array (see {@link Builder#withSelection})
      * and the value is the index of the previous result that should be used for that selection
      * argument array slot.
+     * <p>
+     * This is intended to be a private method but it is exposed for
+     * unit testing purposes
      * @param backRefs an array of previous results
      * @param numBackRefs the number of valid previous results in backRefs
      * @return the ContentValues that should be used in this operation application after
      * expansion of back references. This can be called if either mValues or mValuesBackReferences
      * is null
-     * @VisibleForTesting this is intended to be a private method but it is exposed for
-     * unit testing purposes
      */
     public String[] resolveSelectionArgsBackReferences(
             ContentProviderResult[] backRefs, int numBackRefs) {

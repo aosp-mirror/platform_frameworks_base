@@ -19,4 +19,20 @@
 @stable
 @com.intel.drl.spec_ref
 @ar.org.fitc.spec_ref
+
+# Something about CTS?
 @cts
+
+# Auto-generated info about the SDK
+@sdkCurrent
+@sdkCurrentVersion
+@sdkCurrentRelId
+@sdkPlatformVersion
+@sdkPlatformApiLevel
+@sdkPlatformMajorMinor
+@sdkPlatformReleaseDate
+@sdkPlatformDeployableDate
+@adtZipVersion
+@adtZipDownload
+@adtZipBytes
+@adtZipChecksum
