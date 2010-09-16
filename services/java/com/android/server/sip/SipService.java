@@ -59,6 +59,8 @@ import javax.sip.SipException;
  */
 public final class SipService extends ISipService.Stub {
     private static final String TAG = "SipService";
+    private static final boolean DEBUG = true;
+    private static final boolean DEBUG_TIMER = DEBUG && false;
     private static final int EXPIRY_TIME = 3600;
     private static final int SHORT_EXPIRY_TIME = 10;
     private static final int MIN_EXPIRY_TIME = 60;
@@ -90,7 +92,7 @@ public final class SipService extends ISipService.Stub {
     }
 
     private SipService(Context context) {
-        Log.v(TAG, " service started!");
+        if (DEBUG) Log.d(TAG, " service started!");
         mContext = context;
         mConnectivityReceiver = new ConnectivityReceiver();
         context.registerReceiver(mConnectivityReceiver,
@@ -137,7 +139,7 @@ public final class SipService extends ISipService.Stub {
             throw new RuntimeException(
                     "empty broadcast action for incoming call");
         }
-        Log.v(TAG, "open3: " + localProfile.getUriString() + ": "
+        if (DEBUG) Log.d(TAG, "open3: " + localProfile.getUriString() + ": "
                 + incomingCallBroadcastAction + ": " + listener);
         try {
             SipSessionGroupExt group = createGroup(localProfile,
@@ -238,14 +240,14 @@ public final class SipService extends ISipService.Stub {
     }
 
     private void notifyProfileAdded(SipProfile localProfile) {
-        Log.d(TAG, "notify: profile added: " + localProfile);
+        if (DEBUG) Log.d(TAG, "notify: profile added: " + localProfile);
         Intent intent = new Intent(SipManager.SIP_ADD_PHONE_ACTION);
         intent.putExtra(SipManager.LOCAL_URI_KEY, localProfile.getUriString());
         mContext.sendBroadcast(intent);
     }
 
     private void notifyProfileRemoved(SipProfile localProfile) {
-        Log.d(TAG, "notify: profile removed: " + localProfile);
+        if (DEBUG) Log.d(TAG, "notify: profile removed: " + localProfile);
         Intent intent = new Intent(SipManager.SIP_REMOVE_PHONE_ACTION);
         intent.putExtra(SipManager.LOCAL_URI_KEY, localProfile.getUriString());
         mContext.sendBroadcast(intent);
@@ -260,7 +262,7 @@ public final class SipService extends ISipService.Stub {
 
     private void grabWifiLock() {
         if (mWifiLock == null) {
-            Log.v(TAG, "acquire wifi lock");
+            if (DEBUG) Log.d(TAG, "acquire wifi lock");
             mWifiLock = ((WifiManager)
                     mContext.getSystemService(Context.WIFI_SERVICE))
                     .createWifiLock(WifiManager.WIFI_MODE_FULL, TAG);
@@ -270,7 +272,7 @@ public final class SipService extends ISipService.Stub {
 
     private void releaseWifiLock() {
         if (mWifiLock != null) {
-            Log.v(TAG, "release wifi lock");
+            if (DEBUG) Log.d(TAG, "release wifi lock");
             mWifiLock.release();
             mWifiLock = null;
         }
@@ -283,7 +285,7 @@ public final class SipService extends ISipService.Stub {
 
     private synchronized void onConnectivityChanged(
             String type, boolean connected) {
-        Log.v(TAG, "onConnectivityChanged(): "
+        if (DEBUG) Log.d(TAG, "onConnectivityChanged(): "
                 + mNetworkType + (mConnected? " CONNECTED" : " DISCONNECTED")
                 + " --> " + type + (connected? " CONNECTED" : " DISCONNECTED"));
 
@@ -398,7 +400,7 @@ public final class SipService extends ISipService.Stub {
                 mSipGroup.openToReceiveCalls(this);
                 mAutoRegistration.start(mSipGroup);
             }
-            Log.v(TAG, "  openToReceiveCalls: " + getUri() + ": "
+            if (DEBUG) Log.d(TAG, "  openToReceiveCalls: " + getUri() + ": "
                     + mIncomingCallBroadcastAction);
         }
 
@@ -410,8 +412,8 @@ public final class SipService extends ISipService.Stub {
                 if (mOpened) openToReceiveCalls();
             } else {
                 // close mSipGroup but remember mOpened
-                Log.v(TAG, "  close auto reg temporarily: " + getUri() + ": "
-                        + mIncomingCallBroadcastAction);
+                if (DEBUG) Log.d(TAG, "  close auto reg temporarily: "
+                        + getUri() + ": " + mIncomingCallBroadcastAction);
                 mSipGroup.close();
                 mAutoRegistration.stop();
             }
@@ -437,7 +439,7 @@ public final class SipService extends ISipService.Stub {
             mOpened = false;
             mSipGroup.closeToNotReceiveCalls();
             mAutoRegistration.stop();
-            Log.v(TAG, "   close: " + getUri() + ": "
+            if (DEBUG) Log.d(TAG, "   close: " + getUri() + ": "
                     + mIncomingCallBroadcastAction);
         }
 
@@ -456,13 +458,13 @@ public final class SipService extends ISipService.Stub {
                     }
 
                     // send out incoming call broadcast
-                    Log.d(TAG, " ringing~~ " + getUri() + ": " + caller.getUri()
-                            + ": " + session.getCallId());
                     addPendingSession(session);
                     Intent intent = SipManager.createIncomingCallBroadcast(
                             mIncomingCallBroadcastAction, session.getCallId(),
                             sessionDescription);
-                    Log.d(TAG, "   send out intent: " + intent);
+                    if (DEBUG) Log.d(TAG, " ringing~~ " + getUri() + ": "
+                            + caller.getUri() + ": " + session.getCallId()
+                            + " " + mIncomingCallBroadcastAction);
                     mContext.sendBroadcast(intent);
                 } catch (RemoteException e) {
                     // should never happen with a local call
@@ -474,7 +476,8 @@ public final class SipService extends ISipService.Stub {
         @Override
         public void onError(ISipSession session, String errorClass,
                 String message) {
-            Log.v(TAG, "sip session error: " + errorClass + ": " + message);
+            if (DEBUG) Log.d(TAG, "sip session error: " + errorClass + ": "
+                    + message);
         }
 
         public boolean isOpened() {
@@ -506,7 +509,7 @@ public final class SipService extends ISipService.Stub {
         public void run() {
             synchronized (SipService.this) {
                 SipSessionGroup.SipSessionImpl session = mSession.duplicate();
-                Log.d(TAG, "  ~~~ keepalive");
+                if (DEBUG) Log.d(TAG, "~~~ keepalive");
                 mTimer.cancel(this);
                 session.sendKeepAlive();
                 if (session.isReRegisterRequired()) {
@@ -549,7 +552,7 @@ public final class SipService extends ISipService.Stub {
                 // TODO: when rfc5626 is deployed, use reg-id and sip.instance
                 // in registration to avoid adding duplicate entries to server
                 mSession.unregister();
-                Log.v(TAG, "start AutoRegistrationProcess for "
+                if (DEBUG) Log.d(TAG, "start AutoRegistrationProcess for "
                         + mSession.getLocalProfile().getUriString());
             }
         }
@@ -581,7 +584,6 @@ public final class SipService extends ISipService.Stub {
         }
 
         public void setListener(ISipSessionListener listener) {
-            Log.v(TAG, "setListener(): " + listener);
             synchronized (SipService.this) {
                 mProxy.setListener(listener);
                 if (mSession == null) return;
@@ -619,7 +621,7 @@ public final class SipService extends ISipService.Stub {
         public void run() {
             mErrorCode = null;
             mErrorMessage = null;
-            Log.v(TAG, "  ~~~ registering");
+            if (DEBUG) Log.d(TAG, "~~~ registering");
             synchronized (SipService.this) {
                 if (mConnected && !isStopped()) mSession.register(EXPIRY_TIME);
             }
@@ -642,7 +644,7 @@ public final class SipService extends ISipService.Stub {
         }
 
         private void restart(int duration) {
-            Log.v(TAG, "Refresh registration " + duration + "s later.");
+            if (DEBUG) Log.d(TAG, "Refresh registration " + duration + "s later.");
             mTimer.cancel(this);
             mTimer.set(duration * 1000, this);
         }
@@ -659,7 +661,7 @@ public final class SipService extends ISipService.Stub {
 
         @Override
         public void onRegistering(ISipSession session) {
-            Log.v(TAG, "onRegistering(): " + session + ": " + mSession);
+            if (DEBUG) Log.d(TAG, "onRegistering(): " + session);
             synchronized (SipService.this) {
                 if (!isStopped() && (session != mSession)) return;
                 mRegistered = false;
@@ -669,7 +671,7 @@ public final class SipService extends ISipService.Stub {
 
         @Override
         public void onRegistrationDone(ISipSession session, int duration) {
-            Log.v(TAG, "onRegistrationDone(): " + session + ": " + mSession);
+            if (DEBUG) Log.d(TAG, "onRegistrationDone(): " + session);
             synchronized (SipService.this) {
                 if (!isStopped() && (session != mSession)) return;
 
@@ -703,7 +705,7 @@ public final class SipService extends ISipService.Stub {
                 } else {
                     mRegistered = false;
                     mExpiryTime = -1L;
-                    Log.v(TAG, "Refresh registration immediately");
+                    if (DEBUG) Log.d(TAG, "Refresh registration immediately");
                     run();
                 }
             }
@@ -714,8 +716,8 @@ public final class SipService extends ISipService.Stub {
                 String errorCodeString, String message) {
             SipErrorCode errorCode =
                     Enum.valueOf(SipErrorCode.class, errorCodeString);
-            Log.v(TAG, "onRegistrationFailed(): " + session + ": " + mSession
-                    + ": " + errorCode + ": " + message);
+            if (DEBUG) Log.d(TAG, "onRegistrationFailed(): " + session + ": "
+                    + errorCode + ": " + message);
             synchronized (SipService.this) {
                 if (!isStopped() && (session != mSession)) return;
                 mErrorCode = errorCode;
@@ -724,7 +726,7 @@ public final class SipService extends ISipService.Stub {
                         message);
 
                 if (errorCode == SipErrorCode.INVALID_CREDENTIALS) {
-                    Log.d(TAG, "   pause auto-registration");
+                    if (DEBUG) Log.d(TAG, "   pause auto-registration");
                     stopButKeepStates();
                 } else if (!isStopped()) {
                     onError();
@@ -734,7 +736,7 @@ public final class SipService extends ISipService.Stub {
 
         @Override
         public void onRegistrationTimeout(ISipSession session) {
-            Log.v(TAG, "onRegistrationTimeout(): " + session + ": " + mSession);
+            if (DEBUG) Log.d(TAG, "onRegistrationTimeout(): " + session);
             synchronized (SipService.this) {
                 if (!isStopped() && (session != mSession)) return;
                 mErrorCode = SipErrorCode.TIME_OUT;
@@ -773,30 +775,33 @@ public final class SipService extends ISipService.Stub {
                     NetworkInfo.State state = netInfo.getState();
 
                     NetworkInfo activeNetInfo = getActiveNetworkInfo();
-                    if (activeNetInfo != null) {
-                        Log.v(TAG, "active network: " + activeNetInfo.getTypeName()
-                                + ((activeNetInfo.getState() == NetworkInfo.State.CONNECTED)
-                                        ? " CONNECTED" : " DISCONNECTED"));
-                    } else {
-                        Log.v(TAG, "active network: null");
+                    if (DEBUG) {
+                        if (activeNetInfo != null) {
+                            Log.d(TAG, "active network: "
+                                    + activeNetInfo.getTypeName()
+                                    + ((activeNetInfo.getState() == NetworkInfo.State.CONNECTED)
+                                            ? " CONNECTED" : " DISCONNECTED"));
+                        } else {
+                            Log.d(TAG, "active network: null");
+                        }
                     }
                     if ((state == NetworkInfo.State.CONNECTED)
                             && (activeNetInfo != null)
                             && (activeNetInfo.getType() != netInfo.getType())) {
-                        Log.d(TAG, "ignore connect event: " + type
+                        if (DEBUG) Log.d(TAG, "ignore connect event: " + type
                                 + ", active: " + activeNetInfo.getTypeName());
                         return;
                     }
 
                     if (state == NetworkInfo.State.CONNECTED) {
-                        Log.v(TAG, "Connectivity alert: CONNECTED " + type);
+                        if (DEBUG) Log.d(TAG, "Connectivity alert: CONNECTED " + type);
                         onChanged(type, true);
                     } else if (state == NetworkInfo.State.DISCONNECTED) {
-                        Log.v(TAG, "Connectivity alert: DISCONNECTED " + type);
+                        if (DEBUG) Log.d(TAG, "Connectivity alert: DISCONNECTED " + type);
                         onChanged(type, false);
                     } else {
-                        Log.d(TAG, "Connectivity alert not processed: " + state
-                                + " " + type);
+                        if (DEBUG) Log.d(TAG, "Connectivity alert not processed: "
+                                + state + " " + type);
                     }
                 }
             }
@@ -847,7 +852,7 @@ public final class SipService extends ISipService.Stub {
                         return;
                     }
                     mTask = null;
-                    Log.v(TAG, " deliver change for " + mNetworkType
+                    if (DEBUG) Log.d(TAG, " deliver change for " + mNetworkType
                             + (mConnected ? " CONNECTED" : "DISCONNECTED"));
                     onConnectivityChanged(mNetworkType, mConnected);
                 }
@@ -929,8 +934,10 @@ public final class SipService extends ISipService.Stub {
             newQueue.addAll((Collection<MyEvent>) mEventQueue);
             mEventQueue.clear();
             mEventQueue = newQueue;
-            Log.v(TAG, "queue re-calculated");
-            printQueue();
+            if (DEBUG_TIMER) {
+                Log.d(TAG, "queue re-calculated");
+                printQueue();
+            }
         }
 
         // Determines the period and the trigger time of the new event and insert it
@@ -984,10 +991,12 @@ public final class SipService extends ISipService.Stub {
             }
 
             long triggerTime = event.mTriggerTime;
-            Log.v(TAG, " add event " + event + " scheduled at "
-                    + showTime(triggerTime) + " at " + showTime(now)
-                    + ", #events=" + mEventQueue.size());
-            printQueue();
+            if (DEBUG_TIMER) {
+                Log.d(TAG, " add event " + event + " scheduled at "
+                        + showTime(triggerTime) + " at " + showTime(now)
+                        + ", #events=" + mEventQueue.size());
+                printQueue();
+            }
         }
 
         /**
@@ -997,7 +1006,7 @@ public final class SipService extends ISipService.Stub {
          */
         public synchronized void cancel(Runnable callback) {
             if (stopped() || mEventQueue.isEmpty()) return;
-            Log.d(TAG, "cancel:" + callback);
+            if (DEBUG_TIMER) Log.d(TAG, "cancel:" + callback);
 
             MyEvent firstEvent = mEventQueue.first();
             for (Iterator<MyEvent> iter = mEventQueue.iterator();
@@ -1005,7 +1014,7 @@ public final class SipService extends ISipService.Stub {
                 MyEvent event = iter.next();
                 if (event.mCallback == callback) {
                     iter.remove();
-                    Log.d(TAG, "    cancel found:" + event);
+                    if (DEBUG_TIMER) Log.d(TAG, "    cancel found:" + event);
                 }
             }
             if (mEventQueue.isEmpty()) {
@@ -1019,8 +1028,10 @@ public final class SipService extends ISipService.Stub {
                 recalculatePeriods();
                 scheduleNext();
             }
-            Log.d(TAG, "after cancel:");
-            printQueue();
+            if (DEBUG_TIMER) {
+                Log.d(TAG, "after cancel:");
+                printQueue();
+            }
         }
 
         private void scheduleNext() {
@@ -1069,13 +1080,13 @@ public final class SipService extends ISipService.Stub {
         }
 
         private void execute(long triggerTime) {
-            Log.d(TAG, "time's up, triggerTime = " + showTime(triggerTime) + ": "
-                    + mEventQueue.size());
+            if (DEBUG_TIMER) Log.d(TAG, "time's up, triggerTime = "
+                    + showTime(triggerTime) + ": " + mEventQueue.size());
             if (stopped() || mEventQueue.isEmpty()) return;
 
             for (MyEvent event : mEventQueue) {
                 if (event.mTriggerTime != triggerTime) break;
-                Log.d(TAG, "execute " + event);
+                if (DEBUG_TIMER) Log.d(TAG, "execute " + event);
 
                 event.mLastTriggerTime = event.mTriggerTime;
                 event.mTriggerTime += event.mPeriod;
@@ -1083,8 +1094,10 @@ public final class SipService extends ISipService.Stub {
                 // run the callback in a new thread to prevent deadlock
                 new Thread(event.mCallback).start();
             }
-            Log.d(TAG, "after timeout execution");
-            printQueue();
+            if (DEBUG_TIMER) {
+                Log.d(TAG, "after timeout execution");
+                printQueue();
+            }
             scheduleNext();
         }
 
