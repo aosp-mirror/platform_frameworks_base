@@ -317,7 +317,7 @@ status_t AVCDecoder::read(
                 &nalType, &nalRefIdc);
 
     if (res != AVCDEC_SUCCESS) {
-        LOGE("cannot determine nal type");
+        LOGV("cannot determine nal type");
     } else if (nalType == AVC_NALTYPE_SPS || nalType == AVC_NALTYPE_PPS
                 || (mSPSSeen && mPPSSeen)) {
         switch (nalType) {
@@ -330,6 +330,7 @@ status_t AVCDecoder::read(
                         fragSize);
 
                 if (res != AVCDEC_SUCCESS) {
+                    LOGV("PVAVCDecSeqParamSet returned error %d", res);
                     break;
                 }
 
@@ -396,6 +397,7 @@ status_t AVCDecoder::read(
                         fragSize);
 
                 if (res != AVCDEC_SUCCESS) {
+                    LOGV("PVAVCDecPicParamSet returned error %d", res);
                     break;
                 }
 
@@ -418,8 +420,13 @@ status_t AVCDecoder::read(
                     AVCFrameIO Output;
                     Output.YCbCr[0] = Output.YCbCr[1] = Output.YCbCr[2] = NULL;
 
-                    CHECK_EQ(PVAVCDecGetOutput(mHandle, &index, &Release, &Output),
-                             AVCDEC_SUCCESS);
+                    AVCDec_Status status =
+                        PVAVCDecGetOutput(mHandle, &index, &Release, &Output);
+
+                    if (status != AVCDEC_SUCCESS) {
+                        LOGV("PVAVCDecGetOutput returned error %d", status);
+                        break;
+                    }
 
                     CHECK(index >= 0);
                     CHECK(index < (int32_t)mFrames.size());
@@ -466,7 +473,7 @@ status_t AVCDecoder::read(
 
                     err = OK;
                 } else {
-                    LOGV("failed to decode frame (res = %d)", res);
+                    LOGV("PVAVCDecodeSlice returned error %d", res);
                 }
                 break;
             }
