@@ -399,7 +399,7 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
 
     drawTextureMesh(rect.left, rect.top, rect.right, rect.bottom, layer->texture,
             1.0f, layer->mode, layer->blend, &mMeshVertices[0].position[0],
-            &mMeshVertices[0].texture[0], NULL, 0, true, true);
+            &mMeshVertices[0].texture[0], GL_TRIANGLE_STRIP, gMeshCount, true, true);
 
     resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
 
@@ -574,13 +574,12 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
     Patch* mesh = mCaches.patchCache.get(patch);
     mesh->updateVertices(bitmap, left, top, right, bottom,
             &patch->xDivs[0], &patch->yDivs[0], patch->numXDivs, patch->numYDivs);
-    mesh->dump();
 
     // Specify right and bottom as +1.0f from left/top to prevent scaling since the
     // patch mesh already defines the final size
     drawTextureMesh(left, top, left + 1.0f, top + 1.0f, texture->id, alpha / 255.0f,
             mode, texture->blend, &mesh->vertices[0].position[0],
-            &mesh->vertices[0].texture[0], mesh->indices, mesh->indicesCount);
+            &mesh->vertices[0].texture[0], GL_TRIANGLES, mesh->verticesCount);
 }
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
@@ -956,19 +955,21 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f, mode, texture->blend,
-            &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0], NULL);
+    drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f, mode,
+            texture->blend, &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
+            GL_TRIANGLE_STRIP, gMeshCount);
 }
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
         GLuint texture, float alpha, SkXfermode::Mode mode, bool blend) {
     drawTextureMesh(left, top, right, bottom, texture, alpha, mode, blend,
-            &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0], NULL);
+            &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
+            GL_TRIANGLE_STRIP, gMeshCount);
 }
 
 void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float bottom,
         GLuint texture, float alpha, SkXfermode::Mode mode, bool blend,
-        GLvoid* vertices, GLvoid* texCoords, GLvoid* indices, GLsizei elementsCount,
+        GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
         bool swapSrcDst, bool ignoreTransform) {
     clearLayerRegions();
 
@@ -1010,11 +1011,7 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
         mColorFilter->setupProgram(mCaches.currentProgram);
     }
 
-    if (!indices) {
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
-    } else {
-        glDrawElements(GL_TRIANGLES, elementsCount, GL_UNSIGNED_SHORT, indices);
-    }
+    glDrawArrays(drawMode, 0, elementsCount);
     glDisableVertexAttribArray(texCoordsSlot);
 }
 

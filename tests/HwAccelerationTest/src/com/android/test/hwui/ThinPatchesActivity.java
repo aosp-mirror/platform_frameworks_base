@@ -41,13 +41,14 @@ public class ThinPatchesActivity extends Activity {
     }
 
     private class PatchView extends View {
-        private Drawable mPatch;
+        private Drawable mPatch1, mPatch2;
 
         public PatchView(Activity activity) {
             super(activity);
 
             final Resources resources = activity.getResources();
-            mPatch = resources.getDrawable(R.drawable.btn_toggle_on);
+            mPatch1 = resources.getDrawable(R.drawable.patch);
+            mPatch2 = resources.getDrawable(R.drawable.btn_toggle_on);
         }
 
         @Override
@@ -58,8 +59,13 @@ public class ThinPatchesActivity extends Activity {
             final int left = (getWidth() - width) / 2;
             final int top  = (getHeight() - height) / 2;
 
-            mPatch.setBounds(left, top, left + width, top + height);
-            mPatch.draw(canvas);
+            mPatch1.setBounds(left, top, left + width, top + height);
+            mPatch1.draw(canvas);
+
+            canvas.translate(0.0f, height + 20.0f);
+            
+            mPatch2.setBounds(left, top, left + width, top + height);
+            mPatch2.draw(canvas);
         }
     }
 }
