@@ -286,7 +286,8 @@ sp<IMemory> CameraSourceTimeLapse::cropYUVImage(const sp<IMemory> &source_data) 
     YUVImage::YUVFormat yuvFormat;
     if (srcFormat == OMX_COLOR_FormatYUV420SemiPlanar) {
         yuvFormat = YUVImage::YUV420SemiPlanar;
-    } else if (srcFormat == OMX_COLOR_FormatYUV420Planar) {
+    } else {
+        CHECK_EQ(srcFormat, OMX_COLOR_FormatYUV420Planar);
         yuvFormat = YUVImage::YUV420Planar;
     }
 
