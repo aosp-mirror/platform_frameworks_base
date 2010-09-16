@@ -331,9 +331,20 @@ status_t WAVSource::read(
         return err;
     }
 
+    size_t maxBytesToRead =
+        mBitsPerSample == 8 ? kMaxFrameSize / 2 : kMaxFrameSize;
+
+    size_t maxBytesAvailable =
+        (mCurrentPos - mOffset >= (off_t)mSize)
+            ? 0 : mSize - (mCurrentPos - mOffset);
+
+    if (maxBytesToRead > maxBytesAvailable) {
+        maxBytesToRead = maxBytesAvailable;
+    }
+
     ssize_t n = mDataSource->readAt(
             mCurrentPos, buffer->data(),
-            mBitsPerSample == 8 ? kMaxFrameSize / 2 : kMaxFrameSize);
+            maxBytesToRead);
 
     if (n <= 0) {
         buffer->release();
