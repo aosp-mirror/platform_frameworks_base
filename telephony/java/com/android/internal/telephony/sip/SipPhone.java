@@ -757,7 +757,7 @@ public class SipPhone extends SipPhoneBase {
                 Log.v(LOG_TAG, "hangup conn: " + mPeer.getUriString() + ": "
                         + ": on phone " + getPhone().getPhoneName());
                 try {
-                    mSipAudioCall.endCall();
+                    if (mSipAudioCall != null) mSipAudioCall.endCall();
                     setState(Call.State.DISCONNECTING);
                     setDisconnectCause(DisconnectCause.LOCAL);
                 } catch (SipException e) {
