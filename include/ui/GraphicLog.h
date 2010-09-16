@@ -30,24 +30,24 @@ class GraphicLog : public Singleton<GraphicLog>
 
 public:
     enum {
-        SF_APP_DEQUEUE_BEFORE   = 60000,
-        SF_APP_DEQUEUE_AFTER    = 60001,
-        SF_APP_LOCK_BEFORE      = 60002,
-        SF_APP_LOCK_AFTER       = 60003,
-        SF_APP_QUEUE            = 60004,
+        SF_APP_DEQUEUE_BEFORE   = 60100,
+        SF_APP_DEQUEUE_AFTER    = 60101,
+        SF_APP_LOCK_BEFORE      = 60102,
+        SF_APP_LOCK_AFTER       = 60103,
+        SF_APP_QUEUE            = 60104,
 
-        SF_REPAINT              = 60005,
-        SF_COMPOSITION_COMPLETE = 60006,
-        SF_UNLOCK_CLIENTS       = 60007,
-        SF_SWAP_BUFFERS         = 60008,
-        SF_REPAINT_DONE         = 60009,
+        SF_REPAINT              = 60105,
+        SF_COMPOSITION_COMPLETE = 60106,
+        SF_UNLOCK_CLIENTS       = 60107,
+        SF_SWAP_BUFFERS         = 60108,
+        SF_REPAINT_DONE         = 60109,
 
-        SF_FB_POST_BEFORE       = 60010,
-        SF_FB_POST_AFTER        = 60011,
-        SF_FB_DEQUEUE_BEFORE    = 60012,
-        SF_FB_DEQUEUE_AFTER     = 60013,
-        SF_FB_LOCK_BEFORE       = 60014,
-        SF_FB_LOCK_AFTER        = 60015,
+        SF_FB_POST_BEFORE       = 60110,
+        SF_FB_POST_AFTER        = 60111,
+        SF_FB_DEQUEUE_BEFORE    = 60112,
+        SF_FB_DEQUEUE_AFTER     = 60113,
+        SF_FB_LOCK_BEFORE       = 60114,
+        SF_FB_LOCK_AFTER        = 60115,
     };
 
     inline void log(int32_t tag, int32_t buffer) {
