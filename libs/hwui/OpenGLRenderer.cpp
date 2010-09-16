@@ -353,6 +353,8 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
     // Layers only make sense if they are in the framebuffer's bounds
     bounds.intersect(*mSnapshot->clipRect);
+    bounds.snapToPixelBoundaries();
+
     if (bounds.isEmpty() || bounds.getWidth() > mMaxTextureSize ||
             bounds.getHeight() > mMaxTextureSize) {
         return false;
