@@ -478,7 +478,7 @@ public class NotificationTest extends Activity {
         }
     }
 
-    @Override
+    &#64;Override
     protected void onPrepareDialog(int id, Dialog dialog) {
         switch(id) {
         case PROGRESS_DIALOG:

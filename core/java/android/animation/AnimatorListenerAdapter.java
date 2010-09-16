@@ -24,28 +24,28 @@ package android.animation;
 public abstract class AnimatorListenerAdapter implements Animator.AnimatorListener {
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     @Override
     public void onAnimationCancel(Animator animation) {
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     @Override
     public void onAnimationEnd(Animator animation) {
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     @Override
     public void onAnimationRepeat(Animator animation) {
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     @Override
     public void onAnimationStart(Animator animation) {
