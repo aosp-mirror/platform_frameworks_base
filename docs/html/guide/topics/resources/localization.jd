@@ -433,12 +433,12 @@ Menu &gt; Settings &gt; Locale &amp; text &gt; Select locale). </p>
 href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a>.</p>
 <h4>Creating and using a custom locale</h4>
 
-<p>A &quot;custom&quot; locale is a language/region combination that the
-Android system image does not explicitly support. (For a list of supported 
-locales, see the <a href="{@docRoot}sdk/android-{@sdkCurrentVersion}.html">Android
-Version Notes</a>.) You can test how your application will run in a custom
-locale by creating a custom locale in the emulator. There are two ways to do
-this:</p>
+<p>A &quot;custom&quot; locale is a language/region combination that the Android
+system image does not explicitly support. (For a list of supported locales in
+Android platforms see the Version Notes in the <a
+href="{@docRoot}sdk/index.html">SDK</a> tab). You can test
+how your application will run in a custom locale by creating a custom locale in
+the emulator. There are two ways to do this:</p>
 
 <ul>
   <li>Use the Custom Locale application, which is accessible from the

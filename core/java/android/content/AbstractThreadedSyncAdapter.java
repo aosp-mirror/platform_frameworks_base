@@ -37,8 +37,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class AbstractThreadedSyncAdapter {
     /**
      * Kernel event log tag.  Also listed in data/etc/event-log-tags.
-     * @Deprecated
+     * @deprecated Private constant.  May go away in the next release.
      */
+    @Deprecated
     public static final int LOG_SYNC_DETAILS = 2743;
 
     private final Context mContext;
