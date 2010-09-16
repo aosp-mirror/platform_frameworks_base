@@ -24,9 +24,71 @@ import android.os.SystemClock;
  * Object used to report movement (mouse, pen, finger, trackball) events.  This
  * class may hold either absolute or relative movements, depending on what
  * it is being used for.
- * 
- * Refer to {@link InputDevice} for information about how different kinds of
+ * <p>
+ * On pointing devices such as touch screens, pointer coordinates specify absolute
+ * positions such as view X/Y coordinates.  Each complete gesture is represented
+ * by a sequence of motion events with actions that describe pointer state transitions
+ * and movements.  A gesture starts with a motion event with {@link #ACTION_DOWN}
+ * that provides the location of the first pointer down.  As each additional
+ * pointer that goes down or up, the framework will generate a motion event with
+ * {@link #ACTION_POINTER_DOWN} or {@link #ACTION_POINTER_UP} accordingly.
+ * Pointer movements are described by motion events with {@link #ACTION_MOVE}.
+ * Finally, a gesture end either when the final pointer goes up as represented
+ * by a motion event with {@link #ACTION_UP} or when gesture is canceled
+ * with {@link #ACTION_CANCEL}.
+ * </p><p>
+ * On trackballs, the pointer coordinates specify relative movements as X/Y deltas.
+ * A trackball gesture consists of a sequence of movements described by motion
+ * events with {@link #ACTION_MOVE} interspersed with occasional {@link #ACTION_DOWN}
+ * or {@link #ACTION_UP} motion events when the trackball button is pressed or released.
+ * </p><p>
+ * Motion events always report movements for all pointers at once.  The number
+ * of pointers only ever changes by one as individual pointers go up and down,
+ * except when the gesture is canceled.
+ * </p><p>
+ * The order in which individual pointers appear within a motion event can change
+ * from one event to the next. Use the {@link #getPointerId(int)} method to obtain a
+ * pointer id to track pointers across motion events in a gesture.  Then for
+ * successive motion events, use the {@link #findPointerIndex(int)} method to obtain
+ * the pointer index for a given pointer id in that motion event.
+ * </p><p>
+ * For efficiency, motion events with {@link #ACTION_MOVE} may batch together
+ * multiple movement samples within a single object.  The most current
+ * pointer coordinates are available using {@link #getX(int)} and {@link #getY(int)}.
+ * Earlier coordinates within the batch are accessed using {@link #getHistoricalX(int, int)}
+ * and {@link #getHistoricalY(int, int)}.  The coordinates are "historical" only
+ * insofar as they are older than the current coordinates in the batch; however,
+ * they are still distinct from any other coordinates reported in prior motion events.
+ * To process all coordinates in the batch in time order, first consume the historical
+ * coordinates then consume the current coordinates.
+ * </p><p>
+ * Example: Consuming all samples for all pointers in a motion event in time order.
+ * </p><p><pre><code>
+ * void printSamples(MotionEvent ev) {
+ *     final int historySize = ev.getHistorySize();
+ *     final int pointerCount = ev.getPointerCount();
+ *     for (int h = 0; h &lt; historySize; h++) {
+ *         System.out.printf("At time %d:", ev.getHistoricalEventTime(h));
+ *         for (int p = 0; p &lt; pointerCount; p++) {
+ *             System.out.printf("  pointer %d: (%f,%f)",
+ *                 ev.getPointerId(p), ev.getHistoricalX(p, h), ev.getHistoricalY(p, h));
+ *         }
+ *     }
+ *     System.out.printf("At time %d:", ev.getEventTime());
+ *     for (int p = 0; p &lt; pointerCount; p++) {
+ *         System.out.printf("  pointer %d: (%f,%f)",
+ *             ev.getPointerId(p), ev.getX(p), ev.getY(p));
+ *     }
+ * }
+ * </code></pre></p><p>
+ * In general, the framework makes no guarantees that the motion events delivered
+ * to a view constitute a complete gesture.  In particular, there is no
+ * guarantee that a view will always receive a motion event with {@link #ACTION_UP}
+ * for each {@link #ACTION_DOWN} that was delivered.
+ * </p><p>
+ * Refer to {@link InputDevice} for more information about how different kinds of
  * input devices and sources represent pointer coordinates.
+ * </p>
  */
 public final class MotionEvent extends InputEvent implements Parcelable {
     private static final long MS_PER_NS = 1000000;

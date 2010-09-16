@@ -111,10 +111,10 @@ enum {
     /* The input device is a multi-touch touchscreen. */
     INPUT_DEVICE_CLASS_TOUCHSCREEN_MT= 0x00000010,
 
-    /* The input device is a directional pad. */
+    /* The input device is a directional pad (implies keyboard, has DPAD keys). */
     INPUT_DEVICE_CLASS_DPAD          = 0x00000020,
 
-    /* The input device is a gamepad (implies keyboard). */
+    /* The input device is a gamepad (implies keyboard, has BUTTON keys). */
     INPUT_DEVICE_CLASS_GAMEPAD       = 0x00000040,
 
     /* The input device has switches. */
