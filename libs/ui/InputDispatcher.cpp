@@ -776,6 +776,9 @@ void InputDispatcher::resumeAfterTargetsNotReadyTimeoutLocked(nsecs_t newTimeout
         // Give up.
         mInputTargetWaitTimeoutExpired = true;
 
+        // Release the touch target.
+        releaseTouchedWindowLocked();
+
         // Input state will not be realistic.  Mark it out of sync.
         ssize_t connectionIndex = getConnectionIndexLocked(inputChannel);
         if (connectionIndex >= 0) {
@@ -2157,9 +2160,8 @@ void InputDispatcher::setInputWindows(const Vector<InputWindow>& inputWindows) {
     { // acquire lock
         AutoMutex _l(mLock);
 
-        sp<InputChannel> oldFocusedWindowChannel = mFocusedWindow
-                ? mFocusedWindow->inputChannel : NULL;
-        int32_t oldFocusedWindowLayer = mFocusedWindow ? mFocusedWindow->layer : -1;
+        // Clear old window pointers but remember their associated channels.
+        mFocusedWindow = NULL;
 
         sp<InputChannel> touchedWindowChannel;
         if (mTouchedWindow) {
@@ -2173,11 +2175,11 @@ void InputDispatcher::setInputWindows(const Vector<InputWindow>& inputWindows) {
             }
             mTouchedWallpaperWindows.clear();
         }
-
-        mFocusedWindow = NULL;
         mWallpaperWindows.clear();
-
         mWindows.clear();
+
+        // Loop over new windows and rebuild the necessary window pointers for
+        // tracking focus and touch.
         mWindows.appendVector(inputWindows);
 
         size_t numWindows = mWindows.size();
@@ -2201,40 +2203,7 @@ void InputDispatcher::setInputWindows(const Vector<InputWindow>& inputWindows) {
                 mTouchedWindow = window;
             }
         }
-
         mTempTouchedWallpaperChannels.clear();
-
-        bool preempt = false;
-        if (mFocusedWindow
-                && mFocusedWindow->inputChannel != oldFocusedWindowChannel
-                && mFocusedWindow->canReceiveKeys) {
-            // If the new input focus is an error window or appears above the current
-            // input focus, drop the current touched window so that we can start
-            // delivering events to the new input focus as soon as possible.
-            if (mFocusedWindow->layoutParamsFlags & InputWindow::FLAG_SYSTEM_ERROR) {
-#if DEBUG_FOCUS
-                LOGD("Preempting: New SYSTEM_ERROR window; resetting state");
-#endif
-                preempt = true;
-            } else if (oldFocusedWindowChannel.get() != NULL
-                    && mFocusedWindow->layer > oldFocusedWindowLayer) {
-#if DEBUG_FOCUS
-                LOGD("Preempting: Transferring focus to new window at higher layer: "
-                        "old win layer=%d, new win layer=%d",
-                        oldFocusedWindowLayer, mFocusedWindow->layer);
-#endif
-                preempt = true;
-            }
-        }
-        if (mTouchedWindow && ! mTouchedWindow->visible) {
-#if DEBUG_FOCUS
-            LOGD("Preempting: Touched window became invisible.");
-#endif
-            preempt = true;
-        }
-        if (preempt) {
-            releaseTouchedWindowLocked();
-        }
 
 #if DEBUG_FOCUS
         logDispatchStateLocked();
@@ -2310,7 +2279,17 @@ void InputDispatcher::setInputDispatchMode(bool enabled, bool frozen) {
 void InputDispatcher::logDispatchStateLocked() {
     String8 dump;
     dumpDispatchStateLocked(dump);
-    LOGD("%s", dump.string());
+
+    char* text = dump.lockBuffer(dump.size());
+    char* start = text;
+    while (*start != '\0') {
+        char* end = strchr(start, '\n');
+        if (*end == '\n') {
+            *(end++) = '\0';
+        }
+        LOGD("%s", start);
+        start = end;
+    }
 }
 
 void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
@@ -2324,28 +2303,30 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
     } else {
         dump.append("  focusedApplication: <null>\n");
     }
-    dump.appendFormat("  focusedWindow: '%s'\n",
-            mFocusedWindow != NULL ? mFocusedWindow->inputChannel->getName().string() : "<null>");
-    dump.appendFormat("  touchedWindow: '%s', touchDown=%d\n",
-            mTouchedWindow != NULL ? mTouchedWindow->inputChannel->getName().string() : "<null>",
+    dump.appendFormat("  focusedWindow: name='%s'\n",
+            mFocusedWindow != NULL ? mFocusedWindow->name.string() : "<null>");
+    dump.appendFormat("  touchedWindow: name='%s', touchDown=%d\n",
+            mTouchedWindow != NULL ? mTouchedWindow->name.string() : "<null>",
             mTouchDown);
     for (size_t i = 0; i < mTouchedWallpaperWindows.size(); i++) {
-        dump.appendFormat("  touchedWallpaperWindows[%d]: '%s'\n",
-                i, mTouchedWallpaperWindows[i]->inputChannel->getName().string());
+        dump.appendFormat("  touchedWallpaperWindows[%d]: name='%s'\n",
+                i, mTouchedWallpaperWindows[i]->name.string());
     }
     for (size_t i = 0; i < mWindows.size(); i++) {
-        dump.appendFormat("  windows[%d]: '%s', paused=%s, hasFocus=%s, hasWallpaper=%s, "
-                "visible=%s, flags=0x%08x, type=0x%08x, "
+        dump.appendFormat("  windows[%d]: name='%s', paused=%s, hasFocus=%s, hasWallpaper=%s, "
+                "visible=%s, canReceiveKeys=%s, flags=0x%08x, type=0x%08x, layer=%d, "
                 "frame=[%d,%d][%d,%d], "
                 "visibleFrame=[%d,%d][%d,%d], "
                 "touchableArea=[%d,%d][%d,%d], "
                 "ownerPid=%d, ownerUid=%d, dispatchingTimeout=%0.3fms\n",
-                i, mWindows[i].inputChannel->getName().string(),
+                i, mWindows[i].name.string(),
                 toString(mWindows[i].paused),
                 toString(mWindows[i].hasFocus),
                 toString(mWindows[i].hasWallpaper),
                 toString(mWindows[i].visible),
+                toString(mWindows[i].canReceiveKeys),
                 mWindows[i].layoutParamsFlags, mWindows[i].layoutParamsType,
+                mWindows[i].layer,
                 mWindows[i].frameLeft, mWindows[i].frameTop,
                 mWindows[i].frameRight, mWindows[i].frameBottom,
                 mWindows[i].visibleFrameLeft, mWindows[i].visibleFrameTop,
