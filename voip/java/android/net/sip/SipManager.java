@@ -218,44 +218,55 @@ public class SipManager {
     }
 
     /**
-     * Creates a {@link SipAudioCall} to make a call.
+     * Creates a {@link SipAudioCall} to make a call. The attempt will be timed
+     * out if the call is not established within {@code timeout} seconds and
+     * {@code SipAudioCall.Listener.onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
+     * will be called.
      *
      * @param context context to create a {@link SipAudioCall} object
      * @param localProfile the SIP profile to make the call from
      * @param peerProfile the SIP profile to make the call to
      * @param listener to listen to the call events from {@link SipAudioCall};
      *      can be null
+     * @param timeout the timeout value in seconds
      * @return a {@link SipAudioCall} object
      * @throws SipException if calling the SIP service results in an error
+     * @see SipAudioCall.Listener.onError
      */
     public SipAudioCall makeAudioCall(Context context, SipProfile localProfile,
-            SipProfile peerProfile, SipAudioCall.Listener listener)
+            SipProfile peerProfile, SipAudioCall.Listener listener, int timeout)
             throws SipException {
         SipAudioCall call = new SipAudioCallImpl(context, localProfile);
         call.setListener(listener);
-        call.makeCall(peerProfile, this);
+        call.makeCall(peerProfile, this, timeout);
         return call;
     }
 
     /**
      * Creates a {@link SipAudioCall} to make a call. To use this method, one
-     * must call {@link #open(SipProfile)} first.
+     * must call {@link #open(SipProfile)} first. The attempt will be timed out
+     * if the call is not established within {@code timeout} seconds and
+     * {@code SipAudioCall.Listener.onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
+     * will be called.
      *
      * @param context context to create a {@link SipAudioCall} object
      * @param localProfileUri URI of the SIP profile to make the call from
      * @param peerProfileUri URI of the SIP profile to make the call to
      * @param listener to listen to the call events from {@link SipAudioCall};
      *      can be null
+     * @param timeout the timeout value in seconds
      * @return a {@link SipAudioCall} object
      * @throws SipException if calling the SIP service results in an error
+     * @see SipAudioCall.Listener.onError
      */
     public SipAudioCall makeAudioCall(Context context, String localProfileUri,
-            String peerProfileUri, SipAudioCall.Listener listener)
+            String peerProfileUri, SipAudioCall.Listener listener, int timeout)
             throws SipException {
         try {
             return makeAudioCall(context,
                     new SipProfile.Builder(localProfileUri).build(),
-                    new SipProfile.Builder(peerProfileUri).build(), listener);
+                    new SipProfile.Builder(peerProfileUri).build(), listener,
+                    timeout);
         } catch (ParseException e) {
             throw new SipException("build SipProfile", e);
         }

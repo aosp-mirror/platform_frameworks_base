@@ -112,9 +112,11 @@ interface ISipSession {
      *
      * @param callee the SIP profile to make the call to
      * @param sessionDescription the session description of this call
+     * @param timeout the session will be timed out if the call is not
+     *        established within {@code timeout} seconds
      * @see ISipSessionListener
      */
-    void makeCall(in SipProfile callee, String sessionDescription);
+    void makeCall(in SipProfile callee, String sessionDescription, int timeout);
 
     /**
      * Answers an incoming call with the specified session description. The
@@ -122,8 +124,10 @@ interface ISipSession {
      * {@link SipSessionState#INCOMING_CALL}.
      *
      * @param sessionDescription the session description to answer this call
+     * @param timeout the session will be timed out if the call is not
+     *        established within {@code timeout} seconds
      */
-    void answerCall(String sessionDescription);
+    void answerCall(String sessionDescription, int timeout);
 
     /**
      * Ends an established call, terminates an outgoing call or rejects an
@@ -140,6 +144,8 @@ interface ISipSession {
      * to call when the session state is in {@link SipSessionState#IN_CALL}.
      *
      * @param sessionDescription the new session description
+     * @param timeout the session will be timed out if the call is not
+     *        established within {@code timeout} seconds
      */
-    void changeCall(String sessionDescription);
+    void changeCall(String sessionDescription, int timeout);
 }
