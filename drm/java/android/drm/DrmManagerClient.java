@@ -213,12 +213,12 @@ public class DrmManagerClient {
      * Save DRM rights to specified rights path
      * and make association with content path.
      *
+     * <p class="note">In case of OMA or WM-DRM, rightsPath and contentPath could be null.</p>
+     *
      * @param drmRights DrmRights to be saved
      * @param rightsPath File path where rights to be saved
      * @param contentPath File path where content was saved
      * @throws IOException if failed to save rights information in the given path
-     *
-     * @note In case of OMA or WM-DRM, rightsPath and contentPath could be null
      */
     public void saveRights(
             DrmRights drmRights, String rightsPath, String contentPath) throws IOException {
@@ -256,9 +256,9 @@ public class DrmManagerClient {
      * @param path Path of the content to be handled
      * @param mimeType Mimetype of the object to be handled
      * @return
-     *        true - if the given mimeType or path can be handled
-     *        false - cannot be handled.
-     * @note false will be return in case the state is uninitialized
+     *        true - if the given mimeType or path can be handled.
+     *        false - cannot be handled.  false will be returned in case
+     *        the state is uninitialized
      */
     public boolean canHandle(String path, String mimeType) {
         if ((null == path || path.equals("")) && (null == mimeType || mimeType.equals(""))) {
