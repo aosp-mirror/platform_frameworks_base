@@ -1390,7 +1390,7 @@
     <!-- Other IM address type -->
     <string name="imTypeOther">Other</string>
 
-    <!-- Custom IM address type -->
+    <!-- Custom IM protocol type -->
     <string name="imProtocolCustom">Custom</string>
     <!-- AIM IM protocol type -->
     <string name="imProtocolAim">AIM</string>
@@ -1417,6 +1417,15 @@
     <string name="orgTypeOther">Other</string>
     <!-- Custom organization type -->
     <string name="orgTypeCustom">Custom</string>
+
+    <!-- Custom SIP address type -->
+    <string name="sipAddressTypeCustom">Custom</string>
+    <!-- Home SIP address type -->
+    <string name="sipAddressTypeHome">Home</string>
+    <!-- Work SIP address type -->
+    <string name="sipAddressTypeWork">Work</string>
+    <!-- Other SIP address type -->
+    <string name="sipAddressTypeOther">Other</string>
 
     <!-- Instructions telling the user to enter their SIM PIN to unlock the keyguard.
          Displayed in one line in a large font.  -->
