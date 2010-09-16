@@ -16,6 +16,15 @@
 
 package com.android.providers.settings;
 
+import com.android.internal.content.PackageHelper;
+import com.android.internal.telephony.RILConstants;
+import com.android.internal.util.XmlUtils;
+import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockPatternView;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
@@ -36,14 +45,6 @@ import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.internal.content.PackageHelper;
-import com.android.internal.telephony.RILConstants;
-import com.android.internal.util.XmlUtils;
-import com.android.internal.widget.LockPatternUtils;
-import com.android.internal.widget.LockPatternView;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -60,7 +61,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 58;
+    private static final int DATABASE_VERSION = 59;
 
     private Context mContext;
 
@@ -757,6 +758,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 58;
         }
 
+        if (upgradeVersion == 58) {
+            /* Add default for new Auto Time Zone */
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT INTO secure(name,value)"
+                        + " VALUES(?,?);");
+                loadBooleanSetting(stmt, Settings.System.AUTO_TIME_ZONE,
+                        R.bool.def_auto_time_zone); // Sync timezone to NITZ
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 59;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -1067,7 +1085,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     
             loadBooleanSetting(stmt, Settings.System.AUTO_TIME,
                     R.bool.def_auto_time); // Sync time to NITZ
-    
+
+            loadBooleanSetting(stmt, Settings.System.AUTO_TIME_ZONE,
+                    R.bool.def_auto_time_zone); // Sync timezone to NITZ
+
             loadIntegerSetting(stmt, Settings.System.SCREEN_BRIGHTNESS,
                     R.integer.def_screen_brightness);
     

@@ -1494,6 +1494,12 @@ public final class Settings {
         public static final String AUTO_TIME = "auto_time";
 
         /**
+         * Value to specify if the user prefers the time zone
+         * to be automatically fetched from the network (NITZ). 1=yes, 0=no
+         */
+        public static final String AUTO_TIME_ZONE = "auto_time_zone";
+
+        /**
          * Display times as 12 or 24 hours
          *   12
          *   24
@@ -1775,6 +1781,7 @@ public final class Settings {
             TEXT_AUTO_PUNCTUATE,
             TEXT_SHOW_PASSWORD,
             AUTO_TIME,
+            AUTO_TIME_ZONE,
             TIME_12_24,
             DATE_FORMAT,
             ACCELEROMETER_ROTATION,
