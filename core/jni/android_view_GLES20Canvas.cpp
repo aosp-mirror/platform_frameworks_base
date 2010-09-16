@@ -84,6 +84,11 @@ static void android_view_GLES20Canvas_prepare(JNIEnv* env, jobject canvas,
     renderer->prepare();
 }
 
+static void android_view_GLES20Canvas_finish(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer) {
+    renderer->finish();
+}
+
 static void android_view_GLES20Canvas_acquireContext(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer) {
     renderer->acquireContext();
@@ -384,6 +389,7 @@ static JNINativeMethod gMethods[] = {
     { "nDestroyRenderer",   "(I)V",            (void*) android_view_GLES20Canvas_destroyRenderer },
     { "nSetViewport",       "(III)V",          (void*) android_view_GLES20Canvas_setViewport },
     { "nPrepare",           "(I)V",            (void*) android_view_GLES20Canvas_prepare },
+    { "nFinish",            "(I)V",            (void*) android_view_GLES20Canvas_finish },
     { "nAcquireContext",    "(I)V",            (void*) android_view_GLES20Canvas_acquireContext },
     { "nReleaseContext",    "(I)V",            (void*) android_view_GLES20Canvas_releaseContext },
 
