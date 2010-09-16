@@ -308,6 +308,10 @@ public class WebView extends AbsoluteLayout
     // true means redraw the screen all-the-time. Only with AUTO_REDRAW_HACK
     private boolean mAutoRedraw;
 
+    // Reference to the AlertDialog displayed by InvokeListBox.
+    // It's used to dismiss the dialog in destroy if not done before.
+    private AlertDialog mListBoxDialog = null;
+
     static final String LOGTAG = "webview";
 
     private static class ExtendedZoomControls extends FrameLayout {
@@ -1232,6 +1236,10 @@ public class WebView extends AbsoluteLayout
      */
     public void destroy() {
         clearTextEntry(false);
+        if (mListBoxDialog != null) {
+            mListBoxDialog.dismiss();
+            mListBoxDialog = null;
+        }
         if (mWebViewCore != null) {
             // Set the handlers to null before destroying WebViewCore so no
             // more messages will be posted.
@@ -7072,7 +7080,7 @@ public class WebView extends AbsoluteLayout
                                 EventHub.SINGLE_LISTBOX_CHOICE, -2, 0);
                 }});
             }
-            final AlertDialog dialog = b.create();
+            mListBoxDialog = b.create();
             listView.setAdapter(adapter);
             listView.setFocusableInTouchMode(true);
             // There is a bug (1250103) where the checks in a ListView with
@@ -7094,7 +7102,8 @@ public class WebView extends AbsoluteLayout
                             int position, long id) {
                         mWebViewCore.sendMessage(
                                 EventHub.SINGLE_LISTBOX_CHOICE, (int)id, 0);
-                        dialog.dismiss();
+                        mListBoxDialog.dismiss();
+                        mListBoxDialog = null;
                     }
                 });
                 if (mSelection != -1) {
@@ -7106,13 +7115,14 @@ public class WebView extends AbsoluteLayout
                     adapter.registerDataSetObserver(observer);
                 }
             }
-            dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            mListBoxDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
                 public void onCancel(DialogInterface dialog) {
                     mWebViewCore.sendMessage(
                                 EventHub.SINGLE_LISTBOX_CHOICE, -2, 0);
+                    mListBoxDialog = null;
                 }
             });
-            dialog.show();
+            mListBoxDialog.show();
         }
     }
 
