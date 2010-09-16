@@ -62,21 +62,16 @@ struct Patch {
     void updateVertices(const SkBitmap* bitmap, float left, float top, float right, float bottom,
             const int32_t* xDivs,  const int32_t* yDivs,
             const uint32_t width, const uint32_t height);
-    void dump();
-
-    uint32_t xCount;
-    uint32_t yCount;
-
-    uint16_t* indices;
-    uint32_t indicesCount;
 
     TextureVertex* vertices;
     uint32_t verticesCount;
 
 private:
-    static inline void generateVertices(TextureVertex* vertex, float y, float v,
-            const int32_t xDivs[], uint32_t xCount, float xStretch, float xStretchTex,
-            float width, float widthTex);
+    static inline void generateRow(TextureVertex*& vertex, float y1, float y2,
+            float v1, float v2, const int32_t xDivs[], uint32_t xCount,
+            float stretchX, float width, float bitmapWidth);
+    static inline void generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, float y2,
+            float u1, float v1, float u2, float v2);
 }; // struct Patch
 
 }; // namespace uirenderer

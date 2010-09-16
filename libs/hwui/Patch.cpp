@@ -17,6 +17,7 @@
 #define LOG_TAG "OpenGLRenderer"
 
 #include <cstring>
+#include <cmath>
 
 #include <utils/Log.h>
 
@@ -29,38 +30,14 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-Patch::Patch(const uint32_t xCount, const uint32_t yCount):
-        xCount(xCount + 2), yCount(yCount + 2) {
-    verticesCount = (xCount + 2) * (yCount + 2);
-    vertices = new TextureVertex[verticesCount];
-
+Patch::Patch(const uint32_t xCount, const uint32_t yCount) {
     // 2 triangles per patch, 3 vertices per triangle
-    indicesCount = (xCount + 1) * (yCount + 1) * 2 * 3;
-    indices = new uint16_t[indicesCount];
-
-    const uint32_t xNum = xCount + 1;
-    const uint32_t yNum = yCount + 1;
-
-    uint16_t* startIndices = indices;
-    uint32_t n = 0;
-    for (uint32_t y = 0; y < yNum; y++) {
-        for (uint32_t x = 0; x < xNum; x++) {
-            *startIndices++ = n;
-            *startIndices++ = n + 1;
-            *startIndices++ = n + xNum + 2;
-
-            *startIndices++ = n;
-            *startIndices++ = n + xNum + 2;
-            *startIndices++ = n + xNum + 1;
-
-            n += 1;
-        }
-        n += 1;
-    }
+    verticesCount = (xCount + 1) * (yCount + 1) * 2 * 3;
+    vertices = new TextureVertex[verticesCount];
+    memset(vertices, 0, sizeof(TextureVertex) * verticesCount);
 }
 
 Patch::~Patch() {
-    delete indices;
     delete vertices;
 }
 
@@ -69,15 +46,13 @@ Patch::~Patch() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Patch::updateVertices(const SkBitmap* bitmap, float left, float top, float right,
-        float bottom, const int32_t* xDivs,  const int32_t* yDivs, const uint32_t width,
+        float bottom, const int32_t* xDivs, const int32_t* yDivs, const uint32_t width,
         const uint32_t height) {
     const uint32_t xStretchCount = (width + 1) >> 1;
     const uint32_t yStretchCount = (height + 1) >> 1;
 
-    float xStretch = 0;
-    float yStretch = 0;
-    float xStretchTex = 0;
-    float yStretchTex = 0;
+    float stretchX = 0.0f;
+    float stretchY = 0.0;
 
     const float meshWidth = right - left;
 
@@ -89,9 +64,10 @@ void Patch::updateVertices(const SkBitmap* bitmap, float left, float top, float 
         for (uint32_t i = 1; i < width; i += 2) {
             stretchSize += xDivs[i] - xDivs[i - 1];
         }
-        xStretchTex = (stretchSize / bitmapWidth) / xStretchCount;
+        const float xStretchTex = stretchSize;
         const float fixed = bitmapWidth - stretchSize;
-        xStretch = (right - left - fixed) / xStretchCount;
+        const float xStretch = right - left - fixed;
+        stretchX = xStretch / xStretchTex;
     }
 
     if (yStretchCount > 0) {
@@ -99,89 +75,86 @@ void Patch::updateVertices(const SkBitmap* bitmap, float left, float top, float 
         for (uint32_t i = 1; i < height; i += 2) {
             stretchSize += yDivs[i] - yDivs[i - 1];
         }
-        yStretchTex = (stretchSize / bitmapHeight) / yStretchCount;
+        const float yStretchTex = stretchSize;
         const float fixed = bitmapHeight - stretchSize;
-        yStretch = (bottom - top - fixed) / yStretchCount;
+        const float yStretch = bottom - top - fixed;
+        stretchY = yStretch / yStretchTex;
     }
 
-    float vy = 0.0f;
-    float ty = 0.0f;
     TextureVertex* vertex = vertices;
 
-    generateVertices(vertex, 0.0f, 0.0f, xDivs, width, xStretch, xStretchTex,
-            meshWidth, bitmapWidth);
-    vertex += width + 2;
+    float previousStepY = 0.0f;
 
-    for (uint32_t y = 0; y < height; y++) {
-        if (y & 1) {
-            vy += yStretch;
-            ty += yStretchTex;
+    float y1 = 0.0f;
+    float v1 = 0.0f;
+
+    for (uint32_t i = 0; i < height; i++) {
+        float stepY = yDivs[i];
+
+        float y2 = 0.0f;
+        if (i & 1) {
+            const float segment = stepY - previousStepY;
+            y2 = y1 + segment * stretchY;
         } else {
-            const float step = float(yDivs[y]);
-            vy += step;
-            ty += step / bitmapHeight;
+            y2 = y1 + stepY - previousStepY;
         }
-        generateVertices(vertex, vy, ty, xDivs, width, xStretch, xStretchTex,
-                meshWidth, bitmapWidth);
-        vertex += width + 2;
+        float v2 = fmax(0.0f, stepY - 0.5f) / bitmapHeight;
+
+        generateRow(vertex, y1, y2, v1, v2, xDivs, width, stretchX,
+                right - left, bitmapWidth);
+
+        y1 = y2;
+        v1 = (stepY + 0.5f) / bitmapHeight;
+
+        previousStepY = stepY;
     }
 
-    generateVertices(vertex, bottom - top, 1.0f, xDivs, width, xStretch, xStretchTex,
-            meshWidth, bitmapWidth);
+    generateRow(vertex, y1, bottom - top, v1, 1.0f, xDivs, width, stretchX,
+            right - left, bitmapWidth);
 }
 
-inline void Patch::generateVertices(TextureVertex* vertex, float y, float v,
-        const int32_t xDivs[], uint32_t xCount, float xStretch, float xStretchTex,
-        float width, float widthTex) {
-    float vx = 0.0f;
-    float tx = 0.0f;
+inline void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, float v2,
+        const int32_t xDivs[], uint32_t xCount, float stretchX, float width, float bitmapWidth) {
+    float previousStepX = 0.0f;
 
-    TextureVertex::set(vertex, vx, y, tx, v);
-    vertex++;
+    float x1 = 0.0f;
+    float u1 = 0.0f;
 
-    for (uint32_t x = 0; x < xCount; x++) {
-        if (x & 1) {
-            vx += xStretch;
-            tx += xStretchTex;
+    // Generate the row quad by quad
+    for (uint32_t i = 0; i < xCount; i++) {
+        float stepX = xDivs[i];
+
+        float x2 = 0.0f;
+        if (i & 1) {
+            const float segment = stepX - previousStepX;
+            x2 = x1 + segment * stretchX;
         } else {
-            const float step = float(xDivs[x]);
-            vx += step;
-            tx += step / widthTex;
+            x2 = x1 + stepX - previousStepX;
         }
+        float u2 = fmax(0.0f, stepX - 0.5f) / bitmapWidth;
 
-        TextureVertex::set(vertex, vx, y, tx, v);
-        vertex++;
+        generateQuad(vertex, x1, y1, x2, y2, u1, v1, u2, v2);
+
+        x1 = x2;
+        u1 = (stepX + 0.5f) / bitmapWidth;
+
+        previousStepX = stepX;
     }
 
-    TextureVertex::set(vertex, width, y, 1.0f, v);
-    vertex++;
+    generateQuad(vertex, x1, y1, width, y2, u1, v1, 1.0f, v2);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Debug tools
-///////////////////////////////////////////////////////////////////////////////
+inline void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, float y2,
+            float u1, float v1, float u2, float v2) {
+    // Left triangle
+    TextureVertex::set(vertex++, x1, y1, u1, v1);
+    TextureVertex::set(vertex++, x2, y1, u2, v1);
+    TextureVertex::set(vertex++, x1, y2, u1, v2);
 
-void Patch::dump() {
-    LOGD("Vertices [");
-    for (uint32_t y = 0; y < yCount; y++) {
-        char buffer[512];
-        buffer[0] = '\0';
-        uint32_t offset = 0;
-        for (uint32_t x = 0; x < xCount; x++) {
-            TextureVertex* v = &vertices[y * xCount + x];
-            offset += sprintf(&buffer[offset], " (%.4f,%.4f)-(%.4f,%.4f)",
-                    v->position[0], v->position[1], v->texture[0], v->texture[1]);
-        }
-        LOGD("  [%s ]", buffer);
-    }
-    LOGD("]\nIndices [ ");
-    char buffer[4096];
-    buffer[0] = '\0';
-    uint32_t offset = 0;
-    for (uint32_t i = 0; i < indicesCount; i++) {
-        offset += sprintf(&buffer[offset], "%d ", indices[i]);
-    }
-    LOGD("  %s\n]", buffer);
+    // Right triangle
+    TextureVertex::set(vertex++, x1, y2, u1, v2);
+    TextureVertex::set(vertex++, x2, y1, u2, v1);
+    TextureVertex::set(vertex++, x2, y2, u2, v2);
 }
 
 }; // namespace uirenderer
