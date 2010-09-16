@@ -703,42 +703,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         }
     }
 
-    /* enable poisoning of memory of freed objects */
-    property_get("dalvik.vm.gc.overwritefree", propBuf, "false");
-    if (strcmp(propBuf, "true") == 0) {
-        opt.optionString = "-Xgc:overwritefree";
-        mOptions.add(opt);
-    } else if (strcmp(propBuf, "false") != 0) {
-        LOGW("dalvik.vm.gc.overwritefree should be 'true' or 'false'");
-    }
-
-    /* enable heap verification before each gc */
-    property_get("dalvik.vm.gc.preverify", propBuf, "false");
-    if (strcmp(propBuf, "true") == 0) {
-        opt.optionString = "-Xgc:preverify";
-        mOptions.add(opt);
-    } else if (strcmp(propBuf, "false") != 0) {
-        LOGW("dalvik.vm.gc.preverify should be 'true' or 'false'");
-    }
-
-    /* enable heap verification after each gc */
-    property_get("dalvik.vm.gc.postverify", propBuf, "false");
-    if (strcmp(propBuf, "true") == 0) {
-        opt.optionString = "-Xgc:postverify";
-        mOptions.add(opt);
-    } else if (strcmp(propBuf, "false") != 0) {
-        LOGW("dalvik.vm.gc.postverify should be 'true' or 'false'");
-    }
-
-    /* enable card table verification for partial gc */
-    property_get("dalvik.vm.gc.verifycardtable", propBuf, "false");
-    if (strcmp(propBuf, "true") == 0) {
-        opt.optionString = "-Xgc:verifycardtable";
-        mOptions.add(opt);
-    } else if (strcmp(propBuf, "false") != 0) {
-        LOGW("dalvik.vm.gc.verifycardtable should be 'true' or 'false'");
-    }
-
     /* enable debugging; set suspend=y to pause during VM init */
 #ifdef HAVE_ANDROID_OS
     /* use android ADB transport */
