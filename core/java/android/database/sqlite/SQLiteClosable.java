@@ -79,8 +79,8 @@ public abstract class SQLiteClosable {
     // STOPSHIP remove this method before shipping
     private void checkRefCount() {
         if (mReferenceCount > 1000) {
-            throw new IllegalStateException("refcount: " + mReferenceCount + ", " +
-                    getObjInfo());
+            throw new IllegalStateException("bad refcount: " + mReferenceCount +
+                    ". file bug against frameworks->database" + getObjInfo());
         }
     }
 }
