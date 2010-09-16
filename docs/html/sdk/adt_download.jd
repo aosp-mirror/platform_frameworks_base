@@ -24,8 +24,8 @@ ADT Installation</a>.</p>
   <tr>
      <td>0.9.8</td>
      <td><a href="http://dl-ssl.google.com/android/ADT-0.9.8.zip">ADT-0.9.8.zip</a></td>
-     <td><nobr>{@adtZipBytes} bytes</nobr></td>
-     <td>{@adtZipChecksum}</td>
+     <td><nobr>8703591 bytes</nobr></td>
+     <td>22070f8e52924605a3b3abf87c1ba39f</td>
      <td>Requires SDK Tools, Revision 7 <em><nobr>September 2010</nobr></em></td>
   </tr>
   <tr>

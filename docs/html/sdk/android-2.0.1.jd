@@ -2,8 +2,6 @@ page.title=Android 2.0.1, Release 1
 sdk.platform.version=2.0.1
 sdk.platform.apiLevel=6
 sdk.platform.majorMinor=minor
-sdk.platform.releaseDate=December 2009
-sdk.platform.deployableDate=December 2009
 
 @jd:body
 
@@ -44,7 +42,7 @@ differences report &raquo;</a> </li>
 <em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
 
 <p>Android {@sdkPlatformVersion} is a {@sdkPlatformMajorMinor} platform release
-deployable to Android-powered handsets starting in {@sdkPlatformDeployableDate}.
+deployable to Android-powered handsets starting in December 2009.
 This release includes minor API
 changes, bug fixes and framework behavioral changes. For information on changes
 and fixes, see the <a href="#api">Framework API</a> section.</p>
