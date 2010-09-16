@@ -228,6 +228,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     protected static final int FLAG_DISALLOW_INTERCEPT = 0x80000;
 
     /**
+     * When set, at least one child of this ViewGroup will return true from hasOverlay.
+     */
+    private static final int FLAG_CHILD_HAS_OVERLAY = 0x100000;
+
+    /**
      * Indicates which types of drawing caches are to be kept in memory.
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
@@ -854,6 +859,34 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 final int scrolledYInt = (int) scrolledYFloat;
                 final View[] children = mChildren;
                 final int count = mChildrenCount;
+
+                // Check for children with overlays first. They don't rely on hit rects to determine
+                // if they can accept a new touch event.
+                if ((mGroupFlags & FLAG_CHILD_HAS_OVERLAY) == FLAG_CHILD_HAS_OVERLAY) {
+                    for (int i = count - 1; i >= 0; i--) {
+                        final View child = children[i];
+                        // Don't let children respond to events as an overlay during an animation.
+                        if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE
+                                && child.getAnimation() == null
+                                && child.isOverlayEnabled()) {
+                            // offset the event to the view's coordinate system
+                            final float xc = scrolledXFloat - child.mLeft;
+                            final float yc = scrolledYFloat - child.mTop;
+                            ev.setLocation(xc, yc);
+                            child.mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
+                            if (child.dispatchTouchEvent(ev))  {
+                                // Event handled, we have a target now.
+                                mMotionTarget = child;
+                                return true;
+                            }
+                            // The event didn't get handled, try the next view.
+                            // Don't reset the event's location, it's not
+                            // necessary here.
+                        }
+                    }
+                }
+
+                // Now check views normally.
                 for (int i = count - 1; i >= 0; i--) {
                     final View child = children[i];
                     if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE
@@ -2312,6 +2345,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (clearChildFocus != null) {
             clearChildFocus(clearChildFocus);
         }
+
+        mGroupFlags &= ~FLAG_CHILD_HAS_OVERLAY;
     }
 
     /**
@@ -2534,7 +2569,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 final int left = mLeft;
                 final int top = mTop;
 
-                if (dirty.intersect(0, 0, mRight - left, mBottom - top) ||
+                if ((mGroupFlags & FLAG_CHILD_HAS_OVERLAY) == FLAG_CHILD_HAS_OVERLAY ||
+                        dirty.intersect(0, 0, mRight - left, mBottom - top) ||
                         (mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION) {
                     mPrivateFlags &= ~DRAWING_CACHE_VALID;
 
@@ -3450,6 +3486,69 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     public void setLayoutAnimationListener(Animation.AnimationListener animationListener) {
         mAnimationListener = animationListener;
+    }
+
+    /**
+     * Called when a child's overlay state changes between enabled/disabled.
+     * @param child Child view whose state has changed or null
+     * @hide
+     */
+    public void childOverlayStateChanged(View child) {
+        boolean childHasOverlay = false;
+        if (child != null) {
+            childHasOverlay = child.isOverlayEnabled();
+        } else {
+            final int childCount = getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                if (childHasOverlay |= getChildAt(i).isOverlayEnabled()) {
+                    break;
+                }
+            }
+        }
+        
+        final boolean hasChildWithOverlay = childHasOverlay ||
+                (mGroupFlags & FLAG_CHILD_HAS_OVERLAY) == FLAG_CHILD_HAS_OVERLAY;
+
+        final boolean oldValue = isOverlayEnabled();
+        mGroupFlags = (mGroupFlags & ~FLAG_CHILD_HAS_OVERLAY) |
+                (hasChildWithOverlay ? FLAG_CHILD_HAS_OVERLAY : 0);
+        if (isOverlayEnabled() != oldValue) {
+            final ViewParent parent = getParent();
+            if (parent != null) {
+                try {
+                    parent.childOverlayStateChanged(this);
+                } catch (AbstractMethodError e) {
+                    Log.e("ViewGroup", "Could not propagate hasOverlay state", e);
+                }
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isOverlayEnabled() {
+        return super.isOverlayEnabled() ||
+                ((mGroupFlags & FLAG_CHILD_HAS_OVERLAY) == FLAG_CHILD_HAS_OVERLAY);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void onDrawOverlay(Canvas canvas) {
+        if ((mGroupFlags & FLAG_CHILD_HAS_OVERLAY) == FLAG_CHILD_HAS_OVERLAY) {
+            final int childCount = getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                final View child = getChildAt(i);
+                if (child.isOverlayEnabled()) {
+                    canvas.translate(child.mLeft + child.mScrollX, child.mTop + child.mScrollY);
+                    child.onDrawOverlay(canvas);
+                    canvas.translate(-(child.mLeft + child.mScrollX),
+                            -(child.mTop + child.mScrollY));
+                }
+            }
+        }
     }
 
     /**

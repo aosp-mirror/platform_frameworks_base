@@ -208,4 +208,11 @@ public interface ViewParent {
      */
     public boolean requestChildRectangleOnScreen(View child, Rect rectangle,
             boolean immediate);
+
+    /**
+     * Called when a child view's overlay state changes between enabled/disabled.
+     * @param child Child view whose state changed or null.
+     * @hide
+     */
+    public void childOverlayStateChanged(View child);
 }
