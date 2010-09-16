@@ -81,9 +81,8 @@ enum {
  */
 struct InputTarget {
     enum {
-        /* This flag indicates that subsequent event delivery should be held until the
-         * current event is delivered to this target or a timeout occurs. */
-        FLAG_SYNC = 0x01,
+        /* This flag indicates that the event is being delivered to a foreground application. */
+        FLAG_FOREGROUND = 0x01,
 
         /* This flag indicates that a MotionEvent with AMOTION_EVENT_ACTION_DOWN falls outside
          * of the area of this target and so should instead be delivered as an
@@ -108,12 +107,6 @@ struct InputTarget {
 
     // Flags for the input target.
     int32_t flags;
-
-    // The timeout for event delivery to this target in nanoseconds, or -1 to wait indefinitely.
-    nsecs_t timeout;
-
-    // The time already spent waiting for this target in nanoseconds, or 0 if none.
-    nsecs_t timeSpentWaitingForApplication;
 
     // The x and y offset to add to a MotionEvent as it is delivered.
     // (ignored for KeyEvents)
@@ -190,6 +183,7 @@ struct InputWindow {
     };
 
     sp<InputChannel> inputChannel;
+    String8 name;
     int32_t layoutParamsFlags;
     int32_t layoutParamsType;
     nsecs_t dispatchingTimeout;
@@ -206,9 +200,11 @@ struct InputWindow {
     int32_t touchableAreaRight;
     int32_t touchableAreaBottom;
     bool visible;
+    bool canReceiveKeys;
     bool hasFocus;
     bool hasWallpaper;
     bool paused;
+    int32_t layer;
     int32_t ownerPid;
     int32_t ownerUid;
 
@@ -257,17 +253,11 @@ public:
 
     /* Notifies the system that an application is not responding.
      * Returns a new timeout to continue waiting, or 0 to abort dispatch. */
-    virtual nsecs_t notifyANR(const sp<InputApplicationHandle>& inputApplicationHandle) = 0;
+    virtual nsecs_t notifyANR(const sp<InputApplicationHandle>& inputApplicationHandle,
+            const sp<InputChannel>& inputChannel) = 0;
 
     /* Notifies the system that an input channel is unrecoverably broken. */
     virtual void notifyInputChannelBroken(const sp<InputChannel>& inputChannel) = 0;
-
-    /* Notifies the system that an input channel is not responding.
-     * Returns a new timeout to continue waiting, or 0 to abort dispatch. */
-    virtual nsecs_t notifyInputChannelANR(const sp<InputChannel>& inputChannel) = 0;
-
-    /* Notifies the system that an input channel recovered from ANR. */
-    virtual void notifyInputChannelRecoveredFromANR(const sp<InputChannel>& inputChannel) = 0;
 
     /* Gets the key repeat initial timeout or -1 if automatic key repeating is disabled. */
     virtual nsecs_t getKeyRepeatTimeout() = 0;
@@ -361,16 +351,6 @@ public:
      */
     virtual void setInputDispatchMode(bool enabled, bool frozen) = 0;
 
-    /* Preempts input dispatch in progress by making pending synchronous
-     * dispatches asynchronous instead.  This method is generally called during a focus
-     * transition from one application to the next so as to enable the new application
-     * to start receiving input as soon as possible without having to wait for the
-     * old application to finish up.
-     *
-     * This method may be called on any thread (usually by the input manager).
-     */
-    virtual void preemptInputDispatch() = 0;
-
     /* Registers or unregister input channels that may be used as targets for input events.
      * If monitor is true, the channel will receive a copy of all input events.
      *
@@ -424,7 +404,6 @@ public:
     virtual void setInputWindows(const Vector<InputWindow>& inputWindows);
     virtual void setFocusedApplication(const InputApplication* inputApplication);
     virtual void setInputDispatchMode(bool enabled, bool frozen);
-    virtual void preemptInputDispatch();
 
     virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel, bool monitor);
     virtual status_t unregisterInputChannel(const sp<InputChannel>& inputChannel);
@@ -454,7 +433,7 @@ private:
         int32_t injectorUid;      // -1 if not injected
 
         bool dispatchInProgress; // initially false, set to true while dispatching
-        int32_t pendingSyncDispatches; // the number of synchronous dispatches in progress
+        int32_t pendingForegroundDispatches; // the number of foreground dispatches in progress
 
         inline bool isInjected() { return injectorPid >= 0; }
 
@@ -522,7 +501,6 @@ private:
         int32_t targetFlags;
         float xOffset;
         float yOffset;
-        nsecs_t timeout;
 
         // True if dispatch has started.
         bool inProgress;
@@ -540,12 +518,8 @@ private:
         //   will be set to NULL.
         MotionSample* tailMotionSample;
 
-        inline bool isSyncTarget() const {
-            return targetFlags & InputTarget::FLAG_SYNC;
-        }
-
-        inline void preemptSyncTarget() {
-            targetFlags &= ~ InputTarget::FLAG_SYNC;
+        inline bool hasForegroundTarget() const {
+            return targetFlags & InputTarget::FLAG_FOREGROUND;
         }
     };
 
@@ -628,6 +602,8 @@ private:
             dequeue(first);
             return first;
         }
+
+        uint32_t count() const;
     };
 
     /* Allocates queue entries and performs reference counting as needed. */
@@ -647,7 +623,7 @@ private:
                 nsecs_t downTime, uint32_t pointerCount,
                 const int32_t* pointerIds, const PointerCoords* pointerCoords);
         DispatchEntry* obtainDispatchEntry(EventEntry* eventEntry,
-                int32_t targetFlags, float xOffset, float yOffset, nsecs_t timeout);
+                int32_t targetFlags, float xOffset, float yOffset);
         CommandEntry* obtainCommandEntry(Command command);
 
         void releaseEventEntry(EventEntry* entry);
@@ -761,8 +737,6 @@ private:
             STATUS_NORMAL,
             // An unrecoverable communication error has occurred.
             STATUS_BROKEN,
-            // The client is not responding.
-            STATUS_NOT_RESPONDING,
             // The input channel has been unregistered.
             STATUS_ZOMBIE
         };
@@ -772,11 +746,9 @@ private:
         InputPublisher inputPublisher;
         InputState inputState;
         Queue<DispatchEntry> outboundQueue;
-        nsecs_t nextTimeoutTime; // next timeout time (LONG_LONG_MAX if none)
 
         nsecs_t lastEventTime; // the time when the event was originally captured
         nsecs_t lastDispatchTime; // the time when the last event was dispatched
-        nsecs_t lastANRTime; // the time when the last ANR was recorded
 
         explicit Connection(const sp<InputChannel>& inputChannel);
 
@@ -788,18 +760,6 @@ private:
         // Returns NULL if not found.
         DispatchEntry* findQueuedDispatchEntryForEvent(const EventEntry* eventEntry) const;
 
-        // Determine whether this connection has a pending synchronous dispatch target.
-        // Since there can only ever be at most one such target at a time, if there is one,
-        // it must be at the tail because nothing else can be enqueued after it.
-        inline bool hasPendingSyncTarget() const {
-            return ! outboundQueue.isEmpty() && outboundQueue.tailSentinel.prev->isSyncTarget();
-        }
-
-        // Assuming there is a pending sync target, make it async.
-        inline void preemptSyncTarget() {
-            outboundQueue.tailSentinel.prev->preemptSyncTarget();
-        }
-
         // Gets the time since the current event was originally obtained from the input driver.
         inline double getEventLatencyMillis(nsecs_t currentTime) const {
             return (currentTime - lastEventTime) / 1000000.0;
@@ -810,15 +770,7 @@ private:
             return (currentTime - lastDispatchTime) / 1000000.0;
         }
 
-        // Gets the time since the current event ANR was declared, if applicable.
-        inline double getANRLatencyMillis(nsecs_t currentTime) const {
-            return (currentTime - lastANRTime) / 1000000.0;
-        }
-
         status_t initialize();
-
-        void setNextTimeoutTime(nsecs_t currentTime, nsecs_t timeout);
-        void resetTimeout(nsecs_t currentTime);
     };
 
     sp<InputDispatcherPolicyInterface> mPolicy;
@@ -851,19 +803,13 @@ private:
     // All registered connections mapped by receive pipe file descriptor.
     KeyedVector<int, sp<Connection> > mConnectionsByReceiveFd;
 
-    ssize_t getConnectionIndex(const sp<InputChannel>& inputChannel);
+    ssize_t getConnectionIndexLocked(const sp<InputChannel>& inputChannel);
 
     // Active connections are connections that have a non-empty outbound queue.
     // We don't use a ref-counted pointer here because we explicitly abort connections
     // during unregistration which causes the connection's outbound queue to be cleared
     // and the connection itself to be deactivated.
     Vector<Connection*> mActiveConnections;
-
-    // List of connections that have timed out.  Only used by dispatchOnce()
-    // We don't use a ref-counted pointer here because it is not possible for a connection
-    // to be unregistered while processing timed out connections since we hold the lock for
-    // the duration.
-    Vector<Connection*> mTimedOutConnections;
 
     // Input channels that will receive a copy of all input events.
     Vector<sp<InputChannel> > mMonitoringChannels;
@@ -877,7 +823,7 @@ private:
     void setInjectionResultLocked(EventEntry* entry, int32_t injectionResult);
 
     Condition mInjectionSyncFinishedCondition;
-    void decrementPendingSyncDispatchesLocked(EventEntry* entry);
+    void decrementPendingForegroundDispatchesLocked(EventEntry* entry);
 
     // Throttling state.
     struct ThrottleState {
@@ -951,8 +897,6 @@ private:
     void logOutboundMotionDetailsLocked(const char* prefix, const MotionEntry* entry);
 
     // The input targets that were most recently identified for dispatch.
-    // If there is a synchronous event dispatch in progress, the current input targets will
-    // remain unchanged until the dispatch has completed or been aborted.
     bool mCurrentInputTargetsValid; // false while targets are being recomputed
     Vector<InputTarget> mCurrentInputTargets;
     int32_t mCurrentInputWindowType;
@@ -975,8 +919,9 @@ private:
     int32_t handleTargetsNotReadyLocked(nsecs_t currentTime, const EventEntry* entry,
             const InputApplication* application, const InputWindow* window,
             nsecs_t* nextWakeupTime);
-    void resumeAfterTargetsNotReadyTimeoutLocked(nsecs_t newTimeout);
-    nsecs_t getTimeSpentWaitingForApplicationWhileFindingTargetsLocked(nsecs_t currentTime);
+    void resumeAfterTargetsNotReadyTimeoutLocked(nsecs_t newTimeout,
+            const sp<InputChannel>& inputChannel);
+    nsecs_t getTimeSpentWaitingForApplicationLocked(nsecs_t currentTime);
     void resetANRTimeoutsLocked();
 
     int32_t findFocusedWindowLocked(nsecs_t currentTime, const EventEntry* entry,
@@ -984,14 +929,16 @@ private:
     int32_t findTouchedWindowLocked(nsecs_t currentTime, const MotionEntry* entry,
             nsecs_t* nextWakeupTime, InputWindow** outWindow);
 
-    void addWindowTargetLocked(const InputWindow* window, int32_t targetFlags,
-            nsecs_t timeSpentWaitingForApplication);
+    void addWindowTargetLocked(const InputWindow* window, int32_t targetFlags);
     void addMonitoringTargetsLocked();
     void pokeUserActivityLocked(nsecs_t eventTime, int32_t windowType, int32_t eventType);
     bool checkInjectionPermission(const InputWindow* window,
             int32_t injectorPid, int32_t injectorUid);
     bool isWindowObscuredLocked(const InputWindow* window);
+    bool isWindowFinishedWithPreviousInputLocked(const InputWindow* window);
     void releaseTouchedWindowLocked();
+    String8 getApplicationWindowLabelLocked(const InputApplication* application,
+            const InputWindow* window);
 
     // Manage the dispatch cycle for a single connection.
     // These methods are deliberately not Interruptible because doing all of the work
@@ -1000,20 +947,13 @@ private:
     void prepareDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
             EventEntry* eventEntry, const InputTarget* inputTarget,
             bool resumeWithAppendedMotionSample);
-    void startDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
-            nsecs_t timeSpentWaitingForApplication);
+    void startDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
     void finishDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
     void startNextDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
-    void timeoutDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
-    void resumeAfterTimeoutDispatchCycleLocked(nsecs_t currentTime,
-            const sp<Connection>& connection, nsecs_t newTimeout);
     void abortDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
             bool broken);
-    void drainOutboundQueueLocked(Connection* connection, DispatchEntry* firstDispatchEntryToDrain);
+    void drainOutboundQueueLocked(Connection* connection);
     static int handleReceiveCallback(int receiveFd, int events, void* data);
-
-    // Preempting input dispatch.
-    bool preemptInputDispatchInnerLocked();
 
     // Dump state.
     void dumpDispatchStateLocked(String8& dump);
@@ -1027,20 +967,23 @@ private:
     void onDispatchCycleStartedLocked(
             nsecs_t currentTime, const sp<Connection>& connection);
     void onDispatchCycleFinishedLocked(
-            nsecs_t currentTime, const sp<Connection>& connection, bool recoveredFromANR);
-    void onDispatchCycleANRLocked(
             nsecs_t currentTime, const sp<Connection>& connection);
     void onDispatchCycleBrokenLocked(
             nsecs_t currentTime, const sp<Connection>& connection);
+    void onANRLocked(
+            nsecs_t currentTime, const InputApplication* application, const InputWindow* window,
+            nsecs_t eventTime, nsecs_t waitStartTime);
 
     // Outbound policy interactions.
     void doNotifyConfigurationChangedInterruptible(CommandEntry* commandEntry);
     void doNotifyInputChannelBrokenLockedInterruptible(CommandEntry* commandEntry);
-    void doNotifyInputChannelANRLockedInterruptible(CommandEntry* commandEntry);
-    void doNotifyInputChannelRecoveredFromANRLockedInterruptible(CommandEntry* commandEntry);
+    void doNotifyANRLockedInterruptible(CommandEntry* commandEntry);
     void doInterceptKeyBeforeDispatchingLockedInterruptible(CommandEntry* commandEntry);
     void doPokeUserActivityLockedInterruptible(CommandEntry* commandEntry);
-    void doTargetsNotReadyTimeoutLockedInterruptible(CommandEntry* commandEntry);
+
+    // Statistics gathering.
+    void updateDispatchStatisticsLocked(nsecs_t currentTime, const EventEntry* entry,
+            int32_t injectionResult, nsecs_t timeSpentWaitingForApplication);
 };
 
 /* Enqueues and dispatches input events, endlessly. */
