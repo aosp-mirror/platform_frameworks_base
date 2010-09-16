@@ -872,6 +872,7 @@ class SipSessionGroup implements SipListener {
                     mPeerSessionDescription = extractContent(response);
                     establishCall();
                     return true;
+                case Response.UNAUTHORIZED:
                 case Response.PROXY_AUTHENTICATION_REQUIRED:
                     if (handleAuthentication(event)) {
                         addSipSession(this);
