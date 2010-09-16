@@ -811,8 +811,7 @@ status_t OMXCodec::isColorFormatSupported(
         if (OMX_ErrorNone != mOMX->getParameter(
                 mNode, OMX_IndexParamVideoPortFormat,
                 &portFormat, sizeof(portFormat))) {
-
-            return UNKNOWN_ERROR;
+            break;
         }
         // Make sure that omx component does not overwrite
         // the incremented index (bug 2897413).
@@ -832,6 +831,8 @@ status_t OMXCodec::isColorFormatSupported(
             break;
         }
     }
+
+    LOGE("color format %d is not supported", colorFormat);
     return UNKNOWN_ERROR;
 }
 

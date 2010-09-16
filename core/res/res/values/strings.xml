@@ -704,12 +704,12 @@
     <string name="permdesc_movePackage">Allows an application to move application resources from internal to external media and vice versa.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_readLogs">read system log files</string>
+    <string name="permlab_readLogs">read sensitive log data</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readLogs">Allows an application to read from the
         system\'s various log files.  This allows it to discover general
-        information about what you are doing with the phone, but they should
-        not contain any personal or private information.</string>
+        information about what you are doing with the phone, potentially
+        including personal or private information.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_diagnostic">read/write to resources owned by diag</string>
@@ -1379,7 +1379,7 @@
     <!-- Other IM address type -->
     <string name="imTypeOther">Other</string>
 
-    <!-- Custom IM address type -->
+    <!-- Custom IM protocol type -->
     <string name="imProtocolCustom">Custom</string>
     <!-- AIM IM protocol type -->
     <string name="imProtocolAim">AIM</string>
@@ -1406,6 +1406,15 @@
     <string name="orgTypeOther">Other</string>
     <!-- Custom organization type -->
     <string name="orgTypeCustom">Custom</string>
+
+    <!-- Custom SIP address type -->
+    <string name="sipAddressTypeCustom">Custom</string>
+    <!-- Home SIP address type -->
+    <string name="sipAddressTypeHome">Home</string>
+    <!-- Work SIP address type -->
+    <string name="sipAddressTypeWork">Work</string>
+    <!-- Other SIP address type -->
+    <string name="sipAddressTypeOther">Other</string>
 
     <!-- Attbution of a contact status update, when the time of update is unknown -->
     <string name="contact_status_update_attribution">via <xliff:g id="source" example="Google Talk">%1$s</xliff:g></string>

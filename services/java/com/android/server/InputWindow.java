@@ -27,6 +27,9 @@ public final class InputWindow {
     // The input channel associated with the window.
     public InputChannel inputChannel;
     
+    // The window name.
+    public String name;
+    
     // Window layout params attributes.  (WindowManager.LayoutParams)
     public int layoutParamsFlags;
     public int layoutParamsType;
@@ -55,6 +58,9 @@ public final class InputWindow {
     // Window is visible.
     public boolean visible;
     
+    // Window can receive keys.
+    public boolean canReceiveKeys;
+    
     // Window has focus.
     public boolean hasFocus;
     
@@ -63,6 +69,9 @@ public final class InputWindow {
     
     // Input event dispatching is paused.
     public boolean paused;
+    
+    // Window layer.
+    public int layer;
     
     // Id of process and user that owns the window.
     public int ownerPid;

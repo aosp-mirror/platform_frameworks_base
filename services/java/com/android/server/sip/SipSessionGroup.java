@@ -80,6 +80,8 @@ import javax.sip.message.Response;
  */
 class SipSessionGroup implements SipListener {
     private static final String TAG = "SipSession";
+    private static final boolean DEBUG = true;
+    private static final boolean DEBUG_PING = DEBUG && false;
     private static final String ANONYMOUS = "anonymous";
     private static final String SERVER_ERROR_PREFIX = "Response: ";
     private static final int EXPIRY_TIME = 3600;
@@ -218,22 +220,26 @@ class SipSessionGroup implements SipListener {
 
     private synchronized SipSessionImpl getSipSession(EventObject event) {
         String key = SipHelper.getCallId(event);
-        Log.d(TAG, "sesssion key from event: " + key);
-        Log.d(TAG, "active sessions:");
-        for (String k : mSessionMap.keySet()) {
-            Log.d(TAG, " ..." + k + ": " + mSessionMap.get(k));
-        }
         SipSessionImpl session = mSessionMap.get(key);
+        if ((session != null) && isLoggable(session)) {
+            Log.d(TAG, "session key from event: " + key);
+            Log.d(TAG, "active sessions:");
+            for (String k : mSessionMap.keySet()) {
+                Log.d(TAG, " ..." + k + ": " + mSessionMap.get(k));
+            }
+        }
         return ((session != null) ? session : mCallReceiverSession);
     }
 
     private synchronized void addSipSession(SipSessionImpl newSession) {
         removeSipSession(newSession);
         String key = newSession.getCallId();
-        Log.d(TAG, "+++  add a session with key:  '" + key + "'");
         mSessionMap.put(key, newSession);
-        for (String k : mSessionMap.keySet()) {
-            Log.d(TAG, "   .....  " + k + ": " + mSessionMap.get(k));
+        if (isLoggable(newSession)) {
+            Log.d(TAG, "+++  add a session with key:  '" + key + "'");
+            for (String k : mSessionMap.keySet()) {
+                Log.d(TAG, "  " + k + ": " + mSessionMap.get(k));
+            }
         }
     }
 
@@ -254,10 +260,12 @@ class SipSessionGroup implements SipListener {
                 }
             }
         }
-        Log.d(TAG, "   remove session " + session + " with key '" + key + "'");
 
-        for (String k : mSessionMap.keySet()) {
-            Log.d(TAG, "   .....  " + k + ": " + mSessionMap.get(k));
+        if ((s != null) && isLoggable(s)) {
+            Log.d(TAG, "remove session " + session + " @key '" + key + "'");
+            for (String k : mSessionMap.keySet()) {
+                Log.d(TAG, "  " + k + ": " + mSessionMap.get(k));
+            }
         }
     }
 
@@ -288,10 +296,10 @@ class SipSessionGroup implements SipListener {
     private synchronized void process(EventObject event) {
         SipSessionImpl session = getSipSession(event);
         try {
-            if ((session != null) && session.process(event)) {
-                Log.d(TAG, " ~~~~~   new state: " + session.mState);
-            } else {
-                Log.d(TAG, "event not processed: " + event);
+            boolean isLoggable = isLoggable(session, event);
+            boolean processed = (session != null) && session.process(event);
+            if (isLoggable && processed) {
+                Log.d(TAG, "new state after: " + session.mState);
             }
         } catch (Throwable e) {
             Log.w(TAG, "event process error: " + event, e);
@@ -321,8 +329,8 @@ class SipSessionGroup implements SipListener {
         }
 
         public boolean process(EventObject evt) throws SipException {
-            Log.d(TAG, " ~~~~~   " + this + ": " + mState + ": processing "
-                    + log(evt));
+            if (isLoggable(this, evt)) Log.d(TAG, " ~~~~~   " + this + ": "
+                    + mState + ": processing " + log(evt));
             if (isRequestEvent(Request.INVITE, evt)) {
                 RequestEvent event = (RequestEvent) evt;
                 SipSessionImpl newSession = new SipSessionImpl(mProxy);
@@ -503,8 +511,8 @@ class SipSessionGroup implements SipListener {
         }
 
         public boolean process(EventObject evt) throws SipException {
-            Log.d(TAG, " ~~~~~   " + this + ": " + mState + ": processing "
-                    + log(evt));
+            if (isLoggable(this, evt)) Log.d(TAG, " ~~~~~   " + this + ": "
+                    + mState + ": processing " + log(evt));
             synchronized (SipSessionGroup.this) {
                 if (isClosed()) return false;
 
@@ -672,14 +680,14 @@ class SipSessionGroup implements SipListener {
                     if (mRPort == 0) mRPort = rPort;
                     if (mRPort != rPort) {
                         mReRegisterFlag = true;
-                        Log.w(TAG, String.format("rport is changed: %d <> %d",
-                                mRPort, rPort));
+                        if (DEBUG) Log.w(TAG, String.format(
+                                "rport is changed: %d <> %d", mRPort, rPort));
                         mRPort = rPort;
                     } else {
-                        Log.w(TAG, "rport is the same: " + rPort);
+                        if (DEBUG_PING) Log.w(TAG, "rport is the same: " + rPort);
                     }
                 } else {
-                    Log.w(TAG, "peer did not respect our rport request");
+                    if (DEBUG) Log.w(TAG, "peer did not respond rport");
                 }
                 reset();
                 return true;
@@ -872,6 +880,7 @@ class SipSessionGroup implements SipListener {
                     mPeerSessionDescription = extractContent(response);
                     establishCall();
                     return true;
+                case Response.UNAUTHORIZED:
                 case Response.PROXY_AUTHENTICATION_REQUIRED:
                     if (handleAuthentication(event)) {
                         addSipSession(this);
@@ -1185,6 +1194,34 @@ class SipSessionGroup implements SipListener {
         } catch (ParseException e) {
             throw new SipException("createPeerProfile()", e);
         }
+    }
+
+    private static boolean isLoggable(SipSessionImpl s) {
+        if (s != null) {
+            switch (s.mState) {
+                case PINGING:
+                    return DEBUG_PING;
+            }
+        }
+        return DEBUG;
+    }
+
+    private static boolean isLoggable(SipSessionImpl s, EventObject evt) {
+        if (!isLoggable(s)) return false;
+        if (evt == null) return false;
+
+        if (evt instanceof OptionsCommand) {
+            return DEBUG_PING;
+        } else if (evt instanceof ResponseEvent) {
+            Response response = ((ResponseEvent) evt).getResponse();
+            if (Request.OPTIONS.equals(response.getHeader(CSeqHeader.NAME))) {
+                return DEBUG_PING;
+            }
+            return DEBUG;
+        } else if (evt instanceof RequestEvent) {
+            return DEBUG;
+        }
+        return false;
     }
 
     private static String log(EventObject evt) {

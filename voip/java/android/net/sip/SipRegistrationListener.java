@@ -29,15 +29,15 @@ public interface SipRegistrationListener {
     void onRegistering(String localProfileUri);
 
     /**
-     * Called when registration is successfully done.
+     * Called when the registration succeeded.
      *
      * @param localProfileUri the URI string of the SIP profile to register with
-     * @param expiryTime duration in second before the registration expires
+     * @param expiryTime duration in seconds before the registration expires
      */
     void onRegistrationDone(String localProfileUri, long expiryTime);
 
     /**
-     * Called when the registration fails.
+     * Called when the registration failed.
      *
      * @param localProfileUri the URI string of the SIP profile to register with
      * @param errorCode error code of this error

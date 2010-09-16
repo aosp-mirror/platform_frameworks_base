@@ -3552,7 +3552,7 @@ public final class ContactsContract {
          * <li>{@link #TYPE_CUSTOM}. Put the actual type in {@link #LABEL}.</li>
          * <li>{@link #TYPE_DEFAULT}</li>
          * <li>{@link #TYPE_OTHER_NAME}</li>
-         * <li>{@link #TYPE_MAINDEN_NAME}</li>
+         * <li>{@link #TYPE_MAIDEN_NAME}</li>
          * <li>{@link #TYPE_SHORT_NAME}</li>
          * <li>{@link #TYPE_INITIALS}</li>
          * </ul>
@@ -3578,6 +3578,9 @@ public final class ContactsContract {
 
             public static final int TYPE_DEFAULT = 1;
             public static final int TYPE_OTHER_NAME = 2;
+            public static final int TYPE_MAIDEN_NAME = 3;
+            /** @deprecated Use TYPE_MAIDEN_NAME instead. */
+            @Deprecated
             public static final int TYPE_MAINDEN_NAME = 3;
             public static final int TYPE_SHORT_NAME = 4;
             public static final int TYPE_INITIALS = 5;
@@ -4882,17 +4885,30 @@ public final class ContactsContract {
          * <td>{@link #DATA1}</td>
          * <td></td>
          * </tr>
+         * <tr>
+         * <td>int</td>
+         * <td>{@link #TYPE}</td>
+         * <td>{@link #DATA2}</td>
+         * <td>Allowed values are:
+         * <p>
+         * <ul>
+         * <li>{@link #TYPE_CUSTOM}. Put the actual type in {@link #LABEL}.</li>
+         * <li>{@link #TYPE_HOME}</li>
+         * <li>{@link #TYPE_WORK}</li>
+         * <li>{@link #TYPE_OTHER}</li>
+         * </ul>
+         * </p>
+         * </td>
+         * </tr>
+         * <tr>
+         * <td>String</td>
+         * <td>{@link #LABEL}</td>
+         * <td>{@link #DATA3}</td>
+         * <td></td>
+         * </tr>
          * </table>
          */
-        public static final class SipAddress implements DataColumnsWithJoins {
-            // TODO: Ultimately this class will probably implement
-            // CommonColumns too (in addition to DataColumnsWithJoins)
-            // since it may make sense to have multiple SIP addresses with
-            // different types+labels, just like with phone numbers.
-            //
-            // But that can be extended in the future without breaking any
-            // public API, so let's keep this class ultra-simple for now.
-
+        public static final class SipAddress implements DataColumnsWithJoins, CommonColumns {
             /**
              * This utility class cannot be instantiated
              */
@@ -4901,11 +4917,44 @@ public final class ContactsContract {
             /** MIME type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/sip_address";
 
+            public static final int TYPE_HOME = 1;
+            public static final int TYPE_WORK = 2;
+            public static final int TYPE_OTHER = 3;
+
             /**
              * The SIP address.
              * <P>Type: TEXT</P>
              */
             public static final String SIP_ADDRESS = DATA1;
+            // ...and TYPE and LABEL come from the CommonColumns interface.
+
+            /**
+             * Return the string resource that best describes the given
+             * {@link #TYPE}. Will always return a valid resource.
+             */
+            public static final int getTypeLabelResource(int type) {
+                switch (type) {
+                    case TYPE_HOME: return com.android.internal.R.string.sipAddressTypeHome;
+                    case TYPE_WORK: return com.android.internal.R.string.sipAddressTypeWork;
+                    case TYPE_OTHER: return com.android.internal.R.string.sipAddressTypeOther;
+                    default: return com.android.internal.R.string.sipAddressTypeCustom;
+                }
+            }
+
+            /**
+             * Return a {@link CharSequence} that best describes the given type,
+             * possibly substituting the given {@link #LABEL} value
+             * for {@link #TYPE_CUSTOM}.
+             */
+            public static final CharSequence getTypeLabel(Resources res, int type,
+                    CharSequence label) {
+                if (type == TYPE_CUSTOM && !TextUtils.isEmpty(label)) {
+                    return label;
+                } else {
+                    final int labelRes = getTypeLabelResource(type);
+                    return res.getText(labelRes);
+                }
+            }
         }
     }
 
