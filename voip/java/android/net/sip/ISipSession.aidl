@@ -20,8 +20,8 @@ import android.net.sip.ISipSessionListener;
 import android.net.sip.SipProfile;
 
 /**
- * A SIP session that is associated with a SIP dialog or a transaction
- * (e.g., registration) not within a dialog.
+ * A SIP session that is associated with a SIP dialog or a transaction that is
+ * not within a dialog.
  * @hide
  */
 interface ISipSession {
