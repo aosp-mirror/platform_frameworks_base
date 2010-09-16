@@ -4905,6 +4905,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
 
         if ((changed & VISIBILITY_MASK) != 0) {
+            if (mParent instanceof ViewGroup) {
+                ((ViewGroup)mParent).onChildVisibilityChanged(this, (flags & VISIBILITY_MASK));
+            }
             dispatchVisibilityChanged(this, (flags & VISIBILITY_MASK));
         }
 

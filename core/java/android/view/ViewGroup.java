@@ -323,6 +323,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     // being animated.
     private ArrayList<View> mTransitioningViews;
 
+    // List of children changing visibility. This is used to potentially keep rendering
+    // views during a transition when they otherwise would have become gone/invisible
+    private ArrayList<View> mVisibilityChangingChildren;
+
     public ViewGroup(Context context) {
         super(context);
         initViewGroup();
@@ -754,6 +758,32 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         for (int i = 0; i < count; i++) {
             children[i].dispatchDisplayHint(hint);
+        }
+    }
+
+    /**
+     * @hide
+     * @param child
+     * @param visibility
+     */
+    void onChildVisibilityChanged(View child, int visibility) {
+        if (mTransition != null) {
+            if (visibility == VISIBLE) {
+                mTransition.showChild(this, child);
+            } else {
+                mTransition.hideChild(this, child);
+            }
+            if (visibility != VISIBLE) {
+                // Only track this on disappearing views - appearing views are already visible
+                // and don't need special handling during drawChild()
+                if (mVisibilityChangingChildren == null) {
+                    mVisibilityChangingChildren = new ArrayList<View>();
+                }
+                mVisibilityChangingChildren.add(child);
+                if (mTransitioningViews != null && mTransitioningViews.contains(child)) {
+                    addDisappearingView(child);
+                }
+            }
         }
     }
 
@@ -2598,7 +2628,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         if (mTransition != null) {
-            mTransition.childAdd(this, child);
+            mTransition.addChild(this, child);
         }
 
         if (!checkLayoutParams(params)) {
@@ -2817,7 +2847,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private void removeViewInternal(int index, View view) {
 
         if (mTransition != null) {
-            mTransition.childRemove(this, view);
+            mTransition.removeChild(this, view);
         }
 
         boolean clearChildFocus = false;
@@ -2893,7 +2923,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final View view = children[i];
 
             if (mTransition != null) {
-                mTransition.childRemove(this, view);
+                mTransition.removeChild(this, view);
             }
 
             if (view == focused) {
@@ -2962,7 +2992,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final View view = children[i];
 
             if (mTransition != null) {
-                mTransition.childRemove(this, view);
+                mTransition.removeChild(this, view);
             }
 
             if (view == focused) {
@@ -3005,7 +3035,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     protected void removeDetachedView(View child, boolean animate) {
         if (mTransition != null) {
-            mTransition.childRemove(this, child);
+            mTransition.removeChild(this, child);
         }
 
         if (child == mFocused) {
@@ -4025,11 +4055,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final ArrayList<View> disappearingChildren = mDisappearingChildren;
             if (disappearingChildren != null && disappearingChildren.contains(view)) {
                 disappearingChildren.remove(view);
-                if (view.mAttachInfo != null) {
-                    view.dispatchDetachedFromWindow();
-                }
-                if (view.mParent != null) {
-                    view.mParent = null;
+                if (mVisibilityChangingChildren != null &&
+                        mVisibilityChangingChildren.contains(view)) {
+                    mVisibilityChangingChildren.remove(view);
+                } else {
+                    if (view.mAttachInfo != null) {
+                        view.dispatchDetachedFromWindow();
+                    }
+                    if (view.mParent != null) {
+                        view.mParent = null;
+                    }
                 }
                 mGroupFlags |= FLAG_INVALIDATE_REQUIRED;
             }

@@ -172,7 +172,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     int mItemCount;
 
     /**
-     * The number of items in the adapter before a data changed event occured.
+     * The number of items in the adapter before a data changed event occurred.
      */
     int mOldItemCount;
 
@@ -557,7 +557,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     /**
      * @return The number of items owned by the Adapter associated with this
      *         AdapterView. (This is the number of data items, which may be
-     *         larger than the number of visible view.)
+     *         larger than the number of visible views.)
      */
     @ViewDebug.CapturedViewProperty
     public int getCount() {
