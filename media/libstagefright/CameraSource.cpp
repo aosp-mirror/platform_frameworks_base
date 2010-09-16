@@ -98,6 +98,9 @@ static int32_t getColorFormat(const char* colorFormat) {
        return OMX_COLOR_Format16bitRGB565;
     }
 
+    LOGE("Uknown color format (%s), please add it to "
+         "CameraSource::getColorFormat", colorFormat);
+
     CHECK_EQ(0, "Unknown color format");
 }
 
