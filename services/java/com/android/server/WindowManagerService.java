@@ -5096,61 +5096,39 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         
-        /* Notifies the window manager about an input channel that is not responding.
+        /* Notifies the window manager about an application that is not responding.
          * Returns a new timeout to continue waiting in nanoseconds, or 0 to abort dispatch.
          * 
          * Called by the InputManager.
          */
-        public long notifyInputChannelANR(InputChannel inputChannel) {
-            AppWindowToken token;
-            synchronized (mWindowMap) {
-                WindowState windowState = getWindowStateForInputChannelLocked(inputChannel);
-                if (windowState == null) {
-                    return 0; // window is unknown, abort dispatching
+        public long notifyANR(Object token, InputChannel inputChannel) {
+            AppWindowToken appWindowToken = null;
+            if (inputChannel != null) {
+                synchronized (mWindowMap) {
+                    WindowState windowState = getWindowStateForInputChannelLocked(inputChannel);
+                    if (windowState != null) {
+                        Slog.i(TAG, "Input event dispatching timed out sending to "
+                                + windowState.mAttrs.getTitle());
+                        appWindowToken = windowState.mAppToken;
+                    }
                 }
-                
-                Slog.i(TAG, "Input event dispatching timed out sending to "
-                        + windowState.mAttrs.getTitle());
-                token = windowState.mAppToken;
             }
             
-            return notifyANRInternal(token);
-        }
-    
-        /* Notifies the window manager about an input channel spontaneously recovering from ANR
-         * by successfully delivering the event that originally timed out.
-         * 
-         * Called by the InputManager.
-         */
-        public void notifyInputChannelRecoveredFromANR(InputChannel inputChannel) {
-            // Nothing to do just now.
-            // Just wait for the user to dismiss the ANR dialog.
-        }
-        
-        /* Notifies the window manager about an application that is not responding
-         * in general rather than with respect to a particular input channel.
-         * Returns a new timeout to continue waiting in nanoseconds, or 0 to abort dispatch.
-         * 
-         * Called by the InputManager.
-         */
-        public long notifyANR(Object token) {
-            AppWindowToken appWindowToken = (AppWindowToken) token;
+            if (appWindowToken == null && token != null) {
+                appWindowToken = (AppWindowToken) token;
+                Slog.i(TAG, "Input event dispatching timed out sending to application "
+                        + appWindowToken.stringName);
+            }
 
-            Slog.i(TAG, "Input event dispatching timed out sending to application "
-                    + appWindowToken.stringName);
-            return notifyANRInternal(appWindowToken);
-        }
-        
-        private long notifyANRInternal(AppWindowToken token) {
-            if (token != null && token.appToken != null) {
+            if (appWindowToken != null && appWindowToken.appToken != null) {
                 try {
                     // Notify the activity manager about the timeout and let it decide whether
                     // to abort dispatching or keep waiting.
-                    boolean abort = token.appToken.keyDispatchingTimedOut();
+                    boolean abort = appWindowToken.appToken.keyDispatchingTimedOut();
                     if (! abort) {
                         // The activity manager declined to abort dispatching.
                         // Wait a bit longer and timeout again later.
-                        return token.inputDispatchingTimeoutNanos;
+                        return appWindowToken.inputDispatchingTimeoutNanos;
                     }
                 } catch (RemoteException ex) {
                 }
@@ -5203,13 +5181,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 // Add a window to our list of input windows.
                 final InputWindow inputWindow = mTempInputWindows.add();
                 inputWindow.inputChannel = child.mInputChannel;
+                inputWindow.name = child.toString();
                 inputWindow.layoutParamsFlags = flags;
                 inputWindow.layoutParamsType = type;
                 inputWindow.dispatchingTimeoutNanos = child.getInputDispatchingTimeoutNanos();
                 inputWindow.visible = isVisible;
+                inputWindow.canReceiveKeys = child.canReceiveKeys();
                 inputWindow.hasFocus = hasFocus;
                 inputWindow.hasWallpaper = hasWallpaper;
                 inputWindow.paused = child.mAppToken != null ? child.mAppToken.paused : false;
+                inputWindow.layer = child.mLayer;
                 inputWindow.ownerPid = child.mSession.mPid;
                 inputWindow.ownerUid = child.mSession.mUid;
                 
@@ -5302,23 +5283,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (newWindow != mInputFocus) {
                 if (newWindow != null && newWindow.canReceiveKeys()) {
-                    // If the new input focus is an error window or appears above the current
-                    // input focus, preempt any pending synchronous dispatch so that we can
-                    // start delivering events to the new input focus as soon as possible.
-                    if ((newWindow.mAttrs.flags & FLAG_SYSTEM_ERROR) != 0) {
-                        if (DEBUG_INPUT) {
-                            Slog.v(TAG, "New SYSTEM_ERROR window; resetting state");
-                        }
-                        preemptInputDispatchLw();
-                    } else if (mInputFocus != null && newWindow.mLayer > mInputFocus.mLayer) {
-                        if (DEBUG_INPUT) {
-                            Slog.v(TAG, "Transferring focus to new window at higher layer: "
-                                    + "old win layer=" + mInputFocus.mLayer
-                                    + ", new win layer=" + newWindow.mLayer);
-                        }
-                        preemptInputDispatchLw();
-                    }
-                    
                     // Displaying a window implicitly causes dispatching to be unpaused.
                     // This is to protect against bugs if someone pauses dispatching but
                     // forgets to resume.
@@ -5328,14 +5292,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 mInputFocus = newWindow;
                 updateInputWindowsLw();
             }
-        }
-        
-        /* Tells the dispatcher to stop waiting for its current synchronous event targets.
-         * Essentially, just makes those dispatches asynchronous so a new dispatch cycle
-         * can begin.
-         */
-        private void preemptInputDispatchLw() {
-            mInputManager.preemptInputDispatch();
         }
         
         public void setFocusedAppLw(AppWindowToken newApp) {
