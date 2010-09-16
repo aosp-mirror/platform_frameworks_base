@@ -3561,6 +3561,10 @@
         <attr name="title" />
         <!-- The summary for the item. -->
         <attr name="summary" format="string" />
+        <!-- The title for the bread crumb of this item. -->
+        <attr name="breadCrumbTitle" format="string" />
+        <!-- The short title for the bread crumb of this item. -->
+        <attr name="breadCrumbShortTitle" format="string" />
         <!-- An icon for the item. -->
         <attr name="icon" />
         <!-- The fragment that is displayed when the user selects this item. -->

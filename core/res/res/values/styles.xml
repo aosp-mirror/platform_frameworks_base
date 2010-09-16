@@ -563,6 +563,11 @@
         <item name="android:popupBackground">@android:drawable/editbox_dropdown_background_dark</item>
     </style>
 
+    <!-- Default style for {@link android.app.FragmentBreadCrumbs} view. -->
+    <style name="Widget.FragmentBreadCrumbs">
+        <item name="android:padding">4dp</item>
+    </style>
+
     <style name="Widget.KeyboardView" parent="android:Widget">
         <item name="android:background">@android:drawable/keyboard_background</item>
         <item name="android:keyBackground">@android:drawable/btn_keyboard_key</item>

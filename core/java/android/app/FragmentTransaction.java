@@ -88,7 +88,7 @@ public interface FragmentTransaction {
 
     /**
      * @return <code>true</code> if this transaction contains no operations,
-     *         <code>false</code> otherwise.
+     * <code>false</code> otherwise.
      */
     public boolean isEmpty();
     
@@ -111,12 +111,63 @@ public interface FragmentTransaction {
     /** Fragment is being removed */
     public final int TRANSIT_FRAGMENT_CLOSE = 2 | TRANSIT_EXIT_MASK;
 
+    /**
+     * Set specific animation resources to run for the fragments that are
+     * entering and exiting in this transaction.
+     */
     public FragmentTransaction setCustomAnimations(int enter, int exit);
     
+    /**
+     * Select a standard transition animation for this transaction.  May be
+     * one of {@link #TRANSIT_NONE}, {@link #TRANSIT_FRAGMENT_OPEN},
+     * or {@link #TRANSIT_FRAGMENT_CLOSE}
+     */
     public FragmentTransaction setTransition(int transit);
+
+    /**
+     * Set a custom style resource that will be used for resolving transit
+     * animations.
+     */
     public FragmentTransaction setTransitionStyle(int styleRes);
     
+    /**
+     * Add this transaction to the back stack.  This means that the transaction
+     * will be remembered after it is committed, and will reverse its operation
+     * when later popped off the stack.
+     *
+     * @param name An optional name for this back stack state, or null.
+     */
     public FragmentTransaction addToBackStack(String name);
+
+    /**
+     * Set the full title to show as a bread crumb when this transaction
+     * is on the back stack, as used by {@link FragmentBreadCrumbs}.
+     *
+     * @param res A string resource containing the title.
+     */
+    public FragmentTransaction setBreadCrumbTitle(int res);
+
+    /**
+     * Like {@link #setBreadCrumbTitle(int)} but taking a raw string; this
+     * method is <em>not</em> recommended, as the string can not be changed
+     * later if the locale changes.
+     */
+    public FragmentTransaction setBreadCrumbTitle(CharSequence text);
+
+    /**
+     * Set the short title to show as a bread crumb when this transaction
+     * is on the back stack, as used by {@link FragmentBreadCrumbs}.
+     *
+     * @param res A string resource containing the title.
+     */
+    public FragmentTransaction setBreadCrumbShortTitle(int res);
+
+    /**
+     * Like {@link #setBreadCrumbShortTitle(int)} but taking a raw string; this
+     * method is <em>not</em> recommended, as the string can not be changed
+     * later if the locale changes.
+     */
+    public FragmentTransaction setBreadCrumbShortTitle(CharSequence text);
 
     /**
      * Schedules a commit of this transaction.  Note that the commit does

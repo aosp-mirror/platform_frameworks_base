@@ -1352,6 +1352,8 @@
   <public type="attr" name="popupMenuStyle" />
   <public type="attr" name="textAppearanceLargePopupMenu" />
   <public type="attr" name="textAppearanceSmallPopupMenu" />
+  <public type="attr" name="breadCrumbTitle" />
+  <public type="attr" name="breadCrumbShortTitle" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
@@ -1390,6 +1392,7 @@
   <public type="style" name="Widget.ActionButton.CloseMode" />
   <public type="style" name="TextAppearance.Widget.PopupMenu.Large" />
   <public type="style" name="TextAppearance.Widget.PopupMenu.Small" />
+  <public type="style" name="Widget.FragmentBreadCrumbs" />
 
   <public type="string" name="selectTextMode" />
 

@@ -8745,7 +8745,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mPrivateFlags = (mPrivateFlags & ~ACTIVATED) | (activated ? ACTIVATED : 0);
             invalidate();
             refreshDrawableState();
-            dispatchSetSelected(activated);
+            dispatchSetActivated(activated);
         }
     }
 

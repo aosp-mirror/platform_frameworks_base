@@ -22,6 +22,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.app.Fragment;
+import android.app.FragmentBreadCrumbs;
 import android.app.FragmentTransaction;
 import android.app.ListActivity;
 import android.content.Context;
@@ -117,7 +118,6 @@ public abstract class PreferenceActivity extends ListActivity implements
     // Constants for state save/restore
     private static final String HEADERS_TAG = ":android:headers";
     private static final String CUR_HEADER_TAG = ":android:cur_header";
-    private static final String SINGLE_PANE_TAG = ":android:single_pane";
     private static final String PREFERENCES_TAG = ":android:preferences";
 
     /**
@@ -168,6 +168,8 @@ public abstract class PreferenceActivity extends ListActivity implements
     private FrameLayout mListFooter;
 
     private View mPrefsContainer;
+
+    private FragmentBreadCrumbs mFragmentBreadCrumbs;
 
     private boolean mSinglePane;
 
@@ -300,6 +302,18 @@ public abstract class PreferenceActivity extends ListActivity implements
         public CharSequence summary;
 
         /**
+         * Optional text to show as the title in the bread crumb.
+         * @attr ref android.R.styleable#PreferenceHeader_breadCrumbTitle
+         */
+        public CharSequence breadCrumbTitle;
+
+        /**
+         * Optional text to show as the short title in the bread crumb.
+         * @attr ref android.R.styleable#PreferenceHeader_breadCrumbShortTitle
+         */
+        public CharSequence breadCrumbShortTitle;
+
+        /**
          * Optional icon resource to show for this header.
          * @attr ref android.R.styleable#PreferenceHeader_icon
          */
@@ -341,6 +355,8 @@ public abstract class PreferenceActivity extends ListActivity implements
             dest.writeLong(id);
             TextUtils.writeToParcel(title, dest, flags);
             TextUtils.writeToParcel(summary, dest, flags);
+            TextUtils.writeToParcel(breadCrumbTitle, dest, flags);
+            TextUtils.writeToParcel(breadCrumbShortTitle, dest, flags);
             dest.writeInt(iconRes);
             dest.writeString(fragment);
             dest.writeBundle(fragmentArguments);
@@ -357,6 +373,8 @@ public abstract class PreferenceActivity extends ListActivity implements
             id = in.readLong();
             title = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             summary = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+            breadCrumbTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+            breadCrumbShortTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             iconRes = in.readInt();
             fragment = in.readString();
             fragmentArguments = in.readBundle();
@@ -405,7 +423,6 @@ public abstract class PreferenceActivity extends ListActivity implements
                     setSelectedHeader(mHeaders.get(curHeader));
                 }
             }
-            mSinglePane = savedInstanceState.getBoolean(SINGLE_PANE_TAG);
 
         } else {
             if (initialFragment != null && mSinglePane) {
@@ -537,7 +554,11 @@ public abstract class PreferenceActivity extends ListActivity implements
     public boolean onIsMultiPane() {
         Configuration config = getResources().getConfiguration();
         if ((config.screenLayout&Configuration.SCREENLAYOUT_SIZE_MASK)
-                == Configuration.SCREENLAYOUT_SIZE_XLARGE
+                == Configuration.SCREENLAYOUT_SIZE_XLARGE) {
+            return true;
+        }
+        if ((config.screenLayout&Configuration.SCREENLAYOUT_SIZE_MASK)
+                == Configuration.SCREENLAYOUT_SIZE_LARGE
                 && config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             return true;
         }
@@ -649,6 +670,10 @@ public abstract class PreferenceActivity extends ListActivity implements
                             com.android.internal.R.styleable.PreferenceHeader_title);
                     header.summary = sa.getText(
                             com.android.internal.R.styleable.PreferenceHeader_summary);
+                    header.breadCrumbTitle = sa.getText(
+                            com.android.internal.R.styleable.PreferenceHeader_breadCrumbTitle);
+                    header.breadCrumbShortTitle = sa.getText(
+                            com.android.internal.R.styleable.PreferenceHeader_breadCrumbShortTitle);
                     header.iconRes = sa.getResourceId(
                             com.android.internal.R.styleable.PreferenceHeader_icon, 0);
                     header.fragment = sa.getString(
@@ -741,7 +766,6 @@ public abstract class PreferenceActivity extends ListActivity implements
                 }
             }
         }
-        outState.putBoolean(SINGLE_PANE_TAG, mSinglePane);
 
         if (mPreferenceManager != null) {
             final PreferenceScreen preferenceScreen = getPreferenceScreen();
@@ -837,6 +861,20 @@ public abstract class PreferenceActivity extends ListActivity implements
         startActivity(intent);
     }
 
+    /**
+     * Change the base title of the bread crumbs for the current preferences.
+     * This will normally be called for you.  See
+     * {@link android.app.FragmentBreadCrumbs} for more information.
+     */
+    public void showBreadCrumbs(CharSequence title, CharSequence shortTitle) {
+        if (mFragmentBreadCrumbs == null) {
+            mFragmentBreadCrumbs = new FragmentBreadCrumbs(this);
+            mFragmentBreadCrumbs.setActivity(this);
+            getActionBar().setCustomNavigationMode(mFragmentBreadCrumbs);
+        }
+        mFragmentBreadCrumbs.setTitle(title, shortTitle);
+    }
+
     void setSelectedHeader(Header header) {
         mCurHeader = header;
         int index = mHeaders.indexOf(header);
@@ -845,6 +883,21 @@ public abstract class PreferenceActivity extends ListActivity implements
         } else {
             getListView().clearChoices();
         }
+        if (header != null) {
+            CharSequence title = header.breadCrumbTitle;
+            if (title == null) title = header.title;
+            if (title == null) title = getTitle();
+            showBreadCrumbs(title, header.breadCrumbShortTitle);
+        } else {
+            showBreadCrumbs(getTitle(), null);
+        }
+    }
+
+    public void switchToHeaderInner(String fragmentName, Bundle args) {
+        getFragmentManager().popBackStack(BACK_STACK_PREFS, POP_BACK_STACK_INCLUSIVE);
+        Fragment f = Fragment.instantiate(this, fragmentName, args);
+        getFragmentManager().openTransaction().replace(
+                com.android.internal.R.id.prefs, f).commit();
     }
 
     /**
@@ -856,12 +909,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      */
     public void switchToHeader(String fragmentName, Bundle args) {
         setSelectedHeader(null);
-
-        getFragmentManager().popBackStack(BACK_STACK_PREFS, POP_BACK_STACK_INCLUSIVE);
-
-        Fragment f = Fragment.instantiate(this, fragmentName, args);
-        getFragmentManager().openTransaction().replace(
-                com.android.internal.R.id.prefs, f).commit();
+        switchToHeaderInner(fragmentName, args);
     }
 
     /**
@@ -871,8 +919,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      * @param header The new header to display.
      */
     public void switchToHeader(Header header) {
-        switchToHeader(header.fragment, header.fragmentArguments);
-        mCurHeader = header;
+        switchToHeaderInner(header.fragment, header.fragmentArguments);
         setSelectedHeader(header);
     }
 
@@ -930,17 +977,32 @@ public abstract class PreferenceActivity extends ListActivity implements
      */
     public void startPreferenceFragment(Fragment fragment, boolean push) {
         FragmentTransaction transaction = getFragmentManager().openTransaction();
-        transaction.replace(com.android.internal.R.id.prefs, fragment);
+        startPreferenceFragment(fragment, transaction);
         if (push) {
             transaction.addToBackStack(BACK_STACK_PREFS);
         }
         transaction.commit();
     }
 
+    /**
+     * Start a new fragment.
+     *
+     * @param fragment The fragment to start
+     * @param ft The FragmentTransaction in which to perform this operation.
+     * Will not be added to the back stack or committed for you; you use do that.
+     */
+    public void startPreferenceFragment(Fragment fragment, FragmentTransaction ft) {
+        ft.replace(com.android.internal.R.id.prefs, fragment);
+    }
+
     @Override
     public boolean onPreferenceStartFragment(PreferenceFragment caller, Preference pref) {
         Fragment f = Fragment.instantiate(this, pref.getFragment(), pref.getExtras());
-        startPreferenceFragment(f, true);
+        FragmentTransaction transaction = getFragmentManager().openTransaction();
+        startPreferenceFragment(f, transaction);
+        transaction.setBreadCrumbTitle(pref.getTitle());
+        transaction.addToBackStack(BACK_STACK_PREFS);
+        transaction.commit();
         return true;
     }
 

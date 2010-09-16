@@ -54,6 +54,7 @@
             android:layout_below="@android:id/title"
             android:layout_alignLeft="@android:id/title"
             android:textAppearance="?android:attr/textAppearanceSmall"
+            android:ellipsize="end"
             android:maxLines="2" />
 
     </RelativeLayout>

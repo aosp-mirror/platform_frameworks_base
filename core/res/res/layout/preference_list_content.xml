@@ -33,7 +33,7 @@
             android:orientation="vertical"
             android:layout_width="0px"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="10">
 
             <ListView android:id="@android:id/list"
                 android:layout_width="match_parent"
@@ -52,7 +52,7 @@
         <FrameLayout android:id="@+id/prefs"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
-                android:layout_weight="3"
+                android:layout_weight="33"
                 android:visibility="gone" />
     </LinearLayout>
 
