@@ -45,6 +45,13 @@ namespace android {
 namespace uirenderer {
 
 ///////////////////////////////////////////////////////////////////////////////
+// Defines
+///////////////////////////////////////////////////////////////////////////////
+
+// Debug
+#define DEBUG_OPENGL 1
+
+///////////////////////////////////////////////////////////////////////////////
 // Renderer
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -59,6 +66,7 @@ public:
 
     void setViewport(int width, int height);
     void prepare();
+    void finish();
     void acquireContext();
     void releaseContext();
 
@@ -394,6 +402,8 @@ private:
 
     // List of rectangles to clear due to calls to saveLayer()
     Vector<Rect*> mLayers;
+
+    GLint mMaxTextureSize;
 
 }; // class OpenGLRenderer
 

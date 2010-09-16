@@ -110,11 +110,9 @@ Layer* LayerCache::get(LayerSize& size) {
         layer = new Layer;
         layer->blend = true;
 
-        // Generate the texture in which the FBO will draw
         glGenTextures(1, &layer->texture);
         glBindTexture(GL_TEXTURE_2D, layer->texture);
 
-        // The FBO will not be scaled, so we can use lower quality filtering
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 

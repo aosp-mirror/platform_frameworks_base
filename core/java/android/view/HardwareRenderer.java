@@ -210,7 +210,7 @@ public abstract class HardwareRenderer {
          * is invoked and the requested flag is turned off. The error code is
          * also logged as a warning.
          */
-        void checkErrors() {
+        void checkEglErrors() {
             if (isEnabled()) {
                 int error = sEgl.eglGetError();
                 if (error != EGL10.EGL_SUCCESS) {
@@ -221,7 +221,7 @@ public abstract class HardwareRenderer {
                         // we'll try again if it was context lost
                         setRequested(false);
                     }
-                    Log.w(LOG_TAG, "OpenGL error: " + error);
+                    Log.w(LOG_TAG, "EGL error: " + Integer.toHexString(error));
                 }
             }
         }
@@ -348,7 +348,7 @@ public abstract class HardwareRenderer {
         void initializeIfNeeded(int width, int height, View.AttachInfo attachInfo,
                 SurfaceHolder holder) {
             if (isRequested()) {
-                checkErrors();
+                checkEglErrors();
                 super.initializeIfNeeded(width, height, attachInfo, holder);
             }
         }
@@ -386,6 +386,9 @@ public abstract class HardwareRenderer {
         void onPreDraw() {
         }
 
+        void onPostDraw() {
+        }
+        
         /**
          * Defines the EGL configuration for this renderer. The default configuration
          * is RGBX, no depth, no stencil.
@@ -418,10 +421,12 @@ public abstract class HardwareRenderer {
                     canvas.restoreToCount(saveCount);
                 }
 
+                onPostDraw();
+
                 attachInfo.mIgnoreDirtyState = false;
 
                 sEgl.eglSwapBuffers(sEglDisplay, mEglSurface);
-                checkErrors();
+                checkEglErrors();
             }
         }
 
@@ -568,6 +573,11 @@ public abstract class HardwareRenderer {
         @Override
         void onPreDraw() {
             mGlCanvas.onPreDraw();
+        }
+
+        @Override
+        void onPostDraw() {
+            mGlCanvas.onPostDraw();
         }
 
         static HardwareRenderer create(boolean translucent) {

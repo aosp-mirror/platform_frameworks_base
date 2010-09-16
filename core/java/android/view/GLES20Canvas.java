@@ -148,8 +148,14 @@ class GLES20Canvas extends Canvas {
     void onPreDraw() {
         nPrepare(mRenderer);
     }
-    
+
     private native void nPrepare(int renderer);
+
+    void onPostDraw() {
+        nFinish(mRenderer);
+    }
+    
+    private native void nFinish(int renderer);
 
     @Override
     public boolean acquireContext() {

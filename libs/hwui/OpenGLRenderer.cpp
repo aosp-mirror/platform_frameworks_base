@@ -124,6 +124,8 @@ OpenGLRenderer::OpenGLRenderer(): mCaches(Caches::getInstance()) {
     if (maxTextureUnits < REQUIRED_TEXTURE_UNITS_COUNT) {
         LOGW("At least %d texture units are required!", REQUIRED_TEXTURE_UNITS_COUNT);
     }
+
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
@@ -159,6 +161,15 @@ void OpenGLRenderer::prepare() {
     glScissor(0, 0, mWidth, mHeight);
 
     mSnapshot->setClip(0.0f, 0.0f, mWidth, mHeight);
+}
+
+void OpenGLRenderer::finish() {
+#if DEBUG_OPENGL
+    GLenum status = GL_NO_ERROR;
+    while ((status = glGetError()) != GL_NO_ERROR) {
+        LOGD("GL error from OpenGLRenderer: 0x%x", status);
+    }
+#endif
 }
 
 void OpenGLRenderer::acquireContext() {
@@ -342,7 +353,10 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
     // Layers only make sense if they are in the framebuffer's bounds
     bounds.intersect(*mSnapshot->clipRect);
-    if (bounds.isEmpty()) return false;
+    if (bounds.isEmpty() || bounds.getWidth() > mMaxTextureSize ||
+            bounds.getHeight() > mMaxTextureSize) {
+        return false;
+    }
 
     LayerSize size(bounds.getWidth(), bounds.getHeight());
     Layer* layer = mCaches.layerCache.get(size);
