@@ -669,6 +669,9 @@ public class RemoteViewsAdapter extends BaseAdapter {
     public RemoteViewsAdapter(Context context, Intent intent, RemoteAdapterConnectionCallback callback) {
         mContext = context;
         mIntent = intent;
+        if (mIntent == null) {
+            throw new IllegalArgumentException("Non-null Intent must be specified.");
+        }
 
         // initialize the worker thread
         mWorkerThread = new HandlerThread("RemoteViewsCache-loader");
@@ -687,6 +690,10 @@ public class RemoteViewsAdapter extends BaseAdapter {
     protected void finalize() throws Throwable {
         // remember to unbind from the service when finalizing
         unbindService();
+    }
+
+    public Intent getRemoteViewsServiceIntent() {
+        return mIntent;
     }
 
     public int getCount() {
