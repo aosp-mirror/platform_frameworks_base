@@ -1035,7 +1035,7 @@ status_t OMXCodec::getVideoProfileLevel(
                 mNode, OMX_IndexParamVideoProfileLevelQuerySupported,
                 &param, sizeof(param));
 
-        if (err != OK) return err;
+        if (err != OK) break;
 
         int32_t supportedProfile = static_cast<int32_t>(param.eProfile);
         int32_t supportedLevel = static_cast<int32_t>(param.eLevel);
@@ -1043,7 +1043,10 @@ status_t OMXCodec::getVideoProfileLevel(
             supportedProfile, supportedLevel);
 
         if (profile == supportedProfile &&
-            level == supportedLevel) {
+            level <= supportedLevel) {
+            // We can further check whether the level is a valid
+            // value; but we will leave that to the omx encoder component
+            // via OMX_SetParameter call.
             profileLevel.mProfile = profile;
             profileLevel.mLevel = level;
             return OK;
