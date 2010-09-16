@@ -68,6 +68,7 @@ import javax.sip.message.Response;
  */
 class SipHelper {
     private static final String TAG = SipHelper.class.getSimpleName();
+    private static final boolean DEBUG = true;
 
     private SipStack mSipStack;
     private SipProvider mSipProvider;
@@ -264,6 +265,7 @@ class SipHelper {
 
             ClientTransaction clientTransaction =
                     mSipProvider.getNewClientTransaction(request);
+            if (DEBUG) Log.d(TAG, "send INVITE: " + request);
             clientTransaction.sendRequest();
             return clientTransaction;
         } catch (ParseException e) {
@@ -281,6 +283,7 @@ class SipHelper {
 
             ClientTransaction clientTransaction =
                     mSipProvider.getNewClientTransaction(request);
+            if (DEBUG) Log.d(TAG, "send RE-INVITE: " + request);
             dialog.sendRequest(clientTransaction);
             return clientTransaction;
         } catch (ParseException e) {
@@ -314,6 +317,7 @@ class SipHelper {
             ToHeader toHeader = (ToHeader) response.getHeader(ToHeader.NAME);
             toHeader.setTag(tag);
             response.addHeader(toHeader);
+            if (DEBUG) Log.d(TAG, "send RINGING: " + response);
             transaction.sendResponse(response);
             return transaction;
         } catch (ParseException e) {
@@ -340,7 +344,9 @@ class SipHelper {
             if (inviteTransaction == null) {
                 inviteTransaction = getServerTransaction(event);
             }
+
             if (inviteTransaction.getState() != TransactionState.COMPLETED) {
+                if (DEBUG) Log.d(TAG, "send OK: " + response);
                 inviteTransaction.sendResponse(response);
             }
 
@@ -358,6 +364,7 @@ class SipHelper {
                     Response.BUSY_HERE, request);
 
             if (inviteTransaction.getState() != TransactionState.COMPLETED) {
+                if (DEBUG) Log.d(TAG, "send BUSY HERE: " + response);
                 inviteTransaction.sendResponse(response);
             }
         } catch (ParseException e) {
@@ -373,27 +380,31 @@ class SipHelper {
         Response response = event.getResponse();
         long cseq = ((CSeqHeader) response.getHeader(CSeqHeader.NAME))
                 .getSeqNumber();
-        dialog.sendAck(dialog.createAck(cseq));
+        Request ack = dialog.createAck(cseq);
+        if (DEBUG) Log.d(TAG, "send ACK: " + ack);
+        dialog.sendAck(ack);
     }
 
     public void sendBye(Dialog dialog) throws SipException {
         Request byeRequest = dialog.createRequest(Request.BYE);
-        Log.d(TAG, "send BYE: " + byeRequest);
+        if (DEBUG) Log.d(TAG, "send BYE: " + byeRequest);
         dialog.sendRequest(mSipProvider.getNewClientTransaction(byeRequest));
     }
 
     public void sendCancel(ClientTransaction inviteTransaction)
             throws SipException {
         Request cancelRequest = inviteTransaction.createCancel();
+        if (DEBUG) Log.d(TAG, "send CANCEL: " + cancelRequest);
         mSipProvider.getNewClientTransaction(cancelRequest).sendRequest();
     }
 
     public void sendResponse(RequestEvent event, int responseCode)
             throws SipException {
         try {
-            getServerTransaction(event).sendResponse(
-                    mMessageFactory.createResponse(
-                            responseCode, event.getRequest()));
+            Response response = mMessageFactory.createResponse(
+                    responseCode, event.getRequest());
+            if (DEBUG) Log.d(TAG, "send response: " + response);
+            getServerTransaction(event).sendResponse(response);
         } catch (ParseException e) {
             throw new SipException("sendResponse()", e);
         }
@@ -402,8 +413,10 @@ class SipHelper {
     public void sendInviteRequestTerminated(Request inviteRequest,
             ServerTransaction inviteTransaction) throws SipException {
         try {
-            inviteTransaction.sendResponse(mMessageFactory.createResponse(
-                    Response.REQUEST_TERMINATED, inviteRequest));
+            Response response = mMessageFactory.createResponse(
+                    Response.REQUEST_TERMINATED, inviteRequest);
+            if (DEBUG) Log.d(TAG, "send response: " + response);
+            inviteTransaction.sendResponse(response);
         } catch (ParseException e) {
             throw new SipException("sendInviteRequestTerminated()", e);
         }
