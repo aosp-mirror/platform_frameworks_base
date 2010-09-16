@@ -361,8 +361,8 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since ./frameworks/base/api/6.xml 6 \
     -since ./frameworks/base/api/7.xml 7 \
     -since ./frameworks/base/api/8.xml 8 \
-		-error 1 -error 2 -warning 3 -error 4 -error 6 -error 8 -error 14 \
-		-overview $(LOCAL_PATH)/core/java/overview.html
+    -werror -hide 13 \
+    -overview $(LOCAL_PATH)/core/java/overview.html
 
 framework_docs_LOCAL_ADDITIONAL_JAVA_DIR:= $(call intermediates-dir-for,JAVA_LIBRARIES,framework)
 
