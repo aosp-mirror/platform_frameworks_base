@@ -1008,7 +1008,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private void sendConnectedBroadcast(NetworkInfo info) {
-        Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
+        sendGeneralBroadcast(info, ConnectivityManager.CONNECTIVITY_ACTION);
+    }
+
+    private void sendInetConditionBroadcast(NetworkInfo info) {
+        sendGeneralBroadcast(info, ConnectivityManager.INET_CONDITION_ACTION);
+    }
+
+    private void sendGeneralBroadcast(NetworkInfo info, String bcastType) {
+        Intent intent = new Intent(bcastType);
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
         if (info.isFailover()) {
             intent.putExtra(ConnectivityManager.EXTRA_IS_FAILOVER, true);
@@ -1512,7 +1520,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         break;
                     }
                     mDefaultInetConditionPublished = mDefaultInetCondition;
-                    sendConnectedBroadcast(networkInfo);
+                    sendInetConditionBroadcast(networkInfo);
                     break;
             }
         }
