@@ -777,10 +777,12 @@ void InputDispatcher::resumeAfterTargetsNotReadyTimeoutLocked(nsecs_t newTimeout
         mInputTargetWaitTimeoutExpired = true;
 
         // Input state will not be realistic.  Mark it out of sync.
-        ssize_t connectionIndex = getConnectionIndexLocked(inputChannel);
-        if (connectionIndex >= 0) {
-            sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
-            connection->inputState.setOutOfSync();
+        if (inputChannel.get()) {
+            ssize_t connectionIndex = getConnectionIndexLocked(inputChannel);
+            if (connectionIndex >= 0) {
+                sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
+                connection->inputState.setOutOfSync();
+            }
         }
     }
 }
