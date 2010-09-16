@@ -427,25 +427,12 @@ web_docs_sample_code_flags := \
 framework_docs_SDK_VERSION:=2.2
   # release version (ie "Release x")  (full releases only)
 framework_docs_SDK_REL_ID:=1
-  # name of current SDK directory (full releases only)
-framework_docs_SDK_CURRENT_DIR:=$(framework_docs_SDK_VERSION)_r$(framework_docs_SDK_REL_ID)
   # flag to build offline docs for a preview release
 framework_docs_SDK_PREVIEW:=0
 
-## Latest ADT version identifiers, for reference from published docs
-framework_docs_ADT_VERSION:=0.9.8
-framework_docs_ADT_DOWNLOAD:=ADT-0.9.8.zip
-framework_docs_ADT_BYTES:=8301417
-framework_docs_ADT_CHECKSUM:=27e0de800512f13feae46fb554e6ee2f
-
 framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-hdf sdk.version $(framework_docs_SDK_VERSION) \
-		-hdf sdk.rel.id $(framework_docs_SDK_REL_ID) \
-		-hdf sdk.current $(framework_docs_SDK_CURRENT_DIR) \
-		-hdf adt.zip.version $(framework_docs_ADT_VERSION) \
-		-hdf adt.zip.download $(framework_docs_ADT_DOWNLOAD) \
-		-hdf adt.zip.bytes $(framework_docs_ADT_BYTES) \
-		-hdf adt.zip.checksum $(framework_docs_ADT_CHECKSUM) 
+		-hdf sdk.rel.id $(framework_docs_SDK_REL_ID)
 
 # ====  the api stubs and current.xml ===========================
 include $(CLEAR_VARS)
@@ -529,7 +516,7 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-hdf android.whichdoc offline 
 
 ifeq ($(framework_docs_SDK_PREVIEW),true)
-  LOCAL_DROIDDOC_OPTIONS += -hdf sdk.current preview 
+  LOCAL_DROIDDOC_OPTIONS += -hdf sdk.preview true
 endif
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk

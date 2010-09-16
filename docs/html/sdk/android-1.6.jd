@@ -2,8 +2,6 @@ page.title=Android 1.6 Platform
 sdk.platform.version=1.6
 sdk.platform.apiLevel=4
 sdk.platform.majorMinor=minor
-sdk.platform.releaseDate=December 2009
-sdk.platform.deployableDate=October 2009
 
 @jd:body
 
@@ -43,7 +41,7 @@ Differences Report &raquo;</a> </li>
 <em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
 
 <p>Android {@sdkPlatformVersion} is a {@sdkPlatformMajorMinor} platform release
-deployable to Android-powered handsets since {@sdkPlatformDeployableDate}.
+deployable to Android-powered handsets since October 2009.
 The platform includes new features for users and developers, as well as changes
 in the Android framework API. </p>
 
