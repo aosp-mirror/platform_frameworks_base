@@ -764,7 +764,11 @@ int64_t APacketSource::getQueueDurationUs(bool *eos) {
     int64_t lastTimeUs;
     CHECK(last->meta()->findInt64("timeUs", &lastTimeUs));
 
-    CHECK_GE(lastTimeUs, firstTimeUs);
+    if (lastTimeUs < firstTimeUs) {
+        LOG(ERROR) << "Huh? Time moving backwards? "
+                   << firstTimeUs << " > " << lastTimeUs;
+        return 0;
+    }
 
     return lastTimeUs - firstTimeUs;
 }

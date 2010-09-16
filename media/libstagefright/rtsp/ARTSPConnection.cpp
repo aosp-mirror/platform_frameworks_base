@@ -175,19 +175,38 @@ void ARTSPConnection::onConnect(const sp<AMessage> &msg) {
 
     mState = CONNECTING;
 
-    mSocket = socket(AF_INET, SOCK_STREAM, 0);
-
-    MakeSocketBlocking(mSocket, false);
-
     AString url;
     CHECK(msg->findString("url", &url));
 
+    sp<AMessage> reply;
+    CHECK(msg->findMessage("reply", &reply));
+
     AString host, path;
     unsigned port;
-    CHECK(ParseURL(url.c_str(), &host, &port, &path));
+    if (!ParseURL(url.c_str(), &host, &port, &path)) {
+        LOG(ERROR) << "Malformed rtsp url " << url;
+
+        reply->setInt32("result", ERROR_MALFORMED);
+        reply->post();
+
+        mState = DISCONNECTED;
+        return;
+    }
 
     struct hostent *ent = gethostbyname(host.c_str());
-    CHECK(ent != NULL);
+    if (ent == NULL) {
+        LOG(ERROR) << "Unknown host " << host;
+
+        reply->setInt32("result", -ENOENT);
+        reply->post();
+
+        mState = DISCONNECTED;
+        return;
+    }
+
+    mSocket = socket(AF_INET, SOCK_STREAM, 0);
+
+    MakeSocketBlocking(mSocket, false);
 
     struct sockaddr_in remote;
     memset(remote.sin_zero, 0, sizeof(remote.sin_zero));
@@ -197,9 +216,6 @@ void ARTSPConnection::onConnect(const sp<AMessage> &msg) {
 
     int err = ::connect(
             mSocket, (const struct sockaddr *)&remote, sizeof(remote));
-
-    sp<AMessage> reply;
-    CHECK(msg->findMessage("reply", &reply));
 
     reply->setInt32("server-ip", ntohl(remote.sin_addr.s_addr));
 
@@ -337,13 +353,20 @@ void ARTSPConnection::onSendRequest(const sp<AMessage> &msg) {
 
         if (n == 0) {
             // Server closed the connection.
-            TRESPASS();
+            LOG(ERROR) << "Server unexpectedly closed the connection.";
+
+            reply->setInt32("result", ERROR_IO);
+            reply->post();
+            return;
         } else if (n < 0) {
             if (errno == EINTR) {
                 continue;
             }
 
-            TRESPASS();
+            LOG(ERROR) << "Error sending rtsp request.";
+            reply->setInt32("result", -errno);
+            reply->post();
+            return;
         }
 
         numBytesSent += (size_t)n;
@@ -415,13 +438,15 @@ status_t ARTSPConnection::receive(void *data, size_t size) {
         ssize_t n = recv(mSocket, (uint8_t *)data + offset, size - offset, 0);
         if (n == 0) {
             // Server closed the connection.
+            LOG(ERROR) << "Server unexpectedly closed the connection.";
             return ERROR_IO;
         } else if (n < 0) {
             if (errno == EINTR) {
                 continue;
             }
 
-            TRESPASS();
+            LOG(ERROR) << "Error reading rtsp response.";
+            return -errno;
         }
 
         offset += (size_t)n;
