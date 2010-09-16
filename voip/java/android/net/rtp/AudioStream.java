@@ -20,12 +20,27 @@ import java.net.InetAddress;
 import java.net.SocketException;
 
 /**
- * AudioStream represents a RTP stream carrying audio payloads.
+ * An AudioStream is a {@link RtpStream} which carrys audio payloads over
+ * Real-time Transport Protocol (RTP). Two different classes are developed in
+ * order to support various usages such as audio conferencing. An AudioStream
+ * represents a remote endpoint which consists of a network mapping and a
+ * configured {@link AudioCodec}. On the other side, An {@link AudioGroup}
+ * represents a local endpoint which mixes all the AudioStreams and optionally
+ * interacts with the speaker and the microphone at the same time. The simplest
+ * usage includes one for each endpoints. For other combinations, users should
+ * be aware of the limitations described in {@link AudioGroup}.
+ *
+ * <p>An AudioStream becomes busy when it joins an AudioGroup. In this case most
+ * of the setter methods are disabled. This is designed to ease the task of
+ * managing native resources. One can always make an AudioStream leave its
+ * AudioGroup by calling {@link #join(AudioGroup)} with {@code null} and put it
+ * back after the modification is done.
+ *
+ * @see AudioGroup
+ * @hide
  */
-/** @hide */
 public class AudioStream extends RtpStream {
     private AudioCodec mCodec;
-    private int mCodecType = -1;
     private int mDtmfType = -1;
     private AudioGroup mGroup;
 
@@ -42,7 +57,8 @@ public class AudioStream extends RtpStream {
     }
 
     /**
-     * Returns {@code true} if the stream already joined an {@link AudioGroup}.
+     * Returns {@code true} if the stream has already joined an
+     * {@link AudioGroup}.
      */
     @Override
     public final boolean isBusy() {
@@ -52,7 +68,7 @@ public class AudioStream extends RtpStream {
     /**
      * Returns the joined {@link AudioGroup}.
      */
-    public AudioGroup getAudioGroup() {
+    public AudioGroup getGroup() {
         return mGroup;
     }
 
@@ -74,35 +90,26 @@ public class AudioStream extends RtpStream {
             mGroup = null;
         }
         if (group != null) {
-            group.add(this, mCodec, mCodecType, mDtmfType);
+            group.add(this, mCodec, mDtmfType);
             mGroup = group;
         }
     }
 
     /**
-     * Sets the {@link AudioCodec} and its RTP payload type. According to RFC
-     * 3551, the type must be in the range of 0 and 127, where 96 and above are
-     * dynamic types. For codecs with static mappings (non-negative
-     * {@link AudioCodec#defaultType}), assigning a different non-dynamic type
-     * is disallowed.
+     * Sets the {@link AudioCodec}.
      *
      * @param codec The AudioCodec to be used.
-     * @param type The RTP payload type.
-     * @throws IllegalArgumentException if the type is invalid or used by DTMF.
+     * @throws IllegalArgumentException if its type is used by DTMF.
      * @throws IllegalStateException if the stream is busy.
      */
-    public void setCodec(AudioCodec codec, int type) {
+    public void setCodec(AudioCodec codec) {
         if (isBusy()) {
             throw new IllegalStateException("Busy");
         }
-        if (type < 0 || type > 127 || (type != codec.defaultType && type < 96)) {
-            throw new IllegalArgumentException("Invalid type");
-        }
-        if (type == mDtmfType) {
+        if (codec.type == mDtmfType) {
             throw new IllegalArgumentException("The type is used by DTMF");
         }
         mCodec = codec;
-        mCodecType = type;
     }
 
     /**
@@ -127,7 +134,7 @@ public class AudioStream extends RtpStream {
             if (type < 96 || type > 127) {
                 throw new IllegalArgumentException("Invalid type");
             }
-            if (type == mCodecType) {
+            if (type == mCodec.type) {
                 throw new IllegalArgumentException("The type is used by codec");
             }
         }
