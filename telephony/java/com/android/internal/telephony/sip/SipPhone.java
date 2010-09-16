@@ -165,6 +165,7 @@ public class SipPhone extends SipPhoneBase {
             } else {
                 throw new CallStateException("phone not ringing");
             }
+            updatePhoneState();
         }
     }
 
