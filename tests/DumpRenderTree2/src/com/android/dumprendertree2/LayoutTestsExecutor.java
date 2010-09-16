@@ -35,6 +35,7 @@ import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import android.view.Window;
 import android.webkit.ConsoleMessage;
+import android.webkit.HttpAuthHandler;
 import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
@@ -166,6 +167,19 @@ public class LayoutTestsExecutor extends Activity {
                 onTestFinished();
             }
         }
+
+         @Override
+         public void onReceivedHttpAuthRequest(WebView view, HttpAuthHandler handler,
+                 String host, String realm) {
+             if (handler.useHttpAuthUsernamePassword() && view != null) {
+                 String[] credentials = view.getHttpAuthUsernamePassword(host, realm);
+                 if (credentials != null && credentials.length == 2) {
+                     handler.proceed(credentials[0], credentials[1]);
+                     return;
+                 }
+             }
+             handler.cancel();
+         }
     };
 
     private WebChromeClient mWebChromeClient = new WebChromeClient() {
