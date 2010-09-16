@@ -66,7 +66,13 @@ public class DatabaseUtils {
     /** One of the values returned by {@link #getSqlStatementType(String)}. */
     public static final int STATEMENT_ABORT = 6;
     /** One of the values returned by {@link #getSqlStatementType(String)}. */
-    public static final int STATEMENT_OTHER = 7;
+    public static final int STATEMENT_PRAGMA = 7;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    public static final int STATEMENT_DDL = 8;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    public static final int STATEMENT_UNPREPARED = 9;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    public static final int STATEMENT_OTHER = 99;
 
     /**
      * Special function for writing an exception result at the header of
@@ -1255,6 +1261,13 @@ public class DatabaseUtils {
             return STATEMENT_ABORT;
         } else if (prefixSql.equals("BEG")) {
             return STATEMENT_BEGIN;
+        } else if (prefixSql.equals("PRA")) {
+            return STATEMENT_PRAGMA;
+        } else if (prefixSql.equals("CRE") || prefixSql.equals("DRO") ||
+                prefixSql.equals("ALT")) {
+            return STATEMENT_DDL;
+        } else if (prefixSql.equals("ANA") || prefixSql.equals("DET")) {
+            return STATEMENT_UNPREPARED;
         }
         return STATEMENT_OTHER;
     }

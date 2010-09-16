@@ -239,6 +239,17 @@ static jobject native_1x1_blob_ashmem(JNIEnv* env, jobject object)
     return value;
 }
 
+static void native_executeSql(JNIEnv* env, jobject object, jstring sql)
+{
+    char const* sqlString = env->GetStringUTFChars(sql, NULL);
+    sqlite3 * handle = GET_HANDLE(env, object);
+    int err = sqlite3_exec(handle, sqlString, NULL, NULL, NULL);
+    if (err != SQLITE_OK) {
+        throw_sqlite3_exception(env, handle);
+    }
+    env->ReleaseStringUTFChars(sql, sqlString);
+}
+
 static JNINativeMethod sMethods[] =
 {
      /* name, signature, funcPtr */
@@ -247,6 +258,7 @@ static JNINativeMethod sMethods[] =
     {"native_1x1_long", "()J", (void *)native_1x1_long},
     {"native_1x1_string", "()Ljava/lang/String;", (void *)native_1x1_string},
     {"native_1x1_blob_ashmem", "()Landroid/os/ParcelFileDescriptor;", (void *)native_1x1_blob_ashmem},
+    {"native_executeSql", "(Ljava/lang/String;)V", (void *)native_executeSql},
 };
 
 int register_android_database_SQLiteStatement(JNIEnv * env)

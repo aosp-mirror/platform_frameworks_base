@@ -86,6 +86,10 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      */
     /* package */ HashMap<Integer, Object> mBindArgs = null;
     /* package */ final int mStatementType;
+    /* package */ static final int STATEMENT_CACHEABLE = 16;
+    /* package */ static final int STATEMENT_DONT_PREPARE = 32;
+    /* package */ static final int STATEMENT_USE_POOLED_CONN = 64;
+    /* package */ static final int STATEMENT_TYPE_MASK = 0x0f;
 
     /* package */ SQLiteProgram(SQLiteDatabase db, String sql) {
         this(db, sql, null, true);
@@ -94,7 +98,25 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     /* package */ SQLiteProgram(SQLiteDatabase db, String sql, Object[] bindArgs,
             boolean compileFlag) {
         mSql = sql.trim();
-        mStatementType = DatabaseUtils.getSqlStatementType(mSql);
+        int n = DatabaseUtils.getSqlStatementType(mSql);
+        switch (n) {
+            case DatabaseUtils.STATEMENT_UPDATE:
+                mStatementType = n | STATEMENT_CACHEABLE;
+                break;
+            case DatabaseUtils.STATEMENT_SELECT:
+                mStatementType = n | STATEMENT_CACHEABLE | STATEMENT_USE_POOLED_CONN;
+                break;
+            case DatabaseUtils.STATEMENT_ATTACH:
+            case DatabaseUtils.STATEMENT_BEGIN:
+            case DatabaseUtils.STATEMENT_COMMIT:
+            case DatabaseUtils.STATEMENT_ABORT:
+            case DatabaseUtils.STATEMENT_DDL:
+            case DatabaseUtils.STATEMENT_UNPREPARED:
+                mStatementType = n | STATEMENT_DONT_PREPARE;
+                break;
+            default:
+                mStatementType = n;
+        }
         db.acquireReference();
         db.addSQLiteClosable(this);
         mDatabase = db;
@@ -112,8 +134,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
 
     private void compileSql() {
         // only cache CRUD statements
-        if (mStatementType != DatabaseUtils.STATEMENT_SELECT &&
-                mStatementType != DatabaseUtils.STATEMENT_UPDATE) {
+        if ((mStatementType & STATEMENT_CACHEABLE) == 0) {
             mCompiledSql = new SQLiteCompiledSql(mDatabase, mSql);
             nStatement = mCompiledSql.nStatement;
             // since it is not in the cache, no need to acquire() it.
@@ -163,14 +184,19 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         if (mCompiledSql == null) {
             return;
         }
-        synchronized(mDatabase.mCompiledQueries) {
-            if (!mDatabase.mCompiledQueries.containsValue(mCompiledSql)) {
-                // it is NOT in compiled-sql cache. i.e., responsibility of
-                // releasing this statement is on me.
-                mCompiledSql.releaseSqlStatement();
-            } else {
-                // it is in compiled-sql cache. reset its CompiledSql#mInUse flag
-                mCompiledSql.release();
+        if ((mStatementType & STATEMENT_CACHEABLE) == 0) {
+            // this SQL statement was never in cache
+            mCompiledSql.releaseSqlStatement();
+        } else {
+            synchronized(mDatabase.mCompiledQueries) {
+                if (!mDatabase.mCompiledQueries.containsValue(mCompiledSql)) {
+                    // it is NOT in compiled-sql cache. i.e., responsibility of
+                    // releasing this statement is on me.
+                    mCompiledSql.releaseSqlStatement();
+                } else {
+                    // it is in compiled-sql cache. reset its CompiledSql#mInUse flag
+                    mCompiledSql.release();
+                }
             }
         }
         mCompiledSql = null;
@@ -347,6 +373,16 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     }
 
     /* package */ synchronized void compileAndbindAllArgs() {
+        if ((mStatementType & STATEMENT_DONT_PREPARE) > 0) {
+            // no need to prepare this SQL statement
+            if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
+                if (mBindArgs != null) {
+                    throw new IllegalArgumentException("no need to pass bindargs for this sql :" +
+                            mSql);
+                }
+            }
+            return;
+        }
         if (nStatement == 0) {
             // SQL statement is not compiled yet. compile it now.
             compileSql();
