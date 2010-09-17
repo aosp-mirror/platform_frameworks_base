@@ -590,6 +590,9 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
         break;
     case MEDIA_PLAYBACK_COMPLETE:
         LOGV("playback complete");
+        if (mCurrentState == MEDIA_PLAYER_IDLE) {
+            LOGE("playback complete in idle state");
+        }
         if (!mLoop) {
             mCurrentState = MEDIA_PLAYER_PLAYBACK_COMPLETE;
         }
