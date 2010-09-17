@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.tablet;
 
 import android.app.ActivityManagerNative;
 import android.app.PendingIntent;
+import android.app.Notification;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.Intent;
@@ -28,6 +29,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.view.animation.AnimationUtils;
 import android.view.Gravity;
@@ -36,6 +38,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
@@ -81,8 +84,8 @@ public class TabletStatusBarService extends StatusBarService {
 
     NotificationIconArea.IconLayout mIconLayout;
 
-    KickerController mKicker;
-    View mKickerView;
+    TabletTicker mTicker;
+    View mTickerView;
     boolean mTicking;
     boolean mExpandedVisible;
 
@@ -163,7 +166,7 @@ public class TabletStatusBarService extends StatusBarService {
         // where the icons go
         mIconLayout = (NotificationIconArea.IconLayout) sb.findViewById(R.id.icons);
 
-        mKicker = new KickerController((Context)this, mStatusBarView);
+        mTicker = new TabletTicker((Context)this, (FrameLayout)sb.findViewById(R.id.ticker));
 
         // System info (center)
         mBatteryMeter = (ImageView) sb.findViewById(R.id.battery);
@@ -274,7 +277,7 @@ public class TabletStatusBarService extends StatusBarService {
             } catch (PendingIntent.CanceledException e) {
             }
         } else {
-            // tick()
+            tick(notification);
         }
     }
 
@@ -344,7 +347,7 @@ public class TabletStatusBarService extends StatusBarService {
             removeNotificationViews(key);
             addNotificationViews(key, notification);
         }
-        // TODO: kicker; immersive mode
+        // TODO: ticker; immersive mode
     }
 
     public void removeNotification(IBinder key) {
@@ -368,7 +371,7 @@ public class TabletStatusBarService extends StatusBarService {
             if ((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
                 Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
                 if (mTicking) {
-                    mKicker.halt();
+                    mTicker.halt();
                 } else {
                     mNotificationIconArea.setVisibility(View.INVISIBLE);
                 }
@@ -381,7 +384,7 @@ public class TabletStatusBarService extends StatusBarService {
         } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
             if (mTicking && (state & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
                 Slog.d(TAG, "DISABLE_NOTIFICATION_TICKER: yes");
-                mKicker.halt();
+                mTicker.halt();
             }
         }
         */
@@ -405,7 +408,7 @@ public class TabletStatusBarService extends StatusBarService {
                 Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
                 if (mTicking) {
                     mNotificationIconArea.setVisibility(View.INVISIBLE);
-                    mKicker.halt();
+                    mTicker.halt();
                 } else {
                     mNotificationIconArea.setVisibility(View.INVISIBLE);
                 }
@@ -417,10 +420,16 @@ public class TabletStatusBarService extends StatusBarService {
             }
         } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
             if (mTicking && (net & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
-                mKicker.halt();
+                mTicker.halt();
             }
         }
         */
+    }
+
+    private boolean hasTicker(Notification n) {
+        return !TextUtils.isEmpty(n.tickerText)
+                || !TextUtils.isEmpty(n.tickerTitle)
+                || !TextUtils.isEmpty(n.tickerSubtitle);
     }
 
     private void tick(StatusBarNotification n) {
@@ -428,51 +437,11 @@ public class TabletStatusBarService extends StatusBarService {
         // until status bar window is attached to the window manager,
         // because...  well, what's the point otherwise?  And trying to
         // run a ticker without being attached will crash!
-        if (n.notification.tickerText != null && mStatusBarView.getWindowToken() != null) {
+        if (hasTicker(n.notification) && mStatusBarView.getWindowToken() != null) {
             if (0 == (mDisabled & (StatusBarManager.DISABLE_NOTIFICATION_ICONS
                             | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
-                mKicker.addEntry(n);
+                mTicker.add(n);
             }
-        }
-    }
-
-    private class KickerController {
-        View mView;
-        ImageView mKickerIcon;
-        TextSwitcher mKickerText;
-
-        public KickerController(Context context, View sb) {
-            mView = sb.findViewById(R.id.ticker);
-            mKickerIcon = (ImageView) mView.findViewById(R.id.tickerIcon);
-            mKickerText = (TextSwitcher) mView.findViewById(R.id.tickerText);
-        }
-
-        public void halt() {
-            tickerHalting();
-        }
-
-        public void addEntry(StatusBarNotification n) {
-            mKickerIcon.setImageResource(n.notification.icon);
-            mKickerText.setCurrentText(n.notification.tickerText);
-            tickerStarting();
-        }
-
-        public void tickerStarting() {
-            mTicking = true;
-            mIconLayout.setVisibility(View.GONE);
-            mKickerView.setVisibility(View.VISIBLE);
-        }
-
-        public void tickerDone() {
-            mIconLayout.setVisibility(View.VISIBLE);
-            mKickerView.setVisibility(View.GONE);
-            mTicking = false;
-        }
-
-        public void tickerHalting() {
-            mIconLayout.setVisibility(View.VISIBLE);
-            mKickerView.setVisibility(View.GONE);
-            mTicking = false;
         }
     }
 

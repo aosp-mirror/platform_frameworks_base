@@ -21,6 +21,7 @@ import java.util.Date;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Parcel;
@@ -124,9 +125,45 @@ public class Notification implements Parcelable
 
     /**
      * Text to scroll across the screen when this item is added to
-     * the status bar.
+     * the status bar on large and smaller devices.
+     *
+     * <p>This field is provided separately from the other ticker fields
+     * both for compatibility and to allow an application to choose different
+     * text for when the text scrolls in and when it is displayed all at once
+     * in conjunction with one or more icons.
+     *
+     * @see #tickerTitle
+     * @see #tickerSubtitle
+     * @see #tickerIcons
      */
     public CharSequence tickerText;
+
+    /**
+     * The title line for the ticker over a the fat status bar on xlarge devices.
+     *
+     * @see #tickerText
+     * @see #tickerSubtitle
+     * @see #tickerIcons
+     */
+    public CharSequence tickerTitle;
+
+    /**
+     * The subtitle line for the ticker over a the fat status bar on xlarge devices.
+     *
+     * @see #tickerText
+     * @see #tickerTitle
+     * @see #tickerIcons
+     */
+    public CharSequence tickerSubtitle;
+
+    /**
+     * The icons to show to the left of the other ticker fields.
+     *
+     * @see #tickerText
+     * @see #tickerTitle
+     * @see #tickerSubtitle
+     */
+    public Bitmap[] tickerIcons;
 
     /**
      * The view that will represent this notification in the expanded status bar.
@@ -347,6 +384,21 @@ public class Notification implements Parcelable
             tickerText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
         }
         if (parcel.readInt() != 0) {
+            tickerTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
+        }
+        if (parcel.readInt() != 0) {
+            tickerSubtitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
+        }
+        final int tickerIconCount = parcel.readInt();
+        if (tickerIconCount >= 0) {
+            tickerIcons = new Bitmap[tickerIconCount];
+            for (int i=0; i<tickerIconCount; i++) {
+                if (parcel.readInt() != 0) {
+                    tickerIcons[i] = Bitmap.CREATOR.createFromParcel(parcel);
+                }
+            }
+        }
+        if (parcel.readInt() != 0) {
             contentView = RemoteViews.CREATOR.createFromParcel(parcel);
         }
         defaults = parcel.readInt();
@@ -381,6 +433,19 @@ public class Notification implements Parcelable
 
         if (this.tickerText != null) {
             that.tickerText = this.tickerText.toString();
+        }
+        if (this.tickerTitle != null) {
+            that.tickerTitle = this.tickerTitle.toString();
+        }
+        if (this.tickerSubtitle != null) {
+            that.tickerSubtitle = this.tickerSubtitle.toString();
+        }
+        if (this.tickerIcons != null) {
+            final int N = this.tickerIcons.length;
+            that.tickerIcons = new Bitmap[N];
+            for (int i=0; i<N; i++) {
+                that.tickerIcons[i] = Bitmap.createBitmap(this.tickerIcons[i]);
+            }
         }
         if (this.contentView != null) {
             that.contentView = this.contentView.clone();
@@ -437,6 +502,32 @@ public class Notification implements Parcelable
             TextUtils.writeToParcel(tickerText, parcel, flags);
         } else {
             parcel.writeInt(0);
+        }
+        if (tickerTitle != null) {
+            parcel.writeInt(1);
+            TextUtils.writeToParcel(tickerTitle, parcel, flags);
+        } else {
+            parcel.writeInt(0);
+        }
+        if (tickerSubtitle != null) {
+            parcel.writeInt(1);
+            TextUtils.writeToParcel(tickerSubtitle, parcel, flags);
+        } else {
+            parcel.writeInt(0);
+        }
+        if (tickerIcons != null) {
+            final int N = tickerIcons.length;
+            parcel.writeInt(N);
+            for (int i=0; i<N; i++) {
+                if (tickerIcons[i] != null) {
+                    parcel.writeInt(1);
+                    tickerIcons[i].writeToParcel(parcel, flags);
+                } else {
+                    parcel.writeInt(0);
+                }
+            }
+        } else {
+            parcel.writeInt(-1);
         }
         if (contentView != null) {
             parcel.writeInt(1);

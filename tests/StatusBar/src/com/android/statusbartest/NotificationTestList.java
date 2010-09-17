@@ -16,12 +16,14 @@
 
 package com.android.statusbartest;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.app.Notification;
-import android.app.NotificationManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Environment;
 import android.os.Vibrator;
 import android.os.Handler;
@@ -74,6 +76,112 @@ public class NotificationTestList extends TestActivity
                 Log.d(TAG, "releasing wake lock");
                 wl.release();
                 Log.d(TAG, "released wake lock");
+            }
+        },
+
+        new Test("Cancel #1") {
+            public void run()
+            {
+                mNM.cancel(1);
+            }
+        },
+
+        new Test("Ticker 1 line") {
+            public void run() {
+                Notification n = new Notification(R.drawable.icon1, "tick tick tick",
+                        mActivityCreateTime);
+                n.setLatestEventInfo(NotificationTestList.this, "Persistent #1",
+                            "This is a notification!!!", makeIntent());
+                mNM.notify(1, n);
+            }
+        },
+
+        new Test("Ticker 1 line & icon") {
+            public void run() {
+                Notification n = new Notification(R.drawable.icon1, "tick tick tick",
+                        mActivityCreateTime);
+                n.setLatestEventInfo(NotificationTestList.this, "Persistent #1",
+                            "This is a notification!!!", makeIntent());
+                n.tickerIcons = new Bitmap[1];
+                n.tickerIcons[0] = loadBitmap(R.drawable.icon3);
+                mNM.notify(1, n);
+            }
+        },
+
+        new Test("Ticker 2 lines") {
+            public void run() {
+                Notification n = new Notification(R.drawable.icon1, "tick tick tick\ntock tock",
+                        mActivityCreateTime);
+                n.setLatestEventInfo(NotificationTestList.this, "Persistent #1",
+                            "This is a notification!!!", makeIntent());
+                mNM.notify(1, n);
+            }
+        },
+
+        new Test("Ticker title") {
+            public void run() {
+                Notification n = new Notification(R.drawable.icon1, null,
+                        mActivityCreateTime);
+                n.setLatestEventInfo(NotificationTestList.this, "Persistent #1",
+                            "This is a notification!!!", makeIntent());
+                n.tickerTitle = "This is a title";
+                mNM.notify(1, n);
+            }
+        },
+
+        new Test("Ticker subtitle") {
+            public void run() {
+                Notification n = new Notification(R.drawable.icon1, null,
+                        mActivityCreateTime);
+                n.setLatestEventInfo(NotificationTestList.this, "Persistent #1",
+                            "This is a notification!!!", makeIntent());
+                n.tickerSubtitle = "and a subtitle";
+                mNM.notify(1, n);
+            }
+        },
+
+        new Test("Ticker title & subtitle") {
+            public void run() {
+                Notification n = new Notification(R.drawable.icon1, null,
+                        mActivityCreateTime);
+                n.setLatestEventInfo(NotificationTestList.this, "Persistent #1",
+                            "This is a notification!!!", makeIntent());
+                n.tickerTitle = "This is a title it is really really longggggg long long long long";
+                n.tickerSubtitle = "and a subtitle it is really really longggggg long long long long long long long long long long long long long long long long";
+                mNM.notify(1, n);
+            }
+        },
+
+        new Test("Ticker text, title & subtitle") {
+            public void run() {
+                Notification n = new Notification(R.drawable.icon1, "not visible",
+                        mActivityCreateTime);
+                n.setLatestEventInfo(NotificationTestList.this, "Persistent #1",
+                            "This is a notification!!!", makeIntent());
+                n.tickerTitle = "This is a title";
+                n.tickerSubtitle = "and a subtitle";
+                mNM.notify(1, n);
+            }
+        },
+
+        new Test("Ticker title, subtitle & 2 icons") {
+            public void run() {
+                Notification n = new Notification(R.drawable.icon1, null,
+                        mActivityCreateTime);
+                n.setLatestEventInfo(NotificationTestList.this, "Persistent #1",
+                            "This is a notification!!!", makeIntent());
+                n.tickerTitle = "This is a title";
+                n.tickerSubtitle = "and a subtitle";
+
+                n.tickerIcons = new Bitmap[2];
+                n.tickerIcons[0] = loadBitmap(R.drawable.icon3);
+                n.tickerIcons[1] = loadBitmap(R.drawable.app_gmail);
+
+                mNM.notify(1, n);
+                /*
+                n.tickerIcons[0].recycle();
+                n.tickerIcons[1].recycle();
+                */
             }
         },
 
@@ -479,7 +587,7 @@ public class NotificationTestList extends TestActivity
 
         new Test("Persistent #3") {
             public void run() {
-                Notification n = new Notification(R.drawable.icon2, "tock tock tock",
+                Notification n = new Notification(R.drawable.icon2, "tock tock tock\nmooooo",
                         System.currentTimeMillis());
                 n.setLatestEventInfo(NotificationTestList.this, "Persistent #3",
                             "Notify me!!!", makeIntent());
@@ -700,6 +808,11 @@ public class NotificationTestList extends TestActivity
                     R.drawable.ic_statusbar_missedcall, null,
                     time, label, "" + new java.util.Date(time), null));
 
+    }
+
+    Bitmap loadBitmap(int resId) {
+        BitmapDrawable bd = (BitmapDrawable)getResources().getDrawable(resId);
+        return Bitmap.createBitmap(bd.getBitmap());
     }
 }
 
