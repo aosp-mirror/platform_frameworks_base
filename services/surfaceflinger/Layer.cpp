@@ -380,6 +380,7 @@ sp<GraphicBuffer> Layer::requestBuffer(int index,
             mReqWidth  = reqWidth;
             mReqHeight = reqHeight;
             mReqFormat = reqFormat;
+            mFixedSize = reqWidth && reqHeight;
 
             lcblk->reallocateAllExcept(index);
         }
