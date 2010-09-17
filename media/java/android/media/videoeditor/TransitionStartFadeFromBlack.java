@@ -16,37 +16,19 @@
 
 package android.media.videoeditor;
 
-
 /**
- * TransitionAtStart is a class useful to manage a predefined transition at the
- * beginning of the movie.
+ * This transition fades from black using fade-in in a certain provided
+ * duration. This transition is always applied at the beginning of the movie.
  * {@hide}
  */
-public class TransitionAtStart extends Transition {
-    /**
-     * This transition fades from black using fade-in in a certain provided
-     * duration. This transition is always applied at the beginning of the
-     * movie.
-     */
-    public static final int TYPE_FADE_FROM_BLACK = 0;
-
-    /**
-     * This transition fades from black frame using curtain opening: A black
-     * image is displayed and moves from bottom to top making the video visible.
-     * This transition is always applied at the beginning of the movie.
-     */
-    public static final int TYPE_CURTAIN_OPENING = 1;
-
-    // The transition type
-    private final int mType;
-
+public class TransitionStartFadeFromBlack extends Transition {
     /**
      * An object of this type cannot be instantiated by using the default
      * constructor
      */
     @SuppressWarnings("unused")
-    private TransitionAtStart() {
-        this(null, null, 0, 0);
+    private TransitionStartFadeFromBlack() {
+        this(null, null, 0);
     }
 
     /**
@@ -56,22 +38,11 @@ public class TransitionAtStart extends Transition {
      * @param beforeMediaItem The transition is applied to the beginning of
      *      this media item
      * @param durationMs The duration of the transition in milliseconds
-     * @param type The type of the transition to apply.
      */
-    public TransitionAtStart(String transitionId, MediaItem beforeMediaItem, long durationMs,
-            int type) {
+    public TransitionStartFadeFromBlack(String transitionId, MediaItem beforeMediaItem,
+            long durationMs) {
         super(transitionId, null, beforeMediaItem, durationMs,
                 Transition.BEHAVIOR_LINEAR);
-        mType = type;
-    }
-
-    /**
-     * Get the type of this transition
-     *
-     * @return The type of the transition
-     */
-    public int getType() {
-        return mType;
     }
 
     /*
@@ -79,12 +50,5 @@ public class TransitionAtStart extends Transition {
      */
     @Override
     public void generate() {
-    }
-
-    /*
-     * {@inheritDoc}
-     */
-    @Override
-    void invalidate() {
     }
 }

@@ -16,36 +16,19 @@
 
 package android.media.videoeditor;
 
-
 /**
- * TransitionAtEnd is a class useful to manage a predefined transition at the
- * end of the movie.
- * {@hide}
+ * This transition fades to black frame using curtain closing: A black image is
+ * moved from top to bottom to cover the video. This transition is always
+ * applied at the end of the movie. {@hide}
  */
-public class TransitionAtEnd extends Transition {
-    /**
-     * This transition fades to black frame using fade out in a certain provided
-     * duration. This transition is always applied at the end of the movie.
-     */
-    public static final int TYPE_FADE_TO_BLACK = 0;
-
-    /**
-     * This transition fades to black frame using curtain closing: A black image is
-     * moved from top to bottom to cover the video. This transition is always
-     * applied at the end of the movie.
-     */
-    public static final int TYPE_CURTAIN_CLOSING = 1;
-
-    // The transition type
-    private final int mType;
-
+public class TransitionEndCurtainClosing extends Transition {
     /**
      * An object of this type cannot be instantiated by using the default
      * constructor
      */
     @SuppressWarnings("unused")
-    private TransitionAtEnd() {
-        this(null, null, 0, 0);
+    private TransitionEndCurtainClosing() {
+        this(null, null, 0);
     }
 
     /**
@@ -55,21 +38,10 @@ public class TransitionAtEnd extends Transition {
      * @param afterMediaItem The transition is applied to the end of this
      *      media item
      * @param durationMs duration of the transition in milliseconds
-     * @param type type of the transition to apply.
      */
-    public TransitionAtEnd(String transitionId, MediaItem afterMediaItem, long duration,
-            int type) {
+    public TransitionEndCurtainClosing(String transitionId, MediaItem afterMediaItem,
+            long duration) {
         super(transitionId, afterMediaItem, null, duration, Transition.BEHAVIOR_LINEAR);
-        mType = type;
-    }
-
-    /**
-     * Get the type of this transition
-     *
-     * @return The type of the transition
-     */
-    public int getType() {
-        return mType;
     }
 
     /*
