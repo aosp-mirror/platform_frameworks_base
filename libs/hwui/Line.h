@@ -93,7 +93,7 @@ public:
                 mXDivs, mYDivs, mXDivsCount, mYDivsCount);
 
         tx = -gLineAABias;
-        ty = lineWidth == 1.0f ? -gLineAABias : -half - gLineAABias;
+        ty = lineWidth <= 1.0f ? -gLineAABias : -half - gLineAABias;
     }
 
     inline GLvoid* getVertices() const {
