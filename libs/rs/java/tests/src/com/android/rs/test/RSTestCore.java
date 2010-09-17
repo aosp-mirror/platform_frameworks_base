@@ -30,10 +30,10 @@ public class RSTestCore {
     private Resources mRes;
     private RenderScriptGL mRS;
 
-    private ScriptC_TestRoot mRootScript;
+    private ScriptC_test_root mRootScript;
 
     private boolean fp_mad() {
-        ScriptC_FpMad s = new ScriptC_FpMad(mRS, mRes, R.raw.fpmad, true);
+        ScriptC_fp_mad s = new ScriptC_fp_mad(mRS, mRes, R.raw.fp_mad, true);
         s.invoke_doTest(0, 0);
         return true;
     }
@@ -43,7 +43,7 @@ public class RSTestCore {
         mRS = rs;
         mRes = res;
 
-        mRootScript = new ScriptC_TestRoot(mRS, mRes, R.raw.testroot, true);
+        mRootScript = new ScriptC_test_root(mRS, mRes, R.raw.test_root, true);
 
         fp_mad();
 

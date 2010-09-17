@@ -29,7 +29,7 @@ public class FountainRS {
 
     private Resources mRes;
     private RenderScriptGL mRS;
-    private ScriptC_Fountain mScript;
+    private ScriptC_fountain mScript;
     public void init(RenderScriptGL rs, Resources res, int width, int height) {
         mRS = rs;
         mRes = res;
@@ -45,7 +45,7 @@ public class FountainRS {
         smb.addIndexType(Primitive.POINT);
         Mesh sm = smb.create();
 
-        mScript = new ScriptC_Fountain(mRS, mRes, R.raw.fountain, true);
+        mScript = new ScriptC_fountain(mRS, mRes, R.raw.fountain, true);
         mScript.set_partMesh(sm);
         mScript.bind_point(points);
         mRS.contextBindRootScript(mScript);
