@@ -199,6 +199,10 @@ public class CamcorderProfile
      * E.g. if the device supports 480p, 720p, and 1080p, then low is 480p and high is
      * 1080p.
      *
+     * The same is true for time lapse quality levels, i.e. QUALITY_TIME_LAPSE_LOW,
+     * QUALITY_TIME_LAPSE_HIGH are guaranteed to be supported and have to match one of
+     * qcif, cif, 480p, 720p, or 1080p.
+     *
      * A camcorder recording session with higher quality level usually has higher output
      * bit rate, better video and/or audio recording quality, larger video frame
      * resolution and higher audio sampling rate, etc, than those with lower quality

@@ -424,24 +424,7 @@ MediaProfiles::createDefaultVideoEncoders(MediaProfiles *profiles)
 }
 
 /*static*/ MediaProfiles::CamcorderProfile*
-MediaProfiles::createDefaultCamcorderTimeLapseHighProfile()
-{
-    MediaProfiles::VideoCodec *videoCodec =
-        new MediaProfiles::VideoCodec(VIDEO_ENCODER_H263, 20000000, 720, 480, 20);
-
-    AudioCodec *audioCodec = new AudioCodec(AUDIO_ENCODER_AMR_NB, 12200, 8000, 1);
-    CamcorderProfile *profile = new MediaProfiles::CamcorderProfile;
-    profile->mCameraId = 0;
-    profile->mFileFormat = OUTPUT_FORMAT_THREE_GPP;
-    profile->mQuality = CAMCORDER_QUALITY_TIME_LAPSE_HIGH;
-    profile->mDuration = 60;
-    profile->mVideoCodec = videoCodec;
-    profile->mAudioCodec = audioCodec;
-    return profile;
-}
-
-/*static*/ MediaProfiles::CamcorderProfile*
-MediaProfiles::createDefaultCamcorderTimeLapseLowProfile()
+MediaProfiles::createDefaultCamcorderTimeLapseQcifProfile(camcorder_quality quality)
 {
     MediaProfiles::VideoCodec *videoCodec =
         new MediaProfiles::VideoCodec(VIDEO_ENCODER_H263, 1000000, 176, 144, 20);
@@ -450,7 +433,7 @@ MediaProfiles::createDefaultCamcorderTimeLapseLowProfile()
     CamcorderProfile *profile = new MediaProfiles::CamcorderProfile;
     profile->mCameraId = 0;
     profile->mFileFormat = OUTPUT_FORMAT_THREE_GPP;
-    profile->mQuality = CAMCORDER_QUALITY_TIME_LAPSE_LOW;
+    profile->mQuality = quality;
     profile->mDuration = 60;
     profile->mVideoCodec = videoCodec;
     profile->mAudioCodec = audioCodec;
@@ -458,24 +441,40 @@ MediaProfiles::createDefaultCamcorderTimeLapseLowProfile()
 }
 
 /*static*/ MediaProfiles::CamcorderProfile*
-MediaProfiles::createDefaultCamcorderHighProfile()
+MediaProfiles::createDefaultCamcorderTimeLapse480pProfile(camcorder_quality quality)
 {
     MediaProfiles::VideoCodec *videoCodec =
-        new MediaProfiles::VideoCodec(VIDEO_ENCODER_H263, 360000, 352, 288, 20);
+        new MediaProfiles::VideoCodec(VIDEO_ENCODER_H263, 20000000, 720, 480, 20);
 
     AudioCodec *audioCodec = new AudioCodec(AUDIO_ENCODER_AMR_NB, 12200, 8000, 1);
     CamcorderProfile *profile = new MediaProfiles::CamcorderProfile;
     profile->mCameraId = 0;
     profile->mFileFormat = OUTPUT_FORMAT_THREE_GPP;
-    profile->mQuality = CAMCORDER_QUALITY_HIGH;
+    profile->mQuality = quality;
     profile->mDuration = 60;
     profile->mVideoCodec = videoCodec;
     profile->mAudioCodec = audioCodec;
     return profile;
 }
 
+/*static*/ void
+MediaProfiles::createDefaultCamcorderTimeLapseLowProfiles(
+        MediaProfiles::CamcorderProfile **lowTimeLapseProfile,
+        MediaProfiles::CamcorderProfile **lowSpecificTimeLapseProfile) {
+    *lowTimeLapseProfile = createDefaultCamcorderTimeLapseQcifProfile(CAMCORDER_QUALITY_TIME_LAPSE_LOW);
+    *lowSpecificTimeLapseProfile = createDefaultCamcorderTimeLapseQcifProfile(CAMCORDER_QUALITY_TIME_LAPSE_QCIF);
+}
+
+/*static*/ void
+MediaProfiles::createDefaultCamcorderTimeLapseHighProfiles(
+        MediaProfiles::CamcorderProfile **highTimeLapseProfile,
+        MediaProfiles::CamcorderProfile **highSpecificTimeLapseProfile) {
+    *highTimeLapseProfile = createDefaultCamcorderTimeLapse480pProfile(CAMCORDER_QUALITY_TIME_LAPSE_HIGH);
+    *highSpecificTimeLapseProfile = createDefaultCamcorderTimeLapse480pProfile(CAMCORDER_QUALITY_TIME_LAPSE_480P);
+}
+
 /*static*/ MediaProfiles::CamcorderProfile*
-MediaProfiles::createDefaultCamcorderLowProfile()
+MediaProfiles::createDefaultCamcorderQcifProfile(camcorder_quality quality)
 {
     MediaProfiles::VideoCodec *videoCodec =
         new MediaProfiles::VideoCodec(VIDEO_ENCODER_H263, 192000, 176, 144, 20);
@@ -486,20 +485,72 @@ MediaProfiles::createDefaultCamcorderLowProfile()
     MediaProfiles::CamcorderProfile *profile = new MediaProfiles::CamcorderProfile;
     profile->mCameraId = 0;
     profile->mFileFormat = OUTPUT_FORMAT_THREE_GPP;
-    profile->mQuality = CAMCORDER_QUALITY_LOW;
+    profile->mQuality = quality;
     profile->mDuration = 30;
     profile->mVideoCodec = videoCodec;
     profile->mAudioCodec = audioCodec;
     return profile;
 }
 
+/*static*/ MediaProfiles::CamcorderProfile*
+MediaProfiles::createDefaultCamcorderCifProfile(camcorder_quality quality)
+{
+    MediaProfiles::VideoCodec *videoCodec =
+        new MediaProfiles::VideoCodec(VIDEO_ENCODER_H263, 360000, 352, 288, 20);
+
+    AudioCodec *audioCodec = new AudioCodec(AUDIO_ENCODER_AMR_NB, 12200, 8000, 1);
+    CamcorderProfile *profile = new MediaProfiles::CamcorderProfile;
+    profile->mCameraId = 0;
+    profile->mFileFormat = OUTPUT_FORMAT_THREE_GPP;
+    profile->mQuality = quality;
+    profile->mDuration = 60;
+    profile->mVideoCodec = videoCodec;
+    profile->mAudioCodec = audioCodec;
+    return profile;
+}
+
+/*static*/ void
+MediaProfiles::createDefaultCamcorderLowProfiles(
+        MediaProfiles::CamcorderProfile **lowProfile,
+        MediaProfiles::CamcorderProfile **lowSpecificProfile) {
+    *lowProfile = createDefaultCamcorderQcifProfile(CAMCORDER_QUALITY_LOW);
+    *lowSpecificProfile = createDefaultCamcorderQcifProfile(CAMCORDER_QUALITY_QCIF);
+}
+
+/*static*/ void
+MediaProfiles::createDefaultCamcorderHighProfiles(
+        MediaProfiles::CamcorderProfile **highProfile,
+        MediaProfiles::CamcorderProfile **highSpecificProfile) {
+    *highProfile = createDefaultCamcorderCifProfile(CAMCORDER_QUALITY_HIGH);
+    *highSpecificProfile = createDefaultCamcorderCifProfile(CAMCORDER_QUALITY_CIF);
+}
+
 /*static*/ void
 MediaProfiles::createDefaultCamcorderProfiles(MediaProfiles *profiles)
 {
-    profiles->mCamcorderProfiles.add(createDefaultCamcorderTimeLapseHighProfile());
-    profiles->mCamcorderProfiles.add(createDefaultCamcorderTimeLapseLowProfile());
-    profiles->mCamcorderProfiles.add(createDefaultCamcorderHighProfile());
-    profiles->mCamcorderProfiles.add(createDefaultCamcorderLowProfile());
+    // low camcorder profiles.
+    MediaProfiles::CamcorderProfile *lowProfile, *lowSpecificProfile;
+    createDefaultCamcorderLowProfiles(&lowProfile, &lowSpecificProfile);
+    profiles->mCamcorderProfiles.add(lowProfile);
+    profiles->mCamcorderProfiles.add(lowSpecificProfile);
+
+    // high camcorder profiles.
+    MediaProfiles::CamcorderProfile* highProfile, *highSpecificProfile;
+    createDefaultCamcorderHighProfiles(&highProfile, &highSpecificProfile);
+    profiles->mCamcorderProfiles.add(highProfile);
+    profiles->mCamcorderProfiles.add(highSpecificProfile);
+
+    // low camcorder time lapse profiles.
+    MediaProfiles::CamcorderProfile *lowTimeLapseProfile, *lowSpecificTimeLapseProfile;
+    createDefaultCamcorderTimeLapseLowProfiles(&lowTimeLapseProfile, &lowSpecificTimeLapseProfile);
+    profiles->mCamcorderProfiles.add(lowTimeLapseProfile);
+    profiles->mCamcorderProfiles.add(lowSpecificTimeLapseProfile);
+
+    // high camcorder time lapse profiles.
+    MediaProfiles::CamcorderProfile *highTimeLapseProfile, *highSpecificTimeLapseProfile;
+    createDefaultCamcorderTimeLapseHighProfiles(&highTimeLapseProfile, &highSpecificTimeLapseProfile);
+    profiles->mCamcorderProfiles.add(highTimeLapseProfile);
+    profiles->mCamcorderProfiles.add(highSpecificTimeLapseProfile);
 }
 
 /*static*/ void
