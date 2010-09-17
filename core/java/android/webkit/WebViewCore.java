@@ -1706,7 +1706,7 @@ final class WebViewCore {
                 }
             } else if (mViewportWidth > 0) {
                 if (mSettings.getUseFixedViewport()) {
-                    // Use website specified viewport width.
+                    // Use website specified or desired fixed viewport width.
                     width = mViewportWidth;
                 } else {
                     width = Math.max(w, mViewportWidth);
@@ -1827,6 +1827,13 @@ final class WebViewCore {
             }
             if (mInitialViewState != null) {
                 draw.mViewState = mInitialViewState;
+                if (mViewportWidth == -1 && mSettings.getUseFixedViewport() &&
+                    mSettings.getUseWideViewPort()) {
+                    // Use website's initial preferred width as the fixed viewport width.
+                    mViewportWidth = Math.min(mSettings.getMaxFixedViewportWidth(),
+                        draw.mMinPrefWidth);
+                    draw.mViewState.mViewportWidth = mViewportWidth;
+                }
                 mInitialViewState = null;
             }
             if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw NEW_PICTURE_MSG_ID");
