@@ -26,12 +26,13 @@ import sys
 import os
 import subprocess
 import logging
+import optparse
 
-def main():
-  if len(sys.argv) < 2:
+def main(options, args):
+  if len(args) < 1:
     run_cmd = ""
   else:
-    run_cmd = sys.argv[1]
+    run_cmd = args[0]
 
   # Setup logging class
   logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -53,9 +54,13 @@ def main():
   android_tree_root = os.path.join(script_location, parent, parent, parent, parent, parent)
   android_tree_root = os.path.normpath(android_tree_root)
 
-  # Paths relative to android_tree_root
+  # If any of these is relative, then it's relative to ServerRoot (in our case android_tree_root)
   webkit_path = os.path.join("external", "webkit")
-  layout_tests_path = os.path.join(webkit_path, "LayoutTests")
+  if (options.tests_root_directory != None):
+    # if options.tests_root_directory is absolute, os.getcwd() is discarded!
+    layout_tests_path = os.path.normpath(os.path.join(os.getcwd(), options.tests_root_directory))
+  else:
+    layout_tests_path = os.path.join(webkit_path, "LayoutTests")
   http_conf_path = os.path.join(layout_tests_path, "http", "conf")
 
   # Prepare the command to set ${APACHE_RUN_USER} and ${APACHE_RUN_GROUP}
@@ -121,4 +126,8 @@ def main():
     logging.info("OK")
 
 if __name__ == "__main__":
-  main();
+  option_parser = optparse.OptionParser(usage="Usage: %prog [options] start|stop|restart")
+  option_parser.add_option("", "--tests-root-directory",
+                           help="The directory from which to take the tests, default is external/webkit/LayoutTests in this checkout of the Android tree")
+  options, args = option_parser.parse_args();
+  main(options, args);
