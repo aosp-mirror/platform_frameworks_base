@@ -393,6 +393,9 @@
 
     <style name="Widget.TextView">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textSelectHandleLeft">?android:attr/textSelectHandleLeft</item>
+        <item name="android:textSelectHandleRight">?android:attr/textSelectHandleRight</item>
+        <item name="android:textSelectHandle">?android:attr/textSelectHandle</item>
     </style>
     
     <style name="Widget.TextView.ListSeparator">

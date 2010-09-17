@@ -207,6 +207,8 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
 
     private final int mDensity;
     
+    private boolean mHasOverlay;
+
     public static IWindowSession getWindowSession(Looper mainLooper) {
         synchronized (mStaticInit) {
             if (!mInitialized) {
@@ -1357,6 +1359,9 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                         canvas.setScreenDensity(scalingRequired
                                 ? DisplayMetrics.DENSITY_DEVICE : 0);
                         mView.draw(canvas);
+                        if (mHasOverlay) {
+                            mView.onDrawOverlay(canvas);
+                        }
                     } finally {
                         mAttachInfo.mIgnoreDirtyState = false;
                     }
@@ -2737,6 +2742,19 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     public boolean requestChildRectangleOnScreen(View child, Rect rectangle,
             boolean immediate) {
         return scrollToRectOrFocus(rectangle, immediate);
+    }
+
+    /**
+     * @hide
+     */
+    public void childOverlayStateChanged(View child) {
+        final boolean oldState = mHasOverlay;
+        mHasOverlay = child.isOverlayEnabled();
+        // Invalidate the whole thing when we change overlay states just in case
+        // something left chunks of data drawn someplace it shouldn't have.
+        if (mHasOverlay != oldState) {
+            child.invalidate();
+        }
     }
 
     class TakenSurfaceHolder extends BaseSurfaceHolder {
