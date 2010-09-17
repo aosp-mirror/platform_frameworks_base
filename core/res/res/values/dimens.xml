@@ -43,6 +43,8 @@
     <dimen name="fastscroll_thumb_width">64dp</dimen>
     <!-- Height of the fastscroll thumb -->
     <dimen name="fastscroll_thumb_height">52dp</dimen>
+    <!-- Min width for a tablet device -->
+    <dimen name="min_xlarge_screen_width">800dp</dimen>
     <!-- Default height of a key in the password keyboard for alpha -->
     <dimen name="password_keyboard_key_height_alpha">56dip</dimen>
     <!-- Default height of a key in the password keyboard for numeric -->
