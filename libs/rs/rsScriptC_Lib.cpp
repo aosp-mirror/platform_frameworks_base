@@ -263,13 +263,23 @@ static const void * SC_getElementAtXYZ(RsAllocation va, uint32_t x, uint32_t y, 
 }
 
 static void SC_setObject(void **vdst, void * vsrc) {
-    static_cast<ObjectBase *>(vsrc)->incSysRef();
-    static_cast<ObjectBase *>(vdst[0])->decSysRef();
+    //LOGE("SC_setObject  %p,%p  %p", vdst, *vdst, vsrc);
+    if (vsrc) {
+        static_cast<ObjectBase *>(vsrc)->incSysRef();
+    }
+    if (vdst[0]) {
+        static_cast<ObjectBase *>(vdst[0])->decSysRef();
+    }
     *vdst = vsrc;
+    //LOGE("SC_setObject *");
 }
 static void SC_clearObject(void **vdst) {
-    static_cast<ObjectBase *>(vdst[0])->decSysRef();
+    //LOGE("SC_clearObject  %p,%p", vdst, *vdst);
+    if (vdst[0]) {
+        static_cast<ObjectBase *>(vdst[0])->decSysRef();
+    }
     *vdst = NULL;
+    //LOGE("SC_clearObject *");
 }
 static bool SC_isObject(RsAllocation vsrc) {
     return vsrc != NULL;
@@ -423,9 +433,50 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z14rsGetElementAt13rs_allocationjj", (void *)&SC_getElementAtXY },
     { "_Z14rsGetElementAt13rs_allocationjjj", (void *)&SC_getElementAtXYZ },
 
-    { "_Z11rsSetObjectP13rs_allocation13rs_allocation", (void *)&SC_setObject },
+    { "_Z11rsSetObjectP10rs_elementS_", (void *)&SC_setObject },
+    { "_Z13rsClearObjectP10rs_element", (void *)&SC_clearObject },
+    { "_Z10rsIsObject10rs_element", (void *)&SC_isObject },
+
+    { "_Z11rsSetObjectP7rs_typeS_", (void *)&SC_setObject },
+    { "_Z13rsClearObjectP7rs_type", (void *)&SC_clearObject },
+    { "_Z10rsIsObject7rs_type", (void *)&SC_isObject },
+
+    { "_Z11rsSetObjectP13rs_allocationS_", (void *)&SC_setObject },
     { "_Z13rsClearObjectP13rs_allocation", (void *)&SC_clearObject },
     { "_Z10rsIsObject13rs_allocation", (void *)&SC_isObject },
+
+    { "_Z11rsSetObjectP10rs_samplerS_", (void *)&SC_setObject },
+    { "_Z13rsClearObjectP10rs_sampler", (void *)&SC_clearObject },
+    { "_Z10rsIsObject10rs_sampler", (void *)&SC_isObject },
+
+    { "_Z11rsSetObjectP9rs_scriptS_", (void *)&SC_setObject },
+    { "_Z13rsClearObjectP9rs_script", (void *)&SC_clearObject },
+    { "_Z10rsIsObject9rs_script", (void *)&SC_isObject },
+
+    { "_Z11rsSetObjectP7rs_meshS_", (void *)&SC_setObject },
+    { "_Z13rsClearObjectP7rs_mesh", (void *)&SC_clearObject },
+    { "_Z10rsIsObject7rs_mesh", (void *)&SC_isObject },
+
+    { "_Z11rsSetObjectP19rs_program_fragmentS_", (void *)&SC_setObject },
+    { "_Z13rsClearObjectP19rs_program_fragment", (void *)&SC_clearObject },
+    { "_Z10rsIsObject19rs_program_fragment", (void *)&SC_isObject },
+
+    { "_Z11rsSetObjectP17rs_program_vertexS_", (void *)&SC_setObject },
+    { "_Z13rsClearObjectP17rs_program_vertex", (void *)&SC_clearObject },
+    { "_Z10rsIsObject17rs_program_vertex", (void *)&SC_isObject },
+
+    { "_Z11rsSetObjectP17rs_program_rasterS_", (void *)&SC_setObject },
+    { "_Z13rsClearObjectP17rs_program_raster", (void *)&SC_clearObject },
+    { "_Z10rsIsObject17rs_program_raster", (void *)&SC_isObject },
+
+    { "_Z11rsSetObjectP16rs_program_storeS_", (void *)&SC_setObject },
+    { "_Z13rsClearObjectP16rs_program_store", (void *)&SC_clearObject },
+    { "_Z10rsIsObject16rs_program_store", (void *)&SC_isObject },
+
+    { "_Z11rsSetObjectP7rs_fontS_", (void *)&SC_setObject },
+    { "_Z13rsClearObjectP7rs_font", (void *)&SC_clearObject },
+    { "_Z10rsIsObject7rs_font", (void *)&SC_isObject },
+
 
     { "_Z21rsAllocationMarkDirty13rs_allocation", (void *)&SC_allocationMarkDirty },
 
