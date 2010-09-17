@@ -463,6 +463,38 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return result;
     }
 
+    /**
+     * Return LinkProperties for the active (i.e., connected) default
+     * network interface.  It is assumed that at most one default network
+     * is active at a time. If more than one is active, it is indeterminate
+     * which will be returned.
+     * @return the ip properties for the active network, or {@code null} if
+     * none is active
+     */
+    public LinkProperties getActiveLinkProperties() {
+        enforceAccessPermission();
+        for (int type=0; type <= ConnectivityManager.MAX_NETWORK_TYPE; type++) {
+            if (mNetAttributes[type] == null || !mNetAttributes[type].isDefault()) {
+                continue;
+            }
+            NetworkStateTracker t = mNetTrackers[type];
+            NetworkInfo info = t.getNetworkInfo();
+            if (info.isConnected()) {
+                return t.getLinkProperties();
+            }
+        }
+        return null;
+    }
+
+    public LinkProperties getLinkProperties(int networkType) {
+        enforceAccessPermission();
+        if (ConnectivityManager.isNetworkTypeValid(networkType)) {
+            NetworkStateTracker t = mNetTrackers[networkType];
+            if (t != null) return t.getLinkProperties();
+        }
+        return null;
+    }
+
     public boolean setRadios(boolean turnOn) {
         boolean result = true;
         enforceChangePermission();
