@@ -16,6 +16,7 @@
 
 package android.database.sqlite;
 
+import android.content.res.Resources;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -31,13 +32,9 @@ import java.util.Random;
 
     private static final String TAG = "DatabaseConnectionPool";
 
-    /** The default connection pool size. It is set based on the amount of memory the device has.
-     * TODO: set this with 'a system call' which returns the amount of memory the device has
-     */
-    private static final int DEFAULT_CONNECTION_POOL_SIZE = 1;
-
-    /** the pool size set for this {@link SQLiteDatabase} */
-    private volatile int mMaxPoolSize = DEFAULT_CONNECTION_POOL_SIZE;
+    /** The default connection pool size. */
+    private volatile int mMaxPoolSize =
+        Resources.getSystem().getInteger(com.android.internal.R.integer.db_connection_pool_size);
 
     /** The connection pool objects are stored in this member.
      * TODO: revisit this data struct as the number of pooled connections increase beyond
