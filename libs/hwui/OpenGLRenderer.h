@@ -189,6 +189,12 @@ private:
             int color, SkXfermode::Mode mode, bool ignoreTransform = false);
 
     /**
+     * Setups shaders to draw a colored rect.
+     */
+    void setupColorRect(float left, float top, float right, float bottom,
+            float r, float g, float b, float a, SkXfermode::Mode mode, bool ignoreTransform);
+
+    /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
      * are transformed by the current snapshot's transform matrix.
      *

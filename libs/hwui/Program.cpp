@@ -46,10 +46,9 @@ Program::Program(const char* vertex, const char* fragment) {
         GLint infoLen = 0;
         glGetProgramiv(id, GL_INFO_LOG_LENGTH, &infoLen);
         if (infoLen > 1) {
-            char* log = (char*) malloc(sizeof(char) * infoLen);
-            glGetProgramInfoLog(id, infoLen, 0, log);
+            GLchar log[infoLen];
+            glGetProgramInfoLog(id, infoLen, 0, &log[0]);
             LOGE("Error while linking shaders: %s", log);
-            delete log;
         }
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
