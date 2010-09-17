@@ -83,16 +83,20 @@ public:
      * This method does not return until it has finished invoking the appropriate callbacks
      * for all file descriptors that were signalled.
      */
-    int pollOnce(int timeoutMillis,
-            int* outFd = NULL, int* outEvents = NULL, void** outData = NULL);
+    int pollOnce(int timeoutMillis, int* outFd, int* outEvents, void** outData);
+    inline int pollOnce(int timeoutMillis) {
+        return pollOnce(timeoutMillis, NULL, NULL, NULL);
+    }
 
     /**
      * Like pollOnce(), but performs all pending callbacks until all
      * data has been consumed or a file descriptor is available with no callback.
      * This function will never return ALOOPER_POLL_CALLBACK.
      */
-    int pollAll(int timeoutMillis,
-            int* outFd = NULL, int* outEvents = NULL, void** outData = NULL);
+    int pollAll(int timeoutMillis, int* outFd, int* outEvents, void** outData);
+    inline int pollAll(int timeoutMillis) {
+        return pollAll(timeoutMillis, NULL, NULL, NULL);
+    }
 
     /**
      * Wakes the poll asynchronously.
@@ -128,8 +132,7 @@ public:
      * This method can be called on any thread.
      * This method may block briefly if it needs to wake the poll.
      */
-    int addFd(int fd, int ident,
-            int events, ALooper_callbackFunc callback, void* data = NULL);
+    int addFd(int fd, int ident, int events, ALooper_callbackFunc callback, void* data);
 
     /**
      * Removes a previously added file descriptor from the looper.
