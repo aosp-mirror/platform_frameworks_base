@@ -39,6 +39,7 @@ public class ManagerService extends Service {
     private static final String LOG_TAG = "ManagerService";
 
     private static final int MSG_CRASH_TIMEOUT_EXPIRED = 0;
+    private static final int MSG_SUMMARIZER_DONE = 1;
 
     private static final int CRASH_TIMEOUT_MS = 20 * 1000;
 
@@ -86,30 +87,42 @@ public class ManagerService extends Service {
                     break;
 
                 case MSG_CURRENT_TEST_CRASHED:
-                    mCrashMessagesHandler.removeMessages(MSG_CRASH_TIMEOUT_EXPIRED);
+                    mInternalMessagesHandler.removeMessages(MSG_CRASH_TIMEOUT_EXPIRED);
                     onTestCrashed();
                     break;
 
                 case MSG_ALL_TESTS_FINISHED:
-                    mSummarizer.setTestsRelativePath(mAllTestsRelativePath);
-                    mSummarizer.summarize();
-                    Intent intent = new Intent(ManagerService.this, TestsListActivity.class);
-                    intent.setAction(Intent.ACTION_SHUTDOWN);
-                    /** This flag is needed because we send the intent from the service */
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                    break;
+                    /** We run it in a separate thread to avoid ANR */
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            mSummarizer.setTestsRelativePath(mAllTestsRelativePath);
+                            Message msg = Message.obtain(mInternalMessagesHandler,
+                                    MSG_SUMMARIZER_DONE);
+                            mSummarizer.summarize(msg);
+                        }
+                    }.start();
             }
         }
     };
 
     private Messenger mMessenger = new Messenger(mIncomingHandler);
 
-    private Handler mCrashMessagesHandler = new Handler() {
+    private Handler mInternalMessagesHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what == MSG_CRASH_TIMEOUT_EXPIRED) {
-                onTestCrashed();
+            switch (msg.what) {
+                case MSG_CRASH_TIMEOUT_EXPIRED:
+                    onTestCrashed();
+                    break;
+
+                case MSG_SUMMARIZER_DONE:
+                    Intent intent = new Intent(ManagerService.this, TestsListActivity.class);
+                    intent.setAction(Intent.ACTION_SHUTDOWN);
+                    /** This flag is needed because we send the intent from the service */
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    break;
             }
         }
     };
@@ -150,7 +163,7 @@ public class ManagerService extends Service {
     }
 
     private void onActualResultsObtained(Bundle bundle) {
-        mCrashMessagesHandler.removeMessages(MSG_CRASH_TIMEOUT_EXPIRED);
+        mInternalMessagesHandler.removeMessages(MSG_CRASH_TIMEOUT_EXPIRED);
         ensureNextTestSetup(bundle.getString("nextTest"), bundle.getInt("testIndex") + 1);
 
         AbstractResult results =
@@ -168,7 +181,7 @@ public class ManagerService extends Service {
 
         mCurrentlyRunningTest = nextTest;
         mCurrentlyRunningTestIndex = index;
-        mCrashMessagesHandler.sendEmptyMessageDelayed(MSG_CRASH_TIMEOUT_EXPIRED, CRASH_TIMEOUT_MS);
+        mInternalMessagesHandler.sendEmptyMessageDelayed(MSG_CRASH_TIMEOUT_EXPIRED, CRASH_TIMEOUT_MS);
     }
 
     /**
