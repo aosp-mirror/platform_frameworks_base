@@ -24,6 +24,7 @@ import android.os.Message;
 import android.os.ServiceManager;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.IRotationWatcher;
 import android.view.IWindowManager;
 import android.view.Surface;
@@ -487,7 +488,7 @@ public class SensorManager
         private final ArrayList<Sensor> mSensorList = new ArrayList<Sensor>();
         private final Handler mHandler;
         private SensorEvent mValuesPool;
-        public int mSensors;
+        public SparseBooleanArray mSensors = new SparseBooleanArray();
 
         ListenerDelegate(SensorEventListener listener, Sensor sensor, Handler handler) {
             mSensorEventListener = listener;
@@ -541,18 +542,17 @@ public class SensorManager
             return mSensorEventListener;
         }
 
-        int addSensor(Sensor sensor) {
-            mSensors |= 1<<sensor.getHandle();
+        void addSensor(Sensor sensor) {
+            mSensors.put(sensor.getHandle(), true);
             mSensorList.add(sensor);
-            return mSensors;
         }
         int removeSensor(Sensor sensor) {
-            mSensors &= ~(1<<sensor.getHandle());
+            mSensors.delete(sensor.getHandle());
             mSensorList.remove(sensor);
-            return mSensors;
+            return mSensors.size();
         }
         boolean hasSensor(Sensor sensor) {
-            return ((mSensors & (1<<sensor.getHandle())) != 0);
+            return mSensors.get(sensor.getHandle());
         }
         List<Sensor> getSensors() {
             return mSensorList;
@@ -971,6 +971,31 @@ public class SensorManager
         return registerListener(listener, sensor, rate, null);
     }
 
+    private boolean enableSensorLocked(Sensor sensor, int delay) {
+        boolean result = false;
+        for (ListenerDelegate i : sListeners) {
+            if (i.hasSensor(sensor)) {
+                String name = sensor.getName();
+                int handle = sensor.getHandle();
+                result = sensors_enable_sensor(sQueue, name, handle, delay);
+                break;
+            }
+        }
+        return result;
+    }
+
+    private boolean disableSensorLocked(Sensor sensor) {
+        for (ListenerDelegate i : sListeners) {
+            if (i.hasSensor(sensor)) {
+                // not an error, it's just that this sensor is still in use
+                return true;
+            }
+        }
+        String name = sensor.getName();
+        int handle = sensor.getHandle();
+        return sensors_enable_sensor(sQueue, name, handle, SENSOR_DISABLE);
+    }
+
     /**
      * Registers a {@link android.hardware.SensorEventListener
      * SensorEventListener} for the given sensor.
@@ -1008,7 +1033,7 @@ public class SensorManager
         if (listener == null || sensor == null) {
             return false;
         }
-        boolean result;
+        boolean result = true;
         int delay = -1;
         switch (rate) {
             case SENSOR_DELAY_FASTEST:
@@ -1029,6 +1054,7 @@ public class SensorManager
         }
 
         synchronized (sListeners) {
+            // look for this listener in our list
             ListenerDelegate l = null;
             for (ListenerDelegate i : sListeners) {
                 if (i.getListener() == listener) {
@@ -1037,29 +1063,37 @@ public class SensorManager
                 }
             }
 
-            String name = sensor.getName();
-            int handle = sensor.getHandle();
+            // if we don't find it, add it to the list
             if (l == null) {
-                result = false;
                 l = new ListenerDelegate(listener, sensor, handler);
                 sListeners.add(l);
+                // if the list is not empty, start our main thread
                 if (!sListeners.isEmpty()) {
-                    result = sSensorThread.startLocked();
-                    if (result) {
-                        result = sensors_enable_sensor(sQueue, name, handle, delay);
-                        if (!result) {
-                            // there was an error, remove the listeners
+                    if (sSensorThread.startLocked()) {
+                        if (!enableSensorLocked(sensor, delay)) {
+                            // oops. there was an error
                             sListeners.remove(l);
+                            result = false;
                         }
+                    } else {
+                        // there was an error, remove the listener
+                        sListeners.remove(l);
+                        result = false;
                     }
+                } else {
+                    // weird, we couldn't add the listener
+                    result = false;
                 }
             } else {
-                result = sensors_enable_sensor(sQueue, name, handle, delay);
-                if (result) {
-                    l.addSensor(sensor);
+                l.addSensor(sensor);
+                if (!enableSensorLocked(sensor, delay)) {
+                    // oops. there was an error
+                    l.removeSensor(sensor);
+                    result = false;
                 }
             }
         }
+
         return result;
     }
 
@@ -1072,18 +1106,15 @@ public class SensorManager
             for (int i=0 ; i<size ; i++) {
                 ListenerDelegate l = sListeners.get(i);
                 if (l.getListener() == listener) {
-                    // disable these sensors
-                    String name = sensor.getName();
-                    int handle = sensor.getHandle();
-                    sensors_enable_sensor(sQueue, name, handle, SENSOR_DISABLE);
-                    // if we have no more sensors enabled on this listener,
-                    // take it off the list.
                     if (l.removeSensor(sensor) == 0) {
+                        // if we have no more sensors enabled on this listener,
+                        // take it off the list.
                         sListeners.remove(i);
                     }
                     break;
                 }
             }
+            disableSensorLocked(sensor);
         }
     }
 
@@ -1096,13 +1127,11 @@ public class SensorManager
             for (int i=0 ; i<size ; i++) {
                 ListenerDelegate l = sListeners.get(i);
                 if (l.getListener() == listener) {
+                    sListeners.remove(i);
                     // disable all sensors for this listener
                     for (Sensor sensor : l.getSensors()) {
-                        String name = sensor.getName();
-                        int handle = sensor.getHandle();
-                        sensors_enable_sensor(sQueue, name, handle, SENSOR_DISABLE);
+                        disableSensorLocked(sensor);
                     }
-                    sListeners.remove(i);
                     break;
                 }
             }
