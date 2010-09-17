@@ -146,7 +146,7 @@ void LayerBlur::onDraw(const Region& clip) const
     Region::const_iterator it = clip.begin();
     Region::const_iterator const end = clip.end();
     if (it != end) {
-#if defined(GL_OES_texture_external)
+#if defined(GL_OES_EGL_image_external)
         if (GLExtensions::getInstance().haveTextureExternal()) {
             glDisable(GL_TEXTURE_EXTERNAL_OES);
         }
