@@ -110,7 +110,7 @@ status_t SensorEventQueue::waitForEvent() const
         }
     } while (result != fd);
 
-    return result;
+    return  (result == fd) ? status_t(NO_ERROR) : result;
 }
 
 status_t SensorEventQueue::wake() const
