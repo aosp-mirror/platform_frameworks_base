@@ -511,10 +511,9 @@ public class SipManager {
         }
 
         @Override
-        public void onRegistrationFailed(ISipSession session, String errorCode,
+        public void onRegistrationFailed(ISipSession session, int errorCode,
                 String message) {
-            mListener.onRegistrationFailed(getUri(session),
-                    Enum.valueOf(SipErrorCode.class, errorCode), message);
+            mListener.onRegistrationFailed(getUri(session), errorCode, message);
         }
 
         @Override
