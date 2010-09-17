@@ -447,12 +447,12 @@ public class SensorManager
                     int accuracy = status[0];
                     synchronized (sListeners) {
                         if (sensor == -1 || sListeners.isEmpty()) {
-                            if (sensor == -1) {
-                                // we lost the connection to the event stream. this happens
-                                // when the last listener is removed.
-                                Log.d(TAG, "_sensors_data_poll() failed, we bail out.");
+                            // we lost the connection to the event stream. this happens
+                            // when the last listener is removed or if there is an error
+                            if (sensor == -1 && !sListeners.isEmpty()) {
+                                // log a warning in case of abnormal termination
+                                Log.e(TAG, "_sensors_data_poll() failed, we bail out: sensors=" + sensor);
                             }
-
                             // we have no more listeners or polling failed, terminate the thread
                             sensors_destroy_queue(sQueue);
                             sQueue = 0;
@@ -1101,6 +1101,7 @@ public class SensorManager
         if (listener == null || sensor == null) {
             return;
         }
+
         synchronized (sListeners) {
             final int size = sListeners.size();
             for (int i=0 ; i<size ; i++) {
@@ -1122,6 +1123,7 @@ public class SensorManager
         if (listener == null) {
             return;
         }
+
         synchronized (sListeners) {
             final int size = sListeners.size();
             for (int i=0 ; i<size ; i++) {
