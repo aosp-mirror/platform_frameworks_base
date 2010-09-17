@@ -74,8 +74,8 @@ public:
 
     ~Line() {
         delete mPatch;
-        delete mXDivs;
-        delete mYDivs;
+        delete[] mXDivs;
+        delete[] mYDivs;
 
         glDeleteTextures(1, &mTexture);
     }
