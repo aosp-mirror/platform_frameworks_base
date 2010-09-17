@@ -1466,6 +1466,8 @@ void OMXCodec::setComponentRole() {
 }
 
 OMXCodec::~OMXCodec() {
+    mSource.clear();
+
     CHECK(mState == LOADED || mState == ERROR);
 
     status_t err = mOMX->freeNode(mNode);
