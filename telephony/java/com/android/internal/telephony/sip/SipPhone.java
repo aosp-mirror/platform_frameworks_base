@@ -629,6 +629,7 @@ public class SipPhone extends SipPhoneBase {
                     if (newState == Call.State.INCOMING) {
                         setState(mOwner.getState()); // INCOMING or WAITING
                     } else {
+                        if (newState == Call.State.ACTIVE) call.startAudio();
                         setState(newState);
                     }
                     mOwner.onConnectionStateChanged(SipConnection.this);

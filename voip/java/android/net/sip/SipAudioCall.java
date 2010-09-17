@@ -153,7 +153,7 @@ public interface SipAudioCall {
     void setListener(Listener listener, boolean callbackImmediately);
 
     /**
-     * Closes this object. The object is not usable after being closed.
+     * Closes this object. This object is not usable after being closed.
      */
     void close();
 
@@ -170,6 +170,12 @@ public interface SipAudioCall {
      */
     void makeCall(SipProfile callee, SipManager sipManager, int timeout)
             throws SipException;
+
+    /**
+     * Starts the audio for the established call. This method should be called
+     * after {@link Listener#onCallEstablished} is called.
+     */
+    void startAudio();
 
     /**
      * Attaches an incoming call to this call object.
