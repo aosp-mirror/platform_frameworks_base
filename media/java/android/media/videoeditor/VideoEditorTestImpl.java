@@ -714,7 +714,7 @@ public class VideoEditorTestImpl implements VideoEditor {
 
         // Subtract the transition times
         for (Transition transition : mTransitions) {
-            if (!(transition instanceof TransitionAtStart) && !(transition instanceof TransitionAtEnd)) {
+            if (!(transition instanceof TransitionStartCurtainOpening) && !(transition instanceof TransitionEndFadeToBlack)) {
                 mDurationMs -= transition.getDuration();
             }
         }
