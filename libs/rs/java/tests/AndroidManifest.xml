@@ -4,7 +4,8 @@
     <application 
         android:label="_RS_Test"
         android:icon="@drawable/test_pattern">
-        <activity android:name="RSTest">
+        <activity android:name="RSTest"
+                  android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
