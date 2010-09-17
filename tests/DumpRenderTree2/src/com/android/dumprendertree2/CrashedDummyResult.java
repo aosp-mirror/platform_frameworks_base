@@ -61,7 +61,23 @@ public class CrashedDummyResult extends AbstractResult {
 
     @Override
     public ResultCode getResultCode() {
-        return ResultCode.FAIL_CRASHED;
+        return ResultCode.NO_ACTUAL_RESULT;
+    }
+
+    @Override
+    public boolean didCrash() {
+        return true;
+    }
+
+    @Override
+    public boolean didTimeOut() {
+        return false;
+    }
+
+    @Override
+    public void setDidTimeOut() {
+        /** This method is not applicable for this type of result */
+        assert false;
     }
 
     @Override

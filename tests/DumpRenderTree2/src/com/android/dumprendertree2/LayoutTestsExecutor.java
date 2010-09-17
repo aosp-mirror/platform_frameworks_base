@@ -426,6 +426,7 @@ public class LayoutTestsExecutor extends Activity {
         assert mCurrentState.isRunningState() : "mCurrentState = " + mCurrentState.name();
 
         Log.i(LOG_TAG, "onTestFinished(): " + mCurrentTestRelativePath);
+        mResultHandler.removeMessages(MSG_TEST_TIMED_OUT);
         obtainActualResultsFromWebView();
     }
 
@@ -441,6 +442,9 @@ public class LayoutTestsExecutor extends Activity {
 
         mCurrentState = CurrentState.OBTAINING_RESULT;
 
+        if (mCurrentTestTimedOut) {
+            mCurrentResult.setDidTimeOut();
+        }
         mCurrentResult.obtainActualResults(mCurrentWebView,
                 mResultHandler.obtainMessage(MSG_ACTUAL_RESULT_OBTAINED));
     }
@@ -452,7 +456,6 @@ public class LayoutTestsExecutor extends Activity {
         Log.i(LOG_TAG, "onActualResultsObtained(): " + mCurrentTestRelativePath);
         mCurrentState = CurrentState.IDLE;
 
-        mResultHandler.removeMessages(MSG_TEST_TIMED_OUT);
         reportResultToService();
         mCurrentTestIndex++;
         updateProgressBar();
@@ -470,9 +473,6 @@ public class LayoutTestsExecutor extends Activity {
 
             Bundle bundle = mCurrentResult.getBundle();
             bundle.putInt("testIndex", mCurrentTestIndex);
-            if (mCurrentTestTimedOut) {
-                bundle.putString("resultCode", AbstractResult.ResultCode.FAIL_TIMED_OUT.name());
-            }
             if (!mTestsList.isEmpty()) {
                 bundle.putString("nextTest", mTestsList.get(0));
             }

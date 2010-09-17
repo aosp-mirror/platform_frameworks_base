@@ -46,12 +46,14 @@ public abstract class AbstractResult implements Comparable<AbstractResult> {
         public abstract AbstractResult createResult(Bundle bundle);
     }
 
+    /**
+     * A code representing the result of comparing actual and expected results.
+     */
     public enum ResultCode {
-        PASS("Passed"),
-        FAIL_RESULT_DIFFERS("Result differs"),
-        FAIL_NO_EXPECTED_RESULT("No expected result"),
-        FAIL_TIMED_OUT("Timed out"),
-        FAIL_CRASHED("Crashed");
+        RESULTS_MATCH("Results match"),
+        RESULTS_DIFFER("Results differ"),
+        NO_EXPECTED_RESULT("No expected result"),
+        NO_ACTUAL_RESULT("No actual result");
 
         private String mTitle;
 
@@ -123,12 +125,46 @@ public abstract class AbstractResult implements Comparable<AbstractResult> {
     public abstract String getActualTextResult();
 
     /**
-     * Returns the code of this result.
+     * Returns the status code representing the result of comparing actual and expected results.
      *
      * @return
-     *      the code of this result
+     *      the status code from comparing actual and expected results
      */
     public abstract ResultCode getResultCode();
+
+    /**
+     * Returns whether this test crashed.
+     *
+     * @return
+     *      whether this test crashed
+     */
+    public abstract boolean didCrash();
+
+    /**
+     * Returns whether this test timed out.
+     *
+     * @return
+     *      whether this test timed out
+     */
+    public abstract boolean didTimeOut();
+
+    /**
+     * Sets that this test timed out.
+     */
+    public abstract void setDidTimeOut();
+
+    /**
+     * Returns whether the test passed.
+     *
+     * @return
+     *      whether the test passed
+     */
+    public boolean didPass() {
+        // Tests that crash can't have timed out or have an actual result.
+        assert !(didCrash() && didTimeOut());
+        assert !(didCrash() && getResultCode() != ResultCode.NO_ACTUAL_RESULT);
+        return !didCrash() && !didTimeOut() && getResultCode() == ResultCode.RESULTS_MATCH;
+    }
 
     /**
      * Return the type of the result data.
