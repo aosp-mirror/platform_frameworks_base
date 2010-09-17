@@ -134,12 +134,6 @@ public class Summarizer {
             "       background-color: #ff8888; }" +
             "span.ins {" +
             "       background-color: #88ff88; }" +
-            "span.fail {" +
-            "       color: red;}" +
-            "span.pass {" +
-            "       color: green;}" +
-            "span.time_out {" +
-            "       color: orange;}" +
             "table.summary {" +
             "       border: 1px solid black;" +
             "       margin-top: 20px;}" +
@@ -151,9 +145,6 @@ public class Summarizer {
             "       text-transform: uppercase;" +
             "       padding: 3px;" +
             "       -webkit-border-radius: 4px;}" +
-            "span." + AbstractResult.ResultCode.PASS.name() + "{" +
-            "       background-color: #8ee100;" +
-            "       color: black;}" +
             "span." + AbstractResult.ResultCode.FAIL_RESULT_DIFFERS.name() + "{" +
             "       background-color: #ccc;" +
             "       color: black;}" +
