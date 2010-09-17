@@ -633,7 +633,7 @@ void OpenGLRenderer::drawLines(float* points, int count, const SkPaint* paint) {
             mLine.update(points[i], points[i + 1], points[i + 2], points[i + 3],
                     strokeWidth, tx, ty);
         } else {
-            ty = -strokeWidth * 0.5f;
+            ty = strokeWidth <= 1.0f ? 0.0f : -strokeWidth * 0.5f;
         }
 
         const float dx = points[i + 2] - points[i];
