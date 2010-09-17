@@ -75,6 +75,10 @@ def main(options, args):
   apache2_restart_template = "apache2 -k %s"
   directives  = " -c \"ServerRoot " + android_tree_root + "\""
 
+  # The default config in apache2-debian-httpd.conf listens on ports 8080 and
+  # 8443. We also need to listen on port 8000 for HTTP tests.
+  directives += " -c \"Listen 8000\""
+
   # We use http/tests as the document root as the HTTP tests use hardcoded
   # resources at the server root. We then use aliases to make available the
   # complete set of tests and the required scripts.
