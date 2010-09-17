@@ -55,7 +55,8 @@ import java.util.List;
 public final class CallManager {
 
     private static final String LOG_TAG ="Phone";
-    private static final boolean LOCAL_DEBUG = true;
+    private static final boolean DBG = true;
+    private static final boolean VDBG = false;
 
     private static final int EVENT_DISCONNECT = 100;
     private static final int EVENT_PRECISE_CALL_STATE_CHANGED = 101;
@@ -434,12 +435,16 @@ public final class CallManager {
     public void acceptCall(Call ringingCall) throws CallStateException {
         Phone ringingPhone = ringingCall.getPhone();
 
+        if (VDBG) {
+            Log.d(LOG_TAG, "CallManager.acceptCall " + this);
+        }
+
         if ( hasActiveFgCall() ) {
             Phone activePhone = getActiveFgCall().getPhone();
             boolean hasBgCall = ! (activePhone.getBackgroundCall().isIdle());
             boolean sameChannel = (activePhone == ringingPhone);
 
-            if (LOCAL_DEBUG) {
+            if (DBG) {
                 Log.d(LOG_TAG, "hasBgCall: "+ hasBgCall + "sameChannel:" + sameChannel);
             }
 
@@ -587,12 +592,16 @@ public final class CallManager {
      * handled asynchronously.
      */
     public Connection dial(Phone phone, String dialString) throws CallStateException {
+        if (VDBG) {
+            Log.d(LOG_TAG, "CallManager.dial( phone=" + phone + ", dialString="+ dialString + ")");
+            Log.d(LOG_TAG, this.toString());
+        }
         if ( hasActiveFgCall() ) {
             Phone activePhone = getActiveFgCall().getPhone();
             boolean hasBgCall = !(activePhone.getBackgroundCall().isIdle());
 
-            if (LOCAL_DEBUG) {
-                Log.d(LOG_TAG, "hasBgCall: "+ hasBgCall + "sameChannel:" + (activePhone != phone));
+            if (DBG) {
+                Log.d(LOG_TAG, "hasBgCall: "+ hasBgCall + " sameChannel:" + (activePhone == phone));
             }
 
             if (activePhone != phone) {
@@ -1365,7 +1374,7 @@ public final class CallManager {
      * return empty list if there is no active background call
      */
     public List<Connection> getBgCallConnections() {
-        Call bgCall = getActiveFgCall();
+        Call bgCall = getFirstActiveBgCall();
         if ( bgCall != null) {
             return bgCall.getConnections();
         }
@@ -1504,4 +1513,46 @@ public final class CallManager {
             }
         }
     };
+
+    @Override
+    public String toString() {
+        Call call;
+        StringBuilder b = new StringBuilder();
+
+        b.append("########### Dump CallManager ############");
+        b.append("\nCM state = " + getState());
+        call = getActiveFgCall();
+        b.append("\n   - FG call: " + getActiveFgCallState());
+        b.append(" from " + call.getPhone());
+        b.append("\n     Conn: ").append(getFgCallConnections());
+        call = getFirstActiveBgCall();
+        b.append("\n   - BG call: " + call.getState());
+        b.append(" from " + call.getPhone());
+        b.append("\n     Conn: ").append(getBgCallConnections());
+        call = getFirstActiveRingingCall();
+        b.append("\n   - RINGING call: " +call.getState());
+        b.append(" from " + call.getPhone());
+
+        b.append("\n");
+        for (Phone phone : getAllPhones()) {
+            if (phone != null) {
+                b.append("\n Phone: " + phone + ", name = " + phone.getPhoneName()
+                        + ", state = " + phone.getState());
+                call = phone.getForegroundCall();
+                b.append("\n   - FG call: ").append(call);
+                b.append("  State: ").append(call.getState());
+                b.append("\n     Conn: ").append(call.getConnections());
+                call = phone.getBackgroundCall();
+                b.append("\n   - BG call: ").append(call);
+                b.append("  State: ").append(call.getState());
+                b.append("\n     Conn: ").append(call.getConnections());
+                call = phone.getRingingCall();
+                b.append("\n   - RINGING call: ").append(call);
+                b.append( "  State: ").append(call.getState());
+                b.append("\n     Conn: ").append(call.getConnections());
+            }
+        }
+        b.append("\n########## End Dump CallManager ##########");
+        return b.toString();
+    }
 }
