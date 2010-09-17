@@ -30,6 +30,8 @@ namespace android {
 
 static jboolean sScanModeActive = false;
 
+//TODO: check general errors in addition to overflow on snprintf
+
 /*
  * The following remembers the jfieldID's of the fields
  * of the DhcpInfo Java object, so that we don't have
@@ -153,6 +155,36 @@ static jstring android_net_wifi_listNetworksCommand(JNIEnv* env, jobject clazz)
 static jint android_net_wifi_addNetworkCommand(JNIEnv* env, jobject clazz)
 {
     return doIntCommand("ADD_NETWORK");
+}
+
+static jboolean android_net_wifi_wpsPbcCommand(JNIEnv* env, jobject clazz, jstring bssid)
+{
+    char cmdstr[50];
+    jboolean isCopy;
+
+    const char *bssidStr = env->GetStringUTFChars(bssid, &isCopy);
+    int numWritten = snprintf(cmdstr, sizeof(cmdstr), "WPS_PBC %s", bssidStr);
+    env->ReleaseStringUTFChars(bssid, bssidStr);
+
+    if ((numWritten == -1) || (numWritten >= sizeof(cmdstr))) {
+        return false;
+    }
+    return doBooleanCommand(cmdstr, "OK");
+}
+
+static jboolean android_net_wifi_wpsPinCommand(JNIEnv* env, jobject clazz, jstring bssid, int apPin)
+{
+    char cmdstr[50];
+    jboolean isCopy;
+
+    const char *bssidStr = env->GetStringUTFChars(bssid, &isCopy);
+    int numWritten = snprintf(cmdstr, sizeof(cmdstr), "WPS_REG %s %d", bssidStr, apPin);
+    env->ReleaseStringUTFChars(bssid, bssidStr);
+
+    if ((numWritten == -1) || (numWritten >= (int)sizeof(cmdstr))) {
+        return false;
+    }
+    return doBooleanCommand(cmdstr, "OK");
 }
 
 static jboolean android_net_wifi_setNetworkVariableCommand(JNIEnv* env,
@@ -603,7 +635,8 @@ static JNINativeMethod gWifiMethods[] = {
     { "setScanResultHandlingCommand", "(I)Z", (void*) android_net_wifi_setScanResultHandlingCommand },
     { "addToBlacklistCommand", "(Ljava/lang/String;)Z", (void*) android_net_wifi_addToBlacklistCommand },
     { "clearBlacklistCommand", "()Z", (void*) android_net_wifi_clearBlacklistCommand },
-
+    { "startWpsPbcCommand", "(Ljava/lang/String;)Z", (void*) android_net_wifi_wpsPbcCommand },
+    { "startWpsPinCommand", "(Ljava/lang/String;I)Z", (void*) android_net_wifi_wpsPinCommand },
     { "doDhcpRequest", "(Landroid/net/DhcpInfo;)Z", (void*) android_net_wifi_doDhcpRequest },
     { "getDhcpError", "()Ljava/lang/String;", (void*) android_net_wifi_getDhcpError },
 };

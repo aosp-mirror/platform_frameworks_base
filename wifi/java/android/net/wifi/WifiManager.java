@@ -1037,6 +1037,32 @@ public class WifiManager {
     }
 
     /**
+     * Start Wi-fi protected setup push button Configuration
+     *
+     * @param bssid BSSID of the access point
+     * @hide
+     */
+    public void startWpsPbc(String bssid) {
+        try {
+            mService.startWpsPbc(bssid);
+        } catch (RemoteException e) { }
+    }
+
+    /**
+     * Start Wi-fi Protected Setup pin method configuration
+     *
+     * @param bssid BSSID of the access point
+     * @param apPin PIN issued by the access point
+     *
+     * @hide
+     */
+    public void startWpsPin(String bssid, int apPin) {
+        try {
+            mService.startWpsPin(bssid, apPin);
+        } catch (RemoteException e) { }
+    }
+
+    /**
      * Allows an application to keep the Wi-Fi radio awake.
      * Normally the Wi-Fi radio may turn off when the user has not used the device in a while.
      * Acquiring a WifiLock will keep the radio on until the lock is released.  Multiple 

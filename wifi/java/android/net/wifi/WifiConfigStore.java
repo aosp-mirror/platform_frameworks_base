@@ -23,6 +23,7 @@ import android.net.DhcpInfo;
 import android.net.wifi.WifiConfiguration.IpAssignment;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiConfiguration.Status;
+import static android.net.wifi.WifiConfiguration.INVALID_NETWORK_ID;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
@@ -95,9 +96,9 @@ class WifiConfigStore {
      * and enable all stored networks in supplicant.
      */
     static void initialize(Context context) {
-        Log.d(TAG, "Updating config and enabling all networks");
+        Log.d(TAG, "Loading config and enabling all networks");
         sContext = context;
-        updateConfiguredNetworks();
+        loadConfiguredNetworks();
         enableAllNetworks();
     }
 
@@ -150,7 +151,7 @@ class WifiConfigStore {
     static void selectNetwork(WifiConfiguration config) {
         if (config != null) {
             int netId = addOrUpdateNetworkNative(config);
-            if (netId != -1) {
+            if (netId != INVALID_NETWORK_ID) {
                 selectNetwork(netId);
             } else {
                 Log.e(TAG, "Failed to update network " + config);
@@ -174,7 +175,7 @@ class WifiConfigStore {
         if (sLastPriority == -1 || sLastPriority > 1000000) {
             synchronized (sConfiguredNetworks) {
                 for(WifiConfiguration config : sConfiguredNetworks.values()) {
-                    if (config.networkId != -1) {
+                    if (config.networkId != INVALID_NETWORK_ID) {
                         config.priority = 0;
                         addOrUpdateNetworkNative(config);
                     }
@@ -204,10 +205,10 @@ class WifiConfigStore {
      * @param config WifiConfiguration to be saved
      */
     static void saveNetwork(WifiConfiguration config) {
-        boolean newNetwork = (config.networkId == -1);
+        boolean newNetwork = (config.networkId == INVALID_NETWORK_ID);
         int netId = addOrUpdateNetworkNative(config);
         /* enable a new network */
-        if (newNetwork && netId >= 0) {
+        if (newNetwork && netId != INVALID_NETWORK_ID) {
             WifiNative.enableNetworkCommand(netId, false);
             synchronized (sConfiguredNetworks) {
                 sConfiguredNetworks.get(netId).status = Status.ENABLED;
@@ -288,13 +289,7 @@ class WifiConfigStore {
         }
 
         if (disableOthers) {
-            synchronized (sConfiguredNetworks) {
-                for(WifiConfiguration config : sConfiguredNetworks.values()) {
-                    if(config != null && config.networkId != netId) {
-                        config.status = Status.DISABLED;
-                    }
-                }
-            }
+            markAllNetworksDisabledExcept(netId);
         }
         return ret;
     }
@@ -318,6 +313,32 @@ class WifiConfigStore {
      */
     static boolean saveConfig() {
         return WifiNative.saveConfigCommand();
+    }
+
+    /**
+     * Start WPS pin method configuration
+     */
+    static boolean startWpsPin(String bssid, int apPin) {
+        if (WifiNative.startWpsPinCommand(bssid, apPin)) {
+            /* WPS leaves all networks disabled */
+            markAllNetworksDisabled();
+            return true;
+        }
+        Log.e(TAG, "Failed to start WPS pin method configuration");
+        return false;
+    }
+
+    /**
+     * Start WPS push button configuration
+     */
+    static boolean startWpsPbc(String bssid) {
+        if (WifiNative.startWpsPbcCommand(bssid)) {
+            /* WPS leaves all networks disabled */
+            markAllNetworksDisabled();
+            return true;
+        }
+        Log.e(TAG, "Failed to start WPS push button configuration");
+        return false;
     }
 
     /**
@@ -350,7 +371,7 @@ class WifiConfigStore {
         sContext.sendBroadcast(intent);
     }
 
-    private static void updateConfiguredNetworks() {
+    static void loadConfiguredNetworks() {
         String listStr = WifiNative.listNetworksCommand();
         sLastPriority = 0;
 
@@ -391,6 +412,22 @@ class WifiConfigStore {
             }
         }
         readIpConfigurations();
+        sendConfigChangeBroadcast();
+    }
+
+    /* Mark all networks except specified netId as disabled */
+    private static void markAllNetworksDisabledExcept(int netId) {
+        synchronized (sConfiguredNetworks) {
+            for(WifiConfiguration config : sConfiguredNetworks.values()) {
+                if(config != null && config.networkId != netId) {
+                    config.status = Status.DISABLED;
+                }
+            }
+        }
+    }
+
+    private static void markAllNetworksDisabled() {
+        markAllNetworksDisabledExcept(INVALID_NETWORK_ID);
     }
 
     private static void writeIpConfigurations() {
@@ -513,20 +550,20 @@ class WifiConfigStore {
 
     private static int addOrUpdateNetworkNative(WifiConfiguration config) {
         /*
-         * If the supplied networkId is -1, we create a new empty
+         * If the supplied networkId is INVALID_NETWORK_ID, we create a new empty
          * network configuration. Otherwise, the networkId should
          * refer to an existing configuration.
          */
         int netId = config.networkId;
         boolean updateFailed = true;
-        boolean newNetwork = netId == -1;
-        // networkId of -1 means we want to create a new network
+        boolean newNetwork = (netId == INVALID_NETWORK_ID);
+        // networkId of INVALID_NETWORK_ID means we want to create a new network
 
         if (newNetwork) {
             netId = WifiNative.addNetworkCommand();
             if (netId < 0) {
                 Log.e(TAG, "Failed to add a network!");
-                return -1;
+                return INVALID_NETWORK_ID;
           }
         }
 
@@ -700,7 +737,7 @@ class WifiConfigStore {
                         "Failed to set a network variable, removed network: "
                         + netId);
             }
-            return -1;
+            return INVALID_NETWORK_ID;
         }
 
         /* An update of the network variables requires reading them

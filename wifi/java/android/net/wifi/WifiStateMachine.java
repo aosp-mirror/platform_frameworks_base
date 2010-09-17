@@ -151,7 +151,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     /* Connection to a specific network involves disabling all networks,
      * this flag tracks if networks need to be re-enabled */
     private boolean mEnableAllNetworks = false;
-
+    /* Track if WPS was started since we need to re-enable networks
+     * and load configuration afterwards */
+    private boolean mWpsStarted = false;
 
     // Event log tags (must be in sync with event-log-tags)
     private static final int EVENTLOG_WIFI_STATE_CHANGED        = 50021;
@@ -299,7 +301,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * supplicant config.
      */
     private static final int CMD_FORGET_NETWORK                   = 92;
-
+    /* Start Wi-Fi protected setup */
+    private static final int CMD_START_WPS                        = 93;
 
 
     /**
@@ -406,7 +409,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * Keep track of whether WIFI is running.
      */
     private boolean mIsRunning = false;
-    
+
     /**
      * Keep track of whether we last told the battery stats we had started.
      */
@@ -763,6 +766,14 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
     public void forgetNetwork(int netId) {
         sendMessage(obtainMessage(CMD_FORGET_NETWORK, netId, 0));
+    }
+
+    public void startWpsPbc(String bssid) {
+        sendMessage(obtainMessage(CMD_START_WPS, bssid));
+    }
+
+    public void startWpsPin(String bssid, int apPin) {
+        sendMessage(obtainMessage(CMD_START_WPS, apPin, 0, bssid));
     }
 
     public void enableRssiPolling(boolean enabled) {
@@ -1597,6 +1608,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_CONNECT_NETWORK:
                 case CMD_SAVE_NETWORK:
                 case CMD_FORGET_NETWORK:
+                case CMD_START_WPS:
                     break;
                 default:
                     Log.e(TAG, "Error! unhandled message" + message);
@@ -2355,6 +2367,33 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     /* Expect a disconnection from the old connection */
                     transitionTo(mDisconnectingState);
                     break;
+                case CMD_START_WPS:
+                    String bssid = (String) message.obj;
+                    int apPin = message.arg1;
+                    boolean success;
+                    if (apPin != 0) {
+                        /* WPS pin method configuration */
+                        success = WifiConfigStore.startWpsPin(bssid, apPin);
+                    } else {
+                        /* WPS push button configuration */
+                        success = WifiConfigStore.startWpsPbc(bssid);
+                    }
+                    /* During WPS setup, all other networks are disabled. After
+                     * a successful connect a new config is created in the supplicant.
+                     *
+                     * We need to enable all networks after a successful connection
+                     * or when supplicant goes inactive due to failure. Enabling all
+                     * networks after a disconnect is observed as done with connectNetwork
+                     * does not lead to a successful WPS setup.
+                     *
+                     * Upon success, the configuration list needs to be reloaded
+                     */
+                    if (success) {
+                        mWpsStarted = true;
+                        /* Expect a disconnection from the old connection */
+                        transitionTo(mDisconnectingState);
+                    }
+                    break;
                 case SCAN_RESULTS_EVENT:
                     /* Set the scan setting back to "connect" mode */
                     WifiNative.setScanResultHandlingCommand(CONNECT_MODE);
@@ -2581,6 +2620,12 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         @Override
         public void enter() {
             if (DBG) Log.d(TAG, getName() + "\n");
+            /* A successful WPS connection */
+            if (mWpsStarted) {
+                WifiConfigStore.enableAllNetworks();
+                WifiConfigStore.loadConfiguredNetworks();
+                mWpsStarted = false;
+            }
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
@@ -2911,6 +2956,14 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             @Override
              public void enter() {
                  if (DBG) Log.d(TAG, getName() + "\n");
+
+                 /* A failed WPS connection */
+                 if (mWpsStarted) {
+                     Log.e(TAG, "WPS set up failed, enabling other networks");
+                     WifiConfigStore.enableAllNetworks();
+                     mWpsStarted = false;
+                 }
+
                  Message message = getCurrentMessage();
                  StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
 

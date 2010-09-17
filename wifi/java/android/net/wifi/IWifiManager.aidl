@@ -105,5 +105,9 @@ interface IWifiManager
     void saveNetwork(in WifiConfiguration wifiConfig);
 
     void forgetNetwork(int networkId);
+
+    void startWpsPbc(String bssid);
+
+    void startWpsPin(String bssid, int apPin);
 }
 

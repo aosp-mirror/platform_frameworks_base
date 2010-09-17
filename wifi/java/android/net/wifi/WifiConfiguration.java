@@ -43,6 +43,8 @@ public class WifiConfiguration implements Parcelable {
     public static final String priorityVarName = "priority";
     /** {@hide} */
     public static final String hiddenSSIDVarName = "scan_ssid";
+    /** {@hide} */
+    public static final int INVALID_NETWORK_ID = -1;
 
     /** {@hide} */
     public class EnterpriseField {
@@ -313,7 +315,7 @@ public class WifiConfiguration implements Parcelable {
     public DhcpInfo ipConfig;
 
     public WifiConfiguration() {
-        networkId = -1;
+        networkId = INVALID_NETWORK_ID;
         SSID = null;
         BSSID = null;
         priority = 0;
