@@ -146,9 +146,12 @@ typedef void* GLeglImageOES;
 #define GL_INT_10_10_10_2_OES                                   0x8DF7
 #endif
 
-/* GL_OES_texture_external */
-#ifndef GL_TEXTURE_EXTERNAL_OES
+/* GL_OES_EGL_image_external */
+#ifndef GL_OES_EGL_image_external
 #define GL_TEXTURE_EXTERNAL_OES                                 0x8D65
+#define GL_SAMPLER_EXTERNAL_OES                                 0x8D66
+#define GL_TEXTURE_BINDING_EXTERNAL_OES                         0x8D67
+#define GL_REQUIRED_TEXTURE_IMAGE_UNITS_OES                     0x8D68
 #endif
 
 /*------------------------------------------------------------------------*
@@ -546,9 +549,9 @@ typedef GLboolean (GL_APIENTRYP PFNGLISVERTEXARRAYOESPROC) (GLuint array);
 #define GL_OES_vertex_type_10_10_10_2 1
 #endif
 
-/* GL_OES_texture_external */
-#ifndef GL_OES_texture_external
-#define GL_OES_texture_external 1
+/* GL_OES_EGL_image_external */
+#ifndef GL_OES_EGL_image_external
+#define GL_OES_EGL_image_external 1
 #endif
 
 /*------------------------------------------------------------------------*

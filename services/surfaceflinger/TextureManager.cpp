@@ -43,7 +43,7 @@ TextureManager::TextureManager()
 }
 
 GLenum TextureManager::getTextureTarget(const Image* image) {
-#if defined(GL_OES_texture_external)
+#if defined(GL_OES_EGL_image_external)
     switch (image->target) {
         case Texture::TEXTURE_EXTERNAL:
             return GL_TEXTURE_EXTERNAL_OES;
@@ -85,7 +85,7 @@ status_t TextureManager::initTexture(Image* pImage, int32_t format)
     pImage->height = 0;
 
     GLenum target = GL_TEXTURE_2D;
-#if defined(GL_OES_texture_external)
+#if defined(GL_OES_EGL_image_external)
     if (GLExtensions::getInstance().haveTextureExternal()) {
         if (format && isYuvFormat(format)) {
             target = GL_TEXTURE_EXTERNAL_OES;
@@ -306,7 +306,7 @@ void TextureManager::activateTexture(const Texture& texture, bool filter)
     if (target == GL_TEXTURE_2D) {
         glBindTexture(GL_TEXTURE_2D, texture.name);
         glEnable(GL_TEXTURE_2D);
-#if defined(GL_OES_texture_external)
+#if defined(GL_OES_EGL_image_external)
         if (GLExtensions::getInstance().haveTextureExternal()) {
             glDisable(GL_TEXTURE_EXTERNAL_OES);
         }
@@ -329,7 +329,7 @@ void TextureManager::activateTexture(const Texture& texture, bool filter)
 void TextureManager::deactivateTextures()
 {
     glDisable(GL_TEXTURE_2D);
-#if defined(GL_OES_texture_external)
+#if defined(GL_OES_EGL_image_external)
     if (GLExtensions::getInstance().haveTextureExternal()) {
         glDisable(GL_TEXTURE_EXTERNAL_OES);
     }
