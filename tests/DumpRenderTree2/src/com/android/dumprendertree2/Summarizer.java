@@ -20,6 +20,7 @@ import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
+import android.os.Message;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
@@ -234,10 +235,11 @@ public class Summarizer {
         mTestsRelativePath = testsRelativePath;
     }
 
-    public void summarize() {
+    public void summarize(Message onFinishMessage) {
         String webKitRevision = getWebKitRevision();
         createHtmlDetails(webKitRevision);
         createTxtSummary(webKitRevision);
+        onFinishMessage.sendToTarget();
     }
 
     public void reset() {
