@@ -16,10 +16,7 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
-#include <cstring>
 #include <cmath>
-
-#include <utils/Log.h>
 
 #include "Patch.h"
 
@@ -34,7 +31,6 @@ Patch::Patch(const uint32_t xCount, const uint32_t yCount) {
     // 2 triangles per patch, 3 vertices per triangle
     verticesCount = (xCount + 1) * (yCount + 1) * 2 * 3;
     vertices = new TextureVertex[verticesCount];
-    memset(vertices, 0, sizeof(TextureVertex) * verticesCount);
 }
 
 Patch::~Patch() {
@@ -45,9 +41,9 @@ Patch::~Patch() {
 // Vertices management
 ///////////////////////////////////////////////////////////////////////////////
 
-void Patch::updateVertices(const SkBitmap* bitmap, float left, float top, float right,
-        float bottom, const int32_t* xDivs, const int32_t* yDivs, const uint32_t width,
-        const uint32_t height) {
+void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
+        float left, float top, float right, float bottom,
+        const int32_t* xDivs, const int32_t* yDivs, const uint32_t width, const uint32_t height) {
     const uint32_t xStretchCount = (width + 1) >> 1;
     const uint32_t yStretchCount = (height + 1) >> 1;
 
@@ -55,9 +51,6 @@ void Patch::updateVertices(const SkBitmap* bitmap, float left, float top, float 
     float stretchY = 0.0;
 
     const float meshWidth = right - left;
-
-    const float bitmapWidth = float(bitmap->width());
-    const float bitmapHeight = float(bitmap->height());
 
     if (xStretchCount > 0) {
         uint32_t stretchSize = 0;

@@ -40,6 +40,7 @@
 #include "SkiaShader.h"
 #include "SkiaColorFilter.h"
 #include "Caches.h"
+#include "Line.h"
 
 namespace android {
 namespace uirenderer {
@@ -99,6 +100,7 @@ public:
     void drawColor(int color, SkXfermode::Mode mode);
     void drawRect(float left, float top, float right, float bottom, const SkPaint* paint);
     void drawPath(SkPath* path, SkPaint* paint);
+    void drawLines(float* points, int count, const SkPaint* paint);
 
     void resetShader();
     void setupShader(SkiaShader* shader);
@@ -297,6 +299,15 @@ private:
             SkXfermode::Mode mode, bool transforms, bool applyFilters);
 
     /**
+     * Same as above setupTextureAlpha8() but specifies the mesh's vertices
+     * and texCoords pointers.
+     */
+    void setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t height,
+            GLuint& textureUnit, float x, float y, float r, float g, float b, float a,
+            SkXfermode::Mode mode, bool transforms, bool applyFilters,
+            GLvoid* vertices, GLvoid* texCoords);
+
+    /**
      * Draws text underline and strike-through if needed.
      *
      * @param text The text to decor
@@ -403,6 +414,10 @@ private:
     // List of rectangles to clear due to calls to saveLayer()
     Vector<Rect*> mLayers;
 
+    // Single object used to draw lines
+    Line mLine;
+
+    // Misc
     GLint mMaxTextureSize;
 
 }; // class OpenGLRenderer

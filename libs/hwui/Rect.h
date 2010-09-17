@@ -164,4 +164,4 @@ struct Rect {
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_RECT_H
+#endif // ANDROID_UI_RECT_H

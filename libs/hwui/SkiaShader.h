@@ -73,6 +73,10 @@ struct SkiaShader {
         mGradientCache = gradientCache;
     }
 
+    virtual void updateTransforms(Program* program, const mat4& modelView,
+            const Snapshot& snapshot) {
+    }
+
     void setMatrix(SkMatrix* matrix) {
         mMatrix = matrix;
     }
@@ -106,6 +110,7 @@ struct SkiaBitmapShader: public SkiaShader {
     void describe(ProgramDescription& description, const Extensions& extensions);
     void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
             GLuint* textureUnit);
+    void updateTransforms(Program* program, const mat4& modelView, const Snapshot& snapshot);
 
 private:
     /**
@@ -130,6 +135,7 @@ struct SkiaLinearGradientShader: public SkiaShader {
     void describe(ProgramDescription& description, const Extensions& extensions);
     void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
             GLuint* textureUnit);
+    void updateTransforms(Program* program, const mat4& modelView, const Snapshot& snapshot);
 
 private:
     float* mBounds;
