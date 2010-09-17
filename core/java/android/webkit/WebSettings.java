@@ -178,6 +178,7 @@ public class WebSettings {
     private boolean         mUseDoubleTree = false;
     private boolean         mUseWideViewport = false;
     private boolean         mUseFixedViewport = false;
+    private int             mMaxFixedViewportWidth = WebView.DEFAULT_VIEWPORT_WIDTH;
     private boolean         mSupportMultipleWindows = false;
     private boolean         mShrinksStandaloneImagesToFit = false;
     private long            mMaximumDecodedImageSize = 0; // 0 means default
@@ -324,8 +325,9 @@ public class WebSettings {
 
         // Detect tablet device for fixed viewport mode.
         final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        mUseFixedViewport = (metrics.density == 1.0f 
-            && (metrics.widthPixels >= 800 ||metrics.heightPixels >= 800));
+        final int landscapeWidth = Math.max(metrics.widthPixels, metrics.heightPixels);
+        mUseFixedViewport = (metrics.density == 1.0f && landscapeWidth >= 800);
+        mMaxFixedViewportWidth = (int) (landscapeWidth * 1.25);
 
         if (sLockForLocaleSettings == null) {
             sLockForLocaleSettings = new Object();
@@ -1513,6 +1515,13 @@ public class WebSettings {
      */
     /* package */ boolean getUseFixedViewport() {
         return mUseFixedViewport;
+    }
+
+    /**
+     * Returns maximum fixed viewport width.
+     */
+    /* package */ int getMaxFixedViewportWidth() {
+        return mMaxFixedViewportWidth;
     }
 
     /**
