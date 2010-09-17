@@ -38,6 +38,7 @@ import android.os.SystemProperties;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.EventLog;
@@ -322,6 +323,21 @@ public class WifiStateTracker extends NetworkStateTracker {
 
     private static String[] sDnsPropNames;
     private Runnable mReleaseWakeLockCallback;
+
+    /**
+     * Keep track of whether we last told the battery stats we had started.
+     */
+    private boolean mReportedRunning = false;
+
+    /**
+     * Most recently set source of starting WIFI.
+     */
+    private final WorkSource mRunningWifiUids = new WorkSource();
+
+    /**
+     * The last reported UIDs that were responsible for starting WIFI.
+     */
+    private final WorkSource mLastRunningWifiUids = new WorkSource();
 
     /**
      * A structure for supplying information about a supplicant state
@@ -633,12 +649,35 @@ public class WifiStateTracker extends NetworkStateTracker {
         return mRunState == RUN_STATE_STOPPED || mRunState == RUN_STATE_STOPPING;
     }
 
-    private void noteRunState() {
+    public void updateBatteryWorkSourceLocked(WorkSource newSource) {
         try {
+            if (newSource != null) {
+                mRunningWifiUids.set(newSource);
+            }
             if (mRunState == RUN_STATE_RUNNING) {
-                mBatteryStats.noteWifiRunning();
+                if (mReportedRunning) {
+                    // If the work source has changed since last time, need
+                    // to remove old work from battery stats.
+                    if (mLastRunningWifiUids.diff(mRunningWifiUids)) {
+                        mBatteryStats.noteWifiRunningChanged(mLastRunningWifiUids,
+                                mRunningWifiUids);
+                        mLastRunningWifiUids.set(mRunningWifiUids);
+                    }
+                } else {
+                    // Now being started, report it.
+                    mBatteryStats.noteWifiRunning(mRunningWifiUids);
+                    mLastRunningWifiUids.set(mRunningWifiUids);
+                    mReportedRunning = true;
+                }
             } else if (mRunState == RUN_STATE_STOPPED) {
-                mBatteryStats.noteWifiStopped();
+                if (mReportedRunning) {
+                    // Last reported we were running, time to stop.
+                    mBatteryStats.noteWifiStopped(mLastRunningWifiUids);
+                    mLastRunningWifiUids.clear();
+                    mReportedRunning = false;
+                }
+            } else {
+                // State in transition -- nothing to update yet.
             }
         } catch (RemoteException ignore) {
         }
@@ -802,7 +841,9 @@ public class WifiStateTracker extends NetworkStateTracker {
         switch (msg.what) {
             case EVENT_SUPPLICANT_CONNECTION:
                 mRunState = RUN_STATE_RUNNING;
-                noteRunState();
+                synchronized (this) {
+                    updateBatteryWorkSourceLocked(null);
+                }
                 checkUseStaticIp();
                 /* Reset notification state on new connection */
                 resetNotificationTimer();
@@ -876,7 +917,9 @@ public class WifiStateTracker extends NetworkStateTracker {
 
             case EVENT_SUPPLICANT_DISCONNECT:
                 mRunState = RUN_STATE_STOPPED;
-                noteRunState();
+                synchronized (this) {
+                    updateBatteryWorkSourceLocked(null);
+                }
                 boolean died = mWifiState.get() != WIFI_STATE_DISABLED &&
                                mWifiState.get() != WIFI_STATE_DISABLING;
                 if (died) {
@@ -1268,7 +1311,9 @@ public class WifiStateTracker extends NetworkStateTracker {
                     mWM.setWifiEnabled(true);
                     break;
                 }
-                noteRunState();
+                synchronized (this) {
+                    updateBatteryWorkSourceLocked(null);
+                }
                 break;
 
             case EVENT_PASSWORD_KEY_MAY_BE_INCORRECT:

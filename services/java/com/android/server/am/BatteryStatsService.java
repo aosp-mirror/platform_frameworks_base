@@ -218,17 +218,17 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
-    public void noteWifiOn(int uid) {
+    public void noteWifiOn() {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteWifiOnLocked(uid);
+            mStats.noteWifiOnLocked();
         }
     }
     
-    public void noteWifiOff(int uid) {
+    public void noteWifiOff() {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteWifiOffLocked(uid);
+            mStats.noteWifiOffLocked();
         }
     }
 
@@ -260,17 +260,24 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
-    public void noteWifiRunning() {
+    public void noteWifiRunning(WorkSource ws) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteWifiRunningLocked();
+            mStats.noteWifiRunningLocked(ws);
         }
     }
 
-    public void noteWifiStopped() {
+    public void noteWifiRunningChanged(WorkSource oldWs, WorkSource newWs) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteWifiStoppedLocked();
+            mStats.noteWifiRunningChangedLocked(oldWs, newWs);
+        }
+    }
+
+    public void noteWifiStopped(WorkSource ws) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiStoppedLocked(ws);
         }
     }
 
