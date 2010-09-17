@@ -16,9 +16,11 @@
 
 package com.android.dumprendertree2;
 
+import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.os.Build;
 import android.os.Message;
 import android.util.DisplayMetrics;
@@ -32,7 +34,6 @@ import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -189,6 +190,7 @@ public class Summarizer {
     private static final String TXT_SUMMARY_RELATIVE_PATH = "summary.txt";
 
     private static final int RESULTS_PER_DUMP = 500;
+    private static final int RESULTS_PER_DB_ACCESS = 50;
 
     private int mCrashedTestsCount = 0;
     private List<AbstractResult> mUnexpectedFailures = new ArrayList<AbstractResult>();
@@ -196,16 +198,31 @@ public class Summarizer {
     private List<AbstractResult> mExpectedPasses = new ArrayList<AbstractResult>();
     private List<AbstractResult> mUnexpectedPasses = new ArrayList<AbstractResult>();
 
+    private Cursor mUnexpectedFailuresCursor;
+    private Cursor mExpectedFailuresCursor;
+    private Cursor mUnexpectedPassesCursor;
+    private Cursor mExpectedPassesCursor;
+
     private FileFilter mFileFilter;
     private String mResultsRootDirPath;
     private String mTestsRelativePath;
     private Date mDate;
 
     private int mResultsSinceLastHtmlDump = 0;
+    private int mResultsSinceLastDbAccess = 0;
 
-    public Summarizer(FileFilter fileFilter, String resultsRootDirPath) {
+    private SummarizerDBHelper mDbHelper;
+
+    public Summarizer(FileFilter fileFilter, String resultsRootDirPath, Context context) {
         mFileFilter = fileFilter;
         mResultsRootDirPath = resultsRootDirPath;
+
+        /**
+         * We don't run the database I/O in a separate thread to avoid consumer/producer problem
+         * and to simplify code.
+         */
+        mDbHelper = new SummarizerDBHelper(context);
+        mDbHelper.open();
     }
 
     public static URI getDetailsUri() {
@@ -221,6 +238,7 @@ public class Summarizer {
         }
 
         if (result.didPass()) {
+            result.clearResults();
             if (mFileFilter.isFail(relativePath)) {
                 mUnexpectedPasses.add(result);
             } else {
@@ -233,6 +251,32 @@ public class Summarizer {
                 mUnexpectedFailures.add(result);
             }
         }
+
+        if (++mResultsSinceLastDbAccess == RESULTS_PER_DB_ACCESS) {
+            persistLists();
+            clearLists();
+        }
+    }
+
+    private void clearLists() {
+        mUnexpectedFailures.clear();
+        mExpectedFailures.clear();
+        mUnexpectedPasses.clear();
+        mExpectedPasses.clear();
+    }
+
+    private void persistLists() {
+        persistListToTable(mUnexpectedFailures, SummarizerDBHelper.UNEXPECTED_FAILURES_TABLE);
+        persistListToTable(mExpectedFailures, SummarizerDBHelper.EXPECTED_FAILURES_TABLE);
+        persistListToTable(mUnexpectedPasses, SummarizerDBHelper.UNEXPECTED_PASSES_TABLE);
+        persistListToTable(mExpectedPasses, SummarizerDBHelper.EXPECTED_PASSES_TABLE);
+        mResultsSinceLastDbAccess = 0;
+    }
+
+    private void persistListToTable(List<AbstractResult> results, String table) {
+        for (AbstractResult abstractResult : results) {
+            mDbHelper.insertAbstractResult(abstractResult, table);
+        }
     }
 
     public void setTestsRelativePath(String testsRelativePath) {
@@ -240,17 +284,35 @@ public class Summarizer {
     }
 
     public void summarize(Message onFinishMessage) {
+        persistLists();
+        clearLists();
+
+        mUnexpectedFailuresCursor =
+            mDbHelper.getAbstractResults(SummarizerDBHelper.UNEXPECTED_FAILURES_TABLE);
+        mUnexpectedPassesCursor =
+            mDbHelper.getAbstractResults(SummarizerDBHelper.UNEXPECTED_PASSES_TABLE);
+        mExpectedFailuresCursor =
+            mDbHelper.getAbstractResults(SummarizerDBHelper.EXPECTED_FAILURES_TABLE);
+        mExpectedPassesCursor =
+            mDbHelper.getAbstractResults(SummarizerDBHelper.EXPECTED_PASSES_TABLE);
+
         String webKitRevision = getWebKitRevision();
         createHtmlDetails(webKitRevision);
         createTxtSummary(webKitRevision);
+
+        clearLists();
+        mUnexpectedFailuresCursor.close();
+        mUnexpectedPassesCursor.close();
+        mExpectedFailuresCursor.close();
+        mExpectedPassesCursor.close();
+
         onFinishMessage.sendToTarget();
     }
 
     public void reset() {
         mCrashedTestsCount = 0;
-        mUnexpectedFailures.clear();
-        mExpectedFailures.clear();
-        mExpectedPasses.clear();
+        clearLists();
+        mDbHelper.reset();
         mDate = new Date();
     }
 
@@ -273,10 +335,10 @@ public class Summarizer {
 
         txt.append("TOTAL:                     " + getTotalTestCount() + "\n");
         txt.append("CRASHED (among all tests): " + mCrashedTestsCount + "\n");
-        txt.append("UNEXPECTED FAILURES:       " + mUnexpectedFailures.size() + "\n");
-        txt.append("UNEXPECTED PASSES:         " + mUnexpectedPasses.size() + "\n");
-        txt.append("EXPECTED FAILURES:         " + mExpectedFailures.size() + "\n");
-        txt.append("EXPECTED PASSES:           " + mExpectedPasses.size() + "\n");
+        txt.append("UNEXPECTED FAILURES:       " + mUnexpectedFailuresCursor.getCount() + "\n");
+        txt.append("UNEXPECTED PASSES:         " + mUnexpectedPassesCursor.getCount() + "\n");
+        txt.append("EXPECTED FAILURES:         " + mExpectedFailuresCursor.getCount() + "\n");
+        txt.append("EXPECTED PASSES:           " + mExpectedPassesCursor.getCount() + "\n");
 
         FsUtils.writeDataToStorage(new File(mResultsRootDirPath, TXT_SUMMARY_RELATIVE_PATH),
                 txt.toString().getBytes(), false);
@@ -293,20 +355,20 @@ public class Summarizer {
         createTopSummaryTable(webKitRevision, html);
         dumpHtmlToFile(html, false);
 
-        createResultsList(html, "Unexpected failures", mUnexpectedFailures);
-        createResultsList(html, "Unexpected passes", mUnexpectedPasses);
-        createResultsList(html, "Expected failures", mExpectedFailures);
-        createResultsList(html, "Expected passes", mExpectedPasses);
+        createResultsList(html, "Unexpected failures", mUnexpectedFailuresCursor);
+        createResultsList(html, "Unexpected passes", mUnexpectedPassesCursor);
+        createResultsList(html, "Expected failures", mExpectedFailuresCursor);
+        createResultsList(html, "Expected passes", mExpectedPassesCursor);
 
         html.append("</body></html>");
         dumpHtmlToFile(html, true);
     }
 
     private int getTotalTestCount() {
-        return mUnexpectedFailures.size() +
-                mUnexpectedPasses.size() +
-                mExpectedPasses.size() +
-                mExpectedFailures.size();
+        return mUnexpectedFailuresCursor.getCount() +
+                mUnexpectedPassesCursor.getCount() +
+                mExpectedPassesCursor.getCount() +
+                mExpectedFailuresCursor.getCount();
     }
 
     private String getWebKitVersionFromUserAgentString() {
@@ -355,10 +417,10 @@ public class Summarizer {
         html.append("<table class=\"summary\">");
         createSummaryTableRow(html, "TOTAL", getTotalTestCount());
         createSummaryTableRow(html, "CRASHED (among all tests)", mCrashedTestsCount);
-        createSummaryTableRow(html, "UNEXPECTED FAILURES", mUnexpectedFailures.size());
-        createSummaryTableRow(html, "UNEXPECTED PASSES", mUnexpectedPasses.size());
-        createSummaryTableRow(html, "EXPECTED FAILURES", mExpectedFailures.size());
-        createSummaryTableRow(html, "EXPECTED PASSES", mExpectedPasses.size());
+        createSummaryTableRow(html, "UNEXPECTED FAILURES", mUnexpectedFailuresCursor.getCount());
+        createSummaryTableRow(html, "UNEXPECTED PASSES", mUnexpectedPassesCursor.getCount());
+        createSummaryTableRow(html, "EXPECTED FAILURES", mExpectedFailuresCursor.getCount());
+        createSummaryTableRow(html, "EXPECTED PASSES", mExpectedPassesCursor.getCount());
         html.append("</table>");
     }
 
@@ -370,14 +432,21 @@ public class Summarizer {
     }
 
     private void createResultsList(
-            StringBuilder html, String title, List<AbstractResult> resultsList) {
+            StringBuilder html, String title, Cursor cursor) {
         String relativePath;
         String id = "";
         AbstractResult.ResultCode resultCode;
 
-        Collections.sort(resultsList);
-        html.append("<h2>" + title + " [" + resultsList.size() + "]</h2>");
-        for (AbstractResult result : resultsList) {
+        html.append("<h2>" + title + " [" + cursor.getCount() + "]</h2>");
+
+        if (!cursor.moveToFirst()) {
+            return;
+        }
+
+        AbstractResult result;
+        do {
+            result = SummarizerDBHelper.getAbstractResult(cursor);
+
             relativePath = result.getRelativePath();
             resultCode = result.getResultCode();
 
@@ -429,7 +498,9 @@ public class Summarizer {
             if (++mResultsSinceLastHtmlDump == RESULTS_PER_DUMP) {
                 dumpHtmlToFile(html, true);
             }
-        }
+
+            cursor.moveToNext();
+        } while (!cursor.isAfterLast());
     }
 
     private void appendTags(StringBuilder html, AbstractResult result) {
