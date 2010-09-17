@@ -37,6 +37,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -239,24 +240,18 @@ public class SipAudioCallImpl extends SipSessionAdapter
         }
     }
 
-    private synchronized void establishCall(String sessionDescription) {
-        stopRingbackTone();
-        stopRinging();
-        try {
-            SdpSessionDescription sd =
-                    new SdpSessionDescription(sessionDescription);
-            Log.d(TAG, "sip call established: " + sd);
-            startCall(sd);
-            mInCall = true;
-        } catch (SdpException e) {
-            Log.e(TAG, "createSessionDescription()", e);
-        }
-    }
-
     @Override
     public void onCallEstablished(ISipSession session,
             String sessionDescription) {
-        establishCall(sessionDescription);
+        stopRingbackTone();
+        stopRinging();
+        try {
+            mPeerSd = new SdpSessionDescription(sessionDescription);
+            Log.d(TAG, "sip call established: " + mPeerSd);
+        } catch (SdpException e) {
+            Log.e(TAG, "createSessionDescription()", e);
+        }
+
         Listener listener = mListener;
         if (listener != null) {
             try {
@@ -609,10 +604,23 @@ public class SipAudioCallImpl extends SipSessionAdapter
         return copies;
     }
 
-    private void startCall(SdpSessionDescription peerSd) {
+    public void startAudio() {
+        try {
+            startAudioInternal();
+        } catch (UnknownHostException e) {
+            onError(mSipSession, SipErrorCode.PEER_NOT_REACHABLE.toString(),
+                    e.getMessage());
+        } catch (Throwable e) {
+            onError(mSipSession, SipErrorCode.CLIENT_ERROR.toString(),
+                    e.getMessage());
+        }
+    }
+
+    private synchronized void startAudioInternal() throws UnknownHostException {
         stopCall(DONT_RELEASE_SOCKET);
+        mInCall = true;
+        SdpSessionDescription peerSd = mPeerSd;
         if (isWifiOn()) grabWifiHighPerfLock();
-        mPeerSd = peerSd;
         String peerMediaAddress = peerSd.getPeerMediaAddress(AUDIO);
         // TODO: handle multiple media fields
         int peerMediaPort = peerSd.getPeerMediaPort(AUDIO);
@@ -621,58 +629,55 @@ public class SipAudioCallImpl extends SipSessionAdapter
         int localPort = getLocalMediaPort();
         int sampleRate = 8000;
         int frameSize = sampleRate / 50; // 160
-        try {
-            // TODO: get sample rate from sdp
-            mCodec = getCodec(peerSd);
 
-            AudioStream audioStream = mAudioStream;
-            audioStream.associate(InetAddress.getByName(peerMediaAddress),
-                    peerMediaPort);
-            audioStream.setCodec(convert(mCodec), mCodec.payloadType);
-            audioStream.setDtmfType(DTMF);
-            Log.d(TAG, "start media: localPort=" + localPort + ", peer="
-                    + peerMediaAddress + ":" + peerMediaPort);
+        // TODO: get sample rate from sdp
+        mCodec = getCodec(peerSd);
 
-            audioStream.setMode(RtpStream.MODE_NORMAL);
-            if (!mHold) {
-                // FIXME: won't work if peer is not sending nor receiving
-                if (!peerSd.isSending(AUDIO)) {
-                    Log.d(TAG, "   not receiving");
-                    audioStream.setMode(RtpStream.MODE_SEND_ONLY);
-                }
-                if (!peerSd.isReceiving(AUDIO)) {
-                    Log.d(TAG, "   not sending");
-                    audioStream.setMode(RtpStream.MODE_RECEIVE_ONLY);
-                }
+        AudioStream audioStream = mAudioStream;
+        audioStream.associate(InetAddress.getByName(peerMediaAddress),
+                peerMediaPort);
+        audioStream.setCodec(convert(mCodec), mCodec.payloadType);
+        audioStream.setDtmfType(DTMF);
+        Log.d(TAG, "start media: localPort=" + localPort + ", peer="
+                + peerMediaAddress + ":" + peerMediaPort);
 
-                /* The recorder volume will be very low if the device is in
-                 * IN_CALL mode. Therefore, we have to set the mode to NORMAL
-                 * in order to have the normal microphone level.
-                 */
-                ((AudioManager) mContext.getSystemService
-                        (Context.AUDIO_SERVICE))
-                        .setMode(AudioManager.MODE_NORMAL);
+        audioStream.setMode(RtpStream.MODE_NORMAL);
+        if (!mHold) {
+            // FIXME: won't work if peer is not sending nor receiving
+            if (!peerSd.isSending(AUDIO)) {
+                Log.d(TAG, "   not receiving");
+                audioStream.setMode(RtpStream.MODE_SEND_ONLY);
+            }
+            if (!peerSd.isReceiving(AUDIO)) {
+                Log.d(TAG, "   not sending");
+                audioStream.setMode(RtpStream.MODE_RECEIVE_ONLY);
             }
 
-            // AudioGroup logic:
-            AudioGroup audioGroup = getAudioGroup();
-            if (mHold) {
-                if (audioGroup != null) {
-                    audioGroup.setMode(AudioGroup.MODE_ON_HOLD);
-                }
-                // don't create an AudioGroup here; doing so will fail if
-                // there's another AudioGroup out there that's active
+            /* The recorder volume will be very low if the device is in
+             * IN_CALL mode. Therefore, we have to set the mode to NORMAL
+             * in order to have the normal microphone level.
+             */
+            ((AudioManager) mContext.getSystemService
+                    (Context.AUDIO_SERVICE))
+                    .setMode(AudioManager.MODE_NORMAL);
+        }
+
+        // AudioGroup logic:
+        AudioGroup audioGroup = getAudioGroup();
+        if (mHold) {
+            if (audioGroup != null) {
+                audioGroup.setMode(AudioGroup.MODE_ON_HOLD);
+            }
+            // don't create an AudioGroup here; doing so will fail if
+            // there's another AudioGroup out there that's active
+        } else {
+            if (audioGroup == null) audioGroup = new AudioGroup();
+            audioStream.join(audioGroup);
+            if (mMuted) {
+                audioGroup.setMode(AudioGroup.MODE_MUTED);
             } else {
-                if (audioGroup == null) audioGroup = new AudioGroup();
-                audioStream.join(audioGroup);
-                if (mMuted) {
-                    audioGroup.setMode(AudioGroup.MODE_MUTED);
-                } else {
-                    audioGroup.setMode(AudioGroup.MODE_NORMAL);
-                }
+                audioGroup.setMode(AudioGroup.MODE_NORMAL);
             }
-        } catch (Exception e) {
-            Log.e(TAG, "call()", e);
         }
     }
 
