@@ -41,7 +41,7 @@ public:
     virtual ~Sampler();
 
     void bind(Allocation *);
-    void setupGL(const Context *, bool npot);
+    void setupGL(const Context *, const Allocation *);
 
     void bindToContext(SamplerState *, uint32_t slot);
     void unbindFromContext(SamplerState *);

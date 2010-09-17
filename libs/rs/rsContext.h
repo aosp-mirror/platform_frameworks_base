@@ -153,9 +153,6 @@ public:
     void timerPrint();
     void timerFrame();
 
-    bool checkVersion1_1() const {return (mGL.mMajorVersion > 1) || (mGL.mMinorVersion >= 1); }
-    bool checkVersion2_0() const {return mGL.mMajorVersion >= 2; }
-
     struct {
         bool mLogTimes;
         bool mLogScripts;

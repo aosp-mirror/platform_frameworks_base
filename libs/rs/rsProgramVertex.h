@@ -35,7 +35,6 @@ public:
     ProgramVertex(Context *, bool texMat);
     virtual ~ProgramVertex();
 
-    virtual void setupGL(const Context *rsc, ProgramVertexState *state);
     virtual void setupGL2(const Context *rsc, ProgramVertexState *state, ShaderCache *sc);
 
 

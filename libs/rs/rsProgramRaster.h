@@ -34,7 +34,6 @@ public:
                   bool pointSprite);
     virtual ~ProgramRaster();
 
-    virtual void setupGL(const Context *, ProgramRasterState *);
     virtual void setupGL2(const Context *, ProgramRasterState *);
     virtual void serialize(OStream *stream) const;
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_RASTER; }

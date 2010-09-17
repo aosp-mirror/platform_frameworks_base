@@ -32,7 +32,6 @@ public:
     ProgramStore(Context *);
     virtual ~ProgramStore();
 
-    virtual void setupGL(const Context *, ProgramStoreState *);
     virtual void setupGL2(const Context *, ProgramStoreState *);
 
     void setDepthFunc(RsDepthFunc);

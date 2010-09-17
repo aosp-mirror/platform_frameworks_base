@@ -59,7 +59,7 @@ Sampler::~Sampler()
 {
 }
 
-void Sampler::setupGL(const Context *rsc, bool npot)
+void Sampler::setupGL(const Context *rsc, const Allocation *tex)
 {
     GLenum trans[] = {
         GL_NEAREST, //RS_SAMPLER_NEAREST,
@@ -77,13 +77,17 @@ void Sampler::setupGL(const Context *rsc, bool npot)
         GL_CLAMP_TO_EDGE, //RS_SAMPLER_CLAMP
     };
 
-    if (!rsc->ext_OES_texture_npot() && npot) {
+    if (!rsc->ext_OES_texture_npot() && tex->getType()->getIsNp2()) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, transNP[mMinFilter]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, transNP[mMagFilter]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, transNP[mWrapS]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, transNP[mWrapT]);
     } else {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, trans[mMinFilter]);
+        if (tex->getHasGraphicsMipmaps()) {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, trans[mMinFilter]);
+        } else {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, transNP[mMinFilter]);
+        }
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, trans[mMagFilter]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, trans[mWrapS]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, trans[mWrapT]);

@@ -34,7 +34,6 @@ public:
                              uint32_t paramLength);
     virtual ~ProgramFragment();
 
-    virtual void setupGL(const Context *, ProgramFragmentState *);
     virtual void setupGL2(const Context *, ProgramFragmentState *, ShaderCache *sc);
 
     virtual void createShader();
