@@ -103,13 +103,8 @@ void ProgramFragment::setConstantColor(float r, float g, float b, float a)
     mDirty = true;
 }
 
-void ProgramFragment::setupGL(const Context *rsc, ProgramFragmentState *state)
-{
-}
-
 void ProgramFragment::setupGL2(const Context *rsc, ProgramFragmentState *state, ShaderCache *sc)
 {
-
     //LOGE("sgl2 frag1 %x", glGetError());
     if ((state->mLast.get() == this) && !mDirty) {
         return;
@@ -131,12 +126,12 @@ void ProgramFragment::setupGL2(const Context *rsc, ProgramFragmentState *state, 
         glBindTexture(GL_TEXTURE_2D, mTextures[ct]->getTextureID());
         rsc->checkError("ProgramFragment::setupGL2 tex bind");
         if (mSamplers[ct].get()) {
-            mSamplers[ct]->setupGL(rsc, mTextures[ct]->getType()->getIsNp2());
+            mSamplers[ct]->setupGL(rsc, mTextures[ct].get());
         } else {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             rsc->checkError("ProgramFragment::setupGL2 tex env");
         }
 

@@ -68,11 +68,6 @@ static void logMatrix(const char *txt, const float *f)
     LOGV("%6.4f, %6.4f, %6.4f, %6.4f", f[3], f[7], f[11], f[15]);
 }
 
-void ProgramVertex::setupGL(const Context *rsc, ProgramVertexState *state)
-{
-    assert(0);
-}
-
 void ProgramVertex::loadShader(Context *rsc) {
     Program::loadShader(rsc, GL_VERTEX_SHADER);
 }
