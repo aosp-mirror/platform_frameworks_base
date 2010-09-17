@@ -188,6 +188,8 @@ public class Summarizer {
     private static final String HTML_DETAILS_RELATIVE_PATH = "details.html";
     private static final String TXT_SUMMARY_RELATIVE_PATH = "summary.txt";
 
+    private static final int RESULTS_PER_DUMP = 500;
+
     private int mCrashedTestsCount = 0;
     private List<AbstractResult> mUnexpectedFailures = new ArrayList<AbstractResult>();
     private List<AbstractResult> mExpectedFailures = new ArrayList<AbstractResult>();
@@ -198,6 +200,8 @@ public class Summarizer {
     private String mResultsRootDirPath;
     private String mTestsRelativePath;
     private Date mDate;
+
+    private int mResultsSinceLastHtmlDump = 0;
 
     public Summarizer(FileFilter fileFilter, String resultsRootDirPath) {
         mFileFilter = fileFilter;
@@ -250,6 +254,13 @@ public class Summarizer {
         mDate = new Date();
     }
 
+    private void dumpHtmlToFile(StringBuilder html, boolean append) {
+        FsUtils.writeDataToStorage(new File(mResultsRootDirPath, HTML_DETAILS_RELATIVE_PATH),
+                html.toString().getBytes(), append);
+        html.setLength(0);
+        mResultsSinceLastHtmlDump = 0;
+    }
+
     private void createTxtSummary(String webKitRevision) {
         StringBuilder txt = new StringBuilder();
 
@@ -280,6 +291,7 @@ public class Summarizer {
         html.append("</head><body>");
 
         createTopSummaryTable(webKitRevision, html);
+        dumpHtmlToFile(html, false);
 
         createResultsList(html, "Unexpected failures", mUnexpectedFailures);
         createResultsList(html, "Unexpected passes", mUnexpectedPasses);
@@ -287,9 +299,7 @@ public class Summarizer {
         createResultsList(html, "Expected passes", mExpectedPasses);
 
         html.append("</body></html>");
-
-        FsUtils.writeDataToStorage(new File(mResultsRootDirPath, HTML_DETAILS_RELATIVE_PATH),
-                html.toString().getBytes(), false);
+        dumpHtmlToFile(html, true);
     }
 
     private int getTotalTestCount() {
@@ -415,6 +425,10 @@ public class Summarizer {
             }
 
             html.append("<div class=\"space\"></div>");
+
+            if (++mResultsSinceLastHtmlDump == RESULTS_PER_DUMP) {
+                dumpHtmlToFile(html, true);
+            }
         }
     }
 
