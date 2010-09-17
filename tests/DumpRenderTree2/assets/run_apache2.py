@@ -27,6 +27,7 @@ import os
 import subprocess
 import logging
 import optparse
+import time
 
 def main(options, args):
   if len(args) < 1:
@@ -71,7 +72,7 @@ def main(options, args):
   custom_log_path = os.path.join(tmp_WebKit, "apache2-access.log")
 
   # Prepare the command to (re)start/stop the server with specified settings
-  apache2_restart_cmd = "apache2 -k " + run_cmd
+  apache2_restart_template = "apache2 -k %s"
   directives  = " -c \"ServerRoot " + android_tree_root + "\""
 
   # We use http/tests as the document root as the HTTP tests use hardcoded
@@ -104,7 +105,20 @@ def main(options, args):
 
   # Try to execute the commands
   logging.info("Will " + run_cmd + " apache2 server.")
-  cmd = export_envvars_cmd + " && " + apache2_restart_cmd + directives + conf_file_cmd
+  cmd_template = export_envvars_cmd + " && " + apache2_restart_template + directives + conf_file_cmd
+
+  # It is worth noting here that if the configuration file with which we restart the server points
+  # to a different PidFile it will not work and result in second apache2 instance.
+  if (run_cmd == 'restart'):
+    logging.info("First will stop...")
+    execute_cmd(cmd_template % ('stop'))
+    logging.info("Stopped. Will start now...")
+    # We need to sleep breifly to avoid errors with apache being stopped and started too quickly
+    time.sleep(0.5)
+
+  execute_cmd(cmd_template % (run_cmd))
+
+def execute_cmd(cmd):
   p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   (out, err) = p.communicate()
 
