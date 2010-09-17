@@ -63,8 +63,8 @@ public class SceneGraphRS {
     private Font mItalic;
     private Allocation mTextAlloc;
 
-    private ScriptC_Scenegraph mScript;
-    private ScriptC_Transform mTransformScript;
+    private ScriptC_scenegraph mScript;
+    private ScriptC_transform mTransformScript;
 
     int mLastX;
     int mLastY;
@@ -172,8 +172,8 @@ public class SceneGraphRS {
 
     private void initRS() {
 
-        mScript = new ScriptC_Scenegraph(mRS, mRes, R.raw.scenegraph, true);
-        mTransformScript = new ScriptC_Transform(mRS, mRes, R.raw.transform, false);
+        mScript = new ScriptC_scenegraph(mRS, mRes, R.raw.scenegraph, true);
+        mTransformScript = new ScriptC_transform(mRS, mRes, R.raw.transform, false);
         mTransformScript.set_transformScript(mTransformScript);
 
         mScript.set_gTransformRS(mTransformScript);

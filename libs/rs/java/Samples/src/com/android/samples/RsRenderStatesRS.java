@@ -92,7 +92,7 @@ public class RsRenderStatesRS {
 
     private Allocation mTextAlloc;
 
-    private ScriptC_Rsrenderstates mScript;
+    private ScriptC_rsrenderstates mScript;
 
     private final BitmapFactory.Options mOptionsARGB = new BitmapFactory.Options();
 
@@ -304,7 +304,7 @@ public class RsRenderStatesRS {
 
     private void initRS() {
 
-        mScript = new ScriptC_Rsrenderstates(mRS, mRes, R.raw.rsrenderstates, true);
+        mScript = new ScriptC_rsrenderstates(mRS, mRes, R.raw.rsrenderstates, true);
 
         initSamplers();
         initProgramStore();
