@@ -74,6 +74,7 @@ import java.util.List;
 public class SipPhone extends SipPhoneBase {
     private static final String LOG_TAG = "SipPhone";
     private static final boolean LOCAL_DEBUG = true;
+    private static final int SESSION_TIMEOUT = 8; // in seconds
 
     // A call that is ringing or (call) waiting
     private SipCall ringingCall = new SipCall();
@@ -675,7 +676,7 @@ public class SipPhone extends SipPhoneBase {
 
         void acceptCall() throws CallStateException {
             try {
-                mSipAudioCall.answerCall();
+                mSipAudioCall.answerCall(SESSION_TIMEOUT);
             } catch (SipException e) {
                 throw new CallStateException("acceptCall(): " + e);
             }
@@ -693,7 +694,7 @@ public class SipPhone extends SipPhoneBase {
         void dial() throws SipException {
             setState(Call.State.DIALING);
             mSipAudioCall = mSipManager.makeAudioCall(mContext, mProfile,
-                    mPeer, null);
+                    mPeer, null, SESSION_TIMEOUT);
             mSipAudioCall.setRingbackToneEnabled(false);
             mSipAudioCall.setListener(mAdapter);
         }
@@ -701,7 +702,7 @@ public class SipPhone extends SipPhoneBase {
         void hold() throws CallStateException {
             setState(Call.State.HOLDING);
             try {
-                mSipAudioCall.holdCall();
+                mSipAudioCall.holdCall(SESSION_TIMEOUT);
             } catch (SipException e) {
                 throw new CallStateException("hold(): " + e);
             }
@@ -711,7 +712,7 @@ public class SipPhone extends SipPhoneBase {
             mSipAudioCall.setAudioGroup(audioGroup);
             setState(Call.State.ACTIVE);
             try {
-                mSipAudioCall.continueCall();
+                mSipAudioCall.continueCall(SESSION_TIMEOUT);
             } catch (SipException e) {
                 throw new CallStateException("unhold(): " + e);
             }

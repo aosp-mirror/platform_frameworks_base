@@ -55,6 +55,7 @@ public class SipAudioCallImpl extends SipSessionAdapter
     private static final boolean DONT_RELEASE_SOCKET = false;
     private static final String AUDIO = "audio";
     private static final int DTMF = 101;
+    private static final int SESSION_TIMEOUT = 5; // in seconds
 
     private Context mContext;
     private SipProfile mLocalProfile;
@@ -144,12 +145,21 @@ public class SipAudioCallImpl extends SipSessionAdapter
         if (closeRtp) stopCall(RELEASE_SOCKET);
         stopRingbackTone();
         stopRinging();
-        mSipSession = null;
+
         mInCall = false;
         mHold = false;
         mSessionId = -1L;
         mErrorCode = null;
         mErrorMessage = null;
+
+        if (mSipSession != null) {
+            try {
+                mSipSession.setListener(null);
+            } catch (RemoteException e) {
+                // don't care
+            }
+            mSipSession = null;
+        }
     }
 
     public synchronized SipProfile getLocalProfile() {
@@ -219,7 +229,7 @@ public class SipAudioCallImpl extends SipSessionAdapter
             // session changing request
             try {
                 mPeerSd = new SdpSessionDescription(sessionDescription);
-                answerCall();
+                answerCall(SESSION_TIMEOUT);
             } catch (Throwable e) {
                 Log.e(TAG, "onRinging()", e);
                 session.endCall();
@@ -346,14 +356,15 @@ public class SipAudioCallImpl extends SipSessionAdapter
     }
 
     public synchronized void makeCall(SipProfile peerProfile,
-            SipManager sipManager) throws SipException {
+            SipManager sipManager, int timeout) throws SipException {
         try {
             mSipSession = sipManager.createSipSession(mLocalProfile, this);
             if (mSipSession == null) {
                 throw new SipException(
                         "Failed to create SipSession; network available?");
             }
-            mSipSession.makeCall(peerProfile, createOfferSessionDescription());
+            mSipSession.makeCall(peerProfile, createOfferSessionDescription(),
+                    timeout);
         } catch (Throwable e) {
             if (e instanceof SipException) {
                 throw (SipException) e;
@@ -376,10 +387,10 @@ public class SipAudioCallImpl extends SipSessionAdapter
         }
     }
 
-    public synchronized void holdCall() throws SipException {
+    public synchronized void holdCall(int timeout) throws SipException {
         if (mHold) return;
         try {
-            mSipSession.changeCall(createHoldSessionDescription());
+            mSipSession.changeCall(createHoldSessionDescription(), timeout);
             mHold = true;
         } catch (Throwable e) {
             throwSipException(e);
@@ -389,21 +400,21 @@ public class SipAudioCallImpl extends SipSessionAdapter
         if (audioGroup != null) audioGroup.setMode(AudioGroup.MODE_ON_HOLD);
     }
 
-    public synchronized void answerCall() throws SipException {
+    public synchronized void answerCall(int timeout) throws SipException {
         try {
             stopRinging();
-            mSipSession.answerCall(createAnswerSessionDescription());
+            mSipSession.answerCall(createAnswerSessionDescription(), timeout);
         } catch (Throwable e) {
             Log.e(TAG, "answerCall()", e);
             throwSipException(e);
         }
     }
 
-    public synchronized void continueCall() throws SipException {
+    public synchronized void continueCall(int timeout) throws SipException {
         if (!mHold) return;
         try {
             mHold = false;
-            mSipSession.changeCall(createContinueSessionDescription());
+            mSipSession.changeCall(createContinueSessionDescription(), timeout);
         } catch (Throwable e) {
             throwSipException(e);
         }
