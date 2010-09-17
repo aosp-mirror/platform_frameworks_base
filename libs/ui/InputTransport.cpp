@@ -131,7 +131,10 @@ status_t InputChannel::openInputChannelPair(const String8& name,
 }
 
 status_t InputChannel::sendSignal(char signal) {
-    ssize_t nWrite = ::write(mSendPipeFd, & signal, 1);
+    ssize_t nWrite;
+    do {
+        nWrite = ::write(mSendPipeFd, & signal, 1);
+    } while (nWrite == -1 && errno == EINTR);
 
     if (nWrite == 1) {
 #if DEBUG_CHANNEL_SIGNALS
@@ -147,7 +150,11 @@ status_t InputChannel::sendSignal(char signal) {
 }
 
 status_t InputChannel::receiveSignal(char* outSignal) {
-    ssize_t nRead = ::read(mReceivePipeFd, outSignal, 1);
+    ssize_t nRead;
+    do {
+        nRead = ::read(mReceivePipeFd, outSignal, 1);
+    } while (nRead == -1 && errno == EINTR);
+
     if (nRead == 1) {
 #if DEBUG_CHANNEL_SIGNALS
         LOGD("channel '%s' ~ received signal '%c'", mName.string(), *outSignal);
