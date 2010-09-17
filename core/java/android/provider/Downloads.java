@@ -895,6 +895,14 @@ public final class Downloads {
          */
         public static final String COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI = "is_visible_in_downloads_ui";
 
+        /**
+         * If true, the user has confirmed that this download can proceed over the mobile network
+         * even though it exceeds the recommended maximum size.
+         * <P>Type: BOOLEAN</P>
+         */
+        public static final String COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT =
+            "bypass_recommended_size_limit";
+
         /*
          * Lists the destinations that an application can specify for a download.
          */
