@@ -6714,7 +6714,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             boolean handled = false;
             final float x = event.getX();
             final float y = event.getY();
-            if (x < mLeft || x > mRight || y < mTop || y > mBottom) {
+            if (x < 0 || x >= mRight - mLeft || y < 0 || y >= mBottom - mTop) {
                 if (mInsertionPointCursorController != null) {
                     handled |= mInsertionPointCursorController.onTouchEvent(event);
                 }
