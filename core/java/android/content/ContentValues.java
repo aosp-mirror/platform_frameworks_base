@@ -414,6 +414,8 @@ public final class ContentValues implements Parcelable {
         } catch (ClassCastException e) {
             if (value instanceof CharSequence) {
                 return Boolean.valueOf(value.toString());
+            } else if (value instanceof Number) {
+                return ((Number) value).intValue() != 0;
             } else {
                 Log.e(TAG, "Cannot cast value for " + key + " to a Boolean: " + value, e);
                 return null;
