@@ -128,6 +128,22 @@ void SkiaBitmapShader::setupProgram(Program* program, const mat4& modelView,
     glUniform2f(program->getUniform("textureDimension"), 1.0f / width, 1.0f / height);
 }
 
+void SkiaBitmapShader::updateTransforms(Program* program, const mat4& modelView,
+        const Snapshot& snapshot) {
+    mat4 textureTransform;
+    if (mMatrix) {
+        SkMatrix inverse;
+        mMatrix->invert(&inverse);
+        textureTransform.load(inverse);
+        textureTransform.multiply(modelView);
+    } else {
+        textureTransform.load(modelView);
+    }
+
+    glUniformMatrix4fv(program->getUniform("textureTransform"), 1,
+            GL_FALSE, &textureTransform.data[0]);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Linear gradient shader
 ///////////////////////////////////////////////////////////////////////////////
@@ -182,6 +198,13 @@ void SkiaLinearGradientShader::setupProgram(Program* program, const mat4& modelV
     glUniform2f(program->getUniform("gradient"), gradientX, gradientY);
     glUniform1f(program->getUniform("gradientLength"),
             1.0f / (gradientX * gradientX + gradientY * gradientY));
+    glUniformMatrix4fv(program->getUniform("screenSpace"), 1, GL_FALSE, &screenSpace.data[0]);
+}
+
+void SkiaLinearGradientShader::updateTransforms(Program* program, const mat4& modelView,
+        const Snapshot& snapshot) {
+    mat4 screenSpace(*snapshot.transform);
+    screenSpace.multiply(modelView);
     glUniformMatrix4fv(program->getUniform("screenSpace"), 1, GL_FALSE, &screenSpace.data[0]);
 }
 
