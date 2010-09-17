@@ -851,8 +851,8 @@ private:
 
     // Inbound event processing.
     void drainInboundQueueLocked();
-    void releasePendingEventLocked(bool wasDropped);
-    void releaseInboundEventLocked(EventEntry* entry, bool wasDropped);
+    void releasePendingEventLocked();
+    void releaseInboundEventLocked(EventEntry* entry);
     bool isEventFromReliableSourceLocked(EventEntry* entry);
 
     // Dispatch state.
@@ -886,10 +886,10 @@ private:
             nsecs_t currentTime, ConfigurationChangedEntry* entry);
     bool dispatchKeyLocked(
             nsecs_t currentTime, KeyEntry* entry, nsecs_t keyRepeatTimeout,
-            nsecs_t* nextWakeupTime);
+            bool dropEvent, nsecs_t* nextWakeupTime);
     bool dispatchMotionLocked(
             nsecs_t currentTime, MotionEntry* entry,
-            nsecs_t* nextWakeupTime);
+            bool dropEvent, nsecs_t* nextWakeupTime);
     void dispatchEventToCurrentInputTargetsLocked(
             nsecs_t currentTime, EventEntry* entry, bool resumeWithAppendedMotionSample);
 
@@ -914,8 +914,8 @@ private:
     bool mInputTargetWaitTimeoutExpired;
 
     // Finding targets for input events.
-    void startFindingTargetsLocked();
-    void finishFindingTargetsLocked(const InputWindow* window);
+    void resetTargetsLocked();
+    void commitTargetsLocked(const InputWindow* window);
     int32_t handleTargetsNotReadyLocked(nsecs_t currentTime, const EventEntry* entry,
             const InputApplication* application, const InputWindow* window,
             nsecs_t* nextWakeupTime);
