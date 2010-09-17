@@ -39,6 +39,7 @@ public class TextResult extends AbstractResult {
     private String mExpectedResultPath;
     private String mActualResult;
     private String mRelativePath;
+    private boolean mDidTimeOut;
     private ResultCode mResultCode;
     private Message mResultObtainedMsg;
 
@@ -74,10 +75,7 @@ public class TextResult extends AbstractResult {
         mActualResult = bundle.getString("actualTextualResult");
         setAdditionalTextOutputString(bundle.getString("additionalTextOutputString"));
         mRelativePath = bundle.getString("relativePath");
-        String resultCode = bundle.getString("resultCode");
-        if (resultCode != null) {
-            mResultCode = ResultCode.valueOf(resultCode);
-        }
+        mDidTimeOut = bundle.getBoolean("didTimeOut");
     }
 
     @Override
@@ -87,14 +85,28 @@ public class TextResult extends AbstractResult {
         }
 
         if (mExpectedResult == null) {
-            mResultCode = AbstractResult.ResultCode.FAIL_NO_EXPECTED_RESULT;
+            mResultCode = AbstractResult.ResultCode.NO_EXPECTED_RESULT;
         } else if (!mExpectedResult.equals(mActualResult)) {
-            mResultCode = AbstractResult.ResultCode.FAIL_RESULT_DIFFERS;
+            mResultCode = AbstractResult.ResultCode.RESULTS_DIFFER;
         } else {
-            mResultCode = AbstractResult.ResultCode.PASS;
+            mResultCode = AbstractResult.ResultCode.RESULTS_MATCH;
         }
-
         return mResultCode;
+    }
+
+    @Override
+    public boolean didCrash() {
+        return false;
+    }
+
+    @Override
+    public boolean didTimeOut() {
+        return mDidTimeOut;
+    }
+
+    @Override
+    public void setDidTimeOut() {
+        mDidTimeOut = true;
     }
 
     @Override
@@ -239,9 +251,7 @@ public class TextResult extends AbstractResult {
         bundle.putString("actualTextualResult", getActualTextResult());
         bundle.putString("additionalTextOutputString", getAdditionalTextOutputString());
         bundle.putString("relativePath", mRelativePath);
-        if (mResultCode != null) {
-            bundle.putString("resultCode", mResultCode.name());
-        }
+        bundle.putBoolean("didTimeOut", mDidTimeOut);
         bundle.putString("type", getType().name());
         return bundle;
     }
