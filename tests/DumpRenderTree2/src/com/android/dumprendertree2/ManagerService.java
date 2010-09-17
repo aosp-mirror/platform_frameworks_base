@@ -147,7 +147,7 @@ public class ManagerService extends Service {
         super.onCreate();
 
         mFileFilter = new FileFilter();
-        mSummarizer = new Summarizer(mFileFilter, RESULTS_ROOT_DIR_PATH);
+        mSummarizer = new Summarizer(mFileFilter, RESULTS_ROOT_DIR_PATH, getApplicationContext());
     }
 
     @Override
