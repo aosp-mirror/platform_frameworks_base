@@ -7727,8 +7727,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             bounds.bottom = bounds.top + drawableHeight;
 
             convertFromViewportToContentCoordinates(bounds);
+            invalidate();
             mDrawable.setBounds(bounds);
-            postInvalidate();
+            invalidate();
         }
 
         boolean hasFingerOn(float x, float y) {
@@ -7745,9 +7746,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return Rect.intersects(mDrawable.getBounds(), fingerRect);
         }
 
+        void invalidate() {
+            final Rect bounds = mDrawable.getBounds();
+            TextView.this.invalidate(bounds.left, bounds.top,
+                    bounds.right, bounds.bottom);
+        }
+
         void postInvalidate() {
             final Rect bounds = mDrawable.getBounds();
-            TextView.this.postInvalidate(bounds.left, bounds.top, bounds.right, bounds.bottom);
+            TextView.this.postInvalidate(bounds.left, bounds.top,
+                    bounds.right, bounds.bottom);
         }
 
         void postInvalidateDelayed(long delay) {
