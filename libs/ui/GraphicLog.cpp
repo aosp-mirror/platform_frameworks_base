@@ -30,7 +30,11 @@ ANDROID_SINGLETON_STATIC_INSTANCE(GraphicLog)
 
 static inline
 void writeInt32(uint8_t* base, size_t& pos, int32_t value) {
+#ifdef HAVE_LITTLE_ENDIAN
+    int32_t v = value;
+#else
     int32_t v = htole32(value);
+#endif
     base[pos] = EVENT_TYPE_INT;
     memcpy(&base[pos+1], &v, sizeof(int32_t));
     pos += 1+sizeof(int32_t);
@@ -38,7 +42,11 @@ void writeInt32(uint8_t* base, size_t& pos, int32_t value) {
 
 static inline
 void writeInt64(uint8_t* base,  size_t& pos, int64_t value) {
+#ifdef HAVE_LITTLE_ENDIAN
+    int64_t v = value;
+#else
     int64_t v = htole64(value);
+#endif
     base[pos] = EVENT_TYPE_LONG;
     memcpy(&base[pos+1], &v, sizeof(int64_t));
     pos += 1+sizeof(int64_t);

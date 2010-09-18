@@ -307,6 +307,10 @@ public class Keyboard {
         /** Create an empty key with no attributes. */
         public Key(Row parent) {
             keyboard = parent.parent;
+            height = parent.defaultHeight;
+            width = parent.defaultWidth;
+            gap = parent.defaultHorizontalGap;
+            edgeFlags = parent.rowEdgeFlags;
         }
         
         /** Create a key with the given top-left coordinate and extract its attributes from
@@ -564,9 +568,6 @@ public class Keyboard {
             final Key key = new Key(row);
             key.x = x;
             key.y = y;
-            key.width = mDefaultWidth;
-            key.height = mDefaultHeight;
-            key.gap = mDefaultHorizontalGap;
             key.label = String.valueOf(c);
             key.codes = new int[] { c };
             column++;

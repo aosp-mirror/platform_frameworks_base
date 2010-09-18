@@ -37,6 +37,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,6 +56,7 @@ public class SipAudioCallImpl extends SipSessionAdapter
     private static final boolean DONT_RELEASE_SOCKET = false;
     private static final String AUDIO = "audio";
     private static final int DTMF = 101;
+    private static final int SESSION_TIMEOUT = 5; // in seconds
 
     private Context mContext;
     private SipProfile mLocalProfile;
@@ -144,12 +146,21 @@ public class SipAudioCallImpl extends SipSessionAdapter
         if (closeRtp) stopCall(RELEASE_SOCKET);
         stopRingbackTone();
         stopRinging();
-        mSipSession = null;
+
         mInCall = false;
         mHold = false;
         mSessionId = -1L;
         mErrorCode = null;
         mErrorMessage = null;
+
+        if (mSipSession != null) {
+            try {
+                mSipSession.setListener(null);
+            } catch (RemoteException e) {
+                // don't care
+            }
+            mSipSession = null;
+        }
     }
 
     public synchronized SipProfile getLocalProfile() {
@@ -219,7 +230,7 @@ public class SipAudioCallImpl extends SipSessionAdapter
             // session changing request
             try {
                 mPeerSd = new SdpSessionDescription(sessionDescription);
-                answerCall();
+                answerCall(SESSION_TIMEOUT);
             } catch (Throwable e) {
                 Log.e(TAG, "onRinging()", e);
                 session.endCall();
@@ -229,24 +240,18 @@ public class SipAudioCallImpl extends SipSessionAdapter
         }
     }
 
-    private synchronized void establishCall(String sessionDescription) {
-        stopRingbackTone();
-        stopRinging();
-        try {
-            SdpSessionDescription sd =
-                    new SdpSessionDescription(sessionDescription);
-            Log.d(TAG, "sip call established: " + sd);
-            startCall(sd);
-            mInCall = true;
-        } catch (SdpException e) {
-            Log.e(TAG, "createSessionDescription()", e);
-        }
-    }
-
     @Override
     public void onCallEstablished(ISipSession session,
             String sessionDescription) {
-        establishCall(sessionDescription);
+        stopRingbackTone();
+        stopRinging();
+        try {
+            mPeerSd = new SdpSessionDescription(sessionDescription);
+            Log.d(TAG, "sip call established: " + mPeerSd);
+        } catch (SdpException e) {
+            Log.e(TAG, "createSessionDescription()", e);
+        }
+
         Listener listener = mListener;
         if (listener != null) {
             try {
@@ -346,14 +351,15 @@ public class SipAudioCallImpl extends SipSessionAdapter
     }
 
     public synchronized void makeCall(SipProfile peerProfile,
-            SipManager sipManager) throws SipException {
+            SipManager sipManager, int timeout) throws SipException {
         try {
             mSipSession = sipManager.createSipSession(mLocalProfile, this);
             if (mSipSession == null) {
                 throw new SipException(
                         "Failed to create SipSession; network available?");
             }
-            mSipSession.makeCall(peerProfile, createOfferSessionDescription());
+            mSipSession.makeCall(peerProfile, createOfferSessionDescription(),
+                    timeout);
         } catch (Throwable e) {
             if (e instanceof SipException) {
                 throw (SipException) e;
@@ -376,10 +382,10 @@ public class SipAudioCallImpl extends SipSessionAdapter
         }
     }
 
-    public synchronized void holdCall() throws SipException {
+    public synchronized void holdCall(int timeout) throws SipException {
         if (mHold) return;
         try {
-            mSipSession.changeCall(createHoldSessionDescription());
+            mSipSession.changeCall(createHoldSessionDescription(), timeout);
             mHold = true;
         } catch (Throwable e) {
             throwSipException(e);
@@ -389,21 +395,21 @@ public class SipAudioCallImpl extends SipSessionAdapter
         if (audioGroup != null) audioGroup.setMode(AudioGroup.MODE_ON_HOLD);
     }
 
-    public synchronized void answerCall() throws SipException {
+    public synchronized void answerCall(int timeout) throws SipException {
         try {
             stopRinging();
-            mSipSession.answerCall(createAnswerSessionDescription());
+            mSipSession.answerCall(createAnswerSessionDescription(), timeout);
         } catch (Throwable e) {
             Log.e(TAG, "answerCall()", e);
             throwSipException(e);
         }
     }
 
-    public synchronized void continueCall() throws SipException {
+    public synchronized void continueCall(int timeout) throws SipException {
         if (!mHold) return;
         try {
             mHold = false;
-            mSipSession.changeCall(createContinueSessionDescription());
+            mSipSession.changeCall(createContinueSessionDescription(), timeout);
         } catch (Throwable e) {
             throwSipException(e);
         }
@@ -598,10 +604,23 @@ public class SipAudioCallImpl extends SipSessionAdapter
         return copies;
     }
 
-    private void startCall(SdpSessionDescription peerSd) {
+    public void startAudio() {
+        try {
+            startAudioInternal();
+        } catch (UnknownHostException e) {
+            onError(mSipSession, SipErrorCode.PEER_NOT_REACHABLE.toString(),
+                    e.getMessage());
+        } catch (Throwable e) {
+            onError(mSipSession, SipErrorCode.CLIENT_ERROR.toString(),
+                    e.getMessage());
+        }
+    }
+
+    private synchronized void startAudioInternal() throws UnknownHostException {
         stopCall(DONT_RELEASE_SOCKET);
+        mInCall = true;
+        SdpSessionDescription peerSd = mPeerSd;
         if (isWifiOn()) grabWifiHighPerfLock();
-        mPeerSd = peerSd;
         String peerMediaAddress = peerSd.getPeerMediaAddress(AUDIO);
         // TODO: handle multiple media fields
         int peerMediaPort = peerSd.getPeerMediaPort(AUDIO);
@@ -610,58 +629,55 @@ public class SipAudioCallImpl extends SipSessionAdapter
         int localPort = getLocalMediaPort();
         int sampleRate = 8000;
         int frameSize = sampleRate / 50; // 160
-        try {
-            // TODO: get sample rate from sdp
-            mCodec = getCodec(peerSd);
 
-            AudioStream audioStream = mAudioStream;
-            audioStream.associate(InetAddress.getByName(peerMediaAddress),
-                    peerMediaPort);
-            audioStream.setCodec(convert(mCodec), mCodec.payloadType);
-            audioStream.setDtmfType(DTMF);
-            Log.d(TAG, "start media: localPort=" + localPort + ", peer="
-                    + peerMediaAddress + ":" + peerMediaPort);
+        // TODO: get sample rate from sdp
+        mCodec = getCodec(peerSd);
 
-            audioStream.setMode(RtpStream.MODE_NORMAL);
-            if (!mHold) {
-                // FIXME: won't work if peer is not sending nor receiving
-                if (!peerSd.isSending(AUDIO)) {
-                    Log.d(TAG, "   not receiving");
-                    audioStream.setMode(RtpStream.MODE_SEND_ONLY);
-                }
-                if (!peerSd.isReceiving(AUDIO)) {
-                    Log.d(TAG, "   not sending");
-                    audioStream.setMode(RtpStream.MODE_RECEIVE_ONLY);
-                }
+        AudioStream audioStream = mAudioStream;
+        audioStream.associate(InetAddress.getByName(peerMediaAddress),
+                peerMediaPort);
+        audioStream.setCodec(convert(mCodec), mCodec.payloadType);
+        audioStream.setDtmfType(DTMF);
+        Log.d(TAG, "start media: localPort=" + localPort + ", peer="
+                + peerMediaAddress + ":" + peerMediaPort);
 
-                /* The recorder volume will be very low if the device is in
-                 * IN_CALL mode. Therefore, we have to set the mode to NORMAL
-                 * in order to have the normal microphone level.
-                 */
-                ((AudioManager) mContext.getSystemService
-                        (Context.AUDIO_SERVICE))
-                        .setMode(AudioManager.MODE_NORMAL);
+        audioStream.setMode(RtpStream.MODE_NORMAL);
+        if (!mHold) {
+            // FIXME: won't work if peer is not sending nor receiving
+            if (!peerSd.isSending(AUDIO)) {
+                Log.d(TAG, "   not receiving");
+                audioStream.setMode(RtpStream.MODE_SEND_ONLY);
+            }
+            if (!peerSd.isReceiving(AUDIO)) {
+                Log.d(TAG, "   not sending");
+                audioStream.setMode(RtpStream.MODE_RECEIVE_ONLY);
             }
 
-            // AudioGroup logic:
-            AudioGroup audioGroup = getAudioGroup();
-            if (mHold) {
-                if (audioGroup != null) {
-                    audioGroup.setMode(AudioGroup.MODE_ON_HOLD);
-                }
-                // don't create an AudioGroup here; doing so will fail if
-                // there's another AudioGroup out there that's active
+            /* The recorder volume will be very low if the device is in
+             * IN_CALL mode. Therefore, we have to set the mode to NORMAL
+             * in order to have the normal microphone level.
+             */
+            ((AudioManager) mContext.getSystemService
+                    (Context.AUDIO_SERVICE))
+                    .setMode(AudioManager.MODE_NORMAL);
+        }
+
+        // AudioGroup logic:
+        AudioGroup audioGroup = getAudioGroup();
+        if (mHold) {
+            if (audioGroup != null) {
+                audioGroup.setMode(AudioGroup.MODE_ON_HOLD);
+            }
+            // don't create an AudioGroup here; doing so will fail if
+            // there's another AudioGroup out there that's active
+        } else {
+            if (audioGroup == null) audioGroup = new AudioGroup();
+            audioStream.join(audioGroup);
+            if (mMuted) {
+                audioGroup.setMode(AudioGroup.MODE_MUTED);
             } else {
-                if (audioGroup == null) audioGroup = new AudioGroup();
-                audioStream.join(audioGroup);
-                if (mMuted) {
-                    audioGroup.setMode(AudioGroup.MODE_MUTED);
-                } else {
-                    audioGroup.setMode(AudioGroup.MODE_NORMAL);
-                }
+                audioGroup.setMode(AudioGroup.MODE_NORMAL);
             }
-        } catch (Exception e) {
-            Log.e(TAG, "call()", e);
         }
     }
 
