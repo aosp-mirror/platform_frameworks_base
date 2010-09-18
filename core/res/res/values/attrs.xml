@@ -451,6 +451,21 @@
         <!-- The preference layout that has the child/tabbed effect. -->
         <attr name="preferenceLayoutChild" format="reference" />
 
+        <!-- ============================ -->
+        <!-- Text selection handle styles -->
+        <!-- ============================ -->
+        <eat-comment />
+
+        <!-- Reference to a drawable that will be used to display a text selection
+             anchor on the left side of a selection region. -->
+        <attr name="textSelectHandleLeft" format="reference" />
+        <!-- Reference to a drawable that will be used to display a text selection
+             anchor on the right side of a selection region. -->
+        <attr name="textSelectHandleRight" format="reference" />
+        <!-- Reference to a drawable that will be used to display a text selection
+             anchor for positioning the cursor within text. -->
+        <attr name="textSelectHandle" format="reference" />
+
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -2152,6 +2167,16 @@
              EditorInfo.extras} field when the input
              method is connected. -->
         <attr name="editorExtras" format="reference" />
+
+        <!-- Reference to a drawable that will be used to display a text selection
+             anchor on the left side of a selection region. -->
+        <attr name="textSelectHandleLeft" />
+        <!-- Reference to a drawable that will be used to display a text selection
+             anchor on the right side of a selection region. -->
+        <attr name="textSelectHandleRight" />
+        <!-- Reference to a drawable that will be used to display a text selection
+             anchor for positioning the cursor within text. -->
+        <attr name="textSelectHandle" />
     </declare-styleable>
     <!-- An <code>input-extras</code> is a container for extra data to supply to
          an input method.  Contains

@@ -285,6 +285,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
     InputMethodState mInputMethodState;
 
+    private int mTextSelectHandleLeftRes;
+    private int mTextSelectHandleRightRes;
+    private int mTextSelectHandleRes;
+
     /*
      * Kick-start the font cache for the zygote process (to pay the cost of
      * initializing freetype for our default font only once).
@@ -704,6 +708,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 } catch (IOException e) {
                     Log.w(LOG_TAG, "Failure reading input extras", e);
                 }
+                break;
+
+            case com.android.internal.R.styleable.TextView_textSelectHandleLeft:
+                mTextSelectHandleLeftRes = a.getResourceId(attr, 0);
+                break;
+
+            case com.android.internal.R.styleable.TextView_textSelectHandleRight:
+                mTextSelectHandleRightRes = a.getResourceId(attr, 0);
+                break;
+
+            case com.android.internal.R.styleable.TextView_textSelectHandle:
+                mTextSelectHandleRes = a.getResourceId(attr, 0);
                 break;
             }
         }
@@ -3733,6 +3749,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             showError();
             mShowErrorAfterAttach = false;
         }
+        
+        updateOverlay();
     }
 
     @Override
@@ -3750,6 +3768,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mError != null) {
             hideError();
         }
+        
+        setOverlayEnabled(false);
     }
 
     @Override
@@ -4100,7 +4120,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         */
 
         canvas.restore();
+    }
 
+    /**
+     * @hide
+     */
+    @Override
+    public void onDrawOverlay(Canvas canvas) {
         if (mInsertionPointCursorController != null) {
             mInsertionPointCursorController.draw(canvas);
         }
@@ -6679,10 +6705,31 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean onTouchEvent(MotionEvent event) {
         final int action = event.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN) {
+            // Check to see if we're testing for our anchor overlay.
+            boolean handled = false;
+            final float x = event.getX();
+            final float y = event.getY();
+            if (x < 0 || x >= mRight - mLeft || y < 0 || y >= mBottom - mTop) {
+                if (mInsertionPointCursorController != null) {
+                    handled |= mInsertionPointCursorController.onTouchEvent(event);
+                }
+                if (mSelectionModifierCursorController != null) {
+                    handled |= mSelectionModifierCursorController.onTouchEvent(event);
+                }
+
+                if (!handled) {
+                    return false;
+                }
+            }
+
             // Reset this state; it will be re-set if super.onTouchEvent
             // causes focus to move to the view.
             mTouchFocusSelected = false;
             mScrolled = false;
+
+            if (handled) {
+                return true;
+            }
         }
 
         final boolean superResult = super.onTouchEvent(event);
@@ -7571,6 +7618,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    private void updateOverlay() {
+        boolean enableOverlay = false;
+        if (mSelectionModifierCursorController != null) {
+            enableOverlay |= mSelectionModifierCursorController.isShowing();
+        }
+        if (mInsertionPointCursorController != null) {
+            enableOverlay |= mInsertionPointCursorController.isShowing();
+        }
+        setOverlayEnabled(enableOverlay);
+    }
+
     /**
      * A CursorController instance can be used to control a cursor in the text.
      *
@@ -7594,6 +7652,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public void hide();
 
         /**
+         * @return true if the CursorController is currently visible
+         */
+        public boolean isShowing();
+
+        /**
          * Update the controller's position.
          */
         public void updatePosition(int x, int y);
@@ -7615,7 +7678,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
          * a chance to become active and/or visible.
          * @param event The touch event
          */
-        public void onTouchEvent(MotionEvent event);
+        public boolean onTouchEvent(MotionEvent event);
 
         /**
          * Draws a visual representation of the controller on the canvas.
@@ -7649,10 +7712,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final Rect bounds = sCursorControllerTempRect;
             bounds.left = (int) (mLayout.getPrimaryHorizontal(offset) - drawableWidth / 2.0)
                 + mScrollX;
-            bounds.top = (bottom ? lineBottom : lineTop) - drawableHeight / 2 + mScrollY;
+            bounds.top = (bottom ? lineBottom : lineTop) + mScrollY;
 
             mTopExtension = bottom ? 0 : drawableHeight / 2;
-            mBottomExtension = drawableHeight;
+            mBottomExtension = 0; //drawableHeight / 4;
 
             // Extend touch region up when editing the last line of text (or a single line) so that
             // it is easier to grab.
@@ -7710,7 +7773,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         InsertionPointCursorController() {
             Resources res = mContext.getResources();
-            mHandle = new Handle(res.getDrawable(com.android.internal.R.drawable.text_select_handle));
+            mHandle = new Handle(res.getDrawable(mTextSelectHandleRes));
         }
 
         public void show() {
@@ -7718,6 +7781,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // Has to be done after updateDrawablePosition, so that previous position invalidate
             // in only done if necessary.
             mIsVisible = true;
+            updateOverlay();
         }
 
         public void hide() {
@@ -7729,6 +7793,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     mHandle.postInvalidate();
                 }
             }
+        }
+
+        public boolean isShowing() {
+            return mIsVisible;
         }
 
         public void draw(Canvas canvas) {
@@ -7746,6 +7814,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     } else {
                         mHandle.mDrawable.setAlpha(0);
                         mIsVisible = false;
+                        updateOverlay();
                     }
                 }
                 mHandle.mDrawable.draw(canvas);
@@ -7774,6 +7843,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // Should never happen, safety check.
                 Log.w(LOG_TAG, "Update cursor controller position called with no cursor");
                 mIsVisible = false;
+                updateOverlay();
                 return;
             }
 
@@ -7783,7 +7853,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mHandle.mDrawable.setAlpha(255);
         }
 
-        public void onTouchEvent(MotionEvent event) {
+        public boolean onTouchEvent(MotionEvent event) {
             if (isFocused() && isTextEditable() && mIsVisible) {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN : {
@@ -7811,8 +7881,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             mOffsetY += viewportToContentVerticalOffset();
 
                             mOnDownTimerStart = event.getEventTime();
+                            return true;
                         }
-                        break;
+                        return false;
                     }
 
                     case MotionEvent.ACTION_UP : {
@@ -7830,6 +7901,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                 }
             }
+            return false;
         }
 
         public float getOffsetX() {
@@ -7859,8 +7931,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         SelectionModifierCursorController() {
             Resources res = mContext.getResources();
-            mStartHandle = new Handle(res.getDrawable(com.android.internal.R.drawable.text_select_handle));
-            mEndHandle = new Handle(res.getDrawable(com.android.internal.R.drawable.text_select_handle));
+            mStartHandle = new Handle(res.getDrawable(mTextSelectHandleLeftRes));
+            mEndHandle = new Handle(res.getDrawable(mTextSelectHandleRightRes));
         }
 
         public void show() {
@@ -7868,6 +7940,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // Has to be done after updateDrawablePositions, so that previous position invalidate
             // in only done if necessary.
             mIsVisible = true;
+            updateOverlay();
             mFadeOutTimerStart = -1;
             hideInsertionPointCursorController();
         }
@@ -7880,8 +7953,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
+        public boolean isShowing() {
+            return mIsVisible;
+        }
+
         public void cancelFadeOutAnimation() {
             mIsVisible = false;
+            updateOverlay();
             mStartHandle.postInvalidate();
             mEndHandle.postInvalidate();
         }
@@ -7900,6 +7978,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         mStartHandle.mDrawable.setAlpha(0);
                         mEndHandle.mDrawable.setAlpha(0);
                         mIsVisible = false;
+                        updateOverlay();
                     }
                 }
                 mStartHandle.mDrawable.draw(canvas);
@@ -7957,6 +8036,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // Should never happen, safety check.
                 Log.w(LOG_TAG, "Update selection controller position called with no cursor");
                 mIsVisible = false;
+                updateOverlay();
                 return;
             }
 
@@ -7969,7 +8049,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mEndHandle.mDrawable.setAlpha(255);
         }
 
-        public void onTouchEvent(MotionEvent event) {
+        public boolean onTouchEvent(MotionEvent event) {
             if (isTextEditable()) {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
@@ -8004,6 +8084,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                                     mOnDownTimerStart = event.getEventTime();
                                     ((ArrowKeyMovementMethod)mMovement).setCursorController(this);
+                                    return true;
                                 }
                             }
                         }
@@ -8029,6 +8110,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         break;
                 }
             }
+            return false;
         }
 
         /**

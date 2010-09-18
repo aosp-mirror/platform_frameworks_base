@@ -189,6 +189,12 @@ public class WifiService extends IWifiManager.Stub {
     private static final int SCAN_RESULT_BUFFER_SIZE = 512;
     private boolean mNeedReconfig;
 
+    /**
+     * Temporary for computing UIDS that are responsible for starting WIFI.
+     * Protected by mWifiStateTracker lock.
+     */
+    private final WorkSource mTmpWorkSource = new WorkSource();
+
     /*
      * Last UID that asked to enable WIFI.
      */
@@ -529,9 +535,9 @@ public class WifiService extends IWifiManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             if (wifiState == WIFI_STATE_ENABLED) {
-                mBatteryStats.noteWifiOn(uid);
+                mBatteryStats.noteWifiOn();
             } else if (wifiState == WIFI_STATE_DISABLED) {
-                mBatteryStats.noteWifiOff(uid);
+                mBatteryStats.noteWifiOff();
             }
         } catch (RemoteException e) {
         } finally {
@@ -788,9 +794,9 @@ public class WifiService extends IWifiManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             if (wifiAPState == WIFI_AP_STATE_ENABLED) {
-                mBatteryStats.noteWifiOn(uid);
+                mBatteryStats.noteWifiOn();
             } else if (wifiAPState == WIFI_AP_STATE_DISABLED) {
-                mBatteryStats.noteWifiOff(uid);
+                mBatteryStats.noteWifiOff();
             }
         } catch (RemoteException e) {
         } finally {
@@ -1664,6 +1670,9 @@ public class WifiService extends IWifiManager.Stub {
                 mAlarmManager.cancel(mIdleIntent);
                 mDeviceIdle = false;
                 mScreenOff = false;
+                // Once the screen is on, we are not keeping WIFI running
+                // because of any locks so clear that tracking immediately.
+                reportStartWorkSource();
                 mWifiStateTracker.enableRssiPolling(true);
                 /* DHCP or other temporary failures in the past can prevent
                  * a disabled network from being connected to, enable on screen on
@@ -1705,6 +1714,7 @@ public class WifiService extends IWifiManager.Stub {
             } else if (action.equals(ACTION_DEVICE_IDLE)) {
                 Slog.d(TAG, "got ACTION_DEVICE_IDLE");
                 mDeviceIdle = true;
+                reportStartWorkSource();
             } else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
                 /*
                  * Set a timer to put Wi-Fi to sleep, but only if the screen is off
@@ -1806,6 +1816,18 @@ public class WifiService extends IWifiManager.Stub {
         Message.obtain(mWifiHandler, MESSAGE_ENABLE_NETWORKS).sendToTarget();
     }
 
+    private void reportStartWorkSource() {
+        synchronized (mWifiStateTracker) {
+            mTmpWorkSource.clear();
+            if (mDeviceIdle) {
+                for (int i=0; i<mLocks.mList.size(); i++) {
+                    mTmpWorkSource.add(mLocks.mList.get(i).mWorkSource);
+                }
+            }
+            mWifiStateTracker.updateBatteryWorkSourceLocked(mTmpWorkSource);
+        }
+    }
+
     private void updateWifiState() {
         // send a message so it's all serialized
         Message.obtain(mWifiHandler, MESSAGE_UPDATE_STATE, 0, 0).sendToTarget();
@@ -1814,7 +1836,12 @@ public class WifiService extends IWifiManager.Stub {
     private void doUpdateWifiState() {
         boolean wifiEnabled = getPersistedWifiEnabled();
         boolean airplaneMode = isAirplaneModeOn() && !mAirplaneModeOverwridden;
-        boolean lockHeld = mLocks.hasLocks();
+
+        boolean lockHeld;
+        synchronized (mLocks) {
+            lockHeld = mLocks.hasLocks();
+        }
+
         int strongestLockMode = WifiManager.WIFI_MODE_FULL;
         boolean wifiShouldBeEnabled = wifiEnabled && !airplaneMode;
         boolean wifiShouldBeStarted = !mDeviceIdle || lockHeld;
@@ -1922,6 +1949,7 @@ public class WifiService extends IWifiManager.Stub {
                     break;
 
                 case MESSAGE_START_WIFI:
+                    reportStartWorkSource();
                     mWifiStateTracker.setScanOnlyMode(msg.arg1 == WifiManager.WIFI_MODE_SCAN_ONLY);
                     mWifiStateTracker.restart();
                     mWifiStateTracker.setHighPerfMode(msg.arg1 ==
@@ -2197,6 +2225,10 @@ public class WifiService extends IWifiManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+
+        // Be aggressive about adding new locks into the accounted state...
+        // we want to over-report rather than under-report.
+        reportStartWorkSource();
 
         updateWifiState();
         return true;
