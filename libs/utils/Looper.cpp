@@ -184,43 +184,49 @@ int Looper::pollInner(int timeoutMillis) {
 #if DEBUG_POLL_AND_WAKE
     LOGD("%p ~ pollOnce - handling events from %d fds", this, eventCount);
 #endif
-    { // acquire lock
-        AutoMutex _l(mLock);
-        for (int i = 0; i < eventCount; i++) {
-            int fd = eventItems[i].data.fd;
-            uint32_t epollEvents = eventItems[i].events;
-            if (fd == mWakeReadPipeFd) {
-                if (epollEvents & EPOLLIN) {
+    bool acquiredLock = false;
+    for (int i = 0; i < eventCount; i++) {
+        int fd = eventItems[i].data.fd;
+        uint32_t epollEvents = eventItems[i].events;
+        if (fd == mWakeReadPipeFd) {
+            if (epollEvents & EPOLLIN) {
 #if DEBUG_POLL_AND_WAKE
-                    LOGD("%p ~ pollOnce - awoken", this);
+                LOGD("%p ~ pollOnce - awoken", this);
 #endif
-                    char buffer[16];
-                    ssize_t nRead;
-                    do {
-                        nRead = read(mWakeReadPipeFd, buffer, sizeof(buffer));
-                    } while ((nRead == -1 && errno == EINTR) || nRead == sizeof(buffer));
-                } else {
-                    LOGW("Ignoring unexpected epoll events 0x%x on wake read pipe.", epollEvents);
-                }
+                char buffer[16];
+                ssize_t nRead;
+                do {
+                    nRead = read(mWakeReadPipeFd, buffer, sizeof(buffer));
+                } while ((nRead == -1 && errno == EINTR) || nRead == sizeof(buffer));
             } else {
-                ssize_t requestIndex = mRequests.indexOfKey(fd);
-                if (requestIndex >= 0) {
-                    int events = 0;
-                    if (epollEvents & EPOLLIN) events |= ALOOPER_EVENT_INPUT;
-                    if (epollEvents & EPOLLOUT) events |= ALOOPER_EVENT_OUTPUT;
-                    if (epollEvents & EPOLLERR) events |= ALOOPER_EVENT_ERROR;
-                    if (epollEvents & EPOLLHUP) events |= ALOOPER_EVENT_HANGUP;
+                LOGW("Ignoring unexpected epoll events 0x%x on wake read pipe.", epollEvents);
+            }
+        } else {
+            if (! acquiredLock) {
+                mLock.lock();
+                acquiredLock = true;
+            }
 
-                    Response response;
-                    response.events = events;
-                    response.request = mRequests.valueAt(requestIndex);
-                    mResponses.push(response);
-                } else {
-                    LOGW("Ignoring unexpected epoll events 0x%x on fd %d that is "
-                            "no longer registered.", epollEvents, fd);
-                }
+            ssize_t requestIndex = mRequests.indexOfKey(fd);
+            if (requestIndex >= 0) {
+                int events = 0;
+                if (epollEvents & EPOLLIN) events |= ALOOPER_EVENT_INPUT;
+                if (epollEvents & EPOLLOUT) events |= ALOOPER_EVENT_OUTPUT;
+                if (epollEvents & EPOLLERR) events |= ALOOPER_EVENT_ERROR;
+                if (epollEvents & EPOLLHUP) events |= ALOOPER_EVENT_HANGUP;
+
+                Response response;
+                response.events = events;
+                response.request = mRequests.valueAt(requestIndex);
+                mResponses.push(response);
+            } else {
+                LOGW("Ignoring unexpected epoll events 0x%x on fd %d that is "
+                        "no longer registered.", epollEvents, fd);
             }
         }
+    }
+    if (acquiredLock) {
+        mLock.unlock();
     }
 
     for (size_t i = 0; i < mResponses.size(); i++) {
