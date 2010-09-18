@@ -103,9 +103,19 @@ public interface NetworkStateTracker {
     public NetworkInfo getNetworkInfo();
 
     /**
-     * Fetch LinkProperties for the network
+     * Return the LinkProperties for the connection.
+     *
+     * @return a copy of the LinkProperties, is never null.
      */
     public LinkProperties getLinkProperties();
+
+    /**
+     * A capability is an Integer/String pair, the capabilities
+     * are defined in the class LinkSocket#Key.
+     *
+     * @return a copy of this connections capabilities, may be empty but never null.
+     */
+    public LinkCapabilities getLinkCapabilities();
 
     /**
      * Return the system properties name associated with the tcp buffer sizes

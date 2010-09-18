@@ -18,6 +18,7 @@ package android.app;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -28,16 +29,20 @@ final class BackStackState implements Parcelable {
     final int mTransitionStyle;
     final String mName;
     final int mIndex;
-    
-    public BackStackState(FragmentManagerImpl fm, BackStackEntry bse) {
+    final int mBreadCrumbTitleRes;
+    final CharSequence mBreadCrumbTitleText;
+    final int mBreadCrumbShortTitleRes;
+    final CharSequence mBreadCrumbShortTitleText;
+
+    public BackStackState(FragmentManagerImpl fm, BackStackRecord bse) {
         int numRemoved = 0;
-        BackStackEntry.Op op = bse.mHead;
+        BackStackRecord.Op op = bse.mHead;
         while (op != null) {
             if (op.removed != null) numRemoved += op.removed.size();
             op = op.next;
         }
         mOps = new int[bse.mNumOp*5 + numRemoved];
-        
+
         if (!bse.mAddToBackStack) {
             throw new IllegalStateException("Not on back stack");
         }
@@ -64,21 +69,29 @@ final class BackStackState implements Parcelable {
         mTransitionStyle = bse.mTransitionStyle;
         mName = bse.mName;
         mIndex = bse.mIndex;
+        mBreadCrumbTitleRes = bse.mBreadCrumbTitleRes;
+        mBreadCrumbTitleText = bse.mBreadCrumbTitleText;
+        mBreadCrumbShortTitleRes = bse.mBreadCrumbShortTitleRes;
+        mBreadCrumbShortTitleText = bse.mBreadCrumbShortTitleText;
     }
-    
+
     public BackStackState(Parcel in) {
         mOps = in.createIntArray();
         mTransition = in.readInt();
         mTransitionStyle = in.readInt();
         mName = in.readString();
         mIndex = in.readInt();
+        mBreadCrumbTitleRes = in.readInt();
+        mBreadCrumbTitleText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mBreadCrumbShortTitleRes = in.readInt();
+        mBreadCrumbShortTitleText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
     }
-    
-    public BackStackEntry instantiate(FragmentManagerImpl fm) {
-        BackStackEntry bse = new BackStackEntry(fm);
+
+    public BackStackRecord instantiate(FragmentManagerImpl fm) {
+        BackStackRecord bse = new BackStackRecord(fm);
         int pos = 0;
         while (pos < mOps.length) {
-            BackStackEntry.Op op = new BackStackEntry.Op();
+            BackStackRecord.Op op = new BackStackRecord.Op();
             op.cmd = mOps[pos++];
             if (FragmentManagerImpl.DEBUG) Log.v(FragmentManagerImpl.TAG,
                     "BSE " + bse + " set base fragment #" + mOps[pos]);
@@ -103,10 +116,14 @@ final class BackStackState implements Parcelable {
         bse.mName = mName;
         bse.mIndex = mIndex;
         bse.mAddToBackStack = true;
+        bse.mBreadCrumbTitleRes = mBreadCrumbTitleRes;
+        bse.mBreadCrumbTitleText = mBreadCrumbTitleText;
+        bse.mBreadCrumbShortTitleRes = mBreadCrumbShortTitleRes;
+        bse.mBreadCrumbShortTitleText = mBreadCrumbShortTitleText;
         bse.bumpBackStackNesting(1);
         return bse;
     }
-    
+
     public int describeContents() {
         return 0;
     }
@@ -117,14 +134,18 @@ final class BackStackState implements Parcelable {
         dest.writeInt(mTransitionStyle);
         dest.writeString(mName);
         dest.writeInt(mIndex);
+        dest.writeInt(mBreadCrumbTitleRes);
+        TextUtils.writeToParcel(mBreadCrumbTitleText, dest, 0);
+        dest.writeInt(mBreadCrumbShortTitleRes);
+        TextUtils.writeToParcel(mBreadCrumbShortTitleText, dest, 0);
     }
-    
+
     public static final Parcelable.Creator<BackStackState> CREATOR
             = new Parcelable.Creator<BackStackState>() {
         public BackStackState createFromParcel(Parcel in) {
             return new BackStackState(in);
         }
-        
+
         public BackStackState[] newArray(int size) {
             return new BackStackState[size];
         }
@@ -134,18 +155,19 @@ final class BackStackState implements Parcelable {
 /**
  * @hide Entry of an operation on the fragment back stack.
  */
-final class BackStackEntry implements FragmentTransaction, Runnable {
+final class BackStackRecord implements FragmentTransaction,
+        FragmentManager.BackStackEntry, Runnable {
     static final String TAG = "BackStackEntry";
-    
+
     final FragmentManagerImpl mManager;
-    
+
     static final int OP_NULL = 0;
     static final int OP_ADD = 1;
     static final int OP_REPLACE = 2;
     static final int OP_REMOVE = 3;
     static final int OP_HIDE = 4;
     static final int OP_SHOW = 5;
-    
+
     static final class Op {
         Op next;
         Op prev;
@@ -155,7 +177,7 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
         int exitAnim;
         ArrayList<Fragment> removed;
     }
-    
+
     Op mHead;
     Op mTail;
     int mNumOp;
@@ -167,11 +189,34 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
     String mName;
     boolean mCommitted;
     int mIndex;
-    
-    public BackStackEntry(FragmentManagerImpl manager) {
+
+    int mBreadCrumbTitleRes;
+    CharSequence mBreadCrumbTitleText;
+    int mBreadCrumbShortTitleRes;
+    CharSequence mBreadCrumbShortTitleText;
+
+    public BackStackRecord(FragmentManagerImpl manager) {
         mManager = manager;
     }
-    
+
+    public int getId() {
+        return mIndex;
+    }
+
+    public CharSequence getBreadCrumbTitle() {
+        if (mBreadCrumbTitleRes != 0) {
+            return mManager.mActivity.getText(mBreadCrumbTitleRes);
+        }
+        return mBreadCrumbTitleText;
+    }
+
+    public CharSequence getBreadCrumbShortTitle() {
+        if (mBreadCrumbShortTitleRes != 0) {
+            return mManager.mActivity.getText(mBreadCrumbShortTitleRes);
+        }
+        return mBreadCrumbShortTitleText;
+    }
+
     void addOp(Op op) {
         if (mHead == null) {
             mHead = mTail = op;
@@ -184,7 +229,7 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
         op.exitAnim = mExitAnim;
         mNumOp++;
     }
-        
+
     public FragmentTransaction add(Fragment fragment, String tag) {
         doAddOp(0, fragment, tag, OP_ADD);
         return this;
@@ -206,7 +251,7 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
         }
         fragment.mImmediateActivity = mManager.mActivity;
         fragment.mFragmentManager = mManager;
-        
+
         if (tag != null) {
             if (fragment.mTag != null && !tag.equals(fragment.mTag)) {
                 throw new IllegalStateException("Can't change tag of fragment "
@@ -215,7 +260,7 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
             }
             fragment.mTag = tag;
         }
-        
+
         if (containerViewId != 0) {
             if (fragment.mFragmentId != 0 && fragment.mFragmentId != containerViewId) {
                 throw new IllegalStateException("Can't change container ID of fragment "
@@ -224,7 +269,7 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
             }
             fragment.mContainerId = fragment.mFragmentId = containerViewId;
         }
-        
+
         Op op = new Op();
         op.cmd = opcmd;
         op.fragment = fragment;
@@ -234,27 +279,27 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
     public FragmentTransaction replace(int containerViewId, Fragment fragment) {
         return replace(containerViewId, fragment, null);
     }
-    
+
     public FragmentTransaction replace(int containerViewId, Fragment fragment, String tag) {
         if (containerViewId == 0) {
             throw new IllegalArgumentException("Must use non-zero containerViewId");
         }
-        
+
         doAddOp(containerViewId, fragment, tag, OP_REPLACE);
         return this;
     }
-    
+
     public FragmentTransaction remove(Fragment fragment) {
         if (fragment.mImmediateActivity == null) {
             throw new IllegalStateException("Fragment not added: " + fragment);
         }
         fragment.mImmediateActivity = null;
-        
+
         Op op = new Op();
         op.cmd = OP_REMOVE;
         op.fragment = fragment;
         addOp(op);
-        
+
         return this;
     }
 
@@ -262,47 +307,71 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
         if (fragment.mImmediateActivity == null) {
             throw new IllegalStateException("Fragment not added: " + fragment);
         }
-        
+
         Op op = new Op();
         op.cmd = OP_HIDE;
         op.fragment = fragment;
         addOp(op);
-        
+
         return this;
     }
-    
+
     public FragmentTransaction show(Fragment fragment) {
         if (fragment.mImmediateActivity == null) {
             throw new IllegalStateException("Fragment not added: " + fragment);
         }
-        
+
         Op op = new Op();
         op.cmd = OP_SHOW;
         op.fragment = fragment;
         addOp(op);
-        
+
         return this;
     }
-    
+
     public FragmentTransaction setCustomAnimations(int enter, int exit) {
         mEnterAnim = enter;
         mExitAnim = exit;
         return this;
     }
-    
+
     public FragmentTransaction setTransition(int transition) {
         mTransition = transition;
         return this;
     }
-    
+
     public FragmentTransaction setTransitionStyle(int styleRes) {
         mTransitionStyle = styleRes;
         return this;
     }
-    
+
     public FragmentTransaction addToBackStack(String name) {
         mAddToBackStack = true;
         mName = name;
+        return this;
+    }
+
+    public FragmentTransaction setBreadCrumbTitle(int res) {
+        mBreadCrumbTitleRes = res;
+        mBreadCrumbTitleText = null;
+        return this;
+    }
+
+    public FragmentTransaction setBreadCrumbTitle(CharSequence text) {
+        mBreadCrumbTitleRes = 0;
+        mBreadCrumbTitleText = text;
+        return this;
+    }
+
+    public FragmentTransaction setBreadCrumbShortTitle(int res) {
+        mBreadCrumbShortTitleRes = res;
+        mBreadCrumbShortTitleText = null;
+        return this;
+    }
+
+    public FragmentTransaction setBreadCrumbShortTitle(CharSequence text) {
+        mBreadCrumbShortTitleRes = 0;
+        mBreadCrumbShortTitleText = text;
         return this;
     }
 
@@ -341,10 +410,10 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
         mManager.enqueueAction(this);
         return mIndex;
     }
-    
+
     public void run() {
         if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Run: " + this);
-        
+
         if (mAddToBackStack) {
             if (mIndex < 0) {
                 throw new IllegalStateException("addToBackStack() called after commit()");
@@ -405,23 +474,23 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
                     throw new IllegalArgumentException("Unknown cmd: " + op.cmd);
                 }
             }
-            
+
             op = op.next;
         }
-        
+
         mManager.moveToState(mManager.mCurState, mTransition,
                 mTransitionStyle, true);
-        
+
         if (mAddToBackStack) {
             mManager.addBackStackState(this);
         }
     }
-    
+
     public void popFromBackStack(boolean doStateMove) {
         if (FragmentManagerImpl.DEBUG) Log.v(TAG, "popFromBackStack: " + this);
 
         bumpBackStackNesting(-1);
-        
+
         Op op = mTail;
         while (op != null) {
             switch (op.cmd) {
@@ -465,10 +534,10 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
                     throw new IllegalArgumentException("Unknown cmd: " + op.cmd);
                 }
             }
-            
+
             op = op.prev;
         }
-        
+
         if (doStateMove) {
             mManager.moveToState(mManager.mCurState,
                     FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle, true);
@@ -479,15 +548,15 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
             mIndex = -1;
         }
     }
-    
+
     public String getName() {
         return mName;
     }
-    
+
     public int getTransition() {
         return mTransition;
     }
-    
+
     public int getTransitionStyle() {
         return mTransitionStyle;
     }

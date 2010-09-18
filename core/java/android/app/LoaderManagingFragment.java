@@ -148,7 +148,7 @@ public abstract class LoaderManagingFragment<D> extends Fragment
         mStarted = false;
     }
 
-    /** TO DO: This needs to be turned into a retained fragment.
+    /* TO DO: This needs to be turned into a retained fragment.
     @Override
     public Object onRetainNonConfigurationInstance() {
         // Pass the loader along to the next guy

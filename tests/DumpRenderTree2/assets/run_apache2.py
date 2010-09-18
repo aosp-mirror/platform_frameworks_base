@@ -26,12 +26,14 @@ import sys
 import os
 import subprocess
 import logging
+import optparse
+import time
 
-def main():
-  if len(sys.argv) < 2:
+def main(options, args):
+  if len(args) < 1:
     run_cmd = ""
   else:
-    run_cmd = sys.argv[1]
+    run_cmd = args[0]
 
   # Setup logging class
   logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -53,9 +55,13 @@ def main():
   android_tree_root = os.path.join(script_location, parent, parent, parent, parent, parent)
   android_tree_root = os.path.normpath(android_tree_root)
 
-  # Paths relative to android_tree_root
+  # If any of these is relative, then it's relative to ServerRoot (in our case android_tree_root)
   webkit_path = os.path.join("external", "webkit")
-  layout_tests_path = os.path.join(webkit_path, "LayoutTests")
+  if (options.tests_root_directory != None):
+    # if options.tests_root_directory is absolute, os.getcwd() is discarded!
+    layout_tests_path = os.path.normpath(os.path.join(os.getcwd(), options.tests_root_directory))
+  else:
+    layout_tests_path = os.path.join(webkit_path, "LayoutTests")
   http_conf_path = os.path.join(layout_tests_path, "http", "conf")
 
   # Prepare the command to set ${APACHE_RUN_USER} and ${APACHE_RUN_GROUP}
@@ -66,7 +72,7 @@ def main():
   custom_log_path = os.path.join(tmp_WebKit, "apache2-access.log")
 
   # Prepare the command to (re)start/stop the server with specified settings
-  apache2_restart_cmd = "apache2 -k " + run_cmd
+  apache2_restart_template = "apache2 -k %s"
   directives  = " -c \"ServerRoot " + android_tree_root + "\""
 
   # We use http/tests as the document root as the HTTP tests use hardcoded
@@ -99,7 +105,20 @@ def main():
 
   # Try to execute the commands
   logging.info("Will " + run_cmd + " apache2 server.")
-  cmd = export_envvars_cmd + " && " + apache2_restart_cmd + directives + conf_file_cmd
+  cmd_template = export_envvars_cmd + " && " + apache2_restart_template + directives + conf_file_cmd
+
+  # It is worth noting here that if the configuration file with which we restart the server points
+  # to a different PidFile it will not work and result in second apache2 instance.
+  if (run_cmd == 'restart'):
+    logging.info("First will stop...")
+    execute_cmd(cmd_template % ('stop'))
+    logging.info("Stopped. Will start now...")
+    # We need to sleep breifly to avoid errors with apache being stopped and started too quickly
+    time.sleep(0.5)
+
+  execute_cmd(cmd_template % (run_cmd))
+
+def execute_cmd(cmd):
   p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   (out, err) = p.communicate()
 
@@ -121,4 +140,8 @@ def main():
     logging.info("OK")
 
 if __name__ == "__main__":
-  main();
+  option_parser = optparse.OptionParser(usage="Usage: %prog [options] start|stop|restart")
+  option_parser.add_option("", "--tests-root-directory",
+                           help="The directory from which to take the tests, default is external/webkit/LayoutTests in this checkout of the Android tree")
+  options, args = option_parser.parse_args();
+  main(options, args);

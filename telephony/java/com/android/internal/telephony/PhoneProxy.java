@@ -20,6 +20,7 @@ package com.android.internal.telephony;
 import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.Intent;
+import android.net.LinkCapabilities;
 import android.net.LinkProperties;
 import android.os.Handler;
 import android.os.Message;
@@ -210,6 +211,10 @@ public class PhoneProxy extends Handler implements Phone {
 
     public LinkProperties getLinkProperties(String apnType) {
         return mActivePhone.getLinkProperties(apnType);
+    }
+
+    public LinkCapabilities getLinkCapabilities(String apnType) {
+        return mActivePhone.getLinkCapabilities(apnType);
     }
 
     public String getActiveApn() {

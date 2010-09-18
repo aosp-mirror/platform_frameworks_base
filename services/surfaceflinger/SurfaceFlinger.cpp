@@ -1003,7 +1003,7 @@ void SurfaceFlinger::drawWormhole() const
         glVertexPointer(2, GL_SHORT, 0, vertices);
         glTexCoordPointer(2, GL_SHORT, 0, tcoords);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-#if defined(GL_OES_texture_external)
+#if defined(GL_OES_EGL_image_external)
         if (GLExtensions::getInstance().haveTextureExternal()) {
             glDisable(GL_TEXTURE_EXTERNAL_OES);
         }

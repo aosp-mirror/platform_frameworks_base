@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.net.LinkCapabilities;
 import android.net.NetworkInfo;
 import android.net.LinkProperties;
 import android.net.NetworkStateTracker;
@@ -48,6 +49,7 @@ public class WifiStateTracker implements NetworkStateTracker {
     private AtomicBoolean mDefaultRouteSet = new AtomicBoolean(false);
 
     private LinkProperties mLinkProperties;
+    private LinkCapabilities mLinkCapabilities;
     private NetworkInfo mNetworkInfo;
 
     /* For sending events to connectivity service handler */
@@ -59,9 +61,9 @@ public class WifiStateTracker implements NetworkStateTracker {
     public WifiStateTracker() {
         mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0, NETWORKTYPE, "");
         mLinkProperties = new LinkProperties();
+        mLinkCapabilities = new LinkCapabilities();
 
         mNetworkInfo.setIsAvailable(false);
-        mLinkProperties.clear();
         setTeardownRequested(false);
     }
 
@@ -196,6 +198,16 @@ public class WifiStateTracker implements NetworkStateTracker {
     }
 
     /**
+     * A capability is an Integer/String pair, the capabilities
+     * are defined in the class LinkSocket#Key.
+     *
+     * @return a copy of this connections capabilities, may be empty but never null.
+     */
+    public LinkCapabilities getLinkCapabilities() {
+        return new LinkCapabilities(mLinkCapabilities);
+    }
+
+    /**
      * Fetch default gateway address for the network
      */
     public int getDefaultGatewayAddr() {
@@ -230,8 +242,16 @@ public class WifiStateTracker implements NetworkStateTracker {
            if (intent.getAction().equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
                 mNetworkInfo = (NetworkInfo) intent.getParcelableExtra(
                         WifiManager.EXTRA_NETWORK_INFO);
-                mLinkProperties = (LinkProperties) intent.getParcelableExtra(
+                mLinkProperties = intent.getParcelableExtra(
                         WifiManager.EXTRA_LINK_PROPERTIES);
+                if (mLinkProperties == null) {
+                    mLinkProperties = new LinkProperties();
+                }
+                mLinkCapabilities = intent.getParcelableExtra(
+                        WifiManager.EXTRA_LINK_CAPABILITIES);
+                if (mLinkCapabilities == null) {
+                    mLinkCapabilities = new LinkCapabilities();
+                }
                 Message msg = mCsHandler.obtainMessage(EVENT_STATE_CHANGED, mNetworkInfo);
                 msg.sendToTarget();
             } else if (intent.getAction().equals(WifiManager.CONFIG_CHANGED_ACTION)) {

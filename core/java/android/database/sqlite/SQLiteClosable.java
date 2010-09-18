@@ -76,12 +76,11 @@ public abstract class SQLiteClosable {
         return buff.toString();
     }
 
+    // STOPSHIP remove this method before shipping
     private void checkRefCount() {
-        if (SQLiteDebug.DEBUG_ACTIVE_CURSOR_FINALIZATION) {
-            if (mReferenceCount > 1000) {
-                throw new IllegalStateException("refcount: " + mReferenceCount + ", " +
-                        getObjInfo());
-            }
+        if (mReferenceCount > 1000) {
+            throw new IllegalStateException("bad refcount: " + mReferenceCount +
+                    ". file bug against frameworks->database" + getObjInfo());
         }
     }
 }

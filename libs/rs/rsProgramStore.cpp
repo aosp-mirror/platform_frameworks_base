@@ -56,41 +56,6 @@ ProgramStore::~ProgramStore()
 {
 }
 
-void ProgramStore::setupGL(const Context *rsc, ProgramStoreState *state)
-{
-    if (state->mLast.get() == this) {
-        return;
-    }
-    state->mLast.set(this);
-
-    glColorMask(mColorRWriteEnable,
-                mColorGWriteEnable,
-                mColorBWriteEnable,
-                mColorAWriteEnable);
-    if (mBlendEnable) {
-        glEnable(GL_BLEND);
-        glBlendFunc(mBlendSrc, mBlendDst);
-    } else {
-        glDisable(GL_BLEND);
-    }
-
-    //LOGE("pfs  %i, %i, %x", mDepthWriteEnable, mDepthTestEnable, mDepthFunc);
-
-    glDepthMask(mDepthWriteEnable);
-    if(mDepthTestEnable || mDepthWriteEnable) {
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(mDepthFunc);
-    } else {
-        glDisable(GL_DEPTH_TEST);
-    }
-
-    if (mDitherEnable) {
-        glEnable(GL_DITHER);
-    } else {
-        glDisable(GL_DITHER);
-    }
-}
-
 void ProgramStore::setupGL2(const Context *rsc, ProgramStoreState *state)
 {
     if (state->mLast.get() == this) {

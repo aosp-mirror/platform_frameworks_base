@@ -162,9 +162,11 @@ int Looper::pollInner(int timeoutMillis) {
     struct epoll_event eventItems[EPOLL_MAX_EVENTS];
     int eventCount = epoll_wait(mEpollFd, eventItems, EPOLL_MAX_EVENTS, timeoutMillis);
     if (eventCount < 0) {
-        if (errno != EINTR) {
-            LOGW("Poll failed with an unexpected error, errno=%d", errno);
+        if (errno == EINTR) {
+            return ALOOPER_POLL_WAKE;
         }
+
+        LOGW("Poll failed with an unexpected error, errno=%d", errno);
         return ALOOPER_POLL_ERROR;
     }
 
@@ -196,7 +198,7 @@ int Looper::pollInner(int timeoutMillis) {
                     ssize_t nRead;
                     do {
                         nRead = read(mWakeReadPipeFd, buffer, sizeof(buffer));
-                    } while (nRead == sizeof(buffer));
+                    } while ((nRead == -1 && errno == EINTR) || nRead == sizeof(buffer));
                 } else {
                     LOGW("Ignoring unexpected epoll events 0x%x on wake read pipe.", epollEvents);
                 }
@@ -272,7 +274,11 @@ void Looper::wake() {
     LOGD("%p ~ wake", this);
 #endif
 
-    ssize_t nWrite = write(mWakeWritePipeFd, "W", 1);
+    ssize_t nWrite;
+    do {
+        nWrite = write(mWakeWritePipeFd, "W", 1);
+    } while (nWrite == -1 && errno == EINTR);
+
     if (nWrite != 1) {
         if (errno != EAGAIN) {
             LOGW("Could not write wake signal, errno=%d", errno);

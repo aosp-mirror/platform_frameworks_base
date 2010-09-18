@@ -145,6 +145,7 @@ int  Volume_getParameter       (EffectContext *pContext,
                                 void          *pParam,
                                 size_t        *pValueSize,
                                 void          *pValue);
+int Effect_setEnabled(EffectContext *pContext, bool enabled);
 
 /* Effect Library Interface Implementation */
 extern "C" int EffectQueryNumberEffects(uint32_t *pNumEffects){
@@ -303,32 +304,34 @@ extern "C" int EffectCreate(effect_uuid_t       *uuid,
     }
     LOGV("\tEffectCreate - pBundledContext is %p", pContext->pBundledContext);
 
+    SessionContext *pSessionContext = &GlobalSessionMemory[pContext->pBundledContext->SessionNo];
+
     // Create each Effect
     if (memcmp(uuid, &gBassBoostDescriptor.uuid, sizeof(effect_uuid_t)) == 0){
         // Create Bass Boost
         LOGV("\tEffectCreate - Effect to be created is LVM_BASS_BOOST");
-        GlobalSessionMemory[pContext->pBundledContext->SessionNo].bBassInstantiated = LVM_TRUE;
+        pSessionContext->bBassInstantiated = LVM_TRUE;
 
         pContext->itfe       = &gLvmEffectInterface;
         pContext->EffectType = LVM_BASS_BOOST;
     } else if (memcmp(uuid, &gVirtualizerDescriptor.uuid, sizeof(effect_uuid_t)) == 0){
         // Create Virtualizer
         LOGV("\tEffectCreate - Effect to be created is LVM_VIRTUALIZER");
-        GlobalSessionMemory[pContext->pBundledContext->SessionNo].bVirtualizerInstantiated=LVM_TRUE;
+        pSessionContext->bVirtualizerInstantiated=LVM_TRUE;
 
         pContext->itfe       = &gLvmEffectInterface;
         pContext->EffectType = LVM_VIRTUALIZER;
     } else if (memcmp(uuid, &gEqualizerDescriptor.uuid, sizeof(effect_uuid_t)) == 0){
         // Create Equalizer
         LOGV("\tEffectCreate - Effect to be created is LVM_EQUALIZER");
-        GlobalSessionMemory[pContext->pBundledContext->SessionNo].bEqualizerInstantiated = LVM_TRUE;
+        pSessionContext->bEqualizerInstantiated = LVM_TRUE;
 
         pContext->itfe       = &gLvmEffectInterface;
         pContext->EffectType = LVM_EQUALIZER;
     } else if (memcmp(uuid, &gVolumeDescriptor.uuid, sizeof(effect_uuid_t)) == 0){
         // Create Volume
         LOGV("\tEffectCreate - Effect to be created is LVM_VOLUME");
-        GlobalSessionMemory[pContext->pBundledContext->SessionNo].bVolumeInstantiated = LVM_TRUE;
+        pSessionContext->bVolumeInstantiated = LVM_TRUE;
 
         pContext->itfe       = &gLvmEffectInterface;
         pContext->EffectType = LVM_VOLUME;
@@ -353,29 +356,33 @@ extern "C" int EffectRelease(effect_interface_t interface){
         return -EINVAL;
     }
 
+
+    Effect_setEnabled(pContext, LVM_FALSE);
+
+    SessionContext *pSessionContext = &GlobalSessionMemory[pContext->pBundledContext->SessionNo];
+
     // Clear the instantiated flag for the effect
     if(pContext->EffectType == LVM_BASS_BOOST) {
         LOGV("\tEffectRelease LVM_BASS_BOOST Clearing global intstantiated flag");
-        GlobalSessionMemory[pContext->pBundledContext->SessionNo].bBassInstantiated = LVM_FALSE;
+        pSessionContext->bBassInstantiated = LVM_FALSE;
     } else if(pContext->EffectType == LVM_VIRTUALIZER) {
         LOGV("\tEffectRelease LVM_VIRTUALIZER Clearing global intstantiated flag");
-        GlobalSessionMemory[pContext->pBundledContext->SessionNo].bVirtualizerInstantiated
-            = LVM_FALSE;
+        pSessionContext->bVirtualizerInstantiated = LVM_FALSE;
     } else if(pContext->EffectType == LVM_EQUALIZER) {
         LOGV("\tEffectRelease LVM_EQUALIZER Clearing global intstantiated flag");
-        GlobalSessionMemory[pContext->pBundledContext->SessionNo].bEqualizerInstantiated =LVM_FALSE;
+        pSessionContext->bEqualizerInstantiated =LVM_FALSE;
     } else if(pContext->EffectType == LVM_VOLUME) {
         LOGV("\tEffectRelease LVM_VOLUME Clearing global intstantiated flag");
-        GlobalSessionMemory[pContext->pBundledContext->SessionNo].bVolumeInstantiated = LVM_FALSE;
+        pSessionContext->bVolumeInstantiated = LVM_FALSE;
     } else {
         LOGV("\tLVM_ERROR : EffectRelease : Unsupported effect\n\n\n\n\n\n\n");
     }
 
     // if all effects are no longer instantiaed free the lvm memory and delete BundledEffectContext
-    if((GlobalSessionMemory[pContext->pBundledContext->SessionNo].bBassInstantiated == LVM_FALSE)&&
-    (GlobalSessionMemory[pContext->pBundledContext->SessionNo].bVolumeInstantiated == LVM_FALSE)&&
-    (GlobalSessionMemory[pContext->pBundledContext->SessionNo].bEqualizerInstantiated ==LVM_FALSE)&&
-    (GlobalSessionMemory[pContext->pBundledContext->SessionNo].bVirtualizerInstantiated==LVM_FALSE))
+    if ((pSessionContext->bBassInstantiated == LVM_FALSE) &&
+            (pSessionContext->bVolumeInstantiated == LVM_FALSE) &&
+            (pSessionContext->bEqualizerInstantiated ==LVM_FALSE) &&
+            (pSessionContext->bVirtualizerInstantiated==LVM_FALSE))
     {
         #ifdef LVM_PCM
         if (pContext->pBundledContext->PcmInPtr != NULL) {
@@ -402,8 +409,8 @@ extern "C" int EffectRelease(effect_interface_t interface){
         }
 
         LOGV("\tEffectRelease: All effects are no longer instantiated\n");
-        GlobalSessionMemory[pContext->pBundledContext->SessionNo].bBundledEffectsEnabled =LVM_FALSE;
-        GlobalSessionMemory[pContext->pBundledContext->SessionNo].pBundledContext = LVM_NULL;
+        pSessionContext->bBundledEffectsEnabled =LVM_FALSE;
+        pSessionContext->pBundledContext = LVM_NULL;
         LOGV("\tEffectRelease: Freeing LVM Bundle memory\n");
         LvmEffect_free(pContext);
         LOGV("\tEffectRelease: Deleting LVM Bundle context %p\n", pContext->pBundledContext);
@@ -2377,6 +2384,107 @@ LVM_INT16 LVC_ToDB_s32Tos16(LVM_INT32 Lin_fix)
     return db_fix;
 }
 
+//----------------------------------------------------------------------------
+// Effect_setEnabled()
+//----------------------------------------------------------------------------
+// Purpose:
+// Enable or disable effect
+//
+// Inputs:
+//  pContext      - pointer to effect context
+//  enabled       - true if enabling the effect, false otherwise
+//
+// Outputs:
+//
+//----------------------------------------------------------------------------
+
+int Effect_setEnabled(EffectContext *pContext, bool enabled)
+{
+    LOGV("\tEffect_setEnabled() type %d, enabled %d", pContext->EffectType, enabled);
+
+    if (enabled) {
+        switch (pContext->EffectType) {
+            case LVM_BASS_BOOST:
+                if (pContext->pBundledContext->bBassEnabled == LVM_TRUE) {
+                     LOGV("\tLVM_ERROR : Effect_setEnabled() LVM_BASS_BOOST is already enabled");
+                     return -EINVAL;
+                }
+                pContext->pBundledContext->SamplesToExitCountBb =
+                     (LVM_INT32)(pContext->pBundledContext->SamplesPerSecond*0.1);
+                pContext->pBundledContext->bBassEnabled = LVM_TRUE;
+                break;
+            case LVM_EQUALIZER:
+                if (pContext->pBundledContext->bEqualizerEnabled == LVM_TRUE) {
+                    LOGV("\tLVM_ERROR : Effect_setEnabled() LVM_EQUALIZER is already enabled");
+                    return -EINVAL;
+                }
+                pContext->pBundledContext->SamplesToExitCountEq =
+                     (LVM_INT32)(pContext->pBundledContext->SamplesPerSecond*0.1);
+                pContext->pBundledContext->bEqualizerEnabled = LVM_TRUE;
+                break;
+            case LVM_VIRTUALIZER:
+                if (pContext->pBundledContext->bVirtualizerEnabled == LVM_TRUE) {
+                    LOGV("\tLVM_ERROR : Effect_setEnabled() LVM_VIRTUALIZER is already enabled");
+                    return -EINVAL;
+                }
+                pContext->pBundledContext->SamplesToExitCountVirt =
+                     (LVM_INT32)(pContext->pBundledContext->SamplesPerSecond*0.1);
+                pContext->pBundledContext->bVirtualizerEnabled = LVM_TRUE;
+                break;
+            case LVM_VOLUME:
+                if (pContext->pBundledContext->bVolumeEnabled == LVM_TRUE) {
+                    LOGV("\tLVM_ERROR : Effect_setEnabled() LVM_VOLUME is already enabled");
+                    return -EINVAL;
+                }
+                pContext->pBundledContext->bVolumeEnabled = LVM_TRUE;
+                break;
+            default:
+                LOGV("\tLVM_ERROR : Effect_setEnabled() invalid effect type");
+                return -EINVAL;
+        }
+        pContext->pBundledContext->NumberEffectsEnabled++;
+        LvmEffect_enable(pContext);
+    } else {
+        switch (pContext->EffectType) {
+            case LVM_BASS_BOOST:
+                if (pContext->pBundledContext->bBassEnabled == LVM_FALSE) {
+                    LOGV("\tLVM_ERROR : Effect_setEnabled() LVM_BASS_BOOST is already disabled");
+                    return -EINVAL;
+                }
+                pContext->pBundledContext->bBassEnabled = LVM_FALSE;
+                break;
+            case LVM_EQUALIZER:
+                if (pContext->pBundledContext->bEqualizerEnabled == LVM_FALSE) {
+                    LOGV("\tLVM_ERROR : Effect_setEnabled() LVM_EQUALIZER is already disabled");
+                    return -EINVAL;
+                }
+                pContext->pBundledContext->bEqualizerEnabled = LVM_FALSE;
+                break;
+            case LVM_VIRTUALIZER:
+                if (pContext->pBundledContext->bVirtualizerEnabled == LVM_FALSE) {
+                    LOGV("\tLVM_ERROR : Effect_setEnabled() LVM_VIRTUALIZER is already disabled");
+                    return -EINVAL;
+                }
+                pContext->pBundledContext->bVirtualizerEnabled = LVM_FALSE;
+                break;
+            case LVM_VOLUME:
+                if (pContext->pBundledContext->bVolumeEnabled == LVM_FALSE) {
+                    LOGV("\tLVM_ERROR : Effect_setEnabled() LVM_VOLUME is already disabled");
+                    return -EINVAL;
+                }
+                pContext->pBundledContext->bVolumeEnabled = LVM_FALSE;
+                break;
+            default:
+                LOGV("\tLVM_ERROR : Effect_setEnabled() invalid effect type");
+                return -EINVAL;
+        }
+        pContext->pBundledContext->NumberEffectsEnabled--;
+        LvmEffect_disable(pContext);
+    }
+
+    return 0;
+}
+
 } // namespace
 } // namespace
 
@@ -2426,7 +2534,7 @@ extern "C" int Effect_process(effect_interface_t     self,
             //LOGV("\tEffect_process: Waiting to turn off BASS_BOOST, %d samples left",
             //    pContext->pBundledContext->SamplesToExitCountBb);
         } else {
-        status = -ENODATA;
+            status = -ENODATA;
         }
     }
     if ((pContext->pBundledContext->bVolumeEnabled == LVM_FALSE)&&
@@ -2843,62 +2951,8 @@ extern "C" int Effect_command(effect_interface_t  self,
                 LOGV("\tLVM_ERROR : Effect_command cmdCode Case: EFFECT_CMD_ENABLE: ERROR");
                 return -EINVAL;
             }
-            switch (pContext->EffectType){
-                case LVM_BASS_BOOST:
-                    if(pContext->pBundledContext->bBassEnabled == LVM_TRUE){
-                         LOGV("\tLVM_ERROR : BassBoost_command cmdCode Case: "
-                                 "EFFECT_CMD_ENABLE: ERROR-Effect is already enabled");
-                         return -EINVAL;
-                    }
-                    pContext->pBundledContext->bBassEnabled = LVM_TRUE;
-                    //LOGV("\tEffect_command cmdCode Case:EFFECT_CMD_ENABLE LVM_BASS_BOOSTenabled");
-                    break;
-                case LVM_EQUALIZER:
-                    if(pContext->pBundledContext->bEqualizerEnabled == LVM_TRUE){
-                         LOGV("\tLVM_ERROR : Equalizer_command cmdCode Case: "
-                                 "EFFECT_CMD_ENABLE: ERROR-Effect is already enabled");
-                         return -EINVAL;
-                    }
-                    pContext->pBundledContext->bEqualizerEnabled = LVM_TRUE;
-                    //LOGV("\tEffect_command cmdCode Case:EFFECT_CMD_ENABLE LVM_EQUALIZER enabled");
-                    break;
-                case LVM_VIRTUALIZER:
-                    if(pContext->pBundledContext->bVirtualizerEnabled == LVM_TRUE){
-                         LOGV("\tLVM_ERROR : Virtualizer_command cmdCode Case: "
-                                 "EFFECT_CMD_ENABLE: ERROR-Effect is already enabled");
-                         return -EINVAL;
-                    }
-                    pContext->pBundledContext->bVirtualizerEnabled = LVM_TRUE;
-                    //LOGV("\tEffect_command cmdCode :EFFECT_CMD_ENABLE LVM_VIRTUALIZER enabled");
-                    break;
-                case LVM_VOLUME:
-                    if(pContext->pBundledContext->bVolumeEnabled == LVM_TRUE){
-                         LOGV("\tLVM_ERROR : Volume_command cmdCode Case: "
-                                 "EFFECT_CMD_ENABLE: ERROR-Effect is already enabled");
-                         return -EINVAL;
-                    }
-                    pContext->pBundledContext->bVolumeEnabled = LVM_TRUE;
-                    LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_ENABLE LVM_VOLUME enabled");
-                    break;
-                default:
-                    LOGV("\tLVM_ERROR : Effect_command cmdCode Case: "
-                        "EFFECT_CMD_ENABLE: ERROR, invalid Effect Type");
-                    return -EINVAL;
-            }
-            *(int *)pReplyData = 0;
-            pContext->pBundledContext->NumberEffectsEnabled++;
-            android::LvmEffect_enable(pContext);
-            pContext->pBundledContext->SamplesToExitCountEq =
-                 (LVM_INT32)(pContext->pBundledContext->SamplesPerSecond*0.1); // 0.1 secs Stereo
-            pContext->pBundledContext->SamplesToExitCountBb =
-                 (LVM_INT32)(pContext->pBundledContext->SamplesPerSecond*0.1); // 0.1 secs Stereo
-            pContext->pBundledContext->SamplesToExitCountVirt =
-                 (LVM_INT32)(pContext->pBundledContext->SamplesPerSecond*0.1); // 0.1 secs Stereo
-            LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_ENABLE Samples to Exit = %d",
-                pContext->pBundledContext->SamplesToExitCountBb);
-            //LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_ENABLE NumberEffectsEnabled = %d",
-            //        pContext->pBundledContext->NumberEffectsEnabled);
-            //LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_ENABLE end");
+
+            *(int *)pReplyData = android::Effect_setEnabled(pContext, LVM_TRUE);
             break;
 
         case EFFECT_CMD_DISABLE:
@@ -2907,57 +2961,7 @@ extern "C" int Effect_command(effect_interface_t  self,
                 LOGV("\tLVM_ERROR : Effect_command cmdCode Case: EFFECT_CMD_DISABLE: ERROR");
                 return -EINVAL;
             }
-            switch (pContext->EffectType){
-                case LVM_BASS_BOOST:
-                    if(pContext->pBundledContext->bBassEnabled == LVM_FALSE){
-                         LOGV("\tLVM_ERROR : BassBoost_command cmdCode Case: "
-                                 "EFFECT_CMD_DISABLE: ERROR-Effect is not yet enabled");
-                         return -EINVAL;
-                    }
-                    pContext->pBundledContext->bBassEnabled      = LVM_FALSE;
-                    //LOGV("\tEffect_command cmdCode Case: "
-                    //       "EFFECT_CMD_DISABLE LVM_BASS_BOOST disabled");
-                    break;
-                case LVM_EQUALIZER:
-                    if(pContext->pBundledContext->bEqualizerEnabled == LVM_FALSE){
-                         LOGV("\tLVM_ERROR : Equalizer_command cmdCode Case: "
-                                 "EFFECT_CMD_DISABLE: ERROR-Effect is not yet enabled");
-                         return -EINVAL;
-                    }
-                    pContext->pBundledContext->bEqualizerEnabled = LVM_FALSE;
-                    //LOGV("\tEffect_command cmdCode Case: "
-                    //       "EFFECT_CMD_DISABLE LVM_EQUALIZER disabled");
-                    break;
-                case LVM_VIRTUALIZER:
-                    if(pContext->pBundledContext->bVirtualizerEnabled == LVM_FALSE){
-                         LOGV("\tLVM_ERROR : Virtualizer_command cmdCode Case: "
-                                 "EFFECT_CMD_DISABLE: ERROR-Effect is not yet enabled");
-                         return -EINVAL;
-                    }
-                    pContext->pBundledContext->bVirtualizerEnabled = LVM_FALSE;
-                    //LOGV("\tEffect_command cmdCode Case: "
-                    //     "EFFECT_CMD_DISABLE LVM_VIRTUALIZER disabled");
-                    break;
-                case LVM_VOLUME:
-                    if(pContext->pBundledContext->bVolumeEnabled == LVM_FALSE){
-                         LOGV("\tLVM_ERROR : Volume_command cmdCode Case: "
-                                 "EFFECT_CMD_DISABLE: ERROR-Effect is not yet enabled");
-                         return -EINVAL;
-                    }
-                    pContext->pBundledContext->bVolumeEnabled = LVM_FALSE;
-                    //LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_DISABLE LVM_VOLUME disabled");
-                    break;
-                default:
-                    LOGV("\tLVM_ERROR : Effect_command cmdCode Case: "
-                        "EFFECT_CMD_DISABLE: ERROR, invalid Effect Type");
-                    return -EINVAL;
-            }
-            *(int *)pReplyData = 0;
-            pContext->pBundledContext->NumberEffectsEnabled--;
-            android::LvmEffect_disable(pContext);
-            //LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_DISABLE NumberEffectsEnabled = %d",
-            //        pContext->pBundledContext->NumberEffectsEnabled);
-            //LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_DISABLE end");
+            *(int *)pReplyData = android::Effect_setEnabled(pContext, LVM_FALSE);
             break;
 
         case EFFECT_CMD_SET_DEVICE:

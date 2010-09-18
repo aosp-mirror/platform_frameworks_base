@@ -232,23 +232,15 @@ void Context::timerPrint()
 
 bool Context::setupCheck()
 {
-    if (checkVersion2_0()) {
-        if (!mShaderCache.lookup(this, mVertex.get(), mFragment.get())) {
-            LOGE("Context::setupCheck() 1 fail");
-            return false;
-        }
-
-        mFragmentStore->setupGL2(this, &mStateFragmentStore);
-        mFragment->setupGL2(this, &mStateFragment, &mShaderCache);
-        mRaster->setupGL2(this, &mStateRaster);
-        mVertex->setupGL2(this, &mStateVertex, &mShaderCache);
-
-    } else {
-        mFragmentStore->setupGL(this, &mStateFragmentStore);
-        mFragment->setupGL(this, &mStateFragment);
-        mRaster->setupGL(this, &mStateRaster);
-        mVertex->setupGL(this, &mStateVertex);
+    if (!mShaderCache.lookup(this, mVertex.get(), mFragment.get())) {
+        LOGE("Context::setupCheck() 1 fail");
+        return false;
     }
+
+    mFragmentStore->setupGL2(this, &mStateFragmentStore);
+    mFragment->setupGL2(this, &mStateFragment, &mShaderCache);
+    mRaster->setupGL2(this, &mStateRaster);
+    mVertex->setupGL2(this, &mStateVertex, &mShaderCache);
     return true;
 }
 
@@ -940,6 +932,7 @@ RsContext rsContextCreateGL(RsDevice vdev, uint32_t version, bool useDepth)
     LOGV("rsContextCreateGL %p, %i", vdev, useDepth);
     Device * dev = static_cast<Device *>(vdev);
     Context *rsc = new Context(dev, true, useDepth);
+    LOGV("rsContextCreateGL ret %p ", rsc);
     return rsc;
 }
 

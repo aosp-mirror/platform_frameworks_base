@@ -465,11 +465,11 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Set the friendly Bluetooth name of the local Bluetoth adapter.
+     * Set the friendly Bluetooth name of the local Bluetooth adapter.
      * <p>This name is visible to remote Bluetooth devices.
-     * <p>Valid Bluetooth names are a maximum of 248 UTF-8 characters, however
-     * many remote devices can only display the first 40 characters, and some
-     * may be limited to just 20.
+     * <p>Valid Bluetooth names are a maximum of 248 bytes using UTF-8
+     * encoding, although many remote devices can only display the first
+     * 40 characters, and some may be limited to just 20.
      * <p>If Bluetooth state is not {@link #STATE_ON}, this API
      * will return false. After turning on Bluetooth,
      * wait for {@link #ACTION_STATE_CHANGED} with {@link #STATE_ON}
@@ -488,7 +488,7 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Get the current Bluetooth scan mode of the local Bluetooth adaper.
+     * Get the current Bluetooth scan mode of the local Bluetooth adapter.
      * <p>The Bluetooth scan mode determines if the local adapter is
      * connectable and/or discoverable from remote Bluetooth devices.
      * <p>Possible values are:
@@ -611,7 +611,7 @@ public final class BluetoothAdapter {
     /**
      * Cancel the current device discovery process.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
-     * <p>Because discovery is a heavyweight precedure for the Bluetooth
+     * <p>Because discovery is a heavyweight procedure for the Bluetooth
      * adapter, this method should always be called before attempting to connect
      * to a remote device with {@link
      * android.bluetooth.BluetoothSocket#connect()}. Discovery is not managed by

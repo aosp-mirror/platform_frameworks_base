@@ -724,10 +724,7 @@ RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h
     const Element *src = static_cast<const Element *>(_src);
     const Element *dst = static_cast<const Element *>(_dst);
 
-    // Check for pow2 on pre es 2.0 versions.
-    rsAssert(rsc->checkVersion2_0() || (!(w & (w-1)) && !(h & (h-1))));
-
-    //LOGE("rsi_AllocationCreateFromBitmap %i %i %i %i %i", w, h, dstFmt, srcFmt, genMips);
+    //LOGE("%p rsi_AllocationCreateFromBitmap %i %i %i", rsc, w, h, genMips);
     rsi_TypeBegin(rsc, _dst);
     rsi_TypeAdd(rsc, RS_DIMENSION_X, w);
     rsi_TypeAdd(rsc, RS_DIMENSION_Y, h);

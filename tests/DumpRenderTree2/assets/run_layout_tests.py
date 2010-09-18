@@ -32,8 +32,15 @@ def main(options, args):
 
   tmpdir = tempfile.gettempdir()
 
+  if options.tests_root_directory != None:
+    # if options.tests_root_directory is absolute, os.getcwd() is discarded!
+    tests_root_directory = os.path.normpath(os.path.join(os.getcwd(), options.tests_root_directory))
+    server_options = " --tests-root-directory=" + tests_root_directory
+  else:
+    server_options = "";
+
   # Restart the server
-  cmd = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "run_apache2.py") + " restart"
+  cmd = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "run_apache2.py") + server_options + " restart"
   os.system(cmd);
 
   # Run the tests in path
@@ -73,5 +80,7 @@ if __name__ == "__main__":
   option_parser = optparse.OptionParser(usage="Usage: %prog [options] test-relative-path")
   option_parser.add_option("", "--show-results-in-browser", default="true",
                            help="Show the results the host's default web browser, default=true")
+  option_parser.add_option("", "--tests-root-directory",
+                           help="The directory from which to take the tests, default is external/webkit/LayoutTests in this checkout of the Android tree")
   options, args = option_parser.parse_args();
   main(options, args);

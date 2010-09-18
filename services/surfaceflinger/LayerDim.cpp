@@ -71,7 +71,7 @@ void LayerDim::onDraw(const Region& clip) const
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
         glColor4f(0, 0, 0, alpha);
 
-#if defined(GL_OES_texture_external)
+#if defined(GL_OES_EGL_image_external)
         if (GLExtensions::getInstance().haveTextureExternal()) {
             glDisable(GL_TEXTURE_EXTERNAL_OES);
         }

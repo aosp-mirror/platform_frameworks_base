@@ -325,9 +325,6 @@ InputDevice* InputReader::createDevice(int32_t deviceId, const String8& name, ui
     if (classes & INPUT_DEVICE_CLASS_DPAD) {
         keyboardSources |= AINPUT_SOURCE_DPAD;
     }
-    if (classes & INPUT_DEVICE_CLASS_GAMEPAD) {
-        keyboardSources |= AINPUT_SOURCE_GAMEPAD;
-    }
 
     if (keyboardSources != 0) {
         device->addMapper(new KeyboardInputMapper(device,

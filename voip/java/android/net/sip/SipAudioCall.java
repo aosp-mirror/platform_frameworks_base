@@ -153,17 +153,29 @@ public interface SipAudioCall {
     void setListener(Listener listener, boolean callbackImmediately);
 
     /**
-     * Closes this object. The object is not usable after being closed.
+     * Closes this object. This object is not usable after being closed.
      */
     void close();
 
     /**
-     * Initiates an audio call to the specified profile.
+     * Initiates an audio call to the specified profile. The attempt will be
+     * timed out if the call is not established within {@code timeout} seconds
+     * and {@code Listener.onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
+     * will be called.
      *
      * @param callee the SIP profile to make the call to
      * @param sipManager the {@link SipManager} object to help make call with
+     * @param timeout the timeout value in seconds
+     * @see Listener.onError
      */
-    void makeCall(SipProfile callee, SipManager sipManager) throws SipException;
+    void makeCall(SipProfile callee, SipManager sipManager, int timeout)
+            throws SipException;
+
+    /**
+     * Starts the audio for the established call. This method should be called
+     * after {@link Listener#onCallEstablished} is called.
+     */
+    void startAudio();
 
     /**
      * Attaches an incoming call to this call object.
@@ -179,18 +191,38 @@ public interface SipAudioCall {
 
     /**
      * Puts a call on hold.  When succeeds, {@link Listener#onCallHeld} is
-     * called.
+     * called. The attempt will be timed out if the call is not established
+     * within {@code timeout} seconds and
+     * {@code Listener.onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
+     * will be called.
+     *
+     * @param timeout the timeout value in seconds
+     * @see Listener.onError
      */
-    void holdCall() throws SipException;
+    void holdCall(int timeout) throws SipException;
 
-    /** Answers a call. */
-    void answerCall() throws SipException;
+    /**
+     * Answers a call. The attempt will be timed out if the call is not
+     * established within {@code timeout} seconds and
+     * {@code Listener.onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
+     * will be called.
+     *
+     * @param timeout the timeout value in seconds
+     * @see Listener.onError
+     */
+    void answerCall(int timeout) throws SipException;
 
     /**
      * Continues a call that's on hold. When succeeds,
-     * {@link Listener#onCallEstablished} is called.
+     * {@link Listener#onCallEstablished} is called. The attempt will be timed
+     * out if the call is not established within {@code timeout} seconds and
+     * {@code Listener.onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
+     * will be called.
+     *
+     * @param timeout the timeout value in seconds
+     * @see Listener.onError
      */
-    void continueCall() throws SipException;
+    void continueCall(int timeout) throws SipException;
 
     /** Puts the device to speaker mode. */
     void setSpeakerMode(boolean speakerMode);

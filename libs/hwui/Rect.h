@@ -148,6 +148,13 @@ struct Rect {
         return false;
     }
 
+    void snapToPixelBoundaries() {
+        left = floor(left);
+        top = floor(top);
+        right = ceil(right);
+        bottom = ceil(bottom);
+    }
+
     void dump() const {
         LOGD("Rect[l=%f t=%f r=%f b=%f]", left, top, right, bottom);
     }
@@ -157,4 +164,4 @@ struct Rect {
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_RECT_H
+#endif // ANDROID_UI_RECT_H

@@ -20,6 +20,7 @@ import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
+import android.os.Message;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
@@ -75,9 +76,12 @@ public class Summarizer {
             "       width: 20px;}" +
             "h3 span.sqr {" +
             "       text-decoration: none;" +
-            "       color: #8ee100;" +
             "       float: left;" +
             "       width: 20px;}" +
+            "h3 span.sqr_pass {" +
+            "       color: #8ee100;}" +
+            "h3 span.sqr_fail {" +
+            "       color: #c30000;}" +
             "span.source {" +
             "       display: block;" +
             "       font-size: 10px;" +
@@ -134,12 +138,6 @@ public class Summarizer {
             "       background-color: #ff8888; }" +
             "span.ins {" +
             "       background-color: #88ff88; }" +
-            "span.fail {" +
-            "       color: red;}" +
-            "span.pass {" +
-            "       color: green;}" +
-            "span.time_out {" +
-            "       color: orange;}" +
             "table.summary {" +
             "       border: 1px solid black;" +
             "       margin-top: 20px;}" +
@@ -151,19 +149,16 @@ public class Summarizer {
             "       text-transform: uppercase;" +
             "       padding: 3px;" +
             "       -webkit-border-radius: 4px;}" +
-            "span." + AbstractResult.ResultCode.PASS.name() + "{" +
-            "       background-color: #8ee100;" +
-            "       color: black;}" +
-            "span." + AbstractResult.ResultCode.FAIL_RESULT_DIFFERS.name() + "{" +
+            "span." + AbstractResult.ResultCode.RESULTS_DIFFER.name() + "{" +
             "       background-color: #ccc;" +
             "       color: black;}" +
-            "span." + AbstractResult.ResultCode.FAIL_NO_EXPECTED_RESULT.name() + "{" +
+            "span." + AbstractResult.ResultCode.NO_EXPECTED_RESULT.name() + "{" +
             "       background-color: #a700e4;" +
             "       color: #fff;}" +
-            "span." + AbstractResult.ResultCode.FAIL_TIMED_OUT.name() + "{" +
+            "span.timed_out {" +
             "       background-color: #f3cb00;" +
             "       color: black;}" +
-            "span." + AbstractResult.ResultCode.FAIL_CRASHED.name() + "{" +
+            "span.crashed {" +
             "       background-color: #c30000;" +
             "       color: #fff;}" +
             "span.noLtc {" +
@@ -217,11 +212,11 @@ public class Summarizer {
     public void appendTest(AbstractResult result) {
         String relativePath = result.getRelativePath();
 
-        if (result.getResultCode() == AbstractResult.ResultCode.FAIL_CRASHED) {
+        if (result.didCrash()) {
             mCrashedTestsCount++;
         }
 
-        if (result.getResultCode() == AbstractResult.ResultCode.PASS) {
+        if (result.didPass()) {
             if (mFileFilter.isFail(relativePath)) {
                 mUnexpectedPasses.add(result);
             } else {
@@ -240,10 +235,11 @@ public class Summarizer {
         mTestsRelativePath = testsRelativePath;
     }
 
-    public void summarize() {
+    public void summarize(Message onFinishMessage) {
         String webKitRevision = getWebKitRevision();
         createHtmlDetails(webKitRevision);
         createTxtSummary(webKitRevision);
+        onFinishMessage.sendToTarget();
     }
 
     public void reset() {
@@ -285,13 +281,10 @@ public class Summarizer {
 
         createTopSummaryTable(webKitRevision, html);
 
-        createResultsListWithDiff(html, "Unexpected failures", mUnexpectedFailures);
-
-        createResultsListNoDiff(html, "Unexpected passes", mUnexpectedPasses);
-
-        createResultsListWithDiff(html, "Expected failures", mExpectedFailures);
-
-        createResultsListNoDiff(html, "Expected passes", mExpectedPasses);
+        createResultsList(html, "Unexpected failures", mUnexpectedFailures);
+        createResultsList(html, "Unexpected passes", mUnexpectedPasses);
+        createResultsList(html, "Expected failures", mExpectedFailures);
+        createResultsList(html, "Expected passes", mExpectedPasses);
 
         html.append("</body></html>");
 
@@ -366,8 +359,8 @@ public class Summarizer {
         html.append("</tr>");
     }
 
-    private void createResultsListWithDiff(StringBuilder html, String title,
-            List<AbstractResult> resultsList) {
+    private void createResultsList(
+            StringBuilder html, String title, List<AbstractResult> resultsList) {
         String relativePath;
         String id = "";
         AbstractResult.ResultCode resultCode;
@@ -377,7 +370,6 @@ public class Summarizer {
         for (AbstractResult result : resultsList) {
             relativePath = result.getRelativePath();
             resultCode = result.getResultCode();
-            assert resultCode != AbstractResult.ResultCode.PASS : "resultCode=" + resultCode;
 
             html.append("<h3>");
 
@@ -387,61 +379,73 @@ public class Summarizer {
              * to cause any problems in this case
              */
             id = relativePath.replace(File.separator, ":");
-            html.append("<a href=\"#\" onClick=\"toggleDisplay('" + id + "');");
-            html.append("return false;\">");
-            html.append("<span class=\"tri\" id=\"tri." + id + "\">&#x25b6; </span>");
-            html.append("<span class=\"path\">" + relativePath + "</span>");
-            html.append("</a>");
 
-            html.append(" <span class=\"listItem " + resultCode.name() + "\">");
-            html.append(resultCode.toString());
-            html.append("</span>");
+            /** Write the test name */
+            if (resultCode == AbstractResult.ResultCode.RESULTS_DIFFER) {
+                html.append("<a href=\"#\" onClick=\"toggleDisplay('" + id + "');");
+                html.append("return false;\">");
+                html.append("<span class=\"tri\" id=\"tri." + id + "\">&#x25b6; </span>");
+                html.append("<span class=\"path\">" + relativePath + "</span>");
+                html.append("</a>");
+            } else {
+                html.append("<a href=\"" + getViewSourceUrl(result.getRelativePath()).toString() + "\"");
+                html.append(" target=\"_blank\">");
+                html.append("<span class=\"sqr sqr_" + (result.didPass() ? "pass" : "fail"));
+                html.append("\">&#x25a0; </span>");
+                html.append("<span class=\"path\">" + result.getRelativePath() + "</span>");
+                html.append("</a>");
+            }
 
-            /** Detect missing LTC function */
-            String additionalTextOutputString = result.getAdditionalTextOutputString();
-            if (additionalTextOutputString != null &&
-                    additionalTextOutputString.contains("com.android.dumprendertree") &&
-                    additionalTextOutputString.contains("has no method")) {
-                if (additionalTextOutputString.contains("LayoutTestController")) {
-                    html.append(" <span class=\"listItem noLtc\">LTC function missing</span>");
-                }
-                if (additionalTextOutputString.contains("EventSender")) {
-                    html.append(" <span class=\"listItem noEventSender\">");
-                    html.append("ES function missing</span>");
-                }
+            if (!result.didPass()) {
+                appendTags(html, result);
             }
 
             html.append("</h3>");
             appendExpectedResultsSources(result, html);
 
-            html.append("<div class=\"diff\" style=\"display: none;\" id=\"" + id + "\">");
-            html.append(result.getDiffAsHtml());
-            html.append("<a href=\"#\" onClick=\"toggleDisplay('" + id + "');");
-            html.append("return false;\">Hide</a>");
-            html.append(" | ");
-            html.append("<a href=\"" + getViewSourceUrl(relativePath).toString() + "\"");
-            html.append(" target=\"_blank\">Show source</a>");
-            html.append("</div>");
+            if (resultCode == AbstractResult.ResultCode.RESULTS_DIFFER) {
+                html.append("<div class=\"diff\" style=\"display: none;\" id=\"" + id + "\">");
+                html.append(result.getDiffAsHtml());
+                html.append("<a href=\"#\" onClick=\"toggleDisplay('" + id + "');");
+                html.append("return false;\">Hide</a>");
+                html.append(" | ");
+                html.append("<a href=\"" + getViewSourceUrl(relativePath).toString() + "\"");
+                html.append(" target=\"_blank\">Show source</a>");
+                html.append("</div>");
+            }
 
             html.append("<div class=\"space\"></div>");
         }
     }
 
-    private void createResultsListNoDiff(StringBuilder html, String title,
-            List<AbstractResult> resultsList) {
-        Collections.sort(resultsList);
-        html.append("<h2>" + title + " [" + resultsList.size() + "]</h2>");
-        for (AbstractResult result : resultsList) {
-            html.append("<h3>");
-            html.append("<a href=\"" + getViewSourceUrl(result.getRelativePath()).toString() +
-                    "\"");
-            html.append(" target=\"_blank\">");
-            html.append("<span class=\"sqr\">&#x25a0; </span>");
-            html.append("<span class=\"path\">" + result.getRelativePath() + "</span>");
-            html.append("</a>");
-            html.append("</h3>");
-            appendExpectedResultsSources(result, html);
-            html.append("<div class=\"space\"></div>");
+    private void appendTags(StringBuilder html, AbstractResult result) {
+        /** Tag tests which crash, time out or where results don't match */
+        if (result.didCrash()) {
+            html.append(" <span class=\"listItem crashed\">Crashed</span>");
+        } else {
+            if (result.didTimeOut()) {
+                html.append(" <span class=\"listItem timed_out\">Timed out</span>");
+            }
+            AbstractResult.ResultCode resultCode = result.getResultCode();
+            if (resultCode != AbstractResult.ResultCode.RESULTS_MATCH) {
+                html.append(" <span class=\"listItem " + resultCode.name() + "\">");
+                html.append(resultCode.toString());
+                html.append("</span>");
+            }
+        }
+
+        /** Detect missing LTC function */
+        String additionalTextOutputString = result.getAdditionalTextOutputString();
+        if (additionalTextOutputString != null &&
+                additionalTextOutputString.contains("com.android.dumprendertree") &&
+                additionalTextOutputString.contains("has no method")) {
+            if (additionalTextOutputString.contains("LayoutTestController")) {
+                html.append(" <span class=\"listItem noLtc\">LTC function missing</span>");
+            }
+            if (additionalTextOutputString.contains("EventSender")) {
+                html.append(" <span class=\"listItem noEventSender\">");
+                html.append("ES function missing</span>");
+            }
         }
     }
 

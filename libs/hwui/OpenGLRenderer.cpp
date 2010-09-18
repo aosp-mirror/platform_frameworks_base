@@ -39,6 +39,9 @@ namespace uirenderer {
 // Generates simple and textured vertices
 #define FV(x, y, u, v) { { x, y }, { u, v } }
 
+#define RAD_TO_DEG (180.0f / 3.14159265f)
+#define MIN_ANGLE 0.001f
+
 ///////////////////////////////////////////////////////////////////////////////
 // Globals
 ///////////////////////////////////////////////////////////////////////////////
@@ -124,6 +127,8 @@ OpenGLRenderer::OpenGLRenderer(): mCaches(Caches::getInstance()) {
     if (maxTextureUnits < REQUIRED_TEXTURE_UNITS_COUNT) {
         LOGW("At least %d texture units are required!", REQUIRED_TEXTURE_UNITS_COUNT);
     }
+
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
@@ -159,6 +164,15 @@ void OpenGLRenderer::prepare() {
     glScissor(0, 0, mWidth, mHeight);
 
     mSnapshot->setClip(0.0f, 0.0f, mWidth, mHeight);
+}
+
+void OpenGLRenderer::finish() {
+#if DEBUG_OPENGL
+    GLenum status = GL_NO_ERROR;
+    while ((status = glGetError()) != GL_NO_ERROR) {
+        LOGD("GL error from OpenGLRenderer: 0x%x", status);
+    }
+#endif
 }
 
 void OpenGLRenderer::acquireContext() {
@@ -342,7 +356,12 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
     // Layers only make sense if they are in the framebuffer's bounds
     bounds.intersect(*mSnapshot->clipRect);
-    if (bounds.isEmpty()) return false;
+    bounds.snapToPixelBoundaries();
+
+    if (bounds.isEmpty() || bounds.getWidth() > mMaxTextureSize ||
+            bounds.getHeight() > mMaxTextureSize) {
+        return false;
+    }
 
     LayerSize size(bounds.getWidth(), bounds.getHeight());
     Layer* layer = mCaches.layerCache.get(size);
@@ -572,7 +591,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
     getAlphaAndMode(paint, &alpha, &mode);
 
     Patch* mesh = mCaches.patchCache.get(patch);
-    mesh->updateVertices(bitmap, left, top, right, bottom,
+    mesh->updateVertices(bitmap->width(), bitmap->height(),left, top, right, bottom,
             &patch->xDivs[0], &patch->yDivs[0], patch->numXDivs, patch->numYDivs);
 
     // Specify right and bottom as +1.0f from left/top to prevent scaling since the
@@ -580,6 +599,50 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
     drawTextureMesh(left, top, left + 1.0f, top + 1.0f, texture->id, alpha / 255.0f,
             mode, texture->blend, &mesh->vertices[0].position[0],
             &mesh->vertices[0].texture[0], GL_TRIANGLES, mesh->verticesCount);
+}
+
+void OpenGLRenderer::drawLines(float* points, int count, const SkPaint* paint) {
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
+
+    uint32_t color = paint->getColor();
+    const GLfloat a = alpha / 255.0f;
+    const GLfloat r = a * ((color >> 16) & 0xFF) / 255.0f;
+    const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
+    const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
+
+    GLuint textureUnit = 0;
+    setupTextureAlpha8(mLine.getTexture(), 0, 0, textureUnit, 0.0f, 0.0f, r, g, b, a,
+            mode, false, true, mLine.getVertices(), mLine.getTexCoords());
+
+    for (int i = 0; i < count; i += 4) {
+        float tx = 0.0f;
+        float ty = 0.0f;
+
+        mLine.update(points[i], points[i + 1], points[i + 2], points[i + 3],
+                paint->getStrokeWidth(), tx, ty);
+
+        const float dx = points[i + 2] - points[i];
+        const float dy = points[i + 3] - points[i + 1];
+        const float mag = sqrtf(dx * dx + dy * dy);
+        const float angle = acos(dx / mag);
+
+        mModelView.loadTranslate(points[i], points[i + 1], 0.0f);
+        if (angle > MIN_ANGLE || angle < -MIN_ANGLE) {
+            mModelView.rotate(angle * RAD_TO_DEG, 0.0f, 0.0f, 1.0f);
+        }
+        mModelView.translate(tx, ty, 0.0f);
+        mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
+
+        if (mShader) {
+            mShader->updateTransforms(mCaches.currentProgram, mModelView, *mSnapshot);
+        }
+
+        glDrawArrays(GL_TRIANGLES, 0, mLine.getElementsCount());
+    }
+
+    glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));
 }
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
@@ -777,12 +840,22 @@ void OpenGLRenderer::setupTextureAlpha8(const Texture* texture, GLuint& textureU
         float x, float y, float r, float g, float b, float a, SkXfermode::Mode mode,
         bool transforms, bool applyFilters) {
     setupTextureAlpha8(texture->id, texture->width, texture->height, textureUnit,
-            x, y, r, g, b, a, mode, transforms, applyFilters);
+            x, y, r, g, b, a, mode, transforms, applyFilters,
+            &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0]);
 }
 
 void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t height,
         GLuint& textureUnit, float x, float y, float r, float g, float b, float a,
         SkXfermode::Mode mode, bool transforms, bool applyFilters) {
+    setupTextureAlpha8(texture, width, height, textureUnit,
+            x, y, r, g, b, a, mode, transforms, applyFilters,
+            &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0]);
+}
+
+void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t height,
+        GLuint& textureUnit, float x, float y, float r, float g, float b, float a,
+        SkXfermode::Mode mode, bool transforms, bool applyFilters,
+        GLvoid* vertices, GLvoid* texCoords) {
      // Describe the required shaders
      ProgramDescription description;
      description.hasTexture = true;
@@ -811,9 +884,9 @@ void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t
 
      // Setup attributes
      glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
-             gMeshStride, &mMeshVertices[0].position[0]);
+             gMeshStride, vertices);
      glVertexAttribPointer(texCoordsSlot, 2, GL_FLOAT, GL_FALSE,
-             gMeshStride, &mMeshVertices[0].texture[0]);
+             gMeshStride, texCoords);
 
      // Setup uniforms
      if (transforms) {

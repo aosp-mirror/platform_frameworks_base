@@ -28,8 +28,7 @@ import android.os.ServiceManager;
  * keyboard may compose the capabilities of a standard keyboard together with a track pad mouse
  * or other pointing device.
  * </p><p>
- * Some input devices present multiple distinguishable sources of input.  For example, a
- * game pad may have two analog joysticks, a directional pad and a full complement of buttons.
+ * Some input devices present multiple distinguishable sources of input.
  * Applications can query the framework about the characteristics of each distinct source.
  * </p><p>
  * As a further wrinkle, different kinds of input sources uses different coordinate systems
@@ -55,7 +54,7 @@ public final class InputDevice implements Parcelable {
     
     /**
      * The input source has buttons or keys.
-     * Examples: {@link #SOURCE_KEYBOARD}, {@link #SOURCE_GAMEPAD}, {@link #SOURCE_DPAD}.
+     * Examples: {@link #SOURCE_KEYBOARD}, {@link #SOURCE_DPAD}.
      * 
      * A {@link KeyEvent} should be interpreted as a button or key press.
      * 
@@ -101,18 +100,6 @@ public final class InputDevice implements Parcelable {
     public static final int SOURCE_CLASS_POSITION = 0x00000008;
     
     /**
-     * The input source is a joystick.
-     * 
-     * A {@link KeyEvent} should be interpreted as a joystick button press.
-     * 
-     * A {@link MotionEvent} should be interpreted in absolute coordinates as a joystick
-     * position in normalized device-specific units nominally between -1.0 and 1.0.
-     * 
-     * Use {@link #getMotionRange} to query the range and precision of motion.
-     */
-    public static final int SOURCE_CLASS_JOYSTICK = 0x00000010;
-    
-    /**
      * The input source is unknown.
      */
     public static final int SOURCE_UNKNOWN = 0x00000000;
@@ -130,13 +117,6 @@ public final class InputDevice implements Parcelable {
      * @see #SOURCE_CLASS_BUTTON
      */
     public static final int SOURCE_DPAD = 0x00000200 | SOURCE_CLASS_BUTTON;
-    
-    /**
-     * The input source is a gamepad.
-     * 
-     * @see #SOURCE_CLASS_BUTTON
-     */
-    public static final int SOURCE_GAMEPAD = 0x00000400 | SOURCE_CLASS_BUTTON;
     
     /**
      * The input source is a touch screen pointing device.
@@ -168,20 +148,6 @@ public final class InputDevice implements Parcelable {
      * @see #SOURCE_CLASS_POSITION
      */
     public static final int SOURCE_TOUCHPAD = 0x00100000 | SOURCE_CLASS_POSITION;
-
-    /**
-     * The input source is a joystick mounted on the left or is a standalone joystick.
-     * 
-     * @see #SOURCE_CLASS_JOYSTICK
-     */
-    public static final int SOURCE_JOYSTICK_LEFT = 0x01000000 | SOURCE_CLASS_JOYSTICK;
-    
-    /**
-     * The input source is a joystick mounted on the right.
-     * 
-     * @see #SOURCE_CLASS_JOYSTICK
-     */
-    public static final int SOURCE_JOYSTICK_RIGHT = 0x02000000 | SOURCE_CLASS_JOYSTICK;
     
     /**
      * A special input source constant that is used when filtering input devices
@@ -411,7 +377,7 @@ public final class InputDevice implements Parcelable {
         /**
          * Gets the extent of the center flat position with respect to this coordinate.
          * For example, a flat value of 8 means that the center position is between -8 and +8.
-         * This value is mainly useful for calibrating joysticks.
+         * This value is mainly useful for calibrating self-centering devices.
          * @return The extent of the center flat position.
          */
         public float getFlat() {
@@ -506,13 +472,10 @@ public final class InputDevice implements Parcelable {
         description.append("  Sources:");
         appendSourceDescriptionIfApplicable(description, SOURCE_KEYBOARD, "keyboard");
         appendSourceDescriptionIfApplicable(description, SOURCE_DPAD, "dpad");
-        appendSourceDescriptionIfApplicable(description, SOURCE_GAMEPAD, "gamepad");
         appendSourceDescriptionIfApplicable(description, SOURCE_TOUCHSCREEN, "touchscreen");
         appendSourceDescriptionIfApplicable(description, SOURCE_MOUSE, "mouse");
         appendSourceDescriptionIfApplicable(description, SOURCE_TRACKBALL, "trackball");
         appendSourceDescriptionIfApplicable(description, SOURCE_TOUCHPAD, "touchpad");
-        appendSourceDescriptionIfApplicable(description, SOURCE_JOYSTICK_LEFT, "joystick_left");
-        appendSourceDescriptionIfApplicable(description, SOURCE_JOYSTICK_RIGHT, "joystick_right");
         description.append("\n");
         
         appendRangeDescriptionIfApplicable(description, MOTION_RANGE_X, "x");

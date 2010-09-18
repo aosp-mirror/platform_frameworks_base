@@ -60,7 +60,7 @@ public final class Downloads {
      * @hide
      */
     public static final Uri CONTENT_URI =
-        Uri.parse("content://downloads/download");
+        Uri.parse("content://downloads/my_downloads");
 
     /**
      * Broadcast Action: this is sent by the download manager to the app
@@ -637,10 +637,17 @@ public final class Downloads {
                 "android.permission.DOWNLOAD_WITHOUT_NOTIFICATION";
 
         /**
-         * The content:// URI for the data table in the provider
+         * The content:// URI to access downloads owned by the caller's UID.
          */
         public static final Uri CONTENT_URI =
-            Uri.parse("content://downloads/download");
+                Uri.parse("content://downloads/my_downloads");
+
+        /**
+         * The content URI for accessing all downloads across all UIDs (requires the
+         * ACCESS_ALL_DOWNLOADS permission).
+         */
+        public static final Uri ALL_DOWNLOADS_CONTENT_URI =
+                Uri.parse("content://downloads/all_downloads");
 
         /**
          * Broadcast Action: this is sent by the download manager to the app

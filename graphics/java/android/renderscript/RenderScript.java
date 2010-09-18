@@ -608,7 +608,7 @@ public class RenderScript {
             while(mRun) {
                 rbuf[0] = 0;
                 int msg = mRS.nContextGetMessage(mRS.mContext, rbuf, true);
-                if (msg == 0) {
+                if ((msg == 0) && mRun) {
                     // Can happen for two reasons
                     if (rbuf[0] > 0) {
                         // 1: Buffer needs to be enlarged.
@@ -661,6 +661,10 @@ public class RenderScript {
         validate();
         nContextDeinitToClient(mContext);
         mMessageThread.mRun = false;
+        try {
+            mMessageThread.join();
+        } catch(InterruptedException e) {
+        }
 
         nContextDestroy();
         mContext = 0;

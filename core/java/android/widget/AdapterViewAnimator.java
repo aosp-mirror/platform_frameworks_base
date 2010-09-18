@@ -779,6 +779,15 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      */
     @android.view.RemotableViewMethod
     public void setRemoteViewsAdapter(Intent intent) {
+        // Ensure that we don't already have a RemoteViewsAdapter that is bound to an existing
+        // service handling the specified intent.
+        Intent.FilterComparison fc = new Intent.FilterComparison(intent);
+        if (mRemoteViewsAdapter != null &&
+                fc.equals(mRemoteViewsAdapter.getRemoteViewsServiceIntent())) {
+            return;
+        }
+
+        // Otherwise, create a new RemoteViewsAdapter for binding
         mRemoteViewsAdapter = new RemoteViewsAdapter(getContext(), intent, this);
     }
 

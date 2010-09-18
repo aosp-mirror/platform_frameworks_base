@@ -90,6 +90,7 @@ public:
     void decRefs(const void *ptr, size_t ct) const;
 
     void sendDirty() const;
+    bool getHasGraphicsMipmaps() const {return mTextureGenMipmap;}
 
 protected:
     ObjectBaseRef<const Type> mType;

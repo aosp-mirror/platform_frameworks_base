@@ -122,7 +122,7 @@ InputDispatcher::~InputDispatcher() {
         AutoMutex _l(mLock);
 
         resetKeyRepeatLocked();
-        releasePendingEventLocked(true);
+        releasePendingEventLocked();
         drainInboundQueueLocked();
     }
 
@@ -174,7 +174,7 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t keyRepeatTimeout,
     if (! mDispatchEnabled) {
         if (mPendingEvent || ! mInboundQueue.isEmpty()) {
             LOGI("Dropping pending events because input dispatch is disabled.");
-            releasePendingEventLocked(true);
+            releasePendingEventLocked();
             drainInboundQueueLocked();
         }
         return;
@@ -281,51 +281,50 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t keyRepeatTimeout,
 
     // Now we have an event to dispatch.
     assert(mPendingEvent != NULL);
-    bool wasDispatched = false;
-    bool wasDropped = false;
+    bool done = false;
     switch (mPendingEvent->type) {
     case EventEntry::TYPE_CONFIGURATION_CHANGED: {
         ConfigurationChangedEntry* typedEntry =
                 static_cast<ConfigurationChangedEntry*>(mPendingEvent);
-        wasDispatched = dispatchConfigurationChangedLocked(currentTime, typedEntry);
+        done = dispatchConfigurationChangedLocked(currentTime, typedEntry);
         break;
     }
 
     case EventEntry::TYPE_KEY: {
         KeyEntry* typedEntry = static_cast<KeyEntry*>(mPendingEvent);
-        if (isAppSwitchPendingLocked()) {
-            if (isAppSwitchKey(typedEntry->keyCode)) {
+        bool appSwitchKey = isAppSwitchKey(typedEntry->keyCode);
+        bool dropEvent = isAppSwitchDue && ! appSwitchKey;
+        done = dispatchKeyLocked(currentTime, typedEntry, keyRepeatTimeout, dropEvent,
+                nextWakeupTime);
+        if (done) {
+            if (dropEvent) {
+                LOGI("Dropped key because of pending overdue app switch.");
+            } else if (appSwitchKey) {
                 resetPendingAppSwitchLocked(true);
-            } else if (isAppSwitchDue) {
-                LOGI("Dropping key because of pending overdue app switch.");
-                wasDropped = true;
-                break;
             }
         }
-        wasDispatched = dispatchKeyLocked(currentTime, typedEntry, keyRepeatTimeout,
-                nextWakeupTime);
         break;
     }
 
     case EventEntry::TYPE_MOTION: {
         MotionEntry* typedEntry = static_cast<MotionEntry*>(mPendingEvent);
-        if (isAppSwitchDue) {
-            LOGI("Dropping motion because of pending overdue app switch.");
-            wasDropped = true;
-            break;
+        bool dropEvent = isAppSwitchDue;
+        done = dispatchMotionLocked(currentTime, typedEntry, dropEvent, nextWakeupTime);
+        if (done) {
+            if (dropEvent) {
+                LOGI("Dropped motion because of pending overdue app switch.");
+            }
         }
-        wasDispatched = dispatchMotionLocked(currentTime, typedEntry, nextWakeupTime);
         break;
     }
 
     default:
         assert(false);
-        wasDropped = true;
         break;
     }
 
-    if (wasDispatched || wasDropped) {
-        releasePendingEventLocked(wasDropped);
+    if (done) {
+        releasePendingEventLocked();
         *nextWakeupTime = LONG_LONG_MIN;  // force next poll to wake up immediately
     }
 }
@@ -403,21 +402,21 @@ InputDispatcher::CommandEntry* InputDispatcher::postCommandLocked(Command comman
 void InputDispatcher::drainInboundQueueLocked() {
     while (! mInboundQueue.isEmpty()) {
         EventEntry* entry = mInboundQueue.dequeueAtHead();
-        releaseInboundEventLocked(entry, true /*wasDropped*/);
+        releaseInboundEventLocked(entry);
     }
 }
 
-void InputDispatcher::releasePendingEventLocked(bool wasDropped) {
+void InputDispatcher::releasePendingEventLocked() {
     if (mPendingEvent) {
-        releaseInboundEventLocked(mPendingEvent, wasDropped);
+        releaseInboundEventLocked(mPendingEvent);
         mPendingEvent = NULL;
     }
 }
 
-void InputDispatcher::releaseInboundEventLocked(EventEntry* entry, bool wasDropped) {
-    if (wasDropped) {
+void InputDispatcher::releaseInboundEventLocked(EventEntry* entry) {
+    if (entry->injectionResult == INPUT_EVENT_INJECTION_PENDING) {
 #if DEBUG_DISPATCH_CYCLE
-        LOGD("Pending event was dropped.");
+        LOGD("Inbound event was dropped.  Setting injection result to failed.");
 #endif
         setInjectionResultLocked(entry, INPUT_EVENT_INJECTION_FAILED);
     }
@@ -492,7 +491,41 @@ bool InputDispatcher::dispatchConfigurationChangedLocked(
 
 bool InputDispatcher::dispatchKeyLocked(
         nsecs_t currentTime, KeyEntry* entry, nsecs_t keyRepeatTimeout,
-        nsecs_t* nextWakeupTime) {
+        bool dropEvent, nsecs_t* nextWakeupTime) {
+    // Give the policy a chance to intercept the key.
+    if (entry->interceptKeyResult == KeyEntry::INTERCEPT_KEY_RESULT_UNKNOWN) {
+        bool trusted;
+        if (! dropEvent && mFocusedWindow) {
+            trusted = checkInjectionPermission(mFocusedWindow,
+                    entry->injectorPid, entry->injectorUid);
+        } else {
+            trusted = isEventFromReliableSourceLocked(entry);
+        }
+        if (trusted) {
+            CommandEntry* commandEntry = postCommandLocked(
+                    & InputDispatcher::doInterceptKeyBeforeDispatchingLockedInterruptible);
+            if (! dropEvent && mFocusedWindow) {
+                commandEntry->inputChannel = mFocusedWindow->inputChannel;
+            }
+            commandEntry->keyEntry = entry;
+            entry->refCount += 1;
+            return false; // wait for the command to run
+        } else {
+            entry->interceptKeyResult = KeyEntry::INTERCEPT_KEY_RESULT_CONTINUE;
+        }
+    } else if (entry->interceptKeyResult == KeyEntry::INTERCEPT_KEY_RESULT_SKIP) {
+        resetTargetsLocked();
+        setInjectionResultLocked(entry, INPUT_EVENT_INJECTION_SUCCEEDED);
+        return true;
+    }
+
+    // Clean up if dropping the event.
+    if (dropEvent) {
+        resetTargetsLocked();
+        setInjectionResultLocked(entry, INPUT_EVENT_INJECTION_FAILED);
+        return true;
+    }
+
     // Preprocessing.
     if (! entry->dispatchInProgress) {
         logOutboundKeyDetailsLocked("dispatchKey - ", entry);
@@ -521,7 +554,7 @@ bool InputDispatcher::dispatchKeyLocked(
         }
 
         entry->dispatchInProgress = true;
-        startFindingTargetsLocked(); // resets mCurrentInputTargetsValid
+        resetTargetsLocked();
     }
 
     // Identify targets.
@@ -539,20 +572,7 @@ bool InputDispatcher::dispatchKeyLocked(
         }
 
         addMonitoringTargetsLocked();
-        finishFindingTargetsLocked(window);
-    }
-
-    // Give the policy a chance to intercept the key.
-    if (entry->interceptKeyResult == KeyEntry::INTERCEPT_KEY_RESULT_UNKNOWN) {
-        CommandEntry* commandEntry = postCommandLocked(
-                & InputDispatcher::doInterceptKeyBeforeDispatchingLockedInterruptible);
-        commandEntry->inputChannel = mCurrentInputChannel;
-        commandEntry->keyEntry = entry;
-        entry->refCount += 1;
-        return false; // wait for the command to run
-    }
-    if (entry->interceptKeyResult == KeyEntry::INTERCEPT_KEY_RESULT_SKIP) {
-        return true;
+        commitTargetsLocked(window);
     }
 
     // Dispatch the key.
@@ -576,13 +596,20 @@ void InputDispatcher::logOutboundKeyDetailsLocked(const char* prefix, const KeyE
 }
 
 bool InputDispatcher::dispatchMotionLocked(
-        nsecs_t currentTime, MotionEntry* entry, nsecs_t* nextWakeupTime) {
+        nsecs_t currentTime, MotionEntry* entry, bool dropEvent, nsecs_t* nextWakeupTime) {
+    // Clean up if dropping the event.
+    if (dropEvent) {
+        resetTargetsLocked();
+        setInjectionResultLocked(entry, INPUT_EVENT_INJECTION_FAILED);
+        return true;
+    }
+
     // Preprocessing.
     if (! entry->dispatchInProgress) {
         logOutboundMotionDetailsLocked("dispatchMotion - ", entry);
 
         entry->dispatchInProgress = true;
-        startFindingTargetsLocked(); // resets mCurrentInputTargetsValid
+        resetTargetsLocked();
     }
 
     bool isPointerEvent = entry->source & AINPUT_SOURCE_CLASS_POINTER;
@@ -610,7 +637,7 @@ bool InputDispatcher::dispatchMotionLocked(
         }
 
         addMonitoringTargetsLocked();
-        finishFindingTargetsLocked(window);
+        commitTargetsLocked(window);
     }
 
     // Dispatch the motion.
@@ -705,14 +732,14 @@ void InputDispatcher::dispatchEventToCurrentInputTargetsLocked(nsecs_t currentTi
     }
 }
 
-void InputDispatcher::startFindingTargetsLocked() {
+void InputDispatcher::resetTargetsLocked() {
     mCurrentInputTargetsValid = false;
     mCurrentInputTargets.clear();
     mCurrentInputChannel.clear();
     mInputTargetWaitCause = INPUT_TARGET_WAIT_CAUSE_NONE;
 }
 
-void InputDispatcher::finishFindingTargetsLocked(const InputWindow* window) {
+void InputDispatcher::commitTargetsLocked(const InputWindow* window) {
     mCurrentInputWindowType = window->layoutParamsType;
     mCurrentInputChannel = window->inputChannel;
     mCurrentInputTargetsValid = true;
@@ -780,10 +807,12 @@ void InputDispatcher::resumeAfterTargetsNotReadyTimeoutLocked(nsecs_t newTimeout
         releaseTouchedWindowLocked();
 
         // Input state will not be realistic.  Mark it out of sync.
-        ssize_t connectionIndex = getConnectionIndexLocked(inputChannel);
-        if (connectionIndex >= 0) {
-            sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
-            connection->inputState.setOutOfSync();
+        if (inputChannel.get()) {
+            ssize_t connectionIndex = getConnectionIndexLocked(inputChannel);
+            if (connectionIndex >= 0) {
+                sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
+                connection->inputState.setOutOfSync();
+            }
         }
     }
 }

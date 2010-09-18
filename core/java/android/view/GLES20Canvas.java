@@ -148,8 +148,14 @@ class GLES20Canvas extends Canvas {
     void onPreDraw() {
         nPrepare(mRenderer);
     }
-    
+
     private native void nPrepare(int renderer);
+
+    void onPostDraw() {
+        nFinish(mRenderer);
+    }
+    
+    private native void nFinish(int renderer);
 
     @Override
     public boolean acquireContext() {
@@ -531,17 +537,24 @@ class GLES20Canvas extends Canvas {
         mLine[1] = startY;
         mLine[2] = stopX;
         mLine[3] = stopY;
-        drawLines(mLine, 0, 1, paint);
+        drawLines(mLine, 0, 4, paint);
     }
 
     @Override
     public void drawLines(float[] pts, int offset, int count, Paint paint) {
-        // TODO: Implement
+        if ((offset | count) < 0 || offset + count > pts.length) {
+            throw new IllegalArgumentException("The lines array must contain 4 elements per line.");
+        }
+        boolean hasModifier = setupModifiers(paint);
+        nDrawLines(mRenderer, pts, offset, count, paint.mNativePaint);
+        if (hasModifier) nResetModifiers(mRenderer);
     }
+
+    private native void nDrawLines(int renderer, float[] points, int offset, int count, int paint);
 
     @Override
     public void drawLines(float[] pts, Paint paint) {
-        drawLines(pts, 0, pts.length / 4, paint);
+        drawLines(pts, 0, pts.length, paint);
     }
 
     @Override

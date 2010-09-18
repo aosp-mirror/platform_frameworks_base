@@ -36,7 +36,7 @@ public abstract class RemoteViewsService extends Service {
     private static final String LOG_TAG = "RemoteViewsService";
 
     // multimap implementation for reference counting
-    private HashMap<Intent, Pair<RemoteViewsFactory, Integer>> mRemoteViewFactories;
+    private HashMap<Intent.FilterComparison, Pair<RemoteViewsFactory, Integer>> mRemoteViewFactories;
     private final Object mLock = new Object();
 
     /**
@@ -89,7 +89,9 @@ public abstract class RemoteViewsService extends Service {
             return mFactory.getCount();
         }
         public RemoteViews getViewAt(int position) {
-            return mFactory.getViewAt(position);
+            RemoteViews rv = mFactory.getViewAt(position);
+            rv.setIsWidgetCollectionChild(true);
+            return rv;
         }
         public RemoteViews getLoadingView() {
             return mFactory.getLoadingView();
@@ -108,26 +110,28 @@ public abstract class RemoteViewsService extends Service {
     }
 
     public RemoteViewsService() {
-        mRemoteViewFactories = new HashMap<Intent, Pair<RemoteViewsFactory, Integer>>();
+        mRemoteViewFactories =
+                new HashMap<Intent.FilterComparison, Pair<RemoteViewsFactory, Integer>>();
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         synchronized (mLock) {
             // increment the reference count to the particular factory associated with this intent
+            Intent.FilterComparison fc = new Intent.FilterComparison(intent);
             Pair<RemoteViewsFactory, Integer> factoryRef = null;
             RemoteViewsFactory factory = null;
-            if (!mRemoteViewFactories.containsKey(intent)) {
+            if (!mRemoteViewFactories.containsKey(fc)) {
                 factory = onGetViewFactory(intent);
                 factoryRef = new Pair<RemoteViewsFactory, Integer>(factory, 1);
-                mRemoteViewFactories.put(intent, factoryRef);
+                mRemoteViewFactories.put(fc, factoryRef);
                 factory.onCreate();
             } else {
-                Pair<RemoteViewsFactory, Integer> oldFactoryRef = mRemoteViewFactories.get(intent);
+                Pair<RemoteViewsFactory, Integer> oldFactoryRef = mRemoteViewFactories.get(fc);
                 factory = oldFactoryRef.first;
                 int newRefCount = oldFactoryRef.second.intValue() + 1;
                 factoryRef = new Pair<RemoteViewsFactory, Integer>(oldFactoryRef.first, newRefCount);
-                mRemoteViewFactories.put(intent, factoryRef);
+                mRemoteViewFactories.put(fc, factoryRef);
             }
             return new RemoteViewsFactoryAdapter(factory);
         }
@@ -136,16 +140,19 @@ public abstract class RemoteViewsService extends Service {
     @Override
     public boolean onUnbind(Intent intent) {
         synchronized (mLock) {
-            if (mRemoteViewFactories.containsKey(intent)) {
+            Intent.FilterComparison fc = new Intent.FilterComparison(intent);
+            if (mRemoteViewFactories.containsKey(fc)) {
                 // this alleviates the user's responsibility of having to clear all factories
-                Pair<RemoteViewsFactory, Integer> oldFactoryRef = mRemoteViewFactories.get(intent);
+                Pair<RemoteViewsFactory, Integer> oldFactoryRef =
+                        mRemoteViewFactories.get(fc);
                 int newRefCount = oldFactoryRef.second.intValue() - 1;
                 if (newRefCount <= 0) {
                     oldFactoryRef.first.onDestroy();
-                    mRemoteViewFactories.remove(intent);
+                    mRemoteViewFactories.remove(fc);
                 } else {
-                    Pair<RemoteViewsFactory, Integer> factoryRef = new Pair<RemoteViewsFactory, Integer>(oldFactoryRef.first, newRefCount);
-                    mRemoteViewFactories.put(intent, factoryRef);
+                    Pair<RemoteViewsFactory, Integer> factoryRef =
+                            new Pair<RemoteViewsFactory, Integer>(oldFactoryRef.first, newRefCount);
+                    mRemoteViewFactories.put(fc, factoryRef);
                 }
             }
         }

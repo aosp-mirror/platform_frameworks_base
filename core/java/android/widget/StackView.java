@@ -869,21 +869,19 @@ public class StackView extends AdapterViewAnimator {
             View p = v;
             if (!(v.getParent() != null && v.getParent() instanceof View)) return;
 
-            View gp = (View) v.getParent();
             boolean firstPass = true;
             parentRect.set(0, 0, 0, 0);
             int depth = 0;
-            while (gp.getParent() != null && gp.getParent() instanceof View
+            while (p.getParent() != null && p.getParent() instanceof View
                     && !parentRect.contains(r)) {
                 if (!firstPass) {
-                    r.offset(p.getLeft() - gp.getScrollX(), p.getTop() - gp.getScrollY());
+                    r.offset(p.getLeft() - p.getScrollX(), p.getTop() - p.getScrollY());
                     depth++;
                 }
                 firstPass = false;
                 p = (View) p.getParent();
-                gp = (View) p.getParent();
-                parentRect.set(p.getLeft() - gp.getScrollX(), p.getTop() - gp.getScrollY(),
-                        p.getRight() - gp.getScrollX(), p.getBottom() - gp.getScrollY());
+                parentRect.set(p.getScrollX(), p.getScrollY(),
+                               p.getWidth() + p.getScrollX(), p.getHeight() + p.getScrollY());
 
                 // TODO: we need to stop early here if we've hit the edge of the screen
                 // so as to prevent us from walking too high in the hierarchy. A lot of this

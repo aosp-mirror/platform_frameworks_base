@@ -40,6 +40,48 @@ import java.util.ArrayList;
  */
 public interface FragmentManager {
     /**
+     * Representation of an entry on the fragment back stack, as created
+     * with {@link FragmentTransaction#addToBackStack(String)
+     * FragmentTransaction.addToBackStack()}.  Entries can later be
+     * retrieved with {@link FragmentManager#getBackStackEntry(int)
+     * FragmentManager.getBackStackEntry()}.
+     *
+     * <p>Note that you should never hold on to a BackStackEntry object;
+     * the identifier as returned by {@link #getId} is the only thing that
+     * will be persisted across activity instances.
+     */
+    public interface BackStackEntry {
+        /**
+         * Return the unique identifier for the entry.  This is the only
+         * representation of the entry that will persist across activity
+         * instances.
+         */
+        public int getId();
+
+        /**
+         * Return the full bread crumb title for the entry, or null if it
+         * does not have one.
+         */
+        public CharSequence getBreadCrumbTitle();
+
+        /**
+         * Return the short bread crumb title for the entry, or null if it
+         * does not have one.
+         */
+        public CharSequence getBreadCrumbShortTitle();
+    }
+
+    /**
+     * Interface to watch for changes to the back stack.
+     */
+    public interface OnBackStackChangedListener {
+        /**
+         * Called whenever the contents of the back stack change.
+         */
+        public void onBackStackChanged();
+    }
+
+    /**
      * Start a series of edit operations on the Fragments associated with
      * this FragmentManager.
      */
@@ -103,6 +145,28 @@ public interface FragmentManager {
      * @param flags Either 0 or {@link #POP_BACK_STACK_INCLUSIVE}.
      */
     public boolean popBackStack(int id, int flags);
+
+    /**
+     * Return the number of entries currently in the back stack.
+     */
+    public int countBackStackEntries();
+
+    /**
+     * Return the BackStackEntry at index <var>index</var> in the back stack;
+     * entries start index 0 being the bottom of the stack.
+     */
+    public BackStackEntry getBackStackEntry(int index);
+
+    /**
+     * Add a new listener for changes to the fragment back stack.
+     */
+    public void addOnBackStackChangedListener(OnBackStackChangedListener listener);
+
+    /**
+     * Remove a listener that was previously added with
+     * {@link #addOnBackStackChangedListener(OnBackStackChangedListener)}.
+     */
+    public void removeOnBackStackChangedListener(OnBackStackChangedListener listener);
 
     /**
      * Put a reference to a fragment in a Bundle.  This Bundle can be
@@ -182,11 +246,13 @@ final class FragmentManagerImpl implements FragmentManager {
     ArrayList<Fragment> mActive;
     ArrayList<Fragment> mAdded;
     ArrayList<Integer> mAvailIndices;
-    ArrayList<BackStackEntry> mBackStack;
+    ArrayList<BackStackRecord> mBackStack;
     
     // Must be accessed while locked.
-    ArrayList<BackStackEntry> mBackStackIndices;
+    ArrayList<BackStackRecord> mBackStackIndices;
     ArrayList<Integer> mAvailBackStackIndices;
+
+    ArrayList<OnBackStackChangedListener> mBackStackChangeListeners;
 
     int mCurState = Fragment.INITIALIZING;
     Activity mActivity;
@@ -205,7 +271,7 @@ final class FragmentManagerImpl implements FragmentManager {
         }
     };
     public FragmentTransaction openTransaction() {
-        return new BackStackEntry(this);
+        return new BackStackRecord(this);
     }
 
     public boolean popBackStack() {
@@ -221,6 +287,27 @@ final class FragmentManagerImpl implements FragmentManager {
             throw new IllegalArgumentException("Bad id: " + id);
         }
         return popBackStackState(mActivity.mHandler, null, id, flags);
+    }
+
+    public int countBackStackEntries() {
+        return mBackStack != null ? mBackStack.size() : 0;
+    }
+
+    public BackStackEntry getBackStackEntry(int index) {
+        return mBackStack.get(index);
+    }
+
+    public void addOnBackStackChangedListener(OnBackStackChangedListener listener) {
+        if (mBackStackChangeListeners == null) {
+            mBackStackChangeListeners = new ArrayList<OnBackStackChangedListener>();
+        }
+        mBackStackChangeListeners.add(listener);
+    }
+
+    public void removeOnBackStackChangedListener(OnBackStackChangedListener listener) {
+        if (mBackStackChangeListeners != null) {
+            mBackStackChangeListeners.remove(listener);
+        }
     }
 
     public void putFragment(Bundle bundle, String key, Fragment fragment) {
@@ -696,11 +783,11 @@ final class FragmentManagerImpl implements FragmentManager {
         }
     }
     
-    public int allocBackStackIndex(BackStackEntry bse) {
+    public int allocBackStackIndex(BackStackRecord bse) {
         synchronized (this) {
             if (mAvailBackStackIndices == null || mAvailBackStackIndices.size() <= 0) {
                 if (mBackStackIndices == null) {
-                    mBackStackIndices = new ArrayList<BackStackEntry>();
+                    mBackStackIndices = new ArrayList<BackStackRecord>();
                 }
                 int index = mBackStackIndices.size();
                 if (DEBUG) Log.v(TAG, "Setting back stack index " + index + " to " + bse);
@@ -716,10 +803,10 @@ final class FragmentManagerImpl implements FragmentManager {
         }
     }
 
-    public void setBackStackIndex(int index, BackStackEntry bse) {
+    public void setBackStackIndex(int index, BackStackRecord bse) {
         synchronized (this) {
             if (mBackStackIndices == null) {
-                mBackStackIndices = new ArrayList<BackStackEntry>();
+                mBackStackIndices = new ArrayList<BackStackRecord>();
             }
             int N = mBackStackIndices.size();
             if (index < N) {
@@ -785,11 +872,20 @@ final class FragmentManagerImpl implements FragmentManager {
         }
     }
     
-    public void addBackStackState(BackStackEntry state) {
+    void reportBackStackChanged() {
+        if (mBackStackChangeListeners != null) {
+            for (int i=0; i<mBackStackChangeListeners.size(); i++) {
+                mBackStackChangeListeners.get(i).onBackStackChanged();
+            }
+        }
+    }
+
+    void addBackStackState(BackStackRecord state) {
         if (mBackStack == null) {
-            mBackStack = new ArrayList<BackStackEntry>();
+            mBackStack = new ArrayList<BackStackRecord>();
         }
         mBackStack.add(state);
+        reportBackStackChanged();
     }
     
     boolean popBackStackState(Handler handler, String name, int id, int flags) {
@@ -801,11 +897,12 @@ final class FragmentManagerImpl implements FragmentManager {
             if (last < 0) {
                 return false;
             }
-            final BackStackEntry bss = mBackStack.remove(last);
+            final BackStackRecord bss = mBackStack.remove(last);
             enqueueAction(new Runnable() {
                 public void run() {
                     if (DEBUG) Log.v(TAG, "Popping back stack state: " + bss);
                     bss.popFromBackStack(true);
+                    reportBackStackChanged();
                 }
             });
         } else {
@@ -815,7 +912,7 @@ final class FragmentManagerImpl implements FragmentManager {
                 // the stack.
                 index = mBackStack.size()-1;
                 while (index >= 0) {
-                    BackStackEntry bss = mBackStack.get(index);
+                    BackStackRecord bss = mBackStack.get(index);
                     if (name != null && name.equals(bss.getName())) {
                         break;
                     }
@@ -831,7 +928,7 @@ final class FragmentManagerImpl implements FragmentManager {
                     index--;
                     // Consume all following entries that match.
                     while (index >= 0) {
-                        BackStackEntry bss = mBackStack.get(index);
+                        BackStackRecord bss = mBackStack.get(index);
                         if ((name != null && name.equals(bss.getName()))
                                 || (id >= 0 && id == bss.mIndex)) {
                             index--;
@@ -844,8 +941,8 @@ final class FragmentManagerImpl implements FragmentManager {
             if (index == mBackStack.size()-1) {
                 return false;
             }
-            final ArrayList<BackStackEntry> states
-                    = new ArrayList<BackStackEntry>();
+            final ArrayList<BackStackRecord> states
+                    = new ArrayList<BackStackRecord>();
             for (int i=mBackStack.size()-1; i>index; i--) {
                 states.add(mBackStack.remove(i));
             }
@@ -856,6 +953,7 @@ final class FragmentManagerImpl implements FragmentManager {
                         if (DEBUG) Log.v(TAG, "Popping back stack state: " + states.get(i));
                         states.get(i).popFromBackStack(i == LAST);
                     }
+                    reportBackStackChanged();
                 }
             });
         }
@@ -1073,9 +1171,9 @@ final class FragmentManagerImpl implements FragmentManager {
         
         // Build the back stack.
         if (fms.mBackStack != null) {
-            mBackStack = new ArrayList<BackStackEntry>(fms.mBackStack.length);
+            mBackStack = new ArrayList<BackStackRecord>(fms.mBackStack.length);
             for (int i=0; i<fms.mBackStack.length; i++) {
-                BackStackEntry bse = fms.mBackStack[i].instantiate(this);
+                BackStackRecord bse = fms.mBackStack[i].instantiate(this);
                 if (DEBUG) Log.v(TAG, "restoreAllState: adding bse #" + i
                         + " (index " + bse.mIndex + "): " + bse);
                 mBackStack.add(bse);

@@ -5286,7 +5286,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * The amount that the view is scaled in x around the pivot point, as a proportion of
      * the view's unscaled width. A value of 1, the default, means that no scaling is applied.
      *
-     * @default 1.0f
+     * <p>By default, this is 1.0f.
+     *
      * @see #getPivotX()
      * @see #getPivotY()
      * @return The scaling factor.
@@ -5318,7 +5319,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * The amount that the view is scaled in y around the pivot point, as a proportion of
      * the view's unscaled height. A value of 1, the default, means that no scaling is applied.
      *
-     * @default 1.0f
+     * <p>By default, this is 1.0f.
+     *
      * @see #getPivotX()
      * @see #getPivotY()
      * @return The scaling factor.
@@ -5427,7 +5429,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * The opacity of the view. This is a value from 0 to 1, where 0 means the view is
      * completely transparent and 1 means the view is completely opaque.
      *
-     * @default 1.0f
+     * <p>By default this is 1.0f.
      * @return The opacity of the view.
      */
     public float getAlpha() {
@@ -8743,7 +8745,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mPrivateFlags = (mPrivateFlags & ~ACTIVATED) | (activated ? ACTIVATED : 0);
             invalidate();
             refreshDrawableState();
-            dispatchSetSelected(activated);
+            dispatchSetActivated(activated);
         }
     }
 

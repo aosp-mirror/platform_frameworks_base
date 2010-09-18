@@ -56,9 +56,16 @@ void ScriptC::setupScript(Context *rsc)
                 = nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC));
 
     for (uint32_t ct=0; ct < mEnviroment.mFieldCount; ct++) {
-        if (!mSlots[ct].get())
+        if (mSlots[ct].get() && !mTypes[ct].get()) {
+            mTypes[ct].set(mSlots[ct]->getType());
+        }
+
+        if (!mTypes[ct].get())
             continue;
-        void *ptr = mSlots[ct]->getPtr();
+        void *ptr = NULL;
+        if (mSlots[ct].get()) {
+            ptr = mSlots[ct]->getPtr();
+        }
         void **dest = ((void ***)mEnviroment.mFieldAddress)[ct];
         //LOGE("setupScript %i %p = %p    %p %i", ct, dest, ptr, mSlots[ct]->getType(), mSlots[ct]->getType()->getDimX());
 

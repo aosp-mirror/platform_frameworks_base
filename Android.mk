@@ -356,6 +356,7 @@ framework_docs_LOCAL_DROIDDOC_HTML_DIR := docs/html
 # The since flag (-since N.xml API_LEVEL) is used to add API Level information
 # to the reference documentation. Must be in order of oldest to newest.
 framework_docs_LOCAL_DROIDDOC_OPTIONS := \
+    -knowntags ./frameworks/base/docs/knowntags.txt \
     -since ./frameworks/base/api/1.xml 1 \
     -since ./frameworks/base/api/2.xml 2 \
     -since ./frameworks/base/api/3.xml 3 \
@@ -365,11 +366,13 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since ./frameworks/base/api/7.xml 7 \
     -since ./frameworks/base/api/8.xml 8 \
     -since ./frameworks/base/api/current.xml HC \
-		-error 101 -error 102 -warning 103 -error 104 -error 106 -error 108 -warning 113 \
-		-error 114 \
+		-werror -hide 113 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
-framework_docs_LOCAL_ADDITIONAL_JAVA_DIR:=$(call intermediates-dir-for,JAVA_LIBRARIES,framework)
+framework_docs_LOCAL_ADDITIONAL_JAVA_DIR:= $(call intermediates-dir-for,JAVA_LIBRARIES,framework)
+
+framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES := \
+    frameworks/base/docs/knowntags.txt
 
 sample_dir := development/samples
 
@@ -431,25 +434,12 @@ web_docs_sample_code_flags := \
 framework_docs_SDK_VERSION:=2.2
   # release version (ie "Release x")  (full releases only)
 framework_docs_SDK_REL_ID:=1
-  # name of current SDK directory (full releases only)
-framework_docs_SDK_CURRENT_DIR:=$(framework_docs_SDK_VERSION)_r$(framework_docs_SDK_REL_ID)
   # flag to build offline docs for a preview release
 framework_docs_SDK_PREVIEW:=0
 
-## Latest ADT version identifiers, for reference from published docs
-framework_docs_ADT_VERSION:=0.9.8
-framework_docs_ADT_DOWNLOAD:=ADT-0.9.8.zip
-framework_docs_ADT_BYTES:=8301417
-framework_docs_ADT_CHECKSUM:=27e0de800512f13feae46fb554e6ee2f
-
 framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-hdf sdk.version $(framework_docs_SDK_VERSION) \
-		-hdf sdk.rel.id $(framework_docs_SDK_REL_ID) \
-		-hdf sdk.current $(framework_docs_SDK_CURRENT_DIR) \
-		-hdf adt.zip.version $(framework_docs_ADT_VERSION) \
-		-hdf adt.zip.download $(framework_docs_ADT_DOWNLOAD) \
-		-hdf adt.zip.bytes $(framework_docs_ADT_BYTES) \
-		-hdf adt.zip.checksum $(framework_docs_ADT_CHECKSUM) 
+		-hdf sdk.rel.id $(framework_docs_SDK_REL_ID)
 
 # ====  the api stubs and current.xml ===========================
 include $(CLEAR_VARS)
@@ -461,6 +451,7 @@ LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
 LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
 LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
 LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
 
 LOCAL_MODULE := api-stubs
 
@@ -491,6 +482,7 @@ LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
 LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
 LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
 LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
 
 LOCAL_MODULE := doc-comment-check
 
@@ -519,6 +511,7 @@ LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
 LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
 LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
 LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
 
 LOCAL_MODULE := offline-sdk
 
@@ -533,7 +526,7 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-hdf android.whichdoc offline
 
 ifeq ($(framework_docs_SDK_PREVIEW),true)
-  LOCAL_DROIDDOC_OPTIONS += -hdf sdk.current preview 
+  LOCAL_DROIDDOC_OPTIONS += -hdf sdk.preview true
 endif
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
@@ -560,6 +553,7 @@ LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
 LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
 LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
 LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
 
 LOCAL_MODULE := online-sdk
 
@@ -587,6 +581,7 @@ LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
 LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
 LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
 LOCAL_ADDITIONAL_JAVA_DIR:=$(call intermediates-dir-for,JAVA_LIBRARIES,framework)
+LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
 
 LOCAL_MODULE := hidden
 LOCAL_DROIDDOC_OPTIONS:=\
@@ -620,6 +615,7 @@ LOCAL_SRC_FILES := $(ext_src_files)
 LOCAL_NO_STANDARD_LIBRARIES := true
 LOCAL_JAVA_LIBRARIES := core
 LOCAL_JAVA_RESOURCE_DIRS := $(ext_res_dirs)
+LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := ext
 
 LOCAL_NO_EMMA_INSTRUMENT := true

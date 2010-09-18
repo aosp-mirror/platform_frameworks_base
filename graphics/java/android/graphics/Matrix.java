@@ -422,6 +422,10 @@ public class Matrix {
      * the transformed vectors into the array of vectors specified by dst. The
      * two arrays represent their "vectors" as pairs of floats [x, y].
      *
+     * Note: this method does not apply the translation associated with the matrix. Use
+     * {@link Matrix#mapPoints(float[], int, float[], int, int)} if you want the translation
+     * to be applied.
+     *
      * @param dst   The array of dst vectors (x,y pairs)
      * @param dstIndex The index of the first [x,y] pair of dst floats
      * @param src   The array of src vectors (x,y pairs)
@@ -455,6 +459,9 @@ public class Matrix {
      * the transformed vectors into the array of vectors specified by dst. The
      * two arrays represent their "vectors" as pairs of floats [x, y].
      *
+     * Note: this method does not apply the translation associated with the matrix. Use
+     * {@link Matrix#mapPoints(float[], float[])} if you want the translation to be applied.
+     *
      * @param dst   The array of dst vectors (x,y pairs)
      * @param src   The array of src vectors (x,y pairs)
      */
@@ -478,6 +485,10 @@ public class Matrix {
     /**
      * Apply this matrix to the array of 2D vectors, and write the transformed
      * vectors back into the array.
+     *
+     * Note: this method does not apply the translation associated with the matrix. Use
+     * {@link Matrix#mapPoints(float[])} if you want the translation to be applied.
+     *
      * @param vecs The array [x0, y0, x1, y1, ...] of vectors to transform.
      */
     public void mapVectors(float[] vecs) {

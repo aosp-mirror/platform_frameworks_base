@@ -61,52 +61,6 @@ void ProgramRaster::setCullMode(RsCullMode mode)
     mDirty = true;
 }
 
-void ProgramRaster::setupGL(const Context *rsc, ProgramRasterState *state)
-{
-    if (state->mLast.get() == this && !mDirty) {
-        return;
-    }
-    state->mLast.set(this);
-    mDirty = false;
-
-    if (mPointSmooth) {
-        glEnable(GL_POINT_SMOOTH);
-    } else {
-        glDisable(GL_POINT_SMOOTH);
-    }
-
-    glLineWidth(mLineWidth);
-    if (mLineSmooth) {
-        glEnable(GL_LINE_SMOOTH);
-    } else {
-        glDisable(GL_LINE_SMOOTH);
-    }
-
-    if (rsc->checkVersion1_1()) {
-#ifndef ANDROID_RS_BUILD_FOR_HOST
-        if (mPointSprite) {
-            glEnable(GL_POINT_SPRITE_OES);
-        } else {
-            glDisable(GL_POINT_SPRITE_OES);
-        }
-#endif //ANDROID_RS_BUILD_FOR_HOST
-    }
-
-    switch(mCull) {
-        case RS_CULL_BACK:
-            glEnable(GL_CULL_FACE);
-            glCullFace(GL_BACK);
-            break;
-        case RS_CULL_FRONT:
-            glEnable(GL_CULL_FACE);
-            glCullFace(GL_FRONT);
-            break;
-        case RS_CULL_NONE:
-            glDisable(GL_CULL_FACE);
-            break;
-    }
-}
-
 void ProgramRaster::setupGL2(const Context *rsc, ProgramRasterState *state)
 {
     if (state->mLast.get() == this && !mDirty) {
