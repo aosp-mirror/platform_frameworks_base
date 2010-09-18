@@ -335,9 +335,9 @@ public final class ActivityThread {
         }
     }
 
-    private static final class DumpServiceInfo {
+    private static final class DumpComponentInfo {
         FileDescriptor fd;
-        IBinder service;
+        IBinder token;
         String[] args;
         boolean dumped;
     }
@@ -592,9 +592,9 @@ public final class ActivityThread {
         }
 
         public void dumpService(FileDescriptor fd, IBinder servicetoken, String[] args) {
-            DumpServiceInfo data = new DumpServiceInfo();
+            DumpComponentInfo data = new DumpComponentInfo();
             data.fd = fd;
-            data.service = servicetoken;
+            data.token = servicetoken;
             data.args = args;
             data.dumped = false;
             queueOrSendMessage(H.DUMP_SERVICE, data);
@@ -663,6 +663,25 @@ public final class ActivityThread {
 
         public void scheduleCrash(String msg) {
             queueOrSendMessage(H.SCHEDULE_CRASH, msg);
+        }
+
+        public void dumpActivity(FileDescriptor fd, IBinder activitytoken, String[] args) {
+            DumpComponentInfo data = new DumpComponentInfo();
+            data.fd = fd;
+            data.token = activitytoken;
+            data.args = args;
+            data.dumped = false;
+            queueOrSendMessage(H.DUMP_ACTIVITY, data);
+            synchronized (data) {
+                while (!data.dumped) {
+                    try {
+                        data.wait();
+                    } catch (InterruptedException e) {
+                        // no need to do anything here, we will keep waiting until
+                        // dumped is set
+                    }
+                }
+            }
         }
         
         @Override
@@ -892,6 +911,7 @@ public final class ActivityThread {
         public static final int DISPATCH_PACKAGE_BROADCAST = 133;
         public static final int SCHEDULE_CRASH          = 134;
         public static final int DUMP_HEAP               = 135;
+        public static final int DUMP_ACTIVITY           = 136;
         String codeToString(int code) {
             if (localLOGV) {
                 switch (code) {
@@ -931,6 +951,7 @@ public final class ActivityThread {
                     case DISPATCH_PACKAGE_BROADCAST: return "DISPATCH_PACKAGE_BROADCAST";
                     case SCHEDULE_CRASH: return "SCHEDULE_CRASH";
                     case DUMP_HEAP: return "DUMP_HEAP";
+                    case DUMP_ACTIVITY: return "DUMP_ACTIVITY";
                 }
             }
             return "(unknown)";
@@ -1025,7 +1046,7 @@ public final class ActivityThread {
                     scheduleGcIdler();
                     break;
                 case DUMP_SERVICE:
-                    handleDumpService((DumpServiceInfo)msg.obj);
+                    handleDumpService((DumpComponentInfo)msg.obj);
                     break;
                 case LOW_MEMORY:
                     handleLowMemory();
@@ -1058,6 +1079,9 @@ public final class ActivityThread {
                     throw new RemoteServiceException((String)msg.obj);
                 case DUMP_HEAP:
                     handleDumpHeap(msg.arg1 != 0, (DumpHeapData)msg.obj);
+                    break;
+                case DUMP_ACTIVITY:
+                    handleDumpActivity((DumpComponentInfo)msg.obj);
                     break;
             }
         }
@@ -2024,12 +2048,28 @@ public final class ActivityThread {
         }
     }
 
-    private void handleDumpService(DumpServiceInfo info) {
+    private void handleDumpService(DumpComponentInfo info) {
         try {
-            Service s = mServices.get(info.service);
+            Service s = mServices.get(info.token);
             if (s != null) {
                 PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd));
                 s.dump(info.fd, pw, info.args);
+                pw.close();
+            }
+        } finally {
+            synchronized (info) {
+                info.dumped = true;
+                info.notifyAll();
+            }
+        }
+    }
+
+    private void handleDumpActivity(DumpComponentInfo info) {
+        try {
+            ActivityClientRecord r = mActivities.get(info.token);
+            if (r != null && r.activity != null) {
+                PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd));
+                r.activity.dump(info.fd, pw, info.args);
                 pw.close();
             }
         } finally {

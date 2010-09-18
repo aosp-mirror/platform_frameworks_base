@@ -38,6 +38,8 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnCreateContextMenuListener;
 import android.widget.AdapterView;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.HashMap;
 
 final class FragmentState implements Parcelable {
@@ -207,7 +209,7 @@ final class FragmentState implements Parcelable {
  *
  * <p>An activity's layout XML can include <code>&lt;fragment&gt;</code> tags
  * to embed fragment instances inside of the layout.  For example, here is
- * a simply layout that embeds one fragment:</p>
+ * a simple layout that embeds one fragment:</p>
  *
  * {@sample development/samples/ApiDemos/res/layout/fragment_layout.xml layout}
  *
@@ -251,6 +253,33 @@ final class FragmentState implements Parcelable {
  * details activity will finish of it finds itself running in a configuration
  * where the details can be shown inline.
  *
+ * <p>When a configuration change causes the activity hosting these fragments
+ * to restart, its new instance may use a different layout that doesn't
+ * include the same fragments as the previous layout.  In this case all of
+ * the previous fragments will still be instantiated and running in the new
+ * instance; however, any that are no longer associated with a &lt;fragment&gt;
+ * tag in the view hierarchy will not have their content view created and will
+ * return false from {@link #isInLayout}.
+ * 
+ * <p>The attributes of the &lt;fragment&gt; tag are used to control the
+ * LayoutParams provider when attaching the fragment's view to the parent
+ * container.  They can alse be parsed by the fragment in {@link #onInflate}
+ * as parameters.
+ * 
+ * <p>The fragment being instantiated must have some kind of unique identifier
+ * so that it can be re-associated with a previous instance if the parent
+ * activity needs to be destroyed and recreated.  This can be provided these
+ * ways:
+ * 
+ * <ul>
+ * <li>If nothing is explicitly supplied, the view ID of the container will
+ * be used.
+ * <li><code>android:tag</code> can be used in &lt;fragment&gt; to provide
+ * a specific tag name for the fragment.
+ * <li><code>android:id</code> can be used in &lt;fragment&gt; to provide
+ * a specific identifier for the fragment.
+ * </ul>
+ * 
  * <a name="BackStack"></a>
  * <h3>Back Stack</h3>
  *
@@ -316,6 +345,9 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     // Set to true if this fragment was instantiated from a layout file.
     boolean mFromLayout;
     
+    // Set to true when the view has actually been inflated in its layout.
+    boolean mInLayout;
+
     // Number of active back stack entries this fragment is in.
     int mBackStackNesting;
     
@@ -585,7 +617,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     /**
      * Return the FragmentManager for interacting with fragments associated
      * with this fragment's activity.  Note that this will be non-null slightly
-     * before {@link #getActivity()}, in the time from when the fragment is
+     * before {@link #getActivity()}, during the time from when the fragment is
      * placed in a {@link FragmentTransaction} until it is committed and
      * attached to its activity.
      */
@@ -600,6 +632,17 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
         return mActivity != null && mActivity.mFragments.mAdded.contains(this);
     }
     
+    /**
+     * Return true if the layout is included as part of an activity view
+     * hierarchy via the &lt;fragment&gt; tag.  This will always be true when
+     * fragments are created through the &lt;fragment&gt; tag, <em>except</em>
+     * in the case where an old fragment is restored from a previous state and
+     * it does not appear in the layout of the current state.
+     */
+    final public boolean isInLayout() {
+        return mInLayout;
+    }
+
     /**
      * Return true if the fragment is in the resumed state.  This is true
      * for the duration of {@link #onResume()} and {@link #onPause()} as well.
@@ -1075,6 +1118,76 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
         return false;
     }
     
+    /**
+     * Print the Fragments's state into the given stream.
+     *
+     * @param prefix Text to print at the front of each line.
+     * @param fd The raw file descriptor that the dump is being sent to.
+     * @param writer The PrintWriter to which you should dump your state.  This will be
+     * closed for you after you return.
+     * @param args additional arguments to the dump request.
+     */
+    public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+        writer.print(prefix); writer.print("mFragmentId="); writer.print(mFragmentId);
+                writer.print(" mContainerId="); writer.print(mContainerId);
+                writer.print(" mTag="); writer.println(mTag);
+        writer.print(prefix); writer.print("mState="); writer.print(mState);
+                writer.print(" mIndex="); writer.print(mIndex);
+                writer.print(" mWho="); writer.print(mWho);
+                writer.print(" mBackStackNesting="); writer.println(mBackStackNesting);
+        writer.print(prefix); writer.print("mAdded="); writer.print(mAdded);
+                writer.print(" mResumed="); writer.print(mResumed);
+                writer.print(" mFromLayout="); writer.print(mFromLayout);
+                writer.print(" mInLayout="); writer.println(mInLayout);
+        writer.print(prefix); writer.print("mHidden="); writer.print(mHidden);
+                writer.print(" mRetainInstance="); writer.print(mRetainInstance);
+                writer.print(" mRetaining="); writer.print(mRetaining);
+                writer.print(" mHasMenu="); writer.println(mHasMenu);
+        if (mFragmentManager != null) {
+            writer.print(prefix); writer.print("mFragmentManager=");
+                    writer.println(mFragmentManager);
+        }
+        if (mImmediateActivity != null) {
+            writer.print(prefix); writer.print("mImmediateActivity=");
+                    writer.println(mImmediateActivity);
+        }
+        if (mActivity != null) {
+            writer.print(prefix); writer.print("mActivity=");
+                    writer.println(mActivity);
+        }
+        if (mArguments != null) {
+            writer.print(prefix); writer.print("mArguments="); writer.println(mArguments);
+        }
+        if (mSavedFragmentState != null) {
+            writer.print(prefix); writer.print("mSavedFragmentState=");
+                    writer.println(mSavedFragmentState);
+        }
+        if (mSavedViewState != null) {
+            writer.print(prefix); writer.print("mSavedViewState=");
+                    writer.println(mSavedViewState);
+        }
+        if (mTarget != null) {
+            writer.print(prefix); writer.print("mTarget="); writer.print(mTarget);
+                    writer.print(" mTargetRequestCode=");
+                    writer.println(mTargetRequestCode);
+        }
+        if (mNextAnim != 0) {
+            writer.print(prefix); writer.print("mNextAnim="); writer.println(mNextAnim);
+        }
+        if (mContainer != null) {
+            writer.print(prefix); writer.print("mContainer="); writer.println(mContainer);
+        }
+        if (mView != null) {
+            writer.print(prefix); writer.print("mView="); writer.println(mView);
+        }
+        if (mLoaderManager != null) {
+            writer.print(prefix); writer.print("mLoaderManager="); writer.print(mLoaderManager);
+                    writer.print(" mStarted="); writer.print(mStarted);
+                    writer.print(" mCheckedForLoaderManager=");
+                    writer.println(mCheckedForLoaderManager);
+        }
+    }
+
     void performStop() {
         onStop();
         if (mStarted) {
