@@ -1252,6 +1252,9 @@
   <public type="attr" name="xlargeScreens" id="0x010102bf" />
   <public type="attr" name="immersive" id="0x010102c0" />
   <public type="attr" name="filterTouchesWhenObscured" id="0x010102c4" />
+  <public type="attr" name="textSelectHandleLeft" id="0x010102c5" />
+  <public type="attr" name="textSelectHandleRight" id="0x010102c6" />
+  <public type="attr" name="textSelectHandle" id="0x010102c7" />
 
   <public-padding type="attr" name="kraken_resource_pad" end="0x01010300" />
 

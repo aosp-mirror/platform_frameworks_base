@@ -152,6 +152,11 @@
         <item name="scrollbarTrackHorizontal">@null</item>
         <item name="scrollbarTrackVertical">@null</item>
 
+        <!-- Text selection handle attributes -->
+        <item name="textSelectHandleLeft">@android:drawable/text_select_handle_middle</item>
+        <item name="textSelectHandleRight">@android:drawable/text_select_handle_middle</item>
+        <item name="textSelectHandle">@android:drawable/text_select_handle_middle</item>
+
         <!-- Widget styles -->
         <item name="absListViewStyle">@android:style/Widget.AbsListView</item>
         <item name="autoCompleteTextViewStyle">@android:style/Widget.AutoCompleteTextView</item>        
