@@ -53,6 +53,8 @@ private:
     int64_t mAnchorTimeUs;
     int64_t mNumSamplesOutput;
     status_t mInitCheck;
+    int64_t  mNumDecodedBuffers;
+    int32_t  mUpsamplingFactor;
 
     MediaBuffer *mInputBuffer;
 
