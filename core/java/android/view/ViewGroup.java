@@ -4066,10 +4066,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             for (int i = 0; i < childCount; i++) {
                 final View child = getChildAt(i);
                 if (child.isOverlayEnabled()) {
-                    canvas.translate(child.mLeft + child.mScrollX, child.mTop + child.mScrollY);
+                    canvas.translate(child.mLeft - child.mScrollX, child.mTop - child.mScrollY);
                     child.onDrawOverlay(canvas);
-                    canvas.translate(-(child.mLeft + child.mScrollX),
-                            -(child.mTop + child.mScrollY));
+                    canvas.translate(-(child.mLeft - child.mScrollX),
+                            -(child.mTop - child.mScrollY));
                 }
             }
         }
