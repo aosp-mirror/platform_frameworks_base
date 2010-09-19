@@ -71,6 +71,7 @@ public final class SipService extends ISipService.Stub {
     private boolean mConnected;
     private WakeupTimer mTimer;
     private WifiManager.WifiLock mWifiLock;
+    private boolean mWifiOnly;
 
     // SipProfile URI --> group
     private Map<String, SipSessionGroupExt> mSipGroups =
@@ -99,6 +100,7 @@ public final class SipService extends ISipService.Stub {
                 new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
         mTimer = new WakeupTimer(context);
+        mWifiOnly = SipManager.isSipWifiOnly(context);
     }
 
     public synchronized SipProfile[] getListOfProfiles() {
@@ -773,6 +775,15 @@ public final class SipService extends ISipService.Stub {
                             b.get(ConnectivityManager.EXTRA_NETWORK_INFO);
                     String type = netInfo.getTypeName();
                     NetworkInfo.State state = netInfo.getState();
+
+                    if (mWifiOnly && (netInfo.getType() !=
+                            ConnectivityManager.TYPE_WIFI)) {
+                        if (DEBUG) {
+                            Log.d(TAG, "Wifi only, other connectivity ignored: "
+                                    + type);
+                        }
+                        return;
+                    }
 
                     NetworkInfo activeNetInfo = getActiveNetworkInfo();
                     if (DEBUG) {
