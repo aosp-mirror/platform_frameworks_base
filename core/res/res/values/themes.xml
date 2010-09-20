@@ -156,6 +156,7 @@
         <item name="textSelectHandleLeft">@android:drawable/text_select_handle_middle</item>
         <item name="textSelectHandleRight">@android:drawable/text_select_handle_middle</item>
         <item name="textSelectHandle">@android:drawable/text_select_handle_middle</item>
+        <item name="textSelectHandleWindowStyle">@android:style/Widget.TextSelectHandle</item>
 
         <!-- Widget styles -->
         <item name="absListViewStyle">@android:style/Widget.AbsListView</item>

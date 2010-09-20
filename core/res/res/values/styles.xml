@@ -881,6 +881,17 @@
         <item name="android:background">@android:drawable/bottom_bar</item>
     </style>
 
+    <!-- Style for the small popup windows that contain text selection anchors. -->
+    <style name="Widget.TextSelectHandle">
+        <item name="android:windowAnimationStyle">@android:style/Animation.TextSelectHandle</item>
+    </style>
+
+    <!-- Style for animating text selection handles. -->
+    <style name="Animation.TextSelectHandle">
+        <item name="windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="windowExitAnimation">@android:anim/fade_out</item>
+    </style>
+
     <style name="Widget.ActionBar">
         <item name="android:background">@android:drawable/action_bar_background</item>
         <item name="android:displayOptions">useLogo</item>
