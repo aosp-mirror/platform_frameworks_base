@@ -25,7 +25,6 @@ import android.os.ParcelFileDescriptor;
 import android.provider.BaseColumns;
 import android.provider.Downloads;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -195,6 +194,12 @@ public class DownloadManager {
     public final static int ERROR_CANNOT_RESUME = 1008;
 
     /**
+     * Value of {@link #COLUMN_ERROR_CODE} when the requested destination file already exists (the
+     * download manager will not overwrite an existing file).
+     */
+    public final static int ERROR_FILE_ALREADY_EXISTS = 1009;
+
+    /**
      * Broadcast intent action sent by the download manager when a download completes.
      */
     public final static String ACTION_DOWNLOAD_COMPLETE = "android.intent.action.DOWNLOAD_COMPLETE";
@@ -235,10 +240,11 @@ public class DownloadManager {
         Downloads.COLUMN_URI,
         Downloads.COLUMN_MIME_TYPE,
         Downloads.COLUMN_TOTAL_BYTES,
-        Downloads._DATA,
         Downloads.COLUMN_STATUS,
         Downloads.COLUMN_CURRENT_BYTES,
         Downloads.COLUMN_LAST_MODIFICATION,
+        Downloads.COLUMN_DESTINATION,
+        Downloads.Impl.COLUMN_FILE_NAME_HINT,
     };
 
     private static final Set<String> LONG_COLUMNS = new HashSet<String>(
@@ -820,15 +826,10 @@ public class DownloadManager {
         }
 
         private String getLocalUri() {
-            String localUri = getUnderlyingString(Downloads.Impl._DATA);
-            if (localUri == null) {
-                return null;
-            }
-
             long destinationType = getUnderlyingLong(Downloads.Impl.COLUMN_DESTINATION);
             if (destinationType == Downloads.Impl.DESTINATION_FILE_URI) {
-                // return file URI for external download
-                return Uri.fromFile(new File(localUri)).toString();
+                // return client-provided file URI for external download
+                return getUnderlyingString(Downloads.Impl.COLUMN_FILE_NAME_HINT);
             }
 
             // return content URI for cache download
@@ -893,6 +894,9 @@ public class DownloadManager {
 
                 case Downloads.Impl.STATUS_CANNOT_RESUME:
                     return ERROR_CANNOT_RESUME;
+
+                case Downloads.Impl.STATUS_FILE_ALREADY_EXISTS_ERROR:
+                    return ERROR_FILE_ALREADY_EXISTS;
 
                 default:
                     return ERROR_UNKNOWN;
