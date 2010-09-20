@@ -124,7 +124,7 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
     }
 
     public void onCallChangeFailed(final ISipSession session,
-            final String errorCode, final String message) {
+            final int errorCode, final String message) {
         if (mListener == null) return;
         proxy(new Runnable() {
             public void run() {
@@ -137,7 +137,7 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
         });
     }
 
-    public void onError(final ISipSession session, final String errorCode,
+    public void onError(final ISipSession session, final int errorCode,
             final String message) {
         if (mListener == null) return;
         proxy(new Runnable() {
@@ -179,7 +179,7 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
     }
 
     public void onRegistrationFailed(final ISipSession session,
-            final String errorCode, final String message) {
+            final int errorCode, final String message) {
         if (mListener == null) return;
         proxy(new Runnable() {
             public void run() {

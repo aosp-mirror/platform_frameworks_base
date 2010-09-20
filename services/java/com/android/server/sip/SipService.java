@@ -476,10 +476,10 @@ public final class SipService extends ISipService.Stub {
         }
 
         @Override
-        public void onError(ISipSession session, String errorClass,
+        public void onError(ISipSession session, int errorCode,
                 String message) {
-            if (DEBUG) Log.d(TAG, "sip session error: " + errorClass + ": "
-                    + message);
+            if (DEBUG) Log.d(TAG, "sip session error: "
+                    + SipErrorCode.toString(errorCode) + ": " + message);
         }
 
         public boolean isOpened() {
@@ -535,7 +535,7 @@ public final class SipService extends ISipService.Stub {
         private int mBackoff = 1;
         private boolean mRegistered;
         private long mExpiryTime;
-        private SipErrorCode mErrorCode;
+        private int mErrorCode;
         private String mErrorMessage;
 
         private String getAction() {
@@ -591,10 +591,9 @@ public final class SipService extends ISipService.Stub {
                 if (mSession == null) return;
 
                 try {
-                    SipSessionState state = (mSession == null)
+                    int state = (mSession == null)
                             ? SipSessionState.READY_TO_CALL
-                            : Enum.valueOf(
-                                    SipSessionState.class, mSession.getState());
+                            : mSession.getState();
                     if ((state == SipSessionState.REGISTERING)
                             || (state == SipSessionState.DEREGISTERING)) {
                         mProxy.onRegistering(mSession);
@@ -602,12 +601,12 @@ public final class SipService extends ISipService.Stub {
                         int duration = (int)
                                 (mExpiryTime - SystemClock.elapsedRealtime());
                         mProxy.onRegistrationDone(mSession, duration);
-                    } else if (mErrorCode != null) {
+                    } else if (mErrorCode != SipErrorCode.NO_ERROR) {
                         if (mErrorCode == SipErrorCode.TIME_OUT) {
                             mProxy.onRegistrationTimeout(mSession);
                         } else {
-                            mProxy.onRegistrationFailed(mSession,
-                                    mErrorCode.toString(), mErrorMessage);
+                            mProxy.onRegistrationFailed(mSession, mErrorCode,
+                                    mErrorMessage);
                         }
                     }
                 } catch (Throwable t) {
@@ -621,7 +620,7 @@ public final class SipService extends ISipService.Stub {
         }
 
         public void run() {
-            mErrorCode = null;
+            mErrorCode = SipErrorCode.NO_ERROR;
             mErrorMessage = null;
             if (DEBUG) Log.d(TAG, "~~~ registering");
             synchronized (SipService.this) {
@@ -714,18 +713,15 @@ public final class SipService extends ISipService.Stub {
         }
 
         @Override
-        public void onRegistrationFailed(ISipSession session,
-                String errorCodeString, String message) {
-            SipErrorCode errorCode =
-                    Enum.valueOf(SipErrorCode.class, errorCodeString);
+        public void onRegistrationFailed(ISipSession session, int errorCode,
+                String message) {
             if (DEBUG) Log.d(TAG, "onRegistrationFailed(): " + session + ": "
-                    + errorCode + ": " + message);
+                    + SipErrorCode.toString(errorCode) + ": " + message);
             synchronized (SipService.this) {
                 if (!isStopped() && (session != mSession)) return;
                 mErrorCode = errorCode;
                 mErrorMessage = message;
-                mProxy.onRegistrationFailed(session, errorCode.toString(),
-                        message);
+                mProxy.onRegistrationFailed(session, errorCode, message);
 
                 if (errorCode == SipErrorCode.INVALID_CREDENTIALS) {
                     if (DEBUG) Log.d(TAG, "   pause auto-registration");
