@@ -34,6 +34,7 @@ import java.io.File;
  */
 public abstract class Transition {
     // The transition behavior
+    private static final int BEHAVIOR_MIN_VALUE = 0;
     /** The transition starts slowly and speed up */
     public static final int BEHAVIOR_SPEED_UP = 0;
     /** The transition start fast and speed down */
@@ -44,6 +45,8 @@ public abstract class Transition {
     public static final int BEHAVIOR_MIDDLE_SLOW = 3;
     /** The transition starts slowly and ends slowly with a fast middle */
     public static final int BEHAVIOR_MIDDLE_FAST = 4;
+
+    private static final int BEHAVIOR_MAX_VALUE = 4;
 
     // The unique id of the transition
     private final String mUniqueId;
@@ -84,6 +87,9 @@ public abstract class Transition {
      */
     protected Transition(String transitionId, MediaItem afterMediaItem, MediaItem beforeMediaItem,
             long durationMs, int behavior) {
+        if (behavior < BEHAVIOR_MIN_VALUE || behavior > BEHAVIOR_MAX_VALUE) {
+            throw new IllegalArgumentException("Invalid behavior: " + behavior);
+        }
         mUniqueId = transitionId;
         mAfterMediaItem = afterMediaItem;
         mBeforeMediaItem = beforeMediaItem;
