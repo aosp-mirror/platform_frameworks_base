@@ -136,30 +136,24 @@ void* Loader::open(EGLNativeDisplayType display, int impl, egl_connection_t* cnx
      */
     
     void* dso;
-    char path[PATH_MAX];
     int index = int(display);
     driver_t* hnd = 0;
-    const char* const format = "/system/lib/egl/lib%s_%s.so";
     
     char const* tag = getTag(index, impl);
     if (tag) {
-        snprintf(path, PATH_MAX, format, "GLES", tag);
-        dso = load_driver(path, cnx, EGL | GLESv1_CM | GLESv2);
+        dso = load_driver("GLES", tag, cnx, EGL | GLESv1_CM | GLESv2);
         if (dso) {
             hnd = new driver_t(dso);
         } else {
             // Always load EGL first
-            snprintf(path, PATH_MAX, format, "EGL", tag);
-            dso = load_driver(path, cnx, EGL);
+            dso = load_driver("EGL", tag, cnx, EGL);
             if (dso) {
                 hnd = new driver_t(dso);
 
                 // TODO: make this more automated
-                snprintf(path, PATH_MAX, format, "GLESv1_CM", tag);
-                hnd->set( load_driver(path, cnx, GLESv1_CM), GLESv1_CM );
+                hnd->set( load_driver("GLESv1_CM", tag, cnx, GLESv1_CM), GLESv1_CM );
 
-                snprintf(path, PATH_MAX, format, "GLESv2", tag);
-                hnd->set( load_driver(path, cnx, GLESv2), GLESv2 );
+                hnd->set( load_driver("GLESv2", tag, cnx, GLESv2), GLESv2 );
             }
         }
     }
@@ -222,12 +216,20 @@ void Loader::init_api(void* dso,
     }
 }
 
-void *Loader::load_driver(const char* driver_absolute_path,
+void *Loader::load_driver(const char* kind, const char *tag,
         egl_connection_t* cnx, uint32_t mask)
 {
+    char driver_absolute_path[PATH_MAX];
+    const char* const search1 = "/vendor/lib/egl/lib%s_%s.so";
+    const char* const search2 = "/system/lib/egl/lib%s_%s.so";
+
+    snprintf(driver_absolute_path, PATH_MAX, search1, kind, tag);
     if (access(driver_absolute_path, R_OK)) {
-        // this happens often, we don't want to log an error
-        return 0;
+        snprintf(driver_absolute_path, PATH_MAX, search2, kind, tag);
+        if (access(driver_absolute_path, R_OK)) {
+            // this happens often, we don't want to log an error
+            return 0;
+        }
     }
 
     void* dso = dlopen(driver_absolute_path, RTLD_NOW | RTLD_LOCAL);
