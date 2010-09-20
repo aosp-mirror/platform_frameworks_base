@@ -70,6 +70,7 @@ public class CallerInfo {
      */
     public String name;
     public String phoneNumber;
+    public String nomalizedNumber;
 
     public String cnapName;
     public int numberPresentation;
@@ -148,6 +149,12 @@ public class CallerInfo {
                 columnIndex = cursor.getColumnIndex(PhoneLookup.NUMBER);
                 if (columnIndex != -1) {
                     info.phoneNumber = cursor.getString(columnIndex);
+                }
+
+                // Look for the normalized number
+                columnIndex = cursor.getColumnIndex(PhoneLookup.NORMALIZED_NUMBER);
+                if (columnIndex != -1) {
+                    info.nomalizedNumber = cursor.getString(columnIndex);
                 }
 
                 // Look for the label/type combo
