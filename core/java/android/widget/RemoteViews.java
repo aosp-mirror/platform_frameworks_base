@@ -156,6 +156,93 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
+    private class SetOnClickFillInIntent extends Action {
+        public SetOnClickFillInIntent(int id, Intent fillInIntent) {
+            this.viewId = id;
+            this.fillInIntent = fillInIntent;
+        }
+
+        public SetOnClickFillInIntent(Parcel parcel) {
+            viewId = parcel.readInt();
+            fillInIntent = Intent.CREATOR.createFromParcel(parcel);
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(TAG);
+            dest.writeInt(viewId);
+            fillInIntent.writeToParcel(dest, 0 /* no flags */);
+        }
+
+        @Override
+        public void apply(View root) {
+            final View target = root.findViewById(viewId);
+
+            if (!mIsWidgetCollectionChild) {
+                Log.e("RemoteViews", "The method setOnClickFillInIntent is available " +
+                        "only from RemoteViewsFactory (ie. on collection items).");
+                return;
+            }
+
+            if (target != null && fillInIntent != null) {
+                OnClickListener listener = new OnClickListener() {
+                    public void onClick(View v) {
+                        // Insure that this view is a child of an AdapterView
+                        View parent = (View) v.getParent();
+                        while (!(parent instanceof AdapterView<?>)
+                                && !(parent instanceof AppWidgetHostView)) {
+                            parent = (View) parent.getParent();
+                        }
+
+                        if (parent instanceof AppWidgetHostView) {
+                            // Somehow they've managed to get this far without having
+                            // and AdapterView as a parent.
+                            Log.e("RemoteViews", "Collection item doesn't have AdapterView parent");
+                            return;
+                        }
+
+                        // Insure that a template pending intent has been set on an ancestor
+                        if (!(parent.getTag() instanceof PendingIntent)) {
+                            Log.e("RemoteViews", "Attempting setOnClickFillInIntent without" +
+					" calling setPendingIntentTemplate on parent.");
+                            return;
+                        }
+
+                        PendingIntent pendingIntent = (PendingIntent) parent.getTag();
+
+                        final float appScale = v.getContext().getResources()
+                        .getCompatibilityInfo().applicationScale;
+                        final int[] pos = new int[2];
+                        v.getLocationOnScreen(pos);
+
+                        final Rect rect = new Rect();
+                        rect.left = (int) (pos[0] * appScale + 0.5f);
+                        rect.top = (int) (pos[1] * appScale + 0.5f);
+                        rect.right = (int) ((pos[0] + v.getWidth()) * appScale + 0.5f);
+                        rect.bottom = (int) ((pos[1] + v.getHeight()) * appScale + 0.5f);
+
+                        fillInIntent.setSourceBounds(rect);
+                        try {
+                            // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
+                            v.getContext().startIntentSender(
+                                    pendingIntent.getIntentSender(), fillInIntent,
+                                    Intent.FLAG_ACTIVITY_NEW_TASK,
+                                    Intent.FLAG_ACTIVITY_NEW_TASK, 0);
+                        } catch (IntentSender.SendIntentException e) {
+                            android.util.Log.e(LOG_TAG, "Cannot send pending intent: ", e);
+                        }
+                    }
+
+                };
+                target.setOnClickListener(listener);
+            }
+        }
+
+        int viewId;
+        Intent fillInIntent;
+
+        public final static int TAG = 9;
+    }
+
     private class SetOnClickExtras extends Action {
         public SetOnClickExtras(int id, Bundle extras) {
             this.viewId = id;
@@ -273,7 +360,7 @@ public class RemoteViews implements Parcelable, Filter {
                 target.setTag(pendingIntentTemplate);
             } else {
                 Log.e("RemoteViews", "Cannot setPendingIntentTemplate on a view which is not" +
-                        "an AdapterView.");
+                        "an AdapterView (id: " + viewId + ")");
                 return;
             }
         }
@@ -313,7 +400,8 @@ public class RemoteViews implements Parcelable, Filter {
             // If the view is an AdapterView, setting a PendingIntent on click doesn't make much
             // sense, do they mean to set a PendingIntent template for the AdapterView's children?
             if (mIsWidgetCollectionChild) {
-                Log.e("RemoteViews", "Cannot setOnClickPendingIntent for collection item.");
+                Log.e("RemoteViews", "Cannot setOnClickPendingIntent for collection item " +
+				"(id: " + viewId + ")");
                 // TODO: return; We'll let this slide until apps are up to date.
             }
 
@@ -824,6 +912,9 @@ public class RemoteViews implements Parcelable, Filter {
                 case SetPendingIntentTemplate.TAG:
                     mActions.add(new SetPendingIntentTemplate(parcel));
                     break;
+                case SetOnClickFillInIntent.TAG:
+                    mActions.add(new SetOnClickFillInIntent(parcel));
+                    break;
                 default:
                     throw new ActionException("Tag " + tag + " not found");
                 }
@@ -1020,6 +1111,11 @@ public class RemoteViews implements Parcelable, Filter {
      * {@link android.view.View#setOnClickListener(android.view.View.OnClickListener)}
      * to launch the provided {@link PendingIntent}.
      * 
+     * When setting the on-click action of items within collections (eg. {@link ListView},
+     * {@link StackView} etc.), this method will not work. Instead, use {@link
+     * RemoteViews#setPendingIntentTemplate(int, PendingIntent) in conjunction with
+     * RemoteViews#setOnClickFillInIntent(int, Intent).
+     *
      * @param viewId The id of the view that will trigger the {@link PendingIntent} when clicked
      * @param pendingIntent The {@link PendingIntent} to send when user clicks
      */
@@ -1028,10 +1124,11 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * When using collections (eg. ListView, StackView etc.) in widgets, it is very costly
-     * to set PendingIntents on the individual items, and is hence not permitted. Instead
-     * a single PendingIntent template can be set on the collection, and individual items can
-     * differentiate their click behavior using {@link RemoteViews#setOnClickExtras(int, Bundle)}.
+     * When using collections (eg. {@link ListView}, {@link StackView} etc.) in widgets, it is very
+     * costly to set PendingIntents on the individual items, and is hence not permitted. Instead
+     * this method should be used to set a single PendingIntent template on the collection, and
+     * individual items can differentiate their on-click behavior using
+     * {@link RemoteViews#setOnClickFillInIntent(int, Intent)}.
      *
      * @param viewId The id of the collection who's children will use this PendingIntent template
      *          when clicked
@@ -1043,17 +1140,36 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * When using collections (eg. ListView, StackView etc.) in widgets, it is very costly
-     * to set PendingIntents on the individual items, and is hence not permitted. Instead
-     * a single PendingIntent template can be set on the collection, see {@link
-     * RemoteViews#setPendingIntentTemplate(int, PendingIntent)}, and the items click
-     * behaviour can be distinguished by setting extras.
+     * Being deprecated. See {@link RemoteViews#setOnClickFillInIntent(int, Intent)}.
      *
-     * @param viewId The id of the
+     * @param viewId
      * @param extras
      */
     public void setOnClickExtras(int viewId, Bundle extras) {
         addAction(new SetOnClickExtras(viewId, extras));
+    }
+
+    /**
+     * When using collections (eg. {@link ListView}, {@link StackView} etc.) in widgets, it is very
+     * costly to set PendingIntents on the individual items, and is hence not permitted. Instead
+     * a single PendingIntent template can be set on the collection, see {@link
+     * RemoteViews#setPendingIntentTemplate(int, PendingIntent)}, and the individual on-click
+     * action of a given item can be distinguished by setting a fillInIntent on that item. The
+     * fillInIntent is then combined with the PendingIntent template in order to determine the final
+     * intent which will be executed when the item is clicked. This works as follows: any fields
+     * which are left blank in the PendingIntent template, but are provided by the fillInIntent
+     * will be overwritten, and the resulting PendingIntent will be used.
+     *
+     *
+     * of the PendingIntent template will then be filled in with the associated fields that are
+     * set in fillInIntent. See {@link Intent#fillIn(Intent, int)} for more details.
+     *
+     * @param viewId The id of the view on which to set the fillInIntent
+     * @param fillInIntent The intent which will be combined with the parent's PendingIntent
+     *        in order to determine the on-click behavior of the view specified by viewId
+     */
+    public void setOnClickFillInIntent(int viewId, Intent fillInIntent) {
+        addAction(new SetOnClickFillInIntent(viewId, fillInIntent));
     }
 
     /**
