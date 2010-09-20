@@ -823,7 +823,9 @@ public class SipPhone extends SipPhoneBase {
 
         @Override
         public void onCallEnded(SipAudioCall call) {
-            onCallEnded(Connection.DisconnectCause.NORMAL);
+            onCallEnded(call.isInCall()
+                    ? Connection.DisconnectCause.NORMAL
+                    : Connection.DisconnectCause.INCOMING_MISSED);
         }
 
         @Override
