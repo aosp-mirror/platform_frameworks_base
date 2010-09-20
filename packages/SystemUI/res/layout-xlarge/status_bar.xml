@@ -16,7 +16,7 @@
 -->
 
 <!--    android:background="@drawable/status_bar_closed_default_background" -->
-<FrameLayout
+<com.android.systemui.statusbar.tablet.TabletStatusBarView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:background="@drawable/status_bar_background"
@@ -132,5 +132,5 @@
         android:visibility="invisible"
         android:clickable="true"
         />
-</FrameLayout>
+</com.android.systemui.statusbar.tablet.TabletStatusBarView>
 
