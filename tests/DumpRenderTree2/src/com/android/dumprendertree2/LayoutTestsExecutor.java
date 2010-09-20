@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -30,19 +31,20 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.PowerManager.WakeLock;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.Window;
 import android.webkit.ConsoleMessage;
+import android.webkit.GeolocationPermissions;
 import android.webkit.HttpAuthHandler;
 import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.webkit.GeolocationPermissions;
 import android.webkit.WebStorage.QuotaUpdater;
 
 import java.io.File;
@@ -74,7 +76,7 @@ public class LayoutTestsExecutor extends Activity {
         }
     }
 
-    private static final String LOG_TAG = "LayoutTestExecutor";
+    private static final String LOG_TAG = "LayoutTestsExecutor";
 
     public static final String EXTRA_TESTS_LIST = "TestsList";
     public static final String EXTRA_TEST_INDEX = "TestIndex";
@@ -179,6 +181,13 @@ public class LayoutTestsExecutor extends Activity {
                  }
              }
              handler.cancel();
+         }
+
+         @Override
+         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+             // We ignore SSL errors. In particular, the certificate used by the LayoutTests server
+             // produces an error as it lacks a CN field.
+             handler.proceed();
          }
     };
 
