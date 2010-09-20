@@ -42,11 +42,11 @@ public class SipSessionAdapter extends ISipSessionListener.Stub {
     public void onCallBusy(ISipSession session) {
     }
 
-    public void onCallChangeFailed(ISipSession session, String errorCode,
+    public void onCallChangeFailed(ISipSession session, int errorCode,
             String message) {
     }
 
-    public void onError(ISipSession session, String errorCode, String message) {
+    public void onError(ISipSession session, int errorCode, String message) {
     }
 
     public void onRegistering(ISipSession session) {
@@ -55,7 +55,7 @@ public class SipSessionAdapter extends ISipSessionListener.Stub {
     public void onRegistrationDone(ISipSession session, int duration) {
     }
 
-    public void onRegistrationFailed(ISipSession session, String errorCode,
+    public void onRegistrationFailed(ISipSession session, int errorCode,
             String message) {
     }
 

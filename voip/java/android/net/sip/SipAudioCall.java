@@ -90,9 +90,9 @@ public interface SipAudioCall {
          * @param call the call object that carries out the audio call
          * @param errorCode error code of this error
          * @param errorMessage error message
+         * @see SipErrorCode
          */
-        void onError(SipAudioCall call, SipErrorCode errorCode,
-                String errorMessage);
+        void onError(SipAudioCall call, int errorCode, String errorMessage);
     }
 
     /**
@@ -126,7 +126,7 @@ public interface SipAudioCall {
         public void onCallHeld(SipAudioCall call) {
             onChanged(call);
         }
-        public void onError(SipAudioCall call, SipErrorCode errorCode,
+        public void onError(SipAudioCall call, int errorCode,
                 String errorMessage) {
             onChanged(call);
         }
@@ -318,10 +318,11 @@ public interface SipAudioCall {
 
     /**
      * Gets the state of the {@link ISipSession} that carries this call.
+     * The value returned must be one of the states in {@link SipSessionState}.
      *
      * @return the session state
      */
-    SipSessionState getState();
+    int getState();
 
     /**
      * Gets the {@link ISipSession} that carries this call.
