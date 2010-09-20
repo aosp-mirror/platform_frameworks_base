@@ -20,6 +20,7 @@
     <!-- for object info -->
     <string name="name_label">Name: </string>
     <string name="size_label">Size: </string>
+    <string name="format_label">Format: </string>
     <string name="thumb_width_label">Thumb Width: </string>
     <string name="thumb_height_label">Thumb Height: </string>
     <string name="thumb_size_label">Thumb Size: </string>

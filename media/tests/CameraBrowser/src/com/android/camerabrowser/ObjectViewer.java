@@ -69,6 +69,7 @@ public class ObjectViewer extends Activity {
                         Mtp.Object.DATE_MODIFIED,
                         Mtp.Object.KEYWORDS,
                         Mtp.Object.THUMB,
+                        Mtp.Object.FORMAT,
                         };
 
     @Override
@@ -125,6 +126,8 @@ public class ObjectViewer extends Activity {
                     thumbView.setImageBitmap(bitmap);
                 }
             }
+            view = (TextView)findViewById(R.id.format);
+            view.setText(Long.toHexString(c.getLong(14)).toUpperCase());
         }
     }
 
