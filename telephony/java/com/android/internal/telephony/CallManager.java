@@ -82,7 +82,7 @@ public final class CallManager {
     // Singleton instance
     private static final CallManager INSTANCE = new CallManager();
 
-    // list of registered phones
+    // list of registered phones, which are PhoneBase objs
     private final ArrayList<Phone> mPhones;
 
     // list of supported ringing calls
@@ -97,7 +97,7 @@ public final class CallManager {
     // empty connection list
     private final ArrayList<Connection> emptyConnections = new ArrayList<Connection>();
 
-    // default phone as the first phone registered
+    // default phone as the first phone registered, which is PhoneBase obj
     private Phone mDefaultPhone;
 
     // state registrants
@@ -181,6 +181,46 @@ public final class CallManager {
     }
 
     /**
+     * Get the corresponding PhoneBase obj
+     *
+     * @param phone a Phone object
+     * @return the corresponding PhoneBase obj in Phone if Phone
+     * is a PhoneProxy obj
+     * or the Phone itself if Phone is not a PhoneProxy obj
+     */
+    private static Phone getPhoneBase(Phone phone) {
+        if (phone instanceof PhoneProxy) {
+            return phone.getForegroundCall().getPhone();
+        }
+        return phone;
+    }
+
+    /**
+     * Check if two phones refer to the same PhoneBase obj
+     *
+     * Note: PhoneBase, not PhoneProxy, is to be used inside of CallManager
+     *
+     * Both PhoneBase and PhoneProxy implement Phone interface, so
+     * they have same phone APIs, such as dial(). The real implementation, for
+     * example in GSM,  is in GSMPhone as extend from PhoneBase, so that
+     * foregroundCall.getPhone() returns GSMPhone obj. On the other hand,
+     * PhoneFactory.getDefaultPhone() returns PhoneProxy obj, which has a class
+     * member of GSMPhone.
+     *
+     * So for phone returned by PhoneFacotry, which is used by PhoneApp,
+     *        phone.getForegroundCall().getPhone() != phone
+     * but
+     *        isSamePhone(phone, phone.getForegroundCall().getPhone()) == true
+     *
+     * @param p1 is the first Phone obj
+     * @param p2 is the second Phone obj
+     * @return true if p1 and p2 refer to the same phone
+     */
+    public static boolean isSamePhone(Phone p1, Phone p2) {
+        return (getPhoneBase(p1) == getPhoneBase(p2));
+    }
+
+    /**
      * Returns all the registered phone objects.
      * @return all the registered phone objects.
      */
@@ -246,22 +286,47 @@ public final class CallManager {
 
     /**
      * Register phone to CallManager
-     * @param phone
+     * @param phone to be registered
      * @return true if register successfully
      */
     public boolean registerPhone(Phone phone) {
-        if (phone != null && !mPhones.contains(phone)) {
+        Phone basePhone = getPhoneBase(phone);
+
+        if (basePhone != null && !mPhones.contains(basePhone)) {
             if (mPhones.isEmpty()) {
-                mDefaultPhone = phone;
+                mDefaultPhone = basePhone;
             }
-            mPhones.add(phone);
-            mRingingCalls.add(phone.getRingingCall());
-            mBackgroundCalls.add(phone.getBackgroundCall());
-            mForegroundCalls.add(phone.getForegroundCall());
-            registerForPhoneStates(phone);
+            mPhones.add(basePhone);
+            mRingingCalls.add(basePhone.getRingingCall());
+            mBackgroundCalls.add(basePhone.getBackgroundCall());
+            mForegroundCalls.add(basePhone.getForegroundCall());
+            registerForPhoneStates(basePhone);
             return true;
         }
         return false;
+    }
+
+    /**
+     * unregister phone from CallManager
+     * @param phone to be unregistered
+     */
+    public void unregisterPhone(Phone phone) {
+        Phone basePhone = getPhoneBase(phone);
+
+        if (basePhone != null && mPhones.contains(basePhone)) {
+            mPhones.remove(basePhone);
+            mRingingCalls.remove(basePhone.getRingingCall());
+            mBackgroundCalls.remove(basePhone.getBackgroundCall());
+            mForegroundCalls.remove(basePhone.getForegroundCall());
+            unregisterForPhoneStates(basePhone);
+            if (basePhone == mDefaultPhone) {
+                if (mPhones.isEmpty()) {
+                    mDefaultPhone = null;
+                } else {
+                    mDefaultPhone = mPhones.get(0);
+                }
+            }
+        }
     }
 
     /**
@@ -304,26 +369,7 @@ public final class CallManager {
         return null;
     }
 
-    /**
-     * unregister phone from CallManager
-     * @param phone
-     */
-    public void unregisterPhone(Phone phone) {
-        if (phone != null && mPhones.contains(phone)) {
-            mPhones.remove(phone);
-            mRingingCalls.remove(phone.getRingingCall());
-            mBackgroundCalls.remove(phone.getBackgroundCall());
-            mForegroundCalls.remove(phone.getForegroundCall());
-            unregisterForPhoneStates(phone);
-            if (phone == mDefaultPhone) {
-                if (mPhones.isEmpty()) {
-                    mDefaultPhone = null;
-                } else {
-                    mDefaultPhone = mPhones.get(0);
-                }
-            }
-        }
-    }
+
 
     public void setAudioMode() {
         Context context = getContext();
@@ -592,8 +638,9 @@ public final class CallManager {
      * handled asynchronously.
      */
     public Connection dial(Phone phone, String dialString) throws CallStateException {
+        Phone basePhone = getPhoneBase(phone);
         if (VDBG) {
-            Log.d(LOG_TAG, "CallManager.dial( phone=" + phone + ", dialString="+ dialString + ")");
+            Log.d(LOG_TAG, "CallManager.dial( phone=" + basePhone + ", dialString="+ dialString + ")");
             Log.d(LOG_TAG, this.toString());
         }
         if ( hasActiveFgCall() ) {
@@ -601,10 +648,10 @@ public final class CallManager {
             boolean hasBgCall = !(activePhone.getBackgroundCall().isIdle());
 
             if (DBG) {
-                Log.d(LOG_TAG, "hasBgCall: "+ hasBgCall + " sameChannel:" + (activePhone == phone));
+                Log.d(LOG_TAG, "hasBgCall: "+ hasBgCall + " sameChannel:" + (activePhone == basePhone));
             }
 
-            if (activePhone != phone) {
+            if (activePhone != basePhone) {
                 if (hasBgCall) {
                     Log.d(LOG_TAG, "Hangup");
                     getActiveFgCall().hangup();
@@ -614,7 +661,7 @@ public final class CallManager {
                 }
             }
         }
-        return phone.dial(dialString);
+        return basePhone.dial(dialString);
     }
 
     /**
