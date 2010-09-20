@@ -32,7 +32,7 @@ import java.io.Serializable;
  * A class that represent a result of the test. It is responsible for returning the result's
  * raw data and generating its own diff in HTML format.
  */
-public abstract class AbstractResult implements Comparable<AbstractResult> {
+public abstract class AbstractResult implements Comparable<AbstractResult>, Serializable {
 
     private static final String LOG_TAG = "AbstractResult";
 
