@@ -683,7 +683,7 @@ class LoadListener extends Handler implements EventHandler {
                         String host = mAuthHeader.isProxy() ?
                                 Network.getInstance(mContext).getProxyHostname() :
                                 mUri.mHost;
-                        HttpAuthHandler.onReceivedCredentials(this, host,
+                        HttpAuthHandlerImpl.onReceivedCredentials(this, host,
                                 mAuthHeader.getRealm(), mUsername, mPassword);
                         makeAuthResponse(mUsername, mPassword);
                     } else {
