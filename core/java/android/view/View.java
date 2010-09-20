@@ -1613,12 +1613,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     private static final int AWAKEN_SCROLL_BARS_ON_ATTACH = 0x08000000;
 
     /**
-     * Indicates that this view has a visible/touchable overlay.
-     * @hide
-     */
-    static final int HAS_OVERLAY = 0x10000000;
-
-    /**
      * Indicates that pivotX or pivotY were explicitly set and we should not assume the center
      * for transform operations
      *
@@ -3038,57 +3032,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     protected void onFocusLost() {
         resetPressedState();
-    }
-
-    /**
-     * Enable or disable drawing overlays after a full drawing pass. This enables a view to
-     * draw on a topmost overlay layer after normal drawing completes and get right of first
-     * refusal for touch events in the window.
-     * 
-     * <em>Warning:</em> Views that use this feature should take care to disable/enable overlay
-     * appropriately when they are attached/detached from their window. All overlays should be
-     * disabled when detached.
-     * 
-     * @param enabled true if overlay drawing should be enabled for this view, false otherwise
-     * 
-     * @see #onDrawOverlay(Canvas)
-     * 
-     * @hide
-     */
-    protected void setOverlayEnabled(boolean enabled) {
-        final boolean oldValue = (mPrivateFlags & HAS_OVERLAY) == HAS_OVERLAY;
-        mPrivateFlags = (mPrivateFlags & ~HAS_OVERLAY) | (enabled ? HAS_OVERLAY : 0);
-        if (enabled != oldValue) {
-            final ViewParent parent = getParent();
-            if (parent != null) {
-                try {
-                    parent.childOverlayStateChanged(this);
-                } catch (AbstractMethodError e) {
-                    Log.e(VIEW_LOG_TAG, "Could not propagate hasOverlay state", e);
-                }
-            }
-        }
-    }
-
-    /**
-     * @return true if this View has an overlay enabled.
-     * 
-     * @see #setOverlayEnabled(boolean)
-     * @see #onDrawOverlay(Canvas)
-     * 
-     * @hide
-     */
-    public boolean isOverlayEnabled() {
-        return (mPrivateFlags & HAS_OVERLAY) == HAS_OVERLAY;
-    }
-
-    /**
-     * Override this method to draw on an overlay layer above all other views in the window
-     * after the standard drawing pass is complete. This allows a view to draw outside its
-     * normal boundaries.
-     * @hide
-     */
-    public void onDrawOverlay(Canvas canvas) {
     }
 
     private void resetPressedState() {

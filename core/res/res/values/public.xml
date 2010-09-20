@@ -1255,6 +1255,7 @@
   <public type="attr" name="textSelectHandleLeft" id="0x010102c5" />
   <public type="attr" name="textSelectHandleRight" id="0x010102c6" />
   <public type="attr" name="textSelectHandle" id="0x010102c7" />
+  <public type="attr" name="textSelectHandleWindowStyle" id="0x010102c8" />
 
   <public-padding type="attr" name="kraken_resource_pad" end="0x01010300" />
 
