@@ -97,6 +97,14 @@ public class SipManager {
          */
     }
 
+    /**
+     * Returns true if SIP is only available on WIFI.
+     */
+    public static boolean isSipWifiOnly(Context context) {
+        return context.getResources().getBoolean(
+                com.android.internal.R.bool.config_sip_wifi_only);
+    }
+
     private SipManager() {
         createSipService();
     }
