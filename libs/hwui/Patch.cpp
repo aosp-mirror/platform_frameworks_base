@@ -34,7 +34,7 @@ Patch::Patch(const uint32_t xCount, const uint32_t yCount) {
 }
 
 Patch::~Patch() {
-    delete vertices;
+    delete[] vertices;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -93,7 +93,7 @@ public class RsListRS {
 
     ScriptField_ListAllocs_s mListAllocs;
 
-    private ScriptC_Rslist mScript;
+    private ScriptC_rslist mScript;
 
     int mLastX;
     int mLastY;
@@ -121,7 +121,7 @@ public class RsListRS {
 
     private void initRS() {
 
-        mScript = new ScriptC_Rslist(mRS, mRes, R.raw.rslist, true);
+        mScript = new ScriptC_rslist(mRS, mRes, R.raw.rslist, true);
 
         mListAllocs = new ScriptField_ListAllocs_s(mRS, DATA_LIST.length);
         for(int i = 0; i < DATA_LIST.length; i ++) {

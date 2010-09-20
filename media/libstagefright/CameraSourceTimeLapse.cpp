@@ -89,9 +89,32 @@ CameraSourceTimeLapse::CameraSourceTimeLapse(const sp<Camera> &camera,
         mMeta->setInt32(kKeyWidth, width);
         mMeta->setInt32(kKeyHeight, height);
     }
+
+    // Initialize quick stop variables.
+    mQuickStop = false;
+    mForceRead = false;
+    mLastReadBufferCopy = NULL;
+    mStopWaitingForIdleCamera = false;
 }
 
 CameraSourceTimeLapse::~CameraSourceTimeLapse() {
+}
+
+void CameraSourceTimeLapse::startQuickReadReturns() {
+    Mutex::Autolock autoLock(mQuickStopLock);
+    LOGV("Enabling quick read returns");
+
+    // Enable quick stop mode.
+    mQuickStop = true;
+
+    if (mUseStillCameraForTimeLapse) {
+        // wake up the thread right away.
+        mTakePictureCondition.signal();
+    } else {
+        // Force dataCallbackTimestamp() coming from the video camera to not skip the
+        // next frame as we want read() to get a get a frame right away.
+        mForceRead = true;
+    }
 }
 
 bool CameraSourceTimeLapse::trySettingPreviewSize(int32_t width, int32_t height) {
@@ -168,6 +191,53 @@ bool CameraSourceTimeLapse::computeCropRectangleOffset() {
     return true;
 }
 
+void CameraSourceTimeLapse::signalBufferReturned(MediaBuffer* buffer) {
+    Mutex::Autolock autoLock(mQuickStopLock);
+    if (mQuickStop && (buffer == mLastReadBufferCopy)) {
+        buffer->setObserver(NULL);
+        buffer->release();
+    } else {
+        return CameraSource::signalBufferReturned(buffer);
+    }
+}
+
+void createMediaBufferCopy(const MediaBuffer& sourceBuffer, int64_t frameTime, MediaBuffer **newBuffer) {
+    size_t sourceSize = sourceBuffer.size();
+    void* sourcePointer = sourceBuffer.data();
+
+    (*newBuffer) = new MediaBuffer(sourceSize);
+    memcpy((*newBuffer)->data(), sourcePointer, sourceSize);
+
+    (*newBuffer)->meta_data()->setInt64(kKeyTime, frameTime);
+}
+
+void CameraSourceTimeLapse::fillLastReadBufferCopy(MediaBuffer& sourceBuffer) {
+    int64_t frameTime;
+    CHECK(sourceBuffer.meta_data()->findInt64(kKeyTime, &frameTime));
+    createMediaBufferCopy(sourceBuffer, frameTime, &mLastReadBufferCopy);
+    mLastReadBufferCopy->add_ref();
+    mLastReadBufferCopy->setObserver(this);
+}
+
+status_t CameraSourceTimeLapse::read(
+        MediaBuffer **buffer, const ReadOptions *options) {
+    if (mLastReadBufferCopy == NULL) {
+        mLastReadStatus = CameraSource::read(buffer, options);
+
+        // mQuickStop may have turned to true while read was blocked. Make a copy of
+        // the buffer in that case.
+        Mutex::Autolock autoLock(mQuickStopLock);
+        if (mQuickStop && *buffer) {
+            fillLastReadBufferCopy(**buffer);
+        }
+        return mLastReadStatus;
+    } else {
+        (*buffer) = mLastReadBufferCopy;
+        (*buffer)->add_ref();
+        return mLastReadStatus;
+    }
+}
+
 // static
 void *CameraSourceTimeLapse::ThreadTimeLapseWrapper(void *me) {
     CameraSourceTimeLapse *source = static_cast<CameraSourceTimeLapse *>(me);
@@ -176,17 +246,31 @@ void *CameraSourceTimeLapse::ThreadTimeLapseWrapper(void *me) {
 }
 
 void CameraSourceTimeLapse::threadTimeLapseEntry() {
-    while(mStarted) {
-        if (mCameraIdle) {
-            LOGV("threadTimeLapseEntry: taking picture");
-            CHECK_EQ(OK, mCamera->takePicture());
+    while (mStarted) {
+        {
+            Mutex::Autolock autoLock(mCameraIdleLock);
+            if (!mCameraIdle) {
+                mCameraIdleCondition.wait(mCameraIdleLock);
+            }
+            CHECK(mCameraIdle);
             mCameraIdle = false;
-            usleep(mTimeBetweenTimeLapseFrameCaptureUs);
-        } else {
-            LOGV("threadTimeLapseEntry: camera busy with old takePicture. Sleeping a little.");
-            usleep(1E4);
         }
+
+        // Even if mQuickStop == true we need to take one more picture
+        // as a read() may be blocked, waiting for a frame to get available.
+        // After this takePicture, if mQuickStop == true, we can safely exit
+        // this thread as read() will make a copy of this last frame and keep
+        // returning it in the quick stop mode.
+        Mutex::Autolock autoLock(mQuickStopLock);
+        CHECK_EQ(OK, mCamera->takePicture());
+        if (mQuickStop) {
+            LOGV("threadTimeLapseEntry: Exiting due to mQuickStop = true");
+            return;
+        }
+        mTakePictureCondition.waitRelative(mQuickStopLock,
+                mTimeBetweenTimeLapseFrameCaptureUs * 1000);
     }
+    LOGV("threadTimeLapseEntry: Exiting due to mStarted = false");
 }
 
 void CameraSourceTimeLapse::startCameraRecording() {
@@ -201,6 +285,7 @@ void CameraSourceTimeLapse::startCameraRecording() {
         params.setPictureSize(mPictureWidth, mPictureHeight);
         mCamera->setParameters(params.flatten());
         mCameraIdle = true;
+        mStopWaitingForIdleCamera = false;
 
         // disable shutter sound and play the recording sound.
         mCamera->sendCommand(CAMERA_CMD_ENABLE_SHUTTER_SOUND, 0, 0);
@@ -224,11 +309,25 @@ void CameraSourceTimeLapse::stopCameraRecording() {
         void *dummy;
         pthread_join(mThreadTimeLapse, &dummy);
 
-        // play the recording sound and restart preview.
+        // Last takePicture may still be underway. Wait for the camera to get
+        // idle.
+        Mutex::Autolock autoLock(mCameraIdleLock);
+        mStopWaitingForIdleCamera = true;
+        if (!mCameraIdle) {
+            mCameraIdleCondition.wait(mCameraIdleLock);
+        }
+        CHECK(mCameraIdle);
+        mCamera->setListener(NULL);
+
+        // play the recording sound.
         mCamera->sendCommand(CAMERA_CMD_PLAY_RECORDING_SOUND, 0, 0);
-        CHECK_EQ(OK, mCamera->startPreview());
     } else {
+        mCamera->setListener(NULL);
         mCamera->stopRecording();
+    }
+    if (mLastReadBufferCopy) {
+        mLastReadBufferCopy->release();
+        mLastReadBufferCopy = NULL;
     }
 }
 
@@ -264,7 +363,9 @@ void *CameraSourceTimeLapse::ThreadStartPreviewWrapper(void *me) {
 
 void CameraSourceTimeLapse::threadStartPreview() {
     CHECK_EQ(OK, mCamera->startPreview());
+    Mutex::Autolock autoLock(mCameraIdleLock);
     mCameraIdle = true;
+    mCameraIdleCondition.signal();
 }
 
 void CameraSourceTimeLapse::restartPreview() {
@@ -358,7 +459,23 @@ bool CameraSourceTimeLapse::skipFrameAndModifyTimeStamp(int64_t *timestampUs) {
             LOGV("dataCallbackTimestamp timelapse: initial frame");
 
             mLastTimeLapseFrameRealTimestampUs = *timestampUs;
-        } else if (*timestampUs <
+            return false;
+        }
+
+        {
+            Mutex::Autolock autoLock(mQuickStopLock);
+
+            // mForceRead may be set to true by startQuickReadReturns(). In that
+            // case don't skip this frame.
+            if (mForceRead) {
+                LOGV("dataCallbackTimestamp timelapse: forced read");
+                mForceRead = false;
+                *timestampUs = mLastFrameTimestampUs;
+                return false;
+            }
+        }
+
+        if (*timestampUs <
                 (mLastTimeLapseFrameRealTimestampUs + mTimeBetweenTimeLapseFrameCaptureUs)) {
             // Skip all frames from last encoded frame until
             // sufficient time (mTimeBetweenTimeLapseFrameCaptureUs) has passed.
@@ -374,6 +491,7 @@ bool CameraSourceTimeLapse::skipFrameAndModifyTimeStamp(int64_t *timestampUs) {
 
             mLastTimeLapseFrameRealTimestampUs = *timestampUs;
             *timestampUs = mLastFrameTimestampUs + mTimeBetweenTimeLapseVideoFramesUs;
+            return false;
         }
     }
     return false;
@@ -383,6 +501,18 @@ void CameraSourceTimeLapse::dataCallbackTimestamp(int64_t timestampUs, int32_t m
             const sp<IMemory> &data) {
     if (!mUseStillCameraForTimeLapse) {
         mSkipCurrentFrame = skipFrameAndModifyTimeStamp(&timestampUs);
+    } else {
+        Mutex::Autolock autoLock(mCameraIdleLock);
+        // If we are using the still camera and stop() has been called, it may
+        // be waiting for the camera to get idle. In that case return
+        // immediately. Calling CameraSource::dataCallbackTimestamp() will lead
+        // to a deadlock since it tries to access CameraSource::mLock which in
+        // this case is held by CameraSource::stop() currently waiting for the
+        // camera to get idle. And camera will not get idle until this call
+        // returns.
+        if (mStopWaitingForIdleCamera) {
+            return;
+        }
     }
     CameraSource::dataCallbackTimestamp(timestampUs, msgType, data);
 }

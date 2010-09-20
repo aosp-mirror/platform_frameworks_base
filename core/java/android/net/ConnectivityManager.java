@@ -264,6 +264,24 @@ public class ConnectivityManager
         }
     }
 
+    /** @hide */
+    public LinkProperties getActiveLinkProperties() {
+        try {
+            return mService.getActiveLinkProperties();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /** @hide */
+    public LinkProperties getLinkProperties(int networkType) {
+        try {
+            return mService.getLinkProperties(networkType);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
     /** {@hide} */
     public boolean setRadios(boolean turnOn) {
         try {

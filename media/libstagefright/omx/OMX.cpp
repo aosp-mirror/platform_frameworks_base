@@ -245,13 +245,15 @@ status_t OMX::freeNode(node_id node) {
     CHECK(index >= 0);
     mLiveNodes.removeItemsAt(index);
 
+    instance->observer()->asBinder()->unlinkToDeath(this);
+
+    status_t err = instance->freeNode(mMaster);
+
     index = mDispatchers.indexOfKey(node);
     CHECK(index >= 0);
     mDispatchers.removeItemsAt(index);
 
-    instance->observer()->asBinder()->unlinkToDeath(this);
-
-    return instance->freeNode(mMaster);
+    return err;
 }
 
 status_t OMX::sendCommand(

@@ -612,16 +612,29 @@ void OpenGLRenderer::drawLines(float* points, int count, const SkPaint* paint) {
     const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
     const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
 
-    GLuint textureUnit = 0;
-    setupTextureAlpha8(mLine.getTexture(), 0, 0, textureUnit, 0.0f, 0.0f, r, g, b, a,
-            mode, false, true, mLine.getVertices(), mLine.getTexCoords());
+    const bool isAA = paint->isAntiAlias();
+    if (isAA) {
+        GLuint textureUnit = 0;
+        setupTextureAlpha8(mLine.getTexture(), 0, 0, textureUnit, 0.0f, 0.0f, r, g, b, a,
+                mode, false, true, mLine.getVertices(), mLine.getTexCoords());
+    } else {
+        setupColorRect(0.0f, 0.0f, 1.0f, 1.0f, r, g, b, a, mode, false);
+    }
+
+    const float strokeWidth = paint->getStrokeWidth();
+    const GLsizei elementsCount = isAA ? mLine.getElementsCount() : gMeshCount;
+    const GLenum drawMode = isAA ? GL_TRIANGLES : GL_TRIANGLE_STRIP;
 
     for (int i = 0; i < count; i += 4) {
         float tx = 0.0f;
         float ty = 0.0f;
 
-        mLine.update(points[i], points[i + 1], points[i + 2], points[i + 3],
-                paint->getStrokeWidth(), tx, ty);
+        if (isAA) {
+            mLine.update(points[i], points[i + 1], points[i + 2], points[i + 3],
+                    strokeWidth, tx, ty);
+        } else {
+            ty = strokeWidth <= 1.0f ? 0.0f : -strokeWidth * 0.5f;
+        }
 
         const float dx = points[i + 2] - points[i];
         const float dy = points[i + 3] - points[i + 1];
@@ -633,13 +646,17 @@ void OpenGLRenderer::drawLines(float* points, int count, const SkPaint* paint) {
             mModelView.rotate(angle * RAD_TO_DEG, 0.0f, 0.0f, 1.0f);
         }
         mModelView.translate(tx, ty, 0.0f);
+        if (!isAA) {
+            float length = mLine.getLength(points[i], points[i + 1], points[i + 2], points[i + 3]);
+            mModelView.scale(length, strokeWidth, 1.0f);
+        }
         mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
 
         if (mShader) {
             mShader->updateTransforms(mCaches.currentProgram, mModelView, *mSnapshot);
         }
 
-        glDrawArrays(GL_TRIANGLES, 0, mLine.getElementsCount());
+        glDrawArrays(drawMode, 0, elementsCount);
     }
 
     glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));
@@ -978,6 +995,14 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
     const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
 
+    setupColorRect(left, top, right, bottom, r, g, b, a, mode, ignoreTransform);
+
+    // Draw the mesh
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
+}
+
+void OpenGLRenderer::setupColorRect(float left, float top, float right, float bottom,
+        float r, float g, float b, float a, SkXfermode::Mode mode, bool ignoreTransform) {
     GLuint textureUnit = 0;
 
     // Describe the required shaders
@@ -990,7 +1015,7 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     }
 
     // Setup the blending mode
-    chooseBlending(alpha < 255 || (mShader && mShader->blend()), mode, description);
+    chooseBlending(a < 1.0f || (mShader && mShader->blend()), mode, description);
 
     // Build and use the appropriate shader
     useProgram(mCaches.programCache.get(description));
@@ -1017,9 +1042,6 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     if (mColorFilter) {
         mColorFilter->setupProgram(mCaches.currentProgram);
     }
-
-    // Draw the mesh
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
 }
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,

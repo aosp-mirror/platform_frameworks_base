@@ -770,6 +770,12 @@ class ZoomManager {
         } else {
             mMaxZoomScale = viewState.mMaxScale;
         }
+        if (viewState.mViewportWidth > 0 &&
+            mWebView.getSettings().getUseFixedViewport() &&
+            mWebView.getSettings().getUseWideViewPort()) {
+            // Use website specified viewport width.
+            setZoomOverviewWidth(viewState.mViewportWidth);
+        }
     }
 
     /**
@@ -835,7 +841,7 @@ class ZoomManager {
                 if (settings.getUseWideViewPort()
                     && (settings.getLoadWithOverviewMode() || settings.getUseFixedViewport())) {
                     mInitialZoomOverview = true;
-                    scale = (float) mWebView.getViewWidth() / WebView.DEFAULT_VIEWPORT_WIDTH;
+                    scale = (float) mWebView.getViewWidth() / mZoomOverviewWidth;
                 } else {
                     scale = viewState.mTextWrapScale;
                 }

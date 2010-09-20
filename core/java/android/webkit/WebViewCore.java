@@ -1705,7 +1705,12 @@ final class WebViewCore {
                                     nativeGetContentMinPrefWidth())));
                 }
             } else if (mViewportWidth > 0) {
-                width = Math.max(w, mViewportWidth);
+                if (mSettings.getUseFixedViewport()) {
+                    // Use website specified or desired fixed viewport width.
+                    width = mViewportWidth;
+                } else {
+                    width = Math.max(w, mViewportWidth);
+                }
             } else {
                 width = textwrapWidth;
             }
@@ -1780,6 +1785,7 @@ final class WebViewCore {
         int mScrollX;
         int mScrollY;
         boolean mMobileSite;
+        int mViewportWidth;
     }
 
     static class DrawData {
@@ -1821,6 +1827,13 @@ final class WebViewCore {
             }
             if (mInitialViewState != null) {
                 draw.mViewState = mInitialViewState;
+                if (mViewportWidth == -1 && mSettings.getUseFixedViewport() &&
+                    mSettings.getUseWideViewPort()) {
+                    // Use website's initial preferred width as the fixed viewport width.
+                    mViewportWidth = Math.min(mSettings.getMaxFixedViewportWidth(),
+                        draw.mMinPrefWidth);
+                    draw.mViewState.mViewportWidth = mViewportWidth;
+                }
                 mInitialViewState = null;
             }
             if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw NEW_PICTURE_MSG_ID");
@@ -2154,6 +2167,7 @@ final class WebViewCore {
         mInitialViewState.mScrollX = mRestoredX;
         mInitialViewState.mScrollY = mRestoredY;
         mInitialViewState.mMobileSite = (0 == mViewportWidth);
+        mInitialViewState.mViewportWidth = mViewportWidth;
         if (mRestoredScale > 0) {
             mInitialViewState.mViewScale = mRestoredScale / 100.0f;
             if (mRestoredTextWrapScale > 0) {

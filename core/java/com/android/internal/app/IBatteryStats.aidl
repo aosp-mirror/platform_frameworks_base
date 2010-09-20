@@ -49,10 +49,11 @@ interface IBatteryStats {
     void notePhoneSignalStrength(in SignalStrength signalStrength);
     void notePhoneDataConnectionState(int dataType, boolean hasData);
     void notePhoneState(int phoneState);
-    void noteWifiOn(int uid);
-    void noteWifiOff(int uid);
-    void noteWifiRunning();
-    void noteWifiStopped();
+    void noteWifiOn();
+    void noteWifiOff();
+    void noteWifiRunning(in WorkSource ws);
+    void noteWifiRunningChanged(in WorkSource oldWs, in WorkSource newWs);
+    void noteWifiStopped(in WorkSource ws);
     void noteBluetoothOn();
     void noteBluetoothOff();
     void noteFullWifiLockAcquired(int uid);

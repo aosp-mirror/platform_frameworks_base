@@ -302,10 +302,25 @@ private:
 
     // If the xml configuration file does not exist, use hard-coded values
     static MediaProfiles* createDefaultInstance();
-    static CamcorderProfile *createDefaultCamcorderLowProfile();
-    static CamcorderProfile *createDefaultCamcorderHighProfile();
-    static CamcorderProfile *createDefaultCamcorderTimeLapseLowProfile();
-    static CamcorderProfile *createDefaultCamcorderTimeLapseHighProfile();
+
+    static CamcorderProfile *createDefaultCamcorderQcifProfile(camcorder_quality quality);
+    static CamcorderProfile *createDefaultCamcorderCifProfile(camcorder_quality quality);
+    static void createDefaultCamcorderLowProfiles(
+            MediaProfiles::CamcorderProfile **lowProfile,
+            MediaProfiles::CamcorderProfile **lowSpecificProfile);
+    static void createDefaultCamcorderHighProfiles(
+            MediaProfiles::CamcorderProfile **highProfile,
+            MediaProfiles::CamcorderProfile **highSpecificProfile);
+
+    static CamcorderProfile *createDefaultCamcorderTimeLapseQcifProfile(camcorder_quality quality);
+    static CamcorderProfile *createDefaultCamcorderTimeLapse480pProfile(camcorder_quality quality);
+    static void createDefaultCamcorderTimeLapseLowProfiles(
+            MediaProfiles::CamcorderProfile **lowTimeLapseProfile,
+            MediaProfiles::CamcorderProfile **lowSpecificTimeLapseProfile);
+    static void createDefaultCamcorderTimeLapseHighProfiles(
+            MediaProfiles::CamcorderProfile **highTimeLapseProfile,
+            MediaProfiles::CamcorderProfile **highSpecificTimeLapseProfile);
+
     static void createDefaultCamcorderProfiles(MediaProfiles *profiles);
     static void createDefaultVideoEncoders(MediaProfiles *profiles);
     static void createDefaultAudioEncoders(MediaProfiles *profiles);

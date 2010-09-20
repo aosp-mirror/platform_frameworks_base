@@ -79,7 +79,7 @@ class Network {
      * HTTP authentication handler: takes care of synchronization of HTTP
      * authentication requests.
      */
-    private HttpAuthHandler mHttpAuthHandler;
+    private HttpAuthHandlerImpl mHttpAuthHandler;
 
     private Context mContext;
 
@@ -158,7 +158,7 @@ class Network {
         }
         mContext = context;
         mSslErrorHandler = new SslErrorHandler();
-        mHttpAuthHandler = new HttpAuthHandler(this);
+        mHttpAuthHandler = new HttpAuthHandlerImpl(this);
 
         mRequestQueue = new RequestQueue(context);
     }

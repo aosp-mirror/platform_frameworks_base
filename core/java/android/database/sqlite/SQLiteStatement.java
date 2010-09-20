@@ -71,7 +71,7 @@ public class SQLiteStatement extends SQLiteProgram
     }
 
     /**
-     * Execute this SQL statement, if the the number of rows affected by exection of this SQL
+     * Execute this SQL statement, if the the number of rows affected by execution of this SQL
      * statement is of any importance to the caller - for example, UPDATE / DELETE SQL statements.
      *
      * @return the number of rows affected by this SQL statement execution.
@@ -82,7 +82,15 @@ public class SQLiteStatement extends SQLiteProgram
         synchronized(this) {
             try {
                 long timeStart = acquireAndLock(WRITE);
-                int numChanges = native_execute();
+                int numChanges = 0;
+                if ((mStatementType & STATEMENT_DONT_PREPARE) > 0) {
+                    // since the statement doesn't have to be prepared,
+                    // call the following native method which will not prepare
+                    // the query plan
+                    native_executeSql(mSql);
+                } else {
+                    numChanges = native_execute();
+                }
                 mDatabase.logTimeStat(mSql, timeStart);
                 return numChanges;
             } finally {
@@ -199,8 +207,8 @@ public class SQLiteStatement extends SQLiteProgram
         mState = 0;
         // use pooled database connection handles for SELECT SQL statements
         mDatabase.verifyDbIsOpen();
-        SQLiteDatabase db = (mStatementType != DatabaseUtils.STATEMENT_SELECT) ? mDatabase
-                : mDatabase.getDbConnection(mSql);
+        SQLiteDatabase db = ((mStatementType & SQLiteProgram.STATEMENT_USE_POOLED_CONN) > 0)
+                ? mDatabase.getDbConnection(mSql) : mDatabase;
         // use the database connection obtained above
         mOrigDb = mDatabase;
         mDatabase = db;
@@ -217,13 +225,14 @@ public class SQLiteStatement extends SQLiteProgram
          * beginTransaction() methods in SQLiteDatabase call lockForced() before
          * calling execSQL("BEGIN transaction").
          */
-        if (mStatementType == DatabaseUtils.STATEMENT_BEGIN) {
+        if ((mStatementType & SQLiteProgram.STATEMENT_TYPE_MASK) == DatabaseUtils.STATEMENT_BEGIN) {
             if (!mDatabase.isDbLockedByCurrentThread()) {
                 // transaction is  NOT started by calling beginTransaction() methods in
                 // SQLiteDatabase
                 mDatabase.setTransactionUsingExecSqlFlag();
             }
-        } else if (mStatementType == DatabaseUtils.STATEMENT_UPDATE) {
+        } else if ((mStatementType & SQLiteProgram.STATEMENT_TYPE_MASK) ==
+                DatabaseUtils.STATEMENT_UPDATE) {
             // got update SQL statement. if there is NO pending transaction, start one
             if (!mDatabase.inTransaction()) {
                 mDatabase.beginTransactionNonExclusive();
@@ -257,8 +266,10 @@ public class SQLiteStatement extends SQLiteProgram
         } else if (mState == LOCK_ACQUIRED) {
             mDatabase.unlock();
         }
-        if (mStatementType == DatabaseUtils.STATEMENT_COMMIT ||
-                mStatementType == DatabaseUtils.STATEMENT_ABORT) {
+        if ((mStatementType & SQLiteProgram.STATEMENT_TYPE_MASK) ==
+                DatabaseUtils.STATEMENT_COMMIT ||
+                (mStatementType & SQLiteProgram.STATEMENT_TYPE_MASK) ==
+                DatabaseUtils.STATEMENT_ABORT) {
             mDatabase.resetTransactionUsingExecSqlFlag();
         }
         clearBindings();
@@ -275,4 +286,5 @@ public class SQLiteStatement extends SQLiteProgram
     private final native long native_1x1_long();
     private final native String native_1x1_string();
     private final native ParcelFileDescriptor native_1x1_blob_ashmem() throws IOException;
+    private final native void native_executeSql(String sql);
 }

@@ -74,14 +74,18 @@ public:
 
     ~Line() {
         delete mPatch;
-        delete mXDivs;
-        delete mYDivs;
+        delete[] mXDivs;
+        delete[] mYDivs;
 
         glDeleteTextures(1, &mTexture);
     }
 
+    inline float getLength(float x1, float y1, float x2, float y2) {
+        return sqrtf((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    }
+
     void update(float x1, float y1, float x2, float y2, float lineWidth, float& tx, float& ty) {
-        const float length = sqrtf((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+        const float length = getLength(x1, y1, x2, y2);
         const float half = lineWidth * 0.5f;
 
         mPatch->updateVertices(gLineTextureWidth, gLineTextureHeight,
@@ -89,7 +93,7 @@ public:
                 mXDivs, mYDivs, mXDivsCount, mYDivsCount);
 
         tx = -gLineAABias;
-        ty = -half - gLineAABias;
+        ty = lineWidth <= 1.0f ? -gLineAABias : -half - gLineAABias;
     }
 
     inline GLvoid* getVertices() const {

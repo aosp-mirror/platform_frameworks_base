@@ -20,47 +20,75 @@ package android.net.sip;
  * Defines {@link ISipSession} states.
  * @hide
  */
-public enum SipSessionState {
+public class SipSessionState {
     /** When session is ready to initiate a call or transaction. */
-    READY_TO_CALL,
+    public static final int READY_TO_CALL = 0;
 
     /** When the registration request is sent out. */
-    REGISTERING,
+    public static final int REGISTERING = 1;
 
     /** When the unregistration request is sent out. */
-    DEREGISTERING,
+    public static final int DEREGISTERING = 2;
 
     /** When an INVITE request is received. */
-    INCOMING_CALL,
+    public static final int INCOMING_CALL = 3;
 
     /** When an OK response is sent for the INVITE request received. */
-    INCOMING_CALL_ANSWERING,
+    public static final int INCOMING_CALL_ANSWERING = 4;
 
     /** When an INVITE request is sent. */
-    OUTGOING_CALL,
+    public static final int OUTGOING_CALL = 5;
 
     /** When a RINGING response is received for the INVITE request sent. */
-    OUTGOING_CALL_RING_BACK,
+    public static final int OUTGOING_CALL_RING_BACK = 6;
 
     /** When a CANCEL request is sent for the INVITE request sent. */
-    OUTGOING_CALL_CANCELING,
+    public static final int OUTGOING_CALL_CANCELING = 7;
 
     /** When a call is established. */
-    IN_CALL,
+    public static final int IN_CALL = 8;
 
     /** Some error occurs when making a remote call to {@link ISipSession}. */
-    REMOTE_ERROR,
+    public static final int REMOTE_ERROR = 9;
 
     /** When an OPTIONS request is sent. */
-    PINGING;
+    public static final int PINGING = 10;
+
+    /** Not defined. */
+    public static final int NOT_DEFINED = 101;
 
     /**
-     * Checks if the specified string represents the same state as this object.
-     *
-     * @return true if the specified string represents the same state as this
-     *      object
+     * Converts the state to string.
      */
-    public boolean equals(String state) {
-        return toString().equals(state);
+    public static String toString(int state) {
+        switch (state) {
+            case READY_TO_CALL:
+                return "READY_TO_CALL";
+            case REGISTERING:
+                return "REGISTERING";
+            case DEREGISTERING:
+                return "DEREGISTERING";
+            case INCOMING_CALL:
+                return "INCOMING_CALL";
+            case INCOMING_CALL_ANSWERING:
+                return "INCOMING_CALL_ANSWERING";
+            case OUTGOING_CALL:
+                return "OUTGOING_CALL";
+            case OUTGOING_CALL_RING_BACK:
+                return "OUTGOING_CALL_RING_BACK";
+            case OUTGOING_CALL_CANCELING:
+                return "OUTGOING_CALL_CANCELING";
+            case IN_CALL:
+                return "IN_CALL";
+            case REMOTE_ERROR:
+                return "REMOTE_ERROR";
+            case PINGING:
+                return "PINGING";
+            default:
+                return "NOT_DEFINED";
+        }
+    }
+
+    private SipSessionState() {
     }
 }

@@ -60,7 +60,7 @@ public class SimpleModelRS {
     private Font mItalic;
     private Allocation mTextAlloc;
 
-    private ScriptC_Simplemodel mScript;
+    private ScriptC_simplemodel mScript;
 
     int mLastX;
     int mLastY;
@@ -138,7 +138,7 @@ public class SimpleModelRS {
 
     private void initRS() {
 
-        mScript = new ScriptC_Simplemodel(mRS, mRes, R.raw.simplemodel, true);
+        mScript = new ScriptC_simplemodel(mRS, mRes, R.raw.simplemodel, true);
 
         initPFS();
         initPF();

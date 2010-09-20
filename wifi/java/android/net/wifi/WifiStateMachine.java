@@ -56,6 +56,7 @@ import android.os.SystemProperties;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Process;
+import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.EventLog;
@@ -400,6 +401,26 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
     private final AtomicInteger mLastEnableUid = new AtomicInteger(Process.myUid());
     private final AtomicInteger mLastApEnableUid = new AtomicInteger(Process.myUid());
+
+    /**
+     * Keep track of whether WIFI is running.
+     */
+    private boolean mIsRunning = false;
+    
+    /**
+     * Keep track of whether we last told the battery stats we had started.
+     */
+    private boolean mReportedRunning = false;
+
+    /**
+     * Most recently set source of starting WIFI.
+     */
+    private final WorkSource mRunningWifiUids = new WorkSource();
+
+    /**
+     * The last reported UIDs that were responsible for starting WIFI.
+     */
+    private final WorkSource mLastRunningWifiUids = new WorkSource();
 
     private final IBatteryStats mBatteryStats;
 
@@ -887,6 +908,40 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         sendMessage(CMD_REQUEST_CM_WAKELOCK);
     }
 
+    public void updateBatteryWorkSource(WorkSource newSource) {
+        synchronized (mRunningWifiUids) {
+            try {
+                if (newSource != null) {
+                    mRunningWifiUids.set(newSource);
+                }
+                if (mIsRunning) {
+                    if (mReportedRunning) {
+                        // If the work source has changed since last time, need
+                        // to remove old work from battery stats.
+                        if (mLastRunningWifiUids.diff(mRunningWifiUids)) {
+                            mBatteryStats.noteWifiRunningChanged(mLastRunningWifiUids,
+                                    mRunningWifiUids);
+                            mLastRunningWifiUids.set(mRunningWifiUids);
+                        }
+                    } else {
+                        // Now being started, report it.
+                        mBatteryStats.noteWifiRunning(mRunningWifiUids);
+                        mLastRunningWifiUids.set(mRunningWifiUids);
+                        mReportedRunning = true;
+                    }
+                } else {
+                    if (mReportedRunning) {
+                        // Last reported we were running, time to stop.
+                        mBatteryStats.noteWifiStopped(mLastRunningWifiUids);
+                        mLastRunningWifiUids.clear();
+                        mReportedRunning = false;
+                    }
+                }
+            } catch (RemoteException ignore) {
+            }
+        }
+    }
+
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
@@ -988,9 +1043,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
         try {
             if (wifiState == WIFI_STATE_ENABLED) {
-                mBatteryStats.noteWifiOn(mLastEnableUid.get());
+                mBatteryStats.noteWifiOn();
             } else if (wifiState == WIFI_STATE_DISABLED) {
-                mBatteryStats.noteWifiOff(mLastEnableUid.get());
+                mBatteryStats.noteWifiOff();
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to note battery stats in wifi");
@@ -1012,9 +1067,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
         try {
             if (wifiApState == WIFI_AP_STATE_ENABLED) {
-                mBatteryStats.noteWifiOn(mLastApEnableUid.get());
+                mBatteryStats.noteWifiOn();
             } else if (wifiApState == WIFI_AP_STATE_DISABLED) {
-                mBatteryStats.noteWifiOff(mLastApEnableUid.get());
+                mBatteryStats.noteWifiOff();
             }
         } catch (RemoteException e) {
             Log.d(TAG, "Failed to note battery stats in wifi");
@@ -2053,9 +2108,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             if (DBG) Log.d(TAG, getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
-            try {
-                mBatteryStats.noteWifiRunning();
-            } catch (RemoteException ignore) {}
+            mIsRunning = true;
+            updateBatteryWorkSource(null);
 
             /* Initialize channel count */
             setNumAllowedChannels();
@@ -2141,9 +2195,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         @Override
         public void exit() {
             if (DBG) Log.d(TAG, getName() + "\n");
-            try {
-                mBatteryStats.noteWifiStopped();
-            } catch (RemoteException ignore) { }
+            mIsRunning = false;
+            updateBatteryWorkSource(null);
             mScanResults = null;
         }
     }

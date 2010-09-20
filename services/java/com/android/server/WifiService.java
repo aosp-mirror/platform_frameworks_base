@@ -182,7 +182,12 @@ public class WifiService extends IWifiManager.Stub {
      * something other than scanning, we reset this to 0.
      */
     private int mNumScansSinceNetworkStateChange;
-
+    
+    /**
+     * Temporary for computing UIDS that are responsible for starting WIFI.
+     * Protected by mWifiStateTracker lock.
+     */
+    private final WorkSource mTmpWorkSource = new WorkSource();
 
     WifiService(Context context) {
         mContext = context;
@@ -404,6 +409,9 @@ public class WifiService extends IWifiManager.Stub {
             mAirplaneModeOverwridden.set(true);
         }
 
+        if (enable) {
+            reportStartWorkSource();
+        }
         mWifiStateMachine.setWifiEnabled(enable);
 
         /*
@@ -812,6 +820,9 @@ public class WifiService extends IWifiManager.Stub {
                 mAlarmManager.cancel(mIdleIntent);
                 mDeviceIdle = false;
                 mScreenOff = false;
+                // Once the screen is on, we are not keeping WIFI running
+                // because of any locks so clear that tracking immediately.
+                reportStartWorkSource();
                 mWifiStateMachine.enableRssiPolling(true);
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 Slog.d(TAG, "ACTION_SCREEN_OFF");
@@ -847,6 +858,7 @@ public class WifiService extends IWifiManager.Stub {
             } else if (action.equals(ACTION_DEVICE_IDLE)) {
                 Slog.d(TAG, "got ACTION_DEVICE_IDLE");
                 mDeviceIdle = true;
+                reportStartWorkSource();
             } else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
                 /*
                  * Set a timer to put Wi-Fi to sleep, but only if the screen is off
@@ -927,6 +939,16 @@ public class WifiService extends IWifiManager.Stub {
         }
     };
 
+    private synchronized void reportStartWorkSource() {
+        mTmpWorkSource.clear();
+        if (mDeviceIdle) {
+            for (int i=0; i<mLocks.mList.size(); i++) {
+                mTmpWorkSource.add(mLocks.mList.get(i).mWorkSource);
+            }
+        }
+        mWifiStateMachine.updateBatteryWorkSource(mTmpWorkSource);
+    }
+    
     private void updateWifiState() {
         boolean wifiEnabled = getPersistedWifiEnabled();
         boolean airplaneMode = isAirplaneModeOn() && !mAirplaneModeOverwridden.get();
@@ -947,6 +969,7 @@ public class WifiService extends IWifiManager.Stub {
 
         if (wifiShouldBeEnabled) {
             if (wifiShouldBeStarted) {
+                reportStartWorkSource();
                 mWifiStateMachine.setWifiEnabled(true);
                 mWifiStateMachine.setScanOnlyMode(
                         strongestLockMode == WifiManager.WIFI_MODE_SCAN_ONLY);
@@ -1178,6 +1201,10 @@ public class WifiService extends IWifiManager.Stub {
             Binder.restoreCallingIdentity(ident);
         }
 
+        // Be aggressive about adding new locks into the accounted state...
+        // we want to over-report rather than under-report.
+        reportStartWorkSource();
+        
         updateWifiState();
         return true;
     }

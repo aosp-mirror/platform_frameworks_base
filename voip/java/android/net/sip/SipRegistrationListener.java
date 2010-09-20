@@ -42,7 +42,8 @@ public interface SipRegistrationListener {
      * @param localProfileUri the URI string of the SIP profile to register with
      * @param errorCode error code of this error
      * @param errorMessage error message
+     * @see SipErrorCode
      */
-    void onRegistrationFailed(String localProfileUri, SipErrorCode errorCode,
+    void onRegistrationFailed(String localProfileUri, int errorCode,
             String errorMessage);
 }

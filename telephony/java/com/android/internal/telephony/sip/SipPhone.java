@@ -801,15 +801,15 @@ public class SipPhone extends SipPhoneBase {
 
     private static Call.State getCallStateFrom(SipAudioCall sipAudioCall) {
         if (sipAudioCall.isOnHold()) return Call.State.HOLDING;
-        SipSessionState sessionState = sipAudioCall.getState();
+        int sessionState = sipAudioCall.getState();
         switch (sessionState) {
-            case READY_TO_CALL:            return Call.State.IDLE;
-            case INCOMING_CALL:
-            case INCOMING_CALL_ANSWERING:  return Call.State.INCOMING;
-            case OUTGOING_CALL:            return Call.State.DIALING;
-            case OUTGOING_CALL_RING_BACK:  return Call.State.ALERTING;
-            case OUTGOING_CALL_CANCELING:  return Call.State.DISCONNECTING;
-            case IN_CALL:                  return Call.State.ACTIVE;
+            case SipSessionState.READY_TO_CALL:            return Call.State.IDLE;
+            case SipSessionState.INCOMING_CALL:
+            case SipSessionState.INCOMING_CALL_ANSWERING:  return Call.State.INCOMING;
+            case SipSessionState.OUTGOING_CALL:            return Call.State.DIALING;
+            case SipSessionState.OUTGOING_CALL_RING_BACK:  return Call.State.ALERTING;
+            case SipSessionState.OUTGOING_CALL_CANCELING:  return Call.State.DISCONNECTING;
+            case SipSessionState.IN_CALL:                  return Call.State.ACTIVE;
             default:
                 Log.w(LOG_TAG, "illegal connection state: " + sessionState);
                 return Call.State.DISCONNECTED;
@@ -822,7 +822,9 @@ public class SipPhone extends SipPhoneBase {
 
         @Override
         public void onCallEnded(SipAudioCall call) {
-            onCallEnded(Connection.DisconnectCause.NORMAL);
+            onCallEnded(call.isInCall()
+                    ? Connection.DisconnectCause.NORMAL
+                    : Connection.DisconnectCause.INCOMING_MISSED);
         }
 
         @Override
@@ -831,30 +833,31 @@ public class SipPhone extends SipPhoneBase {
         }
 
         @Override
-        public void onError(SipAudioCall call, SipErrorCode errorCode,
+        public void onError(SipAudioCall call, int errorCode,
                 String errorMessage) {
             switch (errorCode) {
-                case PEER_NOT_REACHABLE:
+                case SipErrorCode.PEER_NOT_REACHABLE:
                     onError(Connection.DisconnectCause.NUMBER_UNREACHABLE);
                     break;
-                case INVALID_REMOTE_URI:
+                case SipErrorCode.INVALID_REMOTE_URI:
                     onError(Connection.DisconnectCause.INVALID_NUMBER);
                     break;
-                case TIME_OUT:
-                case TRANSACTION_TERMINTED:
+                case SipErrorCode.TIME_OUT:
+                case SipErrorCode.TRANSACTION_TERMINTED:
                     onError(Connection.DisconnectCause.TIMED_OUT);
                     break;
-                case DATA_CONNECTION_LOST:
+                case SipErrorCode.DATA_CONNECTION_LOST:
                     onError(Connection.DisconnectCause.LOST_SIGNAL);
                     break;
-                case INVALID_CREDENTIALS:
+                case SipErrorCode.INVALID_CREDENTIALS:
                     onError(Connection.DisconnectCause.INVALID_CREDENTIALS);
                     break;
-                case SOCKET_ERROR:
-                case SERVER_ERROR:
-                case CLIENT_ERROR:
+                case SipErrorCode.SOCKET_ERROR:
+                case SipErrorCode.SERVER_ERROR:
+                case SipErrorCode.CLIENT_ERROR:
                 default:
-                    Log.w(LOG_TAG, "error: " + errorCode + ": " + errorMessage);
+                    Log.w(LOG_TAG, "error: " + SipErrorCode.toString(errorCode)
+                            + ": " + errorMessage);
                     onError(Connection.DisconnectCause.ERROR_UNSPECIFIED);
             }
         }

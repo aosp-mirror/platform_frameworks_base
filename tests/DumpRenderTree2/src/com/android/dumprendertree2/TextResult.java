@@ -41,11 +41,11 @@ public class TextResult extends AbstractResult {
     private String mRelativePath;
     private boolean mDidTimeOut;
     private ResultCode mResultCode;
-    private Message mResultObtainedMsg;
+    transient private Message mResultObtainedMsg;
 
     private boolean mDumpChildFramesAsText;
 
-    private Handler mHandler = new Handler() {
+    transient private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == MSG_DOCUMENT_AS_TEXT) {
@@ -76,6 +76,13 @@ public class TextResult extends AbstractResult {
         setAdditionalTextOutputString(bundle.getString("additionalTextOutputString"));
         mRelativePath = bundle.getString("relativePath");
         mDidTimeOut = bundle.getBoolean("didTimeOut");
+    }
+
+    @Override
+    public void clearResults() {
+        super.clearResults();
+        mExpectedResult = null;
+        mActualResult = null;
     }
 
     @Override

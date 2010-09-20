@@ -40,10 +40,8 @@ public class ForwarderManager {
      * We use these ports because other webkit platforms do. They are set up in
      * external/webkit/LayoutTests/http/conf/apache2-debian-httpd.conf
      */
-    public static final int HTTP_PORT = 8080;
+    public static final int HTTP_PORT = 8000;
     public static final int HTTPS_PORT = 8443;
-
-    public static final String HOST = "localhost";
 
     private static ForwarderManager forwarderManager;
 
@@ -75,7 +73,7 @@ public class ForwarderManager {
 
         URL url = null;
         try {
-            url = new URL(protocol, HOST, port, "/");
+            url = new URL(protocol, HOST_IP, port, "/");
         } catch (MalformedURLException e) {
             assert false : "isHttps=" + isHttps;
         }

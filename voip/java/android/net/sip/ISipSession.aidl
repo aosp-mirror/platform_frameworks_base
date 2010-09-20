@@ -49,14 +49,11 @@ interface ISipSession {
 
     /**
      * Gets the session state. The value returned must be one of the states in
-     * {@link SipSessionState}. One may convert it to {@link SipSessionState} by
-     * <code>
-     *      Enum.valueOf(SipSessionState.class, session.getState());
-     * </code>
+     * {@link SipSessionState}.
      *
      * @return the session state
      */
-    String getState();
+    int getState();
 
     /**
      * Checks if the session is in a call.

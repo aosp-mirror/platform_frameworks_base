@@ -41,9 +41,9 @@ public class ImageProcessingActivity extends Activity
     private Bitmap mBitmapIn;
     private Bitmap mBitmapOut;
     private Bitmap mBitmapScratch;
-    private ScriptC_Threshold mScript;
-    private ScriptC_VerticalBlur mScriptVBlur;
-    private ScriptC_HorizontalBlur mScriptHBlur;
+    private ScriptC_threshold mScript;
+    private ScriptC_vertical_blur mScriptVBlur;
+    private ScriptC_horizontal_blur mScriptHBlur;
     private int mRadius = 0;
     private SeekBar mRadiusSeekBar;
 
@@ -352,7 +352,7 @@ public class ImageProcessingActivity extends Activity
         mSaturationSeekBar.setProgress(50);
 
         mBenchmarkResult = (TextView) findViewById(R.id.benchmarkText);
-        mBenchmarkResult.setText("Benchmark no yet run");
+        mBenchmarkResult.setText("Benchmark not yet run");
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
@@ -380,10 +380,10 @@ public class ImageProcessingActivity extends Activity
         mScratchPixelsAllocation1 = Allocation.createTyped(mRS, tb.create());
         mScratchPixelsAllocation2 = Allocation.createTyped(mRS, tb.create());
 
-        mScriptVBlur = new ScriptC_VerticalBlur(mRS, getResources(), R.raw.verticalblur, false);
-        mScriptHBlur = new ScriptC_HorizontalBlur(mRS, getResources(), R.raw.horizontalblur, false);
+        mScriptVBlur = new ScriptC_vertical_blur(mRS, getResources(), R.raw.vertical_blur, false);
+        mScriptHBlur = new ScriptC_horizontal_blur(mRS, getResources(), R.raw.horizontal_blur, false);
 
-        mScript = new ScriptC_Threshold(mRS, getResources(), R.raw.threshold, false);
+        mScript = new ScriptC_threshold(mRS, getResources(), R.raw.threshold, false);
         mScript.set_width(mBitmapIn.getWidth());
         mScript.set_height(mBitmapIn.getHeight());
         mScript.set_radius(mRadius);

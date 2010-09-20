@@ -18,7 +18,15 @@ package com.android.dumprendertree2;
 
 import android.os.Bundle;
 import android.os.Message;
+import android.util.Log;
 import android.webkit.WebView;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 /**
  * A class that represent a result of the test. It is responsible for returning the result's
@@ -49,7 +57,7 @@ public abstract class AbstractResult implements Comparable<AbstractResult> {
     /**
      * A code representing the result of comparing actual and expected results.
      */
-    public enum ResultCode {
+    public enum ResultCode implements Serializable {
         RESULTS_MATCH("Results match"),
         RESULTS_DIFFER("Results differ"),
         NO_EXPECTED_RESULT("No expected result"),
@@ -79,6 +87,58 @@ public abstract class AbstractResult implements Comparable<AbstractResult> {
 
     public String getAdditionalTextOutputString() {
         return mAdditionalTextOutputString;
+    }
+
+    public byte[] getBytes() {
+        ByteArrayOutputStream baos = null;
+        ObjectOutputStream oos = null;
+        try {
+            try {
+                baos = new ByteArrayOutputStream();
+                oos = new ObjectOutputStream(baos);
+                oos.writeObject(this);
+            } finally {
+                if (baos != null) {
+                    baos.close();
+                }
+                if (oos != null) {
+                    oos.close();
+                }
+            }
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Unable to serialize result: " + getRelativePath(), e);
+        }
+
+        return baos == null ? null : baos.toByteArray();
+    }
+
+    public static AbstractResult create(byte[] bytes) {
+        ByteArrayInputStream bais = null;
+        ObjectInputStream ois = null;
+        AbstractResult result = null;
+        try {
+            try {
+                bais = new ByteArrayInputStream(bytes);
+                ois = new ObjectInputStream(bais);
+                result = (AbstractResult)ois.readObject();
+            } finally {
+                if (bais != null) {
+                    bais.close();
+                }
+                if (ois != null) {
+                    ois.close();
+                }
+            }
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Unable to deserialize result!", e);
+        } catch (ClassNotFoundException e) {
+            Log.e(LOG_TAG, "Unable to deserialize result!", e);
+        }
+        return result;
+    }
+
+    public void clearResults() {
+        mAdditionalTextOutputString = null;
     }
 
     /**
