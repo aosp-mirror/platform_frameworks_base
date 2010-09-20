@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * All information we are collecting about things that can happen that impact
@@ -3836,6 +3837,22 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    private HistoryItem mHistoryIterator;
+
+    public boolean startIteratingHistoryLocked() {
+        return (mHistoryIterator = mHistory) != null;
+    }
+
+    public boolean getNextHistoryLocked(HistoryItem out) {
+        HistoryItem cur = mHistoryIterator;
+        if (cur == null) {
+            return false;
+        }
+        out.setTo(cur);
+        mHistoryIterator = cur.next;
+        return true;
+    }
+
     @Override
     public HistoryItem getHistory() {
         return mHistory;
@@ -3962,7 +3979,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             if (doWrite || (mLastWriteTime + (60 * 1000)) < mSecRealtime) {
                 if (mFile != null) {
-                    writeLocked();
+                    writeAsyncLocked();
                 }
             }
         }
@@ -4358,11 +4375,22 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void shutdownLocked() {
-        writeLocked();
+        writeSyncLocked();
         mShuttingDown = true;
     }
     
-    public void writeLocked() {
+    Parcel mPendingWrite = null;
+    final ReentrantLock mWriteLock = new ReentrantLock();
+
+    public void writeAsyncLocked() {
+        writeLocked(false);
+    }
+
+    public void writeSyncLocked() {
+        writeLocked(true);
+    }
+
+    void writeLocked(boolean sync) {
         if (mFile == null) {
             Slog.w("BatteryStats", "writeLocked: no file associated with this instance");
             return;
@@ -4372,23 +4400,51 @@ public final class BatteryStatsImpl extends BatteryStats {
             return;
         }
         
+        Parcel out = Parcel.obtain();
+        writeSummaryToParcel(out);
+        mLastWriteTime = SystemClock.elapsedRealtime();
+
+        if (mPendingWrite != null) {
+            mPendingWrite.recycle();
+        }
+        mPendingWrite = out;
+
+        if (sync) {
+            commitPendingDataToDisk();
+        } else {
+            Thread thr = new Thread("BatteryStats-Write") {
+                @Override
+                public void run() {
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                    commitPendingDataToDisk();
+                }
+            };
+            thr.start();
+        }
+    }
+
+    public void commitPendingDataToDisk() {
+        Parcel next;
+        synchronized (this) {
+            next = mPendingWrite;
+            mPendingWrite = null;
+
+            mWriteLock.lock();
+        }
+
         try {
             FileOutputStream stream = new FileOutputStream(mFile.chooseForWrite());
-            Parcel out = Parcel.obtain();
-            writeSummaryToParcel(out);
-            stream.write(out.marshall());
-            out.recycle();
-
+            stream.write(next.marshall());
             stream.flush();
             stream.close();
             mFile.commit();
-
-            mLastWriteTime = SystemClock.elapsedRealtime();
-            return;
         } catch (IOException e) {
             Slog.w("BatteryStats", "Error writing battery statistics", e);
+            mFile.rollback();
+        } finally {
+            next.recycle();
+            mWriteLock.unlock();
         }
-        mFile.rollback();
     }
 
     static byte[] readFully(FileInputStream stream) throws java.io.IOException {
