@@ -36,6 +36,14 @@
             android:gravity="center_vertical"
             android:orientation="horizontal"
             >
+            <ImageView
+                class="com.android.systemui.statusbar.tablet.NotificationIconArea$MoreView"
+                android:id="@+id/expand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_sysbar_open"
+                android:onClick="notificationIconsClicked"
+                />
             <view
                 class="com.android.systemui.statusbar.tablet.NotificationIconArea$IconLayout"
                 android:id="@+id/icons"
@@ -50,14 +58,6 @@
                 android:layout_height="match_parent"
                 android:background="@drawable/sysbar_hidenotification_handle"
                 android:layout_marginLeft="8dip"
-                />
-            <ImageView
-                class="com.android.systemui.statusbar.tablet.NotificationIconArea$MoreView"
-                android:id="@+id/expand"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_sysbar_open"
-                android:onClick="notificationIconsClicked"
                 />
 
         </com.android.systemui.statusbar.tablet.NotificationIconArea>
