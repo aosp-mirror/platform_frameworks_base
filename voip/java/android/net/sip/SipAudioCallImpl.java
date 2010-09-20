@@ -266,7 +266,6 @@ public class SipAudioCallImpl extends SipSessionAdapter
     @Override
     public void onCallEnded(ISipSession session) {
         Log.d(TAG, "sip call ended: " + session);
-        close();
         Listener listener = mListener;
         if (listener != null) {
             try {
@@ -275,12 +274,12 @@ public class SipAudioCallImpl extends SipSessionAdapter
                 Log.e(TAG, "onCallEnded()", t);
             }
         }
+        close();
     }
 
     @Override
     public void onCallBusy(ISipSession session) {
         Log.d(TAG, "sip call busy: " + session);
-        close(false);
         Listener listener = mListener;
         if (listener != null) {
             try {
@@ -289,6 +288,7 @@ public class SipAudioCallImpl extends SipSessionAdapter
                 Log.e(TAG, "onCallBusy()", t);
             }
         }
+        close(false);
     }
 
     @Override
@@ -313,18 +313,18 @@ public class SipAudioCallImpl extends SipSessionAdapter
                 + ": " + message);
         mErrorCode = errorCode;
         mErrorMessage = message;
-        synchronized (this) {
-            if ((mErrorCode == SipErrorCode.DATA_CONNECTION_LOST)
-                    || !isInCall()) {
-                close(true);
-            }
-        }
         Listener listener = mListener;
         if (listener != null) {
             try {
                 listener.onError(this, errorCode, message);
             } catch (Throwable t) {
                 Log.e(TAG, "onError()", t);
+            }
+        }
+        synchronized (this) {
+            if ((errorCode == SipErrorCode.DATA_CONNECTION_LOST)
+                    || !isInCall()) {
+                close(true);
             }
         }
     }
