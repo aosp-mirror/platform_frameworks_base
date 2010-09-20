@@ -35,6 +35,10 @@ import android.net.sip.SipSessionState;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.text.TextUtils;
@@ -73,6 +77,8 @@ public final class SipService extends ISipService.Stub {
     private WifiManager.WifiLock mWifiLock;
     private boolean mWifiOnly;
 
+    private MyExecutor mExecutor;
+
     // SipProfile URI --> group
     private Map<String, SipSessionGroupExt> mSipGroups =
             new HashMap<String, SipSessionGroupExt>();
@@ -101,6 +107,12 @@ public final class SipService extends ISipService.Stub {
 
         mTimer = new WakeupTimer(context);
         mWifiOnly = SipManager.isSipWifiOnly(context);
+    }
+
+    private MyExecutor getExecutor() {
+        // create mExecutor lazily
+        if (mExecutor == null) mExecutor = new MyExecutor();
+        return mExecutor;
     }
 
     public synchronized SipProfile[] getListOfProfiles() {
@@ -509,6 +521,15 @@ public final class SipService extends ISipService.Stub {
         }
 
         public void run() {
+            // delegate to mExecutor
+            getExecutor().addTask(new Runnable() {
+                public void run() {
+                    realRun();
+                }
+            });
+        }
+
+        private void realRun() {
             synchronized (SipService.this) {
                 SipSessionGroup.SipSessionImpl session = mSession.duplicate();
                 if (DEBUG) Log.d(TAG, "~~~ keepalive");
@@ -620,6 +641,15 @@ public final class SipService extends ISipService.Stub {
         }
 
         public void run() {
+            // delegate to mExecutor
+            getExecutor().addTask(new Runnable() {
+                public void run() {
+                    realRun();
+                }
+            });
+        }
+
+        private void realRun() {
             mErrorCode = SipErrorCode.NO_ERROR;
             mErrorMessage = null;
             if (DEBUG) Log.d(TAG, "~~~ registering");
@@ -829,7 +859,7 @@ public final class SipService extends ISipService.Stub {
                 if (connected) {
                     if (mTask != null) mTask.cancel();
                     mTask = new MyTimerTask(type, connected);
-                    mTimer.schedule(mTask, 3 * 1000L);
+                    mTimer.schedule(mTask, 2 * 1000L);
                     // TODO: hold wakup lock so that we can finish change before
                     // the device goes to sleep
                 } else {
@@ -852,6 +882,15 @@ public final class SipService extends ISipService.Stub {
 
             @Override
             public void run() {
+                // delegate to mExecutor
+                getExecutor().addTask(new Runnable() {
+                    public void run() {
+                        realRun();
+                    }
+                });
+            }
+
+            private void realRun() {
                 synchronized (SipService.this) {
                     if (mTask != this) {
                         Log.w(TAG, "  unexpected task: " + mNetworkType
@@ -1160,6 +1199,32 @@ public final class SipService extends ISipService.Stub {
 
         public boolean equals(Object that) {
             return (this == that);
+        }
+    }
+
+    // Single-threaded executor
+    private static class MyExecutor extends Handler {
+        MyExecutor() {
+            super(createLooper());
+        }
+
+        private static Looper createLooper() {
+            HandlerThread thread = new HandlerThread("SipService");
+            thread.start();
+            return thread.getLooper();
+        }
+
+        void addTask(Runnable task) {
+            Message.obtain(this, 0/* don't care */, task).sendToTarget();
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.obj instanceof Runnable) {
+                ((Runnable) msg.obj).run();
+            } else {
+                Log.w(TAG, "can't handle msg: " + msg);
+            }
         }
     }
 }
