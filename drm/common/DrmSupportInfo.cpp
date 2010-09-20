@@ -42,7 +42,7 @@ bool DrmSupportInfo::operator==(const DrmSupportInfo& drmSupportInfo) const {
 }
 
 bool DrmSupportInfo::isSupportedMimeType(const String8& mimeType) const {
-    for (int i = 0; i < mMimeTypeVector.size(); i++) {
+    for (unsigned int i = 0; i < mMimeTypeVector.size(); i++) {
         const String8 item = mMimeTypeVector.itemAt(i);
 
         if (String8("") != mimeType && item.find(mimeType) != -1) {
@@ -53,7 +53,7 @@ bool DrmSupportInfo::isSupportedMimeType(const String8& mimeType) const {
 }
 
 bool DrmSupportInfo::isSupportedFileSuffix(const String8& fileType) const {
-    for (int i = 0; i < mFileSuffixVector.size(); i++) {
+    for (unsigned int i = 0; i < mFileSuffixVector.size(); i++) {
         const String8 item = mFileSuffixVector.itemAt(i);
 
         if (String8("") != fileType && item.find(fileType) != -1) {

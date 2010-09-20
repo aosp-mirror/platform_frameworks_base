@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_NDEBUG 0
-#define LOG_TAG "IDrmServiceListener"
-#include <utils/Log.h>
-
 #include <stdint.h>
 #include <sys/types.h>
 #include <binder/Parcel.h>

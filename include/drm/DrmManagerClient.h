@@ -70,8 +70,10 @@ public:
      * Close the decrypt session for the given handle
      *
      * @param[in] decryptHandle Handle for the decryption session
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    void closeDecryptSession(DecryptHandle* decryptHandle);
+    status_t closeDecryptSession(DecryptHandle* decryptHandle);
 
     /**
      * Consumes the rights for a content.
@@ -81,8 +83,11 @@ public:
      * @param[in] decryptHandle Handle for the decryption session
      * @param[in] action Action to perform. (Action::DEFAULT, Action::PLAY, etc)
      * @param[in] reserve True if the rights should be reserved.
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure.
+     *     In case license has been expired, DRM_ERROR_LICENSE_EXPIRED will be returned.
      */
-    void consumeRights(DecryptHandle* decryptHandle, int action, bool reserve);
+    status_t consumeRights(DecryptHandle* decryptHandle, int action, bool reserve);
 
     /**
      * Informs the DRM engine about the playback actions performed on the DRM files.
@@ -90,9 +95,11 @@ public:
      * @param[in] decryptHandle Handle for the decryption session
      * @param[in] playbackStatus Playback action (Playback::START, Playback::STOP, Playback::PAUSE)
      * @param[in] position Position in the file (in milliseconds) where the start occurs.
-     *     Only valid together with Playback::START.
+     *                     Only valid together with Playback::START.
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    void setPlaybackStatus(DecryptHandle* decryptHandle, int playbackStatus, int position);
+    status_t setPlaybackStatus(DecryptHandle* decryptHandle, int playbackStatus, int position);
 
     /**
      * Initialize decryption for the given unit of the protected content
@@ -100,8 +107,10 @@ public:
      * @param[in] decryptHandle Handle for the decryption session
      * @param[in] decryptUnitId ID which specifies decryption unit, such as track ID
      * @param[in] headerInfo Information for initializing decryption of this decrypUnit
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    void initializeDecryptUnit(
+    status_t initializeDecryptUnit(
             DecryptHandle* decryptHandle, int decryptUnitId, const DrmBuffer* headerInfo);
 
     /**
@@ -113,6 +122,7 @@ public:
      * @param[in] decryptUnitId ID which specifies decryption unit, such as track ID
      * @param[in] encBuffer Encrypted data block
      * @param[out] decBuffer Decrypted data block
+     * @param[in] IV Optional buffer
      * @return status_t
      *     Returns the error code for this API
      *     DRM_NO_ERROR for success, and one of DRM_ERROR_UNKNOWN, DRM_ERROR_LICENSE_EXPIRED
@@ -121,15 +131,17 @@ public:
      */
     status_t decrypt(
             DecryptHandle* decryptHandle, int decryptUnitId,
-            const DrmBuffer* encBuffer, DrmBuffer** decBuffer);
+            const DrmBuffer* encBuffer, DrmBuffer** decBuffer, DrmBuffer* IV = NULL);
 
     /**
      * Finalize decryption for the given unit of the protected content
      *
      * @param[in] decryptHandle Handle for the decryption session
      * @param[in] decryptUnitId ID which specifies decryption unit, such as track ID
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    void finalizeDecryptUnit(DecryptHandle* decryptHandle, int decryptUnitId);
+    status_t finalizeDecryptUnit(DecryptHandle* decryptHandle, int decryptUnitId);
 
     /**
      * Reads the specified number of bytes from an open DRM file.
@@ -217,8 +229,10 @@ public:
      * @param[in] drmRights DrmRights to be saved
      * @param[in] rightsPath File path where rights to be saved
      * @param[in] contentPath File path where content was saved
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    void saveRights(
+    status_t saveRights(
         const DrmRights& drmRights, const String8& rightsPath, const String8& contentPath);
 
     /**
@@ -256,15 +270,19 @@ public:
      * Removes the rights associated with the given protected content
      *
      * @param[in] path Path of the protected content
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    void removeRights(const String8& path);
+    status_t removeRights(const String8& path);
 
     /**
      * Removes all the rights information of each plug-in associated with
      * DRM framework. Will be used in master reset
      *
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    void removeAllRights();
+    status_t removeAllRights();
 
     /**
      * This API is for Forward Lock DRM.

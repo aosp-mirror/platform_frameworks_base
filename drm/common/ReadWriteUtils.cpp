@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "ReadWriteUtils"
+#include <utils/Log.h>
+
 #include <ReadWriteUtils.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -22,7 +26,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <utils/FileMap.h>
 #include <utils/String8.h>
 
 using namespace android;
@@ -39,16 +42,37 @@ String8 ReadWriteUtils::readBytes(const String8& filePath) {
         struct stat sb;
 
         if (fstat(fd, &sb) == 0 && sb.st_size > 0) {
-            FileMap* fileMap = new FileMap();
-            if (fileMap->create(filePath.string(), fd, 0, sb.st_size, true)) {
-                char* addr = (char*)fileMap->getDataPtr();
-                string.append(addr, sb.st_size);
-                fileMap->release();
+            int length = sb.st_size;
+            char* bytes = new char[length];
+            if (length == read(fd, (void*) bytes, length)) {
+                string.append(bytes, length);
             }
+            delete bytes;
         }
         fclose(file);
     }
     return string;
+}
+
+int ReadWriteUtils::readBytes(const String8& filePath, char** buffer) {
+    FILE* file = NULL;
+    file = fopen(filePath.string(), "r");
+    int length = 0;
+
+    if (NULL != file) {
+        int fd = fileno(file);
+        struct stat sb;
+
+        if (fstat(fd, &sb) == 0 && sb.st_size > 0) {
+            length = sb.st_size;
+            *buffer = new char[length];
+            if (length != read(fd, (void*) *buffer, length)) {
+                length = FAILURE;
+            }
+        }
+        fclose(file);
+    }
+    return length;
 }
 
 void ReadWriteUtils::writeToFile(const String8& filePath, const String8& data) {
@@ -60,12 +84,8 @@ void ReadWriteUtils::writeToFile(const String8& filePath, const String8& data) {
 
         int size = data.size();
         if (FAILURE != ftruncate(fd, size)) {
-            FileMap* fileMap = NULL;
-            fileMap = new FileMap();
-            if (fileMap->create(filePath.string(), fd, 0, size, false)) {
-                char* addr = (char*)fileMap->getDataPtr();
-                memcpy(addr, data.string(), size);
-                fileMap->release();
+            if (size != write(fd, data.string(), size)) {
+                LOGE("Failed to write the data to: %s", filePath.string());
             }
         }
         fclose(file);
@@ -79,20 +99,9 @@ void ReadWriteUtils::appendToFile(const String8& filePath, const String8& data) 
     if (NULL != file) {
         int fd = fileno(file);
 
-        int offset = lseek(fd, 0, SEEK_END);
-        if (FAILURE != offset) {
-            int newEntrySize = data.size();
-            int fileSize = offset + newEntrySize;
-
-            if (FAILURE != ftruncate(fd, fileSize)) {
-                FileMap* fileMap = NULL;
-                fileMap = new FileMap();
-                if (fileMap->create(filePath.string(), fd, offset, fileSize, false)) {
-                    char* addr = (char*)fileMap->getDataPtr();
-                    memcpy(addr, data.string(), data.size());
-                    fileMap->release();
-                }
-            }
+        int size = data.size();
+        if (size != write(fd, data.string(), size)) {
+            LOGE("Failed to write the data to: %s", filePath.string());
         }
         fclose(file);
     }

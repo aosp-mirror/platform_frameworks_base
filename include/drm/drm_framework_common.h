@@ -254,13 +254,13 @@ public:
      *      (file format is not encrypted but ES is encrypted)
      *         e.g., Marlin DRM (MP4 file format), WM-DRM (asf file format)
      *
-     *         DecryptAPI::TYPE_ELEMENTARY_STREAM_BASED
+     *         DecryptApiType::ELEMENTARY_STREAM_BASED
      *             Decryption API set for ES based DRM
      *                 initializeDecryptUnit(), decrypt(), and finalizeDecryptUnit()
      *   2. Decrypt APIs for container based DRM (file format itself is encrypted)
      *         e.g., OMA DRM (dcf file format)
      *
-     *         DecryptAPI::TYPE_CONTAINER_BASED
+     *         DecryptApiType::CONTAINER_BASED
      *             POSIX based Decryption API set for container based DRM
      *                 pread()
      */
