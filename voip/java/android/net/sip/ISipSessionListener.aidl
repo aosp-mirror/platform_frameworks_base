@@ -79,8 +79,7 @@ interface ISipSessionListener {
      * @param errorCode error code defined in {@link SipErrorCode}
      * @param errorMessage error message
      */
-    void onError(in ISipSession session, String errorCode,
-            String errorMessage);
+    void onError(in ISipSession session, int errorCode, String errorMessage);
 
     /**
      * Called when an error occurs during session modification negotiation.
@@ -89,7 +88,7 @@ interface ISipSessionListener {
      * @param errorCode error code defined in {@link SipErrorCode}
      * @param errorMessage error message
      */
-    void onCallChangeFailed(in ISipSession session, String errorCode,
+    void onCallChangeFailed(in ISipSession session, int errorCode,
             String errorMessage);
 
     /**
@@ -114,7 +113,7 @@ interface ISipSessionListener {
      * @param errorCode error code defined in {@link SipErrorCode}
      * @param errorMessage error message
      */
-    void onRegistrationFailed(in ISipSession session, String errorCode,
+    void onRegistrationFailed(in ISipSession session, int errorCode,
             String errorMessage);
 
     /**

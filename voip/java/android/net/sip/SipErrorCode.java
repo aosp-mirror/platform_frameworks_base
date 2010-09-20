@@ -24,34 +24,69 @@ package android.net.sip;
  * {@link ISipSessionListener#onRegistrationFailed}.
  * @hide
  */
-public enum SipErrorCode {
+public class SipErrorCode {
+    /** Not an error. */
+    public static final int NO_ERROR = 0;
+
     /** When some socket error occurs. */
-    SOCKET_ERROR,
+    public static final int SOCKET_ERROR = -1;
 
     /** When server responds with an error. */
-    SERVER_ERROR,
+    public static final int SERVER_ERROR = -2;
 
     /** When transaction is terminated unexpectedly. */
-    TRANSACTION_TERMINTED,
+    public static final int TRANSACTION_TERMINTED = -3;
 
     /** When some error occurs on the device, possibly due to a bug. */
-    CLIENT_ERROR,
+    public static final int CLIENT_ERROR = -4;
 
     /** When the transaction gets timed out. */
-    TIME_OUT,
+    public static final int TIME_OUT = -5;
 
     /** When the remote URI is not valid. */
-    INVALID_REMOTE_URI,
+    public static final int INVALID_REMOTE_URI = -6;
 
     /** When the peer is not reachable. */
-    PEER_NOT_REACHABLE,
+    public static final int PEER_NOT_REACHABLE = -7;
 
     /** When invalid credentials are provided. */
-    INVALID_CREDENTIALS,
+    public static final int INVALID_CREDENTIALS = -8;
 
     /** The client is in a transaction and cannot initiate a new one. */
-    IN_PROGRESS,
+    public static final int IN_PROGRESS = -9;
 
     /** When data connection is lost. */
-    DATA_CONNECTION_LOST;
+    public static final int DATA_CONNECTION_LOST = -10;
+
+    public static String toString(int errorCode) {
+        switch (errorCode) {
+            case NO_ERROR:
+                return "NO_ERROR";
+            case SOCKET_ERROR:
+                return "SOCKET_ERROR";
+            case SERVER_ERROR:
+                return "SERVER_ERROR";
+            case TRANSACTION_TERMINTED:
+                return "TRANSACTION_TERMINTED";
+            case CLIENT_ERROR:
+                return "CLIENT_ERROR";
+            case TIME_OUT:
+                return "TIME_OUT";
+            case INVALID_REMOTE_URI:
+                return "INVALID_REMOTE_URI";
+            case PEER_NOT_REACHABLE:
+                return "PEER_NOT_REACHABLE";
+            case INVALID_CREDENTIALS:
+                return "INVALID_CREDENTIALS";
+            case IN_PROGRESS:
+                return "IN_PROGRESS";
+            case DATA_CONNECTION_LOST:
+                return "DATA_CONNECTION_LOST";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
+    private SipErrorCode() {
+    }
 }

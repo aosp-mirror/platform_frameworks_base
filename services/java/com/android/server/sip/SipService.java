@@ -35,6 +35,10 @@ import android.net.sip.SipSessionState;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.text.TextUtils;
@@ -71,6 +75,9 @@ public final class SipService extends ISipService.Stub {
     private boolean mConnected;
     private WakeupTimer mTimer;
     private WifiManager.WifiLock mWifiLock;
+    private boolean mWifiOnly;
+
+    private MyExecutor mExecutor;
 
     // SipProfile URI --> group
     private Map<String, SipSessionGroupExt> mSipGroups =
@@ -99,6 +106,13 @@ public final class SipService extends ISipService.Stub {
                 new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
         mTimer = new WakeupTimer(context);
+        mWifiOnly = SipManager.isSipWifiOnly(context);
+    }
+
+    private MyExecutor getExecutor() {
+        // create mExecutor lazily
+        if (mExecutor == null) mExecutor = new MyExecutor();
+        return mExecutor;
     }
 
     public synchronized SipProfile[] getListOfProfiles() {
@@ -474,10 +488,10 @@ public final class SipService extends ISipService.Stub {
         }
 
         @Override
-        public void onError(ISipSession session, String errorClass,
+        public void onError(ISipSession session, int errorCode,
                 String message) {
-            if (DEBUG) Log.d(TAG, "sip session error: " + errorClass + ": "
-                    + message);
+            if (DEBUG) Log.d(TAG, "sip session error: "
+                    + SipErrorCode.toString(errorCode) + ": " + message);
         }
 
         public boolean isOpened() {
@@ -507,6 +521,15 @@ public final class SipService extends ISipService.Stub {
         }
 
         public void run() {
+            // delegate to mExecutor
+            getExecutor().addTask(new Runnable() {
+                public void run() {
+                    realRun();
+                }
+            });
+        }
+
+        private void realRun() {
             synchronized (SipService.this) {
                 SipSessionGroup.SipSessionImpl session = mSession.duplicate();
                 if (DEBUG) Log.d(TAG, "~~~ keepalive");
@@ -533,7 +556,7 @@ public final class SipService extends ISipService.Stub {
         private int mBackoff = 1;
         private boolean mRegistered;
         private long mExpiryTime;
-        private SipErrorCode mErrorCode;
+        private int mErrorCode;
         private String mErrorMessage;
 
         private String getAction() {
@@ -589,10 +612,9 @@ public final class SipService extends ISipService.Stub {
                 if (mSession == null) return;
 
                 try {
-                    SipSessionState state = (mSession == null)
+                    int state = (mSession == null)
                             ? SipSessionState.READY_TO_CALL
-                            : Enum.valueOf(
-                                    SipSessionState.class, mSession.getState());
+                            : mSession.getState();
                     if ((state == SipSessionState.REGISTERING)
                             || (state == SipSessionState.DEREGISTERING)) {
                         mProxy.onRegistering(mSession);
@@ -600,12 +622,12 @@ public final class SipService extends ISipService.Stub {
                         int duration = (int)
                                 (mExpiryTime - SystemClock.elapsedRealtime());
                         mProxy.onRegistrationDone(mSession, duration);
-                    } else if (mErrorCode != null) {
+                    } else if (mErrorCode != SipErrorCode.NO_ERROR) {
                         if (mErrorCode == SipErrorCode.TIME_OUT) {
                             mProxy.onRegistrationTimeout(mSession);
                         } else {
-                            mProxy.onRegistrationFailed(mSession,
-                                    mErrorCode.toString(), mErrorMessage);
+                            mProxy.onRegistrationFailed(mSession, mErrorCode,
+                                    mErrorMessage);
                         }
                     }
                 } catch (Throwable t) {
@@ -619,7 +641,16 @@ public final class SipService extends ISipService.Stub {
         }
 
         public void run() {
-            mErrorCode = null;
+            // delegate to mExecutor
+            getExecutor().addTask(new Runnable() {
+                public void run() {
+                    realRun();
+                }
+            });
+        }
+
+        private void realRun() {
+            mErrorCode = SipErrorCode.NO_ERROR;
             mErrorMessage = null;
             if (DEBUG) Log.d(TAG, "~~~ registering");
             synchronized (SipService.this) {
@@ -712,18 +743,15 @@ public final class SipService extends ISipService.Stub {
         }
 
         @Override
-        public void onRegistrationFailed(ISipSession session,
-                String errorCodeString, String message) {
-            SipErrorCode errorCode =
-                    Enum.valueOf(SipErrorCode.class, errorCodeString);
+        public void onRegistrationFailed(ISipSession session, int errorCode,
+                String message) {
             if (DEBUG) Log.d(TAG, "onRegistrationFailed(): " + session + ": "
-                    + errorCode + ": " + message);
+                    + SipErrorCode.toString(errorCode) + ": " + message);
             synchronized (SipService.this) {
                 if (!isStopped() && (session != mSession)) return;
                 mErrorCode = errorCode;
                 mErrorMessage = message;
-                mProxy.onRegistrationFailed(session, errorCode.toString(),
-                        message);
+                mProxy.onRegistrationFailed(session, errorCode, message);
 
                 if (errorCode == SipErrorCode.INVALID_CREDENTIALS) {
                     if (DEBUG) Log.d(TAG, "   pause auto-registration");
@@ -774,6 +802,15 @@ public final class SipService extends ISipService.Stub {
                     String type = netInfo.getTypeName();
                     NetworkInfo.State state = netInfo.getState();
 
+                    if (mWifiOnly && (netInfo.getType() !=
+                            ConnectivityManager.TYPE_WIFI)) {
+                        if (DEBUG) {
+                            Log.d(TAG, "Wifi only, other connectivity ignored: "
+                                    + type);
+                        }
+                        return;
+                    }
+
                     NetworkInfo activeNetInfo = getActiveNetworkInfo();
                     if (DEBUG) {
                         if (activeNetInfo != null) {
@@ -822,7 +859,7 @@ public final class SipService extends ISipService.Stub {
                 if (connected) {
                     if (mTask != null) mTask.cancel();
                     mTask = new MyTimerTask(type, connected);
-                    mTimer.schedule(mTask, 3 * 1000L);
+                    mTimer.schedule(mTask, 2 * 1000L);
                     // TODO: hold wakup lock so that we can finish change before
                     // the device goes to sleep
                 } else {
@@ -845,6 +882,15 @@ public final class SipService extends ISipService.Stub {
 
             @Override
             public void run() {
+                // delegate to mExecutor
+                getExecutor().addTask(new Runnable() {
+                    public void run() {
+                        realRun();
+                    }
+                });
+            }
+
+            private void realRun() {
                 synchronized (SipService.this) {
                     if (mTask != this) {
                         Log.w(TAG, "  unexpected task: " + mNetworkType
@@ -1153,6 +1199,32 @@ public final class SipService extends ISipService.Stub {
 
         public boolean equals(Object that) {
             return (this == that);
+        }
+    }
+
+    // Single-threaded executor
+    private static class MyExecutor extends Handler {
+        MyExecutor() {
+            super(createLooper());
+        }
+
+        private static Looper createLooper() {
+            HandlerThread thread = new HandlerThread("SipService");
+            thread.start();
+            return thread.getLooper();
+        }
+
+        void addTask(Runnable task) {
+            Message.obtain(this, 0/* don't care */, task).sendToTarget();
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.obj instanceof Runnable) {
+                ((Runnable) msg.obj).run();
+            } else {
+                Log.w(TAG, "can't handle msg: " + msg);
+            }
         }
     }
 }
