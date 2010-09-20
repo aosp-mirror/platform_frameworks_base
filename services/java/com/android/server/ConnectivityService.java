@@ -48,6 +48,7 @@ import com.android.server.connectivity.Tethering;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 /**
@@ -108,6 +109,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private boolean mSystemReady;
     private Intent mInitialBroadcast;
+
+    // used in DBG mode to track inet condition reports
+    private static final int INET_CONDITION_LOG_MAX_SIZE = 15;
+    private ArrayList mInetLog;
 
     private static class NetworkAttributes {
         /**
@@ -329,6 +334,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                   mTethering.getTetherableWifiRegexs().length != 0) &&
                                  mTethering.getUpstreamIfaceRegexs().length != 0);
 
+        if (DBG) {
+            mInetLog = new ArrayList();
+        }
     }
 
 
@@ -1365,6 +1373,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         pw.println();
 
         mTethering.dump(fd, pw, args);
+
+        if (mInetLog != null) {
+            pw.println();
+            pw.println("Inet condition reports:");
+            for(int i = 0; i < mInetLog.size(); i++) {
+                pw.println(mInetLog.get(i));
+            }
+        }
     }
 
     // must be stateless - things change under us.
@@ -1613,6 +1629,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 android.Manifest.permission.STATUS_BAR,
                 "ConnectivityService");
 
+        if (DBG) {
+            int pid = getCallingPid();
+            int uid = getCallingUid();
+            String s = pid + "(" + uid + ") reports inet is " +
+                (percentage > 50 ? "connected" : "disconnected") + " (" + percentage + ") on " +
+                "network Type " + networkType + " at " + GregorianCalendar.getInstance().getTime();
+            mInetLog.add(s);
+            while(mInetLog.size() > INET_CONDITION_LOG_MAX_SIZE) {
+                mInetLog.remove(0);
+            }
+        }
         mHandler.sendMessage(mHandler.obtainMessage(
             NetworkStateTracker.EVENT_INET_CONDITION_CHANGE, networkType, percentage));
     }
