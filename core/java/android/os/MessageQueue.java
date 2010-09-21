@@ -33,6 +33,7 @@ import java.util.ArrayList;
 public class MessageQueue {
     Message mMessages;
     private final ArrayList<IdleHandler> mIdleHandlers = new ArrayList<IdleHandler>();
+    private IdleHandler[] mPendingIdleHandlers;
     private boolean mQuiting = false;
     boolean mQuitAllowed = true;
 
@@ -105,90 +106,74 @@ public class MessageQueue {
     }
 
     final Message next() {
-        boolean tryIdle = true;
-        // when we start out, we'll just touch the input pipes and then go from there
-        int timeToNextEventMillis = 0;
+        int pendingIdleHandlerCount = -1; // -1 only during first iteration
+        int nextPollTimeoutMillis = 0;
 
-        while (true) {
-            long now;
-            Object[] idlers = null;
+        for (;;) {
+            if (nextPollTimeoutMillis != 0) {
+                Binder.flushPendingCommands();
+            }
+            nativePollOnce(nextPollTimeoutMillis);
 
-            boolean dispatched = nativePollOnce(timeToNextEventMillis);
-
-            // Try to retrieve the next message, returning if found.
             synchronized (this) {
-                now = SystemClock.uptimeMillis();
-                Message msg = pullNextLocked(now);
+                // Try to retrieve the next message.  Return if found.
+                final long now = SystemClock.uptimeMillis();
+                final Message msg = mMessages;
                 if (msg != null) {
-                    return msg;
-                }
-                
-                if (tryIdle && mIdleHandlers.size() > 0) {
-                    idlers = mIdleHandlers.toArray();
-                }
-            }
-    
-            // There was no message so we are going to wait...  but first,
-            // if there are any idle handlers let them know.
-            boolean didIdle = false;
-            if (idlers != null) {
-                for (Object idler : idlers) {
-                    boolean keep = false;
-                    try {
-                        didIdle = true;
-                        keep = ((IdleHandler)idler).queueIdle();
-                    } catch (Throwable t) {
-                        Log.wtf("MessageQueue", "IdleHandler threw exception", t);
-                    }
-
-                    if (!keep) {
-                        synchronized (this) {
-                            mIdleHandlers.remove(idler);
-                        }
-                    }
-                }
-            }
-            
-            // While calling an idle handler, a new message could have been
-            // delivered...  so go back and look again for a pending message.
-            if (didIdle) {
-                tryIdle = false;
-                continue;
-            }
-
-            synchronized (this) {
-                // No messages, nobody to tell about it...  time to wait!
-                if (mMessages != null) {
-                    long longTimeToNextEventMillis = mMessages.when - now;
-                    
-                    if (longTimeToNextEventMillis > 0) {
-                        Binder.flushPendingCommands();
-                        timeToNextEventMillis = (int) Math.min(longTimeToNextEventMillis,
-                                Integer.MAX_VALUE);
+                    final long when = msg.when;
+                    if (now >= when) {
+                        mMessages = msg.next;
+                        if (Config.LOGV) Log.v("MessageQueue", "Returning message: " + msg);
+                        return msg;
                     } else {
-                        timeToNextEventMillis = 0;
+                        nextPollTimeoutMillis = (int) Math.min(when - now, Integer.MAX_VALUE);
                     }
                 } else {
-                    Binder.flushPendingCommands();
-                    timeToNextEventMillis = -1;
+                    nextPollTimeoutMillis = -1;
+                }
+
+                // If first time, then get the number of idlers to run.
+                if (pendingIdleHandlerCount < 0) {
+                    pendingIdleHandlerCount = mIdleHandlers.size();
+                }
+                if (pendingIdleHandlerCount == 0) {
+                    // No idle handlers to run.  Loop and wait some more.
+                    continue;
+                }
+
+                if (mPendingIdleHandlers == null) {
+                    mPendingIdleHandlers = new IdleHandler[Math.max(pendingIdleHandlerCount, 4)];
+                }
+                mPendingIdleHandlers = mIdleHandlers.toArray(mPendingIdleHandlers);
+            }
+
+            // Run the idle handlers.
+            // We only ever reach this code block during the first iteration.
+            for (int i = 0; i < pendingIdleHandlerCount; i++) {
+                final IdleHandler idler = mPendingIdleHandlers[i];
+                mPendingIdleHandlers[i] = null; // release the reference to the handler
+
+                boolean keep = false;
+                try {
+                    keep = idler.queueIdle();
+                } catch (Throwable t) {
+                    Log.wtf("MessageQueue", "IdleHandler threw exception", t);
+                }
+
+                if (!keep) {
+                    synchronized (this) {
+                        mIdleHandlers.remove(idler);
+                    }
                 }
             }
-            // loop to the while(true) and do the appropriate nativeWait(when)
-        }
-    }
 
-    final Message pullNextLocked(long now) {
-        Message msg = mMessages;
-        if (msg != null) {
-            if (now >= msg.when) {
-                mMessages = msg.next;
-                if (Config.LOGV) Log.v(
-                    "MessageQueue", "Returning message: " + msg);
-                return msg;
-            }
-        }
+            // Reset the idle handler count to 0 so we do not run them again.
+            pendingIdleHandlerCount = 0;
 
-        return null;
+            // While calling an idle handler, a new message could have been delivered
+            // so go back and look again for a pending message without waiting.
+            nextPollTimeoutMillis = 0;
+        }
     }
 
     final boolean enqueueMessage(Message msg, long when) {
