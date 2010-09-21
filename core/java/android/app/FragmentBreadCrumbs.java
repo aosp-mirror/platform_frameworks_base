@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.app.FragmentManager.BackStackEntry;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -139,14 +140,14 @@ public class FragmentBreadCrumbs extends ViewGroup
         FragmentManager fm = mActivity.getFragmentManager();
         int numEntries = fm.countBackStackEntries();
         int numViews = mContainer.getChildCount();
-        for (int i=mTopEntry != null ? -1 : 0; i<numEntries; i++) {
-            FragmentManager.BackStackEntry bse = i == -1 ? mTopEntry : fm.getBackStackEntry(i);
-            int viewI = mTopEntry != null ? i+1 : i;
+        for (int i = mTopEntry != null ? -1 : 0; i < numEntries; i++) {
+            BackStackEntry bse = i == -1 ? mTopEntry : fm.getBackStackEntry(i);
+            int viewI = mTopEntry != null ? i + 1 : i;
             if (viewI < numViews) {
                 View v = mContainer.getChildAt(viewI);
                 Object tag = v.getTag();
                 if (tag != bse) {
-                    for (int j=viewI; j<numViews; j++) {
+                    for (int j = viewI; j < numViews; j++) {
                         mContainer.removeViewAt(viewI);
                     }
                     numViews = viewI;
@@ -163,13 +164,24 @@ public class FragmentBreadCrumbs extends ViewGroup
                     text.setCompoundDrawables(null, null, null, null);
                 }
                 mContainer.addView(item);
+                item.setOnClickListener(mOnClickListener);
             }
         }
-        int viewI = mTopEntry != null ? numEntries+1 : numEntries;
+        int viewI = mTopEntry != null ? numEntries + 1 : numEntries;
         numViews = mContainer.getChildCount();
         while (numViews > viewI) {
             mContainer.removeViewAt(numViews-1);
             numViews--;
         }
     }
+
+    private OnClickListener mOnClickListener = new OnClickListener() {
+        public void onClick(View v) {
+            if (v.getTag() instanceof BackStackEntry) {
+                BackStackEntry bse = (BackStackEntry) v.getTag();
+                mActivity.getFragmentManager().popBackStack(bse.getId(),
+                        bse == mTopEntry? FragmentManager.POP_BACK_STACK_INCLUSIVE : 0);
+            }
+        }
+    };
 }
