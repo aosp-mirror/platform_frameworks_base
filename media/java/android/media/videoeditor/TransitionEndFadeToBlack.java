@@ -28,7 +28,7 @@ public class TransitionEndFadeToBlack extends Transition {
      */
     @SuppressWarnings("unused")
     private TransitionEndFadeToBlack() {
-        this(null, null, 0);
+        this(null, null, 0, BEHAVIOR_LINEAR);
     }
 
     /**
@@ -38,9 +38,11 @@ public class TransitionEndFadeToBlack extends Transition {
      * @param afterMediaItem The transition is applied to the end of this
      *      media item
      * @param durationMs duration of the transition in milliseconds
+     * @param behavior The transition behavior
      */
-    public TransitionEndFadeToBlack(String transitionId, MediaItem afterMediaItem, long duration) {
-        super(transitionId, afterMediaItem, null, duration, Transition.BEHAVIOR_LINEAR);
+    public TransitionEndFadeToBlack(String transitionId, MediaItem afterMediaItem, long duration,
+            int behavior) {
+        super(transitionId, afterMediaItem, null, duration, behavior);
     }
 
     /*

@@ -35,8 +35,7 @@ import android.util.Xml;
 import android.view.SurfaceHolder;
 
 /**
- * The VideoEditor implementation
- * {@hide}
+ * The VideoEditor implementation {@hide}
  */
 public class VideoEditorTestImpl implements VideoEditor {
     // Logging
@@ -49,6 +48,8 @@ public class VideoEditorTestImpl implements VideoEditor {
     private static final String TAG_PROJECT = "project";
     private static final String TAG_MEDIA_ITEMS = "media_items";
     private static final String TAG_MEDIA_ITEM = "media_item";
+    private static final String TAG_BEGIN_TRANSITION = "begin_transition";
+    private static final String TAG_END_TRANSITION = "end_transition";
     private static final String ATTR_ID = "id";
     private static final String ATTR_FILENAME = "filename";
     private static final String ATTR_AUDIO_WAVEFORM_FILENAME = "wavefoem";
@@ -59,8 +60,14 @@ public class VideoEditorTestImpl implements VideoEditor {
     private static final String ATTR_BEGIN_TIME = "start_time";
     private static final String ATTR_END_TIME = "end_time";
     private static final String ATTR_VOLUME = "volume";
+    private static final String ATTR_BEHAVIOR = "behavior";
+    private static final String ATTR_DIRECTION = "direction";
+    private static final String ATTR_BLENDING = "blending";
+    private static final String ATTR_INVERT = "invert";
+    private static final String ATTR_MASK = "mask";
 
-    private static long mDurationMs;
+    // Instance variables
+    private long mDurationMs;
     private final String mProjectPath;
     private final List<MediaItem> mMediaItems = new ArrayList<MediaItem>();
     private final List<AudioTrack> mAudioTracks = new ArrayList<AudioTrack>();
@@ -74,6 +81,8 @@ public class VideoEditorTestImpl implements VideoEditor {
     private class PreviewThread extends Thread {
         // Instance variables
         private final static long FRAME_DURATION = 33;
+
+        // Instance variables
         private final PreviewProgressListener mListener;
         private final int mCallbackAfterFrameCount;
         private final long mFromMs, mToMs;
@@ -85,10 +94,12 @@ public class VideoEditorTestImpl implements VideoEditor {
          *
          * @param fromMs Start preview at this position
          * @param toMs The time (relative to the timeline) at which the preview
-         *      will stop. Use -1 to play to the end of the timeline
-         * @param callbackAfterFrameCount The listener interface should be invoked
-         *            after the number of frames specified by this parameter.
-         * @param loop true if the preview should be looped once it reaches the end
+         *            will stop. Use -1 to play to the end of the timeline
+         * @param callbackAfterFrameCount The listener interface should be
+         *            invoked after the number of frames specified by this
+         *            parameter.
+         * @param loop true if the preview should be looped once it reaches the
+         *            end
          * @param listener The listener
          */
         public PreviewThread(long fromMs, long toMs, boolean loop, int callbackAfterFrameCount,
@@ -217,7 +228,15 @@ public class VideoEditorTestImpl implements VideoEditor {
             throw new IllegalArgumentException("Media item already exists: " + mediaItem.getId());
         }
 
+        // Invalidate the end transition if necessary
+        final int mediaItemsCount = mMediaItems.size();
+        if ( mediaItemsCount > 0) {
+            removeTransitionAfter(mediaItemsCount - 1);
+        }
+
+        // Add the new media item
         mMediaItems.add(mediaItem);
+
         computeTimelineDuration();
     }
 
@@ -235,9 +254,8 @@ public class VideoEditorTestImpl implements VideoEditor {
 
         if (afterMediaItemId == null) {
             if (mMediaItems.size() > 0) {
-                final MediaItem mi = mMediaItems.get(0);
                 // Invalidate the transition at the beginning of the timeline
-                removeTransitionBefore(mi);
+                removeTransitionBefore(0);
             }
             mMediaItems.add(0, mediaItem);
             computeTimelineDuration();
@@ -247,9 +265,9 @@ public class VideoEditorTestImpl implements VideoEditor {
                 final MediaItem mi = mMediaItems.get(i);
                 if (mi.getId().equals(afterMediaItemId)) {
                     // Invalidate the transition at this position
-                    removeTransitionAfter(mi);
+                    removeTransitionAfter(i);
                     // Insert the new media item
-                    mMediaItems.add(i+1, mediaItem);
+                    mMediaItems.add(i + 1, mediaItem);
                     computeTimelineDuration();
                     return;
                 }
@@ -273,9 +291,9 @@ public class VideoEditorTestImpl implements VideoEditor {
 
         if (afterMediaItemId == null) {
             if (mMediaItems.size() > 0) {
-                final MediaItem mi = mMediaItems.get(0);
                 // Invalidate adjacent transitions at the insertion point
-                removeTransitionBefore(mi);
+                removeTransitionBefore(0);
+
                 // Insert the media item at the new position
                 mMediaItems.add(0, moveMediaItem);
                 computeTimelineDuration();
@@ -288,9 +306,9 @@ public class VideoEditorTestImpl implements VideoEditor {
                 final MediaItem mi = mMediaItems.get(i);
                 if (mi.getId().equals(afterMediaItemId)) {
                     // Invalidate adjacent transitions at the insertion point
-                    removeTransitionAfter(mi);
+                    removeTransitionAfter(i);
                     // Insert the media item at the new position
-                    mMediaItems.add(i+1, moveMediaItem);
+                    mMediaItems.add(i + 1, moveMediaItem);
                     computeTimelineDuration();
                     return;
                 }
@@ -359,28 +377,27 @@ public class VideoEditorTestImpl implements VideoEditor {
      * {@inheritDoc}
      */
     public synchronized void addTransition(Transition transition) {
-        // If a transition already exists at the specified position then
-        // invalidate it.
-        final Iterator<Transition> it = mTransitions.iterator();
-        while (it.hasNext()) {
-            final Transition t = it.next();
-            if (t.getAfterMediaItem() == transition.getAfterMediaItem()
-                    || t.getBeforeMediaItem() == transition.getBeforeMediaItem()) {
-                it.remove();
-                t.invalidate();
-                break;
-            }
-        }
-
         mTransitions.add(transition);
 
-        // Cross reference the transitions
+        final MediaItem beforeMediaItem = transition.getBeforeMediaItem();
         final MediaItem afterMediaItem = transition.getAfterMediaItem();
+
+        // Cross reference the transitions
         if (afterMediaItem != null) {
+            // If a transition already exists at the specified position then
+            // invalidate it.
+            if (afterMediaItem.getEndTransition() != null) {
+                afterMediaItem.getEndTransition().invalidate();
+            }
             afterMediaItem.setEndTransition(transition);
         }
-        final MediaItem beforeMediaItem = transition.getBeforeMediaItem();
+
         if (beforeMediaItem != null) {
+            // If a transition already exists at the specified position then
+            // invalidate it.
+            if (beforeMediaItem.getBeginTransition() != null) {
+                beforeMediaItem.getBeginTransition().invalidate();
+            }
             beforeMediaItem.setBeginTransition(transition);
         }
         computeTimelineDuration();
@@ -460,7 +477,7 @@ public class VideoEditorTestImpl implements VideoEditor {
             for (int i = 0; i < audioTrackCount; i++) {
                 AudioTrack at = mAudioTracks.get(i);
                 if (at.getId().equals(afterAudioTrackId)) {
-                    mAudioTracks.add(i+1, audioTrack);
+                    mAudioTracks.add(i + 1, audioTrack);
                     return;
                 }
             }
@@ -526,24 +543,67 @@ public class VideoEditorTestImpl implements VideoEditor {
         serializer.startTag("", TAG_PROJECT);
         serializer.attribute("", ATTR_ASPECT_RATIO, Integer.toString(mAspectRatio));
 
+        boolean firstMediaItem = true;
         serializer.startTag("", TAG_MEDIA_ITEMS);
         for (MediaItem mediaItem : mMediaItems) {
             serializer.startTag("", TAG_MEDIA_ITEM);
             serializer.attribute("", ATTR_ID, mediaItem.getId());
             serializer.attribute("", ATTR_TYPE, mediaItem.getClass().getSimpleName());
             serializer.attribute("", ATTR_FILENAME, mediaItem.getFilename());
-            serializer.attribute("", ATTR_RENDERING_MODE, Integer.toString(mediaItem.getRenderingMode()));
+            serializer.attribute("", ATTR_RENDERING_MODE, Integer.toString(mediaItem
+                    .getRenderingMode()));
             if (mediaItem instanceof MediaVideoItem) {
                 final MediaVideoItem mvi = (MediaVideoItem)mediaItem;
-                serializer.attribute("", ATTR_BEGIN_TIME, Long.toString(mvi.getBoundaryBeginTime()));
+                serializer
+                        .attribute("", ATTR_BEGIN_TIME, Long.toString(mvi.getBoundaryBeginTime()));
                 serializer.attribute("", ATTR_END_TIME, Long.toString(mvi.getBoundaryEndTime()));
                 serializer.attribute("", ATTR_VOLUME, Integer.toString(mvi.getVolume()));
                 if (mvi.getAudioWaveformFilename() != null) {
-                    serializer.attribute("", ATTR_AUDIO_WAVEFORM_FILENAME, mvi.getAudioWaveformFilename());
+                    serializer.attribute("", ATTR_AUDIO_WAVEFORM_FILENAME, mvi
+                            .getAudioWaveformFilename());
                 }
             } else if (mediaItem instanceof MediaImageItem) {
                 serializer.attribute("", ATTR_DURATION, Long.toString(mediaItem.getDuration()));
             }
+
+            if (firstMediaItem) {
+                firstMediaItem = false;
+                final Transition beginTransition = mediaItem.getBeginTransition();
+                if (beginTransition != null) {
+                    serializer.startTag("", TAG_BEGIN_TRANSITION);
+                    serializer.attribute("", ATTR_ID, beginTransition.getId());
+                    serializer.attribute("", ATTR_TYPE, beginTransition.getClass()
+                            .getSimpleName());
+                    serializer.attribute("", ATTR_DURATION, Long.toString(beginTransition
+                            .getDuration()));
+                    serializer.attribute("", ATTR_BEHAVIOR, Integer.toString(beginTransition
+                            .getBehavior()));
+                    serializer.endTag("", TAG_BEGIN_TRANSITION);
+                }
+            }
+
+            final Transition endTransition = mediaItem.getEndTransition();
+            if (endTransition != null) {
+                serializer.startTag("", TAG_END_TRANSITION);
+                serializer.attribute("", ATTR_ID, endTransition.getId());
+                serializer.attribute("", ATTR_TYPE, endTransition.getClass().getSimpleName());
+                serializer.attribute("", ATTR_DURATION, Long.toString(endTransition
+                        .getDuration()));
+                serializer.attribute("", ATTR_BEHAVIOR, Integer.toString(endTransition
+                        .getBehavior()));
+                if (endTransition instanceof TransitionSliding) {
+                    serializer.attribute("", ATTR_DIRECTION, Integer
+                            .toString(((TransitionSliding)endTransition).getDirection()));
+                } else if (endTransition instanceof TransitionAlpha) {
+                    TransitionAlpha ta = (TransitionAlpha)endTransition;
+                    serializer.attribute("", ATTR_BLENDING, Integer.toString(ta
+                            .getBlendingPercent()));
+                    serializer.attribute("", ATTR_INVERT, Boolean.toString(ta.isInvert()));
+                    serializer.attribute("", ATTR_MASK, ta.getMaskFilename());
+                }
+                serializer.endTag("", TAG_END_TRANSITION);
+            }
+
             serializer.endTag("", TAG_MEDIA_ITEM);
         }
         serializer.endTag("", TAG_MEDIA_ITEMS);
@@ -568,6 +628,8 @@ public class VideoEditorTestImpl implements VideoEditor {
         parser.setInput(new FileInputStream(file), "UTF-8");
         int eventType = parser.getEventType();
         String name;
+        MediaItem currentMediaItem = null;
+        MediaItem previousMediaItem = null;
         while (eventType != XmlPullParser.END_DOCUMENT) {
             switch (eventType) {
                 case XmlPullParser.START_TAG: {
@@ -579,27 +641,59 @@ public class VideoEditorTestImpl implements VideoEditor {
                         final String mediaItemId = parser.getAttributeValue("", ATTR_ID);
                         final String type = parser.getAttributeValue("", ATTR_TYPE);
                         final String filename = parser.getAttributeValue("", ATTR_FILENAME);
-                        final int renderingMode = Integer.parseInt(parser.getAttributeValue("", ATTR_RENDERING_MODE));
-                        final MediaItem mediaItem;
+                        final int renderingMode = Integer.parseInt(parser.getAttributeValue("",
+                                ATTR_RENDERING_MODE));
+
                         if (MediaImageItem.class.getSimpleName().equals(type)) {
-                            final long durationMs = Long.parseLong(parser.getAttributeValue("", ATTR_DURATION));
-                            mediaItem = new MediaImageItem(mediaItemId, filename, durationMs,
-                                    renderingMode);
-                        }  else if (MediaVideoItem.class.getSimpleName().equals(type)) {
-                            final String audioWaveformFilename = parser.getAttributeValue("", ATTR_AUDIO_WAVEFORM_FILENAME);
-                            mediaItem = new MediaVideoItem(mediaItemId, filename, renderingMode, audioWaveformFilename);
+                            final long durationMs = Long.parseLong(parser.getAttributeValue("",
+                                    ATTR_DURATION));
+                            currentMediaItem = new MediaImageItem(mediaItemId, filename,
+                                    durationMs, renderingMode);
+                        } else if (MediaVideoItem.class.getSimpleName().equals(type)) {
+                            final String audioWaveformFilename = parser.getAttributeValue("",
+                                    ATTR_AUDIO_WAVEFORM_FILENAME);
+                            currentMediaItem = new MediaVideoItem(mediaItemId, filename,
+                                    renderingMode, audioWaveformFilename);
 
-                            final long beginTimeMs = Long.parseLong(parser.getAttributeValue("", ATTR_BEGIN_TIME));
-                            final long endTimeMs = Long.parseLong(parser.getAttributeValue("", ATTR_END_TIME));
-                            ((MediaVideoItem)mediaItem).setExtractBoundaries(beginTimeMs, endTimeMs);
+                            final long beginTimeMs = Long.parseLong(parser.getAttributeValue("",
+                                    ATTR_BEGIN_TIME));
+                            final long endTimeMs = Long.parseLong(parser.getAttributeValue("",
+                                    ATTR_END_TIME));
+                            ((MediaVideoItem)currentMediaItem).setExtractBoundaries(beginTimeMs,
+                                    endTimeMs);
 
-                            final int volumePercent = Integer.parseInt(parser.getAttributeValue("", ATTR_VOLUME));
-                            ((MediaVideoItem)mediaItem).setVolume(volumePercent);
+                            final int volumePercent = Integer.parseInt(parser.getAttributeValue("",
+                                    ATTR_VOLUME));
+                            ((MediaVideoItem)currentMediaItem).setVolume(volumePercent);
                         } else {
                             Log.e(TAG, "Unknown media item type: " + type);
-                            mediaItem = null;
+                            currentMediaItem = null;
                         }
-                        mMediaItems.add(mediaItem);
+
+                        if (currentMediaItem != null) {
+                            if (previousMediaItem != null) {
+                                currentMediaItem.setBeginTransition(previousMediaItem
+                                        .getEndTransition());
+                            }
+                            mMediaItems.add(currentMediaItem);
+                        }
+                    } else if (name.equals(TAG_BEGIN_TRANSITION)) {
+                        final Transition transition = parseTransition(parser, currentMediaItem,
+                                null);
+                        currentMediaItem.setBeginTransition(transition);
+                    } else if (name.equals(TAG_END_TRANSITION)) {
+                        final Transition transition = parseTransition(parser, previousMediaItem,
+                                currentMediaItem);
+                        currentMediaItem.setEndTransition(transition);
+                    }
+                    break;
+                }
+
+                case XmlPullParser.END_TAG: {
+                    name = parser.getName();
+                    if (name.equals(TAG_MEDIA_ITEM)) {
+                        previousMediaItem = currentMediaItem;
+                        currentMediaItem = null;
                     }
                     break;
                 }
@@ -612,6 +706,53 @@ public class VideoEditorTestImpl implements VideoEditor {
         }
 
         computeTimelineDuration();
+    }
+
+    /**
+     * Parse the transition
+     *
+     * @param parser The parser
+     * @param afterMediaItem The transition is at the end of this media item
+     * @param beforeMediaItem The transition is at the beginning of this media
+     *            item
+     * @return The transition
+     */
+    private Transition parseTransition(XmlPullParser parser, MediaItem beforeMediaItem,
+            MediaItem afterMediaItem) {
+        final String transitionId = parser.getAttributeValue("", ATTR_ID);
+        final String type = parser.getAttributeValue("", ATTR_TYPE);
+        final long durationMs = Long.parseLong(parser.getAttributeValue("", ATTR_DURATION));
+        final int behavior = Integer.parseInt(parser.getAttributeValue("", ATTR_BEHAVIOR));
+        if (TransitionStartCurtainOpening.class.getSimpleName().equals(type)) {
+            return new TransitionStartCurtainOpening(transitionId, beforeMediaItem, durationMs,
+                    behavior);
+        } else if (TransitionStartFadeFromBlack.class.getSimpleName().equals(type)) {
+            return new TransitionStartFadeFromBlack(transitionId, beforeMediaItem, durationMs,
+                    behavior);
+        } else if (TransitionAlpha.class.getSimpleName().equals(type)) {
+            final int blending = Integer.parseInt(parser.getAttributeValue("", ATTR_BLENDING));
+            final String maskFilename = parser.getAttributeValue("", ATTR_MASK);
+            final boolean invert = Boolean.getBoolean(parser.getAttributeValue("", ATTR_INVERT));
+            return new TransitionAlpha(transitionId, afterMediaItem, beforeMediaItem, durationMs,
+                    behavior, maskFilename, blending, invert);
+        } else if (TransitionAlpha.class.getSimpleName().equals(type)) {
+            return new TransitionCrossfade(transitionId, afterMediaItem, beforeMediaItem,
+                    durationMs, behavior);
+        } else if (TransitionSliding.class.getSimpleName().equals(type)) {
+            final int direction = Integer.parseInt(parser.getAttributeValue("", ATTR_DIRECTION));
+            return new TransitionSliding(transitionId, afterMediaItem, beforeMediaItem, durationMs,
+                    behavior, direction);
+        } else if (TransitionFadeToBlack.class.getSimpleName().equals(type)) {
+            return new TransitionFadeToBlack(transitionId, afterMediaItem, beforeMediaItem,
+                    durationMs, behavior);
+        } else if (TransitionEndCurtainClosing.class.getSimpleName().equals(type)) {
+            return new TransitionEndCurtainClosing(transitionId, beforeMediaItem, durationMs,
+                    behavior);
+        } else if (TransitionEndFadeToBlack.class.getSimpleName().equals(type)) {
+            return new TransitionEndFadeToBlack(transitionId, beforeMediaItem, durationMs, behavior);
+        }
+
+        return null;
     }
 
     public void cancelExport(String filename) {
@@ -632,7 +773,8 @@ public class VideoEditorTestImpl implements VideoEditor {
             }
         }
 
-        // This is necessary because the user may had called setDuration on MediaImageItems
+        // This is necessary because the user may had called setDuration on
+        // MediaImageItems
         computeTimelineDuration();
     }
 
@@ -647,7 +789,8 @@ public class VideoEditorTestImpl implements VideoEditor {
      * {@inheritDoc}
      */
     public long getDuration() {
-        // Since MediaImageItem can change duration we need to compute the duration here
+        // Since MediaImageItem can change duration we need to compute the
+        // duration here
         computeTimelineDuration();
         return mDurationMs;
     }
@@ -679,9 +822,8 @@ public class VideoEditorTestImpl implements VideoEditor {
     /*
      * {@inheritDoc}
      */
-    public synchronized void startPreview(SurfaceHolder surfaceHolder, long fromMs,
-            long toMs, boolean loop, int callbackAfterFrameCount,
-            PreviewProgressListener listener) {
+    public synchronized void startPreview(SurfaceHolder surfaceHolder, long fromMs, long toMs,
+            boolean loop, int callbackAfterFrameCount, PreviewProgressListener listener) {
         if (fromMs >= mDurationMs) {
             return;
         }
@@ -714,7 +856,10 @@ public class VideoEditorTestImpl implements VideoEditor {
 
         // Subtract the transition times
         for (Transition transition : mTransitions) {
-            if (!(transition instanceof TransitionStartCurtainOpening) && !(transition instanceof TransitionEndFadeToBlack)) {
+            if (!(transition instanceof TransitionStartCurtainOpening)
+                    && !(transition instanceof TransitionStartFadeFromBlack)
+                    && !(transition instanceof TransitionEndFadeToBlack)
+                    && !(transition instanceof TransitionEndCurtainClosing)) {
                 mDurationMs -= transition.getDuration();
             }
         }
@@ -742,9 +887,10 @@ public class VideoEditorTestImpl implements VideoEditor {
     /**
      * Remove the transition before this media item
      *
-     * @param mediaItem The media item
+     * @param index The media item index
      */
-    private void removeTransitionBefore(MediaItem mediaItem) {
+    private void removeTransitionBefore(int index) {
+        final MediaItem mediaItem = mMediaItems.get(0);
         final Iterator<Transition> it = mTransitions.iterator();
         while (it.hasNext()) {
             Transition t = it.next();
@@ -752,6 +898,9 @@ public class VideoEditorTestImpl implements VideoEditor {
                 it.remove();
                 t.invalidate();
                 mediaItem.setBeginTransition(null);
+                if (index > 0) {
+                    mMediaItems.get(index - 1).setEndTransition(null);
+                }
                 break;
             }
         }
@@ -760,9 +909,10 @@ public class VideoEditorTestImpl implements VideoEditor {
     /**
      * Remove the transition after this media item
      *
-     * @param mediaItem The media item
+     * @param index The media item index
      */
-    private void removeTransitionAfter(MediaItem mediaItem) {
+    private void removeTransitionAfter(int index) {
+        final MediaItem mediaItem = mMediaItems.get(index);
         final Iterator<Transition> it = mTransitions.iterator();
         while (it.hasNext()) {
             Transition t = it.next();
@@ -770,6 +920,10 @@ public class VideoEditorTestImpl implements VideoEditor {
                 it.remove();
                 t.invalidate();
                 mediaItem.setEndTransition(null);
+                // Invalidate the reference in the next media item
+                if (index < mMediaItems.size() - 1) {
+                    mMediaItems.get(index + 1).setBeginTransition(null);
+                }
                 break;
             }
         }
