@@ -416,4 +416,8 @@
 
     <!-- Enables SIP on WIFI only -->
     <bool name="config_sip_wifi_only">false</bool>
+
+    <!-- Number of database connections opened and managed by framework layer
+         to handle queries on each database. -->
+    <integer name="db_connection_pool_size">1</integer>
 </resources>
