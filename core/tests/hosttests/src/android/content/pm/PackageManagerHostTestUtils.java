@@ -597,7 +597,7 @@ public class PackageManagerHostTestUtils extends Assert {
             mTestRunErrorMessage = errorMessage;
         }
 
-        public void testRunStarted(int testCount) {
+        public void testRunStarted(String runName, int testCount) {
             // ignore
         }
 
