@@ -24,15 +24,14 @@
 
 namespace android {
 
-static pthread_mutex_t gTLSMutex = PTHREAD_MUTEX_INITIALIZER;
-static bool gHaveTLS = false;
-static pthread_key_t gTLS = 0;
-
 // Hint for number of file descriptors to be associated with the epoll instance.
 static const int EPOLL_SIZE_HINT = 8;
 
 // Maximum number of file descriptors for which to retrieve poll events each iteration.
 static const int EPOLL_MAX_EVENTS = 16;
+
+static pthread_once_t gTLSOnce = PTHREAD_ONCE_INIT;
+static pthread_key_t gTLSKey = 0;
 
 Looper::Looper(bool allowNonCallbacks) :
         mAllowNonCallbacks(allowNonCallbacks),
@@ -56,6 +55,7 @@ Looper::Looper(bool allowNonCallbacks) :
             errno);
 
     struct epoll_event eventItem;
+    memset(& eventItem, 0, sizeof(epoll_event)); // zero out unused members of data field union
     eventItem.events = EPOLLIN;
     eventItem.data.fd = mWakeReadPipeFd;
     result = epoll_ctl(mEpollFd, EPOLL_CTL_ADD, mWakeReadPipeFd, & eventItem);
@@ -67,6 +67,11 @@ Looper::~Looper() {
     close(mWakeReadPipeFd);
     close(mWakeWritePipeFd);
     close(mEpollFd);
+}
+
+void Looper::initTLSKey() {
+    int result = pthread_key_create(& gTLSKey, threadDestructor);
+    LOG_ALWAYS_FATAL_IF(result != 0, "Could not allocate TLS key.");
 }
 
 void Looper::threadDestructor(void *st) {
@@ -83,7 +88,7 @@ void Looper::setForThread(const sp<Looper>& looper) {
         looper->incStrong((void*)threadDestructor);
     }
 
-    pthread_setspecific(gTLS, looper.get());
+    pthread_setspecific(gTLSKey, looper.get());
 
     if (old != NULL) {
         old->decStrong((void*)threadDestructor);
@@ -91,17 +96,10 @@ void Looper::setForThread(const sp<Looper>& looper) {
 }
 
 sp<Looper> Looper::getForThread() {
-    if (!gHaveTLS) {
-        pthread_mutex_lock(&gTLSMutex);
-        if (pthread_key_create(&gTLS, threadDestructor) != 0) {
-            pthread_mutex_unlock(&gTLSMutex);
-            return NULL;
-        }
-        gHaveTLS = true;
-        pthread_mutex_unlock(&gTLSMutex);
-    }
+    int result = pthread_once(& gTLSOnce, initTLSKey);
+    LOG_ALWAYS_FATAL_IF(result != 0, "pthread_once failed");
 
-    return (Looper*)pthread_getspecific(gTLS);
+    return (Looper*)pthread_getspecific(gTLSKey);
 }
 
 sp<Looper> Looper::prepare(int opts) {
@@ -331,6 +329,7 @@ int Looper::addFd(int fd, int ident, int events, ALooper_callbackFunc callback, 
         request.data = data;
 
         struct epoll_event eventItem;
+        memset(& eventItem, 0, sizeof(epoll_event)); // zero out unused members of data field union
         eventItem.events = epollEvents;
         eventItem.data.fd = fd;
 
