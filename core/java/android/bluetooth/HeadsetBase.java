@@ -89,7 +89,7 @@ public final class HeadsetBase {
         initializeNativeDataNative(-1);
     }
 
-    /* Create from an already exisiting rfcomm connection */
+    /* Create from an already existing rfcomm connection */
     public HeadsetBase(PowerManager pm, BluetoothAdapter adapter, BluetoothDevice device,
             int socketFd, int rfcommChannel, Handler handler) {
         mDirection = DIRECTION_INCOMING;
@@ -128,7 +128,7 @@ public final class HeadsetBase {
                        (System.currentTimeMillis() - timestamp) + " ms");
 
         if (result.getResultCode() == AtCommandResult.ERROR) {
-            Log.i(TAG, "Error pocessing <" + input + ">");
+            Log.i(TAG, "Error processing <" + input + ">");
         }
 
         sendURC(result.toString());
