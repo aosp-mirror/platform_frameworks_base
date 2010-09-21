@@ -3428,6 +3428,15 @@ public final class Settings {
                 "download_manager_max_bytes_over_mobile";
 
         /**
+         * The recommended maximum size, in bytes, of a download that the download manager should
+         * transfer over a non-wifi connection. Over this size, the use will be warned, but will
+         * have the option to start the download over the mobile connection anyway.
+         * @hide
+         */
+        public static final String DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE =
+                "download_manager_recommended_max_bytes_over_mobile";
+
+        /**
          * ms during which to consume extra events related to Inet connection condition
          * after a transtion to fully-connected
          * @hide
