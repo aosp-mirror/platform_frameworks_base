@@ -18,6 +18,10 @@
 
 #define MY_HANDLER_H_
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "MyHandler"
+#include <utils/Log.h>
+
 #include "APacketSource.h"
 #include "ARTPConnection.h"
 #include "ARTSPConnection.h"
@@ -137,8 +141,8 @@ struct MyHandler : public AHandler {
                 int32_t result;
                 CHECK(msg->findInt32("result", &result));
 
-                LOG(INFO) << "connection request completed with result "
-                     << result << " (" << strerror(-result) << ")";
+                LOGI("connection request completed with result %d (%s)",
+                     result, strerror(-result));
 
                 if (result == OK) {
                     AString request;
@@ -173,8 +177,8 @@ struct MyHandler : public AHandler {
                 int32_t result;
                 CHECK(msg->findInt32("result", &result));
 
-                LOG(INFO) << "DESCRIBE completed with result "
-                     << result << " (" << strerror(-result) << ")";
+                LOGI("DESCRIBE completed with result %d (%s)",
+                     result, strerror(-result));
 
                 if (result == OK) {
                     sp<RefBase> obj;
@@ -251,8 +255,8 @@ struct MyHandler : public AHandler {
                 int32_t result;
                 CHECK(msg->findInt32("result", &result));
 
-                LOG(INFO) << "SETUP(" << index << ") completed with result "
-                     << result << " (" << strerror(-result) << ")";
+                LOGI("SETUP(%d) completed with result %d (%s)",
+                     index, result, strerror(-result));
 
                 if (result == OK) {
                     CHECK(track != NULL);
@@ -326,8 +330,8 @@ struct MyHandler : public AHandler {
                 int32_t result;
                 CHECK(msg->findInt32("result", &result));
 
-                LOG(INFO) << "PLAY completed with result "
-                     << result << " (" << strerror(-result) << ")";
+                LOGI("PLAY completed with result %d (%s)",
+                     result, strerror(-result));
 
                 if (result == OK) {
                     sp<RefBase> obj;
@@ -404,8 +408,8 @@ struct MyHandler : public AHandler {
                 int32_t result;
                 CHECK(msg->findInt32("result", &result));
 
-                LOG(INFO) << "TEARDOWN completed with result "
-                     << result << " (" << strerror(-result) << ")";
+                LOGI("TEARDOWN completed with result %d (%s)",
+                     result, strerror(-result));
 
                 sp<AMessage> reply = new AMessage('disc', id());
 
@@ -431,7 +435,7 @@ struct MyHandler : public AHandler {
             case 'chek':
             {
                 if (mNumAccessUnitsReceived == 0) {
-                    LOG(INFO) << "stream ended? aborting.";
+                    LOGI("stream ended? aborting.");
                     (new AMessage('abor', id()))->post();
                     break;
                 }
@@ -461,7 +465,7 @@ struct MyHandler : public AHandler {
                 CHECK(msg->findSize("track-index", &trackIndex));
 
                 if (trackIndex >= mTracks.size()) {
-                    LOG(ERROR) << "late packets ignored.";
+                    LOGV("late packets ignored.");
                     break;
                 }
 
@@ -469,7 +473,7 @@ struct MyHandler : public AHandler {
 
                 int32_t eos;
                 if (msg->findInt32("eos", &eos)) {
-                    LOG(INFO) << "received BYE on track index " << trackIndex;
+                    LOGI("received BYE on track index %d", trackIndex);
 #if 0
                     track->mPacketSource->signalEOS(ERROR_END_OF_STREAM);
 #endif
@@ -484,14 +488,13 @@ struct MyHandler : public AHandler {
                 uint32_t seqNum = (uint32_t)accessUnit->int32Data();
 
                 if (mSeekPending) {
-                    LOG(INFO) << "we're seeking, dropping stale packet.";
+                    LOGV("we're seeking, dropping stale packet.");
                     break;
                 }
 
                 if (seqNum < track->mFirstSeqNumInSegment) {
-                    LOG(INFO) << "dropping stale access-unit "
-                              << "(" << seqNum << " < "
-                              << track->mFirstSeqNumInSegment << ")";
+                    LOGV("dropping stale access-unit (%d < %d)",
+                         seqNum, track->mFirstSeqNumInSegment);
                     break;
                 }
 
@@ -506,10 +509,8 @@ struct MyHandler : public AHandler {
                 if (track->mNewSegment) {
                     track->mNewSegment = false;
 
-                    LOG(VERBOSE) << "first segment unit ntpTime="
-                              << StringPrintf("0x%016llx", ntpTime)
-                              << " rtpTime=" << rtpTime
-                              << " seq=" << seqNum;
+                    LOGV("first segment unit ntpTime=0x%016llx rtpTime=%u seq=%d",
+                         ntpTime, rtpTime, seqNum);
                 }
 
                 if (mFirstAccessUnit) {
@@ -535,7 +536,7 @@ struct MyHandler : public AHandler {
                 int32_t damaged;
                 if (accessUnit->meta()->findInt32("damaged", &damaged)
                         && damaged != 0) {
-                    LOG(INFO) << "ignoring damaged AU";
+                    LOGI("ignoring damaged AU");
                 } else
 #endif
                 {
@@ -608,8 +609,8 @@ struct MyHandler : public AHandler {
                 int32_t result;
                 CHECK(msg->findInt32("result", &result));
 
-                LOG(INFO) << "PLAY completed with result "
-                     << result << " (" << strerror(-result) << ")";
+                LOGI("PLAY completed with result %d (%s)",
+                     result, strerror(-result));
 
                 if (result == OK) {
                     sp<RefBase> obj;
@@ -622,12 +623,12 @@ struct MyHandler : public AHandler {
                     } else {
                         parsePlayResponse(response);
 
-                        LOG(INFO) << "seek completed.";
+                        LOGI("seek completed.");
                     }
                 }
 
                 if (result != OK) {
-                    LOG(ERROR) << "seek failed, aborting.";
+                    LOGE("seek failed, aborting.");
                     (new AMessage('abor', id()))->post();
                 }
 
@@ -652,11 +653,10 @@ struct MyHandler : public AHandler {
             {
                 if (!mReceivedFirstRTCPPacket) {
                     if (mTryTCPInterleaving) {
-                        LOG(WARNING) << "Never received any data, disconnecting.";
+                        LOGW("Never received any data, disconnecting.");
                         (new AMessage('abor', id()))->post();
                     } else {
-                        LOG(WARNING)
-                            << "Never received any data, switching transports.";
+                        LOGW("Never received any data, switching transports.");
 
                         mTryTCPInterleaving = true;
 
@@ -700,7 +700,7 @@ struct MyHandler : public AHandler {
         }
 
         AString range = response->mHeaders.valueAt(i);
-        LOG(VERBOSE) << "Range: " << range;
+        LOGV("Range: %s", range.c_str());
 
         AString val;
         CHECK(GetAttribute(range.c_str(), "npt", &val));
@@ -724,7 +724,7 @@ struct MyHandler : public AHandler {
         for (List<AString>::iterator it = streamInfos.begin();
              it != streamInfos.end(); ++it) {
             (*it).trim();
-            LOG(VERBOSE) << "streamInfo[" << n << "] = " << *it;
+            LOGV("streamInfo[%d] = %s", n, (*it).c_str());
 
             CHECK(GetAttribute((*it).c_str(), "url", &val));
 
@@ -748,8 +748,7 @@ struct MyHandler : public AHandler {
 
             uint32_t rtpTime = strtoul(val.c_str(), &end, 10);
 
-            LOG(VERBOSE) << "track #" << n
-                      << ": rtpTime=" << rtpTime << " <=> npt=" << npt1;
+            LOGV("track #%d: rtpTime=%u <=> ntp=%.2f", n, rtpTime, npt1);
 
             info->mPacketSource->setNormalPlayTimeMapping(
                     rtpTime, (int64_t)(npt1 * 1E6));
@@ -806,8 +805,7 @@ private:
             new APacketSource(mSessionDesc, index);
 
         if (source->initCheck() != OK) {
-            LOG(WARNING) << "Unsupported format. Ignoring track #"
-                         << index << ".";
+            LOGW("Unsupported format. Ignoring track #%d.", index);
 
             sp<AMessage> reply = new AMessage('setu', id());
             reply->setSize("index", index);
@@ -830,7 +828,7 @@ private:
         info->mFirstSeqNumInSegment = 0;
         info->mNewSegment = true;
 
-        LOG(VERBOSE) << "track #" << mTracks.size() << " URL=" << trackURL;
+        LOGV("track #%d URL=%s", mTracks.size(), trackURL.c_str());
 
         AString request = "SETUP ";
         request.append(trackURL);
