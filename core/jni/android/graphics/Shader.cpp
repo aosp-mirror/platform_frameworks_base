@@ -318,6 +318,59 @@ static SkShader* SweepGradient_create2(JNIEnv* env, jobject, float x, float y,
     return s;
 }
 
+static SkiaShader* SweepGradient_postCreate1(JNIEnv* env, jobject o, SkShader* shader,
+        float x, float y, jintArray colorArray, jfloatArray posArray) {
+#ifdef USE_OPENGL_RENDERER
+    size_t count = env->GetArrayLength(colorArray);
+    const jint* colorValues = env->GetIntArrayElements(colorArray, NULL);
+
+    jfloat* storedPositions = new jfloat[count];
+    uint32_t* storedColors = new uint32_t[count];
+    for (size_t i = 0; i < count; i++) {
+        storedColors[i] = static_cast<uint32_t>(colorValues[i]);
+    }
+
+    if (posArray) {
+        AutoJavaFloatArray autoPos(env, posArray, count);
+        const float* posValues = autoPos.ptr();
+        for (size_t i = 0; i < count; i++) {
+            storedPositions[i] = posValues[i];
+        }
+    } else {
+        storedPositions[0] = 0.0f;
+        storedPositions[1] = 1.0f;
+    }
+
+    SkiaShader* skiaShader = new SkiaSweepGradientShader(x, y, storedColors, storedPositions, count,
+            shader, NULL, (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+
+    env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues), JNI_ABORT);
+    return skiaShader;
+#else
+    return NULL;
+#endif
+}
+
+static SkiaShader* SweepGradient_postCreate2(JNIEnv* env, jobject o, SkShader* shader,
+        float x, float y, int color0, int color1) {
+#ifdef USE_OPENGL_RENDERER
+    float* storedPositions = new float[2];
+    storedPositions[0] = 0.0f;
+    storedPositions[1] = 1.0f;
+
+    uint32_t* storedColors = new uint32_t[2];
+    storedColors[0] = static_cast<uint32_t>(color0);
+    storedColors[1] = static_cast<uint32_t>(color1);
+
+    SkiaShader* skiaShader = new SkiaSweepGradientShader(x, y, storedColors, storedPositions, 2,
+            shader, NULL, (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+
+    return skiaShader;
+#else
+    return NULL;
+#endif
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 static SkShader* ComposeShader_create1(JNIEnv* env, jobject o,
@@ -389,8 +442,10 @@ static JNINativeMethod gRadialGradientMethods[] = {
 };
 
 static JNINativeMethod gSweepGradientMethods[] = {
-    {"nativeCreate1",   "(FF[I[F)I",  (void*)SweepGradient_create1   },
-    {"nativeCreate2",   "(FFII)I",    (void*)SweepGradient_create2   }
+    {"nativeCreate1",      "(FF[I[F)I",  (void*)SweepGradient_create1     },
+    {"nativeCreate2",      "(FFII)I",    (void*)SweepGradient_create2     },
+    { "nativePostCreate1", "(IFF[I[F)I", (void*)SweepGradient_postCreate1 },
+    { "nativePostCreate2", "(IFFII)I",   (void*)SweepGradient_postCreate2 }
 };
 
 static JNINativeMethod gComposeShaderMethods[] = {
