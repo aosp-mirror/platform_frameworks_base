@@ -144,6 +144,12 @@ float Matrix4::getTranslateY() {
     return data[kTranslateY];
 }
 
+void Matrix4::multiply(float v) {
+    for (int i = 0; i < 16; i++) {
+        data[i] *= v;
+    }
+}
+
 void Matrix4::loadTranslate(float x, float y, float z) {
     loadIdentity();
     data[kTranslateX] = x;

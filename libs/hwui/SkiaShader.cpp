@@ -209,6 +209,30 @@ void SkiaLinearGradientShader::updateTransforms(Program* program, const mat4& mo
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Circular gradient shader
+///////////////////////////////////////////////////////////////////////////////
+
+SkiaCircularGradientShader::SkiaCircularGradientShader(float x, float y, float radius,
+        uint32_t* colors, float* positions, int count, SkShader* key, SkShader::TileMode tileMode,
+        SkMatrix* matrix, bool blend):
+        SkiaSweepGradientShader(kCircularGradient, x, y, colors, positions, count, key,
+                tileMode, matrix, blend),
+        mRadius(radius) {
+}
+
+void SkiaCircularGradientShader::describe(ProgramDescription& description,
+        const Extensions& extensions) {
+    description.hasGradient = true;
+    description.gradientType = ProgramDescription::kGradientCircular;
+}
+
+void SkiaCircularGradientShader::setupProgram(Program* program, const mat4& modelView,
+        const Snapshot& snapshot, GLuint* textureUnit) {
+    SkiaSweepGradientShader::setupProgram(program, modelView, snapshot, textureUnit);
+    glUniform1f(program->getUniform("gradientRadius"), 1.0f / mRadius);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Sweep gradient shader
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -216,6 +240,13 @@ SkiaSweepGradientShader::SkiaSweepGradientShader(float x, float y, uint32_t* col
         float* positions, int count, SkShader* key, SkMatrix* matrix, bool blend):
         SkiaShader(kSweepGradient, key, SkShader::kClamp_TileMode,
                 SkShader::kClamp_TileMode, matrix, blend),
+        mX(x), mY(y), mColors(colors), mPositions(positions), mCount(count) {
+}
+
+SkiaSweepGradientShader::SkiaSweepGradientShader(Type type, float x, float y, uint32_t* colors,
+        float* positions, int count, SkShader* key, SkShader::TileMode tileMode,
+        SkMatrix* matrix, bool blend):
+        SkiaShader(type, key, tileMode, tileMode, matrix, blend),
         mX(x), mY(y), mColors(colors), mPositions(positions), mCount(count) {
 }
 
@@ -243,10 +274,15 @@ void SkiaSweepGradientShader::setupProgram(Program* program, const mat4& modelVi
     float left = mX;
     float top = mY;
 
+    mat4 shaderMatrix;
     if (mMatrix) {
-        mat4 shaderMatrix(*mMatrix);
+        shaderMatrix.load(*mMatrix);
         shaderMatrix.mapPoint(left, top);
     }
+
+    mat4 copy(shaderMatrix);
+    shaderMatrix.loadInverse(copy);
+
     snapshot.transform->mapPoint(left, top);
 
     mat4 screenSpace(*snapshot.transform);
@@ -255,6 +291,7 @@ void SkiaSweepGradientShader::setupProgram(Program* program, const mat4& modelVi
     // Uniforms
     bindTexture(texture->id, gTileModes[mTileX], gTileModes[mTileY], textureSlot);
     glUniform1i(program->getUniform("gradientSampler"), textureSlot);
+    glUniformMatrix4fv(program->getUniform("gradientMatrix"), 1, GL_FALSE, &shaderMatrix.data[0]);
     glUniform2f(program->getUniform("gradientStart"), left, top);
     glUniformMatrix4fv(program->getUniform("screenSpace"), 1, GL_FALSE, &screenSpace.data[0]);
 }

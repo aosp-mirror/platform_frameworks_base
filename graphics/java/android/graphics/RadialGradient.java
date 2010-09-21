@@ -40,6 +40,8 @@ public class RadialGradient extends Shader {
             throw new IllegalArgumentException("color and position arrays must be of equal length");
         }
         native_instance = nativeCreate1(x, y, radius, colors, positions, tile.nativeInt);
+        native_shader = nativePostCreate1(native_instance, x, y, radius, colors, positions,
+                tile.nativeInt);
     }
 
 	/**	Create a shader that draws a radial gradient given the center and radius.
@@ -56,11 +58,18 @@ public class RadialGradient extends Shader {
             throw new IllegalArgumentException("radius must be > 0");
         }
         native_instance = nativeCreate2(x, y, radius, color0, color1, tile.nativeInt);
+        native_shader = nativePostCreate2(native_instance, x, y, radius, color0, color1,
+                tile.nativeInt);
     }
 
 	private static native int nativeCreate1(float x, float y, float radius,
-                                            int colors[], float positions[], int tileMode);
+            int colors[], float positions[], int tileMode);
 	private static native int nativeCreate2(float x, float y, float radius,
-                                            int color0, int color1, int tileMode);
+            int color0, int color1, int tileMode);
+
+    private static native int nativePostCreate1(int native_shader, float x, float y, float radius,
+            int colors[], float positions[], int tileMode);
+    private static native int nativePostCreate2(int native_shader, float x, float y, float radius,
+            int color0, int color1, int tileMode);
 }
 

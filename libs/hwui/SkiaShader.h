@@ -152,17 +152,35 @@ struct SkiaSweepGradientShader: public SkiaShader {
             SkShader* key, SkMatrix* matrix, bool blend);
     ~SkiaSweepGradientShader();
 
-    void describe(ProgramDescription& description, const Extensions& extensions);
-    void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
+    virtual void describe(ProgramDescription& description, const Extensions& extensions);
+    virtual void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
             GLuint* textureUnit);
     void updateTransforms(Program* program, const mat4& modelView, const Snapshot& snapshot);
 
-private:
+protected:
+    SkiaSweepGradientShader(Type type, float x, float y, uint32_t* colors, float* positions,
+            int count, SkShader* key, SkShader::TileMode tileMode, SkMatrix* matrix, bool blend);
+
     float mX, mY;
     uint32_t* mColors;
     float* mPositions;
     int mCount;
 }; // struct SkiaSweepGradientShader
+
+/**
+ * A shader that draws a circular gradient.
+ */
+struct SkiaCircularGradientShader: public SkiaSweepGradientShader {
+    SkiaCircularGradientShader(float x, float y, float radius, uint32_t* colors, float* positions,
+            int count, SkShader* key,SkShader::TileMode tileMode, SkMatrix* matrix, bool blend);
+
+    void describe(ProgramDescription& description, const Extensions& extensions);
+    void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
+            GLuint* textureUnit);
+
+private:
+    float mRadius;
+}; // struct SkiaCircularGradientShader
 
 /**
  * A shader that draws two shaders, composited with an xfermode.
