@@ -1831,7 +1831,7 @@ final class WebViewCore {
                     mSettings.getUseWideViewPort()) {
                     // Use website's initial preferred width as the fixed viewport width.
                     mViewportWidth = Math.min(mSettings.getMaxFixedViewportWidth(),
-                        draw.mMinPrefWidth);
+                        Math.max(draw.mWidthHeight.x, draw.mMinPrefWidth));
                     draw.mViewState.mViewportWidth = mViewportWidth;
                 }
                 mInitialViewState = null;
