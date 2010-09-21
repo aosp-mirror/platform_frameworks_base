@@ -150,23 +150,15 @@ public class SipPhone extends SipPhoneBase {
             // in case the active/holding call disappeared and this
             // is no longer call waiting
 
-            if (ringingCall.getState() == Call.State.INCOMING) {
+            if ((ringingCall.getState() == Call.State.INCOMING) ||
+                    (ringingCall.getState() == Call.State.WAITING)) {
                 Log.v(LOG_TAG, "acceptCall");
                 // Always unmute when answering a new call
                 setMute(false);
-                // make ringingCall foreground
-                foregroundCall.switchWith(ringingCall);
-                foregroundCall.acceptCall();
-            } else if (ringingCall.getState() == Call.State.WAITING) {
-                setMute(false);
-                switchHoldingAndActive();
-                // make ringingCall foreground
-                foregroundCall.switchWith(ringingCall);
-                foregroundCall.acceptCall();
+                ringingCall.acceptCall();
             } else {
                 throw new CallStateException("phone not ringing");
             }
-            updatePhoneState();
         }
     }
 
@@ -485,8 +477,8 @@ public class SipPhone extends SipPhoneBase {
         }
 
         void acceptCall() throws CallStateException {
-            if (this != foregroundCall) {
-                throw new CallStateException("acceptCall() in a non-fg call");
+            if (this != ringingCall) {
+                throw new CallStateException("acceptCall() in a non-ringing call");
             }
             if (connections.size() != 1) {
                 throw new CallStateException("acceptCall() in a conf call");
@@ -649,6 +641,18 @@ public class SipPhone extends SipPhoneBase {
                     if (newState == Call.State.INCOMING) {
                         setState(mOwner.getState()); // INCOMING or WAITING
                     } else {
+                        if (mOwner == ringingCall) {
+                            if (ringingCall.getState() == Call.State.WAITING) {
+                                try {
+                                    switchHoldingAndActive();
+                                } catch (CallStateException e) {
+                                    // disconnect the call.
+                                    onCallEnded(DisconnectCause.LOCAL);
+                                    return;
+                                }
+                            }
+                            foregroundCall.switchWith(ringingCall);
+                        }
                         if (newState == Call.State.ACTIVE) call.startAudio();
                         setState(newState);
                     }

@@ -54,12 +54,10 @@ public interface Phone {
      * <li>OFFHOOK = The phone is off hook. At least one call
      * exists that is dialing, active or holding and no calls are
      * ringing or waiting.</li>
-     * <li>ANSWERING = The incoming call is picked up but the
-     *  call is not established yet.</li>
      * </ul>
      */
     enum State {
-        IDLE, RINGING, OFFHOOK, ANSWERING;
+        IDLE, RINGING, OFFHOOK;
     };
 
     /**
