@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "ThreadedSource"
+//#define LOG_NDEBUG 0
+#include <utils/Log.h>
+
 #include "include/ThreadedSource.h"
 
 #include <media/stagefright/foundation/ADebug.h>

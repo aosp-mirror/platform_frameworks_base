@@ -5,7 +5,6 @@ LOCAL_SRC_FILES:=               \
     AAtomizer.cpp               \
     ABitReader.cpp              \
     ABuffer.cpp                 \
-    ADebug.cpp                  \
     AHandler.cpp                \
     ALooper.cpp                 \
     ALooperRoster.cpp           \
