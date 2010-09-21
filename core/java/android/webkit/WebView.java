@@ -1284,13 +1284,18 @@ public class WebView extends AbsoluteLayout
         return mDatabase.getHttpAuthUsernamePassword(host, realm);
     }
 
+    private void clearHelpers() {
+        clearTextEntry(false);
+        selectionDone();
+    }
+
     /**
      * Destroy the internal state of the WebView. This method should be called
      * after the WebView has been removed from the view system. No other
      * methods may be called on a WebView after destroy.
      */
     public void destroy() {
-        clearTextEntry(false);
+        clearHelpers();
         if (mWebViewCore != null) {
             // Set the handlers to null before destroying WebViewCore so no
             // more messages will be posted.
@@ -1608,7 +1613,7 @@ public class WebView extends AbsoluteLayout
         arg.mUrl = url;
         arg.mExtraHeaders = extraHeaders;
         mWebViewCore.sendMessage(EventHub.LOAD_URL, arg);
-        clearTextEntry(false);
+        clearHelpers();
     }
 
     /**
@@ -1637,7 +1642,7 @@ public class WebView extends AbsoluteLayout
             arg.mUrl = url;
             arg.mPostData = postData;
             mWebViewCore.sendMessage(EventHub.POST_URL, arg);
-            clearTextEntry(false);
+            clearHelpers();
         } else {
             loadUrl(url);
         }
@@ -1693,7 +1698,7 @@ public class WebView extends AbsoluteLayout
         arg.mEncoding = encoding;
         arg.mHistoryUrl = historyUrl;
         mWebViewCore.sendMessage(EventHub.LOAD_DATA, arg);
-        clearTextEntry(false);
+        clearHelpers();
     }
 
     /**
@@ -1710,7 +1715,7 @@ public class WebView extends AbsoluteLayout
      * Reload the current url.
      */
     public void reload() {
-        clearTextEntry(false);
+        clearHelpers();
         switchOutDrawHistory();
         mWebViewCore.sendMessage(EventHub.RELOAD);
     }
@@ -1790,7 +1795,7 @@ public class WebView extends AbsoluteLayout
 
     private void goBackOrForward(int steps, boolean ignoreSnapshot) {
         if (steps != 0) {
-            clearTextEntry(false);
+            clearHelpers();
             mWebViewCore.sendMessage(EventHub.GO_BACK_FORWARD, steps,
                     ignoreSnapshot ? 1 : 0);
         }
@@ -4421,7 +4426,7 @@ public class WebView extends AbsoluteLayout
 
     @Override
     protected void onDetachedFromWindow() {
-        clearTextEntry(false);
+        clearHelpers();
         dismissZoomControl();
         if (hasWindowFocus()) setActive(false);
         super.onDetachedFromWindow();
