@@ -222,6 +222,9 @@ class PackageManagerService extends IPackageManager.Stub {
     // This is the object monitoring the system app dir.
     final FileObserver mSystemInstallObserver;
 
+    // This is the object monitoring the system app dir.
+    final FileObserver mVendorInstallObserver;
+
     // This is the object monitoring mAppInstallDir.
     final FileObserver mAppInstallObserver;
 
@@ -234,6 +237,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
     final File mFrameworkDir;
     final File mSystemAppDir;
+    final File mVendorAppDir;
     final File mAppInstallDir;
     final File mDalvikCacheDir;
 
@@ -927,6 +931,14 @@ class PackageManagerService extends IPackageManager.Stub {
             scanDirLI(mSystemAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanMode);
             
+            // Collect all vendor packages.
+            mVendorAppDir = new File("/vendor/app");
+            mVendorInstallObserver = new AppDirObserver(
+                mVendorAppDir.getPath(), OBSERVER_EVENTS, true);
+            mVendorInstallObserver.startWatching();
+            scanDirLI(mVendorAppDir, PackageParser.PARSE_IS_SYSTEM
+                    | PackageParser.PARSE_IS_SYSTEM_DIR, scanMode);
+
             if (mInstaller != null) {
                 if (DEBUG_UPGRADE) Log.v(TAG, "Running installd update commands");
                 mInstaller.moveFiles();
@@ -2493,9 +2505,13 @@ class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void scanDirLI(File dir, int flags, int scanMode) {
-        Log.d(TAG, "Scanning app dir " + dir);
-
         String[] files = dir.list();
+        if (files == null) {
+            Log.d(TAG, "No files in app dir " + dir);
+            return;
+        }
+
+        Log.d(TAG, "Scanning app dir " + dir);
 
         int i;
         for (i=0; i<files.length; i++) {
