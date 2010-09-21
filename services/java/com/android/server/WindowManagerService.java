@@ -8325,6 +8325,11 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
         
+        if (mDisplay == null) {
+            // Not yet initialized, nothing to do.
+            return;
+        }
+
         boolean recoveringMemory = false;
         if (mForceRemoves != null) {
             recoveringMemory = true;

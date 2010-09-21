@@ -663,7 +663,7 @@ public abstract class PreferenceActivity extends ListActivity implements
 
                     TypedArray sa = getResources().obtainAttributes(attrs,
                             com.android.internal.R.styleable.PreferenceHeader);
-                    header.id = sa.getInt(
+                    header.id = sa.getResourceId(
                             com.android.internal.R.styleable.PreferenceHeader_id,
                             (int)HEADER_ID_UNDEFINED);
                     header.title = sa.getText(

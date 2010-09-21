@@ -46,8 +46,8 @@ public:
      * Adds a new linear gradient to the cache. The generated texture is
      * returned.
      */
-    Texture* addLinearGradient(SkShader* shader, float* bounds, uint32_t* colors,
-            float* positions, int count, SkShader::TileMode tileMode);
+    Texture* addLinearGradient(SkShader* shader, uint32_t* colors, float* positions,
+            int count, SkShader::TileMode tileMode = SkShader::kClamp_TileMode);
     /**
      * Returns the texture associated with the specified shader.
      */

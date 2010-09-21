@@ -71,7 +71,8 @@ public class Shader {
      * @param localM The shader's new local matrix, or null to specify identity
      */
     public void setLocalMatrix(Matrix localM) {
-        nativeSetLocalMatrix(native_instance, native_shader, localM.native_instance);
+        nativeSetLocalMatrix(native_instance, native_shader,
+                localM == null ? 0 : localM.native_instance);
     }
 
     protected void finalize() throws Throwable {

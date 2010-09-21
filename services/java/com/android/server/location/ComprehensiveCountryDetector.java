@@ -16,10 +16,6 @@
 
 package com.android.server.location;
 
-import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import android.content.Context;
 import android.location.Country;
 import android.location.CountryListener;
@@ -30,6 +26,10 @@ import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Slog;
+
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * This class is used to detect the country where the user is. The sources of
@@ -354,6 +354,6 @@ public class ComprehensiveCountryDetector extends CountryDetectorBase {
     }
 
     protected boolean isGeoCoderImplemented() {
-        return Geocoder.isImplemented();
+        return Geocoder.isPresent();
     }
 }

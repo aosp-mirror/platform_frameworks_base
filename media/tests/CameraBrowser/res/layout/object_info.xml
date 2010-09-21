@@ -41,6 +41,16 @@
             style="@style/info_value" />
     </TableRow>
     <TableRow>
+        <TextView android:id="@+id/format_label"
+            android:text="@string/format_label"
+            android:layout_gravity="right"
+            android:layout_marginRight="8dip"
+            style="@style/info_label" />
+
+        <TextView android:id="@+id/format"
+            style="@style/info_value" />
+    </TableRow>
+    <TableRow>
         <TextView android:id="@+id/thumb_width_label"
             android:text="@string/thumb_width_label"
             android:layout_gravity="right"

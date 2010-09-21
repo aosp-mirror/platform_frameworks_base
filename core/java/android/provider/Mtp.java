@@ -147,7 +147,7 @@ public final class Mtp
          * or any of the valid MTP object formats as defined in the MTP specification.
          * <P>Type: INTEGER</P>
          */
-        public static final String THUMB_FORMAT = "format";
+        public static final String THUMB_FORMAT = "thumb_format";
 
         /**
          * The size of the object's thumbnail in bytes.

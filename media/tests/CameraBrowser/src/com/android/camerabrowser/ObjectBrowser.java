@@ -101,17 +101,17 @@ public class ObjectBrowser extends ListActivity {
             format = c.getLong(FORMAT_COLUMN);
             Log.d(TAG, "rowId: " + rowId + " name: " + name + " format: " + format);
         }
-        if (format == MtpConstants.FORMAT_JFIF) {
-            Intent intent = new Intent(this, ObjectViewer.class);
-            intent.putExtra("device", mDeviceID);
-            intent.putExtra("storage", mStorageID);
-            intent.putExtra("object",rowID);
-            startActivity(intent);
-        } else {
+        if (format == MtpConstants.FORMAT_ASSOCIATION) {
             Intent intent = new Intent(this, ObjectBrowser.class);
             intent.putExtra("device", mDeviceID);
             intent.putExtra("storage", mStorageID);
             intent.putExtra("object", rowID);
+            startActivity(intent);
+        } else {
+            Intent intent = new Intent(this, ObjectViewer.class);
+            intent.putExtra("device", mDeviceID);
+            intent.putExtra("storage", mStorageID);
+            intent.putExtra("object",rowID);
             startActivity(intent);
         }
     }

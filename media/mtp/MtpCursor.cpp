@@ -371,7 +371,7 @@ bool MtpCursor::fillObject(CursorWindow* window, MtpDevice* device,
                     goto fail;
                 break;
             default:
-                LOGE("fillStorage: unknown column %d\n", mColumns[i]);
+                LOGE("fillObject: unknown column %d\n", mColumns[i]);
                 goto fail;
         }
     }

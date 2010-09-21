@@ -44,9 +44,6 @@ namespace uirenderer {
     #define PROGRAM_LOGD(...)
 #endif
 
-/*
- * IMPORTANT: All 32 bits are used, switch to a long.
- */
 #define PROGRAM_KEY_TEXTURE 0x1
 #define PROGRAM_KEY_A8_TEXTURE 0x2
 #define PROGRAM_KEY_BITMAP 0x4
@@ -70,14 +67,13 @@ namespace uirenderer {
 #define PROGRAM_BITMAP_WRAPS_SHIFT 9
 #define PROGRAM_BITMAP_WRAPT_SHIFT 11
 
+#define PROGRAM_GRADIENT_TYPE_SHIFT 33
+
 ///////////////////////////////////////////////////////////////////////////////
 // Types
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * IMPORTANT: All 32 bits are used, switch to a long.
- */
-typedef uint32_t programid;
+typedef uint64_t programid;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Cache
@@ -96,9 +92,16 @@ struct ProgramDescription {
         kColorBlend
     };
 
+    enum Gradient {
+        kGradientLinear,
+        kGradientCircular,
+        kGradientSweep
+    };
+
     ProgramDescription():
         hasTexture(false), hasAlpha8Texture(false),
         hasBitmap(false), isBitmapNpot(false), hasGradient(false),
+        gradientType(kGradientLinear),
         shadersMode(SkXfermode::kClear_Mode), isBitmapFirst(false),
         bitmapWrapS(GL_CLAMP_TO_EDGE), bitmapWrapT(GL_CLAMP_TO_EDGE),
         colorOp(kColorNone), colorMode(SkXfermode::kClear_Mode),
@@ -112,8 +115,12 @@ struct ProgramDescription {
     // Shaders
     bool hasBitmap;
     bool isBitmapNpot;
+
     bool hasGradient;
+    Gradient gradientType;
+
     SkXfermode::Mode shadersMode;
+
     bool isBitmapFirst;
     GLenum bitmapWrapS;
     GLenum bitmapWrapT;
@@ -152,7 +159,8 @@ struct ProgramDescription {
             }
         }
         if (hasGradient) key |= PROGRAM_KEY_GRADIENT;
-        if (isBitmapFirst) key  |= PROGRAM_KEY_BITMAP_FIRST;
+        key |= programid(gradientType) << PROGRAM_GRADIENT_TYPE_SHIFT;
+        if (isBitmapFirst) key |= PROGRAM_KEY_BITMAP_FIRST;
         if (hasBitmap && hasGradient) {
             key |= (shadersMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_SHADER_SHIFT;
         }
@@ -173,6 +181,12 @@ struct ProgramDescription {
         key |= (framebufferMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_FRAMEBUFFER_SHIFT;
         if (swapSrcDst) key |= PROGRAM_KEY_SWAP_SRC_DST;
         return key;
+    }
+
+    void log(const char* message) const {
+        programid k = key();
+        PROGRAM_LOGD("%s (key = 0x%.8x%.8x)", message, uint32_t(k >> 32),
+                uint32_t(k & 0xffffffff));
     }
 }; // struct ProgramDescription
 
