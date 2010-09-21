@@ -1941,7 +1941,7 @@ public class WebView extends AbsoluteLayout
     public void clearView() {
         mContentWidth = 0;
         mContentHeight = 0;
-        nativeSetBaseLayer(0);
+        if (mNativeClass != 0) nativeSetBaseLayer(0);
         mWebViewCore.sendMessage(EventHub.CLEAR_CONTENT);
     }
 
