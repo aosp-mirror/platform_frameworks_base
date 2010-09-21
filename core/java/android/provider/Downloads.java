@@ -1077,7 +1077,12 @@ public final class Downloads {
         /**
          * The lowest-valued error status that is not an actual HTTP status code.
          */
-        public static final int MIN_ARTIFICIAL_ERROR_STATUS = 489;
+        public static final int MIN_ARTIFICIAL_ERROR_STATUS = 488;
+
+        /**
+         * The requested destination file already exists.
+         */
+        public static final int STATUS_FILE_ALREADY_EXISTS_ERROR = 488;
 
         /**
          * Some possibly transient error occurred, but we can't resume the download.

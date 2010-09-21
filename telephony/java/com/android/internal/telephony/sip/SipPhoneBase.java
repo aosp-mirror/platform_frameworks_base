@@ -538,8 +538,6 @@ abstract class SipPhoneBase extends PhoneBase {
 
         if (getRingingCall().isRinging()) {
             state = State.RINGING;
-        } else if (getForegroundCall().isRinging()) {
-            state = State.ANSWERING;
         } else if (getForegroundCall().isIdle()
                 && getBackgroundCall().isIdle()) {
             state = State.IDLE;

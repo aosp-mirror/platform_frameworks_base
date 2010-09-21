@@ -145,7 +145,7 @@ public class WifiService extends IWifiManager.Stub {
      */
     private static final long DEFAULT_IDLE_MILLIS = 15 * 60 * 1000; /* 15 minutes */
 
-    private static final String WAKELOCK_TAG = "WifiService";
+    private static final String WAKELOCK_TAG = "*wifi*";
 
     /**
      * The maximum amount of time to hold the wake lock after a disconnect
@@ -1825,6 +1825,7 @@ public class WifiService extends IWifiManager.Stub {
                 }
             }
             mWifiStateTracker.updateBatteryWorkSourceLocked(mTmpWorkSource);
+            sWakeLock.setWorkSource(mTmpWorkSource);
         }
     }
 

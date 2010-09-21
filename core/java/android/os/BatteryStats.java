@@ -397,7 +397,7 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
-    public final class HistoryItem implements Parcelable {
+    public final static class HistoryItem implements Parcelable {
         public HistoryItem next;
         
         public long time;
@@ -482,6 +482,18 @@ public abstract class BatteryStats implements Parcelable {
             dest.writeInt(states);
         }
         
+        public void setTo(HistoryItem o) {
+            time = o.time;
+            cmd = o.cmd;
+            batteryLevel = o.batteryLevel;
+            batteryStatus = o.batteryStatus;
+            batteryHealth = o.batteryHealth;
+            batteryPlugType = o.batteryPlugType;
+            batteryTemperature = o.batteryTemperature;
+            batteryVoltage = o.batteryVoltage;
+            states = o.states;
+        }
+
         public void setTo(long time, byte cmd, HistoryItem o) {
             this.time = time;
             this.cmd = cmd;
@@ -526,6 +538,10 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
     
+    public abstract boolean startIteratingHistoryLocked();
+
+    public abstract boolean getNextHistoryLocked(HistoryItem out);
+
     /**
      * Return the current history of battery state changes.
      */
@@ -1688,8 +1704,8 @@ public abstract class BatteryStats implements Parcelable {
      */
     @SuppressWarnings("unused")
     public void dumpLocked(PrintWriter pw) {
-        HistoryItem rec = getHistory();
-        if (rec != null) {
+        final HistoryItem rec = new HistoryItem();
+        if (startIteratingHistoryLocked()) {
             pw.println("Battery History:");
             long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
             int oldState = 0;
@@ -1698,7 +1714,7 @@ public abstract class BatteryStats implements Parcelable {
             int oldPlug = -1;
             int oldTemp = -1;
             int oldVolt = -1;
-            while (rec != null) {
+            while (getNextHistoryLocked(rec)) {
                 pw.print("  ");
                 TimeUtils.formatDuration(rec.time-now, pw, TimeUtils.HUNDRED_DAY_FIELD_LEN);
                 pw.print(" ");
@@ -1803,7 +1819,6 @@ public abstract class BatteryStats implements Parcelable {
                     pw.println();
                 }
                 oldState = rec.states;
-                rec = rec.next;
             }
             pw.println("");
         }
