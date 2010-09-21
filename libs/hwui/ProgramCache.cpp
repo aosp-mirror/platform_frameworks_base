@@ -40,9 +40,12 @@ const char* gVS_Header_Uniforms_HasGradient[3] = {
         "uniform vec2 gradientStart;\n"
         "uniform mat4 screenSpace;\n",
         // Circular
-        "",
+        "uniform vec2 gradientStart;\n"
+        "uniform mat4 gradientMatrix;\n"
+        "uniform mat4 screenSpace;\n",
         // Sweep
         "uniform vec2 gradientStart;\n"
+        "uniform mat4 gradientMatrix;\n"
         "uniform mat4 screenSpace;\n"
 };
 const char* gVS_Header_Uniforms_HasBitmap =
@@ -56,7 +59,7 @@ const char* gVS_Header_Varyings_HasGradient[3] = {
         // Linear
         "varying float index;\n",
         // Circular
-        "",
+        "varying vec2 circular;\n",
         // Sweep
         "varying vec2 sweep;\n"
 };
@@ -69,10 +72,11 @@ const char* gVS_Main_OutGradient[3] = {
         "    vec4 location = screenSpace * position;\n"
         "    index = dot(location.xy - gradientStart, gradient) * gradientLength;\n",
         // Circular
-        "",
+        "    vec4 location = screenSpace * position;\n"
+        "    circular = (gradientMatrix * vec4(location.xy - gradientStart, 0.0, 0.0)).xy;\n",
         // Sweep
         "    vec4 location = screenSpace * position;\n"
-        "    sweep = location.xy - gradientStart;\n"
+        "    sweep = (gradientMatrix * vec4(location.xy - gradientStart, 0.0, 0.0)).xy;\n"
 };
 const char* gVS_Main_OutBitmapTexCoords =
         "    vec4 bitmapCoords = textureTransform * position;\n"
@@ -98,6 +102,7 @@ const char* gFS_Uniforms_GradientSampler[3] = {
         // Linear
         "uniform sampler2D gradientSampler;\n",
         // Circular
+        "uniform float gradientRadius;\n"
         "uniform sampler2D gradientSampler;\n",
         // Sweep
         "uniform sampler2D gradientSampler;\n"
@@ -129,7 +134,8 @@ const char* gFS_Main_FetchGradient[3] = {
         // Linear
         "    vec4 gradientColor = texture2D(gradientSampler, vec2(index, 0.5));\n",
         // Circular
-        "",
+        "    float index = length(circular) * gradientRadius;\n"
+        "    vec4 gradientColor = texture2D(gradientSampler, vec2(index, 0.5));\n",
         // Sweep
         "    float index = atan(sweep.y, sweep.x) * 0.15915494309; // inv(2 * PI)\n"
         "    vec4 gradientColor = texture2D(gradientSampler, vec2(index - floor(index), 0.5));\n"

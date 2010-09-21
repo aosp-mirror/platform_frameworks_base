@@ -83,6 +83,8 @@ public:
         load(u);
     }
 
+    void multiply(float v);
+
     void translate(float x, float y, float z) {
         Matrix4 u;
         u.loadTranslate(x, y, z);
