@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "hexdump"
+#include <utils/Log.h>
+
 #include "hexdump.h"
 
 #include "ADebug.h"
@@ -63,7 +67,7 @@ void hexdump(const void *_data, size_t size) {
             }
         }
 
-        LOG(INFO) << line;
+        LOGI("%s", line.c_str());
 
         offset += 16;
     }

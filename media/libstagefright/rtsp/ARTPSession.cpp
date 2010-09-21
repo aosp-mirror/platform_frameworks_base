@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "ARTPSession"
+#include <utils/Log.h>
+
 #include "ARTPSession.h"
 
 #include <media/stagefright/foundation/ABuffer.h>
@@ -51,24 +55,24 @@ status_t ARTPSession::setup(const sp<ASessionDescription> &desc) {
         if (!mDesc->findAttribute(i, "c=", &connection)) {
             // No per-stream connection information, try global fallback.
             if (!mDesc->findAttribute(0, "c=", &connection)) {
-                LOG(ERROR) << "Unable to find connection attribtue.";
+                LOGE("Unable to find connection attribute.");
                 return mInitCheck;
             }
         }
         if (!(connection == "IN IP4 127.0.0.1")) {
-            LOG(ERROR) << "We only support localhost connections for now.";
+            LOGE("We only support localhost connections for now.");
             return mInitCheck;
         }
 
         unsigned port;
         if (!validateMediaFormat(i, &port) || (port & 1) != 0) {
-            LOG(ERROR) << "Invalid media format.";
+            LOGE("Invalid media format.");
             return mInitCheck;
         }
 
         sp<APacketSource> source = new APacketSource(mDesc, i);
         if (source->initCheck() != OK) {
-            LOG(ERROR) << "Unsupported format.";
+            LOGE("Unsupported format.");
             return mInitCheck;
         }
 
@@ -157,9 +161,8 @@ void ARTPSession::onMessageReceived(const sp<AMessage> &msg) {
             printf("access unit complete size=%d\tntp-time=0x%016llx\n",
                    accessUnit->size(), ntpTime);
 #else
-            LOG(INFO) << "access unit complete, "
-                      << "size=" << accessUnit->size() << ", "
-                      << "ntp-time=" << ntpTime;
+            LOGI("access unit complete, size=%d, ntp-time=%llu",
+                 accessUnit->size(), ntpTime);
             hexdump(accessUnit->data(), accessUnit->size());
 #endif
 #endif
@@ -169,9 +172,8 @@ void ARTPSession::onMessageReceived(const sp<AMessage> &msg) {
             CHECK(!memcmp("\x00\x00\x00\x01", accessUnit->data(), 4));
             unsigned x = accessUnit->data()[4];
 
-            LOG(INFO) << "access unit complete: "
-                      << StringPrintf("nalType=0x%02x, nalRefIdc=0x%02x",
-                                      x & 0x1f, (x & 0x60) >> 5);
+            LOGI("access unit complete: nalType=0x%02x, nalRefIdc=0x%02x",
+                 x & 0x1f, (x & 0x60) >> 5);
 #endif
 
             accessUnit->meta()->setInt64("ntp-time", ntpTime);
@@ -181,7 +183,7 @@ void ARTPSession::onMessageReceived(const sp<AMessage> &msg) {
             int32_t damaged;
             if (accessUnit->meta()->findInt32("damaged", &damaged)
                     && damaged != 0) {
-                LOG(INFO) << "ignoring damaged AU";
+                LOGI("ignoring damaged AU");
             } else
 #endif
             {

@@ -72,7 +72,6 @@ private:
     uint64_t RTP2NTP(uint32_t rtpTime) const;
 
     bool queuePacket(const sp<ABuffer> &buffer);
-    void dump() const;
 
     DISALLOW_EVIL_CONSTRUCTORS(ARTPSource);
 };

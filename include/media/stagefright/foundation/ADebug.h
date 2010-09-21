@@ -22,45 +22,18 @@
 
 #include <media/stagefright/foundation/ABase.h>
 #include <media/stagefright/foundation/AString.h>
+#include <utils/Log.h>
 
 namespace android {
 
-enum LogType {
-    VERBOSE,
-    INFO,
-    WARNING,
-    ERROR,
-    FATAL,
-};
-
-struct Logger {
-    Logger(LogType type);
-    virtual ~Logger();
-
-    template<class T> Logger &operator<<(const T &x) {
-        mMessage.append(x);
-
-        return *this;
-    }
-
-private:
-    android::AString mMessage;
-    LogType mLogType;
-
-    DISALLOW_EVIL_CONSTRUCTORS(Logger);
-};
-
-const char *LeafName(const char *s);
-
-#undef LOG
-#define LOG(type)    Logger(type) << LeafName(__FILE__) << ":" << __LINE__ << " "
+#define LITERAL_TO_STRING_INTERNAL(x)    #x
+#define LITERAL_TO_STRING(x) LITERAL_TO_STRING_INTERNAL(x)
 
 #define CHECK(condition)                                \
-    do {                                                \
-        if (!(condition)) {                             \
-            LOG(FATAL) << "CHECK(" #condition ") failed.";    \
-        }                                               \
-    } while (false)
+    LOG_ALWAYS_FATAL_IF(                                \
+            !(condition),                               \
+            __FILE__ ":" LITERAL_TO_STRING(__LINE__)    \
+            " CHECK(" #condition ") failed.")
 
 #define MAKE_COMPARATOR(suffix,op)                          \
     template<class A, class B>                              \
@@ -85,8 +58,10 @@ MAKE_COMPARATOR(GT,>)
     do {                                                                \
         AString ___res = Compare_##suffix(x, y);                        \
         if (!___res.empty()) {                                          \
-            LOG(FATAL) << "CHECK_" #suffix "(" #x "," #y ") failed: "   \
-                       << ___res;                                       \
+            LOG_ALWAYS_FATAL(                                           \
+                    __FILE__ ":" LITERAL_TO_STRING(__LINE__)            \
+                    " CHECK_" #suffix "( " #x "," #y ") failed: %s",    \
+                    ___res.c_str());                                    \
         }                                                               \
     } while (false)
 
@@ -97,7 +72,7 @@ MAKE_COMPARATOR(GT,>)
 #define CHECK_GE(x,y)   CHECK_OP(x,y,GE,>=)
 #define CHECK_GT(x,y)   CHECK_OP(x,y,GT,>)
 
-#define TRESPASS()      LOG(FATAL) << "Should not be here."
+#define TRESPASS()      LOG_ALWAYS_FATAL("Should not be here.")
 
 }  // namespace android
 

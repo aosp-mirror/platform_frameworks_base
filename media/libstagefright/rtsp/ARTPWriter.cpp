@@ -1,3 +1,23 @@
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+//#define LOG_NDEBUG 0
+#define LOG_TAG "ARTPWriter"
+#include <utils/Log.h>
+
 #include "ARTPWriter.h"
 
 #include <fcntl.h>
@@ -249,7 +269,7 @@ void ARTPWriter::onRead(const sp<AMessage> &msg) {
     status_t err = mSource->read(&mediaBuf);
 
     if (err != OK) {
-        LOG(INFO) << "reached EOS.";
+        LOGI("reached EOS.");
 
         Mutex::Autolock autoLock(mLock);
         mFlags |= kFlagEOS;
@@ -257,7 +277,7 @@ void ARTPWriter::onRead(const sp<AMessage> &msg) {
     }
 
     if (mediaBuf->range_length() > 0) {
-        LOG(VERBOSE) << "read buffer of size " << mediaBuf->range_length();
+        LOGV("read buffer of size %d", mediaBuf->range_length());
 
         if (mMode == H264) {
             StripStartcode(mediaBuf);
@@ -500,7 +520,7 @@ void ARTPWriter::dumpSessionDesc() {
         sdp.append("a=fmtp:" PT_STR " octed-align\r\n");
     }
 
-    LOG(INFO) << sdp;
+    LOGI("%s", sdp.c_str());
 }
 
 void ARTPWriter::makeH264SPropParamSets(MediaBuffer *buffer) {

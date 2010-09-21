@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "ARTPSource"
+#include <utils/Log.h>
+
 #include "ARTPSource.h"
 
 #include "AAMRAssembler.h"
@@ -26,8 +30,6 @@
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
-
-#define BE_VERBOSE      0
 
 namespace android {
 
@@ -83,14 +85,10 @@ void ARTPSource::processRTPPacket(const sp<ABuffer> &buffer) {
             && mAssembler != NULL) {
         mAssembler->onPacketReceived(this);
     }
-
-    dump();
 }
 
 void ARTPSource::timeUpdate(uint32_t rtpTime, uint64_t ntpTime) {
-#if BE_VERBOSE
-    LOG(VERBOSE) << "timeUpdate";
-#endif
+    LOGV("timeUpdate");
 
     mLastNTPTime = ntpTime;
     mLastNTPTimeUpdateUs = ALooper::GetNowUs();
@@ -173,96 +171,13 @@ bool ARTPSource::queuePacket(const sp<ABuffer> &buffer) {
     }
 
     if (it != mQueue.end() && (uint32_t)(*it)->int32Data() == seqNum) {
-        LOG(WARNING) << "Discarding duplicate buffer";
+        LOGW("Discarding duplicate buffer");
         return false;
     }
 
     mQueue.insert(it, buffer);
 
     return true;
-}
-
-void ARTPSource::dump() const {
-    if ((mNumBuffersReceived % 128) != 0) {
-        return;
-    }
-
-#if 0
-    if (mAssembler == NULL) {
-        char tmp[20];
-        sprintf(tmp, "0x%08x", mID);
-
-        int32_t numMissing = 0;
-
-        if (!mQueue.empty()) {
-            List<sp<ABuffer> >::const_iterator it = mQueue.begin();
-            uint32_t expectedSeqNum = (uint32_t)(*it)->int32Data();
-            ++expectedSeqNum;
-            ++it;
-
-            for (; it != mQueue.end(); ++it) {
-                uint32_t seqNum = (uint32_t)(*it)->int32Data();
-                CHECK_GE(seqNum, expectedSeqNum);
-
-                if (seqNum != expectedSeqNum) {
-                    numMissing += seqNum - expectedSeqNum;
-                    expectedSeqNum = seqNum;
-                }
-
-                ++expectedSeqNum;
-            }
-        }
-
-        LOG(VERBOSE) << "[" << tmp << "] Missing " << numMissing
-             << " / " << (mNumBuffersReceived + numMissing) << " packets. ("
-             << (100.0 * numMissing / (mNumBuffersReceived + numMissing))
-             << " %%)";
-    }
-#endif
-
-#if 0
-    AString out;
-
-    out.append(tmp);
-    out.append(" [");
-
-    List<sp<ABuffer> >::const_iterator it = mQueue.begin();
-    while (it != mQueue.end()) {
-        uint32_t start = (uint32_t)(*it)->int32Data();
-
-        out.append(start);
-
-        ++it;
-        uint32_t expected = start + 1;
-
-        while (it != mQueue.end()) {
-            uint32_t seqNum = (uint32_t)(*it)->int32Data();
-
-            if (seqNum != expected) {
-                if (expected > start + 1) {
-                    out.append("-");
-                    out.append(expected - 1);
-                }
-                out.append(", ");
-                break;
-            }
-
-            ++it;
-            ++expected;
-        }
-
-        if (it == mQueue.end()) {
-            if (expected > start + 1) {
-                out.append("-");
-                out.append(expected - 1);
-            }
-        }
-    }
-
-    out.append("]");
-
-    LOG(VERBOSE) << out;
-#endif
 }
 
 uint64_t ARTPSource::RTP2NTP(uint32_t rtpTime) const {
@@ -291,7 +206,7 @@ void ARTPSource::addFIR(const sp<ABuffer> &buffer) {
     mLastFIRRequestUs = nowUs;
 
     if (buffer->size() + 20 > buffer->capacity()) {
-        LOG(WARNING) << "RTCP buffer too small to accomodate FIR.";
+        LOGW("RTCP buffer too small to accomodate FIR.");
         return;
     }
 
@@ -324,12 +239,12 @@ void ARTPSource::addFIR(const sp<ABuffer> &buffer) {
 
     buffer->setRange(buffer->offset(), buffer->size() + 20);
 
-    LOG(VERBOSE) << "Added FIR request.";
+    LOGV("Added FIR request.");
 }
 
 void ARTPSource::addReceiverReport(const sp<ABuffer> &buffer) {
     if (buffer->size() + 32 > buffer->capacity()) {
-        LOG(WARNING) << "RTCP buffer too small to accomodate RR.";
+        LOGW("RTCP buffer too small to accomodate RR.");
         return;
     }
 
