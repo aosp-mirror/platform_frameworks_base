@@ -1021,6 +1021,9 @@ public class Camera {
         private static final String KEY_ZOOM_SUPPORTED = "zoom-supported";
         private static final String KEY_SMOOTH_ZOOM_SUPPORTED = "smooth-zoom-supported";
         private static final String KEY_FOCUS_DISTANCES = "focus-distances";
+        private static final String KEY_VIDEO_SIZE = "video-size";
+        private static final String KEY_PREFERRED_PREVIEW_SIZE_FOR_VIDEO =
+                                            "preferred-preview-size-for-video";
 
         // Parameter key suffix for supported values.
         private static final String SUPPORTED_VALUES_SUFFIX = "-values";
@@ -1398,7 +1401,7 @@ public class Camera {
         /**
          * Returns the dimensions setting for preview pictures.
          *
-         * @return a Size object with the height and width setting
+         * @return a Size object with the width and height setting
          *          for the preview picture
          */
         public Size getPreviewSize() {
@@ -1415,6 +1418,46 @@ public class Camera {
         public List<Size> getSupportedPreviewSizes() {
             String str = get(KEY_PREVIEW_SIZE + SUPPORTED_VALUES_SUFFIX);
             return splitSize(str);
+        }
+
+        /**
+         * Gets the supported video frame sizes that can be used by
+         * MediaRecorder.
+         *
+         * If the returned list is not null, the returned list will contain at
+         * least one Size and one of the sizes in the returned list must be
+         * passed to MediaRecorder.setVideoSize() for camcorder application if
+         * camera is used as the video source. In this case, the size of the
+         * preview can be different from the resolution of the recorded video
+         * during video recording.
+         *
+         * @return a list of Size object if camera has separate preview and
+         *         video output; otherwise, null is returned.
+         * @see #getPreferredPreviewSizeForVideo()
+         */
+        public List<Size> getSupportedVideoSizes() {
+            String str = get(KEY_VIDEO_SIZE + SUPPORTED_VALUES_SUFFIX);
+            return splitSize(str);
+        }
+
+        /**
+         * Returns the preferred or recommended preview size (width and height)
+         * in pixels for video recording. Camcorder applications should
+         * set the preview size to a value that is not larger than the
+         * preferred preview size. In other words, the product of the width
+         * and height of the preview size should not be larger than that of
+         * the preferred preview size. In addition, we recommend to choose a
+         * preview size that has the same aspect ratio as the resolution of
+         * video to be recorded.
+         *
+         * @return the preferred preview size (width and height) in pixels for
+         *         video recording if getSupportedVideoSizes() does not return
+         *         null; otherwise, null is returned.
+         * @see #getSupportedVideoSizes()
+         */
+        public Size getPreferredPreviewSizeForVideo() {
+            String pair = get(KEY_PREFERRED_PREVIEW_SIZE_FOR_VIDEO);
+            return strToSize(pair);
         }
 
         /**
