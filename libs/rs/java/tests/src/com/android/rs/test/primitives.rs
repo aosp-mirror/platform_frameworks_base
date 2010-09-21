@@ -3,7 +3,9 @@
 #pragma rs export_func(rs_primitives_test)
 
 // Testing primitive types
-static float floatTest = 1.0;
+#pragma rs export_var(floatTest)
+#pragma rs export_var(doubleTest)
+static float floatTest = 1.99f;
 static double doubleTest = 2.05;
 static char charTest = -8;
 static short shortTest = -16;
@@ -16,7 +18,7 @@ static void test_primitive_types(uint32_t index) {
     bool failed = false;
     start();
 
-    _RS_ASSERT(floatTest == 1.0);
+    _RS_ASSERT(floatTest == 1.99f);
     _RS_ASSERT(doubleTest == 2.05);
     _RS_ASSERT(charTest == -8);
     _RS_ASSERT(shortTest == -16);
