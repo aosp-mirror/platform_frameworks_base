@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "ARTPConnection"
+#include <utils/Log.h>
+
 #include "ARTPConnection.h"
 
 #include "ARTPSource.h"
@@ -319,7 +323,7 @@ void ARTPConnection::onPollStreams() {
             }
 
             if (buffer->size() > 0) {
-                LOG(VERBOSE) << "Sending RR...";
+                LOGV("Sending RR...");
 
                 ssize_t n = sendto(
                         s->mRTCPSocket, buffer->data(), buffer->size(), 0,
@@ -356,7 +360,7 @@ status_t ARTPConnection::receive(StreamInfo *s, bool receiveRTP) {
 
     buffer->setRange(0, nbytes);
 
-    // LOG(INFO) << "received " << buffer->size() << " bytes.";
+    // LOGI("received %d bytes.", buffer->size());
 
     status_t err;
     if (receiveRTP) {
@@ -521,9 +525,8 @@ status_t ARTPConnection::parseRTCP(StreamInfo *s, const sp<ABuffer> &buffer) {
 
             default:
             {
-                LOG(WARNING) << "Unknown RTCP packet type "
-                             << (unsigned)data[1]
-                             << " of size " << headerLength;
+                LOGW("Unknown RTCP packet type %u of size %d",
+                     (unsigned)data[1], headerLength);
                 break;
             }
         }
@@ -567,10 +570,10 @@ status_t ARTPConnection::parseSR(
     uint32_t rtpTime = u32at(&data[16]);
 
 #if 0
-    LOG(INFO) << StringPrintf(
-            "XXX timeUpdate: ssrc=0x%08x, rtpTime %u == ntpTime %.3f",
-            id,
-            rtpTime, (ntpTime >> 32) + (double)(ntpTime & 0xffffffff) / (1ll << 32));
+    LOGI("XXX timeUpdate: ssrc=0x%08x, rtpTime %u == ntpTime %.3f",
+         id,
+         rtpTime,
+         (ntpTime >> 32) + (double)(ntpTime & 0xffffffff) / (1ll << 32));
 #endif
 
     sp<ARTPSource> source = findSource(s, id);

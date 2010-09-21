@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "ARTSPConnection"
+#include <utils/Log.h>
+
 #include "ARTSPConnection.h"
 
 #include <media/stagefright/foundation/ABuffer.h>
@@ -41,7 +45,7 @@ ARTSPConnection::ARTSPConnection()
 
 ARTSPConnection::~ARTSPConnection() {
     if (mSocket >= 0) {
-        LOG(ERROR) << "Connection is still open, closing the socket.";
+        LOGE("Connection is still open, closing the socket.");
         close(mSocket);
         mSocket = -1;
     }
@@ -184,7 +188,7 @@ void ARTSPConnection::onConnect(const sp<AMessage> &msg) {
     AString host, path;
     unsigned port;
     if (!ParseURL(url.c_str(), &host, &port, &path)) {
-        LOG(ERROR) << "Malformed rtsp url " << url;
+        LOGE("Malformed rtsp url %s", url.c_str());
 
         reply->setInt32("result", ERROR_MALFORMED);
         reply->post();
@@ -195,7 +199,7 @@ void ARTSPConnection::onConnect(const sp<AMessage> &msg) {
 
     struct hostent *ent = gethostbyname(host.c_str());
     if (ent == NULL) {
-        LOG(ERROR) << "Unknown host " << host;
+        LOGE("Unknown host %s", host.c_str());
 
         reply->setInt32("result", -ENOENT);
         reply->post();
@@ -300,7 +304,7 @@ void ARTSPConnection::onCompleteConnection(const sp<AMessage> &msg) {
     CHECK_EQ(optionLen, (socklen_t)sizeof(err));
 
     if (err != 0) {
-        LOG(ERROR) << "err = " << err << " (" << strerror(err) << ")";
+        LOGE("err = %d (%s)", err, strerror(err));
 
         reply->setInt32("result", -err);
 
@@ -343,7 +347,7 @@ void ARTSPConnection::onSendRequest(const sp<AMessage> &msg) {
 
     request.insert(cseqHeader, i + 2);
 
-    LOG(VERBOSE) << request;
+    LOGV("%s", request.c_str());
 
     size_t numBytesSent = 0;
     while (numBytesSent < request.size()) {
@@ -353,7 +357,7 @@ void ARTSPConnection::onSendRequest(const sp<AMessage> &msg) {
 
         if (n == 0) {
             // Server closed the connection.
-            LOG(ERROR) << "Server unexpectedly closed the connection.";
+            LOGE("Server unexpectedly closed the connection.");
 
             reply->setInt32("result", ERROR_IO);
             reply->post();
@@ -363,7 +367,7 @@ void ARTSPConnection::onSendRequest(const sp<AMessage> &msg) {
                 continue;
             }
 
-            LOG(ERROR) << "Error sending rtsp request.";
+            LOGE("Error sending rtsp request.");
             reply->setInt32("result", -errno);
             reply->post();
             return;
@@ -438,14 +442,14 @@ status_t ARTSPConnection::receive(void *data, size_t size) {
         ssize_t n = recv(mSocket, (uint8_t *)data + offset, size - offset, 0);
         if (n == 0) {
             // Server closed the connection.
-            LOG(ERROR) << "Server unexpectedly closed the connection.";
+            LOGE("Server unexpectedly closed the connection.");
             return ERROR_IO;
         } else if (n < 0) {
             if (errno == EINTR) {
                 continue;
             }
 
-            LOG(ERROR) << "Error reading rtsp response.";
+            LOGE("Error reading rtsp response.");
             return -errno;
         }
 
@@ -516,7 +520,7 @@ bool ARTSPConnection::receiveRTSPReponse() {
             notify->setObject("buffer", buffer);
             notify->post();
         } else {
-            LOG(WARNING) << "received binary data, but no one cares.";
+            LOGW("received binary data, but no one cares.");
         }
 
         return true;
@@ -525,7 +529,7 @@ bool ARTSPConnection::receiveRTSPReponse() {
     sp<ARTSPResponse> response = new ARTSPResponse;
     response->mStatusLine = statusLine;
 
-    LOG(INFO) << "status: " << response->mStatusLine;
+    LOGI("status: %s", response->mStatusLine.c_str());
 
     ssize_t space1 = response->mStatusLine.find(" ");
     if (space1 < 0) {
@@ -555,7 +559,7 @@ bool ARTSPConnection::receiveRTSPReponse() {
             break;
         }
 
-        LOG(VERBOSE) << "line: " << line;
+        LOGV("line: %s", line.c_str());
 
         ssize_t colonPos = line.find(":");
         if (colonPos < 0) {

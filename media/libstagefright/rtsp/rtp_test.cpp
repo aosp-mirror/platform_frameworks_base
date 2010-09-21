@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "rtp_test"
+#include <utils/Log.h>
+
 #include <binder/ProcessState.h>
 
 #include <media/stagefright/foundation/ADebug.h>
@@ -200,8 +204,7 @@ int main(int argc, char **argv) {
                 continue;
             }
 
-            LOG(ERROR) << "decoder returned error "
-                       << StringPrintf("0x%08x", err);
+            LOGE("decoder returned error 0x%08x", err);
             break;
         }
 
