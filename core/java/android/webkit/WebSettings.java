@@ -19,6 +19,7 @@ package android.webkit;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -326,7 +327,9 @@ public class WebSettings {
         // Detect tablet device for fixed viewport mode.
         final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         final int landscapeWidth = Math.max(metrics.widthPixels, metrics.heightPixels);
-        mUseFixedViewport = (metrics.density == 1.0f && landscapeWidth >= 800);
+        final int minTabletWidth = context.getResources().getDimensionPixelSize(
+            com.android.internal.R.dimen.min_xlarge_screen_width);
+        mUseFixedViewport = (metrics.density == 1.0f && landscapeWidth >= minTabletWidth);
         mMaxFixedViewportWidth = (int) (landscapeWidth * 1.25);
 
         if (sLockForLocaleSettings == null) {
