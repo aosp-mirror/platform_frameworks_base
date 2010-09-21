@@ -355,27 +355,6 @@ public final class CallManager {
         return getFirstActiveRingingCall().getPhone();
     }
 
-    /**
-     * unregister phone from CallManager
-     * @param phone
-     */
-    public void unregisterPhone(Phone phone) {
-        if (phone != null && mPhones.contains(phone)) {
-            mPhones.remove(phone);
-            mRingingCalls.remove(phone.getRingingCall());
-            mBackgroundCalls.remove(phone.getBackgroundCall());
-            mForegroundCalls.remove(phone.getForegroundCall());
-            unregisterForPhoneStates(phone);
-            if (phone == mDefaultPhone) {
-                if (mPhones.isEmpty()) {
-                    mDefaultPhone = null;
-                } else {
-                    mDefaultPhone = mPhones.get(0);
-                }
-            }
-        }
-    }
-
     public void setAudioMode() {
         Context context = getContext();
         if (context == null) return;
