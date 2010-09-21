@@ -791,8 +791,15 @@ nScriptSetVarI(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slo
 static void
 nScriptSetVarF(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slot, float val)
 {
-    LOG_API("nScriptSetVarI, con(%p), s(%p), slot(%i), val(%f)", con, (void *)script, slot, val);
+    LOG_API("nScriptSetVarF, con(%p), s(%p), slot(%i), val(%f)", con, (void *)script, slot, val);
     rsScriptSetVarF(con, (RsScript)script, slot, val);
+}
+
+static void
+nScriptSetVarD(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slot, double val)
+{
+    LOG_API("nScriptSetVarD, con(%p), s(%p), slot(%i), val(%lf)", con, (void *)script, slot, val);
+    rsScriptSetVarD(con, (RsScript)script, slot, val);
 }
 
 static void
@@ -1281,6 +1288,7 @@ static JNINativeMethod methods[] = {
 {"rsnScriptInvokeV",                 "(III[B)V",                              (void*)nScriptInvokeV },
 {"rsnScriptSetVarI",                 "(IIII)V",                               (void*)nScriptSetVarI },
 {"rsnScriptSetVarF",                 "(IIIF)V",                               (void*)nScriptSetVarF },
+{"rsnScriptSetVarD",                 "(IIID)V",                               (void*)nScriptSetVarD },
 {"rsnScriptSetVarV",                 "(III[B)V",                              (void*)nScriptSetVarV },
 
 {"rsnScriptCBegin",                  "(I)V",                                  (void*)nScriptCBegin },

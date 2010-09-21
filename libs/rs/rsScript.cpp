@@ -101,6 +101,12 @@ void rsi_ScriptSetVarF(Context *rsc, RsScript vs, uint32_t slot, float value)
     s->setVar(slot, &value, sizeof(value));
 }
 
+void rsi_ScriptSetVarD(Context *rsc, RsScript vs, uint32_t slot, double value)
+{
+    Script *s = static_cast<Script *>(vs);
+    s->setVar(slot, &value, sizeof(value));
+}
+
 void rsi_ScriptSetVarV(Context *rsc, RsScript vs, uint32_t slot, const void *data, uint32_t len)
 {
     const float *fp = (const float *)data;
