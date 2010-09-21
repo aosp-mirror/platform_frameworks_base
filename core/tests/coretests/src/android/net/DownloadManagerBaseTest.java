@@ -27,6 +27,7 @@ import android.net.NetworkInfo;
 import android.net.DownloadManager.Query;
 import android.net.DownloadManager.Request;
 import android.net.wifi.WifiManager;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
@@ -43,9 +44,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.TimeoutException;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.Vector;
 
 import junit.framework.AssertionFailedError;
@@ -67,6 +71,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
 
     protected static final String LOG_TAG = "android.net.DownloadManagerBaseTest";
     protected static final int HTTP_OK = 200;
+    protected static final int HTTP_REDIRECT = 307;
     protected static final int HTTP_PARTIAL_CONTENT = 206;
     protected static final int HTTP_NOT_FOUND = 404;
     protected static final int HTTP_SERVICE_UNAVAILABLE = 503;
@@ -119,6 +124,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
 
     public static class MultipleDownloadsCompletedReceiver extends BroadcastReceiver {
         private volatile int mNumDownloadsCompleted = 0;
+        private Set<Long> downloadIds = Collections.synchronizedSet(new HashSet<Long>());
 
         /**
          * {@inheritDoc}
@@ -129,6 +135,8 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
                 ++mNumDownloadsCompleted;
                 Log.i(LOG_TAG, "MultipleDownloadsCompletedReceiver got intent: " +
                         intent.getAction() + " --> total count: " + mNumDownloadsCompleted);
+                Bundle extras = intent.getExtras();
+                downloadIds.add(new Long(extras.getLong(DownloadManager.EXTRA_DOWNLOAD_ID)));
             }
         }
 
@@ -142,6 +150,18 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
         public int numDownloadsCompleted() {
             return mNumDownloadsCompleted;
         }
+
+        /**
+         * Gets the list of download IDs.
+         * @return A Set<Long> with the ids of the completed downloads.
+         */
+        public Set<Long> getDownloadIds() {
+            synchronized(downloadIds) {
+                Set<Long> returnIds = new HashSet<Long>(downloadIds);
+                return returnIds;
+            }
+        }
+
     }
 
     public static class WiFiChangedReceiver extends BroadcastReceiver {
@@ -193,6 +213,17 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
         mDownloadManager = (DownloadManager)mContext.getSystemService(Context.DOWNLOAD_SERVICE);
         mServer = new MockWebServer();
         // Note: callers overriding this should call mServer.play() with the desired port #
+    }
+
+    /**
+     * Helper to enqueue a response from the MockWebServer with no body.
+     *
+     * @param status The HTTP status code to return for this response
+     * @return Returns the mock web server response that was queued (which can be modified)
+     */
+    protected MockResponse enqueueResponse(int status) {
+        return doEnqueueResponse(status);
+
     }
 
     /**

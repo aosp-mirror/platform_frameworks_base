@@ -46,8 +46,10 @@ public class DownloadManagerHostTests extends DeviceTestCase {
     private static final String EXTERNAL_DOWNLOAD_URI_KEY = "external_download_uri";
     // Note: External environment variable ANDROID_TEST_EXTERNAL_URI must be set to point to the
     // external URI under which the files downloaded by the tests can be found. Note that the Uri
-    // must be accessible by the device during a test run.
-    private static String EXTERNAL_DOWNLOAD_URI_VALUE = null;
+    // must be accessible by the device during a test run. Correspondingly,
+    // ANDROID_TEST_EXTERNAL_LARGE_URI should point to the external URI of the folder containing
+    // large files.
+    private static String externalDownloadUriValue = null;
 
     Hashtable<String, String> mExtraParams = null;
 
@@ -61,8 +63,8 @@ public class DownloadManagerHostTests extends DeviceTestCase {
         // ensure apk path has been set before test is run
         assertNotNull(getTestAppPath());
         mPMUtils = new PackageManagerHostTestUtils(getDevice());
-        EXTERNAL_DOWNLOAD_URI_VALUE = System.getenv("ANDROID_TEST_EXTERNAL_URI");
-        assertNotNull(EXTERNAL_DOWNLOAD_URI_VALUE);
+        externalDownloadUriValue = System.getenv("ANDROID_TEST_EXTERNAL_URI");
+        assertNotNull(externalDownloadUriValue);
         mExtraParams = getExtraParams();
     }
 
@@ -71,7 +73,7 @@ public class DownloadManagerHostTests extends DeviceTestCase {
      */
     protected Hashtable<String, String> getExtraParams() {
         Hashtable<String, String> extraParams = new Hashtable<String, String>();
-        extraParams.put(EXTERNAL_DOWNLOAD_URI_KEY, EXTERNAL_DOWNLOAD_URI_VALUE);
+        extraParams.put(EXTERNAL_DOWNLOAD_URI_KEY, externalDownloadUriValue);
         return extraParams;
     }
 
@@ -187,6 +189,21 @@ public class DownloadManagerHostTests extends DeviceTestCase {
 
         boolean testPassed = mPMUtils.runDeviceTestsDidAllTestsPass(FILE_DOWNLOAD_PKG,
                 FILE_DOWNLOAD_CLASS, "runDownloadMultipleAirplaneModeEnableDisable",
+                DOWNLOAD_TEST_RUNNER_NAME, mExtraParams);
+        assertTrue(testPassed);
+    }
+
+    /**
+     * Spawns a device-based function to test 15 concurrent downloads of 5,000,000-byte files
+     *
+     * @throws Exception if the test failed at any point
+     */
+    public void testDownloadMultipleSimultaneously() throws Exception {
+        mPMUtils.installAppAndVerifyExistsOnDevice(String.format("%s%s%s", getTestAppPath(),
+                File.separator, FILE_DOWNLOAD_APK), FILE_DOWNLOAD_PKG, true);
+
+        boolean testPassed = mPMUtils.runDeviceTestsDidAllTestsPass(FILE_DOWNLOAD_PKG,
+                FILE_DOWNLOAD_CLASS, "runDownloadMultipleSimultaneously",
                 DOWNLOAD_TEST_RUNNER_NAME, mExtraParams);
         assertTrue(testPassed);
     }
