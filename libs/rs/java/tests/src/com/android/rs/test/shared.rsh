@@ -23,3 +23,13 @@ static float end(uint32_t idx) {
     return ((float)t) / 1000.f;
 }
 
+#define _RS_ASSERT(b) \
+do { \
+    rsDebug("Checking " #b, ((int) (b))); \
+    if (!(b)) { \
+        failed = true; \
+        rsDebug(#b " FAILED", 0); \
+    } \
+\
+} while (0)
+

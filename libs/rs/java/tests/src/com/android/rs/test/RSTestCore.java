@@ -38,33 +38,21 @@ public class RSTestCore {
         return true;
     }
 
-    //private ScriptC_Fountain mScript;
+    private boolean rs_primitives_test() {
+        ScriptC_primitives s = new ScriptC_primitives(mRS, mRes, R.raw.primitives, true);
+        s.invoke_rs_primitives_test(0, 0);
+        return true;
+    }
+
     public void init(RenderScriptGL rs, Resources res, int width, int height) {
         mRS = rs;
         mRes = res;
 
         mRootScript = new ScriptC_test_root(mRS, mRes, R.raw.test_root, true);
 
+        rs_primitives_test();
         fp_mad();
 
-
-        /*
-        ProgramFragment.Builder pfb = new ProgramFragment.Builder(rs);
-        pfb.setVaryingColor(true);
-        rs.contextBindProgramFragment(pfb.create());
-
-        ScriptField_Point points = new ScriptField_Point(mRS, PART_COUNT);
-
-        Mesh.AllocationBuilder smb = new Mesh.AllocationBuilder(mRS);
-        smb.addVertexAllocation(points.getAllocation());
-        smb.addIndexType(Primitive.POINT);
-        Mesh sm = smb.create();
-
-        mScript = new ScriptC_Fountain(mRS, mRes, R.raw.fountain, true);
-        mScript.set_partMesh(sm);
-        mScript.bind_point(points);
-        mRS.contextBindRootScript(mScript);
-        */
     }
 
     public void newTouchPosition(float x, float y, float pressure, int id) {
