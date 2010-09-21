@@ -36,25 +36,26 @@ public class EdgeGlow {
     private static final int PULL_TIME = 250;
 
     // Time it will take for a pulled glow to decay to partial strength before release
-    private static final int PULL_DECAY_TIME = 1000;
+    private static final int PULL_DECAY_TIME = 10000;
 
+    private static final float MAX_ALPHA = 1.f;
     private static final float HELD_EDGE_ALPHA = 0.7f;
     private static final float HELD_EDGE_SCALE_Y = 0.5f;
     private static final float HELD_GLOW_ALPHA = 0.5f;
     private static final float HELD_GLOW_SCALE_Y = 0.5f;
 
-    private static final float MAX_GLOW_HEIGHT = 0.33f;
+    private static final float MAX_GLOW_HEIGHT = 3.f;
 
-    private static final float PULL_GLOW_BEGIN = 0.5f;
+    private static final float PULL_GLOW_BEGIN = 1.f;
     private static final float PULL_EDGE_BEGIN = 0.6f;
 
     // Minimum velocity that will be absorbed
-    private static final int MIN_VELOCITY = 750;
-    
+    private static final int MIN_VELOCITY = 100;
+
     private static final float EPSILON = 0.001f;
 
-    private Drawable mEdge;
-    private Drawable mGlow;
+    private final Drawable mEdge;
+    private final Drawable mGlow;
     private int mWidth;
     private int mHeight;
 
@@ -73,15 +74,26 @@ public class EdgeGlow {
     private float mGlowScaleYFinish;
 
     private long mStartTime;
-    private int mDuration;
+    private float mDuration;
 
-    private Interpolator mInterpolator;
+    private final Interpolator mInterpolator;
 
     private static final int STATE_IDLE = 0;
     private static final int STATE_PULL = 1;
     private static final int STATE_ABSORB = 2;
     private static final int STATE_RECEDE = 3;
     private static final int STATE_PULL_DECAY = 4;
+
+    // How much dragging should effect the height of the edge image.
+    // Number determined by user testing.
+    private static final int PULL_DISTANCE_EDGE_FACTOR = 5;
+
+    // How much dragging should effect the height of the glow image.
+    // Number determined by user testing.
+    private static final int PULL_DISTANCE_GLOW_FACTOR = 10;
+
+    private static final int VELOCITY_EDGE_FACTOR = 8;
+    private static final int VELOCITY_GLOW_FACTOR = 16;
 
     private int mState = STATE_IDLE;
 
@@ -109,6 +121,7 @@ public class EdgeGlow {
 
     /**
      * Call when the object is pulled by the user.
+     *
      * @param deltaDistance Change in distance since the last call
      */
     public void onPull(float deltaDistance) {
@@ -127,11 +140,12 @@ public class EdgeGlow {
         mPullDistance += deltaDistance;
         float distance = Math.abs(mPullDistance);
 
-        mEdgeAlpha = mEdgeAlphaStart = Math.max(PULL_EDGE_BEGIN, Math.min(distance, 1.f));
-        mEdgeScaleY = mEdgeScaleYStart = Math.max(HELD_EDGE_SCALE_Y, Math.min(distance, 2.f));
+        mEdgeAlpha = mEdgeAlphaStart = Math.max(PULL_EDGE_BEGIN, Math.min(distance, MAX_ALPHA));
+        mEdgeScaleY = mEdgeScaleYStart = Math.max(
+                HELD_EDGE_SCALE_Y, Math.min(distance * PULL_DISTANCE_EDGE_FACTOR, 1.f));
 
-        mGlowAlpha = mGlowAlphaStart = Math.max(0.5f,
-                Math.min(mGlowAlpha + Math.abs(deltaDistance), 1.f));
+        mGlowAlpha = mGlowAlphaStart = Math.max(
+                0.5f, Math.min(mGlowAlpha + Math.abs(deltaDistance), MAX_ALPHA));
 
         float glowChange = Math.abs(deltaDistance);
         if (deltaDistance > 0 && mPullDistance < 0) {
@@ -140,7 +154,8 @@ public class EdgeGlow {
         if (mPullDistance == 0) {
             mGlowScaleY = 0;
         }
-        mGlowScaleY = mGlowScaleYStart = Math.max(0, mGlowScaleY + glowChange * 2);
+        mGlowScaleY = mGlowScaleYStart = Math.max(
+                0, mGlowScaleY + glowChange * PULL_DISTANCE_GLOW_FACTOR);
 
         mEdgeAlphaFinish = mEdgeAlpha;
         mEdgeScaleYFinish = mEdgeScaleY;
@@ -165,9 +180,9 @@ public class EdgeGlow {
         mGlowScaleYStart = mGlowScaleY;
 
         mEdgeAlphaFinish = 0.f;
-        mEdgeScaleYFinish = 0.1f;
+        mEdgeScaleYFinish = 0.f;
         mGlowAlphaFinish = 0.f;
-        mGlowScaleYFinish = 0.1f;
+        mGlowScaleYFinish = 0.f;
 
         mStartTime = AnimationUtils.currentAnimationTimeMillis();
         mDuration = RECEDE_TIME;
@@ -175,6 +190,7 @@ public class EdgeGlow {
 
     /**
      * Call when the effect absorbs an impact at the given velocity.
+     *
      * @param velocity Velocity at impact in pixels per second.
      */
     public void onAbsorb(int velocity) {
@@ -182,27 +198,43 @@ public class EdgeGlow {
         velocity = Math.max(MIN_VELOCITY, Math.abs(velocity));
 
         mStartTime = AnimationUtils.currentAnimationTimeMillis();
-        mDuration = (int) (velocity * 0.03f);
+        mDuration = 0.1f + (velocity * 0.03f);
 
+        // The edge should always be at least partially visible, regardless
+        // of velocity.
         mEdgeAlphaStart = 0.5f;
         mEdgeScaleYStart = 0.2f;
+        // The glow depends more on the velocity, and therefore starts out
+        // nearly invisible.
         mGlowAlphaStart = 0.5f;
         mGlowScaleYStart = 0.f;
 
-        mEdgeAlphaFinish = Math.max(0, Math.min(velocity * 0.01f, 1));
+        // Factor the velocity by 8. Testing on device shows this works best to
+        // reflect the strength of the user's scrolling.
+        mEdgeAlphaFinish = Math.max(0, Math.min(velocity * VELOCITY_EDGE_FACTOR, 1));
+        // Edge should never get larger than the size of its asset.
         mEdgeScaleYFinish = 1.f;
-        mGlowAlphaFinish = 1.f;
-        mGlowScaleYFinish = Math.min(velocity * 0.001f, 1);
+
+        // Growth for the size of the glow should be quadratic to properly
+        // respond
+        // to a user's scrolling speed. The faster the scrolling speed, the more
+        // intense the effect should be for both the size and the saturation.
+        mGlowScaleYFinish = Math.min(0.025f + (velocity * (velocity / 100) * 0.00015f), 1.75f);
+        // Alpha should change for the glow as well as size.
+        mGlowAlphaFinish = Math.max(
+                mGlowAlphaStart, Math.min(velocity * VELOCITY_GLOW_FACTOR * .00001f, MAX_ALPHA));
     }
 
+
     /**
-     * Draw into the provided canvas.
-     * Assumes that the canvas has been rotated accordingly and the size has been set.
-     * The effect will be drawn the full width of X=0 to X=width, emitting from Y=0 and extending
-     * to some factor < 1.f of height.
+     * Draw into the provided canvas. Assumes that the canvas has been rotated
+     * accordingly and the size has been set. The effect will be drawn the full
+     * width of X=0 to X=width, emitting from Y=0 and extending to some factor <
+     * 1.f of height.
      *
      * @param canvas Canvas to draw into
-     * @return true if drawing should continue beyond this frame to continue the animation
+     * @return true if drawing should continue beyond this frame to continue the
+     *         animation
      */
     public boolean draw(Canvas canvas) {
         update();
@@ -213,15 +245,14 @@ public class EdgeGlow {
         final float distScale = (float) mHeight / mWidth;
 
         mGlow.setAlpha((int) (Math.max(0, Math.min(mGlowAlpha, 1)) * 255));
-        mGlow.setBounds(0, 0, mWidth, (int) Math.min(glowHeight * mGlowScaleY * distScale * 0.6f,
-                mHeight * MAX_GLOW_HEIGHT));
+        // Width of the image should be 3 * the width of the screen.
+        // Should start off screen to the left.
+        mGlow.setBounds(-mWidth, 0, mWidth * 2, (int) Math.min(
+                glowHeight * mGlowScaleY * distScale * 0.6f, mHeight * MAX_GLOW_HEIGHT));
         mGlow.draw(canvas);
 
         mEdge.setAlpha((int) (Math.max(0, Math.min(mEdgeAlpha, 1)) * 255));
-        mEdge.setBounds(0,
-                0,
-                mWidth,
-                (int) (edgeHeight * mEdgeScaleY));
+        mEdge.setBounds(0, 0, mWidth, (int) (edgeHeight * mEdgeScaleY));
         mEdge.draw(canvas);
 
         return mState != STATE_IDLE;
@@ -229,7 +260,7 @@ public class EdgeGlow {
 
     private void update() {
         final long time = AnimationUtils.currentAnimationTimeMillis();
-        final float t = Math.min((float) (time - mStartTime) / mDuration, 1.f);
+        final float t = Math.min((time - mStartTime) / mDuration, 1.f);
 
         final float interp = mInterpolator.getInterpolation(t);
 
@@ -251,7 +282,7 @@ public class EdgeGlow {
                     mGlowScaleYStart = mGlowScaleY;
 
                     mEdgeAlphaFinish = 0.f;
-                    mEdgeScaleYFinish = 0.1f;
+                    mEdgeScaleYFinish = mEdgeScaleY;
                     mGlowAlphaFinish = 0.f;
                     mGlowScaleYFinish = mGlowScaleY;
                     break;
@@ -265,10 +296,11 @@ public class EdgeGlow {
                     mGlowAlphaStart = mGlowAlpha;
                     mGlowScaleYStart = mGlowScaleY;
 
-                    mEdgeAlphaFinish = Math.min(mEdgeAlphaStart, HELD_EDGE_ALPHA);
-                    mEdgeScaleYFinish = Math.min(mEdgeScaleYStart, HELD_EDGE_SCALE_Y);
-                    mGlowAlphaFinish = Math.min(mGlowAlphaStart, HELD_GLOW_ALPHA);
-                    mGlowScaleYFinish = Math.min(mGlowScaleY, HELD_GLOW_SCALE_Y);
+                    // After a pull, the glow should fade to nothing.
+                    mEdgeAlphaFinish = 0.f;
+                    mEdgeScaleYFinish = 0.f;
+                    mGlowAlphaFinish = 0.f;
+                    mGlowScaleYFinish = 0.f;
                     break;
                 case STATE_PULL_DECAY:
                     // Do nothing; wait for release
