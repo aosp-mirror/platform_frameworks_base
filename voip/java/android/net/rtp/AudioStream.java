@@ -96,6 +96,15 @@ public class AudioStream extends RtpStream {
     }
 
     /**
+     * Returns the {@link AudioCodec}, or {@code null} if it is not set.
+     *
+     * @see #setCodec(AudioCodec)
+     */
+    public AudioCodec getCodec() {
+        return mCodec;
+    }
+
+    /**
      * Sets the {@link AudioCodec}.
      *
      * @param codec The AudioCodec to be used.
@@ -113,12 +122,22 @@ public class AudioStream extends RtpStream {
     }
 
     /**
+     * Returns the RTP payload type for dual-tone multi-frequency (DTMF) digits,
+     * or {@code -1} if it is not enabled.
+     *
+     * @see #setDtmfType(int)
+     */
+    public int getDtmfType() {
+        return mDtmfType;
+    }
+
+    /**
      * Sets the RTP payload type for dual-tone multi-frequency (DTMF) digits.
      * The primary usage is to send digits to the remote gateway to perform
      * certain tasks, such as second-stage dialing. According to RFC 2833, the
      * RTP payload type for DTMF is assigned dynamically, so it must be in the
      * range of 96 and 127. One can use {@code -1} to disable DTMF and free up
-     * the previous assigned value. This method cannot be called when the stream
+     * the previous assigned type. This method cannot be called when the stream
      * already joined an {@link AudioGroup}.
      *
      * @param type The RTP payload type to be used or {@code -1} to disable it.
