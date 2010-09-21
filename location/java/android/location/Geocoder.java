@@ -41,7 +41,7 @@ import java.util.List;
  * The Geocoder class requires a backend service that is not included in
  * the core android framework.  The Geocoder query methods will return an
  * empty list if there no backend service in the platform.  Use the
- * isImplemented() method to determine whether a Geocoder implementation
+ * isPresent() method to determine whether a Geocoder implementation
  * exists.
  */
 public final class Geocoder {
@@ -56,13 +56,13 @@ public final class Geocoder {
      * connectivity may still cause these methods to return null or
      * empty lists.
      */
-    public static Boolean isImplemented() {
+    public static boolean isPresent() {
         IBinder b = ServiceManager.getService(Context.LOCATION_SERVICE);
         ILocationManager lm = ILocationManager.Stub.asInterface(b);
         try {
-            return lm.geocoderIsImplemented();
+            return lm.geocoderIsPresent();
         } catch (RemoteException e) {
-            Log.e(TAG, "isImplemented: got RemoteException", e);
+            Log.e(TAG, "isPresent: got RemoteException", e);
             return false;
         }
     }
