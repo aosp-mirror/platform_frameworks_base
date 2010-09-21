@@ -214,9 +214,9 @@ public abstract class WindowOrientationListener {
         // background.
 
         // When device is near-vertical (screen approximately facing the horizon)
-        private static final int DEFAULT_TIME_CONSTANT_MS = 50;
+        private static final int DEFAULT_TIME_CONSTANT_MS = 100;
         // When device is partially tilted towards the sky or ground
-        private static final int TILTED_TIME_CONSTANT_MS = 300;
+        private static final int TILTED_TIME_CONSTANT_MS = 500;
         // When device is under external acceleration, i.e. not just gravity.  We heavily distrust
         // such readings.
         private static final int ACCELERATING_TIME_CONSTANT_MS = 2000;
