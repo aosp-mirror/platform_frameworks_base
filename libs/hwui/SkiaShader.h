@@ -145,6 +145,26 @@ private:
 }; // struct SkiaLinearGradientShader
 
 /**
+ * A shader that draws a sweep gradient.
+ */
+struct SkiaSweepGradientShader: public SkiaShader {
+    SkiaSweepGradientShader(float x, float y, uint32_t* colors, float* positions, int count,
+            SkShader* key, SkMatrix* matrix, bool blend);
+    ~SkiaSweepGradientShader();
+
+    void describe(ProgramDescription& description, const Extensions& extensions);
+    void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
+            GLuint* textureUnit);
+    void updateTransforms(Program* program, const mat4& modelView, const Snapshot& snapshot);
+
+private:
+    float mX, mY;
+    uint32_t* mColors;
+    float* mPositions;
+    int mCount;
+}; // struct SkiaSweepGradientShader
+
+/**
  * A shader that draws two shaders, composited with an xfermode.
  */
 struct SkiaComposeShader: public SkiaShader {

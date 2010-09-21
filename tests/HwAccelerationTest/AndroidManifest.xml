@@ -31,6 +31,15 @@
         </activity>
         
         <activity
+                android:name="AdvancedGradientsActivity"
+                android:label="_Advanced Gradients">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <activity
                 android:name="ResizeActivity"
                 android:label="_Resize"
                 android:windowSoftInputMode="adjustResize">
@@ -250,7 +259,7 @@
 
         <activity
                 android:name="AdvancedBlendActivity"
-                android:label="_AdvancedBlend">
+                android:label="_Advanced Blend">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
