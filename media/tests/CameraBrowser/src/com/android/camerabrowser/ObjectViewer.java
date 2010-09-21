@@ -51,8 +51,8 @@ public class ObjectViewer extends Activity {
     private static final String TAG = "ObjectViewer";
 
     private int mDeviceID;
-    private int mStorageID;
-    private int mObjectID;
+    private long mStorageID;
+    private long mObjectID;
 
     private static final String[] OBJECT_COLUMNS =
         new String[] {  Mtp.Object._ID,
@@ -84,8 +84,8 @@ public class ObjectViewer extends Activity {
         super.onResume();
 
         mDeviceID = getIntent().getIntExtra("device", 0);
-        mStorageID = getIntent().getIntExtra("storage", 0);
-        mObjectID = getIntent().getIntExtra("object", 0);
+        mStorageID = getIntent().getLongExtra("storage", 0);
+        mObjectID = getIntent().getLongExtra("object", 0);
 
         if (mDeviceID != 0 && mObjectID != 0) {
         Cursor c = getContentResolver().query(

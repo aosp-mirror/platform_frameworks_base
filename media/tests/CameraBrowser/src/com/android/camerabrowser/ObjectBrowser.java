@@ -44,8 +44,8 @@ public class ObjectBrowser extends ListActivity {
     private Cursor mCursor;
     private ObjectCursorAdapter mAdapter;
     private int mDeviceID;
-    private int mStorageID;
-    private int mObjectID;
+    private long mStorageID;
+    private long mObjectID;
 
     private static final String[] OBJECT_COLUMNS =
         new String[] { Mtp.Object._ID, Mtp.Object.NAME, Mtp.Object.FORMAT, Mtp.Object.THUMB };
@@ -65,8 +65,8 @@ public class ObjectBrowser extends ListActivity {
         super.onResume();
 
         mDeviceID = getIntent().getIntExtra("device", 0);
-        mStorageID = getIntent().getIntExtra("storage", 0);
-        mObjectID = getIntent().getIntExtra("object", 0);
+        mStorageID = getIntent().getLongExtra("storage", 0);
+        mObjectID = getIntent().getLongExtra("object", 0);
         if (mDeviceID != 0 && mStorageID != 0) {
             Cursor c;
             Uri uri;
@@ -88,7 +88,7 @@ public class ObjectBrowser extends ListActivity {
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        int rowID = (int)mAdapter.getItemId(position);
+        long rowID = mAdapter.getItemId(position);
         Cursor c = getContentResolver().query(
                         Mtp.Object.getContentUri(mDeviceID, rowID),
                         OBJECT_COLUMNS, null, null, null);
@@ -111,7 +111,7 @@ public class ObjectBrowser extends ListActivity {
             Intent intent = new Intent(this, ObjectViewer.class);
             intent.putExtra("device", mDeviceID);
             intent.putExtra("storage", mStorageID);
-            intent.putExtra("object",rowID);
+            intent.putExtra("object", rowID);
             startActivity(intent);
         }
     }

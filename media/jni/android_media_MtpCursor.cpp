@@ -49,7 +49,7 @@ static bool ExceptionCheck(void* env)
 
 static void
 android_media_MtpCursor_setup(JNIEnv *env, jobject thiz, jobject javaClient,
-        jint queryType, jint deviceID, jint storageID, jint objectID, jintArray javaColumns)
+        jint queryType, jint deviceID, jlong storageID, jlong objectID, jintArray javaColumns)
 {
 #ifdef HAVE_ANDROID_OS
     LOGD("android_media_MtpCursor_setup queryType: %d deviceID: %d storageID: %d objectID: %d\n",
@@ -104,7 +104,7 @@ android_media_MtpCursor_fill_window(JNIEnv *env, jobject thiz, jobject javaWindo
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    {"native_setup",            "(Landroid/media/MtpClient;IIII[I)V",
+    {"native_setup",            "(Landroid/media/MtpClient;IIJJ[I)V",
                                         (void *)android_media_MtpCursor_setup},
     {"native_finalize",         "()V",  (void *)android_media_MtpCursor_finalize},
     {"native_fill_window",      "(Landroid/database/CursorWindow;I)I",
