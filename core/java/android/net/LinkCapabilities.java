@@ -146,7 +146,7 @@ public class LinkCapabilities implements Parcelable {
         // code these to match
 
         /** Default Role */
-        public static final String DEFAULT = "0";
+        public static final String DEFAULT = "default";
         /** Bulk down load */
         public static final String BULK_DOWNLOAD = "bulk.download";
         /** Bulk upload */
