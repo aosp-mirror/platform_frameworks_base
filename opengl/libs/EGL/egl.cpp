@@ -1344,16 +1344,18 @@ EGLBoolean eglWaitNative(EGLint engine)
 EGLint eglGetError(void)
 {
     EGLint result = EGL_SUCCESS;
+    EGLint err;
     for (int i=0 ; i<IMPL_NUM_IMPLEMENTATIONS ; i++) {
-        EGLint err = EGL_SUCCESS;
+        err = EGL_SUCCESS;
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso)
             err = cnx->egl.eglGetError();
         if (err!=EGL_SUCCESS && result==EGL_SUCCESS)
             result = err;
     }
+    err = getError();
     if (result == EGL_SUCCESS)
-        result = getError();
+        result = err;
     return result;
 }
 
