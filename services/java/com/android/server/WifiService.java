@@ -173,6 +173,7 @@ public class WifiService extends IWifiManager.Stub {
     private static final int MESSAGE_STOP_ACCESS_POINT  = 7;
     private static final int MESSAGE_SET_CHANNELS       = 8;
     private static final int MESSAGE_ENABLE_NETWORKS    = 9;
+    private static final int MESSAGE_START_SCAN         = 10;
 
 
     private final  WifiHandler mWifiHandler;
@@ -385,23 +386,12 @@ public class WifiService extends IWifiManager.Stub {
 
     /**
      * see {@link android.net.wifi.WifiManager#startScan()}
-     * @return {@code true} if the operation succeeds
      */
-    public boolean startScan(boolean forceActive) {
+    public void startScan(boolean forceActive) {
         enforceChangePermission();
+        if (mWifiHandler == null) return;
 
-        switch (mWifiStateTracker.getSupplicantState()) {
-            case DISCONNECTED:
-            case INACTIVE:
-            case SCANNING:
-            case DORMANT:
-                break;
-            default:
-                mWifiStateTracker.setScanResultHandling(
-                        WifiStateTracker.SUPPL_SCAN_HANDLING_LIST_ONLY);
-                break;
-        }
-        return mWifiStateTracker.scan(forceActive);
+        Message.obtain(mWifiHandler, MESSAGE_START_SCAN, forceActive ? 1 : 0, 0).sendToTarget();
     }
 
     /**
@@ -2001,6 +1991,21 @@ public class WifiService extends IWifiManager.Stub {
                     mWifiStateTracker.enableAllNetworks(getConfiguredNetworks());
                     break;
 
+                case MESSAGE_START_SCAN:
+                    boolean forceActive = (msg.arg1 == 1);
+                    switch (mWifiStateTracker.getSupplicantState()) {
+                        case DISCONNECTED:
+                        case INACTIVE:
+                        case SCANNING:
+                        case DORMANT:
+                            break;
+                        default:
+                            mWifiStateTracker.setScanResultHandling(
+                                    WifiStateTracker.SUPPL_SCAN_HANDLING_LIST_ONLY);
+                            break;
+                    }
+                    mWifiStateTracker.scan(forceActive);
+                    break;
             }
         }
     }

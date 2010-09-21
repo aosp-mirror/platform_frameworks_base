@@ -570,7 +570,8 @@ public class WifiManager {
      */
     public boolean startScan() {
         try {
-            return mService.startScan(false);
+            mService.startScan(false);
+            return true;
         } catch (RemoteException e) {
             return false;
         }
@@ -588,7 +589,8 @@ public class WifiManager {
      */
     public boolean startScanActive() {
         try {
-            return mService.startScan(true);
+            mService.startScan(true);
+            return true;
         } catch (RemoteException e) {
             return false;
         }
