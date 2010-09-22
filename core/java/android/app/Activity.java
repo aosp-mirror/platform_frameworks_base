@@ -74,6 +74,8 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -605,7 +607,7 @@ import java.util.HashMap;
  * or finished.
  */
 public class Activity extends ContextThemeWrapper
-        implements LayoutInflater.Factory,
+        implements LayoutInflater.Factory2,
         Window.Callback, KeyEvent.Callback,
         OnCreateContextMenuListener, ComponentCallbacks {
     private static final String TAG = "Activity";
@@ -4030,15 +4032,30 @@ public class Activity extends ContextThemeWrapper
      * Standard implementation of
      * {@link android.view.LayoutInflater.Factory#onCreateView} used when
      * inflating with the LayoutInflater returned by {@link #getSystemService}.
+     * This implementation does nothing and is for
+     * pre-{@link android.os.Build.VERSION_CODES#HONEYCOMB} apps.  Newer apps
+     * should use {@link #onCreateView(View, String, Context, AttributeSet)}.
+     *
+     * @see android.view.LayoutInflater#createView
+     * @see android.view.Window#getLayoutInflater
+     */
+    public View onCreateView(String name, Context context, AttributeSet attrs) {
+        return null;
+    }
+
+    /**
+     * Standard implementation of
+     * {@link android.view.LayoutInflater.Factory2#onCreateView(View, String, Context, AttributeSet)}
+     * used when inflating with the LayoutInflater returned by {@link #getSystemService}.
      * This implementation handles <fragment> tags to embed fragments inside
      * of the activity.
      *
      * @see android.view.LayoutInflater#createView
      * @see android.view.Window#getLayoutInflater
      */
-    public View onCreateView(String name, Context context, AttributeSet attrs) {
+    public View onCreateView(View parent, String name, Context context, AttributeSet attrs) {
         if (!"fragment".equals(name)) {
-            return null;
+            return onCreateView(name, context, attrs);
         }
         
         String fname = attrs.getAttributeValue(null, "class");
@@ -4047,46 +4064,87 @@ public class Activity extends ContextThemeWrapper
         if (fname == null) {
             fname = a.getString(com.android.internal.R.styleable.Fragment_name);
         }
-        int id = a.getResourceId(com.android.internal.R.styleable.Fragment_id, 0);
+        int id = a.getResourceId(com.android.internal.R.styleable.Fragment_id, View.NO_ID);
         String tag = a.getString(com.android.internal.R.styleable.Fragment_tag);
         a.recycle();
         
-        if (id == 0) {
+        int containerId = parent != null ? parent.getId() : 0;
+        if (containerId == View.NO_ID && id == View.NO_ID && tag == null) {
             throw new IllegalArgumentException(attrs.getPositionDescription()
-                    + ": Must specify unique android:id for " + fname);
+                    + ": Must specify unique android:id, android:tag, or have a parent with an id for " + fname);
         }
-        
+
         // If we restored from a previous state, we may already have
         // instantiated this fragment from the state and should use
         // that instance instead of making a new one.
-        Fragment fragment = mFragments.findFragmentById(id);
+        Fragment fragment = id != View.NO_ID ? mFragments.findFragmentById(id) : null;
+        if (fragment == null && tag != null) {
+            fragment = mFragments.findFragmentByTag(tag);
+        }
+        if (fragment == null && containerId != View.NO_ID) {
+            fragment = mFragments.findFragmentById(containerId);
+        }
+
         if (FragmentManagerImpl.DEBUG) Log.v(TAG, "onCreateView: id=0x"
                 + Integer.toHexString(id) + " fname=" + fname
                 + " existing=" + fragment);
         if (fragment == null) {
             fragment = Fragment.instantiate(this, fname);
             fragment.mFromLayout = true;
-            fragment.mFragmentId = id;
+            fragment.mFragmentId = id != 0 ? id : containerId;
+            fragment.mContainerId = containerId;
             fragment.mTag = tag;
+            fragment.mInLayout = true;
             fragment.mImmediateActivity = this;
             fragment.mFragmentManager = mFragments;
+            fragment.onInflate(attrs, fragment.mSavedFragmentState);
+            mFragments.addFragment(fragment, true);
+
+        } else if (fragment.mInLayout) {
+            // A fragment already exists and it is not one we restored from
+            // previous state.
+            throw new IllegalArgumentException(attrs.getPositionDescription()
+                    + ": Duplicate id 0x" + Integer.toHexString(id)
+                    + ", tag " + tag + ", or parent id 0x" + Integer.toHexString(containerId)
+                    + " with another fragment for " + fname);
+        } else {
+            // This fragment was retained from a previous instance; get it
+            // going now.
+            fragment.mInLayout = true;
+            fragment.mImmediateActivity = this;
             // If this fragment is newly instantiated (either right now, or
             // from last saved state), then give it the attributes to
             // initialize itself.
             if (!fragment.mRetaining) {
                 fragment.onInflate(attrs, fragment.mSavedFragmentState);
             }
-            mFragments.addFragment(fragment, true);
+            mFragments.moveToState(fragment);
         }
+
         if (fragment.mView == null) {
             throw new IllegalStateException("Fragment " + fname
                     + " did not create a view.");
         }
-        fragment.mView.setId(id);
+        if (id != 0) {
+            fragment.mView.setId(id);
+        }
         if (fragment.mView.getTag() == null) {
             fragment.mView.setTag(tag);
         }
         return fragment.mView;
+    }
+
+    /**
+     * Print the Activity's state into the given stream.  This gets invoked if
+     * you run "adb shell dumpsys activity <youractivityname>".
+     *
+     * @param fd The raw file descriptor that the dump is being sent to.
+     * @param writer The PrintWriter to which you should dump your state.  This will be
+     * closed for you after you return.
+     * @param args additional arguments to the dump request.
+     */
+    public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+        mFragments.dump("", fd, writer, args);
     }
 
     /**
@@ -4177,7 +4235,7 @@ public class Activity extends ContextThemeWrapper
         
         mWindow = PolicyManager.makeNewWindow(this);
         mWindow.setCallback(this);
-        mWindow.getLayoutInflater().setFactory(this);
+        mWindow.getLayoutInflater().setFactory2(this);
         if (info.softInputMode != WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED) {
             mWindow.setSoftInputMode(info.softInputMode);
         }

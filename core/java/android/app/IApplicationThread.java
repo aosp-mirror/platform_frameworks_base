@@ -105,7 +105,9 @@ public interface IApplicationThread extends IInterface {
     static final int EXTERNAL_STORAGE_UNAVAILABLE = 1;
     void dispatchPackageBroadcast(int cmd, String[] packages) throws RemoteException;
     void scheduleCrash(String msg) throws RemoteException;
-    
+    void dumpActivity(FileDescriptor fd, IBinder servicetoken, String[] args)
+            throws RemoteException;
+
     String descriptor = "android.app.IApplicationThread";
 
     int SCHEDULE_PAUSE_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION;
@@ -143,4 +145,5 @@ public interface IApplicationThread extends IInterface {
     int DISPATCH_PACKAGE_BROADCAST_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+33;
     int SCHEDULE_CRASH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+34;
     int DUMP_HEAP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+35;
+    int DUMP_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+36;
 }

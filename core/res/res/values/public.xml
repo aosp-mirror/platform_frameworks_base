@@ -1377,6 +1377,16 @@
   <!-- A simple ListView item layout which can contain text and support (single or multiple) item selection. -->
   <public type="layout" name="simple_selectable_list_item" />
 
+  <!-- A version of {@link #simple_list_item_1} that is able to change its
+       background state to indicate when it is activated (that is checked by
+       a ListView). -->
+  <public type="layout" name="simple_list_item_activated_1" />
+
+  <!-- A version of {@link #simple_list_item_2} that is able to change its
+       background state to indicate when it is activated (that is checked by
+       a ListView). -->
+  <public type="layout" name="simple_list_item_activated_2" />
+
   <public type="style" name="Theme.WithActionBar" />
   <public type="style" name="Widget.Spinner.DropDown" />
   <public type="style" name="Widget.ActionButton" />
