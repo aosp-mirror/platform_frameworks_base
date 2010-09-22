@@ -104,6 +104,7 @@ private:
     int mSampleRate;
     int mSampleCount;
     int mInterval;
+    int mLogThrottle;
 
     int16_t *mBuffer;
     int mBufferMask;
@@ -278,7 +279,10 @@ void AudioStream::encode(int tick, AudioStream *chain)
         chain = chain->mNext;
     }
     if (!mixed) {
-        LOGD("stream[%d] no data", mSocket);
+        if ((mTick ^ mLogThrottle) >> 10) {
+            mLogThrottle = mTick;
+            LOGD("stream[%d] no data", mSocket);
+        }
         return;
     }
 
