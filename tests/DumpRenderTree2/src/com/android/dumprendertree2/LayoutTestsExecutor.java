@@ -236,7 +236,7 @@ public class LayoutTestsExecutor extends Activity {
                  * We never display the new window, just create the view and allow it's content to
                  * execute and be recorded by the executor.
                  */
-                newWindowWebView = new WebView(LayoutTestsExecutor.this);
+                newWindowWebView = createWebViewWithJavascriptInterfaces();
                 setupWebView(newWindowWebView);
             }
 
@@ -317,7 +317,7 @@ public class LayoutTestsExecutor extends Activity {
         mCurrentResult = null;
         mCurrentAdditionalTextOutput = null;
 
-        mCurrentWebView = new WebView(this);
+        mCurrentWebView = createWebViewWithJavascriptInterfaces();
         setupWebView(mCurrentWebView);
 
         mEventSender.reset(mCurrentWebView);
@@ -329,11 +329,26 @@ public class LayoutTestsExecutor extends Activity {
         }
     }
 
+    private static class WebViewWithJavascriptInterfaces extends WebView {
+        public WebViewWithJavascriptInterfaces(
+                Context context, Map<String, Object> javascriptInterfaces) {
+            super(context,
+                  null, // attribute set
+                  0, // default style resource ID
+                  javascriptInterfaces,
+                  false); // is private browsing
+        }
+    }
+    private WebView createWebViewWithJavascriptInterfaces() {
+        Map<String, Object> javascriptInterfaces = new HashMap<String, Object>();
+        javascriptInterfaces.put("layoutTestController", mLayoutTestController);
+        javascriptInterfaces.put("eventSender", mEventSender);
+        return new WebViewWithJavascriptInterfaces(this, javascriptInterfaces);
+    }
+
     private void setupWebView(WebView webView) {
         webView.setWebViewClient(mWebViewClient);
         webView.setWebChromeClient(mWebChromeClient);
-        webView.addJavascriptInterface(mLayoutTestController, "layoutTestController");
-        webView.addJavascriptInterface(mEventSender, "eventSender");
 
         /**
          * Setting a touch interval of -1 effectively disables the optimisation in WebView
