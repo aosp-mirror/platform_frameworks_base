@@ -327,6 +327,13 @@ public class LayoutTestsExecutor extends Activity {
         mCurrentAdditionalTextOutput = null;
 
         mCurrentWebView = createWebViewWithJavascriptInterfaces();
+        // When we create the first WebView, we need to pause to wait for the WebView thread to spin
+        // and up and for it to register its message handlers.
+        if (previousWebView == null) {
+            try {
+                Thread.currentThread().sleep(1000);
+            } catch (Exception e) {}
+        }
         setupWebView(mCurrentWebView);
 
         mEventSender.reset(mCurrentWebView);
