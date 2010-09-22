@@ -31,6 +31,7 @@
 #include "ProgramCache.h"
 #include "PathCache.h"
 #include "TextDropShadowCache.h"
+#include "Line.h"
 
 namespace android {
 namespace uirenderer {
@@ -64,6 +65,8 @@ public:
     PatchCache patchCache;
     TextDropShadowCache dropShadowCache;
     GammaFontRenderer fontRenderer;
+
+    Line line;
 }; // class Caches
 
 }; // namespace uirenderer

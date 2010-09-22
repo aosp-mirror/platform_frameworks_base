@@ -122,6 +122,8 @@ private:
 
     SkBitmap* mBitmap;
     const Texture* mTexture;
+    GLenum mWrapS;
+    GLenum mWrapT;
 }; // struct SkiaBitmapShader
 
 /**

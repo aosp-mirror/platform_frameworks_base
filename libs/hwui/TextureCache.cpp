@@ -159,8 +159,8 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
         return;
     }
 
-    const bool resize = !regenerate || bitmap->width() != texture->width ||
-            bitmap->height() != texture->height;
+    const bool resize = !regenerate || bitmap->width() != int(texture->width) ||
+            bitmap->height() != int(texture->height);
 
     if (!regenerate) {
         glGenTextures(1, &texture->id);

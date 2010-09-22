@@ -40,7 +40,6 @@
 #include "SkiaShader.h"
 #include "SkiaColorFilter.h"
 #include "Caches.h"
-#include "Line.h"
 
 namespace android {
 namespace uirenderer {
@@ -419,9 +418,6 @@ private:
 
     // List of rectangles to clear due to calls to saveLayer()
     Vector<Rect*> mLayers;
-
-    // Single object used to draw lines
-    Line mLine;
 
     // Misc
     GLint mMaxTextureSize;
