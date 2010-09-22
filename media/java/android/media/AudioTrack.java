@@ -963,14 +963,17 @@ public class AudioTrack
     //--------------------
 
     /**
-     * Attaches an auxiliary effect to the audio track. A typical auxiliary effect is a
-     * reverberation effect which can be applied on any sound source that directs a certain
-     * amount of its energy to this effect. This amount is defined by setAuxEffectSendLevel().
+     * Attaches an auxiliary effect to the audio track. A typical auxiliary
+     * effect is a reverberation effect which can be applied on any sound source
+     * that directs a certain amount of its energy to this effect. This amount
+     * is defined by setAuxEffectSendLevel().
      * {@see #setAuxEffectSendLevel(float)}.
-     * <p>After creating an auxiliary effect (e.g. {@link android.media.EnvironmentalReverb}),
-     * retrieve its ID with {@link android.media.AudioEffect#getId()} and use it when calling
+     * <p>After creating an auxiliary effect (e.g.
+     * {@link android.media.audiofx.EnvironmentalReverb}), retrieve its ID with
+     * {@link android.media.audiofx.AudioEffect#getId()} and use it when calling
      * this method to attach the audio track to the effect.
-     * <p>To detach the effect from the audio track, call this method with a null effect id.
+     * <p>To detach the effect from the audio track, call this method with a
+     * null effect id.
      *
      * @param effectId system wide unique id of the effect to attach
      * @return error code or success, see {@link #SUCCESS},

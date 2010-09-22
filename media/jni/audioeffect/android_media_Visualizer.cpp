@@ -40,7 +40,7 @@ using namespace android;
 #define NATIVE_EVENT_FFT_CAPTURE                1
 
 // ----------------------------------------------------------------------------
-static const char* const kClassPathName = "android/media/Visualizer";
+static const char* const kClassPathName = "android/media/audiofx/Visualizer";
 
 struct fields_t {
     // these fields provide access from C++ to the...
