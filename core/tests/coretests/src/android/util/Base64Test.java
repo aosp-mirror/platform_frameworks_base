@@ -16,6 +16,9 @@
 
 package android.util;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 import junit.framework.TestCase;
 
 import java.io.ByteArrayInputStream;
@@ -402,6 +405,14 @@ public class Base64Test extends TestCase {
             }
             assertEquals(actual, ap, encoded);
         }
+    }
+
+    /** http://b/3026478 */
+    public void testSingleByteReads() throws IOException {
+        InputStream in = new Base64InputStream(
+                new ByteArrayInputStream("/v8=".getBytes()), Base64.DEFAULT);
+        assertEquals(254, in.read());
+        assertEquals(255, in.read());
     }
 
     /**
