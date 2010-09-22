@@ -424,6 +424,9 @@
         <attr name="quickContactBadgeStyleSmallWindowMedium" format="reference" />
         <!-- Default quickcontact badge style with large quickcontact window. -->
         <attr name="quickContactBadgeStyleSmallWindowLarge" format="reference" />
+        <!-- Reference to a style that will be used for the window containing a text
+             selection anchor. -->
+        <attr name="textSelectHandleWindowStyle" format="reference" />
 
         <!-- =================== -->
         <!-- Preference styles   -->
@@ -2236,6 +2239,7 @@
     </declare-styleable>
     <declare-styleable name="PopupWindow">
         <attr name="popupBackground" format="reference|color" />
+        <attr name="windowAnimationStyle" />
     </declare-styleable>
     <declare-styleable name="ViewAnimator">
         <attr name="inAnimation" format="reference" />
