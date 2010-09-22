@@ -45,6 +45,8 @@
     <dimen name="fastscroll_thumb_height">52dp</dimen>
     <!-- Min width for a tablet device -->
     <dimen name="min_xlarge_screen_width">800dp</dimen>
+    <!-- Fixed viewport margin for website content width change -->
+    <dimen name="fixed_viewport_margin">7dp</dimen>
     <!-- Default height of a key in the password keyboard for alpha -->
     <dimen name="password_keyboard_key_height_alpha">56dip</dimen>
     <!-- Default height of a key in the password keyboard for numeric -->
